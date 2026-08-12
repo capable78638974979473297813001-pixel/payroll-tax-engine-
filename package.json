@@ -1,0 +1,15 @@
+{
+  "name": "payroll-tax-engine",
+  "version": "0.1.0",
+  "description": "Gross-to-net US payroll tax engine. Effective-dated data, per-tax taxable wage bases.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.6.0"
+  },
+  "scripts": {
+    "test": "node --test tests/engine.test.ts tests/harvester.test.ts",
+    "demo": "node examples/demo.ts",
+    "demo:harvest": "node examples/harvest-demo.ts"
+  },
+  "license": "MIT"
+}

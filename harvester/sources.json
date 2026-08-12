@@ -1,0 +1,88 @@
+{
+  "comment": "Authoritative sources only. The organising principle: never monitor an individual municipality's own website. Monitor the state-level register that the municipality is legally required to report into. Ohio's ~600 municipalities collapse to one Department of Taxation file; Pennsylvania's ~2,500 Act 32 jurisdictions collapse to one DCED register. That is what turns '7,400 jurisdictions' into roughly 60 things to watch.",
+
+  "sources": [
+    {
+      "id": "irs-pub15t",
+      "level": "federal",
+      "jurisdiction": "US",
+      "title": "IRS Publication 15-T — Federal Income Tax Withholding Methods",
+      "url": "https://www.irs.gov/pub/irs-pdf/p15t.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "weekly",
+      "expectedChange": "annual, published Nov-Dec; mid-year revisions do happen after major legislation",
+      "feeds": ["data/federal/{year}.json#incomeTax"]
+    },
+    {
+      "id": "ssa-wage-base",
+      "level": "federal",
+      "jurisdiction": "US",
+      "title": "SSA — OASDI Contribution and Benefit Base",
+      "url": "https://www.ssa.gov/oact/cola/cbb.html",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "weekly",
+      "expectedChange": "annual, announced mid-October with the COLA",
+      "feeds": ["data/federal/{year}.json#socialSecurity.wageBase"]
+    },
+    {
+      "id": "dol-futa-credit-reduction",
+      "level": "federal",
+      "jurisdiction": "US",
+      "title": "US DOL — FUTA Credit Reduction States",
+      "url": "https://oui.doleta.gov/unemploy/futa_credit.asp",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 50,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, finalised each November",
+      "feeds": ["data/federal/{year}.json#futa.creditReductionStates"]
+    },
+    {
+      "id": "oh-municipal-rates",
+      "level": "local",
+      "jurisdiction": "OH",
+      "title": "Ohio Dept of Taxation — Municipal Income Tax Rate Database (The Finder)",
+      "url": "https://thefinder.tax.ohio.gov/?tab=fileDownloads",
+      "authority": "state_register",
+      "format": "delimited",
+      "coversJurisdictions": 600,
+      "checkFrequency": "weekly",
+      "expectedChange": "rolling; municipal rate changes take effect 1 Jan and 1 Jul",
+      "keyField": "municipalityCode",
+      "feeds": ["data/locals/OH-{year}.json"],
+      "note": "Replaces monitoring ~600 individual village and city websites."
+    },
+    {
+      "id": "pa-act32-eit",
+      "level": "local",
+      "jurisdiction": "PA",
+      "title": "PA DCED Municipal Statistics — Act 32 EIT rates and PSD codes",
+      "url": "https://munstats.pa.gov/public/FindLocalTax.aspx",
+      "authority": "state_register",
+      "format": "delimited",
+      "coversJurisdictions": 2500,
+      "checkFrequency": "weekly",
+      "expectedChange": "rolling; most changes effective 1 Jan",
+      "keyField": "psdCode",
+      "feeds": ["data/locals/PA-{year}.json"],
+      "note": "DCED is the only legally recognised source for PSD codes and EIT rates. Individual tax collection bureaus republish it and are NOT authoritative."
+    },
+    {
+      "id": "pa-dor-withholding",
+      "level": "state",
+      "jurisdiction": "PA",
+      "title": "PA DOR — Employer Withholding",
+      "url": "https://www.revenue.pa.gov/TaxTypes/EmployerWithholding/",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "rare; the 3.07% rate has been stable for years",
+      "feeds": ["data/states/PA-{year}.json"]
+    }
+  ]
+}

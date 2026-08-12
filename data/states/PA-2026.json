@@ -1,0 +1,30 @@
+{
+  "code": "PA",
+  "name": "Pennsylvania",
+  "year": 2026,
+  "method": "flat_rate",
+  "sources": [
+    {
+      "title": "PA DOR — Employer Withholding, personal income tax rate",
+      "url": "https://www.revenue.pa.gov/TaxTypes/EmployerWithholding/",
+      "verifiedOn": "2026-08-11"
+    }
+  ],
+  "flatRate": {
+    "rate": 0.0307,
+    "allowanceAmount": 0.0,
+    "comment": "Pennsylvania has no personal exemptions, no standard deduction and no withholding allowances. Withholding is a straight percentage of PA-taxable compensation."
+  },
+  "exemptPretax": [
+    "section125",
+    "hsa",
+    "fsa",
+    "dependent_care",
+    "commuter"
+  ],
+  "exemptComment": "Deliberately omits deferral_401k / 403b / 457 / SIMPLE. Pennsylvania taxes elective retirement deferrals as compensation when earned, unlike federal income tax. An engine with a single shared 'taxable wages' figure gets Pennsylvania wrong on every cheque where an employee defers.",
+  "knownGaps": [
+    "PA employee unemployment (UC) withholding is not modelled — rate not yet verified from a primary source.",
+    "Act 32 local Earned Income Tax (EIT) and Local Services Tax (LST) require PSD-code resolution; see README."
+  ]
+}

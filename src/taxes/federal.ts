@@ -1,0 +1,329 @@
+import type { Cents } from '../money.ts';
+import {
+  applyRate,
+  atLeastZero,
+  dollars,
+  fmt,
+  overThreshold,
+  roundHalfUp,
+  underCap,
+} from '../money.ts';
+import type { Bracket, FederalRuleset } from '../registry.ts';
+import { federalRuleset } from '../registry.ts';
+import type {
+  ComputeContext,
+  FilingStatus,
+  PaycheckInput,
+  PretaxCategory,
+  TaxLine,
+} from '../types.ts';
+import { supplementalEarnings } from '../wages.ts';
+
+/**
+ * Pub 15-T publishes one schedule for "Single or Married Filing Separately".
+ */
+function scheduleKey(status: FilingStatus): string {
+  return status === 'married_separate' ? 'single' : status;
+}
+
+function findBracket(schedule: Bracket[], annualWages: Cents): Bracket {
+  for (const b of schedule) {
+    const from = dollars(b.from);
+    const to = b.to === null ? Infinity : dollars(b.to);
+    if (annualWages >= from && annualWages < to) return b;
+  }
+  return schedule[schedule.length - 1];
+}
+
+/**
+ * Federal income tax withholding — Publication 15-T, Worksheet 1A
+ * (Percentage Method for Automated Payroll Systems).
+ *
+ * Line numbers in the comments map to the worksheet so the implementation can
+ * be diffed against the published form when it changes each January.
+ */
+export function federalIncomeTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: FederalRuleset,
+): TaxLine {
+  const w4 = input.federalW4;
+  const cfg = rules.incomeTax;
+  const periods = ctx.periodsPerYear;
+
+  // The full federal base spans every taxable earning, less federal-exempt
+  // pretax. Supplemental wages (bonus/commission) are carved out and taxed on
+  // the flat path instead (see federalSupplementalTax); pretax is applied to
+  // the regular portion first, so the two lines together still tax the full
+  // base. If pretax exceeds regular wages the remainder is not spilled back
+  // onto supplemental — a rare case documented rather than modelled in v1.
+  const fullBase = ctx.taxableWagesFor(cfg.exemptPretax as PretaxCategory[]);
+  const supplementalCash = supplementalEarnings(input.earnings);
+  const taxableWages = atLeastZero(fullBase - supplementalCash);
+
+  const line = (amount: Cents, detail: string): TaxLine => ({
+    id: 'US_FIT',
+    name: 'Federal Income Tax',
+    payer: 'employee',
+    jurisdiction: 'federal',
+    taxableWages,
+    amount,
+    detail,
+  });
+
+  if (w4.exempt) {
+    return line(0, 'Employee claimed exempt on Form W-4');
+  }
+
+  // Step 1 — annualise and adjust.
+  const annualWages = taxableWages * periods; // 1c
+  const withOther = annualWages + w4.otherIncome; // 1e
+
+  // 1g: zero when the Step 2 checkbox is marked, because the multiple-jobs
+  // schedules already have the adjustment built into their bracket widths.
+  const standardAdj = w4.multipleJobs
+    ? 0
+    : dollars(
+        w4.filingStatus === 'married_joint'
+          ? cfg.step1StandardAdjustment.married_joint
+          : cfg.step1StandardAdjustment.other,
+      );
+
+  const totalDeductions = w4.deductions + standardAdj; // 1h
+  const adjustedAnnual = atLeastZero(withOther - totalDeductions); // 1i
+
+  // Step 2 — bracket lookup.
+  const schedules = w4.multipleJobs
+    ? cfg.multipleJobsSchedules
+    : cfg.standardSchedules;
+  const schedule = schedules[scheduleKey(w4.filingStatus)];
+  if (!schedule) {
+    throw new Error(
+      `No 2026 federal schedule for filing status "${w4.filingStatus}"`,
+    );
+  }
+
+  const bracket = findBracket(schedule, adjustedAnnual);
+  const excess = adjustedAnnual - dollars(bracket.from); // 2e
+  const tentativeAnnual =
+    dollars(bracket.base) + applyRate(excess, bracket.rate); // 2g
+  const tentativePerPeriod = Math.round(tentativeAnnual / periods); // 2h
+
+  // Step 3 — dependent and other credits.
+  const creditPerPeriod = Math.round(w4.dependentCredit / periods); // 3b
+  const afterCredits = atLeastZero(tentativePerPeriod - creditPerPeriod); // 3c
+
+  // Step 4 — additional withholding requested by the employee.
+  const total = afterCredits + w4.extraWithholding; // 4b
+
+  const detail =
+    `annualised ${fmt(annualWages)} → adjusted ${fmt(adjustedAnnual)}; ` +
+    `bracket ${(bracket.rate * 100).toFixed(0)}% over ${fmt(dollars(bracket.from))}; ` +
+    `tentative/yr ${fmt(tentativeAnnual)} ÷ ${periods}` +
+    (creditPerPeriod ? `; less credits ${fmt(creditPerPeriod)}` : '') +
+    (w4.extraWithholding ? `; plus extra ${fmt(w4.extraWithholding)}` : '');
+
+  return line(total, detail);
+}
+
+/**
+ * Federal income tax on supplemental wages (bonus, commission) — Pub 15
+ * flat-rate method. A flat 22% on supplemental wages, and a mandatory 37% on
+ * the portion of cumulative supplemental wages above $1,000,000 in the calendar
+ * year. Returns null when there are no supplemental earnings, so a plain
+ * paycheck is unaffected.
+ *
+ * This is a separate line from US_FIT so the breakdown stays auditable: a
+ * customer can see exactly what withholding the bonus drove.
+ */
+export function federalSupplementalTax(
+  input: PaycheckInput,
+  rules: FederalRuleset,
+): TaxLine | null {
+  const supplementalCash = supplementalEarnings(input.earnings);
+  if (supplementalCash <= 0) return null;
+
+  const cfg = rules.incomeTax;
+
+  // An exempt W-4 claims no federal income tax liability at all, supplemental
+  // included; nothing is withheld.
+  if (input.federalW4.exempt) {
+    return {
+      id: 'US_FIT_SUPP',
+      name: 'Federal Income Tax (Supplemental)',
+      payer: 'employee',
+      jurisdiction: 'federal',
+      taxableWages: supplementalCash,
+      amount: 0,
+      detail: 'Employee claimed exempt on Form W-4',
+    };
+  }
+
+  const threshold = dollars(cfg.supplementalMandatoryThreshold);
+  const ytdSupp = input.ytd.supplemental ?? 0;
+  const over = overThreshold(supplementalCash, ytdSupp, threshold);
+  const under = supplementalCash - over;
+
+  // One rounding for the whole line even across the two rate bands
+  // (docs/rounding-and-precision.md rule 4).
+  const amount = roundHalfUp(
+    under * cfg.supplementalRate + over * cfg.supplementalMandatoryRate,
+  );
+
+  const detail = over
+    ? `${fmt(under)} @ ${(cfg.supplementalRate * 100).toFixed(0)}% + ` +
+      `${fmt(over)} @ ${(cfg.supplementalMandatoryRate * 100).toFixed(0)}% ` +
+      `(cumulative supplemental over ${fmt(threshold)})`
+    : `${fmt(supplementalCash)} @ ${(cfg.supplementalRate * 100).toFixed(0)}% flat supplemental rate`;
+
+  return {
+    id: 'US_FIT_SUPP',
+    name: 'Federal Income Tax (Supplemental)',
+    payer: 'employee',
+    jurisdiction: 'federal',
+    taxableWages: supplementalCash,
+    amount,
+    detail,
+  };
+}
+
+/** Social Security (OASDI) — capped at the annual wage base. */
+export function socialSecurity(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: FederalRuleset,
+): TaxLine[] {
+  const cfg = rules.socialSecurity;
+  const base = ctx.taxableWagesFor(cfg.exemptPretax as PretaxCategory[]);
+  const cap = dollars(cfg.wageBase);
+  const taxable = underCap(base, input.ytd.socialSecurity, cap);
+
+  const detail =
+    taxable < base
+      ? `capped: ${fmt(input.ytd.socialSecurity)} YTD against ${fmt(cap)} wage base`
+      : `${fmt(taxable)} @ 6.2%`;
+
+  return [
+    {
+      id: 'US_SS_EE',
+      name: 'Social Security',
+      payer: 'employee',
+      jurisdiction: 'federal',
+      taxableWages: taxable,
+      amount: applyRate(taxable, cfg.employeeRate),
+      detail,
+    },
+    {
+      id: 'US_SS_ER',
+      name: 'Social Security (Employer)',
+      payer: 'employer',
+      jurisdiction: 'federal',
+      taxableWages: taxable,
+      amount: applyRate(taxable, cfg.employerRate),
+      detail,
+    },
+  ];
+}
+
+/** Medicare, plus the employee-only Additional Medicare surtax. */
+export function medicare(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: FederalRuleset,
+): TaxLine[] {
+  const cfg = rules.medicare;
+  const taxable = ctx.taxableWagesFor(cfg.exemptPretax as PretaxCategory[]);
+
+  const lines: TaxLine[] = [
+    {
+      id: 'US_MED_EE',
+      name: 'Medicare',
+      payer: 'employee',
+      jurisdiction: 'federal',
+      taxableWages: taxable,
+      amount: applyRate(taxable, cfg.employeeRate),
+      detail: `${fmt(taxable)} @ 1.45%, no wage cap`,
+    },
+    {
+      id: 'US_MED_ER',
+      name: 'Medicare (Employer)',
+      payer: 'employer',
+      jurisdiction: 'federal',
+      taxableWages: taxable,
+      amount: applyRate(taxable, cfg.employerRate),
+      detail: `${fmt(taxable)} @ 1.45%, no wage cap`,
+    },
+  ];
+
+  // Additional Medicare: employee only, on wages above the threshold.
+  // The employer applies the flat $200,000 trigger regardless of filing
+  // status; any over/under is settled by the employee on Form 8959.
+  const threshold = dollars(cfg.additional.threshold);
+  const surtaxBase = overThreshold(taxable, input.ytd.medicare, threshold);
+  if (surtaxBase > 0) {
+    lines.push({
+      id: 'US_MED_ADDL',
+      name: 'Additional Medicare',
+      payer: 'employee',
+      jurisdiction: 'federal',
+      taxableWages: surtaxBase,
+      amount: applyRate(surtaxBase, cfg.additional.rate),
+      detail: `${fmt(surtaxBase)} of this cheque exceeds the ${fmt(threshold)} threshold @ 0.9%`,
+    });
+  }
+
+  return lines;
+}
+
+/** FUTA — employer only, capped, and assumes the full state credit. */
+export function futa(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: FederalRuleset,
+): TaxLine[] {
+  const cfg = rules.futa;
+  const base = ctx.taxableWagesFor(cfg.exemptPretax as PretaxCategory[]);
+  const cap = dollars(cfg.wageBase);
+  const taxable = underCap(base, input.ytd.futa, cap);
+
+  if (taxable === 0) {
+    return [
+      {
+        id: 'US_FUTA',
+        name: 'FUTA',
+        payer: 'employer',
+        jurisdiction: 'federal',
+        taxableWages: 0,
+        amount: 0,
+        detail: `wage base ${fmt(cap)} already met`,
+      },
+    ];
+  }
+
+  return [
+    {
+      id: 'US_FUTA',
+      name: 'FUTA',
+      payer: 'employer',
+      jurisdiction: 'federal',
+      taxableWages: taxable,
+      amount: applyRate(taxable, cfg.netRate),
+      detail: `${fmt(taxable)} @ 0.6% net of the 5.4% state credit`,
+    },
+  ];
+}
+
+export function federalTaxes(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+): TaxLine[] {
+  const rules = federalRuleset(input.checkDate);
+  const supplemental = federalSupplementalTax(input, rules);
+  return [
+    federalIncomeTax(input, ctx, rules),
+    ...(supplemental ? [supplemental] : []),
+    ...socialSecurity(input, ctx, rules),
+    ...medicare(input, ctx, rules),
+    ...futa(input, ctx, rules),
+  ];
+}

@@ -1,0 +1,144 @@
+{
+  "code": "MI",
+  "name": "Michigan",
+  "year": 2026,
+  "method": "flat_rate",
+  "sources": [
+    {
+      "title": "2026 Michigan Income Tax Withholding Guide, Form 446 (Rev. 02-26)",
+      "url": "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/SUW/TY2026/446_Withholding-Guide_2026.pdf",
+      "verifiedOn": "2026-08-11",
+      "verifiedBy": "primary source (Treasury PDF) — read directly: 'Withholding Rate: 4.25% Personal Exemption Amount: $5,900'"
+    },
+    {
+      "title": "4.25% Income Tax Rate for Individuals and Fiduciaries in 2026 Tax Year (Treasury taxpayer notice, 2026-04-15)",
+      "url": "https://www.michigan.gov/treasury/reference/taxpayer-notices/2026/04/15/425-income-tax-rate-for-individuals-and-fiduciaries-in-2026-tax-year",
+      "verifiedOn": "2026-08-11"
+    },
+    {
+      "title": "MCL 206.703(2) — Every employer required under the Internal Revenue Code to withhold on an individual's compensation shall deduct and withhold Michigan tax",
+      "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-206-703",
+      "verifiedOn": "2026-08-12",
+      "verifiedBy": "UPGRADED this session: fetched directly from legislature.mi.gov and read the actual statute text (quoted in title). CORRECTION: a general web search this session claimed the real withholding statute was MCL 206.351 — checked directly and that section is REPEALED (2011 PA 38, eff. 2012-01-01). 206.703 (the citation already in this file) is confirmed correct and current."
+    },
+    {
+      "title": "MCL 206.30 — retirement/pension income deductions (subsection (1)(f) etc.), the basis for MI taxable income tracking federal AGI",
+      "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-206-30",
+      "verifiedOn": "2026-08-11",
+      "verifiedBy": "web-confirmed statute citation via search summary; full text still not directly fetched this session — treat exemptPretax's specific pretax-deferral claim as one tier below 206.703's confidence."
+    },
+    {
+      "title": "Revenue Administrative Bulletin 1988-27 — Section 125 cafeteria plan benefits excluded from AGI are excluded from MI taxable income",
+      "url": "https://michigan.gov/treasury/0,4679,7-121-44402_44415_44416-7351--,00.html",
+      "verifiedOn": "2026-08-11"
+    }
+  ],
+  "flatRate": {
+    "rate": 0.0425,
+    "allowanceAmount": 5900.0,
+    "comment": "Michigan withholds 4.25% after subtracting the annual personal/dependency exemption allowance ($5,900 per exemption for 2026, up from $5,800 in 2025). The employee's MI-W4 exemption count goes in workState.certificate.allowances. NOTE: a widely-syndicated third-party page listed Michigan at 4.05% (the expired 2023 temporary rate) — the 4.25% here is from the official 2026 Form 446, not a secondary source."
+  },
+  "supplementalRate": 0.0425,
+  "supplementalComment": "Bonuses/other separate payments: multiply by 4.25% with NO exemption adjustment (Form 446). Not yet wired — the engine's state path applies exemptions to all earnings; see knownGaps.",
+  "exemptPretax": [
+    "section125",
+    "hsa",
+    "fsa",
+    "dependent_care",
+    "deferral_401k",
+    "deferral_403b",
+    "deferral_457",
+    "deferral_simple",
+    "commuter"
+  ],
+  "exemptComment": "MCL 206.30 defines MI taxable income as federal adjusted gross income (with statutory adjustments), so anything already excluded from federal AGI — Section 125 cafeteria benefits (RAB 1988-27, an actual named enumeration) and elective retirement deferrals (401k/403b/457/SIMPLE, pretax for federal purposes) — is excluded from the MI base too. This is the OPPOSITE of Pennsylvania, which taxes elective deferrals as compensation when earned. The WITHHOLDING OBLIGATION statute (MCL 206.703(2)) was fetched and read directly this session, confirming it ties Michigan withholding to the same 'compensation' concept the IRC uses for federal withholding — supporting, though not itself individually enumerating, the exclusion. 206.30 itself is still cited but not directly fetched; RAB 1988-27 remains the strongest single piece of evidence (an explicit named enumeration for cafeteria plans specifically).",
+  "withholdingCertificate": {
+    "$comment": "NEW this session: the actual MI-W4 form, fetched and read directly. This is Michigan's federal-W4 equivalent and a real gap to have skipped — 'exemptions claimed' upstream of the rate calc has to come from somewhere, and this is that somewhere.",
+    "source": {
+      "title": "MI-W4 (Rev. 12-20) — Employee's Michigan Withholding Exemption Certificate",
+      "url": "https://www.michigan.gov/-/media/Project/Websites/taxes/Forms/All-Years/MIW4.pdf",
+      "verifiedOn": "2026-08-12",
+      "verifiedBy": "PDF downloaded and text-extracted directly this session"
+    },
+    "fields": {
+      "personalAndDependentExemptions": "Line 6 — a single count, feeds directly into flatRate.allowanceAmount x count in this engine's existing flat_rate calc.",
+      "additionalWithholdingPerPay": "Line 7 — a flat dollar amount added per pay period, same concept as federal W-4 Step 4(c). NOT currently modelled in the engine (state.ts's flatRate() has no field for this).",
+      "newHireFlag": "Line 5 — yes/no plus date of hire; feeds Michigan's new-hire reporting requirement, not the tax calc itself.",
+      "driverLicenseOrStateId": "Required field on the form itself (unusual — most states' withholding certificates don't require this)."
+    },
+    "exemptionClaims": {
+      "$comment": "Line 8 — three distinct reasons an employee can claim FULL exemption from MI withholding. All three are currently unmodelled; the engine has no equivalent to federal W4.exempt for state-level MI, and no concept of the third reason at all.",
+      "noLiabilityExpected": "Standard 'I don't expect to owe MI tax this year' claim, analogous to federal W-4 exempt.",
+      "wagesExempt": "Wages themselves are exempt from withholding, with a free-text explanation field on the form (no enumerated list of what qualifies).",
+      "renaissanceZone": "A genuinely Michigan-specific concept NOT touched anywhere else in this dataset: certain economically-distressed areas of Michigan are designated Renaissance Zones under the Michigan Renaissance Zone Act, and residents domiciled in an active zone can be fully exempt from MI income tax (state AND applicable city tax) for the zone's duration. NOT researched further this session (which zones are currently active, expiration dates, whether it's full or partial exemption) — flagged as a real, disclosed unknown rather than silently omitted."
+    },
+    "knownGap": "Not modelled in the engine at all beyond the exemption COUNT (which already flows into flatRate). Additional per-pay withholding, the exempt-from-withholding claims, and Renaissance Zone status have zero representation in types.ts's FederalW4-only model — Michigan needs its own certificate type, distinct from reusing federal W4 fields."
+  },
+  "reciprocity": {
+    "source": {
+      "title": "Michigan Treasury — Withholding Reciprocity Examples (Analysis section: MCL 206.703(2), MCL 206.110, MCL 206.256, RAB 2017-13)",
+      "url": "https://www.michigan.gov/taxes/business-taxes/payroll-service-providers/withholding-reciprocity-examples",
+      "verifiedOn": "2026-08-11",
+      "verifiedBy": "fetched directly via browser; text quoted below is from the page's own Analysis section"
+    },
+    "reciprocalStates": ["IL", "IN", "KY", "MN", "OH", "WI"],
+    "rule": "MCL 206.256. A resident of a reciprocal state remains subject to ONLY their home state's income tax regardless of where services are performed. This is symmetric and direction-matters: (1) a resident of IL/IN/KY/MN/OH/WI working IN Michigan is EXEMPT from Michigan withholding — the employer withholds nothing for MI; (2) a MICHIGAN RESIDENT working in one of those six states remains subject to MICHIGAN tax on those wages (the reciprocal state does not tax them, and MI does not credit/exempt them) — confirmed by the source's own Example 4 (a MI resident earning wages in Ohio Jan-Mar remains MI-taxable on that Ohio income).",
+    "nonReciprocalNote": "Absent a reciprocity agreement, the general MCL 206.110 rule applies: MI residents are taxed by MI on ALL income regardless of work location; nonresidents are taxed by MI only on MI-source income. Example: a Tennessee resident working in Michigan (TN is not reciprocal) IS subject to MI withholding on Michigan wages.",
+    "mechanism": "Employee claims exemption from MI withholding via Form MI-W4's reciprocity line (or an employer-created equivalent form per the source page).",
+    "knownGap": "Not modelled in the calculation engine — input.residenceState exists in types.ts but stateIncomeTax() in state.ts only reads input.workState and has no reciprocity branch. This is real functional scope, not a data gap: implementing it correctly requires resolving BOTH residence and work state together, which none of PA/MI/any state currently does."
+  },
+  "unemploymentInsurance": {
+    "$comment": "Employer-only (SUTA/SUI) — no employee contribution. UPGRADED to primary_source_confirmed this session: found and read Michigan's actual statutory rate-formula page directly (Section 19, Michigan Employment Security Act), replacing the earlier secondary-sourced 'new employer 2.7% / experienced range 0.06%-10.3%' placeholder with Michigan's real, more precise structure.",
+    "sources": [
+      {
+        "title": "Michigan LEO/UIA — Taxable Wage Base FAQ",
+        "url": "https://www.michigan.gov/leo/bureaus-agencies/uia/employers/forms/accordion/taxable-wage-base",
+        "verifiedOn": "2026-08-11",
+        "verifiedBy": "fetched directly via browser; page's own text still labelled '2025' at fetch time, not yet updated to say '2026' explicitly"
+      },
+      {
+        "title": "Michigan LEO/UIA — Unemployment Tax Rate (statutory formula, Section 19 of the Michigan Employment Security Act)",
+        "url": "https://www.michigan.gov/leo/bureaus-agencies/uia/assets/unemployment-tax-rate",
+        "verifiedOn": "2026-08-11",
+        "verifiedBy": "fetched directly via browser; full formula text read and transcribed below. This page independently states the taxable wage base as a flat $9,000 (no default/qualified split mentioned here), a minor inconsistency against the Taxable Wage Base FAQ page's $9,500/$9,000 split — both are Michigan's own pages; not resolved further this session, disclosed rather than silently picking one."
+      }
+    ],
+    "administeredBy": "Michigan Unemployment Insurance Agency (UIA), part of the Dept of Labor and Economic Opportunity (LEO)",
+    "wageBase": {
+      "default": 9500.0,
+      "qualifiedEmployer": 9000.0,
+      "rule": "Default/statutory ceiling is $9,500. A 'qualified employer' — current on all quarterly reports, no unpaid balance of $25+ in tax/penalty/interest — gets a reduced $9,000 base. The reduction is further gated on the UIA Trust Fund balance reaching/holding $2.5B for two consecutive quarters (per the Taxable Wage Base FAQ page's own stated mechanism). A second MI primary page (Unemployment Tax Rate) states $9,000 flatly without mentioning the split — an inconsistency between Michigan's own pages, disclosed rather than resolved by guessing.",
+      "confidence": "primary_source_confirmed, with one disclosed inter-page inconsistency noted above."
+    },
+    "rateFormula": {
+      "$comment": "This is Michigan's REAL structure, not a simple min/max range like Ohio's — a genuine, disclosed structural difference between the two states' UI systems. Michigan computes a rate from three components (CBC + ABC + NBC) once an employer has 5+ years of liability; new employers get a flat statutory rate for their first two years, then a phased blend.",
+      "newEmployerSchedule": {
+        "year1": 0.027,
+        "year2": 0.027,
+        "year3": "1/3 CBC + 1.8%",
+        "year4": "2/3 CBC + 1.0%",
+        "year5Plus": "CBC + ABC + NBC (fully experience-rated)"
+      },
+      "constructionIndustryNote": "First two years: the average construction-contractor rate (not the general 2.7%) — a distinct figure not captured here; year 3 is 1/3 CBC + 2/3 of that construction rate; year 4 is 2/3 CBC + 1/3 of it.",
+      "components": {
+        "CBC": "Chargeable Benefits Component = (60 months of benefits paid) / (60 months of taxable payroll), each 60-month period ending the previous June 30.",
+        "ABC": "Account Building Component = [(Required Reserve) - (Actual Reserve)] x 0.5, divided by total payroll for the 12 months ending last June 30. Required Reserve = that same 12-month payroll x 0.0375 ('cost criterion'). Actual Reserve = all tax payments except NBC, since the business began, minus all benefit payments since the business began — can be negative.",
+        "NBC": "Nonchargeable Benefits Component — the one component NOT based on the employer's own experience. Flat 1.0% standard for employers with 5+ years in business, reduced for employers with few/no benefit charges: 0.5% (no charges in 5yr), 0.4% (6yr), 0.3% (7yr), 0.2% (8yr), 0.1% (9yr)."
+      },
+      "acrossTheBoardReduction": "If the UI Trust Fund holds at least 1.2% of all contributing employers' total payroll (trailing 12 months), each employer's rate is further cut by the better of: 10% off each component, or a flat 0.1% off the total rate. Does not apply to employers already at the year's minimum rate or with under 4 years of liability."
+    },
+    "confidence": "primary_source_confirmed — read directly from Michigan's own statutory-formula page (Section 19, Michigan Employment Security Act), not a secondary aggregator. This REPLACES the prior pending_verification 'new employer 2.7% / experienced range 0.06%-10.3%' placeholder with Michigan's actual, more precise mechanism. No simple published min/max bound exists for experienced employers the way Ohio publishes one (0.4%-10.1%) — Michigan's system is formula-computed per employer, not table-looked-up, and stating an invented min/max here would be less accurate than the real formula.",
+    "knownGap": "Not modelled in the calculation engine — futa() in src/taxes/federal.ts has no MI/state analog yet. Even more than Ohio's, Michigan's SUTA cannot be a static jurisdiction-rate lookup: it requires per-employer history (years of liability, 60-month benefit/payroll ratios, reserve balances) that current PaycheckInput has no fields for at all."
+  },
+  "verification": {
+    "regularWagesCalculation": "PROVEN, not just plausible: 4 hand-derived fixtures (baseline, zero-exemption, 401k-reduces-base, section125-reduces-base) run through the actual calculatePaycheck() engine and matched to the cent — see tests/engine.test.ts describe('Michigan'). This confirms MI's flat-rate-plus-exemption structure genuinely dispatches through the engine's existing flat_rate method (built for PA), not just that the JSON looks compatible.",
+    "notCoveredByThoseFixtures": "Supplemental (bonus) wages, reciprocity, and SUTA are NOT exercised by any test — see knownGaps below. Only the regular-wages state-income-tax path has been proven end-to-end."
+  },
+  "knownGaps": [
+    "State supplemental (bonus) 4.25% no-exemption path not yet wired — currently the flat_rate method applies exemptions to all earnings including supplemental. NOT covered by any test.",
+    "MI-W4 additional-withholding and additional-exemptions (age/blind) fields not yet modelled.",
+    "Local city income tax (24 cities) lives in data/local/MI-cities-2026.json and is not yet computed by the engine.",
+    "Reciprocity (6 states) is documented above but not implemented — see reciprocity.knownGap.",
+    "State unemployment (SUTA) is documented above but not implemented, and the experienced-employer rate is fundamentally per-employer, not a jurisdiction constant — see unemploymentInsurance.knownGap."
+  ]
+}
