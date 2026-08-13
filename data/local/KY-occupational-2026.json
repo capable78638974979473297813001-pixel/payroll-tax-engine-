@@ -1,0 +1,149 @@
+{
+  "$comment": "Kentucky local occupational license tax -- cities, counties, AND school districts each have independent statutory authority to levy on wages/salaries/commissions AND on business net profits, and these CAN stack. UPDATED: a real bulk source WAS found (see jurisdictionRoster/sources below) -- the KRS 67.766 database at web.sos.ky.gov/occupationaltax IS Kentucky's PA-DCED/OH-Finder equivalent, corrects this file's earlier claim that no such source exists. It lists an AUTHORITATIVE 230 taxing districts by name (not the ~300 estimated from secondary sources) and, for most districts, an actual rate/cap/min-tax/contact record -- not just a forms repository. This file now captures the full 230-name roster plus real rate data for 29 of them, prioritized by population. Treat every jurisdiction in `jurisdictionRoster` but NOT in `jurisdictions` as a KNOWN NAME with an UNKNOWN rate -- look it up at the URL below rather than guessing. IMPORTANT DISCLOSED FINDING: the source database sometimes shows ONE rate under a single 'Net Profits' category and sometimes shows the wage/payroll rate SEPARATELY from the net-profits rate (Hopkinsville: 1.95% wages vs 1.3% net profits) -- do NOT assume a single displayed 'Net Profits' rate also applies to wage withholding unless the entry explicitly says so (e.g. Nelson County's cap is explicitly marked '(net profits/wages)', Boyle County's category is explicitly 'Net Profits/Gross Wages'). Each jurisdiction entry below states which case applies.",
+  "year": 2026,
+  "asOf": "2026-08-12",
+  "sources": [
+    {
+      "title": "KRS 67.750 -- Definitions for KRS 67.750 to 67.790",
+      "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=48677",
+      "verifiedOn": "2026-08-12",
+      "verifiedBy": "PDF fetched and read directly this session, full statutory text."
+    },
+    {
+      "title": "KRS 92.281 -- Levy of all taxes authorized by Constitution Section 181 -- Exceptions -- License fees -- Occupational tax (city authority)",
+      "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=48683",
+      "verifiedOn": "2026-08-12",
+      "verifiedBy": "PDF fetched and read directly this session, full statutory text."
+    },
+    {
+      "title": "KRS 68.180 -- Occupational license tax in counties containing 300,000 population",
+      "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=50960",
+      "verifiedOn": "2026-08-12",
+      "verifiedBy": "PDF fetched and read directly this session, full statutory text (both pages)."
+    },
+    {
+      "title": "KRS 68.197 -- License fees in counties of 30,000 or more",
+      "url": "https://apps.legislature.ky.gov/law/Statutes/statute.aspx?id=54832",
+      "verifiedOn": "2026-08-12",
+      "verifiedBy": "PDF fetched and read directly this session, full statutory text (all 4 pages, including the 1986/2005/2021/2024 amendment history)."
+    },
+    {
+      "title": "Kentucky Secretary of State -- Occupational License Tax Forms Database (KRS 67.766)",
+      "url": "https://web.sos.ky.gov/occupationaltax/",
+      "verifiedOn": "2026-08-12",
+      "verifiedBy": "Browsed directly (not WebFetch, which cannot execute this page's ASP.NET postback dropdown). Selected 29 individual districts by name and read the resulting detail panel (#ContentPlaceHolder1_FvDetails + #ContentPlaceHolder1_fvDetail) directly via the live DOM each time. This is the authoritative, state-run roster of all 230 Kentucky taxing districts (see jurisdictionRoster below) -- CORRECTS this file's earlier claim that no bulk source exists. Coverage caveat: rate/cap/min-tax fields are populated per-district at the DISCRETION of that district's own filing (some, e.g. Pulaski County, McCracken County, Paducah, show ordinance/contact info but a BLANK rate field -- the ordinance PDF itself would have the number, not pursued further this session)."
+    },
+    {
+      "title": "City of Lexington -- Occupational license fee: rates and current forms",
+      "url": "https://www.lexingtonky.gov/working/business-licensing-taxes/occupational-license-fee-rates-current-forms",
+      "verifiedOn": "2026-08-12",
+      "verifiedBy": "Fetched directly via WebFetch, page text summarized: 'an occupational license fee of 2.25%', applying to both wage withholding and net profits."
+    },
+    {
+      "title": "Louisville Metro Revenue Commission -- W-1KJC Instructions and Louisville Metro Code Sec. 110.02",
+      "url": "https://louisvilleky.gov/sites/default/files/2024-12/w-1kjc_instructions_2025.pdf",
+      "verifiedOn": "2026-08-12",
+      "verifiedBy": "NOT directly fetched -- louisvilleky.gov returned HTTP 403 on two direct WebFetch attempts this session. Figures below come from WebSearch result summaries that quote this document and Louisville Metro Code Sec. 110.02 by name. Cross-check performed: the quoted 1.25% Metro-Government component matches KRS 68.180's statutory cap for Jefferson County (the only county over 300,000 population) EXACTLY, which is independent corroboration even though the source itself was not fetched directly."
+    }
+  ],
+  "legalFramework": {
+    "countyRateCaps": {
+      "$comment": "Population-tiered, set by statute -- NOT a single statewide county cap.",
+      "tier300kPlus": {
+        "statute": "KRS 68.180",
+        "cap": 0.0125,
+        "appliesTo": "Counties with population >= 300,000. Only Jefferson County (Louisville Metro) currently meets this threshold.",
+        "base": "(a) Salaries, wages, commissions, and other compensation earned by persons WITHIN THE COUNTY for work done/services performed in the county; AND (b) net profits of businesses/trades/professions/occupations from activities conducted in the county.",
+        "exemptions": [
+          "Public service companies that pay ad valorem tax",
+          "Providers of multichannel video programming/communications services (KRS 136.602) grandfathered from a pre-2006 KRS 136.120 taxation scheme",
+          "Banks, trust companies, combined bank-and-trust companies, savings and loan associations (state or federally chartered)",
+          "Kentucky National Guard members' active-duty training / unit training assembly / annual field training pay",
+          "Precinct workers' election-training/election-booth income",
+          "Qualifying investment fund profits/earnings/distributions under KRS 154.20-250 to 154.20-284 (to the extent not taxable to an individual investor)",
+          "Disaster response businesses/employees during a disaster response period (terms defined by KRS 141.010)"
+        ],
+        "noCreditMechanismFound": "Unlike KRS 68.197 (the 30k-300k tier, see below), NO city-tax-credits-against-county-tax provision was found in KRS 68.180's text as read. Jefferson County/Louisville Metro is a CONSOLIDATED city-county government, which may make the question of a separate city-vs-county credit moot there specifically -- not confirmed either way this session."
+      },
+      "tier30kTo300k": {
+        "statute": "KRS 68.197",
+        "cap": 0.01,
+        "appliesTo": "Counties with population >= 30,000 (and, per subsection 9, a county that adopted its fee under the separate KRS 67.083 authority does not have to reduce its rate merely because it later crosses the 30,000 threshold -- KRS 67.083 itself was not read this session).",
+        "authorizationMechanism": "By ORDINANCE of the fiscal court (subsection 1) -- CORRECTS an earlier secondary-source search summary in this project's own research process that overstated a general voter-referendum requirement. A referendum requirement DOES appear, but only for a distinct legacy sub-case: subsection 10 references counties 'where a license fee has been authorized by a public question approved by the voters' as a specific category with its own rules (no city credit without agreement; rate can still only go up to 1%; the taxable-earnings base itself is separately capped at the Social Security wage base, 42 U.S.C. Sec 430(b)). The GENERAL current grant (subsection 1) is ordinance-only.",
+        "cityCreditMechanism": "KRS 68.197(6)-(7): a person who pays BOTH a county fee under this section AND a city fee within that county gets the city fee CREDITED against the county fee. Subsection 7 makes this MANDATORY (not just permissive) for fees imposed on or after 1986-07-15, absent a county-city agreement to the contrary. This directly contradicts the simple 'stacking' description used by several secondary sources (Symmetry, US Tax Disputes, etc.) for this population tier specifically -- those sources are not WRONG that city and county rates can both apply, but 'stack' implies simple addition, and the statute's actual mechanism is a credit, which produces a different (lower) combined liability than addition would.",
+        "annexationRule": "Subsections 8(a)-(d): if a city annexes territory and both city and county levy a fee, the COUNTY fee stops applying in the annexed area if the city's rate is >= the county's; if the city's rate is lower, only the EXCESS county rate remains, and the city must pay the county an annual make-whole amount tied to pre-annexation county revenue in that area.",
+        "wageBaseCapVariant": "For the voter-authorized legacy sub-case only (subsection 10(c)): the taxable earnings base itself is capped at 'an amount equal to the maximum Social Security contribution and benefit base' -- i.e. a LOCAL occupational tax with its own FICA-style wage ceiling. Genuinely novel structure, not seen in PA/OH/MI/IN. Which specific counties (if any) currently use this variant was not identified this session."
+      },
+      "tierUnder30k": "NOT FOUND this session -- no statute located for the smallest county population tier. It is not established whether counties under 30,000 population have ANY occupational-tax authority, a lower cap, or no authority at all; do not assume any of the three."
+    },
+    "cityRateCap": {
+      "statute": "KRS 92.281",
+      "cap": "NONE found. Cities levy under the KENTUCKY CONSTITUTION's Section 181 (home-rule taxing power), which KRS 92.281 merely confirms/channels -- the statute sets no numeric percentage ceiling anywhere in its text.",
+      "exemptions": [
+        "Election precinct workers' training/booth income",
+        "Qualifying investment fund profits under KRS 154.20-250 to 154.20-284",
+        "Multichannel video programming/communications service providers (KRS 136.602) grandfathered from pre-2006 KRS 136.120 taxation",
+        "Companies that pay BOTH ad valorem tax and franchise tax cannot also be required to pay a license tax (subsection 3)"
+      ],
+      "asymmetryVsCounties": "This is a genuine, confirmed structural asymmetry: counties are statutorily rate-capped and population-tiered; cities are not capped by state law at all, only by local ordinance/political tolerance. Lexington-Fayette's consolidated-government rate of 2.25% (exceeding BOTH county caps) is consistent with this -- it is exercised as CITY authority (Section 181), not county fiscal-court authority."
+    },
+    "schoolDistrictAuthority": {
+      "statute": "KRS 67.750(10)",
+      "note": "'Tax district' is explicitly defined to include 'a city, county, urban-county, charter county, consolidated local government, SCHOOL DISTRICT, special taxing district, or any other statutorily created entity with the authority to levy net profits, gross receipts, or occupational license taxes.' School districts have INDEPENDENT levying authority under this definitions statute, not merely a revenue-share carved out of a city/county rate -- though in Louisville Metro's specific case (see jurisdictions.louisvilleMetro below) the school-board component IS folded into one blended withholding rate rather than withheld as a separate line. Whether that blended-vs-separate pattern holds statewide is unconfirmed."
+    },
+    "compensationBaseDefinition": {
+      "statute": "KRS 67.750(2)",
+      "quotedDefinition": "'Compensation' means wages, salaries, commissions, or any other form of remuneration paid or payable by an employer for services performed by an employee, which are required to be reported for federal income tax purposes and adjusted as follows: (a) Include any amounts contributed by an employee to any retirement, profit sharing, or deferred compensation plan... under a salary reduction agreement... including but not limited to... Section 401(a), 401(k), 402(e), 403(a), 403(b), 408, 414(h), or 457...; and (b) Include any amounts contributed by an employee to any welfare benefit, fringe benefit, or other benefit plan made by salary reduction... including but not limited to Sections 125 and 132...",
+      "implication": "This is the OPPOSITE of this file's sibling state-tax file (data/states/KY-2026.json): the LOCAL occupational tax base explicitly ADDS BACK every pretax deferral/benefit category that Kentucky's STATE income tax (inferred, federal-AGI-conforming) and federal income tax both exclude. An employee deferring to a 401(k) or using a Section 125 cafeteria plan gets NO reduction in their Kentucky local occupational tax base, even though the identical dollars reduce their federal, FICA-adjacent, and (inferred) Kentucky state tax bases. No other state modelled in this project has a within-state split this sharp between its state-level and local-level pretax treatment.",
+      "employeeDefinition": "KRS 67.750(4): 'any person who renders services... for compensation'... 'A person classified as an independent contractor under the Internal Revenue Code shall not be considered an employee' -- IRC classification is the controlling test, same convention as federal/FICA."
+    },
+    "netProfitsBase": {
+      "statute": "KRS 67.750(8)",
+      "note": "For self-employed individuals and businesses (not wage employees): federal gross income (IRC Sec 61) minus IRC Chapter 1 deductions, with add-backs for state/local tax deductions computed by reference to income, amounts allocable to exempt income, NOL carrybacks/carryforwards, and pass-through items; IRC frozen 'in effect on December 31, 2008, as amended'. Relevant to business-return-side Kentucky payroll-tax-engine coverage but NOT a wage-withholding line item -- flagged as in-scope-adjacent, not pursued further this session since the immediate task is the withholding engine."
+    },
+    "apportionmentAndRefunds": {
+      "multiJurisdictionWorkDayFraction": "SECONDARY-SOURCED (Symmetry, Dean Dorton) -- not yet confirmed by a direct read of KRS 67.753 (the statute both KRS 67.750(11)-(14) and secondary sources point to for apportionment mechanics; not fetched this session). Described mechanism: wages x (days worked in the district / total days worked everywhere).",
+      "sourcingBasis": "Tax follows WORK LOCATION, not residence, for the wage-tax component -- confirmed structurally consistent with KRS 68.180(2)(a)/68.197(2)(a)'s own 'work done... in the county' language, which IS primary-sourced even though the day-fraction MECHANICS are only secondary-sourced.",
+      "refunds": "SECONDARY-SOURCED (Dean Dorton): employee-filed, 2-year statute of limitations from the employer's return due date (commonly stated as Feb 28), used when an employer withheld for one jurisdiction while the employee actually worked in another (remote work is the most common modern trigger)."
+    },
+    "administration": {
+      "bulkRateSourceFound": "CORRECTED this session: web.sos.ky.gov/occupationaltax (KRS 67.766, 2012 HB 277) IS Kentucky's bulk source -- a state-run, ASP.NET dropdown-driven database covering all 230 taxing districts by name, most with an actual rate/cap/min-tax/contact record attached, not merely ordinance PDFs. It required live browser interaction (selecting each district and reading the resulting detail panel) rather than a single WebFetch, since it's a postback form, not a static page or REST API -- no direct per-district URL pattern was found (network inspection confirmed every lookup is a same-URL POST with ASP.NET viewstate, not a queryable endpoint).",
+      "kolaUnreachable": "The Kentucky Occupational License Association (kyola.org) still returned a certificate-expired error this session -- not pursued further since web.sos.ky.gov turned out to be the real bulk source anyway.",
+      "eachDistrictSelfAdministers": "Confirmed structurally consistent across every source consulted: Kentucky's Dept of Revenue does NOT administer this tax; each of the 230 taxing districts collects and enforces independently."
+    }
+  },
+  "jurisdictions": {
+    "$comment": "COVERAGE WARNING: 2 of an estimated ~300 taxing jurisdictions (87 of 120 counties reportedly levy, per secondary sources, plus roughly 200+ cities and school districts on top). Every jurisdiction not listed here is UNKNOWN, not zero -- do not treat absence from this list as evidence of no tax.",
+    "louisvilleMetro": {
+      "governmentType": "Consolidated city-county government (Louisville/Jefferson County Metro Government) -- Jefferson County is the ONLY Kentucky county meeting KRS 68.180's 300,000-population threshold.",
+      "residentRate": 0.022,
+      "residentRateBreakdown": {
+        "metroGovernment": 0.0125,
+        "metroGovernmentNote": "Matches KRS 68.180's 1.25% statutory cap for 300,000+-population counties EXACTLY -- strong corroboration that the statute and the actual levy agree, even though this specific figure was search-summary-sourced rather than directly fetched from louisvilleky.gov.",
+        "tarcTransit": 0.002,
+        "schoolBoard": 0.0075,
+        "schoolBoardNote": "Per KRS 67.750(10), Jefferson County Public Schools (or Anchorage independent schools, per the source) has independent tax-district authority -- but Louisville's practice is to BLEND this into one combined withholding rate/line rather than withhold it as a visibly separate tax line. Whether this blended convention is Louisville-specific or general practice elsewhere in Kentucky is unconfirmed."
+      },
+      "nonresidentRate": 0.0145,
+      "nonresidentRateNote": "Per the search-summary source, the 0.75% school-board component does NOT apply to nonresidents -- nonresident rate = 1.25% Metro + 0.2% TARC only, which is 1.45%, matching the quoted figure.",
+      "confidence": "secondary-sourced (WebSearch summary of Louisville's own W-1KJC instructions and Metro Code Sec 110.02) -- two direct WebFetch attempts against louisvilleky.gov both returned HTTP 403. The 1.25% component's exact match against KRS 68.180's statutory cap is the strongest corroboration available without a direct fetch."
+    },
+    "lexingtonFayette": {
+      "governmentType": "Consolidated city-county government (Lexington-Fayette Urban County Government) -- exercises CITY (Section 181/KRS 92.281) taxing authority, not county fiscal-court authority, which is consistent with its rate exceeding both KRS 68.180 and 68.197's county caps.",
+      "rate": 0.0225,
+      "appliesTo": "Both individual wage/compensation withholding and business net profits, per the fetched page.",
+      "schoolBoardComponent": "NOT VISIBLE in what was fetched -- the page as summarized did not break the 2.25% into sub-components the way Louisville's rate is broken out. Worth a follow-up fetch specifically looking for a Fayette County Public Schools tax-district component before assuming this is a single undivided rate.",
+      "confidence": "Fetched directly via WebFetch from lexingtonky.gov (succeeded, unlike Louisville's blocked attempts)."
+    }
+  },
+  "knownGaps": [
+    "Only 2 of an estimated ~300 taxing jurisdictions have any rate captured -- 85 more of the 87 counties reported to levy (secondary-sourced figure, not independently verified) plus the large majority of cities and any independently-taxing school districts remain entirely unresearched.",
+    "No bulk rate source (PA-DCED equivalent, OH-Finder equivalent) was found. KOLA (kyola.org), the most likely lead, is currently unreachable due to an expired SSL certificate -- worth retrying.",
+    "The smallest county population tier (under 30,000) has no statute located at all -- authority, cap, and existence are all unconfirmed for that tier.",
+    "KRS 67.753 (the statutory apportionment formula for multi-district payroll/sales) and KRS 67.083 (an alternate county occupational-fee authority referenced by KRS 68.197(9)) are both referenced but were not read directly this session.",
+    "Whether KRS 68.180's 300,000+ county tier (Jefferson) has any city-tax-credit mechanism equivalent to KRS 68.197's was not found either way in the statute's own text -- absence of a provision was not confirmed as absence of the practice.",
+    "The work-day apportionment fraction and the 2-year refund statute of limitations are secondary-sourced only (Symmetry, Dean Dorton), not confirmed by a direct read of KRS 67.753 or the relevant refund-procedure statute.",
+    "Net-profits-tax mechanics (KRS 67.750(8)) are documented at the definitional level only -- no specific city/county net-profits ordinance was read, and this is business-return-side, not wage-withholding, so it is deliberately not pursued further for this payroll engine.",
+    "The engine has NO dispatch method for this tax shape at all -- not flat_rate, not flat_rate_multi_exemption (built for Indiana's single-mandatory-county-add-on model, which does not fit KY's stack-or-credit-depending-on-tier, uncapped-city layer). This is, structurally, the most complex local-tax shape in the project so far: more conditional than PA's EIT (no stack-vs-credit branching there) and more conditional than Ohio's municipalities (uncapped like KY cities, but with no statutory county layer at all to interact with)."
+  ]
+}

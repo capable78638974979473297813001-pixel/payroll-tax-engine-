@@ -5,18 +5,18 @@
   "source": {
     "title": "Ohio Dept of Taxation - School District Income Tax rate list, Tax Year 2026",
     "url": "https://tax.ohio.gov/static/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf",
-    "verifiedOn": "2026-08-11",
-    "verifiedBy": "PDF downloaded, text-extracted, and parsed by a script this session; the official document itself states 'Total number of districts are 214' and 'Taxes based on earned income only; 68 districts.'"
+    "verifiedOn": "2026-08-12",
+    "verifiedBy": "PDF re-downloaded and re-parsed 2026-08-12 with pdfplumber (word-coordinate row clustering) to fix a 2-row table-merge bug found in the 2026-08-11 pdftotext-based parse; see parseConfidence. The official document itself states 'Total number of districts are 214' and 'Taxes based on earned income only; 68 districts' -- both now matched exactly."
   },
   "officialTotals": {
     "districtsPerSource": 214,
     "earnedIncomeOnlyPerSource": 68
   },
   "parsedTotals": {
-    "districtsExtracted": 212,
+    "districtsExtracted": 214,
     "earnedIncomeOnlyExtracted": 68
   },
-  "parseConfidence": "The earned-income-only sub-count matches the source document's own footnote EXACTLY (68/68), which is strong internal evidence the parsing logic is correct for every row it did capture. Total row count is 212 of the official 214 -- 2 districts were not captured, for a formatting reason not identified after checking the two most likely causes (non-standard digit counts, split row-start lines) with no hits. Disclosed as a known, unresolved 2-row gap rather than silently rounded up to 214.",
+  "parseConfidence": "EXHAUSTIVELY VERIFIED 2026-08-12: every one of the 214 rows was independently re-extracted from the source PDF (pdfplumber word-coordinate clustering, with explicit handling for the table's two wrap patterns -- rows whose name text splits across two lines with county/SD/IRN trailing on the second line, e.g. West Liberty-Salem LSD -- and rows where county/SD/IRN lead but rate/year trail on a continuation line) and then diffed field-by-field (county, IRN, rate2026, earnedIncomeOnlyBase, firstYearEffective) against the shipped data. Result: 214/214 sdNumbers match, zero field discrepancies. This closes both the original 2-row merge bug (Seneca East/Tiffin CSD, Carlisle/Kings LSD, fixed and now independently reconfirmed correct) and the possibility of any other undetected transcription error elsewhere in the table -- the first pass only checked for merge-shaped anomalies via pattern matching; this pass checked every value against a from-scratch parse. Also cross-checked against the document's own page-0 change summary ('Seneca * 7407 Tiffin CSD 0.75% ... expires 2031', 'Warren * 8303 Kings LSD 1.00% ... CPT'), which independently confirms the two previously-fixed rows. 68/68 earned-income-only count preserved throughout.",
   "schema": "Each entry: county, sdNumber (4-digit school-district number), irn (5-digit Information Retrieval Number), name (district name, often with an embedded expiration/CPT note exactly as Ohio publishes it), rate2026 (decimal, e.g. 0.0075 = 0.75%), earnedIncomeOnlyBase (true = taxes earned income only; false = traditional MAGI-less-exemptions base), firstYearEffective (the year this district first adopted SDIT, not necessarily when the CURRENT rate took effect if renewed/changed since).",
   "districts": [
     {
@@ -203,7 +203,7 @@
       "county": "Champaign",
       "sdNumber": "1105",
       "irn": "46219",
-      "name": "West Liberty-Salem LSD (1.00% expires 2027;  0.25% expires 2036; 0.50% CPT)",
+      "name": "West Liberty-Salem LSD (1.00% expires 2027; 0.25% expires 2036; 0.50% CPT)",
       "rate2026": 0.0175,
       "earnedIncomeOnlyBase": false,
       "firstYearEffective": 1984
@@ -1598,7 +1598,16 @@
       "county": "Seneca",
       "sdNumber": "7406",
       "irn": "49684",
-      "name": "Seneca East LSD (expires 2030) 1.00 % 2001 Seneca) 7407 44891 Tiffin CSD (expires 2031)",
+      "name": "Seneca East LSD (expires 2030)",
+      "rate2026": 0.01,
+      "earnedIncomeOnlyBase": false,
+      "firstYearEffective": 2001
+    },
+    {
+      "county": "Seneca",
+      "sdNumber": "7407",
+      "irn": "44891",
+      "name": "Tiffin CSD (expires 2031)",
       "rate2026": 0.0075,
       "earnedIncomeOnlyBase": true,
       "firstYearEffective": 2026
@@ -1733,7 +1742,16 @@
       "county": "Warren",
       "sdNumber": "8301",
       "irn": "50419",
-      "name": "Carlisle LSD 1.00 % 2004 Warren) 8303 50435 Kings LSD (CPT)",
+      "name": "Carlisle LSD",
+      "rate2026": 0.01,
+      "earnedIncomeOnlyBase": false,
+      "firstYearEffective": 2004
+    },
+    {
+      "county": "Warren",
+      "sdNumber": "8303",
+      "irn": "50435",
+      "name": "Kings LSD (CPT)",
       "rate2026": 0.01,
       "earnedIncomeOnlyBase": true,
       "firstYearEffective": 2026
@@ -1929,7 +1947,6 @@
     }
   ],
   "knownGaps": [
-    "2 of 214 official districts are not present in this file -- see parseConfidence above.",
     "Rate expiration dates are embedded in the free-text name field rather than a structured dated field.",
     "Not wired into the calculation engine at all -- no district-level resolution by address exists anywhere in this project.",
     "firstYearEffective is when the district FIRST adopted SDIT, not when the CURRENT 2026 rate took effect if renewed/changed since."

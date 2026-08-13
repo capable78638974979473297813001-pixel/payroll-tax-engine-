@@ -3763,18 +3763,20 @@
       "administeredBy": "self_or_other"
     },
     {
-      "name": "Shawnee Hills",
+      "name": "Shawnee Hills (Delaware)",
       "municode": "71976",
       "rate": 0.02,
       "effectiveFrom": "2002-01-01",
-      "administeredBy": "RITA"
+      "administeredBy": "RITA",
+      "sourceNote": "DISAMBIGUATED 2026-08-12: Ohio has 2 municipalities named Shawnee Hills (Delaware County village, Greene County village) sharing one unqualified name in the Finder source, the same ambiguity pattern as Oakwood below. Rate assigned to Delaware County confirmed via RITA's own published Tax Rates Table (municipality code 749, 2.000%) and an Ohio Auditor of State audit report explicitly naming 'the Village of Shawnee Hills, Delaware County, Ohio ... a municipal income tax of 2.0 percent.'"
     },
     {
-      "name": "Shawnee Hills",
+      "name": "Shawnee Hills (Greene)",
       "municode": "71983",
       "rate": 0,
       "effectiveFrom": "2002-01-01",
-      "administeredBy": "RITA"
+      "administeredBy": "RITA",
+      "sourceNote": "DISAMBIGUATED 2026-08-12: by elimination from Shawnee Hills (Delaware)'s sourceNote -- RITA's own Tax Rates Table lists only one 'Shawnee Hills' (code 749, 2.000%), which the Ohio Auditor of State confirms is the Delaware County village, so this second Finder entry (0% rate) is inferred to be the Greene County village. Not independently confirmed against a Greene-County-specific primary source; administeredBy='RITA' is carried over from the Finder row as-is and not separately re-verified for this specific municipality."
     },
     {
       "name": "Sheffield",

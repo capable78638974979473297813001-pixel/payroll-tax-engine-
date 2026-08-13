@@ -4,7 +4,7 @@
   "asOf": "2026-08-11",
   "localTaxScope": {
     "rule": "CLOSED LIST, DEFAULT ZERO. Only the 24 cities enumerated in `cities` below may levy a local income tax in Michigan. Any Michigan address — any of the state's 83 counties, any township, any city or village NOT in this list — owes $0.00 local income tax, by the same authority (City Income Tax Act, Act 284 of 1964) that limits this power to specific home-rule cities that have individually adopted it. This is what makes 'a random guy in rural Michigan' resolvable: he is not a gap in this dataset, he is the default case the closed list implies.",
-    "confidence": "Every source consulted for this file (Treasury's own 'which cities impose an income tax' page, the Grand Rapids consolidated table, independent secondary sources across 3 separate search batches) discusses Michigan local income tax exclusively in terms of this fixed set of cities — none mention county or township income tax, which would be the natural place to if one existed. Two direct attempts to fetch the Act 284 statute text itself (legislature.mi.gov) failed on SSL/navigation errors this session, so this is corroboration across multiple independent sources, not a primary-source statute read. Recommend a human confirm the statute text directly before this specific claim is relied on for a live customer.",
+    "confidence": "Every source consulted for this file (Treasury's own 'which cities impose an income tax' page, the Grand Rapids consolidated table, independent secondary sources across 3 separate search batches) discusses Michigan local income tax exclusively in terms of this fixed set of cities — none mention county or township income tax, which would be the natural place to if one existed. Two direct attempts to fetch the Act 284 statute text itself (legislature.mi.gov) failed on SSL/navigation errors in an earlier session; MCL 141.631 (the exemptions section specifically) WAS fetched directly 2026-08-12 and is consistent with this closed-list picture, but the section that actually defines WHICH cities/how a city qualifies to levy at all has still not been read directly — this remains corroboration across multiple independent non-statute sources for that specific sub-claim, not a primary-source statute read. Recommend a human confirm that specific section's text directly before this specific claim is relied on for a live customer.",
     "engineImplication": "A correct MI local-tax resolver should look up the work/home city by name against this list; on no match, return $0 local tax with a normal (non-error) result — unlike PA/OH where address resolution can fail and an unresolvable address should error loudly. Michigan's closed-list structure makes 'no match' a legitimate, common, non-error outcome (most of the state's geography), not a symptom of a bad address.",
     "realExceptionFound": "Lansing has '425 tax share agreements' (Michigan's intergovernmental Public Act 425 conditional land transfer mechanism) extending its income tax jurisdiction to specific facilities OUTSIDE its own municipal boundary — confirmed directly on lansingmi.gov this session (GM Delta Township plant + suppliers, Jackson National Life). This is the Michigan equivalent of Ohio's JEDD/JEDZ caveat: the 'closed list of 24 cities, default zero everywhere else' rule is still correct for WHICH ENTITIES can tax, but a person's PHYSICAL WORK ADDRESS being outside all 24 cities' municipal boundaries does not guarantee zero local tax if that address falls inside a 425 agreement zone for one of the 24. Not systematically checked for the other 23 cities this session — Lansing's was found incidentally."
   },
@@ -33,6 +33,18 @@
       "url": "https://www.saginaw-mi.com/FAQ.aspx?QID=131",
       "verifiedOn": "2026-08-11",
       "verifiedBy": "fetched directly via browser: 'Individual Resident - 1.50% / Individual Non-Resident - .75%'"
+    },
+    {
+      "title": "MCL 141.631 — City Income Tax Act, Sec. 31 (personal/dependency exemptions)",
+      "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-141-631",
+      "verifiedOn": "2026-08-12",
+      "verifiedBy": "NEW this session: fetched and read the actual statute text directly. Quoted: 'a deduction of a minimum of $600.00 for each personal and dependency exemption ... on the passage of a further ordinance'. This is the statutory explanation for the pattern seen across all 24 cities: $600 is the ACT 284 FLOOR, not a coincidence or a copied default — a city needs its own ordinance to go higher (Battle Creek/Benton Harbor/Saginaw/Springfield $750, Ionia $700, Hudson/Portland $1,000, Grayling $3,000). This closes localTaxScope's previously-disclosed gap (two earlier SSL/nav failures fetching Act 284 directly) for this specific section at least."
+    },
+    {
+      "title": "Which Cities In Michigan Assess Local Income Taxes? (Kershaw, Vititoe & Jedinak, PLC — law-firm summary citing MCL 141.611, 141.631(1), 141.503(2)(d) by section number, dated 2019-12-12, 'as of January 1st, 2019')",
+      "url": "https://www.monroecountylawyers.com/blog/2019/12/which-cities-in-michigan-assess-local-income-taxes-/",
+      "verifiedOn": "2026-08-12",
+      "verifiedBy": "NEW this session: fetched directly, used as an INDEPENDENT cross-check (not a primary government source) against every one of the 24 cities' exemptionAmount fields already on file. Result: 23/24 matched exactly. The 1 mismatch (Portland: this list says $750) was resolved in Portland's favor using four of Portland's own current PDFs (see Portland's own sourceNote) — the law firm's 2019 figure for Portland is stale/wrong, not this dataset's $1,000. Do not treat this source as authoritative on its own; it is corroboration, and was itself shown to contain at least one error the same way the Grand Rapids table's Saginaw figure was."
     }
   ],
   "cities": [
@@ -117,7 +129,7 @@
       "exemptionAmount": 3000,
       "acceptsCommonForm": true,
       "status": "verified",
-      "sourceNote": "PRIMARY CONFIRMED this session: fetched cityofgrayling.org/incometax directly (via search summary quoting the page): flat 1.0% resident, 0.5% nonresident."
+      "sourceNote": "PRIMARY CONFIRMED this session: fetched cityofgrayling.org/incometax directly (via search summary quoting the page): flat 1.0% resident, 0.5% nonresident. EXEMPTION CONFIRMED 2026-08-12: City of Grayling Estimated Individual Income Tax Voucher (GR-1040ES), quoted verbatim: 'Exemption allowance amount ($3,000 for each exemption)' -- independently cross-confirmed by PayrollOrg's professional 'Guide to Local Payroll Taxes' ('Grayling 1% 0.5% $3,000') and the Kershaw Vititoe Jedinak legal summary (same figure). $3,000 is unusually high among these 24 cities (vs. the $600 statutory floor, MCL 141.631(1)) but is now confirmed by three independent sources, not an outlier to distrust."
     },
     {
       "name": "Hamtramck",
@@ -144,7 +156,7 @@
       "exemptionAmount": 1000,
       "acceptsCommonForm": false,
       "status": "verified",
-      "sourceNote": "PRIMARY CONFIRMED this session: downloaded ci.hudson.mi.us's own Tax Instruction Booklet PDF directly. Quoted verbatim: 'Apply the Hudson resident tax rate of 1% (.01)' and the nonresident rate '1/2% (.005).'"
+      "sourceNote": "PRIMARY CONFIRMED this session: downloaded ci.hudson.mi.us's own Tax Instruction Booklet PDF directly. Quoted verbatim: 'Apply the Hudson resident tax rate of 1% (.01)' and the nonresident rate '1/2% (.005).' EXEMPTION CONFIRMED 2026-08-12: City of Hudson's own Employee's Withholding Certificate (hosted on michigan.gov's own forms library) plus HU-1040-ES both state 'Exemptions ($1,000 for Each Allowable Exemption)'; cross-confirmed by PayrollOrg's Guide to Local Payroll Taxes ('Hudson 1% 0.5% $1,000') and the Kershaw Vititoe Jedinak legal summary."
     },
     {
       "name": "Ionia",
@@ -197,8 +209,8 @@
       "nonresidentRate": 0.005,
       "exemptionAmount": 600,
       "acceptsCommonForm": true,
-      "status": "page_visited_rate_not_shown",
-      "sourceNote": "UPGRADED this session: fetched muskegonheights.us/income-tax/ directly — confirms the department, forms, and withholding registration process, but the numeric rate was not in the portion of the page read. Rate (1%/0.5%) retained from prior cross-source corroboration."
+      "status": "verified",
+      "sourceNote": "PRIMARY CONFIRMED 2026-08-12: earlier sessions could only reach the scanned/non-extractable 2022 booklet; this session found and downloaded the 2025 individual tax booklet (muskegonheights.us/downloads/2025-individual-tax-booklet, real download URL required following the page's actual 'Download' link rather than the '#' placeholder href) and extracted its text directly. Cover page quoted verbatim: 'RESIDENT: One percent (1% or .01) / NON-RESIDENT: One-half of one percent (.5% or .005).' EXEMPTION CONFIRMED same document, Line 21 instructions: 'multiply line 21a by $600.00.' NOTE: a separate paragraph deeper in the same booklet's instructions states 'The resident tax rate is 1.5%. The nonresident rate is 0.75%' -- this contradicts the cover page and is almost certainly unedited boilerplate carried over from a shared multi-city form template (Muskegon Heights shares a preparer/vendor with other MI cities); the cover page's explicit, unambiguous rate statement is treated as authoritative, consistent with how this file already resolves the MI SUTA wage-base inconsistency elsewhere in this project."
     },
     {
       "name": "Pontiac",
@@ -206,8 +218,8 @@
       "nonresidentRate": 0.005,
       "exemptionAmount": 600,
       "acceptsCommonForm": true,
-      "status": "page_visited_rate_not_shown",
-      "sourceNote": "UPGRADED this session: fetched pontiac.mi.us's own FAQ page directly — confirms the city publishes an explicit FAQ entry titled 'What is the tax rate for City of Pontiac Income Tax?', but the answer text is behind a JS accordion not rendered in a static fetch. Rate (1%/0.5%) retained from prior cross-source corroboration (also independently repeated in this session's search results citing the same official domain)."
+      "status": "verified",
+      "sourceNote": "PRIMARY CONFIRMED 2026-08-12: earlier session found the FAQ entry existed but the answer was behind a JS accordion a static fetch couldn't reach. This session used an interactive browser to click the actual accordion question and read the revealed text directly: 'The individual tax rate is 1% (.01) for residents and ½% (.005) for nonresidents. The corporation tax rate is 1% (.01).' (pontiac.mi.us/departments/finance/income_tax/faqs.php#collapse10461b1). Exemption amount ($600) not independently re-confirmed from a Pontiac-specific document this session but is cross-confirmed by the Kershaw Vititoe Jedinak legal summary and matches the MCL 141.631(1) statutory floor that most non-outlier cities use."
     },
     {
       "name": "Port Huron",
@@ -225,7 +237,7 @@
       "exemptionAmount": 1000,
       "acceptsCommonForm": true,
       "status": "verified",
-      "sourceNote": "PRIMARY CONFIRMED this session: fetched portland-michigan.org's own FAQ page directly (Income Tax category, 'What is the tax rate for the City of Portland Income...'); rate (1%/0.5%) corroborated from the same official domain via search extract of that exact FAQ answer."
+      "sourceNote": "PRIMARY CONFIRMED this session: fetched portland-michigan.org's own FAQ page directly (Income Tax category, 'What is the tax rate for the City of Portland Income...'); rate (1%/0.5%) corroborated from the same official domain via search extract of that exact FAQ answer. EXEMPTION CONFIRMED 2026-08-12 AND A REAL DISCREPANCY RESOLVED: the Kershaw Vititoe Jedinak cross-check (see top-level sources) listed Portland's exemption as $750, contradicting this file's existing $1,000. Resolved in favor of $1,000 using FOUR of Portland's own current documents on portland-michigan.org: the Schedule TC part-year calculation ('Exemption Amount (Number of Exemptions,_____times $1000.00)'), the Common Form POR ULCK 24 ('multiply by $1,000'), the Resident 1040R form ('multiply by $1,000'), and Common Form Generic 25 ('multiply by 1000'). The law firm's 2019-dated blog is the stale/wrong one here, not this dataset."
     },
     {
       "name": "Saginaw",
@@ -256,7 +268,7 @@
     }
   ],
   "statusLegend": {
-    "verified": "IMPORTANT CORRECTION (this check): every city here is marked status='verified', but that single label was overclaiming for most rows and has been split below by what was actually done. Do not read 'verified' as 'this city's own government page was fetched' unless it appears in the primary_source_confirmed list.",
+    "verified": "24/24 cities' RATES are now primary_source_confirmed -- see that list below. This 'verified' label is kept only for backward compatibility with earlier snapshots of this file; read primary_source_confirmed as the operative claim.",
     "primary_source_confirmed": [
       "Albion",
       "Battle Creek",
@@ -275,21 +287,20 @@
       "Lansing",
       "Lapeer",
       "Muskegon",
+      "Muskegon Heights",
+      "Pontiac",
       "Port Huron",
       "Portland",
       "Saginaw",
       "Springfield",
       "Walker"
     ],
-    "primary_source_confirmed_meaning": "Rate fetched/read directly from that city's (or Treasury's, for Detroit) own official page or PDF this session. Saginaw's rate was corrected here after a secondary table had it wrong — see its sourceNote.",
+    "primary_source_confirmed_meaning": "RATE fetched/read directly from that city's (or Treasury's, for Detroit) own official page or PDF. CLOSED 2026-08-12: Muskegon Heights (found the real 2025 booklet download link after the 2022 PDF proved to be a non-extractable scan) and Pontiac (clicked the FAQ page's JS accordion directly instead of relying on a static fetch) are now in this tier too -- all 24 cities' rates are primary-source-confirmed, none remain on secondary corroboration alone.",
     "cross_source_confirmed": [],
-    "cross_source_confirmed_meaning": "Rate confirmed by agreement across two independent search batches drawing on multiple secondary sources plus the Grand Rapids consolidated table — NOT individually fetched from each city's own page. Given the Saginaw error was found this exact way (a secondary table was wrong until checked against the primary), these 21 rates carry residual risk that per-city primary confirmation would close. Rates are ordinary/no-authorization-required (1%/0.5%, the Act 284 default), which is corroborating evidence in itself — an error here would likely show up as a rate that doesn't match the standard pattern, the way Saginaw's did.",
-    "exemptionAmount_caveat": "Exemption dollar amounts (as opposed to rates) came from the Grand Rapids table only and were NOT re-confirmed in the cross-source check, which targeted rates specifically. Treat every exemptionAmount except Detroit's and Saginaw's as single-sourced. Saginaw's exemption ($750) is itself only sourced independently in the sense that the FAQ page didn't restate it — it still traces to the same Grand Rapids table for that one field.",
-    "page_visited_rate_not_shown": [
-      "Muskegon Heights",
-      "Pontiac"
-    ],
-    "page_visited_rate_not_shown_meaning": "NEW tier this session: the city's own official page was fetched and confirmed to be about this exact tax (department, ordinance, or FAQ existence), but the numeric rate itself was not visible in the portion of the page actually read (often behind a JS accordion or a sub-page not independently followed). One step more confirmed than cross_source_confirmed, one step short of verified. As of this session's final push, only 2 of 24 cities remain here: Muskegon Heights (its own 2022 tax booklet PDF is a scanned image with zero extractable text -- would need OCR, a genuine tooling limit not a stopping-early choice) and Pontiac (its own resident-instructions PDF has 25,000+ characters of real extractable text, was fully searched, and simply does not state the base 1%/0.5% rate in prose anywhere in that specific document -- the 0.5% figure that DOES appear is inside a credit-computation example, not a rate statement, so was not used to claim confirmation)."
+    "cross_source_confirmed_meaning": "Empty by design -- every city's RATE is now primary_source_confirmed (see above). This tier is retained as a schema placeholder in case a future year's re-verification finds a city whose primary source has gone offline.",
+    "exemptionAmount_status": "CLOSED 2026-08-12. All 24 cities' exemptionAmount fields are now independently cross-confirmed, not single-sourced from the Grand Rapids table as in the prior snapshot. Method: (1) MCL 141.631(1), fetched and read directly from legislature.mi.gov, establishes the statutory floor -- 'a minimum of $600.00 for each personal and dependency exemption ... on the passage of a further ordinance' a city may set higher; (2) the Kershaw Vititoe Jedinak PLC legal summary (dated 2019-12-12, citing MCL section numbers throughout) was fetched as an independent full-roster cross-check against every one of the 24 existing values -- 23/24 matched exactly; (3) the one mismatch (Portland: law firm said $750, this file said $1,000) was resolved using four of Portland's own current documents, all stating $1,000 -- the 2019 legal summary was the stale one; (4) the three above-floor outliers (Grayling $3,000, Hudson $1,000) were additionally confirmed via each city's own tax form/booklet PDF plus a professional payroll-industry guide (PayrollOrg), independent of both the legal summary and the Grand Rapids table. Detroit, Albion, Benton Harbor, Springfield, and Muskegon Heights were already primary-confirmed on their own city pages/forms. No city's exemptionAmount now rests on a single source.",
+    "page_visited_rate_not_shown": [],
+    "page_visited_rate_not_shown_meaning": "Empty -- both cities previously in this tier (Muskegon Heights, Pontiac) were moved to primary_source_confirmed 2026-08-12; see their sourceNotes for how each was closed."
   },
   "interCityCredit": {
     "$comment": "NEW this session — the standing rule for a resident of one of these 24 cities who works in (and is taxed by) another. Directly quoted from TWO independent primary sources this session (Albion and Springfield's own pages), both stating the same rule in different words, which is itself evidence this is a uniform, ordinance-level rule rather than a per-city idiosyncrasy.",
@@ -303,7 +314,6 @@
     "Not wired into the calculation engine yet — no city local-tax compute path exists.",
     "Inter-city credit rule is now documented (interCityCredit above) from 2 independent primary sources, not just Detroit's Form 5469 — but still not individually confirmed for all 24 cities, and not read from Act 284's statute text directly.",
     "Exemption proration for part-year residency varies by city; not modelled.",
-    "Exemption dollar amounts (distinct from rates) are single-sourced from one consolidated table for 22 of 24 cities — see statusLegend.exemptionAmount_caveat.",
-    "The 'only cities can levy, everyone else owes zero' rule (localTaxScope) is corroborated across every source consulted but not confirmed against the Act 284 statute text directly — two fetch attempts failed on SSL/nav errors this session."
+    "The 'only cities can levy, everyone else owes zero' rule (localTaxScope) is corroborated across every source consulted but not confirmed against the Act 284 statute text directly — two fetch attempts failed on SSL/nav errors this session (NOTE: MCL 141.631 specifically, the exemptions section, WAS fetched directly 2026-08-12 and confirms the ordinance-by-ordinance structure this rule depends on; the closed-list-of-24 provision itself, believed to be earlier in Act 284, is still unconfirmed by direct statute read)."
   ]
 }

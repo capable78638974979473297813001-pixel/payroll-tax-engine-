@@ -106,3 +106,44 @@ export function hasStateRuleset(code: string, checkDate: string): boolean {
     join(DATA_ROOT, 'states', `${code.toUpperCase()}-${yearOf(checkDate)}.json`),
   );
 }
+
+export interface CountyEntry {
+  name: string;
+  countyCode: string;
+  rate: number;
+  changedSinceOct2025?: boolean;
+}
+
+interface CountyRegistryFile {
+  year: number;
+  counties: CountyEntry[];
+}
+
+/**
+ * Whether a mandatory county-level registry exists for this state/year — e.g.
+ * Indiana, where every address falls inside exactly one of 92 counties (no
+ * closed-list-with-a-zero-case the way Michigan's 24 cities work).
+ */
+export function hasCountyRuleset(stateCode: string, checkDate: string): boolean {
+  return existsSync(
+    join(DATA_ROOT, 'local', `${stateCode.toUpperCase()}-counties-${yearOf(checkDate)}.json`),
+  );
+}
+
+/**
+ * Look up one county's rate by name (case-insensitive). Returns undefined
+ * for an unrecognised name rather than throwing — the caller decides how to
+ * surface that (see taxes/state.ts's handling of a missing/unknown county).
+ */
+export function countyRuleset(
+  stateCode: string,
+  countyName: string,
+  checkDate: string,
+): CountyEntry | undefined {
+  const file = loadJson<CountyRegistryFile>(
+    join('local', `${stateCode.toUpperCase()}-counties-${yearOf(checkDate)}.json`),
+  );
+  return file.counties.find(
+    (c) => c.name.toLowerCase() === countyName.toLowerCase(),
+  );
+}
