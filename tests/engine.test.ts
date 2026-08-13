@@ -735,6 +735,107 @@ describe('Wisconsin', () => {
   });
 });
 
+describe('Kentucky', () => {
+  // Expected values hand-derived from the DOR's own 2026 Withholding Tax
+  // Formula (42A003 TCF) before the code was run, same discipline as
+  // PA/MI/IN/IL/WI. Kentucky has NO exemption-count concept at all (Form K-4
+  // has no personal/dependent count field) — the $3,360 standard deduction
+  // is a single flat annual amount, unconditional, which is why Kentucky got
+  // its own flatRateFixedDeduction() method instead of reusing flatRate().
+  const kyState = () => ({ workState: { code: 'KY' } });
+
+  test("reproduces the DOR's own monthly worked example to the cent", () => {
+    // Monthly $3,270: annual 3,270×12=39,240 − 3,360 deduction = 35,880
+    // taxable × 3.5% = 1,255.80/yr ÷ 12 = 104.65. Matches 42A003 TCF exactly,
+    // including its intermediate figures — no correction needed for this one.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3270) }],
+        ...kyState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'KY_SIT'), dollars(104.65));
+  });
+
+  test("reproduces the DOR's own biweekly example, CORRECTED for its own arithmetic error", () => {
+    // Biweekly $1,500: annual 1,500×26=39,000 − 3,360 = 35,640 taxable ×
+    // 3.5% = 1,247.40/yr ÷ 26 = 47.9769... → 47.98.
+    // The source document's own step 3 multiplies a typo'd $35,730 instead
+    // of the $35,640 its own step 2 just computed (off by $90), AND its
+    // final answer is truncated to a flat "$47" instead of $47.98. Both are
+    // flaws in the PRIMARY SOURCE'S own printed example, not in this
+    // formula: reproducing the source's typo would require deliberately
+    // reimplementing its arithmetic error, so this fixture asserts the
+    // value the formula, and the source's own uncorrected step 2, actually
+    // imply — $47.98, not $47.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1500) }],
+        ...kyState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'KY_SIT'), dollars(47.98));
+  });
+
+  test('wages entirely below the standard deduction withhold zero, not negative', () => {
+    // Weekly $50: annual 50×52=2,600, below the $3,360 deduction entirely —
+    // atLeastZero() clamps the taxable base to 0 before the rate is applied.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(50) }],
+        ...kyState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'KY_SIT'), 0);
+  });
+
+  test('supplemental wages on the SAME cheque are AGGREGATED, not taxed on a separate line — 103 KAR 18:070', () => {
+    // Biweekly $1,500 regular + $500 supplemental in ONE cheque. 103 KAR
+    // 18:070 Section 3(1) requires treating same-cheque supplemental wages
+    // "as if the aggregate of the supplemental and regular wages were a
+    // single wage payment" — the opposite of Wisconsin's bracketSupplementalTax()
+    // pattern, which carves supplemental OUT into its own flat-rate line.
+    // Combined base 2,000/period: annual 2,000×26=52,000 − 3,360 = 48,640
+    // taxable × 3.5% = 1,702.40/yr ÷ 26 = 65.4769... → 65.48.
+    // Asserts there is exactly ONE Kentucky state-tax line (no KY_SIT_SUPP),
+    // and that its taxableWages figure is the FULL combined base — proof
+    // this is genuine aggregation, not a coincidentally-matching total.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(1500) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(500) },
+        ],
+        ...kyState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'KY_SIT'), dollars(65.48));
+    assert.equal(r.taxes.some((t) => t.id === 'KY_SIT_SUPP'), false);
+    const line = r.taxes.find((t) => t.id === 'KY_SIT');
+    assert.equal(line?.taxableWages, dollars(2000));
+  });
+
+  test('401(k) deferral reduces the Kentucky base — federal-AGI conformity, confirmed by a full read of KRS 141.019', () => {
+    // Monthly $3,270 with a $270 401(k) deferral: taxable wages drop to
+    // 3,000/mo. Annual 36,000 − 3,360 = 32,640 × 3.5% = 1,142.40/yr ÷ 12 = 95.20.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3270) }],
+        deductions: [
+          { code: '401K', category: 'deferral_401k', amount: dollars(270) },
+        ],
+        ...kyState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'KY_SIT'), dollars(95.2));
+  });
+});
+
 describe('gross-to-net', () => {
   test('net pay reconciles and excludes employer taxes', () => {
     const r = calculatePaycheck(input());

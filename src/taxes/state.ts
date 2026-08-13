@@ -6,13 +6,13 @@ import {
   hasStateRuleset,
   stateRuleset,
 } from '../registry.ts';
+import { supplementalEarnings } from '../wages.ts';
 import type {
   ComputeContext,
   PaycheckInput,
   PretaxCategory,
   TaxLine,
 } from '../types.ts';
-import { supplementalEarnings } from '../wages.ts';
 
 /**
  * State income tax withholding.
@@ -60,6 +60,8 @@ export function stateIncomeTax(
       if (supplemental) lines.push(supplemental);
       return lines;
     }
+    case 'flat_rate_fixed_deduction':
+      return [flatRateFixedDeduction(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -95,6 +97,100 @@ function flatRate(
   const detail = annualAllowance
     ? `${fmt(annualWages)}/yr less ${fmt(annualAllowance)} allowances @ ${(cfg.rate * 100).toFixed(2)}%`
     : `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%`;
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages,
+    amount,
+    detail,
+  };
+}
+
+interface FixedDeductionConfig {
+  rate: number;
+  deductionAmount: number; // dollars, flat ANNUAL amount subtracted once
+}
+
+/**
+ * Flat state rate over annual wages less a FIXED annual deduction — no
+ * certificate-driven multiplier at all, unlike flatRate() (PA/MI's
+ * allowanceAmount × certificate.allowances). Built for Kentucky: Form K-4
+ * (fetched and read directly from revenue.ky.gov) has no personal/dependent
+ * exemption COUNT field anywhere on it — the $3,360 standard deduction
+ * applies once per employee, unconditionally, regardless of dependents.
+ * Reusing flatRate() here would require every caller to remember to pass
+ * certificate.allowances = 1 (never the natural default of 0) to get the
+ * correct deduction — a footgun this method removes by construction instead
+ * of documenting around it.
+ *
+ * SUPPLEMENTAL WAGES ARE DELIBERATELY NOT CARVED OUT of `taxableWages` here.
+ * An earlier version of this function copied Wisconsin's pattern (split
+ * supplemental into its own flat-rate line) on the assumption that Kentucky
+ * would need the same double-counting guard federal/WI supplemental wages
+ * need. That assumption was wrong: 103 KAR 18:070 Section 3 (fetched and
+ * read directly) prescribes AGGREGATION, not a separate rate — "If
+ * supplemental wages are paid at the same time as regular wages, the tax to
+ * be withheld shall be determined as if the aggregate of the supplemental
+ * and regular wages were a single wage payment." So for any single
+ * calculatePaycheck() call (which models one paycheck, i.e. wages paid "at
+ * the same time"), the CORRECT behavior is exactly what taxableWagesFor()
+ * already returns with no special-casing — regular and supplemental cash
+ * combined, deduction applied once to the combined total. Carving
+ * supplemental out and taxing it flatly, as the earlier version did, would
+ * have UNDER-withheld relative to Kentucky's own prescribed method whenever
+ * combined annual wages crossed into taxable territory only because of the
+ * supplemental amount.
+ *
+ * NOT MODELLED (disclosed, not guessed): 103 KAR 18:070 Section 3(2) — when
+ * supplemental wages are paid on a SEPARATE cheque from regular wages, they
+ * must be aggregated with the CURRENT or LAST PRECEDING payroll period's
+ * regular wages, not treated as their own standalone payment. A standalone
+ * bonus run through calculatePaycheck() by itself (no earnings but the
+ * bonus) cannot reproduce this — the engine has no mechanism to look back at
+ * a prior period's regular wages, the same class of cross-period gap already
+ * disclosed for Indiana's 30-day nonresident rule and Michigan's Renaissance
+ * Zone. A standalone-bonus cheque will therefore UNDER-withhold relative to
+ * Kentucky's actual rule (it gets the $3,360 deduction as if it were a full
+ * period's only wages, when 103 KAR 18:070 says it should be combined with
+ * an already-deduction-consuming regular payment instead).
+ *
+ * DATE CAVEAT: the fetched copy of 103 KAR 18:070 is captioned "[Effective
+ * 7/27/2026]" by Cornell LII — a recertification date, not necessarily a
+ * substantive rule change (KAR regulations are periodically re-filed under
+ * Kentucky's administrative review process). Whether the aggregation
+ * mechanic itself differs from what was in force 2026-01-01 through
+ * 2026-07-26 was NOT separately checked this session — same class of
+ * disclosed gap as Ohio's HB96 mid-year rate change, and this engine has no
+ * date-based dispatch for either.
+ *
+ * Verified against the DOR's own 2026 Withholding Tax Formula (42A003 TCF)
+ * worked examples — see tests/engine.test.ts, describe('Kentucky'). The
+ * monthly example reproduces to the cent ($104.65); the biweekly example
+ * reproduces the CORRECTED figure ($47.98), not the source document's own
+ * truncated "$47" — see that test's comment for the arithmetic.
+ */
+function flatRateFixedDeduction(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.flatRate as FixedDeductionConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+
+  const annualWages = taxableWages * ctx.periodsPerYear;
+  const annualDeduction = dollars(cfg.deductionAmount);
+  const annualTaxable = atLeastZero(annualWages - annualDeduction);
+
+  const annualTax = applyRate(annualTaxable, cfg.rate);
+  const amount = Math.round(annualTax / ctx.periodsPerYear);
+
+  const detail =
+    `${fmt(annualWages)}/yr less ${fmt(annualDeduction)} standard deduction ` +
+    `@ ${(cfg.rate * 100).toFixed(2)}%, ÷ ${ctx.periodsPerYear}`;
 
   return {
     id: `${rules.code}_SIT`,

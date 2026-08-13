@@ -14,6 +14,27 @@
       "title": "SSA 2026 COLA / OASDI contribution and benefit base",
       "url": "https://www.ssa.gov/oact/cola/cbb.html",
       "verifiedOn": "2026-08-11"
+    },
+    {
+      "id": "pub15",
+      "title": "IRS Publication 15 (2026), Employer's Tax Guide",
+      "url": "https://www.irs.gov/pub/irs-pdf/p15.pdf",
+      "verifiedOn": "2026-08-13",
+      "comment": "General employment-tax reference (depositing, reporting, special employment categories). Added for completeness of the source trail -- the categories it covers beyond ordinary W-2 wages (household/agricultural/railroad/statutory employees, ministers, tips, etc.) are out of scope for this engine; see knownGaps."
+    },
+    {
+      "id": "w4-instructions",
+      "title": "IRS Form W-4 (2026) and Instructions",
+      "url": "https://www.irs.gov/pub/irs-pdf/fw4.pdf",
+      "verifiedOn": "2026-08-13",
+      "comment": "Source for the Step 1-4 mechanics federalIncomeTax() implements. The Step 3/4(a)/4(b)/4(c) VALUES are employee input (types.ts's FederalW4), not data -- this file supplies the RATES those inputs are run through (schedules, step1StandardAdjustment)."
+    },
+    {
+      "id": "obbba-2025",
+      "title": "One Big Beautiful Bill Act, P.L. 119-21 (2025)",
+      "url": "https://www.congress.gov/bill/119th-congress/house-bill/1",
+      "verifiedOn": "2026-08-13",
+      "comment": "Legislative basis for the 2026 brackets/rates: OBBBA permanently extended the 2017 TCJA individual rate structure (10/12/22/24/32/35/37%) rather than letting it sunset, and left the supplemental flat rates (22%/37%) unchanged. Recorded so this file can answer 'why these numbers' rather than just 'what are these numbers'."
     }
   ],
 
@@ -29,6 +50,7 @@
     "supplementalRate": 0.22,
     "supplementalMandatoryRate": 0.37,
     "supplementalMandatoryThreshold": 1000000.0,
+    "supplementalComment": "This is Pub 15's FLAT-RATE method for supplemental wages identified separately from regular wages. Pub 15 also allows an AGGREGATE method (add supplemental to regular wages paid at the same time, withhold on the total via the normal percentage method) -- that method is already reachable in this engine WITHOUT separate code: an earning simply isn't tagged category:'supplemental' (see types.ts EarningCategory), so it flows through federalIncomeTax()'s normal base instead of federalSupplementalTax()'s flat-rate path. The caller's tagging choice IS the method choice; there is no additional decision-tree data to store here.",
     "backupWithholdingRate": 0.24,
 
     "standardSchedules": {
@@ -162,5 +184,15 @@
       "dependent_care",
       "commuter"
     ]
-  }
+  },
+
+  "knownGaps": [
+    "Nonresident alien (NRA) withholding is not modelled: no NRA status field, no NRA wage addback, no restricted-W-4 handling. NRA employees would be silently run through the resident percentage method, which understates their correct withholding -- treat any NRA employee as unsupported, not zero-adjustment.",
+    "Pension/annuity withholding (Pub 15-T's separate periodic-payment tables, Form W-4P) is not modelled -- this engine assumes ordinary W-2 wage/salary payroll only.",
+    "Nonpayroll withholding (Form 945 categories: IRA distributions, gambling winnings, certain government/Indian gaming payments) is out of scope -- these aren't wage payroll at all.",
+    "Special employment-tax categories are not modelled: household employees, agricultural (incl. H-2A) workers, statutory employees, ministers/clergy, election workers, railroad employees, tipped employees' allocated-tips rules. A standard W-2 wage/salary employee is the only supported case; using this engine for any of these categories will produce wrong numbers, not an explicit error.",
+    "FUTA credit-reduction states are not modelled (see futa.comment) -- the DOL's annual credit-reduction list changes which states' net FUTA rate exceeds 0.6%.",
+    "Backup withholding (backupWithholdingRate, 24%) is recorded as data but has no compute path -- no rule detects a missing/invalid TIN and applies it.",
+    "The percentage_method_automated_worksheet_1a method is the ONLY Pub 15-T method implemented. Pub 15-T also publishes wage-bracket tables and non-automated percentage-method tables for manual systems; this engine intentionally supports only the automated-system method, which is exact rather than table-rounded."
+  ]
 }
