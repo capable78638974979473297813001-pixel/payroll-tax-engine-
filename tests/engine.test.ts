@@ -334,6 +334,26 @@ describe('Pennsylvania', () => {
     assert.equal(amountOf(r, 'PA_SIT'), dollars(92.1)); // 3,000 × 3.07%
   });
 
+  // PA is the first state in this project where the EMPLOYEE (not just the
+  // employer) pays a UC/SUTA contribution — confirmed from two independent
+  // PA Dept. of Labor & Industry pages: 0.07% of gross wages, no wage cap.
+  test('employee UC withholding: 0.07% of gross wages, uncapped', () => {
+    const r = calculatePaycheck(input(pa));
+    assert.equal(amountOf(r, 'PA_UC_EE'), dollars(2.1)); // 3,000 × 0.07%
+  });
+
+  test('401(k) deferral does NOT reduce the PA UC base either — same taxable-wages rule as PA_SIT', () => {
+    const r = calculatePaycheck(
+      input({
+        ...pa,
+        deductions: [
+          { code: '401K', category: 'deferral_401k', amount: dollars(500) },
+        ],
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_UC_EE'), dollars(2.1)); // still 3,000 × 0.07%
+  });
+
   test('Section 125 reduces the PA base', () => {
     const r = calculatePaycheck(
       input({

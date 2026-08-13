@@ -46,7 +46,27 @@ export function stateIncomeTax(
   }
 
   const rules = stateRuleset(state.code, input.checkDate);
+  const lines = incomeTaxLines(input, ctx, rules);
 
+  // Employee-paid state unemployment withholding (Pennsylvania's UC tax is
+  // the first state in this project to have one) is ORTHOGONAL to the
+  // income-tax method above — it's a separate levy under separate law, not
+  // another income-tax bracket — so it's dispatched on the presence of a
+  // `stateUnemploymentEmployee` config block rather than being wired into
+  // any one method. Any future state with an employee-paid SUTA/UC
+  // component gets this for free by adding the config, no code change.
+  if (rules.stateUnemploymentEmployee) {
+    lines.push(stateUnemploymentEmployeeTax(input, ctx, rules));
+  }
+
+  return lines;
+}
+
+function incomeTaxLines(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine[] {
   switch (rules.method) {
     case 'flat_rate':
       return [flatRate(input, ctx, rules)];
@@ -66,9 +86,50 @@ export function stateIncomeTax(
       return [];
     default:
       throw new Error(
-        `Unsupported withholding method "${rules.method}" for ${state.code}`,
+        `Unsupported withholding method "${rules.method}" for ${rules.code}`,
       );
   }
+}
+
+interface StateUnemploymentEmployeeConfig {
+  rate: number;
+  wageBase: number | null;
+}
+
+/**
+ * Employee-paid state unemployment compensation withholding — Pennsylvania
+ * is unusual among states in taxing the EMPLOYEE for UC, not just the
+ * employer (see futa() in taxes/federal.ts for the ordinary employer-only
+ * shape). Confirmed uncapped for PA (wageBase: null) directly from the
+ * Department of Labor & Industry: "Employee contributions are based on an
+ * individual's total (gross) wages and are not limited to the taxable wage
+ * base in effect for employer contributions" — so this deliberately does
+ * NOT route through underCap() the way federal FUTA/SS do; a null wageBase
+ * means uncapped, not "not yet wired."
+ */
+function stateUnemploymentEmployeeTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.stateUnemploymentEmployee as StateUnemploymentEmployeeConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+
+  const amount = applyRate(taxableWages, cfg.rate);
+
+  return {
+    id: `${rules.code}_UC_EE`,
+    name: `${rules.name} Unemployment Compensation (Employee)`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages,
+    amount,
+    detail:
+      cfg.wageBase === null
+        ? `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, no wage cap`
+        : `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, capped at ${fmt(dollars(cfg.wageBase))}/yr`,
+  };
 }
 
 interface FlatRateConfig {

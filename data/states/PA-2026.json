@@ -5,15 +5,28 @@
   "method": "flat_rate",
   "sources": [
     {
-      "title": "PA DOR — Employer Withholding, personal income tax rate",
-      "url": "https://www.revenue.pa.gov/TaxTypes/EmployerWithholding/",
-      "verifiedOn": "2026-08-11"
+      "title": "PA Department of Revenue -- Employer Withholding",
+      "url": "https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html",
+      "verifiedOn": "2026-08-13",
+      "verifiedBy": "Fetched directly (the old revenue.pa.gov/TaxTypes/EmployerWithholding/ URL now 302-redirects here). Quoted: 'The Pennsylvania personal income tax withholding rate is 3.07 percent of compensation from resident and nonresident employees earning income in Pennsylvania' -- confirms the rate is UNCHANGED for 2026, not a fresh figure. Also names REV-415 (Employer Withholding Information Guide) as the authoritative formula document and confirms the reciprocal-state list; REV-415's own full text was not fetched this session."
+    },
+    {
+      "title": "PA Department of Labor & Industry -- Yearly Tax Highlights (UC)",
+      "url": "https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/yearly-tax-highlights",
+      "verifiedOn": "2026-08-13",
+      "verifiedBy": "Fetched directly. Quoted: 'Employee contributions (UC withholding) is 0.07 percent (70 cents per $1,000 gross wages)... no wage cap limit.' Also captured employer-side 2026 figures for context (not used by this engine, which only computes employee-facing withholding): new-employer rate 3.8220% (non-construction) / 10.5924% (construction), experienced range 1.4190%-10.3734%, wage base $10,000, 9.2% surcharge + 0.60% additional contributions tax baked into those rates, 0% interest factor."
+    },
+    {
+      "title": "PA Department of Labor & Industry -- Employee Withholding (UC)",
+      "url": "https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/employee-withholding",
+      "verifiedOn": "2026-08-13",
+      "verifiedBy": "Fetched directly, a second independent DLI page corroborating the same 0.07% rate and no-cap rule. Quoted: 'Employee contributions are based on an individual's total (gross) wages and are not limited to the taxable wage base in effect for employer contributions.' States the rate has applied '2023 and thereafter' -- i.e. not a 2026-specific change, unchanged since 2023."
     }
   ],
   "flatRate": {
     "rate": 0.0307,
     "allowanceAmount": 0.0,
-    "comment": "Pennsylvania has no personal exemptions, no standard deduction and no withholding allowances. Withholding is a straight percentage of PA-taxable compensation."
+    "comment": "Pennsylvania has no personal exemptions, no standard deduction and no withholding allowances. Withholding is a straight percentage of PA-taxable compensation. Confirmed unchanged for 2026 from PA's own current employer-withholding page."
   },
   "exemptPretax": [
     "section125",
@@ -22,9 +35,59 @@
     "dependent_care",
     "commuter"
   ],
-  "exemptComment": "Deliberately omits deferral_401k / 403b / 457 / SIMPLE. Pennsylvania taxes elective retirement deferrals as compensation when earned, unlike federal income tax. An engine with a single shared 'taxable wages' figure gets Pennsylvania wrong on every cheque where an employee defers.",
+  "exemptComment": "Deliberately omits deferral_401k / 403b / 457 / SIMPLE. Pennsylvania taxes elective retirement deferrals as compensation when earned, unlike federal income tax -- confirmed this session via a dedicated search (not just carried over from the prior version of this file): 'contributions to a 401(K) or contributions to other types of retirement plans are considered part of the employee's taxable compensation under Pennsylvania law, unlike federal income tax law', and nonqualified deferred-comp salary reductions are 'taxable at the time of deduction'. An engine with a single shared 'taxable wages' figure gets Pennsylvania wrong on every cheque where an employee defers. This SAME list is reused for stateUnemploymentEmployee below -- confirmed this session that PA UC's employee-withholding base is also gross/total wages with no 401(k) carve-out (Form UC-2 instructions), so the two PA taxes share one taxable-wages definition, unlike MI/IN where state income tax and local tax disagree on pretax treatment.",
+  "stateUnemploymentEmployee": {
+    "rate": 0.0007,
+    "wageBase": null,
+    "comment": "Pennsylvania is the first state in this project where the EMPLOYEE, not just the employer, pays a UC/SUTA contribution -- most states are employer-only (see futa() in federal.ts). 0.07% of gross wages, NO wage cap, confirmed independently on two separate DLI pages this session. wageBase: null is a deliberate 'uncapped' signal, not an unfilled placeholder -- src/taxes/state.ts's stateUnemploymentEmployeeTax() reads it as 'do not route through underCap()'. Dispatched generically off this config block's presence (see stateIncomeTax() in state.ts), not tied to PA's flat_rate method specifically, so any future state with an employee-paid UC component gets it for free.",
+    "knownGap": "Employer-side UC (new-employer/experience-rated rates, $10,000 wage base) is documented in sources above for context but not modelled -- same class of gap as every other state's employer-paid SUTA in this project (MI, IN): experience-rating is per-employer, not a jurisdiction constant a static ruleset file can hold."
+  },
+  "reciprocity": {
+    "source": {
+      "title": "PA Department of Revenue -- Employer Withholding (reciprocal agreements)",
+      "url": "https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html",
+      "verifiedOn": "2026-08-13",
+      "verifiedBy": "Fetched directly. Quoted verbatim: 'If you agree not to withhold Pennsylvania tax because your employee is a resident of a reciprocal state, you must withhold that state's tax.'"
+    },
+    "reciprocalStates": ["IN", "MD", "NJ", "OH", "VA", "WV"],
+    "mechanismDiffersFromKY": "Genuinely different mechanic from Kentucky's reciprocity (which simply exempts the nonresident, full stop): Pennsylvania's own guidance frames this as an employer CHOICE ('if you agree not to withhold PA tax') that carries an affirmative obligation -- the employer doesn't just stop withholding PA tax, it must start withholding the EMPLOYEE'S HOME STATE's tax instead. This is closer in shape to a mandatory swap than a simple exemption. Not yet confirmed whether PA truly requires this or merely permits it (the word 'agree' suggests an employer-employee arrangement, not an automatic legal mandate) -- flagged as an open question, not resolved by inference.",
+    "mechanism": "Form REV-419 (Employee's Nonwithholding Application Certificate) -- employee-side certificate filed with the employer. REV-419's own text was not fetched directly this session; its existence and purpose are corroborated by PA's own withholding page plus secondary tax-prep sources (TaxSlayer, Deel), not yet at the K-4-equivalent confidence tier of a direct form read.",
+    "kyResidentDirectionNotChecked": "Whether a PA RESIDENT working in one of the 6 reciprocal states owes PA tax on that income (the outbound direction) was not separately researched this session -- flagged as an open item, same category of gap Kentucky's reciprocity had before its own audit pass resolved it via KY-TAM-18-03.",
+    "knownGap": "Not implemented in the calculation engine -- same as every other state's reciprocity in this project (input.residenceState exists in types.ts but stateIncomeTax() only reads input.workState)."
+  },
+  "localTax": {
+    "$comment": "Pennsylvania's Act 32 local Earned Income Tax (EIT) + Local Services Tax (LST) -- researched structurally this session (see chat), NOT yet built as a data file the way Kentucky's occupational tax was. Recorded here as a pointer/summary so this file doesn't silently omit that PA has a local layer at all.",
+    "eit": {
+      "authority": "Act 32 of 2008 (53 P.S. sec. 6924.101 et seq.), administered by PA DCED",
+      "structure": "~2,500+ municipalities/school districts organized into 69 Tax Collection Districts (TCDs, generally one per county), each with a designated third-party tax officer (e.g. Berkheimer, Keystone Collections Group) -- NOT the county government itself, a structural difference from Kentucky where the county fiscal court is usually the collector.",
+      "psdCodes": "6-digit Political Subdivision codes identify each municipality+school-district combination. Out-of-state residents get PSD 88000 / 0% resident rate.",
+      "withholdingRule": "Employers withhold at the HIGHER of the employee's resident EIT rate or the work-location's nonresident EIT rate -- a single number per paycheck, genuinely different from Kentucky's stack-or-credit-depending-on-tier local system.",
+      "bulkSource": "PA DCED publishes a downloadable PSD Codes Excel spreadsheet plus a live lookup tool (apps.dced.pa.gov/Munstats-Public/FindLocalTax.aspx) -- identified this session as PA's equivalent of Kentucky's SOS occupational-tax database, not yet downloaded/parsed."
+    },
+    "lst": {
+      "authority": "Act 32 of 2008, administered by PA DCED",
+      "annualCap": 52.0,
+      "lowIncomeExemption": {
+        "threshold": 12000.0,
+        "rule": "Political subdivisions levying LST over $10/yr MUST exempt taxpayers earning under $12,000 total (all sources) within that subdivision; subdivisions levying $10/yr or less MAY exempt them (permissive, not mandatory)."
+      },
+      "proration": "Combined muni+school LST over $10/yr must be prorated across pay periods, rounded DOWN to the nearest $0.01 (e.g. $52/yr = $1.00/week). $10/yr or less may be withheld entirely from the first paycheck instead.",
+      "situsPriority": "For an employee working multiple PA jurisdictions in one pay period: (1) principal place of employment, (2) place of residence AND employment, (3) employment location closest to residence. A secondary employer need not withhold if shown proof of LST already withheld by the principal employer.",
+      "source": {
+        "title": "PA DCED -- Local Services Tax (LST)",
+        "url": "https://dced.pa.gov/local-government/local-income-tax-information/local-services-tax/",
+        "verifiedOn": "2026-08-13",
+        "verifiedBy": "Fetched directly this session, full page text captured including the situs-priority order and the exact proration/rounding rule."
+      }
+    },
+    "knownGap": "Neither EIT nor LST has a data file or engine dispatch method yet -- same status Kentucky's occupational tax was in before its own build-out pass. This is the next logical piece of PA work, not started this session."
+  },
   "knownGaps": [
-    "PA employee unemployment (UC) withholding is not modelled — rate not yet verified from a primary source.",
-    "Act 32 local Earned Income Tax (EIT) and Local Services Tax (LST) require PSD-code resolution; see README."
+    "Reciprocity is documented structurally (including a genuinely different swap-not-exemption mechanic vs. Kentucky) but not implemented in the engine, and REV-419's own text hasn't been read directly yet -- one tier below this project's K-4-equivalent confidence bar.",
+    "Whether PA's reciprocity mandate is a legal requirement or an employer-employee 'agreement' (per PA's own 'if you agree' phrasing) is unresolved.",
+    "The outbound reciprocity direction (PA resident working in a reciprocal state) was not researched this session.",
+    "Act 32 local EIT and LST are documented structurally (this file's localTax block) but have no data file or compute path yet -- PA DCED's downloadable PSD/rate spreadsheet was identified as a real bulk source but not yet downloaded.",
+    "Employer-side UC rates (new-employer/experience-rated, $10,000 wage base) are recorded for context only, not modelled -- same per-employer-experience-rating gap as every other state's employer SUTA in this project.",
+    "stateUnemploymentEmployeeTax() has not yet been run through calculatePaycheck() in a test -- see tests/engine.test.ts describe('Pennsylvania') for what IS covered (the base 3.07% flat rate, unchanged from before this session's build-out)."
   ]
 }
