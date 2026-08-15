@@ -1353,6 +1353,214 @@ describe('Minnesota', () => {
   });
 });
 
+describe('Montana', () => {
+  // Expected values reproduce the Employer and Information Agent Guide's OWN
+  // worked examples exactly — not values computed only by this engine. This
+  // is the strongest verification tier available: Montana's guide gives its
+  // own answer for each example, so these fixtures prove the engine agrees
+  // with the primary source's own arithmetic, not just with itself.
+  const mtState = (certificate: Record<string, unknown>) => ({
+    workState: { code: 'MT', certificate },
+  });
+
+  test('Guide Example: single/MFS, semi-monthly $1,375 -> $33', () => {
+    // $0 + 4.7% x ($1,375-$671) = $33.088 -> $33 (nearest dollar, not $34 —
+    // proves this engine follows the guide's own examples, not its prose).
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1375) }],
+        ...mtState({ filingStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), dollars(33));
+  });
+
+  test('Guide Example: single/MFS, biweekly $2,950 -> $114', () => {
+    // $86 + 5.65% x ($2,950-$2,446) = $114.476 -> $114.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2950) }],
+        ...mtState({ filingStatus: 'mfs' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), dollars(114));
+  });
+
+  test('Guide Example: single/MFS, weekly $475 -> $8', () => {
+    // $0 + 4.7% x ($475-$310) = $7.755 -> $8.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(475) }],
+        ...mtState({ filingStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), dollars(8));
+  });
+
+  test('Guide Example: MFJ/QSS, semi-monthly $1,375 -> $2', () => {
+    // $0 + 4.7% x ($1,375-$1,342) = $1.551 -> $2.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1375) }],
+        ...mtState({ filingStatus: 'mfj' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), dollars(2));
+  });
+
+  test('Guide Example: MFJ/QSS, biweekly $5,950 -> $232', () => {
+    // $172 + 5.65% x ($5,950-$4,892) = $231.777 -> $232.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(5950) }],
+        ...mtState({ filingStatus: 'qss' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), dollars(232));
+  });
+
+  test('Guide Example: MFJ/QSS, weekly $725 -> $5', () => {
+    // $0 + 4.7% x ($725-$619) = $4.982 -> $5.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(725) }],
+        ...mtState({ filingStatus: 'mfj' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), dollars(5));
+  });
+
+  test('Guide Example: Head of Household, semi-monthly $1,375 -> $17', () => {
+    // $0 + 4.7% x ($1,375-$1,006) = $17.343 -> $17.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1375) }],
+        ...mtState({ filingStatus: 'hoh' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), dollars(17));
+  });
+
+  test('both-spouses-working reuses the single/MFS table, not a fourth schedule', () => {
+    // MFJ + bothSpousesWorking, semi-monthly $1,375 — MUST match the
+    // single/MFS example ($33), NOT the MFJ/QSS example ($2), proving
+    // resolveMTSchedule() actually redirects to single_mfs_bothWorking
+    // rather than just relabeling the MFJ table.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1375) }],
+        ...mtState({ filingStatus: 'mfj', bothSpousesWorking: true }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), dollars(33));
+  });
+
+  test('no certificate defaults to single, matching Form MW-4\'s own stated fallback', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1375) }],
+        workState: { code: 'MT' },
+      }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), dollars(33));
+  });
+
+  test('an unrecognized certificate.filingStatus throws', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(475) }],
+            ...mtState({ filingStatus: 'divorced' }),
+          }),
+        ),
+      /Unrecognized MT certificate\.filingStatus/,
+    );
+  });
+
+  test('MW-4 line 4 (specified withholding) fully replaces the bracket calculation', () => {
+    // Same wages as the $33 example, but specifiedWithholding overrides it —
+    // must produce $75, NOT $33, and must suppress the supplemental line too.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(1375) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(500) },
+        ],
+        ...mtState({ filingStatus: 'single', specifiedWithholding: dollars(75) }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), dollars(75));
+    assert.equal(r.taxes.some((t) => t.id === 'MT_SIT_SUPP'), false);
+  });
+
+  test('supplemental wages use flat 5% (Method 3), separate from the regular bracket line', () => {
+    // Regular $1,375 semi-monthly (single) -> $33, same as the base example
+    // since the regular line carves supplemental out of its own base.
+    // Supplemental $500 x 5% = $25.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(1375) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(500) },
+        ],
+        ...mtState({ filingStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), dollars(33));
+    assert.equal(amountOf(r, 'MT_SIT_SUPP'), dollars(25));
+  });
+
+  test('reciprocity: a North Dakota resident working in Montana owes $0 MT income tax', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1375) }],
+        residenceState: { code: 'ND' },
+        ...mtState({ filingStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), 0);
+  });
+
+  test('certificate.exempt (MW-4 line 5) zeroes MT_SIT generically, same mechanism as every other state', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(475) }],
+        ...mtState({ filingStatus: 'single', exempt: true }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), 0);
+  });
+
+  test('a quarterly pay frequency, which Montana does not publish a table for, throws rather than guessing', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'quarterly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(4000) }],
+            ...mtState({ filingStatus: 'single' }),
+          }),
+        ),
+      /don't publish a "quarterly" schedule/,
+    );
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

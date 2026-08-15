@@ -1,4 +1,4 @@
-import { applyRate, atLeastZero, dollars, fmt, roundHalfUp, underCap } from '../money.ts';
+import { applyRate, atLeastZero, dollars, fmt, roundHalfUp, toWholeDollars, underCap } from '../money.ts';
 import type { StateRuleset } from '../registry.ts';
 import {
   countyRuleset,
@@ -261,6 +261,15 @@ function applyAdditionalStateWithholding(
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   if (cert.exempt) return lines;
 
+  // Montana's Form MW-4 is explicit that its own "extra withholding" (line
+  // 3) and "specified withholding" (line 4) are mutually exclusive — "If
+  // you are an employee and enter an amount on this line, DO NOT complete
+  // lines 1, 2, or 3." bracketPerPeriodGross() already produces the
+  // specified-withholding line without ever reading additionalWithholding,
+  // but this guard keeps that true even if a caller populates both fields
+  // by mistake, rather than silently stacking them.
+  if (Number(cert.specifiedWithholding ?? 0) > 0) return lines;
+
   // Cents already, matching federalW4.extraWithholding's convention — NOT a
   // dollars-file figure needing dollars() conversion. A caller supplies
   // dollars(50), not 50.
@@ -302,6 +311,12 @@ function incomeTaxLines(
     case 'bracket_flat_allowance': {
       const lines: TaxLine[] = [bracketFlatAllowance(input, ctx, rules)];
       const supplemental = flatRateSupplementalTax(input, ctx, rules);
+      if (supplemental) lines.push(supplemental);
+      return lines;
+    }
+    case 'bracket_per_period_gross': {
+      const lines: TaxLine[] = [bracketPerPeriodGross(input, ctx, rules)];
+      const supplemental = montanaSupplementalTax(input, ctx, rules);
       if (supplemental) lines.push(supplemental);
       return lines;
     }
@@ -1046,5 +1061,184 @@ function statePaidLeaveEmployeeTax(
       cfg.wageBase === null
         ? `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, no wage cap`
         : `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, capped at ${fmt(dollars(cfg.wageBase))}/yr (${fmt(ytd)} YTD already counted)`,
+  };
+}
+
+type MTSchedule = 'single_mfs_bothWorking' | 'mfj_qss' | 'hoh';
+
+interface BracketPerPeriodGrossConfig {
+  brackets: Record<MTSchedule, Record<string, WIBracket[]>>; // second key is PayFrequency
+}
+
+/**
+ * Resolves Form MW-4's filing-status lines (1a/1b/1c/2) to which of
+ * Montana's THREE published bracket schedules applies. Critically, marking
+ * line 2 (both spouses working) does NOT select a fourth schedule — MW-4's
+ * own tables are headed "Use these tables if the employee marks the box on
+ * line 1a OR line 2," i.e. both-spouses-working reuses the SAME
+ * single/MFS table, not a separately-halved one. It only LOOKS like a
+ * halved MFJ table because MFJ's own thresholds happen to be exactly double
+ * single's — that's Montana's bracket design, not a computed halving this
+ * engine performs.
+ *
+ * Default (no MW-4, or lines 1/2 both empty with no line-4 override): the
+ * single/MFS schedule — confirmed directly from Form MW-4's own employer
+ * instructions, "If you do not complete your Form MW-4, your employer will
+ * withhold taxes for you using the single filing status on line 1a."
+ */
+function resolveMTSchedule(cert: Record<string, unknown>): MTSchedule {
+  const filingStatus = cert.filingStatus;
+  if (filingStatus === undefined || filingStatus === null || filingStatus === 'single' || filingStatus === 'mfs') {
+    return 'single_mfs_bothWorking';
+  }
+  if (filingStatus === 'mfj' || filingStatus === 'qss') {
+    return cert.bothSpousesWorking ? 'single_mfs_bothWorking' : 'mfj_qss';
+  }
+  if (filingStatus === 'hoh') return 'hoh';
+  throw new Error(
+    `Unrecognized MT certificate.filingStatus ${JSON.stringify(filingStatus)} — expected ` +
+      `'single', 'mfs', 'mfj', 'qss', or 'hoh'.`,
+  );
+}
+
+/**
+ * Montana's withholding formula (2026 Employer and Information Agent
+ * Guide's "Montana Withholding Tax Formula", W = A + (B × (G - C))) — the
+ * simplest bracket mechanic in this project so far: NO annualization step
+ * and NO separate standard-deduction subtraction. The guide's own
+ * "Definitions" section states plainly 'G = Gross Earnings for the payroll
+ * period' — the bracket table is applied DIRECTLY to gross per-period
+ * wages, with the standard deduction already baked into each schedule's
+ * own 0%-rate first bracket rather than subtracted as a separate step. (The
+ * table column headers say "of the net taxable earnings over C", which
+ * reads as if there's a separate net-taxable-earnings variable — but no
+ * such subtraction appears anywhere in the formula's own definitions or
+ * its three worked examples, which all plug raw per-period earnings
+ * straight into the bracket lookup. Treated the formula's own worked
+ * arithmetic as authoritative over that one inconsistent phrase.)
+ *
+ * Montana publishes a SEPARATE bracket table per pay frequency (Monthly,
+ * Semi-Monthly, Bi-Weekly, Weekly, Daily, Annual) rather than one annual
+ * table scaled by periodsPerYear the way every other bracket state in this
+ * project works — so periodsPerYear is never used here at all. Montana's
+ * own guide does not publish Quarterly or Semiannual tables, so those two
+ * PayFrequency values throw rather than being silently guessed at via
+ * interpolation.
+ *
+ * ROUNDING: the guide's prose says "rounded up to the nearest dollar" in
+ * two places, but its own worked examples contradict that — Example 1
+ * (single/MFS, semi-monthly, $1,375) computes to $33.088, and the guide's
+ * OWN stated answer is $33, not $34. Ceiling rounding would have produced
+ * $34. Verified independently against a second example in the same section
+ * (biweekly $2,950 → $114.476 → stated $114, not $115). Ordinary
+ * nearest-dollar rounding (Math.round, this project's usual roundHalfUp) is
+ * what the primary source's own arithmetic actually does, so that's what
+ * this function uses — the "rounded up" prose is treated as imprecise, not
+ * authoritative.
+ *
+ * Line 4 ("specified withholding") is a full REPLACEMENT of the ordinary
+ * calculation, not an addition — Form MW-4 itself: "If you are an employee
+ * and enter an amount on this line, DO NOT complete lines 1, 2, or 3."
+ * Checked FIRST, before the bracket lookup, and short-circuits it entirely.
+ */
+function bracketPerPeriodGross(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.bracketPerPeriodGross as BracketPerPeriodGrossConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  // Supplemental wages are carved out and taxed separately on the flat
+  // 5%-of-supplemental path instead (montanaSupplementalTax()) — same
+  // regular/supplemental split every other bracket state in this project
+  // uses, so the two lines together still tax the full base exactly once.
+  const supplementalCash = supplementalEarnings(input.earnings);
+  const grossWages = atLeastZero(fullBase - supplementalCash);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+
+  const specified = Number(cert.specifiedWithholding ?? 0);
+  if (specified > 0) {
+    return {
+      id: `${rules.code}_SIT`,
+      name: `${rules.name} Income Tax`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: grossWages,
+      amount: specified,
+      detail: `Form MW-4 line 4 specified withholding: ${fmt(specified)} flat, replacing the normal bracket calculation (lines 1-3 not applied).`,
+    };
+  }
+
+  const schedule = resolveMTSchedule(cert);
+  const perFrequencyTables = cfg.brackets[schedule];
+  const brackets = perFrequencyTables[input.payFrequency];
+  if (!brackets) {
+    throw new Error(
+      `Montana's own withholding tables don't publish a "${input.payFrequency}" schedule ` +
+        `(only monthly/semimonthly/biweekly/weekly/daily/annual are published) — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+
+  const bracket = findWIBracket(brackets, grossWages);
+  const excess = grossWages - dollars(bracket.from);
+  // Montana states withholding amounts in WHOLE DOLLARS, not dollars-and-
+  // cents — confirmed by every worked example in the source (e.g. $33.088
+  // computed → the guide's own stated answer is $33, not $33.09). Caught
+  // this against the guide's own examples before trusting it: an earlier
+  // draft that stopped at cent-level rounding produced $33.09 here, which
+  // does not match the source at all.
+  const amount = toWholeDollars(dollars(bracket.base) + applyRate(excess, bracket.rate));
+
+  const detail =
+    `${fmt(grossWages)} gross (${schedule}, ${input.payFrequency}) @ ${(bracket.rate * 100).toFixed(2)}% ` +
+    `over ${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))}`;
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: grossWages,
+    amount,
+    detail,
+  };
+}
+
+/**
+ * Montana's supplemental wages "Method 3" — a flat 5.00% of the supplemental
+ * payment alone, the only one of the guide's three separately-paid-
+ * supplemental methods that doesn't require reaching into a different
+ * payroll period's wages (Methods 1/2 both combine the supplemental with
+ * SOME period's regular wages first — not modelled, same class of gap as
+ * Kentucky's supplementalTreatment.engineGap). Returns null when there's no
+ * supplemental income, or when MW-4 line 4 (specifiedWithholding) is active
+ * — the form's own instruction to skip lines 1-3 when line 4 is used applies
+ * here too: a flat specified amount replaces ALL of this employee's
+ * withholding for the period, not just the regular-wages line.
+ */
+function montanaSupplementalTax(
+  input: PaycheckInput,
+  _ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const supplementalCash = supplementalEarnings(input.earnings);
+  if (supplementalCash <= 0) return null;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (Number(cert.specifiedWithholding ?? 0) > 0) return null;
+
+  const rate = (rules.supplementalWages as { flatRate: number }).flatRate;
+  const amount = toWholeDollars(applyRate(supplementalCash, rate));
+
+  return {
+    id: `${rules.code}_SIT_SUPP`,
+    name: `${rules.name} Income Tax (Supplemental)`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: supplementalCash,
+    amount,
+    detail: `${fmt(supplementalCash)} @ ${(rate * 100).toFixed(2)}% flat (Method 3), rounded to the nearest dollar`,
   };
 }
