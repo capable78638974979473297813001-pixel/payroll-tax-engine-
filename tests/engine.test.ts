@@ -95,6 +95,29 @@ describe('federal income tax — Pub 15-T Worksheet 1A', () => {
     assert.equal(amountOf(r, 'US_FIT'), dollars(320.38));
   });
 
+  test('nonresident alien: Pub 15-T Table 2 adds a fixed amount to wages before annualizing', () => {
+    // Same $3,000 biweekly base as above, plus w4.nonresidentAlien:true.
+    // Table 2 biweekly = $619.20. Adjusted per-period wages: 3,000+619.20=
+    // 3,619.20 -> annual 3,619.20x26=94,099.20 - 8,600 standard adj =
+    // 85,499.20 -> 22% bracket over 57,900, base 5,800: 5,800 + 0.22 x
+    // 27,599.20 = 5,800+6,071.824 = 11,871.824/yr -> /26 = 456.6086... ->
+    // $456.61 (vs. $320.38 for the same wages without the adjustment).
+    const r = calculatePaycheck(
+      input({
+        federalW4: {
+          filingStatus: 'single',
+          multipleJobs: false,
+          dependentCredit: 0,
+          otherIncome: 0,
+          deductions: 0,
+          extraWithholding: 0,
+          nonresidentAlien: true,
+        },
+      }),
+    );
+    assert.equal(amountOf(r, 'US_FIT'), dollars(456.61));
+  });
+
   test('Step 2 checkbox switches to the multiple-jobs schedule', () => {
     // No 8,600 adjustment; 78,000 → 24% bracket over 60,900, base 8,983
     // 8,983 + 0.24 × 17,100 = 13,087/yr ÷ 26 = 503.35
@@ -463,6 +486,29 @@ describe('Michigan', () => {
     );
     assert.equal(amountOf(r, 'MI_SIT'), dollars(113.61));
   });
+
+  test('certificate.exempt and certificate.additionalWithholding are GENERIC — proven here via flatRate(), not just Minnesota\'s bracket method', () => {
+    // Same base case as 'single, biweekly, $3,000, 1 exemption' ($117.86).
+    // state.ts's applyStateWithholdingExemption()/applyAdditionalStateWithholding()
+    // wrap EVERY income-tax method's output (matched by the shared
+    // `${code}_SIT` id prefix, not hardcoded to bracket_flat_allowance), so
+    // Michigan's flat_rate method gets both for free.
+    const exempt = calculatePaycheck(input({ ...mi(1), workState: { code: 'MI', certificate: { allowances: 1, exempt: true } } }));
+    assert.equal(amountOf(exempt, 'MI_SIT'), 0);
+
+    const withExtra = calculatePaycheck(
+      input({ workState: { code: 'MI', certificate: { allowances: 1, additionalWithholding: dollars(15) } } }),
+    );
+    assert.equal(amountOf(withExtra, 'MI_SIT'), dollars(117.86 + 15));
+  });
+
+  test('reciprocity is also generic — an Ohio resident working in Michigan owes $0 MI income tax', () => {
+    // Ohio is one of MI's reciprocalStates (data/states/MI-2026.json).
+    const r = calculatePaycheck(
+      input({ residenceState: { code: 'OH' }, ...mi(1) }),
+    );
+    assert.equal(amountOf(r, 'MI_SIT'), 0);
+  });
 });
 
 describe('Indiana', () => {
@@ -514,6 +560,26 @@ describe('Indiana', () => {
       }),
     );
     assert.equal(amountOf(r, 'IN_SIT'), dollars(23.6));
+    assert.equal(amountOf(r, 'IN_COUNTY'), dollars(16.16));
+  });
+
+  test('reciprocity exempts STATE tax only — county tax still applies (WH-47\'s own critical gotcha)', () => {
+    // Same $800/wk, Marion County case as above, but residenceState:KY —
+    // one of Indiana's reciprocalStates. Per data/states/IN-2026.json's own
+    // reciprocity.rule ('this exemption does NOT extend to Indiana COUNTY
+    // tax'), IN_SIT must drop to $0 while IN_COUNTY stays at $16.16,
+    // completely unaffected. This is the case a naive whole-line-array
+    // reciprocity implementation would get wrong — state.ts's
+    // zeroStateIncomeTaxLines() only zeroes IN_SIT-prefixed lines.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+        residenceState: { code: 'KY' },
+        ...inState({ county: 'Marion' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'IN_SIT'), 0);
     assert.equal(amountOf(r, 'IN_COUNTY'), dollars(16.16));
   });
 
@@ -588,6 +654,22 @@ describe('Illinois', () => {
       }),
     );
     assert.equal(amountOf(r, 'IL_SIT'), dollars(39.6));
+  });
+
+  test('reciprocity: a Wisconsin resident working in Illinois owes $0 IL income tax', () => {
+    // Same $800/wk, zero-allowance case as above. Wisconsin is one of
+    // Illinois's reciprocalStates (data/states/IL-2026.json) — and unlike
+    // Indiana, Illinois has no local tax for the exemption to carve around,
+    // so this should be a clean $0, full stop.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+        residenceState: { code: 'WI' },
+        ...ilState({}),
+      }),
+    );
+    assert.equal(amountOf(r, 'IL_SIT'), 0);
   });
 
   test('401(k) deferral reduces the Illinois base — federal-AGI conformity', () => {
@@ -778,6 +860,39 @@ describe('Kentucky', () => {
     assert.equal(amountOf(r, 'KY_SIT'), dollars(104.65));
   });
 
+  test('certificate.exempt and certificate.additionalWithholding work generically via flatRateFixedDeduction() too', () => {
+    // Same $3,270/month base case as above ($104.65).
+    const exempt = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3270) }],
+        workState: { code: 'KY', certificate: { exempt: true } },
+      }),
+    );
+    assert.equal(amountOf(exempt, 'KY_SIT'), 0);
+
+    const withExtra = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3270) }],
+        workState: { code: 'KY', certificate: { additionalWithholding: dollars(20) } },
+      }),
+    );
+    assert.equal(amountOf(withExtra, 'KY_SIT'), dollars(104.65 + 20));
+  });
+
+  test('reciprocity: a resident of a KY-reciprocal state owes $0 KY income tax', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3270) }],
+        residenceState: { code: 'OH' },
+        ...kyState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'KY_SIT'), 0);
+  });
+
   test("reproduces the DOR's own biweekly example, CORRECTED for its own arithmetic error", () => {
     // Biweekly $1,500: annual 1,500×26=39,000 − 3,360 = 35,640 taxable ×
     // 3.5% = 1,247.40/yr ÷ 26 = 47.9769... → 47.98.
@@ -903,6 +1018,338 @@ describe('gross-to-net', () => {
   test('whole-dollar rounding is opt-in', () => {
     const r = calculatePaycheck(input({ roundToWholeDollars: true }));
     assert.equal(amountOf(r, 'US_FIT'), dollars(320));
+  });
+});
+
+describe('Minnesota', () => {
+  // Expected values hand-derived from wh-inst-26's "Computer Formula" (p.34)
+  // before the code was run, same discipline as every other state. Unlike
+  // Wisconsin's single shared bracket schedule, Minnesota publishes TWO
+  // different schedules (single vs. married) — these fixtures deliberately
+  // exercise both. Minnesota's own tables round to the WHOLE dollar; these
+  // fixtures compute to the CENT via the underlying formula instead (the
+  // tables are just a rounded presentation of the same formula, not a
+  // separately authoritative source — wh-inst-26 itself says rounding to
+  // the whole dollar is optional, "You may round...").
+  const mnState = (certificate: Record<string, unknown>) => ({
+    workState: { code: 'MN', certificate },
+  });
+
+  test('single, weekly $605, 0 allowances', () => {
+    // Annual 605x52=31,460. No allowance. Net wage 31,460 falls in the
+    // 4,700-38,010 bracket (5.35%, base $0). Excess: 31,460-4,700=26,760.
+    // Tax: 5.35% x 26,760 = 1,431.66/yr ÷ 52 = 27.5319... → $27.53.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+        ...mnState({ maritalStatus: 'single', allowances: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), dollars(27.53));
+  });
+
+  test('single, weekly $605, 2 allowances — same bracket, allowance lowers the base', () => {
+    // Annual 31,460. Allowance: 2x$5,300=$10,600. Net: 31,460-10,600=20,860
+    // — still the 4,700-38,010 bracket. Excess: 20,860-4,700=16,160.
+    // Tax: 5.35% x 16,160 = 864.56/yr ÷ 52 = 16.6262... → $16.63.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+        ...mnState({ maritalStatus: 'single', allowances: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), dollars(16.63));
+  });
+
+  test('married, weekly $905, 3 allowances — uses the MARRIED bracket schedule', () => {
+    // Annual 905x52=47,060. Allowance: 3x$5,300=$15,900. Net: 47,060-15,900
+    // =31,160 — married's 14,700-63,400 bracket (5.35%, base $0), a
+    // DIFFERENT threshold than single's, proving the two schedules are
+    // genuinely distinct, not the same table reused. Excess: 31,160-14,700
+    // =16,460. Tax: 5.35% x 16,460 = 880.61/yr ÷ 52 = 16.9348... → $16.93.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(905) }],
+        ...mnState({ maritalStatus: 'married', allowances: 3 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), dollars(16.93));
+  });
+
+  test('zero or negative net wage after allowances withholds nothing', () => {
+    // Weekly $80, 1 allowance. Annual 80x52=4,160. Allowance $5,300 exceeds
+    // annual wages entirely — net wage clamps to $0, landing in the 0%
+    // band (0-4,700). No tax withheld, not a crash or negative amount.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(80) }],
+        ...mnState({ maritalStatus: 'single', allowances: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), 0);
+  });
+
+  test('supplemental (bonus) wages use ONE flat 6.25% rate, unlike Wisconsin\'s bracket-dependent rate', () => {
+    // Biweekly $2,000 regular + $500 bonus, single, 1 allowance.
+    // Regular line excludes the bonus from its own base: annual 2,000x26=
+    // 52,000. Allowance $5,300. Net: 46,700 — the 38,010-114,130 bracket
+    // (6.80%, base $1,782.09). Excess: 46,700-38,010=8,690.
+    // Tax: 1,782.09 + 6.80% x 8,690 = 1,782.09+590.92 = 2,373.01/yr ÷ 26 =
+    // 91.269615... → $91.27 (9126.96 cents rounds to 9127).
+    // Supplemental line: flat 6.25% of $500 = $31.25 — no bracket lookup at
+    // all, unlike Wisconsin's bracketSupplementalTax().
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(2000) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(500) },
+        ],
+        ...mnState({ maritalStatus: 'single', allowances: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), dollars(91.27));
+    assert.equal(amountOf(r, 'MN_SIT_SUPP'), dollars(31.25));
+  });
+
+  test('no supplemental line at all when there is no supplemental income', () => {
+    const r = calculatePaycheck(input(mnState({ maritalStatus: 'single', allowances: 1 })));
+    assert.equal(r.taxes.some((t) => t.id === 'MN_SIT_SUPP'), false);
+  });
+
+  test('certificate.exempt zeroes BOTH the regular and supplemental lines (Form W-4MN Section 2)', () => {
+    // Biweekly $2,000 regular + $500 bonus, single, 1 allowance — same
+    // wages as the earlier supplemental fixture, which produced MN_SIT
+    // $91.27 and MN_SIT_SUPP $31.25 with exempt unset. With exempt:true,
+    // both lines must be $0 instead — Section 2 covers all MN wages, not
+    // just regular pay. Lines stay PRESENT (zeroed), not removed, so a
+    // caller inspecting result.taxes always finds the same set of ids.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(2000) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(500) },
+        ],
+        ...mnState({ maritalStatus: 'single', allowances: 1, exempt: true }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), 0);
+    assert.equal(amountOf(r, 'MN_SIT_SUPP'), 0);
+  });
+
+  test('certificate.additionalWithholding adds a flat per-period amount on top of the formula (W-4MN Section 1 Line 2)', () => {
+    // Same base case as 'single, weekly $605, 0 allowances' ($27.53),
+    // plus a $10.00 additional withholding request. Expect $37.53 —
+    // added to MN_SIT only, not duplicated onto a supplemental line.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+        ...mnState({ maritalStatus: 'single', allowances: 0, additionalWithholding: dollars(10) }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), dollars(37.53));
+  });
+
+  test('additionalWithholding is skipped entirely when the employee is also exempt', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+        ...mnState({ maritalStatus: 'single', allowances: 0, exempt: true, additionalWithholding: dollars(10) }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), 0);
+  });
+
+  test('reciprocity: a Michigan resident working in Minnesota owes $0 MN income tax', () => {
+    // Same wages as the base fixture ($605/wk, single, 0 allowances,
+    // which normally withholds $27.53) but residenceState:MI — one of
+    // MN's two active reciprocal states (data/states/MN-2026.json
+    // reciprocity.reciprocalStates). Expect MN_SIT to drop to $0 purely
+    // from residence, with no change to the earnings themselves.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+        residenceState: { code: 'MI' },
+        ...mnState({ maritalStatus: 'single', allowances: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), 0);
+  });
+
+  test('reciprocity does NOT apply when residenceState equals the work state', () => {
+    // Guards against a degenerate case: a Minnesota resident working in
+    // Minnesota must NOT match its own state code in reciprocalStates
+    // (which it isn't in anyway) — normal $27.53 withholding applies.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+        residenceState: { code: 'MN' },
+        ...mnState({ maritalStatus: 'single', allowances: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), dollars(27.53));
+  });
+
+  test('reciprocity does NOT apply to a non-reciprocal-state resident (Wisconsin\'s agreement is not currently active)', () => {
+    // Wisconsin is named in Rule 8002.0200 but its actual agreement is
+    // terminated (see reciprocity.reciprocalStatesEligibleButNotCurrentlyActive
+    // in the data file) — MN-2026.json's reciprocalStates deliberately
+    // excludes WI, so a Wisconsin resident still owes ordinary MN tax.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+        residenceState: { code: 'WI' },
+        ...mnState({ maritalStatus: 'single', allowances: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), dollars(27.53));
+  });
+
+  test('nonresident de minimis: low annual wages waive MN withholding even without reciprocity', () => {
+    // Weekly $200, single, residenceState CA (not a reciprocal state).
+    // Annual estimate: 200x52=10,400 — below MN's $15,300 nonresident
+    // de minimis threshold (wh-inst-26 p.4) — so MN_SIT is $0 even though
+    // CA has no reciprocal agreement with MN at all.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(200) }],
+        residenceState: { code: 'CA' },
+        ...mnState({ maritalStatus: 'single', allowances: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), 0);
+  });
+
+  test('nonresident de minimis does NOT waive withholding once estimated annual wages reach the threshold', () => {
+    // Weekly $300, residenceState CA. Annual estimate: 300x52=15,600 —
+    // AT/ABOVE the $15,300 threshold, so ordinary withholding applies:
+    // net wage 15,600 falls in the 4,700-38,010 bracket. Excess:
+    // 15,600-4,700=10,900. Tax: 5.35% x 10,900 = 583.15/yr ÷ 52 =
+    // 11.2144... → $11.21.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(300) }],
+        residenceState: { code: 'CA' },
+        ...mnState({ maritalStatus: 'single', allowances: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), dollars(11.21));
+  });
+
+  test('nonresident alien: Form W-4MN routes to Pub 15-T Table 2, reusing the SAME federal table as US_FIT', () => {
+    // Same $605/wk, single, 0-allowance base as 'single, weekly $605, 0
+    // allowances' ($27.53), plus certificate.nonresidentAlien:true. Table 2
+    // weekly = $309.60. Adjusted per-period wages: 605+309.60=914.60 ->
+    // annual 914.60x52=47,559.20 (no allowance to subtract) -> falls in
+    // the 38,010-114,130 bracket (6.80%, base $1,782.09), NOT the
+    // 4,700-38,010 bracket the unadjusted $605/wk wage falls in. Excess:
+    // 47,559.20-38,010=9,549.20. Tax: 1,782.09+6.80%x9,549.20=1,782.09+
+    // 649.3456=2,431.4356/yr -> /52 = 46.758... -> $46.76.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+        ...mnState({ maritalStatus: 'single', allowances: 0, nonresidentAlien: true }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), dollars(46.76));
+  });
+
+  test('an unrecognized certificate.maritalStatus throws instead of silently defaulting to single', () => {
+    // A caller passing the raw W-4MN checkbox label, or any typo, must fail
+    // loudly rather than produce a plausible-looking wrong number by
+    // silently falling through to 'single'.
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+            ...mnState({ maritalStatus: 'divorced', allowances: 0 }),
+          }),
+        ),
+      /Unrecognized MN certificate\.maritalStatus/,
+    );
+  });
+
+  test("the third checkbox ('married_withhold_as_single') resolves to the SINGLE schedule, not married", () => {
+    // Married, weekly $905, 3 allowances, but withholding at the higher
+    // single rate — same wages as the earlier 'married, weekly $905, 3
+    // allowances' fixture, which used the MARRIED schedule and got $16.93.
+    // With this checkbox, the SAME wages must land on the SINGLE schedule
+    // instead: annual 47,060 - 15,900 allowance = 31,160 net -> single's
+    // 4,700-38,010 bracket (5.35%, base $0), not married's 14,700-63,400
+    // bracket. Excess: 31,160-4,700=26,460. Tax: 5.35% x 26,460 = 1,415.61/yr
+    // -> /52 = 27.223... -> $27.22 — a DIFFERENT number than $16.93,
+    // proving this really did switch schedules, not just relabel the same one.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(905) }],
+        ...mnState({ maritalStatus: 'married_withhold_as_single', allowances: 3 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), dollars(27.22));
+  });
+
+  describe('Minnesota Paid Leave (employee)', () => {
+    test('0.44% of wages, no cap in play', () => {
+      // Weekly $605 — same wages as the base income-tax fixture.
+      // 605 x 0.44% = 2.662 -> rounds to $2.66.
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+          ...mnState({ maritalStatus: 'single', allowances: 0 }),
+        }),
+      );
+      assert.equal(amountOf(r, 'MN_PFML_EE'), dollars(2.66));
+    });
+
+    test('runs even when MN income tax is $0 via reciprocity — separate statute, separate levy', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+          residenceState: { code: 'MI' },
+          ...mnState({ maritalStatus: 'single', allowances: 0 }),
+        }),
+      );
+      assert.equal(amountOf(r, 'MN_SIT'), 0);
+      assert.equal(amountOf(r, 'MN_PFML_EE'), dollars(2.66));
+    });
+
+    test('caps at the wage base using YTD, not just the current cheque', () => {
+      // $184,900 already counted YTD toward MN's Paid Leave cap ($185,000).
+      // Only $100 of this week's $605 is still under the cap.
+      // 100 x 0.44% = 0.44 -> $0.44.
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+          ytd: {
+            socialSecurity: 0,
+            medicare: 0,
+            futa: 0,
+            statePaidLeave: { MN: dollars(184900) },
+          },
+          ...mnState({ maritalStatus: 'single', allowances: 0 }),
+        }),
+      );
+      assert.equal(amountOf(r, 'MN_PFML_EE'), dollars(0.44));
+    });
   });
 });
 

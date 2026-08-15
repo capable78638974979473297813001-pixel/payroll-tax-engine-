@@ -53,6 +53,18 @@
     "supplementalComment": "This is Pub 15's FLAT-RATE method for supplemental wages identified separately from regular wages. Pub 15 also allows an AGGREGATE method (add supplemental to regular wages paid at the same time, withhold on the total via the normal percentage method) -- that method is already reachable in this engine WITHOUT separate code: an earning simply isn't tagged category:'supplemental' (see types.ts EarningCategory), so it flows through federalIncomeTax()'s normal base instead of federalSupplementalTax()'s flat-rate path. The caller's tagging choice IS the method choice; there is no additional decision-tree data to store here.",
     "backupWithholdingRate": 0.24,
 
+    "nonresidentAlienAdjustment": {
+      "comment": "Pub 15-T's 'Withholding Adjustment for Nonresident Alien Employees' procedure: add this per-period dollar amount to wages BEFORE annualizing (Step 1/2 of that procedure), then run the ordinary percentage-method worksheet on the inflated figure -- not a separate calculation path, just a bigger base. The amounts added are excluded from Box 1/income-tax-liability -- purely a withholding-calculation adjustment (Pub 15-T's own words: 'don't increase the income tax liability of the employee'). Two tables exist in Pub 15-T: Table 1 is for a nonresident alien whose Form W-4 predates 2020 (or who hasn't filed a 2020+ form); Table 2 is for a 2020-or-later Form W-4. This engine's FederalW4 type models ONLY the 2020+ shape (see its own doc comment) -- there is no legacy-W-4 representation anywhere in this project -- so TABLE 2 is the one that actually matches what this engine's inputs represent, and is what's recorded below. Reconstructed from the source PDF's own column-shifted table by chaining each period's multiple against the next (e.g. weekly 309.60 x 2 = 618.20 =~ biweekly's 619.20; monthly 1,341.70 x 3 = 4,025.10 =~ quarterly's 4,025.00) -- every value ties out to a period-count multiple of an adjacent one, the same internal-consistency check already used elsewhere in this project for column-shifted PDF tables.",
+      "weekly": 309.60,
+      "biweekly": 619.20,
+      "semimonthly": 670.80,
+      "monthly": 1341.70,
+      "quarterly": 4025.00,
+      "semiannual": 8050.00,
+      "annual": 16100.00,
+      "daily": 61.90
+    },
+
     "standardSchedules": {
       "married_joint": [
         { "from": 0.0, "to": 19300.0, "base": 0.0, "rate": 0.0 },

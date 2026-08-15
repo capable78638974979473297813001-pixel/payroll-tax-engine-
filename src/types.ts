@@ -81,6 +81,17 @@ export interface FederalW4 {
   extraWithholding: Cents;
   /** Employee claimed exempt from federal withholding. */
   exempt?: boolean;
+  /**
+   * Employee is a nonresident alien performing services within the US —
+   * triggers Pub 15-T's "Withholding Adjustment for Nonresident Alien
+   * Employees" procedure (add a fixed per-period dollar amount to wages
+   * before the ordinary percentage-method calculation runs). Does NOT apply
+   * to nonresident alien students/business apprentices from India, who Pub
+   * 15-T explicitly carves out of this procedure — the caller is
+   * responsible for that carve-out, same as every other eligibility
+   * determination this engine trusts the input for.
+   */
+  nonresidentAlien?: boolean;
 }
 
 /** Year-to-date wages, needed for every wage-base-capped tax. */
@@ -99,6 +110,13 @@ export interface YearToDate {
   supplemental?: Cents;
   /** YTD wages per state unemployment, keyed by state code. */
   stateUnemployment?: Record<string, Cents>;
+  /**
+   * YTD wages already counted toward a state Paid Family & Medical Leave
+   * wage-base cap, keyed by state code (e.g. Minnesota Paid Leave). Separate
+   * tracker from stateUnemployment even where a state has both, since the
+   * two levies cap at different wage bases under different statutes.
+   */
+  statePaidLeave?: Record<string, Cents>;
 }
 
 export interface StateWithholding {

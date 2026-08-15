@@ -59,7 +59,19 @@ export function federalIncomeTax(
   // onto supplemental — a rare case documented rather than modelled in v1.
   const fullBase = ctx.taxableWagesFor(cfg.exemptPretax as PretaxCategory[]);
   const supplementalCash = supplementalEarnings(input.earnings);
-  const taxableWages = atLeastZero(fullBase - supplementalCash);
+  let taxableWages = atLeastZero(fullBase - supplementalCash);
+
+  // Pub 15-T's nonresident alien withholding adjustment: add a fixed
+  // per-period amount to wages BEFORE annualizing (Steps 1-2 of that
+  // procedure), then run the ordinary worksheet on the inflated figure —
+  // the added amount is excluded from taxableWages reported on the line
+  // itself (Pub 15-T: it "shouldn't be included in any box on the
+  // employee's Form W-2 and doesn't increase the income tax liability"),
+  // so it's tracked separately and only folded into the ANNUALIZED figure
+  // below, not into the TaxLine's own taxableWages field.
+  const nraAdjustment = w4.nonresidentAlien
+    ? dollars(cfg.nonresidentAlienAdjustment[input.payFrequency] ?? 0)
+    : 0;
 
   const line = (amount: Cents, detail: string): TaxLine => ({
     id: 'US_FIT',
@@ -76,7 +88,7 @@ export function federalIncomeTax(
   }
 
   // Step 1 — annualise and adjust.
-  const annualWages = taxableWages * periods; // 1c
+  const annualWages = (taxableWages + nraAdjustment) * periods; // 1c
   const withOther = annualWages + w4.otherIncome; // 1e
 
   // 1g: zero when the Step 2 checkbox is marked, because the multiple-jobs
@@ -117,6 +129,9 @@ export function federalIncomeTax(
   const total = afterCredits + w4.extraWithholding; // 4b
 
   const detail =
+    (nraAdjustment
+      ? `NRA adjustment +${fmt(nraAdjustment)}/period (Pub 15-T Table 2, not reported as wages); `
+      : '') +
     `annualised ${fmt(annualWages)} → adjusted ${fmt(adjustedAnnual)}; ` +
     `bracket ${(bracket.rate * 100).toFixed(0)}% over ${fmt(dollars(bracket.from))}; ` +
     `tentative/yr ${fmt(tentativeAnnual)} ÷ ${periods}` +

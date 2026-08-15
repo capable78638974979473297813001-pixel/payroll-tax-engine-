@@ -61,6 +61,7 @@ export interface FederalRuleset {
     standardSchedules: Record<string, Bracket[]>;
     multipleJobsSchedules: Record<string, Bracket[]>;
     exemptPretax: string[];
+    nonresidentAlienAdjustment: Record<string, number>;
   };
   socialSecurity: {
     employeeRate: number;

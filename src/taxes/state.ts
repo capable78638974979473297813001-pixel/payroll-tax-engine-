@@ -1,7 +1,8 @@
-import { applyRate, atLeastZero, dollars, fmt, roundHalfUp } from '../money.ts';
+import { applyRate, atLeastZero, dollars, fmt, roundHalfUp, underCap } from '../money.ts';
 import type { StateRuleset } from '../registry.ts';
 import {
   countyRuleset,
+  federalRuleset,
   hasCountyRuleset,
   hasStateRuleset,
   stateRuleset,
@@ -46,7 +47,45 @@ export function stateIncomeTax(
   }
 
   const rules = stateRuleset(state.code, input.checkDate);
-  const lines = incomeTaxLines(input, ctx, rules);
+
+  // incomeTaxLines() ALWAYS runs first, even when reciprocity/de minimis/an
+  // exemption certificate will zero the result — deliberately, NOT an
+  // early-return. Indiana is why: its own reciprocity block documents that a
+  // reciprocal nonresident is exempt from STATE tax only, and the employer
+  // "remains responsible for withholding any applicable Indiana County
+  // taxes" regardless. flatRateMultiExemption() returns BOTH an IN_SIT line
+  // and an IN_COUNTY line; an early-return that replaced the whole array
+  // with one $0 line would have silently deleted a county tax that was still
+  // legally owed. Zeroing by id PREFIX (`${code}_SIT`) instead of replacing
+  // the array keeps IN_COUNTY (and any other non-`_SIT`-prefixed line, e.g.
+  // stateUnemploymentEmployeeTax's `${code}_UC_EE`) untouched no matter which
+  // of these exemptions applies.
+  let lines = incomeTaxLines(input, ctx, rules);
+
+  // Reciprocity and the nonresident de minimis threshold are both read
+  // generically off rules.reciprocity, so every state file that already
+  // documents reciprocalStates (IL/IN/KY/MI/MN/OH/PA/WI) goes live the
+  // moment a caller populates input.residenceState — no per-state code
+  // change needed, matching this file's "data-only" ethos. Reciprocity is
+  // checked first; de minimis only matters when reciprocity didn't already
+  // resolve it.
+  const reciprocityReason = reciprocityExemptionReason(input, rules);
+  const deMinimisReason = reciprocityReason
+    ? null
+    : nonresidentDeMinimisReason(input, ctx, rules);
+  const exemptReason = reciprocityReason ?? deMinimisReason;
+  if (exemptReason) {
+    lines = zeroStateIncomeTaxLines(rules, lines, exemptReason);
+  } else {
+    lines = applyStateWithholdingExemption(input, rules, lines);
+  }
+
+  // Additional withholding never applies once reciprocity/de minimis/an
+  // exemption certificate has already zeroed the state line — an employee
+  // legally owing $0 to this state isn't also topping that $0 up.
+  if (!exemptReason) {
+    lines = applyAdditionalStateWithholding(input, rules, lines);
+  }
 
   // Employee-paid state unemployment withholding (Pennsylvania's UC tax is
   // the first state in this project to have one) is ORTHOGONAL to the
@@ -55,11 +94,189 @@ export function stateIncomeTax(
   // `stateUnemploymentEmployee` config block rather than being wired into
   // any one method. Any future state with an employee-paid SUTA/UC
   // component gets this for free by adding the config, no code change.
+  // Runs regardless of income-tax reciprocity/exemption above: UC and Paid
+  // Leave are separate levies under separate statutes, not exemptable via an
+  // income-tax reciprocity agreement or a Section-2-style income-tax
+  // exemption certificate.
   if (rules.stateUnemploymentEmployee) {
     lines.push(stateUnemploymentEmployeeTax(input, ctx, rules));
   }
 
+  const paidLeave = statePaidLeaveEmployeeTax(input, ctx, rules);
+  if (paidLeave) lines.push(paidLeave);
+
   return lines;
+}
+
+interface ReciprocityConfig {
+  reciprocalStates?: string[];
+  nonresidentDeMinimisThreshold?: number; // dollars, annual
+}
+
+/**
+ * Zeroes every line whose id starts with `${rules.code}_SIT` — the
+ * income-tax line(s) specifically — leaving every other line (a mandatory
+ * local/county add-on like Indiana's IN_COUNTY, stateUnemploymentEmployeeTax's
+ * `${code}_UC_EE`, Paid Leave's `${code}_PFML_EE`) untouched. This is the ONE
+ * shared mechanism behind reciprocity, the nonresident de minimis threshold,
+ * and an employee-claimed withholding-exemption certificate — all three are
+ * "this employee owes $0 of THIS STATE's income tax," never "this employee
+ * owes $0 of everything this state might ever withhold." Indiana is why this
+ * matters concretely: WH-47 reciprocity exempts state tax only, and the
+ * employer "remains responsible for withholding any applicable Indiana
+ * County taxes" regardless — a wholesale line-array replacement would have
+ * silently deleted a county tax still legally owed.
+ */
+function zeroStateIncomeTaxLines(
+  rules: StateRuleset,
+  lines: TaxLine[],
+  reason: string,
+): TaxLine[] {
+  const prefix = `${rules.code}_SIT`;
+  return lines.map((line) =>
+    line.id.startsWith(prefix)
+      ? { ...line, taxableWages: 0, amount: 0, detail: reason }
+      : line,
+  );
+}
+
+/**
+ * Reciprocity exemption — a resident of a state with an ACTIVE reciprocal
+ * agreement working here owes no INCOME TAX withholding to the work state
+ * (e.g. a Michigan resident working in Minnesota with Form MWR on file).
+ * Read generically off rules.reciprocity.reciprocalStates, which every
+ * reciprocity block in this project already carries in the same shape.
+ *
+ * Simplification, disclosed rather than hidden: this checks ONLY that
+ * input.residenceState.code appears in the work state's reciprocalStates
+ * list. It does not model the underlying paperwork (Form MWR, REV-419, Form
+ * K-4, WH-47, etc.) that a real employer would need on file before stopping
+ * withholding — the same trust-the-input assumption this engine already
+ * makes for W-4 elections generally. Returns null (no exemption) whenever
+ * residenceState is absent, matching the work state, or not on the list, so
+ * every existing caller that never sets residenceState is unaffected.
+ *
+ * Returns a REASON STRING, not a TaxLine — the caller decides what to zero
+ * (see zeroStateIncomeTaxLines) rather than this function assuming it should
+ * replace everything.
+ */
+function reciprocityExemptionReason(
+  input: PaycheckInput,
+  rules: StateRuleset,
+): string | null {
+  const reciprocity = rules.reciprocity as ReciprocityConfig | undefined;
+  const reciprocalStates = reciprocity?.reciprocalStates;
+  if (!reciprocalStates || reciprocalStates.length === 0) return null;
+
+  const residence = input.residenceState?.code;
+  if (!residence || residence === rules.code) return null;
+  if (!reciprocalStates.includes(residence)) return null;
+
+  return (
+    `$0 — reciprocity exemption: employee resides in ${residence}, which has an ` +
+    `active reciprocal agreement with ${rules.code}. Assumes the required reciprocity ` +
+    `certificate is on file; this engine does not separately verify that filing. Applies ` +
+    `to ${rules.code} income tax only — any separate local/county tax this state levies ` +
+    `is unaffected.`
+  );
+}
+
+/**
+ * Nonresident de minimis threshold — some states (Minnesota, via wh-inst-26
+ * p.4) don't require ANY income-tax withholding from a nonresident if the
+ * employer doesn't expect to pay them at least a stated annual amount,
+ * independent of reciprocity. Read generically off
+ * rules.reciprocity.nonresidentDeMinimisThreshold; states without that field
+ * (most of them) simply never trigger this.
+ *
+ * Uses the SAME annualization ctx.taxableWagesFor()/periodsPerYear already
+ * uses elsewhere in this file — an estimate from the current cheque, not a
+ * true year-to-date total, the same approximation every other
+ * annualize-then-bracket method in this project already makes.
+ */
+function nonresidentDeMinimisReason(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): string | null {
+  const reciprocity = rules.reciprocity as ReciprocityConfig | undefined;
+  const threshold = reciprocity?.nonresidentDeMinimisThreshold;
+  if (threshold === undefined) return null;
+
+  const residence = input.residenceState?.code;
+  if (!residence || residence === rules.code) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const estimatedAnnualWages = ctx.taxableWagesFor(exempt) * ctx.periodsPerYear;
+  if (estimatedAnnualWages >= dollars(threshold)) return null;
+
+  return (
+    `$0 — nonresident de minimis: estimated annual wages ${fmt(estimatedAnnualWages)} are ` +
+    `below ${rules.name}'s $${threshold} nonresident withholding threshold.`
+  );
+}
+
+/**
+ * Employee-claimed exemption from state withholding (Minnesota's W-4MN
+ * Section 2 is the first concrete, enumerable example in this project, but
+ * read generically off certificate.exempt so any future state's own
+ * exemption certificate gets this for free). Mirrors federalW4.exempt's
+ * short-circuit-to-$0 behavior in taxes/federal.ts, but implemented as a
+ * post-processing step here rather than inside every method function, so it
+ * doesn't have to be re-implemented per method the way federal's single
+ * function could just early-return.
+ */
+function applyStateWithholdingExemption(
+  input: PaycheckInput,
+  rules: StateRuleset,
+  lines: TaxLine[],
+): TaxLine[] {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (!cert.exempt) return lines;
+
+  return zeroStateIncomeTaxLines(
+    rules,
+    lines,
+    `$0 — employee claimed exempt from ${rules.name} withholding (certificate.exempt).`,
+  );
+}
+
+/**
+ * Additional flat per-period withholding requested by the employee beyond
+ * what the formula computes — Minnesota's W-4MN Section 1 Line 2 is the
+ * first concrete example, but read generically off
+ * certificate.additionalWithholding, the state-level equivalent of
+ * federalW4.extraWithholding (Step 4(c)) in taxes/federal.ts. Skipped
+ * entirely when the employee is exempt (cert.exempt), mirroring federal's
+ * own precedence: exempt short-circuits before extra withholding is ever
+ * considered. Applied only to the PRIMARY `${code}_SIT` line, not the
+ * supplemental line, matching the form's own framing of "per pay period"
+ * regular withholding.
+ */
+function applyAdditionalStateWithholding(
+  input: PaycheckInput,
+  rules: StateRuleset,
+  lines: TaxLine[],
+): TaxLine[] {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (cert.exempt) return lines;
+
+  // Cents already, matching federalW4.extraWithholding's convention — NOT a
+  // dollars-file figure needing dollars() conversion. A caller supplies
+  // dollars(50), not 50.
+  const extra = Number(cert.additionalWithholding ?? 0);
+  if (extra <= 0) return lines;
+
+  const primaryId = `${rules.code}_SIT`;
+  return lines.map((line) =>
+    line.id === primaryId
+      ? {
+          ...line,
+          amount: line.amount + extra,
+          detail: `${line.detail}; plus ${fmt(extra)} additional withholding requested (certificate.additionalWithholding)`,
+        }
+      : line,
+  );
 }
 
 function incomeTaxLines(
@@ -82,6 +299,12 @@ function incomeTaxLines(
     }
     case 'flat_rate_fixed_deduction':
       return [flatRateFixedDeduction(input, ctx, rules)];
+    case 'bracket_flat_allowance': {
+      const lines: TaxLine[] = [bracketFlatAllowance(input, ctx, rules)];
+      const supplemental = flatRateSupplementalTax(input, ctx, rules);
+      if (supplemental) lines.push(supplemental);
+      return lines;
+    }
     case 'no_income_tax':
       return [];
     default:
@@ -605,5 +828,223 @@ function bracketSupplementalTax(
     detail:
       `${fmt(supplementalCash)} @ ${(bracket.rate * 100).toFixed(2)}% flat ` +
       `(estimated annual gross salary ${fmt(estimatedAnnualSalary)} falls in this bracket)`,
+  };
+}
+
+interface BracketFlatAllowanceConfig {
+  // Unlike Wisconsin (one shared bracket schedule regardless of marital
+  // status — only its deduction phase-out differs by status), Minnesota
+  // publishes genuinely DIFFERENT bracket thresholds/bases for single vs.
+  // married (e.g. the 0%-band ends at $4,700 single but $14,700 married) —
+  // confirmed from wh-inst-26's own Computer Formula chart, so this config
+  // must carry two full schedules, not one.
+  brackets: { single: WIBracket[]; married: WIBracket[] };
+  allowanceAmount: number; // dollars, flat amount per withholding allowance (W-4MN)
+  supplementalRate: number; // flat rate applied to supplemental wages, unrelated to bracket
+}
+
+/**
+ * Minnesota's withholding formula (wh-inst-26's own "Computer Formula",
+ * p.34) — a genuine progressive bracket schedule like Wisconsin's, but with
+ * a FLAT per-allowance subtraction ($5,300 × allowances claimed on Form
+ * W-4MN) instead of Wisconsin's income-phased-out standard deduction. Reuses
+ * the same {from,to,base,rate} WIBracket shape and findWIBracket() lookup —
+ * genuinely the same kind of table, just a simpler reduction step ahead of
+ * it, so introducing a second bracket-lookup helper would just be
+ * duplication.
+ *
+ * Verified against wh-inst-26's own published withholding tables (pp.16-33),
+ * not just the formula: reproduced three table cells by hand using this
+ * exact formula at the midpoint wage of each "at least / but less than" row
+ * (single/0-allowance $600-610 → $28, single/2-allowance $600-610 → $17,
+ * married/3-allowance $900-910 → $17), all matching to the whole dollar the
+ * tables themselves round to. Not to-the-cent worked examples the way
+ * Wisconsin's W-166 provides — Minnesota's own document doesn't publish
+ * those — so whole-dollar table agreement is the strongest verification
+ * this source actually offers.
+ *
+ * Supplemental wages are carved out of this base (same regular/supplemental
+ * split as Wisconsin) and taxed on the separate flat-rate path instead — see
+ * flatRateSupplementalTax().
+ */
+/**
+ * Resolves Form W-4MN's marital-status checkbox to the bracket schedule it
+ * actually selects. W-4MN has THREE checkboxes, not two — 'Single', 'Married',
+ * and 'Married, but withhold at higher Single rate' — and wh-inst-26's
+ * tables only publish two schedules, so the third checkbox is single's
+ * schedule despite the employee being married. Absence (no certificate, no
+ * field set) defaults to 'single' per Form W-4MN's OWN documented fallback:
+ * "If a valid Form W-4MN is not completed by the employee, withhold taxes
+ * as if the employee is single and claiming zero withholding allowances."
+ * An unrecognized non-empty value is a caller bug, not a "no form" case —
+ * thrown rather than silently folded into 'single', so a typo doesn't quietly
+ * produce a plausible-looking wrong number.
+ */
+function resolveMNMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  const raw = cert.maritalStatus;
+  if (raw === undefined || raw === null) return 'single';
+  if (raw === 'single' || raw === 'married_withhold_as_single') return 'single';
+  if (raw === 'married') return 'married';
+  throw new Error(
+    `Unrecognized MN certificate.maritalStatus ${JSON.stringify(raw)} — expected ` +
+      `'single', 'married', or 'married_withhold_as_single' (Form W-4MN's third ` +
+      `checkbox, which withholds at the single rate despite the employee being married).`,
+  );
+}
+
+function bracketFlatAllowance(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.bracketFlatAllowance as BracketFlatAllowanceConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  const supplementalCash = supplementalEarnings(input.earnings);
+  const taxableWages = atLeastZero(fullBase - supplementalCash);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+
+  // Form W-4MN's own employer instructions route nonresident alien
+  // employees to "Table 1 and the procedure under Withholding Adjustment
+  // for Nonresident Alien Employees in IRS Publication 15-T" to compute
+  // MINNESOTA withholding, not just federal — an unusual explicit borrowing
+  // of a federal procedure/table for state purposes. Reuses federal.ts's
+  // own nonresidentAlienAdjustment table via federalRuleset() rather than
+  // duplicating the dollar figures here. NOTE the source text literally
+  // says "Table 1" (the pre-2020-W-4 table), but this engine's FederalW4
+  // type — and by extension its state certificates — only ever represents
+  // a 2020+-style form, so Table 2 is what's actually reused; that
+  // discrepancy in MN's own source text is disclosed in MN-2026.json rather
+  // than silently resolved.
+  const nraAdjustment = cert.nonresidentAlien
+    ? dollars(
+        federalRuleset(input.checkDate).incomeTax.nonresidentAlienAdjustment[
+          input.payFrequency
+        ] ?? 0,
+      )
+    : 0;
+
+  const annualWages = (taxableWages + nraAdjustment) * ctx.periodsPerYear;
+
+  // wh-inst-26's tables only distinguish single vs. married — no separate
+  // head-of-household schedule — so it maps to 'single' by convention, the
+  // same disclosed simplification as Wisconsin's file.
+  const maritalStatus = resolveMNMaritalStatus(cert);
+  const allowances = Number(cert.allowances ?? 0);
+
+  const annualAllowance = dollars(cfg.allowanceAmount) * allowances;
+  const annualNetWage = atLeastZero(annualWages - annualAllowance);
+
+  const brackets = cfg.brackets[maritalStatus];
+  const bracket = findWIBracket(brackets, annualNetWage);
+  const excess = annualNetWage - dollars(bracket.from);
+  const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
+  const amount = Math.round(annualTax / ctx.periodsPerYear);
+
+  const detail =
+    (nraAdjustment
+      ? `NRA adjustment +${fmt(nraAdjustment)}/period (Pub 15-T Table 2, per W-4MN's own instructions); `
+      : '') +
+    `${fmt(annualWages)}/yr less ${fmt(annualAllowance)} allowances ` +
+    `(${allowances} × $${cfg.allowanceAmount}, ${maritalStatus}) = ${fmt(annualNetWage)} net ` +
+    `@ ${(bracket.rate * 100).toFixed(2)}% bracket, ÷ ${ctx.periodsPerYear}`;
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    // This field reports the NET (post-allowance) wage this bracket lookup
+    // ran on, the same "derived calculation figure" convention as Wisconsin's
+    // bracketPhaseoutDeduction() — not literal gross wages either way. When
+    // an NRA adjustment applies, that derived figure legitimately includes
+    // it, since the adjustment genuinely changed which bracket got selected.
+    taxableWages: Math.round(annualNetWage / ctx.periodsPerYear),
+    amount,
+    detail,
+  };
+}
+
+/**
+ * Minnesota's supplemental (bonus) wages — wh-inst-26's own "Method 2":
+ * unlike Wisconsin's bracket-dependent supplemental rate, Minnesota applies
+ * ONE FLAT RATE (6.25%) to every supplemental payment regardless of the
+ * employee's regular-wage bracket or allowances claimed. Quoted directly:
+ * "Supplemental payments made to an employee separately from regular wages
+ * are subject to the 6.25% Minnesota withholding rate regardless of how many
+ * allowances employees claim." Returns null when there's no supplemental
+ * income, so a plain paycheck is unaffected — same convention as Wisconsin's
+ * bracketSupplementalTax().
+ */
+function flatRateSupplementalTax(
+  input: PaycheckInput,
+  _ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const supplementalCash = supplementalEarnings(input.earnings);
+  if (supplementalCash <= 0) return null;
+
+  const cfg = rules.bracketFlatAllowance as BracketFlatAllowanceConfig;
+  const amount = applyRate(supplementalCash, cfg.supplementalRate);
+
+  return {
+    id: `${rules.code}_SIT_SUPP`,
+    name: `${rules.name} Income Tax (Supplemental)`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: supplementalCash,
+    amount,
+    detail: `${fmt(supplementalCash)} @ ${(cfg.supplementalRate * 100).toFixed(2)}% flat, regardless of allowances or bracket`,
+  };
+}
+
+interface StatePaidLeaveEmployeeConfig {
+  rate: number;
+  wageBase: number | null; // dollars, annual — null means uncapped
+}
+
+/**
+ * Employee-paid state Paid Family & Medical Leave premium — Minnesota Paid
+ * Leave (launched 2026-01-01) is the first example in this project, but
+ * dispatched generically off a `statePaidLeaveEmployee` config block, the
+ * same orthogonal-to-income-tax pattern stateUnemploymentEmployeeTax()
+ * already uses for Pennsylvania's employee-paid UC. Genuinely a different
+ * levy from state UC, though structurally identical (flat rate over a
+ * wage-base-capped base) — reuses underCap() the same way, keyed by YTD
+ * wages already paid toward THIS specific premium
+ * (input.ytd.statePaidLeave[code]), not toward UC's own YTD tracker.
+ *
+ * Runs unconditionally (see stateIncomeTax()) — NOT gated by income-tax
+ * reciprocity or a Section-2-style withholding-exemption certificate, since
+ * Minn. Stat. 268B is a separate statute from the income-tax reciprocity
+ * statute (290.081) it happens to sit next to in this file.
+ */
+function statePaidLeaveEmployeeTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cfg = rules.statePaidLeaveEmployee as StatePaidLeaveEmployeeConfig | undefined;
+  if (!cfg) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const currentWages = ctx.taxableWagesFor(exempt);
+  const ytd = input.ytd.statePaidLeave?.[rules.code] ?? 0;
+  const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
+  const taxableWages = underCap(currentWages, ytd, cap);
+  const amount = applyRate(taxableWages, cfg.rate);
+
+  return {
+    id: `${rules.code}_PFML_EE`,
+    name: `${rules.name} Paid Leave (Employee)`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages,
+    amount,
+    detail:
+      cfg.wageBase === null
+        ? `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, no wage cap`
+        : `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, capped at ${fmt(dollars(cfg.wageBase))}/yr (${fmt(ytd)} YTD already counted)`,
   };
 }
