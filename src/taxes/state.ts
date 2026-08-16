@@ -105,6 +105,31 @@ export function stateIncomeTax(
   const paidLeave = statePaidLeaveEmployeeTax(input, ctx, rules);
   if (paidLeave) lines.push(paidLeave);
 
+  const disability = stateDisabilityEmployeeTax(input, ctx, rules);
+  if (disability) lines.push(disability);
+
+  // New York City resident tax — a genuine LOCAL tax layered on top of NYS
+  // withholding for NYC residents only, dispatched off certificate.nycResident
+  // (IT-2104's own Yes/No question) rather than a separate certificate.
+  // Runs regardless of NYS reciprocity/exemption above: NYC's own tax has no
+  // reciprocity concept (it only ever applies to NYC residents, who by
+  // definition aren't a reciprocal-state nonresident) and no exemption
+  // certificate of its own was found in NYS-50-T-NYC or IT-2104.
+  const nyc = nycLocalTax(input, ctx, rules);
+  if (nyc) lines.push(nyc);
+  const nycSupp = nycSupplementalTax(input, ctx, rules);
+  if (nycSupp) lines.push(nycSupp);
+
+  // Yonkers — a genuine LOCAL tax with two mutually exclusive shapes: a
+  // RESIDENT surcharge (16.75% of the exact same NYS-style calculation
+  // above, via computeNYSStyleTax()) or a NONRESIDENT earnings tax (a flat
+  // 0.50% of gross wages after a wage-level step-function exemption, for
+  // people who work in Yonkers without residing there) — never both.
+  const yonkers = yonkersLocalTax(input, ctx, rules);
+  if (yonkers) lines.push(yonkers);
+  const yonkersSupp = yonkersSupplementalTax(input, ctx, rules);
+  if (yonkersSupp) lines.push(yonkersSupp);
+
   return lines;
 }
 
@@ -1312,16 +1337,35 @@ function findMethodIIIBand(bands: NYMethodIIIBand[], annualNetWages: number): NY
  * exemptions → $8.01; monthly $50,000 single 3 exemptions → $3,576.63 — see
  * tests/engine.test.ts, describe('New York').
  */
-function bracketPerPeriodNet(
+interface NYSStyleTaxResult {
+  grossWages: number;
+  allowance: number;
+  netWages: number;
+  amount: number;
+  detail: string;
+}
+
+/**
+ * The shared NYS-style computation — subtract Table A's combined allowance
+ * from per-period gross wages, look up the result in a per-period bracket
+ * table, falling back to Method III for very high earners. Factored out of
+ * bracketPerPeriodNet() specifically because Yonkers' resident tax surcharge
+ * (NYS-50-T-Y) is DEFINED as 16.75% of this EXACT same calculation — same
+ * Table A, same brackets, same Method III, confirmed by direct comparison
+ * (Yonkers' own Table A is byte-for-byte identical to NYS's). Reusing this
+ * helper rather than re-deriving the tax independently guarantees the two
+ * can never silently drift apart.
+ */
+function computeNYSStyleTax(
   input: PaycheckInput,
   ctx: ComputeContext,
   rules: StateRuleset,
-): TaxLine {
-  const cfg = rules as unknown as NYRulesetShape;
+  cfg: NYRulesetShape,
+): NYSStyleTaxResult {
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const fullBase = ctx.taxableWagesFor(exempt);
   const supplementalCash = supplementalEarnings(input.earnings);
-  const grossWagesBeforeNRA = atLeastZero(fullBase - supplementalCash);
+  const grossWages = atLeastZero(fullBase - supplementalCash);
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const maritalStatus = resolveNYMaritalStatus(cert);
@@ -1350,16 +1394,6 @@ function bracketPerPeriodNet(
       ? allowanceTable[exemptions]
       : allowanceTable[10] + (allowanceTable[10] - allowanceTable[9]) * (exemptions - 10);
   const allowance = dollars(allowanceDollars);
-
-  // UNLIKE Minnesota's W-4MN, neither NYS-50-T-NYS nor IT-2104 says
-  // anything about nonresident alien employees anywhere (searched directly
-  // — zero mentions in either document) — so, unlike bracketFlatAllowance()
-  // for Minnesota, this function deliberately does NOT apply the federal
-  // Pub 15-T Table 2 adjustment. Building that in by analogy without an
-  // NY-specific instruction would risk a confidently-wrong number rather
-  // than a disclosed gap; see NY-2026.json's knownGaps.
-  const grossWages = grossWagesBeforeNRA;
-
   const netWages = atLeastZero(grossWages - allowance);
 
   const brackets = cfg.brackets[maritalStatus][input.payFrequency];
@@ -1385,21 +1419,40 @@ function bracketPerPeriodNet(
       `flat, ÷ ${ctx.periodsPerYear}`;
   } else {
     const excess = netWages - dollars(bracket.from);
-    const tax = dollars(bracket.base) + applyRate(excess, bracket.rate);
-    amount = tax;
+    amount = dollars(bracket.base) + applyRate(excess, bracket.rate);
     detail =
       `${fmt(grossWages)} gross less ${fmt(allowance)} allowance = ${fmt(netWages)} net ` +
       `@ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))}`;
   }
+
+  return { grossWages, allowance, netWages, amount, detail };
+}
+
+/**
+ * UNLIKE Minnesota's W-4MN, neither NYS-50-T-NYS nor IT-2104 says anything
+ * about nonresident alien employees anywhere (searched directly — zero
+ * mentions in either document) — so, unlike bracketFlatAllowance() for
+ * Minnesota, this deliberately does NOT apply the federal Pub 15-T Table 2
+ * adjustment. Building that in by analogy without an NY-specific
+ * instruction would risk a confidently-wrong number rather than a disclosed
+ * gap; see NY-2026.json's knownGaps.
+ */
+function bracketPerPeriodNet(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules as unknown as NYRulesetShape;
+  const result = computeNYSStyleTax(input, ctx, rules, cfg);
 
   return {
     id: `${rules.code}_SIT`,
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: netWages,
-    amount,
-    detail,
+    taxableWages: result.netWages,
+    amount: result.amount,
+    detail: result.detail,
   };
 }
 
@@ -1431,5 +1484,370 @@ function flatRateSupplementalFromConfig(
     taxableWages: supplementalCash,
     amount,
     detail: `${fmt(supplementalCash)} @ ${(cfg.flatRate * 100).toFixed(2)}% flat`,
+  };
+}
+
+interface NYCLocalTaxConfig {
+  combinedAllowanceTable: Record<'single' | 'married', Record<string, number[]>>;
+  brackets: Record<string, NYBracket[]>;
+  supplementalRate: number;
+}
+
+/**
+ * New York City resident income tax — a genuine LOCAL tax (jurisdiction:
+ * 'local'), structurally the SAME shape as bracketPerPeriodNet() (subtract a
+ * combined deduction+exemption allowance from per-period gross wages, look
+ * up the result in a per-period bracket table) but with two real
+ * differences: (1) NYC's bracket schedule is IDENTICAL between single and
+ * married — only the allowance differs by status, confirmed by direct
+ * comparison of the source's own published tables — so there's only one
+ * `brackets` table, not two; (2) NYC has no Method III equivalent at all —
+ * its own top bracket just keeps applying the top rate indefinitely, no
+ * escape hatch for very high earners.
+ *
+ * Only computed when certificate.nycResident is true — NYC's own tax
+ * applies to residents only (the pre-1999 NYC nonresident commuter tax was
+ * repealed and is not modelled, see NY-2026.json's own scope notes).
+ *
+ * Verified against all 8 of NYS-50-T-NYC's own worked examples (4 single, 4
+ * married) — see tests/engine.test.ts, describe('New York City').
+ */
+function nycLocalTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (!cert.nycResident) return null;
+
+  const cfg = rules.nycLocalTax as NYCLocalTaxConfig | undefined;
+  if (!cfg) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  const supplementalCash = supplementalEarnings(input.earnings);
+  const grossWages = atLeastZero(fullBase - supplementalCash);
+
+  const maritalStatus = resolveNYMaritalStatus(cert);
+  // IT-2104 Line 2 is a genuinely SEPARATE NYC-specific exemption count from
+  // Line 1's NYS+Yonkers count — falls back to certificate.exemptions only
+  // when nycExemptions isn't explicitly supplied.
+  const exemptions = Number(cert.nycExemptions ?? cert.exemptions ?? 0);
+  if (exemptions < 0 || !Number.isInteger(exemptions)) {
+    throw new Error(`NYC certificate.nycExemptions (${exemptions}) must be a non-negative integer.`);
+  }
+
+  const allowanceTable = cfg.combinedAllowanceTable[maritalStatus][input.payFrequency];
+  if (!allowanceTable) {
+    throw new Error(
+      `NYS-50-T-NYC doesn't publish a "${input.payFrequency}" allowance schedule — ` +
+        `cannot compute NY_NYC_SIT.`,
+    );
+  }
+  const allowanceDollars =
+    exemptions <= 10
+      ? allowanceTable[exemptions]
+      : allowanceTable[10] + (allowanceTable[10] - allowanceTable[9]) * (exemptions - 10);
+  const allowance = dollars(allowanceDollars);
+  const netWages = atLeastZero(grossWages - allowance);
+
+  const brackets = cfg.brackets[input.payFrequency];
+  if (!brackets) {
+    throw new Error(
+      `NYS-50-T-NYC doesn't publish a "${input.payFrequency}" bracket schedule — ` +
+        `cannot compute NY_NYC_SIT.`,
+    );
+  }
+  const bracket = findWIBracket(brackets, netWages);
+  const excess = netWages - dollars(bracket.from);
+  const baseAmount = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  // IT-2104 Line 4 — a NYC-SPECIFIC flat per-period additional-withholding
+  // amount, genuinely distinct from NYS's own Line 3 (certificate.
+  // additionalWithholding). Cents already, matching that field's own
+  // convention — a caller supplies dollars(50), not 50.
+  const extra = Number(cert.additionalWithholdingNYC ?? 0);
+  const amount = baseAmount + (extra > 0 ? extra : 0);
+
+  return {
+    id: `${rules.code}_NYC_SIT`,
+    name: 'New York City Income Tax',
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages: netWages,
+    amount,
+    detail:
+      `${fmt(grossWages)} gross less ${fmt(allowance)} allowance = ${fmt(netWages)} net ` +
+      `@ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))}` +
+      (extra > 0 ? `; plus ${fmt(extra)} additional withholding requested (certificate.additionalWithholdingNYC)` : ''),
+  };
+}
+
+/**
+ * NYC's flat 4.25% supplemental-wage rate (NYS-50-T-NYC's own "Method a"),
+ * the same shape as flatRateSupplementalFromConfig() but reading a
+ * different config namespace (rules.nycLocalTax.supplementalRate) and
+ * emitting a distinctly-prefixed id, since this is a separate LOCAL levy,
+ * not the state one. Only applies when certificate.nycResident is true — no
+ * supplemental line for a non-NYC-resident regardless of supplemental pay.
+ */
+function nycSupplementalTax(
+  input: PaycheckInput,
+  _ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (!cert.nycResident) return null;
+
+  const supplementalCash = supplementalEarnings(input.earnings);
+  if (supplementalCash <= 0) return null;
+
+  const cfg = rules.nycLocalTax as NYCLocalTaxConfig | undefined;
+  if (!cfg) return null;
+
+  const amount = applyRate(supplementalCash, cfg.supplementalRate);
+
+  return {
+    id: `${rules.code}_NYC_SIT_SUPP`,
+    name: 'New York City Income Tax (Supplemental)',
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages: supplementalCash,
+    amount,
+    detail: `${fmt(supplementalCash)} @ ${(cfg.supplementalRate * 100).toFixed(2)}% flat`,
+  };
+}
+
+interface YonkersExemptionTier {
+  from: number; // dollars, gross wages
+  to: number | null;
+  exemption: number | null; // dollars; null = fully exempt, no tax at all
+}
+
+interface YonkersLocalTaxConfig {
+  residentSurcharge: { rate: number };
+  residentSupplementalRate: number;
+  nonresidentRate: number;
+  nonresidentSupplementalRate: number;
+  nonresidentExemptionTiers: Record<string, YonkersExemptionTier[]>;
+}
+
+function findYonkersExemptionTier(
+  tiers: YonkersExemptionTier[],
+  grossWages: number,
+): YonkersExemptionTier {
+  for (const t of tiers) {
+    const from = dollars(t.from);
+    const to = t.to === null ? Infinity : dollars(t.to);
+    if (grossWages >= from && grossWages < to) return t;
+  }
+  return tiers[tiers.length - 1];
+}
+
+/**
+ * Yonkers has two mutually exclusive, structurally VERY different taxes:
+ *
+ * RESIDENT surcharge (certificate.yonkersResident): NYS-50-T-Y's own
+ * instructions define this as 16.75% of the exact same NYS-style tax
+ * computation NYS itself uses — same Table A (byte-for-byte identical to
+ * NYS's, confirmed by direct comparison), same brackets, same Method III.
+ * Reuses computeNYSStyleTax() rather than re-deriving the calculation, so
+ * the two can never silently drift apart. Verified against NYS-50-T-Y's own
+ * 4 worked examples, each of which is literally "compute the NYS example,
+ * then multiply by 0.1675" — e.g. $8.01 (NYS Example 1's own answer) x
+ * 0.1675 = $1.34.
+ *
+ * NONRESIDENT earnings tax (certificate.yonkersNonresidentWorker, for
+ * someone who works in Yonkers without residing there): a completely
+ * different shape — flat 0.50% of GROSS wages (no marital status, no
+ * exemption-count allowance) after subtracting a WAGE-LEVEL step-function
+ * exemption (5 tiers per pay period, decreasing to $0 as wages rise, with
+ * a "no tax at all" floor for the lowest tier) — genuinely different from
+ * every other exemption/allowance shape in this project, none of which are
+ * keyed off the wage amount itself rather than a claimed exemption count.
+ */
+function yonkersLocalTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const cfg = rules.yonkersLocalTax as YonkersLocalTaxConfig | undefined;
+  if (!cfg) return null;
+
+  // IT-2104 Line 5 — a YONKERS-SPECIFIC flat per-period additional-
+  // withholding amount, distinct from NYS's Line 3 (certificate.
+  // additionalWithholding) and NYC's Line 4 (certificate.
+  // additionalWithholdingNYC). Applies regardless of resident/nonresident
+  // status — IT-2104's own instructions don't restrict Line 5 to residents
+  // only. Cents already, matching every other additionalWithholding*
+  // field's convention.
+  const extraYonkers = Number(cert.additionalWithholdingYonkers ?? 0);
+  const extra = extraYonkers > 0 ? extraYonkers : 0;
+
+  if (cert.yonkersResident) {
+    const nyCfg = rules as unknown as NYRulesetShape;
+    const base = computeNYSStyleTax(input, ctx, rules, nyCfg);
+    const baseAmount = applyRate(base.amount, cfg.residentSurcharge.rate);
+    const amount = baseAmount + extra;
+
+    return {
+      id: `${rules.code}_YONKERS_SIT`,
+      name: 'Yonkers Resident Income Tax Surcharge',
+      payer: 'employee',
+      // taxableWages reports the underlying NYS-style NET WAGES the
+      // surcharge is indirectly based on (via that calculation's own tax
+      // amount) — the most honest "wage base" figure available, since this
+      // tax's literal base is a dollar amount of TAX, not wages, which the
+      // detail string spells out explicitly.
+      jurisdiction: 'local',
+      taxableWages: base.netWages,
+      amount,
+      detail:
+        `${(cfg.residentSurcharge.rate * 100).toFixed(2)}% of ${fmt(base.amount)} NYS-style base tax (${base.detail}) = ${fmt(baseAmount)}` +
+        (extra > 0 ? `; plus ${fmt(extra)} additional withholding requested (certificate.additionalWithholdingYonkers)` : ''),
+    };
+  }
+
+  if (cert.yonkersNonresidentWorker) {
+    const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+    const fullBase = ctx.taxableWagesFor(exempt);
+    const supplementalCash = supplementalEarnings(input.earnings);
+    const grossWages = atLeastZero(fullBase - supplementalCash);
+
+    const tiers = cfg.nonresidentExemptionTiers[input.payFrequency];
+    if (!tiers) {
+      throw new Error(
+        `NYS-50-T-Y doesn't publish a "${input.payFrequency}" nonresident exemption ` +
+          `schedule — cannot compute ${rules.code}_YONKERS_SIT.`,
+      );
+    }
+    const tier = findYonkersExemptionTier(tiers, grossWages);
+
+    if (tier.exemption === null) {
+      return {
+        id: `${rules.code}_YONKERS_SIT`,
+        name: 'Yonkers Nonresident Earnings Tax',
+        payer: 'employee',
+        jurisdiction: 'local',
+        taxableWages: 0,
+        amount: extra,
+        detail:
+          `$0 — ${fmt(grossWages)} gross wages are below Yonkers' no-withholding threshold for this pay period.` +
+          (extra > 0 ? ` Plus ${fmt(extra)} additional withholding requested (certificate.additionalWithholdingYonkers).` : ''),
+      };
+    }
+
+    const taxable = atLeastZero(grossWages - dollars(tier.exemption));
+    const baseAmount = applyRate(taxable, cfg.nonresidentRate);
+    const amount = baseAmount + extra;
+
+    return {
+      id: `${rules.code}_YONKERS_SIT`,
+      name: 'Yonkers Nonresident Earnings Tax',
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: taxable,
+      amount,
+      detail:
+        `${fmt(grossWages)} gross less ${fmt(dollars(tier.exemption))} wage-level exemption ` +
+        `= ${fmt(taxable)} taxable @ ${(cfg.nonresidentRate * 100).toFixed(2)}% = ${fmt(baseAmount)}` +
+        (extra > 0 ? `; plus ${fmt(extra)} additional withholding requested (certificate.additionalWithholdingYonkers)` : ''),
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Yonkers supplemental wages — RESIDENT rate (1.95975%) is confirmed to be
+ * exactly NYS's own 11.70% supplemental rate x Yonkers' 16.75% surcharge
+ * (0.1170 x 0.1675 = 0.0195975 precisely), the same "surcharge on NYS's own
+ * figure" relationship as the regular-wages case. NONRESIDENT rate is flat
+ * 0.50%, identical to the ordinary nonresident earnings tax rate — no
+ * separate supplemental treatment needed since that tax is already flat
+ * with no bracket to bypass, unlike every rate-schedule-based supplemental
+ * method elsewhere in this project.
+ */
+function yonkersSupplementalTax(
+  input: PaycheckInput,
+  _ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const cfg = rules.yonkersLocalTax as YonkersLocalTaxConfig | undefined;
+  if (!cfg) return null;
+
+  const supplementalCash = supplementalEarnings(input.earnings);
+  if (supplementalCash <= 0) return null;
+
+  let rate: number;
+  if (cert.yonkersResident) {
+    rate = cfg.residentSupplementalRate;
+  } else if (cert.yonkersNonresidentWorker) {
+    rate = cfg.nonresidentSupplementalRate;
+  } else {
+    return null;
+  }
+
+  const amount = applyRate(supplementalCash, rate);
+
+  return {
+    id: `${rules.code}_YONKERS_SIT_SUPP`,
+    name: 'Yonkers Income Tax (Supplemental)',
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages: supplementalCash,
+    amount,
+    detail: `${fmt(supplementalCash)} @ ${(rate * 100).toFixed(4)}% flat`,
+  };
+}
+
+interface StateDisabilityEmployeeConfig {
+  rate: number;
+  weeklyCapDollars: number; // dollars, e.g. 0.60 — a PER-WEEK cap, not annual
+}
+
+/**
+ * Employee-paid state disability insurance — New York's DBL is the first
+ * state in this project with a cap that resets EVERY PAY PERIOD rather than
+ * accumulating across the year, genuinely different from every other capped
+ * employee-paid program here (PA's UC is uncapped; MN's Paid Leave caps an
+ * ANNUAL cumulative dollar total via YTD tracking). WCB's own page states
+ * the rule as a flat dollar-per-WEEK ceiling ('no more than 60 cents a
+ * week'), so this scales that weekly figure by how many weeks are actually
+ * in one pay period (52 / periodsPerYear) rather than storing a
+ * separately-transcribed per-frequency table — the same 'formula over
+ * table' preference already used elsewhere in this project when a state's
+ * own rule is stated as a clean formula rather than published per-period
+ * numbers.
+ */
+function stateDisabilityEmployeeTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cfg = rules.stateDisabilityEmployee as StateDisabilityEmployeeConfig | undefined;
+  if (!cfg) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+  const uncapped = applyRate(taxableWages, cfg.rate);
+
+  const weeksInPeriod = 52 / ctx.periodsPerYear;
+  const periodCap = roundHalfUp(dollars(cfg.weeklyCapDollars) * weeksInPeriod);
+  const amount = Math.min(uncapped, periodCap);
+
+  return {
+    id: `${rules.code}_DBL_EE`,
+    name: `${rules.name} Disability Benefits (Employee)`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages,
+    amount,
+    detail:
+      `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, capped at $${cfg.weeklyCapDollars.toFixed(2)}/week ` +
+      `(${fmt(periodCap)} this ${weeksInPeriod === 1 ? 'period' : `${weeksInPeriod.toFixed(2)}-week period`})` +
+      (uncapped > periodCap ? ' — cap applied' : ''),
   };
 }
