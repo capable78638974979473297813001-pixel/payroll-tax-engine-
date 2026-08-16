@@ -2447,6 +2447,187 @@ describe('New York Disability Benefits Law (employee)', () => {
   });
 });
 
+describe('New Jersey', () => {
+  // Expected values hand-derived from NJ-WT's own Rate Table A/B weekly and
+  // biweekly schedules (see data/states/NJ-2026.json's $extractionNote for
+  // how those tables were reconstructed and cross-checked against NJ-WT's
+  // own published per-period base figures) BEFORE the code was run, same
+  // discipline as every other state file. No official worked example exists
+  // in NJ-WT itself (that section of the PDF is an unextractable image), so
+  // these are hand bracket-lookups, not reproductions of a published example
+  // — disclosed here rather than presented as matching a source's own
+  // worked arithmetic the way Kentucky/Wisconsin/Minnesota's tests do.
+
+  test('Rate A (default, no certificate), weekly $1,000, 0 exemptions', () => {
+    // $1,000 falls in the $769-$1,442 bracket: base $15.29 + 6.1% of
+    // ($1,000-$769=$231) = $15.29 + $14.091 = $29.381 -> $29.38.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'NJ' },
+      }),
+    );
+    assert.equal(amountOf(r, 'NJ_SIT'), dollars(29.38));
+  });
+
+  test('exemptions reduce the base before the SAME bracket lookup', () => {
+    // 2 exemptions x $19.20/week = $38.40 allowance. $1,000 - $38.40 =
+    // $961.60, still in the $769-$1,442 bracket: $15.29 + 6.1% of
+    // ($961.60-$769=$192.60) = $15.29 + $11.7486 = $27.0386 -> $27.04.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'NJ', certificate: { exemptions: 2 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'NJ_SIT'), dollars(27.04));
+  });
+
+  test('filingStatus mfj/hoh/qw selects Rate Table B, not A', () => {
+    // $1,000 falls in Rate B's $962-$1,346 bracket: base $17.31 + 2.7% of
+    // ($1,000-$962=$38) = $17.31 + $1.026 = $18.336 -> $18.34.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'NJ', certificate: { filingStatus: 'mfj' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'NJ_SIT'), dollars(18.34));
+  });
+
+  test('certificate.rateTableOverride (NJ-W4 Line 3) picks a specific table directly', () => {
+    // Same $1,000 weekly wage, but the employee selected Rate B on Line 3
+    // despite an otherwise Rate-A-selecting single filing status.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'NJ', certificate: { filingStatus: 'single', rateTableOverride: 'B' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'NJ_SIT'), dollars(18.34));
+  });
+
+  test('biweekly $3,000 (the shared default paycheck), Rate A, 0 exemptions', () => {
+    // $3,000 falls in Rate A biweekly's $2,885-$19,231 bracket: base
+    // $112.69 + 7.0% of ($3,000-$2,885=$115) = $112.69 + $8.05 = $120.74.
+    const r = calculatePaycheck(input({ workState: { code: 'NJ' } }));
+    assert.equal(amountOf(r, 'NJ_SIT'), dollars(120.74));
+  });
+
+  test('reciprocity: a Pennsylvania resident working in NJ owes $0 NJ income tax', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        residenceState: { code: 'PA' },
+        workState: { code: 'NJ' },
+      }),
+    );
+    assert.equal(amountOf(r, 'NJ_SIT'), 0);
+  });
+
+  test('supplemental wages aggregate with regular wages, no separate rate', () => {
+    // NJ-WT: paid at the same time, total and withhold at the combined rate
+    // — so a $1,000 supplemental-only "paycheck" (no regular earnings) is
+    // computed exactly like the plain-regular-wages case above.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(1000) }],
+        workState: { code: 'NJ' },
+      }),
+    );
+    assert.equal(amountOf(r, 'NJ_SIT'), dollars(29.38));
+  });
+
+  test('an unrecognized filingStatus throws rather than guessing a rate table', () => {
+    assert.throws(() =>
+      calculatePaycheck(
+        input({ workState: { code: 'NJ', certificate: { filingStatus: 'bogus' } } }),
+      ),
+    );
+  });
+});
+
+describe('New Jersey Unemployment/Workforce, TDI, and FLI (employee)', () => {
+  test('combined UI/WF/SWF: 0.425% of wages, well under the $44,800 wage base', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'NJ' },
+      }),
+    );
+    assert.equal(amountOf(r, 'NJ_UC_EE'), dollars(4.25));
+  });
+
+  test('UI/WF/SWF caps at the $44,800 annual wage base using YTD, not just the current cheque', () => {
+    // $44,750 YTD leaves only $50 of room this cheque, even though the
+    // cheque itself is $1,000: $50 x 0.425% = $0.2125 -> $0.21.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'NJ' },
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0, stateUnemployment: { NJ: dollars(44_750) } },
+      }),
+    );
+    assert.equal(amountOf(r, 'NJ_UC_EE'), dollars(0.21));
+  });
+
+  test('TDI: 0.19% of wages, capped at the $171,100 wage base via YTD', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'NJ' },
+      }),
+    );
+    assert.equal(amountOf(r, 'NJ_DBL_EE'), dollars(1.90));
+
+    // $171,050 YTD leaves $50 of room: $50 x 0.19% = $0.095 -> $0.10 (round-half-up).
+    const capped = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'NJ' },
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0, stateDisabilityEmployee: { NJ: dollars(171_050) } },
+      }),
+    );
+    assert.equal(amountOf(capped, 'NJ_DBL_EE'), dollars(0.10));
+  });
+
+  test('FLI: 0.23% of wages, capped at the $171,100 wage base via YTD, separate tracker from TDI', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'NJ' },
+      }),
+    );
+    assert.equal(amountOf(r, 'NJ_PFML_EE'), dollars(2.30));
+  });
+
+  test('UI/WF/SWF, TDI, and FLI all run even when NJ income tax is $0 via PA reciprocity', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        residenceState: { code: 'PA' },
+        workState: { code: 'NJ' },
+      }),
+    );
+    assert.equal(amountOf(r, 'NJ_SIT'), 0);
+    assert.equal(amountOf(r, 'NJ_UC_EE'), dollars(4.25));
+    assert.equal(amountOf(r, 'NJ_DBL_EE'), dollars(1.90));
+    assert.equal(amountOf(r, 'NJ_PFML_EE'), dollars(2.30));
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

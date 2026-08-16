@@ -117,6 +117,13 @@ export interface YearToDate {
    * two levies cap at different wage bases under different statutes.
    */
   statePaidLeave?: Record<string, Cents>;
+  /**
+   * YTD wages already counted toward a state disability insurance wage-base
+   * cap, keyed by state code (e.g. New Jersey TDI). Only used by the
+   * annual-wage-base variant of stateDisabilityEmployeeTax() — New York's DBL
+   * uses a per-period dollar cap instead and never reads this.
+   */
+  stateDisabilityEmployee?: Record<string, Cents>;
 }
 
 export interface StateWithholding {

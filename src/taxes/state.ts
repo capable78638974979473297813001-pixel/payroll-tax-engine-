@@ -351,6 +351,8 @@ function incomeTaxLines(
       if (supplemental) lines.push(supplemental);
       return lines;
     }
+    case 'bracket_per_period_rate_table':
+      return [bracketPerPeriodRateTable(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -372,9 +374,17 @@ interface StateUnemploymentEmployeeConfig {
  * shape). Confirmed uncapped for PA (wageBase: null) directly from the
  * Department of Labor & Industry: "Employee contributions are based on an
  * individual's total (gross) wages and are not limited to the taxable wage
- * base in effect for employer contributions" — so this deliberately does
- * NOT route through underCap() the way federal FUTA/SS do; a null wageBase
- * means uncapped, not "not yet wired."
+ * base in effect for employer contributions."
+ *
+ * A non-null wageBase routes through underCap() with YTD wages tracked in
+ * input.ytd.stateUnemployment, the same wage-base/YTD mechanism
+ * statePaidLeaveEmployeeTax() already uses — added for New Jersey, whose
+ * combined UI/Workforce/Supplemental-Workforce employee contribution IS
+ * capped at the state's UI taxable wage base (unlike PA's UC, which is not).
+ * Before New Jersey, this field only ever held null (PA), so this branch was
+ * previously unreachable — a latent gap in what the detail string already
+ * claimed ("capped at X/yr") versus what amount actually computed, now
+ * fixed.
  */
 function stateUnemploymentEmployeeTax(
   input: PaycheckInput,
@@ -383,8 +393,11 @@ function stateUnemploymentEmployeeTax(
 ): TaxLine {
   const cfg = rules.stateUnemploymentEmployee as StateUnemploymentEmployeeConfig;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
-  const taxableWages = ctx.taxableWagesFor(exempt);
+  const currentWages = ctx.taxableWagesFor(exempt);
 
+  const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
+  const ytd = input.ytd.stateUnemployment?.[rules.code] ?? 0;
+  const taxableWages = cap === null ? currentWages : underCap(currentWages, ytd, cap);
   const amount = applyRate(taxableWages, cfg.rate);
 
   return {
@@ -397,7 +410,7 @@ function stateUnemploymentEmployeeTax(
     detail:
       cfg.wageBase === null
         ? `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, no wage cap`
-        : `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, capped at ${fmt(dollars(cfg.wageBase))}/yr`,
+        : `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, capped at ${fmt(dollars(cfg.wageBase))}/yr (${fmt(ytd)} YTD already counted)`,
   };
 }
 
@@ -1466,6 +1479,151 @@ function bracketPerPeriodNet(
   };
 }
 
+interface NJRateTableConfig {
+  // NJ-WT's own "Withholding Allowance Value Table" — a flat per-exemption
+  // dollar figure per pay period (NOT a precomputed combined table the way
+  // NY's Table A is), so a single number per period rather than
+  // combinedAllowanceTable's per-exemption-count array.
+  allowanceAmount: Record<string, number>;
+  // NJ-WT's five "Rate Tables" (A-E), each a full {from,to,base,rate}
+  // schedule PER PAY PERIOD (published separately per period, like Montana
+  // and New York — not one annual table divided down). Which table applies
+  // is a Form NJ-W4 election, not a marital-status computation — see
+  // resolveNJRateTable().
+  brackets: Record<'A' | 'B' | 'C' | 'D' | 'E', Record<string, WIBracket[]>>;
+}
+
+/**
+ * Resolves Form NJ-W4's filing-status boxes (Line 2) and its own explicit
+ * rate-table override (Line 3) to which of NJ-WT's five published Rate
+ * Tables applies. Per NJ-WT's own "Which Rate Table to Use" instructions:
+ * Rate A if Line 2 Box 1 (Single) or Box 3 (Married/CU Partner Separate) is
+ * checked; Rate B if Box 2 (Married/CU Joint), 4 (Head of Household), or 5
+ * (Qualifying Widow(er)) is checked AND Line 3 is blank; otherwise — Line 3
+ * completed — withhold at whichever specific table (A-E) the employee
+ * selected there. NJ-WT documents C/D/E only as employee-selectable
+ * higher-withholding options (typically used by two-earner households to
+ * avoid underwithholding), not as filing-status-determined defaults, so
+ * certificate.rateTableOverride is the ONLY way this function ever returns
+ * C, D, or E.
+ *
+ * Default (no certificate at all): Rate A, matching Form NJ-W4's own
+ * Box-1(Single)-is-the-baseline framing and this project's standing
+ * no-form-means-single convention.
+ */
+function resolveNJRateTable(cert: Record<string, unknown>): 'A' | 'B' | 'C' | 'D' | 'E' {
+  const override = cert.rateTableOverride;
+  if (override !== undefined && override !== null) {
+    if (override === 'A' || override === 'B' || override === 'C' || override === 'D' || override === 'E') {
+      return override;
+    }
+    throw new Error(
+      `Unrecognized NJ certificate.rateTableOverride ${JSON.stringify(override)} — expected 'A', 'B', 'C', 'D', or 'E'.`,
+    );
+  }
+
+  const filingStatus = cert.filingStatus;
+  if (filingStatus === undefined || filingStatus === null || filingStatus === 'single' || filingStatus === 'mfs') {
+    return 'A';
+  }
+  if (filingStatus === 'mfj' || filingStatus === 'hoh' || filingStatus === 'qw') {
+    return 'B';
+  }
+  throw new Error(
+    `Unrecognized NJ certificate.filingStatus ${JSON.stringify(filingStatus)} — expected 'single', 'mfs', 'mfj', 'hoh', or 'qw'.`,
+  );
+}
+
+/**
+ * New Jersey's withholding formula (NJ-WT's own "Percentage Method"/Rate
+ * Tables) — structurally the closest existing shape in this project is New
+ * York's bracket_per_period_net (subtract an allowance from PER-PERIOD gross
+ * wages, no annualizing, then look up the result in a bracket table
+ * published separately per pay frequency) — but genuinely different in two
+ * ways: (1) the allowance is a FLAT per-exemption dollar amount times the
+ * count claimed (NJ-WT's own worked instructions: "Multiply the proper
+ * withholding allowance ... by the number of exemptions claimed ... Subtract
+ * this amount from the wages"), not NY's precomputed combined-allowance
+ * table; (2) which bracket SCHEDULE applies is a direct Form NJ-W4 election
+ * (Rate A-E) rather than a marital-status lookup. Both differences are small
+ * enough that reusing bracketPerPeriodNet()/computeNYSStyleTax() outright
+ * would require threading a NY-specific combinedAllowanceTable shape through
+ * a state that doesn't have one — a new function, sharing the same
+ * findWIBracket() bracket-lookup helper, was more honest than forcing the
+ * fit.
+ *
+ * Supplemental wages are DELIBERATELY NOT carved out or given a separate
+ * rate — NJ-WT is explicit: "If the supplemental wages are paid at the same
+ * time as regular wages: Total the employee's regular wage and supplemental
+ * wages and withhold at the appropriate rate based on the combined
+ * payment." Aggregation, the same shape as Kentucky's flatRateFixedDeduction
+ * — ctx.taxableWagesFor() already returns the combined total with no special
+ * casing needed for a single calculatePaycheck() call.
+ *
+ * NOT MODELLED (disclosed, not guessed): NJ-WT's own alternate rule for
+ * supplemental wages paid on a SEPARATE cheque from regular wages ("withhold
+ * from the supplemental wages without any exemption allowances") — the same
+ * class of cross-period gap already disclosed for Kentucky's separate-cheque
+ * supplemental rule and Indiana's 30-day nonresident rule; this engine
+ * models one paycheck at a time and has no mechanism to detect "this cheque
+ * is supplemental-only."
+ *
+ * Every bracket base figure in NJ-2026.json's Rate Tables was reconstructed
+ * from NJ-WT's own annual boundaries+rates (the cleanly-extracted table) and
+ * verified to reproduce every one of NJ-WT's own per-period base figures to
+ * the cent for weekly, monthly, and annual — see the file's own $methodComment.
+ */
+function bracketPerPeriodRateTable(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.bracketPerPeriodRateTable as NJRateTableConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const grossWages = ctx.taxableWagesFor(exempt);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const exemptions = Number(cert.exemptions ?? 0);
+  if (exemptions < 0 || !Number.isInteger(exemptions)) {
+    throw new Error(`NJ certificate.exemptions (${exemptions}) must be a non-negative integer.`);
+  }
+
+  const allowancePerExemption = cfg.allowanceAmount[input.payFrequency];
+  if (allowancePerExemption === undefined) {
+    throw new Error(
+      `New Jersey's own withholding allowance table doesn't publish a "${input.payFrequency}" ` +
+        `figure — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const allowance = roundHalfUp(dollars(allowancePerExemption) * exemptions);
+  const netWages = atLeastZero(grossWages - allowance);
+
+  const rateTable = resolveNJRateTable(cert);
+  const brackets = cfg.brackets[rateTable][input.payFrequency];
+  if (!brackets) {
+    throw new Error(
+      `New Jersey's own Rate Table "${rateTable}" doesn't publish a "${input.payFrequency}" ` +
+        `bracket schedule — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const bracket = findWIBracket(brackets, netWages);
+  const excess = netWages - dollars(bracket.from);
+  const amount = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: netWages,
+    amount,
+    detail:
+      `${fmt(grossWages)} gross less ${fmt(allowance)} allowance (${exemptions} × $${allowancePerExemption}) ` +
+      `= ${fmt(netWages)} net, Rate Table ${rateTable} @ ${(bracket.rate * 100).toFixed(2)}% over ` +
+      `${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))}`,
+  };
+}
+
 /**
  * Flat-rate supplemental wages read generically off rules.supplementalWages
  * .flatRate — New York's own 11.70% (Method A) is the first user, but this
@@ -1815,23 +1973,28 @@ function yonkersSupplementalTax(
 
 interface StateDisabilityEmployeeConfig {
   rate: number;
-  weeklyCapDollars: number; // dollars, e.g. 0.60 — a PER-WEEK cap, not annual
+  weeklyCapDollars?: number; // dollars, e.g. 0.60 — a PER-WEEK cap, not annual (New York's DBL shape)
+  wageBase?: number; // dollars, ANNUAL wage base — YTD-tracked like statePaidLeaveEmployee (New Jersey's TDI shape)
   exemptPretax?: string[]; // overrides the shared rules.exemptPretax when present
 }
 
 /**
- * Employee-paid state disability insurance — New York's DBL is the first
+ * Employee-paid state disability insurance — New York's DBL was the first
  * state in this project with a cap that resets EVERY PAY PERIOD rather than
- * accumulating across the year, genuinely different from every other capped
- * employee-paid program here (PA's UC is uncapped; MN's Paid Leave caps an
- * ANNUAL cumulative dollar total via YTD tracking). WCB's own page states
- * the rule as a flat dollar-per-WEEK ceiling ('no more than 60 cents a
- * week'), so this scales that weekly figure by how many weeks are actually
- * in one pay period (52 / periodsPerYear) rather than storing a
- * separately-transcribed per-frequency table — the same 'formula over
- * table' preference already used elsewhere in this project when a state's
- * own rule is stated as a clean formula rather than published per-period
- * numbers.
+ * accumulating across the year (WCB's own page: 'no more than 60 cents a
+ * week'), genuinely different from every other capped employee-paid program
+ * here at the time (PA's UC is uncapped; MN's Paid Leave caps an ANNUAL
+ * cumulative dollar total via YTD tracking). That per-period shape is
+ * config-driven via weeklyCapDollars, scaling the weekly figure by how many
+ * weeks are actually in one pay period (52 / periodsPerYear) rather than
+ * storing a separately-transcribed per-frequency table.
+ *
+ * New Jersey's TDI is the ordinary ANNUAL-wage-base shape instead (same
+ * mechanism as statePaidLeaveEmployeeTax()) — config-driven via `wageBase`,
+ * mutually exclusive with weeklyCapDollars. A state config is expected to set
+ * exactly one of the two; which branch runs is decided by which field is
+ * present, not by state code, so this stays data-only for any future state
+ * that fits either existing shape.
  */
 function stateDisabilityEmployeeTax(
   input: PaycheckInput,
@@ -1845,9 +2008,25 @@ function stateDisabilityEmployeeTax(
   const taxableWages = ctx.taxableWagesFor(exempt);
   const uncapped = applyRate(taxableWages, cfg.rate);
 
+  let amount: number;
+  if (cfg.wageBase !== undefined) {
+    const ytd = input.ytd.stateDisabilityEmployee?.[rules.code] ?? 0;
+    const cappedWages = underCap(taxableWages, ytd, dollars(cfg.wageBase));
+    amount = applyRate(cappedWages, cfg.rate);
+    return {
+      id: `${rules.code}_DBL_EE`,
+      name: `${rules.name} Disability Benefits (Employee)`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: cappedWages,
+      amount,
+      detail: `${fmt(cappedWages)} @ ${(cfg.rate * 100).toFixed(2)}%, capped at ${fmt(dollars(cfg.wageBase))}/yr (${fmt(ytd)} YTD already counted)`,
+    };
+  }
+
   const weeksInPeriod = 52 / ctx.periodsPerYear;
-  const periodCap = roundHalfUp(dollars(cfg.weeklyCapDollars) * weeksInPeriod);
-  const amount = Math.min(uncapped, periodCap);
+  const periodCap = roundHalfUp(dollars(cfg.weeklyCapDollars!) * weeksInPeriod);
+  amount = Math.min(uncapped, periodCap);
 
   return {
     id: `${rules.code}_DBL_EE`,
@@ -1857,7 +2036,7 @@ function stateDisabilityEmployeeTax(
     taxableWages,
     amount,
     detail:
-      `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, capped at $${cfg.weeklyCapDollars.toFixed(2)}/week ` +
+      `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, capped at $${cfg.weeklyCapDollars!.toFixed(2)}/week ` +
       `(${fmt(periodCap)} this ${weeksInPeriod === 1 ? 'period' : `${weeksInPeriod.toFixed(2)}-week period`})` +
       (uncapped > periodCap ? ' — cap applied' : ''),
   };
