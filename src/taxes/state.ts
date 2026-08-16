@@ -353,6 +353,8 @@ function incomeTaxLines(
     }
     case 'bracket_per_period_rate_table':
       return [bracketPerPeriodRateTable(input, ctx, rules)];
+    case 'bracket_two_status_per_period':
+      return [bracketTwoStatusPerPeriod(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -2039,5 +2041,96 @@ function stateDisabilityEmployeeTax(
       `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, capped at $${cfg.weeklyCapDollars!.toFixed(2)}/week ` +
       `(${fmt(periodCap)} this ${weeksInPeriod === 1 ? 'period' : `${weeksInPeriod.toFixed(2)}-week period`})` +
       (uncapped > periodCap ? ' — cap applied' : ''),
+  };
+}
+
+interface BracketTwoStatusConfig {
+  brackets: Record<'single' | 'married', Record<string, WIBracket[]>>; // second key is PayFrequency
+}
+
+/**
+ * Resolves Form ID W-4's filing status to which of Idaho's two published
+ * bracket schedules applies — Idaho's own Table for Percentage Computation
+ * Method (EPB00744) publishes exactly two schedules, "Single Persons
+ * Including Head of Household" and "Married Persons," so head-of-household
+ * maps to the single schedule BY THE SOURCE'S OWN HEADING, not by this
+ * engine's convention (unlike Wisconsin's/Minnesota's disclosed HOH→single
+ * simplification, which those states' own tables don't actually make —
+ * Idaho's genuinely does). Default (no ID W-4 on file) is 'single', the same
+ * no-form convention used everywhere else in this project — Idaho's own
+ * computing-withholding guide requires a form be kept on file but does not
+ * itself state a default, so this is the project's standing convention,
+ * not an Idaho-specific instruction.
+ */
+function resolveIDMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  const raw = cert.maritalStatus;
+  if (raw === undefined || raw === null || raw === 'single' || raw === 'hoh') return 'single';
+  if (raw === 'married') return 'married';
+  throw new Error(
+    `Unrecognized ID certificate.maritalStatus ${JSON.stringify(raw)} — expected ` +
+      `'single', 'married', or 'hoh' (Idaho's own table folds head-of-household into ` +
+      `the single schedule).`,
+  );
+}
+
+/**
+ * Idaho's Percentage Computation Method (EPB00744, effective 2026-07-23) —
+ * the simplest bracket shape in this project: ONE flat 5.3% rate above a
+ * filing-status-only threshold (no progressive brackets at all — Idaho
+ * became a true flat-tax state), published as an independently-rounded
+ * per-period table (like Montana/NY/New Jersey) rather than one annual
+ * figure divided down, so the {from,to,base,rate} WIBracket shape covers it
+ * with exactly two rows per period: {0, threshold, 0, 0%} and {threshold,
+ * null, 0, 5.3%}. married's threshold is exactly 2x single's in every
+ * period published (verified: annual $16,100/$32,200, monthly $1,342/
+ * $2,683, semimonthly $671/$1,342, biweekly $619/$1,238, weekly $310/$619,
+ * daily $62/$124) — Idaho's own design, not a computed doubling here.
+ *
+ * NOT MODELLED (disclosed, not guessed): Form ID W-4's "Idaho Child Tax
+ * Credit allowance" count. EPB00744 headlines every table "wages after
+ * subtracting child tax credit allowances," but tax.idaho.gov/ictcat states
+ * directly: "The Idaho Child Tax Credit has sunsetted per Idaho Code
+ * Section 63-3029L. Because the credit is no longer in effect, the
+ * allowance amount will be zero." A $0-per-allowance subtraction is a
+ * no-op regardless of certificate.allowances, so this engine skips reading
+ * that field entirely for 2026 rather than wiring a subtraction step that
+ * can never do anything — same reasoning as Kentucky's K-4 having no
+ * exemption-count field to read.
+ */
+function bracketTwoStatusPerPeriod(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.bracketTwoStatus as BracketTwoStatusConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const maritalStatus = resolveIDMaritalStatus(cert);
+
+  const brackets = cfg.brackets[maritalStatus][input.payFrequency];
+  if (!brackets) {
+    throw new Error(
+      `Idaho's own withholding tables don't publish a "${input.payFrequency}" bracket ` +
+        `schedule — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const bracket = findWIBracket(brackets, taxableWages);
+  const excess = taxableWages - dollars(bracket.from);
+  const amount = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages,
+    amount,
+    detail:
+      bracket.rate === 0
+        ? `${fmt(taxableWages)} below the ${maritalStatus} ${fmt(dollars(bracket.to ?? 0))} threshold — $0`
+        : `${fmt(taxableWages)} less ${fmt(dollars(bracket.from))} ${maritalStatus} threshold ` +
+          `@ ${(bracket.rate * 100).toFixed(2)}%`,
   };
 }

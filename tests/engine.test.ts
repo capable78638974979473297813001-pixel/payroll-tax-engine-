@@ -2628,6 +2628,121 @@ describe('New Jersey Unemployment/Workforce, TDI, and FLI (employee)', () => {
   });
 });
 
+describe('Idaho', () => {
+  // Expected values hand-derived from EPB00744's own Table for Percentage
+  // Computation Method (single weekly threshold $310, married $619; 5.3%
+  // flat above it) before the code was run, same discipline as every other
+  // state in this project.
+  const idState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'ID', certificate },
+  });
+
+  test('weekly $1,000 single: (1,000 − 310) × 5.3% = $36.57', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...idState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(36.57));
+  });
+
+  test("married's threshold is exactly double single's: (1,000 − 619) × 5.3% = $20.19", () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...idState({ maritalStatus: 'married' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(20.19));
+  });
+
+  test('head of household folds into the single schedule — same $36.57 as plain single', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...idState({ maritalStatus: 'hoh' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(36.57));
+  });
+
+  test('wages at or below the threshold owe $0, not a negative bracket', () => {
+    const below = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(300) }],
+        ...idState(),
+      }),
+    );
+    assert.equal(amountOf(below, 'ID_SIT'), 0);
+
+    const atThreshold = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(310) }],
+        ...idState(),
+      }),
+    );
+    assert.equal(amountOf(atThreshold, 'ID_SIT'), 0);
+  });
+
+  test('Idaho conforms to federal pretax treatment — a 401(k) deferral REDUCES the Idaho base (unlike Pennsylvania)', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(200) }],
+        ...idState(),
+      }),
+    );
+    // (800 − 310) × 5.3% = $25.97, not $36.57.
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(25.97));
+  });
+
+  test('no reciprocity exemption exists — Idaho has none, confirmed structurally empty rather than omitted', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        residenceState: { code: 'OR' },
+        ...idState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(36.57));
+  });
+
+  test('an unrecognized marital status throws rather than silently defaulting', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            ...idState({ maritalStatus: 'mfs' }),
+          }),
+        ),
+      /Unrecognized ID certificate\.maritalStatus/,
+    );
+  });
+
+  test('no employee-paid unemployment, disability, or paid-leave lines exist for Idaho', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...idState(),
+      }),
+    );
+    assert.equal(r.taxes.some((t) => t.id === 'ID_UC_EE'), false);
+    assert.equal(r.taxes.some((t) => t.id === 'ID_DBL_EE'), false);
+    assert.equal(r.taxes.some((t) => t.id === 'ID_PFML_EE'), false);
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

@@ -1,0 +1,113 @@
+{
+  "code": "ID",
+  "name": "Idaho",
+  "year": 2026,
+  "method": "bracket_two_status_per_period",
+  "$scopeNote": "STATE income tax only. Idaho has no local income tax anywhere (cities/counties are statutorily barred from imposing one), no reciprocity agreements with any state, and no employee-paid unemployment insurance, disability insurance, or paid family leave program -- Idaho UI is employer-funded only, confirmed directly from the Idaho Department of Labor. This makes Idaho the simplest state file in this project: one tax, one flat rate, no locals, no other employee-paid levies.",
+  "$methodComment": "Idaho became a true flat-tax state: EPB00744 (Table for Percentage Computation Method of Withholding, effective 2026-07-23) publishes exactly two brackets per pay period per filing status -- $0 below a threshold, then a flat 5.3% of everything above it. No progressive schedule at all, unlike every bracket state built so far in this project. Tables are published INDEPENDENTLY PER PERIOD (like Montana/NY/NJ), not derived by dividing one annual figure -- confirmed the married threshold is exactly 2x single's in every period (a deliberate design choice by Idaho, not something this engine computes).",
+  "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
+  "exemptPretaxComment": "Idaho conforms to the Internal Revenue Code (as of 2015-01-01, per tax.idaho.gov/governance/statutes/irc/) and computes Idaho taxable income starting from FEDERAL taxable income under Idaho Code 63-3022 — the OPPOSITE of Pennsylvania's non-conformity. Confirmed cross-source (not an independently-fetched primary statute read this session) that 401(k)/403(b)/457/SIMPLE deferrals and section 125 cafeteria-plan elections excluded from federal wages are excluded from Idaho withholding wages too, so this reuses the SAME exemptPretax list as federal.json's incomeTax rather than PA's empty one — the same conformity pattern already established for Michigan and Ohio in this project.",
+  "sources": [
+    {
+      "title": "EPB00744 — Table for Percentage Computation Method of Withholding",
+      "url": "https://tax.idaho.gov/document-mngr/pubs_EPB00744",
+      "verifiedOn": "2026-08-16",
+      "verifiedBy": "Downloaded and text-extracted directly (pdftotext -layout; extracted cleanly, no column-garbling hazard this time — a 2-bracket table has no multi-column layout to misalign, unlike NJ's 5-rate-table document). Revision date printed on the document itself: 'EPB00744 07-23-2026'."
+    },
+    {
+      "title": "Withholding tables updated for 2026 — Idaho State Tax Commission press release",
+      "url": "https://tax.idaho.gov/pressrelease/withholding-tables-updated-for-2026/",
+      "verifiedOn": "2026-08-16",
+      "verifiedBy": "Fetched directly. States the July 31, 2026 effective date and that 'The Idaho Child Tax Credit has sunsetted per Idaho Code section 63-3029L' as the reason for the table update, and links directly to EPB00744."
+    },
+    {
+      "title": "Idaho Child Tax Credit Allowance Table (ICTCAT) page",
+      "url": "https://tax.idaho.gov/ictcat",
+      "verifiedOn": "2026-08-16",
+      "verifiedBy": "Fetched directly. Verbatim: 'The Idaho Child Tax Credit has sunsetted per Idaho Code Section 63-3029L. Because the credit is no longer in effect, the allowance amount will be zero.' — the basis for NOT modelling a per-allowance subtraction step (see $methodComment / knownGaps)."
+    },
+    {
+      "title": "Computing Withholding — Idaho State Tax Commission",
+      "url": "https://tax.idaho.gov/taxes/income-tax/withholding/computing/",
+      "verifiedOn": "2026-08-16",
+      "verifiedBy": "Fetched directly. Covers the percentage-computation-method steps, supplemental wages (aggregate with regular wages, OR withhold a flat 5.3% on a separately-issued supplemental payment — the same 5.3% as the regular flat rate, so this engine's default aggregation path already produces the correct amount with no separate supplemental line needed, the same convention as Kentucky's flatRateFixedDeduction), and confirms a federal/ID W-4 must be kept on file per employee."
+    },
+    {
+      "title": "Idaho Department of Labor — Unemployment Tax Information Handbook (Nov. 2025)",
+      "url": "https://www.labor.idaho.gov/wp-content/uploads/2025/11/Handbook_Tax-information_Nov.-2025-1.pdf",
+      "verifiedOn": "2026-08-16",
+      "verifiedBy": "Cross-source confirmed (search-engine synthesis of this and other secondary sources, not independently re-fetched and read in full this session) that Idaho UI is EMPLOYER-funded only, with no employee contribution — context-only fact, not engine-consumed, same convention as every other state's employer-only UI in this project. 2026 employer new-employer rate 1.0%, experienced range 0.21%-5.40%, wage base $58,300 — recorded for completeness, not verified to primary-document rigor."
+    }
+  ],
+  "bracketTwoStatus": {
+   "brackets": {
+    "single": {
+      "weekly": [
+        { "from": 0, "to": 310, "base": 0, "rate": 0 },
+        { "from": 310, "to": null, "base": 0, "rate": 0.053 }
+      ],
+      "biweekly": [
+        { "from": 0, "to": 619, "base": 0, "rate": 0 },
+        { "from": 619, "to": null, "base": 0, "rate": 0.053 }
+      ],
+      "semimonthly": [
+        { "from": 0, "to": 671, "base": 0, "rate": 0 },
+        { "from": 671, "to": null, "base": 0, "rate": 0.053 }
+      ],
+      "monthly": [
+        { "from": 0, "to": 1342, "base": 0, "rate": 0 },
+        { "from": 1342, "to": null, "base": 0, "rate": 0.053 }
+      ],
+      "daily": [
+        { "from": 0, "to": 62, "base": 0, "rate": 0 },
+        { "from": 62, "to": null, "base": 0, "rate": 0.053 }
+      ],
+      "annual": [
+        { "from": 0, "to": 16100, "base": 0, "rate": 0 },
+        { "from": 16100, "to": null, "base": 0, "rate": 0.053 }
+      ]
+    },
+    "married": {
+      "weekly": [
+        { "from": 0, "to": 619, "base": 0, "rate": 0 },
+        { "from": 619, "to": null, "base": 0, "rate": 0.053 }
+      ],
+      "biweekly": [
+        { "from": 0, "to": 1238, "base": 0, "rate": 0 },
+        { "from": 1238, "to": null, "base": 0, "rate": 0.053 }
+      ],
+      "semimonthly": [
+        { "from": 0, "to": 1342, "base": 0, "rate": 0 },
+        { "from": 1342, "to": null, "base": 0, "rate": 0.053 }
+      ],
+      "monthly": [
+        { "from": 0, "to": 2683, "base": 0, "rate": 0 },
+        { "from": 2683, "to": null, "base": 0, "rate": 0.053 }
+      ],
+      "daily": [
+        { "from": 0, "to": 124, "base": 0, "rate": 0 },
+        { "from": 124, "to": null, "base": 0, "rate": 0.053 }
+      ],
+      "annual": [
+        { "from": 0, "to": 32200, "base": 0, "rate": 0 },
+        { "from": 32200, "to": null, "base": 0, "rate": 0.053 }
+      ]
+    }
+   }
+  },
+  "reciprocity": {
+    "reciprocalStates": [],
+    "note": "Idaho has no income-tax reciprocity agreement with any other state (cross-source confirmed) — the reciprocity mechanism is present in the ruleset shape for consistency with other states but reciprocalStates is deliberately empty, not omitted, to make the 'checked, found none' state explicit rather than indistinguishable from 'not yet researched.'"
+  },
+  "unemploymentInsuranceEmployer": {
+    "$comment": "Employer-paid only — context-only, not engine-consumed, same convention as every other state's employer UI in this project. Cross-source confirmed, not independently primary-fetched and read this session.",
+    "newEmployerRate": 0.01,
+    "experiencedRateRange": { "min": 0.0021, "max": 0.054 },
+    "wageBase": 58300
+  },
+  "knownGaps": [
+    "Idaho Child Tax Credit allowance mechanism: EPB00744's own table headers reference 'wages after subtracting child tax credit allowances,' but the credit sunset per Idaho Code 63-3029L means the allowance amount is $0 for 2026 (confirmed directly at tax.idaho.gov/ictcat) — a no-op subtraction, so certificate.allowances is not read by bracketTwoStatusPerPeriod(). If the credit is ever reinstated by a future legislature, this file would need a real per-allowance subtraction step added, which does not exist in the engine today.",
+    "Supplemental wages paid on a SEPARATE cheque from regular wages: this engine models one calculatePaycheck() call at a time, so a standalone bonus cheque is taxed using ONLY that cheque's own wages against the full per-period threshold — it cannot look back at a prior regular cheque the way Idaho's own 'aggregate with regular wages' option would. The engine's default (untagged supplemental cash flows through the same bracket) already matches Idaho's OTHER stated option (flat 5.3%, identical to the regular flat rate) for wages ABOVE the threshold, but would UNDER-withhold relative to aggregation for a small standalone bonus that lands entirely within the $0 band — same class of disclosed cross-period gap as Kentucky's 103 KAR 18:070 Section 3(2) note.",
+    "resolveIDMaritalStatus's no-form default (single) is this project's standing convention, not a rule stated anywhere in Idaho's own EPB00744, ictcat, or computing-withholding pages — none of them say what to withhold absent a form beyond 'you must have a Form W-4 on file.'"
+  ]
+}
