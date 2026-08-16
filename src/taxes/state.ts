@@ -1048,6 +1048,7 @@ function flatRateSupplementalTax(
 interface StatePaidLeaveEmployeeConfig {
   rate: number;
   wageBase: number | null; // dollars, annual — null means uncapped
+  exemptPretax?: string[]; // overrides the shared rules.exemptPretax when present
 }
 
 /**
@@ -1065,6 +1066,15 @@ interface StatePaidLeaveEmployeeConfig {
  * reciprocity or a Section-2-style withholding-exemption certificate, since
  * Minn. Stat. 268B is a separate statute from the income-tax reciprocity
  * statute (290.081) it happens to sit next to in this file.
+ *
+ * cfg.exemptPretax, when present, OVERRIDES the shared rules.exemptPretax —
+ * added because New York's PFL premium base turned out NOT to share NYS
+ * income tax's pretax exclusions (NY Tax Dept. Notice N-17-12 confirms PFL
+ * premiums are deducted from employees' AFTER-TAX wages, i.e. this is
+ * structurally NOT a pretax-eligible deduction the way 401(k)/section 125
+ * are, and paidfamilyleave.ny.gov's own cost page consistently describes
+ * the premium as a percentage of "gross wages"). Minnesota's config has no
+ * exemptPretax override, so it keeps its original behavior unchanged.
  */
 function statePaidLeaveEmployeeTax(
   input: PaycheckInput,
@@ -1074,7 +1084,7 @@ function statePaidLeaveEmployeeTax(
   const cfg = rules.statePaidLeaveEmployee as StatePaidLeaveEmployeeConfig | undefined;
   if (!cfg) return null;
 
-  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const exempt = (cfg.exemptPretax ?? rules.exemptPretax ?? []) as PretaxCategory[];
   const currentWages = ctx.taxableWagesFor(exempt);
   const ytd = input.ytd.statePaidLeave?.[rules.code] ?? 0;
   const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
@@ -1806,6 +1816,7 @@ function yonkersSupplementalTax(
 interface StateDisabilityEmployeeConfig {
   rate: number;
   weeklyCapDollars: number; // dollars, e.g. 0.60 — a PER-WEEK cap, not annual
+  exemptPretax?: string[]; // overrides the shared rules.exemptPretax when present
 }
 
 /**
@@ -1830,7 +1841,7 @@ function stateDisabilityEmployeeTax(
   const cfg = rules.stateDisabilityEmployee as StateDisabilityEmployeeConfig | undefined;
   if (!cfg) return null;
 
-  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const exempt = (cfg.exemptPretax ?? rules.exemptPretax ?? []) as PretaxCategory[];
   const taxableWages = ctx.taxableWagesFor(exempt);
   const uncapped = applyRate(taxableWages, cfg.rate);
 

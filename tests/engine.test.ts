@@ -2355,6 +2355,26 @@ describe('New York Paid Family Leave (employee)', () => {
     // employee-paid program in this project.
     assert.equal(amountOf(r, 'NY_PFML_EE'), dollars(4.32));
   });
+
+  test('computed on GROSS wages -- a section125 pretax deduction does NOT reduce the PFL base, unlike NY_SIT', () => {
+    // Weekly $1,000 regular wages, $200 section125 deduction. NY_SIT's own
+    // base excludes the $200 (NYS income tax's exemptPretax list includes
+    // section125), but PFL's cfg.exemptPretax override is an EMPTY array --
+    // per Notice N-17-12 ('after-tax wages') and paidfamilyleave.ny.gov's
+    // own 'gross wages' framing -- so PFL is computed on the FULL $1,000,
+    // not the $800 net-of-cafeteria-plan figure. 1,000 x 0.00432 = $4.32,
+    // the SAME answer as the no-deduction case above, proving the deduction
+    // had zero effect on this specific line.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        deductions: [{ code: 'MED', category: 'section125', amount: dollars(200) }],
+        workState: { code: 'NY', certificate: { maritalStatus: 'single', exemptions: 0 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_PFML_EE'), dollars(4.32));
+  });
 });
 
 describe('New York Disability Benefits Law (employee)', () => {
@@ -2408,6 +2428,22 @@ describe('New York Disability Benefits Law (employee)', () => {
       }),
     );
     assert.equal(amountOf(r, 'NY_DBL_EE'), dollars(2.60));
+  });
+
+  test('also computed on GROSS wages -- a 401(k) deferral does not reduce the DBL base either', () => {
+    // Weekly $100 regular wages, $30 401(k) deferral. If DBL read the net-
+    // of-deferral $70 base, 0.5% would be $0.35 -- instead it stays $0.50
+    // (0.5% of the full $100), proving the same gross-wages override
+    // applies to DBL as PFL.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(100) }],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(30) }],
+        workState: { code: 'NY', certificate: { maritalStatus: 'single', exemptions: 0 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_DBL_EE'), dollars(0.50));
   });
 });
 
