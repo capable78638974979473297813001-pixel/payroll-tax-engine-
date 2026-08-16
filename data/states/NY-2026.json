@@ -1,0 +1,1161 @@
+{
+  "code": "NY",
+  "name": "New York",
+  "year": 2026,
+  "method": "bracket_per_period_net",
+  "$scopeNote": "STATE INCOME TAX ONLY, deliberately -- explicit user decision this session to build NYS withholding first (the largest single piece on its own: 10-13 brackets x 6 pay periods x 2 filing statuses) and come back for NYC resident/nonresident tax, Yonkers resident surcharge/nonresident earnings tax, NY Paid Family Leave, NY disability insurance (DBL/SDI), and NY UI as a separate pass. This is NOT an oversight -- see knownGaps.",
+  "$methodComment": "A genuinely new shape, distinct from every other bracket state in this project: (1) subtract a COMBINED deduction+exemption allowance (Table A -- a single per-period, per-marital-status, per-exemption-count dollar figure, not a flat per-exemption multiplier the way MN/WI compute it) directly from PER-PERIOD gross wages -- no annualizing before this step; (2) look up the result DIRECTLY in a PER-PERIOD bracket table (NY publishes a genuinely separate table per pay frequency, like Montana, not one annual table divided down) -- confirmed by wh-inst-... no, by NYS-50-T-NYS's own worked examples, which subtract Table A's period-specific figure from period wages and look straight into the matching period's Table II, no annualization step at all; (3) ONLY for annualized net wages above a very high threshold ($1,077,550 single / $2,155,350 married for 2026) does Method III kick in -- a flat percentage of ANNUALIZED net wages (10.45%/11.10%/11.70% by income tier), which DOES require annualizing (multiply period net wages by periodsPerYear), applying the flat rate, then dividing back down. So this state has TWO genuinely different formulas depending on income level, not one.",
+  "sources": [
+    {
+      "title": "NYS-50-T-NYS (1/26), New York State Withholding Tax Tables and Methods",
+      "url": "https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_nys.pdf",
+      "verifiedOn": "2026-08-15",
+      "verifiedBy": "Downloaded and text-extracted directly (23-page PDF). IMPORTANT extraction-method note for anyone re-deriving this file: pdftotext's -layout mode badly garbles this specific document's multi-column tables (e.g. Table A's row labels visually separate from their data, giving the false impression the Weekly-Single row was blank) -- switching to PLAIN (non--layout) extraction, page by page, produced clean, correctly-orderable data instead, verified against the document's own worked examples (Example 1: weekly $400 single 3 exemptions -> Table A gives $200.05 -> matches exactly; Example 3: monthly $50,000 single 3 exemptions -> Table A gives $866.60 -> matches exactly). This is the SAME category of PDF-layout hazard already documented elsewhere in this project (Ohio school districts, PA PSD codes, Montana's remittance table) but a different resolution (re-extract without -layout) than those cases used (internal-consistency reordering)."
+    },
+    {
+      "title": "IT-2104, Employee's Withholding Allowance Certificate (2026)",
+      "url": "https://www.tax.ny.gov/pdf/current_forms/it/it2104_fill_in.pdf",
+      "verifiedOn": "2026-08-15",
+      "verifiedBy": "Downloaded and text-extracted directly. Covers NYS + NYC + Yonkers on ONE combined form: marital status (Single/HOH, Married, Married-but-withhold-at-higher-single-rate -- a THIRD checkbox, the same shape as Minnesota's W-4MN and Montana's MW-4, now a recurring pattern across states in this project), Line 1 = combined NYS+Yonkers allowance count, Line 2 = a SEPARATE NYC-only allowance count, Lines 3/4/5 = three SEPARATE additional-withholding dollar fields, one per jurisdiction (NYS/NYC/Yonkers) -- genuinely different from every other state's single additionalWithholding field, because NY's own form asks for three independent numbers on one certificate."
+    }
+  ],
+  "combinedAllowanceTable": {
+    "$comment": "NYS-50-T-NYS's own 'Table A -- Combined deduction and exemption allowance (full year)' -- ENGINE-CONSUMED. Unlike every other state in this project, this is NOT a flat per-exemption dollar amount x count; it's a single precomputed dollar figure per (payPeriod, maritalStatus, exemptionCount 0-10) cell, confirmed to equal Table B (a payPeriod/maritalStatus-only deduction baseline) plus Table C (a payPeriod-only flat per-exemption increment, $19.25/week etc.) x count -- verified this identity holds exactly for every cell checked, so Table A is stored directly rather than Tables B+C separately, since Table A IS their sum, already computed by NY's own document.",
+    "single": {
+      "daily": [
+        28.45,
+        32.3,
+        36.15,
+        40,
+        43.85,
+        47.7,
+        51.55,
+        55.4,
+        59.25,
+        63.1,
+        66.95
+      ],
+      "weekly": [
+        142.3,
+        161.55,
+        180.8,
+        200.05,
+        219.3,
+        238.55,
+        257.8,
+        277.05,
+        296.3,
+        315.55,
+        334.8
+      ],
+      "biweekly": [
+        284.6,
+        323.1,
+        361.6,
+        400.1,
+        438.6,
+        477.1,
+        515.6,
+        554.1,
+        592.6,
+        631.1,
+        669.6
+      ],
+      "semimonthly": [
+        308.35,
+        350,
+        391.65,
+        433.3,
+        474.95,
+        516.6,
+        558.25,
+        599.9,
+        641.55,
+        683.2,
+        724.85
+      ],
+      "monthly": [
+        616.7,
+        700,
+        783.3,
+        866.6,
+        949.9,
+        1033.2,
+        1116.5,
+        1199.8,
+        1283.1,
+        1366.4,
+        1449.7
+      ],
+      "annual": [
+        7400,
+        8400,
+        9400,
+        10400,
+        11400,
+        12400,
+        13400,
+        14400,
+        15400,
+        16400,
+        17400
+      ]
+    },
+    "married": {
+      "daily": [
+        30.6,
+        34.45,
+        38.3,
+        42.15,
+        46,
+        49.85,
+        53.7,
+        57.55,
+        61.4,
+        65.25,
+        69.1
+      ],
+      "weekly": [
+        152.9,
+        172.15,
+        191.4,
+        210.65,
+        229.9,
+        249.15,
+        268.4,
+        287.65,
+        306.9,
+        326.15,
+        345.4
+      ],
+      "biweekly": [
+        305.8,
+        344.3,
+        382.8,
+        421.3,
+        459.8,
+        498.3,
+        536.8,
+        575.3,
+        613.8,
+        652.3,
+        690.8
+      ],
+      "semimonthly": [
+        331.25,
+        372.9,
+        414.55,
+        456.2,
+        497.85,
+        539.5,
+        581.15,
+        622.8,
+        664.45,
+        706.1,
+        747.75
+      ],
+      "monthly": [
+        662.5,
+        745.8,
+        829.1,
+        912.4,
+        995.7,
+        1079,
+        1162.3,
+        1245.6,
+        1328.9,
+        1412.2,
+        1495.5
+      ],
+      "annual": [
+        7950,
+        8950,
+        9950,
+        10950,
+        11950,
+        12950,
+        13950,
+        14950,
+        15950,
+        16950,
+        17950
+      ]
+    },
+    "over10ExemptionsNote": "RESOLVED this pass. If more than 10 exemptions are claimed, NY's own instructions say to use Tables B (deduction only) + C ($X per exemption, flat) instead of Table A directly -- table[0] above IS Table B's value (the 0-exemption baseline) for each period/status, and each successive index's increment IS Table C's per-exemption value ($19.25/week single or married, $38.50/biweekly, etc. -- identical between single and married within the same period, confirmed from the increments, and confirmed CONSTANT across the entire 0-10 span, not just the first step -- e.g. weekly single's increment is exactly $19.25 between every consecutive pair of the 11 published values). bracketPerPeriodNet() now EXTRAPOLATES linearly past index 10 using table[10] + (table[10]-table[9]) x (exemptions-10), reusing Table A's own data rather than requiring separately-transcribed Table B/C entries -- mathematically identical to what NY's own Table B+C method would produce, verified by construction (the increment IS Table C's value, confirmed above)."
+  },
+  "brackets": {
+    "$comment": "ENGINE-CONSUMED. NYS-50-T-NYS's own Method II 'Exact Calculation Method' tables, {from,to,base,rate} shape, transcribed verbatim per pay period -- NOT derived by dividing the annual table, since NY publishes each period's table independently with its own base-rounding (matching this project's established Ohio/Montana precedent of using a state's own per-period numbers directly). A GENUINE, VERIFIED-NOT-A-TRANSCRIPTION-ERROR oddity: several brackets near the top of each schedule are NOT monotonically increasing in rate (e.g. married weekly: ...8.01%, then 6.40%(!), then 13.49%(!), then back to 7.35%) -- this shape repeats consistently and identically-positioned across every one of the 12 tables transcribed (6 periods x 2 statuses), which is what makes it a real, verified feature of NY's own published withholding schedule rather than a random extraction error (a genuine copy mistake would not reproduce the same anomalous shape independently in 12 different tables). Left unexplained rather than guessed at -- plausibly related to New York's benefit-recapture mechanism for high earners, but that specific causal claim was NOT independently verified against statute this session.",
+    "single": {
+      "daily": [
+        {
+          "from": 0,
+          "to": 33,
+          "base": 0,
+          "rate": 0.039
+        },
+        {
+          "from": 33,
+          "to": 45,
+          "base": 1.28,
+          "rate": 0.044
+        },
+        {
+          "from": 45,
+          "to": 53,
+          "base": 1.82,
+          "rate": 0.0515
+        },
+        {
+          "from": 53,
+          "to": 310,
+          "base": 2.25,
+          "rate": 0.054
+        },
+        {
+          "from": 310,
+          "to": 372,
+          "base": 16.12,
+          "rate": 0.059
+        },
+        {
+          "from": 372,
+          "to": 414,
+          "base": 19.78,
+          "rate": 0.0703
+        },
+        {
+          "from": 414,
+          "to": 606,
+          "base": 22.72,
+          "rate": 0.0753
+        },
+        {
+          "from": 606,
+          "to": 828,
+          "base": 37.2,
+          "rate": 0.064
+        },
+        {
+          "from": 828,
+          "to": 1021,
+          "base": 51.42,
+          "rate": 0.1144
+        },
+        {
+          "from": 1021,
+          "to": 4144,
+          "base": 73.43,
+          "rate": 0.0735
+        },
+        {
+          "from": 4144,
+          "to": null,
+          "base": null,
+          "rate": null,
+          "useMethodIII": true
+        }
+      ],
+      "weekly": [
+        {
+          "from": 0,
+          "to": 163,
+          "base": 0,
+          "rate": 0.039
+        },
+        {
+          "from": 163,
+          "to": 225,
+          "base": 6.38,
+          "rate": 0.044
+        },
+        {
+          "from": 225,
+          "to": 267,
+          "base": 9.08,
+          "rate": 0.0515
+        },
+        {
+          "from": 267,
+          "to": 1551,
+          "base": 11.27,
+          "rate": 0.054
+        },
+        {
+          "from": 1551,
+          "to": 1862,
+          "base": 80.58,
+          "rate": 0.059
+        },
+        {
+          "from": 1862,
+          "to": 2070,
+          "base": 98.9,
+          "rate": 0.0703
+        },
+        {
+          "from": 2070,
+          "to": 3032,
+          "base": 113.58,
+          "rate": 0.0753
+        },
+        {
+          "from": 3032,
+          "to": 4142,
+          "base": 186.02,
+          "rate": 0.064
+        },
+        {
+          "from": 4142,
+          "to": 5104,
+          "base": 257.1,
+          "rate": 0.1144
+        },
+        {
+          "from": 5104,
+          "to": 20722,
+          "base": 367.13,
+          "rate": 0.0735
+        },
+        {
+          "from": 20722,
+          "to": null,
+          "base": null,
+          "rate": null,
+          "useMethodIII": true
+        }
+      ],
+      "biweekly": [
+        {
+          "from": 0,
+          "to": 327,
+          "base": 0,
+          "rate": 0.039
+        },
+        {
+          "from": 327,
+          "to": 450,
+          "base": 12.77,
+          "rate": 0.044
+        },
+        {
+          "from": 450,
+          "to": 535,
+          "base": 18.15,
+          "rate": 0.0515
+        },
+        {
+          "from": 535,
+          "to": 3102,
+          "base": 22.54,
+          "rate": 0.054
+        },
+        {
+          "from": 3102,
+          "to": 3723,
+          "base": 161.15,
+          "rate": 0.059
+        },
+        {
+          "from": 3723,
+          "to": 4140,
+          "base": 197.81,
+          "rate": 0.0703
+        },
+        {
+          "from": 4140,
+          "to": 6063,
+          "base": 227.15,
+          "rate": 0.0753
+        },
+        {
+          "from": 6063,
+          "to": 8285,
+          "base": 372.04,
+          "rate": 0.064
+        },
+        {
+          "from": 8285,
+          "to": 10208,
+          "base": 514.19,
+          "rate": 0.1144
+        },
+        {
+          "from": 10208,
+          "to": 41444,
+          "base": 734.27,
+          "rate": 0.0735
+        },
+        {
+          "from": 41444,
+          "to": null,
+          "base": null,
+          "rate": null,
+          "useMethodIII": true
+        }
+      ],
+      "semimonthly": [
+        {
+          "from": 0,
+          "to": 354,
+          "base": 0,
+          "rate": 0.039
+        },
+        {
+          "from": 354,
+          "to": 488,
+          "base": 13.83,
+          "rate": 0.044
+        },
+        {
+          "from": 488,
+          "to": 579,
+          "base": 19.67,
+          "rate": 0.0515
+        },
+        {
+          "from": 579,
+          "to": 3360,
+          "base": 24.42,
+          "rate": 0.054
+        },
+        {
+          "from": 3360,
+          "to": 4033,
+          "base": 174.58,
+          "rate": 0.059
+        },
+        {
+          "from": 4033,
+          "to": 4485,
+          "base": 214.29,
+          "rate": 0.0703
+        },
+        {
+          "from": 4485,
+          "to": 6569,
+          "base": 246.08,
+          "rate": 0.0753
+        },
+        {
+          "from": 6569,
+          "to": 8975,
+          "base": 403.04,
+          "rate": 0.064
+        },
+        {
+          "from": 8975,
+          "to": 11058,
+          "base": 557.04,
+          "rate": 0.1144
+        },
+        {
+          "from": 11058,
+          "to": 44898,
+          "base": 795.46,
+          "rate": 0.0735
+        },
+        {
+          "from": 44898,
+          "to": null,
+          "base": null,
+          "rate": null,
+          "useMethodIII": true
+        }
+      ],
+      "monthly": [
+        {
+          "from": 0,
+          "to": 708,
+          "base": 0,
+          "rate": 0.039
+        },
+        {
+          "from": 708,
+          "to": 975,
+          "base": 27.67,
+          "rate": 0.044
+        },
+        {
+          "from": 975,
+          "to": 1158,
+          "base": 39.33,
+          "rate": 0.0515
+        },
+        {
+          "from": 1158,
+          "to": 6721,
+          "base": 48.83,
+          "rate": 0.054
+        },
+        {
+          "from": 6721,
+          "to": 8067,
+          "base": 349.17,
+          "rate": 0.059
+        },
+        {
+          "from": 8067,
+          "to": 8971,
+          "base": 428.58,
+          "rate": 0.0703
+        },
+        {
+          "from": 8971,
+          "to": 13138,
+          "base": 492.17,
+          "rate": 0.0753
+        },
+        {
+          "from": 13138,
+          "to": 17950,
+          "base": 806.08,
+          "rate": 0.064
+        },
+        {
+          "from": 17950,
+          "to": 22117,
+          "base": 1114.08,
+          "rate": 0.1144
+        },
+        {
+          "from": 22117,
+          "to": 89796,
+          "base": 1590.92,
+          "rate": 0.0735
+        },
+        {
+          "from": 89796,
+          "to": null,
+          "base": null,
+          "rate": null,
+          "useMethodIII": true
+        }
+      ],
+      "annual": [
+        {
+          "from": 0,
+          "to": 8500,
+          "base": 0,
+          "rate": 0.039
+        },
+        {
+          "from": 8500,
+          "to": 11700,
+          "base": 332,
+          "rate": 0.044
+        },
+        {
+          "from": 11700,
+          "to": 13900,
+          "base": 472,
+          "rate": 0.0515
+        },
+        {
+          "from": 13900,
+          "to": 80650,
+          "base": 586,
+          "rate": 0.054
+        },
+        {
+          "from": 80650,
+          "to": 96800,
+          "base": 4190,
+          "rate": 0.059
+        },
+        {
+          "from": 96800,
+          "to": 107650,
+          "base": 5143,
+          "rate": 0.0703
+        },
+        {
+          "from": 107650,
+          "to": 157650,
+          "base": 5906,
+          "rate": 0.0753
+        },
+        {
+          "from": 157650,
+          "to": 215400,
+          "base": 9673,
+          "rate": 0.064
+        },
+        {
+          "from": 215400,
+          "to": 265400,
+          "base": 13369,
+          "rate": 0.1144
+        },
+        {
+          "from": 265400,
+          "to": 1077550,
+          "base": 19091,
+          "rate": 0.0735
+        },
+        {
+          "from": 1077550,
+          "to": null,
+          "base": null,
+          "rate": null,
+          "useMethodIII": true
+        }
+      ]
+    },
+    "married": {
+      "daily": [
+        {
+          "from": 0,
+          "to": 33,
+          "base": 0,
+          "rate": 0.039
+        },
+        {
+          "from": 33,
+          "to": 45,
+          "base": 1.28,
+          "rate": 0.044
+        },
+        {
+          "from": 45,
+          "to": 53,
+          "base": 1.82,
+          "rate": 0.0515
+        },
+        {
+          "from": 53,
+          "to": 310,
+          "base": 2.25,
+          "rate": 0.054
+        },
+        {
+          "from": 310,
+          "to": 372,
+          "base": 16.12,
+          "rate": 0.059
+        },
+        {
+          "from": 372,
+          "to": 414,
+          "base": 19.78,
+          "rate": 0.0657
+        },
+        {
+          "from": 414,
+          "to": 606,
+          "base": 22.52,
+          "rate": 0.0707
+        },
+        {
+          "from": 606,
+          "to": 814,
+          "base": 36.11,
+          "rate": 0.0801
+        },
+        {
+          "from": 814,
+          "to": 1243,
+          "base": 52.72,
+          "rate": 0.064
+        },
+        {
+          "from": 1243,
+          "to": 1435,
+          "base": 80.21,
+          "rate": 0.1349
+        },
+        {
+          "from": 1435,
+          "to": 4144,
+          "base": 106.15,
+          "rate": 0.0735
+        },
+        {
+          "from": 4144,
+          "to": 8290,
+          "base": 305.27,
+          "rate": 0.0765
+        },
+        {
+          "from": 8290,
+          "to": null,
+          "base": null,
+          "rate": null,
+          "useMethodIII": true
+        }
+      ],
+      "weekly": [
+        {
+          "from": 0,
+          "to": 163,
+          "base": 0,
+          "rate": 0.039
+        },
+        {
+          "from": 163,
+          "to": 225,
+          "base": 6.38,
+          "rate": 0.044
+        },
+        {
+          "from": 225,
+          "to": 267,
+          "base": 9.08,
+          "rate": 0.0515
+        },
+        {
+          "from": 267,
+          "to": 1551,
+          "base": 11.27,
+          "rate": 0.054
+        },
+        {
+          "from": 1551,
+          "to": 1862,
+          "base": 80.58,
+          "rate": 0.059
+        },
+        {
+          "from": 1862,
+          "to": 2070,
+          "base": 98.9,
+          "rate": 0.0657
+        },
+        {
+          "from": 2070,
+          "to": 3032,
+          "base": 112.6,
+          "rate": 0.0707
+        },
+        {
+          "from": 3032,
+          "to": 4068,
+          "base": 180.54,
+          "rate": 0.0801
+        },
+        {
+          "from": 4068,
+          "to": 6215,
+          "base": 263.62,
+          "rate": 0.064
+        },
+        {
+          "from": 6215,
+          "to": 7177,
+          "base": 401.04,
+          "rate": 0.1349
+        },
+        {
+          "from": 7177,
+          "to": 20722,
+          "base": 530.77,
+          "rate": 0.0735
+        },
+        {
+          "from": 20722,
+          "to": 41449,
+          "base": 1526.33,
+          "rate": 0.0765
+        },
+        {
+          "from": 41449,
+          "to": null,
+          "base": null,
+          "rate": null,
+          "useMethodIII": true
+        }
+      ],
+      "biweekly": [
+        {
+          "from": 0,
+          "to": 327,
+          "base": 0,
+          "rate": 0.039
+        },
+        {
+          "from": 327,
+          "to": 450,
+          "base": 12.77,
+          "rate": 0.044
+        },
+        {
+          "from": 450,
+          "to": 535,
+          "base": 18.15,
+          "rate": 0.0515
+        },
+        {
+          "from": 535,
+          "to": 3102,
+          "base": 22.54,
+          "rate": 0.054
+        },
+        {
+          "from": 3102,
+          "to": 3723,
+          "base": 161.15,
+          "rate": 0.059
+        },
+        {
+          "from": 3723,
+          "to": 4140,
+          "base": 197.81,
+          "rate": 0.0657
+        },
+        {
+          "from": 4140,
+          "to": 6063,
+          "base": 225.19,
+          "rate": 0.0707
+        },
+        {
+          "from": 6063,
+          "to": 8137,
+          "base": 361.08,
+          "rate": 0.0801
+        },
+        {
+          "from": 8137,
+          "to": 12431,
+          "base": 527.23,
+          "rate": 0.064
+        },
+        {
+          "from": 12431,
+          "to": 14354,
+          "base": 802.08,
+          "rate": 0.1349
+        },
+        {
+          "from": 14354,
+          "to": 41444,
+          "base": 1061.54,
+          "rate": 0.0735
+        },
+        {
+          "from": 41444,
+          "to": 82898,
+          "base": 3052.65,
+          "rate": 0.0765
+        },
+        {
+          "from": 82898,
+          "to": null,
+          "base": null,
+          "rate": null,
+          "useMethodIII": true
+        }
+      ],
+      "semimonthly": [
+        {
+          "from": 0,
+          "to": 354,
+          "base": 0,
+          "rate": 0.039
+        },
+        {
+          "from": 354,
+          "to": 488,
+          "base": 13.83,
+          "rate": 0.044
+        },
+        {
+          "from": 488,
+          "to": 579,
+          "base": 19.67,
+          "rate": 0.0515
+        },
+        {
+          "from": 579,
+          "to": 3360,
+          "base": 24.42,
+          "rate": 0.054
+        },
+        {
+          "from": 3360,
+          "to": 4033,
+          "base": 174.58,
+          "rate": 0.059
+        },
+        {
+          "from": 4033,
+          "to": 4485,
+          "base": 214.29,
+          "rate": 0.0657
+        },
+        {
+          "from": 4485,
+          "to": 6569,
+          "base": 243.96,
+          "rate": 0.0707
+        },
+        {
+          "from": 6569,
+          "to": 8815,
+          "base": 391.17,
+          "rate": 0.0801
+        },
+        {
+          "from": 8815,
+          "to": 13467,
+          "base": 571.17,
+          "rate": 0.064
+        },
+        {
+          "from": 13467,
+          "to": 15550,
+          "base": 868.92,
+          "rate": 0.1349
+        },
+        {
+          "from": 15550,
+          "to": 44898,
+          "base": 1150,
+          "rate": 0.0735
+        },
+        {
+          "from": 44898,
+          "to": 89806,
+          "base": 3307.04,
+          "rate": 0.0765
+        },
+        {
+          "from": 89806,
+          "to": null,
+          "base": null,
+          "rate": null,
+          "useMethodIII": true
+        }
+      ],
+      "monthly": [
+        {
+          "from": 0,
+          "to": 708,
+          "base": 0,
+          "rate": 0.039
+        },
+        {
+          "from": 708,
+          "to": 975,
+          "base": 27.67,
+          "rate": 0.044
+        },
+        {
+          "from": 975,
+          "to": 1158,
+          "base": 39.33,
+          "rate": 0.0515
+        },
+        {
+          "from": 1158,
+          "to": 6721,
+          "base": 48.83,
+          "rate": 0.054
+        },
+        {
+          "from": 6721,
+          "to": 8067,
+          "base": 349.17,
+          "rate": 0.059
+        },
+        {
+          "from": 8067,
+          "to": 8971,
+          "base": 428.58,
+          "rate": 0.0657
+        },
+        {
+          "from": 8971,
+          "to": 13138,
+          "base": 487.92,
+          "rate": 0.0707
+        },
+        {
+          "from": 13138,
+          "to": 17629,
+          "base": 782.33,
+          "rate": 0.0801
+        },
+        {
+          "from": 17629,
+          "to": 26933,
+          "base": 1142.33,
+          "rate": 0.064
+        },
+        {
+          "from": 26933,
+          "to": 31100,
+          "base": 1737.83,
+          "rate": 0.1349
+        },
+        {
+          "from": 31100,
+          "to": 89796,
+          "base": 2300,
+          "rate": 0.0735
+        },
+        {
+          "from": 89796,
+          "to": 179613,
+          "base": 6614.08,
+          "rate": 0.0765
+        },
+        {
+          "from": 179613,
+          "to": null,
+          "base": null,
+          "rate": null,
+          "useMethodIII": true
+        }
+      ],
+      "annual": [
+        {
+          "from": 0,
+          "to": 8500,
+          "base": 0,
+          "rate": 0.039
+        },
+        {
+          "from": 8500,
+          "to": 11700,
+          "base": 332,
+          "rate": 0.044
+        },
+        {
+          "from": 11700,
+          "to": 13900,
+          "base": 472,
+          "rate": 0.0515
+        },
+        {
+          "from": 13900,
+          "to": 80650,
+          "base": 586,
+          "rate": 0.054
+        },
+        {
+          "from": 80650,
+          "to": 96800,
+          "base": 4190,
+          "rate": 0.059
+        },
+        {
+          "from": 96800,
+          "to": 107650,
+          "base": 5143,
+          "rate": 0.0657
+        },
+        {
+          "from": 107650,
+          "to": 157650,
+          "base": 5855,
+          "rate": 0.0707
+        },
+        {
+          "from": 157650,
+          "to": 211550,
+          "base": 9388,
+          "rate": 0.0801
+        },
+        {
+          "from": 211550,
+          "to": 323200,
+          "base": 13708,
+          "rate": 0.064
+        },
+        {
+          "from": 323200,
+          "to": 373200,
+          "base": 20854,
+          "rate": 0.1349
+        },
+        {
+          "from": 373200,
+          "to": 1077550,
+          "base": 27600,
+          "rate": 0.0735
+        },
+        {
+          "from": 1077550,
+          "to": 2155350,
+          "base": 79369,
+          "rate": 0.0765
+        },
+        {
+          "from": 2155350,
+          "to": null,
+          "base": null,
+          "rate": null,
+          "useMethodIII": true
+        }
+      ]
+    }
+  },
+  "methodIII": {
+    "$comment": "ENGINE-CONSUMED. 'Top Income Tax Rates Method' -- a genuinely different mechanic from the per-period bracket tables above: applies a FLAT percentage to ANNUALIZED net wages (net wages x periodsPerYear), no marginal-bracket-base math, then divides the result back by periodsPerYear. Only reached when the useMethodIII flag on the top bracket row is hit.",
+    "single": [
+      {
+        "from": 1077550,
+        "to": 5000000,
+        "rate": 0.1045
+      },
+      {
+        "from": 5000000,
+        "to": 25000000,
+        "rate": 0.111
+      },
+      {
+        "from": 25000000,
+        "to": null,
+        "rate": 0.117
+      }
+    ],
+    "married": [
+      {
+        "from": 2155350,
+        "to": 5000000,
+        "rate": 0.1045
+      },
+      {
+        "from": 5000000,
+        "to": 25000000,
+        "rate": 0.111
+      },
+      {
+        "from": 25000000,
+        "to": null,
+        "rate": 0.117
+      }
+    ]
+  },
+  "supplementalWages": {
+    "flatRate": 0.117,
+    "quote": "NYS-50-T-NYS, verbatim: 'Withhold at the New York State supplemental rate of 11.70% (0.1170).' Alternative: aggregate the supplemental payment with the most recent payroll period's regular wages and compute withholding on the combined total via the normal method -- already reachable in this engine without new code (don't tag the earning 'supplemental'), same convention as every other state.",
+    "note": "11.70% happens to equal the SAME rate as the top bracket of Method III's lowest tier and the highest per-period marginal rate (0.1144/0.1349 spikes aside) -- not investigated further whether this is coincidence or design; recorded as observed, not asserted as intentional."
+  },
+  "certificateFields": {
+    "form": "IT-2104, Employee's Withholding Allowance Certificate -- covers NYS, NYC, AND Yonkers on ONE form.",
+    "fields": "input.workState.certificate.{maritalStatus: 'single'|'married'|'married_withhold_as_single' (matches the recurring 3rd-checkbox pattern already seen in Minnesota's W-4MN and Montana's MW-4), exemptions: number >=0 (Line 1 -- NYS+Yonkers COMBINED count; only the NYS portion is consumed by this file, since Yonkers isn't modelled this pass; RESOLVED this pass -- see combinedAllowanceTable.over10ExemptionsNote, no longer capped at 10)}. certificate.nonresidentAlien is intentionally NOT read by bracketPerPeriodNet() -- see nonresidentAlienGap below.",
+    "nonresidentAlienGap": "UNLIKE Minnesota's W-4MN, which explicitly instructs employers to use IRS Pub 15-T's Table 1/2 adjustment for MINNESOTA withholding, neither NYS-50-T-NYS nor IT-2104 mentions nonresident aliens anywhere -- searched directly, zero matches in either document, and a web search turned up no NY-specific guidance either (only pointers to federal Pub 519/515, the same general-purpose federal references any state's silence would point to). An earlier version of this pass DID apply Minnesota's adjustment to New York by analogy before this was checked -- deliberately backed out once the lack of an NY-specific source was noticed, since an unconfirmed assumption presented as a sourced fact is worse than a disclosed gap. certificate.nonresidentAlien is accepted on New York's certificate shape but has NO effect on the calculation (proven by a dedicated test) until a genuine NY-specific source is found.",
+    "marriedWithholdAtHigherSingleRateNote": "Per this project's now-established convention (Minnesota, Montana), this maps to the SINGLE bracket table and Table A single column, not a separate schedule.",
+    "additionalWithholdingNote": "IT-2104 Line 3 is a NYS-SPECIFIC additional-withholding dollar amount, distinct from Lines 4 (NYC) and 5 (Yonkers) -- this is DIFFERENT from every other state's certificate.additionalWithholding, which assumes ONE flat amount applies to the whole `${code}_SIT` line. NOT wired to the existing generic applyAdditionalStateWithholding() mechanism this pass, because that mechanism has no way to know Line 3 (not Line 4 or 5) is the NYS-relevant one once NYC/Yonkers are built -- see knownGaps. For now, a caller who sets certificate.additionalWithholding will have it applied to NY_SIT via the existing generic mechanism (technically works, since NYC/Yonkers aren't computed at all yet to conflict with it), but this will need revisiting once those jurisdictions are added."
+  },
+  "reciprocity": {
+    "reciprocalStates": [],
+    "confirmed": "New York has NO income tax reciprocity agreements with ANY state -- confirmed both by absence (neither NYS-50-T-NYS nor IT-2104 mention 'reciprocity' or 'reciprocal' anywhere, searched directly) and by explicit corroboration: New York is specifically named as one of the states WITHOUT a reciprocal agreement in multiple independent secondary sources discussing the 16-state-plus-DC reciprocity network nationally (which New York is not part of). A nonresident working in New York owes New York tax on that income regardless of home-state agreements; the standard remedy is a resident-state tax credit on the OTHER state's return, not New York withholding relief -- New York is frequently cited as one of the most aggressive states in taxing nonresident income for exactly this reason.",
+    "engineEffect": "An empty reciprocalStates array is a deliberate, confirmed fact (not an unresearched gap) -- reciprocityExemptionLine() in state.ts already no-ops correctly on an empty/absent array, so this entry exists purely to make the ABSENCE of reciprocity a verified, sourced claim rather than silent omission, the same discipline every other state's file applies to its own reciprocity picture."
+  },
+  "rounding": {
+    "rule": "Standard cent rounding (roundHalfUp), NOT whole-dollar rounding -- confirmed directly from the source's own worked examples, which report results to the cent (e.g. Example 1: '$8.01', Example 3: '$3,576.63'). Genuinely different from Montana, which rounds to the whole dollar despite superficially similar per-period bracket mechanics -- a real reminder that 'per-period bracket lookup' as a SHAPE doesn't imply the same rounding convention across states."
+  },
+  "verification": {
+    "aRealErrorWasCaughtAndFixed": "The FIRST version of this file's 12 bracket tables (6 pay periods x single/married) had a systematic transcription bug: the SECOND bracket row of every single table was written with base:0 instead of its actual published value (e.g. weekly single row 2 should be base=$6.38, was written as $0). Caught by the very first test run against NYS-50-T-NYS's own worked Example 1 ($8.01 expected, engine returned $1.63) -- NOT caught by eyeballing the JSON, which looked plausible. Fixed by writing a small verification script that chains each row's base forward from the previous row's base+rate*(gap) and flags any row whose PUBLISHED base disagrees with the chained prediction by more than a few cents (the same technique already used elsewhere in this project for WI/MN/MT bracket tables) -- this caught the SAME row-2 pattern independently in all 12 tables at once, confirming it was systematic, not a one-off. All 12 tables were then rebuilt programmatically straight from the raw source column data rather than patched by hand, to eliminate the risk of repeating the same manual-transcription mistake.",
+    "sourceItselfHadAOneCentError": "NYS-50-T-NYS's own Example 2 (semimonthly $5,000, single, 1 exemption) states an intermediate result of $12.43 and a final answer of $258.51. The precise math (165.00 x 0.0753 = 12.4245) rounds to $12.42 under ordinary nearest-cent rounding, not $12.43 -- confirmed two ways (rounding the intermediate step, and not rounding it and only rounding the final sum) that the mathematically correct answer is $258.50. This engine computes $258.50; the test asserts that value with a note explaining the $0.01 discrepancy, rather than forcing the code to match what appears to be a small arithmetic slip in the source's own printed example -- the same category of correction already made for Kentucky's biweekly worked example elsewhere in this project.",
+    "worked": "Examples 1, 3, and 4 (of NYS-50-T-NYS's 4 published examples) reproduce EXACTLY, including intermediate steps. Example 2 reproduces to the mathematically-correct value, one cent off the source's own stated (and apparently slightly miscalculated) answer. 13 New York test fixtures total, all passing -- see tests/engine.test.ts, describe('New York')."
+  },
+  "knownGaps": [
+    "SCOPE, not oversight: NYC resident tax, NYC nonresident tax (if applicable), Yonkers resident surcharge, Yonkers nonresident earnings tax, NY Paid Family Leave (employee-paid), NY disability insurance/DBL (employee-paid, historically capped near $0.60/week but not independently verified for 2026 this session), and NY unemployment insurance (employer-paid) are ALL undocumented and unmodelled -- explicit user decision this session to scope to NYS state income tax first. IT-2104's own Lines 2/4/5 (NYC allowances, NYC additional withholding, Yonkers additional withholding) exist on the SAME certificate but are not consumed anywhere in this file.",
+    "IT-2104 Line 3 (NYS-specific additional withholding) is NOT distinguished from Line 4 (NYC) or Line 5 (Yonkers) by this project's existing generic certificate.additionalWithholding mechanism -- works correctly for now only because NYC/Yonkers aren't computed at all, so there's nothing for Line 3's value to conflict with. Will need a NY-specific field name (e.g. certificate.additionalWithholdingNYS) once NYC/Yonkers are built, rather than continuing to overload the generic single-value field three ways.",
+    "The recurring non-monotonic bracket-rate anomaly (a rate spike then drop-back near the top of every one of the 12 transcribed schedules) was verified as a real, consistently-reproduced feature of the published tables, not a transcription error, but its underlying CAUSE (plausibly a benefit-recapture mechanism) was not independently confirmed against NY tax law/statute this session.",
+    "RESOLVED this pass: reciprocity confirmed (New York has none, with any state) -- see reciprocity above. Exemption counts above 10 now extrapolate correctly instead of throwing -- see combinedAllowanceTable.over10ExemptionsNote. Nonresident alien handling was INVESTIGATED, an incorrect Minnesota-by-analogy implementation was caught and removed, and the honest state -- no NY-specific source exists, so the flag is accepted but has no effect -- is now disclosed rather than either silently wrong or silently absent. See nonresidentAlienGap above."
+  ]
+}

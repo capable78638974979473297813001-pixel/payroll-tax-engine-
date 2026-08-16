@@ -1561,6 +1561,280 @@ describe('Montana', () => {
   });
 });
 
+describe('New York', () => {
+  // Expected values hand-derived from NYS-50-T-NYS's own worked examples and
+  // published tables, same discipline as every other state. New York is the
+  // first state in this project where the deduction/exemption allowance is a
+  // single precomputed per-period/per-status/per-count lookup (Table A)
+  // rather than a flat per-exemption multiplier, AND where the bracket table
+  // itself is published separately per pay frequency with no annualization
+  // step for ordinary earners — Method III (a flat rate on ANNUALIZED net
+  // wages) only kicks in for very high earners.
+  const nyState = (certificate: Record<string, unknown>) => ({
+    workState: { code: 'NY', certificate },
+  });
+
+  test('NYS-50-T-NYS Example 1: weekly $400, single, 3 exemptions', () => {
+    // Table A: $200.05. Net: 400-200.05=199.95. Weekly single bracket
+    // 163-267 has TWO rows in the published table for that span (225 is a
+    // sub-boundary) -- 199.95 falls in [163,225): base $0, rate 4.40%,
+    // subtract $163. (199.95-163)*0.0440=1.6258 -> +6.38 base = $8.0058
+    // -> $8.01 (the source's own stated answer).
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+        ...nyState({ maritalStatus: 'single', exemptions: 3 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_SIT'), dollars(8.01));
+  });
+
+  test('NYS-50-T-NYS Example 2: semimonthly $5,000, single, 1 exemption', () => {
+    // Table A: $350.00. Net: 5,000-350=4,650. Falls in [4,485,6,569): base
+    // $246.08, rate 7.53%, subtract $4,485. (4,650-4,485)*0.0753=12.4245 ->
+    // nearest-cent rounds to $12.42, not $12.43 (12.4245 is below the
+    // 12.425 halfway point) -> +246.08 = $258.50.
+    //
+    // NYS-50-T-NYS's OWN printed example states $12.43 and a final $258.51
+    // -- a genuine $0.01 rounding slip in the SOURCE's own worked example
+    // (165.00 x 0.0753 = 12.4245 rounds to 12.42 under ordinary nearest-cent
+    // rounding, not 12.43), the same category of source imprecision already
+    // documented and corrected for in this project (Kentucky's biweekly
+    // example: 'corrected to $47.98 from the source's own truncated $47').
+    // Verified two independent ways this session: by hand, and by NOT
+    // rounding the intermediate step at all (165x0.0753=12.4245, +246.08=
+    // 258.5045, which itself rounds to $258.50, not $258.51 either way).
+    // This engine computes the mathematically correct $258.50.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+        ...nyState({ maritalStatus: 'single', exemptions: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_SIT'), dollars(258.50));
+  });
+
+  test('NYS-50-T-NYS Example 3: monthly $50,000, single, 3 exemptions', () => {
+    // Table A: $866.60. Net: 50,000-866.60=49,133.40. Falls in
+    // [22,117,89,796): base $1,590.92, rate 7.35%, subtract $22,117.
+    // (49,133.40-22,117)*0.0735=1,985.7057 -> +1,590.92 = $3,576.6257 ->
+    // $3,576.63 (the source's own stated answer).
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(50000) }],
+        ...nyState({ maritalStatus: 'single', exemptions: 3 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_SIT'), dollars(3576.63));
+  });
+
+  test('NYS-50-T-NYS Example 4: daily $750, single, 2 exemptions', () => {
+    // Table A: $36.15. Net: 750-36.15=713.85. Falls in [606,828): base
+    // $37.20, rate 6.40%, subtract $606. (713.85-606)*0.0640=6.9024 ->
+    // +37.20 = $44.1024 -> $44.10 (the source's own stated answer).
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'daily',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(750) }],
+        ...nyState({ maritalStatus: 'single', exemptions: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_SIT'), dollars(44.10));
+  });
+
+  test('married uses a genuinely different schedule than single, not just a relabeled one', () => {
+    // Weekly $2,000, married, 2 exemptions. Table A (married, weekly, 2
+    // exemptions): $191.40. Net: 2,000-191.40=1,808.60. Married weekly
+    // bracket [1,551,1,862): base $80.58, rate 5.90%, subtract $1,551.
+    // (1,808.60-1,551)*0.0590=15.1994 -> +80.58 = $95.7794 -> $95.78.
+    // (The SINGLE schedule's [1,551,1,862) row has the same rate/base by
+    // coincidence at this particular bracket, so this fixture deliberately
+    // does NOT prove schedule divergence by itself -- see the next test for
+    // that proof instead, at a bracket where the two schedules genuinely
+    // differ.)
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...nyState({ maritalStatus: 'married', exemptions: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_SIT'), dollars(95.78));
+  });
+
+  test('married and single schedules genuinely diverge at a higher bracket', () => {
+    // Weekly $4,500, single vs married, 0 exemptions each -- picked
+    // specifically because single's [4,142,5,104) bracket (11.44% off a
+    // $257.10 base) and married's [4,068,6,215) bracket (6.40% off a
+    // $263.62 base) cover this wage differently.
+    // Single: Table A(single,weekly,0)=$142.30. Net=4,500-142.30=4,357.70.
+    // Falls in single's [4,142,5,104): base $257.10, rate 11.44%, subtract
+    // $4,142. Excess=$215.70; 21570 cents x 0.1144=2467.608 cents, rounds to
+    // 2468 cents ($24.68) at THIS step (the engine rounds each applyRate()
+    // call, not just the final sum) -> +$257.10 = $281.78.
+    // Married: Table A(married,weekly,0)=$152.90. Net=4,500-152.90=4,347.10.
+    // Falls in married's [4,068,6,215): base $263.62, rate 6.40%, subtract
+    // $4,068. Excess=$279.10; 27910 cents x 0.0640=1786.24, rounds to 1786
+    // cents ($17.86) -> +$263.62 = $281.48. Genuinely different from
+    // single's $281.78, proving the two schedules are not the same table
+    // under a different label.
+    const rSingle = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(4500) }],
+        ...nyState({ maritalStatus: 'single', exemptions: 0 }),
+      }),
+    );
+    const rMarried = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(4500) }],
+        ...nyState({ maritalStatus: 'married', exemptions: 0 }),
+      }),
+    );
+    assert.equal(amountOf(rSingle, 'NY_SIT'), dollars(281.78));
+    assert.equal(amountOf(rMarried, 'NY_SIT'), dollars(281.48));
+  });
+
+  test("third checkbox ('married_withhold_at_higher_single_rate' via 'married_withhold_as_single') resolves to the SINGLE schedule", () => {
+    // Same $4,500/week, 0 exemptions as the single case above -- proves the
+    // third checkbox maps correctly, not a NEW number.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(4500) }],
+        ...nyState({ maritalStatus: 'married_withhold_as_single', exemptions: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_SIT'), dollars(281.78));
+  });
+
+  test('an unrecognized certificate.maritalStatus throws instead of silently defaulting to single', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            ...nyState({ maritalStatus: 'divorced', exemptions: 0 }),
+          }),
+        ),
+      /Unrecognized NY certificate\.maritalStatus/,
+    );
+  });
+
+  test('more than 10 exemptions extrapolates linearly from Table A, per NY\'s own Table B+C method', () => {
+    // Weekly $400, single, 11 exemptions. Table A only publishes 0-10;
+    // index 10 is $334.80, index 9 is $315.55, a $19.25 per-exemption
+    // increment confirmed constant across the whole published table.
+    // Allowance(11) = 334.80 + 19.25*(11-10) = $354.05. Net = 400-354.05=
+    // $45.95 -> falls in [0,163): base $0, rate 3.90%. 45.95*0.039=1.79205
+    // -> $1.79.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+        ...nyState({ maritalStatus: 'single', exemptions: 11 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_SIT'), dollars(1.79));
+  });
+
+  test('a negative exemptions count throws rather than silently reading a nonsense index', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            ...nyState({ maritalStatus: 'single', exemptions: -1 }),
+          }),
+        ),
+      /non-negative integer/,
+    );
+  });
+
+  test('nonresidentAlien flag has NO effect on NY -- unlike Minnesota, NY has no sourced NRA instruction to apply', () => {
+    // Same $605/wk single 0-exemption base as the ordinary case, WITH
+    // certificate.nonresidentAlien:true set. Deliberately proves this flag
+    // is a no-op for New York: neither NYS-50-T-NYS nor IT-2104 mentions
+    // nonresident aliens anywhere, so this engine does NOT apply Minnesota's
+    // Pub 15-T Table 2 adjustment here — doing so without an NY-specific
+    // source would risk a confidently-wrong number. Ordinary calculation:
+    // Table A (single,weekly,0)=$142.30. Net=605-142.30=462.70 -> falls in
+    // [267,1551): base $11.27, rate 5.40%. (462.70-267)*0.0540=10.5678 ->
+    // +11.27 = $21.8378 -> $21.84.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+        ...nyState({ maritalStatus: 'single', exemptions: 0, nonresidentAlien: true }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_SIT'), dollars(21.84));
+  });
+
+  test('Method III: a very high weekly wage triggers the flat-rate-on-annualized-wages fallback', () => {
+    // Weekly $21,000, single, 0 exemptions. Table A: $142.30. Net:
+    // 21,000-142.30=20,857.70 -- ABOVE single's top bounded bracket
+    // ($20,722), so Method III applies. Annualized: 20,857.70*52=
+    // 1,084,600.40 -- falls in Method III's first single tier
+    // ($1,077,550-$5,000,000 @ 10.45%). Annual tax: 1,084,600.40*0.1045=
+    // 113,340.7418 -> $113,340.74. Per-week: 113,340.74/52=2,179.6296...
+    // -> $2,179.63.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(21000) }],
+        ...nyState({ maritalStatus: 'single', exemptions: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_SIT'), dollars(2179.63));
+  });
+
+  test('supplemental wages use New York\'s flat 11.70% rate, separate from the regular-wages bracket lookup', () => {
+    // Biweekly $2,000 regular + $1,000 bonus, single, 2 exemptions.
+    // Regular line excludes the bonus from its own base: Table A
+    // (single,biweekly,2)=$361.60. Net=2,000-361.60=1,638.40. Falls in
+    // [535,3,102): base $22.54, rate 5.40%, subtract $535.
+    // (1,638.40-535)*0.0540=59.5836 -> +22.54 = $82.1236 -> $82.12.
+    // Supplemental line: 1,000*11.70%=$117.00 flat, no bracket lookup.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(2000) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+        ],
+        ...nyState({ maritalStatus: 'single', exemptions: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_SIT'), dollars(82.12));
+    assert.equal(amountOf(r, 'NY_SIT_SUPP'), dollars(117.00));
+  });
+
+  test('no supplemental line at all when there is no supplemental income', () => {
+    const r = calculatePaycheck(
+      input(nyState({ maritalStatus: 'single', exemptions: 0 })),
+    );
+    assert.equal(r.taxes.some((t) => t.id === 'NY_SIT_SUPP'), false);
+  });
+
+  test('zero wages after the allowance is subtracted withholds $0, not negative', () => {
+    // Weekly $100, single, 5 exemptions. Table A (single,weekly,5)=$238.55,
+    // which exceeds the $100 gross wage entirely.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(100) }],
+        ...nyState({ maritalStatus: 'single', exemptions: 5 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_SIT'), 0);
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

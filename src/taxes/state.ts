@@ -320,6 +320,12 @@ function incomeTaxLines(
       if (supplemental) lines.push(supplemental);
       return lines;
     }
+    case 'bracket_per_period_net': {
+      const lines: TaxLine[] = [bracketPerPeriodNet(input, ctx, rules)];
+      const supplemental = flatRateSupplementalFromConfig(input, ctx, rules);
+      if (supplemental) lines.push(supplemental);
+      return lines;
+    }
     case 'no_income_tax':
       return [];
     default:
@@ -1240,5 +1246,190 @@ function montanaSupplementalTax(
     taxableWages: supplementalCash,
     amount,
     detail: `${fmt(supplementalCash)} @ ${(rate * 100).toFixed(2)}% flat (Method 3), rounded to the nearest dollar`,
+  };
+}
+
+interface NYBracket extends WIBracket {
+  useMethodIII?: boolean;
+}
+
+interface NYMethodIIIBand {
+  from: number; // dollars, annual
+  to: number | null;
+  rate: number;
+}
+
+interface NYRulesetShape {
+  combinedAllowanceTable: Record<'single' | 'married', Record<string, number[]>>;
+  brackets: Record<'single' | 'married', Record<string, NYBracket[]>>;
+  methodIII: Record<'single' | 'married', NYMethodIIIBand[]>;
+  supplementalWages: { flatRate: number };
+}
+
+/**
+ * Resolves IT-2104's marital-status checkbox to which of New York's two
+ * published schedules applies — the same three-checkbox shape (single,
+ * married, married-but-withhold-at-higher-single-rate) already seen in
+ * Minnesota's W-4MN and Montana's MW-4, now a recurring cross-state pattern
+ * in this project rather than a one-off. Absence defaults to 'single',
+ * matching every other state's no-certificate convention.
+ */
+function resolveNYMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  const raw = cert.maritalStatus;
+  if (raw === undefined || raw === null) return 'single';
+  if (raw === 'single' || raw === 'married_withhold_as_single') return 'single';
+  if (raw === 'married') return 'married';
+  throw new Error(
+    `Unrecognized NY certificate.maritalStatus ${JSON.stringify(raw)} — expected ` +
+      `'single', 'married', or 'married_withhold_as_single'.`,
+  );
+}
+
+function findMethodIIIBand(bands: NYMethodIIIBand[], annualNetWages: number): NYMethodIIIBand {
+  for (const b of bands) {
+    const from = dollars(b.from);
+    const to = b.to === null ? Infinity : dollars(b.to);
+    if (annualNetWages >= from && annualNetWages < to) return b;
+  }
+  return bands[bands.length - 1];
+}
+
+/**
+ * New York State's withholding formula (NYS-50-T-NYS's Method II "Exact
+ * Calculation Method", with a Method III fallback for very high earners) —
+ * a genuinely new shape in this project: (1) subtract a COMBINED
+ * deduction+exemption allowance (a single precomputed per-period,
+ * per-marital-status, per-exemption-count dollar figure — Table A — not a
+ * flat per-exemption multiplier) directly from PER-PERIOD gross wages, no
+ * annualizing first; (2) look up the result in a bracket table published
+ * SEPARATELY per pay frequency (like Montana — not one annual table divided
+ * down); (3) ONLY when net wages exceed the top published bracket
+ * (annualized above $1,077,550 single / $2,155,350 married for 2026) does
+ * Method III apply instead — a flat percentage of ANNUALIZED net wages,
+ * which DOES require annualizing, unlike the ordinary per-period path.
+ *
+ * Verified against the source's own worked examples: weekly $400 single 3
+ * exemptions → $8.01; monthly $50,000 single 3 exemptions → $3,576.63 — see
+ * tests/engine.test.ts, describe('New York').
+ */
+function bracketPerPeriodNet(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules as unknown as NYRulesetShape;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  const supplementalCash = supplementalEarnings(input.earnings);
+  const grossWagesBeforeNRA = atLeastZero(fullBase - supplementalCash);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const maritalStatus = resolveNYMaritalStatus(cert);
+  const exemptions = Number(cert.exemptions ?? 0);
+  if (exemptions < 0 || !Number.isInteger(exemptions)) {
+    throw new Error(`NY certificate.exemptions (${exemptions}) must be a non-negative integer.`);
+  }
+
+  const allowanceTable = cfg.combinedAllowanceTable[maritalStatus][input.payFrequency];
+  if (!allowanceTable) {
+    throw new Error(
+      `New York's own withholding tables don't publish a "${input.payFrequency}" allowance ` +
+        `schedule (only daily/weekly/biweekly/semimonthly/monthly/annual are published) — ` +
+        `cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  // NY's own Table A only publishes 0-10 directly; above 10, its own
+  // instructions say to use Table B (the 0-exemption baseline, already
+  // table[0]) plus Table C ($X per exemption, a flat per-period constant
+  // confirmed equal to the increment between any two consecutive Table A
+  // entries) — so linear extrapolation past index 10 reproduces exactly
+  // what NY's own B+C method would compute, without needing separately
+  // transcribed data.
+  const allowanceDollars =
+    exemptions <= 10
+      ? allowanceTable[exemptions]
+      : allowanceTable[10] + (allowanceTable[10] - allowanceTable[9]) * (exemptions - 10);
+  const allowance = dollars(allowanceDollars);
+
+  // UNLIKE Minnesota's W-4MN, neither NYS-50-T-NYS nor IT-2104 says
+  // anything about nonresident alien employees anywhere (searched directly
+  // — zero mentions in either document) — so, unlike bracketFlatAllowance()
+  // for Minnesota, this function deliberately does NOT apply the federal
+  // Pub 15-T Table 2 adjustment. Building that in by analogy without an
+  // NY-specific instruction would risk a confidently-wrong number rather
+  // than a disclosed gap; see NY-2026.json's knownGaps.
+  const grossWages = grossWagesBeforeNRA;
+
+  const netWages = atLeastZero(grossWages - allowance);
+
+  const brackets = cfg.brackets[maritalStatus][input.payFrequency];
+  if (!brackets) {
+    throw new Error(
+      `New York's own withholding tables don't publish a "${input.payFrequency}" bracket ` +
+        `schedule — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const bracket = findWIBracket(brackets, netWages) as NYBracket;
+
+  let amount: number;
+  let detail: string;
+
+  if (bracket.useMethodIII) {
+    const annualNetWages = netWages * ctx.periodsPerYear;
+    const band = findMethodIIIBand(cfg.methodIII[maritalStatus], annualNetWages);
+    const annualTax = applyRate(annualNetWages, band.rate);
+    amount = Math.round(annualTax / ctx.periodsPerYear);
+    detail =
+      `${fmt(grossWages)} gross less ${fmt(allowance)} allowance = ${fmt(netWages)} net; ` +
+      `annualized ${fmt(annualNetWages)} triggers Method III @ ${(band.rate * 100).toFixed(2)}% ` +
+      `flat, ÷ ${ctx.periodsPerYear}`;
+  } else {
+    const excess = netWages - dollars(bracket.from);
+    const tax = dollars(bracket.base) + applyRate(excess, bracket.rate);
+    amount = tax;
+    detail =
+      `${fmt(grossWages)} gross less ${fmt(allowance)} allowance = ${fmt(netWages)} net ` +
+      `@ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))}`;
+  }
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: netWages,
+    amount,
+    detail,
+  };
+}
+
+/**
+ * Flat-rate supplemental wages read generically off rules.supplementalWages
+ * .flatRate — New York's own 11.70% (Method A) is the first user, but this
+ * is written to read the config rather than hardcode NY's number, so a
+ * future state with the same shape (flat % of supplemental, no bracket
+ * lookup) gets it for free.
+ */
+function flatRateSupplementalFromConfig(
+  input: PaycheckInput,
+  _ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const supplementalCash = supplementalEarnings(input.earnings);
+  if (supplementalCash <= 0) return null;
+
+  const cfg = rules.supplementalWages as { flatRate: number } | undefined;
+  if (!cfg) return null;
+
+  const amount = applyRate(supplementalCash, cfg.flatRate);
+
+  return {
+    id: `${rules.code}_SIT_SUPP`,
+    name: `${rules.name} Income Tax (Supplemental)`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: supplementalCash,
+    amount,
+    detail: `${fmt(supplementalCash)} @ ${(cfg.flatRate * 100).toFixed(2)}% flat`,
   };
 }
