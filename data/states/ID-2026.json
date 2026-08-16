@@ -33,10 +33,16 @@
       "verifiedBy": "Fetched directly. Covers the percentage-computation-method steps, supplemental wages (aggregate with regular wages, OR withhold a flat 5.3% on a separately-issued supplemental payment — the same 5.3% as the regular flat rate, so this engine's default aggregation path already produces the correct amount with no separate supplemental line needed, the same convention as Kentucky's flatRateFixedDeduction), and confirms a federal/ID W-4 must be kept on file per employee."
     },
     {
-      "title": "Idaho Department of Labor — Unemployment Tax Information Handbook (Nov. 2025)",
-      "url": "https://www.labor.idaho.gov/wp-content/uploads/2025/11/Handbook_Tax-information_Nov.-2025-1.pdf",
+      "title": "Form ID W-4, Employee's Withholding Allowance Certificate (EFO00307, 04-28-2025 revision)",
+      "url": "https://tax.idaho.gov/w4form",
       "verifiedOn": "2026-08-16",
-      "verifiedBy": "Cross-source confirmed (search-engine synthesis of this and other secondary sources, not independently re-fetched and read in full this session) that Idaho UI is EMPLOYER-funded only, with no employee contribution — context-only fact, not engine-consumed, same convention as every other state's employer-only UI in this project. 2026 employer new-employer rate 1.0%, experienced range 0.21%-5.40%, wage base $58,300 — recorded for completeness, not verified to primary-document rigor."
+      "verifiedBy": "Downloaded and text-extracted directly (pdftotext -layout). Confirmed 04-28-2025 is the current revision applicable for 2026 (no separate 2026-dated form exists — the Child Tax Credit sunset was reflected in EPB00744's table update, not a form reprint). An EARLIER fetch of the prior 12-05-2024 revision (superseded, kept out of this sources list) had a STALE nonresident-alien Pay Period table ($16/$33/$36/$71) that the 04-28-2025 revision corrects to $15/$31/$33/$66 — caught by deliberately checking for a newer revision rather than trusting the first PDF found. ENGINE-CONSUMED: confirms Form ID W-4 has THREE withholding-status checkboxes (A Single, B Married, C Married-but-withhold-at-Single-rate — the same recurring 3-checkbox shape as MN/MT/NY), and the full nonresident-alien procedure (force Box A, enter 0 allowances, add the Pay Period table's dollar figure to Line 2/additional withholding) — both now wired into resolveIDMaritalStatus()/bracketTwoStatusPerPeriod(), closing a real gap from this file's first draft, which only recognized single/married/hoh and would have thrown on Box C."
+    },
+    {
+      "title": "Idaho Department of Labor — 2026 UI Rate Class Array",
+      "url": "https://www.labor.idaho.gov/wp-content/uploads/2024/12/Tax-rate_Class-array_2026.pdf",
+      "verifiedOn": "2026-08-16",
+      "verifiedBy": "Downloaded and text-extracted directly (pdftotext -layout) from the Department of Labor's own linked 2026 rate document — upgraded from an earlier cross-source-only figure. Confirms, verbatim, 'Effective date: 01/01/2026, Taxable wage base: $58,300' (the earlier cross-sourced $58,300 figure held up), a 7-class POSITIVE reserve-ratio schedule from 0.208% (class 1) to 0.694% (class 7), a STANDARD (new-employer) rate of 1.000% (0.970% UI contribution + 0.030% workforce development), and a 6-class DEFICIT schedule from 1.250% down to a flat 5.400% (class 6, the true ceiling) — a more precise and complete structure than the earlier secondary-sourced '0.21%-5.40%' range, which rounded the true 0.208% floor and didn't capture the positive/deficit class split at all. Context-only, not engine-consumed (employer-paid, experience-rated — same convention as every other state's employer UI in this project)."
     }
   ],
   "bracketTwoStatus": {
@@ -93,6 +99,13 @@
         { "from": 32200, "to": null, "base": 0, "rate": 0.053 }
       ]
     }
+   },
+   "nonresidentAlienAdjustment": {
+     "$comment": "Form ID W-4's OWN Pay Period table (04-28-2025 revision), NOT borrowed from federal Pub 15-T the way Minnesota's is -- verbatim instruction: 'Using the Pay Period table below, enter the additional amount of income tax you want withheld each pay period on line 2.' A flat per-period dollar ADD-ON TO TAX, applied after the single-schedule bracket lookup (see bracketTwoStatusPerPeriod's doc comment for why this differs structurally from MN's wage-level adjustment). Idaho's form does not publish quarterly/semiannual/annual figures.",
+     "weekly": 15,
+     "biweekly": 31,
+     "semimonthly": 33,
+     "monthly": 66
    }
   },
   "reciprocity": {
@@ -100,14 +113,16 @@
     "note": "Idaho has no income-tax reciprocity agreement with any other state (cross-source confirmed) — the reciprocity mechanism is present in the ruleset shape for consistency with other states but reciprocalStates is deliberately empty, not omitted, to make the 'checked, found none' state explicit rather than indistinguishable from 'not yet researched.'"
   },
   "unemploymentInsuranceEmployer": {
-    "$comment": "Employer-paid only — context-only, not engine-consumed, same convention as every other state's employer UI in this project. Cross-source confirmed, not independently primary-fetched and read this session.",
+    "$comment": "Employer-paid only — context-only, not engine-consumed, same convention as every other state's employer UI in this project. Primary-sourced (see sources — Idaho Dept. of Labor's own 2026 Rate Class Array PDF, fetched and read directly).",
     "newEmployerRate": 0.01,
-    "experiencedRateRange": { "min": 0.0021, "max": 0.054 },
+    "positiveClassRange": { "min": 0.00208, "max": 0.00694 },
+    "deficitClassRange": { "min": 0.0125, "max": 0.054 },
     "wageBase": 58300
   },
   "knownGaps": [
     "Idaho Child Tax Credit allowance mechanism: EPB00744's own table headers reference 'wages after subtracting child tax credit allowances,' but the credit sunset per Idaho Code 63-3029L means the allowance amount is $0 for 2026 (confirmed directly at tax.idaho.gov/ictcat) — a no-op subtraction, so certificate.allowances is not read by bracketTwoStatusPerPeriod(). If the credit is ever reinstated by a future legislature, this file would need a real per-allowance subtraction step added, which does not exist in the engine today.",
     "Supplemental wages paid on a SEPARATE cheque from regular wages: this engine models one calculatePaycheck() call at a time, so a standalone bonus cheque is taxed using ONLY that cheque's own wages against the full per-period threshold — it cannot look back at a prior regular cheque the way Idaho's own 'aggregate with regular wages' option would. The engine's default (untagged supplemental cash flows through the same bracket) already matches Idaho's OTHER stated option (flat 5.3%, identical to the regular flat rate) for wages ABOVE the threshold, but would UNDER-withhold relative to aggregation for a small standalone bonus that lands entirely within the $0 band — same class of disclosed cross-period gap as Kentucky's 103 KAR 18:070 Section 3(2) note.",
-    "resolveIDMaritalStatus's no-form default (single) is this project's standing convention, not a rule stated anywhere in Idaho's own EPB00744, ictcat, or computing-withholding pages — none of them say what to withhold absent a form beyond 'you must have a Form W-4 on file.'"
+    "resolveIDMaritalStatus's no-form default (single) is this project's standing convention, not a rule stated anywhere in Idaho's own EPB00744, ictcat, W-4, or computing-withholding pages — none of them say what to withhold absent a form beyond 'you must have a Form W-4 on file.'",
+    "nonresidentAlienAdjustment only publishes weekly/biweekly/semimonthly/monthly — Form ID W-4's own Pay Period table stops there (no quarterly/semiannual/daily/annual row), so bracketTwoStatusPerPeriod() falls back to $0 additional withholding for a nonresident alien on any of those less-common frequencies rather than guessing an interpolated figure."
   ]
 }

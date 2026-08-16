@@ -2046,30 +2046,50 @@ function stateDisabilityEmployeeTax(
 
 interface BracketTwoStatusConfig {
   brackets: Record<'single' | 'married', Record<string, WIBracket[]>>; // second key is PayFrequency
+  nonresidentAlienAdjustment?: Record<string, number>; // dollars, keyed by PayFrequency
 }
 
 /**
  * Resolves Form ID W-4's filing status to which of Idaho's two published
- * bracket schedules applies — Idaho's own Table for Percentage Computation
+ * bracket schedules applies. Idaho's own Table for Percentage Computation
  * Method (EPB00744) publishes exactly two schedules, "Single Persons
  * Including Head of Household" and "Married Persons," so head-of-household
  * maps to the single schedule BY THE SOURCE'S OWN HEADING, not by this
  * engine's convention (unlike Wisconsin's/Minnesota's disclosed HOH→single
  * simplification, which those states' own tables don't actually make —
- * Idaho's genuinely does). Default (no ID W-4 on file) is 'single', the same
- * no-form convention used everywhere else in this project — Idaho's own
- * computing-withholding guide requires a form be kept on file but does not
- * itself state a default, so this is the project's standing convention,
- * not an Idaho-specific instruction.
+ * Idaho's genuinely does). Form ID W-4 (EFO00307, 04-28-2025 revision —
+ * fetched and read directly, confirmed the current one applicable for 2026)
+ * ALSO has a third checkbox, "C (Married, but withhold at Single rate)" —
+ * the same recurring 3-checkbox shape already seen on MN's W-4MN, MT's
+ * MW-4, and NY's IT-2104 — which resolves to the SINGLE schedule despite
+ * the employee being married, the same convention used by
+ * resolveMNMaritalStatus()/resolveNYMaritalStatus() for that exact
+ * checkbox. An earlier version of this file only recognized 'single' and
+ * 'married' and would have THROWN for this real, form-documented option —
+ * caught by re-reading the actual form rather than trusting the withholding
+ * table's own two schedule NAMES as the complete list of certificate inputs.
+ * Default (no ID W-4 on file) is 'single', the same no-form convention used
+ * everywhere else in this project — Idaho's own computing-withholding guide
+ * requires a form be kept on file but does not itself state a default, so
+ * this is the project's standing convention, not an Idaho-specific
+ * instruction.
  */
 function resolveIDMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
   const raw = cert.maritalStatus;
-  if (raw === undefined || raw === null || raw === 'single' || raw === 'hoh') return 'single';
+  if (
+    raw === undefined ||
+    raw === null ||
+    raw === 'single' ||
+    raw === 'hoh' ||
+    raw === 'married_withhold_as_single'
+  ) {
+    return 'single';
+  }
   if (raw === 'married') return 'married';
   throw new Error(
-    `Unrecognized ID certificate.maritalStatus ${JSON.stringify(raw)} — expected ` +
-      `'single', 'married', or 'hoh' (Idaho's own table folds head-of-household into ` +
-      `the single schedule).`,
+    `Unrecognized ID certificate.maritalStatus ${JSON.stringify(raw)} — expected 'single', ` +
+      `'married', 'hoh' (folds into the single schedule per Idaho's own table heading), or ` +
+      `'married_withhold_as_single' (Form ID W-4's Box C, which also withholds at the single rate).`,
   );
 }
 
@@ -2085,6 +2105,22 @@ function resolveIDMaritalStatus(cert: Record<string, unknown>): 'single' | 'marr
  * period published (verified: annual $16,100/$32,200, monthly $1,342/
  * $2,683, semimonthly $671/$1,342, biweekly $619/$1,238, weekly $310/$619,
  * daily $62/$124) — Idaho's own design, not a computed doubling here.
+ *
+ * Nonresident aliens: Form ID W-4's own instructions (fetched and read
+ * directly) are genuinely different from every other NRA adjustment in this
+ * project — Minnesota's W-4MN borrows FEDERAL Pub 15-T Table 2 and ADDS it
+ * to WAGES before the bracket lookup runs; Idaho instead publishes its OWN
+ * Pay Period table and tells the employee to force Box A (single), enter 0
+ * allowances, and put the table's dollar figure directly on Line 2
+ * (additional withholding) — a flat dollar ADD-ON TO THE COMPUTED TAX, not
+ * a wage adjustment that could shift which bracket applies. Modeled here as
+ * such: certificate.nonresidentAlien forces the single schedule and adds
+ * cfg.nonresidentAlienAdjustment[payFrequency] to the final amount, rather
+ * than requiring the caller to separately populate
+ * certificate.additionalWithholding with a precomputed number (which would
+ * also have worked, since that field is already generic, but doing it here
+ * matches every other state's engine-consumed NRA handling instead of
+ * leaving it as a caller obligation).
  *
  * NOT MODELLED (disclosed, not guessed): Form ID W-4's "Idaho Child Tax
  * Credit allowance" count. EPB00744 headlines every table "wages after
@@ -2107,7 +2143,10 @@ function bracketTwoStatusPerPeriod(
   const taxableWages = ctx.taxableWagesFor(exempt);
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  const maritalStatus = resolveIDMaritalStatus(cert);
+  // Form ID W-4's own NRA instructions: "Check the 'A' box (Single)
+  // withholding regardless of your marital status" — forced, not merely
+  // defaulted, so this overrides whatever certificate.maritalStatus says.
+  const maritalStatus = cert.nonresidentAlien ? 'single' : resolveIDMaritalStatus(cert);
 
   const brackets = cfg.brackets[maritalStatus][input.payFrequency];
   if (!brackets) {
@@ -2118,7 +2157,10 @@ function bracketTwoStatusPerPeriod(
   }
   const bracket = findWIBracket(brackets, taxableWages);
   const excess = taxableWages - dollars(bracket.from);
-  const amount = dollars(bracket.base) + applyRate(excess, bracket.rate);
+  const nraAdjustment = cert.nonresidentAlien
+    ? dollars(cfg.nonresidentAlienAdjustment?.[input.payFrequency] ?? 0)
+    : 0;
+  const amount = dollars(bracket.base) + applyRate(excess, bracket.rate) + nraAdjustment;
 
   return {
     id: `${rules.code}_SIT`,
@@ -2128,9 +2170,12 @@ function bracketTwoStatusPerPeriod(
     taxableWages,
     amount,
     detail:
-      bracket.rate === 0
+      (bracket.rate === 0
         ? `${fmt(taxableWages)} below the ${maritalStatus} ${fmt(dollars(bracket.to ?? 0))} threshold — $0`
         : `${fmt(taxableWages)} less ${fmt(dollars(bracket.from))} ${maritalStatus} threshold ` +
-          `@ ${(bracket.rate * 100).toFixed(2)}%`,
+          `@ ${(bracket.rate * 100).toFixed(2)}%`) +
+      (nraAdjustment
+        ? `; plus ${fmt(nraAdjustment)}/period nonresident alien adjustment (Form ID W-4's own Pay Period table)`
+        : ''),
   };
 }

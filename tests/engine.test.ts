@@ -2715,6 +2715,45 @@ describe('Idaho', () => {
     assert.equal(amountOf(r, 'ID_SIT'), dollars(36.57));
   });
 
+  test("Form ID W-4's Box C (married, but withhold at Single rate) uses the single schedule — same $36.57", () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...idState({ maritalStatus: 'married_withhold_as_single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(36.57));
+  });
+
+  test("nonresident alien: forced to the single schedule plus Form ID W-4's own Pay Period table add-on", () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        // maritalStatus: 'married' deliberately included to prove the NRA
+        // instruction ("check Box A regardless of your marital status")
+        // overrides it, not just supplements a default.
+        ...idState({ nonresidentAlien: true, maritalStatus: 'married' }),
+      }),
+    );
+    // (1,000 − 310) × 5.3% = $36.57, plus the weekly $15 NRA add-on = $51.57.
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(51.57));
+  });
+
+  test('nonresident alien on a pay frequency outside the Pay Period table falls back to $0 add-on, not an error', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'annual',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(50000) }],
+        ...idState({ nonresidentAlien: true }),
+      }),
+    );
+    // (50,000 − 16,100) × 5.3% = $1,796.70, no annual row in the Pay Period
+    // table so the add-on is $0, not a thrown error or a guessed figure.
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(1796.70));
+  });
+
   test('an unrecognized marital status throws rather than silently defaulting', () => {
     assert.throws(
       () =>
