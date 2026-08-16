@@ -2782,6 +2782,213 @@ describe('Idaho', () => {
   });
 });
 
+describe('Connecticut', () => {
+  // Expected values independently hand-derived from Circular CT's own
+  // 16-step Withholding Calculation Rules BEFORE running any of these —
+  // computed via a standalone re-implementation of Steps 1-13 against
+  // CT-2026.json's transcribed tables (kept out of engine.test.ts itself),
+  // then cross-checked against calculatePaycheck()'s actual output. Two
+  // independent implementations of the same source document agreeing is
+  // the strongest verification available here, since Circular CT publishes
+  // no to-the-cent worked examples the way PA/KY/WI do.
+  const ctState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'CT', certificate },
+  });
+
+  test('weekly $1,000, Code A: no exemption left at this income, 2% phase-out add-back applies, no credit', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...ctState({ withholdingCode: 'A' }),
+      }),
+    );
+    // Annualized $52,000: exemption $0 (Code A phases to $0 at $35,000);
+    // initial tax (Table B) $2,110; 2% phase-out add-back (Table C) $25;
+    // recapture (Table D) $0; credit (Table E) 0% (phased to $0 by $25,000).
+    // ($2,110+$25) ÷ 52 = $41.0577 → $41.06.
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(41.06));
+  });
+
+  test('Code D always gets $0 exemption and $0 credit regardless of income — same result as Code A here', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...ctState({ withholdingCode: 'D' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(41.06));
+  });
+
+  test('Code F, annual $30,000: exemption phase-down and Table E credit both apply', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'annual',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(30000) }],
+        ...ctState({ withholdingCode: 'F' }),
+      }),
+    );
+    // Exemption at $30,000 (Code F): $14,000 → taxable $16,000. Table B
+    // (A/D/F schedule): $200 + 4.5% × $6,000 = $470. Table C: $0 (below
+    // $56,500). Table D: $0. Table E credit at $30,000: 1% (the
+    // $26,500-$31,300 band). $470 × 0.99 = $465.30.
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(465.3));
+  });
+
+  test('Code C, annual $600,000: high enough to trigger the Table D tax recapture', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'annual',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(600000) }],
+        ...ctState({ withholdingCode: 'C' }),
+      }),
+    );
+    // No exemption left. Table B: $28,000 + 6.9% × $100,000 = $34,900.
+    // Table C phase-out add-back at $600,000: $500 (past $145,500, flat).
+    // Table D recapture at $600,000 (Code C schedule): $4,280 ($600,000
+    // falls in the $600,000-$610,000 row). Sum $34,900+$500+$4,280 =
+    // $39,680. Credit is 0% by this income. Total $39,680.00.
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(39680));
+  });
+
+  test('wages fully absorbed by the Code A exemption owe $0, not a negative bracket', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(200) }],
+        ...ctState({ withholdingCode: 'A' }),
+      }),
+    );
+    // Annualized $10,400 is inside Code A's $0-$24,000 full-exemption band
+    // ($12,000 exemption) — $10,400 < $12,000, so taxable income is
+    // negative, clamped to $0 per Step 6's own instruction.
+    assert.equal(amountOf(r, 'CT_SIT'), 0);
+  });
+
+  test('no Form CT-W4 on file: flat 6.99%, no exemption, no credit — NOT the usual "default single" convention', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...ctState({}),
+      }),
+    );
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(69.9));
+  });
+
+  test('certificate.exempt (Form CT-W4 Code E) zeroes withholding, generically', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...ctState({ exempt: true }),
+      }),
+    );
+    assert.equal(amountOf(r, 'CT_SIT'), 0);
+  });
+
+  test("Form CT-W4 Line 2 (additional withholding) adds, Line 3 (reduced withholding) subtracts and floors at $0", () => {
+    const base = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...ctState({ withholdingCode: 'A' }),
+      }),
+    );
+    assert.equal(amountOf(base, 'CT_SIT'), dollars(41.06));
+
+    const withLine2 = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...ctState({ withholdingCode: 'A', additionalWithholding: dollars(10) }),
+      }),
+    );
+    assert.equal(amountOf(withLine2, 'CT_SIT'), dollars(51.06));
+
+    const withLine3 = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...ctState({ withholdingCode: 'A', reducedWithholding: dollars(10) }),
+      }),
+    );
+    assert.equal(amountOf(withLine3, 'CT_SIT'), dollars(31.06));
+
+    const line3ExceedsTax = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...ctState({ withholdingCode: 'A', reducedWithholding: dollars(1000) }),
+      }),
+    );
+    assert.equal(amountOf(line3ExceedsTax, 'CT_SIT'), 0);
+  });
+
+  test('an unrecognized withholding code throws rather than silently defaulting', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            ...ctState({ withholdingCode: 'Z' }),
+          }),
+        ),
+      /Unrecognized CT certificate\.withholdingCode/,
+    );
+  });
+
+  test('no reciprocity exemption exists — Connecticut has none', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        residenceState: { code: 'NY' },
+        ...ctState({ withholdingCode: 'A' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(41.06));
+  });
+
+  test('CT Paid Leave: 0.5%, capped at the same wage base as federal Social Security', () => {
+    const under = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...ctState({ withholdingCode: 'A' }),
+      }),
+    );
+    assert.equal(amountOf(under, 'CT_PFML_EE'), dollars(5));
+
+    const overCap = calculatePaycheck(
+      input({
+        payFrequency: 'annual',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(600000) }],
+        ...ctState({ withholdingCode: 'C' }),
+      }),
+    );
+    // Capped at $184,500 × 0.5% = $922.50, not $600,000 × 0.5% = $3,000.
+    assert.equal(amountOf(overCap, 'CT_PFML_EE'), dollars(922.5));
+  });
+
+  test('Idaho-style 401(k) conformity check: a deferral reduces the CT base (unlike Pennsylvania)', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(200) }],
+        ...ctState({ withholdingCode: 'A' }),
+      }),
+    );
+    // Annualized $41,600 taxable (down from $52,000): Table B $200+4.5%×
+    // $31,600=$1,622; Table C at $41,600: $0 (below $50,250); Table D: $0;
+    // credit 0%. $1,622 ÷ 52 = $31.19230... → $31.19.
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(31.19));
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

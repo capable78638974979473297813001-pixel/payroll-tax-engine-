@@ -85,6 +85,7 @@ export function stateIncomeTax(
   // legally owing $0 to this state isn't also topping that $0 up.
   if (!exemptReason) {
     lines = applyAdditionalStateWithholding(input, rules, lines);
+    lines = applyReducedStateWithholding(input, rules, lines);
   }
 
   // Employee-paid state unemployment withholding (Pennsylvania's UC tax is
@@ -313,6 +314,44 @@ function applyAdditionalStateWithholding(
   );
 }
 
+/**
+ * Reduced per-period withholding requested by the employee — Connecticut's
+ * Form CT-W4 is the first (and so far only) state form in this project with
+ * a REQUEST-LESS-WITHHOLDING line (Line 3), the mirror image of every other
+ * state's additional-withholding line (Line 2 on the same form, already
+ * handled generically by applyAdditionalStateWithholding()). Connecticut's
+ * own Withholding Calculation Rules Step 15/16 state the amount "cannot
+ * exceed the total withholding amount" and the final result "cannot be less
+ * than zero" — enforced here via atLeastZero() rather than trusting the
+ * caller to have already capped certificate.reducedWithholding correctly.
+ * Generic by design (reads certificate.reducedWithholding, not gated to
+ * Connecticut specifically) so any future state with the same request-less
+ * mechanic gets this for free, the same reusability convention as
+ * applyAdditionalStateWithholding().
+ */
+function applyReducedStateWithholding(
+  input: PaycheckInput,
+  rules: StateRuleset,
+  lines: TaxLine[],
+): TaxLine[] {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (cert.exempt) return lines;
+
+  const reduction = Number(cert.reducedWithholding ?? 0);
+  if (reduction <= 0) return lines;
+
+  const primaryId = `${rules.code}_SIT`;
+  return lines.map((line) =>
+    line.id === primaryId
+      ? {
+          ...line,
+          amount: atLeastZero(line.amount - reduction),
+          detail: `${line.detail}; less ${fmt(reduction)} reduced withholding requested (certificate.reducedWithholding), floored at $0`,
+        }
+      : line,
+  );
+}
+
 function incomeTaxLines(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -355,6 +394,8 @@ function incomeTaxLines(
       return [bracketPerPeriodRateTable(input, ctx, rules)];
     case 'bracket_two_status_per_period':
       return [bracketTwoStatusPerPeriod(input, ctx, rules)];
+    case 'connecticut_withholding_code':
+      return [connecticutWithholdingCode(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -2177,5 +2218,164 @@ function bracketTwoStatusPerPeriod(
       (nraAdjustment
         ? `; plus ${fmt(nraAdjustment)}/period nonresident alien adjustment (Form ID W-4's own Pay Period table)`
         : ''),
+  };
+}
+
+type CTCode = 'A' | 'B' | 'C' | 'D' | 'F';
+
+interface CTStepRow {
+  from: number; // dollars, annualized salary
+  to: number | null; // dollars, null = no ceiling
+}
+interface CTExemptionRow extends CTStepRow {
+  exemption: number; // dollars
+}
+interface CTCreditRow extends CTStepRow {
+  credit: number; // decimal fraction, e.g. 0.75 -- NOT a dollar figure, never passed through dollars()
+}
+
+interface ConnecticutTablesConfig {
+  tableA: Record<CTCode, CTExemptionRow[] | 'ZERO'>;
+  tableB: Record<CTCode, WIBracket[]>;
+  tableC: Record<CTCode, WIBracket[]>;
+  tableD: Record<CTCode, WIBracket[]>;
+  tableE: Record<CTCode, CTCreditRow[] | 'ZERO'>;
+  noFormRate: number; // flat rate withheld when no Form CT-W4 is on file
+}
+
+/**
+ * Resolves Form CT-W4's own "Withholding Code" (Line 1: A, B, C, D, or F —
+ * Code E is EXEMPT, already handled generically upstream by
+ * certificate.exempt / zeroStateIncomeTaxLines(), never reaches this
+ * function). Genuinely different from every other state's certificate
+ * shape in this project: Connecticut's own code ISN'T a marital-status
+ * field with a documented single/no-form default — Circular CT (fetched
+ * and read directly) states plainly: "If an employee fails to give you a
+ * completed Form CTW4, you must withhold at a flat rate of 6.99%, without
+ * allowance [for exemption]." Returning null (rather than a code) signals
+ * that no-form case to connecticutWithholdingCode(), which routes to the
+ * flat-rate path instead of guessing a code.
+ */
+function resolveCTCode(cert: Record<string, unknown>): CTCode | null {
+  const raw = cert.withholdingCode;
+  if (raw === undefined || raw === null) return null;
+  if (raw === 'A' || raw === 'B' || raw === 'C' || raw === 'D' || raw === 'F') return raw;
+  throw new Error(
+    `Unrecognized CT certificate.withholdingCode ${JSON.stringify(raw)} — expected 'A', 'B', ` +
+      `'C', 'D', or 'F' (Form CT-W4's own Withholding Code letters; 'E' is exempt, handled ` +
+      `via certificate.exempt instead of a withholding code).`,
+  );
+}
+
+function findCTStep<T extends CTStepRow>(rows: T[], salaryCents: number): T {
+  for (const r of rows) {
+    const from = dollars(r.from);
+    const to = r.to === null ? Infinity : dollars(r.to);
+    if (salaryCents >= from && salaryCents < to) return r;
+  }
+  return rows[rows.length - 1];
+}
+
+/**
+ * Connecticut's Withholding Calculation Rules (IP 2026(1) / TPG-211,
+ * effective 2026-01-01, "unchanged from 2025") — by far the most involved
+ * formula in this project: FIVE separate tables chained together (Table A
+ * personal exemption phase-DOWN, Table B a genuine progressive bracket,
+ * Table C a step-function "2% bracket phase-out add-back" for
+ * upper-middle incomes, Table D a step-function "tax recapture" that claws
+ * back the benefit of the lower brackets entirely for high earners, Table E
+ * a step-function personal-credit DECIMAL multiplier applied last), all
+ * keyed off ANNUALIZED salary (Step 3) rather than per-period wages
+ * directly, then divided back down to a per-period amount at the very end
+ * (Step 13) — closer in spirit to NY's Method II than to any single-table
+ * bracket state already in this project, but with two additional
+ * step-function adjustments NY doesn't have.
+ *
+ * Implements Steps 1-13 only. Steps 14-16 (Form CT-W4 Line 2 "additional"
+ * and Line 3 "reduced" withholding, floored at $0) are NOT duplicated here
+ * — Line 2 is already the exact same certificate.additionalWithholding
+ * mechanism every other state's form uses (applyAdditionalStateWithholding,
+ * called generically by stateIncomeTax()), and Line 3 is the new
+ * applyReducedStateWithholding() this state introduced. Keeping those two
+ * steps in the shared outer wrapper rather than re-implementing them here
+ * avoids double-applying certificate.additionalWithholding.
+ *
+ * Table C and Table D are step functions (a single flat dollar amount for
+ * the whole row, no marginal rate within the row) rather than genuine
+ * brackets, confirmed from Circular CT's own column headers ("2% Tax Rate
+ * Phase-Out Add-Back" / "Recapture Amount", not "of excess over") — modeled
+ * by reusing the WIBracket {from,to,base,rate} shape with rate ALWAYS 0, so
+ * findWIBracket()'s existing base+rate×excess arithmetic collapses to just
+ * `base` for every row, without needing a separate step-only lookup type.
+ */
+function connecticutWithholdingCode(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.connecticutTables as ConnecticutTablesConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt); // Step 1
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const code = resolveCTCode(cert); // Step 4
+
+  if (code === null) {
+    const amount = applyRate(taxableWages, cfg.noFormRate);
+    return {
+      id: `${rules.code}_SIT`,
+      name: `${rules.name} Income Tax`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages,
+      amount,
+      detail:
+        `${fmt(taxableWages)} @ ${(cfg.noFormRate * 100).toFixed(2)}% flat, no allowance — ` +
+        `no Form CT-W4 on file (certificate.withholdingCode not set)`,
+    };
+  }
+
+  const annualizedSalary = taxableWages * ctx.periodsPerYear; // Step 3
+
+  const exemptionTable = cfg.tableA[code];
+  const exemption =
+    exemptionTable === 'ZERO' ? 0 : dollars(findCTStep(exemptionTable, annualizedSalary).exemption); // Step 5
+  const annualizedTaxable = annualizedSalary - exemption; // Step 6
+
+  let annualTotal: number;
+  let detail: string;
+
+  if (annualizedTaxable <= 0) {
+    annualTotal = 0;
+    detail = `${fmt(annualizedSalary)}/yr less ${fmt(exemption)} Code ${code} exemption = $0 taxable`;
+  } else {
+    const initialBracket = findWIBracket(cfg.tableB[code], annualizedTaxable);
+    const initialTax =
+      dollars(initialBracket.base) + applyRate(annualizedTaxable - dollars(initialBracket.from), initialBracket.rate); // Step 7
+
+    const phaseOutAddBack = dollars(findWIBracket(cfg.tableC[code], annualizedSalary).base); // Step 8
+    const recapture = dollars(findWIBracket(cfg.tableD[code], annualizedSalary).base); // Step 9
+    const withholdingAmount = initialTax + phaseOutAddBack + recapture; // Step 10
+
+    const creditTable = cfg.tableE[code];
+    const credit = creditTable === 'ZERO' ? 0 : findCTStep(creditTable, annualizedSalary).credit; // Step 11
+    annualTotal = roundHalfUp(withholdingAmount * (1 - credit)); // Step 12
+
+    detail =
+      `${fmt(annualizedSalary)}/yr less ${fmt(exemption)} Code ${code} exemption = ${fmt(annualizedTaxable)} taxable; ` +
+      `initial tax ${fmt(initialTax)} + ${fmt(phaseOutAddBack)} 2% phase-out add-back + ${fmt(recapture)} recapture ` +
+      `= ${fmt(withholdingAmount)}, less ${(credit * 100).toFixed(0)}% personal credit`;
+  }
+
+  const amount = Math.round(annualTotal / ctx.periodsPerYear); // Step 13
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages,
+    amount,
+    detail: `${detail}, ÷ ${ctx.periodsPerYear}`,
   };
 }
