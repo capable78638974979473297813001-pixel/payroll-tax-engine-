@@ -30,6 +30,12 @@
       "url": "https://www.ctpaidleave.org/how-ct-paid-leave-works/contributions",
       "verifiedOn": "2026-08-16",
       "verifiedBy": "Fetched directly. Verbatim: \"The CT Paid Leave Board of Directors has voted to maintain the contribution rate at 0.5% for 2026.\" Wage cap stated as \"until they reach the Social Security contribution limit\" without restating the dollar figure on this specific page -- cross-checked against this project's own data/federal/2026.json socialSecurity.wageBase ($184,500), which the CT Paid Leave Authority's own program design ties to by reference. NOTE: this means CT Paid Leave's wageBase in this file must be kept in sync with federal.json's SS wage base by definition, not just by coincidence -- flagged in knownGaps."
+    },
+    {
+      "title": "Form CT-W4, Employee's Withholding Certificate (Rev. 12/25, effective 2026-01-01)",
+      "url": "https://portal.ct.gov/-/media/drs/forms/2026/wth/ct-w4_1225fillable.pdf?rev=9e9e0216cd394f579961e1d4cd5c7ab3&hash=4D496BCBD10659462D3799732B5A91F2",
+      "verifiedOn": "2026-08-16",
+      "verifiedBy": "Downloaded and text-extracted directly (pdftotext -layout) as a follow-up check after Scott asked whether this file was Symmetry-level -- the same discipline that caught a real bug in Idaho's build (Form ID W-4's Box C). This one came back clean: Line 1 (Withholding Code), Line 2 (additional withholding per pay period), and Line 3 (reduced withholding per pay period) match connecticutWithholdingCode()/applyAdditionalStateWithholding()/applyReducedStateWithholding() exactly, with no undiscovered checkbox or field. ALSO closed a real documentation-only gap: the Code-A/B/C/D/F-to-filing-status mapping this file previously only had from a secondary WebSearch synthesis is now primary-confirmed directly off the form: A = Married Filing Separately (or MFJ with both spouses working, mid-income), B = Head of Household, C = MFJ or Qualifying Surviving Spouse with a non-working spouse, F = Single, D = an elective highest-withholding option available to EVERY filing status (significant nonwage income, a nonresident with substantial other income, or a high-combined-income MFJ/MFS couple) -- not itself engine-consumed (certificate.withholdingCode is supplied directly by the caller), but confirms resolveCTCode()'s accepted letter set (A/B/C/D/F, with E routed through certificate.exempt) has no missing option, unlike Idaho's Box C gap."
     }
   ],
   "connecticutTables": {
