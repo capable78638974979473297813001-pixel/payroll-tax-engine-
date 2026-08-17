@@ -24,7 +24,13 @@
       "title": "32 V.S.A. § 5825, Credit for taxes paid to other states and provinces",
       "url": "https://law.justia.com/codes/vermont/title-32/chapter-151/section-5825/",
       "verifiedOn": "2026-08-16",
-      "verifiedBy": "Cross-source confirmed (search-engine synthesis, not independently fetched and read in full this session): Vermont has no withholding-level reciprocity agreement with any state; instead residents get a nonrefundable RETURN-level credit for income tax paid to another state/province on income also taxed by Vermont, capped at the Vermont tax attributable to that income. Same out-of-scope convention as Connecticut's and every other state's own credit-for-taxes-paid mechanism in this project."
+      "verifiedBy": "Fetched directly (upgraded from an earlier cross-source-only citation, as a follow-up check after Scott asked whether this file was Symmetry-level) via curl with a browser User-Agent (law.justia.com also 403s a plain WebFetch). Confirms this is purely a RETURN-level mechanism, not withholding-level reciprocity: 'A taxpayer of this State who was a resident individual... shall receive credit against the tax imposed... for income taxes imposed by, and paid to, another state.' Capped at 'the portion of Vermont income tax... attributable to the adjusted gross income earned or received from sources within such other state.' Same out-of-scope convention as Connecticut's and every other state's own credit-for-taxes-paid mechanism in this project."
+    },
+    {
+      "title": "Governor Phil Scott Launches Voluntary Paid Family and Medical Leave Program — Office of Governor Phil Scott",
+      "url": "https://governor.vermont.gov/vtfmli",
+      "verifiedOn": "2026-08-16",
+      "verifiedBy": "Fetched directly (upgraded from an earlier cross-source-only claim, as a follow-up check after Scott asked whether this file was Symmetry-level) via curl with a browser User-Agent (this site also 403s a plain WebFetch). Confirms VT-FMLI's voluntary status with a direct quote from Governor Scott himself: 'Providing all Vermonters with access to affordable paid family and medical leave, without imposing a new mandatory tax, is truly a win-win.' Also confirms contributions 'can be fully paid by the employer, split between the employer and employees, or fully paid for by the employees as a voluntary benefit' — i.e. even the EMPLOYEE/employer split is plan-specific, not a single statewide rate, reinforcing why this file does not model a statePaidLeaveEmployee config for it."
     }
   ],
   "vermontWithholding": {
