@@ -2617,6 +2617,68 @@ describe('New Jersey', () => {
     );
     assert.equal(amountOf(r, 'NJ_SIT'), dollars(14.68));
   });
+
+  test("Newark's payroll tax: 1% employer-paid, does NOT reduce employee net pay", () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'NJ', certificate: { locality: 'Newark' } },
+      }),
+    );
+    const line = r.taxes.find((t) => t.id === 'NEWARK_PAYROLL_ER');
+    assert.ok(line);
+    assert.equal(line.payer, 'employer');
+    assert.equal(line.jurisdiction, 'local');
+    assert.equal(line.amount, dollars(10.0)); // 1% of $1,000
+
+    // Employer-paid lines never reduce net pay — compare against an
+    // otherwise-identical paycheck with no Newark locality.
+    const noLocality = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'NJ' },
+      }),
+    );
+    assert.equal(r.netPay, noLocality.netPay);
+  });
+
+  test('no Newark payroll tax line when the employee is not linked to a Newark locality', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'NJ' },
+      }),
+    );
+    assert.equal(r.taxes.some((t) => t.id === 'NEWARK_PAYROLL_ER'), false);
+
+    const otherCity = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'NJ', certificate: { locality: 'Jersey City' } },
+      }),
+    );
+    assert.equal(otherCity.taxes.some((t) => t.id === 'NEWARK_PAYROLL_ER'), false);
+  });
+
+  test("certificate.newarkResidentApportionmentExcluded zeroes this employee's contribution, not the whole employer's liability", () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: {
+          code: 'NJ',
+          certificate: { locality: 'Newark', newarkResidentApportionmentExcluded: true },
+        },
+      }),
+    );
+    const line = r.taxes.find((t) => t.id === 'NEWARK_PAYROLL_ER');
+    assert.ok(line);
+    assert.equal(line.amount, 0);
+  });
 });
 
 describe('New Jersey Unemployment/Workforce, TDI, and FLI (employee)', () => {

@@ -131,6 +131,15 @@ export function stateIncomeTax(
   const yonkersSupp = yonkersSupplementalTax(input, ctx, rules);
   if (yonkersSupp) lines.push(yonkersSupp);
 
+  // Newark's payroll tax — a genuinely DIFFERENT shape from every other
+  // local tax in this project: EMPLOYER-paid (not employee withholding —
+  // the ordinance is explicit: "The Employer is responsible for the
+  // Payroll Tax"), so it never touches net pay, and dispatched off
+  // certificate.locality rather than a residency flag, since Newark taxes
+  // by WHERE SERVICES ARE PERFORMED/SUPERVISED, not residence.
+  const newark = newarkPayrollTaxEmployer(input, ctx, rules);
+  if (newark) lines.push(newark);
+
   // Resident-working-elsewhere credit — a DIFFERENT direction from every
   // reciprocity mechanism above: those zero THIS state's tax when the
   // employee resides in a reciprocal state; this instead adds an
@@ -2887,5 +2896,102 @@ function bracketPerPeriodKansas(
       `${fmt(grossWages)} gross less ${fmt(roundHalfUp(allowance))} allowance ($${annualExemption}/yr ÷ ` +
       `${ctx.periodsPerYear}) = ${fmt(netWages)} net, ${rate} @ ${(bracket.rate * 100).toFixed(2)}% over ` +
       `${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))}`,
+  };
+}
+
+interface NewarkPayrollTaxConfig {
+  rate: number;
+  quarterlyThresholdDollars: number; // whole-EMPLOYER aggregate — see doc comment
+}
+
+/**
+ * Newark's Payroll Tax — City of Newark ordinance #6S & FE, per the City's
+ * own 2026 Payroll Tax Booklet (fetched and read directly). Genuinely
+ * different from every other local tax in this project on THREE axes at
+ * once: (1) EMPLOYER-paid, not an employee withholding — quoted verbatim,
+ * "The Employer is responsible for the Payroll Tax" — so this returns a
+ * `payer: 'employer'` line, which calculate.ts already excludes from net
+ * pay (same as US_FUTA/US_SS_ER/US_MED_ER); (2) triggered by WHERE WORK IS
+ * PERFORMED/SUPERVISED/REPORTED, not residence — dispatched off
+ * certificate.locality === 'Newark', a NEW certificate concept in this
+ * file since New Jersey has no other local tax to have already needed one;
+ * (3) assessed on the EMPLOYER'S AGGREGATE QUARTERLY PAYROLL across every
+ * Newark-linked employee combined, not per employee per paycheck.
+ *
+ * That third point is the real architectural mismatch, disclosed rather
+ * than silently worked around: this engine's calculatePaycheck() computes
+ * exactly one employee's one paycheck, with no visibility into what OTHER
+ * employees the same employer is paying this quarter. Two aggregate facts
+ * the ordinance's own form (Lines 1-2) requires the EMPLOYER to determine
+ * across their whole Newark workforce are therefore NOT verified here:
+ *   - The $2,500/quarter minimum (ordinance: "If line 1 is less than
+ *     $2,500.00 enter... zero on line 3") — this function has no way to
+ *     know the employer's total quarterly Newark payroll, so it always
+ *     computes a nonzero amount whenever THIS employee's own Newark wages
+ *     are nonzero. In practice this rarely matters (an employer running
+ *     real payroll through this engine has almost certainly cleared
+ *     $2,500/quarter in aggregate), but it is not independently checked.
+ *   - The >50%-Newark-resident-workforce apportionment (ordinance Line 2:
+ *     wages of Newark-resident employees ABOVE the 50% threshold are
+ *     EXCLUDED from the taxable base entirely — not a reduced 0.5% rate on
+ *     everyone, a claim a secondary source made that this ordinance's own
+ *     text does not support) — modeled as an opt-in per-employee exclusion
+ *     via certificate.newarkResidentApportionmentExcluded, which the
+ *     EMPLOYER must set after doing their own workforce-wide residency
+ *     determination (the same "caller supplies the pre-computed worksheet
+ *     result" boundary as Iowa's totalAllowanceAmount or NJ's own
+ *     rateTableOverride) — this engine cannot determine, from one
+ *     employee's data, whether that employee falls above or below the
+ *     employer's 50% threshold.
+ *
+ * Taxable base is federal-withholding wages ("subject to withholding by
+ * the employer for Federal income tax purposes") — reuses
+ * rules.exemptPretax, the same NJ-wide conformity list, since the
+ * ordinance's own wage definition tracks the federal one, not NJ's own
+ * (non-conforming, gross-wages) state income tax base.
+ */
+function newarkPayrollTaxEmployer(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (cert.locality !== 'Newark') return null;
+
+  const cfg = rules.newarkPayrollTax as NewarkPayrollTaxConfig | undefined;
+  if (!cfg) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+
+  if (cert.newarkResidentApportionmentExcluded) {
+    return {
+      id: 'NEWARK_PAYROLL_ER',
+      name: 'Newark Payroll Tax (Employer)',
+      payer: 'employer',
+      jurisdiction: 'local',
+      taxableWages: 0,
+      amount: 0,
+      detail:
+        `$0 — certificate.newarkResidentApportionmentExcluded: this employee's wages are excluded ` +
+        `from the taxable base under the ordinance's >50%-Newark-resident-workforce apportionment ` +
+        `(the employer's own aggregate determination, not verified by this engine).`,
+    };
+  }
+
+  const amount = applyRate(taxableWages, cfg.rate);
+
+  return {
+    id: 'NEWARK_PAYROLL_ER',
+    name: 'Newark Payroll Tax (Employer)',
+    payer: 'employer',
+    jurisdiction: 'local',
+    taxableWages,
+    amount,
+    detail:
+      `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, this employee's contribution toward ` +
+      `the employer's quarterly Newark payroll — the $${cfg.quarterlyThresholdDollars}/quarter ` +
+      `minimum and the >50%-resident-workforce apportionment are EMPLOYER-AGGREGATE facts this ` +
+      `engine cannot verify per paycheck (see newarkPayrollTaxEmployer()'s own doc comment).`,
   };
 }
