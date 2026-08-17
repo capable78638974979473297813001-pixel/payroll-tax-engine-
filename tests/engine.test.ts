@@ -3209,6 +3209,127 @@ describe('Iowa', () => {
   });
 });
 
+describe('Vermont', () => {
+  const vtState = (certificate: Record<string, unknown>) => ({
+    workState: { code: 'VT', certificate },
+  });
+
+  test("reproduces GB-1210-2026's own worked example: weekly $1,800, married, 2 allowances → $45.77", () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1800) }],
+        ...vtState({ maritalStatus: 'mfj', allowances: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'VT_SIT'), dollars(45.77));
+  });
+
+  test('weekly $1,000 single, 0 allowances: (1,000 − 75) × 3.35% = $30.99', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...vtState({ maritalStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'VT_SIT'), dollars(30.99));
+  });
+
+  test("Form W-4VT's 'married, but withhold at higher Single rate' and MFS both use the single schedule", () => {
+    const higherSingle = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...vtState({ maritalStatus: 'married_withhold_as_single' }),
+      }),
+    );
+    assert.equal(amountOf(higherSingle, 'VT_SIT'), dollars(30.99));
+
+    const mfs = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...vtState({ maritalStatus: 'mfs' }),
+      }),
+    );
+    assert.equal(amountOf(mfs, 'VT_SIT'), dollars(30.99));
+  });
+
+  test('wages below the threshold owe $0', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(70) }],
+        ...vtState({ maritalStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'VT_SIT'), 0);
+  });
+
+  test('certificate.exempt and certificate.additionalWithholding work generically', () => {
+    const exempt = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...vtState({ exempt: true }),
+      }),
+    );
+    assert.equal(amountOf(exempt, 'VT_SIT'), 0);
+
+    const withExtra = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...vtState({ maritalStatus: 'single', additionalWithholding: dollars(10) }),
+      }),
+    );
+    assert.equal(amountOf(withExtra, 'VT_SIT'), dollars(30.99 + 10));
+  });
+
+  test('an unrecognized marital status throws rather than silently defaulting', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            ...vtState({ maritalStatus: 'hoh' }),
+          }),
+        ),
+      /Unrecognized VT certificate\.maritalStatus/,
+    );
+  });
+
+  test('an unsupported pay frequency (semiannual) throws rather than guessing', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'semiannual',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(9000) }],
+            ...vtState({ maritalStatus: 'single' }),
+          }),
+        ),
+      /doesn't publish a "semiannual" figure/,
+    );
+  });
+
+  test('no local income tax and no employee-paid unemployment/disability/paid-leave lines exist for Vermont', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...vtState({ maritalStatus: 'single' }),
+      }),
+    );
+    assert.equal(r.taxes.some((t) => t.jurisdiction === 'local'), false);
+    assert.equal(r.taxes.some((t) => t.id === 'VT_UC_EE'), false);
+    assert.equal(r.taxes.some((t) => t.id === 'VT_DBL_EE'), false);
+    assert.equal(r.taxes.some((t) => t.id === 'VT_PFML_EE'), false);
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

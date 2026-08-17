@@ -398,6 +398,8 @@ function incomeTaxLines(
       return [connecticutWithholdingCode(input, ctx, rules)];
     case 'flat_rate_marital_deduction':
       return [flatRateMaritalDeduction(input, ctx, rules)];
+    case 'bracket_per_period_allowance':
+      return [bracketPerPeriodAllowance(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -2523,5 +2525,125 @@ function flatRateMaritalDeduction(
     detail:
       `${fmt(taxableWages)} less ${fmt(roundHalfUp(deductionPerPeriod))} deduction (${pathNote}) ` +
       `@ ${(cfg.rate * 100).toFixed(2)}%, less ${fmt(roundHalfUp(allowancePerPeriod))} allowance/period`,
+  };
+}
+
+interface VTBracketConfig {
+  allowanceAmount: Record<string, number>; // dollars, keyed by PayFrequency
+  brackets: Record<'single' | 'married', Record<string, WIBracket[]>>;
+}
+
+/**
+ * Resolves Form W-4VT's filing-status checkboxes to which of Vermont's TWO
+ * published bracket schedules applies. The form (fetched and read
+ * directly) actually has FOUR boxes — Single, Married/Civil Union Filing
+ * Jointly, Married/Civil Union Filing Separately, and "Married, but
+ * withhold at higher Single rate" — not two, a real gap the withholding
+ * TABLES document alone (which only shows "Single"/"Married" schedule
+ * headers) would never have surfaced; caught by deliberately fetching the
+ * actual form the same way Idaho's Box C was caught. Married-filing-
+ * separately and the explicit higher-single-rate checkbox BOTH resolve to
+ * the single schedule — confirmed both directly (the form's own general
+ * information: "'Married, but withhold at higher Single rate' should be
+ * used if you are married but filing separately, or if both spouses work")
+ * and cross-source. Head of household has NO checkbox on this form at
+ * all — HOH filers check "Single" and add one extra allowance via the
+ * allowance worksheet's own Line 4, so it never reaches this resolver as a
+ * distinct status; certificate.allowances is expected to already include
+ * that +1, the same "caller supplies the already-computed total" convention
+ * as every other state's own allowance count.
+ */
+function resolveVTMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  const raw = cert.maritalStatus;
+  if (
+    raw === undefined ||
+    raw === null ||
+    raw === 'single' ||
+    raw === 'mfs' ||
+    raw === 'married_withhold_as_single'
+  ) {
+    return 'single';
+  }
+  if (raw === 'mfj') return 'married';
+  throw new Error(
+    `Unrecognized VT certificate.maritalStatus ${JSON.stringify(raw)} — expected 'single', ` +
+      `'mfs', 'married_withhold_as_single', or 'mfj' (civil union partners use the same ` +
+      `'mfj' schedule per Form W-4VT's own "Civil union partners use Married table" note).`,
+  );
+}
+
+/**
+ * Vermont's Percentage Method Withholding (GB-1210-2026, effective
+ * 2026-01-01, fetched and read directly): subtract a flat per-allowance
+ * dollar amount (times the count claimed on Form W-4VT) from PER-PERIOD
+ * gross wages, then look up the result in one of Vermont's own two
+ * per-period bracket tables (Single or Married) — genuinely the same shape
+ * as New Jersey's Rate Table method (bracketPerPeriodRateTable), just with
+ * 2 schedules selected by marital status instead of 5 selected by W-4
+ * checkboxes, so this is a small parallel function rather than a forced
+ * reuse of NJ's NJ-specific resolver. Brackets are published independently
+ * PER PERIOD (like Montana/NY/NJ/Connecticut), not derived by dividing one
+ * annual table — transcribed verbatim per period rather than derived from
+ * the annual figures, unlike Iowa's flat 2-bracket shape, because a real
+ * marginal bracket schedule is more sensitive to exact boundary/base cents
+ * than Iowa's single flat-rate-above-a-threshold shape was proven to be.
+ * Verified against the source's own worked example: weekly $1,800, married,
+ * 2 allowances ($103.85 x2=$207.70) → $45.77 — see
+ * tests/engine.test.ts, describe('Vermont').
+ *
+ * NOT MODELLED (disclosed, not guessed): Vermont's own guidance that
+ * NON-PERIODIC supplemental payments "can be ESTIMATED at 30% of the
+ * federal withholding" — permissive wording ("can be"), not a required
+ * formula the way New York's 11.70% Method A is, and it would require
+ * reading federal's OWN supplemental rate (22%/37% tiers) at calculation
+ * time to reproduce faithfully. Periodic supplemental wages paid at the
+ * SAME time as regular wages already aggregate correctly through this
+ * function via the normal taxableWagesFor() base, no special-casing
+ * needed — the same convention as Kentucky/Idaho/Connecticut/Iowa.
+ */
+function bracketPerPeriodAllowance(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.vermontWithholding as VTBracketConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const grossWages = ctx.taxableWagesFor(exempt);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const allowances = Number(cert.allowances ?? 0);
+  const allowancePerUnit = cfg.allowanceAmount[input.payFrequency];
+  if (allowancePerUnit === undefined) {
+    throw new Error(
+      `Vermont's own withholding allowance table doesn't publish a "${input.payFrequency}" ` +
+        `figure — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const allowance = roundHalfUp(dollars(allowancePerUnit) * allowances);
+  const netWages = atLeastZero(grossWages - allowance);
+
+  const status = resolveVTMaritalStatus(cert);
+  const brackets = cfg.brackets[status][input.payFrequency];
+  if (!brackets) {
+    throw new Error(
+      `Vermont's own withholding tables don't publish a "${input.payFrequency}" bracket ` +
+        `schedule — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const bracket = findWIBracket(brackets, netWages);
+  const excess = netWages - dollars(bracket.from);
+  const amount = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: netWages,
+    amount,
+    detail:
+      `${fmt(grossWages)} gross less ${fmt(allowance)} allowance (${allowances} × $${allowancePerUnit}) ` +
+      `= ${fmt(netWages)} net, ${status} @ ${(bracket.rate * 100).toFixed(2)}% over ` +
+      `${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))}`,
   };
 }
