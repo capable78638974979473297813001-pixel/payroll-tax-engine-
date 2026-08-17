@@ -3423,6 +3423,60 @@ describe('Kansas', () => {
     );
   });
 
+  test('resident-working-elsewhere credit: KS resident working in MI owes the KS/MI shortfall', () => {
+    // Weekly $2,000. MI: flat 4.25%, no allowances claimed = $85.00.
+    // KS: single, 1 personal allowance ($9,160/yr ÷ 52) net wages land in
+    // the 5.58% bracket = $96.20 due. Credit = $96.20 − $85.00 = $11.20.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        workState: { code: 'MI' },
+        residenceState: { code: 'KS', certificate: { allowanceRate: 'single', personalAllowances: 1 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'MI_SIT'), dollars(85.0));
+    assert.equal(amountOf(r, 'KS_SIT_CREDIT'), dollars(11.2));
+  });
+
+  test('resident-working-elsewhere credit floors at $0 when the work state already withheld more', () => {
+    // Weekly $1,000: MI flat 4.25% = $42.50, KS single/1-allowance = $40.40.
+    // MI already withheld more than KS would have required, per KW-100's
+    // own rule ("no Kansas withholding tax is due") — not simply absent.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'MI' },
+        residenceState: { code: 'KS', certificate: { allowanceRate: 'single', personalAllowances: 1 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'MI_SIT'), dollars(42.5));
+    assert.equal(amountOf(r, 'KS_SIT_CREDIT'), 0);
+    assert.ok(r.taxes.some((t) => t.id === 'KS_SIT_CREDIT'));
+  });
+
+  test('no resident-working-elsewhere credit line when residence and work state are the same, or residenceState is unset', () => {
+    const sameState = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'KS', certificate: { allowanceRate: 'single', personalAllowances: 1 } },
+        residenceState: { code: 'KS', certificate: { allowanceRate: 'single', personalAllowances: 1 } },
+      }),
+    );
+    assert.equal(sameState.taxes.some((t) => t.id === 'KS_SIT_CREDIT'), false);
+
+    const noResidence = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'MI' },
+      }),
+    );
+    assert.equal(noResidence.taxes.some((t) => t.id === 'KS_SIT_CREDIT'), false);
+  });
+
   test('no local income tax and no employee-paid unemployment/disability/paid-leave lines exist for Kansas', () => {
     const r = calculatePaycheck(
       input({

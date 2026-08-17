@@ -131,7 +131,88 @@ export function stateIncomeTax(
   const yonkersSupp = yonkersSupplementalTax(input, ctx, rules);
   if (yonkersSupp) lines.push(yonkersSupp);
 
+  // Resident-working-elsewhere credit — a DIFFERENT direction from every
+  // reciprocity mechanism above: those zero THIS state's tax when the
+  // employee resides in a reciprocal state; this instead adds an
+  // ADDITIONAL line for the employee's RESIDENCE state (Kansas is the
+  // first — KW-100: "withhold... the amount of withholding tax due
+  // Kansas, less the amount of withholding tax required by the other
+  // state(s)"). Computed last, using the FINAL work-state SIT amount
+  // (after this state's own reciprocity/exemption/additional/reduced
+  // adjustments above), since "withholding tax required by the other
+  // state" means what was actually withheld, not a pre-adjustment figure.
+  const residentCredit = residentWorkingElsewhereCreditLine(input, ctx, lines);
+  if (residentCredit) lines.push(residentCredit);
+
   return lines;
+}
+
+/**
+ * See stateIncomeTax()'s own call site for the direction this runs in.
+ * Gated by rules.residentWorkingElsewhereCredit on the RESIDENCE state's
+ * OWN ruleset (opt-in per state, data-only — every other state silently
+ * does nothing here, matching this file's existing convention for every
+ * other generically-dispatched mechanism).
+ *
+ * Computes the residence state's OWN base income tax via incomeTaxLines()
+ * DIRECTLY, not the full stateIncomeTax() wrapper — this is the raw
+ * "amount due" KW-100 describes, not layered with the residence state's
+ * own UC/PFML/disability/reciprocity machinery, none of which bears on
+ * this specific credit calculation. Runs on a VIRTUAL input with workState
+ * swapped to the residence state (and ITS OWN certificate) because every
+ * existing method function reads input.workState?.certificate — the
+ * employee's actual K-4-equivalent filed FOR the residence state lives at
+ * input.residenceState.certificate, a different certificate than whatever
+ * (if anything) applies to the real work state.
+ *
+ * Emits an explicit line even when the credit computes to $0 (the other
+ * state withheld at least as much as the residence state would have) —
+ * that is a normal, expected outcome KW-100 itself documents, not a
+ * missing-data signal, so it gets the same "explicit, not silent" $0
+ * treatment as every other zeroed line in this file.
+ */
+function residentWorkingElsewhereCreditLine(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  workStateLines: TaxLine[],
+): TaxLine | null {
+  const residence = input.residenceState;
+  const work = input.workState;
+  if (!residence || !work || residence.code === work.code) return null;
+  if (!hasStateRuleset(residence.code, input.checkDate)) return null;
+
+  const residenceRules = stateRuleset(residence.code, input.checkDate);
+  if (!residenceRules.residentWorkingElsewhereCredit) return null;
+
+  const virtualInput: PaycheckInput = {
+    ...input,
+    workState: { code: residence.code, certificate: residence.certificate },
+  };
+  const residenceLines = incomeTaxLines(virtualInput, ctx, residenceRules);
+  const residenceTax = residenceLines
+    .filter((l) => l.id === `${residence.code}_SIT`)
+    .reduce((sum, l) => sum + l.amount, 0);
+
+  const workTax = workStateLines
+    .filter((l) => l.id === `${work.code}_SIT`)
+    .reduce((sum, l) => sum + l.amount, 0);
+
+  const credit = atLeastZero(residenceTax - workTax);
+
+  return {
+    id: `${residence.code}_SIT_CREDIT`,
+    name: `${residenceRules.name} Income Tax (Resident Working Elsewhere)`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: residenceLines[0]?.taxableWages ?? 0,
+    amount: credit,
+    detail:
+      `${fmt(residenceTax)} ${residence.code} tax due on these wages, less ${fmt(workTax)} ` +
+      `${work.code} withholding actually withheld = ${fmt(credit)}` +
+      (credit === 0 && residenceTax > 0
+        ? ` (${work.code} withholding covers or exceeds the ${residence.code} amount — no ${residence.code} withholding due)`
+        : ''),
+  };
 }
 
 interface ReciprocityConfig {
