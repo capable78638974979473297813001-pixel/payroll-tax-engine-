@@ -2989,6 +2989,226 @@ describe('Connecticut', () => {
   });
 });
 
+describe('Iowa', () => {
+  // All 10 examples reproduced verbatim from Iowa's own 2026 Withholding
+  // Formula document (revenue.iowa.gov) — expected values transcribed from
+  // the source's own worked arithmetic before running, same discipline as
+  // every other state in this project.
+  const iaState = (certificate: Record<string, unknown>) => ({
+    workState: { code: 'IA', certificate },
+  });
+
+  test('Example 1: biweekly $2,100, 2026 IA W-4 "Other", $40 allowance → $59.26', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2100) }],
+        ...iaState({ maritalStatus: 'other', totalAllowanceAmount: dollars(40) }),
+      }),
+    );
+    assert.equal(amountOf(r, 'IA_SIT'), dollars(59.26));
+  });
+
+  test('Example 2: biweekly $2,100, MFJ/QSS spouse not earning, $80 allowance → $38.72', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2100) }],
+        ...iaState({ maritalStatus: 'mfj', spouseHasEarnedIncome: false, totalAllowanceAmount: dollars(80) }),
+      }),
+    );
+    assert.equal(amountOf(r, 'IA_SIT'), dollars(38.72));
+  });
+
+  test('Example 3: biweekly $2,100, Head of Household, $160 allowance → $45.15', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2100) }],
+        ...iaState({ maritalStatus: 'hoh', totalAllowanceAmount: dollars(160) }),
+      }),
+    );
+    assert.equal(amountOf(r, 'IA_SIT'), dollars(45.15));
+  });
+
+  test('Example 4: monthly $5,000, "Other", $40 allowance → $145.50', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+        ...iaState({ maritalStatus: 'other', totalAllowanceAmount: dollars(40) }),
+      }),
+    );
+    assert.equal(amountOf(r, 'IA_SIT'), dollars(145.50));
+  });
+
+  test('Example 5: monthly $5,000, MFJ/QSS spouse not earning, $80 allowance → $101.00', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+        ...iaState({ maritalStatus: 'mfj', spouseHasEarnedIncome: false, totalAllowanceAmount: dollars(80) }),
+      }),
+    );
+    assert.equal(amountOf(r, 'IA_SIT'), dollars(101.00));
+  });
+
+  test('Example 6: monthly $5,000, Head of Household, $160 allowance → $114.92', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+        ...iaState({ maritalStatus: 'hoh', totalAllowanceAmount: dollars(160) }),
+      }),
+    );
+    assert.equal(amountOf(r, 'IA_SIT'), dollars(114.92));
+  });
+
+  test('Example 7: biweekly $2,100, LEGACY (pre-2024) Single, 1 allowance → $59.26', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2100) }],
+        ...iaState({ formVintage: 'pre_2024', maritalStatus: 'single', allowances: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'IA_SIT'), dollars(59.26));
+  });
+
+  test('Example 8: biweekly $2,100, LEGACY Married, 2 allowances → $38.72', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2100) }],
+        ...iaState({ formVintage: 'pre_2024', maritalStatus: 'married', allowances: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'IA_SIT'), dollars(38.72));
+  });
+
+  test('Example 9: monthly $5,000, LEGACY Single, 1 allowance → $145.50', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+        ...iaState({ formVintage: 'pre_2024', maritalStatus: 'single', allowances: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'IA_SIT'), dollars(145.50));
+  });
+
+  test('Example 10: monthly $5,000, LEGACY Married, 2 allowances → $101.00', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+        ...iaState({ formVintage: 'pre_2024', maritalStatus: 'married', allowances: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'IA_SIT'), dollars(101.00));
+  });
+
+  test('no IA W-4 on file defaults to "Other" with $0 allowance, per the source\'s own fallback rule', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2100) }],
+        workState: { code: 'IA' },
+      }),
+    );
+    // Same $1,600 taxable base as Example 1 (D=$500/period either way), but
+    // NO $40 allowance this time: T2=$60.80, T3=$60.80-$0=$60.80.
+    assert.equal(amountOf(r, 'IA_SIT'), dollars(60.80));
+  });
+
+  test('certificate.exempt and certificate.additionalWithholding work generically', () => {
+    const exempt = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2100) }],
+        ...iaState({ exempt: true }),
+      }),
+    );
+    assert.equal(amountOf(exempt, 'IA_SIT'), 0);
+
+    const withExtra = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2100) }],
+        ...iaState({ maritalStatus: 'other', totalAllowanceAmount: dollars(40), additionalWithholding: dollars(25) }),
+      }),
+    );
+    assert.equal(amountOf(withExtra, 'IA_SIT'), dollars(59.26 + 25));
+  });
+
+  test('reciprocity: an Illinois resident working in Iowa owes $0 Iowa income tax', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2100) }],
+        residenceState: { code: 'IL' },
+        ...iaState({ maritalStatus: 'other', totalAllowanceAmount: dollars(40) }),
+      }),
+    );
+    assert.equal(amountOf(r, 'IA_SIT'), 0);
+  });
+
+  test('quarterly pay period uses the annualize-then-divide fallback and reproduces the biweekly-equivalent rate', () => {
+    // 4x Example 1's biweekly wages annualized to a quarterly-equivalent
+    // check: $2,100/biweekly x 26 periods/yr = $54,600/yr = $13,650/quarter.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'quarterly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(13650) }],
+        ...iaState({ maritalStatus: 'other', totalAllowanceAmount: dollars(40) }),
+      }),
+    );
+    // Annual wages = 13,650 x 4 = 54,600. T1 = 54,600 - 13,000 = 41,600.
+    // T2 = 41,600 x 3.8% = 1,580.80. T3 = 1,580.80 - 40 = 1,540.80/yr,
+    // ÷ 4 quarters = $385.20/quarter.
+    assert.equal(amountOf(r, 'IA_SIT'), dollars(385.20));
+  });
+
+  test('an unrecognized marital status throws for both W-4 vintages', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'biweekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(2100) }],
+            ...iaState({ maritalStatus: 'qss' }),
+          }),
+        ),
+      /Unrecognized IA certificate\.maritalStatus/,
+    );
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'biweekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(2100) }],
+            ...iaState({ formVintage: 'pre_2024', maritalStatus: 'hoh' }),
+          }),
+        ),
+      /Unrecognized IA certificate\.maritalStatus/,
+    );
+  });
+
+  test('no local income tax and no employee-paid unemployment/disability/paid-leave lines exist for Iowa', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2100) }],
+        ...iaState({ maritalStatus: 'other', totalAllowanceAmount: dollars(40) }),
+      }),
+    );
+    assert.equal(r.taxes.some((t) => t.jurisdiction === 'local'), false);
+    assert.equal(r.taxes.some((t) => t.id === 'IA_UC_EE'), false);
+    assert.equal(r.taxes.some((t) => t.id === 'IA_DBL_EE'), false);
+    assert.equal(r.taxes.some((t) => t.id === 'IA_PFML_EE'), false);
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

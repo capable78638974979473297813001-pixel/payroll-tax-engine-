@@ -396,6 +396,8 @@ function incomeTaxLines(
       return [bracketTwoStatusPerPeriod(input, ctx, rules)];
     case 'connecticut_withholding_code':
       return [connecticutWithholdingCode(input, ctx, rules)];
+    case 'flat_rate_marital_deduction':
+      return [flatRateMaritalDeduction(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -2377,5 +2379,149 @@ function connecticutWithholdingCode(
     taxableWages,
     amount,
     detail: `${detail}, ÷ ${ctx.periodsPerYear}`,
+  };
+}
+
+interface IowaConfig {
+  rate: number;
+  deduction2024Plus: { other: number; hoh: number; mfj_no_spouse_income: number }; // ANNUAL dollars
+  deductionLegacy: { single: number; married: number }; // ANNUAL dollars
+  legacyAllowanceAmount: number; // dollars per allowance, pre-2024 IA W-4 only
+}
+
+/**
+ * Resolves the 2026 IA W-4's own "Filing Status" checkboxes (Other/Single,
+ * Head of Household, Married filing jointly or Qualifying Surviving Spouse)
+ * plus its "does your spouse also have earned income?" Yes/No sub-question
+ * to which of Iowa's THREE deduction columns applies. Per the form's own
+ * instructions (fetched and read directly): checking "Yes" to the spouse
+ * question routes to the SAME deduction column as "Other" (i.e. computed as
+ * if single) — "This means the deduction for taxpayers using the filing
+ * status single will be used in the calculation" — while "No" OR LEFT BLANK
+ * routes to the wider joint-filer column. Default (no form, or marital
+ * status missing) is 'other', matching the Withholding Formula document's
+ * own explicit fallback: "the employee's marital status is missing" is one
+ * of the three named conditions for column (A).
+ */
+function resolveIA2024Status(
+  cert: Record<string, unknown>,
+): 'other' | 'hoh' | 'mfj_no_spouse_income' {
+  const raw = cert.maritalStatus;
+  if (raw === undefined || raw === null || raw === 'other') return 'other';
+  if (raw === 'hoh') return 'hoh';
+  if (raw === 'mfj') return cert.spouseHasEarnedIncome === true ? 'other' : 'mfj_no_spouse_income';
+  throw new Error(
+    `Unrecognized IA certificate.maritalStatus ${JSON.stringify(raw)} — expected 'other' ` +
+      `(includes Single/MFS), 'hoh', or 'mfj' (with certificate.spouseHasEarnedIncome deciding ` +
+      `which of the two MFJ deduction columns applies).`,
+  );
+}
+
+/**
+ * Resolves the LEGACY (2023-or-earlier) IA W-4's own two-column marital
+ * status — Single (or married but legally separated) vs. Married — used
+ * only when certificate.formVintage is 'pre_2024'. Iowa's 2026 Withholding
+ * Formula document (fetched and read directly) explicitly preserves this
+ * path: "employers may continue to compute withholding based on the
+ * information from the employee's most recently furnished Form W-4," with
+ * its own Steps 1B/3B for exactly this case, because Iowa does not require
+ * existing employees to refile after a form redesign.
+ */
+function resolveIALegacyStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  const raw = cert.maritalStatus;
+  if (raw === undefined || raw === null || raw === 'single') return 'single';
+  if (raw === 'married') return 'married';
+  throw new Error(
+    `Unrecognized IA certificate.maritalStatus ${JSON.stringify(raw)} for a pre-2024 IA W-4 — ` +
+      `expected 'single' or 'married'.`,
+  );
+}
+
+/**
+ * Iowa's 2026 Withholding Formula (revenue.iowa.gov, effective 2026-01-01,
+ * fetched and read directly, including all 10 of the document's own
+ * to-the-cent worked examples — reproduced exactly in
+ * tests/engine.test.ts). Flat 3.80% (Iowa became a true flat-tax state
+ * under SF2442) over wages less a marital-status-dependent deduction, less
+ * a dollar allowance amount divided by pay periods:
+ * T1 = G − D, T2 = T1 × 3.80%, T3 = T2 − (W ÷ P).
+ *
+ * The source publishes D as a SEPARATE pre-rounded dollar figure per pay
+ * period (daily/weekly/biweekly/semimonthly/monthly/annual) rather than one
+ * annual figure divided down — but verified BY CONSTRUCTION that every
+ * published per-period D figure equals the annual figure divided by that
+ * period's own periodsPerYear, rounded to the cent (e.g. semimonthly
+ * $541.67 = $13,000 ÷ 24). This engine stores only the annual figure and
+ * computes D_period = annualD ÷ periodsPerYear UNROUNDED, rounding only
+ * once at final emission — algebraically proven equivalent to the source's
+ * own explicit fallback for pay frequencies it doesn't publish a table for
+ * (quarterly/semiannual): "use the annual payroll formulas to get T3, [then]
+ * divide this amount by 4" (or 2). Distributing that single division across
+ * G, D, and W individually before combining, versus doing it once at the
+ * end, produces the identical result by simple algebra — so ONE code path
+ * correctly covers all 8 PayFrequency values, not just the 6 the source
+ * tabulates directly.
+ *
+ * Two IA W-4 vintages are both live in practice (Iowa does not require
+ * existing employees to refile after a form redesign): the CURRENT
+ * (2024-or-later) form has the employee compute and report a single TOTAL
+ * dollar allowance amount (Line 7 — this engine takes that figure directly
+ * via certificate.totalAllowanceAmount, the same "caller supplies the
+ * already-computed number" convention as every other state's
+ * additionalWithholding, rather than re-deriving the form's own six-line
+ * worksheet); the LEGACY (2023-or-earlier) form instead reports a plain
+ * allowance COUNT multiplied by a flat $40 each. Selected via
+ * certificate.formVintage — default (unset) is the current form.
+ *
+ * Step 4 (add certificate.additionalWithholding, Line 8) is NOT handled
+ * here — it's already covered generically by applyAdditionalStateWithholding()
+ * in the caller, the same as every other state's own "Line 2"-equivalent.
+ */
+function flatRateMaritalDeduction(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.iowaWithholding as IowaConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const periodsPerYear = ctx.periodsPerYear;
+
+  let annualDeduction: number; // dollars
+  let allowanceCents: number;
+  let pathNote: string;
+
+  if (cert.formVintage === 'pre_2024') {
+    const status = resolveIALegacyStatus(cert);
+    annualDeduction = cfg.deductionLegacy[status];
+    const count = Number(cert.allowances ?? 0);
+    allowanceCents = dollars(cfg.legacyAllowanceAmount) * count;
+    pathNote = `pre-2024 IA W-4, ${status}, ${count} allowance(s) × $${cfg.legacyAllowanceAmount}`;
+  } else {
+    const status = resolveIA2024Status(cert);
+    annualDeduction = cfg.deduction2024Plus[status];
+    allowanceCents = Number(cert.totalAllowanceAmount ?? 0);
+    pathNote = `2024+ IA W-4, ${status}`;
+  }
+
+  const deductionPerPeriod = dollars(annualDeduction) / periodsPerYear;
+  const allowancePerPeriod = allowanceCents / periodsPerYear;
+
+  const t1 = taxableWages - deductionPerPeriod;
+  const t2 = t1 * cfg.rate;
+  const t3 = t2 - allowancePerPeriod;
+  const amount = atLeastZero(roundHalfUp(t3));
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages,
+    amount,
+    detail:
+      `${fmt(taxableWages)} less ${fmt(roundHalfUp(deductionPerPeriod))} deduction (${pathNote}) ` +
+      `@ ${(cfg.rate * 100).toFixed(2)}%, less ${fmt(roundHalfUp(allowancePerPeriod))} allowance/period`,
   };
 }
