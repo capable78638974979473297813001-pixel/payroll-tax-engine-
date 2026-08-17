@@ -3330,6 +3330,114 @@ describe('Vermont', () => {
   });
 });
 
+describe('Kansas', () => {
+  const ksState = (certificate: Record<string, unknown>) => ({
+    workState: { code: 'KS', certificate },
+  });
+
+  test("reproduces KW-100's own worked example: semimonthly $2,000, married/spouse not working, 1 dependent → $41.44", () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...ksState({ allowanceRate: 'joint', personalAllowances: 2, dependents: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'KS_SIT'), dollars(41.44));
+  });
+
+  test('weekly $400 single, 1 personal allowance: (400 − 176.15) × 5.2% = $8.05', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+        ...ksState({ allowanceRate: 'single', personalAllowances: 1 }),
+      }),
+    );
+    // Annual exemption $9,160 ÷ 52 = $176.1538..., net = $223.8462...
+    // Falls in [69, 512): 5.2% of (223.8462 − 69) = 5.2% × 154.8462 = $8.05.
+    assert.equal(amountOf(r, 'KS_SIT'), dollars(8.05));
+  });
+
+  test('no K-4 on file: withheld at Single rate with $0 exemption, per KW-100\'s own explicit instruction', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+        workState: { code: 'KS' },
+      }),
+    );
+    // No allowance subtracted: 400 falls in [69,512): 5.2% × (400-69) = $17.21.
+    assert.equal(amountOf(r, 'KS_SIT'), dollars(17.21));
+  });
+
+  test('Head of Household uses the single/HOH bracket table but gets the extra $2,320 allowance', () => {
+    const withoutHoh = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+        ...ksState({ allowanceRate: 'single', personalAllowances: 1 }),
+      }),
+    );
+    const withHoh = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+        ...ksState({ allowanceRate: 'single', personalAllowances: 1, headOfHousehold: true }),
+      }),
+    );
+    assert.ok(amountOf(withHoh, 'KS_SIT') < amountOf(withoutHoh, 'KS_SIT'));
+  });
+
+  test('certificate.exempt and certificate.additionalWithholding work generically', () => {
+    const exempt = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+        ...ksState({ exempt: true }),
+      }),
+    );
+    assert.equal(amountOf(exempt, 'KS_SIT'), 0);
+
+    const withExtra = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+        ...ksState({ allowanceRate: 'single', personalAllowances: 1, additionalWithholding: dollars(15) }),
+      }),
+    );
+    assert.equal(amountOf(withExtra, 'KS_SIT'), dollars(8.05 + 15));
+  });
+
+  test('an unrecognized allowance rate throws rather than silently defaulting', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+            ...ksState({ allowanceRate: 'married' }),
+          }),
+        ),
+      /Unrecognized KS certificate\.allowanceRate/,
+    );
+  });
+
+  test('no local income tax and no employee-paid unemployment/disability/paid-leave lines exist for Kansas', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+        ...ksState({ allowanceRate: 'single', personalAllowances: 1 }),
+      }),
+    );
+    assert.equal(r.taxes.some((t) => t.jurisdiction === 'local'), false);
+    assert.equal(r.taxes.some((t) => t.id === 'KS_UC_EE'), false);
+    assert.equal(r.taxes.some((t) => t.id === 'KS_DBL_EE'), false);
+    assert.equal(r.taxes.some((t) => t.id === 'KS_PFML_EE'), false);
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

@@ -400,6 +400,8 @@ function incomeTaxLines(
       return [flatRateMaritalDeduction(input, ctx, rules)];
     case 'bracket_per_period_allowance':
       return [bracketPerPeriodAllowance(input, ctx, rules)];
+    case 'bracket_per_period_kansas':
+      return [bracketPerPeriodKansas(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -2644,6 +2646,136 @@ function bracketPerPeriodAllowance(
     detail:
       `${fmt(grossWages)} gross less ${fmt(allowance)} allowance (${allowances} × $${allowancePerUnit}) ` +
       `= ${fmt(netWages)} net, ${status} @ ${(bracket.rate * 100).toFixed(2)}% over ` +
+      `${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))}`,
+  };
+}
+
+interface KSExemptionTiers {
+  personal: number; // dollars, ANNUAL, per B/C line claimed on Form K-4 ($9,160 each)
+  hohAdditional: number; // dollars, ANNUAL, Line D if filing head of household ($2,320)
+  dependent: number; // dollars, ANNUAL, per dependent on Line E ($2,320 each)
+}
+
+interface KSConfig {
+  exemptionTiers: KSExemptionTiers;
+  brackets: Record<'single' | 'joint', Record<string, WIBracket[]>>; // second key is PayFrequency
+}
+
+/**
+ * Resolves Form K-4's own "Allowance Rate" (Line 3 / Line A of the Personal
+ * Allowance Worksheet — Single or Joint) to which of Kansas's two published
+ * bracket tables applies. Head of Household uses the SAME table as Single
+ * — Table 3's own heading is literally "(a) SINGLE person (including Head
+ * of Household)" — HOH only affects the EXEMPTION AMOUNT (via Line D's
+ * $2,320 bonus, see kansasExemptionAmount()), never which bracket table is
+ * looked up. Default (no K-4 on file) is 'single', matching the guide's own
+ * explicit instruction: "If your employer does not receive a K-4 form from
+ * you, they must withhold Kansas income tax from your wages without
+ * exemption at the 'Single' allowance rate" — a rare case in this project
+ * where the no-form default is a directly quoted state instruction, not
+ * just this project's own standing convention.
+ */
+function resolveKSAllowanceRate(cert: Record<string, unknown>): 'single' | 'joint' {
+  const raw = cert.allowanceRate;
+  if (raw === undefined || raw === null || raw === 'single') return 'single';
+  if (raw === 'joint') return 'joint';
+  throw new Error(
+    `Unrecognized KS certificate.allowanceRate ${JSON.stringify(raw)} — expected 'single' or 'joint'.`,
+  );
+}
+
+/**
+ * Form K-4's Personal Allowance Worksheet does NOT compute a single flat
+ * per-allowance dollar figure the way most other states' allowance
+ * mechanisms do — each line is worth a DIFFERENT amount: Line B ("married
+ * or single") and Line C ("spouse does not work") are each worth Kansas's
+ * flat personal exemption ($9,160) INDEPENDENTLY (a married couple who
+ * both claim B and C gets $18,320 total — two $9,160 units, not one
+ * "married" constant), Line D (head of household) adds a further $2,320,
+ * and Line E is $2,320 per dependent. Verified against KW-100's own worked
+ * example (Esmeralda: married, spouse not working, 1 dependent — claims
+ * B=1, C=1, D=0, E=1 — $9,160 + $9,160 + $2,320 = $20,640, matching the
+ * guide's own "$18,320 (equivalent to two exemptions of $9,160) + $2,320"
+ * arithmetic exactly). Because of this, certificate.personalAllowances (a
+ * caller-supplied count of how many $9,160 units are claimed — normally 1
+ * for a single filer, 0-2 for a married one) is what this engine reads,
+ * NOT Form K-4's own Line F total (B+C+D+E summed together), which would
+ * silently misattribute dollar value if read as a single flat multiplier.
+ */
+function kansasExemptionAmount(cert: Record<string, unknown>, tiers: KSExemptionTiers): number {
+  const personalUnits = Number(cert.personalAllowances ?? 0);
+  const dependents = Number(cert.dependents ?? 0);
+  const hoh = cert.headOfHousehold === true;
+  return (
+    tiers.personal * personalUnits +
+    (hoh ? tiers.hohAdditional : 0) +
+    tiers.dependent * dependents
+  );
+}
+
+/**
+ * Kansas's Percentage Formula (KW-100, "for wages paid on and after
+ * 2024-07-01" — Kansas's SB 1 (2024) tax reform reduced this to a genuine
+ * 2-bracket system, 5.20%/5.58%, still current for 2026 per the KDOR's own
+ * guide having no newer revision). Subtract the ANNUAL exemption amount,
+ * computed continuously (not pre-rounded) and divided by periodsPerYear —
+ * per the guide's OWN literal instruction: "An individual's withholding
+ * allowance amount is their total Kansas individual income tax personal
+ * exemption amount divided by the number of payroll periods in the
+ * calendar year" — from per-period gross wages, then look up the result in
+ * one of Kansas's own EIGHT independently-published per-period bracket
+ * tables (Tables 1-8: weekly/biweekly/semimonthly/monthly/quarterly/
+ * semiannual/annual/daily — the full PayFrequency set, transcribed
+ * verbatim per period rather than derived, unlike the allowance amount —
+ * see bracketPerPeriodAllowance's own doc comment for why a genuine
+ * marginal bracket's boundary values are transcribed rather than derived,
+ * while a pure deduction amount is safe to compute continuously).
+ *
+ * Verified against the guide's own fully worked example: semimonthly
+ * $2,000, married (spouse not working), 1 dependent, 3 allowances (B=1,
+ * C=1, E=1) → $41.44, rounds to $41 — see tests/engine.test.ts,
+ * describe('Kansas'). This engine does NOT apply KW-100's own "round to
+ * the nearest whole dollar" step, matching every other state's own
+ * cents-precision convention in this project (KW-100's whole-dollar
+ * rounding is a paper-table simplification, same category as Wisconsin's
+ * whole-dollar table rounding disclosed elsewhere).
+ */
+function bracketPerPeriodKansas(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.kansasWithholding as KSConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const grossWages = ctx.taxableWagesFor(exempt);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const annualExemption = kansasExemptionAmount(cert, cfg.exemptionTiers);
+  const allowance = dollars(annualExemption) / ctx.periodsPerYear;
+  const netWages = atLeastZero(grossWages - allowance);
+
+  const rate = resolveKSAllowanceRate(cert);
+  const brackets = cfg.brackets[rate][input.payFrequency];
+  if (!brackets) {
+    throw new Error(
+      `Kansas's own withholding tables don't publish a "${input.payFrequency}" bracket ` +
+        `schedule — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const bracket = findWIBracket(brackets, netWages);
+  const excess = netWages - dollars(bracket.from);
+  const amount = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: netWages,
+    amount,
+    detail:
+      `${fmt(grossWages)} gross less ${fmt(roundHalfUp(allowance))} allowance ($${annualExemption}/yr ÷ ` +
+      `${ctx.periodsPerYear}) = ${fmt(netWages)} net, ${rate} @ ${(bracket.rate * 100).toFixed(2)}% over ` +
       `${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))}`,
   };
 }
