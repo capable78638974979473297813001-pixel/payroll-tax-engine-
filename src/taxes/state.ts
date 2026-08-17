@@ -1690,18 +1690,26 @@ function resolveNJRateTable(cert: Record<string, unknown>): 'A' | 'B' | 'C' | 'D
  * — ctx.taxableWagesFor() already returns the combined total with no special
  * casing needed for a single calculatePaycheck() call.
  *
- * NOT MODELLED (disclosed, not guessed): NJ-WT's own alternate rule for
- * supplemental wages paid on a SEPARATE cheque from regular wages ("withhold
- * from the supplemental wages without any exemption allowances") — the same
- * class of cross-period gap already disclosed for Kentucky's separate-cheque
- * supplemental rule and Indiana's 30-day nonresident rule; this engine
- * models one paycheck at a time and has no mechanism to detect "this cheque
- * is supplemental-only."
+ * NJ-WT's own ALTERNATE rule for supplemental wages paid on a SEPARATE
+ * cheque from regular wages ("withhold from the supplemental wages without
+ * any exemption allowances") IS modelled: detected structurally, not via a
+ * separate certificate flag — a paycheck with supplemental cash and NO
+ * 'regular'-category earning at all IS a standalone supplemental cheque by
+ * definition, a signal the earnings array already carries. (This does NOT
+ * close the cross-period class of gap already disclosed for Kentucky's own
+ * separate-cheque rule and Indiana's 30-day nonresident rule — NJ-WT's own
+ * "different time" language implicitly assumes a prior regular cheque
+ * already existed this period, which a standalone calculatePaycheck() call
+ * has no way to look back at; this only distinguishes the WITHIN-this-cheque
+ * shape NJ-WT itself describes: allowance subtracted, or not.)
  *
  * Every bracket base figure in NJ-2026.json's Rate Tables was reconstructed
  * from NJ-WT's own annual boundaries+rates (the cleanly-extracted table) and
  * verified to reproduce every one of NJ-WT's own per-period base figures to
- * the cent for weekly, monthly, and annual — see the file's own $methodComment.
+ * the cent for all 8 pay periods — see the file's own $methodComment/
+ * $extractionNote (the "daily" period needed real care: NJ-WT's own table
+ * divides the annual figure by 365, not this engine's usual 260-workday
+ * convention).
  */
 function bracketPerPeriodRateTable(
   input: PaycheckInput,
@@ -1718,6 +1726,35 @@ function bracketPerPeriodRateTable(
     throw new Error(`NJ certificate.exemptions (${exemptions}) must be a non-negative integer.`);
   }
 
+  const rateTable = resolveNJRateTable(cert);
+  const brackets = cfg.brackets[rateTable][input.payFrequency];
+  if (!brackets) {
+    throw new Error(
+      `New Jersey's own Rate Table "${rateTable}" doesn't publish a "${input.payFrequency}" ` +
+        `bracket schedule — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+
+  const supplementalCash = supplementalEarnings(input.earnings);
+  const hasRegularWages = input.earnings.some((e) => e.category === 'regular');
+  if (!hasRegularWages && supplementalCash > 0) {
+    const bracket = findWIBracket(brackets, grossWages);
+    const excess = grossWages - dollars(bracket.from);
+    const amount = dollars(bracket.base) + applyRate(excess, bracket.rate);
+    return {
+      id: `${rules.code}_SIT`,
+      name: `${rules.name} Income Tax`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: grossWages,
+      amount,
+      detail:
+        `${fmt(grossWages)} supplemental wages on a separate cheque (no regular wages this ` +
+        `period) — NJ-WT: withheld WITHOUT exemption allowances, Rate Table ${rateTable} @ ` +
+        `${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))}`,
+    };
+  }
+
   const allowancePerExemption = cfg.allowanceAmount[input.payFrequency];
   if (allowancePerExemption === undefined) {
     throw new Error(
@@ -1728,14 +1765,6 @@ function bracketPerPeriodRateTable(
   const allowance = roundHalfUp(dollars(allowancePerExemption) * exemptions);
   const netWages = atLeastZero(grossWages - allowance);
 
-  const rateTable = resolveNJRateTable(cert);
-  const brackets = cfg.brackets[rateTable][input.payFrequency];
-  if (!brackets) {
-    throw new Error(
-      `New Jersey's own Rate Table "${rateTable}" doesn't publish a "${input.payFrequency}" ` +
-        `bracket schedule — cannot compute ${rules.code}_SIT.`,
-    );
-  }
   const bracket = findWIBracket(brackets, netWages);
   const excess = netWages - dollars(bracket.from);
   const amount = dollars(bracket.base) + applyRate(excess, bracket.rate);

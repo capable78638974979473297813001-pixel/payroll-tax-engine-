@@ -2530,18 +2530,46 @@ describe('New Jersey', () => {
     assert.equal(amountOf(r, 'NJ_SIT'), 0);
   });
 
-  test('supplemental wages aggregate with regular wages, no separate rate', () => {
-    // NJ-WT: paid at the same time, total and withhold at the combined rate
-    // — so a $1,000 supplemental-only "paycheck" (no regular earnings) is
-    // computed exactly like the plain-regular-wages case above.
+  test('supplemental wages paid AT THE SAME TIME as regular wages aggregate, allowance applies once', () => {
+    // NJ-WT: "Total the employee's regular wage and supplemental wages and
+    // withhold at the appropriate rate based on the combined payment." A
+    // $700 regular + $300 supplemental cheque, 2 exemptions, is identical
+    // to a single $1,000 regular cheque with 2 exemptions ($27.04, see
+    // above) — the allowance is subtracted once from the combined total,
+    // not once per earning line.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(700) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(300) },
+        ],
+        workState: { code: 'NJ', certificate: { exemptions: 2 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'NJ_SIT'), dollars(27.04));
+  });
+
+  test('supplemental wages on a SEPARATE cheque (no regular wages this period) are withheld WITHOUT the exemption allowance', () => {
+    // NJ-WT: "If the supplemental wages are paid at a different time [than
+    // regular wages]: Withhold from the supplemental wages without any
+    // exemption allowances." Detected structurally — no 'regular' earning
+    // on this cheque at all. 2 exemptions would normally subtract $38.40
+    // ($19.20 x 2); here it must NOT be subtracted, so this differs from
+    // the plain-regular-wages 2-exemptions case above ($27.04) even though
+    // the gross dollar amount is identical.
     const r = calculatePaycheck(
       input({
         payFrequency: 'weekly',
         earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(1000) }],
-        workState: { code: 'NJ' },
+        workState: { code: 'NJ', certificate: { exemptions: 2 } },
       }),
     );
+    // Full $1,000 (no allowance subtracted) falls in the same $769-$1,442
+    // bracket as the very first test above: base $15.29 + 6.1% of
+    // ($1,000-$769=$231) = $29.381 -> $29.38, NOT $27.04.
     assert.equal(amountOf(r, 'NJ_SIT'), dollars(29.38));
+    assert.notEqual(amountOf(r, 'NJ_SIT'), dollars(27.04));
   });
 
   test('an unrecognized filingStatus throws rather than guessing a rate table', () => {
@@ -2550,6 +2578,44 @@ describe('New Jersey', () => {
         input({ workState: { code: 'NJ', certificate: { filingStatus: 'bogus' } } }),
       ),
     );
+  });
+
+  test('quarterly and semiannual periods, derived from the annual table, are wired up', () => {
+    // Rate A quarterly: $18,750-$125,000 bracket, base $732.50 + 7.0% of
+    // ($20,000-$18,750=$1,250) = $732.50 + $87.50 = $820.00.
+    const q = calculatePaycheck(
+      input({
+        payFrequency: 'quarterly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(20000) }],
+        workState: { code: 'NJ' },
+      }),
+    );
+    assert.equal(amountOf(q, 'NJ_SIT'), dollars(820.0));
+
+    // Rate A semiannual: $37,500-$250,000 bracket (over the $10,000
+    // threshold "and up" — no allowance claimed), base $1,465.00 + 7.0% of
+    // ($40,000-$37,500=$2,500) = $1,465.00 + $175.00 = $1,640.00.
+    const s = calculatePaycheck(
+      input({
+        payFrequency: 'semiannual',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(40000) }],
+        workState: { code: 'NJ' },
+      }),
+    );
+    assert.equal(amountOf(s, 'NJ_SIT'), dollars(1640.0));
+  });
+
+  test("daily period uses NJ-WT's own 365-based divisor, not this engine's usual 260-day convention", () => {
+    // Rate A daily: $205-$1,370 bracket, base $8.03 + 7.0% of
+    // ($300-$205=$95) = $8.03 + $6.65 = $14.68.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'daily',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(300) }],
+        workState: { code: 'NJ' },
+      }),
+    );
+    assert.equal(amountOf(r, 'NJ_SIT'), dollars(14.68));
   });
 });
 
