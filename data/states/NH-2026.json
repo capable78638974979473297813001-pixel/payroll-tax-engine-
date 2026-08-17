@@ -1,0 +1,36 @@
+{
+  "code": "NH",
+  "name": "New Hampshire",
+  "year": 2026,
+  "method": "no_income_tax",
+  "$scopeNote": "New Hampshire has NO state income tax of any kind for 2026. New Hampshire has never taxed wages/salaries directly. Its only individual-income tax, the Interest & Dividends (I&D) Tax, was phased down (5% -> 4% for periods ending on/after 2023-12-31 -> 3% for periods ending on/after 2024-12-31) and fully repealed effective 2025-01-01 -- so 2026 is unambiguously a $0 year, not merely 'still phasing out.' No local income tax anywhere (New Hampshire does not permit municipalities to levy one -- towns/cities fund themselves through property tax instead). No employee-paid unemployment, disability, or mandatory paid-leave program: Granite State Paid Family Leave is explicitly VOLUNTARY (the nation's first state-sponsored voluntary plan) for both employers and employees, capped at $5/week for an individual buying coverage directly -- not a payroll tax with a fixed statewide rate the way NJ/NY/CT's mandatory PFML programs are, so not engine-consumed, same convention as Vermont's VT-FMLI.",
+  "sources": [
+    {
+      "title": "NH Interest and Dividends Tax Repeal — McLane Middleton client alert",
+      "url": "https://www.mclane.com/insights/nh-interest-and-dividends-tax-repealed-as-of-january-1/",
+      "verifiedOn": "2026-08-16",
+      "verifiedBy": "Fetched directly. Verbatim: 'Starting January 1, 2025, New Hampshire taxpayers are no longer subject to the New Hampshire Interest & Dividends Tax.' Also gives the phase-down history (5% pre-2023, 4% for periods ending on/after 2023-12-31, 3% for periods ending on/after 2024-12-31, 0% from 2025-01-01). Used a New Hampshire-based LAW FIRM's own published client alert rather than a generic tax-content site, one tier below a direct revenue.nh.gov fetch (see note below) but a step above an anonymous secondary source.",
+      "note": "revenue.nh.gov itself (both the dedicated repeal press release and the general Interest & Dividends Tax overview page) returned an Akamai edge-level 'Access Denied' (not a simple bot-check — a CDN block that a browser User-Agent header does not bypass, unlike the curl workaround that worked for Vermont's governor.vermont.gov/law.justia.com). Cross-checked against 3 independent secondary tax-guide sources (visaverge, countrytaxcalc, netchex) which all agree on the 2025-01-01 effective date with no dissent — treated as sufficient corroboration given the primary site's inaccessibility, but disclosed as a real access limitation rather than silently presented as a direct government fetch."
+    },
+    {
+      "title": "New Hampshire's Paid Family and Medical Leave Plan — Ogletree Deakins",
+      "url": "https://ogletree.com/insights-resources/blog-posts/new-hampshires-paid-family-and-medical-leave-plan-breaking-ground-in-the-granite-state/",
+      "verifiedOn": "2026-08-16",
+      "verifiedBy": "Fetched directly. Verbatim: 'the Granite State Paid Family Leave Plan[] is the nation's first and only voluntary, state-sponsored paid leave plan' and 'premium payments are capped at $5 per week or $260 annually' for an individual purchasing coverage directly. Employers with 50+ employees may opt in; if they don't, employees may buy individual coverage. No fixed statewide payroll-tax rate exists (unlike NJ/NY/CT PFML), so this is context-only, not engine-consumed — same convention as Vermont's VT-FMLI, which is voluntary for the identical reason."
+    },
+    {
+      "title": "New Hampshire local municipal income tax and UI — cross-source confirmation",
+      "url": "https://www.rippling.com/blog/payroll-tax-in-new-hampshire",
+      "verifiedOn": "2026-08-16",
+      "verifiedBy": "Cross-source confirmed (search-engine synthesis of this and other secondary sources, not independently fetched and read in full this session): New Hampshire does not permit municipalities to levy a local income tax, and unemployment insurance is funded entirely by employer payroll tax with no employee contribution — context-only, not engine-consumed, same convention as every other state's employer-only UI in this project. 2026 new-employer rate 1.7%, wage base $14,000 (recorded for completeness, not independently primary-verified)."
+    }
+  ],
+  "reciprocity": {
+    "reciprocalStates": [],
+    "note": "Not applicable rather than 'checked, none found' — New Hampshire has no income tax to be reciprocal about, so no resident-vs-nonresident withholding question can arise here at all. reciprocalStates left structurally empty for consistency with every other state file's shape."
+  },
+  "knownGaps": [
+    "revenue.nh.gov itself could not be fetched directly (Akamai CDN block, not a simple bot-check) — the I&D-tax-repeal date rests on a reputable NH law firm's client alert plus 3 consistent secondary sources rather than a direct government-site read, a thinner evidentiary tier than most other files in this project.",
+    "Employer-only UI rate/wage base figures are cross-source only, not independently fetched from nhes.nh.gov — context-only, not engine-consumed, so this does not affect calculation correctness."
+  ]
+}

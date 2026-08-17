@@ -3492,6 +3492,37 @@ describe('Kansas', () => {
   });
 });
 
+describe('New Hampshire', () => {
+  // New Hampshire has no income tax of any kind for 2026 (the Interest &
+  // Dividends Tax fully repealed 2025-01-01) — the simplest state file in
+  // this project, using the existing no_income_tax method with zero new
+  // calc code.
+  test('no state income tax line at all — zero, not merely unmodelled', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        workState: { code: 'NH' },
+      }),
+    );
+    assert.equal(r.taxes.some((t) => t.id === 'NH_SIT'), false);
+  });
+
+  test('no local income tax and no employee-paid unemployment/disability/paid-leave lines exist for New Hampshire', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        workState: { code: 'NH' },
+      }),
+    );
+    assert.equal(r.taxes.some((t) => t.jurisdiction === 'local'), false);
+    assert.equal(r.taxes.some((t) => t.id === 'NH_UC_EE'), false);
+    assert.equal(r.taxes.some((t) => t.id === 'NH_DBL_EE'), false);
+    assert.equal(r.taxes.some((t) => t.id === 'NH_PFML_EE'), false);
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(
