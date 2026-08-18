@@ -38,6 +38,18 @@
       "verifiedBy": "Downloaded and text-extracted directly (pdftotext -layout). ENGINE-CONSUMED: the exact 'Simplified Method' formula (Gross wages x 0.0113 = Total Premium; Gross wages x 0.0113 x 0.7143 = Employee Share; Total Premium - Employee Share = Employer Share -- this exact per-line computation, not a chain of independently-rounded subtractions, is what statePaidLeaveEmployerTax() in src/taxes/state.ts reproduces), the WA Cares formula (Gross wages x 0.0058 = total premium, 'This is the maximum amount you can withhold'), confirmation WA Cares has NO Social Security cap ('The Social Security cap does not apply') while PFML DOES share it, the full 'gross wages' definition (the basis for this file's exemptPretax inference), and confirmation that employers under 50 WA employees are not required to pay the employer PFML share but must still withhold/remit the employee share. NOTE: this same document has one internal typo (a 'Current Paid Leave premium rate methodology' section states 'the 2026 premium rate will be 0.0113 percent' -- an obvious decimal-placement error against its own '1.13 percent' stated twice elsewhere in the same document; the correct 1.13% is used throughout this file)."
     },
     {
+      "title": "WA Cares Fund — Exemptions",
+      "url": "https://wacaresfund.wa.gov/exemptions",
+      "verifiedOn": "2026-08-17",
+      "verifiedBy": "Fetched directly, as a follow-up check after Scott asked to verify this file was Symmetry-level — the same discipline that caught real gaps in Idaho and Kansas. Found a genuinely omitted feature: FIVE distinct WA Cares exemption categories exist (residency outside WA, active-duty military or spouse, 70%+ service-connected veteran disability, an approved pre-2023 private-LTC-insurance exemption closed to new applicants but still permanently binding for existing holders, and — the most unusual — non-immigrant work-visa holders who became AUTOMATICALLY exempt as of 2026-01-01 unless they proactively opt in). None of this was modelled in the original build. Now closed: stateLongTermCareEmployeeTax() checks certificate.wacaresExempt generically (the caller resolves which category applies and the visa-holder default-exemption logic; this engine only applies the resulting $0, the same eligibility-adjudication scope boundary as every other state's certificate.exempt)."
+    },
+    {
+      "title": "L&I — Paid Family & Medical Leave (exempt employer/employee categories)",
+      "url": "https://www.lni.wa.gov/workers-rights/leave/paid-family-and-medical-leave",
+      "verifiedOn": "2026-08-17",
+      "verifiedBy": "Cross-source confirmed (search-engine synthesis, not independently fetched and read in full this session), found on the same follow-up pass as the WA Cares exemptions: federal employers/employees, federally-recognized Tribes (may opt in), self-employed individuals (may opt in), and businesses with a collective-bargaining agreement predating 2017-10-19 (employees, except federal, may opt in) are all exempt from PFML by default. Closed generically via certificate.paidLeaveExempt on the SHARED statePaidLeaveEmployeeTax()/statePaidLeaveEmployerTax() functions (not Washington-specific code), so any future state using the same functions gets this for free; Minnesota/New York's existing behavior is unaffected since they're never expected to set this field."
+    },
+    {
       "title": "Washington's Payroll Taxes in 2026: The JumpStart Tax — The Startup Law Blog",
       "url": "https://www.thestartuplawblog.com/seattle-payroll-expense-tax-guide/",
       "verifiedOn": "2026-08-17",

@@ -1262,6 +1262,33 @@ function statePaidLeaveEmployeeTax(
   const ytd = input.ytd.statePaidLeave?.[rules.code] ?? 0;
   const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
   const taxableWages = underCap(currentWages, ytd, cap);
+
+  // Generic exemption gate, added for Washington PFML (whose own program
+  // exempts federal employers/employees, federally-recognized Tribes,
+  // self-employed individuals, and pre-Oct-2017 collective-bargaining
+  // units — several of which MAY opt in, which this engine treats no
+  // differently from any other elected coverage) but deliberately NOT
+  // Washington-specific: certificate.paidLeaveExempt is read the same way
+  // for any state using this shared function, the same "state-agnostic,
+  // opt-in via a certificate field" convention as certificate.exempt for
+  // income tax. Minnesota/New York's own Paid Leave programs are simply
+  // never expected to set this field, so their existing behavior is
+  // unaffected either way.
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (cert.paidLeaveExempt) {
+    return {
+      id: `${rules.code}_PFML_EE`,
+      name: `${rules.name} Paid Leave (Employee)`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages,
+      amount: 0,
+      detail:
+        '$0 — Paid Leave exemption on file (certificate.paidLeaveExempt); this engine does not verify the ' +
+        'underlying eligibility category.',
+    };
+  }
+
   const amount = applyRate(taxableWages, cfg.rate);
 
   return {
@@ -1317,6 +1344,11 @@ function statePaidLeaveEmployerTax(
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   if (!cert.employerLiableForPaidLeaveShare) return null;
+  // Same exemption gate as statePaidLeaveEmployeeTax() — an exempt employee
+  // (federal, Tribal, self-employed opt-out, etc.) generates no premium at
+  // all, employee or employer share, since there's no total premium to
+  // split in the first place.
+  if (cert.paidLeaveExempt) return null;
 
   const exempt = (cfg.exemptPretax ?? rules.exemptPretax ?? []) as PretaxCategory[];
   const currentWages = ctx.taxableWagesFor(exempt);
@@ -1371,6 +1403,40 @@ function stateLongTermCareEmployeeTax(
   const ytd = input.ytd.stateLongTermCare?.[rules.code] ?? 0;
   const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
   const taxableWages = underCap(currentWages, ytd, cap);
+
+  // wacaresfund.wa.gov's own exemptions page (fetched directly): FIVE
+  // distinct exemption categories exist for Washington specifically —
+  // residency outside WA, active-duty military (or spouse), a 70%+
+  // service-connected veteran disability rating, an approved pre-2023
+  // private-LTC-insurance exemption (closed to new applicants but still
+  // permanently binding for existing holders), and — genuinely unlike
+  // every other exemption in this project — non-immigrant work-visa
+  // holders are AUTOMATICALLY exempt as of 2026-01-01 UNLESS they
+  // proactively opt IN. This engine does not adjudicate eligibility for
+  // any of these (the same scope boundary as every other state's
+  // certificate.exempt) — the caller is responsible for having already
+  // resolved which category (if any) applies, including the visa-holder
+  // default-exemption logic, and passes the single resulting boolean.
+  // Not reusing the income-tax certificate.exempt field/mechanism: that
+  // one is scoped to zeroing `${code}_SIT`-prefixed lines only (see
+  // zeroStateIncomeTaxLines()) and Washington has no income tax at all —
+  // this is a genuinely separate levy with its own exemption concept.
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (cert.wacaresExempt) {
+    return {
+      id: `${rules.code}_LTC_EE`,
+      name: `${rules.name} Long-Term Care (Employee)`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages,
+      amount: 0,
+      detail:
+        '$0 — WA Cares Fund exemption on file (certificate.wacaresExempt); this engine does not verify ' +
+        'the underlying approval letter or eligibility category (residency/military/veteran-disability/' +
+        'private-LTC-insurance/non-immigrant-visa).',
+    };
+  }
+
   const amount = applyRate(taxableWages, cfg.rate);
 
   return {

@@ -3753,6 +3753,43 @@ describe('Washington', () => {
     assert.equal(amountOf(r, 'WA_PFML_EE'), dollars(8.07));
     assert.equal(amountOf(r, 'WA_LTC_EE'), dollars(5.8));
   });
+
+  test('WA Cares Fund exemption (certificate.wacaresExempt) zeroes only WA Cares, not PFML', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...waState({ wacaresExempt: true }),
+      }),
+    );
+    assert.equal(amountOf(r, 'WA_LTC_EE'), 0);
+    assert.ok(r.taxes.some((t) => t.id === 'WA_LTC_EE'));
+    // PFML is a genuinely separate levy under a separate exemption scheme —
+    // a WA Cares exemption does not imply a PFML exemption.
+    assert.equal(amountOf(r, 'WA_PFML_EE'), dollars(8.07));
+  });
+
+  test('Paid Leave exemption (certificate.paidLeaveExempt) zeroes both employee and employer PFML shares', () => {
+    const employeeSide = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...waState({ paidLeaveExempt: true }),
+      }),
+    );
+    assert.equal(amountOf(employeeSide, 'WA_PFML_EE'), 0);
+    // WA Cares is unaffected — separate exemption scheme.
+    assert.equal(amountOf(employeeSide, 'WA_LTC_EE'), dollars(5.8));
+
+    const employerSide = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...waState({ paidLeaveExempt: true, employerLiableForPaidLeaveShare: true }),
+      }),
+    );
+    assert.equal(employerSide.taxes.some((t) => t.id === 'WA_PFML_ER'), false);
+  });
 });
 
 describe('effective dating', () => {
