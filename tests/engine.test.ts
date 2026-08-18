@@ -3829,7 +3829,15 @@ describe('Massachusetts', () => {
     assert.equal(amountOf(r, 'MA_SIT'), dollars(95.77));
   });
 
-  test("Form M-4's spouse code '4' plus 2 dependents: exemption 4,400+4,400+2,000=10,800/yr → $89.62", () => {
+  test("Form M-4 Line 4 is a literal SUM of the raw codes, not a per-category total: personal(1)+spouse(4)+2 dependents = 7 → $1,000×7+$3,400 = $10,400/yr exemption → $90.00", () => {
+    // Verification-pass correction: an earlier version of this test
+    // asserted $89.62, built on a WRONG per-category model (personal
+    // $4,400 + spouse $4,400 + 2×$1,000 dependents = $10,800/yr). The USDA
+    // National Finance Center's own MA withholding bulletin, cross-checked
+    // against Form M-4's own Line 4 instruction ("Add the number of
+    // exemptions which you have claimed above"), confirms Line 4 = 1+4+2 =
+    // 7, and the real formula is $1,000 × 7 + $3,400 = $10,400/yr (÷52 =
+    // $200.00/week exactly). (2,000 − 200) × 5% = $90.00.
     const r = calculatePaycheck(
       input({
         payFrequency: 'weekly',
@@ -3837,10 +3845,13 @@ describe('Massachusetts', () => {
         ...maState({ personalExemptionCode: 1, spouseExemptionCode: 4, dependents: 2 }),
       }),
     );
-    assert.equal(amountOf(r, 'MA_SIT'), dollars(89.62));
+    assert.equal(amountOf(r, 'MA_SIT'), dollars(90));
   });
 
-  test('personal exemption code "2" (age 65+) adds the $700 additional amount', () => {
+  test('personal exemption code "2" (age 65+): Line 4 = 2 → $1,000×2+$3,400 = $5,400/yr exemption → $94.81', () => {
+    // Also corrected: the old per-category model computed $5,100/yr
+    // ($4,400 personal + a separately-tallied $700 age-65 addition), not
+    // the real $5,400 the Line-4-sum formula gives at Line4=2.
     const r = calculatePaycheck(
       input({
         payFrequency: 'weekly',
@@ -3848,7 +3859,7 @@ describe('Massachusetts', () => {
         ...maState({ personalExemptionCode: 2 }),
       }),
     );
-    assert.equal(amountOf(r, 'MA_SIT'), dollars(95.1));
+    assert.equal(amountOf(r, 'MA_SIT'), dollars(94.81));
   });
 
   test('Head of Household credit ($120/yr) and blindness credit ($110/yr) subtract from the computed TAX, not from wages', () => {

@@ -3197,11 +3197,8 @@ function newarkPayrollTaxEmployer(
 }
 
 interface MAExemptionConfig {
-  personal: number; // dollars, annual — M-4 Line 1 = "1"
-  personalOver65Additional: number; // dollars, annual — additional when Line 1 = "2"
-  spouse: number; // dollars, annual — M-4 Line 2 = "4"
-  spouseOver65Additional: number; // dollars, annual — additional when Line 2 = "5"
-  dependent: number; // dollars, annual, per dependent claimed on Line 3
+  perExemptionPoint: number; // dollars, annual — $1,000 per point in Line 4's own summed total
+  baseAddOn: number; // dollars, annual — $3,400 flat add-on, only once Line 4's total is 1 or more
 }
 
 interface FlatRateSurtaxCreditConfig {
@@ -3216,51 +3213,68 @@ interface FlatRateSurtaxCreditConfig {
 }
 
 /**
- * Resolves Form M-4's own Line 1/Line 2 numeric codes to a dollar exemption
- * amount. Massachusetts's own form (fetched and read directly) is unusual
- * among every state built in this project: the employee doesn't write a
- * COUNT on these lines, they write a SPECIFIC CODE NUMBER the state's own
- * withholding system maps to a dollar figure — "1" (personal) and "4"
- * (spouse) BOTH map to the SAME $4,400 exemption ("Entering '4' makes a
- * withholding system adjustment for the $4,400 exemption for a spouse," per
- * the form's own Instruction C), and "2"/"5" both add the $700 age-65
- * amount on top. Modeled here as a single lookup shared by both lines,
- * since the form's own numbering scheme treats them identically.
+ * Validates Form M-4's own Line 1/Line 2 numeric codes — NOT a dollar
+ * lookup (see the correction note on flatRateSurtaxCredit() for why an
+ * earlier version of this function wrongly treated it as one). M-4's own
+ * text: Line 1 is "1" (personal), or "2" if the employee is 65 or older.
+ * Line 2 is "4" if claiming a spouse exemption, or "5" if the spouse is
+ * also 65+. These raw numbers get SUMMED directly into Line 4's own total
+ * — the form's own Line 4 instruction is literally "Add the number of
+ * exemptions which you have claimed above" — so this function's only job
+ * is to reject anything Form M-4 doesn't actually offer as a checkbox/code,
+ * not to convert a code into a dollar figure.
  */
-function maExemptionForCode(code: number, cfg: MAExemptionConfig, isSpouse: boolean): number {
-  const base = isSpouse ? cfg.spouse : cfg.personal;
-  const over65 = isSpouse ? cfg.spouseOver65Additional : cfg.personalOver65Additional;
-  if (code === 0) return 0;
-  if (code === (isSpouse ? 4 : 1)) return base;
-  if (code === (isSpouse ? 5 : 2)) return base + over65;
+function validateMACode(code: number, line: 1 | 2): number {
+  if (line === 1) {
+    if (code === 0 || code === 1 || code === 2) return code;
+    throw new Error(
+      `Unrecognized MA certificate.personalExemptionCode ${JSON.stringify(code)} — Form M-4's ` +
+        `own Line 1 only ever takes 0 (no certificate filed), 1, or 2 (age 65+).`,
+    );
+  }
+  if (code === 0 || code === 4 || code === 5) return code;
   throw new Error(
-    `Unrecognized MA certificate.${isSpouse ? 'spouseExemptionCode' : 'personalExemptionCode'} ` +
-      `${JSON.stringify(code)} — Form M-4's own Line ${isSpouse ? 2 : 1} only ever takes ` +
-      `${isSpouse ? "0 (no spouse exemption), 4, or 5" : '1 or 2'}.`,
+    `Unrecognized MA certificate.spouseExemptionCode ${JSON.stringify(code)} — Form M-4's own ` +
+      `Line 2 only ever takes 0 (no spouse exemption), 4, or 5 (spouse age 65+).`,
   );
 }
 
 /**
  * Massachusetts's withholding formula (Circular M, effective 2026-01-01) —
  * a flat 5% rate, but with THREE genuinely separate mechanisms layered on
- * top that no single existing method in this project combines: (1) a
- * multi-tier exemption subtracted from wages BEFORE the rate applies
- * (personal/spouse/dependent, each independently confirmed — personal and
- * spouse both $4,400 directly off Form M-4's own text, age-65 and
- * dependent amounts cross-source confirmed after Circular M itself proved
- * unreachable — see $extractionNote); (2) the 2023 "Fair Share Amendment"
- * 4% surtax on ANNUALIZED post-exemption wages over $1,107,750 (2026),
- * modeled as a second WIBracket row (9% = 5% + 4%) reusing the same
- * findWIBracket() helper as every bracket state in this project, computed
- * at the annual scale then divided once — the same algebraically-proven
- * annualize-then-divide equivalence already used for Iowa; (3) FLAT DOLLAR
- * CREDITS (not exemptions) subtracted from the computed TAX itself, not
- * from wages — Head of Household ($120/yr) and blindness ($110/yr), per
- * Form M-4's own Boxes A and B — a genuinely different mechanism from
- * every wage-reducing exemption elsewhere in this project, verified
- * against a secondary source's own published per-period breakdown (e.g.
- * weekly HOH $2.31 = $120÷52) before trusting the annual/periodsPerYear
- * derivation for periods that source didn't itself publish.
+ * top that no single existing method in this project combines: (1) an
+ * exemption subtracted from wages BEFORE the rate applies, computed from
+ * Form M-4's own Line 4 "total number of exemptions" — NOT, as an earlier
+ * version of this file modeled it, a separate dollar lookup per category
+ * (personal/spouse/dependent each with their own amount). CORRECTED on a
+ * verification pass, using the USDA National Finance Center's own detailed
+ * Massachusetts withholding bulletin (a federal payroll shared-service
+ * that independently re-derives every state's formula for its own
+ * processing — about as close to a primary source as this file could
+ * reach once Circular M itself proved completely unfetchable, see
+ * $extractionNote) cross-checked against Form M-4's own text for exactly
+ * how Line 4 is built: Line 4 = Line 1 (1, or 2 if 65+) + Line 2 (0, or 4
+ * if claiming a spouse, or 5 if the spouse is also 65+) + Line 3 (the
+ * dependent count) — a literal sum of the form's own raw numeric codes,
+ * confirmed by NFC's own instruction ("Second and Third Positions - Enter
+ * the total number of exemptions claimed on LINE 4 of the M-4") pointing
+ * at exactly that sum. The dollar exemption is then $1,000 x that Line-4
+ * total + a flat $3,400, EXCEPT when the total is 0 (no certificate filed
+ * at all — Form M-4's own margin note: withholding is "without
+ * exemptions," i.e. $0, not the formula's own $3,400 floor). A married
+ * employee with 2 dependents (Line 4 = 1+4+2 = 7) gets $1,000x7+$3,400 =
+ * $10,400/yr, NOT the $10,800 an earlier per-category model computed by
+ * treating personal/spouse as two independent $4,400 amounts. (2) the 2023
+ * "Fair Share Amendment" 4% surtax on ANNUALIZED post-exemption wages over
+ * $1,107,750 (2026), modeled as a second WIBracket row (9% = 5% + 4%)
+ * reusing the same findWIBracket() helper as every bracket state in this
+ * project, computed at the annual scale then divided once — the same
+ * algebraically-proven annualize-then-divide equivalence already used for
+ * Iowa; (3) FLAT DOLLAR CREDITS (not exemptions) subtracted from the
+ * computed TAX itself, not from wages — Head of Household ($120/yr) and
+ * blindness ($110/yr), per Form M-4's own Boxes A and B, confirmed
+ * unchanged by the same NFC bulletin's own Step 8 ("Subtract the following
+ * tax credits... from the annual Massachusetts tax withholding").
  */
 function flatRateSurtaxCredit(
   input: PaycheckInput,
@@ -3284,14 +3298,18 @@ function flatRateSurtaxCredit(
   // project (e.g. PA/MI's certificate.allowances defaults to 0, not some
   // standard nonzero figure). Caught on a dedicated verification pass by
   // re-reading text already on file, not new research.
-  const personalCode = Number(cert.personalExemptionCode ?? 0);
-  const spouseCode = Number(cert.spouseExemptionCode ?? 0);
+  const personalCode = validateMACode(Number(cert.personalExemptionCode ?? 0), 1);
+  const spouseCode = validateMACode(Number(cert.spouseExemptionCode ?? 0), 2);
   const dependents = Number(cert.dependents ?? 0);
 
+  // Form M-4's own Line 4: a literal sum of the raw codes above (NOT a
+  // count of "how many categories are claimed" — see this function's own
+  // doc comment for why 1+4+2 = 7, not 4).
+  const line4Total = personalCode + spouseCode + dependents;
   const annualExemption =
-    dollars(maExemptionForCode(personalCode, cfg.exemptionTiers, false)) +
-    dollars(maExemptionForCode(spouseCode, cfg.exemptionTiers, true)) +
-    dollars(cfg.exemptionTiers.dependent) * dependents;
+    line4Total === 0
+      ? 0
+      : dollars(cfg.exemptionTiers.perExemptionPoint) * line4Total + dollars(cfg.exemptionTiers.baseAddOn);
   const exemptionPerPeriod = annualExemption / periodsPerYear;
 
   const netWages = atLeastZero(taxableWages - exemptionPerPeriod);
