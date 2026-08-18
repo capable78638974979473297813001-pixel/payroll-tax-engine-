@@ -3273,7 +3273,18 @@ function flatRateSurtaxCredit(
   const periodsPerYear = ctx.periodsPerYear;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  const personalCode = Number(cert.personalExemptionCode ?? 1);
+  // Form M-4's own left-margin instruction to the employee: "Otherwise,
+  // Massachusetts Income Taxes will be withheld from your wages WITHOUT
+  // EXEMPTIONS" — a no-certificate employee gets $0 exemption, not even
+  // the base personal amount. Defaulting personalExemptionCode to 1 (as an
+  // earlier version of this file did) would have silently granted the
+  // full $4,400 personal exemption to an employee who never filed a
+  // certificate at all — the opposite of every other state's own "absent
+  // certificate defaults to the LEAST generous outcome" convention in this
+  // project (e.g. PA/MI's certificate.allowances defaults to 0, not some
+  // standard nonzero figure). Caught on a dedicated verification pass by
+  // re-reading text already on file, not new research.
+  const personalCode = Number(cert.personalExemptionCode ?? 0);
   const spouseCode = Number(cert.spouseExemptionCode ?? 0);
   const dependents = Number(cert.dependents ?? 0);
 

@@ -3803,12 +3803,27 @@ describe('Massachusetts', () => {
     workState: { code: 'MA', certificate },
   });
 
-  test('single, no dependents: (2,000 − 84.62 exemption) × 5% = $95.77', () => {
+  test("no certificate filed: Form M-4's own instruction is withholding \"without exemptions\" — full $100.00, not the $95.77 a filed certificate would give", () => {
+    // Verification-pass finding: an earlier version of this file defaulted
+    // the unset personal-exemption code to 1 (the full $4,400 exemption),
+    // silently granting a benefit the source explicitly says a no-form
+    // employee does NOT get. (2,000 − $0 exemption) × 5% = $100.00.
     const r = calculatePaycheck(
       input({
         payFrequency: 'weekly',
         earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
         ...maState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'MA_SIT'), dollars(100));
+  });
+
+  test('single, personal exemption claimed (Form M-4 Line 1 = "1"): (2,000 − 84.62 exemption) × 5% = $95.77', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...maState({ personalExemptionCode: 1 }),
       }),
     );
     assert.equal(amountOf(r, 'MA_SIT'), dollars(95.77));
@@ -3841,7 +3856,7 @@ describe('Massachusetts', () => {
       input({
         payFrequency: 'weekly',
         earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
-        ...maState({ headOfHousehold: true }),
+        ...maState({ personalExemptionCode: 1, headOfHousehold: true }),
       }),
     );
     assert.equal(amountOf(hoh, 'MA_SIT'), dollars(93.46));
@@ -3850,7 +3865,7 @@ describe('Massachusetts', () => {
       input({
         payFrequency: 'weekly',
         earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
-        ...maState({ blind: true }),
+        ...maState({ personalExemptionCode: 1, blind: true }),
       }),
     );
     assert.equal(amountOf(blind, 'MA_SIT'), dollars(93.65));
@@ -3861,12 +3876,23 @@ describe('Massachusetts', () => {
       input({
         payFrequency: 'weekly',
         earnings: [{ code: 'REG', category: 'regular', amount: dollars(30000) }],
-        ...maState(),
+        ...maState({ personalExemptionCode: 1 }),
       }),
     );
     // Annualized net wages $1,555,600 → $55,387.50 base (5% up to threshold)
     // + 9% of the $447,850 excess = $95,694.00/yr ÷ 52 = $1,840.27.
     assert.equal(amountOf(r, 'MA_SIT'), dollars(1840.27));
+  });
+
+  test('additional withholding (Form M-4 Line 5) works generically: $95.77 + $25.00 = $120.77', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...maState({ personalExemptionCode: 1, additionalWithholding: dollars(25) }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MA_SIT'), dollars(120.77));
   });
 
   test('an unrecognized exemption code throws rather than silently defaulting', () => {
@@ -3911,7 +3937,7 @@ describe('Massachusetts', () => {
         payFrequency: 'weekly',
         earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
         residenceState: { code: 'RI' },
-        ...maState(),
+        ...maState({ personalExemptionCode: 1 }),
       }),
     );
     assert.equal(amountOf(r, 'MA_SIT'), dollars(95.77));
