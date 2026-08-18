@@ -3,6 +3,7 @@
   "name": "Maine",
   "year": 2026,
   "method": "bracket_phaseout_deduction_whole_dollar",
+  "roundFinalToWholeDollar": true,
   "$scopeNote": "STATE income tax + Paid Family & Medical Leave (PFML, employee AND employer shares, contributions began 2025-01-01, benefits available from 2026-05-01). Maine has NO local income tax anywhere and NO reciprocity agreement with any state -- residents working elsewhere instead claim a RETURN-level credit for taxes paid to another jurisdiction (out of scope, same convention as every other state's return-level credit already disclosed in this project, e.g. Connecticut's).",
   "$methodComment": "See maineWithholding()'s own doc comment in src/taxes/state.ts for the full mechanism (phased standard deduction + flat per-allowance amount + progressive bracket, structurally close to Wisconsin's bracketPhaseoutDeduction() but with a genuinely different, easy-to-miss feature: Maine rounds to the nearest WHOLE DOLLAR at multiple intermediate steps, not once at the end -- confirmed against all 3 of the source document's own worked examples, reproduced exactly in tests/engine.test.ts).",
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
@@ -19,6 +20,12 @@
       "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_form_w-4me_fillable.pdf",
       "verifiedOn": "2026-08-18",
       "verifiedBy": "Downloaded and text-extracted directly (pdftotext -layout), the same 'check the actual form' discipline that caught a real bug in Idaho's build. Confirmed the Personal Allowances Worksheet (Lines A-E: personal, spouse, HOH, dependents, summed into Line 4), Line 5 (additional withholding, matches the existing generic mechanism), and FIVE distinct exemption reasons on Line 6 (federal-W-4-exempt, federal-W-4P-no-withholding, resident-no-prior/current-year-liability, retirement-payee-no-liability, Military Spouse Residency Relief Act) plus a SIXTH, structurally separate one on Line 7 (enrolled tribal member working on tribal land) -- all six collapse to the same $0-withholding engine outcome via the existing generic certificate.exempt mechanism, since this engine does not adjudicate WHICH reason applies, the same eligibility-adjudication scope boundary as every other state's exemption certificate in this project. No undisclosed field found."
+    },
+    {
+      "title": "USDA National Finance Center — Maine State Income Tax Withholding (NFC-26-1771620053)",
+      "url": "https://help.nfc.usda.gov/bulletins/2026/1771620053.htm",
+      "verifiedOn": "2026-08-18",
+      "verifiedBy": "Fetched directly (HTML, not PDF) as a follow-up verification pass, the same source category that caught a real formula bug in Massachusetts. Published 2026-03-13, effective Pay Period 04 2026. A fully INDEPENDENT re-derivation of Maine's formula for federal payroll processing, and it matches this file's own Maine Revenue Services figures EXACTLY with zero discrepancies: the $5,300 per-allowance amount, both standard-deduction phase-out bands verbatim, both bracket schedules verbatim (rates, thresholds, AND pre-computed bases), the S00 no-form default, and the whole-dollar rounding convention. Two independent sources -- one state, one federal -- now agree on every figure in this file's core formula, the strongest confirmation tier reached for any state in this project so far. Also surfaced one genuine implementation gap: NFC's own Step 9 instruction is 'Add the additional amount... and round to the nearest dollar' -- i.e. Maine rounds AGAIN after adding Line 5 additional withholding, not just at the base-tax step. This engine's generic applyAdditionalStateWithholding() (shared by every state) adds cents without re-rounding, which is correct for every cent-rounding state but would leave a non-whole-dollar final amount for Maine if a caller ever supplied a non-whole-dollar additionalWithholding value -- disclosed in knownGaps rather than silently left as an assumed-fine edge case."
     },
     {
       "title": "Maine Department of Labor — June 2026 Paid Family and Medical Leave (PFML) Employer FAQ",
@@ -66,5 +73,8 @@
     "Local income tax absence is standard general knowledge / cross-source only, not independently confirmed against a specific Maine statute or constitutional provision the way Massachusetts's prohibition was (see that file's own constitutional citations) -- a real, disclosed access-depth difference between these two neighboring files.",
     "Supplemental wages paid on a SEPARATE cheque: Maine's own instructions make the flat-5% method OPTIONAL for this case ('the payer MAY withhold a flat five percent'), not mandatory -- this engine's default (aggregation via taxableWagesFor(), the same as every other state without a distinct supplemental method) reflects the OTHER path Maine's own instructions describe (paid WITH regular wages), and cannot look back at a prior separate cheque regardless -- same disclosed class of gap as Kentucky/Idaho/Connecticut/Iowa.",
     "The tribal-member exemption (Form W-4ME Line 7) is scoped narrowly to wages earned FOR WORK PERFORMED ON TRIBAL LAND specifically -- this engine's generic certificate.exempt flag applies to the WHOLE paycheck, so a caller representing a tribal member with SOME Maine wages earned off tribal land would need to model that split outside this engine (the same scope boundary as every eligibility-adjudication gate in this project, but worth naming since the underlying exemption is itself income-source-scoped, not simply person-scoped)."
-  ]
+  ],
+  "verification": {
+    "wholeDollarFinalRounding": "CLOSED on the NFC verification pass: rules.roundFinalToWholeDollar (a new generic flag, not Maine-specific code) now re-rounds the primary SIT line to the nearest dollar AFTER additional/reduced withholding is applied, matching NFC's own Step 9 instruction exactly. Verified with a non-whole-dollar additionalWithholding test case ($33 base + $10.60 = $43.60 -> $44)."
+  }
 }

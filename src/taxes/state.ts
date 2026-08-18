@@ -88,6 +88,26 @@ export function stateIncomeTax(
     lines = applyReducedStateWithholding(input, rules, lines);
   }
 
+  // Maine is the first (and so far only) state in this project whose OWN
+  // formula rounds to the nearest WHOLE DOLLAR, not the nearest cent — and
+  // critically, USDA NFC's own bulletin (fetched directly) documents that
+  // this re-rounds AGAIN after Line 2/5-style additional withholding is
+  // added, not just once at the base-tax step. maineWithholding() already
+  // rounds its own base amount to the nearest dollar, but
+  // applyAdditionalStateWithholding() (shared by every state, and correct
+  // as-is for every cent-rounding state) adds raw cents without
+  // re-rounding — so a caller-supplied additionalWithholding that isn't
+  // itself a whole-dollar figure would otherwise leave a non-whole-dollar
+  // final amount for Maine specifically. Gated by a generic
+  // rules.roundFinalToWholeDollar flag (not Maine-specific code) so any
+  // future state with the same rounding convention gets this for free.
+  if (rules.roundFinalToWholeDollar) {
+    const primaryId = `${rules.code}_SIT`;
+    lines = lines.map((line) =>
+      line.id === primaryId ? { ...line, amount: toWholeDollars(line.amount) } : line,
+    );
+  }
+
   // Employee-paid state unemployment withholding (Pennsylvania's UC tax is
   // the first state in this project to have one) is ORTHOGONAL to the
   // income-tax method above — it's a separate levy under separate law, not

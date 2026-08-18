@@ -4039,6 +4039,20 @@ describe('Maine', () => {
     assert.equal(amountOf(withExtra, 'ME_SIT'), dollars(33 + 10));
   });
 
+  test("USDA NFC's own instruction — round AGAIN to the nearest dollar after adding Line 5 — holds even for a non-whole-dollar additional amount", () => {
+    // $33 base + $10.60 additional = $43.60, which Maine's own formula
+    // rounds to $44, not left at $43.60 the way every cent-rounding
+    // state's own additionalWithholding line would be.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...meState({ maritalStatus: 'single', allowances: 2, additionalWithholding: dollars(10.6) }),
+      }),
+    );
+    assert.equal(amountOf(r, 'ME_SIT'), dollars(44));
+  });
+
   test("Married, but withholding at higher Single rate' uses the single schedule", () => {
     const r = calculatePaycheck(
       input({
