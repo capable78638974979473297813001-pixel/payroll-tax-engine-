@@ -3966,6 +3966,149 @@ describe('Massachusetts', () => {
   });
 });
 
+describe('Maine', () => {
+  // All 3 examples reproduced verbatim from Maine Revenue Services' own
+  // 2026 Withholding Tables booklet — expected values transcribed from the
+  // source's own worked arithmetic (including its multi-step whole-dollar
+  // rounding) before running, same discipline as every other state.
+  const meState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'ME', certificate },
+  });
+
+  test('Example 1: single $300/week, 2 allowances → annualized income is negative, so $0 withheld', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(300) }],
+        ...meState({ maritalStatus: 'single', allowances: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'ME_SIT'), 0);
+  });
+
+  test('Example 2: single $1,000/week, 2 allowances → $33 (annualized $1,694 ÷ 52, rounded)', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...meState({ maritalStatus: 'single', allowances: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'ME_SIT'), dollars(33));
+  });
+
+  test('Example 3: married $4,500/week, 2 allowances, in the standard-deduction phase-out band → $257', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(4500) }],
+        ...meState({ maritalStatus: 'married', allowances: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'ME_SIT'), dollars(257));
+  });
+
+  test('no Form W-4ME on file defaults to single, zero allowances → $46', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'ME' },
+      }),
+    );
+    assert.equal(amountOf(r, 'ME_SIT'), dollars(46));
+  });
+
+  test('certificate.exempt and certificate.additionalWithholding work generically', () => {
+    const exempt = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...meState({ exempt: true }),
+      }),
+    );
+    assert.equal(amountOf(exempt, 'ME_SIT'), 0);
+
+    const withExtra = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...meState({ maritalStatus: 'single', allowances: 2, additionalWithholding: dollars(10) }),
+      }),
+    );
+    assert.equal(amountOf(withExtra, 'ME_SIT'), dollars(33 + 10));
+  });
+
+  test("Married, but withholding at higher Single rate' uses the single schedule", () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...meState({ maritalStatus: 'married_withhold_as_single', allowances: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'ME_SIT'), dollars(33));
+  });
+
+  test('an unrecognized marital status throws rather than silently defaulting', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            ...meState({ maritalStatus: 'hoh' }),
+          }),
+        ),
+      /Unrecognized ME certificate\.maritalStatus/,
+    );
+  });
+
+  test('PFML: employee flat 0.5%; employer share (15+ employees) is the other 0.5%', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'ME' },
+      }),
+    );
+    assert.equal(amountOf(r, 'ME_PFML_EE'), dollars(5));
+    assert.equal(r.taxes.some((t) => t.id === 'ME_PFML_ER'), false);
+
+    const withEmployer = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...meState({ employerLiableForPaidLeaveShare: true }),
+      }),
+    );
+    assert.equal(amountOf(withEmployer, 'ME_PFML_ER'), dollars(5));
+  });
+
+  test('no reciprocity exemption exists — Maine has none, confirmed structurally empty rather than omitted', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        residenceState: { code: 'NH' },
+        ...meState({ maritalStatus: 'single', allowances: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'ME_SIT'), dollars(33));
+  });
+
+  test('no local income tax line exists for Maine', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...meState({ maritalStatus: 'single', allowances: 2 }),
+      }),
+    );
+    assert.equal(r.taxes.some((t) => t.jurisdiction === 'local'), false);
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

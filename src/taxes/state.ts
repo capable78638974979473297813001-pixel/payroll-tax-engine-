@@ -515,6 +515,8 @@ function incomeTaxLines(
       return [flatRateSurtaxCredit(input, ctx, rules)];
     case 'bracket_per_period_kansas':
       return [bracketPerPeriodKansas(input, ctx, rules)];
+    case 'bracket_phaseout_deduction_whole_dollar':
+      return [maineWithholding(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -3347,5 +3349,125 @@ function flatRateSurtaxCredit(
       (hohCredit || blindCredit
         ? `, less ${fmt(roundHalfUp(hohCredit + blindCredit))} credits (HOH/blind)`
         : ''),
+  };
+}
+
+interface MaineStandardDeductionBand {
+  max: number; // dollars, full deduction below phaseOutStart
+  phaseOutStart: number; // dollars, annualized wages
+  phaseOutEnd: number; // dollars, annualized wages — deduction is $0 at/above this
+}
+
+interface MaineConfig {
+  allowanceAmount: number; // dollars, annual, flat per allowance (Form W-4ME Step 2)
+  standardDeduction: { single: MaineStandardDeductionBand; married: MaineStandardDeductionBand };
+  brackets: { single: WIBracket[]; married: WIBracket[] };
+}
+
+/**
+ * Resolves Form W-4ME's own Line 3 (Single or Head of Household / Married /
+ * Married-but-withholding-at-higher-Single-rate) to which of Maine's two
+ * published bracket schedules applies — the same recurring 3-checkbox shape
+ * already seen on MN/MT/NY/ID's own forms, where the third option
+ * deliberately routes to the SINGLE schedule despite the employee being
+ * married. Form W-4ME's own instructions are explicit that MFS and
+ * nonresident aliens must ALSO check the single box regardless of actual
+ * marital status. Default (no form, or an invalid one) is single with zero
+ * allowances, per the form's own instructions to employers: "the employer
+ * or payer must withhold as if the employee or payee were single and
+ * claiming no allowances."
+ */
+function resolveMaineStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  const raw = cert.maritalStatus;
+  if (raw === undefined || raw === null || raw === 'single' || raw === 'married_withhold_as_single') {
+    return 'single';
+  }
+  if (raw === 'married') return 'married';
+  throw new Error(
+    `Unrecognized ME certificate.maritalStatus ${JSON.stringify(raw)} — expected 'single' ` +
+      `(includes Head of Household, MFS, and nonresident aliens), 'married', or ` +
+      `'married_withhold_as_single' (Form W-4ME's own higher-single-rate option).`,
+  );
+}
+
+/**
+ * Maine's Percentage Method (Maine Revenue Services' own 2026 Withholding
+ * Tables booklet, fetched and read directly, including all 3 of the
+ * document's own worked examples — reproduced exactly in
+ * tests/engine.test.ts). Structurally the closest existing shape in this
+ * project is Wisconsin's bracketPhaseoutDeduction() — a standard deduction
+ * that phases linearly down to $0 as annualized wages rise between two
+ * thresholds, a flat per-allowance amount subtracted alongside it, then a
+ * progressive bracket schedule — but with ONE genuinely different, and
+ * easy to get wrong, feature: Maine's own instructions round to the
+ * NEAREST WHOLE DOLLAR at multiple intermediate steps, not once at the end
+ * the way every other bracket state in this project does. Confirmed
+ * against the source's own Example 3: the phased standard deduction itself
+ * is rounded to the nearest dollar ($27,750×$120,550/$150,000 = $22,301.75,
+ * which the source's own worked arithmetic uses as $22,302, not the
+ * unrounded fraction) BEFORE being subtracted from annualized wages, and
+ * again the annualized withholding amount (Step 5) is rounded to the
+ * nearest dollar BEFORE being divided by periodsPerYear for the final
+ * per-period figure (Step 6) — reproducing Example 2's own displayed
+ * $1,693.625 → $1,694 → ($1,694÷52=$32.58) → $33 chain exactly requires
+ * this exact staged rounding, not a single continuous computation rounded
+ * once. toWholeDollars() (money.ts) is used at each of these stages.
+ *
+ * A genuine oddity, verified not a transcription slip: married thresholds
+ * are NOT exactly double the single ones ($54,850/$129,750 vs $27,400×2=
+ * $54,800/$64,850×2=$129,700, each off by $50) — Maine's own design, not
+ * computed here.
+ */
+function maineWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.maineWithholding as MaineConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+  const periodsPerYear = ctx.periodsPerYear;
+  const annualWages = toWholeDollars(taxableWages * periodsPerYear);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const status = resolveMaineStatus(cert);
+  const allowances = Number(cert.allowances ?? 0);
+  const allowanceAmount = toWholeDollars(dollars(cfg.allowanceAmount) * allowances);
+
+  const band = cfg.standardDeduction[status];
+  const maxDeduction = dollars(band.max);
+  const phaseOutStart = dollars(band.phaseOutStart);
+  const phaseOutEnd = dollars(band.phaseOutEnd);
+
+  let standardDeduction: number;
+  if (annualWages <= phaseOutStart) {
+    standardDeduction = maxDeduction;
+  } else if (annualWages >= phaseOutEnd) {
+    standardDeduction = 0;
+  } else {
+    const raw = (maxDeduction * (phaseOutEnd - annualWages)) / (phaseOutEnd - phaseOutStart);
+    standardDeduction = toWholeDollars(atLeastZero(raw));
+  }
+
+  const annualIncome = atLeastZero(annualWages - allowanceAmount - standardDeduction);
+
+  const brackets = cfg.brackets[status];
+  const bracket = findWIBracket(brackets, annualIncome);
+  const excess = annualIncome - dollars(bracket.from);
+  const annualWithholding = toWholeDollars(dollars(bracket.base) + applyRate(excess, bracket.rate));
+
+  const amount = toWholeDollars(Math.round(annualWithholding / periodsPerYear));
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages,
+    amount,
+    detail:
+      `${fmt(annualWages)}/yr less ${fmt(allowanceAmount)} allowances (${allowances} × $${cfg.allowanceAmount}) ` +
+      `less ${fmt(standardDeduction)} standard deduction (${status}) = ${fmt(annualIncome)} annualized income ` +
+      `@ ${(bracket.rate * 100).toFixed(2)}% bracket, annualized withholding ${fmt(annualWithholding)} ÷ ${periodsPerYear}, rounded to the nearest dollar`,
   };
 }
