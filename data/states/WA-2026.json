@@ -1,0 +1,75 @@
+{
+  "code": "WA",
+  "name": "Washington",
+  "year": 2026,
+  "method": "no_income_tax",
+  "$scopeNote": "NO state or local income tax on wages -- Washington has no personal income tax at all, and RCW 1.90.100 (amended 2026, fetched and read directly) plus the older RCW 36.65.030 (1984, also fetched directly) both PROHIBIT any state, county, city, or local jurisdiction from taxing personal income, statutorily foreclosing the whole category, not just a 'none exist yet' observation. Washington DOES have three genuinely distinct WAGE-BASED payroll levies modelled here despite having no income tax: Paid Family & Medical Leave (PFML, employee AND employer shares) and the WA Cares Fund long-term-care premium (employee only, uncapped). Washington's Capital Gains Tax (chapter 82A.04 RCW, the specific carve-out RCW 1.90.100(2) references) is a RETURN-level excise tax on investment gains above a ~$1,000,000 threshold, not a payroll withholding -- out of scope, same convention as every other return-level tax already disclosed in this project (e.g. Connecticut's out-of-state credit, Iowa's school district surtax). Seattle's JumpStart payroll tax (an EMPLOYER-only tax on total payroll expense, ~0.746%-2.557% by tiered thresholds around $9M total payroll and a $194,452+ individual-wage trigger) is a REAL, separate, not-yet-modelled item -- structurally similar to Newark's payroll tax in this project (employer-aggregate, not per-paycheck) but genuinely more complex (multi-tier rate matrix, not one flat rate) -- flagged in knownGaps as a natural follow-up, not built this pass.",
+  "exemptPretax": [],
+  "exemptPretaxComment": "DISCLOSED INFERENCE, not a directly-quoted statement: Washington's own Employer Wage Reporting and Premiums Toolkit defines 'gross wages' for BOTH PFML and WA Cares as an enumerated list of wage TYPES (salary, hourly wages, bonuses, commissions, PTO cash-outs, etc.) built from RCW 50A.05.010/WAC 192-510-025, rather than by reference to 'wages subject to federal income tax withholding' the way every federal-conforming state in this project (MI/OH/ID/CT/IA/VT) explicitly states. The absence of that federal-conformity phrasing, combined with a wage list that never mentions retirement-plan or cafeteria-plan deferrals as excluded, is read as evidence these premiums apply to TRUE gross wages BEFORE any pretax reduction -- the same non-conforming shape as Pennsylvania's state income tax, not the federal-conforming majority. Lower confidence than this project's federal-conformity findings for other states, since no source directly and explicitly addresses 401(k)/section 125 treatment either way -- disclosed as an inference, not asserted as directly sourced.",
+  "sources": [
+    {
+      "title": "RCW 1.90.100 — Personal Income Tax Prohibition",
+      "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=1.90.100",
+      "verifiedOn": "2026-08-17",
+      "verifiedBy": "Fetched directly. Verbatim: 'Neither the state nor any county, city, or other local jurisdiction in the state of Washington may tax any individual person on any form of personal income.' Subsection (2) carves out chapter 82A.04 RCW (the Capital Gains Tax) as long as its standard deduction is at least $1,000,000 -- confirms the Capital Gains Tax is a deliberate, narrow statutory exception, not evidence of a broader wage-tax opening."
+    },
+    {
+      "title": "RCW 36.65.030 — Tax on net income prohibited",
+      "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=36.65.030",
+      "verifiedOn": "2026-08-17",
+      "verifiedBy": "Fetched directly. Verbatim, in full: 'A county, city, or city-county shall not levy a tax on net income.' Enacted 1984 -- the older, narrower predecessor to RCW 1.90.100's broader 2024+ prohibition."
+    },
+    {
+      "title": "ESD — Paid Family and Medical Leave premium rate increases to 1.13% in 2026",
+      "url": "https://esd.wa.gov/about-us/news-release/2025/paid-family-medical-leave-premium-rate-increases-113-2026",
+      "verifiedOn": "2026-08-17",
+      "verifiedBy": "Fetched directly. Verbatim: 'The premium rate will be 1.13%... Employers will pay 28.57% of the total premium and employees will pay 71.43%.'"
+    },
+    {
+      "title": "Washington State's Paid Family and Medical Leave — Estimate your Paid Leave payments",
+      "url": "https://paidleave.wa.gov/estimate-your-paid-leave-payments/",
+      "verifiedOn": "2026-08-17",
+      "verifiedBy": "Fetched directly. Verbatim: '1.13% of each employee's gross wages, not including tips, up to the 2026 Social Security cap ($184,500).'"
+    },
+    {
+      "title": "Employer Wage Reporting and Premiums Toolkit (v25.1, June 2026)",
+      "url": "https://paidleave.wa.gov/app/uploads/2021/12/Employer-Wage-Reporting-and-Premiums-Toolkit-v25.1-2026.06.26.pdf",
+      "verifiedOn": "2026-08-17",
+      "verifiedBy": "Downloaded and text-extracted directly (pdftotext -layout). ENGINE-CONSUMED: the exact 'Simplified Method' formula (Gross wages x 0.0113 = Total Premium; Gross wages x 0.0113 x 0.7143 = Employee Share; Total Premium - Employee Share = Employer Share -- this exact per-line computation, not a chain of independently-rounded subtractions, is what statePaidLeaveEmployerTax() in src/taxes/state.ts reproduces), the WA Cares formula (Gross wages x 0.0058 = total premium, 'This is the maximum amount you can withhold'), confirmation WA Cares has NO Social Security cap ('The Social Security cap does not apply') while PFML DOES share it, the full 'gross wages' definition (the basis for this file's exemptPretax inference), and confirmation that employers under 50 WA employees are not required to pay the employer PFML share but must still withhold/remit the employee share. NOTE: this same document has one internal typo (a 'Current Paid Leave premium rate methodology' section states 'the 2026 premium rate will be 0.0113 percent' -- an obvious decimal-placement error against its own '1.13 percent' stated twice elsewhere in the same document; the correct 1.13% is used throughout this file)."
+    },
+    {
+      "title": "Washington's Payroll Taxes in 2026: The JumpStart Tax — The Startup Law Blog",
+      "url": "https://www.thestartuplawblog.com/seattle-payroll-expense-tax-guide/",
+      "verifiedOn": "2026-08-17",
+      "verifiedBy": "Cross-source confirmed only (search-engine synthesis, not independently fetched and read in full this session): Seattle's JumpStart payroll expense tax applies when 2025 payroll exceeded $9,074,409 AND at least one employee earns $194,452+, at tiered rates 0.746%-2.557% by payroll size and individual wage level. NOT engine-consumed -- recorded for completeness only, see knownGaps."
+    }
+  ],
+  "statePaidLeaveEmployee": {
+    "rate": 0.00807159,
+    "wageBase": 184500,
+    "$comment": "= 0.0113 (total PFML rate) x 0.7143 (employee share fraction), stored at full precision so applyRate()'s single rounding reproduces Washington's own 'gross wages x 0.0113 x 0.7143, round once' formula exactly (not two independently-rounded multiplications chained together, which can drift by a cent). Wage base is the federal Social Security wage base ($184,500 for 2026) -- Washington's own toolkit states this by reference ('up to the Social Security cap') rather than publishing an independent dollar figure, so this file's wageBase must be kept in sync with data/federal/2026.json's own socialSecurity.wageBase if that ever changes -- same disclosed sync-risk pattern as Connecticut/New York's own SS-cap-linked premiums in this project.",
+    "exemptPretax": []
+  },
+  "statePaidLeaveEmployer": {
+    "totalRate": 0.0113,
+    "employeeShareFraction": 0.7143,
+    "wageBase": 184500,
+    "exemptPretax": []
+  },
+  "stateLongTermCareEmployee": {
+    "rate": 0.0058,
+    "wageBase": null,
+    "$comment": "WA Cares Fund. Quoted verbatim: 'Employees are responsible for the full WA Cares premium... The Social Security cap does not apply.' Uncapped, 100% employee-paid, no employer share at all -- structurally the simplest of Washington's three payroll levies.",
+    "exemptPretax": []
+  },
+  "reciprocity": {
+    "reciprocalStates": [],
+    "note": "Not applicable rather than 'checked, none found' — Washington has no income tax to be reciprocal about, so no resident-vs-nonresident withholding question can arise here at all. Same framing as New Hampshire in this project. reciprocalStates left structurally empty for consistency with every other state file's shape."
+  },
+  "knownGaps": [
+    "Seattle's JumpStart payroll tax (employer-only, ~0.746%-2.557% tiered by total payroll and individual wage level, triggered around $9M total payroll and at least one $194,452+ earner) is a real, separate Seattle-specific tax, structurally similar to Newark's payroll tax already modelled in this project (an employer-aggregate levy a single calculatePaycheck() call can't fully verify) but genuinely more complex (a multi-tier rate matrix, not Newark's one flat rate) -- not built this pass, cross-source only.",
+    "exemptPretax ([] for all three WA payroll levies) rests on an INFERENCE from the absence of federal-conformity language in Washington's own wage definition, not a directly-quoted statement either way -- see exemptPretaxComment.",
+    "certificate.employerLiableForPaidLeaveShare (gating the employer PFML share) is a caller-supplied flag reflecting the employer's OWN determination of whether they have 50+ WA employees -- this engine cannot verify that aggregate headcount from one employee's paycheck, the same class of gap already disclosed for Newark's $2,500/quarter threshold and >50%-resident-workforce apportionment.",
+    "Washington's Capital Gains Tax (chapter 82A.04 RCW) is confirmed real and current (RCW 1.90.100(2)'s own carve-out) but is a RETURN-level excise tax on investment gains, not a payroll withholding -- correctly out of scope for this engine, recorded here only so a future reader doesn't mistake WA's 'no income tax' framing for 'no state tax of any kind.'"
+  ]
+}

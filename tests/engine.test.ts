@@ -3651,6 +3651,110 @@ describe('New Hampshire', () => {
   });
 });
 
+describe('Washington', () => {
+  // Expected values hand-derived from Washington's own Employer Wage
+  // Reporting and Premiums Toolkit formula before running: PFML employee
+  // share = wages x 0.0113 x 0.7143; WA Cares = wages x 0.0058, uncapped.
+  const waState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'WA', certificate },
+  });
+
+  test('no state or local income tax line exists for Washington', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...waState(),
+      }),
+    );
+    assert.equal(r.taxes.some((t) => t.id === 'WA_SIT'), false);
+    assert.equal(r.taxes.some((t) => t.jurisdiction === 'local'), false);
+  });
+
+  test('PFML employee share: $1,000 x 0.0113 x 0.7143 = $8.07', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...waState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'WA_PFML_EE'), dollars(8.07));
+  });
+
+  test('WA Cares Fund: $1,000 x 0.58% = $5.80', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...waState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'WA_LTC_EE'), dollars(5.8));
+  });
+
+  test('no PFML employer-share line by default (small-employer assumption)', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...waState(),
+      }),
+    );
+    assert.equal(r.taxes.some((t) => t.id === 'WA_PFML_ER'), false);
+  });
+
+  test('PFML employer share, once certified 50+ employees: total premium less employee share = $3.23', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...waState({ employerLiableForPaidLeaveShare: true }),
+      }),
+    );
+    // Total premium $11.30, employee share $8.07, employer share $3.23.
+    assert.equal(amountOf(r, 'WA_PFML_ER'), dollars(3.23));
+    const employerLine = r.taxes.find((t) => t.id === 'WA_PFML_ER');
+    assert.equal(employerLine?.payer, 'employer');
+  });
+
+  test('PFML shares the Social Security wage cap; WA Cares does not', () => {
+    // Employee already at the $184,500 SS cap for the year — PFML employee
+    // share is now $0, but WA Cares keeps taxing the full new wages since
+    // it has no cap at all ("The Social Security cap does not apply").
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ytd: {
+          socialSecurity: 0,
+          medicare: 0,
+          futa: 0,
+          statePaidLeave: { WA: dollars(184500) },
+        },
+        ...waState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'WA_PFML_EE'), 0);
+    assert.equal(amountOf(r, 'WA_LTC_EE'), dollars(5.8));
+  });
+
+  test('no reciprocity exemption exists — not applicable, since Washington has no income tax at all', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        residenceState: { code: 'OR' },
+        ...waState(),
+      }),
+    );
+    // Both payroll levies still apply regardless of residence — they are
+    // not income-tax reciprocity-exemptable levies.
+    assert.equal(amountOf(r, 'WA_PFML_EE'), dollars(8.07));
+    assert.equal(amountOf(r, 'WA_LTC_EE'), dollars(5.8));
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

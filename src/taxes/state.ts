@@ -106,8 +106,29 @@ export function stateIncomeTax(
   const paidLeave = statePaidLeaveEmployeeTax(input, ctx, rules);
   if (paidLeave) lines.push(paidLeave);
 
+  // Employer's share of a Paid Leave-style premium — Washington PFML is the
+  // first state in this project where the EMPLOYER also pays a share of the
+  // same premium as the employee (New York/Minnesota's Paid Leave programs
+  // are employee-only). Genuinely separate from statePaidLeaveEmployeeTax()
+  // rather than a shared helper, because the employer share is defined as
+  // "total premium minus employee share," not its own independent rate.
+  const paidLeaveEmployer = statePaidLeaveEmployerTax(input, ctx, rules);
+  if (paidLeaveEmployer) lines.push(paidLeaveEmployer);
+
   const disability = stateDisabilityEmployeeTax(input, ctx, rules);
   if (disability) lines.push(disability);
+
+  // Long-term care insurance premium — Washington's WA Cares Fund is the
+  // first state in this project with this specific levy (distinct from
+  // Paid Leave/PFML, which funds job-protected leave; WA Cares funds a
+  // long-term-care benefit). Structurally identical to
+  // statePaidLeaveEmployeeTax() (flat rate, optionally wage-base-capped)
+  // but genuinely a different program under a different statute, and the
+  // existing statePaidLeaveEmployee config slot is already claimed by
+  // Washington's own actual Paid Leave program in the same file — reusing
+  // it for WA Cares too would silently overwrite one config with the other.
+  const longTermCare = stateLongTermCareEmployeeTax(input, ctx, rules);
+  if (longTermCare) lines.push(longTermCare);
 
   // New York City resident tax — a genuine LOCAL tax layered on top of NYS
   // withholding for NYC residents only, dispatched off certificate.nycResident
@@ -1246,6 +1267,115 @@ function statePaidLeaveEmployeeTax(
   return {
     id: `${rules.code}_PFML_EE`,
     name: `${rules.name} Paid Leave (Employee)`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages,
+    amount,
+    detail:
+      cfg.wageBase === null
+        ? `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, no wage cap`
+        : `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, capped at ${fmt(dollars(cfg.wageBase))}/yr (${fmt(ytd)} YTD already counted)`,
+  };
+}
+
+interface StatePaidLeaveEmployerConfig {
+  totalRate: number; // e.g. 0.0113 — Washington's own combined premium rate
+  employeeShareFraction: number; // e.g. 0.7143 — fraction of totalRate the EMPLOYEE pays
+  wageBase: number | null; // dollars, annual — shares the SAME cap as the employee share
+  exemptPretax?: string[];
+}
+
+/**
+ * Employer's share of a Paid Leave-style premium — Washington's own
+ * "Employer Wage Reporting and Premiums Toolkit" (fetched and read
+ * directly) gives the EXACT formula: "Gross wages x 0.0113 = Total Premium
+ * ... Gross wages x 0.0113 x 0.7143 = Employee Share ... Total Premium −
+ * Employee Share = Employer Share." Computed here the same way — total and
+ * employee share both derived directly from taxableWages (not by
+ * subtracting two independently-rounded numbers, which could drift by a
+ * cent from the source's own single-multiplication-per-line method) — then
+ * subtracted, matching the source's own Step 3 exactly.
+ *
+ * Washington's own rule: employers with fewer than 50 WA employees are NOT
+ * required to pay this share (though they must still withhold/remit the
+ * EMPLOYEE share regardless). Whether THIS employer clears that 50-employee
+ * threshold is an EMPLOYER-AGGREGATE fact this engine cannot see from one
+ * employee's paycheck — the same class of gap already disclosed for
+ * Newark's payroll tax. Gated by certificate.employerLiableForPaidLeaveShare,
+ * which the CALLER sets after the employer's own headcount determination —
+ * absent or false, this returns null (no line at all), matching the "small
+ * employers have no obligation here" default rather than emitting a
+ * confusing $0 line for the common case.
+ */
+function statePaidLeaveEmployerTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cfg = rules.statePaidLeaveEmployer as StatePaidLeaveEmployerConfig | undefined;
+  if (!cfg) return null;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (!cert.employerLiableForPaidLeaveShare) return null;
+
+  const exempt = (cfg.exemptPretax ?? rules.exemptPretax ?? []) as PretaxCategory[];
+  const currentWages = ctx.taxableWagesFor(exempt);
+  const ytd = input.ytd.statePaidLeave?.[rules.code] ?? 0;
+  const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
+  const taxableWages = underCap(currentWages, ytd, cap);
+
+  const totalPremium = applyRate(taxableWages, cfg.totalRate);
+  const employeeShare = applyRate(taxableWages, cfg.totalRate * cfg.employeeShareFraction);
+  const amount = atLeastZero(totalPremium - employeeShare);
+
+  return {
+    id: `${rules.code}_PFML_ER`,
+    name: `${rules.name} Paid Leave (Employer)`,
+    payer: 'employer',
+    jurisdiction: 'state',
+    taxableWages,
+    amount,
+    detail:
+      `${fmt(totalPremium)} total premium (${fmt(taxableWages)} @ ${(cfg.totalRate * 100).toFixed(2)}%) ` +
+      `less ${fmt(employeeShare)} employee share = ${fmt(amount)} employer share ` +
+      `(certificate.employerLiableForPaidLeaveShare — caller's own 50+-employee determination)`,
+  };
+}
+
+interface StateLongTermCareEmployeeConfig {
+  rate: number;
+  wageBase: number | null;
+  exemptPretax?: string[];
+}
+
+/**
+ * Long-term care insurance premium — Washington's WA Cares Fund is the
+ * first state in this project with this specific levy, genuinely distinct
+ * from Paid Leave/PFML (which funds job-protected leave) even though it's
+ * structurally identical (flat rate, optionally wage-base-capped) to
+ * statePaidLeaveEmployeeTax(). 100% employee-paid, per Washington's own
+ * toolkit, quoted verbatim: "Employees are responsible for the full WA
+ * Cares premium... The Social Security cap does not apply" — confirmed
+ * UNCAPPED (wageBase: null), unlike PFML which shares the SS cap.
+ */
+function stateLongTermCareEmployeeTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cfg = rules.stateLongTermCareEmployee as StateLongTermCareEmployeeConfig | undefined;
+  if (!cfg) return null;
+
+  const exempt = (cfg.exemptPretax ?? rules.exemptPretax ?? []) as PretaxCategory[];
+  const currentWages = ctx.taxableWagesFor(exempt);
+  const ytd = input.ytd.stateLongTermCare?.[rules.code] ?? 0;
+  const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
+  const taxableWages = underCap(currentWages, ytd, cap);
+  const amount = applyRate(taxableWages, cfg.rate);
+
+  return {
+    id: `${rules.code}_LTC_EE`,
+    name: `${rules.name} Long-Term Care (Employee)`,
     payer: 'employee',
     jurisdiction: 'state',
     taxableWages,

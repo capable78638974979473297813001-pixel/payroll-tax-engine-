@@ -124,6 +124,14 @@ export interface YearToDate {
    * uses a per-period dollar cap instead and never reads this.
    */
   stateDisabilityEmployee?: Record<string, Cents>;
+  /**
+   * YTD wages already counted toward a state long-term-care insurance
+   * wage-base cap, keyed by state code (e.g. Washington's WA Cares Fund).
+   * Separate tracker from statePaidLeave even where a state has both (WA
+   * does — Paid Leave and WA Cares are different statutes with different
+   * caps, WA Cares uncapped and Paid Leave sharing the SS wage base).
+   */
+  stateLongTermCare?: Record<string, Cents>;
 }
 
 export interface StateWithholding {
