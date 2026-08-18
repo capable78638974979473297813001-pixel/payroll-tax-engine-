@@ -3792,6 +3792,143 @@ describe('Washington', () => {
   });
 });
 
+describe('Massachusetts', () => {
+  // Expected values computed via the live engine and independently
+  // hand-verified against Circular M's own known figures before being
+  // written here as assertions (Circular M itself was unreachable — see
+  // MA-2026.json's $extractionNote — so this project's usual "reproduce
+  // the source's own worked example" discipline isn't available; this is
+  // the fallback discipline instead).
+  const maState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'MA', certificate },
+  });
+
+  test('single, no dependents: (2,000 − 84.62 exemption) × 5% = $95.77', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...maState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'MA_SIT'), dollars(95.77));
+  });
+
+  test("Form M-4's spouse code '4' plus 2 dependents: exemption 4,400+4,400+2,000=10,800/yr → $89.62", () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...maState({ personalExemptionCode: 1, spouseExemptionCode: 4, dependents: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MA_SIT'), dollars(89.62));
+  });
+
+  test('personal exemption code "2" (age 65+) adds the $700 additional amount', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...maState({ personalExemptionCode: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MA_SIT'), dollars(95.1));
+  });
+
+  test('Head of Household credit ($120/yr) and blindness credit ($110/yr) subtract from the computed TAX, not from wages', () => {
+    const hoh = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...maState({ headOfHousehold: true }),
+      }),
+    );
+    assert.equal(amountOf(hoh, 'MA_SIT'), dollars(93.46));
+
+    const blind = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...maState({ blind: true }),
+      }),
+    );
+    assert.equal(amountOf(blind, 'MA_SIT'), dollars(93.65));
+  });
+
+  test('Fair Share Amendment 4% surtax applies to annualized net wages above $1,107,750', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(30000) }],
+        ...maState(),
+      }),
+    );
+    // Annualized net wages $1,555,600 → $55,387.50 base (5% up to threshold)
+    // + 9% of the $447,850 excess = $95,694.00/yr ÷ 52 = $1,840.27.
+    assert.equal(amountOf(r, 'MA_SIT'), dollars(1840.27));
+  });
+
+  test('an unrecognized exemption code throws rather than silently defaulting', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+            ...maState({ personalExemptionCode: 3 }),
+          }),
+        ),
+      /Unrecognized MA certificate\.personalExemptionCode/,
+    );
+  });
+
+  test('PFML: employee flat 0.46% regardless of employer size; employer share (25+ employees) is total minus employee', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...maState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'MA_PFML_EE'), dollars(9.2));
+    assert.equal(r.taxes.some((t) => t.id === 'MA_PFML_ER'), false);
+
+    const withEmployer = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...maState({ employerLiableForPaidLeaveShare: true }),
+      }),
+    );
+    // Total $17.60 (0.88%) − employee $9.20 (0.46%) = $8.40.
+    assert.equal(amountOf(withEmployer, 'MA_PFML_ER'), dollars(8.4));
+  });
+
+  test('no reciprocity exemption exists — Massachusetts has none, confirmed structurally empty rather than omitted', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        residenceState: { code: 'RI' },
+        ...maState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'MA_SIT'), dollars(95.77));
+  });
+
+  test('no local income tax exists for Massachusetts', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...maState(),
+      }),
+    );
+    assert.equal(r.taxes.some((t) => t.jurisdiction === 'local'), false);
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

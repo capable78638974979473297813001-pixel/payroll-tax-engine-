@@ -511,6 +511,8 @@ function incomeTaxLines(
       return [flatRateMaritalDeduction(input, ctx, rules)];
     case 'bracket_per_period_allowance':
       return [bracketPerPeriodAllowance(input, ctx, rules)];
+    case 'flat_rate_surtax_credit':
+      return [flatRateSurtaxCredit(input, ctx, rules)];
     case 'bracket_per_period_kansas':
       return [bracketPerPeriodKansas(input, ctx, rules)];
     case 'no_income_tax':
@@ -1370,7 +1372,9 @@ function statePaidLeaveEmployerTax(
     detail:
       `${fmt(totalPremium)} total premium (${fmt(taxableWages)} @ ${(cfg.totalRate * 100).toFixed(2)}%) ` +
       `less ${fmt(employeeShare)} employee share = ${fmt(amount)} employer share ` +
-      `(certificate.employerLiableForPaidLeaveShare — caller's own 50+-employee determination)`,
+      `(certificate.employerLiableForPaidLeaveShare — caller's own employer-size determination; ` +
+      `the exact headcount threshold is state-specific, e.g. Washington's 50+ vs Massachusetts's 25+, ` +
+      `and is not itself encoded here since this function is shared across states)`,
   };
 }
 
@@ -3189,5 +3193,130 @@ function newarkPayrollTaxEmployer(
       `the employer's quarterly Newark payroll — the $${cfg.quarterlyThresholdDollars}/quarter ` +
       `minimum and the >50%-resident-workforce apportionment are EMPLOYER-AGGREGATE facts this ` +
       `engine cannot verify per paycheck (see newarkPayrollTaxEmployer()'s own doc comment).`,
+  };
+}
+
+interface MAExemptionConfig {
+  personal: number; // dollars, annual — M-4 Line 1 = "1"
+  personalOver65Additional: number; // dollars, annual — additional when Line 1 = "2"
+  spouse: number; // dollars, annual — M-4 Line 2 = "4"
+  spouseOver65Additional: number; // dollars, annual — additional when Line 2 = "5"
+  dependent: number; // dollars, annual, per dependent claimed on Line 3
+}
+
+interface FlatRateSurtaxCreditConfig {
+  rate: number; // 0.05
+  surtaxRate: number; // 0.04 — ADDITIONAL rate on the excess (so 0.09 total)
+  surtaxThreshold: number; // dollars, annual, applied to annualized post-exemption wages
+  exemptionTiers: MAExemptionConfig;
+  creditsAnnual: {
+    headOfHousehold: number; // dollars, annual — M-4 Box A
+    blind: number; // dollars, annual — M-4 Box B
+  };
+}
+
+/**
+ * Resolves Form M-4's own Line 1/Line 2 numeric codes to a dollar exemption
+ * amount. Massachusetts's own form (fetched and read directly) is unusual
+ * among every state built in this project: the employee doesn't write a
+ * COUNT on these lines, they write a SPECIFIC CODE NUMBER the state's own
+ * withholding system maps to a dollar figure — "1" (personal) and "4"
+ * (spouse) BOTH map to the SAME $4,400 exemption ("Entering '4' makes a
+ * withholding system adjustment for the $4,400 exemption for a spouse," per
+ * the form's own Instruction C), and "2"/"5" both add the $700 age-65
+ * amount on top. Modeled here as a single lookup shared by both lines,
+ * since the form's own numbering scheme treats them identically.
+ */
+function maExemptionForCode(code: number, cfg: MAExemptionConfig, isSpouse: boolean): number {
+  const base = isSpouse ? cfg.spouse : cfg.personal;
+  const over65 = isSpouse ? cfg.spouseOver65Additional : cfg.personalOver65Additional;
+  if (code === 0) return 0;
+  if (code === (isSpouse ? 4 : 1)) return base;
+  if (code === (isSpouse ? 5 : 2)) return base + over65;
+  throw new Error(
+    `Unrecognized MA certificate.${isSpouse ? 'spouseExemptionCode' : 'personalExemptionCode'} ` +
+      `${JSON.stringify(code)} — Form M-4's own Line ${isSpouse ? 2 : 1} only ever takes ` +
+      `${isSpouse ? "0 (no spouse exemption), 4, or 5" : '1 or 2'}.`,
+  );
+}
+
+/**
+ * Massachusetts's withholding formula (Circular M, effective 2026-01-01) —
+ * a flat 5% rate, but with THREE genuinely separate mechanisms layered on
+ * top that no single existing method in this project combines: (1) a
+ * multi-tier exemption subtracted from wages BEFORE the rate applies
+ * (personal/spouse/dependent, each independently confirmed — personal and
+ * spouse both $4,400 directly off Form M-4's own text, age-65 and
+ * dependent amounts cross-source confirmed after Circular M itself proved
+ * unreachable — see $extractionNote); (2) the 2023 "Fair Share Amendment"
+ * 4% surtax on ANNUALIZED post-exemption wages over $1,107,750 (2026),
+ * modeled as a second WIBracket row (9% = 5% + 4%) reusing the same
+ * findWIBracket() helper as every bracket state in this project, computed
+ * at the annual scale then divided once — the same algebraically-proven
+ * annualize-then-divide equivalence already used for Iowa; (3) FLAT DOLLAR
+ * CREDITS (not exemptions) subtracted from the computed TAX itself, not
+ * from wages — Head of Household ($120/yr) and blindness ($110/yr), per
+ * Form M-4's own Boxes A and B — a genuinely different mechanism from
+ * every wage-reducing exemption elsewhere in this project, verified
+ * against a secondary source's own published per-period breakdown (e.g.
+ * weekly HOH $2.31 = $120÷52) before trusting the annual/periodsPerYear
+ * derivation for periods that source didn't itself publish.
+ */
+function flatRateSurtaxCredit(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.flatRateSurtaxCredit as FlatRateSurtaxCreditConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+  const periodsPerYear = ctx.periodsPerYear;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const personalCode = Number(cert.personalExemptionCode ?? 1);
+  const spouseCode = Number(cert.spouseExemptionCode ?? 0);
+  const dependents = Number(cert.dependents ?? 0);
+
+  const annualExemption =
+    dollars(maExemptionForCode(personalCode, cfg.exemptionTiers, false)) +
+    dollars(maExemptionForCode(spouseCode, cfg.exemptionTiers, true)) +
+    dollars(cfg.exemptionTiers.dependent) * dependents;
+  const exemptionPerPeriod = annualExemption / periodsPerYear;
+
+  const netWages = atLeastZero(taxableWages - exemptionPerPeriod);
+  const annualNetWages = netWages * periodsPerYear;
+
+  const brackets: WIBracket[] = [
+    { from: 0, to: cfg.surtaxThreshold, base: 0, rate: cfg.rate },
+    {
+      from: cfg.surtaxThreshold,
+      to: null,
+      base: cfg.surtaxThreshold * cfg.rate,
+      rate: cfg.rate + cfg.surtaxRate,
+    },
+  ];
+  const bracket = findWIBracket(brackets, annualNetWages);
+  const excess = annualNetWages - dollars(bracket.from);
+  const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  const hohCredit = cert.headOfHousehold ? dollars(cfg.creditsAnnual.headOfHousehold) / periodsPerYear : 0;
+  const blindCredit = cert.blind ? dollars(cfg.creditsAnnual.blind) / periodsPerYear : 0;
+
+  const amount = atLeastZero(roundHalfUp(annualTax / periodsPerYear - hohCredit - blindCredit));
+  const netWagesRounded = roundHalfUp(netWages);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: netWagesRounded,
+    amount,
+    detail:
+      `${fmt(taxableWages)} less ${fmt(roundHalfUp(exemptionPerPeriod))} exemption = ${fmt(netWagesRounded)} net ` +
+      `@ ${(bracket.rate * 100).toFixed(0)}%${bracket.rate > cfg.rate ? ' (surtax bracket)' : ''}` +
+      (hohCredit || blindCredit
+        ? `, less ${fmt(roundHalfUp(hohCredit + blindCredit))} credits (HOH/blind)`
+        : ''),
   };
 }
