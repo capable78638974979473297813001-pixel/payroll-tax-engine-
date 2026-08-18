@@ -4121,6 +4121,44 @@ describe('Maine', () => {
     );
     assert.equal(r.taxes.some((t) => t.jurisdiction === 'local'), false);
   });
+
+  test('PFML rate override lets a caller supply a specific small employer\'s own chosen rate: $1,000 × 0.20% = $2.00', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...meState({ paidLeaveEmployeeRateOverride: 0.002 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'ME_PFML_EE'), dollars(2));
+  });
+
+  test('tribal exemption (certificate.exemptWages) excludes just the tribal-land-sourced portion of wages, not the whole cheque', () => {
+    // $1,000 wages, $400 earned on tribal land and exempt under Form
+    // W-4ME Line 7 -- only $600/week is Maine-taxable.
+    const partial = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...meState({ maritalStatus: 'single', allowances: 2, exemptWages: dollars(400) }),
+      }),
+    );
+    // $600 × 52 = $31,200/yr − $10,600 allowances − $12,450 standard
+    // deduction = $8,150 annualized income × 5.8% = $472.70 → $473,
+    // ÷ 52 = $9.096... → $9.
+    assert.equal(amountOf(partial, 'ME_SIT'), dollars(9));
+
+    // If ALL wages are tribal-land-sourced, this reproduces the same $0
+    // result the all-or-nothing certificate.exempt flag already gives.
+    const full = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...meState({ maritalStatus: 'single', allowances: 2, exemptWages: dollars(1000) }),
+      }),
+    );
+    assert.equal(amountOf(full, 'ME_SIT'), 0);
+  });
 });
 
 describe('effective dating', () => {

@@ -1313,7 +1313,23 @@ function statePaidLeaveEmployeeTax(
     };
   }
 
-  const amount = applyRate(taxableWages, cfg.rate);
+  // Rate override, added for Maine: employers under 15 employees have a
+  // LOWER total obligation (0.5%, vs 1.0% for 15+) and may legally choose
+  // to absorb some of it themselves rather than passing the full amount to
+  // the employee — a genuine employer-discretion fact this engine cannot
+  // derive from statute alone (unlike the wage-base cap or the exemption
+  // gate above, there's no single correct number; it's a per-employer
+  // choice). Rather than leave that as an unfixable disclosed gap, this
+  // lets the CALLER supply the actual negotiated/chosen rate when they
+  // know it, while cfg.rate remains the correct default (the statutory
+  // MAXIMUM either employer-size tier may charge — Maine's own FAQ: "no
+  // more than 0.5 percent can come from the employee" applies uniformly to
+  // both tiers, so the default is already right for the common case).
+  // State-agnostic, like every other certificate gate on this shared
+  // function — Minnesota/New York/Washington are never expected to set it.
+  const rateOverride = cert.paidLeaveEmployeeRateOverride;
+  const rate = typeof rateOverride === 'number' ? rateOverride : cfg.rate;
+  const amount = applyRate(taxableWages, rate);
 
   return {
     id: `${rules.code}_PFML_EE`,
@@ -1323,9 +1339,13 @@ function statePaidLeaveEmployeeTax(
     taxableWages,
     amount,
     detail:
-      cfg.wageBase === null
-        ? `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, no wage cap`
-        : `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, capped at ${fmt(dollars(cfg.wageBase))}/yr (${fmt(ytd)} YTD already counted)`,
+      (typeof rateOverride === 'number'
+        ? `rate overridden via certificate.paidLeaveEmployeeRateOverride (this employer's own chosen rate, ` +
+          `not the ${(cfg.rate * 100).toFixed(2)}% statutory maximum); `
+        : '') +
+      (cfg.wageBase === null
+        ? `${fmt(taxableWages)} @ ${(rate * 100).toFixed(2)}%, no wage cap`
+        : `${fmt(taxableWages)} @ ${(rate * 100).toFixed(2)}%, capped at ${fmt(dollars(cfg.wageBase))}/yr (${fmt(ytd)} YTD already counted)`),
   };
 }
 
@@ -3445,11 +3465,27 @@ function maineWithholding(
 ): TaxLine {
   const cfg = rules.maineWithholding as MaineConfig;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
-  const taxableWages = ctx.taxableWagesFor(exempt);
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+
+  // Form W-4ME's Line 7 tribal-member exemption is scoped to wages earned
+  // FOR WORK PERFORMED ON TRIBAL LAND specifically, not the whole
+  // paycheck — genuinely narrower than the generic certificate.exempt
+  // flag this file also honors (which zeroes the ENTIRE _SIT line via
+  // zeroStateIncomeTaxLines(), correct for a tribal member whose Maine
+  // wages are ALL tribal-land-sourced, the common case). For the mixed
+  // case — some wages on tribal land, some off — certificate.exemptWages
+  // (cents, this pay period) lets the caller exclude just the tribal-land
+  // portion from the taxable base directly, rather than forcing an
+  // all-or-nothing choice the real exemption doesn't require. The caller
+  // is still responsible for knowing which wages qualify (the same
+  // eligibility-adjudication boundary as every exemption in this project);
+  // this only changes WHAT gets excluded once that split is known, not who
+  // determines it.
+  const exemptWages = atLeastZero(Number(cert.exemptWages ?? 0));
+  const taxableWages = atLeastZero(ctx.taxableWagesFor(exempt) - exemptWages);
   const periodsPerYear = ctx.periodsPerYear;
   const annualWages = toWholeDollars(taxableWages * periodsPerYear);
 
-  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const status = resolveMaineStatus(cert);
   const allowances = Number(cert.allowances ?? 0);
   const allowanceAmount = toWholeDollars(dollars(cfg.allowanceAmount) * allowances);
