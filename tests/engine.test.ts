@@ -4161,6 +4161,89 @@ describe('Maine', () => {
   });
 });
 
+describe('Ohio', () => {
+  // Expected values hand-derived from OH-2026.json's own periodTables
+  // (transcribed verbatim from the Ohio Department of Taxation's own
+  // withholding tables in an earlier session) before running, then
+  // confirmed against the live engine — this describe block closes the
+  // long-standing gap where OH's 'bracket_per_period' method had no
+  // dispatch case at all, so calculatePaycheck() threw for any Ohio input.
+  const ohState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'OH', certificate },
+  });
+
+  test('weekly $1,000, 1 exemption: (1,000 − 12.50) × bracket = $22.57', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...ohState({ exemptions: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'OH_SIT'), dollars(22.57));
+  });
+
+  test('no IT-4 on file defaults to 0 exemptions: weekly $1,000 → $22.94', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OH' },
+      }),
+    );
+    assert.equal(amountOf(r, 'OH_SIT'), dollars(22.94));
+  });
+
+  test('certificate.additionalWithholding (IT-4 Section II Line 5) works generically', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...ohState({ exemptions: 1, additionalWithholding: dollars(15) }),
+      }),
+    );
+    assert.equal(amountOf(r, 'OH_SIT'), dollars(22.57 + 15));
+  });
+
+  test('reciprocity (the actual fix): an Indiana resident working in Ohio owes $0 Ohio income tax', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        residenceState: { code: 'IN' },
+        ...ohState({ exemptions: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'OH_SIT'), 0);
+  });
+
+  test('reciprocity does not over-apply: a New York resident working in Ohio still owes full Ohio tax', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        residenceState: { code: 'NY' },
+        ...ohState({ exemptions: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'OH_SIT'), dollars(22.57));
+  });
+
+  test('all 5 reciprocal states (IN/KY/MI/PA/WV) zero Ohio tax the same way', () => {
+    for (const code of ['IN', 'KY', 'MI', 'PA', 'WV']) {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          residenceState: { code },
+          ...ohState({ exemptions: 1 }),
+        }),
+      );
+      assert.equal(amountOf(r, 'OH_SIT'), 0, `expected $0 OH tax for a ${code} resident`);
+    }
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

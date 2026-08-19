@@ -537,6 +537,8 @@ function incomeTaxLines(
       return [bracketPerPeriodKansas(input, ctx, rules)];
     case 'bracket_phaseout_deduction_whole_dollar':
       return [maineWithholding(input, ctx, rules)];
+    case 'bracket_per_period':
+      return [ohioWithholding(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -3525,5 +3527,91 @@ function maineWithholding(
       `${fmt(annualWages)}/yr less ${fmt(allowanceAmount)} allowances (${allowances} × $${cfg.allowanceAmount}) ` +
       `less ${fmt(standardDeduction)} standard deduction (${status}) = ${fmt(annualIncome)} annualized income ` +
       `@ ${(bracket.rate * 100).toFixed(2)}% bracket, annualized withholding ${fmt(annualWithholding)} ÷ ${periodsPerYear}, rounded to the nearest dollar`,
+  };
+}
+
+interface OhioBracket {
+  floor: number; // dollars
+  ceiling: number | null; // dollars
+  base: number; // dollars
+  rate: number;
+}
+
+interface OhioPeriodTable {
+  exemptionPerPeriod: number; // dollars, flat per exemption claimed
+  brackets: OhioBracket[];
+}
+
+/**
+ * Ohio's Percentage Method (Ohio Department of Taxation's own withholding
+ * tables, fetched and read directly in an earlier session — see
+ * data/states/OH-2026.json's own $extractionNote/sources). Closes a real,
+ * previously-disclosed gap: this method had NO dispatch case here at all,
+ * so calculatePaycheck() threw for every Ohio input, which in turn meant
+ * OH's own reciprocity data (IN/KY/MI/PA/WV, already primary-confirmed via
+ * Form IT 4NR) was structurally unreachable — reciprocityExemptionReason()
+ * in this file already reads reciprocalStates generically and would zero
+ * OH_SIT correctly, but stateIncomeTax() never got far enough to call it.
+ * Fixing THIS is what actually fixes Ohio's reciprocal-tax handling, not a
+ * change to the reciprocity logic itself, which was already correct.
+ *
+ * The simplest per-period bracket shape in this project so far: ONE
+ * schedule per period (no separate single/married tables the way NY/NJ/
+ * Montana/Idaho/Iowa all have), and the exemption is a flat per-period
+ * dollar amount times a straight exemption COUNT (Form IT-4's own Section
+ * II is a simplified 0/1 checklist summed into one number) — not a
+ * precomputed combined-allowance table or a multi-tier personal/spouse/
+ * dependent split. Subtract the exemption from per-period wages directly
+ * (no annualizing), then look up the result in the period's own bracket
+ * table — the same "per-period table, no annual division" shape already
+ * established for Montana/NY/New Jersey/Kansas.
+ *
+ * Uses rules.periodTables (the August 1, 2026-onward table) unconditionally
+ * for any 2026 check date — see OH-2026.json's own midYearEffectiveDating
+ * note for why: this engine's ruleset lookup is year-only, with no
+ * mechanism yet to switch to priorTable2026 for a pre-August check date.
+ * That mechanism gap is real and disclosed, and deliberately NOT solved
+ * here — a much bigger change (registry.ts's yearOf()/date-range lookup)
+ * than fixing the missing dispatch case this function addresses.
+ */
+function ohioWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const tables = rules.periodTables as Record<string, OhioPeriodTable>;
+  const table = tables[input.payFrequency];
+  if (!table) {
+    throw new Error(
+      `Ohio's own withholding tables don't publish a "${input.payFrequency}" schedule — cannot ` +
+        `compute ${rules.code}_SIT.`,
+    );
+  }
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const exemptions = Number(cert.exemptions ?? 0);
+  const exemptionAmount = dollars(table.exemptionPerPeriod) * exemptions;
+  const netWages = atLeastZero(taxableWages - exemptionAmount);
+
+  const bracket =
+    table.brackets.find(
+      (b) => netWages >= dollars(b.floor) && (b.ceiling === null || netWages < dollars(b.ceiling)),
+    ) ?? table.brackets[table.brackets.length - 1];
+  const excess = netWages - dollars(bracket.floor);
+  const amount = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: netWages,
+    amount,
+    detail:
+      `${fmt(taxableWages)} less ${fmt(exemptionAmount)} exemptions (${exemptions} × $${table.exemptionPerPeriod}) ` +
+      `= ${fmt(netWages)} net @ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.floor))}, base ${fmt(dollars(bracket.base))}`,
   };
 }
