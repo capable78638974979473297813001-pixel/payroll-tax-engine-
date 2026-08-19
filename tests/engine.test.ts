@@ -4168,7 +4168,14 @@ describe('Ohio', () => {
   // confirmed against the live engine — this describe block closes the
   // long-standing gap where OH's 'bracket_per_period' method had no
   // dispatch case at all, so calculatePaycheck() threw for any Ohio input.
+  // checkDate is set explicitly to on/after 2026-08-01 in every test below
+  // (the engine test suite's own global default, '2026-06-15', is BEFORE
+  // Ohio's HB96 rate change — see the dedicated mid-year-dating tests
+  // further down for that boundary specifically) so each test's intent
+  // (testing the CURRENT table) doesn't depend on a shared default that
+  // has nothing to do with Ohio.
   const ohState = (certificate: Record<string, unknown> = {}) => ({
+    checkDate: '2026-08-15',
     workState: { code: 'OH', certificate },
   });
 
@@ -4188,6 +4195,7 @@ describe('Ohio', () => {
       input({
         payFrequency: 'weekly',
         earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        checkDate: '2026-08-15',
         workState: { code: 'OH' },
       }),
     );
@@ -4241,6 +4249,43 @@ describe('Ohio', () => {
       );
       assert.equal(amountOf(r, 'OH_SIT'), 0, `expected $0 OH tax for a ${code} resident`);
     }
+  });
+
+  test("mid-year effective dating (the gap just closed): HB96's rate cut applies to checks on/after 2026-08-01, not before", () => {
+    // Same $1,000/week, 1 exemption as the first test above, but priced on
+    // the PRIOR (Oct 2025) table: base $8.89 not $8.02, top bracket 3.64%
+    // vs 3.40% — (987.50 − 500.96) × 2.99% + 8.89 = $23.44.
+    const beforeCutoff = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        checkDate: '2026-01-15',
+        workState: { code: 'OH', certificate: { exemptions: 1 } },
+      }),
+    );
+    assert.equal(amountOf(beforeCutoff, 'OH_SIT'), dollars(23.44));
+
+    // The day before the cutover still uses the prior table...
+    const dayBefore = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        checkDate: '2026-07-31',
+        workState: { code: 'OH', certificate: { exemptions: 1 } },
+      }),
+    );
+    assert.equal(amountOf(dayBefore, 'OH_SIT'), dollars(23.44));
+
+    // ...and the cutover date itself already uses the new, lower table.
+    const cutoverDay = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        checkDate: '2026-08-01',
+        workState: { code: 'OH', certificate: { exemptions: 1 } },
+      }),
+    );
+    assert.equal(amountOf(cutoverDay, 'OH_SIT'), dollars(22.57));
   });
 });
 

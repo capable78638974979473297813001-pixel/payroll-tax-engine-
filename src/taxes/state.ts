@@ -3579,7 +3579,21 @@ function ohioWithholding(
   ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine {
-  const tables = rules.periodTables as Record<string, OhioPeriodTable>;
+  // Mid-year effective dating: Ohio's HB96 cut rates for payroll periods
+  // ending on/after 2026-08-01 (periodTables); priorTable2026 held from
+  // 2026-01-01 through 2026-07-31 (the October 2025 table, never replaced
+  // by a separate January 2026 one). Both tables already live in THIS
+  // ruleset object regardless of check date — registry.ts's year-only file
+  // lookup was never the actual blocker, since OH-2026.json covers all of
+  // 2026 either way. What was missing is choosing between them, done here
+  // via a plain string comparison against rules.midYearEffectiveDating's
+  // own thresholdDate (ISO yyyy-mm-dd sorts correctly as a string).
+  const dating = rules.midYearEffectiveDating as { thresholdDate: string } | undefined;
+  const usePriorTable = dating && input.checkDate < dating.thresholdDate;
+  const tables = (usePriorTable ? rules.priorTable2026 : rules.periodTables) as Record<
+    string,
+    OhioPeriodTable
+  >;
   const table = tables[input.payFrequency];
   if (!table) {
     throw new Error(
@@ -3612,6 +3626,7 @@ function ohioWithholding(
     amount,
     detail:
       `${fmt(taxableWages)} less ${fmt(exemptionAmount)} exemptions (${exemptions} × $${table.exemptionPerPeriod}) ` +
-      `= ${fmt(netWages)} net @ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.floor))}, base ${fmt(dollars(bracket.base))}`,
+      `= ${fmt(netWages)} net @ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.floor))}, base ${fmt(dollars(bracket.base))}` +
+      (usePriorTable ? ` (pre-2026-08-01 table)` : ''),
   };
 }
