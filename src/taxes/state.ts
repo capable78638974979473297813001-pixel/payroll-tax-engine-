@@ -539,6 +539,8 @@ function incomeTaxLines(
       return [maineWithholding(input, ctx, rules)];
     case 'bracket_per_period':
       return [ohioWithholding(input, ctx, rules)];
+    case 'bracket_annual_exemption_credit':
+      return [delawareWithholding(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -3628,5 +3630,108 @@ function ohioWithholding(
       `${fmt(taxableWages)} less ${fmt(exemptionAmount)} exemptions (${exemptions} × $${table.exemptionPerPeriod}) ` +
       `= ${fmt(netWages)} net @ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.floor))}, base ${fmt(dollars(bracket.base))}` +
       (usePriorTable ? ` (pre-2026-08-01 table)` : ''),
+  };
+}
+
+interface DEWithholdingConfig {
+  standardDeduction: { single: number; married: number }; // dollars, ANNUAL
+  personalCreditPerExemption: number; // dollars, ANNUAL, subtracted from TAX not from wages
+  brackets: WIBracket[]; // reuses the {from,to,base,rate} shape already proven for WI/ME
+  // Delaware's own Employer's Guide annualizes by a DIFFERENT multiplier per
+  // period than this engine's generic PERIODS_PER_YEAR table — most notably
+  // daily x300, not the engine-wide 260-workday convention (the same class
+  // of mismatch New Jersey's daily table hit at x365). Keyed by PayFrequency
+  // string; only the 5 frequencies Delaware's guide actually publishes.
+  annualizeMultiplier: Partial<Record<string, number>>;
+}
+
+/**
+ * Delaware's withholding formula (Employer's Guide, Section 17 "Computing
+ * Withholding Taxes" — "An approved method, based on annualized wages"),
+ * fetched and read directly, both as the Guide's own HTML page and via its
+ * separately-published DE-W4NR worksheet, which independently states and
+ * demonstrates the identical rate table). Genuinely new shape in this
+ * project: annualize wages, subtract a flat STANDARD DEDUCTION by filing
+ * status (single/MFS $3,250, MFJ $6,500 — MFS uses the SINGLE figure, not a
+ * half-of-joint figure, confirmed by the Guide's own third worked example),
+ * look up a 7-bracket progressive schedule, THEN subtract a flat $110 PER
+ * EXEMPTION as a CREDIT AGAINST THE COMPUTED TAX (not a deduction from
+ * wages, unlike every other exemption-amount state in this project — Ohio's
+ * exemptionPerPeriod and Wisconsin's exemptionAmount both reduce the taxable
+ * base pre-bracket; Delaware's reduces the tax itself post-bracket), floor
+ * at $0, divide by the per-period multiplier.
+ *
+ * Verified against all THREE of the Employer's Guide's own worked examples
+ * (single/1 exemption, MFJ/3 exemptions, MFS/2 exemptions — each reproduced
+ * across all four published per-period divisors: weekly/biweekly/
+ * semi-monthly/monthly) — see tests/engine.test.ts, describe('Delaware').
+ *
+ * The 2.20%-6.60% rate table itself was double-checked against a real,
+ * disclosed risk: Delaware HB13/HS2 (153rd General Assembly) proposed a
+ * restructured bracket schedule "for taxable years beginning after December
+ * 31, 2025" — i.e. this exact tax year. Checked the bill's own legislative
+ * history directly rather than assuming either "it must be old news" or
+ * "it must already be law": HS2 for HB13 did NOT pass before the General
+ * Assembly adjourned in 2025 ("failed to advance this session"), so the
+ * pre-existing 2.20%-6.60% table (unchanged since HB1 in 2013, per the
+ * Guide's own "Effective January 1, 2025" table — Delaware hasn't touched
+ * these seven numbers since 2014) remains the one actually in force for
+ * 2026. Cross-confirmed the OLD table is still current on Delaware's own
+ * software-developer tax-rate-changes page, which shows no update.
+ */
+function delawareWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.delawareWithholding as DEWithholdingConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+
+  const multiplier = cfg.annualizeMultiplier[input.payFrequency];
+  if (multiplier === undefined) {
+    throw new Error(
+      `Delaware's own Employer's Guide doesn't publish an annualizing multiplier for ` +
+        `"${input.payFrequency}" — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const annualWages = periodWages * multiplier;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  // The Guide's own regulation text (Section 15(a)) is explicit: absent a
+  // certificate, "withhold tax as if the employee is a single person who
+  // has no withholding allowances" — the same no-certificate default this
+  // project uses everywhere else, here made a direct quote rather than an
+  // inferred convention. MFS uses the single-column standard deduction per
+  // the Guide's own third worked example; only 'mfj' selects the married
+  // (double) figure.
+  const maritalStatus = cert.maritalStatus === 'mfj' ? 'married' : 'single';
+  const exemptions = Number(cert.exemptions ?? 0);
+
+  const standardDeduction = dollars(cfg.standardDeduction[maritalStatus]);
+  const taxableIncome = atLeastZero(annualWages - standardDeduction);
+
+  const bracket = findWIBracket(cfg.brackets, taxableIncome);
+  const excess = taxableIncome - dollars(bracket.from);
+  const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  const credit = dollars(cfg.personalCreditPerExemption) * exemptions;
+  const annualLiability = atLeastZero(annualTax - credit);
+
+  const amount = roundHalfUp(annualLiability / multiplier);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(annualWages)}/yr (×${multiplier}) less ${fmt(standardDeduction)} standard deduction ` +
+      `(${maritalStatus}) = ${fmt(taxableIncome)} taxable @ ${(bracket.rate * 100).toFixed(2)}% ` +
+      `over ${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))} = ${fmt(annualTax)} ` +
+      `less ${fmt(credit)} exemption credit (${exemptions} × $${cfg.personalCreditPerExemption}) ` +
+      `= ${fmt(annualLiability)}/yr ÷ ${multiplier}`,
   };
 }

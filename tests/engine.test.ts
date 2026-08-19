@@ -4289,6 +4289,154 @@ describe('Ohio', () => {
   });
 });
 
+describe('Delaware', () => {
+  // Expected values hand-derived from the Employer's Guide's own three
+  // worked examples (Section 17), before the code was run, same discipline
+  // as every other state. All three share the same $25,000 annualized-wage
+  // starting point, isolating the standard-deduction and exemption-credit
+  // differences between filing statuses while proving the shared bracket
+  // lookup and annualization steps once. Delaware is the first state in
+  // this project where the exemption amount is a CREDIT subtracted from
+  // computed tax, not a deduction subtracted from wages before the bracket
+  // lookup.
+  const deState = (certificate: Record<string, unknown>) => ({
+    workState: { code: 'DE', certificate },
+  });
+
+  test('Guide Example 1: single, 1 exemption, weekly (annualized $25,000)', () => {
+    // $480.7692.../wk x52 = $25,000/yr. Less $3,250 standard deduction =
+    // $21,750 taxable. Bracket 20,000-25,000 @ 5.20%, base $741: 741 +
+    // 5.20%x1,750 = 741+91 = $832.00 tax. Less 1x$110 credit = $722.00
+    // liability. ÷52 = $13.88 (Guide's own stated answer).
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: Math.round(dollars(25000) / 52) }],
+        ...deState({ maritalStatus: 'single', exemptions: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'DE_SIT'), dollars(13.88));
+  });
+
+  test('Guide Example 1, same $25,000/yr: biweekly/semi-monthly/monthly all match the Guide', () => {
+    const annual = dollars(25000);
+    const cases: [string, number, number][] = [
+      ['biweekly', 26, 27.77],
+      ['semimonthly', 24, 30.08],
+      ['monthly', 12, 60.17],
+    ];
+    for (const [payFrequency, periods, expected] of cases) {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: payFrequency as PaycheckInput['payFrequency'],
+          earnings: [{ code: 'REG', category: 'regular', amount: Math.round(annual / periods) }],
+          ...deState({ maritalStatus: 'single', exemptions: 1 }),
+        }),
+      );
+      assert.equal(amountOf(r, 'DE_SIT'), dollars(expected), `${payFrequency} should be ${expected}`);
+    }
+  });
+
+  test('Guide Example 2: MFJ, 3 exemptions, same $25,000/yr — bigger deduction, bigger credit', () => {
+    // $25,000/yr less $6,500 MFJ standard deduction = $18,500 taxable.
+    // Bracket 10,000-20,000 @ 4.80%, base $261: 261 + 4.80%x8,500 =
+    // 261+408 = $669.00 tax. Less 3x$110 credit = $339.00 liability.
+    const annual = dollars(25000);
+    const cases: [string, number, number][] = [
+      ['weekly', 52, 6.52],
+      ['biweekly', 26, 13.04],
+      ['semimonthly', 24, 14.13],
+      ['monthly', 12, 28.25],
+    ];
+    for (const [payFrequency, periods, expected] of cases) {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: payFrequency as PaycheckInput['payFrequency'],
+          earnings: [{ code: 'REG', category: 'regular', amount: Math.round(annual / periods) }],
+          ...deState({ maritalStatus: 'mfj', exemptions: 3 }),
+        }),
+      );
+      assert.equal(amountOf(r, 'DE_SIT'), dollars(expected), `${payFrequency} should be ${expected}`);
+    }
+  });
+
+  test('Guide Example 3: Married Filing Separately, 2 exemptions — uses the SINGLE standard deduction, not half of MFJ', () => {
+    // $25,000/yr less $3,250 (single/MFS figure, NOT $3,250 = half of
+    // $6,500 by coincidence of Delaware's own numbers) = $21,750 taxable,
+    // same bracket math as Example 1 ($832.00 tax). Less 2x$110 credit =
+    // $612.00 liability — proves MFS is NOT dispatched to the married
+    // standard-deduction bucket.
+    const annual = dollars(25000);
+    const cases: [string, number, number][] = [
+      ['weekly', 52, 11.77],
+      ['biweekly', 26, 23.54],
+      ['semimonthly', 24, 25.5],
+      ['monthly', 12, 51.0],
+    ];
+    for (const [payFrequency, periods, expected] of cases) {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: payFrequency as PaycheckInput['payFrequency'],
+          earnings: [{ code: 'REG', category: 'regular', amount: Math.round(annual / periods) }],
+          ...deState({ maritalStatus: 'mfs', exemptions: 2 }),
+        }),
+      );
+      assert.equal(amountOf(r, 'DE_SIT'), dollars(expected), `${payFrequency} should be ${expected}`);
+    }
+  });
+
+  test("no certificate on file defaults to single, 0 exemptions (Guide Section 15(a)'s own default)", () => {
+    // Same $25,000/yr, no certificate at all: single standard deduction,
+    // same $832.00 tax as Example 1, but $0 credit (0 exemptions) instead
+    // of Example 1's $110 — proving the no-certificate default is genuinely
+    // "single, no allowances," not silently reusing whatever the last test
+    // configured.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: Math.round(dollars(25000) / 52) }],
+        workState: { code: 'DE' },
+      }),
+    );
+    assert.equal(amountOf(r, 'DE_SIT'), dollars(16.0));
+  });
+
+  test('401(k) deferral reduces the DE base (federal-conformity state, unlike Pennsylvania)', () => {
+    // $1,000/wk regular with a $200 401(k) deferral: DE taxable wages are
+    // $800/wk = $41,600/yr (below the $60,000 floor, so a real bracket
+    // shift versus the undeferred $52,000/yr would land in a lower band).
+    // Annual $41,600 less $3,250 standard deduction = $38,350 taxable.
+    // Bracket 25,000-60,000 @ 5.55%, base $1,001: 1,001 + 5.55%x13,350 =
+    // 1,001+740.93 = $1,741.93 tax. Less 1x$110 credit = $1,631.93 liability
+    // ÷52 = $31.38 (weekly, rounds from 31.3833).
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(200) }],
+        ...deState({ maritalStatus: 'single', exemptions: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'DE_SIT'), dollars(31.38));
+  });
+
+  test('no DE reciprocity: a Delaware resident working in Pennsylvania still owes full DE tax if DE is the work state', () => {
+    // Confirms reciprocityExemptionReason() finds no match for DE (its own
+    // reciprocalStates is empty) even when a residenceState is supplied —
+    // Delaware's own Employer's Guide states directly it has no reciprocal
+    // agreements with any state.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: Math.round(dollars(25000) / 52) }],
+        workState: { code: 'DE', certificate: { maritalStatus: 'single', exemptions: 1 } },
+        residenceState: { code: 'PA' },
+      }),
+    );
+    assert.equal(amountOf(r, 'DE_SIT'), dollars(13.88));
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(
