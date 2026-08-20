@@ -5048,6 +5048,185 @@ describe('California', () => {
   });
 });
 
+describe('Colorado', () => {
+  // DR 1098 publishes no full worked example with a stated dollar answer
+  // the way California/Utah's guides do, so these are hand-derived from
+  // the worksheet's own formula, independently verified before running.
+  const coState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'CO', certificate },
+  });
+
+  test('single/other filing status, weekly $1,000: $5,500 deduction, 4.40% flat', () => {
+    // Annual 52,000 - 5,500 = 46,500 x 4.40% = 2,046.00/yr / 52 = 39.346... -> $39.35.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...coState({ filingStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'CO_SIT'), dollars(39.35));
+  });
+
+  test('MFJ gets the $11,000 deduction, not $5,500', () => {
+    // Annual 52,000 - 11,000 = 41,000 x 4.40% = 1,804.00/yr / 52 = 34.6923... -> $34.69.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...coState({ filingStatus: 'mfj' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'CO_SIT'), dollars(34.69));
+  });
+
+  test('DR 0004 Line 2 REPLACES the flat deduction, not adds to it', () => {
+    // Same wages/status as the first test, but an $8,000 DR 0004 override
+    // instead of the $5,500 default: 52,000 - 8,000 = 44,000 x 4.40% =
+    // 1,936.00/yr / 52 = 37.2307... -> $37.23 (not $39.35).
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...coState({ filingStatus: 'single', dr0004Line2Amount: 8000 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'CO_SIT'), dollars(37.23));
+  });
+
+  test('no W-4/DR 0004 on file defaults to single ($5,500 deduction)', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'CO' },
+      }),
+    );
+    assert.equal(amountOf(r, 'CO_SIT'), dollars(39.35));
+  });
+
+  test('FAMLI employee share: $1,000 x 0.44%', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'CO' },
+      }),
+    );
+    assert.equal(amountOf(r, 'CO_PFML_EE'), dollars(4.4));
+  });
+
+  test('FAMLI employer share (10+ employees): total premium less employee share', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'CO', certificate: { employerLiableForPaidLeaveShare: true } },
+      }),
+    );
+    // Total premium 1,000 x 0.88% = 8.80, less employee share (4.40) = 4.40.
+    assert.equal(amountOf(r, 'CO_PFML_ER'), dollars(4.4));
+  });
+
+  test('no FAMLI employer-share line by default (under-10-employee assumption)', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'CO' },
+      }),
+    );
+    assert.equal(r.taxes.some((t) => t.id === 'CO_PFML_ER'), false);
+  });
+});
+
+describe('Utah', () => {
+  // Reproduces ALL SIX of Publication 14's own worked examples exactly —
+  // see utahWithholding()'s own doc comment for why the whole-dollar
+  // rounding at lines 2 and 5 specifically (not just the final answer) is
+  // what makes these match.
+  const utState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'UT', certificate },
+  });
+
+  test('Example 1: weekly $400, single -> $12', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+        ...utState({ maritalStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'UT_SIT'), dollars(12));
+  });
+
+  test('Example 2: biweekly $2,600, single -> $116 (allowance fully phased out to $0)', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2600) }],
+        ...utState({ maritalStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'UT_SIT'), dollars(116));
+  });
+
+  test('Example 3: semimonthly $1,200, married -> $18', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1200) }],
+        ...utState({ maritalStatus: 'married' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'UT_SIT'), dollars(18));
+  });
+
+  test('Example 4: monthly $7,800, married -> $347 (allowance fully phased out to $0)', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(7800) }],
+        ...utState({ maritalStatus: 'married' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'UT_SIT'), dollars(347));
+  });
+
+  test('Example 5: quarterly $9,000, single -> $367 (line 2 rounds $400.50 up to $401)', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'quarterly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(9000) }],
+        ...utState({ maritalStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'UT_SIT'), dollars(367));
+  });
+
+  test('Example 6: daily $175, married -> $5', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'daily',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(175) }],
+        ...utState({ maritalStatus: 'married' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'UT_SIT'), dollars(5));
+  });
+
+  test('head of household folds into the single schedule, per Publication 14\'s own note', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+        ...utState({ maritalStatus: 'hoh' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'UT_SIT'), dollars(12));
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

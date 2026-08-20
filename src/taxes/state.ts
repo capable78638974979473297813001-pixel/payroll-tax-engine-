@@ -624,6 +624,10 @@ function incomeTaxLines(
       return [oregonWithholding(input, ctx, rules)];
     case 'bracket_per_period_three_status':
       return [californiaWithholding(input, ctx, rules)];
+    case 'flat_rate_status_deduction':
+      return [coloradoWithholding(input, ctx, rules)];
+    case 'flat_rate_phaseout_allowance':
+      return [utahWithholding(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -4615,5 +4619,145 @@ function californiaWithholding(
       ` less ${fmt(standardDeduction)} standard deduction (${status}) = ${fmt(taxableIncome)} taxable ` +
       `@ ${(bracket.rate * 100).toFixed(3)}% over ${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))} ` +
       `= ${fmt(computedTax)} less ${fmt(credit)} exemption credit (${regularAllowances} regular allowance(s))`,
+  };
+}
+
+interface COConfig {
+  standardDeduction: { mfj: number; other: number };
+  rate: number;
+  annualizeMultiplier: Partial<Record<string, number>>;
+}
+
+/**
+ * Colorado's withholding (DR 1098, 2026 Colorado Withholding Worksheet for
+ * Employers, fetched and read directly): the simplest formula in this
+ * project in some time. Annualize wages, subtract a flat filing-status
+ * deduction ($11,000 MFJ / $5,500 otherwise — or a caller-supplied DR 0004
+ * Line 2 override, which REPLACES rather than adjusts the flat figure),
+ * floor at $0, x 4.40%, divide by periods. No allowance-count mechanism at
+ * all — unlike every other 'flat deduction' state in this project (Iowa,
+ * Kentucky), there is no per-exemption dollar figure to multiply by a
+ * count, just the one flat deduction bucket.
+ */
+function coloradoWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.flatRateStatusDeduction as COConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+
+  const multiplier = cfg.annualizeMultiplier[input.payFrequency];
+  if (multiplier === undefined) {
+    throw new Error(
+      `Colorado's own Pay Period Table doesn't publish a "${input.payFrequency}" multiplier — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const annualWages = periodWages * multiplier;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  let deductionDollars: number;
+  let deductionNote: string;
+  if (cert.dr0004Line2Amount !== undefined) {
+    deductionDollars = Number(cert.dr0004Line2Amount);
+    deductionNote = 'DR 0004 Line 2';
+  } else {
+    const mfj = cert.filingStatus === 'mfj';
+    deductionDollars = mfj ? cfg.standardDeduction.mfj : cfg.standardDeduction.other;
+    deductionNote = mfj ? 'MFJ default' : 'single/other default';
+  }
+  const deduction = dollars(deductionDollars);
+
+  const taxable = atLeastZero(annualWages - deduction);
+  const annualTax = applyRate(taxable, cfg.rate);
+  const amount = roundHalfUp(annualTax / multiplier);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(annualWages)}/yr less ${fmt(deduction)} deduction (${deductionNote}) = ${fmt(taxable)} taxable ` +
+      `@ ${(cfg.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${multiplier}`,
+  };
+}
+
+interface UTConfig {
+  rate: number;
+  phaseOutRate: number;
+  baseAllowance: { single: Partial<Record<string, number>>; married: Partial<Record<string, number>> };
+  phaseOutThreshold: { single: Partial<Record<string, number>>; married: Partial<Record<string, number>> };
+}
+
+function resolveUTMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  // Publication 14's own note: "Use the Single column for taxpayers who
+  // file as head-of-household on their federal return."
+  return cert.maritalStatus === 'married' ? 'married' : 'single';
+}
+
+/**
+ * Utah's withholding (Publication 14, effective 2026-06-01, fetched and
+ * read directly): a flat-rate gross tax reduced by a PHASING-OUT credit,
+ * genuinely combining two shapes this project has seen separately —
+ * Delaware/Oregon's "credit subtracted after the bracket/rate" and
+ * Wisconsin's "the deduction/credit itself shrinks with income." No
+ * allowance-count field: Utah relies entirely on the federal W-4's filing
+ * status, nothing state-specific to count.
+ *
+ * ROUNDING IS THE LOAD-BEARING DETAIL HERE, verified against all 6 of the
+ * source's own worked examples: lines 2 and 5 are EACH independently
+ * rounded to the nearest WHOLE DOLLAR (not cent) the moment they're
+ * computed — reusing the generic roundFinalToWholeDollar mechanism (which
+ * rounds only once, at the very end) would NOT reproduce Publication 14's
+ * own answers. toWholeDollars() is applied directly to each of those two
+ * raw (fractional-cent) products rather than rounding to the cent first —
+ * confirmed by Example 5 (quarterly/single/$9,000): $9,000 x 4.45% =
+ * $400.50 exactly, which must round HALF-UP to $401 to reproduce the
+ * source's own stated $401 and, downstream, its own stated $367 final
+ * answer.
+ */
+function utahWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.flatRatePhaseoutAllowance as UTConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const status = resolveUTMaritalStatus(cert);
+  const period = input.payFrequency;
+
+  const baseAllowanceDollars = cfg.baseAllowance[status][period];
+  const phaseOutThresholdDollars = cfg.phaseOutThreshold[status][period];
+  if (baseAllowanceDollars === undefined || phaseOutThresholdDollars === undefined) {
+    throw new Error(
+      `Utah's own Publication 14 doesn't publish a "${period}" schedule — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+
+  const line2 = toWholeDollars(periodWages * cfg.rate);
+  const line3 = dollars(baseAllowanceDollars);
+  const line4 = atLeastZero(periodWages - dollars(phaseOutThresholdDollars));
+  const line5 = toWholeDollars(line4 * cfg.phaseOutRate);
+  const line6 = atLeastZero(line3 - line5);
+  const amount = atLeastZero(line2 - line6);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(periodWages)} @ ${(cfg.rate * 100).toFixed(2)}% = ${fmt(line2)} gross tax; base allowance ` +
+      `${fmt(line3)} less ${fmt(line5)} phase-out (${(cfg.phaseOutRate * 100).toFixed(1)}% of ${fmt(line4)} over ` +
+      `$${phaseOutThresholdDollars}) = ${fmt(line6)} net allowance (${status}); withholding = ${fmt(line2)} - ${fmt(line6)}`,
   };
 }

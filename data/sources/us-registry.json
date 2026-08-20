@@ -90,8 +90,9 @@
       "structure": "flat",
       "withholdingSource": "https://tax.colorado.gov/withholding-tax-guide",
       "sourceDoc": "DR 1098 Withholding Worksheet for Employers (https://tax.colorado.gov/DR1098)",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11"
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-20",
+      "note": "Wired into calc code (coloradoWithholding()) 2026-08-20: DR 1098 formula (flat filing-status deduction, 4.40% rate, no allowance-count field), FAMLI (0.44%/0.44% split, uncapped-to-SS-cap) via the existing generic paid-leave dispatch. Denver Occupational Privilege Tax documented (flat $5.75/mo employee + $4.00/mo employer, gated on a $500/mo earnings threshold) but NOT wired -- a genuinely new tax shape (flat monthly dollar, not percentage-of-wages). Aurora's OPT repeal (effective 2025-01-01) confirmed cross-source. No reciprocity, no local income tax otherwise."
     },
     {
       "code": "CT",
@@ -489,8 +490,9 @@
       "structure": "flat_with_allowance",
       "withholdingSource": "https://tax.utah.gov/business/withholding-overview/withholding/",
       "sourceDoc": "Publication 14 Withholding Tax Guide (flat rate with income-based allowance that phases out). Uses federal W-4.",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11"
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-20",
+      "note": "Wired into calc code (utahWithholding()) 2026-08-20: Publication 14's post-2026-06-01 formula (flat 4.45% rate less a PHASING-OUT credit -- base allowance minus 1.3% of wages over a threshold), verified against ALL SIX of the guide's own worked examples reproduced exactly, including its multi-step whole-dollar rounding convention. The PRE-2026-06-01 formula (4.5%, older allowance figures) is NOT modelled -- a real, disclosed gap for any check date before the mid-year change. No reciprocity, no local income tax, no PFML/disability program exists in Utah."
     },
     {
       "code": "VT",
