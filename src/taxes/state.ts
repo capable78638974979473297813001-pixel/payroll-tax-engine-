@@ -320,6 +320,17 @@ function residentWorkingElsewhereCreditLine(
 interface ReciprocityConfig {
   reciprocalStates?: string[];
   nonresidentDeMinimisThreshold?: number; // dollars, annual
+  // Subset of reciprocalStates whose exemption is CONDITIONAL on a daily
+  // commute, not the plain "resides there" test every other entry in
+  // reciprocalStates uses. Kentucky's own 103 KAR 17:140 is the reason
+  // this exists: it exempts Illinois/Indiana/Michigan/Ohio/West Virginia/
+  // Wisconsin residents unconditionally, but Virginia residents ONLY if
+  // they commute DAILY to the Kentucky workplace — the same condition
+  // Virginia's own VA-4 instructions independently confirm from the other
+  // side (Line 3(c), "Kentucky or DC residents who commute daily"). A bare
+  // reciprocalStates list has no way to represent this — the ONLY
+  // difference between a commuter-only entry and an ordinary one is here.
+  commuterOnlyStates?: string[];
 }
 
 /**
@@ -380,6 +391,18 @@ function reciprocityExemptionReason(
   const residence = input.residenceState?.code;
   if (!residence || residence === rules.code) return null;
   if (!reciprocalStates.includes(residence)) return null;
+
+  // Kentucky/Virginia's own bug class: some reciprocity entries are gated
+  // on a daily commute, not bare residence. A caller who never sets
+  // certificate.dailyCommuter gets NO exemption here — the safer default,
+  // matching this project's "absent input defaults to the LEAST generous
+  // outcome" convention (same reasoning Massachusetts's M-4 exemption-code
+  // default already uses) — rather than silently granting an exemption
+  // the underlying regulation would actually deny to a non-commuter.
+  if (reciprocity?.commuterOnlyStates?.includes(residence)) {
+    const dailyCommuter = input.residenceState?.certificate?.dailyCommuter === true;
+    if (!dailyCommuter) return null;
+  }
 
   return (
     `$0 — reciprocity exemption: employee resides in ${residence}, which has an ` +
@@ -3843,7 +3866,19 @@ function employeeElectedFlat(
     };
   }
 
-  const rate = cert.electedRate !== undefined ? Number(cert.electedRate) : cfg.defaultRate;
+  let rate: number;
+  if (cert.electedRate !== undefined) {
+    rate = Number(cert.electedRate);
+    if (!cfg.availableRates.includes(rate)) {
+      throw new Error(
+        `Unrecognized AZ certificate.electedRate ${JSON.stringify(cert.electedRate)} — Form A-4 only ` +
+          `offers ${cfg.availableRates.map((r) => `${(r * 100).toFixed(1)}%`).join(', ')} (or the zero ` +
+          `election via certificate.zeroElection). Cannot compute ${rules.code}_SIT.`,
+      );
+    }
+  } else {
+    rate = cfg.defaultRate;
+  }
   const amount = applyRate(taxableWages, rate);
 
   return {

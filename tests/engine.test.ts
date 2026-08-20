@@ -969,6 +969,50 @@ describe('Kentucky', () => {
     );
     assert.equal(amountOf(r, 'KY_SIT'), dollars(95.2));
   });
+
+  test('reciprocity BUG FIX: a Virginia resident who does NOT commute daily owes full KY tax, not $0', () => {
+    // Found on an audit pass: 103 KAR 17:140 exempts Virginia residents
+    // from Kentucky withholding ONLY if they commute daily — a narrower
+    // condition than the other 6 reciprocal states, which are unconditional
+    // on residence alone. The engine previously had no way to represent
+    // this and granted every one of the 7 states the same blanket
+    // exemption. Monthly $3,270, no certificate: reproduces the DOR's own
+    // worked example ($104.65) — proof the VA residence, on its own,
+    // changes NOTHING when certificate.dailyCommuter isn't set.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3270) }],
+        workState: { code: 'KY' },
+        residenceState: { code: 'VA' },
+      }),
+    );
+    assert.equal(amountOf(r, 'KY_SIT'), dollars(104.65));
+  });
+
+  test('a Virginia resident who DOES commute daily gets the reciprocity exemption', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3270) }],
+        workState: { code: 'KY' },
+        residenceState: { code: 'VA', certificate: { dailyCommuter: true } },
+      }),
+    );
+    assert.equal(amountOf(r, 'KY_SIT'), 0);
+  });
+
+  test('the other 6 reciprocal states remain UNCONDITIONAL — no dailyCommuter flag needed', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3270) }],
+        workState: { code: 'KY' },
+        residenceState: { code: 'OH' },
+      }),
+    );
+    assert.equal(amountOf(r, 'KY_SIT'), 0);
+  });
 });
 
 describe('gross-to-net', () => {
@@ -4478,6 +4522,30 @@ describe('Arizona', () => {
       }),
     );
     assert.equal(amountOf(r, 'AZ_SIT'), 0);
+  });
+
+  test('an elected rate outside Form A-4\'s 7 published options throws rather than silently applying it', () => {
+    // Found during an audit pass: the original implementation cast
+    // certificate.electedRate straight to a number and applied it via
+    // applyRate() with no check against Arizona's own closed list of legal
+    // rates (0.5/1.0/1.5/2.0/2.5/3.0/3.5%) — a caller-supplied 12% (a
+    // plausible typo for '1.2%', or a copy-paste from a different state's
+    // rate) would have silently withheld 6x too much with no error at all.
+    // Every other state's own enum-like certificate field in this project
+    // (marital status codes, withholding codes, filing statuses) throws on
+    // an unrecognized value; Arizona's rate election is exactly that kind
+    // of closed-list field and was the one exception.
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'biweekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+            ...azState({ electedRate: 0.12 }),
+          }),
+        ),
+      /Unrecognized AZ certificate\.electedRate/,
+    );
   });
 });
 
