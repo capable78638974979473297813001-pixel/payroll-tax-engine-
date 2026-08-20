@@ -1,0 +1,103 @@
+{
+  "code": "NE",
+  "name": "Nebraska",
+  "year": 2026,
+  "method": "bracket_per_period_allowance",
+  "$methodComment": "Structurally the SAME shape as Vermont's method already wired into state.ts (bracketPerPeriodAllowance): subtract a flat per-allowance dollar amount from wages, then look up a bracket table selected by marital status. Data-only pass — not wired into calc code, but unlike most states in this batch, Nebraska could plausibly REUSE Vermont's existing dispatch function almost as-is if wired in later (2 schedules by marital status, allowance table keyed by pay frequency), rather than needing a new function.",
+  "sources": [
+    {
+      "title": "2026 Nebraska Circular EN (full withholding guide)",
+      "url": "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026cir_en_whole.pdf",
+      "verifiedOn": "2026-08-20",
+      "verifiedBy": "PDF downloaded and text-extracted directly. The `-layout` extraction of the per-period percentage tables (weekly/biweekly/etc.) came out visually garbled — the SAME class of column-shift artifact already documented for NJ/CT/OH in this project. Fixed the SAME way NY's was fixed: re-extracted WITHOUT -layout (raw reading order), which came out cleanly for the Quarterly/Semiannual/Annual/Daily tables. Used the clean ANNUAL table (Table 7) as the source of truth and verified it internally to the cent by chaining each bracket's base from the one below (74.13 = 3,280 x 2.26%; 560.35 = 74.13 + 15,100 x 3.22%; ... all six steps check out exactly against the document's own printed base figures) — did NOT need to fight through the garbled weekly/biweekly/monthly tables at all, since Iowa's precedent in this project already proved per-period tables are just the annual figure divided and independently rounded (verified below)."
+    },
+    {
+      "title": "Nebraska Income Tax Withholding Percentage Method — Withholding Allowance Table",
+      "url": "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026_percent.pdf",
+      "verifiedOn": "2026-08-20",
+      "verifiedBy": "Same document set as above; the allowance-value table (by pay period) extracted cleanly even under -layout, since it's a simple 2-column table."
+    }
+  ],
+  "$importantDistinctionFromReturnBrackets": "Nebraska's REAL statutory individual income tax return brackets (Neb. Rev. Stat. 77-2715.03) are a DIFFERENT, simpler 3-tier schedule (2.46% / 3.51% / 4.55% top rate for 2026) that several secondary sources conflated with the withholding table below. This is the SAME structural distinction Wisconsin's data file already documents in this project: the WITHHOLDING table (Circular EN) is what payroll actually uses, and it is NOT required to match the RETURN bracket schedule exactly — Circular EN's own 6-step schedule (topping out at 4.60%, not 4.55%) is a genuinely different, independently-published table, not a transcription error. This file uses the Circular EN withholding table, correctly.",
+  "bracketPerPeriodAllowance": {
+    "allowanceAmount": {
+      "daily": 9.38,
+      "weekly": 46.92,
+      "biweekly": 93.85,
+      "semimonthly": 101.67,
+      "monthly": 203.33,
+      "quarterly": 610.0,
+      "semiannual": 1220.0,
+      "annual": 2440.0
+    },
+    "allowanceAmountComment": "Value of ONE withholding allowance, multiplied by the number of allowances claimed on Nebraska Form W-4N (or the employee's federal W-4 allowance count for pre-2020 certificates still on file — Circular EN explicitly grandfathers pre-2020 federal W-4s the same way this project's other post-2020-redesign states, e.g. Delaware, do), then SUBTRACTED from wages BEFORE the bracket lookup — a deduction, not a post-tax credit (the opposite of Delaware's shape built earlier this project).",
+    "brackets": {
+      "single": {
+        "annual": [
+          { "from": 0, "to": 3430, "base": 0, "rate": 0.0 },
+          { "from": 3430, "to": 6710, "base": 0, "rate": 0.0226 },
+          { "from": 6710, "to": 21810, "base": 74.13, "rate": 0.0322 },
+          { "from": 21810, "to": 31610, "base": 560.35, "rate": 0.0421 },
+          { "from": 31610, "to": 40130, "base": 972.93, "rate": 0.0435 },
+          { "from": 40130, "to": 75370, "base": 1343.55, "rate": 0.0448 },
+          { "from": 75370, "to": null, "base": 2922.30, "rate": 0.046 }
+        ]
+      },
+      "married": {
+        "annual": [
+          { "from": 0, "to": 8190, "base": 0, "rate": 0.0 },
+          { "from": 8190, "to": 13010, "base": 0, "rate": 0.0226 },
+          { "from": 13010, "to": 32400, "base": 108.93, "rate": 0.0322 },
+          { "from": 32400, "to": 50400, "base": 733.29, "rate": 0.0421 },
+          { "from": 50400, "to": 62530, "base": 1491.09, "rate": 0.0435 },
+          { "from": 62530, "to": 82920, "base": 2018.75, "rate": 0.0448 },
+          { "from": 82920, "to": null, "base": 2932.22, "rate": 0.046 }
+        ]
+      }
+    },
+    "bracketsComment": "'Single' schedule is labelled 'SINGLE Person-Including Head of Household' and 'Married' is 'MARRIED Person-Including Surviving Spouse' in Circular EN's own table headers — i.e. Nebraska's own withholding table explicitly folds HOH into single (not this engine's usual disclosed simplification; the source says so directly, the same rare case Kansas's KW-100 was). Only the ANNUAL table is recorded here; Circular EN separately publishes weekly/biweekly/semimonthly/monthly/quarterly/semiannual/daily tables directly, and per Iowa's already-proven method in this project, each of those is just this annual table's boundaries and bases divided by the period count and independently rounded to the cent (verified for Quarterly, which extracted cleanly: 3,430/4=857.5, rounds to 858 — matches the source's own quarterly table exactly; 74.13/4=18.53 — matches exactly; 972.93/4=243.2325 rounds to 243.23, but the source's own quarterly table shows 243.24 — a one-cent independent-rounding discrepancy, the SAME class of harmless noise Iowa's per-period tables showed, not a data error)."
+  },
+  "supplementalComment": "Circular EN: if supplemental wages (bonus, commission, overtime, severance, sales awards) are paid WITH regular wages, treat the total as one payment through the normal formula. If paid separately, either (a) aggregate with the current or immediately preceding period's regular wages and net out tax already withheld, or (b) withhold a flat 3.5% — notably NOT Nebraska's top marginal rate (4.60%), unlike most other states' flat-supplemental conventions in this project. Not yet modelled.",
+  "exemptPretax": [
+    "section125",
+    "hsa",
+    "fsa",
+    "dependent_care",
+    "deferral_401k",
+    "deferral_403b",
+    "deferral_457",
+    "deferral_simple",
+    "commuter"
+  ],
+  "exemptComment": "Nebraska has ROLLING conformity to the Internal Revenue Code (confirmed via a cross-source search, consistent with Nebraska's own Form W-4N instructions using federal AGI as the withholding-relevant starting point) — the same 'starts from federal AGI, no addback for these categories' inference tier as Wisconsin/Ohio, not yet upgraded to a direct statute or Circular EN quote naming each category.",
+  "reciprocity": {
+    "rule": "NONE. Nebraska does not have reciprocity agreements with any bordering state (Iowa, Missouri, Kansas, Colorado, Wyoming, South Dakota) — cross-source confirmed, not independently verified against Circular EN's own text this session (the document's Table of Contents does not list a reciprocity section, consistent with 'none' but not a direct quote either)."
+  },
+  "localIncomeTax": {
+    "rule": "NONE. No Nebraska city or county levies a local income or wage tax."
+  },
+  "unemploymentInsurance": {
+    "$comment": "Employer-only (SUTA) — no employee contribution. Uses a 20-category array/reserve-ratio system, similar in spirit to Wisconsin's Schedule D but with a genuinely unusual wrinkle: the WAGE BASE itself, not just the rate, varies by category.",
+    "administeredBy": "Nebraska Department of Labor",
+    "wageBase": { "mostEmployers": 9000.0, "category20": 24000.0 },
+    "wageBaseComment": "UNUSUAL, disclosed rather than smoothed over: category 20 (the worst-rated employers, statutorily floored at 5.40% to satisfy a federal minimum-rate requirement) faces a HIGHER taxable wage base ($24,000) than every other category ($9,000) — a genuinely different mechanism from every other state's SUTA in this project, where the wage base is uniform and only the RATE varies by experience.",
+    "newEmployerRate": { "nonConstruction": 0.0125, "construction": 0.054 },
+    "categoryRange": { "category1": 0.0, "category12Average": 0.0055, "category20": 0.054 },
+    "sources": [
+      {
+        "title": "A Guide to Understanding Nebraska's Unemployment Insurance Combined Tax Rates (2026)",
+        "url": "https://dol.nebraska.gov/webdocs/Resources/Items/2026%20UI%20guide%20to%20understanding.pdf",
+        "verifiedOn": "2026-08-20",
+        "verifiedBy": "PDF downloaded and text-extracted directly off Nebraska DOL's own site — all figures above (both wage bases, both new-employer rates, category 1/12/20 rates) read directly from this document, not cross-sourced."
+      }
+    ]
+  },
+  "knownGaps": [
+    "Not wired into calc code (data-only pass) — but structurally the closest of this batch to a drop-in reuse of the existing bracketPerPeriodAllowance() function already built for Vermont.",
+    "Only the ANNUAL table is transcribed; the separately-published weekly/biweekly/semimonthly/monthly per-period tables were left unread (garbled on first extraction attempt) since Iowa's precedent already proves they're derivable from the annual table to within a cent of independent rounding.",
+    "UI's full 20-category rate table (categories 2-19) was not transcribed — only categories 1, 12 (average), and 20 (the two statutory floors/ceilings plus the average) were pulled.",
+    "exemptPretax rests on general IRC-conformity knowledge, not a direct Circular EN quote naming 401(k)/125/etc. by category — one tier below Delaware's or Arizona's sourcing for the same claim.",
+    "Supplemental flat-3.5% method documented but not modelled.",
+    "Nonresident/non-wage withholding rules (construction contractors, nonresident personal-services withholding, gambling winnings) are real and documented in Circular EN but out of scope for this pass — payroll-specific wage withholding only."
+  ]
+}

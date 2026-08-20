@@ -1,0 +1,64 @@
+{
+  "code": "NV",
+  "name": "Nevada",
+  "year": 2026,
+  "method": "no_income_tax",
+  "$methodComment": "Structural fact, not a modelling choice: Nevada's constitution (Art. 10, and the state's own franchise on personal income tax) has never levied a personal income tax, and no legislative proposal is pending. Data-only pass — this state has no employee-side withholding tax at all, so the interesting content here is entirely EMPLOYER-paid: the Modified Business Tax (MBT, a payroll excise) and SUTA. Not wired into calc code beyond the existing no_income_tax dispatch, which already returns zero lines.",
+  "sources": [
+    {
+      "title": "Modified Business Tax (MBT) FAQs",
+      "url": "https://tax.nv.gov/faqs/modified-business-tax-faqs/",
+      "verifiedOn": "2026-08-20",
+      "verifiedBy": "Fetched directly. Caught a REAL error in the process: multiple secondary sources (Deel, ProfitFirstPayroll) still quote 1.378% or 1.475% as Nevada's 2026 General Business MBT rate — those are Nevada's OWN historical rates (1.475% pre-2015-07-01, 1.378% pre-2023-07-01). The Department's own FAQ page states plainly: 'Effective July 1, 2023: The tax rate for most General Business employers reduced to 1.17% from 1.378%' — no further change since, so 1.17% is the correct 2026 rate. This is the same class of stale-secondary-source trap already caught for Delaware's UI rate and Virginia's wage base."
+    },
+    {
+      "title": "Modified Business Tax (MBT) program page",
+      "url": "https://tax.nv.gov/tax-types/modified-business-tax",
+      "verifiedOn": "2026-08-20",
+      "verifiedBy": "Cross-referenced against the FAQ page above; consistent."
+    },
+    {
+      "title": "UI Information for Employers (Nevada DETR)",
+      "url": "https://detr.nv.gov/Page/UI_Information_for_Employers",
+      "verifiedOn": "2026-08-20",
+      "verifiedBy": "cross_source_confirmed only — direct fetch returned a JS-rendered shell with no extractable text (same class of failure as Ohio's reciprocity FAQ documented elsewhere in this project). Figures below are corroborated across 3 independent secondary sources (Rippling, Netchex, a 2025 DETR small-business-impact-meeting PDF) with no contradictions, but NOT read directly off DETR's own rendered page the way the MBT figures were."
+    }
+  ],
+  "wageIncomeTax": false,
+  "wageIncomeTaxNote": "Nevada has never had a personal income tax. No employee-side income tax withholding exists or is proposed. This is a structural fact, the same tier as South Dakota/Texas/Washington/Wyoming/Florida/Alaska/Tennessee/New Hampshire's wage-tax-free status already recorded in us-registry.json.",
+  "reciprocity": { "rule": "N/A — no state income tax to reciprocate on." },
+  "localIncomeTax": {
+    "rule": "NONE. Nevada's constitution reserves taxing authority narrowly; no county or municipality (including Las Vegas/Clark County) levies a local income or payroll tax on wages."
+  },
+  "modifiedBusinessTax": {
+    "$comment": "Employer-paid EXCISE on total gross wages paid (after health-insurance-premium deductions), NOT an employee withholding tax — the employee's paycheck is never touched by this. Genuinely different tax base from every payroll tax modelled elsewhere in this project so far (it's Nevada's substitute for not having a corporate or personal income tax).",
+    "generalBusiness": {
+      "rate": 0.0117,
+      "quarterlyExemption": 50000,
+      "note": "Rate effective 2023-07-01, current through 2026. First $50,000 of a quarter's gross wages is non-taxable; only the excess over $50,000 is taxed at 1.17%. Every registered employer must file a return each quarter regardless of tax due."
+    },
+    "financialInstitutionsAndMining": {
+      "rate": 0.01554,
+      "quarterlyExemption": 0,
+      "note": "Rate effective 2023-07-01. NO $50,000 exemption for this category — the full wage base (after health-benefit deductions) is taxed. SB 483 (78th Legislative Session) expanded 'financial institution' to include Net Proceeds of Minerals taxpayers (NRS 362.100-362.240), who file on a separate MBT-Mining return but pay the same 1.554% rate."
+    },
+    "statutoryAuthority": "NRS 363B (General Business), NRS 363A (Financial Institutions)."
+  },
+  "unemploymentInsurance": {
+    "$comment": "Employer-only (SUTA) — no employee contribution, same shape as every other state's SUTA in this project.",
+    "administeredBy": "Nevada Department of Employment, Training and Rehabilitation (DETR)",
+    "wageBase": 43700.0,
+    "newEmployerRate": 0.0295,
+    "newEmployerDuration": "14 to 17 calendar quarters (varies by the calendar-quarter in which the employer first became liable) before transitioning to experience rating.",
+    "careerEnhancementProgram": {
+      "rate": 0.0005,
+      "note": "An additional 0.05% assessment layered on top of the regular UI rate, funding Nevada's Career Enhancement Program — applies to all employers, new and experience-rated alike."
+    },
+    "confidence": "cross_source_confirmed (see sources above) — not read directly off DETR's own page this session."
+  },
+  "knownGaps": [
+    "MBT and SUTA are documented but NOT wired into calc code (this is a data-only pass, matching the scope Scott set for this batch) — both are employer-paid so they wouldn't touch the employee-paycheck engine's existing state-income-tax dispatch anyway; they'd need a new employer-liability calculation path this project hasn't built yet (closest existing precedent: newarkPayrollTaxEmployer(), which is employer-paid but wired specifically for NJ's Newark ordinance).",
+    "SUTA's experience-rated schedule (beyond the new-employer rate) was not pulled — the 2025 Small Business Impact Meeting PDF found in search results likely has it but wasn't fetched directly this session.",
+    "MBT's $50,000 exemption is per-QUARTER, not per-year — a caller would need to track wages on a calendar-quarter basis, a different accumulation window than every other wage-base mechanism in this project (which are annual)."
+  ]
+}

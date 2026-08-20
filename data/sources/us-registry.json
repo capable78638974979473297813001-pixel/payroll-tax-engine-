@@ -58,9 +58,9 @@
       "structure": "employee_elected_flat",
       "withholdingSource": "https://azdor.gov/business/withholding-tax",
       "sourceDoc": "Form A-4 percentage election (employee picks 0.0-3.5%; 2.0% default). Not a bracket table.",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11",
-      "note": "Unusual structure: withholding is an employee-elected flat % of gross, not a bracket lookup."
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-20",
+      "note": "Deep data pass 2026-08-20: employee-elected flat withholding percentage (0.5-3.5%, 2.0% default) fully documented from Form A-4 + WEC, including CA/IN/OR/VA nonresident credit-based reciprocity. Not wired into calc code."
     },
     {
       "code": "AR",
@@ -296,9 +296,9 @@
       "structure": "bracket",
       "withholdingSource": "https://dor.mo.gov/taxation/business/tax-types/withholding/",
       "sourceDoc": "Missouri Employer's Withholding Tax Formula + tables. Form MO W-4.",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11",
-      "note": "Kansas City and St. Louis each levy a 1% earnings tax administered by the CITY, not the state DOR — separate local sources, not yet enumerated."
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-20",
+      "note": "Deep data pass 2026-08-20: flat-rate-marital-deduction annual bracket withholding verified against the DOR's own worked example (including its per-bracket-step whole-dollar rounding quirk), Kansas City + St. Louis local earnings taxes documented. Not wired into calc code."
     },
     {
       "code": "MT",
@@ -317,16 +317,18 @@
       "structure": "bracket",
       "withholdingSource": "https://revenue.nebraska.gov/businesses/nebraska-income-tax-withholding",
       "sourceDoc": "2026 Nebraska Circular EN (all tables changed; top rate 4.55%). Form W-4N.",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11"
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-20",
+      "note": "Deep data pass 2026-08-20: Circular EN annual bracket-per-period-allowance withholding table verified to the cent, UI (20-category array system, unusual dual wage base) documented. Not wired into calc code."
     },
     {
       "code": "NV",
       "name": "Nevada",
       "wageIncomeTax": false,
       "structure": "none",
-      "note": "No state wage income tax. Employer Modified Business Tax + SUI.",
-      "status": "structural_fact"
+      "note": "Deep data pass 2026-08-20: no income tax (structural fact unchanged). Modified Business Tax (employer excise) corrected from stale 1.378%/1.475% secondary-source figures to the real current 1.17% general / 1.554% financial-institution rates, plus UI. Not wired into calc code.",
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-20"
     },
     {
       "code": "NH",
@@ -419,9 +421,9 @@
       "structure": "bracket",
       "withholdingSource": "https://www.oregon.gov/dor/programs/businesses/pages/withholding-and-payroll-tax.aspx",
       "sourceDoc": "Oregon Withholding Tax Formulas 150-206-436 (Rev. 12-31-25, 2026). Statewide Transit Tax 0.1% (separate). Form OR-W-4.",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11",
-      "note": "High-complexity: statewide transit tax 0.1%, TriMet/LTD transit district taxes, Paid Leave Oregon — separate sources. Spec flagged as buy-or-defer."
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-20",
+      "note": "Deep data pass 2026-08-20: withholding formula, statewide transit tax (confirmed still 0.1% -- Measure 120 failed), TriMet/Lane transit, Paid Leave Oregon, Metro SHS + Multnomah PFA local taxes, UI all documented. Not wired into calc code."
     },
     {
       "code": "PA",

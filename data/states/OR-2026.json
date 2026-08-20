@@ -1,0 +1,197 @@
+{
+  "code": "OR",
+  "name": "Oregon",
+  "year": 2026,
+  "method": "bracket_federal_subtraction_phaseout",
+  "$methodComment": "By far the most structurally involved state DATA file in this project to date, matching the complexity flagged in us-registry.json's own 'buy-or-defer' note. Genuinely novel shape: Oregon's 'BASE wage' formula subtracts BOTH a standard deduction AND the employee's own FEDERAL tax withheld (itself phased out at high income) before applying a bracket table, then subtracts a flat per-allowance PERSONAL EXEMPTION CREDIT after the bracket lookup (Delaware-style credit-after-tax, not deduction-before). On top of the state income tax itself, Oregon layers FOUR separate, genuinely independent payroll levies documented below: the Statewide Transit Tax (employee, flat 0.1%), TriMet/Lane Transit District taxes (employer-only), Paid Leave Oregon (employee+employer split), and Portland-area local personal income taxes (Metro SHS + Multnomah PFA). Data-only pass — none of this is wired into calc code.",
+  "sources": [
+    {
+      "title": "150-206-436 (Rev. 12-31-25) Oregon Withholding Tax Formulas, effective 2026-01-01",
+      "url": "https://www.oregon.gov/dor/forms/FormsPubs/withholding-tax-formulas_206-436_2026.pdf",
+      "verifiedOn": "2026-08-20",
+      "verifiedBy": "PDF downloaded and text-extracted directly, extracted CLEANLY. Reproduced the document's own Example 1 by hand (single, $25,000 annual, 0 allowances, $1,000 federal withheld, $2,910 standard deduction -> BASE $21,090 -> bracket 3 [$11,400-$50,000, base $941, rate 8.75%] -> $941+(21,090-11,400)x0.0875=$1,789.375, rounds to $1,789) — matches the document's own stated $1,789 exactly before trusting the bracket table."
+    },
+    {
+      "title": "Oregon Department of Revenue: Statewide Transit Tax (webpage)",
+      "url": "https://www.oregon.gov/dor/programs/businesses/pages/statewide-transit-tax.aspx",
+      "verifiedOn": "2026-08-20",
+      "verifiedBy": "Fetched and read directly. CAUGHT A REAL, TIME-SENSITIVE CONFLICT: an initial web search summary claimed the rate 'doubled to 0.2% effective January 1, 2026' — this refers to HB 3991's PROPOSED doubling, which was referred to voters as Measure 120 for the 2026-05-19 primary and DID NOT PASS. The department's own page states plainly, in present tense as of this fetch: 'Please continue to withhold at the rate of one-tenth of 1 percent or .001.' This is the same class of pending-legislation trap Delaware's HB13 check caught earlier in this project — verified by going to the primary source rather than trusting a search summary that had conflated a proposal with an enacted change."
+    },
+    {
+      "title": "150-211-503 (Rev. 11-18-25) A Guide to TriMet and Lane Transit Payroll Taxes",
+      "url": "https://www.oregon.gov/dor/forms/formspubs/transit-payroll-taxes_211-503.pdf",
+      "verifiedOn": "2026-08-20",
+      "verifiedBy": "PDF downloaded and text-extracted directly. Confirms the tax is imposed DIRECTLY ON THE EMPLOYER ('The transit tax is imposed directly on the employer'), not an employee withholding — genuinely different payer than the statewide transit tax. Current numeric rates (0.8237% TriMet, 0.80% LTD) were NOT stated in this guide itself (it points to 'the TriMet/LTD portion of the Oregon Combined Payroll Tax Report' for the current rate) — sourced instead from the 2026 Combined Payroll Tax Report Instructions per search corroboration, cross_source_confirmed tier for the numeric rates specifically."
+    },
+    {
+      "title": "Paid Leave Oregon — Contributions Calculator / rate page",
+      "url": "https://paidleave.oregon.gov/employers/contributions-calculator.html",
+      "verifiedOn": "2026-08-20",
+      "verifiedBy": "Fetched and read directly. Quoted verbatim: 'Employees pay 60% of the total 1% contribution rate... Large employers with 25 or more employees on average pay 40% of the total 1% contribution rate... Small employers with fewer than 25 employees on average don't have to pay the employer contribution unless they have received an assistance grant in the last 2 years.' Wage base confirmed as the Social Security wage index, $184,500 for 2026."
+    },
+    {
+      "title": "Current Tax and Contribution Rates (Oregon Employment Department)",
+      "url": "https://www.oregon.gov/employ/businesses/pages/current-tax-rate.aspx",
+      "verifiedOn": "2026-08-20",
+      "verifiedBy": "Fetched and read directly. UI: new employer rate 2.4% (includes a 0.135% special payroll tax offset for Q1-3 2026), wage base $56,700."
+    },
+    {
+      "title": "Metro Supportive Housing Services (SHS) Personal Income Tax and Multnomah County Preschool for All (PFA) Personal Income Tax — withholding requirement",
+      "url": "https://www.portland.gov/revenue/withholding",
+      "verifiedOn": "2026-08-20",
+      "verifiedBy": "cross_source_confirmed across multiple secondary sources agreeing on the 2026 inflation-adjusted thresholds and rates; NOT fetched directly from portland.gov this session (same 403/bot-fingerprint risk pattern this project has hit before on municipal sites, e.g. Wilmington DE — not independently tested here, but treated at the same lower confidence tier out of caution)."
+    }
+  ],
+  "bracketFederalSubtractionPhaseout": {
+    "$comment": "The 'computer formula' from 150-206-436. BASE = annual wages - federal tax withheld (capped/phased) - standard deduction. Two full sub-schedules exist depending on which of TWO thresholds the EMPLOYEE'S ANNUAL WAGES (not BASE) fall into: under $50,000 uses a simpler federal-subtraction cap with no phase-out; $50,000 and up applies the phase-out schedule below. This project's usual {from,to,base,rate} bracket shape is reused, but note the OREGON PERSONAL EXEMPTION CREDIT ($263/allowance) is subtracted AFTER the bracket lookup, Delaware-style — NOT baked into these bracket bases.",
+    "standardDeduction": {
+      "singleOrHOHUnder3Allowances": 2910,
+      "marriedOrSingle3PlusAllowances": 5820,
+      "note": "Form OR-W-4's own convention, quoted from the FAQ: 'For employees claiming single or head of household status, use $2,910... For employees claiming married status, use $5,820... For single employees with three or more allowances, use $5,820' — i.e. a single filer with 3+ allowances gets bumped to the MARRIED deduction figure, a genuinely unusual allowance-count-driven status escalation not seen elsewhere in this project."
+    },
+    "federalTaxSubtractionCap": {
+      "underAnnualWages50000": 8750,
+      "at50000AndAbove": {
+        "singleSchedule": [
+          { "wagesAtLeast": 50000, "wagesLessThan": 125000, "cap": 8750 },
+          { "wagesAtLeast": 125000, "wagesLessThan": 130000, "cap": 7000 },
+          { "wagesAtLeast": 130000, "wagesLessThan": 135000, "cap": 5250 },
+          { "wagesAtLeast": 135000, "wagesLessThan": 140000, "cap": 3500 },
+          { "wagesAtLeast": 140000, "wagesLessThan": 145000, "cap": 1750 },
+          { "wagesAtLeast": 145000, "wagesLessThan": null, "cap": 0 }
+        ],
+        "marriedSchedule": [
+          { "wagesAtLeast": 50000, "wagesLessThan": 250000, "cap": 8750 },
+          { "wagesAtLeast": 250000, "wagesLessThan": 260000, "cap": 7000 },
+          { "wagesAtLeast": 260000, "wagesLessThan": 270000, "cap": 5250 },
+          { "wagesAtLeast": 270000, "wagesLessThan": 280000, "cap": 3500 },
+          { "wagesAtLeast": 280000, "wagesLessThan": 290000, "cap": 1750 },
+          { "wagesAtLeast": 290000, "wagesLessThan": null, "cap": 0 }
+        ]
+      },
+      "note": "Which schedule (single vs. married) applies is keyed off the W-4's marital-status BOX, not the allowance count — even a married employee electing to withhold at the higher single rate uses the SINGLE phase-out schedule per the formula document's own FAQ #4."
+    },
+    "brackets": {
+      "annualWagesUnder50000": {
+        "singleFewerThan3Allowances": [
+          { "from": 0, "to": 4550, "base": 263, "rate": 0.0475 },
+          { "from": 4550, "to": 11400, "base": 479, "rate": 0.0675 },
+          { "from": 11400, "to": 50000, "base": 941, "rate": 0.0875 }
+        ],
+        "single3PlusAllowancesOrMarried": [
+          { "from": 0, "to": 9100, "base": 263, "rate": 0.0475 },
+          { "from": 9100, "to": 22800, "base": 695, "rate": 0.0675 },
+          { "from": 22800, "to": 50000, "base": 1620, "rate": 0.0875 }
+        ]
+      },
+      "annualWages50000AndUp": {
+        "singleFewerThan3Allowances": [
+          { "from": 11400, "to": 125000, "base": 678, "rate": 0.0875 },
+          { "from": 125000, "to": null, "base": 10618, "rate": 0.099 }
+        ],
+        "single3PlusAllowancesOrMarried": [
+          { "from": 22800, "to": 250000, "base": 1357, "rate": 0.0875 },
+          { "from": 250000, "to": null, "base": 21237, "rate": 0.099 }
+        ]
+      },
+      "bracketsComment": "VERIFIED, not just transcribed: the lowest bracket's base ($263 for both under-50k schedules) is NOT zero, despite BASE=$0 being the bracket floor — a real, printed, internally-consistent feature of Oregon's own formula (263 + 4,550x4.75% = 478.625, rounds to 479, matching the next bracket's own printed base exactly; 479 + 6,850x6.75% = 941.375, rounds to 941, matching the third bracket's base exactly) confirmed by chaining all three bases together AND independently confirmed against the document's own Example 1 ($1,789 exact match). This $263 also happens to equal the personal exemption credit's own per-allowance dollar figure — flagged as a striking but so-far-unexplained coincidence, not assumed to be a mislabelling.",
+      "annualizeMultiplier": { "daily": 260, "weekly": 52, "semimonthly": 24, "biweekly": 26, "monthly": 12 }
+    },
+    "personalExemptionCredit": {
+      "perAllowance": 263,
+      "possibleInconsistencyInSource": "Example 1's own itemized worksheet line 9 states 'Less personal exemption credit ($256 x 0)' — a DIFFERENT figure ($256, not $263) from the one printed 6 times across the formula tables themselves. Because Example 1 uses 0 allowances, this specific example can't arithmetically distinguish which figure is correct. Trusting $263 (printed consistently across every bracket-formula line in both the under-$50k and $50k+ tables) over the isolated $256 in one itemized-example line, matching this project's established 'stale prose survives a document refresh' pattern (Illinois's Mary example, Michigan's Muskegon Heights booklet, Wisconsin's $1,500/$2,000 threshold) — flagged explicitly rather than silently picking one.",
+      "appliedAfterBracket": true
+    },
+    "noCertificateDefault": "8 percent flat rate (HB 2119, 2019) — a genuinely different no-certificate default shape from every bracket-table state in this project (most default to 'single, zero allowances' run through the normal table; Oregon instead skips the table entirely and applies a flat 8% until a certificate is filed). Also reused as the ALTERNATE flat-rate method for supplemental wages paid separately from regular wages."
+  },
+  "exemptPretax": [
+    "section125",
+    "hsa",
+    "fsa",
+    "dependent_care",
+    "deferral_401k",
+    "deferral_403b",
+    "deferral_457",
+    "deferral_simple",
+    "commuter"
+  ],
+  "exemptComment": "The formula document's own FAQ #6 states directly: wages does NOT include 'Non-taxable amounts such as pre-tax deductions for insurance, cafeteria or flex spending plans (section 125 plans), retirement plans (section 401k, etc.), health savings accounts, etc.' — an explicit, direct, by-name enumeration essentially matching Michigan's RAB-1988-27 and Arizona's A-4 as the strongest-sourced exemptPretax tier in this project; no inference chain needed.",
+  "statewideTransitTax": {
+    "rate": 0.001,
+    "payer": "employee",
+    "base": "Wages of Oregon residents (wherever performed) AND wages of nonresidents who perform services in Oregon — ORS 316.162.",
+    "note": "Confirmed CURRENT and unchanged at 0.1% (see sources above — Measure 120's proposed doubling to 0.2% failed at the 2026-05-19 primary). A genuinely SEPARATE tax from the TriMet/Lane transit taxes below — same name family, different statute (ORS 320.550), different payer (employee here, employer there), different administration.",
+    "exemptEmployers": ["Federal credit unions", "Public school districts", "501(c)(3) nonprofits (except hospitals)", "Insurance companies (except domestic insurers)", "Domestic service in a private home"]
+  },
+  "tripDistrictPayrollTaxes": {
+    "$comment": "EMPLOYER-PAID excise taxes on gross payroll for work performed within the district — never touches the employee's paycheck, a structurally different shape from the statewide transit tax above despite the similar name.",
+    "triMet": {
+      "rate": 0.008237,
+      "district": "Tri-County Metropolitan Transportation District (Portland metro area — parts of Multnomah, Washington, and Clackamas counties)",
+      "confidence": "cross_source_confirmed for the numeric rate; the guide PDF itself points to the Combined Payroll Tax Report for the current figure rather than stating it."
+    },
+    "laneTransit": {
+      "rate": 0.008,
+      "district": "Lane County Mass Transit District (Eugene/Springfield area)",
+      "confidence": "cross_source_confirmed for the numeric rate, same caveat as TriMet."
+    },
+    "exemptEmployers": ["Federal credit unions", "Public school districts", "501(c)(3) nonprofits (except hospitals)", "Insurance companies (except domestic insurers)", "Domestic service in a private home"],
+    "ltdAdditionalExemptions": ["Public education districts", "Public special service and utility districts", "Port authorities", "Fire districts"]
+  },
+  "paidLeaveOregon": {
+    "totalRate": 0.01,
+    "employeeShare": 0.006,
+    "employerShare": {
+      "rate": 0.004,
+      "condition": "Only employers with 25 or more employees on average. Employers with fewer than 25 employees on average owe $0 employer share, UNLESS they've received a Paid Leave assistance grant within the last 2 years."
+    },
+    "wageBase": 184500.0,
+    "wageBaseNote": "Pegged to the Social Security taxable wage index each year, same mechanism Connecticut's Paid Leave already uses in this project (flagged there as a must-keep-in-sync risk) — Oregon's own page states the figure directly rather than requiring this engine to derive it from federal.json, so it's recorded here as a literal 2026 dollar figure rather than a cross-reference.",
+    "administeredBy": "Oregon Employment Department"
+  },
+  "portlandAreaLocalIncomeTax": {
+    "$comment": "TWO independently-enacted, uniformly co-administered local PERSONAL income taxes layered on top of state withholding for Portland-metro-area residents/workers — a genuinely different local-tax shape from every other state in this project (closer to NYC's resident surcharge in spirit than to PA/OH/MI's flat-rate municipal wage taxes). cross_source_confirmed tier throughout — portland.gov itself was not fetched directly this session.",
+    "metroSupportiveHousingServices": {
+      "rate": 0.01,
+      "base": "Metro-district taxable income (Multnomah/Washington/Clackamas county residents, and nonresidents on Metro-district-source income) above an inflation-indexed threshold.",
+      "thresholds2026": { "single": 128000, "marriedJoint": 205000 },
+      "note": "Thresholds began inflation-indexing starting tax year 2026 (previously fixed at $125,000/$200,000 for 2021-2025) — the $128,000/$205,000 figures above are the FIRST inflation adjustment."
+    },
+    "multnomahPreschoolForAll": {
+      "rate": 0.015,
+      "surtaxRate": 0.015,
+      "surtaxThresholds": { "single": 250000, "marriedJoint": 400000 },
+      "base": "Multnomah County taxable income above $125,000 single / $200,000 joint, PLUS an additional 1.5% (3.0% combined marginal) above $250,000 single / $400,000 joint.",
+      "note": "A genuine two-tier marginal local tax, not a single flat rate above a threshold — the second 1.5% stacks on top of the first, giving a 3.0% marginal rate at the highest tier."
+    },
+    "withholdingRequirement": "Employers generally must withhold Metro SHS + Multnomah PFA once an employee's YTD wages reach $200,000 in the calendar year — a wage-triggered withholding obligation, not tied to filing status the way the tax itself is.",
+    "administeredBy": "City of Portland Revenue Division administers both taxes on behalf of Metro and Multnomah County under a uniform-administration agreement — NOT the Oregon DOR."
+  },
+  "unemploymentInsurance": {
+    "$comment": "Employer-only (SUTA) — no employee contribution.",
+    "administeredBy": "Oregon Employment Department",
+    "wageBase": 56700.0,
+    "newEmployerRate": 0.024,
+    "specialPayrollTaxOffset": 0.00135,
+    "experienceRatedRange": { "min": 0.009, "max": 0.054 },
+    "note": "New employer rate and offset confirmed steady from 2025 into 2026 (multiple secondary sources agree 'rates hold steady for 2026')."
+  },
+  "reciprocity": {
+    "source": {
+      "title": "Arizona Form WEC Instructions (2026) — cross-referenced, not Oregon's own page",
+      "verifiedOn": "2026-08-20",
+      "verifiedBy": "Confirmed from ARIZONA's side (see AZ-2026.json) that Oregon residents working in Arizona may claim an AZ withholding exemption. NOT yet independently confirmed from Oregon's OWN documentation that the relationship runs symmetrically (an Arizona resident working in Oregon exempt from OR withholding) — flagged as a genuine gap, the same caution this project applied to Kansas's asymmetric-feeling reciprocity finding."
+    },
+    "possibleReciprocalStates": ["AZ"],
+    "knownGap": "Oregon's OWN withholding formula document (150-206-436) does not mention reciprocity at all — its FAQ section is entirely about the computation formula, not multi-state rules. A dedicated search of Oregon DOR's reciprocity-specific guidance was not done this session; the only evidence for OR-AZ reciprocity comes from Arizona's side of the relationship."
+  },
+  "knownGaps": [
+    "Not wired into calc code (data-only pass) — this would be a substantial new dispatch method if built, genuinely more involved than any bracket method currently in state.ts (Connecticut's 16-step formula is the closest precedent for complexity).",
+    "TriMet/LTD numeric rates are cross_source_confirmed, not read directly off the Combined Payroll Tax Report Instructions PDF this session.",
+    "Metro SHS / Multnomah PFA figures are cross_source_confirmed only — portland.gov itself was not fetched directly (untested for the same bot-blocking risk already seen on Wilmington DE's site).",
+    "Oregon's own reciprocity documentation was not found or read this session — the AZ relationship is asserted from Arizona's side only.",
+    "The $263-vs-$256 personal exemption credit discrepancy in the source document itself (see personalExemptionCredit.possibleInconsistencyInSource) could not be resolved with 0-allowance examples alone; worth re-checking against a worked example that uses a nonzero allowance count if one is found.",
+    "Alternative supplemental-wage flat 8% method documented but not modelled.",
+    "Nonresident allocation, statewide transit tax self-employment provisions, and OR-40N/OR-40P return-level mechanics are out of scope — payroll withholding only."
+  ]
+}
