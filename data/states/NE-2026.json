@@ -2,14 +2,14 @@
   "code": "NE",
   "name": "Nebraska",
   "year": 2026,
-  "method": "bracket_annual_from_period_allowance",
-  "$methodComment": "Similar in SPIRIT to Vermont's bracketPerPeriodAllowance() (subtract a flat per-allowance dollar amount from wages, then look up a bracket table selected by marital status) but NOT reused directly — Vermont's function expects genuinely-published PER-PERIOD bracket tables (rules.vermontWithholding.brackets[status][payFrequency]), while Nebraska's own per-period tables extracted garbled from the PDF and were never transcribed; only the ANNUAL table survived cleanly. So this got its own small function, nebraskaWithholding(), which subtracts the allowance per-period, then ANNUALIZES the net figure and divides the annual bracket's answer by the period count — a disclosed approximation (see bracketPerPeriodAllowance.bracketsComment) rather than a literal per-period lookup. WIRED INTO CALC CODE this session, dispatched on 'bracket_annual_from_period_allowance' (a distinct method name from Vermont's 'bracket_per_period_allowance' specifically so the two configs, which have incompatible shapes, can never be cross-dispatched by accident).",
+  "method": "bracket_per_period_allowance",
+  "$methodComment": "REUSES Vermont's existing bracketPerPeriodAllowance() dispatch DIRECTLY — no new function needed. An earlier pass this session left this on a custom 'bracket_annual_from_period_allowance' method because the per-period tables extracted garbled under pdftotext -layout and only the ANNUAL table survived; CLOSED properly this session by re-extracting the SAME pages WITHOUT -layout (the fix already proven for NY/OH elsewhere in this project) — every one of Circular EN's own published per-period tables (daily/weekly/biweekly/semimonthly/monthly/quarterly/semiannual/annual) came out cleanly and was verified internally to the cent by chaining each bracket's base from the one below. With the REAL per-period tables in hand, Nebraska's shape is now IDENTICAL to Vermont's (subtract a flat per-allowance amount from PER-PERIOD wages, look up a bracket table published for that exact period) — reusing bracketPerPeriodAllowance() rather than keeping a bespoke annualize-then-divide approximation function around. The custom nebraskaWithholding() function and its 'bracket_annual_from_period_allowance' method were REMOVED from state.ts in the same pass that fixed this file, so the dead approximation code doesn't linger once the real data made it unnecessary.",
   "sources": [
     {
       "title": "2026 Nebraska Circular EN (full withholding guide)",
       "url": "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026cir_en_whole.pdf",
       "verifiedOn": "2026-08-20",
-      "verifiedBy": "PDF downloaded and text-extracted directly. The `-layout` extraction of the per-period percentage tables (weekly/biweekly/etc.) came out visually garbled — the SAME class of column-shift artifact already documented for NJ/CT/OH in this project. Fixed the SAME way NY's was fixed: re-extracted WITHOUT -layout (raw reading order), which came out cleanly for the Quarterly/Semiannual/Annual/Daily tables. Used the clean ANNUAL table (Table 7) as the source of truth and verified it internally to the cent by chaining each bracket's base from the one below (74.13 = 3,280 x 2.26%; 560.35 = 74.13 + 15,100 x 3.22%; ... all six steps check out exactly against the document's own printed base figures) — did NOT need to fight through the garbled weekly/biweekly/monthly tables at all, since Iowa's precedent in this project already proved per-period tables are just the annual figure divided and independently rounded (verified below)."
+      "verifiedBy": "PDF downloaded and text-extracted directly. The `-layout` extraction of the per-period percentage tables (weekly/biweekly/etc.) came out visually garbled — the SAME class of column-shift artifact already documented for NJ/CT/OH in this project. Fixed the SAME way NY's was fixed: re-extracted WITHOUT -layout (raw reading order), which came out CLEANLY for every single one of Circular EN's 8 published tables (daily/weekly/biweekly/semimonthly/monthly/quarterly/semiannual/annual). Each table verified internally to the cent by chaining every bracket's base from the one below it (e.g. weekly single: 1.42 = 63 x 2.26%; 10.76 = 1.42 + 290 x 3.22%; ...; all six steps check out exactly against the document's own printed figures, for BOTH single and married, across ALL 8 tables) — no approximation or derivation needed anywhere in this file."
     },
     {
       "title": "Nebraska Income Tax Withholding Percentage Method — Withholding Allowance Table",
@@ -33,6 +33,69 @@
     "allowanceAmountComment": "Value of ONE withholding allowance, multiplied by the number of allowances claimed on Nebraska Form W-4N (or the employee's federal W-4 allowance count for pre-2020 certificates still on file — Circular EN explicitly grandfathers pre-2020 federal W-4s the same way this project's other post-2020-redesign states, e.g. Delaware, do), then SUBTRACTED from wages BEFORE the bracket lookup — a deduction, not a post-tax credit (the opposite of Delaware's shape built earlier this project).",
     "brackets": {
       "single": {
+        "daily": [
+          { "from": 0, "to": 13, "base": 0, "rate": 0.0 },
+          { "from": 13, "to": 26, "base": 0, "rate": 0.0226 },
+          { "from": 26, "to": 84, "base": 0.29, "rate": 0.0322 },
+          { "from": 84, "to": 122, "base": 2.16, "rate": 0.0421 },
+          { "from": 122, "to": 154, "base": 3.76, "rate": 0.0435 },
+          { "from": 154, "to": 290, "base": 5.15, "rate": 0.0448 },
+          { "from": 290, "to": null, "base": 11.24, "rate": 0.046 }
+        ],
+        "weekly": [
+          { "from": 0, "to": 66, "base": 0, "rate": 0.0 },
+          { "from": 66, "to": 129, "base": 0, "rate": 0.0226 },
+          { "from": 129, "to": 419, "base": 1.42, "rate": 0.0322 },
+          { "from": 419, "to": 608, "base": 10.76, "rate": 0.0421 },
+          { "from": 608, "to": 772, "base": 18.72, "rate": 0.0435 },
+          { "from": 772, "to": 1449, "base": 25.85, "rate": 0.0448 },
+          { "from": 1449, "to": null, "base": 56.18, "rate": 0.046 }
+        ],
+        "biweekly": [
+          { "from": 0, "to": 132, "base": 0, "rate": 0.0 },
+          { "from": 132, "to": 258, "base": 0, "rate": 0.0226 },
+          { "from": 258, "to": 839, "base": 2.85, "rate": 0.0322 },
+          { "from": 839, "to": 1216, "base": 21.56, "rate": 0.0421 },
+          { "from": 1216, "to": 1543, "base": 37.43, "rate": 0.0435 },
+          { "from": 1543, "to": 2899, "base": 51.65, "rate": 0.0448 },
+          { "from": 2899, "to": null, "base": 112.40, "rate": 0.046 }
+        ],
+        "semimonthly": [
+          { "from": 0, "to": 143, "base": 0, "rate": 0.0 },
+          { "from": 143, "to": 280, "base": 0, "rate": 0.0226 },
+          { "from": 280, "to": 909, "base": 3.10, "rate": 0.0322 },
+          { "from": 909, "to": 1317, "base": 23.35, "rate": 0.0421 },
+          { "from": 1317, "to": 1672, "base": 40.53, "rate": 0.0435 },
+          { "from": 1672, "to": 3140, "base": 55.97, "rate": 0.0448 },
+          { "from": 3140, "to": null, "base": 121.74, "rate": 0.046 }
+        ],
+        "monthly": [
+          { "from": 0, "to": 286, "base": 0, "rate": 0.0 },
+          { "from": 286, "to": 559, "base": 0, "rate": 0.0226 },
+          { "from": 559, "to": 1818, "base": 6.17, "rate": 0.0322 },
+          { "from": 1818, "to": 2634, "base": 46.71, "rate": 0.0421 },
+          { "from": 2634, "to": 3344, "base": 81.06, "rate": 0.0435 },
+          { "from": 3344, "to": 6281, "base": 111.95, "rate": 0.0448 },
+          { "from": 6281, "to": null, "base": 243.53, "rate": 0.046 }
+        ],
+        "quarterly": [
+          { "from": 0, "to": 858, "base": 0, "rate": 0.0 },
+          { "from": 858, "to": 1678, "base": 0, "rate": 0.0226 },
+          { "from": 1678, "to": 5453, "base": 18.53, "rate": 0.0322 },
+          { "from": 5453, "to": 7903, "base": 140.09, "rate": 0.0421 },
+          { "from": 7903, "to": 10033, "base": 243.24, "rate": 0.0435 },
+          { "from": 10033, "to": 18843, "base": 335.90, "rate": 0.0448 },
+          { "from": 18843, "to": null, "base": 730.59, "rate": 0.046 }
+        ],
+        "semiannual": [
+          { "from": 0, "to": 1715, "base": 0, "rate": 0.0 },
+          { "from": 1715, "to": 3355, "base": 0, "rate": 0.0226 },
+          { "from": 3355, "to": 10905, "base": 37.06, "rate": 0.0322 },
+          { "from": 10905, "to": 15805, "base": 280.17, "rate": 0.0421 },
+          { "from": 15805, "to": 20065, "base": 486.46, "rate": 0.0435 },
+          { "from": 20065, "to": 37685, "base": 671.77, "rate": 0.0448 },
+          { "from": 37685, "to": null, "base": 1461.15, "rate": 0.046 }
+        ],
         "annual": [
           { "from": 0, "to": 3430, "base": 0, "rate": 0.0 },
           { "from": 3430, "to": 6710, "base": 0, "rate": 0.0226 },
@@ -44,6 +107,69 @@
         ]
       },
       "married": {
+        "daily": [
+          { "from": 0, "to": 32, "base": 0, "rate": 0.0 },
+          { "from": 32, "to": 50, "base": 0, "rate": 0.0226 },
+          { "from": 50, "to": 125, "base": 0.41, "rate": 0.0322 },
+          { "from": 125, "to": 194, "base": 2.83, "rate": 0.0421 },
+          { "from": 194, "to": 241, "base": 5.73, "rate": 0.0435 },
+          { "from": 241, "to": 319, "base": 7.77, "rate": 0.0448 },
+          { "from": 319, "to": null, "base": 11.26, "rate": 0.046 }
+        ],
+        "weekly": [
+          { "from": 0, "to": 158, "base": 0, "rate": 0.0 },
+          { "from": 158, "to": 250, "base": 0, "rate": 0.0226 },
+          { "from": 250, "to": 623, "base": 2.08, "rate": 0.0322 },
+          { "from": 623, "to": 969, "base": 14.09, "rate": 0.0421 },
+          { "from": 969, "to": 1203, "base": 28.66, "rate": 0.0435 },
+          { "from": 1203, "to": 1595, "base": 38.84, "rate": 0.0448 },
+          { "from": 1595, "to": null, "base": 56.40, "rate": 0.046 }
+        ],
+        "biweekly": [
+          { "from": 0, "to": 315, "base": 0, "rate": 0.0 },
+          { "from": 315, "to": 500, "base": 0, "rate": 0.0226 },
+          { "from": 500, "to": 1246, "base": 4.18, "rate": 0.0322 },
+          { "from": 1246, "to": 1938, "base": 28.20, "rate": 0.0421 },
+          { "from": 1938, "to": 2405, "base": 57.33, "rate": 0.0435 },
+          { "from": 2405, "to": 3189, "base": 77.64, "rate": 0.0448 },
+          { "from": 3189, "to": null, "base": 112.76, "rate": 0.046 }
+        ],
+        "semimonthly": [
+          { "from": 0, "to": 341, "base": 0, "rate": 0.0 },
+          { "from": 341, "to": 542, "base": 0, "rate": 0.0226 },
+          { "from": 542, "to": 1350, "base": 4.54, "rate": 0.0322 },
+          { "from": 1350, "to": 2100, "base": 30.56, "rate": 0.0421 },
+          { "from": 2100, "to": 2605, "base": 62.14, "rate": 0.0435 },
+          { "from": 2605, "to": 3455, "base": 84.11, "rate": 0.0448 },
+          { "from": 3455, "to": null, "base": 122.19, "rate": 0.046 }
+        ],
+        "monthly": [
+          { "from": 0, "to": 683, "base": 0, "rate": 0.0 },
+          { "from": 683, "to": 1084, "base": 0, "rate": 0.0226 },
+          { "from": 1084, "to": 2700, "base": 9.06, "rate": 0.0322 },
+          { "from": 2700, "to": 4200, "base": 61.10, "rate": 0.0421 },
+          { "from": 4200, "to": 5211, "base": 124.25, "rate": 0.0435 },
+          { "from": 5211, "to": 6910, "base": 168.23, "rate": 0.0448 },
+          { "from": 6910, "to": null, "base": 244.35, "rate": 0.046 }
+        ],
+        "quarterly": [
+          { "from": 0, "to": 2048, "base": 0, "rate": 0.0 },
+          { "from": 2048, "to": 3253, "base": 0, "rate": 0.0226 },
+          { "from": 3253, "to": 8100, "base": 27.23, "rate": 0.0322 },
+          { "from": 8100, "to": 12600, "base": 183.30, "rate": 0.0421 },
+          { "from": 12600, "to": 15633, "base": 372.75, "rate": 0.0435 },
+          { "from": 15633, "to": 20730, "base": 504.69, "rate": 0.0448 },
+          { "from": 20730, "to": null, "base": 733.04, "rate": 0.046 }
+        ],
+        "semiannual": [
+          { "from": 0, "to": 4095, "base": 0, "rate": 0.0 },
+          { "from": 4095, "to": 6505, "base": 0, "rate": 0.0226 },
+          { "from": 6505, "to": 16200, "base": 54.47, "rate": 0.0322 },
+          { "from": 16200, "to": 25200, "base": 366.65, "rate": 0.0421 },
+          { "from": 25200, "to": 31265, "base": 745.55, "rate": 0.0435 },
+          { "from": 31265, "to": 41460, "base": 1009.38, "rate": 0.0448 },
+          { "from": 41460, "to": null, "base": 1466.12, "rate": 0.046 }
+        ],
         "annual": [
           { "from": 0, "to": 8190, "base": 0, "rate": 0.0 },
           { "from": 8190, "to": 13010, "base": 0, "rate": 0.0226 },
@@ -55,7 +181,7 @@
         ]
       }
     },
-    "bracketsComment": "'Single' schedule is labelled 'SINGLE Person-Including Head of Household' and 'Married' is 'MARRIED Person-Including Surviving Spouse' in Circular EN's own table headers — i.e. Nebraska's own withholding table explicitly folds HOH into single (not this engine's usual disclosed simplification; the source says so directly, the same rare case Kansas's KW-100 was). Only the ANNUAL table is recorded here; Circular EN separately publishes weekly/biweekly/semimonthly/monthly/quarterly/semiannual/daily tables directly, and per Iowa's already-proven method in this project, each of those is just this annual table's boundaries and bases divided by the period count and independently rounded to the cent (verified for Quarterly, which extracted cleanly: 3,430/4=857.5, rounds to 858 — matches the source's own quarterly table exactly; 74.13/4=18.53 — matches exactly; 972.93/4=243.2325 rounds to 243.23, but the source's own quarterly table shows 243.24 — a one-cent independent-rounding discrepancy, the SAME class of harmless noise Iowa's per-period tables showed, not a data error)."
+    "bracketsComment": "'Single' schedule is labelled 'SINGLE Person-Including Head of Household' and 'Married' is 'MARRIED Person-Including Surviving Spouse' in Circular EN's own table headers — i.e. Nebraska's own withholding table explicitly folds HOH into single (not this engine's usual disclosed simplification; the source says so directly, the same rare case Kansas's KW-100 was). EVERY one of Circular EN's 8 published per-period tables is now recorded here VERBATIM (not derived from the annual figure) — daily/weekly/biweekly/semimonthly/monthly/quarterly/semiannual/annual, both statuses. This SUPERSEDES an earlier version of this file that only had the annual table and derived the rest by division; that approximation is no longer needed or used now that the real tables are in hand. One cross-check worth keeping on record: the QUARTERLY table's own printed base at the $10,033 boundary is 243.24, while dividing the ANNUAL table's corresponding base (972.93) by 4 gives 243.2325, which rounds to 243.23 — a one-cent difference between the real published table and what naive division would have produced, exactly the kind of drift that would have gone unnoticed had the approximation been kept instead of replaced."
   },
   "supplementalComment": "Circular EN: if supplemental wages (bonus, commission, overtime, severance, sales awards) are paid WITH regular wages, treat the total as one payment through the normal formula. If paid separately, either (a) aggregate with the current or immediately preceding period's regular wages and net out tax already withheld, or (b) withhold a flat 3.5% — notably NOT Nebraska's top marginal rate (4.60%), unlike most other states' flat-supplemental conventions in this project. Not yet modelled.",
   "exemptPretax": [
@@ -114,9 +240,8 @@
       }
     ]
   },
-  "verification": "PROVEN via calculatePaycheck(): 2 hand-derived fixtures (0 allowances landing in one bracket, 2 allowances shifting the annualized net figure into the PRIOR bracket, proving the allowance subtraction genuinely changes which bracket applies) — see tests/engine.test.ts, describe('Nebraska'). No official Circular EN worked example was available to reproduce verbatim, so these are internally-consistent hand derivations against this file's own verified annual bracket table, not source-published answers. The annualize-then-divide approximation itself (as opposed to Circular EN's real per-period-table lookup) remains unverified cell-by-cell — see the next gap.",
+  "verification": "PROVEN via calculatePaycheck() against the REAL per-period tables (not an approximation): (1) 0 allowances, weekly $500, landing in one weekly bracket. (2) 2 allowances shifting the net figure into the prior weekly bracket — this fixture caught a genuine hand-arithmetic error of the AUTHOR's own during this session (27,716 x 3.22% was first miscalculated as 892.6552 instead of the correct 892.4552, a 20-cent slip that would have shipped a wrong test assertion, $10.35 instead of the correct $10.34, had the test suite not caught the mismatch on first run — corrected before commit). (3) quarterly $9,000, chosen SPECIFICALLY because it produces a different cent answer ($290.96) under the real per-period table than the old annualize-then-divide approximation would have ($290.98) — this fixture exists to catch a regression back to the approximation, not just to exercise the happy path. See tests/engine.test.ts, describe('Nebraska'). No official Circular EN worked example was ever found to reproduce verbatim, so all fixtures are hand/script-derived against this file's own verified tables, not source-published answers — but the tables themselves are now the REAL published ones, not a derived approximation.",
   "knownGaps": [
-    "Only the ANNUAL table is transcribed; the separately-published weekly/biweekly/semimonthly/monthly per-period tables were left unread (garbled on first extraction attempt) since Iowa's precedent already proves they're derivable from the annual table to within a cent of independent rounding.",
     "exemptPretax rests on general IRC-conformity knowledge, not a direct Circular EN quote naming 401(k)/125/etc. by category — one tier below Delaware's or Arizona's sourcing for the same claim.",
     "Supplemental flat-3.5% method documented but not modelled.",
     "Nonresident/non-wage withholding rules (construction contractors, nonresident personal-services withholding, gambling winnings) are real and documented in Circular EN but out of scope for this pass — payroll-specific wage withholding only."

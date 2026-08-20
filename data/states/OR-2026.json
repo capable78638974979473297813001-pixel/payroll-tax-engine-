@@ -116,9 +116,15 @@
     "commuter"
   ],
   "exemptComment": "The formula document's own FAQ #6 states directly: wages does NOT include 'Non-taxable amounts such as pre-tax deductions for insurance, cafeteria or flex spending plans (section 125 plans), retirement plans (section 401k, etc.), health savings accounts, etc.' — an explicit, direct, by-name enumeration essentially matching Michigan's RAB-1988-27 and Arizona's A-4 as the strongest-sourced exemptPretax tier in this project; no inference chain needed.",
+  "stateExciseEmployee": {
+    "idSuffix": "STT",
+    "name": "Statewide Transit Tax",
+    "rate": 0.001
+  },
   "statewideTransitTax": {
     "rate": 0.001,
     "payer": "employee",
+    "wiredIntoCalcCode": "CLOSED this session via stateExciseEmployeeTax() in state.ts, dispatched off the stateExciseEmployee config block above — a flat, uncapped, universal employee excise. See tests/engine.test.ts, describe('Oregon'), the statewide-transit-tax fixture.",
     "base": "Wages of Oregon residents (wherever performed) AND wages of nonresidents who perform services in Oregon — ORS 316.162.",
     "note": "Confirmed CURRENT and unchanged at 0.1% (see sources above — Measure 120's proposed doubling to 0.2% failed at the 2026-05-19 primary). A genuinely SEPARATE tax from the TriMet/Lane transit taxes below — same name family, different statute (ORS 320.550), different payer (employee here, employer there), different administration.",
     "exemptEmployers": ["Federal credit unions", "Public school districts", "501(c)(3) nonprofits (except hospitals)", "Insurance companies (except domestic insurers)", "Domestic service in a private home"]
@@ -138,12 +144,22 @@
     },
     "exemptEmployers": ["Federal credit unions", "Public school districts", "501(c)(3) nonprofits (except hospitals)", "Insurance companies (except domestic insurers)", "Domestic service in a private home"],
     "ltdAdditionalExemptions": ["Public education districts", "Public special service and utility districts", "Port authorities", "Fire districts"],
+    "wiredIntoCalcCode": "CLOSED this session via oregonTransitDistrictTaxEmployer() in state.ts, dispatched off certificate.locality ('TriMet' or 'LTD') the same caller-resolved-locality shape as Newark's and Missouri's local taxes. Rounds DOWN to the nearest cent per Oregon's own instructions (Math.floor, not roundHalfUp) — see tests/engine.test.ts, describe('Oregon').",
     "source": {
       "title": "2026 Oregon Combined Payroll Tax Report Instructions",
       "url": "https://www.oregon.gov/dor/forms/FormsPubs/combined-payroll_211-155-2_2026.pdf",
       "verifiedOn": "2026-08-20",
       "verifiedBy": "PDF downloaded and text-extracted directly. Also independently re-confirmed the Statewide Transit Tax rate here too: 'Statewide Transit tax (STT) rate is 0.001' — a second primary source agreeing with the dedicated STT webpage, closing out that figure at the highest confidence tier in this file."
     }
+  },
+  "statePaidLeaveEmployee": {
+    "rate": 0.006,
+    "wageBase": 184500.0
+  },
+  "statePaidLeaveEmployer": {
+    "totalRate": 0.01,
+    "employeeShareFraction": 0.6,
+    "wageBase": 184500.0
   },
   "paidLeaveOregon": {
     "totalRate": 0.01,
@@ -154,9 +170,13 @@
     },
     "wageBase": 184500.0,
     "wageBaseNote": "Pegged to the Social Security taxable wage index each year, same mechanism Connecticut's Paid Leave already uses in this project (flagged there as a must-keep-in-sync risk) — Oregon's own page states the figure directly rather than requiring this engine to derive it from federal.json, so it's recorded here as a literal 2026 dollar figure rather than a cross-reference.",
-    "administeredBy": "Oregon Employment Department"
+    "administeredBy": "Oregon Employment Department",
+    "wiredIntoCalcCode": "CLOSED this session — Oregon's shape (total rate split employee/employer, shared SS-indexed wage base, employer share gated on the employer's OWN headcount determination) is EXACTLY the shape statePaidLeaveEmployeeTax()/statePaidLeaveEmployerTax() were already built for (Washington's PFML). Wired via the statePaidLeaveEmployee/statePaidLeaveEmployer config blocks below — no new engine code needed. Employer share still requires the caller to set certificate.employerLiableForPaidLeaveShare (Oregon's 25-employee threshold is an employer-aggregate fact this engine cannot see from one paycheck, same disclosed limitation as Washington's 50-employee threshold)."
   },
   "portlandAreaLocalIncomeTax": {
+    "metroSHS": { "rate": 0.01, "threshold": 200000 },
+    "multnomahPFA": { "tier1Rate": 0.015, "tier1Threshold": 200000, "tier2Rate": 0.015, "tier2Threshold": 400000 },
+    "wiredIntoCalcCode": "CLOSED this session via portlandAreaLocalTax() in state.ts, dispatched off the metroSHS/multnomahPFA config keys above — a THRESHOLD-triggered local tax (like federal Additional Medicare's shape, not a bracket or flat-rate method), using the flat $200k/$400k WITHHOLDING triggers (not the filing-status-indexed RETURN thresholds documented below in metroSupportiveHousingServices/multnomahPreschoolForAll, which stay purely as return-level documentation). Gated on certificate.metroDistrict / certificate.multnomahCounty, either of which the caller sets independently — an employee can be in one, both, or neither. See tests/engine.test.ts, describe('Oregon').",
     "$comment": "TWO independently-enacted, uniformly co-administered local PERSONAL income taxes layered on top of state withholding for Portland-metro-area residents/workers — a genuinely different local-tax shape from every other state in this project (closer to NYC's resident surcharge in spirit than to PA/OH/MI's flat-rate municipal wage taxes). UPGRADED to primary source this session — portland.gov's own withholding page was fetched and read directly, and it surfaced a real correction: the TAX's own filing-status-indexed thresholds ($128,000/$205,000 for SHS; $125,000/$200,000 and $250,000/$400,000 for PFA) are NOT the same numbers used to trigger WITHHOLDING. Employers withhold using flat, filing-status-INDEPENDENT wage triggers ($200,000 and $400,000) because they don't necessarily know an employee's filing status — see withholdingRequirement below, now corrected from this session's original (wrong) assumption that withholding used the same indexed thresholds as the tax itself.",
     "metroSupportiveHousingServices": {
       "rate": 0.01,
@@ -202,11 +222,10 @@
     },
     "deMinimisThreshold": "Nonresident's Oregon-source earnings for the year less than their Oregon standard deduction ($2,910 single/HOH, $5,820 married, 2026 figures) — below this, no OR withholding is required at all, though the employee may still request it if they have other Oregon income."
   },
-  "verification": "PROVEN via calculatePaycheck() for the BASE STATE INCOME TAX only: 3 fixtures — (1) single/0 allowances using the engine's REAL computed federal withholding as the input (the actual integration test for the federalIncomeTax() dependency, not a federal-exempt shortcut), (2) married/2 allowances/high earner exercising the promoted bracket + exemption credit with federal-exempt to isolate OR-specific arithmetic, (3) the no-certificate flat-8% default. All three cross-checked against an independent standalone reimplementation of the formula (kept deliberately separate from state.ts, same discipline used for Connecticut, since Oregon publishes no cent-exact worked example using REAL federal withholding) before being written into the test file. See tests/engine.test.ts, describe('Oregon'). NOT exercised by any fixture: the phase-out-cap TIERS actually engaging (both test cases either stayed under the cap or used $0 federal withholding) — the cap logic path itself runs, but no fixture proves a specific tier boundary is right. Statewide transit tax, TriMet/LTD, Paid Leave Oregon, and the Portland-area local taxes are NOT wired into calc code at all — only the base OR_SIT line is.",
+  "verification": "PROVEN via calculatePaycheck(), now covering EVERY levy documented in this file, not just the base state income tax: (1)-(4) base OR_SIT — single/0 allowances using the engine's REAL computed federal withholding as the input, married/2 allowances/high earner exercising the promoted bracket + exemption credit, the no-certificate flat-8% default, AND a high earner (weekly $3,000, real federal withholding ~$26,174/yr) proving the phase-out-cap SCHEDULE actually engages and phases the federal subtraction all the way down to $0 at its final tier — closing what had been the one remaining untested code path in the base formula. All cross-checked against an independent standalone reimplementation before being written into the test file (Connecticut's precedent, since Oregon publishes no cent-exact worked example using REAL federal withholding). (5) Statewide Transit Tax — flat 0.1% via the new stateExciseEmployeeTax(). (6)-(7) Paid Leave Oregon — employee share fires unconditionally via the existing generic statePaidLeaveEmployeeTax() (built for Washington), employer share correctly gated on certificate.employerLiableForPaidLeaveShare via statePaidLeaveEmployerTax(). (8)-(9) TriMet (proving the round-DOWN rule specifically: $8.237 rounds to $8.23, not $8.24) and Lane Transit District, both employer-paid, dispatched off certificate.locality. (10)-(12) Metro SHS and Multnomah PFA — the $200k/$400k YTD-threshold trigger actually crossing mid-paycheck (not just a flag being set), the two-tier Multnomah calculation, both taxes co-existing on the same paycheck, and the below-threshold $0 case. See tests/engine.test.ts, describe('Oregon') and describe('Missouri'). NOT exercised by any fixture: a PARTIAL phase-out cap tier (only the two extremes — full $8,750 cap and the fully-phased-$0 tier — have been proven; the intermediate $7,000/$5,250/$3,500/$1,750 tiers between $125k-$145k single / $250k-$290k married have not been individually hit by a fixture).",
   "knownGaps": [
-    "The phase-out-cap SCHEDULE (both single and married tiers) has not been exercised by any test fixture — the code path that selects a tier runs, but no fixture forces a high-enough federal-withholding-vs-wage combination to prove a specific tier boundary is correct rather than just plausible.",
+    "The phase-out-cap schedule's INTERMEDIATE tiers (the $7,000/$5,250/$3,500/$1,750 steps between the full-cap and zero-cap extremes) have not been individually exercised by a fixture — only the two extremes have.",
     "The $263-vs-$256 personal exemption credit discrepancy in the source document itself (see personalExemptionCredit.possibleInconsistencyInSource) could not be resolved with 0-allowance examples alone; worth re-checking against a worked example that uses a nonzero allowance count if one is found.",
-    "Statewide Transit Tax, TriMet/LTD, Paid Leave Oregon, and the Metro SHS/Multnomah PFA local taxes are all documented but NOT wired into calc code — only the base state income tax (OR_SIT) is.",
     "Alternative supplemental-wage flat 8% method documented but not modelled.",
     "Nonresident allocation, statewide transit tax self-employment provisions, and OR-40N/OR-40P return-level mechanics are out of scope — payroll withholding only."
   ]

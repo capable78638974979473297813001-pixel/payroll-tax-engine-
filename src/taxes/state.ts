@@ -1,4 +1,13 @@
-import { applyRate, atLeastZero, dollars, fmt, roundHalfUp, toWholeDollars, underCap } from '../money.ts';
+import {
+  applyRate,
+  atLeastZero,
+  dollars,
+  fmt,
+  overThreshold,
+  roundHalfUp,
+  toWholeDollars,
+  underCap,
+} from '../money.ts';
 import type { StateRuleset } from '../registry.ts';
 import {
   countyRuleset,
@@ -181,6 +190,48 @@ export function stateIncomeTax(
   // by WHERE SERVICES ARE PERFORMED/SUPERVISED, not residence.
   const newark = newarkPayrollTaxEmployer(input, ctx, rules);
   if (newark) lines.push(newark);
+
+  // A flat, uncapped, universal employee excise — Oregon's Statewide
+  // Transit Tax is the first (and so far only) user, but written
+  // generically (dispatched off rules.stateExciseEmployee) the same way
+  // stateLongTermCareEmployeeTax() was for Washington, in case a future
+  // state needs the same trivial shape (flat rate, no allowances, no cap).
+  const excise = stateExciseEmployeeTax(input, ctx, rules);
+  if (excise) lines.push(excise);
+
+  // Missouri's Kansas City / St. Louis earnings taxes — the employee side,
+  // gated on certificate.locality the same way Newark's employer tax is
+  // gated, since which city (if any) applies is a caller-resolved fact
+  // (residence OR work location, either one triggers it) this engine
+  // cannot derive from the state code alone.
+  const moLocal = missouriLocalEarningsTax(input, ctx, rules);
+  if (moLocal) lines.push(moLocal);
+
+  // St. Louis's Payroll Expense Tax — a SEPARATE employer-only levy layered
+  // on top of the employee earnings tax above, unique to St. Louis (Kansas
+  // City has no equivalent). Genuinely additive, not a replacement, unlike
+  // Newark's payroll tax which has no accompanying employee-side tax.
+  const stlPayrollExpense = stLouisPayrollExpenseTaxEmployer(input, ctx, rules);
+  if (stlPayrollExpense) lines.push(stlPayrollExpense);
+
+  // Oregon's TriMet / Lane Transit District taxes — employer-paid excises
+  // on payroll for work performed within the district, gated on
+  // certificate.locality ('TriMet' or 'LTD') since transit-district
+  // membership depends on WHERE SERVICES ARE PERFORMED, the same
+  // caller-resolved-locality shape as Newark's and Missouri's local taxes.
+  const orTransit = oregonTransitDistrictTaxEmployer(input, ctx, rules);
+  if (orTransit) lines.push(orTransit);
+
+  // Portland-area local personal income taxes (Metro SHS + Multnomah PFA)
+  // — genuinely different shape from every other local tax in this
+  // project: THRESHOLD-triggered (no tax at all below a flat YTD-wage
+  // trigger, then a flat rate on everything above it, forever, not just
+  // the first dollar past the line), closer to federal Additional Medicare
+  // than to a bracket or flat-rate local tax. Can emit ZERO, ONE, or TWO
+  // lines depending on certificate.metroDistrict / certificate.multnomahCounty
+  // (an employee can be in one, both, or neither).
+  const portlandLocal = portlandAreaLocalTax(input, ctx, rules);
+  lines.push(...portlandLocal);
 
   // Resident-working-elsewhere credit — a DIFFERENT direction from every
   // reciprocity mechanism above: those zero THIS state's tax when the
@@ -546,8 +597,6 @@ function incomeTaxLines(
       return [employeeElectedFlat(input, ctx, rules)];
     case 'flat_rate_marital_deduction_whole_dollar':
       return [missouriWithholding(input, ctx, rules)];
-    case 'bracket_annual_from_period_allowance':
-      return [nebraskaWithholding(input, ctx, rules)];
     case 'bracket_federal_subtraction_phaseout':
       return [oregonWithholding(input, ctx, rules)];
     case 'no_income_tax':
@@ -2929,7 +2978,17 @@ interface VTBracketConfig {
  * that +1, the same "caller supplies the already-computed total" convention
  * as every other state's own allowance count.
  */
-function resolveVTMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
+/**
+ * Shared by Vermont AND Nebraska now that both use bracketPerPeriodAllowance()
+ * — VT's own certificate vocabulary is richer (mfs, married_withhold_as_single,
+ * civil unions) since Form W-4VT has those explicit checkboxes; Nebraska's
+ * Circular EN has no such nuance (its own table header is simply "MARRIED
+ * Person-Including Surviving Spouse", one unified status), so 'married' is
+ * accepted as a plain synonym for 'mfj' rather than forcing Nebraska callers
+ * to learn Vermont's own form-specific vocabulary for a distinction Nebraska
+ * doesn't have.
+ */
+function resolveMFJMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
   const raw = cert.maritalStatus;
   if (
     raw === undefined ||
@@ -2940,49 +2999,49 @@ function resolveVTMaritalStatus(cert: Record<string, unknown>): 'single' | 'marr
   ) {
     return 'single';
   }
-  if (raw === 'mfj') return 'married';
+  if (raw === 'mfj' || raw === 'married') return 'married';
   throw new Error(
-    `Unrecognized VT certificate.maritalStatus ${JSON.stringify(raw)} — expected 'single', ` +
-      `'mfs', 'married_withhold_as_single', or 'mfj' (civil union partners use the same ` +
-      `'mfj' schedule per Form W-4VT's own "Civil union partners use Married table" note).`,
+    `Unrecognized certificate.maritalStatus ${JSON.stringify(raw)} — expected 'single', 'mfs', ` +
+      `'married_withhold_as_single', 'mfj', or 'married' (civil union partners use the same ` +
+      `'mfj'/'married' schedule per Form W-4VT's own "Civil union partners use Married table" note).`,
   );
 }
 
 /**
- * Vermont's Percentage Method Withholding (GB-1210-2026, effective
- * 2026-01-01, fetched and read directly): subtract a flat per-allowance
- * dollar amount (times the count claimed on Form W-4VT) from PER-PERIOD
- * gross wages, then look up the result in one of Vermont's own two
- * per-period bracket tables (Single or Married) — genuinely the same shape
- * as New Jersey's Rate Table method (bracketPerPeriodRateTable), just with
- * 2 schedules selected by marital status instead of 5 selected by W-4
- * checkboxes, so this is a small parallel function rather than a forced
- * reuse of NJ's NJ-specific resolver. Brackets are published independently
- * PER PERIOD (like Montana/NY/NJ/Connecticut), not derived by dividing one
- * annual table — transcribed verbatim per period rather than derived from
- * the annual figures, unlike Iowa's flat 2-bracket shape, because a real
- * marginal bracket schedule is more sensitive to exact boundary/base cents
- * than Iowa's single flat-rate-above-a-threshold shape was proven to be.
- * Verified against the source's own worked example: weekly $1,800, married,
- * 2 allowances ($103.85 x2=$207.70) → $45.77 — see
- * tests/engine.test.ts, describe('Vermont').
+ * A flat per-allowance dollar amount subtracted from PER-PERIOD gross
+ * wages, then looked up in a bracket table published independently PER
+ * PERIOD (like Montana/NY/NJ/Connecticut, not derived by dividing one
+ * annual table) and selected by marital status. Built for Vermont's
+ * Percentage Method Withholding (GB-1210-2026, fetched and read directly;
+ * verified against the source's own worked example — weekly $1,800,
+ * married, 2 allowances ($103.85 x2=$207.70) → $45.77) and REUSED DIRECTLY
+ * for Nebraska once Circular EN's own per-period tables were successfully
+ * re-extracted (an earlier pass kept Nebraska on a bespoke approximation
+ * function because only its ANNUAL table had extracted cleanly at the
+ * time — see NE-2026.json's own $methodComment for that history). The two
+ * states' configs live under the SAME rules.bracketPerPeriodAllowance key
+ * now, dispatched by the same 'bracket_per_period_allowance' method name,
+ * genuinely the same shape rather than two similar-looking ones forced
+ * together.
  *
- * NOT MODELLED (disclosed, not guessed): Vermont's own guidance that
- * NON-PERIODIC supplemental payments "can be ESTIMATED at 30% of the
- * federal withholding" — permissive wording ("can be"), not a required
- * formula the way New York's 11.70% Method A is, and it would require
- * reading federal's OWN supplemental rate (22%/37% tiers) at calculation
- * time to reproduce faithfully. Periodic supplemental wages paid at the
- * SAME time as regular wages already aggregate correctly through this
- * function via the normal taxableWagesFor() base, no special-casing
- * needed — the same convention as Kentucky/Idaho/Connecticut/Iowa.
+ * NOT MODELLED (disclosed, not guessed) for Vermont specifically: its own
+ * guidance that NON-PERIODIC supplemental payments "can be ESTIMATED at
+ * 30% of the federal withholding" — permissive wording ("can be"), not a
+ * required formula the way New York's 11.70% Method A is, and it would
+ * require reading federal's OWN supplemental rate (22%/37% tiers) at
+ * calculation time to reproduce faithfully. Periodic supplemental wages
+ * paid at the SAME time as regular wages already aggregate correctly
+ * through this function via the normal taxableWagesFor() base, no
+ * special-casing needed — the same convention as Kentucky/Idaho/
+ * Connecticut/Iowa. Nebraska's own supplemental rule (flat 3.5%,
+ * documented in NE-2026.json) is likewise not modelled here.
  */
 function bracketPerPeriodAllowance(
   input: PaycheckInput,
   ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine {
-  const cfg = rules.vermontWithholding as VTBracketConfig;
+  const cfg = rules.bracketPerPeriodAllowance as VTBracketConfig;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const grossWages = ctx.taxableWagesFor(exempt);
 
@@ -2998,7 +3057,7 @@ function bracketPerPeriodAllowance(
   const allowance = roundHalfUp(dollars(allowancePerUnit) * allowances);
   const netWages = atLeastZero(grossWages - allowance);
 
-  const status = resolveVTMaritalStatus(cert);
+  const status = resolveMFJMaritalStatus(cert);
   const brackets = cfg.brackets[status][input.payFrequency];
   if (!brackets) {
     throw new Error(
@@ -3893,81 +3952,6 @@ function missouriWithholding(
   };
 }
 
-interface NEConfig {
-  allowanceAmount: Partial<Record<string, number>>; // dollars, PER PERIOD
-  brackets: { single: { annual: WIBracket[] }; married: { annual: WIBracket[] } };
-}
-
-function resolveNEMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
-  return cert.maritalStatus === 'married' ? 'married' : 'single';
-}
-
-/**
- * Nebraska's withholding (2026 Circular EN Percentage Method, fetched and
- * read directly): subtract a flat PER-PERIOD allowance amount from wages,
- * THEN annualize the net figure and look up Circular EN's own ANNUAL
- * bracket table (Table 7 — the only one of its 8 per-period tables that
- * extracted cleanly; the weekly/biweekly/semimonthly/monthly tables hit the
- * same PDF column-shift artifact already documented elsewhere in this
- * project and were not transcribed).
- *
- * DISCLOSED APPROXIMATION, not a silent one: Circular EN's real method
- * looks up the net-of-allowance PER-PERIOD figure directly in a per-period
- * table published for that exact frequency — it does not itself annualize
- * and divide. This function instead annualizes the net figure and divides
- * the annual table's answer by the period count. Per this project's Iowa
- * precedent (proven algebraically and cell-by-cell that annual-divided-by-N
- * reproduces a state's own published per-period tables to within a cent of
- * independent rounding), this should match Circular EN's real per-period
- * tables closely — but UNLIKE Iowa, that equivalence has NOT been verified
- * cell-by-cell against Nebraska's own weekly/biweekly/monthly tables here,
- * because those tables were never successfully transcribed. Flagged as a
- * real, bounded-risk approximation rather than a proven-identical method.
- */
-function nebraskaWithholding(
-  input: PaycheckInput,
-  ctx: ComputeContext,
-  rules: StateRuleset,
-): TaxLine {
-  const cfg = rules.bracketPerPeriodAllowance as NEConfig;
-  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
-  const periodWages = ctx.taxableWagesFor(exempt);
-
-  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  const allowances = Number(cert.allowances ?? 0);
-  const allowancePerUnit = cfg.allowanceAmount[input.payFrequency];
-  if (allowancePerUnit === undefined) {
-    throw new Error(
-      `Nebraska's own withholding allowance table doesn't publish a "${input.payFrequency}" ` +
-        `figure — cannot compute ${rules.code}_SIT.`,
-    );
-  }
-  const allowance = roundHalfUp(dollars(allowancePerUnit) * allowances);
-  const netPeriodWages = atLeastZero(periodWages - allowance);
-  const annualNetWages = netPeriodWages * ctx.periodsPerYear;
-
-  const status = resolveNEMaritalStatus(cert);
-  const brackets = cfg.brackets[status].annual;
-  const bracket = findWIBracket(brackets, annualNetWages);
-  const excess = annualNetWages - dollars(bracket.from);
-  const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
-
-  const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
-
-  return {
-    id: `${rules.code}_SIT`,
-    name: `${rules.name} Income Tax`,
-    payer: 'employee',
-    jurisdiction: 'state',
-    taxableWages: netPeriodWages,
-    amount,
-    detail:
-      `${fmt(periodWages)} less ${fmt(allowance)} allowance (${allowances} × $${allowancePerUnit}) ` +
-      `= ${fmt(netPeriodWages)} net, annualized ${fmt(annualNetWages)} @ ${(bracket.rate * 100).toFixed(2)}% ` +
-      `over ${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))}, ${status} schedule`,
-  };
-}
-
 interface ORCapTier {
   wagesAtLeast: number;
   wagesLessThan: number | null;
@@ -4142,4 +4126,266 @@ function oregonWithholding(
       `${fmt(credit)} exemption credit (${allowances} × $${cfg.personalExemptionCredit.perAllowance}) = ` +
       `${fmt(annualTax)}/yr ÷ ${multiplier}`,
   };
+}
+
+interface StateExciseEmployeeConfig {
+  idSuffix: string; // e.g. 'STT'
+  name: string; // e.g. 'Statewide Transit Tax'
+  rate: number;
+  exemptPretax?: string[];
+}
+
+/**
+ * A flat, uncapped, universal EMPLOYEE excise on wages — no allowances, no
+ * standard deduction, no wage base. Oregon's Statewide Transit Tax (ORS
+ * 320.550, 0.1%, "wages of Oregon residents regardless of where the work is
+ * performed... wages of nonresidents who perform services in Oregon") is
+ * the first user, but this is written generically (dispatched off
+ * rules.stateExciseEmployee) rather than as OR-specific code, the same
+ * "generic shape, single current user" pattern already established for
+ * stateLongTermCareEmployeeTax(). Genuinely simpler than that function:
+ * Oregon's own guide never mentions a wage base or a certificate-driven
+ * exemption for this specific tax, so neither is modelled — a future
+ * state that DOES need one would need its own config field added, not
+ * silently assumed here.
+ */
+function stateExciseEmployeeTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cfg = rules.stateExciseEmployee as StateExciseEmployeeConfig | undefined;
+  if (!cfg) return null;
+
+  const exempt = (cfg.exemptPretax ?? rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+  const amount = applyRate(taxableWages, cfg.rate);
+
+  return {
+    id: `${rules.code}_${cfg.idSuffix}`,
+    name: `${rules.name} ${cfg.name}`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages,
+    amount,
+    detail: `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(3)}%, no wage cap`,
+  };
+}
+
+interface MOLocalityConfig {
+  kansasCity?: { rate: number };
+  stLouis?: { earningsTaxRate: number; payrollExpenseTax?: { rate: number } };
+}
+
+/**
+ * Kansas City's and St. Louis's 1% earnings taxes — the EMPLOYEE side.
+ * Both apply to residents AND nonresidents who work in the city, so
+ * dispatched off certificate.locality (the caller's own resolution of
+ * "does this employee's residence OR work location put them in scope"),
+ * the same caller-resolved-locality shape as Newark's payroll tax rather
+ * than an engine-computed residence/work-location comparison.
+ */
+function missouriLocalEarningsTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const locality = cert.locality;
+  if (locality !== 'Kansas City' && locality !== 'St. Louis') return null;
+
+  const cfg = rules.localIncomeTax as MOLocalityConfig | undefined;
+  if (!cfg) return null;
+  const rate = locality === 'Kansas City' ? cfg.kansasCity?.rate : cfg.stLouis?.earningsTaxRate;
+  if (rate === undefined) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+  const amount = applyRate(taxableWages, rate);
+  const idSuffix = locality === 'Kansas City' ? 'KC_EARN' : 'STL_EARN';
+
+  return {
+    id: idSuffix,
+    name: `${locality} Earnings Tax`,
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages,
+    amount,
+    detail:
+      `${fmt(taxableWages)} @ ${(rate * 100).toFixed(2)}% (certificate.locality = "${locality}", the ` +
+      `caller's own residence-or-work-location determination)`,
+  };
+}
+
+/**
+ * St. Louis's Payroll Expense Tax — 0.5%, EMPLOYER-only, layered on top of
+ * (not instead of) the 1% employee earnings tax above. Kansas City has no
+ * equivalent, which is why this is its own separate function rather than a
+ * second branch inside missouriLocalEarningsTax() — the two taxes have
+ * different payers and only one of the two cities even has this one.
+ */
+function stLouisPayrollExpenseTaxEmployer(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (cert.locality !== 'St. Louis') return null;
+
+  const cfg = rules.localIncomeTax as MOLocalityConfig | undefined;
+  const rate = cfg?.stLouis?.payrollExpenseTax?.rate;
+  if (rate === undefined) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+  const amount = applyRate(taxableWages, rate);
+
+  return {
+    id: 'STL_PAYROLL_ER',
+    name: 'St. Louis Payroll Expense Tax (Employer)',
+    payer: 'employer',
+    jurisdiction: 'local',
+    taxableWages,
+    amount,
+    detail: `${fmt(taxableWages)} @ ${(rate * 100).toFixed(2)}%, employer-only, layered on top of the employee earnings tax`,
+  };
+}
+
+interface ORTransitDistrictConfig {
+  triMet?: { rate: number };
+  laneTransit?: { rate: number };
+}
+
+/**
+ * Oregon's TriMet / Lane Transit District payroll excises — EMPLOYER-paid
+ * (Oregon's own guide: "The transit tax is imposed directly on the
+ * employer"), on payroll for services performed within the district.
+ * Dispatched off certificate.locality ('TriMet' or 'LTD'), the same
+ * caller-resolved-locality shape as Newark's and Missouri's local taxes.
+ *
+ * TriMet rounds DOWN to the nearest cent, not this project's usual
+ * round-half-up — Oregon's own Combined Payroll Tax Report Instructions,
+ * quoted verbatim: "Multiply box 5a by box 6a. Round down to the nearest
+ * cent." Applied to LTD too, since the combined report's own box-6a/6b
+ * instructions for the two districts are structurally parallel and no
+ * contrary instruction was found for LTD specifically — disclosed as an
+ * assumption, not independently confirmed for LTD's own box.
+ */
+function oregonTransitDistrictTaxEmployer(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const district = cert.locality;
+  if (district !== 'TriMet' && district !== 'LTD') return null;
+
+  const cfg = rules.tripDistrictPayrollTaxes as ORTransitDistrictConfig | undefined;
+  if (!cfg) return null;
+  const rate = district === 'TriMet' ? cfg.triMet?.rate : cfg.laneTransit?.rate;
+  if (rate === undefined) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+  const amount = Math.floor(taxableWages * rate);
+  const name = district === 'TriMet' ? 'TriMet Transit District Tax' : 'Lane Transit District Tax';
+  const idSuffix = district === 'TriMet' ? 'TRIMET_ER' : 'LTD_ER';
+
+  return {
+    id: idSuffix,
+    name,
+    payer: 'employer',
+    jurisdiction: 'local',
+    taxableWages,
+    amount,
+    detail: `${fmt(taxableWages)} @ ${(rate * 100).toFixed(4)}%, rounded DOWN to the nearest cent per Oregon's own instructions`,
+  };
+}
+
+interface PortlandLocalTaxConfig {
+  metroSHS: { rate: number; threshold: number };
+  multnomahPFA: { tier1Rate: number; tier1Threshold: number; tier2Rate: number; tier2Threshold: number };
+}
+
+/**
+ * Portland-area local personal income taxes — Metro Supportive Housing
+ * Services (1%) and Multnomah County Preschool For All (1.5% + an
+ * ADDITIONAL 1.5% above a second threshold). Genuinely different shape
+ * from every other local tax in this project: THRESHOLD-triggered, not
+ * bracket- or flat-rate — no tax at all below a flat YTD-wage trigger,
+ * then a flat rate on every dollar above it, closer in shape to federal
+ * Additional Medicare (money.ts's overThreshold()) than to any state
+ * income tax method in this file. Portland's own withholding page is
+ * explicit that the withholding TRIGGER is a flat $200,000/$400,000 wage
+ * level, NOT the same filing-status-indexed thresholds the actual tax
+ * uses on the employee's return — this function implements the
+ * WITHHOLDING trigger only, correctly.
+ *
+ * Multnomah's "additional 1.5% above $400k" collapses algebraically to
+ * applying tier1Rate to the $200k-$400k slice AND tier2Rate to the $400k+
+ * slice independently (rather than tier1Rate everywhere above $200k plus
+ * a separate top-up), since (portionAbove200k - portionAbove400k) x
+ * tier1Rate + portionAbove400k x (tier1Rate + tier2Rate) simplifies to
+ * portionAbove200k x tier1Rate + portionAbove400k x tier2Rate when
+ * tier1Rate and tier2Rate are equal (both 1.5% here) — verified this
+ * holds algebraically before relying on the simplified form.
+ *
+ * Can return 0, 1, or 2 lines: an employee can be in the Metro district,
+ * Multnomah County, both (Multnomah County sits entirely within the
+ * Metro district in practice, so "both" is the common case for anyone
+ * inside Multnomah), or neither.
+ */
+function portlandAreaLocalTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine[] {
+  const cfg = rules.portlandAreaLocalIncomeTax as PortlandLocalTaxConfig | undefined;
+  if (!cfg) return [];
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const currentWages = ctx.taxableWagesFor(exempt);
+  const lines: TaxLine[] = [];
+
+  if (cert.metroDistrict) {
+    const ytd = input.ytd.localIncomeTax?.['OR_METRO'] ?? 0;
+    const threshold = dollars(cfg.metroSHS.threshold);
+    const taxableExcess = overThreshold(currentWages, ytd, threshold);
+    const amount = applyRate(taxableExcess, cfg.metroSHS.rate);
+    lines.push({
+      id: 'OR_METRO_SHS',
+      name: 'Metro Supportive Housing Services Tax',
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: taxableExcess,
+      amount,
+      detail:
+        `${fmt(currentWages)} wages (${fmt(ytd)} YTD already counted), ${fmt(taxableExcess)} above the ` +
+        `$${cfg.metroSHS.threshold.toLocaleString()} withholding trigger @ ${(cfg.metroSHS.rate * 100).toFixed(1)}%`,
+    });
+  }
+
+  if (cert.multnomahCounty) {
+    const ytd = input.ytd.localIncomeTax?.['OR_MULTNOMAH'] ?? 0;
+    const tier1Threshold = dollars(cfg.multnomahPFA.tier1Threshold);
+    const tier2Threshold = dollars(cfg.multnomahPFA.tier2Threshold);
+    const above1 = overThreshold(currentWages, ytd, tier1Threshold);
+    const above2 = overThreshold(currentWages, ytd, tier2Threshold);
+    const amount = applyRate(above1, cfg.multnomahPFA.tier1Rate) + applyRate(above2, cfg.multnomahPFA.tier2Rate);
+    lines.push({
+      id: 'OR_MULTNOMAH_PFA',
+      name: 'Multnomah County Preschool For All Tax',
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: above1,
+      amount,
+      detail:
+        `${fmt(currentWages)} wages (${fmt(ytd)} YTD), ${fmt(above1)} above $${cfg.multnomahPFA.tier1Threshold.toLocaleString()} ` +
+        `@ ${(cfg.multnomahPFA.tier1Rate * 100).toFixed(1)}%, plus ${fmt(above2)} above ` +
+        `$${cfg.multnomahPFA.tier2Threshold.toLocaleString()} @ an ADDITIONAL ${(cfg.multnomahPFA.tier2Rate * 100).toFixed(1)}%`,
+    });
+  }
+
+  return lines;
 }

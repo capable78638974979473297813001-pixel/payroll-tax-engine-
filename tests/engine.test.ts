@@ -3425,7 +3425,9 @@ describe('Vermont', () => {
             ...vtState({ maritalStatus: 'hoh' }),
           }),
         ),
-      /Unrecognized VT certificate\.maritalStatus/,
+      // resolveMFJMaritalStatus() is now shared with Nebraska, so its error
+      // message dropped the VT-specific wording — updated here to match.
+      /Unrecognized certificate\.maritalStatus/,
     );
   });
 
@@ -4513,6 +4515,41 @@ describe('Missouri', () => {
     );
     assert.equal(amountOf(r, 'MO_SIT'), dollars(2));
   });
+
+  test('Kansas City earnings tax: 1% via certificate.locality, not tied to residence vs. work-location logic', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2916.67) }],
+        workState: { code: 'MO', certificate: { locality: 'Kansas City' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'KC_EARN'), dollars(29.17));
+    assert.equal(r.taxes.some((t) => t.id === 'STL_EARN' || t.id === 'STL_PAYROLL_ER'), false);
+  });
+
+  test('St. Louis: BOTH the 1% employee earnings tax AND the separate 0.5% employer payroll expense tax fire', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2916.67) }],
+        workState: { code: 'MO', certificate: { locality: 'St. Louis' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'STL_EARN'), dollars(29.17));
+    assert.equal(amountOf(r, 'STL_PAYROLL_ER'), dollars(14.58));
+  });
+
+  test('no certificate.locality at all means neither city tax fires', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2916.67) }],
+        workState: { code: 'MO' },
+      }),
+    );
+    assert.equal(r.taxes.some((t) => t.id === 'KC_EARN' || t.id === 'STL_EARN'), false);
+  });
 });
 
 describe('Nebraska', () => {
@@ -4537,14 +4574,14 @@ describe('Nebraska', () => {
     assert.equal(amountOf(r, 'NE_SIT'), dollars(14.17));
   });
 
-  test('allowances reduce the base before annualizing', () => {
+  test('allowances reduce the base before the PER-PERIOD bracket lookup (real table, not annualize-and-divide)', () => {
     // Same $500/week, 2 allowances: 2 x $46.92 = $93.84 subtracted PER
-    // PERIOD first. Net = 500 - 93.84 = 406.16/wk, annualized x52 =
-    // 21,120.32 -> falls in the SAME bracket as the 0-allowance case
-    // (21,810 floor)? No: 21,120.32 < 21,810, so this actually lands in
-    // the PRIOR bracket [6,710-21,810, base 74.13, rate 3.22%]: 74.13 +
-    // (21,120.32-6,710) x 3.22% = 74.13 + 464.01 = 538.14 (14,410.32 x
-    // 0.0322 = 464.012 -> rounds to 464.01). /52 = 10.349... -> 10.35.
+    // PERIOD first (WEEKLY table's own allowance value, not annualized).
+    // Net = 500 - 93.84 = 406.16/wk, which falls in the weekly SINGLE
+    // table's own [$129-$419, base $1.42, rate 3.22%] bracket directly (no
+    // annualizing involved): 1.42 + (406.16-129) x 3.22% = 1.42 + 277.16 x
+    // 0.0322 = 1.42 + 8.92 (277.16 x 0.0322 = 8.924552, rounds DOWN to
+    // 8.92, not 8.93) = $10.34.
     const r = calculatePaycheck(
       input({
         payFrequency: 'weekly',
@@ -4552,7 +4589,29 @@ describe('Nebraska', () => {
         workState: { code: 'NE', certificate: { maritalStatus: 'single', allowances: 2 } },
       }),
     );
-    assert.equal(amountOf(r, 'NE_SIT'), dollars(10.35));
+    assert.equal(amountOf(r, 'NE_SIT'), dollars(10.34));
+  });
+
+  test('quarterly $9,000 proves the REAL per-period table is in use, not the old annualize-then-divide approximation', () => {
+    // Real quarterly table, bracket [$7,903-$10,033, base $243.24, rate
+    // 4.35%]: 243.24 + (9,000-7,903) x 4.35% = 243.24 + 1,097 x 0.0435 =
+    // 243.24 + 47.72 (1,097 x 0.0435 = 47.7195, rounds to 47.72) = $290.96.
+    // The OLD annualize-then-divide approximation this file used before the
+    // real per-period tables were recovered would instead have annualized
+    // to $36,000, used the ANNUAL bracket [$31,610-$40,130, base $972.93,
+    // rate 4.35%] -> 972.93 + 4,390 x 4.35% = 1,163.90/yr -> /4 = $290.975,
+    // rounding HALF UP to $290.98 — a real 2-cent difference from the
+    // correct $290.96, verified independently before writing this fixture,
+    // that this test exists specifically to catch if the wiring ever
+    // regresses back to the approximation.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'quarterly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(9000) }],
+        workState: { code: 'NE', certificate: { maritalStatus: 'single', allowances: 0 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'NE_SIT'), dollars(290.96));
   });
 });
 
@@ -4613,6 +4672,32 @@ describe('Oregon', () => {
     assert.equal(amountOf(r, 'OR_SIT'), dollars(735.56));
   });
 
+  test('high earner: the federal-subtraction cap phases all the way down to $0, using REAL computed federal withholding', () => {
+    // Weekly $3,000 (annual $156,000), single, 0 allowances. This is the
+    // fixture that actually exercises the phase-out CAP TABLE — every
+    // other Oregon fixture either used federal-exempt (cap logic runs but
+    // multiplies against $0 either way) or stayed under the cap ceiling
+    // entirely. At $156,000, real federal withholding is a substantial
+    // $503.35/wk ($26,174.20/yr annualized) — but Oregon's own phase-out
+    // schedule's LAST tier (wages >= $145,000, single) caps the federal
+    // subtraction at exactly $0, so none of that real federal withholding
+    // reduces the Oregon base at all. BASE = 156,000 - 0 - 2,910 (single
+    // deduction) = 153,090. Bracket [125,000+, base 10,618, rate 9.9%]:
+    // 10,618 + (153,090-125,000) x 9.9% = 10,618 + 2,780.91 = 13,398.91/yr
+    // -> /52 = 257.6714... -> $257.67. Verified first by running the real
+    // engine and reading its own detail string ("less $0.00 federal
+    // (capped $0.00)"), then independently re-deriving every intermediate
+    // figure by hand before trusting it.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+        workState: { code: 'OR', certificate: { maritalStatus: 'single', allowances: 0 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'OR_SIT'), dollars(257.67));
+  });
+
   test('no Form OR-W-4 on file defaults to a flat 8% (HB 2119), skipping the whole formula', () => {
     const r = calculatePaycheck(
       input({
@@ -4622,6 +4707,142 @@ describe('Oregon', () => {
       }),
     );
     assert.equal(amountOf(r, 'OR_SIT'), dollars(80));
+  });
+
+  test('Statewide Transit Tax: flat 0.1%, uncapped, on top of OR_SIT', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR' },
+      }),
+    );
+    assert.equal(amountOf(r, 'OR_STT'), dollars(1));
+  });
+
+  test('Paid Leave Oregon: employee share fires generically via statePaidLeaveEmployeeTax()', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR' },
+      }),
+    );
+    assert.equal(amountOf(r, 'OR_PFML_EE'), dollars(6));
+  });
+
+  test('Paid Leave Oregon: employer share only fires when the caller sets certificate.employerLiableForPaidLeaveShare', () => {
+    const withoutFlag = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR' },
+      }),
+    );
+    assert.equal(withoutFlag.taxes.some((t) => t.id === 'OR_PFML_ER'), false);
+
+    const withFlag = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR', certificate: { employerLiableForPaidLeaveShare: true } },
+      }),
+    );
+    assert.equal(amountOf(withFlag, 'OR_PFML_ER'), dollars(4));
+  });
+
+  test('TriMet transit district tax (employer-paid) rounds DOWN, not half-up', () => {
+    // 1,000 x 0.008237 = 8.237 -> rounds down to $8.23, NOT $8.24.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR', certificate: { locality: 'TriMet' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'TRIMET_ER'), dollars(8.23));
+    assert.equal(r.taxes.some((t) => t.id === 'LTD_ER'), false);
+  });
+
+  test('Lane Transit District tax fires instead of TriMet when certificate.locality is LTD', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR', certificate: { locality: 'LTD' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'LTD_ER'), dollars(8));
+  });
+
+  test('Metro Supportive Housing Services Tax: nothing below the $200k YTD trigger, taxed above it', () => {
+    // $5,000 this week, $199,000 already YTD -> crosses $200,000 mid-cheque:
+    // only the $4,000 above the trigger is taxed, at 1% = $40.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+        workState: { code: 'OR', certificate: { metroDistrict: true } },
+        ytd: {
+          socialSecurity: 0,
+          medicare: 0,
+          futa: 0,
+          localIncomeTax: { OR_METRO: dollars(199000) },
+        },
+      }),
+    );
+    assert.equal(amountOf(r, 'OR_METRO_SHS'), dollars(40));
+  });
+
+  test('Multnomah PFA: two-tier threshold, both tiers taxed at 1.5% independently once both are crossed', () => {
+    // $5,000 this week, $399,000 already YTD -> the FULL $5,000 sits above
+    // the $200k tier (1.5%) AND $4,000 of it sits above the $400k tier (an
+    // ADDITIONAL 1.5%): 5,000 x 1.5% + 4,000 x 1.5% = 75 + 60 = $135.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+        workState: { code: 'OR', certificate: { multnomahCounty: true } },
+        ytd: {
+          socialSecurity: 0,
+          medicare: 0,
+          futa: 0,
+          localIncomeTax: { OR_MULTNOMAH: dollars(399000) },
+        },
+      }),
+    );
+    assert.equal(amountOf(r, 'OR_MULTNOMAH_PFA'), dollars(135));
+  });
+
+  test('an employee inside BOTH the Metro district and Multnomah County gets both local lines', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+        workState: { code: 'OR', certificate: { metroDistrict: true, multnomahCounty: true } },
+        ytd: {
+          socialSecurity: 0,
+          medicare: 0,
+          futa: 0,
+          localIncomeTax: { OR_METRO: dollars(199000), OR_MULTNOMAH: dollars(399000) },
+        },
+      }),
+    );
+    assert.equal(amountOf(r, 'OR_METRO_SHS'), dollars(40));
+    assert.equal(amountOf(r, 'OR_MULTNOMAH_PFA'), dollars(135));
+  });
+
+  test('below both Portland-area thresholds, neither local line appears at all', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR', certificate: { metroDistrict: true, multnomahCounty: true } },
+      }),
+    );
+    assert.equal(r.taxes.some((t) => t.id === 'OR_METRO_SHS'), true);
+    assert.equal(amountOf(r, 'OR_METRO_SHS'), 0);
+    assert.equal(amountOf(r, 'OR_MULTNOMAH_PFA'), 0);
   });
 });
 

@@ -132,6 +132,18 @@ export interface YearToDate {
    * caps, WA Cares uncapped and Paid Leave sharing the SS wage base).
    */
   stateLongTermCare?: Record<string, Cents>;
+  /**
+   * YTD wages already counted toward a LOCAL income tax's withholding
+   * TRIGGER (not a wage-base cap — these are threshold-based: no tax at
+   * all below the threshold, then a flat rate on wages above it, forever,
+   * not just the first dollar past the line). Keyed by an arbitrary
+   * per-locality id chosen by that locality's own dispatch function (e.g.
+   * 'OR_METRO', 'OR_MULTNOMAH' for Portland's Metro Supportive Housing
+   * Services and Multnomah County Preschool For All taxes) rather than by
+   * state code, since a single state can have multiple independent local
+   * triggers active at once.
+   */
+  localIncomeTax?: Record<string, Cents>;
 }
 
 export interface StateWithholding {
