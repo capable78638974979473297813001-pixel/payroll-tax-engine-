@@ -622,6 +622,8 @@ function incomeTaxLines(
       return [missouriWithholding(input, ctx, rules)];
     case 'bracket_federal_subtraction_phaseout':
       return [oregonWithholding(input, ctx, rules)];
+    case 'bracket_per_period_three_status':
+      return [californiaWithholding(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -2469,7 +2471,7 @@ function yonkersSupplementalTax(
 interface StateDisabilityEmployeeConfig {
   rate: number;
   weeklyCapDollars?: number; // dollars, e.g. 0.60 — a PER-WEEK cap, not annual (New York's DBL shape)
-  wageBase?: number; // dollars, ANNUAL wage base — YTD-tracked like statePaidLeaveEmployee (New Jersey's TDI shape)
+  wageBase?: number | null; // dollars, ANNUAL wage base — YTD-tracked like statePaidLeaveEmployee (New Jersey's TDI shape); null means genuinely uncapped (California's SDI shape)
   exemptPretax?: string[]; // overrides the shared rules.exemptPretax when present
 }
 
@@ -2505,8 +2507,18 @@ function stateDisabilityEmployeeTax(
 
   let amount: number;
   if (cfg.wageBase !== undefined) {
+    // BUG FOUND on an audit pass: this branch used to call dollars(cfg.wageBase)
+    // unconditionally, INCLUDING when wageBase was the literal JSON `null` —
+    // dollars(null) coerces to Math.round(null * 100) = 0, so underCap() saw
+    // cap=0 (a real, non-null cap of $0) rather than "uncapped," and every
+    // wage was capped to $0. Never triggered before because no state used
+    // wageBase: null here (NJ has a real numeric cap; NY uses the OTHER
+    // branch, weeklyCapDollars) — California's genuinely-uncapped SDI (SB
+    // 951, uncapped since 2024) was the first. Fixed to match the exact
+    // guard stateLongTermCareEmployeeTax() (WA Cares) already used correctly.
+    const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
     const ytd = input.ytd.stateDisabilityEmployee?.[rules.code] ?? 0;
-    const cappedWages = underCap(taxableWages, ytd, dollars(cfg.wageBase));
+    const cappedWages = underCap(taxableWages, ytd, cap);
     amount = applyRate(cappedWages, cfg.rate);
     return {
       id: `${rules.code}_DBL_EE`,
@@ -2515,7 +2527,10 @@ function stateDisabilityEmployeeTax(
       jurisdiction: 'state',
       taxableWages: cappedWages,
       amount,
-      detail: `${fmt(cappedWages)} @ ${(cfg.rate * 100).toFixed(2)}%, capped at ${fmt(dollars(cfg.wageBase))}/yr (${fmt(ytd)} YTD already counted)`,
+      detail:
+        cap === null
+          ? `${fmt(cappedWages)} @ ${(cfg.rate * 100).toFixed(2)}%, no wage cap`
+          : `${fmt(cappedWages)} @ ${(cfg.rate * 100).toFixed(2)}%, capped at ${fmt(cap)}/yr (${fmt(ytd)} YTD already counted)`,
     };
   }
 
@@ -4423,4 +4438,182 @@ function portlandAreaLocalTax(
   }
 
   return lines;
+}
+
+interface CATwoBucketTable extends Partial<Record<string, number>> {}
+
+interface CAConfig {
+  lowIncomeExemption: { lower: CATwoBucketTable; higher: CATwoBucketTable };
+  estimatedDeductionTable: Partial<Record<string, number[]>>;
+  standardDeduction: { lower: CATwoBucketTable; higher: CATwoBucketTable };
+  exemptionCreditTable: Partial<Record<string, number[]>>;
+  brackets: {
+    singleOrMarriedTwoIncomes: Partial<Record<string, WIBracket[]>>;
+    marriedOneIncome: Partial<Record<string, WIBracket[]>>;
+    hoh: Partial<Record<string, WIBracket[]>>;
+  };
+}
+
+type CAFilingStatus = 'singleOrMarriedTwoIncomes' | 'marriedOneIncome' | 'hoh';
+
+// Certificate values stay in DE 4's own snake_case-ish wording
+// ('single_or_married_two_incomes', 'married_one_income', 'hoh') since
+// that's the natural way to write a certificate field; this resolver is
+// the ONE place that translates them to the camelCase keys CA-2026.json's
+// brackets/standardDeduction/lowIncomeExemption objects are actually keyed
+// by, so a caller never needs to know about that internal naming choice.
+function resolveCAFilingStatus(cert: Record<string, unknown>): CAFilingStatus {
+  const raw = cert.filingStatus;
+  // DE 4's own instruction: "If you do not provide your employer a completed
+  // DE 4, your employer must use Single with Zero withholding allowance."
+  if (raw === undefined || raw === null) return 'singleOrMarriedTwoIncomes';
+  if (raw === 'single_or_married_two_incomes') return 'singleOrMarriedTwoIncomes';
+  if (raw === 'married_one_income') return 'marriedOneIncome';
+  if (raw === 'hoh') return 'hoh';
+  throw new Error(
+    `Unrecognized CA certificate.filingStatus ${JSON.stringify(raw)} — Form DE 4 only offers 'single_or_married_two_incomes' ` +
+      `('Single or Married (with two or more incomes)'), 'married_one_income' ('Married (one income)'), or 'hoh' ('Head of Household').`,
+  );
+}
+
+/**
+ * Looks up a Table-4-shaped array (index 0 = 0 allowances, indices 1-10 = 1
+ * through 10 allowances directly) and extrapolates past 10 by multiplying
+ * the 1-allowance figure by the count — Method B's own footnote 1, verified
+ * against its own worked example ('a married taxpayer with 15 allowances...
+ * weekly... would be $48.60' = $3.24 × 15, reproduced exactly).
+ */
+function caTableLookup(table: number[], count: number): number {
+  if (count <= 10) return table[count] ?? 0;
+  return table[1] * count;
+}
+
+/**
+ * Looks up a Table-2-shaped array (index 0 = 1 allowance, indices 1-9 = 2
+ * through 10 allowances) and extrapolates past 10 the same way — footnote 2:
+ * "multiply the amount shown for one Additional Allowance by the number
+ * claimed."
+ */
+function caEstimatedDeductionLookup(table: number[], count: number): number {
+  if (count <= 0) return 0;
+  if (count <= 10) return table[count - 1] ?? 0;
+  return table[0] * count;
+}
+
+/**
+ * California's Method B - Exact Calculation Method (2026 Withholding
+ * Schedules, EDD, fetched and read directly). Six sequential steps — see
+ * this file's own $methodComment in CA-2026.json for the full derivation.
+ * The one piece NOT mechanically obvious from the source: which of TWO
+ * "low income exemption" / "standard deduction" threshold sets applies to a
+ * MARRIED (one-income) employee depends on their OWN regular-allowance
+ * count (0-1 vs. 2+), not on filing status alone — 'single_or_married_two_
+ * incomes' always uses the lower set, 'hoh' always uses the higher set, but
+ * 'married_one_income' straddles both depending on regularAllowances.
+ *
+ * DISCLOSED, NOT SILENTLY RESOLVED: EDD's own Examples E and F use a
+ * DIFFERENT valid method than this function implements — annualizing gross
+ * wages and the ANNUAL standard deduction first, computing on the ANNUAL
+ * bracket table, then dividing the result back down — explicitly offered
+ * as a convenience for "employers who... want to conserve computer memory
+ * by storing only the annual... values" (the document's own words). This
+ * function instead uses the PRIMARY per-period Tables 5-28 directly (no
+ * annualizing step at all), which is what Examples A-D themselves use and
+ * what this function reproduces to the cent. Because EDD's own per-period
+ * standard-deduction figures are INDEPENDENTLY ROUNDED rather than derived
+ * by pure division from the annual figure (e.g. semimonthly $476 vs.
+ * annual $11,412 ÷ 24 = $475.50), the two methods can differ by a cent or
+ * two on the exact same inputs — verified concretely: Example E's own
+ * scenario reproduces as $4.11 via this function's method vs. the
+ * document's own annualized-method answer of $4.13; Example F reproduces
+ * as $7.15 vs. the document's $7.17. This is a genuine two-valid-methods
+ * divergence in the source itself, not a transcription error — Examples
+ * A-D (which use the SAME direct per-period method this function does)
+ * match exactly, with zero discrepancy, which is what actually validates
+ * the Tables 5-28 transcription.
+ */
+function californiaWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.bracketPerPeriodThreeStatus as CAConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const status = resolveCAFilingStatus(cert);
+  const regularAllowances = Number(cert.regularAllowances ?? 0);
+  const estimatedAllowances = Number(cert.estimatedDeductionAllowances ?? 0);
+
+  const period = input.payFrequency;
+  const higherBucket = status === 'hoh' || (status === 'marriedOneIncome' && regularAllowances >= 2);
+  const bucket = higherBucket ? 'higher' : 'lower';
+
+  const lowIncomeThreshold = cfg.lowIncomeExemption[bucket][period];
+  if (lowIncomeThreshold === undefined) {
+    throw new Error(
+      `California's own Low Income Exemption table doesn't publish a "${period}" figure — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  if (periodWages <= dollars(lowIncomeThreshold)) {
+    return {
+      id: `${rules.code}_SIT`,
+      name: `${rules.name} Income Tax`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: 0,
+      amount: 0,
+      detail: `${fmt(periodWages)} at or below the $${lowIncomeThreshold} Low Income Exemption threshold (${status}) — $0, no further steps computed.`,
+    };
+  }
+
+  const estimatedDeductionTable = cfg.estimatedDeductionTable[period];
+  if (estimatedAllowances > 0 && !estimatedDeductionTable) {
+    throw new Error(
+      `California's own Estimated Deduction table doesn't publish a "${period}" figure — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const estimatedDeduction = estimatedDeductionTable
+    ? dollars(caEstimatedDeductionLookup(estimatedDeductionTable, estimatedAllowances))
+    : 0;
+  const afterEstimatedDeduction = atLeastZero(periodWages - estimatedDeduction);
+
+  const standardDeduction = dollars(cfg.standardDeduction[bucket][period] ?? 0);
+  const taxableIncome = atLeastZero(afterEstimatedDeduction - standardDeduction);
+
+  const brackets = cfg.brackets[status][period];
+  if (!brackets) {
+    throw new Error(
+      `California's own Method B Tax Rate Tables don't publish a "${period}" schedule for "${status}" — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const bracket = findWIBracket(brackets, taxableIncome);
+  const excess = taxableIncome - dollars(bracket.from);
+  const computedTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  const creditTable = cfg.exemptionCreditTable[period];
+  if (!creditTable) {
+    throw new Error(
+      `California's own Exemption Allowance Table doesn't publish a "${period}" figure — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const credit = dollars(caTableLookup(creditTable, regularAllowances));
+
+  const amount = atLeastZero(computedTax - credit);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: taxableIncome,
+    amount,
+    detail:
+      `${fmt(periodWages)} gross` +
+      (estimatedDeduction ? ` less ${fmt(estimatedDeduction)} estimated deduction (${estimatedAllowances} allowance(s))` : '') +
+      ` less ${fmt(standardDeduction)} standard deduction (${status}) = ${fmt(taxableIncome)} taxable ` +
+      `@ ${(bracket.rate * 100).toFixed(3)}% over ${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))} ` +
+      `= ${fmt(computedTax)} less ${fmt(credit)} exemption credit (${regularAllowances} regular allowance(s))`,
+  };
 }

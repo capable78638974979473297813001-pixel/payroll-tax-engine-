@@ -420,8 +420,14 @@ describe('Pennsylvania', () => {
   });
 
   test('an unmodelled state is flagged, never silently zero', () => {
-    const r = calculatePaycheck(input({ workState: { code: 'CA' } }));
-    const line = r.taxes.find((t) => t.id === 'CA_SIT');
+    // Was CA before this project built California — updated to TX (a state
+    // this project has genuinely never built a ruleset for) once that
+    // stopped being true, rather than leave a stale example that would
+    // silently start testing the WRONG thing (California's real $0-below-
+    // threshold Low Income Exemption line, not the no-ruleset-at-all flag
+    // this test actually means to exercise).
+    const r = calculatePaycheck(input({ workState: { code: 'TX' } }));
+    const line = r.taxes.find((t) => t.id === 'TX_SIT');
     assert.ok(line);
     assert.match(line.detail ?? '', /NOT MODELLED/);
   });
@@ -4911,6 +4917,134 @@ describe('Oregon', () => {
     assert.equal(r.taxes.some((t) => t.id === 'OR_METRO_SHS'), true);
     assert.equal(amountOf(r, 'OR_METRO_SHS'), 0);
     assert.equal(amountOf(r, 'OR_MULTNOMAH_PFA'), 0);
+  });
+});
+
+describe('California', () => {
+  // Reproduces ALL SIX of EDD's own published worked examples (2026
+  // Withholding Schedules, Method B) — a rarer luxury than most states in
+  // this project get. Examples A-D use the SAME direct per-period Tables
+  // 5-28 this engine implements and match to the cent exactly. Examples E
+  // and F use a DIFFERENT valid method EDD itself offers (annualize gross
+  // wages and the ANNUAL standard deduction, compute on the annual table,
+  // divide back down) — genuinely NOT the same arithmetic path, and EDD's
+  // own per-period standard-deduction figures are independently rounded
+  // rather than pure annual/N division, so the two methods land a cent or
+  // two apart on the same inputs. E/F below assert the CORRECT answer for
+  // THIS function's own (primary, per-period-table) method, not EDD's
+  // published annualized-method answer — see californiaWithholding()'s own
+  // doc comment for the full arithmetic showing both paths.
+  const caState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'CA', certificate },
+  });
+
+  test('Example A: weekly $210, single, 1 allowance — below the Low Income Exemption threshold, $0', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(210) }],
+        ...caState({ filingStatus: 'single_or_married_two_incomes', regularAllowances: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'CA_SIT'), 0);
+  });
+
+  test('Example B: biweekly $1,600, married, 2 regular + 1 estimated-deduction allowance -> $2.38', () => {
+    // The estimated-deduction allowance is NOT counted toward the Table 4
+    // exemption credit (Method B's own footnote 1) — only the 2 regular
+    // ones are. $1,600 - $38 (Table 2, 1 allowance) = $1,562 - $439
+    // (Table 3, married/2+ allowances) = $1,123 taxable -> Table 27 bracket
+    // [$852-$2,020, base $9.37, 2.2%]: $9.37 + 2.2%x$271 = $15.33 - $12.95
+    // (Table 4, 2 allowances) = $2.38.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1600) }],
+        ...caState({ filingStatus: 'married_one_income', regularAllowances: 2, estimatedDeductionAllowances: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'CA_SIT'), dollars(2.38));
+  });
+
+  test('Example C: monthly $5,100, married, 5 allowances -> $0.82', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(5100) }],
+        ...caState({ filingStatus: 'married_one_income', regularAllowances: 5 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'CA_SIT'), dollars(0.82));
+  });
+
+  test('Example D: weekly $950, head of household, 3 allowances -> $1.69', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(950) }],
+        ...caState({ filingStatus: 'hoh', regularAllowances: 3 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'CA_SIT'), dollars(1.69));
+  });
+
+  test('Example E scenario (semi-monthly $2,400, married, 4 allowances): $4.11 via this method, NOT EDD\'s own $4.13 annualized-method answer', () => {
+    // Direct per-period path (this function): $2,400 - $476 (Table 3,
+    // married/2+, semimonthly) = $1,924 taxable -> Table 18 bracket
+    // [$924-$2,188, base $10.16, 2.2%]: $10.16 + 2.2%x$1,000 = $32.16 -
+    // $28.05 (Table 4, 4 allowances) = $4.11. EDD's OWN example computes
+    // this via annualizing first ($57,600 - $11,412 = $46,188 taxable,
+    // $772.40 computed, -$673.20 credit = $99.20/yr / 24 = $4.13) — a
+    // genuinely different, EDD-sanctioned method this engine doesn't
+    // implement, landing 2 cents apart due to the semimonthly Table 3
+    // figure ($476) not being pure annual-divided-by-24 ($475.50).
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2400) }],
+        ...caState({ filingStatus: 'married_one_income', regularAllowances: 4 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'CA_SIT'), dollars(4.11));
+  });
+
+  test('Example F scenario (monthly $4,750, married, 4 allowances): $7.15 via this method, NOT EDD\'s own $7.17 annualized-method answer', () => {
+    // Same divergence class as Example E, for the same disclosed reason.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(4750) }],
+        ...caState({ filingStatus: 'married_one_income', regularAllowances: 4 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'CA_SIT'), dollars(7.15));
+  });
+
+  test('no DE 4 on file defaults to Single with zero allowances', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(950) }],
+        workState: { code: 'CA' },
+      }),
+    );
+    // Same $950 weekly wage as Example D, but single/0-allowances instead
+    // of HOH/3-allowances: threshold $363 (lower bucket) crossed, std
+    // deduction $110 (lower), taxable $840 -> Table 23 bracket
+    // [$797-$1,107, base $21.61, 6.6%]: $21.61 + 6.6%x$43 = $24.45, no
+    // credit (0 allowances) = $24.45.
+    assert.equal(amountOf(r, 'CA_SIT'), dollars(24.45));
+  });
+
+  test('SDI: $1,000 x 1.3%, uncapped', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'CA' },
+      }),
+    );
+    assert.equal(amountOf(r, 'CA_DBL_EE'), dollars(13));
   });
 });
 
