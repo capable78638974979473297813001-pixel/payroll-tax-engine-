@@ -50,21 +50,21 @@
     "effectiveDate": "2026-06-01",
     "priorRate": 0.045,
     "currentRate": 0.0445,
-    "note": "Publication 14 ITSELF is titled 'effective June 1, 2026' -- this file models ONLY the post-2026-06-01 formula (rate 4.45%, base allowances $485/$970 annual), which is what applies to today's date (2026-08-20) and everything going forward. The PRE-2026-06-01 formula (rate 4.5%, base allowances $450/$900 per a secondary-source figure, NOT independently verified against a primary pre-June document this session) is a genuinely disclosed gap -- unlike Ohio's OWN mid-year change, which this project modelled BOTH sides of via midYearEffectiveDating, Utah's prior-period formula was not chased down to the same precision given this session's time budget. A payroll run dated before 2026-06-01 would need the OLD formula, which this file does not currently provide."
+    "note": "Publication 14 ITSELF is titled 'Rev. 4/26... Effective June 1, 2026' -- re-confirmed by re-reading the actual downloaded PDF's own header text on a verification pass, not just trusting the earlier build. This file models ONLY the post-2026-06-01 formula (rate 4.45%, base allowances $485/$970 annual), which is what applies to today's date (2026-08-20) and everything going forward. The PRE-2026-06-01 figures remain UNRESOLVED, not fabricated: a verification-pass search surfaced an EY Tax News headline ('Utah Tax Commission releases revised withholding formula reflecting lower income tax rate for 2025') describing the SAME 4.5%-to-4.45% change and the SAME $450/$900-to-$485/$970 allowance figures, but dated to a 2025-06-01 effective date -- which would mean the rate has actually been 4.45% since June 2025, not a genuinely NEW mid-2026 change at all, and this file's whole midYearRateChange framing could be describing something a year further back than believed. This was NOT resolved by fetching the actual EY article or an archived pre-2026 Pub 14 revision (attempted, not found this session) -- flagged explicitly as an open question about WHEN 4.45% took effect, not just what the OLD number was, rather than silently picking one story or the other."
   },
   "reciprocity": {
-    "rule": "NONE. Utah has no reciprocal withholding agreements with any state -- cross-source confirmed."
+    "rule": "NONE. Utah has no reciprocal withholding agreements with any state -- cross-source confirmed by TWO independent search passes on separate sessions, no contradictions found either time."
   },
   "localIncomeTax": {
-    "rule": "NONE. No Utah city or county levies a local income or wage tax."
+    "rule": "NONE. No Utah city or county levies a local income or wage tax -- 'Utah does not permit cities, counties, or municipalities to levy income taxes' per a re-verification pass, consistent with the original finding and not contradicted by anything found on a second, independent check."
   },
   "unemploymentInsurance": {
     "$comment": "Employer-only (SUI) -- no employee contribution.",
     "administeredBy": "Utah Department of Workforce Services",
     "wageBase": 50700.0,
     "earnedRateRange": { "min": 0.001, "max": 0.071 },
-    "newEmployerRate": 0.011,
-    "newEmployerRateNote": "cross_source_confirmed for the specific 1.1% figure (not read directly off jobs.utah.gov this session, which describes new-employer rates as industry-benefit-ratio-based rather than publishing one flat number) -- the .1%-7.1% RANGE is primary-sourced, the single 1.1% 'general new employer' figure is not.",
+    "newEmployerRate": null,
+    "newEmployerRateNote": "CORRECTED on a verification pass -- the previously-recorded flat 1.1% figure was a secondary-source oversimplification and has been removed rather than left standing uncorrected. Utah's OWN Employer Handbook (jobs.utah.gov/ui/employer/Public/Handbook/Employer_Handbook.pdf, fetched and read directly) states plainly: 'As a new employer, your rate is based on an industry classification' -- there is no single flat new-employer rate the way Colorado's introductory rate table (also in this project) turned out to have real numbers for. The specific per-industry benefit-ratio table was not found this session; a caller needing a real new-employer figure would need Utah's own current-year industry rate table, not yet obtained.",
     "delinquentSurcharge": 0.01
   },
   "verification": "PROVEN via calculatePaycheck() against ALL SIX of Publication 14's own worked examples: Example 1 (weekly $400, single -> $12), Example 2 (biweekly $2,600, single -> $116, allowance fully phased to $0), Example 3 (semimonthly $1,200, married -> $18), Example 4 (monthly $7,800, married -> $347, allowance fully phased to $0), Example 5 (quarterly $9,000, single -> $367), Example 6 (daily $175, married -> $5) -- all reproduced to the exact whole dollar. See tests/engine.test.ts, describe('Utah').",

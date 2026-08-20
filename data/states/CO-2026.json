@@ -77,7 +77,10 @@
       "repealed": true,
       "repealedEffective": "2025-01-01",
       "formerRate": { "employee": 2.0, "employer": 2.0 },
-      "note": "REPEALED, not merely reduced — Aurora City Council voted to eliminate its OPT entirely, effective for wages paid on/after 2025-01-01. A real, catchable trap: several payroll-guide sites found during this session's research still list Aurora as an active $2/$2 OPT jurisdiction without the repeal date, which would overstate withholding for any Aurora-based employee in 2026."
+      "formerMonthlyEarningsThreshold": 250,
+      "repealOrdinance": "Ordinance 2022-77",
+      "note": "REPEALED, not merely reduced — Aurora City Council voted to eliminate its OPT entirely, effective for wages paid on/after 2025-01-01. A real, catchable trap: several payroll-guide sites found during this session's research still list Aurora as an active $2/$2 OPT jurisdiction without the repeal date, which would overstate withholding for any Aurora-based employee in 2026.",
+      "verification": "UPGRADED on a verification pass from cross_source_confirmed to primary_source_confirmed — fetched auroragov.org's own OPT page directly, which states plainly: 'Occupational Privilege Tax Repeal - Reminder. The city of Aurora Occupational Privilege Tax will be repealed effective Jan. 1, 2025.' Also picked up two facts this file didn't have before (the $250/month earnings threshold that used to trigger liability, and the repeal ordinance number) directly from that same primary fetch."
     },
     "otherOptJurisdictions": {
       "$comment": "Colorado's other OPT cities (Glendale, Greenwood Village, Sheridan) are known to exist by name but were NOT individually researched to primary-source depth this session — named here so the gap is explicit rather than silently omitted, not asserted with any rate figures.",
@@ -98,11 +101,18 @@
     "$comment": "Gated on certificate.employerLiableForPaidLeaveShare, same convention as Washington/Massachusetts's own employer-size gate in this project — FAMLI's own threshold is 10+ employees (fewer than 10 owes $0 employer share). The caller supplies this determination; the exact headcount rule isn't itself encoded in the shared function, matching the existing WA/MA precedent's own documented limitation."
   },
   "unemploymentInsurance": {
-    "$comment": "Employer-only (SUI) — no employee contribution.",
+    "$comment": "Employer-only (SUI) — no employee contribution. UPGRADED on a verification pass, and a REAL BUG in this file's own first draft was caught in the process: the original newEmployerRate (0.0135) was actually just the Solvency Surcharge component of the introductory rate, not the combined rate — CDLE's own introductory-rates page shows the 2026 rate is built from THREE components (Beginning Rate + Support Rate + Solvency Surcharge), and 1.35% alone would have understated new-employer UI cost by more than half.",
     "administeredBy": "Colorado Department of Labor and Employment (CDLE)",
     "wageBase": 30600.0,
-    "newEmployerRate": 0.0135,
-    "confidence": "cross_source_confirmed (see sources above)."
+    "introductoryRates2026": {
+      "nonConstruction": { "beginningRate": 0.0153, "supportRate": 0.0017, "surchargeRate": 0.0135, "combinedRate": 0.0305 },
+      "generalConstruction": { "beginningRate": 0.0153, "supportRate": 0.0017, "surchargeRate": 0.0135, "combinedRate": 0.0305 },
+      "heavyConstruction": { "beginningRate": 0.0428, "supportRate": 0.0048, "surchargeRate": 0.01525, "combinedRate": 0.06285 },
+      "trades": { "beginningRate": 0.0153, "supportRate": 0.0017, "surchargeRate": 0.0135, "combinedRate": 0.0305 },
+      "politicalSubdivisionGroup": { "beginningRate": 0.002, "supportRate": 0, "surchargeRate": 0, "combinedRate": 0.002 },
+      "note": "'New employer' is not one flat figure in Colorado — it's classification-dependent, same structural shape as Ohio's own construction/general split already documented elsewhere in this project. Employers new to Colorado who don't yet qualify for an experience (computed) rate pay this introductory rate; the Solvency Surcharge applies uniformly to ALL employers (introductory and experience-rated alike) when Colorado's UI Trust Fund solvency triggers it, per CDLE's own page."
+    },
+    "confidence": "primary_source_confirmed — fetched directly from cdle.colorado.gov/employers/unemployment-insurance-premiums/premium-rates (wage base) and .../introductory-rates (the full rate table) on a verification pass, upgraded from the original cross_source_confirmed tier."
   },
   "verification": "PROVEN via calculatePaycheck(): fixtures hand-derived from DR 1098's own worksheet formula (no official EDD-style worked example with a full dollar figure was found in DR 1098 itself, unlike California's Method B) plus FAMLI and Denver OPT fixtures. See tests/engine.test.ts, describe('Colorado').",
   "knownGaps": [
