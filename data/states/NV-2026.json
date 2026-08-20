@@ -52,13 +52,15 @@
     "newEmployerDuration": "14 to 17 calendar quarters (varies by the calendar-quarter in which the employer first became liable) before transitioning to experience rating.",
     "careerEnhancementProgram": {
       "rate": 0.0005,
-      "note": "An additional 0.05% assessment layered on top of the regular UI rate, funding Nevada's Career Enhancement Program — applies to all employers, new and experience-rated alike."
+      "note": "An additional 0.05% assessment layered on top of the regular UI rate, funding Nevada's Career Enhancement Program — applies to all employers except those already at the 5.40% ceiling."
     },
-    "confidence": "cross_source_confirmed (see sources above) — not read directly off DETR's own page this session."
+    "experienceRatedRange": { "min": 0.0025, "max": 0.054 },
+    "experienceRatedRangeNote": "18 rate classes spanning 0.25% to 5.40%, cross-source confirmed across 2 independent secondary sources with no contradictions (both citing what appears to be the same underlying DETR small-business-impact-meeting materials).",
+    "confidence": "cross_source_confirmed — direct fetch of detr.nv.gov was ATTEMPTED THREE times this session (the main UI info page, a guessed direct PDF URL, and the December 2025/March 2026 newsletter PDFs) and every attempt was BLOCKED by the site's own Akamai edge filtering ('Access Denied... Reference #...edgesuite.net'), the same class of failure already documented for Wilmington DE and Kansas City MO in this project. Not a skipped attempt — genuinely inaccessible via this tool's fetch method this session. The MBT figures above (which ARE primary-sourced) came from tax.nv.gov, a DIFFERENT Nevada state domain that was NOT blocked — the block is specific to detr.nv.gov/ui.nv.gov."
   },
   "knownGaps": [
     "MBT and SUTA are documented but NOT wired into calc code (this is a data-only pass, matching the scope Scott set for this batch) — both are employer-paid so they wouldn't touch the employee-paycheck engine's existing state-income-tax dispatch anyway; they'd need a new employer-liability calculation path this project hasn't built yet (closest existing precedent: newarkPayrollTaxEmployer(), which is employer-paid but wired specifically for NJ's Newark ordinance).",
-    "SUTA's experience-rated schedule (beyond the new-employer rate) was not pulled — the 2025 Small Business Impact Meeting PDF found in search results likely has it but wasn't fetched directly this session.",
+    "SUTA's full 18-class rate table (not just the min/max) was not obtained — detr.nv.gov's own PDFs were consistently blocked (see unemploymentInsurance.confidence above); would need either a different fetch path or a human-provided copy of the Small Business Impact Meeting PDF to close fully.",
     "MBT's $50,000 exemption is per-QUARTER, not per-year — a caller would need to track wages on a calendar-quarter basis, a different accumulation window than every other wage-base mechanism in this project (which are annual)."
   ]
 }

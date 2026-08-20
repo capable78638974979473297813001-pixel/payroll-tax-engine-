@@ -128,15 +128,22 @@
     "triMet": {
       "rate": 0.008237,
       "district": "Tri-County Metropolitan Transportation District (Portland metro area — parts of Multnomah, Washington, and Clackamas counties)",
-      "confidence": "cross_source_confirmed for the numeric rate; the guide PDF itself points to the Combined Payroll Tax Report for the current figure rather than stating it."
+      "roundingRule": "Rounds DOWN to the nearest cent, not this project's usual round-half-up — a genuine, disclosed exception, quoted verbatim from Oregon's own instructions: 'Multiply box 5a by box 6a. Round down to the nearest cent.'",
+      "confidence": "UPGRADED to primary_source_confirmed this session — fetched Oregon's own 2026 Combined Payroll Tax Report Instructions (150-211-155-2) directly and found the rate stated in the actual box-by-box filing instructions: 'Box 6a. Tax rate. TM yearly tax rates are: 2026 and beyond = 0.008237.'"
     },
     "laneTransit": {
       "rate": 0.008,
       "district": "Lane County Mass Transit District (Eugene/Springfield area)",
-      "confidence": "cross_source_confirmed for the numeric rate, same caveat as TriMet."
+      "confidence": "UPGRADED to primary_source_confirmed this session, same document as TriMet: 'Lane Transit District (LTD) tax rate is 0.0080.'"
     },
     "exemptEmployers": ["Federal credit unions", "Public school districts", "501(c)(3) nonprofits (except hospitals)", "Insurance companies (except domestic insurers)", "Domestic service in a private home"],
-    "ltdAdditionalExemptions": ["Public education districts", "Public special service and utility districts", "Port authorities", "Fire districts"]
+    "ltdAdditionalExemptions": ["Public education districts", "Public special service and utility districts", "Port authorities", "Fire districts"],
+    "source": {
+      "title": "2026 Oregon Combined Payroll Tax Report Instructions",
+      "url": "https://www.oregon.gov/dor/forms/FormsPubs/combined-payroll_211-155-2_2026.pdf",
+      "verifiedOn": "2026-08-20",
+      "verifiedBy": "PDF downloaded and text-extracted directly. Also independently re-confirmed the Statewide Transit Tax rate here too: 'Statewide Transit tax (STT) rate is 0.001' — a second primary source agreeing with the dedicated STT webpage, closing out that figure at the highest confidence tier in this file."
+    }
   },
   "paidLeaveOregon": {
     "totalRate": 0.01,
@@ -150,21 +157,30 @@
     "administeredBy": "Oregon Employment Department"
   },
   "portlandAreaLocalIncomeTax": {
-    "$comment": "TWO independently-enacted, uniformly co-administered local PERSONAL income taxes layered on top of state withholding for Portland-metro-area residents/workers — a genuinely different local-tax shape from every other state in this project (closer to NYC's resident surcharge in spirit than to PA/OH/MI's flat-rate municipal wage taxes). cross_source_confirmed tier throughout — portland.gov itself was not fetched directly this session.",
+    "$comment": "TWO independently-enacted, uniformly co-administered local PERSONAL income taxes layered on top of state withholding for Portland-metro-area residents/workers — a genuinely different local-tax shape from every other state in this project (closer to NYC's resident surcharge in spirit than to PA/OH/MI's flat-rate municipal wage taxes). UPGRADED to primary source this session — portland.gov's own withholding page was fetched and read directly, and it surfaced a real correction: the TAX's own filing-status-indexed thresholds ($128,000/$205,000 for SHS; $125,000/$200,000 and $250,000/$400,000 for PFA) are NOT the same numbers used to trigger WITHHOLDING. Employers withhold using flat, filing-status-INDEPENDENT wage triggers ($200,000 and $400,000) because they don't necessarily know an employee's filing status — see withholdingRequirement below, now corrected from this session's original (wrong) assumption that withholding used the same indexed thresholds as the tax itself.",
     "metroSupportiveHousingServices": {
       "rate": 0.01,
       "base": "Metro-district taxable income (Multnomah/Washington/Clackamas county residents, and nonresidents on Metro-district-source income) above an inflation-indexed threshold.",
       "thresholds2026": { "single": 128000, "marriedJoint": 205000 },
-      "note": "Thresholds began inflation-indexing starting tax year 2026 (previously fixed at $125,000/$200,000 for 2021-2025) — the $128,000/$205,000 figures above are the FIRST inflation adjustment."
+      "note": "Thresholds began inflation-indexing starting tax year 2026 (previously fixed at $125,000/$200,000 for 2021-2025) — the $128,000/$205,000 figures above are the FIRST inflation adjustment. These are the RETURN-level thresholds, not the withholding trigger (see withholdingRequirement)."
     },
     "multnomahPreschoolForAll": {
       "rate": 0.015,
       "surtaxRate": 0.015,
       "surtaxThresholds": { "single": 250000, "marriedJoint": 400000 },
       "base": "Multnomah County taxable income above $125,000 single / $200,000 joint, PLUS an additional 1.5% (3.0% combined marginal) above $250,000 single / $400,000 joint.",
-      "note": "A genuine two-tier marginal local tax, not a single flat rate above a threshold — the second 1.5% stacks on top of the first, giving a 3.0% marginal rate at the highest tier."
+      "note": "A genuine two-tier marginal local tax, not a single flat rate above a threshold — the second 1.5% stacks on top of the first, giving a 3.0% marginal rate at the highest tier. Portland's own page adds a disclosed future change: 'The rate will increase by 0.8% in 2027' — not yet in effect for 2026."
     },
-    "withholdingRequirement": "Employers generally must withhold Metro SHS + Multnomah PFA once an employee's YTD wages reach $200,000 in the calendar year — a wage-triggered withholding obligation, not tied to filing status the way the tax itself is.",
+    "withholdingRequirement": {
+      "metroSHS": "Employers withhold 1% on wages ABOVE $200,000 YTD for employees working within the Metro district — a flat wage trigger, not adjusted by filing status (the employer generally doesn't know it). This is DIFFERENT from the tax's own $128,000/$205,000 filing-status thresholds above; an employee can owe $0 on their actual return despite having withholding taken, or vice versa, reconciled at filing via Metro's own opt-in/opt-out form.",
+      "multnomahPFA": "Employers withhold 1.5% on wages above $200,000 YTD, PLUS an additional 1.5% (3% combined) above $400,000 YTD — again flat wage triggers, not the tax's own $125k/$200k and $250k/$400k filing-status-indexed thresholds.",
+      "source": {
+        "title": "Personal Income Tax Withholding Information for Employers/Payroll Providers",
+        "url": "https://www.portland.gov/revenue/withholding",
+        "verifiedOn": "2026-08-20",
+        "verifiedBy": "Fetched and read directly this session (portland.gov did NOT block the fetch, unlike Wilmington DE's site hit earlier in this project). Quoted verbatim: 'employers with a Metro location are required to withhold this tax from employees that work within Metro and earn $200,000 or more during the calendar year. Income above $200,000 will be withheld at a rate of 1%' and '...employees that work within Multnomah County and earn $200,000 or more... Income above $200,000 will be withheld at a rate of 1.5%. Income above $400,000 will be withheld at a rate of 3%.'"
+      }
+    },
     "administeredBy": "City of Portland Revenue Division administers both taxes on behalf of Metro and Multnomah County under a uniform-administration agreement — NOT the Oregon DOR."
   },
   "unemploymentInsurance": {
@@ -177,19 +193,17 @@
     "note": "New employer rate and offset confirmed steady from 2025 into 2026 (multiple secondary sources agree 'rates hold steady for 2026')."
   },
   "reciprocity": {
+    "rule": "NONE, confirmed RESOLVED (was left as an open question earlier this session, now closed by reading Oregon's own primary source). Oregon does NOT reciprocate Arizona's exemption. Arizona exempts residents of CA/IN/OR/VA who work in Arizona from AZ withholding (see AZ-2026.json), but this is a ONE-WAY, asymmetric relationship — an Arizona resident working in Oregon gets no equivalent Oregon exemption.",
     "source": {
-      "title": "Arizona Form WEC Instructions (2026) — cross-referenced, not Oregon's own page",
+      "title": "150-206-692 (Rev. 02-08-22), Withholding/Transit Tax Information: Out-of-state/Nonresident Employers",
+      "url": "https://www.oregon.gov/dor/forms/FormsPubs/withholding-transit-tax-non-resident_206-692.pdf",
       "verifiedOn": "2026-08-20",
-      "verifiedBy": "Confirmed from ARIZONA's side (see AZ-2026.json) that Oregon residents working in Arizona may claim an AZ withholding exemption. NOT yet independently confirmed from Oregon's OWN documentation that the relationship runs symmetrically (an Arizona resident working in Oregon exempt from OR withholding) — flagged as a genuine gap, the same caution this project applied to Kansas's asymmetric-feeling reciprocity finding."
+      "verifiedBy": "PDF downloaded and text-extracted directly — this is Oregon DOR's own dedicated out-of-state/nonresident-employer guide, the correct document to check for a reciprocity carve-out (rather than the withholding-formula document, which doesn't cover multi-state rules at all). It states the rule unconditionally and makes NO mention of Arizona, California, Indiana, Virginia, or any other state-specific exemption: 'You must withhold Oregon income tax from all wages earned by nonresident employees for services performed in Oregon, unless their Oregon earning for the year will be less than their standard deduction amount for their filing status.' The ONLY nonresident exemption Oregon offers is this de-minimis income threshold — a genuinely different, income-level-based mechanism, not a state-of-residence-based one. Note the document itself is dated 2022 and its own $2,420/$4,840 standard deduction figures are stale (2026's are $2,910/$5,820 per the withholding formula document) — the RULE (no reciprocity, de-minimis exemption only) is what's being relied on here, not those specific stale dollar figures."
     },
-    "possibleReciprocalStates": ["AZ"],
-    "knownGap": "Oregon's OWN withholding formula document (150-206-436) does not mention reciprocity at all — its FAQ section is entirely about the computation formula, not multi-state rules. A dedicated search of Oregon DOR's reciprocity-specific guidance was not done this session; the only evidence for OR-AZ reciprocity comes from Arizona's side of the relationship."
+    "deMinimisThreshold": "Nonresident's Oregon-source earnings for the year less than their Oregon standard deduction ($2,910 single/HOH, $5,820 married, 2026 figures) — below this, no OR withholding is required at all, though the employee may still request it if they have other Oregon income."
   },
   "knownGaps": [
     "Not wired into calc code (data-only pass) — this would be a substantial new dispatch method if built, genuinely more involved than any bracket method currently in state.ts (Connecticut's 16-step formula is the closest precedent for complexity).",
-    "TriMet/LTD numeric rates are cross_source_confirmed, not read directly off the Combined Payroll Tax Report Instructions PDF this session.",
-    "Metro SHS / Multnomah PFA figures are cross_source_confirmed only — portland.gov itself was not fetched directly (untested for the same bot-blocking risk already seen on Wilmington DE's site).",
-    "Oregon's own reciprocity documentation was not found or read this session — the AZ relationship is asserted from Arizona's side only.",
     "The $263-vs-$256 personal exemption credit discrepancy in the source document itself (see personalExemptionCredit.possibleInconsistencyInSource) could not be resolved with 0-allowance examples alone; worth re-checking against a worked example that uses a nonzero allowance count if one is found.",
     "Alternative supplemental-wage flat 8% method documented but not modelled.",
     "Nonresident allocation, statewide transit tax self-employment provisions, and OR-40N/OR-40P return-level mechanics are out of scope — payroll withholding only."

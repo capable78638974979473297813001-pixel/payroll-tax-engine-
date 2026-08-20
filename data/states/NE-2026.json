@@ -82,20 +82,41 @@
     "wageBase": { "mostEmployers": 9000.0, "category20": 24000.0 },
     "wageBaseComment": "UNUSUAL, disclosed rather than smoothed over: category 20 (the worst-rated employers, statutorily floored at 5.40% to satisfy a federal minimum-rate requirement) faces a HIGHER taxable wage base ($24,000) than every other category ($9,000) — a genuinely different mechanism from every other state's SUTA in this project, where the wage base is uniform and only the RATE varies by experience.",
     "newEmployerRate": { "nonConstruction": 0.0125, "construction": 0.054 },
-    "categoryRange": { "category1": 0.0, "category12Average": 0.0055, "category20": 0.054 },
+    "categoryRateSchedule": [
+      { "category": 1, "experienceFactor": 0.0, "rate": 0.0 },
+      { "category": 2, "experienceFactor": 0.25, "rate": 0.0014 },
+      { "category": 3, "experienceFactor": 0.4, "rate": 0.0022 },
+      { "category": 4, "experienceFactor": 0.45, "rate": 0.0025 },
+      { "category": 5, "experienceFactor": 0.5, "rate": 0.0028 },
+      { "category": 6, "experienceFactor": 0.6, "rate": 0.0033 },
+      { "category": 7, "experienceFactor": 0.65, "rate": 0.0036 },
+      { "category": 8, "experienceFactor": 0.7, "rate": 0.0039 },
+      { "category": 9, "experienceFactor": 0.8, "rate": 0.0044 },
+      { "category": 10, "experienceFactor": 0.9, "rate": 0.005 },
+      { "category": 11, "experienceFactor": 0.95, "rate": 0.0053 },
+      { "category": 12, "experienceFactor": 1.0, "rate": 0.0055 },
+      { "category": 13, "experienceFactor": 1.05, "rate": 0.0058 },
+      { "category": 14, "experienceFactor": 1.1, "rate": 0.0061 },
+      { "category": 15, "experienceFactor": 1.2, "rate": 0.0067 },
+      { "category": 16, "experienceFactor": 1.35, "rate": 0.0075 },
+      { "category": 17, "experienceFactor": 1.55, "rate": 0.0086 },
+      { "category": 18, "experienceFactor": 1.8, "rate": 0.01 },
+      { "category": 19, "experienceFactor": 2.15, "rate": 0.0119 },
+      { "category": 20, "experienceFactor": 2.6, "rate": 0.054 }
+    ],
+    "categoryRateScheduleComment": "FULL 20-category array table, all 20 rows read directly off Nebraska DOL's own PDF (not derived) — closes the gap this file originally left at only categories 1/12/20. Category 12 is statutorily the state average (0.55% for 2026). Categories 2-19's rates are each computed as experienceFactor x 0.55%, rounded to the nearest basis point (verified: category 2 = 0.25 x 0.55% = 0.1375%, rounds to 0.14%, matching the printed figure exactly; category 19 = 2.15 x 0.55% = 1.1825%, rounds to 1.19%, matching exactly) — EXCEPT category 20, whose rate (5.40%) is a statutory floor override (2.60 x 0.55% would only be 1.43%) imposed to satisfy a federal requirement that at least one category carry a 5.4%-or-higher rate, per the guide's own explanation.",
     "sources": [
       {
         "title": "A Guide to Understanding Nebraska's Unemployment Insurance Combined Tax Rates (2026)",
         "url": "https://dol.nebraska.gov/webdocs/Resources/Items/2026%20UI%20guide%20to%20understanding.pdf",
         "verifiedOn": "2026-08-20",
-        "verifiedBy": "PDF downloaded and text-extracted directly off Nebraska DOL's own site — all figures above (both wage bases, both new-employer rates, category 1/12/20 rates) read directly from this document, not cross-sourced."
+        "verifiedBy": "PDF downloaded and text-extracted directly off Nebraska DOL's own site — all figures above (both wage bases, both new-employer rates, the FULL 20-category rate schedule) read directly from this document, not cross-sourced."
       }
     ]
   },
   "knownGaps": [
     "Not wired into calc code (data-only pass) — but structurally the closest of this batch to a drop-in reuse of the existing bracketPerPeriodAllowance() function already built for Vermont.",
     "Only the ANNUAL table is transcribed; the separately-published weekly/biweekly/semimonthly/monthly per-period tables were left unread (garbled on first extraction attempt) since Iowa's precedent already proves they're derivable from the annual table to within a cent of independent rounding.",
-    "UI's full 20-category rate table (categories 2-19) was not transcribed — only categories 1, 12 (average), and 20 (the two statutory floors/ceilings plus the average) were pulled.",
     "exemptPretax rests on general IRC-conformity knowledge, not a direct Circular EN quote naming 401(k)/125/etc. by category — one tier below Delaware's or Arizona's sourcing for the same claim.",
     "Supplemental flat-3.5% method documented but not modelled.",
     "Nonresident/non-wage withholding rules (construction contractors, nonresident personal-services withholding, gambling winnings) are real and documented in Circular EN but out of scope for this pass — payroll-specific wage withholding only."
