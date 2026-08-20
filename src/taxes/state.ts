@@ -7,6 +7,7 @@ import {
   hasStateRuleset,
   stateRuleset,
 } from '../registry.ts';
+import { federalIncomeTax } from './federal.ts';
 import { supplementalEarnings } from '../wages.ts';
 import type {
   ComputeContext,
@@ -541,6 +542,14 @@ function incomeTaxLines(
       return [ohioWithholding(input, ctx, rules)];
     case 'bracket_annual_exemption_credit':
       return [delawareWithholding(input, ctx, rules)];
+    case 'employee_elected_flat':
+      return [employeeElectedFlat(input, ctx, rules)];
+    case 'flat_rate_marital_deduction_whole_dollar':
+      return [missouriWithholding(input, ctx, rules)];
+    case 'bracket_annual_from_period_allowance':
+      return [nebraskaWithholding(input, ctx, rules)];
+    case 'bracket_federal_subtraction_phaseout':
+      return [oregonWithholding(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -3733,5 +3742,404 @@ function delawareWithholding(
       `over ${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))} = ${fmt(annualTax)} ` +
       `less ${fmt(credit)} exemption credit (${exemptions} × $${cfg.personalCreditPerExemption}) ` +
       `= ${fmt(annualLiability)}/yr ÷ ${multiplier}`,
+  };
+}
+
+interface AZFlatConfig {
+  availableRates: number[];
+  defaultRate: number;
+}
+
+/**
+ * Arizona's withholding — the simplest method in this project by a wide
+ * margin. No bracket table, no standard deduction, no exemption count: the
+ * EMPLOYEE picks a flat percentage of gross taxable wages on Form A-4 (2026,
+ * fetched and read directly), 0.5%-3.5% in 0.5% steps, or elects zero via a
+ * separate certification of no expected tax liability. No-form default is
+ * ALSO a flat rate (2.0%) rather than "single, zero allowances" run through
+ * a table, since there's no table to fall back to — Form A-4's own words:
+ * "If you do not give this form to your employer the department requires
+ * your employer to withhold 2.0% of your gross taxable wages."
+ */
+function employeeElectedFlat(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.employeeElectedFlat as AZFlatConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+
+  if (cert.zeroElection) {
+    return {
+      id: `${rules.code}_SIT`,
+      name: `${rules.name} Income Tax`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages,
+      amount: 0,
+      detail: 'Form A-4 zero-withholding election on file',
+    };
+  }
+
+  const rate = cert.electedRate !== undefined ? Number(cert.electedRate) : cfg.defaultRate;
+  const amount = applyRate(taxableWages, rate);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages,
+    amount,
+    detail:
+      cert.electedRate !== undefined
+        ? `${fmt(taxableWages)} @ ${(rate * 100).toFixed(1)}% (Form A-4 election)`
+        : `${fmt(taxableWages)} @ ${(rate * 100).toFixed(1)}% (no Form A-4 on file — HB 2119 default)`,
+  };
+}
+
+interface MOConfig {
+  standardDeduction: {
+    singleOrMarriedSpouseWorksOrMFS: number;
+    marriedSpouseDoesNotWork: number;
+    headOfHousehold: number;
+  };
+  brackets: WIBracket[];
+  annualizeMultiplier: Partial<Record<string, number>>;
+}
+
+function resolveMOFilingStatus(
+  cert: Record<string, unknown>,
+): 'singleOrMarriedSpouseWorksOrMFS' | 'marriedSpouseDoesNotWork' | 'headOfHousehold' {
+  const raw = cert.filingStatus;
+  if (raw === 'married_spouse_does_not_work') return 'marriedSpouseDoesNotWork';
+  if (raw === 'head_of_household') return 'headOfHousehold';
+  // Form MO W-4's own default box order and this project's standing
+  // no-certificate convention both land here: 'Single or Married Spouse
+  // Works or Married Filing Separate' is the form's FIRST checkbox and
+  // covers three real filing situations under one shared deduction figure.
+  return 'singleOrMarriedSpouseWorksOrMFS';
+}
+
+/**
+ * Missouri's withholding formula (2026 Withholding Tax Formula, fetched and
+ * read directly): annualize wages, subtract a flat standard deduction keyed
+ * off Form MO W-4's THREE checkboxes (not five filing statuses — Single,
+ * Married-spouse-works, and MFS all share ONE deduction figure; Married-
+ * spouse-doesn't-work gets exactly double; HOH is independent), apply a
+ * 8-bracket annual schedule, divide by periods.
+ *
+ * IMPORTANT ROUNDING NOTE, worked out carefully from the source's own
+ * example rather than assumed: the document's worksheet LOOKS like it
+ * rounds each $1,348-wide bracket's incremental tax to the whole dollar
+ * before summing (26.96 -> 27, 33.70 -> 34, etc.), which could easily be
+ * misread as "round every bracket step to the dollar." It does NOT. Those
+ * whole-dollar sums are how the precomputed 'base' figures in this file's
+ * bracket table were themselves built (verified: 0+27+34+40+47+54+61=263,
+ * matching the top bracket's base exactly) — they are baked into the data,
+ * not recomputed here. The CURRENT bracket's own marginal tax on the actual
+ * excess uses ORDINARY cent rounding (verified against the source's own
+ * example: excess $9,464 x 4.70% = $444.808, rounds to $444.81 — NOT
+ * whole-dollar), and the two combine to $707.81 (also not whole-dollar) —
+ * matching the source's own annual figure exactly. Only the FINAL per-period
+ * amount is rounded to the whole dollar, via the generic
+ * rules.roundFinalToWholeDollar mechanism this file already built for
+ * Maine — re-verified end to end: $707.81 / 12 = $58.9841..., rounds to
+ * $59, matching the source's own stated answer.
+ */
+function missouriWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.flatRateMaritalDeduction as MOConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+
+  const multiplier = cfg.annualizeMultiplier[input.payFrequency];
+  if (multiplier === undefined) {
+    throw new Error(
+      `Missouri's own withholding formula doesn't publish an annualizing multiplier for ` +
+        `"${input.payFrequency}" — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const annualWages = periodWages * multiplier;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const status = resolveMOFilingStatus(cert);
+  const standardDeduction = dollars(cfg.standardDeduction[status]);
+  const taxableIncome = atLeastZero(annualWages - standardDeduction);
+
+  const bracket = findWIBracket(cfg.brackets, taxableIncome);
+  const excess = taxableIncome - dollars(bracket.from);
+  const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  const amount = roundHalfUp(annualTax / multiplier);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(annualWages)}/yr (×${multiplier}) less ${fmt(standardDeduction)} standard deduction ` +
+      `(${status}) = ${fmt(taxableIncome)} taxable @ ${(bracket.rate * 100).toFixed(2)}% over ` +
+      `${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))} = ${fmt(annualTax)}/yr ÷ ${multiplier}`,
+  };
+}
+
+interface NEConfig {
+  allowanceAmount: Partial<Record<string, number>>; // dollars, PER PERIOD
+  brackets: { single: { annual: WIBracket[] }; married: { annual: WIBracket[] } };
+}
+
+function resolveNEMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  return cert.maritalStatus === 'married' ? 'married' : 'single';
+}
+
+/**
+ * Nebraska's withholding (2026 Circular EN Percentage Method, fetched and
+ * read directly): subtract a flat PER-PERIOD allowance amount from wages,
+ * THEN annualize the net figure and look up Circular EN's own ANNUAL
+ * bracket table (Table 7 — the only one of its 8 per-period tables that
+ * extracted cleanly; the weekly/biweekly/semimonthly/monthly tables hit the
+ * same PDF column-shift artifact already documented elsewhere in this
+ * project and were not transcribed).
+ *
+ * DISCLOSED APPROXIMATION, not a silent one: Circular EN's real method
+ * looks up the net-of-allowance PER-PERIOD figure directly in a per-period
+ * table published for that exact frequency — it does not itself annualize
+ * and divide. This function instead annualizes the net figure and divides
+ * the annual table's answer by the period count. Per this project's Iowa
+ * precedent (proven algebraically and cell-by-cell that annual-divided-by-N
+ * reproduces a state's own published per-period tables to within a cent of
+ * independent rounding), this should match Circular EN's real per-period
+ * tables closely — but UNLIKE Iowa, that equivalence has NOT been verified
+ * cell-by-cell against Nebraska's own weekly/biweekly/monthly tables here,
+ * because those tables were never successfully transcribed. Flagged as a
+ * real, bounded-risk approximation rather than a proven-identical method.
+ */
+function nebraskaWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.bracketPerPeriodAllowance as NEConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const allowances = Number(cert.allowances ?? 0);
+  const allowancePerUnit = cfg.allowanceAmount[input.payFrequency];
+  if (allowancePerUnit === undefined) {
+    throw new Error(
+      `Nebraska's own withholding allowance table doesn't publish a "${input.payFrequency}" ` +
+        `figure — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const allowance = roundHalfUp(dollars(allowancePerUnit) * allowances);
+  const netPeriodWages = atLeastZero(periodWages - allowance);
+  const annualNetWages = netPeriodWages * ctx.periodsPerYear;
+
+  const status = resolveNEMaritalStatus(cert);
+  const brackets = cfg.brackets[status].annual;
+  const bracket = findWIBracket(brackets, annualNetWages);
+  const excess = annualNetWages - dollars(bracket.from);
+  const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: netPeriodWages,
+    amount,
+    detail:
+      `${fmt(periodWages)} less ${fmt(allowance)} allowance (${allowances} × $${allowancePerUnit}) ` +
+      `= ${fmt(netPeriodWages)} net, annualized ${fmt(annualNetWages)} @ ${(bracket.rate * 100).toFixed(2)}% ` +
+      `over ${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))}, ${status} schedule`,
+  };
+}
+
+interface ORCapTier {
+  wagesAtLeast: number;
+  wagesLessThan: number | null;
+  cap: number;
+}
+
+interface ORConfig {
+  standardDeduction: {
+    singleOrHOHUnder3Allowances: number;
+    marriedOrSingle3PlusAllowances: number;
+  };
+  federalTaxSubtractionCap: {
+    underAnnualWages50000: number;
+    at50000AndAbove: { singleSchedule: ORCapTier[]; marriedSchedule: ORCapTier[] };
+  };
+  brackets: {
+    annualWagesUnder50000: {
+      singleFewerThan3Allowances: WIBracket[];
+      single3PlusAllowancesOrMarried: WIBracket[];
+    };
+    annualWages50000AndUp: {
+      singleFewerThan3Allowances: WIBracket[];
+      single3PlusAllowancesOrMarried: WIBracket[];
+    };
+    annualizeMultiplier: Partial<Record<string, number>>;
+  };
+  personalExemptionCredit: { perAllowance: number };
+}
+
+function findORCapTier(schedule: ORCapTier[], annualWages: number): ORCapTier {
+  for (const t of schedule) {
+    const at = dollars(t.wagesAtLeast);
+    const lt = t.wagesLessThan === null ? Infinity : dollars(t.wagesLessThan);
+    if (annualWages >= at && annualWages < lt) return t;
+  }
+  return schedule[schedule.length - 1];
+}
+
+/**
+ * Oregon's withholding "computer formula" (150-206-436, Rev. 12-31-25,
+ * fetched and read directly): by far the most structurally involved method
+ * in this project. BASE = annual wages - federal tax withheld (capped, and
+ * for high earners phased down to $0) - a filing-status/allowance-count
+ * standard deduction. BASE is then run through one of FOUR bracket tables
+ * (selected by both which side of $50,000 annual wages the EMPLOYEE falls
+ * on, and which schedule — single-few-allowances vs. married-or-3+-
+ * allowances — applies), and a flat $263-per-allowance PERSONAL EXEMPTION
+ * CREDIT is subtracted AFTER the bracket lookup, Delaware-style.
+ *
+ * Genuinely new engine capability: this is the first state whose formula
+ * depends on the EMPLOYEE'S OWN COMPUTED FEDERAL WITHHOLDING as an input,
+ * not just federally-defined wage categories. Rather than changing
+ * calculatePaycheck()'s shared signature (which would touch every other
+ * state), this function reuses the existing exported federalIncomeTax()
+ * directly — a pure function of the same input/ctx/federal ruleset, so
+ * calling it here a second time (once here, once for the real US_FIT line)
+ * is deterministic and produces an identical figure, not a source of drift.
+ *
+ * TWO SEPARATE schedule-selection rules, not one — verified against the
+ * formula document's own FAQ #4 and #7 rather than assumed symmetric:
+ * (1) the STANDARD DEDUCTION and BRACKET TABLE use "single with 3+
+ * allowances OR married" as one combined bucket (Form OR-W-4's own
+ * convention — a single filer with 3+ allowances gets promoted to the
+ * married figures). (2) the FEDERAL-SUBTRACTION PHASE-OUT SCHEDULE instead
+ * keys OFF THE RAW MARITAL-STATUS BOX ONLY, ignoring the 3+-allowances
+ * promotion — FAQ #7's own words: "Use the single phase-out amounts. Only
+ * use married phase-out amounts for employees who check the 'Married' box."
+ * Collapsing these into one resolver would have been a real, silent bug.
+ *
+ * Verified against the source's own Example 1 via an independent hand
+ * calculation (single, $25,000 annual, 0 allowances, assumed $1,000
+ * federal withheld, $2,910 standard deduction -> BASE $21,090 -> bracket
+ * [11,400-50,000, base 941, rate 8.75%] -> $941+(21,090-11,400)x0.0875=
+ * $1,789.375, rounds to $1,789 — matches the document's own stated answer
+ * exactly). That verification used the DOCUMENT'S OWN assumed $1,000
+ * federal-withheld figure, which is illustrative rather than something
+ * this engine's real 2026 federal formula would necessarily produce for
+ * that exact wage/certificate combination — see tests/engine.test.ts,
+ * describe('Oregon') for how the ENGINE-level tests instead hand-verify
+ * Oregon's formula using the REAL federal withholding this engine computes
+ * as the input, which is what happens in an actual paycheck.
+ *
+ * No-certificate default is a flat 8% of taxable wages (HB 2119, 2019) —
+ * gated on the certificate being entirely ABSENT, not merely defaulted,
+ * since Oregon's own rule is about no OR-W-4 being on file at all, not
+ * about an employee who filed one claiming single/zero allowances.
+ */
+function oregonWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+
+  if (!input.workState?.certificate) {
+    const amount = applyRate(periodWages, 0.08);
+    return {
+      id: `${rules.code}_SIT`,
+      name: `${rules.name} Income Tax`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: periodWages,
+      amount,
+      detail: `${fmt(periodWages)} @ 8.00% (no Form OR-W-4 on file — HB 2119 default)`,
+    };
+  }
+
+  const cfg = rules.bracketFederalSubtractionPhaseout as ORConfig;
+  const multiplier = cfg.brackets.annualizeMultiplier[input.payFrequency];
+  if (multiplier === undefined) {
+    throw new Error(
+      `Oregon's own withholding formula doesn't publish an annualizing multiplier for ` +
+        `"${input.payFrequency}" — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const annualWages = periodWages * multiplier;
+
+  const cert = input.workState.certificate as Record<string, unknown>;
+  const maritalStatusBox = cert.maritalStatus === 'married' ? 'married' : 'single';
+  const allowances = Number(cert.allowances ?? 0);
+  const promoted = maritalStatusBox === 'married' || allowances >= 3;
+
+  const standardDeduction = dollars(
+    promoted
+      ? cfg.standardDeduction.marriedOrSingle3PlusAllowances
+      : cfg.standardDeduction.singleOrHOHUnder3Allowances,
+  );
+
+  const fedLine = federalIncomeTax(input, ctx, federalRuleset(input.checkDate));
+  const federalWithheldAnnual = fedLine.amount * multiplier;
+
+  const under50k = annualWages < dollars(50000);
+  const cap = under50k
+    ? dollars(cfg.federalTaxSubtractionCap.underAnnualWages50000)
+    : dollars(
+        findORCapTier(
+          maritalStatusBox === 'married'
+            ? cfg.federalTaxSubtractionCap.at50000AndAbove.marriedSchedule
+            : cfg.federalTaxSubtractionCap.at50000AndAbove.singleSchedule,
+          annualWages,
+        ).cap,
+      );
+  const federalSubtraction = Math.min(federalWithheldAnnual, cap);
+
+  const BASE = atLeastZero(annualWages - federalSubtraction - standardDeduction);
+
+  const bracketGroup = under50k ? cfg.brackets.annualWagesUnder50000 : cfg.brackets.annualWages50000AndUp;
+  const brackets = promoted
+    ? bracketGroup.single3PlusAllowancesOrMarried
+    : bracketGroup.singleFewerThan3Allowances;
+  const bracket = findWIBracket(brackets, BASE);
+  const excess = BASE - dollars(bracket.from);
+  const annualTaxBeforeCredit = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  const credit = dollars(cfg.personalExemptionCredit.perAllowance) * allowances;
+  const annualTax = atLeastZero(annualTaxBeforeCredit - credit);
+
+  const amount = roundHalfUp(annualTax / multiplier);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(annualWages)}/yr less ${fmt(federalSubtraction)} federal (capped ${fmt(cap)}) less ` +
+      `${fmt(standardDeduction)} std. deduction = ${fmt(BASE)} BASE @ ${(bracket.rate * 100).toFixed(2)}% over ` +
+      `${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))} = ${fmt(annualTaxBeforeCredit)} less ` +
+      `${fmt(credit)} exemption credit (${allowances} × $${cfg.personalExemptionCredit.perAllowance}) = ` +
+      `${fmt(annualTax)}/yr ÷ ${multiplier}`,
   };
 }

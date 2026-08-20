@@ -4437,6 +4437,194 @@ describe('Delaware', () => {
   });
 });
 
+describe('Arizona', () => {
+  // Arizona's own mechanism, not a bracket table: the employee elects a flat
+  // percentage of gross taxable wages on Form A-4 (2026), or elects zero. No
+  // certificate on file defaults to a flat 2.0% per the form's own words.
+  const azState = (certificate?: Record<string, unknown>) => ({
+    workState: { code: 'AZ', ...(certificate ? { certificate } : {}) },
+  });
+
+  test('elected 2.5% on Form A-4', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+        ...azState({ electedRate: 0.025 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'AZ_SIT'), dollars(75));
+  });
+
+  test('no Form A-4 on file defaults to the flat 2.0% HB 2119 rate', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+        ...azState(),
+      }),
+    );
+    assert.equal(amountOf(r, 'AZ_SIT'), dollars(60));
+  });
+
+  test('zero-withholding election on Form A-4 produces $0, not the default rate', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+        ...azState({ zeroElection: true }),
+      }),
+    );
+    assert.equal(amountOf(r, 'AZ_SIT'), 0);
+  });
+});
+
+describe('Missouri', () => {
+  // Expected values reproduce the 2026 Missouri Withholding Tax Formula's
+  // OWN worked example (married, spouse works, $35,000 annual, monthly
+  // $59) — monthly wages chosen as $2,916.67 so that x12 lands within 4
+  // cents of the source's stated $35,000 annual figure; verified by hand
+  // that the 4-cent difference doesn't shift the bracket or the rounded
+  // answer. roundFinalToWholeDollar (the same generic mechanism built for
+  // Maine) is what turns the raw $58.98 into the source's stated $59.
+  test("reproduces the DOR's own worked example: married/spouse-works, monthly $2,916.67", () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2916.67) }],
+        workState: { code: 'MO' },
+      }),
+    );
+    assert.equal(amountOf(r, 'MO_SIT'), dollars(59));
+  });
+
+  test('married, spouse does not work gets DOUBLE the standard deduction', () => {
+    // Annual $35,000.04 (2,916.67 x 12), deduction $32,200 (2x $16,100) ->
+    // taxable $2,800.04 -> falls in the 3rd bracket ($2,696-$4,044, base
+    // $27, rate 2.5%), NOT the 2nd: 27.00 + (2,800.04-2,696) x 2.5% =
+    // 27.00 + 2.60 = 29.60/yr -> /12 = 2.4667 -> raw $2.47, rounds to the
+    // nearest WHOLE DOLLAR (Missouri's final-rounding rule) = $2.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2916.67) }],
+        workState: { code: 'MO', certificate: { filingStatus: 'married_spouse_does_not_work' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'MO_SIT'), dollars(2));
+  });
+});
+
+describe('Nebraska', () => {
+  // Hand-derived from Circular EN's own verified ANNUAL bracket table (no
+  // official per-period worked example was available in the source —
+  // Circular EN's per-period tables extracted garbled and were not
+  // transcribed; this exercises the annualize-then-divide approximation
+  // disclosed in NE-2026.json rather than reproducing a published cell).
+  test('single, weekly $500, 0 allowances', () => {
+    // Annual net = 500 x 52 = 26,000 (0 allowances, no subtraction).
+    // Bracket [21,810-31,610, base 560.35, rate 4.21%]: 560.35 +
+    // (26,000-21,810) x 4.21% = 560.35 + 176.40 = 736.75 (fees applyRate's
+    // own rounding: 4,190 x 0.0421 = 176.399 -> rounds to 176.40).
+    // /52 = 14.168... -> rounds to 14.17.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+        workState: { code: 'NE', certificate: { maritalStatus: 'single', allowances: 0 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'NE_SIT'), dollars(14.17));
+  });
+
+  test('allowances reduce the base before annualizing', () => {
+    // Same $500/week, 2 allowances: 2 x $46.92 = $93.84 subtracted PER
+    // PERIOD first. Net = 500 - 93.84 = 406.16/wk, annualized x52 =
+    // 21,120.32 -> falls in the SAME bracket as the 0-allowance case
+    // (21,810 floor)? No: 21,120.32 < 21,810, so this actually lands in
+    // the PRIOR bracket [6,710-21,810, base 74.13, rate 3.22%]: 74.13 +
+    // (21,120.32-6,710) x 3.22% = 74.13 + 464.01 = 538.14 (14,410.32 x
+    // 0.0322 = 464.012 -> rounds to 464.01). /52 = 10.349... -> 10.35.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+        workState: { code: 'NE', certificate: { maritalStatus: 'single', allowances: 2 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'NE_SIT'), dollars(10.35));
+  });
+});
+
+describe('Oregon', () => {
+  // Oregon is the first state in this project whose formula depends on the
+  // employee's own COMPUTED FEDERAL WITHHOLDING, not just federally-defined
+  // wage categories. These fixtures were verified two ways: (1) an
+  // independent standalone reimplementation of the formula (deliberately
+  // separate from state.ts, the same discipline used for Connecticut, since
+  // Oregon publishes no cent-exact worked example using REAL federal
+  // withholding — its own Example 1 assumes an illustrative $1,000 federal
+  // figure that doesn't correspond to any real 2026 federal computation);
+  // (2) reading the actual engine's own detail string for the same inputs
+  // and confirming every intermediate figure matches by hand.
+  test('single, weekly $1,000, 0 allowances — real federal withholding as input', () => {
+    // Engine computes US_FIT = $78.08/wk (annualized $4,060.16). Annual OR
+    // wages = $52,000 (>= $50,000, so the phase-out-cap table applies, but
+    // $4,060.16 is under the $8,750 cap so the full federal figure is
+    // subtracted, uncapped in practice). BASE = 52,000 - 4,060.16 - 2,910
+    // (single, <3 allowances) = 45,029.84. Bracket [11,400-125,000, base
+    // 678, rate 8.75%]: 678 + (45,029.84-11,400) x 8.75% = 678 + 2,942.61
+    // = 3,620.61. No exemption credit (0 allowances). /52 = 69.628... ->
+    // 69.63.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR', certificate: { maritalStatus: 'single', allowances: 0 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'OR_SIT'), dollars(69.63));
+  });
+
+  test('married, 2 allowances, monthly $10,000, federal-exempt — promoted bracket + exemption credit', () => {
+    // federalW4.exempt=true isolates the OR-specific arithmetic from
+    // federal's own formula for this fixture. Annual wages $120,000 (>=
+    // $50,000, married schedule). BASE = 120,000 - 0 (federal) - 5,820
+    // (married deduction) = 114,180. Bracket [22,800-250,000, base
+    // 1,357, rate 8.75%]: 1,357 + (114,180-22,800) x 8.75% = 1,357 +
+    // 7,995.75 = 9,352.75. Less 2 x $263 = $526 exemption credit =
+    // 8,826.75. /12 = 735.5625 -> rounds to 735.56.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(10000) }],
+        federalW4: {
+          filingStatus: 'single',
+          multipleJobs: false,
+          dependentCredit: 0,
+          otherIncome: 0,
+          deductions: 0,
+          extraWithholding: 0,
+          exempt: true,
+        },
+        workState: { code: 'OR', certificate: { maritalStatus: 'married', allowances: 2 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'OR_SIT'), dollars(735.56));
+  });
+
+  test('no Form OR-W-4 on file defaults to a flat 8% (HB 2119), skipping the whole formula', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR' },
+      }),
+    );
+    assert.equal(amountOf(r, 'OR_SIT'), dollars(80));
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

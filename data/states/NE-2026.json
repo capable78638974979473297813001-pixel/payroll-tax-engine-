@@ -2,8 +2,8 @@
   "code": "NE",
   "name": "Nebraska",
   "year": 2026,
-  "method": "bracket_per_period_allowance",
-  "$methodComment": "Structurally the SAME shape as Vermont's method already wired into state.ts (bracketPerPeriodAllowance): subtract a flat per-allowance dollar amount from wages, then look up a bracket table selected by marital status. Data-only pass — not wired into calc code, but unlike most states in this batch, Nebraska could plausibly REUSE Vermont's existing dispatch function almost as-is if wired in later (2 schedules by marital status, allowance table keyed by pay frequency), rather than needing a new function.",
+  "method": "bracket_annual_from_period_allowance",
+  "$methodComment": "Similar in SPIRIT to Vermont's bracketPerPeriodAllowance() (subtract a flat per-allowance dollar amount from wages, then look up a bracket table selected by marital status) but NOT reused directly — Vermont's function expects genuinely-published PER-PERIOD bracket tables (rules.vermontWithholding.brackets[status][payFrequency]), while Nebraska's own per-period tables extracted garbled from the PDF and were never transcribed; only the ANNUAL table survived cleanly. So this got its own small function, nebraskaWithholding(), which subtracts the allowance per-period, then ANNUALIZES the net figure and divides the annual bracket's answer by the period count — a disclosed approximation (see bracketPerPeriodAllowance.bracketsComment) rather than a literal per-period lookup. WIRED INTO CALC CODE this session, dispatched on 'bracket_annual_from_period_allowance' (a distinct method name from Vermont's 'bracket_per_period_allowance' specifically so the two configs, which have incompatible shapes, can never be cross-dispatched by accident).",
   "sources": [
     {
       "title": "2026 Nebraska Circular EN (full withholding guide)",
@@ -114,8 +114,8 @@
       }
     ]
   },
+  "verification": "PROVEN via calculatePaycheck(): 2 hand-derived fixtures (0 allowances landing in one bracket, 2 allowances shifting the annualized net figure into the PRIOR bracket, proving the allowance subtraction genuinely changes which bracket applies) — see tests/engine.test.ts, describe('Nebraska'). No official Circular EN worked example was available to reproduce verbatim, so these are internally-consistent hand derivations against this file's own verified annual bracket table, not source-published answers. The annualize-then-divide approximation itself (as opposed to Circular EN's real per-period-table lookup) remains unverified cell-by-cell — see the next gap.",
   "knownGaps": [
-    "Not wired into calc code (data-only pass) — but structurally the closest of this batch to a drop-in reuse of the existing bracketPerPeriodAllowance() function already built for Vermont.",
     "Only the ANNUAL table is transcribed; the separately-published weekly/biweekly/semimonthly/monthly per-period tables were left unread (garbled on first extraction attempt) since Iowa's precedent already proves they're derivable from the annual table to within a cent of independent rounding.",
     "exemptPretax rests on general IRC-conformity knowledge, not a direct Circular EN quote naming 401(k)/125/etc. by category — one tier below Delaware's or Arizona's sourcing for the same claim.",
     "Supplemental flat-3.5% method documented but not modelled.",

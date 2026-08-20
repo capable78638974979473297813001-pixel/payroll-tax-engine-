@@ -60,7 +60,7 @@
       "sourceDoc": "Form A-4 percentage election (employee picks 0.0-3.5%; 2.0% default). Not a bracket table.",
       "status": "modelled",
       "sourceVerifiedOn": "2026-08-20",
-      "note": "Deep data pass 2026-08-20: employee-elected flat withholding percentage (0.5-3.5%, 2.0% default) fully documented from Form A-4 + WEC, including CA/IN/OR/VA nonresident credit-based reciprocity. Not wired into calc code."
+      "note": "Wired into calc code 2026-08-20 (employeeElectedFlat() in state.ts), verified against calculatePaycheck() -- elected rate, no-form default, and zero election all pass."
     },
     {
       "code": "AR",
@@ -298,7 +298,7 @@
       "sourceDoc": "Missouri Employer's Withholding Tax Formula + tables. Form MO W-4.",
       "status": "modelled",
       "sourceVerifiedOn": "2026-08-20",
-      "note": "Deep data pass 2026-08-20: flat-rate-marital-deduction annual bracket withholding verified against the DOR's own worked example (including its per-bracket-step whole-dollar rounding quirk), Kansas City + St. Louis local earnings taxes documented. Not wired into calc code."
+      "note": "Wired into calc code 2026-08-20 (missouriWithholding() in state.ts), verified against calculatePaycheck() reproducing the DOR's own worked example exactly (9/month) plus the married-spouse-doesn't-work double deduction."
     },
     {
       "code": "MT",
@@ -319,7 +319,7 @@
       "sourceDoc": "2026 Nebraska Circular EN (all tables changed; top rate 4.55%). Form W-4N.",
       "status": "modelled",
       "sourceVerifiedOn": "2026-08-20",
-      "note": "Deep data pass 2026-08-20: Circular EN annual bracket-per-period-allowance withholding table verified to the cent, UI (20-category array system, unusual dual wage base) documented. Not wired into calc code."
+      "note": "Wired into calc code 2026-08-20 (nebraskaWithholding() in state.ts), verified against calculatePaycheck() with 2 hand-derived fixtures. Uses an annualize-then-divide approximation of Circular EN's real per-period tables (not verified cell-by-cell -- see knownGaps)."
     },
     {
       "code": "NV",
@@ -423,7 +423,7 @@
       "sourceDoc": "Oregon Withholding Tax Formulas 150-206-436 (Rev. 12-31-25, 2026). Statewide Transit Tax 0.1% (separate). Form OR-W-4.",
       "status": "modelled",
       "sourceVerifiedOn": "2026-08-20",
-      "note": "Deep data pass 2026-08-20: withholding formula, statewide transit tax (confirmed still 0.1% -- Measure 120 failed), TriMet/Lane transit, Paid Leave Oregon, Metro SHS + Multnomah PFA local taxes, UI all documented. Not wired into calc code."
+      "note": "Wired into calc code 2026-08-20 (oregonWithholding() in state.ts) -- base state income tax only, verified against calculatePaycheck() with the real federal-withholding dependency exercised, not just a federal-exempt shortcut. Statewide transit tax, TriMet/LTD, Paid Leave Oregon, and Portland-area local taxes remain data-only, not wired."
     },
     {
       "code": "PA",

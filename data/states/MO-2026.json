@@ -2,8 +2,9 @@
   "code": "MO",
   "name": "Missouri",
   "year": 2026,
-  "method": "flat_rate_marital_deduction",
-  "$methodComment": "Structurally close to Iowa's shape (annualize, subtract a filing-status standard deduction, apply a bracket table, divide by periods, round to whole dollar at multiple steps) but with NO exemption/allowance count concept at all — Form MO W-4 has exactly 3 checkboxes (no numeric allowance line), same 'no exemption concept, form picks the deduction directly' shape as Kentucky's flatRateFixedDeduction(), except Missouri's deduction VARIES by which of the 3 boxes is checked (Kentucky's is one flat figure for everyone). Data-only pass — not wired into calc code.",
+  "method": "flat_rate_marital_deduction_whole_dollar",
+  "roundFinalToWholeDollar": true,
+  "$methodComment": "Structurally close to Iowa's shape (annualize, subtract a filing-status standard deduction, apply a bracket table, divide by periods) but with NO exemption/allowance count concept at all — Form MO W-4 has exactly 3 checkboxes (no numeric allowance line), same 'no exemption concept, form picks the deduction directly' shape as Kentucky's flatRateFixedDeduction(), except Missouri's deduction VARIES by which of the 3 boxes is checked (Kentucky's is one flat figure for everyone). WIRED INTO CALC CODE this session via missouriWithholding() in state.ts, dispatched on 'flat_rate_marital_deduction_whole_dollar' rather than reusing Iowa's plain 'flat_rate_marital_deduction' method name — the two states share a similar shape but Missouri needs a real bracket table (not a flat rate) plus the roundFinalToWholeDollar mechanism, so collapsing them under one method name would have silently misrouted one state's config into the other's function.",
   "sources": [
     {
       "title": "2026 Missouri Withholding Tax Formula",
@@ -101,8 +102,8 @@
     "experienceRatedRangeNote": "0.0% to 6.0%, quoted directly from DOLIR's own page: 'Rates could range from 0.0% to 6.0%, not including maximum rate surcharge and/or contribution rate adjustment.' Missouri is genuinely unusual in allowing a true 0.0% floor (many states floor above zero) — Shared Work Program participants have their own separate 0.0%-9.0% range, also not including surcharges.",
     "confidence": "primary_source_confirmed — labor.mo.gov/des/employers/tax-rates fetched and read directly this session (wage base, all 4 new-employer categories, experience range, and the Shared Work Program rate all read off this one page, not cross-sourced)."
   },
+  "verification": "PROVEN via calculatePaycheck(): reproduces the DOR's own worked example exactly ($59/month, married-spouse-works) via missouriWithholding() in state.ts, plus a second fixture confirming the double standard deduction for married-spouse-doesn't-work — see tests/engine.test.ts, describe('Missouri'). The per-bracket-step whole-dollar-sum question (see bracketsComment) turned out NOT to need special handling in the calc code: the precomputed 'base' figures already bake in that whole-dollar-per-step summation from the source data itself, and the CURRENT bracket's own marginal tax uses ordinary cent rounding, matching the source's own worked example precisely when reproduced end to end — confirmed empirically, not just asserted.",
   "knownGaps": [
-    "Not wired into calc code (data-only pass) — the per-bracket-step whole-dollar rounding (see bracketsComment) is the one real trap for whoever does wire this in; a naive reuse of WIBracket/applyRate's cents-based rounding would silently produce a slightly wrong answer.",
     "Kansas City's local-tax figures remain cross_source_confirmed — direct fetch was attempted and BLOCKED (Akamai-style bot filtering, same as Wilmington DE). St. Louis's direct fetch attempt 404'd rather than being blocked, meaning the current URL wasn't found.",
     "St. Louis's Payroll Expense Tax (employer-only, 0.5%) has no existing engine mechanism to model as a stand-alone employer levy on TOP of a city earnings tax — Newark's newarkPayrollTaxEmployer() is the closest precedent but replaces rather than layers.",
     "Supplemental-wage flat 4.7% method documented but not modelled."

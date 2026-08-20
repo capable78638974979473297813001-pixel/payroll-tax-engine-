@@ -3,7 +3,7 @@
   "name": "Arizona",
   "year": 2026,
   "method": "employee_elected_flat",
-  "$methodComment": "Genuinely the simplest withholding mechanism in this project: Arizona withholding is NOT computed from a bracket table, a standard deduction, or an exemption count at all. The employee picks a flat percentage of gross taxable wages (0.5% to 3.5%, in 0.5% steps) on Form A-4, or elects zero. No wage base, no filing-status distinction, no allowance mechanic. Data-only pass — not wired into calc code, though this would be one of the EASIEST states to wire in (arguably simpler than Idaho's flatRate()) since it's just `rate x taxableWages`, no config beyond the rate itself and a default.",
+  "$methodComment": "Genuinely the simplest withholding mechanism in this project: Arizona withholding is NOT computed from a bracket table, a standard deduction, or an exemption count at all. The employee picks a flat percentage of gross taxable wages (0.5% to 3.5%, in 0.5% steps) on Form A-4, or elects zero. No wage base, no filing-status distinction, no allowance mechanic. WIRED INTO CALC CODE via employeeElectedFlat() in state.ts, dispatched on 'employee_elected_flat'. 3 tests (elected rate, no-form 2.0% default, zero election) all pass — see tests/engine.test.ts, describe('Arizona').",
   "sources": [
     {
       "title": "2026 Form A-4, Employee's Arizona Withholding Election",
@@ -106,8 +106,8 @@
     ],
     "confidence": "primary_source_confirmed — full rate chart (both ratio-group tables, all 25 rows) read directly off Arizona DES's own UIT-0603A (FY26) PDF, not cross-sourced."
   },
+  "verification": "PROVEN via calculatePaycheck(): 3 fixtures (elected 2.5%, no-form 2.0% default, zero election) — see tests/engine.test.ts, describe('Arizona'). No supplemental-wage or reciprocity path is exercised (Arizona has no separate supplemental method; reciprocity is documented but not implemented as an engine mechanism, same gap class as several other states' reciprocity in this project).",
   "knownGaps": [
-    "Not wired into calc code (data-only pass) — but this is the lowest-effort state in this project to wire in whenever it's prioritized: rate x taxableWages, no bracket lookup, no per-frequency table.",
     "Reciprocity's CA leg remains genuinely uncertain — see reciprocity.caLegNotIndependentlyVerified. The OR leg was actively checked and found ASYMMETRIC this session (see reciprocity.orAsymmetryConfirmed), which raises rather than lowers suspicion about whether the CA leg is truly mutual too.",
     "Native American reservation exemption and military spouse exemption (both real, found on the same WEC form) are noted but not modelled as certificate fields — neither has appeared as a concept anywhere else in this project except Michigan's separate 'closed list' city-tax discussion, and would need new certificate fields this engine doesn't have."
   ]
