@@ -39,9 +39,9 @@
       "wageIncomeTax": true,
       "structure": "bracket",
       "withholdingSource": "https://www.revenue.alabama.gov/individual-corporate/withholding-tax-2/",
-      "sourceDoc": "Withholding Tax Tables and Instructions for Employers (whbooklet). Own Form A-4.",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11"
+      "sourceDoc": "whbooklet_0126.pdf (84pp), fetched and read directly. Wired into calc code (alabamaWithholding()) -- genuinely unusual shape: the employee's own ANNUAL FEDERAL WITHHOLDING is one of the deduction components (computed by calling federalIncomeTax() directly, the same pattern Oregon's federal-subtraction method already established), alongside a standard deduction that steps DOWN as income rises (differently per one of 5 status codes: 0/S/MS/M/H), a flat personal exemption by status, and a per-dependent allowance that steps down by GROSS INCOME rather than status. Two bracket schedules (M vs everyone else). Reproduced the booklet's own worked example exactly. Real 31-day nonresident de minimis rule found (day-count, not dollars) -- disclosed, not modelled (this engine has no day-tracking mechanism). Real local occupational taxes exist (Birmingham/Bessemer/Gadsden/Jefferson County) -- documented structurally, not built (same status PA's Act 32 EIT was in before its own build). No reciprocity with any state; no mandatory paid leave.",
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-21"
     },
     {
       "code": "AK",
@@ -139,11 +139,11 @@
       "code": "GA",
       "name": "Georgia",
       "wageIncomeTax": true,
-      "structure": "bracket",
+      "structure": "flat",
       "withholdingSource": "https://dor.georgia.gov/taxes/withholding-tax-employers",
-      "sourceDoc": "2026 Employer's Withholding Tax Guide (updated June 2026). Form G-4.",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11"
+      "sourceDoc": "Employer's Withholding Tax Guide, revised June 2026 (reflecting HB 463, signed 2026-05-11) -- fetched directly from dor.georgia.gov after an initial third-party mirror turned out to be a STALE pre-HB-463 version (caught by cross-checking the Governor's own press release before trusting either). Wired into calc code (georgiaWithholding()): a genuine MID-YEAR change, not just year-over-year -- the statute cut the rate 5.19%->4.99% and raised the standard deduction ($24k/$12k -> $30k/$15k MFJ/other) and dependent allowance ($4,000->$5,000) retroactive to 2026-01-01, but employer WITHHOLDING transitions specifically on 2026-05-11 (same shape as Ohio's HB96 mid-year cut). Both before/after tables verified against the guide's own worked examples exactly. 401(k)/deferred-comp confirmed NOT taxable via the guide's own direct FAQ. No reciprocity with any state; no local income tax (state-preempted); no mandatory paid leave. Structure corrected from 'bracket' to 'flat' -- Georgia completed its HB 1437 flat-tax transition.",
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-21"
     },
     {
       "code": "HI",

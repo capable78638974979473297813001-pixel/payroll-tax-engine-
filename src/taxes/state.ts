@@ -729,6 +729,10 @@ function incomeTaxLines(
       return [southCarolinaWithholding(input, ctx, rules)];
     case 'arkansas_bracket_credit':
       return [arkansasWithholding(input, ctx, rules)];
+    case 'alabama_federal_subtraction':
+      return [alabamaWithholding(input, ctx, rules)];
+    case 'georgia_status_deduction':
+      return [georgiaWithholding(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -5623,5 +5627,206 @@ function arkansasWithholding(
       `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction, ${midrangeNote} ` +
       `@ ${(bracket.rate * 100).toFixed(2)}% less ${fmt(adjustment)} adjustment = ${fmt(annualGrossTax)} gross tax, ` +
       `less ${fmt(credit)} (${exemptions} × $${cfg.personalCreditPerExemption} credit) = ${fmt(annualNetTax)}/yr ÷ ${multiplier}`,
+  };
+}
+
+interface ALStandardDeductionStep {
+  base: number;
+  floor: number;
+  threshold: number;
+  ceiling: number;
+  stepAmount: number;
+  stepIncrement: number;
+}
+
+interface ALConfig {
+  standardDeduction: {
+    single_0: ALStandardDeductionStep;
+    marriedFilingSeparately: ALStandardDeductionStep;
+    marriedFilingJointly: ALStandardDeductionStep;
+    headOfFamily: ALStandardDeductionStep;
+  };
+  personalExemption: { code0: number; codeS: number; codeMS: number; codeM: number; codeH: number };
+  dependentAllowance: {
+    tiers: { giLessOrEqual?: number; giGreaterThan?: number; perDependent: number }[];
+  };
+  brackets: { nonMarried: WIBracket[]; married: WIBracket[] };
+}
+
+function resolveALDeductionKey(
+  code: string,
+): keyof ALConfig['standardDeduction'] {
+  if (code === 'MS') return 'marriedFilingSeparately';
+  if (code === 'M') return 'marriedFilingJointly';
+  if (code === 'H') return 'headOfFamily';
+  return 'single_0'; // '0' or 'S', or no certificate on file
+}
+
+function alabamaStandardDeduction(cfg: ALStandardDeductionStep, gi: number): number {
+  const threshold = dollars(cfg.threshold);
+  const ceiling = dollars(cfg.ceiling);
+  const base = dollars(cfg.base);
+  const floor = dollars(cfg.floor);
+  if (gi <= threshold) return base;
+  if (gi >= ceiling) return floor;
+  const stepIncrement = dollars(cfg.stepIncrement);
+  const steps = Math.ceil((gi - threshold) / stepIncrement);
+  return Math.max(floor, base - dollars(cfg.stepAmount) * steps);
+}
+
+function alabamaPersonalExemption(cfg: ALConfig['personalExemption'], code: string): number {
+  if (code === 'S') return dollars(cfg.codeS);
+  if (code === 'MS') return dollars(cfg.codeMS);
+  if (code === 'M') return dollars(cfg.codeM);
+  if (code === 'H') return dollars(cfg.codeH);
+  return dollars(cfg.code0); // '0' or unset
+}
+
+function alabamaDependentPerUnit(
+  tiers: ALConfig['dependentAllowance']['tiers'],
+  gi: number,
+): number {
+  for (const t of tiers) {
+    if (t.giLessOrEqual !== undefined && gi <= dollars(t.giLessOrEqual)) {
+      return dollars(t.perDependent);
+    }
+  }
+  return dollars(tiers[tiers.length - 1].perDependent);
+}
+
+/**
+ * Alabama's withholding formula (Formula For Computing Alabama Withholding
+ * Tax, read directly): a genuinely unusual shape among every state in this
+ * project — the employee's own ANNUAL FEDERAL WITHHOLDING is one of the
+ * deductions, alongside a standard deduction that steps DOWN as income
+ * rises (a different threshold/step-size per filing status), a flat
+ * personal exemption by status, and a per-dependent allowance that steps
+ * down by GROSS INCOME (not status). Two 3-bracket schedules: "M" (married
+ * filing jointly) gets double-width brackets; every other status shares
+ * the narrower one.
+ *
+ * Computes federal withholding by calling federalIncomeTax() directly —
+ * the same "compute another tax's line, read its .amount" pattern this
+ * project's own Oregon method (bracketFederalSubtractionPhaseout) already
+ * established, just without Oregon's cap.
+ */
+function alabamaWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.alabamaFederalSubtraction as ALConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+  const annualGI = periodWages * ctx.periodsPerYear;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const code = typeof cert.alabamaExemptionCode === 'string' ? cert.alabamaExemptionCode : '0';
+  const isMarried = code === 'M';
+
+  const standardDeduction = alabamaStandardDeduction(
+    cfg.standardDeduction[resolveALDeductionKey(code)],
+    annualGI,
+  );
+  const personalExemption = alabamaPersonalExemption(cfg.personalExemption, code);
+  const dependents = Number(cert.dependents ?? 0);
+  const dependentTotal = alabamaDependentPerUnit(cfg.dependentAllowance.tiers, annualGI) * dependents;
+
+  const fedLine = federalIncomeTax(input, ctx, federalRuleset(input.checkDate));
+  const federalWithheldAnnual = fedLine.amount * ctx.periodsPerYear;
+
+  const totalDeductions = standardDeduction + federalWithheldAnnual + personalExemption + dependentTotal;
+  const taxableAmount = atLeastZero(annualGI - totalDeductions);
+
+  const brackets = isMarried ? cfg.brackets.married : cfg.brackets.nonMarried;
+  const bracket = findWIBracket(brackets, taxableAmount);
+  const excess = taxableAmount - dollars(bracket.from);
+  const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
+  const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(annualGI)}/yr GI less ${fmt(standardDeduction)} standard deduction, ` +
+      `${fmt(federalWithheldAnnual)} annual federal withholding, ${fmt(personalExemption)} personal exemption (${code}), ` +
+      `${fmt(dependentTotal)} (${dependents} dependents) = ${fmt(taxableAmount)} taxable @ ` +
+      `${(bracket.rate * 100).toFixed(2)}% (${isMarried ? 'M' : 'non-M'} schedule) = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
+  };
+}
+
+interface GATablePeriod {
+  rate: number;
+  standardDeductionAnnual: {
+    marriedFilingJoint: number;
+    singleOrHeadOfHousehold: number;
+    marriedFilingSeparate: number;
+  };
+  dependentAllowanceAnnual: number;
+}
+
+interface GAConfig {
+  effectiveDateOfNewTable: string;
+  beforeMay11_2026: GATablePeriod;
+  fromMay11_2026: GATablePeriod;
+}
+
+/**
+ * Georgia's withholding formula (Employer's Withholding Tax Guide, read
+ * directly): a genuine MID-YEAR change from HB 463 — the statute cut the
+ * rate and raised the standard deduction/dependent allowance retroactive
+ * to 2026-01-01, but the employer WITHHOLDING transition date is
+ * 2026-05-11 specifically (both tables verified against the guide's own
+ * before/after worked examples). Same shape as Ohio's HB96 mid-year cut —
+ * a plain string-compare against effectiveDateOfNewTable, no new
+ * mechanism. Otherwise simple: annualize, subtract a 3-tier standard
+ * deduction (MFJ gets its own figure; Single/HoH/MFS all share the same
+ * lower one) plus a flat per-dependent allowance, multiply by the single
+ * flat rate. No whole-dollar rounding.
+ */
+function georgiaWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.georgiaStatusDeduction as GAConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+  const annualWages = periodWages * ctx.periodsPerYear;
+
+  const table = input.checkDate >= cfg.effectiveDateOfNewTable ? cfg.fromMay11_2026 : cfg.beforeMay11_2026;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const statusKey =
+    cert.filingStatus === 'married_filing_joint'
+      ? 'marriedFilingJoint'
+      : cert.filingStatus === 'married_filing_separate'
+        ? 'marriedFilingSeparate'
+        : 'singleOrHeadOfHousehold';
+  const standardDeduction = dollars(table.standardDeductionAnnual[statusKey]);
+
+  const dependents = Number(cert.dependents ?? 0);
+  const dependentAllowance = dollars(table.dependentAllowanceAnnual) * dependents;
+
+  const taxableIncome = atLeastZero(annualWages - standardDeduction - dependentAllowance);
+  const annualTax = applyRate(taxableIncome, table.rate);
+  const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction (${statusKey}) ` +
+      `less ${fmt(dependentAllowance)} (${dependents} dependents) = ${fmt(taxableIncome)} taxable ` +
+      `@ ${(table.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear} ` +
+      `(${table === cfg.fromMay11_2026 ? 'post' : 'pre'}-2026-05-11 table)`,
   };
 }

@@ -5847,6 +5847,169 @@ describe('Arkansas', () => {
   });
 });
 
+describe('Alabama', () => {
+  // Alabama's own formula subtracts the employee's ANNUAL FEDERAL
+  // WITHHOLDING as a deduction component -- this describe block isolates
+  // the AL-only math with a federal-exempt certificate first, then proves
+  // the cross-tax dependency actually wires through separately.
+  test("reproduces the withholding booklet's own worked example structure: weekly $850, 'M-2', federal exempt -> $31.35", () => {
+    // GI = 850x52 = $44,200. Standard deduction (MFJ, GI >= $35,500
+    // ceiling): floor $5,000. Personal exemption (M): $3,000. 2
+    // dependents x $1,000 (GI <= $50,000 tier) = $2,000. Federal
+    // withholding = $0 (exempt, isolating AL-only math from the booklet's
+    // own stale example federal figure). Total deductions = $10,000.
+    // Taxable = $34,200. Married bracket [$6,000+, base $220, 5%]:
+    // 220 + 5%x(34,200-6,000=28,200=$1,410) = $1,630.00/yr / 52 = $31.35.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(850) }],
+        workState: { code: 'AL', certificate: { alabamaExemptionCode: 'M', dependents: 2 } },
+        federalW4: {
+          filingStatus: 'married_joint',
+          multipleJobs: false,
+          dependentCredit: 0,
+          otherIncome: 0,
+          deductions: 0,
+          extraWithholding: 0,
+          exempt: true,
+        },
+      }),
+    );
+    assert.equal(amountOf(r, 'AL_SIT'), dollars(31.35));
+  });
+
+  test('federal withholding actually reduces the AL taxable base (cross-tax dependency wired through)', () => {
+    const fixture = {
+      payFrequency: 'weekly' as const,
+      earnings: [{ code: 'REG', category: 'regular', amount: dollars(850) }],
+      workState: {
+        code: 'AL',
+        certificate: { alabamaExemptionCode: 'M', dependents: 2 },
+      },
+    };
+    const withFederalExempt = calculatePaycheck(
+      input({
+        ...fixture,
+        federalW4: {
+          filingStatus: 'married_joint',
+          multipleJobs: false,
+          dependentCredit: 0,
+          otherIncome: 0,
+          deductions: 0,
+          extraWithholding: 0,
+          exempt: true,
+        },
+      }),
+    );
+    const withRealFederal = calculatePaycheck(input(fixture)); // default federalW4, not exempt
+    const federalWithheld = amountOf(withRealFederal, 'US_FIT');
+    assert.ok(federalWithheld > 0, 'fixture must actually produce nonzero federal withholding to test this');
+    assert.ok(
+      amountOf(withRealFederal, 'AL_SIT') < amountOf(withFederalExempt, 'AL_SIT'),
+      'more federal withholding should mean less AL taxable income, and therefore less AL tax',
+    );
+  });
+
+  test('the standard deduction step function matches the booklet\'s own Schedule table for Single status', () => {
+    // Single/"0", GI = $26,000 (weekly $500 x 52) -- $1 above the $25,999
+    // threshold, which the booklet's own table shows still rounds UP to
+    // ONE full $500 increment: $3,000 - $25 = $2,975 standard deduction.
+    // Personal exemption $0 ("0" code). No dependents, no federal
+    // withholding (exempt).
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+        workState: { code: 'AL', certificate: { alabamaExemptionCode: '0' } },
+        federalW4: {
+          filingStatus: 'single',
+          multipleJobs: false,
+          dependentCredit: 0,
+          otherIncome: 0,
+          deductions: 0,
+          extraWithholding: 0,
+          exempt: true,
+        },
+      }),
+    );
+    // Taxable = 26,000 - 2,975 = 23,025. Non-married bracket
+    // [$3,000+, base $110, 5%]: 110 + 5%x(23,025-3,000=20,025=$1,001.25)
+    // = $1,111.25/yr / 52 = $21.37 (roundHalfUp of 21.370192...).
+    assert.equal(amountOf(r, 'AL_SIT'), dollars(21.37));
+  });
+});
+
+describe('Georgia', () => {
+  const gaState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'GA', certificate },
+  });
+
+  test("reproduces the guide's own POST-2026-05-11 Table E example exactly: semimonthly $2,000, MFJ, 1 dependent -> $27.03", () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...gaState({ filingStatus: 'married_filing_joint', dependents: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'GA_SIT'), dollars(27.03));
+  });
+
+  test("reproduces the guide's own POST-2026-05-11 Table F example exactly: biweekly $935, Head of Household, 2 dependents -> $0.00", () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(935) }],
+        ...gaState({ dependents: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'GA_SIT'), 0);
+  });
+
+  test("reproduces the guide's own PRE-2026-05-11 Table E example exactly: semimonthly $1,470.83, MFJ, 1 dependent -> $15.79 (5.19% rate, old deduction)", () => {
+    // Confirms the mid-year HB463 transition actually dispatches on
+    // checkDate: a payroll BEFORE 2026-05-11 must still use the old
+    // 5.19%/$24,000/$4,000 table, not the new one.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-03-15',
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1470.83) }],
+        ...gaState({ filingStatus: 'married_filing_joint', dependents: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'GA_SIT'), dollars(15.79));
+  });
+
+  test("reproduces the guide's own PRE-2026-05-11 Table F example exactly: biweekly $730.77, Head of Household, 2 dependents -> $0.00", () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-03-15',
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(730.77) }],
+        ...gaState({ dependents: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'GA_SIT'), 0);
+  });
+
+  test('no reciprocity with any state', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        residenceState: { code: 'AL' },
+        ...gaState({ filingStatus: 'married_filing_joint', dependents: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'GA_SIT'), dollars(27.03));
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(
