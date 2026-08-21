@@ -1,0 +1,71 @@
+{
+  "code": "NC",
+  "name": "North Carolina",
+  "year": 2026,
+  "method": "north_carolina_status_deduction",
+  "sources": [
+    {
+      "title": "NC-30 (Web 11-25) -- 2026 Income Tax Withholding Tables and Instructions for Employers",
+      "url": "https://www.ncdor.gov/income-tax-withholding-tables-and-instructions-employers/open",
+      "verifiedOn": "2026-08-21",
+      "verifiedBy": "PDF downloaded (570KB, 5,908 lines after extraction) and read directly in full, including both the Percentage Method and Annualized Wages Method formula tables. Confirmed rate change per Session Law 2023-134: individual income tax rate drops from 4.25% to 3.99% for tax year 2026, quoted directly from the document's own 'New for 2026' notice."
+    },
+    {
+      "title": "NCDOR -- Withholding Tax Frequently Asked Questions",
+      "url": "https://www.ncdor.gov/withholding-tax-frequently-asked-questions",
+      "verifiedOn": "2026-08-21",
+      "verifiedBy": "Cross-referenced for context only -- the NC-30 PDF itself was the primary source for every figure in this file."
+    },
+    {
+      "title": "NC Division of Employment Security -- Tax Rate Information",
+      "url": "https://www.des.nc.gov/employers/tax-rate-information",
+      "verifiedOn": "2026-08-21",
+      "verifiedBy": "Fetched directly. Quoted: taxable wage base '$34,200', new employer rate '1.000% (.01000)', experience-rated range 0.06% to 5.76%. Matches every secondary source checked (Bloomberg Tax, Kreto) with zero discrepancy -- a clean primary confirmation, not a correction."
+    }
+  ],
+  "flatRateStatusDeduction": {
+    "$comment": "NC-30's own 'New for 2026' notice + the Percentage Method / Annualized Wages Method formula tables (both read directly, both state the identical formula and produce identical results by construction -- the Annualized Wages Method table's own Line 4/5/8/10 sequence was used as the primary structure since it maps cleanly onto this project's annualize-then-divide convention already used by DC/VA/Delaware).",
+    "rate": 0.0409,
+    "rateComment": "NOT the bare 3.99% individual income tax rate (Session Law 2023-134, down from 4.25%) -- NC-30 states directly: 'The withholding calculations are based on the individual income tax rate of 3.99% plus 0.1%. This results in a withholding tax rate of 4.09%.' The extra 0.1% is baked into every wage-bracket table, percentage-method formula, and annualized-method formula in the document; it is not a separate line item or a temporary surcharge callout -- it IS the withholding rate. Confirmed via the document's own worked example: a $500 monthly wage 'Without the modification, Employer will withhold $44... Using the modification, Employer will withhold $21 ($500 X 4.09%)' -- a direct quote using 4.09% as a plain multiplier, not 3.99%.",
+    "standardDeductionAnnual": {
+      "single_married_survivingSpouse": 12750.0,
+      "headOfHousehold": 19125.0
+    },
+    "standardDeductionComment": "Only TWO deduction tiers, not the usual three/four -- Single, Married, and Surviving Spouse ALL share the identical $12,750 figure (the Percentage Method's own formula table is headed 'Single Person, Married Person, or Surviving Spouse', one combined table, not separate Single/Married tables the way most other states in this project split them). Head of Household gets a genuinely higher $19,125. No Married Filing Separately distinction exists in the formula at all. Both figures confirmed twice: directly stated ('N.C. standard deduction $12,750.00' / '$19,125.00' in the Annualized Method table) AND cross-checked against the monthly Percentage Method table ($1,062.50 x 12 = $12,750.00 exactly; $1,593.75 x 12 = $19,125.00 exactly).",
+    "allowanceAmountAnnual": 2500.0,
+    "allowanceComment": "Confirmed directly ('Multiply the number of allowances by $2,500.00') and cross-checked against NC-30's own explanation of WHY: 'Additional withholding allowances may be claimed by employees expecting to have allowable N.C. itemized deductions exceeding the N.C. standard deduction... one additional allowance for each $2,500 that the N.C. standard deduction and other N.C. deductions exceed the federal standard deduction.'"
+  },
+  "roundFinalToWholeDollar": true,
+  "roundingComment": "NC-30 states this explicitly on every single formula table page: 'Round off the final amount to the nearest whole dollar.' Uses this project's existing generic rules.roundFinalToWholeDollar mechanism (built for Maine, reused by Virginia) rather than new code.",
+  "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
+  "exemptPretaxComment": "Confirmed directly, not inferred: NC-30 Section 9 states 'The term wages has the same meaning as in section 3401 of the Internal Revenue Code' and 'Employers are required to withhold on wages to the same extent required for federal income tax purposes.' This ties NC's OWN withholding base definition directly to the federal IRC 3401 wage definition, which already excludes 401(k)/125/HSA/etc. elective deferrals at the point of measurement -- a more direct, on-point citation than most other federal-conformity states in this project (which typically only confirm conformity through the state's OWN taxable-income/AGI statute, one inferential step removed from the withholding base itself).",
+  "reciprocity": {
+    "$comment": "CHECKED, not assumed absent: NC-30's full 5,908-line text was searched for 'reciprocal'/'reciprocity' and returned zero matches. North Carolina has no reciprocal withholding agreement with any state -- a nonresident working in NC owes NC tax on NC-source wages regardless of home state, full stop.",
+    "reciprocalStates": []
+  },
+  "outOfStateWorkNote": "NC-30 does not address this (it is a Div. of Revenue document; NC's default 'resident working elsewhere' sourcing convention was not independently researched this pass) -- disclosed as an open item rather than assumed to match any other state's pattern.",
+  "nonresidentAlienNote": "NC-4 NRA (not independently fetched this pass, described secondhand via NC-30 Section 13) requires nonresident aliens be withheld at Single status with an ADDITIONAL per-period amount added (the tax on the $12,750 single standard deduction, since NRAs generally aren't allowed the NC standard deduction at all) -- e.g. $44/month, $21/biweekly, etc. NOT modelled as separate calc-code this pass; a caller handling an NRA employee should set filingStatus to 'single', 0 allowances, and compute the additional-withholding amount from NC-30's own published chart (weekly $11, biweekly $21, semimonthly $22, monthly $44) via the existing generic certificate.additionalWithholding mechanism.",
+  "localIncomeTax": {
+    "rule": "NONE. No North Carolina city or county levies a local income/wage tax. Not found anywhere in NC-30 or any source checked this pass.",
+    "confidence": "checked_not_found -- NC-30's full text contains no local-tax provision of any kind; consistent with general knowledge that NC has no local income tax authority."
+  },
+  "paidFamilyMedicalLeave": {
+    "rule": "NONE. North Carolina has no mandatory state-run paid family/medical leave program for private employers. Senate Bill 480 and House Bill 499 (2025-2026 session) would create one but neither has been enacted as of this pass.",
+    "confidence": "cross_source_confirmed via search synthesis, not independently fetched from ncleg.gov this pass."
+  },
+  "unemploymentInsurance": {
+    "administeredBy": "NC Division of Employment Security (DES)",
+    "wageBase": 34200.0,
+    "newEmployerRate": 0.01,
+    "experiencedEmployerRateRange": [0.0006, 0.0576],
+    "confidence": "primary_source_confirmed -- des.nc.gov's own Tax Rate Information page fetched directly, quoted verbatim above.",
+    "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project: experience-rated, an individual employer's actual rate depends on employer-specific history a static jurisdiction file can't hold."
+  },
+  "knownGaps": [
+    "Not wired for the NC-4 NRA nonresident-alien path -- disclosed with the exact published additional-withholding chart above rather than built as new certificate-driven logic this pass.",
+    "The 'NC resident working out of state' default sourcing convention was not independently researched -- NC-30 is silent on it (a Div. of Revenue document, not a multistate-sourcing guide).",
+    "Employer-side UC is documented (wage base, new-employer rate, experience range, all primary-sourced) but not modelled -- same per-employer-experience-rating gap as every other state's employer SUTA in this project.",
+    "Supplemental wages: NC-30 documents a flat 4.09% option (identical to the regular rate, since the regular rate itself already includes NC's own 'buffer') or an aggregate method -- not yet wired into calc code this pass.",
+    "No test yet exercises stateUnemploymentEmployee-style config since NC has no employee-paid UC component (unlike Pennsylvania) -- not applicable, noted for completeness only."
+  ]
+}

@@ -5700,6 +5700,103 @@ describe('West Virginia', () => {
   });
 });
 
+describe('North Carolina', () => {
+  const ncState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'NC', certificate },
+  });
+
+  test('weekly $1,000, Single/Married, 1 allowance: $29', () => {
+    // Annual 1,000x52=52,000. Less $12,750 standard deduction, less
+    // 1x$2,500 allowance = $36,750 taxable. x4.09% = $1,503.08/yr (cent-
+    // rounded) / 52 = $28.91 -> rounds to the nearest WHOLE DOLLAR ($29),
+    // per NC-30's own explicit rounding instruction.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...ncState({ allowances: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NC_SIT'), dollars(29));
+  });
+
+  test('weekly $1,000, Head of Household, 0 allowances: $26', () => {
+    // Annual 52,000 less the HIGHER $19,125 HoH standard deduction (no
+    // separate Married table exists in NC's formula -- this is the ONLY
+    // status split) = $32,875 taxable. x4.09% = $1,344.59/yr / 52 =
+    // $25.86 -> rounds to $26.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...ncState({ filingStatus: 'head_of_household' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NC_SIT'), dollars(26));
+  });
+
+  test('no reciprocity with any state', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        residenceState: { code: 'VA' },
+        ...ncState({ allowances: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NC_SIT'), dollars(29));
+  });
+});
+
+describe('South Carolina', () => {
+  const scState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'SC', certificate },
+  });
+
+  test("reproduces WH-1603F's own worked example exactly: weekly $750, 3 allowances -> $10.58", () => {
+    // Annual 750x52=39,000. Personal allowance 3x$5,000=$15,000. Standard
+    // deduction 10%x39,000=$3,900 (under the $7,500 cap). Taxable
+    // $20,100. Bracket 3 (>=$18,230): $437.70 + 6%x($20,100-18,230=1,870
+    // =$112.20) = $549.90/yr / 52 = $10.5750 -> $10.58/week. No
+    // whole-dollar rounding in South Carolina, unlike NC/VA.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(750) }],
+        ...scState({ allowances: 3 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'SC_SIT'), dollars(10.58));
+  });
+
+  test('0 allowances forfeits BOTH the personal allowance AND the standard deduction at once', () => {
+    // Annual 500x52=26,000, NO deductions at all (the all-or-nothing
+    // quirk WH-1603F's own text confirms). Bracket 3: $437.70 +
+    // 6%x(26,000-18,230=7,770=$466.20) = $903.90/yr / 52 = $17.3827 ->
+    // $17.38/week.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+        workState: { code: 'SC' },
+      }),
+    );
+    assert.equal(amountOf(r, 'SC_SIT'), dollars(17.38));
+  });
+
+  test('no reciprocity with any state', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(750) }],
+        residenceState: { code: 'NC' },
+        ...scState({ allowances: 3 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'SC_SIT'), dollars(10.58));
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

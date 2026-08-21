@@ -723,6 +723,10 @@ function incomeTaxLines(
       return [virginiaWithholding(input, ctx, rules)];
     case 'west_virginia_dual_table':
       return [westVirginiaWithholding(input, ctx, rules)];
+    case 'north_carolina_status_deduction':
+      return [northCarolinaWithholding(input, ctx, rules)];
+    case 'south_carolina_allowance_deduction':
+      return [southCarolinaWithholding(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -5400,5 +5404,127 @@ function pennsylvaniaLST(
     detail:
       `${fmt(annualLST)}/yr ÷ ${ctx.periodsPerYear} periods, rounded DOWN to the cent (Act 32's own ` +
       `proration rule, the opposite direction from every other tax in this engine) = ${fmt(perPeriod)}/period`,
+  };
+}
+
+interface NCConfig {
+  rate: number;
+  standardDeductionAnnual: {
+    single_married_survivingSpouse: number;
+    headOfHousehold: number;
+  };
+  allowanceAmountAnnual: number;
+}
+
+/**
+ * North Carolina's withholding formula (NC-30's own Annualized Wages
+ * Method table, read directly): annualize wages, subtract a flat standard
+ * deduction (ONLY two tiers — Single/Married/Surviving Spouse share one
+ * figure, $12,750; Head of Household gets $19,125 — no separate Married
+ * table at all, unlike most bracket/deduction states in this project) plus
+ * $2,500 per allowance, then multiply the whole remainder by a SINGLE flat
+ * rate. That rate, 4.09%, is NOT the bare 3.99% individual income tax rate
+ * — NC-30 states directly that withholding itself is computed at "3.99%
+ * plus 0.1%," so 0.0409 is the correct multiplier here, already baked in.
+ * Final amount rounds to the nearest WHOLE DOLLAR — handled generically by
+ * rules.roundFinalToWholeDollar in stateIncomeTax(), not here.
+ */
+function northCarolinaWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.flatRateStatusDeduction as NCConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+  const annualWages = periodWages * ctx.periodsPerYear;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const isHoH = cert.filingStatus === 'head_of_household';
+  const standardDeduction = dollars(
+    isHoH
+      ? cfg.standardDeductionAnnual.headOfHousehold
+      : cfg.standardDeductionAnnual.single_married_survivingSpouse,
+  );
+  const allowances = Number(cert.allowances ?? 0);
+  const allowanceDeduction = dollars(cfg.allowanceAmountAnnual) * allowances;
+
+  const taxableIncome = atLeastZero(annualWages - standardDeduction - allowanceDeduction);
+  const annualTax = applyRate(taxableIncome, cfg.rate);
+  const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction (${isHoH ? 'HoH' : 'Single/Married/Surviving Spouse'}) ` +
+      `less ${fmt(allowanceDeduction)} (${allowances} × $${cfg.allowanceAmountAnnual} allowances) ` +
+      `= ${fmt(taxableIncome)} taxable @ ${(cfg.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
+  };
+}
+
+interface SCConfig {
+  allowanceAmountAnnual: number;
+  standardDeductionRate: number;
+  standardDeductionCapAnnual: number;
+  brackets: { annual: WIBracket[] };
+}
+
+/**
+ * South Carolina's withholding formula (WH-1603F, read directly):
+ * annualize wages, then — ONLY if at least 1 allowance is claimed — subtract
+ * a Personal Allowance ($5,000/allowance) AND a Standard Deduction (10% of
+ * annual wages, capped at $7,500). Claiming 0 allowances forfeits BOTH
+ * deductions at once, a genuine all-or-nothing quirk confirmed directly
+ * from the source, not assumed. Runs the result through a 3-bracket table
+ * (0%/3%/6%) and divides by periods — no whole-dollar rounding (unlike
+ * North Carolina/Virginia), cent-precision throughout, matching WH-1603F's
+ * own worked example exactly ($10.58/week).
+ */
+function southCarolinaWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.flatRateAllowanceDeduction as SCConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+  const annualWages = periodWages * ctx.periodsPerYear;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const allowances = Number(cert.allowances ?? 0);
+
+  let personalAllowance = 0;
+  let standardDeduction = 0;
+  if (allowances > 0) {
+    personalAllowance = dollars(cfg.allowanceAmountAnnual) * allowances;
+    standardDeduction = Math.min(
+      roundHalfUp(annualWages * cfg.standardDeductionRate),
+      dollars(cfg.standardDeductionCapAnnual),
+    );
+  }
+  const taxableIncome = atLeastZero(annualWages - personalAllowance - standardDeduction);
+
+  const bracket = findWIBracket(cfg.brackets.annual, taxableIncome);
+  const excess = taxableIncome - dollars(bracket.from);
+  const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
+  const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(annualWages)}/yr less ${fmt(personalAllowance)} personal allowance (${allowances} × $${cfg.allowanceAmountAnnual}) ` +
+      `less ${fmt(standardDeduction)} standard deduction (10% capped at $${cfg.standardDeductionCapAnnual}) ` +
+      `= ${fmt(taxableIncome)} taxable @ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.from))}, ` +
+      `base ${fmt(dollars(bracket.base))} = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
   };
 }
