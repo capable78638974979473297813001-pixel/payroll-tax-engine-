@@ -5762,9 +5762,8 @@ function alabamaWithholding(
 interface GATablePeriod {
   rate: number;
   standardDeductionAnnual: {
-    marriedFilingJoint: number;
-    singleOrHeadOfHousehold: number;
-    marriedFilingSeparate: number;
+    marriedFilingJointOneSpouseWorks: number;
+    everyoneElse: number;
   };
   dependentAllowanceAnnual: number;
 }
@@ -5800,14 +5799,23 @@ function georgiaWithholding(
 
   const table = input.checkDate >= cfg.effectiveDateOfNewTable ? cfg.fromMay11_2026 : cfg.beforeMay11_2026;
 
+  // G-4's own Line 3 letter codes (A=Single, B=MFJ-BOTH-spouses-working or
+  // MFS, C=MFJ-ONE-spouse-working, D=Head of Household) — cross-confirmed
+  // independently via USDA NFC's own bulletin, which uses different
+  // letters (S/M/N/H) but the identical substance: ONLY "one spouse
+  // working" MFJ gets the higher standard deduction. B (both spouses
+  // working) is a real, easy-to-miss trap — it LOOKS like ordinary MFJ but
+  // gets the LOWER bucket, same as Single/HoH/MFS. Caught by an
+  // independent NFC cross-check after this file's first version only
+  // checked for a generic 'married_filing_joint' string with no
+  // one-vs-both-working distinction at all.
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  const statusKey =
-    cert.filingStatus === 'married_filing_joint'
-      ? 'marriedFilingJoint'
-      : cert.filingStatus === 'married_filing_separate'
-        ? 'marriedFilingSeparate'
-        : 'singleOrHeadOfHousehold';
-  const standardDeduction = dollars(table.standardDeductionAnnual[statusKey]);
+  const higherDeduction = cert.georgiaMaritalStatus === 'C';
+  const standardDeduction = dollars(
+    higherDeduction
+      ? table.standardDeductionAnnual.marriedFilingJointOneSpouseWorks
+      : table.standardDeductionAnnual.everyoneElse,
+  );
 
   const dependents = Number(cert.dependents ?? 0);
   const dependentAllowance = dollars(table.dependentAllowanceAnnual) * dependents;
@@ -5824,7 +5832,8 @@ function georgiaWithholding(
     taxableWages: periodWages,
     amount,
     detail:
-      `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction (${statusKey}) ` +
+      `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction ` +
+      `(${higherDeduction ? 'MFJ, one spouse working' : 'Single/HoH/MFS/MFJ-both-working'}) ` +
       `less ${fmt(dependentAllowance)} (${dependents} dependents) = ${fmt(taxableIncome)} taxable ` +
       `@ ${(table.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear} ` +
       `(${table === cfg.fromMay11_2026 ? 'post' : 'pre'}-2026-05-11 table)`,

@@ -17,6 +17,12 @@
       "verifiedBy": "PDF downloaded and read directly, both pages. Confirms all 5 status/exemption codes (0/S/MS/M/H) and their exact personal-exemption dollar amounts, the dependent-count line, and the additional-withholding line. Zero reciprocity language on the form."
     },
     {
+      "title": "USDA National Finance Center -- Alabama State Income Tax Withholding bulletin (TAXES 22-24)",
+      "url": "https://help.nfc.usda.gov/bulletins/2022/1666037747.htm?taxmap=true",
+      "verifiedOn": "2026-08-21",
+      "verifiedBy": "Fetched directly ('verify Alabama and Georgia, make sure it's right' pass) -- an independent federal payroll shared-service that re-derives every state's own withholding formula for its own processing, the same source class that caught a real bug in this project's Georgia file the same pass. FULL INDEPENDENT CONFIRMATION, zero discrepancies: the federal-withholding-deduction mechanism, all 4 standard-deduction step schedules (exact base/floor/threshold figures for Single/MFS/MFJ/HoH), all 5 personal exemption amounts, both dependent-allowance income tiers, and both bracket schedules (including the $110/$220 base constants) match this file's own whbooklet_0126.pdf-derived figures exactly. No 2026-specific NFC bulletin exists for Alabama (only this 2022 one, TAXES 22-24) -- reasonably read as confirmation that Alabama's formula structure has been stable and unchanged since at least 2022, not a gap in NFC's own coverage."
+    },
+    {
       "title": "Alabama Department of Labor -- 2026 UI wage base and rate figures (cross-source)",
       "url": "https://www2.labor.alabama.gov/",
       "verifiedOn": "2026-08-21",

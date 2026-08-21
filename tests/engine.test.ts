@@ -5951,7 +5951,7 @@ describe('Georgia', () => {
         checkDate: '2026-06-15',
         payFrequency: 'semimonthly',
         earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
-        ...gaState({ filingStatus: 'married_filing_joint', dependents: 1 }),
+        ...gaState({ georgiaMaritalStatus: 'C', dependents: 1 }),
       }),
     );
     assert.equal(amountOf(r, 'GA_SIT'), dollars(27.03));
@@ -5978,7 +5978,7 @@ describe('Georgia', () => {
         checkDate: '2026-03-15',
         payFrequency: 'semimonthly',
         earnings: [{ code: 'REG', category: 'regular', amount: dollars(1470.83) }],
-        ...gaState({ filingStatus: 'married_filing_joint', dependents: 1 }),
+        ...gaState({ georgiaMaritalStatus: 'C', dependents: 1 }),
       }),
     );
     assert.equal(amountOf(r, 'GA_SIT'), dollars(15.79));
@@ -6003,10 +6003,32 @@ describe('Georgia', () => {
         payFrequency: 'semimonthly',
         earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
         residenceState: { code: 'AL' },
-        ...gaState({ filingStatus: 'married_filing_joint', dependents: 1 }),
+        ...gaState({ georgiaMaritalStatus: 'C', dependents: 1 }),
       }),
     );
     assert.equal(amountOf(r, 'GA_SIT'), dollars(27.03));
+  });
+
+  test('MFJ with BOTH spouses working (Status B) gets the LOWER standard deduction, not the MFJ figure — confirmed independently via USDA NFC', () => {
+    // Same $2,000 semimonthly, same 1 dependent as the Status C test above,
+    // but Status B (MFJ, both spouses working) is NOT the same as Status C
+    // (MFJ, one spouse working) despite both being "married filing
+    // jointly" on the actual tax return — G-4's own form and NFC's own
+    // bulletin (using different letters, S/M/N/H, but the same substance)
+    // both single this out as a real, easy-to-miss distinction. Standard
+    // deduction stays at $15,000 (the Single/HoH/MFS figure), not $30,000:
+    // 48,000 - 15,000 - 5,000 = 28,000 taxable x 4.99% = $1,397.20/yr /
+    // 24 = $58.22 — nearly DOUBLE the $27.03 a Status-C employee owes on
+    // identical wages, entirely from the standard deduction difference.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...gaState({ georgiaMaritalStatus: 'B', dependents: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'GA_SIT'), dollars(58.22));
   });
 });
 

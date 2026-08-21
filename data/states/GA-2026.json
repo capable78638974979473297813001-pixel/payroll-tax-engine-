@@ -27,26 +27,33 @@
       "url": "https://dor.georgia.gov/document/form/tsdemployeeswithholdingallowancecertificateg-4pdf/download",
       "verifiedOn": "2026-08-21",
       "verifiedBy": "PDF downloaded and read directly, both pages. Already reflects HB 463's NEW $15,000/$30,000 standard deduction figures in its own 'Worksheet for Calculating Additional Allowances' (used only for a SEPARATE itemizer's-additional-allowance calculation, not the base withholding formula) -- this was the first signal this pass that the initially-fetched guide mirror was stale, since the G-4 form's own numbers didn't match it. Confirms the 4-letter marital-status code (A=Single, B=MFJ/MFS both spouses working, C=MFJ one spouse working, D=HoH) and zero reciprocity language."
+    },
+    {
+      "title": "USDA National Finance Center -- Georgia State Income Tax Withholding bulletin (2026)",
+      "url": "https://help.nfc.usda.gov/bulletins/2026/1784643404.htm",
+      "verifiedOn": "2026-08-21",
+      "verifiedBy": "Fetched directly ('verify Alabama and Georgia, make sure it's right' pass) -- an independent federal payroll shared-service that re-derives every state's own withholding formula for its own processing, the same source class that caught a real Massachusetts formula error earlier in this project. CAUGHT A REAL BUG: this file's original version read certificate.filingStatus === 'married_filing_joint' as sufficient to grant the higher $30,000/$24,000 standard deduction, with no distinction for whether both spouses work. NFC's own bulletin (using its own S/M/N/H lettering, not G-4's A/B/C/D, but identical substance) states directly: code M = 'Married, Filing Joint Return (One Spouse Working)' -> $30,000; code N = 'Married, Filing Separate Returns or Joint Return (Both Spouses Working)' -> $15,000, the SAME lower figure as Single/HoH. Fixed: georgiaWithholding() now reads certificate.georgiaMaritalStatus as G-4's own A/B/C/D letters and grants the higher deduction ONLY for C."
     }
   ],
   "georgiaStatusDeduction": {
-    "$comment": "A genuine MID-YEAR change, not just a year-over-year one -- HB 463 cut the rate and raised the standard deduction/dependent allowance retroactively to 2026-01-01, but the EMPLOYER WITHHOLDING transition date is 2026-05-11 specifically (quoted directly from both the Governor's press release and the employer guide itself). Both tables verified against the guide's own worked examples for their respective periods.",
+    "$comment": "A genuine MID-YEAR change, not just a year-over-year one -- HB 463 cut the rate and raised the standard deduction/dependent allowance retroactively to 2026-01-01, but the EMPLOYER WITHHOLDING transition date is 2026-05-11 specifically (quoted directly from both the Governor's press release and the employer guide itself). Both tables verified against the guide's own worked examples for their respective periods. CORRECTED after an independent verification pass (2026-08-21): the higher MFJ standard deduction applies ONLY when one spouse works (G-4's own Status C). An employee who is MFJ with BOTH spouses working (G-4's Status B) gets the SAME lower deduction as Single/HoH/MFS -- confirmed independently via USDA NFC's own withholding bulletin (help.nfc.usda.gov/bulletins/2026/1784643404.htm), which uses its own S/M/N/H lettering but states the identical substance verbatim: code M = 'Married, Filing Joint Return (One Spouse Working)' = $30,000; code N = 'Married, Filing Separate Returns or Joint Return (Both Spouses Working)' = $15,000. The original version of this file only checked for a generic 'married_filing_joint' status with no one-vs-both-working distinction at all, which would have silently overpaid the $30,000 deduction to any MFJ-both-working employee.",
+    "statusCodesG4": "Form G-4's own Line 3 letters: A=Single, B=Married Filing Separate OR Married Filing Joint (both spouses working), C=Married Filing Joint (one spouse working), D=Head of Household. ONLY C gets the higher standard deduction below -- engine reads certificate.georgiaMaritalStatus as one of these 4 letters, defaulting to the lower bucket (same as A/B/D) when absent, consistent with this project's 'absent certificate defaults to the least generous outcome' convention.",
     "effectiveDateOfNewTable": "2026-05-11",
     "beforeMay11_2026": {
       "rate": 0.0519,
-      "standardDeductionAnnual": { "marriedFilingJoint": 24000.0, "singleOrHeadOfHousehold": 12000.0, "marriedFilingSeparate": 12000.0 },
+      "standardDeductionAnnual": { "marriedFilingJointOneSpouseWorks": 24000.0, "everyoneElse": 12000.0 },
       "dependentAllowanceAnnual": 4000.0,
-      "verifiedExample1": "Semimonthly $1,470.83, MFJ (spouse not working), 1 dependent: 1,470.83 - 1,000.00 (Table E(1)) - 166.67 (Table E(4)) = 304.16 taxable x 5.19% = $15.79.",
+      "verifiedExample1": "Semimonthly $1,470.83, MFJ one spouse working (Status C), 1 dependent: 1,470.83 - 1,000.00 (Table E(1)) - 166.67 (Table E(4)) = 304.16 taxable x 5.19% = $15.79.",
       "verifiedExample2": "Biweekly $730.77, HoH, 2 dependents: 730.77 - 461.54 (Table F(1)) - 307.70 (Table F(4), 153.85x2) = -38.47 -> floored to $0.00 taxable x 5.19% = $0.00."
     },
     "fromMay11_2026": {
       "rate": 0.0499,
-      "standardDeductionAnnual": { "marriedFilingJoint": 30000.0, "singleOrHeadOfHousehold": 15000.0, "marriedFilingSeparate": 15000.0 },
+      "standardDeductionAnnual": { "marriedFilingJointOneSpouseWorks": 30000.0, "everyoneElse": 15000.0 },
       "dependentAllowanceAnnual": 5000.0,
-      "verifiedExample1": "Semimonthly $2,000.00, MFJ (spouse not working), 1 dependent: 2,000.00 - 1,250.00 (Table E(1)) - 208.33 (Table E(4)) = 541.67 taxable x 4.99% = $27.03.",
+      "verifiedExample1": "Semimonthly $2,000.00, MFJ one spouse working (Status C), 1 dependent: 2,000.00 - 1,250.00 (Table E(1)) - 208.33 (Table E(4)) = 541.67 taxable x 4.99% = $27.03.",
       "verifiedExample2": "Biweekly $935.00, HoH, 2 dependents: 935.00 - 576.92 (Table F(1)) - 384.62 (Table F(4), 192.31x2) = -26.54 -> floored to $0.00 taxable x 4.99% = $0.00."
     },
-    "formula": "Annualize wages (periodWages x periodsPerYear). Subtract the status-appropriate standard deduction (MFJ gets its own figure; Single, Head of Household, AND Married Filing Separate all share the SAME lower figure -- confirmed directly, not assumed, from Table E/F's own column headers). If dependents are claimed, also subtract dependentAllowanceAnnual x count. Multiply the remainder (floored at $0) by the flat rate. Divide by periods. No whole-dollar rounding (cent precision throughout, confirmed by both worked examples' own cent-level answers)."
+    "formula": "Annualize wages (periodWages x periodsPerYear). Subtract the standard deduction: the HIGHER figure ONLY for MFJ-one-spouse-working (Status C); every other status (A/B/D -- Single, HoH, MFS, MFJ-both-working) shares the SAME lower figure. If dependents are claimed, also subtract dependentAllowanceAnnual x count. Multiply the remainder (floored at $0) by the flat rate. Divide by periods. No whole-dollar rounding (cent precision throughout, confirmed by both worked examples' own cent-level answers)."
   },
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
   "exemptPretaxComment": "Confirmed directly via the guide's own FAQ, the cleanest confirmation tier this project uses for this recurring question: 'Are contributions to qualified 401(k), profit sharing, or deferred compensation plans taxable? No.'",
