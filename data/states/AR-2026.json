@@ -1,0 +1,121 @@
+{
+  "code": "AR",
+  "name": "Arkansas",
+  "year": 2026,
+  "method": "arkansas_bracket_credit",
+  "sources": [
+    {
+      "title": "State of Arkansas Withholding Tax -- Formula Method, Tax Year 2026 (Effective 01/01/2026)",
+      "url": "https://www.dfa.arkansas.gov/wp-content/uploads/whformula_2026.pdf",
+      "verifiedOn": "2026-08-21",
+      "verifiedBy": "PDF downloaded and read directly. WITHOUT the -layout flag for the bracket table specifically -- the -layout reconstruction badly interleaved the 4-column (From/To/Percentage/Minus Adjustment) table into what looked like a nonsensical mismatch; the plain reading-order extraction produced 4 clean column-blocks instead, which were then paired by POSITION. A genuine index-shift was found and resolved during that pairing: the 'Minus Adjustment' column has ONE FEWER entry than From/To/Percentage, because the first (0%) bracket has no adjustment at all (implicitly $0) -- adjustment[i] corresponds to bracket[i+1], not bracket[i]. Verified this mapping is correct (not an assumption) by reproducing the document's own full worked example to the cent: Gary, monthly, $2,127/period, 2 exemptions -> $23,054 net taxable -> $50-midrange-rounded to $23,050 -> bracket lookup (3.4%, adjustment $287.97) -> $783.70 gross, less adjustment = $495.73, ROUNDED to $496.00 (a genuine mid-formula whole-dollar rounding step, confirmed by the document's own text, not assumed) -> less $58.00 personal credit (2 x $29) = $438.00 annual net tax -> / 12 = $36.50/month, matching the document's own final answer exactly."
+    },
+    {
+      "title": "State of Arkansas Withholding Tax -- Low Income Tax Tables, Tax Year 2026 (Effective 01/01/2026)",
+      "url": "https://www.dfa.arkansas.gov/wp-content/uploads/withholdTaxTablesLowIncome_2026.pdf",
+      "verifiedOn": "2026-08-21",
+      "verifiedBy": "PDF downloaded (28 pages, 1,062 lines extracted) and its structure read directly -- NOT fully transcribed, see knownGaps. This is a genuinely SEPARATE mechanism from the main Formula Method above: AR4EC's own Line 5 ('I qualify for the low-income tax rates... Yes/No') lets an employee in a narrow income band, by filing status and dependent count, elect a reduced/phased-in withholding schedule instead of the standard bracket formula. Income-range thresholds confirmed directly from AR4EC's own instructions page (see certificateNotes below)."
+    },
+    {
+      "title": "AR4EC -- Employee's Withholding Exemption Certificate (R 02/07/2025)",
+      "url": "https://www.dfa.arkansas.gov/wp-content/uploads/AR4EC2025_FI.pdf",
+      "verifiedOn": "2026-08-21",
+      "verifiedBy": "PDF downloaded and read directly, both pages. Confirms the exemption-counting mechanism (self=1, self+spouse=2, HoH+self=2, +1/dependent, ALL summed into one TOTAL EXEMPTIONS line -- no separate personal/dependent split reaches the withholding formula itself, unlike Kansas's K-4). Confirms the low-income election (Line 5) and its income-range table. Zero reciprocity language anywhere on the form."
+    },
+    {
+      "title": "AR Division of Workforce Services -- Employer UI Contributions",
+      "url": "https://dws.arkansas.gov/workforce-services/unemployment/employer-ui-information/employer-ui-contributions/",
+      "verifiedOn": "2026-08-21",
+      "verifiedBy": "Fetched directly, but the cached/rendered content returned 2025-dated figures ('2.0% (1.9% + 0.1% administrative assessment) for 2025', wage base '$7,000', range '0.200% to 10.100%') rather than a 2026-specific update -- the wage base and range are stable/long-standing figures corroborated by every secondary source checked with zero dissent, but the exact 2026 new-employer rate breakdown rests on secondary sources (2.0% + 0.200% stabilization = 2.2% total) not independently reconfirmed from a 2026-dated DWS page this pass."
+    }
+  ],
+  "arkansasBracketCredit": {
+    "$comment": "Full formula, verified to the cent against the source's own worked example (see sources above). 1) Annualize wages using AR's own multiplier map (daily = x260, a 5-day workweek, NOT this engine's more common 5-day-week default elsewhere -- confirmed explicit, not assumed). 2) Subtract the flat $2,470 standard deduction (no filing-status variation at all in the withholding formula -- AR4EC's filing-status field only matters for the SEPARATE low-income election, not the standard formula). 3) For taxable income under $100,001, round to the nearest $50 MIDRANGE of each $100 band (e.g. $23,054 -> $23,050) BEFORE the bracket lookup -- a real, easily-missed step, confirmed necessary by the worked example (skipping it would look plausible but be wrong). 4) Look up the bracket: tax = taxableIncome x rate, MINUS a published adjustment constant (NOT a base+excess formula -- verified these two framings are NOT numerically interchangeable here, since AR's own adjustment constants carry small independent rounding baked in; converting to base+excess drifted 3 cents off the source's own answer in a spot check). Round that result to the nearest WHOLE DOLLAR. 5) Subtract $29 x total exemptions (a flat post-bracket CREDIT, not a pre-tax deduction) to get Annual Net Tax. 6) Divide by pay periods.",
+    "standardDeductionAnnual": 2470.0,
+    "personalCreditPerExemption": 29.0,
+    "annualizeMultiplier": { "monthly": 12, "semimonthly": 24, "biweekly": 26, "weekly": 52, "daily": 260 },
+    "midrangeRoundingThreshold": 100001.0,
+    "midrangeRoundingComment": "Applies to EVERY bracket, not just the fine-grained $100-wide bands near the top -- confirmed against the worked example, which rounds $23,054 (deep inside the WIDE $16,000-$26,399 3.4% bracket) to $23,050 before the bracket lookup, not just for incomes near the phase-in zone.",
+    "brackets": [
+      { "from": 0, "to": 5600, "rate": 0.0, "adjustment": 0 },
+      { "from": 5600, "to": 11200, "rate": 0.02, "adjustment": 111.98 },
+      { "from": 11200, "to": 16000, "rate": 0.03, "adjustment": 223.97 },
+      { "from": 16000, "to": 26400, "rate": 0.034, "adjustment": 287.97 },
+      { "from": 26400, "to": 94701, "rate": 0.039, "adjustment": 419.96 },
+      { "from": 94701, "to": 94801, "rate": 0.039, "adjustment": 399.30 },
+      { "from": 94801, "to": 94901, "rate": 0.039, "adjustment": 389.30 },
+      { "from": 94901, "to": 95001, "rate": 0.039, "adjustment": 379.30 },
+      { "from": 95001, "to": 95101, "rate": 0.039, "adjustment": 369.30 },
+      { "from": 95101, "to": 95201, "rate": 0.039, "adjustment": 359.30 },
+      { "from": 95201, "to": 95301, "rate": 0.039, "adjustment": 349.30 },
+      { "from": 95301, "to": 95401, "rate": 0.039, "adjustment": 339.30 },
+      { "from": 95401, "to": 95501, "rate": 0.039, "adjustment": 329.30 },
+      { "from": 95501, "to": 95601, "rate": 0.039, "adjustment": 319.30 },
+      { "from": 95601, "to": 95701, "rate": 0.039, "adjustment": 309.30 },
+      { "from": 95701, "to": 95801, "rate": 0.039, "adjustment": 299.30 },
+      { "from": 95801, "to": 95901, "rate": 0.039, "adjustment": 289.30 },
+      { "from": 95901, "to": 96001, "rate": 0.039, "adjustment": 279.30 },
+      { "from": 96001, "to": 96101, "rate": 0.039, "adjustment": 269.30 },
+      { "from": 96101, "to": 96201, "rate": 0.039, "adjustment": 259.30 },
+      { "from": 96201, "to": 96301, "rate": 0.039, "adjustment": 249.30 },
+      { "from": 96301, "to": 96401, "rate": 0.039, "adjustment": 239.30 },
+      { "from": 96401, "to": 96501, "rate": 0.039, "adjustment": 229.30 },
+      { "from": 96501, "to": 96601, "rate": 0.039, "adjustment": 219.30 },
+      { "from": 96601, "to": 96701, "rate": 0.039, "adjustment": 209.30 },
+      { "from": 96701, "to": 96801, "rate": 0.039, "adjustment": 199.30 },
+      { "from": 96801, "to": 96901, "rate": 0.039, "adjustment": 189.30 },
+      { "from": 96901, "to": 97001, "rate": 0.039, "adjustment": 179.30 },
+      { "from": 97001, "to": 97101, "rate": 0.039, "adjustment": 169.30 },
+      { "from": 97101, "to": 97201, "rate": 0.039, "adjustment": 159.30 },
+      { "from": 97201, "to": 97301, "rate": 0.039, "adjustment": 149.30 },
+      { "from": 97301, "to": 97401, "rate": 0.039, "adjustment": 139.30 },
+      { "from": 97401, "to": 97501, "rate": 0.039, "adjustment": 129.30 },
+      { "from": 97501, "to": 97601, "rate": 0.039, "adjustment": 119.30 },
+      { "from": 97601, "to": 97701, "rate": 0.039, "adjustment": 109.30 },
+      { "from": 97701, "to": 97801, "rate": 0.039, "adjustment": 99.30 },
+      { "from": 97801, "to": null, "rate": 0.039, "adjustment": 89.30 }
+    ],
+    "bracketStructureNote": "37 bands, not the usual 4-6 -- from $26,400 to $97,800, the marginal RATE stays flat at 3.9% but the adjustment constant steps DOWN by exactly $10.00 every $100 of income, a smoothing mechanism that makes the EFFECTIVE (not marginal) rate rise gradually toward the true flat-topped formula rather than jumping at a single cliff. Verified algebraically: the 31 $100-wide bands from $94,701 to $97,800 span adjustment $399.30 down to $89.30, a $310.00 total drop over 31 steps = exactly $10.00/step. Only above $97,800 does the formula become genuinely flat (3.9% x income - $89.30, forever)."
+  },
+  "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
+  "exemptPretaxComment": "Inferred from federal-conformity structure, not independently confirmed against a specific AR statute this pass -- neither the Formula Method document nor AR4EC discusses pretax deferral treatment directly. Flagged as an open item, same confidence tier this project uses for other states before their own dedicated statute reads.",
+  "reciprocity": {
+    "$comment": "CHECKED, not assumed absent: the Formula Method document and AR4EC (both read in full) contain zero reciprocity language.",
+    "reciprocalStates": []
+  },
+  "lowIncomeElection": {
+    "$comment": "REAL, DISCLOSED, NOT BUILT this pass -- see certificateNotes below for why. AR4EC Line 5 lets a qualifying employee elect reduced withholding via a SEPARATE 28-page (1,062-line), wage-bracket-style table (not a formula) covering Single/Married Filing Jointly/Head of Household x weekly/biweekly/semimonthly/monthly x 0-6 dependents. Only applies within a narrow income band per status -- above the band, standard withholding resumes (the employee would simply owe more at filing than was withheld, or the certificate becomes inapplicable); below a lower bound, $0 is withheld regardless of method.",
+    "incomeThresholds2026": {
+      "single": "$14,265 to $17,000",
+      "marriedFilingJointly_1orFewerDependents": "$24,057 to $28,300",
+      "marriedFilingJointly_2orMoreDependents": "$28,953 to $35,100",
+      "headOfHousehold_1orFewerDependents": "$20,282 to $24,600",
+      "headOfHousehold_2orMoreDependents": "$24,176 to $28,200",
+      "source": "AR4EC (R 02/07/2025) instructions page, read directly -- note the form's own revision date predates 2026, so these dollar figures should be re-checked against a 2026-specific AR4EC revision if one has since been issued."
+    },
+    "notBuiltReason": "The main Formula Method (fully built and verified to the cent -- see arkansasBracketCredit above) is what the overwhelming majority of Arkansas paychecks use. The low-income table is a genuine, certificate-gated ALTERNATIVE path affecting a narrow income band; digitizing all 1,062 lines (12 sub-tables: 3 statuses x 4 periods, each a multi-page wage-bracket grid by dependent count) was judged not worth the transcription risk for a narrow-band election when the underlying dollar thresholds are already disclosed here for a future pass to build against directly."
+  },
+  "localIncomeTax": {
+    "rule": "NONE. No Arkansas city or county levies a tax on wages or earned income.",
+    "confidence": "cross_source_confirmed."
+  },
+  "paidFamilyMedicalLeave": {
+    "rule": "NONE. No mandatory or voluntary state-authorized paid family/medical leave program of any kind found for Arkansas -- a genuine structural difference from Tennessee/South Carolina, which at least authorize a voluntary private-insurance option.",
+    "confidence": "cross_source_confirmed."
+  },
+  "unemploymentInsurance": {
+    "administeredBy": "AR Division of Workforce Services (DWS)",
+    "wageBase": 7000.0,
+    "wageBaseConfidence": "cross_source_confirmed -- stable at $7,000 (the FUTA statutory minimum) across every source checked, including DWS's own page, with zero dissent for many years running.",
+    "newEmployerRate": 0.022,
+    "newEmployerRateNote": "2.0% base + 0.200% stabilization tax = 2.2% total for 2026, per secondary sources -- DWS's own fetched page returned 2025-dated figures (2.0% + 0.1% administrative assessment) rather than confirming the 2026 breakdown directly. Flagged as one tier below a direct 2026-dated primary quote.",
+    "experiencedEmployerRateRange": [0.002, 0.101],
+    "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project. New-employer rate is cross-source only for the 2026-specific figure; wage base and experienced range are stable/well-corroborated."
+  },
+  "knownGaps": [
+    "The low-income tax election (AR4EC Line 5) is disclosed with its exact 2026 income thresholds but not built as calc code -- see lowIncomeElection above for the specific reasoning (narrow income band, 1,062-line table, main formula covers the overwhelming majority of paychecks).",
+    "exemptPretax is inferred from federal-conformity structure, not confirmed against a specific AR statute.",
+    "Employer-side UC is documented but not modelled -- same per-employer-experience-rating gap as every other state's employer SUTA in this project. The 2026-specific new-employer rate breakdown rests on secondary sources.",
+    "AR4EC's own low-income income thresholds come from a form revised 02/07/2025 -- worth re-checking against a 2026-specific AR4EC revision if one has since been issued."
+  ]
+}

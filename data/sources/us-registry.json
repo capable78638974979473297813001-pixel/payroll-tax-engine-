@@ -68,9 +68,9 @@
       "wageIncomeTax": true,
       "structure": "bracket",
       "withholdingSource": "https://www.dfa.arkansas.gov/office/taxes/income-tax-administration/withholding-tax-branch/withholding-tax-forms-instructions/",
-      "sourceDoc": "Withholding formula (whformula PDF) + withholding tax tables (ar.gov/WithholdingTaxTables).",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11"
+      "sourceDoc": "whformula_2026.pdf (Formula Method), fetched and read directly. Wired into calc code (arkansasWithholding()): a genuinely unusual 37-band bracket table (flat 3.9% rate above $26,400, but the ADJUSTMENT constant steps down $10/$100 through a $94,700-$97,800 smoothing zone before the formula goes truly flat), a real $50-midrange-rounding step for incomes under $100,001 that applies even inside wide brackets, a mid-formula whole-dollar rounding step, and a flat $29/exemption POST-bracket credit. Reproduced the document's own full worked example to the cent. AR4EC's separate 'low-income tax rates' election (a 1,062-line, 28-page wage-bracket table for a narrow income band by filing status) is documented with its exact 2026 thresholds but deliberately not digitized this pass -- see AR-2026.json's lowIncomeElection block. No reciprocity with any state (checked, zero mentions in either primary document). No local income tax, no mandatory paid leave.",
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-21"
     },
     {
       "code": "CA",
@@ -474,8 +474,9 @@
       "name": "Tennessee",
       "wageIncomeTax": false,
       "structure": "none",
-      "note": "No state wage income tax (former Hall tax on investment income repealed).",
-      "status": "structural_fact"
+      "note": "No state wage income tax (former Hall tax on investment income repealed effective 2021). State data captured in data/states/TN-2026.json: UI wage base $7,000 primary-confirmed directly from tn.gov (unchanged since 2018), reserve-ratio Premium Rate Table mechanism documented (T.C.A. 50-7-403). No local income tax; Paid Family Leave Insurance Act (2023) is voluntary-insurance-only, no mandatory deduction.",
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-21"
     },
     {
       "code": "TX",

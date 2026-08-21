@@ -727,6 +727,8 @@ function incomeTaxLines(
       return [northCarolinaWithholding(input, ctx, rules)];
     case 'south_carolina_allowance_deduction':
       return [southCarolinaWithholding(input, ctx, rules)];
+    case 'arkansas_bracket_credit':
+      return [arkansasWithholding(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -5526,5 +5528,100 @@ function southCarolinaWithholding(
       `less ${fmt(standardDeduction)} standard deduction (10% capped at $${cfg.standardDeductionCapAnnual}) ` +
       `= ${fmt(taxableIncome)} taxable @ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.from))}, ` +
       `base ${fmt(dollars(bracket.base))} = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
+  };
+}
+
+interface ARBracket {
+  from: number; // dollars
+  to: number | null; // dollars, null = no ceiling
+  rate: number;
+  adjustment: number; // dollars, subtracted from (taxableIncome × rate) directly
+}
+
+function findARBracket(brackets: ARBracket[], annualTaxableIncome: number): ARBracket {
+  for (const b of brackets) {
+    const from = dollars(b.from);
+    const to = b.to === null ? Infinity : dollars(b.to);
+    if (annualTaxableIncome >= from && annualTaxableIncome < to) return b;
+  }
+  return brackets[brackets.length - 1];
+}
+
+interface ARConfig {
+  standardDeductionAnnual: number;
+  personalCreditPerExemption: number;
+  annualizeMultiplier: Partial<Record<string, number>>;
+  midrangeRoundingThreshold: number;
+  brackets: ARBracket[];
+}
+
+/**
+ * Arkansas's withholding formula (whformula_2026.pdf, read directly):
+ * annualize, subtract a flat $2,470 standard deduction (no filing-status
+ * variation — status only matters for the separate low-income election,
+ * not this formula), round to the nearest $50 MIDRANGE of each $100 band
+ * for taxable income under $100,001 (a real, source-required step — the
+ * document's own worked example rounds $23,054 to $23,050 before the
+ * bracket lookup, even deep inside a wide bracket), look up a bracket
+ * using tax = income × rate − adjustment (NOT base+excess — verified these
+ * are not numerically interchangeable for AR's own published constants),
+ * round THAT to the nearest whole dollar, then subtract a flat $29-per-
+ * exemption CREDIT (post-bracket, like Delaware's, not a pre-tax
+ * deduction) to reach the annual net tax, then divide by periods.
+ */
+function arkansasWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.arkansasBracketCredit as ARConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+
+  const multiplier = cfg.annualizeMultiplier[input.payFrequency];
+  if (multiplier === undefined) {
+    throw new Error(
+      `Arkansas's own Formula Method doesn't publish an annualizing multiplier for ` +
+        `"${input.payFrequency}" — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const annualWages = periodWages * multiplier;
+
+  const standardDeduction = dollars(cfg.standardDeductionAnnual);
+  let taxableIncome = atLeastZero(annualWages - standardDeduction);
+
+  const midrangeThreshold = dollars(cfg.midrangeRoundingThreshold);
+  let midrangeNote = 'no midrange rounding (≥ $100,001)';
+  if (taxableIncome < midrangeThreshold) {
+    const band = dollars(100);
+    const half = dollars(50);
+    const rounded = Math.floor(taxableIncome / band) * band + half;
+    midrangeNote = `midrange-rounded from ${fmt(taxableIncome)} to ${fmt(rounded)}`;
+    taxableIncome = rounded;
+  }
+
+  const bracket = findARBracket(cfg.brackets, taxableIncome);
+  const rawTax = applyRate(taxableIncome, bracket.rate);
+  const adjustment = dollars(bracket.adjustment);
+  const annualGrossTax = toWholeDollars(atLeastZero(rawTax - adjustment));
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const exemptions = Number(cert.exemptions ?? 0);
+  const credit = dollars(cfg.personalCreditPerExemption) * exemptions;
+  const annualNetTax = atLeastZero(annualGrossTax - credit);
+
+  const amount = roundHalfUp(annualNetTax / multiplier);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction, ${midrangeNote} ` +
+      `@ ${(bracket.rate * 100).toFixed(2)}% less ${fmt(adjustment)} adjustment = ${fmt(annualGrossTax)} gross tax, ` +
+      `less ${fmt(credit)} (${exemptions} × $${cfg.personalCreditPerExemption} credit) = ${fmt(annualNetTax)}/yr ÷ ${multiplier}`,
   };
 }

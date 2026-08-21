@@ -5797,6 +5797,56 @@ describe('South Carolina', () => {
   });
 });
 
+describe('Arkansas', () => {
+  const arState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'AR', certificate },
+  });
+
+  test("reproduces the Formula Method's own worked example exactly: monthly $2,127, 2 exemptions -> $36.50", () => {
+    // Annual 2,127x12=25,524, less $2,470 standard deduction = $23,054
+    // net taxable. Midrange-rounded to $23,050 (nearest $50 of the
+    // $23,000-$23,100 band). Bracket [$16,000-$26,400, 3.4%, adjustment
+    // $287.97]: 23,050x3.4%=$783.70, less $287.97 = $495.73, ROUNDED to
+    // $496.00 (a genuine mid-formula whole-dollar step). Less $58.00
+    // credit (2x$29) = $438.00 annual net tax / 12 = $36.50.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2127) }],
+        ...arState({ exemptions: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'AR_SIT'), dollars(36.5));
+  });
+
+  test('$50-midrange rounding applies at low income too, not just the top phase-in zone: weekly $200, 0 exemptions -> $0.90', () => {
+    // Annual 200x52=10,400, less $2,470 = $7,930 net taxable. Midrange-
+    // rounded to $7,950. Bracket [$5,600-$11,200, 2%, adjustment
+    // $111.98]: 7,950x2%=$159.00, less $111.98 = $47.02, rounds to
+    // $47.00. No exemptions, so annual net tax stays $47.00 / 52 = $0.90.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(200) }],
+        workState: { code: 'AR' },
+      }),
+    );
+    assert.equal(amountOf(r, 'AR_SIT'), dollars(0.9));
+  });
+
+  test('no reciprocity with any state', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2127) }],
+        residenceState: { code: 'TN' },
+        ...arState({ exemptions: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'AR_SIT'), dollars(36.5));
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(
