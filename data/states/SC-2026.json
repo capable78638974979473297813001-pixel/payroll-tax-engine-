@@ -23,6 +23,12 @@
       "verifiedBy": "PDF downloaded and read directly, both pages. Confirms the exemption-certificate mechanism (Line 7) and the additional-withholding line (Line 6); confirms zero reciprocity language anywhere on the form."
     },
     {
+      "title": "S.C. Code Ann. sec. 12-6-1120 -- Gross income; computation; modifications",
+      "url": "https://law.justia.com/codes/south-carolina/title-12/chapter-6/section-12-6-1120/",
+      "verifiedOn": "2026-08-21",
+      "verifiedBy": "Search-synthesized (WebSearch, not a direct statute-text fetch this pass): South Carolina 'substantially conforms to the Internal Revenue Code of 1986, as amended through December 31, 2024,' starting from federal taxable income with a short specific modifications list (IRC secs. 78/86/87 excluded, Social Security benefits excluded) -- none touching 401(k)/125 deferrals. Upgrades exemptPretax from a bare inference to a statute-cited one; see exemptPretaxComment for the residual confidence-tier caveat."
+    },
+    {
       "title": "SC Department of Employment and Workforce -- 2026 Tax Rate Cuts Press Release",
       "url": "https://dew.sc.gov/news/2025-11/2026-tax-rate-cuts-press-release",
       "verifiedOn": "2026-08-21",
@@ -46,7 +52,7 @@
     }
   },
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
-  "exemptPretaxComment": "Inferred from federal-conformity structure, not independently confirmed against a specific SC statute this pass -- neither WH-1603F, WH-105, nor the SC W-4 discusses pretax deferral treatment directly. Same confidence tier as this project's earlier-pass states before their own dedicated statute reads (e.g. Virginia/West Virginia before their FAGI-conformity citations were found) -- flagged as an open item, not silently assumed to the same higher tier.",
+  "exemptPretaxComment": "UPGRADED ('fix any and all gaps' pass): S.C. Code Ann. sec. 12-6-1120 confirms South Carolina 'substantially conforms to the Internal Revenue Code of 1986, as amended through December 31, 2024,' starting from federal taxable income and applying only a short, specific list of modifications (Sections 78/86/87 excluded, Social Security benefits excluded) -- none of which touch 401(k)/403(b)/457/125 elective deferrals. Same confidence tier as Virginia's/West Virginia's FAGI-conformity citations: a statute-level conformity confirmation, not a direct read of the withholding-specific wage definition (which none of WH-1603F/WH-105/SC W-4 discusses). One tier below Indiana's/Kentucky's complete-enumerated-list reads, since 12-6-1120's own non-adopted-sections list was not independently confirmed exhaustive for this specific question this pass.",
   "reciprocity": {
     "$comment": "CHECKED, not assumed absent: WH-1603F, WH-105, and the SC W-4 were all read in full and none mentions a reciprocal agreement with any state. South Carolina has no reciprocal withholding agreement with any state.",
     "reciprocalStates": []
@@ -71,7 +77,7 @@
     "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project. Wage base itself is one tier below the rate figures (cross-source, not a direct dew.sc.gov quote) -- worth a follow-up primary check."
   },
   "knownGaps": [
-    "exemptPretax is inferred from this project's standard federal-conformity default, not confirmed against a specific SC statute -- flagged explicitly, one tier below states with a direct AGI/wages citation.",
+    "exemptPretax UPGRADED via S.C. Code Ann. sec. 12-6-1120 (see exemptPretaxComment) -- statute-level conformity confirmed, though the withholding-specific wage definition itself was not independently read.",
     "SC W-4's page-3 Personal Allowances Worksheet (referenced but not fetched in full this pass) determines HOW an employee arrives at their allowance count -- not needed for the withholding calculation itself (which only consumes the final count), but not independently read.",
     "UI wage base ($14,000) is cross-source only, not a direct dew.sc.gov quote -- the rate figures above ARE primary-confirmed, creating an internal confidence-tier split worth closing with a follow-up fetch.",
     "Employer-side UC is documented but not modelled -- same per-employer-experience-rating gap as every other state's employer SUTA in this project.",

@@ -41,7 +41,7 @@
     "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project. The exact numeric Premium Rate Table 6 was not fetched as a standalone document this pass."
   },
   "knownGaps": [
-    "Premium Rate Table 6's own numeric rate-by-reserve-ratio table was not fetched as a standalone document -- the rate RANGE is cross-source only, while the wage base and rate-table-selection mechanism are primary-confirmed.",
+    "Premium Rate Table 6's own numeric rate-by-reserve-ratio table was not fetched as a standalone document -- 3 separate attempts this session (WebFetch, curl with a browser User-Agent, curl with an added Referer header and forced HTTP/1.1) all failed against tn.gov/content/dam/... with a connection-level reset (not a proper HTTP error), the same class of access block already documented for New Hampshire/Massachusetts's revenue domains elsewhere in this project -- NOT pursued further given this figure is employer-side-only and not consumed by the engine regardless. The rate RANGE stays cross-source only; the wage base and rate-table-selection mechanism are primary-confirmed (see tn.gov's own UI Tax Rates HTML page, which fetched fine).",
     "Given no income tax exists, this file is intentionally lighter-weight than income-tax states in this project -- consistent with the South Dakota precedent."
   ]
 }

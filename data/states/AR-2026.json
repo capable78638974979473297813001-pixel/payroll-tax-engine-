@@ -23,6 +23,12 @@
       "verifiedBy": "PDF downloaded and read directly, both pages. Confirms the exemption-counting mechanism (self=1, self+spouse=2, HoH+self=2, +1/dependent, ALL summed into one TOTAL EXEMPTIONS line -- no separate personal/dependent split reaches the withholding formula itself, unlike Kansas's K-4). Confirms the low-income election (Line 5) and its income-range table. Zero reciprocity language anywhere on the form."
     },
     {
+      "title": "Arkansas Code sec. 26-51-414 -- Deferred compensation plans",
+      "url": "https://law.justia.com/codes/arkansas/title-26/subtitle-5/chapter-51/subchapter-4/section-26-51-414/",
+      "verifiedOn": "2026-08-21",
+      "verifiedBy": "Search-synthesized (WebSearch, not a direct statute-text fetch this pass): sec. 26-51-414(a)(1) allows a deduction under IRC secs. 72, 219, 401, 402-404, 406-416, 457 (specific vintage dates: most sections as in effect 2017-01-01, sec. 401 as in effect 2010-03-30) -- an explicit IRC-section-number adoption of the 401(k)/403(b)/457/SIMPLE deferral categories. Upgrades exemptPretax to this project's strongest confidence tier for this question; see exemptPretaxComment for the residual Section 125 caveat."
+    },
+    {
       "title": "AR Division of Workforce Services -- Employer UI Contributions",
       "url": "https://dws.arkansas.gov/workforce-services/unemployment/employer-ui-information/employer-ui-contributions/",
       "verifiedOn": "2026-08-21",
@@ -78,7 +84,7 @@
     "bracketStructureNote": "37 bands, not the usual 4-6 -- from $26,400 to $97,800, the marginal RATE stays flat at 3.9% but the adjustment constant steps DOWN by exactly $10.00 every $100 of income, a smoothing mechanism that makes the EFFECTIVE (not marginal) rate rise gradually toward the true flat-topped formula rather than jumping at a single cliff. Verified algebraically: the 31 $100-wide bands from $94,701 to $97,800 span adjustment $399.30 down to $89.30, a $310.00 total drop over 31 steps = exactly $10.00/step. Only above $97,800 does the formula become genuinely flat (3.9% x income - $89.30, forever)."
   },
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
-  "exemptPretaxComment": "Inferred from federal-conformity structure, not independently confirmed against a specific AR statute this pass -- neither the Formula Method document nor AR4EC discusses pretax deferral treatment directly. Flagged as an open item, same confidence tier this project uses for other states before their own dedicated statute reads.",
+  "exemptPretaxComment": "UPGRADED ('fix any and all gaps' pass): Arkansas Code sec. 26-51-414(a)(1) directly adopts federal treatment for retirement/deferred-compensation plans -- 'a deduction pursuant to IRC secs. 72, 219, 401, 402-404, 406-416, 457' (26 U.S.C. secs. 72/219/402-404/406-416/457 as in effect 2017-01-01; sec. 401 as in effect 2010-03-30) -- an explicit statutory adoption of the 401(k)/403(b)/457/SIMPLE deferral categories by IRC section number, not just a general AGI-conformity inference. Same confidence tier as Michigan's RAB-1988-27 named enumeration, the strongest tier this project uses for this question. Section 125/cafeteria-plan treatment specifically was not independently re-confirmed this pass (26-51-414 is framed around retirement/annuity plans by section number, not cafeteria benefits) -- one small residual gap within an otherwise strong citation.",
   "reciprocity": {
     "$comment": "CHECKED, not assumed absent: the Formula Method document and AR4EC (both read in full) contain zero reciprocity language.",
     "reciprocalStates": []
@@ -114,7 +120,7 @@
   },
   "knownGaps": [
     "The low-income tax election (AR4EC Line 5) is disclosed with its exact 2026 income thresholds but not built as calc code -- see lowIncomeElection above for the specific reasoning (narrow income band, 1,062-line table, main formula covers the overwhelming majority of paychecks).",
-    "exemptPretax is inferred from federal-conformity structure, not confirmed against a specific AR statute.",
+    "exemptPretax RESOLVED via direct Arkansas Code sec. 26-51-414(a)(1) citation (see exemptPretaxComment) -- explicit IRC-section adoption for retirement/deferral categories; Section 125 cafeteria-plan treatment specifically remains a residual, smaller gap.",
     "Employer-side UC is documented but not modelled -- same per-employer-experience-rating gap as every other state's employer SUTA in this project. The 2026-specific new-employer rate breakdown rests on secondary sources.",
     "AR4EC's own low-income income thresholds come from a form revised 02/07/2025 -- worth re-checking against a 2026-specific AR4EC revision if one has since been issued."
   ]
