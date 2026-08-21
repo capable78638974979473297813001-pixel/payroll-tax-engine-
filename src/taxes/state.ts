@@ -4,16 +4,19 @@ import {
   dollars,
   fmt,
   overThreshold,
+  roundDownToCent,
   roundHalfUp,
   toWholeDollars,
   underCap,
 } from '../money.ts';
-import type { StateRuleset } from '../registry.ts';
+import type { PALocalEntry, StateRuleset } from '../registry.ts';
 import {
   countyRuleset,
   federalRuleset,
   hasCountyRuleset,
+  hasPALocalRuleset,
   hasStateRuleset,
+  paLocalRuleset,
   stateRuleset,
 } from '../registry.ts';
 import { federalIncomeTax } from './federal.ts';
@@ -233,6 +236,12 @@ export function stateIncomeTax(
   const portlandLocal = portlandAreaLocalTax(input, ctx, rules);
   lines.push(...portlandLocal);
 
+  // Pennsylvania's Act 32 local Earned Income Tax + Local Services Tax —
+  // see pennsylvaniaLocalTax()'s own doc comment for the withholding rule
+  // and the 2,627-jurisdiction data file it reads from.
+  const paLocal = pennsylvaniaLocalTax(input, ctx, rules);
+  lines.push(...paLocal);
+
   // Resident-working-elsewhere credit — a DIFFERENT direction from every
   // reciprocity mechanism above: those zero THIS state's tax when the
   // employee resides in a reciprocal state; this instead adds an
@@ -246,7 +255,77 @@ export function stateIncomeTax(
   const residentCredit = residentWorkingElsewhereCreditLine(input, ctx, lines);
   if (residentCredit) lines.push(residentCredit);
 
+  // Reciprocity SWAP — a third direction, distinct from both the plain
+  // exemption above (zeroes this state's tax, full stop) and Kansas's
+  // credit line above (adds a RESIDENCE-state line computed elsewhere in
+  // this same function). Pennsylvania's REV-419 is the reason this exists:
+  // its own text doesn't just exempt a reciprocal-state resident from PA
+  // tax, it obligates the PA employer to withhold the EMPLOYEE'S HOME
+  // STATE's tax instead ("If you agree not to withhold PA tax... you must
+  // withhold the other state's tax") — the same certificate box that
+  // grants the exemption also authorizes the swap, per REV-419's own
+  // Section II(b) wording ("I claim an exemption... AND authorize my
+  // employer to withhold income tax for my resident state"), so this
+  // fires automatically whenever the exemption already did — no separate
+  // certificate flag, consistent with reciprocityExemptionReason()'s own
+  // documented assumption that the underlying certificate is on file.
+  // Gated by rules.reciprocity.swapWithholdsResidenceState (opt-in,
+  // data-only) so no other state's behavior changes.
+  const swapLine = reciprocitySwapWithholdingLine(input, ctx, rules, reciprocityReason);
+  if (swapLine) lines.push(swapLine);
+
   return lines;
+}
+
+/**
+ * Computes the employee's RESIDENCE state's tax on the same wages and adds
+ * it as its own line — the "swap" half of Pennsylvania's REV-419 mechanism
+ * (see stateIncomeTax()'s own call site for the full explanation). Reuses
+ * the exact virtual-input pattern residentWorkingElsewhereCreditLine()
+ * already established (workState swapped to the residence state + ITS OWN
+ * certificate, since every method function reads input.workState?.certificate)
+ * — the only real difference is this adds the residence state's FULL tax as
+ * a new line rather than netting it against a credit, because the WORK
+ * state's own tax is already $0 here (that's what triggered this in the
+ * first place), so there's nothing to net against.
+ */
+function reciprocitySwapWithholdingLine(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+  reciprocityReason: string | null,
+): TaxLine | null {
+  if (!reciprocityReason) return null;
+  if (!(rules.reciprocity as ReciprocityConfig | undefined)?.swapWithholdsResidenceState) {
+    return null;
+  }
+
+  const residence = input.residenceState;
+  if (!residence) return null;
+  if (!hasStateRuleset(residence.code, input.checkDate)) return null;
+
+  const residenceRules = stateRuleset(residence.code, input.checkDate);
+  const virtualInput: PaycheckInput = {
+    ...input,
+    workState: { code: residence.code, certificate: residence.certificate },
+  };
+  const residenceLines = incomeTaxLines(virtualInput, ctx, residenceRules);
+  const residenceTax = residenceLines
+    .filter((l) => l.id === `${residence.code}_SIT`)
+    .reduce((sum, l) => sum + l.amount, 0);
+
+  return {
+    id: `${residence.code}_SIT_RECIPROCITY_SWAP`,
+    name: `${residenceRules.name} Income Tax (withheld by ${rules.code} employer under reciprocity)`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: residenceLines[0]?.taxableWages ?? 0,
+    amount: residenceTax,
+    detail:
+      `${fmt(residenceTax)} ${residence.code} tax withheld by the ${rules.code} employer instead of ` +
+      `${rules.code} tax, per ${rules.code}'s reciprocity swap mechanism — the employer has agreed not ` +
+      `to withhold ${rules.code} tax, so ${residence.code}'s own withholding rules apply to these wages instead.`,
+  };
 }
 
 /**
@@ -331,6 +410,12 @@ interface ReciprocityConfig {
   // reciprocalStates list has no way to represent this — the ONLY
   // difference between a commuter-only entry and an ordinary one is here.
   commuterOnlyStates?: string[];
+  // Pennsylvania-originated (REV-419): once this state's own reciprocity
+  // exemption fires for a resident of a reciprocalStates entry, ALSO emit
+  // an additional line for that employee's residence-state tax on the same
+  // wages — see reciprocitySwapWithholdingLine(). Opt-in, data-only, so
+  // every other state's plain-exemption behavior is unchanged.
+  swapWithholdsResidenceState?: boolean;
 }
 
 /**
@@ -634,6 +719,10 @@ function incomeTaxLines(
       return [rhodeIslandWithholding(input, ctx, rules)];
     case 'bracket_annual_allowance_deduction':
       return [dcWithholding(input, ctx, rules)];
+    case 'virginia_annual_dual_allowance':
+      return [virginiaWithholding(input, ctx, rules)];
+    case 'west_virginia_dual_table':
+      return [westVirginiaWithholding(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -5012,5 +5101,304 @@ function dcWithholding(
       `${fmt(annualWages)}/yr less ${fmt(allowanceAmount)} allowances (${allowances} × $${cfg.allowanceAmountAnnual}) ` +
       `= ${fmt(taxableIncome)} taxable @ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.from))}, ` +
       `base ${fmt(dollars(bracket.base))} = ${fmt(annualTax)}/yr ÷ ${multiplier}`,
+  };
+}
+
+interface VAWithholdingConfig {
+  standardDeductionAnnual: number;
+  personalExemptionAnnual: number;
+  ageOrBlindExemptionAnnual: number;
+  brackets: { annual: WIBracket[] };
+}
+
+/**
+ * Virginia's withholding formula (Income Tax Withholding Guide for
+ * Employers, Rev. 05/25): annualize wages (periodWages × ctx.periodsPerYear
+ * — no custom multiplier needed, unlike NJ/DE, since VA never publishes a
+ * non-standard daily divisor), subtract a FLAT standard deduction that does
+ * NOT vary by marital status (VA-4's own worksheet has no marital-status
+ * field at all — a spouse is just one more $930 exemption unit, see
+ * VA-2026.json's standardDeductionQuirk), then subtract two separately-
+ * valued per-unit exemption counts (personal/dependent at $930 each,
+ * age-65/blind at $800 each), then look up ONE bracket table (Virginia
+ * publishes no separate schedule by filing status — the marital difference
+ * lives entirely in the exemption count, never the rate table).
+ *
+ * Non-obvious rounding step, confirmed necessary by matching the Guide's
+ * own worked example exactly: the (excess × rate) marginal-tax component is
+ * rounded to the nearest WHOLE DOLLAR before adding to the bracket's base —
+ * full-cent-precision math throughout produces $109.48/period for the
+ * worked example below, not the Guide's own $109.50.
+ */
+function virginiaWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.withholdingStructure as unknown as VAWithholdingConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+  const annualWages = periodWages * ctx.periodsPerYear;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const personalExemptions = Number(cert.personalExemptions ?? 0);
+  const ageOrBlindExemptions = Number(cert.ageOrBlindExemptions ?? 0);
+
+  const standardDeduction = dollars(cfg.standardDeductionAnnual);
+  const personalDeduction = dollars(cfg.personalExemptionAnnual) * personalExemptions;
+  const ageBlindDeduction = dollars(cfg.ageOrBlindExemptionAnnual) * ageOrBlindExemptions;
+  const taxableIncome = atLeastZero(
+    annualWages - standardDeduction - personalDeduction - ageBlindDeduction,
+  );
+
+  const bracket = findWIBracket(cfg.brackets.annual, taxableIncome);
+  const excess = taxableIncome - dollars(bracket.from);
+  const marginalTax = toWholeDollars(applyRate(excess, bracket.rate));
+  const annualTax = dollars(bracket.base) + marginalTax;
+  const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction, ` +
+      `${fmt(personalDeduction)} (${personalExemptions} × $${cfg.personalExemptionAnnual} personal), ` +
+      `${fmt(ageBlindDeduction)} (${ageOrBlindExemptions} × $${cfg.ageOrBlindExemptionAnnual} age/blind) ` +
+      `= ${fmt(taxableIncome)} taxable @ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.from))} ` +
+      `(rounded to nearest $1) + base ${fmt(dollars(bracket.base))} = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
+  };
+}
+
+interface WVWithholdingConfig {
+  exemptionAmountByPeriod: Partial<Record<string, number>>;
+  brackets: {
+    twoEarnerOrTwoJobs_default: Partial<Record<string, WIBracket[]>>;
+    oneEarnerOneJob_electedViaLine5: Partial<Record<string, WIBracket[]>>;
+  };
+}
+
+/**
+ * West Virginia's withholding formula (IT-100.2A, March 2026 revision): NO
+ * annualize-then-divide step, unlike most bracket states in this project —
+ * WV publishes genuine, independently-set PER-PERIOD tables (confirmed by
+ * spot-check: annual $7,500/52 = $144.23, but the source's own weekly
+ * boundary is $144 flat), so this dispatches straight off input.payFrequency
+ * against the matching table. A flat per-exemption amount (also published
+ * per-period, not derived) is subtracted from gross wages first.
+ *
+ * The table SELECTION is the genuinely unusual part: not marital status.
+ * IT-104 Line 5 is an employee ELECTION — checking it opts into the "One
+ * Earner/One Job" table (higher thresholds, less withheld); leaving it
+ * unchecked (the default, including when no certificate is on file at all)
+ * uses the "Two Earner/Two or More Jobs" table (lower thresholds, more
+ * withheld) regardless of the employee's actual marital status.
+ */
+function westVirginiaWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.withholdingStructure as unknown as WVWithholdingConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const exemptions = Number(cert.exemptions ?? 0);
+  const oneEarnerElection = cert.oneEarnerElection === true;
+
+  const exemptionPerUnit = cfg.exemptionAmountByPeriod[input.payFrequency];
+  const tableSet = oneEarnerElection
+    ? cfg.brackets.oneEarnerOneJob_electedViaLine5
+    : cfg.brackets.twoEarnerOrTwoJobs_default;
+  const brackets = tableSet[input.payFrequency];
+
+  if (exemptionPerUnit === undefined || !brackets) {
+    throw new Error(
+      `West Virginia's own IT-100.2A doesn't publish a withholding table for ` +
+        `"${input.payFrequency}" — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+
+  const exemptionDeduction = dollars(exemptionPerUnit) * exemptions;
+  const taxableWage = atLeastZero(periodWages - exemptionDeduction);
+
+  const bracket = findWIBracket(brackets, taxableWage);
+  const excess = taxableWage - dollars(bracket.from);
+  const amount = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(periodWages)} less ${fmt(exemptionDeduction)} (${exemptions} × $${exemptionPerUnit} exemptions) ` +
+      `= ${fmt(taxableWage)} taxable @ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.from))}, ` +
+      `base ${fmt(dollars(bracket.base))} — ${oneEarnerElection ? 'One Earner/One Job (IT-104 Line 5 elected)' : 'Two Earner/Two or More Jobs (default)'} table`,
+  };
+}
+
+/**
+ * Pennsylvania's Act 32 local Earned Income Tax + Local Services Tax —
+ * genuinely different shape from every other local tax in this project.
+ * Reads data/local/PA-EIT-LST-2026.json (2,627 PSD-code jurisdictions,
+ * built and cross-checked in an earlier pass) via registry.ts's
+ * paLocalRuleset(), the same "separate large local file, looked up by
+ * code" pattern Indiana's countyRuleset() already established — except PA
+ * needs TWO lookups per paycheck (residence PSD and work PSD), not one,
+ * because the withholding RULE itself compares both jurisdictions'
+ * rates: "withhold at the HIGHER of the employee's resident EIT rate or
+ * the work-location's nonresident EIT rate" (documented directly in
+ * PA-2026.json's localTax.eit.withholdingRule, quoted from PA DCED).
+ *
+ * Same convention as Indiana's countyAddOnLine(): this engine does NOT
+ * resolve an address to a PSD code itself — the caller supplies the
+ * already-resolved 6-digit codes via certificate.workPSD (required) and
+ * certificate.residencePSD (optional; absent or "88000" is treated as
+ * PA DCED's own out-of-state-resident convention, a 0% resident rate,
+ * per PA-2026.json's localTax.eit.psdCodes note — 88000 is a documented
+ * convention, not an actual row in the bulk register, so it's handled
+ * directly here rather than looked up).
+ *
+ * NOT YET independently verified: whether Act 32's own "earned income"
+ * base definition is identical to PA's state PIT compensation base (this
+ * function assumes it is, reusing rules.exemptPretax — the same list
+ * PA_SIT and PA_UC_EE already share) — both are creatures of the same
+ * underlying PA "compensation" concept, but that specific equivalence for
+ * the LOCAL tax specifically was not independently sourced this pass.
+ * Flagged in PA-2026.json's knownGaps, not silently assumed away.
+ */
+function pennsylvaniaLocalTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine[] {
+  if (rules.code !== 'PA') return [];
+  if (!hasPALocalRuleset(input.checkDate)) return [];
+
+  const notModelled = (detail: string): TaxLine => ({
+    id: 'PA_EIT',
+    name: 'PA Local Earned Income Tax',
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages: 0,
+    amount: 0,
+    detail: `NOT MODELLED — ${detail} Do not treat as zero-tax.`,
+  });
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const workPSD = typeof cert.workPSD === 'string' ? cert.workPSD : undefined;
+  if (!workPSD) {
+    return [
+      notModelled(
+        'No certificate.workPSD supplied — this engine requires the already-resolved 6-digit PSD ' +
+          'code, the same convention as Indiana\'s county tax; it does not resolve an address itself.',
+      ),
+    ];
+  }
+
+  const workEntry = paLocalRuleset(workPSD, input.checkDate);
+  if (!workEntry) {
+    return [notModelled(`PSD code "${workPSD}" not found in the 2,627-jurisdiction registry.`)];
+  }
+
+  const residencePSD = typeof cert.residencePSD === 'string' ? cert.residencePSD : undefined;
+  const residenceEntry =
+    residencePSD && residencePSD !== '88000'
+      ? paLocalRuleset(residencePSD, input.checkDate)
+      : undefined;
+  const residentRate = residenceEntry ? residenceEntry.totalResidentEIT : 0;
+  const nonresidentRate = workEntry.nonresidentEIT;
+  const rate = Math.max(residentRate, nonresidentRate);
+  const higherSide = residentRate >= nonresidentRate ? 'resident' : 'nonresident';
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+  const eitAmount = applyRate(taxableWages, rate);
+
+  const eitLine: TaxLine = {
+    id: 'PA_EIT',
+    name: 'PA Local Earned Income Tax',
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages,
+    amount: eitAmount,
+    detail:
+      `${fmt(taxableWages)} @ ${(rate * 100).toFixed(2)}% (the ${higherSide} rate is higher) — resident ` +
+      `${(residentRate * 100).toFixed(2)}% (PSD ${residencePSD ?? '88000/out-of-state'}) vs. work-location ` +
+      `nonresident ${(nonresidentRate * 100).toFixed(2)}% (PSD ${workPSD}, ${workEntry.municipality})`,
+  };
+
+  const lines: TaxLine[] = [eitLine];
+  const lstLine = pennsylvaniaLST(ctx, rules, workEntry);
+  if (lstLine) lines.push(lstLine);
+
+  return lines;
+}
+
+/**
+ * Local Services Tax — a flat per-period FEE, not a percentage of wages,
+ * capped statewide at $52/yr (Act 32) and prorated ROUNDED DOWN to the
+ * cent (the opposite rounding direction from every other tax in this
+ * project — see money.ts's roundDownToCent()). Uses the WORK PSD's own
+ * lst.total figure directly rather than re-deriving/re-capping it in
+ * code — the data itself is already primary-sourced and spot-checked
+ * against the $52/$12,000 figures in PA-2026.json's own localTax.lst
+ * block, so re-imposing a cap here would only risk MASKING a real data
+ * discrepancy rather than catching one.
+ *
+ * Low-income exemption: estimates ANNUAL wages by annualizing this one
+ * cheque (periodWages × periodsPerYear) — the same approximation
+ * nonresidentDeMinimisReason() already makes elsewhere in this file, not
+ * a true year-to-date figure. Uses the municipal LIE threshold if
+ * present, falling back to the school district's, matching how the
+ * combined municipal+school total is what's actually being exempted.
+ */
+function pennsylvaniaLST(
+  ctx: ComputeContext,
+  rules: StateRuleset,
+  workEntry: PALocalEntry,
+): TaxLine | null {
+  const lst = workEntry.lst;
+  if (!lst || lst.total <= 0) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+  const estimatedAnnualWages = periodWages * ctx.periodsPerYear;
+
+  const lie = lst.lowIncomeExemption?.municipal || lst.lowIncomeExemption?.schoolDistrict;
+  if (lie && estimatedAnnualWages < dollars(lie)) {
+    return {
+      id: 'PA_LST',
+      name: 'PA Local Services Tax',
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: 0,
+      amount: 0,
+      detail:
+        `$0 — estimated annual wages ${fmt(estimatedAnnualWages)} (this cheque annualized, not a true ` +
+        `YTD figure) fall below the $${lie.toLocaleString()} Act 32 low-income exemption threshold`,
+    };
+  }
+
+  const annualLST = dollars(lst.total);
+  const perPeriod = roundDownToCent(annualLST / ctx.periodsPerYear);
+
+  return {
+    id: 'PA_LST',
+    name: 'PA Local Services Tax',
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages: 0,
+    amount: perPeriod,
+    detail:
+      `${fmt(annualLST)}/yr ÷ ${ctx.periodsPerYear} periods, rounded DOWN to the cent (Act 32's own ` +
+      `proration rule, the opposite direction from every other tax in this engine) = ${fmt(perPeriod)}/period`,
   };
 }

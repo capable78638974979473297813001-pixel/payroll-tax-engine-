@@ -69,3 +69,16 @@ export function overThreshold(current: Cents, ytd: Cents, threshold: Cents): Cen
 export function toWholeDollars(cents: Cents): Cents {
   return Math.round(cents / 100) * 100;
 }
+
+/**
+ * Round DOWN (floor) to the nearest whole cent — the opposite direction
+ * from roundHalfUp. Pennsylvania's Local Services Tax is the first tax in
+ * this project whose own governing rule (Act 32) explicitly requires this:
+ * "prorated across pay periods, rounded DOWN to the nearest $0.01." Kept as
+ * a distinct, named function rather than an inline Math.floor so the
+ * direction is unmistakable at every call site — the same discipline this
+ * file already applies to roundHalfUp vs. toWholeDollars.
+ */
+export function roundDownToCent(raw: number): Cents {
+  return Math.floor(raw);
+}

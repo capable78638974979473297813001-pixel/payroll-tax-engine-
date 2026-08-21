@@ -1942,7 +1942,14 @@
     "reciprocalStates": [
       "PA"
     ],
-    "note": "New Jersey and Pennsylvania have a long-standing bilateral reciprocal agreement under which neither state withholds income tax from the other's residents working there. Upgraded from a cross-source-only citation to a direct fetch of nj.gov/treasury/taxation/njit25.shtml (as a follow-up check after Scott asked whether this file was Symmetry-level), quoted verbatim: 'Compensation paid to Pennsylvania residents employed in New Jersey is not subject to New Jersey Income Tax under the terms of the Reciprocal Personal Income Tax Agreement between the states.' A PA resident working in NJ files Form NJ-165 with their employer to stop NJ withholding; an NJ resident working in PA files Form REV-419EX with their PA employer."
+    "note": "New Jersey and Pennsylvania have a long-standing bilateral reciprocal agreement under which neither state withholds income tax from the other's residents working there. Upgraded from a cross-source-only citation to a direct fetch of nj.gov/treasury/taxation/njit25.shtml (as a follow-up check after Scott asked whether this file was Symmetry-level), quoted verbatim: 'Compensation paid to Pennsylvania residents employed in New Jersey is not subject to New Jersey Income Tax under the terms of the Reciprocal Personal Income Tax Agreement between the states.' A PA resident working in NJ files Form NJ-165 with their employer to stop NJ withholding; an NJ resident working in PA files Form REV-419EX with their PA employer.",
+    "swapWithholdsResidenceState": true,
+    "swapSource": {
+      "title": "Form NJ-165 -- Employee's Certificate of Nonresidence in New Jersey",
+      "url": "https://www.nj.gov/treasury/taxation/pdf/current/nj165.pdf",
+      "verifiedOn": "2026-08-21",
+      "verifiedBy": "PDF downloaded and read directly (as a follow-up to PA-2026.json's own reciprocity pass, which found PA's REV-415 describing this same mechanism from PA's side and needed independent NJ-side confirmation before trusting it). Quoted verbatim, the exact certificate a PA resident signs for their NJ employer: 'I claim exemption from withholding of New Jersey Gross Income Tax on compensation paid to me in the State of New Jersey and authorize my employer to withhold Pennsylvania personal income taxes on my behalf.' This is NOT just an exemption -- it's the same withholding SWAP mechanism PA's own REV-419 describes from its side, now confirmed from NJ's own primary source too, not inferred from PA's description alone. Engine mechanism: reciprocitySwapWithholdingLine() (src/taxes/state.ts), the same generic function PA's own swapWithholdsResidenceState flag already uses -- when a PA resident works in NJ, NJ_SIT zeroes via the plain reciprocalStates match AND a new PA_SIT_RECIPROCITY_SWAP line is added computing PA's actual tax on those wages. Proven in tests/engine.test.ts."
+    }
   },
   "stateUnemploymentEmployee": {
     "rate": 0.00425,

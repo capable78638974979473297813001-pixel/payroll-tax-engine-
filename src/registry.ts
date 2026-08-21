@@ -148,3 +148,45 @@ export function countyRuleset(
     (c) => c.name.toLowerCase() === countyName.toLowerCase(),
   );
 }
+
+export interface PALocalEntry {
+  psdCode: string;
+  county: string;
+  municipality: string;
+  schoolDistrict: string;
+  residentEIT: number;
+  nonresidentEIT: number;
+  schoolDistrictEIT: number;
+  totalResidentEIT: number;
+  lst?: {
+    municipal: number;
+    schoolDistrict: number;
+    total: number;
+    lowIncomeExemption?: { municipal: number; schoolDistrict: number };
+  };
+}
+
+interface PALocalRegistryFile {
+  year: number;
+  jurisdictions: PALocalEntry[];
+}
+
+/** Whether a PA Act 32 local (EIT/LST) registry exists for this check date. */
+export function hasPALocalRuleset(checkDate: string): boolean {
+  return existsSync(join(DATA_ROOT, 'local', `PA-EIT-LST-${yearOf(checkDate)}.json`));
+}
+
+/**
+ * Look up one PSD (Political Subdivision) code's EIT/LST rates. Returns
+ * undefined for an unrecognised code — same convention as countyRuleset(),
+ * the caller (taxes/state.ts) decides how to surface that.
+ */
+export function paLocalRuleset(
+  psdCode: string,
+  checkDate: string,
+): PALocalEntry | undefined {
+  const file = loadJson<PALocalRegistryFile>(
+    join('local', `PA-EIT-LST-${yearOf(checkDate)}.json`),
+  );
+  return file.jurisdictions.find((j) => j.psdCode === psdCode);
+}

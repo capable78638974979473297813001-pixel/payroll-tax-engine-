@@ -431,6 +431,106 @@ describe('Pennsylvania', () => {
     assert.ok(line);
     assert.match(line.detail ?? '', /NOT MODELLED/);
   });
+
+  test("reciprocity SWAP (REV-419): a New Jersey resident working in PA gets $0 PA tax AND a real NJ tax line instead", () => {
+    // Biweekly $3,000, no certificate on either side — the SAME default
+    // fixture NJ's own 'Rate A, 0 exemptions' test already proved computes
+    // to $120.74 when NJ is the WORK state. Here PA is the work state and
+    // NJ is only the RESIDENCE state, so this proves the swap mechanism
+    // reproduces that exact figure via the virtual-input path, not a
+    // coincidence — reciprocitySwapWithholdingLine() runs incomeTaxLines()
+    // against NJ's own ruleset on the same wages.
+    const r = calculatePaycheck(
+      input({
+        workState: { code: 'PA' },
+        residenceState: { code: 'NJ' },
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_SIT'), 0);
+    assert.equal(amountOf(r, 'NJ_SIT_RECIPROCITY_SWAP'), dollars(120.74));
+  });
+
+  test('reciprocity SWAP does not over-apply: a New York resident working in PA owes full PA tax and gets no swap line at all', () => {
+    const r = calculatePaycheck(
+      input({
+        workState: { code: 'PA' },
+        residenceState: { code: 'NY' },
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_SIT'), dollars(92.1)); // full 3.07%, no exemption — NY isn't reciprocal
+    assert.equal(r.taxes.some((t) => t.id === 'NY_SIT_RECIPROCITY_SWAP'), false);
+  });
+
+  // Act 32 local EIT + LST, wired to calc-code this pass — reads the real
+  // 2,627-jurisdiction data/local/PA-EIT-LST-2026.json registry. Fixtures
+  // use Pittsburgh's own two real PSD codes (700102 = Pittsburgh City /
+  // Pittsburgh SD, totalResidentEIT 3.0%, nonresidentEIT 1.0%; 730105 =
+  // Pittsburgh City / Baldwin-Whitehall SD, totalResidentEIT 1.5%) rather
+  // than invented numbers, so these tests double as a sanity check on the
+  // underlying data file too.
+  test('EIT withholds at the RESIDENT rate when it is higher: lives and works at PSD 700102 (3.0% vs 1.0% nonresident)', () => {
+    const r = calculatePaycheck(
+      input({
+        workState: { code: 'PA', certificate: { workPSD: '700102', residencePSD: '700102' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_EIT'), dollars(90.0)); // 3,000 × 3.0%
+  });
+
+  test('EIT withholds at the NONRESIDENT rate when it is higher: out-of-state resident working at PSD 700102', () => {
+    const r = calculatePaycheck(
+      input({
+        workState: { code: 'PA', certificate: { workPSD: '700102' } }, // no residencePSD = out-of-state
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_EIT'), dollars(30.0)); // 3,000 × 1.0% nonresident (0% resident, out-of-state)
+  });
+
+  test('EIT compares TWO DIFFERENT PSDs correctly: resident of 730105 (1.5%) working at 700102 (1.0% nonresident)', () => {
+    const r = calculatePaycheck(
+      input({
+        workState: { code: 'PA', certificate: { workPSD: '700102', residencePSD: '730105' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_EIT'), dollars(45.0)); // 3,000 × 1.5% resident (higher than 1.0% nonresident)
+  });
+
+  test('LST prorates the $52/yr combined total across biweekly periods: $2.00/period', () => {
+    const r = calculatePaycheck(
+      input({
+        workState: { code: 'PA', certificate: { workPSD: '700102', residencePSD: '700102' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_LST'), dollars(2.0)); // 52 / 26 periods = exactly $2.00
+  });
+
+  test('LST low-income exemption: biweekly $400 (annualized $10,400) is below the $12,000 threshold', () => {
+    const r = calculatePaycheck(
+      input({
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+        workState: { code: 'PA', certificate: { workPSD: '700102', residencePSD: '700102' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_LST'), 0);
+  });
+
+  test('missing certificate.workPSD is flagged NOT MODELLED, never silently zero', () => {
+    const r = calculatePaycheck(input({ workState: { code: 'PA' } }));
+    const line = r.taxes.find((t) => t.id === 'PA_EIT');
+    assert.ok(line);
+    assert.equal(line.amount, 0);
+    assert.match(line.detail ?? '', /NOT MODELLED/);
+  });
+
+  test('an unrecognised PSD code is flagged NOT MODELLED, never silently zero', () => {
+    const r = calculatePaycheck(
+      input({ workState: { code: 'PA', certificate: { workPSD: '999999' } } }),
+    );
+    const line = r.taxes.find((t) => t.id === 'PA_EIT');
+    assert.ok(line);
+    assert.equal(line.amount, 0);
+    assert.match(line.detail ?? '', /NOT MODELLED/);
+  });
 });
 
 describe('Michigan', () => {
@@ -582,6 +682,25 @@ describe('Indiana', () => {
         payFrequency: 'weekly',
         earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
         residenceState: { code: 'KY' },
+        ...inState({ county: 'Marion' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'IN_SIT'), 0);
+    assert.equal(amountOf(r, 'IN_COUNTY'), dollars(16.16));
+  });
+
+  test('reciprocity is generic across states too — a Pennsylvania resident working in Indiana gets the same state/county split as Kentucky above', () => {
+    // Same fixture as the KY test immediately above, residenceState swapped
+    // to PA — proving WH-47's state-only exemption isn't accidentally
+    // KY-specific plumbing. IN-2026.json's reciprocalStates lists PA with
+    // no per-state carve-out (unlike Virginia's daily-commute condition on
+    // Kentucky's own reciprocalStates), so this is expected to match KY's
+    // result exactly, and does.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+        residenceState: { code: 'PA' },
         ...inState({ county: 'Marion' }),
       }),
     );
@@ -2568,7 +2687,14 @@ describe('New Jersey', () => {
     assert.equal(amountOf(r, 'NJ_SIT'), dollars(120.74));
   });
 
-  test('reciprocity: a Pennsylvania resident working in NJ owes $0 NJ income tax', () => {
+  test('reciprocity: a Pennsylvania resident working in NJ owes $0 NJ income tax, AND gets a PA swap line instead (NJ-165)', () => {
+    // NJ-165's own text ("...authorize my employer to withhold Pennsylvania
+    // personal income taxes on my behalf") confirms this isn't just a plain
+    // exemption -- it's the same withholding SWAP mechanism PA's own
+    // REV-419 describes from its side, now independently confirmed from
+    // NJ's side too. reciprocitySwapWithholdingLine() (generic, gated by
+    // NJ-2026.json's own reciprocity.swapWithholdsResidenceState) computes
+    // PA's flat 3.07% on the same wages: 1,000 × 3.07% = $30.70.
     const r = calculatePaycheck(
       input({
         payFrequency: 'weekly',
@@ -2578,6 +2704,7 @@ describe('New Jersey', () => {
       }),
     );
     assert.equal(amountOf(r, 'NJ_SIT'), 0);
+    assert.equal(amountOf(r, 'PA_SIT_RECIPROCITY_SWAP'), dollars(30.7));
   });
 
   test('supplemental wages paid AT THE SAME TIME as regular wages aggregate, allowance applies once', () => {
@@ -5425,6 +5552,151 @@ describe('District of Columbia', () => {
       }),
     );
     assert.equal(amountOf(r, 'DC_SIT'), 0);
+  });
+});
+
+describe('Virginia', () => {
+  // VA was built to calc-code specifically to unblock proving PA
+  // reciprocity's outbound direction through the real engine (VA-2026.json
+  // was previously data-only). Expected values hand-derived from the
+  // Income Tax Withholding Guide's own formula before running, same
+  // discipline as every other state here.
+  const vaState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'VA', certificate },
+  });
+
+  test("reproduces the Guide's own worked example to the cent: semimonthly $2,649, 5 personal exemptions", () => {
+    // A = 2,649 x 24 = 63,576. T = 63,576 - [8,750 + 5x930] = 50,176.
+    // Over $17,000: 720 + 5.75%x(50,176-17,000=33,176) = 720 + 1,907.62,
+    // rounded to the nearest WHOLE DOLLAR before adding (the Guide's own
+    // non-obvious step) = 720 + 1,908 = 2,628/yr / 24 = $109.50/period.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2649) }],
+        ...vaState({ personalExemptions: 5 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'VA_SIT'), dollars(109.5));
+  });
+
+  test('the age/blind exemption (E2, $800) is tracked separately from the personal exemption (E1, $930)', () => {
+    // Annual $50,000, 0 personal + 1 age/blind exemption.
+    // T = 50,000 - [8,750 + 0 + 1x800] = 40,450. Over $17,000: 720 +
+    // 5.75%x(40,450-17,000=23,450) = 720 + 1,348.375 -> rounds to 1,348
+    // = $2,068.00/yr (annual frequency, no further division).
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'annual',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(50000) }],
+        ...vaState({ ageOrBlindExemptions: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'VA_SIT'), dollars(2068.0));
+  });
+
+  test('reciprocity: PA/MD/WV residents owe $0 VA tax unconditionally', () => {
+    for (const code of ['PA', 'MD', 'WV']) {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'semimonthly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(2649) }],
+          residenceState: { code },
+          ...vaState({ personalExemptions: 5 }),
+        }),
+      );
+      assert.equal(amountOf(r, 'VA_SIT'), 0, `expected $0 VA tax for a ${code} resident`);
+    }
+  });
+
+  test("reciprocity's KY/DC commuter gate: a daily commuter owes $0, a non-commuter owes full VA tax", () => {
+    // This is the bug VA-4's own narrowerCommuterException field already
+    // documented — before this pass, KY/DC weren't even in VA's own
+    // reciprocalStates array, so the commuter gate could never fire at all
+    // (reciprocityExemptionReason() checks reciprocalStates FIRST). Now
+    // wired end-to-end.
+    const commuter = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2649) }],
+        residenceState: { code: 'KY', certificate: { dailyCommuter: true } },
+        ...vaState({ personalExemptions: 5 }),
+      }),
+    );
+    assert.equal(amountOf(commuter, 'VA_SIT'), 0);
+
+    const nonCommuter = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2649) }],
+        residenceState: { code: 'KY' },
+        ...vaState({ personalExemptions: 5 }),
+      }),
+    );
+    assert.equal(amountOf(nonCommuter, 'VA_SIT'), dollars(109.5));
+  });
+});
+
+describe('West Virginia', () => {
+  // WV was built to calc-code alongside VA, same motivation. Uses genuine
+  // per-period tables (no annualize/divide) — hand-derived independently
+  // from IT-100.2A's own weekly table before running.
+  const wvState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'WV', certificate },
+  });
+
+  test('weekly $800, 1 exemption, default Two Earner table: $23.74', () => {
+    // Taxable = 800 - 38.46 = 761.54. Bracket [577-866, base 15.95, 4.22%]:
+    // 15.95 + 4.22%x(761.54-577=184.54) = 15.95 + 7.79 = $23.74.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+        ...wvState({ exemptions: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'WV_SIT'), dollars(23.74));
+  });
+
+  test('weekly $800, 1 exemption, One Earner/One Job elected (IT-104 Line 5): $21.04', () => {
+    // Same taxable $761.54, but the ONE-EARNER table's bracket [481-769,
+    // base 12.17, 3.16%] applies instead: 12.17 + 3.16%x(761.54-481=280.54)
+    // = 12.17 + 8.87 = $21.04 — less withheld than the default table, as
+    // expected (opting in is only available to single filers/one-job
+    // households, and produces LOWER withholding, per IT-104's own design).
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+        ...wvState({ exemptions: 1, oneEarnerElection: true }),
+      }),
+    );
+    assert.equal(amountOf(r, 'WV_SIT'), dollars(21.04));
+  });
+
+  test('no certificate on file defaults to 0 exemptions and the (higher-withholding) Two Earner table: $25.36', () => {
+    // Taxable = 800 - 0 = 800. Bracket [577-866, base 15.95, 4.22%]:
+    // 15.95 + 4.22%x(800-577=223) = 15.95 + 9.41 = $25.36.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+        workState: { code: 'WV' },
+      }),
+    );
+    assert.equal(amountOf(r, 'WV_SIT'), dollars(25.36));
+  });
+
+  test('reciprocity: a Pennsylvania resident working in West Virginia owes $0 WV tax', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+        residenceState: { code: 'PA' },
+        ...wvState({ exemptions: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'WV_SIT'), 0);
   });
 });
 
