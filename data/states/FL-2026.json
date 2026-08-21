@@ -15,7 +15,13 @@
       "title": "Florida Paid Family Leave Insurance Act -- cross-source",
       "url": "https://www.floridapolicy.org/posts/a-smart-investment-the-case-for-paid-family-leave-in-florida",
       "verifiedOn": "2026-08-21",
-      "verifiedBy": "Cross-source confirmed only, not independently fetched from a Florida statute this pass. Authorizes VOLUNTARY private paid-family-leave insurance products -- no state fund, no mandatory payroll deduction. Real structural finding beyond the usual 'no mandatory program': Florida law affirmatively PREEMPTS local governments from creating their OWN paid-leave mandates too (a state law barring cities/counties from filling the gap), a stronger preemption than most 'no local program' states in this project, which are simply silent on local authority rather than actively barring it."
+      "verifiedBy": "Cross-source confirmed only, not independently fetched from a Florida statute this pass. Authorizes VOLUNTARY private paid-family-leave insurance products -- no state fund, no mandatory payroll deduction."
+    },
+    {
+      "title": "Fla. Stat. sec. 218.077 -- Local government employment benefit mandates preempted",
+      "url": "https://www.flsenate.gov/Laws/Statutes/2025/218.077",
+      "verifiedOn": "2026-08-21",
+      "verifiedBy": "RESOLVED ('do a quick verification' pass) -- the local-paid-leave-preemption claim was previously cross-source only; fetched the actual statute text directly. Quoted verbatim: 'a political subdivision may not establish, mandate, or otherwise require an employer to pay a minimum wage, other than a state or federal minimum wage... or to provide employment benefits not otherwise required by state or federal law.' Originated as 2013 HB 655; broader than paid leave alone (also bars local minimum-wage, scheduling, and heat-protection mandates). Three narrow carve-outs: the political subdivision's OWN employees, employers receiving a direct tax abatement/subsidy as a contract condition, or where federal funding conditions require it. A 2024 amendment separately barred local governments from using vendor wages/benefits as a contracting 'evaluation factor,' with the wage/scheduling provisions specifically taking effect 2026-09-30 -- a forward date, not yet in force as of this file's 2026 target, noted for completeness but not load-bearing for the paid-leave preemption itself (already long in force)."
     }
   ],
   "exemptPretax": [],
@@ -29,7 +35,7 @@
     "confidence": "cross_source_confirmed."
   },
   "paidFamilyMedicalLeave": {
-    "rule": "NONE mandatory, and none permitted locally either. The Florida Paid Family Leave Insurance Act authorizes licensed insurers to OFFER voluntary paid-leave policies -- no state fund, no mandatory deduction (same voluntary-insurance-only shape as South Carolina's Act 206 and Tennessee's 2023 Act). Florida additionally preempts local governments from creating their own paid-leave mandates, a real structural fact beyond the bare absence of a state program -- not independently verified against the actual preemption statute this pass.",
+    "rule": "NONE mandatory, and none permitted locally either. The Florida Paid Family Leave Insurance Act authorizes licensed insurers to OFFER voluntary paid-leave policies -- no state fund, no mandatory deduction (same voluntary-insurance-only shape as South Carolina's Act 206 and Tennessee's 2023 Act). Florida additionally preempts local governments from creating their own paid-leave mandates -- CONFIRMED directly via Fla. Stat. sec. 218.077's own text (see sources above), not just cross-sourced: 'a political subdivision may not... require an employer to... provide employment benefits not otherwise required by state or federal law.'",
     "confidence": "cross_source_confirmed."
   },
   "unemploymentInsurance": {
@@ -43,7 +49,7 @@
     "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project: experience-rated, an individual employer's actual rate depends on employer-specific history a static jurisdiction file can't hold."
   },
   "knownGaps": [
-    "The local-government paid-leave preemption is cross-source only, not independently verified against the actual Florida statute text this pass.",
+    "The local-government paid-leave preemption is now RESOLVED via a direct Fla. Stat. sec. 218.077 statute read (see sources above).",
     "Given no income tax exists, this file is intentionally lighter-weight than income-tax states in this project -- consistent with the South Dakota/Tennessee precedent."
   ]
 }
