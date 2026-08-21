@@ -132,8 +132,9 @@
       "name": "Florida",
       "wageIncomeTax": false,
       "structure": "none",
-      "note": "No state wage income tax. Employer SUI only.",
-      "status": "structural_fact"
+      "note": "No state wage income tax (constitutional prohibition, Fla. Const. Art. VII sec. 5). State data captured in data/states/FL-2026.json: Reemployment Tax (FL's name for SUTA, administered by the Dept of Revenue not a labor agency) wage base $7,000, new-employer 2.7%/10 quarters, range 0.1%-5.4%, all primary-confirmed directly from floridarevenue.com. No local income tax (and localities are additionally barred from creating any paid-leave mandate of their own). No mandatory paid leave; a 2026 Paid Family Leave Insurance Act authorizes voluntary private coverage only.",
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-21"
     },
     {
       "code": "GA",
