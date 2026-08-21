@@ -123,8 +123,9 @@
       "structure": "bracket",
       "withholdingSource": "https://otr.cfo.dc.gov/page/income-tax-withholding-instructions-and-tables",
       "sourceDoc": "FR-230 Income Tax Withholding Instructions and Tables. Form D-4.",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11"
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-20",
+      "note": "Wired into calc code (dcWithholding()) 2026-08-20: single bracket table, flat per-allowance deduction, sourced from a 2022 NFC federal-payroll bulletin (DC's own current-year FR-230 was not locatable) whose BRACKETS were cross-checked against fresh 2026 sources and held up -- the allowance dollar amount specifically is disclosed as unconfirmed for 2026. DC does not tax nonresident wages at all under a federal statutory prohibition (Home Rule Act), modelled as a direct check rather than a reciprocalStates list. Universal Paid Leave (0.75%, 100% employer-funded) and UI not wired/researched."
     },
     {
       "code": "FL",
@@ -245,9 +246,9 @@
       "structure": "bracket_plus_local",
       "withholdingSource": "https://marylandtaxes.gov/business/income/withholding/index.php",
       "sourceDoc": "Maryland Employer Withholding Guide (annual PDF, e.g. https://www.marylandtaxes.gov/forms/24-forms/Withholding-Guide.pdf)",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11",
-      "note": "State graduated + county local rate withheld together in one table."
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-20",
+      "note": "Wired into calc code (marylandWithholding()) 2026-08-20: state 10-tier bracket + all 24 county local rates (2 tiered: Anne Arundel, Frederick) summed on the same taxable income, verified against the guide's own published combined-rate table (7-for-7 exact match). Closed a real reciprocity asymmetry -- PA/VA/WV already listed MD as reciprocal; MD itself had no data until now. UI and PFML status not researched."
     },
     {
       "code": "MA",
@@ -443,8 +444,9 @@
       "structure": "bracket",
       "withholdingSource": "https://tax.ri.gov/tax-sections/withholding-tax",
       "sourceDoc": "2026 Rhode Island Employer's Income Tax Withholding Tables booklet. Form RI W-4.",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11"
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-20",
+      "note": "Wired into calc code (rhodeIslandWithholding()) 2026-08-20: single bracket table for all filing statuses, genuine per-period tables (not annualized-derived), verified against the booklet's own worked example (7.57) exactly. TDI (1.1%, 00k wage base, also funds TCI/paid-caregiver-leave) wired via the existing generic disability dispatch. No reciprocity, no local tax."
     },
     {
       "code": "SC",

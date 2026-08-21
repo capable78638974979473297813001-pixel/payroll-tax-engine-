@@ -628,6 +628,12 @@ function incomeTaxLines(
       return [coloradoWithholding(input, ctx, rules)];
     case 'flat_rate_phaseout_allowance':
       return [utahWithholding(input, ctx, rules)];
+    case 'bracket_state_plus_local':
+      return [marylandWithholding(input, ctx, rules)];
+    case 'bracket_per_period_single_table':
+      return [rhodeIslandWithholding(input, ctx, rules)];
+    case 'bracket_annual_allowance_deduction':
+      return [dcWithholding(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -4759,5 +4765,252 @@ function utahWithholding(
       `${fmt(periodWages)} @ ${(cfg.rate * 100).toFixed(2)}% = ${fmt(line2)} gross tax; base allowance ` +
       `${fmt(line3)} less ${fmt(line5)} phase-out (${(cfg.phaseOutRate * 100).toFixed(1)}% of ${fmt(line4)} over ` +
       `$${phaseOutThresholdDollars}) = ${fmt(line6)} net allowance (${status}); withholding = ${fmt(line2)} - ${fmt(line6)}`,
+  };
+}
+
+interface MDCountyRate {
+  flat?: number;
+  tiered?: { single: WIBracket[]; mfjHoh: WIBracket[] };
+}
+
+interface MDConfig {
+  stateBrackets: { mfjHoh: WIBracket[]; single: WIBracket[] };
+  standardDeductionAnnual: number;
+  standardDeductionPerPeriod: Partial<Record<string, number>>;
+  exemptionAmountAnnual: number;
+  exemptionAmountPerPeriod: Partial<Record<string, number>>;
+  noCertificateDefault: { filingStatus: string; exemptions: number; localRate: number };
+  nonresidentSpecialRate: number;
+}
+
+function resolveMDFilingStatus(cert: Record<string, unknown>): 'single' | 'mfjHoh' {
+  return cert.filingStatus === 'mfjHoh' ? 'mfjHoh' : 'single';
+}
+
+/**
+ * Maryland's withholding (2026 Employer Withholding Guide, fetched and read
+ * directly): STATE tax (a 10-tier graduated bracket) plus LOCAL tax (each
+ * county sets its own rate, applied to the SAME taxable income) summed into
+ * one combined line — never separated into two lines, matching the guide's
+ * own convention that the combined figure appears as a single "STATE TAX"
+ * amount. Computed at the ANNUAL level and divided by periods, rather than
+ * reproducing the guide's own separately-published per-period tables —
+ * verified that this reproduces the guide's own combined MARGINAL RATES
+ * exactly (see this file's own doc comment in MD-2026.json), though the
+ * exact per-period CENTS may differ by a small amount from the guide's own
+ * independently-rounded per-period tables, the same class of two-valid-
+ * methods divergence already documented for California's Examples E/F.
+ *
+ * Two of Maryland's 24 local jurisdictions (Anne Arundel, Frederick) have
+ * their OWN internally tiered rate, not a flat percentage — a genuinely
+ * different local-tax shape from every other state's local tax in this
+ * project. certificate.county selects a key into rules.countyRates;
+ * certificate.nonresident bypasses the county lookup entirely in favor of
+ * a flat 2.25% "Special Nonresident Rate" applied on top of the same state
+ * bracket, replacing rather than stacking with any county figure.
+ */
+function marylandWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.bracketStatePlusLocal as MDConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+  const annualWages = periodWages * ctx.periodsPerYear;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const hasCertificate = Boolean(input.workState?.certificate);
+  const status = hasCertificate
+    ? resolveMDFilingStatus(cert)
+    : (cfg.noCertificateDefault.filingStatus as 'single' | 'mfjHoh');
+  const exemptions = hasCertificate ? Number(cert.exemptions ?? 0) : cfg.noCertificateDefault.exemptions;
+
+  const standardDeduction = dollars(cfg.standardDeductionAnnual);
+  const exemptionAmount = dollars(cfg.exemptionAmountAnnual) * exemptions;
+  const taxableIncome = atLeastZero(annualWages - standardDeduction - exemptionAmount);
+
+  const stateBrackets = cfg.stateBrackets[status];
+  const stateBracket = findWIBracket(stateBrackets, taxableIncome);
+  const stateExcess = taxableIncome - dollars(stateBracket.from);
+  const stateTax = dollars(stateBracket.base) + applyRate(stateExcess, stateBracket.rate);
+
+  let localTax: number;
+  let localNote: string;
+  const nonresident = Boolean(cert.nonresident);
+  if (nonresident) {
+    localTax = applyRate(taxableIncome, cfg.nonresidentSpecialRate);
+    localNote = `nonresident, Special ${(cfg.nonresidentSpecialRate * 100).toFixed(2)}% rate`;
+  } else {
+    const countyName = hasCertificate ? (cert.county as string | undefined) : undefined;
+    const countyRates = (rules.countyRates ?? {}) as Record<string, MDCountyRate>;
+    const county = countyName ? countyRates[countyName] : undefined;
+    if (!hasCertificate || !county) {
+      localTax = applyRate(taxableIncome, cfg.noCertificateDefault.localRate);
+      localNote = `no certificate/unrecognized county — max local rate ${(cfg.noCertificateDefault.localRate * 100).toFixed(2)}%`;
+    } else if (county.flat !== undefined) {
+      localTax = applyRate(taxableIncome, county.flat);
+      localNote = `${countyName} @ ${(county.flat * 100).toFixed(2)}% flat`;
+    } else if (county.tiered) {
+      const localBrackets = county.tiered[status];
+      const localBracket = findWIBracket(localBrackets, taxableIncome);
+      const localExcess = taxableIncome - dollars(localBracket.from);
+      localTax = dollars(localBracket.base) + applyRate(localExcess, localBracket.rate);
+      localNote = `${countyName} @ ${(localBracket.rate * 100).toFixed(2)}% tiered over ${fmt(dollars(localBracket.from))}`;
+    } else {
+      throw new Error(`MD county "${countyName}" has neither a flat nor a tiered rate configured.`);
+    }
+  }
+
+  const annualTax = stateTax + localTax;
+  const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} std. deduction less ${fmt(exemptionAmount)} ` +
+      `exemptions (${exemptions}) = ${fmt(taxableIncome)} taxable; state ${fmt(stateTax)} + local ${fmt(localTax)} ` +
+      `(${localNote}) = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
+  };
+}
+
+interface RIConfig {
+  exemptionAmountPerPeriod: Partial<Record<string, number>>;
+  exemptionPhaseOutThresholdPerPeriod: Partial<Record<string, number>>;
+  brackets: Partial<Record<string, WIBracket[]>>;
+}
+
+/**
+ * Rhode Island's withholding (2026 Withholding Tax Booklet, fetched and
+ * read directly): ONE bracket schedule for every filing status — 'TABLES
+ * ARE FOR ALL FILING STATUS TYPES,' the booklet's own words. Subtract
+ * (exemptions x per-period exemption amount) from wages, look up the
+ * result directly in the genuine PER-PERIOD table (not derived from the
+ * annual one — see this file's own doc comment in RI-2026.json for why
+ * that specifically matters here, a real one-cent divergence). The one
+ * real wrinkle: the exemption amount is a CLIFF, not a gradual phase-out —
+ * once period wages exceed the published threshold, the exemption is $0
+ * for that period, not partially reduced.
+ */
+function rhodeIslandWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.bracketPerPeriodSingleTable as RIConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+  const period = input.payFrequency;
+
+  const exemptionPerUnit = cfg.exemptionAmountPerPeriod[period];
+  const phaseOutThreshold = cfg.exemptionPhaseOutThresholdPerPeriod[period];
+  const brackets = cfg.brackets[period];
+  if (exemptionPerUnit === undefined || phaseOutThreshold === undefined || !brackets) {
+    throw new Error(
+      `Rhode Island's own withholding tables don't publish a "${period}" schedule — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const exemptions = Number(cert.exemptions ?? 0);
+
+  const phasedOut = periodWages > dollars(phaseOutThreshold);
+  const exemption = phasedOut ? 0 : roundHalfUp(dollars(exemptionPerUnit) * exemptions);
+  const netWages = atLeastZero(periodWages - exemption);
+
+  const bracket = findWIBracket(brackets, netWages);
+  const excess = netWages - dollars(bracket.from);
+  const amount = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: netWages,
+    amount,
+    detail:
+      `${fmt(periodWages)} less ${fmt(exemption)} exemption (${exemptions} × $${exemptionPerUnit}` +
+      (phasedOut ? `, phased out — wages exceed $${phaseOutThreshold}` : '') +
+      `) = ${fmt(netWages)} net @ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))}`,
+  };
+}
+
+interface DCConfig {
+  brackets: WIBracket[];
+  allowanceAmountAnnual: number;
+  annualizeMultiplier: Partial<Record<string, number>>;
+}
+
+/**
+ * DC's withholding (NFC-22-1668460546, effective Pay Period 22, 2022, the
+ * fullest formula source found for DC's actual withholding — see
+ * DC-2026.json's own sources for the cross-check that confirmed the
+ * BRACKETS specifically are still current for 2026 even though this
+ * exact bulletin is older). ONE bracket table for every filing status,
+ * a flat per-ALLOWANCE amount subtracted from wages BEFORE the bracket
+ * lookup (a deduction, not a post-tax credit — Delaware/Oregon's shape
+ * is the opposite of this). DC does not tax nonresidents' wages AT ALL
+ * under a federal statutory prohibition (the Home Rule Act) — modelled
+ * as a direct certificate.nonresident check, not this project's usual
+ * reciprocalStates list mechanism, since the real rule applies to
+ * residents of all 50 states uniformly rather than a handful of named
+ * ones.
+ */
+function dcWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.bracketAnnualAllowanceDeduction as DCConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (cert.nonresident) {
+    return {
+      id: `${rules.code}_SIT`,
+      name: `${rules.name} Income Tax`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: 0,
+      amount: 0,
+      detail: `$0 — DC does not tax nonresident wages (Home Rule Act of 1973, federal statutory prohibition, not a bilateral reciprocity agreement)`,
+    };
+  }
+
+  const multiplier = cfg.annualizeMultiplier[input.payFrequency];
+  if (multiplier === undefined) {
+    throw new Error(
+      `DC's own withholding formula doesn't publish an annualizing multiplier for "${input.payFrequency}" — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const annualWages = periodWages * multiplier;
+
+  const allowances = Number(cert.allowances ?? 0);
+  const allowanceAmount = dollars(cfg.allowanceAmountAnnual) * allowances;
+  const taxableIncome = atLeastZero(annualWages - allowanceAmount);
+
+  const bracket = findWIBracket(cfg.brackets, taxableIncome);
+  const excess = taxableIncome - dollars(bracket.from);
+  const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
+  const amount = roundHalfUp(annualTax / multiplier);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(annualWages)}/yr less ${fmt(allowanceAmount)} allowances (${allowances} × $${cfg.allowanceAmountAnnual}) ` +
+      `= ${fmt(taxableIncome)} taxable @ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.from))}, ` +
+      `base ${fmt(dollars(bracket.base))} = ${fmt(annualTax)}/yr ÷ ${multiplier}`,
   };
 }

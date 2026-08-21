@@ -5227,6 +5227,207 @@ describe('Utah', () => {
   });
 });
 
+describe('Maryland', () => {
+  // No official worked example with a stated dollar answer was found in
+  // the 2026 guide the way California/Rhode Island's own sources
+  // provided, so these fixtures are hand-derived from the guide's own
+  // formula (state bracket + county rate, both on the same taxable
+  // income) — but the STATE+LOCAL COMBINATION logic itself was verified
+  // separately first: reconstructing state brackets 4-10 (4.75/5.00/5.25/
+  // 5.50/5.75/6.25/6.50%) each plus the guide's own published "2.25%
+  // local" table reproduces its stated combined rates (7.00/7.25/7.50/
+  // 7.75/8.00/8.50/8.75%) exactly, 7-for-7, before any of this was
+  // written into a test.
+  const mdState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'MD', certificate },
+  });
+
+  test('Worcester County (flat 2.25%), single, 0 exemptions, annual $80,000', () => {
+    // Taxable: 80,000 - 3,400 = 76,600. State (single, bracket [3,000-
+    // 100,000], base $90, 4.75%): 90 + 4.75%x73,600 = 90+3,496=3,586.00.
+    // Local (Worcester 2.25% flat): 76,600 x 2.25% = 1,723.50. Combined:
+    // 3,586.00 + 1,723.50 = 5,309.50.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'annual',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(80000) }],
+        ...mdState({ filingStatus: 'single', exemptions: 0, county: 'Worcester' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MD_SIT'), dollars(5309.5));
+  });
+
+  test('Anne Arundel County (TIERED local rate), MFJ/HOH, 2 exemptions, annual $120,000', () => {
+    // Taxable: 120,000 - 3,400 - 2x3,200 = 110,200. State (mfjHoh, bracket
+    // [3,000-150,000], base $90, 4.75%): 90+4.75%x107,200=90+5,092=5,182.00.
+    // Local (Anne Arundel mfjHoh tiered, [75,000-480,000], base $2,025,
+    // 2.94%): 2,025+2.94%x35,200=2,025+1,034.88=3,059.88. Combined:
+    // 5,182.00+3,059.88=8,241.88.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'annual',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(120000) }],
+        ...mdState({ filingStatus: 'mfjHoh', exemptions: 2, county: 'AnneArundel' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MD_SIT'), dollars(8241.88));
+  });
+
+  test('Frederick County (TIERED local rate), single, 1 exemption, annual $60,000', () => {
+    // Taxable: 60,000-3,400-3,200=53,400. State: same bracket as above,
+    // 90+4.75%x50,400=90+2,394=2,484.00. Local (Frederick single tiered,
+    // [50,000-150,000], base $1,250, 2.96%): 1,250+2.96%x3,400=1,250+
+    // 100.64=1,350.64. Combined: 2,484.00+1,350.64=3,834.64.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'annual',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(60000) }],
+        ...mdState({ filingStatus: 'single', exemptions: 1, county: 'Frederick' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MD_SIT'), dollars(3834.64));
+  });
+
+  test('no certificate at all defaults to the maximum 3.30% local rate', () => {
+    // Same $80,000/single/0-exemption base as the Worcester test, but the
+    // no-cert default local rate (3.30%) instead of Worcester's 2.25%:
+    // 76,600 x 3.30% = 2,527.80. Combined: 3,586.00+2,527.80=6,113.80.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'annual',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(80000) }],
+        workState: { code: 'MD' },
+      }),
+    );
+    assert.equal(amountOf(r, 'MD_SIT'), dollars(6113.8));
+  });
+
+  test('nonresident uses the flat 2.25% Special Nonresident Rate, not a county lookup', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'annual',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(80000) }],
+        ...mdState({ filingStatus: 'single', exemptions: 0, nonresident: true }),
+      }),
+    );
+    // Same figure as the Worcester test (2.25% happens to match Worcester's
+    // own flat rate) -- confirms the nonresident PATH itself is exercised
+    // and produces the correct combined amount, not that the two are
+    // indistinguishable in general.
+    assert.equal(amountOf(r, 'MD_SIT'), dollars(5309.5));
+  });
+
+  test('reciprocity: a Pennsylvania resident working in Maryland owes $0 MD tax', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'annual',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(80000) }],
+        ...mdState({ filingStatus: 'single', exemptions: 0, county: 'Worcester' }),
+        residenceState: { code: 'PA' },
+      }),
+    );
+    assert.equal(amountOf(r, 'MD_SIT'), 0);
+  });
+});
+
+describe('Rhode Island', () => {
+  const riState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'RI', certificate },
+  });
+
+  test("reproduces the booklet's own worked example: weekly $2,195, 1 exemption -> $87.57", () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2195) }],
+        ...riState({ exemptions: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'RI_SIT'), dollars(87.57));
+  });
+
+  test('exemption phases out entirely (a cliff) once weekly wages exceed $5,592.31', () => {
+    // Weekly $6,000, 2 exemptions -- wages exceed the $5,592.31 weekly
+    // threshold, so the exemption is $0 despite 2 being claimed. Net =
+    // $6,000, bracket [3,586-inf, base $154.56, 5.99%]: 154.56 +
+    // 5.99%x2,414 = 154.56+144.60=299.16.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(6000) }],
+        ...riState({ exemptions: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'RI_SIT'), dollars(299.16));
+  });
+
+  test('TDI: $1,000 x 1.1%', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'RI' },
+      }),
+    );
+    assert.equal(amountOf(r, 'RI_DBL_EE'), dollars(11));
+  });
+
+  test('no reciprocity: a Massachusetts resident working in RI still owes ordinary RI withholding', () => {
+    const withMA = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2195) }],
+        ...riState({ exemptions: 1 }),
+        residenceState: { code: 'MA' },
+      }),
+    );
+    assert.equal(amountOf(withMA, 'RI_SIT'), dollars(87.57));
+  });
+});
+
+describe('District of Columbia', () => {
+  const dcState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'DC', certificate },
+  });
+
+  test('annual $50,000, 1 allowance', () => {
+    // Taxable: 50,000-4,300=45,700. Bracket [40,000-60,000, base $2,200,
+    // 6.5%]: 2,200+6.5%x5,700=2,200+370.50=2,570.50.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'annual',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(50000) }],
+        ...dcState({ allowances: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'DC_SIT'), dollars(2570.5));
+  });
+
+  test('biweekly $2,000, 0 allowances', () => {
+    // Annual 2,000x26=52,000. Bracket [40,000-60,000, base $2,200, 6.5%]:
+    // 2,200+6.5%x12,000=2,200+780=2,980.00/yr / 26 = 114.6153... -> $114.62.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        workState: { code: 'DC' },
+      }),
+    );
+    assert.equal(amountOf(r, 'DC_SIT'), dollars(114.62));
+  });
+
+  test('DC does not tax nonresident wages at all (Home Rule Act), regardless of residence state', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'annual',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(200000) }],
+        ...dcState({ nonresident: true }),
+      }),
+    );
+    assert.equal(amountOf(r, 'DC_SIT'), 0);
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(
