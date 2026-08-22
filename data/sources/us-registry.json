@@ -358,9 +358,9 @@
       "wageIncomeTax": true,
       "structure": "bracket",
       "withholdingSource": "https://www.tax.newmexico.gov/governments/wage-withholding-taxes/",
-      "sourceDoc": "FYI-104 New Mexico Withholding Tax (Rev. 11/2025, percentage method tables).",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11"
+      "sourceDoc": "FYI-104 (REV. 11/2025), fetched and read directly (realfile.tax.newmexico.gov, since the commonly-linked URL 404's). Wired into calc code (newMexicoWithholding()): a genuinely different shape from every other bracket state in this project -- NO annualize/divide step, FYI-104 publishes a COMPLETE independent {from,to,base,rate} table for each of 8 native pay periods x 3 filing statuses (24 schedules total), looked up directly. A real multi-column PDF extraction hazard shifted every bracket's base value one tier early in a naive read; caught via FYI-104's own worked example (weekly $1,000 married -> $21.80) and fixed via a sequential non-column re-extraction, independently verified bracket-by-bracket via cumulative-base algebra, and cross-checked against a 2025 USDA NFC bulletin whose base figures match this file's exactly. Also found and corrected a second real error IN New Mexico's own published PDF: the Semi-Monthly table's own 'Not Over' summary line prints $304/$608/$456, but the table's own bracket row and Annual-table scaling both prove the correct figures are $335/$671/$503. No local tax, no bilateral reciprocity (return-level credit only). exemptPretax confirmed via NMSA 7-2-2's federal-AGI-conformity language.",
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-22"
     },
     {
       "code": "NY",
@@ -484,8 +484,9 @@
       "name": "Texas",
       "wageIncomeTax": false,
       "structure": "none",
-      "note": "No state wage income tax. Employer SUI only.",
-      "status": "structural_fact"
+      "note": "No state wage income tax -- constitutionally barred (Tex. Const. Art. VIII sec. 24, added by 2019 voter referendum; any future income tax itself requires a statewide vote). State data captured in data/states/TX-2026.json: UI (TWC, $9,000 fixed wage base, 0.32%-6.32% 2026 range, new employers 2.7%, primary-confirmed via twc.texas.gov's own rate page). VERIFY PASS (2026-08-22) fetched TWC's own 2025-11-17 Discussion Paper directly and found the 5 underlying rate components (GTR/RTR/OA/DTR/ETIA) sum to a CALCULATED 0.36%/7.86% range, not the published 0.32%/6.32% -- resolved by exact arithmetic: the gap at both ends matches the calculated Deficit Tax Rate component precisely, meaning the Commission zeroed out DTR under its own Sec. 204.067 discretion for the final 2026 rates. No local income tax; no mandatory paid leave, and Texas affirmatively preempts local paid-leave/paid-sick-leave ordinances via H.B. 2127 (2023) -- already enforced in court against real Austin/Dallas/San Antonio ordinances, a litigation-tested preemption stronger than most other states' bare absence finding.",
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-22"
     },
     {
       "code": "UT",

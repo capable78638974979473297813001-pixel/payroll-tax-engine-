@@ -420,14 +420,14 @@ describe('Pennsylvania', () => {
   });
 
   test('an unmodelled state is flagged, never silently zero', () => {
-    // Was CA before this project built California — updated to TX (a state
-    // this project has genuinely never built a ruleset for) once that
-    // stopped being true, rather than leave a stale example that would
-    // silently start testing the WRONG thing (California's real $0-below-
-    // threshold Low Income Exemption line, not the no-ruleset-at-all flag
-    // this test actually means to exercise).
-    const r = calculatePaycheck(input({ workState: { code: 'TX' } }));
-    const line = r.taxes.find((t) => t.id === 'TX_SIT');
+    // Was CA, then TX, before this project built those states — updated to
+    // HI (a state this project has genuinely never built a ruleset for)
+    // once that stopped being true, rather than leave a stale example that
+    // would silently start testing the WRONG thing (e.g. Texas's real $0
+    // no-income-tax line, not the no-ruleset-at-all flag this test
+    // actually means to exercise).
+    const r = calculatePaycheck(input({ workState: { code: 'HI' } }));
+    const line = r.taxes.find((t) => t.id === 'HI_SIT');
     assert.ok(line);
     assert.match(line.detail ?? '', /NOT MODELLED/);
   });
@@ -6295,6 +6295,204 @@ describe('Mississippi', () => {
       }),
     );
     assert.equal(amountOf(r, 'MS_SIT'), dollars(5));
+  });
+});
+
+describe('Texas', () => {
+  test('no state wage income tax — TX_SIT is not produced', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(700) }],
+        workState: { code: 'TX', certificate: {} },
+      }),
+    );
+    assert.equal(r.taxes.some((t) => t.id === 'TX_SIT'), false);
+  });
+});
+
+describe('New Mexico', () => {
+  const nmState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'NM', certificate },
+  });
+
+  test("reproduces FYI-104's own worked example exactly: weekly $1,000, married -> $21.80", () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...nmState({ filingStatus: 'married_joint' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NM_SIT'), dollars(21.8));
+  });
+
+  test("reproduces FYI-104's own worked example WITH the additional withholding it adds on top: $21.80 + $20.00 = $41.80", () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...nmState({ filingStatus: 'married_joint', additionalWithholding: dollars(20) }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NM_SIT'), dollars(41.8));
+  });
+
+  test('no certificate on file defaults to the Single table, not Married — same wage taxed differently', () => {
+    // Weekly $200: Single's own bracket (155-261, 1.5%) taxes $0.68;
+    // Married's own bracket (0-310, 0%) taxes $0.00 on the identical wage.
+    const noCert = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(200) }],
+        workState: { code: 'NM', certificate: {} },
+      }),
+    );
+    assert.equal(amountOf(noCert, 'NM_SIT'), dollars(0.68));
+
+    const married = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(200) }],
+        ...nmState({ filingStatus: 'married_joint' }),
+      }),
+    );
+    assert.equal(amountOf(married, 'NM_SIT'), 0);
+  });
+
+  test("'married filing separately' resolves to the SAME Single table the federal W-4 checkbox bundles it with", () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(200) }],
+        ...nmState({ filingStatus: 'married_separate' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NM_SIT'), dollars(0.68));
+  });
+
+  test('Head of Household uses its own table, distinct from both Single and Married', () => {
+    // Weekly $300: Single's own bracket (261-395, 3.2%, base $1.59) taxes
+    // $2.84; HoH's own bracket (232-386, 1.5%, base $0) taxes $1.02 on the
+    // identical wage — genuinely different, not just a relabeled Single.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(300) }],
+        ...nmState({ filingStatus: 'head_of_household' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NM_SIT'), dollars(1.02));
+  });
+
+  test("Semi-Monthly table uses the CORRECT $335 zero-bracket threshold, not FYI-104's own erroneous $304 summary line", () => {
+    // A real, disclosed error in New Mexico's own published PDF: the
+    // Semi-Monthly table's "Not Over" summary line prints $304, but that
+    // table's own first bracket row (and algebraic scaling from the
+    // Annual table) both independently confirm $335 is correct. $330/pay
+    // period sits between the two figures — taxed $0.00 under the correct
+    // $335 threshold, which is what this test locks in.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(330) }],
+        ...nmState({ filingStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NM_SIT'), 0);
+  });
+
+  test('Daily payroll period looks up its own published table directly — no annualize/divide step', () => {
+    // $200/day, Single: bracket 159.80-225.20, 4.7%, base $4.48.
+    // (200.00 - 159.80) x 4.7% = 1.8894 -> $1.89 + $4.48 = $6.37.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'daily',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(200) }],
+        ...nmState({ filingStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NM_SIT'), dollars(6.37));
+  });
+
+  test('Quarterly payroll period looks up its own published table directly', () => {
+    // $5,000/quarter, Single: bracket 3,388-5,138, 3.2%, base $20.63.
+    // (5,000-3,388) x 3.2% = 51.584 -> $51.58 + $20.63 = $72.21.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'quarterly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+        ...nmState({ filingStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NM_SIT'), dollars(72.21));
+  });
+
+  test('supplemental wages withhold a flat 5.9%, independent of the regular-wage bracket', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(700) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+        ],
+        ...nmState({ filingStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NM_SIT_SUPP'), dollars(59.0));
+  });
+
+  test('a claimed exemption zeroes withholding entirely (certificate.exempt)', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...nmState({ filingStatus: 'married_joint', exempt: true }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NM_SIT'), 0);
+  });
+
+  test('no bilateral reciprocity with any state — a nonresident still owes full New Mexico tax on NM-source wages', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        residenceState: { code: 'TX' },
+        ...nmState({ filingStatus: 'married_joint' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NM_SIT'), dollars(21.8));
+  });
+
+  test('a 401(k) deferral reduces the New Mexico taxable base', () => {
+    // Same $1,000/wk married baseline ($21.80), but $210/wk to a 401(k)
+    // drops taxable wages to $790/wk — exactly the bracket floor, so the
+    // full 4.3% bracket is skipped entirely and tax falls to the $12.77
+    // base of the bracket below it, not just a proportional reduction.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(210) }],
+        ...nmState({ filingStatus: 'married_joint' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NM_SIT'), dollars(12.77));
   });
 });
 

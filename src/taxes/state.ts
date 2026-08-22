@@ -737,6 +737,12 @@ function incomeTaxLines(
       return [louisianaWithholding(input, ctx, rules)];
     case 'mississippi_bracket_deduction':
       return [mississippiWithholding(input, ctx, rules)];
+    case 'new_mexico_percentage_method': {
+      const lines: TaxLine[] = [newMexicoWithholding(input, ctx, rules)];
+      const supplemental = flatRateSupplementalFromConfig(input, ctx, rules);
+      if (supplemental) lines.push(supplemental);
+      return lines;
+    }
     case 'no_income_tax':
       return [];
     default:
@@ -6011,5 +6017,112 @@ function mississippiWithholding(
       `less ${fmt(totalExemptionClaimed)} exemption claimed (Form 89-350 Line 6) = ${fmt(afterDeductions)}, ` +
       `less ${fmt(dollars(cfg.bracketThresholdAnnual))} 0%-bracket threshold = ${fmt(excessOverThreshold)} taxable ` +
       `@ ${(cfg.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
+  };
+}
+
+interface NMConfig {
+  brackets: {
+    single: Partial<Record<string, WIBracket[]>>;
+    married: Partial<Record<string, WIBracket[]>>;
+    hoh: Partial<Record<string, WIBracket[]>>;
+  };
+}
+
+type NMFilingStatus = 'single' | 'married' | 'hoh';
+
+// New Mexico has no state-specific withholding certificate at all — FYI-104
+// itself tells employees to complete a copy of the FEDERAL Form W-4 and
+// write "For New Mexico State Withholding Only" across the top. That form's
+// own 2020+ redesign has exactly 3 filing-status checkboxes ("Single or
+// Married filing separately" / "Married filing jointly" / "Head of
+// household"), which map 1:1 onto FYI-104's own three lettered tables — so
+// this resolver deliberately reuses the SAME certificate.filingStatus
+// vocabulary already used for federalW4 (rather than inventing a NM-specific
+// field) and folds 'married_separate' into the Single table, exactly as the
+// federal checkbox itself bundles them. Absent/unrecognized status defaults
+// to 'single' — the narrowest brackets, this project's standing "absent
+// certificate = least generous outcome" convention (FYI-104 doesn't itself
+// state a no-form default, since there is no NM-specific form to fail to
+// file).
+function resolveNMFilingStatus(cert: Record<string, unknown>): NMFilingStatus {
+  const raw = cert.filingStatus;
+  if (raw === 'married_joint') return 'married';
+  if (raw === 'head_of_household') return 'hoh';
+  return 'single';
+}
+
+/**
+ * New Mexico's withholding formula (FYI-104 REV. 11/2025, "New Mexico State
+ * Wage Withholding Tax Tables for Percentage Method of Withholding," fetched
+ * and read directly — effective for wages paid on or after 2026-01-01).
+ * Genuinely simpler than most bracket states in this project: NO annualize/
+ * divide step at all — FYI-104 publishes a COMPLETE, independent {from, to,
+ * base, rate} bracket schedule for each of 8 native pay periods (daily,
+ * weekly, biweekly, semimonthly, monthly, quarterly, semiannual, annual) ×
+ * 3 filing statuses, so the period wage is looked up directly against that
+ * period's own table — no periodsPerYear conversion, and therefore none of
+ * the daily-divisor class of bug Louisiana's own table needed a fix for.
+ * Reproduced FYI-104's own worked example exactly: weekly $1,000, married,
+ * "over $790 but not over $1,098... $12.77 + 4.3% of excess over $790" ->
+ * (1,000-790)*.043 + 12.77 = $21.80.
+ *
+ * Transcription note (important): this document's own PDF text extracts
+ * with a real multi-column layout hazard (the same class already
+ * documented for CT/NJ/PA elsewhere in this project) — a naive column-
+ * preserving extraction shifts every bracket's BASE value one tier too
+ * early (e.g. it would attribute the $12.77 base to the $617-$790 bracket
+ * instead of the $790-$1,098 bracket the worked example itself proves it
+ * belongs to). Every one of the 24 bracket schedules below (8 periods × 3
+ * statuses) was instead built from a sequential, non-column-reconstructed
+ * extraction and independently verified by recomputing each bracket's own
+ * base from the previous bracket's base + rate × width and confirming it
+ * lands within a cent or two of the printed figure (small residual drift is
+ * expected — the source's own bases are independently rounded per bracket,
+ * not chained, the same phenomenon already documented for Wisconsin's
+ * bracket tables) — not just eyeballed once.
+ *
+ * A second real, documented artifact: the Semi-Monthly table's own summary
+ * "Not Over" line prints $304/$608/$456 (single/married/HoH), but the
+ * table's own first bracket row, AND algebraic scaling from the (internally
+ * self-consistent) Annual table, both independently confirm the correct
+ * figures are $335/$671/$503 — an error in New Mexico's own published PDF,
+ * not a transcription artifact on this project's end. The correct
+ * ($335/$671/$503) figures are what's encoded below.
+ */
+function newMexicoWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.percentageMethodTables as NMConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const status = resolveNMFilingStatus(cert);
+
+  const period = input.payFrequency;
+  const table = cfg.brackets[status][period];
+  if (!table) {
+    throw new Error(
+      `New Mexico's own FYI-104 doesn't publish a "${period}" table for "${status}" — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+
+  const bracket = findWIBracket(table, periodWages);
+  const excess = periodWages - dollars(bracket.from);
+  const amount = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(periodWages)} (${status}, ${period}) in bracket ${fmt(dollars(bracket.from))}-` +
+      `${bracket.to === null ? '∞' : fmt(dollars(bracket.to))}: ${fmt(dollars(bracket.base))} + ` +
+      `${(bracket.rate * 100).toFixed(1)}% × ${fmt(excess)} = ${fmt(amount)}`,
   };
 }
