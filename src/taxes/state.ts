@@ -733,6 +733,10 @@ function incomeTaxLines(
       return [alabamaWithholding(input, ctx, rules)];
     case 'georgia_status_deduction':
       return [georgiaWithholding(input, ctx, rules)];
+    case 'louisiana_blockA_deduction':
+      return [louisianaWithholding(input, ctx, rules)];
+    case 'mississippi_bracket_deduction':
+      return [mississippiWithholding(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -5837,5 +5841,175 @@ function georgiaWithholding(
       `less ${fmt(dependentAllowance)} (${dependents} dependents) = ${fmt(taxableIncome)} taxable ` +
       `@ ${(table.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear} ` +
       `(${table === cfg.fromMay11_2026 ? 'post' : 'pre'}-2026-05-11 table)`,
+  };
+}
+
+interface LAConfig {
+  rate: number;
+  standardDeductionAnnual: {
+    claim1_single_marriedSeparate: number;
+    claim2_marriedJoint_hoh_qss: number;
+  };
+  // R-1306's own "Number of Pay Periods in a year" table uses DIFFERENT
+  // period counts than this engine's generic PERIODS_PER_YEAR for 'daily'
+  // specifically (365, not the engine-wide 260-workday convention) — the
+  // same class of mismatch New Jersey's and Delaware's daily tables hit.
+  // Keyed by PayFrequency string; only the 6 frequencies R-1306 actually
+  // publishes (daily/weekly/biweekly/semimonthly/monthly/annual).
+  annualizeMultiplier: Partial<Record<string, number>>;
+}
+
+/**
+ * Louisiana's withholding formula (R-1306, read directly): annualize wages,
+ * subtract a standard deduction selected ENTIRELY by the employee's Form
+ * L-4 Block A claim — "0" (no deduction), "1" (single/married-separate,
+ * $12,875), or "2" (married-joint/qualifying-surviving-spouse/head-of-
+ * household, $25,750) — then multiply the whole remainder by the single
+ * flat rate. Genuinely different from every other status-deduction state in
+ * this project: the controlling input isn't filingStatus at all, it's the
+ * literal claim number the employee wrote on the form (Block A doesn't even
+ * require the claim to match the employee's actual filing status — R-1306's
+ * own text says "Any taxpayer may use 1 or 2 as the standard deduction").
+ * Reproduced both of R-1306's own worked examples exactly (weekly $700,
+ * claim 1 -> $13.98; bi-weekly $4,600, claim 2 -> $111.54). No dependent
+ * allowance, no whole-dollar rounding (cent precision throughout, matching
+ * both worked examples' own cent-level answers) — roundHalfUp only.
+ * Annualizes via R-1306's OWN published multiplier per frequency, NOT
+ * ctx.periodsPerYear — caught during a 'verify' pass: R-1306's daily figure
+ * is 365, not this engine's generic 260-workday daily convention (the same
+ * mismatch NJ's and Delaware's daily tables required their own override
+ * for). Throws for any frequency R-1306 doesn't itself publish (quarterly/
+ * semiannual) rather than guessing, same discipline as Delaware's.
+ * Form L-4's own Line 7 (signed additional-or-reduced withholding, capped
+ * at $0) is NOT special-cased here — it's already covered for free by the
+ * two generic post-processing steps every state gets
+ * (applyAdditionalStateWithholding()/applyReducedStateWithholding()), the
+ * same pattern Connecticut's Line 3 established.
+ */
+function louisianaWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.flatRateBlockADeduction as LAConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+
+  const multiplier = cfg.annualizeMultiplier[input.payFrequency];
+  if (multiplier === undefined) {
+    throw new Error(
+      `Louisiana's own R-1306 doesn't publish an annualizing multiplier for ` +
+        `"${input.payFrequency}" — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const annualWages = periodWages * multiplier;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const blockA = Number(cert.louisianaBlockA ?? 0);
+  const standardDeduction = dollars(
+    blockA === 2
+      ? cfg.standardDeductionAnnual.claim2_marriedJoint_hoh_qss
+      : blockA === 1
+        ? cfg.standardDeductionAnnual.claim1_single_marriedSeparate
+        : 0,
+  );
+
+  const taxableIncome = atLeastZero(annualWages - standardDeduction);
+  const annualTax = applyRate(taxableIncome, cfg.rate);
+  const amount = roundHalfUp(annualTax / multiplier);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction (Form L-4 Block A claim ${blockA}) ` +
+      `= ${fmt(taxableIncome)} taxable @ ${(cfg.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${multiplier}`,
+  };
+}
+
+interface MSConfig {
+  rate: number;
+  bracketThresholdAnnual: number;
+  standardDeductionAnnual: {
+    single: number;
+    headOfFamily: number;
+    marriedSpouseNotEmployed: number;
+    marriedBothEmployed: number;
+  };
+}
+
+/**
+ * Mississippi's withholding formula, reverse-derived from Pub 89-700's own
+ * published wage-bracket tables (the document itself has no separate
+ * formula page — Table A/B/C/D are the primary artifact) and verified by
+ * reproducing 3 of Table A's own cells exactly before trusting it: annual
+ * wages less a filing-status standard deduction (Single $2,300 / Head of
+ * Family $3,400 / Married-spouse-not-employed $4,600 / Married-both-
+ * employed $2,300, i.e. Table D's own documented half-of-$4,600 split) less
+ * the employee's own TOTAL exemption figure (Form 89-350's Line 6 — the
+ * form itself has the employee sum personal + $1,500/dependent +
+ * $1,500/age-or-blind-block into one number, so this engine consumes that
+ * total directly rather than re-deriving it, the same mechanism the form
+ * uses) is taxed at 0% for the first $10,000 and a flat 4.0% above that
+ * (Pub 89-700's own summary box: "First $10,000 ... 0% / Remaining balance
+ * (excess of $10,000) ... 4.0%" for tax year 2026 — NOT the 4.1% figure
+ * several secondary aggregators repeat uncited; the primary document and
+ * this reproduction both say 4.0%). Verified against Table A (Single),
+ * weekly period: wages $505/exemption $0 -> $11, $605/$0 -> $15, $495/
+ * $6,000 -> $6, all three reproduced exactly. Pub 89-700 Section 13(e)
+ * states the per-period result "should be rounded to the nearest whole
+ * dollar" — handled generically via rules.roundFinalToWholeDollar in
+ * stateIncomeTax(), not duplicated here (roundHalfUp below is cent-level;
+ * the outer whole-dollar pass runs after). Absent certificate: Pub 89-700
+ * Section 12 states explicitly the employer "shall withhold based on zero
+ * exemption" — totalExemptionClaimed defaults to 0. filingStatus absent
+ * defaults to 'single' (the smallest standard deduction), consistent with
+ * this project's standing "absent certificate = least generous outcome"
+ * convention for the one input Pub 89-700 doesn't itself address.
+ */
+function mississippiWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.bracketStatusDeduction as MSConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+  const annualWages = periodWages * ctx.periodsPerYear;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const status = (cert.filingStatus as string) ?? 'single';
+  const standardDeduction = dollars(
+    status === 'married_spouse_not_employed'
+      ? cfg.standardDeductionAnnual.marriedSpouseNotEmployed
+      : status === 'married_both_employed'
+        ? cfg.standardDeductionAnnual.marriedBothEmployed
+        : status === 'head_of_family'
+          ? cfg.standardDeductionAnnual.headOfFamily
+          : cfg.standardDeductionAnnual.single,
+  );
+  const totalExemptionClaimed = dollars(Number(cert.totalExemptionClaimed ?? 0));
+
+  const afterDeductions = atLeastZero(annualWages - standardDeduction - totalExemptionClaimed);
+  const excessOverThreshold = atLeastZero(afterDeductions - dollars(cfg.bracketThresholdAnnual));
+  const annualTax = applyRate(excessOverThreshold, cfg.rate);
+  const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction (${status}) ` +
+      `less ${fmt(totalExemptionClaimed)} exemption claimed (Form 89-350 Line 6) = ${fmt(afterDeductions)}, ` +
+      `less ${fmt(dollars(cfg.bracketThresholdAnnual))} 0%-bracket threshold = ${fmt(excessOverThreshold)} taxable ` +
+      `@ ${(cfg.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
   };
 }

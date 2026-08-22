@@ -6032,6 +6032,272 @@ describe('Georgia', () => {
   });
 });
 
+describe('Louisiana', () => {
+  const laState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'LA', certificate },
+  });
+
+  test("reproduces R-1306's own Example 1 exactly: weekly $700, Block A claim 1 -> $13.98", () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(700) }],
+        ...laState({ louisianaBlockA: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'LA_SIT'), dollars(13.98));
+  });
+
+  test("reproduces R-1306's own Example 2 exactly: bi-weekly $4,600, Block A claim 2 -> $111.54", () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(4600) }],
+        ...laState({ louisianaBlockA: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'LA_SIT'), dollars(111.54));
+  });
+
+  test('Block A claim 0 (or no certificate at all) gets NO standard deduction — flat 3.09% on the full wage', () => {
+    // Form L-4's own text: an employee who never files a certificate is
+    // withheld "without any standard deduction" — the same outcome as
+    // affirmatively claiming 0. $700/wk x 3.09% = $21.63 exactly.
+    const withNoCertificate = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(700) }],
+        workState: { code: 'LA', certificate: {} },
+      }),
+    );
+    assert.equal(amountOf(withNoCertificate, 'LA_SIT'), dollars(21.63));
+
+    const withClaimZero = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(700) }],
+        ...laState({ louisianaBlockA: 0 }),
+      }),
+    );
+    assert.equal(amountOf(withClaimZero, 'LA_SIT'), dollars(21.63));
+  });
+
+  test('a 401(k) deferral reduces the Louisiana taxable base', () => {
+    // Same $700/wk, claim 1, but $200/wk goes to a 401(k) first: taxable
+    // wages become $500/wk. Annual $26,000 less $12,875 standard deduction
+    // = $13,125 taxable x 3.09% = $405.5625/yr -> rounds to $405.56 -> /52
+    // = $7.7992... -> $7.80/wk, well below the no-401(k) $13.98 baseline.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(700) }],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(200) }],
+        ...laState({ louisianaBlockA: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'LA_SIT'), dollars(7.8));
+  });
+
+  test('no reciprocity with any state — a nonresident still owes full Louisiana tax', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(700) }],
+        residenceState: { code: 'MS' },
+        ...laState({ louisianaBlockA: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'LA_SIT'), dollars(13.98));
+  });
+
+  test("daily payroll annualizes on R-1306's own 365 divisor, NOT this engine's generic 260-workday convention", () => {
+    // A real bug caught during a 'verify' pass: R-1306's own "Number of Pay
+    // Periods in a year" table states Daily = 365, not the 260 this engine
+    // uses for every other state's daily frequency (the same mismatch New
+    // Jersey's and Delaware's daily tables required their own override
+    // for). $100/day, claim 1: annual $36,500 - $12,875 = $23,625 taxable
+    // x 3.09% = $729.9825 -> rounds to $730.00... precisely: 23,625 x
+    // .0309 = 730.0125 -> $730.01/yr / 365 = $2.0000... -> $2.00/day.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'daily',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(100) }],
+        ...laState({ louisianaBlockA: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'LA_SIT'), dollars(2.0));
+  });
+
+  test('a frequency R-1306 does not publish (quarterly) throws rather than guessing a divisor', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            checkDate: '2026-06-15',
+            payFrequency: 'quarterly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(9000) }],
+            ...laState({ louisianaBlockA: 1 }),
+          }),
+        ),
+      /doesn't publish an annualizing multiplier for "quarterly"/,
+    );
+  });
+});
+
+describe('Mississippi', () => {
+  const msState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'MS', certificate },
+  });
+
+  test("reproduces Pub 89-700's own Table A (Single) cell exactly: weekly $505, $0 exemption -> $11", () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(505) }],
+        ...msState({ filingStatus: 'single', totalExemptionClaimed: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MS_SIT'), dollars(11));
+  });
+
+  test("reproduces Pub 89-700's own Table A (Single) cell exactly: weekly $605, $0 exemption -> $15", () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+        ...msState({ filingStatus: 'single', totalExemptionClaimed: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MS_SIT'), dollars(15));
+  });
+
+  test("reproduces Pub 89-700's own Table A (Single) cell exactly: weekly $495, $6,000 exemption -> $6", () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(495) }],
+        ...msState({ filingStatus: 'single', totalExemptionClaimed: 6000 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MS_SIT'), dollars(6));
+  });
+
+  test('no certificate on file defaults to Single status and zero exemption — Pub 89-700 Section 12', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(505) }],
+        workState: { code: 'MS', certificate: {} },
+      }),
+    );
+    assert.equal(amountOf(r, 'MS_SIT'), dollars(11));
+  });
+
+  test('married with spouse NOT employed gets the full $4,600 standard deduction', () => {
+    // Monthly $3,000: $36,000 annual - $4,600 = $31,400 - $10,000 = $21,400
+    // taxable x 4.0% = $856.00/yr / 12 = $71.33 -> rounds to $71.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+        ...msState({ filingStatus: 'married_spouse_not_employed', totalExemptionClaimed: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MS_SIT'), dollars(71));
+  });
+
+  test("married with BOTH spouses employed gets only HALF the deduction — Section 13(d)'s own 'divided equally' rule", () => {
+    // Same $3,000 monthly: $36,000 - $2,300 (half of $4,600) = $33,700 -
+    // $10,000 = $23,700 taxable x 4.0% = $948.00/yr / 12 = $79.00 exactly —
+    // a genuinely higher tax than the spouse-not-employed case above on
+    // identical wages, entirely from the halved standard deduction.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+        ...msState({ filingStatus: 'married_both_employed', totalExemptionClaimed: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MS_SIT'), dollars(79));
+  });
+
+  test('Head of Family standard deduction plus a Form 89-350 exemption total', () => {
+    // Monthly $3,000, Head of Family ($3,400 SD) with the $9,500 base
+    // exemption claimed: $36,000 - $3,400 - $9,500 = $23,100 - $10,000 =
+    // $13,100 taxable x 4.0% = $524.00/yr / 12 = $43.67 -> rounds to $44.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+        ...msState({ filingStatus: 'head_of_family', totalExemptionClaimed: 9500 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MS_SIT'), dollars(44));
+  });
+
+  test('a 401(k) deferral reduces the Mississippi taxable base', () => {
+    // Same $505/wk Single/$0-exemption baseline as the first test above,
+    // but $50/wk goes to a 401(k) first: taxable wages become $455/wk,
+    // well below the $11/wk no-401(k) baseline.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(505) }],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(50) }],
+        ...msState({ filingStatus: 'single', totalExemptionClaimed: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MS_SIT'), dollars(9));
+  });
+
+  test('no reciprocity with any state — a nonresident still owes full Mississippi tax', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(505) }],
+        residenceState: { code: 'LA' },
+        ...msState({ filingStatus: 'single', totalExemptionClaimed: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MS_SIT'), dollars(11));
+  });
+
+  test("daily payroll correctly uses this engine's standard 260-day annualization — reproduces Table A's own Daily cell exactly", () => {
+    // Checked specifically because Louisiana's own Daily table needed a
+    // 365-day override instead of the engine default — verified Mississippi
+    // does NOT have the same landmine before assuming either way. Daily
+    // $167, Single, $0 exemption: $167 x 260 = $43,420 annual - $2,300 =
+    // $41,120 - $10,000 = $31,120 taxable x 4.0% = $1,244.80/yr / 260 =
+    // $4.7877 -> rounds to $5/day. Matches Pub 89-700's own Table A
+    // (Single, Daily), 166-168 row, $0-exemption column exactly.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'daily',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(167) }],
+        ...msState({ filingStatus: 'single', totalExemptionClaimed: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MS_SIT'), dollars(5));
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

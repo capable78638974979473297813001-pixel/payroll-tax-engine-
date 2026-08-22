@@ -226,9 +226,9 @@
       "wageIncomeTax": true,
       "structure": "flat",
       "withholdingSource": "https://revenue.louisiana.gov/tax-forms/businesses/r-1306-tf-01-01-2025/",
-      "sourceDoc": "R-1306 Louisiana Withholding Tables and Formulas (flat 3.09%). Form L-4 (R-1300).",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11"
+      "sourceDoc": "R-1306 (1/26) Louisiana Withholding Tables and Formulas, fetched and read directly (curl workaround, same class of PDF hazard documented elsewhere in this project). Wired into calc code (louisianaWithholding()): flat 3.09% on annual wages less a standard deduction selected ENTIRELY by the employee's own Form L-4 Block A claim (0/1/2 -- $0/$12,875/$25,750), not filingStatus. Reproduced both of R-1306's own worked examples exactly ($13.98 weekly claim-1, $111.54 bi-weekly claim-2). No dependents, no local tax, no reciprocity (checked, zero mentions). exemptPretax confirmed via R.S. 47:293's federal-AGI-conformity language. UI wage base $7,000 primary-confirmed (resolved a $7,000/$7,700 secondary conflict via laworks.net's own rate table). VERIFY PASS (2026-08-22) caught and fixed a real bug: R-1306's own Daily payroll count is 365, not this engine's generic 260-workday convention (the same class of mismatch NJ's/Delaware's daily tables needed their own override for) -- added a dedicated annualizeMultiplier map, throws for quarterly/semiannual rather than guessing. Also confirmed via a THIRD independent source that the $12,875/$25,750 standard deduction figures (which conflict with a stale 2025 NFC bulletin's $12,500/$25,000) are correct: Louisiana's standard deduction became CPI-U-inflation-adjusted starting 2026.",
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-22"
     },
     {
       "code": "ME",
@@ -288,9 +288,9 @@
       "wageIncomeTax": true,
       "structure": "bracket",
       "withholdingSource": "https://www.dor.ms.gov/business/withholding-tax",
-      "sourceDoc": "Pub 89-700 Withholding Instructions and Tax Tables. Form 89-350.",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11"
+      "sourceDoc": "Pub 89-700-25-1 (Rev. 07/25) Withholding Instructions and Tax Tables, fetched and read directly (curl workaround). No formula page exists in the source -- Tables A/B/C/D are the primary artifact; the annual formula was reverse-derived and verified by reproducing 3 of Table A's own cells exactly. Wired into calc code (mississippiWithholding()): annual wages less a filing-status standard deduction ($2,300 Single / $3,400 Head of Family / $4,600 Married-spouse-not-employed / $2,300 Married-both-employed, per Section 13(d)'s own 'divided equally' statement) less the employee's own pre-summed Form 89-350 Line 6 total, taxed 0% on the first $10,000 and 4.0% above -- NOT the 4.1% figure repeated uncited by several secondary sources; the primary document plus this file's own reproduction both confirm 4.0% for 2026. No local tax, no reciprocity (checked). exemptPretax flagged as this project's weakest evidentiary tier: MS Code 27-7-15's only textual salary-reduction exclusion ties to Section 25-17-5, which is written for state/local GOVERNMENT employee cafeteria plans specifically, not general private-sector 401(k)/125 conformity -- modelled per universal industry practice anyway, disclosed honestly rather than silently upgraded.",
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-22"
     },
     {
       "code": "MO",
