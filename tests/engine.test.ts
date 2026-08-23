@@ -420,14 +420,15 @@ describe('Pennsylvania', () => {
   });
 
   test('an unmodelled state is flagged, never silently zero', () => {
-    // Was CA, then TX, before this project built those states — updated to
-    // HI (a state this project has genuinely never built a ruleset for)
-    // once that stopped being true, rather than leave a stale example that
-    // would silently start testing the WRONG thing (e.g. Texas's real $0
-    // no-income-tax line, not the no-ruleset-at-all flag this test
-    // actually means to exercise).
-    const r = calculatePaycheck(input({ workState: { code: 'HI' } }));
-    const line = r.taxes.find((t) => t.id === 'HI_SIT');
+    // Was CA, then TX, then HI, before this project built those states —
+    // updated to WY (the one state this project has genuinely never built
+    // a ruleset for — a no-income-tax structural fact with no data/states
+    // file at all) once HI stopped being true, rather than leave a stale
+    // example that would silently start testing the WRONG thing (e.g.
+    // Hawaii's real bracket-computed line, not the no-ruleset-at-all flag
+    // this test actually means to exercise).
+    const r = calculatePaycheck(input({ workState: { code: 'WY' } }));
+    const line = r.taxes.find((t) => t.id === 'WY_SIT');
     assert.ok(line);
     assert.match(line.detail ?? '', /NOT MODELLED/);
   });
@@ -6493,6 +6494,182 @@ describe('New Mexico', () => {
       }),
     );
     assert.equal(amountOf(r, 'NM_SIT'), dollars(12.77));
+  });
+});
+
+describe('Hawaii', () => {
+  const hiState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'HI', certificate },
+  });
+
+  test("reproduces Booklet A's own worked example exactly: single, weekly $500, 3 allowances -> $9.58", () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+        ...hiState({ hawaiiMaritalStatus: 'single', allowances: 3 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'HI_SIT'), dollars(9.58));
+  });
+
+  test('married status uses the wider Married bracket table, not Single', () => {
+    // Same $500/wk, 3 allowances, but married: 26,000 - 3,432 - 4,350 =
+    // 18,218 taxable falls in Married's FIRST bracket (0-19,200, 1.40%)
+    // instead of Single's third bracket — 18,218 x 1.40% = $255.05/yr / 52
+    // = $4.90/wk, a much smaller number than the $9.58 Single produces on
+    // identical wages, proving the two tables are genuinely different, not
+    // aliased.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+        ...hiState({ hawaiiMaritalStatus: 'married', allowances: 3 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'HI_SIT'), dollars(4.9));
+  });
+
+  test('absent certificate defaults to single with zero allowances, per HW-4\'s own instruction', () => {
+    // 26,000 annual - 0 allowances - 4,350 lump sum = 21,650 taxable,
+    // Single bracket 4 (19,200-24,000): 552.00 + 6.4% x 2,450 = $708.80/yr
+    // / 52 = $13.6308 -> $13.63/wk.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+        workState: { code: 'HI' },
+      }),
+    );
+    assert.equal(amountOf(r, 'HI_SIT'), dollars(13.63));
+  });
+
+  test('a certified disabled person owes $0, not the generic certificate.exempt flag', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...hiState({ hawaiiMaritalStatus: 'certified_disabled' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'HI_SIT'), 0);
+  });
+
+  test('a nonresident military spouse owes $0', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...hiState({ hawaiiMaritalStatus: 'nonresident_military_spouse' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'HI_SIT'), 0);
+  });
+
+  test('no reciprocity with any state', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+        residenceState: { code: 'CA' },
+        ...hiState({ hawaiiMaritalStatus: 'single', allowances: 3 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'HI_SIT'), dollars(9.58));
+  });
+
+  test('a 401(k) deferral reduces the Hawaii taxable base', () => {
+    // Same $500/wk single/3-allowances baseline ($9.58 taxable at 18,218),
+    // but $300/wk to a 401(k) drops taxable annual wages to (200x52) -
+    // 3,432 - 4,350 = 2,618 — out of the 5.5% bracket entirely and down
+    // into bracket 1 (0-9,600, 1.40%): 2,618 x 1.40% = $36.65/yr / 52 =
+    // $0.7048 -> $0.70/wk.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(300) }],
+        ...hiState({ hawaiiMaritalStatus: 'single', allowances: 3 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'HI_SIT'), dollars(0.7));
+  });
+
+  test('TDI: 0.5% of wages, capped at $7.50/week', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        ...hiState({ hawaiiMaritalStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'HI_DBL_EE'), dollars(5.0)); // 1,000 × 0.5%
+  });
+
+  test('TDI caps at $7.50/week even on high wages', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+        ...hiState({ hawaiiMaritalStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'HI_DBL_EE'), dollars(7.5)); // would be $25 uncapped
+  });
+});
+
+describe('Alaska', () => {
+  const ak = { workState: { code: 'AK' } };
+
+  test('no state income tax', () => {
+    const r = calculatePaycheck(input(ak));
+    const line = r.taxes.find((t) => t.id === 'AK_SIT');
+    assert.equal(line, undefined);
+  });
+
+  // Alaska is one of only three states in this project (with PA and NJ)
+  // that taxes the EMPLOYEE for unemployment insurance, not just the
+  // employer — confirmed directly from labor.alaska.gov's own 2026 rate
+  // table: flat 0.50% for every employer regardless of experience class.
+  test('employee UI withholding: 0.50% of gross wages', () => {
+    const r = calculatePaycheck(input(ak));
+    assert.equal(amountOf(r, 'AK_UC_EE'), dollars(15)); // 3,000 × 0.50%
+  });
+
+  test('employee UI stops once the $54,200 annual wage base is reached', () => {
+    const r = calculatePaycheck(
+      input({
+        ...ak,
+        ytd: {
+          socialSecurity: 0,
+          medicare: 0,
+          futa: 0,
+          stateUnemployment: { AK: dollars(53_000) },
+        },
+      }),
+    );
+    // Only $1,200 of room left under the $54,200 cap before this $3,000
+    // cheque: 1,200 × 0.50% = $6.00, not 3,000 × 0.50% = $15.00.
+    assert.equal(amountOf(r, 'AK_UC_EE'), dollars(6));
+  });
+
+  test('a 401(k) deferral does NOT reduce the AK UI base — same taxable-wages rule as every other state UC', () => {
+    const r = calculatePaycheck(
+      input({
+        ...ak,
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(500) }],
+      }),
+    );
+    assert.equal(amountOf(r, 'AK_UC_EE'), dollars(15)); // still 3,000 × 0.50%
   });
 });
 

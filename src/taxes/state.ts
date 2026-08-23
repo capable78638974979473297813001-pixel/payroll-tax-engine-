@@ -743,6 +743,8 @@ function incomeTaxLines(
       if (supplemental) lines.push(supplemental);
       return lines;
     }
+    case 'hawaii_annual_bracket':
+      return [hawaiiWithholding(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -6124,5 +6126,105 @@ function newMexicoWithholding(
       `${fmt(periodWages)} (${status}, ${period}) in bracket ${fmt(dollars(bracket.from))}-` +
       `${bracket.to === null ? '∞' : fmt(dollars(bracket.to))}: ${fmt(dollars(bracket.base))} + ` +
       `${(bracket.rate * 100).toFixed(1)}% × ${fmt(excess)} = ${fmt(amount)}`,
+  };
+}
+
+interface HIConfig {
+  allowanceAmountAnnual: number;
+  extraLumpSumAllowanceAnnual: number;
+  brackets: {
+    single: WIBracket[];
+    married: WIBracket[];
+  };
+}
+
+/**
+ * Hawaii's withholding formula (Booklet A, Employer's Tax Guide, Appendix
+ * Part 1 "Annualized Income Tax Withholding" — read directly, all figures
+ * effective for wages paid 2026-01-01 and after): annualize wages, subtract
+ * $1,144 per withholding allowance PLUS a separate, unconditional "extra
+ * lump sum withholding allowance amount" ($4,350 — a TCJA-standard-
+ * deduction-offset introduced when Hawaii adopted the redesigned 2020+-
+ * style W-4 concept; raised from $1,650 for 2026), then run the remainder
+ * through an 8-bracket annual schedule (1.40%-7.90%) keyed by only TWO
+ * statuses — Single (which Form HW-4's own instructions state explicitly
+ * ALSO covers unmarried Head of Household: "you are treated as Single for
+ * withholding tax purposes") and Married. Chose Part 1's annualize-then-
+ * divide method over Part 2's 8 separately-published per-period tables
+ * (Weekly/Biweekly/Semimonthly/Monthly/Quarterly/Semiannual/Annual/Daily) —
+ * the Guide itself sanctions this explicitly ("You may determine the tax to
+ * be withheld on the basis of annualized wages... Only the annual rates
+ * below, wage brackets and allowance values need to be stored") — reproduced
+ * the Guide's own worked example exactly (single, weekly $500, 3 allowances:
+ * 26,000 - 3,432 - 4,350 = 18,218 taxable -> $497.99/yr -> $9.58/wk). NOT
+ * verified against Part 2's own per-period tables, which round each period's
+ * boundaries independently (annual/N rounded to the dollar) rather than
+ * dividing an exact annual figure — a small, disclosed divergence at bracket
+ * boundaries, the same class of choice this project has made for PA/DC/VA/
+ * Delaware. Step 1(c)'s extra-lump-sum deduction is read as UNCONDITIONAL —
+ * applied even at zero allowances claimed — since it's listed as its own
+ * lettered step outside the allowance-count branch (a) and the worked
+ * example applies it as an independent subtraction; this is an inference
+ * from the instruction's structure, not a directly quoted "always applies"
+ * sentence, so it's disclosed rather than asserted with full confidence.
+ * Hawaii law does NOT allow ordinary certificate.exempt-style exemption —
+ * HW-4's own instructions state this directly — so the two real routes to
+ * $0 HI withholding (certified disabled person; nonresident military
+ * spouse under the Service Members Civil Relief Act) are modelled as
+ * distinct certificate.hawaiiMaritalStatus values rather than reusing the
+ * generic exempt flag other states share.
+ */
+function hawaiiWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.annualBracket as HIConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+  const annualWages = periodWages * ctx.periodsPerYear;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const status = (cert.hawaiiMaritalStatus as string) ?? 'single';
+
+  if (status === 'certified_disabled' || status === 'nonresident_military_spouse') {
+    return {
+      id: `${rules.code}_SIT`,
+      name: `${rules.name} Income Tax`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: 0,
+      amount: 0,
+      detail:
+        status === 'certified_disabled'
+          ? '$0 — certified disabled person, not subject to Hawaii withholding (Form HW-4 Line 3).'
+          : "$0 — nonresident military spouse, exempt under the Service Members Civil Relief Act as amended by the Military Spouses Residency Relief Act (Form HW-4 Line 3).",
+    };
+  }
+
+  const brackets = status === 'married' ? cfg.brackets.married : cfg.brackets.single;
+  const allowances = Number(cert.allowances ?? 0);
+  const allowanceDeduction = dollars(cfg.allowanceAmountAnnual) * allowances;
+  const lumpSumDeduction = dollars(cfg.extraLumpSumAllowanceAnnual);
+
+  const taxableIncome = atLeastZero(annualWages - allowanceDeduction - lumpSumDeduction);
+  const bracket = findWIBracket(brackets, taxableIncome);
+  const excess = taxableIncome - dollars(bracket.from);
+  const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
+  const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(annualWages)}/yr less ${fmt(allowanceDeduction)} (${allowances} × $${cfg.allowanceAmountAnnual} allowances) ` +
+      `less ${fmt(lumpSumDeduction)} extra lump sum allowance = ${fmt(taxableIncome)} taxable ` +
+      `(${status === 'married' ? 'Married' : 'Single incl. unmarried HoH'}), bracket ${fmt(dollars(bracket.from))}-` +
+      `${bracket.to === null ? '∞' : fmt(dollars(bracket.to))}: ${fmt(dollars(bracket.base))} + ` +
+      `${(bracket.rate * 100).toFixed(2)}% × ${fmt(excess)} = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
   };
 }

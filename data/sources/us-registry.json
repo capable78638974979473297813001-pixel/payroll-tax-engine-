@@ -48,8 +48,9 @@
       "name": "Alaska",
       "wageIncomeTax": false,
       "structure": "none",
-      "note": "No state wage income tax. Has state unemployment (SUI) with an employee-paid portion — to model separately.",
-      "status": "structural_fact"
+      "note": "No state wage income tax. Employee-paid UI wired into calc code (data/states/AK-2026.json): flat 0.50% for every employer regardless of experience class, $54,200 wage base, both primary-confirmed directly from labor.alaska.gov's own 2026 rate table -- one of only three states in this project (with PA and NJ) taxing the employee for unemployment insurance. No local tax, no mandatory paid leave.",
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-22"
     },
     {
       "code": "AZ",
@@ -152,9 +153,9 @@
       "wageIncomeTax": true,
       "structure": "bracket",
       "withholdingSource": "https://tax.hawaii.gov/geninfo/a2_b2_4empl_whhold/",
-      "sourceDoc": "Booklet A Employer's Tax Guide (Rev. 2025). Form HW-4.",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11"
+      "sourceDoc": "Booklet A Employer's Tax Guide Appendix (eff. 2025-12-05 for wages paid 2026 and after), fetched and read directly. Wired into calc code (hawaiiWithholding()): annualize wages, subtract $1,144/allowance plus an unconditional $4,350 extra lump sum allowance, run through an 8-bracket annual schedule (1.40%-7.90%) keyed by only 2 statuses (Single incl. unmarried HoH, and Married). Reproduced the Guide's own worked example exactly. Form HW-4 (Rev. 2025) read directly: Hawaii law does NOT allow generic 'exempt' status -- the two real $0 routes (certified disabled person; nonresident military spouse) modelled as distinct certificate.hawaiiMaritalStatus values rather than the generic exempt flag. TDI (employee disability, 0.5%/$7.50-wk ceiling) wired via the existing generic disability dispatch. No reciprocity, no local tax; HFLL is unpaid-only (out of scope).",
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-22"
     },
     {
       "code": "ID",

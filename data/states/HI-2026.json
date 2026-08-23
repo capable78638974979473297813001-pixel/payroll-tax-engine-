@@ -1,0 +1,109 @@
+{
+  "code": "HI",
+  "name": "Hawaii",
+  "year": 2026,
+  "method": "hawaii_annual_bracket",
+  "sources": [
+    {
+      "title": "Booklet A, Employer's Tax Guide, Appendix -- Hawaii Income Tax Withholding Rates, Methods, and Tax Tables (effective as of 2025-12-05 for withholding 2026-01-01 and thereafter)",
+      "url": "https://files.hawaii.gov/tax/news/pubs/25BkltA.pdf",
+      "verifiedOn": "2026-08-22",
+      "verifiedBy": "PDF downloaded directly (curl with a browser User-Agent) and read in full via pdftotext, both WITH and WITHOUT -layout: the -layout extraction scrambled Part 1's/Part 2's multi-column bracket tables (rate/base columns interleaved across rows), the same class of hazard documented elsewhere in this project (PA UC-748, MS Pub 89-700) -- dropping -layout produced a clean, unambiguous reading of every bracket boundary/base/rate. Reproduced Part 1's own worked example exactly (single, weekly $500, 3 allowances: $26,000 annual - $3,432 (3x$1,144) - $4,350 extra lump sum = $18,218 taxable -> tax on first $14,400 = $288.00 + 5.5% x $3,818 = $209.99 -> $497.99/yr -> $497.99/52 = $9.58/wk). Both the Single (incl. unmarried HoH) and Married annual bracket tables independently verified algebraically: every published 'base' cell reproduces (within normal whole-dollar-rounding drift) from the previous bracket's base plus that bracket's rate times the boundary width, across all 8 brackets for both statuses."
+    },
+    {
+      "title": "Form HW-4 (Rev. 2025) -- Employee's Withholding Allowance and Status Certificate",
+      "url": "https://www.cu.edu/doc/2026-hi-state-w-4pdf",
+      "verifiedOn": "2026-08-22",
+      "verifiedBy": "PDF downloaded and read directly, both pages plus the worksheet. Confirms Line 3's FIVE options (Single / Married / Married-but-withhold-at-higher-Single-rate / Certified Disabled Person (not subject to withholding) / Nonresident Military Spouse (not subject to withholding)) -- a real, currently-standing checkbox structure, not a legacy pre-2020 artifact. Confirms Line 5 (additional per-period withholding) already works generically via this project's shared certificate.additionalWithholding mechanism. States directly: 'Hawaii law does NOT allow \"EXEMPT\" status for withholding purposes' -- the two Line-3 options above are the ONLY routes to $0 HI withholding, modelled as distinct certificate.hawaiiMaritalStatus values rather than the generic certificate.exempt flag every other state in this project shares. Also confirms the absent-certificate default: 'You must file this form with your employer or your employer must withhold tax from your wages as if you were single and claimed no withholding allowances.'"
+    },
+    {
+      "title": "Hawaii Revised Statutes 235-2.4 -- Operation of certain Internal Revenue Code provisions; sections 63 to 530",
+      "url": "https://law.justia.com/codes/hawaii/2022/title-14/chapter-235/section-235-2-4/",
+      "verifiedOn": "2026-08-22",
+      "verifiedBy": "Fetched directly. Quoted: 'Section 63 (with respect to taxable income defined) of the Internal Revenue Code shall be operative for the purposes of this chapter, subject to the following...' -- IRC Section 63 taxable income itself builds on Section 62 adjusted gross income, the same evidentiary tier as Louisiana's/Virginia's/West Virginia's/New Mexico's federal-AGI-conformity citations elsewhere in this project (one inferential step removed from the withholding wage base itself, not a direct itemized 401(k)/125 list the way Kentucky's/Arkansas's citations are)."
+    },
+    {
+      "title": "Hawaii Dept of Labor and Industrial Relations, Disability Compensation Division -- 2026 Maximum Weekly Wage Base and Maximum Weekly Benefit Amount",
+      "url": "https://labor.hawaii.gov/dcd/files/2025/12/2026-Maximum-Weekly-Wage-Base.pdf",
+      "verifiedOn": "2026-08-22",
+      "verifiedBy": "PDF downloaded and read directly. Quoted: 2026 Maximum Weekly Wage Base $1,500.21; 'An employer may withhold TDI contributions of one-half the premium cost but not more than .5% of the employee's weekly wage, with the maximum not to exceed $7.50' -- modelled as the statutory CEILING (0.5% capped at $7.50/wk), the figure universally quoted as 'the HI TDI rate' in payroll practice, via the existing generic stateDisabilityEmployeeTax() weeklyCapDollars mechanism (zero new code). Disclosed: the true withheld amount is technically capped at the LESSER of half the actual negotiated insurance premium or this ceiling, so an employer with a cheaper TDI policy could legally withhold less -- this engine cannot know the actual premium and models the ceiling, the near-universal practical figure, not a guaranteed-exact amount (the same class of employer-elected-cost-share ambiguity Delaware's Paid Leave was left entirely UNWIRED for; chose to wire Hawaii's since virtually every payroll reference treats 0.5%/$7.50 as the de facto standard rate, unlike Delaware's genuinely optional program)."
+    },
+    {
+      "title": "Hawaii Dept of Labor and Industrial Relations -- Tax Rate Schedule and Weekly Benefit Amount (Unemployment Insurance)",
+      "url": "https://labor.hawaii.gov/ui/tax-rate-schedule-and-weekly-benefit-amount/",
+      "verifiedOn": "2026-08-22",
+      "verifiedBy": "Fetched directly. Quoted for Calendar Year 2026: Contribution Rate Schedule C, Taxable Wage Base $64,500, Tax Rate for New Employers 2.40%, Maximum Tax Rate 5.60%, Employment & Training (E&T) Rate 0.01% -- primary-confirmed, matching every secondary source checked with zero discrepancy."
+    },
+    {
+      "title": "Hawaii Dept of Labor and Industrial Relations, Wage Standards Division -- Hawaii Family Leave (HFLL)",
+      "url": "https://labor.hawaii.gov/wsd/hawaii-family-leave/",
+      "verifiedOn": "2026-08-22",
+      "verifiedBy": "Search-synthesized (WebSearch, not independently fetched this pass): HFLL mandates 4 weeks of UNPAID, job-protected leave at employers with 100+ employees -- not a payroll deduction, correctly out of scope. A 2025 bill to create a genuine paid family/medical leave insurance program passed the House but stalled in a Senate committee; not enacted as of this pass. TDI (funded above) covers short-term DISABILITY only, not family leave."
+    }
+  ],
+  "annualBracket": {
+    "$comment": "Booklet A Appendix Part 1 'Annualized Income Tax Withholding', read directly. The Guide itself sanctions using only the annual table plus per-period division rather than transcribing all 8 of Part 2's separately-published per-period tables.",
+    "allowanceAmountAnnual": 1144.0,
+    "extraLumpSumAllowanceAnnual": 4350.0,
+    "extraLumpSumComment": "Raised from $1,650 (2025) to $4,350 for 2026 -- a TCJA-standard-deduction-offset mechanism. Read as UNCONDITIONAL (applied even at zero allowances claimed), since Step 1(c) is its own lettered instruction outside the allowance-count branch (a)/(b) and the Guide's own worked example applies it as an independent subtraction -- disclosed as an inference from the instruction's structure, not a directly quoted 'always applies regardless' sentence.",
+    "bracketsComment": "'A. SINGLE PERSONS -- INCLUDING UNMARRIED HEADS OF HOUSEHOLD' -- HW-4's own instructions confirm HoH is treated as Single for withholding purposes. Both tables verified algebraically against the previous bracket's base + rate x width, and the 'single' table cross-checked against Booklet A's own worked example.",
+    "brackets": {
+      "single": [
+        { "from": 0, "to": 9600, "base": 0, "rate": 0.014 },
+        { "from": 9600, "to": 14400, "base": 134.00, "rate": 0.032 },
+        { "from": 14400, "to": 19200, "base": 288.00, "rate": 0.055 },
+        { "from": 19200, "to": 24000, "base": 552.00, "rate": 0.064 },
+        { "from": 24000, "to": 36000, "base": 859.00, "rate": 0.068 },
+        { "from": 36000, "to": 48000, "base": 1675.00, "rate": 0.072 },
+        { "from": 48000, "to": 125000, "base": 2539.00, "rate": 0.076 },
+        { "from": 125000, "to": null, "base": 8391.00, "rate": 0.079 }
+      ],
+      "married": [
+        { "from": 0, "to": 19200, "base": 0, "rate": 0.014 },
+        { "from": 19200, "to": 28800, "base": 269.00, "rate": 0.032 },
+        { "from": 28800, "to": 38400, "base": 576.00, "rate": 0.055 },
+        { "from": 38400, "to": 48000, "base": 1104.00, "rate": 0.064 },
+        { "from": 48000, "to": 72000, "base": 1718.00, "rate": 0.068 },
+        { "from": 72000, "to": 96000, "base": 3350.00, "rate": 0.072 },
+        { "from": 96000, "to": 250000, "base": 5078.00, "rate": 0.076 },
+        { "from": 250000, "to": null, "base": 16782.00, "rate": 0.079 }
+      ]
+    },
+    "verifiedExample": "Single, weekly $500, 3 allowances: 26,000 - 3,432 - 4,350 = 18,218 taxable; bracket [14,400-19,200): 288.00 + 5.5% x (18,218-14,400=3,818=209.99) = 497.99/yr / 52 = $9.5767 -> $9.58/wk. Matches Booklet A's own worked example exactly."
+  },
+  "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
+  "exemptPretaxComment": "HRS 235-2.4(a) operates IRC Section 63 (taxable income) for Hawaii purposes, which itself builds on Section 62 adjusted gross income -- the same evidentiary tier as LA/VA/WV/NM's federal-AGI-conformity citations, not an itemized 401(k)/125 list.",
+  "reciprocity": {
+    "$comment": "CHECKED, not assumed absent: search-synthesized (not independently fetched from a Hawaii-specific reciprocity statute this pass) -- multiple independent sources agree Hawaii has no reciprocal withholding agreement with any state.",
+    "reciprocalStates": []
+  },
+  "localIncomeTax": {
+    "rule": "NONE. No Hawaii county levies a local income/wage tax anywhere in the state.",
+    "confidence": "cross_source_confirmed; not independently verified against a specific county-authority statute this pass."
+  },
+  "stateDisabilityEmployee": {
+    "rate": 0.005,
+    "weeklyCapDollars": 7.50,
+    "$comment": "Wired via the existing generic stateDisabilityEmployeeTax() weeklyCapDollars mechanism (New York DBL's shape) -- zero new code. Models the statutory CEILING (0.5% of wages, capped $7.50/wk), NOT a guaranteed exact figure -- see the DCD source note above for the real employer-elected-cost-share ambiguity underneath this ceiling."
+  },
+  "unemploymentInsurance": {
+    "administeredBy": "Hawaii Dept of Labor and Industrial Relations (DLIR)",
+    "wageBase": 64500.0,
+    "newEmployerRate": 0.024,
+    "maximumTaxRate": 0.056,
+    "employmentTrainingRate": 0.0001,
+    "confidence": "primary_source_confirmed -- labor.hawaii.gov's own Tax Rate Schedule page, quoted directly above.",
+    "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project: experience-rated, an individual employer's actual rate depends on employer-specific history a static jurisdiction file can't hold."
+  },
+  "prepaidHealthCare": {
+    "rule": "Hawaii's Prepaid Health Care Act mandates employer-provided health coverage for employees working 20+ hours/week earning at least 86.67x the state minimum wage; employer may withhold up to half the premium, capped at 1.5% of wages. This is an EMPLOYER health-insurance mandate, not a wage-withholding tax -- out of scope for this engine, same convention as every other employer-side benefit mandate documented but not built elsewhere in this project (e.g. Washington's employer PFML share IS wired since it's a wage-based premium akin to UC; PHC's per-employee dollar-premium shape and coverage-eligibility gating make it a different kind of obligation entirely).",
+    "confidence": "primary_source_confirmed (same DCD PDF as TDI above)."
+  },
+  "knownGaps": [
+    "Part 2's 8 separate per-period wage-bracket tables were not independently transcribed/verified -- this file uses Part 1's annualize-then-divide method instead (explicitly sanctioned by the Guide itself), which will diverge from Part 2's tables by small sub-dollar amounts at bracket boundaries due to independent per-period rounding.",
+    "The extra lump sum allowance's 'unconditional, even at zero regular allowances' treatment is an inference from the instruction's lettered structure, not a directly quoted confirmation -- flagged, not asserted with full confidence.",
+    "HI TDI is modelled as the statutory ceiling (0.5%/$7.50 wk), not the employer's actual negotiated premium share -- see stateDisabilityEmployee comment above.",
+    "Employer-side UC and Prepaid Health Care premiums are documented but not modelled -- both are employer-borne obligations this engine's employee-paycheck focus doesn't compute (UC for the usual per-employer-experience-rating reason; PHC because it's a health-insurance mandate, not a wage tax).",
+    "Reciprocity absence is cross-source confirmed only, not independently verified against a Hawaii-specific statute this pass."
+  ]
+}
