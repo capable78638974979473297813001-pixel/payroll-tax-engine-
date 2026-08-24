@@ -149,6 +149,18 @@ export function countyRuleset(
   );
 }
 
+/**
+ * Every county in one state's registry — for a caller that needs to search
+ * (e.g. geocode/'s fuzzy name matching) rather than look up an exact known
+ * name the way countyRuleset() does.
+ */
+export function allCounties(stateCode: string, checkDate: string): CountyEntry[] {
+  const file = loadJson<CountyRegistryFile>(
+    join('local', `${stateCode.toUpperCase()}-counties-${yearOf(checkDate)}.json`),
+  );
+  return file.counties;
+}
+
 export interface PALocalEntry {
   psdCode: string;
   county: string;
@@ -191,6 +203,14 @@ export function paLocalRuleset(
   return file.jurisdictions.find((j) => j.psdCode === psdCode);
 }
 
+/** Every PA Act 32 jurisdiction — for geocode/'s county+municipality search. */
+export function allPALocalJurisdictions(checkDate: string): PALocalEntry[] {
+  const file = loadJson<PALocalRegistryFile>(
+    join('local', `PA-EIT-LST-${yearOf(checkDate)}.json`),
+  );
+  return file.jurisdictions;
+}
+
 export interface MICityEntry {
   name: string;
   residentRate: number;
@@ -224,6 +244,14 @@ export function miCityRuleset(
     join('local', `MI-cities-${yearOf(checkDate)}.json`),
   );
   return file.cities.find((c) => c.name.toLowerCase() === cityName.toLowerCase());
+}
+
+/** Every Michigan taxing city — for geocode/'s fuzzy name matching. */
+export function allMICities(checkDate: string): MICityEntry[] {
+  const file = loadJson<MICityRegistryFile>(
+    join('local', `MI-cities-${yearOf(checkDate)}.json`),
+  );
+  return file.cities;
 }
 
 export interface OHMunicipalityEntry {
@@ -265,6 +293,14 @@ export function ohMunicipalityRuleset(
   return file.municipalities.find((m) => m.name.toLowerCase() === name.toLowerCase());
 }
 
+/** Every Ohio taxing municipality — for geocode/'s fuzzy name matching. */
+export function allOHMunicipalities(checkDate: string): OHMunicipalityEntry[] {
+  const file = loadJson<OHMunicipalityRegistryFile>(
+    join('local', `OH-municipalities-${yearOf(checkDate)}.json`),
+  );
+  return file.municipalities;
+}
+
 export interface OHSchoolDistrictEntry {
   county: string;
   sdNumber: string;
@@ -301,4 +337,12 @@ export function ohSchoolDistrictRuleset(
     join('local', `OH-school-districts-${yearOf(checkDate)}.json`),
   );
   return file.districts.find((d) => d.sdNumber === sdNumber);
+}
+
+/** Every Ohio school district that levies SDIT — for geocode/'s fuzzy name matching. */
+export function allOHSchoolDistricts(checkDate: string): OHSchoolDistrictEntry[] {
+  const file = loadJson<OHSchoolDistrictRegistryFile>(
+    join('local', `OH-school-districts-${yearOf(checkDate)}.json`),
+  );
+  return file.districts;
 }

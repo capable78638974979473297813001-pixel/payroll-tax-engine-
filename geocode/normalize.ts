@@ -1,0 +1,129 @@
+/**
+ * Name normalization for matching a Census Bureau geography name against
+ * this project's own rate-table keys.
+ *
+ * The two sides never use the same convention. Census returns "Bluffton
+ * village", "Columbus city", "Marion County", "Abington township",
+ * "Bluffton Exempted Village School District". This project's own data
+ * files (built independently, straight off each state's own primary
+ * source) use "Bluffton", "Columbus", "Marion", "Abington", "ABINGTON TWP",
+ * "Bluffton EVSD (expires 2028)". Every function here is pure and
+ * deterministic — no network, no fuzzy/probabilistic matching — so a match
+ * or non-match is always explainable and reproducible.
+ */
+
+/** Strip a parenthetical annotation, e.g. "Bluffton EVSD (expires 2028)" -> "Bluffton EVSD". */
+export function stripParenthetical(name: string): string {
+  return name.replace(/\s*\([^)]*\)\s*$/, '').trim();
+}
+
+/**
+ * Census's "Incorporated Places" / "County Subdivisions" layers append a
+ * legal/statistical qualifier this project's own MI/OH city files never
+ * carry (they're keyed by the bare name). "Indianapolis city (balance)" is
+ * the specific reason this strips iteratively rather than once — a single
+ * regex pass leaves "(balance)" behind after removing "city ".
+ */
+export function stripPlaceTypeSuffix(name: string): string {
+  let n = name.trim();
+  let prev: string;
+  do {
+    prev = n;
+    n = n
+      .replace(/\s*\(balance\)\s*$/i, '')
+      .replace(/\s+(city|village|town|township|borough|CDP|municipality)\s*$/i, '')
+      .trim();
+  } while (n !== prev);
+  return n;
+}
+
+/** "Marion County" -> "Marion". Indiana's own file stores the bare name. */
+export function stripCountySuffix(name: string): string {
+  return name.replace(/\s+County\s*$/i, '').trim();
+}
+
+const CASE_FOLD = (s: string): string => s.trim().toUpperCase();
+
+/** Case/whitespace-insensitive equality — the baseline every matcher below builds on. */
+export function namesEqual(a: string, b: string): boolean {
+  return CASE_FOLD(a) === CASE_FOLD(b);
+}
+
+/**
+ * PA-EIT-LST-2026.json stores municipality names Pennsylvania's own way:
+ * upper-case, township/borough abbreviated ("ABINGTON TWP", "ABBOTT TWP").
+ * Census's County Subdivisions layer returns "Abington township" — this
+ * expands Census's spelled-out suffix to PA's own abbreviation so a plain
+ * string-equality check (namesEqual) works without a fuzzy matcher.
+ */
+export function toPAMunicipalityForm(censusCountySubdivisionName: string): string {
+  const n = censusCountySubdivisionName.trim();
+  return n
+    .replace(/\s+Township\s*$/i, ' TWP')
+    .replace(/\s+Borough\s*$/i, ' BORO')
+    .replace(/\s+City\s*$/i, ' CITY')
+    .replace(/\s+Town\s*$/i, ' TOWN')
+    .toUpperCase()
+    .trim();
+}
+
+/**
+ * Ohio school district names on each side use genuinely different
+ * vocabularies for the SAME legal concept: Census/TIGERweb spells out
+ * "Exempted Village School District" / "City School District" / "Local
+ * School District"; data/local/OH-school-districts-2026.json (parsed
+ * directly from Ohio's own SDIT_LIST.pdf) abbreviates to "EVSD"/"CSD"/
+ * "LSD"/"JVSD" and appends parenthetical expiration notes. Reduces BOTH
+ * sides to just the district's own place name plus a normalized type code,
+ * so "Bluffton Exempted Village School District" and "Bluffton EVSD
+ * (expires 2028)" both become {base: "BLUFFTON", type: "EVSD"}.
+ */
+export interface SchoolDistrictKey {
+  base: string;
+  type: string | null;
+}
+
+const OH_SD_TYPE_WORDS: [RegExp, string][] = [
+  [/\bExempted\s+Village\b/i, 'EVSD'],
+  [/\bLocal\b/i, 'LSD'],
+  [/\bCity\b/i, 'CSD'],
+  [/\bJoint\s+Vocational\b/i, 'JVSD'],
+  [/\bUnion\b/i, 'USD'],
+];
+
+export function schoolDistrictKeyFromCensusName(censusName: string): SchoolDistrictKey {
+  let base = censusName.replace(/\s*School\s+District\s*$/i, '').trim();
+  let type: string | null = null;
+  for (const [re, code] of OH_SD_TYPE_WORDS) {
+    if (re.test(base)) {
+      type = code;
+      base = base.replace(re, '').trim();
+      break;
+    }
+  }
+  return { base: CASE_FOLD(base), type };
+}
+
+const OH_SD_ABBREVIATIONS = ['EVSD', 'CSD', 'LSD', 'JVSD', 'USD'];
+
+export function schoolDistrictKeyFromDataFileName(dataFileName: string): SchoolDistrictKey {
+  const withoutNote = stripParenthetical(dataFileName);
+  const tokens = withoutNote.trim().split(/\s+/);
+  const last = tokens[tokens.length - 1]?.toUpperCase();
+  if (last && OH_SD_ABBREVIATIONS.includes(last)) {
+    return { base: CASE_FOLD(tokens.slice(0, -1).join(' ')), type: last };
+  }
+  return { base: CASE_FOLD(withoutNote), type: null };
+}
+
+/**
+ * Two district keys match when their base place-name is identical. The
+ * `type` code is carried through for a confidence signal (see resolve.ts)
+ * but NOT required to agree — Census and Ohio's own PDF have been observed
+ * to classify the same district's type word slightly differently, so
+ * requiring type equality would produce false negatives on a signal this
+ * project doesn't fully trust either side of, per the confidence tiers.
+ */
+export function schoolDistrictKeysMatch(a: SchoolDistrictKey, b: SchoolDistrictKey): boolean {
+  return a.base === b.base && a.base.length > 0;
+}

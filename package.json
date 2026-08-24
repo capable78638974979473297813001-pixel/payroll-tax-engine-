@@ -7,9 +7,10 @@
     "node": ">=22.6.0"
   },
   "scripts": {
-    "test": "node --test tests/engine.test.ts tests/harvester.test.ts",
+    "test": "node --test tests/engine.test.ts tests/harvester.test.ts tests/geocode.test.ts",
     "demo": "node examples/demo.ts",
-    "demo:harvest": "node examples/harvest-demo.ts"
+    "demo:harvest": "node examples/harvest-demo.ts",
+    "demo:geocode": "node examples/geocode-demo.ts"
   },
   "license": "MIT"
 }
