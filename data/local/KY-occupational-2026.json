@@ -143,7 +143,12 @@
         "county": "Adair",
         "category": "Tax Rate:  0.50%",
         "rate": "0.50%",
-        "unreliable": true
+        "unreliable": true,
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Adairville",
@@ -151,7 +156,12 @@
         "category": "Net Profits",
         "rate": "1.5%",
         "cap": "Website:  http://adairvilleky.us/wordpress1/city-government/",
-        "unreliable": true
+        "unreliable": true,
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Alexandria",
@@ -159,14 +169,24 @@
         "category": "Gross Receipts",
         "rate": "0.075%",
         "minTax": "$100",
-        "cap": "$25,000"
+        "cap": "$25,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Allen County",
         "county": "Allen",
         "rate": "1%",
         "category": "Payroll and Net Profits",
-        "source": "Allen County Occupational Tax Office official forms packet (allencountykentucky.com), read directly: \"Payroll Tax (1%) and Net Profits Tax (1%)\", confirmed again on the Quarterly Payroll Tax Return Form itself (\"Total line 4 multiplied by 1%\")"
+        "source": "Allen County Occupational Tax Office official forms packet (allencountykentucky.com), read directly: \"Payroll Tax (1%) and Net Profits Tax (1%)\", confirmed again on the Quarterly Payroll Tax Return Form itself (\"Total line 4 multiplied by 1%\")",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Auburn",
@@ -174,7 +194,12 @@
         "category": "Gross Receipts",
         "rate": "0.0033%",
         "minTax": "$50",
-        "cap": "$5,000"
+        "cap": "$5,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Augusta",
@@ -182,19 +207,34 @@
         "category": "Net Profits and Payroll",
         "rate": "1.25%",
         "minTax": "$50 Net profits",
-        "cap": "$900 for both"
+        "cap": "$900 for both",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Bardstown",
         "county": "Nelson",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Beattyville",
         "county": "Lee",
         "category": "Gross Receipts",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Bellevue",
@@ -202,21 +242,36 @@
         "category": "Gross Receipts",
         "rate": "Bracketed",
         "minTax": "$60",
-        "cap": "$6,325"
+        "cap": "$6,325",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "tiered_bracket_unparseable",
+        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
       },
       {
         "name": "Benton",
         "county": "Marshall",
         "rate": "0.50%",
         "category": "Payroll",
-        "source": "tax-rates.org secondary aggregator, city flat rate on earned income"
+        "source": "tax-rates.org secondary aggregator, city flat rate on earned income",
+        "wageRateDecimal": 0.005,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Berea",
         "county": "Madison",
         "category": "Net Profits",
         "rate": "2%",
-        "minTax": "$25 (Bus. Lic.)"
+        "minTax": "$25 (Bus. Lic.)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Boone County Mental Health, Retardation/Aging",
@@ -224,25 +279,45 @@
         "category": "Net Profits",
         "rate": "0.15%",
         "minTax": "Cap:  $25.00",
-        "cap": "$25.00"
+        "cap": "$25.00",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Boone County School Board",
         "county": "Boone",
         "category": "Net Profits",
-        "rate": "0.5%"
+        "rate": "0.5%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Bourbon County",
         "county": "Bourbon",
         "category": "Net Profits",
-        "rate": "1.25%"
+        "rate": "1.25%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Boyd County",
         "county": "Boyd",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Brandenburg",
@@ -250,7 +325,12 @@
         "rate": "0.333%",
         "category": "Payroll (Ordinance No. 648, eff. 2025-07-01)",
         "minTax": "exempt below 0,000/yr and above 00,000/yr wages",
-        "source": "Bloomberg Tax + brandenburg.ky.gov Ordinance No. 648 PDF, adopted June 2025"
+        "source": "Bloomberg Tax + brandenburg.ky.gov Ordinance No. 648 PDF, adopted June 2025",
+        "wageRateDecimal": 0.00333,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Breathitt County",
@@ -258,448 +338,833 @@
         "rate": "2%",
         "category": "Payroll and Net Profits",
         "source": "Breathitt County Occupational Tax Administrator official memo (breathitt.org), read directly, citing Ordinance No. 202301-12-1 eff. 2023-02-01: \"2% of each individual's gross wages, salaries and commissions... 2% of the net profits of every business\"",
-        "minTax": "$100/yr permanent, $50/yr part-time (under 3 days/week), credited against net profits due"
+        "minTax": "$100/yr permanent, $50/yr part-time (under 3 days/week), credited against net profits due",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Bromley",
         "county": "Kenton",
         "category": "Gross Receipts",
-        "rate": "0.00125"
+        "rate": "0.00125",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Brooksville",
         "category": "Net Proftis/Gross Receipts",
         "rate": "1.75% of Net Profits/0.0075% of Gross Receipts",
         "minTax": "Variable/Depends on Occupation",
-        "cap": "$900"
+        "cap": "$900",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Brownsville",
         "category": "Net Profits",
         "rate": "1%",
-        "minTax": "$20"
+        "minTax": "$20",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Burkesville",
         "rate": "1.00%",
         "category": "Payroll",
-        "source": "tax-rates.org secondary aggregator, city flat rate, residents and nonresidents alike"
+        "source": "tax-rates.org secondary aggregator, city flat rate, residents and nonresidents alike",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Butler County",
         "rate": "1%",
         "category": "Payroll and Net Profits",
-        "source": "Butler County Occupational Tax Office (butlercounty.ky.gov), confirmed via direct search of the county's own page: \"Occupational License Fee at one percent (1%) on all GROSS wages... and one percent (1%) on NET business profits\""
+        "source": "Butler County Occupational Tax Office (butlercounty.ky.gov), confirmed via direct search of the county's own page: \"Occupational License Fee at one percent (1%) on all GROSS wages... and one percent (1%) on NET business profits\"",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Cadiz",
         "category": "Gross Receipts",
         "rate": "1%",
         "minTax": "$50",
-        "cap": "$1250"
+        "cap": "$1250",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Caldwell County",
         "rate": "1.5%",
         "category": "Payroll",
-        "source": "Caldwell County official page (caldwellcounty.ky.gov/departments/Pages/occupational-license-and-transient-room-tax.aspx), read directly: \"The tax rate on amounts earned in Caldwell County, Kentucky is 1.5% of the GROSS wages on all employees\", per Ordinance 06/10/14"
+        "source": "Caldwell County official page (caldwellcounty.ky.gov/departments/Pages/occupational-license-and-transient-room-tax.aspx), read directly: \"The tax rate on amounts earned in Caldwell County, Kentucky is 1.5% of the GROSS wages on all employees\", per Ordinance 06/10/14",
+        "wageRateDecimal": 0.015,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Calvert City",
         "category": "Net Profits",
         "rate": "0.5%",
-        "cap": "$65,000"
+        "cap": "$65,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Camargo",
         "category": "Net Profits/Gross Receipts",
         "rate": "2%",
-        "minTax": "$50 license fee"
+        "minTax": "$50 license fee",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Campbellsville",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Carlisle",
         "rate": "1.00%",
         "category": "Payroll",
-        "source": "tax-rates.org secondary aggregator, city flat rate (Nicholas County)"
+        "source": "tax-rates.org secondary aggregator, city flat rate (Nicholas County)",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Carroll County",
         "category": "Net Profits",
         "rate": "1.5%",
-        "cap": "$250,000 maximum annually"
+        "cap": "$250,000 maximum annually",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Carter County",
         "category": "Payroll",
         "rate": "1.00%",
-        "source": "Carter County Fiscal Court official Employer's Quarterly Return form (cartercountyky.com), read directly: \"Multiply Line 3 ... by the current rate of 1 and[00/100 percent]\" (form column-width truncates the full \"1.00%\" phrase but the whole-number rate is unambiguous)"
+        "source": "Carter County Fiscal Court official Employer's Quarterly Return form (cartercountyky.com), read directly: \"Multiply Line 3 ... by the current rate of 1 and[00/100 percent]\" (form column-width truncates the full \"1.00%\" phrase but the whole-number rate is unambiguous)",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Catlettsburg",
         "category": "Both",
         "rate": "1.5%",
-        "minTax": "1.5%"
+        "minTax": "1.5%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Cave City",
         "category": "Net Profits",
         "rate": "1%",
-        "minTax": "$100"
+        "minTax": "$100",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "City of Union",
         "rate": "2%",
         "category": "Payroll",
-        "source": "cityofunionky.org, eff. 2023-01-01"
+        "source": "cityofunionky.org, eff. 2023-01-01",
+        "wageRateDecimal": 0.02,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Clark County",
         "rate": "1.5%",
         "category": "Payroll (5+ full-time employees) and Net Profits",
-        "source": "Clark County Fiscal Court official page (clarkcoky.com/149/Occupational-License-Payroll-Tax), read directly: \"Employers with 5 or more full-time employees must withhold 1.5% license fee... 1.5% of the Net Profits\""
+        "source": "Clark County Fiscal Court official page (clarkcoky.com/149/Occupational-License-Payroll-Tax), read directly: \"Employers with 5 or more full-time employees must withhold 1.5% license fee... 1.5% of the Net Profits\"",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Clarkson",
         "category": "Gross Receipts",
-        "rate": "1.2%"
+        "rate": "1.2%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Clay County",
         "rate": "1%",
         "category": "Payroll and Net Profits",
-        "source": "Clay County Occupational Tax Office official site (claytaxadmin.com), read directly: \"license fee of 1% of gross payroll and 1% on net profits for all work performed in... Kentucky\""
+        "source": "Clay County Occupational Tax Office official site (claytaxadmin.com), read directly: \"license fee of 1% of gross payroll and 1% on net profits for all work performed in... Kentucky\"",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Clinton",
         "category": "Gross Receipts",
         "rate": "0.5%",
-        "cap": "$200/per employee"
+        "cap": "$200/per employee",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Clinton County",
         "category": "Net Profits/Gross Receipts",
-        "rate": "1.25%/1.25%"
+        "rate": "1.25%/1.25%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Coal Run Village",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Cold Spring",
         "category": "Gross Receipts",
         "rate": "Tax Schedule",
         "minTax": "$25",
-        "cap": "$1500"
+        "cap": "$1500",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "tiered_bracket_unparseable",
+        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
       },
       {
         "name": "Corbin",
         "category": "Payroll Only",
-        "rate": "1% on payroll only"
+        "rate": "1% on payroll only",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_explicit_wage_figure",
+        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
       },
       {
         "name": "Crescent Springs",
         "category": "Gross Receipts",
-        "rate": "0.00075%"
+        "rate": "0.00075%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Crestview Hills",
         "category": "Gross Receipts",
         "rate": "0.075%",
-        "cap": "$40,000"
+        "cap": "$40,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Crittenden County",
         "category": "Net Profits",
         "rate": "1.5%",
         "minTax": "$50.00 annually",
-        "cap": "None"
+        "cap": "None",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Cumberland County Fiscal Court",
         "category": "Net Profits",
         "rate": "1.75%",
-        "cap": "$750 yr/per employee or net profit form"
+        "cap": "$750 yr/per employee or net profit form",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Cumberland County Public School District",
         "rate": "0.5%",
         "category": "Payroll (SEEK equivalent tax effort)",
-        "source": "Kentucky Department of Education, 2025-2026 Local District Tax Levies (Tax Rate Levied as of April 30 2026.xlsx, education.ky.gov/districts/SEEK) -- downloaded directly and parsed as XML (the .xlsx zip's sheet1.xml + sharedStrings.xml), since neither WebFetch nor a direct curl with default headers could retrieve it (blocked as HTML/WAF until a browser User-Agent was used). District row 141 Cumberland County, column Q (\"Occu-pational\"): 0.5. CROSS-VALIDATED by parsing the same file for two districts already confirmed from the SOS database in this project -- Boone County School Board (0.5% via SOS) and Fayette County Public School District (0.5% via SOS) -- both matched this spreadsheet exactly, confirming the column is already in percent (not per-$100 assessed value) and that this source is reliable."
+        "source": "Kentucky Department of Education, 2025-2026 Local District Tax Levies (Tax Rate Levied as of April 30 2026.xlsx, education.ky.gov/districts/SEEK) -- downloaded directly and parsed as XML (the .xlsx zip's sheet1.xml + sharedStrings.xml), since neither WebFetch nor a direct curl with default headers could retrieve it (blocked as HTML/WAF until a browser User-Agent was used). District row 141 Cumberland County, column Q (\"Occu-pational\"): 0.5. CROSS-VALIDATED by parsing the same file for two districts already confirmed from the SOS database in this project -- Boone County School Board (0.5% via SOS) and Fayette County Public School District (0.5% via SOS) -- both matched this spreadsheet exactly, confirming the column is already in percent (not per-$100 assessed value) and that this source is reliable.",
+        "wageRateDecimal": 0.005,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Cynthiana",
         "category": "Net Profits",
         "rate": "1.5%",
-        "minTax": "$50.00"
+        "minTax": "$50.00",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Danville",
         "category": "Net Profits/Gross Wages",
-        "rate": "1.25%"
+        "rate": "1.25%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Dawson Springs",
         "category": "Net Profits",
         "rate": "1.5% up to 50,000; 1% 50,000 to 500,000; 0.5% over 500,000",
-        "minTax": "$50/year"
+        "minTax": "$50/year",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "tiered_bracket_unparseable",
+        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
       },
       {
         "name": "Dayton",
         "rate": "2.5%",
         "category": "Payroll",
-        "source": "daytonky.com official Business Tax and Fee Schedules page -- NOT administered by the Campbell County Occupational License Office (which covers Alexandria/Cold Spring/Ft.Thomas/Highland Heights/Melbourne/Southgate/Wilder/Woodlawn but explicitly NOT Dayton), confirming Dayton runs its own separate collection."
+        "source": "daytonky.com official Business Tax and Fee Schedules page -- NOT administered by the Campbell County Occupational License Office (which covers Alexandria/Cold Spring/Ft.Thomas/Highland Heights/Melbourne/Southgate/Wilder/Woodlawn but explicitly NOT Dayton), confirming Dayton runs its own separate collection.",
+        "wageRateDecimal": 0.025,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Dry Ridge",
         "rate": "1.25%",
         "category": "Payroll",
-        "source": "cdrky.org city site, distinct from Grant County"
+        "source": "cdrky.org city site, distinct from Grant County",
+        "wageRateDecimal": 0.0125,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Earlington",
         "rate": "1.5%",
         "category": "Payroll/Net Profits",
-        "source": "WebSearch summary of Hopkins County occupational tax pages"
+        "source": "WebSearch summary of Hopkins County occupational tax pages",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Eddyville",
         "rate": "1.5%",
         "category": "Payroll",
-        "source": "eddyvilleky.org, city site"
+        "source": "eddyvilleky.org, city site",
+        "wageRateDecimal": 0.015,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Edgewood",
         "category": "Net Profits",
         "rate": "0.0075%",
-        "minTax": "$50"
+        "minTax": "$50",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Edmonton",
         "rate": "1.00%",
         "category": "Payroll",
-        "source": "Metcalfe County ordinance (Edmonton is the county seat, no separate city rate found) -- CORRECTED to match Metcalfe County's own primary-sourced 1.00% (was previously 0.5%, based on a secondary source that Metcalfe's own form disproved)"
+        "source": "Metcalfe County ordinance (Edmonton is the county seat, no separate city rate found) -- CORRECTED to match Metcalfe County's own primary-sourced 1.00% (was previously 0.5%, based on a secondary source that Metcalfe's own form disproved)",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Elkton",
         "category": "Gross Receipts",
         "rate": ".125%",
         "minTax": "None",
-        "cap": "$3,125"
+        "cap": "$3,125",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Elsmere",
         "category": "Net Profits",
         "rate": "0.01%",
         "minTax": "$50",
-        "cap": "$1,000"
+        "cap": "$1,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Eminence",
         "category": "Net Profits",
         "rate": "0.0075%",
         "minTax": "$100",
-        "cap": "$3,000"
+        "cap": "$3,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Erlanger",
         "category": "Gross Receipts",
         "rate": "0.00075%",
-        "cap": "$40,000"
+        "cap": "$40,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Estill County",
         "rate": "2.00%",
         "category": "Net Profits/Payroll",
-        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)"
+        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Fayette County Public School District",
         "category": "Net Profits",
-        "rate": "0.5%"
+        "rate": "0.5%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Flemingsburg",
         "rate": "1.5%",
         "category": "Payroll and Net Profits",
-        "source": "flemingsburgky.org, rate increased 0.5pp June 2024"
+        "source": "flemingsburgky.org, rate increased 0.5pp June 2024",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Florence",
         "category": "Gross Receipts",
         "rate": "0.001%",
         "minTax": "$40",
-        "cap": "$10,000"
+        "cap": "$10,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Fordsville",
         "rate": "1.25%",
         "category": "Payroll/Net Profits",
-        "source": "Ohio County occupational tax office (no separate Fordsville city rate found; county rate applies)"
+        "source": "Ohio County occupational tax office (no separate Fordsville city rate found; county rate applies)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Fort Mitchell",
         "category": "Gross Receipts",
-        "rate": "0.00075%"
+        "rate": "0.00075%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Fort Thomas",
         "category": "Net Profits",
         "rate": "1.25%",
-        "minTax": "$25"
+        "minTax": "$25",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Fort Wright",
         "category": "Gross Receipts",
-        "rate": "0.00075%"
+        "rate": "0.00075%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Frankfort",
         "category": "Net Profits",
         "rate": "1.95%",
-        "minTax": "$60"
+        "minTax": "$60",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Franklin",
         "rate": "1.00%",
         "category": "Payroll",
-        "source": "tax-rates.org secondary aggregator, city flat rate (Simpson County)"
+        "source": "tax-rates.org secondary aggregator, city flat rate (Simpson County)",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Gallatin County Fiscal Court",
-        "rate": "Flat Bus. Fee"
+        "rate": "Flat Bus. Fee",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Gamaliel",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Garrard County",
         "category": "Net Profits",
-        "rate": "2%"
+        "rate": "2%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Georgetown",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Grant County",
         "rate": "2% (reduced from 2.5% eff. 2026-05)",
-        "source": "Bloomberg Tax + Grant County News reporting a fiscal court rate cut; SOS database (2.5%) not yet updated to reflect this"
+        "source": "Bloomberg Tax + Grant County News reporting a fiscal court rate cut; SOS database (2.5%) not yet updated to reflect this",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Grayson",
         "rate": "1%",
         "category": "Payroll (Adjusted Gross Wages -- gross wages less employer-withheld medical/dental/vision/retirement pretax deductions)",
-        "source": "graysonky.org official site, ordinance enacted Dec 2007"
+        "source": "graysonky.org official site, ordinance enacted Dec 2007",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Grayson County",
         "rate": "0.50%",
         "category": "Net Profits/Payroll",
-        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)"
+        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Greensburg",
         "category": "Net Profits",
         "rate": "1%",
-        "minTax": "$25 (Business License), credit given for the first $2,500 in net profits"
+        "minTax": "$25 (Business License), credit given for the first $2,500 in net profits",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Guthrie",
         "rate": "1.00% (Todd County rate -- no separate Guthrie city ordinance found)",
         "category": "Payroll",
-        "source": "Todd Fiscal Court official Employer Return of License Fee Withheld form (HCOC-Q3), directly read: \"Tax Due at - 1.00%\""
+        "source": "Todd Fiscal Court official Employer Return of License Fee Withheld form (HCOC-Q3), directly read: \"Tax Due at - 1.00%\"",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Hancock County",
         "category": "Net Profits",
-        "rate": "1.25%"
+        "rate": "1.25%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Hardin County Industrial Tax District",
-        "rate": "1% net profits and 1% gross payroll"
+        "rate": "1% net profits and 1% gross payroll",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Harrison County",
         "category": "Net Profits",
         "rate": "1.5%",
-        "cap": "ball"
+        "cap": "ball",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Harrodsburg",
         "category": "Net Profits",
-        "rate": "1.5%"
+        "rate": "1.5%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Hart County",
         "category": "Net Profits",
         "rate": "0.8%",
-        "cap": "$10,000"
+        "cap": "$10,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Hartford",
         "category": "Payroll Tax Only",
-        "rate": "1% Gross Wages"
+        "rate": "1% Gross Wages",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_explicit_wage_figure",
+        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
       },
       {
         "name": "Hazard",
         "category": "Net Profits",
         "rate": "1.25%",
-        "minTax": "$100"
+        "minTax": "$100",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Henderson",
         "rate": "1.65%",
         "category": "Payroll and Net Profits",
-        "source": "hendersonky.gov, eff. 2023-01-01 (up from 1.49%)"
+        "source": "hendersonky.gov, eff. 2023-01-01 (up from 1.49%)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Hickman",
         "category": "Net Profits",
         "rate": "1.5%",
-        "minTax": "$50 (Application Fee)"
+        "minTax": "$50 (Application Fee)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Hickman County",
         "rate": "1%",
         "category": "Payroll",
-        "source": "Hickman County official Employers Quarterly Return of Payroll License Fee form (explorehickmancounty.com), read directly: \"Actual Tax Due in Quarter at 1%\", pursuant to Ordinance 2007-03"
+        "source": "Hickman County official Employers Quarterly Return of Payroll License Fee form (explorehickmancounty.com), read directly: \"Actual Tax Due in Quarter at 1%\", pursuant to Ordinance 2007-03",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Highland Heights",
         "category": "Gross Receipts",
         "rate": "0.35%",
         "minTax": "$75",
-        "cap": "$10,000"
+        "cap": "$10,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Hillview",
         "category": "Net Profits",
-        "rate": "1.8%"
+        "rate": "1.8%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Hodgenville",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Hopkins County",
         "rate": ".5% (.005)",
         "category": "Payroll",
-        "source": "Hopkins County Fiscal Court official Employers License Fee Withheld Return (HCFC Form 01, hopkinscounty.ky.gov), read directly: \"Actual Fee Withheld .5% (.005)\""
+        "source": "Hopkins County Fiscal Court official Employers License Fee Withheld Return (HCFC Form 01, hopkinscounty.ky.gov), read directly: \"Actual Fee Withheld .5% (.005)\"",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Independence",
         "category": "Gross Receipts",
-        "rate": "0.00075%"
+        "rate": "0.00075%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Irvington",
@@ -707,307 +1172,577 @@
         "category": "Payroll and Net Profits, tracked SEPARATELY",
         "minTax": "$60 one-time business license fee",
         "cap": "Payroll capped at 0.50%, net profit capped at 3% -- the ordinance sets a CURRENT rate below its own authorized ceiling, unusual among jurisdictions in this file",
-        "source": "City of Irvington Ordinance 2025-06 (media-irvington.ky.gov), PDF read directly in full -- brand new, passed 2025-11-24. Quoted: \"an occupational tax for all persons working inside the City limits... set at ONE-QUARTER OF ONE PERCENT (0.25%), and capped at ONE-HALF OF ONE PERCENT (0.50%)\" for payroll; \"a rate of ONE AND ONE-HALF PERCENT (1.50%), capped at THREE (3%)\" for net profit. Section 2(e): employees earning under $25,000/year from Irvington work are FULLY EXEMPT from the payroll tax -- a real earnings-floor exemption not seen elsewhere in this file. Monthly remittance required once withheld amounts exceed $3,000 in any of the preceding 4 quarters (Sec. 5(E)), otherwise quarterly."
+        "source": "City of Irvington Ordinance 2025-06 (media-irvington.ky.gov), PDF read directly in full -- brand new, passed 2025-11-24. Quoted: \"an occupational tax for all persons working inside the City limits... set at ONE-QUARTER OF ONE PERCENT (0.25%), and capped at ONE-HALF OF ONE PERCENT (0.50%)\" for payroll; \"a rate of ONE AND ONE-HALF PERCENT (1.50%), capped at THREE (3%)\" for net profit. Section 2(e): employees earning under $25,000/year from Irvington work are FULLY EXEMPT from the payroll tax -- a real earnings-floor exemption not seen elsewhere in this file. Monthly remittance required once withheld amounts exceed $3,000 in any of the preceding 4 quarters (Sec. 5(E)), otherwise quarterly.",
+        "wageRateDecimal": 0.0025,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_explicit_wage_figure",
+        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
       },
       {
         "name": "Jackson",
         "rate": "1.5%",
         "category": "Payroll",
-        "source": "City of Jackson official Quarterly Withholding form (cityofjacksonky.org/assets/forms/quarterly-withholding.pdf), read directly -- line 5 states \"Actual Tax Withheld in Quarter at 1.5%\", governed by Ordinance #102016-A."
+        "source": "City of Jackson official Quarterly Withholding form (cityofjacksonky.org/assets/forms/quarterly-withholding.pdf), read directly -- line 5 states \"Actual Tax Withheld in Quarter at 1.5%\", governed by Ordinance #102016-A.",
+        "wageRateDecimal": 0.015,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Jackson County",
         "rate": "1.85%",
         "category": "Net Profits/Payroll",
-        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org)"
+        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Jeffersontown",
         "rate": "1%",
         "category": "Payroll (gross wage)",
-        "source": "jeffersontownky.com official FAQ, stacks with Louisville Metro occupational tax since Jtown sits inside Jefferson County"
+        "source": "jeffersontownky.com official FAQ, stacks with Louisville Metro occupational tax since Jtown sits inside Jefferson County",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Jeffersonville",
         "rate": "1.00%",
         "category": "Payroll",
-        "source": "tax-rates.org secondary aggregator, city flat rate (Montgomery County)"
+        "source": "tax-rates.org secondary aggregator, city flat rate (Montgomery County)",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Jessamine County",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Johnson County Fiscal Court",
         "category": "Net Profits",
         "rate": "0.5%",
-        "minTax": "$25"
+        "minTax": "$25",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Knox County",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "La Grange",
         "category": "Gross Receipts",
         "rate": "Sliding Scale",
-        "minTax": "$55.00"
+        "minTax": "$55.00",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "tiered_bracket_unparseable",
+        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
       },
       {
         "name": "Lakeside Park",
         "category": "Gross Receipts",
-        "rate": "0.0075%"
+        "rate": "0.0075%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Lebanon",
         "category": "Net Profits",
         "rate": "1%",
-        "minTax": "$25 (Bus. Lic. Fee)"
+        "minTax": "$25 (Bus. Lic. Fee)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Lebanon Junction",
         "rate": "1.50%",
         "category": "Payroll (gross annual salaries/wages/compensations)",
-        "source": "City of Lebanon Junction Ordinance No. 2019-05, PDF read directly -- SECTION ONE: \"On and after January 1, 2020, there is hereby levied and imposed an Occupational License Tax... equal to One and a Half Percent (1.50%)...\" Effective 2020-01-01, supersedes 2003-08 which first established the tax (rate not confirmed for the pre-2020 period)."
+        "source": "City of Lebanon Junction Ordinance No. 2019-05, PDF read directly -- SECTION ONE: \"On and after January 1, 2020, there is hereby levied and imposed an Occupational License Tax... equal to One and a Half Percent (1.50%)...\" Effective 2020-01-01, supersedes 2003-08 which first established the tax (rate not confirmed for the pre-2020 period).",
+        "wageRateDecimal": 0.015,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Leitchfield",
         "category": "Net Profits",
         "rate": "1.2%",
-        "minTax": "$50 (Bus. Lic.)"
+        "minTax": "$50 (Bus. Lic.)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Lewisburg",
         "category": "Gross Receipts",
         "rate": "0.10%",
         "minTax": "$40",
-        "cap": "$5,000"
+        "cap": "$5,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Lincoln County",
         "category": "Net Profits",
-        "rate": "1% (Withholding 1%)"
+        "rate": "1% (Withholding 1%)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Livingston County",
         "category": "Net Profits/Gross Receipts",
-        "rate": "1%/percentage ea. schedule stands alone"
+        "rate": "1%/percentage ea. schedule stands alone",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "tiered_bracket_unparseable",
+        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
       },
       {
         "name": "Logan County",
         "category": "Net Profits",
-        "rate": "0.75%"
+        "rate": "0.75%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Ludlow",
         "category": "Gross Receipts",
-        "rate": "0.00075%"
+        "rate": "0.00075%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Lyndon",
         "rate": "2.2% resident / 1.45% nonresident",
         "category": "Payroll (inherits Louisville Metro/Jefferson County rate)",
-        "source": "No separate Lyndon city ordinance found -- Lyndon is a small Jefferson County city; applying the countywide Louisville Metro rate absent contrary evidence, flagged as inferred not directly confirmed"
+        "source": "No separate Lyndon city ordinance found -- Lyndon is a small Jefferson County city; applying the countywide Louisville Metro rate absent contrary evidence, flagged as inferred not directly confirmed",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": 0.022,
+        "wageRateNonresidentDecimal": 0.0145,
+        "wageRateStatus": "parsed_resident_nonresident_split",
+        "wageRateNote": "Resident/nonresident split rate, same shape as Michigan's city taxes elsewhere in this project. Matches jurisdictions.louisvilleMetro's own residentRate/nonresidentRate exactly -- category confirms this jurisdiction inherits Louisville Metro/Jefferson County's rate."
       },
       {
         "name": "Lynnview",
         "category": "Gross Receipts",
         "rate": "Sliding Scale",
-        "minTax": "$250.00"
+        "minTax": "$250.00",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "tiered_bracket_unparseable",
+        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
       },
       {
         "name": "Madisonville",
         "category": "Net Profits",
         "rate": "2.5%",
-        "minTax": "$25"
+        "minTax": "$25",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Magoffin County",
         "rate": "1.00%",
         "category": "Net Profits/Payroll",
-        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)"
+        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Marion",
         "category": "Net Profits",
         "rate": "1.5%",
-        "minTax": "$50"
+        "minTax": "$50",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Marion County",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Marshall County",
         "category": "Net Profits",
         "rate": "1%",
-        "cap": "$65,000"
+        "cap": "$65,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Marshall County Occupational License Tax For Schools",
         "category": "Net Profits",
-        "rate": "0.5%"
+        "rate": "0.5%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Martin County Fiscal Court",
         "rate": "2%",
         "category": "Payroll",
-        "source": "martincountyky.com official county site, read directly: \"all places of business and those employed within Martin County are subject to a 2%, mandatory Occupational Tax rate\""
+        "source": "martincountyky.com official county site, read directly: \"all places of business and those employed within Martin County are subject to a 2%, mandatory Occupational Tax rate\"",
+        "wageRateDecimal": 0.02,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Mayfield",
         "category": "Net Profits",
         "rate": "2% <= $50,000; 1% $50,001-$500,000; 0.5% > $500,000 (+1.9% payroll tax)",
-        "minTax": "$100"
+        "minTax": "$100",
+        "wageRateDecimal": 0.019,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_explicit_wage_figure",
+        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
       },
       {
         "name": "Maysville",
         "category": "Gross Receipts",
         "rate": "0.1%",
-        "minTax": "$100"
+        "minTax": "$100",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "McCreary County",
         "category": "Net Profits",
-        "rate": "1.5%"
+        "rate": "1.5%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "McKee",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Boone County Fiscal Court",
         "category": "Net Profits",
-        "rate": "0.8%"
+        "rate": "0.8%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Kenton County",
         "category": "Net Profits",
-        "rate": "Sliding scale"
+        "rate": "Sliding scale",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "tiered_bracket_unparseable",
+        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
       },
       {
         "name": "Warren County",
         "category": "Net Profits/Gross Receipts",
-        "rate": "1%/1%"
+        "rate": "1%/1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Daviess County Fiscal Court",
         "category": "Net Profits",
-        "rate": "0.35%"
+        "rate": "0.35%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Campbell County",
         "category": "Flat Fee",
-        "rate": "$75 flat"
+        "rate": "$75 flat",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "flat_fee_not_percentage",
+        "wageRateNote": null
       },
       {
         "name": "Madison County",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Franklin County",
         "category": "Net Profits",
         "rate": "1%",
-        "minTax": "$40"
+        "minTax": "$40",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Pulaski County",
         "rate": "1.00%",
         "category": "Net Profits/Payroll",
-        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)"
+        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Scott County",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "McCracken County",
         "rate": "1.00%",
         "category": "Net Profits/Payroll",
-        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)"
+        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Henderson County",
         "category": "Net Profits",
         "rate": "1%",
-        "cap": "$2,000"
+        "cap": "$2,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Bowling Green",
         "category": "Net Profits",
         "rate": "2.0%",
-        "minTax": "$30"
+        "minTax": "$30",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Owensboro",
         "category": "Net Profits",
         "rate": "1.78%",
-        "minTax": "$75"
+        "minTax": "$75",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Covington",
         "category": "Net Profits",
         "rate": "2.5%",
         "minTax": "$100",
-        "cap": "$80,000"
+        "cap": "$80,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Nelson County Fiscal Court",
         "category": "Net Profits",
         "rate": "0.5%",
-        "cap": "$15,000 (net profits/wages)"
+        "cap": "$15,000 (net profits/wages)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Hopkinsville",
         "category": "Net Profits",
         "rate": "1.95% wages / 1.3% net profits",
         "minTax": "$100 (gross receipts > $25,000); $25 processing fee (gross receipts <= $25,000)",
-        "cap": "$10,000"
+        "cap": "$10,000",
+        "wageRateDecimal": 0.0195,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_explicit_wage_figure",
+        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
       },
       {
         "name": "Elizabethtown",
         "category": "Net Profits",
         "rate": "1.95%",
-        "minTax": "$25 (credit against first $25 due on net profits return)"
+        "minTax": "$25 (credit against first $25 due on net profits return)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Richmond",
         "category": "Net Profits",
         "rate": "2%",
-        "minTax": "$25"
+        "minTax": "$25",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Nicholasville",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Winchester",
         "category": "Payroll Only",
-        "rate": "2%"
+        "rate": "2%",
+        "wageRateDecimal": 0.02,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Radcliff",
         "category": "Gross Receipts",
         "rate": "Schedule of Rates based on business type (5 types)",
-        "minTax": "$25"
+        "minTax": "$25",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "tiered_bracket_unparseable",
+        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
       },
       {
         "name": "Shelby County",
         "category": "Net Profits",
         "rate": "1% ($10,000 exemption)",
-        "cap": "$15,000"
+        "cap": "$15,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Boyle County",
         "category": "Net Profits/Gross Wages",
-        "rate": "1.25%"
+        "rate": "1.25%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Paducah",
@@ -1015,378 +1750,708 @@
         "category": "Payroll",
         "minTax": null,
         "cap": null,
-        "source": "paducahky.gov official Finance dept page -- increased from 1.5% to 2.0% on 2005-08-09. Outside Paducah city limits but within McCracken County, the rate is 1% (McCracken County already captured separately)."
+        "source": "paducahky.gov official Finance dept page -- increased from 1.5% to 2.0% on 2005-08-09. Outside Paducah city limits but within McCracken County, the rate is 1% (McCracken County already captured separately).",
+        "wageRateDecimal": 0.02,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Ashland",
         "category": "Net Profits",
         "rate": "2.375% eff. 1/1/2026",
-        "minTax": "$100 (Bus. Lic. Fee)"
+        "minTax": "$100 (Bus. Lic. Fee)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Laurel County",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Glasgow",
         "category": "Net Profits and Gross Receipts",
         "rate": "1.75%",
-        "minTax": "$25"
+        "minTax": "$25",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "McLean County",
         "category": "Net Profits/Payroll",
         "rate": "1%",
         "minTax": "$50.00",
-        "cap": "$750.00"
+        "cap": "$750.00",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Melbourne",
         "category": "Flat Fee",
         "rate": "$50",
         "minTax": "$50",
-        "cap": "$50"
+        "cap": "$50",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "flat_fee_not_percentage",
+        "wageRateNote": null
       },
       {
         "name": "Menifee County",
         "rate": "1.25%",
         "category": "Net Profits/Payroll",
-        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)"
+        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Mercer County",
         "category": "Net Profits",
-        "rate": "1.00%"
+        "rate": "1.00%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Metcalfe County",
         "category": "Payroll",
         "rate": "1.00%",
-        "source": "Metcalfe County Treasurer official Employer's Return of License Tax Withheld form (metcalfecounty.ky.gov), read directly: \"Tax Due at - 1.00%\". CORRECTS an earlier secondary-source claim (0.5%) found via a general web search summary -- this project's own established practice of not trusting search snippets without a primary check caught a real error here."
+        "source": "Metcalfe County Treasurer official Employer's Return of License Tax Withheld form (metcalfecounty.ky.gov), read directly: \"Tax Due at - 1.00%\". CORRECTS an earlier secondary-source claim (0.5%) found via a general web search summary -- this project's own established practice of not trusting search snippets without a primary check caught a real error here.",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Middlesboro",
         "category": "Net Profits",
         "rate": "2% (+2% Business License Fee)",
-        "minTax": "$50 (Bus. Lic. Fee)/$250 if Franchise or Net Profit"
+        "minTax": "$50 (Bus. Lic. Fee)/$250 if Franchise or Net Profit",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Middletown",
         "rate": "2.2% resident / 1.45% nonresident",
         "category": "Payroll (inherits Louisville Metro/Jefferson County rate)",
-        "source": "No separate Middletown city ordinance found -- applying the countywide Louisville Metro rate absent contrary evidence, flagged as inferred not directly confirmed"
+        "source": "No separate Middletown city ordinance found -- applying the countywide Louisville Metro rate absent contrary evidence, flagged as inferred not directly confirmed",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": 0.022,
+        "wageRateNonresidentDecimal": 0.0145,
+        "wageRateStatus": "parsed_resident_nonresident_split",
+        "wageRateNote": "Resident/nonresident split rate, same shape as Michigan's city taxes elsewhere in this project. Matches jurisdictions.louisvilleMetro's own residentRate/nonresidentRate exactly -- category confirms this jurisdiction inherits Louisville Metro/Jefferson County's rate."
       },
       {
         "name": "Midway",
         "category": "Net Profits",
-        "rate": "2%"
+        "rate": "2%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Millersburg",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Monroe County",
         "rate": "1.00%",
         "category": "Net Profits/Payroll",
-        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)"
+        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Montgomery County",
         "category": "Net Profits",
-        "rate": "2%"
+        "rate": "2%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Morehead",
         "category": "Net Profits",
-        "rate": "1.5%"
+        "rate": "1.5%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Morgantown",
         "category": "Net Profits",
-        "rate": "2%"
+        "rate": "2%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Mt. Vernon",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Muldraugh",
         "category": "Gross Receipts",
         "rate": "0.0025%",
         "minTax": "$25",
-        "cap": "$5,000"
+        "cap": "$5,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Newport",
         "category": "Gross Receipts",
         "rate": "0.0035%",
         "minTax": "$75",
-        "cap": "$24,700 (Adj/CPI)"
+        "cap": "$24,700 (Adj/CPI)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Nicholas County",
         "rate": "1%",
         "category": "Payroll and Net Profits",
-        "source": "Nicholas County Occupational Tax Administrator official memo (nicholascounty.ky.gov), read directly: \"effective January 1, 1988, the 1% Occupational License Fee applies... 1% of each individual's gross wages, salaries, and commissions... 1% of the net profits of every business\""
+        "source": "Nicholas County Occupational Tax Administrator official memo (nicholascounty.ky.gov), read directly: \"effective January 1, 1988, the 1% Occupational License Fee applies... 1% of each individual's gross wages, salaries, and commissions... 1% of the net profits of every business\"",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
         "name": "Nortonville",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Oak Grove",
         "category": "Gross Receipts",
         "rate": "0.06% Wholesale/0.15% Retail/0.38% Professional",
-        "minTax": "$100"
+        "minTax": "$100",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Ohio County",
         "category": "Net Profits",
         "rate": "1.25%",
         "minTax": "under $1000=$0, over $1000=1.25%",
-        "cap": "$10,000"
+        "cap": "$10,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Owenton",
         "category": "Gross Receipts",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Paintsville",
         "category": "Gross Receipts",
-        "rate": "1.25%"
+        "rate": "1.25%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Paris",
         "category": "Net Profits",
         "rate": "1.5%",
-        "minTax": "$75 (Bus. Lic. Fee; credit toward net profits tax)"
+        "minTax": "$75 (Bus. Lic. Fee; credit toward net profits tax)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Park City",
         "category": "Net Profits",
         "rate": "0.01%",
-        "minTax": "$25"
+        "minTax": "$25",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Park Hills",
         "category": "Gross Receipts",
         "rate": "0.0035%",
         "minTax": "$25",
-        "cap": "$1,000"
+        "cap": "$1,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Perry County",
         "category": "Net Profits/Gross Receipts",
-        "rate": "1%/1%"
+        "rate": "1%/1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Perryville",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Pike County",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Pikeville",
         "rate": "2.00%",
         "category": "Payroll",
-        "source": "tax-rates.org secondary aggregator; Pike County (already captured) levies separately and stacks"
+        "source": "tax-rates.org secondary aggregator; Pike County (already captured) levies separately and stacks",
+        "wageRateDecimal": 0.02,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Pineville",
         "category": "Net Profits",
-        "rate": "1.5%"
+        "rate": "1.5%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Powell County",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Prestonsburg",
         "category": "Net Profits",
         "rate": "1.5%",
-        "minTax": "Bus. Lic. Fee"
+        "minTax": "Bus. Lic. Fee",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Princeton",
         "category": "Net Profits",
         "rate": "1.5%",
-        "minTax": "$50.00"
+        "minTax": "$50.00",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Raceland",
         "category": "Net Profits",
-        "rate": "1.5%"
+        "rate": "1.5%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Robertson County",
         "rate": "1.5%",
         "category": "Payroll (net-profits component REPLACED by a flat $100/yr business license as of 2025, no longer a percentage)",
         "source": "Robertson County Fiscal Court official 2025 letter to business owners (robertsoncounty.ky.gov), read directly, quoted: \"the Occupational Tax of 1.5% of gross wages and other compensation payable in Robertson County... typically withheld by an employer\" and separately: \"The prior Net Profit Tax... of 1.5% is no longer collected. This Net Profit Tax was replaced by a yearly Business License\" ($100/yr) -- a genuine 2025 structural change, not just a rate confirmation.",
-        "minTax": "$100/yr flat business license (replaces the former 1.5% net-profits tax)"
+        "minTax": "$100/yr flat business license (replaces the former 1.5% net-profits tax)",
+        "wageRateDecimal": 0.015,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Rockcastle County Fiscal Court",
         "category": "Net Profits",
-        "rate": "1.5%"
+        "rate": "1.5%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Rowan County",
         "category": "Net Profits",
-        "rate": "1.5%"
+        "rate": "1.5%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Russell",
         "category": "Net Profits",
         "rate": "1.50%",
-        "minTax": "$100.00"
+        "minTax": "$100.00",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Russell County",
         "category": "Net Profits",
         "rate": "0.75%",
-        "cap": "$2,500"
+        "cap": "$2,500",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Russellville",
         "rate": "2% payroll / 2% net profits",
         "category": "Payroll and Net Profits",
         "minTax": "$25 (net profits, even if a loss)",
-        "source": "russellvilleky.gov official Occupational Tax Department PDF, \"Information for New Licensees\" -- read directly, full quote: \"EVERY LICENSEE WITH AT LEAST ONE EMPLOYEE MUST PAY... A FEE OF 2% OF ALL GROSS SALARIES, WAGES, COMMISSIONS...\""
+        "source": "russellvilleky.gov official Occupational Tax Department PDF, \"Information for New Licensees\" -- read directly, full quote: \"EVERY LICENSEE WITH AT LEAST ONE EMPLOYEE MUST PAY... A FEE OF 2% OF ALL GROSS SALARIES, WAGES, COMMISSIONS...\"",
+        "wageRateDecimal": 0.02,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_explicit_wage_figure",
+        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
       },
       {
         "name": "Ryland Heights",
         "category": "Net Profits",
-        "rate": "0.01%"
+        "rate": "0.01%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Salem",
         "category": "Payroll Tax and 1099s",
-        "rate": "1% of all gross pay"
+        "rate": "1% of all gross pay",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_explicit_wage_figure",
+        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
       },
       {
         "name": "Scott County Public School District",
         "category": "Net Profits",
-        "rate": "0.5%"
+        "rate": "0.5%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Scottsville",
         "category": "Net Profits",
         "rate": "1.5%",
-        "minTax": "$30"
+        "minTax": "$30",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Shelbyville",
         "category": "Net Profits",
         "rate": "1%",
         "minTax": "$75",
-        "cap": "$7,500"
+        "cap": "$7,500",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Shepherdsville",
-        "rate": "2%"
+        "rate": "2%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Shively",
         "category": "Net Profits",
         "rate": "1.5%",
-        "minTax": "$100"
+        "minTax": "$100",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Simpsonville",
         "category": "Net Profits",
         "rate": "0.5%",
         "minTax": "$100",
-        "cap": "$3,000"
+        "cap": "$3,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Somerset",
         "category": "Net Profits",
-        "rate": "0.6%"
+        "rate": "0.6%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Southgate",
         "category": "Gross Receipts",
         "rate": "Tax Schedule",
         "minTax": "$35",
-        "cap": "$5500"
+        "cap": "$5500",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "tiered_bracket_unparseable",
+        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
       },
       {
         "name": "Spencer",
         "category": "Net Profits",
         "rate": "0.80%",
-        "minTax": "$25"
+        "minTax": "$25",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Springfield",
         "category": "Net Profits",
-        "rate": "1.5%"
+        "rate": "1.5%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Stanford",
         "category": "Net Profits",
-        "rate": "0.65%"
+        "rate": "0.65%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Taylor County",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Taylor Mill",
         "category": "Net Profits",
-        "rate": "0.02%"
+        "rate": "0.02%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Todd County",
         "rate": "1.00%",
         "category": "Payroll",
-        "source": "Todd Fiscal Court official Employer's Return of License Fee Withheld form (HCOC-Q3), read directly this session: \"Tax Due at - 1.00%\""
+        "source": "Todd Fiscal Court official Employer's Return of License Fee Withheld form (HCOC-Q3), read directly this session: \"Tax Due at - 1.00%\"",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Tompkinsville",
         "category": "Gross Receipts",
         "rate": "1.5%",
         "minTax": "$50",
-        "cap": "$2,000"
+        "cap": "$2,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Union County Fiscal Court",
         "category": "Net Profits",
         "rate": "0.50%",
-        "cap": "$1,000"
+        "cap": "$1,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Vanceburg",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Versailles",
         "category": "Net Profits",
         "rate": "1.5%",
-        "minTax": "$50"
+        "minTax": "$50",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Villa Hills",
         "category": "Gross Receipts",
-        "rate": "0.00075%"
+        "rate": "0.00075%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Vine Grove",
         "category": "Wages",
         "rate": "2%",
-        "minTax": "$100"
+        "minTax": "$100",
+        "wageRateDecimal": 0.02,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Walton",
@@ -1394,70 +2459,157 @@
         "category": "Payroll",
         "minTax": "N/A",
         "cap": "FICA/Social Security wage base (84,500 for 2026), the KRS 68.197(10)(c) SS-wage-base-cap mechanism in action",
-        "source": "linknky.com + boonecountyky.org, NEW tax eff. 2026-01-01, administered by Boone County"
+        "source": "linknky.com + boonecountyky.org, NEW tax eff. 2026-01-01, administered by Boone County",
+        "wageRateDecimal": 0.02,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Warren County Public Schools",
         "category": "Net Profits",
-        "rate": "0.5%"
+        "rate": "0.5%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Warsaw",
         "category": "Gross Receipts",
         "rate": "1%",
-        "cap": "Social Security Cap"
+        "cap": "Social Security Cap",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Washington County",
         "category": "Net Profits/Gross Receipts",
-        "rate": "0.75%/0.75%"
+        "rate": "0.75%/0.75%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "West Buechel",
         "category": "Gross Receipts",
         "rate": "0.25%",
-        "minTax": "$500"
+        "minTax": "$500",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "West Liberty",
         "category": "Net Profits/Gross Receipts",
-        "rate": "1.0%"
+        "rate": "1.0%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "West Point",
         "category": "Occupational/Net Profit",
-        "rate": "1% Occupational, 2% Net Profit"
+        "rate": "1% Occupational, 2% Net Profit",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Whitley County",
         "category": "Net Profits",
-        "rate": "1%"
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Wilder",
         "category": "Gross Receipts",
         "rate": ".075%",
         "minTax": "$50",
-        "cap": "$40,000"
+        "cap": "$40,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Wilmore",
         "category": "Net Profits",
-        "rate": "2%"
+        "rate": "2%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Woodford",
         "category": "Net Profits",
-        "rate": "1.5%"
+        "rate": "1.5%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Woodlawn",
         "category": "Flat Fee",
         "rate": "$50",
         "minTax": "$50",
-        "cap": "$50"
+        "cap": "$50",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "flat_fee_not_percentage",
+        "wageRateNote": null
       }
-    ]
+    ],
+    "normalizationPass": {
+      "date": "2026-08-24",
+      "description": "Parses each scraped entry's raw rate string + category into a confirmed wage-withholding rate where the source data makes that safe, WITHOUT deleting or altering any original field (rate/category/unreliable/etc. are untouched -- wageRateDecimal and its siblings are purely additive). Deliberately conservative: a \"Net Profits\" or \"Gross Receipts\" category alone is NOT assumed to equal the wage-withholding rate (this project's own Hopkinsville research proved they can differ: 1.95% wages vs 1.3% net profits), and a single figure attached to a category naming BOTH payroll and net profits is flagged ambiguous rather than assumed shared. Caught and fixed one real bug in this pass before trusting the output: an early version's \"payroll-exclusive category\" check matched \"Payroll and Net Profits\" too (it starts with \"Payroll\"), which would have wrongly promoted 10 genuinely ambiguous entries (Allen/Breathitt/Butler/Clark/Clay counties, Earlington, Flemingsburg, Fordsville, Henderson, Nicholas County) into confident matches -- caught by reviewing the full classified output before writing it back, not by trusting the first pass.",
+      "statusMeaning": {
+        "parsed_explicit_wage_figure": "The raw rate string itself names which number is the wage/payroll figure (e.g. \"1.95% wages / 1.3% net profits\") -- highest confidence.",
+        "parsed_payroll_category_single_figure": "Category is payroll-exclusive (no net-profits component named) and the rate string is one clean figure.",
+        "parsed_equal_split_rate": "Rate string gives two IDENTICAL figures for net-profits and payroll -- the shared figure is used.",
+        "parsed_resident_nonresident_split": "Rate string gives an explicit resident/nonresident split, same shape as this project's Michigan city taxes -- see wageRateResidentDecimal/wageRateNonresidentDecimal instead of wageRateDecimal.",
+        "ambiguous_single_figure_multi_base_category": "Category names BOTH a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- NOT assumed to be the wage figure.",
+        "category_not_confirmed_as_wage_tax": "Category is \"Net Profits\" or \"Gross Receipts\" alone -- per Hopkinsville's own proof elsewhere in this file, not assumed to equal the wage-withholding rate without separate confirmation.",
+        "tiered_bracket_unparseable": "Rate is a tiered/bracketed schedule (e.g. \"Sliding Scale\", \"1.5% up to $50,000; 1% ...\") -- cannot be reduced to one flat number without inventing which bracket applies.",
+        "flat_fee_not_percentage": "Rate is a flat dollar fee, not a percentage of wages at all.",
+        "unparsed_needs_review": "Raw rate/category did not match any parsing rule in this pass -- needs a human to read the source ordinance directly."
+      },
+      "counts": {
+        "unparsed_needs_review": 22,
+        "category_not_confirmed_as_wage_tax": 132,
+        "ambiguous_single_figure_multi_base_category": 22,
+        "tiered_bracket_unparseable": 9,
+        "parsed_payroll_category_single_figure": 28,
+        "parsed_explicit_wage_figure": 7,
+        "parsed_resident_nonresident_split": 2,
+        "flat_fee_not_percentage": 3
+      },
+      "confirmedWageRateCount": 37,
+      "totalEntries": 225
+    }
   },
   "knownGaps": [
     "140 of 230 authoritative taxing districts attempted, 101 with a rate value scraped from the source database -- 90 districts remain entirely unattempted, and the 39 attempted-but-blank districts have no rate in the state's own database either (their ordinance PDF would need a separate fetch to close).",
