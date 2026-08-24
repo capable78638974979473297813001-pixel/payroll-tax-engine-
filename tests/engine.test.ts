@@ -1360,6 +1360,152 @@ describe('Kentucky', () => {
       );
       assert.equal(r.taxes.some((t) => t.id === 'KY_LOCAL'), false);
     });
+
+    test('Hardin County Industrial Tax District: newly confirmed at 1% ("gross payroll" figure the parser initially missed)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: {
+            code: 'KY',
+            certificate: { workCounty: 'Hardin County Industrial Tax District' },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(10.0));
+    });
+
+    test('Allen County: promoted by hand from "ambiguous" after its own source field turned out to directly quote the wage figure (1%)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY', certificate: { workCounty: 'Allen County' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(10.0));
+    });
+
+    test('Estill County: promoted via KACo\'s own dedicated payroll column (cross-source, not primary)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY', certificate: { workCounty: 'Estill County' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(20.0));
+    });
+
+    test('Bowling Green: a bare "Net Profits" SOS category, independently confirmed as the wage rate by a second source (USDA NFC)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY', certificate: { workCity: 'Bowling Green' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(20.0));
+    });
+
+    test('Covington: a genuine cross-source DISCREPANCY (SOS 2.5% vs NFC 2.45%) stays unconfirmed rather than picking one', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY', certificate: { workCity: 'Covington' } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'KY_LOCAL'), false);
+    });
+
+    test('Florence: a real gap the SOS scrape missed entirely -- its wage tax (2%) is a SEPARATE levy from the tiny 0.001% Gross Receipts figure on file', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY', certificate: { workCity: 'Florence' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(20.0));
+    });
+
+    // Walton and Florence (KRS 68.197(10)(c)): the two confirmed real-world
+    // uses of the SS-wage-base-cap variant. Fixed a real typo while wiring
+    // Walton's ($184,500 is the actual 2026 SS wage base, cross-checked
+    // against data/federal/2026.json -- the data file previously said
+    // $84,500).
+    describe('SS-wage-base cap (KRS 68.197(10)(c))', () => {
+      test('Walton: room still available under the cap: only the portion up to the cap is taxed', () => {
+        // $184,500 SS wage base - $184,000 YTD = $500 of room this period,
+        // even though $1,000 was earned. 500 x 2% = $10.00, not 1,000 x 2% = $20.00.
+        const r = calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            workState: { code: 'KY', certificate: { workCity: 'Walton' } },
+            ytd: {
+              socialSecurity: 0,
+              medicare: 0,
+              futa: 0,
+              localIncomeTax: { KY_LOCAL_Walton: dollars(184000) },
+            },
+          }),
+        );
+        assert.equal(amountOf(r, 'KY_LOCAL'), dollars(10.0));
+      });
+
+      test('Walton: already past the cap: $0, not the flat 2%', () => {
+        const r = calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            workState: { code: 'KY', certificate: { workCity: 'Walton' } },
+            ytd: {
+              socialSecurity: 0,
+              medicare: 0,
+              futa: 0,
+              localIncomeTax: { KY_LOCAL_Walton: dollars(184500) },
+            },
+          }),
+        );
+        assert.equal(amountOf(r, 'KY_LOCAL'), 0);
+      });
+
+      test('Florence: also capped, tracked independently of Walton', () => {
+        const r = calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            workState: { code: 'KY', certificate: { workCity: 'Florence' } },
+            ytd: {
+              socialSecurity: 0,
+              medicare: 0,
+              futa: 0,
+              localIncomeTax: { KY_LOCAL_Florence: dollars(184500) },
+            },
+          }),
+        );
+        assert.equal(amountOf(r, 'KY_LOCAL'), 0);
+      });
+
+      test('a different KY jurisdiction is NOT capped — Carlisle keeps taxing the full amount regardless of YTD', () => {
+        const r = calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            workState: { code: 'KY', certificate: { workCity: 'Carlisle' } },
+            ytd: {
+              socialSecurity: 0,
+              medicare: 0,
+              futa: 0,
+              localIncomeTax: { KY_LOCAL_Carlisle: dollars(500000) },
+            },
+          }),
+        );
+        assert.equal(amountOf(r, 'KY_LOCAL'), dollars(10.0));
+      });
+    });
   });
 });
 

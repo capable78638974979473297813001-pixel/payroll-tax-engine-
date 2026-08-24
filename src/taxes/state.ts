@@ -3876,11 +3876,33 @@ function kentuckyLocalTax(
     return { rate, note: `${isResident ? 'resident' : 'nonresident'} ${(rate * 100).toFixed(2)}%` };
   };
 
+  /**
+   * KRS 68.197(10)(c)'s SS-wage-base-cap variant — Walton and Florence are
+   * the two confirmed real-world users (see KY-occupational-2026.json's
+   * own capAtSSWageBase field on each). Tracked per JURISDICTION NAME, not
+   * one shared KY_LOCAL key, since the city and county halves of a credit
+   * pair are legally separate levies that could each have their own cap —
+   * none currently does on the county side, but the tracking key doesn't
+   * assume that stays true. Reuses the SAME federal SS wage base FICA
+   * itself is capped at (federalRuleset(), not a hardcoded KY-side copy),
+   * so this never drifts out of sync the way this project's own data
+   * caught a stale-transcription cap figure ($84,500 instead of the real
+   * $184,500) in an earlier pass.
+   */
+  const taxableFor = (entry: KYJurisdictionEntry): number => {
+    if (!entry.capAtSSWageBase) return periodWages;
+    const ssWageBase = dollars(federalRuleset(input.checkDate).socialSecurity.wageBase);
+    const ytd = input.ytd.localIncomeTax?.[`KY_LOCAL_${entry.name}`] ?? 0;
+    return underCap(periodWages, ytd, ssWageBase);
+  };
+
   if (cityEntry && countyEntry) {
     const cityRate = rateFor(cityEntry);
     const countyRate = rateFor(countyEntry);
-    const cityTax = applyRate(periodWages, cityRate.rate);
-    const countyTaxGross = applyRate(periodWages, countyRate.rate);
+    const cityTaxableWages = taxableFor(cityEntry);
+    const countyTaxableWages = taxableFor(countyEntry);
+    const cityTax = applyRate(cityTaxableWages, cityRate.rate);
+    const countyTaxGross = applyRate(countyTaxableWages, countyRate.rate);
     const credit = Math.min(cityTax, countyTaxGross);
     const netCountyTax = atLeastZero(countyTaxGross - credit);
     const amount = cityTax + netCountyTax;
@@ -3893,8 +3915,9 @@ function kentuckyLocalTax(
       taxableWages: periodWages,
       amount,
       detail:
-        `${fmt(cityTax)} to ${cityEntry.name} @ ${cityRate.note}; ${fmt(netCountyTax)} to ${countyEntry.name} ` +
-        `@ ${countyRate.note}, less a ${fmt(credit)} KRS 68.197(6)-(7) credit for the city fee already paid ` +
+        `${fmt(cityTax)} to ${cityEntry.name} @ ${cityRate.note}${cityEntry.capAtSSWageBase ? ` (${fmt(cityTaxableWages)} of ${fmt(periodWages)}, SS-wage-base-capped)` : ''}; ` +
+        `${fmt(netCountyTax)} to ${countyEntry.name} @ ${countyRate.note}${countyEntry.capAtSSWageBase ? ` (${fmt(countyTaxableWages)} of ${fmt(periodWages)}, SS-wage-base-capped)` : ''}, ` +
+        `less a ${fmt(credit)} KRS 68.197(6)-(7) credit for the city fee already paid ` +
         `(assumes the 30,000-300,000-population county credit tier applies to ${countyEntry.name} — not ` +
         `individually verified)`,
     };
@@ -3902,7 +3925,8 @@ function kentuckyLocalTax(
 
   const entry = (cityEntry ?? countyEntry)!;
   const r = rateFor(entry);
-  const amount = applyRate(periodWages, r.rate);
+  const taxableWages = taxableFor(entry);
+  const amount = applyRate(taxableWages, r.rate);
 
   return {
     id: 'KY_LOCAL',
@@ -3911,7 +3935,9 @@ function kentuckyLocalTax(
     jurisdiction: 'local',
     taxableWages: periodWages,
     amount,
-    detail: `${fmt(periodWages)} @ ${r.note} to ${entry.name}, full gross wages (KRS 67.750(2) adds back pretax deferrals)`,
+    detail: entry.capAtSSWageBase
+      ? `${fmt(taxableWages)} of ${fmt(periodWages)} (SS-wage-base-capped, KRS 68.197(10)(c)) @ ${r.note} to ${entry.name}`
+      : `${fmt(periodWages)} @ ${r.note} to ${entry.name}, full gross wages (KRS 67.750(2) adds back pretax deferrals)`,
   };
 }
 
