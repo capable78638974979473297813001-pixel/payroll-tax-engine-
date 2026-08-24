@@ -1238,6 +1238,129 @@ describe('Kentucky', () => {
     );
     assert.equal(amountOf(r, 'KY_SIT'), 0);
   });
+
+  // Local Occupational Tax (KY_LOCAL) — the confirmed-rate subset of
+  // data/local/KY-occupational-2026.json's own normalization pass. Rates
+  // used below are real: Carlisle 1%, Caldwell County 1.5%, Dayton 2.5%,
+  // Louisville Metro 2.2% resident / 1.45% nonresident.
+  describe('Local Occupational Tax (KY_LOCAL)', () => {
+    test('a single city, no county: flat rate on full wages', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY', certificate: { workCity: 'Carlisle' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(10.0));
+    });
+
+    test('a single county, no city: flat rate on full wages', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY', certificate: { workCounty: 'Caldwell County' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(15.0));
+    });
+
+    test('city + county, county rate HIGHER: KRS 68.197 credit — total equals the county rate, not both stacked', () => {
+      // Carlisle (1%) + Caldwell County (1.5%): city pays $10.00 in full;
+      // county's $15.00 gross is credited $10.00 for the city fee paid,
+      // net county $5.00. Total $15.00 -- the higher of the two, not
+      // $10.00 + $15.00 = $25.00 (naive stacking would overtax).
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: {
+            code: 'KY',
+            certificate: { workCity: 'Carlisle', workCounty: 'Caldwell County' },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(15.0));
+    });
+
+    test('city + county, city rate HIGHER: county credit floors at $0, total equals the city rate', () => {
+      // Dayton (2.5%) + Caldwell County (1.5%): city pays $25.00 in full;
+      // county's $15.00 gross is fully credited away (capped at $15, not
+      // refunded), net county $0. Total $25.00.
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: {
+            code: 'KY',
+            certificate: { workCity: 'Dayton', workCounty: 'Caldwell County' },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(25.0));
+    });
+
+    test('KRS 67.750(2): a 401(k) deferral does NOT reduce the local base, unlike every other tax in this engine', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(200) }],
+          workState: { code: 'KY', certificate: { workCity: 'Carlisle' } },
+        }),
+      );
+      // Full $1,000 @ 1% = $10.00, NOT ($1,000-$200) @ 1% = $8.00.
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(10.0));
+    });
+
+    test('Louisville Metro resident: the resident rate (2.2%), via certificate.residenceCity matching workCity', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: {
+            code: 'KY',
+            certificate: { workCity: 'Louisville', residenceCity: 'Louisville' },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(22.0));
+    });
+
+    test('Louisville Metro nonresident worker: the lower nonresident rate (1.45%)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY', certificate: { workCity: 'Louisville' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(14.5));
+    });
+
+    test('no certificate.workCity/workCounty: no KY_LOCAL line at all', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY' },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'KY_LOCAL'), false);
+    });
+
+    test('a jurisdiction without a CONFIRMED rate (Bardstown -- Net Profits only, unconfirmed for wages): no KY_LOCAL line, not a guess', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY', certificate: { workCity: 'Bardstown' } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'KY_LOCAL'), false);
+    });
+  });
 });
 
 describe('gross-to-net', () => {

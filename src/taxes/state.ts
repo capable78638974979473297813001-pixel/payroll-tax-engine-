@@ -9,18 +9,27 @@ import {
   toWholeDollars,
   underCap,
 } from '../money.ts';
-import type { ALMunicipalityEntry, MICityEntry, OHMunicipalityEntry, PALocalEntry, StateRuleset } from '../registry.ts';
+import type {
+  ALMunicipalityEntry,
+  KYJurisdictionEntry,
+  MICityEntry,
+  OHMunicipalityEntry,
+  PALocalEntry,
+  StateRuleset,
+} from '../registry.ts';
 import {
   alMunicipalityRuleset,
   countyRuleset,
   federalRuleset,
   hasALMunicipalityRuleset,
   hasCountyRuleset,
+  hasKYOccupationalRuleset,
   hasMICityRuleset,
   hasOHMunicipalityRuleset,
   hasOHSchoolDistrictRuleset,
   hasPALocalRuleset,
   hasStateRuleset,
+  kyJurisdictionRuleset,
   miCityRuleset,
   ohMunicipalityRuleset,
   ohSchoolDistrictRuleset,
@@ -219,6 +228,12 @@ export function stateIncomeTax(
   // Jefferson County occupational tax this data file corrects.
   const alLocal = alabamaLocalTax(input, ctx, rules);
   if (alLocal) lines.push(alLocal);
+
+  // Kentucky's city/county occupational tax — see kentuckyLocalTax()'s
+  // own doc comment for the KRS 68.197 city-credited-against-county
+  // mechanism and the inverted (add-back) pretax base.
+  const kyLocal = kentuckyLocalTax(input, ctx, rules);
+  if (kyLocal) lines.push(kyLocal);
 
   // A flat, uncapped, universal employee excise — Oregon's Statewide
   // Transit Tax is the first (and so far only) user, but written
@@ -3766,6 +3781,131 @@ function alabamaLocalTax(
     taxableWages: periodWages,
     amount,
     detail: `${fmt(periodWages)} @ ${(entry.rate * 100).toFixed(2)}% on wages earned in ${entry.name} (certificate.workCity)`,
+  };
+}
+
+/**
+ * Kentucky's city/county/consolidated-government Occupational Tax — the
+ * most structurally complex local tax in this project, reading
+ * data/local/KY-occupational-2026.json via registry.ts's
+ * allKYJurisdictions()/kyJurisdictionRuleset() (the 39-of-225-plus-2
+ * CONFIRMED subset that project's own rate-normalization pass could
+ * safely reduce to a decimal — see that file's own jurisdictions.
+ * normalizationPass block). A city not in this confirmed set correctly
+ * produces no line at all — most of the ~188 unconfirmed scraped entries
+ * genuinely DO levy a tax, this engine just doesn't have a safe enough
+ * number for them yet, so silence here means "not confirmed," never "no
+ * tax."
+ *
+ * Two genuinely novel mechanisms, both required to make this correct
+ * rather than just present:
+ *
+ * 1. INVERTED pretax base (KRS 67.750(2), fetched directly): unlike every
+ *    other tax in this engine, Kentucky's LOCAL occupational tax base
+ *    explicitly ADDS BACK 401(k)/403(b)/457/SIMPLE deferrals and Section
+ *    125/132 benefits that the STATE tax (and federal, and FICA) exclude.
+ *    So this reads ctx.taxableWagesFor([]) — an EMPTY exempt list — to
+ *    get full gross wages with nothing subtracted, deliberately ignoring
+ *    rules.exemptPretax entirely rather than reusing it.
+ *
+ * 2. City-credited-against-county (KRS 68.197(6)-(7), quoted directly in
+ *    KY-2026.json's own localOccupationalTax.summary): when an employee
+ *    works in a city that ALSO sits inside a separately-taxing county,
+ *    the city fee is credited against the county fee — city pays in
+ *    full, county liability is reduced by the city amount (floored at
+ *    zero, no refund of any excess, no carryforward), the same credit
+ *    SHAPE as Ohio's ORC 718.121 mechanism (ohioLocalTax()) even though
+ *    the two jurisdictions being reconciled here are DIFFERENT (city vs.
+ *    the county it sits in, at ONE work location — not a home-vs-work
+ *    comparison the way Ohio's is). Fires only when the caller supplies
+ *    BOTH certificate.workCity AND certificate.workCounty and BOTH
+ *    resolve — Jefferson County (Louisville Metro) and Fayette County
+ *    (Lexington-Fayette) never trigger this by construction, since both
+ *    are consolidated governments registered under a single "Louisville"/
+ *    "Lexington" entry rather than a separate city+county pair. This
+ *    ASSUMES the confirmed county is in KRS 68.197's 30,000-300,000-
+ *    population credit tier — not individually verified per county (the
+ *    data file itself couldn't locate a statute for counties under
+ *    30,000 population at all), the same "treat the floor as the
+ *    safe-default assumption" disclosure Ohio's own interMunicipalCredit
+ *    already carries.
+ *
+ * Louisville Metro and Lyndon/Middletown (which inherit its rate) are the
+ * only entries with a resident/nonresident split (MI-cities-style) rather
+ * than one flat rate — resolved via certificate.residenceCity matching
+ * the SAME jurisdiction name as workCity, the same sameCity idiom
+ * michiganLocalTax() already established.
+ */
+function kentuckyLocalTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  if (rules.code !== 'KY') return null;
+  if (!hasKYOccupationalRuleset(input.checkDate)) return null;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const workCityName = typeof cert.workCity === 'string' ? cert.workCity : undefined;
+  const workCountyName = typeof cert.workCounty === 'string' ? cert.workCounty : undefined;
+  if (!workCityName && !workCountyName) return null;
+
+  const cityEntry = workCityName ? kyJurisdictionRuleset(workCityName, input.checkDate) : undefined;
+  const countyEntry = workCountyName
+    ? kyJurisdictionRuleset(workCountyName, input.checkDate)
+    : undefined;
+  if (!cityEntry && !countyEntry) return null;
+
+  const periodWages = ctx.taxableWagesFor([]);
+  const residenceCityName = typeof cert.residenceCity === 'string' ? cert.residenceCity : undefined;
+
+  const rateFor = (entry: KYJurisdictionEntry): { rate: number; note: string } => {
+    if (entry.wageRateDecimal !== null) {
+      return {
+        rate: entry.wageRateDecimal,
+        note: `flat ${(entry.wageRateDecimal * 100).toFixed(2)}%`,
+      };
+    }
+    const isResident = residenceCityName?.toLowerCase() === entry.name.toLowerCase();
+    const rate = isResident ? entry.wageRateResidentDecimal! : entry.wageRateNonresidentDecimal!;
+    return { rate, note: `${isResident ? 'resident' : 'nonresident'} ${(rate * 100).toFixed(2)}%` };
+  };
+
+  if (cityEntry && countyEntry) {
+    const cityRate = rateFor(cityEntry);
+    const countyRate = rateFor(countyEntry);
+    const cityTax = applyRate(periodWages, cityRate.rate);
+    const countyTaxGross = applyRate(periodWages, countyRate.rate);
+    const credit = Math.min(cityTax, countyTaxGross);
+    const netCountyTax = atLeastZero(countyTaxGross - credit);
+    const amount = cityTax + netCountyTax;
+
+    return {
+      id: 'KY_LOCAL',
+      name: 'Kentucky Local Occupational Tax',
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: periodWages,
+      amount,
+      detail:
+        `${fmt(cityTax)} to ${cityEntry.name} @ ${cityRate.note}; ${fmt(netCountyTax)} to ${countyEntry.name} ` +
+        `@ ${countyRate.note}, less a ${fmt(credit)} KRS 68.197(6)-(7) credit for the city fee already paid ` +
+        `(assumes the 30,000-300,000-population county credit tier applies to ${countyEntry.name} — not ` +
+        `individually verified)`,
+    };
+  }
+
+  const entry = (cityEntry ?? countyEntry)!;
+  const r = rateFor(entry);
+  const amount = applyRate(periodWages, r.rate);
+
+  return {
+    id: 'KY_LOCAL',
+    name: 'Kentucky Local Occupational Tax',
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages: periodWages,
+    amount,
+    detail: `${fmt(periodWages)} @ ${r.note} to ${entry.name}, full gross wages (KRS 67.750(2) adds back pretax deferrals)`,
   };
 }
 

@@ -254,6 +254,92 @@ export function allMICities(checkDate: string): MICityEntry[] {
   return file.cities;
 }
 
+export interface KYJurisdictionEntry {
+  name: string;
+  /** Flat rate applying regardless of residency. Null when this jurisdiction instead uses a resident/nonresident split (see the two fields below). */
+  wageRateDecimal: number | null;
+  wageRateResidentDecimal: number | null;
+  wageRateNonresidentDecimal: number | null;
+}
+
+interface KYOccupationalRegistryFile {
+  jurisdictions: {
+    scraped: Record<
+      string,
+      {
+        name: string;
+        wageRateDecimal?: number | null;
+        wageRateResidentDecimal?: number | null;
+        wageRateNonresidentDecimal?: number | null;
+      }
+    >;
+    louisvilleMetro: { residentRate: number; nonresidentRate: number };
+    lexingtonFayette: { rate: number };
+  };
+}
+
+/** Whether a Kentucky occupational tax registry exists for this check date. */
+export function hasKYOccupationalRuleset(checkDate: string): boolean {
+  return existsSync(join(DATA_ROOT, 'local', `KY-occupational-${yearOf(checkDate)}.json`));
+}
+
+/**
+ * Every Kentucky city/county/consolidated-government jurisdiction that has
+ * a CONFIRMED wage-withholding rate — i.e. the 39 entries (37 from the
+ * scraped 225 + Louisville Metro + Lexington-Fayette) this project's own
+ * normalization pass could safely reduce to a decimal figure, out of 225
+ * scraped plus the 2 consolidated governments. The other ~188 scraped
+ * entries (Net-Profits-only categories, ambiguous multi-base figures,
+ * tiered schedules, flat fees) are deliberately EXCLUDED here — they have
+ * no confirmed wage rate to return, the same "don't guess" discipline as
+ * every other registry function in this file.
+ */
+export function allKYJurisdictions(checkDate: string): KYJurisdictionEntry[] {
+  const file = loadJson<KYOccupationalRegistryFile>(
+    join('local', `KY-occupational-${yearOf(checkDate)}.json`),
+  );
+  const entries: KYJurisdictionEntry[] = [];
+
+  for (const raw of Object.values(file.jurisdictions.scraped)) {
+    const hasFlat = raw.wageRateDecimal !== null && raw.wageRateDecimal !== undefined;
+    const hasSplit =
+      raw.wageRateResidentDecimal !== null &&
+      raw.wageRateResidentDecimal !== undefined &&
+      raw.wageRateNonresidentDecimal !== null &&
+      raw.wageRateNonresidentDecimal !== undefined;
+    if (!hasFlat && !hasSplit) continue;
+    entries.push({
+      name: raw.name,
+      wageRateDecimal: hasFlat ? (raw.wageRateDecimal as number) : null,
+      wageRateResidentDecimal: hasSplit ? (raw.wageRateResidentDecimal as number) : null,
+      wageRateNonresidentDecimal: hasSplit ? (raw.wageRateNonresidentDecimal as number) : null,
+    });
+  }
+
+  entries.push({
+    name: 'Louisville',
+    wageRateDecimal: null,
+    wageRateResidentDecimal: file.jurisdictions.louisvilleMetro.residentRate,
+    wageRateNonresidentDecimal: file.jurisdictions.louisvilleMetro.nonresidentRate,
+  });
+  entries.push({
+    name: 'Lexington',
+    wageRateDecimal: file.jurisdictions.lexingtonFayette.rate,
+    wageRateResidentDecimal: null,
+    wageRateNonresidentDecimal: null,
+  });
+
+  return entries;
+}
+
+/** Look up one Kentucky jurisdiction by name (case-insensitive) among the confirmed-rate set — see allKYJurisdictions()'s own doc comment for what "confirmed" means here. */
+export function kyJurisdictionRuleset(
+  name: string,
+  checkDate: string,
+): KYJurisdictionEntry | undefined {
+  return allKYJurisdictions(checkDate).find((e) => e.name.toLowerCase() === name.toLowerCase());
+}
+
 export interface ALMunicipalityEntry {
   name: string;
   rate: number;
