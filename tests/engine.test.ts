@@ -5487,6 +5487,88 @@ describe('Colorado', () => {
     );
     assert.equal(r.taxes.some((t) => t.id === 'CO_PFML_ER'), false);
   });
+
+  // Denver's Occupational Privilege Tax — flat $5.75/mo employee + $4.00/mo
+  // employer, gated on a $500/month threshold, verbatim from Denver's own
+  // Tax Guide Topic 61 (fetched directly). This closes a real gap: CO-2026
+  // .json's own $comment previously claimed "Denver is the only one wired
+  // into calc code" when it genuinely wasn't (state.ts had no Denver
+  // dispatch at all) — this describe block is the actual proof it's wired.
+  describe('Denver Occupational Privilege Tax (OPT)', () => {
+    test('at/above the $500/month threshold: both the $5.75 employee and $4.00 business OPT fire', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+          workState: {
+            code: 'CO',
+            certificate: { locality: 'Denver', denverMonthlyCompensation: dollars(3000) },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'DENVER_OPT_EE'), dollars(5.75));
+      assert.equal(amountOf(r, 'DENVER_OPT_ER'), dollars(4.0));
+    });
+
+    test('below the $500/month threshold: $0, not the flat amount', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+          workState: {
+            code: 'CO',
+            certificate: { locality: 'Denver', denverMonthlyCompensation: dollars(400) },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'DENVER_OPT_EE'), 0);
+      assert.equal(r.taxes.some((t) => t.id === 'DENVER_OPT_ER'), false);
+    });
+
+    test('exactly $500 meets the threshold (>=, not >)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+          workState: {
+            code: 'CO',
+            certificate: { locality: 'Denver', denverMonthlyCompensation: dollars(500) },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'DENVER_OPT_EE'), dollars(5.75));
+    });
+
+    test('already withheld this month: $0, not withheld a second time', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: {
+            code: 'CO',
+            certificate: {
+              locality: 'Denver',
+              denverMonthlyCompensation: dollars(2000),
+              denverOPTWithheldThisMonth: true,
+            },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'DENVER_OPT_EE'), 0);
+    });
+
+    test('a non-Denver Colorado employee: no Denver OPT lines at all', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'CO' },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'DENVER_OPT_EE'), false);
+      assert.equal(r.taxes.some((t) => t.id === 'DENVER_OPT_ER'), false);
+    });
+  });
 });
 
 describe('Utah', () => {

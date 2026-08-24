@@ -200,6 +200,11 @@ export function stateIncomeTax(
   const newark = newarkPayrollTaxEmployer(input, ctx, rules);
   if (newark) lines.push(newark);
 
+  // Denver's Occupational Privilege Tax — see denverOccupationalPrivilegeTax()'s
+  // own doc comment for the $500/month threshold and the caller-supplied
+  // monthly-aggregation fields this genuinely different tax SHAPE requires.
+  lines.push(...denverOccupationalPrivilegeTax(input, rules));
+
   // A flat, uncapped, universal employee excise — Oregon's Statewide
   // Transit Tax is the first (and so far only) user, but written
   // generically (dispatched off rules.stateExciseEmployee) the same way
@@ -3512,6 +3517,122 @@ function newarkPayrollTaxEmployer(
       `minimum and the >50%-resident-workforce apportionment are EMPLOYER-AGGREGATE facts this ` +
       `engine cannot verify per paycheck (see newarkPayrollTaxEmployer()'s own doc comment).`,
   };
+}
+
+interface DenverOPTConfig {
+  employeeRate: number; // dollars per MONTH, not per pay period
+  employerRatePerEmployee: number; // dollars per MONTH, not per pay period
+  monthlyEarningsThreshold: number; // dollars per calendar month
+}
+
+/**
+ * Denver's Occupational Privilege Tax (OPT, a.k.a. "head tax") — a flat
+ * DOLLAR-PER-MONTH tax, not a percentage of wages, the only tax of this
+ * shape in this project. Two separate levies fire together, verbatim from
+ * Denver's own Tax Guide Topic 61 (fetched directly): "Employees who
+ * perform sufficient services in Denver to receive compensation of at
+ * least $500 per month... are liable for the Employee OPT... to be
+ * withheld by the employer at a rate of $5.75 per month. The employer is
+ * also required to pay the Business OPT at a rate of $4.00 per month for
+ * each taxable employee."
+ *
+ * A genuinely different SHAPE from every other tax in this engine: the
+ * $500 test and the $5.75/$4.00 amounts are PER CALENDAR MONTH, not per
+ * pay period — a real employer typically withholds the full monthly
+ * amount on ONE paycheck per month, not split across every check that
+ * month. This engine has no cross-paycheck monthly-aggregation state of
+ * its own (its only running totals are input.ytd's YEAR-to-date figures),
+ * so the caller supplies what only the caller can already know from
+ * tracking every paycheck in the month: certificate.denverMonthlyCompensation
+ * (this month's cumulative Denver-sourced compensation AS OF this check,
+ * inclusive, in cents) and certificate.denverOPTWithheldThisMonth
+ * (whether an earlier paycheck this same calendar month already withheld
+ * it, to avoid double-charging a flat monthly amount).
+ *
+ * Deliberately NOT modelled, disclosed rather than guessed at: the
+ * owner/partner/manager variant of the Business OPT (owed regardless of
+ * earnings, no $500 test — this engine has no "is this person an
+ * owner/partner" input); the governmental/charitable-entity exemption
+ * from the Business OPT specifically (the Employee OPT still applies to
+ * them, no exemption); the >1-Denver-employer Form TD269 coordination
+ * (this engine computes one employer's paycheck at a time, the same
+ * scoping limit already disclosed for Newark's own multi-employer
+ * apportionment above); and the same-employer, multiple-head-tax-
+ * jurisdiction "majority of working hours" exemption (e.g. an employee
+ * split between Denver and a former head-tax city) — this engine
+ * evaluates Denver in isolation, per certificate.locality.
+ */
+function denverOccupationalPrivilegeTax(
+  input: PaycheckInput,
+  rules: StateRuleset,
+): TaxLine[] {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (cert.locality !== 'Denver') return [];
+
+  const cfg = (rules.localIncomeTax as { denver?: DenverOPTConfig } | undefined)?.denver;
+  if (!cfg) return [];
+
+  if (cert.denverOPTWithheldThisMonth) {
+    return [
+      {
+        id: 'DENVER_OPT_EE',
+        name: 'Denver Occupational Privilege Tax (Employee)',
+        payer: 'employee',
+        jurisdiction: 'local',
+        taxableWages: 0,
+        amount: 0,
+        detail:
+          '$0 — certificate.denverOPTWithheldThisMonth: already withheld on an earlier paycheck ' +
+          'this calendar month; the flat monthly amount is not withheld twice.',
+      },
+    ];
+  }
+
+  const monthlyComp = Number(cert.denverMonthlyCompensation ?? 0);
+  const threshold = dollars(cfg.monthlyEarningsThreshold);
+  if (monthlyComp < threshold) {
+    return [
+      {
+        id: 'DENVER_OPT_EE',
+        name: 'Denver Occupational Privilege Tax (Employee)',
+        payer: 'employee',
+        jurisdiction: 'local',
+        taxableWages: 0,
+        amount: 0,
+        detail:
+          `$0 — ${fmt(monthlyComp)} of this month's Denver-sourced compensation ` +
+          `(certificate.denverMonthlyCompensation) is below the $${cfg.monthlyEarningsThreshold}/month ` +
+          `taxable-employee threshold.`,
+      },
+    ];
+  }
+
+  const employeeAmount = dollars(cfg.employeeRate);
+  const employerAmount = dollars(cfg.employerRatePerEmployee);
+
+  return [
+    {
+      id: 'DENVER_OPT_EE',
+      name: 'Denver Occupational Privilege Tax (Employee)',
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: 0,
+      amount: employeeAmount,
+      detail:
+        `Flat $${cfg.employeeRate}/month — ${fmt(monthlyComp)} of Denver-sourced compensation this ` +
+        `month (certificate.denverMonthlyCompensation) meets the $${cfg.monthlyEarningsThreshold} ` +
+        `taxable-employee threshold.`,
+    },
+    {
+      id: 'DENVER_OPT_ER',
+      name: 'Denver Occupational Privilege Tax (Business)',
+      payer: 'employer',
+      jurisdiction: 'local',
+      taxableWages: 0,
+      amount: employerAmount,
+      detail: `Flat $${cfg.employerRatePerEmployee}/month per taxable employee.`,
+    },
+  ];
 }
 
 interface MAExemptionConfig {
