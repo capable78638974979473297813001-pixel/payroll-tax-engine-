@@ -56,6 +56,9 @@ function attemptedMatches(resolved: ResolvedJurisdiction) {
     resolved.county,
     resolved.paJurisdiction,
     resolved.mdCounty,
+    resolved.alMunicipality,
+    resolved.kyCity,
+    resolved.kyCounty,
   ].filter((m) => m !== null);
 }
 
@@ -85,13 +88,20 @@ async function geocodeAndResolve(
 /**
  * Resolve a full street address (e.g. "2 Woodward Ave, Detroit, MI 48226")
  * into the certificate fields taxes/state.ts already knows how to read.
- * `role` controls whether MI/OH/MD local fields land as workCity/
- * residenceCity and PA's PSD lands as workPSD/residencePSD.
+ * `role` controls whether MI/OH/MD/AL/KY-city local fields land as
+ * workCity/residenceCity and PA's PSD lands as workPSD/residencePSD.
+ * Kentucky's county half (certificate.workCounty, for the KRS 68.197
+ * city-vs-county credit) is only ever populated on a 'work'-role call —
+ * kentuckyLocalTax() has no residence-county concept.
  *
- * Sufficient on its own for MI, OH, IN, PA, and MD (single-address-scoped
- * taxes). Use resolveEmployee() instead for NY/MO/NJ/OR, whose taxes are
- * keyed off a comparison between BOTH addresses — see this module's own
- * doc comment above.
+ * Sufficient on its own for MI, OH, IN, PA, MD, AL, and KY
+ * (single-address-scoped taxes, though KY's credit needs a caller to
+ * resolve the SAME work address for both city and county context — one
+ * resolveAddress('work', ...) call already returns both fields together).
+ * Use resolveEmployee() instead for NY/MO/NJ/OR/CO/WV, whose taxes are
+ * keyed off a comparison between BOTH addresses, or a WORK-only locality
+ * flag not captured by a plain workCity/residenceCity field — see this
+ * module's own doc comment above.
  */
 export async function resolveAddress(
   address: string,
@@ -138,6 +148,14 @@ export interface EmployeeResolution {
  *     withholding guidance: "employees that work within Multnomah
  *     County" — confirmed directly, not assumed, since Metro's own
  *     guidance for the SHS tax uses the same "work within" framing).
+ *   - West Virginia's Municipal Service Fee: WORK address (duty-station
+ *     based, westVirginiaMunicipalServiceFee()'s own doc comment).
+ *   - Denver's Occupational Privilege Tax: WORK address sets
+ *     certificate.locality = 'Denver', but denverOccupationalPrivilegeTax()
+ *     ALSO needs certificate.denverMonthlyCompensation and
+ *     certificate.denverOPTWithheldThisMonth — genuine payroll-history
+ *     facts no address can supply, surfaced via notResolvable below
+ *     rather than silently left unset with no explanation.
  *
  * Either address may be omitted (e.g. an employee who lives out of state
  * and whose residence-state taxes aren't modelled here) — every rule above
@@ -180,12 +198,22 @@ export async function resolveEmployee(
 
   if (workFlags?.multnomahCounty) fields.multnomahCounty = true;
 
+  if (work?.resolved?.wvServiceFeeCity) {
+    fields.locality = work.resolved.wvServiceFeeCity;
+  }
+
   const notResolvable: string[] = [];
   const workState = work?.resolved?.state ?? residence?.resolved?.state;
   if (workState === 'OR') {
     notResolvable.push(
       "Portland Metro's Supportive Housing Services district (certificate.metroDistrict) — no Census/TIGERweb boundary data exists for this regional-government special district; must be supplied manually.",
       "Oregon's TriMet and Lane Transit District boundaries (certificate.locality = 'TriMet'/'LTD') — same reason, no boundary data available via Census.",
+    );
+  }
+  if (workFlags?.denver) {
+    fields.locality = 'Denver';
+    notResolvable.push(
+      "Denver's Occupational Privilege Tax needs certificate.denverMonthlyCompensation (this month's cumulative Denver-sourced pay so far) and certificate.denverOPTWithheldThisMonth — real payroll-history facts, not something any address can supply. certificate.locality was set to 'Denver'; those two fields still need caller input.",
     );
   }
 

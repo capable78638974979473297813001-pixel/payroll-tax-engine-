@@ -63,6 +63,8 @@ await demo('Indianapolis, Indiana — county tax, not city', '200 E Washington S
 await demo('Abington, Pennsylvania — PSD code resolved from county + township', '1176 Old York Rd, Abington, PA 19001', 'PA');
 await demo('Baltimore, Maryland — independent city, not a county', '100 N Holliday St, Baltimore, MD 21202', 'MD');
 await demo('Rockville, Maryland — an ordinary city resolves via its county', '100 N Washington St, Rockville, MD 20850', 'MD');
+await demo('Birmingham, Alabama — municipal occupational tax', '710 20th St N, Birmingham, AL 35203', 'AL');
+await demo('Edmonton, Kentucky — a city AND its containing county resolve together, the KRS 68.197 credit-eligible pair', '105 W Main St, Edmonton, KY 42129', 'KY');
 
 /**
  * The cross-address cases: NYC/Yonkers/Missouri's/Multnomah's taxes are
@@ -128,6 +130,46 @@ await demoEmployee('An employee working in Newark, NJ — the employer-paid payr
 await demoEmployee('An employee working in downtown Portland (Multnomah County), Oregon', 'OR', {
   work: '200 SE Salmon St, Portland, OR 97214',
 });
+await demoEmployee('An employee working in Wheeling, West Virginia — the per-week Municipal Service Fee', 'WV', {
+  work: '1500 Chapline St, Wheeling, WV 26003',
+});
+
+rule('An employee working in downtown Denver, Colorado — the Occupational Privilege Tax');
+{
+  const address = '1437 Bannock St, Denver, CO 80202';
+  console.log(`  Work address: ${address}`);
+  const result = await resolveEmployee({ work: address }, CHECK_DATE);
+  console.log(`  Resolved from Census alone: ${JSON.stringify(result.certificateFields)}`);
+  if (result.notResolvable.length) {
+    console.log(`  \x1b[33m⚠ ${result.notResolvable.join(' / ')}\x1b[0m`);
+  }
+  // denverMonthlyCompensation is real payroll history the caller must
+  // already track — geocoding cannot supply it. Merged in here to show
+  // the complete flow once that (non-address) fact is known.
+  const certificate = { ...result.certificateFields, denverMonthlyCompensation: dollars(3000) };
+  console.log(`  Certificate after adding known payroll history: ${JSON.stringify(certificate)}`);
+
+  const paycheck = calculatePaycheck({
+    checkDate: CHECK_DATE,
+    payFrequency: 'biweekly',
+    earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single',
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    workState: { code: 'CO', certificate },
+  });
+  console.log(`\n  Paycheck taxes for a $3,000 biweekly employee:`);
+  for (const line of paycheck.taxes) {
+    console.log(`    ${line.id.padEnd(16)} ${line.detail}`);
+  }
+}
 
 console.log(
   `\n  \x1b[2mThis resolution ran once, live, for this demo. In real use it runs\n` +

@@ -130,6 +130,29 @@ export function schoolDistrictKeyFromDataFileName(dataFileName: string): SchoolD
 }
 
 /**
+ * Kentucky's confirmed COUNTY-level occupational-tax entries use two
+ * different naming patterns for the same kind of jurisdiction (general
+ * county government) — "Caldwell County" and "Martin County Fiscal
+ * Court" — plus a THIRD, genuinely different jurisdiction type that
+ * happens to also have "County" in its name: school-district-level
+ * entries like "Cumberland County Public School District" (KRS
+ * 67.750(10)'s independent school-district taxing authority, a different
+ * legal actor from the county fiscal court itself). Returns null for the
+ * school-district case deliberately — geocoding a Census "Cumberland
+ * County" match to the SCHOOL DISTRICT'S occupational tax would
+ * misrepresent what's actually being charged, even though today it's the
+ * only confirmed Cumberland-named entry; a general "X County"/"X County
+ * Fiscal Court" match is a claim about the county GOVERNMENT specifically.
+ */
+export function toKYCountyBaseName(name: string): string | null {
+  if (/school|schools/i.test(name)) return null;
+  return name
+    .replace(/\s+Fiscal\s+Court\s*$/i, '')
+    .replace(/\s+County\s*$/i, '')
+    .trim();
+}
+
+/**
  * MD-2026.json's own countyRates object keys its 23 counties + Baltimore
  * City (a state-recognised independent city, part of NO county) in
  * camelCase with punctuation stripped: "AnneArundel", "PrinceGeorges",

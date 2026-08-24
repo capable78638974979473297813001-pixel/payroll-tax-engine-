@@ -15,13 +15,17 @@
  * change how paychecks are computed.
  */
 import {
+  allALMunicipalities,
   allCounties,
+  allKYJurisdictions,
   allMICities,
   allOHMunicipalities,
   allOHSchoolDistricts,
   allPALocalJurisdictions,
   stateRuleset,
+  type ALMunicipalityEntry,
   type CountyEntry,
+  type KYJurisdictionEntry,
   type MICityEntry,
   type OHMunicipalityEntry,
   type OHSchoolDistrictEntry,
@@ -34,6 +38,7 @@ import {
   schoolDistrictKeysMatch,
   stripCountySuffix,
   stripPlaceTypeSuffix,
+  toKYCountyBaseName,
   toMDCountyKey,
   toPAMunicipalityForm,
 } from './normalize.ts';
@@ -190,9 +195,85 @@ function matchMDCounty(
   return { confidence: 'no_match', entry: null };
 }
 
+/** Alabama's 25-city municipal occupational tax — same list-lookup shape as Michigan's/Ohio's cities. */
+function matchALMunicipalityByName(
+  places: string[],
+  checkDate: string,
+): FieldMatch<ALMunicipalityEntry> {
+  const all = allALMunicipalities(checkDate);
+  const candidates: ALMunicipalityEntry[] = [];
+  for (const place of places) {
+    const stripped = stripPlaceTypeSuffix(place);
+    const hit = all.find((c) => namesEqual(c.name, stripped));
+    if (hit && !candidates.includes(hit)) candidates.push(hit);
+  }
+  if (candidates.length === 1) return { confidence: 'matched', entry: candidates[0] };
+  if (candidates.length > 1) return { confidence: 'ambiguous', entry: null, candidates };
+  return { confidence: 'no_match', entry: null };
+}
+
+/**
+ * Kentucky's CITY-role match — Incorporated Places against the 39
+ * confirmed jurisdictions (including "Louisville" and "Lexington", which
+ * are themselves literal entries in that confirmed set, no special-casing
+ * needed the way Maryland's Baltimore City required).
+ */
+function matchKYCityByName(places: string[], checkDate: string): FieldMatch<KYJurisdictionEntry> {
+  const all = allKYJurisdictions(checkDate);
+  const candidates: KYJurisdictionEntry[] = [];
+  for (const place of places) {
+    const stripped = stripPlaceTypeSuffix(place);
+    const hit = all.find((c) => namesEqual(c.name, stripped));
+    if (hit && !candidates.includes(hit)) candidates.push(hit);
+  }
+  if (candidates.length === 1) return { confidence: 'matched', entry: candidates[0] };
+  if (candidates.length > 1) return { confidence: 'ambiguous', entry: null, candidates };
+  return { confidence: 'no_match', entry: null };
+}
+
+/**
+ * Kentucky's COUNTY-role match — the Counties layer against the same
+ * confirmed set, but via toKYCountyBaseName() rather than a plain
+ * namesEqual: Kentucky's own confirmed entries mix "Caldwell County" and
+ * "Martin County Fiscal Court" for the SAME kind of jurisdiction (general
+ * county government), and deliberately excludes school-district-level
+ * entries like "Cumberland County Public School District" from this
+ * role — see toKYCountyBaseName()'s own doc comment for why conflating
+ * those would misrepresent what's actually being charged.
+ */
+function matchKYCountyByName(
+  counties: string[],
+  checkDate: string,
+): FieldMatch<KYJurisdictionEntry> {
+  const all = allKYJurisdictions(checkDate);
+  const censusBaseNames = counties
+    .map((c) => stripCountySuffix(c))
+    .filter((n): n is string => n.length > 0);
+
+  const candidates: KYJurisdictionEntry[] = [];
+  for (const entry of all) {
+    const entryBase = toKYCountyBaseName(entry.name);
+    if (entryBase === null) continue; // school-district-type entry, not a county-government match
+    if (censusBaseNames.some((c) => namesEqual(c, entryBase)) && !candidates.includes(entry)) {
+      candidates.push(entry);
+    }
+  }
+  if (candidates.length === 1) return { confidence: 'matched', entry: candidates[0] };
+  if (candidates.length > 1) return { confidence: 'ambiguous', entry: null, candidates };
+  return { confidence: 'no_match', entry: null };
+}
+
 /** Whether a specific named place appears (after stripping Census's place-type suffix) among a list of Incorporated Places. */
 function placesInclude(places: string[], name: string): boolean {
   return places.some((p) => namesEqual(stripPlaceTypeSuffix(p), name));
+}
+
+/** Which of several candidate place names (if any) appears among a list of Incorporated Places — for West Virginia's 6 service-fee cities, where the MATCHED NAME itself (not just a yes/no flag) is the certificate.locality value. */
+function matchAnyPlace(places: string[], candidateNames: string[]): string | null {
+  for (const name of candidateNames) {
+    if (placesInclude(places, name)) return name;
+  }
+  return null;
 }
 
 /** Whether a specific named county appears (after stripping " County") among a list of Counties. */
@@ -208,6 +289,13 @@ export interface ResolvedJurisdiction {
   county: FieldMatch<CountyEntry> | null;
   paJurisdiction: FieldMatch<PALocalEntry> | null;
   mdCounty: FieldMatch<string> | null;
+  alMunicipality: FieldMatch<ALMunicipalityEntry> | null;
+  /** City-role match only — see index.ts's resolveEmployee() for how this combines with kyCounty for the KRS 68.197 credit. */
+  kyCity: FieldMatch<KYJurisdictionEntry> | null;
+  /** County-role match only. */
+  kyCounty: FieldMatch<KYJurisdictionEntry> | null;
+  /** Whichever of Charleston/Huntington/Morgantown/Parkersburg/Wheeling/Weirton matched, if any — the matched NAME itself is the certificate.locality value westVirginiaMunicipalServiceFee() reads. */
+  wvServiceFeeCity: string | null;
   /**
    * Simple named-place/county flags this address's geography matches,
    * independent of role — the caller (see index.ts's resolveEmployee())
@@ -230,6 +318,8 @@ export interface ResolvedJurisdiction {
     kansasCity: boolean;
     stLouis: boolean;
     multnomahCounty: boolean;
+    /** Denver's Occupational Privilege Tax gate (certificate.locality === 'Denver'). Does NOT resolve certificate.denverMonthlyCompensation/denverOPTWithheldThisMonth — those need real payroll-history the caller must already track, no address can supply them. */
+    denver: boolean;
   };
 }
 
@@ -255,6 +345,10 @@ export function resolveJurisdiction(
     county: null,
     paJurisdiction: null,
     mdCounty: null,
+    alMunicipality: null,
+    kyCity: null,
+    kyCounty: null,
+    wvServiceFeeCity: null,
     flags: {
       newYorkCity: false,
       yonkers: false,
@@ -262,6 +356,7 @@ export function resolveJurisdiction(
       kansasCity: false,
       stLouis: false,
       multnomahCounty: false,
+      denver: false,
     },
   };
 
@@ -301,6 +396,26 @@ export function resolveJurisdiction(
   if (state === 'OR') {
     result.flags.multnomahCounty = countiesInclude(geo.counties, 'Multnomah');
   }
+  if (state === 'AL') {
+    result.alMunicipality = matchALMunicipalityByName(geo.incorporatedPlaces, checkDate);
+  }
+  if (state === 'KY') {
+    result.kyCity = matchKYCityByName(geo.incorporatedPlaces, checkDate);
+    result.kyCounty = matchKYCountyByName(geo.counties, checkDate);
+  }
+  if (state === 'WV') {
+    result.wvServiceFeeCity = matchAnyPlace(geo.incorporatedPlaces, [
+      'Charleston',
+      'Huntington',
+      'Morgantown',
+      'Parkersburg',
+      'Wheeling',
+      'Weirton',
+    ]);
+  }
+  if (state === 'CO') {
+    result.flags.denver = placesInclude(geo.incorporatedPlaces, 'Denver');
+  }
 
   return result;
 }
@@ -339,6 +454,17 @@ export function toCertificateFields(
   }
   if (resolved.mdCounty?.confidence === 'matched' && resolved.mdCounty.entry) {
     fields.county = resolved.mdCounty.entry;
+  }
+  if (resolved.alMunicipality?.confidence === 'matched' && resolved.alMunicipality.entry) {
+    fields[role === 'work' ? 'workCity' : 'residenceCity'] = resolved.alMunicipality.entry.name;
+  }
+  if (resolved.kyCity?.confidence === 'matched' && resolved.kyCity.entry) {
+    fields[role === 'work' ? 'workCity' : 'residenceCity'] = resolved.kyCity.entry.name;
+  }
+  // workCounty is only ever meaningful for the WORK address — Kentucky's
+  // credit mechanism (kentuckyLocalTax()) has no residence-county concept.
+  if (role === 'work' && resolved.kyCounty?.confidence === 'matched' && resolved.kyCounty.entry) {
+    fields.workCounty = resolved.kyCounty.entry.name;
   }
 
   return fields;

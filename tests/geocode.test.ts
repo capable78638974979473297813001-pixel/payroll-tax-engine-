@@ -322,4 +322,128 @@ describe('resolve.ts — real captured Census geographies', () => {
     assert.equal(resolved.flags.kansasCity, false);
     assert.equal(resolved.flags.stLouis, false);
   });
+
+  test('Birmingham, AL: resolves a real municipal occupational tax match', () => {
+    // Real Census result for 710 20th St N, Birmingham, AL 35203.
+    const geo: CensusGeographies = {
+      state: 'AL',
+      incorporatedPlaces: ['Birmingham city'],
+      countySubdivisions: [],
+      counties: ['Jefferson County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.alMunicipality?.confidence, 'matched');
+    assert.equal(resolved.alMunicipality?.entry?.name, 'Birmingham');
+    assert.equal(resolved.alMunicipality?.entry?.rate, 0.01);
+
+    const fields = toCertificateFields(resolved, 'work');
+    assert.equal(fields.workCity, 'Birmingham');
+  });
+
+  test('a real AL city outside the 25-jurisdiction list: no_match, not a guess', () => {
+    const geo: CensusGeographies = {
+      state: 'AL',
+      incorporatedPlaces: ['Montgomery city'],
+      countySubdivisions: [],
+      counties: ['Montgomery County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.alMunicipality?.confidence, 'no_match');
+  });
+
+  test('Edmonton, KY: resolves BOTH the city and its containing county at once — the KRS 68.197 credit-eligible pair', () => {
+    // Real Census result for 105 W Main St, Edmonton, KY 42129 — Edmonton
+    // is Metcalfe County's own county seat, and both are independently
+    // confirmed at 1% in data/local/KY-occupational-2026.json.
+    const geo: CensusGeographies = {
+      state: 'KY',
+      incorporatedPlaces: ['Edmonton city'],
+      countySubdivisions: [],
+      counties: ['Metcalfe County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.kyCity?.confidence, 'matched');
+    assert.equal(resolved.kyCity?.entry?.name, 'Edmonton');
+    assert.equal(resolved.kyCounty?.confidence, 'matched');
+    assert.equal(resolved.kyCounty?.entry?.name, 'Metcalfe County');
+
+    const fields = toCertificateFields(resolved, 'work');
+    assert.equal(fields.workCity, 'Edmonton');
+    assert.equal(fields.workCounty, 'Metcalfe County');
+  });
+
+  test('KY county matching excludes school-district-level entries, even though they name-match', () => {
+    // Cumberland County Public School District (0.5%, confirmed) is a
+    // DIFFERENT jurisdiction from a general "Cumberland County" government
+    // tax — see toKYCountyBaseName()'s own doc comment for why. A Census
+    // "Cumberland County" match must NOT resolve to the school district.
+    const geo: CensusGeographies = {
+      state: 'KY',
+      incorporatedPlaces: [],
+      countySubdivisions: [],
+      counties: ['Cumberland County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.kyCounty?.confidence, 'no_match');
+  });
+
+  test('KY workCounty is only populated on a work-role call, never residence', () => {
+    const geo: CensusGeographies = {
+      state: 'KY',
+      incorporatedPlaces: ['Edmonton city'],
+      countySubdivisions: [],
+      counties: ['Metcalfe County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    const residenceFields = toCertificateFields(resolved, 'residence');
+    assert.equal(residenceFields.workCounty, undefined);
+    assert.equal(residenceFields.residenceCity, 'Edmonton');
+  });
+
+  test('Wheeling, WV: matches the wvServiceFeeCity field by name', () => {
+    // Real Census result for 1500 Chapline St, Wheeling, WV 26003.
+    const geo: CensusGeographies = {
+      state: 'WV',
+      incorporatedPlaces: ['Wheeling city'],
+      countySubdivisions: [],
+      counties: ['Ohio County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.wvServiceFeeCity, 'Wheeling');
+  });
+
+  test('a WV city with no service fee: wvServiceFeeCity stays null', () => {
+    const geo: CensusGeographies = {
+      state: 'WV',
+      incorporatedPlaces: ['Beckley city'],
+      countySubdivisions: [],
+      counties: ['Raleigh County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.wvServiceFeeCity, null);
+  });
+
+  test('Denver, CO: sets the denver flag', () => {
+    // Real Census result for 1437 Bannock St, Denver, CO 80202 — Denver
+    // is itself a consolidated city-county government in Colorado too.
+    const geo: CensusGeographies = {
+      state: 'CO',
+      incorporatedPlaces: ['Denver city'],
+      countySubdivisions: [],
+      counties: ['Denver County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.flags.denver, true);
+  });
+
+  test('a Colorado address outside Denver leaves the denver flag false', () => {
+    const geo: CensusGeographies = {
+      state: 'CO',
+      incorporatedPlaces: ['Colorado Springs city'],
+      countySubdivisions: [],
+      counties: ['El Paso County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.flags.denver, false);
+  });
 });
