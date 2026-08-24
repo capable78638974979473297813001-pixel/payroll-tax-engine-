@@ -1,0 +1,56 @@
+{
+  "$comment": "Alabama's municipal Occupational Tax (Code of Ala. Sec. 11-51-90, home-rule municipal license/privilege taxing power) -- a flat percentage of GROSS WAGES earned working within the municipality, applied to residents and nonresidents alike (work-location-based, no separate resident/nonresident rate the way Michigan's cities have). Unlike Ohio/Pennsylvania, Alabama has NO state-run bulk database of local rates -- the closest thing to an authoritative aggregator is the Alabama League of Municipalities' own member survey.",
+  "year": 2026,
+  "asOf": "2026-08-25",
+  "source": {
+    "title": "Alabama League of Municipalities -- Municipal Tax Rates, 'Municipal Occupational Taxes' section",
+    "url": "https://almonline.org/TaxRates.aspx",
+    "fetchedOn": "2026-08-25",
+    "fetchedBy": "Raw HTML fetched directly via curl (not just a WebFetch AI summary -- the summary was independently cross-checked byte-for-byte against the raw HTML's <div id=\"OccupationalTax\"> section before trusting it; both matched exactly). This is the Alabama League of Municipalities' own tax-rate reference, the closest thing this state has to a centralized aggregator (there is no state-government-run database the way Ohio's Finder or Kentucky's SOS site are) -- but the page itself is explicit about its own limits: 'All city and county rates are those given to the League by survey and should be verified with the appropriate entity for updates' and 'The Alabama League of Municipalities takes no responsibility for and makes no assertions as to the accuracy of this tax rate information.'"
+  },
+  "confidence": "cross_source_confirmed via the industry's own reference association (ALM), NOT independently fetched from each city's own ordinance -- one tier below primary_source_confirmed, the same tier this project already uses for Kentucky's KACo county brief. Birmingham's own municipal code (Municode Library, Title 3, Article A, Chapter 2 -- Occupational Tax) was found and its existence confirmed, but the actual ordinance text could not be fetched (Municode serves an Angular SPA shell to non-browser requests, a 403/JS-wall failure of the same class as several other municipal sites already documented in this project) -- the 1% Birmingham figure IS independently corroborated by a second source (a payroll-industry guide quoting '1% of gross pay' for nonresidents), so it is not resting on ALM alone, but it is not primary-ordinance-confirmed either.",
+  "municipalityCount": 25,
+  "municipalities": [
+    { "name": "Attalla", "rate": 0.02 },
+    { "name": "Auburn", "rate": 0.01 },
+    { "name": "Bear Creek", "rate": 0.01 },
+    { "name": "Bessemer", "rate": 0.01 },
+    { "name": "Birmingham", "rate": 0.01 },
+    { "name": "Brilliant", "rate": 0.01 },
+    { "name": "Fairfield", "rate": 0.01 },
+    { "name": "Gadsden", "rate": 0.02 },
+    { "name": "Glencoe", "rate": 0.02 },
+    { "name": "Goodwater", "rate": 0.0075 },
+    { "name": "Guin", "rate": 0.01 },
+    { "name": "Hacklebug", "rate": 0.01 },
+    { "name": "Haleyville", "rate": 0.01 },
+    { "name": "Hamilton", "rate": 0.01 },
+    { "name": "Leeds", "rate": 0.01 },
+    { "name": "Lynn", "rate": 0.01 },
+    { "name": "Midfield", "rate": 0.01 },
+    { "name": "Mosses", "rate": 0.01 },
+    { "name": "Opelika", "rate": 0.015 },
+    { "name": "Rainbow City", "rate": 0.02 },
+    { "name": "Red Bay", "rate": 0.005 },
+    { "name": "Shorter", "rate": 0.01 },
+    { "name": "Southside", "rate": 0.02 },
+    { "name": "Sulligent", "rate": 0.01 },
+    { "name": "Tuskegee", "rate": 0.02 }
+  ],
+  "jeffersonCountyOccupationalTax": {
+    "status": "DOES NOT EXIST -- corrects a real error this project's own AL-2026.json previously carried ('Jefferson County ALSO levies its own separate county-level occupational tax'). PRIMARY-SOURCE CONFIRMED DEAD: the Alabama State Comptroller's own memo (dated 2011-03-23, fetched directly via pdftotext after WebFetch's HTML conversion failed on the scanned PDF) instructs verbatim: 'In accordance with the Supreme Court's ruling, all collections for Jefferson County Occupational Tax must be stopped immediately... No deductions will be withheld on the April 1, 2011 payday.' Root cause per secondary corroboration: the Alabama Legislature repealed the enabling statute in 1999 and never validly replaced it; the county kept collecting anyway until the Alabama Supreme Court definitively ended it in March 2011. Jefferson County's own current official Revenue page (jccal.org) lists business/sales/lodging/motor-vehicle taxes but no occupational or wage tax, confirming no reinstatement as of this pass. Birmingham (which sits in Jefferson County) is NOT double-taxed -- only its own 1% municipal occupational tax applies.",
+    "source": {
+      "title": "Alabama State Comptroller -- Memorandum, 'Jefferson County Occupational Tax'",
+      "url": "https://comptroller.alabama.gov/wp-content/uploads/2018/01/Jefferson-County-Occupational-Tax.pdf",
+      "verifiedOn": "2026-08-25",
+      "verifiedBy": "PDF fetched directly, text extracted via pdftotext -layout (same extraction-hazard class as Denver's OPT guide -- WebFetch's own HTML conversion failed on this scanned document). Quoted verbatim above."
+    }
+  },
+  "notCapturedYet": "Macon County appeared in one low-confidence AI-generated search summary as having a 1% occupational tax, but does NOT appear on ALM's own list at all and was not independently confirmed by any other source this pass -- most likely a confusion with Tuskegee (a Macon County city, correctly on the list at 2%). Deliberately NOT added to this file; a genuine county-level Macon County tax, if real, remains unconfirmed rather than guessed at.",
+  "knownGaps": [
+    "This is a SURVEY-based list (ALM), not independently verified against each of the 25 cities' own ordinances -- rates could be stale if a city has changed its rate since responding to ALM's survey, the same risk this project already flags for Kentucky's KACo-sourced entries.",
+    "No taxable-base detail (exemptions, minimum earnings thresholds, residency treatment) was independently confirmed per city beyond Birmingham's general 'gross pay, residents and nonresidents alike' convention -- assumed uniform across all 25 cities, not individually verified.",
+    "No inter-jurisdiction credit mechanism (the OH ORC-718.121 equivalent, for an employee who lives in one taxing AL city and works in another) was found or confirmed to exist for Alabama -- unlike Ohio, no evidence was found that Alabama cities tax based on RESIDENCE at all, only work location, so this may be a non-issue rather than an unmodelled gap; not certain either way.",
+    "This list may not be exhaustive -- ALM's survey depends on member cities self-reporting; a city that adopted an occupational tax without responding to ALM's survey would not appear here. No independent statewide cross-check (e.g. against the Alabama Department of Revenue) was found or performed this pass."
+  ]
+}

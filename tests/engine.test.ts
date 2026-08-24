@@ -6334,6 +6334,57 @@ describe('Alabama', () => {
     // = $1,111.25/yr / 52 = $21.37 (roundHalfUp of 21.370192...).
     assert.equal(amountOf(r, 'AL_SIT'), dollars(21.37));
   });
+
+  // Municipal Occupational Tax (AL_LOCAL) — sourced from the Alabama
+  // League of Municipalities' own tax-rate survey (data/local/
+  // AL-municipalities-2026.json), work-location-based, no resident/
+  // nonresident split. Rates used below are real, taken directly from
+  // that file: Birmingham 1%, Gadsden 2%.
+  describe('Municipal Occupational Tax (AL_LOCAL)', () => {
+    test('Birmingham: 1% of wages earned there', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'AL', certificate: { workCity: 'Birmingham' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'AL_LOCAL'), dollars(10.0));
+    });
+
+    test('Gadsden: a different city, a different (higher) rate — 2%', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'AL', certificate: { workCity: 'Gadsden' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'AL_LOCAL'), dollars(20.0));
+    });
+
+    test('no certificate.workCity: no AL_LOCAL line at all', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'AL' },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'AL_LOCAL'), false);
+    });
+
+    test('a city not among the 25 known taxing municipalities: no AL_LOCAL line, not a silent $0 assumption', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'AL', certificate: { workCity: 'Montgomery' } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'AL_LOCAL'), false);
+    });
+  });
 });
 
 describe('Georgia', () => {

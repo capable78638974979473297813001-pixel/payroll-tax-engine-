@@ -254,6 +254,47 @@ export function allMICities(checkDate: string): MICityEntry[] {
   return file.cities;
 }
 
+export interface ALMunicipalityEntry {
+  name: string;
+  rate: number;
+}
+
+interface ALMunicipalityRegistryFile {
+  year: number;
+  municipalities: ALMunicipalityEntry[];
+}
+
+/** Whether an Alabama municipal occupational tax registry exists for this check date. */
+export function hasALMunicipalityRuleset(checkDate: string): boolean {
+  return existsSync(join(DATA_ROOT, 'local', `AL-municipalities-${yearOf(checkDate)}.json`));
+}
+
+/**
+ * Look up one Alabama municipality's occupational tax rate by name
+ * (case-insensitive) — same closed-list convention as every other local
+ * lookup in this file. Unlike Ohio, Alabama's occupational tax is
+ * WORK-location-only (no confirmed residence-based component was found),
+ * so there is only ever one role to resolve, not a resident/nonresident
+ * or home/work pair.
+ */
+export function alMunicipalityRuleset(
+  name: string,
+  checkDate: string,
+): ALMunicipalityEntry | undefined {
+  const file = loadJson<ALMunicipalityRegistryFile>(
+    join('local', `AL-municipalities-${yearOf(checkDate)}.json`),
+  );
+  return file.municipalities.find((m) => m.name.toLowerCase() === name.toLowerCase());
+}
+
+/** Every Alabama taxing municipality — for geocode/'s fuzzy name matching. */
+export function allALMunicipalities(checkDate: string): ALMunicipalityEntry[] {
+  const file = loadJson<ALMunicipalityRegistryFile>(
+    join('local', `AL-municipalities-${yearOf(checkDate)}.json`),
+  );
+  return file.municipalities;
+}
+
 export interface OHMunicipalityEntry {
   name: string;
   municode: string;

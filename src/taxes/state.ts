@@ -9,10 +9,12 @@ import {
   toWholeDollars,
   underCap,
 } from '../money.ts';
-import type { MICityEntry, OHMunicipalityEntry, PALocalEntry, StateRuleset } from '../registry.ts';
+import type { ALMunicipalityEntry, MICityEntry, OHMunicipalityEntry, PALocalEntry, StateRuleset } from '../registry.ts';
 import {
+  alMunicipalityRuleset,
   countyRuleset,
   federalRuleset,
+  hasALMunicipalityRuleset,
   hasCountyRuleset,
   hasMICityRuleset,
   hasOHMunicipalityRuleset,
@@ -211,6 +213,12 @@ export function stateIncomeTax(
   // percentage).
   const wvFee = westVirginiaMunicipalServiceFee(input, ctx, rules);
   if (wvFee) lines.push(wvFee);
+
+  // Alabama's municipal Occupational Tax — see alabamaLocalTax()'s own
+  // doc comment for the ALM-survey confidence tier and the confirmed-dead
+  // Jefferson County occupational tax this data file corrects.
+  const alLocal = alabamaLocalTax(input, ctx, rules);
+  if (alLocal) lines.push(alLocal);
 
   // A flat, uncapped, universal employee excise — Oregon's Statewide
   // Transit Tax is the first (and so far only) user, but written
@@ -3706,6 +3714,58 @@ function westVirginiaMunicipalServiceFee(
       `$${city.weeklyRate}/week flat fee (WV Code 8-13-13), annualized (×52) and divided across ` +
       `${ctx.periodsPerYear} pay periods/yr, rounded down to the cent (same convention as PA's LST) ` +
       `— certificate.locality = "${locality}"`,
+  };
+}
+
+/**
+ * Alabama's municipal Occupational Tax (Code of Ala. Sec. 11-51-90) — a
+ * flat percentage of GROSS WAGES earned working within the municipality,
+ * reading data/local/AL-municipalities-2026.json via registry.ts's
+ * alMunicipalityRuleset() — the same "separate large local file, looked
+ * up by name" pattern already established for Michigan's cities and
+ * Ohio's municipalities. Genuinely SIMPLER than Ohio's equivalent: no
+ * confirmed residence-based component exists for Alabama (unlike Ohio,
+ * where a resident of one taxing city owes tax to their home city too),
+ * so this only ever resolves certificate.workCity, never
+ * certificate.residenceCity, and there is no inter-municipal credit to
+ * apply — disclosed as "not certain either way" in the data file's own
+ * knownGaps rather than assumed to definitely not exist.
+ *
+ * Sourced from the Alabama League of Municipalities' own tax-rate survey
+ * — the closest thing to a centralized aggregator this state has (no
+ * state-government database exists the way Ohio's Finder or Kentucky's
+ * SOS site are) — one confidence tier below primary-source, matching this
+ * project's existing tier for Kentucky's KACo-sourced county entries. A
+ * city not on the 25-jurisdiction list correctly produces no line at all,
+ * not a silent $0 assumption — most Alabama municipalities have no
+ * occupational tax at all, so this is the expected, common outcome.
+ */
+function alabamaLocalTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  if (!hasALMunicipalityRuleset(input.checkDate)) return null;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const workCityName = typeof cert.workCity === 'string' ? cert.workCity : undefined;
+  if (!workCityName) return null;
+
+  const entry: ALMunicipalityEntry | undefined = alMunicipalityRuleset(workCityName, input.checkDate);
+  if (!entry) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+  const amount = applyRate(periodWages, entry.rate);
+
+  return {
+    id: 'AL_LOCAL',
+    name: `${entry.name} Occupational Tax`,
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages: periodWages,
+    amount,
+    detail: `${fmt(periodWages)} @ ${(entry.rate * 100).toFixed(2)}% on wages earned in ${entry.name} (certificate.workCity)`,
   };
 }
 
