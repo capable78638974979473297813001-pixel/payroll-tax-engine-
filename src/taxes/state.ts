@@ -235,6 +235,12 @@ export function stateIncomeTax(
   const kyLocal = kentuckyLocalTax(input, ctx, rules);
   if (kyLocal) lines.push(kyLocal);
 
+  // Wilmington's Wage Tax — Delaware's only municipal wage tax, the same
+  // caller-resolved "resident OR work location" locality gate Missouri's
+  // Kansas City/St. Louis earnings tax already uses.
+  const wilmington = wilmingtonWageTax(input, ctx, rules);
+  if (wilmington) lines.push(wilmington);
+
   // A flat, uncapped, universal employee excise — Oregon's Statewide
   // Transit Tax is the first (and so far only) user, but written
   // generically (dispatched off rules.stateExciseEmployee) the same way
@@ -3906,6 +3912,56 @@ function kentuckyLocalTax(
     taxableWages: periodWages,
     amount,
     detail: `${fmt(periodWages)} @ ${r.note} to ${entry.name}, full gross wages (KRS 67.750(2) adds back pretax deferrals)`,
+  };
+}
+
+interface WilmingtonWageTaxConfig {
+  rate: number;
+}
+
+/**
+ * Wilmington's Wage Tax — Delaware's ONLY municipal wage tax (a closed
+ * list of one, the same structural shape as Michigan's 24-city list, just
+ * smaller): 1.25% of gross earned income, owed by City residents AND by
+ * nonresidents who work within Wilmington's city limits — "whichever
+ * condition is met" per Wilmington's own FY2025 budget-office document,
+ * the same EITHER-address shape as Missouri's Kansas City/St. Louis
+ * earnings tax (missouriLocalEarningsTax()), so this reuses that exact
+ * gating convention: certificate.locality === 'Wilmington' is the
+ * caller's own resolution of "does this employee's residence OR work
+ * location put them in scope", not something this engine derives from
+ * separate residence/work fields itself.
+ *
+ * Uses the standard rules.exemptPretax-adjusted base — unlike Kentucky's
+ * local tax, nothing in Wilmington's own sourced text suggests an
+ * inverted/added-back pretax treatment, so this does NOT special-case the
+ * base the way kentuckyLocalTax() does.
+ */
+function wilmingtonWageTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (cert.locality !== 'Wilmington') return null;
+
+  const cfg = (rules.localIncomeTax as { rate?: number } | undefined)?.rate;
+  if (cfg === undefined) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+  const amount = applyRate(taxableWages, cfg);
+
+  return {
+    id: 'WILMINGTON_WAGE',
+    name: 'Wilmington Wage Tax',
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages,
+    amount,
+    detail:
+      `${fmt(taxableWages)} @ ${(cfg * 100).toFixed(2)}% (certificate.locality = "Wilmington", the ` +
+      `caller's own residence-or-work-location determination)`,
   };
 }
 

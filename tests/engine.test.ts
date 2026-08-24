@@ -4959,6 +4959,44 @@ describe('Delaware', () => {
     );
     assert.equal(amountOf(r, 'DE_SIT'), dollars(13.88));
   });
+
+  // Wilmington Wage Tax (WILMINGTON_WAGE) — Delaware's only municipal wage
+  // tax, 1.25% flat, fired by certificate.locality the same "resident OR
+  // work location" shape as Missouri's KC/St. Louis earnings tax.
+  describe('Wilmington Wage Tax (WILMINGTON_WAGE)', () => {
+    test('certificate.locality = "Wilmington": 1.25% of wages', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'DE', certificate: { locality: 'Wilmington' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WILMINGTON_WAGE'), dollars(12.5));
+    });
+
+    test('no certificate.locality: no WILMINGTON_WAGE line at all', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'DE' },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'WILMINGTON_WAGE'), false);
+    });
+
+    test('a different Delaware locality: no WILMINGTON_WAGE line (closed list of one)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'DE', certificate: { locality: 'Dover' } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'WILMINGTON_WAGE'), false);
+    });
+  });
 });
 
 describe('Arizona', () => {

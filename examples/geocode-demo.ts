@@ -133,6 +133,9 @@ await demoEmployee('An employee working in downtown Portland (Multnomah County),
 await demoEmployee('An employee working in Wheeling, West Virginia — the per-week Municipal Service Fee', 'WV', {
   work: '1500 Chapline St, Wheeling, WV 26003',
 });
+await demoEmployee("An employee working in Wilmington, Delaware — the city's only wage tax, either-address triggered", 'DE', {
+  work: '800 N French St, Wilmington, DE 19801',
+});
 
 rule('An employee working in downtown Denver, Colorado — the Occupational Privilege Tax');
 {

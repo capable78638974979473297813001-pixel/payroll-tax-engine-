@@ -138,10 +138,11 @@ export interface EmployeeResolution {
  *   - Yonkers nonresident-worker tax: WORK address, and only when the
  *     residence address is NOT also Yonkers (the two are mutually
  *     exclusive per yonkersLocalTax()'s own doc comment).
- *   - Missouri Kansas City / St. Louis earnings tax: EITHER address
- *     (missouriLocalEarningsTax()'s own doc comment — "certificate.locality
- *     (the caller's own resolution of 'does this employee's residence OR
- *     work location put them in scope')").
+ *   - Missouri Kansas City / St. Louis earnings tax, and Delaware's
+ *     Wilmington Wage Tax: EITHER address (missouriLocalEarningsTax()'s/
+ *     wilmingtonWageTax()'s own doc comments — "certificate.locality (the
+ *     caller's own resolution of 'does this employee's residence OR work
+ *     location put them in scope')").
  *   - Newark payroll tax: WORK address (an employer tax on services
  *     performed there).
  *   - Multnomah County Preschool For All tax: WORK address (Portland's own
@@ -194,6 +195,8 @@ export async function resolveEmployee(
     fields.locality = 'Kansas City';
   } else if (workFlags?.stLouis || residenceFlags?.stLouis) {
     fields.locality = 'St. Louis';
+  } else if (workFlags?.wilmington || residenceFlags?.wilmington) {
+    fields.locality = 'Wilmington';
   }
 
   if (workFlags?.multnomahCounty) fields.multnomahCounty = true;

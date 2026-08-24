@@ -320,6 +320,7 @@ export interface ResolvedJurisdiction {
     multnomahCounty: boolean;
     /** Denver's Occupational Privilege Tax gate (certificate.locality === 'Denver'). Does NOT resolve certificate.denverMonthlyCompensation/denverOPTWithheldThisMonth — those need real payroll-history the caller must already track, no address can supply them. */
     denver: boolean;
+    wilmington: boolean;
   };
 }
 
@@ -357,6 +358,7 @@ export function resolveJurisdiction(
       stLouis: false,
       multnomahCounty: false,
       denver: false,
+      wilmington: false,
     },
   };
 
@@ -415,6 +417,9 @@ export function resolveJurisdiction(
   }
   if (state === 'CO') {
     result.flags.denver = placesInclude(geo.incorporatedPlaces, 'Denver');
+  }
+  if (state === 'DE') {
+    result.flags.wilmington = placesInclude(geo.incorporatedPlaces, 'Wilmington');
   }
 
   return result;

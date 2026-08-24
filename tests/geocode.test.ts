@@ -446,4 +446,27 @@ describe('resolve.ts — real captured Census geographies', () => {
     const resolved = resolveJurisdiction(geo, CHECK_DATE);
     assert.equal(resolved.flags.denver, false);
   });
+
+  test('Wilmington, DE: sets the wilmington flag', () => {
+    // Real Census result for 800 N French St, Wilmington, DE 19801.
+    const geo: CensusGeographies = {
+      state: 'DE',
+      incorporatedPlaces: ['Wilmington city'],
+      countySubdivisions: [],
+      counties: ['New Castle County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.flags.wilmington, true);
+  });
+
+  test('a Delaware address outside Wilmington leaves the wilmington flag false', () => {
+    const geo: CensusGeographies = {
+      state: 'DE',
+      incorporatedPlaces: ['Dover city'],
+      countySubdivisions: [],
+      counties: ['Kent County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.flags.wilmington, false);
+  });
 });
