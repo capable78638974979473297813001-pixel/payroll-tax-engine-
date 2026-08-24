@@ -555,8 +555,9 @@
       "name": "Wyoming",
       "wageIncomeTax": false,
       "structure": "none",
-      "note": "No state wage income tax. Employer SUI only.",
-      "status": "structural_fact"
+      "note": "No state wage income tax (never has). State data captured in data/states/WY-2026.json: UI wage base $33,800 primary-confirmed directly from dws.wyo.gov (adjusts annually), new-employer rate genuinely industry/experience-driven under W.S. 27-3 Article 5 (no single flat figure, same shape as Louisiana's), no employee-paid UI component (unlike AK/PA/NJ). No local income tax, no mandatory or voluntary paid leave program. This is the LAST of the 51 jurisdictions in this project's registry to receive a data/states/*.json file -- every state now has at least a data-captured ruleset.",
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-22"
     }
   ]
 }

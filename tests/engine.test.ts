@@ -420,15 +420,17 @@ describe('Pennsylvania', () => {
   });
 
   test('an unmodelled state is flagged, never silently zero', () => {
-    // Was CA, then TX, then HI, before this project built those states —
-    // updated to WY (the one state this project has genuinely never built
-    // a ruleset for — a no-income-tax structural fact with no data/states
-    // file at all) once HI stopped being true, rather than leave a stale
-    // example that would silently start testing the WRONG thing (e.g.
-    // Hawaii's real bracket-computed line, not the no-ruleset-at-all flag
-    // this test actually means to exercise).
-    const r = calculatePaycheck(input({ workState: { code: 'WY' } }));
-    const line = r.taxes.find((t) => t.id === 'WY_SIT');
+    // Was CA, then TX, then HI, then WY, before this project built those
+    // states — WY was the last of the 51 real jurisdictions to get a
+    // data/states/*.json file, so there is no longer any REAL state code
+    // this test can borrow. 'ZZ' is not a real two-letter US state/territory
+    // code and never will be — using it (rather than a future tax year for
+    // a real state, which would hit the FEDERAL ruleset lookup first and
+    // throw for the wrong reason) keeps this test exercising exactly the
+    // no-ruleset-file flag it means to, permanently, with no future state
+    // build ever able to make it stale again.
+    const r = calculatePaycheck(input({ workState: { code: 'ZZ' } }));
+    const line = r.taxes.find((t) => t.id === 'ZZ_SIT');
     assert.ok(line);
     assert.match(line.detail ?? '', /NOT MODELLED/);
   });
@@ -6775,6 +6777,21 @@ describe('Oklahoma', () => {
     );
     // $13.00 base (same as the absent-certificate case above) + $25.00 = $38.00.
     assert.equal(amountOf(r, 'OK_SIT'), dollars(38));
+  });
+});
+
+describe('Wyoming', () => {
+  test('no state wage income tax — WY_SIT is not produced', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(700) }],
+        workState: { code: 'WY' },
+      }),
+    );
+    const line = r.taxes.find((t) => t.id === 'WY_SIT');
+    assert.equal(line, undefined);
   });
 });
 

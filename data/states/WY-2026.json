@@ -1,0 +1,46 @@
+{
+  "code": "WY",
+  "name": "Wyoming",
+  "year": 2026,
+  "method": "no_income_tax",
+  "sources": [
+    {
+      "title": "Wyoming Constitution -- no personal income tax; Wyoming Dept of Workforce Services -- Unemployment Taxable Wage Base",
+      "url": "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-taxable-wage-base/",
+      "verifiedOn": "2026-08-22",
+      "verifiedBy": "Fetched directly. Wyoming has never had a personal income tax (one of 9 no-wage-tax states in this project). Quoted the DWS's own historical wage-base table: 2026 $33,800 (up from $32,400 in 2025, adjusted annually)."
+    },
+    {
+      "title": "Wyoming Dept of Workforce Services -- Unemployment Tax Rates",
+      "url": "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-tax-rates/",
+      "verifiedOn": "2026-08-22",
+      "verifiedBy": "Fetched directly. Quoted: rates are 'assigned per W.S. 27-3 Article 5' -- a base rate (industry-average for new employers with under 3 years of experience, benefit-ratio-based for experienced employers) PLUS four additional rate factors summed together, mailed via an annual rate notice. No single flat headline figure exists in the primary source, the same NAICS/experience-driven shape already documented for Louisiana's new-employer rate elsewhere in this project. Cross-sourced range for new employers by industry: 2.28%-9.78% (secondary only, not independently confirmed against the actual per-industry base-rate table this pass)."
+    },
+    {
+      "title": "Wyoming paid family leave and local tax status",
+      "url": "https://www.workforcehub.com/hr-laws-and-regulations/wyoming/wyoming-paid-family-leave-laws/",
+      "verifiedOn": "2026-08-22",
+      "verifiedBy": "Search-synthesized (WebSearch, not independently fetched from a specific Wyoming statute this pass): no Wyoming city or county levies a local income/wage tax; no state-mandated or voluntary state-run paid family/medical leave program exists as of 2026. Workers rely on federal FMLA (unpaid) only."
+    }
+  ],
+  "localIncomeTax": {
+    "rule": "NONE. No Wyoming city or county levies a local income/wage tax.",
+    "confidence": "cross_source_confirmed; not independently verified against a specific municipal-authority statute this pass."
+  },
+  "paidFamilyMedicalLeave": {
+    "rule": "NONE. No mandatory or voluntary state-run paid family/medical leave program of any kind found for Wyoming.",
+    "confidence": "cross_source_confirmed."
+  },
+  "unemploymentInsurance": {
+    "administeredBy": "Wyoming Dept of Workforce Services (DWS)",
+    "wageBase": 33800.0,
+    "newEmployerRateNote": "NOT a single flat figure -- W.S. 27-3 Article 5 assigns a base rate by industry (new employers) or benefit ratio (3+ years experience) PLUS four additional rate factors summed together. Cross-sourced practical new-employer range 2.28%-9.78% by industry; disclosed as cross-source only, since no primary single number exists to quote (same shape as Louisiana's own new-employer rate elsewhere in this project).",
+    "confidence": "primary_source_confirmed for the wage base; new-employer rate mechanism confirmed primary, exact range cross-source only.",
+    "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project: experience-rated, an individual employer's actual rate depends on employer-specific history a static jurisdiction file can't hold. Unlike Alaska/PA/NJ, Wyoming has NO employee-paid UI component -- confirmed via DWS's own rate-mechanism description, which only ever refers to 'employer' contributions."
+  },
+  "knownGaps": [
+    "Local-tax and PFML absence are cross-source confirmed only, not independently verified against a specific Wyoming statute this pass.",
+    "Employer-side UC is documented (wage base primary-sourced, rate mechanism primary-sourced) but not modelled -- same per-employer-experience-rating gap as every other state's employer SUTA in this project.",
+    "The exact 2.28%-9.78% new-employer range by industry is cross-source only -- W.S. 27-3 Article 5's own per-industry base-rate table was not independently fetched this pass."
+  ]
+}
