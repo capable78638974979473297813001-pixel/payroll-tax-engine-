@@ -2,8 +2,8 @@
   "code": "ND",
   "name": "North Dakota",
   "year": 2026,
-  "method": "NOT_MODELLED_dataOnly",
-  "$scopeNote": "DATA-ONLY PASS (Scott: 'do the Dakotas and the Virginias, just for the data'). This file documents North Dakota's real withholding structure to the same depth as MI/OH's data-only passes elsewhere in this project, but is deliberately NOT wired into state.ts / incomeTaxLines() this session -- there is no calc-code method for it yet and 'method' above is a placeholder, not a real dispatch key. North Dakota has one of the lowest real income tax rates in the country (0% / 1.95% / 2.50%, three brackets, genuinely close to Idaho/Iowa in simplicity) but a genuinely two-track withholding SYSTEM depending on which vintage of Form W-4 the employee has on file -- a structural complexity Iowa is the only other state in this project to have (its formVintage dispatch).",
+  "method": "north_dakota_dual_vintage",
+  "$scopeNote": "WIRED TO CALC CODE (a later 'go to every state, look for what's missing' pass): originally a DATA-ONLY pass (Scott: 'do the Dakotas and the Virginias, just for the data'); northDakotaWithholding() in src/taxes/state.ts now dispatches both vintages for real. North Dakota has one of the lowest real income tax rates in the country (0% / 1.95% / 2.50%, three brackets, genuinely close to Idaho/Iowa in simplicity) but a genuinely two-track withholding SYSTEM depending on which vintage of Form W-4 the employee has on file -- a structural complexity Iowa is the only other state in this project to have (its formVintage dispatch). Wiring this in surfaced a real transcription bug, fixed in the same pass: see annualBrackets.bracketNote below.",
   "sources": [
     {
       "title": "2026 Income Tax Withholding Rates and Instructions (North Dakota Office of State Tax Commissioner)",
@@ -36,7 +36,7 @@
       },
       "annualBrackets": {
         "single": [
-          { "from": 0, "to": 57625, "base": 0, "rate": 0.0195 },
+          { "from": 0, "to": 57625, "base": 0, "rate": 0 },
           { "from": 57625, "to": 258450, "base": 0, "rate": 0.0195 },
           { "from": 258450, "to": null, "base": 3916.09, "rate": 0.025 }
         ],
@@ -45,7 +45,7 @@
           { "from": 57500, "to": 168525, "base": 0, "rate": 0.0195 },
           { "from": 168525, "to": null, "base": 2164.99, "rate": 0.025 }
         ],
-        "bracketNote": "Transcribed verbatim from Table 7 (Annual Payroll Period). Single's own table oddly prints '$0' for both the first AND second row's base before the excess-rate column, but the worked mechanics (confirmed against Table 1-6's algebra: e.g. weekly base $75.31 at $1,108 = 1.95% x $3,862-ish scaled -- internally consistent) make clear the true structure is 0% up to $57,625, then 1.95% on the excess up to $258,450, then a fixed $3,916.09 base plus 2.50% above that -- i.e. only TWO effective rates (0%, 1.95%, 2.50%), not three independently-based tiers. Recorded as 3 rows for shape-consistency with this project's other bracket tables (WIBracket-style), with the middle row's base correctly $0 since it starts exactly where the 0% bracket ends."
+        "bracketNote": "Transcribed verbatim from Table 7 (Annual Payroll Period). Single's own table oddly prints '$0' for both the first AND second row's base before the excess-rate column, but the worked mechanics (confirmed against Table 1-6's algebra: e.g. weekly base $75.31 at $1,108 = 1.95% x $3,862-ish scaled -- internally consistent) make clear the true structure is 0% up to $57,625, then 1.95% on the excess up to $258,450, then a fixed $3,916.09 base plus 2.50% above that -- i.e. only TWO effective rates (0%, 1.95%, 2.50%), not three independently-based tiers. Recorded as 3 rows for shape-consistency with this project's other bracket tables (WIBracket-style), with the middle row's base correctly $0 since it starts exactly where the 0% bracket ends. BUG FIXED (wiring pass): the Single table's first bracket had rate 0.0195 here, not 0 -- inconsistent with this very prose AND with Section 2's own Single table below, which covers the identical boundaries and correctly has rate 0 on the first bracket. Corrected to 0."
       },
       "note": "Full per-period tables (weekly/biweekly/semimonthly/monthly/quarterly/semiannual/daily) are published directly by ND -- NOT derived from the annual figures by simple division the way Iowa's were provably shown to be; not independently re-verified this pass that ND's own per-period tables are exact prorations of the annual ones (a real open question, not assumed either way)."
     },
@@ -73,6 +73,8 @@
     },
     "supplementalWages": "Booklet has a dedicated Section 3 (page 57) for supplemental wages, not read in detail this pass -- flagged as an open item below rather than guessed at."
   },
+  "roundFinalToWholeDollar": true,
+  "roundingComment": "Both Section 1 and Section 2 round to the nearest whole dollar per the booklet's own text (see worksheetSteps above) -- handled generically via rules.roundFinalToWholeDollar in stateIncomeTax(), the same mechanism built for Maine and reused by several other states in this project.",
   "reciprocity": {
     "reciprocalStates": ["MN", "MT"],
     "mechanism": "Form NDW-R, filed by the employee with the employer (due by Feb 28 or within 30 days of hire/address change; employer mails to the state by Mar 31; must be refiled annually).",
@@ -99,11 +101,15 @@
     "rule": "NONE, and structurally locked out at the local level too: North Dakota has no mandatory state Paid Family/Medical Leave program, and (a genuinely distinctive fact among every state in this project so far) North Dakota law affirmatively PREEMPTS cities and counties from enacting their OWN mandatory paid-leave ordinances -- not merely an absence of a state program the way most no-PFML states in this project are, but a state-level ceiling that forecloses the Wilmington/JEDD-style local patchwork risk this project has flagged in other states.",
     "confidence": "cross_source_confirmed via search synthesis, not independently read from the ND Century Code preemption provision itself this pass."
   },
-  "exemptPretax": {
-    "note": "Not recorded as a flat category list the way other states in this file are, because Section 2's own mechanism (see withholdingStructure.section2_2020AndLaterW4 above) makes 401k/125/HSA/etc. exclusion structural rather than list-based -- the ND base for a 2020+-W-4 employee IS whatever wage figure the federal W-4 process already produced. Section 1 (pre-2020 W-4) was not independently checked for the same property this pass -- flagged as an open item below."
+  "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
+  "exemptPretaxComment": "FIXED (wiring pass): this field was previously stored as a note object, not an array, which would have thrown ('object is not iterable') the moment any calc code called ctx.taxableWagesFor() against this ruleset -- caught by the first test run, not by inspection. Set to the standard exclusion list this project uses everywhere else. For Section 2 (2020+ W-4) this is doubly justified: the ND base IS whatever wage figure the federal W-4 process already produced, so pretax deferrals are excluded by construction regardless of this list. Section 1 (pre-2020 W-4) relies on this list directly, consistent with every other state's federal-conformity-based exemptPretax -- not independently re-derived from a North Dakota-specific statute this pass.",
+  "certificateFields": {
+    "$comment": "northDakotaWithholding() dispatches on certificate.formVintage.",
+    "section1_pre2020": "certificate.formVintage = 'pre_2020', certificate.maritalStatus ('single'|'married', default 'single'), certificate.allowances (count, default 0).",
+    "section2_2020Plus": "Default path (formVintage unset or anything else). No separate ND certificate -- status is read directly from input.federalW4.filingStatus per the booklet's own instruction that it comes 'straight from the employee's Form W-4 Step 1(c) checkbox.' federalW4.filingStatus 'married_separate' resolves to the Single table (the 2020+ federal form bundles Single/MFS into one checkbox), same convention as New Mexico."
   },
   "knownGaps": [
-    "NOT wired into state.ts / incomeTaxLines() -- data only, per this session's explicit scope ('just for the data'). No new dispatch method, no tests, no worked-example cent-level verification the way Delaware's bracket_annual_exemption_credit was proven.",
+    "WIRED (this pass): northDakotaWithholding() in state.ts dispatches both Section 1 and Section 2. Verified against 2 hand-derived fixtures per section before running -- see tests/engine.test.ts describe('North Dakota'). Not yet checked against any of the booklet's OWN worked examples specifically (none were located/transcribed in the original data-only pass) -- a genuine remaining gap, disclosed rather than treated as equivalent to a source-worked-example verification.",
     "Section 3 (supplemental wages, booklet page 57) was not read this pass -- North Dakota's supplemental-wage treatment is entirely undocumented in this file.",
     "Section 1's per-period tables (weekly/biweekly/etc.) were NOT independently verified to be exact prorations of the annual figures the way this project proved for Iowa -- recorded as annual-only, an open question rather than an assumption either way.",
     "Section 1's own exemptPretax property (whether pre-2020-W-4 'gross wages' already excludes federal pretax deferrals the same structural way Section 2 does) was not separately checked -- likely yes by the same federal-conformity logic, but not confirmed this pass.",

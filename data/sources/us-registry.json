@@ -392,8 +392,8 @@
       "withholdingSource": "https://www.tax.nd.gov/sites/www/files/documents/forms/individual/2026-iit/2026-income-tax-withholding-rates-booklet.pdf",
       "sourceDoc": "2026 Income Tax Withholding Rates and Instructions, fetched and text-extracted directly. Dual-track system: Section 1 (pre-2020 W-4, allowance-based) and Section 2 (2020+ W-4, 3-status annual bracket table, 0%/1.95%/2.50%) both fully documented. State data captured in data/states/ND-2026.json.",
       "status": "modelled",
-      "sourceVerifiedOn": "2026-08-20",
-      "note": "Data-only pass -- NOT wired into engine calc code (no dispatch method exists for the dual-vintage W-4 structure yet). Reciprocity with MN/MT confirmed. No local income tax; no mandatory paid leave (and localities are statutorily preempted from creating their own)."
+      "sourceVerifiedOn": "2026-08-22",
+      "note": "WIRED to calc code (northDakotaWithholding() in state.ts, dispatched via method north_dakota_dual_vintage): both Section 1 (pre-2020 W-4, allowance-based) and Section 2 (2020+ W-4, reads status directly off input.federalW4.filingStatus) now compute real ND_SIT lines. Wiring surfaced and fixed two real pre-existing data bugs: Section 1's own Single bracket table had rate 0.0195 instead of 0 on its first bracket (inconsistent with the file's own prose and with Section 2's identical table), and exemptPretax was stored as a note object rather than an array, which threw ('object is not iterable') on the very first test run. Reciprocity with MN/MT confirmed. No local income tax; no mandatory paid leave (and localities are statutorily preempted from creating their own)."
     },
     {
       "code": "OH",

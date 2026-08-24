@@ -747,6 +747,8 @@ function incomeTaxLines(
       return [hawaiiWithholding(input, ctx, rules)];
     case 'oklahoma_percentage_method':
       return [oklahomaWithholding(input, ctx, rules)];
+    case 'north_dakota_dual_vintage':
+      return [northDakotaWithholding(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -6317,5 +6319,117 @@ function oklahomaWithholding(
       `= ${fmt(netWages)} net (${status === 'married' ? 'Married' : 'Single'}, ${period}), bracket ${fmt(dollars(bracket.from))}-` +
       `${bracket.to === null ? '∞' : fmt(dollars(bracket.to))}: ${fmt(dollars(bracket.base))} + ` +
       `${(bracket.rate * 100).toFixed(1)}% × ${fmt(excess)} = ${fmt(amount)}`,
+  };
+}
+
+/**
+ * North Dakota's dual-vintage withholding (2026 Income Tax Withholding
+ * Rates and Instructions, read directly). This was documented data-only
+ * in an earlier pass ("just for the data") and is wired to calc code here.
+ * Section 1 (pre-2020 federal W-4 still on file): subtract
+ * allowances x a per-period dollar amount from wages, then look up the
+ * SINGLE-or-MARRIED annual bracket table. Section 2 (2020+ federal W-4, or
+ * no W-4 at all for a new hire — ND's own instruction treats a missing
+ * form as Single, the modern default): NO allowance subtraction at all —
+ * the input is already the federal-adjusted wage figure, so pretax
+ * deferrals are excluded from the ND base by construction — annualize
+ * directly and look up one of THREE tables (Married Filing Jointly / Head
+ * of Household / Single) keyed off input.federalW4.filingStatus itself,
+ * since ND's own booklet says the status comes "straight from the
+ * employee's Form W-4 Step 1(c) checkbox" — there is no separate
+ * ND-specific certificate for this vintage at all. federalW4's own
+ * 'married_separate' value has no ND table (the 2020+ federal form bundles
+ * "Single or Married filing separately" into one checkbox), so it resolves
+ * to the Single table, the same bundling this project already established
+ * for New Mexico. Both sections round to the nearest whole dollar (ND's
+ * own stated convention, matching Maine's) via the generic
+ * rules.roundFinalToWholeDollar flag, not duplicated here. Fixed a real
+ * transcription bug found while wiring this in: Section 1's own Single
+ * bracket table had rate 0.0195 (not 0) on its first bracket ([0,57625)),
+ * inconsistent with both this file's own bracketNote prose ("0% up to
+ * $57,625") and with Section 2's OWN Single table, which covers the
+ * identical boundaries/base/rate and correctly has rate 0 there — the two
+ * sections share the same Single and Married/MFJ tables by ND's own
+ * design, so the mismatch was a straightforward transcription slip in
+ * Section 1's copy, corrected in data/states/ND-2026.json rather than
+ * silently worked around in code.
+ */
+function northDakotaWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const structure = rules.withholdingStructure as {
+    section1_preFederal2020W4: {
+      allowanceAmountByPeriod: Partial<Record<string, number>>;
+      annualBrackets: { single: WIBracket[]; married: WIBracket[] };
+    };
+    section2_2020AndLaterW4: {
+      annualBrackets: { marriedFilingJointly: WIBracket[]; headOfHousehold: WIBracket[]; single: WIBracket[] };
+    };
+  };
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const period = input.payFrequency;
+
+  if (cert.formVintage === 'pre_2020') {
+    const section1 = structure.section1_preFederal2020W4;
+    const status = cert.maritalStatus === 'married' ? 'married' : 'single';
+    const allowanceAmount = section1.allowanceAmountByPeriod[period];
+    if (allowanceAmount === undefined) {
+      throw new Error(
+        `North Dakota's own withholding booklet doesn't publish a "${period}" allowance amount for Section 1 — cannot compute ${rules.code}_SIT.`,
+      );
+    }
+    const allowances = Number(cert.allowances ?? 0);
+    const allowanceDeduction = dollars(allowanceAmount) * allowances;
+    const netWages = atLeastZero(periodWages - allowanceDeduction);
+    const annualTaxable = netWages * ctx.periodsPerYear;
+    const bracket = findWIBracket(section1.annualBrackets[status], annualTaxable);
+    const excess = annualTaxable - dollars(bracket.from);
+    const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
+    const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
+    return {
+      id: `${rules.code}_SIT`,
+      name: `${rules.name} Income Tax`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: periodWages,
+      amount,
+      detail:
+        `Section 1 (pre-2020 W-4): ${fmt(periodWages)} less ${fmt(allowanceDeduction)} (${allowances} × $${allowanceAmount}) ` +
+        `= ${fmt(netWages)} net (${status}), annualized bracket ${fmt(dollars(bracket.from))}-` +
+        `${bracket.to === null ? '∞' : fmt(dollars(bracket.to))}: ${fmt(dollars(bracket.base))} + ` +
+        `${(bracket.rate * 100).toFixed(2)}% × ${fmt(excess)} = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
+    };
+  }
+
+  const section2 = structure.section2_2020AndLaterW4;
+  const fedStatus = input.federalW4?.filingStatus ?? 'single';
+  const status2 =
+    fedStatus === 'married_joint'
+      ? 'marriedFilingJointly'
+      : fedStatus === 'head_of_household'
+        ? 'headOfHousehold'
+        : 'single';
+  const annualWages = periodWages * ctx.periodsPerYear;
+  const bracket2 = findWIBracket(section2.annualBrackets[status2], annualWages);
+  const excess2 = annualWages - dollars(bracket2.from);
+  const annualTax2 = dollars(bracket2.base) + applyRate(excess2, bracket2.rate);
+  const amount2 = roundHalfUp(annualTax2 / ctx.periodsPerYear);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount: amount2,
+    detail:
+      `Section 2 (2020+ W-4): ${fmt(annualWages)}/yr (${status2}), bracket ${fmt(dollars(bracket2.from))}-` +
+      `${bracket2.to === null ? '∞' : fmt(dollars(bracket2.to))}: ${fmt(dollars(bracket2.base))} + ` +
+      `${(bracket2.rate * 100).toFixed(2)}% × ${fmt(excess2)} = ${fmt(annualTax2)}/yr ÷ ${ctx.periodsPerYear}`,
   };
 }

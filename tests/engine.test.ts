@@ -6795,6 +6795,96 @@ describe('Wyoming', () => {
   });
 });
 
+describe('North Dakota', () => {
+  test('Section 1 (pre-2020 W-4): weekly $1,500, single, 2 allowances -> $4.00', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1500) }],
+        workState: {
+          code: 'ND',
+          certificate: { formVintage: 'pre_2020', maritalStatus: 'single', allowances: 2 },
+        },
+      }),
+    );
+    assert.equal(amountOf(r, 'ND_SIT'), dollars(4));
+  });
+
+  test('Section 2 (2020+ W-4): reads status from federalW4.filingStatus, not a separate ND certificate — Single', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(8000) }],
+        federalW4: {
+          filingStatus: 'single',
+          multipleJobs: false,
+          dependentCredit: 0,
+          otherIncome: 0,
+          deductions: 0,
+          extraWithholding: 0,
+        },
+        workState: { code: 'ND' },
+      }),
+    );
+    assert.equal(amountOf(r, 'ND_SIT'), dollars(62));
+  });
+
+  test('Section 2: Married Filing Jointly uses its own wider table, not Single', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(8000) }],
+        federalW4: {
+          filingStatus: 'married_joint',
+          multipleJobs: false,
+          dependentCredit: 0,
+          otherIncome: 0,
+          deductions: 0,
+          extraWithholding: 0,
+        },
+        workState: { code: 'ND' },
+      }),
+    );
+    assert.equal(amountOf(r, 'ND_SIT'), dollars(63));
+  });
+
+  test('Section 2: Head of Household uses the widest table of the three', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(8000) }],
+        federalW4: {
+          filingStatus: 'head_of_household',
+          multipleJobs: false,
+          dependentCredit: 0,
+          otherIncome: 0,
+          deductions: 0,
+          extraWithholding: 0,
+        },
+        workState: { code: 'ND' },
+      }),
+    );
+    assert.equal(amountOf(r, 'ND_SIT'), dollars(28));
+  });
+
+  test('no reciprocity zeroing for a non-MN/MT resident', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(8000) }],
+        residenceState: { code: 'TX' },
+        workState: { code: 'ND' },
+      }),
+    );
+    assert.equal(amountOf(r, 'ND_SIT'), dollars(62));
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(
