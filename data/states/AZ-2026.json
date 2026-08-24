@@ -25,8 +25,9 @@
     },
     {
       "title": "150-206-692, Oregon's out-of-state/nonresident-employer guide (cross-referenced from OR-2026.json)",
+      "url": "https://www.oregon.gov/dor/forms/FormsPubs/withholding-transit-tax-non-resident_206-692.pdf",
       "verifiedOn": "2026-08-20",
-      "verifiedBy": "Used to RESOLVE the reciprocity asymmetry flagged in reciprocalStates below — see reciprocity.orAsymmetryConfirmed."
+      "verifiedBy": "Used to RESOLVE the reciprocity asymmetry flagged in reciprocalStates below — see reciprocity.orAsymmetryConfirmed. URL added (comprehensive-audit pass) -- this entry was previously missing it, unlike every other source in this file; the document itself was already fetched directly for OR-2026.json's own reciprocity.source (same URL, same fetch)."
     }
   ],
   "employeeElectedFlat": {

@@ -9,15 +9,19 @@ import {
   toWholeDollars,
   underCap,
 } from '../money.ts';
-import type { MICityEntry, PALocalEntry, StateRuleset } from '../registry.ts';
+import type { MICityEntry, OHMunicipalityEntry, PALocalEntry, StateRuleset } from '../registry.ts';
 import {
   countyRuleset,
   federalRuleset,
   hasCountyRuleset,
   hasMICityRuleset,
+  hasOHMunicipalityRuleset,
+  hasOHSchoolDistrictRuleset,
   hasPALocalRuleset,
   hasStateRuleset,
   miCityRuleset,
+  ohMunicipalityRuleset,
+  ohSchoolDistrictRuleset,
   paLocalRuleset,
   stateRuleset,
 } from '../registry.ts';
@@ -249,6 +253,15 @@ export function stateIncomeTax(
   // nonresident rule and the inter-city credit it applies.
   const miLocal = michiganLocalTax(input, ctx, rules);
   if (miLocal) lines.push(miLocal);
+
+  // Ohio's municipal income tax (679 currently-active jurisdictions) plus
+  // School District Income Tax (214 districts) — see ohioLocalTax()'s and
+  // ohioSchoolDistrictTax()'s own doc comments for the ORC 718.121
+  // inter-municipal credit and the SDIT lookup respectively.
+  const ohLocal = ohioLocalTax(input, ctx, rules);
+  if (ohLocal) lines.push(ohLocal);
+  const ohSchool = ohioSchoolDistrictTax(input, ctx, rules);
+  if (ohSchool) lines.push(ohSchool);
 
   // Resident-working-elsewhere credit — a DIFFERENT direction from every
   // reciprocity mechanism above: those zero THIS state's tax when the
@@ -5523,6 +5536,157 @@ function michiganLocalTax(
       (residenceEntry && workEntry && !sameCity
         ? ' — inter-city credit for the second city\'s tax is a RETURN-level mechanism (files with the home city\'s return), not applied at withholding time'
         : ''),
+  };
+}
+
+/**
+ * Ohio's municipal income tax (Ohio Dept of Taxation's own Finder database,
+ * 679 currently-active jurisdictions, reading data/local/OH-municipalities-
+ * 2026.json via registry.ts's ohMunicipalityRuleset() — the same "separate
+ * large local file, looked up by name" pattern already established for
+ * Michigan's cities and PA's PSD codes). Same caller-resolves-the-address
+ * convention as those two: certificate.residenceCity / certificate.workCity
+ * are already-resolved municipality names, case-insensitive.
+ *
+ * Structurally DIFFERENT from Michigan: OH-municipalities-2026.json's own
+ * residencyNote is explicit that there is only ONE rate per municipality
+ * (no resident/nonresident split) — that single rate applies to income
+ * EARNED WITHIN the municipality regardless of who earned it, and
+ * separately to a RESIDENT's full income if their home municipality is
+ * also on this list. A resident of one taxing municipality who works in a
+ * DIFFERENT taxing municipality can owe both roles at once.
+ *
+ * Where the two roles collide, ORC 718.121 (quoted directly in
+ * OH-2026.json's interMunicipalCredit block) requires the home
+ * municipality to grant a NONREFUNDABLE credit for tax paid to the work
+ * municipality, capped at the home rate — computed here at WITHHOLDING
+ * time (not deferred to the return, the way Michigan's equivalent credit
+ * is), because the statute's own text frames it as a credit "against the
+ * tax or withholding the second municipality claims is due," not a
+ * return-only mechanism. If residenceCity and workCity are the SAME
+ * taxing municipality, tax fires ONCE, not twice. Neither city being one
+ * of the 679 (or no certificate at all) correctly produces no line at all
+ * — this is the closed-list-with-a-zero-case pattern already established
+ * for MI/PA, not a silent omission.
+ */
+function ohioLocalTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  if (rules.code !== 'OH') return null;
+  if (!hasOHMunicipalityRuleset(input.checkDate)) return null;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const residenceCityName = typeof cert.residenceCity === 'string' ? cert.residenceCity : undefined;
+  const workCityName = typeof cert.workCity === 'string' ? cert.workCity : undefined;
+  if (!residenceCityName && !workCityName) return null;
+
+  const residenceEntry = residenceCityName
+    ? ohMunicipalityRuleset(residenceCityName, input.checkDate)
+    : undefined;
+  const workEntry = workCityName ? ohMunicipalityRuleset(workCityName, input.checkDate) : undefined;
+
+  if (!residenceEntry && !workEntry) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+  const sameCity =
+    residenceEntry !== undefined &&
+    workEntry !== undefined &&
+    residenceEntry.name.toLowerCase() === workEntry.name.toLowerCase();
+
+  const taxFor = (entry: OHMunicipalityEntry): number => applyRate(periodWages, entry.rate);
+
+  if (sameCity) {
+    const t = taxFor(residenceEntry as OHMunicipalityEntry);
+    return {
+      id: 'OH_LOCAL',
+      name: 'Ohio Municipal Income Tax',
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: periodWages,
+      amount: t,
+      detail: `${fmt(t)} to ${residenceEntry!.name} @ ${(residenceEntry!.rate * 100).toFixed(2)}% (residence and work municipality are the same)`,
+    };
+  }
+
+  const workTax = workEntry ? taxFor(workEntry) : 0;
+  const homeTax = residenceEntry ? taxFor(residenceEntry) : 0;
+  const credit = Math.min(workTax, homeTax);
+  const netHomeTax = atLeastZero(homeTax - credit);
+  const amount = workTax + netHomeTax;
+
+  const details: string[] = [];
+  if (workEntry) {
+    details.push(`${fmt(workTax)} to ${workEntry.name} @ ${(workEntry.rate * 100).toFixed(2)}% on wages earned there`);
+  }
+  if (residenceEntry) {
+    details.push(
+      workEntry
+        ? `${fmt(netHomeTax)} to ${residenceEntry.name} @ ${(residenceEntry.rate * 100).toFixed(2)}% on all earnings, less a ${fmt(credit)} ORC 718.121 nonrefundable credit for tax paid to ${workEntry!.name} (capped at the home rate, no carryforward)`
+        : `${fmt(homeTax)} to ${residenceEntry.name} @ ${(residenceEntry.rate * 100).toFixed(2)}% on all earnings`,
+    );
+  }
+
+  return {
+    id: 'OH_LOCAL',
+    name: 'Ohio Municipal Income Tax',
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages: periodWages,
+    amount,
+    detail: details.join('; '),
+  };
+}
+
+/**
+ * Ohio's School District Income Tax (SDIT) — a tax category layered on top
+ * of both state and municipal income tax, levied independently by 214 of
+ * Ohio's school districts (data/local/OH-school-districts-2026.json,
+ * Ohio Dept of Taxation's own official SDIT_LIST.pdf). Looked up by the
+ * district's 4-digit sdNumber (certificate.schoolDistrictCode) rather than
+ * by name — see ohSchoolDistrictRuleset()'s own doc comment for why. A
+ * caller-resolved code, the same convention as every other local lookup
+ * in this file: this engine does not resolve an address to a district.
+ *
+ * Applied to the same taxable wage base as the state tax regardless of
+ * whether the district's own ballot measure taxes "traditional" (modified
+ * AGI, which can include non-wage income) or "earned income only" — the
+ * traditional/earned-income distinction governs what counts on the
+ * district's year-end RETURN, not what an employer withholds from wages;
+ * Ohio's own SD 100 withholding guidance applies the district rate to
+ * wages paid either way. A code absent from or expired out of the 214-row
+ * list correctly produces no line, not a silent $0 assumption for an
+ * unrecognised code — same closed-list convention as ohioLocalTax().
+ */
+function ohioSchoolDistrictTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  if (rules.code !== 'OH') return null;
+  if (!hasOHSchoolDistrictRuleset(input.checkDate)) return null;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const sdNumber = typeof cert.schoolDistrictCode === 'string' ? cert.schoolDistrictCode : undefined;
+  if (!sdNumber) return null;
+
+  const entry = ohSchoolDistrictRuleset(sdNumber, input.checkDate);
+  if (!entry) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+  const amount = applyRate(periodWages, entry.rate2026);
+
+  return {
+    id: 'OH_SDIT',
+    name: 'Ohio School District Income Tax',
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages: periodWages,
+    amount,
+    detail: `${fmt(amount)} to ${entry.name} (SD ${entry.sdNumber}) @ ${(entry.rate2026 * 100).toFixed(2)}% on wages (${entry.earnedIncomeOnlyBase ? 'earned-income-only' : 'traditional MAGI'} base, same wage figure withheld either way)`,
   };
 }
 

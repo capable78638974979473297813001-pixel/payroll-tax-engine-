@@ -1,0 +1,9 @@
+node_modules/
+
+# harvester/snapshots and harvester/review are regenerated on every test
+# run (tests/harvester.test.ts's before() hook deletes and recreates both
+# entirely) and embed the machine's own absolute filesystem path in each
+# .raw.meta.json -- not reproducible across clones/machines, so they don't
+# belong in version control. See tests/harvester.test.ts.
+harvester/snapshots/
+harvester/review/

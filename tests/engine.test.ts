@@ -4566,6 +4566,128 @@ describe('Ohio', () => {
     );
     assert.equal(amountOf(cutoverDay, 'OH_SIT'), dollars(22.57));
   });
+
+  // Municipal (OH_LOCAL) and School District (OH_SDIT) income tax — closes
+  // the gap where data/local/OH-municipalities-2026.json (679 jurisdictions)
+  // and data/local/OH-school-districts-2026.json (214 districts) were fully
+  // primary-sourced but never read by any calc code. Rates used below are
+  // real, taken directly from those two files: Columbus 2.5%, Cincinnati
+  // 1.8%, Cleveland 2.5%, Columbus Grove LSD (sdNumber 6901) 1.0%.
+  describe('municipal income tax (OH_LOCAL)', () => {
+    test('living and working in the same taxing city: tax fires once, not twice', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          checkDate: '2026-08-15',
+          workState: {
+            code: 'OH',
+            certificate: { residenceCity: 'Columbus', workCity: 'Columbus' },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'OH_LOCAL'), dollars(25.0));
+    });
+
+    test('home rate below work rate: home tax is fully credited away (ORC 718.121), only the work city collects', () => {
+      // Cincinnati resident (1.8%) working in Columbus (2.5%): work tax
+      // $25.00, home tax $18.00, credit = min(25, 18) = $18.00 -> net home
+      // $0. Total $25.00 (never less than the higher of the two rates).
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          checkDate: '2026-08-15',
+          workState: {
+            code: 'OH',
+            certificate: { residenceCity: 'Cincinnati', workCity: 'Columbus' },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'OH_LOCAL'), dollars(25.0));
+    });
+
+    test('home rate above work rate: home city collects the difference on top of the work tax', () => {
+      // Columbus resident (2.5%) working in Cincinnati (1.8%): work tax
+      // $18.00, home tax $25.00, credit = min(18, 25) = $18.00 -> net home
+      // $7.00. Total $25.00 (same total as above — a resident of the
+      // higher-rate city always ends up paying that city's full rate).
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          checkDate: '2026-08-15',
+          workState: {
+            code: 'OH',
+            certificate: { residenceCity: 'Columbus', workCity: 'Cincinnati' },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'OH_LOCAL'), dollars(25.0));
+    });
+
+    test('work city only (no known residence city): taxed on the work rate alone', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          checkDate: '2026-08-15',
+          workState: { code: 'OH', certificate: { workCity: 'Cleveland' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'OH_LOCAL'), dollars(25.0));
+    });
+
+    test('neither city is one of the 679 taxing municipalities: no OH_LOCAL line at all', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          checkDate: '2026-08-15',
+          workState: { code: 'OH', certificate: { residenceCity: 'Nowhereville' } },
+        }),
+      );
+      assert.equal(r.taxes.find((t) => t.id === 'OH_LOCAL'), undefined);
+    });
+
+    test('no city certificate at all: no OH_LOCAL line (not a silent $0 assumption)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          checkDate: '2026-08-15',
+          workState: { code: 'OH', certificate: {} },
+        }),
+      );
+      assert.equal(r.taxes.find((t) => t.id === 'OH_LOCAL'), undefined);
+    });
+  });
+
+  describe('School District Income Tax (OH_SDIT)', () => {
+    test('a recognised sdNumber taxes wages at the district rate', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          checkDate: '2026-08-15',
+          workState: { code: 'OH', certificate: { schoolDistrictCode: '6901' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'OH_SDIT'), dollars(10.0));
+    });
+
+    test('an unrecognised or absent sdNumber produces no OH_SDIT line', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          checkDate: '2026-08-15',
+          workState: { code: 'OH', certificate: { schoolDistrictCode: '9999' } },
+        }),
+      );
+      assert.equal(r.taxes.find((t) => t.id === 'OH_SDIT'), undefined);
+    });
+  });
 });
 
 describe('Delaware', () => {
@@ -6930,6 +7052,29 @@ describe('Wyoming', () => {
     const line = r.taxes.find((t) => t.id === 'WY_SIT');
     assert.equal(line, undefined);
   });
+});
+
+// FL/NV/SD/TN data files (method: 'no_income_tax') existed with no
+// confirming test, unlike AK/TX/WY — a real coverage gap closed in the
+// comprehensive-audit pass: nothing previously proved the dispatch case
+// actually fires for these 4 states specifically rather than falling
+// through to the "NOT MODELLED" placeholder line stateIncomeTax() emits
+// for a genuinely missing ruleset.
+describe('no-income-tax states without a prior confirming test', () => {
+  for (const code of ['FL', 'NV', 'SD', 'TN']) {
+    test(`${code}: no state wage income tax — ${code}_SIT is not produced`, () => {
+      const r = calculatePaycheck(
+        input({
+          checkDate: '2026-06-15',
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(700) }],
+          workState: { code },
+        }),
+      );
+      const line = r.taxes.find((t) => t.id === `${code}_SIT`);
+      assert.equal(line, undefined);
+    });
+  }
 });
 
 describe('North Dakota', () => {

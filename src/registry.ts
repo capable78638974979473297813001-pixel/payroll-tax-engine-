@@ -225,3 +225,80 @@ export function miCityRuleset(
   );
   return file.cities.find((c) => c.name.toLowerCase() === cityName.toLowerCase());
 }
+
+export interface OHMunicipalityEntry {
+  name: string;
+  municode: string;
+  rate: number;
+  effectiveFrom: string;
+  administeredBy: string;
+}
+
+interface OHMunicipalityRegistryFile {
+  year: number;
+  municipalities: OHMunicipalityEntry[];
+}
+
+/** Whether an Ohio municipal income tax registry exists for this check date. */
+export function hasOHMunicipalityRuleset(checkDate: string): boolean {
+  return existsSync(join(DATA_ROOT, 'local', `OH-municipalities-${yearOf(checkDate)}.json`));
+}
+
+/**
+ * Look up one Ohio municipality's rate by name (case-insensitive) — same
+ * "closed list, undefined for an unrecognised name" convention as
+ * miCityRuleset()/countyRuleset(). Unlike Michigan's file, there is only
+ * ONE rate per municipality (not a resident/nonresident split) — see
+ * OH-municipalities-2026.json's own residencyNote: this rate applies to
+ * income earned within the municipality regardless of who earned it, and
+ * separately to a RESIDENT's total income if their home municipality is
+ * also on this list. taxes/state.ts's ohioLocalTax() is what combines the
+ * two roles and applies the ORC 718.121 inter-municipal credit.
+ */
+export function ohMunicipalityRuleset(
+  name: string,
+  checkDate: string,
+): OHMunicipalityEntry | undefined {
+  const file = loadJson<OHMunicipalityRegistryFile>(
+    join('local', `OH-municipalities-${yearOf(checkDate)}.json`),
+  );
+  return file.municipalities.find((m) => m.name.toLowerCase() === name.toLowerCase());
+}
+
+export interface OHSchoolDistrictEntry {
+  county: string;
+  sdNumber: string;
+  irn: string;
+  name: string;
+  rate2026: number;
+  earnedIncomeOnlyBase: boolean;
+  firstYearEffective: number;
+}
+
+interface OHSchoolDistrictRegistryFile {
+  year: number;
+  districts: OHSchoolDistrictEntry[];
+}
+
+/** Whether an Ohio School District Income Tax (SDIT) registry exists for this check date. */
+export function hasOHSchoolDistrictRuleset(checkDate: string): boolean {
+  return existsSync(join(DATA_ROOT, 'local', `OH-school-districts-${yearOf(checkDate)}.json`));
+}
+
+/**
+ * Look up one Ohio school district's SDIT rate by its 4-digit sdNumber —
+ * not by name, since Ohio's own published names carry embedded annotations
+ * (e.g. "Bluffton EVSD (expires 2028)") that make an exact-string caller
+ * input unreliable; sdNumber is the stable, unambiguous key Ohio's own SD 100
+ * withholding forms use. Same "closed list, undefined for an unrecognised
+ * code" convention as every other local lookup in this file.
+ */
+export function ohSchoolDistrictRuleset(
+  sdNumber: string,
+  checkDate: string,
+): OHSchoolDistrictEntry | undefined {
+  const file = loadJson<OHSchoolDistrictRegistryFile>(
+    join('local', `OH-school-districts-${yearOf(checkDate)}.json`),
+  );
+  return file.districts.find((d) => d.sdNumber === sdNumber);
+}

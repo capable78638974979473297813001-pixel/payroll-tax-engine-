@@ -3,6 +3,12 @@
   "name": "Alaska",
   "year": 2026,
   "method": "no_income_tax",
+  "exemptPretax": [],
+  "exemptPretaxComment": "Not applicable -- no income tax exists for any pretax category to reduce the base of. Added for schema consistency with this project's other no-income-tax states (comprehensive-audit pass).",
+  "reciprocity": {
+    "reciprocalStates": [],
+    "note": "Not applicable -- Alaska has no income tax to be reciprocal about, same convention as this project's other no-income-tax states. Added for schema consistency (comprehensive-audit pass) -- this field was previously missing entirely from this file, unlike every other no-income-tax state's file."
+  },
   "sources": [
     {
       "title": "Alaska Dept of Labor and Workforce Development, Employment Security Tax -- 2026 Unemployment Insurance Tax Rates",
