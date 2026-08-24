@@ -834,7 +834,23 @@ function flatRate(
 ): TaxLine {
   const cfg = rules.flatRate as FlatRateConfig;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
-  const taxableWages = ctx.taxableWagesFor(exempt);
+  const fullBase = ctx.taxableWagesFor(exempt);
+  // Carve supplemental wages out of the regular base ONLY when this
+  // ruleset actually has a supplementalWages config (Michigan does; PA
+  // doesn't) — the caller (incomeTaxLines()'s 'flat_rate' case) attaches a
+  // separate flat-rate supplemental line precisely when that config is
+  // present, so this must stay conditional: flat_rate is shared by PA and
+  // MI, and unconditionally carving out supplementalCash for PA (which
+  // never emits a supplemental line to pick it back up) would silently
+  // leave a bonus untaxed entirely rather than just double-taxed. Found
+  // and fixed the double-taxation direction of this bug via a live check
+  // right after wiring Michigan's supplementalWages config: MI_SIT was
+  // still taxing the full base INCLUDING the bonus while MI_SIT_SUPP taxed
+  // the bonus again on top — the same class of gap bracketPhaseoutDeduction
+  // (WI)/bracketFlatAllowance (MN)/bracketPerPeriodGross (MT) had already
+  // closed for their own single-state methods.
+  const supplementalCash = rules.supplementalWages !== undefined ? supplementalEarnings(input.earnings) : 0;
+  const taxableWages = atLeastZero(fullBase - supplementalCash);
 
   // Annualise so that allowances (an annual figure) apply proportionally.
   const allowances = Number(input.workState?.certificate?.allowances ?? 0);
@@ -6244,7 +6260,17 @@ function newMexicoWithholding(
 ): TaxLine {
   const cfg = rules.percentageMethodTables as NMConfig;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
-  const periodWages = ctx.taxableWagesFor(exempt);
+  const fullBase = ctx.taxableWagesFor(exempt);
+  // Carve supplemental wages out of the regular bracket base — this
+  // ruleset ALWAYS pairs with a separate flat-rate supplemental line (see
+  // the 'new_mexico_percentage_method' dispatch case), so unlike flatRate()
+  // this doesn't need a presence check. FOUND AND FIXED as a genuine
+  // double-taxation bug: periodWages previously included the bonus, so a
+  // supplemental payment was taxed once via this bracket AND again via
+  // NM_SIT_SUPP — the same class of gap NY's computeNYSStyleTax() already
+  // avoided by doing exactly this subtraction.
+  const supplementalCash = supplementalEarnings(input.earnings);
+  const periodWages = atLeastZero(fullBase - supplementalCash);
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const status = resolveNMFilingStatus(cert);

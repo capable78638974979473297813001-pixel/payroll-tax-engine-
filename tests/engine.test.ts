@@ -619,7 +619,15 @@ describe('Michigan', () => {
     assert.equal(amountOf(r, 'MI_SIT'), 0);
   });
 
-  test('supplemental (bonus) wages withhold a flat 4.25%, with no exemption adjustment', () => {
+  test('supplemental (bonus) wages withhold a flat 4.25%, with no exemption adjustment, WITHOUT being taxed twice', () => {
+    // A real double-taxation bug lived here until a later "go to every
+    // state" pass: flatRate() computed MI_SIT over a base that still
+    // INCLUDED the bonus, so the $1,000 supplemental payment was taxed
+    // once via MI_SIT's regular flat rate AND again via MI_SIT_SUPP —
+    // asserting both lines here so that regression can't go silent again.
+    // MI_SIT must see only the $3,000 regular wage — same $117.86 as the
+    // no-bonus baseline test above, proving the bonus was correctly
+    // carved out, not just coincidentally close.
     const r = calculatePaycheck(
       input({
         earnings: [
@@ -629,6 +637,7 @@ describe('Michigan', () => {
         ...mi(1),
       }),
     );
+    assert.equal(amountOf(r, 'MI_SIT'), dollars(117.86));
     assert.equal(amountOf(r, 'MI_SIT_SUPP'), dollars(42.5)); // 1,000 × 4.25%
   });
 
@@ -6560,7 +6569,15 @@ describe('New Mexico', () => {
     assert.equal(amountOf(r, 'NM_SIT'), dollars(72.21));
   });
 
-  test('supplemental wages withhold a flat 5.9%, independent of the regular-wage bracket', () => {
+  test('supplemental wages withhold a flat 5.9%, independent of the regular-wage bracket, WITHOUT being taxed twice', () => {
+    // A real double-taxation bug lived here until a later "go to every
+    // state" pass: NM_SIT used to compute its bracket over periodWages
+    // that still INCLUDED the bonus, so the $1,000 supplemental payment
+    // was taxed once via NM_SIT's bracket AND again via NM_SIT_SUPP's flat
+    // 5.9% — this test now asserts BOTH lines, not just the supplemental
+    // one, so that regression can't go silent again. NM_SIT must see only
+    // the $700 regular wage (bracket [645,799): 15.80 + 4.3% × 55 =
+    // $18.16), not $1,700.
     const r = calculatePaycheck(
       input({
         checkDate: '2026-06-15',
@@ -6572,6 +6589,7 @@ describe('New Mexico', () => {
         ...nmState({ filingStatus: 'single' }),
       }),
     );
+    assert.equal(amountOf(r, 'NM_SIT'), dollars(18.16));
     assert.equal(amountOf(r, 'NM_SIT_SUPP'), dollars(59.0));
   });
 
