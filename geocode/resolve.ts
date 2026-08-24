@@ -20,6 +20,7 @@ import {
   allOHMunicipalities,
   allOHSchoolDistricts,
   allPALocalJurisdictions,
+  stateRuleset,
   type CountyEntry,
   type MICityEntry,
   type OHMunicipalityEntry,
@@ -33,6 +34,7 @@ import {
   schoolDistrictKeysMatch,
   stripCountySuffix,
   stripPlaceTypeSuffix,
+  toMDCountyKey,
   toPAMunicipalityForm,
 } from './normalize.ts';
 
@@ -157,6 +159,47 @@ function matchOHSchoolDistrictByName(
   return { confidence: 'no_match', entry: null };
 }
 
+/**
+ * Maryland's 23 counties + Baltimore City piggyback local income tax
+ * (MDConfig.countyRates, inline in data/states/MD-2026.json — NOT a
+ * separate data/local file the way IN/MI/OH/PA's locals are, since MD's
+ * "local" tax is really a state-defined per-county rate table rather than
+ * an independently-set municipal ordinance). Checks BOTH the Counties
+ * layer (23 real counties) and Incorporated Places (Baltimore City sits
+ * inside no county, so it only ever appears there) since which layer has
+ * the answer depends on whether the address is inside a county or inside
+ * the one county-equivalent independent city.
+ */
+function matchMDCounty(
+  places: string[],
+  counties: string[],
+  checkDate: string,
+): FieldMatch<string> {
+  const rules = stateRuleset('MD', checkDate) as unknown as {
+    countyRates?: Record<string, unknown>;
+  };
+  const keys = Object.keys(rules.countyRates ?? {}).filter((k) => !k.startsWith('$'));
+
+  const candidates: string[] = [];
+  for (const name of [...counties, ...places]) {
+    const key = toMDCountyKey(name);
+    if (keys.includes(key) && !candidates.includes(key)) candidates.push(key);
+  }
+  if (candidates.length === 1) return { confidence: 'matched', entry: candidates[0] };
+  if (candidates.length > 1) return { confidence: 'ambiguous', entry: null, candidates };
+  return { confidence: 'no_match', entry: null };
+}
+
+/** Whether a specific named place appears (after stripping Census's place-type suffix) among a list of Incorporated Places. */
+function placesInclude(places: string[], name: string): boolean {
+  return places.some((p) => namesEqual(stripPlaceTypeSuffix(p), name));
+}
+
+/** Whether a specific named county appears (after stripping " County") among a list of Counties. */
+function countiesInclude(counties: string[], name: string): boolean {
+  return counties.some((c) => namesEqual(stripCountySuffix(c), name));
+}
+
 export interface ResolvedJurisdiction {
   state: string;
   miCity: FieldMatch<MICityEntry> | null;
@@ -164,6 +207,30 @@ export interface ResolvedJurisdiction {
   ohSchoolDistrict: FieldMatch<OHSchoolDistrictEntry> | null;
   county: FieldMatch<CountyEntry> | null;
   paJurisdiction: FieldMatch<PALocalEntry> | null;
+  mdCounty: FieldMatch<string> | null;
+  /**
+   * Simple named-place/county flags this address's geography matches,
+   * independent of role — the caller (see index.ts's resolveEmployee())
+   * applies each one to whichever address role the underlying tax
+   * actually keys off (verified against taxes/state.ts's own doc comments
+   * for each: NYC/Yonkers-resident from the RESIDENCE address, Yonkers-
+   * nonresident-worker/Newark/Multnomah from the WORK address, Kansas
+   * City/St. Louis from EITHER — see resolveEmployee()'s own comments).
+   * Portland's Metro SHS district and Oregon's TriMet/Lane Transit
+   * District are deliberately NOT here: confirmed this session (via
+   * TIGERweb's own layer listing) that Census has no boundary data for
+   * any of the three at all — they are special districts/regional
+   * government boundaries outside what these two free Census services can
+   * resolve, not an oversight.
+   */
+  flags: {
+    newYorkCity: boolean;
+    yonkers: boolean;
+    newark: boolean;
+    kansasCity: boolean;
+    stLouis: boolean;
+    multnomahCounty: boolean;
+  };
 }
 
 /**
@@ -187,6 +254,15 @@ export function resolveJurisdiction(
     ohSchoolDistrict: null,
     county: null,
     paJurisdiction: null,
+    mdCounty: null,
+    flags: {
+      newYorkCity: false,
+      yonkers: false,
+      newark: false,
+      kansasCity: false,
+      stLouis: false,
+      multnomahCounty: false,
+    },
   };
 
   if (state === 'MI') {
@@ -207,6 +283,23 @@ export function resolveJurisdiction(
   }
   if (state === 'PA') {
     result.paJurisdiction = matchPAJurisdiction(geo.counties, geo.countySubdivisions, checkDate);
+  }
+  if (state === 'MD') {
+    result.mdCounty = matchMDCounty(geo.incorporatedPlaces, geo.counties, checkDate);
+  }
+  if (state === 'NY') {
+    result.flags.newYorkCity = placesInclude(geo.incorporatedPlaces, 'New York');
+    result.flags.yonkers = placesInclude(geo.incorporatedPlaces, 'Yonkers');
+  }
+  if (state === 'NJ') {
+    result.flags.newark = placesInclude(geo.incorporatedPlaces, 'Newark');
+  }
+  if (state === 'MO') {
+    result.flags.kansasCity = placesInclude(geo.incorporatedPlaces, 'Kansas City');
+    result.flags.stLouis = placesInclude(geo.incorporatedPlaces, 'St. Louis');
+  }
+  if (state === 'OR') {
+    result.flags.multnomahCounty = countiesInclude(geo.counties, 'Multnomah');
   }
 
   return result;
@@ -243,6 +336,9 @@ export function toCertificateFields(
   }
   if (resolved.paJurisdiction?.confidence === 'matched' && resolved.paJurisdiction.entry) {
     fields[role === 'work' ? 'workPSD' : 'residencePSD'] = resolved.paJurisdiction.entry.psdCode;
+  }
+  if (resolved.mdCounty?.confidence === 'matched' && resolved.mdCounty.entry) {
+    fields.county = resolved.mdCounty.entry;
   }
 
   return fields;

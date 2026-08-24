@@ -1,16 +1,31 @@
 /**
- * Public entry point: one street address in, resolved certificate fields
+ * Public entry point: street address(es) in, resolved certificate fields
  * out. Ties together census.ts's live fetches and resolve.ts's pure
  * matching — kept as a thin orchestrator so each half stays independently
  * testable (resolve.ts's tests use captured fixture JSON; this file itself
  * is exercised only by examples/geocode-demo.ts against the live services).
  *
  * This is explicitly an ONBOARDING/ADDRESS-CHANGE step, not something
- * calculatePaycheck() ever calls — see this module's own README section
- * for why. Call it once when an employee's work or home address is entered
- * or changes, review anything below 'matched' confidence, then store the
- * resulting certificate fields on the employee record for calculatePaycheck()
- * to read on every subsequent paycheck without ever touching the network.
+ * calculatePaycheck() ever calls — see resolve.ts's own doc comment for
+ * why. Call it once when an employee's work or home address is entered or
+ * changes, review anything below 'matched' confidence, then store the
+ * resulting certificate fields on the employee record for
+ * calculatePaycheck() to read on every subsequent paycheck without ever
+ * touching the network.
+ *
+ * Two entry points:
+ *   - resolveAddress() — ONE address, ONE role. Fine for the common case
+ *     (MI/OH/PA/IN local taxes, all keyed purely off that single address).
+ *   - resolveEmployee() — BOTH addresses together. Required whenever a tax
+ *     is keyed off something that isn't simply "this one address's own
+ *     role": Yonkers' resident/nonresident-worker taxes are mutually
+ *     exclusive and need to compare both addresses to know which one (if
+ *     either) fires; Missouri's Kansas City/St. Louis earnings tax fires
+ *     from EITHER address; NYC's resident tax and Maryland's/Multnomah's
+ *     taxes are role-specific in a way a single generic 'work'/'residence'
+ *     label doesn't capture without the state-specific knowledge encoded
+ *     below (verified against each tax's own doc comment in
+ *     taxes/state.ts, not assumed).
  */
 import { fetchSchoolDistrictAtPoint, geocodeAddress } from './census.ts';
 import { resolveJurisdiction, toCertificateFields, type ResolvedJurisdiction } from './resolve.ts';
@@ -33,21 +48,25 @@ export interface AddressResolution {
   fullyResolved: boolean;
 }
 
-/**
- * Resolve a full street address (e.g. "2 Woodward Ave, Detroit, MI 48226")
- * into the certificate fields taxes/state.ts already knows how to read.
- * `role` controls whether MI/OH local fields land as workCity/residenceCity
- * and PA's PSD lands as workPSD/residencePSD — the same employee's home and
- * work addresses are typically resolved as two separate calls.
- */
-export async function resolveAddress(
+function attemptedMatches(resolved: ResolvedJurisdiction) {
+  return [
+    resolved.miCity,
+    resolved.ohMunicipality,
+    resolved.ohSchoolDistrict,
+    resolved.county,
+    resolved.paJurisdiction,
+    resolved.mdCounty,
+  ].filter((m) => m !== null);
+}
+
+/** Geocode one address and resolve it against every registry this module knows how to match. Returns matched: false, not a throw, when Census has no match — an unmatched address is a common, expected outcome. */
+async function geocodeAndResolve(
   address: string,
-  role: 'work' | 'residence',
   checkDate: string,
-): Promise<AddressResolution> {
+): Promise<{ resolved: ResolvedJurisdiction; matched: true } | { resolved: null; matched: false }> {
   const geocoded = await geocodeAddress(address);
   if (!geocoded.matched || !geocoded.geographies || !geocoded.coordinates) {
-    return { address, matched: false, resolved: null, certificateFields: {}, fullyResolved: false };
+    return { resolved: null, matched: false };
   }
 
   let schoolDistrictName: string | undefined;
@@ -57,17 +76,118 @@ export async function resolveAddress(
       undefined;
   }
 
-  const resolved = resolveJurisdiction(geocoded.geographies, checkDate, schoolDistrictName);
-  const certificateFields = toCertificateFields(resolved, role);
+  return {
+    resolved: resolveJurisdiction(geocoded.geographies, checkDate, schoolDistrictName),
+    matched: true,
+  };
+}
 
-  const attempted = [
-    resolved.miCity,
-    resolved.ohMunicipality,
-    resolved.ohSchoolDistrict,
-    resolved.county,
-    resolved.paJurisdiction,
-  ].filter((m) => m !== null);
-  const fullyResolved = attempted.every((m) => m!.confidence !== 'ambiguous');
+/**
+ * Resolve a full street address (e.g. "2 Woodward Ave, Detroit, MI 48226")
+ * into the certificate fields taxes/state.ts already knows how to read.
+ * `role` controls whether MI/OH/MD local fields land as workCity/
+ * residenceCity and PA's PSD lands as workPSD/residencePSD.
+ *
+ * Sufficient on its own for MI, OH, IN, PA, and MD (single-address-scoped
+ * taxes). Use resolveEmployee() instead for NY/MO/NJ/OR, whose taxes are
+ * keyed off a comparison between BOTH addresses — see this module's own
+ * doc comment above.
+ */
+export async function resolveAddress(
+  address: string,
+  role: 'work' | 'residence',
+  checkDate: string,
+): Promise<AddressResolution> {
+  const { resolved, matched } = await geocodeAndResolve(address, checkDate);
+  if (!matched) {
+    return { address, matched: false, resolved: null, certificateFields: {}, fullyResolved: false };
+  }
+
+  const certificateFields = toCertificateFields(resolved, role);
+  const fullyResolved = attemptedMatches(resolved).every((m) => m!.confidence !== 'ambiguous');
 
   return { address, matched: true, resolved, certificateFields, fullyResolved };
+}
+
+export interface EmployeeResolution {
+  work: AddressResolution | null;
+  residence: AddressResolution | null;
+  /** The merged certificate object — everything from resolveAddress() for each role, PLUS the cross-address flags below. Feed this straight into PaycheckInput.workState.certificate. */
+  certificateFields: Record<string, unknown>;
+  /** Taxes this session confirmed CANNOT be resolved from Census/TIGERweb data at all (not a match failure — no boundary data exists for these). Surfaced so a caller doesn't mistake silence for "not applicable". */
+  notResolvable: string[];
+}
+
+/**
+ * Resolve an employee's work AND residence addresses together, applying
+ * the cross-address business rules a single resolveAddress() call can't:
+ *
+ *   - New York City / Yonkers resident tax: RESIDENCE address only
+ *     (nycLocalTax()/yonkersLocalTax()'s own doc comments — "applies to
+ *     residents only").
+ *   - Yonkers nonresident-worker tax: WORK address, and only when the
+ *     residence address is NOT also Yonkers (the two are mutually
+ *     exclusive per yonkersLocalTax()'s own doc comment).
+ *   - Missouri Kansas City / St. Louis earnings tax: EITHER address
+ *     (missouriLocalEarningsTax()'s own doc comment — "certificate.locality
+ *     (the caller's own resolution of 'does this employee's residence OR
+ *     work location put them in scope')").
+ *   - Newark payroll tax: WORK address (an employer tax on services
+ *     performed there).
+ *   - Multnomah County Preschool For All tax: WORK address (Portland's own
+ *     withholding guidance: "employees that work within Multnomah
+ *     County" — confirmed directly, not assumed, since Metro's own
+ *     guidance for the SHS tax uses the same "work within" framing).
+ *
+ * Either address may be omitted (e.g. an employee who lives out of state
+ * and whose residence-state taxes aren't modelled here) — every rule above
+ * degrades gracefully to "that flag stays false" rather than throwing.
+ */
+export async function resolveEmployee(
+  addresses: { work?: string; residence?: string },
+  checkDate: string,
+): Promise<EmployeeResolution> {
+  const [work, residence] = await Promise.all([
+    addresses.work ? resolveAddress(addresses.work, 'work', checkDate) : Promise.resolve(null),
+    addresses.residence
+      ? resolveAddress(addresses.residence, 'residence', checkDate)
+      : Promise.resolve(null),
+  ]);
+
+  const fields: Record<string, unknown> = {
+    ...(work?.certificateFields ?? {}),
+    ...(residence?.certificateFields ?? {}),
+  };
+
+  const workFlags = work?.resolved?.flags;
+  const residenceFlags = residence?.resolved?.flags;
+
+  if (residenceFlags?.newYorkCity) fields.nycResident = true;
+
+  if (residenceFlags?.yonkers) {
+    fields.yonkersResident = true;
+  } else if (workFlags?.yonkers) {
+    fields.yonkersNonresidentWorker = true;
+  }
+
+  if (workFlags?.newark) {
+    fields.locality = 'Newark';
+  } else if (workFlags?.kansasCity || residenceFlags?.kansasCity) {
+    fields.locality = 'Kansas City';
+  } else if (workFlags?.stLouis || residenceFlags?.stLouis) {
+    fields.locality = 'St. Louis';
+  }
+
+  if (workFlags?.multnomahCounty) fields.multnomahCounty = true;
+
+  const notResolvable: string[] = [];
+  const workState = work?.resolved?.state ?? residence?.resolved?.state;
+  if (workState === 'OR') {
+    notResolvable.push(
+      "Portland Metro's Supportive Housing Services district (certificate.metroDistrict) — no Census/TIGERweb boundary data exists for this regional-government special district; must be supplied manually.",
+      "Oregon's TriMet and Lane Transit District boundaries (certificate.locality = 'TriMet'/'LTD') — same reason, no boundary data available via Census.",
+    );
+  }
+
+  return { work, residence, certificateFields: fields, notResolvable };
 }

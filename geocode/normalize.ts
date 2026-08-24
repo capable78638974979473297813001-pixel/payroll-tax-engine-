@@ -23,6 +23,19 @@ export function stripParenthetical(name: string): string {
  * carry (they're keyed by the bare name). "Indianapolis city (balance)" is
  * the specific reason this strips iteratively rather than once — a single
  * regex pass leaves "(balance)" behind after removing "city ".
+ *
+ * The type-suffix match is deliberately CASE-SENSITIVE (lowercase only) —
+ * Census always appends its own type word in lowercase ("Kansas City
+ * city", "Detroit city"), while a place's own NAME can legitimately end in
+ * a capitalized version of the same word ("Kansas City", "Carson City",
+ * "Jersey City", "University City"). A case-INSENSITIVE match here was a
+ * real, caught bug: on "Kansas City city" it stripped the appended
+ * lowercase "city" on pass 1 to get "Kansas City", then — because the
+ * regex's `i` flag also matched the capital "City" that's part of the
+ * actual name — the loop's own iteration stripped THAT too on pass 2,
+ * collapsing "Kansas City" all the way down to "Kansas". Caught by a
+ * failing test (tests/geocode.test.ts's Kansas City case) before it ever
+ * reached the live demo, not by reasoning about it in the abstract.
  */
 export function stripPlaceTypeSuffix(name: string): string {
   let n = name.trim();
@@ -31,7 +44,7 @@ export function stripPlaceTypeSuffix(name: string): string {
     prev = n;
     n = n
       .replace(/\s*\(balance\)\s*$/i, '')
-      .replace(/\s+(city|village|town|township|borough|CDP|municipality)\s*$/i, '')
+      .replace(/\s+(city|village|town|township|borough|CDP|municipality)\s*$/, '')
       .trim();
   } while (n !== prev);
   return n;
@@ -114,6 +127,36 @@ export function schoolDistrictKeyFromDataFileName(dataFileName: string): SchoolD
     return { base: CASE_FOLD(tokens.slice(0, -1).join(' ')), type: last };
   }
   return { base: CASE_FOLD(withoutNote), type: null };
+}
+
+/**
+ * MD-2026.json's own countyRates object keys its 23 counties + Baltimore
+ * City (a state-recognised independent city, part of NO county) in
+ * camelCase with punctuation stripped: "AnneArundel", "PrinceGeorges",
+ * "StMarys", "QueenAnnes", "BaltimoreCounty", "BaltimoreCity". Census
+ * returns "Anne Arundel County", "Prince George's County", "St. Mary's
+ * County", "Queen Anne's County", "Baltimore County" (the Counties layer)
+ * and "Baltimore city" (the Incorporated Places layer, NOT Counties,
+ * since Baltimore City sits inside no county) — this collapses either
+ * form down to MD's own key so a plain equality check works.
+ */
+export function toMDCountyKey(censusName: string): string {
+  const n = censusName.trim();
+  // Baltimore is the one name MD-2026.json deliberately keeps the suffix
+  // on ("BaltimoreCounty" vs "BaltimoreCity") precisely because the two are
+  // easily confused, adjacent, different jurisdictions -- every other
+  // county's key drops "County" entirely, so this can't be a general rule.
+  if (/^Baltimore\s+County$/i.test(n)) return 'BaltimoreCounty';
+  if (/^Baltimore\s+city$/i.test(n)) return 'BaltimoreCity';
+
+  return n
+    .replace(/\s+County\s*$/i, '')
+    .replace(/'/g, '')
+    .replace(/[.\s]+/g, ' ')
+    .trim()
+    .split(' ')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join('');
 }
 
 /**

@@ -9,6 +9,7 @@ import {
   stripCountySuffix,
   stripParenthetical,
   stripPlaceTypeSuffix,
+  toMDCountyKey,
   toPAMunicipalityForm,
 } from '../geocode/normalize.ts';
 import {
@@ -61,6 +62,19 @@ describe('normalize.ts', () => {
   test('toPAMunicipalityForm matches PA-EIT-LST-2026.json\'s own abbreviated convention', () => {
     assert.equal(toPAMunicipalityForm('Abington township'), 'ABINGTON TWP');
     assert.equal(toPAMunicipalityForm('Abbottstown borough'), 'ABBOTTSTOWN BORO');
+  });
+
+  test('toMDCountyKey matches MD-2026.json\'s own camelCase countyRates keys, including the Baltimore City/County special case', () => {
+    assert.equal(toMDCountyKey('Anne Arundel County'), 'AnneArundel');
+    assert.equal(toMDCountyKey("Prince George's County"), 'PrinceGeorges');
+    assert.equal(toMDCountyKey("St. Mary's County"), 'StMarys');
+    assert.equal(toMDCountyKey("Queen Anne's County"), 'QueenAnnes');
+    assert.equal(toMDCountyKey('Montgomery County'), 'Montgomery');
+    // The one deliberate exception: MD-2026.json keeps "County"/"City" on
+    // Baltimore specifically because the two are different, adjacent
+    // jurisdictions that are easy to conflate.
+    assert.equal(toMDCountyKey('Baltimore County'), 'BaltimoreCounty');
+    assert.equal(toMDCountyKey('Baltimore city'), 'BaltimoreCity');
   });
 
   test('Ohio school district keys match across genuinely different vocabularies on each side', () => {
@@ -195,5 +209,117 @@ describe('resolve.ts — real captured Census geographies', () => {
     const resolved = resolveJurisdiction(geo, CHECK_DATE);
     assert.equal(resolved.miCity?.confidence, 'no_match');
     assert.equal(resolved.miCity?.entry, null);
+  });
+
+  // Real captured responses: Baltimore MD (independent city, no county),
+  // Rockville MD (ordinary city inside a real county), St. Louis MO
+  // (independent city), Kansas City MO (ordinary city inside Jackson
+  // County), Newark NJ, Yonkers NY, midtown Manhattan NY, downtown
+  // Portland OR (inside Multnomah County).
+  test('Baltimore, MD: resolves via the Incorporated Places layer to BaltimoreCity, not BaltimoreCounty', () => {
+    const geo: CensusGeographies = {
+      state: 'MD',
+      incorporatedPlaces: ['Baltimore city'],
+      countySubdivisions: [],
+      counties: ['Baltimore city'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.mdCounty?.confidence, 'matched');
+    assert.equal(resolved.mdCounty?.entry, 'BaltimoreCity');
+    assert.deepEqual(toCertificateFields(resolved, 'residence'), { county: 'BaltimoreCity' });
+  });
+
+  test('Rockville, MD: an ordinary city resolves via the county it sits inside, not the city name', () => {
+    const geo: CensusGeographies = {
+      state: 'MD',
+      incorporatedPlaces: ['Rockville city'],
+      countySubdivisions: [],
+      counties: ['Montgomery County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.mdCounty?.confidence, 'matched');
+    assert.equal(resolved.mdCounty?.entry, 'Montgomery');
+  });
+
+  test('New York City: sets the newYorkCity flag from Incorporated Places', () => {
+    const geo: CensusGeographies = {
+      state: 'NY',
+      incorporatedPlaces: ['New York city'],
+      countySubdivisions: [],
+      counties: ['New York County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.flags.newYorkCity, true);
+    assert.equal(resolved.flags.yonkers, false);
+  });
+
+  test('Yonkers, NY: sets the yonkers flag, not the newYorkCity flag', () => {
+    const geo: CensusGeographies = {
+      state: 'NY',
+      incorporatedPlaces: ['Yonkers city'],
+      countySubdivisions: [],
+      counties: ['Westchester County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.flags.yonkers, true);
+    assert.equal(resolved.flags.newYorkCity, false);
+  });
+
+  test('St. Louis, MO: sets the stLouis flag (Census keeps the period)', () => {
+    const geo: CensusGeographies = {
+      state: 'MO',
+      incorporatedPlaces: ['St. Louis city'],
+      countySubdivisions: [],
+      counties: ['St. Louis city'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.flags.stLouis, true);
+    assert.equal(resolved.flags.kansasCity, false);
+  });
+
+  test('Kansas City, MO: sets the kansasCity flag', () => {
+    const geo: CensusGeographies = {
+      state: 'MO',
+      incorporatedPlaces: ['Kansas City city'],
+      countySubdivisions: [],
+      counties: ['Jackson County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.flags.kansasCity, true);
+    assert.equal(resolved.flags.stLouis, false);
+  });
+
+  test('Newark, NJ: sets the newark flag', () => {
+    const geo: CensusGeographies = {
+      state: 'NJ',
+      incorporatedPlaces: ['Newark city'],
+      countySubdivisions: [],
+      counties: ['Essex County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.flags.newark, true);
+  });
+
+  test('downtown Portland, OR: sets multnomahCounty from the Counties layer', () => {
+    const geo: CensusGeographies = {
+      state: 'OR',
+      incorporatedPlaces: ['Portland city'],
+      countySubdivisions: [],
+      counties: ['Multnomah County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.flags.multnomahCounty, true);
+  });
+
+  test('a Missouri address outside both KC and St. Louis leaves both flags false', () => {
+    const geo: CensusGeographies = {
+      state: 'MO',
+      incorporatedPlaces: ['Springfield city'],
+      countySubdivisions: [],
+      counties: ['Greene County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.flags.kansasCity, false);
+    assert.equal(resolved.flags.stLouis, false);
   });
 });
