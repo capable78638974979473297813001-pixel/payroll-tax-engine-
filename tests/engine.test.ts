@@ -6673,6 +6673,111 @@ describe('Alaska', () => {
   });
 });
 
+describe('Oklahoma', () => {
+  const okState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'OK', certificate },
+  });
+
+  test("reproduces OW-2's own Sample Computation exactly: semi-monthly $1,825, married, 2 allowances -> $37.00", () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1825) }],
+        ...okState({ filingStatus: 'married', allowances: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'OK_SIT'), dollars(37));
+  });
+
+  test("'Married, but withhold at higher Single rate' resolves to the SINGLE table, not Married", () => {
+    // Same $1,825 semimonthly, 2 allowances as the worked example above, but
+    // this election uses the narrower Single brackets instead — net $1,741.66
+    // now lands in Single's top bracket (565+, 4.5%): 4.55 + 4.5% x 1,176.66
+    // = $57.50 -> rounds to $58.00, well above the Married table's $37.00 on
+    // identical wages.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'semimonthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1825) }],
+        ...okState({ filingStatus: 'married_withhold_as_single', allowances: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'OK_SIT'), dollars(58));
+  });
+
+  test('absent certificate defaults to Single with zero allowances', () => {
+    // Weekly $500, no certificate: net $500 (no allowance deduction) lands
+    // in Single's top bracket (261+, 4.5%): 2.10 + 4.5% x 239 = $12.86 ->
+    // rounds to $13.00.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+        workState: { code: 'OK' },
+      }),
+    );
+    assert.equal(amountOf(r, 'OK_SIT'), dollars(13));
+  });
+
+  test('a claimed exemption (OK-W-4 Line 7/8/9) zeroes withholding entirely (certificate.exempt)', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...okState({ filingStatus: 'single', exempt: true }),
+      }),
+    );
+    assert.equal(amountOf(r, 'OK_SIT'), 0);
+  });
+
+  test('no reciprocity with any state', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+        residenceState: { code: 'TX' },
+        workState: { code: 'OK' },
+      }),
+    );
+    assert.equal(amountOf(r, 'OK_SIT'), dollars(13));
+  });
+
+  test('a 401(k) deferral reduces the Oklahoma taxable base', () => {
+    // Same weekly $500/single/3-allowances baseline ($10.00), but $100/wk
+    // to a 401(k) drops net wages from $442.31 to $342.31, still in the
+    // 4.5% bracket but on a smaller excess: 2.10 + 4.5% x 81.31 = $5.76 ->
+    // rounds to $6.00.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(100) }],
+        ...okState({ filingStatus: 'single', allowances: 3 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'OK_SIT'), dollars(6));
+  });
+
+  test('additional withholding (OK-W-4 Line 6) adds on top of the computed amount', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+        ...okState({ filingStatus: 'single', additionalWithholding: dollars(25) }),
+      }),
+    );
+    // $13.00 base (same as the absent-certificate case above) + $25.00 = $38.00.
+    assert.equal(amountOf(r, 'OK_SIT'), dollars(38));
+  });
+});
+
 describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(

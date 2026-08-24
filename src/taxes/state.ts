@@ -745,6 +745,8 @@ function incomeTaxLines(
     }
     case 'hawaii_annual_bracket':
       return [hawaiiWithholding(input, ctx, rules)];
+    case 'oklahoma_percentage_method':
+      return [oklahomaWithholding(input, ctx, rules)];
     case 'no_income_tax':
       return [];
     default:
@@ -6226,5 +6228,94 @@ function hawaiiWithholding(
       `(${status === 'married' ? 'Married' : 'Single incl. unmarried HoH'}), bracket ${fmt(dollars(bracket.from))}-` +
       `${bracket.to === null ? '∞' : fmt(dollars(bracket.to))}: ${fmt(dollars(bracket.base))} + ` +
       `${(bracket.rate * 100).toFixed(2)}% × ${fmt(excess)} = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
+  };
+}
+
+interface OKConfig {
+  allowanceAmount: Partial<Record<string, number>>; // dollars per allowance, keyed by payFrequency — each is $1,000 (the personal exemption) / periodsPerYear
+  brackets: {
+    single: Partial<Record<string, WIBracket[]>>;
+    married: Partial<Record<string, WIBracket[]>>;
+  };
+}
+
+/**
+ * Oklahoma's Percentage Formula Method (Packet OW-2, Tables 1-8, read
+ * directly): subtract $1,000/allowance-claimed/periodsPerYear (a single
+ * undifferentiated allowance value — Form OK-W-4's own self/spouse/
+ * dependent/additional-itemized lines all add into ONE count, unlike
+ * Mississippi's differently-valued categories) from period wages, then look
+ * up a genuine PER-PERIOD 4-bracket table (0%/2.5%/3.5%/4.5%) keyed by only
+ * two statuses — Single, and Married ("Married, but withhold at higher
+ * Single rate" resolves to the Single table per OW-2's own instruction:
+ * "If a taxpayer has elected [that] option... use the appropriate Single
+ * Persons withholding table"). All 8 published periods (Weekly/Biweekly/
+ * Semimonthly/Monthly/Quarterly/Semiannual/Annual/Daily) transcribed
+ * directly rather than annualized-and-divided, since OW-2 publishes exact
+ * per-period tables with no annualize/divide guidance the way Hawaii's
+ * Guide offers — verified for internal consistency (Semiannual = 2x
+ * Quarterly, Annual = 4x Quarterly / 2x Semiannual, Married = 2x Single
+ * throughout) and reproduced OW-2's own Sample Computation exactly
+ * (semi-monthly $1,825, married, 2 allowances: 1,825 - (41.67x2=83.34) =
+ * 1,741.66 net; bracket [1,129,∞): 9.10 + 4.5% x 612.66 = $36.6697 ->
+ * rounds to $37.00). Note: OW-2's own worked-example NARRATIVE sentence
+ * says "$12.19 plus 4.5%" but then correctly uses and states the table's
+ * real $9.10 base in the actual arithmetic and final answer — a genuine
+ * typo in Oklahoma's own document, not followed. Rounding is OW-2's own
+ * stated rule ("drop under 50 cents, round 50-99 cents up to the next
+ * dollar" — ordinary round-half-up to the whole dollar) via the generic
+ * rules.roundFinalToWholeDollar flag, not duplicated here. This is the
+ * first state in this project confirmed to have RECENTLY changed its own
+ * bracket COUNT, not just its rates — HB 2764 collapsed 6 narrow brackets
+ * (0.25%-4.75%) into these 4 (0%-4.5%) for 2026, independently corroborated
+ * by a second source before trusting the reconstructed table.
+ */
+function oklahomaWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.percentageMethod as OKConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const statusRaw = (cert.filingStatus as string) ?? 'single';
+  const status = statusRaw === 'married' ? 'married' : 'single';
+
+  const period = input.payFrequency;
+  const allowanceAmount = cfg.allowanceAmount[period];
+  if (allowanceAmount === undefined) {
+    throw new Error(
+      `Oklahoma's own OW-2 doesn't publish a "${period}" withholding allowance amount — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+  const allowances = Number(cert.allowances ?? 0);
+  const allowanceDeduction = dollars(allowanceAmount) * allowances;
+  const netWages = atLeastZero(periodWages - allowanceDeduction);
+
+  const table = cfg.brackets[status][period];
+  if (!table) {
+    throw new Error(
+      `Oklahoma's own OW-2 doesn't publish a "${period}" bracket table for "${status}" — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+
+  const bracket = findWIBracket(table, netWages);
+  const excess = netWages - dollars(bracket.from);
+  const amount = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      `${fmt(periodWages)} less ${fmt(allowanceDeduction)} (${allowances} × $${allowanceAmount} allowances) ` +
+      `= ${fmt(netWages)} net (${status === 'married' ? 'Married' : 'Single'}, ${period}), bracket ${fmt(dollars(bracket.from))}-` +
+      `${bracket.to === null ? '∞' : fmt(dollars(bracket.to))}: ${fmt(dollars(bracket.base))} + ` +
+      `${(bracket.rate * 100).toFixed(1)}% × ${fmt(excess)} = ${fmt(amount)}`,
   };
 }

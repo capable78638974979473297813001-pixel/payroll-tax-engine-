@@ -413,10 +413,9 @@
       "wageIncomeTax": true,
       "structure": "bracket",
       "withholdingSource": "https://oklahoma.gov/tax/businesses/withholding.html",
-      "sourceDoc": "Packet OW-2 2026 Oklahoma Income Tax Withholding Tables (Rev. 11-2025). Form OK-W-4.",
-      "status": "source_verified",
-      "sourceVerifiedOn": "2026-08-11",
-      "sourceRechecked": "2026-08-11 (URL corrected after 404)"
+      "sourceDoc": "Packet OW-2 2026 Oklahoma Income Tax Withholding Tables (Rev. 11-2025), fetched and read directly. Wired into calc code (oklahomaWithholding()): $1,000/allowance/periodsPerYear subtracted from period wages, then a genuine per-period 4-bracket table (0%/2.5%/3.5%/4.5%, all 8 published periods transcribed directly) by status (Single, or Married -- 'withhold at higher Single rate' resolves to Single per OW-2's own instruction). Reproduced OW-2's own Sample Computation exactly; caught a real typo in the source's own narrative sentence ($12.19 vs the table's actual $9.10, not followed). Confirmed via a second source that HB 2764 collapsed OK's prior 6-bracket schedule into these 4 for 2026 -- a genuine bracket-COUNT change, not just a rate change. exemptPretax confirmed via 68 O.S. Sec. 2358's federal-conformity language. No reciprocity, no local tax, no mandatory paid leave.",
+      "status": "modelled",
+      "sourceVerifiedOn": "2026-08-22"
     },
     {
       "code": "OR",
