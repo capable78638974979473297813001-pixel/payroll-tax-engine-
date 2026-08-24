@@ -205,6 +205,13 @@ export function stateIncomeTax(
   // monthly-aggregation fields this genuinely different tax SHAPE requires.
   lines.push(...denverOccupationalPrivilegeTax(input, rules));
 
+  // West Virginia's per-city Municipal Service Fee — see
+  // westVirginiaMunicipalServiceFee()'s own doc comment for why this is a
+  // genuinely new calc-code shape (flat per-week fee, not a wage
+  // percentage).
+  const wvFee = westVirginiaMunicipalServiceFee(input, ctx, rules);
+  if (wvFee) lines.push(wvFee);
+
   // A flat, uncapped, universal employee excise — Oregon's Statewide
   // Transit Tax is the first (and so far only) user, but written
   // generically (dispatched off rules.stateExciseEmployee) the same way
@@ -3633,6 +3640,73 @@ function denverOccupationalPrivilegeTax(
       detail: `Flat $${cfg.employerRatePerEmployee}/month per taxable employee.`,
     },
   ];
+}
+
+interface WVServiceFeeCityConfig {
+  weeklyRate: number; // dollars per week
+}
+
+/**
+ * West Virginia's per-city Municipal/City Service Fee (WV Code 8-13-13) —
+ * a FLAT FEE PER WEEK, not a percentage of wages, imposed by an employee's
+ * DUTY-STATION city (work-location-based, like Newark's tax, not
+ * residence-based) rather than any bracket or flat-rate income tax. A
+ * genuinely different shape from every other local tax in this project:
+ * even PA's Local Services Tax — this project's other flat-fee local tax —
+ * is stated as an ANNUAL cap ($52/yr) prorated across pay periods; West
+ * Virginia's cities instead each publish a bare WEEKLY dollar figure with
+ * no per-pay-period breakdown in any source consulted. This function
+ * infers a per-period amount the same way PA's LST prorates ($weeklyRate
+ * × 52 annualized, then divided across this employee's actual pay
+ * periods, rounded DOWN to the cent) — a reasonable but NOT verbatim-
+ * sourced convention, disclosed as an assumption in WV-2026.json's own
+ * knownGap rather than presented as confirmed.
+ *
+ * Gated on certificate.locality, the same caller-resolved-locality shape
+ * as Newark's/Denver's/Missouri's local taxes — this engine does not
+ * resolve an address to a city itself.
+ *
+ * NOT modelled, disclosed rather than guessed at: Wheeling's own 30-
+ * consecutive-day-in-the-city threshold before the fee first attaches
+ * (no employment-duration input exists anywhere in this engine — every
+ * duty-station-in-Wheeling case is treated as already past the
+ * threshold); the multi-job dedup rule (an employee working multiple jobs
+ * in the same WV city is only assessed once — the same class of
+ * un-modelled multi-employer coordination as Newark's Form-based
+ * exemption elsewhere in this project); and Weirton's mid-2026 rate
+ * change from $2.00 to $5.00/week has no effective-dating mechanism (this
+ * function always uses the current $5.00 figure, correct only for check
+ * dates on/after the ordinance's ~2026-05-14 effective date).
+ */
+function westVirginiaMunicipalServiceFee(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const locality = typeof cert.locality === 'string' ? cert.locality : undefined;
+  if (!locality) return null;
+
+  const cities = (rules.localIncomeTax as { serviceFeeCities?: Record<string, WVServiceFeeCityConfig> } | undefined)
+    ?.serviceFeeCities;
+  const city = cities?.[locality];
+  if (!city) return null;
+
+  const annualFee = dollars(city.weeklyRate) * 52;
+  const amount = roundDownToCent(annualFee / ctx.periodsPerYear);
+
+  return {
+    id: 'WV_LOCAL_FEE',
+    name: `${locality} Municipal Service Fee`,
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages: 0,
+    amount,
+    detail:
+      `$${city.weeklyRate}/week flat fee (WV Code 8-13-13), annualized (×52) and divided across ` +
+      `${ctx.periodsPerYear} pay periods/yr, rounded down to the cent (same convention as PA's LST) ` +
+      `— certificate.locality = "${locality}"`,
+  };
 }
 
 interface MAExemptionConfig {

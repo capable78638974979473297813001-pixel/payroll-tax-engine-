@@ -6033,6 +6033,67 @@ describe('West Virginia', () => {
     );
     assert.equal(amountOf(r, 'WV_SIT'), 0);
   });
+
+  // Municipal Service Fee (WV_LOCAL_FEE) — a flat PER-WEEK fee, genuinely
+  // different from every bracket/percentage tax elsewhere in this file.
+  // Amounts hand-derived from each city's own published weekly rate
+  // (WV-2026.json's own serviceFeeCities) before running.
+  describe('Municipal Service Fee (WV_LOCAL_FEE)', () => {
+    test('Charleston, weekly pay: the weekly rate applies directly ($2.50/wk x 52 / 52 periods)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Charleston' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(2.5));
+    });
+
+    test('Wheeling, biweekly pay: $2.00/wk x 52 / 26 periods = $4.00/period', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+          workState: { code: 'WV', certificate: { locality: 'Wheeling' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(4.0));
+    });
+
+    test('Weirton, monthly pay: $5.00/wk x 52 / 12 periods = $21.6666, rounded DOWN to $21.66', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'monthly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(4000) }],
+          workState: { code: 'WV', certificate: { locality: 'Weirton' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(21.66));
+    });
+
+    test('no certificate.locality: no WV_LOCAL_FEE line at all', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV' },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
+    });
+
+    test('a WV city with no service fee (not one of the 6 captured): no WV_LOCAL_FEE line', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Beckley' } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
+    });
+  });
 });
 
 describe('North Carolina', () => {
