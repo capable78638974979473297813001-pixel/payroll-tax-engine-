@@ -4807,11 +4807,17 @@ function coloradoWithholding(
   };
 }
 
-interface UTConfig {
+interface UTTable {
   rate: number;
   phaseOutRate: number;
   baseAllowance: { single: Partial<Record<string, number>>; married: Partial<Record<string, number>> };
   phaseOutThreshold: { single: Partial<Record<string, number>>; married: Partial<Record<string, number>> };
+}
+
+interface UTConfig {
+  effectiveDateOfNewTable: string;
+  beforeJune2026: UTTable;
+  fromJune2026: UTTable;
 }
 
 function resolveUTMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
@@ -4840,6 +4846,15 @@ function resolveUTMaritalStatus(cert: Record<string, unknown>): 'single' | 'marr
  * $400.50 exactly, which must round HALF-UP to $401 to reproduce the
  * source's own stated $401 and, downstream, its own stated $367 final
  * answer.
+ *
+ * GENUINE MID-YEAR CUT (found on a later "go to every state" pass, same
+ * shape as Ohio's HB96 and Georgia's HB463): SB60 cut the rate 4.50% ->
+ * 4.45% for tax year 2026, but Publication 14's own withholding-table
+ * revision only took effect 2026-06-01 — an archived Rev. 4/25 revision
+ * (fetched via the Wayback Machine, since the live URL had already been
+ * overwritten by the newer one) confirms the OLD 4.5%/$450/$900 table
+ * governed every 2026 pay period before that date. Dispatches on
+ * cfg.effectiveDateOfNewTable via a plain checkDate string-compare.
  */
 function utahWithholding(
   input: PaycheckInput,
@@ -4847,6 +4862,7 @@ function utahWithholding(
   rules: StateRuleset,
 ): TaxLine {
   const cfg = rules.flatRatePhaseoutAllowance as UTConfig;
+  const table = input.checkDate >= cfg.effectiveDateOfNewTable ? cfg.fromJune2026 : cfg.beforeJune2026;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const periodWages = ctx.taxableWagesFor(exempt);
 
@@ -4854,18 +4870,18 @@ function utahWithholding(
   const status = resolveUTMaritalStatus(cert);
   const period = input.payFrequency;
 
-  const baseAllowanceDollars = cfg.baseAllowance[status][period];
-  const phaseOutThresholdDollars = cfg.phaseOutThreshold[status][period];
+  const baseAllowanceDollars = table.baseAllowance[status][period];
+  const phaseOutThresholdDollars = table.phaseOutThreshold[status][period];
   if (baseAllowanceDollars === undefined || phaseOutThresholdDollars === undefined) {
     throw new Error(
       `Utah's own Publication 14 doesn't publish a "${period}" schedule — cannot compute ${rules.code}_SIT.`,
     );
   }
 
-  const line2 = toWholeDollars(periodWages * cfg.rate);
+  const line2 = toWholeDollars(periodWages * table.rate);
   const line3 = dollars(baseAllowanceDollars);
   const line4 = atLeastZero(periodWages - dollars(phaseOutThresholdDollars));
-  const line5 = toWholeDollars(line4 * cfg.phaseOutRate);
+  const line5 = toWholeDollars(line4 * table.phaseOutRate);
   const line6 = atLeastZero(line3 - line5);
   const amount = atLeastZero(line2 - line6);
 
@@ -4877,9 +4893,10 @@ function utahWithholding(
     taxableWages: periodWages,
     amount,
     detail:
-      `${fmt(periodWages)} @ ${(cfg.rate * 100).toFixed(2)}% = ${fmt(line2)} gross tax; base allowance ` +
-      `${fmt(line3)} less ${fmt(line5)} phase-out (${(cfg.phaseOutRate * 100).toFixed(1)}% of ${fmt(line4)} over ` +
-      `$${phaseOutThresholdDollars}) = ${fmt(line6)} net allowance (${status}); withholding = ${fmt(line2)} - ${fmt(line6)}`,
+      `${fmt(periodWages)} @ ${(table.rate * 100).toFixed(2)}% = ${fmt(line2)} gross tax; base allowance ` +
+      `${fmt(line3)} less ${fmt(line5)} phase-out (${(table.phaseOutRate * 100).toFixed(1)}% of ${fmt(line4)} over ` +
+      `$${phaseOutThresholdDollars}) = ${fmt(line6)} net allowance (${status}); withholding = ${fmt(line2)} - ${fmt(line6)} ` +
+      `(${table === cfg.fromJune2026 ? 'post' : 'pre'}-2026-06-01 table)`,
   };
 }
 

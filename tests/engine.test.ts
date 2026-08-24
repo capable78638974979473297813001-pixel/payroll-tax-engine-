@@ -5355,6 +5355,37 @@ describe('Utah', () => {
     );
     assert.equal(amountOf(r, 'UT_SIT'), dollars(12));
   });
+
+  test('a checkDate before 2026-06-01 uses the OLD 4.5% table (Rev. 4/25), not the current 4.45% one', () => {
+    // Same biweekly $2,600/single as Example 2 above, but the OLD table's
+    // own numbers ($117 base allowance, $350 threshold) produce a
+    // genuinely different final answer than the current table's $116 —
+    // proving this actually dispatches on checkDate, not just re-running
+    // the same math with a different label. line2=2,600x4.5%=$117 exactly;
+    // line4=2,600-350=2,250; line5=2,250x1.3%=$29.25->$29; line6=17-29,
+    // floored at $0; withholding=117-0=$117.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-03-15',
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2600) }],
+        ...utState({ maritalStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'UT_SIT'), dollars(117));
+  });
+
+  test('a checkDate on or after 2026-06-01 uses the current 4.45% table', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-01',
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2600) }],
+        ...utState({ maritalStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'UT_SIT'), dollars(116));
+  });
 });
 
 describe('Maryland', () => {
