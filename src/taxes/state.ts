@@ -9,13 +9,15 @@ import {
   toWholeDollars,
   underCap,
 } from '../money.ts';
-import type { PALocalEntry, StateRuleset } from '../registry.ts';
+import type { MICityEntry, PALocalEntry, StateRuleset } from '../registry.ts';
 import {
   countyRuleset,
   federalRuleset,
   hasCountyRuleset,
+  hasMICityRuleset,
   hasPALocalRuleset,
   hasStateRuleset,
+  miCityRuleset,
   paLocalRuleset,
   stateRuleset,
 } from '../registry.ts';
@@ -241,6 +243,12 @@ export function stateIncomeTax(
   // and the 2,627-jurisdiction data file it reads from.
   const paLocal = pennsylvaniaLocalTax(input, ctx, rules);
   lines.push(...paLocal);
+
+  // Michigan's 24-city local income tax (Uniform City Income Tax Ordinance,
+  // Act 284) — see michiganLocalTax()'s own doc comment for the resident/
+  // nonresident rule and the inter-city credit it applies.
+  const miLocal = michiganLocalTax(input, ctx, rules);
+  if (miLocal) lines.push(miLocal);
 
   // Resident-working-elsewhere credit — a DIFFERENT direction from every
   // reciprocity mechanism above: those zero THIS state's tax when the
@@ -649,8 +657,12 @@ function incomeTaxLines(
   rules: StateRuleset,
 ): TaxLine[] {
   switch (rules.method) {
-    case 'flat_rate':
-      return [flatRate(input, ctx, rules)];
+    case 'flat_rate': {
+      const lines: TaxLine[] = [flatRate(input, ctx, rules)];
+      const supplemental = flatRateSupplementalFromConfig(input, ctx, rules);
+      if (supplemental) lines.push(supplemental);
+      return lines;
+    }
     case 'flat_rate_multi_exemption':
       return flatRateMultiExemption(input, ctx, rules);
     case 'flat_rate_two_tier_exemption':
@@ -5383,6 +5395,119 @@ function pennsylvaniaLocalTax(
   if (lstLine) lines.push(lstLine);
 
   return lines;
+}
+
+/**
+ * Michigan's 24-city local income tax (Uniform City Income Tax Ordinance,
+ * Act 284, reading data/local/MI-cities-2026.json via registry.ts's
+ * miCityRuleset() — the same "separate large local file, looked up by
+ * name" pattern already established for Indiana's counties and PA's PSD
+ * codes). This engine does NOT resolve an address to a city itself — the
+ * caller supplies certificate.residenceCity and/or certificate.workCity
+ * (already-resolved city names, case-insensitive), the same convention as
+ * Indiana's/PA's certificate.county/workPSD.
+ *
+ * Rule (Act 284, cross-confirmed via MI-cities-2026.json's own
+ * localTaxScope): a resident of one of the 24 cities owes that city's
+ * RESIDENT rate on ALL earnings, regardless of where they work. An
+ * employee who WORKS in a (different) taxing city but doesn't live there
+ * owes that city's lower NONRESIDENT rate on wages earned there. Both can
+ * apply simultaneously (a resident of one taxing city working in another)
+ * — this engine withholds BOTH lines rather than netting them, because
+ * MI-cities-2026.json's own interCityCredit block documents the credit as
+ * a RETURN-level mechanism ("include page 1 of the other city's income
+ * tax return with your home city return"), not something the employer
+ * computes at withholding time — inventing a withholding-time net-credit
+ * figure would go beyond what any source here actually describes. If
+ * residenceCity and workCity are the SAME taxing city, tax fires ONCE at
+ * the (higher) resident rate, not twice. Neither city being one of the 24
+ * (or no certificate at all) correctly produces $0, not silent omission —
+ * MI-cities-2026.json's own localTaxScope is explicit that this is a
+ * closed list with a default-zero case, the same guarantee already
+ * established for "a random guy in rural Michigan."
+ *
+ * Exemption: reuses certificate.allowances, the SAME count already used
+ * for state MI_SIT, since Michigan's city exemption concept is modelled
+ * on the state's own system and MI-cities-2026.json documents no separate
+ * per-city allowance count a caller would supply instead — a disclosed
+ * assumption, not an independently-confirmed one-to-one mapping.
+ */
+function michiganLocalTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  if (rules.code !== 'MI') return null;
+  if (!hasMICityRuleset(input.checkDate)) return null;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const residenceCityName = typeof cert.residenceCity === 'string' ? cert.residenceCity : undefined;
+  const workCityName = typeof cert.workCity === 'string' ? cert.workCity : undefined;
+  if (!residenceCityName && !workCityName) return null;
+
+  const residenceEntry = residenceCityName ? miCityRuleset(residenceCityName, input.checkDate) : undefined;
+  const workEntry = workCityName ? miCityRuleset(workCityName, input.checkDate) : undefined;
+
+  if (!residenceEntry && !workEntry) {
+    return {
+      id: 'MI_LOCAL',
+      name: 'Michigan Local Income Tax',
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: 0,
+      amount: 0,
+      detail:
+        `$0 — neither "${residenceCityName ?? ''}" nor "${workCityName ?? ''}" is one of Michigan's ` +
+        `24 taxing cities (Act 284 closed list; every other MI address owes $0 local tax by default).`,
+    };
+  }
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+  const annualWages = periodWages * ctx.periodsPerYear;
+  const allowances = Number(cert.allowances ?? 0);
+  const sameCity =
+    residenceEntry !== undefined &&
+    workEntry !== undefined &&
+    residenceEntry.name.toLowerCase() === workEntry.name.toLowerCase();
+
+  const perPeriodTax = (entry: MICityEntry, rate: number): number => {
+    const annualExemption = dollars(entry.exemptionAmount) * allowances;
+    const annualTaxable = atLeastZero(annualWages - annualExemption);
+    return roundHalfUp(applyRate(annualTaxable, rate) / ctx.periodsPerYear);
+  };
+
+  let amount = 0;
+  const details: string[] = [];
+
+  if (residenceEntry) {
+    const t = perPeriodTax(residenceEntry, residenceEntry.residentRate);
+    amount += t;
+    details.push(
+      `${fmt(t)} resident tax to ${residenceEntry.name} @ ${(residenceEntry.residentRate * 100).toFixed(2)}% on all earnings`,
+    );
+  }
+  if (workEntry && !sameCity) {
+    const t = perPeriodTax(workEntry, workEntry.nonresidentRate);
+    amount += t;
+    details.push(
+      `${fmt(t)} nonresident tax to ${workEntry.name} @ ${(workEntry.nonresidentRate * 100).toFixed(2)}% on wages earned there`,
+    );
+  }
+
+  return {
+    id: 'MI_LOCAL',
+    name: 'Michigan Local Income Tax',
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages: periodWages,
+    amount,
+    detail:
+      details.join('; ') +
+      (residenceEntry && workEntry && !sameCity
+        ? ' — inter-city credit for the second city\'s tax is a RETURN-level mechanism (files with the home city\'s return), not applied at withholding time'
+        : ''),
+  };
 }
 
 /**

@@ -1,5 +1,5 @@
 {
-  "$comment": "All 24 Michigan cities levying an income tax. NOT wired into the calculation engine yet (see engine README / knownGaps) — this is the verified data layer, matching the project's data-before-code discipline. Rates are flat percentages of compensation; residents are taxed on all earnings, nonresidents only on Michigan-city-source earnings (Uniform City Income Tax Ordinance, MCL 141.601 et seq.).",
+  "$comment": "All 24 Michigan cities levying an income tax. WIRED into the calculation engine (a later 'go to every state' pass) — see michiganLocalTax() in src/taxes/state.ts, dispatched via certificate.residenceCity/certificate.workCity and read through registry.ts's miCityRuleset(). Rates are flat percentages of compensation; residents are taxed on all earnings, nonresidents only on Michigan-city-source earnings (Uniform City Income Tax Ordinance, MCL 141.601 et seq.).",
   "year": 2026,
   "asOf": "2026-08-11",
   "localTaxScope": {
@@ -311,7 +311,7 @@
     "knownGap": "Not modelled in the engine — no code resolves a taxpayer's home vs. work MI city pair to apply this credit. Not independently confirmed for all 24 cities individually (only 2 of 24 have been checked for this specific provision, though Act 284's uniform-ordinance structure is why 2 agreeing sources is reasonably strong evidence of a shared rule)."
   },
   "knownGaps": [
-    "Not wired into the calculation engine yet — no city local-tax compute path exists.",
+    "RESOLVED: wired into the calculation engine (michiganLocalTax() in src/taxes/state.ts) -- resident and nonresident tax both compute, exemption applies via certificate.allowances (the same count used for state MI_SIT, a disclosed assumption). Inter-city credit is deliberately NOT applied at withholding time -- see the next bullet.",
     "Inter-city credit rule is now documented (interCityCredit above) from 2 independent primary sources, not just Detroit's Form 5469 — but still not individually confirmed for all 24 cities, and not read from Act 284's statute text directly.",
     "Exemption proration for part-year residency varies by city; not modelled.",
     "The 'only cities can levy, everyone else owes zero' rule (localTaxScope) is corroborated across every source consulted but not confirmed against the Act 284 statute text directly — two fetch attempts failed on SSL/nav errors this session (NOTE: MCL 141.631 specifically, the exemptions section, WAS fetched directly 2026-08-12 and confirms the ordinance-by-ordinance structure this rule depends on; the closed-list-of-24 provision itself, believed to be earlier in Act 284, is still unconfirmed by direct statute read)."

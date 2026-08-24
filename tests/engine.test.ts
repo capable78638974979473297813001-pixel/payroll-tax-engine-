@@ -618,6 +618,94 @@ describe('Michigan', () => {
     );
     assert.equal(amountOf(r, 'MI_SIT'), 0);
   });
+
+  test('supplemental (bonus) wages withhold a flat 4.25%, with no exemption adjustment', () => {
+    const r = calculatePaycheck(
+      input({
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(3000) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+        ],
+        ...mi(1),
+      }),
+    );
+    assert.equal(amountOf(r, 'MI_SIT_SUPP'), dollars(42.5)); // 1,000 × 4.25%
+  });
+
+  describe('local city income tax', () => {
+    test('resident of a taxing city owes that city\'s resident rate on all earnings', () => {
+      // Albion: 1% resident, $600 exemption. Annual 78,000 − 600 = 77,400
+      // × 1% = 774.00/yr ÷ 26 = $29.77.
+      const r = calculatePaycheck(
+        input({
+          workState: {
+            code: 'MI',
+            certificate: { allowances: 1, residenceCity: 'Albion' },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'MI_LOCAL'), dollars(29.77));
+    });
+
+    test('nonresident working in a taxing city owes that city\'s lower nonresident rate', () => {
+      // Battle Creek: 0.5% nonresident, $750 exemption. Annual 78,000 − 750
+      // = 77,250 × 0.5% = 386.25/yr ÷ 26 = $14.86.
+      const r = calculatePaycheck(
+        input({
+          workState: {
+            code: 'MI',
+            certificate: { allowances: 1, workCity: 'Battle Creek' },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'MI_LOCAL'), dollars(14.86));
+    });
+
+    test('resident of one taxing city working in another owes BOTH lines, no automatic net credit', () => {
+      // Albion resident ($29.77, from above) + Battle Creek nonresident
+      // ($14.86, from above) = $44.63 combined — the inter-city credit is
+      // a return-level mechanism, not applied at withholding time.
+      const r = calculatePaycheck(
+        input({
+          workState: {
+            code: 'MI',
+            certificate: { allowances: 1, residenceCity: 'Albion', workCity: 'Battle Creek' },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'MI_LOCAL'), dollars(44.63));
+    });
+
+    test('living and working in the SAME taxing city fires the tax only once, at the resident rate', () => {
+      const r = calculatePaycheck(
+        input({
+          workState: {
+            code: 'MI',
+            certificate: { allowances: 1, residenceCity: 'Albion', workCity: 'Albion' },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'MI_LOCAL'), dollars(29.77));
+    });
+
+    test('neither city is one of the 24 taxing cities — $0, not silently omitted', () => {
+      const r = calculatePaycheck(
+        input({
+          workState: {
+            code: 'MI',
+            certificate: { allowances: 1, residenceCity: 'Ann Arbor' },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'MI_LOCAL'), 0);
+    });
+
+    test('no city fields at all produces no MI_LOCAL line — most employees never touch this', () => {
+      const r = calculatePaycheck(input(mi(1)));
+      const line = r.taxes.find((t) => t.id === 'MI_LOCAL');
+      assert.equal(line, undefined);
+    });
+  });
 });
 
 describe('Indiana', () => {

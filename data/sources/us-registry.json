@@ -270,8 +270,8 @@
       "withholdingSource": "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/SUW/TY2026/446_Withholding-Guide_2026.pdf",
       "sourceDoc": "Form 446 (Rev. 02-26) 2026 Withholding Guide, PDF fetched and read directly: '4.25% ... Personal Exemption Amount: $5,900' (corrected from an earlier, stale $5,800/2025 figure recorded here previously). State data modelled in data/states/MI-2026.json.",
       "status": "modelled",
-      "sourceVerifiedOn": "2026-08-11",
-      "note": "State flat rate modelled + fixture-ready. All 24 city income taxes catalogued in data/local/MI-cities-2026.json (Detroit + Saginaw individually verified against primary sources, Saginaw corrected from a wrong secondary rate; other 22 cities source_verified via one consolidated municipal table, pending per-city confirmation). Local calc path not yet wired into the engine."
+      "sourceVerifiedOn": "2026-08-22",
+      "note": "State flat rate modelled + fixture-ready. All 24 city income taxes catalogued in data/local/MI-cities-2026.json, now ALL primary_source_confirmed for both rates and exemption amounts (upgraded in an earlier pass from the original consolidated-table sourcing). WIRED (a later 'go to every state' pass): michiganLocalTax() computes resident/nonresident local tax via certificate.residenceCity/workCity; supplemental (bonus) wages now withhold at a flat 4.25% via the existing generic supplemental mechanism; reciprocity's inbound direction was already wired in an earlier pass."
     },
     {
       "code": "MN",

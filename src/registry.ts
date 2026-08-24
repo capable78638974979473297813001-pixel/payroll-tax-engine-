@@ -190,3 +190,38 @@ export function paLocalRuleset(
   );
   return file.jurisdictions.find((j) => j.psdCode === psdCode);
 }
+
+export interface MICityEntry {
+  name: string;
+  residentRate: number;
+  nonresidentRate: number;
+  exemptionAmount: number;
+}
+
+interface MICityRegistryFile {
+  year: number;
+  cities: MICityEntry[];
+}
+
+/** Whether a Michigan local city-income-tax registry exists for this check date. */
+export function hasMICityRuleset(checkDate: string): boolean {
+  return existsSync(join(DATA_ROOT, 'local', `MI-cities-${yearOf(checkDate)}.json`));
+}
+
+/**
+ * Look up one Michigan city's rates by name (case-insensitive) — same
+ * "closed list, undefined for an unrecognised name" convention as
+ * countyRuleset()/paLocalRuleset(). An undefined return here is the
+ * CORRECT signal for "not one of the 24 taxing cities," not a data gap —
+ * see MI-cities-2026.json's own localTaxScope: any address not in the
+ * list owes $0 by the same closed-list authority (Act 284).
+ */
+export function miCityRuleset(
+  cityName: string,
+  checkDate: string,
+): MICityEntry | undefined {
+  const file = loadJson<MICityRegistryFile>(
+    join('local', `MI-cities-${yearOf(checkDate)}.json`),
+  );
+  return file.cities.find((c) => c.name.toLowerCase() === cityName.toLowerCase());
+}

@@ -38,8 +38,8 @@
     "allowanceAmount": 5900.0,
     "comment": "Michigan withholds 4.25% after subtracting the annual personal/dependency exemption allowance ($5,900 per exemption for 2026, up from $5,800 in 2025). The employee's MI-W4 exemption count goes in workState.certificate.allowances. NOTE: a widely-syndicated third-party page listed Michigan at 4.05% (the expired 2023 temporary rate) — the 4.25% here is from the official 2026 Form 446, not a secondary source."
   },
-  "supplementalRate": 0.0425,
-  "supplementalComment": "Bonuses/other separate payments: multiply by 4.25% with NO exemption adjustment (Form 446). Not yet wired — the engine's state path applies exemptions to all earnings; see knownGaps.",
+  "supplementalWages": { "flatRate": 0.0425 },
+  "supplementalComment": "WIRED (a later 'go to every state' pass): bonuses/other separate payments withhold at a flat 4.25% with NO exemption adjustment (Form 446) -- reused the existing generic flatRateSupplementalFromConfig() mechanism (already built for New Mexico/New York) by renaming this field from a bare supplementalRate number to the supplementalWages.flatRate shape that helper reads, rather than writing MI-specific code. Zero new engine code needed.",
   "exemptPretax": [
     "section125",
     "hsa",
@@ -135,10 +135,10 @@
     "notCoveredByThoseFixtures": "Supplemental (bonus) wages, reciprocity, and SUTA are NOT exercised by any test — see knownGaps below. Only the regular-wages state-income-tax path has been proven end-to-end."
   },
   "knownGaps": [
-    "State supplemental (bonus) 4.25% no-exemption path not yet wired — currently the flat_rate method applies exemptions to all earnings including supplemental. NOT covered by any test.",
-    "MI-W4 additional-withholding and additional-exemptions (age/blind) fields not yet modelled.",
-    "Local city income tax (24 cities) lives in data/local/MI-cities-2026.json and is not yet computed by the engine.",
-    "Reciprocity (6 states) is documented above but not implemented — see reciprocity.knownGap.",
+    "RESOLVED (a later 'go to every state' pass): state supplemental (bonus) 4.25% no-exemption path is wired — see supplementalWages/supplementalComment above. Reuses the existing generic flatRateSupplementalFromConfig() mechanism, zero new code.",
+    "MI-W4 additional-withholding IS modelled generically (certificate.additionalWithholding, see withholdingCertificate.knownGap) — the top-level bullet claiming otherwise was stale and is corrected here. Additional-exemptions (age/blind) remain genuinely unmodelled.",
+    "RESOLVED (a later 'go to every state' pass): local city income tax (24 cities) is now computed — see michiganLocalTax() in state.ts, dispatched via certificate.residenceCity/certificate.workCity. Inter-city credit is documented but deliberately NOT applied at withholding time (it's a return-level mechanism per the data file's own text) — both cities' taxes are withheld independently when they differ.",
+    "Reciprocity's INBOUND direction (6 states) IS implemented — see reciprocity.knownGap above, which already noted this; the claim here that it was 'not implemented' was stale and is corrected. The OUTBOUND direction (a MI resident working in a reciprocal state) remains a genuine, project-wide architecture gap, not MI-specific.",
     "State unemployment (SUTA) is documented above but not implemented, and the experienced-employer rate is fundamentally per-employer, not a jurisdiction constant — see unemploymentInsurance.knownGap."
   ]
 }
