@@ -27,10 +27,17 @@ async function demo(label: string, address: string, workState: string) {
   }
 
   console.log(`  Resolved certificate fields: ${JSON.stringify(result.certificateFields)}`);
-  if (!result.fullyResolved) {
+  if (result.matchQuality) {
     console.log(
-      `  \x1b[33m⚠ ambiguous match on at least one field — a human should confirm before this address goes live.\x1b[0m`,
+      `  Match quality: matched "${result.matchQuality.matchedAddress}"` +
+        (result.matchQuality.addressRangeWidth !== null
+          ? `, address range width ${result.matchQuality.addressRangeWidth}`
+          : '') +
+        (result.matchQuality.matchedViaFallback ? ', via secondary-unit fallback' : ''),
     );
+  }
+  for (const reason of result.lowConfidenceReasons) {
+    console.log(`  \x1b[33m⚠ ${reason}\x1b[0m`);
   }
 
   const paycheck = calculatePaycheck({

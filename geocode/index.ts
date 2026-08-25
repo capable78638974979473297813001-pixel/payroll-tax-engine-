@@ -27,7 +27,7 @@
  *     below (verified against each tax's own doc comment in
  *     taxes/state.ts, not assumed).
  */
-import { fetchSchoolDistrictAtPoint, geocodeAddress } from './census.ts';
+import { fetchSchoolDistrictAtPointSafe, geocodeAddress, type MatchQuality } from './census.ts';
 import { resolveJurisdiction, toCertificateFields, type ResolvedJurisdiction } from './resolve.ts';
 
 export type {
@@ -37,15 +37,34 @@ export type {
   ResolvedJurisdiction,
 } from './resolve.ts';
 export { resolveJurisdiction, toCertificateFields } from './resolve.ts';
-export { geocodeAddress, fetchSchoolDistrictAtPoint } from './census.ts';
+export {
+  fetchSchoolDistrictAtPoint,
+  geocodeAddress,
+  normalizeAddress,
+  type FetchOptions,
+  type MatchQuality,
+} from './census.ts';
+
+/**
+ * A WIDE interpolation range is the honest signal this project can offer
+ * in place of true rooftop precision (see census.ts's own doc comment for
+ * why it can't do better without a paid geocoder). 20 is not a scientific
+ * threshold — it's a deliberately conservative "worth a second look before
+ * this address goes live near a boundary" line, picked to flag block faces
+ * with many addressable lots rather than ordinary short suburban blocks.
+ */
+const WIDE_ADDRESS_RANGE_THRESHOLD = 20;
 
 export interface AddressResolution {
   address: string;
   matched: boolean;
   resolved: ResolvedJurisdiction | null;
   certificateFields: Record<string, unknown>;
-  /** True when every field the address could plausibly need was 'matched' — false means a human should look before this address goes live in certificate data. */
+  matchQuality: MatchQuality | null;
+  /** True when every field the address could plausibly need was 'matched' AND the geocode itself was high-confidence (narrow interpolation range, no fallback retry needed) — false means a human should look before this address goes live in certificate data. */
   fullyResolved: boolean;
+  /** Plain-language reasons fullyResolved is false, if it is — empty when fullyResolved is true. */
+  lowConfidenceReasons: string[];
 }
 
 function attemptedMatches(resolved: ResolvedJurisdiction) {
@@ -62,26 +81,45 @@ function attemptedMatches(resolved: ResolvedJurisdiction) {
   ].filter((m) => m !== null);
 }
 
-/** Geocode one address and resolve it against every registry this module knows how to match. Returns matched: false, not a throw, when Census has no match — an unmatched address is a common, expected outcome. */
-async function geocodeAndResolve(
-  address: string,
-  checkDate: string,
-): Promise<{ resolved: ResolvedJurisdiction; matched: true } | { resolved: null; matched: false }> {
+/**
+ * Geocode one address and resolve it against every registry this module
+ * knows how to match. Returns matched: false, not a throw, when Census has
+ * no match even after census.ts's own secondary-unit-stripping retry — an
+ * unmatched address is a common, expected outcome.
+ *
+ * The school-district lookup (Ohio only) uses the "Safe" variant that
+ * catches its own network failures rather than letting one flaky
+ * secondary call take down a resolution that otherwise succeeded — a
+ * caller still gets the municipality/county match, plus an explicit note
+ * that the school-district half needs a retry.
+ */
+async function geocodeAndResolve(address: string, checkDate: string): Promise<{
+  resolved: ResolvedJurisdiction;
+  matched: true;
+  matchQuality: MatchQuality;
+  schoolDistrictLookupFailed: boolean;
+} | { resolved: null; matched: false; matchQuality: null; schoolDistrictLookupFailed: false }> {
   const geocoded = await geocodeAddress(address);
-  if (!geocoded.matched || !geocoded.geographies || !geocoded.coordinates) {
-    return { resolved: null, matched: false };
+  if (!geocoded.matched || !geocoded.geographies || !geocoded.coordinates || !geocoded.matchQuality) {
+    return { resolved: null, matched: false, matchQuality: null, schoolDistrictLookupFailed: false };
   }
 
   let schoolDistrictName: string | undefined;
+  let schoolDistrictLookupFailed = false;
   if (geocoded.geographies.state === 'OH') {
-    schoolDistrictName =
-      (await fetchSchoolDistrictAtPoint(geocoded.coordinates.x, geocoded.coordinates.y)) ??
-      undefined;
+    const sd = await fetchSchoolDistrictAtPointSafe(geocoded.coordinates.x, geocoded.coordinates.y);
+    if (sd.ok) {
+      schoolDistrictName = sd.district ?? undefined;
+    } else {
+      schoolDistrictLookupFailed = true;
+    }
   }
 
   return {
     resolved: resolveJurisdiction(geocoded.geographies, checkDate, schoolDistrictName),
     matched: true,
+    matchQuality: geocoded.matchQuality,
+    schoolDistrictLookupFailed,
   };
 }
 
@@ -108,15 +146,48 @@ export async function resolveAddress(
   role: 'work' | 'residence',
   checkDate: string,
 ): Promise<AddressResolution> {
-  const { resolved, matched } = await geocodeAndResolve(address, checkDate);
+  const { resolved, matched, matchQuality, schoolDistrictLookupFailed } = await geocodeAndResolve(
+    address,
+    checkDate,
+  );
   if (!matched) {
-    return { address, matched: false, resolved: null, certificateFields: {}, fullyResolved: false };
+    return {
+      address,
+      matched: false,
+      resolved: null,
+      certificateFields: {},
+      matchQuality: null,
+      fullyResolved: false,
+      lowConfidenceReasons: ['Census could not match this address at all, even after retrying with any apartment/suite/unit designator stripped.'],
+    };
   }
 
   const certificateFields = toCertificateFields(resolved, role);
-  const fullyResolved = attemptedMatches(resolved).every((m) => m!.confidence !== 'ambiguous');
 
-  return { address, matched: true, resolved, certificateFields, fullyResolved };
+  const lowConfidenceReasons: string[] = [];
+  const anyFieldAmbiguous = attemptedMatches(resolved).some((m) => m!.confidence === 'ambiguous');
+  if (anyFieldAmbiguous) {
+    lowConfidenceReasons.push('One or more jurisdiction fields matched more than one candidate — see the ambiguous FieldMatch(es) in `resolved` for the candidate list.');
+  }
+  if (matchQuality.matchedViaFallback) {
+    lowConfidenceReasons.push('Only matched after stripping an apartment/suite/unit designator — the interpolated position is for the base street address, not the specific unit.');
+  }
+  if (matchQuality.addressRangeWidth !== null && matchQuality.addressRangeWidth > WIDE_ADDRESS_RANGE_THRESHOLD) {
+    lowConfidenceReasons.push(`Census interpolated this address within a wide address range (${matchQuality.addressRangeWidth} addresses on this block face) — less positionally precise than a narrow range, worth a second look if this address is near a jurisdiction boundary.`);
+  }
+  if (schoolDistrictLookupFailed) {
+    lowConfidenceReasons.push('The Ohio school-district lookup (a separate Census service from the main geocoder) failed after retries — municipality/county resolution above is unaffected, but schoolDistrictCode was not attempted this call. Retry resolveAddress() to try again.');
+  }
+
+  return {
+    address,
+    matched: true,
+    resolved,
+    certificateFields,
+    matchQuality,
+    fullyResolved: lowConfidenceReasons.length === 0,
+    lowConfidenceReasons,
+  };
 }
 
 export interface EmployeeResolution {
@@ -126,6 +197,8 @@ export interface EmployeeResolution {
   certificateFields: Record<string, unknown>;
   /** Taxes this session confirmed CANNOT be resolved from Census/TIGERweb data at all (not a match failure — no boundary data exists for these). Surfaced so a caller doesn't mistake silence for "not applicable". */
   notResolvable: string[];
+  /** Merged from both addresses' own AddressResolution.lowConfidenceReasons, each prefixed with which address it came from — empty when both addresses (that were supplied) resolved with full confidence. */
+  lowConfidenceReasons: string[];
 }
 
 /**
@@ -220,5 +293,10 @@ export async function resolveEmployee(
     );
   }
 
-  return { work, residence, certificateFields: fields, notResolvable };
+  const lowConfidenceReasons = [
+    ...(work?.lowConfidenceReasons ?? []).map((r) => `Work address: ${r}`),
+    ...(residence?.lowConfidenceReasons ?? []).map((r) => `Residence address: ${r}`),
+  ];
+
+  return { work, residence, certificateFields: fields, notResolvable, lowConfidenceReasons };
 }

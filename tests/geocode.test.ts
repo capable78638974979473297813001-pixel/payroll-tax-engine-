@@ -17,6 +17,12 @@ import {
   toCertificateFields,
   type CensusGeographies,
 } from '../geocode/resolve.ts';
+import {
+  fetchSchoolDistrictAtPointSafe,
+  geocodeAddress,
+  normalizeAddress,
+  stripSecondaryUnit,
+} from '../geocode/census.ts';
 
 const CHECK_DATE = '2026-08-15';
 
@@ -468,5 +474,146 @@ describe('resolve.ts — real captured Census geographies', () => {
     };
     const resolved = resolveJurisdiction(geo, CHECK_DATE);
     assert.equal(resolved.flags.wilmington, false);
+  });
+});
+
+describe('census.ts — match quality, retries, and the secondary-unit fallback (mocked fetch, no live network)', () => {
+  function geocoderBody(opts: { matched: boolean; fromAddress?: string; toAddress?: string }) {
+    if (!opts.matched) return { result: { addressMatches: [] } };
+    return {
+      result: {
+        addressMatches: [
+          {
+            matchedAddress: '90 W BROAD ST, COLUMBUS, OH, 43215',
+            coordinates: { x: -83.0, y: 40.0 },
+            addressComponents: { fromAddress: opts.fromAddress, toAddress: opts.toAddress },
+            geographies: {
+              States: [{ STUSAB: 'OH' }],
+              'Incorporated Places': [{ NAME: 'Columbus city' }],
+              'County Subdivisions': [],
+              Counties: [{ NAME: 'Franklin County' }],
+            },
+          },
+        ],
+      },
+    };
+  }
+
+  describe('normalizeAddress / stripSecondaryUnit (pure)', () => {
+    test('normalizeAddress trims and collapses internal whitespace', () => {
+      assert.equal(normalizeAddress('  123  Main   St ,  Columbus, OH  '), '123 Main St , Columbus, OH');
+    });
+
+    test('stripSecondaryUnit removes a trailing apartment/suite/unit designator', () => {
+      assert.equal(stripSecondaryUnit('123 Main St Apt 4B, Columbus, OH 43215'), '123 Main St, Columbus, OH 43215');
+      assert.equal(stripSecondaryUnit('123 Main St Unit 12, Columbus, OH 43215'), '123 Main St, Columbus, OH 43215');
+      assert.equal(stripSecondaryUnit('123 Main St Suite 200, Columbus, OH 43215'), '123 Main St, Columbus, OH 43215');
+      assert.equal(stripSecondaryUnit('123 Main St #5, Columbus, OH 43215'), '123 Main St, Columbus, OH 43215');
+    });
+
+    test('stripSecondaryUnit returns null when there is nothing to strip', () => {
+      assert.equal(stripSecondaryUnit('123 Main St, Columbus, OH 43215'), null);
+    });
+  });
+
+  describe('geocodeAddress fallback retry', () => {
+    test('falls back to the unit-stripped address when the full address does not match, and flags matchedViaFallback', async () => {
+      let calls = 0;
+      const fakeFetch = (async (url: string) => {
+        calls++;
+        const isFirstCall = calls === 1;
+        return new Response(
+          JSON.stringify(geocoderBody(isFirstCall ? { matched: false } : { matched: true, fromAddress: '90', toAddress: '98' })),
+          { status: 200 },
+        );
+      }) as typeof fetch;
+
+      const result = await geocodeAddress('123 Main St Apt 4B, Columbus, OH 43215', fakeFetch);
+      assert.equal(calls, 2, 'should try the full address once, then the stripped fallback once');
+      assert.equal(result.matched, true);
+      assert.equal(result.matchQuality?.matchedViaFallback, true);
+    });
+
+    test('an address with no secondary unit to strip does not retry after a genuine no-match', async () => {
+      let calls = 0;
+      const fakeFetch = (async () => {
+        calls++;
+        return new Response(JSON.stringify(geocoderBody({ matched: false })), { status: 200 });
+      }) as typeof fetch;
+
+      const result = await geocodeAddress('999 Nowhere Rd, Columbus, OH 43215', fakeFetch);
+      assert.equal(calls, 1, 'nothing to strip, so no fallback attempt should fire');
+      assert.equal(result.matched, false);
+    });
+  });
+
+  describe('matchQuality.addressRangeWidth', () => {
+    test('computed from the matched address range Census returns', async () => {
+      const fakeFetch = (async () =>
+        new Response(JSON.stringify(geocoderBody({ matched: true, fromAddress: '90', toAddress: '148' })), {
+          status: 200,
+        })) as typeof fetch;
+
+      const result = await geocodeAddress('90 W Broad St, Columbus, OH 43215', fakeFetch);
+      assert.equal(result.matchQuality?.addressRangeWidth, 58);
+      assert.equal(result.matchQuality?.matchedAddress, '90 W BROAD ST, COLUMBUS, OH, 43215');
+    });
+  });
+
+  describe('retry-with-backoff on transient failures', () => {
+    test('a transient 500 is retried and a subsequent success is returned', async () => {
+      let calls = 0;
+      const fakeFetch = (async () => {
+        calls++;
+        if (calls === 1) return new Response('server error', { status: 500 });
+        return new Response(JSON.stringify(geocoderBody({ matched: true, fromAddress: '1', toAddress: '9' })), {
+          status: 200,
+        });
+      }) as typeof fetch;
+
+      const result = await geocodeAddress('90 W Broad St, Columbus, OH 43215', fakeFetch, { baseBackoffMs: 0 });
+      assert.equal(calls, 2, 'one failed attempt, one retried success');
+      assert.equal(result.matched, true);
+    });
+
+    test('a genuine 400 (bad request) is NOT retried — retrying a client error cannot help', async () => {
+      let calls = 0;
+      const fakeFetch = (async () => {
+        calls++;
+        return new Response('bad request', { status: 400 });
+      }) as typeof fetch;
+
+      await assert.rejects(() => geocodeAddress('90 W Broad St, Columbus, OH 43215', fakeFetch, { baseBackoffMs: 0 }));
+      assert.equal(calls, 1, 'a 400 should fail fast, not burn retries');
+    });
+
+    test('exhausting all retries on persistent 500s eventually throws rather than hanging forever', async () => {
+      let calls = 0;
+      const fakeFetch = (async () => {
+        calls++;
+        return new Response('server error', { status: 500 });
+      }) as typeof fetch;
+
+      await assert.rejects(() => geocodeAddress('90 W Broad St, Columbus, OH 43215', fakeFetch, { baseBackoffMs: 0 }));
+      assert.ok(calls > 1, 'should have retried at least once before giving up');
+    });
+  });
+
+  describe('fetchSchoolDistrictAtPointSafe', () => {
+    test('a network failure is caught and reported as {ok: false}, not thrown', async () => {
+      const failingFetch = (async () => {
+        throw new Error('network down');
+      }) as unknown as typeof fetch;
+
+      const result = await fetchSchoolDistrictAtPointSafe(-83.0, 40.0, failingFetch, { baseBackoffMs: 0 });
+      assert.equal(result.ok, false);
+    });
+
+    test('a genuine "no district here" result still comes back as {ok: true, district: null}, distinct from a failure', async () => {
+      const fakeFetch = (async () => new Response(JSON.stringify({ results: [] }), { status: 200 })) as typeof fetch;
+
+      const result = await fetchSchoolDistrictAtPointSafe(-83.0, 40.0, fakeFetch);
+      assert.deepEqual(result, { ok: true, district: null });
+    });
   });
 });
