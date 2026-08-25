@@ -27,7 +27,13 @@
  *     below (verified against each tax's own doc comment in
  *     taxes/state.ts, not assumed).
  */
-import { fetchSchoolDistrictAtPointSafe, geocodeAddress, type MatchQuality } from './census.ts';
+import {
+  fetchGeographiesAtPointSafe,
+  fetchSchoolDistrictAtPointSafe,
+  geocodeAddress,
+  type MatchQuality,
+} from './census.ts';
+import { resolveRooftop, type RooftopResult } from './rooftop.ts';
 import { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult } from './buildings.ts';
 import { crossCheckSafe, milesBetween, type NominatimResult } from './nominatim.ts';
 import { namesEqual, stripCountySuffix, stripPlaceTypeSuffix } from './normalize.ts';
@@ -49,6 +55,14 @@ export {
 } from './census.ts';
 export { crossCheckAddress, type NominatimResult } from './nominatim.ts';
 export { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult, type NearbyBuilding } from './buildings.ts';
+export {
+  fetchAddressPointsNear,
+  matchAddressPoint,
+  resolveRooftop,
+  type AddressPoint,
+  type RooftopMatch,
+  type RooftopResult,
+} from './rooftop.ts';
 
 /**
  * A LARGE disagreement in resolved COORDINATES between Census and
@@ -62,12 +76,14 @@ export { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult,
 const LARGE_DISTANCE_DISAGREEMENT_MILES = 0.5;
 
 /**
- * A WIDE interpolation range is the honest signal this project can offer
- * in place of true rooftop precision (see census.ts's own doc comment for
- * why it can't do better without a paid geocoder). 20 is not a scientific
- * threshold — it's a deliberately conservative "worth a second look before
- * this address goes live near a boundary" line, picked to flag block faces
- * with many addressable lots rather than ordinary short suburban blocks.
+ * A WIDE interpolation range is the honest signal available for addresses
+ * that are still resolved by interpolation — i.e. the ones rooftop.ts
+ * could not find an authoritative address point for. 20 is not a
+ * scientific threshold — it's a deliberately conservative "worth a second
+ * look before this address goes live near a boundary" line, picked to
+ * flag block faces with many addressable lots rather than ordinary short
+ * suburban blocks. It is deliberately NOT raised on a rooftop-resolved
+ * address: it describes a coordinate that resolution didn't use.
  */
 const WIDE_ADDRESS_RANGE_THRESHOLD = 20;
 
@@ -98,6 +114,19 @@ export interface AddressResolution {
   certificateFields: Record<string, unknown>;
   matchQuality: MatchQuality | null;
   crossCheck: CrossCheckResult | null;
+  /**
+   * 'rooftop' means the jurisdictions above were resolved at an
+   * authoritative, government-published address point for this exact
+   * address (see rooftop.ts) rather than at Census's interpolated
+   * curb position. 'interpolated' means no such point was available —
+   * either the National Address Database has no entry for this address,
+   * or its service couldn't be reached this call.
+   */
+  precision: 'rooftop' | 'interpolated';
+  /** The coordinate the jurisdictions were actually resolved at. */
+  coordinates: { lat: number; lon: number } | null;
+  /** The authoritative-address-point lookup, whatever its outcome — including the distance between the two points, which is the size of the interpolation error this corrected. */
+  rooftop: RooftopResult | null;
   /** True when every field the address could plausibly need was 'matched' AND the geocode itself was high-confidence (narrow interpolation range, no fallback retry needed, no cross-check disagreement) — false means a human should look before this address goes live in certificate data. */
   fullyResolved: boolean;
   /** Plain-language reasons fullyResolved is false, if it is — empty when fullyResolved is true. */
@@ -130,6 +159,24 @@ function attemptedMatches(resolved: ResolvedJurisdiction) {
  * caller still gets the municipality/county match, plus an explicit note
  * that the school-district half needs a retry.
  */
+/** Human-readable list of every geography that came out DIFFERENT at the authoritative point than at the interpolated one. Empty is the normal, reassuring case; non-empty means the corrected coordinate changed the tax answer. */
+function geographyDifferences(
+  interpolated: { incorporatedPlaces: string[]; counties: string[]; countySubdivisions: string[]; state: string },
+  rooftop: { incorporatedPlaces: string[]; counties: string[]; countySubdivisions: string[]; state: string },
+): string[] {
+  const differences: string[] = [];
+  const compare = (label: string, a: string[], b: string[]) => {
+    const left = [...a].sort().join(', ') || 'none';
+    const right = [...b].sort().join(', ') || 'none';
+    if (left !== right) differences.push(`${label}: "${left}" -> "${right}"`);
+  };
+  if (interpolated.state !== rooftop.state) differences.push(`state: "${interpolated.state}" -> "${rooftop.state}"`);
+  compare('place', interpolated.incorporatedPlaces, rooftop.incorporatedPlaces);
+  compare('county subdivision', interpolated.countySubdivisions, rooftop.countySubdivisions);
+  compare('county', interpolated.counties, rooftop.counties);
+  return differences;
+}
+
 async function geocodeAndResolve(address: string, checkDate: string): Promise<{
   resolved: ResolvedJurisdiction;
   matched: true;
@@ -137,6 +184,10 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
   schoolDistrictLookupFailed: boolean;
   coordinates: { x: number; y: number };
   geographies: { incorporatedPlaces: string[]; counties: string[] };
+  precision: 'rooftop' | 'interpolated';
+  point: { lat: number; lon: number };
+  rooftop: RooftopResult;
+  rooftopJurisdictionChanges: string[];
 } | {
   resolved: null;
   matched: false;
@@ -144,6 +195,10 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
   schoolDistrictLookupFailed: false;
   coordinates: null;
   geographies: null;
+  precision: 'interpolated';
+  point: null;
+  rooftop: null;
+  rooftopJurisdictionChanges: never[];
 }> {
   const geocoded = await geocodeAddress(address);
   if (!geocoded.matched || !geocoded.geographies || !geocoded.coordinates || !geocoded.matchQuality) {
@@ -154,13 +209,45 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
       schoolDistrictLookupFailed: false,
       coordinates: null,
       geographies: null,
+      precision: 'interpolated',
+      point: null,
+      rooftop: null,
+      rooftopJurisdictionChanges: [],
     };
   }
 
+  const interpolated = { lat: geocoded.coordinates.y, lon: geocoded.coordinates.x };
+  const rooftop = await resolveRooftop(address, interpolated);
+
+  let geographies = geocoded.geographies;
+  let point = interpolated;
+  let precision: 'rooftop' | 'interpolated' = 'interpolated';
+  let rooftopJurisdictionChanges: string[] = [];
   let schoolDistrictName: string | undefined;
   let schoolDistrictLookupFailed = false;
-  if (geocoded.geographies.state === 'OH') {
-    const sd = await fetchSchoolDistrictAtPointSafe(geocoded.coordinates.x, geocoded.coordinates.y);
+
+  // An authoritative point is only worth having if the jurisdictions get
+  // re-asked AT it — the geocoder's own geographies describe the curb
+  // position it chose, not this address's actual parcel. An ambiguous
+  // match (see rooftop.ts) is deliberately NOT used: a point averaged
+  // across two places that share a street name is worse than the honest
+  // interpolation.
+  if (rooftop.found && rooftop.point && !rooftop.ambiguous) {
+    const at = await fetchGeographiesAtPointSafe(rooftop.point.lon, rooftop.point.lat);
+    if (at.ok && at.result) {
+      rooftopJurisdictionChanges = geographyDifferences(geocoded.geographies, at.result.geographies);
+      geographies = at.result.geographies;
+      schoolDistrictName = at.result.schoolDistrict ?? undefined;
+      point = rooftop.point;
+      precision = 'rooftop';
+    }
+  }
+
+  // Only needed on the interpolated path: the rooftop lookup above already
+  // returns the school district from the SAME identify call, so this
+  // second request would be a duplicate.
+  if (precision === 'interpolated' && geographies.state === 'OH') {
+    const sd = await fetchSchoolDistrictAtPointSafe(point.lon, point.lat);
     if (sd.ok) {
       schoolDistrictName = sd.district ?? undefined;
     } else {
@@ -169,15 +256,19 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
   }
 
   return {
-    resolved: resolveJurisdiction(geocoded.geographies, checkDate, schoolDistrictName),
+    resolved: resolveJurisdiction(geographies, checkDate, schoolDistrictName),
     matched: true,
     matchQuality: geocoded.matchQuality,
     schoolDistrictLookupFailed,
     coordinates: geocoded.coordinates,
     geographies: {
-      incorporatedPlaces: geocoded.geographies.incorporatedPlaces,
-      counties: geocoded.geographies.counties,
+      incorporatedPlaces: geographies.incorporatedPlaces,
+      counties: geographies.counties,
     },
+    precision,
+    point,
+    rooftop,
+    rooftopJurisdictionChanges,
   };
 }
 
@@ -251,8 +342,18 @@ export async function resolveAddress(
   role: 'work' | 'residence',
   checkDate: string,
 ): Promise<AddressResolution> {
-  const { resolved, matched, matchQuality, schoolDistrictLookupFailed, coordinates, geographies } =
-    await geocodeAndResolve(address, checkDate);
+  const {
+    resolved,
+    matched,
+    matchQuality,
+    schoolDistrictLookupFailed,
+    coordinates,
+    geographies,
+    precision,
+    point,
+    rooftop,
+    rooftopJurisdictionChanges,
+  } = await geocodeAndResolve(address, checkDate);
   if (!matched) {
     return {
       address,
@@ -261,13 +362,19 @@ export async function resolveAddress(
       certificateFields: {},
       matchQuality: null,
       crossCheck: null,
+      precision: 'interpolated',
+      coordinates: null,
+      rooftop: null,
       fullyResolved: false,
       lowConfidenceReasons: ['Census could not match this address at all, even after retrying with any apartment/suite/unit designator stripped.'],
     };
   }
 
   const certificateFields = toCertificateFields(resolved, role);
-  const crossCheck = await runCrossCheck(address, geographies, coordinates);
+  // Cross-checked at the point actually used, not at the one Census
+  // guessed: when a rooftop point replaced it, that is the coordinate
+  // whose plausibility a caller needs confirmed.
+  const crossCheck = await runCrossCheck(address, geographies, { x: point.lon, y: point.lat });
 
   const lowConfidenceReasons: string[] = [];
   const anyFieldAmbiguous = attemptedMatches(resolved).some((m) => m!.confidence === 'ambiguous');
@@ -277,7 +384,16 @@ export async function resolveAddress(
   if (matchQuality.matchedViaFallback) {
     lowConfidenceReasons.push('Only matched after stripping an apartment/suite/unit designator — the interpolated position is for the base street address, not the specific unit.');
   }
-  if (matchQuality.addressRangeWidth !== null && matchQuality.addressRangeWidth > WIDE_ADDRESS_RANGE_THRESHOLD) {
+  // Only meaningful while the interpolated point is the one being used:
+  // a wide address range describes how loosely CENSUS positioned this
+  // address, and says nothing about an authoritative point that replaced
+  // it. Warning about it anyway would be describing a coordinate this
+  // resolution didn't use.
+  if (
+    precision === 'interpolated' &&
+    matchQuality.addressRangeWidth !== null &&
+    matchQuality.addressRangeWidth > WIDE_ADDRESS_RANGE_THRESHOLD
+  ) {
     lowConfidenceReasons.push(`Census interpolated this address within a wide address range (${matchQuality.addressRangeWidth} addresses on this block face) — less positionally precise than a narrow range, worth a second look if this address is near a jurisdiction boundary.`);
   }
   if (schoolDistrictLookupFailed) {
@@ -288,6 +404,16 @@ export async function resolveAddress(
   }
   if (crossCheck.distanceDisagreementMiles !== null && crossCheck.distanceDisagreementMiles > LARGE_DISTANCE_DISAGREEMENT_MILES) {
     lowConfidenceReasons.push(`OpenStreetMap's independent geocoder placed this address ${crossCheck.distanceDisagreementMiles.toFixed(2)} miles from Census's own coordinates — larger than ordinary interpolation slop, suggesting one of the two geocoders resolved a genuinely different location.`);
+  }
+  if (rooftopJurisdictionChanges.length > 0) {
+    lowConfidenceReasons.push(
+      `This address sits near a jurisdiction line: resolving it at its authoritative address point (${rooftop!.metersFromInterpolated!.toFixed(0)}m from Census's interpolated position) produced DIFFERENT geographies — ${rooftopJurisdictionChanges.join('; ')}. The authoritative point's answer is what's returned above, since it is the surveyed location of this address rather than a position interpolated along a street; the interpolated answer is recorded here because a difference of this kind changes which local tax applies and deserves a human's eyes once.`,
+    );
+  }
+  if (rooftop?.ambiguous) {
+    lowConfidenceReasons.push(
+      `The National Address Database has several points for this house number and street that are too far apart to be one building (${rooftop.match!.spreadMeters.toFixed(0)}m apart) — most likely the same address exists twice inside the search area. Census's interpolated position was kept rather than picking one of them.`,
+    );
   }
   if (crossCheck.building.houseNumberGap !== null && crossCheck.building.houseNumberGap > LARGE_HOUSE_NUMBER_GAP) {
     const onStreet = crossCheck.building.onStreet!;
@@ -305,6 +431,9 @@ export async function resolveAddress(
     certificateFields,
     matchQuality,
     crossCheck,
+    precision,
+    coordinates: point,
+    rooftop,
     fullyResolved: lowConfidenceReasons.length === 0,
     lowConfidenceReasons,
   };

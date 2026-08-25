@@ -34,6 +34,11 @@ import {
   nearestBuildingOnStreet,
   streetKey,
 } from '../geocode/buildings.ts';
+import {
+  fetchAddressPointsNear,
+  matchAddressPoint,
+  resolveRooftop,
+} from '../geocode/rooftop.ts';
 
 const CHECK_DATE = '2026-08-15';
 
@@ -1062,6 +1067,257 @@ describe('buildings.ts — the OpenStreetMap building-footprint check (real capt
 
       const result = await checkNearestBuilding(TARGET, CENSUS_POINT, downFetch, fresh());
       assert.deepEqual(result, { attempted: false, nearest: null, onStreet: null, houseNumberGap: null });
+    });
+  });
+});
+
+/**
+ * ROOFTOP PRECISION — the authoritative-address-point lookup.
+ *
+ * Every NAD record below is REAL, captured live from the National Address
+ * Database's own public feature service with the exact bounding-box query
+ * fetchAddressPointsNear() builds, around each address's Census-interpolated
+ * position. Only the fields this module reads are kept, coordinates rounded
+ * to 6 decimals (~0.1m), and the point lists trimmed to the target house
+ * number plus a few neighbours on the same street.
+ *
+ * The three cases are here because each one broke something real:
+ *   - Columbus is the case the whole module exists for: Census interpolates
+ *     to the curb 82m away, next to the wrong tower, while Ohio's own
+ *     address point sits 3.9m from City Hall's traced footprint.
+ *   - Baltimore is why the directional fallback exists: Maryland publishes
+ *     "100 N Holliday St" as plain "Holliday Street".
+ *   - Birmingham is why streetKey() expands a street type that sits before
+ *     a trailing directional: "710 20th St N" against "20th Street North".
+ */
+describe('rooftop.ts — authoritative address points (real captured National Address Database data, mocked fetch)', () => {
+  const nadResponse = (features: unknown[]) =>
+    (async () => new Response(JSON.stringify({ features }), { status: 200 })) as unknown as typeof fetch;
+  const FAST_NAD = { baseBackoffMs: 0 };
+
+  // 90 W Broad St, Columbus, OH 43215
+  // Census interpolates to 39.962072, -83.002493; 1027 NAD points in the 300m box, 149 on this street, 1 at this exact number.
+  const COLUMBUS_INTERPOLATED = { lat: 39.962072, lon: -83.002493 };
+  const COLUMBUS_NAD = [
+    { attributes: {"AddNo_Full":"90","St_PreDir":"West","St_Name":"BROAD","St_PosTyp":"Street","Inc_Muni":"Unincorporated","Post_City":"COLUMBUS","Zip_Code":"43215","Placement":"Unknown","NAD_Source":"State of Ohio","Latitude":39.962431,"Longitude":-83.003328} },
+    { attributes: {"AddNo_Full":"45","St_PreDir":"West","St_Name":"BROAD","St_PosTyp":"Street","Inc_Muni":"Unincorporated","Post_City":"COLUMBUS","Zip_Code":"43215","Placement":"Unknown","NAD_Source":"State of Ohio","Latitude":39.961711,"Longitude":-83.001855} },
+    { attributes: {"AddNo_Full":"50","St_PreDir":"West","St_Name":"BROAD","St_PosTyp":"Street","Unit":"30","Inc_Muni":"Unincorporated","Post_City":"COLUMBUS","Zip_Code":"43215","Placement":"Unknown","NAD_Source":"State of Ohio","Latitude":39.962305,"Longitude":-83.001855} },
+    { attributes: {"AddNo_Full":"20","St_PreDir":"East","St_Name":"BROAD","St_PosTyp":"Street","Inc_Muni":"Unincorporated","Post_City":"COLUMBUS","Zip_Code":"43215","Placement":"Unknown","NAD_Source":"State of Ohio","Latitude":39.962469,"Longitude":-83.000103} },
+    { attributes: {"AddNo_Full":"50","St_PreDir":"West","St_Name":"BROAD","St_PosTyp":"Street","Unit":"2002","Inc_Muni":"Unincorporated","Post_City":"COLUMBUS","Zip_Code":"43215","Placement":"Unknown","NAD_Source":"State of Ohio","Latitude":39.962351,"Longitude":-83.002154} },
+    { attributes: {"AddNo_Full":"36","St_PreDir":"West","St_Name":"BROAD","St_PosTyp":"Street","Inc_Muni":"Unincorporated","Post_City":"COLUMBUS","Zip_Code":"43215","Placement":"Unknown","NAD_Source":"State of Ohio","Latitude":39.962673,"Longitude":-83.001811} },
+    { attributes: {"AddNo_Full":"50","St_PreDir":"West","St_Name":"BROAD","St_PosTyp":"Street","Unit":"14","Inc_Muni":"Unincorporated","Post_City":"COLUMBUS","Zip_Code":"43215","Placement":"Unknown","NAD_Source":"State of Ohio","Latitude":39.962388,"Longitude":-83.00228} },
+    { attributes: {"AddNo_Full":"50","St_PreDir":"West","St_Name":"BROAD","St_PosTyp":"Street","Unit":"22","Inc_Muni":"Unincorporated","Post_City":"COLUMBUS","Zip_Code":"43215","Placement":"Unknown","NAD_Source":"State of Ohio","Latitude":39.96228,"Longitude":-83.00204} },
+    { attributes: {"AddNo_Full":"50","St_PreDir":"West","St_Name":"BROAD","St_PosTyp":"Street","Unit":"1909","Inc_Muni":"Unincorporated","Post_City":"COLUMBUS","Zip_Code":"43215","Placement":"Unknown","NAD_Source":"State of Ohio","Latitude":39.962298,"Longitude":-83.002149} },
+  ];
+
+  // 100 N Holliday St, Baltimore, MD 21202
+  // Census interpolates to 39.290556, -76.610351; 427 NAD points in the 300m box, 61 on this street, 2 at this exact number.
+  const BALTIMORE_INTERPOLATED = { lat: 39.290556, lon: -76.610351 };
+  const BALTIMORE_NAD = [
+    { attributes: {"AddNo_Full":"100","St_Name":"Holliday","St_PosTyp":"Street","Unit":"APT 101","Inc_Muni":"Baltimore","Post_City":"Baltimore","Zip_Code":"21202","Placement":"Unknown","NAD_Source":"Maryland Department of Information Technology","Latitude":39.290878,"Longitude":-76.610511} },
+    { attributes: {"AddNo_Full":"100","St_Name":"Holliday","St_PosTyp":"Street","Inc_Muni":"Baltimore","Post_City":"Baltimore","Zip_Code":"21202","Placement":"Unknown","NAD_Source":"Maryland Department of Information Technology","Latitude":39.290878,"Longitude":-76.610511} },
+    { attributes: {"AddNo_Full":"234","St_Name":"Holliday","St_PosTyp":"Street","Unit":"205","Inc_Muni":"Baltimore","Post_City":"Baltimore","Zip_Code":"21202","Placement":"Unknown","NAD_Source":"Maryland Department of Information Technology","Latitude":39.292255,"Longitude":-76.610524} },
+    { attributes: {"AddNo_Full":"200","St_Name":"Holliday","St_PosTyp":"Street","Inc_Muni":"Baltimore","Post_City":"Baltimore","Zip_Code":"21202","Placement":"Unknown","NAD_Source":"Maryland Department of Information Technology","Latitude":39.291662,"Longitude":-76.610555} },
+    { attributes: {"AddNo_Full":"234","St_Name":"Holliday","St_PosTyp":"Street","Unit":"206","Inc_Muni":"Baltimore","Post_City":"Baltimore","Zip_Code":"21202","Placement":"Unknown","NAD_Source":"Maryland Department of Information Technology","Latitude":39.292255,"Longitude":-76.610524} },
+    { attributes: {"AddNo_Full":"234","St_Name":"Holliday","St_PosTyp":"Street","Unit":"304","Inc_Muni":"Baltimore","Post_City":"Baltimore","Zip_Code":"21202","Placement":"Unknown","NAD_Source":"Maryland Department of Information Technology","Latitude":39.292255,"Longitude":-76.610524} },
+    { attributes: {"AddNo_Full":"229","St_Name":"Holliday","St_PosTyp":"Street","Inc_Muni":"Baltimore","Post_City":"Baltimore","Zip_Code":"21202","Placement":"Unknown","NAD_Source":"Maryland Department of Information Technology","Latitude":39.29205,"Longitude":-76.610137} },
+    { attributes: {"AddNo_Full":"234","St_Name":"Holliday","St_PosTyp":"Street","Unit":"201","Inc_Muni":"Baltimore","Post_City":"Baltimore","Zip_Code":"21202","Placement":"Unknown","NAD_Source":"Maryland Department of Information Technology","Latitude":39.292255,"Longitude":-76.610524} },
+  ];
+
+  // 710 20th St N, Birmingham, AL 35203
+  // Census interpolates to 33.519727, -86.810285; 73 NAD points in the 300m box, 6 on this street, 1 at this exact number.
+  const BIRMINGHAM_INTERPOLATED = { lat: 33.519727, lon: -86.810285 };
+  const BIRMINGHAM_NAD = [
+    { attributes: {"AddNo_Full":"710","St_Name":"20th","St_PosTyp":"Street","St_PosDir":"North","Inc_Muni":"Birmingham","Post_City":"Not stated","Zip_Code":"35203","Placement":"Unknown","NAD_Source":"Alabama 911 Board","Latitude":33.520056,"Longitude":-86.810896} },
+    { attributes: {"AddNo_Full":"420","St_Name":"20th","St_PosTyp":"Street","St_PosDir":"North","Inc_Muni":"Birmingham","Post_City":"Not stated","Zip_Code":"35203","Placement":"Unknown","NAD_Source":"Alabama 911 Board","Latitude":33.517618,"Longitude":-86.808477} },
+    { attributes: {"AddNo_Full":"325","St_Name":"20th","St_PosTyp":"Street","St_PosDir":"North","Inc_Muni":"Birmingham","Post_City":"Not stated","Zip_Code":"35203","Placement":"Unknown","NAD_Source":"Alabama 911 Board","Latitude":33.517186,"Longitude":-86.807145} },
+    { attributes: {"AddNo_Full":"600","St_Name":"20th","St_PosTyp":"Street","St_PosDir":"North","Inc_Muni":"Birmingham","Post_City":"Not stated","Zip_Code":"35203","Placement":"Unknown","NAD_Source":"Alabama 911 Board","Latitude":33.519342,"Longitude":-86.809356} },
+    { attributes: {"AddNo_Full":"417","St_Name":"20th","St_PosTyp":"Street","St_PosDir":"North","Inc_Muni":"Birmingham","Post_City":"Not stated","Zip_Code":"35203","Placement":"Unknown","NAD_Source":"Alabama 911 Board","Latitude":33.518035,"Longitude":-86.807627} },
+    { attributes: {"AddNo_Full":"528","St_Name":"20th","St_PosTyp":"Street","St_PosDir":"North","Inc_Muni":"Birmingham","Post_City":"Not stated","Zip_Code":"35203","Placement":"Unknown","NAD_Source":"Alabama 911 Board","Latitude":33.518568,"Longitude":-86.809433} },
+  ];
+
+  const asPoints = async (features: unknown[]) => {
+    const fetched = await fetchAddressPointsNear(39.9, -83.0, 300, nadResponse(features), FAST_NAD);
+    assert.equal(fetched.ok, true);
+    return fetched.ok ? fetched.points : [];
+  };
+
+  describe('reading the service response', () => {
+    test('composes a written street name out of NAD\'s separate columns, and keeps unit/source/placement', async () => {
+      const points = await asPoints(COLUMBUS_NAD);
+      const ninety = points.find((p) => p.houseNumber === '90');
+      assert.equal(ninety?.street, 'West BROAD Street');
+      assert.equal(ninety?.source, 'State of Ohio');
+      assert.equal(ninety?.lat, 39.962431);
+      assert.equal(ninety?.lon, -83.003328);
+      const unitPoint = points.find((p) => p.unit === '2002');
+      assert.equal(unitPoint?.houseNumber, '50');
+    });
+
+    test('a post-directional street ("20th Street North") survives composition in the right order', async () => {
+      const points = await asPoints(BIRMINGHAM_NAD);
+      assert.equal(points.find((p) => p.houseNumber === '710')?.street, '20th Street North');
+    });
+
+    test('the query is the bounding-box form this service actually accepts', async () => {
+      let seenUrl = '';
+      const spyFetch = (async (url: string) => {
+        seenUrl = String(url);
+        return new Response(JSON.stringify({ features: [] }), { status: 200 });
+      }) as unknown as typeof fetch;
+
+      await fetchAddressPointsNear(39.962072, -83.002493, 300, spyFetch, FAST_NAD);
+      const params = new URL(seenUrl).searchParams;
+      assert.equal(params.get('geometryType'), 'esriGeometryEnvelope');
+      assert.equal(params.get('inSR'), '4326');
+      // outFields=* and no resultRecordCount: both deliberate, see rooftop.ts.
+      assert.equal(params.get('outFields'), '*');
+      assert.equal(params.get('resultRecordCount'), null);
+      const [west, south, east, north] = (params.get('geometry') ?? '').split(',').map(Number);
+      assert.ok(west < -83.002493 && east > -83.002493, 'box should straddle the point');
+      assert.ok(south < 39.962072 && north > 39.962072, 'box should straddle the point');
+    });
+
+    test('an ArcGIS error object returned WITH HTTP 200 is a failure, not an empty area', async () => {
+      // This service answers a rejected query with 200 and an error body —
+      // reading that as "no address points here" would turn a bad request
+      // into false evidence about an address.
+      const errorBody = (async () =>
+        new Response(JSON.stringify({ error: { code: 400, message: 'Invalid query parameters.' } }), {
+          status: 200,
+        })) as unknown as typeof fetch;
+
+      const result = await fetchAddressPointsNear(39.9, -83.0, 300, errorBody, FAST_NAD);
+      assert.equal(result.ok, false);
+    });
+
+    test('a genuinely empty area is {ok: true, points: []} — distinct from the service being down', async () => {
+      const empty = await fetchAddressPointsNear(39.9, -83.0, 300, nadResponse([]), FAST_NAD);
+      assert.equal(empty.ok, true);
+      if (empty.ok) assert.deepEqual(empty.points, []);
+
+      const down = (async () => {
+        throw new Error('network down');
+      }) as unknown as typeof fetch;
+      const failed = await fetchAddressPointsNear(39.9, -83.0, 300, down, FAST_NAD);
+      assert.equal(failed.ok, false);
+    });
+  });
+
+  describe('matching an address to its authoritative point (pure)', () => {
+    test('Columbus: finds the one point published for 90 W Broad St', async () => {
+      const match = matchAddressPoint('90 W Broad St, Columbus, OH 43215', await asPoints(COLUMBUS_NAD));
+      assert.equal(match?.matchCount, 1);
+      assert.equal(match?.directionalFallback, false);
+      assert.deepEqual(match?.point, { lat: 39.962431, lon: -83.003328 });
+      assert.equal(match?.chosen.source, 'State of Ohio');
+    });
+
+    test('a tower published as one point per unit collapses to a point inside that tower', async () => {
+      // LeVeque Tower's 50 W Broad address has dozens of unit points; the
+      // group's centre is inside the building, and the spread is
+      // building-sized rather than block-sized.
+      const match = matchAddressPoint('50 W Broad St, Columbus, OH 43215', await asPoints(COLUMBUS_NAD));
+      assert.ok(match!.matchCount > 1);
+      assert.ok(match!.spreadMeters < 60, `expected one building, got ${match!.spreadMeters}m of spread`);
+      assert.equal(match!.matchedUnit, false);
+    });
+
+    test('naming the unit picks that unit\'s own point, not the group centre', async () => {
+      const match = matchAddressPoint('50 W Broad St Apt 2002, Columbus, OH 43215', await asPoints(COLUMBUS_NAD));
+      assert.equal(match?.matchedUnit, true);
+      assert.equal(match?.chosen.unit, '2002');
+      assert.deepEqual(match?.point, { lat: 39.962351, lon: -83.002154 });
+    });
+
+    test('Baltimore: matches when the authority publishes the street WITHOUT the directional the address uses', async () => {
+      const match = matchAddressPoint('100 N Holliday St, Baltimore, MD 21202', await asPoints(BALTIMORE_NAD));
+      assert.equal(match?.directionalFallback, true);
+      assert.equal(match?.chosen.street, 'Holliday Street');
+      assert.deepEqual(match?.point, { lat: 39.290878, lon: -76.610511 });
+    });
+
+    test('Birmingham: matches a street whose type sits BEFORE its directional', async () => {
+      const match = matchAddressPoint('710 20th St N, Birmingham, AL 35203', await asPoints(BIRMINGHAM_NAD));
+      assert.equal(match?.directionalFallback, false);
+      assert.deepEqual(match?.point, { lat: 33.520056, lon: -86.810896 });
+    });
+
+    test('the fallback NEVER crosses two directionals — W Broad must not match E Broad', async () => {
+      // Downtown Columbus has both, at overlapping numbers. An earlier
+      // version of this matched them and returned a point on the wrong side
+      // of the street; the same loosening also produced a point on North
+      // Main for an address on West Main in Edmonton, KY.
+      const match = matchAddressPoint('20 W Broad St, Columbus, OH 43215', await asPoints(COLUMBUS_NAD));
+      assert.equal(match, null);
+    });
+
+    test('a house number the authority has never published gets no point at all, rather than a near one', async () => {
+      const match = matchAddressPoint('711 20th St N, Birmingham, AL 35203', await asPoints(BIRMINGHAM_NAD));
+      assert.equal(match, null);
+    });
+
+    test('an address with no house number cannot be matched', async () => {
+      assert.equal(matchAddressPoint('Broadway, New York, NY', await asPoints(COLUMBUS_NAD)), null);
+    });
+  });
+
+  describe('resolveRooftop — the whole lookup, end to end', () => {
+    test('Columbus: reports the authoritative point and how far it moved from the interpolated one', async () => {
+      const result = await resolveRooftop(
+        '90 W Broad St, Columbus, OH 43215',
+        COLUMBUS_INTERPOLATED,
+        nadResponse(COLUMBUS_NAD),
+        FAST_NAD,
+      );
+      assert.equal(result.attempted, true);
+      assert.equal(result.found, true);
+      assert.equal(result.ambiguous, false);
+      assert.deepEqual(result.point, { lat: 39.962431, lon: -83.003328 });
+      // The real size of the interpolation error being corrected here.
+      assert.ok(
+        result.metersFromInterpolated! > 70 && result.metersFromInterpolated! < 95,
+        `expected roughly 82m, got ${result.metersFromInterpolated}`,
+      );
+    });
+
+    test('an address the database has no point for is found: false, attempted: true — a real answer, not a failure', async () => {
+      const result = await resolveRooftop(
+        '2 Woodward Ave, Detroit, MI 48226',
+        { lat: 42.3297, lon: -83.0455 },
+        nadResponse([]),
+        FAST_NAD,
+      );
+      assert.equal(result.attempted, true);
+      assert.equal(result.found, false);
+      assert.equal(result.point, null);
+    });
+
+    test('an unreachable service is attempted: false — no evidence either way, exactly like the other cross-checks', async () => {
+      const down = (async () => {
+        throw new Error('network down');
+      }) as unknown as typeof fetch;
+      const result = await resolveRooftop('90 W Broad St, Columbus, OH 43215', COLUMBUS_INTERPOLATED, down, FAST_NAD);
+      assert.equal(result.attempted, false);
+      assert.equal(result.found, false);
+    });
+
+    test('points too far apart to be one building are returned but flagged ambiguous, never silently averaged', async () => {
+      // Same number, same street name, half a kilometre apart — the shape a
+      // search box catches when one street name repeats in two places.
+      const twoPlaces = [
+        { attributes: { AddNo_Full: '100', St_Name: 'Main', St_PosTyp: 'Street', Latitude: 39.9, Longitude: -83.0 } },
+        { attributes: { AddNo_Full: '100', St_Name: 'Main', St_PosTyp: 'Street', Latitude: 39.905, Longitude: -83.0 } },
+      ];
+      const result = await resolveRooftop(
+        '100 Main St, Somewhere, OH',
+        { lat: 39.9, lon: -83.0 },
+        nadResponse(twoPlaces),
+        FAST_NAD,
+      );
+      assert.equal(result.found, true);
+      assert.equal(result.ambiguous, true);
+      assert.ok(result.match!.spreadMeters > 200);
     });
   });
 });

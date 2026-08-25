@@ -267,24 +267,58 @@ const DIRECTIONALS: Record<string, string> = {
   ne: 'northeast', nw: 'northwest', se: 'southeast', sw: 'southwest',
 };
 
-/** Street-type suffixes, expanded for the same reason. Applied ONLY to the final token, so "St Clair Ave" doesn't become "Street Clair Avenue". */
+/** Street-type suffixes, expanded for the same reason. Applied only at the END of the name — never at the front, so "St Clair Ave" doesn't become "Street Clair Avenue". */
 const STREET_TYPES: Record<string, string> = {
   st: 'street', str: 'street', ave: 'avenue', av: 'avenue', rd: 'road', blvd: 'boulevard',
   dr: 'drive', ln: 'lane', ct: 'court', pl: 'place', pkwy: 'parkway', pky: 'parkway',
   hwy: 'highway', cir: 'circle', ter: 'terrace', trl: 'trail', sq: 'square', expy: 'expressway',
 };
 
-/** Normalize a street name to a comparable key: lowercased, punctuation dropped, directionals and the trailing street type expanded to their full words. */
+/**
+ * Normalize a street name to a comparable key: lowercased, punctuation
+ * dropped, directionals and the trailing street type expanded to their
+ * full words.
+ *
+ * The street type is expanded at the last position OR just before a
+ * trailing directional, because both orderings are real and both appear
+ * in live data: "710 20th St N" is written that way on the envelope,
+ * while the Alabama 911 Board publishes the same street as "20th Street
+ * North". Without the second case those two never compare equal, and the
+ * address silently gets no authoritative point.
+ */
 export function streetKey(street: string): string {
   const tokens = street.toLowerCase().replace(/[.,#]/g, ' ').split(/\s+/).filter(Boolean);
+  const last = tokens.length - 1;
+  const typePosition = last > 0 && DIRECTIONALS[tokens[last]] ? last - 1 : last;
   return tokens
     .map((token, i) => {
-      const isEdge = i === 0 || i === tokens.length - 1;
+      const isEdge = i === 0 || i === last;
       if (isEdge && DIRECTIONALS[token]) return DIRECTIONALS[token];
-      if (i === tokens.length - 1 && STREET_TYPES[token]) return STREET_TYPES[token];
+      if (i === typePosition && i > 0 && STREET_TYPES[token]) return STREET_TYPES[token];
       return token;
     })
     .join(' ');
+}
+
+/** Every directional word, in the fully-expanded form streetKey() produces — used to compare street names when one source writes the directional and the other doesn't. */
+const EXPANDED_DIRECTIONALS = new Set(Object.values(DIRECTIONALS));
+
+/**
+ * The street key with any leading or trailing directional removed:
+ * "north holliday street" -> "holliday street". Address authorities
+ * genuinely disagree about these — Maryland publishes Baltimore's
+ * "N Holliday St" as plain "Holliday Street" — so this exists to let a
+ * caller retry a failed match with the directional set aside. It is
+ * deliberately a SEPARATE function rather than folded into streetKey():
+ * dropping the directional makes north and south sides of a divided
+ * street compare equal, which is only acceptable as a knowing fallback,
+ * never as the default comparison.
+ */
+export function streetKeyWithoutDirectionals(street: string): string {
+  const tokens = streetKey(street).split(' ');
+  while (tokens.length > 1 && EXPANDED_DIRECTIONALS.has(tokens[0])) tokens.shift();
+  while (tokens.length > 1 && EXPANDED_DIRECTIONALS.has(tokens[tokens.length - 1])) tokens.pop();
+  return tokens.join(' ');
 }
 
 /** Extract the leading house number from a one-line address string (e.g. "90 W Broad St, Columbus, OH" -> "90"). Returns null when the address doesn't start with a number. */

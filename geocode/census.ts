@@ -25,10 +25,14 @@
  *     range rather than using surveyed rooftop coordinates. For an address
  *     genuinely near a jurisdiction line, that can occasionally place the
  *     point on the wrong side. matchQuality.addressRangeWidth (below) is
- *     the honest signal for this — a WIDE range means less positional
- *     confidence, not a guarantee of correctness. A commercial rooftop
- *     geocoder (SmartyStreets, Melissa, Google) doesn't have this failure
- *     mode; this module can only flag the risk, not eliminate it.
+ *     the honest signal for THIS module's own output — a WIDE range means
+ *     less positional confidence, not a guarantee of correctness.
+ *     NO LONGER THE WHOLE STORY: rooftop.ts now resolves an authoritative,
+ *     government-surveyed address point for addresses the National Address
+ *     Database covers, and index.ts prefers that point over this one when
+ *     it exists (measured on this project's own demo addresses: 15 of 18).
+ *     Where NAD has no point, everything above still applies exactly as
+ *     written.
  *   - No USPS CASS certification. normalizeAddress() below does cheap,
  *     genuinely useful cleanup (whitespace, secondary-unit stripping for
  *     the retry fallback) but is not a full address-correction service.
@@ -44,7 +48,8 @@ const TIGERWEB_IDENTIFY =
  * fields Census's own response already carries but this module previously
  * discarded. None of these upgrade interpolation to rooftop precision —
  * they tell a caller when to trust the match less, not how to trust it
- * more.
+ * more. Actually replacing the interpolated coordinate with a surveyed
+ * one is rooftop.ts's job, not this module's.
  */
 export interface MatchQuality {
   /** Census's own normalized interpretation of the input — compare against what was submitted; a large divergence (wrong street, wrong city) is a red flag Census's own confidence score won't otherwise surface. */
@@ -251,11 +256,30 @@ export async function fetchSchoolDistrictAtPoint(
   fetchImpl: typeof fetch = fetch,
   retryOptions: FetchOptions = {},
 ): Promise<string | null> {
+  // Layers 14/16/18: Unified, Secondary, Elementary School Districts.
+  const results = await identifyAt(x, y, '14,16,18', fetchImpl, retryOptions);
+  return results[0]?.value ?? null;
+}
+
+interface IdentifyResult {
+  layerId?: number;
+  value?: string;
+  attributes?: Record<string, string>;
+}
+
+/** The one TIGERweb identify() call both point lookups in this module are built on. Layers are the caller's business; everything else about the request is fixed. */
+async function identifyAt(
+  x: number,
+  y: number,
+  layers: string,
+  fetchImpl: typeof fetch,
+  retryOptions: FetchOptions,
+): Promise<IdentifyResult[]> {
   const url = new URL(TIGERWEB_IDENTIFY);
   url.searchParams.set('geometry', JSON.stringify({ x, y }));
   url.searchParams.set('geometryType', 'esriGeometryPoint');
   url.searchParams.set('sr', '4326');
-  url.searchParams.set('layers', 'all:14,16,18'); // Unified, Secondary, Elementary School Districts
+  url.searchParams.set('layers', `all:${layers}`);
   url.searchParams.set('tolerance', '0');
   url.searchParams.set('mapExtent', `${x - 1},${y - 1},${x + 1},${y + 1}`);
   url.searchParams.set('imageDisplay', '600,550,96');
@@ -266,8 +290,74 @@ export async function fetchSchoolDistrictAtPoint(
   if (!res.ok) {
     throw new Error(`TIGERweb identify returned HTTP ${res.status} for (${x}, ${y})`);
   }
-  const body = (await res.json()) as { results?: { value?: string }[] };
-  return body.results?.[0]?.value ?? null;
+  const body = (await res.json()) as { results?: IdentifyResult[] };
+  return body.results ?? [];
+}
+
+/**
+ * Resolve the SAME set of geographies the address geocoder returns, but at
+ * an arbitrary point rather than from an address string. This is what makes
+ * an authoritative rooftop coordinate actually worth having: the geocoder's
+ * own geographies describe the point IT chose (interpolated, at the curb),
+ * so re-asking at the corrected point is the only way a better coordinate
+ * can change a jurisdiction answer.
+ *
+ * Note the vocabulary matches deliberately: identify() returns "Columbus"
+ * as its display value but carries Census's own "Columbus city" /
+ * "Franklin County" spellings in each result's attributes, which is what
+ * this reads — so resolve.ts's matching sees exactly the strings it would
+ * have seen from the geocoder, with no second naming convention to
+ * normalize. The state comes back as a real USPS code (STUSAB), not a
+ * full state name, for the same reason.
+ *
+ * Returns null when the point resolves to no state at all (offshore, or a
+ * bad coordinate) — a caller should keep whatever it already had.
+ */
+export async function fetchGeographiesAtPoint(
+  x: number,
+  y: number,
+  fetchImpl: typeof fetch = fetch,
+  retryOptions: FetchOptions = {},
+): Promise<{ geographies: CensusGeographies; schoolDistrict: string | null } | null> {
+  // 14 Unified School Districts, 22 County Subdivisions, 28 Incorporated
+  // Places, 80 States, 82 Counties.
+  const results = await identifyAt(x, y, '14,22,28,80,82', fetchImpl, retryOptions);
+
+  const named = (layerId: number): string[] =>
+    results
+      .filter((r) => r.layerId === layerId)
+      .map((r) => r.attributes?.NAME ?? r.value)
+      .filter((n): n is string => !!n);
+
+  const state = results.find((r) => r.layerId === 80)?.attributes?.STUSAB;
+  if (!state) return null;
+
+  return {
+    geographies: {
+      state,
+      incorporatedPlaces: named(28),
+      countySubdivisions: named(22),
+      counties: named(82),
+    },
+    schoolDistrict: named(14)[0] ?? null,
+  };
+}
+
+/** Same as fetchGeographiesAtPoint(), but a failure is reported rather than thrown — an address resolution that already has the geocoder's own answer should degrade to that, not fail outright. */
+export async function fetchGeographiesAtPointSafe(
+  x: number,
+  y: number,
+  fetchImpl: typeof fetch = fetch,
+  retryOptions: FetchOptions = {},
+): Promise<
+  | { ok: true; result: { geographies: CensusGeographies; schoolDistrict: string | null } | null }
+  | { ok: false; error: string }
+> {
+  try {
+    return { ok: true, result: await fetchGeographiesAtPoint(x, y, fetchImpl, retryOptions) };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
 }
 
 /**

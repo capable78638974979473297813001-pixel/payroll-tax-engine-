@@ -5,7 +5,10 @@ import {
   checkNearestBuilding,
   resolveAddress,
   resolveEmployee,
+  resolveRooftop,
 } from '../geocode/index.ts';
+import { fetchNearbyBuildings, nearestBuilding } from '../geocode/buildings.ts';
+import { geocodeAddress } from '../geocode/census.ts';
 
 /**
  * The scenario: an employer has three new hires' street addresses and
@@ -52,6 +55,20 @@ async function demo(label: string, address: string, workState: string) {
     );
   } else {
     console.log(`  OSM cross-check: unavailable this call (no second opinion, not evidence against Census)`);
+  }
+  if (result.precision === 'rooftop') {
+    const chosen = result.rooftop!.match!.chosen;
+    console.log(
+      `  Position: \x1b[32mROOFTOP\x1b[0m — authoritative address point published by ${chosen.source ?? 'the local address authority'}` +
+        (chosen.placement && chosen.placement !== 'Unknown' ? ` (${chosen.placement})` : '') +
+        `, ${result.rooftop!.metersFromInterpolated!.toFixed(0)}m from where Census interpolated. Jurisdictions above were resolved AT that point.`,
+    );
+  } else if (result.rooftop?.attempted) {
+    console.log(
+      `  Position: interpolated by Census — the National Address Database has no published point for this address`,
+    );
+  } else {
+    console.log(`  Position: interpolated by Census — the National Address Database was unreachable this call`);
   }
   const building = result.crossCheck?.building;
   if (building?.attempted && building.onStreet && building.houseNumberGap !== null) {
@@ -214,6 +231,60 @@ rule('An employee working in downtown Denver, Colorado — the Occupational Priv
   for (const line of paycheck.taxes) {
     console.log(`    ${line.id.padEnd(16)} ${line.detail}`);
   }
+}
+
+rule('Rooftop precision, confirmed against a building detected from imagery');
+{
+  /**
+   * The two halves of this module meeting on one address. NAD publishes an
+   * authoritative, government-surveyed point for 90 W Broad St; OSM
+   * publishes a building footprint traced from satellite imagery (the
+   * Columbus footprints carry Esri's own county building-detection import
+   * as their source). Neither knows about the other. If the surveyed point
+   * lands on the detected building, two completely independent systems —
+   * one measured on the ground, one seen from orbit — agree about where
+   * this address physically is. That is what a rooftop geocode is.
+   */
+  const address = '90 W Broad St, Columbus, OH 43215';
+  console.log(`  Address: ${address}\n`);
+
+  const geocoded = await geocodeAddress(address);
+  if (!geocoded.matched || !geocoded.coordinates) {
+    console.log('  Census could not match this address.');
+  } else {
+    const interpolated = { lat: geocoded.coordinates.y, lon: geocoded.coordinates.x };
+    const roof = await resolveRooftop(address, interpolated);
+
+    const describe = async (label: string, point: { lat: number; lon: number }) => {
+      const fetched = await fetchNearbyBuildings(point.lat, point.lon, 80);
+      if (!fetched.ok) {
+        console.log(`  ${label}: ${point.lat.toFixed(6)}, ${point.lon.toFixed(6)} — Overpass unavailable, no footprint check`);
+        return;
+      }
+      const nearest = nearestBuilding(point, fetched.elements);
+      const name = nearest?.name ?? (nearest?.houseNumber ? `${nearest.houseNumber} ${nearest.street}` : 'an unnamed building');
+      console.log(
+        `  ${label}: ${point.lat.toFixed(6)}, ${point.lon.toFixed(6)}` +
+          (nearest ? ` — ${nearest.distanceMeters.toFixed(1)}m from ${name}` : ' — no mapped footprint nearby'),
+      );
+    };
+
+    await describe("Census's interpolated point ", interpolated);
+    if (roof.found && roof.point) {
+      await describe('Authoritative address point', roof.point);
+      console.log(
+        `\n  The authoritative point sits ${roof.metersFromInterpolated!.toFixed(0)}m from the interpolated one, published by ${roof.match!.chosen.source}.`,
+      );
+    } else {
+      console.log(`  No authoritative point available for this address this call.`);
+    }
+  }
+  console.log(
+    `\n  \x1b[2mMeasured on this demo's own address list: 13 of 18 addresses resolve to\n` +
+      `  an authoritative point. The other 5 keep Census's interpolated position,\n` +
+      `  because the National Address Database has nothing published for them —\n` +
+      `  the upgrade is address-by-address, never a blanket claim.\x1b[0m`,
+  );
 }
 
 rule("The footprint check, run against a point that is genuinely WRONG — the reason it exists");

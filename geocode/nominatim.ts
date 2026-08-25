@@ -8,13 +8,14 @@
  * means a human should look, the same review-gate ethos this project's
  * harvester and every FieldMatch in resolve.ts already use.
  *
- * This does NOT close the rooftop-precision gap a paid geocoder has (see
- * census.ts's own doc comment) — OSM's address data is itself crowd-
- * sourced and interpolated in many of the same ways TIGER/Line is. What it
- * buys is a genuinely independent second opinion, which is the standard
- * technique free tooling uses to approximate what licensed rooftop data
- * gives a paid service directly: not the same precision, but a real
- * confidence signal neither source could give alone.
+ * This does NOT itself close the rooftop-precision gap — OSM's address
+ * data is crowd-sourced and interpolated in many of the same ways
+ * TIGER/Line is. What it buys is a genuinely independent second opinion.
+ * The precision gap is closed elsewhere and by different data: rooftop.ts
+ * resolves government-surveyed address points from the National Address
+ * Database, and index.ts prefers those coordinates when they exist. This
+ * module's job is unchanged either way — asking a second system whether
+ * the address even resolves to the same PLACE.
  *
  * Nominatim's own usage policy (https://operations.osmfoundation.org/
  * policies/nominatim/) requires: an identifying User-Agent, an absolute
