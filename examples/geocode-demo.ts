@@ -36,6 +36,18 @@ async function demo(label: string, address: string, workState: string) {
         (result.matchQuality.matchedViaFallback ? ', via secondary-unit fallback' : ''),
     );
   }
+  if (result.crossCheck?.attempted) {
+    const n = result.crossCheck.nominatim!;
+    console.log(
+      `  OSM cross-check: ${n.place ?? '?'}, ${n.county ?? '?'}` +
+        (result.crossCheck.distanceDisagreementMiles !== null
+          ? ` (${result.crossCheck.distanceDisagreementMiles.toFixed(3)}mi from Census's own point)`
+          : '') +
+        (result.crossCheck.placeDisagreement ? ' \x1b[33m[DISAGREES with Census]\x1b[0m' : ' \x1b[32m[agrees]\x1b[0m'),
+    );
+  } else {
+    console.log(`  OSM cross-check: unavailable this call (no second opinion, not evidence against Census)`);
+  }
   for (const reason of result.lowConfidenceReasons) {
     console.log(`  \x1b[33m⚠ ${reason}\x1b[0m`);
   }

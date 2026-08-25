@@ -23,6 +23,7 @@ import {
   normalizeAddress,
   stripSecondaryUnit,
 } from '../geocode/census.ts';
+import { crossCheckAddress, crossCheckSafe, milesBetween } from '../geocode/nominatim.ts';
 
 const CHECK_DATE = '2026-08-15';
 
@@ -614,6 +615,88 @@ describe('census.ts — match quality, retries, and the secondary-unit fallback 
 
       const result = await fetchSchoolDistrictAtPointSafe(-83.0, 40.0, fakeFetch);
       assert.deepEqual(result, { ok: true, district: null });
+    });
+  });
+});
+
+describe('nominatim.ts — the independent cross-check geocoder (mocked fetch, no live network)', () => {
+  function nominatimBody(opts: { matched: boolean; lat?: string; lon?: string; address?: Record<string, string> }) {
+    if (!opts.matched) return [];
+    return [{ lat: opts.lat, lon: opts.lon, address: opts.address }];
+  }
+
+  describe('milesBetween (pure)', () => {
+    test('the same point is zero miles from itself', () => {
+      assert.equal(milesBetween({ lat: 39.96, lon: -83.0 }, { lat: 39.96, lon: -83.0 }), 0);
+    });
+
+    test('a real, known distance comes out approximately right', () => {
+      // Columbus, OH downtown vs. a point ~1 mile east — sanity-checked
+      // against a rough 1-degree-longitude-at-this-latitude ≈ 53 miles
+      // approximation (0.019 deg * 53 ≈ 1.0mi), not an exact fixture.
+      const miles = milesBetween({ lat: 39.9612, lon: -83.0007 }, { lat: 39.9612, lon: -82.9817 });
+      assert.ok(miles > 0.8 && miles < 1.3, `expected roughly 1 mile, got ${miles}`);
+    });
+  });
+
+  describe('crossCheckAddress / crossCheckSafe', () => {
+    test('extracts place from whichever of city/town/village Nominatim used, and county', async () => {
+      const fakeFetch = (async () =>
+        new Response(
+          JSON.stringify(
+            nominatimBody({
+              matched: true,
+              lat: '40.894',
+              lon: '-83.890',
+              address: { town: 'Bluffton', county: 'Allen County', state: 'Ohio' },
+            }),
+          ),
+          { status: 200 },
+        )) as typeof fetch;
+
+      const result = await crossCheckAddress('136 N Main St, Bluffton, OH 45817', fakeFetch, {
+        minIntervalMs: 0,
+      });
+      assert.equal(result.matched, true);
+      assert.equal(result.place, 'Bluffton');
+      assert.equal(result.county, 'Allen County');
+      assert.deepEqual(result.coordinates, { lat: 40.894, lon: -83.89 });
+    });
+
+    test('no match comes back as matched: false, not a throw', async () => {
+      const fakeFetch = (async () =>
+        new Response(JSON.stringify(nominatimBody({ matched: false })), { status: 200 })) as typeof fetch;
+
+      const result = await crossCheckAddress('999 Nowhere Rd', fakeFetch, { minIntervalMs: 0 });
+      assert.equal(result.matched, false);
+    });
+
+    test('crossCheckSafe catches a network failure and reports {ok: false} rather than throwing', async () => {
+      const failingFetch = (async () => {
+        throw new Error('network down');
+      }) as unknown as typeof fetch;
+
+      const result = await crossCheckSafe('90 W Broad St, Columbus, OH 43215', failingFetch, {
+        minIntervalMs: 0,
+        baseBackoffMs: 0,
+      });
+      assert.equal(result.ok, false);
+    });
+
+    test('crossCheckSafe wraps a genuine match as {ok: true, result}', async () => {
+      const fakeFetch = (async () =>
+        new Response(
+          JSON.stringify(
+            nominatimBody({ matched: true, lat: '39.96', lon: '-83.0', address: { city: 'Columbus', county: 'Franklin County' } }),
+          ),
+          { status: 200 },
+        )) as typeof fetch;
+
+      const result = await crossCheckSafe('90 W Broad St, Columbus, OH 43215', fakeFetch, { minIntervalMs: 0 });
+      assert.equal(result.ok, true);
+      if (result.ok) {
+        assert.equal(result.result.place, 'Columbus');
+      }
     });
   });
 });
