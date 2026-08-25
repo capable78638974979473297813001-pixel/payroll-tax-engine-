@@ -134,6 +134,79 @@ export async function crossCheckAddress(
   };
 }
 
+export interface StructuredAddressHit {
+  /** OSM's own confidence that this is a HOUSE-level result rather than a street or town centroid: 30 is the house rank. Anything less is not an address point, whatever else it looks like. */
+  placeRank: number;
+  houseNumber: string | null;
+  road: string | null;
+  coordinates: { lat: number; lon: number } | null;
+}
+
+/**
+ * A STRUCTURED address lookup — street/city/state/postcode in their own
+ * fields rather than one free-text string. Used by rooftop.ts to ask
+ * whether OSM happens to hold a house-level point for an address the
+ * National Address Database has nothing for, which is a genuinely
+ * different question from crossCheckAddress()'s "does a second geocoder
+ * agree about the PLACE".
+ *
+ * Returns whatever OSM says, including results that shouldn't be
+ * trusted — the caller does the judging, because the judgement is
+ * specific to what it's for. That matters here: OSM's own house-level
+ * answer for 90 W Broad St, Columbus is confidently wrong (see
+ * buildings.ts), and a caller that treats rank-30 as proof will inherit
+ * that error.
+ */
+export async function searchStructuredAddress(
+  parts: { street: string; city?: string; state?: string; postalcode?: string },
+  fetchImpl: typeof fetch = fetch,
+  retryOptions: FetchOptions = {},
+): Promise<StructuredAddressHit | null> {
+  await throttle(retryOptions.minIntervalMs ?? DEFAULT_MIN_INTERVAL_MS);
+
+  const url = new URL(NOMINATIM_SEARCH);
+  url.searchParams.set('street', parts.street);
+  if (parts.city) url.searchParams.set('city', parts.city);
+  if (parts.state) url.searchParams.set('state', parts.state);
+  if (parts.postalcode) url.searchParams.set('postalcode', parts.postalcode);
+  url.searchParams.set('format', 'jsonv2');
+  url.searchParams.set('addressdetails', '1');
+  url.searchParams.set('limit', '1');
+
+  const res = await fetchWithRetry(url.toString(), fetchImpl, retryOptions);
+  if (!res.ok) throw new Error(`Nominatim returned HTTP ${res.status} for a structured address lookup`);
+  const body = (await res.json()) as {
+    lat?: string;
+    lon?: string;
+    place_rank?: number;
+    address?: Record<string, string>;
+  }[];
+
+  const match = body[0];
+  if (!match) return null;
+  const lat = Number(match.lat);
+  const lon = Number(match.lon);
+  return {
+    placeRank: match.place_rank ?? 0,
+    houseNumber: match.address?.house_number ?? null,
+    road: match.address?.road ?? null,
+    coordinates: Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null,
+  };
+}
+
+/** Same as searchStructuredAddress(), but a failure is reported rather than thrown — this is a fallback lookup, never a reason to fail a resolution that already has an answer. */
+export async function searchStructuredAddressSafe(
+  parts: { street: string; city?: string; state?: string; postalcode?: string },
+  fetchImpl: typeof fetch = fetch,
+  retryOptions: FetchOptions = {},
+): Promise<{ ok: true; hit: StructuredAddressHit | null } | { ok: false; error: string }> {
+  try {
+    return { ok: true, hit: await searchStructuredAddress(parts, fetchImpl, retryOptions) };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
 /** Same as crossCheckAddress(), but a failure (network/timeout/rate-limit) is caught and reported as `{ok: false}` rather than thrown — a cross-check is a bonus signal, never something that should fail an otherwise-successful primary resolution. */
 export async function crossCheckSafe(
   oneLineAddress: string,

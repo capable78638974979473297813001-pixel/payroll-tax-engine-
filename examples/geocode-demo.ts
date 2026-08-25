@@ -56,19 +56,32 @@ async function demo(label: string, address: string, workState: string) {
   } else {
     console.log(`  OSM cross-check: unavailable this call (no second opinion, not evidence against Census)`);
   }
+  const moved = result.rooftop?.metersFromInterpolated;
   if (result.precision === 'rooftop') {
     const chosen = result.rooftop!.match!.chosen;
     console.log(
       `  Position: \x1b[32mROOFTOP\x1b[0m — authoritative address point published by ${chosen.source ?? 'the local address authority'}` +
         (chosen.placement && chosen.placement !== 'Unknown' ? ` (${chosen.placement})` : '') +
-        `, ${result.rooftop!.metersFromInterpolated!.toFixed(0)}m from where Census interpolated. Jurisdictions above were resolved AT that point.`,
+        `, ${moved!.toFixed(0)}m from where Census interpolated. Jurisdictions above were resolved AT that point.`,
+    );
+  } else if (result.precision === 'rooftop-osm') {
+    console.log(
+      `  Position: \x1b[32mHOUSE-LEVEL (OpenStreetMap)\x1b[0m — no authoritative point published here, but OSM has one for this address` +
+        ` and it agrees with Census's own position (${moved!.toFixed(0)}m apart). Crowd-sourced and corroborated, not authoritative.`,
+    );
+  } else if (result.precision === 'neighbor') {
+    const n = result.rooftop!.neighbors!;
+    console.log(
+      `  Position: \x1b[36mBLOCK-LEVEL\x1b[0m — this exact number isn't published, so the point is interpolated between the` +
+        ` authoritative points for ${n.below.houseNumber} and ${n.above.houseNumber} on the same street (${n.spanMeters.toFixed(0)}m apart),` +
+        ` ${moved!.toFixed(0)}m from where Census interpolated.`,
     );
   } else if (result.rooftop?.attempted) {
     console.log(
-      `  Position: interpolated by Census — the National Address Database has no published point for this address`,
+      `  Position: interpolated by Census — no published point for this address in any source this module can reach`,
     );
   } else {
-    console.log(`  Position: interpolated by Census — the National Address Database was unreachable this call`);
+    console.log(`  Position: interpolated by Census — the address-point services were unreachable this call`);
   }
   const building = result.crossCheck?.building;
   if (building?.attempted && building.onStreet && building.houseNumberGap !== null) {

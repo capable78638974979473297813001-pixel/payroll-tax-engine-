@@ -37,6 +37,8 @@ import {
 import {
   fetchAddressPointsNear,
   matchAddressPoint,
+  neighborBracket,
+  parseAddressParts,
   resolveRooftop,
 } from '../geocode/rooftop.ts';
 
@@ -1093,7 +1095,7 @@ describe('buildings.ts — the OpenStreetMap building-footprint check (real capt
 describe('rooftop.ts — authoritative address points (real captured National Address Database data, mocked fetch)', () => {
   const nadResponse = (features: unknown[]) =>
     (async () => new Response(JSON.stringify({ features }), { status: 200 })) as unknown as typeof fetch;
-  const FAST_NAD = { baseBackoffMs: 0 };
+  const FAST_NAD = { baseBackoffMs: 0, minIntervalMs: 0 };
 
   // 90 W Broad St, Columbus, OH 43215
   // Census interpolates to 39.962072, -83.002493; 1027 NAD points in the 300m box, 149 on this street, 1 at this exact number.
@@ -1318,6 +1320,161 @@ describe('rooftop.ts — authoritative address points (real captured National Ad
       assert.equal(result.found, true);
       assert.equal(result.ambiguous, true);
       assert.ok(result.match!.spreadMeters > 200);
+    });
+  });
+
+  /**
+   * The two fallback tiers, which exist because authoritative coverage is
+   * real but partial: measured over one Census-verified address in each of
+   * the 51 US jurisdictions (npm run coverage:geocode), 34 have an
+   * authoritative point published, and without these tiers the other 17
+   * would fall all the way back to Census's interpolation.
+   */
+  describe('the fallback tiers — OSM house points and neighbour brackets', () => {
+    const FAST = { minIntervalMs: 0, baseBackoffMs: 0 };
+
+    /** Routes by URL, since a tiered resolution talks to two different services in one call. */
+    const twoServiceFetch = (opts: { nad?: unknown[]; nominatim?: unknown[] }) =>
+      (async (url: string) => {
+        const target = String(url);
+        if (target.includes('nominatim')) {
+          return new Response(JSON.stringify(opts.nominatim ?? []), { status: 200 });
+        }
+        return new Response(JSON.stringify({ features: opts.nad ?? [] }), { status: 200 });
+      }) as unknown as typeof fetch;
+
+    /** The shape Nominatim returns for a house-level hit, trimmed to what this module reads. */
+    const osmHouse = (opts: { lat: number; lon: number; houseNumber: string; road: string; rank?: number }) => [
+      {
+        lat: String(opts.lat),
+        lon: String(opts.lon),
+        place_rank: opts.rank ?? 30,
+        address: { house_number: opts.houseNumber, road: opts.road },
+      },
+    ];
+
+    describe('parseAddressParts (pure)', () => {
+      test('splits a one-line US address into the fields a structured geocoder wants', () => {
+        assert.deepEqual(parseAddressParts('90 W Broad St, Columbus, OH 43215'), {
+          houseNumber: '90',
+          street: 'W Broad St',
+          city: 'Columbus',
+          state: 'OH',
+          postalcode: '43215',
+        });
+      });
+
+      test('a missing ZIP is null rather than a guess, and the state still reads', () => {
+        const parts = parseAddressParts('2 Woodward Ave, Detroit, MI');
+        assert.equal(parts.state, 'MI');
+        assert.equal(parts.postalcode, null);
+        assert.equal(parts.city, 'Detroit');
+      });
+
+      test('a street with no house number yields a null number, not an empty string', () => {
+        assert.equal(parseAddressParts('Broadway, New York, NY 10019').houseNumber, null);
+      });
+    });
+
+    describe('neighborBracket (pure, real published numbers)', () => {
+      test('interpolates between the nearest published numbers on either side', async () => {
+        // Maryland publishes 100, 200, 229 and 234 Holliday Street but not
+        // 215 — so 215 sits between the real points for 200 and 229.
+        const points = await asPoints(BALTIMORE_NAD);
+        const bracket = neighborBracket('215 Holliday St, Baltimore, MD 21202', points);
+        assert.equal(bracket?.below.houseNumber, '200');
+        assert.equal(bracket?.above.houseNumber, '229');
+        assert.ok(bracket!.point.lat > 39.291662 && bracket!.point.lat < 39.29205, 'point should sit between the two');
+      });
+
+      test('refuses to extrapolate past the last published number', async () => {
+        const points = await asPoints(BALTIMORE_NAD);
+        assert.equal(neighborBracket('400 Holliday St, Baltimore, MD 21202', points), null);
+      });
+
+      test('refuses a bracket too many house numbers wide to describe a block', async () => {
+        // Birmingham publishes 600 and 710 on 20th Street North. 650 is a
+        // usable bracket; 700 would lean 100 numbers off the lower point.
+        const points = await asPoints(BIRMINGHAM_NAD);
+        assert.ok(neighborBracket('650 20th St N, Birmingham, AL 35203', points) !== null);
+        assert.equal(neighborBracket('705 20th St N, Birmingham, AL 35203', points), null);
+      });
+    });
+
+    describe("the OSM tier, and why it isn't trusted on its own", () => {
+      test('uses an OSM house-level point when it corroborates where Census put the address', async () => {
+        const result = await resolveRooftop(
+          '400 S Monroe St, Tallahassee, FL 32399',
+          { lat: 30.43854, lon: -84.28186 },
+          twoServiceFetch({
+            nad: [],
+            nominatim: osmHouse({ lat: 30.4381654, lon: -84.28135, houseNumber: '400', road: 'South Monroe Street' }),
+          }),
+          FAST,
+        );
+        assert.equal(result.found, true);
+        assert.equal(result.tier, 'osm-corroborated');
+        assert.deepEqual(result.point, { lat: 30.4381654, lon: -84.28135 });
+        assert.ok(result.metersFromInterpolated! < 250);
+      });
+
+      test('REFUSES the real OSM answer for 90 W Broad St, which is 897m away on the wrong side of the river', async () => {
+        // These are the actual coordinates Nominatim returns for that
+        // address — rank 30, house number 90, and wrong. Corroboration is
+        // the only thing standing between this module and that error.
+        const result = await resolveRooftop(
+          '90 W Broad St, Columbus, OH 43215',
+          COLUMBUS_INTERPOLATED,
+          twoServiceFetch({
+            nad: [],
+            nominatim: osmHouse({ lat: 39.9615852, lon: -83.0129995, houseNumber: '90', road: 'West Broad Street' }),
+          }),
+          FAST,
+        );
+        assert.equal(result.found, false);
+        assert.equal(result.tier, null);
+      });
+
+      test('refuses a street-level OSM result, however close it lands', async () => {
+        const result = await resolveRooftop(
+          '400 S Monroe St, Tallahassee, FL 32399',
+          { lat: 30.43854, lon: -84.28186 },
+          twoServiceFetch({
+            nad: [],
+            nominatim: osmHouse({ lat: 30.4385, lon: -84.2818, houseNumber: '400', road: 'South Monroe Street', rank: 26 }),
+          }),
+          FAST,
+        );
+        assert.equal(result.found, false);
+      });
+
+      test('refuses an OSM result for a different house number', async () => {
+        const result = await resolveRooftop(
+          '400 S Monroe St, Tallahassee, FL 32399',
+          { lat: 30.43854, lon: -84.28186 },
+          twoServiceFetch({
+            nad: [],
+            nominatim: osmHouse({ lat: 30.4385, lon: -84.2818, houseNumber: '402', road: 'South Monroe Street' }),
+          }),
+          FAST,
+        );
+        assert.equal(result.found, false);
+      });
+
+      test('an authoritative point always wins — the OSM service is never even asked', async () => {
+        let nominatimCalled = false;
+        const spyFetch = (async (url: string) => {
+          if (String(url).includes('nominatim')) {
+            nominatimCalled = true;
+            return new Response('[]', { status: 200 });
+          }
+          return new Response(JSON.stringify({ features: COLUMBUS_NAD }), { status: 200 });
+        }) as unknown as typeof fetch;
+
+        const result = await resolveRooftop('90 W Broad St, Columbus, OH 43215', COLUMBUS_INTERPOLATED, spyFetch, FAST);
+        assert.equal(result.tier, 'authoritative');
+        assert.equal(nominatimCalled, false);
+      });
     });
   });
 });

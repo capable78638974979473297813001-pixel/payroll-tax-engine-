@@ -53,6 +53,7 @@
  */
 import { streetKey, streetKeyWithoutDirectionals } from './buildings.ts';
 import type { FetchOptions } from './census.ts';
+import { searchStructuredAddressSafe } from './nominatim.ts';
 
 /**
  * The National Address Database, published by the US Department of
@@ -74,6 +75,31 @@ const SEARCH_RADIUS_METERS = 300;
 
 /** A NAD point this far from the rest of its own match group means the group isn't one building — most likely the same house number on the same street name in two different places inside the search box. Reported rather than silently averaged. */
 const IMPLAUSIBLE_SPREAD_METERS = 120;
+
+/**
+ * OSM's house-level points are the fallback where NAD publishes nothing —
+ * and they are NOT trusted on their own. OSM's own house-level answer for
+ * 90 W Broad St, Columbus lands 897m away, on the wrong side of the
+ * river; a rank-30 "house" result with a matching house number can still
+ * be a different building entirely.
+ *
+ * So an OSM point is only used when it CORROBORATES the position Census
+ * already interpolated — same block, give or take. Within that radius the
+ * two independent systems agree about where the address is and OSM adds
+ * precision; beyond it they disagree, and this module has no way to tell
+ * which one is wrong, so it keeps the interpolated point and says so.
+ * 250m is deliberately generous: interpolation itself is routinely 100m+
+ * off (measured, this project's own demo addresses), so a tighter radius
+ * would reject correct OSM points for being more accurate than the thing
+ * they're checked against.
+ */
+const OSM_CORROBORATION_METERS = 250;
+
+/** House numbers this far apart aren't neighbours in any useful sense, and interpolating between them is no better than what Census already does. */
+const MAX_NEIGHBOR_NUMBER_GAP = 60;
+
+/** Two "neighbouring" authoritative points further apart than this are not on the same block face; interpolating between them would invent a position. */
+const MAX_NEIGHBOR_SPAN_METERS = 400;
 
 interface NadAttributes {
   AddNo_Full?: string | null;
@@ -224,6 +250,31 @@ export async function fetchAddressPointsNear(
   }
 }
 
+export interface AddressParts {
+  houseNumber: string | null;
+  street: string | null;
+  city: string | null;
+  state: string | null;
+  postalcode: string | null;
+}
+
+/** Split a one-line US address into the fields a structured geocoder wants. Deliberately simple — it handles the shape this project's own callers use ("90 W Broad St, Columbus, OH 43215") and returns nulls rather than guessing when a piece isn't there. */
+export function parseAddressParts(oneLineAddress: string): AddressParts {
+  const segments = oneLineAddress.split(',').map((s) => s.trim()).filter(Boolean);
+  const streetSegment = segments[0] ?? '';
+  const houseNumber = /^\s*(\d+)/.exec(streetSegment)?.[1] ?? null;
+  const street = streetSegment.replace(/^\s*\d+\s*/, '').trim() || null;
+
+  const last = segments[segments.length - 1] ?? '';
+  const stateZip = /^([A-Za-z]{2})\s+(\d{5})(?:-\d{4})?$/.exec(last);
+  const stateOnly = /^([A-Za-z]{2})$/.exec(last);
+  const state = stateZip?.[1] ?? stateOnly?.[1] ?? null;
+  const postalcode = stateZip?.[2] ?? null;
+  const city = segments.length >= 3 ? segments[segments.length - 2] : null;
+
+  return { houseNumber, street, city, state, postalcode };
+}
+
 /** The unit designator written into a one-line address ("123 Main St Apt 4B" -> "4B"), used to pick between per-unit points when a building has one point per unit. Null when the address names no unit. */
 export function extractUnit(oneLineAddress: string): string | null {
   const m = /\b(?:apt|apartment|unit|ste|suite|rm|room|#)\.?\s*([A-Za-z0-9-]+)/i.exec(oneLineAddress);
@@ -325,14 +376,100 @@ export function matchAddressPoint(oneLineAddress: string, points: AddressPoint[]
   };
 }
 
+export interface NeighborBracket {
+  point: { lat: number; lon: number };
+  below: AddressPoint;
+  above: AddressPoint;
+  /** How far apart the two bracketing points are — small means one block face. */
+  spanMeters: number;
+}
+
+/**
+ * Pure — when the authority publishes the street but not this exact
+ * number (real and common: state capitols, new construction, renumbered
+ * buildings), interpolate between the nearest published number BELOW and
+ * the nearest ABOVE.
+ *
+ * This is still interpolation, and it is labelled as such everywhere it
+ * surfaces. What makes it better than Census's own is what it
+ * interpolates BETWEEN: two surveyed points that really exist, usually a
+ * few doors apart, rather than the two ends of a TIGER address range that
+ * may span an entire block face. It refuses to extrapolate past either
+ * end, and refuses brackets too wide (in numbers or metres) to describe
+ * one block.
+ */
+export function neighborBracket(oneLineAddress: string, points: AddressPoint[]): NeighborBracket | null {
+  const { houseNumber, street } = parseAddressParts(oneLineAddress);
+  if (!houseNumber || !street) return null;
+  const target = Number(houseNumber);
+  if (!Number.isFinite(target)) return null;
+
+  const targetStreet = streetKey(street);
+  const onStreet = points
+    .filter((p) => p.street !== null && streetKey(p.street) === targetStreet && p.houseNumber !== null)
+    .map((p) => ({ p, n: Number(p.houseNumber) }))
+    .filter(({ n }) => Number.isFinite(n));
+
+  let below: { p: AddressPoint; n: number } | null = null;
+  let above: { p: AddressPoint; n: number } | null = null;
+  for (const candidate of onStreet) {
+    if (candidate.n < target && (below === null || candidate.n > below.n)) below = candidate;
+    if (candidate.n > target && (above === null || candidate.n < above.n)) above = candidate;
+  }
+  if (!below || !above) return null;
+  if (target - below.n > MAX_NEIGHBOR_NUMBER_GAP || above.n - target > MAX_NEIGHBOR_NUMBER_GAP) return null;
+
+  const spanMeters = metersBetween(below.p, above.p);
+  if (spanMeters > MAX_NEIGHBOR_SPAN_METERS) return null;
+
+  const fraction = (target - below.n) / (above.n - below.n);
+  return {
+    point: {
+      lat: below.p.lat + (above.p.lat - below.p.lat) * fraction,
+      lon: below.p.lon + (above.p.lon - below.p.lon) * fraction,
+    },
+    below: below.p,
+    above: above.p,
+    spanMeters,
+  };
+}
+
+/**
+ * Which kind of point a resolution ended up with, best first:
+ *   'authoritative'  — a point published for this exact address by the
+ *                      government that assigns addresses. Rooftop.
+ *   'osm-corroborated' — OSM holds a house-level point for this address
+ *                      AND it agrees with Census's own position, so two
+ *                      independent systems place the address there.
+ *                      Crowd-sourced: good, not authoritative.
+ *   'authoritative-neighbors' — interpolated between the two nearest
+ *                      published points on the same street. Block-level,
+ *                      honestly better than a TIGER range, not rooftop.
+ */
+export type AddressPointTier = 'authoritative' | 'osm-corroborated' | 'authoritative-neighbors';
+
+export interface OsmPointResult {
+  point: { lat: number; lon: number };
+  metersFromInterpolated: number;
+  houseNumber: string | null;
+  road: string | null;
+}
+
 export interface RooftopResult {
   /** false when the National Address Database couldn't be reached — no evidence either way, exactly like the other cross-checks here. */
   attempted: boolean;
-  /** true when an authoritative point for THIS address was found. false with attempted: true means NAD answered and has no point for it — the honest, common outcome in areas whose county hasn't contributed. */
+  /** true when ANY tier produced a better point than the interpolated one. false with attempted: true means every tier came up empty — the honest outcome where nobody publishes this address. */
   found: boolean;
-  /** The rooftop-grade coordinate, when found. */
+  /** Which tier produced the point. Null when none did. */
+  tier: AddressPointTier | null;
+  /** The best available coordinate, when found. */
   point: { lat: number; lon: number } | null;
+  /** Set on the 'authoritative' tier only. */
   match: RooftopMatch | null;
+  /** Set on the 'authoritative-neighbors' tier only. */
+  neighbors: NeighborBracket | null;
+  /** Set on the 'osm-corroborated' tier only. */
+  osm: OsmPointResult | null;
   /** How far the authoritative point sits from Census's interpolated one — the size of the error being corrected. */
   metersFromInterpolated: number | null;
   /** True when the match group is too spread out to be one building; the point is still returned, but a caller should treat it as suspect. */
@@ -350,6 +487,17 @@ export async function resolveRooftop(
   retryOptions: FetchOptions = {},
   radiusMeters: number = SEARCH_RADIUS_METERS,
 ): Promise<RooftopResult> {
+  const empty = {
+    found: false as const,
+    tier: null,
+    point: null,
+    match: null,
+    neighbors: null,
+    osm: null,
+    metersFromInterpolated: null,
+    ambiguous: false,
+  };
+
   const fetched = await fetchAddressPointsNear(
     interpolated.lat,
     interpolated.lon,
@@ -357,23 +505,111 @@ export async function resolveRooftop(
     fetchImpl,
     retryOptions,
   );
-  if (!fetched.ok) {
-    return { attempted: false, found: false, point: null, match: null, metersFromInterpolated: null, ambiguous: false };
+  const points = fetched.ok ? fetched.points : [];
+
+  // Tier 1 — a point published for this exact address.
+  const match = matchAddressPoint(oneLineAddress, points);
+  if (match) {
+    return {
+      attempted: true,
+      found: true,
+      tier: 'authoritative',
+      point: match.point,
+      match,
+      neighbors: null,
+      osm: null,
+      metersFromInterpolated: metersBetween(interpolated, match.point),
+      ambiguous: match.spreadMeters > IMPLAUSIBLE_SPREAD_METERS,
+    };
   }
 
-  const match = matchAddressPoint(oneLineAddress, fetched.points);
-  if (!match) {
-    return { attempted: true, found: false, point: null, match: null, metersFromInterpolated: null, ambiguous: false };
+  // Tier 2 — OSM's own house-level point, but only if it corroborates
+  // where Census already put the address. See OSM_CORROBORATION_METERS.
+  const osm = await resolveOsmPoint(oneLineAddress, interpolated, fetchImpl, retryOptions);
+  if (osm) {
+    return {
+      attempted: fetched.ok,
+      found: true,
+      tier: 'osm-corroborated',
+      point: osm.point,
+      match: null,
+      neighbors: null,
+      osm,
+      metersFromInterpolated: osm.metersFromInterpolated,
+      ambiguous: false,
+    };
   }
+
+  // Tier 3 — between the nearest published numbers on the same street.
+  const neighbors = neighborBracket(oneLineAddress, points);
+  if (neighbors) {
+    return {
+      attempted: true,
+      found: true,
+      tier: 'authoritative-neighbors',
+      point: neighbors.point,
+      match: null,
+      neighbors,
+      osm: null,
+      metersFromInterpolated: metersBetween(interpolated, neighbors.point),
+      ambiguous: false,
+    };
+  }
+
+  return { ...empty, attempted: fetched.ok };
+}
+
+/**
+ * Tier 2's lookup: ask OSM for a house-level point, then refuse it unless
+ * it agrees with the interpolated position. Every guard here exists
+ * because a rank-30 OSM "house" result is not evidence on its own — the
+ * house number and street must match what was asked for, and the point
+ * must be close enough to Census's own that the two sources are talking
+ * about the same building.
+ */
+async function resolveOsmPoint(
+  oneLineAddress: string,
+  interpolated: { lat: number; lon: number },
+  fetchImpl: typeof fetch,
+  retryOptions: FetchOptions,
+): Promise<OsmPointResult | null> {
+  const parts = parseAddressParts(oneLineAddress);
+  if (!parts.street || !parts.houseNumber) return null;
+
+  const outcome = await searchStructuredAddressSafe(
+    {
+      street: `${parts.houseNumber} ${parts.street}`,
+      city: parts.city ?? undefined,
+      state: parts.state ?? undefined,
+      postalcode: parts.postalcode ?? undefined,
+    },
+    fetchImpl,
+    retryOptions,
+  );
+  if (!outcome.ok || !outcome.hit) return null;
+
+  const hit = outcome.hit;
+  // 30 is OSM's house rank. A street- or town-level result carries a
+  // lower one and is not an address point at all.
+  if (hit.placeRank !== 30 || !hit.coordinates) return null;
+  if (hit.houseNumber !== parts.houseNumber) return null;
+  if (hit.road && streetKey(hit.road) !== streetKey(parts.street)) return null;
+
+  const metersFromInterpolated = metersBetween(interpolated, hit.coordinates);
+  if (metersFromInterpolated > OSM_CORROBORATION_METERS) return null;
 
   return {
-    attempted: true,
-    found: true,
-    point: match.point,
-    match,
-    metersFromInterpolated: metersBetween(interpolated, match.point),
-    ambiguous: match.spreadMeters > IMPLAUSIBLE_SPREAD_METERS,
+    point: hit.coordinates,
+    metersFromInterpolated,
+    houseNumber: hit.houseNumber,
+    road: hit.road,
   };
 }
 
-export { IMPLAUSIBLE_SPREAD_METERS, SEARCH_RADIUS_METERS };
+export {
+  IMPLAUSIBLE_SPREAD_METERS,
+  MAX_NEIGHBOR_NUMBER_GAP,
+  MAX_NEIGHBOR_SPAN_METERS,
+  OSM_CORROBORATION_METERS,
+  SEARCH_RADIUS_METERS,
+};

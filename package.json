@@ -10,7 +10,8 @@
     "test": "node --test tests/engine.test.ts tests/harvester.test.ts tests/geocode.test.ts",
     "demo": "node examples/demo.ts",
     "demo:harvest": "node examples/harvest-demo.ts",
-    "demo:geocode": "node examples/geocode-demo.ts"
+    "demo:geocode": "node examples/geocode-demo.ts",
+    "coverage:geocode": "node examples/geocode-coverage.ts"
   },
   "license": "MIT"
 }

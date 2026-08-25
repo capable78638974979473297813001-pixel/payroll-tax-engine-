@@ -33,7 +33,7 @@ import {
   geocodeAddress,
   type MatchQuality,
 } from './census.ts';
-import { resolveRooftop, type RooftopResult } from './rooftop.ts';
+import { resolveRooftop, type AddressPointTier, type RooftopResult } from './rooftop.ts';
 import { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult } from './buildings.ts';
 import { crossCheckSafe, milesBetween, type NominatimResult } from './nominatim.ts';
 import { namesEqual, stripCountySuffix, stripPlaceTypeSuffix } from './normalize.ts';
@@ -58,8 +58,12 @@ export { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult,
 export {
   fetchAddressPointsNear,
   matchAddressPoint,
+  neighborBracket,
+  parseAddressParts,
   resolveRooftop,
   type AddressPoint,
+  type AddressPointTier,
+  type NeighborBracket,
   type RooftopMatch,
   type RooftopResult,
 } from './rooftop.ts';
@@ -115,14 +119,20 @@ export interface AddressResolution {
   matchQuality: MatchQuality | null;
   crossCheck: CrossCheckResult | null;
   /**
-   * 'rooftop' means the jurisdictions above were resolved at an
-   * authoritative, government-published address point for this exact
-   * address (see rooftop.ts) rather than at Census's interpolated
-   * curb position. 'interpolated' means no such point was available —
-   * either the National Address Database has no entry for this address,
-   * or its service couldn't be reached this call.
+   * How the coordinate these jurisdictions were resolved at was obtained,
+   * best first (see rooftop.ts for each tier's own reasoning):
+   *   'rooftop'      — a point published for this exact address by the
+   *                    government that assigns addresses.
+   *   'rooftop-osm'  — OpenStreetMap holds a house-level point for this
+   *                    address and it agrees with Census's own position.
+   *                    Crowd-sourced and corroborated, not authoritative.
+   *   'neighbor'     — interpolated between the two nearest published
+   *                    points on the same street. Block-level.
+   *   'interpolated' — Census's own position along a TIGER address range,
+   *                    which is what this project had before any of the
+   *                    above existed.
    */
-  precision: 'rooftop' | 'interpolated';
+  precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'interpolated';
   /** The coordinate the jurisdictions were actually resolved at. */
   coordinates: { lat: number; lon: number } | null;
   /** The authoritative-address-point lookup, whatever its outcome — including the distance between the two points, which is the size of the interpolation error this corrected. */
@@ -159,6 +169,32 @@ function attemptedMatches(resolved: ResolvedJurisdiction) {
  * caller still gets the municipality/county match, plus an explicit note
  * that the school-district half needs a retry.
  */
+/** The tier names rooftop.ts reports, in the vocabulary a caller of this module reads. */
+function precisionForTier(tier: AddressPointTier): 'rooftop' | 'rooftop-osm' | 'neighbor' {
+  switch (tier) {
+    case 'authoritative':
+      return 'rooftop';
+    case 'osm-corroborated':
+      return 'rooftop-osm';
+    case 'authoritative-neighbors':
+      return 'neighbor';
+  }
+}
+
+/** How the point that replaced the interpolated one was obtained, in a sentence a reviewer can act on. */
+function describePoint(rooftop: RooftopResult): string {
+  switch (rooftop.tier) {
+    case 'authoritative':
+      return `its authoritative address point, published by ${rooftop.match!.chosen.source ?? 'the local address authority'}`;
+    case 'osm-corroborated':
+      return "OpenStreetMap's own house-level point for it, which agrees with Census's position";
+    case 'authoritative-neighbors':
+      return `a position interpolated between the authoritative points for ${rooftop.neighbors!.below.houseNumber} and ${rooftop.neighbors!.above.houseNumber} on the same street`;
+    default:
+      return 'a corrected point';
+  }
+}
+
 /** Human-readable list of every geography that came out DIFFERENT at the authoritative point than at the interpolated one. Empty is the normal, reassuring case; non-empty means the corrected coordinate changed the tax answer. */
 function geographyDifferences(
   interpolated: { incorporatedPlaces: string[]; counties: string[]; countySubdivisions: string[]; state: string },
@@ -184,7 +220,7 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
   schoolDistrictLookupFailed: boolean;
   coordinates: { x: number; y: number };
   geographies: { incorporatedPlaces: string[]; counties: string[] };
-  precision: 'rooftop' | 'interpolated';
+  precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'interpolated';
   point: { lat: number; lon: number };
   rooftop: RooftopResult;
   rooftopJurisdictionChanges: string[];
@@ -221,7 +257,7 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
 
   let geographies = geocoded.geographies;
   let point = interpolated;
-  let precision: 'rooftop' | 'interpolated' = 'interpolated';
+  let precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'interpolated' = 'interpolated';
   let rooftopJurisdictionChanges: string[] = [];
   let schoolDistrictName: string | undefined;
   let schoolDistrictLookupFailed = false;
@@ -239,7 +275,7 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
       geographies = at.result.geographies;
       schoolDistrictName = at.result.schoolDistrict ?? undefined;
       point = rooftop.point;
-      precision = 'rooftop';
+      precision = precisionForTier(rooftop.tier!);
     }
   }
 
@@ -407,7 +443,7 @@ export async function resolveAddress(
   }
   if (rooftopJurisdictionChanges.length > 0) {
     lowConfidenceReasons.push(
-      `This address sits near a jurisdiction line: resolving it at its authoritative address point (${rooftop!.metersFromInterpolated!.toFixed(0)}m from Census's interpolated position) produced DIFFERENT geographies — ${rooftopJurisdictionChanges.join('; ')}. The authoritative point's answer is what's returned above, since it is the surveyed location of this address rather than a position interpolated along a street; the interpolated answer is recorded here because a difference of this kind changes which local tax applies and deserves a human's eyes once.`,
+      `This address sits near a jurisdiction line: resolving it at ${describePoint(rooftop!)} (${rooftop!.metersFromInterpolated!.toFixed(0)}m from Census's interpolated position) produced DIFFERENT geographies — ${rooftopJurisdictionChanges.join('; ')}. The better point's answer is what's returned above; the interpolated answer is recorded here because a difference of this kind changes which local tax applies and deserves a human's eyes once.`,
     );
   }
   if (rooftop?.ambiguous) {
