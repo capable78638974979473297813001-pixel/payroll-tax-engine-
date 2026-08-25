@@ -1,6 +1,11 @@
 import { calculatePaycheck } from '../src/calculate.ts';
 import { dollars } from '../src/money.ts';
-import { resolveAddress, resolveEmployee } from '../geocode/index.ts';
+import {
+  LARGE_HOUSE_NUMBER_GAP,
+  checkNearestBuilding,
+  resolveAddress,
+  resolveEmployee,
+} from '../geocode/index.ts';
 
 /**
  * The scenario: an employer has three new hires' street addresses and
@@ -47,6 +52,24 @@ async function demo(label: string, address: string, workState: string) {
     );
   } else {
     console.log(`  OSM cross-check: unavailable this call (no second opinion, not evidence against Census)`);
+  }
+  const building = result.crossCheck?.building;
+  if (building?.attempted && building.onStreet && building.houseNumberGap !== null) {
+    const b = building.onStreet;
+    console.log(
+      `  OSM footprint check: nearest mapped building on this street is "${b.houseNumber} ${b.street}"` +
+        (b.name ? ` (${b.name})` : '') +
+        `, ${Math.round(b.distanceMeters)}m away — ${building.houseNumberGap} house numbers from this address` +
+        (building.houseNumberGap > LARGE_HOUSE_NUMBER_GAP
+          ? ' \x1b[33m[NUMERICALLY IMPLAUSIBLE]\x1b[0m'
+          : ' \x1b[32m[plausible]\x1b[0m'),
+    );
+  } else if (building?.attempted) {
+    console.log(
+      `  OSM footprint check: no building on this street is mapped with a house number within 150m — no signal either way (normal outside dense downtowns)`,
+    );
+  } else {
+    console.log(`  OSM footprint check: Overpass unavailable this call`);
   }
   for (const reason of result.lowConfidenceReasons) {
     console.log(`  \x1b[33m⚠ ${reason}\x1b[0m`);
@@ -191,6 +214,52 @@ rule('An employee working in downtown Denver, Colorado — the Occupational Priv
   for (const line of paycheck.taxes) {
     console.log(`    ${line.id.padEnd(16)} ${line.detail}`);
   }
+}
+
+rule("The footprint check, run against a point that is genuinely WRONG — the reason it exists");
+{
+  /**
+   * Every scenario above resolves an address Census got right, so the
+   * footprint check agrees and says so. This runs the SAME check against
+   * the point NOMINATIM returned for 90 W Broad St — a real, verified
+   * error: it lands 0.56 miles away, across the river, on COSI. Nothing
+   * about a place-name comparison catches that; both geocoders "matched".
+   * The house number of the nearest mapped building on that same street
+   * does catch it, live, in one call.
+   */
+  const address = '90 W Broad St, Columbus, OH 43215';
+  const points = {
+    "Census's point (correct — Columbus City Hall is here)": { lat: 39.962072, lon: -83.002493 },
+    "Nominatim's point (wrong — this is COSI, 0.56mi away)": { lat: 39.961585, lon: -83.012999 },
+  };
+
+  console.log(`  Address under test: ${address}\n`);
+  for (const [label, point] of Object.entries(points)) {
+    const check = await checkNearestBuilding(address, point);
+    if (!check.attempted) {
+      console.log(`  ${label}: Overpass unavailable this call`);
+      continue;
+    }
+    const b = check.onStreet;
+    if (!b || check.houseNumberGap === null) {
+      console.log(`  ${label}: no same-street building mapped with a house number within 150m`);
+      continue;
+    }
+    const verdict =
+      check.houseNumberGap > LARGE_HOUSE_NUMBER_GAP
+        ? `\x1b[33mgap ${check.houseNumberGap} — NUMERICALLY IMPLAUSIBLE for this address\x1b[0m`
+        : `\x1b[32mgap ${check.houseNumberGap} — plausible\x1b[0m`;
+    console.log(
+      `  ${label}\n    nearest on-street building: "${b.houseNumber} ${b.street}"` +
+        (b.name ? ` (${b.name})` : '') +
+        `, ${Math.round(b.distanceMeters)}m away — ${verdict}`,
+    );
+  }
+  console.log(
+    `\n  \x1b[2mThe honest limit: this catches a point that is far enough off that\n` +
+      `  the house numbers stop lining up. A wrong building right next door,\n` +
+      `  with a similar number, still gets through — see buildings.ts.\x1b[0m`,
+  );
 }
 
 console.log(

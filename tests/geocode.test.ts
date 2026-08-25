@@ -24,6 +24,16 @@ import {
   stripSecondaryUnit,
 } from '../geocode/census.ts';
 import { crossCheckAddress, crossCheckSafe, milesBetween } from '../geocode/nominatim.ts';
+import {
+  LARGE_HOUSE_NUMBER_GAP,
+  checkNearestBuilding,
+  extractHouseNumber,
+  extractStreet,
+  fetchNearbyBuildings,
+  nearestBuilding,
+  nearestBuildingOnStreet,
+  streetKey,
+} from '../geocode/buildings.ts';
 
 const CHECK_DATE = '2026-08-15';
 
@@ -697,6 +707,361 @@ describe('nominatim.ts — the independent cross-check geocoder (mocked fetch, n
       if (result.ok) {
         assert.equal(result.result.place, 'Columbus');
       }
+    });
+  });
+});
+
+/**
+ * The building-footprint check. Every footprint below is REAL data,
+ * captured live from the Overpass API this session with the exact query
+ * fetchNearbyBuildings() itself builds:
+ *   curl -X POST https://overpass-api.de/api/interpreter --data-urlencode \
+ *     'data=[out:json][timeout:20];way["building"](39.960237,-83.014757,39.962932,-83.011240);out tags geom;'
+ * (that bbox is the ~150m box around Nominatim's own point for 90 W Broad
+ * St, Columbus; the other set is the same query around Census's point).
+ * Only the six closest footprints per point are kept, and only the tags
+ * this module reads — coordinates are the real ones, rounded to 6
+ * decimals (~0.1m).
+ *
+ * This is the pair of real results the whole module exists for: Census's
+ * point sits 23m from "50 West Broad Street" (LeVeque Tower) — 40 numbers
+ * from the target, plausible — while Nominatim's sits 10m from "500 W
+ * Broad Street" (Gravity Building A), 410 numbers away, which is the
+ * signal that Nominatim resolved a genuinely different location.
+ */
+describe('buildings.ts — the OpenStreetMap building-footprint check (real captured Overpass data, mocked fetch)', () => {
+  const ring = (pairs: [number, number][]) => pairs.map(([lat, lon]) => ({ lat, lon }));
+  const TARGET = '90 W Broad St, Columbus, OH 43215';
+  const CENSUS_POINT = { lat: 39.962072, lon: -83.002493 };
+  const NOMINATIM_POINT = { lat: 39.961585, lon: -83.012999 };
+
+  // CENSUS point {"lat":39.962072,"lon":-83.002493} — 6 of 25 footprints returned
+  const CENSUS_FOOTPRINTS = [
+    // 23m away
+    { tags: {"name":"LeVeque Tower","addr:housenumber":"50","addr:street":"West Broad Street","building":"yes"}, geometry: ring([[39.962419, -83.002334], [39.962216, -83.002296], [39.962242, -83.002064], [39.962247, -83.002024], [39.962289, -83.001647], [39.962370, -83.001663], [39.962423, -83.001673], [39.962452, -83.001678], [39.962410, -83.002054], [39.962443, -83.002104], [39.962437, -83.002153], [39.962734, -83.002209], [39.962714, -83.002390], [39.962419, -83.002334]]) },
+    // 31m away
+    { tags: {"name":"Huntington Plaza","addr:housenumber":"37","addr:street":"West Broad Street","building":"commercial"}, geometry: ring([[39.961615, -83.002180], [39.961880, -83.002233], [39.961910, -83.001981], [39.961940, -83.001725], [39.961674, -83.001672], [39.961634, -83.002022], [39.961615, -83.002180]]) },
+    // 33m away
+    { tags: {"name":"Ohio Department of Education","addr:housenumber":"25","addr:street":"South Front Street","building":"public"}, geometry: ring([[39.961307, -83.003126], [39.961450, -83.003153], [39.961580, -83.003179], [39.961723, -83.003206], [39.961729, -83.003158], [39.961790, -83.002618], [39.961751, -83.002611], [39.961425, -83.002548], [39.961374, -83.002538], [39.961312, -83.003078], [39.961307, -83.003126]]) },
+    // 50m away
+    { tags: {"name":"Palace Theatre","building":"yes"}, geometry: ring([[39.962452, -83.001678], [39.962791, -83.001737], [39.962734, -83.002209], [39.962437, -83.002153], [39.962443, -83.002104], [39.962410, -83.002054], [39.962452, -83.001678]]) },
+    // 58m away
+    { tags: {"name":"City Hall","building":"civic"}, geometry: ring([[39.962824, -83.003773], [39.962835, -83.003676], [39.962873, -83.003683], [39.962931, -83.003181], [39.962898, -83.003175], [39.962916, -83.003019], [39.962473, -83.002932], [39.962456, -83.003075], [39.962425, -83.003069], [39.962367, -83.003577], [39.962409, -83.003585], [39.962395, -83.003701], [39.962455, -83.003713], [39.962453, -83.003731], [39.962488, -83.003738], [39.962486, -83.003762], [39.962714, -83.003806], [39.962718, -83.003777], [39.962750, -83.003783], [39.962752, -83.003759], [39.962824, -83.003773]]) },
+    // 66m away
+    { tags: {"building":"parking"}, geometry: ring([[39.961604, -83.002016], [39.961611, -83.001958], [39.961621, -83.001882], [39.961602, -83.001879], [39.961620, -83.001727], [39.961460, -83.001695], [39.961427, -83.001978], [39.961526, -83.002000], [39.961545, -83.002004], [39.961595, -83.002014], [39.961602, -83.002016], [39.961604, -83.002016]]) },
+  ];
+
+  // NOMINATIM point {"lat":39.961585,"lon":-83.012999} — 6 of 10 footprints returned
+  const NOMINATIM_FOOTPRINTS = [
+    // 10m away
+    { tags: {"name":"Gravity Building A","addr:housenumber":"500","addr:street":"W Broad Street","building":"apartments"}, geometry: ring([[39.960792, -83.013381], [39.960758, -83.013632], [39.960958, -83.013993], [39.961149, -83.014041], [39.961171, -83.013865], [39.961067, -83.013672], [39.961337, -83.013433], [39.961351, -83.013213], [39.961202, -83.013286], [39.961140, -83.013094], [39.961410, -83.012855], [39.961578, -83.013185], [39.961727, -83.013055], [39.961695, -83.012916], [39.961432, -83.012639], [39.961275, -83.012717], [39.961209, -83.012506], [39.960952, -83.012220], [39.960923, -83.012473], [39.961085, -83.012822], [39.961037, -83.012888], [39.960990, -83.012938], [39.960872, -83.012829], [39.960843, -83.013038], [39.961030, -83.013379], [39.960932, -83.013522], [39.960792, -83.013381]]) },
+    // 26m away
+    { tags: {"name":"Gravity Apartments parking garage","building":"parking"}, geometry: ring([[39.961174, -83.013738], [39.961367, -83.014094], [39.961568, -83.013917], [39.961651, -83.014067], [39.961673, -83.014108], [39.961725, -83.014203], [39.961813, -83.014209], [39.962032, -83.014006], [39.961840, -83.013662], [39.961956, -83.013559], [39.961791, -83.013254], [39.961742, -83.013303], [39.961714, -83.013249], [39.961174, -83.013738]]) },
+    // 85m away
+    { tags: {"building":"service"}, geometry: ring([[39.962128, -83.012261], [39.962123, -83.012291], [39.962144, -83.012297], [39.962149, -83.012267], [39.962128, -83.012261]]) },
+    // 96m away
+    { tags: {"name":"Agora Christian Fellowship Church","building":"yes"}, geometry: ring([[39.961262, -83.011452], [39.961270, -83.011394], [39.961187, -83.011386], [39.961158, -83.011607], [39.961065, -83.011585], [39.961022, -83.011607], [39.960996, -83.011805], [39.961418, -83.011891], [39.961468, -83.011492], [39.961262, -83.011452]]) },
+    // 97m away
+    { tags: {"building":"industrial"}, geometry: ring([[39.961847, -83.011742], [39.961844, -83.011775], [39.961739, -83.011757], [39.961743, -83.011718], [39.961707, -83.011711], [39.961705, -83.011736], [39.961448, -83.011690], [39.961434, -83.011819], [39.962055, -83.011931], [39.962071, -83.011782], [39.961847, -83.011742]]) },
+    // 111m away
+    { tags: {"addr:housenumber":"455","addr:street":"W Broad Street","building":"commercial"}, geometry: ring([[39.960555, -83.013208], [39.960612, -83.012696], [39.959959, -83.012572], [39.959902, -83.013084], [39.960555, -83.013208]]) },
+  ];
+
+  /**
+   * Opts out of the retry backoff and the request-spacing throttle (the
+   * LOGIC still runs; the suite just doesn't pay real seconds for it), and
+   * hands each call its OWN availability record. That last part is not
+   * ceremony: without it, the tests below that simulate an outage open the
+   * module-wide circuit and every later test gets skipped instead of run —
+   * which is exactly what happened the first time these were written.
+   */
+  const fresh = (overrides: Record<string, unknown> = {}) => ({
+    minIntervalMs: 0,
+    baseBackoffMs: 0,
+    circuit: { consecutiveFailures: 0, openUntil: 0 },
+    ...overrides,
+  });
+
+  const okFetch = (elements: unknown[]) =>
+    (async () => new Response(JSON.stringify({ elements }), { status: 200 })) as unknown as typeof fetch;
+
+  describe('street/house-number parsing (pure)', () => {
+    test('streetKey makes the postal and OSM spellings of one street compare equal — both forms appear in the real data above', () => {
+      assert.equal(streetKey('W Broad St'), streetKey('West Broad Street'));
+      assert.equal(streetKey('W Broad Street'), streetKey('West Broad Street'));
+      assert.equal(streetKey('N. Main St.'), 'north main street');
+    });
+
+    test('streetKey expands a street type only at the END, so a name that starts with one survives', () => {
+      assert.equal(streetKey('St Clair Ave'), 'st clair avenue');
+    });
+
+    test('streetKey keeps genuinely different streets different', () => {
+      assert.notEqual(streetKey('W Broad St'), streetKey('S Front St'));
+    });
+
+    test('extractHouseNumber reads the leading number, or null when there is none', () => {
+      assert.equal(extractHouseNumber(TARGET), '90');
+      assert.equal(extractHouseNumber('Broadway, New York, NY'), null);
+    });
+
+    test('extractStreet drops the house number and any unit designator', () => {
+      assert.equal(extractStreet(TARGET), 'W Broad St');
+      assert.equal(extractStreet('1600 Broadway, New York, NY 10019'), 'Broadway');
+      assert.equal(extractStreet('123 Main St Apt 4B, Columbus, OH 43215'), 'Main St');
+    });
+  });
+
+  describe('nearestBuilding / nearestBuildingOnStreet (pure, real footprints)', () => {
+    test("the nearest footprint of any kind to Census's point is LeVeque Tower, about 23m away", () => {
+      const nearest = nearestBuilding(CENSUS_POINT, CENSUS_FOOTPRINTS);
+      assert.equal(nearest?.name, 'LeVeque Tower');
+      assert.ok(
+        nearest!.distanceMeters > 15 && nearest!.distanceMeters < 35,
+        `expected roughly 23m, got ${nearest!.distanceMeters}`,
+      );
+    });
+
+    test('the point falls OUTSIDE every footprint — which is why this uses nearest-edge distance, not containment', () => {
+      // Census interpolates to the street curb, not into the building. If
+      // this ever starts returning ~0, the geocoder's behaviour changed,
+      // not this module's.
+      assert.ok(nearestBuilding(CENSUS_POINT, CENSUS_FOOTPRINTS)!.distanceMeters > 5);
+    });
+
+    test('the SAME-STREET filter skips a closer cross-street building whose number would mean nothing', () => {
+      // The Ohio Department of Education footprint ("25 South Front
+      // Street") is only 33m from this point — closer than City Hall and
+      // barely further than Huntington Plaza — but comparing 90 W Broad
+      // St against a South Front Street number compares nothing.
+      const onStreet = nearestBuildingOnStreet(CENSUS_POINT, CENSUS_FOOTPRINTS, 'W Broad St');
+      assert.equal(onStreet?.name, 'LeVeque Tower');
+      assert.equal(onStreet?.houseNumber, '50');
+      assert.equal(onStreet?.street, 'West Broad Street');
+    });
+
+    test('a street with no tagged footprint nearby yields no candidate at all, rather than the wrong one', () => {
+      assert.equal(nearestBuildingOnStreet(CENSUS_POINT, CENSUS_FOOTPRINTS, 'E Long St'), null);
+    });
+
+    test('a footprint tagged with a street but no house number is not a candidate — there is nothing to compare', () => {
+      const untagged = [
+        {
+          tags: { 'addr:street': 'West Broad Street' },
+          geometry: ring([
+            [39.9621, -83.0025],
+            [39.9622, -83.0026],
+          ]),
+        },
+      ];
+      assert.equal(nearestBuildingOnStreet(CENSUS_POINT, untagged, 'W Broad St'), null);
+    });
+  });
+
+  describe('checkNearestBuilding — the real Columbus disagreement, end to end', () => {
+    test("Census's point: a 40-number gap to the nearest same-street building, well under the flag threshold", async () => {
+      const result = await checkNearestBuilding(TARGET, CENSUS_POINT, okFetch(CENSUS_FOOTPRINTS), fresh());
+      assert.equal(result.attempted, true);
+      assert.equal(result.onStreet?.houseNumber, '50');
+      assert.equal(result.houseNumberGap, 40);
+      assert.ok(result.houseNumberGap! < LARGE_HOUSE_NUMBER_GAP);
+    });
+
+    test("Nominatim's point: a 410-number gap — the real error this check was built to catch", async () => {
+      const result = await checkNearestBuilding(TARGET, NOMINATIM_POINT, okFetch(NOMINATIM_FOOTPRINTS), fresh());
+      assert.equal(result.attempted, true);
+      assert.equal(result.nearest?.name, 'Gravity Building A');
+      // Tagged "W Broad Street" here vs. "West Broad Street" on Census's
+      // side of the river — a raw string comparison would have missed
+      // this one entirely.
+      assert.equal(result.onStreet?.houseNumber, '500');
+      assert.equal(result.houseNumberGap, 410);
+      assert.ok(result.houseNumberGap! > LARGE_HOUSE_NUMBER_GAP);
+    });
+
+    test('an address with no mapped footprints nearby is attempted-but-silent, NOT evidence against the point', async () => {
+      const result = await checkNearestBuilding('1 Rural Route 2, Nowhere, OH', { lat: 40.5, lon: -83.5 }, okFetch([]), fresh());
+      assert.equal(result.attempted, true);
+      assert.equal(result.nearest, null);
+      assert.equal(result.houseNumberGap, null);
+    });
+
+    test('a same-street footprint with no house number tagged produces no gap rather than a guess', async () => {
+      const result = await checkNearestBuilding(
+        TARGET,
+        CENSUS_POINT,
+        okFetch([
+          {
+            tags: { 'addr:street': 'West Broad Street', building: 'yes' },
+            geometry: [
+              { lat: 39.9621, lon: -83.0025 },
+              { lat: 39.9622, lon: -83.0026 },
+              { lat: 39.9621, lon: -83.0025 },
+            ],
+          },
+        ]),
+        fresh(),
+      );
+      assert.equal(result.attempted, true);
+      assert.equal(result.houseNumberGap, null);
+    });
+  });
+
+  describe('fetchNearbyBuildings — Overpass request shape and failure handling', () => {
+    test('posts a bounding-box building query, not a GET', async () => {
+      let seen: { url: string; init: RequestInit } | null = null;
+      const spyFetch = (async (url: string, init: RequestInit) => {
+        seen = { url, init };
+        return new Response(JSON.stringify({ elements: [] }), { status: 200 });
+      }) as unknown as typeof fetch;
+
+      await fetchNearbyBuildings(39.962072, -83.002493, 150, spyFetch, fresh());
+      assert.match(seen!.url, /overpass-api\.de/);
+      assert.equal(seen!.init.method, 'POST');
+      const body = String(seen!.init.body);
+      assert.match(body, /way%5B%22building%22%5D/);
+      // The bbox is built around the point, not around the whole city.
+      assert.match(body, /39\.96/);
+    });
+
+    test("a transient 504 (Overpass under load — observed live, repeatedly) is retried, and the retry's success is returned", async () => {
+      let calls = 0;
+      const flakyFetch = (async () => {
+        calls++;
+        if (calls === 1) return new Response('dispatcher error', { status: 504 });
+        return new Response(
+          JSON.stringify({
+            elements: [
+              {
+                tags: { building: 'yes' },
+                geometry: [
+                  { lat: 1, lon: 1 },
+                  { lat: 1.1, lon: 1.1 },
+                ],
+              },
+            ],
+          }),
+          { status: 200 },
+        );
+      }) as unknown as typeof fetch;
+
+      const result = await fetchNearbyBuildings(39.96, -83.0, 150, flakyFetch, fresh());
+      assert.equal(calls, 2);
+      assert.equal(result.ok, true);
+      if (result.ok) assert.equal(result.elements.length, 1);
+    });
+
+    test('a genuine empty result is {ok: true, elements: []} — distinct from a failed query, on purpose', async () => {
+      const result = await fetchNearbyBuildings(39.96, -83.0, 150, okFetch([]), fresh());
+      assert.equal(result.ok, true);
+      if (result.ok) assert.deepEqual(result.elements, []);
+    });
+
+    test('exhausting the retries reports {ok: false} rather than throwing, or pretending nothing is mapped there', async () => {
+      const downFetch = (async () => {
+        throw new Error('network down');
+      }) as unknown as typeof fetch;
+
+      const result = await fetchNearbyBuildings(39.96, -83.0, 150, downFetch, fresh());
+      assert.equal(result.ok, false);
+    });
+
+    test('back-to-back calls are spaced by the throttle — the cap Overpass asks for is enforced here, not left to callers', async () => {
+      const stamps: number[] = [];
+      const stampingFetch = (async () => {
+        stamps.push(Date.now());
+        return new Response(JSON.stringify({ elements: [] }), { status: 200 });
+      }) as unknown as typeof fetch;
+
+      const options = fresh({ minIntervalMs: 60 });
+      await fetchNearbyBuildings(39.96, -83.0, 150, stampingFetch, options);
+      await fetchNearbyBuildings(39.96, -83.0, 150, stampingFetch, options);
+      assert.equal(stamps.length, 2);
+      assert.ok(stamps[1] - stamps[0] >= 55, `expected ~60ms of spacing, got ${stamps[1] - stamps[0]}ms`);
+    });
+
+    test('a 429 with a Retry-After header waits the time the server actually asked for, not a made-up backoff', async () => {
+      let calls = 0;
+      const rateLimitedFetch = (async () => {
+        calls++;
+        if (calls === 1) {
+          return new Response('rate limited', { status: 429, headers: { 'Retry-After': '0.08' } });
+        }
+        return new Response(JSON.stringify({ elements: [] }), { status: 200 });
+      }) as unknown as typeof fetch;
+
+      const started = Date.now();
+      // baseBackoffMs: 0 would retry instantly — the header has to win.
+      const result = await fetchNearbyBuildings(39.96, -83.0, 150, rateLimitedFetch, fresh());
+      assert.equal(calls, 2);
+      assert.equal(result.ok, true);
+      assert.ok(Date.now() - started >= 70, 'expected the Retry-After delay to be honoured');
+    });
+
+    test('a host that never answers at all opens the circuit immediately — the next address is skipped, not made to wait for the same timeout', async () => {
+      const circuit = { consecutiveFailures: 0, openUntil: 0 };
+      const downFetch = (async () => {
+        throw new Error('connect ETIMEDOUT');
+      }) as unknown as typeof fetch;
+      let secondCallReachedTheNetwork = false;
+      const spyFetch = (async () => {
+        secondCallReachedTheNetwork = true;
+        return new Response(JSON.stringify({ elements: [] }), { status: 200 });
+      }) as unknown as typeof fetch;
+
+      const first = await fetchNearbyBuildings(39.96, -83.0, 150, downFetch, fresh({ circuit }));
+      assert.equal(first.ok, false);
+      assert.ok(circuit.openUntil > Date.now(), 'an unreachable host should open the circuit at once');
+
+      const second = await fetchNearbyBuildings(39.96, -83.0, 150, spyFetch, fresh({ circuit }));
+      assert.equal(second.ok, false);
+      assert.equal(secondCallReachedTheNetwork, false);
+    });
+
+    test('an HTTP-level failure gets the benefit of the doubt until three in a row — one unlucky query is not an outage', async () => {
+      const circuit = { consecutiveFailures: 0, openUntil: 0 };
+      const erroringFetch = (async () => new Response('server error', { status: 500 })) as unknown as typeof fetch;
+      const options = fresh({ circuit, retries: 0 });
+
+      await fetchNearbyBuildings(39.96, -83.0, 150, erroringFetch, options);
+      assert.equal(circuit.openUntil, 0, 'one failure should not open the circuit');
+      await fetchNearbyBuildings(39.96, -83.0, 150, erroringFetch, options);
+      assert.equal(circuit.openUntil, 0, 'two failures should not open the circuit');
+      await fetchNearbyBuildings(39.96, -83.0, 150, erroringFetch, options);
+      assert.ok(circuit.openUntil > Date.now(), 'three in a row is an outage');
+    });
+
+    test('a success clears the failure count, so unrelated hiccups never accumulate into a false outage', async () => {
+      const circuit = { consecutiveFailures: 0, openUntil: 0 };
+      const erroringFetch = (async () => new Response('server error', { status: 500 })) as unknown as typeof fetch;
+
+      await fetchNearbyBuildings(39.96, -83.0, 150, erroringFetch, fresh({ circuit, retries: 0 }));
+      assert.equal(circuit.consecutiveFailures, 1);
+      await fetchNearbyBuildings(39.96, -83.0, 150, okFetch([]), fresh({ circuit }));
+      assert.equal(circuit.consecutiveFailures, 0);
+    });
+
+    test('once the cooldown has passed, the next call actually tries again rather than staying open forever', async () => {
+      const circuit = { consecutiveFailures: 9, openUntil: Date.now() - 1 };
+      let tried = false;
+      const spyFetch = (async () => {
+        tried = true;
+        return new Response(JSON.stringify({ elements: [] }), { status: 200 });
+      }) as unknown as typeof fetch;
+
+      const result = await fetchNearbyBuildings(39.96, -83.0, 150, spyFetch, fresh({ circuit }));
+      assert.equal(tried, true);
+      assert.equal(result.ok, true);
+      assert.equal(circuit.consecutiveFailures, 0);
+    });
+
+    test('checkNearestBuilding turns that failure into attempted: false — no second opinion, never a mark against the address', async () => {
+      const downFetch = (async () => {
+        throw new Error('network down');
+      }) as unknown as typeof fetch;
+
+      const result = await checkNearestBuilding(TARGET, CENSUS_POINT, downFetch, fresh());
+      assert.deepEqual(result, { attempted: false, nearest: null, onStreet: null, houseNumberGap: null });
     });
   });
 });

@@ -28,6 +28,7 @@
  *     taxes/state.ts, not assumed).
  */
 import { fetchSchoolDistrictAtPointSafe, geocodeAddress, type MatchQuality } from './census.ts';
+import { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult } from './buildings.ts';
 import { crossCheckSafe, milesBetween, type NominatimResult } from './nominatim.ts';
 import { namesEqual, stripCountySuffix, stripPlaceTypeSuffix } from './normalize.ts';
 import { resolveJurisdiction, toCertificateFields, type ResolvedJurisdiction } from './resolve.ts';
@@ -47,6 +48,7 @@ export {
   type MatchQuality,
 } from './census.ts';
 export { crossCheckAddress, type NominatimResult } from './nominatim.ts';
+export { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult, type NearbyBuilding } from './buildings.ts';
 
 /**
  * A LARGE disagreement in resolved COORDINATES between Census and
@@ -77,6 +79,16 @@ export interface CrossCheckResult {
   placeDisagreement: boolean;
   /** true when the two geocoders' coordinates are more than LARGE_DISTANCE_DISAGREEMENT_MILES apart. */
   distanceDisagreementMiles: number | null;
+  /**
+   * A THIRD, independent signal — see buildings.ts's own doc comment for
+   * the full story: OpenStreetMap's traced building-footprint data (a
+   * different subsystem from Nominatim's own address search) found a
+   * genuine real-world error this way — Nominatim and Census had both
+   * "matched" 90 W Broad St, Columbus, but Nominatim's point sat next to a
+   * building tagged "500 W Broad Street", a 410-number gap, while Census's
+   * point sat next to one tagged "50 W Broad Street", a 40-number gap.
+   */
+  building: BuildingCheckResult;
 }
 
 export interface AddressResolution {
@@ -182,9 +194,17 @@ async function runCrossCheck(
   census: { incorporatedPlaces: string[]; counties: string[] },
   censusCoordinates: { x: number; y: number },
 ): Promise<CrossCheckResult> {
-  const outcome = await crossCheckSafe(address);
+  // Concurrent on purpose: these are two independent services (Nominatim's
+  // address search and Overpass's footprint data), and the building check
+  // is run against CENSUS's own point regardless of whether Nominatim
+  // answers at all — the two signals are not conditional on each other.
+  const [outcome, building] = await Promise.all([
+    crossCheckSafe(address),
+    checkNearestBuilding(address, { lat: censusCoordinates.y, lon: censusCoordinates.x }),
+  ]);
+
   if (!outcome.ok || !outcome.result.matched) {
-    return { attempted: false, nominatim: null, placeDisagreement: false, distanceDisagreementMiles: null };
+    return { attempted: false, nominatim: null, placeDisagreement: false, distanceDisagreementMiles: null, building };
   }
 
   const nominatim = outcome.result;
@@ -204,6 +224,7 @@ async function runCrossCheck(
     nominatim,
     placeDisagreement: !placeMatches || !countyMatches,
     distanceDisagreementMiles,
+    building,
   };
 }
 
@@ -267,6 +288,14 @@ export async function resolveAddress(
   }
   if (crossCheck.distanceDisagreementMiles !== null && crossCheck.distanceDisagreementMiles > LARGE_DISTANCE_DISAGREEMENT_MILES) {
     lowConfidenceReasons.push(`OpenStreetMap's independent geocoder placed this address ${crossCheck.distanceDisagreementMiles.toFixed(2)} miles from Census's own coordinates — larger than ordinary interpolation slop, suggesting one of the two geocoders resolved a genuinely different location.`);
+  }
+  if (crossCheck.building.houseNumberGap !== null && crossCheck.building.houseNumberGap > LARGE_HOUSE_NUMBER_GAP) {
+    const onStreet = crossCheck.building.onStreet!;
+    lowConfidenceReasons.push(
+      `The resolved point sits ${Math.round(onStreet.distanceMeters)}m from a mapped building tagged "${onStreet.houseNumber} ${onStreet.street}"` +
+        (onStreet.name ? ` (${onStreet.name})` : '') +
+        ` — ${crossCheck.building.houseNumberGap} house numbers from this address on the same street, which is numerically implausible for that distance. This is the check that caught a real Nominatim error on 90 W Broad St, Columbus (see buildings.ts); worth confirming the point landed on the right block before this address goes live.`,
+    );
   }
 
   return {
