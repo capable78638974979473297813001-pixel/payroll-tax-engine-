@@ -713,17 +713,24 @@
         "rate": "2.5%",
         "minTax": "$100",
         "cap": "$80,000",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.0245,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateStatus": "confirmed_via_city_primary_source",
+        "wageRateNote": "RESOLVED, and it was a real discrepancy rather than a rounding artifact: Covington's own Finance Department page states 'Employers in Covington are required to withhold 2.45% on all compensation paid to their employees', while the separate net profits tax is '2.5% of the net profits ... or $100, whichever is greater'. So the SOS database's 2.5% 'Net Profits' figure was never the wage rate, exactly the Hopkinsville pattern this file warns about, and the USDA NFC bulletin's 2.45% was right. Covington also caps each employee's liability at the FICA wage base, so capAtSSWageBase is set.",
         "wageRateDiscrepancy": "SOS database (this file's own scrape) shows \"Net Profits\" category at 2.5%. USDA NFC's independent bulletin reports Covington's payroll WITHHOLDING rate as 2.45% specifically -- a genuine 0.05-point disagreement between two independent sources, not a rounding artifact. Could mean the 2.5% net-profits figure and the wage-withholding figure are simply DIFFERENT rates in Covington (the same Hopkinsville pattern this file already documents elsewhere), or one of the two sources is stale/wrong. NOT resolved this pass -- deliberately left unconfirmed (wageRateDecimal stays null) rather than picking one number without a primary source to settle it.",
         "nfcSource": {
           "title": "USDA National Finance Center -- Kentucky City (Local) Income Tax Withholding bulletin",
           "url": "https://help.nfc.usda.gov/bulletins/2024/1709749757.htm",
           "verifiedOn": "2026-08-25",
           "verifiedBy": "An independent federal payroll shared-service that re-derives local withholding rates for its own processing -- the same source class that has already caught real errors for other states in this project (Alabama, Georgia). Used here to cross-confirm several Kentucky \"Net Profits\"-only SOS entries ARE also the wage rate, and to surface Florence's real withholding rate (2.00%), which the SOS scrape had entirely missed under a different, much smaller \"Gross Receipts\" tax (0.001%) -- two genuinely different Florence taxes, not a data error."
+        },
+        "capAtSSWageBase": true,
+        "citySource": {
+          "title": "City of Covington, KY — Finance Department, business licensing and occupational license fee",
+          "url": "https://www.covingtonky.gov/government/departments/finance/business-licensing-occupational-license-fee",
+          "verifiedOn": "2026-08-25",
+          "verifiedBy": "Fetched directly this pass. The page distinguishes the 2.45% employer withholding on compensation from the 2.5% net-profits tax in its own words, which is what settles the conflict the previous pass recorded and declined to guess at."
         }
       },
       {
@@ -917,11 +924,16 @@
         "category": "Net Profits",
         "rate": "1.95%",
         "minTax": "$25 (credit against first $25 due on net profits return)",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.0195,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_city_primary_source",
+        "wageRateNote": "Confirmed against Elizabethtown's own municipal code § 110.03, which measures the occupational license tax by 1.95% of all wages and compensation paid or payable in the city for work done or services rendered in the city by every resident and nonresident employee. The bare 'Net Profits' category on the SOS scrape understated what the ordinance actually covers.",
+        "citySource": {
+          "title": "City of Elizabethtown, KY — Code of Ordinances Chapter 110, § 110.03 Occupational License Tax Payment Required",
+          "url": "https://codelibrary.amlegal.com/codes/elizabethtownky/latest/elizabethtown_ky/0-0-0-3203",
+          "verifiedOn": "2026-08-25"
+        }
       },
       {
         "name": "Elkton",
@@ -1181,11 +1193,16 @@
         "name": "Georgetown",
         "category": "Net Profits",
         "rate": "1%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_city_primary_source",
+        "wageRateNote": "Confirmed: Georgetown split its original gross-receipts tax into a net profits tax on businesses and a 1% payroll tax on employee wages, and the city's own published material describes the employee payroll tax at 1% of gross wages. Note this is the CITY rate only — Scott County levies a separate 0.5% occupational tax, which is a different jurisdiction and stacks.",
+        "citySource": {
+          "title": "City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs gross receipts)",
+          "url": "https://www.georgetownky.gov/2167/Taxes-License-Fees",
+          "verifiedOn": "2026-08-25"
+        }
       },
       {
         "name": "Glasgow",
@@ -1355,11 +1372,16 @@
         "rate": "1.65%",
         "category": "Payroll and Net Profits",
         "source": "hendersonky.gov, eff. 2023-01-01 (up from 1.49%)",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.0165,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
-        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
+        "wageRateStatus": "confirmed_via_city_primary_source",
+        "wageRateNote": "Confirmed: the City of Henderson's own Occupational License Tax page states the tax is 1.65% of gross compensation paid, effective 2023-01-01 (up from 1.49% for periods before that date), and that every employer paying compensation for work performed within the city must withhold and remit it. The single scraped figure WAS the wage figure here — checked rather than assumed.",
+        "citySource": {
+          "title": "City of Henderson, KY — Occupational License Tax",
+          "url": "https://www.hendersonky.gov/174/Occupational-License-Tax",
+          "verifiedOn": "2026-08-25"
+        }
       },
       {
         "name": "Henderson County",
@@ -2125,11 +2147,17 @@
         "name": "Nicholasville",
         "category": "Net Profits",
         "rate": "1%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "corrected_via_city_primary_source",
+        "wageRateNote": "CORRECTION, not a confirmation. The scraped 1% is the JESSAMINE COUNTY payroll withholding rate, which applies county-wide including inside Nicholasville and Wilmore. The CITY of Nicholasville levies its own separate tax of one and one-half percent (1.5%) of all wages and compensation paid or payable in the city, alongside a 1% net-profits tax. Carrying the county's 1% as the city rate would have under-withheld by a third for every employee working in Nicholasville — and the two genuinely stack, so a caller resolving both jurisdictions owes both.",
+        "citySource": {
+          "title": "City of Nicholasville, KY — Tax Office",
+          "url": "https://nicholasville.org/tax-office/",
+          "verifiedOn": "2026-08-25",
+          "verifiedBy": "Fetched directly this pass; the ordinance text quoted on the page reads 'There is a tax of one and one-half percent (1.5%) of all wages and compensation paid or payable in the City.'"
+        }
       },
       {
         "name": "Nortonville",
@@ -2983,7 +3011,7 @@
   "knownGaps": [
     "140 of 230 authoritative taxing districts attempted, 101 with a rate value scraped from the source database -- 90 districts remain entirely unattempted, and the 39 attempted-but-blank districts have no rate in the state's own database either (their ordinance PDF would need a separate fetch to close). SUPERSEDED: county coverage is now complete — all 62 county entries carry a confirmed payroll rate, cross-checked against KACo's own 2025 payroll-rate column with zero disagreements against the 20 an earlier pass had already confirmed. What remains unconfirmed is CITY entries, where the scraped category alone cannot distinguish a payroll rate from a net-profits or gross-receipts one.",
     "A handful of scraped entries have a garbled 'category' field from an ASP.NET DOM-update race during rapid automated scraping (flagged 'unreliable: true' where caught) -- the 'rate' field itself is generally still trustworthy even when 'category' looks off, but should be spot-checked before high-stakes use.",
-    "Bare 'Net Profits' category entries have NOT been individually verified to also govern wage withholding (see Hopkinsville's confirmed wages-vs-net-profits split above) -- treat as a lead to re-check per district, not a confirmed payroll rate.",
+    "Bare 'Net Profits' category entries have NOT been individually verified to also govern wage withholding (see Hopkinsville's confirmed wages-vs-net-profits split above) -- treat as a lead to re-check per district, not a confirmed payroll rate. UPDATED (city-verification pass): five of the largest remaining bare-category cities were checked against their OWN pages or ordinances — Covington 2.45% (its 2.5% was the net-profits rate, and it caps at the FICA wage base), Henderson 1.65%, Elizabethtown 1.95%, Georgetown 1.00%, and Nicholasville 1.50% (the scraped 1% was JESSAMINE COUNTY's rate, not the city's). 127 of 250 entries now carry a confirmed wage rate. Two of the five were corrections rather than confirmations, which is the argument for checking the rest rather than promoting bare categories in bulk.",
     "The smallest county population tier (under 30,000) has no statute located at all -- authority, cap, and existence are all unconfirmed for that tier.",
     "KRS 67.753 (the statutory apportionment formula for multi-district payroll/sales) and KRS 67.083 (an alternate county occupational-fee authority referenced by KRS 68.197(9)) are both referenced but were not read directly this session.",
     "Whether KRS 68.180's 300,000+ county tier (Jefferson) has any city-tax-credit mechanism equivalent to KRS 68.197's was not found either way in the statute's own text -- absence of a provision was not confirmed as absence of the practice.",

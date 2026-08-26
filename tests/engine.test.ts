@@ -1410,7 +1410,12 @@ describe('Kentucky', () => {
       assert.equal(amountOf(r, 'KY_LOCAL'), dollars(20.0));
     });
 
-    test('Covington: a genuine cross-source DISCREPANCY (SOS 2.5% vs NFC 2.45%) stays unconfirmed rather than picking one', () => {
+    test("Covington: the SOS-vs-NFC discrepancy is now SETTLED by the city's own page — 2.45% on wages, and the 2.5% was the net-profits rate", () => {
+      // The previous pass left this unconfirmed rather than choosing
+      // between two sources. Covington's own Finance Department page
+      // settles it: employers withhold 2.45% on compensation, while 2.5%
+      // is the separate net profits tax. So the SOS figure was never the
+      // wage rate — the Hopkinsville pattern this file warns about.
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
@@ -1418,7 +1423,41 @@ describe('Kentucky', () => {
           workState: { code: 'KY', certificate: { workCity: 'Covington' } },
         }),
       );
-      assert.equal(r.taxes.some((t) => t.id === 'KY_LOCAL'), false);
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(24.5));
+    });
+
+    test('Covington caps each employee at the Social Security wage base, like Walton and Florence', () => {
+      // $184,500 of the 2026 base is already used, so only $500 of this
+      // $1,000 cheque is still taxable: $500 x 2.45% = $12.25.
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY', certificate: { workCity: 'Covington' } },
+          ytd: {
+            socialSecurity: 0,
+            medicare: 0,
+            futa: 0,
+            localIncomeTax: { KY_LOCAL_Covington: dollars(184000) },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(12.25));
+    });
+
+    test("Nicholasville: the scrape's 1% was the COUNTY rate — the city's own is 1.5%", () => {
+      // Jessamine County withholds 1% county-wide; the City of
+      // Nicholasville levies its own 1.5% on top, and the two stack.
+      // Carrying the county figure as the city rate under-withheld by a
+      // third for everyone working there.
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY', certificate: { workCity: 'Nicholasville' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(15.0));
     });
 
     test('Florence: a real gap the SOS scrape missed entirely -- its wage tax (2%) is a SEPARATE levy from the tiny 0.001% Gross Receipts figure on file', () => {
