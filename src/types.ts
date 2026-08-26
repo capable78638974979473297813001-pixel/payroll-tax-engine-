@@ -126,6 +126,13 @@ export interface YearToDate {
    */
   categoryCashWages?: Cents;
   /**
+   * YTD compensation already counted toward the railroad retirement Tier II
+   * wage base. A separate tracker from socialSecurity because Tier II caps
+   * far lower ($137,100 for 2026 against $184,500), so the two run out at
+   * different points in the year.
+   */
+  tier2Compensation?: Cents;
+  /**
    * YTD wages already counted toward a state Paid Family & Medical Leave
    * wage-base cap, keyed by state code (e.g. Minnesota Paid Leave). Separate
    * tracker from stateUnemployment even where a state has both, since the
@@ -266,12 +273,23 @@ export interface EmployerContext {
  *                         the year, OR the employer pays $2,500 or more to
  *                         all farmworkers.
  */
+/**
+ *   'railroad'          — covered rail employment, taxed under the Railroad
+ *                         Retirement Tax Act instead of FICA. Tier I is
+ *                         arithmetically identical to social security and
+ *                         Medicare but is a different tax reported on a
+ *                         different return; Tier II is an additional tax
+ *                         with its own rate and its own wage base. Railroad
+ *                         employers pay unemployment contributions under the
+ *                         RUIA, not FUTA.
+ */
 export type EmploymentCategory =
   | 'standard'
   | 'clergy'
   | 'statutory_employee'
   | 'household'
-  | 'agricultural';
+  | 'agricultural'
+  | 'railroad';
 
 export interface PaycheckInput {
   /**

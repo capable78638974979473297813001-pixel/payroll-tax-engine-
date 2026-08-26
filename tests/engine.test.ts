@@ -8564,3 +8564,71 @@ describe('household and agricultural coverage thresholds', () => {
     assert.equal(amountOf(r, 'US_FIT'), dollars(320.38));
   });
 });
+
+/**
+ * Covered rail employment, taxed under the Railroad Retirement Tax Act
+ * instead of FICA. 2026 figures from the Railroad Retirement Board: Tier I
+ * identical to social security and Medicare, Tier II at 4.9% employee and
+ * 13.1% employer on compensation up to $137,100.
+ */
+describe('railroad retirement (RRTA)', () => {
+  const rail = (extra: Record<string, unknown> = {}) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly' as const,
+    earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(4000) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    ...extra,
+  });
+
+  test('Tier I is the same money as FICA, under its own name', () => {
+    const standard = calculatePaycheck(rail());
+    const railroad = calculatePaycheck(rail({ employmentCategory: 'railroad' }));
+
+    assert.equal(amountOf(railroad, 'US_RRTA_TIER1_EE'), amountOf(standard, 'US_SS_EE'));
+    assert.equal(amountOf(railroad, 'US_RRTA_MED_EE'), amountOf(standard, 'US_MED_EE'));
+    // The FICA-named lines are gone: a rail employee does not pay them.
+    assert.equal(railroad.taxes.some((t) => t.id === 'US_SS_EE'), false);
+    assert.match(railroad.taxes.find((t) => t.id === 'US_RRTA_TIER1_EE')?.detail ?? '', /Form CT-1/);
+  });
+
+  test('Tier II is genuinely additional, and the employer pays nearly three times the employee', () => {
+    const r = calculatePaycheck(rail({ employmentCategory: 'railroad' }));
+    assert.equal(amountOf(r, 'US_RRTA_TIER2_EE'), dollars(196.0)); // 4.9%
+    assert.equal(amountOf(r, 'US_RRTA_TIER2_ER'), dollars(524.0)); // 13.1%
+  });
+
+  test("Tier II's wage base runs out long before social security's", () => {
+    const r = calculatePaycheck(
+      rail({
+        employmentCategory: 'railroad',
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0, tier2Compensation: dollars(136000) },
+      }),
+    );
+    // Only $1,100 of this $4,000 cheque is still under the $137,100 base.
+    assert.equal(amountOf(r, 'US_RRTA_TIER2_EE'), dollars(53.9));
+    assert.equal(amountOf(r, 'US_RRTA_TIER2_ER'), dollars(144.1));
+    // Tier I keeps going: its base is $184,500.
+    assert.equal(amountOf(r, 'US_RRTA_TIER1_EE'), dollars(248.0));
+  });
+
+  test('rail employment is outside FUTA — railroad employers pay under the RUIA instead', () => {
+    const r = calculatePaycheck(rail({ employmentCategory: 'railroad' }));
+    assert.equal(amountOf(r, 'US_FUTA'), dollars(0));
+    assert.match(r.taxes.find((t) => t.id === 'US_FUTA')?.detail ?? '', /Railroad Unemployment Insurance Act/);
+  });
+
+  test('income tax withholding is unaffected — rail wages are ordinary wages for that', () => {
+    const standard = calculatePaycheck(rail());
+    const railroad = calculatePaycheck(rail({ employmentCategory: 'railroad' }));
+    assert.equal(amountOf(railroad, 'US_FIT'), amountOf(standard, 'US_FIT'));
+  });
+});

@@ -416,6 +416,72 @@ function categoryCoverage(
   };
 }
 
+interface RailroadRetirementConfig {
+  tier2: { employeeRate: number; employerRate: number; wageBase: number };
+}
+
+/**
+ * Railroad retirement, Tier II — the part of rail employment that has no
+ * FICA equivalent at all.
+ *
+ * Tier I is arithmetically identical to social security and Medicare (the
+ * same 6.20% to the same wage base, the same 1.45% uncapped, the same 0.9%
+ * additional Medicare), which is why this function does not recompute it —
+ * the ordinary lines are relabelled instead, because the amounts are right
+ * and only the name of the tax is wrong. Tier II is genuinely additional:
+ * 4.9% from the employee and 13.1% from the employer for 2026, on
+ * compensation up to $137,100 — a wage base that runs out well before
+ * social security's own.
+ */
+function railroadTier2(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: FederalRuleset,
+): TaxLine[] {
+  const cfg = rules.railroadRetirement as RailroadRetirementConfig | undefined;
+  if (!cfg) return [];
+
+  const exempt = (rules.incomeTax.exemptPretax ?? []) as PretaxCategory[];
+  const compensation = ctx.taxableWagesFor(exempt);
+  const cap = dollars(cfg.tier2.wageBase);
+  const ytd = input.ytd.tier2Compensation ?? 0;
+  const taxableWages = underCap(compensation, ytd, cap);
+
+  const line = (suffix: string, payer: TaxLine["payer"], rate: number): TaxLine => ({
+    id: `US_RRTA_TIER2_${suffix}`,
+    name: `Railroad Retirement Tier II (${payer === "employee" ? "Employee" : "Employer"})`,
+    payer,
+    jurisdiction: 'federal',
+    taxableWages,
+    amount: applyRate(taxableWages, rate),
+    detail: `${fmt(taxableWages)} @ ${(rate * 100).toFixed(2)}%, capped at ${fmt(cap)}/yr (${fmt(ytd)} YTD already counted)`,
+  });
+
+  return [
+    line('EE', 'employee', cfg.tier2.employeeRate),
+    line('ER', 'employer', cfg.tier2.employerRate),
+  ];
+}
+
+/** Tier I is the same money as FICA under a different statute — relabel rather than recompute. */
+function asRailroadTierOne(line: TaxLine): TaxLine {
+  const RENAMES: Record<string, { id: string; name: string }> = {
+    US_SS_EE: { id: 'US_RRTA_TIER1_EE', name: 'Railroad Retirement Tier I (Employee)' },
+    US_SS_ER: { id: 'US_RRTA_TIER1_ER', name: 'Railroad Retirement Tier I (Employer)' },
+    US_MED_EE: { id: 'US_RRTA_MED_EE', name: 'Railroad Retirement Tier I Medicare (Employee)' },
+    US_MED_ER: { id: 'US_RRTA_MED_ER', name: 'Railroad Retirement Tier I Medicare (Employer)' },
+    US_MED_ADDL: { id: 'US_RRTA_MED_ADDL', name: 'Railroad Retirement Additional Medicare (Employee)' },
+  };
+  const renamed = RENAMES[line.id];
+  if (!renamed) return line;
+  return {
+    ...line,
+    id: renamed.id,
+    name: renamed.name,
+    detail: `${line.detail}; levied under the Railroad Retirement Tax Act rather than FICA — same rate and wage base, different tax and different return (Form CT-1)`,
+  };
+}
+
 function applyEmploymentCategory(
   input: PaycheckInput,
   lines: TaxLine[],
@@ -423,6 +489,21 @@ function applyEmploymentCategory(
 ): TaxLine[] {
   const category = input.employmentCategory ?? 'standard';
   if (category === 'standard') return lines;
+
+  if (category === 'railroad') {
+    return lines.map((line) => {
+      if (line.id === 'US_FUTA') {
+        return {
+          ...line,
+          taxableWages: 0,
+          amount: 0,
+          detail:
+            '$0 — rail employment is outside FUTA: railroad employers pay unemployment contributions under the Railroad Unemployment Insurance Act instead, at an experience-rated rate this engine does not model.',
+        };
+      }
+      return asRailroadTierOne(line);
+    });
+  }
 
   if (category === 'household' || category === 'agricultural') {
     if (!coverage) return lines;
@@ -506,6 +587,7 @@ export function federalTaxes(
     ...socialSecurity(input, ctx, rules),
     ...medicare(input, ctx, rules),
       ...futa(input, ctx, rules),
+      ...(input.employmentCategory === 'railroad' ? railroadTier2(input, ctx, rules) : []),
     ],
     categoryCoverage(input, ctx, rules),
   );
