@@ -88,11 +88,11 @@
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 9000,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
-    "newEmployerRate": null,
-    "newEmployerRateSource": "No new-employer rate located for this jurisdiction this pass.",
+    "newEmployerRate": 0.027,
+    "newEmployerRateSource": "DC's 2026 unemployment rate announcement: the new-employer rate remains 2.7% on a $9,000 wage base, alongside a separate 0.2% administrative assessment that this engine does not add (it is an assessment, not the contribution rate, and is disclosed here rather than folded in).",
     "experienceRange": null,
-    "employerSuppliedRateRequired": true,
-    "confidence": "no_single_rate"
+    "employerSuppliedRateRequired": false,
+    "confidence": "source_dated_2026"
   },
   "statePaidLeaveEmployer": {
     "totalRate": 0.0075,
