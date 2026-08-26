@@ -76,7 +76,7 @@
     "verifiedBy": "Fetched directly via curl with a browser User-Agent (plain WebFetch 403s justia.com, the same pattern already documented for Vermont's law.justia.com citation). Verbatim: 'The Legislature shall never, in any manner, suspend or surrender the power of taxation.' The Legislature retains EXCLUSIVE taxing power under this provision and has never enacted legislation authorizing a municipal income tax (cross-source confirmed on this same pass, consistent with Massachusetts's own parallel finding under its Article XLIV) -- so no Maine city or town may levy one, the same two-part structure (constitutional exclusivity + no enabling legislation) already established for Massachusetts."
   },
   "knownGaps": [
-    "Supplemental wages paid on a SEPARATE cheque: Maine's own instructions make the flat-5% method OPTIONAL for this case ('the payer MAY withhold a flat five percent'), not mandatory -- this engine's default (aggregation via taxableWagesFor(), the same as every other state without a distinct supplemental method) reflects the OTHER path Maine's own instructions describe (paid WITH regular wages), and cannot look back at a prior separate cheque regardless -- same disclosed class of gap as Kentucky/Idaho/Connecticut/Iowa. Not fixable within this engine's one-paycheck-at-a-time architecture (same as those other states), unlike the two items closed below."
+    "Supplemental wages paid on a SEPARATE cheque: Maine's own instructions make the flat-5% method OPTIONAL for this case ('the payer MAY withhold a flat five percent'), not mandatory -- this engine's default (aggregation via taxableWagesFor(), the same as every other state without a distinct supplemental method) reflects the OTHER path Maine's own instructions describe (paid WITH regular wages), and cannot look back at a prior separate cheque regardless -- same disclosed class of gap as Kentucky/Idaho/Connecticut/Iowa. Not fixable within this engine's one-paycheck-at-a-time architecture (same as those other states), unlike the two items closed below. WIRED (aggregation pass): aggregateWithPriorRegularPayment() now does exactly this — the caller supplies input.priorRegularPayment (that cheque's taxable wages and the state tax withheld from it), a bonus paid on its own cheque is taxed on the combined figure, and the prior withholding is credited back, floored at zero. The engine still cannot see the prior cheque by itself; it no longer has to."
   ],
   "verification": {
     "wholeDollarFinalRounding": "CLOSED on the NFC verification pass: rules.roundFinalToWholeDollar (a new generic flag, not Maine-specific code) now re-rounds the primary SIT line to the nearest dollar AFTER additional/reduced withholding is applied, matching NFC's own Step 9 instruction exactly. Verified with a non-whole-dollar additionalWithholding test case ($33 base + $10.60 = $43.60 -> $44).",
@@ -101,5 +101,10 @@
     "appliesWhen": "paid_separately",
     "election": "employer_option",
     "source": "Maine's own instructions, quoted in this file's knownGaps: aggregate if paid with regular wages; 'the payer MAY withhold a flat five percent' if paid separately. The permissive verb is why this is an election rather than a rule."
+  },
+  "supplementalAggregation": {
+    "supported": true,
+    "source": "Maine's instructions: aggregate if paid with regular wages; the payer MAY instead withhold a flat 5% if paid separately. Aggregation is the default this block wires.",
+    "engineNote": "Wired via aggregateWithPriorRegularPayment(): the caller supplies input.priorRegularPayment (that cheque's taxable wages and the state tax withheld from it), and a bonus paid on its own cheque is taxed on the combined figure less what was already withheld, floored at zero. Nothing changes when the caller omits it."
   }
 }

@@ -880,6 +880,69 @@ const SUPPLEMENTAL_HANDLED_BY_METHOD = new Set([
  * regular formula and again at the flat rate is a real defect that this
  * project has already hit once, in New Mexico.
  */
+interface SupplementalAggregationConfig {
+  /** Present at all means this state describes the aggregate-and-net-out method. */
+  supported: boolean;
+}
+
+/**
+ * Supplemental wages, AGGREGATION method — the one most states actually
+ * instruct, and the one a paycheck-at-a-time engine structurally could not
+ * do: combine a separately-paid bonus with the most recent REGULAR
+ * payment, compute the tax on the total, and subtract the tax already
+ * withheld from that regular payment.
+ *
+ * Seven state files disclosed this identically — Connecticut, Idaho,
+ * Kentucky, Maine, Missouri, Nebraska and New York all say some version of
+ * "this engine models one calculatePaycheck() call at a time and cannot
+ * look back at a prior regular cheque". The missing piece was never the
+ * arithmetic; it was the prior cheque, which now arrives as
+ * input.priorRegularPayment because the caller is the one holding the
+ * payroll history.
+ *
+ * Applies only to a bonus paid on its OWN cheque (a bonus paid alongside
+ * regular wages already aggregates naturally), only when the caller
+ * supplies the prior payment, and never when a flat supplemental line
+ * already fired — an employer that elected the flat method chose the other
+ * road. The result floors at zero: if the prior withholding already
+ * covered the combined liability, nothing further is withheld rather than
+ * a negative line appearing.
+ */
+function aggregateWithPriorRegularPayment(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+  supplementalCash: Cents,
+): TaxLine[] | null {
+  const cfg = rules.supplementalAggregation as SupplementalAggregationConfig | undefined;
+  if (!cfg?.supported) return null;
+
+  const prior = input.priorRegularPayment;
+  if (!prior || prior.taxableWages <= 0) return null;
+
+  if (cashEarnings(input.earnings) - supplementalCash > 0) return null;
+
+  const priorWithheld = prior.stateIncomeTaxWithheld ?? 0;
+  const combinedCtx: ComputeContext = {
+    ...ctx,
+    taxableWagesFor: (exempt) => ctx.taxableWagesFor(exempt) + prior.taxableWages,
+  };
+
+  const combinedLines = incomeTaxLinesByMethod(input, combinedCtx, rules);
+  const primaryId = `${rules.code}_SIT`;
+  return combinedLines.map((line) => {
+    if (line.id !== primaryId) return line;
+    const amount = atLeastZero(line.amount - priorWithheld);
+    return {
+      ...line,
+      amount,
+      detail:
+        `${line.detail}; computed on this ${fmt(supplementalCash)} supplemental payment ` +
+        `aggregated with the prior regular payment of ${fmt(prior.taxableWages)} ` +
+        `(input.priorRegularPayment), less ${fmt(priorWithheld)} already withheld from it = ${fmt(amount)}`,
+    };
+  });
+}
 function incomeTaxLines(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -888,11 +951,20 @@ function incomeTaxLines(
   const cfg = rules.supplementalWages as SupplementalWagesConfig | undefined;
   const supplementalCash = supplementalEarnings(input.earnings);
   if (!cfg?.appliesWhen || supplementalCash <= 0 || SUPPLEMENTAL_HANDLED_BY_METHOD.has(rules.method)) {
+    if (supplementalCash > 0) {
+      const aggregated = aggregateWithPriorRegularPayment(input, ctx, rules, supplementalCash);
+      if (aggregated) return aggregated;
+    }
     return incomeTaxLinesByMethod(input, ctx, rules);
   }
 
   const supplemental = flatRateSupplementalFromConfig(input, ctx, rules);
-  if (!supplemental) return incomeTaxLinesByMethod(input, ctx, rules);
+  if (!supplemental) {
+    return (
+      aggregateWithPriorRegularPayment(input, ctx, rules, supplementalCash) ??
+      incomeTaxLinesByMethod(input, ctx, rules)
+    );
+  }
 
   const regularCtx: ComputeContext = {
     ...ctx,

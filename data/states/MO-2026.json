@@ -126,5 +126,10 @@
     "appliesWhen": "paid_separately",
     "election": "employer_option",
     "source": "Missouri offers two permitted treatments (this file's supplementalComment): a flat 4.7% — the top marginal rate — on supplemental wages paid separately, or aggregation with the period's regular wages netting out tax already withheld. Because it is the employer's choice, this fires only when the employer elects it."
+  },
+  "supplementalAggregation": {
+    "supported": true,
+    "source": "Missouri's second permitted method: aggregate with the period's regular wages, apply the normal formula to the total, and net out the tax already withheld on the regular portion.",
+    "engineNote": "Wired via aggregateWithPriorRegularPayment(): the caller supplies input.priorRegularPayment (that cheque's taxable wages and the state tax withheld from it), and a bonus paid on its own cheque is taxed on the combined figure less what was already withheld, floored at zero. Nothing changes when the caller omits it."
   }
 }

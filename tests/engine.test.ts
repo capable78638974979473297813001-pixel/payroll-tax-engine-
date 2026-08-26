@@ -8340,3 +8340,102 @@ describe('clergy and statutory employees', () => {
     assert.ok(amountOf(r, 'US_SS_EE') > dollars(0));
   });
 });
+
+/**
+ * Supplemental wages, AGGREGATION method — combine a separately-paid bonus
+ * with the most recent regular payment, tax the total, subtract what was
+ * already withheld. Seven state files disclosed this as unreachable
+ * because a paycheck-at-a-time engine cannot look back; the prior payment
+ * now arrives as input.priorRegularPayment.
+ */
+describe('supplemental wages aggregated with a prior regular payment', () => {
+  const bonusOnly = (state: string, extra: Record<string, unknown> = {}) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly' as const,
+    earnings: [{ code: 'BON', category: 'supplemental' as const, amount: dollars(5000) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    workState: { code: state, certificate: state === 'CT' ? { withholdingCode: 'F' } : {} },
+    ...extra,
+  });
+
+  test('the prior payment raises the base and its withholding is credited back', () => {
+    const alone = calculatePaycheck(bonusOnly('KY'));
+    const aggregated = calculatePaycheck(
+      bonusOnly('KY', {
+        priorRegularPayment: { taxableWages: dollars(3000), stateIncomeTaxWithheld: dollars(120) },
+      }),
+    );
+    assert.equal(amountOf(alone, 'KY_SIT'), dollars(170.48));
+    assert.equal(amountOf(aggregated, 'KY_SIT'), dollars(155.48));
+    assert.match(aggregated.taxes.find((t) => t.id === 'KY_SIT')?.detail ?? '', /aggregated with the prior regular payment/);
+  });
+
+  test('withholding already collected can absorb the whole liability — the line floors at zero', () => {
+    const r = calculatePaycheck(
+      bonusOnly('KY', {
+        priorRegularPayment: { taxableWages: dollars(3000), stateIncomeTaxWithheld: dollars(9999) },
+      }),
+    );
+    assert.equal(amountOf(r, 'KY_SIT'), dollars(0));
+  });
+
+  test('without a prior payment nothing changes — the bonus is taxed on its own', () => {
+    const r = calculatePaycheck(bonusOnly('KY'));
+    assert.equal(amountOf(r, 'KY_SIT'), dollars(170.48));
+  });
+
+  test('a bonus paid WITH regular wages is not aggregated twice', () => {
+    // It already aggregates naturally: both earnings are in the same cheque.
+    const r = calculatePaycheck(
+      bonusOnly('KY', {
+        earnings: [
+          { code: 'REG', category: 'regular' as const, amount: dollars(3000) },
+          { code: 'BON', category: 'supplemental' as const, amount: dollars(5000) },
+        ],
+        priorRegularPayment: { taxableWages: dollars(3000), stateIncomeTaxWithheld: dollars(120) },
+      }),
+    );
+    // $3,000 + $5,000 taxed as one $8,000 payment, with no credit for the prior
+    // cheque's withholding — that credit belongs to the separate-cheque case only.
+    assert.equal(amountOf(r, 'KY_SIT'), dollars(275.48));
+    assert.doesNotMatch(r.taxes.find((t) => t.id === 'KY_SIT')?.detail ?? '', /aggregated with the prior regular payment/);
+  });
+
+  test('an employer that elected the flat method gets the flat method, not aggregation', () => {
+    const elected = calculatePaycheck(
+      bonusOnly('MO', {
+        priorRegularPayment: { taxableWages: dollars(3000), stateIncomeTaxWithheld: dollars(100) },
+        employer: { supplementalFlatRateElection: { MO: true } },
+      }),
+    );
+    assert.equal(amountOf(elected, 'MO_SIT_SUPP'), dollars(235.0));
+    assert.equal(amountOf(elected, 'MO_SIT'), dollars(0));
+
+    const notElected = calculatePaycheck(
+      bonusOnly('MO', {
+        priorRegularPayment: { taxableWages: dollars(3000), stateIncomeTaxWithheld: dollars(100) },
+      }),
+    );
+    assert.equal(amountOf(notElected, 'MO_SIT'), dollars(240.0));
+    assert.equal(notElected.taxes.some((t) => t.id === 'MO_SIT_SUPP'), false);
+  });
+
+  test('a state that does not publish this method ignores the prior payment entirely', () => {
+    const withPrior = calculatePaycheck(
+      bonusOnly('OH', {
+        priorRegularPayment: { taxableWages: dollars(3000), stateIncomeTaxWithheld: dollars(80) },
+      }),
+    );
+    // Ohio publishes a flat 2.75% for separately-paid supplemental wages.
+    assert.equal(amountOf(withPrior, 'OH_SIT_SUPP'), dollars(137.5));
+  });
+});

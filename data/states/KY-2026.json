@@ -72,7 +72,7 @@
       "url": "https://www.law.cornell.edu/regulations/kentucky/103-KAR-18-070_v2",
       "verifiedOn": "2026-08-13"
     },
-    "rule": "Supplemental wages (bonuses, commissions — anything 'paid to an employee by the individual's employer in addition to regular wages') paid on the SAME cheque as regular wages are aggregated and taxed as a single payment — exactly what src/taxes/state.ts's flatRateFixedDeduction() now does with no special-casing, since it just taxes ctx.taxableWagesFor(exempt) as a whole regardless of each earning's category. Supplemental wages paid on a SEPARATE cheque must be aggregated with the CURRENT or LAST PRECEDING regular payroll period instead of standing alone.",
+    "rule": "Supplemental wages (bonuses, commissions — anything 'paid to an employee by the individual's employer in addition to regular wages') paid on the SAME cheque as regular wages are aggregated and taxed as a single payment — exactly what src/taxes/state.ts's flatRateFixedDeduction() now does with no special-casing, since it just taxes ctx.taxableWagesFor(exempt) as a whole regardless of each earning's category. Supplemental wages paid on a SEPARATE cheque must be aggregated with the CURRENT or LAST PRECEDING regular payroll period instead of standing alone. WIRED (aggregation pass): aggregateWithPriorRegularPayment() now does exactly this — the caller supplies input.priorRegularPayment (that cheque's taxable wages and the state tax withheld from it), a bonus paid on its own cheque is taxed on the combined figure, and the prior withholding is credited back, floored at zero. The engine still cannot see the prior cheque by itself; it no longer has to.",
     "engineGap": "The separate-cheque case is NOT modelled. A standalone bonus run through calculatePaycheck() by itself (only a supplemental earning, no regular wages in that call) gets the full $3,360 deduction applied to it as if it were a complete period's only wages — which both UNDER-withholds relative to 103 KAR 18:070 (the deduction should have already been consumed by the regular wages it's supposed to aggregate with) and has no way to reach back into a prior calculatePaycheck() call's data even if the engine wanted to. Same class of disclosed cross-period gap as Indiana's 30-day nonresident rule and Michigan's Renaissance Zone."
   },
   "exemptPretax": [
@@ -240,5 +240,10 @@
     },
     "employerSuppliedRateRequired": false,
     "confidence": "inherited_from_this_file"
+  },
+  "supplementalAggregation": {
+    "supported": true,
+    "source": "103 KAR 18:070 Section 3 prescribes aggregation directly — the regulation's own method, which this file previously recorded as unreachable because the engine could not look back at a prior cheque.",
+    "engineNote": "Wired via aggregateWithPriorRegularPayment(): the caller supplies input.priorRegularPayment (that cheque's taxable wages and the state tax withheld from it), and a bonus paid on its own cheque is taxed on the combined figure less what was already withheld, floored at zero. Nothing changes when the caller omits it."
   }
 }

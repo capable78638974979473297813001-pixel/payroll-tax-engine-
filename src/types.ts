@@ -244,6 +244,23 @@ export interface PaycheckInput {
   employer?: EmployerContext;
   /** Which employment-tax rules apply to this worker. Defaults to 'standard'. */
   employmentCategory?: EmploymentCategory;
+  /**
+   * The employee's most recent REGULAR payment, for states whose rule for a
+   * bonus paid on its own cheque is "aggregate it with the last regular
+   * payment, compute tax on the total, and subtract the tax already
+   * withheld then". That instruction reaches backwards across paychecks,
+   * which a single calculatePaycheck() call cannot do on its own — so the
+   * caller, who has the payroll history, supplies it.
+   *
+   * Omitted (the normal case) means the bonus is taxed on its own, exactly
+   * as before.
+   */
+  priorRegularPayment?: {
+    /** Taxable wages of that prior regular payment. */
+    taxableWages: Cents;
+    /** State income tax actually withheld from it. */
+    stateIncomeTaxWithheld?: Cents;
+  };
   /** Work state (and eventually residence state for reciprocity). */
   workState?: StateWithholding;
   residenceState?: StateWithholding;
