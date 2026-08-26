@@ -41,6 +41,7 @@ import {
   parseAddressParts,
   resolveRooftop,
 } from '../geocode/rooftop.ts';
+import { isInsidePortlandMetro, jeddAtPoint } from '../geocode/districts.ts';
 
 const CHECK_DATE = '2026-08-15';
 
@@ -1475,6 +1476,108 @@ describe('rooftop.ts — authoritative address points (real captured National Ad
         assert.equal(result.tier, 'authoritative');
         assert.equal(nominatimCalled, false);
       });
+    });
+  });
+});
+
+/**
+ * Taxing districts that Census doesn't publish. Both response shapes below
+ * are the real ones, captured live from the publishing governments' own
+ * ArcGIS services: Ohio's JEDD/JEDZ layer answers with name/jedd_id/active
+ * attributes, and Metro's boundary layer answers an ids-only intersect
+ * query with an objectIds array.
+ */
+describe('districts.ts — taxing boundaries that are not Census geographies (mocked fetch)', () => {
+  const FAST = { baseBackoffMs: 0 };
+  const json = (body: unknown, status = 200) =>
+    (async () => new Response(JSON.stringify(body), { status })) as unknown as typeof fetch;
+  const throws = (async () => {
+    throw new Error('network down');
+  }) as unknown as typeof fetch;
+
+  describe('jeddAtPoint — Ohio JEDDs and JEDZs', () => {
+    /** The real answer for a point inside the Bath-Akron-Fairlawn JEDD's own published polygon. */
+    const BATH_AKRON_FAIRLAWN = {
+      features: [{ attributes: { name: 'BATH-AKRON-FAIRLAWN JEDD', jedd_id: 9004, active: 'Y' } }],
+    };
+
+    test('returns the containing zone and its id — the exact join key into the rate file', async () => {
+      const result = await jeddAtPoint(41.1405, -81.643096, json(BATH_AKRON_FAIRLAWN), FAST);
+      assert.equal(result.attempted, true);
+      assert.equal(result.jedd?.name, 'BATH-AKRON-FAIRLAWN JEDD');
+      // Ohio ships the id as a number here and as a string in its rate
+      // database; normalising to string is what makes the join work.
+      assert.equal(result.jedd?.jeddId, '9004');
+      assert.equal(result.jedd?.active, true);
+    });
+
+    test('an address in no zone is attempted: true with no zone — a real answer, not a failure', async () => {
+      const result = await jeddAtPoint(39.9612, -83.0007, json({ features: [] }), FAST);
+      assert.equal(result.attempted, true);
+      assert.equal(result.jedd, null);
+    });
+
+    test('an inactive zone is reported rather than hidden, so a reviewer can see why no tax applied', async () => {
+      const result = await jeddAtPoint(
+        41.1405,
+        -81.643096,
+        json({ features: [{ attributes: { name: 'OLD JEDD', jedd_id: 9999, active: 'N' } }] }),
+        FAST,
+      );
+      assert.equal(result.jedd?.active, false);
+      assert.equal(result.jedd?.jeddId, '9999');
+    });
+
+    test('an unreachable service is attempted: false — never "there is no JEDD here"', async () => {
+      const result = await jeddAtPoint(41.1405, -81.643096, throws, FAST);
+      assert.deepEqual(result, { attempted: false, jedd: null });
+    });
+
+    test('an ArcGIS error body returned with HTTP 200 is a failure, not an empty area', async () => {
+      const result = await jeddAtPoint(41.1405, -81.643096, json({ error: { code: 400 } }), FAST);
+      assert.equal(result.attempted, false);
+    });
+
+    test('queries the point as WGS84 against Ohio\'s own layer', async () => {
+      let seen = '';
+      const spy = (async (url: string) => {
+        seen = String(url);
+        return new Response(JSON.stringify({ features: [] }), { status: 200 });
+      }) as unknown as typeof fetch;
+
+      await jeddAtPoint(41.1405, -81.643096, spy, FAST);
+      const params = new URL(seen).searchParams;
+      assert.match(seen, /maps\.ohio\.gov/);
+      assert.equal(params.get('geometryType'), 'esriGeometryPoint');
+      assert.equal(params.get('inSR'), '4326');
+      assert.equal(params.get('spatialRel'), 'esriSpatialRelIntersects');
+      assert.deepEqual(JSON.parse(params.get('geometry') ?? '{}'), {
+        x: -81.643096,
+        y: 41.1405,
+        spatialReference: { wkid: 4326 },
+      });
+    });
+  });
+
+  describe('isInsidePortlandMetro', () => {
+    test('a point inside the district comes back inside', async () => {
+      const result = await isInsidePortlandMetro(45.51224, -122.6587, json({ objectIds: [1] }), FAST);
+      assert.deepEqual(result, { attempted: true, inside: true });
+    });
+
+    test('a point outside comes back outside, not unknown', async () => {
+      const result = await isInsidePortlandMetro(44.93826, -123.03027, json({ objectIds: [] }), FAST);
+      assert.deepEqual(result, { attempted: true, inside: false });
+    });
+
+    test('a server that ignores returnIdsOnly and answers with features is still understood', async () => {
+      const result = await isInsidePortlandMetro(45.51224, -122.6587, json({ features: [{}] }), FAST);
+      assert.equal(result.inside, true);
+    });
+
+    test('an unreachable service is attempted: false — distinct from "outside the district"', async () => {
+      const result = await isInsidePortlandMetro(45.51224, -122.6587, throws, FAST);
+      assert.deepEqual(result, { attempted: false, inside: false });
     });
   });
 });

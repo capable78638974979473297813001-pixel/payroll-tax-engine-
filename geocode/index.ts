@@ -31,8 +31,10 @@ import {
   fetchGeographiesAtPointSafe,
   fetchSchoolDistrictAtPointSafe,
   geocodeAddress,
+  tigerwebServiceForDate,
   type MatchQuality,
 } from './census.ts';
+import { isInsidePortlandMetro, jeddAtPoint, type JeddDistrict } from './districts.ts';
 import { resolveRooftop, type AddressPointTier, type RooftopResult } from './rooftop.ts';
 import { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult } from './buildings.ts';
 import { crossCheckSafe, milesBetween, type NominatimResult } from './nominatim.ts';
@@ -54,6 +56,7 @@ export {
   type MatchQuality,
 } from './census.ts';
 export { crossCheckAddress, type NominatimResult } from './nominatim.ts';
+export { isInsidePortlandMetro, jeddAtPoint, type DistrictCheck, type JeddCheck, type JeddDistrict } from './districts.ts';
 export { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult, type NearbyBuilding } from './buildings.ts';
 export {
   fetchAddressPointsNear,
@@ -137,6 +140,8 @@ export interface AddressResolution {
   coordinates: { lat: number; lon: number } | null;
   /** The authoritative-address-point lookup, whatever its outcome — including the distance between the two points, which is the size of the interpolation error this corrected. */
   rooftop: RooftopResult | null;
+  /** The Ohio JEDD/JEDZ containing this address, if any — a tax that exists on unincorporated land where no municipality does. Null everywhere outside Ohio, and wherever Ohio's boundary service couldn't be reached. */
+  jedd: JeddDistrict | null;
   /** True when every field the address could plausibly need was 'matched' AND the geocode itself was high-confidence (narrow interpolation range, no fallback retry needed, no cross-check disagreement) — false means a human should look before this address goes live in certificate data. */
   fullyResolved: boolean;
   /** Plain-language reasons fullyResolved is false, if it is — empty when fullyResolved is true. */
@@ -261,6 +266,7 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
   let rooftopJurisdictionChanges: string[] = [];
   let schoolDistrictName: string | undefined;
   let schoolDistrictLookupFailed = false;
+  let historicalVintage = false;
 
   // An authoritative point is only worth having if the jurisdictions get
   // re-asked AT it — the geocoder's own geographies describe the curb
@@ -269,7 +275,7 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
   // across two places that share a street name is worse than the honest
   // interpolation.
   if (rooftop.found && rooftop.point && !rooftop.ambiguous) {
-    const at = await fetchGeographiesAtPointSafe(rooftop.point.lon, rooftop.point.lat);
+    const at = await fetchGeographiesAtPointSafe(rooftop.point.lon, rooftop.point.lat, undefined, {}, checkDate);
     if (at.ok && at.result) {
       rooftopJurisdictionChanges = geographyDifferences(geocoded.geographies, at.result.geographies);
       geographies = at.result.geographies;
@@ -279,11 +285,26 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
     }
   }
 
-  // Only needed on the interpolated path: the rooftop lookup above already
-  // returns the school district from the SAME identify call, so this
-  // second request would be a duplicate.
-  if (precision === 'interpolated' && geographies.state === 'OH') {
-    const sd = await fetchSchoolDistrictAtPointSafe(point.lon, point.lat);
+  // The geocoder's own geographies describe TODAY's boundaries. For a
+  // check date in a year with its own published TIGERweb vintage, the
+  // boundaries that were in force then are the ones that decide the tax —
+  // cities annex land, districts merge — so re-resolve at the same point
+  // against that vintage. Skipped when the vintage IS the current one,
+  // where the extra request would return what Census already said.
+  if (precision === 'interpolated' && tigerwebServiceForDate(checkDate) !== 'tigerWMS_Current') {
+    const at = await fetchGeographiesAtPointSafe(point.lon, point.lat, undefined, {}, checkDate);
+    if (at.ok && at.result) {
+      geographies = at.result.geographies;
+      schoolDistrictName = at.result.schoolDistrict ?? undefined;
+      historicalVintage = true;
+    }
+  }
+
+  // Only needed on the interpolated path, and only when the identify call
+  // above didn't already run: the rooftop lookup returns the school
+  // district from the SAME identify call, so this would be a duplicate.
+  if (precision === 'interpolated' && !historicalVintage && geographies.state === 'OH') {
+    const sd = await fetchSchoolDistrictAtPointSafe(point.lon, point.lat, undefined, {}, checkDate);
     if (sd.ok) {
       schoolDistrictName = sd.district ?? undefined;
     } else {
@@ -401,12 +422,27 @@ export async function resolveAddress(
       precision: 'interpolated',
       coordinates: null,
       rooftop: null,
+      jedd: null,
       fullyResolved: false,
       lowConfidenceReasons: ['Census could not match this address at all, even after retrying with any apartment/suite/unit designator stripped.'],
     };
   }
 
   const certificateFields = toCertificateFields(resolved, role);
+
+  // Ohio only, and only for a WORK address: a JEDD taxes income earned
+  // inside it, on land that belongs to no municipality. Asked at the
+  // resolved point, which is exactly why the rooftop work matters here —
+  // a JEDD boundary follows parcel lines around a development, and a
+  // curb-interpolated point can easily sit on the wrong side of one.
+  let jedd: JeddDistrict | null = null;
+  if (resolved.state === 'OH' && role === 'work') {
+    const found = await jeddAtPoint(point.lat, point.lon);
+    if (found.attempted && found.jedd?.active) {
+      jedd = found.jedd;
+      certificateFields.workJEDDId = found.jedd.jeddId;
+    }
+  }
   // Cross-checked at the point actually used, not at the one Census
   // guessed: when a rooftop point replaced it, that is the coordinate
   // whose plausibility a caller needs confirmed.
@@ -470,6 +506,7 @@ export async function resolveAddress(
     precision,
     coordinates: point,
     rooftop,
+    jedd,
     fullyResolved: lowConfidenceReasons.length === 0,
     lowConfidenceReasons,
   };
@@ -566,9 +603,25 @@ export async function resolveEmployee(
   const notResolvable: string[] = [];
   const workState = work?.resolved?.state ?? residence?.resolved?.state;
   if (workState === 'OR') {
+    // Metro's district is not a Census geography — it covers the urban
+    // parts of three counties and stops short of each one's full extent —
+    // so it's resolved against the boundary Metro itself publishes. The
+    // WORK address decides it: Metro's own withholding guidance keys the
+    // SHS tax off where the work is performed, the same framing
+    // multnomahCounty already uses above.
+    const metroPoint = work?.coordinates ?? null;
+    if (metroPoint) {
+      const metro = await isInsidePortlandMetro(metroPoint.lat, metroPoint.lon);
+      if (metro.attempted) {
+        if (metro.inside) fields.metroDistrict = true;
+      } else {
+        notResolvable.push(
+          "Portland Metro's Supportive Housing Services district (certificate.metroDistrict) — Metro's own boundary service could not be reached this call, so this was NOT determined either way. Retry before treating its absence as 'outside the district'.",
+        );
+      }
+    }
     notResolvable.push(
-      "Portland Metro's Supportive Housing Services district (certificate.metroDistrict) — no Census/TIGERweb boundary data exists for this regional-government special district; must be supplied manually.",
-      "Oregon's TriMet and Lane Transit District boundaries (certificate.locality = 'TriMet'/'LTD') — same reason, no boundary data available via Census.",
+      "Oregon's TriMet and Lane Transit District boundaries (certificate.locality = 'TriMet'/'LTD') — both districts publish their boundaries only as downloadable files (developer.trimet.org/gis), not as a service this can query per address; must be supplied manually. See geocode/districts.ts.",
     );
   }
   if (workFlags?.denver) {

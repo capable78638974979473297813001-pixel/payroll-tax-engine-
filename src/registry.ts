@@ -472,6 +472,41 @@ export function ohSchoolDistrictRuleset(
   return file.districts.find((d) => d.sdNumber === sdNumber);
 }
 
+export interface OHJEDDEntry {
+  name: string;
+  jeddId: string;
+  rate: number;
+  effectiveFrom: string;
+}
+
+interface OHJEDDRegistryFile {
+  year: number;
+  zones: OHJEDDEntry[];
+}
+
+/** Whether an Ohio JEDD/JEDZ rate registry exists for this check date. */
+export function hasOHJEDDRuleset(checkDate: string): boolean {
+  return existsSync(join(DATA_ROOT, 'local', `OH-jedd-jedz-${yearOf(checkDate)}.json`));
+}
+
+/**
+ * Look up one Ohio JEDD/JEDZ's rate by Ohio's own jeddId — never by name.
+ * The id is what makes this safe to automate: geocode/districts.ts reads
+ * the containing zone's `jedd_id` straight off Ohio's published boundary
+ * layer, and the two datasets are keyed the same way, so no string
+ * matching sits between the boundary and the rate. Same closed-list,
+ * undefined-for-an-unknown-id convention as every other local lookup here.
+ */
+export function ohJEDDRuleset(jeddId: string, checkDate: string): OHJEDDEntry | undefined {
+  const file = loadJson<OHJEDDRegistryFile>(join('local', `OH-jedd-jedz-${yearOf(checkDate)}.json`));
+  return file.zones.find((z) => z.jeddId === jeddId);
+}
+
+/** Every Ohio JEDD/JEDZ on file. */
+export function allOHJEDDs(checkDate: string): OHJEDDEntry[] {
+  return loadJson<OHJEDDRegistryFile>(join('local', `OH-jedd-jedz-${yearOf(checkDate)}.json`)).zones;
+}
+
 /** Every Ohio school district that levies SDIT — for geocode/'s fuzzy name matching. */
 export function allOHSchoolDistricts(checkDate: string): OHSchoolDistrictEntry[] {
   const file = loadJson<OHSchoolDistrictRegistryFile>(

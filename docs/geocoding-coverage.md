@@ -141,3 +141,77 @@ publish full extracts that could be ingested and queried locally, which
 is essentially what a paid provider does on your behalf. That is a
 storage-and-refresh commitment this project hasn't made, and until it
 does, the tiers above are the ceiling.
+
+---
+
+# Jurisdiction determination
+
+A coordinate is only half the job. The other half is deciding which taxing
+bodies contain it, and that is where a geocoder stops being a geocoder.
+
+## Boundaries are read at the point that was actually used
+
+Census's geocoder returns geographies for *the point it chose*. Once an
+authoritative address point replaces that position, the jurisdictions get
+re-asked at the new coordinate — a TIGERweb `identify` against States,
+Counties, County Subdivisions, Incorporated Places and Unified School
+Districts. Its results carry Census's own `NAME` spellings ("Columbus
+city", "Franklin County") and a real USPS state code, so the matching code
+sees exactly the strings it would have seen from the geocoder.
+
+## Boundaries are effective-dated
+
+Cities annex land; districts merge. A paycheck dated in a past year should
+be resolved against the boundaries that existed then, so the vintage is
+chosen from the check date: `tigerWMS_ACS2015` for 2015, `Census2020` for
+2020 (no ACS vintage is published for a decennial year), `Current` for a
+date newer than the latest published set.
+
+Layer numbers are **not** stable between vintages — Incorporated Places is
+28 in ACS2023 and 26 in Census2020, where States and Counties also shift —
+so layers are resolved by name from each service's own metadata rather
+than hardcoded. Hardcoding them would silently query the wrong boundary
+type on an older date.
+
+## Districts that Census does not publish
+
+Some taxes are levied by bodies that draw their own boundaries and file
+them nowhere Census publishes. A perfect coordinate finds nothing, because
+the boundary isn't in the data being searched. These are resolved against
+the publishing government's own service:
+
+| District | Tax it decides | Source |
+| --- | --- | --- |
+| Portland Metro | Metro Supportive Housing Services (`certificate.metroDistrict`) | Metro's own RLIS boundary service |
+| Ohio JEDDs / JEDZs | JEDD income tax (`certificate.workJEDDId`) | Ohio's statewide JEDD/JEDZ layer on maps.ohio.gov, 142 zones |
+
+The Ohio case is the sharpest illustration of why this matters. A JEDD
+lets a municipality tax income earned on adjoining **unincorporated**
+township land without annexing it. There is no municipality at such an
+address, so every place-name match correctly returns nothing — and the
+wages are taxed anyway at a municipal rate. Verified end to end: *301
+Springside Dr, Akron, OH 44333* resolves to a rooftop point, falls inside
+the Bath-Akron-Fairlawn JEDD, and withholds 2.50%. Before this it produced
+no local tax line at all.
+
+The boundary layer and the rate file join on Ohio's own `jedd_id`, not on
+a name, so no string matching sits between "which zone contains this
+point" and "what does that zone charge".
+
+## Still not resolved, and why
+
+- **TriMet and Lane Transit District.** Both levy real transit payroll
+  taxes. Both publish their boundaries only as downloadable shapefiles,
+  not as a service that can be queried per address. Resolving them means
+  vendoring and refreshing a boundary file — a different commitment from a
+  live lookup, and not made here. `resolveEmployee()` reports them in
+  `notResolvable` rather than defaulting them to false.
+- **Four JEDD rate rows have no published boundary.** Ohio's boundary
+  layer carries 142 zones against 146 rate rows. An address inside one of
+  those four cannot be detected by coordinate, and nothing guesses.
+- **No CASS address validation.** A malformed or nonexistent address is
+  not corrected, only resolved as best it can be or reported unmatched.
+- **Historical dates are gated by rate data, not boundaries.** The vintage
+  machinery works for any past year, but this repo currently ships 2026
+  rulesets only, so a 2015 check date fails on the missing rate file
+  before boundaries ever matter.

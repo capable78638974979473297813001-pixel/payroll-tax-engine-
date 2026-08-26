@@ -83,6 +83,11 @@ async function demo(label: string, address: string, workState: string) {
   } else {
     console.log(`  Position: interpolated by Census — the address-point services were unreachable this call`);
   }
+  if (result.jedd) {
+    console.log(
+      `  Taxing district: \x1b[32m${result.jedd.name}\x1b[0m (Ohio zone id ${result.jedd.jeddId}) — a JEDD, resolved by point-in-boundary against Ohio's own published layer. No municipality exists at this address, so nothing in Census's data would have found this tax.`,
+    );
+  }
   const building = result.crossCheck?.building;
   if (building?.attempted && building.onStreet && building.houseNumberGap !== null) {
     const b = building.onStreet;
@@ -130,6 +135,11 @@ async function demo(label: string, address: string, workState: string) {
 
 await demo('Bluffton, Ohio — a village that taxes AND a school district that taxes', '136 N Main St, Bluffton, OH 45817', 'OH');
 await demo('Columbus, Ohio — a city that taxes, a school district that does NOT', '90 W Broad St, Columbus, OH 43215', 'OH');
+await demo(
+  "Akron area, Ohio — a JEDD: unincorporated township land, no municipality, and a local tax anyway",
+  '301 Springside Dr, Akron, OH 44333',
+  'OH',
+);
 await demo('Detroit, Michigan', '2 Woodward Ave, Detroit, MI 48226', 'MI');
 await demo('Indianapolis, Indiana — county tax, not city', '200 E Washington St, Indianapolis, IN 46204', 'IN');
 await demo('Abington, Pennsylvania — PSD code resolved from county + township', '1176 Old York Rd, Abington, PA 19001', 'PA');

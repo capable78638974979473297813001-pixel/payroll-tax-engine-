@@ -40,8 +40,92 @@
 import type { CensusGeographies } from './resolve.ts';
 
 const GEOCODER_BASE = 'https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress';
-const TIGERWEB_IDENTIFY =
-  'https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_Current/MapServer/identify';
+const TIGERWEB_BASE = 'https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb';
+
+/**
+ * Boundaries move. Cities annex land, school districts merge, county
+ * subdivisions get redrawn — and a paycheck dated last year should be
+ * resolved against the boundaries that existed last year, not today's.
+ * TIGERweb publishes a separate MapServer per vintage, so this is a
+ * matter of asking the right one.
+ *
+ * Verified live (2026-08-25) against TIGERweb's own service directory:
+ * ACS2012 through ACS2019 and ACS2021 through ACS2025 exist, there is
+ * no ACS2020 (the decennial year publishes as Census2020 instead),
+ * Census2010 covers the previous decennial, and tigerWMS_Current is the
+ * newest boundary set. A year with no published vintage falls forward to
+ * Current rather than guessing.
+ */
+const ACS_VINTAGE_YEARS = new Set([
+  2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2021, 2022, 2023, 2024, 2025,
+]);
+
+/** Which TIGERweb vintage service answers for a given check date. Pure. */
+export function tigerwebServiceForDate(checkDate?: string): string {
+  if (!checkDate) return 'tigerWMS_Current';
+  const year = Number(checkDate.slice(0, 4));
+  if (!Number.isFinite(year)) return 'tigerWMS_Current';
+  if (year <= 2011) return 'tigerWMS_Census2010';
+  if (year === 2020) return 'tigerWMS_Census2020';
+  if (ACS_VINTAGE_YEARS.has(year)) return `tigerWMS_ACS${year}`;
+  return 'tigerWMS_Current';
+}
+
+/**
+ * Layer NUMBERS are not stable across vintages — Incorporated Places is
+ * layer 28 in ACS2023, 26 in Census2020, and 26 in ACS2019 where States
+ * and Counties also shift from 80/82 to 82/84. Hardcoding them would
+ * silently query the wrong boundary type on an older check date, which
+ * is worse than not supporting vintages at all. So layers are looked up
+ * by NAME from each service's own metadata, once, and cached.
+ */
+const LAYER_NAMES = {
+  schoolDistricts: 'Unified School Districts',
+  countySubdivisions: 'County Subdivisions',
+  places: 'Incorporated Places',
+  states: 'States',
+  counties: 'Counties',
+} as const;
+
+type LayerKey = keyof typeof LAYER_NAMES;
+
+const layerIdCache = new Map<string, Promise<Partial<Record<LayerKey, number>>>>();
+
+/** Test-only: forget cached layer metadata so a mocked fetch is actually consulted. */
+export function clearVintageLayerCache(): void {
+  layerIdCache.clear();
+}
+
+async function layerIdsFor(
+  service: string,
+  fetchImpl: typeof fetch,
+  retryOptions: FetchOptions,
+): Promise<Partial<Record<LayerKey, number>>> {
+  const cached = layerIdCache.get(service);
+  if (cached) return cached;
+
+  const pending = (async () => {
+    const res = await fetchWithRetry(`${TIGERWEB_BASE}/${service}/MapServer?f=json`, fetchImpl, retryOptions);
+    if (!res.ok) throw new Error(`TIGERweb ${service} metadata returned HTTP ${res.status}`);
+    const body = (await res.json()) as { layers?: { id: number; name: string }[] };
+    const byName = new Map((body.layers ?? []).map((l) => [l.name, l.id]));
+    const ids: Partial<Record<LayerKey, number>> = {};
+    for (const [key, name] of Object.entries(LAYER_NAMES) as [LayerKey, string][]) {
+      const id = byName.get(name);
+      if (id !== undefined) ids[key] = id;
+    }
+    return ids;
+  })();
+
+  layerIdCache.set(service, pending);
+  try {
+    return await pending;
+  } catch (err) {
+    // A failed metadata fetch must not poison every later call.
+    layerIdCache.delete(service);
+    throw err;
+  }
+}
 
 /**
  * Signals about HOW confidently this address resolved, all derived from
@@ -255,9 +339,12 @@ export async function fetchSchoolDistrictAtPoint(
   y: number,
   fetchImpl: typeof fetch = fetch,
   retryOptions: FetchOptions = {},
+  checkDate?: string,
 ): Promise<string | null> {
-  // Layers 14/16/18: Unified, Secondary, Elementary School Districts.
-  const results = await identifyAt(x, y, '14,16,18', fetchImpl, retryOptions);
+  const service = tigerwebServiceForDate(checkDate);
+  const ids = await layerIdsFor(service, fetchImpl, retryOptions);
+  if (ids.schoolDistricts === undefined) return null;
+  const results = await identifyAt(x, y, String(ids.schoolDistricts), service, fetchImpl, retryOptions);
   return results[0]?.value ?? null;
 }
 
@@ -272,10 +359,11 @@ async function identifyAt(
   x: number,
   y: number,
   layers: string,
+  service: string,
   fetchImpl: typeof fetch,
   retryOptions: FetchOptions,
 ): Promise<IdentifyResult[]> {
-  const url = new URL(TIGERWEB_IDENTIFY);
+  const url = new URL(`${TIGERWEB_BASE}/${service}/MapServer/identify`);
   url.searchParams.set('geometry', JSON.stringify({ x, y }));
   url.searchParams.set('geometryType', 'esriGeometryPoint');
   url.searchParams.set('sr', '4326');
@@ -318,28 +406,36 @@ export async function fetchGeographiesAtPoint(
   y: number,
   fetchImpl: typeof fetch = fetch,
   retryOptions: FetchOptions = {},
+  checkDate?: string,
 ): Promise<{ geographies: CensusGeographies; schoolDistrict: string | null } | null> {
-  // 14 Unified School Districts, 22 County Subdivisions, 28 Incorporated
-  // Places, 80 States, 82 Counties.
-  const results = await identifyAt(x, y, '14,22,28,80,82', fetchImpl, retryOptions);
+  const service = tigerwebServiceForDate(checkDate);
+  const ids = await layerIdsFor(service, fetchImpl, retryOptions);
+  const wanted: LayerKey[] = ['schoolDistricts', 'countySubdivisions', 'places', 'states', 'counties'];
+  const requested = wanted.map((key) => ids[key]).filter((id): id is number => id !== undefined);
+  if (requested.length === 0) return null;
 
-  const named = (layerId: number): string[] =>
-    results
+  const results = await identifyAt(x, y, requested.join(','), service, fetchImpl, retryOptions);
+
+  const named = (key: LayerKey): string[] => {
+    const layerId = ids[key];
+    if (layerId === undefined) return [];
+    return results
       .filter((r) => r.layerId === layerId)
       .map((r) => r.attributes?.NAME ?? r.value)
       .filter((n): n is string => !!n);
+  };
 
-  const state = results.find((r) => r.layerId === 80)?.attributes?.STUSAB;
+  const state = results.find((r) => r.layerId === ids.states)?.attributes?.STUSAB;
   if (!state) return null;
 
   return {
     geographies: {
       state,
-      incorporatedPlaces: named(28),
-      countySubdivisions: named(22),
-      counties: named(82),
+      incorporatedPlaces: named('places'),
+      countySubdivisions: named('countySubdivisions'),
+      counties: named('counties'),
     },
-    schoolDistrict: named(14)[0] ?? null,
+    schoolDistrict: named('schoolDistricts')[0] ?? null,
   };
 }
 
@@ -349,12 +445,13 @@ export async function fetchGeographiesAtPointSafe(
   y: number,
   fetchImpl: typeof fetch = fetch,
   retryOptions: FetchOptions = {},
+  checkDate?: string,
 ): Promise<
   | { ok: true; result: { geographies: CensusGeographies; schoolDistrict: string | null } | null }
   | { ok: false; error: string }
 > {
   try {
-    return { ok: true, result: await fetchGeographiesAtPoint(x, y, fetchImpl, retryOptions) };
+    return { ok: true, result: await fetchGeographiesAtPoint(x, y, fetchImpl, retryOptions, checkDate) };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
@@ -376,9 +473,10 @@ export async function fetchSchoolDistrictAtPointSafe(
   y: number,
   fetchImpl: typeof fetch = fetch,
   retryOptions: FetchOptions = {},
+  checkDate?: string,
 ): Promise<{ ok: true; district: string | null } | { ok: false; error: string }> {
   try {
-    const district = await fetchSchoolDistrictAtPoint(x, y, fetchImpl, retryOptions);
+    const district = await fetchSchoolDistrictAtPoint(x, y, fetchImpl, retryOptions, checkDate);
     return { ok: true, district };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : String(err) };

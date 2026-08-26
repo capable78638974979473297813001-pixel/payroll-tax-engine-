@@ -31,6 +31,8 @@ import {
   hasStateRuleset,
   kyJurisdictionRuleset,
   miCityRuleset,
+  hasOHJEDDRuleset,
+  ohJEDDRuleset,
   ohMunicipalityRuleset,
   ohSchoolDistrictRuleset,
   paLocalRuleset,
@@ -303,6 +305,11 @@ export function stateIncomeTax(
   if (ohLocal) lines.push(ohLocal);
   const ohSchool = ohioSchoolDistrictTax(input, ctx, rules);
   if (ohSchool) lines.push(ohSchool);
+  // JEDDs/JEDZs — the same municipal rate levied on UNINCORPORATED
+  // township land, which ohioLocalTax() above structurally cannot find
+  // because there is no municipality there. See ohioJEDDTax().
+  const ohJEDD = ohioJEDDTax(input, ctx, rules);
+  if (ohJEDD) lines.push(ohJEDD);
 
   // Resident-working-elsewhere credit — a DIFFERENT direction from every
   // reciprocity mechanism above: those zero THIS state's tax when the
@@ -6114,6 +6121,61 @@ function ohioLocalTax(
     taxableWages: periodWages,
     amount,
     detail: details.join('; '),
+  };
+}
+
+/**
+ * Ohio's JEDDs and JEDZs — Joint Economic Development Districts/Zones.
+ *
+ * The mechanism (ORC 715.70–715.83): a municipality and a township
+ * contract to develop and TAX a defined area of UNINCORPORATED township
+ * land, at the municipality's income tax rate, without annexing it. That
+ * makes a JEDD invisible to every jurisdiction lookup this engine had:
+ * the address sits in no incorporated place, so ohioLocalTax()'s
+ * municipality match correctly finds nothing, and the wages get taxed
+ * anyway. It is the specific reason "rural Ohio address, therefore no
+ * local tax" was never a safe inference.
+ *
+ * Levied on income EARNED INSIDE the zone, so this is a WORK-location
+ * tax with no residence half — a JEDD has no residents to speak of by
+ * construction, since the arrangement exists to tax commercial and
+ * industrial development on township land.
+ *
+ * certificate.workJEDDId is Ohio's own jedd_id, not a name: geocode/
+ * districts.ts reads it directly off Ohio's published JEDD boundary
+ * layer for the resolved coordinate, and data/local/OH-jedd-jedz-2026.json
+ * (Ohio's own Finder rate database) is keyed by the same id — so the
+ * boundary and the rate join exactly, with no string matching in
+ * between. An id that isn't in the rate file produces no line at all,
+ * the same closed-list convention as ohioLocalTax().
+ */
+function ohioJEDDTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  if (rules.code !== 'OH') return null;
+  if (!hasOHJEDDRuleset(input.checkDate)) return null;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const jeddId = typeof cert.workJEDDId === 'string' ? cert.workJEDDId : undefined;
+  if (!jeddId) return null;
+
+  const entry = ohJEDDRuleset(jeddId, input.checkDate);
+  if (!entry) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+  const amount = applyRate(periodWages, entry.rate);
+
+  return {
+    id: 'OH_JEDD',
+    name: 'Ohio JEDD/JEDZ Income Tax',
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages: periodWages,
+    amount,
+    detail: `${fmt(amount)} to ${entry.name} @ ${(entry.rate * 100).toFixed(2)}% on wages earned inside the district (certificate.workJEDDId = "${jeddId}", Ohio's own zone id) — unincorporated township land, so no municipal tax applies at this address`,
   };
 }
 

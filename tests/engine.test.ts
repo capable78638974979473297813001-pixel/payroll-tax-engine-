@@ -4957,6 +4957,68 @@ describe('Ohio', () => {
       assert.equal(r.taxes.find((t) => t.id === 'OH_SDIT'), undefined);
     });
   });
+
+  // JEDD/JEDZ income tax (OH_JEDD) — the case where "no municipality at
+  // this address" was never the same thing as "no local tax". Rates below
+  // are real, from data/local/OH-jedd-jedz-2026.json: Bath-Akron-Fairlawn
+  // JEDD (Ohio zone id 9004) 2.5%, Ashtabula Township JEDD (9001) 1.8%.
+  describe('JEDD/JEDZ income tax (OH_JEDD)', () => {
+    test('taxes wages earned inside a zone, at the zone\'s own rate', () => {
+      const r = calculatePaycheck(
+        input({
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+          workState: { code: 'OH', certificate: { workJEDDId: '9004' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'OH_JEDD'), dollars(75.0));
+      // No municipality exists at a JEDD address, so no municipal line
+      // should appear alongside it.
+      assert.equal(r.taxes.some((t) => t.id === 'OH_LOCAL'), false);
+    });
+
+    test('a different zone uses its own published rate, not a shared one', () => {
+      const r = calculatePaycheck(
+        input({
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+          workState: { code: 'OH', certificate: { workJEDDId: '9001' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'OH_JEDD'), dollars(54.0));
+    });
+
+    test('an address in no zone produces no line at all — closed list, not a default rate', () => {
+      const r = calculatePaycheck(
+        input({
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+          workState: { code: 'OH', certificate: {} },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'OH_JEDD'), false);
+    });
+
+    test('an unrecognised zone id is silent rather than guessed', () => {
+      const r = calculatePaycheck(
+        input({
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+          workState: { code: 'OH', certificate: { workJEDDId: '0000' } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'OH_JEDD'), false);
+    });
+
+    test('a JEDD and a school district can both apply to the same address', () => {
+      // JEDD land sits in a township, and townships sit inside school
+      // districts — the two taxes are independent and stack.
+      const r = calculatePaycheck(
+        input({
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+          workState: { code: 'OH', certificate: { workJEDDId: '9004', schoolDistrictCode: '6901' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'OH_JEDD'), dollars(75.0));
+      assert.ok(amountOf(r, 'OH_SDIT') > dollars(0));
+    });
+  });
 });
 
 describe('Delaware', () => {

@@ -1037,7 +1037,8 @@
   ],
   "ruralCoverageImplication": "A resident of unincorporated Ohio township land should be checked against BOTH this file and OH-municipalities-2026.json before concluding /usr/bin/bash local tax -- the municipalities file alone is not sufficient, which is the correction to last session's abstract JEDD/JEDZ caveat.",
   "knownGaps": [
-    "Not wired into the calculation engine.",
-    "JEDD/JEDZ boundaries are contractual and geographic, not simply address-to-name matchable the way a municipality often is -- resolving whether a specific rural address falls inside a zone requires the zone's actual boundary description, which this rate-only file does not contain."
+    "Zone boundaries are resolved live rather than shipped in this file: geocode/districts.ts queries Ohio's own statewide JEDD/JEDZ boundary layer (maps.ohio.gov/arcgis/rest/services/Tax/JEDDJEDZ) at the resolved coordinate and joins to this file on jeddId. So an address inside a zone IS resolvable now, but only while that service is reachable — a failed lookup reports itself as unknown rather than as 'no JEDD here'.",
+    "Ohio's boundary layer carries 142 zones against this file's 146 rate rows. The extra rate rows have no published boundary, so an address inside one of those four cannot be detected by coordinate; nothing here silently guesses which.",
+    "The zone rate is applied to WORK-location wages only (see ohioJEDDTax()). A JEDD levies on income earned inside the district; there is no residence half, since the zones cover commercial development on township land rather than housing."
   ]
 }
