@@ -328,17 +328,77 @@ export function futa(
   ];
 }
 
+/**
+ * Employment categories the Code taxes differently.
+ *
+ * CLERGY. IRS guidance is explicit and unusually broad: a minister's
+ * earnings for services in the exercise of the ministry "are not subject to
+ * income, social security, and Medicare tax withholding" — the minister
+ * pays self-employment tax under SECA instead — and those services are
+ * excluded from FUTA employment as well. So every federal line goes to
+ * zero. The one exception is an income tax withholding the employer and
+ * minister agree to VOLUNTARILY, which the IRS explicitly permits and says
+ * to report in box 2 of the W-2; that arrives as
+ * federalW4.voluntaryWithholdingAgreement.
+ *
+ * STATUTORY EMPLOYEE. The mirror image, and the reason these two share a
+ * function: Publication 15 says not to withhold federal income tax from
+ * someone who is not a common-law employee, while social security and
+ * Medicare taxes MUST be withheld because such a worker is an employee by
+ * statute for FICA purposes. So income tax alone goes to zero.
+ *
+ * Zero LINES rather than missing ones: a payroll register that simply omits
+ * social security for a minister looks identical to one that forgot it. The
+ * line stays, at zero, carrying the reason.
+ */
+function applyEmploymentCategory(
+  input: PaycheckInput,
+  lines: TaxLine[],
+): TaxLine[] {
+  const category = input.employmentCategory ?? 'standard';
+  if (category === 'standard') return lines;
+
+  const voluntary = input.federalW4.voluntaryWithholdingAgreement === true;
+  const zeroOut = (line: TaxLine, reason: string): TaxLine => ({
+    ...line,
+    taxableWages: 0,
+    amount: 0,
+    detail: reason,
+  });
+
+  return lines.map((line) => {
+    const isIncomeTax = line.id === 'US_FIT' || line.id === 'US_FIT_SUPP';
+    if (category === 'statutory_employee') {
+      return isIncomeTax
+        ? zeroOut(
+            line,
+            '$0 — statutory employee: Publication 15 directs an employer not to withhold federal income tax from a worker who is not a common-law employee. Social security and Medicare are still withheld, because such a worker IS an employee by statute for FICA.',
+          )
+        : line;
+    }
+
+    // Clergy: every federal line goes to zero.
+    if (isIncomeTax && voluntary) return line;
+    return zeroOut(
+      line,
+      isIncomeTax
+        ? '$0 — clergy: a minister\'s earnings for services in the exercise of the ministry are not subject to income tax withholding. An employer and minister MAY agree to withhold voluntarily; set federalW4.voluntaryWithholdingAgreement to do that.'
+        : '$0 — clergy: services performed in the exercise of the ministry are outside social security, Medicare and FUTA employment. The minister pays self-employment tax under SECA instead.',
+    );
+  });
+}
+
 export function federalTaxes(
   input: PaycheckInput,
   ctx: ComputeContext,
 ): TaxLine[] {
   const rules = federalRuleset(input.checkDate);
   const supplemental = federalSupplementalTax(input, rules);
-  return [
+  return applyEmploymentCategory(input, [
     federalIncomeTax(input, ctx, rules),
     ...(supplemental ? [supplemental] : []),
     ...socialSecurity(input, ctx, rules),
     ...medicare(input, ctx, rules),
     ...futa(input, ctx, rules),
-  ];
+  ]);
 }

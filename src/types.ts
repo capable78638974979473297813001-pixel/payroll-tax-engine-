@@ -92,6 +92,13 @@ export interface FederalW4 {
    * determination this engine trusts the input for.
    */
   nonresidentAlien?: boolean;
+  /**
+   * A voluntary income tax withholding agreement, the one way a minister's
+   * pay carries federal income tax withholding at all (IRS: an employer and
+   * minister MAY agree to withhold, reported in box 2 of the W-2). Ignored
+   * for every other employment category.
+   */
+  voluntaryWithholdingAgreement?: boolean;
 }
 
 /** Year-to-date wages, needed for every wage-base-capped tax. */
@@ -201,6 +208,27 @@ export interface EmployerContext {
   paidLeaveTier?: Record<string, string>;
 }
 
+/**
+ * Which body of employment-tax rules this worker falls under. Most people
+ * are 'standard'; the others are real categories the Internal Revenue Code
+ * treats differently, and getting them wrong means withholding taxes that
+ * are not owed or missing ones that are.
+ *
+ *   'clergy'            — a duly ordained, commissioned or licensed
+ *                         minister performing services in the exercise of
+ *                         their ministry. Not subject to income tax, social
+ *                         security or Medicare WITHHOLDING (they pay
+ *                         self-employment tax instead under SECA), and the
+ *                         services are excluded from FUTA employment.
+ *   'statutory_employee'— not a common-law employee, but an employee by
+ *                         statute for FICA: social security and Medicare
+ *                         ARE withheld, federal income tax is NOT.
+ *
+ * State treatment is a separate question this flag does NOT answer — see
+ * the federal ruleset's own employmentCategories block.
+ */
+export type EmploymentCategory = 'standard' | 'clergy' | 'statutory_employee';
+
 export interface PaycheckInput {
   /**
    * Check date. Determines WHICH ruleset applies — never "today".
@@ -214,6 +242,8 @@ export interface PaycheckInput {
   ytd: YearToDate;
   /** Employer-side facts the engine cannot derive — see EmployerContext. */
   employer?: EmployerContext;
+  /** Which employment-tax rules apply to this worker. Defaults to 'standard'. */
+  employmentCategory?: EmploymentCategory;
   /** Work state (and eventually residence state for reciprocity). */
   workState?: StateWithholding;
   residenceState?: StateWithholding;

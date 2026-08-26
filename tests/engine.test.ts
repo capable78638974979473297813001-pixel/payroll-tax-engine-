@@ -8266,3 +8266,77 @@ describe('Colorado Occupational Privilege Tax beyond Denver', () => {
     assert.equal(amountOf(r, 'SHERIDAN_OPT_EE'), dollars(0));
   });
 });
+
+/**
+ * Employment categories the Code taxes differently. The IRS is explicit on
+ * both: a minister's earnings for services in the exercise of the ministry
+ * are "not subject to income, social security, and Medicare tax
+ * withholding" and those services are outside FUTA employment, while a
+ * statutory employee is the mirror image — no income tax withholding, but
+ * social security and Medicare ARE withheld.
+ */
+describe('clergy and statutory employees', () => {
+  const worker = (extra: Record<string, unknown> = {}, w4extra: Record<string, unknown> = {}) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly' as const,
+    earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(3000) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+      ...w4extra,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    ...extra,
+  });
+
+  test('an ordinary employee is untouched by the category logic', () => {
+    const r = calculatePaycheck(worker());
+    assert.equal(amountOf(r, 'US_FIT'), dollars(320.38));
+    assert.equal(amountOf(r, 'US_SS_EE'), dollars(186.0));
+    assert.equal(amountOf(r, 'US_FUTA'), dollars(18.0));
+  });
+
+  test('a minister owes no federal withholding of any kind', () => {
+    const r = calculatePaycheck(worker({ employmentCategory: 'clergy' }));
+    for (const id of ['US_FIT', 'US_SS_EE', 'US_SS_ER', 'US_MED_EE', 'US_MED_ER', 'US_FUTA']) {
+      assert.equal(amountOf(r, id), dollars(0), `${id} should be zero for clergy`);
+    }
+    // Zero LINES, not missing ones: a register that simply omits social
+    // security looks identical to one that forgot it.
+    assert.match(r.taxes.find((t) => t.id === 'US_SS_EE')?.detail ?? '', /SECA/);
+  });
+
+  test('a voluntary agreement restores income tax withholding, and only that', () => {
+    const r = calculatePaycheck(
+      worker({ employmentCategory: 'clergy' }, { voluntaryWithholdingAgreement: true }),
+    );
+    assert.equal(amountOf(r, 'US_FIT'), dollars(320.38));
+    assert.equal(amountOf(r, 'US_SS_EE'), dollars(0));
+    assert.equal(amountOf(r, 'US_FUTA'), dollars(0));
+  });
+
+  test('a statutory employee is the mirror image: FICA yes, income tax no', () => {
+    const r = calculatePaycheck(worker({ employmentCategory: 'statutory_employee' }));
+    assert.equal(amountOf(r, 'US_FIT'), dollars(0));
+    assert.equal(amountOf(r, 'US_SS_EE'), dollars(186.0));
+    assert.equal(amountOf(r, 'US_MED_EE'), dollars(43.5));
+    assert.equal(amountOf(r, 'US_FUTA'), dollars(18.0));
+    assert.match(r.taxes.find((t) => t.id === 'US_FIT')?.detail ?? '', /common-law/);
+  });
+
+  test('the flag reaches supplemental income tax too, not just the regular line', () => {
+    const r = calculatePaycheck(
+      worker({
+        employmentCategory: 'statutory_employee',
+        earnings: [{ code: 'BON', category: 'supplemental' as const, amount: dollars(5000) }],
+      }),
+    );
+    assert.equal(amountOf(r, 'US_FIT_SUPP'), dollars(0));
+    assert.ok(amountOf(r, 'US_SS_EE') > dollars(0));
+  });
+});

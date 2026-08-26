@@ -199,12 +199,41 @@
   },
 
   "knownGaps": [
-    "Nonresident alien (NRA) withholding is not modelled: no NRA status field, no NRA wage addback, no restricted-W-4 handling. NRA employees would be silently run through the resident percentage method, which understates their correct withholding -- treat any NRA employee as unsupported, not zero-adjustment.",
+    "Nonresident alien (NRA) withholding is not modelled: no NRA status field, no NRA wage addback, no restricted-W-4 handling. NRA employees would be silently run through the resident percentage method, which understates their correct withholding -- treat any NRA employee as unsupported, not zero-adjustment. STALE, NOW FALSE: NRA withholding IS modelled — federalW4.nonresidentAlien drives the Pub 15-T Table 2 per-period addback in taxes/federal.ts (verified: a biweekly cheque adds $619.20 to wages before annualizing, and the added amount is deliberately excluded from the line's own taxableWages because it isn't reportable wages). What remains unmodelled is only the Table 1 (pre-2020 Form W-4) variant, which this engine's FederalW4 type has no shape for.",
     "Pension/annuity withholding (Pub 15-T's separate periodic-payment tables, Form W-4P) is not modelled -- this engine assumes ordinary W-2 wage/salary payroll only.",
     "Nonpayroll withholding (Form 945 categories: IRA distributions, gambling winnings, certain government/Indian gaming payments) is out of scope -- these aren't wage payroll at all.",
-    "Special employment-tax categories are not modelled: household employees, agricultural (incl. H-2A) workers, statutory employees, ministers/clergy, election workers, railroad employees, tipped employees' allocated-tips rules. A standard W-2 wage/salary employee is the only supported case; using this engine for any of these categories will produce wrong numbers, not an explicit error.",
+    "Special employment-tax categories are not modelled: household employees, agricultural (incl. H-2A) workers, statutory employees, ministers/clergy, election workers, railroad employees, tipped employees' allocated-tips rules. A standard W-2 wage/salary employee is the only supported case; using this engine for any of these categories will produce wrong numbers, not an explicit error. PARTLY CLOSED: clergy and statutory employees are now modelled via input.employmentCategory — see the employmentCategories block above for each one's rule and source. Household employees, agricultural workers, election workers, ministers' housing allowances and railroad (RRTA) employment remain unmodelled.",
     "FUTA credit-reduction states are not modelled (see futa.comment) -- the DOL's annual credit-reduction list changes which states' net FUTA rate exceeds 0.6%.",
     "Backup withholding (backupWithholdingRate, 24%) is recorded as data but has no compute path -- no rule detects a missing/invalid TIN and applies it.",
     "The percentage_method_automated_worksheet_1a method is the ONLY Pub 15-T method implemented. Pub 15-T also publishes wage-bracket tables and non-automated percentage-method tables for manual systems; this engine intentionally supports only the automated-system method, which is exact rather than table-rounded."
-  ]
+  ],
+  "employmentCategories": {
+    "$comment": "Employment categories the Code taxes differently from an ordinary common-law employee, wired via input.employmentCategory. Only the two below are modelled; the rest of the special categories this file's knownGaps names (household, agricultural, election workers, railroad) remain unmodelled and are still disclosed there.",
+    "clergy": {
+      "federalIncomeTaxWithholding": "not_required",
+      "socialSecurityMedicare": "excluded",
+      "futa": "excluded",
+      "voluntaryAgreementPermitted": true,
+      "source": {
+        "title": "IRS — Members of the clergy / Publication 15-A, Special Rules for Ministers",
+        "url": "https://www.irs.gov/businesses/small-businesses-self-employed/members-of-the-clergy",
+        "verifiedOn": "2026-08-25",
+        "quote": "A minister's earnings for services in the exercise of the ministry are not subject to income, social security, and Medicare tax withholding; those services are covered by SECA, so the minister pays self-employment tax instead. An employer and minister MAY agree to withhold income tax voluntarily, reported in box 2 of Form W-2. Services performed by a duly ordained, commissioned or licensed minister in the exercise of the ministry are also excluded from FUTA employment (IRC 3306(c)(8) and the ministerial exclusion)."
+      },
+      "notModelled": "The housing/parsonage allowance (excluded from income tax but INCLUDED in the SECA base) is a wage-classification question this engine's earnings categories don't represent, and the minister's own SECA liability is a self-employment tax, not payroll withholding. A minister who has an approved Form 4361 exemption is likewise outside anything this engine computes."
+    },
+    "statutoryEmployee": {
+      "federalIncomeTaxWithholding": "not_required",
+      "socialSecurityMedicare": "withheld",
+      "futa": "per_ordinary_rules",
+      "source": {
+        "title": "IRS Publication 15 (Circular E), Employer's Tax Guide, for use in 2026",
+        "url": "https://www.irs.gov/pub/irs-pdf/p15.pdf",
+        "verifiedOn": "2026-08-25",
+        "quote": "If someone who works for you isn't an employee under the common-law rules, don't withhold federal income tax from their pay, unless backup withholding applies. Although such persons may not be common-law employees, they're considered employees by statute for social security and Medicare tax purposes if certain conditions are met, and social security and Medicare taxes must be withheld."
+      },
+      "notModelled": "Which workers QUALIFY (certain drivers, full-time life insurance sales agents, home workers, travelling salespeople, each with its own conditions) is a worker-classification determination, not a calculation — the caller makes it and sets input.employmentCategory."
+    },
+    "stateTreatmentNotModelled": "This flag answers the FEDERAL question only. States mostly follow the federal treatment of ministers and statutory employees, but not universally and not always for the same taxes, and no state file in this project has been researched on the point. State income tax, state unemployment and paid-leave lines are therefore left computing as normal for both categories — a deliberate, disclosed limit rather than an assumed conformity."
+  }
 }
