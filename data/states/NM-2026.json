@@ -369,7 +369,7 @@
   },
   "knownGaps": [
     "15-day nonresident de minimis threshold NOT modelled: FYI-104 states directly 'Employers are not required to withhold New Mexico income tax from wages of nonresident employees working in New Mexico for 15 or fewer days during the calendar year' -- a DAY-COUNT threshold, the same class of gap as Alabama's 31-day rule and Illinois's 30-day Form IL-W-6 threshold elsewhere in this project. This engine has no day-tracking mechanism; disclosed rather than force-fit into the existing dollar-based nonresidentDeMinimisThreshold mechanism, which measures a different thing entirely. WIRED (day-count pass): nonresidentDayCountReason() in src/taxes/state.ts now applies this, reading certificate.daysWorkedInStateThisYear against reciprocity.exemptWhenDaysWorkedAtMost. A MISSING day count still withholds — absence is not a claim of few days — and where the statute attaches conditions a paycheck cannot evidence, the caller must also assert certificate.nonresidentDeMinimisEligible.",
-    "Monthly sub-one-dollar de minimis NOT modelled: FYI-104 states 'No withholding is required if the total withholding for an employee during any one month is less than one dollar' -- an aggregate-across-a-month fact this engine's one-paycheck-at-a-time architecture has no way to evaluate, same class of limitation as Newark's quarterly-minimum and Washington's 50+-employee PFML threshold elsewhere in this project.",
+    "Monthly sub-one-dollar de minimis NOT modelled: FYI-104 states 'No withholding is required if the total withholding for an employee during any one month is less than one dollar' -- an aggregate-across-a-month fact this engine's one-paycheck-at-a-time architecture has no way to evaluate, same class of limitation as Newark's quarterly-minimum and Washington's 50+-employee PFML threshold elsewhere in this project. WIRED (this pass): applyMonthlyWithholdingFloor() now applies it from the monthlyDeMinimis block, with a guard that matters — the floor is MONTHLY, so it fires only when the caller supplies the month's running total (certificate.stateTaxWithheldThisMonth) or when one cheque is a month or longer. A weekly $0.68 is $2.72 a month and stays withheld; waiving it on the strength of one cheque would under-withhold all year.",
     "UI wage base and rate range are cross-source only -- dws.state.nm.us's own rate pages returned a WAF block ('Request Rejected') to every fetch attempted this pass; not modelled in the engine regardless (employer-side, experience-rated, same as every state). WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
     "Gambling-winnings withholding (6%) and pension/annuity withholding are documented in FYI-104 but out of scope for a wage-withholding-only engine, same convention as every other state's out-of-scope withholding categories in this project.",
     "The 'married but elected higher-single-rate for federal purposes' instruction describes the PRE-2020 federal W-4's Line 3 checkbox, which doesn't exist on the 2020+ form this project's federalW4 model represents -- disclosed as inapplicable legacy guidance, not modelled."
@@ -387,5 +387,14 @@
     },
     "employerSuppliedRateRequired": false,
     "confidence": "source_dated_2026"
+  },
+  "monthlyDeMinimis": {
+    "monthlyWithholdingFloor": 1,
+    "$comment": "FYI-104, quoted directly: 'No withholding is required if the total withholding for an employee during any one month is less than one dollar.' A MONTHLY test, so it needs a monthly running figure — certificate.stateTaxWithheldThisMonth — which the caller keeps, exactly as Denver's monthly head tax already requires. With nothing supplied the test runs on this cheque alone, which is right for a monthly payroll and conservative everywhere else: it can only ever zero an amount already under a dollar.",
+    "source": {
+      "title": "New Mexico Taxation and Revenue Department — FYI-104, New Mexico Withholding Tax",
+      "url": "https://www.tax.newmexico.gov/forms-publications/",
+      "verifiedOn": "2026-08-25"
+    }
   }
 }

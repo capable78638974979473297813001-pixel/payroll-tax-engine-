@@ -9029,3 +9029,91 @@ describe('Seattle payroll expense tax (JumpStart)', () => {
     assert.equal(amountOf(r, 'SEATTLE_PAYROLL_ER'), dollars(181.1));
   });
 });
+
+/**
+ * Montana's supplemental Methods 1 and 2, and New Mexico's dollar-a-month
+ * floor — the last two state-level mechanisms that were documented in the
+ * data and had nowhere to run.
+ */
+describe('Montana Methods 1/2 and the New Mexico monthly floor', () => {
+  const mt = (extra: Record<string, unknown> = {}) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly' as const,
+    earnings: [{ code: 'BON', category: 'supplemental' as const, amount: dollars(5000) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    workState: { code: 'MT', certificate: {} },
+    ...extra,
+  });
+
+  test('a Montana bonus with no prior cheque falls to Method 3, the flat 5%', () => {
+    const r = calculatePaycheck(mt());
+    assert.equal(amountOf(r, 'MT_SIT_SUPP'), dollars(250.0));
+  });
+
+  test('with the prior regular cheque supplied, Methods 1/2 tax the combined amount', () => {
+    // $5,000 bonus + $3,000 prior = $8,000, which Montana's own table taxes
+    // at $400; less the $120 already withheld from that prior cheque.
+    const r = calculatePaycheck(
+      mt({ priorRegularPayment: { taxableWages: dollars(3000), stateIncomeTaxWithheld: dollars(120) } }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), dollars(280.0));
+  });
+
+  test('...and the flat Method 3 line stands down — the methods are alternatives, not partners', () => {
+    const r = calculatePaycheck(
+      mt({ priorRegularPayment: { taxableWages: dollars(3000), stateIncomeTaxWithheld: dollars(120) } }),
+    );
+    assert.equal(r.taxes.some((t) => t.id === 'MT_SIT_SUPP'), false);
+  });
+
+  const nm = (wage: number, frequency: 'weekly' | 'monthly', cert: Record<string, unknown> = {}) => ({
+    checkDate: '2026-08-15',
+    payFrequency: frequency,
+    earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(wage) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    workState: { code: 'NM', certificate: cert },
+  });
+
+  test('New Mexico waives a month whose withholding comes to less than a dollar', () => {
+    // $700 monthly sits just past the 0% band: 1.5% of $29 is $0.44,
+    // which New Mexico does not require anyone to withhold.
+    const r = calculatePaycheck(nm(700, 'monthly'));
+    assert.equal(amountOf(r, 'NM_SIT'), dollars(0));
+    assert.match(r.taxes.find((t) => t.id === 'NM_SIT')?.detail ?? '', /less than \$1\.00/);
+  });
+
+  test('a WEEKLY cheque under a dollar is still withheld — one cheque is not a month', () => {
+    // $0.68 a week is $2.72 a month, well over the floor. Waiving it on the
+    // strength of a single cheque would under-withhold all year.
+    const r = calculatePaycheck(nm(200, 'weekly'));
+    assert.equal(amountOf(r, 'NM_SIT'), dollars(0.68));
+  });
+
+  test("...unless the caller supplies the month's running total and it is still under a dollar", () => {
+    const r = calculatePaycheck(nm(15, 'weekly', { stateTaxWithheldThisMonth: dollars(0.1) }));
+    assert.equal(amountOf(r, 'NM_SIT'), dollars(0));
+  });
+
+  test('an ordinary New Mexico wage is untouched by the floor', () => {
+    const r = calculatePaycheck(nm(3000, 'monthly'));
+    assert.ok(amountOf(r, 'NM_SIT') > dollars(50));
+  });
+});

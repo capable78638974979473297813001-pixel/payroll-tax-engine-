@@ -248,7 +248,7 @@
     "RESOLVED (data-only, final read-through pass): a genuine correction to the National Guard exemption -- Title 32 orders are NOT exempt by default (only Title 10, plus a narrow homeland-defense/contingency-operation carve-out for Title 32), where the earlier version of this file risked being read as exempting Guard pay generally. Interstate-carrier exemption expanded from 2 to the correct 4 carrier types (added water carriers). Also newly captured: a $10 pension/annuity withholding de minimis, Railroad Retirement Tier I/II benefits' full exemption, and the DoD Survivor Benefit Plan's residency-gated 50% exemption -- see militaryRules/interstateTransportation/pensionAndRetirementWithholding above.",
     "NOT MODELLED IN THE ENGINE (data-only, matching this project's established treatment of similarly-shaped non-wage withholding elsewhere): mineral royalty withholding, MEDIA loan-out withholding, lottery/pass-through/composite tax withholding, pension/annuity distribution withholding for non-W-2 recipients, and the 30-day nonresident exemption (an employer-side eligibility determination this engine's certificate-only model can't compute). WIRED (day-count pass): nonresidentDayCountReason() in src/taxes/state.ts now applies this, reading certificate.daysWorkedInStateThisYear against reciprocity.exemptWhenDaysWorkedAtMost. A MISSING day count still withholds — absence is not a claim of few days — and where the statute attaches conditions a paycheck cannot evidence, the caller must also assert certificate.nonresidentDeMinimisEligible.",
     "The Native American exemption's sub-pay-period granularity cannot be represented by this engine's single whole-cheque certificate.exempt boolean.",
-    "Supplemental wages Methods 1 and 2 (combining with a DIFFERENT period's regular wages) are not modelled, same category of gap as Kentucky's supplementalTreatment.engineGap — only flat-rate Method 3 is implemented.",
+    "Supplemental wages Methods 1 and 2 (combining with a DIFFERENT period's regular wages) are not modelled, same category of gap as Kentucky's supplementalTreatment.engineGap — only flat-rate Method 3 is implemented. WIRED (this pass): both are now computed through aggregateWithPriorRegularPayment(), which takes the prior regular payment as input.priorRegularPayment, taxes the combined amount through Montana's own table and subtracts the tax already withheld from that payment. Method 3's flat line stands down when they run — the methods are alternatives, not partners. Fixing this also exposed a real defect: bracketPerPeriodGross() carved supplemental wages out of its base unconditionally, so the aggregate method was taxing the prior cheque alone; the carve-out is now gated on the supplemental config being present, matching flatRate().",
     "UI penalty-rate mechanic, governmental/reimbursable no-wage-cap rule, and the UI-vs-income-tax wage-base distinction are documented but, consistent with every other state's employer-paid UI in this project, not computed by this engine at all — no per-employer experience-rating, delinquency-status, or employer-type-classification input exists anywhere in types.ts."
   ],
   "suiEmployer": {
@@ -263,5 +263,15 @@
     },
     "employerSuppliedRateRequired": false,
     "confidence": "cross_source_confirmed"
+  },
+  "supplementalAggregation": {
+    "supported": true,
+    "$comment": "Montana's Methods 1 and 2 both combine a separately-paid supplemental payment with a DIFFERENT period's regular wages, tax the total, and subtract what was already withheld from that regular payment — the same shape Connecticut, Idaho, Kentucky, Maine, Missouri, Nebraska and New York use, and the same mechanism (input.priorRegularPayment) now serves all eight. Method 3, the flat 5%, stays available and is what fires when no prior payment is supplied.",
+    "source": {
+      "title": "Montana Department of Revenue — Publication 1, Montana Withholding Tax Guide (supplemental wage methods)",
+      "url": "https://mtrevenue.gov/publications/",
+      "verifiedOn": "2026-08-25",
+      "verifiedBy": "The three-method structure was already researched and recorded in this file's own supplementalWages block; this pass wires Methods 1 and 2 rather than re-deriving them."
+    }
   }
 }

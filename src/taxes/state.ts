@@ -123,6 +123,10 @@ export function stateIncomeTax(
   // employee's zero stays zero however it is scaled.
   lines = applyNonresidentAllocation(input, rules, lines);
 
+  // Last, because it tests the FINAL figure: a state that waives a
+  // sub-dollar month waives whatever survived everything above.
+  lines = applyMonthlyWithholdingFloor(input, rules, lines);
+
   // Additional withholding never applies once reciprocity/de minimis/an
   // exemption certificate has already zeroed the state line — an employee
   // legally owing $0 to this state isn't also topping that $0 up.
@@ -556,6 +560,70 @@ interface NonresidentAllocationConfig {
  * state's own income tax lines — a local tax computed alongside it has its
  * own sourcing rules and is deliberately left alone.
  */
+interface MonthlyDeMinimisConfig {
+  /** Dollars of withholding below which a month owes nothing. */
+  monthlyWithholdingFloor: number;
+}
+
+/**
+ * A monthly de minimis floor on withholding. New Mexico's FYI-104 is the
+ * only instance found: "No withholding is required if the total
+ * withholding for an employee during any one month is less than one
+ * dollar."
+ *
+ * Tiny, and real — and it needs a MONTHLY running figure, which no
+ * year-to-date tracker can supply, so it comes from the caller as
+ * certificate.stateTaxWithheldThisMonth (the same convention Denver's
+ * monthly head tax already uses). Without that figure the test runs on
+ * this cheque alone, which is right for a monthly payroll and
+ * conservative for any other: it can only ever zero an amount that is
+ * already under a dollar.
+ */
+function applyMonthlyWithholdingFloor(
+  input: PaycheckInput,
+  rules: StateRuleset,
+  lines: TaxLine[],
+): TaxLine[] {
+  const cfg = rules.monthlyDeMinimis as MonthlyDeMinimisConfig | undefined;
+  if (!cfg) return lines;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const supplied = cert.stateTaxWithheldThisMonth;
+  const alreadyThisMonth = Number(supplied ?? 0);
+
+  // A weekly cheque is not a month. Testing one against a MONTHLY floor
+  // would waive tax that is genuinely owed once the other cheques land —
+  // $0.68 a week is $2.72 a month, well over New Mexico's dollar. So the
+  // floor applies only when the caller supplies the month's running total,
+  // or when one cheque IS the month (or longer).
+  const ONE_CHEQUE_IS_A_MONTH_OR_MORE = new Set(['monthly', 'quarterly', 'semiannual', 'annual']);
+  if (supplied === undefined && !ONE_CHEQUE_IS_A_MONTH_OR_MORE.has(input.payFrequency)) {
+    return lines;
+  }
+
+  const prefix = `${rules.code}_SIT`;
+  const thisCheque = lines
+    .filter((line) => line.id.startsWith(prefix))
+    .reduce((sum, line) => sum + line.amount, 0);
+
+  const monthTotal = thisCheque + (Number.isFinite(alreadyThisMonth) ? alreadyThisMonth : 0);
+  const floor = dollars(cfg.monthlyWithholdingFloor);
+  if (thisCheque === 0 || monthTotal >= floor) return lines;
+
+  return lines.map((line) =>
+    line.id.startsWith(prefix)
+      ? {
+          ...line,
+          amount: 0,
+          detail:
+            `$0 — ${rules.name} requires no withholding when the total for the month ` +
+            `comes to less than ${fmt(floor)} (${fmt(monthTotal)} here, including ` +
+            `${fmt(alreadyThisMonth)} already withheld this month).`,
+        }
+      : line,
+  );
+}
+
 function applyNonresidentAllocation(
   input: PaycheckInput,
   rules: StateRuleset,
@@ -932,9 +1000,21 @@ function aggregateWithPriorRegularPayment(
     taxableWagesFor: (exempt) => ctx.taxableWagesFor(exempt) + prior.taxableWages,
   };
 
-  const combinedLines = incomeTaxLinesByMethod(input, combinedCtx, rules);
+  // The supplemental config is stripped for this call on purpose. A method
+  // that carries one carves the bonus OUT of its regular base (so a flat
+  // line can pick it up) — but the aggregate method exists precisely to tax
+  // the bonus THROUGH the regular formula, so the carve-out would remove
+  // the very dollars being aggregated. Montana is the case that exposed it:
+  // its Method 3 flat line and Methods 1/2 are alternatives, not partners.
+  const aggregateRules = { ...rules, supplementalWages: undefined } as StateRuleset;
+  const combinedLines = incomeTaxLinesByMethod(input, combinedCtx, aggregateRules);
   const primaryId = `${rules.code}_SIT`;
-  return combinedLines.map((line) => {
+  // A method that emits its own flat supplemental line (Montana's Method 3,
+  // for one) must not emit it here: aggregating the bonus into the regular
+  // formula and ALSO taxing it flat would tax the same dollars twice.
+  return combinedLines
+    .filter((line) => line.id !== `${rules.code}_SIT_SUPP`)
+    .map((line) => {
     if (line.id !== primaryId) return line;
     const amount = atLeastZero(line.amount - priorWithheld);
     return {
@@ -2331,7 +2411,14 @@ function bracketPerPeriodGross(
   // 5%-of-supplemental path instead (montanaSupplementalTax()) — same
   // regular/supplemental split every other bracket state in this project
   // uses, so the two lines together still tax the full base exactly once.
-  const supplementalCash = supplementalEarnings(input.earnings);
+  //
+  // Gated on the config being present, exactly as flatRate() gates its own
+  // carve-out: the aggregate method (Montana's Methods 1 and 2) strips that
+  // config precisely so the bonus stays IN this base and gets taxed through
+  // the regular formula. Carving it out there would drop the dollars being
+  // aggregated.
+  const supplementalCash =
+    rules.supplementalWages !== undefined ? supplementalEarnings(input.earnings) : 0;
   const grossWages = atLeastZero(fullBase - supplementalCash);
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
@@ -2407,7 +2494,13 @@ function montanaSupplementalTax(
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   if (Number(cert.specifiedWithholding ?? 0) > 0) return null;
 
-  const rate = (rules.supplementalWages as { flatRate: number }).flatRate;
+  // Absent when the aggregate method is running: Methods 1/2 and Method 3
+  // are alternatives, so the flat line stands down rather than stacking on
+  // top of a bonus already taxed through the regular formula.
+  const cfg = rules.supplementalWages as { flatRate: number } | undefined;
+  if (!cfg) return null;
+
+  const rate = cfg.flatRate;
   const amount = toWholeDollars(applyRate(supplementalCash, rate));
 
   return {
