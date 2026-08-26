@@ -181,6 +181,24 @@ export interface EmployerContext {
    * does by default.
    */
   supplementalFlatRateElection?: Record<string, boolean>;
+  /**
+   * How much of a paid-leave premium this employer passes on to employees,
+   * as a fraction of the TOTAL premium, keyed by state code. Delaware funds
+   * its programme entirely from the employer by statute but lets the
+   * employer recover up to half from employees — a genuine election with a
+   * ceiling, not a fixed rate, so no jurisdiction file can hold it. Values
+   * above the state's own ceiling are clamped to it.
+   */
+  paidLeaveEmployeeShareFraction?: Record<string, number>;
+  /**
+   * Which paid-leave coverage tier this employer falls in, keyed by state
+   * code. Delaware's premium depends on headcount: 1-9 employees are exempt
+   * from the Act entirely, 10-24 owe the parental component only, 25+ owe
+   * all three. Headcount is an employer fact, so the caller names the tier
+   * ('exempt', 'parentalOnly', 'full') and a state whose config requires one
+   * computes nothing until it arrives.
+   */
+  paidLeaveTier?: Record<string, string>;
 }
 
 export interface PaycheckInput {

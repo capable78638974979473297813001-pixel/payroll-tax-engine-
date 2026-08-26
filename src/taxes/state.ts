@@ -170,6 +170,8 @@ export function stateIncomeTax(
   // are employee-only). Genuinely separate from statePaidLeaveEmployeeTax()
   // rather than a shared helper, because the employer share is defined as
   // "total premium minus employee share," not its own independent rate.
+  const paidLeaveElected = statePaidLeaveElectedEmployeeShare(input, ctx, rules);
+  if (paidLeaveElected) lines.push(paidLeaveElected);
   const paidLeaveEmployer = statePaidLeaveEmployerTax(input, ctx, rules);
   if (paidLeaveEmployer) lines.push(paidLeaveEmployer);
 
@@ -1787,7 +1789,101 @@ interface StatePaidLeaveEmployerConfig {
   employeeShareFraction: number; // e.g. 0.7143 — fraction of totalRate the EMPLOYEE pays
   wageBase: number | null; // dollars, annual — shares the SAME cap as the employee share
   exemptPretax?: string[];
+  /**
+   * Rate by coverage tier, for a state whose premium depends on employer
+   * headcount rather than a yes/no liability gate (Delaware's 1-9 / 10-24 /
+   * 25+ structure). When present, the caller must name the tier via
+   * input.employer.paidLeaveTier — nothing is computed on a guess.
+   */
+  tiers?: Record<string, number>;
+  /**
+   * Ceiling on how much of the total premium the employer may recover from
+   * employees, where the state permits recovery at the employer's option.
+   */
+  maxEmployeeShareFraction?: number;
+  /**
+   * false for a programme that applies to every covered employer with no
+   * size threshold at all — DC's Universal Paid Leave — so it computes
+   * without the caller having to assert liability first. Defaults to true,
+   * which keeps every previously-wired state exactly as it was.
+   */
+  employerSizeGated?: boolean;
 }
+
+/** The premium rate actually in force for this employer, and the label explaining it. */
+function resolvePaidLeaveRate(
+  input: PaycheckInput,
+  rules: StateRuleset,
+  cfg: StatePaidLeaveEmployerConfig,
+): { rate: number; tierLabel: string } | null {
+  if (!cfg.tiers) return { rate: cfg.totalRate, tierLabel: "" };
+  const tier = input.employer?.paidLeaveTier?.[rules.code];
+  if (!tier) return null;
+  const rate = cfg.tiers[tier];
+  if (rate === undefined || rate <= 0) return null;
+  return { rate, tierLabel: ` (coverage tier "${tier}")` };
+}
+
+/** The fraction of the premium the employee bears, honouring an employer election and the state's own ceiling. */
+function resolveEmployeeShareFraction(
+  input: PaycheckInput,
+  rules: StateRuleset,
+  cfg: StatePaidLeaveEmployerConfig,
+): number {
+  const elected = input.employer?.paidLeaveEmployeeShareFraction?.[rules.code];
+  if (elected === undefined) return cfg.employeeShareFraction;
+  const ceiling = cfg.maxEmployeeShareFraction ?? cfg.employeeShareFraction;
+  return Math.min(Math.max(elected, 0), ceiling);
+}
+
+/**
+ * The employee's own share of a premium the EMPLOYER is statutorily liable
+ * for, where the state lets the employer recover part of it. Delaware is
+ * the first: the Act puts 100% of the contribution on the employer but
+ * permits recovering up to half from employees, so the withheld amount is a
+ * function of the employer's election rather than a published employee rate.
+ *
+ * Skipped entirely for states that publish their own fixed employee rate —
+ * those have a statePaidLeaveEmployee config and this would double-count.
+ */
+function statePaidLeaveElectedEmployeeShare(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cfg = rules.statePaidLeaveEmployer as StatePaidLeaveEmployerConfig | undefined;
+  if (!cfg || cfg.maxEmployeeShareFraction === undefined) return null;
+  if (rules.statePaidLeaveEmployee) return null;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (cert.paidLeaveExempt) return null;
+
+  const resolved = resolvePaidLeaveRate(input, rules, cfg);
+  if (!resolved) return null;
+  const fraction = resolveEmployeeShareFraction(input, rules, cfg);
+  if (fraction <= 0) return null;
+
+  const exempt = (cfg.exemptPretax ?? rules.exemptPretax ?? []) as PretaxCategory[];
+  const currentWages = ctx.taxableWagesFor(exempt);
+  const ytd = input.ytd.statePaidLeave?.[rules.code] ?? 0;
+  const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
+  const taxableWages = underCap(currentWages, ytd, cap);
+  const amount = applyRate(taxableWages, resolved.rate * fraction);
+
+  return {
+    id: `${rules.code}_PFML_EE`,
+    name: `${rules.name} Paid Leave (Employee)`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages,
+    amount,
+    detail:
+      `${fmt(taxableWages)} @ ${(resolved.rate * 100).toFixed(2)}% total premium x ${(fraction * 100).toFixed(0)}% ` +
+      `recovered from the employee${resolved.tierLabel} — an employer election, capped by statute at ` +
+      `${((cfg.maxEmployeeShareFraction ?? 0) * 100).toFixed(0)}%`,
+  };
+}
+
 
 /**
  * Employer's share of a Paid Leave-style premium — Washington's own
@@ -1820,7 +1916,10 @@ function statePaidLeaveEmployerTax(
   if (!cfg) return null;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (!cert.employerLiableForPaidLeaveShare) return null;
+  // A programme with no size threshold at all (DC's Universal Paid Leave)
+  // applies to every covered employer, so demanding the caller assert
+  // liability first would just suppress a tax that is always due.
+  if (cfg.employerSizeGated !== false && !cert.employerLiableForPaidLeaveShare) return null;
   // Same exemption gate as statePaidLeaveEmployeeTax() — an exempt employee
   // (federal, Tribal, self-employed opt-out, etc.) generates no premium at
   // all, employee or employer share, since there's no total premium to
@@ -1833,8 +1932,12 @@ function statePaidLeaveEmployerTax(
   const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
   const taxableWages = underCap(currentWages, ytd, cap);
 
-  const totalPremium = applyRate(taxableWages, cfg.totalRate);
-  const employeeShare = applyRate(taxableWages, cfg.totalRate * cfg.employeeShareFraction);
+  const resolved = resolvePaidLeaveRate(input, rules, cfg);
+  if (!resolved) return null;
+  const fraction = resolveEmployeeShareFraction(input, rules, cfg);
+
+  const totalPremium = applyRate(taxableWages, resolved.rate);
+  const employeeShare = applyRate(taxableWages, resolved.rate * fraction);
   const amount = atLeastZero(totalPremium - employeeShare);
 
   return {
@@ -1845,7 +1948,7 @@ function statePaidLeaveEmployerTax(
     taxableWages,
     amount,
     detail:
-      `${fmt(totalPremium)} total premium (${fmt(taxableWages)} @ ${(cfg.totalRate * 100).toFixed(2)}%) ` +
+      `${fmt(totalPremium)} total premium (${fmt(taxableWages)} @ ${(resolved.rate * 100).toFixed(2)}%)${resolved.tierLabel} ` +
       `less ${fmt(employeeShare)} employee share = ${fmt(amount)} employer share ` +
       `(certificate.employerLiableForPaidLeaveShare — caller's own employer-size determination; ` +
       `the exact headcount threshold is state-specific, e.g. Washington's 50+ vs Massachusetts's 25+, ` +

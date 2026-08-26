@@ -120,7 +120,7 @@
     "Non-resident withholding uses a genuinely DIFFERENT mechanism (Form W-4NR's own proration worksheet: compute tax as if resident, then multiply by a Delaware-source-income / federal-AGI fraction) -- not modeled; this engine's delawareWithholding() only implements the resident formula. Disclosed, not guessed.",
     "Form DE-W4's Line 4 is printed as 'Total number of dependents you can claim on your return,' but the DE-W4R worksheet instructs the employee to 'enter the number from Line G onto the Delaware Form W-4' -- Line G is a broader allowance count (self, spouse, dependents, child-care credit, age/blind additions), not merely a dependents count. This is a real, disclosed label/instruction inconsistency in Delaware's own form, not resolved by this project -- certificate.exemptions is documented as accepting whatever final number the worksheet produces, whatever field it's filed under.",
     "City of Wilmington's 1.25% wage tax is data-documented but not wired into the calc engine -- see localIncomeTax.notWiredIntoEngine above. Comparatively cheap to add later: it is a single flat rate with a simple resident-OR-work-location trigger, not a large per-jurisdiction table.",
-    "Delaware Paid Leave is data-documented in full (rates, wage base, employer-size tiers, cost-sharing ceiling) but deliberately not wired into the calc engine -- the actual employee-withheld amount is an employer election within a statutory ceiling, not a fixed rate this engine could compute without a new certificate/config mechanism it doesn't yet have (employer headcount tier + elected cost-share percentage).",
+    "Delaware Paid Leave is data-documented in full (rates, wage base, employer-size tiers, cost-sharing ceiling) but deliberately not wired into the calc engine -- the actual employee-withheld amount is an employer election within a statutory ceiling, not a fixed rate this engine could compute without a new certificate/config mechanism it doesn't yet have (employer headcount tier + elected cost-share percentage). WIRED (paid-leave pass): now computed via the statePaidLeaveEmployer block added to this file. The two reasons it was held back are both represented rather than flattened: coverage TIER comes from input.employer.paidLeaveTier (nothing computes without it) and the employee's share comes from input.employer.paidLeaveEmployeeShareFraction, clamped at the statutory 50% ceiling.",
     "SUTA's 0.2% 'Operations and Technology Assessment' claim from a secondary source was checked against Delaware DOL's own page and NOT found there -- left out of unemploymentInsurance's modeled figures, flagged as unconfirmed rather than included or silently dropped.",
     "Daily pay frequency's x300 annualization multiplier is transcribed from the Guide's own formula sentence but not proven against a to-the-cent worked example (none published for 'daily') the way weekly/biweekly/semi-monthly/monthly all are."
   ],
@@ -136,5 +136,18 @@
     },
     "employerSuppliedRateRequired": false,
     "confidence": "inherited_from_this_file"
+  },
+  "statePaidLeaveEmployer": {
+    "totalRate": 0.008,
+    "tiers": {
+      "exempt": 0,
+      "parentalOnly": 0.0032,
+      "full": 0.008
+    },
+    "employeeShareFraction": 0,
+    "maxEmployeeShareFraction": 0.5,
+    "wageBase": 184500,
+    "employerSizeGated": false,
+    "$comment": "Delaware Paid Leave (Healthy Delaware Families Act), wired from this file's own paidLeave block. Two features no other state in this project has, both encoded rather than flattened: (1) the premium depends on employer HEADCOUNT — 1-9 employees exempt from the Act entirely, 10-24 owe the parental component only (0.32%), 25+ owe all three (0.80%) — so the caller names the tier via input.employer.paidLeaveTier and nothing computes without it; (2) the statute puts 100% of the contribution on the EMPLOYER but permits recovering up to HALF from employees, so employeeShareFraction defaults to 0 and an employer election (input.employer.paidLeaveEmployeeShareFraction) moves it, clamped at maxEmployeeShareFraction. Wage base is the federal Social Security wage base ($184,500 for 2026), counting Delaware wages only."
   }
 }

@@ -69,7 +69,7 @@
     "totalRate": 0.0075,
     "payer": "employer",
     "employeeShare": 0,
-    "$comment": "DC Universal Paid Leave -- 100% employer-funded, genuinely the only paid-leave program in this project with ZERO employee contribution. Not wired into calc code this pass (employer-only levies aren't wired into this engine's employee-paycheck-focused dispatch anywhere yet, same structural gap as every other state's employer-only SUTA/excise in this project)."
+    "$comment": "DC Universal Paid Leave -- 100% employer-funded, genuinely the only paid-leave program in this project with ZERO employee contribution. Not wired into calc code this pass (employer-only levies aren't wired into this engine's employee-paycheck-focused dispatch anywhere yet, same structural gap as every other state's employer-only SUTA/excise in this project). WIRED (paid-leave pass): now computed as DC_PFML_ER via the statePaidLeaveEmployer block added to this file — employerSizeGated:false, since DC's programme has no headcount threshold and every covered employer owes it."
   },
   "unemploymentInsurance": {
     "$comment": "Employer-only (SUI) -- no employee contribution. NOT researched this session -- no figures recorded rather than guessed.",
@@ -81,7 +81,7 @@
     "The $4,300 annual allowance amount is a 2022 figure, NOT re-confirmed for 2026 -- see allowanceAmountComment above. The BRACKETS were independently cross-checked against fresh 2026 sources and held up; the allowance amount was not.",
     "No current-year (2026) FR-230 booklet was locatable from DC's own OTR site this session -- this file rests on a federal-payroll-oriented secondary-primary source (NFC) rather than DC's own primary withholding publication.",
     "UI is not researched at all this session (no wage base, no rate) -- a real, disclosed absence, not just 'not wired into calc code.' WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
-    "Universal Paid Leave (0.75%, employer-only) is documented but not wired into calc code -- same structural gap as every other employer-only levy in this project.",
+    "Universal Paid Leave (0.75%, employer-only) is documented but not wired into calc code -- same structural gap as every other employer-only levy in this project. WIRED (paid-leave pass): now computed as DC_PFML_ER via the statePaidLeaveEmployer block added to this file — employerSizeGated:false, since DC's programme has no headcount threshold and every covered employer owes it.",
     "The no-certificate default is this project's own standing convention (single/zero), not independently confirmed as DC's own stated rule."
   ],
   "suiEmployer": {
@@ -93,5 +93,12 @@
     "experienceRange": null,
     "employerSuppliedRateRequired": true,
     "confidence": "no_single_rate"
+  },
+  "statePaidLeaveEmployer": {
+    "totalRate": 0.0075,
+    "employeeShareFraction": 0,
+    "wageBase": null,
+    "employerSizeGated": false,
+    "$comment": "DC Universal Paid Leave, wired from this file's own universalPaidLeave block: 0.75% of covered wages, funded 100% by the employer — the only paid-leave programme in this project with ZERO employee contribution. employerSizeGated is false because DC's programme has no headcount threshold at all: every covered employer owes it, so requiring a caller to assert liability first would just suppress a tax that is always due. No wage cap."
   }
 }

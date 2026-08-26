@@ -7939,3 +7939,91 @@ describe('flat supplemental wages beyond the five methods that already had it', 
     assert.equal(amountOf(r, 'NY_SIT_SUPP'), dollars(585.0));
   });
 });
+
+/**
+ * The two paid-leave programmes whose shape the shared employer function
+ * couldn't express: DC's, which has no employer-size threshold at all, and
+ * Delaware's, whose premium depends on headcount and whose employee share
+ * exists only if the employer elects to recover it.
+ */
+describe('paid leave where the employer, not the employee, is the payer of record', () => {
+  const leave = (extra: Record<string, unknown> = {}) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly' as const,
+    earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(3000) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    ...extra,
+  });
+
+  test("DC's Universal Paid Leave computes with no liability assertion — it has no size threshold", () => {
+    const r = calculatePaycheck(leave({ workState: { code: 'DC', certificate: {} } }));
+    assert.equal(amountOf(r, 'DC_PFML_ER'), dollars(22.5));
+    assert.equal(r.taxes.find((t) => t.id === 'DC_PFML_ER')?.payer, 'employer');
+    // 100% employer-funded: nothing is withheld from the employee.
+    assert.equal(r.taxes.some((t) => t.id === 'DC_PFML_EE'), false);
+  });
+
+  test('a size-gated programme still waits for the caller to assert liability', () => {
+    // Colorado's FAMLI employer share applies at 10+ employees; without that
+    // determination there is no employer line, exactly as before.
+    const r = calculatePaycheck(leave({ workState: { code: 'CO', certificate: {} } }));
+    assert.equal(r.taxes.some((t) => t.id === 'CO_PFML_ER'), false);
+  });
+
+  test('Delaware computes nothing until the employer names its coverage tier', () => {
+    const r = calculatePaycheck(leave({ workState: { code: 'DE', certificate: {} } }));
+    assert.equal(r.taxes.some((t) => t.id.startsWith('DE_PFML')), false);
+  });
+
+  test('a Delaware employer with 1-9 employees is outside the Act entirely', () => {
+    const r = calculatePaycheck(
+      leave({ workState: { code: 'DE', certificate: {} }, employer: { paidLeaveTier: { DE: 'exempt' } } }),
+    );
+    assert.equal(r.taxes.some((t) => t.id.startsWith('DE_PFML')), false);
+  });
+
+  test('10-24 employees owe the parental component only, 25+ owe all three', () => {
+    const parental = calculatePaycheck(
+      leave({ workState: { code: 'DE', certificate: {} }, employer: { paidLeaveTier: { DE: 'parentalOnly' } } }),
+    );
+    assert.equal(amountOf(parental, 'DE_PFML_ER'), dollars(9.6)); // 0.32%
+
+    const full = calculatePaycheck(
+      leave({ workState: { code: 'DE', certificate: {} }, employer: { paidLeaveTier: { DE: 'full' } } }),
+    );
+    assert.equal(amountOf(full, 'DE_PFML_ER'), dollars(24.0)); // 0.80%
+  });
+
+  test('an employer electing to recover half splits the premium, and the employee line appears', () => {
+    const r = calculatePaycheck(
+      leave({
+        workState: { code: 'DE', certificate: {} },
+        employer: { paidLeaveTier: { DE: 'full' }, paidLeaveEmployeeShareFraction: { DE: 0.5 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'DE_PFML_EE'), dollars(12.0));
+    assert.equal(amountOf(r, 'DE_PFML_ER'), dollars(12.0));
+  });
+
+  test("an election above the statute's ceiling is clamped, not obeyed", () => {
+    const r = calculatePaycheck(
+      leave({
+        workState: { code: 'DE', certificate: {} },
+        employer: { paidLeaveTier: { DE: 'full' }, paidLeaveEmployeeShareFraction: { DE: 0.9 } },
+      }),
+    );
+    // Delaware permits recovering up to HALF; 90% is not a thing an employer
+    // may do, so the employee still bears exactly half.
+    assert.equal(amountOf(r, 'DE_PFML_EE'), dollars(12.0));
+    assert.equal(amountOf(r, 'DE_PFML_ER'), dollars(12.0));
+  });
+});
