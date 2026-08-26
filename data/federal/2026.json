@@ -256,7 +256,7 @@
         "verifiedOn": "2026-08-25",
         "quote": "A minister's earnings for services in the exercise of the ministry are not subject to income, social security, and Medicare tax withholding; those services are covered by SECA, so the minister pays self-employment tax instead. An employer and minister MAY agree to withhold income tax voluntarily, reported in box 2 of Form W-2. Services performed by a duly ordained, commissioned or licensed minister in the exercise of the ministry are also excluded from FUTA employment (IRC 3306(c)(8) and the ministerial exclusion)."
       },
-      "notModelled": "The housing/parsonage allowance (excluded from income tax but INCLUDED in the SECA base) is a wage-classification question this engine's earnings categories don't represent, and the minister's own SECA liability is a self-employment tax, not payroll withholding. A minister who has an approved Form 4361 exemption is likewise outside anything this engine computes."
+      "notModelled": "The housing/parsonage allowance is now modelled as its own earning category (EarningCategory 'housing_allowance'): paid in cash, excluded from the income tax base, and excluded ONLY when the worker is employmentCategory 'clergy' — the same allowance paid to anyone else stays ordinary taxable pay. STILL NOT MODELLED: the minister's own SECA liability, which is a self-employment tax rather than payroll withholding, and an approved Form 4361 exemption."
     },
     "statutoryEmployee": {
       "federalIncomeTaxWithholding": "not_required",

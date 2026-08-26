@@ -8,10 +8,19 @@ import type { Deduction, Earning, PretaxCategory } from './types.ts';
  * Imputed income (group term life over $50k, personal use of a company car)
  * is taxable even though no cash changes hands. Reimbursements are the
  * mirror case: cash moves, nothing is taxable.
+ *
+ * A ministerial housing allowance is a third shape — cash that is excluded
+ * from income tax — but ONLY for a minister, so it is excluded here only
+ * when the caller says the worker is one. For anyone else it is ordinary
+ * taxable pay; a category name is not a tax exemption.
  */
-export function taxableEarnings(earnings: readonly Earning[]): Cents {
+export function taxableEarnings(
+  earnings: readonly Earning[],
+  options: { housingAllowanceExcluded?: boolean } = {},
+): Cents {
   return earnings
     .filter((e) => e.category !== 'reimbursement')
+    .filter((e) => !(options.housingAllowanceExcluded && e.category === 'housing_allowance'))
     .reduce((sum, e) => sum + e.amount, 0);
 }
 
@@ -54,8 +63,9 @@ export function posttaxTotal(deductions: readonly Deduction[]): Cents {
 export function makeTaxableWagesFn(
   earnings: readonly Earning[],
   deductions: readonly Deduction[],
+  options: { housingAllowanceExcluded?: boolean } = {},
 ): (exempt: readonly PretaxCategory[]) => Cents {
-  const gross = taxableEarnings(earnings);
+  const gross = taxableEarnings(earnings, options);
 
   return (exempt) => {
     const exemptSet = new Set(exempt);

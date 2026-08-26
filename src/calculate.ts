@@ -32,7 +32,11 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
   const ctx: ComputeContext = {
     year: yearOf(input.checkDate),
     periodsPerYear,
-    taxableWagesFor: makeTaxableWagesFn(input.earnings, input.deductions),
+    taxableWagesFor: makeTaxableWagesFn(input.earnings, input.deductions, {
+      // A designated housing allowance leaves the tax base only for a
+      // minister — see EarningCategory's own doc comment.
+      housingAllowanceExcluded: input.employmentCategory === 'clergy',
+    }),
   };
 
   let taxes: TaxLine[] = [

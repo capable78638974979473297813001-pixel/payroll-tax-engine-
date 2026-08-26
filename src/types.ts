@@ -51,7 +51,16 @@ export type EarningCategory =
   | 'regular'
   | 'supplemental' // bonus, commission — may use flat supplemental rate
   | 'imputed' // taxable but not paid in cash (e.g. group term life > $50k)
-  | 'reimbursement'; // paid in cash but not taxable
+  | 'reimbursement' // paid in cash but not taxable
+  /**
+   * A minister's designated housing (parsonage) allowance: paid in cash and
+   * excluded from income tax, but included in the minister's own
+   * self-employment tax base. Only excluded from tax when the worker is
+   * employmentCategory 'clergy' — a housing allowance paid to anyone else
+   * is ordinary taxable pay, and treating it otherwise would be a way to
+   * make wages disappear.
+   */
+  | 'housing_allowance';
 
 export interface Earning {
   code: string;

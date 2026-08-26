@@ -8788,3 +8788,51 @@ describe('election workers and railroad unemployment', () => {
     assert.match(r.taxes.find((t) => t.id === 'US_RUIA_ER')?.detail ?? '', /own experience-rated/);
   });
 });
+
+/**
+ * A minister's designated housing allowance: cash that is excluded from
+ * income tax but still paid. The exclusion belongs to the minister, not to
+ * the earning code — a category name is not a tax exemption.
+ */
+describe("ministers' housing allowance", () => {
+  const withAllowance = (extra: Record<string, unknown> = {}, w4: Record<string, unknown> = {}) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly' as const,
+    earnings: [
+      { code: 'REG', category: 'regular' as const, amount: dollars(2000) },
+      { code: 'HOUS', category: 'housing_allowance' as const, amount: dollars(1000) },
+    ],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+      ...w4,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    ...extra,
+  });
+
+  test('for anyone who is not a minister it is ordinary taxable pay', () => {
+    const r = calculatePaycheck(withAllowance());
+    // Same tax as $3,000 of plain wages.
+    assert.equal(amountOf(r, 'US_FIT'), dollars(320.38));
+  });
+
+  test('for a minister it leaves the income tax base', () => {
+    const r = calculatePaycheck(
+      withAllowance({ employmentCategory: 'clergy' }, { voluntaryWithholdingAgreement: true }),
+    );
+    // Tax computed on the $2,000 of ordinary pay only.
+    assert.equal(amountOf(r, 'US_FIT'), dollars(156.15));
+  });
+
+  test('it is still paid — gross and net both include it', () => {
+    const r = calculatePaycheck(withAllowance({ employmentCategory: 'clergy' }));
+    assert.equal(r.grossPay, dollars(3000));
+    assert.equal(r.netPay, dollars(3000));
+  });
+});
