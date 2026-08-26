@@ -17,7 +17,7 @@ import type {
   PretaxCategory,
   TaxLine,
 } from '../types.ts';
-import { supplementalEarnings } from '../wages.ts';
+import { cashEarnings, supplementalEarnings } from '../wages.ts';
 
 /**
  * Pub 15-T publishes one schedule for "Single or Married Filing Separately".
@@ -351,12 +351,116 @@ export function futa(
  * social security for a minister looks identical to one that forgot it. The
  * line stays, at zero, carrying the reason.
  */
+interface CoverageThresholds {
+  household?: { annualCashWages: number; futaQuarterlyCashWages: number };
+  agricultural?: { annualCashWagesPerWorker: number; annualWagesAllFarmworkers: number };
+}
+
+/**
+ * Whether a household or agricultural worker's pay is covered yet.
+ *
+ * Both categories work the same way and neither is a rate change: the
+ * taxes are ordinary FICA and FUTA, and the only question is whether this
+ * worker is inside the system at all. Domestic employment comes in when
+ * cash wages to that worker reach the year's coverage threshold ($3,000
+ * for 2026, indexed annually); farm work comes in when the worker is paid
+ * $150 in the year OR the employer pays $2,500 to all farmworkers, either
+ * test being enough on its own.
+ *
+ * DISCLOSED LIMIT: crossing a threshold makes the year's EARLIER wages
+ * taxable too, and this engine computes one cheque at a time — so it
+ * starts withholding from the cheque that crosses the line and does not
+ * reach back to collect on wages already paid. The catch-up is real and
+ * belongs to the employer; the federal ruleset says so in its own
+ * employmentCategories block rather than the code implying otherwise.
+ */
+function categoryCoverage(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: FederalRuleset,
+): { ficaCovered: boolean; futaCovered: boolean; reason: string } | null {
+  const category = input.employmentCategory;
+  if (category !== 'household' && category !== 'agricultural') return null;
+
+  const thresholds = (rules.employmentCategories as { coverageThresholds?: CoverageThresholds } | undefined)
+    ?.coverageThresholds;
+  const cashThisCheque = cashEarnings(input.earnings);
+  const cashToDate = (input.ytd.categoryCashWages ?? 0) + cashThisCheque;
+
+  if (category === 'household') {
+    const cfg = thresholds?.household;
+    if (!cfg) return null;
+    const ficaCovered = cashToDate >= dollars(cfg.annualCashWages);
+    const quarterly = input.employer?.householdQuarterlyCashWages ?? 0;
+    const futaCovered = quarterly >= dollars(cfg.futaQuarterlyCashWages);
+    return {
+      ficaCovered,
+      futaCovered,
+      reason: ficaCovered
+        ? `household employment: ${fmt(cashToDate)} of cash wages this year meets the $${cfg.annualCashWages} coverage threshold`
+        : `$0 — household employment: ${fmt(cashToDate)} of cash wages this year is under the $${cfg.annualCashWages} coverage threshold (input.ytd.categoryCashWages). Crossing it later makes earlier wages from the same year taxable too, which this engine does not reach back to collect.`,
+    };
+  }
+
+  const cfg = thresholds?.agricultural;
+  if (!cfg) return null;
+  const perWorkerMet = cashToDate >= dollars(cfg.annualCashWagesPerWorker);
+  const farmTotalMet = (input.employer?.agriculturalTotalWages ?? 0) >= dollars(cfg.annualWagesAllFarmworkers);
+  const ficaCovered = perWorkerMet || farmTotalMet;
+  return {
+    ficaCovered,
+    futaCovered: input.employer?.agriculturalFutaLiable === true,
+    reason: ficaCovered
+      ? `farm work: ${perWorkerMet ? `${fmt(cashToDate)} paid to this worker meets the $${cfg.annualCashWagesPerWorker} test` : `the farm payroll meets the $${cfg.annualWagesAllFarmworkers} test`}`
+      : `$0 — farm work: neither test is met — ${fmt(cashToDate)} paid to this worker is under $${cfg.annualCashWagesPerWorker}, and the total farm payroll (input.employer.agriculturalTotalWages) is under $${cfg.annualWagesAllFarmworkers}.`,
+  };
+}
+
 function applyEmploymentCategory(
   input: PaycheckInput,
   lines: TaxLine[],
+  coverage: ReturnType<typeof categoryCoverage> = null,
 ): TaxLine[] {
   const category = input.employmentCategory ?? 'standard';
   if (category === 'standard') return lines;
+
+  if (category === 'household' || category === 'agricultural') {
+    if (!coverage) return lines;
+    return lines.map((line) => {
+      const isIncomeTax = line.id === 'US_FIT' || line.id === 'US_FIT_SUPP';
+      const isFuta = line.id === 'US_FUTA';
+
+      // Domestic employment carries no income tax withholding requirement
+      // at all; farm work carries the same requirement as ordinary wages,
+      // but only once the worker is covered.
+      if (isIncomeTax) {
+        if (category === 'household' && input.federalW4.voluntaryWithholdingAgreement !== true) {
+          return {
+            ...line,
+            taxableWages: 0,
+            amount: 0,
+            detail:
+              "$0 — household employment: federal income tax withholding is not required from a household employee. Set federalW4.voluntaryWithholdingAgreement if the employer and employee agreed to withhold anyway.",
+          };
+        }
+        if (category === 'agricultural' && !coverage.ficaCovered) {
+          return { ...line, taxableWages: 0, amount: 0, detail: coverage.reason };
+        }
+        return line;
+      }
+
+      const covered = isFuta ? coverage.futaCovered : coverage.ficaCovered;
+      if (covered) return line;
+      return {
+        ...line,
+        taxableWages: 0,
+        amount: 0,
+        detail: isFuta
+          ? `$0 — ${category === 'household' ? 'household employment: cash wages to all household employees have not reached $1,000 in a calendar quarter (input.employer.householdQuarterlyCashWages)' : "farm work: the employer has not asserted the agricultural FUTA test (input.employer.agriculturalFutaLiable)"}.`
+          : coverage.reason,
+      };
+    });
+  }
 
   const voluntary = input.federalW4.voluntaryWithholdingAgreement === true;
   const zeroOut = (line: TaxLine, reason: string): TaxLine => ({
@@ -394,11 +498,15 @@ export function federalTaxes(
 ): TaxLine[] {
   const rules = federalRuleset(input.checkDate);
   const supplemental = federalSupplementalTax(input, rules);
-  return applyEmploymentCategory(input, [
+  return applyEmploymentCategory(
+    input,
+    [
     federalIncomeTax(input, ctx, rules),
     ...(supplemental ? [supplemental] : []),
     ...socialSecurity(input, ctx, rules),
     ...medicare(input, ctx, rules),
-    ...futa(input, ctx, rules),
-  ]);
+      ...futa(input, ctx, rules),
+    ],
+    categoryCoverage(input, ctx, rules),
+  );
 }

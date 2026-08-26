@@ -202,12 +202,37 @@
     "Nonresident alien (NRA) withholding is not modelled: no NRA status field, no NRA wage addback, no restricted-W-4 handling. NRA employees would be silently run through the resident percentage method, which understates their correct withholding -- treat any NRA employee as unsupported, not zero-adjustment. STALE, NOW FALSE: NRA withholding IS modelled — federalW4.nonresidentAlien drives the Pub 15-T Table 2 per-period addback in taxes/federal.ts (verified: a biweekly cheque adds $619.20 to wages before annualizing, and the added amount is deliberately excluded from the line's own taxableWages because it isn't reportable wages). What remains unmodelled is only the Table 1 (pre-2020 Form W-4) variant, which this engine's FederalW4 type has no shape for.",
     "Pension/annuity withholding (Pub 15-T's separate periodic-payment tables, Form W-4P) is not modelled -- this engine assumes ordinary W-2 wage/salary payroll only.",
     "Nonpayroll withholding (Form 945 categories: IRA distributions, gambling winnings, certain government/Indian gaming payments) is out of scope -- these aren't wage payroll at all.",
-    "Special employment-tax categories are not modelled: household employees, agricultural (incl. H-2A) workers, statutory employees, ministers/clergy, election workers, railroad employees, tipped employees' allocated-tips rules. A standard W-2 wage/salary employee is the only supported case; using this engine for any of these categories will produce wrong numbers, not an explicit error. PARTLY CLOSED: clergy and statutory employees are now modelled via input.employmentCategory — see the employmentCategories block above for each one's rule and source. Household employees, agricultural workers, election workers, ministers' housing allowances and railroad (RRTA) employment remain unmodelled.",
+    "Special employment-tax categories are not modelled: household employees, agricultural (incl. H-2A) workers, statutory employees, ministers/clergy, election workers, railroad employees, tipped employees' allocated-tips rules. A standard W-2 wage/salary employee is the only supported case; using this engine for any of these categories will produce wrong numbers, not an explicit error. PARTLY CLOSED: clergy and statutory employees are now modelled via input.employmentCategory — see the employmentCategories block above for each one's rule and source. Household employees, agricultural workers, election workers, ministers' housing allowances and railroad (RRTA) employment remain unmodelled. FURTHER CLOSED: household and agricultural workers are now modelled too (input.employmentCategory, with the coverage thresholds in employmentCategories.coverageThresholds). Election workers, railroad (RRTA) employment and ministers housing allowances remain unmodelled.",
     "FUTA credit-reduction states are not modelled (see futa.comment) -- the DOL's annual credit-reduction list changes which states' net FUTA rate exceeds 0.6%.",
     "Backup withholding (backupWithholdingRate, 24%) is recorded as data but has no compute path -- no rule detects a missing/invalid TIN and applies it.",
     "The percentage_method_automated_worksheet_1a method is the ONLY Pub 15-T method implemented. Pub 15-T also publishes wage-bracket tables and non-automated percentage-method tables for manual systems; this engine intentionally supports only the automated-system method, which is exact rather than table-rounded."
   ],
   "employmentCategories": {
+     "coverageThresholds": {
+       "$comment": "Household and agricultural workers are not taxed at different RATES — ordinary FICA and FUTA apply. The question these thresholds answer is whether the worker is inside the system at all for the year.",
+       "household": {
+         "annualCashWages": 3000,
+         "futaQuarterlyCashWages": 1000,
+         "source": {
+           "title": "IRS Publication 926 (2026), Household Employer's Tax Guide",
+           "url": "https://www.irs.gov/pub/irs-pdf/p926.pdf",
+           "verifiedOn": "2026-08-25",
+           "quote": "Social security and Medicare taxes apply to the wages of household workers paid $3,000 or more in cash wages in 2026 (up from $2,800 in 2025). FUTA applies if $1,000 or more in total cash wages is paid to all household employees during any single calendar quarter — a figure unchanged for 2026. Federal income tax withholding is not required from a household employee at all, though employer and employee may agree to it."
+         }
+       },
+       "agricultural": {
+         "annualCashWagesPerWorker": 150,
+         "annualWagesAllFarmworkers": 2500,
+         "source": {
+           "title": "IRS Publication 15 (Circular E) for use in 2026 — agricultural employers (Publication 51 was discontinued and folded into Publication 15)",
+           "url": "https://www.irs.gov/pub/irs-pdf/p15.pdf",
+           "verifiedOn": "2026-08-25",
+           "quote": "The long-standing pair of statutory tests: cash wages of $150 or more paid to one farmworker in the year, OR total wages (cash and noncash) of $2,500 or more paid to all farmworkers. Either test on its own makes the wages subject to social security and Medicare, and income tax withholding follows the same coverage."
+         }
+       },
+       "catchUpNotModelled": "Crossing a threshold mid-year makes that year's EARLIER wages taxable as well. This engine computes one cheque at a time: it starts withholding from the cheque that crosses the line and does not reach back to collect on wages already paid. That catch-up is the employer's to make, and is stated here rather than left for a caller to discover.",
+       "agriculturalFutaTest": "Agricultural FUTA has its own test — $20,000 of farm wages in a calendar quarter, or 10 or more farmworkers on 20 days in 20 different weeks. Both halves are employer-wide facts spanning a year, so the caller asserts the conclusion via input.employer.agriculturalFutaLiable rather than the engine inferring it from one paycheck."
+     },
     "$comment": "Employment categories the Code taxes differently from an ordinary common-law employee, wired via input.employmentCategory. Only the two below are modelled; the rest of the special categories this file's knownGaps names (household, agricultural, election workers, railroad) remain unmodelled and are still disclosed there.",
     "clergy": {
       "federalIncomeTaxWithholding": "not_required",

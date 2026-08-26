@@ -118,6 +118,14 @@ export interface YearToDate {
   /** YTD wages per state unemployment, keyed by state code. */
   stateUnemployment?: Record<string, Cents>;
   /**
+   * Cash wages paid to THIS household or agricultural worker so far this
+   * year, which is what the coverage tests measure. Not the same as the
+   * social security YTD figure above: that one counts wages already
+   * subjected to the tax, while this counts wages paid whether or not they
+   * were taxable yet — the whole question being when they become taxable.
+   */
+  categoryCashWages?: Cents;
+  /**
    * YTD wages already counted toward a state Paid Family & Medical Leave
    * wage-base cap, keyed by state code (e.g. Minnesota Paid Leave). Separate
    * tracker from stateUnemployment even where a state has both, since the
@@ -189,6 +197,25 @@ export interface EmployerContext {
    */
   supplementalFlatRateElection?: Record<string, boolean>;
   /**
+   * Cash wages paid to ALL household employees in the current calendar
+   * quarter — the FUTA test for domestic employment ($1,000 in any
+   * quarter). An employer-wide figure, so only the employer has it.
+   */
+  householdQuarterlyCashWages?: Cents;
+  /**
+   * Wages paid to ALL farmworkers this year — the $2,500 test, which makes
+   * every farmworker's pay taxable regardless of how little any one of them
+   * earned.
+   */
+  agriculturalTotalWages?: Cents;
+  /**
+   * Whether this employer meets the agricultural FUTA test ($20,000 of farm
+   * wages in a calendar quarter, or 10 or more farmworkers on 20 days in
+   * 20 different weeks). Both halves are employer-wide facts across a year,
+   * so the caller asserts the conclusion.
+   */
+  agriculturalFutaLiable?: boolean;
+  /**
    * How much of a paid-leave premium this employer passes on to employees,
    * as a fraction of the TOTAL premium, keyed by state code. Delaware funds
    * its programme entirely from the employer by statute but lets the
@@ -227,7 +254,24 @@ export interface EmployerContext {
  * State treatment is a separate question this flag does NOT answer — see
  * the federal ruleset's own employmentCategories block.
  */
-export type EmploymentCategory = 'standard' | 'clergy' | 'statutory_employee';
+/**
+ *   'household'         — a domestic worker in a private home. FICA applies
+ *                         only once cash wages to that worker reach the
+ *                         year's coverage threshold ($3,000 for 2026), and
+ *                         FUTA only once household cash wages reach $1,000
+ *                         in a calendar quarter. Income tax withholding is
+ *                         not required at all.
+ *   'agricultural'      — a farmworker. FICA and income tax withholding
+ *                         apply only if the worker is paid $150 or more in
+ *                         the year, OR the employer pays $2,500 or more to
+ *                         all farmworkers.
+ */
+export type EmploymentCategory =
+  | 'standard'
+  | 'clergy'
+  | 'statutory_employee'
+  | 'household'
+  | 'agricultural';
 
 export interface PaycheckInput {
   /**

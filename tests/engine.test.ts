@@ -8439,3 +8439,128 @@ describe('supplemental wages aggregated with a prior regular payment', () => {
     assert.equal(amountOf(withPrior, 'OH_SIT_SUPP'), dollars(137.5));
   });
 });
+
+/**
+ * Household and agricultural workers. Neither is taxed at a different
+ * RATE — ordinary FICA and FUTA apply — so the whole question is whether
+ * the worker is inside the system yet. 2026 figures: $3,000 of cash wages
+ * for domestic employment, $1,000 in a quarter for its FUTA, and either
+ * $150 to one farmworker or $2,500 across all of them for farm work.
+ */
+describe('household and agricultural coverage thresholds', () => {
+  const paid = (wage: number, extra: Record<string, unknown> = {}) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly' as const,
+    earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(wage) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    ...extra,
+  });
+
+  test('a household worker under the coverage threshold owes no FICA at all', () => {
+    const r = calculatePaycheck(
+      paid(600, {
+        employmentCategory: 'household',
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0, categoryCashWages: dollars(600) },
+      }),
+    );
+    assert.equal(amountOf(r, 'US_SS_EE'), dollars(0));
+    assert.match(r.taxes.find((t) => t.id === 'US_SS_EE')?.detail ?? '', /\$3000 coverage threshold/);
+  });
+
+  test('the cheque that crosses $3,000 turns FICA on', () => {
+    const r = calculatePaycheck(
+      paid(600, {
+        employmentCategory: 'household',
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0, categoryCashWages: dollars(2900) },
+      }),
+    );
+    assert.equal(amountOf(r, 'US_SS_EE'), dollars(37.2));
+    assert.equal(amountOf(r, 'US_MED_EE'), dollars(8.7));
+  });
+
+  test('household FUTA has its own quarterly test, independent of FICA coverage', () => {
+    const covered = {
+      employmentCategory: 'household',
+      ytd: { socialSecurity: 0, medicare: 0, futa: 0, categoryCashWages: dollars(2900) },
+    };
+    const withoutQuarter = calculatePaycheck(paid(600, covered));
+    assert.equal(amountOf(withoutQuarter, 'US_FUTA'), dollars(0));
+
+    const withQuarter = calculatePaycheck(
+      paid(600, { ...covered, employer: { householdQuarterlyCashWages: dollars(1200) } }),
+    );
+    assert.equal(amountOf(withQuarter, 'US_FUTA'), dollars(3.6));
+  });
+
+  test('income tax is never withheld from a household employee unless both sides agree', () => {
+    const withheld = {
+      employmentCategory: 'household',
+      ytd: { socialSecurity: 0, medicare: 0, futa: 0, categoryCashWages: dollars(5000) },
+    };
+    assert.equal(amountOf(calculatePaycheck(paid(3000, withheld)), 'US_FIT'), dollars(0));
+
+    const voluntary = calculatePaycheck({
+      ...paid(3000, withheld),
+      federalW4: {
+        filingStatus: 'single' as const,
+        multipleJobs: false,
+        dependentCredit: 0,
+        otherIncome: 0,
+        deductions: 0,
+        extraWithholding: 0,
+        voluntaryWithholdingAgreement: true,
+      },
+    });
+    assert.equal(amountOf(voluntary, 'US_FIT'), dollars(320.38));
+  });
+
+  test('a farmworker under BOTH tests owes nothing', () => {
+    const r = calculatePaycheck(paid(100, { employmentCategory: 'agricultural' }));
+    assert.equal(amountOf(r, 'US_SS_EE'), dollars(0));
+    assert.equal(amountOf(r, 'US_FIT'), dollars(0));
+  });
+
+  test('either agricultural test alone is enough — $150 to this worker...', () => {
+    const r = calculatePaycheck(
+      paid(100, {
+        employmentCategory: 'agricultural',
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0, categoryCashWages: dollars(80) },
+      }),
+    );
+    assert.equal(amountOf(r, 'US_SS_EE'), dollars(6.2));
+  });
+
+  test('...or $2,500 across the whole farm, however little this worker earned', () => {
+    const r = calculatePaycheck(
+      paid(100, {
+        employmentCategory: 'agricultural',
+        employer: { agriculturalTotalWages: dollars(2500) },
+      }),
+    );
+    assert.equal(amountOf(r, 'US_SS_EE'), dollars(6.2));
+  });
+
+  test('agricultural FUTA waits for the employer to assert its own test', () => {
+    const without = calculatePaycheck(paid(3000, { employmentCategory: 'agricultural' }));
+    assert.equal(amountOf(without, 'US_FUTA'), dollars(0));
+
+    const asserted = calculatePaycheck(
+      paid(3000, { employmentCategory: 'agricultural', employer: { agriculturalFutaLiable: true } }),
+    );
+    assert.equal(amountOf(asserted, 'US_FUTA'), dollars(18.0));
+  });
+
+  test('a covered farmworker DOES have income tax withheld, unlike a household employee', () => {
+    const r = calculatePaycheck(paid(3000, { employmentCategory: 'agricultural' }));
+    assert.equal(amountOf(r, 'US_FIT'), dollars(320.38));
+  });
+});
