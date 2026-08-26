@@ -98,5 +98,18 @@
     "exemptPretax RESOLVED (see exemptPretaxComment above) -- VA conforms to federal AGI, confirmed via Code of Virginia sec. 58.1-322 directly.",
     "The 2026 Paid Family and Medical Leave program's contribution rate (not yet announced as of this pass -- due October 2027) is obviously not capturable yet; this file only records the timeline, not a rate.",
     "VA-4's own de minimis / no-liability exemption conditions (Line 3(a)/(b): no VA tax liability last year, or VAGI below $11,950 single / $23,900 married) were transcribed but not cross-checked against this engine's existing generic nonresidentDeMinimisReason()/applyStateWithholdingExemption() mechanism for fit -- a plausible future reuse, not evaluated this pass."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 8000,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.025,
+    "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
+    "experienceRange": {
+      "min": 0.001,
+      "max": 0.062
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "inherited_from_this_file"
+  }
 }

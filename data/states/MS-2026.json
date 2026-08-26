@@ -82,13 +82,26 @@
     "newEmployerRateByYear": { "year1": 0.010, "year2": 0.011, "year3Plus": 0.012 },
     "experiencedEmployerRateRange": [0.002, 0.054],
     "confidence": "primary_source_confirmed -- mdes.ms.gov's own Employer FAQs page, quoted directly above. The page itself carries no explicit 2026 revision date, one tier below a dated annual rate notice, though every secondary source checked (Rippling, Mississippi Payroll Guide) agrees with these same figures for 2026 with no dissent.",
-    "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project: experience-rated, an individual employer's actual rate depends on employer-specific history a static jurisdiction file can't hold."
+    "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project: experience-rated, an individual employer's actual rate depends on employer-specific history a static jurisdiction file can't hold. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax."
   },
   "knownGaps": [
     "exemptPretax rests on the weakest evidentiary tier found in this project so far -- see exemptPretaxComment. A follow-up should search Title 27 more broadly (or DOR guidance/rulings) for a private-sector-applicable conformity provision rather than relying on universal industry practice alone.",
     "Form 89-350's per-category breakdown (personal/dependent/age/blind) is not independently modelled -- this engine trusts the employee's own pre-summed Line 6 total, matching the form's own mechanism but meaning a caller must compute that total correctly upstream, same as trusting any other state's raw allowance-count input.",
     "RESOLVED ('verify' pass, 2026-08-22): Tables B/C/D's own standard-deduction figures ($3,400/$4,600/$2,300) were not independently cell-verified against Pub 89-700's own printed tables directly, but ARE now independently confirmed via USDA NFC's 2026 bulletin (see bracketStatusDeduction.independentConfirmation) -- a second, differently-operated source reproducing the same four numbers with zero discrepancies. Still not a cell-by-cell reproduction of Tables B/C/D themselves the way Table A got 3 verified cells, but no longer resting on Section 13's prose alone either.",
-    "Employer-side UC is documented but not modelled -- same per-employer-experience-rating gap as every other state's employer SUTA in this project.",
+    "Employer-side UC is documented but not modelled -- same per-employer-experience-rating gap as every other state's employer SUTA in this project. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
     "Section 13(f)'s true-voluntary-withholding categories (agricultural/household workers, MS residents working where the employer isn't legally required to withhold MS tax) are documented but out of scope for this engine, same as every other state's out-of-scope withholding categories."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 14000,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.01,
+    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "experienceRange": {
+      "min": 0.002,
+      "max": 0.054
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "cross_source_confirmed"
+  }
 }

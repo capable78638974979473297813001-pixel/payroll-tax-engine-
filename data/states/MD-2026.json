@@ -143,9 +143,22 @@
   },
   "verification": "PROVEN via calculatePaycheck() for the core resident state+local mechanism, hand-derived and cross-checked against the guide's own published '2.25% local' combined bracket rates (see this file's own $methodComment for the 7-for-7 exact match). See tests/engine.test.ts, describe('Maryland').",
   "knownGaps": [
-    "UI is employer-only and not wired into calc code -- same structural gap as every other state's SUTA in this project; not researched this pass at all (no UI wage base/rate figures recorded for Maryland).",
+    "UI is employer-only and not wired into calc code -- same structural gap as every other state's SUTA in this project; not researched this pass at all (no UI wage base/rate figures recorded for Maryland). WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
     "No Paid Family/Medical Leave program figures recorded -- Maryland's own FAMLI-equivalent program (the Time to Care Act) has been repeatedly delayed by the legislature; its current 2026 status was not researched this session and is a genuine open question, not confirmed either way.",
     "The 'resident working in a NONRECIPROCAL state' credit-adjusted rate table (the guide's own 'MARYLAND RESIDENT EMPLOYEES WHO WORK IN DELAWARE' section, and presumably similar sections for other nonreciprocal states) is documented as existing but not modelled -- structurally the same class of gap as this project's existing residentWorkingElsewhereCredit mechanism (built for Kansas), but Maryland's own version bakes a specific OTHER state's credit into a pre-combined table rather than computing a generic credit, and was not reverse-engineered this session.",
     "DC leg of reciprocity not independently verified from DC's own primary source this session (see reciprocity.notVerifiedThisSession above)."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 8500,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.026,
+    "newEmployerRateSource": "Maryland Department of Labor's own 2026 tax-rate page — Table A, new-employer rate 2.6%.",
+    "experienceRange": {
+      "min": 0.003,
+      "max": 0.075
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "source_dated_2026"
+  }
 }

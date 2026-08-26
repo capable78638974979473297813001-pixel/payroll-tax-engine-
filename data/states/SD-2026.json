@@ -65,5 +65,18 @@
   "knownGaps": [
     "The experience-rated Schedule A/B contribution-rate table is only partially transcribed (4 of many rows) -- not pursued to full completeness because South Dakota has no income tax and the table is unusable without a reserve-ratio input this engine doesn't carry regardless of completeness.",
     "Local-tax and UI figures rest on the DLR's own primary pages (strong) plus one secondary cross-check (onpay.com, not independently fetched in full) -- not a weakness specific to this file, but recorded per this project's standing confidence-tier convention."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 15000,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.012,
+    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "experienceRange": {
+      "min": 0,
+      "max": 0.095
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "cross_source_confirmed"
+  }
 }

@@ -1337,5 +1337,18 @@
     "The recurring non-monotonic bracket-rate anomaly in NYS's OWN tables (a rate spike then drop-back near the top of every one of the 12 transcribed NYS schedules) remains unexplained -- NOT present in NYC's or Yonkers' tables (Yonkers reuses NYS's own tables directly, so it inherits the same anomaly, just scaled by 16.75%; NYC's own tables are smooth/monotonic throughout).",
     "Reciprocity confirmed (New York has none, with any state). Exemption counts above 10 extrapolate correctly for NYS, NYC, and (via the shared computeNYSStyleTax()) Yonkers residents. Nonresident alien handling is a CONFIRMED disclosed non-effect for ALL FOUR NY documents now (NYS-50-T-NYS, NYS-50-T-NYC, NYS-50-T-Y, and IT-2104 all searched directly for 'alien' -- zero mentions anywhere) -- Yonkers specifically was the one left unchecked before, now closed.",
     "UNRESOLVED, disclosed rather than guessed: whether PFL's and DBL's own wage bases follow the SAME pretax exclusion list as NYS income tax withholding (exemptPretax, reused by both statePaidLeaveEmployeeTax() and stateDisabilityEmployeeTax() via ctx.taxableWagesFor()) was not independently confirmed. Found NY DOT Notice N-17-12 (fetched and read directly), which answers a RELATED but DIFFERENT question -- that PFL premiums themselves are deducted from 'employees' after-tax wages' (i.e. the premium isn't itself pretax-deductible from the employee's own income) -- not whether 401(k)/section-125 amounts are excluded from the wage BASE the 0.432%/0.5% rates apply TO. No primary source answering that specific question was found despite multiple targeted searches. This matters because Minnesota's own build in this project found a genuine case (UI wages explicitly NOT excluding 401(k)/cafeteria amounts, unlike income-tax withholding) where assuming parity between two different taxes' wage definitions would have been wrong -- the same risk exists here, unconfirmed either way."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 17600,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.041,
+    "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
+    "experienceRange": {
+      "min": 0.004,
+      "max": 0.099
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "inherited_from_this_file"
+  }
 }

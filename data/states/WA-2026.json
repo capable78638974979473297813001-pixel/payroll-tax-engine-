@@ -83,5 +83,18 @@
     "exemptPretax ([] for all three WA payroll levies) rests on an INFERENCE from the absence of federal-conformity language in Washington's own wage definition, not a directly-quoted statement either way -- see exemptPretaxComment.",
     "certificate.employerLiableForPaidLeaveShare (gating the employer PFML share) is a caller-supplied flag reflecting the employer's OWN determination of whether they have 50+ WA employees -- this engine cannot verify that aggregate headcount from one employee's paycheck, the same class of gap already disclosed for Newark's $2,500/quarter threshold and >50%-resident-workforce apportionment.",
     "Washington's Capital Gains Tax (chapter 82A.04 RCW) is confirmed real and current (RCW 1.90.100(2)'s own carve-out) but is a RETURN-level excise tax on investment gains, not a payroll withholding -- correctly out of scope for this engine, recorded here only so a future reader doesn't mistake WA's 'no income tax' framing for 'no state tax of any kind.'"
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 78200,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": null,
+    "newEmployerRateSource": "No single new-employer figure exists for this state: the rate is industry-assigned or schedule-driven. The engine therefore requires the employer's own assigned rate here and computes nothing without it.",
+    "experienceRange": {
+      "min": 0.0027,
+      "max": 0.0815
+    },
+    "employerSuppliedRateRequired": true,
+    "confidence": "no_single_rate"
+  }
 }

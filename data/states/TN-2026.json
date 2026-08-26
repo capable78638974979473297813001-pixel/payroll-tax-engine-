@@ -38,10 +38,23 @@
     "wageBaseConfidence": "primary_source_confirmed -- tn.gov's own current wage-base history table, fetched directly, explicitly lists 2026 at $7,000.",
     "rateMechanism": "Reserve-ratio formula (T.C.A. 50-7-403), 6 possible Premium Rate Tables selected semiannually (Jan 1 / Jul 1) by Unemployment Trust Fund balance on the preceding Jun 30 / Dec 31. Rate Table 6 (the LOWEST of the 6 tables, per the state's own naming convention where higher trust-fund health selects a higher table number) is in effect for all of 2026.",
     "rateRangeNote": "cross_source_confirmed only (not independently fetched from the actual downloadable Premium Rate Table 6 PDF this pass): roughly 0.01%-2.3% for positive-reserve-ratio employers, 5%-10% for negative-reserve-ratio employers under Table 6. Same lower-priority-given-no-income-tax treatment this project already applied to South Dakota's own experience-rated schedule.",
-    "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project. The exact numeric Premium Rate Table 6 was not fetched as a standalone document this pass."
+    "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project. The exact numeric Premium Rate Table 6 was not fetched as a standalone document this pass. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax."
   },
   "knownGaps": [
     "Premium Rate Table 6's own numeric rate-by-reserve-ratio table was not fetched as a standalone document -- 3 separate attempts this session (WebFetch, curl with a browser User-Agent, curl with an added Referer header and forced HTTP/1.1) all failed against tn.gov/content/dam/... with a connection-level reset (not a proper HTTP error), the same class of access block already documented for New Hampshire/Massachusetts's revenue domains elsewhere in this project -- NOT pursued further given this figure is employer-side-only and not consumed by the engine regardless. The rate RANGE stays cross-source only; the wage base and rate-table-selection mechanism are primary-confirmed (see tn.gov's own UI Tax Rates HTML page, which fetched fine).",
     "Given no income tax exists, this file is intentionally lighter-weight than income-tax states in this project -- consistent with the South Dakota precedent."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 7000,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.027,
+    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "experienceRange": {
+      "min": 0.0001,
+      "max": 0.023
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "cross_source_confirmed"
+  }
 }

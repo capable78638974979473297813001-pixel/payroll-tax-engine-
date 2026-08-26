@@ -143,5 +143,18 @@
     "Line 3 (additional per-pay withholding) and the quarterly effective-date rule for certificate changes are documented but not modelled.",
     "The nonresident 30-day rule (Form IL-W-6, with continuous proration past the threshold) is documented but not modelled — same class of gap as Indiana's version of this rule, and Illinois's proration mechanism is not something Indiana's all-or-nothing rule needed.",
     "SUI is experience-rated per employer (same structural note as every other state modelled) — the formula is fully documented, but an individual employer's Benefit Ratio requires employer-specific claims/payroll history no static jurisdiction constant can supply."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 14250,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.0335,
+    "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
+    "experienceRange": {
+      "min": 0.0075,
+      "max": 0.0705
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "inherited_from_this_file"
+  }
 }

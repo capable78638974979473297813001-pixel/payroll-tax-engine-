@@ -87,7 +87,20 @@
   "verification": "PROVEN via calculatePaycheck() against ALL SIX of the fromJune2026 table's own worked examples: Example 1 (weekly $400, single -> $12), Example 2 (biweekly $2,600, single -> $116, allowance fully phased to $0), Example 3 (semimonthly $1,200, married -> $18), Example 4 (monthly $7,800, married -> $347, allowance fully phased to $0), Example 5 (quarterly $9,000, single -> $367), Example 6 (daily $175, married -> $5) -- all reproduced to the exact whole dollar. The beforeJune2026 table is additionally proven against its own Example 1 (weekly $400, single -> $12 -- the same final figure as the newer table's Example 1, a genuine coincidence from rounding, not a data-entry collision; verified by hand against the archived document's own arithmetic, not just pattern-matched). See tests/engine.test.ts, describe('Utah').",
   "knownGaps": [
     "RESOLVED (a later 'go to every state' pass): the pre-2026-06-01 formula is now modelled (beforeJune2026 above, fetched from an archived Publication 14 Rev. 4/25) and utahWithholding() dispatches on checkDate the same way Ohio's/Georgia's mid-year cuts do -- a checkDate before 2026-06-01 now correctly uses the OLD 4.5% table instead of silently applying the wrong one.",
-    "UI is employer-only and not wired into calc code -- same structural gap as every other state's SUTA in this project.",
+    "UI is employer-only and not wired into calc code -- same structural gap as every other state's SUTA in this project. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
     "No paid-family-leave or disability program exists in Utah as far as this session found -- correctly absent, not an oversight."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 50700,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": null,
+    "newEmployerRateSource": "No single new-employer figure exists for this state: the rate is industry-assigned or schedule-driven. The engine therefore requires the employer's own assigned rate here and computes nothing without it.",
+    "experienceRange": {
+      "min": 0.001,
+      "max": 0.071
+    },
+    "employerSuppliedRateRequired": true,
+    "confidence": "no_single_rate"
+  }
 }

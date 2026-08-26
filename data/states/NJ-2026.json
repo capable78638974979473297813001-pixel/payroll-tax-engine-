@@ -1974,5 +1974,18 @@
   "knownGaps": [
     "Newark's $2,500/quarter minimum-payroll threshold is an EMPLOYER-AGGREGATE fact (total Newark payroll across every employee, for the whole quarter) that a single calculatePaycheck() call has no way to evaluate -- newarkPayrollTaxEmployer() always computes a nonzero amount whenever this employee's own Newark wages are nonzero, even in the rare case where the employer's true aggregate hasn't yet cleared $2,500 that quarter.",
     "Newark's >50%-Newark-resident-workforce apportionment (ordinance Line 2: excludes the wages of Newark-resident employees ABOVE the 50% threshold from the taxable base entirely) requires certificate.newarkResidentApportionmentExcluded to be set by the CALLER after the employer's own workforce-wide residency determination -- this engine cannot derive, from one employee's own data, whether that employee falls above or below the employer's 50% line. A secondary source described this as a flat 0.50% reduced RATE rather than an exclusion of specific employees' wages; the ordinance's own text (quoted in the code comment) supports the exclusion mechanism, not a blanket rate cut, and that is what's modelled."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 44800,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.028,
+    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "experienceRange": {
+      "min": 0.005,
+      "max": 0.058
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "cross_source_confirmed"
+  }
 }

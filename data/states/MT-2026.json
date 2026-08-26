@@ -244,5 +244,18 @@
     "The Native American exemption's sub-pay-period granularity cannot be represented by this engine's single whole-cheque certificate.exempt boolean.",
     "Supplemental wages Methods 1 and 2 (combining with a DIFFERENT period's regular wages) are not modelled, same category of gap as Kentucky's supplementalTreatment.engineGap — only flat-rate Method 3 is implemented.",
     "UI penalty-rate mechanic, governmental/reimbursable no-wage-cap rule, and the UI-vs-income-tax wage-base distinction are documented but, consistent with every other state's employer-paid UI in this project, not computed by this engine at all — no per-employer experience-rating, delinquency-status, or employer-type-classification input exists anywhere in types.ts."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 47300,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.015,
+    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "experienceRange": {
+      "min": 0,
+      "max": 0.0612
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "cross_source_confirmed"
+  }
 }

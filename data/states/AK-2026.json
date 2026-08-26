@@ -42,10 +42,23 @@
     "experiencedEmployerRateRange": [0.01, 0.054],
     "delinquentOrIneligibleRateNote": "Rate class 21 (the top negative-reserve class) carries an employer rate of 5.40%, total (with the flat 0.50% employee share) 5.90% -- the ceiling for any single employer.",
     "confidence": "primary_source_confirmed -- labor.alaska.gov's own 2026 rate table, quoted directly above.",
-    "knownGap": "Employer-side rate is experience-rated (21 classes by cumulative reportable payroll) -- not modelled in the engine, same structural note as every other state's employer SUTA in this project. The EMPLOYEE side (flat 0.50%, no experience-rating) IS modelled, since it doesn't have this per-employer-history problem."
+    "knownGap": "Employer-side rate is experience-rated (21 classes by cumulative reportable payroll) -- not modelled in the engine, same structural note as every other state's employer SUTA in this project. The EMPLOYEE side (flat 0.50%, no experience-rating) IS modelled, since it doesn't have this per-employer-history problem. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax."
   },
   "knownGaps": [
     "Reciprocity, local-tax, and PFML absence are all cross-source confirmed via search synthesis rather than a direct fetch of a specific Alaska statute this pass -- same tier of confidence as several other no-income-tax states already in this project (TN, FL, SD).",
-    "Employer-side UC experience rating (21 classes) is documented at the structural level but not modelled -- same per-employer-history gap as every other state's employer SUTA in this project."
-  ]
+    "Employer-side UC experience rating (21 classes) is documented at the structural level but not modelled -- same per-employer-history gap as every other state's employer SUTA in this project. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax."
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 54200,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.015,
+    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "experienceRange": {
+      "min": 0.01,
+      "max": 0.054
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "cross_source_confirmed"
+  }
 }

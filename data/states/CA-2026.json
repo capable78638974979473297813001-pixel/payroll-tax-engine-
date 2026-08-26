@@ -401,9 +401,22 @@
   },
   "knownGaps": [
     "Reciprocity is a genuine open question (see reciprocity.$comment above) -- not modelled, and deliberately not guessed at given Oregon's precedent of a superficially-similar claim turning out false on primary-source inspection.",
-    "UI/ETT are employer-only and not wired into calc code -- same structural gap as every other state's SUTA/employer-only levy in this project (no employer-liability calculation path exists yet).",
+    "UI/ETT are employer-only and not wired into calc code -- same structural gap as every other state's SUTA/employer-only levy in this project (no employer-liability calculation path exists yet). WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
     "The 7%-of-payments-over-$1,500 nonresident withholding under R&TC Section 18662 (Form 592/593-family) is a genuinely different mechanism from ordinary wage withholding -- it applies to certain non-wage California-source payments to nonresidents, out of scope for a payroll wage-withholding engine.",
     "Method A (Wage Bracket Table Method) is documented by EDD as an alternative to Method B but explicitly cannot be used by computer software per EDD's own words ('it cannot be used with your computer in determining amounts to be withheld') -- Method B is the only method relevant to this engine, so Method A's own tables were not transcribed.",
     "Military spouse exemption (DE 4 Line 4) and the general exemption certification (DE 4 Line 3) are both real but not separately modelled as certificate fields beyond the existing generic certificate.exempt mechanism, which correctly produces $0 for both cases without distinguishing which applies."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 7000,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.034,
+    "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
+    "experienceRange": {
+      "min": 0.015,
+      "max": 0.062
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "inherited_from_this_file"
+  }
 }

@@ -153,6 +153,25 @@ export interface StateWithholding {
   certificate?: Record<string, unknown>;
 }
 
+/**
+ * Facts about the EMPLOYER rather than the employee. Payroll taxes on the
+ * employer side are mostly experience-rated: the state assigns each
+ * employer its own rate every year based on its own layoff history, so no
+ * jurisdiction file can hold it and no engine can derive it. This is where
+ * a caller supplies what only it knows.
+ */
+export interface EmployerContext {
+  /**
+   * The employer's own assigned state unemployment (SUI/SUTA) contribution
+   * rate, keyed by state code — 0.031 for 3.1%. When absent, the engine
+   * falls back to that state's published NEW-EMPLOYER rate and says so in
+   * the line's detail, because a new employer genuinely pays that rate;
+   * where a state publishes no single new-employer figure (industry- or
+   * schedule-assigned), no line is produced rather than a guessed one.
+   */
+  stateUnemploymentRate?: Record<string, number>;
+}
+
 export interface PaycheckInput {
   /**
    * Check date. Determines WHICH ruleset applies — never "today".
@@ -164,6 +183,8 @@ export interface PaycheckInput {
   deductions: Deduction[];
   federalW4: FederalW4;
   ytd: YearToDate;
+  /** Employer-side facts the engine cannot derive — see EmployerContext. */
+  employer?: EmployerContext;
   /** Work state (and eventually residence state for reciprocity). */
   workState?: StateWithholding;
   residenceState?: StateWithholding;

@@ -160,5 +160,18 @@
     "Nonresident partial-Vermont-service allocation (hours worked in Vermont vs. total hours in the pay period) is described in GB-1210-2026 with a worked example but not modeled -- same class of disclosed gap as Connecticut's Form CTW4NA day-allocation mechanism.",
     "Vermont Family and Medical Leave Insurance (VT-FMLI) is confirmed VOLUNTARY (employer-elected insurance marketplace coverage, not a mandatory payroll tax with a single published statewide rate) -- deliberately not modeled as a statePaidLeaveEmployee config, unlike New York/New Jersey/Connecticut's mandatory programs. An employer that HAS elected VT-FMLI coverage would need its own plan-specific rate supplied by the caller; this file does not attempt to guess one.",
     "resolveVTMaritalStatus's no-form default (single) is this project's standing convention, not a rule GB-1210-2026 or Form W-4VT itself states explicitly -- GB-1210-2026 only says an employer 'may use' federal Form W-4 information if no W-4VT is submitted, without a strict fallback formula."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 15400,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.01,
+    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "experienceRange": {
+      "min": 0.004,
+      "max": 0.054
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "cross_source_confirmed"
+  }
 }

@@ -5,6 +5,8 @@ import { calculatePaycheck } from '../src/calculate.ts';
 import { dollars, overThreshold, underCap } from '../src/money.ts';
 import { makeTaxableWagesFn } from '../src/wages.ts';
 import type { Deduction, Earning, PaycheckInput } from '../src/types.ts';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 
 /**
  * Every expected value below was computed by hand from the published
@@ -7743,5 +7745,112 @@ describe('effective dating', () => {
       () => calculatePaycheck(input({ checkDate: '06/15/2026' })),
       /ISO yyyy-mm-dd/,
     );
+  });
+});
+
+/**
+ * State unemployment, EMPLOYER side — the levy every state charges and this
+ * engine computed in none of them until now. Figures below are the real
+ * published 2026 ones: Ohio's new-employer rate 2.85% on a $9,000 base,
+ * California 3.4% on $7,000, Washington's $78,200 base with no single
+ * published new-employer rate.
+ */
+describe('state unemployment insurance, employer side (XX_SUI_ER)', () => {
+  const suiInput = (extra: Record<string, unknown> = {}) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly' as const,
+    earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(3000) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    ...extra,
+  });
+
+  test("falls back to the state's published new-employer rate, and says so", () => {
+    const r = calculatePaycheck(suiInput({ workState: { code: 'OH', certificate: {} } }));
+    assert.equal(amountOf(r, 'OH_SUI_ER'), dollars(85.5));
+    const line = r.taxes.find((t) => t.id === 'OH_SUI_ER');
+    assert.equal(line?.payer, 'employer');
+    assert.match(line?.detail ?? '', /new-employer rate/);
+  });
+
+  test("an employer's own assigned rate overrides the default", () => {
+    const r = calculatePaycheck(
+      suiInput({
+        workState: { code: 'OH', certificate: {} },
+        employer: { stateUnemploymentRate: { OH: 0.041 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'OH_SUI_ER'), dollars(123.0));
+    assert.match(r.taxes.find((t) => t.id === 'OH_SUI_ER')?.detail ?? '', /own assigned rate/);
+  });
+
+  test('stops at the wage base, counting YTD wages already reported', () => {
+    // Ohio's base is $9,000; $8,500 is already counted, so only $500 of this
+    // $3,000 cheque is still taxable.
+    const r = calculatePaycheck(
+      suiInput({
+        workState: { code: 'OH', certificate: {} },
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0, stateUnemployment: { OH: dollars(8500) } },
+      }),
+    );
+    assert.equal(amountOf(r, 'OH_SUI_ER'), dollars(14.25));
+  });
+
+  test('an employee already over the wage base costs the employer nothing more', () => {
+    const r = calculatePaycheck(
+      suiInput({
+        workState: { code: 'OH', certificate: {} },
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0, stateUnemployment: { OH: dollars(9000) } },
+      }),
+    );
+    assert.equal(amountOf(r, 'OH_SUI_ER'), dollars(0));
+  });
+
+  test('a state with no single published new-employer rate produces NO line rather than a guess', () => {
+    // Washington assigns rates by schedule, not a flat new-employer figure.
+    const r = calculatePaycheck(suiInput({ workState: { code: 'WA', certificate: {} } }));
+    assert.equal(r.taxes.some((t) => t.id === 'WA_SUI_ER'), false);
+  });
+
+  test('...and computes normally once that employer supplies its own rate', () => {
+    const r = calculatePaycheck(
+      suiInput({
+        workState: { code: 'WA', certificate: {} },
+        employer: { stateUnemploymentRate: { WA: 0.012 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'WA_SUI_ER'), dollars(36.0));
+  });
+
+  test('it is an employer cost, not withheld from the employee', () => {
+    const withSui = calculatePaycheck(suiInput({ workState: { code: 'CA', certificate: {} } }));
+    const line = withSui.taxes.find((t) => t.id === 'CA_SUI_ER');
+    assert.equal(line?.amount, dollars(102.0));
+    // California's base is $7,000 at a 3.4% new-employer rate.
+    assert.ok(withSui.employerTaxTotal >= line!.amount);
+    assert.equal(
+      withSui.taxes.filter((t) => t.payer === 'employee').some((t) => t.id === 'CA_SUI_ER'),
+      false,
+    );
+  });
+
+  test('every state file carries the block the calculation reads', () => {
+    // A missing suiEmployer block would silently drop the tax for that
+    // state, which is exactly the failure mode this replaces.
+    const states = readdirSync(join(import.meta.dirname, '..', 'data', 'states'));
+    assert.equal(states.length, 51);
+    for (const file of states) {
+      const parsed = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'data', 'states', file), 'utf8'));
+      assert.ok(parsed.suiEmployer, `${file} has no suiEmployer block`);
+      assert.equal(typeof parsed.suiEmployer.wageBase, 'number', `${file} has no numeric wage base`);
+    }
   });
 });

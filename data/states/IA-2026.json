@@ -58,5 +58,18 @@
     "Supplemental wages paid on a SEPARATE cheque from regular wages: this engine models one calculatePaycheck() call at a time and cannot look back at a prior regular cheque -- same disclosed class of gap as Kentucky/Idaho/Connecticut. Iowa's own formula document does not describe a distinct supplemental-wage procedure at all (flat-rate states generally don't need one for wages paid at the same time), so this gap is narrower than states with an aggregation-vs-flat-rate choice.",
     "Employer-paid unemployment insurance rates/wage base were not researched this pass (context-only, not engine-consumed, matching every other state's employer-only UI treatment in this project) -- no unemploymentInsuranceEmployer block included, unlike some other state files that do carry one at lower confidence tiers.",
     "WATCH: House File 2631 (91st General Assembly, status 'Introduced' as of this file's verifiedOn date) would create Iowa Code chapter 96A, a NEW employer/employee-funded family-and-medical-leave-insurance program administered by the Department of Workforce Development -- confirmed NOT currently enacted (the bill's own text reads 'NEW SECTION. 96A.1'), so this file's 'no PFML/SDI in Iowa' claim holds for 2026. If this bill or a successor passes, Iowa would need a statePaidLeaveEmployee (or employer-side) config added the same way New York/New Jersey/Connecticut's Paid Leave programs are modeled -- recheck this specifically on any future Iowa update rather than assuming the no-PFML status is still current."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 20400,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.01,
+    "newEmployerRateSource": "Iowa Workforce Development's 2026 rate announcement — Table D, new non-construction employers at Rank 4 (1.0%), construction at Rank 9 (5.4%).",
+    "experienceRange": {
+      "min": 0,
+      "max": 0.054
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "source_dated_2026"
+  }
 }

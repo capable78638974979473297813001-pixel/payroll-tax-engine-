@@ -32,5 +32,18 @@
   "knownGaps": [
     "revenue.nh.gov and nhes.nh.gov could not be fetched directly by any method tried (plain WebFetch, curl with a browser User-Agent, multiple subdomains and file paths) — a genuine Akamai CDN block, confirmed on a dedicated follow-up verification pass, not an under-effort. The I&D-tax-repeal date rests on a NH law firm's client alert plus 3 consistent secondary sources rather than a direct government-site read, a thinner evidentiary tier than most other files in this project (which mostly do have a direct primary fetch).",
     "Employer-only UI rate/wage base figures are cross-source only, not independently fetched from nhes.nh.gov — context-only, not engine-consumed, so this does not affect calculation correctness."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 14000,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.017,
+    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "experienceRange": {
+      "min": 0.001,
+      "max": 0.075
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "cross_source_confirmed"
+  }
 }

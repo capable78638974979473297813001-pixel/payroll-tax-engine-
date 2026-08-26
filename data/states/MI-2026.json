@@ -128,7 +128,7 @@
       "acrossTheBoardReduction": "If the UI Trust Fund holds at least 1.2% of all contributing employers' total payroll (trailing 12 months), each employer's rate is further cut by the better of: 10% off each component, or a flat 0.1% off the total rate. Does not apply to employers already at the year's minimum rate or with under 4 years of liability."
     },
     "confidence": "primary_source_confirmed — read directly from Michigan's own statutory-formula page (Section 19, Michigan Employment Security Act), not a secondary aggregator. This REPLACES the prior pending_verification 'new employer 2.7% / experienced range 0.06%-10.3%' placeholder with Michigan's actual, more precise mechanism. No simple published min/max bound exists for experienced employers the way Ohio publishes one (0.4%-10.1%) — Michigan's system is formula-computed per employer, not table-looked-up, and stating an invented min/max here would be less accurate than the real formula.",
-    "knownGap": "Not modelled in the calculation engine — futa() in src/taxes/federal.ts has no MI/state analog yet. Even more than Ohio's, Michigan's SUTA cannot be a static jurisdiction-rate lookup: it requires per-employer history (years of liability, 60-month benefit/payroll ratios, reserve balances) that current PaycheckInput has no fields for at all."
+    "knownGap": "Not modelled in the calculation engine — futa() in src/taxes/federal.ts has no MI/state analog yet. Even more than Ohio's, Michigan's SUTA cannot be a static jurisdiction-rate lookup: it requires per-employer history (years of liability, 60-month benefit/payroll ratios, reserve balances) that current PaycheckInput has no fields for at all. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax."
   },
   "verification": {
     "regularWagesCalculation": "PROVEN, not just plausible: 4 hand-derived fixtures (baseline, zero-exemption, 401k-reduces-base, section125-reduces-base) run through the actual calculatePaycheck() engine and matched to the cent — see tests/engine.test.ts describe('Michigan'). This confirms MI's flat-rate-plus-exemption structure genuinely dispatches through the engine's existing flat_rate method (built for PA), not just that the JSON looks compatible.",
@@ -140,5 +140,18 @@
     "RESOLVED (a later 'go to every state' pass): local city income tax (24 cities) is now computed — see michiganLocalTax() in state.ts, dispatched via certificate.residenceCity/certificate.workCity. Inter-city credit is documented but deliberately NOT applied at withholding time (it's a return-level mechanism per the data file's own text) — both cities' taxes are withheld independently when they differ.",
     "Reciprocity's INBOUND direction (6 states) IS implemented — see reciprocity.knownGap above, which already noted this; the claim here that it was 'not implemented' was stale and is corrected. The OUTBOUND direction (a MI resident working in a reciprocal state) remains a genuine, project-wide architecture gap, not MI-specific.",
     "State unemployment (SUTA) is documented above but not implemented, and the experienced-employer rate is fundamentally per-employer, not a jurisdiction constant — see unemploymentInsurance.knownGap."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 9000,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.027,
+    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "experienceRange": {
+      "min": 0.0006,
+      "max": 0.103
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "cross_source_confirmed"
+  }
 }

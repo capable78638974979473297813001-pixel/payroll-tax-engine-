@@ -89,13 +89,26 @@
     "experiencedEmployerRateRange": [0.0009, 0.0620],
     "experiencedEmployerRateRangeNote": "Read directly off the full 2026 reserve-ratio table (best positive-ratio class 0.09%, worst negative-ratio class 6.20% -- also cited elsewhere as the statutory experienced-employer maximum).",
     "newEmployerRateNote": "NOT a single flat figure by design -- laworks.net's own page states the new-employer rate is 'the average rate for employers in his industrial classification', bounded by statute between 1% and the 6.2% experienced-employer maximum. Secondary sources estimate a practical ~1.14%-2.79% range by industry; disclosed as cross-source only, since no primary single number exists to quote.",
-    "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project: experience-rated, an individual employer's actual rate depends on employer-specific history a static jurisdiction file can't hold."
+    "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project: experience-rated, an individual employer's actual rate depends on employer-specific history a static jurisdiction file can't hold. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax."
   },
   "knownGaps": [
     "Standard deduction is now CPI-U-inflation-adjusted annually (R.S. 47:294(B), confirmed during the 'verify' pass 2026-08-22 -- see the NFC source note above) -- future years' figures will NOT simply carry over from 2026 the way a periodically-legislated fixed dollar amount would; each year's file needs a fresh check against that year's own R-1306, not an assumed static value.",
     "New-employer UI rate is genuinely NAICS-average-driven with no single primary figure to cite -- disclosed with its statutory bounds and a cross-sourced practical range rather than picking one number arbitrarily.",
-    "Employer-side UC is documented but not modelled -- same per-employer-experience-rating gap as every other state's employer SUTA in this project.",
+    "Employer-side UC is documented but not modelled -- same per-employer-experience-rating gap as every other state's employer SUTA in this project. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
     "exemptPretax rests on R.S. 47:293's federal-AGI-conformity language, not an independent read of a Louisiana-specific wage/withholding-base statute (R-1306 itself never defines 'wages' -- it only publishes the formula) -- same evidentiary tier as VA/WV, one tier below KY's/AR's itemized-list citations.",
     "Local income tax and PFML absence are both cross-source confirmed, not independently verified against a specific enabling/preemption statute this pass."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 7000,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": null,
+    "newEmployerRateSource": "No single new-employer figure exists for this state: the rate is industry-assigned or schedule-driven. The engine therefore requires the employer's own assigned rate here and computes nothing without it.",
+    "experienceRange": {
+      "min": 0.0009,
+      "max": 0.062
+    },
+    "employerSuppliedRateRequired": true,
+    "confidence": "no_single_rate"
+  }
 }

@@ -286,5 +286,18 @@
     "RESOLVED, in both DATA and CODE: Form W-4MN Section 1 Line 2's flat per-period 'additional withholding' amount is now read via certificate.additionalWithholding and applied generically across every state in this project, not just Minnesota -- see additionalWithholding above and the MI/IL/KY fixtures proving it.",
     "RESOLVED, in both DATA and CODE: nonresident alien employees are now handled via certificate.nonresidentAlien, which reuses federal.ts's own new Pub 15-T Table 2 adjustment table (data/federal/2026.json's incomeTax.nonresidentAlienAdjustment) rather than duplicating the dollar figures -- proven in tests/engine.test.ts for both US_FIT and MN_SIT. DISCLOSED, not silently resolved: W-4MN's own instructions literally say 'Table 1' (the pre-2020-W-4 table), but this engine's FederalW4/certificate model only ever represents a 2020+-style form, so Table 2 -- the table that actually matches what this engine's inputs represent -- is what's used; that apparent mismatch in MN's own source text is recorded in nonresidentAlienProcedure above, not quietly smoothed over. Nonresident alien STUDENTS FROM INDIA and business apprentices remain out of scope (Pub 15-T's own carve-out; the caller is responsible for not setting the flag for that population).",
     "RESOLVED, in both DATA and CODE: Form W-4MN's third marital-status checkbox ('Married, but withhold at higher Single rate') is now an explicitly recognized value (certificate.maritalStatus:'married_withhold_as_single'), correctly resolving to the SINGLE bracket schedule -- proven with a fixture showing it produces a genuinely different number than the married schedule would. An unrecognized maritalStatus value now THROWS instead of silently defaulting to single, so a typo can no longer produce a plausible-looking wrong number -- see resolveMNMaritalStatus() in state.ts."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 44000,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": null,
+    "newEmployerRateSource": "No single new-employer figure exists for this state: the rate is industry-assigned or schedule-driven. The engine therefore requires the employer's own assigned rate here and computes nothing without it.",
+    "experienceRange": {
+      "min": 0.004,
+      "max": 0.089
+    },
+    "employerSuppliedRateRequired": true,
+    "confidence": "no_single_rate"
+  }
 }

@@ -115,5 +115,18 @@
     "Section 1's own exemptPretax property (whether pre-2020-W-4 'gross wages' already excludes federal pretax deferrals the same structural way Section 2 does) was not separately checked -- likely yes by the same federal-conformity logic, but not confirmed this pass.",
     "UI rate/wage-base figures and the reciprocity mechanism's exact deadlines are cross-source only, not independently fetched from a ND government page this pass -- one tier below this file's own withholding-booklet sourcing.",
     "Local-tax and paid-leave 'none' claims are cross-source confirmed only, not tied to a specific ND Century Code citation."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 46600,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.01,
+    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "experienceRange": {
+      "min": 0.0007,
+      "max": 0.0967
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "cross_source_confirmed"
+  }
 }

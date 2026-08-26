@@ -42,11 +42,24 @@
     "wageBase": 33800.0,
     "newEmployerRateNote": "NOT a single flat figure -- W.S. 27-3 Article 5 assigns a base rate by industry (new employers) or benefit ratio (3+ years experience) PLUS four additional rate factors summed together. Cross-sourced practical new-employer range 2.28%-9.78% by industry; disclosed as cross-source only, since no primary single number exists to quote (same shape as Louisiana's own new-employer rate elsewhere in this project).",
     "confidence": "primary_source_confirmed for the wage base; new-employer rate mechanism confirmed primary, exact range cross-source only.",
-    "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project: experience-rated, an individual employer's actual rate depends on employer-specific history a static jurisdiction file can't hold. Unlike Alaska/PA/NJ, Wyoming has NO employee-paid UI component -- confirmed via DWS's own rate-mechanism description, which only ever refers to 'employer' contributions."
+    "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project: experience-rated, an individual employer's actual rate depends on employer-specific history a static jurisdiction file can't hold. Unlike Alaska/PA/NJ, Wyoming has NO employee-paid UI component -- confirmed via DWS's own rate-mechanism description, which only ever refers to 'employer' contributions. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax."
   },
   "knownGaps": [
     "Local-tax and PFML absence are cross-source confirmed only, not independently verified against a specific Wyoming statute this pass.",
-    "Employer-side UC is documented (wage base primary-sourced, rate mechanism primary-sourced) but not modelled -- same per-employer-experience-rating gap as every other state's employer SUTA in this project.",
+    "Employer-side UC is documented (wage base primary-sourced, rate mechanism primary-sourced) but not modelled -- same per-employer-experience-rating gap as every other state's employer SUTA in this project. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
     "The exact 2.28%-9.78% new-employer range by industry is cross-source only -- W.S. 27-3 Article 5's own per-industry base-rate table was not independently fetched this pass."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 33800,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": null,
+    "newEmployerRateSource": "No single new-employer figure exists for this state: the rate is industry-assigned or schedule-driven. The engine therefore requires the employer's own assigned rate here and computes nothing without it.",
+    "experienceRange": {
+      "min": 0,
+      "max": 0.085
+    },
+    "employerSuppliedRateRequired": true,
+    "confidence": "no_single_rate"
+  }
 }

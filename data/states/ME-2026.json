@@ -82,5 +82,18 @@
     "wholeDollarFinalRounding": "CLOSED on the NFC verification pass: rules.roundFinalToWholeDollar (a new generic flag, not Maine-specific code) now re-rounds the primary SIT line to the nearest dollar AFTER additional/reduced withholding is applied, matching NFC's own Step 9 instruction exactly. Verified with a non-whole-dollar additionalWithholding test case ($33 base + $10.60 = $43.60 -> $44).",
     "pfmlSmallEmployerDiscretion": "CLOSED on the 'fix it, find a way' pass: certificate.paidLeaveEmployeeRateOverride (a new generic field on the SHARED statePaidLeaveEmployeeTax(), not Maine-specific) lets a caller who knows a specific small employer's own chosen rate supply it directly, while the 0.5% default remains correct for the common case (Maine's own FAQ: 'no more than 0.5 percent can come from the employee' applies as the statutory MAXIMUM to BOTH the 15+ and under-15 tiers identically -- there was never a formula difference in the employee's own cap, only in whether the EMPLOYER'S net cost is zero or 0.5%, which this file already handles via the existing employerLiableForPaidLeaveShare gate).",
     "tribalExemptionGranularity": "CLOSED on the 'fix it, find a way' pass: certificate.exemptWages (cents, this pay period) added to maineWithholding() lets a caller exclude just the tribal-land-sourced portion of wages from the taxable base, rather than the all-or-nothing certificate.exempt flag. The caller still determines eligibility and the dollar split (the same boundary as every exemption in this project) -- this only removes the previous forced choice between 'exempt the whole cheque' and 'exempt nothing' for a genuinely mixed tribal/non-tribal pay period."
+  },
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 12000,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.0254,
+    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "experienceRange": {
+      "min": 0.0031,
+      "max": 0.066
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "cross_source_confirmed"
   }
 }

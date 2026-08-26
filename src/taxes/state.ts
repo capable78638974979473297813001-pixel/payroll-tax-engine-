@@ -155,6 +155,12 @@ export function stateIncomeTax(
     lines.push(stateUnemploymentEmployeeTax(input, ctx, rules));
   }
 
+  // The employer's own unemployment contribution — every state levies one,
+  // and it is a real cost of running this paycheck even though nothing is
+  // withheld from the employee for it. See stateUnemploymentEmployerTax().
+  const suiEmployer = stateUnemploymentEmployerTax(input, ctx, rules);
+  if (suiEmployer) lines.push(suiEmployer);
+
   const paidLeave = statePaidLeaveEmployeeTax(input, ctx, rules);
   if (paidLeave) lines.push(paidLeave);
 
@@ -855,6 +861,82 @@ interface StateUnemploymentEmployeeConfig {
  * claimed ("capped at X/yr") versus what amount actually computed, now
  * fixed.
  */
+interface SUIEmployerConfig {
+  wageBase: number | null;
+  newEmployerRate: number | null;
+  experienceRange: { min: number; max: number } | null;
+  employerSuppliedRateRequired?: boolean;
+}
+
+/**
+ * State unemployment insurance, EMPLOYER side (SUI/SUTA) — the one payroll
+ * tax every single state levies, and the one this project carried research
+ * for in all 51 jurisdiction files while computing it in none of them.
+ *
+ * Why it was left out, and why that reasoning was incomplete: an employer's
+ * rate is EXPERIENCE-RATED, assigned annually by the state from that
+ * employer's own layoff history, so no jurisdiction file can hold it. True —
+ * but the same is true of a W-4's contents, and those arrive as input. So
+ * the rate arrives as input too (input.employer.stateUnemploymentRate), and
+ * when it doesn't, the state's own published NEW-EMPLOYER rate is used,
+ * which is what a genuinely new employer actually pays. The line says which
+ * of the two it used, because an auditor needs to know.
+ *
+ * Where a state publishes no single new-employer figure at all — the rate is
+ * assigned by industry (Louisiana, Wyoming, Utah) or by a schedule lookup
+ * (Minnesota, Washington) — and the caller supplied nothing, NO LINE IS
+ * PRODUCED. An invented rate would be worse than a visible absence, and
+ * suiEmployer.employerSuppliedRateRequired marks those states so a caller
+ * can tell the difference in advance.
+ *
+ * WAGE BASE, disclosed: this uses the same pretax-exemption list as the
+ * state's income tax withholding (rules.exemptPretax), matching what
+ * stateUnemploymentEmployeeTax() already does for Alaska/NJ/PA. State
+ * unemployment wage definitions are not always identical to income tax
+ * ones — Section 125 amounts are commonly excluded from both, but elective
+ * deferrals like 401(k) are frequently INCLUDED in the unemployment base
+ * while excluded from income tax. Each state file records that as the open
+ * question it is rather than the code implying a verified answer.
+ */
+function stateUnemploymentEmployerTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cfg = rules.suiEmployer as SUIEmployerConfig | undefined;
+  if (!cfg) return null;
+
+  const supplied = input.employer?.stateUnemploymentRate?.[rules.code];
+  const rate = supplied ?? cfg.newEmployerRate;
+  if (rate === null || rate === undefined) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const currentWages = ctx.taxableWagesFor(exempt);
+  const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
+  const ytd = input.ytd.stateUnemployment?.[rules.code] ?? 0;
+  const taxableWages = cap === null ? currentWages : underCap(currentWages, ytd, cap);
+  const amount = applyRate(taxableWages, rate);
+
+  const rateSource =
+    supplied === undefined
+      ? "the state's published new-employer rate (no employer rate supplied — see input.employer.stateUnemploymentRate)"
+      : "this employer's own assigned rate";
+
+  return {
+    id: `${rules.code}_SUI_ER`,
+    name: `${rules.name} Unemployment Insurance (Employer)`,
+    payer: 'employer',
+    jurisdiction: 'state',
+    taxableWages,
+    amount,
+    detail:
+      `${fmt(taxableWages)} @ ${(rate * 100).toFixed(3)}% — ${rateSource}` +
+      (cap === null
+        ? ', no wage cap'
+        : `, capped at ${fmt(cap)}/yr (${fmt(ytd)} YTD already counted)`),
+  };
+}
+
 function stateUnemploymentEmployeeTax(
   input: PaycheckInput,
   ctx: ComputeContext,

@@ -133,5 +133,18 @@
     "residentWorkingElsewhereCreditLine() computes Kansas's credit using the WORK state's own already-computed ${workCode}_SIT line as 'the amount of withholding tax required by the other state(s).' This is correct when the work state's own withholding is fully modelled in this engine; if the work state has NO ruleset at all, its own SIT line is the explicit $0 'NOT MODELLED' placeholder (see stateIncomeTax()'s own guard), which would make this credit compute as if $0 were actually withheld elsewhere -- overstating the Kansas credit due in that specific edge case. Not expected to matter in practice (every state a real KS resident is likely to work in already has a ruleset in this project or will before this matters), but disclosed rather than silently trusted.",
     "Local-tax-absence is cross-source confirmed plus one indirect primary signal (KW-100's own silence on the topic despite being exhaustive about every other interstate/local scenario) -- not an explicit KDOR primary statement.",
     "Kansas withholding rates were last confirmed unchanged via KW-100's 'Rev. 10-24' revision; no separate 2025 or 2026-dated guide was found, consistent with SB 1's 2024 reform being the last rate change, but this file has not independently verified that a newer, not-yet-indexed KDOR guide doesn't exist."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 15100,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.0175,
+    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "experienceRange": {
+      "min": 0,
+      "max": 0.0695
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "cross_source_confirmed"
+  }
 }

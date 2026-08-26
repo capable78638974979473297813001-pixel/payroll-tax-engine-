@@ -361,13 +361,27 @@
     "experiencedEmployerRateNote": "Bloomberg Tax's own 2026 coverage additionally notes a possible maximum TOTAL rate of 6.4% when an excess-claims premium applies on top of the 5.4% base ceiling -- a real, disclosed nuance beyond the bare min/max range.",
     "newEmployerRateNote": "NOT a single flat figure by design (same shape as Louisiana's own new-employer mechanism elsewhere in this project) -- DWS's own glossary page confirms new employers are assigned 'New Employer Industry Rates' based on their NAICS code, with no single number published on the pages this pass could reach; secondary sources estimate roughly 1%-2% depending on industry.",
     "confidence": "cross_source_confirmed -- dws.state.nm.us's own top-level rate page returned a WAF block to every fetch attempted this pass ('Request Rejected'); figures rest on Bloomberg Tax plus multiple independent payroll-guide aggregators agreeing with no dissent, one tier below a direct DWS dollar-figure quote.",
-    "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project: experience-rated, an individual employer's actual rate depends on employer-specific history a static jurisdiction file can't hold."
+    "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project: experience-rated, an individual employer's actual rate depends on employer-specific history a static jurisdiction file can't hold. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax."
   },
   "knownGaps": [
     "15-day nonresident de minimis threshold NOT modelled: FYI-104 states directly 'Employers are not required to withhold New Mexico income tax from wages of nonresident employees working in New Mexico for 15 or fewer days during the calendar year' -- a DAY-COUNT threshold, the same class of gap as Alabama's 31-day rule and Illinois's 30-day Form IL-W-6 threshold elsewhere in this project. This engine has no day-tracking mechanism; disclosed rather than force-fit into the existing dollar-based nonresidentDeMinimisThreshold mechanism, which measures a different thing entirely.",
     "Monthly sub-one-dollar de minimis NOT modelled: FYI-104 states 'No withholding is required if the total withholding for an employee during any one month is less than one dollar' -- an aggregate-across-a-month fact this engine's one-paycheck-at-a-time architecture has no way to evaluate, same class of limitation as Newark's quarterly-minimum and Washington's 50+-employee PFML threshold elsewhere in this project.",
-    "UI wage base and rate range are cross-source only -- dws.state.nm.us's own rate pages returned a WAF block ('Request Rejected') to every fetch attempted this pass; not modelled in the engine regardless (employer-side, experience-rated, same as every state).",
+    "UI wage base and rate range are cross-source only -- dws.state.nm.us's own rate pages returned a WAF block ('Request Rejected') to every fetch attempted this pass; not modelled in the engine regardless (employer-side, experience-rated, same as every state). WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
     "Gambling-winnings withholding (6%) and pension/annuity withholding are documented in FYI-104 but out of scope for a wage-withholding-only engine, same convention as every other state's out-of-scope withholding categories in this project.",
     "The 'married but elected higher-single-rate for federal purposes' instruction describes the PRE-2020 federal W-4's Line 3 checkbox, which doesn't exist on the 2020+ form this project's federalW4 model represents -- disclosed as inapplicable legacy guidance, not modelled."
-  ]
+  ],
+  "suiEmployer": {
+    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "wageBase": 34800,
+    "wageBaseNote": "This file previously carried $31700; the 2026 table publishes $34800. The 2026 figure is used, and the discrepancy is recorded here rather than dropped.",
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "newEmployerRate": 0.01,
+    "newEmployerRateSource": "New Mexico's 2026 UI release — wage base $34,800 (up from $33,200). This CORRECTS the $31,700 figure previously carried in this file, which was a prior year's base.",
+    "experienceRange": {
+      "min": 0.0033,
+      "max": 0.064
+    },
+    "employerSuppliedRateRequired": false,
+    "confidence": "source_dated_2026"
+  }
 }
