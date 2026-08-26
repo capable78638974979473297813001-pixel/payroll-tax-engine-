@@ -2,6 +2,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { calculatePaycheck } from '../src/calculate.ts';
+import { futa } from '../src/taxes/federal.ts';
 import { dollars, overThreshold, underCap } from '../src/money.ts';
 import { makeTaxableWagesFn } from '../src/wages.ts';
 import type { Deduction, Earning, PaycheckInput } from '../src/types.ts';
@@ -8873,5 +8874,83 @@ describe("ministers' housing allowance", () => {
     const r = calculatePaycheck(withAllowance({ employmentCategory: 'clergy' }));
     assert.equal(r.grossPay, dollars(3000));
     assert.equal(r.netPay, dollars(3000));
+  });
+});
+
+/**
+ * FUTA credit reduction — the reason "FUTA is 0.6%" is only true in states
+ * that repaid their federal unemployment loans. Driven from synthetic
+ * rulesets rather than the shipped 2026 file, because the shipped file
+ * correctly carries an EMPTY map: the year's determination is made after
+ * November 10 and did not exist when it was written.
+ */
+describe('FUTA credit reduction', () => {
+  const earnings = [{ code: 'REG', category: 'regular' as const, amount: dollars(3000) }];
+  const ctx = {
+    year: 2026,
+    periodsPerYear: 26,
+    taxableWagesFor: makeTaxableWagesFn(earnings, []),
+  };
+  const futaInput = (state: string) =>
+    ({
+      checkDate: '2026-08-15',
+      payFrequency: 'biweekly',
+      earnings,
+      deductions: [],
+      federalW4: {
+        filingStatus: 'single',
+        multipleJobs: false,
+        dependentCredit: 0,
+        otherIncome: 0,
+        deductions: 0,
+        extraWithholding: 0,
+      },
+      ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+      workState: { code: state, certificate: {} },
+    }) as unknown as PaycheckInput;
+  const futaRules = (states: Record<string, number>) =>
+    ({
+      futa: {
+        grossRate: 0.06,
+        standardCredit: 0.054,
+        netRate: 0.006,
+        wageBase: 7000,
+        exemptPretax: [],
+        creditReduction: { states, determinationDate: '2026-11-10' },
+      },
+    }) as never;
+
+  test('an undetermined year withholds the ordinary 0.6% and says the determination is pending', () => {
+    const line = futa(futaInput('OH'), ctx, futaRules({}))[0];
+    assert.equal(line.amount, dollars(18.0));
+    assert.match(line.detail ?? '', /determination is made after 2026-11-10/);
+  });
+
+  test("a reduced state pays more — California's 1.2% reduction makes it 1.8%", () => {
+    const line = futa(futaInput('CA'), ctx, futaRules({ CA: 0.012 }))[0];
+    assert.equal(line.amount, dollars(54.0));
+    assert.match(line.detail ?? '', /1\.2% credit reduction/);
+  });
+
+  test('the Virgin Islands 4.5% reduction makes it 5.1% — eight and a half times the headline rate', () => {
+    const line = futa(futaInput('VI'), ctx, futaRules({ VI: 0.045 }))[0];
+    assert.equal(line.amount, dollars(153.0));
+  });
+
+  test('a state NOT on the list is untouched by one that is', () => {
+    const line = futa(futaInput('OH'), ctx, futaRules({ CA: 0.012 }))[0];
+    assert.equal(line.amount, dollars(18.0));
+    // The pending wording must not appear once a determination exists.
+    assert.equal(/determination is made after/.test(line.detail ?? ''), false);
+  });
+
+  test('the shipped 2026 ruleset carries an EMPTY map, not a copy of last year', () => {
+    const federal = JSON.parse(
+      readFileSync(join(import.meta.dirname, '..', 'data', 'federal', '2026.json'), 'utf8'),
+    );
+    assert.deepEqual(federal.futa.creditReduction.states, {});
+    // Last year's finals are kept as reference, never as a substitute.
+    assert.equal(federal.futa.creditReduction.priorYear.year, 2025);
+    assert.equal(federal.futa.creditReduction.priorYear.states.CA, 0.012);
   });
 });

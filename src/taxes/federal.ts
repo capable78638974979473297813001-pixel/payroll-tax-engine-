@@ -291,6 +291,35 @@ export function medicare(
 }
 
 /** FUTA — employer only, capped, and assumes the full state credit. */
+interface FutaCreditReductionConfig {
+  /** Additional rate by state code, on top of the net 0.6% — e.g. 0.012 for a 1.2% reduction. Empty while the year is undetermined. */
+  states?: Record<string, number>;
+  /** The date after which the year's determination is made (November 10 each year). */
+  determinationDate?: string;
+  priorYear?: { year: number; states: Record<string, number> };
+}
+
+/**
+ * FUTA, including CREDIT REDUCTION.
+ *
+ * The 0.6% everyone quotes is 6.0% less a 5.4% credit for the state
+ * unemployment tax the employer also pays. A state that borrowed from the
+ * federal unemployment account and has not repaid loses part of that
+ * credit, so employers there pay MORE than 0.6% — retroactively, for the
+ * whole year, on wages already paid. For 2025 that was California at an
+ * extra 1.2% (net 1.8%) and the Virgin Islands at an extra 4.5% (net
+ * 5.1%); Connecticut and New York were on the potential list in January
+ * and repaid before the deadline, which is exactly why the figure cannot
+ * be predicted from a state having debt earlier in the year.
+ *
+ * The determination is made after NOVEMBER 10 of the year the wages are
+ * paid, so for most of any given year the correct answer is 'not yet
+ * determined'. This models that honestly: the rate is applied when the
+ * jurisdiction file carries one for its own year, and when it does not,
+ * the line says the determination is pending rather than implying 0.6% is
+ * final. The prior year's final figures ride along in the data as the
+ * reference they are, never as a substitute.
+ */
 export function futa(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -315,6 +344,16 @@ export function futa(
     ];
   }
 
+  const reduction = (cfg as { creditReduction?: FutaCreditReductionConfig }).creditReduction;
+  const state = input.workState?.code;
+  const extra = state ? (reduction?.states?.[state] ?? 0) : 0;
+  const rate = cfg.netRate + extra;
+
+  const pending =
+    extra === 0 &&
+    reduction?.determinationDate !== undefined &&
+    Object.keys(reduction.states ?? {}).length === 0;
+
   return [
     {
       id: 'US_FUTA',
@@ -322,8 +361,14 @@ export function futa(
       payer: 'employer',
       jurisdiction: 'federal',
       taxableWages: taxable,
-      amount: applyRate(taxable, cfg.netRate),
-      detail: `${fmt(taxable)} @ 0.6% net of the 5.4% state credit`,
+      amount: applyRate(taxable, rate),
+      detail:
+        extra > 0
+          ? `${fmt(taxable)} @ ${(rate * 100).toFixed(1)}% — 0.6% net of the state credit PLUS a ${(extra * 100).toFixed(1)}% credit reduction, ${state} having not repaid its federal unemployment loans`
+          : `${fmt(taxable)} @ 0.6% net of the 5.4% state credit` +
+            (pending
+              ? `; no credit reduction is applied because this year's determination is made after ${reduction!.determinationDate} and had not been published when this ruleset was written — a reduction, if any, applies retroactively to the whole year`
+              : ''),
     },
   ];
 }

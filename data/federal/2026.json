@@ -182,13 +182,49 @@
   },
 
   "futa": {
+
+      "creditReduction": {
+
+        "states": {},
+
+        "determinationDate": "2026-11-10",
+
+        "$comment": "An employer in a state that has not repaid its federal unemployment loans loses part of the 5.4% credit, so its FUTA rate exceeds 0.6% — retroactively, for the whole year, on wages already paid. The determination is made after November 10 of the wage year, so this map is EMPTY for 2026 by fact rather than by omission: the 2026 list did not exist when this ruleset was written. When DOL publishes it, add entries keyed by state code carrying the ADDITIONAL rate, not the total.",
+
+        "priorYear": {
+
+          "year": 2025,
+
+          "states": {
+
+            "CA": 0.012,
+
+            "VI": 0.045
+
+          },
+
+          "note": "FINAL 2025 figures, reference only — never applied to another year. California failed to repay by the November 10, 2025 deadline (extra 1.2%, so 1.8% net) and the US Virgin Islands likewise (extra 4.5%, so 5.1% net). Connecticut and New York appeared on the JANUARY 2025 potential list and then repaid before the deadline, which is precisely why a state carrying debt mid-year cannot be assumed into a reduction.",
+
+          "source": {
+
+            "title": "US Department of Labor, FUTA Credit Reductions; and the Federal Register notice of FUTA credit reductions applicable for 2025",
+
+            "url": "https://oui.doleta.gov/unemploy/futa_credit.asp",
+
+            "verifiedOn": "2026-08-25"
+
+          }
+
+        }
+
+      },
     "source": "pub15t",
     "grossRate": 0.06,
     "standardCredit": 0.054,
     "netRate": 0.006,
     "wageBase": 7000.0,
     "employerOnly": true,
-    "comment": "Net rate assumes the full state credit. Credit-reduction states pay more; that list is published by DOL each November and is intentionally not modelled here yet.",
+    "comment": "Net rate assumes the full state credit. Credit-reduction states pay more, and that IS now modelled — see creditReduction below: futa() adds the state's additional rate when the map carries one, and says the determination is pending when it does not.",
     "exemptPretax": [
       "section125",
       "hsa",
@@ -203,7 +239,7 @@
     "Pension/annuity withholding (Pub 15-T's separate periodic-payment tables, Form W-4P) is not modelled -- this engine assumes ordinary W-2 wage/salary payroll only.",
     "Nonpayroll withholding (Form 945 categories: IRA distributions, gambling winnings, certain government/Indian gaming payments) is out of scope -- these aren't wage payroll at all.",
     "Special employment-tax categories are not modelled: household employees, agricultural (incl. H-2A) workers, statutory employees, ministers/clergy, election workers, railroad employees, tipped employees' allocated-tips rules. A standard W-2 wage/salary employee is the only supported case; using this engine for any of these categories will produce wrong numbers, not an explicit error. PARTLY CLOSED: clergy and statutory employees are now modelled via input.employmentCategory — see the employmentCategories block above for each one's rule and source. Household employees, agricultural workers, election workers, ministers' housing allowances and railroad (RRTA) employment remain unmodelled. FURTHER CLOSED: household and agricultural workers are now modelled too (input.employmentCategory, with the coverage thresholds in employmentCategories.coverageThresholds). Election workers, railroad (RRTA) employment and ministers housing allowances remain unmodelled. Railroad (RRTA) employment is now modelled as well — see the railroadRetirement block: Tier I relabelled from the identical FICA computation, Tier II computed at 4.9%/13.1% to its own 37,100 base, and FUTA zeroed because rail employers contribute under the RUIA. Election workers and ministers housing allowances remain unmodelled. Election workers are now modelled too ($2,500 coverage threshold, outside FUTA as government employment), and railroad unemployment contributions are computed under the RUIA rather than merely disclosed. What remains unmodelled: ministers housing allowances and the supplemental annuity work-hour tax.",
-    "FUTA credit-reduction states are not modelled (see futa.comment) -- the DOL's annual credit-reduction list changes which states' net FUTA rate exceeds 0.6%.",
+    "FUTA credit-reduction states are not modelled (see futa.comment) -- the DOL's annual credit-reduction list changes which states' net FUTA rate exceeds 0.6%. WIRED (credit-reduction pass): futa() now adds the state's additional rate from futa.creditReduction.states, and where that map is empty the line says the determination is pending rather than implying 0.6% is final. The 2026 map IS empty as shipped, because DOL makes the determination after November 10, 2026 — 2025's finals (CA 1.2%, VI 4.5%) ride along as priorYear reference only.",
     "Backup withholding (backupWithholdingRate, 24%) is recorded as data but has no compute path -- no rule detects a missing/invalid TIN and applies it.",
     "The percentage_method_automated_worksheet_1a method is the ONLY Pub 15-T method implemented. Pub 15-T also publishes wage-bracket tables and non-automated percentage-method tables for manual systems; this engine intentionally supports only the automated-system method, which is exact rather than table-rounded."
   ],
