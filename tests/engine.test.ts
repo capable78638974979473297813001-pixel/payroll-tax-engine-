@@ -8184,3 +8184,85 @@ describe('nonresident allocation of state income tax', () => {
     assert.match(de.taxes.find((t) => t.id === 'DE_SIT')?.detail ?? '', /source income over federal AGI/);
   });
 });
+
+/**
+ * Colorado's other Occupational Privilege Tax cities. Denver was modelled
+ * first and alone; Glendale, Greenwood Village and Sheridan levy their own
+ * head tax, and Aurora levied one until repealing it effective 2025-01-01.
+ * The three live cities do not agree on the threshold test, which is real
+ * money for someone near it.
+ */
+describe('Colorado Occupational Privilege Tax beyond Denver', () => {
+  const opt = (cert: Record<string, unknown>) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly' as const,
+    earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(2000) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    workState: { code: 'CO', certificate: cert },
+  });
+
+  test('Denver is unchanged by the generalization, old certificate field and all', () => {
+    const modern = calculatePaycheck(
+      opt({ locality: 'Denver', localMonthlyCompensation: dollars(4000) }),
+    );
+    assert.equal(amountOf(modern, 'DENVER_OPT_EE'), dollars(5.75));
+    assert.equal(amountOf(modern, 'DENVER_OPT_ER'), dollars(4.0));
+
+    const legacy = calculatePaycheck(
+      opt({ locality: 'Denver', denverMonthlyCompensation: dollars(4000) }),
+    );
+    assert.equal(amountOf(legacy, 'DENVER_OPT_EE'), dollars(5.75));
+  });
+
+  test('Glendale taxes MORE THAN $750, so exactly $750 owes nothing', () => {
+    const atThreshold = calculatePaycheck(
+      opt({ locality: 'Glendale', localMonthlyCompensation: dollars(750) }),
+    );
+    assert.equal(amountOf(atThreshold, 'GLENDALE_OPT_EE'), dollars(0));
+
+    const above = calculatePaycheck(
+      opt({ locality: 'Glendale', localMonthlyCompensation: dollars(750.01) }),
+    );
+    assert.equal(amountOf(above, 'GLENDALE_OPT_EE'), dollars(5.0));
+    assert.equal(amountOf(above, 'GLENDALE_OPT_ER'), dollars(5.0));
+  });
+
+  test('Greenwood Village taxes AT $250 — the opposite boundary from Glendale', () => {
+    const atThreshold = calculatePaycheck(
+      opt({ locality: 'Greenwood Village', localMonthlyCompensation: dollars(250) }),
+    );
+    assert.equal(amountOf(atThreshold, 'GREENWOOD_VILLAGE_OPT_EE'), dollars(2.0));
+    assert.equal(amountOf(atThreshold, 'GREENWOOD_VILLAGE_OPT_ER'), dollars(2.0));
+
+    const below = calculatePaycheck(
+      opt({ locality: 'Greenwood Village', localMonthlyCompensation: dollars(249) }),
+    );
+    assert.equal(amountOf(below, 'GREENWOOD_VILLAGE_OPT_EE'), dollars(0));
+  });
+
+  test('Sheridan publishes no threshold, so the tax is due for each employee', () => {
+    const r = calculatePaycheck(opt({ locality: 'Sheridan', localMonthlyCompensation: dollars(50) }));
+    assert.equal(amountOf(r, 'SHERIDAN_OPT_EE'), dollars(3.0));
+    assert.equal(amountOf(r, 'SHERIDAN_OPT_ER'), dollars(3.0));
+    assert.match(r.taxes.find((t) => t.id === 'SHERIDAN_OPT_EE')?.detail ?? '', /publishes no monthly earnings threshold/);
+  });
+
+  test("Aurora's repealed tax computes nothing for a 2026 cheque", () => {
+    const r = calculatePaycheck(opt({ locality: 'Aurora', localMonthlyCompensation: dollars(4000) }));
+    assert.equal(r.taxes.some((t) => t.id.startsWith('AURORA_OPT')), false);
+  });
+
+  test('a flat monthly amount is never withheld twice in the same month', () => {
+    const r = calculatePaycheck(opt({ locality: 'Sheridan', localOPTWithheldThisMonth: true }));
+    assert.equal(amountOf(r, 'SHERIDAN_OPT_EE'), dollars(0));
+  });
+});

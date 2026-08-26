@@ -66,7 +66,56 @@
     "rule": "NONE. Colorado has no reciprocal withholding agreements with any state — cross-source confirmed, and consistent with the Wage Withholding Tax Guide's own complete silence on the topic (a state that DID have reciprocity agreements would need to document the mechanism somewhere in its own guide; this one simply never mentions it)."
   },
   "localIncomeTax": {
-    "$comment": "Colorado's locals are a genuinely different SHAPE from every other local tax in this project: a flat DOLLAR-PER-MONTH 'Occupational Privilege Tax' (a head tax, not a percentage of wages), gated by a monthly earnings THRESHOLD rather than a bracket. CORRECTED (2026-08-24): this note previously claimed Denver was 'wired into calc code' -- it was not (src/taxes/state.ts had no Denver dispatch at all). NOW actually wired via denverOccupationalPrivilegeTax(), proven by tests/engine.test.ts's describe('Denver Occupational Privilege Tax (OPT)'). The other CO OPT cities (see otherOptJurisdictions below) remain data-only, correctly not claimed as wired.",
+     "occupationalPrivilegeTax": {
+       "Glendale": {
+         "employeeRate": 5,
+         "employerRatePerEmployee": 5,
+         "monthlyEarningsThreshold": 750,
+         "thresholdComparison": "above",
+         "source": {
+           "title": "City of Glendale, CO — Occupational Privilege Tax (municipal code Chapter 3.21 and the city's own OPT page)",
+           "url": "https://www.glendale.co.us/355/Occupational-Privilege-Tax",
+           "verifiedOn": "2026-08-25",
+           "note": "Glendale's own wording is 'earn more than $750 during a calendar month', which is why thresholdComparison is 'above' rather than Denver's at-or-above test — an employee earning exactly $750 in Glendale is NOT taxable, while an employee earning exactly $500 in Denver is."
+         }
+       },
+       "Greenwood Village": {
+         "employeeRate": 2,
+         "employerRatePerEmployee": 2,
+         "monthlyEarningsThreshold": 250,
+         "thresholdComparison": "at_or_above",
+         "source": {
+           "title": "City of Greenwood Village occupational privilege tax",
+           "url": "https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax",
+           "verifiedOn": "2026-08-25",
+           "note": "$2 employee and $2 employer per month, both owed once an employee earns $250 or more in a calendar month. Cross-source confirmed rather than fetched from the city's own page this pass."
+         }
+       },
+       "Sheridan": {
+         "employeeRate": 3,
+         "employerRatePerEmployee": 3,
+         "monthlyEarningsThreshold": null,
+         "source": {
+           "title": "City of Sheridan, CO — Occupational Privilege Tax",
+           "url": "https://ci.sheridan.co.us/288/Occupational-Privilege-Tax",
+           "verifiedOn": "2026-08-25",
+           "note": "Fetched directly and quoted: '$3 per month' from each employee through payroll withholding, with a '$3 per month match ... due from the employer for each employee'. NO monthly earnings threshold appears anywhere on the city's own page — unlike Denver, Glendale and Greenwood Village, which all publish one. Recorded as null rather than borrowing a neighbour's figure; secondary aggregators cite $500 but the city itself does not, so the engine taxes each employee as the page says."
+         }
+       },
+       "Aurora": {
+         "employeeRate": 2,
+         "employerRatePerEmployee": 2,
+         "monthlyEarningsThreshold": 250,
+         "repealedOn": "2025-01-01",
+         "source": {
+           "title": "City of Aurora — Occupational Privilege Tax repeal",
+           "url": "https://www.auroragov.org/business_services/taxes__licensing/occupational_privilege_tax",
+           "verifiedOn": "2026-08-25",
+           "note": "Aurora imposed a $2/$2 OPT until it was REPEALED effective 2025-01-01. Kept here with its repeal date rather than deleted, so a 2024 check date still computes what was actually owed then and a 2026 one correctly computes nothing — a repeal is a fact about the tax, not an absence of one."
+         }
+       }
+     },
+    "$comment": "Colorado's locals are a genuinely different SHAPE from every other local tax in this project: a flat DOLLAR-PER-MONTH 'Occupational Privilege Tax' (a head tax, not a percentage of wages), gated by a monthly earnings THRESHOLD rather than a bracket. CORRECTED (2026-08-24): this note previously claimed Denver was 'wired into calc code' -- it was not (src/taxes/state.ts had no Denver dispatch at all). NOW actually wired via denverOccupationalPrivilegeTax(), proven by tests/engine.test.ts's describe('Denver Occupational Privilege Tax (OPT)'). The other CO OPT cities (see otherOptJurisdictions below) remain data-only, correctly not claimed as wired. WIRED (Colorado OPT pass): Glendale ($5/$5, more than $750/month), Greenwood Village ($2/$2, $250 or more) and Sheridan ($3/$3, no published threshold) are now computed by coloradoOccupationalPrivilegeTax(), and Aurora's repealed tax is carried with its 2025-01-01 repeal date so a pre-repeal check date still computes it. See localIncomeTax.occupationalPrivilegeTax.",
     "denver": {
       "employeeRate": 5.75,
       "employerRatePerEmployee": 4.0,
@@ -90,7 +139,7 @@
       "verification": "UPGRADED on a verification pass from cross_source_confirmed to primary_source_confirmed — fetched auroragov.org's own OPT page directly, which states plainly: 'Occupational Privilege Tax Repeal - Reminder. The city of Aurora Occupational Privilege Tax will be repealed effective Jan. 1, 2025.' Also picked up two facts this file didn't have before (the $250/month earnings threshold that used to trigger liability, and the repeal ordinance number) directly from that same primary fetch."
     },
     "otherOptJurisdictions": {
-      "$comment": "Colorado's other OPT cities (Glendale, Greenwood Village, Sheridan) are known to exist by name but were NOT individually researched to primary-source depth this session — named here so the gap is explicit rather than silently omitted, not asserted with any rate figures.",
+      "$comment": "Colorado's other OPT cities (Glendale, Greenwood Village, Sheridan) are known to exist by name but were NOT individually researched to primary-source depth this session — named here so the gap is explicit rather than silently omitted, not asserted with any rate figures. WIRED (Colorado OPT pass): Glendale ($5/$5, more than $750/month), Greenwood Village ($2/$2, $250 or more) and Sheridan ($3/$3, no published threshold) are now computed by coloradoOccupationalPrivilegeTax(), and Aurora's repealed tax is carried with its 2025-01-01 repeal date so a pre-repeal check date still computes it. See localIncomeTax.occupationalPrivilegeTax.",
       "knownCities": ["Glendale", "Greenwood Village", "Sheridan"]
     }
   },
@@ -124,7 +173,7 @@
   "verification": "PROVEN via calculatePaycheck(): fixtures hand-derived from DR 1098's own worksheet formula (no official EDD-style worked example with a full dollar figure was found in DR 1098 itself, unlike California's Method B) plus FAMLI and Denver OPT fixtures. See tests/engine.test.ts, describe('Colorado').",
   "knownGaps": [
     "DR 0004 Line 2's own precise worksheet (for an employee who wants to compute a MORE ACCURATE deduction figure than the flat $11,000/$5,500) was not transcribed — this engine models it as an opaque caller-supplied override (certificate.dr0004Line2Amount), matching how Kentucky/Iowa-style caller-supplied figures already work elsewhere in this project.",
-    "Only Denver's OPT is modelled with real rate figures; Glendale/Greenwood Village/Sheridan are named but not researched to primary-source depth. None of the OPT jurisdictions are wired into calc code this pass — a genuinely new tax SHAPE (flat monthly dollar amount gated by a monthly earnings threshold, not a percentage of wages or a bracket) that doesn't fit any existing dispatch method.",
+    "Only Denver's OPT is modelled with real rate figures; Glendale/Greenwood Village/Sheridan are named but not researched to primary-source depth. None of the OPT jurisdictions are wired into calc code this pass — a genuinely new tax SHAPE (flat monthly dollar amount gated by a monthly earnings threshold, not a percentage of wages or a bracket) that doesn't fit any existing dispatch method. WIRED (Colorado OPT pass): Glendale ($5/$5, more than $750/month), Greenwood Village ($2/$2, $250 or more) and Sheridan ($3/$3, no published threshold) are now computed by coloradoOccupationalPrivilegeTax(), and Aurora's repealed tax is carried with its 2025-01-01 repeal date so a pre-repeal check date still computes it. See localIncomeTax.occupationalPrivilegeTax.",
     "UI is employer-only and not wired into calc code — same structural gap as every other state's SUTA in this project. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
     "The pre-mid-year-change formula does not apply here (DR 1098 has been a single, non-mid-year-changing formula for 2026 as far as this session found — no HB96/Ohio-style split-table situation was discovered for Colorado)."
   ],
