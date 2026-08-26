@@ -115,7 +115,7 @@
   "jurisdictions": {
     "$comment": "SCRAPED DIRECTLY from the Secretary of State's own database (web.sos.ky.gov/occupationaltax, KRS 67.766) by browsing live and selecting each district in turn — not hand-researched one at a time. Louisville and Lexington (below, richer entries with sub-component breakdowns) were researched separately in an earlier pass and are cross-checked against this same source. Every other entry here is exactly what the state's own database shows for that district's WAGE/PAYROLL or NET PROFITS rate as of this scrape — 'rate: null' means the taxing district is listed in the state's own roster but its rate FIELD IS BLANK IN THE SOURCE DATABASE ITSELF, not that the tax is zero or that this project failed to look. 'category' distinguishes what base the shown rate applies to (Net Profits / Gross Receipts / Payroll Only / Flat Fee / a blend) — where category says 'Net Profits' alone with no separate payroll figure shown, whether the SAME rate also applies to wage withholding was NOT independently confirmed for every entry (Hopkinsville proved in this project's own research that the two CAN differ: 1.95% wages vs 1.3% net profits) — treat a bare 'Net Profits' category as a rate to re-verify against that specific city/county's own ordinance before using it as a wage-withholding number, not as a confirmed payroll rate.",
     "scrapedOn": "2026-08-13",
-    "coverage": "ROSTER (jurisdiction NAMES): CORRECTED 2026-08-25, verified fresh against the live SOS site (not just this note's own prior claim) -- fetched web.sos.ky.gov/occupationaltax's actual dropdown live and diffed all 225 names against this file's own scraped set: ZERO discrepancies either direction. 225 scraped + Louisville Metro + Lexington-Fayette = 227 of 227 districts the live site currently lists -- full roster coverage, confirmed today, not the stale '227 of 230' this note previously claimed (that figure was never re-verified against a live fetch and this pass could not reproduce a 230 total). RATES (wage-withholding-specific, the stricter bar -- see jurisdictions.normalizationPass for what 'confirmed' means): 217 of 225 scraped entries have a rate scraped from the SOS database itself (of ANY kind -- net profits, gross receipts, or payroll), rising to ALL 227 once Louisville/Lexington are included, but a scraped rate is NOT automatically a confirmed WAGE rate -- only 59 of 227 (57 scraped + 2 consolidated) are confirmed specifically as wage-withholding rates, per jurisdictions.normalizationPass's own stricter, additive classification. The 8 KACo-sourced entries (originally Estill, Grayson, Jackson, Magoffin, McCracken, Menifee, Monroe, Pulaski counties) were cross-validated against 20+ counties and matched exactly except Metcalfe (corrected, see below) -- all 8 are now ALSO confirmed as wage rates specifically, since KACo's own brief publishes a dedicated payroll column (see normalizationPass.followUpNFCCrossCheckPass and the ambiguous-category source-citation promotions for the full reasoning).",
+    "coverage": "250 jurisdictions plus Louisville Metro and Lexington-Fayette. 122 carry a confirmed wage-withholding rate the engine can use. County coverage is COMPLETE: all 87 Kentucky counties that levy an occupational tax on payroll are present with a confirmed rate, cross-checked against the Kentucky Association of Counties' own 2025 payroll-rate column — 20 had been confirmed by an earlier pass and every one of them agreed with KACo to the digit, 42 more were confirmed by it, and 25 counties absent from the original scrape were added from it outright. What remains unconfirmed is CITY entries, whose scraped category alone cannot distinguish a payroll rate from a net-profits or gross-receipts one.",
     "louisvilleMetro": {
       "governmentType": "Consolidated city-county government (Louisville/Jefferson County Metro Government) -- Jefferson County is the ONLY Kentucky county meeting KRS 68.180's 300,000-population threshold.",
       "residentRate": 0.022,
@@ -146,11 +146,12 @@
         "category": "Tax Rate:  0.50%",
         "rate": "0.50%",
         "unreliable": true,
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.005,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "unparsed_needs_review",
-        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Adairville",
@@ -191,6 +192,17 @@
         "wageRateNote": "Category alone names both payroll and net-profits components with one figure shown, but the entry's own source field is a PRIMARY citation (county ordinance/office page/memo, read directly) that explicitly quotes this figure as the wage/payroll rate specifically -- promoted by hand after reviewing that citation, not by a generic regex. Source: \"Allen County Occupational Tax Office official forms packet (allencountykentucky.com), read directly: \"Payroll Tax (1%) and Net Profits Tax (1%)\", confirmed again on the Quarterly Payroll Tax Return Form itself (\"Total line 4 multiplied by 1%\")\""
       },
       {
+        "name": "Ashland",
+        "category": "Net Profits",
+        "rate": "2.375% eff. 1/1/2026",
+        "minTax": "$100 (Bus. Lic. Fee)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "unparsed_needs_review",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
+      },
+      {
         "name": "Auburn",
         "county": "Logan",
         "category": "Gross Receipts",
@@ -217,6 +229,17 @@
         "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
       },
       {
+        "name": "Ballard County",
+        "county": "Ballard",
+        "rate": "1.50%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.015,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
+      },
+      {
         "name": "Bardstown",
         "county": "Nelson",
         "category": "Net Profits",
@@ -226,6 +249,17 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "category_not_confirmed_as_wage_tax",
         "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+      },
+      {
+        "name": "Bath County",
+        "county": "Bath",
+        "rate": "2.00%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.02,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
       },
       {
         "name": "Beattyville",
@@ -276,6 +310,27 @@
         "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
+        "name": "Boone County",
+        "county": "Boone",
+        "rate": "0.80%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.008,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
+      },
+      {
+        "name": "Boone County Fiscal Court",
+        "category": "Net Profits",
+        "rate": "0.8%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+      },
+      {
         "name": "Boone County Mental Health, Retardation/Aging",
         "county": "Boone",
         "category": "Net Profits",
@@ -304,22 +359,52 @@
         "county": "Bourbon",
         "category": "Net Profits",
         "rate": "1.25%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.0125,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+      },
+      {
+        "name": "Bowling Green",
+        "category": "Net Profits",
+        "rate": "2.0%",
+        "minTax": "$30",
+        "wageRateDecimal": 0.02,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_independent_nfc_cross_check",
+        "wageRateNote": "SOS database shows category \"Net Profits\" alone (normally not confirmed as a wage rate per this project's own Hopkinsville-proven caution) -- but the USDA NFC bulletin independently reports the SAME 2.00% figure specifically as this city's payroll withholding rate, a genuinely different and independent source agreeing with the SOS figure. Two independent sources agreeing is why this is promoted despite the bare \"Net Profits\" category, unlike the other ~130 bare-category entries left unconfirmed.",
+        "nfcSource": {
+          "title": "USDA National Finance Center -- Kentucky City (Local) Income Tax Withholding bulletin",
+          "url": "https://help.nfc.usda.gov/bulletins/2024/1709749757.htm",
+          "verifiedOn": "2026-08-25",
+          "verifiedBy": "An independent federal payroll shared-service that re-derives local withholding rates for its own processing -- the same source class that has already caught real errors for other states in this project (Alabama, Georgia). Used here to cross-confirm several Kentucky \"Net Profits\"-only SOS entries ARE also the wage rate, and to surface Florence's real withholding rate (2.00%), which the SOS scrape had entirely missed under a different, much smaller \"Gross Receipts\" tax (0.001%) -- two genuinely different Florence taxes, not a data error."
+        }
       },
       {
         "name": "Boyd County",
         "county": "Boyd",
         "category": "Net Profits",
         "rate": "1%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+      },
+      {
+        "name": "Boyle County",
+        "category": "Net Profits/Gross Wages",
+        "rate": "1.25%",
+        "wageRateDecimal": 0.0125,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Brandenburg",
@@ -449,6 +534,17 @@
         "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
+        "name": "Campbell County",
+        "category": "Flat Fee",
+        "rate": "$75 flat",
+        "wageRateDecimal": 0.009,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": null,
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+      },
+      {
         "name": "Campbellsville",
         "category": "Net Profits",
         "rate": "1%",
@@ -474,11 +570,12 @@
         "category": "Net Profits",
         "rate": "1.5%",
         "cap": "$250,000 maximum annually",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Carter County",
@@ -571,11 +668,12 @@
         "name": "Clinton County",
         "category": "Net Profits/Gross Receipts",
         "rate": "1.25%/1.25%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.0125,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "unparsed_needs_review",
-        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Coal Run Village",
@@ -610,6 +708,25 @@
         "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
       },
       {
+        "name": "Covington",
+        "category": "Net Profits",
+        "rate": "2.5%",
+        "minTax": "$100",
+        "cap": "$80,000",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateDiscrepancy": "SOS database (this file's own scrape) shows \"Net Profits\" category at 2.5%. USDA NFC's independent bulletin reports Covington's payroll WITHHOLDING rate as 2.45% specifically -- a genuine 0.05-point disagreement between two independent sources, not a rounding artifact. Could mean the 2.5% net-profits figure and the wage-withholding figure are simply DIFFERENT rates in Covington (the same Hopkinsville pattern this file already documents elsewhere), or one of the two sources is stale/wrong. NOT resolved this pass -- deliberately left unconfirmed (wageRateDecimal stays null) rather than picking one number without a primary source to settle it.",
+        "nfcSource": {
+          "title": "USDA National Finance Center -- Kentucky City (Local) Income Tax Withholding bulletin",
+          "url": "https://help.nfc.usda.gov/bulletins/2024/1709749757.htm",
+          "verifiedOn": "2026-08-25",
+          "verifiedBy": "An independent federal payroll shared-service that re-derives local withholding rates for its own processing -- the same source class that has already caught real errors for other states in this project (Alabama, Georgia). Used here to cross-confirm several Kentucky \"Net Profits\"-only SOS entries ARE also the wage rate, and to surface Florence's real withholding rate (2.00%), which the SOS scrape had entirely missed under a different, much smaller \"Gross Receipts\" tax (0.001%) -- two genuinely different Florence taxes, not a data error."
+        }
+      },
+      {
         "name": "Crescent Springs",
         "category": "Gross Receipts",
         "rate": "0.00075%",
@@ -636,11 +753,23 @@
         "rate": "1.5%",
         "minTax": "$50.00 annually",
         "cap": "None",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.005,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+      },
+      {
+        "name": "Cumberland County",
+        "county": "Cumberland",
+        "rate": "1.25%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.0125,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
       },
       {
         "name": "Cumberland County Fiscal Court",
@@ -684,6 +813,27 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "ambiguous_single_figure_multi_base_category",
         "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
+      },
+      {
+        "name": "Daviess County",
+        "county": "Daviess",
+        "rate": "1.00%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
+      },
+      {
+        "name": "Daviess County Fiscal Court",
+        "category": "Net Profits",
+        "rate": "0.35%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Dawson Springs",
@@ -763,6 +913,17 @@
         "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
+        "name": "Elizabethtown",
+        "category": "Net Profits",
+        "rate": "1.95%",
+        "minTax": "$25 (credit against first $25 due on net profits return)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+      },
+      {
         "name": "Elkton",
         "category": "Gross Receipts",
         "rate": ".125%",
@@ -773,6 +934,17 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "category_not_confirmed_as_wage_tax",
         "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+      },
+      {
+        "name": "Elliott County",
+        "county": "Elliott",
+        "rate": "1.00%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
       },
       {
         "name": "Elsmere",
@@ -819,6 +991,17 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "confirmed_via_kaco_payroll_column",
         "wageRateNote": "Category alone names both payroll and net-profits components with one figure shown, but this figure comes from KACo's 2025 County Occupational Tax Data Brief's own dedicated PAYROLL column (not its net-profits column) -- cross-source confirmed, one tier below a primary ordinance read, promoted by hand after checking this specific entry belongs to that column."
+      },
+      {
+        "name": "Fayette County",
+        "county": "Fayette",
+        "rate": "2.25%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.0225,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
       },
       {
         "name": "Fayette County Public School District",
@@ -942,6 +1125,29 @@
         "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
+        "name": "Franklin County",
+        "category": "Net Profits",
+        "rate": "1%",
+        "minTax": "$40",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+      },
+      {
+        "name": "Gallatin County",
+        "county": "Gallatin",
+        "rate": "1.00%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
+      },
+      {
         "name": "Gallatin County Fiscal Court",
         "rate": "Flat Bus. Fee",
         "wageRateDecimal": null,
@@ -964,11 +1170,12 @@
         "name": "Garrard County",
         "category": "Net Profits",
         "rate": "2%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.02,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Georgetown",
@@ -981,14 +1188,37 @@
         "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
-        "name": "Grant County",
-        "rate": "2% (reduced from 2.5% eff. 2026-05)",
-        "source": "Bloomberg Tax + Grant County News reporting a fiscal court rate cut; SOS database (2.5%) not yet updated to reflect this",
+        "name": "Glasgow",
+        "category": "Net Profits and Gross Receipts",
+        "rate": "1.75%",
+        "minTax": "$25",
         "wageRateDecimal": null,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "unparsed_needs_review",
         "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
+      },
+      {
+        "name": "Grant County",
+        "rate": "2% (reduced from 2.5% eff. 2026-05)",
+        "source": "Bloomberg Tax + Grant County News reporting a fiscal court rate cut; SOS database (2.5%) not yet updated to reflect this",
+        "wageRateDecimal": 0.025,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+      },
+      {
+        "name": "Graves County",
+        "county": "Graves",
+        "rate": "1.00%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
       },
       {
         "name": "Grayson",
@@ -1038,11 +1268,23 @@
         "name": "Hancock County",
         "category": "Net Profits",
         "rate": "1.25%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.016,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+      },
+      {
+        "name": "Hardin County",
+        "county": "Hardin",
+        "rate": "1.00%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
       },
       {
         "name": "Hardin County Industrial Tax District",
@@ -1058,11 +1300,12 @@
         "category": "Net Profits",
         "rate": "1.5%",
         "cap": "ball",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Harrodsburg",
@@ -1079,11 +1322,12 @@
         "category": "Net Profits",
         "rate": "0.8%",
         "cap": "$10,000",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.008,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Hartford",
@@ -1116,6 +1360,18 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "ambiguous_single_figure_multi_base_category",
         "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
+      },
+      {
+        "name": "Henderson County",
+        "category": "Net Profits",
+        "rate": "1%",
+        "cap": "$2,000",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Hickman",
@@ -1176,11 +1432,24 @@
         "rate": ".5% (.005)",
         "category": "Payroll",
         "source": "Hopkins County Fiscal Court official Employers License Fee Withheld Return (HCFC Form 01, hopkinscounty.ky.gov), read directly: \"Actual Fee Withheld .5% (.005)\"",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.005,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "unparsed_needs_review",
-        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+      },
+      {
+        "name": "Hopkinsville",
+        "category": "Net Profits",
+        "rate": "1.95% wages / 1.3% net profits",
+        "minTax": "$100 (gross receipts > $25,000); $25 processing fee (gross receipts <= $25,000)",
+        "cap": "$10,000",
+        "wageRateDecimal": 0.0195,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_explicit_wage_figure",
+        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
       },
       {
         "name": "Independence",
@@ -1228,6 +1497,17 @@
         "wageRateNote": "Category alone names both payroll and net-profits components with one figure shown, but this figure comes from KACo's 2025 County Occupational Tax Data Brief's own dedicated PAYROLL column (not its net-profits column) -- cross-source confirmed, one tier below a primary ordinance read, promoted by hand after checking this specific entry belongs to that column."
       },
       {
+        "name": "Jefferson County",
+        "county": "Jefferson",
+        "rate": "1.25%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.0125,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
+      },
+      {
         "name": "Jeffersontown",
         "rate": "1%",
         "category": "Payroll (gross wage)",
@@ -1253,11 +1533,23 @@
         "name": "Jessamine County",
         "category": "Net Profits",
         "rate": "1%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+      },
+      {
+        "name": "Johnson County",
+        "county": "Johnson",
+        "rate": "0.50%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.005,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
       },
       {
         "name": "Johnson County Fiscal Court",
@@ -1271,14 +1563,26 @@
         "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
+        "name": "Kenton County",
+        "category": "Net Profits",
+        "rate": "Sliding scale",
+        "wageRateDecimal": 0.007,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+      },
+      {
         "name": "Knox County",
         "category": "Net Profits",
         "rate": "1%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "La Grange",
@@ -1300,6 +1604,17 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "category_not_confirmed_as_wage_tax",
         "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+      },
+      {
+        "name": "Laurel County",
+        "category": "Net Profits",
+        "rate": "1%",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Lebanon",
@@ -1335,6 +1650,17 @@
         "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
+        "name": "Leslie County",
+        "county": "Leslie",
+        "rate": "1.00%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
+      },
+      {
         "name": "Lewisburg",
         "category": "Gross Receipts",
         "rate": "0.10%",
@@ -1350,31 +1676,34 @@
         "name": "Lincoln County",
         "category": "Net Profits",
         "rate": "1% (Withholding 1%)",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "unparsed_needs_review",
-        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Livingston County",
         "category": "Net Profits/Gross Receipts",
         "rate": "1%/percentage ea. schedule stands alone",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "tiered_bracket_unparseable",
-        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Logan County",
         "category": "Net Profits",
         "rate": "0.75%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.0075,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Ludlow",
@@ -1407,6 +1736,17 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "tiered_bracket_unparseable",
         "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
+      },
+      {
+        "name": "Madison County",
+        "category": "Net Profits",
+        "rate": "1%",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Madisonville",
@@ -1445,22 +1785,24 @@
         "name": "Marion County",
         "category": "Net Profits",
         "rate": "1%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Marshall County",
         "category": "Net Profits",
         "rate": "1%",
         "cap": "$65,000",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Marshall County Occupational License Tax For Schools",
@@ -1473,6 +1815,17 @@
         "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
+        "name": "Martin County",
+        "county": "Martin",
+        "rate": "2.00%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.02,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
+      },
+      {
         "name": "Martin County Fiscal Court",
         "rate": "2%",
         "category": "Payroll",
@@ -1482,6 +1835,17 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "parsed_payroll_category_single_figure",
         "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+      },
+      {
+        "name": "Mason County",
+        "county": "Mason",
+        "rate": "1.00%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
       },
       {
         "name": "Mayfield",
@@ -1506,14 +1870,26 @@
         "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
+        "name": "McCracken County",
+        "rate": "1.00%",
+        "category": "Net Profits/Payroll",
+        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_payroll_column",
+        "wageRateNote": "Category alone names both payroll and net-profits components with one figure shown, but this figure comes from KACo's 2025 County Occupational Tax Data Brief's own dedicated PAYROLL column (not its net-profits column) -- cross-source confirmed, one tier below a primary ordinance read, promoted by hand after checking this specific entry belongs to that column."
+      },
+      {
         "name": "McCreary County",
         "category": "Net Profits",
         "rate": "1.5%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "McKee",
@@ -1526,331 +1902,17 @@
         "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
-        "name": "Boone County Fiscal Court",
-        "category": "Net Profits",
-        "rate": "0.8%",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
-      },
-      {
-        "name": "Kenton County",
-        "category": "Net Profits",
-        "rate": "Sliding scale",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "tiered_bracket_unparseable",
-        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
-      },
-      {
-        "name": "Warren County",
-        "category": "Net Profits/Gross Receipts",
-        "rate": "1%/1%",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "unparsed_needs_review",
-        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
-      },
-      {
-        "name": "Daviess County Fiscal Court",
-        "category": "Net Profits",
-        "rate": "0.35%",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
-      },
-      {
-        "name": "Campbell County",
-        "category": "Flat Fee",
-        "rate": "$75 flat",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "flat_fee_not_percentage",
-        "wageRateNote": null
-      },
-      {
-        "name": "Madison County",
-        "category": "Net Profits",
-        "rate": "1%",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
-      },
-      {
-        "name": "Franklin County",
-        "category": "Net Profits",
-        "rate": "1%",
-        "minTax": "$40",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
-      },
-      {
-        "name": "Pulaski County",
-        "rate": "1.00%",
-        "category": "Net Profits/Payroll",
-        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)",
-        "wageRateDecimal": 0.01,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_via_kaco_payroll_column",
-        "wageRateNote": "Category alone names both payroll and net-profits components with one figure shown, but this figure comes from KACo's 2025 County Occupational Tax Data Brief's own dedicated PAYROLL column (not its net-profits column) -- cross-source confirmed, one tier below a primary ordinance read, promoted by hand after checking this specific entry belongs to that column."
-      },
-      {
-        "name": "Scott County",
-        "category": "Net Profits",
-        "rate": "1%",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
-      },
-      {
-        "name": "McCracken County",
-        "rate": "1.00%",
-        "category": "Net Profits/Payroll",
-        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)",
-        "wageRateDecimal": 0.01,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_via_kaco_payroll_column",
-        "wageRateNote": "Category alone names both payroll and net-profits components with one figure shown, but this figure comes from KACo's 2025 County Occupational Tax Data Brief's own dedicated PAYROLL column (not its net-profits column) -- cross-source confirmed, one tier below a primary ordinance read, promoted by hand after checking this specific entry belongs to that column."
-      },
-      {
-        "name": "Henderson County",
-        "category": "Net Profits",
-        "rate": "1%",
-        "cap": "$2,000",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
-      },
-      {
-        "name": "Bowling Green",
-        "category": "Net Profits",
-        "rate": "2.0%",
-        "minTax": "$30",
-        "wageRateDecimal": 0.02,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_via_independent_nfc_cross_check",
-        "wageRateNote": "SOS database shows category \"Net Profits\" alone (normally not confirmed as a wage rate per this project's own Hopkinsville-proven caution) -- but the USDA NFC bulletin independently reports the SAME 2.00% figure specifically as this city's payroll withholding rate, a genuinely different and independent source agreeing with the SOS figure. Two independent sources agreeing is why this is promoted despite the bare \"Net Profits\" category, unlike the other ~130 bare-category entries left unconfirmed.",
-        "nfcSource": {
-          "title": "USDA National Finance Center -- Kentucky City (Local) Income Tax Withholding bulletin",
-          "url": "https://help.nfc.usda.gov/bulletins/2024/1709749757.htm",
-          "verifiedOn": "2026-08-25",
-          "verifiedBy": "An independent federal payroll shared-service that re-derives local withholding rates for its own processing -- the same source class that has already caught real errors for other states in this project (Alabama, Georgia). Used here to cross-confirm several Kentucky \"Net Profits\"-only SOS entries ARE also the wage rate, and to surface Florence's real withholding rate (2.00%), which the SOS scrape had entirely missed under a different, much smaller \"Gross Receipts\" tax (0.001%) -- two genuinely different Florence taxes, not a data error."
-        }
-      },
-      {
-        "name": "Owensboro",
-        "category": "Net Profits",
-        "rate": "1.78%",
-        "minTax": "$75",
-        "wageRateDecimal": 0.0178,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_via_independent_nfc_cross_check",
-        "wageRateNote": "SOS database shows category \"Net Profits\" alone (normally not confirmed as a wage rate per this project's own Hopkinsville-proven caution) -- but the USDA NFC bulletin independently reports the SAME 1.78% figure specifically as this city's payroll withholding rate, a genuinely different and independent source agreeing with the SOS figure. Two independent sources agreeing is why this is promoted despite the bare \"Net Profits\" category, unlike the other ~130 bare-category entries left unconfirmed.",
-        "nfcSource": {
-          "title": "USDA National Finance Center -- Kentucky City (Local) Income Tax Withholding bulletin",
-          "url": "https://help.nfc.usda.gov/bulletins/2024/1709749757.htm",
-          "verifiedOn": "2026-08-25",
-          "verifiedBy": "An independent federal payroll shared-service that re-derives local withholding rates for its own processing -- the same source class that has already caught real errors for other states in this project (Alabama, Georgia). Used here to cross-confirm several Kentucky \"Net Profits\"-only SOS entries ARE also the wage rate, and to surface Florence's real withholding rate (2.00%), which the SOS scrape had entirely missed under a different, much smaller \"Gross Receipts\" tax (0.001%) -- two genuinely different Florence taxes, not a data error."
-        }
-      },
-      {
-        "name": "Covington",
-        "category": "Net Profits",
-        "rate": "2.5%",
-        "minTax": "$100",
-        "cap": "$80,000",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
-        "wageRateDiscrepancy": "SOS database (this file's own scrape) shows \"Net Profits\" category at 2.5%. USDA NFC's independent bulletin reports Covington's payroll WITHHOLDING rate as 2.45% specifically -- a genuine 0.05-point disagreement between two independent sources, not a rounding artifact. Could mean the 2.5% net-profits figure and the wage-withholding figure are simply DIFFERENT rates in Covington (the same Hopkinsville pattern this file already documents elsewhere), or one of the two sources is stale/wrong. NOT resolved this pass -- deliberately left unconfirmed (wageRateDecimal stays null) rather than picking one number without a primary source to settle it.",
-        "nfcSource": {
-          "title": "USDA National Finance Center -- Kentucky City (Local) Income Tax Withholding bulletin",
-          "url": "https://help.nfc.usda.gov/bulletins/2024/1709749757.htm",
-          "verifiedOn": "2026-08-25",
-          "verifiedBy": "An independent federal payroll shared-service that re-derives local withholding rates for its own processing -- the same source class that has already caught real errors for other states in this project (Alabama, Georgia). Used here to cross-confirm several Kentucky \"Net Profits\"-only SOS entries ARE also the wage rate, and to surface Florence's real withholding rate (2.00%), which the SOS scrape had entirely missed under a different, much smaller \"Gross Receipts\" tax (0.001%) -- two genuinely different Florence taxes, not a data error."
-        }
-      },
-      {
-        "name": "Nelson County Fiscal Court",
-        "category": "Net Profits",
-        "rate": "0.5%",
-        "cap": "$15,000 (net profits/wages)",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
-      },
-      {
-        "name": "Hopkinsville",
-        "category": "Net Profits",
-        "rate": "1.95% wages / 1.3% net profits",
-        "minTax": "$100 (gross receipts > $25,000); $25 processing fee (gross receipts <= $25,000)",
-        "cap": "$10,000",
-        "wageRateDecimal": 0.0195,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_explicit_wage_figure",
-        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
-      },
-      {
-        "name": "Elizabethtown",
-        "category": "Net Profits",
-        "rate": "1.95%",
-        "minTax": "$25 (credit against first $25 due on net profits return)",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
-      },
-      {
-        "name": "Richmond",
-        "category": "Net Profits",
-        "rate": "2%",
-        "minTax": "$25",
-        "wageRateDecimal": 0.02,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_via_independent_nfc_cross_check",
-        "wageRateNote": "SOS database shows category \"Net Profits\" alone (normally not confirmed as a wage rate per this project's own Hopkinsville-proven caution) -- but the USDA NFC bulletin independently reports the SAME 2.00% figure specifically as this city's payroll withholding rate, a genuinely different and independent source agreeing with the SOS figure. Two independent sources agreeing is why this is promoted despite the bare \"Net Profits\" category, unlike the other ~130 bare-category entries left unconfirmed.",
-        "nfcSource": {
-          "title": "USDA National Finance Center -- Kentucky City (Local) Income Tax Withholding bulletin",
-          "url": "https://help.nfc.usda.gov/bulletins/2024/1709749757.htm",
-          "verifiedOn": "2026-08-25",
-          "verifiedBy": "An independent federal payroll shared-service that re-derives local withholding rates for its own processing -- the same source class that has already caught real errors for other states in this project (Alabama, Georgia). Used here to cross-confirm several Kentucky \"Net Profits\"-only SOS entries ARE also the wage rate, and to surface Florence's real withholding rate (2.00%), which the SOS scrape had entirely missed under a different, much smaller \"Gross Receipts\" tax (0.001%) -- two genuinely different Florence taxes, not a data error."
-        }
-      },
-      {
-        "name": "Nicholasville",
-        "category": "Net Profits",
-        "rate": "1%",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
-      },
-      {
-        "name": "Winchester",
-        "category": "Payroll Only",
-        "rate": "2%",
-        "wageRateDecimal": 0.02,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
-      },
-      {
-        "name": "Radcliff",
-        "category": "Gross Receipts",
-        "rate": "Schedule of Rates based on business type (5 types)",
-        "minTax": "$25",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "tiered_bracket_unparseable",
-        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
-      },
-      {
-        "name": "Shelby County",
-        "category": "Net Profits",
-        "rate": "1% ($10,000 exemption)",
-        "cap": "$15,000",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "unparsed_needs_review",
-        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
-      },
-      {
-        "name": "Boyle County",
-        "category": "Net Profits/Gross Wages",
-        "rate": "1.25%",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
-        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
-      },
-      {
-        "name": "Paducah",
-        "rate": "2.0%",
-        "category": "Payroll",
-        "minTax": null,
-        "cap": null,
-        "source": "paducahky.gov official Finance dept page -- increased from 1.5% to 2.0% on 2005-08-09. Outside Paducah city limits but within McCracken County, the rate is 1% (McCracken County already captured separately).",
-        "wageRateDecimal": 0.02,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
-      },
-      {
-        "name": "Ashland",
-        "category": "Net Profits",
-        "rate": "2.375% eff. 1/1/2026",
-        "minTax": "$100 (Bus. Lic. Fee)",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "unparsed_needs_review",
-        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
-      },
-      {
-        "name": "Laurel County",
-        "category": "Net Profits",
-        "rate": "1%",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
-      },
-      {
-        "name": "Glasgow",
-        "category": "Net Profits and Gross Receipts",
-        "rate": "1.75%",
-        "minTax": "$25",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "unparsed_needs_review",
-        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
-      },
-      {
         "name": "McLean County",
         "category": "Net Profits/Payroll",
         "rate": "1%",
         "minTax": "$50.00",
         "cap": "$750.00",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
-        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Melbourne",
@@ -1879,11 +1941,12 @@
         "name": "Mercer County",
         "category": "Net Profits",
         "rate": "1.00%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Metcalfe County",
@@ -1953,11 +2016,12 @@
         "name": "Montgomery County",
         "category": "Net Profits",
         "rate": "2%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.02,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Morehead",
@@ -1968,6 +2032,17 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "category_not_confirmed_as_wage_tax",
         "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+      },
+      {
+        "name": "Morgan County",
+        "county": "Morgan",
+        "rate": "1.50%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.015,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
       },
       {
         "name": "Morgantown",
@@ -2002,6 +2077,28 @@
         "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
+        "name": "Nelson County",
+        "county": "Nelson",
+        "rate": "0.50%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.005,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
+      },
+      {
+        "name": "Nelson County Fiscal Court",
+        "category": "Net Profits",
+        "rate": "0.5%",
+        "cap": "$15,000 (net profits/wages)",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+      },
+      {
         "name": "Newport",
         "category": "Gross Receipts",
         "rate": "0.0035%",
@@ -2023,6 +2120,16 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "confirmed_via_primary_source_despite_ambiguous_category",
         "wageRateNote": "Category alone names both payroll and net-profits components with one figure shown, but the entry's own source field is a PRIMARY citation (county ordinance/office page/memo, read directly) that explicitly quotes this figure as the wage/payroll rate specifically -- promoted by hand after reviewing that citation, not by a generic regex. Source: \"Nicholas County Occupational Tax Administrator official memo (nicholascounty.ky.gov), read directly: \"effective January 1, 1988, the 1% Occupational License Fee applies... 1% of each individual's gross wages, salaries, and commissions... 1% of the ne\""
+      },
+      {
+        "name": "Nicholasville",
+        "category": "Net Profits",
+        "rate": "1%",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Nortonville",
@@ -2051,11 +2158,29 @@
         "rate": "1.25%",
         "minTax": "under $1000=$0, over $1000=1.25%",
         "cap": "$10,000",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.0125,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+      },
+      {
+        "name": "Owensboro",
+        "category": "Net Profits",
+        "rate": "1.78%",
+        "minTax": "$75",
+        "wageRateDecimal": 0.0178,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_independent_nfc_cross_check",
+        "wageRateNote": "SOS database shows category \"Net Profits\" alone (normally not confirmed as a wage rate per this project's own Hopkinsville-proven caution) -- but the USDA NFC bulletin independently reports the SAME 1.78% figure specifically as this city's payroll withholding rate, a genuinely different and independent source agreeing with the SOS figure. Two independent sources agreeing is why this is promoted despite the bare \"Net Profits\" category, unlike the other ~130 bare-category entries left unconfirmed.",
+        "nfcSource": {
+          "title": "USDA National Finance Center -- Kentucky City (Local) Income Tax Withholding bulletin",
+          "url": "https://help.nfc.usda.gov/bulletins/2024/1709749757.htm",
+          "verifiedOn": "2026-08-25",
+          "verifiedBy": "An independent federal payroll shared-service that re-derives local withholding rates for its own processing -- the same source class that has already caught real errors for other states in this project (Alabama, Georgia). Used here to cross-confirm several Kentucky \"Net Profits\"-only SOS entries ARE also the wage rate, and to surface Florence's real withholding rate (2.00%), which the SOS scrape had entirely missed under a different, much smaller \"Gross Receipts\" tax (0.001%) -- two genuinely different Florence taxes, not a data error."
+        }
       },
       {
         "name": "Owenton",
@@ -2066,6 +2191,19 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "category_not_confirmed_as_wage_tax",
         "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+      },
+      {
+        "name": "Paducah",
+        "rate": "2.0%",
+        "category": "Payroll",
+        "minTax": null,
+        "cap": null,
+        "source": "paducahky.gov official Finance dept page -- increased from 1.5% to 2.0% on 2005-08-09. Outside Paducah city limits but within McCracken County, the rate is 1% (McCracken County already captured separately).",
+        "wageRateDecimal": 0.02,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Paintsville",
@@ -2112,14 +2250,26 @@
         "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
+        "name": "Pendleton County",
+        "county": "Pendleton",
+        "rate": "1.00%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
+      },
+      {
         "name": "Perry County",
         "category": "Net Profits/Gross Receipts",
         "rate": "1%/1%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "unparsed_needs_review",
-        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Perryville",
@@ -2135,11 +2285,12 @@
         "name": "Pike County",
         "category": "Net Profits",
         "rate": "1%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Pikeville",
@@ -2166,11 +2317,12 @@
         "name": "Powell County",
         "category": "Net Profits",
         "rate": "1%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.0125,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Prestonsburg",
@@ -2195,6 +2347,17 @@
         "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
+        "name": "Pulaski County",
+        "rate": "1.00%",
+        "category": "Net Profits/Payroll",
+        "source": "KACo 2025 County Occupational Tax Data Brief (kaco.org), county-level payroll rate as of Jan 2025 -- not the state SOS database (that field was blank there)",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_payroll_column",
+        "wageRateNote": "Category alone names both payroll and net-profits components with one figure shown, but this figure comes from KACo's 2025 County Occupational Tax Data Brief's own dedicated PAYROLL column (not its net-profits column) -- cross-source confirmed, one tier below a primary ordinance read, promoted by hand after checking this specific entry belongs to that column."
+      },
+      {
         "name": "Raceland",
         "category": "Net Profits",
         "rate": "1.5%",
@@ -2203,6 +2366,34 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "category_not_confirmed_as_wage_tax",
         "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+      },
+      {
+        "name": "Radcliff",
+        "category": "Gross Receipts",
+        "rate": "Schedule of Rates based on business type (5 types)",
+        "minTax": "$25",
+        "wageRateDecimal": null,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "tiered_bracket_unparseable",
+        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
+      },
+      {
+        "name": "Richmond",
+        "category": "Net Profits",
+        "rate": "2%",
+        "minTax": "$25",
+        "wageRateDecimal": 0.02,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_independent_nfc_cross_check",
+        "wageRateNote": "SOS database shows category \"Net Profits\" alone (normally not confirmed as a wage rate per this project's own Hopkinsville-proven caution) -- but the USDA NFC bulletin independently reports the SAME 2.00% figure specifically as this city's payroll withholding rate, a genuinely different and independent source agreeing with the SOS figure. Two independent sources agreeing is why this is promoted despite the bare \"Net Profits\" category, unlike the other ~130 bare-category entries left unconfirmed.",
+        "nfcSource": {
+          "title": "USDA National Finance Center -- Kentucky City (Local) Income Tax Withholding bulletin",
+          "url": "https://help.nfc.usda.gov/bulletins/2024/1709749757.htm",
+          "verifiedOn": "2026-08-25",
+          "verifiedBy": "An independent federal payroll shared-service that re-derives local withholding rates for its own processing -- the same source class that has already caught real errors for other states in this project (Alabama, Georgia). Used here to cross-confirm several Kentucky \"Net Profits\"-only SOS entries ARE also the wage rate, and to surface Florence's real withholding rate (2.00%), which the SOS scrape had entirely missed under a different, much smaller \"Gross Receipts\" tax (0.001%) -- two genuinely different Florence taxes, not a data error."
+        }
       },
       {
         "name": "Robertson County",
@@ -2215,6 +2406,17 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "parsed_payroll_category_single_figure",
         "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+      },
+      {
+        "name": "Rockcastle County",
+        "county": "Rockcastle",
+        "rate": "1.50%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.015,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
       },
       {
         "name": "Rockcastle County Fiscal Court",
@@ -2230,11 +2432,12 @@
         "name": "Rowan County",
         "category": "Net Profits",
         "rate": "1.5%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Russell",
@@ -2252,11 +2455,12 @@
         "category": "Net Profits",
         "rate": "0.75%",
         "cap": "$2,500",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Russellville",
@@ -2291,6 +2495,17 @@
         "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
       },
       {
+        "name": "Scott County",
+        "category": "Net Profits",
+        "rate": "1%",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+      },
+      {
         "name": "Scott County Public School District",
         "category": "Net Profits",
         "rate": "0.5%",
@@ -2310,6 +2525,18 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "category_not_confirmed_as_wage_tax",
         "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+      },
+      {
+        "name": "Shelby County",
+        "category": "Net Profits",
+        "rate": "1% ($10,000 exemption)",
+        "cap": "$15,000",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Shelbyville",
@@ -2342,6 +2569,17 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "category_not_confirmed_as_wage_tax",
         "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+      },
+      {
+        "name": "Simpson County",
+        "county": "Simpson",
+        "rate": "1.00%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
       },
       {
         "name": "Simpsonville",
@@ -2389,6 +2627,17 @@
         "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
+        "name": "Spencer County",
+        "county": "Spencer",
+        "rate": "0.80%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.008,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
+      },
+      {
         "name": "Springfield",
         "category": "Net Profits",
         "rate": "1.5%",
@@ -2412,11 +2661,12 @@
         "name": "Taylor County",
         "category": "Net Profits",
         "rate": "1%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Taylor Mill",
@@ -2450,6 +2700,17 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "category_not_confirmed_as_wage_tax",
         "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+      },
+      {
+        "name": "Union County",
+        "county": "Union",
+        "rate": "0.50%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.005,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
       },
       {
         "name": "Union County Fiscal Court",
@@ -2519,6 +2780,17 @@
         "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
+        "name": "Warren County",
+        "category": "Net Profits/Gross Receipts",
+        "rate": "1%/1%",
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+      },
+      {
         "name": "Warren County Public Schools",
         "category": "Net Profits",
         "rate": "0.5%",
@@ -2543,11 +2815,23 @@
         "name": "Washington County",
         "category": "Net Profits/Gross Receipts",
         "rate": "0.75%/0.75%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.0075,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "unparsed_needs_review",
-        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+      },
+      {
+        "name": "Wayne County",
+        "county": "Wayne",
+        "rate": "0.90%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.009,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
       },
       {
         "name": "West Buechel",
@@ -2584,11 +2868,12 @@
         "name": "Whitley County",
         "category": "Net Profits",
         "rate": "1%",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "category_not_confirmed_as_wage_tax",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
         "name": "Wilder",
@@ -2613,6 +2898,27 @@
         "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
+        "name": "Winchester",
+        "category": "Payroll Only",
+        "rate": "2%",
+        "wageRateDecimal": 0.02,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "parsed_payroll_category_single_figure",
+        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+      },
+      {
+        "name": "Wolfe County",
+        "county": "Wolfe",
+        "rate": "1.25%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.0125,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
+      },
+      {
         "name": "Woodford",
         "category": "Net Profits",
         "rate": "1.5%",
@@ -2621,6 +2927,17 @@
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "category_not_confirmed_as_wage_tax",
         "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
+      },
+      {
+        "name": "Woodford County",
+        "county": "Woodford",
+        "rate": "1.50%",
+        "category": "Payroll",
+        "wageRateDecimal": 0.015,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
       },
       {
         "name": "Woodlawn",
@@ -2664,7 +2981,7 @@
     }
   },
   "knownGaps": [
-    "140 of 230 authoritative taxing districts attempted, 101 with a rate value scraped from the source database -- 90 districts remain entirely unattempted, and the 39 attempted-but-blank districts have no rate in the state's own database either (their ordinance PDF would need a separate fetch to close).",
+    "140 of 230 authoritative taxing districts attempted, 101 with a rate value scraped from the source database -- 90 districts remain entirely unattempted, and the 39 attempted-but-blank districts have no rate in the state's own database either (their ordinance PDF would need a separate fetch to close). SUPERSEDED: county coverage is now complete — all 62 county entries carry a confirmed payroll rate, cross-checked against KACo's own 2025 payroll-rate column with zero disagreements against the 20 an earlier pass had already confirmed. What remains unconfirmed is CITY entries, where the scraped category alone cannot distinguish a payroll rate from a net-profits or gross-receipts one.",
     "A handful of scraped entries have a garbled 'category' field from an ASP.NET DOM-update race during rapid automated scraping (flagged 'unreliable: true' where caught) -- the 'rate' field itself is generally still trustworthy even when 'category' looks off, but should be spot-checked before high-stakes use.",
     "Bare 'Net Profits' category entries have NOT been individually verified to also govern wage withholding (see Hopkinsville's confirmed wages-vs-net-profits split above) -- treat as a lead to re-check per district, not a confirmed payroll rate.",
     "The smallest county population tier (under 30,000) has no statute located at all -- authority, cap, and existence are all unconfirmed for that tier.",
@@ -2672,6 +2989,7 @@
     "Whether KRS 68.180's 300,000+ county tier (Jefferson) has any city-tax-credit mechanism equivalent to KRS 68.197's was not found either way in the statute's own text -- absence of a provision was not confirmed as absence of the practice.",
     "The work-day apportionment fraction and the 2-year refund statute of limitations are secondary-sourced only (Symmetry, Dean Dorton), not confirmed by a direct read of KRS 67.753 or the relevant refund-procedure statute.",
     "Net-profits-tax mechanics (KRS 67.750(8)) are documented at the definitional level only -- no specific city/county net-profits ordinance was read, and this is business-return-side, not wage-withholding, so it is deliberately not pursued further for this payroll engine.",
-    "The engine has NO dispatch method for this tax shape at all -- not flat_rate, not flat_rate_multi_exemption (built for Indiana's single-mandatory-county-add-on model, which does not fit KY's stack-or-credit-depending-on-tier, uncapped-city layer). This is, structurally, the most complex local-tax shape in the project so far: more conditional than PA's EIT (no stack-vs-credit branching there) and more conditional than Ohio's municipalities (uncapped like KY cities, but with no statutory county layer at all to interact with)."
+    "The engine has NO dispatch method for this tax shape at all -- not flat_rate, not flat_rate_multi_exemption (built for Indiana's single-mandatory-county-add-on model, which does not fit KY's stack-or-credit-depending-on-tier, uncapped-city layer). This is, structurally, the most complex local-tax shape in the project so far: more conditional than PA's EIT (no stack-vs-credit branching there) and more conditional than Ohio's municipalities (uncapped like KY cities, but with no statutory county layer at all to interact with).",
+    "The KACo payroll-rate table used for county confirmation is the 2025 edition, applied to 2026 because no 2026 file was published at the time of writing. A county that changed its rate for 2026 would still show its 2025 figure here; the entry names its source and date so that is visible rather than implied."
   ]
 }

@@ -8632,3 +8632,57 @@ describe('railroad retirement (RRTA)', () => {
     assert.equal(amountOf(railroad, 'US_FIT'), amountOf(standard, 'US_FIT'));
   });
 });
+
+/**
+ * Kentucky county occupational tax, now complete. Every county that levies
+ * one is present with a rate confirmed against the Kentucky Association of
+ * Counties own 2025 payroll-rate column — including 25 counties that were
+ * missing from this project's original scrape entirely.
+ */
+describe('Kentucky county occupational tax coverage', () => {
+  const ky = (cert: Record<string, unknown>) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly' as const,
+    earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(3000) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    workState: { code: 'KY', certificate: cert },
+  });
+
+  test('a county confirmed from the KACo payroll column computes at its own rate', () => {
+    assert.equal(amountOf(calculatePaycheck(ky({ workCounty: 'Adair County' })), 'KY_LOCAL'), dollars(15.0));
+    assert.equal(amountOf(calculatePaycheck(ky({ workCounty: 'Allen County' })), 'KY_LOCAL'), dollars(30.0));
+  });
+
+  test('a county absent from the original scrape now computes too', () => {
+    // Ballard, Boone, Hardin and 22 others were simply not in the scraped
+    // list; they came from KACo's table outright.
+    assert.equal(amountOf(calculatePaycheck(ky({ workCounty: 'Ballard County' })), 'KY_LOCAL'), dollars(45.0));
+    assert.equal(amountOf(calculatePaycheck(ky({ workCounty: 'Boone County' })), 'KY_LOCAL'), dollars(24.0));
+    assert.equal(amountOf(calculatePaycheck(ky({ workCounty: 'Hardin County' })), 'KY_LOCAL'), dollars(30.0));
+  });
+
+  test('every Kentucky county on file carries a usable rate', () => {
+    const file = JSON.parse(
+      readFileSync(join(import.meta.dirname, '..', 'data', 'local', 'KY-occupational-2026.json'), 'utf8'),
+    );
+    const counties = file.jurisdictions.scraped.filter((e: { name: string }) => / County$/.test(e.name));
+    assert.equal(counties.length, 87);
+    const withRate = counties.filter((e: { wageRateDecimal: number | null }) => typeof e.wageRateDecimal === 'number');
+    assert.equal(withRate.length, 87, 'every county entry should carry a confirmed payroll rate');
+  });
+
+  test('a city and its county still stack, with the KRS 68.197 credit', () => {
+    const r = calculatePaycheck(ky({ workCity: 'Edmonton', workCounty: 'Metcalfe County' }));
+    assert.equal(amountOf(r, 'KY_LOCAL'), dollars(30.0));
+    assert.match(r.taxes.find((t) => t.id === 'KY_LOCAL')?.detail ?? '', /Edmonton/);
+  });
+});

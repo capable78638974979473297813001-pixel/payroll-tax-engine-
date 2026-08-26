@@ -397,11 +397,15 @@ describe('resolve.ts — real captured Census geographies', () => {
     assert.equal(fields.workCounty, 'Metcalfe County');
   });
 
-  test('KY county matching excludes school-district-level entries, even though they name-match', () => {
-    // Cumberland County Public School District (0.5%, confirmed) is a
-    // DIFFERENT jurisdiction from a general "Cumberland County" government
-    // tax — see toKYCountyBaseName()'s own doc comment for why. A Census
-    // "Cumberland County" match must NOT resolve to the school district.
+  test('KY county matching resolves the COUNTY government, never the school district sharing its name', () => {
+    // Cumberland County Public School District levies its own 0.5%
+    // occupational tax, a DIFFERENT jurisdiction from the county
+    // government's own 1.25% — see toKYCountyBaseName()'s doc comment.
+    // Before county coverage was completed from the Kentucky Association
+    // of Counties own payroll-rate table, this test asserted no_match,
+    // because the only Cumberland entry carrying a rate WAS the school
+    // district. The protection it guards is unchanged: a Census
+    // "Cumberland County" must never resolve to the school district.
     const geo: CensusGeographies = {
       state: 'KY',
       incorporatedPlaces: [],
@@ -409,7 +413,9 @@ describe('resolve.ts — real captured Census geographies', () => {
       counties: ['Cumberland County'],
     };
     const resolved = resolveJurisdiction(geo, CHECK_DATE);
-    assert.equal(resolved.kyCounty?.confidence, 'no_match');
+    assert.equal(resolved.kyCounty?.confidence, 'matched');
+    assert.equal(resolved.kyCounty?.entry?.name, 'Cumberland County');
+    assert.equal(resolved.kyCounty?.entry?.wageRateDecimal, 0.0125);
   });
 
   test('KY workCounty is only populated on a work-role call, never residence', () => {
