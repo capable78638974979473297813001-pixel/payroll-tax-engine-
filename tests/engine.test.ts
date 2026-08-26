@@ -8027,3 +8027,93 @@ describe('paid leave where the employer, not the employee, is the payer of recor
     assert.equal(amountOf(r, 'DE_PFML_ER'), dollars(12.0));
   });
 });
+
+/**
+ * Nonresident day-count de minimis. Every threshold below is the real one,
+ * and the boundaries are deliberately tested from both sides because the
+ * states phrase them differently: Alabama and Illinois exempt "fewer
+ * than 31" days (so 30 is the last exempt day), New Mexico exempts "15 or
+ * fewer" (so 15 itself is exempt), Montana "fewer than 30" (29).
+ */
+describe('nonresident day-count de minimis', () => {
+  const away = (state: string, cert: Record<string, unknown>, residence: string | null) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly' as const,
+    earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(3000) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    workState: { code: state, certificate: cert },
+    ...(residence ? { residenceState: { code: residence, certificate: {} } } : {}),
+  });
+
+  test('a nonresident under the threshold owes nothing, and the line says why', () => {
+    const r = calculatePaycheck(away('AL', { daysWorkedInStateThisYear: 20 }, 'GA'));
+    assert.equal(amountOf(r, 'AL_SIT'), dollars(0));
+    assert.match(r.taxes.find((t) => t.id === 'AL_SIT')?.detail ?? '', /day-count de minimis/);
+  });
+
+  test('Alabama exempts at 30 days and taxes at 31 — "fewer than 31"', () => {
+    assert.equal(amountOf(calculatePaycheck(away('AL', { daysWorkedInStateThisYear: 30 }, 'GA')), 'AL_SIT'), dollars(0));
+    assert.ok(amountOf(calculatePaycheck(away('AL', { daysWorkedInStateThisYear: 31 }, 'GA')), 'AL_SIT') > dollars(0));
+  });
+
+  test('New Mexico exempts AT 15 days, not below it — "15 or fewer"', () => {
+    assert.equal(amountOf(calculatePaycheck(away('NM', { daysWorkedInStateThisYear: 15 }, 'TX')), 'NM_SIT'), dollars(0));
+    assert.ok(amountOf(calculatePaycheck(away('NM', { daysWorkedInStateThisYear: 16 }, 'TX')), 'NM_SIT') > dollars(0));
+  });
+
+  test('Montana exempts at 29 and taxes at 30 — "fewer than 30"', () => {
+    const eligible = { daysWorkedInStateThisYear: 29, nonresidentDeMinimisEligible: true };
+    assert.equal(amountOf(calculatePaycheck(away('MT', eligible, 'ID')), 'MT_SIT'), dollars(0));
+    assert.ok(
+      amountOf(
+        calculatePaycheck(away('MT', { ...eligible, daysWorkedInStateThisYear: 30 }, 'ID')),
+        'MT_SIT',
+      ) > dollars(0),
+    );
+  });
+
+  test('a missing day count withholds — absence is not a claim of few days', () => {
+    assert.ok(amountOf(calculatePaycheck(away('AL', {}, 'GA')), 'AL_SIT') > dollars(0));
+  });
+
+  test('a resident is unaffected: no residence state, no de minimis', () => {
+    assert.ok(amountOf(calculatePaycheck(away('AL', { daysWorkedInStateThisYear: 5 }, null)), 'AL_SIT') > dollars(0));
+  });
+
+  test('states whose statute adds unverifiable conditions wait for the caller to assert them', () => {
+    // Indiana's exemption is conditioned on the employer running a
+    // time-and-attendance system that records work location.
+    const withoutAssertion = calculatePaycheck(
+      away('IN', { county: 'Marion', daysWorkedInStateThisYear: 20 }, 'TX'),
+    );
+    assert.ok(amountOf(withoutAssertion, 'IN_SIT') > dollars(0));
+
+    const withAssertion = calculatePaycheck(
+      away('IN', { county: 'Marion', daysWorkedInStateThisYear: 20, nonresidentDeMinimisEligible: true }, 'TX'),
+    );
+    assert.equal(amountOf(withAssertion, 'IN_SIT'), dollars(0));
+  });
+
+  test("Indiana's rule reaches the county tax, which reciprocity deliberately does not", () => {
+    const dayCount = calculatePaycheck(
+      away('IN', { county: 'Marion', daysWorkedInStateThisYear: 20, nonresidentDeMinimisEligible: true }, 'TX'),
+    );
+    assert.equal(amountOf(dayCount, 'IN_COUNTY'), dollars(0));
+
+    // An Ohio resident is exempt from Indiana STATE tax by reciprocity, but
+    // Indiana county tax still applies — the split Indiana's own guidance
+    // draws, and the reason dayCountAlsoExempts exists as a separate field.
+    const reciprocal = calculatePaycheck(away('IN', { county: 'Marion' }, 'OH'));
+    assert.equal(amountOf(reciprocal, 'IN_SIT'), dollars(0));
+    assert.ok(amountOf(reciprocal, 'IN_COUNTY') > dollars(0));
+  });
+});

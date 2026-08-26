@@ -98,9 +98,15 @@
     "quotedFromSource": "compensation paid to a non-resident employee who has performed less than 31 days of service in Illinois and whose compensation is not localized in Illinois under paragraphs one and two in the section 'When is compensation paid in Illinois?'",
     "mechanism": "Form IL-W-6, 'Certificate of Days Worked in Illinois for Non-Residents' — required on file for each nonresident employee expected to work more than 30 days in Illinois UNLESS the employer maintains a time-and-attendance system that contemporaneously records work location by state and allocates wages accordingly (the same alternative-compliance path Indiana's rule offers). Not required to be submitted to IDOR, but must be retained and produced on request.",
     "proRationOverThreshold": "If the employee's compensation is not localized to any single state AND they perform more than 30 nonincidental working days in Illinois, only a FRACTION of compensation is subject to Illinois withholding: total compensation x (Illinois working days / total working days for the year) — a proration mechanism Indiana's rule does not have (Indiana's is all-or-nothing after the 30-day threshold is crossed, with catch-up withholding; Illinois prorates continuously).",
-    "knownGap": "Not modelled — no code path exists for a days-worked threshold or proration anywhere in this engine (same gap already disclosed for Indiana's version of this rule). Form IL-W-6 itself was not separately fetched, only Pub-130's description of it."
+    "knownGap": "Not modelled — no code path exists for a days-worked threshold or proration anywhere in this engine (same gap already disclosed for Indiana's version of this rule). Form IL-W-6 itself was not separately fetched, only Pub-130's description of it. WIRED (day-count pass): nonresidentDayCountReason() in src/taxes/state.ts now applies this, reading certificate.daysWorkedInStateThisYear against reciprocity.exemptWhenDaysWorkedAtMost. A MISSING day count still withholds — absence is not a claim of few days — and where the statute attaches conditions a paycheck cannot evidence, the caller must also assert certificate.nonresidentDeMinimisEligible."
   },
   "reciprocity": {
+
+    "exemptWhenDaysWorkedAtMost": 30,
+
+    "dayCountRequiresCallerEligibility": true,
+
+    "$dayCountComment": "Illinois's own words, quoted in this file's nonresidentThirtyDayRule: compensation paid to a nonresident who 'has performed less than 31 days of service in Illinois and whose compensation is not localized in Illinois' is exempt from withholding — so 30 days is the last exempt day. The localization test is not something a paycheck can evidence, hence the caller-eligibility requirement.",
     "source": {
       "title": "Form IL-W-4 instructions, pointing to Form IL-W-5-NR",
       "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/withholding/documents/currentyear/il-w-4.pdf",
@@ -141,7 +147,7 @@
     "supplementalRate is now confirmed-by-absence (Illinois's own site has zero results for 'supplemental wages'/'supplemental withholding' as phrases) rather than a bare structural inference, but still short of an explicit quoted primary statement the way Indiana's is.",
     "Line 2's own worksheet derivation (from a federal W-4 Deductions Worksheet amount) is not modelled — the engine takes additionalAllowances as an already-computed input.",
     "Line 3 (additional per-pay withholding) and the quarterly effective-date rule for certificate changes are documented but not modelled.",
-    "The nonresident 30-day rule (Form IL-W-6, with continuous proration past the threshold) is documented but not modelled — same class of gap as Indiana's version of this rule, and Illinois's proration mechanism is not something Indiana's all-or-nothing rule needed.",
+    "The nonresident 30-day rule (Form IL-W-6, with continuous proration past the threshold) is documented but not modelled — same class of gap as Indiana's version of this rule, and Illinois's proration mechanism is not something Indiana's all-or-nothing rule needed. WIRED (day-count pass): nonresidentDayCountReason() in src/taxes/state.ts now applies this, reading certificate.daysWorkedInStateThisYear against reciprocity.exemptWhenDaysWorkedAtMost. A MISSING day count still withholds — absence is not a claim of few days — and where the statute attaches conditions a paycheck cannot evidence, the caller must also assert certificate.nonresidentDeMinimisEligible.",
     "SUI is experience-rated per employer (same structural note as every other state modelled) — the formula is fully documented, but an individual employer's Benefit Ratio requires employer-specific claims/payroll history no static jurisdiction constant can supply."
   ],
   "suiEmployer": {

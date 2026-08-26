@@ -102,12 +102,18 @@ export function stateIncomeTax(
   // checked first; de minimis only matters when reciprocity didn't already
   // resolve it.
   const reciprocityReason = reciprocityExemptionReason(input, rules);
-  const deMinimisReason = reciprocityReason
-    ? null
-    : nonresidentDeMinimisReason(input, ctx, rules);
-  const exemptReason = reciprocityReason ?? deMinimisReason;
+  const dayCountReason = reciprocityReason ? null : nonresidentDayCountReason(input, rules);
+  const deMinimisReason =
+    reciprocityReason || dayCountReason ? null : nonresidentDeMinimisReason(input, ctx, rules);
+  const exemptReason = reciprocityReason ?? dayCountReason ?? deMinimisReason;
   if (exemptReason) {
-    lines = zeroStateIncomeTaxLines(rules, lines, exemptReason);
+    // Indiana's day-count rule reaches its county tax too, which is a
+    // separate line id — every other exemption here is state-tax-only.
+    const alsoExempt =
+      dayCountReason !== null
+        ? ((rules.reciprocity as ReciprocityConfig | undefined)?.dayCountAlsoExempts ?? [])
+        : [];
+    lines = zeroStateIncomeTaxLines(rules, lines, exemptReason, alsoExempt);
   } else {
     lines = applyStateWithholdingExemption(input, rules, lines);
   }
@@ -476,6 +482,12 @@ function residentWorkingElsewhereCreditLine(
 interface ReciprocityConfig {
   reciprocalStates?: string[];
   nonresidentDeMinimisThreshold?: number; // dollars, annual
+  /** Day-count variant: a nonresident who worked at most this many days in the state owes no withholding. See nonresidentDayCountReason(). */
+  exemptWhenDaysWorkedAtMost?: number;
+  /** true where the statute attaches conditions a paycheck cannot evidence, so the caller must assert certificate.nonresidentDeMinimisEligible as well. */
+  dayCountRequiresCallerEligibility?: boolean;
+  /** Tax line ids beyond the state income tax that this exemption also covers — Indiana's rule reaches its county tax, which is a separate line. */
+  dayCountAlsoExempts?: string[];
   // Subset of reciprocalStates whose exemption is CONDITIONAL on a daily
   // commute, not the plain "resides there" test every other entry in
   // reciprocalStates uses. Kentucky's own 103 KAR 17:140 is the reason
@@ -513,10 +525,11 @@ function zeroStateIncomeTaxLines(
   rules: StateRuleset,
   lines: TaxLine[],
   reason: string,
+  alsoExempt: readonly string[] = [],
 ): TaxLine[] {
   const prefix = `${rules.code}_SIT`;
   return lines.map((line) =>
-    line.id.startsWith(prefix)
+    line.id.startsWith(prefix) || alsoExempt.includes(line.id)
       ? { ...line, taxableWages: 0, amount: 0, detail: reason }
       : line,
   );
@@ -572,6 +585,56 @@ function reciprocityExemptionReason(
     `certificate is on file; this engine does not separately verify that filing. Applies ` +
     `to ${rules.code} income tax only — any separate local/county tax this state levies ` +
     `is unaffected.`
+  );
+}
+
+/**
+ * Nonresident de minimis, DAY-COUNT variant.
+ *
+ * Five states exempt a nonresident from withholding purely on how many
+ * days they worked in the state that year, with no dollar test at all:
+ * Alabama (fewer than 31), Illinois (less than 31 days of service),
+ * Indiana (30 or fewer), Montana (fewer than 30) and New Mexico (15 or
+ * fewer). Each file said the same thing about it — a day count is a shape
+ * this engine had no way to represent — and each was right until the day
+ * count became an input.
+ *
+ * It arrives as certificate.daysWorkedInStateThisYear, and its ABSENCE
+ * means withhold: a missing count is not a claim that the employee worked
+ * few days, and guessing the exemption would under-withhold. Several of
+ * these rules also carry conditions no engine can verify from a paycheck —
+ * Illinois's 'compensation not localized in Illinois', Indiana's
+ * requirement that the employer run a time-and-attendance system that
+ * records work location contemporaneously, Montana's list of excluded
+ * occupations — so those states additionally require the caller to assert
+ * eligibility, and say so in the line detail.
+ */
+function nonresidentDayCountReason(
+  input: PaycheckInput,
+  rules: StateRuleset,
+): string | null {
+  const reciprocity = rules.reciprocity as ReciprocityConfig | undefined;
+  const limit = reciprocity?.exemptWhenDaysWorkedAtMost;
+  if (limit === undefined) return null;
+
+  const residence = input.residenceState?.code;
+  if (!residence || residence === rules.code) return null;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const days = Number(cert.daysWorkedInStateThisYear);
+  if (!Number.isFinite(days) || days > limit) return null;
+
+  if (reciprocity?.dayCountRequiresCallerEligibility && cert.nonresidentDeMinimisEligible !== true) {
+    return null;
+  }
+
+  return (
+    `$0 — nonresident day-count de minimis: ${days} day(s) worked in ${rules.name} this ` +
+    `calendar year, at or under its ${limit}-day threshold` +
+    (reciprocity?.dayCountRequiresCallerEligibility
+      ? ', and the caller asserted the further conditions this state attaches (certificate.nonresidentDeMinimisEligible)'
+      : '') +
+    '.'
   );
 }
 

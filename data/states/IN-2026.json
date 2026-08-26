@@ -102,7 +102,7 @@
     "rule": "An employer is not required to withhold Indiana state OR county tax on an employee reasonably expected to work in Indiana 30 days or less in the calendar year, PROVIDED the employer has a time-and-attendance system that contemporaneously records out-of-state work location and uses it to allocate compensation between states. If the employee actually exceeds 30 days, the employer must withhold for the days already worked (catch-up) plus everything after. A properly completed Form WH-4AFF relieves the employer from withholding until the 30-day threshold is actually crossed.",
     "exclusions": "NOT available for professional athletes, professional sports team members, race team members, professional entertainers, public figures, or anyone who is or becomes an Indiana resident for any part of the calendar year. Prior-employer days in Indiana count toward the same employee's 30-day count.",
     "quotedFromSource": "If you have a time and attendance system where employees are required to record the employee's out-of-state work location on a contemporaneous basis and that system is used to allocate compensation between states, you are not required to withhold state and local taxes if the employee is reasonably expected to work in Indiana for 30 days or less during the calendar year.",
-    "knownGap": "Not modelled — no code path exists for a days-worked threshold anywhere in this engine. Form WH-4AFF itself was not fetched/read this session."
+    "knownGap": "Not modelled — no code path exists for a days-worked threshold anywhere in this engine. Form WH-4AFF itself was not fetched/read this session. WIRED (day-count pass): nonresidentDayCountReason() in src/taxes/state.ts now applies this, reading certificate.daysWorkedInStateThisYear against reciprocity.exemptWhenDaysWorkedAtMost. A MISSING day count still withholds — absence is not a claim of few days — and where the statute attaches conditions a paycheck cannot evidence, the caller must also assert certificate.nonresidentDeMinimisEligible."
   },
   "specialPopulations": {
     "professionalAthletesAndRaceTeams": {
@@ -110,6 +110,14 @@
     }
   },
   "reciprocity": {
+
+    "exemptWhenDaysWorkedAtMost": 30,
+
+    "dayCountRequiresCallerEligibility": true,
+
+    "dayCountAlsoExempts": ["IN_COUNTY"],
+
+    "$dayCountComment": "Departmental Notice #1: an employer need not withhold Indiana state OR county tax on an employee reasonably expected to work in Indiana 30 days or fewer in the calendar year, PROVIDED the employer runs a time-and-attendance system that contemporaneously records out-of-state work location. The proviso is an employer fact, so the caller asserts it; dayCountAlsoExempts carries the rule's reach into the county line, which every other exemption in this engine deliberately leaves alone.",
     "source": {
       "title": "Form WH-47 — Certificate of Residence",
       "url": "https://forms.in.gov/download.aspx?id=2419",
