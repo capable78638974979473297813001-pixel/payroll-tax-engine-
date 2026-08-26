@@ -202,13 +202,24 @@
     "Nonresident alien (NRA) withholding is not modelled: no NRA status field, no NRA wage addback, no restricted-W-4 handling. NRA employees would be silently run through the resident percentage method, which understates their correct withholding -- treat any NRA employee as unsupported, not zero-adjustment. STALE, NOW FALSE: NRA withholding IS modelled — federalW4.nonresidentAlien drives the Pub 15-T Table 2 per-period addback in taxes/federal.ts (verified: a biweekly cheque adds $619.20 to wages before annualizing, and the added amount is deliberately excluded from the line's own taxableWages because it isn't reportable wages). What remains unmodelled is only the Table 1 (pre-2020 Form W-4) variant, which this engine's FederalW4 type has no shape for.",
     "Pension/annuity withholding (Pub 15-T's separate periodic-payment tables, Form W-4P) is not modelled -- this engine assumes ordinary W-2 wage/salary payroll only.",
     "Nonpayroll withholding (Form 945 categories: IRA distributions, gambling winnings, certain government/Indian gaming payments) is out of scope -- these aren't wage payroll at all.",
-    "Special employment-tax categories are not modelled: household employees, agricultural (incl. H-2A) workers, statutory employees, ministers/clergy, election workers, railroad employees, tipped employees' allocated-tips rules. A standard W-2 wage/salary employee is the only supported case; using this engine for any of these categories will produce wrong numbers, not an explicit error. PARTLY CLOSED: clergy and statutory employees are now modelled via input.employmentCategory — see the employmentCategories block above for each one's rule and source. Household employees, agricultural workers, election workers, ministers' housing allowances and railroad (RRTA) employment remain unmodelled. FURTHER CLOSED: household and agricultural workers are now modelled too (input.employmentCategory, with the coverage thresholds in employmentCategories.coverageThresholds). Election workers, railroad (RRTA) employment and ministers housing allowances remain unmodelled. Railroad (RRTA) employment is now modelled as well — see the railroadRetirement block: Tier I relabelled from the identical FICA computation, Tier II computed at 4.9%/13.1% to its own 37,100 base, and FUTA zeroed because rail employers contribute under the RUIA. Election workers and ministers housing allowances remain unmodelled.",
+    "Special employment-tax categories are not modelled: household employees, agricultural (incl. H-2A) workers, statutory employees, ministers/clergy, election workers, railroad employees, tipped employees' allocated-tips rules. A standard W-2 wage/salary employee is the only supported case; using this engine for any of these categories will produce wrong numbers, not an explicit error. PARTLY CLOSED: clergy and statutory employees are now modelled via input.employmentCategory — see the employmentCategories block above for each one's rule and source. Household employees, agricultural workers, election workers, ministers' housing allowances and railroad (RRTA) employment remain unmodelled. FURTHER CLOSED: household and agricultural workers are now modelled too (input.employmentCategory, with the coverage thresholds in employmentCategories.coverageThresholds). Election workers, railroad (RRTA) employment and ministers housing allowances remain unmodelled. Railroad (RRTA) employment is now modelled as well — see the railroadRetirement block: Tier I relabelled from the identical FICA computation, Tier II computed at 4.9%/13.1% to its own 37,100 base, and FUTA zeroed because rail employers contribute under the RUIA. Election workers and ministers housing allowances remain unmodelled. Election workers are now modelled too ($2,500 coverage threshold, outside FUTA as government employment), and railroad unemployment contributions are computed under the RUIA rather than merely disclosed. What remains unmodelled: ministers housing allowances and the supplemental annuity work-hour tax.",
     "FUTA credit-reduction states are not modelled (see futa.comment) -- the DOL's annual credit-reduction list changes which states' net FUTA rate exceeds 0.6%.",
     "Backup withholding (backupWithholdingRate, 24%) is recorded as data but has no compute path -- no rule detects a missing/invalid TIN and applies it.",
     "The percentage_method_automated_worksheet_1a method is the ONLY Pub 15-T method implemented. Pub 15-T also publishes wage-bracket tables and non-automated percentage-method tables for manual systems; this engine intentionally supports only the automated-system method, which is exact rather than table-rounded."
   ],
   "employmentCategories": {
      "coverageThresholds": {
+        "electionWorker": {
+          "annualCashWages": 2500,
+          "futa": "excluded",
+          "federalIncomeTaxWithholding": "not_required",
+          "source": {
+            "title": "IRS Publication 15 (2026) and SSA, Election Workers — State and Local Government Employers",
+            "url": "https://www.ssa.gov/slge/election_workers.htm",
+            "verifiedOn": "2026-08-25",
+            "quote": "Social security and Medicare taxes apply to election workers paid $2,500 or more in cash or its equivalent in 2026, up from $2,300. Below that figure the worker is outside social security and Medicare entirely. Election work is service for a state or political subdivision, which is excluded from FUTA employment, and the pay is not subject to federal income tax withholding — though it remains taxable income to the worker."
+          }
+        },
        "$comment": "Household and agricultural workers are not taxed at different RATES — ordinary FICA and FUTA apply. The question these thresholds answer is whether the worker is inside the system at all for the year.",
        "household": {
          "annualCashWages": 3000,
@@ -262,6 +273,21 @@
     "stateTreatmentNotModelled": "This flag answers the FEDERAL question only. States mostly follow the federal treatment of ministers and statutory employees, but not universally and not always for the same taxes, and no state file in this project has been researched on the point. State income tax, state unemployment and paid-leave lines are therefore left computing as normal for both categories — a deliberate, disclosed limit rather than an assumed conformity."
   },
   "railroadRetirement": {
+     "ruia": {
+       "newEmployerRate": 0.0558,
+       "monthlyCompensationBase": 2150,
+       "experienceRange": {
+         "min": 0.0065,
+         "max": 0.12
+       },
+       "source": {
+         "title": "US Railroad Retirement Board — Railroad Retirement and Unemployment Insurance Taxes in 2026, and the 2026 Railroad Experience Rating Proclamations",
+         "url": "https://www.rrb.gov/Newsroom/NewsReleases/RetirementUnemploymentInsuranceTaxes",
+         "verifiedOn": "2026-08-25",
+         "quote": "In 2026 the minimum RUIA rate of 0.65 percent applies to 91 percent of covered employers, while 3 percent pay the maximum 12.0 percent. New employers pay 5.58 percent, the average rate paid by all employers in 2022-2024. The monthly compensation base for 2026 is $2,150, and no surcharge applies."
+       },
+       "note": "Contributions are capped MONTHLY, not annually — unlike every state unemployment tax in this project — so the caller keeps the running figure in ytd.railroadMonthlyCompensation and it resets each calendar month."
+     },
     "$comment": "The Railroad Retirement Tax Act, which replaces FICA for covered rail employment. Tier I is arithmetically identical to social security and Medicare — same rates, same wage base, same additional-Medicare threshold — so the engine relabels those lines rather than recomputing them; only the tax and the return differ (Form CT-1, not 941). Tier II below has no FICA equivalent at all.",
     "tier2": {
       "employeeRate": 0.049,
@@ -275,6 +301,6 @@
       "verifiedOn": "2026-08-25",
       "quote": "Tier II tax rates in 2026 remain at 4.9 percent for employees and 13.1 percent for employers; the maximum amount of earnings subject to tier II taxes increases from $130,800 to $137,100. The tier I payroll tax rate remains 7.65 percent, divided into 6.20 percent for retirement (on earnings up to $184,500 in 2026, up from $176,100) and 1.45 percent for Medicare hospital insurance with no maximum."
     },
-    "notModelled": "Railroad unemployment contributions under the RUIA are employer-paid at an experience-rated rate with its own monthly compensation base, and the supplemental annuity work-hour tax is levied per work-hour rather than per dollar — neither is computed here, and rail employment is zeroed out of FUTA rather than silently taxed under it."
+    "notModelled": "WIRED: RUIA contributions are now computed — see the ruia block above (employer rate from input.employer.railroadUnemploymentRate, otherwise the published new-employer rate, capped at the monthly compensation base). STILL NOT MODELLED: the supplemental annuity work-hour tax, which is levied per work-hour rather than per dollar and has no wage base for this engine to work from."
   }
 }

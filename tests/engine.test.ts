@@ -8686,3 +8686,105 @@ describe('Kentucky county occupational tax coverage', () => {
     assert.match(r.taxes.find((t) => t.id === 'KY_LOCAL')?.detail ?? '', /Edmonton/);
   });
 });
+
+/**
+ * Election workers and railroad unemployment — the two remaining federal
+ * categories. 2026 figures: election workers come into social security and
+ * Medicare at $2,500 of pay, and RUIA contributions run 0.65% to 12.0%
+ * with a 5.58% new-employer rate on $2,150 of compensation per MONTH.
+ */
+describe('election workers and railroad unemployment', () => {
+  const fed = (wage: number, extra: Record<string, unknown> = {}) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly' as const,
+    earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(wage) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    ...extra,
+  });
+
+  test('an election worker under $2,500 is outside social security entirely', () => {
+    const r = calculatePaycheck(fed(400, { employmentCategory: 'election_worker' }));
+    assert.equal(amountOf(r, 'US_SS_EE'), dollars(0));
+    assert.equal(amountOf(r, 'US_MED_EE'), dollars(0));
+  });
+
+  test('crossing $2,500 brings them in', () => {
+    const r = calculatePaycheck(
+      fed(400, {
+        employmentCategory: 'election_worker',
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0, categoryCashWages: dollars(2200) },
+      }),
+    );
+    assert.equal(amountOf(r, 'US_SS_EE'), dollars(24.8));
+    assert.equal(amountOf(r, 'US_MED_EE'), dollars(5.8));
+  });
+
+  test('election work is outside FUTA however much is paid — there is no threshold to cross', () => {
+    const r = calculatePaycheck(
+      fed(400, {
+        employmentCategory: 'election_worker',
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0, categoryCashWages: dollars(50000) },
+      }),
+    );
+    assert.equal(amountOf(r, 'US_FUTA'), dollars(0));
+    assert.match(r.taxes.find((t) => t.id === 'US_FUTA')?.detail ?? '', /state or local government/);
+  });
+
+  test('no income tax is withheld from an election worker unless they ask', () => {
+    const covered = {
+      employmentCategory: 'election_worker',
+      ytd: { socialSecurity: 0, medicare: 0, futa: 0, categoryCashWages: dollars(5000) },
+    };
+    assert.equal(amountOf(calculatePaycheck(fed(3000, covered)), 'US_FIT'), dollars(0));
+
+    const requested = calculatePaycheck({
+      ...fed(3000, covered),
+      federalW4: {
+        filingStatus: 'single' as const,
+        multipleJobs: false,
+        dependentCredit: 0,
+        otherIncome: 0,
+        deductions: 0,
+        extraWithholding: 0,
+        voluntaryWithholdingAgreement: true,
+      },
+    });
+    assert.equal(amountOf(requested, 'US_FIT'), dollars(320.38));
+  });
+
+  test('a rail employer pays RUIA instead of FUTA, at the new-employer rate by default', () => {
+    const r = calculatePaycheck(fed(4000, { employmentCategory: 'railroad' }));
+    // $2,150 monthly base at 5.58%.
+    assert.equal(amountOf(r, 'US_RUIA_ER'), dollars(119.97));
+    assert.equal(amountOf(r, 'US_FUTA'), dollars(0));
+  });
+
+  test('RUIA caps by CALENDAR MONTH, not by year', () => {
+    const r = calculatePaycheck(
+      fed(4000, {
+        employmentCategory: 'railroad',
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0, railroadMonthlyCompensation: dollars(2000) },
+      }),
+    );
+    // Only $150 of the $2,150 monthly base is left.
+    assert.equal(amountOf(r, 'US_RUIA_ER'), dollars(8.37));
+  });
+
+  test("an employer's own experience rate replaces the default", () => {
+    const r = calculatePaycheck(
+      fed(4000, { employmentCategory: 'railroad', employer: { railroadUnemploymentRate: 0.0065 } }),
+    );
+    // 0.65% is the floor, which 91% of covered rail employers actually pay.
+    assert.equal(amountOf(r, 'US_RUIA_ER'), dollars(13.98));
+    assert.match(r.taxes.find((t) => t.id === 'US_RUIA_ER')?.detail ?? '', /own experience-rated/);
+  });
+});

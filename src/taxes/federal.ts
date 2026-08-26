@@ -380,12 +380,29 @@ function categoryCoverage(
   rules: FederalRuleset,
 ): { ficaCovered: boolean; futaCovered: boolean; reason: string } | null {
   const category = input.employmentCategory;
-  if (category !== 'household' && category !== 'agricultural') return null;
+  if (category !== 'household' && category !== 'agricultural' && category !== 'election_worker') {
+    return null;
+  }
 
   const thresholds = (rules.employmentCategories as { coverageThresholds?: CoverageThresholds } | undefined)
     ?.coverageThresholds;
   const cashThisCheque = cashEarnings(input.earnings);
   const cashToDate = (input.ytd.categoryCashWages ?? 0) + cashThisCheque;
+
+  if (category === 'election_worker') {
+    const cfg = thresholds?.electionWorker;
+    if (!cfg) return null;
+    const ficaCovered = cashToDate >= dollars(cfg.annualCashWages);
+    return {
+      ficaCovered,
+      // Election work is government employment, which is outside FUTA
+      // whatever the amounts — there is no threshold to cross.
+      futaCovered: false,
+      reason: ficaCovered
+        ? `election work: ${fmt(cashToDate)} paid this year meets the ${cfg.annualCashWages} threshold at which election workers come into social security and Medicare`
+        : `$0 — election work: ${fmt(cashToDate)} paid this year is under the ${cfg.annualCashWages} threshold (input.ytd.categoryCashWages), below which an election worker is outside social security and Medicare entirely.`,
+    };
+  }
 
   if (category === 'household') {
     const cfg = thresholds?.household;
@@ -433,6 +450,60 @@ interface RailroadRetirementConfig {
  * compensation up to $137,100 — a wage base that runs out well before
  * social security's own.
  */
+interface RUIAConfig {
+  newEmployerRate: number;
+  monthlyCompensationBase: number;
+}
+
+/**
+ * Railroad unemployment contributions (RUIA) — the tax rail employers pay
+ * INSTEAD of FUTA, which is why zeroing their FUTA line without computing
+ * this would have understated the cost of a rail paycheck rather than
+ * corrected it.
+ *
+ * Two things make it unlike every other unemployment tax here. It is
+ * experience-rated across an unusually wide band — 0.65% for the 91% of
+ * covered employers at the floor, up to 12.0% at the ceiling — so the
+ * employer's own rate arrives as input, with the published new-employer
+ * rate (5.58% for 2026, the average paid by all employers over 2022-2024)
+ * as the fallback. And it caps MONTHLY rather than annually, at $2,150 of
+ * compensation a month, so its running total resets twelve times a year
+ * and the caller keeps it in ytd.railroadMonthlyCompensation.
+ */
+function railroadUnemployment(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: FederalRuleset,
+): TaxLine[] {
+  const cfg = (rules.railroadRetirement as { ruia?: RUIAConfig } | undefined)?.ruia;
+  if (!cfg) return [];
+
+  const rate = input.employer?.railroadUnemploymentRate ?? cfg.newEmployerRate;
+  const exempt = (rules.incomeTax.exemptPretax ?? []) as PretaxCategory[];
+  const compensation = ctx.taxableWagesFor(exempt);
+  const cap = dollars(cfg.monthlyCompensationBase);
+  const alreadyThisMonth = input.ytd.railroadMonthlyCompensation ?? 0;
+  const taxableWages = underCap(compensation, alreadyThisMonth, cap);
+
+  const supplied = input.employer?.railroadUnemploymentRate !== undefined;
+  return [
+    {
+      id: 'US_RUIA_ER',
+      name: 'Railroad Unemployment Insurance (Employer)',
+      payer: 'employer',
+      jurisdiction: 'federal',
+      taxableWages,
+      amount: applyRate(taxableWages, rate),
+      detail:
+        `${fmt(taxableWages)} @ ${(rate * 100).toFixed(2)}% — ` +
+        (supplied
+          ? "this employer's own experience-rated RUIA rate"
+          : "the published new-employer rate (no rate supplied — see input.employer.railroadUnemploymentRate)") +
+        `, capped at ${fmt(cap)} of compensation per MONTH (${fmt(alreadyThisMonth)} already counted this month)`,
+    },
+  ];
+}
+
 function railroadTier2(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -505,7 +576,7 @@ function applyEmploymentCategory(
     });
   }
 
-  if (category === 'household' || category === 'agricultural') {
+  if (category === 'household' || category === 'agricultural' || category === 'election_worker') {
     if (!coverage) return lines;
     return lines.map((line) => {
       const isIncomeTax = line.id === 'US_FIT' || line.id === 'US_FIT_SUPP';
@@ -515,6 +586,15 @@ function applyEmploymentCategory(
       // at all; farm work carries the same requirement as ordinary wages,
       // but only once the worker is covered.
       if (isIncomeTax) {
+        if (category === 'election_worker' && input.federalW4.voluntaryWithholdingAgreement !== true) {
+          return {
+            ...line,
+            taxableWages: 0,
+            amount: 0,
+            detail:
+              "$0 — election work: an election worker's pay is not subject to federal income tax withholding, though it is still taxable income to the worker. Set federalW4.voluntaryWithholdingAgreement if withholding was requested.",
+          };
+        }
         if (category === 'household' && input.federalW4.voluntaryWithholdingAgreement !== true) {
           return {
             ...line,
@@ -537,7 +617,13 @@ function applyEmploymentCategory(
         taxableWages: 0,
         amount: 0,
         detail: isFuta
-          ? `$0 — ${category === 'household' ? 'household employment: cash wages to all household employees have not reached $1,000 in a calendar quarter (input.employer.householdQuarterlyCashWages)' : "farm work: the employer has not asserted the agricultural FUTA test (input.employer.agriculturalFutaLiable)"}.`
+          ? `$0 — ${
+              category === 'household'
+                ? 'household employment: cash wages to all household employees have not reached $1,000 in a calendar quarter (input.employer.householdQuarterlyCashWages)'
+                : category === 'election_worker'
+                  ? 'election work is service for a state or local government, which is outside FUTA employment entirely'
+                  : "farm work: the employer has not asserted the agricultural FUTA test (input.employer.agriculturalFutaLiable)"
+            }.`
           : coverage.reason,
       };
     });
@@ -587,7 +673,9 @@ export function federalTaxes(
     ...socialSecurity(input, ctx, rules),
     ...medicare(input, ctx, rules),
       ...futa(input, ctx, rules),
-      ...(input.employmentCategory === 'railroad' ? railroadTier2(input, ctx, rules) : []),
+      ...(input.employmentCategory === 'railroad'
+        ? [...railroadTier2(input, ctx, rules), ...railroadUnemployment(input, ctx, rules)]
+        : []),
     ],
     categoryCoverage(input, ctx, rules),
   );

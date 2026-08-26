@@ -133,6 +133,13 @@ export interface YearToDate {
    */
   tier2Compensation?: Cents;
   /**
+   * Compensation already counted toward the railroad unemployment (RUIA)
+   * base THIS CALENDAR MONTH. RUIA caps monthly rather than annually
+   * ($2,150 a month for 2026), so unlike every other tracker here it
+   * resets twelve times a year and the caller keeps it.
+   */
+  railroadMonthlyCompensation?: Cents;
+  /**
    * YTD wages already counted toward a state Paid Family & Medical Leave
    * wage-base cap, keyed by state code (e.g. Minnesota Paid Leave). Separate
    * tracker from stateUnemployment even where a state has both, since the
@@ -223,6 +230,12 @@ export interface EmployerContext {
    */
   agriculturalFutaLiable?: boolean;
   /**
+   * This railroad employer's own experience-rated RUIA contribution rate.
+   * The published range for 2026 runs from 0.65% — which 91% of covered
+   * employers pay — to 12.0%. Absent, the new-employer rate is used.
+   */
+  railroadUnemploymentRate?: number;
+  /**
    * How much of a paid-leave premium this employer passes on to employees,
    * as a fraction of the TOTAL premium, keyed by state code. Delaware funds
    * its programme entirely from the employer by statute but lets the
@@ -283,13 +296,22 @@ export interface EmployerContext {
  *                         employers pay unemployment contributions under the
  *                         RUIA, not FUTA.
  */
+/**
+ *   'election_worker'   — a poll worker or election official paid by a
+ *                         state or local government. FICA applies only once
+ *                         payments reach the year's threshold ($2,500 for
+ *                         2026); the work is government employment, so it
+ *                         is outside FUTA entirely, and income tax is not
+ *                         withheld unless the worker asks for it.
+ */
 export type EmploymentCategory =
   | 'standard'
   | 'clergy'
   | 'statutory_employee'
   | 'household'
   | 'agricultural'
-  | 'railroad';
+  | 'railroad'
+  | 'election_worker';
 
 export interface PaycheckInput {
   /**
