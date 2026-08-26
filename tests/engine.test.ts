@@ -7854,3 +7854,88 @@ describe('state unemployment insurance, employer side (XX_SUI_ER)', () => {
     }
   });
 });
+
+/**
+ * Flat supplemental-wage rates for the states whose withholding method had
+ * no supplemental branch of its own. Rates below are the real published
+ * ones: Ohio 2.75% (separately legislated, not the bracket rate), Rhode
+ * Island 5.99%, Missouri 4.7%, Nebraska 3.5%.
+ */
+describe('flat supplemental wages beyond the five methods that already had it', () => {
+  const BONUS = [{ code: 'BON', category: 'supplemental' as const, amount: dollars(5000) }];
+  const MIXED = [
+    { code: 'REG', category: 'regular' as const, amount: dollars(3000) },
+    { code: 'BON', category: 'supplemental' as const, amount: dollars(5000) },
+  ];
+  const supp = (earnings: typeof BONUS, extra: Record<string, unknown> = {}) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly' as const,
+    earnings,
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    ...extra,
+  });
+
+  test("Ohio's separately-legislated 2.75% applies to a bonus paid on its own cheque", () => {
+    const r = calculatePaycheck(supp(BONUS, { workState: { code: 'OH', certificate: {} } }));
+    assert.equal(amountOf(r, 'OH_SIT_SUPP'), dollars(137.5));
+  });
+
+  test('...and the bonus is carved out of the regular base, not taxed twice', () => {
+    // The defect this guards against is real: New Mexico shipped it once,
+    // taxing a bonus through both the bracket table and the flat rate.
+    const r = calculatePaycheck(supp(BONUS, { workState: { code: 'OH', certificate: {} } }));
+    assert.equal(amountOf(r, 'OH_SIT'), dollars(0));
+  });
+
+  test('a bonus paid WITH regular wages is aggregated instead — no flat line at all', () => {
+    const r = calculatePaycheck(supp(MIXED, { workState: { code: 'OH', certificate: {} } }));
+    assert.equal(r.taxes.some((t) => t.id === 'OH_SIT_SUPP'), false);
+    assert.ok(amountOf(r, 'OH_SIT') > dollars(0));
+  });
+
+  test("Rhode Island's 5.99% supplemental rate computes", () => {
+    const r = calculatePaycheck(supp(BONUS, { workState: { code: 'RI', certificate: {} } }));
+    assert.equal(amountOf(r, 'RI_SIT_SUPP'), dollars(299.5));
+  });
+
+  test('a state that only PERMITS the flat method does nothing until the employer elects it', () => {
+    const aggregated = calculatePaycheck(supp(BONUS, { workState: { code: 'MO', certificate: {} } }));
+    assert.equal(aggregated.taxes.some((t) => t.id === 'MO_SIT_SUPP'), false);
+    assert.ok(amountOf(aggregated, 'MO_SIT') > dollars(0));
+
+    const elected = calculatePaycheck(
+      supp(BONUS, {
+        workState: { code: 'MO', certificate: {} },
+        employer: { supplementalFlatRateElection: { MO: true } },
+      }),
+    );
+    assert.equal(amountOf(elected, 'MO_SIT_SUPP'), dollars(235.0));
+    assert.equal(amountOf(elected, 'MO_SIT'), dollars(0));
+  });
+
+  test("Nebraska's elected 3.5% is its own figure, not its top marginal rate", () => {
+    const r = calculatePaycheck(
+      supp(BONUS, {
+        workState: { code: 'NE', certificate: {} },
+        employer: { supplementalFlatRateElection: { NE: true } },
+      }),
+    );
+    assert.equal(amountOf(r, 'NE_SIT_SUPP'), dollars(175.0));
+  });
+
+  test("a state whose rule is 'always' is untouched by the paid-separately gate", () => {
+    // New York's 11.70% predates this distinction and carries no
+    // appliesWhen, so a bonus riding along with regular wages still gets it.
+    const r = calculatePaycheck(supp(MIXED, { workState: { code: 'NY', certificate: {} } }));
+    assert.equal(amountOf(r, 'NY_SIT_SUPP'), dollars(585.0));
+  });
+});

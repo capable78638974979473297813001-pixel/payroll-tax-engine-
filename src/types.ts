@@ -170,6 +170,17 @@ export interface EmployerContext {
    * schedule-assigned), no line is produced rather than a guessed one.
    */
   stateUnemploymentRate?: Record<string, number>;
+  /**
+   * Several states offer a flat supplemental-wage rate as an EMPLOYER
+   * OPTION rather than a mandate — Missouri's 4.7%, Nebraska's 3.5%,
+   * Oregon's 8%, Maine's 5%, North Carolina's 4.09% — the alternative
+   * always being to aggregate the bonus with regular wages and run the
+   * normal formula. Which one an employer uses is a payroll policy
+   * decision, not a fact about the employee, so it lives here. Keyed by
+   * state code; absent or false means aggregate, which is what the engine
+   * does by default.
+   */
+  supplementalFlatRateElection?: Record<string, boolean>;
 }
 
 export interface PaycheckInput {

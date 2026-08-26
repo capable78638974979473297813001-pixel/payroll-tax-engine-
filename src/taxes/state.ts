@@ -39,7 +39,7 @@ import {
   stateRuleset,
 } from '../registry.ts';
 import { federalIncomeTax } from './federal.ts';
-import { supplementalEarnings } from '../wages.ts';
+import { cashEarnings, supplementalEarnings } from '../wages.ts';
 import type {
   ComputeContext,
   PaycheckInput,
@@ -718,7 +718,57 @@ function applyReducedStateWithholding(
   );
 }
 
+/**
+ * Methods that already call a supplemental function of their own inside
+ * incomeTaxLinesByMethod(). They handle the regular/supplemental split
+ * themselves, so the generic wrapper below must leave them alone or the
+ * bonus would be carved out of the regular base twice.
+ */
+const SUPPLEMENTAL_HANDLED_BY_METHOD = new Set([
+  'flat_rate',
+  'bracket_phaseout_deduction',
+  'bracket_flat_allowance',
+  'bracket_per_period_gross',
+  'bracket_per_period_net',
+  'new_mexico_percentage_method',
+]);
+
+/**
+ * Supplemental wages for every OTHER method.
+ *
+ * Before this, a flat supplemental rate could only be computed by the five
+ * methods that happened to call for it — so Ohio's separately-legislated
+ * 2.75%, Rhode Island's 5.99% and every optional flat rate had nowhere to
+ * run no matter what the data said. This wraps the method dispatch instead
+ * of editing thirty switch cases: when a state has a supplemental config
+ * that opts in (appliesWhen is set) and a line actually fires, the bonus is
+ * subtracted from the base the regular method sees, and the flat line is
+ * appended. Carving it out is the whole point — taxing it once through the
+ * regular formula and again at the flat rate is a real defect that this
+ * project has already hit once, in New Mexico.
+ */
 function incomeTaxLines(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine[] {
+  const cfg = rules.supplementalWages as SupplementalWagesConfig | undefined;
+  const supplementalCash = supplementalEarnings(input.earnings);
+  if (!cfg?.appliesWhen || supplementalCash <= 0 || SUPPLEMENTAL_HANDLED_BY_METHOD.has(rules.method)) {
+    return incomeTaxLinesByMethod(input, ctx, rules);
+  }
+
+  const supplemental = flatRateSupplementalFromConfig(input, ctx, rules);
+  if (!supplemental) return incomeTaxLinesByMethod(input, ctx, rules);
+
+  const regularCtx: ComputeContext = {
+    ...ctx,
+    taxableWagesFor: (exempt) => atLeastZero(ctx.taxableWagesFor(exempt) - supplementalCash),
+  };
+  return [...incomeTaxLinesByMethod(input, regularCtx, rules), supplemental];
+}
+
+function incomeTaxLinesByMethod(
   input: PaycheckInput,
   ctx: ComputeContext,
   rules: StateRuleset,
@@ -2417,12 +2467,40 @@ function bracketPerPeriodRateTable(
   };
 }
 
+interface SupplementalWagesConfig {
+  flatRate: number;
+  /**
+   * 'always' — the state's flat rate applies to supplemental wages however
+   * they are paid (the shape New York, Michigan and Montana already use).
+   * 'paid_separately' — it applies only to a bonus paid on its OWN cheque;
+   * a bonus paid together with regular wages is aggregated instead, which
+   * is what most states actually instruct and what this engine does by
+   * default. Configs written before this distinction existed carry no
+   * value and keep their original behaviour.
+   */
+  appliesWhen?: 'always' | 'paid_separately';
+  /**
+   * 'employer_option' — the state offers this flat method as one of two
+   * permitted choices, so it is applied only when the employer elects it
+   * (input.employer.supplementalFlatRateElection). Anything else is
+   * treated as the state telling employers what to do.
+   */
+  election?: 'required' | 'employer_option';
+}
+
 /**
  * Flat-rate supplemental wages read generically off rules.supplementalWages
  * .flatRate — New York's own 11.70% (Method A) is the first user, but this
- * is written to read the config rather than hardcode NY's number, so a
- * future state with the same shape (flat % of supplemental, no bracket
- * lookup) gets it for free.
+ * is written to read the config rather than hardcode a number, so a state
+ * with the same shape (flat % of supplemental, no bracket lookup) gets it
+ * for free.
+ *
+ * Two refusals matter as much as the arithmetic. A state whose rule is 'flat
+ * rate IF the bonus is paid separately' must NOT produce a flat line when
+ * the bonus rides along with regular wages on the same cheque — the state
+ * says aggregate, and aggregation is what the regular method already does.
+ * And a state that merely PERMITS the flat method leaves the choice to the
+ * employer, so nothing fires until the employer says so.
  */
 function flatRateSupplementalFromConfig(
   input: PaycheckInput,
@@ -2432,8 +2510,17 @@ function flatRateSupplementalFromConfig(
   const supplementalCash = supplementalEarnings(input.earnings);
   if (supplementalCash <= 0) return null;
 
-  const cfg = rules.supplementalWages as { flatRate: number } | undefined;
+  const cfg = rules.supplementalWages as SupplementalWagesConfig | undefined;
   if (!cfg) return null;
+
+  if (cfg.election === 'employer_option') {
+    if (input.employer?.supplementalFlatRateElection?.[rules.code] !== true) return null;
+  }
+
+  if (cfg.appliesWhen === 'paid_separately') {
+    const regularCash = cashEarnings(input.earnings) - supplementalCash;
+    if (regularCash > 0) return null;
+  }
 
   const amount = applyRate(supplementalCash, cfg.flatRate);
 
@@ -2444,7 +2531,10 @@ function flatRateSupplementalFromConfig(
     jurisdiction: 'state',
     taxableWages: supplementalCash,
     amount,
-    detail: `${fmt(supplementalCash)} @ ${(cfg.flatRate * 100).toFixed(2)}% flat`,
+    detail:
+      `${fmt(supplementalCash)} @ ${(cfg.flatRate * 100).toFixed(2)}% flat` +
+      (cfg.appliesWhen === 'paid_separately' ? ', paid on its own cheque' : '') +
+      (cfg.election === 'employer_option' ? ' (employer elected this method over aggregation)' : ''),
   };
 }
 

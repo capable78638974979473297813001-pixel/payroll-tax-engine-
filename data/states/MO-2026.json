@@ -52,7 +52,7 @@
     "annualizeMultiplier": { "daily": 260, "weekly": 52, "biweekly": 26, "semimonthly": 24, "monthly": 12 },
     "finalRounding": "Whole dollar, per the formula document's own instruction: 'You must round the amounts that you withhold from your employees to the nearest whole dollar.'"
   },
-  "supplementalComment": "Missouri offers the same two-option shape as several other states in this project: (1) flat 4.7% (the top marginal rate) on supplemental wages paid separately, or (2) aggregate with regular wages for the period and apply the normal formula to the total, netting out tax already withheld on the regular portion. Not yet modelled in calc code.",
+  "supplementalComment": "Missouri offers the same two-option shape as several other states in this project: (1) flat 4.7% (the top marginal rate) on supplemental wages paid separately, or (2) aggregate with regular wages for the period and apply the normal formula to the total, netting out tax already withheld on the regular portion. Not yet modelled in calc code. WIRED (supplemental pass): the supplementalWages block below now carries the rate, and flatRateSupplementalFromConfig() computes it — but only when the employer elects this method (input.employer.supplementalFlatRateElection), because this state PERMITS the flat rate rather than requiring it. Without an election the engine aggregates, which is the other method the state names.",
   "exemptPretax": [
     "section125",
     "hsa",
@@ -106,7 +106,7 @@
   "verification": "PROVEN via calculatePaycheck(): reproduces the DOR's own worked example exactly ($59/month, married-spouse-works) via missouriWithholding() in state.ts, plus a second fixture confirming the double standard deduction for married-spouse-doesn't-work. The per-bracket-step whole-dollar-sum question (see bracketsComment) turned out NOT to need special handling in the calc code: the precomputed 'base' figures already bake in that whole-dollar-per-step summation from the source data itself, and the CURRENT bracket's own marginal tax uses ordinary cent rounding, matching the source's own worked example precisely when reproduced end to end — confirmed empirically, not just asserted. ALSO PROVEN: Kansas City's 1% earnings tax, and St. Louis's 1% earnings tax co-existing with its separate 0.5% employer-only Payroll Expense Tax on the SAME paycheck (both fire, neither replaces the other), plus a no-locality control case confirming neither city tax fires without certificate.locality set. See tests/engine.test.ts, describe('Missouri').",
   "knownGaps": [
     "Kansas City's local-tax figures remain cross_source_confirmed — direct fetch was attempted and BLOCKED (Akamai-style bot filtering, same as Wilmington DE). St. Louis's direct fetch attempt 404'd rather than being blocked, meaning the current URL wasn't found. (The RATE itself is now wired into and proven through calc code regardless — this gap is about source confidence tier, not whether the number works.)",
-    "Supplemental-wage flat 4.7% method documented but not modelled."
+    "Supplemental-wage flat 4.7% method documented but not modelled. WIRED (supplemental pass): the supplementalWages block below now carries the rate, and flatRateSupplementalFromConfig() computes it — but only when the employer elects this method (input.employer.supplementalFlatRateElection), because this state PERMITS the flat rate rather than requiring it. Without an election the engine aggregates, which is the other method the state names."
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
@@ -120,5 +120,11 @@
     },
     "employerSuppliedRateRequired": false,
     "confidence": "inherited_from_this_file"
+  },
+  "supplementalWages": {
+    "flatRate": 0.047,
+    "appliesWhen": "paid_separately",
+    "election": "employer_option",
+    "source": "Missouri offers two permitted treatments (this file's supplementalComment): a flat 4.7% — the top marginal rate — on supplemental wages paid separately, or aggregation with the period's regular wages netting out tax already withheld. Because it is the employer's choice, this fires only when the employer elects it."
   }
 }

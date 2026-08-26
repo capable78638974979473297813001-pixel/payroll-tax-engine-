@@ -95,5 +95,11 @@
     },
     "employerSuppliedRateRequired": false,
     "confidence": "cross_source_confirmed"
+  },
+  "supplementalWages": {
+    "flatRate": 0.05,
+    "appliesWhen": "paid_separately",
+    "election": "employer_option",
+    "source": "Maine's own instructions, quoted in this file's knownGaps: aggregate if paid with regular wages; 'the payer MAY withhold a flat five percent' if paid separately. The permissive verb is why this is an election rather than a rule."
   }
 }

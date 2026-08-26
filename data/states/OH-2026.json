@@ -247,5 +247,11 @@
     },
     "employerSuppliedRateRequired": false,
     "confidence": "inherited_from_this_file"
+  },
+  "supplementalWages": {
+    "flatRate": 0.0275,
+    "appliesWhen": "paid_separately",
+    "election": "required",
+    "source": "Ohio's separately-legislated supplemental rate, already recorded in this file's supplementalRate/supplementalComment: flat 2.75% on bonuses and supplemental wages, in effect since 2026-01-01 and deliberately UNCHANGED by the August 1 bracket update. Scoped to a bonus paid on its own cheque; a bonus paid alongside regular wages runs through the ordinary bracket_per_period tables, which is what aggregation means here."
   }
 }
