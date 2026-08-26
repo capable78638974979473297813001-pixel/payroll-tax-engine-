@@ -236,6 +236,10 @@ export function stateIncomeTax(
   // own doc comment for the $500/month threshold and the caller-supplied
   // monthly-aggregation fields this genuinely different tax SHAPE requires.
   lines.push(...coloradoOccupationalPrivilegeTax(input, rules));
+  // Seattle's JumpStart payroll expense tax — an employer levy banded by
+  // employer size AND individual compensation. See its own doc comment.
+  const seattle = seattlePayrollExpenseTax(input, ctx, rules);
+  if (seattle) lines.push(seattle);
 
   // West Virginia's per-city Municipal Service Fee — see
   // westVirginiaMunicipalServiceFee()'s own doc comment for why this is a
@@ -4078,6 +4082,95 @@ function optLineIdPrefix(locality: string): string {
  * already withheld on an earlier cheque this month, because the engine's
  * only built-in running totals are YEAR-to-date.
  */
+interface SeattlePayrollTaxConfig {
+  employerPayrollThreshold: number;
+  compensationThreshold: number;
+  upperCompensationBand: number;
+  tiers: { maxPriorYearPayroll: number | null; lowerBandRate: number; upperBandRate: number }[];
+}
+
+/**
+ * Seattle's payroll expense tax — the JumpStart tax.
+ *
+ * An employer tax, not a withholding, and unlike anything else in this
+ * engine it is banded on TWO axes at once: how big the employer is, and
+ * how much the individual employee earns. A business owes nothing unless
+ * its prior-year Seattle payroll reached the threshold ($9,074,409 for
+ * 2026), and then it owes only on compensation above the per-employee
+ * threshold ($194,452), at a rate that depends on which of three payroll
+ * tiers the employer sits in and whether the compensation is in the lower
+ * or upper employee band. The spread is wide — 0.746% to 2.557% — so the
+ * tier is not a rounding detail.
+ *
+ * Banded per employee, so this cheque is placed against what the employee
+ * has already been paid in Seattle this year (ytd.seattleCompensation):
+ * the first dollars up to the threshold are untaxed, the next band carries
+ * the lower rate, and anything past the upper boundary carries the higher
+ * one. Without that running figure the engine cannot know which band a
+ * cheque falls in, so it starts from zero and says so.
+ *
+ * Computes nothing at all without the employer figure. A business under
+ * the payroll threshold owes nothing, and an engine that guessed would be
+ * inventing a tax for the small employers the threshold exists to spare.
+ */
+function seattlePayrollExpenseTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (cert.locality !== 'Seattle') return null;
+
+  const cfg = (rules.localIncomeTax as { seattlePayrollExpenseTax?: SeattlePayrollTaxConfig } | undefined)
+    ?.seattlePayrollExpenseTax;
+  if (!cfg) return null;
+
+  const priorYearPayroll = input.employer?.seattlePriorYearPayrollExpense;
+  if (priorYearPayroll === undefined) return null;
+  if (priorYearPayroll < dollars(cfg.employerPayrollThreshold)) return null;
+
+  const tier =
+    cfg.tiers.find(
+      (t) => t.maxPriorYearPayroll === null || priorYearPayroll < dollars(t.maxPriorYearPayroll),
+    ) ?? cfg.tiers[cfg.tiers.length - 1];
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const thisCheque = ctx.taxableWagesFor(exempt);
+  const already = input.ytd.seattleCompensation ?? 0;
+  const lowerStart = dollars(cfg.compensationThreshold);
+  const upperStart = dollars(cfg.upperCompensationBand);
+
+  const inBand = (from: Cents, to: Cents | null): Cents => {
+    const start = Math.max(already, from);
+    const end = to === null ? already + thisCheque : Math.min(already + thisCheque, to);
+    return atLeastZero(end - start);
+  };
+
+  const lowerBand = inBand(lowerStart, upperStart);
+  const upperBand = inBand(upperStart, null);
+  const taxableWages = lowerBand + upperBand;
+  if (taxableWages === 0) return null;
+
+  const amount = applyRate(lowerBand, tier.lowerBandRate) + applyRate(upperBand, tier.upperBandRate);
+
+  const parts: string[] = [];
+  if (lowerBand > 0) parts.push(`${fmt(lowerBand)} @ ${(tier.lowerBandRate * 100).toFixed(3)}%`);
+  if (upperBand > 0) parts.push(`${fmt(upperBand)} @ ${(tier.upperBandRate * 100).toFixed(3)}%`);
+
+  return {
+    id: 'SEATTLE_PAYROLL_ER',
+    name: 'Seattle Payroll Expense Tax (Employer)',
+    payer: 'employer',
+    jurisdiction: 'local',
+    taxableWages,
+    amount,
+    detail:
+      parts.join(' + ') +
+      ` — compensation above ${fmt(dollars(cfg.compensationThreshold))} for this employee ` +
+      `(${fmt(already)} paid in Seattle earlier this year), at the rate for an employer with ` +
+      `${fmt(priorYearPayroll)} of prior-year Seattle payroll`,
+  };
+}
 function coloradoOccupationalPrivilegeTax(
   input: PaycheckInput,
   rules: StateRuleset,

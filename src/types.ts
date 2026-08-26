@@ -149,6 +149,12 @@ export interface YearToDate {
    */
   railroadMonthlyCompensation?: Cents;
   /**
+   * This employee's Seattle compensation so far this year. Seattle's
+   * payroll expense tax bands by ANNUAL compensation, so a cheque cannot be
+   * placed in a band without knowing what came before it.
+   */
+  seattleCompensation?: Cents;
+  /**
    * YTD wages already counted toward a state Paid Family & Medical Leave
    * wage-base cap, keyed by state code (e.g. Minnesota Paid Leave). Separate
    * tracker from stateUnemployment even where a state has both, since the
@@ -244,6 +250,14 @@ export interface EmployerContext {
    * employers pay — to 12.0%. Absent, the new-employer rate is used.
    */
   railroadUnemploymentRate?: number;
+  /**
+   * This employer's total PRIOR-YEAR Seattle payroll expense, which decides
+   * both whether Seattle's payroll expense tax (JumpStart) applies at all
+   * and which rate tier it applies at. An employer-wide, prior-year figure:
+   * nothing in a single paycheck can imply it, so the tax computes nothing
+   * without it.
+   */
+  seattlePriorYearPayrollExpense?: Cents;
   /**
    * How much of a paid-leave premium this employer passes on to employees,
    * as a fraction of the TOTAL premium, keyed by state code. Delaware funds

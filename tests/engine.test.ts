@@ -8954,3 +8954,78 @@ describe('FUTA credit reduction', () => {
     assert.equal(federal.futa.creditReduction.priorYear.states.CA, 0.012);
   });
 });
+
+/**
+ * Seattle's JumpStart payroll expense tax — an employer levy banded on two
+ * axes at once: how big the employer is, and how much the individual
+ * employee earns. 2026 figures: liable at $9,074,409 of prior-year Seattle
+ * payroll, taxable above $194,452 per employee, upper band from $518,538,
+ * rates 0.746% to 2.557%.
+ */
+describe('Seattle payroll expense tax (JumpStart)', () => {
+  const seattle = (wage: number, ytdComp: number | null, priorPayroll: number | null) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'semimonthly' as const,
+    earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(wage) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: {
+      socialSecurity: 0,
+      medicare: 0,
+      futa: 0,
+      ...(ytdComp !== null ? { seattleCompensation: dollars(ytdComp) } : {}),
+    },
+    workState: { code: 'WA', certificate: { locality: 'Seattle' } },
+    ...(priorPayroll !== null
+      ? { employer: { seattlePriorYearPayrollExpense: dollars(priorPayroll) } }
+      : {}),
+  });
+  const hasLine = (r: ReturnType<typeof calculatePaycheck>) =>
+    r.taxes.some((t) => t.id === 'SEATTLE_PAYROLL_ER');
+
+  test('computes nothing without the employer payroll figure — it cannot be inferred from a paycheck', () => {
+    assert.equal(hasLine(calculatePaycheck(seattle(10000, 0, null))), false);
+  });
+
+  test('an employer under the payroll threshold owes nothing', () => {
+    assert.equal(hasLine(calculatePaycheck(seattle(10000, 0, 5000000))), false);
+  });
+
+  test('a liable employer owes nothing on an employee under the compensation threshold', () => {
+    assert.equal(hasLine(calculatePaycheck(seattle(10000, 100000, 20000000))), false);
+  });
+
+  test('only the part of the cheque above $194,452 is taxed', () => {
+    // $190,000 already paid + $10,000 now: $5,548 sits above the threshold.
+    const r = calculatePaycheck(seattle(10000, 190000, 20000000));
+    assert.equal(amountOf(r, 'SEATTLE_PAYROLL_ER'), dollars(41.39));
+  });
+
+  test("the employer's own size changes the rate on identical wages", () => {
+    const midsize = calculatePaycheck(seattle(10000, 250000, 20000000));
+    const giant = calculatePaycheck(seattle(10000, 250000, 2000000000));
+    assert.equal(amountOf(midsize, 'SEATTLE_PAYROLL_ER'), dollars(74.6)); // 0.746%
+    assert.equal(amountOf(giant, 'SEATTLE_PAYROLL_ER'), dollars(149.2)); // 1.492%
+  });
+
+  test('a cheque spanning the $518,538 boundary is split across both bands', () => {
+    // $515,000 already paid + $10,000 now: $3,538 in the lower band at
+    // 0.746%, $6,462 in the upper at 1.811%.
+    const r = calculatePaycheck(seattle(10000, 515000, 20000000));
+    assert.equal(amountOf(r, 'SEATTLE_PAYROLL_ER'), dollars(143.42));
+  });
+
+  test('it is an employer cost — nothing is withheld from the employee', () => {
+    const r = calculatePaycheck(seattle(10000, 600000, 20000000));
+    const line = r.taxes.find((t) => t.id === 'SEATTLE_PAYROLL_ER');
+    assert.equal(line?.payer, 'employer');
+    assert.equal(amountOf(r, 'SEATTLE_PAYROLL_ER'), dollars(181.1));
+  });
+});

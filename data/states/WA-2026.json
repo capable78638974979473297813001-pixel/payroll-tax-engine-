@@ -79,7 +79,7 @@
     "note": "Not applicable rather than 'checked, none found' — Washington has no income tax to be reciprocal about, so no resident-vs-nonresident withholding question can arise here at all. Same framing as New Hampshire in this project. reciprocalStates left structurally empty for consistency with every other state file's shape."
   },
   "knownGaps": [
-    "Seattle's JumpStart payroll tax (employer-only, ~0.746%-2.557% tiered by total payroll and individual wage level, triggered around $9M total payroll and at least one $194,452+ earner) is a real, separate Seattle-specific tax, structurally similar to Newark's payroll tax already modelled in this project (an employer-aggregate levy a single calculatePaycheck() call can't fully verify) but genuinely more complex (a multi-tier rate matrix, not Newark's one flat rate) -- not built this pass, cross-source only.",
+    "Seattle's JumpStart payroll tax (employer-only, ~0.746%-2.557% tiered by total payroll and individual wage level, triggered around $9M total payroll and at least one $194,452+ earner) is a real, separate Seattle-specific tax, structurally similar to Newark's payroll tax already modelled in this project (an employer-aggregate levy a single calculatePaycheck() call can't fully verify) but genuinely more complex (a multi-tier rate matrix, not Newark's one flat rate) -- not built this pass, cross-source only. WIRED (JumpStart pass): seattlePayrollExpenseTax() now computes it from the localIncomeTax.seattlePayrollExpenseTax block — banded by BOTH the employer's prior-year Seattle payroll (input.employer.seattlePriorYearPayrollExpense) and the employee's own annual compensation (ytd.seattleCompensation), which is what the city's two-axis rate table actually asks for. No employer figure means no line: a small employer owes nothing, and guessing would invent a tax for exactly the businesses the threshold exists to spare.",
     "exemptPretax ([] for all three WA payroll levies) rests on an INFERENCE from the absence of federal-conformity language in Washington's own wage definition, not a directly-quoted statement either way -- see exemptPretaxComment.",
     "certificate.employerLiableForPaidLeaveShare (gating the employer PFML share) is a caller-supplied flag reflecting the employer's OWN determination of whether they have 50+ WA employees -- this engine cannot verify that aggregate headcount from one employee's paycheck, the same class of gap already disclosed for Newark's $2,500/quarter threshold and >50%-resident-workforce apportionment.",
     "Washington's Capital Gains Tax (chapter 82A.04 RCW) is confirmed real and current (RCW 1.90.100(2)'s own carve-out) but is a RETURN-level excise tax on investment gains, not a payroll withholding -- correctly out of scope for this engine, recorded here only so a future reader doesn't mistake WA's 'no income tax' framing for 'no state tax of any kind.'"
@@ -96,5 +96,38 @@
     },
     "employerSuppliedRateRequired": true,
     "confidence": "no_single_rate"
+  },
+  "localIncomeTax": {
+    "seattlePayrollExpenseTax": {
+      "employerPayrollThreshold": 9074409,
+      "compensationThreshold": 194452,
+      "upperCompensationBand": 518538,
+      "tiers": [
+        {
+          "maxPriorYearPayroll": 129634413,
+          "lowerBandRate": 0.00746,
+          "upperBandRate": 0.01811
+        },
+        {
+          "maxPriorYearPayroll": 1296344132,
+          "lowerBandRate": 0.00746,
+          "upperBandRate": 0.02024
+        },
+        {
+          "maxPriorYearPayroll": null,
+          "lowerBandRate": 0.01492,
+          "upperBandRate": 0.02557
+        }
+      ],
+      "$comment": "Seattle's payroll expense tax (JumpStart) — an EMPLOYER tax, not a withholding, banded on two axes at once: the employer's prior-year Seattle payroll and the individual employee's compensation. A business owes nothing unless its 2025 Seattle payroll reached $9,074,409, and then only on compensation above $194,452 per employee. Rates run 0.746% to 2.557%, so the tier is not a rounding detail. Every figure is inflation-adjusted annually by the city, which is why they are data rather than constants.",
+      "$placement": "Filed under localIncomeTax even though Washington levies no local INCOME tax, because that is the key src/taxes/state.ts reads for city-level levies. The tax is on payroll expense, not on income, and nothing is withheld from the employee.",
+      "source": {
+        "title": "City of Seattle, City Finance — Payroll expense tax",
+        "url": "https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/payroll-expense-tax",
+        "verifiedOn": "2026-08-25",
+        "verifiedBy": "Fetched directly this pass. The 2026 table reads: liable at $9,074,409 or more of 2025 Seattle payroll expense, taxable compensation at $194,452 or more in 2026, with rates by payroll tier — under $129,634,413: 0.746% / 1.811%; $129,634,413 to under $1,296,344,132: 0.746% / 2.024%; $1,296,344,132 or more: 1.492% / 2.557% — the first rate of each pair applying to compensation from $194,452 to $518,537.99 and the second above $518,538."
+      },
+      "notModelled": "Seattle's separate 5% excess compensation tax, and the grocery-business and government-entity exemptions, are not modelled — this engine has no employer-industry or entity-type input."
+    }
   }
 }
