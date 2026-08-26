@@ -8117,3 +8117,70 @@ describe('nonresident day-count de minimis', () => {
     assert.ok(amountOf(reciprocal, 'IN_COUNTY') > dollars(0));
   });
 });
+
+/**
+ * Nonresident allocation — the same arithmetic in three states, with three
+ * genuinely different definitions of the fraction: Connecticut's share of
+ * SERVICES (CT-W4NA), Vermont's share of HOURS, Delaware's share of
+ * SOURCE INCOME over federal AGI (W-4NR).
+ */
+describe('nonresident allocation of state income tax', () => {
+  const allocated = (state: string, cert: Record<string, unknown>, residence: string | null) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly' as const,
+    earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(3000) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    workState: { code: state, certificate: cert },
+    ...(residence ? { residenceState: { code: residence, certificate: {} } } : {}),
+  });
+
+  test('Connecticut withholds only the share of services performed there', () => {
+    const full = calculatePaycheck(allocated('CT', { withholdingCode: 'F' }, 'NY'));
+    const part = calculatePaycheck(
+      allocated('CT', { withholdingCode: 'F', nonresidentAllocationFraction: 0.4 }, 'NY'),
+    );
+    assert.equal(amountOf(full, 'CT_SIT'), dollars(140.96));
+    assert.equal(amountOf(part, 'CT_SIT'), dollars(56.38));
+    assert.match(part.taxes.find((t) => t.id === 'CT_SIT')?.detail ?? '', /CT-W4NA/);
+  });
+
+  test('a RESIDENT is never allocated, whatever fraction is supplied', () => {
+    const r = calculatePaycheck(
+      allocated('CT', { withholdingCode: 'F', nonresidentAllocationFraction: 0.4 }, null),
+    );
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(140.96));
+  });
+
+  test('no fraction means no allocation — the full state tax stands', () => {
+    const r = calculatePaycheck(allocated('CT', { withholdingCode: 'F' }, 'NY'));
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(140.96));
+  });
+
+  test('a fraction of 1 or more changes nothing, and a nonsense value is ignored', () => {
+    const whole = calculatePaycheck(
+      allocated('CT', { withholdingCode: 'F', nonresidentAllocationFraction: 1 }, 'NY'),
+    );
+    const nonsense = calculatePaycheck(
+      allocated('CT', { withholdingCode: 'F', nonresidentAllocationFraction: 'most of it' }, 'NY'),
+    );
+    assert.equal(amountOf(whole, 'CT_SIT'), dollars(140.96));
+    assert.equal(amountOf(nonsense, 'CT_SIT'), dollars(140.96));
+  });
+
+  test("each state's line names its OWN basis, not a generic percentage", () => {
+    const vt = calculatePaycheck(allocated('VT', { nonresidentAllocationFraction: 0.25 }, 'NH'));
+    assert.match(vt.taxes.find((t) => t.id === 'VT_SIT')?.detail ?? '', /hours worked in-state/);
+
+    const de = calculatePaycheck(allocated('DE', { nonresidentAllocationFraction: 0.6 }, 'PA'));
+    assert.match(de.taxes.find((t) => t.id === 'DE_SIT')?.detail ?? '', /source income over federal AGI/);
+  });
+});

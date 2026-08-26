@@ -2824,7 +2824,7 @@
   "knownGaps": [
     "Table E's very lowest band (below each code's first published boundary -- $12,000 for Code A, $19,000 for B, $24,000 for C, $15,000 for F) is modeled as the maximum 0.75 credit. The source's own legend lists .75 AND .70 as the two highest values in its 28-value decimal sequence, but no boundary anywhere in the extracted document pairs .70 with a specific income range for any of the 4 codes -- treated as unreachable/inapplicable for this withholding table (see extractionNote) rather than guessed at. Bounded impact: this can only affect wages within a narrow low-income band, and only the CREDIT MULTIPLIER on an already-small base tax at that income level, not the underlying bracket or exemption calculation.",
     "Supplemental wages paid on a SEPARATE cheque from regular wages: Circular CT's own Example 12 requires aggregating the bonus with the LAST REGULAR PAY PERIOD's wages and subtracting tax already withheld from that period -- this engine models one calculatePaycheck() call at a time and cannot look back at a prior period's regular wages, the same class of disclosed cross-period gap as Kentucky's 103 KAR 18:070 Section 3(2) note and Idaho's equivalent.",
-    "Nonresident partial-Connecticut-service allocation (Form CT-W4NA, the percentage-of-services-in-Connecticut mechanism in Circular CT's Examples 8-10) is not modeled -- this engine has no per-employee days-worked-by-jurisdiction input for any state yet, the same disclosed gap as every other state's nonresident-allocation mechanics in this project.",
+    "Nonresident partial-Connecticut-service allocation (Form CT-W4NA, the percentage-of-services-in-Connecticut mechanism in Circular CT's Examples 8-10) is not modeled -- this engine has no per-employee days-worked-by-jurisdiction input for any state yet, the same disclosed gap as every other state's nonresident-allocation mechanics in this project. WIRED (allocation pass): applyNonresidentAllocation() in src/taxes/state.ts now scales this state's income tax by certificate.nonresidentAllocationFraction for a genuine nonresident, with the basis named in the line detail. The engine does not compute the fraction — the state defines it differently in each case (services, hours, source income over AGI) and only the caller knows it.",
     "Every pay frequency this engine supports (weekly/biweekly/semimonthly/monthly/quarterly/semiannual/annual/daily) works correctly with this method, unlike the per-period-TABLE states (NY/NJ/Montana/Idaho) which hard-stop on unpublished frequencies -- Connecticut's formula annualizes via ctx.periodsPerYear directly (Steps 3 and 13), so there is no per-frequency table to be missing rows from."
   ],
   "suiEmployer": {
@@ -2839,5 +2839,10 @@
     },
     "employerSuppliedRateRequired": false,
     "confidence": "source_dated_2026"
+  },
+  "nonresidentAllocation": {
+    "basis": "percentage_of_services",
+    "form": "CT-W4NA",
+    "$comment": "Circular CT's Examples 8-10: a nonresident who performs only part of their services in Connecticut files Form CT-W4NA giving the percentage, and the employer withholds that percentage of the tax that would otherwise apply. The caller supplies the percentage as certificate.nonresidentAllocationFraction; Connecticut defines it as a share of SERVICES, not of hours or of income."
   }
 }

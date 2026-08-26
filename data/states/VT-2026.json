@@ -157,7 +157,7 @@
     "Semiannual pay frequency is not published by GB-1210-2026 (only daily/weekly/biweekly/semimonthly/monthly/quarterly/annual) -- bracketPerPeriodAllowance() throws a clear error rather than guessing for that one frequency.",
     "Non-periodic supplemental payments: GB-1210-2026 says these 'can be estimated at 30% of the federal withholding' -- permissive guidance, not a required formula, and doing it faithfully would mean reading federal's own supplemental rate (22%/37% tiers) at calculation time. Not modeled; periodic supplemental wages paid at the same time as regular wages already aggregate correctly through the normal bracket calculation, the same convention as Kentucky/Idaho/Connecticut/Iowa in this project.",
     "Payments under a non-qualified deferred compensation plan have their OWN flat 6% withholding rate per GB-1210-2026 -- a narrow, real rule this engine does not model since it applies to a payment type (deferred comp distributions) outside this engine's single-regular-paycheck scope.",
-    "Nonresident partial-Vermont-service allocation (hours worked in Vermont vs. total hours in the pay period) is described in GB-1210-2026 with a worked example but not modeled -- same class of disclosed gap as Connecticut's Form CTW4NA day-allocation mechanism.",
+    "Nonresident partial-Vermont-service allocation (hours worked in Vermont vs. total hours in the pay period) is described in GB-1210-2026 with a worked example but not modeled -- same class of disclosed gap as Connecticut's Form CTW4NA day-allocation mechanism. WIRED (allocation pass): applyNonresidentAllocation() in src/taxes/state.ts now scales this state's income tax by certificate.nonresidentAllocationFraction for a genuine nonresident, with the basis named in the line detail. The engine does not compute the fraction — the state defines it differently in each case (services, hours, source income over AGI) and only the caller knows it.",
     "Vermont Family and Medical Leave Insurance (VT-FMLI) is confirmed VOLUNTARY (employer-elected insurance marketplace coverage, not a mandatory payroll tax with a single published statewide rate) -- deliberately not modeled as a statePaidLeaveEmployee config, unlike New York/New Jersey/Connecticut's mandatory programs. An employer that HAS elected VT-FMLI coverage would need its own plan-specific rate supplied by the caller; this file does not attempt to guess one.",
     "resolveVTMaritalStatus's no-form default (single) is this project's standing convention, not a rule GB-1210-2026 or Form W-4VT itself states explicitly -- GB-1210-2026 only says an employer 'may use' federal Form W-4 information if no W-4VT is submitted, without a strict fallback formula."
   ],
@@ -173,5 +173,10 @@
     },
     "employerSuppliedRateRequired": false,
     "confidence": "cross_source_confirmed"
+  },
+  "nonresidentAllocation": {
+    "basis": "hours_in_state",
+    "form": "GB-1210 nonresident allocation",
+    "$comment": "GB-1210-2026 describes the allocation as hours worked in Vermont over total hours in the pay period, with a worked example. Same arithmetic as Connecticut's, a different definition of the fraction — which is why the basis is recorded rather than the two being treated as one rule."
   }
 }

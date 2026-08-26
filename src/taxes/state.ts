@@ -118,6 +118,11 @@ export function stateIncomeTax(
     lines = applyStateWithholdingExemption(input, rules, lines);
   }
 
+  // A nonresident who worked only part of the period in this state owes it
+  // only that part — applied after the exemptions above, since an exempt
+  // employee's zero stays zero however it is scaled.
+  lines = applyNonresidentAllocation(input, rules, lines);
+
   // Additional withholding never applies once reciprocity/de minimis/an
   // exemption certificate has already zeroed the state line — an employee
   // legally owing $0 to this state isn't also topping that $0 up.
@@ -521,6 +526,69 @@ interface ReciprocityConfig {
  * County taxes" regardless — a wholesale line-array replacement would have
  * silently deleted a county tax still legally owed.
  */
+interface NonresidentAllocationConfig {
+  /** What the fraction MEANS in this state, which is not the same everywhere even though the arithmetic is. */
+  basis: 'percentage_of_services' | 'hours_in_state' | 'source_income_fraction';
+  /** The form an employee files to claim it, named in the line detail so a reviewer can find the paperwork. */
+  form?: string;
+}
+
+/**
+ * Nonresident allocation — an employee who performs only PART of their
+ * services in the work state owes that state tax on only that part.
+ *
+ * Connecticut (Form CT-W4NA, percentage of services), Vermont (hours
+ * worked in Vermont over total hours in the period) and Delaware (Form
+ * W-4NR, Delaware-source income over federal AGI) all describe this, all
+ * with worked examples, and all three files recorded it as unmodelled for
+ * the same reason: the engine had nowhere to put the fraction. The
+ * arithmetic is identical in each — compute as if every dollar were earned
+ * in-state, then scale — while the DEFINITION of the fraction differs, so
+ * the config names the basis and the line detail repeats it rather than
+ * implying the three are interchangeable.
+ *
+ * Applies only to a genuine nonresident (input.residenceState set and
+ * different), only when the caller supplies the fraction, and only to this
+ * state's own income tax lines — a local tax computed alongside it has its
+ * own sourcing rules and is deliberately left alone.
+ */
+function applyNonresidentAllocation(
+  input: PaycheckInput,
+  rules: StateRuleset,
+  lines: TaxLine[],
+): TaxLine[] {
+  const cfg = rules.nonresidentAllocation as NonresidentAllocationConfig | undefined;
+  if (!cfg) return lines;
+
+  const residence = input.residenceState?.code;
+  if (!residence || residence === rules.code) return lines;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const fraction = Number(cert.nonresidentAllocationFraction);
+  if (!Number.isFinite(fraction) || fraction < 0 || fraction >= 1) return lines;
+
+  const prefix = `${rules.code}_SIT`;
+  const basisLabel =
+    cfg.basis === 'hours_in_state'
+      ? 'hours worked in-state over total hours this period'
+      : cfg.basis === 'source_income_fraction'
+        ? 'in-state source income over federal AGI'
+        : 'percentage of services performed in-state';
+
+  return lines.map((line) => {
+    if (!line.id.startsWith(prefix) || line.amount === 0) return line;
+    const allocated = applyRate(line.amount, fraction);
+    return {
+      ...line,
+      amount: allocated,
+      detail:
+        `${line.detail}; then allocated to ${rules.code} at ${(fraction * 100).toFixed(2)}% ` +
+        `(${basisLabel}` +
+        (cfg.form ? `, ${cfg.form}` : '') +
+        `) = ${fmt(allocated)}`,
+    };
+  });
+}
 function zeroStateIncomeTaxLines(
   rules: StateRuleset,
   lines: TaxLine[],
