@@ -11,6 +11,7 @@ import {
   windowsDueOn,
 } from '../harvester/calendar.ts';
 import { fetchSource, isPdf } from '../harvester/fetch.ts';
+import { normalizeForComparison } from '../harvester/normalize.ts';
 import { isDue, windowTouchesSource, sweep } from '../harvester/run.ts';
 import type { RegisteredSource } from '../harvester/run.ts';
 
@@ -192,6 +193,82 @@ describe('fetch — failure modes are results, never exceptions', () => {
   test('isPdf trusts the magic number over a wrong Content-Type', () => {
     assert.equal(isPdf(Buffer.from('%PDF-1.4'), 'text/html'), true);
     assert.equal(isPdf(Buffer.from('<html>'), 'text/html'), false);
+  });
+});
+
+describe('normalize — hashing substance, not transport noise', () => {
+  /**
+   * Every fixture below is a real token captured from the live sweep, not
+   * an invented one. Before this normalisation existed, six of the
+   * registered sources reported "changed" on every single run.
+   */
+  const unchangedAfterNormalising = (a: string, b: string) =>
+    normalizeForComparison(a).content === normalizeForComparison(b).content;
+
+  test("Cloudflare's rotating challenge token does not count as a change", () => {
+    // Captured from wyoming's UI page: two fetches 60s apart differed by
+    // exactly this and nothing else.
+    const page = (r: string, t: string) =>
+      `<p>Taxable wage base $30,900</p><script>window.__CF$cv$params={r:'${r}',t:'${t}'};</script>`;
+    assert.ok(
+      unchangedAfterNormalising(
+        page('a31d0d59efbb8720', 'MTc4Nzg1NDQyNw=='),
+        page('a31d0eb6cf4c0880', 'MTc4Nzg1NDQ4Mw=='),
+      ),
+    );
+  });
+
+  test("ASP.NET VIEWSTATE does not count as a change", () => {
+    const page = (v: string) =>
+      `<form><input type="hidden" name="__VIEWSTATE" value="${v}" /><td>1.25%</td></form>`;
+    assert.ok(unchangedAfterNormalising(page('/wEPDwUKMTk1O'), page('/wEPDwULOTg3N')));
+  });
+
+  test('a rotating JWT does not count as a change', () => {
+    const page = (t: string) => `<script>accessToken: "${t}"</script><p>rate 6.6%</p>`;
+    assert.ok(
+      unchangedAfterNormalising(
+        page('eyJhbGciOiJIUzI1NiJ9.eyJzZWFyY2hIdWIiOiJUTkdvdiJ9.t4pOlvrXQnFi'),
+        page('eyJhbGciOiJIUzI1NiJ9.eyJzZWFyY2hIdWIiOiJUTkdvdnYifQ.ZZpOlvrXQnAb'),
+      ),
+    );
+  });
+
+  test("Akamai's per-request telemetry does not count as a change", () => {
+    const page = (rid: string, t: string) =>
+      `<script>i={"ak.v":"41","ak.rid":"${rid}","ak.t":"${t}"}</script><p>$184,500</p>`;
+    assert.ok(unchangedAfterNormalising(page('23d9d91e', '1787854782'), page('44f1c0aa', '1787854999')));
+  });
+
+  test("Cloudflare's email obfuscation does not count as a change", () => {
+    const page = (h: string) => `<a href="/cdn-cgi/l/email-protection#${h}"><span data-cfemail="${h}">x</span></a>`;
+    assert.ok(unchangedAfterNormalising(page('1f7a326c7a6d6976'), page('553078263027233c')));
+  });
+
+  test('a REAL rate change is still detected — normalisation must not swallow content', () => {
+    // The whole point of being conservative: transport noise is stripped,
+    // tax content never is.
+    const before = `<script>window.__CF$cv$params={r:'aaa',t:'bbb'};</script><td>Rate: 3.07%</td>`;
+    const after = `<script>window.__CF$cv$params={r:'ccc',t:'ddd'};</script><td>Rate: 3.50%</td>`;
+    assert.ok(!unchangedAfterNormalising(before, after), 'a moved rate must survive normalisation');
+  });
+
+  test('a published effective date in visible text is never stripped', () => {
+    // The html-comment-timestamp pattern is deliberately scoped to
+    // comments so a real date like Georgia's 2026-05-11 stays put.
+    const { content } = normalizeForComparison('<p>Effective 2026-05-11, the rate falls.</p>');
+    assert.match(content, /2026-05-11/);
+  });
+
+  test('it reports which patterns actually fired', () => {
+    const { strippedPatterns } = normalizeForComparison(
+      `<script>window.__CF$cv$params={r:'a',t:'b'};</script>`,
+    );
+    assert.deepEqual(strippedPatterns, ['cloudflare-challenge-token']);
+  });
+
+  test('line-ending and trailing-whitespace churn is not a change', () => {
+    assert.ok(unchangedAfterNormalising('rate 5%\r\nnext line', 'rate 5%   \nnext line'));
   });
 });
 

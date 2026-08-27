@@ -2,10 +2,25 @@
   "comment": "Authoritative sources only. The organising principle: never monitor an individual municipality's own website. Monitor the state-level register that the municipality is legally required to report into. Ohio's ~600 municipalities collapse to one Department of Taxation file; Pennsylvania's ~2,500 Act 32 jurisdictions collapse to one DCED register. That is what turns '7,400 jurisdictions' into roughly 60 things to watch.",
   "sources": [
     {
+      "id": "dol-futa-credit-reduction",
+      "level": "federal",
+      "jurisdiction": "US",
+      "title": "US DOL — FUTA Credit Reduction States",
+      "url": "https://oui.doleta.gov/unemploy/futa_credit.asp",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 50,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, finalised each November",
+      "feeds": [
+        "data/federal/{year}.json#futa.creditReductionStates"
+      ]
+    },
+    {
       "id": "irs-pub15t",
       "level": "federal",
       "jurisdiction": "US",
-      "title": "IRS Publication 15-T \u2014 Federal Income Tax Withholding Methods",
+      "title": "IRS Publication 15-T — Federal Income Tax Withholding Methods",
       "url": "https://www.irs.gov/pub/irs-pdf/p15t.pdf",
       "authority": "primary",
       "format": "pdf",
@@ -20,7 +35,7 @@
       "id": "ssa-wage-base",
       "level": "federal",
       "jurisdiction": "US",
-      "title": "SSA \u2014 OASDI Contribution and Benefit Base",
+      "title": "SSA — OASDI Contribution and Benefit Base",
       "url": "https://www.ssa.gov/oact/cola/cbb.html",
       "authority": "primary",
       "format": "html",
@@ -32,25 +47,538 @@
       ]
     },
     {
-      "id": "dol-futa-credit-reduction",
-      "level": "federal",
-      "jurisdiction": "US",
-      "title": "US DOL \u2014 FUTA Credit Reduction States",
-      "url": "https://oui.doleta.gov/unemploy/futa_credit.asp",
+      "id": "ak-withholding",
+      "level": "state",
+      "jurisdiction": "AK",
+      "title": "Alaska — unemployment wage base / employer rates",
+      "url": "https://labor.alaska.gov/estax/2026-experience-rates.html",
       "authority": "primary",
       "format": "html",
-      "coversJurisdictions": 50,
-      "checkFrequency": "monthly",
-      "expectedChange": "annual, finalised each November",
+      "coversJurisdictions": 1,
+      "checkFrequency": "quarterly",
+      "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
-        "data/federal/{year}.json#futa.creditReductionStates"
+        "data/states/AK-{year}.json"
+      ]
+    },
+    {
+      "id": "al-withholding",
+      "level": "state",
+      "jurisdiction": "AL",
+      "title": "Alabama — employer withholding tables & instructions",
+      "url": "https://www.revenue.alabama.gov/wp-content/uploads/2026/01/whbooklet_0126.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/AL-{year}.json"
+      ]
+    },
+    {
+      "id": "ar-withholding",
+      "level": "state",
+      "jurisdiction": "AR",
+      "title": "Arkansas — employer withholding tables & instructions",
+      "url": "https://www.dfa.arkansas.gov/wp-content/uploads/whformula_2026.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/AR-{year}.json"
+      ]
+    },
+    {
+      "id": "az-withholding",
+      "level": "state",
+      "jurisdiction": "AZ",
+      "title": "Arizona — employer withholding tables & instructions",
+      "url": "https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2026_A-4_f.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/AZ-{year}.json"
+      ]
+    },
+    {
+      "id": "ca-withholding",
+      "level": "state",
+      "jurisdiction": "CA",
+      "title": "California — employer withholding tables & instructions",
+      "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/26methb.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/CA-{year}.json"
+      ]
+    },
+    {
+      "id": "co-withholding",
+      "level": "state",
+      "jurisdiction": "CO",
+      "title": "Colorado — employer withholding tables & instructions",
+      "url": "https://tax.colorado.gov/sites/tax/files/documents/DR_1098_Colorado_Withholding_Worksheet_for_Employees.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/CO-{year}.json"
+      ]
+    },
+    {
+      "id": "ct-withholding",
+      "level": "state",
+      "jurisdiction": "CT",
+      "title": "Connecticut — employer withholding tables & instructions",
+      "url": "https://portal.ct.gov/-/media/drs/publications/pubsip/2026/ip-2026-1.pdf?rev=4482a3dca0a44b28ae39381a91fb0916&hash=57C34787EE2C1D4A7F989EE1F6B8F0F8",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/CT-{year}.json"
+      ]
+    },
+    {
+      "id": "dc-withholding",
+      "level": "state",
+      "jurisdiction": "DC",
+      "title": "District of Columbia — employer withholding tables & instructions",
+      "url": "https://otr.cfo.dc.gov/",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/DC-{year}.json"
+      ],
+      "note": "DC's Office of Tax and Revenue landing page. The state data file's own first source is a 2022 USDA National Finance Center bulletin — fine as an independent cross-check when the file was written, wrong as a monitoring target, since NFC republishing is not what makes DC's rates change. The specific withholding-booklet path 404s (otr.cfo.dc.gov/page/withholding-tax and /node/379032 both tried), so this watches the section root until a stable document URL is found."
+    },
+    {
+      "id": "de-withholding",
+      "level": "state",
+      "jurisdiction": "DE",
+      "title": "Delaware — employer withholding tables & instructions",
+      "url": "https://revenue.delaware.gov/employers-guide-withholding-regulations-employers-duties/",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/DE-{year}.json"
+      ]
+    },
+    {
+      "id": "fl-withholding",
+      "level": "state",
+      "jurisdiction": "FL",
+      "title": "Florida — unemployment wage base / employer rates",
+      "url": "https://floridarevenue.com/taxes/taxesfees/Pages/rt_rate.aspx",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "quarterly",
+      "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
+      "feeds": [
+        "data/states/FL-{year}.json"
+      ]
+    },
+    {
+      "id": "ga-withholding",
+      "level": "state",
+      "jurisdiction": "GA",
+      "title": "Georgia — employer withholding tables & instructions",
+      "url": "https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-june-2026/download",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/GA-{year}.json"
+      ]
+    },
+    {
+      "id": "hi-withholding",
+      "level": "state",
+      "jurisdiction": "HI",
+      "title": "Hawaii — employer withholding tables & instructions",
+      "url": "https://files.hawaii.gov/tax/news/pubs/25BkltA.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/HI-{year}.json"
+      ]
+    },
+    {
+      "id": "ia-withholding",
+      "level": "state",
+      "jurisdiction": "IA",
+      "title": "Iowa — employer withholding tables & instructions",
+      "url": "https://revenue.iowa.gov/media/53/download?inline=",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/IA-{year}.json"
+      ]
+    },
+    {
+      "id": "id-withholding",
+      "level": "state",
+      "jurisdiction": "ID",
+      "title": "Idaho — employer withholding tables & instructions",
+      "url": "https://tax.idaho.gov/document-mngr/pubs_EPB00744",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/ID-{year}.json"
+      ]
+    },
+    {
+      "id": "il-withholding",
+      "level": "state",
+      "jurisdiction": "IL",
+      "title": "Illinois — employer withholding tables & instructions",
+      "url": "https://tax.illinois.gov/forms/withholding/currentyear/il-700-t-withholding-guide-tables.html",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/IL-{year}.json"
+      ]
+    },
+    {
+      "id": "in-withholding",
+      "level": "state",
+      "jurisdiction": "IN",
+      "title": "Indiana — employer withholding tables & instructions",
+      "url": "https://www.in.gov/dor/files/dn01.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/IN-{year}.json"
+      ]
+    },
+    {
+      "id": "ks-withholding",
+      "level": "state",
+      "jurisdiction": "KS",
+      "title": "Kansas — employer withholding tables & instructions",
+      "url": "https://www.ksrevenue.gov/pdf/kw100.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/KS-{year}.json"
+      ]
+    },
+    {
+      "id": "ky-withholding",
+      "level": "state",
+      "jurisdiction": "KY",
+      "title": "Kentucky — employer withholding tables & instructions",
+      "url": "https://revenue.ky.gov/Forms/2026%20Withholding%20Formula.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/KY-{year}.json"
+      ]
+    },
+    {
+      "id": "la-withholding",
+      "level": "state",
+      "jurisdiction": "LA",
+      "title": "Louisiana — employer withholding tables & instructions",
+      "url": "https://dam.ldr.la.gov/taxforms/1306-1-26.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/LA-{year}.json"
+      ]
+    },
+    {
+      "id": "ma-withholding",
+      "level": "state",
+      "jurisdiction": "MA",
+      "title": "Massachusetts — employer withholding tables & instructions",
+      "url": "https://www.mass.gov/doc/massachusetts-circular-m-income-tax-withholding-tables-at-50-effective-january-1-2026/download",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/MA-{year}.json"
+      ],
+      "note": "The authoritative document: Circular M, the withholding tables themselves. NOTE ON FETCHABILITY, corrected after testing: curl is refused by mass.gov with a 403 on every path, but Node fetch with a full browser header set succeeds and returns the real PDF (verified — the extracted text opens \"Commonwealth of Massachusetts Department of Revenue\"). An earlier version of this note claimed a hard bot wall; that was true of one client, not of the harvester. Deliberately NOT pointed at miltonma.gov's copy of Form M-4, which the state data file used as a research source: that is a town's mirror of a 2019-revision certificate, not the tables, and could vanish unnoticed."
+    },
+    {
+      "id": "md-withholding",
+      "level": "state",
+      "jurisdiction": "MD",
+      "title": "Maryland — employer withholding tables & instructions",
+      "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/instructions/withholding/2026/withholding-guide.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/MD-{year}.json"
+      ]
+    },
+    {
+      "id": "me-withholding",
+      "level": "state",
+      "jurisdiction": "ME",
+      "title": "Maine — employer withholding tables & instructions",
+      "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_wh_tab_instr.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/ME-{year}.json"
+      ]
+    },
+    {
+      "id": "mi-withholding",
+      "level": "state",
+      "jurisdiction": "MI",
+      "title": "Michigan — employer withholding tables & instructions",
+      "url": "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/SUW/TY2026/446_Withholding-Guide_2026.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/MI-{year}.json"
+      ]
+    },
+    {
+      "id": "mn-withholding",
+      "level": "state",
+      "jurisdiction": "MN",
+      "title": "Minnesota — employer withholding tables & instructions",
+      "url": "https://www.revenue.state.mn.us/sites/default/files/2025-12/wh-inst-26.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/MN-{year}.json"
+      ]
+    },
+    {
+      "id": "mo-withholding",
+      "level": "state",
+      "jurisdiction": "MO",
+      "title": "Missouri — employer withholding tables & instructions",
+      "url": "https://dor.mo.gov/forms/Withholding%20Formula_2026.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/MO-{year}.json"
+      ]
+    },
+    {
+      "id": "ms-withholding",
+      "level": "state",
+      "jurisdiction": "MS",
+      "title": "Mississippi — employer withholding tables & instructions",
+      "url": "https://www.dor.ms.gov/sites/default/files/tax-forms/business/89700251revised1.13.2026.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/MS-{year}.json"
+      ]
+    },
+    {
+      "id": "mt-withholding",
+      "level": "state",
+      "jurisdiction": "MT",
+      "title": "Montana — employer withholding tables & instructions",
+      "url": "https://revenuefiles.mt.gov/files/Forms/Montana_Employer_and_Information_Agent_Guide_with_Tax_Tables.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/MT-{year}.json"
+      ]
+    },
+    {
+      "id": "nc-withholding",
+      "level": "state",
+      "jurisdiction": "NC",
+      "title": "North Carolina — employer withholding tables & instructions",
+      "url": "https://www.ncdor.gov/income-tax-withholding-tables-and-instructions-employers/open",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/NC-{year}.json"
+      ]
+    },
+    {
+      "id": "nd-withholding",
+      "level": "state",
+      "jurisdiction": "ND",
+      "title": "North Dakota — employer withholding tables & instructions",
+      "url": "https://www.tax.nd.gov/sites/www/files/documents/forms/individual/2026-iit/2026-income-tax-withholding-rates-booklet.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/ND-{year}.json"
+      ]
+    },
+    {
+      "id": "ne-withholding",
+      "level": "state",
+      "jurisdiction": "NE",
+      "title": "Nebraska — employer withholding tables & instructions",
+      "url": "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026cir_en_whole.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/NE-{year}.json"
+      ]
+    },
+    {
+      "id": "nh-withholding",
+      "level": "state",
+      "jurisdiction": "NH",
+      "title": "New Hampshire — unemployment wage base / employer rates",
+      "url": "https://www.nhes.nh.gov/",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "quarterly",
+      "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
+      "feeds": [
+        "data/states/NH-{year}.json"
+      ],
+      "note": "New Hampshire levies no income tax and no wage tax, so the only payroll figure that moves is the unemployment wage base — this watches NH Employment Security rather than the law-firm client alert the state data file cites for the Interest & Dividends repeal, which is a one-time historical fact that will never change again. Fetches successfully (verified, 186KB) despite curl being 403'd, the same client-dependent refusal documented for Massachusetts."
+    },
+    {
+      "id": "nj-withholding",
+      "level": "state",
+      "jurisdiction": "NJ",
+      "title": "New Jersey — employer withholding tables & instructions",
+      "url": "https://www.nj.gov/treasury/taxation/pdf/current/njwt.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/NJ-{year}.json"
+      ]
+    },
+    {
+      "id": "nm-withholding",
+      "level": "state",
+      "jurisdiction": "NM",
+      "title": "New Mexico — employer withholding tables & instructions",
+      "url": "https://realfile.tax.newmexico.gov/FYI-104.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/NM-{year}.json"
+      ]
+    },
+    {
+      "id": "nv-withholding",
+      "level": "state",
+      "jurisdiction": "NV",
+      "title": "Nevada — unemployment wage base / employer rates",
+      "url": "https://tax.nv.gov/faqs/modified-business-tax-faqs/",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "quarterly",
+      "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
+      "feeds": [
+        "data/states/NV-{year}.json"
+      ]
+    },
+    {
+      "id": "ny-withholding",
+      "level": "state",
+      "jurisdiction": "NY",
+      "title": "New York — employer withholding tables & instructions",
+      "url": "https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_nys.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/NY-{year}.json"
       ]
     },
     {
       "id": "oh-municipal-rates",
       "level": "local",
       "jurisdiction": "OH",
-      "title": "Ohio Dept of Taxation \u2014 Municipal Income Tax Rate Database (The Finder)",
+      "title": "Ohio Dept of Taxation — Municipal Income Tax Rate Database (The Finder)",
       "url": "https://thefinder.tax.ohio.gov/?tab=fileDownloads",
       "authority": "state_register",
       "format": "delimited",
@@ -64,10 +592,40 @@
       "note": "Replaces monitoring ~600 individual village and city websites."
     },
     {
+      "id": "ok-withholding",
+      "level": "state",
+      "jurisdiction": "OK",
+      "title": "Oklahoma — employer withholding tables & instructions",
+      "url": "https://www.oklahoma.gov/content/dam/ok/en/tax/documents/resources/publications/businesses/withholding-tables/WHTables-2026.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/OK-{year}.json"
+      ]
+    },
+    {
+      "id": "or-withholding",
+      "level": "state",
+      "jurisdiction": "OR",
+      "title": "Oregon — employer withholding tables & instructions",
+      "url": "https://www.oregon.gov/dor/forms/FormsPubs/withholding-tax-formulas_206-436_2026.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/OR-{year}.json"
+      ]
+    },
+    {
       "id": "pa-act32-eit",
       "level": "local",
       "jurisdiction": "PA",
-      "title": "PA DCED Municipal Statistics \u2014 Act 32 EIT rates and PSD codes",
+      "title": "PA DCED Municipal Statistics — Act 32 EIT rates and PSD codes",
       "url": "https://apps.dced.pa.gov/munstats-public/FindLocalTax.aspx",
       "authority": "state_register",
       "format": "delimited",
@@ -83,7 +641,7 @@
         {
           "url": "https://munstats.pa.gov/public/FindLocalTax.aspx",
           "retiredOn": "2026-08-27",
-          "reason": "Domain munstats.pa.gov stopped resolving entirely (DNS NXDOMAIN, confirmed by nslookup and a curl exit-6). PA moved Municipal Statistics under apps.dced.pa.gov. Found by the harvester sweep on its first real run \u2014 exactly the source-rot this monitoring exists to catch, and a reminder that a registered URL is itself a thing that decays."
+          "reason": "Domain munstats.pa.gov stopped resolving entirely (DNS NXDOMAIN, confirmed by nslookup and a curl exit-6). PA moved Municipal Statistics under apps.dced.pa.gov. Found by the harvester sweep on its first real run — exactly the source-rot this monitoring exists to catch, and a reminder that a registered URL is itself a thing that decays."
         }
       ]
     },
@@ -91,7 +649,7 @@
       "id": "pa-dor-withholding",
       "level": "state",
       "jurisdiction": "PA",
-      "title": "PA DOR \u2014 Employer Withholding",
+      "title": "PA DOR — Employer Withholding",
       "url": "https://www.revenue.pa.gov/TaxTypes/EmployerWithholding/",
       "authority": "primary",
       "format": "html",
@@ -100,6 +658,188 @@
       "expectedChange": "rare; the 3.07% rate has been stable for years",
       "feeds": [
         "data/states/PA-{year}.json"
+      ]
+    },
+    {
+      "id": "ri-withholding",
+      "level": "state",
+      "jurisdiction": "RI",
+      "title": "Rhode Island — employer withholding tables & instructions",
+      "url": "https://tax.ri.gov/sites/g/files/xkgbur541/files/2025-12/2026%20Withholding%20Tax%20Booklet.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/RI-{year}.json"
+      ]
+    },
+    {
+      "id": "sc-withholding",
+      "level": "state",
+      "jurisdiction": "SC",
+      "title": "South Carolina — employer withholding tables & instructions",
+      "url": "https://dor.sc.gov/sites/dor/files/forms/WH1603F_2026.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/SC-{year}.json"
+      ]
+    },
+    {
+      "id": "sd-withholding",
+      "level": "state",
+      "jurisdiction": "SD",
+      "title": "South Dakota — unemployment wage base / employer rates",
+      "url": "https://dlr.sd.gov/ra/businesses/faq.aspx",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "quarterly",
+      "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
+      "feeds": [
+        "data/states/SD-{year}.json"
+      ]
+    },
+    {
+      "id": "tn-withholding",
+      "level": "state",
+      "jurisdiction": "TN",
+      "title": "Tennessee — unemployment wage base / employer rates",
+      "url": "https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax/ui-tax-rates.html",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "quarterly",
+      "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
+      "feeds": [
+        "data/states/TN-{year}.json"
+      ]
+    },
+    {
+      "id": "tx-withholding",
+      "level": "state",
+      "jurisdiction": "TX",
+      "title": "Texas — unemployment wage base / employer rates",
+      "url": "https://www.twc.texas.gov/programs/unemployment-tax/your-tax-rates",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "quarterly",
+      "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
+      "feeds": [
+        "data/states/TX-{year}.json"
+      ],
+      "note": "KNOWN WAF CHALLENGE, verified: twc.texas.gov answers HTTP 202 with a ~2KB challenge body instead of the page, for every header combination tried (curl gets the real 110KB page; Node fetch does not). The URL is correct and live — the site simply refuses this client. The harvester reports it as such rather than as a dead link, and Texas has no income tax, so the only figure at stake is the annual UI wage base. Read by hand until a working approach is found."
+    },
+    {
+      "id": "ut-withholding",
+      "level": "state",
+      "jurisdiction": "UT",
+      "title": "Utah — employer withholding tables & instructions",
+      "url": "https://files.tax.utah.gov/tax/forms/pubs/pub-14.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/UT-{year}.json"
+      ]
+    },
+    {
+      "id": "va-withholding",
+      "level": "state",
+      "jurisdiction": "VA",
+      "title": "Virginia — employer withholding tables & instructions",
+      "url": "https://www.tax.virginia.gov/sites/default/files/vatax-pdf/employer-withholding-instructions.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/VA-{year}.json"
+      ]
+    },
+    {
+      "id": "vt-withholding",
+      "level": "state",
+      "jurisdiction": "VT",
+      "title": "Vermont — employer withholding tables & instructions",
+      "url": "https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2026.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/VT-{year}.json"
+      ]
+    },
+    {
+      "id": "wa-withholding",
+      "level": "state",
+      "jurisdiction": "WA",
+      "title": "Washington — unemployment wage base / employer rates",
+      "url": "https://esd.wa.gov/employer-taxes/rates",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "quarterly",
+      "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
+      "feeds": [
+        "data/states/WA-{year}.json"
+      ],
+      "note": "Employment Security Department's employer tax rates page (verified 200). Replaces the state data file's citation of RCW 1.90.100 (the income-tax prohibition) — a statute proving Washington has no income tax is a permanent fact, not something to monitor. What actually changes here is the UI wage base and the Paid Leave/WA Cares premium rates."
+    },
+    {
+      "id": "wi-withholding",
+      "level": "state",
+      "jurisdiction": "WI",
+      "title": "Wisconsin — employer withholding tables & instructions",
+      "url": "https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/WI-{year}.json"
+      ]
+    },
+    {
+      "id": "wv-withholding",
+      "level": "state",
+      "jurisdiction": "WV",
+      "title": "West Virginia — employer withholding tables & instructions",
+      "url": "https://tax.wv.gov/Documents/Withholding/it100.2a.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
+      "feeds": [
+        "data/states/WV-{year}.json"
+      ]
+    },
+    {
+      "id": "wy-withholding",
+      "level": "state",
+      "jurisdiction": "WY",
+      "title": "Wyoming — unemployment wage base / employer rates",
+      "url": "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-taxable-wage-base/",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "quarterly",
+      "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
+      "feeds": [
+        "data/states/WY-{year}.json"
       ]
     }
   ]

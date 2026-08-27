@@ -71,6 +71,19 @@ export type FetchResult = FetchOk | FetchFail;
 const BROWSER_UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
+/**
+ * A User-Agent alone is not always enough. Texas's TWC returns a 202 with a
+ * ZERO-byte body to a request sending `Accept: * / *`, and a real body once
+ * `Accept`/`Accept-Language` look like a browser's — measured directly, not
+ * guessed. Several WAFs fingerprint the whole header set, so these are sent
+ * together.
+ */
+const BROWSER_HEADERS: Record<string, string> = {
+  'User-Agent': BROWSER_UA,
+  Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,application/pdf,*/*;q=0.8',
+  'Accept-Language': 'en-US,en;q=0.9',
+};
+
 const DEFAULT_TIMEOUT_MS = 60_000;
 /** Above this, a "document" is almost certainly not the rate register we wanted. */
 const MAX_BYTES = 60 * 1024 * 1024;
@@ -107,10 +120,7 @@ export async function fetchSource(
     response = await doFetch(source.url, {
       redirect: 'follow',
       signal: controller.signal,
-      headers: {
-        'User-Agent': BROWSER_UA,
-        Accept: '*/*',
-      },
+      headers: BROWSER_HEADERS,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -145,8 +155,21 @@ export async function fetchSource(
   if (buffer.byteLength > MAX_BYTES) {
     return fail(`Body is ${buffer.byteLength} bytes, over the ${MAX_BYTES}-byte ceiling.`);
   }
+
+  // A 202 is technically "ok" by fetch's reckoning, which is how this
+  // slipped through at first: Texas's TWC answers 202 with an empty body
+  // when its WAF decides to issue a challenge instead of serving the page.
+  // Reporting that as a generic "empty body" sent the reader hunting for a
+  // dead URL that was in fact perfectly alive.
+  if (response.status === 202 && buffer.byteLength < 4096) {
+    return fail(
+      `HTTP 202 with a ${buffer.byteLength}-byte body — a WAF challenge, not the document. ` +
+        'The URL is probably fine; the site is refusing automated clients. Fetch it by hand.',
+      202,
+    );
+  }
   if (buffer.byteLength === 0) {
-    return fail('Body was empty — a 200 with no content is not a register.');
+    return fail(`Body was empty — HTTP ${response.status} with no content is not a register.`);
   }
 
   const looksPdf = isPdf(buffer, contentType);

@@ -5,6 +5,7 @@ import { windowsDueOn, describeWindows } from './calendar.ts';
 import type { CalendarWindow } from './calendar.ts';
 import { fetchSource } from './fetch.ts';
 import type { FetchOptions, FetchResult } from './fetch.ts';
+import { normalizeForComparison } from './normalize.ts';
 import { hasChanged, writeSnapshot, latestSnapshot } from './snapshot.ts';
 
 /**
@@ -74,6 +75,8 @@ export interface SweepEntry {
   lastCheckedAt?: string;
   reason?: string;
   snapshotPath?: string;
+  /** Volatile tokens (CF challenge, VIEWSTATE…) removed before comparing. */
+  strippedPatterns?: string[];
 }
 
 export interface SweepReport {
@@ -172,20 +175,29 @@ export async function sweep(asOf: string, options: SweepOptions = {}): Promise<S
       continue;
     }
 
-    if (!hasChanged(source.id, result.content)) {
+    // Compare — and snapshot — the NORMALIZED text, not the raw bytes.
+    // Several sources rotate a Cloudflare token or an ASP.NET VIEWSTATE on
+    // every single request; hashing those makes every run report a change
+    // and the monitor becomes noise nobody reads. Snapshotting the
+    // normalized form also makes the stored captures diffable against each
+    // other, which is what a reviewer actually does with them.
+    const { content: normalized, strippedPatterns } = normalizeForComparison(result.content);
+
+    if (!hasChanged(source.id, normalized)) {
       entries.push({ ...base, outcome: 'unchanged' });
       continue;
     }
 
-    const snap = writeSnapshot(source.id, result.content, result.fetchedAt);
+    const snap = writeSnapshot(source.id, normalized, result.fetchedAt);
     entries.push({
       ...base,
       outcome: 'changed',
       snapshotPath: snap.path,
+      ...(strippedPatterns.length ? { strippedPatterns } : {}),
       reason:
         lastCheckedAt === undefined
           ? 'First capture of this source — nothing to compare against yet. Future runs will diff against it.'
-          : 'Document content differs from the last capture. Read it and update the affected data file if a rate actually moved.',
+          : 'Document content differs from the last capture, after volatile tokens were stripped. Read it and update the affected data file if a rate actually moved.',
     });
   }
 
