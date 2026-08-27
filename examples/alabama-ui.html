@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Alabama Paycheck Calculator</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --panel: #ffffff;
+    --border: #dfe3e8;
+    --text: #1b1f24;
+    --muted: #5c6672;
+    --accent: #1f5f4f;
+    --accent-ink: #ffffff;
+    --warn-bg: #fff7e6;
+    --warn-border: #f0c674;
+    --good-bg: #edf7f1;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  header {
+    background: var(--accent);
+    color: var(--accent-ink);
+    padding: 18px 24px;
+  }
+  header h1 { margin: 0; font-size: 19px; font-weight: 600; }
+  header p { margin: 4px 0 0; font-size: 13px; opacity: 0.85; }
+  main {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(360px, 480px) 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  fieldset {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 0 16px;
+    padding: 12px 0 0;
+  }
+  fieldset:first-of-type { border-top: none; padding-top: 0; }
+  legend {
+    font-weight: 600;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    padding: 0;
+    margin-bottom: 8px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .row.single { grid-template-columns: 1fr; }
+  .row.three { grid-template-columns: 1fr 1fr 1fr; }
+  label {
+    display: block;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    width: 100%;
+    padding: 7px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13.5px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--text);
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 0 8px;
+  }
+  .checkbox-row input { width: auto; }
+  .checkbox-row label { margin: 0; color: var(--text); font-size: 13px; }
+  .hint {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin: -4px 0 8px;
+  }
+  .conditional {
+    display: none;
+    padding: 8px 10px;
+    margin: 4px 0 10px;
+    background: #fafbfc;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+  }
+  .conditional.shown { display: block; }
+  button#calc {
+    width: 100%;
+    padding: 11px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  button#calc:hover { filter: brightness(1.08); }
+  button#calc:disabled { opacity: 0.6; cursor: default; }
+  #result-panel { min-height: 200px; }
+  #placeholder { color: var(--muted); padding: 40px 10px; text-align: center; }
+  .error-box {
+    background: #fdecec;
+    border: 1px solid #e8a3a3;
+    color: #7a1f1f;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    white-space: pre-wrap;
+  }
+  .paystub h2 { margin: 0 0 2px; font-size: 17px; }
+  .paystub .meta { color: var(--muted); font-size: 12.5px; margin-bottom: 14px; }
+  table.lines {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  table.lines th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding: 4px 6px;
+  }
+  table.lines td { padding: 5px 6px; border-bottom: 1px solid #f0f2f4; }
+  table.lines td.amt, table.lines th.amt { text-align: right; font-family: var(--mono); }
+  table.lines tr.total td { font-weight: 700; border-top: 2px solid var(--border); border-bottom: none; }
+  .net-pay {
+    background: var(--good-bg);
+    border: 1px solid #b7dcc5;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 16px;
+  }
+  .net-pay .label { font-size: 13px; color: var(--muted); }
+  .net-pay .value { font-size: 24px; font-weight: 700; font-family: var(--mono); color: #175c3c; }
+  .section-title {
+    font-weight: 600;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    margin: 18px 0 8px;
+  }
+  ul.notes { margin: 0; padding-left: 18px; }
+  ul.notes li { margin-bottom: 8px; font-size: 12.8px; color: #333; }
+  ul.warnings { margin: 0; padding-left: 0; list-style: none; }
+  ul.warnings li {
+    margin-bottom: 8px;
+    font-size: 12.8px;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-left: 3px solid #d99a1a;
+    padding: 8px 10px;
+    border-radius: 4px;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    background: #eef1f4;
+    color: var(--muted);
+    margin-left: 6px;
+  }
+  footer {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 6px 20px 30px;
+    color: var(--muted);
+    font-size: 11.5px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Alabama Paycheck Calculator</h1>
+  <p>A working prototype in front of this repo's real payroll-tax engine — every rate, bracket, and rule below is read live from the same JSON data and TypeScript code the test suite checks. Not an official Alabama Department of Revenue tool.</p>
+</header>
+
+<main>
+  <form class="panel" id="form">
+
+    <fieldset>
+      <legend>Pay period</legend>
+      <div class="row">
+        <div>
+          <label for="checkDate">Check date</label>
+          <input type="date" id="checkDate" value="2026-06-15" required />
+        </div>
+        <div>
+          <label for="payFrequency">Pay frequency</label>
+          <select id="payFrequency">
+            <option value="weekly">Weekly</option>
+            <option value="biweekly" selected>Biweekly</option>
+            <option value="semimonthly">Semimonthly</option>
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="semiannual">Semiannual</option>
+            <option value="annual">Annual</option>
+            <option value="daily">Daily</option>
+          </select>
+        </div>
+      </div>
+      <div class="row single">
+        <div>
+          <label for="employeeName">Employee name (optional)</label>
+          <input type="text" id="employeeName" placeholder="Jordan Casey" />
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Earnings this cheque ($)</legend>
+      <div class="row three">
+        <div><label for="e-regular">Regular</label><input type="number" id="e-regular" value="3000" step="0.01" min="0" /></div>
+        <div><label for="e-overtime">Overtime</label><input type="number" id="e-overtime" value="0" step="0.01" min="0" /></div>
+        <div><label for="e-bonus">Bonus</label><input type="number" id="e-bonus" value="0" step="0.01" min="0" /></div>
+      </div>
+      <div class="row three">
+        <div><label for="e-commission">Commission</label><input type="number" id="e-commission" value="0" step="0.01" min="0" /></div>
+        <div><label for="e-imputed">Imputed (e.g. GTL)</label><input type="number" id="e-imputed" value="0" step="0.01" min="0" /></div>
+        <div><label for="e-reimbursement">Reimbursement</label><input type="number" id="e-reimbursement" value="0" step="0.01" min="0" /></div>
+      </div>
+      <div class="row">
+        <div><label for="e-housing">Housing allowance (clergy only)</label><input type="number" id="e-housing" value="0" step="0.01" min="0" /></div>
+        <div><label for="e-severance">Severance / termination pay</label><input type="number" id="e-severance" value="0" step="0.01" min="0" /></div>
+      </div>
+
+      <div class="checkbox-row"><input type="checkbox" id="elect5" /><label for="elect5">Employer elects Alabama's 5% flat withholding rate on bonus/commission</label></div>
+
+      <div class="conditional" id="severance-box">
+        <div class="checkbox-row"><input type="checkbox" id="sev-approved" /><label for="sev-approved">Department of Revenue approval for the $50,000 severance exemption is on file</label></div>
+        <div class="row">
+          <div><label for="sev-ytd">Already exempted earlier this year ($)</label><input type="number" id="sev-ytd" value="0" step="0.01" min="0" /></div>
+          <div><label for="sev-this">Amount of THIS severance to exempt ($, blank = all)</label><input type="number" id="sev-this" step="0.01" min="0" /></div>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Pre-tax deductions this cheque ($)</legend>
+      <div class="row three">
+        <div><label for="d-401k">401(k)</label><input type="number" id="d-401k" value="0" step="0.01" min="0" /></div>
+        <div><label for="d-403b">403(b)</label><input type="number" id="d-403b" value="0" step="0.01" min="0" /></div>
+        <div><label for="d-457">457</label><input type="number" id="d-457" value="0" step="0.01" min="0" /></div>
+      </div>
+      <div class="row three">
+        <div><label for="d-simple">SIMPLE IRA</label><input type="number" id="d-simple" value="0" step="0.01" min="0" /></div>
+        <div><label for="d-125">Section 125 (medical)</label><input type="number" id="d-125" value="0" step="0.01" min="0" /></div>
+        <div><label for="d-hsa">HSA</label><input type="number" id="d-hsa" value="0" step="0.01" min="0" /></div>
+      </div>
+      <div class="row three">
+        <div><label for="d-fsa">FSA</label><input type="number" id="d-fsa" value="0" step="0.01" min="0" /></div>
+        <div><label for="d-dcare">Dependent care</label><input type="number" id="d-dcare" value="0" step="0.01" min="0" /></div>
+        <div><label for="d-commuter">Commuter</label><input type="number" id="d-commuter" value="0" step="0.01" min="0" /></div>
+      </div>
+      <div class="row single">
+        <div><label for="d-posttax">Post-tax deduction (union dues, garnishment, etc.)</label><input type="number" id="d-posttax" value="0" step="0.01" min="0" /></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Form A-4 (Alabama)</legend>
+      <div class="checkbox-row"><input type="checkbox" id="a4-exempt" /><label for="a4-exempt">Employee claims exempt from Alabama withholding</label></div>
+      <div class="conditional" id="a4-exempt-box">
+        <label for="a4-exempt-reason">Reason (which exemption is being claimed)</label>
+        <input type="text" id="a4-exempt-reason" placeholder="e.g. Military Spouses Residency Relief Act (P.L. 111-97)" />
+      </div>
+      <div class="row three">
+        <div>
+          <label for="a4-code">Exemption code</label>
+          <select id="a4-code">
+            <option value="0" selected>0 — none claimed</option>
+            <option value="S">S — single</option>
+            <option value="MS">MS — married filing separately</option>
+            <option value="M">M — married</option>
+            <option value="H">H — head of family</option>
+          </select>
+        </div>
+        <div><label for="a4-dependents">Dependents</label><input type="number" id="a4-dependents" value="0" min="0" step="1" /></div>
+        <div><label for="a4-additional">Extra withholding / cheque ($)</label><input type="number" id="a4-additional" value="0" step="0.01" min="0" /></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Federal Form W-4</legend>
+      <div class="row">
+        <div>
+          <label for="w4-status">Filing status</label>
+          <select id="w4-status">
+            <option value="single" selected>Single</option>
+            <option value="married_joint">Married filing jointly</option>
+            <option value="married_separate">Married filing separately</option>
+            <option value="head_of_household">Head of household</option>
+          </select>
+        </div>
+        <div><label for="w4-dependent-credit">Step 3 dependent credit ($/yr)</label><input type="number" id="w4-dependent-credit" value="0" step="0.01" min="0" /></div>
+      </div>
+      <div class="row">
+        <div><label for="w4-other-income">Step 4(a) other income ($/yr)</label><input type="number" id="w4-other-income" value="0" step="0.01" min="0" /></div>
+        <div><label for="w4-deductions">Step 4(b) extra deductions ($/yr)</label><input type="number" id="w4-deductions" value="0" step="0.01" min="0" /></div>
+      </div>
+      <div class="row">
+        <div><label for="w4-extra">Step 4(c) extra withholding ($/cheque)</label><input type="number" id="w4-extra" value="0" step="0.01" min="0" /></div>
+        <div style="display:flex; align-items:flex-end; gap:14px; padding-bottom:6px;">
+          <div class="checkbox-row" style="margin:0;"><input type="checkbox" id="w4-multiple" /><label for="w4-multiple">Multiple jobs</label></div>
+          <div class="checkbox-row" style="margin:0;"><input type="checkbox" id="w4-exempt" /><label for="w4-exempt">Federal exempt</label></div>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Work location &amp; residency</legend>
+      <div class="row">
+        <div>
+          <label for="work-city">Work city (Alabama occupational tax)</label>
+          <select id="work-city"><option value="">— none / not listed —</option></select>
+        </div>
+        <div>
+          <label for="residence-state">State the employee lives in</label>
+          <input type="text" id="residence-state" value="AL" maxlength="2" style="text-transform:uppercase" />
+        </div>
+      </div>
+      <div class="conditional" id="nonresident-box">
+        <div class="row">
+          <div><label for="days-worked">Days worked in Alabama this year</label><input type="number" id="days-worked" min="0" step="1" placeholder="e.g. 12" /></div>
+          <div><label for="al-fraction">Share of THIS cheque's work done in Alabama (0–1, past 30 days)</label><input type="number" id="al-fraction" min="0" max="1" step="0.01" placeholder="e.g. 0.6" /></div>
+        </div>
+        <p class="hint">Leave the day count blank if you don't track it — Alabama is withheld by default, not assumed exempt. At or under 30 days, the employee owes $0 under Act 2025-334's safe harbor.</p>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Employment category</legend>
+      <select id="employment-category">
+        <option value="standard" selected>Standard employee</option>
+        <option value="household">Household / domestic worker</option>
+        <option value="agricultural">Agricultural worker</option>
+        <option value="clergy">Clergy / minister</option>
+        <option value="statutory_employee">Statutory employee</option>
+        <option value="railroad">Railroad employee</option>
+        <option value="election_worker">Election worker</option>
+      </select>
+      <p class="hint">Alabama excludes household, agricultural, and clergy work from its own withholding entirely — even where federal rules would still tax it.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Year-to-date figures ($)</legend>
+      <div class="row">
+        <div><label for="ytd-ss">Social Security wages</label><input type="number" id="ytd-ss" value="0" step="0.01" min="0" /></div>
+        <div><label for="ytd-medicare">Medicare wages</label><input type="number" id="ytd-medicare" value="0" step="0.01" min="0" /></div>
+      </div>
+      <div class="row">
+        <div><label for="ytd-futa">FUTA wages</label><input type="number" id="ytd-futa" value="0" step="0.01" min="0" /></div>
+        <div><label for="ytd-alui">Alabama unemployment wages</label><input type="number" id="ytd-alui" value="0" step="0.01" min="0" /></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Employer</legend>
+      <div class="row">
+        <div><label for="employer-name">Employer name (optional)</label><input type="text" id="employer-name" placeholder="Delta Fabrication LLC" /></div>
+        <div><label for="employer-rate">Assigned AL unemployment rate (blank = new-employer 2.7%)</label><input type="number" id="employer-rate" step="0.001" min="0" max="1" placeholder="e.g. 0.014" /></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Options</legend>
+      <div class="checkbox-row"><input type="checkbox" id="opt-round" /><label for="opt-round">Round every withholding line to the nearest whole dollar</label></div>
+    </fieldset>
+
+    <button id="calc" type="submit">Calculate paycheck</button>
+  </form>
+
+  <div class="panel" id="result-panel">
+    <div id="placeholder">Fill in the form and press <strong>Calculate paycheck</strong> — the result appears here.</div>
+    <div id="result" style="display:none"></div>
+  </div>
+</main>
+
+<footer>
+  Runs entirely against local repo data (data/states/AL-2026.json, data/local/AL-municipalities-2026.json) via the same calculateAlabamaPaycheck() the CLI and test suite use. Nothing is sent anywhere outside this machine.
+</footer>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+
+  // --- conditional sections -------------------------------------------
+  function syncConditional(triggerEl, boxEl, test) {
+    const update = () => boxEl.classList.toggle('shown', test());
+    triggerEl.forEach((el) => el.addEventListener('input', update));
+    update();
+  }
+  syncConditional([$('e-severance')], $('severance-box'), () => Number($('e-severance').value) > 0);
+  syncConditional([$('a4-exempt')], $('a4-exempt-box'), () => $('a4-exempt').checked);
+  syncConditional([$('residence-state')], $('nonresident-box'), () => $('residence-state').value.trim().toUpperCase() !== 'AL' && $('residence-state').value.trim() !== '');
+
+  // --- populate the work-city dropdown from the engine's own data -----
+  fetch('/api/alabama/cities')
+    .then((r) => r.json())
+    .then((data) => {
+      const sel = $('work-city');
+      for (const c of data.cities) {
+        const opt = document.createElement('option');
+        opt.value = c.name;
+        opt.textContent = c.name + ' (' + (c.rate * 100).toFixed(2) + '%)';
+        sel.appendChild(opt);
+      }
+    })
+    .catch(() => { /* dropdown still usable without the list; server may still be starting */ });
+
+  // --- build the payload -----------------------------------------------
+  function num(id) {
+    const v = $(id).value;
+    return v === '' ? 0 : Number(v);
+  }
+  function numOrUndef(id) {
+    const v = $(id).value;
+    return v === '' ? undefined : Number(v);
+  }
+
+  function buildInput() {
+    const deductions = [];
+    const pretax = [
+      ['d-401k', 'deferral_401k'],
+      ['d-403b', 'deferral_403b'],
+      ['d-457', 'deferral_457'],
+      ['d-simple', 'deferral_simple'],
+      ['d-125', 'section125'],
+      ['d-hsa', 'hsa'],
+      ['d-fsa', 'fsa'],
+      ['d-dcare', 'dependent_care'],
+      ['d-commuter', 'commuter'],
+    ];
+    for (const [id, category] of pretax) {
+      const amount = num(id);
+      if (amount > 0) deductions.push({ code: id, category, amount });
+    }
+    const posttax = num('d-posttax');
+    if (posttax > 0) deductions.push({ code: 'POSTTAX', category: 'posttax', amount: posttax });
+
+    const residenceState = ($('residence-state').value || 'AL').trim().toUpperCase();
+    const isNonresident = residenceState !== 'AL';
+
+    const input = {
+      checkDate: $('checkDate').value,
+      payFrequency: $('payFrequency').value,
+      earnings: {
+        regular: num('e-regular'),
+        overtime: num('e-overtime'),
+        bonus: num('e-bonus'),
+        commission: num('e-commission'),
+        imputed: num('e-imputed'),
+        reimbursement: num('e-reimbursement'),
+        housingAllowance: num('e-housing'),
+        severance: num('e-severance'),
+      },
+      deductions,
+      a4: {
+        exemptionCode: $('a4-code').value,
+        dependents: Math.round(num('a4-dependents')),
+        additionalWithholding: num('a4-additional'),
+        exempt: $('a4-exempt').checked,
+        exemptReason: $('a4-exempt').checked ? $('a4-exempt-reason').value : undefined,
+      },
+      federalW4: {
+        filingStatus: $('w4-status').value,
+        multipleJobs: $('w4-multiple').checked,
+        dependentCredit: num('w4-dependent-credit'),
+        otherIncome: num('w4-other-income'),
+        deductions: num('w4-deductions'),
+        extraWithholding: num('w4-extra'),
+        exempt: $('w4-exempt').checked,
+      },
+      residency: {
+        residenceState,
+        daysWorkedInAlabamaThisYear: isNonresident ? numOrUndef('days-worked') : undefined,
+        alabamaWorkFraction: isNonresident ? numOrUndef('al-fraction') : undefined,
+      },
+      employmentCategory: $('employment-category').value,
+      ytd: {
+        socialSecurity: num('ytd-ss'),
+        medicare: num('ytd-medicare'),
+        futa: num('ytd-futa'),
+        alabamaUnemployment: num('ytd-alui'),
+      },
+      employer: {
+        name: $('employer-name').value || undefined,
+        unemploymentRate: numOrUndef('employer-rate'),
+        useFivePercentSupplementalRate: $('elect5').checked,
+      },
+      options: { roundToWholeDollars: $('opt-round').checked },
+    };
+
+    const workCity = $('work-city').value;
+    if (workCity) input.workCity = workCity;
+    const employeeName = $('employeeName').value;
+    if (employeeName) input.employeeName = employeeName;
+
+    if (num('e-severance') > 0) {
+      input.severanceExemption = {
+        approvalOnFile: $('sev-approved').checked,
+        alreadyExemptedThisYear: num('sev-ytd'),
+        exemptThisPeriod: numOrUndef('sev-this'),
+      };
+    }
+
+    return input;
+  }
+
+  // --- rendering ---------------------------------------------------------
+  function money(amount) { return amount.display; }
+
+  function lineRows(lines) {
+    return lines
+      .map(
+        (l) =>
+          '<tr><td>' + escapeHtml(l.name) + '</td><td class="amt">' + money(l.taxableWages) +
+          '</td><td class="amt">' + money(l.amount) + '</td></tr>',
+      )
+      .join('');
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function render(output) {
+    const el = $('result');
+    const title = output.employeeName ? 'Paycheck — ' + escapeHtml(output.employeeName) : 'Paycheck';
+    let html = '<div class="paystub">';
+    html += '<h2>' + title + '</h2>';
+    html += '<div class="meta">' + output.checkDate + ' · ' + output.payFrequency + ' (' + output.periodsPerYear + '/yr) · Alabama' +
+      (output.alabama.localOccupationalTax ? ' — ' + escapeHtml(output.alabama.localOccupationalTax.city) : '') +
+      (output.employerName ? ' · ' + escapeHtml(output.employerName) : '') + '</div>';
+
+    html += '<div class="net-pay"><span class="label">Net pay</span><span class="value">' + money(output.netPay) + '</span></div>';
+
+    html += '<table class="lines"><thead><tr><th>Withheld from employee</th><th class="amt">Taxable</th><th class="amt">Amount</th></tr></thead><tbody>';
+    html += lineRows(output.employeeTaxes);
+    html += '<tr class="total"><td>Total withheld</td><td></td><td class="amt">' + money(output.employeeTaxTotal) + '</td></tr>';
+    html += '</tbody></table>';
+
+    html += '<table class="lines"><thead><tr><th>Employer cost (not withheld)</th><th class="amt">Taxable</th><th class="amt">Amount</th></tr></thead><tbody>';
+    html += lineRows(output.employerTaxes);
+    html += '<tr class="total"><td>Total employer tax</td><td></td><td class="amt">' + money(output.employerTaxTotal) + '</td></tr>';
+    html += '<tr class="total"><td>Total cost of this paycheck</td><td></td><td class="amt">' + money(output.employerCost) + '</td></tr>';
+    html += '</tbody></table>';
+
+    html += '<div class="section-title">How Alabama got there</div>';
+    html += '<ul class="notes">' + output.alabama.explanation.map((n) => '<li>' + escapeHtml(n) + '</li>').join('') + '</ul>';
+
+    if (output.warnings.length) {
+      html += '<div class="section-title">Worth checking <span class="badge">' + output.warnings.length + '</span></div>';
+      html += '<ul class="warnings">' + output.warnings.map((w) => '<li>' + escapeHtml(w) + '</li>').join('') + '</ul>';
+    }
+
+    html += '</div>';
+    el.innerHTML = html;
+    el.style.display = 'block';
+    $('placeholder').style.display = 'none';
+  }
+
+  function renderError(message, problems) {
+    const el = $('result');
+    let text = message;
+    if (problems && problems.length) {
+      text += '\n\n' + problems.map((p) => '• ' + p).join('\n');
+    }
+    el.innerHTML = '<div class="error-box">' + escapeHtml(text) + '</div>';
+    el.style.display = 'block';
+    $('placeholder').style.display = 'none';
+  }
+
+  $('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('calc');
+    btn.disabled = true;
+    btn.textContent = 'Calculating…';
+    try {
+      const res = await fetch('/api/alabama/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildInput()),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        renderError(data.error || 'Calculation failed.', data.problems);
+      } else {
+        render(data.output);
+      }
+    } catch (err) {
+      renderError('Could not reach the calculator server: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Calculate paycheck';
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

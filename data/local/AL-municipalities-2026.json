@@ -8,6 +8,15 @@
     "fetchedOn": "2026-08-25",
     "fetchedBy": "Raw HTML fetched directly via curl (not just a WebFetch AI summary -- the summary was independently cross-checked byte-for-byte against the raw HTML's <div id=\"OccupationalTax\"> section before trusting it; both matched exactly). This is the Alabama League of Municipalities' own tax-rate reference, the closest thing this state has to a centralized aggregator (there is no state-government-run database the way Ohio's Finder or Kentucky's SOS site are) -- but the page itself is explicit about its own limits: 'All city and county rates are those given to the League by survey and should be verified with the appropriate entity for updates' and 'The Alabama League of Municipalities takes no responsibility for and makes no assertions as to the accuracy of this tax rate information.'"
   },
+  "reverification": {
+    "on": "2026-08-26",
+    "how": "ALM's TaxRates.aspx re-fetched with curl and the raw <div id=\"OccupationalTax\"> block re-read directly (not via an AI summary), during the Alabama input/output pass. Result: UNCHANGED -- the same 25 municipalities at the same 25 rates, in the same three columns. No city added, none removed, no rate moved.",
+    "why": "A survey-sourced list is exactly the kind that goes stale silently, so 'still says the same thing' is a finding worth dating rather than an assumption worth carrying."
+  },
+  "nameMatching": {
+    "$comment": "Lookup is by name, so a name the caller spells the way the WORLD spells it must still resolve. ALM's own page prints \"Hacklebug\", which is not a place: the Marion County town is HACKLEBURG (population ~1,500, the one flattened by the 2011 tornado), and it sits among the other Marion/Winston County towns on ALM's own list -- Bear Creek, Brilliant, Guin, Hamilton, Lynn -- which is exactly where a Hackleburg entry belongs. Rather than silently correct a source this project quotes, the entry keeps ALM's spelling as its canonical name and gains an alias, so both spellings resolve to the same 1% and the discrepancy stays visible instead of being tidied away. If ALM's spelling turns out to be right and some other 'Hacklebug' exists, nothing has been lost -- the alias simply never matches.",
+    "aliasesAreMatchedBy": "alMunicipalityRuleset() in src/registry.ts, case-insensitively, against name and every alias."
+  },
   "confidence": "cross_source_confirmed via the industry's own reference association (ALM), NOT independently fetched from each city's own ordinance -- one tier below primary_source_confirmed, the same tier this project already uses for Kentucky's KACo county brief. Birmingham's own municipal code (Municode Library, Title 3, Article A, Chapter 2 -- Occupational Tax) was found and its existence confirmed, but the actual ordinance text could not be fetched (Municode serves an Angular SPA shell to non-browser requests, a 403/JS-wall failure of the same class as several other municipal sites already documented in this project) -- the 1% Birmingham figure IS independently corroborated by a second source (a payroll-industry guide quoting '1% of gross pay' for nonresidents), so it is not resting on ALM alone, but it is not primary-ordinance-confirmed either.",
   "municipalityCount": 25,
   "municipalities": [
@@ -22,7 +31,7 @@
     { "name": "Glencoe", "rate": 0.02 },
     { "name": "Goodwater", "rate": 0.0075 },
     { "name": "Guin", "rate": 0.01 },
-    { "name": "Hacklebug", "rate": 0.01 },
+    { "name": "Hacklebug", "rate": 0.01, "aliases": ["Hackleburg"], "$aliasNote": "ALM prints \"Hacklebug\"; the real Marion County town is Hackleburg. See nameMatching above." },
     { "name": "Haleyville", "rate": 0.01 },
     { "name": "Hamilton", "rate": 0.01 },
     { "name": "Leeds", "rate": 0.01 },

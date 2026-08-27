@@ -1,0 +1,54 @@
+{
+  "checkDate": "2026-06-15",
+  "payFrequency": "biweekly",
+  "employeeName": "Jordan Casey",
+
+  "earnings": {
+    "regular": 3000,
+    "overtime": 0,
+    "bonus": 0,
+    "commission": 0,
+    "severance": 0
+  },
+
+  "deductions": [
+    { "code": "401K", "category": "deferral_401k", "amount": 150 },
+    { "code": "MEDICAL", "category": "section125", "amount": 80 }
+  ],
+
+  "a4": {
+    "exemptionCode": "S",
+    "dependents": 0,
+    "additionalWithholding": 0,
+    "exempt": false
+  },
+
+  "federalW4": {
+    "filingStatus": "single",
+    "multipleJobs": false,
+    "dependentCredit": 0,
+    "otherIncome": 0,
+    "deductions": 0,
+    "extraWithholding": 0
+  },
+
+  "residency": {
+    "residenceState": "AL"
+  },
+
+  "workCity": "Birmingham",
+
+  "employmentCategory": "standard",
+
+  "ytd": {
+    "socialSecurity": 0,
+    "medicare": 0,
+    "futa": 0,
+    "alabamaUnemployment": 0
+  },
+
+  "employer": {
+    "name": "Example Employer LLC",
+    "unemploymentRate": 0.027
+  }
+}

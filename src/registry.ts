@@ -349,6 +349,17 @@ export function kyJurisdictionRuleset(
 export interface ALMunicipalityEntry {
   name: string;
   rate: number;
+  /**
+   * Other spellings that resolve to this same municipality. Exists because
+   * the source list is a survey and a survey can misspell its own members:
+   * ALM prints "Hacklebug" for what is certainly Hackleburg, the Marion
+   * County town sitting among the other Marion County entries on the same
+   * list. The entry keeps the source's spelling as its canonical name — this
+   * project quotes ALM rather than silently correcting it — and carries the
+   * real one here, so a caller who spells the town the way the world spells
+   * it still gets the 1% instead of a silent no-tax result.
+   */
+  aliases?: string[];
 }
 
 interface ALMunicipalityRegistryFile {
@@ -376,7 +387,12 @@ export function alMunicipalityRuleset(
   const file = loadJson<ALMunicipalityRegistryFile>(
     join('local', `AL-municipalities-${yearOf(checkDate)}.json`),
   );
-  return file.municipalities.find((m) => m.name.toLowerCase() === name.toLowerCase());
+  const wanted = name.trim().toLowerCase();
+  return file.municipalities.find(
+    (m) =>
+      m.name.toLowerCase() === wanted ||
+      (m.aliases ?? []).some((alias) => alias.toLowerCase() === wanted),
+  );
 }
 
 /** Every Alabama taxing municipality — for geocode/'s fuzzy name matching. */
