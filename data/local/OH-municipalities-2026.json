@@ -4775,7 +4775,7 @@
   ],
   "knownGaps": [
     "Not wired into the calculation engine -- no local-tax compute path exists for any state yet.",
-    "Resident-city-vs-work-city credit mechanism is not modelled (see residencyNote).",
+    "Resident-city-vs-work-city credit mechanism is not modelled (see residencyNote). STALE, corrected: ohioLocalTax() implements the ORC 718.121 credit at withholding time — the home municipality's tax is reduced by the tax paid to the work municipality, capped at the home rate. Verified: working in Columbus while living in Cleveland produces one $75.00 line rather than two.",
     "JEDD/JEDZ zones are a SEPARATE dataset -- see data/local/OH-jedd-jedz-2026.json -- because they are legally distinct (contractual zones, not municipalities) and use a different ID scheme in Ohio's own data.",
     "This is a snapshot as of the fetch date; Ohio's own CSV is the living source of truth and should be re-fetched periodically (harvester territory, Phase 9) rather than this file treated as permanently current."
   ],
