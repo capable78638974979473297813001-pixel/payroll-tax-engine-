@@ -9,6 +9,7 @@ import {
   toWholeDollars,
   underCap,
 } from '../money.ts';
+import type { Cents } from '../money.ts';
 import type {
   ALMunicipalityEntry,
   KYJurisdictionEntry,
@@ -101,11 +102,19 @@ export function stateIncomeTax(
   // change needed, matching this file's "data-only" ethos. Reciprocity is
   // checked first; de minimis only matters when reciprocity didn't already
   // resolve it.
-  const reciprocityReason = reciprocityExemptionReason(input, rules);
-  const dayCountReason = reciprocityReason ? null : nonresidentDayCountReason(input, rules);
+  // Whole classes of employment a state excludes from its own withholding
+  // regardless of residence, wages or paperwork — checked before every
+  // residence-based exemption below, since an exempt CLASS of work owes
+  // nothing no matter where the worker lives.
+  const categoryReason = exemptEmploymentCategoryReason(input, rules);
+  const reciprocityReason = categoryReason ? null : reciprocityExemptionReason(input, rules);
+  const dayCountReason =
+    categoryReason || reciprocityReason ? null : nonresidentDayCountReason(input, rules);
   const deMinimisReason =
-    reciprocityReason || dayCountReason ? null : nonresidentDeMinimisReason(input, ctx, rules);
-  const exemptReason = reciprocityReason ?? dayCountReason ?? deMinimisReason;
+    categoryReason || reciprocityReason || dayCountReason
+      ? null
+      : nonresidentDeMinimisReason(input, ctx, rules);
+  const exemptReason = categoryReason ?? reciprocityReason ?? dayCountReason ?? deMinimisReason;
   if (exemptReason) {
     // Indiana's day-count rule reaches its county tax too, which is a
     // separate line id — every other exemption here is state-tax-only.
@@ -813,6 +822,55 @@ function nonresidentDeMinimisReason(
   );
 }
 
+interface ExemptEmploymentCategoriesConfig {
+  categories: string[];
+  source?: string;
+}
+
+/**
+ * Classes of employment a state excludes from its own income tax
+ * withholding outright — not an exemption the employee claims, not a
+ * function of where they live, but a statement that this KIND of work is
+ * outside the state's withholding requirement altogether.
+ *
+ * Alabama is the first state in this project to need it, and needed it for
+ * a reason worth stating: its booklet says the federally exempt classes
+ * (domestic service in a private home, merchant seamen, ministers,
+ * agricultural labour) are exempt for Alabama too, and then adds the part
+ * that federal conformity would get backwards — "Alabama does not follow
+ * the federal requirement to withhold income tax on cash payments to
+ * agricultural employees where the payments are considered wages for social
+ * security purposes and FICA withholding is required." Federally, a
+ * farmworker's cash wages DO become subject to income tax withholding once
+ * the $150/$2,500 tests are met; Alabama declines to follow that, so an
+ * engine that simply mirrored input.employmentCategory's federal treatment
+ * would withhold Alabama tax that is not owed.
+ *
+ * Read generically off rules.exemptEmploymentCategories.categories, listing
+ * this engine's own EmploymentCategory values, so any state with the same
+ * shape gets it by adding data. Zeroes only the `${code}_SIT` lines, via
+ * the same zeroStateIncomeTaxLines() every other exemption here uses — a
+ * separately-levied local occupational tax, an employee UC contribution or
+ * a paid-leave premium is a different statute and is left alone.
+ */
+function exemptEmploymentCategoryReason(
+  input: PaycheckInput,
+  rules: StateRuleset,
+): string | null {
+  const cfg = rules.exemptEmploymentCategories as ExemptEmploymentCategoriesConfig | undefined;
+  if (!cfg?.categories?.length) return null;
+
+  const category = input.employmentCategory ?? 'standard';
+  if (!cfg.categories.includes(category)) return null;
+
+  return (
+    `$0 — ${rules.name} excludes '${category}' employment from its own income tax withholding ` +
+    `(input.employmentCategory). This is a STATE determination and does not disturb the federal ` +
+    `treatment of the same category, which taxes/federal.ts decides on its own terms, nor any ` +
+    `separately-levied local tax.`
+  );
+}
+
 /**
  * Employee-claimed exemption from state withholding (Minnesota's W-4MN
  * Section 2 is the first concrete, enumerable example in this project, but
@@ -831,10 +889,23 @@ function applyStateWithholdingExemption(
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   if (!cert.exempt) return lines;
 
+  // A state can recognise several DIFFERENT exemptions that all arrive as
+  // the same boolean — Alabama alone honours four federal statutes (air
+  // carrier, interstate carrier, water carrier, military spouse) plus its
+  // own merchant-seaman class, and which one is being claimed is a fact
+  // only the caller has. certificate.exemptReason carries that assertion
+  // into the line's own detail, so a paystub or an audit trail says WHY the
+  // line is zero instead of just that someone ticked a box. Free text on
+  // purpose: this engine never adjudicates eligibility, so it has no list to
+  // validate against.
+  const claimed = typeof cert.exemptReason === 'string' ? cert.exemptReason.trim() : '';
+
   return zeroStateIncomeTaxLines(
     rules,
     lines,
-    `$0 — employee claimed exempt from ${rules.name} withholding (certificate.exempt).`,
+    `$0 — employee claimed exempt from ${rules.name} withholding (certificate.exempt)` +
+      (claimed ? `: ${claimed}` : '') +
+      `. Eligibility is the caller's determination, not this engine's.`,
   );
 }
 
@@ -936,6 +1007,8 @@ const SUPPLEMENTAL_HANDLED_BY_METHOD = new Set([
   'bracket_per_period_gross',
   'bracket_per_period_net',
   'new_mexico_percentage_method',
+  'bracket_per_period_three_status',
+  'bracket_state_plus_local',
 ]);
 
 /**
@@ -1126,13 +1199,17 @@ function incomeTaxLinesByMethod(
     case 'bracket_federal_subtraction_phaseout':
       return [oregonWithholding(input, ctx, rules)];
     case 'bracket_per_period_three_status':
-      return [californiaWithholding(input, ctx, rules)];
+      return [californiaWithholding(input, ctx, rules), ...californiaSupplementalTax(input, rules)];
     case 'flat_rate_status_deduction':
       return [coloradoWithholding(input, ctx, rules)];
     case 'flat_rate_phaseout_allowance':
       return [utahWithholding(input, ctx, rules)];
-    case 'bracket_state_plus_local':
-      return [marylandWithholding(input, ctx, rules)];
+    case 'bracket_state_plus_local': {
+      const lines: TaxLine[] = [marylandWithholding(input, ctx, rules)];
+      const supplemental = marylandSupplementalTax(input, rules);
+      if (supplemental) lines.push(supplemental);
+      return lines;
+    }
     case 'bracket_per_period_single_table':
       return [rhodeIslandWithholding(input, ctx, rules)];
     case 'bracket_annual_allowance_deduction':
@@ -5826,6 +5903,119 @@ function caEstimatedDeductionLookup(table: number[], count: number): number {
   return table[0] * count;
 }
 
+interface CASupplementalConfig {
+  bonusAndStockOptionRate: number;
+  otherRate: number;
+  election?: 'employer_option';
+}
+
+/**
+ * Whether — and how much — supplemental cash to carve out of California's
+ * ORDINARY base this cheque, shared by californiaWithholding() and
+ * californiaSupplementalTax() so the two functions can never disagree
+ * about which dollars belong to which of them.
+ *
+ * DE 44's own rule (How to Withhold PIT on Supplemental Wages) has a hard
+ * gate this project hasn't needed before: "If the supplemental wage is
+ * given to the employee at the same time as the employee's regular wages
+ * are paid, you are required to treat the sum of the payments as regular
+ * wages" — combined-with-regular-wages is not a choice, it is a
+ * requirement, and it means the flat rate below must NEVER fire on a
+ * cheque that also carries regular pay. Only once the supplemental wage is
+ * "not given to the employee at the same time as the employee's regular
+ * wages" does DE 44 offer the employer a choice at all — aggregate with
+ * the current regular payment, or the flat percentage method — so the flat
+ * method requires BOTH this cheque to be supplemental-only AND the
+ * employer to have elected it (rules.supplementalWages.election is always
+ * 'employer_option' for California; nothing here is a state mandate the
+ * way Ohio's 2.75% is).
+ */
+function caSupplementalCarveOut(input: PaycheckInput, rules: StateRuleset): Cents {
+  const cfg = rules.supplementalWages as CASupplementalConfig | undefined;
+  if (!cfg) return 0;
+
+  const supplementalCash = supplementalEarnings(input.earnings);
+  if (supplementalCash <= 0) return 0;
+
+  const regularCashOnly = cashEarnings(input.earnings) - supplementalCash;
+  if (regularCashOnly > 0) return 0; // DE 44: combined wages are required to run through the regular table.
+
+  const elected =
+    cfg.election !== 'employer_option' || input.employer?.supplementalFlatRateElection?.[rules.code] === true;
+  return elected ? supplementalCash : 0;
+}
+
+/**
+ * California's own two-tier flat supplemental-wage rate (EDD Form DE 44,
+ * "How to Withhold PIT on Supplemental Wages", read directly): a bonus or
+ * stock option paid on its own cheque may be withheld "without allowing
+ * for any withholding allowances claimed by the employee" at "10.23
+ * percent (.1023)" — while every OTHER kind of supplemental wage the same
+ * section names by name ("such as overtime pay, commissions, sales
+ * awards, severance, and vacation pay") gets the lower "6.6 percent
+ * (.066)". Two rates, not one, is what makes this a bespoke function
+ * rather than a rules.supplementalWages.flatRate config the generic
+ * flatRateSupplementalFromConfig() could read — no other state in this
+ * project splits its own flat supplemental rate by WHAT the payment is,
+ * only by whether it's paid separately or how large the employer's total
+ * supplemental wages have grown (federal's own $1,000,000 mandatory-37%
+ * rule, a different mechanism entirely).
+ *
+ * The split is read off Earning.code rather than a new EarningCategory,
+ * to avoid widening a type every other state's code also depends on for a
+ * distinction only California's own rate table makes: a supplemental
+ * earning whose code case-insensitively contains "bonus" or "stock" gets
+ * 10.23%; every other supplemental earning — commission, severance,
+ * vacation payout, whatever the caller named it — falls into DE 44's own
+ * "other types" catch-all at 6.6%, which is the safer default in both
+ * directions DE 44 actually describes (the "other" bucket IS the general
+ * case in the source's own structure, not a guess this project is making
+ * on top of it).
+ */
+function californiaSupplementalTax(input: PaycheckInput, rules: StateRuleset): TaxLine[] {
+  const carveOut = caSupplementalCarveOut(input, rules);
+  if (carveOut <= 0) return [];
+
+  const cfg = rules.supplementalWages as CASupplementalConfig;
+  let bonusCents = 0;
+  let otherCents = 0;
+  for (const e of input.earnings) {
+    if (e.category !== 'supplemental') continue;
+    if (/bonus|stock/i.test(e.code)) bonusCents += e.amount;
+    else otherCents += e.amount;
+  }
+
+  const lines: TaxLine[] = [];
+  if (bonusCents > 0) {
+    lines.push({
+      id: `${rules.code}_SIT_SUPP_BONUS`,
+      name: `${rules.name} Income Tax (Bonus/Stock Option Supplemental)`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: bonusCents,
+      amount: applyRate(bonusCents, cfg.bonusAndStockOptionRate),
+      detail:
+        `${fmt(bonusCents)} @ ${(cfg.bonusAndStockOptionRate * 100).toFixed(2)}% flat — bonuses and stock ` +
+        `options, no withholding allowances applied (DE 44, employer elected the flat method over aggregation)`,
+    });
+  }
+  if (otherCents > 0) {
+    lines.push({
+      id: `${rules.code}_SIT_SUPP_OTHER`,
+      name: `${rules.name} Income Tax (Other Supplemental)`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: otherCents,
+      amount: applyRate(otherCents, cfg.otherRate),
+      detail:
+        `${fmt(otherCents)} @ ${(cfg.otherRate * 100).toFixed(2)}% flat — overtime pay, commissions, sales ` +
+        `awards, severance, vacation pay etc., no withholding allowances applied (DE 44, employer elected the ` +
+        `flat method over aggregation)`,
+    });
+  }
+  return lines;
+}
+
 /**
  * California's Method B - Exact Calculation Method (2026 Withholding
  * Schedules, EDD, fetched and read directly). Six sequential steps — see
@@ -5865,7 +6055,16 @@ function californiaWithholding(
 ): TaxLine {
   const cfg = rules.bracketPerPeriodThreeStatus as CAConfig;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
-  const periodWages = ctx.taxableWagesFor(exempt);
+  const fullBase = ctx.taxableWagesFor(exempt);
+  // Carved out of THIS base only when californiaSupplementalTax() is
+  // actually about to tax it separately — same gate that function uses,
+  // duplicated rather than threaded through as a parameter because it's a
+  // one-line condition, matching the convention bracketPerPeriodGross()
+  // (Montana) already uses for the identical two-function split. Every
+  // other case — combined with regular wages on the same cheque, no
+  // employer election, no supplemental config at all — leaves the dollars
+  // right where DE 44 puts them: in the ordinary base, taxed once, here.
+  const periodWages = atLeastZero(fullBase - caSupplementalCarveOut(input, rules));
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const status = resolveCAFilingStatus(cert);
@@ -6116,8 +6315,107 @@ interface MDConfig {
   nonresidentSpecialRate: number;
 }
 
+interface MDLumpSumBonusConfig {
+  topStateRate: number;
+  election?: 'employer_option';
+}
+
 function resolveMDFilingStatus(cert: Record<string, unknown>): 'single' | 'mfjHoh' {
   return cert.filingStatus === 'mfjHoh' ? 'mfjHoh' : 'single';
+}
+
+/**
+ * A Maryland county's OWN highest rate — its flat rate, or (Anne Arundel,
+ * Frederick) the top bracket of its tiered schedule. This is exactly the
+ * figure the Employer Withholding Guide's own lump-sum bonus rule means by
+ * "the highest local tax rate for the county of residence": verified
+ * against the guide's own combined-percentage table for all ten distinct
+ * local rates present in this project's county data (2.25%→8.75% through
+ * 3.30%→9.80%, every one of them exactly topStateRate + this county rate),
+ * so no separate ten-entry table needs to be transcribed — it is
+ * DERIVABLE from data this file already carries for the ordinary
+ * per-cheque local tax, not a second source of truth to keep in sync.
+ */
+function mdCountyTopRate(countyName: string | undefined, rules: StateRuleset): number | undefined {
+  if (!countyName) return undefined;
+  const county = ((rules.countyRates ?? {}) as Record<string, MDCountyRate>)[countyName];
+  if (!county) return undefined;
+  if (county.flat !== undefined) return county.flat;
+  if (county.tiered) {
+    const topOfEither = (brackets: WIBracket[]) => brackets[brackets.length - 1]?.rate;
+    return Math.max(topOfEither(county.tiered.single) ?? 0, topOfEither(county.tiered.mfjHoh) ?? 0);
+  }
+  return undefined;
+}
+
+/**
+ * Whether — and at what combined rate — to carve supplemental cash out of
+ * Maryland's ordinary annual-bracket base for the flat lump-sum bonus rate
+ * instead, shared by marylandWithholding() and marylandSupplementalTax()
+ * so the two can't disagree about which dollars belong to which of them.
+ *
+ * The guide's own rule ("For lump sum distribution of annual bonus...")
+ * reads as a distinct payment SHAPE — a bonus distributed as its own lump
+ * sum — not a rate that competes with the ordinary table for a bonus
+ * riding along with a regular cheque, so this only fires when the
+ * supplemental wage is the entire cheque, gated by the same
+ * election-required convention California's DE 44 flat method already
+ * established (rules.lumpSumBonusWithholding.election). Scoped to
+ * RESIDENTS: the guide's own phrase is "the county of residence," which
+ * presumes one, and this project has no primary-sourced lump-sum figure
+ * for the Special Nonresident Rate case.
+ */
+function mdSupplementalCarveOut(
+  input: PaycheckInput,
+  rules: StateRuleset,
+): { cash: Cents; rate: number } | null {
+  const cfg = rules.lumpSumBonusWithholding as MDLumpSumBonusConfig | undefined;
+  if (!cfg) return null;
+
+  const supplementalCash = supplementalEarnings(input.earnings);
+  if (supplementalCash <= 0) return null;
+  if (cashEarnings(input.earnings) - supplementalCash > 0) return null;
+
+  if (cfg.election === 'employer_option' && input.employer?.supplementalFlatRateElection?.[rules.code] !== true) {
+    return null;
+  }
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (cert.nonresident) return null;
+
+  const countyRate = mdCountyTopRate(cert.county as string | undefined, rules);
+  if (countyRate === undefined) return null;
+
+  return { cash: supplementalCash, rate: cfg.topStateRate + countyRate };
+}
+
+/**
+ * Maryland's lump-sum annual bonus rate (2026 Employer Withholding Guide,
+ * "LOCAL TAX RATES" section, read directly): "the withholding amount
+ * should be calculated at the highest State tax rate (6.50%), and the
+ * highest local tax rate for the county of residence" — one flat
+ * percentage covering BOTH the state and local pieces at once, the same
+ * combined-single-line shape marylandWithholding() already uses for the
+ * ordinary formula, just at each rate's own ceiling instead of a bracket
+ * lookup.
+ */
+function marylandSupplementalTax(input: PaycheckInput, rules: StateRuleset): TaxLine | null {
+  const carve = mdSupplementalCarveOut(input, rules);
+  if (!carve) return null;
+
+  const amount = applyRate(carve.cash, carve.rate);
+  return {
+    id: `${rules.code}_SIT_SUPP`,
+    name: `${rules.name} Income Tax (Lump Sum Bonus)`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: carve.cash,
+    amount,
+    detail:
+      `${fmt(carve.cash)} @ ${(carve.rate * 100).toFixed(2)}% flat — highest state rate (6.50%) plus the ` +
+      `highest local rate for the county of residence (Employer Withholding Guide, employer elected the ` +
+      `lump-sum method over the ordinary combined table)`,
+  };
 }
 
 /**
@@ -6149,7 +6447,11 @@ function marylandWithholding(
 ): TaxLine {
   const cfg = rules.bracketStatePlusLocal as MDConfig;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
-  const periodWages = ctx.taxableWagesFor(exempt);
+  // Carved out only when marylandSupplementalTax() is actually about to
+  // tax it separately at the flat lump-sum rate — see that function's own
+  // doc comment; every other cheque leaves the dollars right here.
+  const carve = mdSupplementalCarveOut(input, rules);
+  const periodWages = atLeastZero(ctx.taxableWagesFor(exempt) - (carve?.cash ?? 0));
   const annualWages = periodWages * ctx.periodsPerYear;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
@@ -7192,6 +7494,71 @@ interface ALStandardDeductionStep {
   stepIncrement: number;
 }
 
+interface ALSeveranceConfig {
+  maximumPerEmployee: number;
+  requiresDepartmentApproval: boolean;
+}
+
+/**
+ * Alabama's severance pay exemption — "Upon employer approval up to $50,000
+ * of an employees compensation may be exempt from Alabama income tax if the
+ * payments are received as severance pay, unemployment compensation,
+ * termination pay or pay from a supplemental income plan received as a
+ * result of administrative downsizing," with the booklet's next paragraph
+ * making the approval concrete: "Employers must obtain approval from the
+ * Department of Revenue before exempting severance payments from Alabama
+ * withholding tax."
+ *
+ * Two things follow from that wording and both matter. The exemption is a
+ * DOLLAR CAP on wages, not a rate and not a whole-paycheck flag, so it
+ * belongs in the taxable base rather than at the end of the calculation.
+ * And it is conditional on an approval no paycheck can evidence, so nothing
+ * is exempted unless the caller asserts it: certificate.severanceApprovalOnFile
+ * must be literally true. The $50,000 is per employee, not per cheque, so
+ * the caller also supplies how much earlier cheques already used
+ * (certificate.severanceExemptYtd) — the same "the caller holds the payroll
+ * history" boundary every ytd field in this engine already sits on. Returns
+ * the amount actually exempt on THIS cheque, floored at zero and capped at
+ * what remains of the $50,000.
+ */
+function alabamaExemptSeverance(
+  cert: Record<string, unknown>,
+  rules: StateRuleset,
+  periodWages: Cents,
+): { exempt: Cents; note: string } {
+  const cfg = rules.severancePayExemption as ALSeveranceConfig | undefined;
+  const requested = atLeastZero(Number(cert.severanceExemptWages ?? 0));
+  if (!cfg || requested <= 0) return { exempt: 0, note: '' };
+
+  if (cfg.requiresDepartmentApproval && cert.severanceApprovalOnFile !== true) {
+    return {
+      exempt: 0,
+      note:
+        `; ${fmt(requested)} of severance was NOT exempted — Alabama requires the employer to obtain ` +
+        `Department of Revenue approval before exempting severance from withholding, and ` +
+        `certificate.severanceApprovalOnFile was not asserted`,
+    };
+  }
+
+  const cap = dollars(cfg.maximumPerEmployee);
+  const alreadyUsed = atLeastZero(Number(cert.severanceExemptYtd ?? 0));
+  const room = atLeastZero(cap - alreadyUsed);
+  const exempt = Math.min(requested, room, periodWages);
+
+  const capped = exempt < requested;
+  return {
+    exempt,
+    note:
+      `; less ${fmt(exempt)} exempt severance/termination pay (approved under the $${cfg.maximumPerEmployee.toLocaleString('en-US')} ` +
+      `per-employee exemption` +
+      (capped
+        ? `, capped — ${fmt(requested)} was claimed but only ${fmt(room)} of the exemption remained after ` +
+          `${fmt(alreadyUsed)} used earlier this year`
+        : '') +
+      `)`,
+  };
+}
+
 interface ALConfig {
   standardDeduction: {
     single_0: ALStandardDeductionStep;
@@ -7270,10 +7637,19 @@ function alabamaWithholding(
 ): TaxLine {
   const cfg = rules.alabamaFederalSubtraction as ALConfig;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
-  const periodWages = ctx.taxableWagesFor(exempt);
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+
+  // Approved severance leaves the base before anything is annualized — an
+  // exemption from Alabama income tax is an exemption from the wages the
+  // formula sees, not a credit against the tax it produces.
+  const grossPeriodWages = ctx.taxableWagesFor(exempt);
+  const severance = alabamaExemptSeverance(cert, rules, grossPeriodWages);
+  const periodWages = atLeastZero(grossPeriodWages - severance.exempt);
   const annualGI = periodWages * ctx.periodsPerYear;
 
-  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  // No Form A-4 on file is not a gap this engine has to guess at: the
+  // booklet says "the employer should withhold using zero exemptions,"
+  // which is exactly code '0' with no dependents.
   const code = typeof cert.alabamaExemptionCode === 'string' ? cert.alabamaExemptionCode : '0';
   const isMarried = code === 'M';
 
@@ -7308,7 +7684,8 @@ function alabamaWithholding(
       `${fmt(annualGI)}/yr GI less ${fmt(standardDeduction)} standard deduction, ` +
       `${fmt(federalWithheldAnnual)} annual federal withholding, ${fmt(personalExemption)} personal exemption (${code}), ` +
       `${fmt(dependentTotal)} (${dependents} dependents) = ${fmt(taxableAmount)} taxable @ ` +
-      `${(bracket.rate * 100).toFixed(2)}% (${isMarried ? 'M' : 'non-M'} schedule) = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
+      `${(bracket.rate * 100).toFixed(2)}% (${isMarried ? 'M' : 'non-M'} schedule) = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}` +
+      severance.note,
   };
 }
 

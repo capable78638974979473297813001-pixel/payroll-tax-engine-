@@ -5806,6 +5806,121 @@ describe('California', () => {
     );
     assert.equal(amountOf(r, 'CA_DBL_EE'), dollars(13));
   });
+
+  // DE 44's own two-tier flat supplemental rate — bonuses/stock options at
+  // 10.23%, everything else DE 44 also calls supplemental (overtime,
+  // commissions, sales awards, severance, vacation pay) at 6.6%, both
+  // employer options and both gated on the supplemental wage NOT being
+  // paid at the same time as regular wages.
+  describe('Supplemental wages (DE 44)', () => {
+    test('a standalone $5,000 bonus, employer elects the flat method -> exactly 10.23%', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(5000) }],
+          workState: { code: 'CA', certificate: { regularAllowances: 0 } },
+          employer: { supplementalFlatRateElection: { CA: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'CA_SIT_SUPP_BONUS'), dollars(511.5));
+      // No regular wages this cheque -> the ordinary CA_SIT line sees $0 base.
+      assert.equal(amountOf(r, 'CA_SIT'), 0);
+    });
+
+    test('the same bonus taxed as a stock option (code contains "stock") also gets 10.23%', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'STOCK_OPTION', category: 'supplemental', amount: dollars(5000) }],
+          workState: { code: 'CA', certificate: { regularAllowances: 0 } },
+          employer: { supplementalFlatRateElection: { CA: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'CA_SIT_SUPP_BONUS'), dollars(511.5));
+    });
+
+    test('a standalone $2,000 commission, employer elects the flat method -> exactly 6.6% (DE 44\'s "other types" bucket)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'COMM', category: 'supplemental', amount: dollars(2000) }],
+          workState: { code: 'CA', certificate: { regularAllowances: 0 } },
+          employer: { supplementalFlatRateElection: { CA: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'CA_SIT_SUPP_OTHER'), dollars(132.0));
+      assert.equal(r.taxes.some((t) => t.id === 'CA_SIT_SUPP_BONUS'), false);
+    });
+
+    test('a bonus AND a commission on the same standalone cheque produce two separate flat lines', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [
+            { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+            { code: 'COMM', category: 'supplemental', amount: dollars(500) },
+          ],
+          workState: { code: 'CA', certificate: { regularAllowances: 0 } },
+          employer: { supplementalFlatRateElection: { CA: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'CA_SIT_SUPP_BONUS'), dollars(102.3)); // 1000 * 10.23%
+      assert.equal(amountOf(r, 'CA_SIT_SUPP_OTHER'), dollars(33.0)); // 500 * 6.6%
+    });
+
+    test('without the employer election, no flat line fires — the bonus runs through the ordinary formula instead', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(5000) }],
+          workState: { code: 'CA', certificate: { regularAllowances: 0 } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'CA_SIT_SUPP_BONUS'), false);
+      assert.equal(r.taxes.some((t) => t.id === 'CA_SIT_SUPP_OTHER'), false);
+      assert.ok(amountOf(r, 'CA_SIT') > 0);
+    });
+
+    test('DE 44: a bonus paid ALONGSIDE regular wages is required to be treated as regular wages, never the flat rate, even if elected', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [
+            { code: 'REG', category: 'regular', amount: dollars(3000) },
+            { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+          ],
+          workState: { code: 'CA', certificate: { regularAllowances: 0 } },
+          employer: { supplementalFlatRateElection: { CA: true } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'CA_SIT_SUPP_BONUS'), false);
+      assert.equal(r.taxes.some((t) => t.id === 'CA_SIT_SUPP_OTHER'), false);
+      // The full $4,000 must still be taxed exactly once through CA_SIT,
+      // not silently dropped — compare against the same $4,000 paid as
+      // ordinary regular wages with nothing categorized supplemental.
+      const combined = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(4000) }],
+          workState: { code: 'CA', certificate: { regularAllowances: 0 } },
+        }),
+      );
+      assert.equal(amountOf(r, 'CA_SIT'), amountOf(combined, 'CA_SIT'));
+    });
+
+    test('DE 44 Option 1 (aggregate with the prior/current regular payment) still works via input.priorRegularPayment, with no flat line', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(3000) }],
+          workState: { code: 'CA', certificate: { regularAllowances: 0 } },
+          priorRegularPayment: { taxableWages: dollars(3000), stateIncomeTaxWithheld: dollars(80) },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'CA_SIT_SUPP_BONUS'), false);
+      assert.ok(amountOf(r, 'CA_SIT') > 0);
+    });
+  });
 });
 
 describe('Colorado', () => {
@@ -6200,6 +6315,95 @@ describe('Maryland', () => {
       }),
     );
     assert.equal(amountOf(r, 'MD_SIT'), 0);
+  });
+
+  // The Employer Withholding Guide's own "Lump Sum Distribution of Annual
+  // Bonus" rule: 6.50% (the state's own top rate) plus the county's own
+  // highest local rate, flat, in place of the ordinary combined bracket —
+  // an employer election, gated on the bonus being the whole cheque.
+  describe('Lump sum bonus withholding', () => {
+    test('Allegany (flat 3.20% local): a standalone $10,000 bonus withholds exactly 9.70% (6.50% + 3.20%)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(10000) }],
+          ...mdState({ county: 'Allegany' }),
+          employer: { supplementalFlatRateElection: { MD: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'MD_SIT_SUPP'), dollars(970.0));
+    });
+
+    test('Anne Arundel (tiered local): the lump-sum rate uses the TOP of the tiered schedule (3.20%), same 9.70% combined', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(10000) }],
+          ...mdState({ county: 'AnneArundel' }),
+          employer: { supplementalFlatRateElection: { MD: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'MD_SIT_SUPP'), dollars(970.0));
+    });
+
+    test('a different county (Worcester, 2.25% local) gets a different combined rate: 8.75%', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(10000) }],
+          ...mdState({ county: 'Worcester' }),
+          employer: { supplementalFlatRateElection: { MD: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'MD_SIT_SUPP'), dollars(875.0));
+    });
+
+    test('without the employer election, no flat line fires — falls back to the ordinary annual formula', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(10000) }],
+          ...mdState({ county: 'Allegany' }),
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'MD_SIT_SUPP'), false);
+      assert.ok(amountOf(r, 'MD_SIT') > 0);
+    });
+
+    test('a nonresident never gets the flat lump-sum rate, even if the employer elected it', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(10000) }],
+          ...mdState({ nonresident: true }),
+          employer: { supplementalFlatRateElection: { MD: true } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'MD_SIT_SUPP'), false);
+    });
+
+    test('a bonus paid alongside regular wages runs through the ordinary combined formula, never the flat rate', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [
+            { code: 'REG', category: 'regular', amount: dollars(3000) },
+            { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+          ],
+          ...mdState({ county: 'Allegany' }),
+          employer: { supplementalFlatRateElection: { MD: true } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'MD_SIT_SUPP'), false);
+      const combined = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(4000) }],
+          ...mdState({ county: 'Allegany' }),
+        }),
+      );
+      assert.equal(amountOf(r, 'MD_SIT'), amountOf(combined, 'MD_SIT'));
+    });
   });
 });
 
@@ -6795,6 +6999,270 @@ describe('Alabama', () => {
       );
       assert.equal(r.taxes.some((t) => t.id === 'AL_LOCAL'), false);
     });
+
+    test('Hackleburg resolves via its alias even though the source data spells it "Hacklebug"', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'AL', certificate: { workCity: 'Hackleburg' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'AL_LOCAL'), dollars(10.0));
+    });
+  });
+
+  // 5% flat supplemental election — "Employers may withhold state income
+  // tax from bonuses and supplemental wage payments at the rate of 5%."
+  describe('5% flat supplemental election', () => {
+    test('a standalone bonus, employer elected, is taxed flat at 5% instead of through the formula', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(5000) }],
+          workState: { code: 'AL', certificate: { alabamaExemptionCode: 'S' } },
+          employer: { supplementalFlatRateElection: { AL: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'AL_SIT_SUPP'), dollars(250.0)); // 5000 * 5%
+      // Nothing runs through the ordinary AL_SIT formula for this bonus.
+      assert.equal(amountOf(r, 'AL_SIT'), 0);
+    });
+
+    test('without the election, the same bonus runs through the ordinary annualizing formula instead', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(5000) }],
+          workState: { code: 'AL', certificate: { alabamaExemptionCode: 'S' } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'AL_SIT_SUPP'), false);
+      assert.ok(amountOf(r, 'AL_SIT') > 0);
+    });
+
+    test('a bonus paid alongside regular wages is not carved out even when the employer elected 5% ("always", not "paid_separately")', () => {
+      const withBonus = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [
+            { code: 'REG', category: 'regular', amount: dollars(2000) },
+            { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+          ],
+          workState: { code: 'AL', certificate: { alabamaExemptionCode: 'S' } },
+          employer: { supplementalFlatRateElection: { AL: true } },
+        }),
+      );
+      // appliesWhen: 'always' means the 5% flat line fires whether or not
+      // the bonus is paid on its own cheque -- unlike Ohio's paid_separately shape.
+      assert.equal(amountOf(withBonus, 'AL_SIT_SUPP'), dollars(50.0));
+    });
+  });
+
+  // Exempt classes of employment -- Alabama's own booklet: "the chief
+  // classes of exempt employment are domestic services in private homes...
+  // duly ordained ministers... and agricultural employees," and explicitly
+  // does NOT follow the federal rule that would otherwise tax agricultural
+  // cash wages once the federal thresholds are met.
+  describe('exempt employment categories', () => {
+    test('a household (domestic) worker owes $0 AL_SIT regardless of the A-4 on file', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+          workState: { code: 'AL', certificate: { alabamaExemptionCode: '0' } },
+          employmentCategory: 'household',
+        }),
+      );
+      assert.equal(amountOf(r, 'AL_SIT'), 0);
+    });
+
+    test('an agricultural worker owes $0 AL_SIT even though the same wages could be federally taxable', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+          workState: { code: 'AL', certificate: { alabamaExemptionCode: '0' } },
+          employmentCategory: 'agricultural',
+        }),
+      );
+      assert.equal(amountOf(r, 'AL_SIT'), 0);
+    });
+
+    test('clergy owes $0 AL_SIT', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'monthly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(2800) }],
+          workState: { code: 'AL', certificate: { alabamaExemptionCode: '0' } },
+          employmentCategory: 'clergy',
+        }),
+      );
+      assert.equal(amountOf(r, 'AL_SIT'), 0);
+    });
+
+    test('the exemption is state-income-tax-only: a household worker in a taxing city still owes AL_LOCAL', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+          workState: { code: 'AL', certificate: { workCity: 'Birmingham' } },
+          employmentCategory: 'household',
+        }),
+      );
+      assert.equal(amountOf(r, 'AL_SIT'), 0);
+      assert.equal(amountOf(r, 'AL_LOCAL'), dollars(5.0)); // 1% of $500
+    });
+
+    test('a standard employee is unaffected by this mechanism', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+          workState: { code: 'AL', certificate: { alabamaExemptionCode: '0' } },
+        }),
+      );
+      assert.ok(amountOf(r, 'AL_SIT') > 0);
+    });
+  });
+
+  // The $50,000 severance/termination-pay exemption -- conditional on
+  // Department of Revenue approval this engine cannot see, so nothing is
+  // exempt until the caller asserts certificate.severanceApprovalOnFile.
+  describe('severance pay exemption', () => {
+    test('approved severance is excluded from the AL taxable base before annualizing', () => {
+      const approved = calculatePaycheck(
+        input({
+          payFrequency: 'monthly',
+          earnings: [
+            { code: 'REG', category: 'regular', amount: dollars(6000) },
+            { code: 'SEVERANCE', category: 'regular', amount: dollars(18000) },
+          ],
+          workState: {
+            code: 'AL',
+            certificate: {
+              alabamaExemptionCode: '0',
+              severanceExemptWages: dollars(18000),
+              severanceApprovalOnFile: true,
+            },
+          },
+          federalW4: {
+            filingStatus: 'single',
+            multipleJobs: false,
+            dependentCredit: 0,
+            otherIncome: 0,
+            deductions: 0,
+            extraWithholding: 0,
+            exempt: true,
+          },
+        }),
+      );
+      const notPaid = calculatePaycheck(
+        input({
+          payFrequency: 'monthly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(6000) }],
+          workState: { code: 'AL', certificate: { alabamaExemptionCode: '0' } },
+          federalW4: {
+            filingStatus: 'single',
+            multipleJobs: false,
+            dependentCredit: 0,
+            otherIncome: 0,
+            deductions: 0,
+            extraWithholding: 0,
+            exempt: true,
+          },
+        }),
+      );
+      // Fully exempt severance should leave the AL tax identical to a
+      // cheque that never had the severance dollars at all.
+      assert.equal(amountOf(approved, 'AL_SIT'), amountOf(notPaid, 'AL_SIT'));
+    });
+
+    test('without approval on file, severance is ordinary taxable wages', () => {
+      const noApproval = calculatePaycheck(
+        input({
+          payFrequency: 'monthly',
+          earnings: [
+            { code: 'REG', category: 'regular', amount: dollars(6000) },
+            { code: 'SEVERANCE', category: 'regular', amount: dollars(18000) },
+          ],
+          workState: {
+            code: 'AL',
+            certificate: { alabamaExemptionCode: '0', severanceExemptWages: dollars(18000) },
+          },
+        }),
+      );
+      const withApproval = calculatePaycheck(
+        input({
+          payFrequency: 'monthly',
+          earnings: [
+            { code: 'REG', category: 'regular', amount: dollars(6000) },
+            { code: 'SEVERANCE', category: 'regular', amount: dollars(18000) },
+          ],
+          workState: {
+            code: 'AL',
+            certificate: {
+              alabamaExemptionCode: '0',
+              severanceExemptWages: dollars(18000),
+              severanceApprovalOnFile: true,
+            },
+          },
+        }),
+      );
+      assert.ok(amountOf(noApproval, 'AL_SIT') > amountOf(withApproval, 'AL_SIT'));
+    });
+
+    test('the $50,000 cap is per employee per year: YTD usage reduces the room left on this cheque', () => {
+      // $15,000 already used this year leaves $35,000 of room. $42,000
+      // requested this period should exempt only $35,000, leaving $7,000
+      // taxable on top of the $5,000 regular wages = $12,000 taxable base.
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'monthly',
+          earnings: [
+            { code: 'REG', category: 'regular', amount: dollars(5000) },
+            { code: 'SEVERANCE', category: 'regular', amount: dollars(42000) },
+          ],
+          workState: {
+            code: 'AL',
+            certificate: {
+              alabamaExemptionCode: 'M',
+              dependents: 1,
+              severanceExemptWages: dollars(42000),
+              severanceApprovalOnFile: true,
+              severanceExemptYtd: dollars(15000),
+            },
+          },
+        }),
+      );
+      assert.equal(
+        r.taxes.find((t) => t.id === 'AL_SIT')?.taxableWages,
+        dollars(12000), // 5000 regular + (42000 - 35000 remaining) taxable severance
+      );
+    });
+  });
+
+  // certificate.exemptReason -- Alabama recognises several distinct
+  // exemptions (four federal statutes plus merchant seamen) that all
+  // arrive as the same certificate.exempt boolean; exemptReason lets the
+  // caller say which one, and it should show up in the line's own detail.
+  test('certificate.exemptReason is carried into the AL_SIT line detail', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2400) }],
+        workState: {
+          code: 'AL',
+          certificate: {
+            exempt: true,
+            exemptReason: 'Military Spouses Residency Relief Act (P.L. 111-97)',
+          },
+        },
+      }),
+    );
+    assert.equal(amountOf(r, 'AL_SIT'), 0);
+    const line = r.taxes.find((t) => t.id === 'AL_SIT');
+    assert.ok(line?.detail?.includes('Military Spouses Residency Relief Act'));
   });
 });
 
