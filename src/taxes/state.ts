@@ -827,6 +827,11 @@ interface ExemptEmploymentCategoriesConfig {
   source?: string;
 }
 
+interface VoluntaryWithholdingEmploymentCategoriesConfig {
+  categories: string[];
+  source?: string;
+}
+
 /**
  * Classes of employment a state excludes from its own income tax
  * withholding outright — not an exemption the employee claims, not a
@@ -857,18 +862,42 @@ function exemptEmploymentCategoryReason(
   input: PaycheckInput,
   rules: StateRuleset,
 ): string | null {
-  const cfg = rules.exemptEmploymentCategories as ExemptEmploymentCategoriesConfig | undefined;
-  if (!cfg?.categories?.length) return null;
-
   const category = input.employmentCategory ?? 'standard';
-  if (!cfg.categories.includes(category)) return null;
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
 
-  return (
-    `$0 — ${rules.name} excludes '${category}' employment from its own income tax withholding ` +
-    `(input.employmentCategory). This is a STATE determination and does not disturb the federal ` +
-    `treatment of the same category, which taxes/federal.ts decides on its own terms, nor any ` +
-    `separately-levied local tax.`
-  );
+  const cfg = rules.exemptEmploymentCategories as ExemptEmploymentCategoriesConfig | undefined;
+  if (cfg?.categories?.includes(category)) {
+    return (
+      `$0 — ${rules.name} excludes '${category}' employment from its own income tax withholding ` +
+      `(input.employmentCategory). This is a STATE determination and does not disturb the federal ` +
+      `treatment of the same category, which taxes/federal.ts decides on its own terms, nor any ` +
+      `separately-levied local tax.`
+    );
+  }
+
+  // The mirror case: a category where withholding is not REQUIRED but the
+  // employer and employee may voluntarily agree to it anyway — New York's
+  // own NYS-50 for household employees is the first concrete example
+  // ("Withholding income tax from wages paid to household employees is
+  // voluntary on your part. If you and your employee voluntarily agree,
+  // you may withhold..."), a genuinely different shape from an
+  // unconditional exclusion: the DEFAULT (no agreement asserted) is
+  // exempt, but a caller who asserts one flips it back to ordinary
+  // withholding — the only exemption in this file that a caller can
+  // affirmatively switch back OFF rather than only ever switch on.
+  const voluntaryCfg = rules.voluntaryWithholdingEmploymentCategories as
+    | VoluntaryWithholdingEmploymentCategoriesConfig
+    | undefined;
+  if (voluntaryCfg?.categories?.includes(category) && cert.voluntaryWithholdingAgreement !== true) {
+    return (
+      `$0 — ${rules.name} does not REQUIRE income tax withholding for '${category}' employment ` +
+      `(input.employmentCategory); it is voluntary, by mutual agreement between employer and ` +
+      `employee. No agreement was asserted (certificate.voluntaryWithholdingAgreement), so nothing ` +
+      `is withheld — set that flag once such an agreement is actually in place.`
+    );
+  }
+
+  return null;
 }
 
 /**

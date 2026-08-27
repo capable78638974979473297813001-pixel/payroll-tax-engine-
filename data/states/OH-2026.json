@@ -22,6 +22,12 @@
       "url": "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_PercentageMethod_2025.pdf",
       "verifiedOn": "2026-08-12",
       "verifiedBy": "PDF downloaded and text-extracted directly. CLOSES the previously-disclosed gap: this table was still in force for Ohio payroll periods ending in January-July 2026, before HB96's August 1 change — see priorTable2026 below."
+    },
+    {
+      "title": "Ohio Revised Code Section 5747.06(A) -- Withholding exemptions, paragraphs (1) through (6)",
+      "url": "https://codes.ohio.gov/ohio-revised-code/section-5747.06",
+      "verifiedOn": "2026-08-27",
+      "verifiedBy": "Fetched directly for the 'find and fix anything missing across all 50 states' pass — this file already cited ORC 5747.06(A)(1)-(6) by category name (agricultural labor, domestic service, sub-00/quarter pay, foreign govt/international org service, minors' newspaper delivery, non-cash non-business pay) under withholdingCertificate.withholdingWaiverSectionIII.orc574706Exemption from an earlier pass, but that note was paraphrased, not quoted, and never wired into calc code. Verbatim this pass: (1) \"Agricultural labor as defined in division G of section 3121 of Title 26\"; (2) \"Domestic service in a private home, local college club, or local chapter of a college fraternity or sorority.\" Wired via the SAME generic exemptEmploymentCategoryReason() mechanism (src/taxes/state.ts) Alabama already established — only categories (1) and (2) map onto this engine's existing EmploymentCategory enum (agricultural, household); categories (3)-(6) are a dollar threshold, a foreign-service class, a minors-newspaper class, and a non-cash-payment characteristic this engine has no matching shape for — see this file's own knownGaps."
     }
   ],
   "midYearEffectiveDating": {
@@ -33,102 +39,261 @@
   "priorTable2026": {
     "$comment": "In force for Ohio payroll periods ending 2026-01-01 through 2026-07-31. Same structure as periodTables (per-period exemption, 3 brackets) but different rates — Ohio's brackets dropped between this table and the August 2026 one: 1.775%→1.600% (bottom), 2.990% unchanged (middle), 3.640%→3.400% (top). Exemption-per-period amounts are identical to the August table.",
     "weekly": {
-      "exemptionPerPeriod": 12.50,
+      "exemptionPerPeriod": 12.5,
       "brackets": [
-        { "floor": 0.00, "ceiling": 500.96, "base": 0.00, "rate": 0.01775 },
-        { "floor": 500.96, "ceiling": 1923.08, "base": 8.89, "rate": 0.0299 },
-        { "floor": 1923.08, "ceiling": null, "base": 51.41, "rate": 0.0364 }
+        {
+          "floor": 0.0,
+          "ceiling": 500.96,
+          "base": 0.0,
+          "rate": 0.01775
+        },
+        {
+          "floor": 500.96,
+          "ceiling": 1923.08,
+          "base": 8.89,
+          "rate": 0.0299
+        },
+        {
+          "floor": 1923.08,
+          "ceiling": null,
+          "base": 51.41,
+          "rate": 0.0364
+        }
       ]
     },
     "biweekly": {
-      "exemptionPerPeriod": 25.00,
+      "exemptionPerPeriod": 25.0,
       "brackets": [
-        { "floor": 0.00, "ceiling": 1001.92, "base": 0.00, "rate": 0.01775 },
-        { "floor": 1001.92, "ceiling": 3846.15, "base": 17.78, "rate": 0.0299 },
-        { "floor": 3846.15, "ceiling": null, "base": 102.82, "rate": 0.0364 }
+        {
+          "floor": 0.0,
+          "ceiling": 1001.92,
+          "base": 0.0,
+          "rate": 0.01775
+        },
+        {
+          "floor": 1001.92,
+          "ceiling": 3846.15,
+          "base": 17.78,
+          "rate": 0.0299
+        },
+        {
+          "floor": 3846.15,
+          "ceiling": null,
+          "base": 102.82,
+          "rate": 0.0364
+        }
       ]
     },
     "semimonthly": {
       "exemptionPerPeriod": 27.08,
       "brackets": [
-        { "floor": 0.00, "ceiling": 1085.42, "base": 0.00, "rate": 0.01775 },
-        { "floor": 1085.42, "ceiling": 4166.67, "base": 19.27, "rate": 0.0299 },
-        { "floor": 4166.67, "ceiling": null, "base": 111.40, "rate": 0.0364 }
+        {
+          "floor": 0.0,
+          "ceiling": 1085.42,
+          "base": 0.0,
+          "rate": 0.01775
+        },
+        {
+          "floor": 1085.42,
+          "ceiling": 4166.67,
+          "base": 19.27,
+          "rate": 0.0299
+        },
+        {
+          "floor": 4166.67,
+          "ceiling": null,
+          "base": 111.4,
+          "rate": 0.0364
+        }
       ]
     },
     "monthly": {
       "exemptionPerPeriod": 54.17,
       "brackets": [
-        { "floor": 0.00, "ceiling": 2170.83, "base": 0.00, "rate": 0.01775 },
-        { "floor": 2170.83, "ceiling": 8333.33, "base": 38.53, "rate": 0.0299 },
-        { "floor": 8333.33, "ceiling": null, "base": 222.79, "rate": 0.0364 }
+        {
+          "floor": 0.0,
+          "ceiling": 2170.83,
+          "base": 0.0,
+          "rate": 0.01775
+        },
+        {
+          "floor": 2170.83,
+          "ceiling": 8333.33,
+          "base": 38.53,
+          "rate": 0.0299
+        },
+        {
+          "floor": 8333.33,
+          "ceiling": null,
+          "base": 222.79,
+          "rate": 0.0364
+        }
       ]
     },
     "daily": {
-      "exemptionPerPeriod": 2.50,
+      "exemptionPerPeriod": 2.5,
       "brackets": [
-        { "floor": 0.00, "ceiling": 100.19, "base": 0.00, "rate": 0.01775 },
-        { "floor": 100.19, "ceiling": 384.62, "base": 1.78, "rate": 0.0299 },
-        { "floor": 384.62, "ceiling": null, "base": 10.28, "rate": 0.0364 }
+        {
+          "floor": 0.0,
+          "ceiling": 100.19,
+          "base": 0.0,
+          "rate": 0.01775
+        },
+        {
+          "floor": 100.19,
+          "ceiling": 384.62,
+          "base": 1.78,
+          "rate": 0.0299
+        },
+        {
+          "floor": 384.62,
+          "ceiling": null,
+          "base": 10.28,
+          "rate": 0.0364
+        }
       ]
     }
   },
   "periodTables": {
     "$comment": "Each table: exemptionPerPeriod (subtracted once per exemption claimed, per period, BEFORE bracket lookup) + 3 brackets (floor, ceiling, base tax at floor, marginal rate). All figures transcribed verbatim from the primary PDF.",
     "weekly": {
-      "exemptionPerPeriod": 12.50,
+      "exemptionPerPeriod": 12.5,
       "brackets": [
-        { "floor": 0.00, "ceiling": 500.96, "base": 0.00, "rate": 0.0160 },
-        { "floor": 500.96, "ceiling": 1923.08, "base": 8.02, "rate": 0.0299 },
-        { "floor": 1923.08, "ceiling": null, "base": 50.54, "rate": 0.0340 }
+        {
+          "floor": 0.0,
+          "ceiling": 500.96,
+          "base": 0.0,
+          "rate": 0.016
+        },
+        {
+          "floor": 500.96,
+          "ceiling": 1923.08,
+          "base": 8.02,
+          "rate": 0.0299
+        },
+        {
+          "floor": 1923.08,
+          "ceiling": null,
+          "base": 50.54,
+          "rate": 0.034
+        }
       ]
     },
     "biweekly": {
-      "exemptionPerPeriod": 25.00,
+      "exemptionPerPeriod": 25.0,
       "brackets": [
-        { "floor": 0.00, "ceiling": 1001.92, "base": 0.00, "rate": 0.0160 },
-        { "floor": 1001.92, "ceiling": 3846.15, "base": 16.03, "rate": 0.0299 },
-        { "floor": 3846.15, "ceiling": null, "base": 101.07, "rate": 0.0340 }
+        {
+          "floor": 0.0,
+          "ceiling": 1001.92,
+          "base": 0.0,
+          "rate": 0.016
+        },
+        {
+          "floor": 1001.92,
+          "ceiling": 3846.15,
+          "base": 16.03,
+          "rate": 0.0299
+        },
+        {
+          "floor": 3846.15,
+          "ceiling": null,
+          "base": 101.07,
+          "rate": 0.034
+        }
       ]
     },
     "semimonthly": {
       "exemptionPerPeriod": 27.08,
       "brackets": [
-        { "floor": 0.00, "ceiling": 1085.42, "base": 0.00, "rate": 0.0160 },
-        { "floor": 1085.42, "ceiling": 4166.67, "base": 17.37, "rate": 0.0299 },
-        { "floor": 4166.67, "ceiling": null, "base": 109.50, "rate": 0.0340 }
+        {
+          "floor": 0.0,
+          "ceiling": 1085.42,
+          "base": 0.0,
+          "rate": 0.016
+        },
+        {
+          "floor": 1085.42,
+          "ceiling": 4166.67,
+          "base": 17.37,
+          "rate": 0.0299
+        },
+        {
+          "floor": 4166.67,
+          "ceiling": null,
+          "base": 109.5,
+          "rate": 0.034
+        }
       ]
     },
     "monthly": {
       "exemptionPerPeriod": 54.17,
       "brackets": [
-        { "floor": 0.00, "ceiling": 2170.83, "base": 0.00, "rate": 0.0160 },
-        { "floor": 2170.83, "ceiling": 8333.33, "base": 34.73, "rate": 0.0299 },
-        { "floor": 8333.33, "ceiling": null, "base": 218.99, "rate": 0.0340 }
+        {
+          "floor": 0.0,
+          "ceiling": 2170.83,
+          "base": 0.0,
+          "rate": 0.016
+        },
+        {
+          "floor": 2170.83,
+          "ceiling": 8333.33,
+          "base": 34.73,
+          "rate": 0.0299
+        },
+        {
+          "floor": 8333.33,
+          "ceiling": null,
+          "base": 218.99,
+          "rate": 0.034
+        }
       ]
     },
     "daily": {
-      "exemptionPerPeriod": 2.50,
+      "exemptionPerPeriod": 2.5,
       "brackets": [
-        { "floor": 0.00, "ceiling": 100.19, "base": 0.00, "rate": 0.0160 },
-        { "floor": 100.19, "ceiling": 384.62, "base": 1.60, "rate": 0.0299 },
-        { "floor": 384.62, "ceiling": null, "base": 10.10, "rate": 0.0340 }
+        {
+          "floor": 0.0,
+          "ceiling": 100.19,
+          "base": 0.0,
+          "rate": 0.016
+        },
+        {
+          "floor": 100.19,
+          "ceiling": 384.62,
+          "base": 1.6,
+          "rate": 0.0299
+        },
+        {
+          "floor": 384.62,
+          "ceiling": null,
+          "base": 10.1,
+          "rate": 0.034
+        }
       ]
     }
   },
   "annualEquivalent": {
     "$comment": "Derived (not authoritative — the periodTables above are the source of truth) for human sanity-checking only: floor2 = 500.96*52 ≈ $26,050, floor3 = 1923.08*52 ≈ $100,000, exemption ≈ $650/exemption/year. Notably HB96 removed the historical 0% bracket below $26,050 — the lowest tier is now taxed at 1.6%, not 0%. Do not use these annual figures for calculation; use periodTables directly.",
-    "rate1": 0.0160, "rate1Ceiling": 26050, "rate2": 0.0299, "rate2Ceiling": 100000, "rate3": 0.0340
+    "rate1": 0.016,
+    "rate1Ceiling": 26050,
+    "rate2": 0.0299,
+    "rate2Ceiling": 100000,
+    "rate3": 0.034
   },
   "supplementalRate": 0.0275,
   "supplementalComment": "Flat 2.75% on bonuses/supplemental wages, in effect since 2026-01-01 and UNCHANGED by the August 1 bracket update — confirmed as a separate fact, not assumed to move with the regular-wage tables.",
   "exemptPretax": [
-    "section125", "hsa", "fsa", "dependent_care",
-    "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple",
+    "section125",
+    "hsa",
+    "fsa",
+    "dependent_care",
+    "deferral_401k",
+    "deferral_403b",
+    "deferral_457",
+    "deferral_simple",
     "commuter"
   ],
   "exemptComment": "UPGRADED this session from a pure carry-over assumption: ORC 5747.01 (codes.ohio.gov, fetched directly) defines 'Ohio adjusted gross income' as starting from FEDERAL adjusted gross income plus Ohio-specific adjustments — the same federal-AGI-anchor structure Michigan uses. Section 125/401k/403b/457/SIMPLE deferrals are excluded from federal AGI, so by this same anchoring logic they should be excluded from Ohio's base too. ORC 5747.06 (employer withholding duty, also fetched directly) does NOT itself enumerate these exclusions by name — only 6 unrelated categories (agricultural labor, domestic service, etc.). So this is now inferential-from-a-confirmed-statutory-structure, not a bare assumption, but it is still NOT an explicit enumeration the way RAB 1988-27 explicitly names cafeteria plans for Michigan. One tier below Michigan's sourcing; still short of a full pending_verification clear.",
-
   "withholdingCertificate": {
     "$comment": "NEW this session: the actual combined IT-4 form, fetched and read directly. As of 2020-12-07 this form ALSO absorbed the standalone IT4NR reciprocity form and IT4MIL/IT MIL SP military forms into one document — meaning the reciprocity mechanism documented separately below (from the older standalone IT4NR) is now actually filed via THIS form's Section III, not a separate one. Also directly relevant to schoolDistrictIncomeTax above: the IT-4 IS the trigger mechanism for school district withholding, not a separate certificate.",
     "source": {
@@ -159,13 +324,18 @@
       "verifiedOn": "2026-08-12",
       "verifiedBy": "UPGRADED this session from cross_source_confirmed to PRIMARY: downloaded and text-extracted the actual Ohio Dept of Taxation form directly. Quoted from the form itself: 'Ohio employers: You are required to have a copy of this form on file for each employee who is a resident of Indiana, Kentucky, West Virginia, Michigan or Pennsylvania receiving compensation paid in Ohio and who claims exemption from withholding of Ohio income tax under the reciprocal agreements between Ohio and these other states.' This is Ohio's own official reciprocity-exemption form, not a secondary summary of one."
     },
-    "reciprocalStates": ["IN", "KY", "MI", "PA", "WV"],
+    "reciprocalStates": [
+      "IN",
+      "KY",
+      "MI",
+      "PA",
+      "WV"
+    ],
     "rule": "A resident of IN/KY/MI/PA/WV working in Ohio is not subject to Ohio withholding on those wages; income is taxed by the home state instead. CONFIRMED to match the 5-state list already on file — the primary source did not surface any discrepancy.",
     "mechanism": "PRIMARY-CONFIRMED general mechanism: the employee files Form IT 4NR with their Ohio employer, declaring under penalty of perjury which reciprocal state they reside in, to claim exemption from Ohio withholding. Must notify the employer within 10 days of any change of residence.",
     "mechanismVariesByState": "NOT uniform like Michigan's reciprocity, which is a single symmetric rule. Ohio's exemption mechanism is state-specific: IN uses Form WH-47, KY uses Form 42A809, MI uses Form MI-W4 (all per secondary sources, not re-confirmed against each of those states' own forms this session). PENNSYLVANIA -- DOWNGRADED from 'reported outlier' to 'likely stale/inaccurate claim, not corroborated' (2026-08-21, PA-2026.json's own reciprocity pass): the original claim (PA requires PROOF taxes were paid -- a mailed return + W-2s + statement -- rather than a simple certificate) was re-examined via (1) a direct read of REV-419 itself, which treats all 6 reciprocal states, Ohio included, completely identically with no state-specific carve-out anywhere in its text, and (2) two independent fresh searches this session, both of which describe the Ohio<->PA relationship as an ordinary symmetric IT-4NR/REV-419 certificate exchange with no PA-specific proof requirement mentioned at all. Neither check FOUND the original claim's own source to know what it was actually describing (a genuine possibility: it may have been describing the REFUND process for tax incorrectly withheld, not the prospective withholding-exemption certificate this section governs) -- so this is a reasoned downgrade based on converging evidence, not a definitive primary-source resolution. Still worth a from-scratch verification if it ever matters operationally.",
     "knownGap": "CLOSED (Scott: 'fix ohio reciprical tax'): the root cause was never the reciprocity logic itself — reciprocityExemptionReason() already read reciprocalStates correctly — it was that stateIncomeTax() threw before ever reaching it, because Ohio's base income-tax method had no dispatch case. Fixed by implementing ohioWithholding() (see withholdingCertificate.knownGap above). Verified end-to-end directly: an IN resident working in Ohio now gets a genuine $0 OH_SIT line with the correct reciprocity detail message, while an otherwise-identical NY resident (non-reciprocal) still owes full Ohio tax on the same wages — proving the fix doesn't over-apply. The still-open PA-outlier question (proof-of-tax-paid vs. simple certificate) is unrelated to this fix and remains exactly as disclosed above."
   },
-
   "unemploymentInsurance": {
     "$comment": "Employer-only (SUTA/SUI). UPGRADED to primary_source_confirmed this session — found the correct current URL (jfs.ohio.gov/unemployment-services/..., the old 'job-services-and-unemployment' path was stale/404) and read the official 2023-2026 rate table directly. This ALSO caught two real errors in a secondary-sourced figure encountered along the way: a general web search claimed a flat '5.85% new employer rate' for 2026, which conflates Ohio's separate, higher CONSTRUCTION-INDUSTRY new-employer rate with the general one (2.85%) — resolved by primary source, not guessed.",
     "administeredBy": "Ohio Department of Job and Family Services (ODJFS)",
@@ -189,7 +359,6 @@
     "confidence": "primary_source_confirmed — read directly from ODJFS's own published table, all four years shown for cross-year sanity-checking.",
     "knownGap": "Not modelled in the engine. Same structural note as Michigan: experience-rated (lowest/highest range shown; an individual employer's actual rate is assigned, not looked up as a constant)."
   },
-
   "schoolDistrictIncomeTax": {
     "$comment": "A tax category Michigan does NOT have — Ohio school districts may independently levy an income tax (SDIT), separate from and in addition to state + municipal income tax. This is real added complexity specific to Ohio.",
     "source": {
@@ -208,7 +377,6 @@
     "perDistrictData": "UPGRADED this session: all 212 of 214 districts (98.6%) now have actual per-district rates in data/local/OH-school-districts-2026.json, parsed directly from Ohio's own PDF by a script (not hand-transcribed). The earned-income-only sub-count matches Ohio's own footnote exactly (68/68), which is strong internal evidence the parse is correct for the rows it captured; 2 districts are missing for an unidentified formatting reason, disclosed rather than silently rounded up. See that file's parseConfidence field.",
     "knownGap": "WIRED (comprehensive-audit pass): ohioSchoolDistrictTax() in src/taxes/state.ts reads this data and applies rate2026 to wages when certificate.schoolDistrictCode (a 4-digit sdNumber) is supplied — proven via tests/engine.test.ts, describe('Ohio') > 'School District Income Tax (OH_SDIT)'. This engine still does not resolve a street address to a district itself; the caller must supply the sdNumber. The 2 districts absent from the 214-row source file remain unaccounted for, unchanged."
   },
-
   "interMunicipalCredit": {
     "$comment": "NEW this session, prompted by realizing 'rate + list of 679 cities' isn't enough for a payroll company — someone who lives in one taxing municipality and works in another needs a defined credit rule, and Ohio actually standardized this by statute (unlike the ad-hoc 'varies by ordinance' picture in the earlier knownGaps note).",
     "source": {
@@ -222,7 +390,6 @@
     "practicalImplication": "This is the statewide DEFAULT floor, not necessarily the whole story — individual municipalities can be more generous (grant a larger credit) but not less, per HB5's uniformity intent. Not confirmed this session whether any of the 679 municipalities in data/local/OH-municipalities-2026.json actually do grant more than the ORC 718.121 floor; treat the floor as the safe-default assumption.",
     "knownGap": "WIRED (comprehensive-audit pass): ohioLocalTax() in src/taxes/state.ts resolves certificate.residenceCity/workCity against data/local/OH-municipalities-2026.json and applies exactly this credit — home tax minus min(workTax, homeTax), computed at withholding time per the statute's own 'against the tax or withholding' wording, not deferred to the return the way Michigan's return-level credit is. Proven via tests/engine.test.ts, describe('Ohio') > 'municipal income tax (OH_LOCAL)' (both credit directions plus the same-city and no-match cases). Whether any specific municipality grants MORE than this statutory floor is still not checked."
   },
-
   "knownGaps": [
     "CLOSED: ohioWithholding() now implements the 'bracket_per_period' method (src/taxes/state.ts) — calculatePaycheck() no longer throws for Ohio input, proven by test execution (describe('Ohio') in tests/engine.test.ts).",
     "CLOSED (Scott: 'fix the gap'): mid-year effective dating now works — ohioWithholding() reads midYearEffectiveDating.thresholdDate directly and selects priorTable2026 vs. periodTables based on input.checkDate, resolved entirely within Ohio's own dispatch function rather than by changing registry.ts's year-only file lookup (both tables already lived in this same file regardless of check date; the missing piece was that nothing inside the state ever chose between them). Verified at the exact boundary: 2026-07-31 uses the prior table, 2026-08-01 already uses the new one. Scoped to Ohio specifically for now, not built as a cross-state generic mechanism — see midYearEffectiveDating.mechanismStatus above for why.",
@@ -233,7 +400,8 @@
     "Municipal income tax is now COMPREHENSIVE and primary_source_confirmed — see data/local/OH-municipalities-2026.json (679 municipalities, now also tagged with administeringAgency: RITA/CCA/self_or_other — see below) and data/local/OH-jedd-jedz-2026.json (146 zones), both bulk-downloaded directly from Ohio's own Finder database, replacing the earlier 3-anchor-city approach entirely.",
     "Municipal tax ADMINISTRATION (who an employer actually remits to) is now captured: cross-referenced the full RITA (415 members) and CCA (36 members) rosters, fetched directly from each agency's own site, against the 679-municipality list. Found and disclosed a real gap this surfaced: 5 RITA-member municipalities (DeGraff, Germantown, North Hampton, Stockport, Valleyview) were entirely missing from the original 679-municipality bulk pull — a genuine undercount, not a matching artifact, confirmed by direct substring search. 3 same-named 'Oakwood' municipalities left as administeredBy='unknown_ambiguous_name' rather than guessed.",
     "Inter-municipal credit-for-tax-paid-elsewhere: the statewide statutory DEFAULT (ORC 718.121, post-HB5) is now documented (interMunicipalCredit above) — home municipality credits work-municipality tax paid, capped at the home rate, no carryforward. Whether any specific municipality is more generous than this floor is not checked.",
-    "CLOSED (comprehensive-audit pass): municipal income tax (OH_LOCAL, including the ORC 718.121 credit) and School District Income Tax (OH_SDIT) are now both wired into the calc engine — see interMunicipalCredit.knownGap and schoolDistrictIncomeTax.knownGap above for what each covers. Genuinely still open: this engine does not resolve a street address to a municipality/school district itself (the caller must already know certificate.residenceCity/workCity/schoolDistrictCode); JEDD/JEDZ zones (data/local/OH-jedd-jedz-2026.json, 146 zones) remain entirely unwired since they are keyed by parcel/employer agreement rather than a municipality name; and Kentucky's occupational-license tax (data/local/KY-occupational-2026.json) was deliberately left unwired in this same pass because its own file discloses only 29 of an estimated 230 jurisdictions have real rate data — wiring an incomplete dataset would silently under-tax the other ~200."
+    "CLOSED (comprehensive-audit pass): municipal income tax (OH_LOCAL, including the ORC 718.121 credit) and School District Income Tax (OH_SDIT) are now both wired into the calc engine — see interMunicipalCredit.knownGap and schoolDistrictIncomeTax.knownGap above for what each covers. Genuinely still open: this engine does not resolve a street address to a municipality/school district itself (the caller must already know certificate.residenceCity/workCity/schoolDistrictCode); JEDD/JEDZ zones (data/local/OH-jedd-jedz-2026.json, 146 zones) remain entirely unwired since they are keyed by parcel/employer agreement rather than a municipality name; and Kentucky's occupational-license tax (data/local/KY-occupational-2026.json) was deliberately left unwired in this same pass because its own file discloses only 29 of an estimated 230 jurisdictions have real rate data — wiring an incomplete dataset would silently under-tax the other ~200.",
+    "ORC 5747.06(A) names four MORE withholding exemptions this engine cannot represent: (3) any calendar quarter in which cash pay is under $300 — a dollar threshold, not an employment category, and this engine has no per-employer quarterly-cash-wages tracker for Ohio the way it does for household/agricultural FICA coverage elsewhere; (4) services for a foreign government or international organization; (5) newspaper/shopping-news delivery by a worker under 18; (6) non-business services paid in a medium other than cash. None has a matching EmploymentCategory value — reachable only via the generic certificate.exempt + exemptReason route, same boundary as Alabama's own federal-law exemptions."
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
@@ -253,5 +421,14 @@
     "appliesWhen": "paid_separately",
     "election": "required",
     "source": "Ohio's separately-legislated supplemental rate, already recorded in this file's supplementalRate/supplementalComment: flat 2.75% on bonuses and supplemental wages, in effect since 2026-01-01 and deliberately UNCHANGED by the August 1 bracket update. Scoped to a bonus paid on its own cheque; a bonus paid alongside regular wages runs through the ordinary bracket_per_period tables, which is what aggregation means here."
+  },
+  "exemptEmploymentCategories": {
+    "$comment": "ORC 5747.06(A)(1)-(2), quoted verbatim in this file's own sources[] entry above. Unlike Alabama, Ohio's statute does NOT name clergy/ministers among its withholding exemptions, so \"clergy\" is deliberately NOT included here — a state-by-state list, not a copy of Alabama's.",
+    "categories": [
+      "household",
+      "agricultural"
+    ],
+    "source": "Ohio Revised Code 5747.06(A)(1)-(2).",
+    "confidence": "primary_source_confirmed"
   }
 }

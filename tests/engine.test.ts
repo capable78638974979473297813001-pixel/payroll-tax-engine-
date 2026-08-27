@@ -2413,6 +2413,46 @@ describe('New York', () => {
     );
     assert.equal(amountOf(r, 'NY_SIT'), 0);
   });
+
+  // NYS-50: withholding on household-employee wages is VOLUNTARY, not
+  // mandatory-then-excluded — the default is $0, but an asserted agreement
+  // flips it back to ordinary withholding.
+  describe('Household employees (voluntary withholding)', () => {
+    test('no agreement asserted: $0 NY_SIT by default', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+          workState: { code: 'NY' },
+          employmentCategory: 'household',
+        }),
+      );
+      assert.equal(amountOf(r, 'NY_SIT'), 0);
+    });
+
+    test('certificate.voluntaryWithholdingAgreement flips it back to ordinary withholding', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+          workState: { code: 'NY', certificate: { voluntaryWithholdingAgreement: true } },
+          employmentCategory: 'household',
+        }),
+      );
+      assert.ok(amountOf(r, 'NY_SIT') > 0);
+    });
+
+    test('a standard employee is unaffected by this mechanism', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+          workState: { code: 'NY' },
+        }),
+      );
+      assert.ok(amountOf(r, 'NY_SIT') > 0);
+    });
+  });
 });
 
 describe('New York City', () => {
@@ -5096,6 +5136,57 @@ describe('Ohio', () => {
       );
       assert.equal(amountOf(r, 'OH_JEDD'), dollars(75.0));
       assert.ok(amountOf(r, 'OH_SDIT') > dollars(0));
+    });
+  });
+
+  // ORC 5747.06(A)(1)-(2): agricultural labor and domestic service in a
+  // private home are exempt from Ohio withholding outright.
+  describe('Exempt employment categories (ORC 5747.06(A))', () => {
+    test('a household (domestic) worker owes $0 OH_SIT', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+          workState: { code: 'OH' },
+          employmentCategory: 'household',
+        }),
+      );
+      assert.equal(amountOf(r, 'OH_SIT'), 0);
+    });
+
+    test('an agricultural worker owes $0 OH_SIT', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+          workState: { code: 'OH' },
+          employmentCategory: 'agricultural',
+        }),
+      );
+      assert.equal(amountOf(r, 'OH_SIT'), 0);
+    });
+
+    test('clergy is NOT exempt under Ohio\'s own statute, unlike Alabama\'s', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+          workState: { code: 'OH' },
+          employmentCategory: 'clergy',
+        }),
+      );
+      assert.ok(amountOf(r, 'OH_SIT') > 0);
+    });
+
+    test('a standard employee is unaffected', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+          workState: { code: 'OH' },
+        }),
+      );
+      assert.ok(amountOf(r, 'OH_SIT') > 0);
     });
   });
 });

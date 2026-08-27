@@ -1158,31 +1158,397 @@
     "noMethodIII": "NYC has NO 'Top Income Tax Rates Method' equivalent -- confirmed by the table of contents (no such section listed, unlike NYS's page 22) and by each per-period table's own top row, which just continues applying the same top marginal rate (4.25%) with 'to: null' rather than redirecting to an alternate method. NYC's top bracket rate is far lower than NYS's (4.25% vs up to 11.70%), so a separate ultra-high-earner override is evidently not something NYC's own withholding tables consider necessary.",
     "combinedAllowanceTable": {
       "single": {
-        "daily":       [19.25, 23.10, 26.95, 30.80, 34.65, 38.50, 42.35, 46.20, 50.05, 53.90, 57.75],
-        "weekly":      [96.15, 115.40, 134.65, 153.90, 173.15, 192.40, 211.65, 230.90, 250.15, 269.40, 288.65],
-        "biweekly":    [192.30, 230.80, 269.30, 307.80, 346.30, 384.80, 423.30, 461.80, 500.30, 538.80, 577.30],
-        "semimonthly": [208.35, 250.00, 291.65, 333.30, 374.95, 416.60, 458.25, 499.90, 541.55, 583.20, 624.85],
-        "monthly":     [416.70, 500.00, 583.30, 666.60, 749.90, 833.20, 916.50, 999.80, 1083.10, 1166.40, 1249.70],
-        "annual":      [5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000, 14000, 15000]
+        "daily": [
+          19.25,
+          23.1,
+          26.95,
+          30.8,
+          34.65,
+          38.5,
+          42.35,
+          46.2,
+          50.05,
+          53.9,
+          57.75
+        ],
+        "weekly": [
+          96.15,
+          115.4,
+          134.65,
+          153.9,
+          173.15,
+          192.4,
+          211.65,
+          230.9,
+          250.15,
+          269.4,
+          288.65
+        ],
+        "biweekly": [
+          192.3,
+          230.8,
+          269.3,
+          307.8,
+          346.3,
+          384.8,
+          423.3,
+          461.8,
+          500.3,
+          538.8,
+          577.3
+        ],
+        "semimonthly": [
+          208.35,
+          250.0,
+          291.65,
+          333.3,
+          374.95,
+          416.6,
+          458.25,
+          499.9,
+          541.55,
+          583.2,
+          624.85
+        ],
+        "monthly": [
+          416.7,
+          500.0,
+          583.3,
+          666.6,
+          749.9,
+          833.2,
+          916.5,
+          999.8,
+          1083.1,
+          1166.4,
+          1249.7
+        ],
+        "annual": [
+          5000,
+          6000,
+          7000,
+          8000,
+          9000,
+          10000,
+          11000,
+          12000,
+          13000,
+          14000,
+          15000
+        ]
       },
       "married": {
-        "daily":       [21.15, 25.00, 28.85, 32.70, 36.55, 40.40, 44.25, 48.10, 51.95, 55.80, 59.65],
-        "weekly":      [105.75, 125.00, 144.25, 163.50, 182.75, 202.00, 221.25, 240.50, 259.75, 279.00, 298.25],
-        "biweekly":    [211.50, 250.00, 288.50, 327.00, 365.50, 404.00, 442.50, 481.00, 519.50, 558.00, 596.50],
-        "semimonthly": [229.15, 270.80, 312.45, 354.10, 395.75, 437.40, 479.05, 520.70, 562.35, 604.00, 645.65],
-        "monthly":     [458.30, 541.60, 624.90, 708.20, 791.50, 874.80, 958.10, 1041.40, 1124.70, 1208.00, 1291.30],
-        "annual":      [5500, 6500, 7500, 8500, 9500, 10500, 11500, 12500, 13500, 14500, 15500]
+        "daily": [
+          21.15,
+          25.0,
+          28.85,
+          32.7,
+          36.55,
+          40.4,
+          44.25,
+          48.1,
+          51.95,
+          55.8,
+          59.65
+        ],
+        "weekly": [
+          105.75,
+          125.0,
+          144.25,
+          163.5,
+          182.75,
+          202.0,
+          221.25,
+          240.5,
+          259.75,
+          279.0,
+          298.25
+        ],
+        "biweekly": [
+          211.5,
+          250.0,
+          288.5,
+          327.0,
+          365.5,
+          404.0,
+          442.5,
+          481.0,
+          519.5,
+          558.0,
+          596.5
+        ],
+        "semimonthly": [
+          229.15,
+          270.8,
+          312.45,
+          354.1,
+          395.75,
+          437.4,
+          479.05,
+          520.7,
+          562.35,
+          604.0,
+          645.65
+        ],
+        "monthly": [
+          458.3,
+          541.6,
+          624.9,
+          708.2,
+          791.5,
+          874.8,
+          958.1,
+          1041.4,
+          1124.7,
+          1208.0,
+          1291.3
+        ],
+        "annual": [
+          5500,
+          6500,
+          7500,
+          8500,
+          9500,
+          10500,
+          11500,
+          12500,
+          13500,
+          14500,
+          15500
+        ]
       },
       "over10ExemptionsNote": "Same shape as NYS: per-exemption increments confirmed constant across the whole published table (e.g. weekly single's increment is exactly $19.25 between every consecutive pair, matching Table C directly) -- extrapolated linearly past index 10 the same way as NYS."
     },
     "brackets": {
       "$comment": "Shared between single AND married (see structuralDifferenceFromNYS above) -- {from,to,base,rate}, transcribed verbatim per period, verified against all 8 of the source's own worked examples exactly.",
-      "daily":       [{"from":0,"to":31,"base":0,"rate":0.0205},{"from":31,"to":33.5,"base":0.63,"rate":0.0280},{"from":33.5,"to":57.5,"base":0.71,"rate":0.0325},{"from":57.5,"to":96,"base":1.49,"rate":0.0395},{"from":96,"to":231,"base":3.01,"rate":0.0415},{"from":231,"to":null,"base":8.60,"rate":0.0425}],
-      "weekly":      [{"from":0,"to":154,"base":0,"rate":0.0205},{"from":154,"to":167,"base":3.15,"rate":0.0280},{"from":167,"to":288,"base":3.54,"rate":0.0325},{"from":288,"to":481,"base":7.46,"rate":0.0395},{"from":481,"to":1154,"base":15.06,"rate":0.0415},{"from":1154,"to":null,"base":43.00,"rate":0.0425}],
-      "biweekly":    [{"from":0,"to":308,"base":0,"rate":0.0205},{"from":308,"to":334,"base":6.31,"rate":0.0280},{"from":334,"to":577,"base":7.08,"rate":0.0325},{"from":577,"to":962,"base":14.92,"rate":0.0395},{"from":962,"to":2308,"base":30.12,"rate":0.0415},{"from":2308,"to":null,"base":86.00,"rate":0.0425}],
-      "semimonthly": [{"from":0,"to":333,"base":0,"rate":0.0205},{"from":333,"to":362,"base":6.83,"rate":0.0280},{"from":362,"to":625,"base":7.67,"rate":0.0325},{"from":625,"to":1042,"base":16.17,"rate":0.0395},{"from":1042,"to":2500,"base":32.63,"rate":0.0415},{"from":2500,"to":null,"base":93.17,"rate":0.0425}],
-      "monthly":     [{"from":0,"to":667,"base":0,"rate":0.0205},{"from":667,"to":725,"base":13.67,"rate":0.0280},{"from":725,"to":1250,"base":15.33,"rate":0.0325},{"from":1250,"to":2083,"base":32.33,"rate":0.0395},{"from":2083,"to":5000,"base":65.25,"rate":0.0415},{"from":5000,"to":null,"base":186.33,"rate":0.0425}],
-      "annual":      [{"from":0,"to":8000,"base":0,"rate":0.0205},{"from":8000,"to":8700,"base":164.00,"rate":0.0280},{"from":8700,"to":15000,"base":184.00,"rate":0.0325},{"from":15000,"to":25000,"base":388.00,"rate":0.0395},{"from":25000,"to":60000,"base":783.00,"rate":0.0415},{"from":60000,"to":null,"base":2236.00,"rate":0.0425}]
+      "daily": [
+        {
+          "from": 0,
+          "to": 31,
+          "base": 0,
+          "rate": 0.0205
+        },
+        {
+          "from": 31,
+          "to": 33.5,
+          "base": 0.63,
+          "rate": 0.028
+        },
+        {
+          "from": 33.5,
+          "to": 57.5,
+          "base": 0.71,
+          "rate": 0.0325
+        },
+        {
+          "from": 57.5,
+          "to": 96,
+          "base": 1.49,
+          "rate": 0.0395
+        },
+        {
+          "from": 96,
+          "to": 231,
+          "base": 3.01,
+          "rate": 0.0415
+        },
+        {
+          "from": 231,
+          "to": null,
+          "base": 8.6,
+          "rate": 0.0425
+        }
+      ],
+      "weekly": [
+        {
+          "from": 0,
+          "to": 154,
+          "base": 0,
+          "rate": 0.0205
+        },
+        {
+          "from": 154,
+          "to": 167,
+          "base": 3.15,
+          "rate": 0.028
+        },
+        {
+          "from": 167,
+          "to": 288,
+          "base": 3.54,
+          "rate": 0.0325
+        },
+        {
+          "from": 288,
+          "to": 481,
+          "base": 7.46,
+          "rate": 0.0395
+        },
+        {
+          "from": 481,
+          "to": 1154,
+          "base": 15.06,
+          "rate": 0.0415
+        },
+        {
+          "from": 1154,
+          "to": null,
+          "base": 43.0,
+          "rate": 0.0425
+        }
+      ],
+      "biweekly": [
+        {
+          "from": 0,
+          "to": 308,
+          "base": 0,
+          "rate": 0.0205
+        },
+        {
+          "from": 308,
+          "to": 334,
+          "base": 6.31,
+          "rate": 0.028
+        },
+        {
+          "from": 334,
+          "to": 577,
+          "base": 7.08,
+          "rate": 0.0325
+        },
+        {
+          "from": 577,
+          "to": 962,
+          "base": 14.92,
+          "rate": 0.0395
+        },
+        {
+          "from": 962,
+          "to": 2308,
+          "base": 30.12,
+          "rate": 0.0415
+        },
+        {
+          "from": 2308,
+          "to": null,
+          "base": 86.0,
+          "rate": 0.0425
+        }
+      ],
+      "semimonthly": [
+        {
+          "from": 0,
+          "to": 333,
+          "base": 0,
+          "rate": 0.0205
+        },
+        {
+          "from": 333,
+          "to": 362,
+          "base": 6.83,
+          "rate": 0.028
+        },
+        {
+          "from": 362,
+          "to": 625,
+          "base": 7.67,
+          "rate": 0.0325
+        },
+        {
+          "from": 625,
+          "to": 1042,
+          "base": 16.17,
+          "rate": 0.0395
+        },
+        {
+          "from": 1042,
+          "to": 2500,
+          "base": 32.63,
+          "rate": 0.0415
+        },
+        {
+          "from": 2500,
+          "to": null,
+          "base": 93.17,
+          "rate": 0.0425
+        }
+      ],
+      "monthly": [
+        {
+          "from": 0,
+          "to": 667,
+          "base": 0,
+          "rate": 0.0205
+        },
+        {
+          "from": 667,
+          "to": 725,
+          "base": 13.67,
+          "rate": 0.028
+        },
+        {
+          "from": 725,
+          "to": 1250,
+          "base": 15.33,
+          "rate": 0.0325
+        },
+        {
+          "from": 1250,
+          "to": 2083,
+          "base": 32.33,
+          "rate": 0.0395
+        },
+        {
+          "from": 2083,
+          "to": 5000,
+          "base": 65.25,
+          "rate": 0.0415
+        },
+        {
+          "from": 5000,
+          "to": null,
+          "base": 186.33,
+          "rate": 0.0425
+        }
+      ],
+      "annual": [
+        {
+          "from": 0,
+          "to": 8000,
+          "base": 0,
+          "rate": 0.0205
+        },
+        {
+          "from": 8000,
+          "to": 8700,
+          "base": 164.0,
+          "rate": 0.028
+        },
+        {
+          "from": 8700,
+          "to": 15000,
+          "base": 184.0,
+          "rate": 0.0325
+        },
+        {
+          "from": 15000,
+          "to": 25000,
+          "base": 388.0,
+          "rate": 0.0395
+        },
+        {
+          "from": 25000,
+          "to": 60000,
+          "base": 783.0,
+          "rate": 0.0415
+        },
+        {
+          "from": 60000,
+          "to": null,
+          "base": 2236.0,
+          "rate": 0.0425
+        }
+      ]
     },
     "supplementalRate": 0.0425,
     "supplementalQuote": "NYS-50-T-NYC, verbatim: 'Withhold at the New York City supplemental rate of 4.25% (0.0425).' Same pattern as NYS: the supplemental rate equals the top ordinary marginal rate.",
@@ -1205,11 +1571,141 @@
     "nonresidentSupplementalNote": "Identical to the ordinary nonresident rate -- no separate supplemental treatment needed, since the ordinary nonresident tax is already a flat rate with no bracket for a supplemental method to bypass.",
     "nonresidentExemptionTiers": {
       "$comment": "A GENUINELY NEW shape in this project: a wage-LEVEL step-function exemption (5 tiers, decreasing to $0 as wages rise, with a full 'no tax at all' floor on the lowest tier) -- independent of marital status and of any claimed exemption count entirely, unlike every other allowance/deduction mechanism built so far. Applies to GROSS wages, not net-of-Table-A wages (Table A is a NYS/Yonkers-resident concept; nonresidents use this separate mechanism instead). Verified against all 3 of NYS-50-T-Y's own worked examples for this tax exactly: $75/wk -> $0 (below the $77 floor); $200/wk -> ($200-$38)*0.005=$0.81; $400/semimonthly -> ($400-$125)*0.005=$1.38.",
-      "weekly":      [{"from":0,"to":77,"exemption":null},{"from":77,"to":192,"exemption":58},{"from":192,"to":385,"exemption":38},{"from":385,"to":577,"exemption":19},{"from":577,"to":null,"exemption":0}],
-      "biweekly":    [{"from":0,"to":154,"exemption":null},{"from":154,"to":385,"exemption":115},{"from":385,"to":769,"exemption":77},{"from":769,"to":1154,"exemption":38},{"from":1154,"to":null,"exemption":0}],
-      "semimonthly": [{"from":0,"to":167,"exemption":null},{"from":167,"to":417,"exemption":125},{"from":417,"to":833,"exemption":83},{"from":833,"to":1250,"exemption":42},{"from":1250,"to":null,"exemption":0}],
-      "monthly":     [{"from":0,"to":333,"exemption":null},{"from":333,"to":833,"exemption":250},{"from":833,"to":1667,"exemption":167},{"from":1667,"to":2500,"exemption":83},{"from":2500,"to":null,"exemption":0}],
-      "daily":       [{"from":0,"to":15,"exemption":null},{"from":15,"to":38,"exemption":12},{"from":38,"to":77,"exemption":8},{"from":77,"to":115,"exemption":4},{"from":115,"to":null,"exemption":0}]
+      "weekly": [
+        {
+          "from": 0,
+          "to": 77,
+          "exemption": null
+        },
+        {
+          "from": 77,
+          "to": 192,
+          "exemption": 58
+        },
+        {
+          "from": 192,
+          "to": 385,
+          "exemption": 38
+        },
+        {
+          "from": 385,
+          "to": 577,
+          "exemption": 19
+        },
+        {
+          "from": 577,
+          "to": null,
+          "exemption": 0
+        }
+      ],
+      "biweekly": [
+        {
+          "from": 0,
+          "to": 154,
+          "exemption": null
+        },
+        {
+          "from": 154,
+          "to": 385,
+          "exemption": 115
+        },
+        {
+          "from": 385,
+          "to": 769,
+          "exemption": 77
+        },
+        {
+          "from": 769,
+          "to": 1154,
+          "exemption": 38
+        },
+        {
+          "from": 1154,
+          "to": null,
+          "exemption": 0
+        }
+      ],
+      "semimonthly": [
+        {
+          "from": 0,
+          "to": 167,
+          "exemption": null
+        },
+        {
+          "from": 167,
+          "to": 417,
+          "exemption": 125
+        },
+        {
+          "from": 417,
+          "to": 833,
+          "exemption": 83
+        },
+        {
+          "from": 833,
+          "to": 1250,
+          "exemption": 42
+        },
+        {
+          "from": 1250,
+          "to": null,
+          "exemption": 0
+        }
+      ],
+      "monthly": [
+        {
+          "from": 0,
+          "to": 333,
+          "exemption": null
+        },
+        {
+          "from": 333,
+          "to": 833,
+          "exemption": 250
+        },
+        {
+          "from": 833,
+          "to": 1667,
+          "exemption": 167
+        },
+        {
+          "from": 1667,
+          "to": 2500,
+          "exemption": 83
+        },
+        {
+          "from": 2500,
+          "to": null,
+          "exemption": 0
+        }
+      ],
+      "daily": [
+        {
+          "from": 0,
+          "to": 15,
+          "exemption": null
+        },
+        {
+          "from": 15,
+          "to": 38,
+          "exemption": 12
+        },
+        {
+          "from": 38,
+          "to": 77,
+          "exemption": 8
+        },
+        {
+          "from": 77,
+          "to": 115,
+          "exemption": 4
+        },
+        {
+          "from": 115,
+          "to": null,
+          "exemption": 0
+        }
+      ]
     },
     "certificateFields": "input.workState.certificate.{yonkersResident: boolean (IT-2104's own Yes/No question), yonkersNonresidentWorker: boolean (NOT on IT-2104 at all -- this is an EMPLOYER-determined fact about work location, the employee's own withholding certificate has no field for it, the same category of gap as every other work-location determination this engine currently trusts the caller to resolve upstream), additionalWithholdingYonkers: cents (IT-2104 Line 5 -- RESOLVED, previously missing entirely; its own dedicated field, distinct from NYS's Line 3 and NYC's Line 4, proven not to collide with either via a dedicated fixture. Applies for BOTH yonkersResident and yonkersNonresidentWorker -- IT-2104's own instructions don't restrict Line 5 to residents, and it's honored even when the nonresident calculation itself would otherwise be $0 below the wage threshold, since it's an employee request, not conditioned on the formula's own result)}. yonkersResident and yonkersNonresidentWorker are mutually exclusive by definition (a Yonkers resident cannot also be a nonresident earning wages there) -- yonkersLocalTax() checks yonkersResident FIRST, so if a caller somehow sets both, resident status wins.",
     "verification": "4 resident-surcharge worked examples + 3 nonresident-earnings-tax worked examples, all reproduced exactly -- see tests/engine.test.ts, describe('Yonkers')."
@@ -1227,7 +1723,7 @@
   "stateDisabilityEmployee": {
     "$comment": "New York Disability Benefits Law (DBL) -- a genuinely NEW cap shape for this project: PER-PERIOD (resets every pay period), not cumulative/annual like PFL or MN's Paid Leave. Sourced from the NYS Workers' Compensation Board's own page, fetched and read directly.",
     "rate": 0.005,
-    "weeklyCapDollars": 0.60,
+    "weeklyCapDollars": 0.6,
     "quote": "WCB, verbatim: 'Your contribution is calculated at the rate of one half of one percent of your wages, but no more than 60 cents a week.'",
     "capMechanismNote": "Genuinely different from every other capped employee-paid tax in this project: the cap is a flat 60 cents PER WEEK, resetting each week rather than accumulating toward an annual ceiling -- mathematically equivalent to an implicit $120/week wage base (0.5% x $120 = $0.60), but expressed and implemented as a direct per-period dollar cap (scaled by weeks-per-pay-period, 52/periodsPerYear) rather than a wage-base-and-rate calculation, since that's how the source itself states the rule.",
     "longstandingFigureNote": "This $0.60/week, 0.5%-of-wages structure has been statutory for decades and was directly reconfirmed for 2026 by WCB's own current page (not carried forward from a stale prior-year assumption) -- searched specifically because a secondary article's headline ('Critical Updates to New York Disability Benefits Law in 2026') suggested a possible change; the employee CONTRIBUTION rate itself was confirmed unchanged. Other 2026 DBL changes exist (e.g. to the weekly BENEFIT maximum, which follows NYSAWW) but the employee's own withholding rate/cap is not one of them.",
@@ -1237,7 +1733,7 @@
   },
   "unemploymentInsuranceEmployer": {
     "$comment": "Employer-only, $0 employee withholding -- context/audit only, same structural gap as every other state's employer-paid UI in this project: no per-employer experience-rating input exists anywhere in types.ts. Sourced from two DOL pages (dol.ny.gov/unemployment-insurance-rate-information and /calculating-employers-ui-contribution-rate) fetched via raw HTML and stripped by hand rather than an AI-summarization layer, specifically because repeated summarized fetches of the SAME page gave THREE different, mutually inconsistent versions of the rate range across separate calls (1.7%-9.5%, 1.625%-9.425%, and a garbled '0.5% but less than 1.0%') -- all turned out to be different columns/fragments of the SAME correct 3-column table (UI Rate / RSF / Total), not real conflicts, but only resolvable by reading the raw page text directly rather than trusting a repeated AI summary of it.",
-    "taxableWageBase2026": 17600.00,
+    "taxableWageBase2026": 17600.0,
     "wageBaseQuote": "Instructions for Form NYS-45 (tax.ny.gov PDF), fetched and read directly, quoted verbatim: 'For years beginning in 2026, the wage base will permanently adjust January 1 of each year to 18% (0.18) of the state average annual wage, rounded up to the nearest $100... The state average annual wage cannot be reduced from the prior year's level. The wage base for 2026 is $17,600.' A DIFFERENT search result, also claiming to cite NYS-45(-X) instructions, stated $13,000 and 16% instead -- checked directly against the actual PDF text and confirmed WRONG (likely a stale or hallucinated search extraction); $17,600/18% is what the primary document itself says.",
     "wageBaseHistory": "Full 2013-2025 history transcribed directly from the same PDF's own table: 2013 & prior $8,500; 2014 $10,300; 2015 $10,500; 2016 $10,700; 2017 $10,900; 2018 $11,100; 2019 $11,400; 2020 $11,600; 2021 $11,800; 2022 $12,000; 2023 $12,300; 2024 $12,500; 2025 $12,800; 2026 $17,600 -- the 2026 jump is a genuine, large, one-time step change (not a typo) tied to the same 2026 UI Trust Fund solvency legislation documented below, not the smooth ~$200-300/year increments of prior years.",
     "rates2026": {
@@ -1245,8 +1741,16 @@
       "newEmployerTotal": 0.041,
       "newEmployerNormalContributionRate": 0.034,
       "newEmployerNormalContributionRateNote": "A DISTINCT figure from the 'new employer UI rate' above, not a duplicate -- confirmed via DOL's own 'Calculating an Employer's UI Contribution Rate' page: an employer's rate is built from a normal rate (tied to the overall UI Trust Fund balance, statutorily capped at 3.4%, and AT that cap for 2026) PLUS a subsidiary rate (tied to the separate General Account balance, employer-specific). For a brand-new employer, normal(3.4%) + subsidiary(0.625%, the new-employer bucket's rate) = the 4.025% UI rate shown above.",
-      "lowestRate": { "uiRate": 0.01625, "rsf": 0.00075, "total": 0.017 },
-      "highestRate": { "uiRate": 0.09425, "rsf": 0.00075, "total": 0.095 },
+      "lowestRate": {
+        "uiRate": 0.01625,
+        "rsf": 0.00075,
+        "total": 0.017
+      },
+      "highestRate": {
+        "uiRate": 0.09425,
+        "rsf": 0.00075,
+        "total": 0.095
+      },
       "rsfRate": 0.00075,
       "rsfNote": "Re-employment Services Fund -- flat 0.075% of quarterly payroll, applies to ALL contributory accounts regardless of experience rating. Quoted directly: 'Each eligible employer...shall each calendar quarter make an additional contribution...equal to seventy-five one-thousandths of a percent (0.075%) of its quarterly payroll.' A secondary source separately claimed this is 'up to a maximum of $9 per employee per year' -- NOT independently confirmed and arithmetically suspicious (0.075% x the $17,600 wage base = $13.20, not $9), so this specific dollar-cap claim is disclosed as unverified/likely-stale rather than included as fact.",
       "sizeOfFundIndexColumn2026": "0.5% but less than 1.0%",
@@ -1258,31 +1762,100 @@
       "unreconciledGap": "HONEST, DISCLOSED LIMIT: this subsidiary schedule's own numbers do not obviously reconcile with the earlier bookend TOTAL figures (lowest 1.7%, highest 9.5%) by simple addition of the stated 3.4% new-employer normal rate -- e.g. the negative table's own maximum (8.5% at the 21%-or-more/0.5-1.0%-index cell) plus 3.4% would exceed 9.5% (the stated highest TOTAL), and the normal-rate page's own text says an employer's normal rate itself 'can vary' by the employer's own experience, meaning 3.4% may only be the NEW-EMPLOYER figure, not a flat rate every experienced employer shares. A separate table defining EXPERIENCED employers' own normal-rate-by-experience was referenced by the source pages but not located this session. Recorded honestly as an unresolved cross-source reconciliation rather than force-fitting an invented formula -- the underlying DATA (every cell below) is primary-sourced and correct on its own terms; it's the FULL end-to-end formula connecting normal + subsidiary + Benefit Equalization Factor into one final total rate that isn't completely pinned down.",
       "negativeAccountSubsidiaryRate": {
         "note": "Deficit (negative-account) employers. Rate class -> subsidiary rate %, for the 0.5%-1.0% Size of Fund Index column only.",
-        "21.0% or more": 8.5, "20.5% to 21.0%": 8.4, "20.0% to 20.5%": 8.3, "19.5% to 20.0%": 8.2, "19.0% to 19.5%": 8.1,
-        "18.5% to 19.0%": 8.0, "18.0% to 18.5%": 7.9, "17.5% to 18.0%": 7.8, "17.0% to 17.5%": 7.7, "16.5% to 17.0%": 7.6,
-        "16.0% to 16.5%": 7.5, "15.5% to 16.0%": 7.4, "15.0% to 15.5%": 7.3, "14.5% to 15.0%": 7.2, "14.0% to 14.5%": 7.1,
-        "13.5% to 14.0%": 7.0, "13.0% to 13.5%": 6.9, "12.5% to 13.0%": 6.8, "12.0% to 12.5%": 6.7, "11.5% to 12.0%": 6.6,
-        "11.0% to 11.5%": 6.5, "10.5% to 11.0%": 6.4, "10.0% to 10.5%": 6.3, "9.5% to 10.0%": 6.2, "9.0% to 9.5%": 6.1,
-        "8.5% to 9.0%": 6.0, "8.0% to 8.5%": 5.9, "7.0% to 8.0%": 5.8, "6.0% to 7.0%": 5.7, "5.0% to 6.0%": 5.6,
-        "4.0% to 5.0%": 5.5, "3.0% to 4.0%": 5.2, "2.0% to 3.0%": 5.1, "1.0% to 2.0%": 5.0, "less than 1.0%": 4.8
+        "21.0% or more": 8.5,
+        "20.5% to 21.0%": 8.4,
+        "20.0% to 20.5%": 8.3,
+        "19.5% to 20.0%": 8.2,
+        "19.0% to 19.5%": 8.1,
+        "18.5% to 19.0%": 8.0,
+        "18.0% to 18.5%": 7.9,
+        "17.5% to 18.0%": 7.8,
+        "17.0% to 17.5%": 7.7,
+        "16.5% to 17.0%": 7.6,
+        "16.0% to 16.5%": 7.5,
+        "15.5% to 16.0%": 7.4,
+        "15.0% to 15.5%": 7.3,
+        "14.5% to 15.0%": 7.2,
+        "14.0% to 14.5%": 7.1,
+        "13.5% to 14.0%": 7.0,
+        "13.0% to 13.5%": 6.9,
+        "12.5% to 13.0%": 6.8,
+        "12.0% to 12.5%": 6.7,
+        "11.5% to 12.0%": 6.6,
+        "11.0% to 11.5%": 6.5,
+        "10.5% to 11.0%": 6.4,
+        "10.0% to 10.5%": 6.3,
+        "9.5% to 10.0%": 6.2,
+        "9.0% to 9.5%": 6.1,
+        "8.5% to 9.0%": 6.0,
+        "8.0% to 8.5%": 5.9,
+        "7.0% to 8.0%": 5.8,
+        "6.0% to 7.0%": 5.7,
+        "5.0% to 6.0%": 5.6,
+        "4.0% to 5.0%": 5.5,
+        "3.0% to 4.0%": 5.2,
+        "2.0% to 3.0%": 5.1,
+        "1.0% to 2.0%": 5.0,
+        "less than 1.0%": 4.8
       },
       "positiveAccountSubsidiaryRate": {
         "note": "Employers with a positive reserve. Rate class -> subsidiary rate %, for the 0.5%-1.0% Size of Fund Index column only. Lower account percentage = HIGHER subsidiary rate, the inverse relationship from the negative table.",
-        "less than 1.0%": 3.7, "1.0% to 2.0%": 3.6, "2.0% to 3.0%": 3.5, "3.0% to 4.0%": 3.4, "4.0% to 5.0%": 3.3,
-        "5.0% to 5.5%": 3.2, "5.5% to 5.75%": 3.1, "5.75% to 6.0%": 3.0, "6.0% to 6.25%": 2.9, "6.25% to 6.5%": 2.8,
-        "6.5% to 6.75%": 2.7, "6.75% to 7.0%": 2.6, "7.0% to 7.25%": 2.5, "7.25% to 7.5%": 2.4, "7.5% to 7.75%": 2.3,
-        "7.75% to 8.0%": 2.2, "8.0% to 8.25%": 2.1, "8.25% to 8.5%": 2.0, "8.5% to 8.75%": 1.9, "8.75% to 9.0%": 1.8,
-        "9.0% to 9.25%": 1.7, "9.25% to 9.5%": 1.6, "9.5% to 9.75%": 1.5, "9.75% to 10.0%": 1.4, "10.0% to 10.25%": 1.3,
-        "10.25% to 10.5%": 1.2, "10.5% or more": 1.1
+        "less than 1.0%": 3.7,
+        "1.0% to 2.0%": 3.6,
+        "2.0% to 3.0%": 3.5,
+        "3.0% to 4.0%": 3.4,
+        "4.0% to 5.0%": 3.3,
+        "5.0% to 5.5%": 3.2,
+        "5.5% to 5.75%": 3.1,
+        "5.75% to 6.0%": 3.0,
+        "6.0% to 6.25%": 2.9,
+        "6.25% to 6.5%": 2.8,
+        "6.5% to 6.75%": 2.7,
+        "6.75% to 7.0%": 2.6,
+        "7.0% to 7.25%": 2.5,
+        "7.25% to 7.5%": 2.4,
+        "7.5% to 7.75%": 2.3,
+        "7.75% to 8.0%": 2.2,
+        "8.0% to 8.25%": 2.1,
+        "8.25% to 8.5%": 2.0,
+        "8.5% to 8.75%": 1.9,
+        "8.75% to 9.0%": 1.8,
+        "9.0% to 9.25%": 1.7,
+        "9.25% to 9.5%": 1.6,
+        "9.5% to 9.75%": 1.5,
+        "9.75% to 10.0%": 1.4,
+        "10.0% to 10.25%": 1.3,
+        "10.25% to 10.5%": 1.2,
+        "10.5% or more": 1.1
       },
       "benefitEqualizationFactorNote": "A THIRD table exists (5 account-percentage bands x 11 average-quarterly-payroll-dollar ranges, values from 0.000% to 0.925%) that adjusts rates for newer employers specifically -- per DOL's own description, applies 'from the fifth quarter through the twenty-first quarter of liability, if the account is positive,' to give new employers 'an equal opportunity with established employers to earn rate reductions.' Fetched and parsed in full but NOT transcribed cell-by-cell here (narrower applicability -- only affects a specific employer-tenure window -- and this file's core UI figures are already far more complete than before this pass); its existence and mechanism are disclosed rather than silently omitted, and the raw data is available from the same dol.ny.gov/employer-contribution-rate-table source if ever needed."
     },
     "trustFundContext": "DOL's own page: the NYS fiscal year 2026 Budget 'committed to pay off the state's Unemployment Insurance (UI) loan and achieve solvency in the federal UI Trust Fund,' saving employers 'an average of $100 per employee in 2026 and $250 per employee in 2027.' The same legislation that raised the wage base to $17,600 also lowered 2026 contribution rates from what they'd otherwise have been -- both changes are part of one solvency package, not independent policy choices.",
     "sources": [
-      { "title": "DOL -- Unemployment Insurance Rate Information", "url": "https://dol.ny.gov/unemployment-insurance-rate-information", "verifiedOn": "2026-08-16", "verifiedBy": "Raw HTML fetched via curl and stripped by hand, not an AI-summarization tool, after repeated summarized fetches of this exact page gave inconsistent numbers." },
-      { "title": "DOL -- Calculating an Employer's UI Contribution Rate", "url": "https://dol.ny.gov/calculating-employers-ui-contribution-rate", "verifiedOn": "2026-08-16", "verifiedBy": "Same raw-HTML method." },
-      { "title": "Instructions for Form NYS-45 (tax.ny.gov)", "url": "https://www.tax.ny.gov/pdf/current_forms/wt/nys45i.pdf", "verifiedOn": "2026-08-16", "verifiedBy": "Downloaded and text-extracted directly." },
-      { "title": "DOL -- Employer Contribution Rate Table", "url": "https://dol.ny.gov/employer-contribution-rate-table", "verifiedOn": "2026-08-16", "verifiedBy": "Raw HTML fetched via curl; the actual <table> elements were parsed directly (row/cell structure preserved) rather than flattened to plain text, since this table's meaning depends entirely on which row/column intersection applies -- flattening would have lost that. Source for subsidiaryRateSchedule2026 above." }
+      {
+        "title": "DOL -- Unemployment Insurance Rate Information",
+        "url": "https://dol.ny.gov/unemployment-insurance-rate-information",
+        "verifiedOn": "2026-08-16",
+        "verifiedBy": "Raw HTML fetched via curl and stripped by hand, not an AI-summarization tool, after repeated summarized fetches of this exact page gave inconsistent numbers."
+      },
+      {
+        "title": "DOL -- Calculating an Employer's UI Contribution Rate",
+        "url": "https://dol.ny.gov/calculating-employers-ui-contribution-rate",
+        "verifiedOn": "2026-08-16",
+        "verifiedBy": "Same raw-HTML method."
+      },
+      {
+        "title": "Instructions for Form NYS-45 (tax.ny.gov)",
+        "url": "https://www.tax.ny.gov/pdf/current_forms/wt/nys45i.pdf",
+        "verifiedOn": "2026-08-16",
+        "verifiedBy": "Downloaded and text-extracted directly."
+      },
+      {
+        "title": "DOL -- Employer Contribution Rate Table",
+        "url": "https://dol.ny.gov/employer-contribution-rate-table",
+        "verifiedOn": "2026-08-16",
+        "verifiedBy": "Raw HTML fetched via curl; the actual <table> elements were parsed directly (row/cell structure preserved) rather than flattened to plain text, since this table's meaning depends entirely on which row/column intersection applies -- flattening would have lost that. Source for subsidiaryRateSchedule2026 above."
+      }
     ],
     "knownGap": "Wage base and all 2026 rate figures are now primary-confirmed, including reconciling a genuine conflict between two sources both claiming to quote the same NYS-45 instructions, AND the full subsidiary rate schedule (both Negative and Positive Account Percentage tables, 62 rate-class rows total for the active 2026 Size-of-Fund-Index column) is now transcribed -- see subsidiaryRateSchedule2026. One honest gap remains: how the normal rate, subsidiary rate, and Benefit Equalization Factor combine into one final total rate for an EXPERIENCED (non-new) employer wasn't fully reconciled against the earlier bookend total figures -- see subsidiaryRateSchedule2026.unreconciledGap. Even fully complete, none of this is consumable by the engine -- no per-employer experience-rating (account percentage, Size of Fund Index) or new-vs-established-employer classification input exists anywhere in this project, the same structural gap as every other state's employer SUTA/UI here."
   },
@@ -1297,16 +1870,50 @@
     "rates2026": {
       "note": "For calendar quarters beginning on or after 2025-07-01 (i.e. all of 2026) -- rates changed mid-2025, the 2026 figures below are the CURRENT ones, not the pre-2025-07-01 table also shown on the source page.",
       "zone1": [
-        { "from": 0, "to": 375000, "rate": 0.00055 },
-        { "from": 375000, "to": 437500, "rate": 0.00115 },
-        { "from": 437500, "to": 2500000, "rate": 0.0060 },
-        { "from": 2500000, "to": null, "rate": 0.00895, "note": "Local government employers are capped at 0.60% here instead, per the source's own carve-out." }
+        {
+          "from": 0,
+          "to": 375000,
+          "rate": 0.00055
+        },
+        {
+          "from": 375000,
+          "to": 437500,
+          "rate": 0.00115
+        },
+        {
+          "from": 437500,
+          "to": 2500000,
+          "rate": 0.006
+        },
+        {
+          "from": 2500000,
+          "to": null,
+          "rate": 0.00895,
+          "note": "Local government employers are capped at 0.60% here instead, per the source's own carve-out."
+        }
       ],
       "zone2": [
-        { "from": 0, "to": 375000, "rate": 0.00055 },
-        { "from": 375000, "to": 437500, "rate": 0.00115 },
-        { "from": 437500, "to": 2500000, "rate": 0.0034 },
-        { "from": 2500000, "to": null, "rate": 0.00635, "note": "Local government employers in Zone 2 are not subject to MCTMT at all, per the source's own carve-out." }
+        {
+          "from": 0,
+          "to": 375000,
+          "rate": 0.00055
+        },
+        {
+          "from": 375000,
+          "to": 437500,
+          "rate": 0.00115
+        },
+        {
+          "from": 437500,
+          "to": 2500000,
+          "rate": 0.0034
+        },
+        {
+          "from": 2500000,
+          "to": null,
+          "rate": 0.00635,
+          "note": "Local government employers in Zone 2 are not subject to MCTMT at all, per the source's own carve-out."
+        }
       ]
     },
     "calculationMethod": "Each zone's payroll expense is run through that zone's OWN bracket table independently (each zone effectively gets its own tiered/marginal calculation, not one combined bracket) and the two zone amounts are SUMMED for the quarter's total liability. Verified against the source's own worked example: $450,000 Zone 1 + $200,000 Zone 2 payroll expense -> ($450,000 x 0.60%) + ($200,000 x 0.055%) = $2,700 + $110 = $2,810, matching the source's stated $2,810 exactly.",
@@ -1336,7 +1943,8 @@
     "yonkersNonresidentWorker has no certificate field on IT-2104 at all -- it's an employer-determined fact about work location, not something the employee's own withholding certificate captures, the same category of gap as every other work-location determination this engine currently trusts the caller to resolve upstream.",
     "The recurring non-monotonic bracket-rate anomaly in NYS's OWN tables (a rate spike then drop-back near the top of every one of the 12 transcribed NYS schedules) remains unexplained -- NOT present in NYC's or Yonkers' tables (Yonkers reuses NYS's own tables directly, so it inherits the same anomaly, just scaled by 16.75%; NYC's own tables are smooth/monotonic throughout).",
     "Reciprocity confirmed (New York has none, with any state). Exemption counts above 10 extrapolate correctly for NYS, NYC, and (via the shared computeNYSStyleTax()) Yonkers residents. Nonresident alien handling is a CONFIRMED disclosed non-effect for ALL FOUR NY documents now (NYS-50-T-NYS, NYS-50-T-NYC, NYS-50-T-Y, and IT-2104 all searched directly for 'alien' -- zero mentions anywhere) -- Yonkers specifically was the one left unchecked before, now closed.",
-    "UNRESOLVED, disclosed rather than guessed: whether PFL's and DBL's own wage bases follow the SAME pretax exclusion list as NYS income tax withholding (exemptPretax, reused by both statePaidLeaveEmployeeTax() and stateDisabilityEmployeeTax() via ctx.taxableWagesFor()) was not independently confirmed. Found NY DOT Notice N-17-12 (fetched and read directly), which answers a RELATED but DIFFERENT question -- that PFL premiums themselves are deducted from 'employees' after-tax wages' (i.e. the premium isn't itself pretax-deductible from the employee's own income) -- not whether 401(k)/section-125 amounts are excluded from the wage BASE the 0.432%/0.5% rates apply TO. No primary source answering that specific question was found despite multiple targeted searches. This matters because Minnesota's own build in this project found a genuine case (UI wages explicitly NOT excluding 401(k)/cafeteria amounts, unlike income-tax withholding) where assuming parity between two different taxes' wage definitions would have been wrong -- the same risk exists here, unconfirmed either way."
+    "UNRESOLVED, disclosed rather than guessed: whether PFL's and DBL's own wage bases follow the SAME pretax exclusion list as NYS income tax withholding (exemptPretax, reused by both statePaidLeaveEmployeeTax() and stateDisabilityEmployeeTax() via ctx.taxableWagesFor()) was not independently confirmed. Found NY DOT Notice N-17-12 (fetched and read directly), which answers a RELATED but DIFFERENT question -- that PFL premiums themselves are deducted from 'employees' after-tax wages' (i.e. the premium isn't itself pretax-deductible from the employee's own income) -- not whether 401(k)/section-125 amounts are excluded from the wage BASE the 0.432%/0.5% rates apply TO. No primary source answering that specific question was found despite multiple targeted searches. This matters because Minnesota's own build in this project found a genuine case (UI wages explicitly NOT excluding 401(k)/cafeteria amounts, unlike income-tax withholding) where assuming parity between two different taxes' wage definitions would have been wrong -- the same risk exists here, unconfirmed either way.",
+    "RESOLVED: household-employee withholding is voluntary (NYS-50, quoted in this file's own voluntaryWithholdingEmploymentCategories block) -- wired via exemptEmploymentCategoryReason(), defaulting to $0 NY_SIT unless certificate.voluntaryWithholdingAgreement asserts an actual agreement is in place."
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
@@ -1355,5 +1963,13 @@
     "supported": true,
     "source": "NYS-50-T-NYS's stated alternative to the 11.70% flat rate: aggregate the supplemental payment with the most recent payroll period's regular wages and compute withholding on the total.",
     "engineNote": "Wired via aggregateWithPriorRegularPayment(): the caller supplies input.priorRegularPayment (that cheque's taxable wages and the state tax withheld from it), and a bonus paid on its own cheque is taxed on the combined figure less what was already withheld, floored at zero. Nothing changes when the caller omits it."
+  },
+  "voluntaryWithholdingEmploymentCategories": {
+    "$comment": "NYS-50 (Employer's Guide), Withholding information and instructions, quoted verbatim in this file's own knownGaps: \"Employers of household help -- Withholding income tax from wages paid to household employees is voluntary on your part. If you and your employee voluntarily agree, you may withhold for New York State income tax, New York City income tax, Yonkers resident tax surcharge, or Yonkers nonresident earnings tax, whichever may apply.\" Wired via exemptEmploymentCategoryReason() in src/taxes/state.ts: the default (no agreement asserted) is $0 NY_SIT, but certificate.voluntaryWithholdingAgreement = true flips it back to the ordinary formula — the only exemption mechanism in this project a caller can affirmatively switch back OFF rather than only ever switch on, matching the source's own \"if you and your employee voluntarily agree\" framing exactly.",
+    "categories": [
+      "household"
+    ],
+    "source": "NYS-50, Withholding information and instructions, \"Employers of household help.\"",
+    "confidence": "primary_source_confirmed"
   }
 }
