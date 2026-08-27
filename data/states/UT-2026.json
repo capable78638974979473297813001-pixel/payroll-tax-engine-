@@ -26,24 +26,96 @@
       "rate": 0.045,
       "phaseOutRate": 0.013,
       "baseAllowance": {
-        "single": { "weekly": 9, "biweekly": 17, "semimonthly": 19, "monthly": 38, "quarterly": 113, "semiannual": 225, "annual": 450, "daily": 2 },
-        "married": { "weekly": 17, "biweekly": 35, "semimonthly": 38, "monthly": 75, "quarterly": 225, "semiannual": 450, "annual": 900, "daily": 3 }
+        "single": {
+          "weekly": 9,
+          "biweekly": 17,
+          "semimonthly": 19,
+          "monthly": 38,
+          "quarterly": 113,
+          "semiannual": 225,
+          "annual": 450,
+          "daily": 2
+        },
+        "married": {
+          "weekly": 17,
+          "biweekly": 35,
+          "semimonthly": 38,
+          "monthly": 75,
+          "quarterly": 225,
+          "semiannual": 450,
+          "annual": 900,
+          "daily": 3
+        }
       },
       "phaseOutThreshold": {
-        "single": { "weekly": 175, "biweekly": 350, "semimonthly": 379, "monthly": 759, "quarterly": 2277, "semiannual": 4554, "annual": 9107, "daily": 35 },
-        "married": { "weekly": 350, "biweekly": 701, "semimonthly": 759, "monthly": 1518, "quarterly": 4553, "semiannual": 9107, "annual": 18213, "daily": 70 }
+        "single": {
+          "weekly": 175,
+          "biweekly": 350,
+          "semimonthly": 379,
+          "monthly": 759,
+          "quarterly": 2277,
+          "semiannual": 4554,
+          "annual": 9107,
+          "daily": 35
+        },
+        "married": {
+          "weekly": 350,
+          "biweekly": 701,
+          "semimonthly": 759,
+          "monthly": 1518,
+          "quarterly": 4553,
+          "semiannual": 9107,
+          "annual": 18213,
+          "daily": 70
+        }
       }
     },
     "fromJune2026": {
       "rate": 0.0445,
       "phaseOutRate": 0.013,
       "baseAllowance": {
-        "single": { "weekly": 9, "biweekly": 19, "semimonthly": 20, "monthly": 40, "quarterly": 121, "semiannual": 243, "annual": 485, "daily": 2 },
-        "married": { "weekly": 19, "biweekly": 37, "semimonthly": 40, "monthly": 81, "quarterly": 243, "semiannual": 485, "annual": 970, "daily": 4 }
+        "single": {
+          "weekly": 9,
+          "biweekly": 19,
+          "semimonthly": 20,
+          "monthly": 40,
+          "quarterly": 121,
+          "semiannual": 243,
+          "annual": 485,
+          "daily": 2
+        },
+        "married": {
+          "weekly": 19,
+          "biweekly": 37,
+          "semimonthly": 40,
+          "monthly": 81,
+          "quarterly": 243,
+          "semiannual": 485,
+          "annual": 970,
+          "daily": 4
+        }
       },
       "phaseOutThreshold": {
-        "single": { "weekly": 180, "biweekly": 360, "semimonthly": 390, "monthly": 779, "quarterly": 2337, "semiannual": 4674, "annual": 9348, "daily": 36 },
-        "married": { "weekly": 360, "biweekly": 719, "semimonthly": 779, "monthly": 1558, "quarterly": 4674, "semiannual": 9348, "annual": 18696, "daily": 72 },
+        "single": {
+          "weekly": 180,
+          "biweekly": 360,
+          "semimonthly": 390,
+          "monthly": 779,
+          "quarterly": 2337,
+          "semiannual": 4674,
+          "annual": 9348,
+          "daily": 36
+        },
+        "married": {
+          "weekly": 360,
+          "biweekly": 719,
+          "semimonthly": 779,
+          "monthly": 1558,
+          "quarterly": 4674,
+          "semiannual": 9348,
+          "annual": 18696,
+          "daily": 72
+        },
         "verifiedExample": "Example 5, quarterly/single/$9,000: line2=9000x4.45%=$400.50->$401, line3=$121, line4=9000-2337=6663, line5=6663x1.3%=$86.619->$87, line6=121-87=$34, line7=401-34=$367 -- matches Publication 14's own stated $367 exactly."
       }
     },
@@ -79,7 +151,10 @@
     "$comment": "Employer-only (SUI) -- no employee contribution.",
     "administeredBy": "Utah Department of Workforce Services",
     "wageBase": 50700.0,
-    "earnedRateRange": { "min": 0.001, "max": 0.071 },
+    "earnedRateRange": {
+      "min": 0.001,
+      "max": 0.071
+    },
     "newEmployerRate": null,
     "newEmployerRateNote": "CORRECTED on a verification pass -- the previously-recorded flat 1.1% figure was a secondary-source oversimplification and has been removed rather than left standing uncorrected. Utah's OWN Employer Handbook (jobs.utah.gov/ui/employer/Public/Handbook/Employer_Handbook.pdf, fetched and read directly) states plainly: 'As a new employer, your rate is based on an industry classification' -- there is no single flat new-employer rate the way Colorado's introductory rate table (also in this project) turned out to have real numbers for. The specific per-industry benefit-ratio table was not found this session; a caller needing a real new-employer figure would need Utah's own current-year industry rate table, not yet obtained.",
     "delinquentSurcharge": 0.01
@@ -88,7 +163,8 @@
   "knownGaps": [
     "RESOLVED (a later 'go to every state' pass): the pre-2026-06-01 formula is now modelled (beforeJune2026 above, fetched from an archived Publication 14 Rev. 4/25) and utahWithholding() dispatches on checkDate the same way Ohio's/Georgia's mid-year cuts do -- a checkDate before 2026-06-01 now correctly uses the OLD 4.5% table instead of silently applying the wrong one.",
     "UI is employer-only and not wired into calc code -- same structural gap as every other state's SUTA in this project. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
-    "No paid-family-leave or disability program exists in Utah as far as this session found -- correctly absent, not an oversight."
+    "No paid-family-leave or disability program exists in Utah as far as this session found -- correctly absent, not an oversight.",
+    "Supplemental wages: Publication 14 (Rev. 4/26, effective 2026-06-01) was fetched directly and read in full this pass -- the entire document contains ZERO mentions of \"bonus\" or \"supplemental\" anywhere. Some third-party payroll guides claim a separate Utah flat supplemental rate (a commonly cited figure is 4.65%) -- checked directly against the primary source and found NO SUCH RATE or mechanism in the current guide. A standalone bonus therefore runs through the same flat-rate-with-phaseout-allowance formula as any other wages, which is what this engine already does by default -- the same conclusion already reached for South Carolina and Louisiana/Oklahoma/Vermont in this project, each checked directly rather than assumed."
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",

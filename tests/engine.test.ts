@@ -4208,6 +4208,43 @@ describe('Kansas', () => {
     assert.equal(r.taxes.some((t) => t.id === 'KS_DBL_EE'), false);
     assert.equal(r.taxes.some((t) => t.id === 'KS_PFML_EE'), false);
   });
+
+  // KW-100's own supplemental-wages rule: 5% flat when the bonus is stated
+  // separately, mirroring whichever method the employer used federally.
+  describe('Supplemental wages (KW-100)', () => {
+    test("reproduces KW-100's own worked example: a standalone $1,000 bonus withholds exactly $50 (5%)", () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(1000) }],
+          ...ksState({ allowanceRate: 'single', personalAllowances: 0 }),
+        }),
+      );
+      assert.equal(amountOf(r, 'KS_SIT_SUPP'), dollars(50.0));
+    });
+
+    test('a bonus paid alongside regular wages is combined and taxed through the ordinary formula instead', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [
+            { code: 'REG', category: 'regular', amount: dollars(1000) },
+            { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+          ],
+          ...ksState({ allowanceRate: 'single', personalAllowances: 0 }),
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'KS_SIT_SUPP'), false);
+      const combined = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+          ...ksState({ allowanceRate: 'single', personalAllowances: 0 }),
+        }),
+      );
+      assert.equal(amountOf(r, 'KS_SIT'), amountOf(combined, 'KS_SIT'));
+    });
+  });
 });
 
 describe('New Hampshire', () => {
@@ -7622,6 +7659,42 @@ describe('Mississippi', () => {
     );
     assert.equal(amountOf(r, 'MS_SIT'), dollars(5));
   });
+
+  // Pub 89-700 Section 9's own supplemental-wages rule: aggregate with the
+  // current or last-preceding payroll period, no separate flat rate.
+  test('a standalone bonus aggregated with the prior regular payment equals tax-on-combined minus tax-already-withheld', () => {
+    const regularOnly = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...msState({ filingStatus: 'single', totalExemptionClaimed: 0 }),
+      }),
+    );
+    const regularTax = amountOf(regularOnly, 'MS_SIT');
+
+    const withAggregation = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(3000) }],
+        ...msState({ filingStatus: 'single', totalExemptionClaimed: 0 }),
+        priorRegularPayment: { taxableWages: dollars(2000), stateIncomeTaxWithheld: regularTax },
+      }),
+    );
+
+    const combinedAsOneCheque = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+        ...msState({ filingStatus: 'single', totalExemptionClaimed: 0 }),
+      }),
+    );
+    const expectedMarginal = amountOf(combinedAsOneCheque, 'MS_SIT') - regularTax;
+
+    assert.equal(amountOf(withAggregation, 'MS_SIT'), expectedMarginal);
+  });
 });
 
 describe('Texas', () => {
@@ -7958,6 +8031,42 @@ describe('Hawaii', () => {
       }),
     );
     assert.equal(amountOf(r, 'HI_DBL_EE'), dollars(7.5)); // would be $25 uncapped
+  });
+
+  // Booklet A Section 14(e)'s own supplemental-wages rule: aggregate with
+  // the current or last-preceding payroll period, no separate flat rate.
+  test('a standalone bonus aggregated with the prior regular payment equals tax-on-combined minus tax-already-withheld', () => {
+    const regularOnly = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ...hiState({ hawaiiMaritalStatus: 'single', allowances: 1 }),
+      }),
+    );
+    const regularTax = amountOf(regularOnly, 'HI_SIT');
+
+    const withAggregation = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(3000) }],
+        ...hiState({ hawaiiMaritalStatus: 'single', allowances: 1 }),
+        priorRegularPayment: { taxableWages: dollars(2000), stateIncomeTaxWithheld: regularTax },
+      }),
+    );
+
+    const combinedAsOneCheque = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+        ...hiState({ hawaiiMaritalStatus: 'single', allowances: 1 }),
+      }),
+    );
+    const expectedMarginal = amountOf(combinedAsOneCheque, 'HI_SIT') - regularTax;
+
+    assert.equal(amountOf(withAggregation, 'HI_SIT'), expectedMarginal);
   });
 });
 

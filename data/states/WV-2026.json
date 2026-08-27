@@ -34,103 +34,413 @@
       "url": "https://workforcewv.org/businesses/unemployment-tax-information/",
       "verifiedOn": "2026-08-20",
       "verifiedBy": "Direct fetch attempted; workforcewv.org's own page is a navigation hub with no rate figures inline (rates are gated behind the online employer contribution system, not published on a static page). Wage base ($9,500, unchanged for several years) and new-employer rate (2.7%) rest on consistent secondary-source agreement, not a direct government figure this pass -- a genuine access limitation, not an under-effort, same class of gap as this project's New Hampshire file."
+    },
+    {
+      "title": "WV State Tax Division -- Withholding Help and General Information page, \"Supplemental Wages\" guidance",
+      "url": "https://tax.wv.gov/Business/Withholding/HelpAndGeneralInformation/Pages/WithholdingHelpAndGeneralInformation.aspx",
+      "verifiedOn": "2026-08-27",
+      "verifiedBy": "Fetched directly for the 'find and fix anything missing across all 50 states' pass. The page describes a MARGINAL-AMOUNT method: annualize standard (regular) pay to get a base annual figure and its tax, separately annualize standard pay plus the bonus and get its tax, and withhold the difference — its own worked example: a biweekly $2,000 earner ($52,000 standard annual) receiving a $5,000 bonus withholds the bonus at 4.82%. Attempted to wire this via the existing aggregateWithPriorRegularPayment() mechanism (combine this cheque's bonus with a caller-supplied prior regular payment, tax the combined PERIOD total through the ordinary two-table formula, subtract tax already withheld on the regular portion) — but WV's own IT-100.2A tables are published PER-PERIOD with no annual table at all (this file's own withholdingStructure.brackets.$comment already establishes that), so combining $2,000 + $5,000 = $7,000 and running it through the BIWEEKLY table is a PERIOD-level aggregate, not the ANNUAL-level marginal calculation the help page's own prose describes. Testing this against the page's own $2,000/$5,000 example produced 4.58%, not the stated 4.82% — a real, unresolved discrepancy, not a rounding artifact of the kind already documented for California's Examples E/F. NOT wired this pass rather than shipped unverified; see knownGaps."
     }
   ],
   "withholdingStructure": {
     "mechanism": "Subtract a flat per-period dollar amount PER EXEMPTION CLAIMED (WV/IT-104's own count: 1 for self if claimed, up to 2 for married if not claimed elsewhere, plus 1 per dependent) from gross wages, then look up the result in one of TWO 5-bracket progressive tables -- selection is NOT based on marital status directly, but on an employee ELECTION (IT-104 Line 5): the 'Two Earner/Two or More Jobs' table applies by DEFAULT (i.e. whenever Line 5 is unchecked, regardless of actual marital status), and has LOWER bracket thresholds (withholds MORE); checking Line 5 (available only to Single/HoH/married-with-nonemployed-spouse employees on ONE job) switches to the 'Optional One Earner/One Job' table, which has thresholds exactly 4/3 (=1.3333...) times the two-earner table's at every tier and withholds LESS. This selection mechanic -- an employee opt-IN to a lower-withholding table, defaulting to the higher one -- is structurally different from every other state built in this project (all of which select a table by declared filing status, not by an earner-count election).",
     "exemptionAmountByPeriod": {
-      "weekly": 38.46, "biweekly": 76.92, "semimonthly": 83.33, "monthly": 166.67,
-      "annual": 2000.0, "daily": 7.66
+      "weekly": 38.46,
+      "biweekly": 76.92,
+      "semimonthly": 83.33,
+      "monthly": 166.67,
+      "annual": 2000.0,
+      "daily": 7.66
     },
     "exemptionAmountNote": "Identical across BOTH the two-earner and one-earner tables -- only the bracket thresholds/bases differ, not the per-exemption subtraction.",
     "brackets": {
       "$comment": "All 12 tables (6 periods x 2 earner types) transcribed directly from IT-100.2A (March 2026 revision, re-fetched 2026-08-21) -- these are the source's OWN independently-published per-period tables, not derived from the annual one. Dispatch (westVirginiaWithholding() in src/taxes/state.ts) looks up the table matching input.payFrequency directly; no annualize-then-divide step exists for WV.",
       "twoEarnerOrTwoJobs_default": {
         "weekly": [
-          { "from": 0, "to": 144, "base": 0, "rate": 0.0211 },
-          { "from": 144, "to": 361, "base": 3.04, "rate": 0.0281 },
-          { "from": 361, "to": 577, "base": 9.13, "rate": 0.0316 },
-          { "from": 577, "to": 866, "base": 15.95, "rate": 0.0422 },
-          { "from": 866, "to": null, "base": 28.14, "rate": 0.0458 }
+          {
+            "from": 0,
+            "to": 144,
+            "base": 0,
+            "rate": 0.0211
+          },
+          {
+            "from": 144,
+            "to": 361,
+            "base": 3.04,
+            "rate": 0.0281
+          },
+          {
+            "from": 361,
+            "to": 577,
+            "base": 9.13,
+            "rate": 0.0316
+          },
+          {
+            "from": 577,
+            "to": 866,
+            "base": 15.95,
+            "rate": 0.0422
+          },
+          {
+            "from": 866,
+            "to": null,
+            "base": 28.14,
+            "rate": 0.0458
+          }
         ],
         "biweekly": [
-          { "from": 0, "to": 289, "base": 0, "rate": 0.0211 },
-          { "from": 289, "to": 722, "base": 6.09, "rate": 0.0281 },
-          { "from": 722, "to": 1154, "base": 18.25, "rate": 0.0316 },
-          { "from": 1154, "to": 1731, "base": 31.90, "rate": 0.0422 },
-          { "from": 1731, "to": null, "base": 56.27, "rate": 0.0458 }
+          {
+            "from": 0,
+            "to": 289,
+            "base": 0,
+            "rate": 0.0211
+          },
+          {
+            "from": 289,
+            "to": 722,
+            "base": 6.09,
+            "rate": 0.0281
+          },
+          {
+            "from": 722,
+            "to": 1154,
+            "base": 18.25,
+            "rate": 0.0316
+          },
+          {
+            "from": 1154,
+            "to": 1731,
+            "base": 31.9,
+            "rate": 0.0422
+          },
+          {
+            "from": 1731,
+            "to": null,
+            "base": 56.27,
+            "rate": 0.0458
+          }
         ],
         "semimonthly": [
-          { "from": 0, "to": 313, "base": 0, "rate": 0.0211 },
-          { "from": 313, "to": 782, "base": 6.60, "rate": 0.0281 },
-          { "from": 782, "to": 1250, "base": 19.77, "rate": 0.0316 },
-          { "from": 1250, "to": 1875, "base": 34.58, "rate": 0.0422 },
-          { "from": 1875, "to": null, "base": 60.95, "rate": 0.0458 }
+          {
+            "from": 0,
+            "to": 313,
+            "base": 0,
+            "rate": 0.0211
+          },
+          {
+            "from": 313,
+            "to": 782,
+            "base": 6.6,
+            "rate": 0.0281
+          },
+          {
+            "from": 782,
+            "to": 1250,
+            "base": 19.77,
+            "rate": 0.0316
+          },
+          {
+            "from": 1250,
+            "to": 1875,
+            "base": 34.58,
+            "rate": 0.0422
+          },
+          {
+            "from": 1875,
+            "to": null,
+            "base": 60.95,
+            "rate": 0.0458
+          }
         ],
         "monthly": [
-          { "from": 0, "to": 625, "base": 0, "rate": 0.0211 },
-          { "from": 625, "to": 1562, "base": 13.18, "rate": 0.0281 },
-          { "from": 1562, "to": 2500, "base": 39.53, "rate": 0.0316 },
-          { "from": 2500, "to": 3750, "base": 69.15, "rate": 0.0422 },
-          { "from": 3750, "to": null, "base": 121.91, "rate": 0.0458 }
+          {
+            "from": 0,
+            "to": 625,
+            "base": 0,
+            "rate": 0.0211
+          },
+          {
+            "from": 625,
+            "to": 1562,
+            "base": 13.18,
+            "rate": 0.0281
+          },
+          {
+            "from": 1562,
+            "to": 2500,
+            "base": 39.53,
+            "rate": 0.0316
+          },
+          {
+            "from": 2500,
+            "to": 3750,
+            "base": 69.15,
+            "rate": 0.0422
+          },
+          {
+            "from": 3750,
+            "to": null,
+            "base": 121.91,
+            "rate": 0.0458
+          }
         ],
         "annual": [
-          { "from": 0, "to": 7500, "base": 0, "rate": 0.0211 },
-          { "from": 7500, "to": 18750, "base": 158.25, "rate": 0.0281 },
-          { "from": 18750, "to": 30000, "base": 474.38, "rate": 0.0316 },
-          { "from": 30000, "to": 45000, "base": 829.88, "rate": 0.0422 },
-          { "from": 45000, "to": null, "base": 1462.88, "rate": 0.0458 }
+          {
+            "from": 0,
+            "to": 7500,
+            "base": 0,
+            "rate": 0.0211
+          },
+          {
+            "from": 7500,
+            "to": 18750,
+            "base": 158.25,
+            "rate": 0.0281
+          },
+          {
+            "from": 18750,
+            "to": 30000,
+            "base": 474.38,
+            "rate": 0.0316
+          },
+          {
+            "from": 30000,
+            "to": 45000,
+            "base": 829.88,
+            "rate": 0.0422
+          },
+          {
+            "from": 45000,
+            "to": null,
+            "base": 1462.88,
+            "rate": 0.0458
+          }
         ],
         "daily": [
-          { "from": 0, "to": 29, "base": 0, "rate": 0.0211 },
-          { "from": 29, "to": 72, "base": 0.60, "rate": 0.0281 },
-          { "from": 72, "to": 115, "base": 1.82, "rate": 0.0316 },
-          { "from": 115, "to": 173, "base": 3.17, "rate": 0.0422 },
-          { "from": 173, "to": null, "base": 5.61, "rate": 0.0458 }
+          {
+            "from": 0,
+            "to": 29,
+            "base": 0,
+            "rate": 0.0211
+          },
+          {
+            "from": 29,
+            "to": 72,
+            "base": 0.6,
+            "rate": 0.0281
+          },
+          {
+            "from": 72,
+            "to": 115,
+            "base": 1.82,
+            "rate": 0.0316
+          },
+          {
+            "from": 115,
+            "to": 173,
+            "base": 3.17,
+            "rate": 0.0422
+          },
+          {
+            "from": 173,
+            "to": null,
+            "base": 5.61,
+            "rate": 0.0458
+          }
         ]
       },
       "oneEarnerOneJob_electedViaLine5": {
         "weekly": [
-          { "from": 0, "to": 192, "base": 0, "rate": 0.0211 },
-          { "from": 192, "to": 481, "base": 4.05, "rate": 0.0281 },
-          { "from": 481, "to": 769, "base": 12.17, "rate": 0.0316 },
-          { "from": 769, "to": 1154, "base": 21.27, "rate": 0.0422 },
-          { "from": 1154, "to": null, "base": 37.52, "rate": 0.0458 }
+          {
+            "from": 0,
+            "to": 192,
+            "base": 0,
+            "rate": 0.0211
+          },
+          {
+            "from": 192,
+            "to": 481,
+            "base": 4.05,
+            "rate": 0.0281
+          },
+          {
+            "from": 481,
+            "to": 769,
+            "base": 12.17,
+            "rate": 0.0316
+          },
+          {
+            "from": 769,
+            "to": 1154,
+            "base": 21.27,
+            "rate": 0.0422
+          },
+          {
+            "from": 1154,
+            "to": null,
+            "base": 37.52,
+            "rate": 0.0458
+          }
         ],
         "biweekly": [
-          { "from": 0, "to": 385, "base": 0, "rate": 0.0211 },
-          { "from": 385, "to": 962, "base": 8.12, "rate": 0.0281 },
-          { "from": 962, "to": 1538, "base": 24.34, "rate": 0.0316 },
-          { "from": 1538, "to": 2308, "base": 42.54, "rate": 0.0422 },
-          { "from": 2308, "to": null, "base": 75.03, "rate": 0.0458 }
+          {
+            "from": 0,
+            "to": 385,
+            "base": 0,
+            "rate": 0.0211
+          },
+          {
+            "from": 385,
+            "to": 962,
+            "base": 8.12,
+            "rate": 0.0281
+          },
+          {
+            "from": 962,
+            "to": 1538,
+            "base": 24.34,
+            "rate": 0.0316
+          },
+          {
+            "from": 1538,
+            "to": 2308,
+            "base": 42.54,
+            "rate": 0.0422
+          },
+          {
+            "from": 2308,
+            "to": null,
+            "base": 75.03,
+            "rate": 0.0458
+          }
         ],
         "semimonthly": [
-          { "from": 0, "to": 417, "base": 0, "rate": 0.0211 },
-          { "from": 417, "to": 1042, "base": 8.80, "rate": 0.0281 },
-          { "from": 1042, "to": 1667, "base": 26.36, "rate": 0.0316 },
-          { "from": 1667, "to": 2500, "base": 46.11, "rate": 0.0422 },
-          { "from": 2500, "to": null, "base": 81.26, "rate": 0.0458 }
+          {
+            "from": 0,
+            "to": 417,
+            "base": 0,
+            "rate": 0.0211
+          },
+          {
+            "from": 417,
+            "to": 1042,
+            "base": 8.8,
+            "rate": 0.0281
+          },
+          {
+            "from": 1042,
+            "to": 1667,
+            "base": 26.36,
+            "rate": 0.0316
+          },
+          {
+            "from": 1667,
+            "to": 2500,
+            "base": 46.11,
+            "rate": 0.0422
+          },
+          {
+            "from": 2500,
+            "to": null,
+            "base": 81.26,
+            "rate": 0.0458
+          }
         ],
         "monthly": [
-          { "from": 0, "to": 833, "base": 0, "rate": 0.0211 },
-          { "from": 833, "to": 2083, "base": 17.58, "rate": 0.0281 },
-          { "from": 2083, "to": 3333, "base": 52.70, "rate": 0.0316 },
-          { "from": 3333, "to": 5000, "base": 92.20, "rate": 0.0422 },
-          { "from": 5000, "to": null, "base": 162.55, "rate": 0.0458 }
+          {
+            "from": 0,
+            "to": 833,
+            "base": 0,
+            "rate": 0.0211
+          },
+          {
+            "from": 833,
+            "to": 2083,
+            "base": 17.58,
+            "rate": 0.0281
+          },
+          {
+            "from": 2083,
+            "to": 3333,
+            "base": 52.7,
+            "rate": 0.0316
+          },
+          {
+            "from": 3333,
+            "to": 5000,
+            "base": 92.2,
+            "rate": 0.0422
+          },
+          {
+            "from": 5000,
+            "to": null,
+            "base": 162.55,
+            "rate": 0.0458
+          }
         ],
         "annual": [
-          { "from": 0, "to": 10000, "base": 0, "rate": 0.0211 },
-          { "from": 10000, "to": 25000, "base": 211.0, "rate": 0.0281 },
-          { "from": 25000, "to": 40000, "base": 632.5, "rate": 0.0316 },
-          { "from": 40000, "to": 60000, "base": 1106.5, "rate": 0.0422 },
-          { "from": 60000, "to": null, "base": 1950.5, "rate": 0.0458 }
+          {
+            "from": 0,
+            "to": 10000,
+            "base": 0,
+            "rate": 0.0211
+          },
+          {
+            "from": 10000,
+            "to": 25000,
+            "base": 211.0,
+            "rate": 0.0281
+          },
+          {
+            "from": 25000,
+            "to": 40000,
+            "base": 632.5,
+            "rate": 0.0316
+          },
+          {
+            "from": 40000,
+            "to": 60000,
+            "base": 1106.5,
+            "rate": 0.0422
+          },
+          {
+            "from": 60000,
+            "to": null,
+            "base": 1950.5,
+            "rate": 0.0458
+          }
         ],
         "daily": [
-          { "from": 0, "to": 38, "base": 0, "rate": 0.0211 },
-          { "from": 38, "to": 96, "base": 0.80, "rate": 0.0281 },
-          { "from": 96, "to": 153, "base": 2.43, "rate": 0.0316 },
-          { "from": 153, "to": 230, "base": 4.23, "rate": 0.0422 },
-          { "from": 230, "to": null, "base": 7.48, "rate": 0.0458 }
+          {
+            "from": 0,
+            "to": 38,
+            "base": 0,
+            "rate": 0.0211
+          },
+          {
+            "from": 38,
+            "to": 96,
+            "base": 0.8,
+            "rate": 0.0281
+          },
+          {
+            "from": 96,
+            "to": 153,
+            "base": 2.43,
+            "rate": 0.0316
+          },
+          {
+            "from": 153,
+            "to": 230,
+            "base": 4.23,
+            "rate": 0.0422
+          },
+          {
+            "from": 230,
+            "to": null,
+            "base": 7.48,
+            "rate": 0.0458
+          }
         ]
       },
       "note": "Both tables' per-period boundaries are INDEPENDENTLY published, not derived from the annual figure -- verified this pass by direct comparison: annual $7,500/52 = $144.23, but the source's own weekly boundary is $144 flat (a real, if small, divergence). Every cell above transcribed directly from the re-fetched March 2026 PDF, not scaled from the annual table -- closes this file's own previously-disclosed 'not cell-by-cell verified' gap outright rather than accepting the risk."
@@ -138,7 +448,13 @@
     "noCertificateDefault": "WV/IT-104's own instructions don't state an explicit no-form default the way Kansas's KW-100 or Delaware's regulation text do; by this project's standing convention, absent a certificate the safer assumption is 0 exemptions and the higher-withholding two-earner table (not independently confirmed against a WV-specific statement this pass -- flagged as inferred, not sourced)."
   },
   "reciprocity": {
-    "reciprocalStates": ["KY", "MD", "OH", "PA", "VA"],
+    "reciprocalStates": [
+      "KY",
+      "MD",
+      "OH",
+      "PA",
+      "VA"
+    ],
     "mechanism": "Form WV/IT-104NR (the reverse side of IT-104), filed by the employee with the employer.",
     "rule": "A resident of Kentucky, Maryland, Ohio, Pennsylvania, or Virginia whose ONLY West Virginia-source income is wages/salary is fully exempt from WV withholding -- confirmed by direct quote from IT-104NR's own text: 'you are exempt from West Virginia Personal Income Tax Withholding.' Also covers military spouses under the Military Spouses Residency Relief Act via the same form.",
     "confidence": "primary_source_confirmed -- read directly off the actual certificate form, the strongest sourcing tier this project uses for a reciprocity claim (same tier as Ohio's IT 4NR, Kansas's KW-100 worked example). This is the LARGEST reciprocity cluster of any state in this project so far (5 states, vs. Wisconsin's/Michigan's/Ohio's 4-6 but WV's is unusual for a Mid-Atlantic-adjacent state) -- notably RECIPROCAL WITH VIRGINIA, which should be cross-checked against Virginia's OWN reciprocity list when VA is built (a natural consistency check, same pattern as this project's WI/MI/IL/IN five-state cross-check)."
@@ -147,8 +463,15 @@
     "administeredBy": "WorkForce West Virginia",
     "wageBase": 9500.0,
     "newEmployerRate": 0.027,
-    "experiencedEmployerRateRange": [0.015, 0.085],
-    "outOfStateConstructionRate": { "rate": 0.085, "surtax": 0.01, "note": "1% surtax on top of the 8.5% base for out-of-state construction employers, per secondary sourcing." },
+    "experiencedEmployerRateRange": [
+      0.015,
+      0.085
+    ],
+    "outOfStateConstructionRate": {
+      "rate": 0.085,
+      "surtax": 0.01,
+      "note": "1% surtax on top of the 8.5% base for out-of-state construction employers, per secondary sourcing."
+    },
     "confidence": "cross_source_confirmed only -- workforcewv.org's own page gates the actual rate table behind an authenticated employer system, not a public static page; a direct fetch attempt confirmed this rather than assuming it. Wage base and new-employer rate are consistent across every secondary source checked with zero dissent."
   },
   "localIncomeTax": {
@@ -161,19 +484,41 @@
     "confidence": "cross_source_confirmed across multiple secondary payroll-industry sources with consistent figures for all 6 cities; Charleston's own official fee-overview document exists but was only linked, not independently read as inline text. Parkersburg's fee page and Weirton's rate-increase news coverage WERE fetched and read directly this pass. NOT an exhaustive list of every WV municipality with a service fee -- 6 of an unknown total were captured (up from 4), the same disclosed-partial-coverage convention this project used for Ohio's initial 3-city local pass before the full 679-municipality bulk load. No statewide aggregator was found for this fee (each city sets and administers its own, confirmed by a dedicated search this pass finding no centralized list).",
     "knownGap": "WIRED (2026-08-24 pass, right after Denver's OPT): westVirginiaMunicipalServiceFee() in src/taxes/state.ts, gated on certificate.locality the same way Newark's/Denver's/Missouri's local taxes are. Genuinely new calc-code shape as this note originally said (flat per-week fee, not a wage percentage) -- NOT a reuse of Newark's percentage mechanism. Per-period conversion (weeklyRate x 52 / periodsPerYear, rounded down like PA's LST) is an INFERRED convention, not verbatim from any of the 6 cities' own sources, since none of them state a per-pay-period breakdown -- disclosed as an assumption, not confirmed. Still NOT modelled: Weirton's mid-2026 rate change has no effective-dating mechanism (same class of gap Ohio's HB96 had before midYearEffectiveDating existed -- this file only carries the current $5.00 figure, correct for any check date on/after ~2026-05-14 and WRONG for one before it); Wheeling's 30-consecutive-day threshold before the fee attaches (this engine has no employment-duration input, so every duty-station-in-Wheeling case is treated as already past the threshold); and the multi-job dedup rule (same class of un-modelled multi-employer coordination as Newark's TD269-style cases elsewhere in this project).",
     "serviceFeeCities": {
-      "Charleston": { "weeklyRate": 2.5 },
-      "Huntington": { "weeklyRate": 5.0 },
-      "Morgantown": { "weeklyRate": 3.0 },
-      "Parkersburg": { "weeklyRate": 2.5 },
-      "Wheeling": { "weeklyRate": 2.0 },
-      "Weirton": { "weeklyRate": 5.0 }
+      "Charleston": {
+        "weeklyRate": 2.5
+      },
+      "Huntington": {
+        "weeklyRate": 5.0
+      },
+      "Morgantown": {
+        "weeklyRate": 3.0
+      },
+      "Parkersburg": {
+        "weeklyRate": 2.5
+      },
+      "Wheeling": {
+        "weeklyRate": 2.0
+      },
+      "Weirton": {
+        "weeklyRate": 5.0
+      }
     }
   },
   "paidLeave": {
     "rule": "NONE for the private sector. West Virginia has no state-funded mandatory or voluntary Paid Family/Medical Leave program for private employers. SB 114 (2026 Regular Session) created only a narrow 2-year Paid Parental Leave PILOT PROGRAM for STATE EMPLOYEES (up to 12 weeks, birth/adoption/foster placement of a child under 12) -- out of scope for a general private-sector payroll engine, the same convention this project uses for public-employee-only programs.",
     "confidence": "cross_source_confirmed."
   },
-  "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
+  "exemptPretax": [
+    "section125",
+    "hsa",
+    "fsa",
+    "dependent_care",
+    "deferral_401k",
+    "deferral_403b",
+    "deferral_457",
+    "deferral_simple",
+    "commuter"
+  ],
   "exemptPretaxComment": "RESOLVED this pass (was previously an open item with no array value at all, which broke the engine outright the moment WV got wired to calc-code -- ctx.taxableWagesFor() requires an array). Confirmed via W. Va. Code R. sec. 110-21-12 and secondary corroboration: West Virginia adjusted gross income of a resident individual starts from 'federal adjusted gross income... with certain modifications' -- same FAGI-conformity structure as Virginia. 401(k)/125/HSA/etc. deferrals are already excluded from FAGI at the point of measurement, and no modification found adds them back. Same confidence tier as Virginia's (this pass) and Indiana's/Kentucky's list-read confirmation.",
   "knownGaps": [
     "WIRED to calc-code this pass (westVirginiaWithholding() in src/taxes/state.ts, method west_virginia_dual_table). Dispatches directly off input.payFrequency using the genuine per-period tables (no annualize/divide step) -- proven via 2 hand-derived tests in tests/engine.test.ts, describe('West Virginia'), one per earner-table.",
@@ -182,7 +527,9 @@
     "City Service Fee coverage is now a 6-city sample (Charleston/Huntington/Morgantown/Parkersburg/Wheeling/Weirton, up from 4 this pass), still not an exhaustive statewide enumeration of every WV municipality with WV Code 8-13-13 authority -- Ohio-style bulk-load-from-a-state-aggregator was not attempted because a dedicated search this pass confirmed no equivalent statewide aggregator exists for WV's fee (each city sets and administers its own). PARKERSBURG NOW PRIMARY-CONFIRMED (this pass): the city's own finance-department fees page states the City Service User Fee is 'a flat charge of $2.50 per week for individuals who work at a job within the city limits', withheld by the employer and remitted quarterly — matching the figure already on file. That same page is also the reason to be careful expanding this list: Parkersburg separately levies a POLICE PROTECTION fee ($8/month residential, $16/month commercial), a fire fee by square footage, and a sanitation fee, none of which are payroll deductions. A WV city having 'a fee' does not make it an employee fee, so each addition needs the ordinance read rather than a fee schedule skimmed.",
     "UI rate/wage-base figures are cross-source only -- workforcewv.org gates the actual current rate table behind an authenticated system, confirmed by direct fetch attempt rather than assumed.",
     "exemptPretax RESOLVED (see exemptPretaxComment above) -- WV conforms to federal AGI, confirmed via W. Va. Code R. sec. 110-21-12.",
-    "No-certificate default (0 exemptions, two-earner table) is this project's standing convention applied by analogy, not confirmed against an explicit WV instruction the way Delaware's or Kansas's was."
+    "No-certificate default (0 exemptions, two-earner table) is this project's standing convention applied by analogy, not confirmed against an explicit WV instruction the way Delaware's or Kansas's was.",
+    "The marginal-amount supplemental method requires the caller to supply input.priorRegularPayment (this period's or the employee's standard regular taxable wages, and what WV tax would be withheld on that alone) -- without it, a standalone bonus cheque falls back to this engine's existing default (annualize the bonus alone through the ordinary two-table formula), the same disclosed approximation every other state without a caller-supplied prior payment already carries in this project.",
+    "Supplemental wages: WV's own Withholding Help page describes a real, distinct marginal-amount method for bonuses (see this file's own sources[] entry, \"Supplemental Wages\" guidance) -- but reproducing it exactly against the page's own $2,000-regular/$5,000-bonus worked example (stated answer: 4.82%) was NOT achieved this pass: combining the two amounts through this engine's existing period-level aggregation mechanism (aggregateWithPriorRegularPayment) yields 4.58%, because WV's own IT-100.2A tables are per-period with no annual table, while the help page's prose describes annualizing first. Left UNWIRED rather than shipped with an unverified number -- a standalone bonus falls back to this engine's existing default (the ordinary per-period formula on the bonus alone). Flagged for a dedicated follow-up pass that resolves the annual-vs-period mismatch, not silently guessed at."
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",

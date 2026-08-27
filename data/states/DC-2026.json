@@ -32,18 +32,62 @@
   ],
   "bracketAnnualAllowanceDeduction": {
     "brackets": [
-      { "from": 0, "to": 10000, "base": 0, "rate": 0.04 },
-      { "from": 10000, "to": 40000, "base": 400, "rate": 0.06 },
-      { "from": 40000, "to": 60000, "base": 2200, "rate": 0.065 },
-      { "from": 60000, "to": 250000, "base": 3500, "rate": 0.085 },
-      { "from": 250000, "to": 500000, "base": 19650, "rate": 0.0925 },
-      { "from": 500000, "to": 1000000, "base": 42775, "rate": 0.0975 },
-      { "from": 1000000, "to": null, "base": 91525, "rate": 0.1075 }
+      {
+        "from": 0,
+        "to": 10000,
+        "base": 0,
+        "rate": 0.04
+      },
+      {
+        "from": 10000,
+        "to": 40000,
+        "base": 400,
+        "rate": 0.06
+      },
+      {
+        "from": 40000,
+        "to": 60000,
+        "base": 2200,
+        "rate": 0.065
+      },
+      {
+        "from": 60000,
+        "to": 250000,
+        "base": 3500,
+        "rate": 0.085
+      },
+      {
+        "from": 250000,
+        "to": 500000,
+        "base": 19650,
+        "rate": 0.0925
+      },
+      {
+        "from": 500000,
+        "to": 1000000,
+        "base": 42775,
+        "rate": 0.0975
+      },
+      {
+        "from": 1000000,
+        "to": null,
+        "base": 91525,
+        "rate": 0.1075
+      }
     ],
     "bracketsComment": "Verbatim from the NFC formula, and internally chain-verified before trusting it: 400 + (40000-10000)x0.06=400+1800=2200 (matches); 2200+(60000-40000)x0.065=2200+1300=3500 (matches); 3500+(250000-60000)x0.085=3500+16150=19650 (matches); 19650+(500000-250000)x0.0925=19650+23125=42775 (matches); 42775+(1000000-500000)x0.0975=42775+48750=91525 (matches) -- every published base independently reproduced from the one before it, zero discrepancies. ONE table for all filing statuses.",
     "allowanceAmountAnnual": 4300,
     "allowanceAmountComment": "STALENESS DISCLOSED, not hidden: this figure is from the 2022 NFC bulletin ('the annual deduction amount has changed from $4,150 to $4,300') -- no 2026-dated confirmation of this SPECIFIC dollar figure was found this session, unlike the bracket thresholds (which WERE cross-checked against fresh 2026 sources and held up). DC's allowance amount plausibly adjusts periodically the way many states' does; this could be understating a 2026 figure that has since increased. Flagged explicitly as the single least-confident number in this file, rather than presented with the same confidence as the brackets.",
-    "annualizeMultiplier": { "annual": 1, "semiannual": 2, "quarterly": 4, "monthly": 12, "semimonthly": 24, "biweekly": 26, "weekly": 52, "daily": 260 },
+    "annualizeMultiplier": {
+      "annual": 1,
+      "semiannual": 2,
+      "quarterly": 4,
+      "monthly": 12,
+      "semimonthly": 24,
+      "biweekly": 26,
+      "weekly": 52,
+      "daily": 260
+    },
     "noCertificateDefault": "Not explicitly stated in the sources found this session -- modelled as single/zero-allowances per this project's standing convention for a missing certificate (the least-generous outcome), NOT independently confirmed as DC's own stated rule the way Delaware's or Missouri's no-form defaults were."
   },
   "exemptPretax": [
@@ -82,7 +126,8 @@
     "No current-year (2026) FR-230 booklet was locatable from DC's own OTR site this session -- this file rests on a federal-payroll-oriented secondary-primary source (NFC) rather than DC's own primary withholding publication.",
     "UI is not researched at all this session (no wage base, no rate) -- a real, disclosed absence, not just 'not wired into calc code.' WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
     "Universal Paid Leave (0.75%, employer-only) is documented but not wired into calc code -- same structural gap as every other employer-only levy in this project. WIRED (paid-leave pass): now computed as DC_PFML_ER via the statePaidLeaveEmployer block added to this file — employerSizeGated:false, since DC's programme has no headcount threshold and every covered employer owes it.",
-    "The no-certificate default is this project's own standing convention (single/zero), not independently confirmed as DC's own stated rule."
+    "The no-certificate default is this project's own standing convention (single/zero), not independently confirmed as DC's own stated rule.",
+    "Supplemental wages: DC's own FR-230 Employer Withholding Instructions were checked directly (2018 revision, the most recent full booklet publicly available, cross-checked against the NFC bulletin already cited in this file for anything current-year might have added) -- neither contains a distinct supplemental-wage withholding procedure at all, only a general definition of taxable \"wages\" that happens to name bonuses as an example. Third-party guides describing a DC supplemental rate are actually describing the FEDERAL 22%/37% flat rate, not a DC-specific one. A standalone bonus therefore runs through the same formula as any other wages, which is what this engine already does by default -- the same conclusion reached for South Carolina, Utah, and Arkansas in this project, each checked directly rather than assumed."
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",

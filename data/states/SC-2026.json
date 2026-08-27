@@ -43,15 +43,40 @@
     "allowanceComment": "GENUINE ALL-OR-NOTHING QUIRK, confirmed directly from WH-1603F's own text: 'Personal Allowance: $0 if zero allowances claimed OR $5,000 per personal allowance claimed AND Standard Deduction: $0 if zero allowances claimed OR 10% of gross wages if claiming one or more allowances, up to $7,500 total.' An employee claiming 0 allowances gets NEITHER deduction -- not just a smaller personal allowance, the 10%-of-wages standard deduction disappears too. This is structurally unlike every other state in this project with a similar allowance-driven deduction (e.g. Virginia's flat standard deduction applies regardless of exemption count) -- claiming even 1 allowance is what activates BOTH deduction components at once.",
     "brackets": {
       "annual": [
-        { "from": 0, "to": 3640, "base": 0, "rate": 0.0 },
-        { "from": 3640, "to": 18230, "base": 0, "rate": 0.03 },
-        { "from": 18230, "to": null, "base": 437.70, "rate": 0.06 }
+        {
+          "from": 0,
+          "to": 3640,
+          "base": 0,
+          "rate": 0.0
+        },
+        {
+          "from": 3640,
+          "to": 18230,
+          "base": 0,
+          "rate": 0.03
+        },
+        {
+          "from": 18230,
+          "to": null,
+          "base": 437.7,
+          "rate": 0.06
+        }
       ],
       "bracketComment": "Converted from WH-1603F's own 'X%, then subtract $Y' framing into this project's standard {from,to,base,rate} shape (base = cumulative tax already owed AT bracket.from, consistent with every other bracket-table state here). Verified algebraically before trusting the conversion: the document's own bracket-2 rule ('3%, then subtract $109.20') and bracket-3 rule ('6%, then subtract $656.10') are exactly equivalent to this base/rate form -- 3640 x 3% = $109.20 exactly (cancels the 0%-bracket portion), and at the $18,230 boundary, 0% + 3%x(18230-3640=14590) = $437.70 exactly, matching the document's own bracket-3 base constant.",
       "filingStatusNote": "The SC W-4's own Line 3 has a Single/Married/Married-but-withhold-at-higher-Single-rate checkbox, but WH-1603F's formula NEVER references filing status anywhere in its 4 steps -- confirmed by reading the complete formula document, not by omission. The checkbox appears to only inform which worksheet path the employee follows to arrive at an allowance COUNT (page 3 of the SC W-4, not fetched in full this pass), with the actual withholding CALCULATION depending only on that resulting allowance count, unlike most other states in this project where marital status enters the formula directly (a separate deduction table or bracket schedule)."
     }
   },
-  "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
+  "exemptPretax": [
+    "section125",
+    "hsa",
+    "fsa",
+    "dependent_care",
+    "deferral_401k",
+    "deferral_403b",
+    "deferral_457",
+    "deferral_simple",
+    "commuter"
+  ],
   "exemptPretaxComment": "UPGRADED ('fix any and all gaps' pass): S.C. Code Ann. sec. 12-6-1120 confirms South Carolina 'substantially conforms to the Internal Revenue Code of 1986, as amended through December 31, 2024,' starting from federal taxable income and applying only a short, specific list of modifications (Sections 78/86/87 excluded, Social Security benefits excluded) -- none of which touch 401(k)/403(b)/457/125 elective deferrals. Same confidence tier as Virginia's/West Virginia's FAGI-conformity citations: a statute-level conformity confirmation, not a direct read of the withholding-specific wage definition (which none of WH-1603F/WH-105/SC W-4 discusses). One tier below Indiana's/Kentucky's complete-enumerated-list reads, since 12-6-1120's own non-adopted-sections list was not independently confirmed exhaustive for this specific question this pass.",
   "reciprocity": {
     "$comment": "CHECKED, not assumed absent: WH-1603F, WH-105, and the SC W-4 were all read in full and none mentions a reciprocal agreement with any state. South Carolina has no reciprocal withholding agreement with any state.",
@@ -72,7 +97,10 @@
     "wageBaseConfidence": "cross_source_confirmed only -- dew.sc.gov's own 2026 press release (fetched directly) covers rate figures but does not itself state the wage base; multiple independent secondary sources (Netchex, southcarolinapayrollguide.com) agree on $14,000 with no dissent, one tier below the rate figures below.",
     "newEmployerRate": 0.01,
     "newEmployerRateNote": "PRIMARY-CONFIRMED at 1.0% via direct dew.sc.gov quote -- see sources above for the conflicting uncited 0.55% secondary figure that was checked and rejected.",
-    "experiencedEmployerRateRange": [0.0006, 0.0546],
+    "experiencedEmployerRateRange": [
+      0.0006,
+      0.0546
+    ],
     "lowestClassNote": "dew.sc.gov's own press release: 'Any business that had no UI benefit charges from July 1, 2022, through June 30, 2025, is assigned to tax class 1 and pays 0.06%' -- the specific 3-year look-back window for the lowest experience class, confirmed directly rather than just the bare rate figure.",
     "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project. Wage base itself is one tier below the rate figures (cross-source, not a direct dew.sc.gov quote) -- worth a follow-up primary check. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax."
   },
@@ -81,7 +109,8 @@
     "SC W-4's page-3 Personal Allowances Worksheet (referenced but not fetched in full this pass) determines HOW an employee arrives at their allowance count -- not needed for the withholding calculation itself (which only consumes the final count), but not independently read.",
     "UI wage base ($14,000) is cross-source only, not a direct dew.sc.gov quote -- the rate figures above ARE primary-confirmed, creating an internal confidence-tier split worth closing with a follow-up fetch.",
     "Employer-side UC is documented but not modelled -- same per-employer-experience-rating gap as every other state's employer SUTA in this project. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
-    "SC's own 'nonresident contractors', 'rental payments', and 'royalties/prizes/winnings' withholding categories (WH-105) are out of scope for a wage-withholding payroll engine -- correctly not modelled, noted for completeness only."
+    "SC's own 'nonresident contractors', 'rental payments', and 'royalties/prizes/winnings' withholding categories (WH-105) are out of scope for a wage-withholding payroll engine -- correctly not modelled, noted for completeness only.",
+    "Supplemental wages: WH-1603F (2026 Formula for Computing South Carolina Withholding Tax) was fetched directly and read in full this pass -- the entire document is 4 steps (annualize, deduct personal allowance + standard deduction, apply the Subtraction/Addition Method bracket, divide by periods) and contains zero mention of bonuses, supplemental wages, or any alternate flat-rate method. Some third-party payroll guides claim a separate SC flat supplemental rate (figures cited ranged inconsistently from 6.00% to 6.2%) -- checked directly against the primary source and found NO SUCH RATE exists in the 2026 formula document. A standalone bonus therefore runs through the same annualize-and-bracket formula as any other wages, which is what this engine already does by default, same as Louisiana/Oklahoma/Vermont in this project."
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",

@@ -33,6 +33,12 @@
       "url": "https://help.nfc.usda.gov/bulletins/2026/1768327516.htm",
       "verifiedOn": "2026-08-22",
       "verifiedBy": "'Verify' pass, fetched directly -- an independent federal payroll shared-service bulletin, genuinely dated 2026 (effective Pay Period 09, 2026), the same source class that caught real formula bugs for Massachusetts and Georgia elsewhere in this project. FULL CONFIRMATION, zero discrepancies: '0% up to $10,000 / 4.0% of excess over $10,000' (independently re-confirms the 4.0% rate over the uncited 4.1% secondary claims); standard deduction Single $2,300 / Head of Household $3,400 / Married $4,600 / Married-both-working $2,300 -- all four figures match this file exactly. Also independently confirms this file's absent-certificate default: 'Without W-4 on file: standard deduction $2,300, exemption $0' -- i.e. Single status, zero exemption, exactly what mississippiWithholding() defaults to. This is the strongest single confirmation in this file -- a second federal agency's own independently-operated payroll formula, not a re-read of Pub 89-700."
+    },
+    {
+      "title": "Pub 89-700-25-1, Section 9 -- SUPPLEMENTAL WAGES",
+      "url": "https://www.dor.ms.gov/sites/default/files/tax-forms/business/89700251revised1.13.2026.pdf",
+      "verifiedOn": "2026-08-27",
+      "verifiedBy": "Same publication already on file for this state, re-fetched and read in full for the 'find and fix anything missing across all 50 states' pass. Quoted verbatim, Section 9: \"If supplemental wages... are paid at the same time as regular wages, the income tax to be withheld should be determined as if the total of the supplemental and regular wages was a single wage payment for the regular payroll period. If supplemental wages are paid at a different time... the employer must [or may] add the supplemental wages to the regular wages paid within the same calendar year for the current or last preceding payroll period and withhold income tax as though the supplemental wages and regular wages were one payment.\" The same \"single payment for the period\" framing already verified safe for Hawaii this pass (as opposed to Delaware/West Virginia's textually different \"annualize regular alone, then add the raw bonus to the already-annualized total\" framing, which this engine's existing aggregation mechanism does NOT correctly reproduce -- see those two files' own knownGaps)."
     }
   ],
   "bracketStatusDeduction": {
@@ -58,7 +64,17 @@
   },
   "roundFinalToWholeDollar": true,
   "roundingComment": "Pub 89-700 Section 13(e) states directly: 'This total is the amount to be withheld. This amount should be rounded to the nearest whole dollar.' Handled generically via rules.roundFinalToWholeDollar in stateIncomeTax() -- the same mechanism built for Maine and reused by Virginia/North Carolina -- not duplicated inside mississippiWithholding() itself.",
-  "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
+  "exemptPretax": [
+    "section125",
+    "hsa",
+    "fsa",
+    "dependent_care",
+    "deferral_401k",
+    "deferral_403b",
+    "deferral_457",
+    "deferral_simple",
+    "commuter"
+  ],
   "exemptPretaxComment": "DISCLOSED, not the strongest tier in this project: modelled the same as every other state's standard 401(k)/125/HSA/FSA exclusion set, consistent with universal payroll-industry practice and Pub 89-700's own 'wages' definition (Section 7 -- lists inclusions, adds nothing back for these categories). BUT the one directly-fetched Mississippi statute found this pass (27-7-15) textually ties its ONLY salary-reduction exclusion to Section 25-17-5, which by its own chapter title and definitions applies to STATE/LOCAL GOVERNMENT employee cafeteria plans specifically -- not a general private-sector 401(k)/125 conformity statute the way Kentucky's/Arkansas's itemized-list citations are, or even the FAGI-starting-point citations Louisiana/Virginia/West Virginia have. A broader private-sector conformity provision may exist elsewhere in Title 27 that this pass did not locate. Flagged honestly as the weakest exemptPretax evidentiary tier in this project rather than silently treated as equivalent to the stronger citations elsewhere.",
   "additionalOrReducedWithholding": {
     "rule": "Form 89-350 Line 7 (additional dollar amount per pay period, 'if agreed to by your employer') already works generically via certificate.additionalWithholding -- zero new code needed, same as every other state's Line 2/Line 5/Line 7-style field in this project. Pub 89-700 Section 13(f) separately documents true VOLUNTARY withholding (for categories not otherwise subject to mandatory withholding at all, e.g. agricultural/household workers or MS residents working in a state that doesn't require MS withholding) -- out of scope for a wage-withholding engine that already receives input.workState, not modelled.",
@@ -79,8 +95,15 @@
   "unemploymentInsurance": {
     "administeredBy": "Mississippi Department of Employment Security (MDES)",
     "wageBase": 14000.0,
-    "newEmployerRateByYear": { "year1": 0.010, "year2": 0.011, "year3Plus": 0.012 },
-    "experiencedEmployerRateRange": [0.002, 0.054],
+    "newEmployerRateByYear": {
+      "year1": 0.01,
+      "year2": 0.011,
+      "year3Plus": 0.012
+    },
+    "experiencedEmployerRateRange": [
+      0.002,
+      0.054
+    ],
     "confidence": "primary_source_confirmed -- mdes.ms.gov's own Employer FAQs page, quoted directly above. The page itself carries no explicit 2026 revision date, one tier below a dated annual rate notice, though every secondary source checked (Rippling, Mississippi Payroll Guide) agrees with these same figures for 2026 with no dissent.",
     "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project: experience-rated, an individual employer's actual rate depends on employer-specific history a static jurisdiction file can't hold. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax."
   },
@@ -89,7 +112,8 @@
     "Form 89-350's per-category breakdown (personal/dependent/age/blind) is not independently modelled -- this engine trusts the employee's own pre-summed Line 6 total, matching the form's own mechanism but meaning a caller must compute that total correctly upstream, same as trusting any other state's raw allowance-count input.",
     "RESOLVED ('verify' pass, 2026-08-22): Tables B/C/D's own standard-deduction figures ($3,400/$4,600/$2,300) were not independently cell-verified against Pub 89-700's own printed tables directly, but ARE now independently confirmed via USDA NFC's 2026 bulletin (see bracketStatusDeduction.independentConfirmation) -- a second, differently-operated source reproducing the same four numbers with zero discrepancies. Still not a cell-by-cell reproduction of Tables B/C/D themselves the way Table A got 3 verified cells, but no longer resting on Section 13's prose alone either.",
     "Employer-side UC is documented but not modelled -- same per-employer-experience-rating gap as every other state's employer SUTA in this project. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
-    "Section 13(f)'s true-voluntary-withholding categories (agricultural/household workers, MS residents working where the employer isn't legally required to withhold MS tax) are documented but out of scope for this engine, same as every other state's out-of-scope withholding categories."
+    "Section 13(f)'s true-voluntary-withholding categories (agricultural/household workers, MS residents working where the employer isn't legally required to withhold MS tax) are documented but out of scope for this engine, same as every other state's out-of-scope withholding categories.",
+    "Supplemental wages: Pub 89-700 Section 9 offers only the aggregate method (current or last-preceding payroll period), no separate flat rate -- wired via the existing supplementalAggregation mechanism, which requires the caller to supply input.priorRegularPayment. Without it, a standalone bonus cheque falls back to this engine's existing default (annualize the bonus alone through the ordinary formula)."
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
@@ -103,5 +127,9 @@
     },
     "employerSuppliedRateRequired": false,
     "confidence": "cross_source_confirmed"
+  },
+  "supplementalAggregation": {
+    "supported": true,
+    "source": "Pub 89-700 Section 9: aggregate with the current or last-preceding payroll period, tax the combined amount as a single payment, subtract tax already withheld on the regular portion."
   }
 }

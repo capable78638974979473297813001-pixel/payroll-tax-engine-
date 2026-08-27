@@ -39,51 +39,252 @@
     "$comment": "Full formula, verified to the cent against the source's own worked example (see sources above). 1) Annualize wages using AR's own multiplier map (daily = x260, a 5-day workweek, NOT this engine's more common 5-day-week default elsewhere -- confirmed explicit, not assumed). 2) Subtract the flat $2,470 standard deduction (no filing-status variation at all in the withholding formula -- AR4EC's filing-status field only matters for the SEPARATE low-income election, not the standard formula). 3) For taxable income under $100,001, round to the nearest $50 MIDRANGE of each $100 band (e.g. $23,054 -> $23,050) BEFORE the bracket lookup -- a real, easily-missed step, confirmed necessary by the worked example (skipping it would look plausible but be wrong). 4) Look up the bracket: tax = taxableIncome x rate, MINUS a published adjustment constant (NOT a base+excess formula -- verified these two framings are NOT numerically interchangeable here, since AR's own adjustment constants carry small independent rounding baked in; converting to base+excess drifted 3 cents off the source's own answer in a spot check). Round that result to the nearest WHOLE DOLLAR. 5) Subtract $29 x total exemptions (a flat post-bracket CREDIT, not a pre-tax deduction) to get Annual Net Tax. 6) Divide by pay periods.",
     "standardDeductionAnnual": 2470.0,
     "personalCreditPerExemption": 29.0,
-    "annualizeMultiplier": { "monthly": 12, "semimonthly": 24, "biweekly": 26, "weekly": 52, "daily": 260 },
+    "annualizeMultiplier": {
+      "monthly": 12,
+      "semimonthly": 24,
+      "biweekly": 26,
+      "weekly": 52,
+      "daily": 260
+    },
     "midrangeRoundingThreshold": 100001.0,
     "midrangeRoundingComment": "Applies to EVERY bracket, not just the fine-grained $100-wide bands near the top -- confirmed against the worked example, which rounds $23,054 (deep inside the WIDE $16,000-$26,399 3.4% bracket) to $23,050 before the bracket lookup, not just for incomes near the phase-in zone.",
     "brackets": [
-      { "from": 0, "to": 5600, "rate": 0.0, "adjustment": 0 },
-      { "from": 5600, "to": 11200, "rate": 0.02, "adjustment": 111.98 },
-      { "from": 11200, "to": 16000, "rate": 0.03, "adjustment": 223.97 },
-      { "from": 16000, "to": 26400, "rate": 0.034, "adjustment": 287.97 },
-      { "from": 26400, "to": 94701, "rate": 0.039, "adjustment": 419.96 },
-      { "from": 94701, "to": 94801, "rate": 0.039, "adjustment": 399.30 },
-      { "from": 94801, "to": 94901, "rate": 0.039, "adjustment": 389.30 },
-      { "from": 94901, "to": 95001, "rate": 0.039, "adjustment": 379.30 },
-      { "from": 95001, "to": 95101, "rate": 0.039, "adjustment": 369.30 },
-      { "from": 95101, "to": 95201, "rate": 0.039, "adjustment": 359.30 },
-      { "from": 95201, "to": 95301, "rate": 0.039, "adjustment": 349.30 },
-      { "from": 95301, "to": 95401, "rate": 0.039, "adjustment": 339.30 },
-      { "from": 95401, "to": 95501, "rate": 0.039, "adjustment": 329.30 },
-      { "from": 95501, "to": 95601, "rate": 0.039, "adjustment": 319.30 },
-      { "from": 95601, "to": 95701, "rate": 0.039, "adjustment": 309.30 },
-      { "from": 95701, "to": 95801, "rate": 0.039, "adjustment": 299.30 },
-      { "from": 95801, "to": 95901, "rate": 0.039, "adjustment": 289.30 },
-      { "from": 95901, "to": 96001, "rate": 0.039, "adjustment": 279.30 },
-      { "from": 96001, "to": 96101, "rate": 0.039, "adjustment": 269.30 },
-      { "from": 96101, "to": 96201, "rate": 0.039, "adjustment": 259.30 },
-      { "from": 96201, "to": 96301, "rate": 0.039, "adjustment": 249.30 },
-      { "from": 96301, "to": 96401, "rate": 0.039, "adjustment": 239.30 },
-      { "from": 96401, "to": 96501, "rate": 0.039, "adjustment": 229.30 },
-      { "from": 96501, "to": 96601, "rate": 0.039, "adjustment": 219.30 },
-      { "from": 96601, "to": 96701, "rate": 0.039, "adjustment": 209.30 },
-      { "from": 96701, "to": 96801, "rate": 0.039, "adjustment": 199.30 },
-      { "from": 96801, "to": 96901, "rate": 0.039, "adjustment": 189.30 },
-      { "from": 96901, "to": 97001, "rate": 0.039, "adjustment": 179.30 },
-      { "from": 97001, "to": 97101, "rate": 0.039, "adjustment": 169.30 },
-      { "from": 97101, "to": 97201, "rate": 0.039, "adjustment": 159.30 },
-      { "from": 97201, "to": 97301, "rate": 0.039, "adjustment": 149.30 },
-      { "from": 97301, "to": 97401, "rate": 0.039, "adjustment": 139.30 },
-      { "from": 97401, "to": 97501, "rate": 0.039, "adjustment": 129.30 },
-      { "from": 97501, "to": 97601, "rate": 0.039, "adjustment": 119.30 },
-      { "from": 97601, "to": 97701, "rate": 0.039, "adjustment": 109.30 },
-      { "from": 97701, "to": 97801, "rate": 0.039, "adjustment": 99.30 },
-      { "from": 97801, "to": null, "rate": 0.039, "adjustment": 89.30 }
+      {
+        "from": 0,
+        "to": 5600,
+        "rate": 0.0,
+        "adjustment": 0
+      },
+      {
+        "from": 5600,
+        "to": 11200,
+        "rate": 0.02,
+        "adjustment": 111.98
+      },
+      {
+        "from": 11200,
+        "to": 16000,
+        "rate": 0.03,
+        "adjustment": 223.97
+      },
+      {
+        "from": 16000,
+        "to": 26400,
+        "rate": 0.034,
+        "adjustment": 287.97
+      },
+      {
+        "from": 26400,
+        "to": 94701,
+        "rate": 0.039,
+        "adjustment": 419.96
+      },
+      {
+        "from": 94701,
+        "to": 94801,
+        "rate": 0.039,
+        "adjustment": 399.3
+      },
+      {
+        "from": 94801,
+        "to": 94901,
+        "rate": 0.039,
+        "adjustment": 389.3
+      },
+      {
+        "from": 94901,
+        "to": 95001,
+        "rate": 0.039,
+        "adjustment": 379.3
+      },
+      {
+        "from": 95001,
+        "to": 95101,
+        "rate": 0.039,
+        "adjustment": 369.3
+      },
+      {
+        "from": 95101,
+        "to": 95201,
+        "rate": 0.039,
+        "adjustment": 359.3
+      },
+      {
+        "from": 95201,
+        "to": 95301,
+        "rate": 0.039,
+        "adjustment": 349.3
+      },
+      {
+        "from": 95301,
+        "to": 95401,
+        "rate": 0.039,
+        "adjustment": 339.3
+      },
+      {
+        "from": 95401,
+        "to": 95501,
+        "rate": 0.039,
+        "adjustment": 329.3
+      },
+      {
+        "from": 95501,
+        "to": 95601,
+        "rate": 0.039,
+        "adjustment": 319.3
+      },
+      {
+        "from": 95601,
+        "to": 95701,
+        "rate": 0.039,
+        "adjustment": 309.3
+      },
+      {
+        "from": 95701,
+        "to": 95801,
+        "rate": 0.039,
+        "adjustment": 299.3
+      },
+      {
+        "from": 95801,
+        "to": 95901,
+        "rate": 0.039,
+        "adjustment": 289.3
+      },
+      {
+        "from": 95901,
+        "to": 96001,
+        "rate": 0.039,
+        "adjustment": 279.3
+      },
+      {
+        "from": 96001,
+        "to": 96101,
+        "rate": 0.039,
+        "adjustment": 269.3
+      },
+      {
+        "from": 96101,
+        "to": 96201,
+        "rate": 0.039,
+        "adjustment": 259.3
+      },
+      {
+        "from": 96201,
+        "to": 96301,
+        "rate": 0.039,
+        "adjustment": 249.3
+      },
+      {
+        "from": 96301,
+        "to": 96401,
+        "rate": 0.039,
+        "adjustment": 239.3
+      },
+      {
+        "from": 96401,
+        "to": 96501,
+        "rate": 0.039,
+        "adjustment": 229.3
+      },
+      {
+        "from": 96501,
+        "to": 96601,
+        "rate": 0.039,
+        "adjustment": 219.3
+      },
+      {
+        "from": 96601,
+        "to": 96701,
+        "rate": 0.039,
+        "adjustment": 209.3
+      },
+      {
+        "from": 96701,
+        "to": 96801,
+        "rate": 0.039,
+        "adjustment": 199.3
+      },
+      {
+        "from": 96801,
+        "to": 96901,
+        "rate": 0.039,
+        "adjustment": 189.3
+      },
+      {
+        "from": 96901,
+        "to": 97001,
+        "rate": 0.039,
+        "adjustment": 179.3
+      },
+      {
+        "from": 97001,
+        "to": 97101,
+        "rate": 0.039,
+        "adjustment": 169.3
+      },
+      {
+        "from": 97101,
+        "to": 97201,
+        "rate": 0.039,
+        "adjustment": 159.3
+      },
+      {
+        "from": 97201,
+        "to": 97301,
+        "rate": 0.039,
+        "adjustment": 149.3
+      },
+      {
+        "from": 97301,
+        "to": 97401,
+        "rate": 0.039,
+        "adjustment": 139.3
+      },
+      {
+        "from": 97401,
+        "to": 97501,
+        "rate": 0.039,
+        "adjustment": 129.3
+      },
+      {
+        "from": 97501,
+        "to": 97601,
+        "rate": 0.039,
+        "adjustment": 119.3
+      },
+      {
+        "from": 97601,
+        "to": 97701,
+        "rate": 0.039,
+        "adjustment": 109.3
+      },
+      {
+        "from": 97701,
+        "to": 97801,
+        "rate": 0.039,
+        "adjustment": 99.3
+      },
+      {
+        "from": 97801,
+        "to": null,
+        "rate": 0.039,
+        "adjustment": 89.3
+      }
     ],
     "bracketStructureNote": "37 bands, not the usual 4-6 -- from $26,400 to $97,800, the marginal RATE stays flat at 3.9% but the adjustment constant steps DOWN by exactly $10.00 every $100 of income, a smoothing mechanism that makes the EFFECTIVE (not marginal) rate rise gradually toward the true flat-topped formula rather than jumping at a single cliff. Verified algebraically: the 31 $100-wide bands from $94,701 to $97,800 span adjustment $399.30 down to $89.30, a $310.00 total drop over 31 steps = exactly $10.00/step. Only above $97,800 does the formula become genuinely flat (3.9% x income - $89.30, forever)."
   },
-  "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
+  "exemptPretax": [
+    "section125",
+    "hsa",
+    "fsa",
+    "dependent_care",
+    "deferral_401k",
+    "deferral_403b",
+    "deferral_457",
+    "deferral_simple",
+    "commuter"
+  ],
   "exemptPretaxComment": "UPGRADED ('fix any and all gaps' pass): Arkansas Code sec. 26-51-414(a)(1) directly adopts federal treatment for retirement/deferred-compensation plans -- 'a deduction pursuant to IRC secs. 72, 219, 401, 402-404, 406-416, 457' (26 U.S.C. secs. 72/219/402-404/406-416/457 as in effect 2017-01-01; sec. 401 as in effect 2010-03-30) -- an explicit statutory adoption of the 401(k)/403(b)/457/SIMPLE deferral categories by IRC section number, not just a general AGI-conformity inference. Same confidence tier as Michigan's RAB-1988-27 named enumeration, the strongest tier this project uses for this question. Section 125/cafeteria-plan treatment specifically was not independently re-confirmed this pass (26-51-414 is framed around retirement/annuity plans by section number, not cafeteria benefits) -- one small residual gap within an otherwise strong citation.",
   "reciprocity": {
     "$comment": "CHECKED, not assumed absent: the Formula Method document and AR4EC (both read in full) contain zero reciprocity language.",
@@ -115,14 +316,18 @@
     "wageBaseConfidence": "cross_source_confirmed -- stable at $7,000 (the FUTA statutory minimum) across every source checked, including DWS's own page, with zero dissent for many years running.",
     "newEmployerRate": 0.022,
     "newEmployerRateNote": "2.0% base + 0.200% stabilization tax = 2.2% total for 2026, per secondary sources -- DWS's own fetched page returned 2025-dated figures (2.0% + 0.1% administrative assessment) rather than confirming the 2026 breakdown directly. Flagged as one tier below a direct 2026-dated primary quote.",
-    "experiencedEmployerRateRange": [0.002, 0.101],
+    "experiencedEmployerRateRange": [
+      0.002,
+      0.101
+    ],
     "knownGap": "Not modelled in the engine -- same structural note as every other state's employer SUTA in this project. New-employer rate is cross-source only for the 2026-specific figure; wage base and experienced range are stable/well-corroborated. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax."
   },
   "knownGaps": [
     "The low-income tax election (AR4EC Line 5) is disclosed with its exact 2026 income thresholds but not built as calc code -- see lowIncomeElection above for the specific reasoning (narrow income band, 1,062-line table, main formula covers the overwhelming majority of paychecks).",
     "exemptPretax RESOLVED via direct Arkansas Code sec. 26-51-414(a)(1) citation (see exemptPretaxComment) -- explicit IRC-section adoption for retirement/deferral categories; Section 125 cafeteria-plan treatment specifically remains a residual, smaller gap.",
     "Employer-side UC is documented but not modelled -- same per-employer-experience-rating gap as every other state's employer SUTA in this project. The 2026-specific new-employer rate breakdown rests on secondary sources. WIRED (employer-SUTA pass): stateUnemploymentEmployerTax() in src/taxes/state.ts now computes this as an XX_SUI_ER employer line, reading the normalized suiEmployer block below — the employer's own assigned rate when the caller supplies one (input.employer.stateUnemploymentRate), otherwise this state's published new-employer rate, capped at the wage base against input.ytd.stateUnemployment. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
-    "AR4EC's own low-income income thresholds come from a form revised 02/07/2025 -- worth re-checking against a 2026-specific AR4EC revision if one has since been issued."
+    "AR4EC's own low-income income thresholds come from a form revised 02/07/2025 -- worth re-checking against a 2026-specific AR4EC revision if one has since been issued.",
+    "Supplemental wages: the State of Arkansas Withholding Tax Formula Method document (Tax Year 2026) was fetched directly and read in full this pass -- it contains ZERO mentions of \"bonus\" or \"supplemental\" anywhere. Third-party payroll guides claim a separate 3.9% Arkansas flat supplemental rate -- checked directly and found this is simply Arkansas's own TOP MARGINAL BRACKET RATE (see this file's own brackets, 5,201+ Married/equivalent taxed at exactly 3.90%), not a distinct published supplemental-wage rate. A standalone bonus therefore runs through the same annualize-and-bracket formula as any other wages, which is what this engine already does by default -- the same conclusion already reached for South Carolina and Utah in this project."
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",

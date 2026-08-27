@@ -40,22 +40,72 @@
       "url": "https://wilmdebudget.org/wp-content/uploads/2024/03/fy25-tax-rates.pdf",
       "verifiedOn": "2026-08-19",
       "verifiedBy": "PDF downloaded and text-extracted directly from Wilmington's own budget office. Quoted verbatim: 'WAGE TAX. Base: Individual gross earned income of City residents. Individual gross earned income of non-City residents working within the City limits. Rate: 1.25% (as set by Delaware General Assembly).' Wilmington's own city-hosted page (wilmingtonde.gov) returned an Akamai bot-block (HTTP 403) to every fetch attempt in this session, including a browser-UA curl -- the budget-office PDF and a New Castle County government HR intake form (both independently stating the same 1.25% figure and residence-OR-work-location rule) were used instead, one tier below a direct city-page fetch but still a primary city document, not a third-party tax site."
+    },
+    {
+      "title": "Employer's Guide (Withholding Regulations and Employer's Duties) -- supplemental wages section",
+      "url": "https://revenue.delaware.gov/employers-guide-withholding-regulations-employers-duties/",
+      "verifiedOn": "2026-08-27",
+      "verifiedBy": "Fetched for the 'find and fix anything missing across all 50 states' pass. Quoted: \"If you pay supplemental wages in a different payment from the regular wages... 1. Annualize the employee's regular wages and compute the tax on this amount. 2. Annualize the regular wages and ADD THE SUPPLEMENTAL WAGE to this amount. Compute tax on this amount. 3. Subtract the difference in the tax amounts. 4. The remainder is the amount to be withheld.\" A MARGINAL-AMOUNT method textually different from Hawaii/Mississippi/Rhode Island/New Jersey's own \"treat the combined amount as a single wage payment for the period\" framing (which this engine's existing aggregateWithPriorRegularPayment() mechanism correctly reproduces, verified this pass against Hawaii's and Mississippi's own numbers): Delaware's own Step 2 adds the RAW bonus dollar amount to an ALREADY-ANNUALIZED regular-wages total, not to a per-period figure that then gets annualized again. Attempting this via the existing mechanism would multiply the bonus by periodsPerYear before adding it (the SAME bug already found and NOT shipped for West Virginia this pass), over-taxing it substantially for any frequency shorter than annual. NOT wired this pass rather than shipped unverified — same class of gap as West Virginia, needing a bespoke annual-marginal function."
     }
   ],
   "delawareWithholding": {
     "brackets": [
-      { "from": 0, "to": 2000, "base": 0, "rate": 0 },
-      { "from": 2000, "to": 5000, "base": 0, "rate": 0.022 },
-      { "from": 5000, "to": 10000, "base": 66.0, "rate": 0.039 },
-      { "from": 10000, "to": 20000, "base": 261.0, "rate": 0.048 },
-      { "from": 20000, "to": 25000, "base": 741.0, "rate": 0.052 },
-      { "from": 25000, "to": 60000, "base": 1001.0, "rate": 0.0555 },
-      { "from": 60000, "to": null, "base": 2943.5, "rate": 0.066 }
+      {
+        "from": 0,
+        "to": 2000,
+        "base": 0,
+        "rate": 0
+      },
+      {
+        "from": 2000,
+        "to": 5000,
+        "base": 0,
+        "rate": 0.022
+      },
+      {
+        "from": 5000,
+        "to": 10000,
+        "base": 66.0,
+        "rate": 0.039
+      },
+      {
+        "from": 10000,
+        "to": 20000,
+        "base": 261.0,
+        "rate": 0.048
+      },
+      {
+        "from": 20000,
+        "to": 25000,
+        "base": 741.0,
+        "rate": 0.052
+      },
+      {
+        "from": 25000,
+        "to": 60000,
+        "base": 1001.0,
+        "rate": 0.0555
+      },
+      {
+        "from": 60000,
+        "to": null,
+        "base": 2943.5,
+        "rate": 0.066
+      }
     ],
-    "standardDeduction": { "single": 3250, "married": 6500 },
+    "standardDeduction": {
+      "single": 3250,
+      "married": 6500
+    },
     "standardDeductionComment": "single applies to BOTH 'Single' and 'Married Filing Separately' -- confirmed by the Guide's own third worked example (MFS, 2 exemptions, uses the $3,250 figure, not half of $6,500). Only 'mfj' (Married Filing Jointly) selects the $6,500 married figure.",
     "personalCreditPerExemption": 110,
-    "annualizeMultiplier": { "weekly": 52, "biweekly": 26, "semimonthly": 24, "monthly": 12, "daily": 300 },
+    "annualizeMultiplier": {
+      "weekly": 52,
+      "biweekly": 26,
+      "semimonthly": 24,
+      "monthly": 12,
+      "daily": 300
+    },
     "annualizeMultiplierComment": "Verbatim from Section 17: 'Multiply the daily gross by 300, weekly gross by 52, monthly gross by 12, semi-monthly gross by 24 and bi-weekly by 26.' Daily's x300 is NOT this engine's generic 260-workday PERIODS_PER_YEAR convention -- deliberately kept as Delaware's own published multiplier rather than silently using the engine default, the same fix New Jersey's daily table needed. Quarterly/semiannual/annual are not published by the Guide at all and are left absent -- delawareWithholding() throws a clear error for those rather than guessing.",
     "certificateFields": "input.workState.certificate.{maritalStatus ('mfj' selects married; anything else -- including 'single', 'mfs', or absent -- selects single, matching the Guide's Section 15(a) no-certificate default of 'a single person who has no withholding allowances'), exemptions (a single count -- the RESULT of Form DE-W4R's own Line G/10 worksheet, which the engine does not itself compute; the caller supplies the final number, same convention as Michigan's single allowances count)}."
   },
@@ -107,7 +157,10 @@
     "wageBase": 14500.0,
     "newEmployerRate": 0.01,
     "newConstructionRate": 0.01,
-    "experiencedRateRange": { "lowest": 0.003, "highest": 0.054 },
+    "experiencedRateRange": {
+      "lowest": 0.003,
+      "highest": 0.054
+    },
     "delinquentRate": 0.063,
     "confidence": "primary_source_confirmed -- Delaware DOL's own Employer Services page, its 'Delaware Merit Rate Table,' fetched and read directly this session (see sources above). This CORRECTED a wrong 1.8%-new-employer-rate claim that appeared in an earlier secondary-source pass within this same session (1.8% was actually the table's 2022 column, misread/misattributed by the secondary source) -- caught before being written here, not after.",
     "unconfirmedClaim": "A secondary source (not Delaware DOL's own page) separately claimed a '0.2% Operations and Technology Assessment' surcharge on all wages. Searched Delaware DOL's own Employer Services page directly for any mention of an assessment/technology/surcharge and found none -- not included as a fact in this file, flagged here as an unconfirmed claim rather than either asserted or silently dropped."
@@ -122,7 +175,8 @@
     "City of Wilmington's 1.25% wage tax is data-documented but not wired into the calc engine -- see localIncomeTax.notWiredIntoEngine above. Comparatively cheap to add later: it is a single flat rate with a simple resident-OR-work-location trigger, not a large per-jurisdiction table.",
     "Delaware Paid Leave is data-documented in full (rates, wage base, employer-size tiers, cost-sharing ceiling) but deliberately not wired into the calc engine -- the actual employee-withheld amount is an employer election within a statutory ceiling, not a fixed rate this engine could compute without a new certificate/config mechanism it doesn't yet have (employer headcount tier + elected cost-share percentage). WIRED (paid-leave pass): now computed via the statePaidLeaveEmployer block added to this file. The two reasons it was held back are both represented rather than flattened: coverage TIER comes from input.employer.paidLeaveTier (nothing computes without it) and the employee's share comes from input.employer.paidLeaveEmployeeShareFraction, clamped at the statutory 50% ceiling.",
     "SUTA's 0.2% 'Operations and Technology Assessment' claim from a secondary source was checked against Delaware DOL's own page and NOT found there -- left out of unemploymentInsurance's modeled figures, flagged as unconfirmed rather than included or silently dropped.",
-    "Daily pay frequency's x300 annualization multiplier is transcribed from the Guide's own formula sentence but not proven against a to-the-cent worked example (none published for 'daily') the way weekly/biweekly/semi-monthly/monthly all are."
+    "Daily pay frequency's x300 annualization multiplier is transcribed from the Guide's own formula sentence but not proven against a to-the-cent worked example (none published for 'daily') the way weekly/biweekly/semi-monthly/monthly all are.",
+    "Supplemental wages: Delaware's own Employer's Guide describes a real, distinct annual-marginal method for a bonus paid separately (annualize regular wages alone, separately annualize regular-plus-bonus, withhold the difference) — but this does NOT match the \"combine as one per-period payment\" shape this engine's existing supplementalAggregation mechanism implements (verified working for Hawaii and Mississippi this same pass), so wiring it through that mechanism would over-tax the bonus by effectively multiplying it by the number of pay periods per year. Left UNWIRED rather than shipped with a wrong number — same unresolved class as West Virginia. A standalone bonus falls back to this engine's existing default (annualize the bonus alone through the ordinary formula)."
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
