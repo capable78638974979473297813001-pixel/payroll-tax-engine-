@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Paycheck Calculator</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --panel: #ffffff;
+    --border: #dfe3e8;
+    --text: #1b1f24;
+    --muted: #5c6672;
+    --accent: #1f4f7a;
+    --accent-ink: #ffffff;
+    --good-bg: #edf3f7;
+    --warn-bg: #fff7e6;
+    --warn-border: #f0c674;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  header {
+    background: var(--accent);
+    color: var(--accent-ink);
+    padding: 18px 24px;
+  }
+  header h1 { margin: 0; font-size: 19px; font-weight: 600; }
+  header p { margin: 4px 0 0; font-size: 13px; opacity: 0.88; }
+  header a { color: #cfe3f5; }
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: minmax(380px, 500px) 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 920px) {
+    main { grid-template-columns: 1fr; }
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  fieldset {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 0 16px;
+    padding: 14px 0 0;
+  }
+  fieldset:first-of-type { border-top: none; padding-top: 0; }
+  legend {
+    font-weight: 600;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    padding: 0;
+    margin-bottom: 8px;
+  }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+  .row.single { grid-template-columns: 1fr; }
+  .row.three { grid-template-columns: 1fr 1fr 1fr; }
+  label { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 3px; }
+  input[type="text"], input[type="number"], input[type="date"], select {
+    width: 100%;
+    padding: 7px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13.5px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--text);
+  }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .checkbox-row { display: flex; align-items: center; gap: 6px; margin: 4px 0 8px; }
+  .checkbox-row input { width: auto; }
+  .checkbox-row label { margin: 0; color: var(--text); font-size: 13px; }
+  .hint { font-size: 11.5px; color: var(--muted); margin: -4px 0 8px; }
+  .muted-box {
+    padding: 10px 12px;
+    background: #fafbfc;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 12.8px;
+    margin-bottom: 10px;
+  }
+  #stateFieldsBox { display: flex; flex-direction: column; gap: 8px; }
+  .deduction-row {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 0.8fr auto;
+    gap: 8px;
+    align-items: end;
+    margin-bottom: 8px;
+  }
+  .deduction-row button {
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #a33;
+  }
+  #deductionsList { margin-bottom: 8px; }
+  .btn-row { display: flex; gap: 8px; margin-top: 4px; }
+  button#addDeduction, button#clearAll {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text);
+  }
+  button#calc {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  button#calc:hover { filter: brightness(1.1); }
+  button#calc:disabled { opacity: 0.6; cursor: default; }
+  #result-panel { min-height: 200px; }
+  #placeholder { color: var(--muted); padding: 40px 10px; text-align: center; }
+  .error-box {
+    background: #fdecec;
+    border: 1px solid #e8a3a3;
+    color: #7a1f1f;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    white-space: pre-wrap;
+  }
+  .paystub h2 { margin: 0 0 2px; font-size: 17px; }
+  .paystub .meta { color: var(--muted); font-size: 12.5px; margin-bottom: 14px; }
+  table.lines { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 14px; }
+  table.lines th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding: 4px 6px;
+  }
+  table.lines td { padding: 5px 6px; border-bottom: 1px solid #f0f2f4; vertical-align: top; }
+  table.lines td.amt, table.lines th.amt { text-align: right; font-family: var(--mono); white-space: nowrap; }
+  table.lines tr.total td { font-weight: 700; border-top: 2px solid var(--border); border-bottom: none; }
+  .line-detail { font-size: 11.5px; color: var(--muted); margin-top: 2px; max-width: 480px; }
+  .net-pay {
+    background: var(--good-bg);
+    border: 1px solid #b9d3e6;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 16px;
+  }
+  .net-pay .label { font-size: 13px; color: var(--muted); }
+  .net-pay .value { font-size: 24px; font-weight: 700; font-family: var(--mono); color: #1f4f7a; }
+  .section-title {
+    font-weight: 600;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    margin: 18px 0 8px;
+  }
+  ul.warnings { margin: 0; padding-left: 0; list-style: none; }
+  ul.warnings li {
+    margin-bottom: 8px;
+    font-size: 12.8px;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-left: 3px solid #d99a1a;
+    padding: 8px 10px;
+    border-radius: 4px;
+  }
+  footer { max-width: 1200px; margin: 0 auto; padding: 6px 20px 30px; color: var(--muted); font-size: 11.5px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Paycheck Calculator</h1>
+  <p>Any state, computed directly by this repo's own payroll-tax engine (calculatePaycheck()) — the same code the test suite checks. Not an official tool. See also the <a href="http://localhost:4321">dedicated Alabama calculator</a>.</p>
+</header>
+
+<main>
+  <form class="panel" id="form">
+
+    <fieldset>
+      <legend>State &amp; Date</legend>
+      <div class="row">
+        <div>
+          <label for="state">State</label>
+          <select id="state"><option value="">Federal taxes only</option></select>
+          <p class="hint" id="stateHint">Select a state to include state &amp; local taxes.</p>
+        </div>
+        <div>
+          <label for="checkDate">Check Date</label>
+          <input type="date" id="checkDate" />
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Earnings</legend>
+      <div class="row">
+        <div>
+          <label for="grossPay">Gross Pay</label>
+          <input type="number" id="grossPay" value="0" step="0.01" min="0" />
+        </div>
+        <div>
+          <label for="grossPayMethod">Gross Pay Method</label>
+          <select id="grossPayMethod">
+            <option value="annual" selected>Annually</option>
+            <option value="perPeriod">Per Pay Period</option>
+            <option value="hourly">Hourly</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" id="hourlyRow" style="display:none">
+        <div><label for="hourlyRate">Hourly Rate</label><input type="number" id="hourlyRate" value="0" step="0.01" min="0" /></div>
+        <div><label for="hoursPerPeriod">Hours per Pay Period</label><input type="number" id="hoursPerPeriod" value="0" step="0.25" min="0" /></div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="grossPayYTD">Gross Pay YTD</label>
+          <input type="number" id="grossPayYTD" value="0" step="0.01" min="0" />
+        </div>
+        <div>
+          <label for="payFrequency">Pay Frequency</label>
+          <select id="payFrequency">
+            <option value="weekly">Weekly</option>
+            <option value="biweekly" selected>Biweekly</option>
+            <option value="semimonthly">Semimonthly</option>
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="semiannual">Semiannual</option>
+            <option value="annual">Annual</option>
+            <option value="daily">Daily</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Federal Taxes (enter your W-4 info)</legend>
+      <p class="hint">This engine implements the 2020-or-later Form W-4 only — there is no legacy pre-2020 allowance-based path.</p>
+      <div class="row">
+        <div>
+          <label for="filingStatus">Federal Filing Status</label>
+          <select id="filingStatus">
+            <option value="single" selected>Single or Married filing separately</option>
+            <option value="married_joint">Married filing jointly</option>
+            <option value="head_of_household">Head of household</option>
+          </select>
+        </div>
+        <div>
+          <label for="dependentCredit">Step 3: Dependents Amount</label>
+          <input type="number" id="dependentCredit" value="0" step="0.01" min="0" />
+        </div>
+      </div>
+      <div class="checkbox-row"><input type="checkbox" id="multipleJobs" /><label for="multipleJobs">Step 2: Two Jobs (or Multiple Jobs Worksheet checkbox)</label></div>
+      <div class="row">
+        <div><label for="otherIncome">Step 4a: Other Income</label><input type="number" id="otherIncome" value="0" step="0.01" min="0" /></div>
+        <div><label for="w4Deductions">Step 4b: Deductions</label><input type="number" id="w4Deductions" value="0" step="0.01" min="0" /></div>
+      </div>
+      <div class="row single">
+        <div><label for="extraWithholding">Additional Federal Withholding (per cheque)</label><input type="number" id="extraWithholding" value="0" step="0.01" min="0" /></div>
+      </div>
+      <div class="checkbox-row"><input type="checkbox" id="roundToWholeDollars" /><label for="roundToWholeDollars">Round Withholding to Whole Dollars</label></div>
+      <div class="checkbox-row"><input type="checkbox" id="federalExempt" /><label for="federalExempt">Exempt from Federal Withholding</label></div>
+      <div class="row single">
+        <div>
+          <label for="employmentCategory">Employment Category</label>
+          <select id="employmentCategory">
+            <option value="standard" selected>Standard employee</option>
+            <option value="clergy">Clergy / minister</option>
+            <option value="statutory_employee">Statutory employee</option>
+            <option value="household">Household / domestic worker</option>
+            <option value="agricultural">Agricultural worker</option>
+            <option value="railroad">Railroad employee</option>
+            <option value="election_worker">Election worker</option>
+          </select>
+          <p class="hint">Drives Social Security/Medicare/FUTA treatment — this engine has no standalone "exempt from Social Security" or "exempt from Medicare" checkbox because those exemptions are always a consequence of the worker's category, never an independent election.</p>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>State and Local Taxes</legend>
+      <div id="stateFieldsBox">
+        <div class="muted-box" id="noStateMsg">No state selected. Select state above to see its withholding certificate fields.</div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Benefits and Deductions (optional)</legend>
+      <div id="deductionsList"></div>
+      <div class="btn-row">
+        <button type="button" id="addDeduction">+ Add Deduction</button>
+        <button type="button" id="clearAll">Clear</button>
+      </div>
+    </fieldset>
+
+    <button id="calc" type="submit">Calculate</button>
+  </form>
+
+  <div class="panel" id="result-panel">
+    <div id="placeholder">Fill in the form and press <strong>Calculate</strong> — the result appears here.</div>
+    <div id="result" style="display:none"></div>
+  </div>
+</main>
+
+<footer>
+  Runs entirely against local repo data (data/states/*.json, data/federal/2026.json) via calculatePaycheck(). Nothing is sent anywhere outside this machine.
+</footer>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  $('checkDate').value = new Date().toISOString().slice(0, 10);
+
+  const PRETAX_CATEGORIES = [
+    ['section125', 'Section 125 (medical)'],
+    ['hsa', 'HSA'],
+    ['fsa', 'FSA'],
+    ['dependent_care', 'Dependent care'],
+    ['deferral_401k', '401(k)'],
+    ['deferral_403b', '403(b)'],
+    ['deferral_457', '457'],
+    ['deferral_simple', 'SIMPLE IRA'],
+    ['commuter', 'Commuter'],
+    ['posttax', 'Post-tax (union dues, etc.)'],
+  ];
+
+  // --- gross pay method toggling ------------------------------------
+  $('grossPayMethod').addEventListener('change', () => {
+    $('hourlyRow').style.display = $('grossPayMethod').value === 'hourly' ? 'grid' : 'none';
+  });
+
+  // --- populate state dropdown --------------------------------------
+  let stateFieldsCache = {};
+  fetch('/api/states')
+    .then((r) => r.json())
+    .then((data) => {
+      const sel = $('state');
+      for (const s of data.states) {
+        const opt = document.createElement('option');
+        opt.value = s.code;
+        opt.textContent = s.hasIncomeTax ? s.name : `${s.name} (no income tax)`;
+        sel.appendChild(opt);
+      }
+    });
+
+  function renderStateFields(spec) {
+    const box = $('stateFieldsBox');
+    box.innerHTML = '';
+    const code = $('state').value;
+    if (!code) {
+      box.innerHTML = '<div class="muted-box" id="noStateMsg">No state selected. Select state above to see its withholding certificate fields.</div>';
+      return;
+    }
+    if (!spec.hasIncomeTax) {
+      box.innerHTML = `<div class="muted-box">${code} has no state income tax. Only federal, FICA, and any employer-paid unemployment tax apply.</div>`;
+      return;
+    }
+    if (spec.fields.length === 0 && !spec.hasLocalTax) {
+      box.innerHTML = `<div class="muted-box">${code} uses a flat rate with no certificate fields — nothing further needed.</div>`;
+    }
+    for (const f of spec.fields) {
+      const wrap = document.createElement('div');
+      if (f.type === 'checkbox') {
+        wrap.className = 'checkbox-row';
+        wrap.innerHTML = `<input type="checkbox" id="sf_${f.key}" /><label for="sf_${f.key}">${f.label}</label>`;
+      } else if (f.type === 'select') {
+        wrap.innerHTML = `<label for="sf_${f.key}">${f.label}</label>` +
+          `<select id="sf_${f.key}">${f.options.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}</select>`;
+      } else {
+        wrap.innerHTML = `<label for="sf_${f.key}">${f.label}</label>` +
+          `<input type="${f.type}" id="sf_${f.key}" ${f.placeholder ? `placeholder="${f.placeholder}"` : ''} />`;
+      }
+      box.appendChild(wrap);
+    }
+    if (spec.hasLocalTax && !spec.fields.some(f => f.key === 'workCity')) {
+      const wrap = document.createElement('div');
+      wrap.innerHTML = `<label for="sf_workCity">Work city / locality (local tax)</label><input type="text" id="sf_workCity" placeholder="e.g. Birmingham" />`;
+      box.appendChild(wrap);
+    }
+    const res = document.createElement('div');
+    res.innerHTML = `<label for="sf_residenceState">Residence state (if different, for reciprocity)</label><input type="text" id="sf_residenceState" maxlength="2" style="text-transform:uppercase" placeholder="e.g. PA" />`;
+    box.appendChild(res);
+  }
+
+  $('state').addEventListener('change', () => {
+    const code = $('state').value;
+    if (!code) { renderStateFields({ fields: [], hasLocalTax: false, hasIncomeTax: true }); return; }
+    if (stateFieldsCache[code]) { renderStateFields(stateFieldsCache[code]); return; }
+    fetch('/api/state-fields/' + code)
+      .then((r) => r.json())
+      .then((spec) => { stateFieldsCache[code] = spec; renderStateFields(spec); });
+  });
+
+  // --- deductions list -------------------------------------------------
+  let deductionCount = 0;
+  function addDeductionRow() {
+    deductionCount += 1;
+    const id = deductionCount;
+    const row = document.createElement('div');
+    row.className = 'deduction-row';
+    row.dataset.id = id;
+    row.innerHTML = `
+      <div><label>Description</label><input type="text" class="ded-code" placeholder="e.g. 401K" /></div>
+      <div><label>Category</label><select class="ded-category">${PRETAX_CATEGORIES.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></div>
+      <div><label>Amount ($)</label><input type="number" class="ded-amount" value="0" step="0.01" min="0" /></div>
+      <button type="button" class="ded-remove" title="Remove">✕</button>
+    `;
+    row.querySelector('.ded-remove').addEventListener('click', () => row.remove());
+    $('deductionsList').appendChild(row);
+  }
+  $('addDeduction').addEventListener('click', addDeductionRow);
+  $('clearAll').addEventListener('click', () => { $('deductionsList').innerHTML = ''; deductionCount = 0; });
+
+  // --- building the request ------------------------------------------
+  function num(id) { const v = $(id)?.value; return v === undefined || v === '' ? 0 : Number(v); }
+
+  function collectStateCertificate() {
+    const cert = {};
+    document.querySelectorAll('#stateFieldsBox [id^="sf_"]').forEach((el) => {
+      const key = el.id.slice(3);
+      if (key === 'residenceState') return;
+      if (el.type === 'checkbox') { if (el.checked) cert[key] = true; }
+      else if (el.value !== '') cert[key] = el.value;
+    });
+    return cert;
+  }
+
+  function buildRequest() {
+    const deductions = [];
+    document.querySelectorAll('.deduction-row').forEach((row) => {
+      const code = row.querySelector('.ded-code').value || 'DEDUCTION';
+      const category = row.querySelector('.ded-category').value;
+      const amount = Number(row.querySelector('.ded-amount').value || 0);
+      if (amount > 0) deductions.push({ code, category, amount });
+    });
+
+    const residenceEl = document.getElementById('sf_residenceState');
+    return {
+      checkDate: $('checkDate').value,
+      stateCode: $('state').value || undefined,
+      residenceStateCode: residenceEl && residenceEl.value ? residenceEl.value : undefined,
+      grossPayMethod: $('grossPayMethod').value,
+      grossPay: num('grossPay'),
+      hourlyRate: num('hourlyRate'),
+      hoursPerPeriod: num('hoursPerPeriod'),
+      payFrequency: $('payFrequency').value,
+      grossPayYTD: num('grossPayYTD'),
+      employmentCategory: $('employmentCategory').value,
+      federalW4: {
+        filingStatus: $('filingStatus').value,
+        multipleJobs: $('multipleJobs').checked,
+        dependentCredit: num('dependentCredit'),
+        otherIncome: num('otherIncome'),
+        deductions: num('w4Deductions'),
+        extraWithholding: num('extraWithholding'),
+        exempt: $('federalExempt').checked,
+      },
+      roundToWholeDollars: $('roundToWholeDollars').checked,
+      stateCertificate: collectStateCertificate(),
+      deductions,
+    };
+  }
+
+  // --- rendering ---------------------------------------------------------
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function lineRows(lines) {
+    return lines.map((l) => `
+      <tr>
+        <td>${escapeHtml(l.name)}${l.detail ? `<div class="line-detail">${escapeHtml(l.detail)}</div>` : ''}</td>
+        <td class="amt">${(l.taxableWages / 100).toFixed(2)}</td>
+        <td class="amt">${(l.amount / 100).toFixed(2)}</td>
+      </tr>
+    `).join('');
+  }
+
+  function fmtCents(c) { return '$' + (c / 100).toFixed(2); }
+
+  function render(result, input) {
+    const el = $('result');
+    const employeeLines = result.taxes.filter((t) => t.payer === 'employee');
+    const employerLines = result.taxes.filter((t) => t.payer === 'employer');
+
+    let html = '<div class="paystub">';
+    html += '<h2>Paycheck</h2>';
+    html += `<div class="meta">${result.checkDate} · ${input.payFrequency} · ${input.workState ? input.workState.code : 'Federal only'}</div>`;
+    html += `<div class="net-pay"><span class="label">Net pay</span><span class="value">${fmtCents(result.netPay)}</span></div>`;
+
+    html += `<div style="margin-bottom:14px;font-size:13px;color:var(--muted)">Gross ${fmtCents(result.grossPay)} · Pre-tax deductions -${fmtCents(result.pretaxDeductions)} · Post-tax deductions -${fmtCents(result.posttaxDeductions)}</div>`;
+
+    html += '<table class="lines"><thead><tr><th>Withheld from employee</th><th class="amt">Taxable</th><th class="amt">Amount</th></tr></thead><tbody>';
+    html += lineRows(employeeLines);
+    html += `<tr class="total"><td>Total withheld</td><td></td><td class="amt">${fmtCents(result.employeeTaxTotal)}</td></tr>`;
+    html += '</tbody></table>';
+
+    if (employerLines.length) {
+      html += '<table class="lines"><thead><tr><th>Employer cost (not withheld)</th><th class="amt">Taxable</th><th class="amt">Amount</th></tr></thead><tbody>';
+      html += lineRows(employerLines);
+      html += `<tr class="total"><td>Total employer tax</td><td></td><td class="amt">${fmtCents(result.employerTaxTotal)}</td></tr>`;
+      html += `<tr class="total"><td>Total cost of this paycheck</td><td></td><td class="amt">${fmtCents(result.grossPay + result.employerTaxTotal)}</td></tr>`;
+      html += '</tbody></table>';
+    }
+
+    html += '</div>';
+    el.innerHTML = html;
+    el.style.display = 'block';
+    $('placeholder').style.display = 'none';
+  }
+
+  function renderError(message, problems) {
+    const el = $('result');
+    let text = message;
+    if (problems && problems.length) text += '\n\n' + problems.map((p) => '• ' + p).join('\n');
+    el.innerHTML = '<div class="error-box">' + escapeHtml(text) + '</div>';
+    el.style.display = 'block';
+    $('placeholder').style.display = 'none';
+  }
+
+  $('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('calc');
+    btn.disabled = true;
+    btn.textContent = 'Calculating…';
+    try {
+      const res = await fetch('/api/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildRequest()),
+      });
+      const data = await res.json();
+      if (!res.ok) renderError(data.error || 'Calculation failed.', data.problems);
+      else render(data.result, data.input);
+    } catch (err) {
+      renderError('Could not reach the calculator server: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Calculate';
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

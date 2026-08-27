@@ -12,6 +12,7 @@
     "demo:alabama": "node examples/alabama-demo.ts",
     "alabama": "node examples/alabama-calc.ts",
     "ui:alabama": "node examples/alabama-server.ts",
+    "ui:calculator": "node examples/calculator-server.ts",
     "demo:harvest": "node examples/harvest-demo.ts",
     "demo:geocode": "node examples/geocode-demo.ts",
     "coverage:geocode": "node examples/geocode-coverage.ts",
