@@ -8347,6 +8347,69 @@ describe('North Dakota', () => {
     );
     assert.equal(amountOf(r, 'ND_SIT'), dollars(62));
   });
+
+  // Section 3's own two employer options: flat 1.50%, or aggregate with the
+  // most recent regular payroll period.
+  describe('Supplemental wages (Section 3)', () => {
+    test("Option 1 reproduces the booklet's own worked example exactly: $1,000 bonus x 1.50% = $15.00, when elected", () => {
+      const r = calculatePaycheck(
+        input({
+          checkDate: '2026-06-15',
+          payFrequency: 'monthly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(1000) }],
+          workState: { code: 'ND', certificate: { formVintage: 'current' } },
+          employer: { supplementalFlatRateElection: { ND: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'ND_SIT_SUPP'), dollars(15.0));
+    });
+
+    test('without an election, no flat line fires — falls back to the ordinary formula', () => {
+      const r = calculatePaycheck(
+        input({
+          checkDate: '2026-06-15',
+          payFrequency: 'monthly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(1000) }],
+          workState: { code: 'ND', certificate: { formVintage: 'current' } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'ND_SIT_SUPP'), false);
+    });
+
+    test('Option 2 (aggregate with the most recent regular payroll period) works via input.priorRegularPayment', () => {
+      const regularOnly = calculatePaycheck(
+        input({
+          checkDate: '2026-06-15',
+          payFrequency: 'monthly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(5500) }],
+          workState: { code: 'ND', certificate: { formVintage: 'current' } },
+        }),
+      );
+      const regularTax = amountOf(regularOnly, 'ND_SIT');
+
+      const withAggregation = calculatePaycheck(
+        input({
+          checkDate: '2026-06-15',
+          payFrequency: 'monthly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(1000) }],
+          workState: { code: 'ND', certificate: { formVintage: 'current' } },
+          priorRegularPayment: { taxableWages: dollars(5500), stateIncomeTaxWithheld: regularTax },
+        }),
+      );
+      assert.equal(withAggregation.taxes.some((t) => t.id === 'ND_SIT_SUPP'), false);
+
+      const combinedAsOneCheque = calculatePaycheck(
+        input({
+          checkDate: '2026-06-15',
+          payFrequency: 'monthly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(6500) }],
+          workState: { code: 'ND', certificate: { formVintage: 'current' } },
+        }),
+      );
+      const expectedMarginal = amountOf(combinedAsOneCheque, 'ND_SIT') - regularTax;
+      assert.equal(amountOf(withAggregation, 'ND_SIT'), expectedMarginal);
+    });
+  });
 });
 
 describe('effective dating', () => {
