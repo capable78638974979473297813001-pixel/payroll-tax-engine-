@@ -31,7 +31,15 @@
     }
   ],
   "employeeElectedFlat": {
-    "availableRates": [0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035],
+    "availableRates": [
+      0.005,
+      0.01,
+      0.015,
+      0.02,
+      0.025,
+      0.03,
+      0.035
+    ],
     "defaultRate": 0.02,
     "defaultRateNote": "Form A-4's own instruction, quoted verbatim: 'If you do not give this form to your employer the department requires your employer to withhold 2.0% of your gross taxable wages.' This is a genuinely different no-form default shape from every other state in this project — most default to 'single, zero allowances' on a bracket table; Arizona defaults to a specific flat RATE, because there's no bracket table to fall back to.",
     "zeroElection": {
@@ -59,7 +67,12 @@
       "verifiedOn": "2026-08-20",
       "verifiedBy": "Fetched and read directly. Quoted verbatim: 'If you are a nonresident working in Arizona, you may claim an exemption from Arizona income tax withholding if you are: 1. A resident of one of the following states: California, Indiana, Oregon, or Virginia; AND 2. Allowed to claim a tax credit against your Arizona tax for taxes paid to your state of residence on Form 140NR filed for the year.'"
     },
-    "reciprocalStates": ["CA", "IN", "OR", "VA"],
+    "reciprocalStates": [
+      "CA",
+      "IN",
+      "OR",
+      "VA"
+    ],
     "notARealBilateralAgreement": "IMPORTANT, disclosed rather than glossed over: this is NOT the same legal shape as MI/WI/IN/OH's mutual reciprocity agreements elsewhere in this project (a simple 'residents of state X owe $0 to state Y' pact). Arizona's own form conditions the exemption on being 'ALLOWED to claim a tax credit... on Form 140NR' — i.e. it's really a nonresident-credit-eligibility gate dressed up in reciprocity-like language, not an unconditional bilateral pact.",
     "orAsymmetryConfirmed": "CONFIRMED ASYMMETRIC for the OR leg this session: Oregon's own out-of-state/nonresident-employer guide (150-206-692, fetched directly — see OR-2026.json) makes NO mention of Arizona or any state-of-residence-based exemption at all; Oregon withholds from every nonresident regardless of home state, with only a small de-minimis income exception. So an OREGON resident working in Arizona gets the AZ exemption described here, but an ARIZONA resident working in Oregon gets NO matching Oregon exemption — genuinely one-directional, not a mutual pact, despite Arizona's own form using reciprocity-like language.",
     "caLegNotIndependentlyVerified": "The CA leg specifically was NOT independently confirmed from California's own Franchise Tax Board this session — a direct FTB reciprocal-states page was searched for but not found at a working URL (a guessed URL 404'd). Still resting on Arizona's own primary-sourced WEC form plus general secondary corroboration that CA-AZ reciprocity exists for wage income specifically (distinct from CA's much stricter general nonresident-withholding regime under Rev. & Tax. Code 18662, which is NOT what's being described here). Given the OR leg just turned out to be asymmetric despite reading the same way on Arizona's form, this is flagged as genuinely uncertain rather than assumed symmetric — the Kansas-style caution this file already carried was well-placed.",
@@ -74,43 +87,121 @@
     "wageBase": 8000.0,
     "newEmployerRate": 0.02,
     "newEmployerDuration": "Minimum 2 calendar years before experience rating applies.",
-    "experienceRatedRange": { "min": 0.0003, "max": 0.0836 },
+    "experienceRatedRange": {
+      "min": 0.0003,
+      "max": 0.0836
+    },
     "experienceRatedRangeCorrection": "CORRECTED this session — the original figure (0.08%-20.60%) was wrong and did not match Arizona DES's own chart at all. Verified min/max: 0.03% (13% or more positive ratio) to 8.36% (13% or more negative ratio).",
     "positiveRatioGroupRates": [
-      { "group": "13% or over", "rate": 0.0003 },
-      { "group": "12% but less than 13%", "rate": 0.0023 },
-      { "group": "11% but less than 12%", "rate": 0.0062 },
-      { "group": "10% but less than 11%", "rate": 0.0101 },
-      { "group": "9% but less than 10%", "rate": 0.0139 },
-      { "group": "8% but less than 9%", "rate": 0.0178 },
-      { "group": "7% but less than 8%", "rate": 0.0217 },
-      { "group": "6% but less than 7%", "rate": 0.0256 },
-      { "group": "5% but less than 6%", "rate": 0.0294 },
-      { "group": "4% but less than 5%", "rate": 0.0333 },
-      { "group": "3% but less than 4%", "rate": 0.0372 },
-      { "group": "Less than 3%", "rate": 0.0403 },
-      { "group": "Zero", "rate": 0.0418 }
+      {
+        "group": "13% or over",
+        "rate": 0.0003
+      },
+      {
+        "group": "12% but less than 13%",
+        "rate": 0.0023
+      },
+      {
+        "group": "11% but less than 12%",
+        "rate": 0.0062
+      },
+      {
+        "group": "10% but less than 11%",
+        "rate": 0.0101
+      },
+      {
+        "group": "9% but less than 10%",
+        "rate": 0.0139
+      },
+      {
+        "group": "8% but less than 9%",
+        "rate": 0.0178
+      },
+      {
+        "group": "7% but less than 8%",
+        "rate": 0.0217
+      },
+      {
+        "group": "6% but less than 7%",
+        "rate": 0.0256
+      },
+      {
+        "group": "5% but less than 6%",
+        "rate": 0.0294
+      },
+      {
+        "group": "4% but less than 5%",
+        "rate": 0.0333
+      },
+      {
+        "group": "3% but less than 4%",
+        "rate": 0.0372
+      },
+      {
+        "group": "Less than 3%",
+        "rate": 0.0403
+      },
+      {
+        "group": "Zero",
+        "rate": 0.0418
+      }
     ],
     "negativeRatioGroupRates": [
-      { "group": "Less than 3%", "rate": 0.0441 },
-      { "group": "3% but less than 4%", "rate": 0.0472 },
-      { "group": "4% but less than 5%", "rate": 0.0511 },
-      { "group": "5% but less than 6%", "rate": 0.055 },
-      { "group": "6% but less than 7%", "rate": 0.0588 },
-      { "group": "7% but less than 8%", "rate": 0.0627 },
-      { "group": "8% but less than 9%", "rate": 0.0666 },
-      { "group": "9% but less than 10%", "rate": 0.0705 },
-      { "group": "10% but less than 11%", "rate": 0.0743 },
-      { "group": "11% but less than 12%", "rate": 0.0782 },
-      { "group": "12% but less than 13%", "rate": 0.0821 },
-      { "group": "13% or more", "rate": 0.0836 }
+      {
+        "group": "Less than 3%",
+        "rate": 0.0441
+      },
+      {
+        "group": "3% but less than 4%",
+        "rate": 0.0472
+      },
+      {
+        "group": "4% but less than 5%",
+        "rate": 0.0511
+      },
+      {
+        "group": "5% but less than 6%",
+        "rate": 0.055
+      },
+      {
+        "group": "6% but less than 7%",
+        "rate": 0.0588
+      },
+      {
+        "group": "7% but less than 8%",
+        "rate": 0.0627
+      },
+      {
+        "group": "8% but less than 9%",
+        "rate": 0.0666
+      },
+      {
+        "group": "9% but less than 10%",
+        "rate": 0.0705
+      },
+      {
+        "group": "10% but less than 11%",
+        "rate": 0.0743
+      },
+      {
+        "group": "11% but less than 12%",
+        "rate": 0.0782
+      },
+      {
+        "group": "12% but less than 13%",
+        "rate": 0.0821
+      },
+      {
+        "group": "13% or more",
+        "rate": 0.0836
+      }
     ],
     "confidence": "primary_source_confirmed — full rate chart (both ratio-group tables, all 25 rows) read directly off Arizona DES's own UIT-0603A (FY26) PDF, not cross-sourced."
   },
-  "verification": "PROVEN via calculatePaycheck(): 4 fixtures (elected 2.5%, no-form 2.0% default, zero election, and an unrecognized-rate rejection) — see tests/engine.test.ts, describe('Arizona'). No supplemental-wage or reciprocity path is exercised (Arizona has no separate supplemental method; reciprocity is documented but not implemented as an engine mechanism, same gap class as several other states' reciprocity in this project). A bug-audit pass found and closed a real gap: employeeElectedFlat() originally cast certificate.electedRate straight to a number and applied it with no check against Form A-4's closed list of 7 legal rates — a typo'd or copy-pasted rate (e.g. 12% instead of 1.2%) would have silently withheld a wildly wrong amount with no error. Fixed to validate against cfg.availableRates and throw, matching every other state's own enum-like certificate field convention in this project.",
+  "verification": "PROVEN via calculatePaycheck(): 4 fixtures (elected 2.5%, no-form 2.0% default, zero election, and an unrecognized-rate rejection) — see tests/engine.test.ts, describe('Arizona'). No supplemental-wage or reciprocity path is exercised (Arizona has no separate supplemental method; RECIPROCITY IS LIVE, this claim was stale: reciprocityExemptionReason() reads this file's own reciprocity.reciprocalStates (CA, IN, OR, VA) generically, corrected this pass — a CA/IN/OR/VA resident working in Arizona already owes $0 AZ_SIT without any Arizona-specific code). A bug-audit pass found and closed a real gap: employeeElectedFlat() originally cast certificate.electedRate straight to a number and applied it with no check against Form A-4's closed list of 7 legal rates — a typo'd or copy-pasted rate (e.g. 12% instead of 1.2%) would have silently withheld a wildly wrong amount with no error. Fixed to validate against cfg.availableRates and throw, matching every other state's own enum-like certificate field convention in this project.",
   "knownGaps": [
     "Reciprocity's CA leg remains genuinely uncertain — see reciprocity.caLegNotIndependentlyVerified. The OR leg was actively checked and found ASYMMETRIC this session (see reciprocity.orAsymmetryConfirmed), which raises rather than lowers suspicion about whether the CA leg is truly mutual too.",
-    "Native American reservation exemption and military spouse exemption (both real, found on the same WEC form) are noted but not modelled as certificate fields — neither has appeared as a concept anywhere else in this project except Michigan's separate 'closed list' city-tax discussion, and would need new certificate fields this engine doesn't have."
+    "RESOLVED: both are reachable via the existing generic certificate.exempt + certificate.exemptReason mechanism (already unconditional for every state) — see this file's own certificateBasedExemptions block for the verbatim Form WEC text. The earlier claim that new certificate fields were needed was incorrect and is corrected here."
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
@@ -124,5 +215,20 @@
     },
     "employerSuppliedRateRequired": false,
     "confidence": "inherited_from_this_file"
+  },
+  "certificateBasedExemptions": {
+    "$comment": "Form WEC (2026 rev.), read directly and quoted verbatim in this file's own sources[] entry above. Three exemption categories, ALL reachable through the existing generic certificate.exempt + certificate.exemptReason route (applyStateWithholdingExemption() in src/taxes/state.ts, already unconditional for every state) rather than needing new certificate fields — the earlier claim in this file's own verification note (\"would need new certificate fields this engine doesn't have\") was WRONG about the generic mechanism, corrected this pass. Two are recorded here for completeness; the third (nonresidents of CA/IN/OR/VA) is Arizona's own reciprocity mechanism and is ALREADY live via this file's own reciprocity.reciprocalStates block — also previously mis-stated as unimplemented, also corrected.",
+    "exemptions": [
+      {
+        "id": "native_american_reservation",
+        "form": "Form WEC Part 1",
+        "rule": "Wages are exempt from Arizona withholding if the employee: 1. Lives on the reservation; 2. Works on that reservation; AND 3. Is an affiliated and enrolled member of the tribe for which that reservation was established. \"Any wages earned off the reservation for work done in Arizona are subject to Arizona withholding\" — a three-part, ALL-conditions test the employer verifies against documentation, not something this engine could derive from an address alone."
+      },
+      {
+        "id": "military_spouse",
+        "form": "Form WEC Part 2",
+        "rule": "The federal Military Spouses Residency Relief Act exemption for a nonresident spouse of an active-duty servicemember present in Arizona solely due to military orders — same shape as every other state's MSRRA exemption in this project."
+      }
+    ]
   }
 }

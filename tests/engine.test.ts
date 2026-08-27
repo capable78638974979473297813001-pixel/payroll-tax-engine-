@@ -187,6 +187,49 @@ describe('federal income tax — Pub 15-T Worksheet 1A', () => {
     );
     assert.equal(amountOf(mfs, 'US_FIT'), amountOf(single, 'US_FIT'));
   });
+
+  // OBBBA's "no tax on tips" / "no tax on overtime" deductions (P.L.
+  // 119-21): the 2026 Form W-4's own Step 4(b) Deductions Worksheet has the
+  // employee estimate qualified tips/overtime/car-loan-interest and fold
+  // the total into ONE number entered on Step 4(b) of the actual W-4 —
+  // this engine's existing federalW4.deductions field. No new mechanism
+  // needed; this proves the existing field actually carries it through.
+  test('a caller-supplied Step 4(b) deduction (standing in for an OBBBA tips/overtime worksheet result) reduces the annual base dollar-for-dollar', () => {
+    const withoutDeduction = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1200) }],
+      }),
+    );
+    // $8,000 standing in for the W-4 worksheet's own Line 15 result (e.g.
+    // an $8,000 qualified-tips estimate, no other adjustments, standard
+    // deduction taken — worksheet Line 2 = Line 15 in that case).
+    const withDeduction = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1200) }],
+        federalW4: { ...input().federalW4, deductions: dollars(8000) },
+      }),
+    );
+    assert.ok(
+      amountOf(withDeduction, 'US_FIT') < amountOf(withoutDeduction, 'US_FIT'),
+      'a larger Step 4(b) deduction must reduce federal withholding',
+    );
+    // Independently confirm it's exactly the annualize→bracket→divide
+    // path doing the work by reproducing the "with deduction" figure a
+    // second way: subtracting $8,000 straight from otherIncome instead of
+    // adding it as a deduction lands on the same annual taxable base
+    // (Step 1's own 1e−1h arithmetic doesn't care which side of the
+    // subtraction a dollar comes from), and therefore the same withholding.
+    const viaNegativeOtherIncome = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1200) }],
+        federalW4: { ...input().federalW4, otherIncome: -dollars(8000) },
+      }),
+    );
+    assert.equal(amountOf(withDeduction, 'US_FIT'), amountOf(viaNegativeOtherIncome, 'US_FIT'));
+  });
 });
 
 describe('FICA', () => {
