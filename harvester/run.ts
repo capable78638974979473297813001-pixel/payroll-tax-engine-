@@ -49,6 +49,13 @@ export interface RegisteredSource {
    * healthy every day, which is exactly why it needs saying out loud.
    */
   monitoringGap?: boolean;
+  /**
+   * Inclusive [from, to] byte offsets this source regenerates per request
+   * (an embedded timestamp in a binary export, say). Zeroed before hashing
+   * so the capture is comparable. Measure these by diffing two fetches —
+   * never guess, since masking real content would hide a rate change.
+   */
+  volatileByteRanges?: [number, number][];
   manualOnlyReason?: string;
 }
 

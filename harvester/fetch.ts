@@ -97,7 +97,7 @@ export interface FetchOptions {
 }
 
 export async function fetchSource(
-  source: { id: string; url: string },
+  source: { id: string; url: string; volatileByteRanges?: [number, number][] },
   options: FetchOptions = {},
 ): Promise<FetchResult> {
   const fetchedAt = new Date().toISOString();
@@ -170,6 +170,20 @@ export async function fetchSource(
   }
   if (buffer.byteLength === 0) {
     return fail(`Body was empty — HTTP ${response.status} with no content is not a register.`);
+  }
+
+  // Zero out byte ranges a source is known to regenerate on every request.
+  //
+  // Pennsylvania's Act 32 register is served as a binary .xls, and two
+  // fetches four seconds apart differ in EXACTLY four bytes at offsets
+  // 1132-1135 out of 2,662,336 — an OLE2 container timestamp, measured by
+  // diffing two captures rather than guessed at. Without this the largest
+  // local-tax dataset in the project reports a change every single run and
+  // is therefore unreadable as a signal; with it, the 2,500 rates behind
+  // it are genuinely watched. Applied to the raw bytes because by the time
+  // this is a string the offsets no longer mean anything.
+  for (const [from, to] of source.volatileByteRanges ?? []) {
+    if (from >= 0 && to < buffer.byteLength && from <= to) buffer.fill(0, from, to + 1);
   }
 
   const looksPdf = isPdf(buffer, contentType);

@@ -62,6 +62,22 @@
       ]
     },
     {
+      "id": "al-municipal-occupational",
+      "level": "local",
+      "jurisdiction": "AL",
+      "title": "Alabama League of Municipalities — municipal occupational tax rates",
+      "url": "https://almonline.org/TaxRates.aspx",
+      "authority": "state_register",
+      "format": "html",
+      "coversJurisdictions": 25,
+      "checkFrequency": "monthly",
+      "expectedChange": "rolling; ALM updates as member cities report",
+      "feeds": [
+        "data/local/AL-municipalities-{year}.json"
+      ],
+      "note": "Alabama has NO state-run register of municipal occupational taxes — confirmed when this data was first gathered — so ALM's own survey is the closest thing to a central source, and the data file records that it is one confidence tier below primary. Rates here are percentage-formatted without decimals ('2%'), which is why a naive rate-regex finds none; the figures are present."
+    },
+    {
       "id": "al-withholding",
       "level": "state",
       "jurisdiction": "AL",
@@ -273,6 +289,22 @@
       ]
     },
     {
+      "id": "in-county-rates",
+      "level": "local",
+      "jurisdiction": "IN",
+      "title": "Indiana DOR Departmental Notice #1 — county income tax rates",
+      "url": "https://www.in.gov/dor/files/dn01.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 92,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, and Indiana genuinely does issue mid-year county rate changes",
+      "feeds": [
+        "data/local/IN-counties-{year}.json"
+      ],
+      "note": "Same document as the in-withholding state source: DN#1 carries BOTH the state rate and all 92 county rates. Registered separately so a county-rate change is attributed to the local data file it feeds, rather than being buried under a state-level finding."
+    },
+    {
       "id": "in-withholding",
       "level": "state",
       "jurisdiction": "IN",
@@ -301,6 +333,22 @@
       "feeds": [
         "data/states/KS-{year}.json"
       ]
+    },
+    {
+      "id": "ky-occupational",
+      "level": "local",
+      "jurisdiction": "KY",
+      "title": "Kentucky — local occupational license tax (statutory basis)",
+      "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=48677",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 59,
+      "checkFrequency": "quarterly",
+      "expectedChange": "rare for the statute itself; individual city/county rates change independently",
+      "feeds": [
+        "data/local/KY-occupational-{year}.json"
+      ],
+      "note": "WEAK MONITORING TARGET, recorded honestly: this watches the STATUTE, not the rates. Kentucky has no central register of the ~225 local occupational taxes — the data file itself documents that its 59 confirmed entries were assembled by scraping the Secretary of State list and cross-checking individual ordinances. A rate change in one Kentucky city will NOT surface here. Registered anyway because a change to the enabling statute (rate caps, the KRS 68.197 credit mechanism) is itself worth catching, but treat KY local rates as verified-as-of their data file date, not monitored."
     },
     {
       "id": "ky-withholding",
@@ -376,6 +424,21 @@
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/ME-{year}.json"
+      ]
+    },
+    {
+      "id": "mi-city-income-tax",
+      "level": "local",
+      "jurisdiction": "MI",
+      "title": "Michigan Treasury — cities that impose an income tax",
+      "url": "https://www.michigan.gov/taxes/questions/iit/accordion/general/what-cities-impose-an-income-tax",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 24,
+      "checkFrequency": "monthly",
+      "expectedChange": "rare; Michigan city income taxes require voter approval",
+      "feeds": [
+        "data/local/MI-cities-{year}.json"
       ]
     },
     {
@@ -575,11 +638,27 @@
       ]
     },
     {
+      "id": "oh-jedd-rates",
+      "level": "local",
+      "jurisdiction": "OH",
+      "title": "Ohio The Finder — JEDD/JEDZ tax rates (CSV)",
+      "url": "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/JEDTaxRates.csv",
+      "authority": "primary",
+      "format": "delimited",
+      "coversJurisdictions": 200,
+      "checkFrequency": "monthly",
+      "expectedChange": "rolling; JEDDs are created by contract between a township and a municipality",
+      "feeds": [
+        "data/local/OH-jedd-jedz-{year}.json"
+      ],
+      "note": "A direct CSV API rather than a download page — columns are EffStartDate,EffEndDate,JEDD_ID,Name,Rate, so a future parser can diff rate-by-rate instead of document-by-document."
+    },
+    {
       "id": "oh-municipal-rates",
       "level": "local",
       "jurisdiction": "OH",
       "title": "Ohio Dept of Taxation — Municipal Income Tax Rate Database (The Finder)",
-      "url": "https://thefinder.tax.ohio.gov/?tab=fileDownloads",
+      "url": "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
       "authority": "state_register",
       "format": "delimited",
       "coversJurisdictions": 600,
@@ -589,7 +668,23 @@
       "feeds": [
         "data/locals/OH-{year}.json"
       ],
-      "note": "Replaces monitoring ~600 individual village and city websites."
+      "note": "Replaces monitoring ~600 individual village and city websites. UPGRADED from thefinder.tax.ohio.gov/?tab=fileDownloads — a download LANDING PAGE, which would have changed when the site was restyled and stayed still when a rate moved — to the CSV the page links to, which is the data itself. Columns are EffStartDate,EffEndDate,MuniCode,Name,Rate with rates as decimals ('.01000'), so a future parser can diff rate-by-rate. URL taken from data/local/OH-municipalities-2026.json's own source field."
+    },
+    {
+      "id": "oh-school-district-rates",
+      "level": "local",
+      "jurisdiction": "OH",
+      "title": "Ohio Dept of Taxation — school district income tax rate list (SDIT)",
+      "url": "https://tax.ohio.gov/static/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 214,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; districts add, renew and let levies expire each January",
+      "feeds": [
+        "data/local/OH-school-districts-{year}.json"
+      ],
+      "note": "Verified to be the current edition: the capture opens 'Summary of School District Income Tax Changes Effective Calendar Year 2026'. This is a genuinely separate tax from municipal income tax and has its own register."
     },
     {
       "id": "ok-withholding",
@@ -626,9 +721,9 @@
       "level": "local",
       "jurisdiction": "PA",
       "title": "PA DCED Municipal Statistics — Act 32 EIT rates and PSD codes",
-      "url": "https://apps.dced.pa.gov/munstats-public/FindLocalTax.aspx",
+      "url": "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2026",
       "authority": "state_register",
-      "format": "delimited",
+      "format": "xls",
       "coversJurisdictions": 2500,
       "checkFrequency": "weekly",
       "expectedChange": "rolling; most changes effective 1 Jan",
@@ -636,7 +731,7 @@
       "feeds": [
         "data/locals/PA-{year}.json"
       ],
-      "note": "DCED is the only legally recognised source for PSD codes and EIT rates. Individual tax collection bureaus republish it and are NOT authoritative. KNOWN GAP, found by auditing what was actually captured rather than trusting the fetch succeeded: this URL returns the Municipal Statistics SEARCH FORM, not the register behind it. The captured page is an ASP.NET form — __VIEWSTATE, a Search control, and ZERO rate figures anywhere in 29KB. It fetches 200 and hashes stable, so the monitor reports it healthy every day while telling us nothing: a form does not change when the ~2,500 PSD/EIT rates behind it do. This is the largest local-tax dataset in the project and it is effectively UNWATCHED. Tried and failed to reach the real register: munstats.pa.gov/Reports/ReportInformation2.aspx with report=eitPitLstReg_Dyn and =EitPitLstRegisterPrintable, and a RealTimeRegister query on the form URL, all returned network errors. dced.pa.gov's PSD-codes-and-EIT-rates page DOES load (148KB) but is chiefly a landing page — only a handful of rate-like figures — so it was not adopted as a substitute that would look like a fix without being one. What is needed: the 'EIT / PIT / LST Tax Registers (Real-Time) — Printable' export, whose stable URL was not found this pass. Until then, treat PA local rates as verified only as of their data file's own verifiedOn date, NOT as monitored.",
+      "note": "DCED is the only legally recognised source for PSD codes and EIT rates; collection bureaus republish it and are NOT authoritative. GAP CLOSED: this previously pointed at FindLocalTax.aspx, which is the SEARCH FORM — an ASP.NET page with __VIEWSTATE, a Search control and zero rates in 29KB — so it fetched 200, hashed stable, and reported healthy daily while telling us nothing about the ~2,500 rates behind it. The real register URL was sitting in data/local/PA-EIT-LST-2026.json's own source field the whole time: the EitWithCollector_Dyn_Excel export, 2.66MB of actual jurisdiction rows. It is a binary .xls whose OLE2 container carries a per-request timestamp — two fetches four seconds apart differ in EXACTLY four bytes at offsets 1132-1135, measured by diffing them, not guessed — so volatileByteRanges masks those before hashing. Verified stable across fetches afterwards. No CSV/PDF variant exists: _Dyn, plain, and _Dyn_Csv all return HTTP 500.",
       "urlHistory": [
         {
           "url": "https://munstats.pa.gov/public/FindLocalTax.aspx",
@@ -644,7 +739,12 @@
           "reason": "Domain munstats.pa.gov stopped resolving entirely (DNS NXDOMAIN, confirmed by nslookup and a curl exit-6). PA moved Municipal Statistics under apps.dced.pa.gov. Found by the harvester sweep on its first real run — exactly the source-rot this monitoring exists to catch, and a reminder that a registered URL is itself a thing that decays."
         }
       ],
-      "monitoringGap": true
+      "volatileByteRanges": [
+        [
+          1132,
+          1135
+        ]
+      ]
     },
     {
       "id": "pa-dor-withholding",
