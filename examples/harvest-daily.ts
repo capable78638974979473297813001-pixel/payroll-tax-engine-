@@ -2,6 +2,7 @@ import { runDaily, describeStatus } from '../harvester/daily.ts';
 import { loadSources } from '../harvester/run.ts';
 import { assessHealth, acknowledgeFinding } from '../harvester/journal.ts';
 import { describeDiff, diffSource } from '../harvester/diffview.ts';
+import { auditUiSources, describeAudit } from '../harvester/audit-ui.ts';
 
 /**
  * The three commands around the scheduled sweep.
@@ -22,6 +23,11 @@ if (mode === 'status') {
     loadSources().map((s) => s.id),
   );
   process.exit(health.status === 'red' ? 1 : 0);
+}
+
+if (mode === 'audit') {
+  console.log(describeAudit(auditUiSources()));
+  process.exit(0);
 }
 
 if (mode === 'diff') {

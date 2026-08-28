@@ -1632,20 +1632,20 @@
       "id": "wv-ui-rates",
       "level": "state",
       "jurisdiction": "WV",
-      "title": "West Virginia — unemployment insurance (UNVERIFIED CONTENT)",
-      "url": "https://workforcewv.org/businesses/unemployment-tax-information/",
+      "title": "West Virginia — unemployment insurance employer rates & taxable wage base (Employer Handbook)",
+      "url": "https://workforcewv.org/wp-content/uploads/2024/06/Employer-Handbook-Rev.-06.24.pdf",
       "authority": "primary",
-      "format": "html",
+      "format": "pdf",
       "coversJurisdictions": 1,
       "checkFrequency": "monthly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/WV-{year}.json#suiEmployer"
       ],
-      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures. CONTENT AUDIT FAILED and NOT YET FIXED (2026-08-28): the captured page carries neither a wage base nor rate figures. Four replacement paths were tried (workforcewv.org's employers, unemployment-compensation and tax-rate paths, plus a guessed rate-notice PDF) and none resolved to a page with figures. Left flagged rather than quietly counted; West Virginia's wage base is still covered by the lagging DOL report. Needs a human to locate the real rate table.",
+      "note": "Replaces a page that carried NEITHER figure. This handbook does carry both — but note the URL: /2024/06/Employer-Handbook-Rev.-06.24.pdf is a DATED, VERSIONED path, which makes it a deliberately compromised monitoring target. A frozen file cannot change, so it will hash stably forever and report green indefinitely, including long after WorkForce WV publishes a 2026 or 2027 edition at some other URL. That is a subtler failure than the empty page it replaces: an empty page at least never pretended to hold figures. It is registered because having the correct current numbers under watch beats having nothing, and flagged datedUrlRisk so the false-green is recorded rather than discovered later. THE REAL FIX is an index page that always points at the current handbook; workforcewv.org's own unemployment-tax-information, tax-filing-reporting and FAQ pages were all tried and none carries the figures. Re-check this URL each year against the site's publications list.",
       "coversUI": true,
-      "uiContent": "neither",
-      "monitoringGap": true
+      "uiContent": "wage-base-and-rates",
+      "datedUrlRisk": true
     },
     {
       "id": "wv-withholding",
@@ -1772,7 +1772,8 @@
         "UT",
         "VT",
         "WA",
-        "WI"
+        "WI",
+        "WV"
       ],
       "ratesOnly": [
         "AL",
@@ -1796,13 +1797,14 @@
         "VA",
         "WY"
       ],
-      "carriesNeither": [
-        "WV"
-      ],
+      "carriesNeither": [],
       "noCaptureToCheck": [],
-      "wageBaseMonitoredCount": 35,
-      "rateMonitoredCount": 39,
-      "whatThisChanged": "The registration check accepted any page carrying a wage base OR rates, but every title claimed both. This audit separates them, and the result is materially weaker than the earlier headline: of 47 UI sources, only 29 states have a source that actually states a taxable WAGE BASE and 37 one that states RATES. Thirteen carry rates alone — verified as a property of the page, not a formatting mismatch: North Dakota, New York, Massachusetts, New Mexico, Iowa, South Carolina, Minnesota and Kansas contain no wage-base phrase anywhere. Four (Maryland, Minnesota, New Mexico, West Virginia) carry NEITHER and are now flagged monitoringGap, because a source that fetches cleanly while containing nothing is the failure this project already hit once with Pennsylvania's search form. Titles have been corrected to say what each source actually carries."
+      "wageBaseMonitoredCount": 36,
+      "rateMonitoredCount": 40,
+      "whatThisChanged": "The registration check accepted any page carrying a wage base OR rates, but every title claimed both. This audit separates them, and the result is materially weaker than the earlier headline: of 47 UI sources, only 29 states have a source that actually states a taxable WAGE BASE and 37 one that states RATES. Thirteen carry rates alone — verified as a property of the page, not a formatting mismatch: North Dakota, New York, Massachusetts, New Mexico, Iowa, South Carolina, Minnesota and Kansas contain no wage-base phrase anywhere. Four (Maryland, Minnesota, New Mexico, West Virginia) carry NEITHER and are now flagged monitoringGap, because a source that fetches cleanly while containing nothing is the failure this project already hit once with Pennsylvania's search form. Titles have been corrected to say what each source actually carries.",
+      "datedUrlRisk": [
+        "WV"
+      ]
     }
   }
 }

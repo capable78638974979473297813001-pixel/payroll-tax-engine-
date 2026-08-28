@@ -15,6 +15,7 @@ import {
 } from '../harvester/journal.ts';
 import type { JournalEvent } from '../harvester/journal.ts';
 import { diffLines, pairByKey } from '../harvester/diffview.ts';
+import { classifyText } from '../harvester/audit-ui.ts';
 
 /**
  * The monitor's promise is not "the sweep works". It is that a change is
@@ -322,5 +323,41 @@ describe('seeing WHAT changed, not just that something did', () => {
     assert.equal(d.added.length, 0);
     assert.equal(d.removed.length, 0);
     assert.ok(d.unchangedCount > 0);
+  });
+});
+
+describe('auditing whether a source CONTAINS what it claims to watch', () => {
+  /**
+   * The check that would have caught Pennsylvania's search form, and did
+   * catch Maryland's, Minnesota's and New Mexico's empty pages. Fetching
+   * cleanly is not the same as carrying figures.
+   */
+  test('a page with both a wage base and rates classifies as both', () => {
+    assert.equal(
+      classifyText('<p>The taxable wage base is $27,000. New employer rate 1.90%.</p>'),
+      'wage-base-and-rates',
+    );
+  });
+
+  test('a page with rates but no wage base is not credited with one', () => {
+    assert.equal(classifyText('<p>Experienced rates range from 1.10% to 9.90%.</p>'), 'rates-only');
+  });
+
+  test('a page with a wage base but no rates is not credited with rates', () => {
+    assert.equal(classifyText('<p>Taxable wage base: $9,500 per employee.</p>'), 'wage-base-only');
+  });
+
+  test('an empty landing page is reported as carrying neither', () => {
+    // Pennsylvania's search form was exactly this: real page, no figures.
+    assert.equal(
+      classifyText('<html><body><h1>Employer Services</h1><a href="/search">Search</a></body></html>'),
+      'neither',
+    );
+  });
+
+  test('a bare dollar figure is not mistaken for a wage base', () => {
+    // Over-counting is what produced the inflated coverage claim; a
+    // money-shaped number needs a wage-base phrase beside it to count.
+    assert.equal(classifyText('<p>Benefits of up to $1,500 may be payable.</p>'), 'neither');
   });
 });

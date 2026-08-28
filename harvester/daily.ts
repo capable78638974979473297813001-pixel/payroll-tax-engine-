@@ -255,6 +255,11 @@ export function describeStatus(asOf = new Date().toISOString()): string {
           carriesNeither?: string[];
         };
       };
+      sources?: {
+        id: string;
+        jurisdiction: string;
+        datedUrlRisk?: boolean;
+      };
     };
 
     // What the registered sources actually CONTAIN, which is a different
@@ -269,6 +274,16 @@ export function describeStatus(asOf = new Date().toISOString()): string {
       );
       if (ca.carriesNeither?.length) {
         lines.push(`  Registered but carrying neither figure: ${ca.carriesNeither.join(' ')}`);
+      }
+      // A versioned URL cannot change, so it reports green forever — even
+      // once the agency has published a newer edition somewhere else. That
+      // is a false green rather than a gap, so it is named here rather
+      // than left in a note nobody opens.
+      const dated = (reg.sources ?? []).filter((s) => s.datedUrlRisk);
+      if (dated.length) {
+        lines.push(
+          `  Watching a DATED file (cannot change; re-check yearly): ${dated.map((s) => s.jurisdiction).join(' ')}`,
+        );
       }
       lines.push('');
     }
