@@ -724,19 +724,17 @@
       "id": "tx-withholding",
       "level": "state",
       "jurisdiction": "TX",
-      "title": "Texas — unemployment wage base / employer rates",
-      "url": "https://www.twc.texas.gov/programs/unemployment-tax/your-tax-rates",
+      "title": "Texas — UI taxable wage base (via US DOL Significant Measures of State UI Tax Systems)",
+      "url": "https://oui.doleta.gov/unemploy/pdf/sigmeasures/sigmeasuitaxsys24.pdf",
       "authority": "primary",
-      "format": "html",
+      "format": "pdf",
       "coversJurisdictions": 1,
       "checkFrequency": "quarterly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/TX-{year}.json"
       ],
-      "note": "KNOWN WAF CHALLENGE, verified: twc.texas.gov answers HTTP 202 with a ~2KB challenge body instead of the page, for every header combination tried (curl gets the real 110KB page; Node fetch does not). The URL is correct and live — the site simply refuses this client. The harvester reports it as such rather than as a dead link, and Texas has no income tax, so the only figure at stake is the annual UI wage base. Read by hand until a working approach is found.",
-      "manualOnly": true,
-      "manualOnlyReason": "twc.texas.gov answers every automated request with an HTTP 202 WAF challenge instead of the page, for every header combination tried. The URL is correct and live. Marked manualOnly so it does not pin the health signal to red forever and mask a genuine staleness elsewhere -- it is still listed on every status as needing a human. Texas has no income tax, so the only figure at stake is the annual UI wage base."
+      "note": "REPOINTED after twc.texas.gov proved unfetchable by any machine: every path tried returns an HTTP 202 WAF challenge instead of the page — the rates page, the no-www variant, an alternate rates path, the news index, and even a PDF under /sites/default/files. The block is domain-wide, not path-specific. Three other routes were tried and rejected: statutes.capitol.texas.gov is an Angular SPA that serves only a shell to a plain fetch (same failure class as the Municode wall already documented for Birmingham); law.justia.com 403s; data.texas.gov fetches but carries no wage-base figure. This DOL report is the one authoritative, fetchable source that does: verified it contains the row 'TEXAS ... Fixed 9,000 ... Taxable Wage Base ($)', independently corroborating the 9000 in data/states/TX-2026.json. TWO HONEST LIMITS. (1) It LAGS: DOL publishes annually and the 2024 edition is still the newest as of 2026-08 (the 25 and 26 filenames both 404), so a wage-base change would surface here late rather than promptly — a late signal being strictly better than the none we had. (2) It covers the UI wage base only, not income-tax withholding — which costs nothing HERE, because Texas levies no income tax and the wage base is the only figure in its data file that can move, and DOL's own report calls it 'Fixed'. Do NOT copy this URL to a state that has an income tax; for those, the state's own withholding guide remains the source. The same report does cross-check every state's wage base, so it is worth reading directly when auditing suiEmployer figures."
     },
     {
       "id": "ut-withholding",
