@@ -2835,10 +2835,11 @@
     "newEmployerRateSource": "Connecticut DOL's own 'Information on Unemployment Tax Rate for Calendar Year 2026' announcement (wage base $27,000, new employer 1.9%, experienced 1.1%-9.9%).",
     "experienceRange": {
       "min": 0.011,
-      "max": 0.1
+      "max": 0.099
     },
     "employerSuppliedRateRequired": false,
-    "confidence": "source_dated_2026"
+    "confidence": "source_dated_2026",
+    "experienceRangeCorrection": "CORRECTED 2026-08-28 by auditing against CTDOL's own rate table (portal.ct.gov/dol/knowledge-base/articles/unemployment-taxes/tax-rates-and-taxable-wage-base), fetched and read directly. Its 2026 row reads: $27,000 taxable / 1.90% new employer / 1.10% minimum / 9.90% MAXIMUM. This field previously held 0.10 (10.0%), which contradicted this file's OWN newEmployerRateSource note two lines above ('experienced 1.1%-9.9%') — the prose was right and the number was wrong. 10.0% appears to have come from Connecticut's statutory maximum CHARGED rate, a different figure from the maximum rate actually assigned in the 2026 schedule. No computed paycheck changes: the engine reads newEmployerRate (correct at 1.90%) unless the caller supplies the employer's own assigned rate, and experienceRange is carried for reference only. Wage base and new-employer rate were both verified correct in the same pass."
   },
   "nonresidentAllocation": {
     "basis": "percentage_of_services",

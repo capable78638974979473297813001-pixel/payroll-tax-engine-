@@ -253,6 +253,23 @@
       ]
     },
     {
+      "id": "dc-ui-rates",
+      "level": "state",
+      "jurisdiction": "DC",
+      "title": "District of Columbia — unemployment insurance employer rates",
+      "url": "https://unemployment.dc.gov/page/tax-information",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "coversUI": true,
+      "expectedChange": "annual; rate schedules are set each autumn for the following year",
+      "feeds": [
+        "data/states/DC-{year}.json#suiEmployer"
+      ],
+      "note": "The Office of Unemployment Compensation's own tax-information page — carries rate figures, though no taxable wage base was detected on it. Distinct from does.dc.gov's DEPARTMENT homepage, which was rejected earlier in this sweep for matching only on stray percentages: this is a dedicated tax page, so a rate change should actually move it."
+    },
+    {
       "id": "dc-withholding",
       "level": "state",
       "jurisdiction": "DC",
@@ -702,6 +719,23 @@
       ]
     },
     {
+      "id": "me-ui-rates",
+      "level": "state",
+      "jurisdiction": "ME",
+      "title": "Maine — unemployment insurance employer rates & taxable wage base",
+      "url": "https://www.maine.gov/unemployment/docs/2026/employers/2026_ME_UC1_instructions.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "coversUI": true,
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/ME-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOUR department, where UI figures live — the revenue department's withholding guide carries none. Verified to fetch AND to contain wage-base and rate figures before registering. YEAR-SPECIFIC URL, and therefore self-expiring: the path contains /2026/ and 2026_ME_UC1, so it will 404 once Maine publishes the 2027 instructions. That is acceptable and arguably useful — the harvester reports a 404 as 'the URL has moved or been retired. Update this source's url', which is exactly the right prompt at exactly the right moment. Maine's stable pages (labor homepage, unemployment employers index) were all tried first and carry no figures."
+    },
+    {
       "id": "me-withholding",
       "level": "state",
       "jurisdiction": "ME",
@@ -1050,6 +1084,23 @@
       "feeds": [
         "data/states/NM-{year}.json"
       ]
+    },
+    {
+      "id": "nv-ui-rates",
+      "level": "state",
+      "jurisdiction": "NV",
+      "title": "Nevada — unemployment insurance employer rates & taxable wage base",
+      "url": "https://detr.nv.gov/Page/UI_Information_for_Employers",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "coversUI": true,
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/NV-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOUR department, where UI figures live — the revenue department's withholding guide carries none. Verified to fetch AND to contain wage-base and rate figures before registering."
     },
     {
       "id": "nv-withholding",
@@ -1588,6 +1639,7 @@
       "CA",
       "CO",
       "CT",
+      "DC",
       "DE",
       "FL",
       "GA",
@@ -1601,6 +1653,7 @@
       "LA",
       "MA",
       "MD",
+      "ME",
       "MI",
       "MN",
       "MO",
@@ -1611,6 +1664,7 @@
       "NH",
       "NJ",
       "NM",
+      "NV",
       "NY",
       "OH",
       "OR",
@@ -1631,14 +1685,11 @@
     "backstopOnly": [
       "AR",
       "AZ",
-      "DC",
-      "ME",
       "NE",
-      "NV",
       "OK"
     ],
     "backstopOnlyMeaning": "These states have NO dedicated labour-department source registered, so their UI figures are covered only by dol-ui-wage-bases. That backstop is real but LAGS (DOL publishes annually; the 2024 edition is still newest as of 2026-08) and carries the taxable WAGE BASE only — not new-employer rates or rate schedules. Treat a UI change in these states as something that will be confirmed late, not caught promptly.",
-    "whyNotAllFifty": "Three probing passes plus per-state searching. Five states remain on the federal backstop alone. Arkansas and Arizona refuse automated clients outright (HTTP 403 to every path and header set tried). Nevada, Maine, Nebraska and Oklahoma have resolving agency domains but no page carrying rate or wage-base figures was found — for Nevada both ui.nv.gov and detr.nv.gov's UI tax page fetch and carry neither. DC's and Ohio's DEPARTMENT homepages did fetch and did contain stray percentages, and were REJECTED rather than counted: a homepage changes with every news banner and still would not move when a rate does, which is exactly the false signal that let Pennsylvania's search form look healthy. Ohio was afterwards found properly at its own contribution-rates page. Path-guessing was the wrong tool throughout — Michigan lives under /leo/bureaus-agencies/uia/ and Wisconsin under /ui/employers/, which no guess reached; searching per state is what worked.",
+    "whyNotAllFifty": "Four passes of path-probing plus per-state searching took this from 10 states to 47. The last four resisted. ARKANSAS and ARIZONA refuse automated clients outright — HTTP 403 to every path and header combination tried, the same class of block as Texas's WAF, and no amount of URL-hunting fixes a refusal to serve. NEBRASKA and OKLAHOMA have live agency domains but roughly ten candidate paths each were tried across three passes and none carried rate or wage-base figures; both appear to put rates behind an employer login (neworks.nebraska.gov, eztaxexpress.oesc.state.ok.us), which is not fetchable and arguably not public. Nothing was registered for these four rather than registering a page that would look monitored without being monitored — the DC and Ohio department homepages were rejected on exactly that principle earlier, and both states were later found properly at dedicated tax pages. Their wage base is still covered by the lagging DOL report; their new-employer rates are not covered at all.",
     "neverMonitorable": "An individual employer's EXPERIENCE-RATED contribution rate is not a jurisdiction constant — it depends on that employer's own layoff history and is assigned to them privately. No source can carry it, which is why the engine takes it from input.employer.stateUnemploymentRate and falls back to the published new-employer rate. Only the wage base and the published schedules are monitorable at all.",
     "howCoverageIsCounted": "From an explicit coversUI flag on each source, not inferred from the URL. The regex that preceded it mis-classified Florida — its reemployment-tax rate page IS Florida's UI source, but the domain contains no labour-ish word — which is the sort of quiet miscount that makes a coverage number worth less than the confidence it creates."
   }
