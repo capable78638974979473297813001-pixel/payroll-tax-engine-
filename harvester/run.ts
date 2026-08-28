@@ -40,6 +40,9 @@ export interface RegisteredSource {
   expectedChange?: string;
   feeds?: string[];
   note?: string;
+  /** Known to be unfetchable by machine; see manualOnlyReason. */
+  manualOnly?: boolean;
+  manualOnlyReason?: string;
 }
 
 const FREQUENCY_DAYS: Record<CheckFrequency, number> = {

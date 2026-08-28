@@ -1,5 +1,5 @@
-import { execFile } from 'node:child_process';
-import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
+import { execFile, execFileSync } from 'node:child_process';
+import { existsSync, mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
@@ -224,26 +224,87 @@ export function isPdf(buffer: Buffer, contentType: string): boolean {
  * -layout the columns interleave into unparseable soup — a failure mode
  * already documented across several state files in data/.
  */
+/**
+ * Locate pdftotext without depending on the caller's PATH.
+ *
+ * This is not defensive padding — it is a bug that actually happened. The
+ * interactive sweep read all 55 sources happily, and the very same code
+ * under Windows Task Scheduler failed on 37 of them, because a scheduled
+ * task does not inherit the shell's PATH and poppler lives inside Git for
+ * Windows rather than in a system directory. Two thirds of the registry is
+ * PDF, so "works when I run it, blind at 8am" is close to the worst
+ * possible failure for a monitor whose whole promise is not missing a
+ * change.
+ *
+ * Resolution order: an explicit override first (so any environment can be
+ * pinned), then PATH, then the places poppler actually installs on
+ * Windows. Resolved once and cached, since a sweep calls this ~37 times.
+ */
+let cachedPdftotext: string | null | undefined;
+
+function resolvePdftotext(): string | null {
+  if (cachedPdftotext !== undefined) return cachedPdftotext;
+
+  const candidates = [
+    process.env.PDFTOTEXT_PATH,
+    'pdftotext', // on PATH — the interactive case
+    'C:\\Program Files\\Git\\mingw64\\bin\\pdftotext.exe',
+    'C:\\Program Files (x86)\\Git\\mingw64\\bin\\pdftotext.exe',
+    'C:\\Program Files\\poppler\\bin\\pdftotext.exe',
+    '/usr/bin/pdftotext',
+    '/usr/local/bin/pdftotext',
+    '/opt/homebrew/bin/pdftotext',
+  ].filter((c): c is string => typeof c === 'string' && c.length > 0);
+
+  for (const candidate of candidates) {
+    // A bare name can only be tested by running it; an absolute path can
+    // be checked far more cheaply.
+    if (candidate.includes('/') || candidate.includes('\\')) {
+      if (existsSync(candidate)) {
+        cachedPdftotext = candidate;
+        return cachedPdftotext;
+      }
+      continue;
+    }
+    try {
+      execFileSync(candidate, ['-v'], { stdio: 'ignore', timeout: 10_000 });
+      cachedPdftotext = candidate;
+      return cachedPdftotext;
+    } catch {
+      // Not on PATH here; keep looking.
+    }
+  }
+
+  cachedPdftotext = null;
+  return cachedPdftotext;
+}
+
+/**
+ * Shell out to pdftotext (poppler). Deliberately the -layout variant: the
+ * withholding tables this project reads are column-aligned, and without
+ * -layout the columns interleave into unparseable soup — a failure mode
+ * already documented across several state files in data/.
+ */
 async function pdfToTextViaPdftotext(pdf: Buffer): Promise<string> {
+  const binary = resolvePdftotext();
+  if (binary === null) {
+    throw new Error(
+      'pdftotext could not be found. It ships with poppler-utils (and with Git for Windows, at ' +
+        'Program Files\\Git\\mingw64\\bin). Without it this harvester cannot read PDF sources, which are ' +
+        'most of the registry. Set PDFTOTEXT_PATH to its full path if it lives somewhere unusual.',
+    );
+  }
+
   const dir = mkdtempSync(join(tmpdir(), 'harvester-pdf-'));
   const pdfPath = join(dir, 'source.pdf');
   const txtPath = join(dir, 'source.txt');
   try {
     writeFileSync(pdfPath, pdf);
-    await execFileAsync('pdftotext', ['-layout', pdfPath, txtPath], {
+    await execFileAsync(binary, ['-layout', pdfPath, txtPath], {
       timeout: 120_000,
       maxBuffer: 64 * 1024 * 1024,
     });
     return readFileSync(txtPath, 'utf8');
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    if (message.includes('ENOENT')) {
-      throw new Error(
-        'pdftotext is not installed or not on PATH. It ships with poppler-utils; ' +
-          'without it this harvester cannot read PDF sources.',
-      );
-    }
-    throw err;
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

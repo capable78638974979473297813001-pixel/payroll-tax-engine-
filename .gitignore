@@ -7,3 +7,11 @@ node_modules/
 # belong in version control. See tests/harvester.test.ts.
 harvester/snapshots/
 harvester/review/
+
+# harvester/state is the monitor's own runtime memory -- the append-only
+# event log (what ran, what changed, what was acknowledged) and the sweep
+# lock. Same reasoning as the two above: it records what THIS machine
+# observed and when, embeds absolute paths in snapshot references, and is
+# rebuilt by running the sweep. Committing it would mean one machine's
+# findings appearing as another's history. See harvester/journal.ts.
+harvester/state/

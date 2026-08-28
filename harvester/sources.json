@@ -734,7 +734,9 @@
       "feeds": [
         "data/states/TX-{year}.json"
       ],
-      "note": "KNOWN WAF CHALLENGE, verified: twc.texas.gov answers HTTP 202 with a ~2KB challenge body instead of the page, for every header combination tried (curl gets the real 110KB page; Node fetch does not). The URL is correct and live — the site simply refuses this client. The harvester reports it as such rather than as a dead link, and Texas has no income tax, so the only figure at stake is the annual UI wage base. Read by hand until a working approach is found."
+      "note": "KNOWN WAF CHALLENGE, verified: twc.texas.gov answers HTTP 202 with a ~2KB challenge body instead of the page, for every header combination tried (curl gets the real 110KB page; Node fetch does not). The URL is correct and live — the site simply refuses this client. The harvester reports it as such rather than as a dead link, and Texas has no income tax, so the only figure at stake is the annual UI wage base. Read by hand until a working approach is found.",
+      "manualOnly": true,
+      "manualOnlyReason": "twc.texas.gov answers every automated request with an HTTP 202 WAF challenge instead of the page, for every header combination tried. The URL is correct and live. Marked manualOnly so it does not pin the health signal to red forever and mask a genuine staleness elsewhere -- it is still listed on every status as needing a human. Texas has no income tax, so the only figure at stake is the annual UI wage base."
     },
     {
       "id": "ut-withholding",

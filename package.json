@@ -7,7 +7,7 @@
     "node": ">=22.6.0"
   },
   "scripts": {
-    "test": "node --test tests/engine.test.ts tests/harvester.test.ts tests/geocode.test.ts tests/alabama.test.ts tests/harvest-sweep.test.ts",
+    "test": "node --test tests/engine.test.ts tests/harvester.test.ts tests/geocode.test.ts tests/alabama.test.ts tests/harvest-sweep.test.ts tests/harvest-journal.test.ts",
     "demo": "node examples/demo.ts",
     "demo:alabama": "node examples/alabama-demo.ts",
     "alabama": "node examples/alabama-calc.ts",
@@ -17,7 +17,10 @@
     "demo:geocode": "node examples/geocode-demo.ts",
     "coverage:geocode": "node examples/geocode-coverage.ts",
     "coverage:taxes": "node examples/tax-coverage.ts",
-    "harvest": "node examples/harvest-sweep.ts"
+    "harvest": "node examples/harvest-sweep.ts",
+    "harvest:daily": "node examples/harvest-daily.ts daily",
+    "harvest:status": "node examples/harvest-daily.ts status",
+    "harvest:ack": "node examples/harvest-daily.ts ack"
   },
   "license": "MIT"
 }
