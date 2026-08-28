@@ -489,7 +489,7 @@
       ],
       "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures.",
       "coversUI": true,
-      "uiContent": "rates-only"
+      "uiContent": "wage-base-and-rates"
     },
     {
       "id": "il-withholding",
@@ -708,8 +708,8 @@
       "id": "md-ui-rates",
       "level": "state",
       "jurisdiction": "MD",
-      "title": "Maryland — unemployment insurance (UNVERIFIED CONTENT)",
-      "url": "https://labor.maryland.gov/employment/unemployment.shtml",
+      "title": "Maryland — unemployment insurance employer rates & taxable wage base",
+      "url": "https://labor.maryland.gov/unemployment-insurance/employer-agent/tax-rate.shtml",
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
@@ -718,10 +718,9 @@
       "feeds": [
         "data/states/MD-{year}.json#suiEmployer"
       ],
-      "note": "Watches the LABOUR department rather than the revenue department, which carries no UI figures. Verified to fetch and to contain wage-base and/or rate figures before being registered. CONTENT AUDIT FAILED (2026-08-28): the captured page contains NEITHER a taxable wage base NOR rate figures. It fetches and hashes stably, so it would sit in the registry looking monitored while telling us nothing — the same shape as Pennsylvania's search form. It is left registered but flagged rather than quietly counted; the right fix is to find this state's actual rate table.",
+      "note": "REPLACED after the 2026-08-28 content audit found the previous URL carried NEITHER a wage base nor rate figures — it fetched cleanly and hashed stably, so it sat in the registry looking monitored while saying nothing, the same shape as Pennsylvania's search form. This URL was verified to contain the figures before being swapped in.",
       "coversUI": true,
-      "uiContent": "neither",
-      "monitoringGap": true
+      "uiContent": "wage-base-and-rates"
     },
     {
       "id": "md-withholding",
@@ -823,8 +822,8 @@
       "id": "mn-ui-rates",
       "level": "state",
       "jurisdiction": "MN",
-      "title": "Minnesota — unemployment insurance (UNVERIFIED CONTENT)",
-      "url": "https://www.uimn.org/employers/",
+      "title": "Minnesota — unemployment insurance employer rates & taxable wage base",
+      "url": "https://www.uimn.org/employers/wages-taxes/tax-rates/index.jsp",
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
@@ -833,10 +832,9 @@
       "feeds": [
         "data/states/MN-{year}.json#suiEmployer"
       ],
-      "note": "Watches the LABOUR department rather than the revenue department, which carries no UI figures. Verified to fetch and to contain wage-base and/or rate figures before being registered. CONTENT AUDIT FAILED (2026-08-28): the captured page contains NEITHER a taxable wage base NOR rate figures. It fetches and hashes stably, so it would sit in the registry looking monitored while telling us nothing — the same shape as Pennsylvania's search form. It is left registered but flagged rather than quietly counted; the right fix is to find this state's actual rate table.",
+      "note": "REPLACED after the 2026-08-28 content audit found the previous URL carried NEITHER a wage base nor rate figures — it fetched cleanly and hashed stably, so it sat in the registry looking monitored while saying nothing, the same shape as Pennsylvania's search form. This URL was verified to contain the figures before being swapped in.",
       "coversUI": true,
-      "uiContent": "neither",
-      "monitoringGap": true
+      "uiContent": "wage-base-and-rates"
     },
     {
       "id": "mn-withholding",
@@ -1088,8 +1086,8 @@
       "id": "nm-ui-rates",
       "level": "state",
       "jurisdiction": "NM",
-      "title": "New Mexico — unemployment insurance (UNVERIFIED CONTENT)",
-      "url": "https://www.dws.state.nm.us/Unemployment/Unemployment-for-a-Business/Unemployment-Insurance-Tax",
+      "title": "New Mexico — unemployment insurance taxable wage base",
+      "url": "https://www.dws.state.nm.us/UI-Tax-Information",
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
@@ -1098,10 +1096,9 @@
       "feeds": [
         "data/states/NM-{year}.json#suiEmployer"
       ],
-      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures. CONTENT AUDIT FAILED (2026-08-28): the captured page contains NEITHER a taxable wage base NOR rate figures. It fetches and hashes stably, so it would sit in the registry looking monitored while telling us nothing — the same shape as Pennsylvania's search form. It is left registered but flagged rather than quietly counted; the right fix is to find this state's actual rate table.",
+      "note": "REPLACED after the 2026-08-28 content audit found the previous URL carried NEITHER a wage base nor rate figures — it fetched cleanly and hashed stably, so it sat in the registry looking monitored while saying nothing, the same shape as Pennsylvania's search form. This URL was verified to contain the figures before being swapped in.",
       "coversUI": true,
-      "uiContent": "neither",
-      "monitoringGap": true
+      "uiContent": "wage-base-only"
     },
     {
       "id": "nm-withholding",
@@ -1460,8 +1457,7 @@
         "data/states/TN-{year}.json"
       ],
       "coversUI": true,
-      "uiContent": "unknown-no-snapshot",
-      "monitoringGap": true,
+      "uiContent": "wage-base-only",
       "note": "CONTENT AUDIT INCONCLUSIVE (2026-08-28): no capture was available to check, because the source failed to fetch on the most recent sweep. Re-audit once it has been read successfully."
     },
     {
@@ -1564,7 +1560,7 @@
       ],
       "note": "Watches the LABOUR department, which is where UI figures live — the revenue department's withholding guide carries none. Found by searching per state after path-guessing failed: Michigan, for instance, is under /leo/bureaus-agencies/uia/, not the /uia/ every guess assumed. Verified to fetch AND to contain wage-base and/or rate figures before registering.",
       "coversUI": true,
-      "uiContent": "rates-only"
+      "uiContent": "wage-base-and-rates"
     },
     {
       "id": "vt-withholding",
@@ -1646,7 +1642,7 @@
       "feeds": [
         "data/states/WV-{year}.json#suiEmployer"
       ],
-      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures. CONTENT AUDIT FAILED (2026-08-28): the captured page contains NEITHER a taxable wage base NOR rate figures. It fetches and hashes stably, so it would sit in the registry looking monitored while telling us nothing — the same shape as Pennsylvania's search form. It is left registered but flagged rather than quietly counted; the right fix is to find this state's actual rate table.",
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures. CONTENT AUDIT FAILED and NOT YET FIXED (2026-08-28): the captured page carries neither a wage base nor rate figures. Four replacement paths were tried (workforcewv.org's employers, unemployment-compensation and tax-rate paths, plus a guessed rate-notice PDF) and none resolved to a page with figures. Left flagged rather than quietly counted; West Virginia's wage base is still covered by the lagging DOL report. Needs a human to locate the real rate table.",
       "coversUI": true,
       "uiContent": "neither",
       "monitoringGap": true
@@ -1747,7 +1743,7 @@
     "howCoverageIsCounted": "From an explicit coversUI flag on each source, not inferred from the URL. The regex that preceded it mis-classified Florida — its reemployment-tax rate page IS Florida's UI source, but the domain contains no labour-ish word — which is the sort of quiet miscount that makes a coverage number worth less than the confidence it creates.",
     "contentAudit": {
       "auditedOn": "2026-08-28",
-      "method": "Every UI source's most recent capture was searched for a taxable-wage-base phrase next to a dollar figure, and for percentage rate figures. Run against snapshots already on disk, so it is reproducible without refetching.",
+      "method": "Each UI source's most recent capture searched for a taxable-wage-base phrase beside a dollar figure, and for percentage rate figures. Run against snapshots on disk.",
       "wageBaseAndRates": [
         "AK",
         "CO",
@@ -1756,9 +1752,12 @@
         "FL",
         "HI",
         "ID",
+        "IL",
         "IN",
         "KY",
+        "MD",
         "ME",
+        "MN",
         "MO",
         "MS",
         "NC",
@@ -1771,6 +1770,7 @@
         "SD",
         "TX",
         "UT",
+        "VT",
         "WA",
         "WI"
       ],
@@ -1779,34 +1779,29 @@
         "DC",
         "GA",
         "IA",
-        "IL",
         "KS",
         "LA",
         "MA",
         "MT",
         "NH",
         "NY",
-        "SC",
-        "VT"
+        "SC"
       ],
       "wageBaseOnly": [
         "CA",
         "MI",
         "NJ",
+        "NM",
+        "TN",
         "VA",
         "WY"
       ],
       "carriesNeither": [
-        "MD",
-        "MN",
-        "NM",
         "WV"
       ],
-      "noCaptureToCheck": [
-        "TN"
-      ],
-      "wageBaseMonitoredCount": 29,
-      "rateMonitoredCount": 37,
+      "noCaptureToCheck": [],
+      "wageBaseMonitoredCount": 35,
+      "rateMonitoredCount": 39,
       "whatThisChanged": "The registration check accepted any page carrying a wage base OR rates, but every title claimed both. This audit separates them, and the result is materially weaker than the earlier headline: of 47 UI sources, only 29 states have a source that actually states a taxable WAGE BASE and 37 one that states RATES. Thirteen carry rates alone — verified as a property of the page, not a formatting mismatch: North Dakota, New York, Massachusetts, New Mexico, Iowa, South Carolina, Minnesota and Kansas contain no wage-base phrase anywhere. Four (Maryland, Minnesota, New Mexico, West Virginia) carry NEITHER and are now flagged monitoringGap, because a source that fetches cleanly while containing nothing is the failure this project already hit once with Pennsylvania's search form. Titles have been corrected to say what each source actually carries."
     }
   }
