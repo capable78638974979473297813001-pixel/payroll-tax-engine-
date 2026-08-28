@@ -14,6 +14,7 @@ import {
   FRESHNESS_SLA_HOURS,
 } from '../harvester/journal.ts';
 import type { JournalEvent } from '../harvester/journal.ts';
+import { diffLines, pairByKey } from '../harvester/diffview.ts';
 
 /**
  * The monitor's promise is not "the sweep works". It is that a change is
@@ -265,5 +266,61 @@ describe('F — a lost baseline is never mistaken for a first capture', () => {
     assert.equal(baselineLost, true, 'must be recognised as a lost baseline, not a first capture');
     // seenBefore is the gate on opening a finding, so this case opens one.
     assert.ok(seenBefore, 'a lost baseline must not be silently re-baselined');
+  });
+});
+
+describe('seeing WHAT changed, not just that something did', () => {
+  /**
+   * Detection without diagnosis is only half the job. "Ohio's register
+   * changed" is true of a file listing six hundred jurisdictions and
+   * nearly useless — monitoring for a small change has to mean being able
+   * to see the small change.
+   */
+  const CSV_BEFORE = [
+    'EffStartDate,EffEndDate,MuniCode,Name,Rate',
+    '20040101,99991231,00142,ABERDEEN,.01000',
+    '20020101,99991231,00198,ADA,.01650',
+    '20100101,99991231,00450,ADELPHI,.01000',
+  ].join('\n');
+
+  test('a rate move is shown as one row, before and after', () => {
+    const after = CSV_BEFORE.replace('ABERDEEN,.01000', 'ABERDEEN,.01750');
+    const { paired, addedOnly, removedOnly } = pairByKey(diffLines(CSV_BEFORE, after));
+    assert.equal(paired.length, 1, 'a changed rate is ONE modification, not an add plus a remove');
+    assert.match(paired[0].before, /ABERDEEN,\.01000/);
+    assert.match(paired[0].after, /ABERDEEN,\.01750/);
+    assert.equal(addedOnly.length, 0);
+    assert.equal(removedOnly.length, 0);
+  });
+
+  test('a genuinely new jurisdiction is an addition, not a modification', () => {
+    const after = `${CSV_BEFORE}\n20260101,99991231,00777,NEWVILLE,.02000`;
+    const { paired, addedOnly } = pairByKey(diffLines(CSV_BEFORE, after));
+    assert.equal(paired.length, 0);
+    assert.equal(addedOnly.length, 1);
+    assert.match(addedOnly[0], /NEWVILLE/);
+  });
+
+  test('reordered rows are not reported as changes', () => {
+    // Registers regenerate their exports; row order is not information.
+    const lines = CSV_BEFORE.split('\n');
+    const reordered = [lines[0], lines[3], lines[1], lines[2]].join('\n');
+    const d = diffLines(CSV_BEFORE, reordered);
+    assert.equal(d.removed.length, 0, 'reordering must not look like a change');
+    assert.equal(d.added.length, 0);
+  });
+
+  test('binary content refuses to pretend it can be line-diffed', () => {
+    // Pennsylvania's register is an .xls; a "line diff" of it would be
+    // pages of mojibake presented as information.
+    const bin = '\u0000\uFFFD\uFFFD\u0000\uFFFD'.repeat(400);
+    assert.equal(diffLines(bin, bin + '\uFFFD').binary, true);
+  });
+
+  test('identical captures report nothing moved', () => {
+    const d = diffLines(CSV_BEFORE, CSV_BEFORE);
+    assert.equal(d.added.length, 0);
+    assert.equal(d.removed.length, 0);
+    assert.ok(d.unchangedCount > 0);
   });
 });

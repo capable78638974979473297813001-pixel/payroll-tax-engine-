@@ -265,6 +265,7 @@ export function describeStatus(asOf = new Date().toISOString()): string {
       if (f.snapshotPath) lines.push(`      snapshot: ${f.snapshotPath}`);
       lines.push('');
     }
+    lines.push('  See exactly what moved:              npm run harvest:diff -- <sourceId>');
     lines.push('  These stay open until acknowledged:  npm run harvest:ack -- <findingId> "<who>"');
   }
 

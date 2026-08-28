@@ -20,7 +20,8 @@
     "harvest": "node examples/harvest-sweep.ts",
     "harvest:daily": "node examples/harvest-daily.ts daily",
     "harvest:status": "node examples/harvest-daily.ts status",
-    "harvest:ack": "node examples/harvest-daily.ts ack"
+    "harvest:ack": "node examples/harvest-daily.ts ack",
+    "harvest:diff": "node examples/harvest-daily.ts diff"
   },
   "license": "MIT"
 }
