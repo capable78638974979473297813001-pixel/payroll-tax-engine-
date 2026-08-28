@@ -790,7 +790,7 @@
       "level": "state",
       "jurisdiction": "MI",
       "title": "Michigan — unemployment insurance taxable wage base",
-      "url": "https://www.michigan.gov/leo/bureaus-agencies/uia/employers/forms/accordion/taxable-wage-base",
+      "url": "https://www.michigan.gov/leo/bureaus-agencies/uia/assets/unemployment-tax-rate",
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
@@ -799,9 +799,8 @@
       "feeds": [
         "data/states/MI-{year}.json#suiEmployer"
       ],
-      "note": "Watches the LABOUR department, which is where UI figures live — the revenue department's withholding guide carries none. Found by searching per state after path-guessing failed: Michigan, for instance, is under /leo/bureaus-agencies/uia/, not the /uia/ every guess assumed. Verified to fetch AND to contain wage-base and/or rate figures before registering.",
-      "coversUI": true,
-      "uiContent": "wage-base-only"
+      "note": "Upgraded to a page carrying BOTH the taxable wage base and rate figures, verified before swapping. The previous URL carried only one of the two.",
+      "coversUI": true
     },
     {
       "id": "mi-withholding",
@@ -1054,7 +1053,7 @@
       "level": "state",
       "jurisdiction": "NJ",
       "title": "New Jersey — unemployment insurance taxable wage base",
-      "url": "https://www.nj.gov/labor/ea/employer-services/rate-info/",
+      "url": "https://www.nj.gov/labor/lwdhome/press/2025/20251229_newbenefitrates2026.shtml",
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
@@ -1063,9 +1062,9 @@
       "feeds": [
         "data/states/NJ-{year}.json#suiEmployer"
       ],
-      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures.",
+      "note": "Carries BOTH the wage base and rates — but the URL is a DATED press release (/press/2025/20251229_...), so it can never change and will report green forever. Flagged datedUrlRisk and surfaced in status for that reason. The real fix is a standing rate page; nj.gov/labor/ea/employer-services/rate-info/ was tried and carries neither figure.",
       "coversUI": true,
-      "uiContent": "wage-base-only"
+      "datedUrlRisk": true
     },
     {
       "id": "nj-withholding",
@@ -1516,7 +1515,7 @@
       "level": "state",
       "jurisdiction": "VA",
       "title": "Virginia — unemployment insurance taxable wage base",
-      "url": "https://www.vec.virginia.gov/FAQs/employers/what-wage-base-each-employee-i-will-pay-taxes",
+      "url": "https://www.vec.virginia.gov/frequently-asked-questions",
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
@@ -1525,9 +1524,8 @@
       "feeds": [
         "data/states/VA-{year}.json#suiEmployer"
       ],
-      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures.",
-      "coversUI": true,
-      "uiContent": "wage-base-only"
+      "note": "Upgraded to a page carrying BOTH the taxable wage base and rate figures, verified before swapping. The previous URL carried only one of the two.",
+      "coversUI": true
     },
     {
       "id": "va-withholding",
@@ -1667,7 +1665,7 @@
       "level": "state",
       "jurisdiction": "WY",
       "title": "Wyoming — unemployment wage base / employer rates",
-      "url": "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-taxable-wage-base/",
+      "url": "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-taxable-wage-base/unemployment-tax",
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
@@ -1677,7 +1675,24 @@
         "data/states/WY-{year}.json"
       ],
       "coversUI": true,
-      "uiContent": "wage-base-only"
+      "note": "Upgraded to a page carrying BOTH the taxable wage base and rate figures, verified before swapping. The previous URL carried only one of the two."
+    },
+    {
+      "id": "nm-ui-rates-calc",
+      "level": "state",
+      "jurisdiction": "NM",
+      "title": "New Mexico — how UI tax rates are calculated (rate schedule)",
+      "url": "https://www.dws.state.nm.us/Unemployment/Unemployment-for-a-Business/Unemployment-Insurance-Tax-Information/How-UI-Tax-Rates-Are-Calculated",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "coversUI": true,
+      "expectedChange": "annual; rate schedules are set each autumn",
+      "feeds": [
+        "data/states/NM-{year}.json#suiEmployer"
+      ],
+      "note": "SUPPLEMENTARY to nm-ui-rates, which carries the wage base but no rates. New Mexico publishes the two figures on different pages, so both are watched rather than forcing one page to serve for both."
     }
   ],
   "uiCoverage": {
@@ -1804,7 +1819,8 @@
       "whatThisChanged": "The registration check accepted any page carrying a wage base OR rates, but every title claimed both. This audit separates them, and the result is materially weaker than the earlier headline: of 47 UI sources, only 29 states have a source that actually states a taxable WAGE BASE and 37 one that states RATES. Thirteen carry rates alone — verified as a property of the page, not a formatting mismatch: North Dakota, New York, Massachusetts, New Mexico, Iowa, South Carolina, Minnesota and Kansas contain no wage-base phrase anywhere. Four (Maryland, Minnesota, New Mexico, West Virginia) carry NEITHER and are now flagged monitoringGap, because a source that fetches cleanly while containing nothing is the failure this project already hit once with Pennsylvania's search form. Titles have been corrected to say what each source actually carries.",
       "datedUrlRisk": [
         "WV"
-      ]
+      ],
+      "staleAfterUrlChanges": "STALE as of the MI/NJ/VA/WY/NM url changes in this commit: these counts and the per-source uiContent classifications were computed against the PREVIOUS urls. The changed sources have had their uiContent removed rather than left asserting something about a page they no longer point at — missing is honest, stale is not. Run `npm run harvest:daily` then `npm run harvest:audit` to recompute; the new urls were each verified by direct probe (MI, NJ, VA, WY carry both figures; NM's new page carries rates) but that verification is not the same as a recorded audit against a stored capture."
     }
   }
 }
