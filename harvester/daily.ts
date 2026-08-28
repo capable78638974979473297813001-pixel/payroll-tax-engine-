@@ -246,7 +246,33 @@ export function describeStatus(asOf = new Date().toISOString()): string {
   try {
     const reg = JSON.parse(
       readFileSync(join(import.meta.dirname, 'sources.json'), 'utf8'),
-    ) as { uiCoverage?: { backstopOnly?: string[] } };
+    ) as {
+      uiCoverage?: {
+        backstopOnly?: string[];
+        contentAudit?: {
+          wageBaseMonitoredCount?: number;
+          rateMonitoredCount?: number;
+          carriesNeither?: string[];
+        };
+      };
+    };
+
+    // What the registered sources actually CONTAIN, which is a different
+    // question from whether they fetch. Printed first because a source
+    // that loads cleanly while stating no figures is the failure this
+    // project already hit once, with Pennsylvania's search form.
+    const ca = reg.uiCoverage?.contentAudit;
+    if (ca) {
+      lines.push(
+        `UI FIGURES — of 51 states, ${ca.wageBaseMonitoredCount} have a source stating the taxable WAGE BASE, ` +
+          `${ca.rateMonitoredCount} one stating RATES.`,
+      );
+      if (ca.carriesNeither?.length) {
+        lines.push(`  Registered but carrying neither figure: ${ca.carriesNeither.join(' ')}`);
+      }
+      lines.push('');
+    }
+
     const backstop = reg.uiCoverage?.backstopOnly ?? [];
     if (backstop.length > 0) {
       lines.push(
