@@ -42,6 +42,13 @@ export interface RegisteredSource {
   note?: string;
   /** Known to be unfetchable by machine; see manualOnlyReason. */
   manualOnly?: boolean;
+  /**
+   * The URL fetches cleanly but is not the document whose changes matter —
+   * e.g. a search form standing in front of the register. Distinct from
+   * manualOnly (which cannot be fetched at all): this one looks perfectly
+   * healthy every day, which is exactly why it needs saying out loud.
+   */
+  monitoringGap?: boolean;
   manualOnlyReason?: string;
 }
 

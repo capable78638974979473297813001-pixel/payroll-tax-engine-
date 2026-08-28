@@ -1,6 +1,7 @@
 import { test, describe, before } from 'node:test';
 import assert from 'node:assert/strict';
-import { rmSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { classify, diffRegister, looksLikeParserFailure } from '../harvester/diff.ts';
@@ -11,8 +12,16 @@ import { harvestSource, retroactiveChanges } from '../harvester/harvest.ts';
 const HARVESTER = join(import.meta.dirname, '..', 'harvester');
 
 before(() => {
-  // Snapshots and review items are stateful on disk; start each run clean.
-  rmSync(join(HARVESTER, 'snapshots'), { recursive: true, force: true });
+  // Point snapshots at a throwaway directory BEFORE anything writes one.
+  //
+  // This used to delete harvester/snapshots outright to get a clean slate,
+  // which also deleted all 55 production baselines every time the suite
+  // ran — and since the fixtures below write under 'oh-municipal-rates', a
+  // real registered source id, they collided with the genuine Ohio capture
+  // too. A wiped baseline makes the next sweep treat every source as brand
+  // new, so a rate that moved in that window is absorbed silently. Tests
+  // must not be able to erase what the monitor remembers.
+  process.env.HARVESTER_SNAPSHOT_ROOT = mkdtempSync(join(tmpdir(), 'harvester-snap-'));
   rmSync(join(HARVESTER, 'review'), { recursive: true, force: true });
 });
 

@@ -2,7 +2,23 @@ import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-const SNAPSHOT_ROOT = join(import.meta.dirname, 'snapshots');
+/**
+ * Where captures live. Read through a function, and read fresh each call,
+ * so a test can point it at a temp directory by setting the env var —
+ * a top-level const would be frozen at import time, before any test body
+ * runs.
+ *
+ * This exists because tests/harvester.test.ts used to delete the ENTIRE
+ * snapshots directory in a before() hook to get a clean slate, which also
+ * deleted all 55 production baselines. Worse, its fixtures write under
+ * 'oh-municipal-rates' — a real registered source id — so even a targeted
+ * delete would have corrupted the genuine Ohio baseline. Isolation is the
+ * only correct answer; a test must not be able to erase what the monitor
+ * remembers.
+ */
+function snapshotRoot(): string {
+  return process.env.HARVESTER_SNAPSHOT_ROOT ?? join(import.meta.dirname, 'snapshots');
+}
 
 /**
  * Immutable, content-addressed captures of every source we read.
@@ -30,7 +46,7 @@ export function writeSnapshot(
   content: string | Buffer,
   fetchedAt = new Date().toISOString(),
 ): Snapshot {
-  const dir = join(SNAPSHOT_ROOT, sourceId);
+  const dir = join(snapshotRoot(), sourceId);
   mkdirSync(dir, { recursive: true });
 
   const sha = hash(content);
@@ -55,7 +71,7 @@ export function writeSnapshot(
 }
 
 function listMeta(sourceId: string): Snapshot[] {
-  const dir = join(SNAPSHOT_ROOT, sourceId);
+  const dir = join(snapshotRoot(), sourceId);
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
     .filter((f) => f.endsWith('.meta.json'))

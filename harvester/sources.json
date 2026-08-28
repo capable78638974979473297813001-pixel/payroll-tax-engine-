@@ -636,14 +636,15 @@
       "feeds": [
         "data/locals/PA-{year}.json"
       ],
-      "note": "DCED is the only legally recognised source for PSD codes and EIT rates. Individual tax collection bureaus republish it and are NOT authoritative.",
+      "note": "DCED is the only legally recognised source for PSD codes and EIT rates. Individual tax collection bureaus republish it and are NOT authoritative. KNOWN GAP, found by auditing what was actually captured rather than trusting the fetch succeeded: this URL returns the Municipal Statistics SEARCH FORM, not the register behind it. The captured page is an ASP.NET form — __VIEWSTATE, a Search control, and ZERO rate figures anywhere in 29KB. It fetches 200 and hashes stable, so the monitor reports it healthy every day while telling us nothing: a form does not change when the ~2,500 PSD/EIT rates behind it do. This is the largest local-tax dataset in the project and it is effectively UNWATCHED. Tried and failed to reach the real register: munstats.pa.gov/Reports/ReportInformation2.aspx with report=eitPitLstReg_Dyn and =EitPitLstRegisterPrintable, and a RealTimeRegister query on the form URL, all returned network errors. dced.pa.gov's PSD-codes-and-EIT-rates page DOES load (148KB) but is chiefly a landing page — only a handful of rate-like figures — so it was not adopted as a substitute that would look like a fix without being one. What is needed: the 'EIT / PIT / LST Tax Registers (Real-Time) — Printable' export, whose stable URL was not found this pass. Until then, treat PA local rates as verified only as of their data file's own verifiedOn date, NOT as monitored.",
       "urlHistory": [
         {
           "url": "https://munstats.pa.gov/public/FindLocalTax.aspx",
           "retiredOn": "2026-08-27",
           "reason": "Domain munstats.pa.gov stopped resolving entirely (DNS NXDOMAIN, confirmed by nslookup and a curl exit-6). PA moved Municipal Statistics under apps.dced.pa.gov. Found by the harvester sweep on its first real run — exactly the source-rot this monitoring exists to catch, and a reminder that a registered URL is itself a thing that decays."
         }
-      ]
+      ],
+      "monitoringGap": true
     },
     {
       "id": "pa-dor-withholding",

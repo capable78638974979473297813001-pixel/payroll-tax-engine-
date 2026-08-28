@@ -6,6 +6,7 @@ import {
   appendEvent,
   assessHealth,
   findingIdFor,
+  readEvents,
 } from './journal.ts';
 
 /**
@@ -67,6 +68,17 @@ export async function runDaily(asOf = new Date().toISOString()): Promise<DailyRe
   }
 
   const startedMs = Date.now();
+
+  // Read BEFORE this run appends anything, so it reflects history rather
+  // than this sweep's own writes. This is the durable answer to "have we
+  // ever successfully read this source?", independent of whether its
+  // snapshot file still exists.
+  const everVerified = new Set(
+    readEvents()
+      .filter((e) => e.kind === 'source_verified')
+      .map((e) => e.sourceId),
+  );
+
   appendEvent({ kind: 'run_started', at: asOf, runId, sourceCount: sources.length });
 
   try {
@@ -99,8 +111,22 @@ export async function runDaily(asOf = new Date().toISOString()): Promise<DailyRe
       // are noise — which is exactly how a real one later gets ignored.
       // The source is still recorded as verified above, which is what the
       // freshness guarantee actually rests on.
-      const isFirstCapture = entry.lastCheckedAt === undefined;
-      if (entry.outcome === 'changed' && !isFirstCapture) {
+      //
+      // But "first capture" must be decided from the JOURNAL, not from
+      // whether a snapshot file happens to exist. sweep() infers
+      // lastCheckedAt purely from latestSnapshot(), so anything that
+      // removes the snapshot directory — and tests/harvester.test.ts
+      // deleted ALL of it, production baselines included, until this was
+      // found — makes every source look brand new. Every source then
+      // re-baselines silently and opens nothing, so a rate that moved in
+      // that window is absorbed into the new baseline and never reported.
+      // That is failure mode F, and the earlier no-noise-on-day-one fix
+      // is precisely what opened the hole. The journal is the durable
+      // record and cannot be erased by a test run, so it decides.
+      const seenBefore = everVerified.has(entry.sourceId);
+      const baselineLost = seenBefore && entry.lastCheckedAt === undefined;
+
+      if (entry.outcome === 'changed' && seenBefore) {
         appendEvent({
           kind: 'finding_opened',
           at: asOf,
@@ -110,7 +136,12 @@ export async function runDaily(asOf = new Date().toISOString()): Promise<DailyRe
           jurisdiction: entry.jurisdiction,
           title: entry.title,
           url: entry.url,
-          detail: entry.reason ?? 'Document content changed.',
+          detail: baselineLost
+            ? 'Its stored baseline was missing, so this could not be compared against what we last saw. ' +
+              'The journal shows this source HAS been read before, so the snapshot was lost rather than never taken. ' +
+              'Treated as a change because the alternative is silently re-baselining and absorbing a rate move that ' +
+              'nobody would ever see. Read the document and compare it against the data file by hand.'
+            : (entry.reason ?? 'Document content changed.'),
           ...(entry.snapshotPath ? { snapshotPath: entry.snapshotPath } : {}),
         });
       }
@@ -202,6 +233,19 @@ export function describeStatus(asOf = new Date().toISOString()): string {
       const why = src?.manualOnlyReason?.split('. ')[0];
       lines.push(`  · ${m.sourceId}${why ? ` — ${why}.` : ''}`);
     }
+    lines.push('');
+  }
+
+  // Sources that fetch fine but do not actually watch the thing that
+  // changes. Surfaced on every status read, because their whole failure
+  // mode is looking green forever.
+  const gaps = sources.filter((s) => s.monitoringGap);
+  if (gaps.length > 0) {
+    lines.push('WATCHING THE WRONG THING — fetches fine, but will not reveal a change:');
+    for (const g of gaps) {
+      lines.push(`  · ${g.id} [${g.jurisdiction}] — ${g.title}`);
+    }
+    lines.push("  See each source's own note in harvester/sources.json for what was tried.");
     lines.push('');
   }
 

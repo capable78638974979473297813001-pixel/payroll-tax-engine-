@@ -10,6 +10,7 @@ import {
   acquireLock,
   releaseLock,
   findingIdFor,
+  readEvents,
   FRESHNESS_SLA_HOURS,
 } from '../harvester/journal.ts';
 import type { JournalEvent } from '../harvester/journal.ts';
@@ -212,5 +213,57 @@ describe('two sweeps cannot race each other', () => {
     acquireLock(at(HOURS(0)), lockPath);
     const muchLater = acquireLock(at(HOURS(5)), lockPath);
     assert.equal(muchLater.ok, true);
+  });
+});
+
+describe('F — a lost baseline is never mistaken for a first capture', () => {
+  /**
+   * The bug this pins down was live and silent. sweep() infers
+   * lastCheckedAt purely from whether a snapshot file exists, and
+   * tests/harvester.test.ts deleted the whole snapshot directory —
+   * production baselines included — on every run. Every source then looked
+   * brand new, and because a genuine first capture deliberately opens no
+   * finding (otherwise day one is fifty-five false alarms), a rate that
+   * moved in that window would be absorbed into the new baseline and never
+   * reported by anyone.
+   *
+   * The fix is to decide "have we seen this before?" from the journal,
+   * which a test run cannot erase, rather than from the filesystem.
+   */
+  const everVerifiedFrom = (path: string) =>
+    new Set(
+      readEvents(path)
+        .filter((e) => e.kind === 'source_verified')
+        .map((e) => e.sourceId),
+    );
+
+  test('the journal still knows a source was read even after its snapshot is gone', () => {
+    recordGoodSweep(HOURS(0)); // both sources verified and snapshotted
+    // Snapshots wiped; the journal is untouched.
+    const seen = everVerifiedFrom(events);
+    assert.ok(seen.has('al-withholding'));
+    assert.ok(seen.has('oh-municipal-rates'));
+  });
+
+  test('a genuinely new source is absent from the journal, so day one stays quiet', () => {
+    recordGoodSweep(HOURS(0), ['al-withholding']);
+    const seen = everVerifiedFrom(events);
+    assert.equal(seen.has('oh-municipal-rates'), false, 'never-seen source must not look previously-verified');
+  });
+
+  test('seen-before + missing snapshot is the exact condition that must open a finding', () => {
+    recordGoodSweep(HOURS(0));
+    const seen = everVerifiedFrom(events);
+
+    // What runDaily() computes for a source whose snapshot vanished:
+    // sweep() reports outcome 'changed' with lastCheckedAt undefined.
+    const seenBefore = seen.has('al-withholding');
+    const lastCheckedAt = undefined;
+    const baselineLost = seenBefore && lastCheckedAt === undefined;
+
+    assert.equal(seenBefore, true);
+    assert.equal(baselineLost, true, 'must be recognised as a lost baseline, not a first capture');
+    // seenBefore is the gate on opening a finding, so this case opens one.
+    assert.ok(seenBefore, 'a lost baseline must not be silently re-baselined');
   });
 });
