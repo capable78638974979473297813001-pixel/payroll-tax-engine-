@@ -17,6 +17,22 @@
       ]
     },
     {
+      "id": "dol-ui-wage-bases",
+      "level": "federal",
+      "jurisdiction": "US",
+      "title": "US DOL — Significant Measures of State UI Tax Systems (every state's taxable wage base)",
+      "url": "https://oui.doleta.gov/unemploy/pdf/sigmeasures/sigmeasuitaxsys24.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 51,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, published with a lag",
+      "feeds": [
+        "data/states/{STATE}-{year}.json#suiEmployer"
+      ],
+      "note": "THE BACKSTOP for every state's UI taxable wage base in one document. Registered after a direct question exposed a real gap: 40 of 51 state sources point at a REVENUE department's withholding guide, which covers income tax and says nothing about unemployment insurance — Alabama's booklet states outright that 'State unemployment tax... [is] not administered by the Department of Revenue'. So a state moving its wage base or new-employer rate would not have changed any document being watched. This one covers all 51. Verified to contain e.g. 'TEXAS ... Fixed 9,000 ... Taxable Wage Base ($)'. KNOWN LIMIT: it LAGS — DOL publishes annually and the 2024 edition is still newest as of 2026-08 (the 25 and 26 filenames both 404), so it confirms a change late rather than promptly. That is why per-state labor-department sources are registered alongside it: those are timely, this is the one that is always there. Covers the WAGE BASE reliably; per-employer experience rates are not a jurisdiction constant and are never monitorable."
+    },
+    {
       "id": "irs-pub15t",
       "level": "federal",
       "jurisdiction": "US",
@@ -76,6 +92,22 @@
         "data/local/AL-municipalities-{year}.json"
       ],
       "note": "Alabama has NO state-run register of municipal occupational taxes — confirmed when this data was first gathered — so ALM's own survey is the closest thing to a central source, and the data file records that it is one confidence tier below primary. Rates here are percentage-formatted without decimals ('2%'), which is why a naive rate-regex finds none; the figures are present."
+    },
+    {
+      "id": "al-ui-rates",
+      "level": "state",
+      "jurisdiction": "AL",
+      "title": "Alabama — unemployment insurance employer rates & taxable wage base",
+      "url": "https://www2.labor.alabama.gov/",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/AL-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
     },
     {
       "id": "al-withholding",
@@ -138,6 +170,22 @@
       ]
     },
     {
+      "id": "co-ui-rates",
+      "level": "state",
+      "jurisdiction": "CO",
+      "title": "Colorado — unemployment insurance employer rates & taxable wage base",
+      "url": "https://cdle.colorado.gov/employers/unemployment-insurance-premiums/premium-rates",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/CO-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
+    },
+    {
       "id": "co-withholding",
       "level": "state",
       "jurisdiction": "CO",
@@ -182,6 +230,22 @@
         "data/states/DC-{year}.json"
       ],
       "note": "DC's Office of Tax and Revenue landing page. The state data file's own first source is a 2022 USDA National Finance Center bulletin — fine as an independent cross-check when the file was written, wrong as a monitoring target, since NFC republishing is not what makes DC's rates change. The specific withholding-booklet path 404s (otr.cfo.dc.gov/page/withholding-tax and /node/379032 both tried), so this watches the section root until a stable document URL is found."
+    },
+    {
+      "id": "de-ui-rates",
+      "level": "state",
+      "jurisdiction": "DE",
+      "title": "Delaware — unemployment insurance employer rates & taxable wage base",
+      "url": "https://labor.delaware.gov/divisions/unemployment-insurance/employer-services/",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/DE-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
     },
     {
       "id": "de-withholding",
@@ -229,6 +293,22 @@
       ]
     },
     {
+      "id": "hi-ui-rates",
+      "level": "state",
+      "jurisdiction": "HI",
+      "title": "Hawaii — unemployment insurance employer rates & taxable wage base",
+      "url": "https://labor.hawaii.gov/dcd/files/2025/12/2026-Maximum-Weekly-Wage-Base.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/HI-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
+    },
+    {
       "id": "hi-withholding",
       "level": "state",
       "jurisdiction": "HI",
@@ -259,6 +339,22 @@
       ]
     },
     {
+      "id": "id-ui-rates",
+      "level": "state",
+      "jurisdiction": "ID",
+      "title": "Idaho — unemployment insurance employer rates & taxable wage base",
+      "url": "https://www.labor.idaho.gov/wp-content/uploads/2024/12/Tax-rate_Class-array_2026.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/ID-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
+    },
+    {
       "id": "id-withholding",
       "level": "state",
       "jurisdiction": "ID",
@@ -272,6 +368,22 @@
       "feeds": [
         "data/states/ID-{year}.json"
       ]
+    },
+    {
+      "id": "il-ui-rates",
+      "level": "state",
+      "jurisdiction": "IL",
+      "title": "Illinois — unemployment insurance employer rates & taxable wage base",
+      "url": "https://ides.illinois.gov/content/dam/soi/en/web/ides/ides_forms_and_publications/EA-50_2026.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/IL-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
     },
     {
       "id": "il-withholding",
@@ -303,6 +415,22 @@
         "data/local/IN-counties-{year}.json"
       ],
       "note": "Same document as the in-withholding state source: DN#1 carries BOTH the state rate and all 92 county rates. Registered separately so a county-rate change is attributed to the local data file it feeds, rather than being buried under a state-level finding."
+    },
+    {
+      "id": "in-ui-rates",
+      "level": "state",
+      "jurisdiction": "IN",
+      "title": "Indiana — unemployment insurance employer rates & taxable wage base",
+      "url": "https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/IN-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
     },
     {
       "id": "in-withholding",
@@ -364,6 +492,22 @@
       "feeds": [
         "data/states/KY-{year}.json"
       ]
+    },
+    {
+      "id": "la-ui-rates",
+      "level": "state",
+      "jurisdiction": "LA",
+      "title": "Louisiana — unemployment insurance employer rates & taxable wage base",
+      "url": "https://www.laworks.net/Downloads/UI/WTS/2026RateTable.pdf",
+      "authority": "primary",
+      "format": "pdf",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/LA-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
     },
     {
       "id": "la-withholding",
@@ -472,6 +616,22 @@
       ]
     },
     {
+      "id": "mo-ui-rates",
+      "level": "state",
+      "jurisdiction": "MO",
+      "title": "Missouri — unemployment insurance employer rates & taxable wage base",
+      "url": "https://labor.mo.gov/des/employers/tax-rates",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/MO-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
+    },
+    {
       "id": "mo-withholding",
       "level": "state",
       "jurisdiction": "MO",
@@ -485,6 +645,22 @@
       "feeds": [
         "data/states/MO-{year}.json"
       ]
+    },
+    {
+      "id": "ms-ui-rates",
+      "level": "state",
+      "jurisdiction": "MS",
+      "title": "Mississippi — unemployment insurance employer rates & taxable wage base",
+      "url": "https://mdes.ms.gov/employer-faqs/",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/MS-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
     },
     {
       "id": "ms-withholding",
@@ -515,6 +691,22 @@
       "feeds": [
         "data/states/MT-{year}.json"
       ]
+    },
+    {
+      "id": "nc-ui-rates",
+      "level": "state",
+      "jurisdiction": "NC",
+      "title": "North Carolina — unemployment insurance employer rates & taxable wage base",
+      "url": "https://www.des.nc.gov/employers/tax-rate-information",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/NC-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
     },
     {
       "id": "nc-withholding",
@@ -578,6 +770,22 @@
       "note": "New Hampshire levies no income tax and no wage tax, so the only payroll figure that moves is the unemployment wage base — this watches NH Employment Security rather than the law-firm client alert the state data file cites for the Interest & Dividends repeal, which is a one-time historical fact that will never change again. Fetches successfully (verified, 186KB) despite curl being 403'd, the same client-dependent refusal documented for Massachusetts."
     },
     {
+      "id": "nj-ui-rates",
+      "level": "state",
+      "jurisdiction": "NJ",
+      "title": "New Jersey — unemployment insurance employer rates & taxable wage base",
+      "url": "https://www.nj.gov/labor/ea/employer-services/rate-info/",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/NJ-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
+    },
+    {
       "id": "nj-withholding",
       "level": "state",
       "jurisdiction": "NJ",
@@ -591,6 +799,22 @@
       "feeds": [
         "data/states/NJ-{year}.json"
       ]
+    },
+    {
+      "id": "nm-ui-rates",
+      "level": "state",
+      "jurisdiction": "NM",
+      "title": "New Mexico — unemployment insurance employer rates & taxable wage base",
+      "url": "https://www.dws.state.nm.us/Unemployment/Unemployment-for-a-Business/Unemployment-Insurance-Tax",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/NM-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
     },
     {
       "id": "nm-withholding",
@@ -777,6 +1001,22 @@
       ]
     },
     {
+      "id": "sc-ui-rates",
+      "level": "state",
+      "jurisdiction": "SC",
+      "title": "South Carolina — unemployment insurance employer rates & taxable wage base",
+      "url": "https://dew.sc.gov/news/2025-11/2026-tax-rate-cuts-press-release",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/SC-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
+    },
+    {
       "id": "sc-withholding",
       "level": "state",
       "jurisdiction": "SC",
@@ -853,6 +1093,22 @@
       ]
     },
     {
+      "id": "va-ui-rates",
+      "level": "state",
+      "jurisdiction": "VA",
+      "title": "Virginia — unemployment insurance employer rates & taxable wage base",
+      "url": "https://www.vec.virginia.gov/FAQs/employers/what-wage-base-each-employee-i-will-pay-taxes",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/VA-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
+    },
+    {
       "id": "va-withholding",
       "level": "state",
       "jurisdiction": "VA",
@@ -914,6 +1170,22 @@
       ]
     },
     {
+      "id": "wv-ui-rates",
+      "level": "state",
+      "jurisdiction": "WV",
+      "title": "West Virginia — unemployment insurance employer rates & taxable wage base",
+      "url": "https://workforcewv.org/businesses/unemployment-tax-information/",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/WV-{year}.json#suiEmployer"
+      ],
+      "note": "Watches the LABOR department, not the revenue department. Registered after a direct question found that this state's only source was its income-tax withholding guide, which does not carry UI figures at all — so a wage-base or new-employer-rate change would have moved nothing being watched. URL taken from this state data file's own UI research and verified to fetch and to contain wage-base and/or rate figures."
+    },
+    {
       "id": "wv-withholding",
       "level": "state",
       "jurisdiction": "WV",
@@ -943,5 +1215,66 @@
         "data/states/WY-{year}.json"
       ]
     }
-  ]
+  ],
+  "uiCoverage": {
+    "$comment": "How well each state's UNEMPLOYMENT INSURANCE figures (suiEmployer.wageBase, newEmployerRate, experienceRange) are actually watched — tracked separately because it is a different question from income-tax withholding, answered by a different agency, in a different document. This block exists because a direct question exposed that 40 of 51 states were pointed only at a REVENUE department's withholding guide, which carries no UI figures at all; Alabama's booklet says so in as many words.",
+    "dedicatedStateSource": [
+      "AK",
+      "AL",
+      "CO",
+      "DE",
+      "FL",
+      "HI",
+      "ID",
+      "IL",
+      "IN",
+      "LA",
+      "MO",
+      "MS",
+      "NC",
+      "NH",
+      "NJ",
+      "NM",
+      "NV",
+      "SC",
+      "SD",
+      "TN",
+      "TX",
+      "VA",
+      "WA",
+      "WV",
+      "WY"
+    ],
+    "backstopOnly": [
+      "AR",
+      "AZ",
+      "CA",
+      "CT",
+      "DC",
+      "GA",
+      "IA",
+      "KS",
+      "KY",
+      "MA",
+      "MD",
+      "ME",
+      "MI",
+      "MN",
+      "MT",
+      "ND",
+      "NE",
+      "NY",
+      "OH",
+      "OK",
+      "OR",
+      "PA",
+      "RI",
+      "UT",
+      "VT",
+      "WI"
+    ],
+    "backstopOnlyMeaning": "These states have NO dedicated labour-department source registered, so their UI figures are covered only by dol-ui-wage-bases. That backstop is real but LAGS (DOL publishes annually; the 2024 edition is still newest as of 2026-08) and carries the taxable WAGE BASE only — not new-employer rates or rate schedules. Treat a UI change in these states as something that will be confirmed late, not caught promptly.",
+    "whyNotAllFifty": "Four candidates were tried and rejected on evidence rather than skipped: Arkansas and Arizona return HTTP 403 to any automated client, and the Pennsylvania and Rhode Island URLs their own data files recorded now 404. The remaining states simply had no UI source recorded in their data file to start from; finding one per state is ordinary research, not a blocked problem.",
+    "neverMonitorable": "An individual employer's EXPERIENCE-RATED contribution rate is not a jurisdiction constant — it depends on that employer's own layoff history and is assigned to them privately. No source can carry it, which is why the engine takes it from input.employer.stateUnemploymentRate and falls back to the published new-employer rate. Only the wage base and the published schedules are monitorable at all."
+  }
 }

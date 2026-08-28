@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { loadSources, sweep } from './run.ts';
 import type { SweepEntry } from './run.ts';
 import {
@@ -234,6 +237,27 @@ export function describeStatus(asOf = new Date().toISOString()): string {
       lines.push(`  · ${m.sourceId}${why ? ` — ${why}.` : ''}`);
     }
     lines.push('');
+  }
+
+  // States whose UI figures rest on the lagging federal backstop alone.
+  // Surfaced because "healthy" refers to sources being READ, which is not
+  // the same as every number in data/ being watched — and that gap is
+  // invisible unless it is printed.
+  try {
+    const reg = JSON.parse(
+      readFileSync(join(import.meta.dirname, 'sources.json'), 'utf8'),
+    ) as { uiCoverage?: { backstopOnly?: string[] } };
+    const backstop = reg.uiCoverage?.backstopOnly ?? [];
+    if (backstop.length > 0) {
+      lines.push(
+        `UI RATES — ${backstop.length} states have no dedicated labour-department source; their wage base is`,
+      );
+      lines.push('  covered only by the annual (lagging) US DOL report, and their new-employer rates not at all:');
+      lines.push(`  ${backstop.join(' ')}`);
+      lines.push('');
+    }
+  } catch {
+    // Never let a status read fail over an advisory section.
   }
 
   // Sources that fetch fine but do not actually watch the thing that
