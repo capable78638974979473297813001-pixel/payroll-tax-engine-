@@ -35,15 +35,35 @@ guesses — see `geocode/rooftop.ts` for the guards on each.
 
 ## Measured result
 
-**51 of 51 jurisdictions resolve to something better than Census's own
-interpolation**, correcting it by 8m to 269m (median 90m).
+**50 of 51 jurisdictions resolve to something better than Census's own
+interpolation**, correcting it by 5m to 269m (median 90m).
 
 | Tier | Count |
 | --- | --- |
 | `rooftop` (authoritative) | 34 / 51 |
-| `rooftop-osm` (house-level, corroborated) | 16 / 51 |
+| `rooftop-osm` (house-level, corroborated) | 15 / 51 |
 | `neighbor` (block-level) | 1 / 51 |
-| `interpolated` (no improvement available) | 0 / 51 |
+| `interpolated` (no improvement available) | 1 / 51 |
+
+### These numbers move, and that is not a bug
+
+An earlier run of this same script recorded 51/51, with 16 on
+`rooftop-osm` and none left on `interpolated`. Re-measured on 2026-08-28,
+North Dakota came back `interpolated`: OpenStreetMap did not return a
+house-level point for that sample address on this run, so the pipeline
+correctly refused to claim one and fell back to Census.
+
+Two of the four tiers depend on services outside this repo — the National
+Address Database publishes on its own schedule, and `rooftop-osm` depends
+on both what OSM currently holds and whether Nominatim answers. A
+jurisdiction sitting on `rooftop-osm` can therefore drop to
+`interpolated` on any given day without a line of code changing, and come
+back later.
+
+The table above is a measurement with a date on it, not a guarantee. What
+IS guaranteed is the refusal: every tier declines rather than guesses, so
+a bad day costs precision and never correctness — `interpolated` is
+Census's own answer, which is where this project started.
 
 ### Per jurisdiction
 
@@ -77,7 +97,7 @@ interpolation**, correcting it by 8m to 269m (median 90m).
 | MS | `rooftop-osm` | 8m | — |
 | MT | `rooftop` | 112m | Montana State Library |
 | NC | `rooftop` | 82m | State of North Carolina |
-| ND | `rooftop-osm` | 8m | — |
+| ND | `interpolated` | — | — (OSM returned no house-level point on the 2026-08-28 run; was `rooftop-osm`/8m previously) |
 | NE | `rooftop` | 50m | State of Nebraska |
 | NH | `rooftop-osm` | 28m | — |
 | NJ | `rooftop` | 88m | State of New Jersey |

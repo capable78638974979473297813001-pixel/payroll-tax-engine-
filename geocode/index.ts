@@ -596,6 +596,14 @@ export async function resolveEmployee(
 
   if (workFlags?.multnomahCounty) fields.multnomahCounty = true;
 
+  // Seattle's JumpStart payroll expense tax. Employer-paid, and banded by
+  // BOTH the employer's prior-year Seattle payroll and the employee's own
+  // annual compensation — neither of which an address can supply. Setting
+  // the locality is what makes seattlePayrollExpenseTax() reachable at
+  // all; the two figures it still needs are reported in notResolvable
+  // below, the same way Denver's are.
+  if (workFlags?.seattle) fields.locality = 'Seattle';
+
   if (work?.resolved?.wvServiceFeeCity) {
     fields.locality = work.resolved.wvServiceFeeCity;
   }
@@ -622,6 +630,13 @@ export async function resolveEmployee(
     }
     notResolvable.push(
       "Oregon's TriMet and Lane Transit District boundaries (certificate.locality = 'TriMet'/'LTD') — both districts publish their boundaries only as downloadable files (developer.trimet.org/gis), not as a service this can query per address; must be supplied manually. See geocode/districts.ts.",
+    );
+  }
+  if (workFlags?.seattle) {
+    notResolvable.push(
+      "Seattle's JumpStart payroll expense tax needs input.employer.seattlePriorYearPayrollExpense (which rate tier " +
+        "the employer falls in) and input.ytd.seattleCompensation (this employee's Seattle pay so far this year). " +
+        "Both are payroll facts no address can answer. certificate.locality was set to 'Seattle'; those two still need caller input.",
     );
   }
   if (workFlags?.denver) {

@@ -321,6 +321,16 @@ export interface ResolvedJurisdiction {
     /** Denver's Occupational Privilege Tax gate (certificate.locality === 'Denver'). Does NOT resolve certificate.denverMonthlyCompensation/denverOPTWithheldThisMonth — those need real payroll-history the caller must already track, no address can supply them. */
     denver: boolean;
     wilmington: boolean;
+    /**
+     * Seattle's JumpStart payroll expense tax gate (certificate.locality
+     * === 'Seattle'). Like Denver's, the address is only half the answer:
+     * the tax bands by the EMPLOYER's prior-year Seattle payroll and by
+     * each employee's own annual compensation, so
+     * input.employer.seattlePriorYearPayrollExpense and
+     * input.ytd.seattleCompensation still have to come from the caller.
+     * Setting the locality is what makes those inputs reachable at all.
+     */
+    seattle: boolean;
   };
 }
 
@@ -358,6 +368,7 @@ export function resolveJurisdiction(
       stLouis: false,
       multnomahCounty: false,
       denver: false,
+      seattle: false,
       wilmington: false,
     },
   };
@@ -420,6 +431,9 @@ export function resolveJurisdiction(
   }
   if (state === 'DE') {
     result.flags.wilmington = placesInclude(geo.incorporatedPlaces, 'Wilmington');
+  }
+  if (state === 'WA') {
+    result.flags.seattle = placesInclude(geo.incorporatedPlaces, 'Seattle');
   }
 
   return result;
