@@ -15,3 +15,7 @@ harvester/review/
 # rebuilt by running the sweep. Committing it would mean one machine's
 # findings appearing as another's history. See harvester/journal.ts.
 harvester/state/
+
+# Supabase CLI's own local scratch state (linked project ref cache, CLI
+# version pin) -- machine-local, not project configuration.
+supabase/.temp/

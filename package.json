@@ -22,7 +22,9 @@
     "harvest:status": "node examples/harvest-daily.ts status",
     "harvest:ack": "node examples/harvest-daily.ts ack",
     "harvest:diff": "node examples/harvest-daily.ts diff",
-    "harvest:audit": "node examples/harvest-daily.ts audit"
+    "harvest:audit": "node examples/harvest-daily.ts audit",
+    "edge:build": "node scripts/build-edge-function.ts && node scripts/build-data-bundle.ts",
+    "edge:key": "node scripts/generate-api-key.ts"
   },
   "license": "MIT"
 }

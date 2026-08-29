@@ -1,0 +1,8 @@
+project_id = "payroll-tax-engine"
+
+[functions.calculate-paycheck]
+# This project's own api_keys table is the auth boundary, not Supabase's
+# JWT — verify_jwt = false so a caller only ever needs to send the API
+# key (see supabase/functions/calculate-paycheck/index.ts), not a
+# separate Supabase anon/service token.
+verify_jwt = false
