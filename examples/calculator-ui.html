@@ -83,6 +83,17 @@
     background: #fff;
     color: var(--text);
   }
+  .money-input { position: relative; }
+  .money-input .currency {
+    position: absolute;
+    left: 9px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 13.5px;
+    pointer-events: none;
+  }
+  .money-input input[type="number"] { padding-left: 20px; }
   input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   .checkbox-row { display: flex; align-items: center; gap: 6px; margin: 4px 0 8px; }
   .checkbox-row input { width: auto; }
@@ -209,6 +220,23 @@
   <form class="panel" id="form">
 
     <fieldset>
+      <legend>Work Address (optional)</legend>
+      <p class="hint">Look up a street address to auto-fill the state and local jurisdiction fields below (via the U.S. Census geocoder).</p>
+      <div class="row single">
+        <div><label for="addrStreet">Street Address</label><input type="text" id="addrStreet" placeholder="e.g. 2 Woodward Ave" /></div>
+      </div>
+      <div class="row three">
+        <div><label for="addrCity">City</label><input type="text" id="addrCity" placeholder="e.g. Detroit" /></div>
+        <div><label for="addrState">State</label><input type="text" id="addrState" maxlength="2" style="text-transform:uppercase" placeholder="e.g. MI" /></div>
+        <div><label for="addrZip">ZIP Code</label><input type="text" id="addrZip" placeholder="e.g. 48226" /></div>
+      </div>
+      <div class="btn-row">
+        <button type="button" id="addressLookup">Look Up Jurisdiction</button>
+      </div>
+      <div id="addressStatus" style="display:none; margin-top:8px; white-space:pre-wrap;"></div>
+    </fieldset>
+
+    <fieldset>
       <legend>State &amp; Date</legend>
       <div class="row">
         <div>
@@ -228,7 +256,7 @@
       <div class="row">
         <div>
           <label for="grossPay">Gross Pay</label>
-          <input type="number" id="grossPay" value="0" step="0.01" min="0" />
+          <div class="money-input"><span class="currency">$</span><input type="number" id="grossPay" value="0" step="0.01" min="0" /></div>
         </div>
         <div>
           <label for="grossPayMethod">Gross Pay Method</label>
@@ -240,13 +268,13 @@
         </div>
       </div>
       <div class="row" id="hourlyRow" style="display:none">
-        <div><label for="hourlyRate">Hourly Rate</label><input type="number" id="hourlyRate" value="0" step="0.01" min="0" /></div>
+        <div><label for="hourlyRate">Hourly Rate</label><div class="money-input"><span class="currency">$</span><input type="number" id="hourlyRate" value="0" step="0.01" min="0" /></div></div>
         <div><label for="hoursPerPeriod">Hours per Pay Period</label><input type="number" id="hoursPerPeriod" value="0" step="0.25" min="0" /></div>
       </div>
       <div class="row">
         <div>
           <label for="grossPayYTD">Gross Pay YTD</label>
-          <input type="number" id="grossPayYTD" value="0" step="0.01" min="0" />
+          <div class="money-input"><span class="currency">$</span><input type="number" id="grossPayYTD" value="0" step="0.01" min="0" /></div>
         </div>
         <div>
           <label for="payFrequency">Pay Frequency</label>
@@ -278,16 +306,16 @@
         </div>
         <div>
           <label for="dependentCredit">Step 3: Dependents Amount</label>
-          <input type="number" id="dependentCredit" value="0" step="0.01" min="0" />
+          <div class="money-input"><span class="currency">$</span><input type="number" id="dependentCredit" value="0" step="0.01" min="0" /></div>
         </div>
       </div>
       <div class="checkbox-row"><input type="checkbox" id="multipleJobs" /><label for="multipleJobs">Step 2: Two Jobs (or Multiple Jobs Worksheet checkbox)</label></div>
       <div class="row">
-        <div><label for="otherIncome">Step 4a: Other Income</label><input type="number" id="otherIncome" value="0" step="0.01" min="0" /></div>
-        <div><label for="w4Deductions">Step 4b: Deductions</label><input type="number" id="w4Deductions" value="0" step="0.01" min="0" /></div>
+        <div><label for="otherIncome">Step 4a: Other Income</label><div class="money-input"><span class="currency">$</span><input type="number" id="otherIncome" value="0" step="0.01" min="0" /></div></div>
+        <div><label for="w4Deductions">Step 4b: Deductions</label><div class="money-input"><span class="currency">$</span><input type="number" id="w4Deductions" value="0" step="0.01" min="0" /></div></div>
       </div>
       <div class="row single">
-        <div><label for="extraWithholding">Additional Federal Withholding (per cheque)</label><input type="number" id="extraWithholding" value="0" step="0.01" min="0" /></div>
+        <div><label for="extraWithholding">Additional Federal Withholding (per cheque)</label><div class="money-input"><span class="currency">$</span><input type="number" id="extraWithholding" value="0" step="0.01" min="0" /></div></div>
       </div>
       <div class="checkbox-row"><input type="checkbox" id="roundToWholeDollars" /><label for="roundToWholeDollars">Round Withholding to Whole Dollars</label></div>
       <div class="checkbox-row"><input type="checkbox" id="federalExempt" /><label for="federalExempt">Exempt from Federal Withholding</label></div>
@@ -361,7 +389,24 @@
   });
 
   // --- populate state dropdown --------------------------------------
+  // URL scheme deliberately mirrors paycheckcity.com's own
+  // /calculator/salary/<state-slug>[/result] pattern (slugs confirmed
+  // against their live "Change state" list — kebab-case of the state
+  // name, e.g. "new-york", except the District of Columbia, which they
+  // slug as "washington-dc" rather than the literal "district-of-columbia";
+  // the server's stateSlug() in calculator-server.ts carries the same
+  // exception). /calculator/salary/<slug> deep-links straight to a state
+  // pre-selected; a successful Calculate then pushes /result onto the URL,
+  // same as their own submit flow.
   let stateFieldsCache = {};
+  let slugByCode = {};
+  let codeBySlug = {};
+
+  function pathSlug() {
+    const m = location.pathname.match(/^\/calculator\/salary\/([a-z-]+?)(?:\/result)?\/?$/);
+    return m ? m[1] : null;
+  }
+
   fetch('/api/states')
     .then((r) => r.json())
     .then((data) => {
@@ -371,8 +416,30 @@
         opt.value = s.code;
         opt.textContent = s.hasIncomeTax ? s.name : `${s.name} (no income tax)`;
         sel.appendChild(opt);
+        slugByCode[s.code] = s.slug;
+        codeBySlug[s.slug] = s.code;
+      }
+      const slug = pathSlug();
+      const code = slug ? codeBySlug[slug] : null;
+      if (code) {
+        sel.value = code;
+        sel.dispatchEvent(new Event('change'));
       }
     });
+
+  function syncUrlToState(code, { result } = {}) {
+    const path = code ? `/calculator/salary/${slugByCode[code]}${result ? '/result' : ''}` : '/';
+    if (path !== location.pathname) history.pushState({ code, result: !!result }, '', path);
+  }
+
+  window.addEventListener('popstate', () => {
+    const slug = pathSlug();
+    const code = slug ? codeBySlug[slug] : '';
+    if ($('state').value !== (code || '')) {
+      $('state').value = code || '';
+      $('state').dispatchEvent(new Event('change'));
+    }
+  });
 
   function renderStateFields(spec) {
     const box = $('stateFieldsBox');
@@ -387,8 +454,23 @@
       return;
     }
     if (spec.fields.length === 0 && !spec.hasLocalTax) {
-      box.innerHTML = `<div class="muted-box">${code} uses a flat rate with no certificate fields — nothing further needed.</div>`;
+      box.innerHTML = `<div class="muted-box">${code} uses a flat rate — the two fields below still apply.</div>`;
     }
+    // Every state's own withholding certificate has these two options
+    // (paycheckcity.com shows them first, ahead of any state-specific
+    // fields, on every state's calculator) — read generically by this
+    // repo's own applyStateWithholdingExemption()/
+    // applyAdditionalStateWithholding() in src/taxes/state.ts regardless of
+    // which state is selected, so they belong here once rather than
+    // repeated in every STATE_FIELDS entry.
+    const exemptWrap = document.createElement('div');
+    exemptWrap.className = 'checkbox-row';
+    exemptWrap.innerHTML = `<input type="checkbox" id="sf_exempt" /><label for="sf_exempt">Exempt from State Tax</label>`;
+    box.appendChild(exemptWrap);
+    const extraWrap = document.createElement('div');
+    extraWrap.innerHTML = `<label for="sf_additionalWithholding">Additional State Withholding (per cheque)</label>` +
+      `<div class="money-input"><span class="currency">$</span><input type="number" id="sf_additionalWithholding" value="0" step="0.01" min="0" /></div>`;
+    box.appendChild(extraWrap);
     for (const f of spec.fields) {
       const wrap = document.createElement('div');
       if (f.type === 'checkbox') {
@@ -398,8 +480,10 @@
         wrap.innerHTML = `<label for="sf_${f.key}">${f.label}</label>` +
           `<select id="sf_${f.key}">${f.options.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}</select>`;
       } else {
+        const input = `<input type="${f.type}" id="sf_${f.key}" ${f.placeholder ? `placeholder="${f.placeholder}"` : ''} />`;
+        const isMoney = f.type === 'number' && /\$/.test(f.label);
         wrap.innerHTML = `<label for="sf_${f.key}">${f.label}</label>` +
-          `<input type="${f.type}" id="sf_${f.key}" ${f.placeholder ? `placeholder="${f.placeholder}"` : ''} />`;
+          (isMoney ? `<div class="money-input"><span class="currency">$</span>${input}</div>` : input);
       }
       box.appendChild(wrap);
     }
@@ -413,8 +497,75 @@
     box.appendChild(res);
   }
 
+  // --- address / zip lookup -------------------------------------------
+  function showAddressStatus(text, isError) {
+    const el = $('addressStatus');
+    el.style.display = 'block';
+    el.className = isError ? 'error-box' : 'muted-box';
+    el.textContent = text;
+  }
+
+  async function applyResolvedAddress(data) {
+    const stateCode = data.resolved.state;
+    $('state').value = stateCode;
+    if (!stateFieldsCache[stateCode]) {
+      stateFieldsCache[stateCode] = await fetch('/api/state-fields/' + stateCode).then((r) => r.json());
+    }
+    renderStateFields(stateFieldsCache[stateCode]);
+
+    const filled = [];
+    for (const [key, value] of Object.entries(data.certificateFields || {})) {
+      const el = document.getElementById('sf_' + key);
+      if (!el) continue;
+      if (el.type === 'checkbox') el.checked = Boolean(value);
+      else el.value = String(value);
+      filled.push(key);
+    }
+
+    let msg = `Matched: ${(data.matchQuality && data.matchQuality.matchedAddress) || data.address} → ${stateCode}`;
+    if (filled.length) msg += `\nAuto-filled: ${filled.join(', ')}`;
+    if (data.lowConfidenceReasons && data.lowConfidenceReasons.length) {
+      msg += `\n\n⚠ ${data.lowConfidenceReasons.join(' ')}`;
+    }
+    showAddressStatus(msg, false);
+  }
+
+  $('addressLookup').addEventListener('click', async () => {
+    const street = $('addrStreet').value.trim();
+    const city = $('addrCity').value.trim();
+    const state = $('addrState').value.trim();
+    const zip = $('addrZip').value.trim();
+    if (!street || !city || !state) {
+      showAddressStatus('Street, city, and state are required (ZIP is optional but helps).', true);
+      return;
+    }
+    const address = `${street}, ${city}, ${state}${zip ? ' ' + zip : ''}`;
+    const btn = $('addressLookup');
+    btn.disabled = true;
+    btn.textContent = 'Looking up…';
+    try {
+      const res = await fetch('/api/resolve-address', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address, checkDate: $('checkDate').value }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.matched) {
+        showAddressStatus((data && data.error) || 'Could not match that address against Census data.', true);
+        return;
+      }
+      await applyResolvedAddress(data);
+    } catch (err) {
+      showAddressStatus('Could not reach the address lookup service: ' + err.message, true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Look Up Jurisdiction';
+    }
+  });
+
   $('state').addEventListener('change', () => {
     const code = $('state').value;
+    syncUrlToState(code);
     if (!code) { renderStateFields({ fields: [], hasLocalTax: false, hasIncomeTax: true }); return; }
     if (stateFieldsCache[code]) { renderStateFields(stateFieldsCache[code]); return; }
     fetch('/api/state-fields/' + code)
@@ -433,7 +584,7 @@
     row.innerHTML = `
       <div><label>Description</label><input type="text" class="ded-code" placeholder="e.g. 401K" /></div>
       <div><label>Category</label><select class="ded-category">${PRETAX_CATEGORIES.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></div>
-      <div><label>Amount ($)</label><input type="number" class="ded-amount" value="0" step="0.01" min="0" /></div>
+      <div><label>Amount</label><div class="money-input"><span class="currency">$</span><input type="number" class="ded-amount" value="0" step="0.01" min="0" /></div></div>
       <button type="button" class="ded-remove" title="Remove">✕</button>
     `;
     row.querySelector('.ded-remove').addEventListener('click', () => row.remove());
@@ -562,7 +713,10 @@
       });
       const data = await res.json();
       if (!res.ok) renderError(data.error || 'Calculation failed.', data.problems);
-      else render(data.result, data.input);
+      else {
+        render(data.result, data.input);
+        syncUrlToState($('state').value, { result: true });
+      }
     } catch (err) {
       renderError('Could not reach the calculator server: ' + err.message);
     } finally {

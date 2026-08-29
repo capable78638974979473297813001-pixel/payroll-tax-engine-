@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path';
 import { calculatePaycheck } from '../src/calculate.ts';
 import { dollars } from '../src/money.ts';
 import { PERIODS_PER_YEAR } from '../src/types.ts';
+import { resolveAddress } from '../geocode/index.ts';
 import type {
   Deduction,
   Earning,
@@ -72,6 +73,23 @@ function listStates(): { code: string; name: string; hasIncomeTax: boolean }[] {
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/**
+ * URL slugs matching paycheckcity.com's own /calculator/salary/<slug>
+ * scheme exactly (confirmed against their live "Change state" list) — a
+ * plain kebab-case of the state name, except the District of Columbia,
+ * which PaycheckCity slugs as "washington-dc" rather than the literal
+ * "district-of-columbia".
+ */
+function slugify(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+function stateSlug(code: string, name: string): string {
+  return code === 'DC' ? 'washington-dc' : slugify(name);
+}
+function slugToCode(slug: string): string | undefined {
+  return listStates().find((s) => stateSlug(s.code, s.name) === slug)?.code;
 }
 
 interface CalculatorRequest {
@@ -176,10 +194,24 @@ function buildPaycheckInput(body: CalculatorRequest): PaycheckInput {
   const ytdCents = dollars(body.grossPayYTD ?? 0);
   const stateCode = body.stateCode?.trim().toUpperCase() || undefined;
 
+  // Every state's own withholding certificate has its own dollar-amount
+  // fields, and the convention for those (dr0004Line2Amount, louisianaBlockA,
+  // totalExemptionClaimed, ...) is a RAW dollar figure — the state's own
+  // dispatch function calls dollars() on it internally. The two GENERIC
+  // certificate fields applyAdditionalStateWithholding()/
+  // applyReducedStateWithholding() read (src/taxes/state.ts) are the one
+  // deliberate exception: those two are documented and unit-tested as
+  // expecting CENTS already (certificate.additionalWithholding: dollars(15)
+  // in tests/engine.test.ts), matching federalW4.extraWithholding's own
+  // convention rather than the per-state fields' convention. This form only
+  // ever collects a raw dollar amount from the user, so these two keys need
+  // converting here rather than left to coerceCertificateValue().
+  const CENTS_CERTIFICATE_FIELDS = new Set(['additionalWithholding', 'reducedWithholding']);
   const certificate: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(body.stateCertificate ?? {})) {
     if (v === '' || v === undefined || v === null) continue;
-    certificate[k] = coerceCertificateValue(v);
+    const coerced = coerceCertificateValue(v);
+    certificate[k] = CENTS_CERTIFICATE_FIELDS.has(k) && typeof coerced === 'number' ? dollars(coerced) : coerced;
   }
 
   const w4 = body.federalW4;
@@ -227,14 +259,23 @@ class CalculatorInputError extends Error {
 
 const server = createServer(async (req, res) => {
   try {
-    if (req.method === 'GET' && (req.url === '/' || req.url === '/index.html')) {
+    const salaryPath = req.url?.match(/^\/calculator\/salary(?:\/([a-z-]+))?(?:\/result)?\/?(?:\?.*)?$/);
+
+    if (req.method === 'GET' && (req.url === '/' || req.url === '/index.html' || salaryPath)) {
+      if (salaryPath?.[1] && !slugToCode(salaryPath[1])) {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end(`Not found: no state matches "/calculator/salary/${salaryPath[1]}"`);
+        return;
+      }
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(readFileSync(HTML_PATH, 'utf8'));
       return;
     }
 
     if (req.method === 'GET' && req.url === '/api/states') {
-      sendJson(res, 200, { states: listStates() });
+      sendJson(res, 200, {
+        states: listStates().map((s) => ({ ...s, slug: stateSlug(s.code, s.name) })),
+      });
       return;
     }
 
@@ -245,6 +286,31 @@ const server = createServer(async (req, res) => {
         hasLocalTax: STATES_WITH_LOCAL_TAX.has(code),
         hasIncomeTax: !NO_INCOME_TAX_STATES.has(code),
       });
+      return;
+    }
+
+    if (req.method === 'POST' && req.url === '/api/resolve-address') {
+      const raw = await readBody(req);
+      let body: { address?: string; checkDate?: string };
+      try {
+        body = JSON.parse(raw);
+      } catch {
+        sendJson(res, 400, { error: 'Request body was not valid JSON.' });
+        return;
+      }
+      const address = body.address?.trim();
+      if (!address) {
+        sendJson(res, 422, { error: 'address is required.' });
+        return;
+      }
+      try {
+        const result = await resolveAddress(address, 'work', body.checkDate || new Date().toISOString().slice(0, 10));
+        sendJson(res, 200, result);
+      } catch (err) {
+        sendJson(res, 502, {
+          error: err instanceof Error ? err.message : 'Address lookup failed.',
+        });
+      }
       return;
     }
 

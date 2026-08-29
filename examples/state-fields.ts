@@ -215,7 +215,11 @@ export const STATE_FIELDS: Record<string, FieldSpec[]> = {
     DEPENDENTS,
     { key: 'headOfHousehold', label: 'Head of household', type: 'checkbox' },
   ],
-  KY: [],
+  KY: [
+    WORK_CITY,
+    { key: 'workCounty', label: 'Work county (occupational tax)', type: 'text', placeholder: 'e.g. Boone County' },
+    { key: 'residenceCity', label: 'Residence city (for resident-rate jurisdictions)', type: 'text' },
+  ],
   LA: [
     { key: 'louisianaBlockA', label: 'Block A personal exemption ($, annual)', type: 'number' },
   ],
