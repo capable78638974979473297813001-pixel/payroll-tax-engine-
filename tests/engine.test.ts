@@ -5418,6 +5418,78 @@ describe('Delaware', () => {
       assert.equal(r.taxes.some((t) => t.id === 'WILMINGTON_WAGE'), false);
     });
   });
+
+  describe('supplemental wages (annual-marginal method, Employer\'s Guide Section 17)', () => {
+    test('standalone bonus with prior regular payment: withheld at the MARGINAL annual rate, not re-annualized as if it were the regular wage', () => {
+      // $2,000/wk regular (single, 0 exemptions) annualizes to $104,000,
+      // taxed at $5,633.00/yr (verified separately below). A $5,000 bonus
+      // on its own cheque pushes the annual total to $109,000 — entirely
+      // inside DE's top 6.6% bracket (which starts at $60,000) — so the
+      // marginal tax on the bonus alone is exactly $5,000 x 6.6% = $330.00.
+      const regular = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+          ...deState({ maritalStatus: 'single', exemptions: 0 }),
+        }),
+      );
+      assert.equal(amountOf(regular, 'DE_SIT'), dollars(108.33));
+
+      const bonus = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(5000) }],
+          ...deState({ maritalStatus: 'single', exemptions: 0 }),
+          priorRegularPayment: {
+            taxableWages: dollars(2000),
+            stateIncomeTaxWithheld: amountOf(regular, 'DE_SIT'),
+          },
+        }),
+      );
+      assert.equal(amountOf(bonus, 'DE_SIT'), dollars(330));
+    });
+
+    test('standalone bonus with NO prior-payment context: falls back to the ordinary formula rather than throwing (a disclosed approximation, not a crash)', () => {
+      const bonus = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(5000) }],
+          ...deState({ maritalStatus: 'single', exemptions: 0 }),
+        }),
+      );
+      // No assertion on the exact figure — this is the pre-existing
+      // disclosed fallback (annualize the bonus alone through the
+      // ordinary formula). The point of this test is that it computes
+      // something rather than throwing when payroll history is absent.
+      assert.ok(amountOf(bonus, 'DE_SIT') > 0);
+    });
+
+    test('a bonus paid ALONGSIDE regular wages on the same cheque is unaffected — only a bonus on its OWN cheque uses the annual-marginal path', () => {
+      const combined = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [
+            { code: 'REG', category: 'regular', amount: dollars(2000) },
+            { code: 'BONUS', category: 'supplemental', amount: dollars(5000) },
+          ],
+          ...deState({ maritalStatus: 'single', exemptions: 0 }),
+          priorRegularPayment: { taxableWages: dollars(2000), stateIncomeTaxWithheld: dollars(108.33) },
+        }),
+      );
+      // $7,000 combined on ONE cheque should tax identically to $7,000 of
+      // plain regular wages — priorRegularPayment must be ignored here
+      // because this cheque itself carries non-supplemental cash, so the
+      // ordinary per-cheque formula runs, not the annual-marginal split.
+      const plain = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(7000) }],
+          ...deState({ maritalStatus: 'single', exemptions: 0 }),
+        }),
+      );
+      assert.equal(amountOf(combined, 'DE_SIT'), amountOf(plain, 'DE_SIT'));
+    });
+  });
 });
 
 describe('Arizona', () => {
@@ -6880,6 +6952,76 @@ describe('West Virginia', () => {
       assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
     });
   });
+
+  describe('supplemental wages (annual-marginal method, Withholding Help page)', () => {
+    test('standalone bonus with prior regular payment: withheld at IT-100.2A\'s own top marginal rate (4.58%)', () => {
+      // Withholding Help's own worked example: biweekly $2,000 regular +
+      // $5,000 standalone bonus. The page's OWN PROSE states the bonus
+      // withholds at 4.82% — this implementation, grounded directly in
+      // IT-100.2A's own published annual bracket table, produces 4.58%
+      // (IT-100.2A's own top marginal rate) instead. That 24-basis-point
+      // gap is a DISCLOSED, unresolved discrepancy against the state's own
+      // prose (see westVirginiaSupplementalAnnualMarginal()'s doc comment
+      // for the full reasoning) — not a rounding artifact, and not
+      // silently assumed away. $52,000/yr regular alone -> $1,783.48 tax;
+      // $57,000/yr combined -> $2,012.48 tax; difference = $229.00 =
+      // exactly 4.58% of the $5,000 bonus.
+      const regular = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+          workState: { code: 'WV', certificate: {} },
+        }),
+      );
+      assert.equal(amountOf(regular, 'WV_SIT'), dollars(68.59));
+
+      const bonus = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(5000) }],
+          workState: { code: 'WV', certificate: {} },
+          priorRegularPayment: {
+            taxableWages: dollars(2000),
+            stateIncomeTaxWithheld: amountOf(regular, 'WV_SIT'),
+          },
+        }),
+      );
+      assert.equal(amountOf(bonus, 'WV_SIT'), dollars(229));
+    });
+
+    test('standalone bonus with NO prior-payment context: falls back to the ordinary per-period formula rather than throwing', () => {
+      const bonus = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(5000) }],
+          workState: { code: 'WV', certificate: {} },
+        }),
+      );
+      assert.ok(amountOf(bonus, 'WV_SIT') > 0);
+    });
+
+    test('a bonus paid ALONGSIDE regular wages on the same cheque uses the ordinary per-cheque table, not the annual-marginal split', () => {
+      const combined = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [
+            { code: 'REG', category: 'regular', amount: dollars(2000) },
+            { code: 'BONUS', category: 'supplemental', amount: dollars(5000) },
+          ],
+          workState: { code: 'WV', certificate: {} },
+          priorRegularPayment: { taxableWages: dollars(2000), stateIncomeTaxWithheld: dollars(68.59) },
+        }),
+      );
+      const plain = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(7000) }],
+          workState: { code: 'WV', certificate: {} },
+        }),
+      );
+      assert.equal(amountOf(combined, 'WV_SIT'), amountOf(plain, 'WV_SIT'));
+    });
+  });
 });
 
 describe('North Carolina', () => {
@@ -6927,6 +7069,56 @@ describe('North Carolina', () => {
       }),
     );
     assert.equal(amountOf(r, 'NC_SIT'), dollars(29));
+  });
+
+  describe('certificate.nonresidentAlien (NC-4 NRA, NC-30 §13)', () => {
+    // NC-30 §13's own published additional-withholding chart, reproduced
+    // exactly at $0 wages (isolating the add-on from the ordinary formula):
+    // weekly $11, biweekly $21, semimonthly $22, monthly $44.
+    const cases: [string, number][] = [
+      ['weekly', 11],
+      ['biweekly', 21],
+      ['semimonthly', 22],
+      ['monthly', 44],
+    ];
+    for (const [payFrequency, expected] of cases) {
+      test(`${payFrequency}, $0 wages: exactly NC-30's published add-on of $${expected}`, () => {
+        const r = calculatePaycheck(
+          input({
+            payFrequency: payFrequency as PaycheckInput['payFrequency'],
+            earnings: [{ code: 'REG', category: 'regular', amount: 0 }],
+            ...ncState({ nonresidentAlien: true }),
+          }),
+        );
+        assert.equal(amountOf(r, 'NC_SIT'), dollars(expected));
+      });
+    }
+
+    test('forces Single status and 0 allowances even if the certificate claims otherwise', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'monthly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+          ...ncState({ nonresidentAlien: true, filingStatus: 'head_of_household', allowances: 3 }),
+        }),
+      );
+      // $60,000/yr less $12,750 (forced Single deduction, NOT the $19,125
+      // HoH figure) less $0 (forced 0 allowances) = $47,250 taxable x
+      // 4.09% = $1,932.53/yr / 12 = $161.04 -> $161 (whole-dollar round),
+      // plus the $44 monthly add-on = $205.
+      assert.equal(amountOf(r, 'NC_SIT'), dollars(205));
+    });
+
+    test('without the flag, an otherwise-identical employee is NOT charged the add-on', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'monthly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+          ...ncState({ allowances: 0 }),
+        }),
+      );
+      assert.equal(amountOf(r, 'NC_SIT'), dollars(161));
+    });
   });
 });
 

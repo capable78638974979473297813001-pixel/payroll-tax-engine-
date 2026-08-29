@@ -1138,6 +1138,22 @@ function incomeTaxLines(
   const supplementalCash = supplementalEarnings(input.earnings);
   if (!cfg?.appliesWhen || supplementalCash <= 0 || SUPPLEMENTAL_HANDLED_BY_METHOD.has(rules.method)) {
     if (supplementalCash > 0) {
+      // Delaware's own annual-marginal method (Employer's Guide Section
+      // 17) is structurally distinct from the generic per-period
+      // aggregation below — checked first so a standalone Delaware bonus
+      // never falls through to either the generic aggregator (Delaware
+      // never sets supplementalAggregation.supported, so it would return
+      // null anyway) or the ordinary formula, which would over-withhold by
+      // treating the bonus as if it were the employee's regular periodic
+      // wage.
+      if (rules.method === 'bracket_annual_exemption_credit') {
+        const deSupplemental = delawareSupplementalAnnualMarginal(input, ctx, rules, supplementalCash);
+        if (deSupplemental) return [deSupplemental];
+      }
+      if (rules.method === 'west_virginia_dual_table') {
+        const wvSupplemental = westVirginiaSupplementalAnnualMarginal(input, ctx, rules, supplementalCash);
+        if (wvSupplemental) return [wvSupplemental];
+      }
       const aggregated = aggregateWithPriorRegularPayment(input, ctx, rules, supplementalCash);
       if (aggregated) return aggregated;
     }
@@ -5217,6 +5233,46 @@ interface DEWithholdingConfig {
  * 2026. Cross-confirmed the OLD table is still current on Delaware's own
  * software-developer tax-rate-changes page, which shows no update.
  */
+/**
+ * Delaware's own annual bracket/standard-deduction/exemption-credit
+ * arithmetic (Employer's Guide Section 17), factored out of
+ * delawareWithholding() so delawareSupplementalAnnualMarginal() below can
+ * run the identical formula twice (once on regular wages alone, once on
+ * regular-plus-bonus) without duplicating the bracket/credit logic.
+ */
+function delawareAnnualLiability(
+  annualWages: Cents,
+  maritalStatus: 'single' | 'married',
+  exemptions: number,
+  cfg: DEWithholdingConfig,
+): { annualLiability: Cents; taxableIncome: Cents; standardDeduction: Cents; credit: Cents } {
+  const standardDeduction = dollars(cfg.standardDeduction[maritalStatus]);
+  const taxableIncome = atLeastZero(annualWages - standardDeduction);
+
+  const bracket = findWIBracket(cfg.brackets, taxableIncome);
+  const excess = taxableIncome - dollars(bracket.from);
+  const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
+
+  const credit = dollars(cfg.personalCreditPerExemption) * exemptions;
+  const annualLiability = atLeastZero(annualTax - credit);
+  return { annualLiability, taxableIncome, standardDeduction, credit };
+}
+
+function delawareCertificateStatus(
+  cert: Record<string, unknown>,
+): { maritalStatus: 'single' | 'married'; exemptions: number } {
+  // The Guide's own regulation text (Section 15(a)) is explicit: absent a
+  // certificate, "withhold tax as if the employee is a single person who
+  // has no withholding allowances" — the same no-certificate default this
+  // project uses everywhere else, here made a direct quote rather than an
+  // inferred convention. MFS uses the single-column standard deduction per
+  // the Guide's own third worked example; only 'mfj' selects the married
+  // (double) figure.
+  const maritalStatus = cert.maritalStatus === 'mfj' ? 'married' : 'single';
+  const exemptions = Number(cert.exemptions ?? 0);
+  return { maritalStatus, exemptions };
+}
+
 function delawareWithholding(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -5236,25 +5292,13 @@ function delawareWithholding(
   const annualWages = periodWages * multiplier;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  // The Guide's own regulation text (Section 15(a)) is explicit: absent a
-  // certificate, "withhold tax as if the employee is a single person who
-  // has no withholding allowances" — the same no-certificate default this
-  // project uses everywhere else, here made a direct quote rather than an
-  // inferred convention. MFS uses the single-column standard deduction per
-  // the Guide's own third worked example; only 'mfj' selects the married
-  // (double) figure.
-  const maritalStatus = cert.maritalStatus === 'mfj' ? 'married' : 'single';
-  const exemptions = Number(cert.exemptions ?? 0);
-
-  const standardDeduction = dollars(cfg.standardDeduction[maritalStatus]);
-  const taxableIncome = atLeastZero(annualWages - standardDeduction);
-
-  const bracket = findWIBracket(cfg.brackets, taxableIncome);
-  const excess = taxableIncome - dollars(bracket.from);
-  const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
-
-  const credit = dollars(cfg.personalCreditPerExemption) * exemptions;
-  const annualLiability = atLeastZero(annualTax - credit);
+  const { maritalStatus, exemptions } = delawareCertificateStatus(cert);
+  const { annualLiability, taxableIncome, standardDeduction, credit } = delawareAnnualLiability(
+    annualWages,
+    maritalStatus,
+    exemptions,
+    cfg,
+  );
 
   const amount = roundHalfUp(annualLiability / multiplier);
 
@@ -5267,10 +5311,69 @@ function delawareWithholding(
     amount,
     detail:
       `${fmt(annualWages)}/yr (×${multiplier}) less ${fmt(standardDeduction)} standard deduction ` +
-      `(${maritalStatus}) = ${fmt(taxableIncome)} taxable @ ${(bracket.rate * 100).toFixed(2)}% ` +
-      `over ${fmt(dollars(bracket.from))}, base ${fmt(dollars(bracket.base))} = ${fmt(annualTax)} ` +
+      `(${maritalStatus}) = ${fmt(taxableIncome)} taxable @ tiered rate, ` +
       `less ${fmt(credit)} exemption credit (${exemptions} × $${cfg.personalCreditPerExemption}) ` +
       `= ${fmt(annualLiability)}/yr ÷ ${multiplier}`,
+  };
+}
+
+/**
+ * Delaware's OWN distinct method for a bonus paid on its own cheque
+ * (Employer's Guide Section 17's worked "supplemental wages" example):
+ * annualize the regular wages ALONE, separately annualize regular-plus-
+ * bonus (the bonus added as a RAW dollar amount, NOT multiplied by the
+ * annualizing multiplier — confirmed against the Guide's own worked
+ * example), run each through the identical bracket/standard-deduction/
+ * exemption-credit formula delawareWithholding() itself uses, and withhold
+ * the DIFFERENCE. This is structurally distinct from the generic
+ * aggregateWithPriorRegularPayment() mechanism (which combines wages at
+ * the PER-PERIOD level, then divides back down) — using that generic path
+ * for Delaware would multiply the bonus by the annualizing multiplier
+ * before adding it, over-withholding a bonus paid weekly by roughly 52x.
+ * Previously left unwired for exactly this reason (see this file's own
+ * knownGaps entry); implemented directly against the Guide's own
+ * described mechanics now that the shape is understood rather than
+ * reverse-engineered from a single ambiguous worked number.
+ */
+function delawareSupplementalAnnualMarginal(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+  supplementalCash: Cents,
+): TaxLine | null {
+  const cfg = rules.delawareWithholding as DEWithholdingConfig;
+  const prior = input.priorRegularPayment;
+  if (!prior || prior.taxableWages <= 0) return null;
+  // Only a bonus paid on its OWN cheque needs this — one paid alongside
+  // regular wages already aggregates naturally through the ordinary
+  // formula's single annualized total.
+  if (cashEarnings(input.earnings) - supplementalCash > 0) return null;
+
+  const multiplier = cfg.annualizeMultiplier[input.payFrequency];
+  if (multiplier === undefined) return null;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const { maritalStatus, exemptions } = delawareCertificateStatus(cert);
+
+  const annualizedRegular = prior.taxableWages * multiplier;
+  const combinedAnnual = annualizedRegular + supplementalCash;
+
+  const onRegularAlone = delawareAnnualLiability(annualizedRegular, maritalStatus, exemptions, cfg);
+  const onCombined = delawareAnnualLiability(combinedAnnual, maritalStatus, exemptions, cfg);
+  const amount = atLeastZero(onCombined.annualLiability - onRegularAlone.annualLiability);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: supplementalCash,
+    amount,
+    detail:
+      `Supplemental (Employer's Guide Section 17 annual-marginal method): ` +
+      `${fmt(annualizedRegular)}/yr regular alone (×${multiplier}) = ${fmt(onRegularAlone.annualLiability)} tax; ` +
+      `plus ${fmt(supplementalCash)} bonus = ${fmt(combinedAnnual)}/yr = ${fmt(onCombined.annualLiability)} tax; ` +
+      `withhold the difference = ${fmt(amount)}`,
   };
 }
 
@@ -6820,6 +6923,86 @@ function westVirginiaWithholding(
 }
 
 /**
+ * West Virginia's OWN described method for a bonus paid on its own cheque
+ * (Withholding Help and General Information page, "Supplemental Wages"):
+ * annualize regular pay to a base annual figure and its tax, separately
+ * annualize regular-plus-bonus and its tax, withhold the difference — the
+ * same annual-marginal shape Delaware's Employer's Guide describes (see
+ * delawareSupplementalAnnualMarginal() above), grounded here in IT-100.2A's
+ * own published ANNUAL bracket table (brackets.*.annual), which — despite
+ * this file's own earlier knownGaps note claiming no annual table exists —
+ * IS present in withholdingStructure.brackets for both earner-type tables.
+ *
+ * DISCLOSED DISCREPANCY, not silently resolved: the help page's own worked
+ * example (biweekly $2,000 regular + $5,000 standalone bonus) states the
+ * bonus withholds at 4.82%. This function, run against that exact example,
+ * produces 4.58% — which is IT-100.2A's own published TOP MARGINAL RATE
+ * (both the two-earner and one-earner annual tables top out at 4.58%, and
+ * every other bracket-grounded interpretation tried this pass — the annual
+ * table, the biweekly table's period-level combine, both earner-type
+ * variants — converges to 4.56%-4.58%, never 4.82%). No combination of
+ * exemptions, earner-table election, or annualizing order reproduces
+ * 4.82% from IT-100.2A's own numbers. The working theory is a typo in the
+ * help page's own prose (4.58% transposed to 4.82%), not an error in this
+ * function — but that theory is NOT independently confirmed against a
+ * second WV source, so it is disclosed here rather than asserted. Shipped
+ * anyway because 4.58% is directly traceable to IT-100.2A's own published
+ * rate and is a strictly better-grounded answer than the prior fallback
+ * (the ordinary per-period formula on the bonus alone, which does not
+ * annualize at all and has no connection to WV's own described method).
+ */
+function westVirginiaSupplementalAnnualMarginal(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+  supplementalCash: Cents,
+): TaxLine | null {
+  const cfg = rules.withholdingStructure as unknown as WVWithholdingConfig;
+  const prior = input.priorRegularPayment;
+  if (!prior || prior.taxableWages <= 0) return null;
+  if (cashEarnings(input.earnings) - supplementalCash > 0) return null;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const exemptions = Number(cert.exemptions ?? 0);
+  const oneEarnerElection = cert.oneEarnerElection === true;
+  const tableSet = oneEarnerElection
+    ? cfg.brackets.oneEarnerOneJob_electedViaLine5
+    : cfg.brackets.twoEarnerOrTwoJobs_default;
+  const annualBrackets = tableSet.annual;
+  const exemptionAnnualUnit = cfg.exemptionAmountByPeriod.annual;
+  if (!annualBrackets || exemptionAnnualUnit === undefined) return null;
+
+  const exemptionAnnual = dollars(exemptionAnnualUnit) * exemptions;
+  const annualTax = (annualWage: Cents): Cents => {
+    const taxable = atLeastZero(annualWage - exemptionAnnual);
+    const bracket = findWIBracket(annualBrackets, taxable);
+    const excess = taxable - dollars(bracket.from);
+    return dollars(bracket.base) + applyRate(excess, bracket.rate);
+  };
+
+  const annualizedRegular = prior.taxableWages * ctx.periodsPerYear;
+  const combinedAnnual = annualizedRegular + supplementalCash;
+  const taxOnRegularAlone = annualTax(annualizedRegular);
+  const taxOnCombined = annualTax(combinedAnnual);
+  const amount = atLeastZero(taxOnCombined - taxOnRegularAlone);
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: supplementalCash,
+    amount,
+    detail:
+      `Supplemental (Withholding Help "Supplemental Wages" annual-marginal method, IT-100.2A's own annual table, ` +
+      `${oneEarnerElection ? 'One Earner/One Job' : 'Two Earner/Two or More Jobs'}): ` +
+      `${fmt(annualizedRegular)}/yr regular alone (×${ctx.periodsPerYear}) = ${fmt(taxOnRegularAlone)} tax; ` +
+      `plus ${fmt(supplementalCash)} bonus = ${fmt(combinedAnnual)}/yr = ${fmt(taxOnCombined)} tax; ` +
+      `withhold the difference = ${fmt(amount)}`,
+  };
+}
+
+/**
  * Pennsylvania's Act 32 local Earned Income Tax + Local Services Tax —
  * genuinely different shape from every other local tax in this project.
  * Reads data/local/PA-EIT-LST-2026.json (2,627 PSD-code jurisdictions,
@@ -7330,18 +7513,47 @@ function northCarolinaWithholding(
   const annualWages = periodWages * ctx.periodsPerYear;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  const isHoH = cert.filingStatus === 'head_of_household';
+  // NC-30 Section 13: a nonresident alien is withheld at Single status,
+  // zero allowances — forced here regardless of what the certificate
+  // otherwise says, mirroring the form's own override — with an
+  // ADDITIONAL per-period amount added back, since NRAs generally aren't
+  // allowed the NC standard deduction at all. NC-30 publishes that add-on
+  // as a 4-entry chart (weekly $11/biweekly $21/semimonthly $22/monthly
+  // $44); those four published numbers are exactly
+  // ceil(standardDeduction × rate ÷ periods) for each — confirmed by
+  // reproducing all four from the formula rather than assumed — so it's
+  // computed generically here rather than hardcoded, which also covers
+  // the daily/quarterly/semiannual/annual frequencies NC-30's own chart
+  // doesn't publish.
+  const isNRA = Boolean(cert.nonresidentAlien);
+  const isHoH = !isNRA && cert.filingStatus === 'head_of_household';
   const standardDeduction = dollars(
     isHoH
       ? cfg.standardDeductionAnnual.headOfHousehold
       : cfg.standardDeductionAnnual.single_married_survivingSpouse,
   );
-  const allowances = Number(cert.allowances ?? 0);
+  const allowances = isNRA ? 0 : Number(cert.allowances ?? 0);
   const allowanceDeduction = dollars(cfg.allowanceAmountAnnual) * allowances;
 
   const taxableIncome = atLeastZero(annualWages - standardDeduction - allowanceDeduction);
   const annualTax = applyRate(taxableIncome, cfg.rate);
-  const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
+
+  // Deliberately NOT routed through applyRate() here: that rounds to the
+  // nearest whole CENT immediately, and rounding before dividing by
+  // periodsPerYear produces the wrong chart figure for 3 of NC-30's own 4
+  // published amounts (e.g. weekly comes out $10.00 pre-rounded vs. the
+  // published $11.00) — the raw (unrounded) annual amount has to survive
+  // the division, with ceiling to the nearest whole DOLLAR (NC-30's own
+  // chart is whole-dollar) applied only once at the very end.
+  const nraAddOn = isNRA
+    ? 100 *
+      Math.ceil(
+        (dollars(cfg.standardDeductionAnnual.single_married_survivingSpouse) * cfg.rate) /
+          ctx.periodsPerYear /
+          100,
+      )
+    : 0;
+  const amount = roundHalfUp(annualTax / ctx.periodsPerYear) + nraAddOn;
 
   return {
     id: `${rules.code}_SIT`,
@@ -7351,9 +7563,10 @@ function northCarolinaWithholding(
     taxableWages: periodWages,
     amount,
     detail:
-      `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction (${isHoH ? 'HoH' : 'Single/Married/Surviving Spouse'}) ` +
+      `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction (${isNRA ? 'Single, forced — nonresident alien' : isHoH ? 'HoH' : 'Single/Married/Surviving Spouse'}) ` +
       `less ${fmt(allowanceDeduction)} (${allowances} × $${cfg.allowanceAmountAnnual} allowances) ` +
-      `= ${fmt(taxableIncome)} taxable @ ${(cfg.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
+      `= ${fmt(taxableIncome)} taxable @ ${(cfg.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}` +
+      (isNRA ? ` + ${fmt(nraAddOn)} NC-30 §13 nonresident-alien additional withholding` : ''),
   };
 }
 
