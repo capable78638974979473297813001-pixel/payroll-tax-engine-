@@ -1,0 +1,596 @@
+{
+  "OH": {
+    "total": 20,
+    "exact": 20,
+    "mismatches": []
+  },
+  "PA": {
+    "total": 20,
+    "exact": 20,
+    "mismatches": []
+  },
+  "KY": {
+    "total": 20,
+    "exact": 20,
+    "mismatches": []
+  },
+  "NY": {
+    "total": 20,
+    "exact": 20,
+    "mismatches": []
+  },
+  "MI": {
+    "total": 20,
+    "exact": 20,
+    "mismatches": []
+  },
+  "AL": {
+    "total": 10,
+    "exact": 10,
+    "mismatches": []
+  },
+  "CO": {
+    "total": 10,
+    "exact": 2,
+    "mismatches": [
+      {
+        "n": 111,
+        "netDiff": 0.37
+      },
+      {
+        "n": 112,
+        "netDiff": 0.25
+      },
+      {
+        "n": 113,
+        "netDiff": 0.08
+      },
+      {
+        "n": 114,
+        "netDiff": 0.42
+      },
+      {
+        "n": 116,
+        "netDiff": 0.3
+      },
+      {
+        "n": 118,
+        "netDiff": 0.37
+      },
+      {
+        "n": 119,
+        "netDiff": 0.3
+      },
+      {
+        "n": 120,
+        "netDiff": 0.23
+      }
+    ]
+  },
+  "DE": {
+    "total": 10,
+    "exact": 0,
+    "mismatches": [
+      {
+        "n": 121,
+        "netDiff": 85.7
+      },
+      {
+        "n": 122,
+        "netDiff": 39.39
+      },
+      {
+        "n": 123,
+        "netDiff": 45.95
+      },
+      {
+        "n": 124,
+        "netDiff": 44.13
+      },
+      {
+        "n": 125,
+        "netDiff": 36.09
+      },
+      {
+        "n": 126,
+        "netDiff": 19.54
+      },
+      {
+        "n": 127,
+        "netDiff": 20.53
+      },
+      {
+        "n": 128,
+        "netDiff": 2.54
+      },
+      {
+        "n": 129,
+        "netDiff": 23.05
+      },
+      {
+        "n": 130,
+        "netDiff": 62.77
+      }
+    ]
+  },
+  "IN": {
+    "total": 10,
+    "exact": 10,
+    "mismatches": []
+  },
+  "MD": {
+    "total": 10,
+    "exact": 0,
+    "mismatches": [
+      {
+        "n": 141,
+        "netDiff": 497.17
+      },
+      {
+        "n": 142,
+        "netDiff": 164.29
+      },
+      {
+        "n": 143,
+        "netDiff": 167.56
+      },
+      {
+        "n": 144,
+        "netDiff": 244.78
+      },
+      {
+        "n": 145,
+        "netDiff": 211.73
+      },
+      {
+        "n": 146,
+        "netDiff": 44.86
+      },
+      {
+        "n": 147,
+        "netDiff": 266.4
+      },
+      {
+        "n": 148,
+        "netDiff": 209.73
+      },
+      {
+        "n": 149,
+        "netDiff": 245.8
+      },
+      {
+        "n": 150,
+        "netDiff": 166.21
+      }
+    ]
+  },
+  "MO": {
+    "total": 10,
+    "exact": 10,
+    "mismatches": []
+  },
+  "NJ": {
+    "total": 10,
+    "exact": 10,
+    "mismatches": []
+  },
+  "OR": {
+    "total": 10,
+    "exact": 0,
+    "mismatches": [
+      {
+        "n": 171,
+        "netDiff": 0.9
+      },
+      {
+        "n": 172,
+        "netDiff": 0.38
+      },
+      {
+        "n": 173,
+        "netDiff": 0.46
+      },
+      {
+        "n": 174,
+        "netDiff": 0.45
+      },
+      {
+        "n": 175,
+        "netDiff": 0.89
+      },
+      {
+        "n": 176,
+        "netDiff": 0.42
+      },
+      {
+        "n": 177,
+        "netDiff": 0.93
+      },
+      {
+        "n": 178,
+        "netDiff": 1.33
+      },
+      {
+        "n": 179,
+        "netDiff": 0.75
+      },
+      {
+        "n": 180,
+        "netDiff": 0.77
+      }
+    ]
+  },
+  "WA": {
+    "total": 10,
+    "exact": 10,
+    "mismatches": []
+  },
+  "WV": {
+    "total": 10,
+    "exact": 1,
+    "mismatches": [
+      {
+        "n": 191,
+        "netDiff": 0.46
+      },
+      {
+        "n": 192,
+        "netDiff": 0.12
+      },
+      {
+        "n": 193,
+        "netDiff": 0.43
+      },
+      {
+        "n": 195,
+        "netDiff": 0.08
+      },
+      {
+        "n": 196,
+        "netDiff": 0.43
+      },
+      {
+        "n": 197,
+        "netDiff": 0.19
+      },
+      {
+        "n": 198,
+        "netDiff": 0.39
+      },
+      {
+        "n": 199,
+        "netDiff": 0.33
+      },
+      {
+        "n": 200,
+        "netDiff": 0.35
+      }
+    ]
+  },
+  "CA": {
+    "total": 10,
+    "exact": 8,
+    "mismatches": [
+      {
+        "n": 201,
+        "netDiff": 0.09
+      },
+      {
+        "n": 207,
+        "netDiff": 0.06
+      }
+    ]
+  },
+  "MA": {
+    "total": 10,
+    "exact": 0,
+    "mismatches": [
+      {
+        "n": 211,
+        "netDiff": 18.17
+      },
+      {
+        "n": 212,
+        "netDiff": 5.27
+      },
+      {
+        "n": 213,
+        "netDiff": 3.81
+      },
+      {
+        "n": 214,
+        "netDiff": 41.8
+      },
+      {
+        "n": 215,
+        "netDiff": 54.95
+      },
+      {
+        "n": 216,
+        "netDiff": 44.22
+      },
+      {
+        "n": 217,
+        "netDiff": 5.51
+      },
+      {
+        "n": 218,
+        "netDiff": 83.62
+      },
+      {
+        "n": 219,
+        "netDiff": 78.83
+      },
+      {
+        "n": 220,
+        "netDiff": 16.49
+      }
+    ]
+  },
+  "HI": {
+    "total": 10,
+    "exact": 10,
+    "mismatches": []
+  },
+  "CT": {
+    "total": 10,
+    "exact": 10,
+    "mismatches": []
+  },
+  "IA": {
+    "total": 10,
+    "exact": 10,
+    "mismatches": []
+  },
+  "AK": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "AZ": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "AR": {
+    "total": 3,
+    "exact": 0,
+    "mismatches": [
+      {
+        "n": 257,
+        "netDiff": 16.46
+      },
+      {
+        "n": 258,
+        "netDiff": 17.27
+      },
+      {
+        "n": 259,
+        "netDiff": 9.5
+      }
+    ]
+  },
+  "DC": {
+    "total": 3,
+    "exact": 0,
+    "mismatches": [
+      {
+        "n": 260,
+        "netDiff": 0.4
+      },
+      {
+        "n": 261,
+        "netDiff": 0.08
+      },
+      {
+        "n": 262,
+        "netDiff": 0.07
+      }
+    ]
+  },
+  "FL": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "GA": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "ID": {
+    "total": 3,
+    "exact": 1,
+    "mismatches": [
+      {
+        "n": 269,
+        "netDiff": 0.31
+      },
+      {
+        "n": 270,
+        "netDiff": 0.42
+      }
+    ]
+  },
+  "IL": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "KS": {
+    "total": 3,
+    "exact": 1,
+    "mismatches": [
+      {
+        "n": 275,
+        "netDiff": 0.15
+      },
+      {
+        "n": 277,
+        "netDiff": 0.27
+      }
+    ]
+  },
+  "LA": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "ME": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "MN": {
+    "total": 3,
+    "exact": 0,
+    "mismatches": [
+      {
+        "n": 284,
+        "netDiff": 0.16
+      },
+      {
+        "n": 285,
+        "netDiff": 0.33
+      },
+      {
+        "n": 286,
+        "netDiff": 0.25
+      }
+    ]
+  },
+  "MS": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "MT": {
+    "total": 3,
+    "exact": 0,
+    "mismatches": [
+      {
+        "n": 290,
+        "netDiff": 0.99
+      },
+      {
+        "n": 291,
+        "netDiff": 0.99
+      },
+      {
+        "n": 292,
+        "netDiff": 1
+      }
+    ]
+  },
+  "NE": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "NV": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "NH": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "NM": {
+    "total": 3,
+    "exact": 0,
+    "mismatches": [
+      {
+        "n": 302,
+        "netDiff": 0.4
+      },
+      {
+        "n": 303,
+        "netDiff": 0.36
+      },
+      {
+        "n": 304,
+        "netDiff": 0.77
+      }
+    ]
+  },
+  "NC": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "ND": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "OK": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "RI": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "SC": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "SD": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "TN": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "TX": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "UT": {
+    "total": 3,
+    "exact": 0,
+    "mismatches": [
+      {
+        "n": 329,
+        "netDiff": 0.2
+      },
+      {
+        "n": 330,
+        "netDiff": 0.35
+      },
+      {
+        "n": 331,
+        "netDiff": 0.06
+      }
+    ]
+  },
+  "VT": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "VA": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "WI": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  },
+  "WY": {
+    "total": 3,
+    "exact": 3,
+    "mismatches": []
+  }
+}
