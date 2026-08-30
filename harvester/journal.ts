@@ -139,6 +139,8 @@ export interface OpenFinding {
   openedAt: string;
   /** How many separate sweeps have re-observed a change on this source. */
   seenCount: number;
+  /** When the most recent observation landed, if later than openedAt. */
+  latestObservedAt?: string;
 }
 
 export interface SourceHealth {
@@ -247,9 +249,40 @@ export function assessHealth(
     }
   }
 
-  const openFindings = [...findings.values()]
-    .filter((f) => !acknowledged.has(f.findingId))
-    .sort((a, b) => a.openedAt.localeCompare(b.openedAt));
+  // ONE open finding per source, not one per distinct content hash.
+  //
+  // findingIdFor() keys on the content hash, so a source whose page differs
+  // on every fetch mints a brand new finding every sweep and they pile up
+  // without limit. Measured on real data: 241 open findings across 102
+  // sources after 21 sweeps, 39 sources holding more than one, Florida
+  // alone at 18. That is the "cries wolf" failure the normalisation work
+  // was meant to prevent, arriving by a different route — and a list of
+  // 241 is not a list anyone reads.
+  //
+  // Collapsing by source is not merely cosmetic. Reviewing means opening
+  // the source and looking at what it says NOW; two open findings for one
+  // source are never more actionable than one, because the second tells
+  // you nothing the first did not: go and look at this source. The oldest
+  // is kept so "how long has this been unreviewed" stays truthful, and
+  // seenCount reports how many separate sweeps observed a change, which is
+  // the genuinely useful signal — a source changing daily is behaving very
+  // differently from one that changed once in March.
+  const unacknowledged = [...findings.values()].filter((f) => !acknowledged.has(f.findingId));
+  const bySource = new Map<string, OpenFinding>();
+  for (const f of unacknowledged.sort((a, b) => a.openedAt.localeCompare(b.openedAt))) {
+    const existing = bySource.get(f.sourceId);
+    if (!existing) {
+      bySource.set(f.sourceId, { ...f, seenCount: f.seenCount });
+      continue;
+    }
+    // Keep the oldest as the representative; carry the newest detail and
+    // snapshot, since those describe what the source looks like now.
+    existing.seenCount += f.seenCount;
+    existing.detail = f.detail;
+    existing.snapshotPath = f.snapshotPath;
+    existing.latestObservedAt = f.openedAt;
+  }
+  const openFindings = [...bySource.values()].sort((a, b) => a.openedAt.localeCompare(b.openedAt));
 
   const sourceHealth: SourceHealth[] = knownSourceIds.map((id) => {
     const at = verified.get(id);
@@ -346,16 +379,44 @@ export function findingIdFor(sourceId: string, contentHash: string): string {
   return `${sourceId}:${contentHash.slice(0, 12)}`;
 }
 
+/**
+ * Close a finding — or, given a source id, every open finding on that
+ * source.
+ *
+ * The source form is the one that matters in practice. Findings are
+ * displayed collapsed by source, so what a reviewer sees and decides to
+ * close is a SOURCE; acknowledging only the representative id would leave
+ * its siblings unacknowledged and the entry would reappear on the next
+ * status read, which looks exactly like the acknowledgement having been
+ * ignored. Accepts either, and reports how many it actually closed so a
+ * silent no-op is impossible.
+ */
 export function acknowledgeFinding(
-  findingId: string,
+  findingIdOrSourceId: string,
   by: string,
   note?: string,
   eventsPath = EVENTS_PATH,
-): void {
-  appendEvent(
-    { kind: 'finding_acknowledged', at: new Date().toISOString(), findingId, by, ...(note ? { note } : {}) },
-    eventsPath,
+): { closed: string[] } {
+  const events = readEvents(eventsPath);
+  const acked = new Set(
+    events.flatMap((e) => (e.kind === 'finding_acknowledged' ? [e.findingId] : [])),
   );
+  const opened = events.flatMap((e) => (e.kind === 'finding_opened' ? [e] : []));
+
+  const exact = opened.filter((e) => e.findingId === findingIdOrSourceId);
+  const bySource = opened.filter((e) => e.sourceId === findingIdOrSourceId);
+  const targets = [...new Set((exact.length ? exact : bySource).map((e) => e.findingId))].filter(
+    (id) => !acked.has(id),
+  );
+
+  const at = new Date().toISOString();
+  for (const findingId of targets) {
+    appendEvent(
+      { kind: 'finding_acknowledged', at, findingId, by, ...(note ? { note } : {}) },
+      eventsPath,
+    );
+  }
+  return { closed: targets };
 }
 
 /**

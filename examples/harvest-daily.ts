@@ -48,8 +48,14 @@ if (mode === 'ack') {
     console.error('Usage: npm run harvest:ack -- <findingId> "<who>" ["note"]');
     process.exit(2);
   }
-  acknowledgeFinding(findingId, by, note);
-  console.log(`Acknowledged ${findingId} (by ${by}). It will no longer appear in status.`);
+  const { closed } = acknowledgeFinding(findingId, by, note);
+  if (closed.length === 0) {
+    console.log(`Nothing open matched "${findingId}" — already acknowledged, or not a known finding/source id.`);
+    process.exit(1);
+  }
+  console.log(
+    `Acknowledged ${closed.length} finding(s) for "${findingId}" (by ${by}). They will no longer appear in status.`,
+  );
   process.exit(0);
 }
 

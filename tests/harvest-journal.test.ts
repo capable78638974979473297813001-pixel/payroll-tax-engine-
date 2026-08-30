@@ -10,6 +10,7 @@ import {
   acquireLock,
   releaseLock,
   findingIdFor,
+  acknowledgeFinding,
   readEvents,
   FRESHNESS_SLA_HOURS,
 } from '../harvester/journal.ts';
@@ -159,13 +160,23 @@ describe('D — a finding outlives the sweep that found it', () => {
     assert.equal(h.openFindings[0].seenCount, 3);
   });
 
-  test('a genuinely different change opens a separate finding', () => {
+  test('a second, different change on the SAME source is folded into its finding', () => {
+    // SUPERSEDED INTENT, kept deliberately rather than deleted. This
+    // originally asserted two separate findings, on the reasoning that
+    // different content deserves a different finding. That reasoning is
+    // what produced 241 open findings across 102 sources on real data —
+    // any source whose page differs per fetch minted a new one every
+    // sweep. The distinction it was protecting is not lost: seenCount
+    // records how many times the source moved, and the detail carries the
+    // latest content. What changed is that both now live on ONE finding,
+    // because a reviewer opens a source once and sees its current state.
     recordGoodSweep(HOURS(0));
     appendEvent(opened(HOURS(24), 'run-1', findingIdFor('al-withholding', 'aaaaaaaaaaaa')), events);
     appendEvent(opened(HOURS(48), 'run-2', findingIdFor('al-withholding', 'bbbbbbbbbbbb')), events);
 
     const h = assessHealth(at(HOURS(49)), SOURCES, events);
-    assert.equal(h.openFindings.length, 2);
+    assert.equal(h.openFindings.length, 1, 'one source is one thing to review');
+    assert.equal(h.openFindings[0].seenCount, 2, 'having moved twice is still recorded');
   });
 
   test('only an explicit acknowledgement closes it', () => {
@@ -359,5 +370,82 @@ describe('auditing whether a source CONTAINS what it claims to watch', () => {
     // Over-counting is what produced the inflated coverage claim; a
     // money-shaped number needs a wage-base phrase beside it to count.
     assert.equal(classifyText('<p>Benefits of up to $1,500 may be payable.</p>'), 'neither');
+  });
+});
+
+describe('findings collapse to one per source', () => {
+  /**
+   * Measured failure this prevents: findingIdFor() keys on the content
+   * hash, so a source whose page differs on every fetch mints a new
+   * finding every sweep. On real data that reached 241 open findings
+   * across 102 sources in 21 sweeps, Florida alone holding 18. A list of
+   * 241 is not a list anyone reads, which is the same "cries wolf"
+   * failure the volatile-token normalisation exists to prevent.
+   */
+  const openOn = (when: number, sourceId: string, hash: string): JournalEvent => ({
+    kind: 'finding_opened',
+    at: at(when),
+    runId: `run-${when}`,
+    findingId: findingIdFor(sourceId, hash),
+    sourceId,
+    jurisdiction: 'ZZ',
+    title: 'A noisy register',
+    url: 'https://example.gov/x',
+    detail: `content as of hour ${when / 3_600_000}`,
+  });
+
+  test('a source that changes every sweep yields ONE finding, not one per sweep', () => {
+    recordGoodSweep(HOURS(0));
+    appendEvent(openOn(HOURS(24), 'al-withholding', 'aaaaaaaaaaaa'), events);
+    appendEvent(openOn(HOURS(48), 'al-withholding', 'bbbbbbbbbbbb'), events);
+    appendEvent(openOn(HOURS(72), 'al-withholding', 'cccccccccccc'), events);
+
+    const h = assessHealth(at(HOURS(73)), SOURCES, events);
+    assert.equal(h.openFindings.length, 1, 'three observations of one source is one thing to look at');
+    assert.equal(h.openFindings[0].seenCount, 3, 'but how often it moved is worth knowing');
+  });
+
+  test('the oldest observation is kept, so "how long unreviewed" stays truthful', () => {
+    recordGoodSweep(HOURS(0));
+    appendEvent(openOn(HOURS(24), 'al-withholding', 'aaaaaaaaaaaa'), events);
+    appendEvent(openOn(HOURS(72), 'al-withholding', 'bbbbbbbbbbbb'), events);
+
+    const h = assessHealth(at(HOURS(73)), SOURCES, events);
+    assert.equal(h.openFindings[0].openedAt, at(HOURS(24)));
+    assert.equal(h.openFindings[0].latestObservedAt, at(HOURS(72)), 'and the newest is still reported');
+  });
+
+  test('the newest detail is carried, since it describes the source as it stands now', () => {
+    recordGoodSweep(HOURS(0));
+    appendEvent(openOn(HOURS(24), 'al-withholding', 'aaaaaaaaaaaa'), events);
+    appendEvent(openOn(HOURS(72), 'al-withholding', 'bbbbbbbbbbbb'), events);
+    assert.match(assessHealth(at(HOURS(73)), SOURCES, events).openFindings[0].detail, /hour 72/);
+  });
+
+  test('two different sources stay two findings', () => {
+    recordGoodSweep(HOURS(0));
+    appendEvent(openOn(HOURS(24), 'al-withholding', 'aaaaaaaaaaaa'), events);
+    appendEvent(openOn(HOURS(24), 'oh-municipal-rates', 'bbbbbbbbbbbb'), events);
+    assert.equal(assessHealth(at(HOURS(25)), SOURCES, events).openFindings.length, 2);
+  });
+
+  test('acknowledging by SOURCE id closes every one of its findings', () => {
+    // Acking only the representative would leave its siblings open and the
+    // entry would reappear, looking as though the ack had been ignored.
+    recordGoodSweep(HOURS(0));
+    appendEvent(openOn(HOURS(24), 'al-withholding', 'aaaaaaaaaaaa'), events);
+    appendEvent(openOn(HOURS(48), 'al-withholding', 'bbbbbbbbbbbb'), events);
+    appendEvent(openOn(HOURS(72), 'al-withholding', 'cccccccccccc'), events);
+
+    const { closed } = acknowledgeFinding('al-withholding', 'scott', undefined, events);
+    assert.equal(closed.length, 3, 'all three must close, not just the representative');
+    assert.equal(assessHealth(at(HOURS(73)), SOURCES, events).openFindings.length, 0);
+  });
+
+  test('acknowledging something already closed reports zero rather than pretending', () => {
+    recordGoodSweep(HOURS(0));
+    appendEvent(openOn(HOURS(24), 'al-withholding', 'aaaaaaaaaaaa'), events);
+    acknowledgeFinding('al-withholding', 'scott', undefined, events);
+    assert.equal(acknowledgeFinding('al-withholding', 'scott', undefined, events).closed.length, 0);
   });
 });

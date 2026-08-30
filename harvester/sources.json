@@ -800,7 +800,8 @@
         "data/states/MI-{year}.json#suiEmployer"
       ],
       "note": "Upgraded to a page carrying BOTH the taxable wage base and rate figures, verified before swapping. The previous URL carried only one of the two.",
-      "coversUI": true
+      "coversUI": true,
+      "uiContent": "wage-base-and-rates"
     },
     {
       "id": "mi-withholding",
@@ -1064,7 +1065,8 @@
       ],
       "note": "Carries BOTH the wage base and rates — but the URL is a DATED press release (/press/2025/20251229_...), so it can never change and will report green forever. Flagged datedUrlRisk and surfaced in status for that reason. The real fix is a standing rate page; nj.gov/labor/ea/employer-services/rate-info/ was tried and carries neither figure.",
       "coversUI": true,
-      "datedUrlRisk": true
+      "datedUrlRisk": true,
+      "uiContent": "wage-base-and-rates"
     },
     {
       "id": "nj-withholding",
@@ -1525,7 +1527,8 @@
         "data/states/VA-{year}.json#suiEmployer"
       ],
       "note": "Upgraded to a page carrying BOTH the taxable wage base and rate figures, verified before swapping. The previous URL carried only one of the two.",
-      "coversUI": true
+      "coversUI": true,
+      "uiContent": "wage-base-and-rates"
     },
     {
       "id": "va-withholding",
@@ -1675,7 +1678,8 @@
         "data/states/WY-{year}.json"
       ],
       "coversUI": true,
-      "note": "Upgraded to a page carrying BOTH the taxable wage base and rate figures, verified before swapping. The previous URL carried only one of the two."
+      "note": "Upgraded to a page carrying BOTH the taxable wage base and rate figures, verified before swapping. The previous URL carried only one of the two.",
+      "uiContent": "wage-base-and-rates"
     },
     {
       "id": "nm-ui-rates-calc",
@@ -1692,7 +1696,8 @@
       "feeds": [
         "data/states/NM-{year}.json#suiEmployer"
       ],
-      "note": "SUPPLEMENTARY to nm-ui-rates, which carries the wage base but no rates. New Mexico publishes the two figures on different pages, so both are watched rather than forcing one page to serve for both."
+      "note": "SUPPLEMENTARY to nm-ui-rates, which carries the wage base but no rates. New Mexico publishes the two figures on different pages, so both are watched rather than forcing one page to serve for both.",
+      "uiContent": "rates-only"
     }
   ],
   "uiCoverage": {
@@ -1757,7 +1762,7 @@
     "neverMonitorable": "An individual employer's EXPERIENCE-RATED contribution rate is not a jurisdiction constant — it depends on that employer's own layoff history and is assigned to them privately. No source can carry it, which is why the engine takes it from input.employer.stateUnemploymentRate and falls back to the published new-employer rate. Only the wage base and the published schedules are monitorable at all.",
     "howCoverageIsCounted": "From an explicit coversUI flag on each source, not inferred from the URL. The regex that preceded it mis-classified Florida — its reemployment-tax rate page IS Florida's UI source, but the domain contains no labour-ish word — which is the sort of quiet miscount that makes a coverage number worth less than the confidence it creates.",
     "contentAudit": {
-      "auditedOn": "2026-08-28",
+      "auditedOn": "2026-08-29",
       "method": "Each UI source's most recent capture searched for a taxable-wage-base phrase beside a dollar figure, and for percentage rate figures. Run against snapshots on disk.",
       "wageBaseAndRates": [
         "AK",
@@ -1772,11 +1777,13 @@
         "KY",
         "MD",
         "ME",
+        "MI",
         "MN",
         "MO",
         "MS",
         "NC",
         "ND",
+        "NJ",
         "NV",
         "OH",
         "OR",
@@ -1785,10 +1792,12 @@
         "SD",
         "TX",
         "UT",
+        "VA",
         "VT",
         "WA",
         "WI",
-        "WV"
+        "WV",
+        "WY"
       ],
       "ratesOnly": [
         "AL",
@@ -1800,24 +1809,22 @@
         "MA",
         "MT",
         "NH",
+        "NM",
         "NY",
         "SC"
       ],
       "wageBaseOnly": [
         "CA",
-        "MI",
-        "NJ",
         "NM",
-        "TN",
-        "VA",
-        "WY"
+        "TN"
       ],
       "carriesNeither": [],
       "noCaptureToCheck": [],
       "wageBaseMonitoredCount": 36,
-      "rateMonitoredCount": 40,
+      "rateMonitoredCount": 45,
       "whatThisChanged": "The registration check accepted any page carrying a wage base OR rates, but every title claimed both. This audit separates them, and the result is materially weaker than the earlier headline: of 47 UI sources, only 29 states have a source that actually states a taxable WAGE BASE and 37 one that states RATES. Thirteen carry rates alone — verified as a property of the page, not a formatting mismatch: North Dakota, New York, Massachusetts, New Mexico, Iowa, South Carolina, Minnesota and Kansas contain no wage-base phrase anywhere. Four (Maryland, Minnesota, New Mexico, West Virginia) carry NEITHER and are now flagged monitoringGap, because a source that fetches cleanly while containing nothing is the failure this project already hit once with Pennsylvania's search form. Titles have been corrected to say what each source actually carries.",
       "datedUrlRisk": [
+        "NJ",
         "WV"
       ],
       "staleAfterUrlChanges": "STALE as of the MI/NJ/VA/WY/NM url changes in this commit: these counts and the per-source uiContent classifications were computed against the PREVIOUS urls. The changed sources have had their uiContent removed rather than left asserting something about a page they no longer point at — missing is honest, stale is not. Run `npm run harvest:daily` then `npm run harvest:audit` to recompute; the new urls were each verified by direct probe (MI, NJ, VA, WY carry both figures; NM's new page carries rates) but that verification is not the same as a recorded audit against a stored capture."
