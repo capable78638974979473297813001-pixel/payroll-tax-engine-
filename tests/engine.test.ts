@@ -6941,7 +6941,7 @@ describe('West Virginia', () => {
       assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
     });
 
-    test('a WV city with no service fee (not one of the 6 captured): no WV_LOCAL_FEE line', () => {
+    test('a WV city with no service fee (not one of the 8 captured): no WV_LOCAL_FEE line', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
@@ -6950,6 +6950,50 @@ describe('West Virginia', () => {
         }),
       );
       assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
+    });
+
+    test('Madison, weekly pay: work-location-based like Wheeling, no residency exception ($3.00/wk)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Madison' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(3.0));
+    });
+
+    test('Fairmont, non-resident duty station: nonResidentOnly city still charges a nonresident ($2.00/wk)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Fairmont', residenceCity: 'Clarksburg' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(2.0));
+    });
+
+    test('Fairmont, resident duty station: Ordinance 1812 bills residents directly, not via payroll — no WV_LOCAL_FEE line', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Fairmont', residenceCity: 'Fairmont' } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
+    });
+
+    test('Fairmont, no residenceCity supplied: defaults to nonresident treatment (charged, same as any other duty-station-only city)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Fairmont' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(2.0));
     });
   });
 

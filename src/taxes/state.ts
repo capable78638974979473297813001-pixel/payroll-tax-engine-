@@ -4478,6 +4478,7 @@ function coloradoOccupationalPrivilegeTax(
 
 interface WVServiceFeeCityConfig {
   weeklyRate: number; // dollars per week
+  nonResidentOnly?: boolean; // Fairmont: only non-resident duty-station employees are payroll-withheld; residents are billed directly, not through payroll (see WV-2026.json's serviceFeeCities.Fairmont note)
 }
 
 /**
@@ -4499,6 +4500,13 @@ interface WVServiceFeeCityConfig {
  * Gated on certificate.locality, the same caller-resolved-locality shape
  * as Newark's/Denver's/Missouri's local taxes — this engine does not
  * resolve an address to a city itself.
+ *
+ * Fairmont (added 2026-08-31) is a genuine exception to the work-location-
+ * for-everyone rule: its own Ordinance No. 1812 withholds the fee only from
+ * NON-resident duty-station employees — residents are billed an $8.67/month
+ * fee directly, not through payroll — so its config carries
+ * nonResidentOnly:true and is skipped here when certificate.residenceCity
+ * also names Fairmont.
  *
  * NOT modelled, disclosed rather than guessed at: Wheeling's own 30-
  * consecutive-day-in-the-city threshold before the fee first attaches
@@ -4525,6 +4533,11 @@ function westVirginiaMunicipalServiceFee(
     ?.serviceFeeCities;
   const city = cities?.[locality];
   if (!city) return null;
+
+  if (city.nonResidentOnly) {
+    const residenceCityName = typeof cert.residenceCity === 'string' ? cert.residenceCity : undefined;
+    if (residenceCityName?.toLowerCase() === locality.toLowerCase()) return null;
+  }
 
   const annualFee = dollars(city.weeklyRate) * 52;
   const amount = roundDownToCent(annualFee / ctx.periodsPerYear);

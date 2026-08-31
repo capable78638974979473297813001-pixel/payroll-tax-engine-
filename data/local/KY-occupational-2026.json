@@ -115,7 +115,7 @@
   "jurisdictions": {
     "$comment": "SCRAPED DIRECTLY from the Secretary of State's own database (web.sos.ky.gov/occupationaltax, KRS 67.766) by browsing live and selecting each district in turn — not hand-researched one at a time. Louisville and Lexington (below, richer entries with sub-component breakdowns) were researched separately in an earlier pass and are cross-checked against this same source. Every other entry here is exactly what the state's own database shows for that district's WAGE/PAYROLL or NET PROFITS rate as of this scrape — 'rate: null' means the taxing district is listed in the state's own roster but its rate FIELD IS BLANK IN THE SOURCE DATABASE ITSELF, not that the tax is zero or that this project failed to look. 'category' distinguishes what base the shown rate applies to (Net Profits / Gross Receipts / Payroll Only / Flat Fee / a blend) — where category says 'Net Profits' alone with no separate payroll figure shown, whether the SAME rate also applies to wage withholding was NOT independently confirmed for every entry (Hopkinsville proved in this project's own research that the two CAN differ: 1.95% wages vs 1.3% net profits) — treat a bare 'Net Profits' category as a rate to re-verify against that specific city/county's own ordinance before using it as a wage-withholding number, not as a confirmed payroll rate.",
     "scrapedOn": "2026-08-13",
-    "coverage": "CORRECTED 2026-08-31: two different, mutually contradictory rate-counts were recorded for this file elsewhere in the project (this note said 122 confirmed rates, data/states/KY-2026.json separately said 39) — neither matched the data. Ground truth, counted directly from the file: 127 of 250 scraped rows carry a non-null wageRateDecimal, plus Louisville Metro and Lexington-Fayette (which use their own residentRate/nonresidentRate and rate fields instead, both populated) = 129 of 252 total entries have a real engine-usable rate. The stale summary below (250 jurisdictions plus Louisville Metro and Lexington-Fayette. 122 carry a confirmed wage-withholding rate the engine can use. County coverage is COMPLETE: all 87 Kentucky counties that levy an occupational tax on payroll are present with a confirmed rate, cross-checked against the Kentucky Association of Counties' own 2025 payroll-rate column — 20 had been confirmed by an earlier pass and every one of them agreed with KACo to the digit, 42 more were confirmed by it, and 25 counties absent from the original scrape were added from it outright. What remains unconfirmed is CITY entries, whose scraped category alone cannot distinguish a payroll rate from a net-profits or gross-receipts one.",
+    "coverage": "CORRECTED 2026-08-31: two different, mutually contradictory rate-counts were recorded for this file elsewhere in the project (this note said 122 confirmed rates, data/states/KY-2026.json separately said 39) — neither matched the data. Ground truth, counted directly from the file: 127 of 250 scraped rows carry a non-null wageRateDecimal, plus Louisville Metro and Lexington-Fayette (which use their own residentRate/nonresidentRate and rate fields instead, both populated) = 131 of 252 total entries have a real engine-usable rate (127 of 250 scraped rows carry a flat wageRateDecimal, 2 more -- Lyndon and Middletown -- carry a resident/nonresident split instead, plus Louisville Metro and Lexington-Fayette which also use the split shape). FOLLOW-UP 2026-08-31, real internet access: raised this to 135 by resolving 4 of the 9 payroll-tagged-but-ambiguous entries -- Danville was a REAL FIND, not just a fill-in: its scraped 1.25% was actually Boyle County’s rate copied onto the city row by mistake, and Boyle County’s own government page confirms directly that Danville City itself withholds a separate, higher 1.90% (both apply to a Danville employee, stacked). Flemingsburg’s 1.5% was confirmed as the payroll figure specifically (the raising ordinance is literally titled ‘Occupational Payroll Tax Increase’). Fordsville and Guthrie were already correctly sourced to their county’s/fiscal court’s own confirmed payroll rate but had never had wageRateDecimal populated -- filled in, no new research needed. Earlington remains genuinely unresolved: its scraped 1.5% does NOT match Hopkins County’s own KACo-confirmed 0.5%, so it is not safely assumed to be either a county copy-through error (like Danville was) or a real separate city rate -- a live discrepancy, deliberately left unconfirmed rather than guessed either way. Augusta and Catlettsburg were searched and not resolved this pass -- no primary source found beyond what was already on file. The stale summary below (250 jurisdictions plus Louisville Metro and Lexington-Fayette. 122 carry a confirmed wage-withholding rate the engine can use. County coverage is COMPLETE: all 87 Kentucky counties that levy an occupational tax on payroll are present with a confirmed rate, cross-checked against the Kentucky Association of Counties' own 2025 payroll-rate column — 20 had been confirmed by an earlier pass and every one of them agreed with KACo to the digit, 42 more were confirmed by it, and 25 counties absent from the original scrape were added from it outright. What remains unconfirmed is CITY entries, whose scraped category alone cannot distinguish a payroll rate from a net-profits or gross-receipts one.",
     "louisvilleMetro": {
       "governmentType": "Consolidated city-county government (Louisville/Jefferson County Metro Government) -- Jefferson County is the ONLY Kentucky county meeting KRS 68.180's 300,000-population threshold.",
       "residentRate": 0.022,
@@ -814,12 +814,12 @@
       {
         "name": "Danville",
         "category": "Net Profits/Gross Wages",
-        "rate": "1.25%",
-        "wageRateDecimal": null,
+        "rate": "1.90% wage tax (city-specific, NOT Boyle County's 1.25%)",
+        "wageRateDecimal": 0.019,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
-        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
+        "wageRateStatus": "primary_source_confirmed_2026-08-31",
+        "wageRateNote": "CORRECTED 2026-08-31: the scraped 1.25% figure was Boyle County's own rate (see the separate 'Boyle County' entry, KACo-confirmed at 0.0125), mistakenly carried onto this city row instead of Danville's actual, higher, separate city rate. Confirmed directly from Boyle County's own government page (boylecountyky.gov/191/Occupational-Tax-Business-Information), verbatim: 'you are required to withhold a gross wage tax of 1.90% from each employee who earns a wage while working within the city and 1.25% within the county.' A Danville employee therefore owes BOTH the 1.90% city rate and the 1.25% county rate unless kentuckyLocalTax() already applies some city-vs-county exclusivity/credit rule -- not re-verified this pass whether the engine stacks these correctly for a Danville work location; see this file's own top-level knownGap on the KRS 68.197 credit mechanism."
       },
       {
         "name": "Daviess County",
@@ -1030,11 +1030,11 @@
         "rate": "1.5%",
         "category": "Payroll and Net Profits",
         "source": "flemingsburgky.org, rate increased 0.5pp June 2024",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
-        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
+        "wageRateStatus": "primary_source_confirmed_2026-08-31",
+        "wageRateNote": "CONFIRMED 2026-08-31: the ordinance that raised this rate is itself named 'Ordinance No. 6-24-1 -- Occupational Payroll Tax Increase' (effective 2024-07-01, from 1% to 1.5%) -- its own title resolves what the scraped category alone could not: 1.5% is confirmably the PAYROLL figure, not an ambiguous combined net-profits/payroll number."
       },
       {
         "name": "Florence",
@@ -1071,11 +1071,11 @@
         "rate": "1.25%",
         "category": "Payroll/Net Profits",
         "source": "Ohio County occupational tax office (no separate Fordsville city rate found; county rate applies)",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.0125,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "ambiguous_single_figure_multi_base_category",
-        "wageRateNote": "Category names both a payroll/wage component and a net-profits component, but only one figure was scraped with no split shown -- not safe to assume it's the wage figure specifically without checking the ordinance."
+        "wageRateStatus": "confirmed_2026-08-31_matches_county",
+        "wageRateNote": "CONFIRMED 2026-08-31: this entry's own source note already explains the ambiguity away -- Fordsville has no separate city ordinance, so Ohio County's own KACo-confirmed payroll rate (0.0125, see the 'Ohio County' entry) applies directly. Unlike Danville, this is NOT a missed higher city-specific rate -- it is a deliberate inheritance, now populated to match."
       },
       {
         "name": "Fort Mitchell",
@@ -1275,11 +1275,11 @@
         "rate": "1.00% (Todd County rate -- no separate Guthrie city ordinance found)",
         "category": "Payroll",
         "source": "Todd Fiscal Court official Employer Return of License Fee Withheld form (HCOC-Q3), directly read: \"Tax Due at - 1.00%\"",
-        "wageRateDecimal": null,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "unparsed_needs_review",
-        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
+        "wageRateStatus": "confirmed_2026-08-31",
+        "wageRateNote": "CONFIRMED 2026-08-31: this entry's own source is already a primary government form (Todd Fiscal Court's own withholding return) directly quoting 'Tax Due at - 1.00%' with category already flagged Payroll -- it was simply never parsed into wageRateDecimal despite being unambiguous. Populated to match; no new fetch needed."
       },
       {
         "name": "Hancock County",
