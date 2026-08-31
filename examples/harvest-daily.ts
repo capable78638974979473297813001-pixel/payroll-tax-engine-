@@ -15,13 +15,19 @@ import { auditUiSources, describeAudit } from '../harvester/audit-ui.ts';
 const mode = process.argv[2] ?? 'daily';
 
 if (mode === 'status') {
-  console.log(describeStatus());
   // Exit 1 when the monitor cannot vouch for itself, so a wrapper script
   // or another agent can branch on it without parsing prose.
   const health = assessHealth(
     new Date().toISOString(),
     loadSources().map((s) => s.id),
   );
+  // `status --json` — for CI/automation to read health.status and
+  // openFindings structurally, instead of regexing the prose report below.
+  if (process.argv[3] === '--json') {
+    console.log(JSON.stringify(health));
+  } else {
+    console.log(describeStatus());
+  }
   process.exit(health.status === 'red' ? 1 : 0);
 }
 

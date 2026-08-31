@@ -1,0 +1,188 @@
+name: Harvest daily
+
+# What the 8am task runs, but on GitHub's infrastructure instead of one
+# person's laptop — see harvester/daily.ts's own doc comment for why every
+# source is checked every day regardless of its individual cadence.
+#
+# Hard requirement this workflow is built around: a real rate change must
+# NEVER be silently missed. The corollary — an occasional missed or noisy
+# RUN of the check itself is tolerable — is not: see the design notes
+# below for what that requirement rules out.
+#
+# 12:00 UTC is 8am Eastern Daylight Time / 7am Eastern Standard Time.
+# GitHub Actions cron does not know about daylight saving, so the actual
+# local time drifts by an hour twice a year. That drift is cosmetic — the
+# sweep still runs once a day either way — so it is left alone rather than
+# special-cased.
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch: {}
+
+# A second run must never start while one is still writing state — two
+# concurrent pushes to the state branch would race, and the harvester's
+# own file lock (harvester/journal.ts's acquireLock) only protects a
+# single checkout, not two separate Action runners.
+concurrency:
+  group: harvest-daily
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+env:
+  STATE_BRANCH: harvester-state
+  FINDINGS_LABEL: harvester-findings
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      # gh issue create --label fails outright on a label that doesn't
+      # exist yet; these two are created once, idempotently, so the later
+      # issue-upsert steps never fail on a fresh repo.
+      - name: Ensure tracking labels exist
+        run: |
+          gh label create "$FINDINGS_LABEL" --color FBCA04 \
+            --description "Open harvester findings awaiting review" 2>/dev/null || true
+          gh label create harvester-broken --color B60205 \
+            --description "The harvest-daily monitor itself failed" 2>/dev/null || true
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      # State (harvester/state/, harvester/snapshots/) is deliberately
+      # .gitignore'd in the main checkout — see .gitignore's own comment —
+      # because it used to mean "this machine's memory" and embedded
+      # absolute local paths. A GitHub Actions runner is a fresh machine
+      # every single run, so without an explicit, durable home for that
+      # state, EVERY run would look like day one: no prior snapshot to
+      # diff against, so a real rate change would be silently absorbed
+      # into a new "baseline" and never reported. That is the exact
+      # failure this workflow exists to rule out, so state is git-committed
+      # (not cached — GitHub Actions caches are explicitly best-effort and
+      # can be evicted, which would reproduce the same silent-miss failure)
+      # to its own orphan branch, kept out of the ordinary commit history
+      # main and other branches see.
+      - name: Restore harvester state from the state branch
+        run: |
+          set -e
+          if git ls-remote --exit-code --heads origin "$STATE_BRANCH" >/dev/null 2>&1; then
+            git clone --branch "$STATE_BRANCH" --single-branch --depth 1 \
+              "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" \
+              state-branch
+            mkdir -p harvester/state harvester/snapshots
+            [ -d state-branch/harvester/state ] && cp -a state-branch/harvester/state/. harvester/state/ || true
+            [ -d state-branch/harvester/snapshots ] && cp -a state-branch/harvester/snapshots/. harvester/snapshots/ || true
+            echo "Restored state from existing $STATE_BRANCH branch."
+          else
+            echo "No $STATE_BRANCH branch yet — first-ever run, starting cold."
+            echo "(Safe: daily.ts treats a source's first capture as a baseline, not a finding.)"
+          fi
+
+      # No continue-on-error here, on purpose: a crash must fail this job
+      # loudly. A failed scheduled workflow run triggers GitHub's own
+      # email notification automatically — that is the backstop for "the
+      # run itself broke," separate from and in addition to the app's own
+      # journal, which is the backstop for "a page changed and we didn't
+      # notice."
+      - name: Run the sweep
+        id: harvest
+        run: npm run harvest:daily
+
+      # Runs even if the sweep step above failed, so whatever it managed
+      # to capture before crashing is not lost on top of the crash itself.
+      - name: Commit state back to the state branch
+        if: always()
+        run: |
+          set -e
+          if [ ! -d state-branch ]; then
+            mkdir -p state-branch
+            git -C state-branch init -q
+            git -C state-branch checkout -q --orphan "$STATE_BRANCH"
+          fi
+          mkdir -p state-branch/harvester/state state-branch/harvester/snapshots
+          cp -a harvester/state/. state-branch/harvester/state/ 2>/dev/null || true
+          cp -a harvester/snapshots/. state-branch/harvester/snapshots/ 2>/dev/null || true
+
+          cd state-branch
+          git config user.name "harvester-bot"
+          git config user.email "harvester-bot@users.noreply.github.com"
+          git add harvester/state harvester/snapshots
+          if git diff --cached --quiet; then
+            echo "No state changes to commit."
+          else
+            git commit -q -m "Harvest state: run ${{ github.run_id }} ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+            git push -q "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" \
+              HEAD:"$STATE_BRANCH"
+          fi
+
+      # A single, persistently-updated issue rather than a fresh issue
+      # every day — see the requirement that this must not "cry wolf."
+      # It opens when there is something unacknowledged, is edited in
+      # place while that stays true, and closes itself once every open
+      # finding has been dealt with via `npm run harvest:ack`.
+      - name: Reflect open findings as a single tracking issue
+        if: always()
+        run: |
+          set -e
+          # `|| true` on these two: harvest-daily.ts's status mode exits 1
+          # when health is 'red' ("not trustworthy") — a real state this
+          # step must still report on, not abort before reaching. set -e
+          # would otherwise kill the whole step on exactly the case it
+          # most needs to surface.
+          HEALTH=$(node examples/harvest-daily.ts status --json) || true
+          echo "$HEALTH" > health.json
+          OPEN_COUNT=$(node -e "console.log(JSON.parse(require('fs').readFileSync('health.json','utf8')).openFindings.length)")
+          STATUS_TEXT=$(node examples/harvest-daily.ts status) || true
+
+          EXISTING=$(gh issue list --label "$FINDINGS_LABEL" --state open --json number --jq '.[0].number' || true)
+
+          if [ "$OPEN_COUNT" -gt 0 ]; then
+            BODY_FILE=$(mktemp)
+            {
+              echo "Automated — updated by the harvest-daily workflow, run ${{ github.run_id }}."
+              echo
+              echo '```'
+              echo "$STATUS_TEXT"
+              echo '```'
+            } > "$BODY_FILE"
+
+            if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+              gh issue edit "$EXISTING" --body-file "$BODY_FILE" \
+                --title "Harvester: $OPEN_COUNT open finding(s)"
+            else
+              gh issue create --title "Harvester: $OPEN_COUNT open finding(s)" \
+                --body-file "$BODY_FILE" --label "$FINDINGS_LABEL"
+            fi
+          elif [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+            gh issue comment "$EXISTING" --body "All open findings acknowledged (or resolved) as of run ${{ github.run_id }}. Closing."
+            gh issue close "$EXISTING"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      # Separate from the findings issue above: this one is ONLY for "the
+      # monitor itself is broken" (a crash, or every source unreadable),
+      # not for ordinary findings, so it never fires on a normal day.
+      - name: Flag a broken monitor separately from ordinary findings
+        if: failure()
+        run: |
+          set -e
+          EXISTING=$(gh issue list --label harvester-broken --state open --json number --jq '.[0].number' || true)
+          BODY="The harvest-daily workflow run ${{ github.run_id }} failed — see: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+            gh issue comment "$EXISTING" --body "$BODY"
+          else
+            gh issue create --title "Harvester monitor is broken" --body "$BODY" --label harvester-broken
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
