@@ -6941,7 +6941,7 @@ describe('West Virginia', () => {
       assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
     });
 
-    test('a WV city with no service fee (not one of the 8 captured): no WV_LOCAL_FEE line', () => {
+    test('a WV city with no service fee (not one of the 9 captured): no WV_LOCAL_FEE line', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
@@ -6994,6 +6994,28 @@ describe('West Virginia', () => {
         }),
       );
       assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(2.0));
+    });
+
+    test('Romney, non-resident duty station: nonResidentOnly city charges a nonresident ($1.00/wk)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Romney', residenceCity: 'Petersburg' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(1.0));
+    });
+
+    test('Romney, resident duty station: ordinance Section 5 excludes residents paying the City user fee — no WV_LOCAL_FEE line', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Romney', residenceCity: 'Romney' } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
     });
   });
 
