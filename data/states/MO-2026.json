@@ -75,7 +75,7 @@
       "rate": 0.01,
       "base": "Wages earned within Kansas City limits, for BOTH residents and nonresidents who work there.",
       "administeredBy": "Kansas City Revenue Division (E-Tax), not the Missouri DOR.",
-      "confidence": "cross_source_confirmed — direct fetch was ATTEMPTED this session (both the city's main earnings-tax page and its tax-guide page) and BLOCKED by the same Akamai-style bot-fingerprint filtering already documented for Wilmington DE's site in this project (returned a bare 'Access Denied' edge error, not a normal 403). Not a skipped attempt — genuinely inaccessible via this tool's fetch method."
+      "confidence": "cross_source_confirmed — RETRIED 2026-08-31 with raw curl (not the WebFetch tool) across 5 URL/user-agent variations (plain, no-UA, curl UA, Googlebot UA, a ShowPublishedDocument path) — all 403 with an identical 405-byte body, confirming this is a real bot-fingerprint block at the edge (Akamai/CDN level), not a tool-specific limitation or a stale finding. Also confirmed archive.org is not reachable from this environment (not on the egress allowlist), so a Wayback Machine capture was not available as a fallback either. The 1% figure on file is unchanged and still only cross-source confirmed."
     },
     "stLouis": {
       "earningsTaxRate": 0.01,
@@ -86,7 +86,7 @@
         "note": "A SEPARATE, additional employer-paid tax unique to St. Louis (not present in Kansas City) — layered on top of the 1% employee earnings tax, on the same wage base. Structurally analogous to Newark's employer-only payroll tax already in this project, though Newark's replaces rather than layers on top of an employee tax."
       },
       "administeredBy": "St. Louis Collector of Revenue, not the Missouri DOR.",
-      "confidence": "cross_source_confirmed — direct fetch was ATTEMPTED this session at a guessed stlouis-mo.gov URL and returned a genuine 404 (not a block), meaning the correct current URL wasn't found rather than the site refusing access. Left cross-source rather than spending further attempts guessing URLs."
+      "confidence": "primary_source_confirmed — UPGRADED 2026-08-31: fetched https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/payroll-tax-info.cfm directly (the earlier guessed URL 404’d because the correct path is /collector/, not /collector-of-revenue/). Page states verbatim: ‘The Withholding Tax is a 1% tax imposed on the wages of employees living or working in the City of St. Louis’ and ‘Form P-10 is a quarterly tax return to remit payroll expense tax of 1/2 of 1% (.005) of gross compensation paid to employees.’ Both figures match what was already on file exactly."
     },
     "otherMissouriCities": "No other Missouri municipality is known to levy an earnings tax — this is a closed 2-city list, not enumerated further this session."
   },
