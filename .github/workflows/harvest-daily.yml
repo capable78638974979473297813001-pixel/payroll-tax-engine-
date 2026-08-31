@@ -100,6 +100,25 @@ jobs:
 
       # Runs even if the sweep step above failed, so whatever it managed
       # to capture before crashing is not lost on top of the crash itself.
+      #
+      # Only *.meta.json is committed here — never the raw .raw capture
+      # bodies. Found out why the hard way on this workflow's first real
+      # run: Illinois's own withholding-guide page embeds a live-looking
+      # Mapbox secret token, which GitHub's push protection correctly
+      # refused to let land in this PUBLIC repo's history. That is not a
+      # false positive to route around — republishing a third party's
+      # embedded secret because it happened to be sitting on a page we
+      # fetched would be a real problem, not a CI inconvenience. And it
+      # is not needed anyway: hasChanged()/latestSnapshot() in
+      # harvester/snapshot.ts only ever read the .meta.json's stored
+      # sha256, never the raw bytes, so change detection is fully intact
+      # on metadata alone. The trade-off this accepts: `npm run
+      # harvest:diff -- <sourceId>`, which shows the actual byte-level
+      # diff, only works against whatever a machine has fetched locally
+      # — by design, not by omission, since printing full raw page
+      # bodies into this repo's PUBLIC Actions logs would carry the
+      # exact same leak risk. Run that command on your own machine, not
+      # in CI, when you want to see what actually changed.
       - name: Commit state back to the state branch
         if: always()
         run: |
@@ -111,7 +130,10 @@ jobs:
           fi
           mkdir -p state-branch/harvester/state state-branch/harvester/snapshots
           cp -a harvester/state/. state-branch/harvester/state/ 2>/dev/null || true
-          cp -a harvester/snapshots/. state-branch/harvester/snapshots/ 2>/dev/null || true
+          if [ -d harvester/snapshots ]; then
+            ( cd harvester/snapshots && find . -name '*.meta.json' \
+                -exec cp --parents {} ../../state-branch/harvester/snapshots/ \; )
+          fi
 
           cd state-branch
           git config user.name "harvester-bot"
