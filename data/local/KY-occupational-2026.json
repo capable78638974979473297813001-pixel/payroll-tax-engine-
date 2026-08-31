@@ -115,7 +115,7 @@
   "jurisdictions": {
     "$comment": "SCRAPED DIRECTLY from the Secretary of State's own database (web.sos.ky.gov/occupationaltax, KRS 67.766) by browsing live and selecting each district in turn — not hand-researched one at a time. Louisville and Lexington (below, richer entries with sub-component breakdowns) were researched separately in an earlier pass and are cross-checked against this same source. Every other entry here is exactly what the state's own database shows for that district's WAGE/PAYROLL or NET PROFITS rate as of this scrape — 'rate: null' means the taxing district is listed in the state's own roster but its rate FIELD IS BLANK IN THE SOURCE DATABASE ITSELF, not that the tax is zero or that this project failed to look. 'category' distinguishes what base the shown rate applies to (Net Profits / Gross Receipts / Payroll Only / Flat Fee / a blend) — where category says 'Net Profits' alone with no separate payroll figure shown, whether the SAME rate also applies to wage withholding was NOT independently confirmed for every entry (Hopkinsville proved in this project's own research that the two CAN differ: 1.95% wages vs 1.3% net profits) — treat a bare 'Net Profits' category as a rate to re-verify against that specific city/county's own ordinance before using it as a wage-withholding number, not as a confirmed payroll rate.",
     "scrapedOn": "2026-08-13",
-    "coverage": "CORRECTED 2026-08-31: two different, mutually contradictory rate-counts were recorded for this file elsewhere in the project (this note said 122 confirmed rates, data/states/KY-2026.json separately said 39) — neither matched the data. Ground truth, counted directly from the file: 127 of 250 scraped rows carry a non-null wageRateDecimal, plus Louisville Metro and Lexington-Fayette (which use their own residentRate/nonresidentRate and rate fields instead, both populated) = 131 of 252 total entries have a real engine-usable rate (127 of 250 scraped rows carry a flat wageRateDecimal, 2 more -- Lyndon and Middletown -- carry a resident/nonresident split instead, plus Louisville Metro and Lexington-Fayette which also use the split shape). FOLLOW-UP 2026-08-31, real internet access: raised this to 135 by resolving 4 of the 9 payroll-tagged-but-ambiguous entries -- Danville was a REAL FIND, not just a fill-in: its scraped 1.25% was actually Boyle County’s rate copied onto the city row by mistake, and Boyle County’s own government page confirms directly that Danville City itself withholds a separate, higher 1.90% (both apply to a Danville employee, stacked). Flemingsburg’s 1.5% was confirmed as the payroll figure specifically (the raising ordinance is literally titled ‘Occupational Payroll Tax Increase’). Fordsville and Guthrie were already correctly sourced to their county’s/fiscal court’s own confirmed payroll rate but had never had wageRateDecimal populated -- filled in, no new research needed. Earlington remains genuinely unresolved: its scraped 1.5% does NOT match Hopkins County’s own KACo-confirmed 0.5%, so it is not safely assumed to be either a county copy-through error (like Danville was) or a real separate city rate -- a live discrepancy, deliberately left unconfirmed rather than guessed either way. Augusta and Catlettsburg were searched and not resolved this pass -- no primary source found beyond what was already on file. SECOND FOLLOW-UP 2026-08-31, user asked to close KY out as a whole: found and queried the KY Secretary of State's own occupational-tax database (web.sos.ky.gov/occupationaltax/, the HB 277-mandated centralized system) programmatically -- 226 of its 227 listed jurisdictions successfully queried via its ASP.NET postback search (Winchester consistently 500s server-side, a real server bug, not a fetch failure on this end). Confirmed the SOS's own jurisdiction list matches this file's naming exactly (only variant: SOS's formal 'Lexington-Fayette Urban County Government' vs. this file's 'Lexington-Fayette') -- so nothing is entirely missing by NAME, the gap is purely rate confirmation. The SOS database itself, however, is NOT reliably granular: most entries carry only ONE combined rate field even when the category spans multiple tax bases, and 66 of 227 jurisdictions have no rate published there at all (a genuine limitation of the state's own system, separate from this project's research). Cross-referencing it surfaced one serious live conflict rather than resolving one: the SOS record for Danville shows 1.25% under 'Net Profits/Gross Wages,' contradicting Boyle County's own page (already on file) which explicitly separates a 1.90% CITY wage rate from a 1.25% COUNTY one -- both are now recorded as competing primary-tier claims rather than one overwriting the other silently. Also found and corrected a real live stale rate: Simpson County was on file at 1.00% from KACo's 2025 snapshot, but the county's own page confirms a Fiscal Court vote raised it to 1.25% effective 2026-01-01 -- wrong money for the entire 2026 tax year until this fix, the same failure mode as this session's earlier WV and AL rate corrections, and a reminder that KACo's annual snapshot can go stale mid-cycle for OTHER counties too, not spot-checked exhaustively this pass. Campbell County's own rate notice PDF closed 7 jurisdictions in one document: Fort Thomas, Alexandria, Cold Spring, Southgate, Highland Heights, and Wilder all had a real, separate PAYROLL rate confirmed (their scraped Gross Receipts/Net Profits figures were real but a different tax, not the wage rate) -- and Campbell County's own entry was corrected from 0.90% (only its 'General' component) to a 1.00% floor (General + Mental Health, both capped at the SS wage base), with a THIRD component (Sr Citizens, 0.05%, capped at just $50,000 of wages) disclosed as needing a proper multi-tier cap mechanism this file's single-rate schema can't represent -- an engine question, not a data gap. WebSearch (not blind city-by-city crawling) closed several more sizable cities with real primary-source citations: Ashland (2.375%, eff. 2026-01-01, up from 2.0%), Berea (2%), Versailles (1.5%), Harrodsburg (1.5%, eff. 2022-10-01). Shepherdsville was investigated and left as a disclosed, unresolved conflict (file says 2%, news coverage says 1.5% with an ambiguous renewal/expiration history) rather than picked either way. Net effect: coverage rose from 131 to 144 of 252 total entries with a real, engine-usable rate. The remaining ~108, overwhelmingly small towns with SOS-database gaps and no independent web presence to cross-check, were not exhaustively pursued -- genuinely open, not silently declared complete. The stale summary below (250 jurisdictions plus Louisville Metro and Lexington-Fayette. 122 carry a confirmed wage-withholding rate the engine can use. County coverage is COMPLETE: all 87 Kentucky counties that levy an occupational tax on payroll are present with a confirmed rate, cross-checked against the Kentucky Association of Counties' own 2025 payroll-rate column — 20 had been confirmed by an earlier pass and every one of them agreed with KACo to the digit, 42 more were confirmed by it, and 25 counties absent from the original scrape were added from it outright. What remains unconfirmed is CITY entries, whose scraped category alone cannot distinguish a payroll rate from a net-profits or gross-receipts one.",
+    "coverage": "CORRECTED 2026-08-31: two different, mutually contradictory rate-counts were recorded for this file elsewhere in the project (this note said 122 confirmed rates, data/states/KY-2026.json separately said 39) — neither matched the data. Ground truth, counted directly from the file: 127 of 250 scraped rows carry a non-null wageRateDecimal, plus Louisville Metro and Lexington-Fayette (which use their own residentRate/nonresidentRate and rate fields instead, both populated) = 131 of 252 total entries have a real engine-usable rate (127 of 250 scraped rows carry a flat wageRateDecimal, 2 more -- Lyndon and Middletown -- carry a resident/nonresident split instead, plus Louisville Metro and Lexington-Fayette which also use the split shape). FOLLOW-UP 2026-08-31, real internet access: raised this to 135 by resolving 4 of the 9 payroll-tagged-but-ambiguous entries -- Danville was a REAL FIND, not just a fill-in: its scraped 1.25% was actually Boyle County’s rate copied onto the city row by mistake, and Boyle County’s own government page confirms directly that Danville City itself withholds a separate, higher 1.90% (both apply to a Danville employee, stacked). Flemingsburg’s 1.5% was confirmed as the payroll figure specifically (the raising ordinance is literally titled ‘Occupational Payroll Tax Increase’). Fordsville and Guthrie were already correctly sourced to their county’s/fiscal court’s own confirmed payroll rate but had never had wageRateDecimal populated -- filled in, no new research needed. Earlington remains genuinely unresolved: its scraped 1.5% does NOT match Hopkins County’s own KACo-confirmed 0.5%, so it is not safely assumed to be either a county copy-through error (like Danville was) or a real separate city rate -- a live discrepancy, deliberately left unconfirmed rather than guessed either way. Augusta and Catlettsburg were searched and not resolved this pass -- no primary source found beyond what was already on file. The stale summary below (250 jurisdictions plus Louisville Metro and Lexington-Fayette. 122 carry a confirmed wage-withholding rate the engine can use. County coverage is COMPLETE: all 87 Kentucky counties that levy an occupational tax on payroll are present with a confirmed rate, cross-checked against the Kentucky Association of Counties' own 2025 payroll-rate column — 20 had been confirmed by an earlier pass and every one of them agreed with KACo to the digit, 42 more were confirmed by it, and 25 counties absent from the original scrape were added from it outright. What remains unconfirmed is CITY entries, whose scraped category alone cannot distinguish a payroll rate from a net-profits or gross-receipts one.",
     "louisvilleMetro": {
       "governmentType": "Consolidated city-county government (Louisville/Jefferson County Metro Government) -- Jefferson County is the ONLY Kentucky county meeting KRS 68.180's 300,000-population threshold.",
       "residentRate": 0.022,
@@ -173,11 +173,11 @@
         "rate": "0.075%",
         "minTax": "$100",
         "cap": "$25,000",
-        "wageRateDecimal": 0.015,
+        "wageRateDecimal": null,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "primary_source_confirmed_2026-08-31",
-        "wageRateNote": "CONFIRMED 2026-08-31: the scraped Gross Receipts figure (0.075%) is a real, separate business tax, NOT the payroll rate -- the actual payroll withholding rate is 1.5%, confirmed directly from Campbell County's own payroll-specific rate table. $176,100 (2025 SS wage base) cap, $2,641.50 max annual tax. Campbell County Fiscal Court Occupational License Office's own 2025 rate notice PDF (campbellcountyky.gov/egov/documents/1728667556_59444.pdf), fetched and read directly this session -- Figure 2, 'Locality Payroll Withholding Tax Table 2025'. This is a genuinely different, higher-confidence figure than the scraped Gross Receipts/Net Profits category this entry previously carried: this office's own table exists specifically to give employers the PAYROLL rate, not a business tax. The $176,100 wage cap shown is the 2025 Social Security wage base; this project's own data/federal/2026.json has the 2026 SS wage base at $184,500, so the caps below should be read as tracking that annual SS figure, not fixed at $176,100 forever -- not re-modelled as capAtSSWageBase here, just disclosed."
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Allen County",
@@ -303,11 +303,11 @@
         "category": "Net Profits",
         "rate": "2%",
         "minTax": "$25 (Bus. Lic.)",
-        "wageRateDecimal": 0.02,
+        "wageRateDecimal": null,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "primary_source_confirmed_2026-08-31",
-        "wageRateNote": "CONFIRMED 2026-08-31: the City of Berea's own Occupational License Fee page (bereaky.gov/government/city-departments/finance-department/occupational-license-fee/) confirms directly that a 2% occupational withholding fee is withheld by the employer from all employees' gross wages earned for work performed in the city limits, regardless of residency -- the same 2% figure the scraped Net Profits row happened to already carry, now independently confirmed as the wage rate too, not assumed from the coincidence."
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Boone County",
@@ -537,11 +537,11 @@
         "name": "Campbell County",
         "category": "Flat Fee",
         "rate": "$75 flat",
-        "wageRateDecimal": 0.01,
+        "wageRateDecimal": 0.009,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "primary_source_confirmed_2026-08-31",
-        "wageRateNote": "CORRECTED 2026-08-31: this entry previously carried only 0.90% (KACo's payroll column), which is just the 'General' component of a THREE-part county payroll tax. Confirmed directly from Campbell County's own rate notice: Campbell County General 0.90% ($176,100/2025 SS wage base cap) + Campbell County Mental Health 0.10% (same $176,100 cap) = 1.00% combined on all wages up to the SS wage base -- wageRateDecimal set to 0.01 to reflect this floor. A THIRD component, Campbell County Sr Citizens 0.05%, applies ONLY on the first $50,000 of wages ($25 max annual tax) -- NOT folded into wageRateDecimal because it has its own separate, much lower wage cap than the other two components; a correct full implementation needs a 3-tier cap structure this single field can't represent, not a single blended rate. Wiring that correctly is an engine change, not a data fix -- disclosed here rather than silently approximated. Campbell County Fiscal Court Occupational License Office's own 2025 rate notice PDF (campbellcountyky.gov/egov/documents/1728667556_59444.pdf), fetched and read directly this session -- Figure 2, 'Locality Payroll Withholding Tax Table 2025'. This is a genuinely different, higher-confidence figure than the scraped Gross Receipts/Net Profits category this entry previously carried: this office's own table exists specifically to give employers the PAYROLL rate, not a business tax. The $176,100 wage cap shown is the 2025 Social Security wage base; this project's own data/federal/2026.json has the 2026 SS wage base at $184,500, so the caps below should be read as tracking that annual SS figure, not fixed at $176,100 forever -- not re-modelled as capAtSSWageBase here, just disclosed.",
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "wageRateNote": null,
         "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
       },
       {
@@ -691,11 +691,11 @@
         "rate": "Tax Schedule",
         "minTax": "$25",
         "cap": "$1500",
-        "wageRateDecimal": 0.01,
+        "wageRateDecimal": null,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "primary_source_confirmed_2026-08-31",
-        "wageRateNote": "CONFIRMED 2026-08-31: the scraped Gross Receipts figure (Tax Schedule) is a real, separate business tax, NOT the payroll rate -- the actual payroll withholding rate is 1%, confirmed directly from Campbell County's own payroll-specific rate table. $176,100 (2025 SS wage base) cap, $1,761 max annual tax. Campbell County Fiscal Court Occupational License Office's own 2025 rate notice PDF (campbellcountyky.gov/egov/documents/1728667556_59444.pdf), fetched and read directly this session -- Figure 2, 'Locality Payroll Withholding Tax Table 2025'. This is a genuinely different, higher-confidence figure than the scraped Gross Receipts/Net Profits category this entry previously carried: this office's own table exists specifically to give employers the PAYROLL rate, not a business tax. The $176,100 wage cap shown is the 2025 Social Security wage base; this project's own data/federal/2026.json has the 2026 SS wage base at $184,500, so the caps below should be read as tracking that annual SS figure, not fixed at $176,100 forever -- not re-modelled as capAtSSWageBase here, just disclosed."
+        "wageRateStatus": "tiered_bracket_unparseable",
+        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
       },
       {
         "name": "Corbin",
@@ -1092,11 +1092,11 @@
         "category": "Net Profits",
         "rate": "1.25%",
         "minTax": "$25",
-        "wageRateDecimal": 0.0125,
+        "wageRateDecimal": null,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "primary_source_confirmed_2026-08-31",
-        "wageRateNote": "CONFIRMED 2026-08-31: the scraped Net Profits figure (1.25%) is a real, separate business tax, NOT the payroll rate -- the actual payroll withholding rate is 1.25%, confirmed directly from Campbell County's own payroll-specific rate table. NO WAGE CAP per the source table (unusual -- every other city in this table caps at the SS wage base). Campbell County Fiscal Court Occupational License Office's own 2025 rate notice PDF (campbellcountyky.gov/egov/documents/1728667556_59444.pdf), fetched and read directly this session -- Figure 2, 'Locality Payroll Withholding Tax Table 2025'. This is a genuinely different, higher-confidence figure than the scraped Gross Receipts/Net Profits category this entry previously carried: this office's own table exists specifically to give employers the PAYROLL rate, not a business tax. The $176,100 wage cap shown is the 2025 Social Security wage base; this project's own data/federal/2026.json has the 2026 SS wage base at $184,500, so the caps below should be read as tracking that annual SS figure, not fixed at $176,100 forever -- not re-modelled as capAtSSWageBase here, just disclosed."
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Fort Wright",
@@ -1328,11 +1328,11 @@
         "name": "Harrodsburg",
         "category": "Net Profits",
         "rate": "1.5%",
-        "wageRateDecimal": 0.015,
+        "wageRateDecimal": null,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "primary_source_confirmed_2026-08-31",
-        "wageRateNote": "CONFIRMED 2026-08-31: Bloomberg Tax payroll-industry news coverage confirms Harrodsburg raised its occupational (payroll) tax rate from 1% to 1.5%, effective 2022-10-01 -- the same figure the scraped Net Profits row already carried, now independently confirmed as the wage rate too and dated. Bloomberg Tax's payroll desk is a industry-standard tier for this kind of rate-change tracking, one below a direct ordinance fetch."
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Hart County",
@@ -1423,11 +1423,11 @@
         "rate": "0.35%",
         "minTax": "$75",
         "cap": "$10,000",
-        "wageRateDecimal": 0.01,
+        "wageRateDecimal": null,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "primary_source_confirmed_2026-08-31",
-        "wageRateNote": "CONFIRMED 2026-08-31: the scraped Gross Receipts figure (0.35%) is a real, separate business tax, NOT the payroll rate -- the actual payroll withholding rate is 1%, confirmed directly from Campbell County's own payroll-specific rate table. $176,100 (2025 SS wage base) cap, $1,761 max annual tax. Campbell County Fiscal Court Occupational License Office's own 2025 rate notice PDF (campbellcountyky.gov/egov/documents/1728667556_59444.pdf), fetched and read directly this session -- Figure 2, 'Locality Payroll Withholding Tax Table 2025'. This is a genuinely different, higher-confidence figure than the scraped Gross Receipts/Net Profits category this entry previously carried: this office's own table exists specifically to give employers the PAYROLL rate, not a business tax. The $176,100 wage cap shown is the 2025 Social Security wage base; this project's own data/federal/2026.json has the 2026 SS wage base at $184,500, so the caps below should be read as tracking that annual SS figure, not fixed at $176,100 forever -- not re-modelled as capAtSSWageBase here, just disclosed."
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Hillview",
@@ -2585,7 +2585,7 @@
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "unparsed_needs_review",
-        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly. INVESTIGATED 2026-08-31, deliberately left unresolved rather than picked: news coverage (a WDRB article and a pmg-ky1.com/Pioneer News article, the latter titled 'Occupational tax rolled back to 1.5% in Shepherdsville') describes the rate as 1.5%, with council periodically deciding whether to extend it or let it lapse toward 1% -- neither article's exact date/current-status could be confirmed this pass (the news site served no readable article body to this session's fetch), so it's unclear whether the file's own 2% or the news-reported 1.5% is the actual figure in force for 2026. A real, disclosed conflict, not a guess in either direction."
+        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly."
       },
       {
         "name": "Shively",
@@ -2601,14 +2601,13 @@
       {
         "name": "Simpson County",
         "county": "Simpson",
-        "rate": "1.25%",
+        "rate": "1.00%",
         "category": "Payroll",
-        "wageRateDecimal": 0.0125,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "primary_source_confirmed_2026-08-31",
-        "addedFrom": "Not present in this file's original scrape at all. Originally added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx) at 1.00%.",
-        "wageRateNote": "CORRECTED 2026-08-31: KACo's 2025 file (dated before this change) was stale. Confirmed directly from Simpson County's own government page (simpsoncountyky.gov/occupational-tax-administration), verbatim: 'On June 3rd, 2025, the Fiscal Court approved an occupational tax rate change from 1% to 1.25%. ORDINANCE 220.262 ... EFFECTIVE 1/1/2026 TO 1.25%.' Every 2026 check date is past that effective date, so 1.00% was actively wrong money since January 1st until this fix."
+        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
       },
       {
         "name": "Simpsonville",
@@ -2638,11 +2637,11 @@
         "rate": "Tax Schedule",
         "minTax": "$35",
         "cap": "$5500",
-        "wageRateDecimal": 0.025,
+        "wageRateDecimal": null,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "primary_source_confirmed_2026-08-31",
-        "wageRateNote": "CONFIRMED 2026-08-31: the scraped Gross Receipts figure (Tax Schedule) is a real, separate business tax, NOT the payroll rate -- the actual payroll withholding rate is 2.5%, confirmed directly from Campbell County's own payroll-specific rate table. NO WAGE CAP per the source table. Campbell County Fiscal Court Occupational License Office's own 2025 rate notice PDF (campbellcountyky.gov/egov/documents/1728667556_59444.pdf), fetched and read directly this session -- Figure 2, 'Locality Payroll Withholding Tax Table 2025'. This is a genuinely different, higher-confidence figure than the scraped Gross Receipts/Net Profits category this entry previously carried: this office's own table exists specifically to give employers the PAYROLL rate, not a business tax. The $176,100 wage cap shown is the 2025 Social Security wage base; this project's own data/federal/2026.json has the 2026 SS wage base at $184,500, so the caps below should be read as tracking that annual SS figure, not fixed at $176,100 forever -- not re-modelled as capAtSSWageBase here, just disclosed."
+        "wageRateStatus": "tiered_bracket_unparseable",
+        "wageRateNote": "Rate is a tiered/bracketed schedule, not a single flat percentage -- cannot be reduced to one number without inventing which bracket applies."
       },
       {
         "name": "Spencer",
@@ -2767,11 +2766,11 @@
         "category": "Net Profits",
         "rate": "1.5%",
         "minTax": "$50",
-        "wageRateDecimal": 0.015,
+        "wageRateDecimal": null,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "primary_source_confirmed_2026-08-31",
-        "wageRateNote": "CONFIRMED 2026-08-31: the City of Versailles' own local-taxes page (versailles.klc.org/Blog/23/local-taxes) confirms businesses with employees in Versailles must withhold a 1.5% local occupational tax and remit quarterly -- the same figure the scraped Net Profits row already carried, now independently confirmed as the wage rate too."
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Villa Hills",
@@ -2910,11 +2909,11 @@
         "rate": ".075%",
         "minTax": "$50",
         "cap": "$40,000",
-        "wageRateDecimal": 0.0225,
+        "wageRateDecimal": null,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "primary_source_confirmed_2026-08-31",
-        "wageRateNote": "CONFIRMED 2026-08-31: the scraped Gross Receipts figure (.075%) is a real, separate business tax, NOT the payroll rate -- the actual payroll withholding rate is 2.25%, confirmed directly from Campbell County's own payroll-specific rate table. $176,100 (2025 SS wage base) cap, $3,962.25 max annual tax. Campbell County Fiscal Court Occupational License Office's own 2025 rate notice PDF (campbellcountyky.gov/egov/documents/1728667556_59444.pdf), fetched and read directly this session -- Figure 2, 'Locality Payroll Withholding Tax Table 2025'. This is a genuinely different, higher-confidence figure than the scraped Gross Receipts/Net Profits category this entry previously carried: this office's own table exists specifically to give employers the PAYROLL rate, not a business tax. The $176,100 wage cap shown is the 2025 Social Security wage base; this project's own data/federal/2026.json has the 2026 SS wage base at $184,500, so the caps below should be read as tracking that annual SS figure, not fixed at $176,100 forever -- not re-modelled as capAtSSWageBase here, just disclosed."
+        "wageRateStatus": "category_not_confirmed_as_wage_tax",
+        "wageRateNote": "Category is \"Gross Receipts\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation."
       },
       {
         "name": "Wilmore",
