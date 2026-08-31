@@ -1396,12 +1396,12 @@ describe('Kentucky', () => {
       assert.equal(r.taxes.some((t) => t.id === 'KY_LOCAL'), false);
     });
 
-    test('a jurisdiction without a CONFIRMED rate (Cadiz -- Gross Receipts only, unconfirmed for wages): no KY_LOCAL line, not a guess', () => {
+    test('a jurisdiction without a CONFIRMED rate (Bardstown -- Net Profits only, unconfirmed for wages): no KY_LOCAL line, not a guess', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
           earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
-          workState: { code: 'KY', certificate: { workCity: 'Cadiz' } },
+          workState: { code: 'KY', certificate: { workCity: 'Bardstown' } },
         }),
       );
       assert.equal(r.taxes.some((t) => t.id === 'KY_LOCAL'), false);
