@@ -901,6 +901,29 @@ function exemptEmploymentCategoryReason(
 }
 
 /**
+ * certificate.exempt is read as a bare JS truthy value at three call sites
+ * below, and truthiness is the wrong test for it: the STRING "false" (or
+ * "0", or "no") is truthy in JavaScript, so a caller who means "not exempt"
+ * but serializes it as a string — a very plausible shape coming from a
+ * form field, a database column, or JSON — would silently have this
+ * employee's ENTIRE state income tax zeroed out (applyStateWithholdingExemption
+ * below) with no error. There is no per-state type for `certificate` the
+ * way federalW4.exempt has (certificate varies too much by state to type
+ * narrowly), so nothing else catches this. Only a real boolean or an absent
+ * value is accepted; anything else throws rather than silently guessing
+ * which way "exempt" was meant.
+ */
+function resolveCertExempt(cert: Record<string, unknown>): boolean {
+  const raw = cert.exempt;
+  if (raw === undefined || raw === null) return false;
+  if (raw === true || raw === false) return raw;
+  throw new Error(
+    `Unrecognized certificate.exempt ${JSON.stringify(raw)} — expected a real boolean (true/false), not a string ` +
+      `or other value that merely LOOKS like one.`,
+  );
+}
+
+/**
  * Employee-claimed exemption from state withholding (Minnesota's W-4MN
  * Section 2 is the first concrete, enumerable example in this project, but
  * read generically off certificate.exempt so any future state's own
@@ -916,7 +939,7 @@ function applyStateWithholdingExemption(
   lines: TaxLine[],
 ): TaxLine[] {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (!cert.exempt) return lines;
+  if (!resolveCertExempt(cert)) return lines;
 
   // A state can recognise several DIFFERENT exemptions that all arrive as
   // the same boolean — Alabama alone honours four federal statutes (air
@@ -956,7 +979,7 @@ function applyAdditionalStateWithholding(
   lines: TaxLine[],
 ): TaxLine[] {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.exempt) return lines;
+  if (resolveCertExempt(cert)) return lines;
 
   // Montana's Form MW-4 is explicit that its own "extra withholding" (line
   // 3) and "specified withholding" (line 4) are mutually exclusive — "If
@@ -1006,7 +1029,7 @@ function applyReducedStateWithholding(
   lines: TaxLine[],
 ): TaxLine[] {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.exempt) return lines;
+  if (resolveCertExempt(cert)) return lines;
 
   const reduction = Number(cert.reducedWithholding ?? 0);
   if (reduction <= 0) return lines;

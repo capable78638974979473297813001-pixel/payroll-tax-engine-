@@ -1941,6 +1941,36 @@ describe('Minnesota', () => {
     assert.equal(amountOf(r, 'MN_SIT_SUPP'), 0);
   });
 
+  test('certificate.exempt as the STRING "false" throws instead of silently zeroing state tax — truthy is not the same as true', () => {
+    // The real risk this guards against: a caller serializing a boolean as
+    // a string (a form field, a DB column, JSON) sends "false" meaning
+    // "not exempt" — but "false" is truthy in JavaScript, so a bare `if
+    // (cert.exempt)` check would have silently withheld $0 of state tax
+    // for an employee who never claimed exemption.
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+            ...mnState({ maritalStatus: 'single', allowances: 0, exempt: 'false' }),
+          }),
+        ),
+      /Unrecognized certificate\.exempt/,
+    );
+  });
+
+  test('certificate.exempt as a real boolean false withholds normally, not exempt', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+        ...mnState({ maritalStatus: 'single', allowances: 0, exempt: false }),
+      }),
+    );
+    assert.ok(amountOf(r, 'MN_SIT') > 0);
+  });
+
   test('certificate.additionalWithholding adds a flat per-period amount on top of the formula (W-4MN Section 1 Line 2)', () => {
     // Same base case as 'single, weekly $605, 0 allowances' ($27.53),
     // plus a $10.00 additional withholding request. Expect $37.53 —
