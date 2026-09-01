@@ -1733,7 +1733,7 @@
       "level": "state",
       "jurisdiction": "WY",
       "title": "Wyoming — unemployment wage base / employer rates",
-      "url": "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-taxable-wage-base/unemployment-tax",
+      "url": "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-taxable-wage-base/",
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
@@ -1743,8 +1743,8 @@
         "data/states/WY-{year}.json"
       ],
       "coversUI": true,
-      "note": "Upgraded to a page carrying BOTH the taxable wage base and rate figures, verified before swapping. The previous URL carried only one of the two.",
-      "uiContent": "wage-base-and-rates"
+      "note": "FIXED 2026-09-01, found during a manual (non-harvester) verification pass: the previous URL (this same path plus a trailing /unemployment-tax) had been reduced by the state to a pure prose description of the rate MECHANISM (base rate + four factors) with zero actual numbers anywhere on the page — confirmed by direct fetch, every apparent dollar-figure match was a CSS gradient RGB value, not tax content. The claim this note used to make, that it carried both figures verified before swapping, no longer held; the page had changed since. This parent URL (drop the /unemployment-tax suffix) carries the real year-by-year wage-base table and was verified directly: '2026 $33,800' matches this state's own data file exactly, and the table already lists 2027's $34,900 for next year. No rate percentage appears on this page either (checked directly, only CSS % values present) — this state's own data file already carries newEmployerRate: null, so that is not a regression, just consistent.",
+      "uiContent": "wage-base-only"
     },
     {
       "id": "nm-ui-rates-calc",
