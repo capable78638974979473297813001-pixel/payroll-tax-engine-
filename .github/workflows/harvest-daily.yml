@@ -14,9 +14,22 @@ name: Harvest daily
 # local time drifts by an hour twice a year. That drift is cosmetic — the
 # sweep still runs once a day either way — so it is left alone rather than
 # special-cased.
+#
+# Minute is :07, not :00 — found live, not theoretical: this workflow's
+# only real scheduled firing so far (2026-08-31) ran at 18:19 UTC, over
+# six hours late against this same '12:00' target, and the very next
+# day's firing never happened at all as of 1h17m past target (2026-09-01,
+# confirmed by checking the Actions API directly — zero schedule-triggered
+# runs that day). GitHub's own docs say exactly why: the schedule event
+# "can be delayed during periods of high load," and load peaks specifically
+# at the top of every hour, because that's the slot every other scheduled
+# workflow on the platform also requests by default. Every minute past
+# :00 draws a smaller crowd. This does not make GitHub's scheduler
+# reliable — it remains best-effort, full stop — but it is the one lever
+# available to reduce the delay, and the delay observed was not small.
 on:
   schedule:
-    - cron: '0 12 * * *'
+    - cron: '7 12 * * *'
   workflow_dispatch: {}
 
 # A second run must never start while one is still writing state — two
