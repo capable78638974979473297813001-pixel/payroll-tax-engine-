@@ -1820,6 +1820,22 @@ function findWIBracket(brackets: WIBracket[], annualNetWage: number): WIBracket 
  * taxes/federal.ts already uses, so the two lines together still cover the
  * full base exactly once.
  */
+/**
+ * WI's own formula only distinguishes single vs. married — head-of-household
+ * has no third band in Publication W-166, so it maps to 'single' by
+ * convention (a disclosed simplification, not a WI-published rule).
+ * Anything other than that or an explicit 'married' throws, rather than
+ * silently taxing a married employee at the single rate on a typo — the
+ * same guard already applied to Minnesota/New York/Idaho/Iowa/Maine/
+ * California's own status resolvers.
+ */
+function resolveWIMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  const raw = cert.maritalStatus;
+  if (raw === undefined || raw === null || raw === 'single') return 'single';
+  if (raw === 'married') return 'married';
+  throw new Error(`Unrecognized WI certificate.maritalStatus ${JSON.stringify(raw)} — expected 'single' or 'married'.`);
+}
+
 function bracketPhaseoutDeduction(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -1833,10 +1849,7 @@ function bracketPhaseoutDeduction(
   const annualWages = taxableWages * ctx.periodsPerYear;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  // WI's own formula only distinguishes single vs. married — head-of-household
-  // has no third band in Publication W-166, so it maps to 'single' by
-  // convention (a disclosed simplification, not a WI-published rule).
-  const maritalStatus = cert.maritalStatus === 'married' ? 'married' : 'single';
+  const maritalStatus = resolveWIMaritalStatus(cert);
   const exemptions = Number(cert.exemptions ?? 0);
 
   const band = cfg.standardDeduction[maritalStatus];
@@ -5282,8 +5295,19 @@ function delawareCertificateStatus(
   // project uses everywhere else, here made a direct quote rather than an
   // inferred convention. MFS uses the single-column standard deduction per
   // the Guide's own third worked example; only 'mfj' selects the married
-  // (double) figure.
-  const maritalStatus = cert.maritalStatus === 'mfj' ? 'married' : 'single';
+  // (double) figure. Anything else defined throws rather than silently
+  // taxing a married ('mfj') employee at the single rate on a typo.
+  const raw = cert.maritalStatus;
+  let maritalStatus: 'single' | 'married';
+  if (raw === undefined || raw === null || raw === 'single' || raw === 'mfs') {
+    maritalStatus = 'single';
+  } else if (raw === 'mfj') {
+    maritalStatus = 'married';
+  } else {
+    throw new Error(
+      `Unrecognized DE certificate.maritalStatus ${JSON.stringify(raw)} — expected 'single', 'mfs', or 'mfj'.`,
+    );
+  }
   const exemptions = Number(cert.exemptions ?? 0);
   return { maritalStatus, exemptions };
 }
@@ -5479,8 +5503,24 @@ function resolveMOFilingStatus(
   // Form MO W-4's own default box order and this project's standing
   // no-certificate convention both land here: 'Single or Married Spouse
   // Works or Married Filing Separate' is the form's FIRST checkbox and
-  // covers three real filing situations under one shared deduction figure.
-  return 'singleOrMarriedSpouseWorksOrMFS';
+  // covers three real filing situations under one shared deduction figure
+  // (per this file's own standardDeductionComment) — 'single',
+  // 'married_spouse_works', and 'mfs' are all explicit synonyms for it.
+  // Anything else defined throws rather than silently landing an
+  // unrecognized status in the lowest-deduction bucket.
+  if (
+    raw === undefined ||
+    raw === null ||
+    raw === 'single' ||
+    raw === 'married_spouse_works' ||
+    raw === 'mfs'
+  ) {
+    return 'singleOrMarriedSpouseWorksOrMFS';
+  }
+  throw new Error(
+    `Unrecognized MO certificate.filingStatus ${JSON.stringify(raw)} — expected 'single', 'married_spouse_works', ` +
+      `'mfs', 'married_spouse_does_not_work', or 'head_of_household'.`,
+  );
 }
 
 /**
@@ -5639,6 +5679,18 @@ function findORCapTier(schedule: ORCapTier[], annualWages: number): ORCapTier {
  * since Oregon's own rule is about no OR-W-4 being on file at all, not
  * about an employee who filed one claiming single/zero allowances.
  */
+/**
+ * Oregon's own OR-W-4 vocabulary is a plain single/married checkbox — no
+ * separate head-of-household band. Throws on anything else defined rather
+ * than silently taxing a married employee at the single rate on a typo.
+ */
+function resolveORMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  const raw = cert.maritalStatus;
+  if (raw === undefined || raw === null || raw === 'single') return 'single';
+  if (raw === 'married') return 'married';
+  throw new Error(`Unrecognized OR certificate.maritalStatus ${JSON.stringify(raw)} — expected 'single' or 'married'.`);
+}
+
 function oregonWithholding(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -5671,7 +5723,7 @@ function oregonWithholding(
   const annualWages = periodWages * multiplier;
 
   const cert = input.workState.certificate as Record<string, unknown>;
-  const maritalStatusBox = cert.maritalStatus === 'married' ? 'married' : 'single';
+  const maritalStatusBox = resolveORMaritalStatus(cert);
   const allowances = Number(cert.allowances ?? 0);
   const promoted = maritalStatusBox === 'married' || allowances >= 3;
 
@@ -6369,8 +6421,16 @@ interface UTConfig {
 
 function resolveUTMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
   // Publication 14's own note: "Use the Single column for taxpayers who
-  // file as head-of-household on their federal return."
-  return cert.maritalStatus === 'married' ? 'married' : 'single';
+  // file as head-of-household on their federal return." — 'hoh' is a real,
+  // tested value that deliberately maps here, not a typo. Anything else
+  // defined throws rather than silently taxing a married employee at the
+  // single rate.
+  const raw = cert.maritalStatus;
+  if (raw === undefined || raw === null || raw === 'single' || raw === 'hoh') return 'single';
+  if (raw === 'married') return 'married';
+  throw new Error(
+    `Unrecognized UT certificate.maritalStatus ${JSON.stringify(raw)} — expected 'single', 'hoh', or 'married'.`,
+  );
 }
 
 /**
@@ -6468,7 +6528,10 @@ interface MDLumpSumBonusConfig {
 }
 
 function resolveMDFilingStatus(cert: Record<string, unknown>): 'single' | 'mfjHoh' {
-  return cert.filingStatus === 'mfjHoh' ? 'mfjHoh' : 'single';
+  const raw = cert.filingStatus;
+  if (raw === undefined || raw === null || raw === 'single') return 'single';
+  if (raw === 'mfjHoh') return 'mfjHoh';
+  throw new Error(`Unrecognized MD certificate.filingStatus ${JSON.stringify(raw)} — expected 'single' or 'mfjHoh'.`);
 }
 
 /**
@@ -8222,10 +8285,20 @@ type NMFilingStatus = 'single' | 'married' | 'hoh';
 // state a no-form default, since there is no NM-specific form to fail to
 // file).
 function resolveNMFilingStatus(cert: Record<string, unknown>): NMFilingStatus {
+  // Reuses the SAME vocabulary as federalW4 (single/married_joint/
+  // married_separate/head_of_household) per this file's own
+  // filingStatusNote — 'married_separate' deliberately bundles into
+  // 'single', the same bundling the federal 2020+ W-4 checkbox itself
+  // uses. Anything else defined throws rather than silently taxing a
+  // married employee at the single rate on a typo.
   const raw = cert.filingStatus;
+  if (raw === undefined || raw === null || raw === 'single' || raw === 'married_separate') return 'single';
   if (raw === 'married_joint') return 'married';
   if (raw === 'head_of_household') return 'hoh';
-  return 'single';
+  throw new Error(
+    `Unrecognized NM certificate.filingStatus ${JSON.stringify(raw)} — expected 'single', 'married_separate', ` +
+      `'married_joint', or 'head_of_household'.`,
+  );
 }
 
 /**
@@ -8453,6 +8526,25 @@ interface OKConfig {
  * (0.25%-4.75%) into these 4 (0%-4.5%) for 2026, independently corroborated
  * by a second source before trusting the reconstructed table.
  */
+/**
+ * OW-2's own vocabulary: 'married_withhold_as_single' is the pre-2020-W-4-
+ * style checkbox for a married employee electing single-rate withholding
+ * — a real, deliberate value, not a typo — and maps to the single table
+ * exactly like every other state's equivalent checkbox in this project.
+ * Anything else defined throws rather than silently taxing a married
+ * employee at the single rate.
+ */
+function resolveOKFilingStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  const raw = cert.filingStatus;
+  if (raw === undefined || raw === null || raw === 'single' || raw === 'married_withhold_as_single') {
+    return 'single';
+  }
+  if (raw === 'married') return 'married';
+  throw new Error(
+    `Unrecognized OK certificate.filingStatus ${JSON.stringify(raw)} — expected 'single', 'married', or 'married_withhold_as_single'.`,
+  );
+}
+
 function oklahomaWithholding(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -8463,8 +8555,7 @@ function oklahomaWithholding(
   const periodWages = ctx.taxableWagesFor(exempt);
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  const statusRaw = (cert.filingStatus as string) ?? 'single';
-  const status = statusRaw === 'married' ? 'married' : 'single';
+  const status = resolveOKFilingStatus(cert);
 
   const period = input.payFrequency;
   const allowanceAmount = cfg.allowanceAmount[period];
@@ -8535,6 +8626,19 @@ function oklahomaWithholding(
  * Section 1's copy, corrected in data/states/ND-2026.json rather than
  * silently worked around in code.
  */
+/**
+ * Section 1 (pre-2020 federal W-4 on file) reads its own ND-specific
+ * certificate.maritalStatus, distinct from Section 2's federalW4.filingStatus
+ * dispatch below. Throws on anything other than single/married rather than
+ * silently taxing a married employee at the single rate on a typo.
+ */
+function resolveNDSection1MaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  const raw = cert.maritalStatus;
+  if (raw === undefined || raw === null || raw === 'single') return 'single';
+  if (raw === 'married') return 'married';
+  throw new Error(`Unrecognized ND certificate.maritalStatus ${JSON.stringify(raw)} — expected 'single' or 'married'.`);
+}
+
 function northDakotaWithholding(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -8557,7 +8661,7 @@ function northDakotaWithholding(
 
   if (cert.formVintage === 'pre_2020') {
     const section1 = structure.section1_preFederal2020W4;
-    const status = cert.maritalStatus === 'married' ? 'married' : 'single';
+    const status = resolveNDSection1MaritalStatus(cert);
     const allowanceAmount = section1.allowanceAmountByPeriod[period];
     if (allowanceAmount === undefined) {
       throw new Error(

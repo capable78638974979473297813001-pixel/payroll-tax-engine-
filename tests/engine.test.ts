@@ -1106,6 +1106,13 @@ describe('Wisconsin', () => {
     const r = calculatePaycheck(input(wiState({ maritalStatus: 'single', exemptions: 1 })));
     assert.equal(r.taxes.some((t) => t.id === 'WI_SIT_SUPP'), false);
   });
+
+  test('an unrecognized maritalStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () => calculatePaycheck(input(wiState({ maritalStatus: 'divorced', exemptions: 0 }))),
+      /Unrecognized WI certificate\.maritalStatus/,
+    );
+  });
 });
 
 describe('Kentucky', () => {
@@ -5659,6 +5666,13 @@ describe('Delaware', () => {
       assert.equal(amountOf(combined, 'DE_SIT'), amountOf(plain, 'DE_SIT'));
     });
   });
+
+  test('an unrecognized maritalStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () => calculatePaycheck(input(deState({ maritalStatus: 'divorced', exemptions: 0 }))),
+      /Unrecognized DE certificate\.maritalStatus/,
+    );
+  });
 });
 
 describe('Arizona', () => {
@@ -5795,6 +5809,20 @@ describe('Missouri', () => {
       }),
     );
     assert.equal(r.taxes.some((t) => t.id === 'KC_EARN' || t.id === 'STL_EARN'), false);
+  });
+
+  test('an unrecognized filingStatus throws rather than silently landing in the lowest-deduction bucket', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'monthly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(2916.67) }],
+            workState: { code: 'MO', certificate: { filingStatus: 'divorced' } },
+          }),
+        ),
+      /Unrecognized MO certificate\.filingStatus/,
+    );
   });
 });
 
@@ -6089,6 +6117,20 @@ describe('Oregon', () => {
     assert.equal(r.taxes.some((t) => t.id === 'OR_METRO_SHS'), true);
     assert.equal(amountOf(r, 'OR_METRO_SHS'), 0);
     assert.equal(amountOf(r, 'OR_MULTNOMAH_PFA'), 0);
+  });
+
+  test('an unrecognized maritalStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            workState: { code: 'OR', certificate: { maritalStatus: 'divorced', allowances: 0 } },
+          }),
+        ),
+      /Unrecognized OR certificate\.maritalStatus/,
+    );
   });
 });
 
@@ -6625,6 +6667,13 @@ describe('Utah', () => {
     );
     assert.equal(amountOf(r, 'UT_SIT'), dollars(116));
   });
+
+  test('an unrecognized maritalStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () => calculatePaycheck(input(utState({ maritalStatus: 'divorced' }))),
+      /Unrecognized UT certificate\.maritalStatus/,
+    );
+  });
 });
 
 describe('Maryland', () => {
@@ -6816,6 +6865,13 @@ describe('Maryland', () => {
       );
       assert.equal(amountOf(r, 'MD_SIT'), amountOf(combined, 'MD_SIT'));
     });
+  });
+
+  test('an unrecognized filingStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () => calculatePaycheck(input(mdState({ filingStatus: 'divorced', county: 'Worcester' }))),
+      /Unrecognized MD certificate\.filingStatus/,
+    );
   });
 });
 
@@ -8463,6 +8519,13 @@ describe('New Mexico', () => {
     );
     assert.equal(amountOf(r, 'NM_SIT'), dollars(12.77));
   });
+
+  test('an unrecognized filingStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () => calculatePaycheck(input(nmState({ filingStatus: 'divorced' }))),
+      /Unrecognized NM certificate\.filingStatus/,
+    );
+  });
 });
 
 describe('Hawaii', () => {
@@ -8780,6 +8843,13 @@ describe('Oklahoma', () => {
     // $13.00 base (same as the absent-certificate case above) + $25.00 = $38.00.
     assert.equal(amountOf(r, 'OK_SIT'), dollars(38));
   });
+
+  test('an unrecognized filingStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () => calculatePaycheck(input(okState({ filingStatus: 'divorced' }))),
+      /Unrecognized OK certificate\.filingStatus/,
+    );
+  });
 });
 
 describe('Wyoming', () => {
@@ -8970,6 +9040,24 @@ describe('North Dakota', () => {
       const expectedMarginal = amountOf(combinedAsOneCheque, 'ND_SIT') - regularTax;
       assert.equal(amountOf(withAggregation, 'ND_SIT'), expectedMarginal);
     });
+  });
+
+  test('Section 1: an unrecognized maritalStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            checkDate: '2026-06-15',
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1500) }],
+            workState: {
+              code: 'ND',
+              certificate: { formVintage: 'pre_2020', maritalStatus: 'divorced', allowances: 2 },
+            },
+          }),
+        ),
+      /Unrecognized ND certificate\.maritalStatus/,
+    );
   });
 });
 
