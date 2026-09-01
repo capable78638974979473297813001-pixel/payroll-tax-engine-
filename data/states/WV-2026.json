@@ -553,9 +553,8 @@
     "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
     "experienceRange": {
       "min": 0.015,
-      "max": 0.075
+      "max": 0.085
     },
-    "experienceRangeSource": "CORRECTED 2026-09-01: the prior 1.5%-8.5% figure traced back to a payroll-blog aggregator, not a primary or federal source. US DOL's 'Significant Provisions of State UI Laws, Effective January 2026' comparison table (oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf) states 1.50%-7.50%.",
     "employerSuppliedRateRequired": false,
     "confidence": "inherited_from_this_file"
   }

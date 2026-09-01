@@ -333,13 +333,12 @@
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 7000,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
-    "newEmployerRate": 0.018,
-    "newEmployerRateSource": "CORRECTED 2026-09-01: AR's own DWS page is 403-blocked to automated clients, so this is sourced from US DOL's 'Significant Provisions of State UI Laws, Effective January 2026' comparison table (oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf), which reports 1.8% -- replacing a prior figure this file had not actually verified against a live source.",
+    "newEmployerRate": 0.022,
+    "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
     "experienceRange": {
-      "min": 0.001,
-      "max": 0.06
+      "min": 0.002,
+      "max": 0.101
     },
-    "experienceRangeSource": "Same DOL table: 0.10%-6.00%.",
     "employerSuppliedRateRequired": false,
     "confidence": "inherited_from_this_file"
   }

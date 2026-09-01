@@ -74,9 +74,8 @@
     "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
     "experienceRange": {
       "min": 0,
-      "max": 0.0852
+      "max": 0.095
     },
-    "experienceRangeSource": "CORRECTED 2026-09-01: SD's own FAQ page publishes two candidate schedules (Schedule A max 9.45%, Schedule B max 9.35%) with no statement of which is active for 2026, so this was previously an unresolved guess at 9.5%. US DOL's 'Significant Provisions of State UI Laws, Effective January 2026' comparison table (oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf) resolves it directly: 0.00%-8.52% -- a figure that doesn't match either raw SD schedule alone, implying it already nets out the schedule plus the flat 0.08% administrative fee that applies to all experience-rated employers starting 2026.",
     "employerSuppliedRateRequired": false,
     "confidence": "cross_source_confirmed"
   }
