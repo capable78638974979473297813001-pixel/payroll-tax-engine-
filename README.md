@@ -1,11 +1,13 @@
-# payroll-tax-engine remember this is from two weeks ago not accurate 
+# payroll-tax-engine
 
-A gross-to-net US payroll tax engine. Zero dependencies, integer-cents arithmetic,
-effective-dated rulesets loaded from JSON.
+A gross-to-net US payroll tax engine. Zero runtime dependencies, integer-cents
+arithmetic, effective-dated rulesets loaded from JSON — every jurisdiction,
+federal through local, computed by the same driver.
 
 ```bash
-npm test     # 33 tests
-npm run demo # prints a worked paystub
+npm test              # 940 tests
+npm run demo           # prints a worked paystub
+npm run ui:calculator  # any-state calculator UI, address-based local tax lookup
 ```
 
 ## Status
@@ -15,20 +17,29 @@ npm run demo # prints a worked paystub
 | Federal income tax (Pub 15-T Worksheet 1A, 2026) | Complete — all 6 rate schedules |
 | Social Security / Medicare / Additional Medicare | Complete, wage-base and threshold aware |
 | FUTA | Complete at the standard net rate |
-| Per-tax taxable wage bases | Complete — the core abstraction |
-| State income tax | Framework + Pennsylvania. **40 states outstanding** |
-| Local income tax | Not started |
-| Reciprocity / multi-state | Not started |
-| SUI, SDI, PFML | Not started |
+| State income tax | **51 / 51 jurisdictions** (50 states + DC), 41 distinct `method` cases — one of them (`no_income_tax`) shared by the 9 states with no wage income tax, the other 40 each a real published formula shape |
+| State unemployment (employer) | 51 / 51 — 44 with a computable new-employer rate, 7 industry-assigned (`employerSuppliedRateRequired`) |
+| State UC/SDI/PFML/LTC (employee-paid) | 14 states + DC, wherever the state actually levies one |
+| Local income tax | OH (~600 municipalities + school districts + JEDD/JEDZ), PA (~2,600 Act 32 EIT/LST jurisdictions), MI (24 cities), KY (227 occupational districts), IN (92 counties), AL (25 municipalities), plus NYC, Yonkers, Kansas City/St. Louis earnings tax, Newark payroll tax, Portland Metro/Multnomah, Denver-cluster Colorado OPT, Wilmington wage tax, WV municipal service fees |
+| Reciprocity / multi-state | Wired generically off each state's own `reciprocalStates` — IL/IN/KY/MI/MN/OH/PA/WI's bilateral agreements, DC's blanket nonresident exemption, WV's 5-state cluster |
+| Address → jurisdiction | Rooftop-precision geocoding pipeline (see below) — 35/51 authoritative, 14/51 OSM-corroborated, measured, not assumed |
+| Staying current | Automated daily harvester watching 105 registered sources, human review gate before anything reaches `data/` |
 
-Every rate lives in `data/` with a source URL and a `verifiedOn` date. No rate is
-hardcoded in a `.ts` file, and there is no fallback default — a missing ruleset
-throws rather than quietly returning zero.
+Run `npm run coverage:taxes` for the live, generated version of the table
+above — one worked paycheck through all 51 jurisdictions, printed fresh, not
+transcribed here.
+
+Every rate lives in `data/` with a source URL and a `verifiedOn` date. No rate
+is hardcoded in a `.ts` file, and there is no fallback default — a missing
+ruleset throws rather than quietly returning zero, and a state with no single
+new-employer UI rate (industry-assigned) requires the caller to supply one
+rather than silently computing with a wrong number.
 
 ## The one idea that matters
 
-Naive payroll code computes a single `taxableWages` number and multiplies it by
-each rate. That is wrong, and it is wrong on a large fraction of real paychecks.
+Naive payroll code computes a single `taxableWages` number and multiplies it
+by each rate. That is wrong, and it is wrong on a large fraction of real
+paychecks.
 
 **Every tax has its own taxable base.** The same $240 of 401(k) deferral:
 
@@ -41,67 +52,123 @@ So one paycheck legitimately produces three different bases:
 ```
 Federal Income Tax     base $2,665
 Social Security        base $2,905
-Pennsylvania           base $2,905
+Pennsylvania            base $2,905
 ```
 
 Each tax declares its exemptions as data (`exemptPretax` in its ruleset), and
 `makeTaxableWagesFn` resolves the base per tax. Adding a jurisdiction with an
-unusual rule is a data change, not a code change.
+unusual rule is a data change, not a code change — the same mechanism that
+made adding state 51 no different in kind from adding state 2.
 
 ## Architecture
 
 ```
-data/federal/2026.json     rates + brackets + sources
-data/states/PA-2026.json   one file per state per year
-src/money.ts               integer cents; wage caps; half-up rounding
-src/wages.ts               per-tax taxable base resolution
-src/registry.ts            effective-dated ruleset loading
-src/taxes/federal.ts       Worksheet 1A, FICA, FUTA
-src/taxes/state.ts         method dispatch (flat_rate, …)
-src/calculate.ts           driver — knows nothing about specific taxes
+data/federal/2026.json         rates + brackets + sources
+data/states/XX-2026.json       one file per state per year, all 51
+data/local/*.json              8 bulk local registers (OH x3, PA, MI, KY, IN, AL)
 
-harvester/sources.json     authoritative registers to monitor
-harvester/snapshot.ts      content-addressed immutable captures
-harvester/diff.ts          change detection + severity + parser guard
-harvester/harvest.ts       decisions and the review queue
+src/money.ts                   integer cents; wage caps; half-up rounding
+src/wages.ts                   per-tax taxable base resolution
+src/registry.ts                effective-dated ruleset loading
+src/types.ts                   PaycheckInput / PaycheckResult / TaxLine
+src/taxes/federal.ts           Worksheet 1A, FICA, FUTA
+src/taxes/state.ts             method dispatch, local taxes, SUI, SDI/PFML,
+                                reciprocity — ~8,800 lines, one function per
+                                jurisdiction's actual published mechanism
+src/calculate.ts               driver — knows nothing about specific taxes
+src/alabama/                   a fully-worked reference module (input
+                                normalization, output shaping, scenario
+                                fixtures) kept as the pattern other states'
+                                integration code follows
+
+geocode/census.ts              Census TIGERweb interpolation + boundary lookup
+geocode/rooftop.ts             National Address Database rooftop precision
+geocode/nominatim.ts           OpenStreetMap corroboration (never trusted alone)
+geocode/buildings.ts           traced building-footprint cross-check
+geocode/districts.ts           districts Census doesn't publish (Ohio JEDD/JEDZ,
+                                Portland Metro) resolved against their own source
+geocode/resolve.ts             ties every tier together into one call
+
+harvester/sources.json         105 authoritative registers to monitor
+harvester/snapshot.ts          content-addressed immutable captures
+harvester/diff.ts              change detection + severity + parser guard
+harvester/harvest.ts           decisions and the review queue
+harvester/run.ts               the daily sweep (also runs as a GitHub Action)
+
+supabase/functions/            an Edge Function wrapping calculatePaycheck()
+                                for anyone who wants this as a hosted API
 ```
 
-The ruleset is selected by **check date**, never by the clock, so a correction
-run in March for a December check uses December's rules.
+The ruleset is selected by **check date**, never by the clock, so a
+correction run in March for a December check uses December's rules.
+
+## Local taxes and address → jurisdiction
+
+Local tax selection is a geospatial lookup, not a ZIP lookup — ZIP codes
+cross municipal boundaries, and getting this wrong is a silent, systematic
+error. `geocode/resolve.ts` runs an address through four tiers, each of which
+**refuses rather than guesses**:
+
+| Tier | What it means | Source |
+| --- | --- | --- |
+| `rooftop` | A point published for this exact address by the government that assigns addresses. | National Address Database (US DOT), ~98M points |
+| `rooftop-osm` | OpenStreetMap holds a house-level point AND it agrees with Census's own position. | Nominatim, corroborated against Census, never trusted alone |
+| `neighbor` | Interpolated between the two nearest *published* points on the same street. Block-level. | National Address Database |
+| `interpolated` | Census's own TIGER/Line address-range position, at the curb. | Census geocoder |
+
+Measured, not assumed — `npm run coverage:geocode` resolves one real address
+per jurisdiction through this exact pipeline and reports which tier answered:
+**35/51 land on authoritative rooftop points, 14/51 on OSM-corroborated
+house-level points; only 1/51 falls all the way back to Census's own
+interpolation** (a genuine North Dakota data gap: nothing published at or
+below that address's own house number to bracket from — see
+`docs/geocoding-coverage.md`). Building footprints add a third, independent
+cross-check where OSM has traced the structure.
+
+Once a coordinate is resolved, jurisdictions not published by Census — Ohio's
+JEDD/JEDZ districts, Portland's Metro Supportive Housing boundary — are
+looked up against their own government's boundary service, joined on the
+government's own ID, never on a name match.
 
 ## Staying current without fetching at calculation time
 
 ```bash
 npm run demo:harvest
+npm run harvest:status
 ```
 
-The obvious idea is to fetch rates live so you are never stale. It is the wrong
-trade, for three reasons:
+The obvious idea is to fetch rates live so you are never stale. It is the
+wrong trade, for three reasons:
 
 1. **Reproducibility.** Payroll must be deterministic forever — same check
-   date and inputs, same answer, for audits, amended 941s and W-2c corrections.
-   If the rate comes off the network at calculation time, last March's cheque
-   can never be reproduced, because the source moved underneath it.
+   date and inputs, same answer, for audits, amended 941s and W-2c
+   corrections. If the rate comes off the network at calculation time, last
+   March's cheque can never be reproduced, because the source moved
+   underneath it.
 2. **Availability.** A payroll batch is thousands of cheques. You cannot make
    an HTTP call per cheque, and a municipal web server being down on payday
    cannot be a reason not to run payroll.
-3. **Blast radius.** Live fetch means a reformatted page silently becomes wrong
-   money, with no human in the loop.
+3. **Blast radius.** Live fetch means a reformatted page silently becomes
+   wrong money, with no human in the loop.
 
 So the network and the arithmetic are separated completely:
 
 ```
-harvester (daily) → hash → snapshot → diff → REVIEW GATE → data/ → engine (offline)
+harvester (daily, GitHub Action) → hash → snapshot → diff → REVIEW GATE → data/ → engine (offline)
 ```
 
-**Watch registers, not towns.** The single most useful fact about this problem:
-you never monitor an individual municipality's website. Ohio's ~600
-municipalities are legally required to report into the Department of Taxation's
-downloadable rate database; Pennsylvania's ~2,500 Act 32 jurisdictions report
-into DCED, which is the only legally recognised source for PSD codes and EIT
-rates. That collapses "7,400 jurisdictions" into roughly **60 registers**.
+**Watch registers, not towns.** The single most useful fact about this
+problem: you never monitor an individual municipality's website. Ohio's
+~600 municipalities are legally required to report into the Department of
+Taxation's downloadable rate database; Pennsylvania's ~2,600 Act 32
+jurisdictions report into DCED, the only legally recognised source for PSD
+codes and EIT rates. That collapses thousands of jurisdictions into **105
+registers** (`harvester/sources.json`) — every state's income-tax and UI
+source, plus the bulk local aggregators.
 
-The harvester's decisions:
+The harvester runs daily as a GitHub Action, posts its findings to a single
+tracking issue, and retries transient failures before flagging a source as
+actually broken:
 
 | Decision | When | Effect |
 |---|---|---|
@@ -119,7 +186,7 @@ that actually costs money:
 ```
 
 Nothing auto-publishes. A rate reaches the engine only through a recorded
-human approval, and every capture is retained content-addressed so there is a
+human decision, and every capture is retained content-addressed so there is a
 file — not a memory of a website — behind every historical calculation.
 
 ## Adding a state
@@ -131,59 +198,25 @@ If it fits an existing method, it is data only. Drop in `data/states/XX-2026.jso
   "code": "XX", "name": "Example", "year": 2026, "method": "flat_rate",
   "sources": [{ "title": "…", "url": "…", "verifiedOn": "2026-08-11" }],
   "flatRate": { "rate": 0.0495, "allowanceAmount": 2775.0 },
-  "exemptPretax": ["section125", "hsa", "fsa", "deferral_401k"]
+  "exemptPretax": ["section125", "hsa", "fsa", "deferral_401k"],
+  "suiEmployer": { "wageBase": 9000, "newEmployerRate": 0.027, "experienceRange": { "min": 0.001, "max": 0.07 } }
 }
 ```
 
-The `exemptPretax` list is the part that needs real research per state — the
-rate is the easy half. States with bracketed tables or credit-based formulas
-need a new `method` in `src/taxes/state.ts`.
+The `exemptPretax` list and the `suiEmployer` sourcing are the parts that
+need real research per state — the flat rate is the easy half. A state whose
+formula doesn't fit an existing shape needs a new `method` case in
+`src/taxes/state.ts`; 41 exist already, so a genuinely novel mechanism is
+rare at this point, not the common case.
 
-## Honest assessment of what's left
+## Running it
 
-The calculator is not the hard part; it is largely done above. The remaining
-work is data acquisition and data maintenance.
-
-**Roughly tractable:**
-
-- *40 remaining states.* Perhaps 1–3 days each including verification and test
-  fixtures. Around a dozen are flat-rate and nearly free; California, New York
-  and Oregon have genuinely intricate formulas.
-- *SUI/SDI/PFML.* Per-state wage bases and rates, plus employer-specific
-  experience rates that must be a per-customer input, not a constant.
-
-**Genuinely hard:**
-
-- *Local taxes.* This is most of the "7,400 jurisdictions" figure. Pennsylvania
-  alone has ~2,500 Act 32 EIT jurisdictions; Ohio has ~600 municipalities plus
-  school districts. Both states do publish machine-readable registers, which
-  helps a lot. Kentucky, Michigan, Indiana, Missouri, Maryland, Alabama, New
-  York and Colorado each add their own model.
-- *Address → jurisdiction.* Local tax selection is a geospatial lookup, not a
-  ZIP lookup — ZIP codes cross municipal boundaries, and getting this wrong is
-  a silent, systematic error. Census TIGER/Line shapefiles are free and make
-  this solvable; it is a real subsystem, not a lookup table.
-- *Reciprocity and nexus.* Around 30 interstate agreements, plus resident vs.
-  non-resident sourcing and credit-for-taxes-paid.
-
-**Not a software problem at all:**
-
-- *Maintenance.* There is no public API for any of this. It is ~45 PDFs a year
-  on 45 different schedules, some revised mid-year with retroactive effect.
-  This is the actual product a vendor sells.
-- *Liability.* Withholding errors produce agency penalties for the employer.
-  A vendor's price includes being the party who is wrong.
-
-## When to build vs. buy
-
-Build if payroll tax is your product, you can staff ongoing compliance research,
-and you need control over the calculation. Buy if payroll is a feature of
-something else — the $200k is mostly buying the maintenance treadmill and the
-liability, and neither goes away because the arithmetic turned out to be easy.
-
-A credible middle path: run this engine for federal + FICA + flat-rate states
-(a large share of paychecks, fully verifiable), and buy or defer coverage for
-locals and the complex states.
+- `npm run ui:calculator` — a general, any-state calculator UI backed
+  directly by `calculatePaycheck()`, with address-based local tax resolution
+  through the geocoding pipeline. No separate tax logic lives in the server.
+- `npm run ui:alabama` — the Alabama reference implementation's own UI.
+- `npm run edge:build` then deploy `supabase/functions/calculate-paycheck` —
+  the same engine as a hosted API (`npm run edge:key` issues an API key).
 
 ## Verification
 
@@ -195,63 +228,41 @@ Federal figures were cross-checked two ways before being committed:
    standard deduction: `12,900 + 19,300 = 32,200` (MFJ), `8,600 + 7,500 =
    16,100` (single), `8,600 + 15,550 = 24,150` (HoH) ✓
 
-Test expectations were computed by hand from the worksheet before the code ran.
-A golden file regenerated from its own engine proves nothing.
+Test expectations were computed by hand from the worksheet before the code
+ran. A golden file regenerated from its own engine proves nothing.
 
-## Known gaps in shipped data
+State and local figures carry the same discipline, recorded per-file: a
+`sources[]` entry with a URL and `verifiedOn` date, a `confidence` tier
+(`primary_source_confirmed`, `cross_source_confirmed`, or lower), and — where
+the number came from a live re-check rather than the original research pass
+— a `$note` explaining what changed and why, so a wrong number's history is
+visible instead of overwritten silently.
 
-- PA employee unemployment (UC) withholding — rate not yet verified from a
-  primary source, so deliberately absent rather than guessed.
-- FUTA credit-reduction states (published by DOL each November).
+## Known gaps
 
-## National source registry
+- A handful of state UI sites (AZ, AR, DC, KS, NH, TX at last check) block
+  automated access outright; those states' unemployment figures rest on the
+  best cross-source confirmation available rather than a direct primary
+  fetch, and are marked as such in their own `data/states/*.json`.
+- North Dakota's sample address falls back to Census interpolation rather
+  than a rooftop point — a genuine gap in what's been published near that
+  address, not a code limitation (see `docs/geocoding-coverage.md`).
+- FUTA credit-reduction states are published by DOL each November and are
+  not yet wired to auto-update from that publication.
+- Local income tax coverage is deep where it's built (OH/PA/MI/KY/IN/AL plus
+  the named cities above) but not exhaustive nationally — a jurisdiction not
+  listed in a state file's `knownGaps` and not producing a line for a given
+  address is the correct signal to check that file before assuming "no local
+  tax."
 
-`data/sources/us-registry.json` maps every US wage-withholding jurisdiction to
-its **primary government source** and a verification status — it holds no rate
-values by design. Status ladder:
-
-- `structural_fact` — the 9 states with no wage income tax (nothing to withhold).
-- `source_verified` — official withholding source URL confirmed on the web; rate
-  values not yet transcribed or human-checked.
-- `modelled` — rates are in the engine (`data/`) and locked by hand-derived tests.
-
-As of 2026-08-11: 9 structural facts, 40 states source-verified, 2 (PA, MI)
-modelled, plus the two local aggregators (PA DCED Act 32 — corrected this
-session to `apps.dced.pa.gov/munstats-public/FindLocalTax.aspx` after the
-originally-recorded `munstats.pa.gov` was found not to resolve — and Ohio
-`thefinder.tax.ohio.gov`) that collapse ~3,100 local jurisdictions into 2 feeds.
-A state moves to `modelled` only after a human verifies its rates against the
-cited source — the registry never carries a guessed number.
-
-**Caution on `source_verified` entries:** spot-checking this session found two
-concrete errors in previously-recorded data — Oklahoma's URL 404'd (a
-constructed path, since fixed) and Michigan's exemption amount was a stale
-2025 figure ($5,800 vs. the actual 2026 $5,900). Treat `source_verified` as
-"a source was located," not "the URL and every detail were re-fetched and
-confirmed this session" — each entry should be spot-checked again before
-being trusted for a `modelled` promotion.
-
-## Michigan (`data/states/MI-2026.json`, `data/local/MI-cities-2026.json`)
-
-State: flat 4.25%, $5,900 annual personal exemption — both read directly from
-the primary-source PDF (Form 446, Rev. 02-26), fixture-ready like PA. Pretax
-treatment is the mirror image of PA: MCL 206.30(l) ties MI taxable income to
-federal AGI, so 401(k)/403(b)/457/SIMPLE deferrals reduce the MI base (they
-don't in PA) — sourced from a statute citation, not the 446 guide itself, so
-flagged for a second check before this ruleset is called production-verified.
-
-All 24 city income taxes are catalogued with rates and exemption amounts.
-Detroit (2.4%/1.2%) and Saginaw (1.5%/0.75%) were checked directly against
-their own primary sources; **Saginaw's rate had to be corrected** — a
-consolidated third-party municipal table had it wrong (1.00%/0.50%), a real
-example of exactly the failure mode this project's verification discipline
-exists to catch. The other 22 cities carry the consolidated table's numbers
-un-reconfirmed per city, marked `source_verified` rather than `verified`.
-Local calculation is not yet wired into the engine — data only, per Build
-order (Phase 5 comes after Phase 4 extends the engine itself to new states).
+Every one of these is disclosed in the file it affects, not just here — this
+list is a map to the disclosures, not a substitute for reading them.
 
 ## Sources
 
 - [IRS Publication 15-T (2026)](https://www.irs.gov/pub/irs-pdf/p15t.pdf)
 - [SSA contribution and benefit base](https://www.ssa.gov/oact/cola/cbb.html)
-- [PA DOR employer withholding](https://www.revenue.pa.gov/TaxTypes/EmployerWithholding/)
+- [National Address Database](https://www.transportation.gov/gis/national-address-database) (US DOT)
+- Each state's own file in `data/states/` and `data/local/` cites its own
+  primary source — there is no single national withholding source to point
+  at, which is the whole reason this project exists.
