@@ -6796,6 +6796,20 @@ describe('Maryland', () => {
     assert.equal(amountOf(r, 'MD_SIT'), dollars(5309.5));
   });
 
+  test('certificate.nonresident as the STRING "false" throws instead of silently switching to the nonresident rate', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'annual',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(80000) }],
+            ...mdState({ filingStatus: 'single', exemptions: 0, nonresident: 'false' }),
+          }),
+        ),
+      /Unrecognized certificate\.nonresident/,
+    );
+  });
+
   test('reciprocity: a Pennsylvania resident working in Maryland owes $0 MD tax', () => {
     const r = calculatePaycheck(
       input({
@@ -7000,6 +7014,24 @@ describe('District of Columbia', () => {
       }),
     );
     assert.equal(amountOf(r, 'DC_SIT'), 0);
+  });
+
+  test('certificate.nonresident as the STRING "false" throws instead of silently zeroing a real DC resident\'s tax', () => {
+    // The real risk this guards against: DC's own no-nonresident-tax rule
+    // makes this a genuinely dangerous field to get wrong in this
+    // direction — a true DC resident, wrongly read as nonresident, would
+    // have their entire DC withholding silently zeroed.
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'annual',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(200000) }],
+            ...dcState({ nonresident: 'false' }),
+          }),
+        ),
+      /Unrecognized certificate\.nonresident/,
+    );
   });
 });
 

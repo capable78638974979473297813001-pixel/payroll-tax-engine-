@@ -924,6 +924,31 @@ function resolveCertExempt(cert: Record<string, unknown>): boolean {
 }
 
 /**
+ * certificate.nonresident has the same class of risk as certificate.exempt
+ * above, and a genuinely worse failure mode where it's used: Maryland's
+ * marylandWithholding() switches its ENTIRE local-tax mechanism on this
+ * flag (the ordinary county rate vs. the Special Nonresident Rate), and
+ * DC's dcWithholding() short-circuits to a flat $0 for a nonresident,
+ * because DC is federally barred from taxing nonresident commuters. A
+ * caller who means "not nonresident" (i.e. a resident) but sends the
+ * STRING "false" would, under a bare truthy check, be silently treated as
+ * a nonresident — for DC specifically, that means a real DC resident gets
+ * $0 DC income tax withheld. One of the three existing call sites already
+ * wrapped this in Boolean(...), which does not help: Boolean("false") is
+ * also true. Only a real boolean or an absent value is accepted here;
+ * anything else throws.
+ */
+function resolveCertNonresident(cert: Record<string, unknown>): boolean {
+  const raw = cert.nonresident;
+  if (raw === undefined || raw === null) return false;
+  if (raw === true || raw === false) return raw;
+  throw new Error(
+    `Unrecognized certificate.nonresident ${JSON.stringify(raw)} — expected a real boolean (true/false), not a ` +
+      `string or other value that merely LOOKS like one.`,
+  );
+}
+
+/**
  * Employee-claimed exemption from state withholding (Minnesota's W-4MN
  * Section 2 is the first concrete, enumerable example in this project, but
  * read generically off certificate.exempt so any future state's own
@@ -6614,7 +6639,7 @@ function mdSupplementalCarveOut(
   }
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.nonresident) return null;
+  if (resolveCertNonresident(cert)) return null;
 
   const countyRate = mdCountyTopRate(cert.county as string | undefined, rules);
   if (countyRate === undefined) return null;
@@ -6705,7 +6730,7 @@ function marylandWithholding(
 
   let localTax: number;
   let localNote: string;
-  const nonresident = Boolean(cert.nonresident);
+  const nonresident = resolveCertNonresident(cert);
   if (nonresident) {
     localTax = applyRate(taxableIncome, cfg.nonresidentSpecialRate);
     localNote = `nonresident, Special ${(cfg.nonresidentSpecialRate * 100).toFixed(2)}% rate`;
@@ -6840,7 +6865,7 @@ function dcWithholding(
   const periodWages = ctx.taxableWagesFor(exempt);
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.nonresident) {
+  if (resolveCertNonresident(cert)) {
     return {
       id: `${rules.code}_SIT`,
       name: `${rules.name} Income Tax`,
