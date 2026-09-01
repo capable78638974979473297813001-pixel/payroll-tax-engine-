@@ -40,18 +40,46 @@ interpolation**, correcting it by 5m to 269m (median 90m).
 
 | Tier | Count |
 | --- | --- |
-| `rooftop` (authoritative) | 34 / 51 |
-| `rooftop-osm` (house-level, corroborated) | 15 / 51 |
+| `rooftop` (authoritative) | 35 / 51 |
+| `rooftop-osm` (house-level, corroborated) | 14 / 51 |
 | `neighbor` (block-level) | 1 / 51 |
 | `interpolated` (no improvement available) | 1 / 51 |
 
-### These numbers move, and that is not a bug
+### A real bug, found by chasing why Alaska sat on `interpolated`
+
+Re-measured 2026-09-01 at a caller's explicit request for rooftop
+precision, Alaska was `interpolated` — not a service hiccup, a genuine
+match failure. The National Address Database had 475 points within 300m
+of "120 4th St, Juneau", including both "FOURTH Street" and "West FOURTH
+Street" — but `streetKey()` (`geocode/buildings.ts`) had no concept of a
+numbered street written two ways: digits ("4th") against NAD's own word
+form ("FOURTH"). Tier 1 (exact match) and tier 3 (neighbor bracket, which
+also matches on street name) both silently found nothing, on a street
+that had 41 published points on it.
+
+This is not an Alaska quirk — numbered streets are common nationally, and
+which convention a given state's address authority uses is arbitrary and
+inconsistent even within one state (Juneau's own data has both). Fixed by
+teaching `streetKey()` the same digit-and word forms English uses for
+ordinals up through the low thousands ("twenty-first" / "Twenty First" /
+"21st" all compare equal now, including compounds like "One Hundred
+Twenty-Fifth" for cities with numbering that high), the same
+expand-to-one-canonical-form approach already used for directionals
+("W"/"West") and street types ("St"/"Street") — see `geocode/buildings.ts`
+and its new tests in `tests/geocode.test.ts`. Alaska now resolves
+`rooftop` at 14m, its correct tier all along.
+
+### These numbers still move, and that is not a bug
 
 An earlier run of this same script recorded 51/51, with 16 on
-`rooftop-osm` and none left on `interpolated`. Re-measured on 2026-08-28,
-North Dakota came back `interpolated`: OpenStreetMap did not return a
-house-level point for that sample address on this run, so the pipeline
-correctly refused to claim one and fell back to Census.
+`rooftop-osm` and none left on `interpolated`. North Dakota has sat on
+`interpolated` on multiple runs since, for a different and genuine
+reason, checked directly: NAD publishes East Boulevard Avenue in Bismarck
+densely (602, 604, 606, 612, 624...) but nothing at or below the sample
+address's own number (600) to bracket from — tier 3 correctly refuses
+rather than inventing a "below" point that doesn't exist. That is a real
+data gap in what North Dakota has published, not a bug this project's own
+code can fix.
 
 Two of the four tiers depend on services outside this repo — the National
 Address Database publishes on its own schedule, and `rooftop-osm` depends
@@ -69,7 +97,7 @@ Census's own answer, which is where this project started.
 
 | | Tier | Correction | Published by |
 | --- | --- | --- | --- |
-| AK | `rooftop-osm` | 33m | — |
+| AK | `rooftop` | 14m | State of Alaska |
 | AL | `rooftop` | 124m | Alabama 911 Board |
 | AR | `rooftop` | 105m | Arkansas Geographic Information Office |
 | AZ | `rooftop` | 146m | State of Arizona |
@@ -97,7 +125,7 @@ Census's own answer, which is where this project started.
 | MS | `rooftop-osm` | 8m | — |
 | MT | `rooftop` | 112m | Montana State Library |
 | NC | `rooftop` | 82m | State of North Carolina |
-| ND | `interpolated` | — | — (OSM returned no house-level point on the 2026-08-28 run; was `rooftop-osm`/8m previously) |
+| ND | `interpolated` | — | — (genuine data gap: NAD has no point at or below house number 600 on East Boulevard Ave to bracket from — see above) |
 | NE | `rooftop` | 50m | State of Nebraska |
 | NH | `rooftop-osm` | 28m | — |
 | NJ | `rooftop` | 88m | State of New Jersey |

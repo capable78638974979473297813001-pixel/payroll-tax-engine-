@@ -814,6 +814,35 @@ describe('buildings.ts — the OpenStreetMap building-footprint check (real capt
       assert.notEqual(streetKey('W Broad St'), streetKey('S Front St'));
     });
 
+    test('streetKey makes digit and word forms of a numbered street compare equal — live NAD data for Juneau, AK publishes "FOURTH Street", not "4th St", and this address matched nothing at all before this normalization existed', () => {
+      assert.equal(streetKey('4th St'), streetKey('FOURTH Street'));
+      assert.equal(streetKey('3rd Ave'), streetKey('Third Avenue'));
+      assert.equal(streetKey('11th St'), streetKey('Eleventh Street'));
+      assert.equal(streetKey('20th St'), streetKey('Twentieth Street'));
+    });
+
+    test('streetKey collapses a two-word ordinal, spaced or hyphenated, to its digit form', () => {
+      assert.equal(streetKey('21st Ave'), streetKey('Twenty First Avenue'));
+      assert.equal(streetKey('21st Ave'), streetKey('Twenty-First Avenue'));
+      assert.equal(streetKey('99th St'), streetKey('Ninety Ninth Street'));
+    });
+
+    test('streetKey collapses three- and four-word ordinals into the triple-digit streets some cities (Manhattan) actually have', () => {
+      assert.equal(streetKey('100th St'), streetKey('One Hundredth Street'));
+      assert.equal(streetKey('105th St'), streetKey('One Hundred Fifth Street'));
+      assert.equal(streetKey('120th St'), streetKey('One Hundred Twentieth Street'));
+      assert.equal(streetKey('125th St'), streetKey('One Hundred Twenty Fifth Street'));
+    });
+
+    test('streetKey does not collapse a bare cardinal number that never resolves to an ordinal — "One World Way" names a place, not a numbered street', () => {
+      assert.equal(streetKey('One World Way'), 'one world way');
+    });
+
+    test('streetKey leaves an already-digit ordinal alone', () => {
+      assert.equal(streetKey('4th St'), '4th street');
+      assert.equal(streetKey('21st Ave'), '21st avenue');
+    });
+
     test('extractHouseNumber reads the leading number, or null when there is none', () => {
       assert.equal(extractHouseNumber(TARGET), '90');
       assert.equal(extractHouseNumber('Broadway, New York, NY'), null);
