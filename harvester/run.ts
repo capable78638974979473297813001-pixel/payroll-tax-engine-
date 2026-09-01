@@ -5,6 +5,7 @@ import { windowsDueOn, describeWindows } from './calendar.ts';
 import type { CalendarWindow } from './calendar.ts';
 import { fetchSource } from './fetch.ts';
 import type { FetchOptions, FetchResult } from './fetch.ts';
+import { fetchKyOccupationalDatabase } from './ky-occupational-fetch.ts';
 import { normalizeForComparison } from './normalize.ts';
 import { hasChanged, writeSnapshot, latestSnapshot } from './snapshot.ts';
 
@@ -57,6 +58,23 @@ export interface RegisteredSource {
    */
   volatileByteRanges?: [number, number][];
   manualOnlyReason?: string;
+  /**
+   * This source's fetch is many requests, not one (see
+   * ky-occupational-fetch.ts) — checking it EVERY day the way every other,
+   * single-GET source is force-checked would be a disproportionate load
+   * for a figure that changes at most annually. Exempts it from the daily
+   * sweep's `force: true` so it follows its own checkFrequency instead;
+   * calendar windows (the annual new-year window, in particular) still
+   * force it regardless, same as any other source.
+   */
+  heavyFetch?: boolean;
+  /**
+   * Some sources are not a single GET at all — a WebForms page whose real
+   * content only appears after simulating its own postback flow, say.
+   * Naming the fetcher here keeps sweep() itself generic instead of
+   * special-casing this one source id inline.
+   */
+  customFetcher?: 'ky-occupational-full';
 }
 
 const FREQUENCY_DAYS: Record<CheckFrequency, number> = {
@@ -181,12 +199,18 @@ export async function sweep(asOf: string, options: SweepOptions = {}): Promise<S
       ...(lastCheckedAt ? { lastCheckedAt } : {}),
     };
 
-    if (!due && !options.force) {
+    // heavyFetch sources ignore `force` — see RegisteredSource.heavyFetch.
+    // A calendar window (forcedBy set above) still overrides even for these.
+    const forcedToday = options.force && !(source.heavyFetch && !forcedBy);
+    if (!due && !forcedToday) {
       entries.push({ ...base, outcome: 'skipped_not_due' });
       continue;
     }
 
-    const result: FetchResult = await fetchSource(source, options);
+    const result: FetchResult =
+      source.customFetcher === 'ky-occupational-full'
+        ? await fetchKyOccupationalDatabase(source, options)
+        : await fetchSource(source, options);
     if (!result.ok) {
       entries.push({ ...base, outcome: 'fetch_failed', reason: result.reason });
       continue;

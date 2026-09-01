@@ -606,7 +606,25 @@
       "feeds": [
         "data/local/KY-occupational-{year}.json"
       ],
-      "note": "WEAK MONITORING TARGET, recorded honestly: this watches the STATUTE, not the rates. Kentucky has no central register of the ~225 local occupational taxes — the data file itself documents that its 59 confirmed entries were assembled by scraping the Secretary of State list and cross-checking individual ordinances. A rate change in one Kentucky city will NOT surface here. Registered anyway because a change to the enabling statute (rate caps, the KRS 68.197 credit mechanism) is itself worth catching, but treat KY local rates as verified-as-of their data file date, not monitored."
+      "note": "Watches the STATUTE only (rate caps, the KRS 68.197 credit mechanism) — a genuinely different signal from actual per-district rates, which as of 2026-09-01 are separately and directly monitored by ky-occupational-rates below. Kept as its own source rather than folded in: a statute amendment and a city raising its rate are different events worth distinguishing, and this one costs a single cheap GET."
+    },
+    {
+      "id": "ky-occupational-rates",
+      "level": "local",
+      "jurisdiction": "KY",
+      "title": "Kentucky Secretary of State — Occupational License Tax Database (KRS 67.766), all districts",
+      "url": "https://web.sos.ky.gov/occupationaltax/",
+      "authority": "state_register",
+      "format": "html",
+      "coversJurisdictions": 227,
+      "checkFrequency": "monthly",
+      "expectedChange": "rolling; most effective dates are 1 January, but a district can change its ordinance any time",
+      "feeds": [
+        "data/local/KY-occupational-{year}.json"
+      ],
+      "heavyFetch": true,
+      "customFetcher": "ky-occupational-full",
+      "note": "ADDED 2026-09-01, closing a real gap: this project's own data file already called this database 'Kentucky's PA-DCED/OH-Finder equivalent — an authoritative, state-run roster of 230 taxing districts', but nothing watched it, because it isn't a URL a plain GET can read: it's an ASP.NET WebForms page where the 227 district names load in a <select> but each district's actual rate only appears after a postback selecting it, into a panel that starts empty. harvester/ky-occupational-fetch.ts drives that postback for every district in one session (one GET for the viewstate/cookie, confirmed reusable across all 227 POSTs — verified by hand against three different districts before building this) and concatenates each district's name/ordinance/basis/rate/min/cap into one document, sorted by district id so only real content changes move the hash. Deliberately excludes each district's listed contact name/email/phone/address — administrative metadata and, for a real person's contact details, not something this project should be hashing and git-committing for no reason. Marked heavyFetch (227 requests, not 1) so the daily sweep's normal 'check everything, every day' does not force this specific source daily — see RegisteredSource.heavyFetch in run.ts — but the annual-new-year calendar window still forces it regardless, which is exactly when KY local rates actually move. A single unreadable district fails the WHOLE fetch rather than silently publishing a partial roster, matching this project's standing rule that a failed read is not the same as 'unchanged'."
     },
     {
       "id": "ky-ui-rates",

@@ -78,7 +78,7 @@ const BROWSER_UA =
  * guessed. Several WAFs fingerprint the whole header set, so these are sent
  * together.
  */
-const BROWSER_HEADERS: Record<string, string> = {
+export const BROWSER_HEADERS: Record<string, string> = {
   'User-Agent': BROWSER_UA,
   Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,application/pdf,*/*;q=0.8',
   'Accept-Language': 'en-US,en;q=0.9',

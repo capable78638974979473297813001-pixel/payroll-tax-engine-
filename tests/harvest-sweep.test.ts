@@ -11,9 +11,11 @@ import {
   windowsDueOn,
 } from '../harvester/calendar.ts';
 import { fetchSource, isPdf } from '../harvester/fetch.ts';
+import { fetchKyOccupationalDatabase } from '../harvester/ky-occupational-fetch.ts';
 import { normalizeForComparison } from '../harvester/normalize.ts';
 import { isDue, windowTouchesSource, sweep } from '../harvester/run.ts';
 import type { RegisteredSource } from '../harvester/run.ts';
+import { writeSnapshot } from '../harvester/snapshot.ts';
 
 const HARVESTER = join(import.meta.dirname, '..', 'harvester');
 
@@ -22,6 +24,7 @@ before(() => {
   // capture" vs "unchanged" is deterministic.
   rmSync(join(HARVESTER, 'snapshots', 'sweep-test-a'), { recursive: true, force: true });
   rmSync(join(HARVESTER, 'snapshots', 'sweep-test-b'), { recursive: true, force: true });
+  rmSync(join(HARVESTER, 'snapshots', 'sweep-test-heavy'), { recursive: true, force: true });
 });
 
 /**
@@ -339,6 +342,50 @@ describe('run — what is due today', () => {
     assert.equal(windowTouchesSource(wageBase, ohioLocal), false);
   });
 
+  test('heavyFetch sources are exempt from force: true — see ky-occupational-fetch.ts', async () => {
+    const heavySource: RegisteredSource = {
+      id: 'sweep-test-heavy',
+      level: 'local',
+      jurisdiction: 'KY',
+      title: 'Test heavy source',
+      url: 'https://example.invalid/heavy',
+      authority: 'state_register',
+      format: 'html',
+      checkFrequency: 'monthly',
+      heavyFetch: true,
+    };
+    // Seed a snapshot dated exactly `asOf`, so elapsedDays is 0 — genuinely
+    // not due under the monthly cadence, deterministically, regardless of
+    // whenever this test actually runs (never relying on the real clock,
+    // unlike computing "not due" from a past checkFrequency window).
+    writeSnapshot(heavySource.id, 'heavy content v1', '2026-03-01T00:00:00.000Z');
+
+    // Same day, `force: true` — an ordinary source would be re-checked
+    // regardless of cadence; a heavyFetch source should be skipped instead.
+    const forced = await sweep('2026-03-01', {
+      sources: [heavySource],
+      fetchImpl: stubFetch('heavy content v1'),
+      force: true,
+    });
+    assert.equal(forced.counts.skipped_not_due, 1);
+  });
+
+  test('a calendar window still forces a heavyFetch source, even without force: true', () => {
+    const heavySource: RegisteredSource = {
+      id: 'sweep-test-heavy',
+      level: 'local',
+      jurisdiction: 'KY',
+      title: 'Test heavy source',
+      url: 'https://example.invalid/heavy',
+      authority: 'state_register',
+      format: 'html',
+      checkFrequency: 'monthly',
+      heavyFetch: true,
+    };
+    const newYear = annualAnchors(2027)[0];
+    assert.equal(windowTouchesSource(newYear, heavySource), true);
+  });
+
   test("a state's scheduled date forces that state's sources only", () => {
     const ohioWindow = {
       kind: 'scheduled_effective_date' as const,
@@ -388,6 +435,7 @@ describe('run — what is due today', () => {
           ? new Response('', { status: 500 })
           : new Response('ok content', { status: 200, headers: { 'content-type': 'text/html' } }),
       force: true,
+      retryDelayMs: 0,
     });
     // One failed, but the other was still checked — a broken source must not
     // blind the harvester to the other fifty-nine.
@@ -406,5 +454,114 @@ describe('run — what is due today', () => {
       if (e.snapshotPath) assert.match(e.snapshotPath, /snapshots/);
       assert.ok(!e.snapshotPath?.includes(`${'data'}${'/'}states`));
     }
+  });
+});
+
+describe('ky-occupational-fetch — driving a WebForms postback for every district', () => {
+  const INITIAL_HTML = `<html><body>
+    <input type="hidden" id="__VIEWSTATE" value="VS1" />
+    <input type="hidden" id="__VIEWSTATEGENERATOR" value="GEN1" />
+    <input type="hidden" id="__EVENTVALIDATION" value="EV1" />
+    <select id="ContentPlaceHolder1_ddlDistricts">
+      <option value="2">Beta County</option>
+      <option value="1">Alpha City</option>
+    </select>
+  </body></html>`;
+
+  function detailHtml(name: string, rate: string): string {
+    return `<html><body>
+      <span id="ContentPlaceHolder1_FvDetails_TaxDistrictNameLabel">${name}</span>
+      <span id="ContentPlaceHolder1_FvDetails_OrdinanceLabel">O-1</span>
+      <span id="ContentPlaceHolder1_fvDetail_LblGross">Net Profits</span>
+      <span id="ContentPlaceHolder1_fvDetail_LblRate">${rate}</span>
+      <span id="ContentPlaceHolder1_fvDetail_LblMin"></span>
+      <span id="ContentPlaceHolder1_fvDetail_LblCap"></span>
+      <span id="ContentPlaceHolder1_fvDetail_ContactEMail">someone@example.gov</span>
+    </body></html>`;
+  }
+
+  function mockServer(districtHtml: Record<string, string | null>) {
+    return async (_url: string, init?: RequestInit) => {
+      if (!init || init.method !== 'POST') {
+        return new Response(INITIAL_HTML, {
+          status: 200,
+          headers: { 'content-type': 'text/html', 'set-cookie': 'ASP.NET_SessionId=abc123; path=/' },
+        });
+      }
+      const body = new URLSearchParams(String(init.body));
+      const id = body.get('ctl00$ContentPlaceHolder1$ddlDistricts') ?? '';
+      const html = districtHtml[id];
+      if (html === null || html === undefined) return new Response('', { status: 500 });
+      return new Response(html, { status: 200, headers: { 'content-type': 'text/html' } });
+    };
+  }
+
+  test('reads every district in one session and composes one document, sorted by id', async () => {
+    const fetchImpl = mockServer({
+      '1': detailHtml('Alpha City', '1.5%'),
+      '2': detailHtml('Beta County', '2%'),
+    });
+    const r = await fetchKyOccupationalDatabase(
+      { id: 'ky-occupational-rates', url: 'https://web.sos.ky.gov/occupationaltax/' },
+      { fetchImpl, requestDelayMs: 0 },
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    // Sorted by numeric id (1 before 2) even though the dropdown listed
+    // Beta (2) first — the composite document's order must not depend on
+    // the page's own markup order.
+    const alphaIdx = r.content.indexOf('Alpha City');
+    const betaIdx = r.content.indexOf('Beta County');
+    assert.ok(alphaIdx >= 0 && betaIdx >= 0 && alphaIdx < betaIdx);
+    assert.match(r.content, /rate=1\.5%/);
+    assert.match(r.content, /rate=2%/);
+  });
+
+  test('a rate change in ONE district changes the composite document', async () => {
+    const before = await fetchKyOccupationalDatabase(
+      { id: 'ky-occupational-rates', url: 'https://web.sos.ky.gov/occupationaltax/' },
+      { fetchImpl: mockServer({ '1': detailHtml('Alpha City', '1.5%'), '2': detailHtml('Beta County', '2%') }), requestDelayMs: 0 },
+    );
+    const after = await fetchKyOccupationalDatabase(
+      { id: 'ky-occupational-rates', url: 'https://web.sos.ky.gov/occupationaltax/' },
+      { fetchImpl: mockServer({ '1': detailHtml('Alpha City', '1.75%'), '2': detailHtml('Beta County', '2%') }), requestDelayMs: 0 },
+    );
+    assert.equal(before.ok, true);
+    assert.equal(after.ok, true);
+    if (!before.ok || !after.ok) return;
+    assert.notEqual(before.content, after.content);
+  });
+
+  test('never captures a contact email — administrative metadata, not tax content', async () => {
+    const r = await fetchKyOccupationalDatabase(
+      { id: 'ky-occupational-rates', url: 'https://web.sos.ky.gov/occupationaltax/' },
+      { fetchImpl: mockServer({ '1': detailHtml('Alpha City', '1.5%'), '2': detailHtml('Beta County', '2%') }), requestDelayMs: 0 },
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.doesNotMatch(r.content, /someone@example\.gov/);
+  });
+
+  test('one unreadable district fails the WHOLE fetch, never a silent partial roster', async () => {
+    const r = await fetchKyOccupationalDatabase(
+      { id: 'ky-occupational-rates', url: 'https://web.sos.ky.gov/occupationaltax/' },
+      { fetchImpl: mockServer({ '1': detailHtml('Alpha City', '1.5%'), '2': null }), requestDelayMs: 0 },
+    );
+    assert.equal(r.ok, false);
+    if (r.ok) return;
+    assert.match(r.reason, /Beta County/);
+  });
+
+  test('a missing session cookie or viewstate on the initial page is reported, not thrown', async () => {
+    const r = await fetchKyOccupationalDatabase(
+      { id: 'ky-occupational-rates', url: 'https://web.sos.ky.gov/occupationaltax/' },
+      {
+        fetchImpl: async () => new Response('<html>no viewstate here</html>', { status: 200 }),
+        requestDelayMs: 0,
+      },
+    );
+    assert.equal(r.ok, false);
+    if (r.ok) return;
+    assert.match(r.reason, /VIEWSTATE|cookie/);
   });
 });
