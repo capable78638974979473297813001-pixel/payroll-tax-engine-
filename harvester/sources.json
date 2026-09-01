@@ -1043,6 +1043,24 @@
       ]
     },
     {
+      "id": "ne-ui-rates",
+      "level": "state",
+      "jurisdiction": "NE",
+      "title": "Nebraska — unemployment insurance combined tax rates & taxable wage base",
+      "url": "https://dol.nebraska.gov/UITax/UnemploymentInsuranceTax/CombinedTaxRates",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/NE-{year}.json#suiEmployer"
+      ],
+      "note": "ADDED 2026-09-01, closing a real gap: NE previously had no dedicated labor-department source at all, so its UI figures relied solely on the lagging annual DOL backstop (wage base only, no new-employer rate). Found via the labor department's own UITax portal homepage, not path-guessing. Verified directly: states 'New Employer Rate' 1.25% (Non-construction) and 'Taxable Wage Base' $9,000 for the standard category, both matching this state's own data file (newEmployerRate 0.0125, wageBase 9000) exactly. Also documents the higher $24,000 wage base for UI Tax Category 20 employers.",
+      "coversUI": true,
+      "uiContent": "wage-base-and-rates"
+    },
+    {
       "id": "ne-withholding",
       "level": "state",
       "jurisdiction": "NE",
@@ -1275,6 +1293,24 @@
         "data/states/OH-{year}.json#suiEmployer"
       ],
       "note": "Watches the LABOUR department, where UI figures live — the revenue department's withholding guide carries none. Verified to fetch AND to contain wage-base and/or rate figures before registering.",
+      "coversUI": true,
+      "uiContent": "wage-base-and-rates"
+    },
+    {
+      "id": "ok-ui-rates",
+      "level": "state",
+      "jurisdiction": "OK",
+      "title": "Oklahoma — unemployment insurance contribution rates & taxable wage base",
+      "url": "https://oklahoma.gov/oesc/employers/tax/contribution-rates.html",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/OK-{year}.json#suiEmployer"
+      ],
+      "note": "ADDED 2026-09-01, closing a real gap: OK previously had no dedicated labor-department source at all, so its UI figures relied solely on the lagging annual DOL backstop (wage base only, no new-employer rate). Earlier research found OESC's employer login portal (eztaxexpress.oesc.state.ok.us) is not publicly fetchable; this page is OESC's own public Contribution Rates page instead, found by following oklahoma.gov/oesc's own employers section rather than path-guessing the old domain. Verified directly: states 'Taxable Wage Base $25,000', 'Range of Rates 0.2% to 5.8%', and 'the rate for newly established employers is 1.5%' — all matching this state's own data file (wageBase 25000, newEmployerRate 0.015) exactly.",
       "coversUI": true,
       "uiContent": "wage-base-and-rates"
     },
@@ -1759,12 +1795,14 @@
       "MT",
       "NC",
       "ND",
+      "NE",
       "NH",
       "NJ",
       "NM",
       "NV",
       "NY",
       "OH",
+      "OK",
       "OR",
       "PA",
       "RI",
@@ -1782,12 +1820,10 @@
     ],
     "backstopOnly": [
       "AR",
-      "AZ",
-      "NE",
-      "OK"
+      "AZ"
     ],
     "backstopOnlyMeaning": "These states have NO dedicated labour-department source registered, so their UI figures are covered only by dol-ui-wage-bases. That backstop is real but LAGS (DOL publishes annually; the 2024 edition is still newest as of 2026-08) and carries the taxable WAGE BASE only — not new-employer rates or rate schedules. Treat a UI change in these states as something that will be confirmed late, not caught promptly.",
-    "whyNotAllFifty": "Four passes of path-probing plus per-state searching took this from 10 states to 47. The last four resisted. ARKANSAS and ARIZONA refuse automated clients outright — HTTP 403 to every path and header combination tried, the same class of block as Texas's WAF, and no amount of URL-hunting fixes a refusal to serve. NEBRASKA and OKLAHOMA have live agency domains but roughly ten candidate paths each were tried across three passes and none carried rate or wage-base figures; both appear to put rates behind an employer login (neworks.nebraska.gov, eztaxexpress.oesc.state.ok.us), which is not fetchable and arguably not public. Nothing was registered for these four rather than registering a page that would look monitored without being monitored — the DC and Ohio department homepages were rejected on exactly that principle earlier, and both states were later found properly at dedicated tax pages. Their wage base is still covered by the lagging DOL report; their new-employer rates are not covered at all.",
+    "whyNotAllFifty": "Four passes of path-probing plus per-state searching took this from 10 states to 47, then a 2026-09-01 re-check found working sources for two of the remaining four: NEBRASKA's dol.nebraska.gov/UITax/UnemploymentInsuranceTax/CombinedTaxRates and OKLAHOMA's oklahoma.gov/oesc/employers/tax/contribution-rates.html both carry real, current wage-base and rate figures, verified against this project's own data files. The earlier claim that these two 'put rates behind an employer login' held for the specific portals originally tried (neworks.nebraska.gov, eztaxexpress.oesc.state.ok.us) but not for these two PUBLIC pages, found by browsing each department's own site structure rather than more path-guessing. ARKANSAS and ARIZONA still refuse automated clients outright — HTTP 403 to every path and even the bare domain root, re-confirmed 2026-09-01 — the same class of block as Texas's WAF and the six sources marked manualOnly elsewhere in this registry, and no amount of URL-hunting fixes a refusal to serve. Their wage base is still covered by the lagging DOL report; their new-employer rates are not covered at all.",
     "neverMonitorable": "An individual employer's EXPERIENCE-RATED contribution rate is not a jurisdiction constant — it depends on that employer's own layoff history and is assigned to them privately. No source can carry it, which is why the engine takes it from input.employer.stateUnemploymentRate and falls back to the published new-employer rate. Only the wage base and the published schedules are monitorable at all.",
     "howCoverageIsCounted": "From an explicit coversUI flag on each source, not inferred from the URL. The regex that preceded it mis-classified Florida — its reemployment-tax rate page IS Florida's UI source, but the domain contains no labour-ish word — which is the sort of quiet miscount that makes a coverage number worth less than the confidence it creates.",
     "contentAudit": {
@@ -1856,7 +1892,7 @@
         "NJ",
         "WV"
       ],
-      "staleAfterUrlChanges": "STALE as of the MI/NJ/VA/WY/NM url changes in this commit: these counts and the per-source uiContent classifications were computed against the PREVIOUS urls. The changed sources have had their uiContent removed rather than left asserting something about a page they no longer point at — missing is honest, stale is not. Run `npm run harvest:daily` then `npm run harvest:audit` to recompute; the new urls were each verified by direct probe (MI, NJ, VA, WY carry both figures; NM's new page carries rates) but that verification is not the same as a recorded audit against a stored capture."
+      "staleAfterUrlChanges": "STALE as of the MI/NJ/VA/WY/NM url changes in this commit: these counts and the per-source uiContent classifications were computed against the PREVIOUS urls. The changed sources have had their uiContent removed rather than left asserting something about a page they no longer point at — missing is honest, stale is not. Run `npm run harvest:daily` then `npm run harvest:audit` to recompute; the new urls were each verified by direct probe (MI, NJ, VA, WY carry both figures; NM's new page carries rates) but that verification is not the same as a recorded audit against a stored capture. FURTHER STALE as of 2026-09-01: nj-ui-rates and wv-ui-rates were swapped to yet another URL each (see their own notes — the dated-URL fix), and ne-ui-rates/ok-ui-rates were added as entirely new sources, none of which are reflected in the arrays above. All four were verified by direct probe (stated figures matching each state's own data file exactly) but, again, that is not the same as a recorded audit against a stored capture — run the two commands above before trusting these counts."
     }
   }
 }
