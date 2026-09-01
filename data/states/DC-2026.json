@@ -135,7 +135,11 @@
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
     "newEmployerRate": 0.027,
     "newEmployerRateSource": "DC's 2026 unemployment rate announcement: the new-employer rate remains 2.7% on a $9,000 wage base, alongside a separate 0.2% administrative assessment that this engine does not add (it is an assessment, not the contribution rate, and is disclosed here rather than folded in).",
-    "experienceRange": null,
+    "experienceRange": {
+      "min": 0.019,
+      "max": 0.074
+    },
+    "experienceRangeSource": "ADDED 2026-09-01, this field was previously null: US DOL's 'Significant Provisions of State UI Laws, Effective January 2026' comparison table (oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf) states 1.90%-7.40% for DC -- the same table independently confirms this file's existing wageBase ($9,000) and newEmployerRate (2.7%) figures exactly.",
     "employerSuppliedRateRequired": false,
     "confidence": "source_dated_2026"
   },

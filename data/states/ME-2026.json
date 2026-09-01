@@ -87,12 +87,13 @@
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 12000,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
-    "newEmployerRate": 0.0254,
-    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "newEmployerRate": 0.0223,
+    "newEmployerRateSource": "CORRECTED 2026-09-01: Maine's own registered source (maine.gov) confirms only that Schedule A stays in effect for 2026, not the numeric rate itself. US DOL's 'Significant Provisions of State UI Laws, Effective January 2026' comparison table (oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf) states 2.23%, replacing a stale OnPay-sourced 2.54% figure.",
     "experienceRange": {
-      "min": 0.0031,
-      "max": 0.066
+      "min": 0,
+      "max": 0.0629
     },
+    "experienceRangeSource": "Same DOL table: 0.00%-6.29% under Schedule A -- replacing a stale 0.31%-6.6% figure that matched no source this project checked.",
     "employerSuppliedRateRequired": false,
     "confidence": "cross_source_confirmed"
   },
