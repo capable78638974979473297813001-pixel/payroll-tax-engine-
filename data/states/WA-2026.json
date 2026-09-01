@@ -92,10 +92,11 @@
     "newEmployerRateSource": "No single new-employer figure exists for this state: the rate is industry-assigned or schedule-driven. The engine therefore requires the employer's own assigned rate here and computes nothing without it.",
     "experienceRange": {
       "min": 0.0027,
-      "max": 0.0815
+      "max": 0.0603
     },
+    "experienceRangeSource": "Primary: ESD's own '2026 tax rates for employers' PDF (esd.wa.gov/media/pdf/4819/2026-unemployment-tax-rates-employerspdf), Regular rates for qualified employers table -- Total (experience + social cost + EAF) ranges from 0.27% (rate class 1) to 6.03% (rate class 39). Confirms min 0.27% was already correct; replaces a stale 8.15% max that appears to have folded in the separate 0.5%/1.0% delinquent-employer surcharge tables from the same document, which are a penalty category, not the standard experience range.",
     "employerSuppliedRateRequired": true,
-    "confidence": "no_single_rate"
+    "confidence": "primary_source_confirmed"
   },
   "localIncomeTax": {
     "seattlePayrollExpenseTax": {

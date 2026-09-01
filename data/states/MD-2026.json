@@ -394,14 +394,14 @@
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 8500,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
-    "newEmployerRate": 0.026,
-    "newEmployerRateSource": "Maryland Department of Labor's own 2026 tax-rate page — Table A, new-employer rate 2.6%.",
+    "newEmployerRate": null,
+    "newEmployerRateSource": "CORRECTED 2026-09-01: MD Dept. of Labor's live rate-info page (https://labor.maryland.gov/unemployment-insurance/employer-agent/tax-rate.shtml) does not publish a single new-employer figure -- it states a RANGE: \"The tax rate for new employers may range from 1.0% to 2.6%,\" industry-average-assigned. 2.6% was only the range's ceiling, previously stored as if it were the assigned default (would overstate withholding for most new employers). Now modeled the same way Louisiana's identical industry-assigned mechanism already is in this project: null + employerSuppliedRateRequired.",
     "experienceRange": {
       "min": 0.003,
       "max": 0.075
     },
-    "employerSuppliedRateRequired": false,
-    "confidence": "source_dated_2026"
+    "employerSuppliedRateRequired": true,
+    "confidence": "primary_source_confirmed"
   },
   "lumpSumBonusWithholding": {
     "$comment": "Read directly from this file's own sources[] entry above. A flat combined rate — 6.50% (the state's own top bracket) plus the county's own highest local rate — applied to a bonus distributed as its own lump sum, in place of the ordinary combined state+local bracket formula bracketStatePlusLocal already computes. An EMPLOYER OPTION in the same sense every other state's flat supplemental rate in this project is: the guide describes it as how to compute a lump-sum bonus's withholding, not as the only way a bonus may ever be paid, so this only fires when the caller elects it (input.employer.supplementalFlatRateElection.MD) — a bonus riding along with a regular cheque, or one the employer doesn't elect this method for, runs through the ordinary annual formula exactly as before. Scoped to RESIDENTS: the guide's own phrase is \"the county of residence,\" and no primary-sourced lump-sum figure was found for a nonresident's flat 2.25% Special Nonresident Rate case, so mdSupplementalCarveOut() (src/taxes/state.ts) never fires when certificate.nonresident is set. The COUNTY'S OWN TOP RATE is derived at calculation time from this file's existing countyRates block (mdCountyTopRate() in src/taxes/state.ts) rather than transcribed a second time as its own ten-entry table — for Anne Arundel and Frederick (the two tiered counties), that means the top bracket of their own tiered schedule, verified to equal 3.20% for both, matching the guide's own combined 9.70% figure for those two rows.",

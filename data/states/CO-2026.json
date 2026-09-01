@@ -229,10 +229,11 @@
     "newEmployerRate": 0.0305,
     "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
     "experienceRange": {
-      "min": 0.0081,
-      "max": 0.1234
+      "min": 0.0072,
+      "max": 0.1085
     },
+    "experienceRangeSource": "Primary: CDLE premium-rates page (cdle.colorado.gov/employers/unemployment-insurance-premiums/premium-rates), summing all three eligible-employer schedules for 2026 -- Standard Premium Rate (0.56%-7.34%) + Support Surcharge (0.06%-0.81%) + Solvency Surcharge (0.10%-2.70%) = 0.72% min, 10.85% max. Replaces a stale cross-sourced 0.81%-12.34% figure.",
     "employerSuppliedRateRequired": false,
-    "confidence": "cross_source_confirmed"
+    "confidence": "primary_source_confirmed"
   }
 }

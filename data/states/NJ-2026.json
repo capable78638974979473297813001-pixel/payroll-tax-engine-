@@ -1979,8 +1979,8 @@
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 44800,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
-    "newEmployerRate": 0.028,
-    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "newEmployerRate": 0.026825,
+    "newEmployerRateSource": "Primary: NJ Dept. of Labor's own rate-info page (https://www.nj.gov/labor/ea/employer-services/rate-info/), 2026 New Employer table: UI rate 0.026825 (2.6825%), fiscal year July 1, 2026-June 30, 2027. Replaces a stale OnPay-sourced 2.8% figure.",
     "experienceRange": {
       "min": 0.005,
       "max": 0.058

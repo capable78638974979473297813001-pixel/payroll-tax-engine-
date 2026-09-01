@@ -1953,11 +1953,12 @@
     "newEmployerRate": 0.041,
     "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
     "experienceRange": {
-      "min": 0.004,
-      "max": 0.099
+      "min": 0.017,
+      "max": 0.095
     },
+    "experienceRangeSource": "Primary: NY DOL rate-information page (https://dol.ny.gov/unemployment-insurance-rate-information), 2026 Total Contribution Rates table -- lowest 1.7% (1.625% UI + 0.075% RSF), highest 9.5% (9.425% UI + 0.075% RSF). Replaces a stale 0.4%-9.9% figure that matched neither the UI-only nor total column.",
     "employerSuppliedRateRequired": false,
-    "confidence": "inherited_from_this_file"
+    "confidence": "primary_source_confirmed"
   },
   "supplementalAggregation": {
     "supported": true,
