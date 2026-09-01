@@ -20,7 +20,7 @@ npm run ui:calculator  # any-state calculator UI, address-based local tax lookup
 | State income tax | **51 / 51 jurisdictions** (50 states + DC), 41 distinct `method` cases — one of them (`no_income_tax`) shared by the 9 states with no wage income tax, the other 40 each a real published formula shape |
 | State unemployment (employer) | 51 / 51 — 44 with a computable new-employer rate, 7 industry-assigned (`employerSuppliedRateRequired`) |
 | State UC/SDI/PFML/LTC (employee-paid) | 14 states + DC, wherever the state actually levies one |
-| Local income tax | OH (~600 municipalities + school districts + JEDD/JEDZ), PA (~2,600 Act 32 EIT/LST jurisdictions), MI (24 cities), KY (227 occupational districts), IN (92 counties), AL (25 municipalities), plus NYC, Yonkers, Kansas City/St. Louis earnings tax, Newark payroll tax, Portland Metro/Multnomah, Denver-cluster Colorado OPT, Wilmington wage tax, WV municipal service fees |
+| Local income tax | Every state known to levy one, at the depth each state's own public data allows: OH (~600 municipalities + school districts + JEDD/JEDZ), PA (~2,600 Act 32 EIT/LST jurisdictions), MI (24 cities — the full statewide list), KY (227 occupational districts), IN (92/92 counties), AL (25/25 municipalities), MD (24 counties + Baltimore City, wired into the state ruleset), NYC + Yonkers, Kansas City/St. Louis earnings tax, Newark payroll tax, Portland Metro/Multnomah + TriMet/LTD transit excise, Denver-cluster Colorado OPT, Wilmington wage tax, Seattle's JumpStart payroll tax, WV municipal service fees (10 cities — see below, the one state with no central registry to bulk-load from) |
 | Reciprocity / multi-state | Wired generically off each state's own `reciprocalStates` — IL/IN/KY/MI/MN/OH/PA/WI's bilateral agreements, DC's blanket nonresident exemption, WV's 5-state cluster |
 | Address → jurisdiction | Rooftop-precision geocoding pipeline (see below) — 35/51 authoritative, 14/51 OSM-corroborated, measured, not assumed |
 | Staying current | Automated daily harvester watching 105 registered sources, human review gate before anything reaches `data/` |
@@ -249,11 +249,30 @@ visible instead of overwritten silently.
   address, not a code limitation (see `docs/geocoding-coverage.md`).
 - FUTA credit-reduction states are published by DOL each November and are
   not yet wired to auto-update from that publication.
-- Local income tax coverage is deep where it's built (OH/PA/MI/KY/IN/AL plus
-  the named cities above) but not exhaustive nationally — a jurisdiction not
-  listed in a state file's `knownGaps` and not producing a line for a given
-  address is the correct signal to check that file before assuming "no local
-  tax."
+- **West Virginia's municipal service fee is the one local tax with no
+  central registry to bulk-load from.** WV Code 8-13-13 lets any of ~230
+  chartered municipalities levy the fee independently; unlike every other
+  state above, there is no Ohio-Finder- or Kentucky-SOS-style state
+  database to pull a complete list from — confirmed by a dedicated search,
+  not assumed. 10 cities are on file (Charleston, Huntington, Morgantown,
+  Parkersburg, Wheeling, Weirton, Fairmont, Madison, Romney, Montgomery),
+  each individually ordinance-sourced, and more exist that aren't yet
+  researched. A WV city missing from `serviceFeeCities` in
+  `data/states/WV-2026.json` means "not yet looked up," never "confirmed no
+  fee" — closing this one requires reading roughly 220 more municipal codes
+  one at a time, not finding one more source.
+- **Structurally out of scope, not missing:** a few real local levies exist
+  that no per-paycheck engine can compute at all — New York's MCTMT and San
+  Francisco's Administrative Office Tax are both quarterly taxes on an
+  employer's *aggregate* payroll, with no per-employee, per-cheque figure
+  to emit. Both are researched and documented in their state files
+  (`data/states/NY-2026.json`, `data/states/CA-2026.json`) specifically so
+  the absence reads as a deliberate boundary, not an oversight.
+- Every other state's local income tax coverage matches what that state's
+  own public data supports in full (a bulk register, a complete named-city
+  list, or a fixed small set like Colorado's OPT cluster) — a jurisdiction
+  not producing a line for a resolved address should be checked against
+  that state file's own `knownGaps` before being assumed untaxed.
 
 Every one of these is disclosed in the file it affects, not just here — this
 list is a map to the disclosures, not a substitute for reading them.
