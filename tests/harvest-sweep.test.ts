@@ -16,6 +16,7 @@ import { normalizeForComparison } from '../harvester/normalize.ts';
 import { isDue, windowTouchesSource, sweep } from '../harvester/run.ts';
 import type { RegisteredSource } from '../harvester/run.ts';
 import { writeSnapshot } from '../harvester/snapshot.ts';
+import { fetchWvHandbook } from '../harvester/wv-handbook-fetch.ts';
 
 const HARVESTER = join(import.meta.dirname, '..', 'harvester');
 
@@ -563,5 +564,62 @@ describe('ky-occupational-fetch — driving a WebForms postback for every distri
     assert.equal(r.ok, false);
     if (r.ok) return;
     assert.match(r.reason, /VIEWSTATE|cookie/);
+  });
+});
+
+describe('wv-handbook-fetch — resolving the CURRENT handbook edition, not a pinned one', () => {
+  const source = { id: 'wv-ui-rates', url: 'https://workforcewv.org/index/' };
+
+  function indexPage(handbookHref: string): string {
+    return `<html><body><a href="${handbookHref}">Employer Handbook</a></body></html>`;
+  }
+
+  test('follows the index page to whichever handbook edition it currently lists', async () => {
+    const fetchImpl = async (url: string) =>
+      String(url).includes('Employer-Handbook-Rev')
+        ? new Response('rate tables inside: 2.7%', { status: 200, headers: { 'content-type': 'text/html' } })
+        : new Response(indexPage('/wp-content/uploads/2025/02/Employer-Handbook-Rev.-02.25.pdf'), {
+            status: 200,
+            headers: { 'content-type': 'text/html' },
+          });
+    const r = await fetchWvHandbook(source, { fetchImpl });
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.match(r.content, /2\.7%/);
+  });
+
+  test('a NEW edition on the index page is followed automatically — no URL to update by hand', async () => {
+    const fetchImplOld = async (url: string) =>
+      String(url).includes('Employer-Handbook-Rev')
+        ? new Response('old edition content', { status: 200, headers: { 'content-type': 'text/html' } })
+        : new Response(indexPage('/wp-content/uploads/2024/06/Employer-Handbook-Rev.-06.24.pdf'), { status: 200 });
+    const fetchImplNew = async (url: string) =>
+      String(url).includes('Employer-Handbook-Rev')
+        ? new Response('new edition content', { status: 200, headers: { 'content-type': 'text/html' } })
+        : new Response(indexPage('/wp-content/uploads/2025/02/Employer-Handbook-Rev.-02.25.pdf'), { status: 200 });
+    const before = await fetchWvHandbook(source, { fetchImpl: fetchImplOld });
+    const after = await fetchWvHandbook(source, { fetchImpl: fetchImplNew });
+    assert.equal(before.ok, true);
+    assert.equal(after.ok, true);
+    if (!before.ok || !after.ok) return;
+    assert.notEqual(before.content, after.content);
+  });
+
+  test('a restructured index page with no handbook link is reported, not silently blank', async () => {
+    const r = await fetchWvHandbook(source, {
+      fetchImpl: async () => new Response('<html>no handbook link here</html>', { status: 200 }),
+    });
+    assert.equal(r.ok, false);
+    if (r.ok) return;
+    assert.match(r.reason, /Employer-Handbook/);
+  });
+
+  test('an index page that fails to load is reported like any other fetch failure', async () => {
+    const r = await fetchWvHandbook(source, {
+      fetchImpl: async () => new Response('', { status: 404 }),
+    });
+    assert.equal(r.ok, false);
+    if (r.ok) return;
+    assert.match(r.reason, /moved or been retired/i);
   });
 });

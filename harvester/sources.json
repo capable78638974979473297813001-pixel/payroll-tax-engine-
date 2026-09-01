@@ -1082,7 +1082,7 @@
       "level": "state",
       "jurisdiction": "NJ",
       "title": "New Jersey — unemployment insurance taxable wage base",
-      "url": "https://www.nj.gov/labor/lwdhome/press/2025/20251229_newbenefitrates2026.shtml",
+      "url": "https://nj.gov/labor/ea/employer-services/rate-info/",
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
@@ -1091,9 +1091,8 @@
       "feeds": [
         "data/states/NJ-{year}.json#suiEmployer"
       ],
-      "note": "Carries BOTH the wage base and rates — but the URL is a DATED press release (/press/2025/20251229_...), so it can never change and will report green forever. Flagged datedUrlRisk and surfaced in status for that reason. The real fix is a standing rate page; nj.gov/labor/ea/employer-services/rate-info/ was tried and carries neither figure.",
+      "note": "FIXED 2026-09-01: previously a DATED press release (/press/2025/20251229_...) that could never change and would have reported green forever. An earlier note claimed nj.gov/labor/ea/employer-services/rate-info/ 'carries neither figure' — re-tested directly and that claim no longer holds (or was wrong): this exact URL currently states '2026 Taxable Wage Base ( UI and WF/SWF - workers and employers, TDI - employers ): $44,800', matching this state's own data file exactly, plus the current fiscal-year 'Notice of Employer Contribution Rates' and new-employer rate percentages (2.9825%, 6.0351%, 6.9825%). A standing page, not a dated one — it should update itself every year without needing a URL change.",
       "coversUI": true,
-      "datedUrlRisk": true,
       "uiContent": "wage-base-and-rates"
     },
     {
@@ -1664,7 +1663,7 @@
       "level": "state",
       "jurisdiction": "WV",
       "title": "West Virginia — unemployment insurance employer rates & taxable wage base (Employer Handbook)",
-      "url": "https://workforcewv.org/wp-content/uploads/2024/06/Employer-Handbook-Rev.-06.24.pdf",
+      "url": "https://workforcewv.org/businesses/unemployment-tax-information/employer-resources/",
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
@@ -1673,10 +1672,10 @@
       "feeds": [
         "data/states/WV-{year}.json#suiEmployer"
       ],
-      "note": "Replaces a page that carried NEITHER figure. This handbook does carry both — but note the URL: /2024/06/Employer-Handbook-Rev.-06.24.pdf is a DATED, VERSIONED path, which makes it a deliberately compromised monitoring target. A frozen file cannot change, so it will hash stably forever and report green indefinitely, including long after WorkForce WV publishes a 2026 or 2027 edition at some other URL. That is a subtler failure than the empty page it replaces: an empty page at least never pretended to hold figures. It is registered because having the correct current numbers under watch beats having nothing, and flagged datedUrlRisk so the false-green is recorded rather than discovered later. THE REAL FIX is an index page that always points at the current handbook; workforcewv.org's own unemployment-tax-information, tax-filing-reporting and FAQ pages were all tried and none carries the figures. Re-check this URL each year against the site's publications list.",
+      "customFetcher": "wv-handbook-current",
+      "note": "FIXED 2026-09-01, and not a moment too soon: the OLD url (/2024/06/Employer-Handbook-Rev.-06.24.pdf) was exactly the false-green this note used to warn about, ALREADY HAPPENING — WV had published .../2025/02/Employer-Handbook-Rev.-02.25.pdf months earlier, and the old dated URL was still serving 200 with the stale 06.24 edition the whole time, discovered only by going and checking by hand. harvester/wv-handbook-fetch.ts now reads this standing employer-resources index page first, extracts whichever 'Employer-Handbook-Rev-*.pdf' link it currently lists, and reads THAT PDF's actual text — so a future edition is followed automatically and the real content (not just a filename) is what gets hashed. NOTE: the DATA FILE (data/states/WV-2026.json) has not been re-verified against the 02.25 edition as part of this fix — that is a data-correctness question, not a monitoring one, and is worth checking separately.",
       "coversUI": true,
-      "uiContent": "wage-base-and-rates",
-      "datedUrlRisk": true
+      "uiContent": "wage-base-and-rates"
     },
     {
       "id": "wv-withholding",

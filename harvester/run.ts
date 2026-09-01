@@ -8,6 +8,7 @@ import type { FetchOptions, FetchResult } from './fetch.ts';
 import { fetchKyOccupationalDatabase } from './ky-occupational-fetch.ts';
 import { normalizeForComparison } from './normalize.ts';
 import { hasChanged, writeSnapshot, latestSnapshot } from './snapshot.ts';
+import { fetchWvHandbook } from './wv-handbook-fetch.ts';
 
 /**
  * One sweep of the outside world.
@@ -74,7 +75,7 @@ export interface RegisteredSource {
    * Naming the fetcher here keeps sweep() itself generic instead of
    * special-casing this one source id inline.
    */
-  customFetcher?: 'ky-occupational-full';
+  customFetcher?: 'ky-occupational-full' | 'wv-handbook-current';
 }
 
 const FREQUENCY_DAYS: Record<CheckFrequency, number> = {
@@ -210,7 +211,9 @@ export async function sweep(asOf: string, options: SweepOptions = {}): Promise<S
     const result: FetchResult =
       source.customFetcher === 'ky-occupational-full'
         ? await fetchKyOccupationalDatabase(source, options)
-        : await fetchSource(source, options);
+        : source.customFetcher === 'wv-handbook-current'
+          ? await fetchWvHandbook(source, options)
+          : await fetchSource(source, options);
     if (!result.ok) {
       entries.push({ ...base, outcome: 'fetch_failed', reason: result.reason });
       continue;
