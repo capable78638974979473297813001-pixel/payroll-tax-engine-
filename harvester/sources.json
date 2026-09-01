@@ -1199,7 +1199,7 @@
       "level": "local",
       "jurisdiction": "OH",
       "title": "Ohio The Finder — JEDD/JEDZ tax rates (CSV)",
-      "url": "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/JEDTaxRates.csv",
+      "url": "https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FJEDTaxRates.csv",
       "authority": "primary",
       "format": "delimited",
       "coversJurisdictions": 200,
@@ -1208,14 +1208,14 @@
       "feeds": [
         "data/local/OH-jedd-jedz-{year}.json"
       ],
-      "note": "A direct CSV API rather than a download page — columns are EffStartDate,EffEndDate,JEDD_ID,Name,Rate, so a future parser can diff rate-by-rate instead of document-by-document. BROKEN as of 2026-09-01: every fetch gets HTTP 401 {\"errorCode\":\"BFF4002\",\"errorMessage\":\"Authentication Failure\"} — confirmed with a full browser header set, and again with Referer/Origin set to thefinder.tax.ohio.gov and a cookie jar carried from that page, neither of which changed the result. This is a BFF (backend-for-frontend) API: the public site's own SPA must be obtaining a bearer token through a flow not yet found, not merely sending browser-shaped headers. NOT marked manualOnly on purpose — this one source is 200 JEDD/JEDZ jurisdictions, and leaving it correctly RED keeps it in front of a human via the daily tracking issue until someone either finds the real auth flow or an alternate URL. Do not silence this by suppressing the failure."
+      "note": "A direct CSV API rather than a download page — columns are EffStartDate,EffEndDate,JEDD_ID,Name,Rate, so a future parser can diff rate-by-rate instead of document-by-document. FIXED 2026-09-01: the direct api.thefinder.tax.ohio.gov URL 401s with {\"errorCode\":\"BFF4002\"} for any client — it is a backend-for-frontend API the public site's own browser bundle never calls directly either. Found by downloading and reading thefinder.tax.ohio.gov's own Next.js JS chunks: the site's file-download buttons all route through a SAME-ORIGIN proxy route, `/api/file-downloads/content?target=<url-encoded real API URL>`, which is what this URL now points at. Verified: 200, real CSV body, byte-identical across two fetches two seconds apart, so it hashes stably. If this ever 401s again, re-derive the proxy path from the current JS bundle rather than guessing headers — that is what fixed it this time after header/cookie/Referer guessing all failed."
     },
     {
       "id": "oh-municipal-rates",
       "level": "local",
       "jurisdiction": "OH",
       "title": "Ohio Dept of Taxation — Municipal Income Tax Rate Database (The Finder)",
-      "url": "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
+      "url": "https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FMuni%2FOHMuniRateTable.csv",
       "authority": "state_register",
       "format": "delimited",
       "coversJurisdictions": 600,
@@ -1225,7 +1225,7 @@
       "feeds": [
         "data/locals/OH-{year}.json"
       ],
-      "note": "Replaces monitoring ~600 individual village and city websites. UPGRADED from thefinder.tax.ohio.gov/?tab=fileDownloads — a download LANDING PAGE, which would have changed when the site was restyled and stayed still when a rate moved — to the CSV the page links to, which is the data itself. Columns are EffStartDate,EffEndDate,MuniCode,Name,Rate with rates as decimals ('.01000'), so a future parser can diff rate-by-rate. URL taken from data/local/OH-municipalities-2026.json's own source field. BROKEN as of 2026-09-01: same HTTP 401 BFF4002 auth failure as oh-jedd-rates above, same API host — see that entry's note for what was tried (browser headers, Referer/Origin, a cookie jar from the portal homepage; none worked). NOT marked manualOnly on purpose: this single source stands in for 600 municipalities, the largest local-jurisdiction block in the whole registry, so it must stay visibly RED and in the daily tracking issue rather than being quietly excluded from the freshness check."
+      "note": "Replaces monitoring ~600 individual village and city websites. UPGRADED from thefinder.tax.ohio.gov/?tab=fileDownloads — a download LANDING PAGE, which would have changed when the site was restyled and stayed still when a rate moved — to the CSV the page links to, which is the data itself. Columns are EffStartDate,EffEndDate,MuniCode,Name,Rate with rates as decimals ('.01000'), so a future parser can diff rate-by-rate. URL taken from data/local/OH-municipalities-2026.json's own source field. FIXED 2026-09-01: same HTTP 401 BFF4002 auth failure as oh-jedd-rates above, same underlying API — see that entry's note for the fix (the public site's own JS bundle reveals a same-origin proxy route, `/api/file-downloads/content?target=<url>`, which this URL now uses instead of calling api.thefinder.tax.ohio.gov directly). Verified: 200, 1083 rows of real municipal rate data including full rate-change history per municipality (e.g. Akron rising .02000 -> .02250 -> .02500 across three effective-date rows)."
     },
     {
       "id": "oh-school-district-rates",
