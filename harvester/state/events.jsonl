@@ -326,3 +326,114 @@
 {"kind":"finding_opened","at":"2026-09-01T13:11:02.375Z","runId":"run-2026-09-01T13-11-02-375Z","findingId":"wy-withholding:ab72ffae0d2b","sourceId":"wy-withholding","jurisdiction":"WY","title":"Wyoming — unemployment wage base / employer rates","url":"https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-taxable-wage-base/unemployment-tax","detail":"Document content differs from the last capture, after volatile tokens were stripped. Read it and update the affected data file if a rate actually moved.","snapshotPath":"/home/runner/work/payroll-tax-engine-/payroll-tax-engine-/harvester/snapshots/wy-withholding/2026-09-01T13-13-10-667Z.ab72ffae0d2b.raw"}
 {"kind":"source_verified","at":"2026-09-01T13:11:02.375Z","runId":"run-2026-09-01T13-11-02-375Z","sourceId":"nm-ui-rates-calc","changed":false}
 {"kind":"run_finished","at":"2026-09-01T13:13:11.780Z","runId":"run-2026-09-01T13-11-02-375Z","checked":99,"changed":59,"failed":6,"durationMs":129403}
+{"kind":"run_started","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceCount":105}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"dol-futa-credit-reduction","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"dol-ui-wage-bases","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"irs-pub15t","changed":false}
+{"kind":"source_unreadable","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ssa-wage-base","reason":"HTTP 403 — the site refused the request even with a browser User-Agent. Likely a bot wall (Akamai/Cloudflare); this source may need fetching by hand."}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ak-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"al-municipal-occupational","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"al-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"al-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ar-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"az-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ca-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ca-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"co-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"co-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ct-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ct-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"dc-ui-rates","changed":true}
+{"kind":"finding_opened","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","findingId":"dc-ui-rates:7078bf72b40f","sourceId":"dc-ui-rates","jurisdiction":"DC","title":"District of Columbia — unemployment insurance employer rates","url":"https://unemployment.dc.gov/page/tax-information","detail":"Document content differs from the last capture, after volatile tokens were stripped. Read it and update the affected data file if a rate actually moved.","snapshotPath":"/home/runner/work/payroll-tax-engine-/payroll-tax-engine-/harvester/snapshots/dc-ui-rates/2026-08-31T00-26-42-428Z.7078bf72b40f.raw"}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"dc-withholding","changed":true}
+{"kind":"finding_opened","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","findingId":"dc-withholding:31c80648b07d","sourceId":"dc-withholding","jurisdiction":"DC","title":"District of Columbia — employer withholding tables & instructions","url":"https://otr.cfo.dc.gov/","detail":"Document content differs from the last capture, after volatile tokens were stripped. Read it and update the affected data file if a rate actually moved.","snapshotPath":"/home/runner/work/payroll-tax-engine-/payroll-tax-engine-/harvester/snapshots/dc-withholding/2026-09-01T13-16-55-726Z.31c80648b07d.raw"}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"de-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"de-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"fl-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ga-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ga-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"hi-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"hi-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ia-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ia-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"id-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"id-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"il-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"il-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"in-county-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"in-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"in-withholding","changed":false}
+{"kind":"source_unreadable","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ks-ui-rates","reason":"HTTP 403 — the site refused the request even with a browser User-Agent. Likely a bot wall (Akamai/Cloudflare); this source may need fetching by hand."}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ks-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ky-occupational","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ky-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ky-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"la-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"la-withholding","changed":false}
+{"kind":"source_unreadable","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ma-ui-rates","reason":"HTTP 403 — the site refused the request even with a browser User-Agent. Likely a bot wall (Akamai/Cloudflare); this source may need fetching by hand."}
+{"kind":"source_unreadable","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ma-withholding","reason":"HTTP 403 — the site refused the request even with a browser User-Agent. Likely a bot wall (Akamai/Cloudflare); this source may need fetching by hand."}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"md-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"md-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"me-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"me-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"mi-city-income-tax","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"mi-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"mi-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"mn-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"mn-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"mo-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"mo-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ms-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ms-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"mt-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"mt-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"nc-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"nc-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"nd-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"nd-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ne-ui-rates","changed":true}
+{"kind":"finding_opened","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","findingId":"ne-ui-rates:1a56e4ef1886","sourceId":"ne-ui-rates","jurisdiction":"NE","title":"Nebraska — unemployment insurance combined tax rates & taxable wage base","url":"https://dol.nebraska.gov/UITax/UnemploymentInsuranceTax/CombinedTaxRates","detail":"Document content differs from the last capture, after volatile tokens were stripped. Read it and update the affected data file if a rate actually moved.","snapshotPath":"/home/runner/work/payroll-tax-engine-/payroll-tax-engine-/harvester/snapshots/ne-ui-rates/2026-09-01T13-17-20-872Z.1a56e4ef1886.raw"}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ne-withholding","changed":false}
+{"kind":"source_unreadable","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"nh-withholding","reason":"HTTP 403 — the site refused the request even with a browser User-Agent. Likely a bot wall (Akamai/Cloudflare); this source may need fetching by hand."}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"nj-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"nj-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"nm-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"nm-withholding","changed":false}
+{"kind":"source_unreadable","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"nv-ui-rates","reason":"HTTP 403 — the site refused the request even with a browser User-Agent. Likely a bot wall (Akamai/Cloudflare); this source may need fetching by hand."}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"nv-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ny-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ny-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"oh-jedd-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"oh-municipal-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"oh-school-district-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"oh-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ok-ui-rates","changed":true}
+{"kind":"finding_opened","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","findingId":"ok-ui-rates:96ee3d6bb551","sourceId":"ok-ui-rates","jurisdiction":"OK","title":"Oklahoma — unemployment insurance contribution rates & taxable wage base","url":"https://oklahoma.gov/oesc/employers/tax/contribution-rates.html","detail":"Document content differs from the last capture, after volatile tokens were stripped. Read it and update the affected data file if a rate actually moved.","snapshotPath":"/home/runner/work/payroll-tax-engine-/payroll-tax-engine-/harvester/snapshots/ok-ui-rates/2026-09-01T13-17-27-718Z.96ee3d6bb551.raw"}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ok-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"or-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"or-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"pa-act32-eit","changed":true}
+{"kind":"finding_opened","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","findingId":"pa-act32-eit:976f73ea8d56","sourceId":"pa-act32-eit","jurisdiction":"PA","title":"PA DCED Municipal Statistics — Act 32 EIT rates and PSD codes","url":"https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2026","detail":"Document content differs from the last capture, after volatile tokens were stripped. Read it and update the affected data file if a rate actually moved.","snapshotPath":"/home/runner/work/payroll-tax-engine-/payroll-tax-engine-/harvester/snapshots/pa-act32-eit/2026-09-01T13-17-28-229Z.976f73ea8d56.raw"}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"pa-dor-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"pa-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ri-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ri-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"sc-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"sc-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"sd-withholding","changed":false}
+{"kind":"source_unreadable","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"tn-withholding","reason":"Network error: fetch failed"}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"tx-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ut-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"ut-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"va-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"va-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"vt-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"vt-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"wa-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"wi-ui-rates","changed":false}
+{"kind":"source_unreadable","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"wi-withholding","reason":"Network error: fetch failed"}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"wv-ui-rates","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"wv-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"wy-withholding","changed":false}
+{"kind":"source_verified","at":"2026-09-01T13:16:44.015Z","runId":"run-2026-09-01T13-16-44-015Z","sourceId":"nm-ui-rates-calc","changed":false}
+{"kind":"run_finished","at":"2026-09-01T13:18:04.606Z","runId":"run-2026-09-01T13-16-44-015Z","checked":96,"changed":5,"failed":8,"durationMs":80590}
