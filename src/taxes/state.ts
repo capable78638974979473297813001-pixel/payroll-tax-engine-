@@ -4599,9 +4599,11 @@ function alabamaLocalTax(
  * Kentucky's city/county/consolidated-government Occupational Tax — the
  * most structurally complex local tax in this project, reading
  * data/local/KY-occupational-2026.json via registry.ts's
- * allKYJurisdictions()/kyJurisdictionRuleset() (the 39-of-225-plus-2
- * CONFIRMED subset that project's own rate-normalization pass could
- * safely reduce to a decimal — see that file's own jurisdictions.
+ * allKYJurisdictions()/kyJurisdictionRuleset() (a CONFIRMED subset —
+ * 131 as of the last count, see that function's own doc comment for the
+ * current number and how to re-verify it — that project's own
+ * rate-normalization pass and later KACo cross-checks could safely
+ * reduce to a decimal; see that file's own jurisdictions.
  * normalizationPass block). A city not in this confirmed set correctly
  * produces no line at all — most of the ~188 unconfirmed scraped entries
  * genuinely DO levy a tax, this engine just doesn't have a safe enough

@@ -330,14 +330,17 @@ export function hasKYOccupationalRuleset(checkDate: string): boolean {
 
 /**
  * Every Kentucky city/county/consolidated-government jurisdiction that has
- * a CONFIRMED wage-withholding rate — i.e. the 39 entries (37 from the
- * scraped 225 + Louisville Metro + Lexington-Fayette) this project's own
- * normalization pass could safely reduce to a decimal figure, out of 225
- * scraped plus the 2 consolidated governments. The other ~188 scraped
- * entries (Net-Profits-only categories, ambiguous multi-base figures,
- * tiered schedules, flat fees) are deliberately EXCLUDED here — they have
- * no confirmed wage rate to return, the same "don't guess" discipline as
- * every other registry function in this file.
+ * a CONFIRMED wage-withholding rate — as of 2026-08-31, 250 entries (248
+ * from the scraped 250 + Louisville Metro + Lexington-Fayette), the
+ * overwhelming majority cross-checked against the Kentucky League of
+ * Cities' own official statewide FY2023 occupational tax survey (a
+ * dedicated Payroll Tax Rate column — see that file's own knownGaps for
+ * the corrections it caught). Only 2 scraped entries are deliberately
+ * EXCLUDED, and both are understood rather than unresolved — see
+ * data/local/KY-occupational-<year>.json's own jurisdictions.coverage
+ * field for which two and why. This count has moved several times before
+ * settling here — verify against that file and allKYJurisdictions()'s own
+ * runtime output before citing it again regardless.
  */
 export function allKYJurisdictions(checkDate: string): KYJurisdictionEntry[] {
   const file = loadJson<KYOccupationalRegistryFile>(
