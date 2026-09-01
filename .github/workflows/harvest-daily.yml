@@ -47,6 +47,17 @@ jobs:
         with:
           node-version: '24'
 
+      # Most of the registry is PDF sources, and harvester/fetch.ts shells
+      # out to pdftotext (poppler-utils) to read them. ubuntu-latest does
+      # NOT ship it, so without this step every PDF fetch fails with
+      # "pdftotext could not be found" — discovered from a real run
+      # (2026-08-31T18:20:58Z) that checked only 46 of 102 sources and
+      # failed the other 56, 95 of those on this exact error. A failed
+      # fetch is not "unchanged"; it is a source going dark, which is the
+      # one thing this workflow exists to never let happen silently.
+      - name: Install poppler-utils (pdftotext)
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends poppler-utils
+
       # gh issue create --label fails outright on a label that doesn't
       # exist yet; these two are created once, idempotently, so the later
       # issue-upsert steps never fail on a fresh repo.
