@@ -7206,15 +7206,28 @@ describe('West Virginia', () => {
       assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(4.0));
     });
 
-    test('Weirton, monthly pay: $5.00/wk x 52 / 12 periods = $21.6666, rounded DOWN to $21.66', () => {
+    test('Weirton, monthly pay, check date on/after the 2026-05-14 rate increase: $5.00/wk x 52 / 12 periods = $21.6666, rounded DOWN to $21.66', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'monthly',
+          checkDate: '2026-05-14',
           earnings: [{ code: 'REG', category: 'regular', amount: dollars(4000) }],
           workState: { code: 'WV', certificate: { locality: 'Weirton' } },
         }),
       );
       assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(21.66));
+    });
+
+    test('Weirton, monthly pay, check date BEFORE the 2026-05-14 rate increase: pre-ordinance $2.00/wk applies instead', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'monthly',
+          checkDate: '2026-05-13',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(4000) }],
+          workState: { code: 'WV', certificate: { locality: 'Weirton' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(8.66));
     });
 
     test('no certificate.locality: no WV_LOCAL_FEE line at all', () => {

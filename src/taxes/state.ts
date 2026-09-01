@@ -4538,8 +4538,10 @@ function coloradoOccupationalPrivilegeTax(
 }
 
 interface WVServiceFeeCityConfig {
-  weeklyRate: number; // dollars per week
+  weeklyRate: number; // dollars per week, effective on/after rateEffectiveDate (or always, if that field is absent)
   nonResidentOnly?: boolean; // Fairmont: only non-resident duty-station employees are payroll-withheld; residents are billed directly, not through payroll (see WV-2026.json's serviceFeeCities.Fairmont note)
+  priorWeeklyRate?: number; // Weirton: the rate in effect before rateEffectiveDate — undefined for every city with no known rate history
+  rateEffectiveDate?: string; // ISO yyyy-mm-dd the CURRENT weeklyRate took effect; a check date before this uses priorWeeklyRate instead
 }
 
 /**
@@ -4573,13 +4575,18 @@ interface WVServiceFeeCityConfig {
  * consecutive-day-in-the-city threshold before the fee first attaches
  * (no employment-duration input exists anywhere in this engine — every
  * duty-station-in-Wheeling case is treated as already past the
- * threshold); the multi-job dedup rule (an employee working multiple jobs
- * in the same WV city is only assessed once — the same class of
+ * threshold); and the multi-job dedup rule (an employee working multiple
+ * jobs in the same WV city is only assessed once — the same class of
  * un-modelled multi-employer coordination as Newark's Form-based
- * exemption elsewhere in this project); and Weirton's mid-2026 rate
- * change from $2.00 to $5.00/week has no effective-dating mechanism (this
- * function always uses the current $5.00 figure, correct only for check
- * dates on/after the ordinance's ~2026-05-14 effective date).
+ * exemption elsewhere in this project).
+ *
+ * Weirton's mid-2026 rate change ($2.00/week through 2026-05-13, then
+ * $5.00/week from Ordinance 2272's 2026-05-14 effective date onward, per
+ * WV-2026.json's own serviceFeeCities.Weirton note) IS effective-dated,
+ * via priorWeeklyRate/rateEffectiveDate on the city config — the same
+ * class of gap Ohio's HB96 had before midYearEffectiveDating existed, but
+ * scoped per-city rather than per-state since only one WV city in this
+ * file has a documented rate history so far.
  */
 function westVirginiaMunicipalServiceFee(
   input: PaycheckInput,
@@ -4600,7 +4607,13 @@ function westVirginiaMunicipalServiceFee(
     if (residenceCityName?.toLowerCase() === locality.toLowerCase()) return null;
   }
 
-  const annualFee = dollars(city.weeklyRate) * 52;
+  const usePriorRate =
+    city.rateEffectiveDate !== undefined &&
+    city.priorWeeklyRate !== undefined &&
+    input.checkDate < city.rateEffectiveDate;
+  const weeklyRate = usePriorRate ? city.priorWeeklyRate! : city.weeklyRate;
+
+  const annualFee = dollars(weeklyRate) * 52;
   const amount = roundDownToCent(annualFee / ctx.periodsPerYear);
 
   return {
@@ -4611,9 +4624,12 @@ function westVirginiaMunicipalServiceFee(
     taxableWages: 0,
     amount,
     detail:
-      `$${city.weeklyRate}/week flat fee (WV Code 8-13-13), annualized (×52) and divided across ` +
-      `${ctx.periodsPerYear} pay periods/yr, rounded down to the cent (same convention as PA's LST) ` +
-      `— certificate.locality = "${locality}"`,
+      `$${weeklyRate}/week flat fee (WV Code 8-13-13)` +
+      (usePriorRate
+        ? ` — pre-${city.rateEffectiveDate} rate, since the check date is before the ordinance's own effective date`
+        : '') +
+      `, annualized (×52) and divided across ${ctx.periodsPerYear} pay periods/yr, rounded down to ` +
+      `the cent (same convention as PA's LST) — certificate.locality = "${locality}"`,
   };
 }
 
