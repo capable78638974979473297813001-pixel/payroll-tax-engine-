@@ -163,7 +163,20 @@ jobs:
       # It opens when there is something unacknowledged, is edited in
       # place while that stays true, and closes itself once every open
       # finding has been dealt with via `npm run harvest:ack`.
-      - name: Reflect open findings as a single tracking issue
+      #
+      # Trigger condition deliberately covers TWO different things, not just
+      # one: openFindings (a document's content actually differs) AND
+      # health.status != green (a source has gone stale/unreadable, or the
+      # run itself never finished). Before this fix the trigger was
+      # openFindings alone — so a source that started 403ing every day, or
+      # a PDF extractor silently broken (this actually happened: see the
+      # "Install poppler-utils" step above, added after a real run failed to
+      # read 56 of 102 sources and nothing here said a word about it) would
+      # sit at "0 open findings" forever. Zero findings from a monitor that
+      # cannot read the document is not health, it's the exact silent gap
+      # this whole project exists to close — a change could be sitting
+      # behind that dead fetch and nobody would ever be told to go look.
+      - name: Reflect open findings and health as a single tracking issue
         if: always()
         run: |
           set -e
@@ -175,11 +188,12 @@ jobs:
           HEALTH=$(node examples/harvest-daily.ts status --json) || true
           echo "$HEALTH" > health.json
           OPEN_COUNT=$(node -e "console.log(JSON.parse(require('fs').readFileSync('health.json','utf8')).openFindings.length)")
+          HEALTH_STATUS=$(node -e "console.log(JSON.parse(require('fs').readFileSync('health.json','utf8')).status)")
           STATUS_TEXT=$(node examples/harvest-daily.ts status) || true
 
           EXISTING=$(gh issue list --label "$FINDINGS_LABEL" --state open --json number --jq '.[0].number' || true)
 
-          if [ "$OPEN_COUNT" -gt 0 ]; then
+          if [ "$OPEN_COUNT" -gt 0 ] || [ "$HEALTH_STATUS" != "green" ]; then
             BODY_FILE=$(mktemp)
             {
               echo "Automated — updated by the harvest-daily workflow, run ${{ github.run_id }}."
@@ -189,15 +203,18 @@ jobs:
               echo '```'
             } > "$BODY_FILE"
 
+            TITLE="Harvester: $OPEN_COUNT open finding(s)"
+            if [ "$HEALTH_STATUS" != "green" ]; then
+              TITLE="$TITLE — status $HEALTH_STATUS, sources unverified"
+            fi
+
             if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
-              gh issue edit "$EXISTING" --body-file "$BODY_FILE" \
-                --title "Harvester: $OPEN_COUNT open finding(s)"
+              gh issue edit "$EXISTING" --body-file "$BODY_FILE" --title "$TITLE"
             else
-              gh issue create --title "Harvester: $OPEN_COUNT open finding(s)" \
-                --body-file "$BODY_FILE" --label "$FINDINGS_LABEL"
+              gh issue create --title "$TITLE" --body-file "$BODY_FILE" --label "$FINDINGS_LABEL"
             fi
           elif [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
-            gh issue comment "$EXISTING" --body "All open findings acknowledged (or resolved) as of run ${{ github.run_id }}. Closing."
+            gh issue comment "$EXISTING" --body "All open findings acknowledged (or resolved), and every source verified fresh, as of run ${{ github.run_id }}. Closing."
             gh issue close "$EXISTING"
           fi
         env:

@@ -94,11 +94,53 @@ export interface FetchOptions {
   fetchImpl?: typeof globalThis.fetch;
   /** Injected in tests to avoid depending on a pdftotext binary. */
   pdfToText?: (pdf: Buffer) => Promise<string>;
+  /** Delay before the one retry below. Injected in tests to avoid a real wait. */
+  retryDelayMs?: number;
+}
+
+/**
+ * Whether a failure is worth one retry, or is a settled answer already.
+ *
+ * A source going stale — the actual failure this project exists to catch —
+ * looks identical from the outside whether the cause is "the server had a
+ * bad second" or "this needs a human". Retrying the FIRST kind quietly
+ * turns a would-be false "unreadable" into a real "unchanged"/"changed",
+ * which is strictly more sources verified per run for the cost of one
+ * extra request on the rare day it is needed.
+ *
+ * Deliberately NOT retried: 403/401/404 and the WAF-challenge/empty-body
+ * cases. Those are policy answers, not hiccups — a bot wall or a moved URL
+ * gives the identical answer a second later, so retrying only doubles the
+ * load on a site that just told us no. (Confirmed by
+ * tests/harvest-sweep.test.ts's own "needs a human not a retry" case.)
+ * A missing reply (no status at all — DNS, connection reset, timeout) and a
+ * 5xx (the SERVER's own error, not a decision about us) are the two
+ * genuinely transient shapes.
+ */
+function isRetryable(result: FetchFail): boolean {
+  if (result.status === undefined) return true;
+  return result.status >= 500 && result.status < 600;
+}
+
+const DEFAULT_RETRY_DELAY_MS = 1000;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export async function fetchSource(
   source: { id: string; url: string; volatileByteRanges?: [number, number][] },
   options: FetchOptions = {},
+): Promise<FetchResult> {
+  const first = await attemptFetch(source, options);
+  if (first.ok || !isRetryable(first)) return first;
+  await sleep(options.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS);
+  return attemptFetch(source, options);
+}
+
+async function attemptFetch(
+  source: { id: string; url: string; volatileByteRanges?: [number, number][] },
+  options: FetchOptions,
 ): Promise<FetchResult> {
   const fetchedAt = new Date().toISOString();
   const doFetch = options.fetchImpl ?? globalThis.fetch;

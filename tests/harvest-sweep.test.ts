@@ -146,10 +146,38 @@ describe('fetch — failure modes are results, never exceptions', () => {
       fetchImpl: async () => {
         throw new Error('getaddrinfo ENOTFOUND');
       },
+      retryDelayMs: 0,
     });
     assert.equal(r.ok, false);
     if (r.ok) return;
     assert.match(r.reason, /ENOTFOUND/);
+  });
+
+  test('a network error is retried once before being reported', async () => {
+    let calls = 0;
+    const r = await fetchSource(src, {
+      fetchImpl: async () => {
+        calls++;
+        if (calls === 1) throw new Error('ECONNRESET');
+        return new Response('<html>rate 1.5%</html>', { headers: { 'content-type': 'text/html' } });
+      },
+      retryDelayMs: 0,
+    });
+    assert.equal(calls, 2);
+    assert.equal(r.ok, true);
+  });
+
+  test('a 403 is never retried — it is a settled answer, not a hiccup', async () => {
+    let calls = 0;
+    const r = await fetchSource(src, {
+      fetchImpl: async () => {
+        calls++;
+        return new Response('', { status: 403 });
+      },
+      retryDelayMs: 0,
+    });
+    assert.equal(calls, 1);
+    assert.equal(r.ok, false);
   });
 
   test('an empty 200 is a failure — a blank page is not a register', async () => {

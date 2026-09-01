@@ -60,7 +60,9 @@
       "expectedChange": "annual, announced mid-October with the COLA",
       "feeds": [
         "data/federal/{year}.json#socialSecurity.wageBase"
-      ]
+      ],
+      "manualOnly": true,
+      "manualOnlyReason": "Confirmed HTTP 403 on every attempt from two real GitHub Actions runs (2026-08-31) and independently from this project's own sandbox, using Node's actual fetch with the full browser header set fetch.ts sends — not the curl-vs-Node client difference this project has seen elsewhere (e.g. Massachusetts, New Hampshire), where Node succeeded and curl alone was refused. This is Akamai/Cloudflare-style refusal of a cloud/datacenter IP range, which no header change fixes. One of the highest-value sources in the registry (the OASDI wage base), so excluded from the staleness test rather than pinning overall health red forever, but check it by hand each October when the COLA lands."
     },
     {
       "id": "ak-withholding",
@@ -571,7 +573,9 @@
       ],
       "note": "Watches the LABOUR department rather than the revenue department, which carries no UI figures. Verified to fetch and to contain wage-base and/or rate figures before being registered.",
       "coversUI": true,
-      "uiContent": "rates-only"
+      "uiContent": "rates-only",
+      "manualOnly": true,
+      "manualOnlyReason": "Confirmed HTTP 403 on every attempt from two real GitHub Actions runs (2026-08-31) and independently from this project's own sandbox, using Node's actual fetch with the full browser header set fetch.ts sends. Same cloud/datacenter-IP-refusal shape as ssa-wage-base above — see that entry's note for how this was distinguished from the curl-vs-Node client difference seen elsewhere. Excluded from the staleness test so it does not pin overall health red forever; check by hand each autumn when Kansas resets its rate schedule."
     },
     {
       "id": "ks-withholding",
@@ -686,7 +690,9 @@
       ],
       "note": "Watches the LABOUR department, which is where UI figures live — the revenue department's withholding guide carries none. Found by searching per state after path-guessing failed: Michigan, for instance, is under /leo/bureaus-agencies/uia/, not the /uia/ every guess assumed. Verified to fetch AND to contain wage-base and/or rate figures before registering.",
       "coversUI": true,
-      "uiContent": "rates-only"
+      "uiContent": "rates-only",
+      "manualOnly": true,
+      "manualOnlyReason": "Confirmed HTTP 403 on every attempt from two real GitHub Actions runs (2026-08-31) and independently from this project's own sandbox, using Node's actual fetch with the full browser header set fetch.ts sends — a regression from when this URL was originally verified to succeed under Node (see ma-withholding below, blocked the same way as of this same audit). Excluded from the staleness test so it does not pin overall health red forever; check by hand each autumn when Massachusetts resets its rate schedule, and re-test from a residential network before re-enabling."
     },
     {
       "id": "ma-withholding",
@@ -702,7 +708,9 @@
       "feeds": [
         "data/states/MA-{year}.json"
       ],
-      "note": "The authoritative document: Circular M, the withholding tables themselves. NOTE ON FETCHABILITY, corrected after testing: curl is refused by mass.gov with a 403 on every path, but Node fetch with a full browser header set succeeds and returns the real PDF (verified — the extracted text opens \"Commonwealth of Massachusetts Department of Revenue\"). An earlier version of this note claimed a hard bot wall; that was true of one client, not of the harvester. Deliberately NOT pointed at miltonma.gov's copy of Form M-4, which the state data file used as a research source: that is a town's mirror of a 2019-revision certificate, not the tables, and could vanish unnoticed."
+      "note": "The authoritative document: Circular M, the withholding tables themselves. NOTE ON FETCHABILITY, corrected after testing: curl is refused by mass.gov with a 403 on every path, but Node fetch with a full browser header set succeeds and returns the real PDF (verified — the extracted text opens \"Commonwealth of Massachusetts Department of Revenue\"). An earlier version of this note claimed a hard bot wall; that was true of one client, not of the harvester. Deliberately NOT pointed at miltonma.gov's copy of Form M-4, which the state data file used as a research source: that is a town's mirror of a 2019-revision certificate, not the tables, and could vanish unnoticed. REGRESSED as of 2026-09-01: the same Node fetch that used to succeed now gets HTTP 403 on this exact path, confirmed from two real GitHub Actions runs (2026-08-31) and independently from this project's sandbox — mass.gov's bot wall now appears to block the client itself (or its network range) rather than any missing header.",
+      "manualOnly": true,
+      "manualOnlyReason": "HTTP 403 on every attempt as of 2026-09-01 — see the note above; this used to work under Node fetch and no longer does. Excluded from the staleness test so it does not pin overall health red forever; check by hand each Nov-Jan when Massachusetts republishes Circular M, and re-test from a residential network before re-enabling."
     },
     {
       "id": "md-ui-rates",
@@ -1045,9 +1053,11 @@
       "feeds": [
         "data/states/NH-{year}.json"
       ],
-      "note": "New Hampshire levies no income tax and no wage tax, so the only payroll figure that moves is the unemployment wage base — this watches NH Employment Security rather than the law-firm client alert the state data file cites for the Interest & Dividends repeal, which is a one-time historical fact that will never change again. Fetches successfully (verified, 186KB) despite curl being 403'd, the same client-dependent refusal documented for Massachusetts.",
+      "note": "New Hampshire levies no income tax and no wage tax, so the only payroll figure that moves is the unemployment wage base — this watches NH Employment Security rather than the law-firm client alert the state data file cites for the Interest & Dividends repeal, which is a one-time historical fact that will never change again. Fetches successfully (verified, 186KB) despite curl being 403'd, the same client-dependent refusal documented for Massachusetts. REGRESSED as of 2026-09-01: the same Node fetch that used to succeed now gets HTTP 403, confirmed from two real GitHub Actions runs (2026-08-31) and independently from this project's sandbox.",
       "coversUI": true,
-      "uiContent": "rates-only"
+      "uiContent": "rates-only",
+      "manualOnly": true,
+      "manualOnlyReason": "HTTP 403 on every attempt as of 2026-09-01 — see the note above; this used to work under Node fetch and no longer does. Excluded from the staleness test so it does not pin overall health red forever; check by hand each autumn when NH resets its wage base, and re-test from a residential network before re-enabling."
     },
     {
       "id": "nj-ui-rates",
@@ -1132,7 +1142,9 @@
         "data/states/NV-{year}.json#suiEmployer"
       ],
       "note": "Watches the LABOUR department, where UI figures live — the revenue department's withholding guide carries none. Verified to fetch AND to contain wage-base and rate figures before registering.",
-      "uiContent": "wage-base-and-rates"
+      "uiContent": "wage-base-and-rates",
+      "manualOnly": true,
+      "manualOnlyReason": "Confirmed HTTP 403 on every attempt from two real GitHub Actions runs (2026-08-31) and independently from this project's own sandbox, using Node's actual fetch with the full browser header set fetch.ts sends. Excluded from the staleness test so it does not pin overall health red forever; check by hand each autumn when Nevada resets its rate schedule, and re-test from a residential network before re-enabling."
     },
     {
       "id": "nv-withholding",
@@ -1196,7 +1208,7 @@
       "feeds": [
         "data/local/OH-jedd-jedz-{year}.json"
       ],
-      "note": "A direct CSV API rather than a download page — columns are EffStartDate,EffEndDate,JEDD_ID,Name,Rate, so a future parser can diff rate-by-rate instead of document-by-document."
+      "note": "A direct CSV API rather than a download page — columns are EffStartDate,EffEndDate,JEDD_ID,Name,Rate, so a future parser can diff rate-by-rate instead of document-by-document. BROKEN as of 2026-09-01: every fetch gets HTTP 401 {\"errorCode\":\"BFF4002\",\"errorMessage\":\"Authentication Failure\"} — confirmed with a full browser header set, and again with Referer/Origin set to thefinder.tax.ohio.gov and a cookie jar carried from that page, neither of which changed the result. This is a BFF (backend-for-frontend) API: the public site's own SPA must be obtaining a bearer token through a flow not yet found, not merely sending browser-shaped headers. NOT marked manualOnly on purpose — this one source is 200 JEDD/JEDZ jurisdictions, and leaving it correctly RED keeps it in front of a human via the daily tracking issue until someone either finds the real auth flow or an alternate URL. Do not silence this by suppressing the failure."
     },
     {
       "id": "oh-municipal-rates",
@@ -1213,7 +1225,7 @@
       "feeds": [
         "data/locals/OH-{year}.json"
       ],
-      "note": "Replaces monitoring ~600 individual village and city websites. UPGRADED from thefinder.tax.ohio.gov/?tab=fileDownloads — a download LANDING PAGE, which would have changed when the site was restyled and stayed still when a rate moved — to the CSV the page links to, which is the data itself. Columns are EffStartDate,EffEndDate,MuniCode,Name,Rate with rates as decimals ('.01000'), so a future parser can diff rate-by-rate. URL taken from data/local/OH-municipalities-2026.json's own source field."
+      "note": "Replaces monitoring ~600 individual village and city websites. UPGRADED from thefinder.tax.ohio.gov/?tab=fileDownloads — a download LANDING PAGE, which would have changed when the site was restyled and stayed still when a rate moved — to the CSV the page links to, which is the data itself. Columns are EffStartDate,EffEndDate,MuniCode,Name,Rate with rates as decimals ('.01000'), so a future parser can diff rate-by-rate. URL taken from data/local/OH-municipalities-2026.json's own source field. BROKEN as of 2026-09-01: same HTTP 401 BFF4002 auth failure as oh-jedd-rates above, same API host — see that entry's note for what was tried (browser headers, Referer/Origin, a cookie jar from the portal homepage; none worked). NOT marked manualOnly on purpose: this single source stands in for 600 municipalities, the largest local-jurisdiction block in the whole registry, so it must stay visibly RED and in the daily tracking issue rather than being quietly excluded from the freshness check."
     },
     {
       "id": "oh-school-district-rates",
