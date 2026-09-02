@@ -34,7 +34,13 @@ import {
   tigerwebServiceForDate,
   type MatchQuality,
 } from './census.ts';
-import { isInsidePortlandMetro, jeddAtPoint, type JeddDistrict } from './districts.ts';
+import {
+  isInsideLaneTransitDistrict,
+  isInsidePortlandMetro,
+  isInsideTriMetDistrict,
+  jeddAtPoint,
+  type JeddDistrict,
+} from './districts.ts';
 import { resolveRooftop, type AddressPointTier, type RooftopResult } from './rooftop.ts';
 import { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult } from './buildings.ts';
 import { crossCheckSafe, milesBetween, type NominatimResult } from './nominatim.ts';
@@ -56,7 +62,15 @@ export {
   type MatchQuality,
 } from './census.ts';
 export { crossCheckAddress, type NominatimResult } from './nominatim.ts';
-export { isInsidePortlandMetro, jeddAtPoint, type DistrictCheck, type JeddCheck, type JeddDistrict } from './districts.ts';
+export {
+  isInsideLaneTransitDistrict,
+  isInsidePortlandMetro,
+  isInsideTriMetDistrict,
+  jeddAtPoint,
+  type DistrictCheck,
+  type JeddCheck,
+  type JeddDistrict,
+} from './districts.ts';
 export { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult, type NearbyBuilding } from './buildings.ts';
 export {
   fetchAddressPointsNear,
@@ -628,9 +642,26 @@ export async function resolveEmployee(
         );
       }
     }
-    notResolvable.push(
-      "Oregon's TriMet and Lane Transit District boundaries (certificate.locality = 'TriMet'/'LTD') — both districts publish their boundaries only as downloadable files (developer.trimet.org/gis), not as a service this can query per address; must be supplied manually. See geocode/districts.ts.",
-    );
+    // TriMet and LTD are geographically disjoint (Portland tri-county vs.
+    // Lane County/Eugene-Springfield) — never both true for a real
+    // address, so there's no precedence question in setting locality from
+    // whichever check hits. TriMet's is a local point-in-polygon test (no
+    // live service exists — see districts.ts's own top comment); LTD's is
+    // a live query against RLID's boundary service, same shape as Metro's
+    // above, so it gets the same attempted/not-attempted handling.
+    if (metroPoint) {
+      const trimet = isInsideTriMetDistrict(metroPoint.lat, metroPoint.lon);
+      if (trimet.inside) fields.locality = 'TriMet';
+
+      const ltd = await isInsideLaneTransitDistrict(metroPoint.lat, metroPoint.lon);
+      if (ltd.attempted) {
+        if (ltd.inside) fields.locality = 'LTD';
+      } else {
+        notResolvable.push(
+          "Lane Transit District's transit payroll excise (certificate.locality = 'LTD') — RLID's own boundary service could not be reached this call, so this was NOT determined either way. Retry before treating its absence as 'outside the district'. (TriMet's own boundary is checked locally and isn't affected by this.)",
+        );
+      }
+    }
   }
   if (workFlags?.seattle) {
     notResolvable.push(

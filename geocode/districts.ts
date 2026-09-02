@@ -32,19 +32,45 @@
  *     rate database) uses — so the boundary lookup and the rate table
  *     join on an ID rather than on a name, exactly.
  *
- * DELIBERATELY NOT COVERED, and why — this is the honest remainder,
- * not an oversight:
- *   - TriMet and Lane Transit District. Both levy real transit payroll
- *     taxes, and both publish their district boundaries only as
- *     downloadable shapefiles/KML (developer.trimet.org/gis), not as a
- *     queryable service. Checked: Metro's own RLIS boundary service
+ *   - Lane Transit District. Not published by LTD itself, but by RLID
+ *     (the Lane County regional GIS consortium, run by LCOG) as a live
+ *     queryable layer — found where TriMet's own boundary was NOT: RLID's
+ *     Regional/Boundaries service carries a named "LTD Service Area"
+ *     layer (id 4) alongside county-run boundary layers for ambulance,
+ *     fire, and school districts. Verified live: LTD's own headquarters
+ *     (3500 E 17th Ave, Eugene) intersects it; a downtown Portland point,
+ *     nowhere near Lane County, does not.
+ *   - TriMet's district. Unlike LTD, checked and confirmed NOT to exist
+ *     as a queryable service anywhere: Metro's own RLIS boundary service
  *     carries City Limits, County Boundaries, Metro Boundary, UGB and
  *     more, but no transit-district layer, and PortlandMaps' transit
- *     service publishes routes and stops rather than the district. Using
- *     these would mean vendoring and refreshing a boundary file, which is
- *     a different kind of commitment than a live lookup.
+ *     service publishes routes and stops rather than the district. TriMet
+ *     publishes the boundary itself only as a downloadable KML/shapefile
+ *     (developer.trimet.org/gis) — so this one genuinely is vendored:
+ *     data/local/OR-trimet-boundary-2026.json holds the polygon fetched
+ *     from that file, and isInsideTriMetDistrict() below does the
+ *     point-in-polygon test locally rather than querying a live service.
+ *     A refresh commitment, not a live lookup — see that data file's own
+ *     $comment for why the boundary is expected to be stable but not
+ *     assumed permanent.
  */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { FetchOptions } from './census.ts';
+
+/**
+ * Loaded once at module init, not per-call: this is a static boundary
+ * file (see its own $comment for the refresh commitment that implies),
+ * not a rules file re-read per request the way src/registry.ts's data
+ * loader is. geocode/ is never bundled into the Supabase Edge Function
+ * (checked: nothing under supabase/functions imports from here, only
+ * mentions this path in comments), so plain node:fs is safe here — no
+ * swappable-reader indirection needed the way src/registry.ts has for
+ * the Deno/no-filesystem deployment target.
+ */
+const trimetBoundary = JSON.parse(
+  readFileSync(join(import.meta.dirname, '..', 'data', 'local', 'OR-trimet-boundary-2026.json'), 'utf8'),
+) as { geometry: { type: 'Polygon'; coordinates: [number, number][][] } };
 
 /**
  * Metro's own regional GIS (RLIS), layer 3 of its public boundary
@@ -53,6 +79,16 @@ import type { FetchOptions } from './census.ts';
  */
 const METRO_BOUNDARY_LAYER =
   'https://gis.oregonmetro.gov/arcgis/rest/services/OpenData/BoundaryDataWebMerc/MapServer/3/query';
+
+/**
+ * RLID's (Lane County's regional GIS consortium) own boundary service —
+ * layer 4, "LTD Service Area", found inside its "Service Districts Group"
+ * alongside county-run ambulance/fire/school-district layers. Verified
+ * live against two points: LTD's own headquarters (3500 E 17th Ave,
+ * Eugene) intersects it; downtown Portland, nowhere near Lane County,
+ * does not.
+ */
+const LTD_BOUNDARY_LAYER = 'https://gateway.maps.rlid.org/maps1/rest/services/Regional/Boundaries/MapServer/4/query';
 
 /**
  * Ohio's own JEDD/JEDZ boundary service, published by the state on
@@ -167,6 +203,70 @@ export async function isInsidePortlandMetro(
 }
 
 /**
+ * Is this point inside Lane Transit District — i.e. does LTD's transit
+ * payroll excise (certificate.locality = 'LTD', src/taxes/state.ts's
+ * oregonTransitTax()) apply to work performed here?
+ *
+ * Not published by LTD itself but by RLID, Lane County's regional GIS
+ * consortium — see this file's own top comment for how that was found.
+ * Never throws.
+ */
+export async function isInsideLaneTransitDistrict(
+  lat: number,
+  lon: number,
+  fetchImpl: typeof fetch = fetch,
+  retryOptions: FetchOptions = {},
+): Promise<DistrictCheck> {
+  return pointIsInsideLayer(LTD_BOUNDARY_LAYER, lat, lon, fetchImpl, retryOptions);
+}
+
+/**
+ * Ray-casting point-in-polygon, single ring, no holes — exactly what
+ * TriMet's own boundary file is (verified when it was converted; see
+ * data/local/OR-trimet-boundary-2026.json's own $comment). Deliberately
+ * NOT a general-purpose multi-ring/hole-aware implementation: this
+ * project's zero-dependency stance means writing this by hand rather than
+ * pulling in a geometry library, and the honest scope of what's actually
+ * needed is "one simple polygon", not a general GIS engine. If a second
+ * vendored boundary ever needs holes or multiple rings, extend this then,
+ * with a real fixture proving the extension — not preemptively now.
+ */
+function pointInRing(lat: number, lon: number, ring: readonly (readonly [number, number])[]): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i];
+    const [xj, yj] = ring[j];
+    const crossesRay = yi > lat !== yj > lat;
+    if (!crossesRay) continue;
+    const xIntersect = ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
+    if (lon < xIntersect) inside = !inside;
+  }
+  return inside;
+}
+
+/**
+ * Is this point inside TriMet's district — i.e. does TriMet's transit
+ * payroll excise (certificate.locality = 'TriMet', src/taxes/state.ts's
+ * oregonTransitTax()) apply to work performed here?
+ *
+ * Unlike every other check in this file, this is NOT a live query —
+ * TriMet's boundary is vendored locally (see this file's own top comment
+ * for why, and data/local/OR-trimet-boundary-2026.json's $comment for the
+ * source and the refresh commitment that implies). Pure and synchronous,
+ * unlike its siblings, because there's no network call to make: the data
+ * is already loaded. Kept async-shaped (returns a resolved DistrictCheck)
+ * so callers don't need to special-case it against isInsidePortlandMetro()
+ * and isInsideLaneTransitDistrict(), which do need the network.
+ */
+export function isInsideTriMetDistrict(lat: number, lon: number): DistrictCheck {
+  // The stored ring is already [lon, lat] pairs (KML's own order, kept
+  // as-is by the conversion — see the data file's own $comment), which is
+  // exactly the [x, y] order pointInRing() expects. No remapping needed.
+  const ring = trimetBoundary.geometry.coordinates[0];
+  return { attempted: true, inside: pointInRing(lat, lon, ring) };
+}
+
+/**
  * Which Ohio JEDD/JEDZ, if any, contains this point.
  *
  * This is the lookup that makes the JEDD rate table usable at all: the
@@ -217,4 +317,4 @@ export async function jeddAtPoint(
   }
 }
 
-export { METRO_BOUNDARY_LAYER, OHIO_JEDD_LAYER };
+export { METRO_BOUNDARY_LAYER, OHIO_JEDD_LAYER, LTD_BOUNDARY_LAYER };

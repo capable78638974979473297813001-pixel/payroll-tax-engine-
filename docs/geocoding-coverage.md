@@ -260,8 +260,10 @@ the publishing government's own service:
 
 | District | Tax it decides | Source |
 | --- | --- | --- |
-| Portland Metro | Metro Supportive Housing Services (`certificate.metroDistrict`) | Metro's own RLIS boundary service |
-| Ohio JEDDs / JEDZs | JEDD income tax (`certificate.workJEDDId`) | Ohio's statewide JEDD/JEDZ layer on maps.ohio.gov, 142 zones |
+| Portland Metro | Metro Supportive Housing Services (`certificate.metroDistrict`) | Metro's own RLIS boundary service (live query) |
+| Ohio JEDDs / JEDZs | JEDD income tax (`certificate.workJEDDId`) | Ohio's statewide JEDD/JEDZ layer on maps.ohio.gov, 142 zones (live query) |
+| Lane Transit District | LTD transit payroll excise (`certificate.locality = 'LTD'`) | RLID's (Lane County's regional GIS consortium) boundary service, layer "LTD Service Area" (live query) |
+| TriMet | TriMet transit payroll excise (`certificate.locality = 'TriMet'`) | TriMet's own boundary file (developer.trimet.org/gis), vendored locally and checked with point-in-polygon — see below |
 
 The Ohio case is the sharpest illustration of why this matters. A JEDD
 lets a municipality tax income earned on adjoining **unincorporated**
@@ -276,14 +278,47 @@ The boundary layer and the rate file join on Ohio's own `jedd_id`, not on
 a name, so no string matching sits between "which zone contains this
 point" and "what does that zone charge".
 
+## TriMet and Lane Transit District — resolved 2026-09-03
+
+Both levy real transit payroll taxes and both used to sit in "still not
+resolved" below, because neither publishes its boundary as a service that
+can be queried per address the way Metro and Ohio's JEDDs do. Checked
+each separately rather than assuming the same answer for both, since they
+turned out to be genuinely different:
+
+- **Lane Transit District** IS a live query after all — just not
+  published by LTD itself. RLID, the Lane County regional GIS consortium
+  (run by LCOG), carries a named "LTD Service Area" layer inside its own
+  `Regional/Boundaries` service, alongside county-run ambulance, fire, and
+  school-district boundary layers. Verified live both directions: LTD's
+  own headquarters (3500 E 17th Ave, Eugene) intersects it; downtown
+  Portland, nowhere near Lane County, does not. `isInsideLaneTransitDistrict()`
+  in `geocode/districts.ts`.
+- **TriMet** genuinely is vendored-only — confirmed no live service exists
+  anywhere (Metro's own RLIS carries City Limits/County/Metro Boundary/UGB
+  layers but no transit-district layer; PortlandMaps' transit service
+  publishes routes and stops, not the district). Fetched TriMet's own
+  official boundary file directly (developer.trimet.org/gis/data/tm_boundary.kml
+  — a single simple polygon, 6,207 vertices, no holes), converted it to a
+  coordinate array committed at `data/local/OR-trimet-boundary-2026.json`,
+  and added a hand-written ray-casting point-in-polygon check
+  (`isInsideTriMetDistrict()`) — this project's zero-dependency stance
+  means writing that by hand rather than pulling in a geometry library,
+  and a single simple polygon doesn't need more than that. This is a real
+  refresh commitment (see that data file's own `$comment`), not a live
+  lookup, but TriMet's own district boundary changes rarely.
+
+Verified end to end through `calculatePaycheck()` itself, not just the
+boundary check in isolation: a real Portland work address (1900 SW 4th
+Ave) resolves `certificate.locality = 'TriMet'` and produces a real
+`TRIMET_ER` tax line (0.8237% of wages); a real Eugene work address (3500
+E 17th Ave, LTD's own headquarters) resolves `certificate.locality =
+'LTD'` and produces a real `LTD_ER` line (0.8000%); a Salem work address,
+inside neither district, produces neither line and nothing in
+`notResolvable`.
+
 ## Still not resolved, and why
 
-- **TriMet and Lane Transit District.** Both levy real transit payroll
-  taxes. Both publish their boundaries only as downloadable shapefiles,
-  not as a service that can be queried per address. Resolving them means
-  vendoring and refreshing a boundary file — a different commitment from a
-  live lookup, and not made here. `resolveEmployee()` reports them in
-  `notResolvable` rather than defaulting them to false.
 - **Four JEDD rate rows have no published boundary.** Ohio's boundary
   layer carries 142 zones against 146 rate rows. An address inside one of
   those four cannot be detected by coordinate, and nothing guesses.

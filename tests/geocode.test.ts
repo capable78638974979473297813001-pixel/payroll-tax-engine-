@@ -41,7 +41,12 @@ import {
   parseAddressParts,
   resolveRooftop,
 } from '../geocode/rooftop.ts';
-import { isInsidePortlandMetro, jeddAtPoint } from '../geocode/districts.ts';
+import {
+  isInsideLaneTransitDistrict,
+  isInsidePortlandMetro,
+  isInsideTriMetDistrict,
+  jeddAtPoint,
+} from '../geocode/districts.ts';
 
 const CHECK_DATE = '2026-08-15';
 
@@ -1613,6 +1618,43 @@ describe('districts.ts — taxing boundaries that are not Census geographies (mo
     test('an unreachable service is attempted: false — distinct from "outside the district"', async () => {
       const result = await isInsidePortlandMetro(45.51224, -122.6587, throws, FAST);
       assert.deepEqual(result, { attempted: false, inside: false });
+    });
+  });
+
+  describe('isInsideLaneTransitDistrict — RLID\'s own boundary service', () => {
+    test('a point inside LTD comes back inside', async () => {
+      // LTD's own headquarters, verified live against the real service.
+      const result = await isInsideLaneTransitDistrict(44.041958737191, -123.041500605697, json({ objectIds: [126] }), FAST);
+      assert.deepEqual(result, { attempted: true, inside: true });
+    });
+
+    test('a point outside (Portland, nowhere near Lane County) comes back outside, not unknown', async () => {
+      const result = await isInsideLaneTransitDistrict(45.51224, -122.6784, json({ objectIds: [] }), FAST);
+      assert.deepEqual(result, { attempted: true, inside: false });
+    });
+
+    test('an unreachable service is attempted: false — distinct from "outside the district"', async () => {
+      const result = await isInsideLaneTransitDistrict(44.041958737191, -123.041500605697, throws, FAST);
+      assert.deepEqual(result, { attempted: false, inside: false });
+    });
+  });
+
+  describe('isInsideTriMetDistrict — vendored boundary, local point-in-polygon (no network)', () => {
+    test('downtown Portland, well inside the district, comes back inside', () => {
+      assert.deepEqual(isInsideTriMetDistrict(45.5152, -122.6784), { attempted: true, inside: true });
+    });
+
+    test('Salem, ~50 miles south and outside the district, comes back outside', () => {
+      assert.deepEqual(isInsideTriMetDistrict(44.9429, -123.0351), { attempted: true, inside: false });
+    });
+
+    test('Bend, the other side of the Cascades, comes back outside', () => {
+      assert.deepEqual(isInsideTriMetDistrict(44.0582, -121.3153), { attempted: true, inside: false });
+    });
+
+    test('is synchronous and always attempted: true — there is no network call that can fail', () => {
+      const result = isInsideTriMetDistrict(45.5152, -122.6784);
+      assert.equal(result.attempted, true);
     });
   });
 });
