@@ -35,10 +35,10 @@ import {
   type MatchQuality,
 } from './census.ts';
 import {
-  isInsideLaneTransitDistrict,
+  isInsideCanbyTransitDistrict,
   isInsidePortlandMetro,
-  isInsideTriMetDistrict,
   jeddAtPoint,
+  oregonTransitDistrictAtPoint,
   type JeddDistrict,
 } from './districts.ts';
 import { resolveRooftop, type AddressPointTier, type RooftopResult } from './rooftop.ts';
@@ -63,13 +63,14 @@ export {
 } from './census.ts';
 export { crossCheckAddress, type NominatimResult } from './nominatim.ts';
 export {
-  isInsideLaneTransitDistrict,
+  isInsideCanbyTransitDistrict,
   isInsidePortlandMetro,
-  isInsideTriMetDistrict,
   jeddAtPoint,
+  oregonTransitDistrictAtPoint,
   type DistrictCheck,
   type JeddCheck,
   type JeddDistrict,
+  type OregonTransitDistrictCheck,
 } from './districts.ts';
 export { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult, type NearbyBuilding } from './buildings.ts';
 export {
@@ -642,26 +643,36 @@ export async function resolveEmployee(
         );
       }
     }
-    // TriMet and LTD are geographically disjoint (Portland tri-county vs.
-    // Lane County/Eugene-Springfield) — never both true for a real
-    // address, so there's no precedence question in setting locality from
-    // whichever check hits. TriMet's is a local point-in-polygon test (no
-    // live service exists — see districts.ts's own top comment); LTD's is
-    // a live query against RLID's boundary service, same shape as Metro's
-    // above, so it gets the same attempted/not-attempted handling.
+    // Oregon's local transit payroll tax districts — TriMet, LTD, SCTD,
+    // Canby, Sandy, Wilsonville. All six are geographically disjoint (no
+    // real address sits in two at once — each was established explicitly
+    // to replace, not stack with, TriMet's own tax for that area, per
+    // each district's own transit-tax guide), so there's no precedence
+    // question in letting whichever check hits last win.
     if (metroPoint) {
-      const trimet = isInsideTriMetDistrict(metroPoint.lat, metroPoint.lon);
-      if (trimet.inside) fields.locality = 'TriMet';
-
-      const ltd = await isInsideLaneTransitDistrict(metroPoint.lat, metroPoint.lon);
-      if (ltd.attempted) {
-        if (ltd.inside) fields.locality = 'LTD';
+      const transit = await oregonTransitDistrictAtPoint(metroPoint.lat, metroPoint.lon);
+      if (transit.attempted) {
+        if (transit.locality) fields.locality = transit.locality;
       } else {
         notResolvable.push(
-          "Lane Transit District's transit payroll excise (certificate.locality = 'LTD') — RLID's own boundary service could not be reached this call, so this was NOT determined either way. Retry before treating its absence as 'outside the district'. (TriMet's own boundary is checked locally and isn't affected by this.)",
+          "Oregon's TriMet/LTD/SCTD transit payroll excises (certificate.locality) — ODOT's own jurisdictions service could not be reached this call, so this was NOT determined either way. Retry before treating its absence as 'outside every district'. (Canby/Sandy/Wilsonville below aren't affected by this — they're resolved separately.)",
+        );
+      }
+
+      const canby = await isInsideCanbyTransitDistrict(metroPoint.lat, metroPoint.lon);
+      if (canby.attempted) {
+        if (canby.inside) fields.locality = 'CanbyTransit';
+      } else {
+        notResolvable.push(
+          "Canby's transit payroll excise (certificate.locality = 'CanbyTransit') — Oregon's own UGB boundary service could not be reached this call, so this was NOT determined either way. Retry before treating its absence as 'outside the district'.",
         );
       }
     }
+    // Sandy and Wilsonville are simply their own city limits — no special
+    // boundary lookup needed, just the ordinary Census place match
+    // already computed above as workFlags.sandy/wilsonville.
+    if (workFlags?.sandy) fields.locality = 'SandyTransit';
+    if (workFlags?.wilsonville) fields.locality = 'SMART';
   }
   if (workFlags?.seattle) {
     notResolvable.push(

@@ -6096,22 +6096,45 @@ function stLouisPayrollExpenseTaxEmployer(
 interface ORTransitDistrictConfig {
   triMet?: { rate: number };
   laneTransit?: { rate: number };
+  canby?: { rate: number };
+  sandy?: { rate: number };
+  wilsonville?: { rate: number };
+  sctd?: { rate: number };
 }
 
 /**
- * Oregon's TriMet / Lane Transit District payroll excises — EMPLOYER-paid
- * (Oregon's own guide: "The transit tax is imposed directly on the
- * employer"), on payroll for services performed within the district.
- * Dispatched off certificate.locality ('TriMet' or 'LTD'), the same
- * caller-resolved-locality shape as Newark's and Missouri's local taxes.
- *
- * TriMet rounds DOWN to the nearest cent, not this project's usual
- * round-half-up — Oregon's own Combined Payroll Tax Report Instructions,
- * quoted verbatim: "Multiply box 5a by box 6a. Round down to the nearest
- * cent." Applied to LTD too, since the combined report's own box-6a/6b
- * instructions for the two districts are structurally parallel and no
- * contrary instruction was found for LTD specifically — disclosed as an
- * assumption, not independently confirmed for LTD's own box.
+ * Every Oregon local transit payroll district this engine knows how to
+ * compute, keyed by the certificate.locality value geocode/districts.ts
+ * resolves. TriMet and LTD are administered through Oregon's own
+ * Combined Payroll Tax Report, whose explicit instruction ("round down to
+ * the nearest cent") both districts' boxes share. The other four — Canby,
+ * Sandy, SMART/Wilsonville, SCTD — are administered independently by each
+ * city/district, and none of their own guides state a rounding rule (see
+ * data/states/OR-2026.json's tripDistrictPayrollTaxes entries for each),
+ * so those four use this project's ordinary round-half-up instead of
+ * assuming TriMet's convention carries over to a government that never
+ * said so.
+ */
+const OR_TRANSIT_DISTRICTS: Record<
+  string,
+  { configKey: keyof ORTransitDistrictConfig; name: string; idSuffix: string; roundsDown: boolean }
+> = {
+  TriMet: { configKey: 'triMet', name: 'TriMet Transit District Tax', idSuffix: 'TRIMET_ER', roundsDown: true },
+  LTD: { configKey: 'laneTransit', name: 'Lane Transit District Tax', idSuffix: 'LTD_ER', roundsDown: true },
+  CanbyTransit: { configKey: 'canby', name: 'Canby Area Transit Tax', idSuffix: 'CANBY_TRANSIT_ER', roundsDown: false },
+  SandyTransit: { configKey: 'sandy', name: 'Sandy Transit Tax', idSuffix: 'SANDY_TRANSIT_ER', roundsDown: false },
+  SMART: { configKey: 'wilsonville', name: 'Wilsonville (SMART) Transit Tax', idSuffix: 'SMART_ER', roundsDown: false },
+  SCTD: { configKey: 'sctd', name: 'South Clackamas Transportation District Tax', idSuffix: 'SCTD_ER', roundsDown: false },
+};
+
+/**
+ * Oregon's local transit payroll excises — EMPLOYER-paid (Oregon's own
+ * guide: "The transit tax is imposed directly on the employer"), on
+ * payroll for services performed within the district. Dispatched off
+ * certificate.locality, the same caller-resolved-locality shape as
+ * Newark's and Missouri's local taxes. See OR_TRANSIT_DISTRICTS above for
+ * which of Oregon's six payroll-tax-funded districts this covers and
+ * which rounding rule applies to each.
  */
 function oregonTransitDistrictTaxEmployer(
   input: PaycheckInput,
@@ -6119,28 +6142,28 @@ function oregonTransitDistrictTaxEmployer(
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  const district = cert.locality;
-  if (district !== 'TriMet' && district !== 'LTD') return null;
+  const district = typeof cert.locality === 'string' ? cert.locality : undefined;
+  const meta = district ? OR_TRANSIT_DISTRICTS[district] : undefined;
+  if (!meta) return null;
 
   const cfg = rules.tripDistrictPayrollTaxes as ORTransitDistrictConfig | undefined;
-  if (!cfg) return null;
-  const rate = district === 'TriMet' ? cfg.triMet?.rate : cfg.laneTransit?.rate;
+  const rate = cfg?.[meta.configKey]?.rate;
   if (rate === undefined) return null;
 
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const taxableWages = ctx.taxableWagesFor(exempt);
-  const amount = Math.floor(taxableWages * rate);
-  const name = district === 'TriMet' ? 'TriMet Transit District Tax' : 'Lane Transit District Tax';
-  const idSuffix = district === 'TriMet' ? 'TRIMET_ER' : 'LTD_ER';
+  const amount = meta.roundsDown ? Math.floor(taxableWages * rate) : roundHalfUp(taxableWages * rate);
 
   return {
-    id: idSuffix,
-    name,
+    id: meta.idSuffix,
+    name: meta.name,
     payer: 'employer',
     jurisdiction: 'local',
     taxableWages,
     amount,
-    detail: `${fmt(taxableWages)} @ ${(rate * 100).toFixed(4)}%, rounded DOWN to the nearest cent per Oregon's own instructions`,
+    detail: meta.roundsDown
+      ? `${fmt(taxableWages)} @ ${(rate * 100).toFixed(4)}%, rounded DOWN to the nearest cent per Oregon's own instructions`
+      : `${fmt(taxableWages)} @ ${(rate * 100).toFixed(4)}%`,
   };
 }
 

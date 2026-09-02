@@ -142,9 +142,54 @@
       "district": "Lane County Mass Transit District (Eugene/Springfield area)",
       "confidence": "UPGRADED to primary_source_confirmed this session, same document as TriMet: 'Lane Transit District (LTD) tax rate is 0.0080.'"
     },
+    "canby": {
+      "rate": 0.006,
+      "district": "Canby Area Transit (CAT) district — the Canby URBAN GROWTH BOUNDARY, not simply Canby city limits; explicitly described that way by the city's own guide as 'an area including and extending somewhat beyond the city limits of Canby.'",
+      "roundingRule": "Not specified by Canby's own guide (unlike TriMet/LTD, which are administered through Oregon's own Combined Payroll Tax Report and its explicit 'round down' instruction). Canby administers this tax itself, independently of the state system, so this project's ordinary round-half-up is used instead — disclosed as an assumption, not confirmed either way for this city specifically.",
+      "confidence": "primary_source_confirmed 2026-09-03 -- fetched Canby's own 'Canby Area Transit Taxes: A guide for businesses' PDF (canbyoregon.gov) directly. Quoted verbatim: 'The tax rate is 0.6%. That is $6.00 for every $1,000 of taxable wages (multiplication factor = .0060).'",
+      "source": {
+        "title": "Canby Area Transit Taxes: A guide for businesses",
+        "url": "https://www.canbyoregon.gov/sites/default/files/fileattachments/transit_tax/page/2041/transit_tax_guide_for_businesses.pdf",
+        "verifiedOn": "2026-09-03"
+      }
+    },
+    "sandy": {
+      "rate": 0.006,
+      "district": "Sandy Transit Tax / Sandy Area Metro (SAM) — Sandy's own CITY LIMITS, confirmed directly (unlike Canby's UGB-based boundary): 'Anyone who has self-employment earnings from business or service activities performed in the Sandy city limits.'",
+      "roundingRule": "Not specified by Sandy's own guide — same disclosed assumption as Canby's (this project's ordinary round-half-up, not confirmed against a city-specific instruction).",
+      "confidence": "primary_source_confirmed 2026-09-03 -- fetched the City of Sandy's own 'Transit Tax Instructions' PDF (ci.sandy.or.us) directly. Quoted verbatim: 'The tax rate is .006 (6/10ths of one percent)... (Multiplication Factor = .006).'",
+      "source": {
+        "title": "Sandy Area Metro (SAM) Payroll and Self-Employment Tax Instructions",
+        "url": "https://www.ci.sandy.or.us/sites/default/files/fileattachments/economic_development/page/4671/transit_tax_instructions.pdf",
+        "verifiedOn": "2026-09-03"
+      }
+    },
+    "wilsonville": {
+      "rate": 0.005,
+      "district": "South Metro Area Regional Transit (SMART) — Wilsonville's own city limits, including the Charbonneau district (annexed into the city).",
+      "roundingRule": "Not specified by Wilsonville's own guide — same disclosed assumption as Canby's/Sandy's.",
+      "confidence": "cross_source_confirmed 2026-09-03 -- multiple sources (Wilsonville's own finance department page and independent aggregators) agree on 0.5% for 2026; the city's own PDF guide was not independently text-extracted this pass the way Canby's and Sandy's were, so this sits one tier below those two.",
+      "source": {
+        "title": "City of Wilsonville Transit Payroll Tax Information",
+        "url": "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information",
+        "verifiedOn": "2026-09-03"
+      }
+    },
+    "sctd": {
+      "rate": 0.005,
+      "district": "South Clackamas Transportation District (SCTD, formerly Molalla Transportation District) — a large rural service area around Molalla in southern Clackamas County, well beyond Molalla's own city limits (confirmed: SCTD's own boundary map shows coverage extending along Hwy 211/213 through unincorporated county land).",
+      "roundingRule": "Not specified — same disclosed assumption as Canby's/Sandy's/Wilsonville's.",
+      "confidence": "primary_source_confirmed 2026-09-03 -- fetched SCTD's own actual 2026 Quarterly Payroll Tax Report form (sctd.org) directly; it states the rate as '.005' in the form itself, not a secondary description of it.",
+      "source": {
+        "title": "SCTD 2026 Quarterly Payroll Tax Report",
+        "url": "https://irp.cdn-website.com/b0159101/files/uploaded/2026+Quarterly+Payroll+Tax+Report-Fillable+-34008713.pdf",
+        "verifiedOn": "2026-09-03"
+      }
+    },
     "exemptEmployers": ["Federal credit unions", "Public school districts", "501(c)(3) nonprofits (except hospitals)", "Insurance companies (except domestic insurers)", "Domestic service in a private home"],
     "ltdAdditionalExemptions": ["Public education districts", "Public special service and utility districts", "Port authorities", "Fire districts"],
-    "wiredIntoCalcCode": "CLOSED this session via oregonTransitDistrictTaxEmployer() in state.ts, dispatched off certificate.locality ('TriMet' or 'LTD') the same caller-resolved-locality shape as Newark's and Missouri's local taxes. Rounds DOWN to the nearest cent per Oregon's own instructions (Math.floor, not roundHalfUp) — see tests/engine.test.ts, describe('Oregon').",
+    "otherDistrictsCheckedAndExcluded": "Researched nationally first: this 'district funds itself via employer payroll tax' mechanism is genuinely Oregon-specific (no other state does this). Within Oregon, every OTHER transportation district besides the six above (Basin Transit/Klamath Falls, Grant County, Hood River County, Lincoln County, Rogue Valley/Medford, Salem Area Mass Transit/SAMTD, Sunset Empire/Clatsop County, Tillamook County) was checked and funds itself via PROPERTY tax instead -- directly confirmed for Tillamook ('a property tax levy of twenty cents per thousand assessed valuation'), Hood River County ('local property tax, fare revenue... Federal and State funds', no payroll tax anywhere in its own budget materials), and Basin Transit (30% from 'a local property tax rate of $0.48 per $1,000'; its own 'payroll tax' references turned out to be Oregon's existing STATEWIDE transit tax, already modelled separately as statewideTransitTax above, not a district-specific one). The remaining three (Grant County, Lincoln County, Sunset Empire) share the identical rural-single-county-district profile as the three confirmed above and were NOT independently re-verified one-by-one this pass -- disclosed as pattern-matched, not exhaustively primary-sourced the way the confirmed three are.",
+    "wiredIntoCalcCode": "CLOSED this session via oregonTransitDistrictTaxEmployer() in state.ts, dispatched off certificate.locality ('TriMet', 'LTD', 'SCTD', 'CanbyTransit', 'SandyTransit', or 'SMART') the same caller-resolved-locality shape as Newark's and Missouri's local taxes. TriMet/LTD round DOWN to the nearest cent per Oregon's own instructions (Math.floor); the other four use this project's ordinary round-half-up per the roundingRule disclosures above — see tests/engine.test.ts, describe('Oregon').",
     "source": {
       "title": "2026 Oregon Combined Payroll Tax Report Instructions",
       "url": "https://www.oregon.gov/dor/forms/FormsPubs/combined-payroll_211-155-2_2026.pdf",

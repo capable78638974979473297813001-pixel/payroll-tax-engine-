@@ -262,8 +262,8 @@ the publishing government's own service:
 | --- | --- | --- |
 | Portland Metro | Metro Supportive Housing Services (`certificate.metroDistrict`) | Metro's own RLIS boundary service (live query) |
 | Ohio JEDDs / JEDZs | JEDD income tax (`certificate.workJEDDId`) | Ohio's statewide JEDD/JEDZ layer on maps.ohio.gov, 142 zones (live query) |
-| Lane Transit District | LTD transit payroll excise (`certificate.locality = 'LTD'`) | RLID's (Lane County's regional GIS consortium) boundary service, layer "LTD Service Area" (live query) |
-| TriMet | TriMet transit payroll excise (`certificate.locality = 'TriMet'`) | TriMet's own boundary file (developer.trimet.org/gis), vendored locally and checked with point-in-polygon — see below |
+| TriMet, LTD, SCTD | Oregon transit payroll excises (`certificate.locality`) | ODOT's own statewide transportation-jurisdictions layer, every OR transit district as one live-queryable source — see below |
+| Canby | Canby's transit payroll excise (`certificate.locality = 'CanbyTransit'`) | Oregon's own statewide Urban Growth Boundary layer, published by DLCD (live query) — see below |
 
 The Ohio case is the sharpest illustration of why this matters. A JEDD
 lets a municipality tax income earned on adjoining **unincorporated**
@@ -278,44 +278,69 @@ The boundary layer and the rate file join on Ohio's own `jedd_id`, not on
 a name, so no string matching sits between "which zone contains this
 point" and "what does that zone charge".
 
-## TriMet and Lane Transit District — resolved 2026-09-03
+## Oregon's local transit payroll taxes — resolved fully 2026-09-03
 
-Both levy real transit payroll taxes and both used to sit in "still not
-resolved" below, because neither publishes its boundary as a service that
-can be queried per address the way Metro and Ohio's JEDDs do. Checked
-each separately rather than assuming the same answer for both, since they
-turned out to be genuinely different:
+Started as "close the TriMet/LTD gap" and grew once the obvious follow-up
+question was asked: is this Oregon-only, or does the whole USA need the
+same treatment? Researched nationally first — this "a district funds
+itself via employer payroll tax instead of property/sales tax" mechanism
+turns out to be genuinely Oregon-specific, no other state does it — but
+Oregon itself had more of it than this project had modelled: not just
+TriMet and LTD, but **Canby, Sandy, Wilsonville (SMART), and South
+Clackamas (SCTD)** all levy the same kind of employer excise, previously
+completely unmodelled (not even a disclosed knownGap).
 
-- **Lane Transit District** IS a live query after all — just not
-  published by LTD itself. RLID, the Lane County regional GIS consortium
-  (run by LCOG), carries a named "LTD Service Area" layer inside its own
-  `Regional/Boundaries` service, alongside county-run ambulance, fire, and
-  school-district boundary layers. Verified live both directions: LTD's
-  own headquarters (3500 E 17th Ave, Eugene) intersects it; downtown
-  Portland, nowhere near Lane County, does not. `isInsideLaneTransitDistrict()`
-  in `geocode/districts.ts`.
-- **TriMet** genuinely is vendored-only — confirmed no live service exists
-  anywhere (Metro's own RLIS carries City Limits/County/Metro Boundary/UGB
-  layers but no transit-district layer; PortlandMaps' transit service
-  publishes routes and stops, not the district). Fetched TriMet's own
-  official boundary file directly (developer.trimet.org/gis/data/tm_boundary.kml
-  — a single simple polygon, 6,207 vertices, no holes), converted it to a
-  coordinate array committed at `data/local/OR-trimet-boundary-2026.json`,
-  and added a hand-written ray-casting point-in-polygon check
-  (`isInsideTriMetDistrict()`) — this project's zero-dependency stance
-  means writing that by hand rather than pulling in a geometry library,
-  and a single simple polygon doesn't need more than that. This is a real
-  refresh commitment (see that data file's own `$comment`), not a live
-  lookup, but TriMet's own district boundary changes rarely.
+Checked Oregon's OTHER transportation districts too, so as not to guess
+which ones belonged on this list: Basin Transit (Klamath Falls), Grant
+County, Hood River County, Lincoln County, Rogue Valley (Medford), Salem
+Area Mass Transit (SAMTD), Sunset Empire (Clatsop County), and Tillamook
+County. Confirmed directly that three of these fund themselves via
+PROPERTY tax, not payroll — Tillamook ("a property tax levy of twenty
+cents per thousand assessed valuation"), Hood River County ("local
+property tax, fare revenue... Federal and State funds", no payroll
+mention anywhere), and Basin Transit (30% from "a local property tax rate
+of $0.48 per $1,000"; its own "payroll tax" references turned out to be
+Oregon's existing STATEWIDE transit tax, already modelled separately, not
+a district-specific one). The remaining three share the identical
+rural-single-county profile and were not individually re-verified — that
+part is pattern-matched, not exhaustively primary-sourced.
 
-Verified end to end through `calculatePaycheck()` itself, not just the
-boundary check in isolation: a real Portland work address (1900 SW 4th
-Ave) resolves `certificate.locality = 'TriMet'` and produces a real
-`TRIMET_ER` tax line (0.8237% of wages); a real Eugene work address (3500
-E 17th Ave, LTD's own headquarters) resolves `certificate.locality =
-'LTD'` and produces a real `LTD_ER` line (0.8000%); a Salem work address,
-inside neither district, produces neither line and nothing in
-`notResolvable`.
+**The boundary architecture changed too, for the better.** The original
+TriMet/LTD work (see git history) resolved LTD against RLID's own
+regional service and TriMet against a vendored copy of its KML boundary
+file with a hand-written point-in-polygon check — both worked. Then,
+while sourcing SCTD's boundary, a single better source turned up: ODOT's
+own statewide "jurisdictions" layer (`gis.odot.state.or.us`) carries
+EVERY Oregon transportation district — payroll-funded and property-funded
+alike — as named polygons. `oregonTransitDistrictAtPoint()` in
+`geocode/districts.ts` now queries this one layer for TriMet, LTD, and
+SCTD together, mapping only the payroll-funded subset to a locality value
+and deliberately leaving the property-funded ones unmatched (setting a
+locality for one of those would fabricate a tax that doesn't exist). This
+replaced both the RLID query and the vendored TriMet file — the vendored
+file is gone entirely, along with the refresh commitment it implied; a
+live query never goes stale.
+
+Canby is the one exception: its own transit-tax guide states the
+boundary is "the Canby Urban Growth Boundary — an area including and
+extending somewhat beyond the city limits of Canby," which is NOT the
+same polygon as the "Canby" entry in ODOT's jurisdictions layer (that one
+is plain city limits) and genuinely isn't in that layer under any name.
+`isInsideCanbyTransitDistrict()` queries a second live source instead:
+Oregon's own statewide UGB layer, published by DLCD. Sandy and
+Wilsonville, by contrast, really are just their own city limits (each
+city's own guide says so directly) — no special boundary lookup needed at
+all, just ordinary Census incorporated-place matching, the same mechanism
+Denver's and Seattle's local taxes already use.
+
+Verified end to end through `calculatePaycheck()` itself for all six
+districts, not just the boundary checks in isolation: real work addresses
+in Portland, Eugene, Molalla, Canby, Sandy, and Wilsonville each resolve
+the correct `certificate.locality` and produce the correct tax line
+(`TRIMET_ER` 0.8237%, `LTD_ER` 0.8000%, `SCTD_ER` 0.5000%,
+`CANBY_TRANSIT_ER` 0.6000%, `SANDY_TRANSIT_ER` 0.6000%, `SMART_ER`
+0.5000%); a Salem work address, inside none of the six, produces none of
+the six lines and nothing in `notResolvable`.
 
 ## Still not resolved, and why
 

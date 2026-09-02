@@ -6369,6 +6369,67 @@ describe('Oregon', () => {
     assert.equal(amountOf(r, 'LTD_ER'), dollars(8));
   });
 
+  test('Canby Area Transit tax rounds HALF-UP, not down like TriMet/LTD', () => {
+    // 837.50 x 0.006 = 5.025 -> rounds to $5.03 under this project's
+    // ordinary round-half-up (Math.round(502.5) = 503 cents), NOT $5.02
+    // the way TriMet's floor-based rounding would give.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(837.5) }],
+        workState: { code: 'OR', certificate: { locality: 'CanbyTransit' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'CANBY_TRANSIT_ER'), dollars(5.03));
+    assert.equal(r.taxes.some((t) => t.id === 'TRIMET_ER'), false);
+  });
+
+  test('Sandy transit tax fires off certificate.locality = SandyTransit', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR', certificate: { locality: 'SandyTransit' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'SANDY_TRANSIT_ER'), dollars(6));
+  });
+
+  test('Wilsonville (SMART) transit tax fires off certificate.locality = SMART', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR', certificate: { locality: 'SMART' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'SMART_ER'), dollars(5));
+  });
+
+  test('South Clackamas Transportation District tax fires off certificate.locality = SCTD', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR', certificate: { locality: 'SCTD' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'SCTD_ER'), dollars(5));
+  });
+
+  test('an unrecognised certificate.locality produces no Oregon transit district tax line at all', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR', certificate: { locality: 'SomeOtherCity' } },
+      }),
+    );
+    for (const id of ['TRIMET_ER', 'LTD_ER', 'CANBY_TRANSIT_ER', 'SANDY_TRANSIT_ER', 'SMART_ER', 'SCTD_ER']) {
+      assert.equal(r.taxes.some((t) => t.id === id), false, `${id} should not fire`);
+    }
+  });
+
   test('Metro Supportive Housing Services Tax: nothing below the $200k YTD trigger, taxed above it', () => {
     // $5,000 this week, $199,000 already YTD -> crosses $200,000 mid-cheque:
     // only the $4,000 above the trigger is taxed, at 1% = $40.

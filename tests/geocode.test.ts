@@ -42,10 +42,10 @@ import {
   resolveRooftop,
 } from '../geocode/rooftop.ts';
 import {
-  isInsideLaneTransitDistrict,
+  isInsideCanbyTransitDistrict,
   isInsidePortlandMetro,
-  isInsideTriMetDistrict,
   jeddAtPoint,
+  oregonTransitDistrictAtPoint,
 } from '../geocode/districts.ts';
 
 const CHECK_DATE = '2026-08-15';
@@ -1621,40 +1621,71 @@ describe('districts.ts — taxing boundaries that are not Census geographies (mo
     });
   });
 
-  describe('isInsideLaneTransitDistrict — RLID\'s own boundary service', () => {
-    test('a point inside LTD comes back inside', async () => {
-      // LTD's own headquarters, verified live against the real service.
-      const result = await isInsideLaneTransitDistrict(44.041958737191, -123.041500605697, json({ objectIds: [126] }), FAST);
+  describe("oregonTransitDistrictAtPoint — ODOT's unified statewide jurisdictions layer", () => {
+    /** The real shape ODOT's own service answers with — a point can be inside more than one nested jurisdiction at once (e.g. a county AND a transit district), so the payroll-tax lookup has to scan every feature, not just trust features[0]. */
+    const withNames = (...names: string[]) =>
+      json({ features: names.map((JRSDCT_NM) => ({ attributes: { JRSDCT_NM } })) });
+
+    test('a Portland point maps to TriMet by name', async () => {
+      const result = await oregonTransitDistrictAtPoint(
+        45.5152,
+        -122.6784,
+        withNames('Portland', 'Multnomah County', 'Tri County Metropolitan Mass Transit District of Oregon'),
+        FAST,
+      );
+      assert.deepEqual(result, { attempted: true, locality: 'TriMet' });
+    });
+
+    test('a Eugene point maps to LTD by name', async () => {
+      const result = await oregonTransitDistrictAtPoint(44.0521, -123.0868, withNames('Eugene', 'Lane Transit District'), FAST);
+      assert.deepEqual(result, { attempted: true, locality: 'LTD' });
+    });
+
+    test('a Molalla point maps to SCTD, not to the OTHER real feature (Molalla River School District) also returned', async () => {
+      const result = await oregonTransitDistrictAtPoint(
+        45.1487,
+        -122.5762,
+        withNames('Molalla', 'Clackamas County', 'South Clackamas Transit District', 'Molalla River School District'),
+        FAST,
+      );
+      assert.deepEqual(result, { attempted: true, locality: 'SCTD' });
+    });
+
+    test('a point inside a PROPERTY-tax-funded district (Rogue Valley) correctly answers no payroll-tax locality, not unknown', async () => {
+      const result = await oregonTransitDistrictAtPoint(42.3265, -122.8756, withNames('Medford', 'Rogue Valley Transportation District'), FAST);
+      assert.deepEqual(result, { attempted: true, locality: null });
+    });
+
+    test('a point inside no jurisdiction at all answers no locality', async () => {
+      const result = await oregonTransitDistrictAtPoint(45.51224, -122.6784, json({ features: [] }), FAST);
+      assert.deepEqual(result, { attempted: true, locality: null });
+    });
+
+    test('an unreachable service is attempted: false — distinct from "no payroll-tax district here"', async () => {
+      const result = await oregonTransitDistrictAtPoint(45.5152, -122.6784, throws, FAST);
+      assert.deepEqual(result, { attempted: false, locality: null });
+    });
+  });
+
+  describe("isInsideCanbyTransitDistrict — Oregon's own statewide UGB layer (DLCD)", () => {
+    test("a point inside Canby's own UGB comes back inside", async () => {
+      const result = await isInsideCanbyTransitDistrict(45.2607, -122.6903, json({ features: [{ attributes: { NAME: 'Canby' } }] }), FAST);
       assert.deepEqual(result, { attempted: true, inside: true });
     });
 
-    test('a point outside (Portland, nowhere near Lane County) comes back outside, not unknown', async () => {
-      const result = await isInsideLaneTransitDistrict(45.51224, -122.6784, json({ objectIds: [] }), FAST);
+    test("a point inside a DIFFERENT city's UGB (not Canby's) comes back outside, not a false positive", async () => {
+      const result = await isInsideCanbyTransitDistrict(45.5152, -122.6784, json({ features: [{ attributes: { NAME: 'Metro' } }] }), FAST);
+      assert.deepEqual(result, { attempted: true, inside: false });
+    });
+
+    test('a point inside no UGB at all comes back outside', async () => {
+      const result = await isInsideCanbyTransitDistrict(44.0582, -121.3153, json({ features: [] }), FAST);
       assert.deepEqual(result, { attempted: true, inside: false });
     });
 
     test('an unreachable service is attempted: false — distinct from "outside the district"', async () => {
-      const result = await isInsideLaneTransitDistrict(44.041958737191, -123.041500605697, throws, FAST);
+      const result = await isInsideCanbyTransitDistrict(45.2607, -122.6903, throws, FAST);
       assert.deepEqual(result, { attempted: false, inside: false });
-    });
-  });
-
-  describe('isInsideTriMetDistrict — vendored boundary, local point-in-polygon (no network)', () => {
-    test('downtown Portland, well inside the district, comes back inside', () => {
-      assert.deepEqual(isInsideTriMetDistrict(45.5152, -122.6784), { attempted: true, inside: true });
-    });
-
-    test('Salem, ~50 miles south and outside the district, comes back outside', () => {
-      assert.deepEqual(isInsideTriMetDistrict(44.9429, -123.0351), { attempted: true, inside: false });
-    });
-
-    test('Bend, the other side of the Cascades, comes back outside', () => {
-      assert.deepEqual(isInsideTriMetDistrict(44.0582, -121.3153), { attempted: true, inside: false });
-    });
-
-    test('is synchronous and always attempted: true — there is no network call that can fail', () => {
-      const result = isInsideTriMetDistrict(45.5152, -122.6784);
-      assert.equal(result.attempted, true);
     });
   });
 });

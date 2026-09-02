@@ -331,6 +331,16 @@ export interface ResolvedJurisdiction {
      * Setting the locality is what makes those inputs reachable at all.
      */
     seattle: boolean;
+    /**
+     * Sandy's and Wilsonville's (SMART) local transit payroll excises —
+     * certificate.locality 'SandyTransit'/'SMART'. Unlike TriMet/LTD/SCTD
+     * (special districts with their own non-Census boundaries — see
+     * districts.ts), each of these two IS simply its own city limits,
+     * confirmed directly against each city's own transit-tax guide, so
+     * ordinary Census incorporated-place matching resolves them.
+     */
+    sandy: boolean;
+    wilsonville: boolean;
   };
 }
 
@@ -370,6 +380,8 @@ export function resolveJurisdiction(
       denver: false,
       seattle: false,
       wilmington: false,
+      sandy: false,
+      wilsonville: false,
     },
   };
 
@@ -408,6 +420,8 @@ export function resolveJurisdiction(
   }
   if (state === 'OR') {
     result.flags.multnomahCounty = countiesInclude(geo.counties, 'Multnomah');
+    result.flags.sandy = placesInclude(geo.incorporatedPlaces, 'Sandy');
+    result.flags.wilsonville = placesInclude(geo.incorporatedPlaces, 'Wilsonville');
   }
   if (state === 'AL') {
     result.alMunicipality = matchALMunicipalityByName(geo.incorporatedPlaces, checkDate);
