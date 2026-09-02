@@ -2658,9 +2658,15 @@ function bracketPerPeriodGross(
  * Montana's supplemental wages "Method 3" — a flat 5.00% of the supplemental
  * payment alone, the only one of the guide's three separately-paid-
  * supplemental methods that doesn't require reaching into a different
- * payroll period's wages (Methods 1/2 both combine the supplemental with
- * SOME period's regular wages first — not modelled, same class of gap as
- * Kentucky's supplementalTreatment.engineGap). Returns null when there's no
+ * payroll period's wages. Methods 1/2 (which DO combine the supplemental
+ * with some period's regular wages first) are wired separately, generically,
+ * via aggregateWithPriorRegularPayment() — gated on
+ * rules.supplementalAggregation.supported (true for Montana, see
+ * MT-2026.json's own comment) and firing only when the caller supplies
+ * input.priorRegularPayment; Method 3 here is what fires instead when no
+ * prior payment is given, not a stand-in for Methods 1/2 being unmodelled.
+ * Proven for both paths in tests/engine.test.ts, describe('Montana Methods
+ * 1/2 and the New Mexico monthly floor'). Returns null when there's no
  * supplemental income, or when MW-4 line 4 (specifiedWithholding) is active
  * — the form's own instruction to skip lines 1-3 when line 4 is used applies
  * here too: a flat specified amount replaces ALL of this employee's
@@ -4043,8 +4049,14 @@ function resolveMFJMaritalStatus(cert: Record<string, unknown>): 'single' | 'mar
  * paid at the SAME time as regular wages already aggregate correctly
  * through this function via the normal taxableWagesFor() base, no
  * special-casing needed — the same convention as Kentucky/Idaho/
- * Connecticut/Iowa. Nebraska's own supplemental rule (flat 3.5%,
- * documented in NE-2026.json) is likewise not modelled here.
+ * Connecticut/Iowa. Nebraska's own OPTIONAL flat-3.5% supplemental rule
+ * (Circular EN permits it as an alternative to aggregation, employer's
+ * choice) is wired separately and generically via
+ * flatRateSupplementalFromConfig() off rules.supplementalWages, gated on
+ * input.employer.supplementalFlatRateElection — not handled inside this
+ * function, but not unmodelled either. See NE-2026.json's own
+ * supplementalWages block and tests/engine.test.ts's "Nebraska's elected
+ * 3.5% is its own figure, not its top marginal rate".
  */
 function bracketPerPeriodAllowance(
   input: PaycheckInput,
