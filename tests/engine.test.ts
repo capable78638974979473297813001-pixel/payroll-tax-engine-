@@ -4080,12 +4080,27 @@ describe('Connecticut', () => {
     );
     // Annualized $52,000: exemption $0 (Code A phases to $0 at $35,000);
     // initial tax (Table B) $2,110; 2% phase-out add-back (Table C) $25;
-    // recapture (Table D) $0; credit (Table E) 0% (phased to $0 by $25,000).
-    // ($2,110+$25) ÷ 52 = $41.0577 → $41.06.
-    assert.equal(amountOf(r, 'CT_SIT'), dollars(41.06));
+    // recapture (Table D) $0; withholding $2,135. Table E credit at
+    // $52,000 (Code A): 1% (the $52,000-$52,500 band — BUG FIXED
+    // 2026-09-02, this file's own tableE data was previously missing most
+    // of Table E's real bands, including this one, and reached 0% far too
+    // early; see CT-2026.json's own knownGaps for the full fix, sourced
+    // directly from TPG-211's own Table E page). $2,135 × 0.99 = $2,113.65
+    // ÷ 52 = $40.6471... → $40.65.
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(40.65));
   });
 
-  test('Code D always gets $0 exemption and $0 credit regardless of income — same result as Code A here', () => {
+  test('Code D always gets $0 exemption and $0 credit regardless of income', () => {
+    // Same $2,135 withholding as Code A's own $52,000 case above (same
+    // income, and Code D's own $0 exemption matches Code A's at this
+    // level too), but Code D's credit is ALWAYS 0% (the 'ZERO' sentinel),
+    // not read from Table E at all — so unlike Code A's now-correctly-
+    // computed 1% credit at this exact income, Code D pays the full
+    // $2,135 ÷ 52 = $41.0577 → $41.06, genuinely more than Code A's
+    // $40.65 here. (Before the Table E fix above, both used to look the
+    // same only because Code A's OWN credit was wrongly computed as 0% at
+    // this income too — that coincidence is gone now that Table E is
+    // correct.)
     const r = calculatePaycheck(
       input({
         payFrequency: 'weekly',
@@ -4106,9 +4121,12 @@ describe('Connecticut', () => {
     );
     // Exemption at $30,000 (Code F): $14,000 → taxable $16,000. Table B
     // (A/D/F schedule): $200 + 4.5% × $6,000 = $470. Table C: $0 (below
-    // $56,500). Table D: $0. Table E credit at $30,000: 1% (the
-    // $26,500-$31,300 band). $470 × 0.99 = $465.30.
-    assert.equal(amountOf(r, 'CT_SIT'), dollars(465.3));
+    // $56,500). Table D: $0. Table E credit at $30,000 (Code F): 15% (the
+    // $26,500-$31,300 band — BUG FIXED 2026-09-02, this file's own
+    // tableE data previously had this band wrong at 1%; see
+    // CT-2026.json's own knownGaps for the full fix, sourced directly
+    // from TPG-211's own Table E page). $470 × 0.85 = $399.50.
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(399.5));
   });
 
   test('Code C, annual $600,000: high enough to trigger the Table D tax recapture', () => {
@@ -4171,7 +4189,7 @@ describe('Connecticut', () => {
         ...ctState({ withholdingCode: 'A' }),
       }),
     );
-    assert.equal(amountOf(base, 'CT_SIT'), dollars(41.06));
+    assert.equal(amountOf(base, 'CT_SIT'), dollars(40.65));
 
     const withLine2 = calculatePaycheck(
       input({
@@ -4180,7 +4198,7 @@ describe('Connecticut', () => {
         ...ctState({ withholdingCode: 'A', additionalWithholding: dollars(10) }),
       }),
     );
-    assert.equal(amountOf(withLine2, 'CT_SIT'), dollars(51.06));
+    assert.equal(amountOf(withLine2, 'CT_SIT'), dollars(50.65));
 
     const withLine3 = calculatePaycheck(
       input({
@@ -4189,7 +4207,7 @@ describe('Connecticut', () => {
         ...ctState({ withholdingCode: 'A', reducedWithholding: dollars(10) }),
       }),
     );
-    assert.equal(amountOf(withLine3, 'CT_SIT'), dollars(31.06));
+    assert.equal(amountOf(withLine3, 'CT_SIT'), dollars(30.65));
 
     const line3ExceedsTax = calculatePaycheck(
       input({
@@ -4224,7 +4242,7 @@ describe('Connecticut', () => {
         ...ctState({ withholdingCode: 'A' }),
       }),
     );
-    assert.equal(amountOf(r, 'CT_SIT'), dollars(41.06));
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(40.65));
   });
 
   test('CT Paid Leave: 0.5%, capped at the same wage base as federal Social Security', () => {
@@ -4259,8 +4277,10 @@ describe('Connecticut', () => {
     );
     // Annualized $41,600 taxable (down from $52,000): Table B $200+4.5%×
     // $31,600=$1,622; Table C at $41,600: $0 (below $50,250); Table D: $0;
-    // credit 0%. $1,622 ÷ 52 = $31.19230... → $31.19.
-    assert.equal(amountOf(r, 'CT_SIT'), dollars(31.19));
+    // Table E credit at $41,600 (Code A): 10% (the $27,000-$48,000 band —
+    // BUG FIXED 2026-09-02, same Table E fix as the other CT tests above).
+    // $1,622 × 0.90 = $1,459.80 ÷ 52 = $28.0730... → $28.07.
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(28.07));
   });
 });
 

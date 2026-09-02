@@ -26,7 +26,7 @@
       "verifiedBy": "Downloaded and text-extracted directly (pdftotext -layout, a 39-page document). ENGINE-CONSUMED: all 16 withholding-calculation-rule steps, all 5 tables (A-E) for all 5 non-exempt codes, the flat-6.99%-no-form rule, the aggregation-only supplemental-wage rule (Examples 8-12), Line 2/Line 3 (additional/reduced withholding) semantics, and the federal-wages-conformity statement for 'gross Connecticut wages.'"
     },
     {
-      "title": "CT Paid Leave — Contributions",
+      "title": "CT Paid Leave \u2014 Contributions",
       "url": "https://www.ctpaidleave.org/how-ct-paid-leave-works/contributions",
       "verifiedOn": "2026-08-16",
       "verifiedBy": "Fetched directly. Verbatim: \"The CT Paid Leave Board of Directors has voted to maintain the contribution rate at 0.5% for 2026.\" Wage cap stated as \"until they reach the Social Security contribution limit\" without restating the dollar figure on this specific page -- cross-checked against this project's own data/federal/2026.json socialSecurity.wageBase ($184,500), which the CT Paid Leave Authority's own program design ties to by reference. NOTE: this means CT Paid Leave's wageBase in this file must be kept in sync with federal.json's SS wage base by definition, not just by coincidence -- flagged in knownGaps."
@@ -36,6 +36,12 @@
       "url": "https://portal.ct.gov/-/media/drs/forms/2026/wth/ct-w4_1225fillable.pdf?rev=9e9e0216cd394f579961e1d4cd5c7ab3&hash=4D496BCBD10659462D3799732B5A91F2",
       "verifiedOn": "2026-08-16",
       "verifiedBy": "Downloaded and text-extracted directly (pdftotext -layout) as a follow-up check after Scott asked whether this file was Symmetry-level -- the same discipline that caught a real bug in Idaho's build (Form ID W-4's Box C). This one came back clean: Line 1 (Withholding Code), Line 2 (additional withholding per pay period), and Line 3 (reduced withholding per pay period) match connecticutWithholdingCode()/applyAdditionalStateWithholding()/applyReducedStateWithholding() exactly, with no undiscovered checkbox or field. ALSO closed a real documentation-only gap: the Code-A/B/C/D/F-to-filing-status mapping this file previously only had from a secondary WebSearch synthesis is now primary-confirmed directly off the form: A = Married Filing Separately (or MFJ with both spouses working, mid-income), B = Head of Household, C = MFJ or Qualifying Surviving Spouse with a non-working spouse, F = Single, D = an elective highest-withholding option available to EVERY filing status (significant nonwage income, a nonresident with substantial other income, or a high-combined-income MFJ/MFS couple) -- not itself engine-consumed (certificate.withholdingCode is supplied directly by the caller), but confirms resolveCTCode()'s accepted letter set (A/B/C/D/F, with E routed through certificate.exempt) has no missing option, unlike Idaho's Box C gap."
+    },
+    {
+      "title": "TPG-211, 2026 Withholding Calculation Rules (Rev. 12/25)",
+      "url": "https://portal.ct.gov/-/media/drs/forms/2025/wth/tpg-211_1225.pdf?rev=e16ef13773ec42d4bf0afd2e192e0176&hash=CCF9990D8EE0AA580A11BC6E97235650",
+      "verifiedOn": "2026-09-02",
+      "verifiedBy": "Downloaded directly and text-extracted with pypdfium2 (WebFetch's own summarizer couldn't parse this specific PDF's compressed stream, same class of PDF hazard already documented elsewhere in this project). Page 6 of 6 is Table E - Personal Tax Credits in full, all four codes (A/B/C/F) side by side, every boundary/decimal pair -- closes this file's own previously-disclosed Table E gap outright (see connecticutTables.tableE and this file's knownGaps entry for the fix)."
     }
   ],
   "connecticutTables": {
@@ -2506,74 +2512,144 @@
           "credit": 0.75
         },
         {
-          "from": 12000,
-          "to": 15000,
+          "from": 12000.0,
+          "to": 15000.0,
+          "credit": 0.75
+        },
+        {
+          "from": 15000.0,
+          "to": 15500.0,
+          "credit": 0.7
+        },
+        {
+          "from": 15500.0,
+          "to": 16000.0,
           "credit": 0.65
         },
         {
-          "from": 15000,
-          "to": 15500,
+          "from": 16000.0,
+          "to": 16500.0,
+          "credit": 0.6
+        },
+        {
+          "from": 16500.0,
+          "to": 17000.0,
           "credit": 0.55
         },
         {
-          "from": 15500,
-          "to": 16000,
+          "from": 17000.0,
+          "to": 17500.0,
+          "credit": 0.5
+        },
+        {
+          "from": 17500.0,
+          "to": 18000.0,
           "credit": 0.45
         },
         {
-          "from": 16000,
-          "to": 16500,
+          "from": 18000.0,
+          "to": 18500.0,
+          "credit": 0.4
+        },
+        {
+          "from": 18500.0,
+          "to": 20000.0,
           "credit": 0.35
         },
         {
-          "from": 16500,
-          "to": 17000,
+          "from": 20000.0,
+          "to": 20500.0,
+          "credit": 0.3
+        },
+        {
+          "from": 20500.0,
+          "to": 21000.0,
           "credit": 0.25
         },
         {
-          "from": 17000,
-          "to": 17500,
+          "from": 21000.0,
+          "to": 21500.0,
+          "credit": 0.2
+        },
+        {
+          "from": 21500.0,
+          "to": 25000.0,
           "credit": 0.15
         },
         {
-          "from": 17500,
-          "to": 18000,
+          "from": 25000.0,
+          "to": 25500.0,
+          "credit": 0.14
+        },
+        {
+          "from": 25500.0,
+          "to": 26000.0,
           "credit": 0.13
         },
         {
-          "from": 18000,
-          "to": 18500,
+          "from": 26000.0,
+          "to": 26500.0,
+          "credit": 0.12
+        },
+        {
+          "from": 26500.0,
+          "to": 27000.0,
           "credit": 0.11
         },
         {
-          "from": 18500,
-          "to": 20000,
+          "from": 27000.0,
+          "to": 48000.0,
+          "credit": 0.1
+        },
+        {
+          "from": 48000.0,
+          "to": 48500.0,
           "credit": 0.09
         },
         {
-          "from": 20000,
-          "to": 20500,
+          "from": 48500.0,
+          "to": 49000.0,
+          "credit": 0.08
+        },
+        {
+          "from": 49000.0,
+          "to": 49500.0,
           "credit": 0.07
         },
         {
-          "from": 20500,
-          "to": 21000,
+          "from": 49500.0,
+          "to": 50000.0,
+          "credit": 0.06
+        },
+        {
+          "from": 50000.0,
+          "to": 50500.0,
           "credit": 0.05
         },
         {
-          "from": 21000,
-          "to": 21500,
+          "from": 50500.0,
+          "to": 51000.0,
+          "credit": 0.04
+        },
+        {
+          "from": 51000.0,
+          "to": 51500.0,
           "credit": 0.03
         },
         {
-          "from": 21500,
-          "to": 25000,
+          "from": 51500.0,
+          "to": 52000.0,
+          "credit": 0.02
+        },
+        {
+          "from": 52000.0,
+          "to": 52500.0,
           "credit": 0.01
         },
         {
-          "from": 25000,
+          "from": 52500.0,
           "to": null,
-          "credit": 0
+          "credit": 0.0
         }
       ],
       "B": [
@@ -2583,74 +2659,144 @@
           "credit": 0.75
         },
         {
-          "from": 19000,
-          "to": 24000,
+          "from": 19000.0,
+          "to": 24000.0,
+          "credit": 0.75
+        },
+        {
+          "from": 24000.0,
+          "to": 24500.0,
+          "credit": 0.7
+        },
+        {
+          "from": 24500.0,
+          "to": 25000.0,
           "credit": 0.65
         },
         {
-          "from": 24000,
-          "to": 24500,
+          "from": 25000.0,
+          "to": 25500.0,
+          "credit": 0.6
+        },
+        {
+          "from": 25500.0,
+          "to": 26000.0,
           "credit": 0.55
         },
         {
-          "from": 24500,
-          "to": 25000,
+          "from": 26000.0,
+          "to": 26500.0,
+          "credit": 0.5
+        },
+        {
+          "from": 26500.0,
+          "to": 27000.0,
           "credit": 0.45
         },
         {
-          "from": 25000,
-          "to": 25500,
+          "from": 27000.0,
+          "to": 27500.0,
+          "credit": 0.4
+        },
+        {
+          "from": 27500.0,
+          "to": 34000.0,
           "credit": 0.35
         },
         {
-          "from": 25500,
-          "to": 26000,
+          "from": 34000.0,
+          "to": 34500.0,
+          "credit": 0.3
+        },
+        {
+          "from": 34500.0,
+          "to": 35000.0,
           "credit": 0.25
         },
         {
-          "from": 26000,
-          "to": 26500,
+          "from": 35000.0,
+          "to": 35500.0,
+          "credit": 0.2
+        },
+        {
+          "from": 35500.0,
+          "to": 44000.0,
           "credit": 0.15
         },
         {
-          "from": 26500,
-          "to": 27000,
+          "from": 44000.0,
+          "to": 44500.0,
+          "credit": 0.14
+        },
+        {
+          "from": 44500.0,
+          "to": 45000.0,
           "credit": 0.13
         },
         {
-          "from": 27000,
-          "to": 27500,
+          "from": 45000.0,
+          "to": 45500.0,
+          "credit": 0.12
+        },
+        {
+          "from": 45500.0,
+          "to": 46000.0,
           "credit": 0.11
         },
         {
-          "from": 27500,
-          "to": 34000,
+          "from": 46000.0,
+          "to": 74000.0,
+          "credit": 0.1
+        },
+        {
+          "from": 74000.0,
+          "to": 74500.0,
           "credit": 0.09
         },
         {
-          "from": 34000,
-          "to": 34500,
+          "from": 74500.0,
+          "to": 75000.0,
+          "credit": 0.08
+        },
+        {
+          "from": 75000.0,
+          "to": 75500.0,
           "credit": 0.07
         },
         {
-          "from": 34500,
-          "to": 35000,
+          "from": 75500.0,
+          "to": 76000.0,
+          "credit": 0.06
+        },
+        {
+          "from": 76000.0,
+          "to": 76500.0,
           "credit": 0.05
         },
         {
-          "from": 35000,
-          "to": 35500,
+          "from": 76500.0,
+          "to": 77000.0,
+          "credit": 0.04
+        },
+        {
+          "from": 77000.0,
+          "to": 77500.0,
           "credit": 0.03
         },
         {
-          "from": 35500,
-          "to": 44000,
+          "from": 77500.0,
+          "to": 78000.0,
+          "credit": 0.02
+        },
+        {
+          "from": 78000.0,
+          "to": 78500.0,
           "credit": 0.01
         },
         {
-          "from": 44000,
+          "from": 78500.0,
           "to": null,
-          "credit": 0
+          "credit": 0.0
         }
       ],
       "C": [
@@ -2660,77 +2806,146 @@
           "credit": 0.75
         },
         {
-          "from": 24000,
-          "to": 30000,
+          "from": 24000.0,
+          "to": 30000.0,
+          "credit": 0.75
+        },
+        {
+          "from": 30000.0,
+          "to": 30500.0,
+          "credit": 0.7
+        },
+        {
+          "from": 30500.0,
+          "to": 31000.0,
           "credit": 0.65
         },
         {
-          "from": 30000,
-          "to": 30500,
+          "from": 31000.0,
+          "to": 31500.0,
+          "credit": 0.6
+        },
+        {
+          "from": 31500.0,
+          "to": 32000.0,
           "credit": 0.55
         },
         {
-          "from": 30500,
-          "to": 31000,
+          "from": 32000.0,
+          "to": 32500.0,
+          "credit": 0.5
+        },
+        {
+          "from": 32500.0,
+          "to": 33000.0,
           "credit": 0.45
         },
         {
-          "from": 31000,
-          "to": 31500,
+          "from": 33000.0,
+          "to": 33500.0,
+          "credit": 0.4
+        },
+        {
+          "from": 33500.0,
+          "to": 40000.0,
           "credit": 0.35
         },
         {
-          "from": 31500,
-          "to": 32000,
+          "from": 40000.0,
+          "to": 40500.0,
+          "credit": 0.3
+        },
+        {
+          "from": 40500.0,
+          "to": 41000.0,
           "credit": 0.25
         },
         {
-          "from": 32000,
-          "to": 32500,
+          "from": 41000.0,
+          "to": 41500.0,
+          "credit": 0.2
+        },
+        {
+          "from": 41500.0,
+          "to": 50000.0,
           "credit": 0.15
         },
         {
-          "from": 32500,
-          "to": 33000,
+          "from": 50000.0,
+          "to": 50500.0,
+          "credit": 0.14
+        },
+        {
+          "from": 50500.0,
+          "to": 51000.0,
           "credit": 0.13
         },
         {
-          "from": 33000,
-          "to": 33500,
+          "from": 51000.0,
+          "to": 51500.0,
+          "credit": 0.12
+        },
+        {
+          "from": 51500.0,
+          "to": 52000.0,
           "credit": 0.11
         },
         {
-          "from": 33500,
-          "to": 40000,
+          "from": 52000.0,
+          "to": 96000.0,
+          "credit": 0.1
+        },
+        {
+          "from": 96000.0,
+          "to": 96500.0,
           "credit": 0.09
         },
         {
-          "from": 40000,
-          "to": 40500,
+          "from": 96500.0,
+          "to": 97000.0,
+          "credit": 0.08
+        },
+        {
+          "from": 97000.0,
+          "to": 97500.0,
           "credit": 0.07
         },
         {
-          "from": 40500,
-          "to": 41000,
+          "from": 97500.0,
+          "to": 98000.0,
+          "credit": 0.06
+        },
+        {
+          "from": 98000.0,
+          "to": 98500.0,
           "credit": 0.05
         },
         {
-          "from": 41000,
-          "to": 41500,
+          "from": 98500.0,
+          "to": 99000.0,
+          "credit": 0.04
+        },
+        {
+          "from": 99000.0,
+          "to": 99500.0,
           "credit": 0.03
         },
         {
-          "from": 41500,
-          "to": 50000,
+          "from": 99500.0,
+          "to": 100000.0,
+          "credit": 0.02
+        },
+        {
+          "from": 100000.0,
+          "to": 100500.0,
           "credit": 0.01
         },
         {
-          "from": 50000,
+          "from": 100500.0,
           "to": null,
-          "credit": 0
+          "credit": 0.0
         }
       ],
-      "D": "ZERO",
       "F": [
         {
           "from": 0,
@@ -2738,76 +2953,147 @@
           "credit": 0.75
         },
         {
-          "from": 15000,
-          "to": 18800,
+          "from": 15000.0,
+          "to": 18800.0,
+          "credit": 0.75
+        },
+        {
+          "from": 18800.0,
+          "to": 19300.0,
+          "credit": 0.7
+        },
+        {
+          "from": 19300.0,
+          "to": 19800.0,
           "credit": 0.65
         },
         {
-          "from": 18800,
-          "to": 19300,
+          "from": 19800.0,
+          "to": 20300.0,
+          "credit": 0.6
+        },
+        {
+          "from": 20300.0,
+          "to": 20800.0,
           "credit": 0.55
         },
         {
-          "from": 19300,
-          "to": 19800,
+          "from": 20800.0,
+          "to": 21300.0,
+          "credit": 0.5
+        },
+        {
+          "from": 21300.0,
+          "to": 21800.0,
           "credit": 0.45
         },
         {
-          "from": 19800,
-          "to": 20300,
+          "from": 21800.0,
+          "to": 22300.0,
+          "credit": 0.4
+        },
+        {
+          "from": 22300.0,
+          "to": 25000.0,
           "credit": 0.35
         },
         {
-          "from": 20300,
-          "to": 20800,
+          "from": 25000.0,
+          "to": 25500.0,
+          "credit": 0.3
+        },
+        {
+          "from": 25500.0,
+          "to": 26000.0,
           "credit": 0.25
         },
         {
-          "from": 20800,
-          "to": 21300,
+          "from": 26000.0,
+          "to": 26500.0,
+          "credit": 0.2
+        },
+        {
+          "from": 26500.0,
+          "to": 31300.0,
           "credit": 0.15
         },
         {
-          "from": 21300,
-          "to": 21800,
+          "from": 31300.0,
+          "to": 31800.0,
+          "credit": 0.14
+        },
+        {
+          "from": 31800.0,
+          "to": 32300.0,
           "credit": 0.13
         },
         {
-          "from": 21800,
-          "to": 22300,
+          "from": 32300.0,
+          "to": 32800.0,
+          "credit": 0.12
+        },
+        {
+          "from": 32800.0,
+          "to": 33300.0,
           "credit": 0.11
         },
         {
-          "from": 22300,
-          "to": 25000,
+          "from": 33300.0,
+          "to": 60000.0,
+          "credit": 0.1
+        },
+        {
+          "from": 60000.0,
+          "to": 60500.0,
           "credit": 0.09
         },
         {
-          "from": 25000,
-          "to": 25500,
+          "from": 60500.0,
+          "to": 61000.0,
+          "credit": 0.08
+        },
+        {
+          "from": 61000.0,
+          "to": 61500.0,
           "credit": 0.07
         },
         {
-          "from": 25500,
-          "to": 26000,
+          "from": 61500.0,
+          "to": 62000.0,
+          "credit": 0.06
+        },
+        {
+          "from": 62000.0,
+          "to": 62500.0,
           "credit": 0.05
         },
         {
-          "from": 26000,
-          "to": 26500,
+          "from": 62500.0,
+          "to": 63000.0,
+          "credit": 0.04
+        },
+        {
+          "from": 63000.0,
+          "to": 63500.0,
           "credit": 0.03
         },
         {
-          "from": 26500,
-          "to": 31300,
+          "from": 63500.0,
+          "to": 64000.0,
+          "credit": 0.02
+        },
+        {
+          "from": 64000.0,
+          "to": 64500.0,
           "credit": 0.01
         },
         {
-          "from": 31300,
+          "from": 64500.0,
           "to": null,
-          "credit": 0
+          "credit": 0.0
         }
-      ]
+      ],
+      "D": "ZERO"
     }
   },
   "reciprocity": {
@@ -2822,13 +3108,13 @@
     "quote": "ctpaidleave.org, verbatim: \"The CT Paid Leave Board of Directors has voted to maintain the contribution rate at 0.5% for 2026.\""
   },
   "knownGaps": [
-    "Table E's very lowest band (below each code's first published boundary -- $12,000 for Code A, $19,000 for B, $24,000 for C, $15,000 for F) is modeled as the maximum 0.75 credit. The source's own legend lists .75 AND .70 as the two highest values in its 28-value decimal sequence, but no boundary anywhere in the extracted document pairs .70 with a specific income range for any of the 4 codes -- treated as unreachable/inapplicable for this withholding table (see extractionNote) rather than guessed at. Bounded impact: this can only affect wages within a narrow low-income band, and only the CREDIT MULTIPLIER on an already-small base tax at that income level, not the underlying bracket or exemption calculation.",
-    "Supplemental wages paid on a SEPARATE cheque from regular wages: Circular CT's own Example 12 requires aggregating the bonus with the LAST REGULAR PAY PERIOD's wages and subtracting tax already withheld from that period -- this engine models one calculatePaycheck() call at a time and cannot look back at a prior period's regular wages, the same class of disclosed cross-period gap as Kentucky's 103 KAR 18:070 Section 3(2) note and Idaho's equivalent. WIRED (aggregation pass): aggregateWithPriorRegularPayment() now does exactly this — the caller supplies input.priorRegularPayment (that cheque's taxable wages and the state tax withheld from it), a bonus paid on its own cheque is taxed on the combined figure, and the prior withholding is credited back, floored at zero. The engine still cannot see the prior cheque by itself; it no longer has to.",
-    "Nonresident partial-Connecticut-service allocation (Form CT-W4NA, the percentage-of-services-in-Connecticut mechanism in Circular CT's Examples 8-10) is not modeled -- this engine has no per-employee days-worked-by-jurisdiction input for any state yet, the same disclosed gap as every other state's nonresident-allocation mechanics in this project. WIRED (allocation pass): applyNonresidentAllocation() in src/taxes/state.ts now scales this state's income tax by certificate.nonresidentAllocationFraction for a genuine nonresident, with the basis named in the line detail. The engine does not compute the fraction — the state defines it differently in each case (services, hours, source income over AGI) and only the caller knows it.",
+    "CLOSED 2026-09-02: this used to say Table E's .70 credit band (and, it turned out once actually checked, most of the rest of the table above roughly $16,000-$27,000 depending on code) couldn't be paired with a specific income boundary and was left unreachable, plus that the lowest band was modeled as a flat 0.75. Both were real gaps -- the table on file was genuinely incomplete, not just missing one edge value: the OLD data had each code's credit reaching 0.00 far too early (Code A by $25,000, for one) and several bands (including the entire .70/.65/.60/.55/.50/.45/.40/.30/.25/.20 sequence and the .14 down to .01 tail) missing or compressed into the wrong boundaries entirely. Re-fetched TPG-211 (2026 Withholding Calculation Rules, Rev. 12/25) directly and extracted Table E's own page 6 in full via pdfplumber/pypdfium2 after WebFetch's own summarizer failed on the compressed PDF stream -- the full 28-row table for all four codes (A/B/C/F), transcribed programmatically from the raw extracted text rather than by hand to avoid transcription error, replaces the old data outright. Code D's credit is unaffected (always the 'ZERO' sentinel, never read from Table E). Verified against 3 real income levels this pass, each independently recomputed from the primary source before checking the engine's own output: Code A at $52,000 (now 1%, was wrongly 0%), Code F at $30,000 (now 15%, was wrongly 1%), Code A at $41,600 (now 10%, was wrongly 0%) -- see tests/engine.test.ts's Connecticut describe block, all updated to the corrected figures. The lowest band (below each code's first published boundary) is still modeled as 0.75 by extension of the first published row (not a separate published boundary), the same convention as before -- that part was already correct.",
+    "Supplemental wages paid on a SEPARATE cheque from regular wages: Circular CT's own Example 12 requires aggregating the bonus with the LAST REGULAR PAY PERIOD's wages and subtracting tax already withheld from that period -- this engine models one calculatePaycheck() call at a time and cannot look back at a prior period's regular wages, the same class of disclosed cross-period gap as Kentucky's 103 KAR 18:070 Section 3(2) note and Idaho's equivalent. WIRED (aggregation pass): aggregateWithPriorRegularPayment() now does exactly this \u2014 the caller supplies input.priorRegularPayment (that cheque's taxable wages and the state tax withheld from it), a bonus paid on its own cheque is taxed on the combined figure, and the prior withholding is credited back, floored at zero. The engine still cannot see the prior cheque by itself; it no longer has to.",
+    "Nonresident partial-Connecticut-service allocation (Form CT-W4NA, the percentage-of-services-in-Connecticut mechanism in Circular CT's Examples 8-10) is not modeled -- this engine has no per-employee days-worked-by-jurisdiction input for any state yet, the same disclosed gap as every other state's nonresident-allocation mechanics in this project. WIRED (allocation pass): applyNonresidentAllocation() in src/taxes/state.ts now scales this state's income tax by certificate.nonresidentAllocationFraction for a genuine nonresident, with the basis named in the line detail. The engine does not compute the fraction \u2014 the state defines it differently in each case (services, hours, source income over AGI) and only the caller knows it.",
     "Every pay frequency this engine supports (weekly/biweekly/semimonthly/monthly/quarterly/semiannual/annual/daily) works correctly with this method, unlike the per-period-TABLE states (NY/NJ/Montana/Idaho) which hard-stop on unpublished frequencies -- Connecticut's formula annualizes via ctx.periodsPerYear directly (Steps 3 and 13), so there is no per-frequency table to be missing rows from."
   ],
   "suiEmployer": {
-    "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
+    "$comment": "Normalized employer-side unemployment parameters \u2014 the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 27000,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
     "newEmployerRate": 0.019,
@@ -2839,7 +3125,7 @@
     },
     "employerSuppliedRateRequired": false,
     "confidence": "source_dated_2026",
-    "experienceRangeCorrection": "CORRECTED 2026-08-28 by auditing against CTDOL's own rate table (portal.ct.gov/dol/knowledge-base/articles/unemployment-taxes/tax-rates-and-taxable-wage-base), fetched and read directly. Its 2026 row reads: $27,000 taxable / 1.90% new employer / 1.10% minimum / 9.90% MAXIMUM. This field previously held 0.10 (10.0%), which contradicted this file's OWN newEmployerRateSource note two lines above ('experienced 1.1%-9.9%') — the prose was right and the number was wrong. 10.0% appears to have come from Connecticut's statutory maximum CHARGED rate, a different figure from the maximum rate actually assigned in the 2026 schedule. No computed paycheck changes: the engine reads newEmployerRate (correct at 1.90%) unless the caller supplies the employer's own assigned rate, and experienceRange is carried for reference only. Wage base and new-employer rate were both verified correct in the same pass."
+    "experienceRangeCorrection": "CORRECTED 2026-08-28 by auditing against CTDOL's own rate table (portal.ct.gov/dol/knowledge-base/articles/unemployment-taxes/tax-rates-and-taxable-wage-base), fetched and read directly. Its 2026 row reads: $27,000 taxable / 1.90% new employer / 1.10% minimum / 9.90% MAXIMUM. This field previously held 0.10 (10.0%), which contradicted this file's OWN newEmployerRateSource note two lines above ('experienced 1.1%-9.9%') \u2014 the prose was right and the number was wrong. 10.0% appears to have come from Connecticut's statutory maximum CHARGED rate, a different figure from the maximum rate actually assigned in the 2026 schedule. No computed paycheck changes: the engine reads newEmployerRate (correct at 1.90%) unless the caller supplies the employer's own assigned rate, and experienceRange is carried for reference only. Wage base and new-employer rate were both verified correct in the same pass."
   },
   "nonresidentAllocation": {
     "basis": "percentage_of_services",
