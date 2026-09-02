@@ -3521,6 +3521,26 @@ describe('New Jersey', () => {
     assert.equal(r.netPay, noLocality.netPay);
   });
 
+  test("Newark's payroll tax excludes federal pretax deferrals from its base, not NJ's own (empty) exempt list", () => {
+    // $1,000 regular with a $200 401(k) deferral. NJ's OWN state income
+    // tax is famously non-conforming (rules.exemptPretax === []) and
+    // would tax the full $1,000 — but Newark's ordinance tracks FEDERAL
+    // withholding wages, which exclude a 401(k) deferral. Taxable base
+    // should be $800, not $1,000: 1% x $800 = $8.00, not $10.00.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(200) }],
+        workState: { code: 'NJ', certificate: { locality: 'Newark' } },
+      }),
+    );
+    const line = r.taxes.find((t) => t.id === 'NEWARK_PAYROLL_ER');
+    assert.ok(line);
+    assert.equal(line.taxableWages, dollars(800));
+    assert.equal(line.amount, dollars(8.0));
+  });
+
   test('no Newark payroll tax line when the employee is not linked to a Newark locality', () => {
     const r = calculatePaycheck(
       input({

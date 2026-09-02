@@ -4281,10 +4281,19 @@ interface NewarkPayrollTaxConfig {
  *     employer's 50% threshold.
  *
  * Taxable base is federal-withholding wages ("subject to withholding by
- * the employer for Federal income tax purposes") — reuses
- * rules.exemptPretax, the same NJ-wide conformity list, since the
- * ordinance's own wage definition tracks the federal one, not NJ's own
- * (non-conforming, gross-wages) state income tax base.
+ * the employer for Federal income tax purposes") — reads the FEDERAL
+ * income-tax exclusion list (federalRuleset().incomeTax.exemptPretax:
+ * section125/hsa/fsa/dependent_care/401k/403b/457/simple/commuter), not
+ * rules.exemptPretax (NJ's OWN state-income-tax list). BUG FIXED
+ * 2026-09-02: this used to read rules.exemptPretax, which for New Jersey
+ * is genuinely EMPTY — NJ's state income tax is famously non-conforming
+ * and taxes 401(k)/cafeteria-125/HSA/FSA/commuter contributions as gross
+ * wages — so it silently taxed the Newark employer levy on the FULL gross
+ * wage including pretax deferrals, directly contradicting this same doc
+ * comment's own next sentence ("tracks the federal one, not NJ's own...
+ * base"). Over-collected by 1% of every pretax deferral dollar on every
+ * Newark paycheck with one. See tests/engine.test.ts's Newark describe
+ * block for the before/after figures.
  */
 function newarkPayrollTaxEmployer(
   input: PaycheckInput,
@@ -4297,7 +4306,7 @@ function newarkPayrollTaxEmployer(
   const cfg = rules.newarkPayrollTax as NewarkPayrollTaxConfig | undefined;
   if (!cfg) return null;
 
-  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const exempt = federalRuleset(input.checkDate).incomeTax.exemptPretax as PretaxCategory[];
   const taxableWages = ctx.taxableWagesFor(exempt);
 
   if (cert.newarkResidentApportionmentExcluded) {
