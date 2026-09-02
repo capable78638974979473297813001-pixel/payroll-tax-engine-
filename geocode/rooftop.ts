@@ -51,7 +51,7 @@
  *   - This is positional precision, not address VALIDATION. A typo'd or
  *     nonexistent address doesn't become valid because no point matched.
  */
-import { streetKey, streetKeyWithoutDirectionals } from './buildings.ts';
+import { streetKey, streetKeyCapitolNormalized, streetKeyWithoutDirectionals } from './buildings.ts';
 import type { FetchOptions } from './census.ts';
 import { searchStructuredAddressSafe } from './nominatim.ts';
 
@@ -293,6 +293,8 @@ export interface RooftopMatch {
   matchedUnit: boolean;
   /** True when the street names only matched after setting directionals aside (Maryland publishes Baltimore's "N Holliday St" as plain "Holliday Street"). Still a real match — but a looser one, and only ever accepted when every candidate it produced sits in one tight cluster. */
   directionalFallback: boolean;
+  /** True when the street names only matched after treating "Capital"/"Capitol" as the same word (Kentucky's own NAD submission spells Frankfort's state-capitol street "Capital Avenue"; Census/USPS spell the same street "Capitol Ave"). See streetKeyCapitolNormalized()'s own doc comment. Same tight-cluster guard as directionalFallback. */
+  capitolFallback: boolean;
 }
 
 /**
@@ -342,15 +344,40 @@ export function matchAddressPoint(oneLineAddress: string, points: AddressPoint[]
         streetKeyWithoutDirectionals(p.street!) === targetCore &&
         (!targetHasDirectional || !hasDirectional(p.street!)),
     );
-    if (loose.length === 0) return null;
-    const looseCentre = {
-      lat: loose.reduce((sum, p) => sum + p.lat, 0) / loose.length,
-      lon: loose.reduce((sum, p) => sum + p.lon, 0) / loose.length,
-    };
-    if (Math.max(...loose.map((p) => metersBetween(looseCentre, p))) > IMPLAUSIBLE_SPREAD_METERS) return null;
-    matches = loose;
-    directionalFallback = true;
+    if (loose.length > 0) {
+      const looseCentre = {
+        lat: loose.reduce((sum, p) => sum + p.lat, 0) / loose.length,
+        lon: loose.reduce((sum, p) => sum + p.lon, 0) / loose.length,
+      };
+      if (Math.max(...loose.map((p) => metersBetween(looseCentre, p))) <= IMPLAUSIBLE_SPREAD_METERS) {
+        matches = loose;
+        directionalFallback = true;
+      }
+    }
   }
+
+  let capitolFallback = false;
+  if (matches.length === 0) {
+    // Third pass, narrower than it looks: see streetKeyCapitolNormalized()'s
+    // own doc comment for why this exists (a verified, specific real-world
+    // spelling split, not a guess) and why it's kept separate from
+    // streetKey() itself. Same house-number requirement and tight-cluster
+    // guard as the directional fallback above.
+    const targetCapitol = streetKeyCapitolNormalized(targetStreetRaw);
+    const loose = sameNumber.filter((p) => streetKeyCapitolNormalized(p.street!) === targetCapitol);
+    if (loose.length > 0) {
+      const looseCentre = {
+        lat: loose.reduce((sum, p) => sum + p.lat, 0) / loose.length,
+        lon: loose.reduce((sum, p) => sum + p.lon, 0) / loose.length,
+      };
+      if (Math.max(...loose.map((p) => metersBetween(looseCentre, p))) <= IMPLAUSIBLE_SPREAD_METERS) {
+        matches = loose;
+        capitolFallback = true;
+      }
+    }
+  }
+
+  if (matches.length === 0) return null;
 
   const targetUnit = extractUnit(oneLineAddress);
   const unitMatch = targetUnit
@@ -373,6 +400,7 @@ export function matchAddressPoint(oneLineAddress: string, points: AddressPoint[]
     chosen,
     matchedUnit: Boolean(unitMatch),
     directionalFallback,
+    capitolFallback,
   };
 }
 
@@ -405,10 +433,22 @@ export function neighborBracket(oneLineAddress: string, points: AddressPoint[]):
   if (!Number.isFinite(target)) return null;
 
   const targetStreet = streetKey(street);
-  const onStreet = points
+  let onStreet = points
     .filter((p) => p.street !== null && streetKey(p.street) === targetStreet && p.houseNumber !== null)
     .map((p) => ({ p, n: Number(p.houseNumber) }))
     .filter(({ n }) => Number.isFinite(n));
+
+  if (onStreet.length === 0) {
+    // Same knowing fallback as matchAddressPoint()'s third pass — see
+    // streetKeyCapitolNormalized()'s own doc comment. No extra spread guard
+    // needed here beyond what's already below: MAX_NEIGHBOR_NUMBER_GAP and
+    // MAX_NEIGHBOR_SPAN_METERS apply to whatever this finds either way.
+    const targetCapitol = streetKeyCapitolNormalized(street);
+    onStreet = points
+      .filter((p) => p.street !== null && streetKeyCapitolNormalized(p.street) === targetCapitol && p.houseNumber !== null)
+      .map((p) => ({ p, n: Number(p.houseNumber) }))
+      .filter(({ n }) => Number.isFinite(n));
+  }
 
   let below: { p: AddressPoint; n: number } | null = null;
   let above: { p: AddressPoint; n: number } | null = null;
@@ -438,15 +478,27 @@ export function neighborBracket(oneLineAddress: string, points: AddressPoint[]):
  * Which kind of point a resolution ended up with, best first:
  *   'authoritative'  — a point published for this exact address by the
  *                      government that assigns addresses. Rooftop.
+ *   'authoritative-neighbors' — interpolated between the two nearest
+ *                      published points on the same street. Still built
+ *                      from two real government-surveyed points (not
+ *                      guessed), just not the exact address — block-level,
+ *                      honestly better than a TIGER range, not rooftop.
  *   'osm-corroborated' — OSM holds a house-level point for this address
  *                      AND it agrees with Census's own position, so two
  *                      independent systems place the address there.
  *                      Crowd-sourced: good, not authoritative.
- *   'authoritative-neighbors' — interpolated between the two nearest
- *                      published points on the same street. Block-level,
- *                      honestly better than a TIGER range, not rooftop.
+ *
+ * resolveRooftop() checks 'authoritative-neighbors' BEFORE
+ * 'osm-corroborated' for exactly that reason: a tight NAD bracket (both
+ * MAX_NEIGHBOR_NUMBER_GAP and MAX_NEIGHBOR_SPAN_METERS already guard
+ * against a loose one) is built from real surveyed government points,
+ * which is a better kind of evidence than a crowd-sourced point merely
+ * not disagreeing with Census's own rough interpolation — verified this
+ * matters live: 210 Capitol Ave, Hartford, CT sits 200m from a real NAD
+ * bracket (numbers 168 and 223) that used to lose to OSM's corroborated
+ * point purely because OSM was checked first, not because it was better.
  */
-export type AddressPointTier = 'authoritative' | 'osm-corroborated' | 'authoritative-neighbors';
+export type AddressPointTier = 'authoritative' | 'authoritative-neighbors' | 'osm-corroborated';
 
 export interface OsmPointResult {
   point: { lat: number; lon: number };
@@ -523,7 +575,27 @@ export async function resolveRooftop(
     };
   }
 
-  // Tier 2 — OSM's own house-level point, but only if it corroborates
+  // Tier 2 — between the nearest published numbers on the same street.
+  // Tried BEFORE the OSM tier: two real surveyed government points,
+  // gap- and span-guarded, are a better kind of evidence than a
+  // crowd-sourced point that merely doesn't disagree with Census's own
+  // rough interpolation. See AddressPointTier's own doc comment.
+  const neighbors = neighborBracket(oneLineAddress, points);
+  if (neighbors) {
+    return {
+      attempted: true,
+      found: true,
+      tier: 'authoritative-neighbors',
+      point: neighbors.point,
+      match: null,
+      neighbors,
+      osm: null,
+      metersFromInterpolated: metersBetween(interpolated, neighbors.point),
+      ambiguous: false,
+    };
+  }
+
+  // Tier 3 — OSM's own house-level point, but only if it corroborates
   // where Census already put the address. See OSM_CORROBORATION_METERS.
   const osm = await resolveOsmPoint(oneLineAddress, interpolated, fetchImpl, retryOptions);
   if (osm) {
@@ -536,22 +608,6 @@ export async function resolveRooftop(
       neighbors: null,
       osm,
       metersFromInterpolated: osm.metersFromInterpolated,
-      ambiguous: false,
-    };
-  }
-
-  // Tier 3 — between the nearest published numbers on the same street.
-  const neighbors = neighborBracket(oneLineAddress, points);
-  if (neighbors) {
-    return {
-      attempted: true,
-      found: true,
-      tier: 'authoritative-neighbors',
-      point: neighbors.point,
-      match: null,
-      neighbors,
-      osm: null,
-      metersFromInterpolated: metersBetween(interpolated, neighbors.point),
       ambiguous: false,
     };
   }

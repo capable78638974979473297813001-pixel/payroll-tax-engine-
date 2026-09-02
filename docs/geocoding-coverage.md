@@ -26,12 +26,20 @@ produced the coordinate its jurisdictions were resolved at.
 | `precision` | What it means | Source |
 | --- | --- | --- |
 | `rooftop` | A point published for this exact address by the government that assigns addresses — usually for E911 dispatch. | [National Address Database](https://www.transportation.gov/gis/national-address-database) (US DOT), ~98M points |
+| `neighbor` | This exact number isn't published, so the point is interpolated between the two nearest published points on the same street. Block-level, but still built from two real surveyed government points. | National Address Database |
 | `rooftop-osm` | OpenStreetMap holds a house-level point for this address **and** it agrees with Census's own position. Crowd-sourced, corroborated. | Nominatim structured lookup |
-| `neighbor` | This exact number isn't published, so the point is interpolated between the two nearest published points on the same street. Block-level. | National Address Database |
 | `interpolated` | Census's own position along a TIGER/Line address range, at the curb. What this project had before any of the above. | Census geocoder |
 
 The tiers are tried in that order, and each one refuses rather than
-guesses — see `geocode/rooftop.ts` for the guards on each.
+guesses — see `geocode/rooftop.ts` for the guards on each. `neighbor` is
+checked before `rooftop-osm` (moved 2026-09-02: it used to be tried
+after) because a gap- and span-guarded NAD bracket is built from two real
+surveyed government points, a better kind of evidence than a
+crowd-sourced point that merely doesn't disagree with Census's own rough
+interpolation — verified live: Hartford, CT's sample address used to fall
+to `rooftop-osm` purely because that tier was checked first, when a
+tight, guarded NAD bracket (168 and 223 Capitol Ave, 200m apart) was
+available the whole time and is now what it resolves to.
 
 ## Measured result
 
@@ -41,9 +49,31 @@ interpolation**, correcting it by 5m to 269m (median 90m).
 | Tier | Count |
 | --- | --- |
 | `rooftop` (authoritative) | 35 / 51 |
-| `rooftop-osm` (house-level, corroborated) | 14 / 51 |
-| `neighbor` (block-level) | 1 / 51 |
+| `rooftop-osm` (house-level, corroborated) | 13 / 51 |
+| `neighbor` (block-level, authoritative) | 2 / 51 |
 | `interpolated` (no improvement available) | 1 / 51 |
+
+### A second real bug: "Capital" vs "Capitol"
+
+Found chasing why Kentucky's sample address (700 Capitol Ave, Frankfort)
+never even reached the `neighbor` tier despite the National Address
+Database publishing 526 points nearby: Census/USPS spell that street
+"Capitol Ave" (the building sense, correctly), but Kentucky's own NAD
+submission spells every one of its 29 points on the same street "Capital
+Avenue" (the common, wrong homophone) — a real, verified spelling split
+in the government's own data, not a typo in this project's query. Fixed
+the same way the Alaska ordinal-street fix was: a narrow, explicitly
+guarded fallback (`streetKeyCapitolNormalized()` in `geocode/buildings.ts`)
+tried only after the exact match fails, kept deliberately separate from
+`streetKey()` itself because "Capital" and "Capitol" are genuinely
+different words elsewhere and conflating them by default would be a
+guess, not a correction. For Kentucky's own sample address this doesn't
+change the outcome — the nearest NAD point below house number 700 is 616,
+an 84-number gap wider than `MAX_NEIGHBOR_NUMBER_GAP` allows, so it
+correctly still falls to `rooftop-osm` (9m, tight) rather than force a
+bracket that wide — but the fix is real for any Kentucky address on that
+street (or elsewhere the same misspelling recurs) that does have a close
+enough match.
 
 ### A real bug, found by chasing why Alaska sat on `interpolated`
 
@@ -103,7 +133,7 @@ Census's own answer, which is where this project started.
 | AZ | `rooftop` | 146m | State of Arizona |
 | CA | `rooftop` | 112m | Sacramento County CA |
 | CO | `rooftop` | 90m | Colorado OIT GIS |
-| CT | `rooftop-osm` | 125m | — |
+| CT | `neighbor` | 148m | Connecticut (neighbouring points) |
 | DC | `rooftop` | 111m | OCTO Data Team, District of Columbia |
 | DE | `rooftop` | 66m | Kent County Delaware |
 | FL | `rooftop-osm` | 63m | — |

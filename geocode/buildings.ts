@@ -436,6 +436,39 @@ export function streetKeyWithoutDirectionals(street: string): string {
   return tokens.join(' ');
 }
 
+/**
+ * The street key with "capital"/"capitol" treated as one word.
+ *
+ * A verified real-world spelling split, not a guessed one: Census/USPS
+ * consistently write Kentucky's own seat-of-government street as "Capitol
+ * Ave" (the correct sense — the building), but Kentucky's own NAD
+ * submission spells every point on it "Capital Avenue" (the wrong-but-
+ * common homophone) — confirmed live 2026-09-02: 700 Capitol Ave,
+ * Frankfort, KY has zero matches on "capitol" and 29 points on "Capital
+ * Avenue" including one at house number 704, four doors from the target.
+ * The same misspelling recurs elsewhere for the same reason (it names a
+ * government building, and government data-entry gets its own building's
+ * name wrong often enough to be a pattern, not a fluke).
+ *
+ * Deliberately NOT folded into streetKey() itself, for the same reason
+ * streetKeyWithoutDirectionals() isn't: unlike a directional or a street
+ * type, "Capital" and "Capitol" are genuinely different words elsewhere
+ * (a real "Capital Blvd" financial-district street is not the same place
+ * as a "Capitol Blvd" near a statehouse), so this is a knowing fallback a
+ * caller reaches for after the exact and directional-fallback passes both
+ * find nothing — never the default comparison. matchAddressPoint() and
+ * neighborBracket() apply the same house-number and tight-cluster guards
+ * to this pass as they do to the directional fallback, so a coincidental
+ * same-number collision on an unrelated same-named street still can't
+ * produce a wrong point.
+ */
+export function streetKeyCapitolNormalized(street: string): string {
+  return streetKey(street)
+    .split(' ')
+    .map((token) => (token === 'capital' || token === 'capitol' ? 'capitol' : token))
+    .join(' ');
+}
+
 /** Extract the leading house number from a one-line address string (e.g. "90 W Broad St, Columbus, OH" -> "90"). Returns null when the address doesn't start with a number. */
 export function extractHouseNumber(oneLineAddress: string): string | null {
   const m = /^\s*(\d+)/.exec(oneLineAddress);
