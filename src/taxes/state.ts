@@ -4710,16 +4710,19 @@ function alabamaLocalTax(
  * Kentucky's city/county/consolidated-government Occupational Tax — the
  * most structurally complex local tax in this project, reading
  * data/local/KY-occupational-2026.json via registry.ts's
- * allKYJurisdictions()/kyJurisdictionRuleset() (a CONFIRMED subset —
- * 131 as of the last count, see that function's own doc comment for the
- * current number and how to re-verify it — that project's own
- * rate-normalization pass and later KACo cross-checks could safely
- * reduce to a decimal; see that file's own jurisdictions.
- * normalizationPass block). A city not in this confirmed set correctly
- * produces no line at all — most of the ~188 unconfirmed scraped entries
- * genuinely DO levy a tax, this engine just doesn't have a safe enough
- * number for them yet, so silence here means "not confirmed," never "no
- * tax."
+ * allKYJurisdictions()/kyJurisdictionRuleset() (a CONFIRMED subset — 250
+ * as of the last count (248 scraped + Louisville Metro + Lexington-
+ * Fayette; STALE FIGURE FIXED 2026-09-02, this used to say 131 — see
+ * that function's own doc comment for the current number and how to
+ * re-verify it). A city not in this confirmed set correctly produces no
+ * line at all. STALE CLAIM ALSO FIXED: this used to say silence mostly
+ * meant "one of ~188 unconfirmed scraped entries this engine doesn't
+ * have a safe rate for yet" — a leftover from a much earlier, lower-
+ * confirmation-count state of this file. Today only 2 scraped entries
+ * are deliberately excluded (see allKYJurisdictions()'s own doc comment
+ * for which two and why); silence for any other name means either one
+ * of those 2, or genuinely no KY occupational tax at that jurisdiction,
+ * not an unconfirmed-but-real gap.
  *
  * Two genuinely novel mechanisms, both required to make this correct
  * rather than just present:
@@ -4743,21 +4746,35 @@ function alabamaLocalTax(
  *    the county it sits in, at ONE work location — not a home-vs-work
  *    comparison the way Ohio's is). Fires only when the caller supplies
  *    BOTH certificate.workCity AND certificate.workCounty and BOTH
- *    resolve — Jefferson County (Louisville Metro) and Fayette County
- *    (Lexington-Fayette) never trigger this by construction, since both
- *    are consolidated governments registered under a single "Louisville"/
- *    "Lexington" entry rather than a separate city+county pair. This
- *    ASSUMES the confirmed county is in KRS 68.197's 30,000-300,000-
+ *    resolve. CORRECTED 2026-09-02: this used to claim Jefferson County
+ *    (Louisville Metro) and Fayette County (Lexington-Fayette) "never
+ *    trigger this by construction" because they're only registered as
+ *    consolidated "Louisville"/"Lexington" entries — false. The data
+ *    file ALSO carries separate scraped entries literally named
+ *    "Jefferson County" (1.25%) and "Fayette County" (2.25%), added in a
+ *    later pass from KACo's own county table, so certificate.workCounty
+ *    = "Jefferson County" alongside certificate.workCity = "Louisville"
+ *    DOES resolve both and fire this branch. The computed DOLLAR TOTAL
+ *    stays correct regardless — the county rate is ≤ the city rate in
+ *    both cases, so the KRS 68.197(6)-(7) credit floors the county net
+ *    to $0 either way — but a caller supplying both fields would get a
+ *    detail string describing a real credit between Louisville Metro and
+ *    a Jefferson County Fiscal Court levy that, as a legal matter,
+ *    doesn't separately exist once consolidated into Metro government;
+ *    a cosmetic/detail-string accuracy issue, not a dollar-amount one.
+ *    This ASSUMES the confirmed county is in KRS 68.197's 30,000-300,000-
  *    population credit tier — not individually verified per county (the
  *    data file itself couldn't locate a statute for counties under
  *    30,000 population at all), the same "treat the floor as the
  *    safe-default assumption" disclosure Ohio's own interMunicipalCredit
  *    already carries.
  *
- * Louisville Metro and Lyndon/Middletown (which inherit its rate) are the
- * only entries with a resident/nonresident split (MI-cities-style) rather
- * than one flat rate — resolved via certificate.residenceCity matching
- * the SAME jurisdiction name as workCity, the same sameCity idiom
+ * Louisville Metro, Lyndon/Middletown (which inherit its rate), and
+ * Lynnview (same Jefferson-County-inherited rate; CORRECTED 2026-09-02 —
+ * this list previously omitted it) are the only entries with a
+ * resident/nonresident split (MI-cities-style) rather than one flat rate
+ * — resolved via certificate.residenceCity matching the SAME jurisdiction
+ * name as workCity, the same sameCity idiom
  * michiganLocalTax() already established.
  */
 function kentuckyLocalTax(
