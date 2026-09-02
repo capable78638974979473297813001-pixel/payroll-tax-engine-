@@ -7198,6 +7198,30 @@ function westVirginiaSupplementalAnnualMarginal(
  * underlying PA "compensation" concept, but that specific equivalence for
  * the LOCAL tax specifically was not independently sourced this pass.
  * Flagged in PA-2026.json's knownGaps, not silently assumed away.
+ *
+ * EIT low-income exemption (BUG FIXED 2026-09-02): 49 of 2,627
+ * jurisdictions carry municipalEitLIE/schoolDistrictEitLIE — an Act
+ * 511/319 ordinance exempting estimated-annual-earned-income below a
+ * threshold from that JURISDICTION's own portion of EIT. This data
+ * existed in the file but was never read here — every employee in one of
+ * those 49 places was over-withheld regardless of income. Fixed by
+ * decomposing each side's rate into its municipal (residentEIT /
+ * nonresidentEIT) and school (schoolDistrictEIT, resident side only —
+ * school EIT is levied on residents, not nonresidents) components and
+ * independently testing each against its OWN threshold before
+ * recombining — NOT a single combined-rate threshold test, because 48 of
+ * the 49 jurisdictions have only ONE of the two thresholds set (36
+ * municipal-only, 12 school-only), so naively exempting the whole
+ * combined rate off either one alone would silently over-exempt the
+ * portion that carries no ordinance (the same asymmetric-threshold shape
+ * already disclosed, unfixed, for this file's LST low-income exemption —
+ * see PA-2026.json's own knownGaps for why LST's case is structurally
+ * harder: this engine emits ONE combined PA_LST line with no muni/school
+ * split to decompose, unlike EIT's rate inputs which already arrive
+ * pre-split). Only 1 jurisdiction (PSD 720501, Penn Hills Twp) has both
+ * thresholds set, and they're numerically equal ($2,000 each), so no
+ * jurisdiction in the current data exercises a case where the two
+ * thresholds genuinely disagree.
  */
 function pennsylvaniaLocalTax(
   input: PaycheckInput,
@@ -7238,14 +7262,33 @@ function pennsylvaniaLocalTax(
     residencePSD && residencePSD !== '88000'
       ? paLocalRuleset(residencePSD, input.checkDate)
       : undefined;
-  const residentRate = residenceEntry ? residenceEntry.totalResidentEIT : 0;
-  const nonresidentRate = workEntry.nonresidentEIT;
-  const rate = Math.max(residentRate, nonresidentRate);
-  const higherSide = residentRate >= nonresidentRate ? 'resident' : 'nonresident';
 
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const taxableWages = ctx.taxableWagesFor(exempt);
+  const estimatedAnnualWages = taxableWages * ctx.periodsPerYear;
+  const belowLIE = (threshold: number | undefined): boolean =>
+    threshold !== undefined && estimatedAnnualWages < dollars(threshold);
+
+  // Each side's rate is the sum of its OWN municipal/school components,
+  // each independently gated by ITS OWN low-income-exemption threshold —
+  // see this function's own doc comment for why a single combined-rate
+  // threshold test would be wrong for the 48 jurisdictions that carry
+  // only one of the two thresholds.
+  const residentRate = residenceEntry
+    ? (belowLIE(residenceEntry.municipalEitLIE) ? 0 : residenceEntry.residentEIT) +
+      (belowLIE(residenceEntry.schoolDistrictEitLIE) ? 0 : residenceEntry.schoolDistrictEIT)
+    : 0;
+  const nonresidentRate = belowLIE(workEntry.municipalEitLIE) ? 0 : workEntry.nonresidentEIT;
+  const rate = Math.max(residentRate, nonresidentRate);
+  const higherSide = residentRate >= nonresidentRate ? 'resident' : 'nonresident';
+
   const eitAmount = applyRate(taxableWages, rate);
+
+  const lieApplied =
+    belowLIE(workEntry.municipalEitLIE) ||
+    (residenceEntry
+      ? belowLIE(residenceEntry.municipalEitLIE) || belowLIE(residenceEntry.schoolDistrictEitLIE)
+      : false);
 
   const eitLine: TaxLine = {
     id: 'PA_EIT',
@@ -7257,7 +7300,11 @@ function pennsylvaniaLocalTax(
     detail:
       `${fmt(taxableWages)} @ ${(rate * 100).toFixed(2)}% (the ${higherSide} rate is higher) — resident ` +
       `${(residentRate * 100).toFixed(2)}% (PSD ${residencePSD ?? '88000/out-of-state'}) vs. work-location ` +
-      `nonresident ${(nonresidentRate * 100).toFixed(2)}% (PSD ${workPSD}, ${workEntry.municipality})`,
+      `nonresident ${(nonresidentRate * 100).toFixed(2)}% (PSD ${workPSD}, ${workEntry.municipality})` +
+      (lieApplied
+        ? ` — reduced by a low-income exemption (estimated annual earned income ${fmt(estimatedAnnualWages)} ` +
+          `below at least one jurisdiction's own EIT threshold)`
+        : ''),
   };
 
   const lines: TaxLine[] = [eitLine];
@@ -7600,9 +7647,26 @@ function ohioSchoolDistrictTax(
  * Low-income exemption: estimates ANNUAL wages by annualizing this one
  * cheque (periodWages × periodsPerYear) — the same approximation
  * nonresidentDeMinimisReason() already makes elsewhere in this file, not
- * a true year-to-date figure. Uses the municipal LIE threshold if
- * present, falling back to the school district's, matching how the
- * combined municipal+school total is what's actually being exempted.
+ * a true year-to-date figure.
+ *
+ * BUG FIXED 2026-09-02: this used to pick ONE threshold — municipal if
+ * present, else school district's — and exempt the WHOLE combined
+ * lst.total off it. Real data breaks that in both directions: 73
+ * jurisdictions have both thresholds present but DIFFERENT (e.g. PSD
+ * 650701, municipal LIE $12,000 vs. school LIE $3,200), where picking
+ * only the municipal figure over-exempts anyone earning between the two;
+ * 33 more have the municipal portion's own threshold explicitly $0
+ * ("never exempt" — lowIncomeExemption's own $0 sentinel, not an absent
+ * field) while the school portion IS exempt at a real threshold (e.g.
+ * PSD 180105, municipal $5 LST never exempt, school $5 LST exempt under
+ * $12,000), where the old `||` fallthrough read the school's threshold
+ * and wrongly waived the WHOLE $10 including the never-exempt municipal
+ * $5. Fixed by testing each portion (lst.municipal, lst.schoolDistrict —
+ * confirmed to always sum to lst.total across all 2,627 jurisdictions)
+ * against its OWN threshold independently, then summing whichever
+ * portions survive — still emits ONE combined PA_LST line (this
+ * project's existing output shape, unchanged), just computed correctly
+ * underneath it.
  */
 function pennsylvaniaLST(
   ctx: ComputeContext,
@@ -7616,8 +7680,12 @@ function pennsylvaniaLST(
   const periodWages = ctx.taxableWagesFor(exempt);
   const estimatedAnnualWages = periodWages * ctx.periodsPerYear;
 
-  const lie = lst.lowIncomeExemption?.municipal || lst.lowIncomeExemption?.schoolDistrict;
-  if (lie && estimatedAnnualWages < dollars(lie)) {
+  const belowLIE = (threshold: number | undefined): boolean =>
+    threshold !== undefined && threshold > 0 && estimatedAnnualWages < dollars(threshold);
+  const municipalExempt = belowLIE(lst.lowIncomeExemption?.municipal);
+  const schoolExempt = belowLIE(lst.lowIncomeExemption?.schoolDistrict);
+
+  if (municipalExempt && schoolExempt) {
     return {
       id: 'PA_LST',
       name: 'PA Local Services Tax',
@@ -7627,11 +7695,13 @@ function pennsylvaniaLST(
       amount: 0,
       detail:
         `$0 — estimated annual wages ${fmt(estimatedAnnualWages)} (this cheque annualized, not a true ` +
-        `YTD figure) fall below the $${lie.toLocaleString()} Act 32 low-income exemption threshold`,
+        `YTD figure) fall below BOTH the municipal ($${lst.lowIncomeExemption?.municipal.toLocaleString()}) ` +
+        `and school district ($${lst.lowIncomeExemption?.schoolDistrict.toLocaleString()}) Act 32 ` +
+        `low-income exemption thresholds`,
     };
   }
 
-  const annualLST = dollars(lst.total);
+  const annualLST = dollars(municipalExempt ? 0 : lst.municipal) + dollars(schoolExempt ? 0 : lst.schoolDistrict);
   const perPeriod = roundDownToCent(annualLST / ctx.periodsPerYear);
 
   return {
@@ -7643,7 +7713,13 @@ function pennsylvaniaLST(
     amount: perPeriod,
     detail:
       `${fmt(annualLST)}/yr ÷ ${ctx.periodsPerYear} periods, rounded DOWN to the cent (Act 32's own ` +
-      `proration rule, the opposite direction from every other tax in this engine) = ${fmt(perPeriod)}/period`,
+      `proration rule, the opposite direction from every other tax in this engine) = ${fmt(perPeriod)}/period` +
+      (municipalExempt
+        ? ` — municipal portion ($${lst.municipal}) exempted, estimated annual wages below its own $${lst.lowIncomeExemption?.municipal.toLocaleString()} threshold`
+        : '') +
+      (schoolExempt
+        ? ` — school district portion ($${lst.schoolDistrict}) exempted, estimated annual wages below its own $${lst.lowIncomeExemption?.schoolDistrict.toLocaleString()} threshold`
+        : ''),
   };
 }
 

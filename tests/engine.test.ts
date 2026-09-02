@@ -544,6 +544,46 @@ describe('Pennsylvania', () => {
     assert.equal(amountOf(r, 'PA_EIT'), dollars(45.0)); // 3,000 × 1.5% resident (higher than 1.0% nonresident)
   });
 
+  // EIT low-income exemption (BUG FIXED 2026-09-02): PSD 100401 (Adams
+  // Twp) carries a municipal-only $5,000 threshold — residentEIT 0.5%,
+  // nonresidentEIT 1.0%, schoolDistrictEIT 0.5% (no schoolDistrictEitLIE
+  // on file), so estimated-annual-income below $5,000 exempts only the
+  // MUNICIPAL portion, never the school portion (which has no ordinance).
+  test('EIT low-income exemption: a nonresident earning below the threshold owes $0 (fully municipal, no school component)', () => {
+    const r = calculatePaycheck(
+      input({
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(150) }],
+        workState: { code: 'PA', certificate: { workPSD: '100401' } }, // out-of-state resident
+      }),
+    );
+    // $150 x 26 = $3,900/yr, below the $5,000 municipal threshold.
+    assert.equal(amountOf(r, 'PA_EIT'), 0);
+  });
+
+  test('EIT low-income exemption applies PARTIALLY, not all-or-nothing: exempts only the municipal portion, not the school portion', () => {
+    const r = calculatePaycheck(
+      input({
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(150) }],
+        workState: { code: 'PA', certificate: { workPSD: '100401', residencePSD: '100401' } },
+      }),
+    );
+    // Same $3,900/yr, below the $5,000 MUNICIPAL threshold only —
+    // schoolDistrictEitLIE isn't on file for this PSD, so the 0.5% school
+    // component still applies: $150 x 0.5% = $0.75, not $0 or $1.50.
+    assert.equal(amountOf(r, 'PA_EIT'), dollars(0.75));
+  });
+
+  test('EIT low-income exemption does not fire above the threshold', () => {
+    const r = calculatePaycheck(
+      input({
+        workState: { code: 'PA', certificate: { workPSD: '100401', residencePSD: '100401' } },
+      }),
+    );
+    // Default $3,000/period x 26 = $78,000/yr, well above $5,000 — full
+    // 1.0% combined resident rate applies (higher than 1.0% nonresident).
+    assert.equal(amountOf(r, 'PA_EIT'), dollars(30.0));
+  });
+
   test('LST prorates the $52/yr combined total across biweekly periods: $2.00/period', () => {
     const r = calculatePaycheck(
       input({
@@ -561,6 +601,51 @@ describe('Pennsylvania', () => {
       }),
     );
     assert.equal(amountOf(r, 'PA_LST'), 0);
+  });
+
+  // LST low-income exemption (BUG FIXED 2026-09-02): the old logic picked
+  // ONE threshold (municipal if present, else school's `||` fallback) and
+  // exempted the WHOLE combined LST off it — wrong whenever the two
+  // portions' own thresholds disagree. These two PSDs are exactly that
+  // shape, hand-picked from the real data (not invented).
+  test("LST low-income exemption with DIFFERENT municipal/school thresholds: only the portion below ITS OWN threshold is exempted", () => {
+    // PSD 650701 (Adamsburg Boro): municipal $47 LST, LIE $12,000;
+    // school $5 LST, LIE $3,200. Weekly $200 -> annualized $10,400 is
+    // below the municipal threshold but ABOVE the school one — the old
+    // `||` logic would have read the municipal $12,000 first and
+    // exempted the whole $52. Correct: only the $47 municipal portion is
+    // exempted; the $5 school portion is still owed = $5/52 = $0.0961,
+    // rounded down to $0.09.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(200) }],
+        workState: { code: 'PA', certificate: { workPSD: '650701', residencePSD: '650701' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_LST'), dollars(0.09));
+  });
+
+  test('LST low-income exemption where the MUNICIPAL portion is explicitly never-exempt ($0 threshold): the `||` fallback used to wrongly waive it too', () => {
+    // PSD 180105 (Beech Creek Boro): municipal $5 LST, LIE $0 (an
+    // explicit "never exempt" sentinel, not an absent field); school $5
+    // LST, LIE $12,000. Weekly $150 -> annualized $7,800, below the
+    // school threshold. Old code: `lst.lowIncomeExemption.municipal || ...
+    // .schoolDistrict` reads 0 as FALSY in JS and falls through to the
+    // school's $12,000, wrongly exempting the whole $10 including the
+    // never-exempt municipal $5. Correct: only the school's $5 portion is
+    // exempted; the municipal $5 is still owed = $5/52 = $0.0961, rounded
+    // down to $0.09 — same dollar figure as the test above, different
+    // mechanism (a false "fully exempt" from the old code would have
+    // produced $0 here, not $0.09).
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(150) }],
+        workState: { code: 'PA', certificate: { workPSD: '180105', residencePSD: '180105' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_LST'), dollars(0.09));
   });
 
   test('missing certificate.workPSD is flagged NOT MODELLED, never silently zero', () => {

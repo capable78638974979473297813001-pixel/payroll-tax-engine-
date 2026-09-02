@@ -212,6 +212,10 @@ export interface PALocalEntry {
   nonresidentEIT: number;
   schoolDistrictEIT: number;
   totalResidentEIT: number;
+  /** Act 511/319's own EIT low-income exemption threshold (estimated annual earned income) for this jurisdiction's MUNICIPAL EIT portion — below it, that portion (residentEIT on a resident's own entry, nonresidentEIT on a work entry) is exempt entirely. Present on only 49 of 2,627 entries; absent means no municipal EIT exemption ordinance is on file for this PSD. */
+  municipalEitLIE?: number;
+  /** Same mechanism as municipalEitLIE, but for the SCHOOL DISTRICT's own EIT portion (schoolDistrictEIT) — only ever relevant on a RESIDENT's own entry, since school district EIT is levied on residents, not nonresidents. */
+  schoolDistrictEitLIE?: number;
   lst?: {
     municipal: number;
     schoolDistrict: number;
