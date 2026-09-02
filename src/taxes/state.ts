@@ -5214,13 +5214,17 @@ interface OhioPeriodTable {
  * table — the same "per-period table, no annual division" shape already
  * established for Montana/NY/New Jersey/Kansas.
  *
- * Uses rules.periodTables (the August 1, 2026-onward table) unconditionally
- * for any 2026 check date — see OH-2026.json's own midYearEffectiveDating
- * note for why: this engine's ruleset lookup is year-only, with no
- * mechanism yet to switch to priorTable2026 for a pre-August check date.
- * That mechanism gap is real and disclosed, and deliberately NOT solved
- * here — a much bigger change (registry.ts's yearOf()/date-range lookup)
- * than fixing the missing dispatch case this function addresses.
+ * STALE COMMENT FIXED (2026-09-02): this used to say periodTables (the
+ * August 1, 2026-onward table) was read unconditionally for any 2026 check
+ * date, with no mechanism to switch to priorTable2026 for a pre-August
+ * one. That claim was already false by the time it was written — the
+ * function body below has switched between the two off
+ * rules.midYearEffectiveDating.thresholdDate since this same file's
+ * mid-year-dating pass (see OH-2026.json's own
+ * midYearEffectiveDating.mechanismStatus, marked CLOSED, and this file's
+ * own knownGaps entry for the same fix). Left the doc comment
+ * contradicting the code for one pass — corrected here, no behavior
+ * change.
  */
 function ohioWithholding(
   input: PaycheckInput,
