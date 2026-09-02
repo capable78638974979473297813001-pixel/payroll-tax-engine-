@@ -1229,6 +1229,25 @@ describe('Wisconsin', () => {
     assert.equal(r.taxes.some((t) => t.id === 'WI_SIT_SUPP'), false);
   });
 
+  test('BUG FIX: a pretax deduction exceeding regular wages spills onto the supplemental base too', () => {
+    // $500 regular, $800 401(k) deferral (exceeds regular by $300), $1,000
+    // bonus. Combined taxable = 500+1,000-800 = $700. Before this fix, the
+    // bonus was taxed on the raw, un-reduced $1,000 instead of $700.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(500) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+        ],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(800) }],
+        ...wiState({ maritalStatus: 'single', exemptions: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'WI_SIT'), 0);
+    assert.equal(amountOf(r, 'WI_SIT_SUPP'), dollars(24.78)); // 700 × 3.54%, not 1,000 × 3.54%
+  });
+
   test('an unrecognized maritalStatus throws rather than silently falling through to single', () => {
     assert.throws(
       () => calculatePaycheck(input(wiState({ maritalStatus: 'divorced', exemptions: 0 }))),
@@ -2042,6 +2061,25 @@ describe('Minnesota', () => {
     assert.equal(r.taxes.some((t) => t.id === 'MN_SIT_SUPP'), false);
   });
 
+  test('BUG FIX: a pretax deduction exceeding regular wages spills onto the supplemental base too', () => {
+    // $200 regular, $600 401(k) deferral (exceeds regular by $400), $500
+    // bonus. Combined taxable = 200+500-600 = $100. Before this fix, the
+    // bonus was taxed on the raw, un-reduced $500 instead of $100.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(200) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(500) },
+        ],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(600) }],
+        ...mnState({ maritalStatus: 'single', allowances: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), 0);
+    assert.equal(amountOf(r, 'MN_SIT_SUPP'), dollars(6.25)); // 100 × 6.25%, not 500 × 6.25%
+  });
+
   test('certificate.exempt zeroes BOTH the regular and supplemental lines (Form W-4MN Section 2)', () => {
     // Biweekly $2,000 regular + $500 bonus, single, 1 allowance — same
     // wages as the earlier supplemental fixture, which produced MN_SIT
@@ -2474,6 +2512,25 @@ describe('Montana', () => {
     assert.equal(amountOf(r, 'MT_SIT_SUPP'), dollars(25));
   });
 
+  test('BUG FIX: a pretax deduction exceeding regular wages spills onto the supplemental base too', () => {
+    // $200 regular, $600 401(k) deferral (exceeds regular by $400), $500
+    // bonus. Combined taxable = 200+500-600 = $100. Before this fix, the
+    // bonus was taxed on the raw, un-reduced $500 instead of $100.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(200) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(500) },
+        ],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(600) }],
+        ...mtState({ filingStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), 0);
+    assert.equal(amountOf(r, 'MT_SIT_SUPP'), dollars(5)); // 100 × 5%, not 500 × 5%
+  });
+
   test('reciprocity: a North Dakota resident working in Montana owes $0 MT income tax', () => {
     const r = calculatePaycheck(
       input({
@@ -2539,6 +2596,38 @@ describe('New York', () => {
       }),
     );
     assert.equal(amountOf(r, 'NY_SIT'), dollars(8.01));
+  });
+
+  test('BUG FIX: 401(k)/section-125/HSA/etc. pretax deductions reduce the NY_SIT base, not the full gross', () => {
+    // NY-2026.json's own top-level exemptPretax field was missing entirely
+    // until this fix, silently defaulting to an empty list — every NY
+    // paycheck with a pretax deduction was taxed on the FULL gross amount.
+    // Biweekly $2,000 regular, $500 401(k) deferral, single, 1 exemption.
+    // Taxable = 2,000-500 = $1,500. Table A allowance $323.10 (biweekly,
+    // single, 1 exemption). Net = 1,500-323.10 = $1,176.90, in the
+    // [535,1614) bracket: base $22.54 + 5.40% × (1,176.90-535) = 22.54 +
+    // 34.66260 = $57.20 (rounded).
+    const withDeferral = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(500) }],
+        ...nyState({ maritalStatus: 'single', exemptions: 1 }),
+      }),
+    );
+    assert.equal(amountOf(withDeferral, 'NY_SIT'), dollars(57.2));
+
+    // Cross-check: identical to a plain $1,500 paycheck with no deferral at
+    // all — proving the deferral genuinely reduced the base rather than
+    // coincidentally landing on the same number some other way.
+    const plainFifteenHundred = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1500) }],
+        ...nyState({ maritalStatus: 'single', exemptions: 1 }),
+      }),
+    );
+    assert.equal(amountOf(withDeferral, 'NY_SIT'), amountOf(plainFifteenHundred, 'NY_SIT'));
   });
 
   test('NYS-50-T-NYS Example 2: semimonthly $5,000, single, 1 exemption', () => {
@@ -3008,6 +3097,25 @@ describe('New York City', () => {
     assert.equal(amountOf(r, 'NY_NYC_SIT_SUPP'), dollars(42.50));
   });
 
+  test('BUG FIX: a pretax deduction exceeding regular wages spills onto the supplemental base too', () => {
+    // $200 regular, $900 401(k) deferral (exceeds regular by $700), $1,000
+    // bonus. Combined taxable = 200+1,000-900 = $300. Before this fix, the
+    // bonus was taxed on the raw, un-reduced $1,000 instead of $300.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(200) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+        ],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(900) }],
+        ...nycState({ maritalStatus: 'single', exemptions: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_NYC_SIT'), 0);
+    assert.equal(amountOf(r, 'NY_NYC_SIT_SUPP'), dollars(12.75)); // 300 × 4.25%, not 1,000 × 4.25%
+  });
+
   test('nycExemptions overrides the shared exemptions count when the two genuinely differ', () => {
     // Weekly $400, single, certificate.exemptions:3 (NYS/Yonkers) but
     // certificate.nycExemptions:1 (a genuinely different Line-2 count).
@@ -3149,6 +3257,26 @@ describe('Yonkers', () => {
     );
     // 1,000 x 0.0195975 = 19.5975 -> $19.60.
     assert.equal(amountOf(r, 'NY_YONKERS_SIT_SUPP'), dollars(19.60));
+  });
+
+  test('BUG FIX: a pretax deduction exceeding regular wages spills onto the supplemental base too', () => {
+    // $200 regular, $900 401(k) deferral (exceeds regular by $700), $1,000
+    // bonus. Combined taxable = 200+1,000-900 = $300. Before this fix, the
+    // bonus was taxed on the raw, un-reduced $1,000 instead of $300.
+    // 300 × 1.95975% = 5.87925 -> $5.88.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(200) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+        ],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(900) }],
+        ...residentState({ maritalStatus: 'single', exemptions: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_YONKERS_SIT'), 0);
+    assert.equal(amountOf(r, 'NY_YONKERS_SIT_SUPP'), dollars(5.88));
   });
 
   test('nonresident worker Example 1: weekly $75 -- below the no-withholding threshold', () => {
@@ -6507,6 +6635,30 @@ describe('California', () => {
       assert.ok(amountOf(r, 'CA_SIT') > 0);
     });
 
+    test('BUG FIX: a pretax deduction on a bonus-only cheque reduces the taxable base, allocated proportionally across bonus/other', () => {
+      // $1,000 bonus + $500 commission (both supplemental, no regular
+      // wages), employer elects the flat method, and a $1,000 401(k)
+      // deferral. Before this fix, the carve-out ignored pretax entirely —
+      // the deferral vanished and the full $1,500 was taxed. Raw total
+      // $1,500 less $1,000 pretax = $500 taxable, allocated proportionally
+      // (2:1 bonus:other, matching the raw 1,000:500 split): bonus
+      // $333.33 @ 10.23% = $34.10, other $166.67 @ 6.6% = $11.00.
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [
+            { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+            { code: 'COMM', category: 'supplemental', amount: dollars(500) },
+          ],
+          deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(1000) }],
+          workState: { code: 'CA', certificate: { regularAllowances: 0 } },
+          employer: { supplementalFlatRateElection: { CA: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'CA_SIT_SUPP_BONUS'), dollars(34.1));
+      assert.equal(amountOf(r, 'CA_SIT_SUPP_OTHER'), dollars(11.0));
+    });
+
     test('DE 44: a bonus paid ALONGSIDE regular wages is required to be treated as regular wages, never the flat rate, even if elected', () => {
       const r = calculatePaycheck(
         input({
@@ -6979,6 +7131,23 @@ describe('Maryland', () => {
         }),
       );
       assert.equal(amountOf(r, 'MD_SIT_SUPP'), dollars(970.0));
+    });
+
+    test('BUG FIX: a pretax deduction on a bonus-only cheque reduces the taxable base', () => {
+      // $10,000 bonus (the whole cheque), $3,000 401(k) deferral. Before
+      // this fix, the carve-out ignored pretax entirely — the deferral
+      // vanished and the full $10,000 was taxed. Correct: 10,000-3,000 =
+      // $7,000 @ 9.70% = $679.00, not $970.00.
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(10000) }],
+          deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(3000) }],
+          ...mdState({ county: 'Allegany' }),
+          employer: { supplementalFlatRateElection: { MD: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'MD_SIT_SUPP'), dollars(679.0));
     });
 
     test('Anne Arundel (tiered local): the lump-sum rate uses the TOP of the tiered schedule (3.20%), same 9.70% combined', () => {

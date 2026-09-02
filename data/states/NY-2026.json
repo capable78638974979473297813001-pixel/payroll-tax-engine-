@@ -19,6 +19,18 @@
       "verifiedBy": "Downloaded and text-extracted directly. Covers NYS + NYC + Yonkers on ONE combined form: marital status (Single/HOH, Married, Married-but-withhold-at-higher-single-rate -- a THIRD checkbox, the same shape as Minnesota's W-4MN and Montana's MW-4, now a recurring pattern across states in this project), Line 1 = combined NYS+Yonkers allowance count, Line 2 = a SEPARATE NYC-only allowance count, Lines 3/4/5 = three SEPARATE additional-withholding dollar fields, one per jurisdiction (NYS/NYC/Yonkers) -- genuinely different from every other state's single additionalWithholding field, because NY's own form asks for three independent numbers on one certificate."
     }
   ],
+  "exemptPretax": [
+    "section125",
+    "hsa",
+    "fsa",
+    "dependent_care",
+    "deferral_401k",
+    "deferral_403b",
+    "deferral_457",
+    "deferral_simple",
+    "commuter"
+  ],
+  "exemptPretaxNote": "BUG FIXED 2026-09-02: this field was missing entirely from this file's top level -- NY_SIT, NY_NYC_SIT, and NY_YONKERS_SIT all read (rules.exemptPretax ?? []) generically, so its absence silently defaulted to an EMPTY list, meaning every NY/NYC/Yonkers paycheck with a 401(k)/section-125/HSA/FSA/etc. pretax deduction was taxed on the FULL gross amount instead of the pretax-reduced one -- a real, live over-withholding bug affecting every such paycheck, not a rare edge case. Found while auditing this project's supplemental-wage spillover mechanism, which surfaced the fact that NY's own top-level exemptPretax was undefined when every other state checked had one. This project's OWN existing documentation elsewhere in this same file (statePaidLeaveEmployee.exemptPretaxResolved, stateDisabilityEmployee.exemptPretaxResolved, and this file's own knownGaps) already refer to 'the shared NYS income-tax list' and 'NYS income tax's own base' as an established, populated thing PFL/DBL deliberately override with their own empty list -- strong internal evidence this field was always intended to exist and was lost, not deliberately left empty. CONFIRMED via tax.ny.gov's own withholding guidance (bus/wt/income_subject.htm, fetched directly): wages subject to NY withholding are those 'considered wages for federal income tax withholding purposes' -- i.e. NY explicitly conforms to the FEDERAL wage definition for withholding, the same conformity relationship Ohio's and California's own (already-populated) exemptPretax lists document. This is therefore the same 9-category federal-conforming list those two states use, not a guessed number -- primary-sourced to NY's own statement of conformity, not copied from OH/CA without basis.",
   "combinedAllowanceTable": {
     "$comment": "NYS-50-T-NYS's own 'Table A -- Combined deduction and exemption allowance (full year)' -- ENGINE-CONSUMED. Unlike every other state in this project, this is NOT a flat per-exemption dollar amount x count; it's a single precomputed dollar figure per (payPeriod, maritalStatus, exemptionCount 0-10) cell, confirmed to equal Table B (a payPeriod/maritalStatus-only deduction baseline) plus Table C (a payPeriod-only flat per-exemption increment, $19.25/week etc.) x count -- verified this identity holds exactly for every cell checked, so Table A is stored directly rather than Tables B+C separately, since Table A IS their sum, already computed by NY's own document.",
     "single": {

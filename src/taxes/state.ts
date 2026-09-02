@@ -1292,14 +1292,14 @@ function incomeTaxLinesByMethod(
     case 'bracket_federal_subtraction_phaseout':
       return [oregonWithholding(input, ctx, rules)];
     case 'bracket_per_period_three_status':
-      return [californiaWithholding(input, ctx, rules), ...californiaSupplementalTax(input, rules)];
+      return [californiaWithholding(input, ctx, rules), ...californiaSupplementalTax(input, ctx, rules)];
     case 'flat_rate_status_deduction':
       return [coloradoWithholding(input, ctx, rules)];
     case 'flat_rate_phaseout_allowance':
       return [utahWithholding(input, ctx, rules)];
     case 'bracket_state_plus_local': {
       const lines: TaxLine[] = [marylandWithholding(input, ctx, rules)];
-      const supplemental = marylandSupplementalTax(input, rules);
+      const supplemental = marylandSupplementalTax(input, ctx, rules);
       if (supplemental) lines.push(supplemental);
       return lines;
     }
@@ -1948,20 +1948,28 @@ function bracketPhaseoutDeduction(
  * bracket's marginal RATE flatly to the supplemental payment — no base
  * added, unlike the regular-wages bracket lookup. Returns null when there's
  * no supplemental income, so a plain paycheck is unaffected.
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * the taxED amount used the raw supplementalCash even though pretax
+ * deductions exceeding regular wages should spill onto it. regularWages
+ * below was ALREADY correctly net of that spillover (used to pick the
+ * bracket RATE) — only the amount actually multiplied by that rate was
+ * wrong. Fixed the same way: Math.min(fullBase, supplementalCash).
  */
 function bracketSupplementalTax(
   input: PaycheckInput,
   ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine | null {
-  const supplementalCash = supplementalEarnings(input.earnings);
-  if (supplementalCash <= 0) return null;
+  const rawSupplementalCash = supplementalEarnings(input.earnings);
+  if (rawSupplementalCash <= 0) return null;
 
   const cfg = rules.bracketPhaseoutDeduction as BracketPhaseoutConfig;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const fullBase = ctx.taxableWagesFor(exempt);
-  const regularWages = atLeastZero(fullBase - supplementalCash);
+  const regularWages = atLeastZero(fullBase - rawSupplementalCash);
   const estimatedAnnualSalary = regularWages * ctx.periodsPerYear;
+  const supplementalCash = Math.min(fullBase, rawSupplementalCash);
 
   const bracket = findWIBracket(cfg.brackets, estimatedAnnualSalary);
   const amount = applyRate(supplementalCash, bracket.rate);
@@ -1975,7 +1983,11 @@ function bracketSupplementalTax(
     amount,
     detail:
       `${fmt(supplementalCash)} @ ${(bracket.rate * 100).toFixed(2)}% flat ` +
-      `(estimated annual gross salary ${fmt(estimatedAnnualSalary)} falls in this bracket)`,
+      `(estimated annual gross salary ${fmt(estimatedAnnualSalary)} falls in this bracket)` +
+      (supplementalCash < rawSupplementalCash
+        ? ` — reduced from the raw ${fmt(rawSupplementalCash)}: pretax deductions exceeded regular wages, ` +
+          `and that excess spills onto the supplemental base too`
+        : ''),
   };
 }
 
@@ -2124,16 +2136,23 @@ function bracketFlatAllowance(
  * allowances employees claim." Returns null when there's no supplemental
  * income, so a plain paycheck is unaffected — same convention as Wisconsin's
  * bracketSupplementalTax().
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * pretax deductions exceeding regular wages must spill onto the
+ * supplemental base too. Fixed via Math.min(fullBase, supplementalCash).
  */
 function flatRateSupplementalTax(
   input: PaycheckInput,
-  _ctx: ComputeContext,
+  ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine | null {
-  const supplementalCash = supplementalEarnings(input.earnings);
-  if (supplementalCash <= 0) return null;
+  const rawSupplementalCash = supplementalEarnings(input.earnings);
+  if (rawSupplementalCash <= 0) return null;
 
   const cfg = rules.bracketFlatAllowance as BracketFlatAllowanceConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  const supplementalCash = Math.min(fullBase, rawSupplementalCash);
   const amount = applyRate(supplementalCash, cfg.supplementalRate);
 
   return {
@@ -2143,7 +2162,12 @@ function flatRateSupplementalTax(
     jurisdiction: 'state',
     taxableWages: supplementalCash,
     amount,
-    detail: `${fmt(supplementalCash)} @ ${(cfg.supplementalRate * 100).toFixed(2)}% flat, regardless of allowances or bracket`,
+    detail:
+      `${fmt(supplementalCash)} @ ${(cfg.supplementalRate * 100).toFixed(2)}% flat, regardless of allowances or bracket` +
+      (supplementalCash < rawSupplementalCash
+        ? ` — reduced from the raw ${fmt(rawSupplementalCash)}: pretax deductions exceeded regular wages, ` +
+          `and that excess spills onto the supplemental base too`
+        : ''),
   };
 }
 
@@ -2671,14 +2695,18 @@ function bracketPerPeriodGross(
  * — the form's own instruction to skip lines 1-3 when line 4 is used applies
  * here too: a flat specified amount replaces ALL of this employee's
  * withholding for the period, not just the regular-wages line.
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * pretax deductions exceeding regular wages must spill onto the
+ * supplemental base too. Fixed via Math.min(fullBase, supplementalCash).
  */
 function montanaSupplementalTax(
   input: PaycheckInput,
-  _ctx: ComputeContext,
+  ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine | null {
-  const supplementalCash = supplementalEarnings(input.earnings);
-  if (supplementalCash <= 0) return null;
+  const rawSupplementalCash = supplementalEarnings(input.earnings);
+  if (rawSupplementalCash <= 0) return null;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   if (Number(cert.specifiedWithholding ?? 0) > 0) return null;
@@ -2688,6 +2716,10 @@ function montanaSupplementalTax(
   // top of a bonus already taxed through the regular formula.
   const cfg = rules.supplementalWages as { flatRate: number } | undefined;
   if (!cfg) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  const supplementalCash = Math.min(fullBase, rawSupplementalCash);
 
   const rate = cfg.flatRate;
   const amount = toWholeDollars(applyRate(supplementalCash, rate));
@@ -2699,7 +2731,12 @@ function montanaSupplementalTax(
     jurisdiction: 'state',
     taxableWages: supplementalCash,
     amount,
-    detail: `${fmt(supplementalCash)} @ ${(rate * 100).toFixed(2)}% flat (Method 3), rounded to the nearest dollar`,
+    detail:
+      `${fmt(supplementalCash)} @ ${(rate * 100).toFixed(2)}% flat (Method 3), rounded to the nearest dollar` +
+      (supplementalCash < rawSupplementalCash
+        ? ` — reduced from the raw ${fmt(rawSupplementalCash)}: pretax deductions exceeded regular wages, ` +
+          `and that excess spills onto the supplemental base too`
+        : ''),
   };
 }
 
@@ -3093,14 +3130,26 @@ interface SupplementalWagesConfig {
  * says aggregate, and aggregation is what the regular method already does.
  * And a state that merely PERMITS the flat method leaves the choice to the
  * employer, so nothing fires until the employer says so.
+ *
+ * BUG FIXED 2026-09-02, same root cause and same fix shape as the identical
+ * bug just fixed in federal.ts's federalSupplementalTax(): a pretax
+ * deduction is applied against the REGULAR portion first (see this
+ * function's own callers — incomeTaxLines() builds a regularCtx that
+ * subtracts supplementalCash from the full base, and flatRate() does the
+ * same), so when pretax EXCEEDS regular wages, the excess must spill onto
+ * the supplemental base too rather than vanish. This function used to tax
+ * the raw, un-reduced supplementalCash regardless. Fixed the same way:
+ * cap it at ctx.taxableWagesFor(rules.exemptPretax)'s own combined base —
+ * algebraically Math.min(fullBase, supplementalCash), for the same reason
+ * proven in federalSupplementalTax()'s own doc comment.
  */
 function flatRateSupplementalFromConfig(
   input: PaycheckInput,
-  _ctx: ComputeContext,
+  ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine | null {
-  const supplementalCash = supplementalEarnings(input.earnings);
-  if (supplementalCash <= 0) return null;
+  const rawSupplementalCash = supplementalEarnings(input.earnings);
+  if (rawSupplementalCash <= 0) return null;
 
   const cfg = rules.supplementalWages as SupplementalWagesConfig | undefined;
   if (!cfg) return null;
@@ -3110,9 +3159,14 @@ function flatRateSupplementalFromConfig(
   }
 
   if (cfg.appliesWhen === 'paid_separately') {
-    const regularCash = cashEarnings(input.earnings) - supplementalCash;
+    const regularCash = cashEarnings(input.earnings) - rawSupplementalCash;
     if (regularCash > 0) return null;
   }
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  const supplementalCash = Math.min(fullBase, rawSupplementalCash);
+  const spillover = rawSupplementalCash - supplementalCash;
 
   const amount = applyRate(supplementalCash, cfg.flatRate);
 
@@ -3126,7 +3180,11 @@ function flatRateSupplementalFromConfig(
     detail:
       `${fmt(supplementalCash)} @ ${(cfg.flatRate * 100).toFixed(2)}% flat` +
       (cfg.appliesWhen === 'paid_separately' ? ', paid on its own cheque' : '') +
-      (cfg.election === 'employer_option' ? ' (employer elected this method over aggregation)' : ''),
+      (cfg.election === 'employer_option' ? ' (employer elected this method over aggregation)' : '') +
+      (spillover > 0
+        ? ` — reduced from the raw ${fmt(rawSupplementalCash)}: pretax deductions exceeded regular ` +
+          `wages by ${fmt(spillover)}, and that excess spills onto the supplemental base too`
+        : ''),
   };
 }
 
@@ -3233,21 +3291,29 @@ function nycLocalTax(
  * emitting a distinctly-prefixed id, since this is a separate LOCAL levy,
  * not the state one. Only applies when certificate.nycResident is true — no
  * supplemental line for a non-NYC-resident regardless of supplemental pay.
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * pretax deductions exceeding regular wages must spill onto the
+ * supplemental base too. Fixed via Math.min(fullBase, supplementalCash),
+ * using the same rules.exemptPretax list nycLocalTax() itself reads.
  */
 function nycSupplementalTax(
   input: PaycheckInput,
-  _ctx: ComputeContext,
+  ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   if (!cert.nycResident) return null;
 
-  const supplementalCash = supplementalEarnings(input.earnings);
-  if (supplementalCash <= 0) return null;
+  const rawSupplementalCash = supplementalEarnings(input.earnings);
+  if (rawSupplementalCash <= 0) return null;
 
   const cfg = rules.nycLocalTax as NYCLocalTaxConfig | undefined;
   if (!cfg) return null;
 
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  const supplementalCash = Math.min(fullBase, rawSupplementalCash);
   const amount = applyRate(supplementalCash, cfg.supplementalRate);
 
   return {
@@ -3257,7 +3323,12 @@ function nycSupplementalTax(
     jurisdiction: 'local',
     taxableWages: supplementalCash,
     amount,
-    detail: `${fmt(supplementalCash)} @ ${(cfg.supplementalRate * 100).toFixed(2)}% flat`,
+    detail:
+      `${fmt(supplementalCash)} @ ${(cfg.supplementalRate * 100).toFixed(2)}% flat` +
+      (supplementalCash < rawSupplementalCash
+        ? ` — reduced from the raw ${fmt(rawSupplementalCash)}: pretax deductions exceeded regular wages, ` +
+          `and that excess spills onto the supplemental base too`
+        : ''),
   };
 }
 
@@ -3411,18 +3482,23 @@ function yonkersLocalTax(
  * separate supplemental treatment needed since that tax is already flat
  * with no bracket to bypass, unlike every rate-schedule-based supplemental
  * method elsewhere in this project.
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * pretax deductions exceeding regular wages must spill onto the
+ * supplemental base too. Fixed via Math.min(fullBase, supplementalCash),
+ * using the same rules.exemptPretax list yonkersLocalTax() itself reads.
  */
 function yonkersSupplementalTax(
   input: PaycheckInput,
-  _ctx: ComputeContext,
+  ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const cfg = rules.yonkersLocalTax as YonkersLocalTaxConfig | undefined;
   if (!cfg) return null;
 
-  const supplementalCash = supplementalEarnings(input.earnings);
-  if (supplementalCash <= 0) return null;
+  const rawSupplementalCash = supplementalEarnings(input.earnings);
+  if (rawSupplementalCash <= 0) return null;
 
   let rate: number;
   if (cert.yonkersResident) {
@@ -3433,6 +3509,9 @@ function yonkersSupplementalTax(
     return null;
   }
 
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  const supplementalCash = Math.min(fullBase, rawSupplementalCash);
   const amount = applyRate(supplementalCash, rate);
 
   return {
@@ -3442,7 +3521,12 @@ function yonkersSupplementalTax(
     jurisdiction: 'local',
     taxableWages: supplementalCash,
     amount,
-    detail: `${fmt(supplementalCash)} @ ${(rate * 100).toFixed(4)}% flat`,
+    detail:
+      `${fmt(supplementalCash)} @ ${(rate * 100).toFixed(4)}% flat` +
+      (supplementalCash < rawSupplementalCash
+        ? ` — reduced from the raw ${fmt(rawSupplementalCash)}: pretax deductions exceeded regular wages, ` +
+          `and that excess spills onto the supplemental base too`
+        : ''),
   };
 }
 
@@ -6234,8 +6318,15 @@ interface CASupplementalConfig {
  * employer to have elected it (rules.supplementalWages.election is always
  * 'employer_option' for California; nothing here is a state mandate the
  * way Ohio's 2.75% is).
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * a pretax deduction on this bonus-only cheque reduces the taxable base
+ * regardless of the flat method, but this used to return the raw
+ * supplementalCash uncapped. Fixed via Math.min(fullBase, supplementalCash)
+ * — the general form here since regularCashOnly is always 0 by this
+ * function's own gate (no separate "regular portion" to spill past).
  */
-function caSupplementalCarveOut(input: PaycheckInput, rules: StateRuleset): Cents {
+function caSupplementalCarveOut(input: PaycheckInput, ctx: ComputeContext, rules: StateRuleset): Cents {
   const cfg = rules.supplementalWages as CASupplementalConfig | undefined;
   if (!cfg) return 0;
 
@@ -6247,7 +6338,11 @@ function caSupplementalCarveOut(input: PaycheckInput, rules: StateRuleset): Cent
 
   const elected =
     cfg.election !== 'employer_option' || input.employer?.supplementalFlatRateElection?.[rules.code] === true;
-  return elected ? supplementalCash : 0;
+  if (!elected) return 0;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  return Math.min(fullBase, supplementalCash);
 }
 
 /**
@@ -6276,19 +6371,42 @@ function caSupplementalCarveOut(input: PaycheckInput, rules: StateRuleset): Cent
  * directions DE 44 actually describes (the "other" bucket IS the general
  * case in the source's own structure, not a guess this project is making
  * on top of it).
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * caSupplementalCarveOut() now correctly caps the TOTAL at this cheque's
+ * pretax-reduced base, but this function used to re-derive bonusCents/
+ * otherCents straight from the raw earnings, ignoring that cap entirely —
+ * so a pretax deduction on a bonus-only cheque was silently dropped from
+ * this calculation altogether. When carveOut is less than the raw total
+ * (a pretax deduction reduced the base), the shortfall is allocated
+ * PROPORTIONALLY across the two categories — DE 44 itself says nothing
+ * about which category a deduction should reduce first when both are
+ * present on the same cheque, so proportional allocation is this
+ * project's own inferred, disclosed convention, not a DE 44 rule.
  */
-function californiaSupplementalTax(input: PaycheckInput, rules: StateRuleset): TaxLine[] {
-  const carveOut = caSupplementalCarveOut(input, rules);
+function californiaSupplementalTax(input: PaycheckInput, ctx: ComputeContext, rules: StateRuleset): TaxLine[] {
+  const carveOut = caSupplementalCarveOut(input, ctx, rules);
   if (carveOut <= 0) return [];
 
   const cfg = rules.supplementalWages as CASupplementalConfig;
-  let bonusCents = 0;
-  let otherCents = 0;
+  let rawBonusCents = 0;
+  let rawOtherCents = 0;
   for (const e of input.earnings) {
     if (e.category !== 'supplemental') continue;
-    if (/bonus|stock/i.test(e.code)) bonusCents += e.amount;
-    else otherCents += e.amount;
+    if (/bonus|stock/i.test(e.code)) rawBonusCents += e.amount;
+    else rawOtherCents += e.amount;
   }
+  const rawTotal = rawBonusCents + rawOtherCents;
+  const spilled = rawTotal - carveOut;
+
+  // Proportional allocation of the pretax reduction, largest-remainder
+  // style: round the bonus share once, then assign the exact remainder to
+  // "other" rather than rounding both independently, so the two lines
+  // always sum to exactly carveOut (never a stray penny off from double
+  // rounding).
+  const bonusCents =
+    spilled > 0 && rawTotal > 0 ? Math.round((rawBonusCents / rawTotal) * carveOut) : rawBonusCents;
+  const otherCents = spilled > 0 ? carveOut - bonusCents : rawOtherCents;
 
   const lines: TaxLine[] = [];
   if (bonusCents > 0) {
@@ -6301,7 +6419,12 @@ function californiaSupplementalTax(input: PaycheckInput, rules: StateRuleset): T
       amount: applyRate(bonusCents, cfg.bonusAndStockOptionRate),
       detail:
         `${fmt(bonusCents)} @ ${(cfg.bonusAndStockOptionRate * 100).toFixed(2)}% flat — bonuses and stock ` +
-        `options, no withholding allowances applied (DE 44, employer elected the flat method over aggregation)`,
+        `options, no withholding allowances applied (DE 44, employer elected the flat method over aggregation)` +
+        (spilled > 0
+          ? ` — reduced from the raw ${fmt(rawBonusCents)}: pretax deductions reduced the taxable base by ` +
+            `${fmt(spilled)}, allocated proportionally across bonus/other (this project's own inferred ` +
+            `convention, not a DE 44 rule)`
+          : ''),
     });
   }
   if (otherCents > 0) {
@@ -6315,7 +6438,12 @@ function californiaSupplementalTax(input: PaycheckInput, rules: StateRuleset): T
       detail:
         `${fmt(otherCents)} @ ${(cfg.otherRate * 100).toFixed(2)}% flat — overtime pay, commissions, sales ` +
         `awards, severance, vacation pay etc., no withholding allowances applied (DE 44, employer elected the ` +
-        `flat method over aggregation)`,
+        `flat method over aggregation)` +
+        (spilled > 0
+          ? ` — reduced from the raw ${fmt(rawOtherCents)}: pretax deductions reduced the taxable base by ` +
+            `${fmt(spilled)}, allocated proportionally across bonus/other (this project's own inferred ` +
+            `convention, not a DE 44 rule)`
+          : ''),
     });
   }
   return lines;
@@ -6369,7 +6497,7 @@ function californiaWithholding(
   // other case — combined with regular wages on the same cheque, no
   // employer election, no supplemental config at all — leaves the dollars
   // right where DE 44 puts them: in the ordinary base, taxed once, here.
-  const periodWages = atLeastZero(fullBase - caSupplementalCarveOut(input, rules));
+  const periodWages = atLeastZero(fullBase - caSupplementalCarveOut(input, ctx, rules));
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const status = resolveCAFilingStatus(cert);
@@ -6680,9 +6808,17 @@ function mdCountyTopRate(countyName: string | undefined, rules: StateRuleset): n
  * RESIDENTS: the guide's own phrase is "the county of residence," which
  * presumes one, and this project has no primary-sourced lump-sum figure
  * for the Special Nonresident Rate case.
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * a pretax deduction on this bonus-only cheque reduces the taxable base
+ * regardless of the flat method, but this used to return the raw
+ * supplementalCash uncapped. Fixed via Math.min(fullBase, supplementalCash)
+ * — the general form here since regularCashOnly is always 0 by this
+ * function's own gate (no separate "regular portion" to spill past).
  */
 function mdSupplementalCarveOut(
   input: PaycheckInput,
+  ctx: ComputeContext,
   rules: StateRuleset,
 ): { cash: Cents; rate: number } | null {
   const cfg = rules.lumpSumBonusWithholding as MDLumpSumBonusConfig | undefined;
@@ -6702,7 +6838,9 @@ function mdSupplementalCarveOut(
   const countyRate = mdCountyTopRate(cert.county as string | undefined, rules);
   if (countyRate === undefined) return null;
 
-  return { cash: supplementalCash, rate: cfg.topStateRate + countyRate };
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  return { cash: Math.min(fullBase, supplementalCash), rate: cfg.topStateRate + countyRate };
 }
 
 /**
@@ -6715,10 +6853,11 @@ function mdSupplementalCarveOut(
  * ordinary formula, just at each rate's own ceiling instead of a bracket
  * lookup.
  */
-function marylandSupplementalTax(input: PaycheckInput, rules: StateRuleset): TaxLine | null {
-  const carve = mdSupplementalCarveOut(input, rules);
+function marylandSupplementalTax(input: PaycheckInput, ctx: ComputeContext, rules: StateRuleset): TaxLine | null {
+  const carve = mdSupplementalCarveOut(input, ctx, rules);
   if (!carve) return null;
 
+  const rawSupplementalCash = supplementalEarnings(input.earnings);
   const amount = applyRate(carve.cash, carve.rate);
   return {
     id: `${rules.code}_SIT_SUPP`,
@@ -6730,7 +6869,11 @@ function marylandSupplementalTax(input: PaycheckInput, rules: StateRuleset): Tax
     detail:
       `${fmt(carve.cash)} @ ${(carve.rate * 100).toFixed(2)}% flat — highest state rate (6.50%) plus the ` +
       `highest local rate for the county of residence (Employer Withholding Guide, employer elected the ` +
-      `lump-sum method over the ordinary combined table)`,
+      `lump-sum method over the ordinary combined table)` +
+      (carve.cash < rawSupplementalCash
+        ? ` — reduced from the raw ${fmt(rawSupplementalCash)}: pretax deductions exceeded regular wages, ` +
+          `and that excess spills onto the supplemental base too`
+        : ''),
   };
 }
 
@@ -6766,7 +6909,7 @@ function marylandWithholding(
   // Carved out only when marylandSupplementalTax() is actually about to
   // tax it separately at the flat lump-sum rate — see that function's own
   // doc comment; every other cheque leaves the dollars right here.
-  const carve = mdSupplementalCarveOut(input, rules);
+  const carve = mdSupplementalCarveOut(input, ctx, rules);
   const periodWages = atLeastZero(ctx.taxableWagesFor(exempt) - (carve?.cash ?? 0));
   const annualWages = periodWages * ctx.periodsPerYear;
 
