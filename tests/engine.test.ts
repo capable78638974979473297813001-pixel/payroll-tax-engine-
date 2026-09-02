@@ -384,6 +384,43 @@ describe('supplemental wages — Pub 15 flat-rate method', () => {
     assert.equal(r.taxes.some((t) => t.id === 'US_FIT_SUPP'), false);
   });
 
+  test('BUG FIX: pretax deductions exceeding regular wages spill over onto the supplemental base too', () => {
+    // $500 regular wages, a $2,000 401(k) deferral, and a $5,000 bonus.
+    // Combined taxable = 500 + 5,000 - 2,000 = 3,500. Before this fix,
+    // federalSupplementalTax() taxed the raw, un-reduced $5,000 bonus
+    // (since pretax was applied only against the $500 regular side, with
+    // the $1,500 excess silently discarded rather than spilling onto the
+    // bonus) — $1,100 instead of the correct $770, a $330 over-withhold.
+    const r = calculatePaycheck(
+      input({
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(500) },
+          bonus(5000),
+        ],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(2000) }],
+      }),
+    );
+    assert.equal(amountOf(r, 'US_FIT'), 0); // regular side already correctly zero
+    assert.equal(amountOf(r, 'US_FIT_SUPP'), dollars(770)); // 3,500 × 22%, not 5,000 × 22% = 1,100
+  });
+
+  test('pretax spillover floors at $0 when pretax deductions exceed the ENTIRE combined base', () => {
+    // $500 regular + $1,000 bonus = $1,500 combined, but a $9,000 pretax
+    // deduction exceeds even that — both regular AND supplemental should
+    // be $0, not a negative figure silently clamped somewhere unexpected.
+    const r = calculatePaycheck(
+      input({
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(500) },
+          bonus(1000),
+        ],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(9000) }],
+      }),
+    );
+    assert.equal(amountOf(r, 'US_FIT'), 0);
+    assert.equal(amountOf(r, 'US_FIT_SUPP'), 0);
+  });
+
   test('an exempt W-4 withholds nothing on supplemental wages either', () => {
     const r = calculatePaycheck(
       input({

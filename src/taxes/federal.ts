@@ -55,8 +55,16 @@ export function federalIncomeTax(
   // pretax. Supplemental wages (bonus/commission) are carved out and taxed on
   // the flat path instead (see federalSupplementalTax); pretax is applied to
   // the regular portion first, so the two lines together still tax the full
-  // base. If pretax exceeds regular wages the remainder is not spilled back
-  // onto supplemental — a rare case documented rather than modelled in v1.
+  // base. BUG FIXED 2026-09-02: this used to say that when pretax exceeds
+  // regular wages, the remainder was "not spilled back onto supplemental —
+  // a rare case documented rather than modelled in v1." That was a real
+  // gap, not just a documented one — federalSupplementalTax() taxed the
+  // raw, un-reduced bonus regardless, over-withholding whenever it
+  // happened. Now fixed there (capped at Math.min(fullBase,
+  // supplementalCash), which this function's own atLeastZero(fullBase -
+  // supplementalCash) below algebraically guarantees agrees with this
+  // REGULAR side); see federalSupplementalTax()'s own doc comment for the
+  // proof and tests/engine.test.ts's two new spillover tests.
   const fullBase = ctx.taxableWagesFor(cfg.exemptPretax as PretaxCategory[]);
   const supplementalCash = supplementalEarnings(input.earnings);
   let taxableWages = atLeastZero(fullBase - supplementalCash);
@@ -150,15 +158,37 @@ export function federalIncomeTax(
  *
  * This is a separate line from US_FIT so the breakdown stays auditable: a
  * customer can see exactly what withholding the bonus drove.
+ *
+ * BUG FIXED 2026-09-02: pretax deductions are applied against the REGULAR
+ * portion of wages first (federalIncomeTax()'s own convention — see its
+ * "pretax is applied to the regular portion first" comment), and when a
+ * pretax deduction EXCEEDS regular wages, the excess must spill over onto
+ * the supplemental base too, since the combined pretax deduction reduces
+ * total taxable income regardless of which earning line it's nominally
+ * attached to. This function used to tax the raw, un-reduced
+ * supplementalCash figure regardless — for $500 regular wages, a $2,000
+ * 401(k) deferral, and a $5,000 bonus, it taxed the full $5,000 at 22%
+ * ($1,100) instead of the correct $3,500 ($500+$5,000−$2,000 = $770),
+ * over-withholding by $330. Fixed by capping the taxed amount at
+ * ctx.taxableWagesFor()'s own combined net base — algebraically equal to
+ * Math.min(fullBase, supplementalCash) (proof: federalIncomeTax()'s own
+ * REGULAR-side taxableWages is atLeastZero(fullBase - supplementalCash);
+ * fullBase minus THAT already equals min(fullBase, supplementalCash) in
+ * every case — no pretax exceeding regular, pretax exceeding regular but
+ * not the combined total, and pretax exceeding the combined total too).
+ * The REGULAR side was never wrong — only this function's own figure was.
  */
 export function federalSupplementalTax(
   input: PaycheckInput,
+  ctx: ComputeContext,
   rules: FederalRuleset,
 ): TaxLine | null {
-  const supplementalCash = supplementalEarnings(input.earnings);
-  if (supplementalCash <= 0) return null;
+  const rawSupplementalCash = supplementalEarnings(input.earnings);
+  if (rawSupplementalCash <= 0) return null;
 
   const cfg = rules.incomeTax;
+  const fullBase = ctx.taxableWagesFor(cfg.exemptPretax as PretaxCategory[]);
+  const supplementalCash = Math.min(fullBase, rawSupplementalCash);
 
   // An exempt W-4 claims no federal income tax liability at all, supplemental
   // included; nothing is withheld.
@@ -185,11 +215,17 @@ export function federalSupplementalTax(
     under * cfg.supplementalRate + over * cfg.supplementalMandatoryRate,
   );
 
-  const detail = over
-    ? `${fmt(under)} @ ${(cfg.supplementalRate * 100).toFixed(0)}% + ` +
-      `${fmt(over)} @ ${(cfg.supplementalMandatoryRate * 100).toFixed(0)}% ` +
-      `(cumulative supplemental over ${fmt(threshold)})`
-    : `${fmt(supplementalCash)} @ ${(cfg.supplementalRate * 100).toFixed(0)}% flat supplemental rate`;
+  const spillover = rawSupplementalCash - supplementalCash;
+  const detail =
+    (over
+      ? `${fmt(under)} @ ${(cfg.supplementalRate * 100).toFixed(0)}% + ` +
+        `${fmt(over)} @ ${(cfg.supplementalMandatoryRate * 100).toFixed(0)}% ` +
+        `(cumulative supplemental over ${fmt(threshold)})`
+      : `${fmt(supplementalCash)} @ ${(cfg.supplementalRate * 100).toFixed(0)}% flat supplemental rate`) +
+    (spillover > 0
+      ? ` — reduced from the raw ${fmt(rawSupplementalCash)} bonus: pretax deductions exceeded regular ` +
+        `wages by ${fmt(spillover)}, and that excess spills onto the supplemental base too`
+      : '');
 
   return {
     id: 'US_FIT_SUPP',
@@ -709,7 +745,7 @@ export function federalTaxes(
   ctx: ComputeContext,
 ): TaxLine[] {
   const rules = federalRuleset(input.checkDate);
-  const supplemental = federalSupplementalTax(input, rules);
+  const supplemental = federalSupplementalTax(input, ctx, rules);
   return applyEmploymentCategory(
     input,
     [
