@@ -1,0 +1,73 @@
+{
+  "year": 2026,
+  "$scopeNote": "Only ORDINARY (consumer/creditor judgment) wage garnishment is state-overridable here. Federal law — support orders, federal tax levies, federal student loan default — preempts a state's own wage-exemption statute entirely, so nothing in this file ever changes those two calculations in src/garnishment.ts; only 'consumer_creditor' orders consult it. A state absent from this file has no known departure from the plain federal CCPA default and is computed with it as-is — a narrower claim than 'every state's garnishment law has been fully researched.' Only a handful of states are covered: the ones with a clean, well-documented, easily-verified departure (an outright statutory prohibition, or a materially different percentage/floor formula). Most states track the federal default exactly or vary it only at the margins (a lower percentage for very low earners, a different priority-of-orders rule) that this pass didn't chase down — same disclosure discipline as this project's data/states/*.json knownGaps.",
+  "states": {
+    "TX": {
+      "ordinaryGarnishmentProhibited": true,
+      "sources": [
+        {
+          "title": "Tex. Prop. Code Ann. § 42.001(b)(1) — current wages for personal services exempt from garnishment, attachment, execution or other seizure, except for court-ordered child support",
+          "url": "https://statutes.capitol.texas.gov/Docs/PR/htm/PR.42.htm",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own text, not an independently rendered direct fetch this pass."
+        }
+      ]
+    },
+    "PA": {
+      "ordinaryGarnishmentProhibited": true,
+      "sources": [
+        {
+          "title": "42 Pa. Cons. Stat. § 8127 — wages/salaries/commissions exempt from attachment, execution or other process except for support orders, restitution/costs/fines/bail in a criminal proceeding, board owed for 4 weeks or less, and PHEAA (student loan) obligations",
+          "url": "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/42/00.081.027.000..HTM",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own text, not an independently rendered direct fetch this pass."
+        }
+      ]
+    },
+    "NC": {
+      "ordinaryGarnishmentProhibited": true,
+      "sources": [
+        {
+          "title": "N.C. Gen. Stat. § 1-362 — wages/personal earnings exempt from attachment/garnishment for ordinary judgment debt (North Carolina provides no attachment remedy against a resident debtor's wages outside taxes, support, and a short named list of exceptions)",
+          "url": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_1/GS_1-362.html",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis, not an independently rendered direct fetch this pass."
+        }
+      ],
+      "knownGap": "Some secondary sources frame this as North Carolina simply not providing attachment as a creditor remedy against a resident's wages at all (rather than a bare percentage exemption); this file only asserts the practical outcome relevant to this engine — an ordinary consumer_creditor garnishment computes to $0 in NC — not the precise doctrinal mechanism."
+    },
+    "SC": {
+      "ordinaryGarnishmentProhibited": true,
+      "sources": [
+        {
+          "title": "S.C. Code Ann. § 15-39-410 — earnings of the debtor for personal services excluded from property reachable to satisfy a judgment",
+          "url": "https://www.scstatehouse.gov/code/t15c039.php",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own text, not an independently rendered direct fetch this pass."
+        }
+      ]
+    },
+    "IL": {
+      "ordinaryGarnishment": {
+        "maxGrossEarningsFraction": 0.15,
+        "minimumWageWeeklyMultiplier": 45,
+        "stateMinimumHourlyWage": 15.00
+      },
+      "sources": [
+        {
+          "title": "735 ILCS 5/12-803 — maximum wage deduction: lesser of 15% of GROSS weekly wages, or the amount by which disposable earnings exceed 45x the greater of the state or federal minimum hourly wage",
+          "url": "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own mechanism, not an independently rendered direct fetch this pass."
+        },
+        {
+          "title": "Illinois Department of Labor — Minimum Wage Law (current state minimum hourly wage)",
+          "url": "https://labor.illinois.gov/laws-rules/fls/minimum-wage-law.html",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed: Illinois's minimum wage reached its final legislated step of $15.00/hr effective 2025-01-01 with no further scheduled statutory increase; not independently re-fetched from IDOL's own page this pass."
+        }
+      ],
+      "$note": "Unlike every other figure in this file, Illinois's OWN minimum wage — not the federal $7.25 figure the rest of this file and federal-2026.json use — drives the 45x floor, because 735 ILCS 5/12-803 takes the GREATER of the two and Illinois's has been higher since 2022. The 15% fraction here applies to GROSS wages, not disposable earnings, which is why this state carries its own maxGrossEarningsFraction field instead of reusing maxDisposableEarningsFraction. Re-verify stateMinimumHourlyWage every year this file rolls forward — it is not sourced from anywhere else this engine already tracks."
+    }
+  }
+}

@@ -7,8 +7,9 @@
     "node": ">=22.6.0"
   },
   "scripts": {
-    "test": "node --test tests/engine.test.ts tests/harvester.test.ts tests/geocode.test.ts tests/alabama.test.ts tests/harvest-sweep.test.ts tests/harvest-journal.test.ts",
+    "test": "node --test tests/engine.test.ts tests/harvester.test.ts tests/geocode.test.ts tests/alabama.test.ts tests/harvest-sweep.test.ts tests/harvest-journal.test.ts tests/garnishment.test.ts",
     "demo": "node examples/demo.ts",
+    "demo:garnishment": "node examples/garnishment-demo.ts",
     "demo:alabama": "node examples/alabama-demo.ts",
     "alabama": "node examples/alabama-calc.ts",
     "ui:alabama": "node examples/alabama-server.ts",

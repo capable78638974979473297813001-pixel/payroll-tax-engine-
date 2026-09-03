@@ -579,3 +579,72 @@ export function allOHSchoolDistricts(checkDate: string): OHSchoolDistrictEntry[]
   );
   return file.districts;
 }
+
+export interface GarnishmentSource {
+  title: string;
+  url: string;
+  verifiedOn: string;
+  verifiedBy?: string;
+}
+
+export interface GarnishmentFederalRuleset {
+  year: number;
+  sources: GarnishmentSource[];
+  federalMinimumHourlyWage: number;
+  ordinaryGarnishment: {
+    maxDisposableEarningsFraction: number;
+    minimumWageWeeklyMultiplier: number;
+  };
+  supportOrder: {
+    supportingOtherFamilyFraction: number;
+    notSupportingOtherFamilyFraction: number;
+    arrearsBonusFraction: number;
+  };
+  studentLoanDefault: {
+    maxDisposableEarningsFraction: number;
+    minimumWageWeeklyMultiplier: number;
+  };
+}
+
+/** The CCPA's federal garnishment ceilings — see data/garnishment/federal-*.json. */
+export function garnishmentFederalRuleset(checkDate: string): GarnishmentFederalRuleset {
+  return loadJson<GarnishmentFederalRuleset>(
+    join('garnishment', `federal-${yearOf(checkDate)}.json`),
+  );
+}
+
+export interface GarnishmentStateOverride {
+  /** True where state law bars ordinary consumer/creditor garnishment outright (TX, PA, NC, SC). Never affects support orders or federal student loan default — those preempt state wage exemptions entirely. */
+  ordinaryGarnishmentProhibited?: boolean;
+  ordinaryGarnishment?: {
+    /** Set when the state's own formula caps a fraction of GROSS wages (e.g. Illinois) rather than disposable earnings. */
+    maxGrossEarningsFraction?: number;
+    maxDisposableEarningsFraction?: number;
+    minimumWageWeeklyMultiplier: number;
+    stateMinimumHourlyWage: number;
+  };
+  sources: GarnishmentSource[];
+  $note?: string;
+  knownGap?: string;
+}
+
+interface GarnishmentStateOverrideFile {
+  year: number;
+  states: Record<string, GarnishmentStateOverride>;
+}
+
+/**
+ * A state's own departure from the federal CCPA ordinary-garnishment
+ * default, if this project has researched one — undefined means "use the
+ * federal default," never "confirmed no departure exists." See
+ * data/garnishment/state-overrides-*.json's own $scopeNote.
+ */
+export function garnishmentStateOverride(
+  code: string,
+  checkDate: string,
+): GarnishmentStateOverride | undefined {
+  const file = loadJson<GarnishmentStateOverrideFile>(
+    join('garnishment', `state-overrides-${yearOf(checkDate)}.json`),
+  );
+  return file.states[code.toUpperCase()];
+}

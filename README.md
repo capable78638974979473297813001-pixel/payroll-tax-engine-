@@ -5,9 +5,10 @@ arithmetic, effective-dated rulesets loaded from JSON — every jurisdiction,
 federal through local, computed by the same driver.
 
 ```bash
-npm test              # 940 tests
-npm run demo           # prints a worked paystub
-npm run ui:calculator  # any-state calculator UI, address-based local tax lookup
+npm test                  # 1000+ tests
+npm run demo               # prints a worked paystub
+npm run demo:garnishment   # same, layered with a child-support + creditor garnishment
+npm run ui:calculator      # any-state calculator UI, address-based local tax lookup
 ```
 
 ## Status
@@ -22,6 +23,7 @@ npm run ui:calculator  # any-state calculator UI, address-based local tax lookup
 | State UC/SDI/PFML/LTC (employee-paid) | 14 states + DC, wherever the state actually levies one |
 | Local income tax | Every state known to levy one, at the depth each state's own public data allows: OH (~600 municipalities + school districts + JEDD/JEDZ), PA (~2,600 Act 32 EIT/LST jurisdictions), MI (24 cities — the full statewide list), KY (227 occupational districts), IN (92/92 counties), AL (25/25 municipalities), MD (24 counties + Baltimore City, wired into the state ruleset), NYC + Yonkers, Kansas City/St. Louis earnings tax, Newark payroll tax, Portland Metro/Multnomah + TriMet/LTD transit excise, Denver-cluster Colorado OPT, Wilmington wage tax, Seattle's JumpStart payroll tax, WV municipal service fees (10 cities — see below, the one state with no central registry to bulk-load from) |
 | Reciprocity / multi-state | Wired generically off each state's own `reciprocalStates` — IL/IN/KY/MI/MN/OH/PA/WI's bilateral agreements, DC's blanket nonresident exemption, WV's 5-state cluster |
+| Garnishments (court-ordered / administrative) | CCPA federal ceilings for ordinary consumer/creditor judgment, child support/alimony (50/55/60/65%), and federal student loan default (34 CFR 34.19) — multiple simultaneous orders share one aggregate ceiling, never stacked. 5 states' own departures researched (TX/PA/NC/SC bar ordinary garnishment outright, IL's 15%-of-gross/45x rule); every other state uses the federal default as an unconfirmed baseline, not a researched "no departure exists." Federal tax levies are out of scope (IRS Pub 1494's own table, not a fixed CCPA fraction) — see `src/garnishment.ts` |
 | Address → jurisdiction | Rooftop-precision geocoding pipeline (see below) — 35/51 authoritative, 14/51 OSM-corroborated, measured, not assumed |
 | Staying current | Automated daily harvester watching 105 registered sources, human review gate before anything reaches `data/` |
 
@@ -76,6 +78,9 @@ src/taxes/state.ts             method dispatch, local taxes, SUI, SDI/PFML,
                                 reciprocity — ~8,800 lines, one function per
                                 jurisdiction's actual published mechanism
 src/calculate.ts               driver — knows nothing about specific taxes
+src/garnishment.ts             court-ordered / administrative wage garnishment —
+                                runs AFTER calculatePaycheck(), CCPA ceilings +
+                                researched state overrides for ordinary garnishment
 src/alabama/                   a fully-worked reference module (input
                                 normalization, output shaping, scenario
                                 fixtures) kept as the pattern other states'
@@ -249,6 +254,19 @@ visible instead of overwritten silently.
   address, not a code limitation (see `docs/geocoding-coverage.md`).
 - FUTA credit-reduction states are published by DOL each November and are
   not yet wired to auto-update from that publication.
+- **Garnishment state overrides are researched for 5 states only** (TX, PA,
+  NC, SC — ordinary consumer garnishment barred outright; IL — its own
+  15%-of-gross/45x-minimum-wage formula). Every other state computes
+  ordinary garnishment against the plain federal CCPA default, which is
+  correct for most states but is an unconfirmed baseline, not a researched
+  "no state departure exists" — see `data/garnishment/state-overrides-2026.json`'s
+  own `$scopeNote`. A federal tax levy is out of scope entirely: its exempt
+  amount comes from IRS Publication 1494's own table (filing status,
+  dependents, standard deduction), not a fixed CCPA fraction. Multiple
+  simultaneous support orders are prorated by this engine's own
+  proportional rule when their combined demand exceeds the shared ceiling —
+  a live case defers to the state child-support-enforcement agency's own
+  allocation rule instead.
 - **West Virginia's municipal service fee is the one local tax with no
   central registry to bulk-load from.** WV Code 8-13-13 lets any of ~230
   chartered municipalities levy the fee independently; unlike every other
