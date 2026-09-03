@@ -84,6 +84,14 @@ export interface GarnishmentOrder {
   /** Only meaningful alongside headOfFamily: has the debtor waived that exemption in writing, as Fla. Stat. 222.11 permits? */
   wageExemptionWaivedInWriting?: boolean;
   /**
+   * consumer_creditor only, and only meaningful in a state whose formula
+   * declares `perDependentWeeklyReduction` (currently just North Dakota,
+   * N.D. Cent. Code 32-09.1-06): the number of dependent family members
+   * residing with the employee. Each one further reduces what may be
+   * withheld. Absent or 0 means no reduction — never assumed.
+   */
+  dependents?: number;
+  /**
    * Among orders that are NOT child_support, the lower number draws first
    * when they compete for room under the aggregate ceiling. child_support
    * orders always draw first regardless of this field. Ties keep array
@@ -163,6 +171,7 @@ function capFractionsResult(
   workState: string,
   payFrequency: PayFrequency,
   cfg: GarnishmentFormula,
+  dependents: number,
 ): CapResult {
   const fractions = cfg.capFractions!;
   const values = fractions.map((f) => applyRate(f.basis === 'gross' ? gross : disposable, f.fraction));
@@ -176,6 +185,14 @@ function capFractionsResult(
     const byFloor = atLeastZero(disposable - floor);
     cap = Math.min(cap, byFloor);
     detail += ` or disposable over ${cfg.minimumWageWeeklyMultiplier}x $${cfg.stateMinimumHourlyWage.toFixed(2)}/hr min wage (${fmt(floor)})`;
+  }
+
+  if (cfg.perDependentWeeklyReduction != null && dependents > 0) {
+    const reduction = roundHalfUp(
+      dollars(cfg.perDependentWeeklyReduction) * multiplierForPeriod(payFrequency, 1) * dependents,
+    );
+    cap = atLeastZero(cap - reduction);
+    detail += `, further reduced by ${fmt(reduction)} (${dependents} dependent(s) x $${cfg.perDependentWeeklyReduction.toFixed(2)}/week)`;
   }
   return { cap, detail };
 }
@@ -270,11 +287,12 @@ function formulaCap(
   workState: string,
   payFrequency: PayFrequency,
   cfg: GarnishmentFormula,
+  dependents: number,
 ): CapResult {
   if (cfg.tiers) return tierResult(disposable, workState, payFrequency, cfg);
   if (cfg.grossWeeklyTiers) return grossWeeklyTierResult(disposable, gross, workState, payFrequency, cfg);
   if (cfg.marginalMonthlyBrackets) return marginalMonthlyResult(disposable, workState, payFrequency, cfg);
-  return capFractionsResult(disposable, gross, workState, payFrequency, cfg);
+  return capFractionsResult(disposable, gross, workState, payFrequency, cfg, dependents);
 }
 
 /** null return means no ordinary garnishment may be withheld at all — a flat state prohibition, or a qualifying full exemption the debtor hasn't waived. */
@@ -290,7 +308,14 @@ function ordinaryGarnishmentCap(
   if (override?.ordinaryGarnishmentProhibited) return null;
 
   if (order.headOfFamily && override?.headOfFamilyOrdinaryGarnishment) {
-    return formulaCap(disposable, gross, workState, payFrequency, override.headOfFamilyOrdinaryGarnishment);
+    return formulaCap(
+      disposable,
+      gross,
+      workState,
+      payFrequency,
+      override.headOfFamilyOrdinaryGarnishment,
+      order.dependents ?? 0,
+    );
   }
 
   if (override?.fullExemption?.qualifyingFlag === 'headOfFamily' && order.headOfFamily) {
@@ -302,7 +327,7 @@ function ordinaryGarnishmentCap(
   }
 
   if (override?.ordinaryGarnishment) {
-    return formulaCap(disposable, gross, workState, payFrequency, override.ordinaryGarnishment);
+    return formulaCap(disposable, gross, workState, payFrequency, override.ordinaryGarnishment, order.dependents ?? 0);
   }
 
   const rule = fed.ordinaryGarnishment;

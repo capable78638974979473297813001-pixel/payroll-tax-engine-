@@ -691,6 +691,14 @@ export interface GarnishmentFormula {
   grossWeeklyTiers?: GarnishmentGrossWeeklyTier[];
   /** Shape D — a MARGINAL bracket schedule denominated in monthly dollars, e.g. Hawaii. */
   marginalMonthlyBrackets?: GarnishmentMarginalBracket[];
+  /**
+   * A flat per-dependent WEEKLY dollar reduction applied to the computed cap
+   * (after the fraction/floor test, before clamping at zero) — North
+   * Dakota's $20/dependent (N.D. Cent. Code 32-09.1-06). Only meaningful
+   * alongside `capFractions`; requires the order's own `dependents` count
+   * (see GarnishmentOrder) — absent or 0 dependents means no reduction.
+   */
+  perDependentWeeklyReduction?: number;
 }
 
 export interface GarnishmentStateOverride {

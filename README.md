@@ -23,7 +23,7 @@ npm run ui:calculator      # any-state calculator UI, address-based local tax lo
 | State UC/SDI/PFML/LTC (employee-paid) | 14 states + DC, wherever the state actually levies one |
 | Local income tax | Every state known to levy one, at the depth each state's own public data allows: OH (~600 municipalities + school districts + JEDD/JEDZ), PA (~2,600 Act 32 EIT/LST jurisdictions), MI (24 cities — the full statewide list), KY (227 occupational districts), IN (92/92 counties), AL (25/25 municipalities), MD (24 counties + Baltimore City, wired into the state ruleset), NYC + Yonkers, Kansas City/St. Louis earnings tax, Newark payroll tax, Portland Metro/Multnomah + TriMet/LTD transit excise, Denver-cluster Colorado OPT, Wilmington wage tax, Seattle's JumpStart payroll tax, WV municipal service fees (10 cities — see below, the one state with no central registry to bulk-load from) |
 | Reciprocity / multi-state | Wired generically off each state's own `reciprocalStates` — IL/IN/KY/MI/MN/OH/PA/WI's bilateral agreements, DC's blanket nonresident exemption, WV's 5-state cluster |
-| Garnishments (court-ordered / administrative) | CCPA federal ceilings for ordinary consumer/creditor judgment, child support/alimony (50/55/60/65%), and federal student loan default (34 CFR 34.19) — multiple simultaneous orders share one aggregate ceiling, never stacked. 16 states' own departures researched and modelled across 4 distinct formula shapes: TX/PA/NC/SC bar ordinary garnishment outright; FL exempts a "head of family" debtor at any income; MO gives one a reduced 10% instead; IL/NY/MA/CT/DE/CO/WA cap it by a flat-fraction formula (of gross and/or disposable, plus a minimum-wage floor); MN cliff-brackets by income (10/15/25%, the WHOLE amount reclassified at each threshold); NV cliff-brackets on a fixed gross-weekly dollar line instead; HI uses genuine MARGINAL brackets (5%/10%/20%, only the slice within each band, income-tax-bracket style). NJ and MD's own real departures are identified but not yet modelled (NJ keys to household-size poverty guidelines; MD varies by county) — disclosed rather than silent. Every other state uses the federal default as an unconfirmed baseline, not a researched "no departure exists." Federal tax levies are out of scope (IRS Pub 1494's own table, not a fixed CCPA fraction) — see `src/garnishment.ts` and `data/garnishment/state-overrides-2026.json` |
+| Garnishments (court-ordered / administrative) | CCPA federal ceilings for ordinary consumer/creditor judgment, child support/alimony (50/55/60/65%), and federal student loan default (34 CFR 34.19) — multiple simultaneous orders share one aggregate ceiling, never stacked. 20 states' own departures researched and modelled across 4 distinct formula shapes: TX/PA/NC/SC bar ordinary garnishment outright; FL exempts a "head of family" debtor at any income; MO gives one a reduced 10% instead; IL/NY/MA/CT/DE/CO/WA/WI/ME/VT cap it by a flat-fraction formula (of gross and/or disposable, plus a minimum-wage floor — VT resolves a real dual-rule statute to the more protective consumer-credit-transaction figure); ND applies that same flat-fraction shape with an added $20/week-per-dependent reduction; MN cliff-brackets by income (10/15/25%, the WHOLE amount reclassified at each threshold); NV cliff-brackets on a fixed gross-weekly dollar line instead; HI uses genuine MARGINAL brackets (5%/10%/20%, only the slice within each band, income-tax-bracket style). NJ and MD's own real departures are identified but not yet modelled (NJ keys to household-size poverty guidelines; MD varies by county) — disclosed rather than silent. Every other state uses the federal default as an unconfirmed baseline, not a researched "no departure exists." Federal tax levies are out of scope (IRS Pub 1494's own table, not a fixed CCPA fraction) — see `src/garnishment.ts` and `data/garnishment/state-overrides-2026.json` |
 | Address → jurisdiction | Rooftop-precision geocoding pipeline (see below) — 35/51 authoritative, 14/51 OSM-corroborated, measured, not assumed |
 | Staying current | Automated daily harvester watching 105 registered sources, human review gate before anything reaches `data/` |
 
@@ -254,35 +254,40 @@ visible instead of overwritten silently.
   address, not a code limitation (see `docs/geocoding-coverage.md`).
 - FUTA credit-reduction states are published by DOL each November and are
   not yet wired to auto-update from that publication.
-- **Garnishment state overrides are researched and modelled for 16 states**,
+- **Garnishment state overrides are researched and modelled for 20 states**,
   across 4 distinct formula shapes (`GarnishmentFormula` in `src/registry.ts`):
   TX, PA, NC, SC bar ordinary consumer garnishment outright; FL exempts a
   "head of family" debtor at any income (until affirmatively waived in
   writing); MO gives a head-of-family debtor a reduced 10% instead of a full
-  exemption; IL, NY, MA, CT, DE, CO and WA each cap it by a flat-fraction
-  formula (of gross and/or disposable earnings, plus a minimum-wage floor —
-  New York's is a dual 10%-of-gross/25%-of-disposable test); MN cliff-brackets
-  by income (10/15/25%, indexed to multiples of minimum wage — crossing a
-  threshold reclassifies the WHOLE amount, not a "lesser of" test); NV
-  cliff-brackets too, but on a fixed $770 gross-weekly dollar line instead of
-  a minimum-wage multiple; HI alone uses genuine MARGINAL brackets (5%/10%/20%
-  of monthly-prorated disposable earnings, only the slice within each band —
-  actual income-tax-bracket math, see `GarnishmentMarginalBracket`'s own doc
-  comment). Two more real, confirmed departures are identified but NOT
-  modelled: New Jersey keys its cap to the debtor's income as a fraction of
-  the federal poverty guideline for their household size (this engine tracks
-  no household-size input anywhere); Maryland's cap varies by COUNTY, and
-  workState here is state-level only. Both are disclosed with a `knownGap`
-  in their own entry in `data/garnishment/state-overrides-2026.json` rather
-  than left silent, and both currently compute against the plain federal
-  default in the meantime — very likely wrong for a NJ debtor near the
-  poverty line. Every OTHER state (32 + DC) computes ordinary garnishment
-  against the plain federal CCPA default, which is correct for most of them
-  but is an unconfirmed baseline, not a researched "no state departure
-  exists" — see that file's own `$scopeNote`. Several modelled states also
-  set higher LOCAL minimum wages this file doesn't reach (Denver/Boulder in
-  CO, Minneapolis/St. Paul in MN, NYC/Long Island/Westchester in NY) —
-  disclosed per-state, not silently assumed away. A federal tax levy is out
+  exemption; IL, NY, MA, CT, DE, CO, WA, WI, ME and VT each cap it by a
+  flat-fraction formula (of gross and/or disposable earnings, plus a
+  minimum-wage floor — New York's is a dual 10%-of-gross/25%-of-disposable
+  test, Vermont's resolves a real dual-rule statute to the more protective of
+  its two rates); ND uses that same flat-fraction shape with a further
+  $20/week-per-dependent reduction layered on top (`GarnishmentOrder.dependents`
+  — the one state in this file keyed to headcount rather than income alone);
+  MN cliff-brackets by income (10/15/25%, indexed to multiples of minimum
+  wage — crossing a threshold reclassifies the WHOLE amount, not a "lesser
+  of" test); NV cliff-brackets too, but on a fixed $770 gross-weekly dollar
+  line instead of a minimum-wage multiple; HI alone uses genuine MARGINAL
+  brackets (5%/10%/20% of monthly-prorated disposable earnings, only the
+  slice within each band — actual income-tax-bracket math, see
+  `GarnishmentMarginalBracket`'s own doc comment). Two more real, confirmed
+  departures are identified but NOT modelled: New Jersey keys its cap to the
+  debtor's income as a fraction of the federal poverty guideline for their
+  household size (this engine tracks no household-size input anywhere);
+  Maryland's cap varies by COUNTY, and workState here is state-level only.
+  Both are disclosed with a `knownGap` in their own entry in
+  `data/garnishment/state-overrides-2026.json` rather than left silent, and
+  both currently compute against the plain federal default in the meantime
+  — very likely wrong for a NJ debtor near the poverty line. Every OTHER
+  state (28 + DC) computes ordinary garnishment against the plain federal
+  CCPA default, which is correct for most of them but is an unconfirmed
+  baseline, not a researched "no state departure exists" — see that file's
+  own `$scopeNote`. Several modelled states also set higher LOCAL minimum
+  wages this file doesn't reach (Denver/Boulder in CO, Minneapolis/St. Paul
+  in MN, NYC/Long Island/Westchester in NY, Portland in ME) — disclosed
+  per-state, not silently assumed away. A federal tax levy is out
   of scope entirely: its exempt amount comes from IRS Publication 1494's own
   table (filing status, dependents, standard deduction), not a fixed CCPA
   fraction. Multiple simultaneous support orders are prorated by this

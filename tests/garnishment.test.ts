@@ -508,4 +508,61 @@ describe('more state overrides — cliff-on-dollar, marginal-bracket and head-of
     ], 'MO');
     assert.equal(notHeadOfFamily.totalWithheld, dollars(250));
   });
+
+  test('Wisconsin: lesser of 20% of disposable and disposable over 30x the FEDERAL minimum wage', () => {
+    // Floor: 30 * $7.25 = $217.50.
+    const floorBinds = run(paycheckOf(dollars(250), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'WI');
+    assert.equal(floorBinds.totalWithheld, dollars(32.5)); // $250-$217.50, smaller than 20%*$250=$50
+
+    const fractionBinds = run(paycheckOf(dollars(2000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'WI');
+    assert.equal(fractionBinds.totalWithheld, dollars(400)); // 20%*$2000
+  });
+
+  test("Maine: lesser of 25% of disposable and disposable over 40x its own $15.10 minimum wage", () => {
+    // Floor: 40 * $15.10 = $604.00.
+    const floorBinds = run(paycheckOf(dollars(700), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'ME');
+    assert.equal(floorBinds.totalWithheld, dollars(96)); // $700-$604, smaller than 25%*$700=$175
+
+    const fractionBinds = run(paycheckOf(dollars(2000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'ME');
+    assert.equal(fractionBinds.totalWithheld, dollars(500)); // 25%*$2000
+  });
+
+  test('Vermont: the MORE protective consumer-credit-transaction rule (15%/40x federal) governs an ordinary garnishment', () => {
+    // Floor: 40 * $7.25 = $290.00.
+    const floorBinds = run(paycheckOf(dollars(300), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'VT');
+    assert.equal(floorBinds.totalWithheld, dollars(10)); // $300-$290, smaller than 15%*$300=$45
+
+    const fractionBinds = run(paycheckOf(dollars(2000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'VT');
+    assert.equal(fractionBinds.totalWithheld, dollars(300)); // 15%*$2000
+  });
+
+  test('North Dakota: the 25%/40x-federal cap is further reduced by $20/week per dependent', () => {
+    const noDependents = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'ND');
+    assert.equal(noDependents.totalWithheld, dollars(250)); // 25%*$1000, floor excess is $710
+
+    const twoDependents = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor', dependents: 2 }),
+    ], 'ND');
+    assert.equal(twoDependents.totalWithheld, dollars(210)); // $250 - 2*$20
+
+    // The per-dependent reduction never pushes the cap below zero.
+    const reductionExceedsCap = run(paycheckOf(dollars(300), 0), [
+      order({ id: 'A', type: 'consumer_creditor', dependents: 3 }),
+    ], 'ND');
+    assert.equal(reductionExceedsCap.totalWithheld, 0); // base cap is $10 (floor-bound); 3*$20=$60 would go negative
+  });
 });

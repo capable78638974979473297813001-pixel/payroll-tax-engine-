@@ -1,6 +1,6 @@
 {
   "year": 2026,
-  "$scopeNote": "Only ORDINARY (consumer/creditor judgment) wage garnishment is state-overridable here. Federal law — support orders, federal tax levies, federal student loan default — preempts a state's own wage-exemption statute entirely, so nothing in this file ever changes those two calculations in src/garnishment.ts; only 'consumer_creditor' orders consult it. A state absent from this file entirely has no known departure from the plain federal CCPA default and is computed with it as-is — a narrower claim than 'every state's garnishment law has been fully researched.' A state PRESENT in this file with only a `knownGap` note (no `ordinaryGarnishmentProhibited`/`ordinaryGarnishment`/`headOfFamilyOrdinaryGarnishment`/`fullExemption` block) means a real departure IS known to exist but isn't modelled yet — also computed against the federal default in the meantime, but disclosed rather than silent. 16 states now carry a modelled override; 2 more (NJ, MD) are flagged known-but-unmodelled; the remaining 32 + DC are the unconfirmed-federal-default baseline described above.",
+  "$scopeNote": "Only ORDINARY (consumer/creditor judgment) wage garnishment is state-overridable here. Federal law — support orders, federal tax levies, federal student loan default — preempts a state's own wage-exemption statute entirely, so nothing in this file ever changes those two calculations in src/garnishment.ts; only 'consumer_creditor' orders consult it. A state absent from this file entirely has no known departure from the plain federal CCPA default and is computed with it as-is — a narrower claim than 'every state's garnishment law has been fully researched.' A state PRESENT in this file with only a `knownGap` note (no `ordinaryGarnishmentProhibited`/`ordinaryGarnishment`/`headOfFamilyOrdinaryGarnishment`/`fullExemption` block) means a real departure IS known to exist but isn't modelled yet — also computed against the federal default in the meantime, but disclosed rather than silent. 20 states now carry a modelled override; 2 more (NJ, MD) are flagged known-but-unmodelled; the remaining 28 + DC are the unconfirmed-federal-default baseline described above.",
   "states": {
     "TX": {
       "ordinaryGarnishmentProhibited": true,
@@ -288,6 +288,77 @@
         }
       ],
       "$note": "Distinct from Florida's `fullExemption`: a Missouri head-of-family debtor still owes something (10% of disposable earnings), just at a reduced rate from the ordinary 25% — never a full $0 regardless of income. Missouri's own statute also names a 50%-of-disposable-earnings figure for a head-of-family debtor when the UNDERLYING DEBT ITSELF is for the support of another person — not modelled here, because this engine already routes any support-related withholding through the separate `child_support` order type and its own federal 50/55/60/65% ceilings rather than through `consumer_creditor` at all, so that branch of 525.030 has no code path that would ever reach it."
+    },
+    "WI": {
+      "ordinaryGarnishment": {
+        "minimumWageWeeklyMultiplier": 30,
+        "stateMinimumHourlyWage": 7.25,
+        "capFractions": [{ "basis": "disposable", "fraction": 0.20 }]
+      },
+      "sources": [
+        {
+          "title": "Wis. Stat. § 812.34 — 80% of disposable earnings exempt from garnishment (i.e. 20% reachable), further limited by the amount by which disposable earnings exceed 30x the FEDERAL minimum hourly wage",
+          "url": "https://docs.legis.wisconsin.gov/document/statutes/812.34",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own 80%-exempt/20%-reachable structure and its 30x-FEDERAL-minimum-wage floor, not an independently rendered direct fetch this pass."
+        }
+      ],
+      "$note": "812.34 also names two protections this file does NOT model: (1) a poverty-line floor — garnishment is further limited so the debtor's household income after garnishment doesn't fall below the federal poverty line, which needs household-size and household-income data this engine has nowhere to put (same structural gap as New Jersey's own poverty-guideline rule below); (2) a reduced 25%-of-disposable-LESS-any-court-ordered-support-assignment rule when a s.767.75 support assignment is already in place against the same employee — not modelled because it requires cross-referencing a live child_support order's own withheld amount into the consumer_creditor calculation, which this engine's aggregate-ceiling mechanism already does in a DIFFERENT (federal-CCPA-shaped) way; Wisconsin's own specific interaction isn't separately wired."
+    },
+    "ME": {
+      "ordinaryGarnishment": {
+        "minimumWageWeeklyMultiplier": 40,
+        "stateMinimumHourlyWage": 15.10,
+        "capFractions": [{ "basis": "disposable", "fraction": 0.25 }]
+      },
+      "sources": [
+        {
+          "title": "14 M.R.S. § 3126 — ordinary garnishment limited to the lesser of 25% of disposable earnings or the amount by which disposable earnings exceed 40x the greater of the federal minimum wage or Maine's own minimum wage (26 M.R.S. § 664)",
+          "url": "https://legislature.maine.gov/statutes/14/title14sec3126-A.html",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own 25%/40x-greater-of mechanism, not an independently rendered direct fetch this pass."
+        },
+        {
+          "title": "Maine Department of Labor — 2026 minimum wage ($15.10/hr, effective 2026-01-01, cost-of-living indexed annually since a 2016 referendum)",
+          "url": "https://www.maine.gov/labor/news_events/article.shtml?id=13338762",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis; not independently re-fetched from Maine DOL's own page this pass."
+        }
+      ],
+      "$note": "Maine's own $15.10/hr exceeds the federal $7.25, so 'greater of' always resolves to Maine's rate here. Portland sets its own higher LOCAL minimum wage ($16.00/hr for 2026) not modelled — same disclosed simplification as this file's other local-minimum-wage gaps (Denver/Boulder in CO, Minneapolis/St. Paul in MN, NYC/Long Island/Westchester in NY). Maine's own minimum wage is cost-of-living indexed annually — re-verify every year this file rolls forward."
+    },
+    "VT": {
+      "ordinaryGarnishment": {
+        "minimumWageWeeklyMultiplier": 40,
+        "stateMinimumHourlyWage": 7.25,
+        "capFractions": [{ "basis": "disposable", "fraction": 0.15 }]
+      },
+      "sources": [
+        {
+          "title": "12 V.S.A. § 3170 — TWO separate rules: general debts get the plain federal 25%/30x-federal-minimum-wage default (no departure), but a CONSUMER CREDIT TRANSACTION debt specifically is limited to the lesser of 15% of disposable earnings or the amount by which disposable earnings exceed 40x the federal minimum wage",
+          "url": "https://www.nationallist.com/image/cache/Vermont_Debt_Collection_Law.pdf",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting both of the statute's own rules and the 15%/40x consumer-credit-transaction figures specifically, not an independently rendered direct fetch this pass."
+        }
+      ],
+      "$note": "This file models ONLY Vermont's consumer-credit-transaction rule (15%/40x-FEDERAL, not 'greater of' — the statute's own text names the federal figure specifically), because that is what an ordinary credit-card-or-personal-loan judgment actually is in practice, and is what this engine's `consumer_creditor` order type is meant to represent. A judgment for some other kind of 'general debt' not arising from a consumer credit transaction would actually get Vermont's LESS protective plain-federal-default rule instead — a real distinction this engine doesn't have a way to ask the caller about (GarnishmentOrder has no 'is this a consumer credit transaction' flag), so it always applies the MORE protective of Vermont's two rules. Also uncounted: a Vermont court may order a still-larger exemption on a case-by-case finding that the debtor's reasonable weekly expenses exceed these amounts (12 V.S.A. 3170(b)(3)) — inherently un-modellable without that court's own finding."
+    },
+    "ND": {
+      "ordinaryGarnishment": {
+        "minimumWageWeeklyMultiplier": 40,
+        "stateMinimumHourlyWage": 7.25,
+        "capFractions": [{ "basis": "disposable", "fraction": 0.25 }],
+        "perDependentWeeklyReduction": 20.00
+      },
+      "sources": [
+        {
+          "title": "N.D. Cent. Code § 32-09.1-06 — ordinary garnishment limited to the lesser of 25% of disposable earnings or the amount by which disposable earnings exceed 40x the FEDERAL minimum hourly wage, further reduced by $20/week for each dependent family member residing with the employee",
+          "url": "http://www.bcsalliance.com/debt1_northdakota.html",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own 25%/40x-federal structure and the $20-per-dependent reduction specifically, not an independently rendered direct fetch this pass."
+        }
+      ],
+      "$note": "The one state in this file whose formula depends on a per-employee DEPENDENT COUNT rather than (or in addition to) income — see GarnishmentOrder.dependents and GarnishmentFormula.perDependentWeeklyReduction's own doc comments. $20/week is a fixed nominal figure with no visible inflation indexing in the sources reviewed; re-verify it hasn't been amended when this file rolls forward rather than assuming it scales."
     },
     "NJ": {
       "sources": [
