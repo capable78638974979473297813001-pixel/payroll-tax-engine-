@@ -184,6 +184,130 @@ describe('ordinary garnishment — state overrides', () => {
     ], 'IL');
     assert.equal(r.totalWithheld, 0);
   });
+
+  test('Connecticut: lesser of 25% of disposable and disposable over 40x its own $16.94 minimum wage', () => {
+    // $677.60 = 40 * $16.94 is the floor.
+    const belowFloor = run(paycheckOf(dollars(600), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'CT');
+    assert.equal(belowFloor.totalWithheld, 0);
+
+    // $700 disposable: 25% = $175; floor excess = $700 - $677.60 = $22.40 (smaller).
+    const floorBinds = run(paycheckOf(dollars(700), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'CT');
+    assert.equal(floorBinds.totalWithheld, dollars(22.4));
+
+    // $2000 disposable: 25% = $500; floor excess = $1322.40 (25% smaller).
+    const fractionBinds = run(paycheckOf(dollars(2000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'CT');
+    assert.equal(fractionBinds.totalWithheld, dollars(500));
+  });
+
+  test('Minnesota: cliff-bracket tiers, not a "lesser of" formula', () => {
+    // Weekly thresholds at $11.41/hr: 40x=$456.40, 60x=$684.60, 80x=$912.80.
+    assert.equal(
+      run(paycheckOf(dollars(400), 0), [order({ id: 'A', type: 'consumer_creditor' })], 'MN')
+        .totalWithheld,
+      0, // at or below 40x: fully exempt
+    );
+    assert.equal(
+      run(paycheckOf(dollars(500), 0), [order({ id: 'A', type: 'consumer_creditor' })], 'MN')
+        .totalWithheld,
+      dollars(50), // 40x-60x tier: flat 10% of the WHOLE $500, not just the excess
+    );
+    assert.equal(
+      run(paycheckOf(dollars(700), 0), [order({ id: 'A', type: 'consumer_creditor' })], 'MN')
+        .totalWithheld,
+      dollars(105), // 60x-80x tier: flat 15%
+    );
+    assert.equal(
+      run(paycheckOf(dollars(1000), 0), [order({ id: 'A', type: 'consumer_creditor' })], 'MN')
+        .totalWithheld,
+      dollars(250), // above 80x: flat 25%
+    );
+  });
+
+  test('New York: lesser of 10% of GROSS, 25% of disposable, and disposable over 30x its own $16 minimum wage', () => {
+    // $1000 gross, $100 tax => $900 disposable. 10% of gross = $100 (smallest).
+    const grossBinds = run(paycheckOf(dollars(1000), dollars(100)), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'NY');
+    assert.equal(grossBinds.totalWithheld, dollars(100));
+
+    // $600 gross, $100 tax => $500 disposable. 10%*600=$60; 25%*500=$125;
+    // floor excess = $500-$480(=30x$16)=$20 (smallest).
+    const floorBinds = run(paycheckOf(dollars(600), dollars(100)), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'NY');
+    assert.equal(floorBinds.totalWithheld, dollars(20));
+
+    // $400 disposable is under the $480 floor: fully exempt.
+    const exempt = run(paycheckOf(dollars(400), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'NY');
+    assert.equal(exempt.totalWithheld, 0);
+  });
+
+  test('Massachusetts: lesser of 15% of GROSS and disposable over 50x its own $15 minimum wage', () => {
+    // $1200 gross, $200 tax => $1000 disposable. 15%*1200=$180;
+    // floor excess = $1000 - $750(=50x$15) = $250 (fraction is smaller).
+    const fractionBinds = run(paycheckOf(dollars(1200), dollars(200)), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'MA');
+    assert.equal(fractionBinds.totalWithheld, dollars(180));
+
+    // $900 gross, $100 tax => $800 disposable. 15%*900=$135;
+    // floor excess = $800-$750=$50 (floor is smaller).
+    const floorBinds = run(paycheckOf(dollars(900), dollars(100)), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'MA');
+    assert.equal(floorBinds.totalWithheld, dollars(50));
+  });
+
+  test('Delaware: a flat 15% of disposable earnings, with no separate minimum-wage floor', () => {
+    assert.equal(
+      run(paycheckOf(dollars(1000), 0), [order({ id: 'A', type: 'consumer_creditor' })], 'DE')
+        .totalWithheld,
+      dollars(150),
+    );
+    // Even a very low earner gets no floor protection beyond the flat 15% —
+    // unlike every other override in this file, DE names no separate floor.
+    assert.equal(
+      run(paycheckOf(dollars(100), 0), [order({ id: 'A', type: 'consumer_creditor' })], 'DE')
+        .totalWithheld,
+      dollars(15),
+    );
+  });
+
+  test("Florida: a head-of-family debtor owes $0 at ANY income level, not just below a threshold", () => {
+    const r = run(paycheckOf(dollars(5000), 0), [
+      order({ id: 'A', type: 'consumer_creditor', headOfFamily: true }),
+    ], 'FL');
+    assert.equal(r.totalWithheld, 0);
+  });
+
+  test('Florida: a head-of-family debtor who waived the exemption in writing gets the plain federal default', () => {
+    // $1000 disposable, no state departure beyond the (waived) exemption:
+    // federal 25% = $250 binds (floor excess would be $782.50).
+    const r = run(paycheckOf(dollars(1000), 0), [
+      order({
+        id: 'A',
+        type: 'consumer_creditor',
+        headOfFamily: true,
+        wageExemptionWaivedInWriting: true,
+      }),
+    ], 'FL');
+    assert.equal(r.totalWithheld, dollars(250));
+  });
+
+  test('Florida: a non-head-of-family debtor gets the plain federal default too', () => {
+    const r = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor', headOfFamily: false }),
+    ], 'FL');
+    assert.equal(r.totalWithheld, dollars(250));
+  });
 });
 
 describe('child support / alimony withholding orders', () => {

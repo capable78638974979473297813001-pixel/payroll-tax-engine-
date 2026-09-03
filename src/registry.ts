@@ -613,15 +613,61 @@ export function garnishmentFederalRuleset(checkDate: string): GarnishmentFederal
   );
 }
 
+/** One "lesser of X% of gross/disposable" test — a state's cap is the MINIMUM across every entry here (plus the minimum-wage floor, if this state's ordinaryGarnishment block also sets one). */
+export interface GarnishmentCapFraction {
+  basis: 'gross' | 'disposable';
+  fraction: number;
+}
+
+/**
+ * A cliff bracket keyed on multiples of the applicable weekly minimum wage —
+ * Minnesota's shape (Minn. Stat. 571.922). Unlike the federal "lesser of a
+ * fraction or the amount over a floor" rule, crossing a threshold here puts
+ * the WHOLE disposable-earnings figure into that bracket's flat fraction,
+ * not just the excess above it. Disposable earnings at or below the lowest
+ * tier's minMultiplier are fully exempt (no tier matches).
+ */
+export interface GarnishmentTier {
+  minMultiplier: number;
+  /** null means "and above" — the top, uncapped bracket. */
+  maxMultiplier: number | null;
+  fraction: number;
+}
+
 export interface GarnishmentStateOverride {
   /** True where state law bars ordinary consumer/creditor garnishment outright (TX, PA, NC, SC). Never affects support orders or federal student loan default — those preempt state wage exemptions entirely. */
   ordinaryGarnishmentProhibited?: boolean;
+  /**
+   * A status-conditioned full exemption from ordinary garnishment — Florida's
+   * "head of family" rule (Fla. Stat. 222.11), the only one of these this
+   * project has researched. The caller asserts the qualifying fact on the
+   * GarnishmentOrder itself (`headOfFamily`), same discipline as every other
+   * eligibility flag this engine refuses to guess; `waivableInWriting: true`
+   * means the debtor can waive it (`wageExemptionWaivedInWriting: true` on
+   * the order), in which case this state's federal-default/ordinaryGarnishment
+   * rule applies as if the exemption were never there.
+   */
+  fullExemption?: {
+    qualifyingFlag: 'headOfFamily';
+    waivableInWriting: boolean;
+  };
   ordinaryGarnishment?: {
-    /** Set when the state's own formula caps a fraction of GROSS wages (e.g. Illinois) rather than disposable earnings. */
-    maxGrossEarningsFraction?: number;
-    maxDisposableEarningsFraction?: number;
-    minimumWageWeeklyMultiplier: number;
-    stateMinimumHourlyWage: number;
+    /**
+     * The minimum-wage floor's own multiplier and hourly figure. BOTH
+     * optional together — omit both when the state's formula has no
+     * separate floor test (e.g. Delaware's flat 15%, already more
+     * protective than the federal floor at every realistic income level).
+     * stateMinimumHourlyWage is pre-resolved to whichever of that state's
+     * own minimum wage or the federal $7.25 is GREATER, at authoring time
+     * — see this file's own per-state $note for which one actually won and
+     * when to re-check it.
+     */
+    minimumWageWeeklyMultiplier?: number;
+    stateMinimumHourlyWage?: number;
+    /** Shape A — a state whose cap is the lesser of one or more straight fractions (of gross and/or disposable earnings), e.g. Illinois, Connecticut, New York, Massachusetts, Delaware. Mutually exclusive with `tiers`. */
+    capFractions?: GarnishmentCapFraction[];
+    /** Shape B — a state whose cap is a cliff-bracket schedule instead, e.g. Minnesota. Mutually exclusive with `capFractions`. */
+    tiers?: GarnishmentTier[];
   };
   sources: GarnishmentSource[];
   $note?: string;

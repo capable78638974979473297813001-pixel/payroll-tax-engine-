@@ -73,6 +73,17 @@ export interface GarnishmentOrder {
   /** child_support only: is any part of this order more than 12 weeks in arrears? Adds 5 points to whichever ceiling applies. */
   arrearsOver12Weeks?: boolean;
   /**
+   * consumer_creditor only, and only meaningful in a state whose override
+   * declares a `fullExemption` (currently just Florida's "head of family"
+   * rule, Fla. Stat. 222.11): does the employee provide more than half the
+   * support for a child or other dependent? True and unwaived means this
+   * garnishment computes to $0 regardless of income. Ignored everywhere
+   * else — never assumed true or false.
+   */
+  headOfFamily?: boolean;
+  /** Only meaningful alongside headOfFamily: has the debtor waived that exemption in writing, as Fla. Stat. 222.11 permits? */
+  wageExemptionWaivedInWriting?: boolean;
+  /**
    * Among orders that are NOT child_support, the lower number draws first
    * when they compete for room under the aggregate ceiling. child_support
    * orders always draw first regardless of this field. Ties keep array
@@ -145,7 +156,62 @@ interface CapResult {
   detail: string;
 }
 
-/** null return means the state prohibits ordinary garnishment outright. */
+/** Shape A: the lesser of one or more straight fractions, plus an optional floor. */
+function capFractionsResult(
+  disposable: Cents,
+  gross: Cents,
+  workState: string,
+  payFrequency: PayFrequency,
+  cfg: NonNullable<GarnishmentStateOverride['ordinaryGarnishment']>,
+): CapResult {
+  const fractions = cfg.capFractions!;
+  const values = fractions.map((f) => applyRate(f.basis === 'gross' ? gross : disposable, f.fraction));
+  let cap = Math.min(...values);
+  let detail =
+    `${workState} ordinary-garnishment cap (state override): lesser of ` +
+    fractions.map((f) => `${(f.fraction * 100).toFixed(0)}% of ${f.basis}`).join(' or ');
+
+  if (cfg.minimumWageWeeklyMultiplier != null && cfg.stateMinimumHourlyWage != null) {
+    const floor = minimumWageFloor(cfg.stateMinimumHourlyWage, payFrequency, cfg.minimumWageWeeklyMultiplier);
+    const byFloor = atLeastZero(disposable - floor);
+    cap = Math.min(cap, byFloor);
+    detail += ` or disposable over ${cfg.minimumWageWeeklyMultiplier}x $${cfg.stateMinimumHourlyWage.toFixed(2)}/hr min wage (${fmt(floor)})`;
+  }
+  return { cap, detail };
+}
+
+/** Shape B: Minnesota's cliff-bracket schedule — see GarnishmentTier's own doc comment for why this ISN'T a "lesser of" test. */
+function tierResult(
+  disposable: Cents,
+  workState: string,
+  payFrequency: PayFrequency,
+  cfg: NonNullable<GarnishmentStateOverride['ordinaryGarnishment']>,
+): CapResult {
+  const hourly = cfg.stateMinimumHourlyWage!;
+  for (const tier of cfg.tiers!) {
+    const minThreshold = roundHalfUp(dollars(hourly) * multiplierForPeriod(payFrequency, tier.minMultiplier));
+    const maxThreshold =
+      tier.maxMultiplier != null
+        ? roundHalfUp(dollars(hourly) * multiplierForPeriod(payFrequency, tier.maxMultiplier))
+        : Number.POSITIVE_INFINITY;
+    if (disposable > minThreshold && disposable <= maxThreshold) {
+      return {
+        cap: applyRate(disposable, tier.fraction),
+        detail:
+          `${workState} ordinary-garnishment cap (state override): ${(tier.fraction * 100).toFixed(0)}% tier ` +
+          `(disposable earnings of ${fmt(disposable)} fall between ${tier.minMultiplier}x and ` +
+          `${tier.maxMultiplier ?? '∞'}x $${hourly.toFixed(2)}/hr min wage)`,
+      };
+    }
+  }
+  const floor = roundHalfUp(dollars(hourly) * multiplierForPeriod(payFrequency, cfg.tiers![0].minMultiplier));
+  return {
+    cap: 0,
+    detail: `${workState}: disposable earnings of ${fmt(disposable)} fall at or below the ${cfg.tiers![0].minMultiplier}x $${hourly.toFixed(2)}/hr min-wage floor (${fmt(floor)}) — fully exempt`,
+  };
+}
+
+/** null return means no ordinary garnishment may be withheld at all — a flat state prohibition, or a qualifying full exemption the debtor hasn't waived. */
 function ordinaryGarnishmentCap(
   disposable: Cents,
   gross: Cents,
@@ -153,26 +219,23 @@ function ordinaryGarnishmentCap(
   payFrequency: PayFrequency,
   fed: GarnishmentFederalRuleset,
   override: GarnishmentStateOverride | undefined,
+  order: GarnishmentOrder,
 ): CapResult | null {
   if (override?.ordinaryGarnishmentProhibited) return null;
 
-  if (override?.ordinaryGarnishment) {
-    const cfg = override.ordinaryGarnishment;
-    const floor = minimumWageFloor(cfg.stateMinimumHourlyWage, payFrequency, cfg.minimumWageWeeklyMultiplier);
-    const byFloor = atLeastZero(disposable - floor);
-    const byFraction =
-      cfg.maxGrossEarningsFraction != null
-        ? applyRate(gross, cfg.maxGrossEarningsFraction)
-        : applyRate(disposable, cfg.maxDisposableEarningsFraction ?? 0.25);
-    const basis = cfg.maxGrossEarningsFraction != null ? 'gross' : 'disposable';
-    const fraction = cfg.maxGrossEarningsFraction ?? cfg.maxDisposableEarningsFraction ?? 0.25;
-    return {
-      cap: Math.min(byFloor, byFraction),
-      detail:
-        `${workState} ordinary-garnishment cap (state override): lesser of ` +
-        `${(fraction * 100).toFixed(0)}% of ${basis} and ${fmt(disposable)} disposable over ` +
-        `${cfg.minimumWageWeeklyMultiplier}x $${cfg.stateMinimumHourlyWage.toFixed(2)}/hr min wage (${fmt(floor)})`,
-    };
+  if (override?.fullExemption?.qualifyingFlag === 'headOfFamily' && order.headOfFamily) {
+    const waived = override.fullExemption.waivableInWriting && order.wageExemptionWaivedInWriting;
+    if (!waived) return null;
+    // Waived: fall through to whatever else this state's file specifies
+    // (or the federal default, if nothing else does) as if the exemption
+    // were never there.
+  }
+
+  if (override?.ordinaryGarnishment?.tiers) {
+    return tierResult(disposable, workState, payFrequency, override.ordinaryGarnishment);
+  }
+  if (override?.ordinaryGarnishment?.capFractions) {
+    return capFractionsResult(disposable, gross, workState, payFrequency, override.ordinaryGarnishment);
   }
 
   const rule = fed.ordinaryGarnishment;
@@ -272,7 +335,7 @@ export function calculateGarnishments(input: GarnishmentInput): GarnishmentResul
   for (const order of otherOrders) {
     const individualCap =
       order.type === 'consumer_creditor'
-        ? ordinaryGarnishmentCap(disposable, gross, workState, payFrequency, fed, override)
+        ? ordinaryGarnishmentCap(disposable, gross, workState, payFrequency, fed, override, order)
         : studentLoanCap(disposable, payFrequency, fed);
 
     if (individualCap === null) {

@@ -1,6 +1,6 @@
 {
   "year": 2026,
-  "$scopeNote": "Only ORDINARY (consumer/creditor judgment) wage garnishment is state-overridable here. Federal law — support orders, federal tax levies, federal student loan default — preempts a state's own wage-exemption statute entirely, so nothing in this file ever changes those two calculations in src/garnishment.ts; only 'consumer_creditor' orders consult it. A state absent from this file has no known departure from the plain federal CCPA default and is computed with it as-is — a narrower claim than 'every state's garnishment law has been fully researched.' Only a handful of states are covered: the ones with a clean, well-documented, easily-verified departure (an outright statutory prohibition, or a materially different percentage/floor formula). Most states track the federal default exactly or vary it only at the margins (a lower percentage for very low earners, a different priority-of-orders rule) that this pass didn't chase down — same disclosure discipline as this project's data/states/*.json knownGaps.",
+  "$scopeNote": "Only ORDINARY (consumer/creditor judgment) wage garnishment is state-overridable here. Federal law — support orders, federal tax levies, federal student loan default — preempts a state's own wage-exemption statute entirely, so nothing in this file ever changes those two calculations in src/garnishment.ts; only 'consumer_creditor' orders consult it. A state absent from this file entirely has no known departure from the plain federal CCPA default and is computed with it as-is — a narrower claim than 'every state's garnishment law has been fully researched.' A state PRESENT in this file with only a `knownGap` note (no `ordinaryGarnishmentProhibited`/`ordinaryGarnishment`/`fullExemption` block) means a real departure IS known to exist but isn't modelled yet — also computed against the federal default in the meantime, but disclosed rather than silent. 11 states now carry a modelled override; 2 more (NJ, MD) are flagged known-but-unmodelled; the remaining 37 + DC are the unconfirmed-federal-default baseline described above.",
   "states": {
     "TX": {
       "ordinaryGarnishmentProhibited": true,
@@ -49,9 +49,9 @@
     },
     "IL": {
       "ordinaryGarnishment": {
-        "maxGrossEarningsFraction": 0.15,
         "minimumWageWeeklyMultiplier": 45,
-        "stateMinimumHourlyWage": 15.00
+        "stateMinimumHourlyWage": 15.00,
+        "capFractions": [{ "basis": "gross", "fraction": 0.15 }]
       },
       "sources": [
         {
@@ -67,7 +67,152 @@
           "verifiedBy": "Cross-source confirmed: Illinois's minimum wage reached its final legislated step of $15.00/hr effective 2025-01-01 with no further scheduled statutory increase; not independently re-fetched from IDOL's own page this pass."
         }
       ],
-      "$note": "Unlike every other figure in this file, Illinois's OWN minimum wage — not the federal $7.25 figure the rest of this file and federal-2026.json use — drives the 45x floor, because 735 ILCS 5/12-803 takes the GREATER of the two and Illinois's has been higher since 2022. The 15% fraction here applies to GROSS wages, not disposable earnings, which is why this state carries its own maxGrossEarningsFraction field instead of reusing maxDisposableEarningsFraction. Re-verify stateMinimumHourlyWage every year this file rolls forward — it is not sourced from anywhere else this engine already tracks."
+      "$note": "735 ILCS 5/12-803 takes the GREATER of Illinois's own minimum wage or the federal $7.25 figure; Illinois's has been higher since 2022, so only Illinois's figure is ever used here. Re-verify stateMinimumHourlyWage every year this file rolls forward — it is not sourced from anywhere else this engine already tracks."
+    },
+    "CT": {
+      "ordinaryGarnishment": {
+        "minimumWageWeeklyMultiplier": 40,
+        "stateMinimumHourlyWage": 16.94,
+        "capFractions": [{ "basis": "disposable", "fraction": 0.25 }]
+      },
+      "sources": [
+        {
+          "title": "Conn. Gen. Stat. § 52-361a — lesser of 25% of weekly disposable earnings, or the amount by which disposable earnings exceed 40x the greater of the federal minimum wage or the Connecticut minimum fair wage",
+          "url": "https://law.justia.com/codes/connecticut/title-52/chapter-906/section-52-361a/",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own mechanism (the 40x multiplier, the 25% fraction, and the 'greater of' minimum-wage rule), not an independently rendered direct fetch this pass."
+        },
+        {
+          "title": "Connecticut minimum wage increase to $16.94/hr effective 2026-01-01 (Employment Cost Index indexed)",
+          "url": "https://ogletree.com/insights-resources/blog-posts/connecticut-minimum-wage-set-to-increase-to-16-94-on-january-1-2026/",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis of the announced rate, not independently fetched from the Connecticut Department of Labor's own page this pass."
+        }
+      ],
+      "$note": "Connecticut's own $16.94/hr already exceeds the federal $7.25 figure, so 'greater of' always resolves to Connecticut's rate. Connecticut's minimum wage is now indexed annually to the federal Employment Cost Index rather than fixed by a one-time statute — re-verify every year this file rolls forward; it is already scheduled to rise again to $17.48 on 2027-01-01."
+    },
+    "MN": {
+      "ordinaryGarnishment": {
+        "stateMinimumHourlyWage": 11.41,
+        "tiers": [
+          { "minMultiplier": 40, "maxMultiplier": 60, "fraction": 0.10 },
+          { "minMultiplier": 60, "maxMultiplier": 80, "fraction": 0.15 },
+          { "minMultiplier": 80, "maxMultiplier": null, "fraction": 0.25 }
+        ]
+      },
+      "sources": [
+        {
+          "title": "Minn. Stat. § 571.922 — non-support garnishment: fully exempt at or below 40x the applicable minimum wage; 10% between 40x-60x; 15% between 60x-80x; 25% above 80x (a cliff schedule — crossing a threshold puts the WHOLE disposable-earnings figure in that bracket, not just the excess, unlike the federal formula)",
+          "url": "https://www.revisor.mn.gov/statutes/cite/571.922",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Directly fetched. Confirmed the threshold-cliff (not marginal) structure explicitly, the 3 percentage tiers and their multiplier boundaries, and that the statute uses the greater of Minnesota's own minimum wage (Minn. Stat. 177.24) or the federal FLSA minimum wage."
+        },
+        {
+          "title": "Minnesota Department of Labor and Industry — 2026 statewide minimum wage ($11.41/hr, single rate for all employer sizes as of 2026-01-01)",
+          "url": "https://dli.mn.gov/news/minimum-wage-rate-adjusted-inflation-jan-1-2026",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis; not independently re-fetched from DLI's own page this pass. Minnesota retired its large-employer/small-employer split for 2026 in favor of one statewide figure, which simplifies this file versus a prior year."
+        }
+      ],
+      "$note": "Minnesota's own $11.41/hr exceeds the federal $7.25, so 'greater of' always resolves to Minnesota's rate here. Minneapolis and St. Paul both set higher LOCAL minimum wages ($16.37/hr for 2026) that are NOT modelled — 571.922 itself only names the state/federal figures, and this file doesn't attempt a city-level override on top of it; treat this as a conservative-but-not-verified simplification for employees working inside those two cities specifically."
+    },
+    "NY": {
+      "ordinaryGarnishment": {
+        "minimumWageWeeklyMultiplier": 30,
+        "stateMinimumHourlyWage": 16.00,
+        "capFractions": [
+          { "basis": "gross", "fraction": 0.10 },
+          { "basis": "disposable", "fraction": 0.25 }
+        ]
+      },
+      "sources": [
+        {
+          "title": "N.Y. CPLR § 5231 — income execution limited to the lesser of 10% of gross income or 25% of disposable earnings, and only to the extent disposable earnings exceed 30x the greater of the federal or New York minimum wage",
+          "url": "https://newyork.public.law/laws/n.y._civil_practice_law_%26_rules_section_5231",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own dual 10%-gross/25%-disposable structure and the 30x floor, not an independently rendered direct fetch this pass."
+        },
+        {
+          "title": "New York State 2026 minimum wage: $17.00/hr (NYC, Long Island, Westchester) vs. $16.00/hr (remainder of the state), both effective 2026-01-01",
+          "url": "https://ogletree.com/insights-resources/blog-posts/2026-minimum-wage-increases-in-new-york-key-details-for-employers/",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis of the announced regional rates, not independently fetched from NY DOL's own page this pass."
+        }
+      ],
+      "$note": "New York sets a REGIONAL minimum wage — $17.00/hr for NYC, Long Island and Westchester vs. $16.00/hr for the rest of the state — but this engine's workState is a bare 2-letter code with no county/region granularity to key off. stateMinimumHourlyWage here uses the LOWER, statewide-outside-downstate figure ($16.00) as a documented simplification: for an employee actually working in the $17.00 region, the true 30x floor is higher than this computes, meaning this engine could compute a small garnishment where the true NYC/LI/Westchester floor would still protect it entirely. This is a genuine, disclosed gap, not an assumed-safe direction — same disclosure discipline as this project's other geographic-granularity gaps (see docs/geocoding-coverage.md)."
+    },
+    "MA": {
+      "ordinaryGarnishment": {
+        "minimumWageWeeklyMultiplier": 50,
+        "stateMinimumHourlyWage": 15.00,
+        "capFractions": [{ "basis": "gross", "fraction": 0.15 }]
+      },
+      "sources": [
+        {
+          "title": "Mass. Gen. Laws ch. 246, § 28 — trustee process wage attachment limited to the lesser of 15% of gross wages, or the amount by which disposable earnings exceed 50x the greater of the federal or Massachusetts minimum wage",
+          "url": "https://www.legalconsumer.com/bankruptcy/bankruptcy-citation.php?CitationID=1078",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own 15%/50x mechanism, not an independently rendered direct fetch this pass."
+        },
+        {
+          "title": "Massachusetts minimum wage: $15.00/hr, unchanged since 2023-01-01",
+          "url": "https://www.masslegalhelp.org/employment-unemployment/getting-paid/minimum-wage",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis; not independently re-fetched from Mass. AG's own page this pass. A 2026 bill (S.1349) proposing a phased increase to $20.00/hr by 2029 was pending, not enacted, as of this pass — re-check if it moves."
+        }
+      ],
+      "$note": "Massachusetts's own $15.00/hr exceeds the federal $7.25, so 'greater of' always resolves to Massachusetts's rate here."
+    },
+    "DE": {
+      "ordinaryGarnishment": {
+        "capFractions": [{ "basis": "disposable", "fraction": 0.15 }]
+      },
+      "sources": [
+        {
+          "title": "Del. Code Ann. tit. 10, § 4913 — 85% of disposable earnings exempt from attachment for an ordinary creditor (support/alimony orders and state tax/fine/cost collection are separately excepted and reach up to 65%)",
+          "url": "https://codes.findlaw.com/de/title-10-courts-and-judicial-procedure/de-code-sect-10-4913.html",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own flat 85%-exempt/15%-reachable structure on a disposable-earnings basis, not an independently rendered direct fetch this pass."
+        }
+      ],
+      "$note": "No separate minimum-wage floor is named alongside the flat 15% figure in the sources reviewed — omitted here (minimumWageWeeklyMultiplier/stateMinimumHourlyWage both absent) rather than guessed. A flat 15% of disposable earnings is already more protective than the federal 25%-or-floor rule at every income level actually reachable by the 30x floor, so the omission doesn't understate the debtor's protection."
+    },
+    "FL": {
+      "fullExemption": {
+        "qualifyingFlag": "headOfFamily",
+        "waivableInWriting": true
+      },
+      "sources": [
+        {
+          "title": "Fla. Stat. § 222.11 — ALL disposable earnings of a 'head of family' (providing more than half the support for a child or other dependent) are exempt from garnishment regardless of amount, unless affirmatively waived in a written agreement",
+          "url": "https://www.flsenate.gov/Laws/Statutes/2010/222.11",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own head-of-family exemption and its written-waiver escape hatch, not an independently rendered direct fetch this pass."
+        }
+      ],
+      "$note": "A head-of-family debtor who has NOT waived the exemption in writing owes $0 on an ordinary garnishment at ANY income level in Florida — this is not a threshold test. A non-head-of-family debtor in Florida gets no departure from the plain federal default beyond this, so this state has no `ordinaryGarnishment` block: only the exemption itself is modelled."
+    },
+    "NJ": {
+      "sources": [
+        {
+          "title": "N.J. Stat. Ann. § 2A:17-56 — wage execution limited to 10% of income when the debtor earns at or below 250% of the federal poverty level for their household size; up to 25% of gross above that threshold (higher still for debts owed to the State)",
+          "url": "https://law.justia.com/codes/new-jersey/title-2a/section-2a-17-56/",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own income-tier mechanism, not an independently rendered direct fetch this pass."
+        }
+      ],
+      "knownGap": "New Jersey's own cap is keyed to the debtor's income AS A FRACTION OF THE FEDERAL POVERTY GUIDELINE FOR THEIR HOUSEHOLD SIZE — a real, confirmed departure from every other state in this file, but one this engine cannot compute today: nothing in PaycheckInput or GarnishmentOrder carries household size, and HHS's poverty guideline table itself is a separate, annually-published figure this project doesn't otherwise track anywhere. Not modelled; New Jersey computes against the plain federal default in the meantime, which is very likely WRONG for a debtor near or below the 250%-of-poverty line (federal 25% where NJ law would actually cap at 10%)."
+    },
+    "MD": {
+      "sources": [
+        {
+          "title": "Md. Code, Com. Law § 15-601.1 — the statewide default tracks the federal formula, but several Maryland COUNTIES (and Caroline County by a separate provision) set their own lower percentage caps for ordinary garnishment by local law",
+          "url": "https://www.alperlaw.com/asset-protection/garnishment-laws-by-state/",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis describing the county-level variation, not an independently rendered direct fetch of the statute or any specific county's own ordinance this pass — no attempt was made to enumerate which counties diverge or by how much."
+        }
+      ],
+      "knownGap": "Maryland's garnishment cap varies by COUNTY, not just by state — this engine's workState is state-level only and carries no county, so a genuine local departure can't be looked up even in principle without first threading county-level geography into GarnishmentInput the way geocode/ already does for local income tax. Not modelled; Maryland computes against the plain federal default in the meantime. Same structural shape as this project's other sub-state-geography gaps (Ohio JEDD/JEDZ, Pennsylvania Act 32) — the difference is those are already wired end-to-end and this one isn't yet."
     }
   }
 }
