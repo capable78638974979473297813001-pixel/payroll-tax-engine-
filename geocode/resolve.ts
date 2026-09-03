@@ -297,6 +297,17 @@ export interface ResolvedJurisdiction {
   /** Whichever of Charleston/Huntington/Morgantown/Parkersburg/Wheeling/Weirton matched, if any — the matched NAME itself is the certificate.locality value westVirginiaMunicipalServiceFee() reads. */
   wvServiceFeeCity: string | null;
   /**
+   * Whichever of Denver/Glendale/Greenwood Village/Sheridan/Aurora
+   * matched, if any — the matched NAME itself is the certificate.locality
+   * value coloradoOccupationalPrivilegeTax() reads. Found 2026-09-03: the
+   * tax computation side already supported all five (Aurora kept for its
+   * pre-2025-01-01 repeal date), but this resolver only ever set Denver —
+   * the other four are plain Census incorporated places, no special
+   * boundary needed, the same oversight class as Oregon's Sandy/
+   * Wilsonville before those were added.
+   */
+  coOptCity: string | null;
+  /**
    * Simple named-place/county flags this address's geography matches,
    * independent of role — the caller (see index.ts's resolveEmployee())
    * applies each one to whichever address role the underlying tax
@@ -318,8 +329,6 @@ export interface ResolvedJurisdiction {
     kansasCity: boolean;
     stLouis: boolean;
     multnomahCounty: boolean;
-    /** Denver's Occupational Privilege Tax gate (certificate.locality === 'Denver'). Does NOT resolve certificate.denverMonthlyCompensation/denverOPTWithheldThisMonth — those need real payroll-history the caller must already track, no address can supply them. */
-    denver: boolean;
     wilmington: boolean;
     /**
      * Seattle's JumpStart payroll expense tax gate (certificate.locality
@@ -370,6 +379,7 @@ export function resolveJurisdiction(
     kyCity: null,
     kyCounty: null,
     wvServiceFeeCity: null,
+    coOptCity: null,
     flags: {
       newYorkCity: false,
       yonkers: false,
@@ -377,7 +387,6 @@ export function resolveJurisdiction(
       kansasCity: false,
       stLouis: false,
       multnomahCounty: false,
-      denver: false,
       seattle: false,
       wilmington: false,
       sandy: false,
@@ -441,7 +450,7 @@ export function resolveJurisdiction(
     ]);
   }
   if (state === 'CO') {
-    result.flags.denver = placesInclude(geo.incorporatedPlaces, 'Denver');
+    result.coOptCity = matchAnyPlace(geo.incorporatedPlaces, ['Denver', 'Glendale', 'Greenwood Village', 'Sheridan', 'Aurora']);
   }
   if (state === 'DE') {
     result.flags.wilmington = placesInclude(geo.incorporatedPlaces, 'Wilmington');

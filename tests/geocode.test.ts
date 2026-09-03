@@ -459,7 +459,7 @@ describe('resolve.ts — real captured Census geographies', () => {
     assert.equal(resolved.wvServiceFeeCity, null);
   });
 
-  test('Denver, CO: sets the denver flag', () => {
+  test('Denver, CO: matches coOptCity', () => {
     // Real Census result for 1437 Bannock St, Denver, CO 80202 — Denver
     // is itself a consolidated city-county government in Colorado too.
     const geo: CensusGeographies = {
@@ -469,10 +469,10 @@ describe('resolve.ts — real captured Census geographies', () => {
       counties: ['Denver County'],
     };
     const resolved = resolveJurisdiction(geo, CHECK_DATE);
-    assert.equal(resolved.flags.denver, true);
+    assert.equal(resolved.coOptCity, 'Denver');
   });
 
-  test('a Colorado address outside Denver leaves the denver flag false', () => {
+  test('a Colorado address outside every OPT city leaves coOptCity null', () => {
     const geo: CensusGeographies = {
       state: 'CO',
       incorporatedPlaces: ['Colorado Springs city'],
@@ -480,7 +480,51 @@ describe('resolve.ts — real captured Census geographies', () => {
       counties: ['El Paso County'],
     };
     const resolved = resolveJurisdiction(geo, CHECK_DATE);
-    assert.equal(resolved.flags.denver, false);
+    assert.equal(resolved.coOptCity, null);
+  });
+
+  test('Glendale, CO: matches coOptCity — found 2026-09-03, previously unreachable despite the tax computation already supporting it', () => {
+    const geo: CensusGeographies = {
+      state: 'CO',
+      incorporatedPlaces: ['Glendale city'],
+      countySubdivisions: [],
+      counties: ['Arapahoe County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.coOptCity, 'Glendale');
+  });
+
+  test('Greenwood Village, CO: matches coOptCity — a multi-word place name, not just single-word cities like the others', () => {
+    const geo: CensusGeographies = {
+      state: 'CO',
+      incorporatedPlaces: ['Greenwood Village city'],
+      countySubdivisions: [],
+      counties: ['Arapahoe County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.coOptCity, 'Greenwood Village');
+  });
+
+  test('Sheridan, CO: matches coOptCity', () => {
+    const geo: CensusGeographies = {
+      state: 'CO',
+      incorporatedPlaces: ['Sheridan city'],
+      countySubdivisions: [],
+      counties: ['Arapahoe County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.coOptCity, 'Sheridan');
+  });
+
+  test('Aurora, CO: matches coOptCity — kept resolvable despite the tax itself being repealed 2025-01-01, so a pre-repeal check date still computes it', () => {
+    const geo: CensusGeographies = {
+      state: 'CO',
+      incorporatedPlaces: ['Aurora city'],
+      countySubdivisions: [],
+      counties: ['Arapahoe County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.coOptCity, 'Aurora');
   });
 
   test('Wilmington, DE: sets the wilmington flag', () => {

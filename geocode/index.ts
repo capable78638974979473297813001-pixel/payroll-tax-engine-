@@ -561,10 +561,12 @@ export interface EmployeeResolution {
  *     guidance for the SHS tax uses the same "work within" framing).
  *   - West Virginia's Municipal Service Fee: WORK address (duty-station
  *     based, westVirginiaMunicipalServiceFee()'s own doc comment).
- *   - Denver's Occupational Privilege Tax: WORK address sets
- *     certificate.locality = 'Denver', but denverOccupationalPrivilegeTax()
- *     ALSO needs certificate.denverMonthlyCompensation and
- *     certificate.denverOPTWithheldThisMonth — genuine payroll-history
+ *   - Colorado's Occupational Privilege Tax (Denver, Glendale, Greenwood
+ *     Village, Sheridan, or Aurora — matched by whichever city the WORK
+ *     address is actually in): sets certificate.locality to the matched
+ *     city name, but coloradoOccupationalPrivilegeTax() ALSO needs
+ *     certificate.localMonthlyCompensation and
+ *     certificate.localOPTWithheldThisMonth — genuine payroll-history
  *     facts no address can supply, surfaced via notResolvable below
  *     rather than silently left unset with no explanation.
  *
@@ -621,6 +623,18 @@ export async function resolveEmployee(
 
   if (work?.resolved?.wvServiceFeeCity) {
     fields.locality = work.resolved.wvServiceFeeCity;
+  }
+
+  // Colorado's Occupational Privilege Tax: WORK address, duty-station
+  // based like WV's service fee — same matched-name mechanism. Found
+  // 2026-09-03: coloradoOccupationalPrivilegeTax() already computed all
+  // five cities (Denver, Glendale, Greenwood Village, Sheridan, Aurora —
+  // Aurora kept for its pre-2025-01-01 repeal date), but this resolver
+  // used to set only Denver's boolean flag, leaving the other four
+  // unreachable even though each is a plain Census incorporated place
+  // needing no special boundary at all.
+  if (work?.resolved?.coOptCity) {
+    fields.locality = work.resolved.coOptCity;
   }
 
   const notResolvable: string[] = [];
@@ -681,10 +695,9 @@ export async function resolveEmployee(
         "Both are payroll facts no address can answer. certificate.locality was set to 'Seattle'; those two still need caller input.",
     );
   }
-  if (workFlags?.denver) {
-    fields.locality = 'Denver';
+  if (work?.resolved?.coOptCity) {
     notResolvable.push(
-      "Denver's Occupational Privilege Tax needs certificate.denverMonthlyCompensation (this month's cumulative Denver-sourced pay so far) and certificate.denverOPTWithheldThisMonth — real payroll-history facts, not something any address can supply. certificate.locality was set to 'Denver'; those two fields still need caller input.",
+      `${work.resolved.coOptCity}'s Occupational Privilege Tax needs certificate.localMonthlyCompensation (this month's cumulative pay so far in the district) and certificate.localOPTWithheldThisMonth — real payroll-history facts, not something any address can supply. certificate.locality was set to '${work.resolved.coOptCity}'; those two fields still need caller input.`,
     );
   }
 
