@@ -414,3 +414,98 @@ describe('federal student loan default (34 CFR 34.19)', () => {
     assert.equal(r.totalWithheld, dollars(150));
   });
 });
+
+describe('more state overrides — cliff-on-dollar, marginal-bracket and head-of-family shapes', () => {
+  test('Colorado: lesser of 20% of disposable and disposable over 40x its own $15.16 minimum wage', () => {
+    // Floor: 40 * $15.16 = $606.40.
+    const floorBinds = run(paycheckOf(dollars(700), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'CO');
+    assert.equal(floorBinds.totalWithheld, dollars(93.6)); // $700-$606.40, smaller than 20%*$700=$140
+
+    const fractionBinds = run(paycheckOf(dollars(2000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'CO');
+    assert.equal(fractionBinds.totalWithheld, dollars(400)); // 20%*$2000, smaller than the floor excess
+
+    const exempt = run(paycheckOf(dollars(500), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'CO');
+    assert.equal(exempt.totalWithheld, 0); // under the $606.40 floor
+  });
+
+  test('Washington: lesser of 20% of disposable and disposable over 35x its own $17.13 minimum wage', () => {
+    // Floor: 35 * $17.13 = $599.55.
+    const floorBinds = run(paycheckOf(dollars(700), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'WA');
+    assert.equal(floorBinds.totalWithheld, dollars(100.45)); // $700-$599.55, smaller than 20%*$700=$140
+
+    const fractionBinds = run(paycheckOf(dollars(2000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'WA');
+    assert.equal(fractionBinds.totalWithheld, dollars(400)); // 20%*$2000
+  });
+
+  test('Nevada: an 18%/25% cliff keyed on a FIXED gross-weekly dollar threshold, applied to disposable earnings', () => {
+    // Floor: 50 * $7.25 = $362.50 (the federal rate specifically, not Nevada's own).
+    // Gross <= $770 -> 18% tier.
+    const lowTier = run(paycheckOf(dollars(700), dollars(50)), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'NV');
+    assert.equal(lowTier.totalWithheld, dollars(117)); // 18% of $650 disposable
+
+    // Gross > $770 -> 25% tier.
+    const highTier = run(paycheckOf(dollars(1000), dollars(100)), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'NV');
+    assert.equal(highTier.totalWithheld, dollars(225)); // 25% of $900 disposable
+
+    // The floor still binds even in the 25% tier at low disposable earnings.
+    const floorBinds = run(paycheckOf(dollars(1000), dollars(600)), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'NV');
+    assert.equal(floorBinds.totalWithheld, dollars(37.5)); // $400-$362.50, smaller than 25%*$400=$100
+  });
+
+  test('Hawaii: MARGINAL brackets on monthly-prorated disposable earnings, not a cliff', () => {
+    // Weekly-prorated breakpoints: $100/mo -> $23.08/week, $200/mo -> $46.15/week.
+    const withinFirstBracket = run(paycheckOf(dollars(10), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'HI');
+    assert.equal(withinFirstBracket.totalWithheld, dollars(0.5)); // 5% of the whole $10
+
+    const acrossTwoBrackets = run(paycheckOf(dollars(40), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'HI');
+    // 5% of the first $23.08 ($1.15) + 10% of the next $16.92 ($1.69) = $2.84 —
+    // NOT 10% of the whole $40, which is what a cliff rule would give.
+    assert.equal(acrossTwoBrackets.totalWithheld, dollars(2.84));
+
+    const acrossAllThreeBrackets = run(paycheckOf(dollars(100), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'HI');
+    // 5% of $23.08 ($1.15) + 10% of $23.07 ($2.31) + 20% of the remaining $53.85 ($10.77) = $14.23.
+    assert.equal(acrossAllThreeBrackets.totalWithheld, dollars(14.23));
+  });
+
+  test('Missouri: a head-of-family debtor gets 10% instead of the ordinary 25%, never a full exemption', () => {
+    const r = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor', headOfFamily: true }),
+    ], 'MO');
+    assert.equal(r.totalWithheld, dollars(100)); // 10% of $1000, smaller than the floor excess
+
+    // The 30x-federal-minimum-wage floor ($217.50) still binds independently.
+    const floorBinds = run(paycheckOf(dollars(220), 0), [
+      order({ id: 'A', type: 'consumer_creditor', headOfFamily: true }),
+    ], 'MO');
+    assert.equal(floorBinds.totalWithheld, dollars(2.5)); // $220-$217.50, smaller than 10%*$220=$22
+
+    // Not head-of-family: Missouri has no other departure, so the plain
+    // federal 25%/30x default applies.
+    const notHeadOfFamily = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor', headOfFamily: false }),
+    ], 'MO');
+    assert.equal(notHeadOfFamily.totalWithheld, dollars(250));
+  });
+});

@@ -43,7 +43,7 @@ import { applyRate, atLeastZero, dollars, fmt, roundHalfUp } from './money.ts';
 import { PERIODS_PER_YEAR } from './types.ts';
 import type { Cents } from './money.ts';
 import type { PayFrequency, PaycheckResult } from './types.ts';
-import type { GarnishmentFederalRuleset, GarnishmentStateOverride } from './registry.ts';
+import type { GarnishmentFederalRuleset, GarnishmentFormula, GarnishmentStateOverride } from './registry.ts';
 import { garnishmentFederalRuleset, garnishmentStateOverride } from './registry.ts';
 
 export type GarnishmentOrderType =
@@ -162,7 +162,7 @@ function capFractionsResult(
   gross: Cents,
   workState: string,
   payFrequency: PayFrequency,
-  cfg: NonNullable<GarnishmentStateOverride['ordinaryGarnishment']>,
+  cfg: GarnishmentFormula,
 ): CapResult {
   const fractions = cfg.capFractions!;
   const values = fractions.map((f) => applyRate(f.basis === 'gross' ? gross : disposable, f.fraction));
@@ -180,12 +180,12 @@ function capFractionsResult(
   return { cap, detail };
 }
 
-/** Shape B: Minnesota's cliff-bracket schedule — see GarnishmentTier's own doc comment for why this ISN'T a "lesser of" test. */
+/** Shape B: Minnesota's cliff-bracket schedule keyed on multiples of minimum wage — see GarnishmentTier's own doc comment for why this ISN'T a "lesser of" test. */
 function tierResult(
   disposable: Cents,
   workState: string,
   payFrequency: PayFrequency,
-  cfg: NonNullable<GarnishmentStateOverride['ordinaryGarnishment']>,
+  cfg: GarnishmentFormula,
 ): CapResult {
   const hourly = cfg.stateMinimumHourlyWage!;
   for (const tier of cfg.tiers!) {
@@ -211,6 +211,72 @@ function tierResult(
   };
 }
 
+/** Shape C: Nevada's cliff-bracket schedule keyed on a fixed GROSS-weekly dollar threshold — the matching tier's fraction then applies to DISPOSABLE earnings. */
+function grossWeeklyTierResult(
+  disposable: Cents,
+  gross: Cents,
+  workState: string,
+  payFrequency: PayFrequency,
+  cfg: GarnishmentFormula,
+): CapResult {
+  const ratio = multiplierForPeriod(payFrequency, 1);
+  const tiers = cfg.grossWeeklyTiers!;
+  const matched = tiers.find((t) => t.maxGrossWeekly == null || gross <= roundHalfUp(dollars(t.maxGrossWeekly) * ratio)) ?? tiers[tiers.length - 1];
+  let cap = applyRate(disposable, matched.fraction);
+  let detail =
+    `${workState} ordinary-garnishment cap (state override): ${(matched.fraction * 100).toFixed(0)}% of ` +
+    `${fmt(disposable)} disposable (gross ${fmt(gross)}/period tier)`;
+
+  if (cfg.minimumWageWeeklyMultiplier != null && cfg.stateMinimumHourlyWage != null) {
+    const floor = minimumWageFloor(cfg.stateMinimumHourlyWage, payFrequency, cfg.minimumWageWeeklyMultiplier);
+    const byFloor = atLeastZero(disposable - floor);
+    cap = Math.min(cap, byFloor);
+    detail += ` or disposable over ${cfg.minimumWageWeeklyMultiplier}x $${cfg.stateMinimumHourlyWage.toFixed(2)}/hr min wage (${fmt(floor)})`;
+  }
+  return { cap, detail };
+}
+
+/** Shape D: Hawaii's MARGINAL bracket schedule denominated in monthly dollars — each bracket's fraction applies only to its own slice of disposable earnings, like an income tax bracket. */
+function marginalMonthlyResult(
+  disposable: Cents,
+  workState: string,
+  payFrequency: PayFrequency,
+  cfg: GarnishmentFormula,
+): CapResult {
+  const monthlyToPeriod = 12 / PERIODS_PER_YEAR[payFrequency];
+  let cap = 0;
+  let prevCeiling = 0;
+  const parts: string[] = [];
+  for (const bracket of cfg.marginalMonthlyBrackets!) {
+    const ceiling =
+      bracket.upToMonthly != null
+        ? roundHalfUp(dollars(bracket.upToMonthly) * monthlyToPeriod)
+        : Number.POSITIVE_INFINITY;
+    const inBand = Math.min(atLeastZero(disposable - prevCeiling), ceiling - prevCeiling);
+    cap += applyRate(inBand, bracket.fraction);
+    parts.push(`${(bracket.fraction * 100).toFixed(0)}% of the slice up to ${bracket.upToMonthly != null ? fmt(ceiling) : '∞'}`);
+    prevCeiling = ceiling;
+    if (disposable <= ceiling) break;
+  }
+  return {
+    cap,
+    detail: `${workState} ordinary-garnishment cap (state override): marginal brackets — ${parts.join(', then ')}`,
+  };
+}
+
+function formulaCap(
+  disposable: Cents,
+  gross: Cents,
+  workState: string,
+  payFrequency: PayFrequency,
+  cfg: GarnishmentFormula,
+): CapResult {
+  if (cfg.tiers) return tierResult(disposable, workState, payFrequency, cfg);
+  if (cfg.grossWeeklyTiers) return grossWeeklyTierResult(disposable, gross, workState, payFrequency, cfg);
+  if (cfg.marginalMonthlyBrackets) return marginalMonthlyResult(disposable, workState, payFrequency, cfg);
+  return capFractionsResult(disposable, gross, workState, payFrequency, cfg);
+}
+
 /** null return means no ordinary garnishment may be withheld at all — a flat state prohibition, or a qualifying full exemption the debtor hasn't waived. */
 function ordinaryGarnishmentCap(
   disposable: Cents,
@@ -223,6 +289,10 @@ function ordinaryGarnishmentCap(
 ): CapResult | null {
   if (override?.ordinaryGarnishmentProhibited) return null;
 
+  if (order.headOfFamily && override?.headOfFamilyOrdinaryGarnishment) {
+    return formulaCap(disposable, gross, workState, payFrequency, override.headOfFamilyOrdinaryGarnishment);
+  }
+
   if (override?.fullExemption?.qualifyingFlag === 'headOfFamily' && order.headOfFamily) {
     const waived = override.fullExemption.waivableInWriting && order.wageExemptionWaivedInWriting;
     if (!waived) return null;
@@ -231,11 +301,8 @@ function ordinaryGarnishmentCap(
     // were never there.
   }
 
-  if (override?.ordinaryGarnishment?.tiers) {
-    return tierResult(disposable, workState, payFrequency, override.ordinaryGarnishment);
-  }
-  if (override?.ordinaryGarnishment?.capFractions) {
-    return capFractionsResult(disposable, gross, workState, payFrequency, override.ordinaryGarnishment);
+  if (override?.ordinaryGarnishment) {
+    return formulaCap(disposable, gross, workState, payFrequency, override.ordinaryGarnishment);
   }
 
   const rule = fed.ordinaryGarnishment;

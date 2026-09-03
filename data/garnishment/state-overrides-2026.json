@@ -1,6 +1,6 @@
 {
   "year": 2026,
-  "$scopeNote": "Only ORDINARY (consumer/creditor judgment) wage garnishment is state-overridable here. Federal law — support orders, federal tax levies, federal student loan default — preempts a state's own wage-exemption statute entirely, so nothing in this file ever changes those two calculations in src/garnishment.ts; only 'consumer_creditor' orders consult it. A state absent from this file entirely has no known departure from the plain federal CCPA default and is computed with it as-is — a narrower claim than 'every state's garnishment law has been fully researched.' A state PRESENT in this file with only a `knownGap` note (no `ordinaryGarnishmentProhibited`/`ordinaryGarnishment`/`fullExemption` block) means a real departure IS known to exist but isn't modelled yet — also computed against the federal default in the meantime, but disclosed rather than silent. 11 states now carry a modelled override; 2 more (NJ, MD) are flagged known-but-unmodelled; the remaining 37 + DC are the unconfirmed-federal-default baseline described above.",
+  "$scopeNote": "Only ORDINARY (consumer/creditor judgment) wage garnishment is state-overridable here. Federal law — support orders, federal tax levies, federal student loan default — preempts a state's own wage-exemption statute entirely, so nothing in this file ever changes those two calculations in src/garnishment.ts; only 'consumer_creditor' orders consult it. A state absent from this file entirely has no known departure from the plain federal CCPA default and is computed with it as-is — a narrower claim than 'every state's garnishment law has been fully researched.' A state PRESENT in this file with only a `knownGap` note (no `ordinaryGarnishmentProhibited`/`ordinaryGarnishment`/`headOfFamilyOrdinaryGarnishment`/`fullExemption` block) means a real departure IS known to exist but isn't modelled yet — also computed against the federal default in the meantime, but disclosed rather than silent. 16 states now carry a modelled override; 2 more (NJ, MD) are flagged known-but-unmodelled; the remaining 32 + DC are the unconfirmed-federal-default baseline described above.",
   "states": {
     "TX": {
       "ordinaryGarnishmentProhibited": true,
@@ -191,6 +191,103 @@
         }
       ],
       "$note": "A head-of-family debtor who has NOT waived the exemption in writing owes $0 on an ordinary garnishment at ANY income level in Florida — this is not a threshold test. A non-head-of-family debtor in Florida gets no departure from the plain federal default beyond this, so this state has no `ordinaryGarnishment` block: only the exemption itself is modelled."
+    },
+    "CO": {
+      "ordinaryGarnishment": {
+        "minimumWageWeeklyMultiplier": 40,
+        "stateMinimumHourlyWage": 15.16,
+        "capFractions": [{ "basis": "disposable", "fraction": 0.20 }]
+      },
+      "sources": [
+        {
+          "title": "Colo. Rev. Stat. § 13-54-104, as amended by HB19-1189 (effective for writs issued on or after 2020-01-01) — general ordinary garnishment reduced from 25%/30x to the lesser of 20% of disposable earnings or the amount by which disposable earnings exceed 40x the greater of the state or federal minimum wage",
+          "url": "https://law.justia.com/codes/colorado/2020/title-13/article-54/section-13-54-104/",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the amended statute's own 20%/40x mechanism and its 2020-01-01 effective date, not an independently rendered direct fetch this pass (direct fetch attempts to law.justia.com returned HTTP 403 this pass)."
+        },
+        {
+          "title": "Colorado Department of Labor and Employment — 2026 statewide minimum wage ($15.16/hr effective 2026-01-01)",
+          "url": "https://www.govdocs.com/colorados-new-minimum-wage-rates/",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis; not independently re-fetched from CDLE's own page this pass."
+        }
+      ],
+      "$note": "Search synthesis surfaced a second, more protective '35%... 30x' figure alongside the headline 20%/40x reform in some summaries, without a clear statement of which debts that second figure actually governs — omitted here rather than guessed; this file models only the well-corroborated general-ordinary-garnishment rule. Denver ($19.29/hr), Boulder ($16.82/hr) and Edgewater ($18.17/hr) all set higher LOCAL minimum wages than the $15.16 statewide figure used here — not modelled, same disclosed simplification as this file's Minnesota and New York entries for their own local/regional minimum wage variation. Colorado's own minimum wage already exceeds the federal $7.25, so 'greater of' always resolves to Colorado's rate here; it's CPI-indexed and rises most years, so re-verify when this file rolls forward."
+    },
+    "WA": {
+      "ordinaryGarnishment": {
+        "minimumWageWeeklyMultiplier": 35,
+        "stateMinimumHourlyWage": 17.13,
+        "capFractions": [{ "basis": "disposable", "fraction": 0.20 }]
+      },
+      "sources": [
+        {
+          "title": "Rev. Code Wash. § 6.27.150 — for consumer debt, the exempt amount is the GREATER of 35x the state minimum hourly wage or 80% of disposable earnings, i.e. the garnishable amount is the LESSER of 20% of disposable earnings or the amount by which disposable earnings exceed 35x the state minimum wage",
+          "url": "https://law.justia.com/codes/washington/2005/title6/6.27.150.html",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own 80%-exempt/20%-reachable and 35x-state-minimum-wage mechanism, not an independently rendered direct fetch this pass (direct fetch attempts returned HTTP 403 this pass). The same statute separately sets a DIFFERENT rule for private student loan debt (lesser of 15% or the amount over 50x the highest applicable minimum wage) and for other, non-consumer-debt garnishments (25%/35x) — this file models only the consumer/creditor rule, since that's the only category GarnishmentOrder's `consumer_creditor` type represents here."
+        },
+        {
+          "title": "Washington State Department of Labor & Industries — 2026 minimum wage ($17.13/hr effective 2026-01-01)",
+          "url": "https://ofm.wa.gov/wp-content/uploads/sites/default/files/public/legacy/policy/25.60.pdf",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis; not independently re-fetched from L&I's own page this pass."
+        }
+      ],
+      "$note": "Washington's own minimum wage is keyed by STATE law only for this statute (not 'greater of state or federal') and already far exceeds the federal $7.25, so the federal figure never enters this calculation at all. Washington's statute is unusual among the states in this file for naming a THIRD category (private student loans, 15%/50x) this engine doesn't separately represent — a private (non-federal) student loan default would need its own GarnishmentOrderType to model correctly; only the federal student loan default program (34 CFR 34.19) is modelled anywhere in this project today."
+    },
+    "NV": {
+      "ordinaryGarnishment": {
+        "minimumWageWeeklyMultiplier": 50,
+        "stateMinimumHourlyWage": 7.25,
+        "grossWeeklyTiers": [
+          { "maxGrossWeekly": 770, "fraction": 0.18 },
+          { "maxGrossWeekly": null, "fraction": 0.25 }
+        ]
+      },
+      "sources": [
+        {
+          "title": "Nev. Rev. Stat. § 31.295 — sliding-scale ordinary garnishment: 18% of disposable earnings if gross weekly pay is $770 or less, 25% if it exceeds $770; either way also capped at the amount by which disposable earnings exceed 50x the FEDERAL minimum hourly wage (not a 'greater of state or federal' test — the statute's own floor names the federal figure specifically)",
+          "url": "https://law.justia.com/codes/nevada/2025/chapter-31/statute-31-295/",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own $770 gross-weekly breakpoint, the 18%/25% tiers, and the 50x-FEDERAL-minimum-wage floor specifically (not Nevada's own, notably higher, minimum wage), not an independently rendered direct fetch this pass."
+        }
+      ],
+      "$note": "Unlike every OTHER tiered/bracket state in this file, Nevada's own breakpoint ($770) is a FIXED GROSS-WEEKLY DOLLAR FIGURE, not indexed to any minimum wage — and the tier decides the FRACTION while that fraction is then applied to DISPOSABLE earnings, not gross. This is genuinely a different mechanism from Minnesota's minimum-wage-indexed cliff tiers (see GarnishmentGrossWeeklyTier's own doc comment in src/registry.ts), which is why this engine represents it as a separate shape rather than reusing `tiers`. $770 is a nominal dollar figure fixed by the statute's own text, not something that moves with inflation on its own — re-verify it hasn't been amended when this file rolls forward, rather than assuming it scales like the minimum-wage-based floors elsewhere in this file do."
+    },
+    "HI": {
+      "ordinaryGarnishment": {
+        "marginalMonthlyBrackets": [
+          { "upToMonthly": 100, "fraction": 0.05 },
+          { "upToMonthly": 200, "fraction": 0.10 },
+          { "upToMonthly": null, "fraction": 0.20 }
+        ]
+      },
+      "sources": [
+        {
+          "title": "Haw. Rev. Stat. § 652-1 — MARGINAL brackets on monthly disposable earnings: 5% of the first $100/month, 10% of the next $100/month (i.e. the $100-$200 slice), 20% of everything over $200/month, prorated to 'an equivalent portion... per week' for other pay frequencies",
+          "url": "https://www.capitol.hawaii.gov/hrscurrent/Vol13_Ch0601-0676/HRS0652/HRS_0652-0001.htm",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own 5%/10%/20% figures and its $100/$200 monthly breakpoints, not an independently rendered direct fetch this pass."
+        }
+      ],
+      "$note": "This is the only MARGINAL (income-tax-bracket-style) garnishment formula in this file — every other tiered state here (Minnesota, Nevada) uses a CLIFF where crossing a threshold reclassifies the WHOLE amount, not just the slice above it. The $100/$200 monthly breakpoints are small, fixed nominal-dollar figures with no visible minimum-wage or inflation indexing in the sources reviewed — they read as though they may not have been updated in a long time, but this file models the statute as currently written rather than adjusting it. No separate minimum-wage floor is layered on top; none was found in the sources reviewed."
+    },
+    "MO": {
+      "headOfFamilyOrdinaryGarnishment": {
+        "minimumWageWeeklyMultiplier": 30,
+        "stateMinimumHourlyWage": 7.25,
+        "capFractions": [{ "basis": "disposable", "fraction": 0.10 }]
+      },
+      "sources": [
+        {
+          "title": "Mo. Rev. Stat. § 525.030 — a head-of-family debtor's ordinary (non-support) garnishment is capped at the lesser of 10% of disposable earnings or the amount by which disposable earnings exceed 30x the FEDERAL minimum hourly wage; a non-head-of-family debtor gets the plain federal 25%/30x default",
+          "url": "https://law.justia.com/codes/missouri/2022/title-xxxvi/chapter-525/section-525-030/",
+          "verifiedOn": "2026-09-03",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own head-of-family 10%/30x variant and confirming the non-head-of-family case matches the plain federal default, not an independently rendered direct fetch this pass."
+        }
+      ],
+      "$note": "Distinct from Florida's `fullExemption`: a Missouri head-of-family debtor still owes something (10% of disposable earnings), just at a reduced rate from the ordinary 25% — never a full $0 regardless of income. Missouri's own statute also names a 50%-of-disposable-earnings figure for a head-of-family debtor when the UNDERLYING DEBT ITSELF is for the support of another person — not modelled here, because this engine already routes any support-related withholding through the separate `child_support` order type and its own federal 50/55/60/65% ceilings rather than through `consumer_creditor` at all, so that branch of 525.030 has no code path that would ever reach it."
     },
     "NJ": {
       "sources": [
