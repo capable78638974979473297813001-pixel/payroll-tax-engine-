@@ -1,5 +1,10 @@
 {
-  "comment": "Authoritative sources only. The organising principle: never monitor an individual municipality's own website. Monitor the state-level register that the municipality is legally required to report into. Ohio's ~600 municipalities collapse to one Department of Taxation file; Pennsylvania's ~2,500 Act 32 jurisdictions collapse to one DCED register. That is what turns '7,400 jurisdictions' into roughly 60 things to watch.",
+  "comment": "Authoritative sources only. The organising principle: never monitor an individual municipality's own website. Monitor the state-level register that the municipality is legally required to report into. Ohio's ~600 municipalities collapse to one Department of Taxation file; Pennsylvania's ~2,500 Act 32 jurisdictions collapse to one DCED register. That is what turns '7,400 jurisdictions' into roughly 60 things to watch. Every entry's `url` resolves to a .gov (or state-designated register, tagged authority: 'state_register') domain -- checked 2026-09-03, none of the 105 point at a payroll vendor, aggregator, or other secondary source.",
+  "checkCadence": {
+    "$comment": "User-directed 2026-09-03: checkFrequency below now follows a two-tier cadence rather than the uniform 'monthly' most sources previously carried. 'daily' = OH, PA, MI, IN, AL, NJ, NY, OR, CO, plus federal (US) sources, since federal figures (FUTA credit reduction, SS wage base, etc.) feed every state's calculation. 'weekly' = every other jurisdiction. harvester/daily.ts's own sweep(asOf, { force: true }) call, which used to override checkFrequency entirely and check every source every day, was changed to force: false so this cadence actually takes effect -- see that file's own updated doc comment for why the previous 'check everything daily' default was a deliberate but now superseded choice, not an oversight being corrected.",
+    "dailyJurisdictions": ["OH", "PA", "MI", "IN", "AL", "NJ", "NY", "OR", "CO", "US"],
+    "weeklyJurisdictions": "every other jurisdiction in this file"
+  },
   "sources": [
     {
       "id": "dol-futa-credit-reduction",
@@ -10,7 +15,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 50,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, finalised each November",
       "feeds": [
         "data/federal/{year}.json#futa.creditReductionStates"
@@ -25,7 +30,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 51,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published with a lag",
       "feeds": [
         "data/states/{STATE}-{year}.json#suiEmployer"
@@ -41,7 +46,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "weekly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov-Dec; mid-year revisions do happen after major legislation",
       "feeds": [
         "data/federal/{year}.json#incomeTax"
@@ -56,7 +61,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "weekly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, announced mid-October with the COLA",
       "feeds": [
         "data/federal/{year}.json#socialSecurity.wageBase"
@@ -73,7 +78,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/AK-{year}.json"
@@ -90,7 +95,7 @@
       "authority": "state_register",
       "format": "html",
       "coversJurisdictions": 25,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "rolling; ALM updates as member cities report",
       "feeds": [
         "data/local/AL-municipalities-{year}.json"
@@ -106,7 +111,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/AL-{year}.json#suiEmployer"
@@ -124,7 +129,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/AL-{year}.json"
@@ -139,7 +144,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/AR-{year}.json"
@@ -154,7 +159,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/AZ-{year}.json"
@@ -169,7 +174,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/CA-{year}.json#suiEmployer"
@@ -187,7 +192,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/CA-{year}.json"
@@ -202,7 +207,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/CO-{year}.json#suiEmployer"
@@ -220,7 +225,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/CO-{year}.json"
@@ -235,7 +240,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/CT-{year}.json#suiEmployer"
@@ -253,7 +258,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/CT-{year}.json"
@@ -268,7 +273,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "coversUI": true,
       "expectedChange": "annual; rate schedules are set each autumn for the following year",
       "feeds": [
@@ -286,7 +291,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/DC-{year}.json"
@@ -302,7 +307,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/DE-{year}.json#suiEmployer"
@@ -320,7 +325,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/DE-{year}.json"
@@ -335,7 +340,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/FL-{year}.json"
@@ -352,7 +357,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/GA-{year}.json#suiEmployer"
@@ -370,7 +375,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/GA-{year}.json"
@@ -385,7 +390,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/HI-{year}.json#suiEmployer"
@@ -403,7 +408,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/HI-{year}.json"
@@ -418,7 +423,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/IA-{year}.json#suiEmployer"
@@ -436,7 +441,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/IA-{year}.json"
@@ -451,7 +456,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/ID-{year}.json#suiEmployer"
@@ -469,7 +474,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/ID-{year}.json"
@@ -484,7 +489,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/IL-{year}.json#suiEmployer"
@@ -502,7 +507,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/IL-{year}.json"
@@ -517,7 +522,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 92,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, and Indiana genuinely does issue mid-year county rate changes",
       "feeds": [
         "data/local/IN-counties-{year}.json"
@@ -533,7 +538,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/IN-{year}.json#suiEmployer"
@@ -551,7 +556,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/IN-{year}.json"
@@ -566,7 +571,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/KS-{year}.json#suiEmployer"
@@ -586,7 +591,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/KS-{year}.json"
@@ -601,7 +606,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 59,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "rare for the statute itself; individual city/county rates change independently",
       "feeds": [
         "data/local/KY-occupational-{year}.json"
@@ -617,7 +622,7 @@
       "authority": "state_register",
       "format": "html",
       "coversJurisdictions": 227,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "rolling; most effective dates are 1 January, but a district can change its ordinance any time",
       "feeds": [
         "data/local/KY-occupational-{year}.json"
@@ -635,7 +640,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/KY-{year}.json#suiEmployer"
@@ -653,7 +658,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/KY-{year}.json"
@@ -668,7 +673,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/LA-{year}.json#suiEmployer"
@@ -686,7 +691,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/LA-{year}.json"
@@ -701,7 +706,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/MA-{year}.json#suiEmployer"
@@ -721,7 +726,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/MA-{year}.json"
@@ -739,7 +744,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/MD-{year}.json#suiEmployer"
@@ -757,7 +762,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/MD-{year}.json"
@@ -772,7 +777,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "coversUI": true,
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
@@ -790,7 +795,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/ME-{year}.json"
@@ -805,7 +810,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 24,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "rare; Michigan city income taxes require voter approval",
       "feeds": [
         "data/local/MI-cities-{year}.json"
@@ -820,7 +825,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/MI-{year}.json#suiEmployer"
@@ -838,7 +843,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/MI-{year}.json"
@@ -853,7 +858,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/MN-{year}.json#suiEmployer"
@@ -871,7 +876,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/MN-{year}.json"
@@ -886,7 +891,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/MO-{year}.json#suiEmployer"
@@ -904,7 +909,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/MO-{year}.json"
@@ -919,7 +924,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/MS-{year}.json#suiEmployer"
@@ -937,7 +942,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/MS-{year}.json"
@@ -952,7 +957,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/MT-{year}.json#suiEmployer"
@@ -970,7 +975,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/MT-{year}.json"
@@ -985,7 +990,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/NC-{year}.json#suiEmployer"
@@ -1003,7 +1008,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/NC-{year}.json"
@@ -1018,7 +1023,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/ND-{year}.json#suiEmployer"
@@ -1036,7 +1041,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/ND-{year}.json"
@@ -1051,7 +1056,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/NE-{year}.json#suiEmployer"
@@ -1069,7 +1074,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/NE-{year}.json"
@@ -1084,7 +1089,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/NH-{year}.json"
@@ -1104,7 +1109,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/NJ-{year}.json#suiEmployer"
@@ -1122,7 +1127,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/NJ-{year}.json"
@@ -1137,7 +1142,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/NM-{year}.json#suiEmployer"
@@ -1155,7 +1160,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/NM-{year}.json"
@@ -1170,7 +1175,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "coversUI": true,
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
@@ -1190,7 +1195,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/NV-{year}.json"
@@ -1205,7 +1210,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/NY-{year}.json#suiEmployer"
@@ -1223,7 +1228,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/NY-{year}.json"
@@ -1238,7 +1243,7 @@
       "authority": "primary",
       "format": "delimited",
       "coversJurisdictions": 200,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "rolling; JEDDs are created by contract between a township and a municipality",
       "feeds": [
         "data/local/OH-jedd-jedz-{year}.json"
@@ -1254,7 +1259,7 @@
       "authority": "state_register",
       "format": "delimited",
       "coversJurisdictions": 600,
-      "checkFrequency": "weekly",
+      "checkFrequency": "daily",
       "expectedChange": "rolling; municipal rate changes take effect 1 Jan and 1 Jul",
       "keyField": "municipalityCode",
       "feeds": [
@@ -1271,7 +1276,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 214,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; districts add, renew and let levies expire each January",
       "feeds": [
         "data/local/OH-school-districts-{year}.json"
@@ -1287,7 +1292,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/OH-{year}.json#suiEmployer"
@@ -1305,7 +1310,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/OK-{year}.json#suiEmployer"
@@ -1323,7 +1328,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/OK-{year}.json"
@@ -1338,7 +1343,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/OR-{year}.json#suiEmployer"
@@ -1356,7 +1361,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/OR-{year}.json"
@@ -1371,7 +1376,7 @@
       "authority": "state_register",
       "format": "xls",
       "coversJurisdictions": 2500,
-      "checkFrequency": "weekly",
+      "checkFrequency": "daily",
       "expectedChange": "rolling; most changes effective 1 Jan",
       "keyField": "psdCode",
       "feeds": [
@@ -1401,7 +1406,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "rare; the 3.07% rate has been stable for years",
       "feeds": [
         "data/states/PA-{year}.json"
@@ -1416,7 +1421,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/PA-{year}.json#suiEmployer"
@@ -1434,7 +1439,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/RI-{year}.json#suiEmployer"
@@ -1452,7 +1457,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/RI-{year}.json"
@@ -1467,7 +1472,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/SC-{year}.json#suiEmployer"
@@ -1485,7 +1490,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/SC-{year}.json"
@@ -1500,7 +1505,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/SD-{year}.json"
@@ -1517,7 +1522,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/TN-{year}.json"
@@ -1535,7 +1540,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/TX-{year}.json"
@@ -1553,7 +1558,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/UT-{year}.json#suiEmployer"
@@ -1571,7 +1576,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/UT-{year}.json"
@@ -1586,7 +1591,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/VA-{year}.json#suiEmployer"
@@ -1604,7 +1609,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/VA-{year}.json"
@@ -1619,7 +1624,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/VT-{year}.json#suiEmployer"
@@ -1637,7 +1642,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/VT-{year}.json"
@@ -1652,7 +1657,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/WA-{year}.json"
@@ -1670,7 +1675,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/WI-{year}.json#suiEmployer"
@@ -1688,7 +1693,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/WI-{year}.json"
@@ -1703,7 +1708,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/WV-{year}.json#suiEmployer"
@@ -1722,7 +1727,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/WV-{year}.json"
@@ -1737,7 +1742,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/WY-{year}.json"
@@ -1755,7 +1760,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "coversUI": true,
       "expectedChange": "annual; rate schedules are set each autumn",
       "feeds": [
