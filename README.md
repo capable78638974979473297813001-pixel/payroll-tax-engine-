@@ -17,7 +17,7 @@ npm run ui:calculator      # any-state calculator UI, address-based local tax lo
 |---|---|
 | Federal income tax (Pub 15-T Worksheet 1A, 2026) | Complete — all 6 rate schedules |
 | Social Security / Medicare / Additional Medicare | Complete, wage-base and threshold aware |
-| FUTA | Complete at the standard net rate |
+| FUTA | Complete at the standard net rate, plus credit-reduction wired for when DOL publishes its 2026 list (empty as shipped — see Known gaps) |
 | State income tax | **51 / 51 jurisdictions** (50 states + DC), 41 distinct `method` cases — one of them (`no_income_tax`) shared by the 9 states with no wage income tax, the other 40 each a real published formula shape |
 | State unemployment (employer) | 51 / 51 — 44 with a computable new-employer rate, 7 industry-assigned (`employerSuppliedRateRequired`) |
 | State UC/SDI/PFML/LTC (employee-paid) | 14 states + DC, wherever the state actually levies one |
@@ -245,15 +245,38 @@ visible instead of overwritten silently.
 
 ## Known gaps
 
-- A handful of state UI sites (AZ, AR, DC, KS, NH, TX at last check) block
-  automated access outright; those states' unemployment figures rest on the
-  best cross-source confirmation available rather than a direct primary
-  fetch, and are marked as such in their own `data/states/*.json`.
-- North Dakota's sample address falls back to Census interpolation rather
-  than a rooftop point — a genuine gap in what's been published near that
-  address, not a code limitation (see `docs/geocoding-coverage.md`).
-- FUTA credit-reduction states are published by DOL each November and are
-  not yet wired to auto-update from that publication.
+- Four state sites — **KS, MA, NH, NV** — block automated access outright
+  (confirmed HTTP 403 on live re-checks, from this project's own sandbox and
+  independently from GitHub Actions runs); those states' unemployment
+  figures rest on the best cross-source confirmation available rather than a
+  direct primary fetch, and are marked `manualOnly` in
+  `harvester/sources.json` and cross-source-confirmed in their own
+  `data/states/*.json`. This list has turned over since it was last written
+  up here — **AZ and AR are not blocked** (both fetch primary PDFs
+  successfully; AZ's DES rate chart is `primary_source_confirmed` directly
+  off the agency's own PDF) and simply have no dedicated state UI source at
+  all, falling back to the DOL's own wage-base report instead (see
+  `uiCoverage.backstopOnly` in `harvester/sources.json`); **DC and TX are
+  not blocked either** — both have working sources (DC's UI-rates page, and
+  TX via the DOL's own Significant Measures report).
+- A state's sample address can fall back to Census interpolation rather than
+  a rooftop point when the address authority hasn't published a bracketing
+  point nearby — a genuine data gap, not a code limitation, and one that
+  moves over time as OSM/NAD coverage changes (see the "these numbers still
+  move" section of `docs/geocoding-coverage.md`). North Dakota has been the
+  repeat example of this, but is not exhibiting it right now: a live re-run
+  today resolved all 51/51 sample addresses to better than Census
+  interpolation (35 rooftop-authoritative, 14 OSM-corroborated, 2
+  between-published-points) — 0/51 on `interpolated`, ND included.
+- FUTA credit-reduction **is wired** (`futa()` in `src/taxes/federal.ts` adds
+  a state's additional rate from `futa.creditReduction.states` whenever that
+  map carries an entry) — DOL just hasn't published the 2026 list yet, since
+  the determination is made after November 10 of the wage year. The map is
+  correctly empty for 2026 as shipped, and the engine says the determination
+  is pending rather than silently assuming the full 5.4% credit; 2025's
+  finals (CA 1.2%, VI 4.5%) ride along as `priorYear` reference only. What
+  is genuinely not automated is populating that map once DOL does publish —
+  it still needs a human edit to `data/federal/2026.json`.
 - **Garnishment state overrides are researched and modelled for 20 states**,
   across 4 distinct formula shapes (`GarnishmentFormula` in `src/registry.ts`):
   TX, PA, NC, SC bar ordinary consumer garnishment outright; FL exempts a
