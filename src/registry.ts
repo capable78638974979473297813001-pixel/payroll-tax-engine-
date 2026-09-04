@@ -323,7 +323,7 @@ interface KYOccupationalRegistryFile {
       }
     >;
     louisvilleMetro: { residentRate: number; nonresidentRate: number };
-    lexingtonFayette: { rate: number };
+    lexingtonFayette: { residentRate: number; nonresidentRate: number };
   };
 }
 
@@ -378,9 +378,9 @@ export function allKYJurisdictions(checkDate: string): KYJurisdictionEntry[] {
   });
   entries.push({
     name: 'Lexington',
-    wageRateDecimal: file.jurisdictions.lexingtonFayette.rate,
-    wageRateResidentDecimal: null,
-    wageRateNonresidentDecimal: null,
+    wageRateDecimal: null,
+    wageRateResidentDecimal: file.jurisdictions.lexingtonFayette.residentRate,
+    wageRateNonresidentDecimal: file.jurisdictions.lexingtonFayette.nonresidentRate,
     capAtSSWageBase: false,
   });
 

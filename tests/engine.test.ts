@@ -1563,6 +1563,38 @@ describe('Kentucky', () => {
       assert.equal(amountOf(r, 'KY_LOCAL'), dollars(14.5));
     });
 
+    // Lexington-Fayette WIRED 2026-09-04: previously a single flat 2.25%
+    // (LFUCG only). Fayette County Public Schools levies its own separate
+    // 0.5% RESIDENT-ONLY occupational tax, own withholding requirement, not
+    // blended into LFUCG's figure — reshaped into a resident/nonresident
+    // split (2.75%/2.25%) the same way Louisville's own school-board
+    // component already works, reusing kentuckyLocalTax()'s existing
+    // resident/nonresident logic with no code change to that function.
+    test('Lexington-Fayette resident: LFUCG (2.25%) + the separate FCPS school tax (0.5%) = 2.75%', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: {
+            code: 'KY',
+            certificate: { workCity: 'Lexington', residenceCity: 'Lexington' },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(27.5));
+    });
+
+    test("Lexington-Fayette nonresident worker: LFUCG only (2.25%) — FCPS's tax is resident-only", () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY', certificate: { workCity: 'Lexington' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(22.5));
+    });
+
     test('no certificate.workCity/workCounty: no KY_LOCAL line at all', () => {
       const r = calculatePaycheck(
         input({
