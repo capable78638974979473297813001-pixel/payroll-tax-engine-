@@ -19,6 +19,7 @@
     "$comment": "The source register has a 'School District PIT (percent)' column for school districts that levy a Personal Income Tax (broader base than EIT) instead of the standard Earned Income Tax -- structurally real (Act 511 permits it) but EVERY one of the 2,627 rows in this 2026 snapshot has PIT = 0%, i.e. no PA school district is currently exercising this option. Kept in the per-jurisdiction schema (as an omitted-when-zero field) rather than dropped, since this is a snapshot fact for 2026, not a structural impossibility -- a future year's re-pull could find a nonzero row."
   },
   "knownGaps": [
+    "FIXED 2026-09-04 (local-tax re-verification pass, all states with a local/city tax checked against their own official source): Philadelphia's row (PSD 510101) was stale. PA DCED's own bulk register is the authoritative source for every OTHER Act 32 jurisdiction, but Philadelphia's Wage Tax is collected directly by the City outside the Act 32/DCED system entirely and resets every July 1 (the City's fiscal year boundary) -- this register's 2026-08-21 snapshot still carried FY2026's 3.74%/3.43% (resident/nonresident) figures, effective 07/01/2025, a full fiscal year stale. Confirmed directly against the City of Philadelphia's own Wage Tax page (phila.gov) that FY2027's rate -- 3.735%/3.425%, effective 07/01/2026 -- has been in force since before this pass's check date, and corrected this row accordingly (see its own $note). GENERALIZES: any other city that collects its own EIT-equivalent tax directly rather than through Act 32 (if one exists) would have the same blind spot in this file and should be checked against its own city source, not assumed current just because this register's overall asOf date is recent -- DCED's own snapshot date says nothing about a self-collecting city's independent fiscal-year reset.",
     "Local Services Tax (LST) situs-priority and proration rules (documented in data/states/PA-2026.json's localTax.lst block) are not applied here -- this file is rate DATA per jurisdiction, not the multi-worksite situs LOGIC; that logic still needs an engine dispatch method.",
     "STALE, CORRECTED 2026-09-02: this used to say no engine dispatch method existed for EIT or LST. That is no longer true and appears to have gone uncorrected after the fix landed -- pennsylvaniaLocalTax() and pennsylvaniaLST() (src/taxes/state.ts) both exist, are dispatched off certificate.workPSD/residencePSD via paLocalRuleset(), and PA_EIT/PA_LST lines compute correctly (see data/states/PA-2026.json's own localTax.knownGap, marked CLOSED, and tests/engine.test.ts's Pennsylvania describe block). This file's DATA half and the CODE half are both closed; only the situs-priority/proration nuance in the entry above this one remains genuinely open.",
     "Out-of-state residents' PSD code (88000, 0% resident rate per PA DCED convention) is not included as a row in this bulk export -- it is a convention documented in data/states/PA-2026.json's localTax.eit.psdCodes note, not a jurisdiction PA DCED's own register lists.",
@@ -36908,13 +36909,14 @@
       "schoolDistrictId": "515001",
       "schoolDistrict": "PHILADELPHIA CITY S D",
       "tcd": "PHILADELPHIA CITY *",
-      "residentEIT": 0.0374,
-      "nonresidentEIT": 0.0343,
+      "residentEIT": 0.03735,
+      "nonresidentEIT": 0.03425,
       "schoolDistrictEIT": 0.0,
-      "totalResidentEIT": 0.0374,
-      "residentEITEffective": "07/01/2025",
-      "nonresidentEITEffective": "07/01/2025",
-      "eitCollector": "CITY OF PHILADELPHIA"
+      "totalResidentEIT": 0.03735,
+      "residentEITEffective": "07/01/2026",
+      "nonresidentEITEffective": "07/01/2026",
+      "eitCollector": "CITY OF PHILADELPHIA",
+      "$note": "RESOLVED (2026-09-04 local-tax re-verification pass): Philadelphia's Wage Tax is set annually, effective July 1 (the city's fiscal year start), separate from the Act 32 EIT collector system this file otherwise reflects. The prior figures on file (3.74%/3.43%, effective 07/01/2025) were FY2026's rate and expired 2026-06-30; confirmed directly against the City of Philadelphia's own Wage Tax page (phila.gov) that FY2027's rate -- 3.735% resident / 3.425% nonresident, effective 07/01/2026 -- has been in effect since before this pass's check date. Continues Philadelphia's multi-year pattern of small annual cuts already noted elsewhere in this project's history."
     },
     {
       "psdCode": "170701",

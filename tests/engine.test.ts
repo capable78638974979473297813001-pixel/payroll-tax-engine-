@@ -581,6 +581,20 @@ describe('Pennsylvania', () => {
     assert.equal(amountOf(r, 'PA_EIT'), dollars(45.0)); // 3,000 × 1.5% resident (higher than 1.0% nonresident)
   });
 
+  // Philadelphia (PSD 510101) FIXED 2026-09-04: this file's own snapshot of
+  // PA DCED's bulk register still carried FY2026's expired rate (3.74%),
+  // because Philadelphia collects its own Wage Tax directly, outside the
+  // Act 32/DCED system, on its own July 1 fiscal-year boundary. Corrected
+  // against phila.gov directly to FY2027's 3.735% resident rate.
+  test("Philadelphia's Wage Tax reflects the current FY2027 rate (3.735%), not the expired FY2026 one (3.74%)", () => {
+    const r = calculatePaycheck(
+      input({
+        workState: { code: 'PA', certificate: { workPSD: '510101', residencePSD: '510101' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_EIT'), dollars(112.05)); // 3,000 × 3.735%
+  });
+
   // EIT low-income exemption (BUG FIXED 2026-09-02): PSD 100401 (Adams
   // Twp) carries a municipal-only $5,000 threshold — residentEIT 0.5%,
   // nonresidentEIT 1.0%, schoolDistrictEIT 0.5% (no schoolDistrictEitLIE
@@ -1438,6 +1452,22 @@ describe('Kentucky', () => {
   // used below are real: Carlisle 1%, Caldwell County 1.5%, Dayton 2.5%,
   // Louisville Metro 2.2% resident / 1.45% nonresident.
   describe('Local Occupational Tax (KY_LOCAL)', () => {
+    // Somerset FIXED 2026-09-04: this entry was still on the pre-increase
+    // 0.6% rate, with a note that a reported two-phase increase toward
+    // 1.2% hadn't been confirmed enacted. It was — confirmed directly
+    // against the City of Somerset's own announcement — phased to 0.9% on
+    // 2025-07-01 and to the current 1.2% on 2026-01-01, both now past.
+    test("Somerset reflects the current 1.2% rate, not the superseded pre-2025 0.6% one", () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY', certificate: { workCity: 'Somerset' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(12.0));
+    });
+
     test('a single city, no county: flat rate on full wages', () => {
       const r = calculatePaycheck(
         input({

@@ -2725,13 +2725,13 @@
       {
         "name": "Somerset",
         "category": "Net Profits",
-        "rate": "0.6%",
-        "wageRateDecimal": 0.006,
+        "rate": "1.2% eff. 1/1/2026",
+        "wageRateDecimal": 0.012,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_via_city_ordinance",
-        "wageRateNote": "Confirmed against the city's own Ordinance 13-02 (2013, still the base rate found this pass): \"Six tenths of a percent (.006) of all wages and compensation paid or payable in the City\" -- matches the scraped figure exactly. A 2024-era news article referenced a PROPOSED two-phase increase (0.6% toward 1.2%) but did not confirm it was actually enacted -- not applied without primary confirmation of an effective ordinance.",
-        "wageRateSource": "City of Somerset Ordinance No. 13-02 (cityofsomerset.com/wp-content/uploads/2017/05/13-02.pdf), read directly via pdftotext."
+        "wageRateStatus": "confirmed_via_city_official_page",
+        "wageRateNote": "RESOLVED (2026-09-04 local-tax re-verification pass): the two-phase increase this entry previously flagged as 'proposed... not confirmed enacted' DID pass. City Council approved the ordinance (City of Somerset's own news page, 'Somerset City Council hears first reading of occupational tax increase', plus a follow-up 'Somerset Council votes to increase Occupational Tax' report confirming passage) phasing the Net Profits/Occupational License rate from the prior 0.6% up by 0.3 points on 2025-07-01 (to 0.9%) and another 0.3 points on 2026-01-01 (to the current 1.2%) -- both dates already in the past as of this pass. Superseded Ordinance 13-02's 0.6% figure, previously this entry's only confirmed source.",
+        "wageRateSource": "City of Somerset official news page (cityofsomerset.com/2025/05/12/somerset-city-council-hears-first-reading-of-occupational-tax-increase/), corroborated by the city's own follow-up vote announcement and independent local news coverage (Yahoo News, FOX 56) all agreeing on the same 0.6%->0.9%->1.2% schedule and both effective dates."
       },
       {
         "name": "Southgate",
@@ -3131,6 +3131,7 @@
     }
   },
   "knownGaps": [
+    "FIXED 2026-09-04 (local-tax re-verification pass, all states with a local/city tax checked against their own official source): Somerset's entry was stale. This file previously carried Somerset's PRE-increase 0.6% rate (from 2013's Ordinance 13-02) with a note that a reported two-phase increase toward 1.2% had NOT been confirmed as actually enacted. It was: City Council approved the ordinance (confirmed via the City of Somerset's own official news page, corroborated by independent local news), phasing the rate up 0.3 points on 2025-07-01 (to 0.9%) and another 0.3 points on 2026-01-01 (to the current 1.2%) -- both effective dates already past as of this pass. Corrected to 1.2% (see the entry's own wageRateNote). Also checked and found ALREADY CORRECT this same pass: Ashland's 2.375% (eff. 1/1/2026), Walton's new 2% tax (eff. 1/1/2026), and Elsmere's 1.75% (eff. for check dates on/after 7/1/2026) -- all three were already on file with accurate figures and sourcing before this pass; only Somerset needed a fix.",
     "140 of 230 authoritative taxing districts attempted, 101 with a rate value scraped from the source database -- 90 districts remain entirely unattempted, and the 39 attempted-but-blank districts have no rate in the state's own database either (their ordinance PDF would need a separate fetch to close). SUPERSEDED: county coverage is now complete — all 62 county entries carry a confirmed payroll rate, cross-checked against KACo's own 2025 payroll-rate column with zero disagreements against the 20 an earlier pass had already confirmed. What remains unconfirmed is CITY entries, where the scraped category alone cannot distinguish a payroll rate from a net-profits or gross-receipts one.",
     "A handful of scraped entries have a garbled 'category' field from an ASP.NET DOM-update race during rapid automated scraping (flagged 'unreliable: true' where caught) -- the 'rate' field itself is generally still trustworthy even when 'category' looks off, but should be spot-checked before high-stakes use.",
     "Bare 'Net Profits' category entries have NOT been individually verified to also govern wage withholding (see Hopkinsville's confirmed wages-vs-net-profits split above) -- treat as a lead to re-check per district, not a confirmed payroll rate. UPDATED (city-verification pass): five of the largest remaining bare-category cities were checked against their OWN pages or ordinances — Covington 2.45% (its 2.5% was the net-profits rate, and it caps at the FICA wage base), Henderson 1.65%, Elizabethtown 1.95%, Georgetown 1.00%, and Nicholasville 1.50% (the scraped 1% was JESSAMINE COUNTY's rate, not the city's). 127 of 250 entries now carry a confirmed wage rate. Two of the five were corrections rather than confirmations, which is the argument for checking the rest rather than promoting bare categories in bulk.",
