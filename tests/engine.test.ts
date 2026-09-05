@@ -7638,7 +7638,7 @@ describe('West Virginia', () => {
   // Amounts hand-derived from each city's own published weekly rate
   // (WV-2026.json's own serviceFeeCities) before running.
   describe('Municipal Service Fee (WV_LOCAL_FEE)', () => {
-    test('Charleston, weekly pay: the weekly rate applies directly ($2.50/wk x 52 / 52 periods)', () => {
+    test('Charleston, weekly pay: the weekly rate applies directly ($3.00/wk x 52 / 52 periods)', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
@@ -7646,7 +7646,7 @@ describe('West Virginia', () => {
           workState: { code: 'WV', certificate: { locality: 'Charleston' } },
         }),
       );
-      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(2.5));
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(3.0));
     });
 
     test('Wheeling, biweekly pay: $2.00/wk x 52 / 26 periods = $4.00/period', () => {

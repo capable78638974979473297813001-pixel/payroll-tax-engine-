@@ -355,7 +355,20 @@ visible instead of overwritten silently.
   shape, but only after a voter referendum most counties don't appear to
   have run — no confirmed instance was found anywhere in the state, so
   nothing was added, but a future pass should check county-commission
-  records rather than assume this is purely a municipal-level tax.
+  records rather than assume this is purely a municipal-level tax. That
+  same pass also caught a real error in an existing city — Charleston's
+  rate was 2.50 with no citation behind it at all; the city's own official
+  fee-overview PDF puts it at 3.00/week, corroborated independently by its
+  own ordinance text and a federal payroll bulletin, both dating the same
+  2018 increase — and ran down four newly-found "Municipal Service Fee"
+  ordinances (Nitro, Weston, Dunbar, Mannington) that all turned out to be
+  the WRONG shape once actually read: a flat charge billed to property
+  owners or per building unit, not the per-employee payroll withholding
+  this engine models, the same class of exclusion as Chester's fee. That
+  turned into a structural finding worth naming: WV Code 8-13-13 is being
+  used by far more than 10 cities, but seemingly mostly for a
+  property-billed fee rather than the payroll-withheld one — a newly-found
+  city's ordinance needs its basis checked every time, not assumed.
 - **Structurally out of scope, not missing:** a few real local levies exist
   that no per-paycheck engine can compute at all — New York's MCTMT and San
   Francisco's Administrative Office Tax are both quarterly taxes on an
