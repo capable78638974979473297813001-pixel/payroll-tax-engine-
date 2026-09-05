@@ -19,7 +19,7 @@ npm run ui:calculator      # any-state calculator UI, address-based local tax lo
 | Social Security / Medicare / Additional Medicare | Complete, wage-base and threshold aware |
 | FUTA | Complete at the standard net rate, plus credit-reduction wired for when DOL publishes its 2026 list (empty as shipped — see Known gaps) |
 | State income tax | **51 / 51 jurisdictions** (50 states + DC), 41 distinct `method` cases — one of them (`no_income_tax`) shared by the 9 states with no wage income tax, the other 40 each a real published formula shape |
-| State unemployment (employer) | 51 / 51 — 44 with a computable new-employer rate, 7 industry-assigned (`employerSuppliedRateRequired`) |
+| State unemployment (employer) | 51 / 51 — 44 with a computable new-employer rate, 7 industry-assigned (`employerSuppliedRateRequired`); Kansas further branches its own new-employer rate by industry (`EmployerContext.suiIndustry`) rather than requiring one |
 | State UC/SDI/PFML/LTC (employee-paid) | 14 states + DC, wherever the state actually levies one |
 | Local income tax | Every state known to levy one, at the depth each state's own public data allows: OH (~600 municipalities + school districts + JEDD/JEDZ), PA (~2,600 Act 32 EIT/LST jurisdictions), MI (24 cities — the full statewide list), KY (227 occupational districts), IN (92/92 counties), AL (25/25 municipalities), MD (24 counties + Baltimore City, wired into the state ruleset), NYC + Yonkers, Kansas City/St. Louis earnings tax, Newark payroll tax, Portland Metro/Multnomah + TriMet/LTD transit excise, Denver-cluster Colorado OPT, Wilmington wage tax, Seattle's JumpStart payroll tax, WV municipal service fees (10 cities — see below, the one state with no central registry to bulk-load from) |
 | Reciprocity / multi-state | Wired generically off each state's own `reciprocalStates` — IL/IN/KY/MI/MN/OH/PA/WI's bilateral agreements, DC's blanket nonresident exemption, WV's 5-state cluster |
@@ -261,11 +261,14 @@ visible instead of overwritten silently.
   TX via the DOL's own Significant Measures report). Re-verifying these four
   states' figures another way (Wayback Machine, alternate URLs, varied
   browser headers — all still blocked) surfaced two new, real findings while
-  looking: **Kansas assigns new CONSTRUCTION-industry employers a 5.55%
+  looking. **Kansas assigns new CONSTRUCTION-industry employers a 5.55%
   new-employer SUI rate versus 1.75% for everyone else** (confirmed via the
-  Kansas Legislative Research Department's own published briefing), which
-  this engine does not yet branch on — every KS caller currently gets 1.75%
-  regardless of industry (`data/states/KS-2026.json`'s own `knownGaps`).
+  Kansas Legislative Research Department's own published briefing) — this is
+  now wired: `EmployerContext.suiIndustry` (keyed by state code) lets a
+  caller say which industry classification applies, checked against
+  `suiEmployer.industryNewEmployerRates` before falling back to the flat
+  rate, so the many non-construction KS callers aren't forced to supply a
+  rate they already got correctly by default.
   **New Hampshire's 1.7% new-employer rate is confirmed only for H1 2026** —
   it's actually NHES's statutory 2.7% less a quarterly "Fund Balance
   Reduction" (currently 1.00%, giving 1.7%), and no secondary source has

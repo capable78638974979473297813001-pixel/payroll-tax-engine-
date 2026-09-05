@@ -9688,6 +9688,36 @@ describe('state unemployment insurance, employer side (XX_SUI_ER)', () => {
     assert.equal(amountOf(r, 'WA_SUI_ER'), dollars(36.0));
   });
 
+  test("Kansas: a construction employer gets its own 5.55% rate, not the flat 1.75%", () => {
+    // $3,000 biweekly, well under the $15,100 wage base -- fully taxable.
+    const general = calculatePaycheck(suiInput({ workState: { code: 'KS', certificate: {} } }));
+    assert.equal(amountOf(general, 'KS_SUI_ER'), dollars(52.5)); // 1.75% * $3,000
+    assert.match(general.taxes.find((t) => t.id === 'KS_SUI_ER')?.detail ?? '', /new-employer rate \(no employer rate supplied/);
+
+    const construction = calculatePaycheck(
+      suiInput({
+        workState: { code: 'KS', certificate: {} },
+        employer: { suiIndustry: { KS: 'construction' } },
+      }),
+    );
+    assert.equal(amountOf(construction, 'KS_SUI_ER'), dollars(166.5)); // 5.55% * $3,000
+    assert.match(
+      construction.taxes.find((t) => t.id === 'KS_SUI_ER')?.detail ?? '',
+      /"construction" industry classification/,
+    );
+  });
+
+  test("Kansas: an explicit employer-supplied rate still overrides the industry rate", () => {
+    const r = calculatePaycheck(
+      suiInput({
+        workState: { code: 'KS', certificate: {} },
+        employer: { suiIndustry: { KS: 'construction' }, stateUnemploymentRate: { KS: 0.02 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'KS_SUI_ER'), dollars(60.0)); // 2% * $3,000, not 5.55%
+    assert.match(r.taxes.find((t) => t.id === 'KS_SUI_ER')?.detail ?? '', /own assigned rate/);
+  });
+
   test('it is an employer cost, not withheld from the employee', () => {
     const withSui = calculatePaycheck(suiInput({ workState: { code: 'CA', certificate: {} } }));
     const line = withSui.taxes.find((t) => t.id === 'CA_SUI_ER');
