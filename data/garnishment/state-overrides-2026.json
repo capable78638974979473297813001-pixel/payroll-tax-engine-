@@ -1,6 +1,6 @@
 {
   "year": 2026,
-  "$scopeNote": "Only ORDINARY (consumer/creditor judgment) wage garnishment is state-overridable here. Federal law — support orders, federal tax levies, federal student loan default — preempts a state's own wage-exemption statute entirely, so nothing in this file ever changes those two calculations in src/garnishment.ts; only 'consumer_creditor' orders consult it. A state absent from this file entirely has no known departure from the plain federal CCPA default and is computed with it as-is — a narrower claim than 'every state's garnishment law has been fully researched.' A state PRESENT in this file with only a `knownGap` note (no `ordinaryGarnishmentProhibited`/`ordinaryGarnishment`/`headOfFamilyOrdinaryGarnishment`/`fullExemption` block) means a real departure IS known to exist but isn't modelled yet — also computed against the federal default in the meantime, but disclosed rather than silent. 20 states now carry a modelled override; 2 more (NJ, MD) are flagged known-but-unmodelled; the remaining 28 + DC are the unconfirmed-federal-default baseline described above.",
+  "$scopeNote": "Only ORDINARY (consumer/creditor judgment) wage garnishment is state-overridable here. Federal law — support orders, federal tax levies, federal student loan default — preempts a state's own wage-exemption statute entirely, so nothing in this file ever changes those two calculations in src/garnishment.ts; only 'consumer_creditor' orders consult it. A state absent from this file entirely has no known departure from the plain federal CCPA default and is computed with it as-is — a narrower claim than 'every state's garnishment law has been fully researched.' A state PRESENT in this file with only a `knownGap` note (no `ordinaryGarnishmentProhibited`/`ordinaryGarnishment`/`headOfFamilyOrdinaryGarnishment`/`fullExemption` block) means a real departure IS known to exist but isn't modelled yet — also computed against the federal default in the meantime, but disclosed rather than silent. 22 states now carry a modelled override (NJ wired 2026-09-05 via GarnishmentFormula's new povertyGuidelineTier shape; MD wired the same day, on re-research finding its county variation was itself repealed by a 2020 amendment — see MD's own $note); the remaining 28 + DC are the unconfirmed-federal-default baseline described above. No state currently carries only a bare `knownGap` disclosure.",
   "states": {
     "TX": {
       "ordinaryGarnishmentProhibited": true,
@@ -363,24 +363,57 @@
     "NJ": {
       "sources": [
         {
-          "title": "N.J. Stat. Ann. § 2A:17-56 — wage execution limited to 10% of income when the debtor earns at or below 250% of the federal poverty level for their household size; up to 25% of gross above that threshold (higher still for debts owed to the State)",
+          "title": "N.J. Stat. Ann. § 2A:17-56(a) — wage execution limited to 10% of wages/earnings/income due and owing when the debtor's income is at or below 250% of the federal poverty level for their household size; above that threshold the statute sets no fixed number and leaves it to the issuing court's own discretion (bounded by the federal CCPA ceiling)",
           "url": "https://law.justia.com/codes/new-jersey/title-2a/section-2a-17-56/",
           "verifiedOn": "2026-09-03",
           "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own income-tier mechanism, not an independently rendered direct fetch this pass."
+        },
+        {
+          "title": "Nolo, \"New Jersey Wage Garnishment Laws\" (attorney-authored, dated modified 2026-04-09) — confirms the 10%/250%-FPL mechanism, that the statute leaves the above-threshold case to court discretion bounded by the federal 25%/disposable-earnings ceiling (not a fixed NJ percentage for an ordinary judgment creditor — the 25% figure in the statute is for debts owed TO THE STATE specifically, a different creditor this engine doesn't model), and a SEPARATE flat $48/week exemption under N.J. Stat. 2A:17-50",
+          "url": "https://www.nolo.com/legal-encyclopedia/new-jersey-wage-garnishment-laws.html",
+          "verifiedOn": "2026-09-05",
+          "verifiedBy": "Directly fetched and read (attorney byline, citing 15 U.S.C. 1673, N.J. Stat. 2A:17-50/2A:17-56/2A:17-56.9, and the govinfo/IRS/DOL primary sources it draws from)."
+        },
+        {
+          "title": "HHS/ASPE 2026 Poverty Guidelines for the 48 Contiguous States and DC — household of 1: $15,960; +$5,680 per additional person",
+          "url": "https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines",
+          "verifiedOn": "2026-09-05",
+          "verifiedBy": "Directly fetched from HHS/ASPE's own published 2026 table (48-contiguous-states-and-DC figures; NJ is not AK/HI so those separate tables don't apply here)."
         }
       ],
-      "knownGap": "New Jersey's own cap is keyed to the debtor's income AS A FRACTION OF THE FEDERAL POVERTY GUIDELINE FOR THEIR HOUSEHOLD SIZE — a real, confirmed departure from every other state in this file, but one this engine cannot compute today: nothing in PaycheckInput or GarnishmentOrder carries household size, and HHS's poverty guideline table itself is a separate, annually-published figure this project doesn't otherwise track anywhere. Not modelled; New Jersey computes against the plain federal default in the meantime, which is very likely WRONG for a debtor near or below the 250%-of-poverty line (federal 25% where NJ law would actually cap at 10%)."
+      "ordinaryGarnishment": {
+        "povertyGuidelineTier": {
+          "belowThresholdFraction": 0.1,
+          "basis": "gross",
+          "thresholdMultipleOfPoverty": 2.5,
+          "povertyGuidelineBase": 15960,
+          "povertyGuidelinePerAdditionalPerson": 5680,
+          "flatWeeklyExemption": 48
+        }
+      },
+      "$note": "WIRED 2026-09-05, closing the household-size gap this entry previously disclosed: GarnishmentFormula gained a new povertyGuidelineTier shape (src/registry.ts, src/garnishment.ts) and GarnishmentOrder gained householdSize, the same discipline as ND's dependents or FL's headOfFamily — a caller-asserted fact this engine never guesses. Two modelling choices, both disclosed rather than silent: (1) basis is GROSS, not the CCPA's 'disposable earnings' term of art — the statute's own words ('wages, debts, earnings, salary, income from trust funds or profits due and owing') read as gross, unlike the federal 25% rule which explicitly says disposable; (2) above the 250%-of-poverty threshold, this engine falls through to the plain federal default rather than inventing a fixed NJ number, because the statute itself gives the court discretion there ('may order a larger percentage') rather than naming one — the 25% figure that secondary sources often quote alongside this rule is specifically for debts owed TO THE STATE (a different creditor this engine's GarnishmentOrderType doesn't model at all, not the ordinary consumer_creditor case). The poverty-guideline base/increment are HHS's 2026 48-states-and-DC table and must be re-verified every January when HHS republishes it — see this override's own sources. Absent GarnishmentOrder.householdSize, this falls through to the federal default with an explanatory line rather than assuming a household size, same as an unset headOfFamily. The $48/week flat exemption (2A:17-50) is a separate, additional floor layered on top of the percentage test, not a replacement for it."
     },
     "MD": {
       "sources": [
         {
-          "title": "Md. Code, Com. Law § 15-601.1 — the statewide default tracks the federal formula, but several Maryland COUNTIES (and Caroline County by a separate provision) set their own lower percentage caps for ordinary garnishment by local law",
-          "url": "https://www.alperlaw.com/asset-protection/garnishment-laws-by-state/",
-          "verifiedOn": "2026-09-03",
-          "verifiedBy": "Cross-source confirmed via search synthesis describing the county-level variation, not an independently rendered direct fetch of the statute or any specific county's own ordinance this pass — no attempt was made to enumerate which counties diverge or by how much."
+          "title": "Md. Code, Com. Law § 15-601.1 (as amended 2020) — a 2020 amendment REPEALED the old county-by-county variation (the separate lower floor that used to apply in Caroline, Kent, Queen Anne's and Worcester counties) and replaced it with a single statewide rule: the greater of 75% of disposable wages or 30 times MARYLAND's own state minimum hourly wage is exempt from garnishment; the reachable amount is the lesser of 25% of disposable wages or the excess over that floor",
+          "url": "https://plainstatute.com/wage-garnishment/maryland",
+          "verifiedOn": "2026-09-05",
+          "verifiedBy": "Cross-source confirmed: this source states it was checked word-for-word against the official statute at mgaleg.maryland.gov (dated 2026-07-17) and explicitly answers 'Does Maryland garnishment differ by county? No.' A second, independent secondary source (md.elaws.us, via search synthesis) agrees on the same 2020-amendment/uniform-statewide conclusion and the same 75%/30x-minimum-wage formula. Not an independently rendered direct fetch of mgaleg.maryland.gov's own statute page this pass — that page serves a JS-rendered shell to a non-browser request, the same block already documented elsewhere in this project (e.g. Municode)."
+        },
+        {
+          "title": "Maryland state minimum hourly wage — $15.00, reached for all employers 2024-01-01 and unchanged for 2026 (no scheduled increase on file)",
+          "url": "https://onpay.com/insights/minimum-wage-by-state-summary/maryland/",
+          "verifiedOn": "2026-09-05",
+          "verifiedBy": "Cross-source confirmed across multiple payroll-industry minimum-wage guides, all agreeing on $15.00/hr statewide for 2026 with no further scheduled increase."
         }
       ],
-      "knownGap": "Maryland's garnishment cap varies by COUNTY, not just by state — this engine's workState is state-level only and carries no county, so a genuine local departure can't be looked up even in principle without first threading county-level geography into GarnishmentInput the way geocode/ already does for local income tax. Not modelled; Maryland computes against the plain federal default in the meantime. Same structural shape as this project's other sub-state-geography gaps (Ohio JEDD/JEDZ, Pennsylvania Act 32) — the difference is those are already wired end-to-end and this one isn't yet."
+      "ordinaryGarnishment": {
+        "capFractions": [{ "basis": "disposable", "fraction": 0.25 }],
+        "minimumWageWeeklyMultiplier": 30,
+        "stateMinimumHourlyWage": 15.0
+      },
+      "$note": "WIRED 2026-09-05, closing this entry's own previously-disclosed county-geography gap -- but not the way that gap assumed it would close. Re-researching Maryland's statute for this pass surfaced that the county variation this file's own PRIOR note described is itself STALE: a 2020 amendment to Md. Code, Com. Law 15-601.1 repealed the old Caroline/Kent/Queen Anne's/Worcester carve-out and made the exemption uniform statewide, so there is no more sub-state geography to thread into GarnishmentInput after all -- the correct fix was updating the RESEARCH, not building county plumbing. The resulting statewide rule turns out to be EXACTLY this project's existing Shape A (capFractions + a minimum-wage floor, the same mechanism IL/NY/MA/CT/DE/CO/WA already use) with one substitution: Maryland's own $15.00/hr state minimum wage stands in for the federal $7.25 in the 30x floor test, since 15-601.1 says '30 times the State minimum hourly wage,' not the federal one -- the 25% fraction itself is identical to the federal CCPA default. No new GarnishmentFormula shape or code was needed. Re-verify stateMinimumHourlyWage if Maryland's minimum wage changes."
     }
   }
 }

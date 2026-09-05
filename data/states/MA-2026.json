@@ -122,12 +122,12 @@
     "wageBase": 15000,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
     "newEmployerRate": 0.0242,
-    "newEmployerRateSource": "Massachusetts's 2026 UI rate release — Schedule E, new employer 2.42%. NOTE a secondary table published 2.13%; the 2026-dated release is preferred here.",
+    "newEmployerRateSource": "Massachusetts's 2026 UI rate release — Schedule E, new employer 2.42%. NOTE a secondary table published 2.13%; the 2026-dated release is preferred here (2.13% is Schedule D's 2025 figure, per a 2026-09-05 re-check below — not a live disagreement about 2026 itself). RE-VERIFIED 2026-09-05: mass.gov remains confirmed HTTP 403 on every attempt (varied headers, Wayback Machine lookup — all unsuccessful). Bloomberg Tax's own payroll-news coverage ('Massachusetts Releases 2026 Unemployment Insurance Tax Rates', a professionally-edited tax-news service, a stronger tier than a generic payroll-software blog) was fetched and independently corroborates this file's Schedule E experience-rated range EXACTLY: '0.94% to 5.24% for positive-rated employers and... 7.03% to 14.37% for negative-rated employers' matches experienceRange {0.0094, 0.1437} below to the decimal. The article's own new-employer-rate sentence was truncated in the fetch and could not be read directly, but the exact match on the harder-to-coincidentally-agree-on experience-rated bounds is strong indirect corroboration that this same Schedule E (and therefore its 2.42% new-employer figure) is the release being described.",
     "experienceRange": {
       "min": 0.0094,
       "max": 0.1437
     },
     "employerSuppliedRateRequired": false,
-    "confidence": "source_dated_2026"
+    "confidence": "cross_source_confirmed, strengthened 2026-09-05"
   }
 }

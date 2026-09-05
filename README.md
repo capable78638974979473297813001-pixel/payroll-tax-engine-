@@ -23,7 +23,7 @@ npm run ui:calculator      # any-state calculator UI, address-based local tax lo
 | State UC/SDI/PFML/LTC (employee-paid) | 14 states + DC, wherever the state actually levies one |
 | Local income tax | Every state known to levy one, at the depth each state's own public data allows: OH (~600 municipalities + school districts + JEDD/JEDZ), PA (~2,600 Act 32 EIT/LST jurisdictions), MI (24 cities — the full statewide list), KY (227 occupational districts), IN (92/92 counties), AL (25/25 municipalities), MD (24 counties + Baltimore City, wired into the state ruleset), NYC + Yonkers, Kansas City/St. Louis earnings tax, Newark payroll tax, Portland Metro/Multnomah + TriMet/LTD transit excise, Denver-cluster Colorado OPT, Wilmington wage tax, Seattle's JumpStart payroll tax, WV municipal service fees (10 cities — see below, the one state with no central registry to bulk-load from) |
 | Reciprocity / multi-state | Wired generically off each state's own `reciprocalStates` — IL/IN/KY/MI/MN/OH/PA/WI's bilateral agreements, DC's blanket nonresident exemption, WV's 5-state cluster |
-| Garnishments (court-ordered / administrative) | CCPA federal ceilings for ordinary consumer/creditor judgment, child support/alimony (50/55/60/65%), and federal student loan default (34 CFR 34.19) — multiple simultaneous orders share one aggregate ceiling, never stacked. 20 states' own departures researched and modelled across 4 distinct formula shapes: TX/PA/NC/SC bar ordinary garnishment outright; FL exempts a "head of family" debtor at any income; MO gives one a reduced 10% instead; IL/NY/MA/CT/DE/CO/WA/WI/ME/VT cap it by a flat-fraction formula (of gross and/or disposable, plus a minimum-wage floor — VT resolves a real dual-rule statute to the more protective consumer-credit-transaction figure); ND applies that same flat-fraction shape with an added $20/week-per-dependent reduction; MN cliff-brackets by income (10/15/25%, the WHOLE amount reclassified at each threshold); NV cliff-brackets on a fixed gross-weekly dollar line instead; HI uses genuine MARGINAL brackets (5%/10%/20%, only the slice within each band, income-tax-bracket style). NJ and MD's own real departures are identified but not yet modelled (NJ keys to household-size poverty guidelines; MD varies by county) — disclosed rather than silent. Every other state uses the federal default as an unconfirmed baseline, not a researched "no departure exists." Federal tax levies are out of scope (IRS Pub 1494's own table, not a fixed CCPA fraction) — see `src/garnishment.ts` and `data/garnishment/state-overrides-2026.json` |
+| Garnishments (court-ordered / administrative) | CCPA federal ceilings for ordinary consumer/creditor judgment, child support/alimony (50/55/60/65%), and federal student loan default (34 CFR 34.19) — multiple simultaneous orders share one aggregate ceiling, never stacked. 22 states' own departures researched and modelled across 5 distinct formula shapes: TX/PA/NC/SC bar ordinary garnishment outright; FL exempts a "head of family" debtor at any income; MO gives one a reduced 10% instead; IL/NY/MA/CT/DE/CO/WA/WI/ME/VT/MD cap it by a flat-fraction formula (of gross and/or disposable, plus a minimum-wage floor — VT resolves a real dual-rule statute to the more protective consumer-credit-transaction figure, MD's floor uses its own $15.00 state minimum wage in place of the federal one); ND applies that same flat-fraction shape with an added $20/week-per-dependent reduction; MN cliff-brackets by income (10/15/25%, the WHOLE amount reclassified at each threshold); NV cliff-brackets on a fixed gross-weekly dollar line instead; HI uses genuine MARGINAL brackets (5%/10%/20%, only the slice within each band, income-tax-bracket style); NJ ties its 10% cap to the debtor's household size against the HHS federal poverty guideline, reverting to the federal default above 250% of it (the statute leaves that case to court discretion, not a fixed number). Every other state uses the federal default as an unconfirmed baseline, not a researched "no departure exists." Federal tax levies are out of scope (IRS Pub 1494's own table, not a fixed CCPA fraction) — see `src/garnishment.ts` and `data/garnishment/state-overrides-2026.json` |
 | Address → jurisdiction | Rooftop-precision geocoding pipeline (see below) — 35/51 authoritative, 14/51 OSM-corroborated, measured, not assumed |
 | Staying current | Automated daily harvester watching 105 registered sources, human review gate before anything reaches `data/` |
 
@@ -258,7 +258,20 @@ visible instead of overwritten silently.
   all, falling back to the DOL's own wage-base report instead (see
   `uiCoverage.backstopOnly` in `harvester/sources.json`); **DC and TX are
   not blocked either** — both have working sources (DC's UI-rates page, and
-  TX via the DOL's own Significant Measures report).
+  TX via the DOL's own Significant Measures report). Re-verifying these four
+  states' figures another way (Wayback Machine, alternate URLs, varied
+  browser headers — all still blocked) surfaced two new, real findings while
+  looking: **Kansas assigns new CONSTRUCTION-industry employers a 5.55%
+  new-employer SUI rate versus 1.75% for everyone else** (confirmed via the
+  Kansas Legislative Research Department's own published briefing), which
+  this engine does not yet branch on — every KS caller currently gets 1.75%
+  regardless of industry (`data/states/KS-2026.json`'s own `knownGaps`).
+  **New Hampshire's 1.7% new-employer rate is confirmed only for H1 2026** —
+  it's actually NHES's statutory 2.7% less a quarterly "Fund Balance
+  Reduction" (currently 1.00%, giving 1.7%), and no secondary source has
+  surfaced the Q3/Q4 2026 reduction figure yet, so a real mid-year change is
+  possible and currently unverifiable (`data/states/NH-2026.json`'s own
+  `newEmployerRateSource`).
 - A state's sample address can fall back to Census interpolation rather than
   a rooftop point when the address authority hasn't published a bracketing
   point nearby — a genuine data gap, not a code limitation, and one that
@@ -277,37 +290,43 @@ visible instead of overwritten silently.
   finals (CA 1.2%, VI 4.5%) ride along as `priorYear` reference only. What
   is genuinely not automated is populating that map once DOL does publish —
   it still needs a human edit to `data/federal/2026.json`.
-- **Garnishment state overrides are researched and modelled for 20 states**,
-  across 4 distinct formula shapes (`GarnishmentFormula` in `src/registry.ts`):
+- **Garnishment state overrides are researched and modelled for 22 states**,
+  across 5 distinct formula shapes (`GarnishmentFormula` in `src/registry.ts`):
   TX, PA, NC, SC bar ordinary consumer garnishment outright; FL exempts a
   "head of family" debtor at any income (until affirmatively waived in
   writing); MO gives a head-of-family debtor a reduced 10% instead of a full
-  exemption; IL, NY, MA, CT, DE, CO, WA, WI, ME and VT each cap it by a
+  exemption; IL, NY, MA, CT, DE, CO, WA, WI, ME, VT and MD each cap it by a
   flat-fraction formula (of gross and/or disposable earnings, plus a
   minimum-wage floor — New York's is a dual 10%-of-gross/25%-of-disposable
   test, Vermont's resolves a real dual-rule statute to the more protective of
-  its two rates); ND uses that same flat-fraction shape with a further
-  $20/week-per-dependent reduction layered on top (`GarnishmentOrder.dependents`
-  — the one state in this file keyed to headcount rather than income alone);
-  MN cliff-brackets by income (10/15/25%, indexed to multiples of minimum
-  wage — crossing a threshold reclassifies the WHOLE amount, not a "lesser
-  of" test); NV cliff-brackets too, but on a fixed $770 gross-weekly dollar
-  line instead of a minimum-wage multiple; HI alone uses genuine MARGINAL
-  brackets (5%/10%/20% of monthly-prorated disposable earnings, only the
-  slice within each band — actual income-tax-bracket math, see
-  `GarnishmentMarginalBracket`'s own doc comment). Two more real, confirmed
-  departures are identified but NOT modelled: New Jersey keys its cap to the
-  debtor's income as a fraction of the federal poverty guideline for their
-  household size (this engine tracks no household-size input anywhere);
-  Maryland's cap varies by COUNTY, and workState here is state-level only.
-  Both are disclosed with a `knownGap` in their own entry in
-  `data/garnishment/state-overrides-2026.json` rather than left silent, and
-  both currently compute against the plain federal default in the meantime
-  — very likely wrong for a NJ debtor near the poverty line. Every OTHER
-  state (28 + DC) computes ordinary garnishment against the plain federal
-  CCPA default, which is correct for most of them but is an unconfirmed
-  baseline, not a researched "no state departure exists" — see that file's
-  own `$scopeNote`. Several modelled states also set higher LOCAL minimum
+  its two rates, Maryland's floor uses its own $15.00 state minimum wage
+  rather than the federal one); ND uses that same flat-fraction shape with a
+  further $20/week-per-dependent reduction layered on top
+  (`GarnishmentOrder.dependents` — the one state in this file keyed to
+  headcount rather than income alone); MN cliff-brackets by income (10/15/25%,
+  indexed to multiples of minimum wage — crossing a threshold reclassifies
+  the WHOLE amount, not a "lesser of" test); NV cliff-brackets too, but on a
+  fixed $770 gross-weekly dollar line instead of a minimum-wage multiple; HI
+  alone uses genuine MARGINAL brackets (5%/10%/20% of monthly-prorated
+  disposable earnings, only the slice within each band — actual
+  income-tax-bracket math, see `GarnishmentMarginalBracket`'s own doc
+  comment); NJ uses a fifth shape, `GarnishmentFormula.povertyGuidelineTier`
+  — 10% of gross while the debtor's annualized income sits at or under 250%
+  of the HHS federal poverty guideline for their household size
+  (`GarnishmentOrder.householdSize`, never guessed when absent — the same
+  discipline as an unset `headOfFamily`), reverting to the plain federal
+  default above that threshold because N.J. Stat. 2A:17-56 itself leaves
+  that case to court discretion rather than naming a fixed percentage, plus
+  a separate flat $48/week exemption (N.J. Stat. 2A:17-50) layered on top.
+  Maryland's own previously-disclosed gap (a county-by-county variation) was
+  re-researched rather than built around: a 2020 amendment had already
+  repealed that variation and made the state's rule uniform, so it needed no
+  new sub-state-geography plumbing at all, just the correction above. Every
+  OTHER state (28 + DC) computes ordinary garnishment against the plain
+  federal CCPA default, which is correct for most of them but is an
+  unconfirmed baseline, not a researched "no state departure exists" — see
+  `data/garnishment/state-overrides-2026.json`'s own `$scopeNote`. Several
+  modelled states also set higher LOCAL minimum
   wages this file doesn't reach (Denver/Boulder in CO, Minneapolis/St. Paul
   in MN, NYC/Long Island/Westchester in NY, Portland in ME) — disclosed
   per-state, not silently assumed away. A federal tax levy is out
@@ -328,7 +347,15 @@ visible instead of overwritten silently.
   researched. A WV city missing from `serviceFeeCities` in
   `data/states/WV-2026.json` means "not yet looked up," never "confirmed no
   fee" — closing this one requires reading roughly 220 more municipal codes
-  one at a time, not finding one more source.
+  one at a time, not finding one more source. A fresh research pass
+  (2026-09-05) retried the previously-blocked leads (still blocked) and
+  surfaced a genuinely new, DISTINCT mechanism worth naming even though no
+  city was added: WV Code § 7-20-12 lets any COUNTY (not municipality)
+  impose its own countywide service fee via the same payroll-withholding
+  shape, but only after a voter referendum most counties don't appear to
+  have run — no confirmed instance was found anywhere in the state, so
+  nothing was added, but a future pass should check county-commission
+  records rather than assume this is purely a municipal-level tax.
 - **Structurally out of scope, not missing:** a few real local levies exist
   that no per-paycheck engine can compute at all — New York's MCTMT and San
   Francisco's Administrative Office Tax are both quarterly taxes on an

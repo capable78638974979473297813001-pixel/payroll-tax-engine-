@@ -167,6 +167,23 @@ describe('ordinary garnishment — state overrides', () => {
     });
   }
 
+  test('Maryland: lesser of 25% of disposable and disposable over 30x its own $15.00 minimum wage', () => {
+    // Md. Code Com. Law 15-601.1 (2020 amendment, uniform statewide): floor
+    // is 30 x $15.00 = $450/week. $1000 disposable: 25%=$250, floor excess
+    // is $1000-$450=$550 -- 25% is smaller.
+    const aboveFloor = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'MD');
+    assert.equal(aboveFloor.totalWithheld, dollars(250));
+
+    // $500 disposable: 25%=$125, but floor excess is only $500-$450=$50 --
+    // the floor binds instead.
+    const floorBinds = run(paycheckOf(dollars(500), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'MD');
+    assert.equal(floorBinds.totalWithheld, dollars(50));
+  });
+
   test('Illinois: lesser of 15% of GROSS and disposable over 45x its own $15 minimum wage', () => {
     // $1000 gross, $100 tax => $900 disposable. 15% of gross = $150;
     // disposable over 45*$15=$675 is $225. $150 is smaller.
@@ -564,5 +581,40 @@ describe('more state overrides — cliff-on-dollar, marginal-bracket and head-of
       order({ id: 'A', type: 'consumer_creditor', dependents: 3 }),
     ], 'ND');
     assert.equal(reductionExceedsCap.totalWithheld, 0); // base cap is $10 (floor-bound); 3*$20=$60 would go negative
+  });
+
+  test('New Jersey: 10% of GROSS while at/under 250% of the household poverty guideline, else the federal default', () => {
+    // Household of 4: 2026 HHS guideline $33,000 x 250% = $82,500. $1000/week
+    // annualizes to $52,000 -- at or under the threshold, so the 10%-of-gross
+    // tier applies: 10% x $1000 = $100. The $48/week flat floor ($1000-$48=
+    // $952) doesn't bind here.
+    const belowThreshold = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor', householdSize: 4 }),
+    ], 'NJ');
+    assert.equal(belowThreshold.totalWithheld, dollars(100));
+
+    // Household of 1: guideline $15,960 x 250% = $39,900. The same $1000/week
+    // ($52,000/year) now EXCEEDS the threshold, so N.J. Stat. 2A:17-56 leaves
+    // it to court discretion -- this engine falls through to the plain
+    // federal default: lesser of 25%*$1000 and $1000-$217.50(30x $7.25).
+    const aboveThreshold = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor', householdSize: 1 }),
+    ], 'NJ');
+    assert.equal(aboveThreshold.totalWithheld, dollars(250));
+
+    // No household size supplied at all: never guessed, same federal
+    // fallback as the above-threshold case.
+    const noHouseholdSize = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'NJ');
+    assert.equal(noHouseholdSize.totalWithheld, dollars(250));
+
+    // At very low income the separate $48/week flat exemption (2A:17-50)
+    // binds ahead of the 10% fraction: 10%*$50=$5, but the flat floor only
+    // leaves $50-$48=$2 exposed.
+    const flatFloorBinds = run(paycheckOf(dollars(50), 0), [
+      order({ id: 'A', type: 'consumer_creditor', householdSize: 1 }),
+    ], 'NJ');
+    assert.equal(flatFloorBinds.totalWithheld, dollars(2));
   });
 });
