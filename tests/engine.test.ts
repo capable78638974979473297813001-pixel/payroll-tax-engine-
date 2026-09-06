@@ -10101,6 +10101,32 @@ describe('nonresident day-count de minimis', () => {
     assert.equal(amountOf(reciprocal, 'IN_SIT'), dollars(0));
     assert.ok(amountOf(reciprocal, 'IN_COUNTY') > dollars(0));
   });
+
+  test('the day-count rule STACKS with reciprocity — a reciprocal-state resident who ALSO qualifies is never worse off than a non-reciprocal one', () => {
+    // BUG FIXED (found during manual cross-state testing, 2026-09-06):
+    // day-count used to be skipped entirely whenever reciprocity already
+    // exempted the state line, so a Kentucky resident (on IN's own
+    // reciprocalStates list) who independently satisfied the SAME 30-day/
+    // employer-eligibility facts as the TX resident above stayed stuck
+    // paying full Indiana county tax — strictly worse off than a resident
+    // of a state with NO relationship to Indiana at all, for identical
+    // day-count facts. Day-count is a genuinely separate legal basis
+    // (Departmental Notice #1 applies to any nonresident, not just a
+    // reciprocalStates resident) and must be checked independently of
+    // whether reciprocity already fired.
+    const kyWithDayCount = calculatePaycheck(
+      away('IN', { county: 'Marion', daysWorkedInStateThisYear: 10, nonresidentDeMinimisEligible: true }, 'KY'),
+    );
+    assert.equal(amountOf(kyWithDayCount, 'IN_SIT'), dollars(0));
+    assert.equal(amountOf(kyWithDayCount, 'IN_COUNTY'), dollars(0));
+
+    // Unchanged: a reciprocal-state resident who does NOT separately supply
+    // day-count facts still gets only the narrower reciprocity treatment —
+    // this fix adds a path, it doesn't grant an exemption nobody claimed.
+    const kyPlainReciprocity = calculatePaycheck(away('IN', { county: 'Marion' }, 'KY'));
+    assert.equal(amountOf(kyPlainReciprocity, 'IN_SIT'), dollars(0));
+    assert.ok(amountOf(kyPlainReciprocity, 'IN_COUNTY') > dollars(0));
+  });
 });
 
 /**

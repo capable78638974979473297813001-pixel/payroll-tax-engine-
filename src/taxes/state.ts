@@ -108,13 +108,28 @@ export function stateIncomeTax(
   // nothing no matter where the worker lives.
   const categoryReason = exemptEmploymentCategoryReason(input, rules);
   const reciprocityReason = categoryReason ? null : reciprocityExemptionReason(input, rules);
-  const dayCountReason =
-    categoryReason || reciprocityReason ? null : nonresidentDayCountReason(input, rules);
+  // BUG FIXED (found during manual cross-state testing, 2026-09-06): the
+  // day-count rule is a genuinely SEPARATE legal basis from reciprocity —
+  // Indiana's own 30-day rule (Departmental Notice #1) applies to ANY
+  // nonresident, not just a resident of one of its reciprocalStates, and it
+  // reaches FURTHER than bare reciprocity (it also exempts county tax,
+  // which WH-47 reciprocity explicitly does not — see IN-2026.json's own
+  // "critical gotcha"). This used to be skipped the moment reciprocityReason
+  // already applied, which meant a Kentucky resident who ALSO independently
+  // qualified for the 30-day rule stayed stuck paying full Indiana county
+  // tax, while an otherwise-identical California resident (no relationship
+  // to Indiana at all) got BOTH state and county zeroed under the exact
+  // same day-count facts — a reciprocal-state resident ending up strictly
+  // WORSE off than a non-reciprocal one is backwards, and nothing in
+  // Indiana's own data disclosed it as intentional. Only an employment-
+  // CATEGORY exemption (broader than residence entirely) should still
+  // short-circuit this check.
+  const dayCountReason = categoryReason ? null : nonresidentDayCountReason(input, rules);
   const deMinimisReason =
     categoryReason || reciprocityReason || dayCountReason
       ? null
       : nonresidentDeMinimisReason(input, ctx, rules);
-  const exemptReason = categoryReason ?? reciprocityReason ?? dayCountReason ?? deMinimisReason;
+  const exemptReason = categoryReason ?? dayCountReason ?? reciprocityReason ?? deMinimisReason;
   if (exemptReason) {
     // Indiana's day-count rule reaches its county tax too, which is a
     // separate line id — every other exemption here is state-tax-only.
