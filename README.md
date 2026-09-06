@@ -24,7 +24,7 @@ npm run ui:calculator      # any-state calculator UI, address-based local tax lo
 | Local income tax | Every state known to levy one, at the depth each state's own public data allows: OH (~600 municipalities + school districts + JEDD/JEDZ), PA (~2,600 Act 32 EIT/LST jurisdictions), MI (24 cities — the full statewide list), KY (227 occupational districts), IN (92/92 counties), AL (25/25 municipalities), MD (24 counties + Baltimore City, wired into the state ruleset), NYC + Yonkers, Kansas City/St. Louis earnings tax, Newark payroll tax, Portland Metro/Multnomah + TriMet/LTD transit excise, Denver-cluster Colorado OPT, Wilmington wage tax, Seattle's JumpStart payroll tax, WV municipal service fees (10 cities — see below, the one state with no central registry to bulk-load from) |
 | Reciprocity / multi-state | Wired generically off each state's own `reciprocalStates` — IL/IN/KY/MI/MN/OH/PA/WI's bilateral agreements, DC's blanket nonresident exemption, WV's 5-state cluster |
 | Garnishments (court-ordered / administrative) | CCPA federal ceilings for ordinary consumer/creditor judgment, child support/alimony (50/55/60/65%), and federal student loan default (34 CFR 34.19) — multiple simultaneous orders share one aggregate ceiling, never stacked. 22 states' own departures researched and modelled across 5 distinct formula shapes: TX/PA/NC/SC bar ordinary garnishment outright; FL exempts a "head of family" debtor at any income; MO gives one a reduced 10% instead; IL/NY/MA/CT/DE/CO/WA/WI/ME/VT/MD cap it by a flat-fraction formula (of gross and/or disposable, plus a minimum-wage floor — VT resolves a real dual-rule statute to the more protective consumer-credit-transaction figure, MD's floor uses its own $15.00 state minimum wage in place of the federal one); ND applies that same flat-fraction shape with an added $20/week-per-dependent reduction; MN cliff-brackets by income (10/15/25%, the WHOLE amount reclassified at each threshold); NV cliff-brackets on a fixed gross-weekly dollar line instead; HI uses genuine MARGINAL brackets (5%/10%/20%, only the slice within each band, income-tax-bracket style); NJ ties its 10% cap to the debtor's household size against the HHS federal poverty guideline, reverting to the federal default above 250% of it (the statute leaves that case to court discretion, not a fixed number). Every other state uses the federal default as an unconfirmed baseline, not a researched "no departure exists." Federal tax levies are out of scope (IRS Pub 1494's own table, not a fixed CCPA fraction) — see `src/garnishment.ts` and `data/garnishment/state-overrides-2026.json` |
-| Address → jurisdiction | Rooftop-precision geocoding pipeline (see below) — 35/51 authoritative, 14/51 OSM-corroborated, measured, not assumed |
+| Address → jurisdiction | Four-tier geocoding pipeline that PREFERS rooftop precision and refuses to guess when it can't get there (see below) — a live run lands 35/51 on an authoritative rooftop point, not all 51; measured every run, not assumed, and the split moves day to day |
 | Staying current | Automated daily harvester watching 105 registered sources, human review gate before anything reaches `data/` |
 
 Run `npm run coverage:taxes` for the live, generated version of the table
@@ -122,13 +122,17 @@ error. `geocode/resolve.ts` runs an address through four tiers, each of which
 | `interpolated` | Census's own TIGER/Line address-range position, at the curb. | Census geocoder |
 
 Measured, not assumed — `npm run coverage:geocode` resolves one real address
-per jurisdiction through this exact pipeline and reports which tier answered:
-**35/51 land on authoritative rooftop points, 14/51 on OSM-corroborated
-house-level points; only 1/51 falls all the way back to Census's own
-interpolation** (a genuine North Dakota data gap: nothing published at or
-below that address's own house number to bracket from — see
-`docs/geocoding-coverage.md`). Building footprints add a third, independent
-cross-check where OSM has traced the structure.
+per jurisdiction through this exact pipeline and reports which tier answered.
+A run just now: **35/51 land on authoritative rooftop points, 13/51 on
+OSM-corroborated house-level points, 2/51 on a between-published-points
+`neighbor` estimate, and 1/51 falls all the way back to Census's own
+interpolation** (North Dakota this run: nothing published at or below that
+address's own house number to bracket from). These counts are a live
+measurement, not a fixed claim — they move day to day as OSM/NAD coverage
+changes underneath the pipeline, so re-run the command above rather than
+trusting a number written down here; see `docs/geocoding-coverage.md`'s own
+"these numbers still move" section. Building footprints add a third,
+independent cross-check where OSM has traced the structure.
 
 Once a coordinate is resolved, jurisdictions not published by Census — Ohio's
 JEDD/JEDZ districts, Portland's Metro Supportive Housing boundary — are
@@ -275,15 +279,19 @@ visible instead of overwritten silently.
   surfaced the Q3/Q4 2026 reduction figure yet, so a real mid-year change is
   possible and currently unverifiable (`data/states/NH-2026.json`'s own
   `newEmployerRateSource`).
-- A state's sample address can fall back to Census interpolation rather than
-  a rooftop point when the address authority hasn't published a bracketing
-  point nearby — a genuine data gap, not a code limitation, and one that
-  moves over time as OSM/NAD coverage changes (see the "these numbers still
-  move" section of `docs/geocoding-coverage.md`). North Dakota has been the
-  repeat example of this, but is not exhibiting it right now: a live re-run
-  today resolved all 51/51 sample addresses to better than Census
-  interpolation (35 rooftop-authoritative, 14 OSM-corroborated, 2
-  between-published-points) — 0/51 on `interpolated`, ND included.
+- **Not every state resolves at rooftop precision, and that's expected, not a
+  bug.** A live re-run just now (`npm run coverage:geocode`) puts 35/51 on an
+  authoritative rooftop point, 13/51 on an OSM-corroborated house-level
+  point (one tier down), 2/51 on a between-published-points estimate (lower
+  still), and 1/51 — North Dakota — all the way back to plain Census
+  interpolation: nothing published at or below that sample address's own
+  house number to bracket from, a real data gap, not a code limitation. Two
+  runs in this same session already show these counts moving: an earlier
+  run this same day had ND resolving above interpolation and 14/51 (not
+  13/51) at the OSM tier — the "these numbers still move" section of
+  `docs/geocoding-coverage.md` explains why (OSM/NAD coverage changes
+  underneath this pipeline day to day) and should be treated as the live
+  source of truth over any specific count frozen here.
 - FUTA credit-reduction **is wired** (`futa()` in `src/taxes/federal.ts` adds
   a state's additional rate from `futa.creditReduction.states` whenever that
   map carries an entry) — DOL just hasn't published the 2026 list yet, since
