@@ -204,9 +204,13 @@ function capFractionsResult(
 
   if (cfg.minimumWageWeeklyMultiplier != null && cfg.stateMinimumHourlyWage != null) {
     const floor = minimumWageFloor(cfg.stateMinimumHourlyWage, payFrequency, cfg.minimumWageWeeklyMultiplier);
-    const byFloor = atLeastZero(disposable - floor);
+    const excess = atLeastZero(disposable - floor);
+    const byFloor = cfg.minimumWageExcessFraction != null ? applyRate(excess, cfg.minimumWageExcessFraction) : excess;
     cap = Math.min(cap, byFloor);
-    detail += ` or disposable over ${cfg.minimumWageWeeklyMultiplier}x $${cfg.stateMinimumHourlyWage.toFixed(2)}/hr min wage (${fmt(floor)})`;
+    detail +=
+      cfg.minimumWageExcessFraction != null
+        ? ` or ${(cfg.minimumWageExcessFraction * 100).toFixed(0)}% of the excess over ${cfg.minimumWageWeeklyMultiplier}x $${cfg.stateMinimumHourlyWage.toFixed(2)}/hr min wage (floor ${fmt(floor)})`
+        : ` or disposable over ${cfg.minimumWageWeeklyMultiplier}x $${cfg.stateMinimumHourlyWage.toFixed(2)}/hr min wage (${fmt(floor)})`;
   }
 
   if (cfg.perDependentWeeklyReduction != null && dependents > 0) {

@@ -281,7 +281,12 @@ visible instead of overwritten silently.
   Reduction" (currently 1.00%, giving 1.7%), and no secondary source has
   surfaced the Q3/Q4 2026 reduction figure yet, so a real mid-year change is
   possible and currently unverifiable (`data/states/NH-2026.json`'s own
-  `newEmployerRateSource`).
+  `newEmployerRateSource`). Re-attempted 2026-09-06, now that Q3 2026 is
+  actually underway: nhes.nh.gov is still a confirmed 403, and this time the
+  Wayback Machine's own CDX index and its closest saved snapshot were tried
+  too — also blocked, and no snapshot from June 2026 onward exists to check
+  regardless. Still unresolved after two genuinely different routes, not one
+  repeated attempt.
 - **Not every state resolves at rooftop precision, and that's expected, not a
   bug.** A live re-run just now (`npm run coverage:geocode`) puts 35/51 on an
   authoritative rooftop point, 12/51 on an OSM-corroborated house-level
@@ -325,8 +330,15 @@ visible instead of overwritten silently.
   finals (CA 1.2%, VI 4.5%) ride along as `priorYear` reference only. What
   is genuinely not automated is populating that map once DOL does publish —
   it still needs a human edit to `data/federal/2026.json`.
-- **Garnishment state overrides are researched and modelled for 22 states**,
-  across 5 distinct formula shapes (`GarnishmentFormula` in `src/registry.ts`):
+- **Garnishment state overrides are researched and modelled for 29 states**
+  (up from 22 — California, New Mexico, South Dakota, Virginia, West
+  Virginia, DC and Nebraska were added in a dedicated pass through the
+  previously-"unconfirmed-federal-default" states, rather than assumed to
+  match federal law), plus Georgia confirmed to have no departure at all
+  (its own statute just re-enacts the federal CCPA rule verbatim — a
+  researched *confirmation of absence*, a stronger claim than the ~20
+  states still simply not yet looked at), across 6 distinct formula shapes
+  (`GarnishmentFormula` in `src/registry.ts`):
   TX, PA, NC, SC bar ordinary consumer garnishment outright; FL exempts a
   "head of family" debtor at any income (until affirmatively waived in
   writing); MO gives a head-of-family debtor a reduced 10% instead of a full
@@ -356,15 +368,36 @@ visible instead of overwritten silently.
   Maryland's own previously-disclosed gap (a county-by-county variation) was
   re-researched rather than built around: a 2020 amendment had already
   repealed that variation and made the state's rule uniform, so it needed no
-  new sub-state-geography plumbing at all, just the correction above. Every
-  OTHER state (28 + DC) computes ordinary garnishment against the plain
-  federal CCPA default, which is correct for most of them but is an
-  unconfirmed baseline, not a researched "no state departure exists" — see
-  `data/garnishment/state-overrides-2026.json`'s own `$scopeNote`. Several
-  modelled states also set higher LOCAL minimum
+  new sub-state-geography plumbing at all, just the correction above.
+  **California's own formula (Cal. Civ. Proc. Code § 706.050) needed a
+  genuinely new sixth shape**, `GarnishmentFormula.minimumWageExcessFraction`
+  — every other capFractions state takes 100% of the excess once a
+  minimum-wage floor is crossed, but California only exposes 40% of that
+  excess to garnishment (lesser of 20% of disposable earnings, or 40% of the
+  amount by which disposable earnings exceed 48x its own $16.90 minimum
+  wage) — confirmed directly from the California Courts' own self-help
+  guide for employers, worked example included. New Mexico, South Dakota,
+  Virginia, West Virginia, DC and Nebraska all turned out to fit the
+  existing flat-fraction shape (South Dakota adds ND's own
+  per-dependent-reduction mechanism at a different dollar figure; Nebraska's
+  head-of-family variant is structurally identical to Missouri's, just a
+  different reduced fraction). Adding California's own real override
+  surfaced a real test-suite hazard worth naming: `tests/garnishment.test.ts`
+  had been defaulting its `workState` to `'CA'` specifically *because*
+  California had no override before this pass — every test that omitted
+  `workState` was unknowingly relying on that absence to isolate the plain
+  federal formula, and would have silently started computing California's
+  new real formula instead the moment it shipped; the default was moved to
+  `'AL'` (confirmed to have no departure) before any of this landed. The
+  remaining ~20 states still compute ordinary garnishment against the plain
+  federal CCPA default as an unconfirmed baseline, not a researched "no
+  state departure exists" — see
+  `data/garnishment/state-overrides-2026.json`'s own `$scopeNote` for
+  exactly which. Several modelled states also set higher LOCAL minimum
   wages this file doesn't reach (Denver/Boulder in CO, Minneapolis/St. Paul
-  in MN, NYC/Long Island/Westchester in NY, Portland in ME) — disclosed
-  per-state, not silently assumed away. A federal tax levy is out
+  in MN, NYC/Long Island/Westchester in NY, Portland in ME, and now several
+  New Mexico and California cities/counties too) — disclosed per-state, not
+  silently assumed away. A federal tax levy is out
   of scope entirely: its exempt amount comes from IRS Publication 1494's own
   table (filing status, dependents, standard deduction), not a fixed CCPA
   fraction. Multiple simultaneous support orders are prorated by this
@@ -403,7 +436,12 @@ visible instead of overwritten silently.
   turned into a structural finding worth naming: WV Code 8-13-13 is being
   used by far more than 10 cities, but seemingly mostly for a
   property-billed fee rather than the payroll-withheld one — a newly-found
-  city's ordinance needs its basis checked every time, not assumed.
+  city's ordinance needs its basis checked every time, not assumed. A
+  further pass (2026-09-06) chased the one open lead the prior pass flagged
+  as worth a human phone call (Shinnston) and searched broadly for any 2026
+  council vote on a new fee — found nothing new either way; the conclusion
+  stands that this needs a records request or a city-by-city canvass, not
+  more web search.
 - **Structurally out of scope, not missing:** a few real local levies exist
   that no per-paycheck engine can compute at all — New York's MCTMT and San
   Francisco's Administrative Office Tax are both quarterly taxes on an

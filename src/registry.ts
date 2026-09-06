@@ -711,6 +711,19 @@ export interface GarnishmentFormula {
    */
   minimumWageWeeklyMultiplier?: number;
   stateMinimumHourlyWage?: number;
+  /**
+   * What fraction of the excess over the minimum-wage floor is actually
+   * reachable — every state in this file except California takes the
+   * FULL excess (the federal CCPA's own rule: disposable earnings minus the
+   * floor, no further scaling), so this defaults to 1.0 (100%) when omitted
+   * and every existing entry's behavior is unchanged. California's own
+   * formula (Cal. Civ. Proc. Code § 706.050) is the one exception found so
+   * far: only 40% of the amount by which disposable earnings exceed 48x the
+   * applicable minimum wage is reachable, not the full excess — set to 0.40
+   * there. Only meaningful alongside `capFractions` plus a minimum-wage
+   * floor; ignored otherwise.
+   */
+  minimumWageExcessFraction?: number;
   /** Shape A — the lesser of one or more straight fractions (of gross and/or disposable earnings), e.g. Illinois, Connecticut, New York, Massachusetts, Delaware, Colorado, Washington. */
   capFractions?: GarnishmentCapFraction[];
   /** Shape B — a cliff-bracket schedule keyed on multiples of minimum wage, e.g. Minnesota. */

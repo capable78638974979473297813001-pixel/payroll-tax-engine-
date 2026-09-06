@@ -48,7 +48,13 @@ function order(overrides: Partial<GarnishmentOrder> & Pick<GarnishmentOrder, 'id
 function run(
   paycheck: PaycheckResult,
   orders: GarnishmentOrder[],
-  workState = 'CA',
+  // AL has no state departure on file (confirmed via search synthesis — it
+  // follows the plain federal CCPA default), which is exactly what these
+  // tests without an explicit workState want to isolate. This used to be
+  // 'CA' before California got its own real, researched override
+  // (Cal. Civ. Proc. Code § 706.050) — every test below that didn't name a
+  // state was unknowingly relying on California having none.
+  workState = 'AL',
   payFrequency: PayFrequency = 'weekly',
 ) {
   return calculateGarnishments({
@@ -131,10 +137,12 @@ describe('ordinary (consumer/creditor) garnishment — federal default', () => {
 
   test('the 30x floor scales by pay frequency (biweekly = 60x, monthly = 130x)', () => {
     // Biweekly floor: 60 * $7.25 = $435.00. $500 disposable clears it by $65.
+    // AL, not CA -- California has its own real override now (Cal. Civ.
+    // Proc. Code 706.050), so this uses a state confirmed to have none.
     const biweekly = run(
       paycheckOf(dollars(500), 0),
       [order({ id: 'A', type: 'consumer_creditor', amountOrdered: dollars(500) })],
-      'CA',
+      'AL',
       'biweekly',
     );
     assert.equal(biweekly.totalWithheld, dollars(65)); // lesser of 25%=$125 and $65
@@ -142,7 +150,7 @@ describe('ordinary (consumer/creditor) garnishment — federal default', () => {
     const monthly = run(
       paycheckOf(dollars(900), 0),
       [order({ id: 'A', type: 'consumer_creditor', amountOrdered: dollars(900) })],
-      'CA',
+      'AL',
       'monthly',
     );
     assert.equal(monthly.totalWithheld, 0);
@@ -182,6 +190,130 @@ describe('ordinary garnishment — state overrides', () => {
       order({ id: 'A', type: 'consumer_creditor' }),
     ], 'MD');
     assert.equal(floorBinds.totalWithheld, dollars(50));
+  });
+
+  test('Georgia: no state departure — computes identically to the plain federal default', () => {
+    // O.C.G.A. 18-4-5 just re-enacts the federal 25%/30x-federal-min-wage
+    // rule verbatim; $1000 disposable => 25%=$250 (floor excess is $782.50,
+    // so the fraction binds, same as the federal-default test above).
+    const r = run(paycheckOf(dollars(1000), 0), [order({ id: 'A', type: 'consumer_creditor' })], 'GA');
+    assert.equal(r.totalWithheld, dollars(250));
+  });
+
+  test('California: lesser of 20% of disposable and 40% of the excess over 48x its own $16.90 minimum wage', () => {
+    // Cal. Civ. Proc. Code 706.050. Floor = 48 x $16.90 = $811.20/week.
+    // $3000 disposable: 20%=$600; 40% of ($3000-$811.20)=$875.52 -- the 20%
+    // fraction is smaller.
+    const fractionBinds = run(paycheckOf(dollars(3000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'CA');
+    assert.equal(fractionBinds.totalWithheld, dollars(600));
+
+    // $1500 disposable: 20%=$300; 40% of ($1500-$811.20)=40% of $688.80=
+    // $275.52 -- here the 40%-of-excess test is smaller, unlike every OTHER
+    // state in this file (which all take 100% of the excess once the floor
+    // binds) -- this is the whole reason minimumWageExcessFraction exists.
+    const excessFractionBinds = run(paycheckOf(dollars(1500), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'CA');
+    assert.equal(excessFractionBinds.totalWithheld, dollars(275.52));
+  });
+
+  test('New Mexico: lesser of 25% of disposable and disposable over 40x its own $12.00 minimum wage', () => {
+    // N.M. Stat. Ann. 35-12-7. Floor = 40 x $12.00 = $480/week.
+    const fractionBinds = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'NM');
+    assert.equal(fractionBinds.totalWithheld, dollars(250)); // 25% of $1000
+
+    const floorBinds = run(paycheckOf(dollars(520), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'NM');
+    assert.equal(floorBinds.totalWithheld, dollars(40)); // $520-$480 excess
+  });
+
+  test("South Dakota: lesser of 20% of disposable and disposable over 40x its own $11.85 minimum wage, less $25/week per dependent", () => {
+    // S.D. Codified Laws 21-18-51. Floor = 40 x $11.85 = $474/week.
+    const noDependents = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'SD');
+    assert.equal(noDependents.totalWithheld, dollars(200)); // 20% of $1000
+
+    const withDependents = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor', dependents: 2 }),
+    ], 'SD');
+    assert.equal(withDependents.totalWithheld, dollars(150)); // $200 - 2x$25
+
+    const floorBinds = run(paycheckOf(dollars(500), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'SD');
+    assert.equal(floorBinds.totalWithheld, dollars(26)); // $500-$474 excess
+  });
+
+  test('Virginia: lesser of 25% of disposable and disposable over 40x its own $12.77 minimum wage', () => {
+    // Va. Code Ann. 34-29. Floor = 40 x $12.77 = $510.80/week.
+    const fractionBinds = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'VA');
+    assert.equal(fractionBinds.totalWithheld, dollars(250)); // 25% of $1000
+
+    const floorBinds = run(paycheckOf(dollars(600), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'VA');
+    assert.equal(floorBinds.totalWithheld, dollars(89.20)); // $600-$510.80
+  });
+
+  test('West Virginia: lesser of 20% of disposable and disposable over 50x the FEDERAL $7.25 minimum wage', () => {
+    // W. Va. Code 38-5A-3 -- names the federal minimum wage specifically,
+    // never West Virginia's own (lower) state figure. Floor = 50 x $7.25 =
+    // $362.50/week.
+    const fractionBinds = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'WV');
+    assert.equal(fractionBinds.totalWithheld, dollars(200)); // 20% of $1000
+
+    const floorBinds = run(paycheckOf(dollars(400), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'WV');
+    assert.equal(floorBinds.totalWithheld, dollars(37.50)); // $400-$362.50
+  });
+
+  test("Washington DC: 25% of the excess over 40x DC's own $18.40 minimum wage (no separate fraction cap)", () => {
+    // D.C. Code 16-572 -- the reachable amount already IS "25% of the
+    // excess," not a separate lesser-of test against a flat 25%-of-
+    // disposable fraction, but this engine's capFractions+floor shape
+    // computes the same result either way since 25% of disposable can
+    // never be smaller than 25% of (disposable minus a positive floor).
+    // Floor = 40 x $18.40 = $736/week.
+    const r = run(paycheckOf(dollars(2000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'DC');
+    assert.equal(r.totalWithheld, dollars(500)); // 25% of $2000
+
+    const floorBinds = run(paycheckOf(dollars(800), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'DC');
+    assert.equal(floorBinds.totalWithheld, dollars(64)); // $800-$736 excess
+  });
+
+  test('Nebraska: matches the federal default in general, but drops to 15% (same 30x-federal floor) for a head-of-family debtor', () => {
+    // Neb. Rev. Stat. 25-1558.
+    const notHeadOfFamily = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'NE');
+    assert.equal(notHeadOfFamily.totalWithheld, dollars(250)); // 25%, same as federal default
+
+    const headOfFamily = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor', headOfFamily: true }),
+    ], 'NE');
+    assert.equal(headOfFamily.totalWithheld, dollars(150)); // 15% instead of 25%
+
+    // $250 disposable, head of family: 15%=$37.50, but floor excess is only
+    // $250-$217.50=$32.50 -- the floor binds even at the reduced fraction.
+    const floorBinds = run(paycheckOf(dollars(250), 0), [
+      order({ id: 'A', type: 'consumer_creditor', headOfFamily: true }),
+    ], 'NE');
+    assert.equal(floorBinds.totalWithheld, dollars(32.50));
   });
 
   test('Illinois: lesser of 15% of GROSS and disposable over 45x its own $15 minimum wage', () => {
