@@ -662,12 +662,40 @@ export interface GarnishmentMarginalBracket {
 }
 
 /**
+ * New Jersey's income-tier test (N.J. Stat. 2A:17-56(a)): a judgment
+ * creditor may take at most `belowThresholdFraction` while the debtor's
+ * ANNUALIZED income is at or under `thresholdMultipleOfPoverty` times the
+ * HHS federal poverty guideline for their own household size — a real
+ * number this project didn't track anywhere else, so it is carried here
+ * rather than assumed. Above that threshold the statute itself sets no
+ * fixed number ("the court... may order a larger percentage"), so this
+ * project falls through to the plain federal CCPA default in that case —
+ * disclosed as a modelling choice, not a verbatim NJ figure. Requires the
+ * caller to supply `GarnishmentOrder.householdSize`; absent that fact, this
+ * engine does not guess it and falls through to the same federal default,
+ * exactly the way an unset `headOfFamily` is never assumed true.
+ */
+export interface GarnishmentPovertyGuidelineTier {
+  belowThresholdFraction: number;
+  /** What `belowThresholdFraction` applies to — NJ's own statute text ("wages... earnings... due and owing") reads as gross, not the CCPA's narrower "disposable earnings" term of art. */
+  basis: 'gross' | 'disposable';
+  thresholdMultipleOfPoverty: number;
+  /** HHS poverty guideline for a household of 1 — 48 contiguous states + DC table (NJ is not AK/HI). Re-published every January; re-verify yearly. */
+  povertyGuidelineBase: number;
+  /** Added per household member beyond 1, same HHS table. */
+  povertyGuidelinePerAdditionalPerson: number;
+  /** A separate flat WEEKLY dollar amount exempt from execution regardless of the percentage test — N.J. Stat. 2A:17-50's $48, distinct from the poverty-guideline mechanism above. */
+  flatWeeklyExemption?: number;
+}
+
+/**
  * One state's (or one head-of-family variant's) full garnishment formula.
  * Every field is optional because a formula can be built from any ONE of
- * capFractions/tiers/grossWeeklyTiers/marginalMonthlyBrackets (mutually
- * exclusive in practice — a real state statute uses exactly one shape) plus
- * an optional minimum-wage floor layered on top of capFractions specifically
- * (see minimumWageWeeklyMultiplier's own doc comment).
+ * capFractions/tiers/grossWeeklyTiers/marginalMonthlyBrackets/
+ * povertyGuidelineTier (mutually exclusive in practice — a real state
+ * statute uses exactly one shape) plus an optional minimum-wage floor
+ * layered on top of capFractions specifically (see
+ * minimumWageWeeklyMultiplier's own doc comment).
  */
 export interface GarnishmentFormula {
   /**
@@ -683,6 +711,19 @@ export interface GarnishmentFormula {
    */
   minimumWageWeeklyMultiplier?: number;
   stateMinimumHourlyWage?: number;
+  /**
+   * What fraction of the excess over the minimum-wage floor is actually
+   * reachable — every state in this file except California takes the
+   * FULL excess (the federal CCPA's own rule: disposable earnings minus the
+   * floor, no further scaling), so this defaults to 1.0 (100%) when omitted
+   * and every existing entry's behavior is unchanged. California's own
+   * formula (Cal. Civ. Proc. Code § 706.050) is the one exception found so
+   * far: only 40% of the amount by which disposable earnings exceed 48x the
+   * applicable minimum wage is reachable, not the full excess — set to 0.40
+   * there. Only meaningful alongside `capFractions` plus a minimum-wage
+   * floor; ignored otherwise.
+   */
+  minimumWageExcessFraction?: number;
   /** Shape A — the lesser of one or more straight fractions (of gross and/or disposable earnings), e.g. Illinois, Connecticut, New York, Massachusetts, Delaware, Colorado, Washington. */
   capFractions?: GarnishmentCapFraction[];
   /** Shape B — a cliff-bracket schedule keyed on multiples of minimum wage, e.g. Minnesota. */
@@ -691,6 +732,8 @@ export interface GarnishmentFormula {
   grossWeeklyTiers?: GarnishmentGrossWeeklyTier[];
   /** Shape D — a MARGINAL bracket schedule denominated in monthly dollars, e.g. Hawaii. */
   marginalMonthlyBrackets?: GarnishmentMarginalBracket[];
+  /** Shape E — an income-tier test keyed to the debtor's household size against the HHS federal poverty guideline, e.g. New Jersey. */
+  povertyGuidelineTier?: GarnishmentPovertyGuidelineTier;
   /**
    * A flat per-dependent WEEKLY dollar reduction applied to the computed cap
    * (after the fraction/floor test, before clamping at zero) — North

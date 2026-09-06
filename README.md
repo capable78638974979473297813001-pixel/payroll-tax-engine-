@@ -17,14 +17,14 @@ npm run ui:calculator      # any-state calculator UI, address-based local tax lo
 |---|---|
 | Federal income tax (Pub 15-T Worksheet 1A, 2026) | Complete — all 6 rate schedules |
 | Social Security / Medicare / Additional Medicare | Complete, wage-base and threshold aware |
-| FUTA | Complete at the standard net rate |
+| FUTA | Complete at the standard net rate, plus credit-reduction wired for when DOL publishes its 2026 list (empty as shipped — see Known gaps) |
 | State income tax | **51 / 51 jurisdictions** (50 states + DC), 41 distinct `method` cases — one of them (`no_income_tax`) shared by the 9 states with no wage income tax, the other 40 each a real published formula shape |
-| State unemployment (employer) | 51 / 51 — 44 with a computable new-employer rate, 7 industry-assigned (`employerSuppliedRateRequired`) |
+| State unemployment (employer) | 51 / 51 — 44 with a computable new-employer rate, 7 industry-assigned (`employerSuppliedRateRequired`); Kansas further branches its own new-employer rate by industry (`EmployerContext.suiIndustry`) rather than requiring one |
 | State UC/SDI/PFML/LTC (employee-paid) | 14 states + DC, wherever the state actually levies one |
 | Local income tax | Every state known to levy one, at the depth each state's own public data allows: OH (~600 municipalities + school districts + JEDD/JEDZ), PA (~2,600 Act 32 EIT/LST jurisdictions), MI (24 cities — the full statewide list), KY (227 occupational districts), IN (92/92 counties), AL (25/25 municipalities), MD (24 counties + Baltimore City, wired into the state ruleset), NYC + Yonkers, Kansas City/St. Louis earnings tax, Newark payroll tax, Portland Metro/Multnomah + TriMet/LTD transit excise, Denver-cluster Colorado OPT, Wilmington wage tax, Seattle's JumpStart payroll tax, WV municipal service fees (10 cities — see below, the one state with no central registry to bulk-load from) |
 | Reciprocity / multi-state | Wired generically off each state's own `reciprocalStates` — IL/IN/KY/MI/MN/OH/PA/WI's bilateral agreements, DC's blanket nonresident exemption, WV's 5-state cluster |
-| Garnishments (court-ordered / administrative) | CCPA federal ceilings for ordinary consumer/creditor judgment, child support/alimony (50/55/60/65%), and federal student loan default (34 CFR 34.19) — multiple simultaneous orders share one aggregate ceiling, never stacked. 20 states' own departures researched and modelled across 4 distinct formula shapes: TX/PA/NC/SC bar ordinary garnishment outright; FL exempts a "head of family" debtor at any income; MO gives one a reduced 10% instead; IL/NY/MA/CT/DE/CO/WA/WI/ME/VT cap it by a flat-fraction formula (of gross and/or disposable, plus a minimum-wage floor — VT resolves a real dual-rule statute to the more protective consumer-credit-transaction figure); ND applies that same flat-fraction shape with an added $20/week-per-dependent reduction; MN cliff-brackets by income (10/15/25%, the WHOLE amount reclassified at each threshold); NV cliff-brackets on a fixed gross-weekly dollar line instead; HI uses genuine MARGINAL brackets (5%/10%/20%, only the slice within each band, income-tax-bracket style). NJ and MD's own real departures are identified but not yet modelled (NJ keys to household-size poverty guidelines; MD varies by county) — disclosed rather than silent. Every other state uses the federal default as an unconfirmed baseline, not a researched "no departure exists." Federal tax levies are out of scope (IRS Pub 1494's own table, not a fixed CCPA fraction) — see `src/garnishment.ts` and `data/garnishment/state-overrides-2026.json` |
-| Address → jurisdiction | Rooftop-precision geocoding pipeline (see below) — 35/51 authoritative, 14/51 OSM-corroborated, measured, not assumed |
+| Garnishments (court-ordered / administrative) | CCPA federal ceilings for ordinary consumer/creditor judgment, child support/alimony (50/55/60/65%), and federal student loan default (34 CFR 34.19) — multiple simultaneous orders share one aggregate ceiling, never stacked. 22 states' own departures researched and modelled across 5 distinct formula shapes: TX/PA/NC/SC bar ordinary garnishment outright; FL exempts a "head of family" debtor at any income; MO gives one a reduced 10% instead; IL/NY/MA/CT/DE/CO/WA/WI/ME/VT/MD cap it by a flat-fraction formula (of gross and/or disposable, plus a minimum-wage floor — VT resolves a real dual-rule statute to the more protective consumer-credit-transaction figure, MD's floor uses its own $15.00 state minimum wage in place of the federal one); ND applies that same flat-fraction shape with an added $20/week-per-dependent reduction; MN cliff-brackets by income (10/15/25%, the WHOLE amount reclassified at each threshold); NV cliff-brackets on a fixed gross-weekly dollar line instead; HI uses genuine MARGINAL brackets (5%/10%/20%, only the slice within each band, income-tax-bracket style); NJ ties its 10% cap to the debtor's household size against the HHS federal poverty guideline, reverting to the federal default above 250% of it (the statute leaves that case to court discretion, not a fixed number). Every other state uses the federal default as an unconfirmed baseline, not a researched "no departure exists." Federal tax levies are out of scope (IRS Pub 1494's own table, not a fixed CCPA fraction) — see `src/garnishment.ts` and `data/garnishment/state-overrides-2026.json` |
+| Address → jurisdiction | Five-tier geocoding pipeline that PREFERS rooftop precision and refuses to guess when it can't get there (see below) — a live run lands 35/51 on an authoritative rooftop point, not all 51, plus a gated county-parcel fallback (1 state, so far) for where the free federal registry has nothing at all; measured every run, not assumed, and the split moves day to day |
 | Staying current | Automated daily harvester watching 105 registered sources, human review gate before anything reaches `data/` |
 
 Run `npm run coverage:taxes` for the live, generated version of the table
@@ -111,7 +111,7 @@ correction run in March for a December check uses December's rules.
 
 Local tax selection is a geospatial lookup, not a ZIP lookup — ZIP codes
 cross municipal boundaries, and getting this wrong is a silent, systematic
-error. `geocode/resolve.ts` runs an address through four tiers, each of which
+error. `geocode/resolve.ts` runs an address through five tiers, each of which
 **refuses rather than guesses**:
 
 | Tier | What it means | Source |
@@ -119,16 +119,23 @@ error. `geocode/resolve.ts` runs an address through four tiers, each of which
 | `rooftop` | A point published for this exact address by the government that assigns addresses. | National Address Database (US DOT), ~98M points |
 | `rooftop-osm` | OpenStreetMap holds a house-level point AND it agrees with Census's own position. | Nominatim, corroborated against Census, never trusted alone |
 | `neighbor` | Interpolated between the two nearest *published* points on the same street. Block-level. | National Address Database |
+| `parcel-centroid` | A COUNTY's own tax-parcel polygon matched this address and its area passed a "single building" gate — used in place of `rooftop-osm` only when it lands measurably closer. | An individually-verified county GIS service — see `geocode/parcel.ts` |
 | `interpolated` | Census's own TIGER/Line address-range position, at the curb. | Census geocoder |
 
 Measured, not assumed — `npm run coverage:geocode` resolves one real address
-per jurisdiction through this exact pipeline and reports which tier answered:
-**35/51 land on authoritative rooftop points, 14/51 on OSM-corroborated
-house-level points; only 1/51 falls all the way back to Census's own
-interpolation** (a genuine North Dakota data gap: nothing published at or
-below that address's own house number to bracket from — see
-`docs/geocoding-coverage.md`). Building footprints add a third, independent
-cross-check where OSM has traced the structure.
+per jurisdiction through this exact pipeline and reports which tier answered.
+A run just now: **35/51 land on authoritative rooftop points, 12/51 on
+OSM-corroborated house-level points, 2/51 on a between-published-points
+`neighbor` estimate, 1/51 on a county parcel centroid (Pennsylvania, 68m —
+see Known gaps for the story and the failure mode it took two tries to
+close), and 1/51 falls all the way back to Census's own interpolation**
+(North Dakota this run: nothing published at or below that address's own
+house number to bracket from). These counts are a live measurement, not a
+fixed claim — they move day to day as OSM/NAD coverage changes underneath
+the pipeline, so re-run the command above rather than trusting a number
+written down here; see `docs/geocoding-coverage.md`'s own "these numbers
+still move" section. Building footprints add a third,
+independent cross-check where OSM has traced the structure.
 
 Once a coordinate is resolved, jurisdictions not published by Census — Ohio's
 JEDD/JEDZ districts, Portland's Metro Supportive Housing boundary — are
@@ -245,49 +252,152 @@ visible instead of overwritten silently.
 
 ## Known gaps
 
-- A handful of state UI sites (AZ, AR, DC, KS, NH, TX at last check) block
-  automated access outright; those states' unemployment figures rest on the
-  best cross-source confirmation available rather than a direct primary
-  fetch, and are marked as such in their own `data/states/*.json`.
-- North Dakota's sample address falls back to Census interpolation rather
-  than a rooftop point — a genuine gap in what's been published near that
-  address, not a code limitation (see `docs/geocoding-coverage.md`).
-- FUTA credit-reduction states are published by DOL each November and are
-  not yet wired to auto-update from that publication.
-- **Garnishment state overrides are researched and modelled for 20 states**,
-  across 4 distinct formula shapes (`GarnishmentFormula` in `src/registry.ts`):
+- Four state sites — **KS, MA, NH, NV** — block automated access outright
+  (confirmed HTTP 403 on live re-checks, from this project's own sandbox and
+  independently from GitHub Actions runs); those states' unemployment
+  figures rest on the best cross-source confirmation available rather than a
+  direct primary fetch, and are marked `manualOnly` in
+  `harvester/sources.json` and cross-source-confirmed in their own
+  `data/states/*.json`. This list has turned over since it was last written
+  up here — **AZ and AR are not blocked** (both fetch primary PDFs
+  successfully; AZ's DES rate chart is `primary_source_confirmed` directly
+  off the agency's own PDF) and simply have no dedicated state UI source at
+  all, falling back to the DOL's own wage-base report instead (see
+  `uiCoverage.backstopOnly` in `harvester/sources.json`); **DC and TX are
+  not blocked either** — both have working sources (DC's UI-rates page, and
+  TX via the DOL's own Significant Measures report). Re-verifying these four
+  states' figures another way (Wayback Machine, alternate URLs, varied
+  browser headers — all still blocked) surfaced two new, real findings while
+  looking. **Kansas assigns new CONSTRUCTION-industry employers a 5.55%
+  new-employer SUI rate versus 1.75% for everyone else** (confirmed via the
+  Kansas Legislative Research Department's own published briefing) — this is
+  now wired: `EmployerContext.suiIndustry` (keyed by state code) lets a
+  caller say which industry classification applies, checked against
+  `suiEmployer.industryNewEmployerRates` before falling back to the flat
+  rate, so the many non-construction KS callers aren't forced to supply a
+  rate they already got correctly by default.
+  **New Hampshire's 1.7% new-employer rate is confirmed only for H1 2026** —
+  it's actually NHES's statutory 2.7% less a quarterly "Fund Balance
+  Reduction" (currently 1.00%, giving 1.7%), and no secondary source has
+  surfaced the Q3/Q4 2026 reduction figure yet, so a real mid-year change is
+  possible and currently unverifiable (`data/states/NH-2026.json`'s own
+  `newEmployerRateSource`). Re-attempted 2026-09-06, now that Q3 2026 is
+  actually underway: nhes.nh.gov is still a confirmed 403, and this time the
+  Wayback Machine's own CDX index and its closest saved snapshot were tried
+  too — also blocked, and no snapshot from June 2026 onward exists to check
+  regardless. Still unresolved after two genuinely different routes, not one
+  repeated attempt.
+- **Not every state resolves at rooftop precision, and that's expected, not a
+  bug.** A live re-run just now (`npm run coverage:geocode`) puts 35/51 on an
+  authoritative rooftop point, 12/51 on an OSM-corroborated house-level
+  point (one tier down), 2/51 on a between-published-points estimate (lower
+  still), 1/51 on a county tax-parcel centroid (see below), and 1/51 — North
+  Dakota — all the way back to plain Census interpolation: nothing published
+  at or below that sample address's own house number to bracket from, a
+  real data gap, not a code limitation. These counts have already moved
+  within this same project's history — the "these numbers still move"
+  section of `docs/geocoding-coverage.md` explains why (OSM/NAD coverage
+  changes underneath this pipeline day to day) and should be treated as the
+  live source of truth over any specific count frozen here. Directly
+  querying the National Address Database confirmed 9 states have ZERO
+  points within 300m of their sample address — not a bug in this project's
+  query, a genuine gap in what the free federal registry has. One of those
+  9 (Pennsylvania) now closes a different way: county governments often
+  publish their OWN tax-parcel GIS separately from NAD, and that parcel's
+  centroid can substitute for a rooftop point — Dauphin County, PA's own
+  287 sqm parcel for the Capitol address lands 68m out, beating the 131m
+  `rooftop-osm` fallback. Proven live to be unreliable in TWO distinct ways
+  before it shipped, both now hard-gated in `geocode/parcel.ts`: (1)
+  Mississippi's own Hinds County parcel for the same KIND of address is
+  31,551 sqm — the whole capitol grounds, not one building — and its
+  centroid lands 146m out, *worse* than that state's existing 8m OSM
+  result, so parcel-centroid area-gates at 2,000 sqm and simply contributes
+  nothing where a matching parcel is oversized; (2) the nearest small
+  parcel to Pennsylvania's own target address turned out to be a real,
+  different, nearby building (house number 400, not the target's 501) —
+  caught before shipping, fixed by requiring an actual address-field match
+  (or an honestly-unattributed government parcel) before a parcel is ever
+  used, never mere proximity. No national registry of county parcel
+  services exists — `PARCEL_SOURCES` in `geocode/parcel.ts` is a registry
+  of individually-verified counties (one, so far: Dauphin County, PA), not
+  a formula that covers a state once one county in it is added.
+- FUTA credit-reduction **is wired** (`futa()` in `src/taxes/federal.ts` adds
+  a state's additional rate from `futa.creditReduction.states` whenever that
+  map carries an entry) — DOL just hasn't published the 2026 list yet, since
+  the determination is made after November 10 of the wage year. The map is
+  correctly empty for 2026 as shipped, and the engine says the determination
+  is pending rather than silently assuming the full 5.4% credit; 2025's
+  finals (CA 1.2%, VI 4.5%) ride along as `priorYear` reference only. What
+  is genuinely not automated is populating that map once DOL does publish —
+  it still needs a human edit to `data/federal/2026.json`.
+- **Garnishment state overrides are researched and modelled for 29 states**
+  (up from 22 — California, New Mexico, South Dakota, Virginia, West
+  Virginia, DC and Nebraska were added in a dedicated pass through the
+  previously-"unconfirmed-federal-default" states, rather than assumed to
+  match federal law), plus Georgia confirmed to have no departure at all
+  (its own statute just re-enacts the federal CCPA rule verbatim — a
+  researched *confirmation of absence*, a stronger claim than the ~20
+  states still simply not yet looked at), across 6 distinct formula shapes
+  (`GarnishmentFormula` in `src/registry.ts`):
   TX, PA, NC, SC bar ordinary consumer garnishment outright; FL exempts a
   "head of family" debtor at any income (until affirmatively waived in
   writing); MO gives a head-of-family debtor a reduced 10% instead of a full
-  exemption; IL, NY, MA, CT, DE, CO, WA, WI, ME and VT each cap it by a
+  exemption; IL, NY, MA, CT, DE, CO, WA, WI, ME, VT and MD each cap it by a
   flat-fraction formula (of gross and/or disposable earnings, plus a
   minimum-wage floor — New York's is a dual 10%-of-gross/25%-of-disposable
   test, Vermont's resolves a real dual-rule statute to the more protective of
-  its two rates); ND uses that same flat-fraction shape with a further
-  $20/week-per-dependent reduction layered on top (`GarnishmentOrder.dependents`
-  — the one state in this file keyed to headcount rather than income alone);
-  MN cliff-brackets by income (10/15/25%, indexed to multiples of minimum
-  wage — crossing a threshold reclassifies the WHOLE amount, not a "lesser
-  of" test); NV cliff-brackets too, but on a fixed $770 gross-weekly dollar
-  line instead of a minimum-wage multiple; HI alone uses genuine MARGINAL
-  brackets (5%/10%/20% of monthly-prorated disposable earnings, only the
-  slice within each band — actual income-tax-bracket math, see
-  `GarnishmentMarginalBracket`'s own doc comment). Two more real, confirmed
-  departures are identified but NOT modelled: New Jersey keys its cap to the
-  debtor's income as a fraction of the federal poverty guideline for their
-  household size (this engine tracks no household-size input anywhere);
-  Maryland's cap varies by COUNTY, and workState here is state-level only.
-  Both are disclosed with a `knownGap` in their own entry in
-  `data/garnishment/state-overrides-2026.json` rather than left silent, and
-  both currently compute against the plain federal default in the meantime
-  — very likely wrong for a NJ debtor near the poverty line. Every OTHER
-  state (28 + DC) computes ordinary garnishment against the plain federal
-  CCPA default, which is correct for most of them but is an unconfirmed
-  baseline, not a researched "no state departure exists" — see that file's
-  own `$scopeNote`. Several modelled states also set higher LOCAL minimum
+  its two rates, Maryland's floor uses its own $15.00 state minimum wage
+  rather than the federal one); ND uses that same flat-fraction shape with a
+  further $20/week-per-dependent reduction layered on top
+  (`GarnishmentOrder.dependents` — the one state in this file keyed to
+  headcount rather than income alone); MN cliff-brackets by income (10/15/25%,
+  indexed to multiples of minimum wage — crossing a threshold reclassifies
+  the WHOLE amount, not a "lesser of" test); NV cliff-brackets too, but on a
+  fixed $770 gross-weekly dollar line instead of a minimum-wage multiple; HI
+  alone uses genuine MARGINAL brackets (5%/10%/20% of monthly-prorated
+  disposable earnings, only the slice within each band — actual
+  income-tax-bracket math, see `GarnishmentMarginalBracket`'s own doc
+  comment); NJ uses a fifth shape, `GarnishmentFormula.povertyGuidelineTier`
+  — 10% of gross while the debtor's annualized income sits at or under 250%
+  of the HHS federal poverty guideline for their household size
+  (`GarnishmentOrder.householdSize`, never guessed when absent — the same
+  discipline as an unset `headOfFamily`), reverting to the plain federal
+  default above that threshold because N.J. Stat. 2A:17-56 itself leaves
+  that case to court discretion rather than naming a fixed percentage, plus
+  a separate flat $48/week exemption (N.J. Stat. 2A:17-50) layered on top.
+  Maryland's own previously-disclosed gap (a county-by-county variation) was
+  re-researched rather than built around: a 2020 amendment had already
+  repealed that variation and made the state's rule uniform, so it needed no
+  new sub-state-geography plumbing at all, just the correction above.
+  **California's own formula (Cal. Civ. Proc. Code § 706.050) needed a
+  genuinely new sixth shape**, `GarnishmentFormula.minimumWageExcessFraction`
+  — every other capFractions state takes 100% of the excess once a
+  minimum-wage floor is crossed, but California only exposes 40% of that
+  excess to garnishment (lesser of 20% of disposable earnings, or 40% of the
+  amount by which disposable earnings exceed 48x its own $16.90 minimum
+  wage) — confirmed directly from the California Courts' own self-help
+  guide for employers, worked example included. New Mexico, South Dakota,
+  Virginia, West Virginia, DC and Nebraska all turned out to fit the
+  existing flat-fraction shape (South Dakota adds ND's own
+  per-dependent-reduction mechanism at a different dollar figure; Nebraska's
+  head-of-family variant is structurally identical to Missouri's, just a
+  different reduced fraction). Adding California's own real override
+  surfaced a real test-suite hazard worth naming: `tests/garnishment.test.ts`
+  had been defaulting its `workState` to `'CA'` specifically *because*
+  California had no override before this pass — every test that omitted
+  `workState` was unknowingly relying on that absence to isolate the plain
+  federal formula, and would have silently started computing California's
+  new real formula instead the moment it shipped; the default was moved to
+  `'AL'` (confirmed to have no departure) before any of this landed. The
+  remaining ~20 states still compute ordinary garnishment against the plain
+  federal CCPA default as an unconfirmed baseline, not a researched "no
+  state departure exists" — see
+  `data/garnishment/state-overrides-2026.json`'s own `$scopeNote` for
+  exactly which. Several modelled states also set higher LOCAL minimum
   wages this file doesn't reach (Denver/Boulder in CO, Minneapolis/St. Paul
-  in MN, NYC/Long Island/Westchester in NY, Portland in ME) — disclosed
-  per-state, not silently assumed away. A federal tax levy is out
+  in MN, NYC/Long Island/Westchester in NY, Portland in ME, and now several
+  New Mexico and California cities/counties too) — disclosed per-state, not
+  silently assumed away. A federal tax levy is out
   of scope entirely: its exempt amount comes from IRS Publication 1494's own
   table (filing status, dependents, standard deduction), not a fixed CCPA
   fraction. Multiple simultaneous support orders are prorated by this
@@ -305,7 +415,33 @@ visible instead of overwritten silently.
   researched. A WV city missing from `serviceFeeCities` in
   `data/states/WV-2026.json` means "not yet looked up," never "confirmed no
   fee" — closing this one requires reading roughly 220 more municipal codes
-  one at a time, not finding one more source.
+  one at a time, not finding one more source. A fresh research pass
+  (2026-09-05) retried the previously-blocked leads (still blocked) and
+  surfaced a genuinely new, DISTINCT mechanism worth naming even though no
+  city was added: WV Code § 7-20-12 lets any COUNTY (not municipality)
+  impose its own countywide service fee via the same payroll-withholding
+  shape, but only after a voter referendum most counties don't appear to
+  have run — no confirmed instance was found anywhere in the state, so
+  nothing was added, but a future pass should check county-commission
+  records rather than assume this is purely a municipal-level tax. That
+  same pass also caught a real error in an existing city — Charleston's
+  rate was 2.50 with no citation behind it at all; the city's own official
+  fee-overview PDF puts it at 3.00/week, corroborated independently by its
+  own ordinance text and a federal payroll bulletin, both dating the same
+  2018 increase — and ran down four newly-found "Municipal Service Fee"
+  ordinances (Nitro, Weston, Dunbar, Mannington) that all turned out to be
+  the WRONG shape once actually read: a flat charge billed to property
+  owners or per building unit, not the per-employee payroll withholding
+  this engine models, the same class of exclusion as Chester's fee. That
+  turned into a structural finding worth naming: WV Code 8-13-13 is being
+  used by far more than 10 cities, but seemingly mostly for a
+  property-billed fee rather than the payroll-withheld one — a newly-found
+  city's ordinance needs its basis checked every time, not assumed. A
+  further pass (2026-09-06) chased the one open lead the prior pass flagged
+  as worth a human phone call (Shinnston) and searched broadly for any 2026
+  council vote on a new fee — found nothing new either way; the conclusion
+  stands that this needs a records request or a city-by-city canvass, not
+  more web search.
 - **Structurally out of scope, not missing:** a few real local levies exist
   that no per-paycheck engine can compute at all — New York's MCTMT and San
   Francisco's Administrative Office Tax are both quarterly taxes on an

@@ -1375,6 +1375,14 @@ interface SUIEmployerConfig {
   newEmployerRate: number | null;
   experienceRange: { min: number; max: number } | null;
   employerSuppliedRateRequired?: boolean;
+  /**
+   * Overrides newEmployerRate for a specific industry, keyed by the same
+   * string EmployerContext.suiIndustry uses — Kansas's 5.55% construction
+   * rate vs. 1.75% for everyone else (see that field's own doc comment).
+   * Checked before newEmployerRate, never before an explicit
+   * input.employer.stateUnemploymentRate supplied for this state.
+   */
+  industryNewEmployerRates?: Record<string, number>;
 }
 
 /**
@@ -1416,7 +1424,9 @@ function stateUnemploymentEmployerTax(
   if (!cfg) return null;
 
   const supplied = input.employer?.stateUnemploymentRate?.[rules.code];
-  const rate = supplied ?? cfg.newEmployerRate;
+  const industry = input.employer?.suiIndustry?.[rules.code];
+  const industryRate = industry === undefined ? undefined : cfg.industryNewEmployerRates?.[industry];
+  const rate = supplied ?? industryRate ?? cfg.newEmployerRate;
   if (rate === null || rate === undefined) return null;
 
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
@@ -1427,9 +1437,11 @@ function stateUnemploymentEmployerTax(
   const amount = applyRate(taxableWages, rate);
 
   const rateSource =
-    supplied === undefined
-      ? "the state's published new-employer rate (no employer rate supplied — see input.employer.stateUnemploymentRate)"
-      : "this employer's own assigned rate";
+    supplied !== undefined
+      ? "this employer's own assigned rate"
+      : industryRate !== undefined
+        ? `the state's published new-employer rate for its "${industry}" industry classification (see input.employer.suiIndustry)`
+        : "the state's published new-employer rate (no employer rate supplied — see input.employer.stateUnemploymentRate)";
 
   return {
     id: `${rules.code}_SUI_ER`,

@@ -28,6 +28,7 @@ produced the coordinate its jurisdictions were resolved at.
 | `rooftop` | A point published for this exact address by the government that assigns addresses — usually for E911 dispatch. | [National Address Database](https://www.transportation.gov/gis/national-address-database) (US DOT), ~98M points |
 | `neighbor` | This exact number isn't published, so the point is interpolated between the two nearest published points on the same street. Block-level, but still built from two real surveyed government points. | National Address Database |
 | `rooftop-osm` | OpenStreetMap holds a house-level point for this address **and** it agrees with Census's own position. Crowd-sourced, corroborated. | Nominatim structured lookup |
+| `parcel-centroid` | A COUNTY government's own tax-parcel polygon matched this address and its area passed a "single building, not a whole campus" gate. Only ever used in place of `rooftop-osm`, and only when it lands measurably closer to Census's own point — see "A fifth tier" below. | An individually-verified county GIS service — no national registry exists |
 | `interpolated` | Census's own position along a TIGER/Line address range, at the curb. What this project had before any of the above. | Census geocoder |
 
 The tiers are tried in that order, and each one refuses rather than
@@ -49,9 +50,51 @@ interpolation**, correcting it by 5m to 269m (median 90m).
 | Tier | Count |
 | --- | --- |
 | `rooftop` (authoritative) | 35 / 51 |
-| `rooftop-osm` (house-level, corroborated) | 13 / 51 |
+| `rooftop-osm` (house-level, corroborated) | 12 / 51 |
 | `neighbor` (block-level, authoritative) | 2 / 51 |
+| `parcel-centroid` (county GIS, gated) | 1 / 51 |
 | `interpolated` (no improvement available) | 1 / 51 |
+
+### A fifth tier: county tax-parcel centroids, and why it took two tries to get right
+
+Chasing why 9 states have ZERO National Address Database points within
+300m of their sample address (verified live by querying NAD directly, not
+assumed): many COUNTY governments separately publish their own tax-parcel
+GIS layer, carrying a site address and a polygon. That polygon's centroid
+can stand in for a rooftop point — but proven BOTH WAYS in the same
+session: Pennsylvania's Capitol address has no NAD point, but Dauphin
+County's own parcel GIS carries a 287 sqm parcel (a single state office
+building, unattributed in the county's own address fields — the pattern a
+government building with no ordinary postal address shows) whose centroid
+lands 68m from the true address, IMPROVING on the 131m `rooftop-osm`
+fallback already in place. Mississippi's Capitol address also has no NAD
+point, and Hinds County's own parcel GIS carries a parcel for the same
+kind of complex — but it is 31,551 sqm, the entire capitol grounds, and
+its centroid lands 146m away, WORSE than the 8m `rooftop-osm` fallback
+already in place there. Same technique, opposite verdict, because a tax
+parcel is a legal property boundary, not a surveyed structure point — its
+centroid only approximates "where is the building" when the parcel holds
+one building, not a whole campus.
+
+The FIRST implementation of the size gate above still produced a wrong
+answer for a normal (non-government) address: given several small parcels
+near an interpolated point, picking "whichever is closest" chose a real,
+correctly-surveyed, but WRONG parcel — one attributed to house number 400,
+a different building, when the target was 501. Distance to a point says
+nothing about whether a parcel IS that address; only the parcel's own
+address fields do. Fixed by classifying every candidate against the
+target address FIRST (`geocode/parcel.ts`'s `classifyParcelAddress`) —
+an EXACT match on house number and street (with the same directional-
+and, newly, street-type-suffix fallback `rooftop.ts` already uses for
+NAD) is preferred outright; an UNATTRIBUTED parcel (no house number at
+all, the government-building pattern above) is used only when no exact
+match exists; a parcel with a real, DIFFERENT address is never used, at
+any distance, at any size. `resolveRooftop()` then only lets a
+`parcel-centroid` result replace an existing `rooftop-osm` one when it is
+the numerically closer of the two to Census's own point — never merely
+by existing, so a state with no registered parcel source (every state but
+Pennsylvania, as of this pass — there is no national registry of these,
+only individually-verified counties) behaves exactly as before.
 
 ### A second real bug: "Capital" vs "Capitol"
 
@@ -165,7 +208,7 @@ Census's own answer, which is where this project started.
 | OH | `rooftop` | 82m | State of Ohio |
 | OK | `rooftop-osm` | 167m | — |
 | OR | `rooftop` | 67m | Oregon Department of Administrative Services |
-| PA | `rooftop-osm` | 131m | — |
+| PA | `parcel-centroid` | 68m | Dauphin County, PA |
 | RI | `rooftop` | 269m | State of Rhode Island |
 | SC | `rooftop-osm` | 107m | — |
 | SD | `rooftop-osm` | 104m | — |

@@ -1,6 +1,6 @@
 {
   "year": 2026,
-  "$scopeNote": "Only ORDINARY (consumer/creditor judgment) wage garnishment is state-overridable here. Federal law — support orders, federal tax levies, federal student loan default — preempts a state's own wage-exemption statute entirely, so nothing in this file ever changes those two calculations in src/garnishment.ts; only 'consumer_creditor' orders consult it. A state absent from this file entirely has no known departure from the plain federal CCPA default and is computed with it as-is — a narrower claim than 'every state's garnishment law has been fully researched.' A state PRESENT in this file with only a `knownGap` note (no `ordinaryGarnishmentProhibited`/`ordinaryGarnishment`/`headOfFamilyOrdinaryGarnishment`/`fullExemption` block) means a real departure IS known to exist but isn't modelled yet — also computed against the federal default in the meantime, but disclosed rather than silent. 20 states now carry a modelled override; 2 more (NJ, MD) are flagged known-but-unmodelled; the remaining 28 + DC are the unconfirmed-federal-default baseline described above.",
+  "$scopeNote": "Only ORDINARY (consumer/creditor judgment) wage garnishment is state-overridable here. Federal law — support orders, federal tax levies, federal student loan default — preempts a state's own wage-exemption statute entirely, so nothing in this file ever changes those two calculations in src/garnishment.ts; only 'consumer_creditor' orders consult it. A state absent from this file entirely has no known departure from the plain federal CCPA default and is computed with it as-is — a narrower claim than 'every state's garnishment law has been fully researched.' A state PRESENT in this file with only a `knownGap` note (no `ordinaryGarnishmentProhibited`/`ordinaryGarnishment`/`headOfFamilyOrdinaryGarnishment`/`fullExemption` block) means a real departure IS known to exist but isn't modelled yet — also computed against the federal default in the meantime, but disclosed rather than silent. A state present with sources but NO formula/prohibition block at all (currently just Georgia) means the OPPOSITE: it was actively researched and confirmed to have no departure, a stronger claim than simple absence from this file. 29 states now carry a modelled override (NJ and MD wired 2026-09-05 — see their own $note entries; California, New Mexico, South Dakota, Virginia, West Virginia, DC and Nebraska wired 2026-09-06, found via a dedicated pass through every state this file hadn't yet researched rather than assumed to match the federal default); Georgia is confirmed-no-departure; the remaining ~20 states are still the unconfirmed-federal-default baseline described above.",
   "states": {
     "TX": {
       "ordinaryGarnishmentProhibited": true,
@@ -363,24 +363,217 @@
     "NJ": {
       "sources": [
         {
-          "title": "N.J. Stat. Ann. § 2A:17-56 — wage execution limited to 10% of income when the debtor earns at or below 250% of the federal poverty level for their household size; up to 25% of gross above that threshold (higher still for debts owed to the State)",
+          "title": "N.J. Stat. Ann. § 2A:17-56(a) — wage execution limited to 10% of wages/earnings/income due and owing when the debtor's income is at or below 250% of the federal poverty level for their household size; above that threshold the statute sets no fixed number and leaves it to the issuing court's own discretion (bounded by the federal CCPA ceiling)",
           "url": "https://law.justia.com/codes/new-jersey/title-2a/section-2a-17-56/",
           "verifiedOn": "2026-09-03",
           "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own income-tier mechanism, not an independently rendered direct fetch this pass."
+        },
+        {
+          "title": "Nolo, \"New Jersey Wage Garnishment Laws\" (attorney-authored, dated modified 2026-04-09) — confirms the 10%/250%-FPL mechanism, that the statute leaves the above-threshold case to court discretion bounded by the federal 25%/disposable-earnings ceiling (not a fixed NJ percentage for an ordinary judgment creditor — the 25% figure in the statute is for debts owed TO THE STATE specifically, a different creditor this engine doesn't model), and a SEPARATE flat $48/week exemption under N.J. Stat. 2A:17-50",
+          "url": "https://www.nolo.com/legal-encyclopedia/new-jersey-wage-garnishment-laws.html",
+          "verifiedOn": "2026-09-05",
+          "verifiedBy": "Directly fetched and read (attorney byline, citing 15 U.S.C. 1673, N.J. Stat. 2A:17-50/2A:17-56/2A:17-56.9, and the govinfo/IRS/DOL primary sources it draws from)."
+        },
+        {
+          "title": "HHS/ASPE 2026 Poverty Guidelines for the 48 Contiguous States and DC — household of 1: $15,960; +$5,680 per additional person",
+          "url": "https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines",
+          "verifiedOn": "2026-09-05",
+          "verifiedBy": "Directly fetched from HHS/ASPE's own published 2026 table (48-contiguous-states-and-DC figures; NJ is not AK/HI so those separate tables don't apply here)."
         }
       ],
-      "knownGap": "New Jersey's own cap is keyed to the debtor's income AS A FRACTION OF THE FEDERAL POVERTY GUIDELINE FOR THEIR HOUSEHOLD SIZE — a real, confirmed departure from every other state in this file, but one this engine cannot compute today: nothing in PaycheckInput or GarnishmentOrder carries household size, and HHS's poverty guideline table itself is a separate, annually-published figure this project doesn't otherwise track anywhere. Not modelled; New Jersey computes against the plain federal default in the meantime, which is very likely WRONG for a debtor near or below the 250%-of-poverty line (federal 25% where NJ law would actually cap at 10%)."
+      "ordinaryGarnishment": {
+        "povertyGuidelineTier": {
+          "belowThresholdFraction": 0.1,
+          "basis": "gross",
+          "thresholdMultipleOfPoverty": 2.5,
+          "povertyGuidelineBase": 15960,
+          "povertyGuidelinePerAdditionalPerson": 5680,
+          "flatWeeklyExemption": 48
+        }
+      },
+      "$note": "WIRED 2026-09-05, closing the household-size gap this entry previously disclosed: GarnishmentFormula gained a new povertyGuidelineTier shape (src/registry.ts, src/garnishment.ts) and GarnishmentOrder gained householdSize, the same discipline as ND's dependents or FL's headOfFamily — a caller-asserted fact this engine never guesses. Two modelling choices, both disclosed rather than silent: (1) basis is GROSS, not the CCPA's 'disposable earnings' term of art — the statute's own words ('wages, debts, earnings, salary, income from trust funds or profits due and owing') read as gross, unlike the federal 25% rule which explicitly says disposable; (2) above the 250%-of-poverty threshold, this engine falls through to the plain federal default rather than inventing a fixed NJ number, because the statute itself gives the court discretion there ('may order a larger percentage') rather than naming one — the 25% figure that secondary sources often quote alongside this rule is specifically for debts owed TO THE STATE (a different creditor this engine's GarnishmentOrderType doesn't model at all, not the ordinary consumer_creditor case). The poverty-guideline base/increment are HHS's 2026 48-states-and-DC table and must be re-verified every January when HHS republishes it — see this override's own sources. Absent GarnishmentOrder.householdSize, this falls through to the federal default with an explanatory line rather than assuming a household size, same as an unset headOfFamily. The $48/week flat exemption (2A:17-50) is a separate, additional floor layered on top of the percentage test, not a replacement for it."
     },
     "MD": {
       "sources": [
         {
-          "title": "Md. Code, Com. Law § 15-601.1 — the statewide default tracks the federal formula, but several Maryland COUNTIES (and Caroline County by a separate provision) set their own lower percentage caps for ordinary garnishment by local law",
-          "url": "https://www.alperlaw.com/asset-protection/garnishment-laws-by-state/",
-          "verifiedOn": "2026-09-03",
-          "verifiedBy": "Cross-source confirmed via search synthesis describing the county-level variation, not an independently rendered direct fetch of the statute or any specific county's own ordinance this pass — no attempt was made to enumerate which counties diverge or by how much."
+          "title": "Md. Code, Com. Law § 15-601.1 (as amended 2020) — a 2020 amendment REPEALED the old county-by-county variation (the separate lower floor that used to apply in Caroline, Kent, Queen Anne's and Worcester counties) and replaced it with a single statewide rule: the greater of 75% of disposable wages or 30 times MARYLAND's own state minimum hourly wage is exempt from garnishment; the reachable amount is the lesser of 25% of disposable wages or the excess over that floor",
+          "url": "https://plainstatute.com/wage-garnishment/maryland",
+          "verifiedOn": "2026-09-05",
+          "verifiedBy": "Cross-source confirmed: this source states it was checked word-for-word against the official statute at mgaleg.maryland.gov (dated 2026-07-17) and explicitly answers 'Does Maryland garnishment differ by county? No.' A second, independent secondary source (md.elaws.us, via search synthesis) agrees on the same 2020-amendment/uniform-statewide conclusion and the same 75%/30x-minimum-wage formula. Not an independently rendered direct fetch of mgaleg.maryland.gov's own statute page this pass — that page serves a JS-rendered shell to a non-browser request, the same block already documented elsewhere in this project (e.g. Municode)."
+        },
+        {
+          "title": "Maryland state minimum hourly wage — $15.00, reached for all employers 2024-01-01 and unchanged for 2026 (no scheduled increase on file)",
+          "url": "https://onpay.com/insights/minimum-wage-by-state-summary/maryland/",
+          "verifiedOn": "2026-09-05",
+          "verifiedBy": "Cross-source confirmed across multiple payroll-industry minimum-wage guides, all agreeing on $15.00/hr statewide for 2026 with no further scheduled increase."
         }
       ],
-      "knownGap": "Maryland's garnishment cap varies by COUNTY, not just by state — this engine's workState is state-level only and carries no county, so a genuine local departure can't be looked up even in principle without first threading county-level geography into GarnishmentInput the way geocode/ already does for local income tax. Not modelled; Maryland computes against the plain federal default in the meantime. Same structural shape as this project's other sub-state-geography gaps (Ohio JEDD/JEDZ, Pennsylvania Act 32) — the difference is those are already wired end-to-end and this one isn't yet."
+      "ordinaryGarnishment": {
+        "capFractions": [{ "basis": "disposable", "fraction": 0.25 }],
+        "minimumWageWeeklyMultiplier": 30,
+        "stateMinimumHourlyWage": 15.0
+      },
+      "$note": "WIRED 2026-09-05, closing this entry's own previously-disclosed county-geography gap -- but not the way that gap assumed it would close. Re-researching Maryland's statute for this pass surfaced that the county variation this file's own PRIOR note described is itself STALE: a 2020 amendment to Md. Code, Com. Law 15-601.1 repealed the old Caroline/Kent/Queen Anne's/Worcester carve-out and made the exemption uniform statewide, so there is no more sub-state geography to thread into GarnishmentInput after all -- the correct fix was updating the RESEARCH, not building county plumbing. The resulting statewide rule turns out to be EXACTLY this project's existing Shape A (capFractions + a minimum-wage floor, the same mechanism IL/NY/MA/CT/DE/CO/WA already use) with one substitution: Maryland's own $15.00/hr state minimum wage stands in for the federal $7.25 in the 30x floor test, since 15-601.1 says '30 times the State minimum hourly wage,' not the federal one -- the 25% fraction itself is identical to the federal CCPA default. No new GarnishmentFormula shape or code was needed. Re-verify stateMinimumHourlyWage if Maryland's minimum wage changes."
+    },
+    "GA": {
+      "sources": [
+        {
+          "title": "O.C.G.A. § 18-4-5 — Georgia's ordinary garnishment cap is the lesser of 25% of disposable earnings or the amount by which weekly disposable earnings exceed 30 times the federal minimum hourly wage — the plain federal CCPA formula verbatim, not a state departure",
+          "url": "https://www.kaidenlaw.com/post/how-much-can-be-garnished-from-wages-georgia",
+          "verifiedOn": "2026-09-06",
+          "verifiedBy": "Cross-source confirmed via search synthesis (multiple independent consumer-law and debt-collection guides) all quoting the same 25%/30x-federal figures with no additional state-specific fraction or floor; not an independently rendered direct fetch of the statute text this pass."
+        }
+      ],
+      "$note": "RESEARCHED 2026-09-06, first state in this file to be actively confirmed rather than left as an unconfirmed absence: Georgia's own statute simply re-enacts the federal CCPA default (25%/30x federal minimum wage) with no departure at all, unlike most states in this file which exist here specifically because they DO depart. No `ordinaryGarnishment` block is set — there is nothing to override — so this entry changes no computed result; it exists purely to convert Georgia from 'not yet looked at' to 'looked at, confirmed to match federal law.'"
+    },
+    "CA": {
+      "sources": [
+        {
+          "title": "Cal. Civ. Proc. Code § 706.050 — ordinary garnishment limited to the lesser of 20% of disposable earnings, or 40% of the amount by which disposable earnings exceed 48 times the state (or, if higher, local) minimum hourly wage",
+          "url": "https://selfhelp.courts.ca.gov/guide-earnings-withholding-orders-employers",
+          "verifiedOn": "2026-09-06",
+          "verifiedBy": "Directly fetched from the California Courts' own self-help guide for employers, which quotes both figures verbatim and walks through a full worked example ($17/hr min wage x 48 = $816 floor; $900 disposable: 40% of ($900-$816)=$33.60 vs 20% of $900=$180 — the lesser, $33.60, is withheld). Cross-corroborated by the statute text itself (via Justia, 403-blocked from a direct fetch this pass but readable through search synthesis) and multiple independent consumer-law summaries, all agreeing on 20%/40%/48x with no dissent."
+        },
+        {
+          "title": "California Department of Industrial Relations — state minimum wage $16.90/hr effective 2026-01-01",
+          "url": "https://www.dir.ca.gov/dlse/minimum_wage.htm",
+          "verifiedOn": "2026-09-06",
+          "verifiedBy": "Directly fetched from DIR's own page, which states the figure and effective date verbatim."
+        }
+      ],
+      "ordinaryGarnishment": {
+        "capFractions": [{ "basis": "disposable", "fraction": 0.20 }],
+        "minimumWageWeeklyMultiplier": 48,
+        "stateMinimumHourlyWage": 16.90,
+        "minimumWageExcessFraction": 0.40
+      },
+      "$note": "WIRED 2026-09-06 — the first state in this file whose floor test reaches only a FRACTION of the excess over the minimum-wage line rather than the full excess (see GarnishmentFormula.minimumWageExcessFraction's own doc comment, added specifically for this entry). Every other state here (IL/NY/MA/CT/CO/WA/WI/ME/VT/ND/MD/NM/SD/VA/WV/DC below) takes 100% of the excess once the floor is crossed; California takes only 40% of it, which is why 40%/48x is NOT simply 'more protective NY-style 25%/30x' — it changes the SHAPE of the marginal test, not just the numbers. Also disclosed, not modelled: the statute's own text directs using a higher LOCAL minimum wage where one applies (many CA cities and counties set their own, e.g. San Francisco, Emeryville) instead of the $16.90 statewide figure used here — same class of geographic simplification already disclosed for CO/MN/NY/ME's own local-minimum-wage gaps, and for the same reason (workState is a bare 2-letter code with no city/county granularity). This entry is also why tests/garnishment.test.ts's own run() helper had to stop defaulting workState to 'CA': every test written before this pass that omitted workState was unknowingly relying on California having NO override, and would have silently started computing California's real formula instead of the plain federal baseline those tests actually intend to exercise. Switched the default to 'AL' — multiple sources checked while researching this batch listed Alabama among the states with no known departure, the same conclusion Georgia's own entry above confirms more deliberately, though Alabama itself was not independently re-searched to that same standard this pass."
+    },
+    "NM": {
+      "sources": [
+        {
+          "title": "N.M. Stat. Ann. § 35-12-7 (as amended 2023, effective 2023-07-01) — exempt from garnishment is the GREATER of 75% of disposable earnings or 40 times the highest applicable (federal, state, or local) minimum hourly wage; i.e. reachable is the LESSER of 25% of disposable earnings or the excess over that 40x floor",
+          "url": "https://law.justia.com/codes/new-mexico/chapter-35/article-12/section-35-12-7/",
+          "verifiedOn": "2026-09-06",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own 75%/40x-highest-applicable-minimum-wage mechanism and its 2023 amendment (which changed the floor from 40x the FEDERAL wage specifically to 40x whichever of federal/state/local is highest), not an independently rendered direct fetch this pass."
+        },
+        {
+          "title": "New Mexico minimum wage — $12.00/hr statewide, unchanged since 2023-01-01",
+          "url": "https://onpay.com/insights/minimum-wage-by-state-summary/new-mexico/",
+          "verifiedOn": "2026-09-06",
+          "verifiedBy": "Cross-source confirmed across multiple payroll-industry guides agreeing on $12.00/hr with no further scheduled statutory increase."
+        }
+      ],
+      "ordinaryGarnishment": {
+        "capFractions": [{ "basis": "disposable", "fraction": 0.25 }],
+        "minimumWageWeeklyMultiplier": 40,
+        "stateMinimumHourlyWage": 12.00
+      },
+      "$note": "WIRED 2026-09-06. New Mexico's own 2023 amendment changed the floor from '40x the federal minimum wage' to '40x the HIGHEST applicable federal/state/OR LOCAL minimum wage' — this entry uses the $12.00 statewide figure only; several New Mexico cities (Las Cruces $13.01/hr, Santa Fe's own higher living-wage ordinance) set higher LOCAL minimum wages not modelled here, the same disclosed simplification as this file's other local-minimum-wage gaps (CO/MN/NY/ME/CA above). New Mexico's own state minimum wage ($12.00) already exceeds the federal $7.25, so it is the binding figure regardless."
+    },
+    "SD": {
+      "sources": [
+        {
+          "title": "S.D. Codified Laws § 21-18-51 — ordinary garnishment limited to the lesser of 20% of disposable earnings, or the amount by which disposable earnings exceed 40 times the greater of the federal or South Dakota minimum hourly wage, further reduced by $25/week for each dependent family member residing with the employee",
+          "url": "https://law.justia.com/codes/south-dakota/title-21/chapter-18/section-21-18-51/",
+          "verifiedOn": "2026-09-06",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own 20%/40x-greater-of mechanism and the $25-per-dependent reduction specifically, not an independently rendered direct fetch this pass."
+        },
+        {
+          "title": "South Dakota Department of Labor and Regulation — 2026 minimum wage poster, $11.85/hr",
+          "url": "https://dlr.sd.gov/employment_laws/publications/min-wage-poster-2026-english.pdf",
+          "verifiedOn": "2026-09-06",
+          "verifiedBy": "Cross-source confirmed via search synthesis of the department's own published 2026 poster figure; not independently re-fetched as a PDF this pass."
+        }
+      ],
+      "ordinaryGarnishment": {
+        "capFractions": [{ "basis": "disposable", "fraction": 0.20 }],
+        "minimumWageWeeklyMultiplier": 40,
+        "stateMinimumHourlyWage": 11.85,
+        "perDependentWeeklyReduction": 25.00
+      },
+      "$note": "WIRED 2026-09-06. South Dakota's own $11.85/hr exceeds the federal $7.25, so 'greater of' always resolves to South Dakota's rate here. The second state in this file (after North Dakota) whose formula depends on a per-employee dependent count via GarnishmentFormula.perDependentWeeklyReduction — same mechanism, different dollar figure ($25/week here vs. ND's $20/week) and a different base fraction/multiplier (20%/40x here vs. ND's 25%/40x-FEDERAL-specifically)."
+    },
+    "VA": {
+      "sources": [
+        {
+          "title": "Va. Code Ann. § 34-29 — ordinary garnishment limited to the lesser of 25% of disposable earnings, or the amount by which disposable earnings exceed 40 times the greater of the federal or Virginia minimum hourly wage; nothing withheld if weekly disposable earnings are at or below that 40x floor",
+          "url": "https://law.lis.virginia.gov/vacode/title34/chapter4/section34-29/",
+          "verifiedOn": "2026-09-06",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the Virginia Legislative Information System's own statute text (law.lis.virginia.gov) directly, including the 25%/40x-greater-of mechanism and the full-exemption-at-or-below-the-floor rule; not an independently rendered direct fetch this pass."
+        },
+        {
+          "title": "Virginia Department of Labor and Industry — 2026 minimum wage $12.77/hr effective 2026-01-01",
+          "url": "https://doli.virginia.gov/2025/07/29/virginia-minimum-wage-rate-increasing-effective-january-1-2026/",
+          "verifiedOn": "2026-09-06",
+          "verifiedBy": "Cross-source confirmed via search synthesis of DOLI's own announced figure and effective date; not independently re-fetched from doli.virginia.gov this pass."
+        }
+      ],
+      "ordinaryGarnishment": {
+        "capFractions": [{ "basis": "disposable", "fraction": 0.25 }],
+        "minimumWageWeeklyMultiplier": 40,
+        "stateMinimumHourlyWage": 12.77
+      },
+      "$note": "WIRED 2026-09-06. Virginia's own $12.77/hr exceeds the federal $7.25, so 'greater of' always resolves to Virginia's rate here. Virginia's minimum wage is itself scheduled for a further, larger legislated increase (Gov. Spanberger signed bills raising it further in 2026) — re-verify this figure every year this file rolls forward rather than assuming $12.77 persists. Notably, this is the state whose WV-adjacent reciprocity cluster (data/states/WV-2026.json) already made this project cross-check Virginia's own tax rules once VA gets built — this entry closes the garnishment side of that same neighborhood ahead of a full VA state-tax pass."
+    },
+    "WV": {
+      "sources": [
+        {
+          "title": "W. Va. Code § 38-5A-3 — ordinary (consumer credit sale/consumer loan judgment) garnishment limited to the lesser of 20% of disposable earnings, or the amount by which disposable earnings exceed 50 times the FEDERAL minimum hourly wage specifically (not a 'greater of state or federal' test)",
+          "url": "https://code.wvlegislature.gov/38-5A-3/",
+          "verifiedOn": "2026-09-06",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own text directly (code.wvlegislature.gov, the same official WV Legislature code site already used as a primary source elsewhere in this project's WV-2026.json), including the 20%/50x-FEDERAL-specifically mechanism; not an independently rendered direct fetch this pass."
+        }
+      ],
+      "ordinaryGarnishment": {
+        "capFractions": [{ "basis": "disposable", "fraction": 0.20 }],
+        "minimumWageWeeklyMultiplier": 50,
+        "stateMinimumHourlyWage": 7.25
+      },
+      "$note": "WIRED 2026-09-06 — found while this project's own WV municipal-service-fee research (data/states/WV-2026.json) was already deep in West Virginia statute law; a natural companion gap to close in the same pass. Unlike most 'greater of federal or state minimum wage' floors in this file, W. Va. Code 38-5A-3 names the FEDERAL minimum hourly wage specifically, so West Virginia's own (lower) state minimum wage never enters this calculation at all — stateMinimumHourlyWage is set to the federal $7.25 deliberately, not a placeholder."
+    },
+    "DC": {
+      "sources": [
+        {
+          "title": "D.C. Code § 16-572 (as amended by the Wage Garnishment Fairness Amendment Act of 2018) — ordinary garnishment limited to 25% of the amount by which disposable wages exceed 40 times the DC minimum hourly wage; nothing withheld if disposable wages are at or below that 40x floor",
+          "url": "https://code.dccouncil.gov/us/dc/council/laws/22-296",
+          "verifiedOn": "2026-09-06",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the DC Council's own law-library text of the 2018 amendment act directly, including the 25%/40x-DC-minimum-wage-specifically mechanism; not an independently rendered direct fetch this pass."
+        },
+        {
+          "title": "DC Department of Employment Services — DC minimum wage $18.40/hr effective 2026-07-01 (up from a lower H1-2026 figure)",
+          "url": "https://does.dc.gov/sites/default/files/dc/sites/does/publication/attachments/2026%20Minimum%20Wage%20Poster.pdf",
+          "verifiedOn": "2026-09-06",
+          "verifiedBy": "Cross-source confirmed via search synthesis of DOES's own published 2026 poster and multiple payroll-industry alerts agreeing on the $18.40 figure and its 2026-07-01 effective date; not independently re-fetched as a PDF this pass."
+        }
+      ],
+      "ordinaryGarnishment": {
+        "capFractions": [{ "basis": "disposable", "fraction": 0.25 }],
+        "minimumWageWeeklyMultiplier": 40,
+        "stateMinimumHourlyWage": 18.40
+      },
+      "$note": "WIRED 2026-09-06. Unlike every 'greater of federal or state' floor in this file, D.C. Code 16-572 names the DISTRICT'S OWN minimum wage specifically — no federal comparison at all, and DC's own figure is already far above the federal $7.25 regardless. DC's minimum wage rose MID-YEAR on 2026-07-01 (from a lower H1 figure this file did not separately capture) — this entry uses only the current, post-increase $18.40 figure with no effective-dating mechanism, so a check date before 2026-07-01 would understate the true floor for that period; same class of disclosed simplification as this project's non-effective-dated figures elsewhere (distinct from Weirton's WV service fee or Ohio's HB96, which DO have effective-dating wired). Also note: this is a DISTRICT, not a state, but this engine's workState already treats DC as a 2-letter jurisdiction code like every other state-tax rule in this project, so no special-casing was needed to wire it in here."
+    },
+    "NE": {
+      "sources": [
+        {
+          "title": "Neb. Rev. Stat. § 25-1558 — ordinary garnishment limited to the lesser of 25% of disposable earnings or the amount by which disposable earnings exceed 30 times the federal minimum hourly wage; reduced to 15% of disposable earnings (same 30x-federal floor) for a debtor who is head of a family",
+          "url": "https://law.justia.com/codes/nebraska/2013/chapter-25/statute-25-1558/",
+          "verifiedOn": "2026-09-06",
+          "verifiedBy": "Cross-source confirmed via search synthesis quoting the statute's own 25%/15%-head-of-family/30x-federal mechanism directly, not an independently rendered direct fetch this pass."
+        }
+      ],
+      "ordinaryGarnishment": {
+        "capFractions": [{ "basis": "disposable", "fraction": 0.25 }],
+        "minimumWageWeeklyMultiplier": 30,
+        "stateMinimumHourlyWage": 7.25
+      },
+      "headOfFamilyOrdinaryGarnishment": {
+        "capFractions": [{ "basis": "disposable", "fraction": 0.15 }],
+        "minimumWageWeeklyMultiplier": 30,
+        "stateMinimumHourlyWage": 7.25
+      },
+      "$note": "WIRED 2026-09-06. Nebraska's base rule is IDENTICAL to the plain federal CCPA default (25%/30x federal minimum wage) — the only real departure is the head-of-family variant, which lowers the fraction to 15% but keeps the same 30x-federal floor. Distinct from Missouri's own head-of-family variant (10%/30x-federal, same shape) and from Florida's all-or-nothing `fullExemption` — a Nebraska head-of-family debtor still owes something above the floor, just at a reduced rate, the same structural pattern as Missouri. Because the base ordinaryGarnishment here is identical to the federal default in every respect, this entry only changes behavior for orders with `headOfFamily: true`; setting it anyway (rather than omitting ordinaryGarnishment the way Florida does) keeps this file's own documentation honest about what was actually researched and confirmed, following Georgia's own confirmed-no-departure convention above for the non-head-of-family case specifically."
     }
   }
 }

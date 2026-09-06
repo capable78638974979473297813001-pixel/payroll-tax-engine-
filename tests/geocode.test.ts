@@ -41,6 +41,7 @@ import {
   parseAddressParts,
   resolveRooftop,
 } from '../geocode/rooftop.ts';
+import { resolveParcelCentroid, PARCEL_SOURCES } from '../geocode/parcel.ts';
 import {
   isInsideCanbyTransitDistrict,
   isInsidePortlandMetro,
@@ -1559,6 +1560,196 @@ describe('rooftop.ts — authoritative address points (real captured National Ad
         const result = await resolveRooftop('90 W Broad St, Columbus, OH 43215', COLUMBUS_INTERPOLATED, spyFetch, FAST);
         assert.equal(result.tier, 'authoritative');
         assert.equal(nominatimCalled, false);
+      });
+    });
+
+    describe('the parcel-centroid tier — county tax-parcel data, gated hard against real misattribution', () => {
+      const PA_SOURCE = PARCEL_SOURCES.find((s) => s.state === 'PA')!;
+      const HARRISBURG_INTERPOLATED = { lat: 40.263316301322, lon: -76.884360658074 };
+
+      /** A square ring roughly sideMeters across, centered on (lat, lon). Good enough for area/centroid math at parcel scale. */
+      const squareRing = (lat: number, lon: number, sideMeters: number): number[][] => {
+        const dLat = sideMeters / 2 / 111_320;
+        const dLon = sideMeters / 2 / (111_320 * Math.cos((lat * Math.PI) / 180));
+        return [
+          [lon - dLon, lat - dLat],
+          [lon + dLon, lat - dLat],
+          [lon + dLon, lat + dLat],
+          [lon - dLon, lat + dLat],
+          [lon - dLon, lat - dLat],
+        ];
+      };
+
+      const parcelFeature = (opts: { houseNumber: string; street: string; lat: number; lon: number; sideMeters: number }) => ({
+        attributes: { house_numb: opts.houseNumber, street_nam: opts.street },
+        geometry: { rings: [squareRing(opts.lat, opts.lon, opts.sideMeters)] },
+      });
+
+      /** Routes by URL across all three services a resolution can call — NAD, Nominatim, and this one registered parcel source. */
+      const threeServiceFetch = (opts: { nad?: unknown[]; nominatim?: unknown[]; parcel?: unknown[] }) =>
+        (async (url: string) => {
+          const target = String(url);
+          if (target.includes('nominatim')) return new Response(JSON.stringify(opts.nominatim ?? []), { status: 200 });
+          if (target.startsWith(PA_SOURCE.queryUrl)) {
+            return new Response(JSON.stringify({ features: opts.parcel ?? [] }), { status: 200 });
+          }
+          return new Response(JSON.stringify({ features: opts.nad ?? [] }), { status: 200 });
+        }) as unknown as typeof fetch;
+
+      test('resolveParcelCentroid: an UNATTRIBUTED small parcel (no house number at all) is used when no exact match exists — the real Capitol case', async () => {
+        const result = await resolveParcelCentroid(
+          '501 N 3rd St, Harrisburg, PA 17120',
+          HARRISBURG_INTERPOLATED,
+          (async () =>
+            new Response(
+              JSON.stringify({
+                features: [parcelFeature({ houseNumber: '', street: '', ...HARRISBURG_INTERPOLATED, sideMeters: 17 })],
+              }),
+              { status: 200 },
+            )) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.ok(result);
+        assert.equal(result!.source.state, 'PA');
+        assert.ok(result!.areaSquareMeters < 300);
+      });
+
+      test('resolveParcelCentroid: NEVER uses a parcel with a real, different address, however close it is', async () => {
+        // The exact bug caught live: the nearest SMALL parcel to the target
+        // point was attributed to house number 400, not the target's 501 —
+        // a different, real building. Distance alone must never win.
+        const wrongAddress = parcelFeature({
+          houseNumber: '400',
+          street: '3RD',
+          lat: HARRISBURG_INTERPOLATED.lat + 0.00002,
+          lon: HARRISBURG_INTERPOLATED.lon,
+          sideMeters: 17,
+        });
+        const result = await resolveParcelCentroid(
+          '501 N 3rd St, Harrisburg, PA 17120',
+          HARRISBURG_INTERPOLATED,
+          (async () => new Response(JSON.stringify({ features: [wrongAddress] }), { status: 200 })) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.equal(result, null);
+      });
+
+      test('resolveParcelCentroid: an EXACT address match wins even when a closer unattributed parcel also exists', async () => {
+        const exact = parcelFeature({
+          houseNumber: '501',
+          street: 'N 3rd St',
+          lat: HARRISBURG_INTERPOLATED.lat + 0.0001,
+          lon: HARRISBURG_INTERPOLATED.lon,
+          sideMeters: 17,
+        });
+        const unattributedCloser = parcelFeature({
+          houseNumber: '',
+          street: '',
+          ...HARRISBURG_INTERPOLATED,
+          sideMeters: 17,
+        });
+        const result = await resolveParcelCentroid(
+          '501 N 3rd St, Harrisburg, PA 17120',
+          HARRISBURG_INTERPOLATED,
+          (async () =>
+            new Response(JSON.stringify({ features: [unattributedCloser, exact] }), { status: 200 })) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.ok(result);
+        assert.ok(result!.metersFromInterpolated > 5, 'should have picked the farther EXACT match, not the closer unattributed one');
+      });
+
+      test('resolveParcelCentroid: a directional/street-type mismatch ("3RD" vs "N 3rd St") still counts as exact', async () => {
+        const bareStreetName = parcelFeature({
+          houseNumber: '501',
+          street: '3RD',
+          ...HARRISBURG_INTERPOLATED,
+          sideMeters: 17,
+        });
+        const result = await resolveParcelCentroid(
+          '501 N 3rd St, Harrisburg, PA 17120',
+          HARRISBURG_INTERPOLATED,
+          (async () => new Response(JSON.stringify({ features: [bareStreetName] }), { status: 200 })) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.ok(result);
+      });
+
+      test('resolveParcelCentroid: an oversized parcel (a whole government campus) is rejected outright — the real Mississippi finding', async () => {
+        const wholeCampus = parcelFeature({
+          houseNumber: '',
+          street: '',
+          ...HARRISBURG_INTERPOLATED,
+          sideMeters: 300, // 90,000 sqm, an order of magnitude over the gate
+        });
+        const result = await resolveParcelCentroid(
+          '501 N 3rd St, Harrisburg, PA 17120',
+          HARRISBURG_INTERPOLATED,
+          (async () => new Response(JSON.stringify({ features: [wholeCampus] }), { status: 200 })) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.equal(result, null);
+      });
+
+      test('resolveParcelCentroid: no registered source for this state means no query is even attempted', async () => {
+        let called = false;
+        const result = await resolveParcelCentroid(
+          '400 High St, Jackson, MS 39201',
+          { lat: 32.305111271605, lon: -90.183041057541 },
+          (async () => {
+            called = true;
+            return new Response('{}', { status: 200 });
+          }) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.equal(result, null);
+        assert.equal(called, false);
+      });
+
+      test('resolveRooftop: a parcel centroid CLOSER than OSM wins the tier', async () => {
+        const closeParcel = parcelFeature({ houseNumber: '', street: '', ...HARRISBURG_INTERPOLATED, sideMeters: 17 });
+        const result = await resolveRooftop(
+          '501 N 3rd St, Harrisburg, PA 17120',
+          HARRISBURG_INTERPOLATED,
+          threeServiceFetch({
+            nad: [],
+            nominatim: osmHouse({
+              lat: HARRISBURG_INTERPOLATED.lat + 0.002,
+              lon: HARRISBURG_INTERPOLATED.lon,
+              houseNumber: '501',
+              road: 'North 3rd Street',
+            }),
+            parcel: [closeParcel],
+          }),
+          FAST,
+        );
+        assert.equal(result.tier, 'parcel-centroid');
+      });
+
+      test('resolveRooftop: OSM wins when it is CLOSER than the parcel centroid', async () => {
+        const farParcel = parcelFeature({
+          houseNumber: '',
+          street: '',
+          lat: HARRISBURG_INTERPOLATED.lat + 0.001,
+          lon: HARRISBURG_INTERPOLATED.lon,
+          sideMeters: 17,
+        });
+        const result = await resolveRooftop(
+          '501 N 3rd St, Harrisburg, PA 17120',
+          HARRISBURG_INTERPOLATED,
+          threeServiceFetch({
+            nad: [],
+            nominatim: osmHouse({
+              lat: HARRISBURG_INTERPOLATED.lat + 0.00002,
+              lon: HARRISBURG_INTERPOLATED.lon,
+              houseNumber: '501',
+              road: 'North 3rd Street',
+            }),
+            parcel: [farParcel],
+          }),
+          FAST,
+        );
+        assert.equal(result.tier, 'osm-corroborated');
       });
     });
   });

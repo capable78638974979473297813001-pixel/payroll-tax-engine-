@@ -54,6 +54,7 @@
 import { streetKey, streetKeyCapitolNormalized, streetKeyWithoutDirectionals } from './buildings.ts';
 import type { FetchOptions } from './census.ts';
 import { searchStructuredAddressSafe } from './nominatim.ts';
+import { resolveParcelCentroid, type ParcelCentroidResult } from './parcel.ts';
 
 /**
  * The National Address Database, published by the US Department of
@@ -487,6 +488,15 @@ export function neighborBracket(oneLineAddress: string, points: AddressPoint[]):
  *                      AND it agrees with Census's own position, so two
  *                      independent systems place the address there.
  *                      Crowd-sourced: good, not authoritative.
+ *   'parcel-centroid' — a COUNTY government's own tax-parcel polygon (not
+ *                      NAD, a separate registry — see parcel.ts's own doc
+ *                      comment) matched this address and its area passed
+ *                      a "single building, not a whole campus" size gate.
+ *                      Weaker than 'authoritative' — a legal boundary's
+ *                      centroid, not a surveyed structure point — but
+ *                      real government data, only ever used in place of
+ *                      'osm-corroborated' when it lands measurably closer
+ *                      to Census's own interpolated point.
  *
  * resolveRooftop() checks 'authoritative-neighbors' BEFORE
  * 'osm-corroborated' for exactly that reason: a tight NAD bracket (both
@@ -497,8 +507,18 @@ export function neighborBracket(oneLineAddress: string, points: AddressPoint[]):
  * matters live: 210 Capitol Ave, Hartford, CT sits 200m from a real NAD
  * bracket (numbers 168 and 223) that used to lose to OSM's corroborated
  * point purely because OSM was checked first, not because it was better.
+ * 'parcel-centroid' is checked LAST, against whatever 'osm-corroborated'
+ * found (if anything), and only wins by being closer to Census's own
+ * point — never merely by existing. See parcel.ts's own doc comment for
+ * why: a parcel centroid is unreliable in a way OSM's corroboration
+ * check already isn't, so it only ever gets to REPLACE a result, never to
+ * be trusted purely on its own say-so the way the other three tiers are.
  */
-export type AddressPointTier = 'authoritative' | 'authoritative-neighbors' | 'osm-corroborated';
+export type AddressPointTier =
+  | 'authoritative'
+  | 'authoritative-neighbors'
+  | 'osm-corroborated'
+  | 'parcel-centroid';
 
 export interface OsmPointResult {
   point: { lat: number; lon: number };
@@ -522,6 +542,8 @@ export interface RooftopResult {
   neighbors: NeighborBracket | null;
   /** Set on the 'osm-corroborated' tier only. */
   osm: OsmPointResult | null;
+  /** Set on the 'parcel-centroid' tier only. */
+  parcel: ParcelCentroidResult | null;
   /** How far the authoritative point sits from Census's interpolated one — the size of the error being corrected. */
   metersFromInterpolated: number | null;
   /** True when the match group is too spread out to be one building; the point is still returned, but a caller should treat it as suspect. */
@@ -546,6 +568,7 @@ export async function resolveRooftop(
     match: null,
     neighbors: null,
     osm: null,
+    parcel: null,
     metersFromInterpolated: null,
     ambiguous: false,
   };
@@ -570,6 +593,7 @@ export async function resolveRooftop(
       match,
       neighbors: null,
       osm: null,
+      parcel: null,
       metersFromInterpolated: metersBetween(interpolated, match.point),
       ambiguous: match.spreadMeters > IMPLAUSIBLE_SPREAD_METERS,
     };
@@ -590,6 +614,7 @@ export async function resolveRooftop(
       match: null,
       neighbors,
       osm: null,
+      parcel: null,
       metersFromInterpolated: metersBetween(interpolated, neighbors.point),
       ambiguous: false,
     };
@@ -598,6 +623,32 @@ export async function resolveRooftop(
   // Tier 3 — OSM's own house-level point, but only if it corroborates
   // where Census already put the address. See OSM_CORROBORATION_METERS.
   const osm = await resolveOsmPoint(oneLineAddress, interpolated, fetchImpl, retryOptions);
+
+  // Tier 4 — a county's own tax-parcel centroid (see parcel.ts's own doc
+  // comment for the whole mechanism and why it is gated the way it is).
+  // Tried regardless of whether OSM already succeeded — the only way to
+  // find out a parcel centroid is the BETTER of the two, as it verifiably
+  // is for at least one real address (Pennsylvania's Capitol, 68m vs.
+  // OSM's 131m) — but it only ever REPLACES osm's result by landing
+  // measurably closer to Census's own interpolated point, never merely by
+  // existing.
+  const parcel = await resolveParcelCentroid(oneLineAddress, interpolated, fetchImpl, retryOptions);
+
+  if (parcel && (!osm || parcel.metersFromInterpolated < osm.metersFromInterpolated)) {
+    return {
+      attempted: fetched.ok,
+      found: true,
+      tier: 'parcel-centroid',
+      point: parcel.point,
+      match: null,
+      neighbors: null,
+      osm: null,
+      parcel,
+      metersFromInterpolated: parcel.metersFromInterpolated,
+      ambiguous: false,
+    };
+  }
+
   if (osm) {
     return {
       attempted: fetched.ok,
@@ -607,6 +658,7 @@ export async function resolveRooftop(
       match: null,
       neighbors: null,
       osm,
+      parcel: null,
       metersFromInterpolated: osm.metersFromInterpolated,
       ambiguous: false,
     };

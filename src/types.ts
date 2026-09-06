@@ -276,6 +276,16 @@ export interface EmployerContext {
    * computes nothing until it arrives.
    */
   paidLeaveTier?: Record<string, string>;
+  /**
+   * This employer's SUI-relevant industry classification, keyed by state
+   * code — currently only meaningful where a state's own new-employer SUI
+   * rate is CONDITIONED on industry (Kansas: 5.55% for construction,
+   * 1.75% for everyone else). Absent means the state's plain new-employer
+   * rate applies, the same "unknown fact, use the general rule" default
+   * this engine already applies to an unsupplied stateUnemploymentRate —
+   * never guessed from anything else in the paycheck.
+   */
+  suiIndustry?: Record<string, string>;
 }
 
 /**

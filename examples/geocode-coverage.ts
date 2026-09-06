@@ -81,6 +81,7 @@ const TIER_LABEL: Record<string, string> = {
   authoritative: 'rooftop (authoritative)',
   'osm-corroborated': 'house-level (OSM, corroborated)',
   'authoritative-neighbors': 'block (between published points)',
+  'parcel-centroid': 'parcel centroid (county GIS)',
   none: 'interpolated (Census only)',
 };
 
@@ -112,7 +113,7 @@ async function worker(): Promise<void> {
           address,
           tier: roof.tier ?? 'none',
           meters: roof.metersFromInterpolated === null ? null : Math.round(roof.metersFromInterpolated),
-          source: roof.match?.chosen.source ?? null,
+          source: roof.match?.chosen.source ?? roof.parcel?.source.jurisdictionLabel ?? null,
         };
       }
     } catch (err) {
