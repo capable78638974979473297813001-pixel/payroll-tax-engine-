@@ -18,6 +18,7 @@
     "demo:geocode": "node examples/geocode-demo.ts",
     "coverage:geocode": "node examples/geocode-coverage.ts",
     "coverage:taxes": "node examples/tax-coverage.ts",
+    "coverage:local": "node examples/local-tax-smoke-test.ts",
     "harvest": "node examples/harvest-sweep.ts",
     "harvest:daily": "node examples/harvest-daily.ts daily",
     "harvest:status": "node examples/harvest-daily.ts status",
