@@ -24,7 +24,7 @@ npm run ui:calculator      # any-state calculator UI, address-based local tax lo
 | Local income tax | Every state known to levy one, at the depth each state's own public data allows: OH (~600 municipalities + school districts + JEDD/JEDZ), PA (~2,600 Act 32 EIT/LST jurisdictions), MI (24 cities — the full statewide list), KY (227 occupational districts), IN (92/92 counties), AL (25/25 municipalities), MD (24 counties + Baltimore City, wired into the state ruleset), NYC + Yonkers, Kansas City/St. Louis earnings tax, Newark payroll tax, Portland Metro/Multnomah + TriMet/LTD transit excise, Denver-cluster Colorado OPT, Wilmington wage tax, Seattle's JumpStart payroll tax, WV municipal service fees (10 cities — see below, the one state with no central registry to bulk-load from) |
 | Reciprocity / multi-state | Wired generically off each state's own `reciprocalStates` — IL/IN/KY/MI/MN/OH/PA/WI's bilateral agreements, DC's blanket nonresident exemption, WV's 5-state cluster |
 | Garnishments (court-ordered / administrative) | CCPA federal ceilings for ordinary consumer/creditor judgment, child support/alimony (50/55/60/65%), and federal student loan default (34 CFR 34.19) — multiple simultaneous orders share one aggregate ceiling, never stacked. 22 states' own departures researched and modelled across 5 distinct formula shapes: TX/PA/NC/SC bar ordinary garnishment outright; FL exempts a "head of family" debtor at any income; MO gives one a reduced 10% instead; IL/NY/MA/CT/DE/CO/WA/WI/ME/VT/MD cap it by a flat-fraction formula (of gross and/or disposable, plus a minimum-wage floor — VT resolves a real dual-rule statute to the more protective consumer-credit-transaction figure, MD's floor uses its own $15.00 state minimum wage in place of the federal one); ND applies that same flat-fraction shape with an added $20/week-per-dependent reduction; MN cliff-brackets by income (10/15/25%, the WHOLE amount reclassified at each threshold); NV cliff-brackets on a fixed gross-weekly dollar line instead; HI uses genuine MARGINAL brackets (5%/10%/20%, only the slice within each band, income-tax-bracket style); NJ ties its 10% cap to the debtor's household size against the HHS federal poverty guideline, reverting to the federal default above 250% of it (the statute leaves that case to court discretion, not a fixed number). Every other state uses the federal default as an unconfirmed baseline, not a researched "no departure exists." Federal tax levies are out of scope (IRS Pub 1494's own table, not a fixed CCPA fraction) — see `src/garnishment.ts` and `data/garnishment/state-overrides-2026.json` |
-| Address → jurisdiction | Four-tier geocoding pipeline that PREFERS rooftop precision and refuses to guess when it can't get there (see below) — a live run lands 35/51 on an authoritative rooftop point, not all 51; measured every run, not assumed, and the split moves day to day |
+| Address → jurisdiction | Five-tier geocoding pipeline that PREFERS rooftop precision and refuses to guess when it can't get there (see below) — a live run lands 35/51 on an authoritative rooftop point, not all 51, plus a gated county-parcel fallback (1 state, so far) for where the free federal registry has nothing at all; measured every run, not assumed, and the split moves day to day |
 | Staying current | Automated daily harvester watching 105 registered sources, human review gate before anything reaches `data/` |
 
 Run `npm run coverage:taxes` for the live, generated version of the table
@@ -111,7 +111,7 @@ correction run in March for a December check uses December's rules.
 
 Local tax selection is a geospatial lookup, not a ZIP lookup — ZIP codes
 cross municipal boundaries, and getting this wrong is a silent, systematic
-error. `geocode/resolve.ts` runs an address through four tiers, each of which
+error. `geocode/resolve.ts` runs an address through five tiers, each of which
 **refuses rather than guesses**:
 
 | Tier | What it means | Source |
@@ -119,19 +119,22 @@ error. `geocode/resolve.ts` runs an address through four tiers, each of which
 | `rooftop` | A point published for this exact address by the government that assigns addresses. | National Address Database (US DOT), ~98M points |
 | `rooftop-osm` | OpenStreetMap holds a house-level point AND it agrees with Census's own position. | Nominatim, corroborated against Census, never trusted alone |
 | `neighbor` | Interpolated between the two nearest *published* points on the same street. Block-level. | National Address Database |
+| `parcel-centroid` | A COUNTY's own tax-parcel polygon matched this address and its area passed a "single building" gate — used in place of `rooftop-osm` only when it lands measurably closer. | An individually-verified county GIS service — see `geocode/parcel.ts` |
 | `interpolated` | Census's own TIGER/Line address-range position, at the curb. | Census geocoder |
 
 Measured, not assumed — `npm run coverage:geocode` resolves one real address
 per jurisdiction through this exact pipeline and reports which tier answered.
-A run just now: **35/51 land on authoritative rooftop points, 13/51 on
+A run just now: **35/51 land on authoritative rooftop points, 12/51 on
 OSM-corroborated house-level points, 2/51 on a between-published-points
-`neighbor` estimate, and 1/51 falls all the way back to Census's own
-interpolation** (North Dakota this run: nothing published at or below that
-address's own house number to bracket from). These counts are a live
-measurement, not a fixed claim — they move day to day as OSM/NAD coverage
-changes underneath the pipeline, so re-run the command above rather than
-trusting a number written down here; see `docs/geocoding-coverage.md`'s own
-"these numbers still move" section. Building footprints add a third,
+`neighbor` estimate, 1/51 on a county parcel centroid (Pennsylvania, 68m —
+see Known gaps for the story and the failure mode it took two tries to
+close), and 1/51 falls all the way back to Census's own interpolation**
+(North Dakota this run: nothing published at or below that address's own
+house number to bracket from). These counts are a live measurement, not a
+fixed claim — they move day to day as OSM/NAD coverage changes underneath
+the pipeline, so re-run the command above rather than trusting a number
+written down here; see `docs/geocoding-coverage.md`'s own "these numbers
+still move" section. Building footprints add a third,
 independent cross-check where OSM has traced the structure.
 
 Once a coordinate is resolved, jurisdictions not published by Census — Ohio's
@@ -281,17 +284,38 @@ visible instead of overwritten silently.
   `newEmployerRateSource`).
 - **Not every state resolves at rooftop precision, and that's expected, not a
   bug.** A live re-run just now (`npm run coverage:geocode`) puts 35/51 on an
-  authoritative rooftop point, 13/51 on an OSM-corroborated house-level
+  authoritative rooftop point, 12/51 on an OSM-corroborated house-level
   point (one tier down), 2/51 on a between-published-points estimate (lower
-  still), and 1/51 — North Dakota — all the way back to plain Census
-  interpolation: nothing published at or below that sample address's own
-  house number to bracket from, a real data gap, not a code limitation. Two
-  runs in this same session already show these counts moving: an earlier
-  run this same day had ND resolving above interpolation and 14/51 (not
-  13/51) at the OSM tier — the "these numbers still move" section of
-  `docs/geocoding-coverage.md` explains why (OSM/NAD coverage changes
-  underneath this pipeline day to day) and should be treated as the live
-  source of truth over any specific count frozen here.
+  still), 1/51 on a county tax-parcel centroid (see below), and 1/51 — North
+  Dakota — all the way back to plain Census interpolation: nothing published
+  at or below that sample address's own house number to bracket from, a
+  real data gap, not a code limitation. These counts have already moved
+  within this same project's history — the "these numbers still move"
+  section of `docs/geocoding-coverage.md` explains why (OSM/NAD coverage
+  changes underneath this pipeline day to day) and should be treated as the
+  live source of truth over any specific count frozen here. Directly
+  querying the National Address Database confirmed 9 states have ZERO
+  points within 300m of their sample address — not a bug in this project's
+  query, a genuine gap in what the free federal registry has. One of those
+  9 (Pennsylvania) now closes a different way: county governments often
+  publish their OWN tax-parcel GIS separately from NAD, and that parcel's
+  centroid can substitute for a rooftop point — Dauphin County, PA's own
+  287 sqm parcel for the Capitol address lands 68m out, beating the 131m
+  `rooftop-osm` fallback. Proven live to be unreliable in TWO distinct ways
+  before it shipped, both now hard-gated in `geocode/parcel.ts`: (1)
+  Mississippi's own Hinds County parcel for the same KIND of address is
+  31,551 sqm — the whole capitol grounds, not one building — and its
+  centroid lands 146m out, *worse* than that state's existing 8m OSM
+  result, so parcel-centroid area-gates at 2,000 sqm and simply contributes
+  nothing where a matching parcel is oversized; (2) the nearest small
+  parcel to Pennsylvania's own target address turned out to be a real,
+  different, nearby building (house number 400, not the target's 501) —
+  caught before shipping, fixed by requiring an actual address-field match
+  (or an honestly-unattributed government parcel) before a parcel is ever
+  used, never mere proximity. No national registry of county parcel
+  services exists — `PARCEL_SOURCES` in `geocode/parcel.ts` is a registry
+  of individually-verified counties (one, so far: Dauphin County, PA), not
+  a formula that covers a state once one county in it is added.
 - FUTA credit-reduction **is wired** (`futa()` in `src/taxes/federal.ts` adds
   a state's additional rate from `futa.creditReduction.states` whenever that
   map carries an entry) — DOL just hasn't published the 2026 list yet, since

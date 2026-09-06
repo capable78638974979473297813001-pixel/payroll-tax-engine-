@@ -85,6 +85,13 @@ export {
   type RooftopMatch,
   type RooftopResult,
 } from './rooftop.ts';
+export {
+  PARCEL_SOURCES,
+  MAX_TRUSTED_PARCEL_AREA_SQUARE_METERS,
+  resolveParcelCentroid,
+  type ParcelCentroidResult,
+  type ParcelSource,
+} from './parcel.ts';
 
 /**
  * A LARGE disagreement in resolved COORDINATES between Census and
@@ -146,11 +153,15 @@ export interface AddressResolution {
    *                    Crowd-sourced and corroborated, not authoritative.
    *   'neighbor'     — interpolated between the two nearest published
    *                    points on the same street. Block-level.
+   *   'parcel-centroid' — a county government's own tax-parcel polygon
+   *                    centroid, only ever used in place of 'rooftop-osm'
+   *                    when it measurably beats it — see parcel.ts and
+   *                    rooftop.ts's own AddressPointTier doc comment.
    *   'interpolated' — Census's own position along a TIGER address range,
    *                    which is what this project had before any of the
    *                    above existed.
    */
-  precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'interpolated';
+  precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'parcel-centroid' | 'interpolated';
   /** The coordinate the jurisdictions were actually resolved at. */
   coordinates: { lat: number; lon: number } | null;
   /** The authoritative-address-point lookup, whatever its outcome — including the distance between the two points, which is the size of the interpolation error this corrected. */
@@ -190,7 +201,7 @@ function attemptedMatches(resolved: ResolvedJurisdiction) {
  * that the school-district half needs a retry.
  */
 /** The tier names rooftop.ts reports, in the vocabulary a caller of this module reads. */
-function precisionForTier(tier: AddressPointTier): 'rooftop' | 'rooftop-osm' | 'neighbor' {
+function precisionForTier(tier: AddressPointTier): 'rooftop' | 'rooftop-osm' | 'neighbor' | 'parcel-centroid' {
   switch (tier) {
     case 'authoritative':
       return 'rooftop';
@@ -198,6 +209,8 @@ function precisionForTier(tier: AddressPointTier): 'rooftop' | 'rooftop-osm' | '
       return 'rooftop-osm';
     case 'authoritative-neighbors':
       return 'neighbor';
+    case 'parcel-centroid':
+      return 'parcel-centroid';
   }
 }
 
@@ -210,6 +223,8 @@ function describePoint(rooftop: RooftopResult): string {
       return "OpenStreetMap's own house-level point for it, which agrees with Census's position";
     case 'authoritative-neighbors':
       return `a position interpolated between the authoritative points for ${rooftop.neighbors!.below.houseNumber} and ${rooftop.neighbors!.above.houseNumber} on the same street`;
+    case 'parcel-centroid':
+      return `${rooftop.parcel!.source.jurisdictionLabel}'s own tax-parcel centroid for it (${rooftop.parcel!.areaSquareMeters.toFixed(0)} sqm), which lands closer to Census's position than OpenStreetMap's own point did`;
     default:
       return 'a corrected point';
   }
@@ -240,7 +255,7 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
   schoolDistrictLookupFailed: boolean;
   coordinates: { x: number; y: number };
   geographies: { incorporatedPlaces: string[]; counties: string[] };
-  precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'interpolated';
+  precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'parcel-centroid' | 'interpolated';
   point: { lat: number; lon: number };
   rooftop: RooftopResult;
   rooftopJurisdictionChanges: string[];
@@ -277,7 +292,7 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
 
   let geographies = geocoded.geographies;
   let point = interpolated;
-  let precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'interpolated' = 'interpolated';
+  let precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'parcel-centroid' | 'interpolated' = 'interpolated';
   let rooftopJurisdictionChanges: string[] = [];
   let schoolDistrictName: string | undefined;
   let schoolDistrictLookupFailed = false;

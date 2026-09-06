@@ -268,7 +268,7 @@ const DIRECTIONALS: Record<string, string> = {
 };
 
 /** Street-type suffixes, expanded for the same reason. Applied only at the END of the name — never at the front, so "St Clair Ave" doesn't become "Street Clair Avenue". */
-const STREET_TYPES: Record<string, string> = {
+export const STREET_TYPES: Record<string, string> = {
   st: 'street', str: 'street', ave: 'avenue', av: 'avenue', rd: 'road', blvd: 'boulevard',
   dr: 'drive', ln: 'lane', ct: 'court', pl: 'place', pkwy: 'parkway', pky: 'parkway',
   hwy: 'highway', cir: 'circle', ter: 'terrace', trl: 'trail', sq: 'square', expy: 'expressway',
