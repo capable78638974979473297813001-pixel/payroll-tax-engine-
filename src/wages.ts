@@ -1,6 +1,6 @@
 import type { Cents } from './money.ts';
-import { atLeastZero } from './money.ts';
-import type { Deduction, Earning, PretaxCategory } from './types.ts';
+import { atLeastZero, dollars } from './money.ts';
+import type { Deduction, Earning, PretaxCategory, YearToDate } from './types.ts';
 
 /**
  * Earnings that enter a taxable base at all.
@@ -74,4 +74,90 @@ export function makeTaxableWagesFn(
       .reduce((sum, d) => sum + d.amount, 0);
     return atLeastZero(gross - reduction);
   };
+}
+
+export interface ElectiveDeferralLimits {
+  /** 401(k) and 403(b) share ONE combined IRC 402(g) limit, in dollars. */
+  section402gAggregate: number;
+  /** A governmental/tax-exempt 457(b) plan's own SEPARATE limit, in dollars — not aggregated with 401(k)/403(b). */
+  deferral457: number;
+  /** A SIMPLE plan's own separate, lower limit, in dollars (IRC 408(p)/401(k) SIMPLE). */
+  simple: number;
+}
+
+interface DeferralGroup {
+  categories: readonly PretaxCategory[];
+  limitDollars: number;
+  ytdKey: keyof NonNullable<YearToDate['electiveDeferrals']>;
+}
+
+const DEFERRAL_GROUPS = (
+  limits: ElectiveDeferralLimits,
+): readonly DeferralGroup[] => [
+  { categories: ['deferral_401k', 'deferral_403b'], limitDollars: limits.section402gAggregate, ytdKey: 'section402gAggregate' },
+  { categories: ['deferral_457'], limitDollars: limits.deferral457, ytdKey: 'deferral457' },
+  { categories: ['deferral_simple'], limitDollars: limits.simple, ytdKey: 'simple' },
+];
+
+/**
+ * Caps this period's elective-deferral pretax deductions (401(k)/403(b)/
+ * 457/SIMPLE) at their IRC annual limits, given YTD contributions so far
+ * at THIS employer. Any amount that would push cumulative YTD deferrals
+ * past the applicable limit is reclassified from pretax (category set) to
+ * post-tax (category null) — net pay is unaffected either way (the same
+ * total dollar amount still leaves the paycheck); only which taxes see
+ * the excess as taxable changes, because it no longer legally qualifies
+ * as a pretax deferral once the annual ceiling is reached.
+ *
+ * Three limit groups, matching how the IRC actually aggregates them (see
+ * ElectiveDeferralLimits' own field comments): 401(k)+403(b) combined,
+ * 457(b) separate, SIMPLE separate. Deliberately NOT modelled: catch-up
+ * contributions for age 50+ or the SECURE 2.0 age-60-63 enhanced
+ * catch-up — this engine has no age/birthdate input anywhere, and
+ * guessing eligibility would risk UNDER-capping (treating money as
+ * taxable that the law still exempts), the wrong direction for a tax
+ * engine to guess in — so every employee is capped at the STANDARD
+ * figure regardless of true age. Also not modelled: deferrals at a
+ * DIFFERENT employer earlier in the same calendar year, since `ytd` here
+ * only reflects what THIS employer has paid — see
+ * data/federal/2026.json's own knownGaps entry for both caveats.
+ *
+ * Splits a single over-limit deduction into two lines (same code, the
+ * post-tax remainder suffixed `_OVER_LIMIT`) rather than recharacterizing
+ * the whole thing, so a partially-exempt contribution stays traceable in
+ * the result.
+ */
+export function capElectiveDeferrals(
+  deductions: readonly Deduction[],
+  ytd: YearToDate['electiveDeferrals'] | undefined,
+  limits: ElectiveDeferralLimits,
+): Deduction[] {
+  let result: Deduction[] = deductions.slice();
+
+  for (const group of DEFERRAL_GROUPS(limits)) {
+    const categorySet = new Set<PretaxCategory>(group.categories);
+    const groupTotal = result
+      .filter((d) => d.category !== null && categorySet.has(d.category))
+      .reduce((sum, d) => sum + d.amount, 0);
+    if (groupTotal === 0) continue;
+
+    const ytdSoFar = ytd?.[group.ytdKey] ?? 0;
+    const room = atLeastZero(dollars(group.limitDollars) - ytdSoFar);
+    if (groupTotal <= room) continue;
+
+    let remainingRoom = room;
+    result = result.flatMap((d) => {
+      if (d.category === null || !categorySet.has(d.category)) return [d];
+      const pretaxPart = Math.min(d.amount, remainingRoom);
+      remainingRoom -= pretaxPart;
+      const overLimitPart = d.amount - pretaxPart;
+      if (overLimitPart === 0) return [d];
+      const lines: Deduction[] = [];
+      if (pretaxPart > 0) lines.push({ ...d, amount: pretaxPart });
+      lines.push({ code: `${d.code}_OVER_LIMIT`, category: null, amount: overLimitPart });
+      return lines;
+    });
+  }
+
+  return result;
 }

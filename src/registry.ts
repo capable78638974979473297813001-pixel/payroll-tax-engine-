@@ -125,6 +125,22 @@ export interface FederalRuleset {
     wageBase: number;
     exemptPretax: string[];
   };
+  /**
+   * IRC annual elective-deferral limits, in dollars — the ceiling on how
+   * much of a 401(k)/403(b)/457(b)/SIMPLE deduction can actually be
+   * pretax-exempt this calendar year, not just how much a plan lets an
+   * employee defer. See capElectiveDeferrals() in wages.ts for how these
+   * are applied (standard limits only — no catch-up, see that function's
+   * own doc comment for why).
+   */
+  electiveDeferralLimits: {
+    /** 401(k) and 403(b) share ONE combined IRC 402(g) limit. */
+    section402gAggregate: number;
+    /** A governmental/tax-exempt 457(b) plan's OWN separate limit — not aggregated with 401(k)/403(b). */
+    deferral457: number;
+    /** A SIMPLE plan's own separate, lower limit (IRC 408(p)/401(k) SIMPLE). */
+    simple: number;
+  };
 }
 
 export function federalRuleset(checkDate: string): FederalRuleset {

@@ -188,6 +188,24 @@ export interface YearToDate {
    * triggers active at once.
    */
   localIncomeTax?: Record<string, Cents>;
+  /**
+   * YTD elective-deferral contributions already made to THIS employer's
+   * plan(s) so far this calendar year — what capElectiveDeferrals() (see
+   * wages.ts) checks against the IRC annual limits before letting this
+   * period's 401(k)/403(b)/457/SIMPLE deduction count as pretax. Grouped
+   * the way the law actually aggregates them: section402gAggregate covers
+   * 401(k)+403(b) combined (one shared limit); deferral457 and simple are
+   * each their own separate limit, tracked independently. Does NOT — and
+   * cannot — reflect contributions at a different employer earlier in the
+   * year; see this engine's own disclosed single-employer-visibility
+   * limitation (same class as the Social Security/FUTA wage-base trackers
+   * above).
+   */
+  electiveDeferrals?: {
+    section402gAggregate?: Cents;
+    deferral457?: Cents;
+    simple?: Cents;
+  };
 }
 
 export interface StateWithholding {

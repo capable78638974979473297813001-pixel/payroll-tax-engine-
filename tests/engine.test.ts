@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { calculatePaycheck } from '../src/calculate.ts';
 import { futa } from '../src/taxes/federal.ts';
 import { dollars, overThreshold, underCap } from '../src/money.ts';
-import { makeTaxableWagesFn } from '../src/wages.ts';
+import { capElectiveDeferrals, makeTaxableWagesFn } from '../src/wages.ts';
 import type { Deduction, Earning, PaycheckInput } from '../src/types.ts';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -87,6 +87,103 @@ describe('taxable wage bases diverge per tax', () => {
 
   test('post-tax deductions never reduce any base', () => {
     assert.equal(wagesFor([]), dollars(3000));
+  });
+});
+
+describe('capElectiveDeferrals — IRC 402(g)/457/SIMPLE annual limits', () => {
+  // 2026 figures: section402gAggregate $24,500 (401k+403b combined),
+  // deferral457 $24,500 (separate), simple $17,000 (separate, lower).
+  const LIMITS = { section402gAggregate: 24500, deferral457: 24500, simple: 17000 };
+
+  test('under the limit: passed through unchanged', () => {
+    const deductions: Deduction[] = [
+      { code: '401K', category: 'deferral_401k', amount: dollars(1000) },
+    ];
+    assert.deepEqual(capElectiveDeferrals(deductions, undefined, LIMITS), deductions);
+  });
+
+  test('exactly at the limit (with prior YTD): still passed through unchanged', () => {
+    const deductions: Deduction[] = [
+      { code: '401K', category: 'deferral_401k', amount: dollars(500) },
+    ];
+    const ytd = { section402gAggregate: dollars(24000) };
+    assert.deepEqual(capElectiveDeferrals(deductions, ytd, LIMITS), deductions);
+  });
+
+  test('a single check that alone exceeds the annual limit splits into pretax + _OVER_LIMIT post-tax', () => {
+    // The exact case found during manual verification: $40,000 in one
+    // check against a $24,500 limit, no prior YTD.
+    const deductions: Deduction[] = [
+      { code: '401K', category: 'deferral_401k', amount: dollars(40000) },
+    ];
+    const result = capElectiveDeferrals(deductions, undefined, LIMITS);
+    assert.deepEqual(result, [
+      { code: '401K', category: 'deferral_401k', amount: dollars(24500) },
+      { code: '401K_OVER_LIMIT', category: null, amount: dollars(15500) },
+    ]);
+  });
+
+  test('prior YTD contributions shrink the room left this period', () => {
+    // $23,000 already contributed this year at this employer; a further
+    // $3,000 this period only has $1,500 of room left.
+    const deductions: Deduction[] = [
+      { code: '401K', category: 'deferral_401k', amount: dollars(3000) },
+    ];
+    const ytd = { section402gAggregate: dollars(23000) };
+    const result = capElectiveDeferrals(deductions, ytd, LIMITS);
+    assert.deepEqual(result, [
+      { code: '401K', category: 'deferral_401k', amount: dollars(1500) },
+      { code: '401K_OVER_LIMIT', category: null, amount: dollars(1500) },
+    ]);
+  });
+
+  test('401(k) and 403(b) share ONE combined limit, not two separate ones', () => {
+    // $15,000 to each in the same period = $30,000 combined, $5,500 over
+    // the shared $24,500 limit — split proportionally by processing order.
+    const deductions: Deduction[] = [
+      { code: '401K', category: 'deferral_401k', amount: dollars(15000) },
+      { code: '403B', category: 'deferral_403b', amount: dollars(15000) },
+    ];
+    const result = capElectiveDeferrals(deductions, undefined, LIMITS);
+    assert.deepEqual(result, [
+      { code: '401K', category: 'deferral_401k', amount: dollars(15000) },
+      { code: '403B', category: 'deferral_403b', amount: dollars(9500) },
+      { code: '403B_OVER_LIMIT', category: null, amount: dollars(5500) },
+    ]);
+  });
+
+  test('457(b) has its OWN separate limit, not aggregated with 401(k)', () => {
+    // $24,500 to a 401(k) AND $24,500 to a 457(b) in the same period —
+    // both fully at their own limit, neither reduces the other.
+    const deductions: Deduction[] = [
+      { code: '401K', category: 'deferral_401k', amount: dollars(24500) },
+      { code: '457', category: 'deferral_457', amount: dollars(24500) },
+    ];
+    assert.deepEqual(capElectiveDeferrals(deductions, undefined, LIMITS), deductions);
+  });
+
+  test('SIMPLE plans use their own separate, lower limit', () => {
+    const deductions: Deduction[] = [
+      { code: 'SIMPLE', category: 'deferral_simple', amount: dollars(18000) },
+    ];
+    const result = capElectiveDeferrals(deductions, undefined, LIMITS);
+    assert.deepEqual(result, [
+      { code: 'SIMPLE', category: 'deferral_simple', amount: dollars(17000) },
+      { code: 'SIMPLE_OVER_LIMIT', category: null, amount: dollars(1000) },
+    ]);
+  });
+
+  test('end to end: an over-limit 401(k) deduction is still fully FICA-taxable but only partly income-tax-exempt', () => {
+    const r = calculatePaycheck(input({
+      earnings: [{ code: 'REG', category: 'regular', amount: dollars(50000) }],
+      deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(40000) }],
+    }));
+    // $50,000 - $24,500 (the capped exempt portion) = $25,500 federal taxable.
+    assert.equal(r.taxes.find((t) => t.id === 'US_FIT')?.taxableWages, dollars(25500));
+    // FICA is unaffected by the cap — deferrals are always FICA wages, capped or not.
+    assert.equal(r.taxes.find((t) => t.id === 'US_SS_EE')?.taxableWages, dollars(50000));
+    // Net pay is unaffected: the full $40,000 still leaves the paycheck either way.
+    assert.equal(r.netPay, r.grossPay - dollars(40000) - r.employeeTaxTotal);
   });
 });
 

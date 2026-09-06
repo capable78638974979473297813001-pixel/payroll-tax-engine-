@@ -62,6 +62,29 @@ Each tax declares its exemptions as data (`exemptPretax` in its ruleset), and
 unusual rule is a data change, not a code change — the same mechanism that
 made adding state 51 no different in kind from adding state 2.
 
+A pretax deduction only gets to be pretax up to a real dollar ceiling,
+though, and that ceiling is IRC law, not this engine's own convention:
+`capElectiveDeferrals()` (`src/wages.ts`) checks every 401(k)/403(b)/457/
+SIMPLE deduction against its 2026 annual limit — $24,500 combined for
+401(k)+403(b) (one shared IRC 402(g) limit), $24,500 separately for a
+457(b) (a genuinely independent limit, not aggregated with the other two —
+an employee with both can legally defer up to both in the same year), and
+$17,000 separately for a SIMPLE plan — before `makeTaxableWagesFn` ever
+sees the deduction list. Anything over the applicable limit stops being
+pretax: net pay is unaffected (the same money still leaves the paycheck),
+but the excess becomes taxable the same way any other post-tax deduction
+would be. This was a real, previously-undisclosed gap until a manual
+verification pass (2026-09-06) found it: before this, a caller could
+supply a 401(k) deduction of any size — $40,000 in one check, say — and
+every dollar of it was excluded from federal/state/local taxable wages
+with no ceiling at all. Deliberately NOT modelled: catch-up contributions
+for employees 50+ (this engine has no age/birthdate input anywhere, and
+guessing eligibility risks *under*-capping — the wrong direction for a tax
+engine to guess in), and contributions at a different employer earlier in
+the same calendar year (the YTD figures here only ever reflect what
+*this* employer has paid — see `data/federal/2026.json`'s own
+`knownGaps`).
+
 ## Architecture
 
 ```
