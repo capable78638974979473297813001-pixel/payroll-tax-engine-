@@ -2,7 +2,18 @@
   "comment": "Authoritative sources only. The organising principle: never monitor an individual municipality's own website. Monitor the state-level register that the municipality is legally required to report into. Ohio's ~600 municipalities collapse to one Department of Taxation file; Pennsylvania's ~2,500 Act 32 jurisdictions collapse to one DCED register. That is what turns '7,400 jurisdictions' into roughly 60 things to watch. Every entry's `url` resolves to a .gov (or state-designated register, tagged authority: 'state_register') domain -- checked 2026-09-03, none of the 105 point at a payroll vendor, aggregator, or other secondary source.",
   "checkCadence": {
     "$comment": "User-directed 2026-09-03: checkFrequency below now follows a two-tier cadence rather than the uniform 'monthly' most sources previously carried. 'daily' = OH, PA, MI, IN, AL, NJ, NY, OR, CO, plus federal (US) sources, since federal figures (FUTA credit reduction, SS wage base, etc.) feed every state's calculation. 'weekly' = every other jurisdiction. harvester/daily.ts's own sweep(asOf, { force: true }) call, which used to override checkFrequency entirely and check every source every day, was changed to force: false so this cadence actually takes effect -- see that file's own updated doc comment for why the previous 'check everything daily' default was a deliberate but now superseded choice, not an oversight being corrected.",
-    "dailyJurisdictions": ["OH", "PA", "MI", "IN", "AL", "NJ", "NY", "OR", "CO", "US"],
+    "dailyJurisdictions": [
+      "OH",
+      "PA",
+      "MI",
+      "IN",
+      "AL",
+      "NJ",
+      "NY",
+      "OR",
+      "CO",
+      "US"
+    ],
     "weeklyJurisdictions": "every other jurisdiction in this file"
   },
   "sources": [
@@ -578,7 +589,7 @@
       ],
       "note": "Watches the LABOUR department rather than the revenue department, which carries no UI figures. Verified to fetch and to contain wage-base and/or rate figures before being registered.",
       "coversUI": true,
-      "uiContent": "rates-only",
+      "uiContent": "unknown-no-snapshot",
       "manualOnly": true,
       "manualOnlyReason": "Confirmed HTTP 403 on every attempt from two real GitHub Actions runs (2026-08-31) and independently from this project's own sandbox, using Node's actual fetch with the full browser header set fetch.ts sends. Same cloud/datacenter-IP-refusal shape as ssa-wage-base above — see that entry's note for how this was distinguished from the curl-vs-Node client difference seen elsewhere. Excluded from the staleness test so it does not pin overall health red forever; check by hand each autumn when Kansas resets its rate schedule."
     },
@@ -713,7 +724,7 @@
       ],
       "note": "Watches the LABOUR department, which is where UI figures live — the revenue department's withholding guide carries none. Found by searching per state after path-guessing failed: Michigan, for instance, is under /leo/bureaus-agencies/uia/, not the /uia/ every guess assumed. Verified to fetch AND to contain wage-base and/or rate figures before registering.",
       "coversUI": true,
-      "uiContent": "rates-only",
+      "uiContent": "unknown-no-snapshot",
       "manualOnly": true,
       "manualOnlyReason": "Confirmed HTTP 403 on every attempt from two real GitHub Actions runs (2026-08-31) and independently from this project's own sandbox, using Node's actual fetch with the full browser header set fetch.ts sends — a regression from when this URL was originally verified to succeed under Node (see ma-withholding below, blocked the same way as of this same audit). Excluded from the staleness test so it does not pin overall health red forever; check by hand each autumn when Massachusetts resets its rate schedule, and re-test from a residential network before re-enabling."
     },
@@ -1096,7 +1107,7 @@
       ],
       "note": "New Hampshire levies no income tax and no wage tax, so the only payroll figure that moves is the unemployment wage base — this watches NH Employment Security rather than the law-firm client alert the state data file cites for the Interest & Dividends repeal, which is a one-time historical fact that will never change again. Fetches successfully (verified, 186KB) despite curl being 403'd, the same client-dependent refusal documented for Massachusetts. REGRESSED as of 2026-09-01: the same Node fetch that used to succeed now gets HTTP 403, confirmed from two real GitHub Actions runs (2026-08-31) and independently from this project's sandbox.",
       "coversUI": true,
-      "uiContent": "rates-only",
+      "uiContent": "unknown-no-snapshot",
       "manualOnly": true,
       "manualOnlyReason": "HTTP 403 on every attempt as of 2026-09-01 — see the note above; this used to work under Node fetch and no longer does. Excluded from the staleness test so it does not pin overall health red forever; check by hand each autumn when NH resets its wage base, and re-test from a residential network before re-enabling."
     },
@@ -1116,7 +1127,7 @@
       ],
       "note": "FIXED 2026-09-01: previously a DATED press release (/press/2025/20251229_...) that could never change and would have reported green forever. An earlier note claimed nj.gov/labor/ea/employer-services/rate-info/ 'carries neither figure' — re-tested directly and that claim no longer holds (or was wrong): this exact URL currently states '2026 Taxable Wage Base ( UI and WF/SWF - workers and employers, TDI - employers ): $44,800', matching this state's own data file exactly, plus the current fiscal-year 'Notice of Employer Contribution Rates' and new-employer rate percentages (2.9825%, 6.0351%, 6.9825%). A standing page, not a dated one — it should update itself every year without needing a URL change.",
       "coversUI": true,
-      "uiContent": "wage-base-and-rates"
+      "uiContent": "wage-base-only"
     },
     {
       "id": "nj-withholding",
@@ -1182,7 +1193,7 @@
         "data/states/NV-{year}.json#suiEmployer"
       ],
       "note": "Watches the LABOUR department, where UI figures live — the revenue department's withholding guide carries none. Verified to fetch AND to contain wage-base and rate figures before registering.",
-      "uiContent": "wage-base-and-rates",
+      "uiContent": "unknown-no-snapshot",
       "manualOnly": true,
       "manualOnlyReason": "Confirmed HTTP 403 on every attempt from two real GitHub Actions runs (2026-08-31) and independently from this project's own sandbox, using Node's actual fetch with the full browser header set fetch.ts sends. Excluded from the staleness test so it does not pin overall health red forever; check by hand each autumn when Nevada resets its rate schedule, and re-test from a residential network before re-enabling."
     },
@@ -1832,7 +1843,7 @@
     "neverMonitorable": "An individual employer's EXPERIENCE-RATED contribution rate is not a jurisdiction constant — it depends on that employer's own layoff history and is assigned to them privately. No source can carry it, which is why the engine takes it from input.employer.stateUnemploymentRate and falls back to the published new-employer rate. Only the wage base and the published schedules are monitorable at all.",
     "howCoverageIsCounted": "From an explicit coversUI flag on each source, not inferred from the URL. The regex that preceded it mis-classified Florida — its reemployment-tax rate page IS Florida's UI source, but the domain contains no labour-ish word — which is the sort of quiet miscount that makes a coverage number worth less than the confidence it creates.",
     "contentAudit": {
-      "auditedOn": "2026-08-29",
+      "auditedOn": "2026-09-07",
       "method": "Each UI source's most recent capture searched for a taxable-wage-base phrase beside a dollar figure, and for percentage rate figures. Run against snapshots on disk.",
       "wageBaseAndRates": [
         "AK",
@@ -1853,9 +1864,9 @@
         "MS",
         "NC",
         "ND",
-        "NJ",
-        "NV",
+        "NE",
         "OH",
+        "OK",
         "OR",
         "PA",
         "RI",
@@ -1866,37 +1877,37 @@
         "VT",
         "WA",
         "WI",
-        "WV",
-        "WY"
+        "WV"
       ],
       "ratesOnly": [
         "AL",
         "DC",
         "GA",
         "IA",
-        "KS",
         "LA",
-        "MA",
         "MT",
-        "NH",
         "NM",
         "NY",
         "SC"
       ],
       "wageBaseOnly": [
         "CA",
+        "NJ",
         "NM",
-        "TN"
+        "TN",
+        "WY"
       ],
       "carriesNeither": [],
-      "noCaptureToCheck": [],
-      "wageBaseMonitoredCount": 36,
-      "rateMonitoredCount": 45,
-      "whatThisChanged": "The registration check accepted any page carrying a wage base OR rates, but every title claimed both. This audit separates them, and the result is materially weaker than the earlier headline: of 47 UI sources, only 29 states have a source that actually states a taxable WAGE BASE and 37 one that states RATES. Thirteen carry rates alone — verified as a property of the page, not a formatting mismatch: North Dakota, New York, Massachusetts, New Mexico, Iowa, South Carolina, Minnesota and Kansas contain no wage-base phrase anywhere. Four (Maryland, Minnesota, New Mexico, West Virginia) carry NEITHER and are now flagged monitoringGap, because a source that fetches cleanly while containing nothing is the failure this project already hit once with Pennsylvania's search form. Titles have been corrected to say what each source actually carries.",
-      "datedUrlRisk": [
-        "NJ",
-        "WV"
+      "noCaptureToCheck": [
+        "KS",
+        "MA",
+        "NH",
+        "NV"
       ],
+      "wageBaseMonitoredCount": 37,
+      "rateMonitoredCount": 41,
+      "whatThisChanged": "The registration check accepted any page carrying a wage base OR rates, but every title claimed both. This audit separates them, and the result is materially weaker than the earlier headline: of 47 UI sources, only 29 states have a source that actually states a taxable WAGE BASE and 37 one that states RATES. Thirteen carry rates alone — verified as a property of the page, not a formatting mismatch: North Dakota, New York, Massachusetts, New Mexico, Iowa, South Carolina, Minnesota and Kansas contain no wage-base phrase anywhere. Four (Maryland, Minnesota, New Mexico, West Virginia) carry NEITHER and are now flagged monitoringGap, because a source that fetches cleanly while containing nothing is the failure this project already hit once with Pennsylvania's search form. Titles have been corrected to say what each source actually carries.",
+      "datedUrlRisk": [],
       "staleAfterUrlChanges": "STALE as of the MI/NJ/VA/WY/NM url changes in this commit: these counts and the per-source uiContent classifications were computed against the PREVIOUS urls. The changed sources have had their uiContent removed rather than left asserting something about a page they no longer point at — missing is honest, stale is not. Run `npm run harvest:daily` then `npm run harvest:audit` to recompute; the new urls were each verified by direct probe (MI, NJ, VA, WY carry both figures; NM's new page carries rates) but that verification is not the same as a recorded audit against a stored capture. FURTHER STALE as of 2026-09-01: nj-ui-rates and wv-ui-rates were swapped to yet another URL each (see their own notes — the dated-URL fix), and ne-ui-rates/ok-ui-rates were added as entirely new sources, none of which are reflected in the arrays above. All four were verified by direct probe (stated figures matching each state's own data file exactly) but, again, that is not the same as a recorded audit against a stored capture — run the two commands above before trusting these counts."
     }
   }
