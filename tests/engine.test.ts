@@ -7792,7 +7792,7 @@ describe('West Virginia', () => {
       assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
     });
 
-    test('a WV city with no service fee (not one of the 9 captured): no WV_LOCAL_FEE line', () => {
+    test('a WV city with no service fee (not one of the 11 captured): no WV_LOCAL_FEE line', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
@@ -7867,6 +7867,17 @@ describe('West Virginia', () => {
         }),
       );
       assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
+    });
+
+    test('Glen Dale, weekly pay: work-location-based like Wheeling/Madison, no residency exception ($1.00/wk, Article 752 effective 2025-01-01)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Glen Dale' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(1.0));
     });
   });
 
