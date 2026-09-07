@@ -563,6 +563,32 @@ describe('Pennsylvania', () => {
     assert.equal(amountOf(r, 'PA_LST'), 0);
   });
 
+  // Secondary-employer dedup — closed 2026-09-06. PA DCED's own situs-
+  // priority text says a secondary employer need not withhold LST if
+  // shown proof the principal employer already did; previously disclosed
+  // but not modelled, meaning two concurrent PA employers at the same PSD
+  // would have double-charged it.
+  test('certificate.lstAlreadyWithheldElsewhere skips LST for a secondary employer at the same PSD', () => {
+    const r = calculatePaycheck(
+      input({
+        workState: {
+          code: 'PA',
+          certificate: { workPSD: '700102', residencePSD: '700102', lstAlreadyWithheldElsewhere: true },
+        },
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_LST'), 0);
+  });
+
+  test('lstAlreadyWithheldElsewhere not supplied: LST still withholds normally ($2.00/period)', () => {
+    const r = calculatePaycheck(
+      input({
+        workState: { code: 'PA', certificate: { workPSD: '700102', residencePSD: '700102' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_LST'), dollars(2.0));
+  });
+
   test('missing certificate.workPSD is flagged NOT MODELLED, never silently zero', () => {
     const r = calculatePaycheck(input({ workState: { code: 'PA' } }));
     const line = r.taxes.find((t) => t.id === 'PA_EIT');
@@ -4561,6 +4587,27 @@ describe('Washington', () => {
     assert.equal(amountOf(r, 'WA_PFML_EE'), dollars(8.07));
   });
 
+  // The wage base is the "ssWageBase" sentinel (data/states/WA-2026.json),
+  // resolved live from data/federal/2026.json's own socialSecurity.wageBase
+  // ($184,500) rather than a hand-copied literal — closed 2026-09-06 to
+  // remove a real, self-disclosed drift risk (this used to be a bare
+  // 184500 the file's own comment said "must be kept in sync ... or this
+  // file will silently drift stale"). This test proves the cap actually
+  // applies, not just that it resolves to a number.
+  test('PFML wage base tracks the live federal SS cap: $500 of room left at $184,000 YTD', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0, statePaidLeave: { WA: dollars(184000) } },
+        ...waState(),
+      }),
+    );
+    // Only $500 of room left under the $184,500 SS-linked cap, taxed at
+    // the full 0.0113 x 0.7143 employee-share rate: 500 x 0.00807159 = 4.04 (rounded).
+    assert.equal(amountOf(r, 'WA_PFML_EE'), dollars(4.04));
+  });
+
   test('WA Cares Fund: $1,000 x 0.58% = $5.80', () => {
     const r = calculatePaycheck(
       input({
@@ -5260,6 +5307,121 @@ describe('Ohio', () => {
         }),
       );
       assert.equal(r.taxes.find((t) => t.id === 'OH_LOCAL'), undefined);
+    });
+
+    // ORC 718.011 occasional-entrant exemption — closed 2026-09-06, was
+    // previously not modelled (or even disclosed) at all: the work-city
+    // portion always fired starting day one.
+    describe('occasional-entrant exemption (ORC 718.011)', () => {
+      test('nonresident, not the principal workplace, 20 or fewer days worked: work-city tax exempt, no credit needed', () => {
+        const r = calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            checkDate: '2026-08-15',
+            workState: {
+              code: 'OH',
+              certificate: {
+                residenceCity: 'Cincinnati',
+                workCity: 'Columbus',
+                workCityIsPrincipalWorkplace: false,
+                daysWorkedInMunicipality: 5,
+              },
+            },
+          }),
+        );
+        // Only Cincinnati's own 1.8% home tax applies; Columbus is exempt.
+        assert.equal(amountOf(r, 'OH_LOCAL'), dollars(18.0));
+      });
+
+      test('exactly at the 20-day threshold: still exempt (the statute says "20 or fewer")', () => {
+        const r = calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            checkDate: '2026-08-15',
+            workState: {
+              code: 'OH',
+              certificate: {
+                workCity: 'Columbus',
+                workCityIsPrincipalWorkplace: false,
+                daysWorkedInMunicipality: 20,
+              },
+            },
+          }),
+        );
+        assert.equal(amountOf(r, 'OH_LOCAL'), dollars(0));
+      });
+
+      test('21 days worked: threshold exceeded, ordinary work-city tax applies', () => {
+        const r = calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            checkDate: '2026-08-15',
+            workState: {
+              code: 'OH',
+              certificate: {
+                workCity: 'Columbus',
+                workCityIsPrincipalWorkplace: false,
+                daysWorkedInMunicipality: 21,
+              },
+            },
+          }),
+        );
+        assert.equal(amountOf(r, 'OH_LOCAL'), dollars(25.0));
+      });
+
+      test('principal workplace exception: exemption does not apply even under 20 days', () => {
+        const r = calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            checkDate: '2026-08-15',
+            workState: {
+              code: 'OH',
+              certificate: {
+                workCity: 'Columbus',
+                workCityIsPrincipalWorkplace: true,
+                daysWorkedInMunicipality: 3,
+              },
+            },
+          }),
+        );
+        assert.equal(amountOf(r, 'OH_LOCAL'), dollars(25.0));
+      });
+
+      test('neither field supplied: defaults to pre-fix behavior (withhold), byte-identical to before this fix', () => {
+        const r = calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            checkDate: '2026-08-15',
+            workState: { code: 'OH', certificate: { workCity: 'Columbus' } },
+          }),
+        );
+        assert.equal(amountOf(r, 'OH_LOCAL'), dollars(25.0));
+      });
+
+      test('same city as residence: exemption is irrelevant (not a nonresident scenario) even if both fields are supplied', () => {
+        const r = calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            checkDate: '2026-08-15',
+            workState: {
+              code: 'OH',
+              certificate: {
+                residenceCity: 'Columbus',
+                workCity: 'Columbus',
+                workCityIsPrincipalWorkplace: false,
+                daysWorkedInMunicipality: 3,
+              },
+            },
+          }),
+        );
+        assert.equal(amountOf(r, 'OH_LOCAL'), dollars(25.0));
+      });
     });
   });
 
@@ -6460,7 +6622,9 @@ describe('Colorado', () => {
         }),
       );
       assert.equal(amountOf(r, 'DENVER_OPT_EE'), 0);
-      assert.equal(r.taxes.some((t) => t.id === 'DENVER_OPT_ER'), false);
+      // Both lines report $0 explicitly (not omitted) — a below-threshold
+      // employee owes neither the employee nor the employer OPT.
+      assert.equal(amountOf(r, 'DENVER_OPT_ER'), 0);
     });
 
     test('exactly $500 meets the threshold (>=, not >)', () => {
@@ -6477,7 +6641,7 @@ describe('Colorado', () => {
       assert.equal(amountOf(r, 'DENVER_OPT_EE'), dollars(5.75));
     });
 
-    test('already withheld this month: $0, not withheld a second time', () => {
+    test('same-employer dedup (denverOPTWithheldThisMonth): $0 for BOTH the employee and employer OPT', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
@@ -6492,7 +6656,50 @@ describe('Colorado', () => {
           },
         }),
       );
+      // This employer already paid both its own employee-side withholding
+      // and its own Business OPT for this employee this month.
       assert.equal(amountOf(r, 'DENVER_OPT_EE'), 0);
+      assert.equal(amountOf(r, 'DENVER_OPT_ER'), 0);
+    });
+
+    // Cross-employer coordination (Form TD269) — closed 2026-09-06. Found
+    // while fixing this: the ONLY prior exemption flag zeroed BOTH lines,
+    // which would have wrongly dropped a Business OPT this second employer
+    // genuinely still owes. A separate flag keeps the two facts apart.
+    describe('cross-employer coordination (Form TD269)', () => {
+      test("localOPTEmployeeWithheldByOtherEmployer: employee OPT is $0, but this employer's own Business OPT still computes normally", () => {
+        const r = calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+            workState: {
+              code: 'CO',
+              certificate: {
+                locality: 'Denver',
+                denverMonthlyCompensation: dollars(2000),
+                localOPTEmployeeWithheldByOtherEmployer: true,
+              },
+            },
+          }),
+        );
+        assert.equal(amountOf(r, 'DENVER_OPT_EE'), 0);
+        assert.equal(amountOf(r, 'DENVER_OPT_ER'), dollars(4.0));
+      });
+
+      test('flag not supplied: ordinary behavior (both lines charge normally), unchanged by this fix', () => {
+        const r = calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+            workState: {
+              code: 'CO',
+              certificate: { locality: 'Denver', denverMonthlyCompensation: dollars(2000) },
+            },
+          }),
+        );
+        assert.equal(amountOf(r, 'DENVER_OPT_EE'), dollars(5.75));
+        assert.equal(amountOf(r, 'DENVER_OPT_ER'), dollars(4.0));
+      });
     });
 
     test('a non-Denver Colorado employee: no Denver OPT lines at all', () => {
@@ -7066,7 +7273,7 @@ describe('West Virginia', () => {
   // Amounts hand-derived from each city's own published weekly rate
   // (WV-2026.json's own serviceFeeCities) before running.
   describe('Municipal Service Fee (WV_LOCAL_FEE)', () => {
-    test('Charleston, weekly pay: the weekly rate applies directly ($2.50/wk x 52 / 52 periods)', () => {
+    test('Charleston, weekly pay: the weekly rate applies directly ($3.00/wk x 52 / 52 periods)', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
@@ -7074,7 +7281,10 @@ describe('West Virginia', () => {
           workState: { code: 'WV', certificate: { locality: 'Charleston' } },
         }),
       );
-      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(2.5));
+      // Corrected 2026-09-06: Charleston's own City Service Fee Overview PDF
+      // (charlestonwv.gov) states $3.00/wk, not the $2.50 this file carried
+      // before — see WV-2026.json's charlestonRateCorrection note.
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(3.0));
     });
 
     test('Wheeling, biweekly pay: $2.00/wk x 52 / 26 periods = $4.00/period', () => {
@@ -7110,7 +7320,7 @@ describe('West Virginia', () => {
       assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
     });
 
-    test('a WV city with no service fee (not one of the 9 captured): no WV_LOCAL_FEE line', () => {
+    test('a WV city with no service fee (not one of the 11 captured): no WV_LOCAL_FEE line', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
@@ -7185,6 +7395,123 @@ describe('West Virginia', () => {
         }),
       );
       assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
+    });
+
+    test('Glen Dale, resident duty station: Article 752 has no residency carve-out, so a resident is charged too ($1.00/wk)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Glen Dale', residenceCity: 'Glen Dale' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(1.0));
+    });
+
+    test('Montgomery, weekly pay: work-location-based, no residency exception ($2.00/wk, the 2021-07-01 step of the phased-in schedule)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Montgomery' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(2.0));
+    });
+
+    // Three formerly-disclosed-but-unmodelled gaps, closed 2026-09-06.
+
+    test('Weirton, check date BEFORE the 2026-05-14 ordinance effective date: prior $2.00/wk rate applies, not the current $5.00', () => {
+      const r = calculatePaycheck(
+        input({
+          checkDate: '2026-03-01',
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Weirton' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(2.0));
+    });
+
+    test('Weirton, check date on the effective date itself: new $5.00/wk rate applies', () => {
+      const r = calculatePaycheck(
+        input({
+          checkDate: '2026-05-14',
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Weirton' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(5.0));
+    });
+
+    test('Wheeling, daysWorkedInLocality below the 30-day threshold: fee has not attached yet, no WV_LOCAL_FEE line', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Wheeling', daysWorkedInLocality: 10 } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
+    });
+
+    test('Wheeling, daysWorkedInLocality at the 30-day threshold: fee attaches ($2.00/wk)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Wheeling', daysWorkedInLocality: 30 } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(2.0));
+    });
+
+    test('Wheeling, daysWorkedInLocality not supplied: defaults to already-past-threshold (unchanged pre-fix behavior, $2.00/wk)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Wheeling' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(2.0));
+    });
+
+    test('Glen Dale, daysWorkedInLocality below its 30-day-per-year threshold: no WV_LOCAL_FEE line', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Glen Dale', daysWorkedInLocality: 5 } },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
+    });
+
+    test('multi-job dedup: certificate.wvLocalFeeAlreadyWithheld skips a second employer\'s withholding in the same city', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: {
+            code: 'WV',
+            certificate: { locality: 'Charleston', wvLocalFeeAlreadyWithheld: true },
+          },
+        }),
+      );
+      assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
+    });
+
+    test('multi-job dedup: wvLocalFeeAlreadyWithheld not supplied still charges normally ($3.00/wk)', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Charleston' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(3.0));
     });
   });
 
@@ -9085,14 +9412,61 @@ describe('state unemployment insurance, employer side (XX_SUI_ER)', () => {
 
   test('every state file carries the block the calculation reads', () => {
     // A missing suiEmployer block would silently drop the tax for that
-    // state, which is exactly the failure mode this replaces.
+    // state, which is exactly the failure mode this replaces. wageBase is
+    // either a plain number or Michigan's two-tier { default,
+    // qualifiedEmployer } shape (see resolveSUIWageBase() in state.ts) —
+    // either way it must resolve to real numbers, not silently be missing.
     const states = readdirSync(join(import.meta.dirname, '..', 'data', 'states'));
     assert.equal(states.length, 51);
     for (const file of states) {
       const parsed = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'data', 'states', file), 'utf8'));
       assert.ok(parsed.suiEmployer, `${file} has no suiEmployer block`);
-      assert.equal(typeof parsed.suiEmployer.wageBase, 'number', `${file} has no numeric wage base`);
+      const wageBase = parsed.suiEmployer.wageBase;
+      const isValidTwoTier =
+        wageBase !== null &&
+        typeof wageBase === 'object' &&
+        typeof wageBase.default === 'number' &&
+        typeof wageBase.qualifiedEmployer === 'number';
+      assert.ok(
+        typeof wageBase === 'number' || isValidTwoTier,
+        `${file} has no numeric (or valid two-tier) wage base`,
+      );
     }
+  });
+
+  describe('two-tier wage base (Michigan)', () => {
+    // YTD is set to $9,200 so the two caps ($9,500 default vs. $9,000
+    // qualified) actually diverge within this one $3,000 period — with a
+    // clean $0 YTD, both caps sit far above the period wage and the two
+    // tiers would produce an identical (and so non-distinguishing) result.
+    const nearCapExtra = { ytd: { socialSecurity: 0, medicare: 0, futa: 0, stateUnemployment: { MI: dollars(9200) } } };
+
+    test('no employer qualification supplied: defaults to the higher $9,500 base — $300 of room left, taxed at 2.7%', () => {
+      const r = calculatePaycheck(suiInput({ ...nearCapExtra, workState: { code: 'MI', certificate: {} } }));
+      assert.equal(amountOf(r, 'MI_SUI_ER'), dollars(8.1));
+    });
+
+    test('employer explicitly marked qualified: reduced $9,000 base — already exceeded by YTD, $0 room left', () => {
+      const r = calculatePaycheck(
+        suiInput({
+          ...nearCapExtra,
+          workState: { code: 'MI', certificate: {} },
+          employer: { stateUnemploymentQualifiedForReducedWageBase: { MI: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'MI_SUI_ER'), dollars(0));
+    });
+
+    test('employer explicitly marked NOT qualified: same as the default, $9,500 base ($8.10)', () => {
+      const r = calculatePaycheck(
+        suiInput({
+          ...nearCapExtra,
+          workState: { code: 'MI', certificate: {} },
+          employer: { stateUnemploymentQualifiedForReducedWageBase: { MI: false } },
+        }),
+      );
+      assert.equal(amountOf(r, 'MI_SUI_ER'), dollars(8.1));
+    });
   });
 });
 
@@ -9266,6 +9640,30 @@ describe('paid leave where the employer, not the employee, is the payer of recor
     // may do, so the employee still bears exactly half.
     assert.equal(amountOf(r, 'DE_PFML_EE'), dollars(12.0));
     assert.equal(amountOf(r, 'DE_PFML_ER'), dollars(12.0));
+  });
+
+  // The wage base is the "ssWageBase" sentinel (data/states/DE-2026.json),
+  // resolved live from data/federal/2026.json's own socialSecurity.wageBase
+  // rather than a hand-copied literal — closed 2026-09-06 alongside the
+  // same fix for WA/CT/MA/ME. This exercised a real regression along the
+  // way: statePaidLeaveElectedEmployeeShare() (the function that computes
+  // DE_PFML_EE specifically, since Delaware has no separate
+  // statePaidLeaveEmployee config) still read cfg.wageBase raw and had to
+  // be updated to use the same resolver — caught immediately by this
+  // describe block's own existing tests going from a real dollar amount to
+  // $0 the moment the JSON switched to the sentinel string.
+  test('DE_PFML wage base tracks the live federal SS cap: $500 of room left at $184,000 YTD', () => {
+    const r = calculatePaycheck(
+      leave({
+        workState: { code: 'DE', certificate: {} },
+        employer: { paidLeaveTier: { DE: 'full' }, paidLeaveEmployeeShareFraction: { DE: 0.5 } },
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0, statePaidLeave: { DE: dollars(184000) } },
+      }),
+    );
+    // $500 of room under the $184,500 SS-linked cap: total premium
+    // 500 x 0.8% = $4.00, split 50/50 -> $2.00 employee, $2.00 employer.
+    assert.equal(amountOf(r, 'DE_PFML_EE'), dollars(2.0));
+    assert.equal(amountOf(r, 'DE_PFML_ER'), dollars(2.0));
   });
 });
 
@@ -10316,5 +10714,75 @@ describe('Montana Methods 1/2 and the New Mexico monthly floor', () => {
   test('an ordinary New Mexico wage is untouched by the floor', () => {
     const r = calculatePaycheck(nm(3000, 'monthly'));
     assert.ok(amountOf(r, 'NM_SIT') > dollars(50));
+  });
+});
+
+describe('Voluntary / nexus-based residence-state withholding', () => {
+  // NY works in every fixture below because data/states/NY-2026.json's own
+  // reciprocity.reciprocalStates is confirmed empty (NY has no reciprocity
+  // agreements with any state) — that isolates these tests from the
+  // reciprocityExemptionReason() gate, which must NOT fire here so it's
+  // clear residenceStateWithholdingLine() is what's actually being tested.
+  const nyWorkingMiResiding = (residenceStateWithholding: PaycheckInput['residenceStateWithholding']) =>
+    input({
+      workState: { code: 'NY' },
+      residenceState: { code: 'MI', certificate: { allowances: 1 } },
+      residenceStateWithholding,
+    });
+
+  test('no election at all: no residence-state line, same as before this feature existed', () => {
+    const r = calculatePaycheck(nyWorkingMiResiding(undefined));
+    assert.equal(r.taxes.find((t) => t.id === 'MI_SIT_RESIDENCE'), undefined);
+  });
+
+  test('nexus: withholds MI tax on the same wages NY already taxed, using MI\'s own certificate', () => {
+    const r = calculatePaycheck(nyWorkingMiResiding({ nexus: true }));
+    // Same math as the Michigan describe block above: biweekly $3,000 →
+    // annual 78,000 − 5,900 = 72,100 × 4.25% = 3,064.25/yr ÷ 26 = 117.86.
+    assert.equal(amountOf(r, 'MI_SIT_RESIDENCE'), dollars(117.86));
+    assert.match(r.taxes.find((t) => t.id === 'MI_SIT_RESIDENCE')?.name ?? '', /^Michigan Income Tax \(residence state\)$/);
+    // NY's own work-state tax is untouched — this is additive, not a swap.
+    assert.ok(amountOf(r, 'NY_SIT') > 0);
+  });
+
+  test('voluntary (no nexus): same tax amount as nexus, but labelled as a courtesy election', () => {
+    const r = calculatePaycheck(nyWorkingMiResiding({ voluntary: true }));
+    assert.equal(amountOf(r, 'MI_SIT_RESIDENCE'), dollars(117.86));
+    const line = r.taxes.find((t) => t.id === 'MI_SIT_RESIDENCE');
+    assert.match(line?.name ?? '', /voluntary/);
+    assert.match(line?.detail ?? '', /voluntarily agreed/);
+  });
+
+  test('nexus: false and voluntary: false explicitly set is the same as no election at all', () => {
+    const r = calculatePaycheck(nyWorkingMiResiding({ nexus: false, voluntary: false }));
+    assert.equal(r.taxes.find((t) => t.id === 'MI_SIT_RESIDENCE'), undefined);
+  });
+
+  test('same state on both sides never fires, regardless of the election', () => {
+    const r = calculatePaycheck(
+      input({
+        workState: { code: 'MI', certificate: { allowances: 1 } },
+        residenceState: { code: 'MI', certificate: { allowances: 1 } },
+        residenceStateWithholding: { nexus: true },
+      }),
+    );
+    assert.equal(r.taxes.find((t) => t.id === 'MI_SIT_RESIDENCE'), undefined);
+  });
+
+  test('a mandatory reciprocity exemption takes precedence over a caller-elected courtesy', () => {
+    // MI/OH have an actual reciprocal agreement (MI-2026.json's own
+    // reciprocity.reciprocalStates includes OH), so an OH resident working
+    // in MI already gets MI_SIT zeroed by reciprocityExemptionReason() —
+    // that mandatory, statute-driven mechanism must win even if the caller
+    // also asserts residenceStateWithholding.voluntary for the same period.
+    const r = calculatePaycheck(
+      input({
+        workState: { code: 'MI', certificate: { allowances: 1 } },
+        residenceState: { code: 'OH' },
+        residenceStateWithholding: { voluntary: true },
+      }),
+    );
+    assert.equal(amountOf(r, 'MI_SIT'), 0);
+    assert.equal(r.taxes.find((t) => t.id === 'OH_SIT_RESIDENCE'), undefined);
   });
 });

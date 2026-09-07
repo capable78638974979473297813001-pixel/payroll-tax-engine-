@@ -200,9 +200,9 @@
     },
     "employeeShareFraction": 0,
     "maxEmployeeShareFraction": 0.5,
-    "wageBase": 184500,
+    "wageBase": "ssWageBase",
     "employerSizeGated": false,
-    "$comment": "Delaware Paid Leave (Healthy Delaware Families Act), wired from this file's own paidLeave block. Two features no other state in this project has, both encoded rather than flattened: (1) the premium depends on employer HEADCOUNT — 1-9 employees exempt from the Act entirely, 10-24 owe the parental component only (0.32%), 25+ owe all three (0.80%) — so the caller names the tier via input.employer.paidLeaveTier and nothing computes without it; (2) the statute puts 100% of the contribution on the EMPLOYER but permits recovering up to HALF from employees, so employeeShareFraction defaults to 0 and an employer election (input.employer.paidLeaveEmployeeShareFraction) moves it, clamped at maxEmployeeShareFraction. Wage base is the federal Social Security wage base ($184,500 for 2026), counting Delaware wages only."
+    "$comment": "Delaware Paid Leave (Healthy Delaware Families Act), wired from this file's own paidLeave block. Two features no other state in this project has, both encoded rather than flattened: (1) the premium depends on employer HEADCOUNT — 1-9 employees exempt from the Act entirely, 10-24 owe the parental component only (0.32%), 25+ owe all three (0.80%) — so the caller names the tier via input.employer.paidLeaveTier and nothing computes without it; (2) the statute puts 100% of the contribution on the EMPLOYER but permits recovering up to HALF from employees, so employeeShareFraction defaults to 0 and an employer election (input.employer.paidLeaveEmployeeShareFraction) moves it, clamped at maxEmployeeShareFraction. Wage base is the federal Social Security wage base, counting Delaware wages only. CORRECTED 2026-09-06: this was a hand-copied literal 184500 (a real, undisclosed drift risk found on a \"go to every state\" pass, the same anti-pattern already fixed for Washington/Connecticut/Massachusetts/Maine's own SS-linked Paid Leave programs the same pass) -- now the 'ssWageBase' sentinel, resolved LIVE from data/federal/2026.json's own socialSecurity.wageBase by resolvePaidLeaveWageBase() in src/taxes/state.ts."
   },
   "nonresidentAllocation": {
     "basis": "source_income_fraction",

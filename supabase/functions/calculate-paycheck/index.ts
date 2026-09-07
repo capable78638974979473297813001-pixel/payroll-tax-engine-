@@ -60,12 +60,31 @@ Deno.serve(async (req) => {
   const keyHash = await sha256Hex(presentedKey);
   const { data: keyRow } = await supabase
     .from('api_keys')
-    .select('id, is_active')
+    .select('id, is_active, expires_at, rate_limit_per_minute')
     .eq('key_hash', keyHash)
     .maybeSingle();
 
   if (!keyRow || !keyRow.is_active) {
     return json(401, { error: 'Invalid or inactive API key.' });
+  }
+
+  if (keyRow.expires_at && new Date(keyRow.expires_at).getTime() <= Date.now()) {
+    return json(401, { error: 'This API key expired on ' + keyRow.expires_at + '.' });
+  }
+
+  // Rate limit: count this key's own hits in the trailing 60s rather than a
+  // shared counter, so one key's burst never throttles any other key.
+  const windowStart = new Date(Date.now() - 60_000).toISOString();
+  const { count: recentCount } = await supabase
+    .from('usage_log')
+    .select('id', { count: 'exact', head: true })
+    .eq('api_key_id', keyRow.id)
+    .gte('created_at', windowStart);
+
+  if ((recentCount ?? 0) >= keyRow.rate_limit_per_minute) {
+    return json(429, {
+      error: `Rate limit exceeded: this key allows ${keyRow.rate_limit_per_minute} requests/minute.`,
+    });
   }
 
   let input: PaycheckInput;
@@ -89,13 +108,20 @@ Deno.serve(async (req) => {
 
   // Fire-and-log, not fire-and-forget-the-response: the caller gets their
   // result either way, but usage/last-used tracking happens before
-  // returning so a burst of concurrent requests can't race past it.
+  // returning so a burst of concurrent requests can't race past it. The
+  // full request + result are captured here (not just a status code) so a
+  // later dispute over what this key did — or whether it was even this key
+  // that did it — can be settled by pulling this row, not by trusting either
+  // side's memory of the call.
   await Promise.all([
     supabase.from('usage_log').insert({
       api_key_id: keyRow.id,
       state_code: input?.workState?.code ?? null,
       status_code: status,
       error: errorText,
+      check_date: input?.checkDate ?? null,
+      request: input ?? null,
+      result: responseBody,
     }),
     supabase.from('api_keys').update({ last_used_at: new Date().toISOString() }).eq('id', keyRow.id),
   ]);

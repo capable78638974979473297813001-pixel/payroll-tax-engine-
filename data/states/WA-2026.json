@@ -58,14 +58,14 @@
   ],
   "statePaidLeaveEmployee": {
     "rate": 0.00807159,
-    "wageBase": 184500,
-    "$comment": "= 0.0113 (total PFML rate) x 0.7143 (employee share fraction), stored at full precision so applyRate()'s single rounding reproduces Washington's own 'gross wages x 0.0113 x 0.7143, round once' formula exactly (not two independently-rounded multiplications chained together, which can drift by a cent). Wage base is the federal Social Security wage base ($184,500 for 2026) -- Washington's own toolkit states this by reference ('up to the Social Security cap') rather than publishing an independent dollar figure, so this file's wageBase must be kept in sync with data/federal/2026.json's own socialSecurity.wageBase if that ever changes -- same disclosed sync-risk pattern as Connecticut/New York's own SS-cap-linked premiums in this project.",
+    "wageBase": "ssWageBase",
+    "$comment": "= 0.0113 (total PFML rate) x 0.7143 (employee share fraction), stored at full precision so applyRate()'s single rounding reproduces Washington's own 'gross wages x 0.0113 x 0.7143, round once' formula exactly (not two independently-rounded multiplications chained together, which can drift by a cent). Wage base is the federal Social Security wage base ($184,500 for 2026) -- Washington's own toolkit states this by reference ('up to the Social Security cap') rather than publishing an independent dollar figure. CORRECTED 2026-09-06: this used to be a hand-copied literal 184500 with a comment warning it 'must be kept in sync ... or this file will silently drift stale' -- a real, disclosed drift risk with no enforcement, the same anti-pattern Kentucky's capAtSSWageBase mechanism was already built to avoid for a different tax. Now the 'ssWageBase' sentinel string, resolved LIVE from data/federal/2026.json's own socialSecurity.wageBase by resolvePaidLeaveWageBase() in src/taxes/state.ts -- this can no longer drift, by construction, whatever year's federal figure applies. (Connecticut and Massachusetts's own Paid Leave programs share this exact SS-cap-linked design and got the same fix the same pass; NEW YORK's own PFL cap is NOT SS-linked at all -- it's 52x NY's own average weekly wage, a coincidentally-similar-shaped but functionally unrelated figure -- so an earlier version of this note incorrectly grouped NY into this pattern; corrected here.)",
     "exemptPretax": []
   },
   "statePaidLeaveEmployer": {
     "totalRate": 0.0113,
     "employeeShareFraction": 0.7143,
-    "wageBase": 184500,
+    "wageBase": "ssWageBase",
     "exemptPretax": []
   },
   "stateLongTermCareEmployee": {

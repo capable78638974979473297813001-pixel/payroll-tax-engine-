@@ -55,13 +55,14 @@
   },
   "statePaidLeaveEmployee": {
     "rate": 0.005,
-    "wageBase": 184500,
+    "wageBase": "ssWageBase",
+    "wageBaseComment": "Maine's own statute (quoted above in maineWithholding's sources) ties the wage base to 'the annual base limit set by the U.S. Social Security Administration.' CORRECTED 2026-09-06: this was a hand-copied literal 184500 (a real, undisclosed drift risk found on a \"go to every state\" pass, the same anti-pattern already fixed for Washington/Connecticut/Massachusetts/Delaware's own SS-linked Paid Leave programs the same pass) -- now the 'ssWageBase' sentinel, resolved LIVE from data/federal/2026.json's own socialSecurity.wageBase by resolvePaidLeaveWageBase() in src/taxes/state.ts.",
     "exemptPretax": []
   },
   "statePaidLeaveEmployer": {
     "totalRate": 0.01,
     "employeeShareFraction": 0.5,
-    "wageBase": 184500,
+    "wageBase": "ssWageBase",
     "exemptPretax": []
   },
   "reciprocity": {

@@ -143,15 +143,16 @@
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
-    "wageBase": 9000,
-    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
-    "newEmployerRate": 0.027,
-    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
-    "experienceRange": {
-      "min": 0.0006,
-      "max": 0.103
+    "wageBase": {
+      "default": 9500,
+      "qualifiedEmployer": 9000
     },
+    "wageBaseSource": "CORRECTED 2026-09-06 (found on a 'go to every state, fix real bugs not just disclose them' pass): this had been flattened to a bare 9000 — the QUALIFIED-employer figure applied unconditionally to every employer — even though unemploymentInsurance.wageBase above had already documented the real $9,500 default / $9,000 qualified split with its own primary source. Applying $9,000 to a non-qualified employer under-caps (and so under-withholds/under-remits) their SUTA by $500 of wages. stateUnemploymentEmployerTax() in src/taxes/state.ts now reads this as a two-tier object, resolved via EmployerContext.stateUnemploymentQualifiedForReducedWageBase (keyed by state code, caller-supplied) — defaulting to the $9,500 statutory base when the caller doesn't affirmatively say the employer qualifies, since the reduced base is an opt-in discount, not something to assume in the caller's favor.",
+    "newEmployerRate": 0.027,
+    "newEmployerRateSource": "Matches unemploymentInsurance.rateFormula.newEmployerSchedule.year1/year2 above exactly (both 0.027) — primary_source_confirmed from Michigan's own Section 19 statutory-formula page, not just the earlier OnPay secondary figure this field cites historically. Correct ONLY for an employer's first 2 years; years 3+ require the phased CBC/ABC/NBC formula unemploymentInsurance.rateFormula documents in full, which this engine has no per-employer history (60-month benefit/payroll ratios, reserve balances) to compute — same disclosed structural limit as before, unchanged by this pass.",
+    "experienceRange": null,
+    "experienceRangeNote": "CORRECTED 2026-09-06: this field previously stated an invented {min: 0.0006, max: 0.103} range that directly contradicted unemploymentInsurance.confidence above, which explicitly says 'No simple published min/max bound exists for experienced employers ... stating an invented min/max here would be less accurate than the real formula.' The field was never actually READ by stateUnemploymentEmployerTax() (confirmed by reading the function) so this was a self-contradictory, unused, silently-stale value, not a live calculation bug — but a real data-integrity issue worth fixing on its own, the same class of 'disclosed gap says one thing, the actual field says another' error as WV's Charleston rate and Denver's false already-wired claim elsewhere in this project.",
     "employerSuppliedRateRequired": false,
-    "confidence": "cross_source_confirmed"
+    "confidence": "primary_source_confirmed for the wage base and the year-1/2 new-employer rate (both now consistent with unemploymentInsurance above); years 3+ genuinely unmodellable without per-employer history, disclosed rather than approximated."
   }
 }

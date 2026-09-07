@@ -1,0 +1,1471 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Omnia — payroll tax for all 50 states, DC and the local lines underneath</title>
+<meta name="description" content="Omnia is nationwide US payroll tax infrastructure: gross-to-net withholding for all 50 states, DC and the municipal, county and school district taxes underneath them — at a price a regional payroll company can sign without a procurement team." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* =====================================================================
+     OMNIA — "the ledger" design system.
+
+     The premise: this product reads tax tables and emits pay registers,
+     and the person buying it spends their day inside those documents. So
+     the site is built from that vocabulary instead of SaaS-landing-page
+     vocabulary — green-bar ledger banding, ruled tabular blocks, red-ink
+     stamps on the figures that matter, machine-output monospace for
+     anything a computer produced, and a citation line under data the way
+     a working paper carries its source.
+
+     Type: Public Sans (the typeface of the US federal design system —
+     literally the font of American government forms) for prose, IBM Plex
+     Mono for headlines and every number.
+     ===================================================================== */
+  :root {
+    color-scheme: light;
+
+    /* document stock */
+    --paper:      #FBFAF5;
+    --paper-2:    #F5F3EB;
+    --paper-3:    #EFECE1;
+    /* the green bar of accounting ledger paper */
+    --ledger:     #E4EDE3;
+    --ledger-2:   #D6E3D5;
+
+    --ink:        #14140F;
+    --ink-2:      #4B4B42;
+    --ink-3:      #7C7C70;
+    --ink-4:      #A5A498;
+
+    --rule:       #D5D2C4;
+    --rule-2:     #E6E3D7;
+
+    /* red ink. Used ONLY on a figure or flag that matters. */
+    --stamp:      #B23A24;
+    --stamp-soft: #F7E7E2;
+    /* verification green — citations, confirmed marks */
+    --verify:     #2F5D3A;
+    --verify-soft:#E4EDE3;
+
+    --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, Menlo, monospace;
+    --sans: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+
+    --container: 1200px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  img, svg { max-width: 100%; }
+  a { color: inherit; }
+  p { margin: 0; }
+
+  /* Headlines are machine output: mono, tight, sentence case. */
+  h1, h2, h3 {
+    font-family: var(--mono);
+    margin: 0;
+    font-weight: 500;
+    letter-spacing: -.035em;
+    line-height: 1.08;
+  }
+  h1 { font-size: clamp(32px, 4.4vw, 54px); }
+  h2 { font-size: clamp(24px, 2.9vw, 34px); }
+  h3 { font-size: 16px; font-weight: 600; letter-spacing: -.01em; line-height: 1.35; }
+
+  .container { width: 100%; max-width: var(--container); margin: 0 auto; padding: 0 28px; }
+  @media (max-width: 760px) { .container { padding: 0 16px; } }
+
+  .section { padding: 84px 0; }
+  @media (max-width: 760px) { .section { padding: 54px 0; } }
+  .bg-paper-2 { background: var(--paper-2); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  .bg-ink { background: var(--ink); color: var(--paper); }
+
+  /* ---------- section markers: §01 style, like a form ---------- */
+  .label {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-3); margin: 0 0 20px;
+  }
+  .label::before {
+    content: attr(data-sec);
+    color: var(--stamp); font-weight: 600;
+  }
+  .label::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+  .bg-ink .label { color: var(--ink-4); }
+  .bg-ink .label::after { background: rgba(255,255,255,.18); }
+  .bg-ink .label::before { color: #E0836C; }
+
+  .lead { font-size: clamp(16px, 1.25vw, 18px); line-height: 1.65; color: var(--ink-2); }
+  .bg-ink .lead { color: #ADACA0; }
+  .fine { font-size: 13px; line-height: 1.55; color: var(--ink-3); }
+
+  /* every number on this site is tabular mono */
+  .num, td.num, .stat .n, .fact .n {
+    font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -.02em;
+  }
+
+  /* ---------- citation line: the product's whole thesis, as a motif ---------- */
+  .cite {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .04em; color: var(--ink-4);
+    border-top: 1px dashed var(--rule); padding-top: 8px; margin-top: 14px;
+  }
+  .cite b { color: var(--verify); font-weight: 500; }
+
+  /* ---------- buttons: stamped, square, no bounce ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: .02em;
+    text-decoration: none; cursor: pointer; white-space: nowrap;
+    padding: 13px 20px; border-radius: 2px;
+    background: var(--ink); color: var(--paper); border: 1px solid var(--ink);
+    transition: background .14s ease, color .14s ease;
+  }
+  .btn:hover { background: var(--stamp); border-color: var(--stamp); color: #fff; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-secondary { background: transparent; color: var(--ink); border-color: var(--rule); }
+  .btn-secondary:hover { background: transparent; border-color: var(--ink); color: var(--ink); }
+  .btn-sm { padding: 9px 14px; font-size: 12px; }
+  .bg-ink .btn { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+  .bg-ink .btn:hover { background: var(--stamp); border-color: var(--stamp); color: #fff; }
+  .bg-ink .btn-secondary { background: transparent; color: var(--paper); border-color: rgba(255,255,255,.3); }
+
+  .link-arrow {
+    display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+    font-family: var(--mono); font-size: 12px; letter-spacing: .02em; color: var(--ink);
+    border-bottom: 1px solid var(--rule); padding-bottom: 2px;
+    transition: border-color .14s ease, color .14s ease;
+  }
+  .link-arrow:hover { color: var(--stamp); border-bottom-color: var(--stamp); }
+  .bg-ink .link-arrow { color: var(--paper); border-bottom-color: rgba(255,255,255,.3); }
+
+  /* ---------- masthead ---------- */
+  .announce {
+    background: var(--ink); color: var(--paper);
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: .02em;
+    text-align: center; padding: 8px 20px;
+  }
+  .announce b { color: #E9A08B; font-weight: 500; }
+  .announce a { color: var(--paper); text-decoration: underline; text-underline-offset: 3px; }
+
+  header.site {
+    position: sticky; top: 0; z-index: 60; background: var(--paper);
+    border-bottom: 1px solid var(--ink);
+  }
+  .head-inner { display: flex; align-items: center; gap: 26px; height: 62px; position: relative; }
+  .logo { display: inline-flex; align-items: baseline; gap: 11px; text-decoration: none; }
+  .logo svg { align-self: center; }
+  .logo-word { font-family: var(--mono); font-size: 20px; font-weight: 600; letter-spacing: -.06em; }
+  .logo-sub {
+    font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--ink-3); padding-left: 11px; border-left: 1px solid var(--rule);
+  }
+  .main-nav { display: flex; align-items: center; gap: 26px; margin-left: auto; }
+  .main-nav > a { font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); text-decoration: none; letter-spacing: -.01em; }
+  .main-nav > a:hover { color: var(--stamp); }
+  .main-nav > a.btn { color: var(--paper); }
+  .main-nav > a.btn:hover { color: #fff; }
+  .burger { display: none; background: none; border: 0; cursor: pointer; padding: 8px; margin-left: auto; }
+  .burger span { display: block; width: 20px; height: 1.5px; background: var(--ink); margin: 5px 0; }
+  @media (max-width: 1000px) {
+    .main-nav { display: none; position: absolute; top: 62px; left: 0; right: 0; background: var(--paper);
+      flex-direction: column; align-items: stretch; gap: 0; padding: 6px 0 16px; border-bottom: 1px solid var(--ink); }
+    .main-nav.open { display: flex; }
+    .main-nav > a { padding: 13px 0; border-bottom: 1px solid var(--rule-2); }
+    .main-nav > a.btn { width: max-content; margin-top: 14px; }
+    .burger { display: block; }
+  }
+
+  /* ---------- hero: a headline set against a specimen ---------- */
+  .hero-wrap { border-bottom: 1px solid var(--ink); }
+  .hero { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.02fr); gap: 0; }
+  @media (max-width: 1000px) { .hero { grid-template-columns: 1fr; } }
+  .hero-left { padding: 62px 40px 54px 0; }
+  .hero-right { padding: 62px 0 54px 40px; border-left: 1px solid var(--rule); }
+  @media (max-width: 1000px) {
+    .hero-left { padding: 44px 0 34px; }
+    .hero-right { padding: 34px 0 44px; border-left: none; border-top: 1px solid var(--rule); }
+  }
+  .hero h1 { margin-bottom: 20px; }
+  .hero h1 mark { background: none; color: var(--stamp); }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+
+  /* facts: a ruled register, not badges */
+  .facts { margin-top: 34px; border-top: 1px solid var(--ink); }
+  .fact {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+    padding: 11px 0; border-bottom: 1px solid var(--rule-2);
+  }
+  .fact:nth-child(even) { background: var(--ledger); margin: 0 -10px; padding-left: 10px; padding-right: 10px; }
+  .fact .l { font-size: 13.5px; color: var(--ink-2); }
+  .fact .n { font-size: 17px; font-weight: 500; }
+
+  /* ---------- lead form ---------- */
+  .leadform { border: 1px solid var(--ink); background: var(--paper); margin-top: 30px; }
+  .leadform-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    padding: 12px 18px; background: var(--ink); color: var(--paper);
+  }
+  .leadform-head .label { margin: 0; color: var(--paper); }
+  .leadform-head .label::after { display: none; }
+  .leadform-head .label::before { color: #E9A08B; }
+  .leadform-head > span { font-family: var(--mono); font-size: 10.5px; color: var(--ink-4); }
+  .leadform-body { padding: 20px 18px 18px; }
+  .leadform p.lead { font-size: 14px; margin-bottom: 18px; }
+  .leadform-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px) { .leadform-grid { grid-template-columns: 1fr; } }
+  .leadform-field { display: flex; flex-direction: column; gap: 5px; }
+  .leadform-field label {
+    font-family: var(--mono); font-size: 9.5px; font-weight: 500; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .leadform-field input {
+    font-family: var(--sans); font-size: 15px; color: var(--ink); padding: 10px 11px;
+    border: 1px solid var(--rule); border-radius: 0; background: var(--paper);
+  }
+  .leadform-field input:focus { outline: none; border-color: var(--ink); background: #fff; }
+  .leadform-field input:invalid:not(:placeholder-shown) { border-color: var(--stamp); }
+  .leadform-error {
+    font-family: var(--mono); font-size: 12px; color: var(--stamp); background: var(--stamp-soft);
+    border: 1px solid #E9C9C0; padding: 9px 11px; margin: 14px 0 0;
+  }
+  .leadform-submit { width: 100%; margin-top: 16px; }
+  .leadform-fine { font-family: var(--mono); font-size: 10.5px; color: var(--ink-4); margin: 12px 0 0; letter-spacing: .02em; }
+  .leadform-success { display: none; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .leadform.is-done .leadform-form,
+  .leadform.is-done .leadform-fine,
+  .leadform.is-done > p.lead { display: none; }
+  .leadform.is-done .leadform-body .leadform-success { display: flex; }
+
+  /* ---------- ledger tables: the signature ---------- */
+  .ledger-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .ledger-table thead th {
+    font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: .11em;
+    text-transform: uppercase; color: var(--ink-3); text-align: left;
+    padding: 9px 12px; border-bottom: 1px solid var(--ink); white-space: nowrap;
+  }
+  .ledger-table thead th.num, .ledger-table td.num { text-align: right; }
+  .ledger-table tbody td { padding: 11px 12px; border-bottom: 1px solid var(--rule-2); color: var(--ink-2); vertical-align: top; }
+  .ledger-table tbody tr:nth-child(even) td { background: var(--ledger); }
+  .ledger-table tbody td:first-child { color: var(--ink); font-weight: 500; }
+  .ledger-table td .sub { display: block; font-size: 12.5px; color: var(--ink-3); margin-top: 3px; line-height: 1.5; }
+  .stamp { color: var(--stamp); font-weight: 600; }
+
+  /* ---------- sources strip ---------- */
+  .sources { border-bottom: 1px solid var(--rule); background: var(--paper-2); }
+  .sources-inner { padding: 22px 0; }
+  .sources-list { display: flex; flex-wrap: wrap; gap: 8px 0; }
+  .sources-list span {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); padding: 0 14px;
+    border-right: 1px solid var(--rule);
+  }
+  .sources-list span:last-child { border-right: none; }
+  .sources-list span:first-child { padding-left: 0; }
+
+  /* ---------- stats band ---------- */
+  .band-head { max-width: 760px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 44px; border-top: 1px solid rgba(255,255,255,.22); }
+  @media (max-width: 860px) { .stats { grid-template-columns: 1fr 1fr; } }
+  .stat { padding: 22px 20px 22px 0; border-right: 1px solid rgba(255,255,255,.14); }
+  .stat:last-child { border-right: none; }
+  .stat .n { font-size: clamp(28px, 3.2vw, 38px); font-weight: 500; line-height: 1; }
+  .stat .n em { font-style: normal; color: #E9A08B; }
+  .stat .l { font-size: 13px; line-height: 1.5; color: #9C9B90; margin-top: 9px; }
+
+  /* ---------- section heads ---------- */
+  .sec-head { max-width: 720px; margin-bottom: 42px; }
+  .sec-head h2 + .lead { margin-top: 18px; }
+
+  /* ---------- feature rows: a numbered register, not cards ---------- */
+  .feature-grid { border-top: 1px solid var(--ink); }
+  .feature {
+    display: grid; grid-template-columns: 52px minmax(0,240px) minmax(0,1fr) auto;
+    gap: 24px; align-items: baseline;
+    padding: 20px 12px; border-bottom: 1px solid var(--rule-2);
+  }
+  .feature:nth-child(even) { background: var(--ledger); }
+  @media (max-width: 900px) {
+    .feature { grid-template-columns: 44px 1fr; gap: 8px 16px; }
+    .feature .link-arrow { grid-column: 2; justify-self: start; margin-top: 6px; }
+  }
+  .feature .idx { font-family: var(--mono); font-size: 11.5px; color: var(--stamp); font-weight: 500; }
+  .feature h3 { font-family: var(--sans); }
+  .feature p { font-size: 14px; line-height: 1.6; color: var(--ink-2); }
+
+  /* ---------- split ---------- */
+  .split { display: grid; grid-template-columns: repeat(2, 1fr); gap: 52px; align-items: start; }
+  @media (max-width: 1000px) { .split { grid-template-columns: 1fr; gap: 36px; } }
+  .checklist { list-style: none; margin: 24px 0 0; padding: 0; border-top: 1px solid var(--ink); }
+  .checklist li {
+    position: relative; padding: 14px 12px 14px 34px; font-size: 14.5px; line-height: 1.6;
+    color: var(--ink-2); border-bottom: 1px solid var(--rule-2);
+  }
+  .checklist li:nth-child(even) { background: var(--ledger); }
+  .checklist li b { color: var(--ink); font-weight: 600; }
+  .checklist li::before {
+    content: "✓"; position: absolute; left: 12px; top: 14px;
+    font-family: var(--mono); font-size: 12px; color: var(--verify);
+  }
+  .bg-ink .checklist { border-color: rgba(255,255,255,.25); }
+  .bg-ink .checklist li { border-color: rgba(255,255,255,.12); color: #ADACA0; }
+  .bg-ink .checklist li:nth-child(even) { background: rgba(255,255,255,.04); }
+  .bg-ink .checklist li b { color: #fff; }
+  .bg-ink .checklist li::before { color: #7FB08C; }
+
+  /* ---------- code: terminal output ---------- */
+  .code { border: 1px solid var(--ink); background: var(--ink); }
+  .code-head {
+    display: flex; align-items: center; padding: 9px 14px; border-bottom: 1px solid rgba(255,255,255,.16);
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-4);
+  }
+  .code pre {
+    margin: 0; padding: 16px 14px; overflow-x: auto; font-family: var(--mono);
+    font-size: 12px; line-height: 1.7; color: #D6D4C8; font-variant-numeric: tabular-nums;
+  }
+  .code .k { color: #9DBFA6; } .code .s { color: #D2B48C; } .code .v { color: #A8BBD0; }
+  .code .c { color: #6E6D63; } .code .hi { color: #E9A08B; }
+
+  /* ---------- coverage grid ---------- */
+  .state-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 0; border-top: 1px solid var(--ink); border-left: 1px solid var(--rule-2); }
+  .state {
+    font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12px;
+    padding: 11px 6px; text-align: center; color: var(--ink-2);
+    border-right: 1px solid var(--rule-2); border-bottom: 1px solid var(--rule-2);
+  }
+  .state.local { background: var(--ledger-2); color: var(--ink); font-weight: 600; }
+  .state.local::after { content: "•"; color: var(--stamp); margin-left: 3px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 26px; margin-top: 16px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .legend i { display: inline-block; width: 9px; height: 9px; margin-right: 7px; vertical-align: 0; }
+
+  /* ---------- comparison table ---------- */
+  .vs-wrap { border: 1px solid var(--ink); }
+  .vs-scroll { overflow-x: auto; }
+  table.vs { width: 100%; border-collapse: collapse; min-width: 700px; }
+  table.vs th, table.vs td { text-align: left; padding: 16px 18px; vertical-align: top; font-size: 14px; line-height: 1.55; }
+  table.vs thead th {
+    background: var(--ink); color: var(--paper);
+    font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .06em;
+  }
+  table.vs thead th.ours { color: #E9A08B; }
+  table.vs tbody tr { border-bottom: 1px solid var(--rule-2); }
+  table.vs tbody tr:nth-child(even) { background: var(--ledger); }
+  table.vs tbody tr:last-child { border-bottom: none; }
+  table.vs td.row-label { font-family: var(--mono); font-size: 12px; width: 20%; color: var(--ink); }
+  table.vs td.them { color: var(--ink-3); width: 39%; }
+  table.vs td.ours { color: var(--ink-2); width: 41%; }
+  table.vs td.ours b { color: var(--ink); font-weight: 600; }
+  .vs-foot { padding: 16px 18px; border-top: 1px solid var(--ink); font-size: 13.5px; color: var(--ink-3); background: var(--paper-2); }
+
+  /* ---------- quotes: marginalia, not testimonial cards ---------- */
+  .quote-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; }
+  @media (max-width: 900px) { .quote-grid { grid-template-columns: 1fr; gap: 32px; } }
+  .quote { border-left: 2px solid var(--stamp); padding-left: 20px; }
+  .quote p.q { font-size: 17px; line-height: 1.6; color: var(--ink); }
+  .quote .who { margin-top: 12px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+
+  /* ---------- rate card ---------- */
+  .rate-card { border: 1px solid var(--ink); margin-top: 36px; }
+  .rate-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+    padding: 13px 18px; background: var(--ink); color: var(--paper);
+  }
+  .rate-head h3 { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--paper); }
+  .rate-head .label { margin: 0; color: var(--ink-4); }
+  .rate-head .label::after { display: none; }
+  .rate-head .label::before { color: #E9A08B; }
+  .trial-pill {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink); background: #E9A08B; padding: 5px 10px; font-weight: 500;
+  }
+  .rate-row {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 14px;
+    padding: 13px 18px; border-bottom: 1px solid var(--rule-2); font-size: 14.5px; color: var(--ink-2);
+  }
+  .rate-row:nth-child(even) { background: var(--ledger); }
+  .rate-row:last-child { border-bottom: none; }
+  .rate-row b { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 500; color: var(--ink); }
+  .rate-row.alt { border-top: 1px solid var(--ink); background: var(--paper-2); }
+  .rate-row.alt b { color: var(--stamp); }
+
+  /* ---------- estimator ---------- */
+  .est-wrap { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); border: 1px solid var(--ink); border-top: none; }
+  @media (max-width: 820px) { .est-wrap { grid-template-columns: 1fr; } }
+  .est-inputs { padding: 24px 18px; }
+  .est-output { padding: 24px 18px; background: var(--paper-2); border-left: 1px solid var(--rule); }
+  @media (max-width: 820px) { .est-output { border-left: none; border-top: 1px solid var(--rule); } }
+  .est-field { margin-bottom: 16px; }
+  .est-field label {
+    display: block; font-family: var(--mono); font-size: 9.5px; font-weight: 500; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-3); margin-bottom: 7px;
+  }
+  .est-field input[type="number"], .est-field select {
+    width: 100%; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 16px;
+    color: var(--ink); padding: 10px 11px; border: 1px solid var(--rule); border-radius: 0; background: var(--paper);
+  }
+  .est-field select { font-family: var(--sans); }
+  .est-field input[type="number"]:focus, .est-field select:focus { outline: none; border-color: var(--ink); }
+  .est-toggle { display: flex; gap: 0; border: 1px solid var(--rule); }
+  .est-toggle button {
+    flex: 1; font-family: var(--mono); font-size: 12.5px; padding: 11px 10px; border: none;
+    background: var(--paper); color: var(--ink-2); cursor: pointer; border-right: 1px solid var(--rule);
+  }
+  .est-toggle button:last-child { border-right: none; }
+  .est-toggle button.on { background: var(--ink); color: var(--paper); }
+  .est-note { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-top: 2px; line-height: 1.6; }
+
+  .est-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; font-size: 14px; color: var(--ink-2); border-bottom: 1px solid var(--rule-2); }
+  .est-row span:last-child { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--ink); }
+  .est-row.total { border-bottom: none; border-top: 1px solid var(--ink); margin-top: 6px; padding-top: 16px; align-items: baseline; }
+  .est-row.total span:first-child { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+  .est-row.total span:nth-child(2) { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 36px; font-weight: 500; letter-spacing: -.04em; color: var(--stamp); }
+  .est-effective { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-top: 6px; }
+  .est-send { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; align-items: center; }
+  .est-send input[type="email"] {
+    flex: 1; min-width: 190px; font-family: var(--sans); font-size: 14.5px; color: var(--ink);
+    padding: 11px 11px; border: 1px solid var(--rule); border-radius: 0; background: var(--paper);
+  }
+  .est-send input[type="email"]:focus { outline: none; border-color: var(--ink); }
+  .est-msg { font-family: var(--mono); font-size: 12px; color: var(--verify); margin-top: 10px; }
+  .est-msg.err { color: var(--stamp); }
+  .est-msg[hidden] { display: none; }
+  .est-fine { font-family: var(--mono); font-size: 10.5px; color: var(--ink-4); margin-top: 14px; line-height: 1.6; }
+
+  /* ---------- cta ---------- */
+  .cta-card { border: 1px solid var(--ink); padding: 54px 40px; text-align: center; background: var(--paper-2); }
+  @media (max-width: 700px) { .cta-card { padding: 38px 20px; } }
+  .cta-card .lead { max-width: 540px; margin: 18px auto 26px; }
+
+  /* ---------- footer ---------- */
+  footer.site { border-top: 1px solid var(--ink); padding: 48px 0 32px; background: var(--paper-2); }
+  .foot-grid { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: 32px; }
+  @media (max-width: 1000px) { .foot-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 680px) { .foot-grid { grid-template-columns: 1fr 1fr; } }
+  footer.site h4 {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-3); margin: 0 0 14px; font-weight: 500;
+  }
+  footer.site ul { list-style: none; margin: 0; padding: 0; }
+  footer.site li { padding: 5px 0; }
+  footer.site a { font-size: 14px; color: var(--ink-2); text-decoration: none; }
+  footer.site a:hover { color: var(--stamp); }
+  .foot-blurb { font-size: 13.5px; color: var(--ink-3); margin-top: 16px; max-width: 280px; line-height: 1.6; }
+  .foot-bottom {
+    margin-top: 44px; padding-top: 20px; border-top: 1px solid var(--rule);
+    display: flex; flex-wrap: wrap; gap: 12px 26px; justify-content: space-between;
+    font-family: var(--mono); font-size: 11px; color: var(--ink-4);
+  }
+  .foot-links { display: flex; gap: 22px; flex-wrap: wrap; }
+
+  /* ---------- reveal / motion ---------- */
+  .rv { opacity: 0; transform: translateY(8px); transition: opacity .45s ease, transform .45s ease; }
+  .rv.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .rv { opacity: 1; transform: none; transition: none; }
+    .pin-ping, .boundary { animation: none; }
+    .fade-late { opacity: 1; animation: none; }
+  }
+  .pin-ping { transform-box: fill-box; transform-origin: center; animation: ping 3s ease-out infinite; }
+  @keyframes ping { 0% { transform: scale(.6); opacity: .5 } 70% { transform: scale(1.9); opacity: 0 } 100% { opacity: 0 } }
+  .boundary { stroke-dasharray: 5 5; }
+  .fade-late { opacity: 0; animation: fadeIn .5s .9s ease forwards; }
+  @keyframes fadeIn { to { opacity: 1 } }
+</style>
+</head>
+<body>
+
+<div class="announce">
+  <b>Now live</b> — all 50 states, the District, and every local registry underneath them.
+  <a href="#coverage">See the coverage map</a>
+</div>
+
+<header class="site">
+  <div class="container head-inner">
+    <a class="logo" href="#top" aria-label="Omnia home">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <circle class="logo-ring" cx="20" cy="20" r="15.4" stroke="#14161A" stroke-width="3.4"/>
+        <path d="M12.4 22.6 20 15.2l7.6 7.4" stroke="#2E6B55" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="20" cy="25.4" r="2.5" fill="#9A5B2C"/>
+      </svg>
+      <span class="logo-type">
+        <span class="logo-word">Omnia</span>
+        <span class="logo-sub">Payroll Tax</span>
+      </span>
+    </a>
+
+    <button class="burger" id="burger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+
+    <nav class="main-nav" id="mainNav">
+      <a href="#engine">Omnia Engine</a>
+      <a href="#coverage">Coverage</a>
+      <a href="#api">Developers</a>
+      <a href="#why">Why Omnia</a>
+      <a href="#pricing">Pricing</a>
+      <a class="btn btn-sm" href="#lead">Get a demo</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============== HERO ============== -->
+  <div class="hero-wrap">
+    <div class="container hero">
+      <div class="hero-left">
+      <div>
+        <p class="label" data-sec="&#9656;">US payroll tax infrastructure</p>
+        <h1>Every state. Every local line. <mark>One</mark> API call.</h1>
+        <p class="lead">
+          All fifty states, the District of Columbia, and the municipal, county and school district taxes
+          underneath them — every rate carrying the source it came from and the date it was verified. The
+          same nationwide coverage the big engines sell, at a price a regional payroll company can sign
+          without a procurement team.
+        </p>
+
+        <div class="leadform rv in" id="lead">
+          <div class="leadform-head">
+            <p class="label" data-sec="&#9656;">Start here</p>
+            <span>14-day evaluation</span>
+          </div>
+          <div class="leadform-body">
+          <p class="lead">
+            Tell us who you are and where you work &mdash; you're straight into your console with a sandbox
+            key ready to go. We'll follow up separately with a price built around your volume.
+          </p>
+          <form id="leadForm" class="leadform-form" novalidate>
+            <div class="leadform-grid">
+              <div class="leadform-field">
+                <label for="leadName">Full name</label>
+                <input id="leadName" name="name" type="text" autocomplete="name" placeholder="Jordan Casey" required />
+              </div>
+              <div class="leadform-field">
+                <label for="leadEmail">Work email</label>
+                <input id="leadEmail" name="email" type="email" autocomplete="email" placeholder="jordan@yourcompany.com" required />
+              </div>
+              <div class="leadform-field">
+                <label for="leadCompany">Business / company name</label>
+                <input id="leadCompany" name="company" type="text" autocomplete="organization" placeholder="Acme Payroll Services" required />
+              </div>
+              <div class="leadform-field">
+                <label for="leadPhone">Phone number</label>
+                <input id="leadPhone" name="phone" type="tel" autocomplete="tel" placeholder="(555) 123-4567" required />
+              </div>
+            </div>
+            <p class="leadform-error" id="leadError" hidden>Fill in all four fields with a valid work email before continuing.</p>
+            <button type="submit" class="btn leadform-submit">Get my price</button>
+          </form>
+          <p class="leadform-fine">No spam &mdash; this goes straight to pricing, not a drip campaign.</p>
+
+          </div>
+          <div class="leadform-body"><div class="leadform-success" id="leadSuccess">
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                <circle cx="11" cy="11" r="10" fill="#EDF3F0" stroke="#2E6B55" stroke-width="1.4"/>
+                <path d="M6.6 11.2 9.4 14l6-6.8" stroke="#2E6B55" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span id="leadSuccessText">You're in. Taking you to your console&hellip;</span>
+            </div>
+            <a class="btn btn-sm" id="leadDocsLink" href="docs.html" style="margin-top:6px;align-self:flex-start">Open the console &rarr;</a>
+          </div></div>
+        </div>
+
+        <div class="hero-actions">
+          <a class="btn btn-ghost" href="#api">Read the API docs</a>
+        </div>
+        <div class="facts">
+          <div class="fact"><span class="l">Jurisdictions live</span><span class="n">51</span></div>
+          <div class="fact"><span class="l">Local tax registries</span><span class="n">8</span></div>
+          <div class="fact"><span class="l">Free evaluation</span><span class="n">14 days</span></div>
+          <div class="fact"><span class="l">Annual minimum</span><span class="n stamp">None</span></div>
+        </div>
+      </div>
+
+      </div>
+
+      <div class="hero-right">
+        <svg viewBox="0 0 520 430" role="img" aria-label="Map illustration: an interpolated curb point lands on the far side of a city tax boundary while Omnia's rooftop point sits on the addressed building inside the city" style="width:100%;height:auto;filter:drop-shadow(0 26px 46px rgba(10,37,64,.22))">
+          <defs><clipPath id="cardClip"><rect x="8" y="8" width="504" height="414" rx="20"/></clipPath></defs>
+          <rect x="8" y="8" width="504" height="414" rx="20" fill="#FFFFFF" stroke="#E3E3DF"/>
+          <g clip-path="url(#cardClip)">
+            <g stroke="#F3F3F0" stroke-width="15" stroke-linecap="square">
+              <path d="M-10 120H530"/><path d="M-10 300H530"/><path d="M140 0V440"/><path d="M370 0V440"/>
+            </g>
+            <g stroke="#E3E3DF" stroke-width="1" opacity=".85">
+              <path d="M-10 112.5H530"/><path d="M-10 127.5H530"/><path d="M-10 292.5H530"/><path d="M-10 307.5H530"/>
+              <path d="M132.5 0V440"/><path d="M147.5 0V440"/><path d="M362.5 0V440"/><path d="M377.5 0V440"/>
+            </g>
+            <g fill="#FAFAF8" stroke="#E3E3DF">
+              <rect x="26" y="146" width="82" height="58" rx="5"/><rect x="26" y="216" width="82" height="60" rx="5"/>
+              <rect x="176" y="216" width="70" height="60" rx="5"/>
+              <rect x="284" y="146" width="60" height="58" rx="5"/><rect x="284" y="216" width="60" height="60" rx="5"/>
+              <rect x="400" y="146" width="86" height="58" rx="5"/><rect x="400" y="216" width="86" height="60" rx="5"/>
+              <rect x="26" y="330" width="82" height="62" rx="5"/><rect x="176" y="330" width="70" height="62" rx="5"/>
+              <rect x="400" y="330" width="86" height="62" rx="5"/>
+            </g>
+            <rect x="176" y="142" width="70" height="62" rx="5" fill="#EDF3F0" stroke="#2E6B55" stroke-width="1.8"/>
+            <path class="boundary" d="M262 -10V440" stroke="#9A5B2C" stroke-width="2.6"/>
+            <text x="272" y="112" font-family="'JetBrains Mono', monospace" font-size="10" fill="#9A5B2C" letter-spacing="1.6">CITY LINE</text>
+            <g font-family="Inter, sans-serif" font-size="12.5">
+              <text x="28" y="56" fill="#14161A" font-weight="600">Columbus</text>
+              <text x="28" y="76" fill="#838A94">local withholding 2.5%</text>
+              <text x="290" y="56" fill="#14161A" font-weight="600">Outside the city</text>
+              <text x="290" y="76" fill="#838A94">no local withholding</text>
+            </g>
+            <g class="fade-late">
+              <path d="M211 173 L292 236" stroke="#838A94" stroke-width="1.4" stroke-dasharray="4 5"/>
+              <rect x="221" y="190" width="60" height="25" rx="12.5" fill="#FFFFFF" stroke="#E3E3DF"/>
+              <text x="251" y="207" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11.5" font-weight="500" fill="#14161A">58 m</text>
+              <circle cx="292" cy="236" r="13" fill="#F7EFE7" stroke="#9A5B2C" stroke-width="2.6"/>
+              <circle cx="292" cy="236" r="3.4" fill="#7E4A22"/>
+              <rect x="310" y="221" width="176" height="31" rx="15.5" fill="#FFFFFF" stroke="#E3E3DF"/>
+              <text x="325" y="241" font-family="Inter, sans-serif" font-size="12.5" fill="#4A505A">Interpolated to the curb</text>
+            </g>
+            <circle class="pin-ping" cx="211" cy="173" r="13" fill="#2E6B55"/>
+            <circle cx="211" cy="173" r="11.5" fill="#14161A"/>
+            <path d="M206.6 173.4l3.2 3.2 6-6.8" stroke="#2E6B55" stroke-width="2.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="20" y="157" width="158" height="32" rx="16" fill="#14161A"/>
+            <text x="37" y="177" font-family="Inter, sans-serif" font-size="12.5" fill="#FFFFFF" font-weight="500">Rooftop · on building</text>
+          </g>
+          <rect x="8" y="8" width="504" height="414" rx="20" fill="none" stroke="#E3E3DF"/>
+          <text x="28" y="402" font-family="'JetBrains Mono', monospace" font-size="10" fill="#838A94" letter-spacing="1.4">90 W BROAD ST · COLUMBUS OH 43215</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== SOURCES ============== -->
+  <div class="sources">
+    <div class="container sources-inner">
+      <div class="sources-list">
+        <span>OH municipalities &middot; JEDDs &middot; school districts</span>
+        <span>PA EIT &amp; LST by PSD</span>
+        <span>KY occupational</span>
+        <span>MI city income tax</span>
+        <span>AL municipal</span>
+        <span>IN county</span>
+        <span>IRS Pub 15-T</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== STATS ============== -->
+  <section class="section bg-ink">
+    <div class="container">
+      <div class="band-head rv">
+        <p class="label" data-sec="&sect;01">The engine</p>
+        <h2>Every rate carries the source it came from and the date it was verified.</h2>
+        <p class="lead" style="margin-top:18px">
+          Nothing is hardcoded and there is no fallback default. A ruleset Omnia cannot find raises an error
+          rather than quietly returning zero — because a silent zero is how a payroll company finds out in
+          January.
+        </p>
+      </div>
+      <div class="stats">
+        <div class="stat rv"><div class="n"><span data-count="51">51</span></div><div class="l">jurisdictions live — every state plus the District of Columbia</div></div>
+        <div class="stat rv"><div class="n"><span data-count="98">98</span><em>M</em></div><div class="l">surveyed address points behind rooftop resolution</div></div>
+        <div class="stat rv"><div class="n"><span data-count="8">8</span></div><div class="l">local tax registries, down to the school district line</div></div>
+        <div class="stat rv"><div class="n">Daily</div><div class="l">automated sweep of the states' own rate registers</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== COVERAGE ============== -->
+  <section class="section" id="coverage">
+    <div class="container">
+      <div class="sec-head rv">
+        <p class="label" data-sec="&sect;02">Nationwide</p>
+        <h2>Fifty states, the District, and the local lines underneath them.</h2>
+        <p class="lead">
+          There is no partial map and no "supported states" asterisk. Every jurisdiction below is live, each
+          selected by the date on the cheque, and each rate in the file carries the URL it came from and the
+          date a human last verified it.
+        </p>
+      </div>
+
+      <div class="rv">
+        <div class="state-grid">
+            <span class="state local">AL</span>
+            <span class="state">AK</span>
+            <span class="state">AZ</span>
+            <span class="state">AR</span>
+            <span class="state">CA</span>
+            <span class="state">CO</span>
+            <span class="state">CT</span>
+            <span class="state">DC</span>
+            <span class="state">DE</span>
+            <span class="state">FL</span>
+            <span class="state">GA</span>
+            <span class="state">HI</span>
+            <span class="state">ID</span>
+            <span class="state">IL</span>
+            <span class="state local">IN</span>
+            <span class="state">IA</span>
+            <span class="state">KS</span>
+            <span class="state local">KY</span>
+            <span class="state">LA</span>
+            <span class="state">ME</span>
+            <span class="state">MD</span>
+            <span class="state">MA</span>
+            <span class="state local">MI</span>
+            <span class="state">MN</span>
+            <span class="state">MS</span>
+            <span class="state">MO</span>
+            <span class="state">MT</span>
+            <span class="state">NE</span>
+            <span class="state">NV</span>
+            <span class="state">NH</span>
+            <span class="state">NJ</span>
+            <span class="state">NM</span>
+            <span class="state">NY</span>
+            <span class="state">NC</span>
+            <span class="state">ND</span>
+            <span class="state local">OH</span>
+            <span class="state">OK</span>
+            <span class="state">OR</span>
+            <span class="state local">PA</span>
+            <span class="state">RI</span>
+            <span class="state">SC</span>
+            <span class="state">SD</span>
+            <span class="state">TN</span>
+            <span class="state">TX</span>
+            <span class="state">UT</span>
+            <span class="state">VT</span>
+            <span class="state">VA</span>
+            <span class="state">WA</span>
+            <span class="state">WV</span>
+            <span class="state">WI</span>
+            <span class="state">WY</span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--paper);border:1px solid var(--rule)"></i>State withholding, effective-dated</span>
+          <span><i style="background:var(--ledger-2);border:1px solid var(--rule)"></i>Plus a local jurisdiction registry <span class="stamp">&bull;</span></span>
+        </div>
+      </div>
+
+      <div class="split" style="gap:24px;align-items:stretch;margin-top:44px">
+        <div class="card rv" style="gap:6px">
+          <h3 style="margin-bottom:10px">Federal &amp; state</h3>
+          <ul class="checklist" style="margin-top:0">
+            <li>Federal income tax on Publication 15-T worksheets, all six schedules</li>
+            <li>Social Security, Medicare and Additional Medicare, wage-base aware</li>
+            <li>FUTA at the standard net rate, with per-tax taxable bases throughout</li>
+            <li>All 50 state withholding methods plus DC, selected by check date</li>
+            <li>Reciprocity, non-resident and courtesy withholding as explicit inputs</li>
+          </ul>
+        </div>
+        <div class="card rv" style="gap:6px">
+          <h3 style="margin-bottom:10px">Local jurisdictions</h3>
+          <ul class="checklist" style="margin-top:0">
+            <li>Ohio municipalities, JEDDs and JEDZs, and school district income tax</li>
+            <li>Pennsylvania Earned Income Tax and Local Services Tax by PSD code</li>
+            <li>Kentucky county and city occupational licence fees</li>
+            <li>Michigan city income tax, resident and non-resident rates</li>
+            <li>Alabama municipal occupational taxes and Indiana county income tax</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== PRICING ============== -->
+  <section class="section bg-paper-2" id="pricing">
+    <div class="container">
+      <div class="sec-head rv">
+        <p class="label" data-sec="&sect;03">Pricing</p>
+        <h2>You pay for the calculations you make. That's the whole model.</h2>
+        <p class="lead">
+          No per-seat licence, no per-employee-per-month meter that punishes you for winning clients, and no
+          tier that holds a state hostage &mdash; all fifty states, DC and every local registry are included
+          for everyone. Fourteen days free to test against your own data before a card is ever involved.
+        </p>
+      </div>
+
+      <div class="rate-card rv">
+        <div class="rate-head">
+          <div>
+            <p class="label" data-sec="&#9656;">Rate card</p>
+            <h3 style="font-family:var(--head);font-size:19px;font-weight:600">Per calculation, graduated</h3>
+          </div>
+          <span class="trial-pill">First 14 days free</span>
+        </div>
+        <div class="rate-rows">
+          <div class="rate-row"><span>First 25,000 calls a year</span><b>$0.12</b></div>
+          <div class="rate-row"><span>25,001 &ndash; 200,000</span><b>$0.09</b></div>
+          <div class="rate-row"><span>200,001 &ndash; 1,000,000</span><b>$0.06</b></div>
+          <div class="rate-row"><span>Everything above 1,000,000</span><b>$0.04</b></div>
+          <div class="rate-row alt"><span>Rooftop address resolution &mdash; once per address, not per run</span><b>$0.30</b></div>
+        </div>
+      </div>
+
+      <div class="est-wrap rv" id="estimator">
+        <div class="est-inputs">
+          <p class="label" data-sec="&#9656;">Your numbers</p>
+          <h3 style="font-family:var(--head);font-size:19px;font-weight:600;margin-bottom:14px">What would that cost you?</h3>
+
+          <div class="est-field">
+            <label for="estEmployees">Employees you pay</label>
+            <input type="number" id="estEmployees" min="1" step="1" value="8000" />
+          </div>
+
+          <div class="est-field">
+            <label for="estFrequency">Pay frequency</label>
+            <select id="estFrequency">
+              <option value="weekly">Weekly</option>
+              <option value="biweekly" selected>Biweekly</option>
+              <option value="semimonthly">Semi-monthly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+
+          <div class="est-field">
+            <label>Need rooftop address resolution?</label>
+            <div class="est-toggle">
+              <button type="button" id="estRooftopNo" class="on">No</button>
+              <button type="button" id="estRooftopYes">Yes, all of it</button>
+            </div>
+          </div>
+
+          <p class="est-note" id="estCallsNote">&mdash;</p>
+        </div>
+
+        <div class="est-output">
+          <div class="est-row"><span id="estCalcLabel">Calculations</span><span id="estCalcCost">&mdash;</span></div>
+          <div class="est-row" id="estRooftopRow" hidden><span id="estRooftopLabel">Rooftop resolutions</span><span id="estRooftopCost">&mdash;</span></div>
+          <div class="est-row total"><span>Estimated</span><span id="estTotal">$0</span><span style="font-family:var(--body);font-size:13px;color:var(--ink-3);font-weight:400;margin-left:4px">/ year</span></div>
+          <p class="est-effective" id="estEffective">&mdash;</p>
+
+          <div class="est-send">
+            <input type="email" id="estEmail" placeholder="you@yourcompany.com" />
+            <button type="button" class="btn btn-sm" id="estSendBtn">Email me this estimate</button>
+          </div>
+          <p class="est-msg" id="estMsg" hidden></p>
+          <p class="est-fine">
+            An estimate, not a quote &mdash; it moves with your real call volume. Start the 14-day trial and
+            the console meters the actual number.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== ENGINE ============== -->
+  <section class="section" id="engine">
+    <div class="container">
+      <div class="sec-head rv">
+        <p class="label" data-sec="&sect;04">Omnia Engine</p>
+        <h2>One API. Every tax it takes to run a paycheck.</h2>
+        <p class="lead">
+          Omnia Engine is the product &mdash; a single authenticated endpoint that takes an employee's pay details
+          and address and returns a complete, defensible paystub. Everything below is a facet of that one
+          call, not a separate thing to buy.
+        </p>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature rv"><span class="idx">01</span>
+          <h3>Gross-to-net calculation</h3>
+          <p class="fine" style="display:none">Federal + state + local</p>
+          <p>
+            Federal income tax, FICA, FUTA, state withholding and local taxes in a single call &mdash; each with
+            its own taxable wage base, computed in integer cents.
+          </p>
+          <a class="link-arrow" href="#api">See the API
+            <svg width="13" height="10" viewBox="0 0 13 10" fill="none"><path d="M1 5h10M7.5 1.5 11 5l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+
+        <div class="feature rv"><span class="idx">02</span>
+          <h3>Address &amp; jurisdiction resolution</h3>
+          <p class="fine" style="display:none">Built into every call</p>
+          <p>
+            An address in, the taxing jurisdictions out &mdash; resolved from surveyed address points confirmed
+            against the building's own traced footprint, not a curb-side estimate.
+          </p>
+          <a class="link-arrow" href="#resolution">See a resolution
+            <svg width="13" height="10" viewBox="0 0 13 10" fill="none"><path d="M1 5h10M7.5 1.5 11 5l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+
+        <div class="feature rv"><span class="idx">03</span>
+          <h3>Local tax registry</h3>
+          <p class="fine" style="display:none">Down to the district line</p>
+          <p>
+            Ohio municipalities, JEDDs and school districts. Pennsylvania EIT and LST by PSD code. Kentucky,
+            Michigan, Alabama and Indiana localities, each with its own source citation.
+          </p>
+          <a class="link-arrow" href="#coverage">See coverage
+            <svg width="13" height="10" viewBox="0 0 13 10" fill="none"><path d="M1 5h10M7.5 1.5 11 5l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+
+        <div class="feature rv"><span class="idx">04</span>
+          <h3>Rate change monitoring</h3>
+          <p class="fine" style="display:none">Runs every day, quietly</p>
+          <p>
+            A daily harvester snapshots the authoritative registers and hands you a diff with a severity.
+            Mid-year changes arrive as a review item, not as a client's phone call.
+          </p>
+          <a class="link-arrow" href="#monitoring">How monitoring works
+            <svg width="13" height="10" viewBox="0 0 13 10" fill="none"><path d="M1 5h10M7.5 1.5 11 5l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+
+        <div class="feature rv"><span class="idx">05</span>
+          <h3>Sandbox &amp; replay</h3>
+          <p class="fine" style="display:none">Same engine, test data</p>
+          <p>
+            A sandbox that mirrors production data and replays prior periods, so a number you shipped last
+            quarter can be reproduced and explained this quarter.
+          </p>
+          <a class="link-arrow" href="#demo">Try a calculation
+            <svg width="13" height="10" viewBox="0 0 13 10" fill="none"><path d="M1 5h10M7.5 1.5 11 5l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+
+        <div class="feature rv"><span class="idx">06</span>
+          <h3>One JSON endpoint</h3>
+          <p class="fine" style="display:none">That's the whole surface</p>
+          <p>
+            One authenticated endpoint, keys you rotate yourself. Nothing else to integrate, no separate
+            product to license for local tax or address resolution.
+          </p>
+          <a class="link-arrow" href="#api">Read the docs
+            <svg width="13" height="10" viewBox="0 0 13 10" fill="none"><path d="M1 5h10M7.5 1.5 11 5l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== POINT / PRECISION ============== -->
+  <section class="section bg-paper-2" id="resolution">
+    <div class="container split">
+      <div class="rv">
+        <p class="label" data-sec="&sect;05">Inside Omnia Engine</p>
+        <h2>Every address resolved to the building it names.</h2>
+        <p class="lead" style="margin-top:18px">
+          Getting the state right is arithmetic. Getting the municipality right is geography — and a
+          geocoder that interpolates puts the point on the street rather than the property. For 90 W Broad
+          Street in Columbus that is 58 metres of drift, which near a municipal, JEDD or school district
+          line is the difference between withholding and not. So Omnia resolves the building first.
+        </p>
+        <ul class="checklist">
+          <li><b>Start from a surveyed point.</b> Roughly 98 million address points published by the state, county and tribal governments that assign the addresses — the same records that route an ambulance to the right door.</li>
+          <li><b>Confirm it against the building.</b> The point is tested against traced building footprints, so a surveyed coordinate and a structure seen from orbit have to agree before Omnia calls it rooftop.</li>
+          <li><b>Then test the boundary.</b> Municipal, JEDD, school district and PSD lines are evaluated against a point that sits on the property itself, and the response tells you which method produced it.</li>
+        </ul>
+        <div class="hero-actions" style="margin-bottom:0">
+          <a class="btn" href="#demo">Send us your worst address</a>
+        </div>
+      </div>
+      <div class="rv">
+        <div class="code">
+          <div class="code-head">POST /v1/resolve <span class="dots"><i></i><i></i><i></i></span></div>
+<pre>{ <span class="k">"address"</span>: <span class="s">"90 W Broad St, Columbus OH 43215"</span> }
+
+<span class="c">// 200 OK</span>
+{
+  <span class="k">"precision"</span>: <span class="hi">"rooftop"</span>,
+  <span class="k">"confirmedOnBuilding"</span>: <span class="hi">true</span>,
+  <span class="k">"interpolationErrorMeters"</span>: <span class="v">58.2</span>,
+  <span class="k">"jurisdictions"</span>: {
+    <span class="k">"state"</span>:          <span class="s">"OH"</span>,
+    <span class="k">"county"</span>:         <span class="s">"Franklin"</span>,
+    <span class="k">"municipality"</span>:   <span class="s">"Columbus"</span>,
+    <span class="k">"schoolDistrict"</span>: <span class="v">null</span>,
+    <span class="k">"jedd"</span>:           <span class="v">null</span>
+  },
+  <span class="k">"resolvedAt"</span>: <span class="s">"2026-06-15T14:02:11Z"</span>
+}</pre>
+        </div>
+        <p style="font-size:13.5px;color:var(--ink-3);margin-top:14px">
+          Resolution runs once per employee address and is cached against that employee — not billed again on
+          every pay run.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== WHY OMNIA ============== -->
+  <section class="section" id="why">
+    <div class="container">
+      <div class="sec-head rv">
+        <p class="label" data-sec="&sect;06">Why Omnia</p>
+        <h2>Same job. A fraction of the invoice.</h2>
+        <p class="lead">
+          We are not going to tell you the incumbents are bad at this. They are not — they have been doing it
+          for decades, and everybody implements withholding from the same public rules, so the arithmetic
+          lands in the same place. What differs is who the product is packaged and priced for. Their rate
+          cards were written for national processors with a vendor management department. Ours is written for
+          a payroll company with four hundred clients and nobody whose job title is "procurement".
+        </p>
+      </div>
+
+      <div class="vs-wrap rv">
+        <div class="vs-scroll">
+          <table class="vs">
+            <thead>
+              <tr>
+                <th scope="col">What it costs you</th>
+                <th scope="col">The incumbents</th>
+                <th scope="col" class="ours">Omnia</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="row-label">Finding the price</td>
+                <td class="them">Quoted per deal, through an account executive, usually under NDA.</td>
+                <td class="ours"><b>One short form, then a number from a person.</b> No account executive, no NDA.</td>
+              </tr>
+              <tr>
+                <td class="row-label">Entry point</td>
+                <td class="them">An annual commitment, sized to a national processor's volume.</td>
+                <td class="ours"><b>No published minimum.</b> Priced to a regional book, not a national one.</td>
+              </tr>
+              <tr>
+                <td class="row-label">How it scales</td>
+                <td class="them">Per-employee-per-month, so the bill grows with every client you win.</td>
+                <td class="ours"><b>Flat monthly with a bundle.</b> The same rate card at twenty clients and at two thousand.</td>
+              </tr>
+              <tr>
+                <td class="row-label">Commitment</td>
+                <td class="them">An annual term, renegotiated at renewal.</td>
+                <td class="ours"><b>Month to month.</b> Cancel in the dashboard, keep your exported data.</td>
+              </tr>
+              <tr>
+                <td class="row-label">Time to first calculation</td>
+                <td class="them">A sales cycle, a scoping call, then a scheduled implementation.</td>
+                <td class="ours"><b>A sandbox key the same afternoon</b>, with production data behind it.</td>
+              </tr>
+              <tr>
+                <td class="row-label">Trying before buying</td>
+                <td class="them">A booked demo, and a pilot that becomes a contract negotiation.</td>
+                <td class="ours"><b>Free while you evaluate.</b> Run your own cases against it first.</td>
+              </tr>
+              <tr>
+                <td class="row-label">Getting a question answered</td>
+                <td class="them">A support tier, sized to your contract value.</td>
+                <td class="ours"><b>The engineer who wrote the state module</b> — same day, on every plan.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="vs-foot">
+          None of this is a claim about their tax math. It is a claim about the invoice: the coverage a
+          regional bureau actually needs shouldn't cost what a national processor pays, and it shouldn't take
+          a quarter to switch on.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== API ============== -->
+  <section class="section bg-ink" id="api">
+    <div class="container split">
+      <div class="rv">
+        <p class="label" data-sec="&sect;07">For developers</p>
+        <h2>An address goes in. A defensible paystub comes out.</h2>
+        <p class="lead" style="margin-top:18px">
+          Every amount is in integer cents and every tax line reports the taxable base it was computed on, so
+          a number you shipped last quarter can be explained line by line this quarter.
+        </p>
+        <ul class="checklist" style="margin-top:26px">
+          <li><b>Per-tax taxable bases.</b> The same $240 of 401(k) deferral reduces federal wages, does not reduce Social Security wages, and does not reduce Pennsylvania wages.</li>
+          <li><b>Effective-dated by check date.</b> A correction run in March for a December cheque uses December's rules, never today's.</li>
+          <li><b>Keys you control.</b> Stored hashed, rotated on demand, rate-limited per key, with a sandbox that mirrors production data.</li>
+        </ul>
+      </div>
+      <div class="rv">
+        <div class="code">
+          <div class="code-head">POST /v1/paycheck <span class="dots"><i></i><i></i><i></i></span></div>
+<pre><span class="c">// Authorization: Bearer sk_live_…</span>
+{
+  <span class="k">"checkDate"</span>: <span class="s">"2026-06-15"</span>,
+  <span class="k">"payFrequency"</span>: <span class="s">"biweekly"</span>,
+  <span class="k">"earnings"</span>:   [{ <span class="k">"category"</span>: <span class="s">"regular"</span>, <span class="k">"amount"</span>: <span class="v">300000</span> }],
+  <span class="k">"deductions"</span>: [{ <span class="k">"category"</span>: <span class="s">"deferral_401k"</span>, <span class="k">"amount"</span>: <span class="v">24000</span> }],
+  <span class="k">"federalW4"</span>: { <span class="k">"filingStatus"</span>: <span class="s">"single"</span> },
+  <span class="k">"address"</span>:   <span class="s">"90 W Broad St, Columbus OH"</span>
+}
+
+<span class="c">// 200 OK</span>
+{
+  <span class="k">"taxes"</span>: [
+    { <span class="k">"id"</span>: <span class="s">"social_security"</span>,   <span class="k">"base"</span>: <span class="v">300000</span>, <span class="k">"amount"</span>: <span class="v">18600</span> },
+    { <span class="k">"id"</span>: <span class="s">"medicare"</span>,          <span class="k">"base"</span>: <span class="v">300000</span>, <span class="k">"amount"</span>:  <span class="v">4350</span> },
+    { <span class="k">"id"</span>: <span class="s">"federal_income"</span>,    <span class="k">"base"</span>: <span class="v">276000</span>, <span class="k">"amount"</span>: <span class="v">24713</span> },
+    { <span class="k">"id"</span>: <span class="s">"OH_income"</span>,         <span class="k">"base"</span>: <span class="v">276000</span>, <span class="k">"amount"</span>:  <span class="v">6118</span> },
+    { <span class="k">"id"</span>: <span class="s">"OH_local:columbus"</span>, <span class="k">"base"</span>: <span class="v">300000</span>, <span class="k">"amount"</span>:  <span class="hi">7500</span> }
+  ],
+  <span class="k">"netPay"</span>: <span class="v">226119</span>
+}</pre>
+        </div>
+        <p style="font-size:13.5px;color:#8FAAC4;margin-top:14px">
+          Figures illustrative. Note the two bases: the deferral reduced federal and Ohio wages and left FICA
+          and the Columbus municipal base untouched.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== QUOTES ============== -->
+  <section class="section bg-paper-2" id="monitoring">
+    <div class="container quote-grid">
+      <div class="quote rv">
+        <div class="qm" aria-hidden="true">“</div>
+        <p class="q">
+          Near a municipal or school district line, an interpolated point is the difference between
+          withholding the right local tax and the wrong one. So Omnia resolves the building.
+        </p>
+        <p class="who">Omnia engineering notes — rooftop precision</p>
+      </div>
+      <div class="quote rv">
+        <div class="qm" aria-hidden="true">“</div>
+        <p class="q">
+          Every rate lives in data with the URL it came from and the date a human verified it. You can see
+          the age of what you are withholding on, which is the only way anyone can manage it.
+        </p>
+        <p class="who">Omnia data policy — every plan, no exceptions</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== CTA ============== -->
+  <section class="section" id="demo" style="padding-top:0">
+    <div class="container">
+      <div class="cta-card rv">
+        <p class="label" data-sec="&sect;08">Free while you evaluate</p>
+        <h2>Bring us the address that has been wrong since 2019.</h2>
+        <p class="lead">
+          The one that straddles a school district line, sits inside a JEDD, or has quietly been withholding
+          for the neighbouring municipality. We will resolve it live, show you the working, and put a key in
+          your hands the same day.
+        </p>
+        <a class="btn" href="mailto:hello@omnia.tax?subject=Omnia%20demo">Get a demo</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="watermark" aria-hidden="true">OMNIA</div>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <a class="logo" href="#top">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <circle cx="20" cy="20" r="15.4" stroke="#FFFFFF" stroke-width="3.4"/>
+            <path d="M12.4 22.6 20 15.2l7.6 7.4" stroke="#2E6B55" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="20" cy="25.4" r="2.5" fill="#9A5B2C"/>
+          </svg>
+          <span class="logo-type"><span class="logo-word">Omnia</span><span class="logo-sub">Payroll Tax</span></span>
+        </a>
+        <p class="foot-blurb">
+          Nationwide US payroll tax infrastructure — all fifty states, the District, and the local lines
+          underneath — priced for regional payroll companies.
+        </p>
+      </div>
+      <div>
+        <h4>Omnia Engine</h4>
+        <ul>
+          <li><a href="#engine">How it works</a></li>
+          <li><a href="#resolution">Address resolution</a></li>
+          <li><a href="#coverage">Local tax registry</a></li>
+          <li><a href="#monitoring">Rate monitoring</a></li>
+          <li><a href="#api">API reference</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Get started</h4>
+        <ul>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#lead">Get a demo</a></li>
+          <li><a href="#api">API docs</a></li>
+          <li><a href="#api">Sandbox keys</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="#coverage">Local tax guide</a></li>
+          <li><a href="#coverage">Multi-state guide</a></li>
+          <li><a href="#api">Taxable wage bases</a></li>
+          <li><a href="#resolution">Address resolution</a></li>
+          <li><a href="#why">How pricing works</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="mailto:hello@omnia.tax">Contact us</a></li>
+          <li><a href="#why">Who we build for</a></li>
+          <li><a href="#demo">Support</a></li>
+          <li><a href="#monitoring">System status</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>Omnia — every address, every jurisdiction.</span>
+      <span class="foot-links">
+        <a href="#why">Privacy notice</a>
+        <a href="#why">Terms of use</a>
+        <a href="mailto:hello@omnia.tax">hello@omnia.tax</a>
+      </span>
+      <span>Withholding calculations, not tax advice. Filing and deposit remain the employer's responsibility.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // mobile menu
+    var burger = document.getElementById('burger');
+    var nav = document.getElementById('mainNav');
+    burger.addEventListener('click', function () {
+      var open = nav.classList.toggle('open');
+      burger.setAttribute('aria-expanded', String(open));
+    });
+
+    // Inline lead form in the hero: name / work email / business / phone.
+    // Submits to this same server's own POST /api/start-session
+    // (site/server.ts), which really creates the lead and really issues a
+    // session token -- there's no code step, so the moment this succeeds
+    // the browser is redirected straight into docs.html already signed
+    // in. See site/server.ts's own doc comment for why there's no email
+    // ownership check here: it's a deliberate trade for zero friction,
+    // not an oversight.
+    var SESSION_KEY = 'omnia_session';
+    var leadCard = document.getElementById('lead');
+    var leadForm = document.getElementById('leadForm');
+    var leadError = document.getElementById('leadError');
+    var leadSuccessText = document.getElementById('leadSuccessText');
+    var leadDocsLink = document.getElementById('leadDocsLink');
+    var leadSubmitBtn = leadForm.querySelector('button[type="submit"]');
+
+    leadForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var data = new FormData(leadForm);
+      var name = (data.get('name') || '').toString().trim();
+      var email = (data.get('email') || '').toString().trim();
+      var company = (data.get('company') || '').toString().trim();
+      var phone = (data.get('phone') || '').toString().trim();
+      var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+      if (!name || !emailOk || !company || !phone) {
+        leadError.hidden = false;
+        return;
+      }
+      leadError.hidden = true;
+      leadSubmitBtn.disabled = true;
+
+      fetch('/api/start-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, email: email, company: company, phone: phone })
+      })
+        .then(function (res) { return res.json().then(function (body) { return { ok: res.ok, body: body }; }); })
+        .then(function (res) {
+          leadSubmitBtn.disabled = false;
+          if (!res.ok) {
+            leadError.textContent = (res.body && res.body.error) || 'Something went wrong signing you in.';
+            leadError.hidden = false;
+            return;
+          }
+          try {
+            localStorage.setItem(SESSION_KEY, JSON.stringify({
+              token: res.body.sessionToken, email: res.body.email,
+              name: res.body.name, company: res.body.company, hasKey: res.body.hasKey
+            }));
+          } catch (err) { /* storage blocked -- docs.html will just ask again */ }
+
+          var who = res.body.name ? res.body.name.split(' ')[0] : '';
+          leadSuccessText.textContent = who
+            ? 'Thanks, ' + who + ' \u2014 taking you to your console\u2026'
+            : 'You\u2019re in. Taking you to your console\u2026';
+          leadDocsLink.href = 'docs.html';
+          leadCard.classList.add('is-done');
+
+          window.setTimeout(function () { window.location.href = 'docs.html'; }, 600);
+        })
+        .catch(function () {
+          leadSubmitBtn.disabled = false;
+          leadError.textContent = 'Could not reach the server. Run this page with "npm run site", not as a plain file.';
+          leadError.hidden = false;
+        });
+    });
+
+    // count-up stats
+    function countUp(el) {
+      var target = parseInt(el.getAttribute('data-count'), 10);
+      if (reduce || !target) { el.textContent = target || el.textContent; return; }
+      var start = null, dur = 1100;
+      function step(ts) {
+        if (!start) start = ts;
+        var p = Math.min((ts - start) / dur, 1);
+        el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    var items = document.querySelectorAll('.rv');
+    if (!reduce && 'IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          e.target.classList.add('in');
+          var n = e.target.querySelector('[data-count]');
+          if (n) countUp(n);
+          io.unobserve(e.target);
+        });
+      }, { rootMargin: '0px 0px -6% 0px', threshold: 0.1 });
+      items.forEach(function (el, i) {
+        el.style.transitionDelay = (Math.min(i % 3, 2) * 80) + 'ms';
+        io.observe(el);
+      });
+    } else {
+      items.forEach(function (el) { el.classList.add('in'); });
+      document.querySelectorAll('[data-count]').forEach(countUp);
+    }
+  })();
+
+  // Price estimator (Pricing section). Pure client-side math for the live
+  // preview -- POST /api/estimate (site/server.ts) recomputes the same
+  // model from site/lib/pricing.ts before recording anything, so this
+  // preview can't be spoofed into logging a different number than shown.
+  // Keep TIERS/ROOFTOP_RATE here in sync with site/lib/pricing.ts.
+  (function () {
+    var TIERS = [
+      { upTo: 25000, rate: 0.12 },
+      { upTo: 200000, rate: 0.09 },
+      { upTo: 1000000, rate: 0.06 },
+      { upTo: Infinity, rate: 0.04 }
+    ];
+    var ROOFTOP_RATE = 0.30;
+    var PERIODS = { weekly: 52, biweekly: 26, semimonthly: 24, monthly: 12 };
+
+    var employeesInput = document.getElementById('estEmployees');
+    var frequencySel = document.getElementById('estFrequency');
+    var rooftopYes = document.getElementById('estRooftopYes');
+    var rooftopNo = document.getElementById('estRooftopNo');
+    if (!employeesInput) return;
+
+    var rooftop = false;
+
+    function costForCalls(calls) {
+      var remaining = Math.max(0, calls), prev = 0, total = 0;
+      for (var i = 0; i < TIERS.length; i++) {
+        var band = Math.min(remaining, TIERS[i].upTo - prev);
+        if (band > 0) { total += band * TIERS[i].rate; remaining -= band; }
+        prev = TIERS[i].upTo;
+        if (remaining <= 0) break;
+      }
+      return total;
+    }
+
+    function money(n) {
+      return '$' + Math.round(n).toLocaleString('en-US');
+    }
+
+    function compute() {
+      var employees = Math.max(0, parseInt(employeesInput.value, 10) || 0);
+      var freq = frequencySel.value;
+      var periods = PERIODS[freq] || 26;
+      var calls = employees * periods;
+      var calcCost = costForCalls(calls);
+      var roofCost = rooftop ? employees * ROOFTOP_RATE : 0;
+      return {
+        employees: employees, periods: periods, calls: calls,
+        calcCost: calcCost, roofCost: roofCost, total: calcCost + roofCost
+      };
+    }
+
+    function render() {
+      var r = compute();
+      document.getElementById('estCallsNote').textContent =
+        r.employees.toLocaleString() + ' employees × ' + r.periods + ' pay periods = ' +
+        r.calls.toLocaleString() + ' calculations a year';
+      document.getElementById('estCalcLabel').textContent = r.calls.toLocaleString() + ' calculations';
+      document.getElementById('estCalcCost').textContent = money(r.calcCost);
+
+      var roofRow = document.getElementById('estRooftopRow');
+      if (rooftop) {
+        roofRow.hidden = false;
+        document.getElementById('estRooftopLabel').textContent =
+          r.employees.toLocaleString() + ' address resolutions';
+        document.getElementById('estRooftopCost').textContent = money(r.roofCost);
+      } else {
+        roofRow.hidden = true;
+      }
+
+      document.getElementById('estTotal').textContent = money(r.total);
+      document.getElementById('estEffective').textContent = r.calls
+        ? 'Works out to $' + (r.total / r.calls).toFixed(3) + ' per calculation.'
+        : '';
+    }
+
+    employeesInput.addEventListener('input', render);
+    frequencySel.addEventListener('change', render);
+    rooftopYes.addEventListener('click', function () {
+      rooftop = true; rooftopYes.classList.add('on'); rooftopNo.classList.remove('on'); render();
+    });
+    rooftopNo.addEventListener('click', function () {
+      rooftop = false; rooftopNo.classList.add('on'); rooftopYes.classList.remove('on'); render();
+    });
+
+    document.getElementById('estSendBtn').addEventListener('click', function () {
+      var msgEl = document.getElementById('estMsg');
+      var email = document.getElementById('estEmail').value.trim();
+      msgEl.hidden = true;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        msgEl.textContent = 'Enter a valid work email first.';
+        msgEl.className = 'est-msg err';
+        msgEl.hidden = false;
+        return;
+      }
+      var r = compute();
+      fetch('/api/estimate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email, employees: r.employees,
+          payFrequency: frequencySel.value, rooftop: rooftop
+        })
+      })
+        .then(function (res) { return res.json().then(function (b) { return { ok: res.ok, body: b }; }); })
+        .then(function (res) {
+          if (!res.ok) {
+            msgEl.textContent = (res.body && res.body.error) || 'Could not send that estimate.';
+            msgEl.className = 'est-msg err';
+            msgEl.hidden = false;
+            return;
+          }
+          msgEl.textContent = 'Sent to ' + email + ' \u2014 ' + money(res.body.total) +
+            '/yr on ' + res.body.callsPerYear.toLocaleString() + ' calls. We\u2019ll follow up.';
+          msgEl.className = 'est-msg ok';
+          msgEl.hidden = false;
+        })
+        .catch(function () {
+          msgEl.textContent = 'Could not reach the server. Run this with "npm run site".';
+          msgEl.className = 'est-msg err';
+          msgEl.hidden = false;
+        });
+    });
+
+    render();
+  })();
+</script>
+</body>
+</html>

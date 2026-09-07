@@ -215,6 +215,19 @@ export interface EmployerContext {
    */
   stateUnemploymentRate?: Record<string, number>;
   /**
+   * A handful of states publish a TWO-TIER SUI/SUTA taxable wage base — a
+   * higher statutory default, and a reduced base for employers who qualify
+   * (typically: current on all quarterly filings, no unpaid balance).
+   * Michigan is the confirmed case (data/states/MI-2026.json's own
+   * unemploymentInsurance.wageBase: $9,500 default / $9,000 qualified,
+   * gated additionally on a UIA Trust Fund balance test this engine has no
+   * way to evaluate). Keyed by state code; absent or false means the
+   * DEFAULT (higher) base applies — the conservative choice, since the
+   * reduced base is an opt-in discount an employer must affirmatively
+   * qualify for, not something to assume in the caller's favor.
+   */
+  stateUnemploymentQualifiedForReducedWageBase?: Record<string, boolean>;
+  /**
    * Several states offer a flat supplemental-wage rate as an EMPLOYER
    * OPTION rather than a mandate — Missouri's 4.7%, Nebraska's 3.5%,
    * Oregon's 8%, Maine's 5%, North Carolina's 4.09% — the alternative
@@ -371,6 +384,32 @@ export interface PaycheckInput {
   /** Work state (and eventually residence state for reciprocity). */
   workState?: StateWithholding;
   residenceState?: StateWithholding;
+  /**
+   * Whether to withhold the RESIDENCE state's own tax on top of (or instead
+   * of) the work state's — for the case reciprocity doesn't already cover:
+   * an employee living in one state and working in another with no
+   * reciprocal agreement between them. This engine cannot determine either
+   * fact on its own; both are legal/business facts the caller must supply.
+   *
+   *   - `nexus`: the employer is registered/has a legal presence in the
+   *     residence state and is therefore REQUIRED to withhold there.
+   *   - `voluntary`: no nexus, but the employer agreed to withhold anyway
+   *     as a courtesy so the employee isn't stuck making estimated
+   *     payments — Minnesota's own instructions call this "a courtesy to
+   *     your employee"; Rhode Island calls the identical practice
+   *     "CONVENIENCE WITHHOLDING." Neither state requires it; both permit
+   *     it, entirely at the employer's discretion.
+   *
+   * Ignored whenever a reciprocity exemption or swap already governs this
+   * pay period (see reciprocitySwapWithholdingLine()'s own doc comment) —
+   * those are mandatory, statute-driven mechanisms and take precedence
+   * over this caller-elected one. Also ignored when residenceState is the
+   * same as workState, or unset.
+   */
+  residenceStateWithholding?: {
+    nexus?: boolean;
+    voluntary?: boolean;
+  };
   /** Round withholding to whole dollars, as IRS permits. */
   roundToWholeDollars?: boolean;
 }

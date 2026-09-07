@@ -231,7 +231,8 @@
   ],
   "exemptComment": "Rhode Island taxable income starts from federal AGI (R.I. Gen. Laws 44-30), which already nets out these categories at the federal level -- the same 'starts from a federal figure' inference tier as several other states in this project, not yet upgraded to a direct booklet quote naming each category.",
   "reciprocity": {
-    "rule": "NONE. Rhode Island has no reciprocal withholding agreements with Massachusetts or Connecticut (its only bordering states) -- cross-source confirmed. The booklet does offer 'CONVENIENCE WITHHOLDING' (an employer may voluntarily withhold RI tax for an out-of-state RI resident employee as a courtesy), but this is opt-in convenience withholding, not a reciprocity exemption, and is not modelled here."
+    "rule": "NONE. Rhode Island has no reciprocal withholding agreements with Massachusetts or Connecticut (its only bordering states) -- cross-source confirmed. The booklet does offer 'CONVENIENCE WITHHOLDING' (an employer may voluntarily withhold RI tax for an out-of-state RI resident employee as a courtesy), which is opt-in, not a reciprocity exemption.",
+    "convenienceWithholdingKnownGap": "RESOLVED (2026-09-02): this is no longer RI-specific unmodelled behavior -- residenceStateWithholdingLine() in state.ts now computes it generically for every state via input.residenceStateWithholding.voluntary (or .nexus for the mandatory case), gated off whenever a real reciprocity exemption/swap already applies. See tests/engine.test.ts's 'Voluntary / nexus-based residence-state withholding' describe block. Trusts the caller's own assertion at face value -- no verification that the employer actually elected this, the same simplification this engine already makes for reciprocity certificates generally."
   },
   "localIncomeTax": {
     "rule": "NONE. No Rhode Island city or town levies a local income or wage tax."

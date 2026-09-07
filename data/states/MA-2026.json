@@ -96,14 +96,14 @@
   },
   "statePaidLeaveEmployee": {
     "rate": 0.0046,
-    "wageBase": 184500,
-    "$comment": "0.28% medical + 0.18% family = 0.46% flat, REGARDLESS of employer size (unlike Washington, where the employee fraction is defined relative to whatever total rate applies). Shares the federal Social Security wage base by reference -- must be kept in sync with data/federal/2026.json's own socialSecurity.wageBase, same disclosed sync-risk pattern as every other SS-cap-linked premium in this project.",
+    "wageBase": "ssWageBase",
+    "$comment": "0.28% medical + 0.18% family = 0.46% flat, REGARDLESS of employer size (unlike Washington, where the employee fraction is defined relative to whatever total rate applies). Shares the federal Social Security wage base by reference. CORRECTED 2026-09-06: this used to be a hand-copied literal 184500, self-flagged with the same disclosed sync-risk note as Washington's and Connecticut's. Now the 'ssWageBase' sentinel, resolved LIVE from data/federal/2026.json's own socialSecurity.wageBase by resolvePaidLeaveWageBase() in src/taxes/state.ts -- this can no longer drift, by construction.",
     "exemptPretax": []
   },
   "statePaidLeaveEmployer": {
     "totalRate": 0.0088,
     "employeeShareFraction": 0.5227272727272727,
-    "wageBase": 184500,
+    "wageBase": "ssWageBase",
     "$comment": "employeeShareFraction = 0.46 / 0.88 exactly, stored at full precision -- reuses the SAME total-minus-employee-share generic mechanism built for Washington, since the arithmetic shape is identical even though Massachusetts's own split rule (employee always covers 100% of family leave; employer's whole share is medical-only) differs from Washington's proportional-split rule. Gated by certificate.employerLiableForPaidLeaveShare, same as Washington -- for Massachusetts this represents the employer's own determination of having 25+ MA employees (Washington's own threshold is 50), a different number for the SAME kind of caller-supplied aggregate fact.",
     "exemptPretax": []
   },

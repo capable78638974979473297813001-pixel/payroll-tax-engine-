@@ -360,7 +360,8 @@
   },
   "unemploymentInsurance": {
     "administeredBy": "New Mexico Department of Workforce Solutions (DWS)",
-    "wageBase": 31700.0,
+    "wageBase": 34800.0,
+    "wageBaseNote": "UPDATED 2026-09-06 to match suiEmployer.wageBase below (this field previously carried a stale prior-year 31700 figure while the normalized suiEmployer block below had already been corrected to 34800, with its own note explaining the change -- this field just hadn't been kept in sync). No calc-code impact either way: stateUnemploymentEmployerTax() only ever reads suiEmployer.wageBase, never this detailed-research copy.",
     "experiencedEmployerRateRange": [0.0033, 0.054],
     "experiencedEmployerRateNote": "Bloomberg Tax's own 2026 coverage additionally notes a possible maximum TOTAL rate of 6.4% when an excess-claims premium applies on top of the 5.4% base ceiling -- a real, disclosed nuance beyond the bare min/max range.",
     "newEmployerRateNote": "NOT a single flat figure by design (same shape as Louisiana's own new-employer mechanism elsewhere in this project) -- DWS's own glossary page confirms new employers are assigned 'New Employer Industry Rates' based on their NAICS code, with no single number published on the pages this pass could reach; secondary sources estimate roughly 1%-2% depending on industry.",

@@ -29,7 +29,7 @@
       "title": "CT Paid Leave — Contributions",
       "url": "https://www.ctpaidleave.org/how-ct-paid-leave-works/contributions",
       "verifiedOn": "2026-08-16",
-      "verifiedBy": "Fetched directly. Verbatim: \"The CT Paid Leave Board of Directors has voted to maintain the contribution rate at 0.5% for 2026.\" Wage cap stated as \"until they reach the Social Security contribution limit\" without restating the dollar figure on this specific page -- cross-checked against this project's own data/federal/2026.json socialSecurity.wageBase ($184,500), which the CT Paid Leave Authority's own program design ties to by reference. NOTE: this means CT Paid Leave's wageBase in this file must be kept in sync with federal.json's SS wage base by definition, not just by coincidence -- flagged in knownGaps."
+      "verifiedBy": "Fetched directly. Verbatim: \"The CT Paid Leave Board of Directors has voted to maintain the contribution rate at 0.5% for 2026.\" Wage cap stated as \"until they reach the Social Security contribution limit\" without restating the dollar figure on this specific page -- cross-checked against this project's own data/federal/2026.json socialSecurity.wageBase ($184,500), which the CT Paid Leave Authority's own program design ties to by reference. UPDATE 2026-09-06: statePaidLeaveEmployee.wageBase above now uses the 'ssWageBase' sentinel, resolved live from federal.json, so it no longer needs to be manually kept in sync -- this note is left here as historical context for why the sentinel exists, not as a live warning."
     },
     {
       "title": "Form CT-W4, Employee's Withholding Certificate (Rev. 12/25, effective 2026-01-01)",
@@ -2817,8 +2817,8 @@
   "statePaidLeaveEmployee": {
     "$comment": "CT Paid Leave (launched 2022) -- dispatched via the SAME generic statePaidLeaveEmployeeTax() built for Minnesota, zero new code.",
     "rate": 0.005,
-    "wageBase": 184500,
-    "wageBaseComment": "Tracks the federal Social Security taxable wage base by the CT Paid Leave program's own design (ctpaidleave.org: contributions apply \"until they reach the Social Security contribution limit\"), NOT an independently-set CT figure -- this value MUST be updated whenever data/federal/2026.json's socialSecurity.wageBase changes for a future year, or this file will silently drift stale. Currently matches federal.json exactly (184500).",
+    "wageBase": "ssWageBase",
+    "wageBaseComment": "Tracks the federal Social Security taxable wage base by the CT Paid Leave program's own design (ctpaidleave.org: contributions apply \"until they reach the Social Security contribution limit\"), NOT an independently-set CT figure. CORRECTED 2026-09-06: this used to be a hand-copied literal 184500, self-flagged as needing manual updates 'or this file will silently drift stale' -- a real, disclosed drift risk with no enforcement. Now the 'ssWageBase' sentinel, resolved LIVE from data/federal/2026.json's own socialSecurity.wageBase by resolvePaidLeaveWageBase() in src/taxes/state.ts (same fix applied to Washington and Massachusetts's own SS-cap-linked Paid Leave programs the same pass) -- this can no longer drift, by construction.",
     "quote": "ctpaidleave.org, verbatim: \"The CT Paid Leave Board of Directors has voted to maintain the contribution rate at 0.5% for 2026.\""
   },
   "knownGaps": [

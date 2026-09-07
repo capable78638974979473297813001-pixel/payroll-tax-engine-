@@ -19,3 +19,9 @@ harvester/state/
 # Supabase CLI's own local scratch state (linked project ref cache, CLI
 # version pin) -- machine-local, not project configuration.
 supabase/.temp/
+
+# site/.data is the docs/console demo's own runtime store (leads,
+# sessions, issued keys, usage log) -- this machine's local test data,
+# not project configuration. See site/lib/store.ts.
+site/.data/
+

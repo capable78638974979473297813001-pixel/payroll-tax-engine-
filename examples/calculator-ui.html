@@ -221,7 +221,7 @@
 
     <fieldset>
       <legend>Work Address (optional)</legend>
-      <p class="hint">Look up a street address to auto-fill the state and local jurisdiction fields below (via the U.S. Census geocoder).</p>
+      <p class="hint">Look up a street address to auto-fill the state and local jurisdiction fields below (via the U.S. Census geocoder). Fill in Residence Address below too if it's different — several local taxes (NYC/Yonkers residency, Missouri's earnings tax, reciprocity) depend on comparing both.</p>
       <div class="row single">
         <div><label for="addrStreet">Street Address</label><input type="text" id="addrStreet" placeholder="e.g. 2 Woodward Ave" /></div>
       </div>
@@ -230,8 +230,21 @@
         <div><label for="addrState">State</label><input type="text" id="addrState" maxlength="2" style="text-transform:uppercase" placeholder="e.g. MI" /></div>
         <div><label for="addrZip">ZIP Code</label><input type="text" id="addrZip" placeholder="e.g. 48226" /></div>
       </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Residence Address (optional)</legend>
+      <p class="hint">Where the employee lives, if different from where they work. Needed for residence-based local taxes (e.g. NYC/Yonkers residents) and for state reciprocity.</p>
+      <div class="row single">
+        <div><label for="addrResStreet">Street Address</label><input type="text" id="addrResStreet" placeholder="e.g. 233 Broadway" /></div>
+      </div>
+      <div class="row three">
+        <div><label for="addrResCity">City</label><input type="text" id="addrResCity" placeholder="e.g. Yonkers" /></div>
+        <div><label for="addrResState">State</label><input type="text" id="addrResState" maxlength="2" style="text-transform:uppercase" placeholder="e.g. NY" /></div>
+        <div><label for="addrResZip">ZIP Code</label><input type="text" id="addrResZip" placeholder="e.g. 10701" /></div>
+      </div>
       <div class="btn-row">
-        <button type="button" id="addressLookup">Look Up Jurisdiction</button>
+        <button type="button" id="addressLookup">Look Up Jurisdiction(s)</button>
       </div>
       <div id="addressStatus" style="display:none; margin-top:8px; white-space:pre-wrap;"></div>
     </fieldset>
@@ -334,6 +347,8 @@
           <p class="hint">Drives Social Security/Medicare/FUTA treatment — this engine has no standalone "exempt from Social Security" or "exempt from Medicare" checkbox because those exemptions are always a consequence of the worker's category, never an independent election.</p>
         </div>
       </div>
+      <div class="checkbox-row"><input type="checkbox" id="voluntaryWithholdingAgreement" /><label for="voluntaryWithholdingAgreement">Voluntary Federal Withholding Agreement</label></div>
+      <p class="hint">Only matters for Clergy, Household, and Election Worker above — those categories are exempt from federal withholding by default; check this if the employer and employee agreed in writing to withhold anyway.</p>
     </fieldset>
 
     <fieldset>
@@ -341,6 +356,12 @@
       <div id="stateFieldsBox">
         <div class="muted-box" id="noStateMsg">No state selected. Select state above to see its withholding certificate fields.</div>
       </div>
+    </fieldset>
+
+    <fieldset id="residenceStateFieldset" style="display:none;">
+      <legend>Residence State's Own Withholding Certificate</legend>
+      <p class="hint">The residence state's OWN W-4-equivalent form (filing status, exemptions) — separate from the work state's certificate above. Used whenever the engine computes tax for this state: nexus/voluntary withholding above, Pennsylvania-style mandatory reciprocity swaps, or a resident-working-elsewhere credit (e.g. Kansas). Leave blank to withhold at that state's default no-certificate-on-file rate.</p>
+      <div id="residenceStateFieldsBox"></div>
     </fieldset>
 
     <fieldset>
@@ -441,21 +462,93 @@
     }
   });
 
+  // Shared by renderStateFields() (prefix 'sf_', the work state's
+  // certificate) and renderResidenceStateFields() (prefix 'rf_', the
+  // residence state's own — a DIFFERENT certificate, since state.ts reads
+  // input.workState.certificate and input.residenceState.certificate as
+  // two separate objects; see residenceStateWithholdingLine()'s own doc
+  // comment for why the residence state needs its own W-4-equivalent form
+  // rather than reusing the work state's.
+  function renderFieldsInto(box, fields, prefix) {
+    for (const f of fields) {
+      const wrap = document.createElement('div');
+      if (f.type === 'checkbox') {
+        wrap.className = 'checkbox-row';
+        wrap.innerHTML = `<input type="checkbox" id="${prefix}${f.key}" /><label for="${prefix}${f.key}">${f.label}</label>`;
+      } else if (f.type === 'select') {
+        wrap.innerHTML = `<label for="${prefix}${f.key}">${f.label}</label>` +
+          `<select id="${prefix}${f.key}">${f.options.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}</select>`;
+      } else {
+        const input = `<input type="${f.type}" id="${prefix}${f.key}" ${f.placeholder ? `placeholder="${f.placeholder}"` : ''} />`;
+        const isMoney = f.type === 'number' && /\$/.test(f.label);
+        wrap.innerHTML = `<label for="${prefix}${f.key}">${f.label}</label>` +
+          (isMoney ? `<div class="money-input"><span class="currency">$</span>${input}</div>` : input);
+      }
+      box.appendChild(wrap);
+    }
+  }
+
+  // Residence state's OWN withholding certificate (filing status,
+  // exemptions, etc.) — reads the SAME /api/state-fields/<code> spec as the
+  // work state, since residenceStateWithholdingLine() reuses the identical
+  // incomeTaxLines() machinery, just pointed at the residence state instead.
+  // Local-tax-only fields in that spec (workCity, workPSD, etc.) render here
+  // too but have no effect — residenceStateWithholdingLine() only ever
+  // reads the plain ${code}_SIT income tax line, never local taxes — this
+  // form just doesn't specially hide them, since harmlessly-unused fields
+  // beat silently guessing which fields in a shared per-state list are
+  // "income tax" vs "local."
+  let residenceFieldsCache = {};
+  async function renderResidenceStateFields() {
+    const code = $('sf_residenceState')?.value?.trim().toUpperCase();
+    const workCode = $('state').value;
+    const fieldset = $('residenceStateFieldset');
+    const box = $('residenceStateFieldsBox');
+    box.innerHTML = '';
+    if (!code || code === workCode) {
+      fieldset.style.display = 'none';
+      return;
+    }
+    if (!residenceFieldsCache[code]) {
+      residenceFieldsCache[code] = await fetch('/api/state-fields/' + code).then((r) => r.json());
+    }
+    const spec = residenceFieldsCache[code];
+    if (!spec.hasIncomeTax) {
+      fieldset.style.display = '';
+      box.innerHTML = `<div class="muted-box">${code} has no state income tax — nothing to withhold here.</div>`;
+      return;
+    }
+    if (spec.fields.length === 0) {
+      fieldset.style.display = '';
+      box.innerHTML = `<div class="muted-box">${code} uses a flat rate with no certificate fields of its own.</div>`;
+      return;
+    }
+    fieldset.style.display = '';
+    renderFieldsInto(box, spec.fields, 'rf_');
+  }
+  // sf_residenceState is rebuilt from scratch by renderStateFields() every
+  // time the work state changes, so a direct addEventListener on it would
+  // be silently lost — delegate on the form instead, which always exists.
+  $('form').addEventListener('input', (e) => {
+    if (e.target && e.target.id === 'sf_residenceState') renderResidenceStateFields();
+  });
+
   function renderStateFields(spec) {
     const box = $('stateFieldsBox');
     box.innerHTML = '';
     const code = $('state').value;
     if (!code) {
       box.innerHTML = '<div class="muted-box" id="noStateMsg">No state selected. Select state above to see its withholding certificate fields.</div>';
+      $('residenceStateFieldset').style.display = 'none';
       return;
     }
     if (!spec.hasIncomeTax) {
       box.innerHTML = `<div class="muted-box">${code} has no state income tax. Only federal, FICA, and any employer-paid unemployment tax apply.</div>`;
-      return;
     }
-    if (spec.fields.length === 0 && !spec.hasLocalTax) {
+    if (spec.hasIncomeTax && spec.fields.length === 0 && !spec.hasLocalTax) {
       box.innerHTML = `<div class="muted-box">${code} uses a flat rate — the two fields below still apply.</div>`;
     }
+    if (spec.hasIncomeTax) {
     // Every state's own withholding certificate has these two options
     // (paycheckcity.com shows them first, ahead of any state-specific
     // fields, on every state's calculator) — read generically by this
@@ -487,6 +580,11 @@
       }
       box.appendChild(wrap);
     }
+    }
+    // Everything below is independent of whether the WORK state itself has
+    // an income tax — the most common real nexus/voluntary scenario is
+    // exactly a no-income-tax work state (TX, FL) with a remote employee
+    // living somewhere that does tax them, so these must still render then.
     if (spec.hasLocalTax && !spec.fields.some(f => f.key === 'workCity')) {
       const wrap = document.createElement('div');
       wrap.innerHTML = `<label for="sf_workCity">Work city / locality (local tax)</label><input type="text" id="sf_workCity" placeholder="e.g. Birmingham" />`;
@@ -495,6 +593,23 @@
     const res = document.createElement('div');
     res.innerHTML = `<label for="sf_residenceState">Residence state (if different, for reciprocity)</label><input type="text" id="sf_residenceState" maxlength="2" style="text-transform:uppercase" placeholder="e.g. PA" />`;
     box.appendChild(res);
+
+    // Voluntary/nexus residence-state withholding — only matters when
+    // residence and work states differ AND no reciprocity agreement already
+    // covers it (e.g. an NY-based employer with a CA remote hire). Always
+    // shown here, same as the residence-state field above, rather than
+    // gated on a specific pair of states, since it applies to any of them.
+    const election = document.createElement('div');
+    election.innerHTML =
+      `<div class="checkbox-row"><input type="checkbox" id="sf_residenceNexus" /><label for="sf_residenceNexus">Employer has nexus in residence state (required withholding)</label></div>` +
+      `<div class="checkbox-row"><input type="checkbox" id="sf_residenceVoluntary" /><label for="sf_residenceVoluntary">Voluntary/courtesy withholding for residence state</label></div>` +
+      `<p class="hint">Only applies when residence state differs from the state above and no reciprocity agreement already covers it — e.g. a remote employee living in a state the employer isn't registered in. Nexus means the employer is legally required to withhold there; voluntary means they've agreed to as a courtesy, same as Minnesota's or Rhode Island's own "convenience withholding."</p>`;
+    box.appendChild(election);
+    // sf_residenceState was just rebuilt empty, so any previously-shown
+    // residence certificate no longer applies to it — reset rather than
+    // leave a stale form (or a stale field set for the OLD work state,
+    // since renderResidenceStateFields() also compares against $('state')).
+    renderResidenceStateFields();
   }
 
   // --- address / zip lookup -------------------------------------------
@@ -505,8 +620,20 @@
     el.textContent = text;
   }
 
+  // resolveEmployee() (geocode/index.ts) resolves work + residence TOGETHER
+  // because several taxes are keyed off comparing both — NYC/Yonkers
+  // residency, Missouri's KC/St. Louis earnings tax (either address puts you
+  // in scope) — so this always sends whichever of the two addresses is
+  // filled in, rather than resolving them with two independent calls that
+  // couldn't see each other.
   async function applyResolvedAddress(data) {
-    const stateCode = data.resolved.state;
+    const workState = data.work && data.work.matched ? data.work.resolved.state : null;
+    const residenceState = data.residence && data.residence.matched ? data.residence.resolved.state : null;
+    const stateCode = workState || residenceState;
+    if (!stateCode) {
+      showAddressStatus('Neither address could be matched against Census data.', true);
+      return;
+    }
     $('state').value = stateCode;
     if (!stateFieldsCache[stateCode]) {
       stateFieldsCache[stateCode] = await fetch('/api/state-fields/' + stateCode).then((r) => r.json());
@@ -521,9 +648,29 @@
       else el.value = String(value);
       filled.push(key);
     }
+    // residenceState is a separate PaycheckInput field (reciprocity), not a
+    // certificate.* key, so it's set here rather than via the loop above —
+    // only when residence and work genuinely differ, matching what
+    // input.residenceState is actually for.
+    if (residenceState && residenceState !== stateCode) {
+      const el = document.getElementById('sf_residenceState');
+      if (el) { el.value = residenceState; filled.push('residenceState'); }
+    }
+    // Setting .value programmatically doesn't fire the 'input' event the
+    // delegated listener above depends on, so this needs an explicit call.
+    await renderResidenceStateFields();
 
-    let msg = `Matched: ${(data.matchQuality && data.matchQuality.matchedAddress) || data.address} → ${stateCode}`;
+    const matchLines = [];
+    if (data.work && data.work.matched) matchLines.push(`Work matched: ${data.work.matchQuality.matchedAddress} → ${workState}`);
+    else if (data.work) matchLines.push(`Work address NOT matched.`);
+    if (data.residence && data.residence.matched) matchLines.push(`Residence matched: ${data.residence.matchQuality.matchedAddress} → ${residenceState}`);
+    else if (data.residence) matchLines.push(`Residence address NOT matched.`);
+
+    let msg = matchLines.join('\n');
     if (filled.length) msg += `\nAuto-filled: ${filled.join(', ')}`;
+    if (data.notResolvable && data.notResolvable.length) {
+      msg += `\n\n⚠ Not resolvable from an address: ${data.notResolvable.join(' ')}`;
+    }
     if (data.lowConfidenceReasons && data.lowConfidenceReasons.length) {
       msg += `\n\n⚠ ${data.lowConfidenceReasons.join(' ')}`;
     }
@@ -531,15 +678,24 @@
   }
 
   $('addressLookup').addEventListener('click', async () => {
-    const street = $('addrStreet').value.trim();
-    const city = $('addrCity').value.trim();
-    const state = $('addrState').value.trim();
-    const zip = $('addrZip').value.trim();
-    if (!street || !city || !state) {
-      showAddressStatus('Street, city, and state are required (ZIP is optional but helps).', true);
+    const workStreet = $('addrStreet').value.trim();
+    const workCity = $('addrCity').value.trim();
+    const workState = $('addrState').value.trim();
+    const workZip = $('addrZip').value.trim();
+    const resStreet = $('addrResStreet').value.trim();
+    const resCity = $('addrResCity').value.trim();
+    const resState = $('addrResState').value.trim();
+    const resZip = $('addrResZip').value.trim();
+
+    const workAddress = (workStreet && workCity && workState)
+      ? `${workStreet}, ${workCity}, ${workState}${workZip ? ' ' + workZip : ''}` : undefined;
+    const residenceAddress = (resStreet && resCity && resState)
+      ? `${resStreet}, ${resCity}, ${resState}${resZip ? ' ' + resZip : ''}` : undefined;
+
+    if (!workAddress && !residenceAddress) {
+      showAddressStatus('Fill in at least one address (street, city, and state — ZIP is optional but helps).', true);
       return;
     }
-    const address = `${street}, ${city}, ${state}${zip ? ' ' + zip : ''}`;
     const btn = $('addressLookup');
     btn.disabled = true;
     btn.textContent = 'Looking up…';
@@ -547,11 +703,11 @@
       const res = await fetch('/api/resolve-address', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address, checkDate: $('checkDate').value }),
+        body: JSON.stringify({ workAddress, residenceAddress, checkDate: $('checkDate').value }),
       });
       const data = await res.json();
-      if (!res.ok || !data.matched) {
-        showAddressStatus((data && data.error) || 'Could not match that address against Census data.', true);
+      if (!res.ok) {
+        showAddressStatus((data && data.error) || 'Could not reach the address lookup service.', true);
         return;
       }
       await applyResolvedAddress(data);
@@ -559,7 +715,7 @@
       showAddressStatus('Could not reach the address lookup service: ' + err.message, true);
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Look Up Jurisdiction';
+      btn.textContent = 'Look Up Jurisdiction(s)';
     }
   });
 
@@ -600,7 +756,21 @@
     const cert = {};
     document.querySelectorAll('#stateFieldsBox [id^="sf_"]').forEach((el) => {
       const key = el.id.slice(3);
-      if (key === 'residenceState') return;
+      if (key === 'residenceState' || key === 'residenceNexus' || key === 'residenceVoluntary') return;
+      if (el.type === 'checkbox') { if (el.checked) cert[key] = true; }
+      else if (el.value !== '') cert[key] = el.value;
+    });
+    return cert;
+  }
+
+  // The residence state's OWN certificate — a separate object from the work
+  // state's (input.residenceState.certificate vs input.workState.certificate
+  // in types.ts), collected from the 'rf_' prefixed fields rendered by
+  // renderResidenceStateFields() rather than the 'sf_' ones above.
+  function collectResidenceStateCertificate() {
+    const cert = {};
+    document.querySelectorAll('#residenceStateFieldsBox [id^="rf_"]').forEach((el) => {
+      const key = el.id.slice(3);
       if (el.type === 'checkbox') { if (el.checked) cert[key] = true; }
       else if (el.value !== '') cert[key] = el.value;
     });
@@ -617,10 +787,14 @@
     });
 
     const residenceEl = document.getElementById('sf_residenceState');
+    const nexusEl = document.getElementById('sf_residenceNexus');
+    const voluntaryEl = document.getElementById('sf_residenceVoluntary');
     return {
       checkDate: $('checkDate').value,
       stateCode: $('state').value || undefined,
       residenceStateCode: residenceEl && residenceEl.value ? residenceEl.value : undefined,
+      residenceNexus: nexusEl ? nexusEl.checked : false,
+      residenceVoluntary: voluntaryEl ? voluntaryEl.checked : false,
       grossPayMethod: $('grossPayMethod').value,
       grossPay: num('grossPay'),
       hourlyRate: num('hourlyRate'),
@@ -636,9 +810,11 @@
         deductions: num('w4Deductions'),
         extraWithholding: num('extraWithholding'),
         exempt: $('federalExempt').checked,
+        voluntaryWithholdingAgreement: $('voluntaryWithholdingAgreement').checked,
       },
       roundToWholeDollars: $('roundToWholeDollars').checked,
       stateCertificate: collectStateCertificate(),
+      residenceStateCertificate: collectResidenceStateCertificate(),
       deductions,
     };
   }

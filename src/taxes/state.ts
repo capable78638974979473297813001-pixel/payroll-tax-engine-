@@ -43,6 +43,7 @@ import { federalIncomeTax } from './federal.ts';
 import { cashEarnings, supplementalEarnings } from '../wages.ts';
 import type {
   ComputeContext,
+  EmployerContext,
   PaycheckInput,
   PretaxCategory,
   TaxLine,
@@ -379,6 +380,13 @@ export function stateIncomeTax(
   const swapLine = reciprocitySwapWithholdingLine(input, ctx, rules, reciprocityReason);
   if (swapLine) lines.push(swapLine);
 
+  // Voluntary/nexus-based residence-state withholding — see its own doc
+  // comment. Independent of, and gated off by, the reciprocity mechanisms
+  // above (a caller-elected courtesy never overrides a statute-driven
+  // exemption or swap for the same pay period).
+  const residenceLine = residenceStateWithholdingLine(input, ctx, rules, reciprocityReason);
+  if (residenceLine) lines.push(residenceLine);
+
   return lines;
 }
 
@@ -430,6 +438,78 @@ function reciprocitySwapWithholdingLine(
       `${fmt(residenceTax)} ${residence.code} tax withheld by the ${rules.code} employer instead of ` +
       `${rules.code} tax, per ${rules.code}'s reciprocity swap mechanism — the employer has agreed not ` +
       `to withhold ${rules.code} tax, so ${residence.code}'s own withholding rules apply to these wages instead.`,
+  };
+}
+
+/**
+ * Voluntary ("courtesy"/"convenience") or nexus-based withholding for the
+ * employee's RESIDENCE state — the case NONE of the three mechanisms above
+ * cover: an employee living in one state and working in another with NO
+ * reciprocal agreement between them at all. Two real-world triggers, both
+ * caller-supplied facts this engine cannot determine on its own (see
+ * input.residenceStateWithholding's own doc comment in types.ts):
+ *
+ *   - NEXUS: the employer is registered/has a legal presence in the
+ *     residence state and is therefore REQUIRED to withhold there.
+ *   - VOLUNTARY: no nexus, but the employer agreed to withhold anyway as a
+ *     courtesy — Minnesota's own instructions use exactly that word for
+ *     out-of-state employers withholding MN tax as "a courtesy to your
+ *     employee" (data/states/MN-2026.json); Rhode Island calls the
+ *     identical practice "CONVENIENCE WITHHOLDING" and explicitly disclaims
+ *     it as unmodelled (data/states/RI-2026.json's own reciprocity.rule).
+ *     This function is what closes that disclosed gap, generically for
+ *     every state rather than RI alone, since the practice isn't RI-specific.
+ *
+ * Reuses the exact virtual-input pattern residentWorkingElsewhereCreditLine()
+ * and reciprocitySwapWithholdingLine() already established. Gated OFF
+ * whenever reciprocityReason is set — a mandatory, statute-driven
+ * exemption/swap already governs this pay period and takes precedence over
+ * a caller-elected courtesy.
+ */
+function residenceStateWithholdingLine(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  work: StateRuleset,
+  reciprocityReason: string | null,
+): TaxLine | null {
+  if (reciprocityReason) return null;
+
+  const residence = input.residenceState;
+  if (!residence || residence.code === work.code) return null;
+
+  const election = input.residenceStateWithholding;
+  const nexus = election?.nexus === true;
+  const voluntary = election?.voluntary === true;
+  if (!nexus && !voluntary) return null;
+
+  if (!hasStateRuleset(residence.code, input.checkDate)) return null;
+  const residenceRules = stateRuleset(residence.code, input.checkDate);
+
+  const virtualInput: PaycheckInput = {
+    ...input,
+    workState: { code: residence.code, certificate: residence.certificate },
+  };
+  const residenceLines = incomeTaxLines(virtualInput, ctx, residenceRules);
+  const residenceTax = residenceLines
+    .filter((l) => l.id === `${residence.code}_SIT`)
+    .reduce((sum, l) => sum + l.amount, 0);
+
+  const basis = nexus
+    ? `the employer is registered/has nexus in ${residence.code} (input.residenceStateWithholding.nexus)`
+    : `the employer voluntarily agreed to withhold ${residence.code} tax as a courtesy to the employee, ` +
+      `absent nexus (input.residenceStateWithholding.voluntary)`;
+
+  return {
+    id: `${residence.code}_SIT_RESIDENCE`,
+    name: `${residenceRules.name} Income Tax (residence state${nexus ? '' : ', voluntary'})`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: residenceLines[0]?.taxableWages ?? 0,
+    amount: residenceTax,
+    detail:
+      `${fmt(residenceTax)} — ${basis}. Separate from any ${work.code} withholding above; whether this ` +
+      `also earns the employee a credit on their ${work.code} return (or vice versa) is a filing-time ` +
+      `question this engine does not resolve.`,
   };
 }
 
@@ -1323,7 +1403,11 @@ interface StateUnemploymentEmployeeConfig {
  * fixed.
  */
 interface SUIEmployerConfig {
-  wageBase: number | null;
+  // Either a single published wage base, or a two-tier { default,
+  // qualifiedEmployer } shape for states (Michigan confirmed) that offer a
+  // reduced base to employers current on their filings — see
+  // EmployerContext.stateUnemploymentQualifiedForReducedWageBase.
+  wageBase: number | { default: number; qualifiedEmployer: number } | null;
   newEmployerRate: number | null;
   experienceRange: { min: number; max: number } | null;
   employerSuppliedRateRequired?: boolean;
@@ -1358,7 +1442,33 @@ interface SUIEmployerConfig {
  * deferrals like 401(k) are frequently INCLUDED in the unemployment base
  * while excluded from income tax. Each state file records that as the open
  * question it is rather than the code implying a verified answer.
+ *
+ * TWO-TIER WAGE BASE BUG, found and fixed on a "go to every state" pass
+ * (2026-09-06): Michigan's own data file documents a real $9,500 statutory
+ * default vs. $9,000 reduced base for employers current on all filings
+ * (data/states/MI-2026.json's unemploymentInsurance.wageBase) — but the
+ * normalized suiEmployer.wageBase this function actually reads had been
+ * silently collapsed to a flat 9000, applying the QUALIFIED-only discount
+ * to every employer regardless of whether they qualify. That systematically
+ * under-caps (and so under-withholds/under-remits) SUTA for any employer
+ * that ISN'T current on its filings. cfg.wageBase can now be either a
+ * plain number or a { default, qualifiedEmployer } object; when it's the
+ * object, EmployerContext.stateUnemploymentQualifiedForReducedWageBase
+ * (keyed by state code, caller-supplied — the same "only the employer
+ * knows this" shape as stateUnemploymentRate) picks which applies,
+ * defaulting to the higher/statutory base when not supplied.
  */
+function resolveSUIWageBase(
+  wageBase: SUIEmployerConfig['wageBase'],
+  stateCode: string,
+  employer: EmployerContext | undefined,
+): number | null {
+  if (wageBase === null) return null;
+  if (typeof wageBase === 'number') return wageBase;
+  const qualifies = employer?.stateUnemploymentQualifiedForReducedWageBase?.[stateCode] === true;
+  return qualifies ? wageBase.qualifiedEmployer : wageBase.default;
+}
+
 function stateUnemploymentEmployerTax(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -1373,7 +1483,8 @@ function stateUnemploymentEmployerTax(
 
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const currentWages = ctx.taxableWagesFor(exempt);
-  const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
+  const resolvedWageBase = resolveSUIWageBase(cfg.wageBase, rules.code, input.employer);
+  const cap = resolvedWageBase === null ? null : dollars(resolvedWageBase);
   const ytd = input.ytd.stateUnemployment?.[rules.code] ?? 0;
   const taxableWages = cap === null ? currentWages : underCap(currentWages, ytd, cap);
   const amount = applyRate(taxableWages, rate);
@@ -2086,9 +2197,33 @@ function flatRateSupplementalTax(
   };
 }
 
+// 'ssWageBase' means "this state's own program ties its cap to the federal
+// Social Security wage base by DESIGN, not to an independently-set state
+// figure" — Washington, Connecticut and Massachusetts's own Paid Leave
+// programs all say so explicitly in their own published rules. Resolved
+// dynamically from data/federal/<year>.json instead of a copied-in number,
+// closing a real drift risk found on a "go to every state" pass
+// (2026-09-06): those three states' data files had each hand-copied the
+// SS wage base and explicitly flagged themselves as "MUST be kept in sync
+// ... or this file will silently drift stale" — the exact anti-pattern
+// Kentucky's capAtSSWageBase mechanism was already built to avoid for its
+// own local tax (see kentuckyLocalTax()'s own doc comment, which cites a
+// real prior incident: a stale transcribed cap of $84,500 instead of the
+// real $184,500). Three states independently carrying the same
+// "remember to update me" risk, with two of them having already had a
+// near-miss documented in their own file, was worth closing generically
+// rather than leaving as a dormant landmine for the next annual SS-cap
+// change.
+type WageBaseSpec = number | 'ssWageBase' | null;
+
+function resolvePaidLeaveWageBase(wageBase: WageBaseSpec, checkDate: string): number | null {
+  if (wageBase === 'ssWageBase') return federalRuleset(checkDate).socialSecurity.wageBase;
+  return wageBase;
+}
+
 interface StatePaidLeaveEmployeeConfig {
   rate: number;
-  wageBase: number | null; // dollars, annual — null means uncapped
+  wageBase: WageBaseSpec; // dollars, annual — null means uncapped; 'ssWageBase' tracks the federal SS cap live
   exemptPretax?: string[]; // overrides the shared rules.exemptPretax when present
 }
 
@@ -2128,7 +2263,8 @@ function statePaidLeaveEmployeeTax(
   const exempt = (cfg.exemptPretax ?? rules.exemptPretax ?? []) as PretaxCategory[];
   const currentWages = ctx.taxableWagesFor(exempt);
   const ytd = input.ytd.statePaidLeave?.[rules.code] ?? 0;
-  const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
+  const resolvedWageBase = resolvePaidLeaveWageBase(cfg.wageBase, input.checkDate);
+  const cap = resolvedWageBase === null ? null : dollars(resolvedWageBase);
   const taxableWages = underCap(currentWages, ytd, cap);
 
   // Generic exemption gate, added for Washington PFML (whose own program
@@ -2187,16 +2323,16 @@ function statePaidLeaveEmployeeTax(
         ? `rate overridden via certificate.paidLeaveEmployeeRateOverride (this employer's own chosen rate, ` +
           `not the ${(cfg.rate * 100).toFixed(2)}% statutory maximum); `
         : '') +
-      (cfg.wageBase === null
+      (resolvedWageBase === null
         ? `${fmt(taxableWages)} @ ${(rate * 100).toFixed(2)}%, no wage cap`
-        : `${fmt(taxableWages)} @ ${(rate * 100).toFixed(2)}%, capped at ${fmt(dollars(cfg.wageBase))}/yr (${fmt(ytd)} YTD already counted)`),
+        : `${fmt(taxableWages)} @ ${(rate * 100).toFixed(2)}%, capped at ${fmt(dollars(resolvedWageBase))}/yr (${fmt(ytd)} YTD already counted)`),
   };
 }
 
 interface StatePaidLeaveEmployerConfig {
   totalRate: number; // e.g. 0.0113 — Washington's own combined premium rate
   employeeShareFraction: number; // e.g. 0.7143 — fraction of totalRate the EMPLOYEE pays
-  wageBase: number | null; // dollars, annual — shares the SAME cap as the employee share
+  wageBase: WageBaseSpec; // dollars, annual — shares the SAME cap as the employee share; 'ssWageBase' tracks the federal SS cap live
   exemptPretax?: string[];
   /**
    * Rate by coverage tier, for a state whose premium depends on employer
@@ -2275,7 +2411,8 @@ function statePaidLeaveElectedEmployeeShare(
   const exempt = (cfg.exemptPretax ?? rules.exemptPretax ?? []) as PretaxCategory[];
   const currentWages = ctx.taxableWagesFor(exempt);
   const ytd = input.ytd.statePaidLeave?.[rules.code] ?? 0;
-  const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
+  const resolvedWageBase = resolvePaidLeaveWageBase(cfg.wageBase, input.checkDate);
+  const cap = resolvedWageBase === null ? null : dollars(resolvedWageBase);
   const taxableWages = underCap(currentWages, ytd, cap);
   const amount = applyRate(taxableWages, resolved.rate * fraction);
 
@@ -2338,7 +2475,8 @@ function statePaidLeaveEmployerTax(
   const exempt = (cfg.exemptPretax ?? rules.exemptPretax ?? []) as PretaxCategory[];
   const currentWages = ctx.taxableWagesFor(exempt);
   const ytd = input.ytd.statePaidLeave?.[rules.code] ?? 0;
-  const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
+  const resolvedWageBase = resolvePaidLeaveWageBase(cfg.wageBase, input.checkDate);
+  const cap = resolvedWageBase === null ? null : dollars(resolvedWageBase);
   const taxableWages = underCap(currentWages, ytd, cap);
 
   const resolved = resolvePaidLeaveRate(input, rules, cfg);
@@ -4422,6 +4560,21 @@ function coloradoOccupationalPrivilegeTax(
 
   if (cfg.repealedOn && input.checkDate >= cfg.repealedOn) return [];
 
+  const employerLine = (amount: Cents, detail: string): TaxLine => ({
+    id: `${prefix}_OPT_ER`,
+    name: `${locality} Occupational Privilege Tax (Employer)`,
+    payer: 'employer',
+    jurisdiction: 'local',
+    taxableWages: 0,
+    amount,
+    detail,
+  });
+
+  // SAME-employer dedup: this employer has already paid BOTH its own
+  // employee-side withholding and its own Business OPT for this employee
+  // this calendar month (e.g. a second paycheck in a semi-monthly cycle).
+  // Both lines zero — the whole tax is a once-a-month head tax, not a
+  // per-paycheck one.
   const alreadyWithheld = cert.localOPTWithheldThisMonth ?? cert.denverOPTWithheldThisMonth;
   if (alreadyWithheld) {
     return [
@@ -4430,8 +4583,27 @@ function coloradoOccupationalPrivilegeTax(
         `$0 — already withheld on an earlier paycheck this calendar month ` +
           `(certificate.localOPTWithheldThisMonth); the flat monthly amount is not withheld twice.`,
       ),
+      employerLine(
+        0,
+        `$0 — this employer already paid its own Business OPT for this employee this calendar month.`,
+      ),
     ];
   }
+
+  // CROSS-employer coordination (Denver's Form TD269 and its equivalent
+  // elsewhere) — found and closed on the "go to every state, fix real
+  // bugs" pass (2026-09-06). This was previously disclosed in
+  // CO-2026.json's own denver.note as "not modelled" — but the ONLY
+  // existing flag (alreadyWithheld, above) zeros BOTH lines, which is
+  // right for the same-employer case but WRONG here: TD269 exempts a
+  // SECONDARY employer from withholding the $5.75 EMPLOYEE portion (a
+  // different, first employer already did), but that secondary employer
+  // still owes its OWN $4.00 Business OPT for this same taxable employee
+  // — reusing alreadyWithheld for this case would have silently dropped
+  // a Business OPT payment this employer genuinely owes. A distinct flag
+  // keeps the two real-world facts separate: opt-in, defaults to false
+  // (charge normally) so this is additive.
+  const employeeWithheldElsewhere = cert.localOPTEmployeeWithheldByOtherEmployer === true;
 
   const monthlyComp = Number(cert.localMonthlyCompensation ?? cert.denverMonthlyCompensation ?? 0);
   const threshold = cfg.monthlyEarningsThreshold;
@@ -4448,12 +4620,30 @@ function coloradoOccupationalPrivilegeTax(
               ? `not above the $${threshold}/month taxable-employee threshold.`
               : `below the $${threshold}/month taxable-employee threshold.`),
         ),
+        employerLine(0, `$0 — this employee does not meet the $${threshold}/month taxable-employee threshold.`),
       ];
     }
   }
 
-  const employeeAmount = dollars(cfg.employeeRate);
   const employerAmount = dollars(cfg.employerRatePerEmployee);
+  const employerLineOut = employerLine(
+    employerAmount,
+    `Flat $${cfg.employerRatePerEmployee}/month per taxable employee.`,
+  );
+
+  if (employeeWithheldElsewhere) {
+    return [
+      employeeLine(
+        0,
+        `$0 — certificate.localOPTEmployeeWithheldByOtherEmployer is true: a different employer already ` +
+          `withheld this employee's flat monthly amount this month (Denver's Form TD269 or equivalent). ` +
+          `This employer's own Business/employer-side OPT is still owed and NOT exempted by that form.`,
+      ),
+      employerLineOut,
+    ];
+  }
+
+  const employeeAmount = dollars(cfg.employeeRate);
 
   return [
     employeeLine(
@@ -4464,21 +4654,15 @@ function coloradoOccupationalPrivilegeTax(
           : ` — ${fmt(monthlyComp)} of ${locality}-sourced compensation this month ` +
             `(certificate.localMonthlyCompensation) meets the $${threshold} taxable-employee threshold.`),
     ),
-    {
-      id: `${prefix}_OPT_ER`,
-      name: `${locality} Occupational Privilege Tax (Employer)`,
-      payer: 'employer',
-      jurisdiction: 'local',
-      taxableWages: 0,
-      amount: employerAmount,
-      detail: `Flat $${cfg.employerRatePerEmployee}/month per taxable employee.`,
-    },
+    employerLineOut,
   ];
 }
 
 interface WVServiceFeeCityConfig {
   weeklyRate: number; // dollars per week
   nonResidentOnly?: boolean; // Fairmont: only non-resident duty-station employees are payroll-withheld; residents are billed directly, not through payroll (see WV-2026.json's serviceFeeCities.Fairmont note)
+  minDaysBeforeAttaching?: number; // Wheeling (30, consecutive per its own FAQ), Glen Dale (30, per calendar year per Art. 752.03(b)) — see certificate.daysWorkedInLocality below
+  rateChange?: { effectiveDate: string; priorWeeklyRate: number }; // Weirton: $2.00/wk before the ordinance's effective date, $5.00/wk (weeklyRate) on/after it
 }
 
 /**
@@ -4508,17 +4692,48 @@ interface WVServiceFeeCityConfig {
  * nonResidentOnly:true and is skipped here when certificate.residenceCity
  * also names Fairmont.
  *
- * NOT modelled, disclosed rather than guessed at: Wheeling's own 30-
- * consecutive-day-in-the-city threshold before the fee first attaches
- * (no employment-duration input exists anywhere in this engine — every
- * duty-station-in-Wheeling case is treated as already past the
- * threshold); the multi-job dedup rule (an employee working multiple jobs
- * in the same WV city is only assessed once — the same class of
- * un-modelled multi-employer coordination as Newark's Form-based
- * exemption elsewhere in this project); and Weirton's mid-2026 rate
- * change from $2.00 to $5.00/week has no effective-dating mechanism (this
- * function always uses the current $5.00 figure, correct only for check
- * dates on/after the ordinance's ~2026-05-14 effective date).
+ * THREE REAL OVER/WRONG-WITHHOLDING BUGS CLOSED (2026-09-06 "go to every
+ * state" pass) — all three were previously disclosed as un-modelled gaps
+ * rather than fixed; a payroll engine that always over-withholds on a
+ * known, sourced rule is a bug, not a confidence-tier caveat, so this pass
+ * treated them as such:
+ *
+ * 1. MULTI-JOB DEDUP — every WV city's own ordinance says an employee
+ *    working 2+ jobs in the same city is charged once (Charleston's own
+ *    Prior Payment Form CSF-1 is literally built for this: the employee
+ *    tells their SECOND employer not to withhold once the first already
+ *    has). certificate.wvLocalFeeAlreadyWithheld:true (caller-supplied —
+ *    this engine has no cross-employer visibility, the same "only the
+ *    caller can know this" shape as Denver's OPT
+ *    denverOPTWithheldThisMonth) skips this line entirely. Defaults to
+ *    false/undefined (charge), so a caller who doesn't supply it gets the
+ *    same behavior as before this fix — this is an ADDITIVE fix, not a
+ *    behavior change for existing callers.
+ *
+ * 2. EMPLOYMENT-DURATION THRESHOLD — Wheeling (30 consecutive days) and
+ *    Glen Dale (30 days per calendar year, Art. 752.03(b)) don't charge
+ *    the fee until a duration threshold is crossed; every other city's
+ *    own source has no such threshold. city.minDaysBeforeAttaching (only
+ *    set on those two configs) is compared against caller-supplied
+ *    certificate.daysWorkedInLocality; the fee is skipped when the
+ *    supplied count is below the threshold. Genuinely approximate for
+ *    Wheeling specifically: this engine counts a single cumulative
+ *    "days worked in this locality" number and cannot distinguish a
+ *    CONSECUTIVE run from a total-with-gaps the way Wheeling's own FAQ
+ *    literally requires — correct for Glen Dale's calendar-year-total
+ *    rule, an approximation for Wheeling's consecutive-day rule,
+ *    disclosed here rather than silently assumed exact. certificate.
+ *    daysWorkedInLocality left UNSUPPLIED preserves the pre-fix
+ *    behavior (treated as past threshold, i.e. charged) rather than
+ *    silently flipping existing callers to $0.
+ *
+ * 3. WEIRTON MID-2026 RATE CHANGE — city.rateChange.effectiveDate /
+ *    .priorWeeklyRate (same input.checkDate string-compare pattern as
+ *    Utah's cfg.effectiveDateOfNewTable and Ohio's midYearEffectiveDating
+ *    elsewhere in this file) picks $2.00/wk for any checkDate before the
+ *    ordinance's 2026-05-14 effective date and $5.00/wk (the plain
+ *    weeklyRate field) on/after it, instead of always using the current
+ *    figure regardless of the check date being calculated.
  */
 function westVirginiaMunicipalServiceFee(
   input: PaycheckInput,
@@ -4539,7 +4754,19 @@ function westVirginiaMunicipalServiceFee(
     if (residenceCityName?.toLowerCase() === locality.toLowerCase()) return null;
   }
 
-  const annualFee = dollars(city.weeklyRate) * 52;
+  if (cert.wvLocalFeeAlreadyWithheld === true) return null;
+
+  if (typeof city.minDaysBeforeAttaching === 'number') {
+    const daysWorked = typeof cert.daysWorkedInLocality === 'number' ? cert.daysWorkedInLocality : undefined;
+    if (daysWorked !== undefined && daysWorked < city.minDaysBeforeAttaching) return null;
+  }
+
+  const effectiveWeeklyRate =
+    city.rateChange && input.checkDate < city.rateChange.effectiveDate
+      ? city.rateChange.priorWeeklyRate
+      : city.weeklyRate;
+
+  const annualFee = dollars(effectiveWeeklyRate) * 52;
   const amount = roundDownToCent(annualFee / ctx.periodsPerYear);
 
   return {
@@ -4550,7 +4777,7 @@ function westVirginiaMunicipalServiceFee(
     taxableWages: 0,
     amount,
     detail:
-      `$${city.weeklyRate}/week flat fee (WV Code 8-13-13), annualized (×52) and divided across ` +
+      `$${effectiveWeeklyRate}/week flat fee (WV Code 8-13-13), annualized (×52) and divided across ` +
       `${ctx.periodsPerYear} pay periods/yr, rounded down to the cent (same convention as PA's LST) ` +
       `— certificate.locality = "${locality}"`,
   };
@@ -4584,6 +4811,12 @@ function alabamaLocalTax(
   ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine | null {
+  // Gate on the actual work state, not just the presence of certificate.workCity —
+  // that field name is shared with Kentucky/Michigan/Ohio's own local-tax
+  // certificates, so without this check a Michigan employee whose work city
+  // happens to share a name with an Alabama municipality (e.g. Birmingham)
+  // would incorrectly get charged Alabama's occupational tax too.
+  if (input.workState?.code !== 'AL') return null;
   if (!hasALMunicipalityRuleset(input.checkDate)) return null;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
@@ -7109,7 +7342,7 @@ function pennsylvaniaLocalTax(
   };
 
   const lines: TaxLine[] = [eitLine];
-  const lstLine = pennsylvaniaLST(ctx, rules, workEntry);
+  const lstLine = pennsylvaniaLST(input, ctx, rules, workEntry);
   if (lstLine) lines.push(lstLine);
 
   return lines;
@@ -7257,6 +7490,40 @@ function michiganLocalTax(
  * of the 679 (or no certificate at all) correctly produces no line at all
  * — this is the closed-list-with-a-zero-case pattern already established
  * for MI/PA, not a silent omission.
+ *
+ * OCCASIONAL-ENTRANT EXEMPTION (ORC 718.011), found and closed on the
+ * "go to every state, fix real bugs" pass (2026-09-06) — previously not
+ * even DISCLOSED anywhere in this project, let alone modelled, the same
+ * shape of gap as West Virginia's day-count thresholds: a nonresident who
+ * works in a municipality that ISN'T their principal place of work for 20
+ * OR FEWER days in the calendar year owes that municipality nothing —
+ * before this fix, workEntry's tax always fired starting day one. Gated
+ * on TWO caller-supplied certificate fields, both opt-in and both
+ * defaulting to the pre-fix (withhold) behavior when absent, so this is
+ * additive: certificate.workCityIsPrincipalWorkplace (default true — most
+ * callers use this engine for an employee's regular duty station, and
+ * defaulting to "exempt" would be the wrong, revenue-losing direction)
+ * and certificate.daysWorkedInMunicipality (the cumulative day count;
+ * reusing WV's daysWorkedInLocality NAMING convention for the same kind
+ * of fact would be a false match here — WV's field means "in this one
+ * named locality" where Ohio's specifically means "in the WORK
+ * municipality, as distinct from wherever else the employee also
+ * works," hence the more specific name). The exemption only ever zeroes
+ * the WORK-city portion — never fires when workCity equals residenceCity
+ * (that isn't a "nonresident" case at all) — and correctly needs no
+ * ORC 718.121 credit adjustment since an exempted employee paid the work
+ * city nothing to credit against.
+ *
+ * Two real exceptions in ORC 718.011's own text are deliberately NOT
+ * modelled, disclosed rather than guessed at: (1) professional
+ * athletes/entertainers/public figures are excluded from the exemption
+ * regardless of day count — this engine's EmploymentCategory has no such
+ * category and adding one for this single narrow case was judged not
+ * worth the cross-cutting change; (2) "small employers" (ORC 718.01)
+ * must withhold ALL of an employee's wages to the employer's OWN fixed-
+ * location municipality only, a structurally different regime this
+ * function has no employer-size or employer-fixed-location input to
+ * evaluate at all. Both are real, sourced gaps, not silent omissions.
  */
 function ohioLocalTax(
   input: PaycheckInput,
@@ -7300,19 +7567,29 @@ function ohioLocalTax(
     };
   }
 
-  const workTax = workEntry ? taxFor(workEntry) : 0;
+  const isPrincipalWorkplace = cert.workCityIsPrincipalWorkplace !== false;
+  const daysWorked = typeof cert.daysWorkedInMunicipality === 'number' ? cert.daysWorkedInMunicipality : undefined;
+  const occasionalEntrantExempt =
+    workEntry !== undefined && !isPrincipalWorkplace && daysWorked !== undefined && daysWorked <= 20;
+
+  const workTax = workEntry && !occasionalEntrantExempt ? taxFor(workEntry) : 0;
   const homeTax = residenceEntry ? taxFor(residenceEntry) : 0;
   const credit = Math.min(workTax, homeTax);
   const netHomeTax = atLeastZero(homeTax - credit);
   const amount = workTax + netHomeTax;
 
   const details: string[] = [];
-  if (workEntry) {
+  if (occasionalEntrantExempt) {
+    details.push(
+      `$0 to ${workEntry!.name} — ORC 718.011 occasional-entrant exemption (${daysWorked} day(s) worked there, ` +
+        `not the principal workplace, 20-day threshold not exceeded)`,
+    );
+  } else if (workEntry) {
     details.push(`${fmt(workTax)} to ${workEntry.name} @ ${(workEntry.rate * 100).toFixed(2)}% on wages earned there`);
   }
   if (residenceEntry) {
     details.push(
-      workEntry
+      workEntry && !occasionalEntrantExempt
         ? `${fmt(netHomeTax)} to ${residenceEntry.name} @ ${(residenceEntry.rate * 100).toFixed(2)}% on all earnings, less a ${fmt(credit)} ORC 718.121 nonrefundable credit for tax paid to ${workEntry!.name} (capped at the home rate, no carryforward)`
         : `${fmt(homeTax)} to ${residenceEntry.name} @ ${(residenceEntry.rate * 100).toFixed(2)}% on all earnings`,
     );
@@ -7451,14 +7728,46 @@ function ohioSchoolDistrictTax(
  * a true year-to-date figure. Uses the municipal LIE threshold if
  * present, falling back to the school district's, matching how the
  * combined municipal+school total is what's actually being exempted.
+ *
+ * SECONDARY-EMPLOYER DEDUP, found and closed on the "go to every state,
+ * fix real bugs" pass (2026-09-06) — PA-2026.json's own localTax.lst.
+ * situsPriority text (sourced from PA DCED directly) says verbatim "a
+ * secondary employer need not withhold if shown proof of LST already
+ * withheld by the principal employer," but this had been left disclosed
+ * as un-modelled rather than fixed — the same over-withholding shape as
+ * West Virginia's multi-job service fee, just narrower (only fires when
+ * two employers both owe LST to the SAME PSD, since LST is a per-work-
+ * locality tax — two DIFFERENT PA localities genuinely both owe it,
+ * that's not double-counting). certificate.lstAlreadyWithheldElsewhere
+ * (caller-supplied, opt-in, defaults to false/absent = charge — the
+ * same additive, non-breaking pattern as WV's equivalent fix) skips
+ * this line when the employee's principal employer has already
+ * withheld it for the year.
  */
 function pennsylvaniaLST(
+  input: PaycheckInput,
   ctx: ComputeContext,
   rules: StateRuleset,
   workEntry: PALocalEntry,
 ): TaxLine | null {
   const lst = workEntry.lst;
   if (!lst || lst.total <= 0) return null;
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (cert.lstAlreadyWithheldElsewhere === true) {
+    return {
+      id: 'PA_LST',
+      name: 'PA Local Services Tax',
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: 0,
+      amount: 0,
+      detail:
+        '$0 — certificate.lstAlreadyWithheldElsewhere is true: proof of LST already withheld by the ' +
+        'principal employer for this PSD means a secondary employer need not withhold it again (PA DCED\'s ' +
+        'own situs-priority rule).',
+    };
+  }
 
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const periodWages = ctx.taxableWagesFor(exempt);

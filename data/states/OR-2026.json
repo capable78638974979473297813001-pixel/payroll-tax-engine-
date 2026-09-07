@@ -154,12 +154,13 @@
   },
   "statePaidLeaveEmployee": {
     "rate": 0.006,
-    "wageBase": 184500.0
+    "wageBase": "ssWageBase",
+    "wageBaseFix": "CORRECTED 2026-09-06: was a hand-copied literal 184500 (see paidLeaveOregon.wageBaseNote below for the originally-disclosed drift risk) -- now resolved LIVE from data/federal/2026.json's own socialSecurity.wageBase by resolvePaidLeaveWageBase() in src/taxes/state.ts, closing the same class of bug fixed for WA/CT/MA/DE/ME/CO the same pass."
   },
   "statePaidLeaveEmployer": {
     "totalRate": 0.01,
     "employeeShareFraction": 0.6,
-    "wageBase": 184500.0
+    "wageBase": "ssWageBase"
   },
   "paidLeaveOregon": {
     "totalRate": 0.01,
@@ -169,7 +170,7 @@
       "condition": "Only employers with 25 or more employees on average. Employers with fewer than 25 employees on average owe $0 employer share, UNLESS they've received a Paid Leave assistance grant within the last 2 years."
     },
     "wageBase": 184500.0,
-    "wageBaseNote": "Pegged to the Social Security taxable wage index each year, same mechanism Connecticut's Paid Leave already uses in this project (flagged there as a must-keep-in-sync risk) — Oregon's own page states the figure directly rather than requiring this engine to derive it from federal.json, so it's recorded here as a literal 2026 dollar figure rather than a cross-reference.",
+    "wageBaseNote": "Pegged to the Social Security taxable wage index each year -- this block is the detailed RESEARCH record only (not read by calc code, which uses statePaidLeaveEmployee/Employer above), so it's kept as a literal 2026 dollar figure here for readability. CORRECTED 2026-09-06: the ENGINE-CONSUMED copies (statePaidLeaveEmployee.wageBase / statePaidLeaveEmployer.wageBase above) now use the 'ssWageBase' sentinel instead of a hand-copied literal, closing the drift risk this note used to describe -- this record-only copy can safely stay a literal since nothing computes from it directly.",
     "administeredBy": "Oregon Employment Department",
     "wiredIntoCalcCode": "CLOSED this session — Oregon's shape (total rate split employee/employer, shared SS-indexed wage base, employer share gated on the employer's OWN headcount determination) is EXACTLY the shape statePaidLeaveEmployeeTax()/statePaidLeaveEmployerTax() were already built for (Washington's PFML). Wired via the statePaidLeaveEmployee/statePaidLeaveEmployer config blocks below — no new engine code needed. Employer share still requires the caller to set certificate.employerLiableForPaidLeaveShare (Oregon's 25-employee threshold is an employer-aggregate fact this engine cannot see from one paycheck, same disclosed limitation as Washington's 50-employee threshold)."
   },
