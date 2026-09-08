@@ -1,0 +1,142 @@
+# Minimum wage database
+
+Every federal, state, territorial and local minimum wage in the United States that
+this project could verify, as of **2026-09-08**.
+
+This is a different kind of dataset from everything else in `data/`. The rest of the
+repo answers *what comes out of a paycheck*. These files answer the question that
+constrains the paycheck before any withholding happens: **how low may the hourly rate
+itself go.** A minimum wage is a floor on gross pay, not a tax — which is why it lives
+in its own folder rather than being stapled onto the state tax rulesets.
+
+## The one rule
+
+DOL states it on its own State Minimum Wage Laws page: where federal, state and local
+minimum wage laws all cover the same hour of work, the employer owes the **highest** of
+the applicable rates.
+
+So the data is stored one level at a time and merged at query time by
+`minimumWage()` in `src/minimum-wage.ts`. Nothing here is pre-flattened into "the rate
+for this address": a pre-merged table loses the reason a number is what it is, and goes
+stale one jurisdiction at a time without anything noticing.
+
+```ts
+import { minimumWage } from './src/minimum-wage.ts';
+
+minimumWage({ checkDate: '2026-08-15', state: 'WA', locality: 'seattle' });
+// → { cents: 2130, bindingLevel: 'local', bindingJurisdiction: 'Seattle',
+//     considered: [ federal 725, state 1713, local 2130 ] }
+```
+
+The `considered` trail always carries the levels that *lost*, so a caller can see why
+an answer is what it is.
+
+## Layout
+
+```
+federal-2026.json              the FLSA floor, the youth wage, and the federal
+                               contractor minimum wages (EO 13658 / revoked EO 14026)
+states/XX-2026.json            50 states + DC
+territories/XX-2026.json       PR, VI, GU, AS, MP
+local/XX-local-2026.json       69 city and county ordinances across 10 states
+sectoral/CA-sectoral-2026.json minimum wages California sets by INDUSTRY, not geography
+```
+
+Every file carries its own `sources` (title, URL, `verifiedOn`, and a `verifiedBy` note
+saying whether the figure was read from a primary page or cross-sourced), a
+`confidence` tier, and a `knownGaps` list. Same discipline as the tax rulesets.
+
+Each rate appears as **both** `hourly` (decimal dollars, what the jurisdiction
+publishes) and `hourlyCents` (what this engine computes in). A test asserts the two can
+never drift apart.
+
+## What makes this hard, and where a naive table goes wrong
+
+These are the traps the database is shaped around. Each one is a real, catchable error,
+and each is covered by a test in `tests/minimum-wage.test.ts`.
+
+**Not everything adjusts on January 1.** Alaska, DC, Oregon and the two Maryland
+counties step on July 1; Florida steps on **September 30**; Santa Fe city and county
+step on **March 1**; Chicago and Cook County step on July 1. A January-only refresh
+cycle carries a stale rate for months of every year.
+
+**Some jurisdictions step mid-year for *some* employers.** Renton and Everett WA and
+Saint Paul MN each raise their smaller-employer tiers on July 1 while the large-employer
+rate holds. Those tiers carry `effectiveFrom`/`effectiveTo` so a date query gets the
+right one.
+
+**"Surpassed by state law" is not the same as "delete the entry."** Albuquerque's
+standard rate ($11.85) lost to New Mexico's $12.00, but its **tipped** minimum of $7.20
+is more than double the state's $3.00 and still binds. Dropping the entry would underpay
+every tipped worker in the state's largest city by $4.20 an hour.
+
+**Tipped pay is a separate ladder, not a discount.** Nine jurisdictions here allow no tip
+credit at all (Alaska, California, Minnesota, Montana, Nevada, Oregon, Washington, Guam,
+and Flagstaff AZ). Three are on their own escalators: Chicago is abolishing its tip
+credit by 2028, DC's is a rising percentage of the minimum wage under the amended
+Initiative 82, and Michigan's rises a couple of points a year. Colorado is the only state
+where a *locality* may widen the tip offset — Edgewater did, to $4.67.
+
+**Two live state rates are below $7.25.** Montana's $4.00 and Oklahoma's $2.00 bind only
+where the FLSA does not reach the employer at all. Both are carried as variants, never as
+the standard rate. Georgia's and Wyoming's own $5.15 statutes are carried in a separate
+`stateStatutoryRate` field for the same reason.
+
+**American Samoa has no single minimum wage.** Federal law itself sets **18** industry
+rates there, from $5.78 (garment manufacturing) to $7.19 (stevedoring), all below $7.25,
+stepping $0.40 every three years. `minimumWage()` deliberately returns no state figure
+for AS and says why, rather than inventing one.
+
+**EO 14026 is revoked.** A payroll system still applying the $17.75 federal contractor
+rate is overpaying; covered older contracts fell back to EO 13658's $13.65 (tipped
+$9.55) on 2026-05-11.
+
+**South Dakota publishes a half cent.** Its tipped cash wage is exactly half of $11.85 —
+`$5.925`. DOL's federal table rounds it to $5.93; this database carries the state's own
+figure, because rounding down would underpay. It is the only non-integer cent figure
+here.
+
+**Stale tier splits.** Maryland's small-employer tier, Minnesota's large/small split,
+Nevada's health-benefits tier and Seattle's employer-size tiers have all been abolished
+within the last two years. A table still carrying two rates for any of them is wrong.
+
+## Sourcing
+
+The spine is DOL's own three tables (state minimum wage laws, tipped employees, and the
+consolidated table), all fetched and read directly. Every state or locality whose own
+labor department, city page or official notice was also read directly is marked
+`primary_source_confirmed`; anything resting on two or more independent secondary
+sources agreeing is marked `cross_source_confirmed` and says so in `verifiedBy`.
+
+Where the sources disagreed, the disagreement is recorded rather than smoothed over —
+South Dakota's tipped cent, and Washington L&I's Burien and Renton figures correcting a
+secondary source, are both documented in the files themselves.
+
+Local coverage was canvassed against the UC Berkeley Labor Center's standing inventory of
+US city and county minimum wage ordinances, so the list of *which jurisdictions exist* is
+not this project's own guess. Repealed ordinances (Bangor ME, Tacoma WA) are deliberately
+absent rather than carried at zero.
+
+## Known gaps
+
+- **Sector-specific ordinances are only partly covered.** California's fast food and
+  health care rates and the Los Angeles hotel rate are carried; the Los Angeles airport,
+  Santa Monica, Long Beach, West Hollywood and Glendale hotel ordinances are named but
+  given no figures, because none was verified to this database's standard.
+- **Coverage tests are not modelled.** Whether a particular employer is a "fast food
+  restaurant," a covered health care facility, a Cook County municipality that opted out,
+  or a SeaTac hospitality employer is a legal determination. This database carries rates,
+  not coverage tests.
+- **Only headcount tiers are machine-readable.** Ohio's gross-receipts threshold, New
+  Jersey's seasonality test and unincorporated King County's revenue test are recorded in
+  prose; `minimumWage()` says so in the trail rather than guessing.
+- **State preemption of local ordinances was not individually researched.** The absence
+  of a `local/` file for a state means no ordinance was found there, not that the state
+  forbids one.
+- **Nebraska's Omaha and Lincoln ordinances are in active litigation** and are carried as
+  not in effect. Re-verify before relying on either.
+- **New York's home care aide minimum wage** (Public Health Law 3614-f) is a separate,
+  higher figure published in NYSDOL fact sheet P105. No figure is asserted here.
+- **Effective dates that fall just after this file's `asOf`** are carried in
+  `scheduledChanges` rather than applied — most urgently Florida's step to $15.00 on
+  2026-09-30, three weeks after this database was compiled.

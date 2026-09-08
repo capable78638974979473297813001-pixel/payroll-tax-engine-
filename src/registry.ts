@@ -812,3 +812,169 @@ export function garnishmentStateOverride(
   );
   return file.states[code.toUpperCase()];
 }
+
+// ---------------------------------------------------------------------------
+// Minimum wage — data/minimum-wage/
+//
+// A separate dataset from everything above it in this file. Every other
+// ruleset here answers "what is withheld from this paycheck"; these answer
+// "how low may the paycheck itself go," which is a floor on GROSS pay, not
+// a tax. They live in their own folder for that reason, and the loaders
+// below deliberately mirror the same shape as the tax loaders so the
+// swappable dataReader (Edge Function bundling, tests) covers them too.
+// ---------------------------------------------------------------------------
+
+/** One published hourly figure, carried as both dollars and cents. */
+export interface MinimumWageAmount {
+  hourly: number;
+  hourlyCents: number;
+  id?: string;
+  label?: string;
+  test?: string;
+  note?: string;
+  effectiveFrom?: string;
+  effectiveTo?: string;
+  /** Machine-readable employer-size test, where the jurisdiction's tier is a headcount. */
+  appliesWhen?: { employeeCountMin?: number; employeeCountMax?: number };
+  /** True where the tier means "this ordinance does not reach this employer at all." */
+  notCovered?: boolean;
+  [key: string]: unknown;
+}
+
+export interface TippedMinimumWage {
+  tipCreditAllowed: boolean;
+  cashWage: number;
+  cashWageCents: number;
+  maxTipCredit?: number;
+  maxTipCreditCents?: number;
+  tippedEmployeeThreshold?: { amount: number; period: string; note?: string } | null;
+  note?: string;
+}
+
+export interface MinimumWageJurisdiction extends MinimumWageAmount {
+  id: string;
+  name: string;
+  level: string;
+  tipped?: TippedMinimumWage;
+  variants?: MinimumWageAmount[];
+  coverage?: string;
+  status?: string;
+}
+
+export interface FederalMinimumWageRuleset {
+  jurisdiction: { level: string; code: string; name: string };
+  year: number;
+  asOf: string;
+  standard: MinimumWageAmount;
+  tipped: TippedMinimumWage;
+  youthAndTraining: MinimumWageAmount[];
+  [key: string]: unknown;
+}
+
+export interface StateMinimumWageRuleset {
+  jurisdiction: { level: string; code: string; name: string };
+  year: number;
+  asOf: string;
+  hasStateMinimumWage?: boolean;
+  /** Null only for American Samoa, whose federal floor is 18 industry rates instead. */
+  standard: MinimumWageAmount | null;
+  tipped: TippedMinimumWage;
+  variants?: MinimumWageAmount[];
+  youthAndTraining?: MinimumWageAmount[];
+  industryRates?: MinimumWageAmount[];
+  sources: { title: string; url: string; verifiedOn: string }[];
+  [key: string]: unknown;
+}
+
+export interface LocalMinimumWageFile {
+  state: string;
+  year: number;
+  asOf: string;
+  jurisdictions: MinimumWageJurisdiction[];
+  [key: string]: unknown;
+}
+
+export function federalMinimumWageRuleset(checkDate: string): FederalMinimumWageRuleset {
+  return loadJson<FederalMinimumWageRuleset>(
+    join('minimum-wage', `federal-${yearOf(checkDate)}.json`),
+  );
+}
+
+/**
+ * One state's, DC's or a territory's own minimum wage ruleset. States and
+ * territories live in sibling folders because a territory is not a state
+ * anywhere else in this engine either; this resolves whichever exists.
+ */
+export function stateMinimumWageRuleset(
+  code: string,
+  checkDate: string,
+): StateMinimumWageRuleset {
+  const upper = code.toUpperCase();
+  const year = yearOf(checkDate);
+  const statePath = join('minimum-wage', 'states', `${upper}-${year}.json`);
+  if (dataFileExists(statePath)) {
+    return loadJson<StateMinimumWageRuleset>(statePath);
+  }
+  return loadJson<StateMinimumWageRuleset>(
+    join('minimum-wage', 'territories', `${upper}-${year}.json`),
+  );
+}
+
+export function hasStateMinimumWageRuleset(code: string, checkDate: string): boolean {
+  const upper = code.toUpperCase();
+  const year = yearOf(checkDate);
+  return (
+    dataFileExists(join('minimum-wage', 'states', `${upper}-${year}.json`)) ||
+    dataFileExists(join('minimum-wage', 'territories', `${upper}-${year}.json`))
+  );
+}
+
+export function hasLocalMinimumWageRuleset(stateCode: string, checkDate: string): boolean {
+  return dataFileExists(
+    join('minimum-wage', 'local', `${stateCode.toUpperCase()}-local-${yearOf(checkDate)}.json`),
+  );
+}
+
+/**
+ * Every local minimum wage ordinance this project has researched in one
+ * state. An empty result means "no ordinance file for this state," which is
+ * NOT the same as "no locality in this state has one" — see the folder's
+ * own README for what was canvassed.
+ */
+export function localMinimumWageRuleset(
+  stateCode: string,
+  checkDate: string,
+): MinimumWageJurisdiction[] {
+  if (!hasLocalMinimumWageRuleset(stateCode, checkDate)) return [];
+  const file = loadJson<LocalMinimumWageFile>(
+    join('minimum-wage', 'local', `${stateCode.toUpperCase()}-local-${yearOf(checkDate)}.json`),
+  );
+  return file.jurisdictions;
+}
+
+export interface SectoralMinimumWageFile {
+  state: string;
+  year: number;
+  sectors: (MinimumWageAmount & { id: string; name: string; coverage: string })[];
+  [key: string]: unknown;
+}
+
+export function hasSectoralMinimumWageRuleset(stateCode: string, checkDate: string): boolean {
+  return dataFileExists(
+    join('minimum-wage', 'sectoral', `${stateCode.toUpperCase()}-sectoral-${yearOf(checkDate)}.json`),
+  );
+}
+
+export function sectoralMinimumWageRuleset(
+  stateCode: string,
+  checkDate: string,
+): SectoralMinimumWageFile['sectors'] {
+  if (!hasSectoralMinimumWageRuleset(stateCode, checkDate)) return [];
+  return loadJson<SectoralMinimumWageFile>(
+    join(
+      'minimum-wage',
+      'sectoral',
+      `${stateCode.toUpperCase()}-sectoral-${yearOf(checkDate)}.json`,
+    ),
+  ).sectors;
+}

@@ -1,0 +1,66 @@
+{
+  "state": "CA",
+  "year": 2026,
+  "asOf": "2026-09-08",
+  "$comment": "Minimum wages California sets by INDUSTRY rather than by geography. They are not local ordinances and not the state minimum wage; a covered fast-food or health-care employee is owed the sectoral rate even in a city with no local ordinance at all, and even where the local ordinance is lower.",
+  "sectors": [
+    {
+      "id": "fast_food",
+      "name": "Fast food restaurant employees",
+      "hourly": 20.0,
+      "hourlyCents": 2000,
+      "effectiveFrom": "2024-04-01",
+      "coverage": "Employees of limited-service restaurants that are part of a national chain with 60 or more establishments nationwide (AB 1228 / Labor Code 1475 et seq.), as set by the Fast Food Council.",
+      "note": "Unchanged at $20.00 for 2026 -- the Council has adopted no increase since the rate took effect.",
+      "confidence": "cross_source_confirmed"
+    },
+    {
+      "id": "health_care_large_systems",
+      "name": "Health care workers -- large health systems, large hospitals and dialysis clinics",
+      "hourly": 25.0,
+      "hourlyCents": 2500,
+      "effectiveFrom": "2026-07-01",
+      "coverage": "SB 525 (Health & Safety Code 1182.14 et seq.) covered employees of large private hospitals, large integrated health systems and dialysis clinics.",
+      "note": "$23.00 from 2024-06-01, $24.00 from 2025-07-01, $25.00 from 2026-07-01.",
+      "confidence": "cross_source_confirmed"
+    },
+    {
+      "id": "health_care_other_facilities",
+      "name": "Health care workers -- other covered facilities, including skilled nursing facilities",
+      "hourly": 23.0,
+      "hourlyCents": 2300,
+      "effectiveFrom": "2026-07-01",
+      "coverage": "SB 525 covered employees at facilities outside the large-system, high-government-payor and clinic categories.",
+      "note": "Stepped to $23.00 on 2026-07-01, continuing toward $25.00 later in the SB 525 schedule.",
+      "confidence": "cross_source_confirmed"
+    },
+    {
+      "id": "los_angeles_hotel",
+      "name": "Los Angeles hotel workers",
+      "hourly": 25.0,
+      "hourlyCents": 2500,
+      "effectiveFrom": "2026-07-01",
+      "coverage": "Employees at Los Angeles hotels with 60 or more guest rooms, under the city's Hotel Worker Minimum Wage Ordinance as amended in 2026.",
+      "healthBenefitSupplement": {
+        "hourly": 4.25,
+        "hourlyCents": 425,
+        "note": "An ADDITIONAL $4.25/hr for the provision of health care benefits; where the employer provides no health benefits, the $4.25 must be paid as additional hourly wages -- so the cash floor is $29.25."
+      },
+      "confidence": "cross_source_confirmed"
+    }
+  ],
+  "sources": [
+    {
+      "title": "California employment-law summaries of the July 1, 2026 sectoral wage steps (Fisher Phillips, CalChamber, SHRM, California Medical Association)",
+      "url": "https://www.fisherphillips.com/en/insights/insights/california-local-minimum-wage-increases-effective-july-1-2026",
+      "verifiedOn": "2026-09-08",
+      "verifiedBy": "cross_source_confirmed this session across several independent California employment-law summaries for the fast-food $20.00, the SB 525 steps to $25.00 (large systems, hospitals and dialysis) and $23.00 (other covered facilities including skilled nursing) on 2026-07-01, and the Los Angeles hotel-worker $25.00 plus the $4.25 health-benefit supplement. The URL given is one of those summaries -- its own rate CHART is a PDF this session could not render, so the figures rest on the agreeing prose of several sources rather than on that chart. California DIR's own health-care minimum wage FAQ 404'd on a direct fetch. This is the weakest-sourced file in this database and is marked accordingly."
+    }
+  ],
+  "confidence": "cross_source_confirmed",
+  "knownGaps": [
+    "SB 525 defines FOUR employer categories. Only the two whose 2026-07-01 figures were confirmed this session are asserted here; the high-government-payor/rural-independent hospital category and the clinic category exist and are on their own slower schedules, and no figure is guessed for them.",
+    "Los Angeles also sets an airport-worker minimum wage, and Santa Monica, Long Beach, West Hollywood and Glendale each run hotel-worker ordinances. Those are real minimum wages that are deliberately NOT given figures here, because none was verified to a primary or double-secondary standard this session.",
+    "Whether a particular restaurant or facility is 'covered' is a legal determination under each statute's own definitions; this file carries rates, not coverage tests."
+  ]
+}

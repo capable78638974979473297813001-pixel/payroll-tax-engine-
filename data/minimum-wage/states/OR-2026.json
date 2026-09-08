@@ -1,0 +1,69 @@
+{
+  "jurisdiction": {
+    "level": "state",
+    "code": "OR",
+    "name": "Oregon"
+  },
+  "year": 2026,
+  "asOf": "2026-09-08",
+  "hasStateMinimumWage": true,
+  "standard": {
+    "hourly": 15.55,
+    "hourlyCents": 1555,
+    "effectiveFrom": "2026-07-01",
+    "coverage": "Standard counties -- everywhere that is neither inside the Portland urban growth boundary nor one of the 18 designated non-urban counties.",
+    "note": "ORS 653.025: THREE geographic rates, adjusted every July 1 by CPI. Oregon's step date is July 1, so a January-only refresh cycle carries stale Oregon rates for half the year."
+  },
+  "tipped": {
+    "tipCreditAllowed": false,
+    "cashWage": 15.55,
+    "cashWageCents": 1555,
+    "maxTipCredit": 0.0,
+    "maxTipCreditCents": 0,
+    "tippedEmployeeThreshold": null,
+    "note": "This state allows NO tip credit: the full state minimum wage must be paid in cash before any tips. Oregon has never allowed a tip credit, at any of its three rates."
+  },
+  "variants": [
+    {
+      "hourly": 16.8,
+      "hourlyCents": 1680,
+      "id": "portland_metro",
+      "label": "Portland metro (inside the urban growth boundary)",
+      "test": "Work performed inside the Portland metropolitan urban growth boundary. ORS 653.025 sets this at $1.25 above the standard rate."
+    },
+    {
+      "hourly": 14.55,
+      "hourlyCents": 1455,
+      "id": "nonurban",
+      "label": "Non-urban counties",
+      "test": "Baker, Coos, Crook, Curry, Douglas, Gilliam, Grant, Harney, Jefferson, Klamath, Lake, Malheur, Morrow, Sherman, Umatilla, Union, Wallowa and Wheeler counties. $1.00 below the standard rate."
+    }
+  ],
+  "youthAndTraining": [],
+  "indexation": {
+    "indexed": true,
+    "basis": "CPI-U (US city average)",
+    "adjustmentDate": "07-01"
+  },
+  "scheduledChanges": [],
+  "knownGaps": [
+    "Oregon's three rates are geographic but are set by STATE law, not by local ordinance -- they are variants of the state rate here, not entries in local/."
+  ],
+  "sources": [
+    {
+      "id": "dol-state-mw",
+      "title": "U.S. DOL Wage and Hour Division -- State Minimum Wage Laws (table current as of July 1, 2026)",
+      "url": "https://www.dol.gov/agencies/whd/minimum-wage/state",
+      "verifiedOn": "2026-09-08",
+      "verifiedBy": "Fetched and read directly this session. DOL's own state-by-state table is the spine of every standard rate in this database; where a state's own labor department was ALSO read directly, that source is listed too and wins on any disagreement (see South Dakota's tipped cash wage for the one case where they disagreed)."
+    },
+    {
+      "id": "dol-tipped-mw",
+      "title": "U.S. DOL Wage and Hour Division -- Minimum Wages for Tipped Employees (table current as of July 1, 2026)",
+      "url": "https://www.dol.gov/agencies/whd/state/minimum-wage/tipped",
+      "verifiedOn": "2026-09-08",
+      "verifiedBy": "Fetched and read directly this session. Source of the combined rate / maximum tip credit / minimum cash wage triple and the 'tipped employee' monthly-tips definition for every state and territory in this database."
+    }
+  ],
+  "confidence": "primary_source_confirmed"
+}
