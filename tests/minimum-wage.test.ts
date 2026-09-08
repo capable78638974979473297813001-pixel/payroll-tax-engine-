@@ -382,6 +382,69 @@ describe('local minimum wages', () => {
     assert.match(answer.considered.find((c) => c.level === 'local')!.basis, /not covered/);
   });
 
+  test('Washington’s local ordinances have no tipped block, but a tipped query still returns the FULL local rate', () => {
+    // A real bug this locks in: none of Washington's 8 local ordinance
+    // files publish a separate `tipped` figure, because Washington bans
+    // tip credits statewide and every local rate is already a full-cash
+    // floor. The naive reading of "no tipped block" is "fall back to the
+    // state's $17.13" — which was this resolver's actual behavior until
+    // fixed, silently underpaying every tipped worker in every WA city by
+    // the gap between the state and local rate (up to $4.52/hr in Tukwila).
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'WA', locality: 'seattle', tipped: true }).cents,
+      2130,
+    );
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'WA', locality: 'tukwila', tipped: true }).cents,
+      2165,
+    );
+    // And the size-tiered ordinances get the size-appropriate figure, not
+    // just their large-employer headline rate.
+    const burienLarge = minimumWage({
+      checkDate: D, state: 'WA', locality: 'burien', tipped: true, employeeCount: 600,
+    });
+    assert.equal(burienLarge.cents, 2163);
+    const burienUncovered = minimumWage({
+      checkDate: D, state: 'WA', locality: 'burien', tipped: true, employeeCount: 5,
+    });
+    assert.equal(burienUncovered.cents, 1713, 'not covered by Burien -> state rate, still full cash (WA has no credit)');
+    assert.equal(burienUncovered.tipCreditAllowed, false);
+  });
+
+  test('Maryland’s two counties have genuinely DIFFERENT tipped cash wages — one is not derivable from the other', () => {
+    // Montgomery County sets its own $4.00 cash wage; Howard County simply
+    // permits the state's $3.63. A formula (localStandard − stateCredit)
+    // would have gotten Montgomery wrong — this was checked against
+    // primary/cross-sourced research rather than assumed, after the first
+    // draft of this database left both unspecified.
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'MD', locality: 'montgomery_county', tipped: true }).cents,
+      400,
+    );
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'MD', locality: 'howard_county', tipped: true }).cents,
+      363,
+    );
+  });
+
+  test('New Mexico’s two under-researched counties turned out to need OPPOSITE fixes', () => {
+    // Santa Fe County sets its own $4.62 tipped wage — well above the
+    // state's $3.00, so leaving it unspecified would have UNDERPAID.
+    // Bernalillo County genuinely just uses the state's $3.00 unchanged —
+    // confirmed and made explicit, rather than left as a silent gap that
+    // happens to produce the right number for the wrong reason.
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'NM', locality: 'santa_fe_county', tipped: true }).cents,
+      462,
+    );
+    assert.equal(
+      minimumWage({
+        checkDate: D, state: 'NM', locality: 'bernalillo_county_unincorporated', tipped: true,
+      }).cents,
+      300,
+    );
+  });
+
   test('California’s 40 ordinances, on two different adjustment cycles', () => {
     const ca = Object.fromEntries(localMinimumWages('CA', D).map((j) => [j.id, j]));
     assert.equal(ca.west_hollywood!.hourlyCents, 2025); // highest in the database

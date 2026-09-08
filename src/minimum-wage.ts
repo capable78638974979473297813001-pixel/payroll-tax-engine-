@@ -322,9 +322,11 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
     });
   }
 
+  let foundLocal: MinimumWageJurisdiction | undefined;
   if (query.locality) {
     const locals = localMinimumWageRuleset(query.state, query.checkDate);
     const found = findLocality(locals, query.locality);
+    foundLocal = found;
     if (!found) {
       considered.push({
         level: 'local',
@@ -345,19 +347,52 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
         caveat: found.note as string | undefined,
       });
     } else if (query.tipped) {
-      considered.push({
-        level: 'local',
-        jurisdiction: found.name,
-        cents: tippedCents(found.tipped),
-        basis: found.tipped
-          ? found.tipped.tipCreditAllowed
+      if (found.tipped) {
+        considered.push({
+          level: 'local',
+          jurisdiction: found.name,
+          cents: tippedCents(found.tipped),
+          basis: found.tipped.tipCreditAllowed
             ? 'Local tipped cash wage'
-            : 'Local ordinance allows no tip credit — the full local rate is owed in cash'
-          : 'Ordinance publishes no separate tipped rate',
-        caveat: found.tipped
-          ? undefined
-          : 'No local tipped figure: the state tipped rule applies against the local rate.',
-      });
+            : 'Local ordinance allows no tip credit — the full local rate is owed in cash',
+        });
+      } else if (!state.tipped.tipCreditAllowed) {
+        // The ordinance publishes no distinct tipped figure, but its STATE
+        // bans tip credits outright — a fact that reaches every locality in
+        // that state, not just the ones that bothered to restate it (found
+        // live: Washington's own state file already asserted this in prose
+        // for all 8 of its local ordinances, but the code never enforced
+        // it, so a tipped Seattle query silently fell back to the STATE's
+        // $17.13 instead of Seattle's own $21.30 full-cash floor). The
+        // local standard rate — sized correctly via the same selectTier()
+        // the non-tipped path uses — IS the tipped cash floor here.
+        const tier = selectTier(found, found.variants, query);
+        considered.push({
+          level: 'local',
+          jurisdiction: found.name,
+          cents: tier.amount ? toCents(tier.amount as MinimumWageAmount) : undefined,
+          basis: tier.notCovered
+            ? 'Employer is below this ordinance’s size threshold — not covered'
+            : 'No local tipped figure, but the state allows no tip credit anywhere — the local standard rate is the cash floor',
+          caveat:
+            !tier.narrowed && (found.variants ?? []).some((v) => v.appliesWhen)
+              ? 'This ordinance publishes employer-size tiers; no employeeCount was supplied, so the headline rate is used.'
+              : undefined,
+        });
+      } else {
+        // The state DOES allow a credit, but neither this ordinance nor
+        // this project's research has pinned down its own figure — never
+        // guess a formula (localStandard − stateCredit has been checked
+        // and found WRONG at least once: Montgomery County MD's real cash
+        // wage is $4.00, not state's $3.63 scaled). Contribute nothing, so
+        // the state's own tipped rate wins the comparison instead.
+        considered.push({
+          level: 'local',
+          jurisdiction: found.name,
+          basis: 'Ordinance publishes no separate tipped rate',
+          caveat: 'No local tipped figure: the state tipped rule applies against the local rate.',
+        });
+      }
     } else {
       const tier = selectTier(found, found.variants, query);
       considered.push({
@@ -388,8 +423,7 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
         ? fed.tipped.tipCreditAllowed
         : binding.level === 'state'
           ? state.tipped.tipCreditAllowed
-          : (findLocality(localMinimumWageRuleset(query.state, query.checkDate), query.locality!)
-              ?.tipped?.tipCreditAllowed ?? state.tipped.tipCreditAllowed)
+          : (foundLocal?.tipped?.tipCreditAllowed ?? state.tipped.tipCreditAllowed)
       : false;
 
   return {

@@ -51,8 +51,26 @@
           "url": "https://www.santafecountynm.gov/livingwage",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "cross_source_confirmed this session: the county announced its 2026 living wage adjustment to the same $15.40 figure as the city, on the same March 1 cycle."
+        },
+        {
+          "title": "Santa Fe County, NM -- 2026 living wage adjustment (tipped base wage)",
+          "url": "https://www.santafecountynm.gov/livingwage",
+          "verifiedOn": "2026-09-08",
+          "verifiedBy": "cross_source_confirmed this session: 'the hourly living wage in Santa Fe County ... will increase to $15.40 for non-tipped employees and $4.62 for tipped employees, effective March 1, 2026.' Found only after this project's ORIGINAL research pass had left Santa Fe County's tipped rate unspecified, which would have silently fallen back to the state's $3.00 -- understating the true cash floor by $1.62/hr."
         }
-      ]
+      ],
+      "tipped": {
+        "tipCreditAllowed": true,
+        "cashWage": 4.62,
+        "cashWageCents": 462,
+        "maxTipCredit": 10.78,
+        "maxTipCreditCents": 1078,
+        "tippedEmployeeThreshold": {
+          "amount": 30.0,
+          "period": "month"
+        },
+        "note": "Santa Fe County's OWN tipped base wage, distinct from Santa Fe city's ordinance (which publishes no cash-wage figure at all -- see santa_fe_city's own tipped.note) and from the state's $3.00. Rises with the county's own living-wage schedule."
+      }
     },
     {
       "id": "las_cruces",
@@ -125,7 +143,27 @@
       "adjustmentDate": "01-01",
       "coverage": "Unincorporated Bernalillo County. The county's own ordinance rate has been overtaken by New Mexico's $12.00 state rate, which is therefore the prevailing figure.",
       "confidence": "cross_source_confirmed",
-      "note": "Carried because the ordinance still exists and its TIPPED provision may, like Albuquerque's, remain above the state's $3.00 -- but no county tipped figure was verified this session, so none is asserted. See knownGaps."
+      "note": "Carried because the ordinance still exists and its TIPPED provision may, like Albuquerque's, remain above the state's $3.00 -- but no county tipped figure was verified this session, so none is asserted. See knownGaps.",
+      "tipped": {
+        "tipCreditAllowed": true,
+        "cashWage": 3.0,
+        "cashWageCents": 300,
+        "maxTipCredit": 9.0,
+        "maxTipCreditCents": 900,
+        "tippedEmployeeThreshold": {
+          "amount": 30.0,
+          "period": "month"
+        },
+        "note": "Bernalillo County's own ordinance sets no different tipped figure of its own -- the state's $3.00 cash wage applies unchanged, confirmed explicitly here rather than left as a silent gap."
+      },
+      "sources": [
+        {
+          "title": "Bernalillo County, NM minimum wage ordinance and prevailing state tipped rate",
+          "url": "https://www.legalconsumer.com/wage-and-hour-law/minimum-wage.php?FIPS=35001",
+          "verifiedOn": "2026-09-08",
+          "verifiedBy": "cross_source_confirmed this session: 'employers can pay tipped employees $3.00 per hour' in unincorporated Bernalillo County, matching the state figure exactly -- unlike Santa Fe County, which sets its own higher tipped figure."
+        }
+      ]
     }
   ],
   "sources": [

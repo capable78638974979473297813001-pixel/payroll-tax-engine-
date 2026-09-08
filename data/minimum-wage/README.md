@@ -77,6 +77,22 @@ credit by 2028, DC's is a rising percentage of the minimum wage under the amende
 Initiative 82, and Michigan's rises a couple of points a year. Colorado is the only state
 where a *locality* may widen the tip offset — Edgewater did, to $4.67.
 
+**None of Washington's 8 local ordinances publish their own `tipped` figure — and that is
+correct, not a gap.** Washington bans tip credits statewide, so a local ordinance with no
+distinct tipped block still means the *full local rate* is the cash floor, not the state's
+lower one. `minimumWage()` derives this from the state's own `tipCreditAllowed: false`
+rather than requiring 8 duplicate blocks; a real bug this exact case caught during
+development was the resolver falling back to the STATE's $17.13 for a tipped Seattle
+query instead of Seattle's own $21.30. Two Maryland counties needed the opposite kind of
+care: Montgomery County's tipped cash wage ($4.00) turned out to be genuinely different
+from Maryland's own ($3.63) rather than derivable from it — `localStandard − stateCredit`
+would have gotten it wrong — so it is researched and stated explicitly rather than
+assumed. New Mexico's two under-researched counties needed both directions of the same
+fix: Santa Fe County sets its own $4.62 (above the state's $3.00, so leaving it
+unspecified would have *underpaid*), while Bernalillo County genuinely does just use the
+state's $3.00 unchanged — confirmed and stated explicitly rather than left as a silent
+gap that happens to produce the right number for the wrong reason.
+
 **Two live state rates are below $7.25.** Montana's $4.00 and Oklahoma's $2.00 bind only
 where the FLSA does not reach the employer at all. Both are carried as variants, never as
 the standard rate. Georgia's and Wyoming's own $5.15 statutes are carried in a separate

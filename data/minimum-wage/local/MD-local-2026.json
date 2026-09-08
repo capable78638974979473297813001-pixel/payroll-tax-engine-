@@ -40,10 +40,28 @@
           "url": "https://www.montgomerycountymd.gov/office-human-rights/minimum-wage-increase",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "cross_source_confirmed this session across the county's own press release and Office of Human Rights page: $18.00 large / $16.50 mid-size / $15.95 small, effective 2026-07-01 under the county's annual regional-inflation adjustment."
+        },
+        {
+          "title": "Montgomery County, MD tipped-employee cash wage ($4.00/hr, Montgomery County Code Sec. 27-69)",
+          "url": "https://www.montgomerycountymd.gov/humanrights/min-wage.html",
+          "verifiedOn": "2026-09-08",
+          "verifiedBy": "cross_source_confirmed this session across multiple independent summaries citing the county's own code section; found only after this project's ORIGINAL research pass had left Montgomery County's tipped rate unspecified and let it silently fall back to the state's $3.63 -- which understates every Montgomery County tipped worker's true cash floor by $0.37/hr. The county's own page did not render this specific figure on a direct fetch."
         }
       ],
       "appliesWhen": {
         "employeeCountMin": 51
+      },
+      "tipped": {
+        "tipCreditAllowed": true,
+        "cashWage": 4.0,
+        "cashWageCents": 400,
+        "maxTipCredit": 14.0,
+        "maxTipCreditCents": 1400,
+        "tippedEmployeeThreshold": {
+          "amount": 30.0,
+          "period": "month"
+        },
+        "note": "Montgomery County Code Chapter 27 (Human Rights and Civil Liberties), Sec. 27-69 sets its OWN cash wage of $4.00/hr -- higher than the state's $3.63 -- applied against whichever of the county's three employer-size tiers covers this employer. maxTipCredit shown against the LARGE-employer $18.00 tier (the widest gap); the mid-size and small tiers have smaller credits against the same $4.00 cash floor."
       }
     },
     {
@@ -61,8 +79,26 @@
           "url": "https://www.howardcountymd.gov/finance/minimum-wage",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "Fetched and read directly this session at the county's own Finance Department page. Its own wage schedule table shows the small-employer tier reaching $16.00 on 2026-07-01, unifying with the county's single rate, and confirms that from 2027-01-01 onward increases are set by CPI-U rather than by council action."
+        },
+        {
+          "title": "Howard County, MD tipped-employee minimum wage (permits the state's $3.63 cash wage)",
+          "url": "https://www.howardcountymd.gov/finance/minimum-wage",
+          "verifiedOn": "2026-09-08",
+          "verifiedBy": "cross_source_confirmed this session: 'Howard County permits the same tip credit as Maryland state law -- employers must pay tipped employees at least $3.63 per hour, and the combination of cash wages and tips must equal or exceed the Howard County minimum wage rate.'"
         }
-      ]
+      ],
+      "tipped": {
+        "tipCreditAllowed": true,
+        "cashWage": 3.63,
+        "cashWageCents": 363,
+        "maxTipCredit": 12.37,
+        "maxTipCreditCents": 1237,
+        "tippedEmployeeThreshold": {
+          "amount": 30.0,
+          "period": "month"
+        },
+        "note": "Howard County permits the SAME cash wage as Maryland state law ($3.63/hr) -- unlike Montgomery County, which sets its own higher figure -- applied against the county's own (higher) standard rate."
+      }
     }
   ],
   "sources": [
