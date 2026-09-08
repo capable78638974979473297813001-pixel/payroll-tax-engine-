@@ -849,6 +849,18 @@ export interface MinimumWageAmount {
   region?: string;
   /** New York's own tipped-employee occupation split; matched against MinimumWageQuery.occupation. */
   occupation?: 'food_service' | 'service_employee';
+  /**
+   * Marks this variant as the rate that was in effect BEFORE the headline
+   * `standard`/`tipped` figure took over mid-YEAR — e.g. Alaska's $13.00
+   * from 2025-07-01 through 2026-06-30, before its $14.00 step on
+   * 2026-07-01. Selected purely by `effectiveFrom`/`effectiveTo` covering
+   * `checkDate`, with no size or region test — this project's data
+   * represents the state of the world AS OF its own `asOf` date, not a
+   * full year-round history, so this field exists ONLY where a checkDate
+   * earlier in the same calendar year would otherwise get the wrong,
+   * later-in-the-year figure.
+   */
+  historicalPredecessorOf?: 'standard' | 'tipped';
   [key: string]: unknown;
 }
 

@@ -65,6 +65,21 @@ Saint Paul MN each raise their smaller-employer tiers on July 1 while the large-
 rate holds. Those tiers carry `effectiveFrom`/`effectiveTo` so a date query gets the
 right one.
 
+**A jurisdiction whose CURRENT rate took effect mid-2026 needs its PRIOR 2026 figure too,
+or a January checkDate gets the wrong answer.** This project's data represents the world
+as of its own `asOf` date — not a full year-round history — except where a rate stepped
+after January 1 of its own year, which is common enough to be the rule rather than the
+exception: Alaska, DC, Oregon (its state rate AND both named regions), Chicago, Cook
+County, Montgomery and Howard Counties MD (across every one of their employer-size
+tiers), and nine of California's ten July-cycle cities all changed on 2026-07-01, and
+Malibu's own scheduled increase was suspended for a full extra year by its city council.
+Each carries a `historicalPredecessorOf: 'standard' | 'tipped'` variant with its own
+`effectiveFrom`/`effectiveTo` window, resolved by date the same way a size tier is
+resolved by headcount. `minimumWage()` composes it correctly with every other axis: a
+tipped query in a no-tip-credit state (California, Oregon) correctly gets the
+PRIOR period's rate, not the current one; a named-region query (Oregon's Portland metro)
+gets its OWN prior figure, not the state's generic one.
+
 **"Surpassed by state law" is not the same as "delete the entry."** Albuquerque's
 standard rate ($11.85) lost to New Mexico's $12.00, but its **tipped** minimum of $7.20
 is more than double the state's $3.00 and still binds. Dropping the entry would underpay

@@ -2,7 +2,7 @@
   "state": "CA",
   "year": 2026,
   "asOf": "2026-09-08",
-  "$comment": "38 California city and county minimum wage ordinances -- more than the rest of the country combined. Two things make California local rates a distinctive trap: they adjust on TWO different cycles (January 1 and July 1), so any single annual refresh leaves half of them stale, and none of them permits a tip credit, because state law forbids it everywhere in California. Rates here are the ones IN EFFECT on this file's asOf date (2026-09-08), i.e. the July 1, 2026 figures for July-cycle cities and the January 1, 2026 figures for the rest.",
+  "$comment": "38 California city and county minimum wage ordinances -- more than the rest of the country combined. Two things make California local rates a distinctive trap: they adjust on TWO different cycles (January 1 and July 1), so any single annual refresh leaves half of them stale, and none of them permits a tip credit, because state law forbids it everywhere in California. Rates here are the ones IN EFFECT on this file's asOf date (2026-09-08), i.e. the July 1, 2026 figures for July-cycle cities and the January 1, 2026 figures for the rest. The 11 July-cycle jurisdictions (10 cities plus unincorporated LA County) also carry a historicalPredecessorOf variant with the July 2025-June 2026 figure that was in effect before this file's own headline number, so a checkDate earlier in 2026 resolves correctly too.",
   "tipCreditAllowed": false,
   "jurisdictions": [
     {
@@ -20,7 +20,29 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "variants": [
+        {
+          "id": "pre_2026_06_30",
+          "label": "July 2025 - June 2026 rate",
+          "hourly": 17.46,
+          "hourlyCents": 1746,
+          "historicalPredecessorOf": "standard",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "In effect before the 2026-07-01 CPI step to $17.76."
+        },
+        {
+          "id": "pre_2026_06_30_tipped",
+          "label": "July 2025 - June 2026 tipped cash wage",
+          "hourly": 17.46,
+          "hourlyCents": 1746,
+          "historicalPredecessorOf": "tipped",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "California bars any tip credit statewide; the tipped cash wage always equals the standard rate."
+        }
+      ]
     },
     {
       "id": "belmont",
@@ -54,7 +76,29 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "variants": [
+        {
+          "id": "pre_2026_06_30",
+          "label": "July 2025 - June 2026 rate",
+          "hourly": 19.18,
+          "hourlyCents": 1918,
+          "historicalPredecessorOf": "standard",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "In effect before the 2026-07-01 CPI step to $19.61."
+        },
+        {
+          "id": "pre_2026_06_30_tipped",
+          "label": "July 2025 - June 2026 tipped cash wage",
+          "hourly": 19.18,
+          "hourlyCents": 1918,
+          "historicalPredecessorOf": "tipped",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "California bars any tip credit statewide; the tipped cash wage always equals the standard rate."
+        }
+      ]
     },
     {
       "id": "burlingame",
@@ -156,7 +200,29 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "variants": [
+        {
+          "id": "pre_2026_06_30",
+          "label": "July 2025 - June 2026 rate",
+          "hourly": 19.9,
+          "hourlyCents": 1990,
+          "historicalPredecessorOf": "standard",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "In effect before the 2026-07-01 CPI step to $20.34."
+        },
+        {
+          "id": "pre_2026_06_30_tipped",
+          "label": "July 2025 - June 2026 tipped cash wage",
+          "hourly": 19.9,
+          "hourlyCents": 1990,
+          "historicalPredecessorOf": "tipped",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "California bars any tip credit statewide; the tipped cash wage always equals the standard rate."
+        }
+      ]
     },
     {
       "id": "foster_city",
@@ -190,7 +256,29 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "variants": [
+        {
+          "id": "pre_2026_06_30",
+          "label": "July 2025 - June 2026 rate",
+          "hourly": 17.75,
+          "hourlyCents": 1775,
+          "historicalPredecessorOf": "standard",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "In effect before the 2026-07-01 CPI step to $18.05."
+        },
+        {
+          "id": "pre_2026_06_30_tipped",
+          "label": "July 2025 - June 2026 tipped cash wage",
+          "hourly": 17.75,
+          "hourlyCents": 1775,
+          "historicalPredecessorOf": "tipped",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "California bars any tip credit statewide; the tipped cash wage always equals the standard rate."
+        }
+      ]
     },
     {
       "id": "half_moon_bay",
@@ -272,7 +360,29 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "variants": [
+        {
+          "id": "pre_2026_06_30",
+          "label": "July 2025 - June 2026 rate",
+          "hourly": 17.87,
+          "hourlyCents": 1787,
+          "historicalPredecessorOf": "standard",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "In effect before the 2026-07-01 CPI step to $18.42."
+        },
+        {
+          "id": "pre_2026_06_30_tipped",
+          "label": "July 2025 - June 2026 tipped cash wage",
+          "hourly": 17.87,
+          "hourlyCents": 1787,
+          "historicalPredecessorOf": "tipped",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "California bars any tip credit statewide; the tipped cash wage always equals the standard rate."
+        }
+      ]
     },
     {
       "id": "los_angeles_county_unincorporated",
@@ -289,7 +399,29 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0
       },
-      "coverage": "Applies ONLY in unincorporated Los Angeles County. Work inside any incorporated city in the county is governed by that city's own ordinance (or the state rate), not this one."
+      "coverage": "Applies ONLY in unincorporated Los Angeles County. Work inside any incorporated city in the county is governed by that city's own ordinance (or the state rate), not this one.",
+      "variants": [
+        {
+          "id": "pre_2026_06_30",
+          "label": "July 2025 - June 2026 rate",
+          "hourly": 17.81,
+          "hourlyCents": 1781,
+          "historicalPredecessorOf": "standard",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "In effect before the 2026-07-01 step to $18.47."
+        },
+        {
+          "id": "pre_2026_06_30_tipped",
+          "label": "July 2025 - June 2026 tipped cash wage",
+          "hourly": 17.81,
+          "hourlyCents": 1781,
+          "historicalPredecessorOf": "tipped",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "California bars any tip credit statewide; the tipped cash wage always equals the standard rate."
+        }
+      ]
     },
     {
       "id": "malibu",
@@ -306,7 +438,30 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "variants": [
+        {
+          "id": "pre_2026_06_30",
+          "label": "Rate held through June 2026 (one-year increase suspension)",
+          "hourly": 17.27,
+          "hourlyCents": 1727,
+          "historicalPredecessorOf": "standard",
+          "effectiveFrom": "2024-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "Malibu City Council approved a one-year suspension of its own scheduled CPI increase, holding the rate at $17.27 for two full years before resuming to $17.91 on 2026-07-01.",
+          "confidence": "cross_source_confirmed"
+        },
+        {
+          "id": "pre_2026_06_30_tipped",
+          "label": "Tipped cash wage, held through June 2026",
+          "hourly": 17.27,
+          "hourlyCents": 1727,
+          "historicalPredecessorOf": "tipped",
+          "effectiveFrom": "2024-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "California bars any tip credit statewide; the tipped cash wage always equals the standard rate."
+        }
+      ]
     },
     {
       "id": "menlo_park",
@@ -340,7 +495,29 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "variants": [
+        {
+          "id": "pre_2026_06_30",
+          "label": "July 2025 - June 2026 rate",
+          "hourly": 18.2,
+          "hourlyCents": 1820,
+          "historicalPredecessorOf": "standard",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "In effect before the 2026-07-01 CPI step to $18.50."
+        },
+        {
+          "id": "pre_2026_06_30_tipped",
+          "label": "July 2025 - June 2026 tipped cash wage",
+          "hourly": 18.2,
+          "hourlyCents": 1820,
+          "historicalPredecessorOf": "tipped",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "California bars any tip credit statewide; the tipped cash wage always equals the standard rate."
+        }
+      ]
     },
     {
       "id": "mountain_view",
@@ -451,7 +628,29 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "variants": [
+        {
+          "id": "pre_2026_06_30",
+          "label": "July 2025 - June 2026 rate",
+          "hourly": 18.04,
+          "hourlyCents": 1804,
+          "historicalPredecessorOf": "standard",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "In effect before the 2026-07-01 CPI step to $18.57."
+        },
+        {
+          "id": "pre_2026_06_30_tipped",
+          "label": "July 2025 - June 2026 tipped cash wage",
+          "hourly": 18.04,
+          "hourlyCents": 1804,
+          "historicalPredecessorOf": "tipped",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "California bars any tip credit statewide; the tipped cash wage always equals the standard rate."
+        }
+      ]
     },
     {
       "id": "petaluma",
@@ -553,7 +752,29 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "variants": [
+        {
+          "id": "pre_2026_06_30",
+          "label": "July 2025 - June 2026 rate",
+          "hourly": 19.18,
+          "hourlyCents": 1918,
+          "historicalPredecessorOf": "standard",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "In effect before the 2026-07-01 CPI step to $19.61."
+        },
+        {
+          "id": "pre_2026_06_30_tipped",
+          "label": "July 2025 - June 2026 tipped cash wage",
+          "hourly": 19.18,
+          "hourlyCents": 1918,
+          "historicalPredecessorOf": "tipped",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "California bars any tip credit statewide; the tipped cash wage always equals the standard rate."
+        }
+      ]
     },
     {
       "id": "san_jose",
@@ -638,7 +859,29 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "variants": [
+        {
+          "id": "pre_2026_06_30",
+          "label": "July 2025 - June 2026 rate",
+          "hourly": 17.81,
+          "hourlyCents": 1781,
+          "historicalPredecessorOf": "standard",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "In effect before the 2026-07-01 CPI step to $18.47."
+        },
+        {
+          "id": "pre_2026_06_30_tipped",
+          "label": "July 2025 - June 2026 tipped cash wage",
+          "hourly": 17.81,
+          "hourlyCents": 1781,
+          "historicalPredecessorOf": "tipped",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "California bars any tip credit statewide; the tipped cash wage always equals the standard rate."
+        }
+      ]
     },
     {
       "id": "santa_rosa",
@@ -764,6 +1007,18 @@
       "url": "https://www.malibucity.org/minimumwage",
       "verifiedOn": "2026-09-08",
       "verifiedBy": "Fetched and read directly this session at the city's own page. Quoted: the increase reflects 'the Consumer Price Index (CPI-W) during the last 12-month period posted for November 2025 ... increased 3.7% for Urban Wage Earners and Clerical Workers ... in the Los Angeles-Long Beach-Anaheim statistical region,' per Malibu Municipal Code Sec. 5.36.040, giving $17.91 effective 2026-07-01."
+    },
+    {
+      "title": "California local minimum wage increases effective July 1, 2025 (prior-year figures for the ten July-cycle cities)",
+      "url": "https://hrwatchdog.calchamber.com/2025/06/california-local-minimum-wage-increases-for-july-1-2025/",
+      "verifiedOn": "2026-09-08",
+      "verifiedBy": "cross_source_confirmed this session for the July 2025 - June 2026 figures now carried as historicalPredecessorOf entries on each of the ten July-cycle cities: Alameda $17.46, Berkeley $19.18, Emeryville $19.90, Fremont $17.75, Los Angeles $17.87, Milpitas $18.20, Pasadena $18.04, San Francisco $19.18, Santa Monica $17.81, and Malibu's own one-year-suspended $17.27 (held two full years rather than one, per its city council's own suspension of its scheduled increase)."
+    },
+    {
+      "title": "Unincorporated Los Angeles County minimum wage, July 1, 2025 step ($17.81)",
+      "url": "https://dcba.lacounty.gov/newsroom/new-worker-protections-for-july-1-2025/",
+      "verifiedOn": "2026-09-08",
+      "verifiedBy": "cross_source_confirmed this session: the rate increased from $17.27 to $17.81 effective 2025-07-01, in effect through 2026-06-30, before the step to $18.47 this file's own headline figure carries."
     }
   ],
   "confidence": "cross_source_confirmed",

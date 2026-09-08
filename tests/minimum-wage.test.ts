@@ -21,7 +21,14 @@ import {
  */
 
 const DATA_ROOT = join(import.meta.dirname, '..', 'data', 'minimum-wage');
-const D = '2026-06-15'; // any 2026 date; selects the 2026 rulesets
+// A date safely AFTER every mid-2026 July 1 step this database models
+// (Alaska, DC, Oregon, Chicago, Cook County, several Maryland and
+// California local ordinances) — a date-agnostic "any 2026 date" no
+// longer exists once a database tracks historicalPredecessorOf figures;
+// tests that specifically probe the BEFORE side of a mid-year step use
+// their own explicit earlier date instead (e.g. Renton, Saint Paul, and
+// the historicalPredecessorOf tests below).
+const D = '2026-08-15';
 
 function everyFile(): string[] {
   const out: string[] = [];
@@ -369,6 +376,115 @@ describe('local minimum wages', () => {
       checkDate: '2026-08-15', state: 'WA', locality: 'renton', employeeCount: 200,
     });
     assert.equal(august.cents, 2157);
+  });
+
+  test('states and localities whose CURRENT rate took effect mid-2026 correctly answer for earlier 2026 dates too', () => {
+    // A systemic version of the Saint Paul gap above, caught by auditing
+    // every jurisdiction whose headline figure took effect after January 1
+    // of its own year: Alaska, DC, Oregon (state + both its regions),
+    // Chicago, Cook County and nine of California's ten July-cycle cities
+    // all stepped on 2026-07-01, and this file's FIRST draft only recorded
+    // the post-step figure — silently wrong for any January-June 2026
+    // checkDate. historicalPredecessorOf entries fix this without changing
+    // any of the "current" answers already covered elsewhere in this file.
+    const jan = '2026-03-01';
+    assert.equal(minimumWage({ checkDate: jan, state: 'AK' }).cents, 1300);
+    assert.equal(minimumWage({ checkDate: jan, state: 'AK', tipped: true }).cents, 1300);
+    assert.equal(minimumWage({ checkDate: jan, state: 'DC' }).cents, 1795);
+    assert.equal(minimumWage({ checkDate: jan, state: 'DC', tipped: true }).cents, 1000);
+    assert.equal(minimumWage({ checkDate: jan, state: 'OR' }).cents, 1505);
+    assert.equal(minimumWage({ checkDate: jan, state: 'OR', region: 'portland_metro' }).cents, 1630);
+    assert.equal(minimumWage({ checkDate: jan, state: 'OR', region: 'nonurban' }).cents, 1405);
+    assert.equal(minimumWage({ checkDate: jan, state: 'OR', tipped: true }).cents, 1505);
+    assert.equal(minimumWage({ checkDate: jan, state: 'IL', locality: 'chicago' }).cents, 1660);
+    assert.equal(minimumWage({ checkDate: jan, state: 'IL', locality: 'chicago', tipped: true }).cents, 1262);
+    assert.equal(minimumWage({ checkDate: jan, state: 'IL', locality: 'cook_county' }).cents, 1500);
+    assert.equal(minimumWage({ checkDate: jan, state: 'CA', locality: 'los_angeles' }).cents, 1787);
+    assert.equal(minimumWage({ checkDate: jan, state: 'CA', locality: 'san_francisco' }).cents, 1918);
+    // California never allows a tip credit, so the July-cycle cities'
+    // predecessor figure must also win a TIPPED query for that period.
+    assert.equal(
+      minimumWage({ checkDate: jan, state: 'CA', locality: 'los_angeles', tipped: true }).cents,
+      1787,
+    );
+    // And the "current" (post-step) answers, at this file's own D, are
+    // untouched by any of the above.
+    assert.equal(minimumWage({ checkDate: D, state: 'AK' }).cents, 1400);
+    assert.equal(minimumWage({ checkDate: D, state: 'IL', locality: 'chicago' }).cents, 1705);
+  });
+
+  test('Malibu’s one-year-suspended rate was flat for TWO full years, not one', () => {
+    // Malibu's city council suspended its scheduled increase, holding the
+    // rate at $17.27 through both the July 2024 AND July 2025 steps —
+    // caught only because the predecessor figure was researched
+    // specifically, rather than assumed to follow the same one-year
+    // cadence as every other California July-cycle city.
+    assert.equal(minimumWage({ checkDate: '2026-03-01', state: 'CA', locality: 'malibu' }).cents, 1727);
+    assert.equal(minimumWage({ checkDate: '2026-06-15', state: 'CA', locality: 'malibu' }).cents, 1727);
+    assert.equal(minimumWage({ checkDate: D, state: 'CA', locality: 'malibu' }).cents, 1791);
+  });
+
+  test('unincorporated LA County and Santa Fe also needed their own prior-period figures', () => {
+    // A systematic re-audit after the fixes above found two more the same
+    // sweep had missed: LA County's own July-cycle step (distinct from the
+    // ten CITY entries already fixed) and Santa Fe's March 1 cycle, which
+    // no other jurisdiction in this database shares.
+    assert.equal(
+      minimumWage({ checkDate: '2026-03-01', state: 'CA', locality: 'los_angeles_county_unincorporated' }).cents,
+      1781,
+    );
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'CA', locality: 'los_angeles_county_unincorporated' }).cents,
+      1847,
+    );
+    assert.equal(
+      minimumWage({ checkDate: '2026-02-01', state: 'NM', locality: 'santa_fe_city' }).cents,
+      1500,
+    );
+    assert.equal(minimumWage({ checkDate: D, state: 'NM', locality: 'santa_fe_city' }).cents, 1540);
+    assert.equal(
+      minimumWage({ checkDate: '2026-02-01', state: 'NM', locality: 'santa_fe_county', tipped: true }).cents,
+      450,
+      'the county has its own tipped figure, distinct from the city\'s tip-counting-only rule',
+    );
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'NM', locality: 'santa_fe_county', tipped: true }).cents,
+      462,
+    );
+  });
+
+  test('Montgomery and Howard Counties MD stepped mid-2026 across EVERY employer-size tier at once', () => {
+    const jan = '2026-03-01';
+    assert.equal(
+      minimumWage({ checkDate: jan, state: 'MD', locality: 'montgomery_county', employeeCount: 100 }).cents,
+      1765,
+    );
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'MD', locality: 'montgomery_county', employeeCount: 100 }).cents,
+      1800,
+    );
+    assert.equal(
+      minimumWage({ checkDate: jan, state: 'MD', locality: 'montgomery_county', employeeCount: 20 }).cents,
+      1600,
+    );
+    assert.equal(
+      minimumWage({ checkDate: jan, state: 'MD', locality: 'montgomery_county', employeeCount: 5 }).cents,
+      1550,
+    );
+    // Howard County had TWO tiers through June 2026 and unified to one in July.
+    assert.equal(
+      minimumWage({ checkDate: jan, state: 'MD', locality: 'howard_county', employeeCount: 5 }).cents,
+      1550,
+    );
+    assert.equal(
+      minimumWage({ checkDate: jan, state: 'MD', locality: 'howard_county', employeeCount: 50 }).cents,
+      1600,
+    );
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'MD', locality: 'howard_county', employeeCount: 5 }).cents,
+      1600,
+      'unified to one rate for everyone from 2026-07-01',
+    );
   });
 
   test('Saint Paul’s small and micro tiers also step mid-year, in both directions', () => {

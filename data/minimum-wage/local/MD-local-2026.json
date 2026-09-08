@@ -15,23 +15,62 @@
       "coverage": "Large employers: 51 or more employees.",
       "variants": [
         {
-          "id": "midsize",
+          "id": "large_h1",
+          "label": "Employers with 51 or more employees, January 1 - June 30, 2026",
+          "hourly": 17.65,
+          "hourlyCents": 1765,
+          "appliesWhen": {
+            "employeeCountMin": 51
+          },
+          "effectiveFrom": "2026-01-01",
+          "effectiveTo": "2026-06-30",
+          "test": "In effect before the 2026-07-01 step to $18.00."
+        },
+        {
+          "id": "midsize_h1",
+          "label": "Employers with 11-50 employees, January 1 - June 30, 2026",
+          "hourly": 16.0,
+          "hourlyCents": 1600,
+          "appliesWhen": {
+            "employeeCountMin": 11,
+            "employeeCountMax": 50
+          },
+          "effectiveFrom": "2026-01-01",
+          "effectiveTo": "2026-06-30",
+          "test": "In effect before the 2026-07-01 step to $16.50."
+        },
+        {
+          "id": "small_h1",
+          "label": "Employers with 10 or fewer employees, January 1 - June 30, 2026",
+          "hourly": 15.5,
+          "hourlyCents": 1550,
+          "appliesWhen": {
+            "employeeCountMax": 10
+          },
+          "effectiveFrom": "2026-01-01",
+          "effectiveTo": "2026-06-30",
+          "test": "In effect before the 2026-07-01 step to $15.95."
+        },
+        {
+          "id": "midsize_h2",
           "label": "Employers with 11-50 employees",
           "hourly": 16.5,
           "hourlyCents": 1650,
           "appliesWhen": {
             "employeeCountMin": 11,
             "employeeCountMax": 50
-          }
+          },
+          "effectiveFrom": "2026-07-01"
         },
         {
-          "id": "small",
+          "id": "small_h2",
           "label": "Employers with 10 or fewer employees",
           "hourly": 15.95,
           "hourlyCents": 1595,
           "appliesWhen": {
             "employeeCountMax": 10
-          }
+          },
+          "effectiveFrom": "2026-07-01"
         }
       ],
       "sources": [
@@ -46,6 +85,12 @@
           "url": "https://www.montgomerycountymd.gov/humanrights/min-wage.html",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "cross_source_confirmed this session across multiple independent summaries citing the county's own code section; found only after this project's ORIGINAL research pass had left Montgomery County's tipped rate unspecified and let it silently fall back to the state's $3.63 -- which understates every Montgomery County tipped worker's true cash floor by $0.37/hr. The county's own page did not render this specific figure on a direct fetch."
+        },
+        {
+          "title": "Montgomery County, MD minimum wage rates in effect before the 2026-07-01 step",
+          "url": "https://content.govdelivery.com/accounts/MDMONTGOMERY/bulletins/40be635",
+          "verifiedOn": "2026-09-08",
+          "verifiedBy": "cross_source_confirmed this session: large $17.65, mid-size $16.00, small $15.50 -- each increasing on 2026-07-01 (large +$0.35 to $18.00, mid-size +$0.50 to $16.50, small +$0.45 to $15.95)."
         }
       ],
       "appliesWhen": {
@@ -85,6 +130,12 @@
           "url": "https://www.howardcountymd.gov/finance/minimum-wage",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "cross_source_confirmed this session: 'Howard County permits the same tip credit as Maryland state law -- employers must pay tipped employees at least $3.63 per hour, and the combination of cash wages and tips must equal or exceed the Howard County minimum wage rate.'"
+        },
+        {
+          "title": "Howard County, MD -- two-tier minimum wage structure before the 2026-07-01 unification",
+          "url": "https://www.howardcountymd.gov/finance/minimum-wage",
+          "verifiedOn": "2026-09-08",
+          "verifiedBy": "cross_source_confirmed this session: 'Small employers (fewer than 15 employees) began 2026 at $15.50 per hour, and large employers (15 or more employees) had to pay $16.00 per hour,' unifying to a single $16.00 rate for all employers on 2026-07-01."
         }
       ],
       "tipped": {
@@ -98,7 +149,21 @@
           "period": "month"
         },
         "note": "Howard County permits the SAME cash wage as Maryland state law ($3.63/hr) -- unlike Montgomery County, which sets its own higher figure -- applied against the county's own (higher) standard rate."
-      }
+      },
+      "variants": [
+        {
+          "id": "small_h1",
+          "label": "Employers with fewer than 15 employees, January 1 - June 30, 2026",
+          "hourly": 15.5,
+          "hourlyCents": 1550,
+          "appliesWhen": {
+            "employeeCountMax": 14
+          },
+          "effectiveFrom": "2026-01-01",
+          "effectiveTo": "2026-06-30",
+          "test": "Howard County had TWO tiers through 2026-06-30 -- this one, and $16.00 for everyone else. They unified into a single $16.00 rate on 2026-07-01, which is why this file's own base entry carries no appliesWhen at all."
+        }
+      ]
     }
   ],
   "sources": [

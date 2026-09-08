@@ -133,6 +133,25 @@ function hasRegions(variants: MinimumWageAmount[] | undefined): boolean {
 }
 
 /**
+ * The rate that was in effect before the current headline figure took over
+ * mid-year, if `checkDate` falls in its window — see
+ * MinimumWageAmount.historicalPredecessorOf's own doc comment for why this
+ * exists at all (this project's data is a point-in-time snapshot, not a
+ * full year-round history, EXCEPT where a jurisdiction's current rate took
+ * effect after January 1 of its own year, which is common: Alaska, DC and
+ * Oregon all step on July 1).
+ */
+function historicalPredecessor(
+  variants: MinimumWageAmount[] | undefined,
+  kind: 'standard' | 'tipped',
+  checkDate: string,
+): MinimumWageAmount | undefined {
+  return (variants ?? []).find(
+    (v) => v.historicalPredecessorOf === kind && dateInRange(v, checkDate),
+  );
+}
+
+/**
  * Resolve a named region (MinimumWageQuery.region) against a jurisdiction's
  * variants, for either the standard rate or the tipped rate.
  *
@@ -146,16 +165,25 @@ function hasRegions(variants: MinimumWageAmount[] | undefined): boolean {
  * figure IS the jurisdiction's own baseline tipped rate rather than a
  * distinct variant, so the caller falls through to that baseline correctly
  * instead of silently returning the wrong occupation's number.
+ *
+ * Also date-filtered: Oregon's regional rates step on the same July 1 as
+ * its baseline, so a region can carry BOTH a current and a
+ * historicalPredecessorOf entry sharing one id — dateInRange narrows to
+ * whichever one actually covers `checkDate`.
  */
 function resolveRegion(
   variants: MinimumWageAmount[] | undefined,
   kind: 'standard' | 'tipped',
   region: string,
   occupation: 'food_service' | 'service_employee' | undefined,
+  checkDate: string,
 ): { amount: MinimumWageAmount | undefined; defaultedOccupation: boolean } {
   const needle = region.trim().toLowerCase();
   const candidates = (variants ?? []).filter(
-    (v) => v.regionalOverrideOf === kind && (v.region ?? v.id ?? '').toLowerCase() === needle,
+    (v) =>
+      v.regionalOverrideOf === kind &&
+      (v.region ?? v.id ?? '').toLowerCase() === needle &&
+      dateInRange(v, checkDate),
   );
   if (kind === 'standard' || candidates.length === 0) {
     return { amount: candidates[0], defaultedOccupation: false };
@@ -180,6 +208,11 @@ function selectTier(
   variants: MinimumWageAmount[] | undefined,
   query: MinimumWageQuery,
 ): { amount: MinimumWageAmount | undefined; narrowed: boolean; notCovered: boolean } {
+  // Callers resolve any applicable historicalPredecessor (see that field's
+  // own doc comment) or named region into `base` BEFORE calling this — it
+  // is not done here, because a region-resolved base must not then be
+  // overwritten by a non-regional predecessor entry sharing the same
+  // variants array (Oregon has both, and they must never cross).
   const sized = (variants ?? []).filter(
     (v) => v.appliesWhen && dateInRange(v, query.checkDate),
   );
@@ -270,9 +303,13 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
       ? 'State tipped cash wage'
       : 'State law allows no tip credit — the full state rate is owed in cash';
     let caveat: string | undefined;
+    let regionMatched = false;
     if (query.region) {
-      const region = resolveRegion(state.variants, 'tipped', query.region, query.occupation);
+      const region = resolveRegion(
+        state.variants, 'tipped', query.region, query.occupation, query.checkDate,
+      );
       if (region.amount) {
+        regionMatched = true;
         cents = toCents(region.amount);
         basis =
           `State tipped cash wage, ${region.amount.label ?? query.region} region` +
@@ -290,19 +327,29 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
       // food-service figure, so falling through to it is correct, not a
       // fallback from an error.
     }
+    if (!regionMatched) {
+      const pred = historicalPredecessor(state.variants, 'tipped', query.checkDate);
+      if (pred) {
+        cents = toCents(pred);
+        basis += ` (figure in effect through ${pred.effectiveTo ?? query.checkDate})`;
+      }
+    }
     considered.push({ level: 'state', jurisdiction: state.jurisdiction.name, cents, basis, caveat });
   } else {
     let base = state.standard;
     let regionLabel: string | undefined;
     let regionCaveat: string | undefined;
     if (query.region) {
-      const region = resolveRegion(state.variants, 'standard', query.region, undefined);
+      const region = resolveRegion(state.variants, 'standard', query.region, undefined, query.checkDate);
       if (region.amount) {
         base = region.amount;
         regionLabel = region.amount.label ?? query.region;
       } else if (!hasRegions(state.variants)) {
         regionCaveat = `${state.jurisdiction.name} has no named regions; 'region' was ignored.`;
       }
+    }
+    if (!regionLabel) {
+      base = historicalPredecessor(state.variants, 'standard', query.checkDate) ?? base;
     }
     const tier = selectTier(base, state.variants, query);
     considered.push({
@@ -348,13 +395,16 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
       });
     } else if (query.tipped) {
       if (found.tipped) {
+        const pred = historicalPredecessor(found.variants, 'tipped', query.checkDate);
         considered.push({
           level: 'local',
           jurisdiction: found.name,
-          cents: tippedCents(found.tipped),
-          basis: found.tipped.tipCreditAllowed
-            ? 'Local tipped cash wage'
-            : 'Local ordinance allows no tip credit — the full local rate is owed in cash',
+          cents: pred ? toCents(pred) : tippedCents(found.tipped),
+          basis:
+            (found.tipped.tipCreditAllowed
+              ? 'Local tipped cash wage'
+              : 'Local ordinance allows no tip credit — the full local rate is owed in cash') +
+            (pred ? ` (figure in effect through ${pred.effectiveTo ?? query.checkDate})` : ''),
         });
       } else if (!state.tipped.tipCreditAllowed) {
         // The ordinance publishes no distinct tipped figure, but its STATE
@@ -366,7 +416,8 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
         // $17.13 instead of Seattle's own $21.30 full-cash floor). The
         // local standard rate — sized correctly via the same selectTier()
         // the non-tipped path uses — IS the tipped cash floor here.
-        const tier = selectTier(found, found.variants, query);
+        const base = historicalPredecessor(found.variants, 'standard', query.checkDate) ?? found;
+        const tier = selectTier(base, found.variants, query);
         considered.push({
           level: 'local',
           jurisdiction: found.name,
@@ -394,7 +445,8 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
         });
       }
     } else {
-      const tier = selectTier(found, found.variants, query);
+      const base = historicalPredecessor(found.variants, 'standard', query.checkDate) ?? found;
+      const tier = selectTier(base, found.variants, query);
       considered.push({
         level: 'local',
         jurisdiction: found.name,

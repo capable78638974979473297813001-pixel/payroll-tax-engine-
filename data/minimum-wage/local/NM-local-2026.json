@@ -34,6 +34,28 @@
           "verifiedOn": "2026-09-08",
           "verifiedBy": "PDF downloaded and its text extracted directly this session (WebFetch's own conversion returned only binary noise; decompressing the PDF's content streams and pulling the text-showing operators worked, same technique used for the American Samoa poster). This specific PDF is the ORDINANCE'S 2025 notice ($15.00/hour effective 2025-03-01); the 2026 $15.40 rate itself rests on the separate cross-sourced citation already carried above. Confirmed directly: the tip-counting rule quoted in the note, and that no minimum cash wage for tipped workers is published anywhere in the ordinance's own text."
         }
+      ],
+      "variants": [
+        {
+          "id": "pre_2026_02_28",
+          "label": "January - February 2026 rate",
+          "hourly": 15.0,
+          "hourlyCents": 1500,
+          "historicalPredecessorOf": "standard",
+          "effectiveFrom": "2025-03-01",
+          "effectiveTo": "2026-02-28",
+          "note": "In effect before the 2026-03-01 step to $15.40."
+        },
+        {
+          "id": "pre_2026_02_28_tipped",
+          "label": "January - February 2026 tipped floor",
+          "hourly": 15.0,
+          "hourlyCents": 1500,
+          "historicalPredecessorOf": "tipped",
+          "effectiveFrom": "2025-03-01",
+          "effectiveTo": "2026-02-28",
+          "note": "Santa Fe's ordinance has no separate cash-wage figure at any point -- tips count toward reaching whichever living wage is then in effect."
+        }
       ]
     },
     {
@@ -70,7 +92,29 @@
           "period": "month"
         },
         "note": "Santa Fe County's OWN tipped base wage, distinct from Santa Fe city's ordinance (which publishes no cash-wage figure at all -- see santa_fe_city's own tipped.note) and from the state's $3.00. Rises with the county's own living-wage schedule."
-      }
+      },
+      "variants": [
+        {
+          "id": "pre_2026_02_28",
+          "label": "January - February 2026 rate",
+          "hourly": 15.0,
+          "hourlyCents": 1500,
+          "historicalPredecessorOf": "standard",
+          "effectiveFrom": "2025-03-01",
+          "effectiveTo": "2026-02-28",
+          "note": "In effect before the 2026-03-01 step to $15.40."
+        },
+        {
+          "id": "pre_2026_02_28_tipped",
+          "label": "January - February 2026 tipped base wage",
+          "hourly": 4.5,
+          "hourlyCents": 450,
+          "historicalPredecessorOf": "tipped",
+          "effectiveFrom": "2025-03-01",
+          "effectiveTo": "2026-02-28",
+          "note": "In effect before the 2026-03-01 step to $4.62."
+        }
+      ]
     },
     {
       "id": "las_cruces",
@@ -172,6 +216,12 @@
       "url": "https://laborcenter.berkeley.edu/inventory-of-us-city-and-county-minimum-wage-ordinances/",
       "verifiedOn": "2026-09-08",
       "verifiedBy": "Fetched and read directly this session. The standing national census of local minimum wage ordinances -- used here to establish WHICH jurisdictions exist (so none is silently omitted), with each rate then cross-checked against a second source."
+    },
+    {
+      "title": "Santa Fe city and county living wage figures in effect through February 2026",
+      "url": "https://www.santafecountynm.gov/news/detail/santa-fe-county-announces-living-wage-increase-effective-march-1-2025",
+      "verifiedOn": "2026-09-08",
+      "verifiedBy": "cross_source_confirmed this session: both the city and county living wage were $15.00 through 2026-02-28 (both stepped to $15.40 on 2026-03-01), and the county's own tipped base wage was $4.50 through the same date (stepping to $4.62). The city's ordinance carries no separate cash wage at any point, per its own tip-counting rule already cited above."
     }
   ],
   "confidence": "cross_source_confirmed",

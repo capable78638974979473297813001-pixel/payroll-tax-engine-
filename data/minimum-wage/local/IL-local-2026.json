@@ -27,6 +27,35 @@
           "url": "https://www.cookcountyil.gov/news/cook-county-issues-notice-minimum-wage-ordinance-5",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "cross_source_confirmed this session across Cook County's own notice and several independent employment-law summaries: Chicago $17.05 standard / $12.96 tipped and suburban Cook County $15.40 standard / $9.25 tipped, both effective 2026-07-01."
+        },
+        {
+          "title": "Chicago minimum wage, July 1, 2025 step ($16.60 standard)",
+          "url": "https://www.amundsendavislaw.com/labor-employment-law-update/il-minimum-wage-2025-update-july-1-2025-increases-to-chicago-and-cook-county-minimum-wages-january-1-2025-increase-to-the-irs-mileage-rate",
+          "verifiedOn": "2026-09-08",
+          "verifiedBy": "cross_source_confirmed this session: 'the minimum wage in Chicago increased from $16.20 per hour to $16.60 per hour' effective 2025-07-01, in effect through 2026-06-30. The 68% tipped figure is computed from Chicago's own published phase-out percentages (60% for 2024, 68% for 2025, 76% for 2026, ...), not independently re-verified as a dollar figure this pass -- flagged cross_source_confirmed rather than primary."
+        }
+      ],
+      "variants": [
+        {
+          "id": "pre_2026_06_30",
+          "label": "January 1 - June 30, 2026 standard rate",
+          "hourly": 16.6,
+          "hourlyCents": 1660,
+          "historicalPredecessorOf": "standard",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "In effect before the 2026-07-01 step to $17.05."
+        },
+        {
+          "id": "pre_2026_06_30_tipped",
+          "label": "January 1 - June 30, 2026 tipped cash wage",
+          "hourly": 12.62,
+          "hourlyCents": 1262,
+          "historicalPredecessorOf": "tipped",
+          "effectiveFrom": "2025-07-01",
+          "effectiveTo": "2026-06-30",
+          "note": "68% of $16.60 under Chicago's own tip-credit phase-out schedule (2023 One Fair Wage ordinance), the step before the 76%-of-$17.05 figure this file's own tipped block carries.",
+          "confidence": "cross_source_confirmed"
         }
       ]
     },
@@ -45,7 +74,37 @@
         "maxTipCredit": 6.15,
         "maxTipCreditCents": 615
       },
-      "coverage": "Suburban Cook County. The county ordinance does NOT apply inside the City of Chicago, which has its own. Individual municipalities within Cook County may opt out of the county ordinance by local ordinance -- a real coverage hole this database records but does not enumerate."
+      "coverage": "Suburban Cook County. The county ordinance does NOT apply inside the City of Chicago, which has its own. Individual municipalities within Cook County may opt out of the county ordinance by local ordinance -- a real coverage hole this database records but does not enumerate.",
+      "variants": [
+        {
+          "id": "pre_2026_06_30",
+          "label": "January 1 - June 30, 2026 standard rate",
+          "hourly": 15.0,
+          "hourlyCents": 1500,
+          "historicalPredecessorOf": "standard",
+          "effectiveFrom": "2025-01-01",
+          "effectiveTo": "2026-06-30",
+          "note": "Cook County's own rate did NOT increase on 2025-07-01 -- it stayed at $15.00, the same as the Illinois state rate then and since -- before its own step to $15.40 on 2026-07-01."
+        },
+        {
+          "id": "pre_2026_06_30_tipped",
+          "label": "January 1 - June 30, 2026 tipped cash wage",
+          "hourly": 9.0,
+          "hourlyCents": 900,
+          "historicalPredecessorOf": "tipped",
+          "effectiveFrom": "2025-01-01",
+          "effectiveTo": "2026-06-30",
+          "note": "60% of $15.00, matching the Illinois state tipped percentage, before the step to $9.25."
+        }
+      ],
+      "sources": [
+        {
+          "title": "Cook County minimum wage notice -- July 1, 2025 (no change from $15.00)",
+          "url": "https://content.govdelivery.com/accounts/ILCOOK/bulletins/3e27980",
+          "verifiedOn": "2026-09-08",
+          "verifiedBy": "cross_source_confirmed this session: 'Effective July 1, 2025, the Cook County minimum wage remained $15.00 for non-tipped workers and $9.00 for tipped workers' -- confirming the county's rate was unchanged from the Illinois state rate through 2026-06-30."
+        }
+      ]
     }
   ],
   "sources": [
