@@ -115,7 +115,13 @@ function tippedCents(tipped: TippedMinimumWage | undefined): number | undefined 
 function sizeMatches(amount: MinimumWageAmount, employeeCount: number | undefined): boolean {
   const when = amount.appliesWhen;
   if (!when) return false;
-  if (employeeCount === undefined) return false;
+  // NaN must be treated as "not supplied," never as "matches everything."
+  // `NaN < x` and `NaN > x` are BOTH false in JS, so without this guard a
+  // NaN employeeCount (e.g. from Number(someInvalidInput) upstream) would
+  // silently satisfy every size bound and resolve to whichever tier
+  // happens to be first in the variants array — a wrong, arbitrary answer
+  // rather than an honest fallback to the headline rate.
+  if (employeeCount === undefined || Number.isNaN(employeeCount)) return false;
   if (when.employeeCountMin !== undefined && employeeCount < when.employeeCountMin) return false;
   if (when.employeeCountMax !== undefined && employeeCount > when.employeeCountMax) return false;
   return true;
