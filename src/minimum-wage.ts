@@ -60,6 +60,24 @@ export interface MinimumWageQuery {
   employeeCount?: number;
   /** Ask for the tipped CASH floor rather than the standard rate. */
   tipped?: boolean;
+  /**
+   * A state's own named geographic sub-region, from its ruleset's own
+   * `variants[].id` — e.g. 'downstate' for New York (NYC, Nassau, Suffolk,
+   * Westchester) or 'portland_metro' / 'nonurban' for Oregon. Omit it and
+   * the state's baseline figure applies — this engine will not guess which
+   * region an employee works in from a bare two-letter state code, the same
+   * discipline as `locality`.
+   */
+  region?: string;
+  /**
+   * New York alone splits TIPPED employees into two differently-credited
+   * occupation categories per region — 'food_service' (restaurant workers)
+   * and 'service_employee' (hotel/other hospitality). Meaningful only when
+   * `tipped` is true and `region` names a New-York-shaped state. Omitted
+   * with an ambiguous region, this defaults to 'food_service' — the larger
+   * category — and the answer's trail says so rather than guessing silently.
+   */
+  occupation?: 'food_service' | 'service_employee';
 }
 
 export interface MinimumWageCandidate {
@@ -107,6 +125,46 @@ function dateInRange(amount: MinimumWageAmount, checkDate: string): boolean {
   if (amount.effectiveFrom && checkDate < amount.effectiveFrom) return false;
   if (amount.effectiveTo && checkDate > amount.effectiveTo) return false;
   return true;
+}
+
+/** Whether a jurisdiction has ANY named-region structure at all — New York and Oregon, currently. */
+function hasRegions(variants: MinimumWageAmount[] | undefined): boolean {
+  return (variants ?? []).some((v) => v.regionalOverrideOf !== undefined);
+}
+
+/**
+ * Resolve a named region (MinimumWageQuery.region) against a jurisdiction's
+ * variants, for either the standard rate or the tipped rate.
+ *
+ * Standard-rate regions are looked up by variant id (New York's 'downstate',
+ * Oregon's 'portland_metro'/'nonurban') — each fully replaces the baseline
+ * figure. Tipped-rate regions add a second axis, occupation, because New
+ * York alone splits tipped workers into 'food_service' and
+ * 'service_employee' categories per region: when occupation is omitted,
+ * this defaults to whichever candidate is tagged 'food_service' — and
+ * returns undefined, not a guess, for a region (upstate) whose food-service
+ * figure IS the jurisdiction's own baseline tipped rate rather than a
+ * distinct variant, so the caller falls through to that baseline correctly
+ * instead of silently returning the wrong occupation's number.
+ */
+function resolveRegion(
+  variants: MinimumWageAmount[] | undefined,
+  kind: 'standard' | 'tipped',
+  region: string,
+  occupation: 'food_service' | 'service_employee' | undefined,
+): { amount: MinimumWageAmount | undefined; defaultedOccupation: boolean } {
+  const needle = region.trim().toLowerCase();
+  const candidates = (variants ?? []).filter(
+    (v) => v.regionalOverrideOf === kind && (v.region ?? v.id ?? '').toLowerCase() === needle,
+  );
+  if (kind === 'standard' || candidates.length === 0) {
+    return { amount: candidates[0], defaultedOccupation: false };
+  }
+  if (occupation) {
+    return { amount: candidates.find((c) => c.occupation === occupation), defaultedOccupation: false };
+  }
+  const foodService = candidates.find((c) => c.occupation === 'food_service');
+  return { amount: foodService, defaultedOccupation: foodService !== undefined && candidates.length > 1 };
 }
 
 /**
@@ -207,27 +265,60 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
         '$7.19; read industryRates from its ruleset and pick the employer’s own industry.',
     });
   } else if (query.tipped) {
-    considered.push({
-      level: 'state',
-      jurisdiction: state.jurisdiction.name,
-      cents: tippedCents(state.tipped),
-      basis: state.tipped.tipCreditAllowed
-        ? 'State tipped cash wage'
-        : 'State law allows no tip credit — the full state rate is owed in cash',
-    });
+    let cents = tippedCents(state.tipped);
+    let basis = state.tipped.tipCreditAllowed
+      ? 'State tipped cash wage'
+      : 'State law allows no tip credit — the full state rate is owed in cash';
+    let caveat: string | undefined;
+    if (query.region) {
+      const region = resolveRegion(state.variants, 'tipped', query.region, query.occupation);
+      if (region.amount) {
+        cents = toCents(region.amount);
+        basis =
+          `State tipped cash wage, ${region.amount.label ?? query.region} region` +
+          (region.amount.occupation ? ` (${region.amount.occupation})` : '');
+        if (region.defaultedOccupation) {
+          caveat =
+            `Multiple tipped occupation categories exist for '${query.region}'; defaulted to ` +
+            `'food_service' since none was specified.`;
+        }
+      } else if (!hasRegions(state.variants)) {
+        caveat = `${state.jurisdiction.name} has no named regions; 'region' was ignored.`;
+      }
+      // Else: a real region with no distinct tipped variant (e.g. NY's
+      // 'upstate') — the baseline tipped rate already IS that region's
+      // food-service figure, so falling through to it is correct, not a
+      // fallback from an error.
+    }
+    considered.push({ level: 'state', jurisdiction: state.jurisdiction.name, cents, basis, caveat });
   } else {
-    const tier = selectTier(state.standard, state.variants, query);
+    let base = state.standard;
+    let regionLabel: string | undefined;
+    let regionCaveat: string | undefined;
+    if (query.region) {
+      const region = resolveRegion(state.variants, 'standard', query.region, undefined);
+      if (region.amount) {
+        base = region.amount;
+        regionLabel = region.amount.label ?? query.region;
+      } else if (!hasRegions(state.variants)) {
+        regionCaveat = `${state.jurisdiction.name} has no named regions; 'region' was ignored.`;
+      }
+    }
+    const tier = selectTier(base, state.variants, query);
     considered.push({
       level: 'state',
       jurisdiction: state.jurisdiction.name,
       cents: tier.amount ? toCents(tier.amount as MinimumWageAmount) : undefined,
-      basis: tier.narrowed
-        ? `State rate, ${(tier.amount as MinimumWageAmount)?.label ?? 'tier'} (${query.employeeCount} employees)`
-        : 'State standard rate',
+      basis: regionLabel
+        ? `State rate, ${regionLabel} region`
+        : tier.narrowed
+          ? `State rate, ${(tier.amount as MinimumWageAmount)?.label ?? 'tier'} (${query.employeeCount} employees)`
+          : 'State standard rate',
       caveat:
-        !tier.narrowed && (state.variants ?? []).some((v) => v.appliesWhen)
+        regionCaveat ??
+        (!tier.narrowed && (state.variants ?? []).some((v) => v.appliesWhen)
           ? 'This state publishes an employer-size tier; no employeeCount was supplied, so the headline rate is used.'
-          : undefined,
+          : undefined),
     });
   }
 

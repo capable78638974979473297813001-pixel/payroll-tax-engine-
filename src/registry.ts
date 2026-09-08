@@ -838,6 +838,17 @@ export interface MinimumWageAmount {
   appliesWhen?: { employeeCountMin?: number; employeeCountMax?: number };
   /** True where the tier means "this ordinance does not reach this employer at all." */
   notCovered?: boolean;
+  /**
+   * Marks a variant as a named geographic sub-region overriding the
+   * standard or tipped figure entirely (New York's downstate counties,
+   * Oregon's Portland metro/non-urban tiers) — selected via
+   * MinimumWageQuery.region, never via employeeCount.
+   */
+  regionalOverrideOf?: 'standard' | 'tipped';
+  /** The region this tipped-rate variant belongs to, matched against MinimumWageQuery.region. */
+  region?: string;
+  /** New York's own tipped-employee occupation split; matched against MinimumWageQuery.occupation. */
+  occupation?: 'food_service' | 'service_employee';
   [key: string]: unknown;
 }
 

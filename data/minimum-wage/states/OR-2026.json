@@ -29,14 +29,16 @@
       "hourlyCents": 1680,
       "id": "portland_metro",
       "label": "Portland metro (inside the urban growth boundary)",
-      "test": "Work performed inside the Portland metropolitan urban growth boundary. ORS 653.025 sets this at $1.25 above the standard rate."
+      "test": "Work performed inside the Portland metropolitan urban growth boundary. ORS 653.025 sets this at $1.25 above the standard rate.",
+      "regionalOverrideOf": "standard"
     },
     {
       "hourly": 14.55,
       "hourlyCents": 1455,
       "id": "nonurban",
       "label": "Non-urban counties",
-      "test": "Baker, Coos, Crook, Curry, Douglas, Gilliam, Grant, Harney, Jefferson, Klamath, Lake, Malheur, Morrow, Sherman, Umatilla, Union, Wallowa and Wheeler counties. $1.00 below the standard rate."
+      "test": "Baker, Coos, Crook, Curry, Douglas, Gilliam, Grant, Harney, Jefferson, Klamath, Lake, Malheur, Morrow, Sherman, Umatilla, Union, Wallowa and Wheeler counties. $1.00 below the standard rate.",
+      "regionalOverrideOf": "standard"
     }
   ],
   "youthAndTraining": [],

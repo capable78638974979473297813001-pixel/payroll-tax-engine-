@@ -87,6 +87,19 @@ rates there, from $5.78 (garment manufacturing) to $7.19 (stevedoring), all belo
 stepping $0.40 every three years. `minimumWage()` deliberately returns no state figure
 for AS and says why, rather than inventing one.
 
+**Two states split their STANDARD rate by named region, not by headcount.** New York
+(downstate NYC/Nassau/Suffolk/Westchester vs. the rest of the state) and Oregon (Portland
+metro vs. standard vs. non-urban) each carry their regional figures as ordinary
+`variants` with no `appliesWhen` employer-size test — the wrong shape for the
+`employeeCount`-driven tier selection every other state's variants use, and easy to miss
+entirely if a caller assumes `employeeCount` is the only axis. `minimumWage()` exposes
+a separate `region` query field for exactly this. New York layers a SECOND axis on top
+for tipped pay — 'food_service' vs. 'service_employee' occupation, per region — and
+upstate's food-service figure has no `variants` entry of its own at all: it *is* the
+state's own baseline tipped rate. Getting that one case right (falling through to the
+baseline rather than the region's only variant, which is the wrong occupation) is what
+`resolveRegion()` in `src/minimum-wage.ts` exists to do.
+
 **EO 14026 is revoked.** A payroll system still applying the $17.75 federal contractor
 rate is overpaying; covered older contracts fell back to EO 13658's $13.65 (tipped
 $9.55) on 2026-05-11.

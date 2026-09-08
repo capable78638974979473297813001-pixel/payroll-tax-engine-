@@ -193,6 +193,24 @@ Fe on March 1; Montana's $4.00 and Oklahoma's $2.00 are live state rates that mu
 be mistaken for the standard one; and the federal contractor rate a stale table still
 carries ($17.75 under EO 14026) was revoked in 2025.
 
+Two states — New York and Oregon — split their STANDARD rate itself by named geographic
+region (NYC/Nassau/Suffolk/Westchester vs. the rest of New York; Portland metro vs.
+standard vs. non-urban Oregon), and New York separately splits its TIPPED rate by
+occupation within each region. Neither axis is a headcount tier, so it needs its own
+query field rather than falling out of `employeeCount`:
+
+```ts
+minimumWage({ checkDate: D, state: 'NY', region: 'downstate' }).cents;              // 1700 — not 1600
+minimumWage({ checkDate: D, state: 'NY', region: 'upstate', tipped: true }).cents;  // 1070 (food_service, the default)
+minimumWage({ checkDate: D, state: 'NY', region: 'upstate', tipped: true, occupation: 'service_employee' }).cents; // 1330
+```
+
+The middle case is the one worth noticing: upstate's food-service tipped rate has no
+separate `variants` entry at all — it *is* the state's own baseline tipped figure — so a
+resolver that only ever looks inside `variants` for an occupation match would silently
+return the wrong number (or none) for it. `minimumWage()` falls through to the baseline
+correctly instead.
+
 See `data/minimum-wage/README.md` for the full sourcing story, the trap list, and the
 known gaps.
 

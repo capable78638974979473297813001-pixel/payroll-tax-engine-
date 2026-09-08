@@ -30,28 +30,38 @@
       "id": "downstate",
       "label": "New York City, Nassau, Suffolk and Westchester counties",
       "test": "Work performed in NYC or in Nassau, Suffolk or Westchester county.",
-      "note": "A payroll engine keyed on a bare two-letter state code cannot get New York right; this is a genuine county-level split inside a state file."
+      "note": "A payroll engine keyed on a bare two-letter state code cannot get New York right; this is a genuine county-level split inside a state file.",
+      "regionalOverrideOf": "standard"
     },
     {
       "hourly": 11.35,
       "hourlyCents": 1135,
       "id": "downstate_food_service",
       "label": "Food service worker cash wage (downstate)",
-      "maxTipCredit": 5.65
+      "maxTipCredit": 5.65,
+      "regionalOverrideOf": "tipped",
+      "region": "downstate",
+      "occupation": "food_service"
     },
     {
       "hourly": 14.15,
       "hourlyCents": 1415,
       "id": "downstate_service_employee",
       "label": "Service employee cash wage (downstate)",
-      "maxTipCredit": 2.85
+      "maxTipCredit": 2.85,
+      "regionalOverrideOf": "tipped",
+      "region": "downstate",
+      "occupation": "service_employee"
     },
     {
       "hourly": 13.3,
       "hourlyCents": 1330,
       "id": "upstate_service_employee",
       "label": "Service employee cash wage (remainder of state)",
-      "maxTipCredit": 2.7
+      "maxTipCredit": 2.7,
+      "regionalOverrideOf": "tipped",
+      "region": "upstate",
+      "occupation": "service_employee"
     }
   ],
   "youthAndTraining": [],

@@ -208,6 +208,83 @@ describe('state minimum wages', () => {
     assert.equal(localMinimumWages('OR', D).length, 0);
   });
 
+  test('minimumWage() actually resolves New York’s and Oregon’s named regions, not just the baseline', () => {
+    // Both states store their regional split as a plain `variants` array
+    // with no employer-size test — selectTier()'s employeeCount-based tier
+    // logic never picks these, so without an explicit region query
+    // minimumWage() silently returns the same figure for a Manhattan
+    // employee as a Buffalo one. This is what actually asking for the
+    // region looks like, and it must return the higher, correct figure.
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'NY', region: 'downstate' }).cents,
+      1700,
+    );
+    assert.equal(minimumWage({ checkDate: D, state: 'NY' }).cents, 1600, 'no region = baseline');
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'OR', region: 'portland_metro' }).cents,
+      1680,
+    );
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'OR', region: 'nonurban' }).cents,
+      1455,
+    );
+    // Case-insensitive, matching every other name lookup in this module.
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'NY', region: 'DOWNSTATE' }).cents,
+      1700,
+    );
+  });
+
+  test('New York’s tipped occupation split resolves correctly in every direction', () => {
+    // Downstate has two DIFFERENTLY-credited occupation categories; upstate
+    // has only one variant (service_employee) because upstate FOOD SERVICE
+    // is the state's own baseline tipped rate, not a separate variant. A
+    // naive "one variant per region" resolver would get the upstate
+    // food-service case wrong by returning the service_employee figure.
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'NY', region: 'downstate', tipped: true }).cents,
+      1135,
+      'no occupation given -> defaults to food_service, the larger category',
+    );
+    assert.equal(
+      minimumWage({
+        checkDate: D, state: 'NY', region: 'downstate', tipped: true, occupation: 'service_employee',
+      }).cents,
+      1415,
+    );
+    assert.equal(
+      minimumWage({
+        checkDate: D, state: 'NY', region: 'upstate', tipped: true, occupation: 'service_employee',
+      }).cents,
+      1330,
+    );
+    assert.equal(
+      minimumWage({
+        checkDate: D, state: 'NY', region: 'upstate', tipped: true, occupation: 'food_service',
+      }).cents,
+      1070,
+      'upstate has no food_service VARIANT because the baseline tipped rate already IS that figure',
+    );
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'NY', region: 'upstate', tipped: true }).cents,
+      1070,
+      'same result with no occupation specified at all',
+    );
+
+    // The ambiguous-default case surfaces a caveat rather than hiding the assumption.
+    const defaulted = minimumWage({ checkDate: D, state: 'NY', region: 'downstate', tipped: true });
+    assert.match(defaulted.considered.find((c) => c.level === 'state')!.caveat ?? '', /defaulted to/);
+  });
+
+  test('a region string is ignored, with a caveat, for a state that has none', () => {
+    const answer = minimumWage({ checkDate: D, state: 'CA', region: 'los_angeles' });
+    assert.equal(answer.cents, 1690); // California's ordinary state rate, unaffected
+    assert.match(
+      answer.considered.find((c) => c.level === 'state')!.caveat ?? '',
+      /no named regions/,
+    );
+  });
+
   test('the two live sub-federal state rates are carried as variants, not as the rate', () => {
     // Montana's $4.00 and Oklahoma's $2.00 bind only where the FLSA does
     // not reach the employer at all. Storing either as the STANDARD rate
