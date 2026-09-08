@@ -427,6 +427,37 @@ describe('run — what is due today', () => {
     assert.equal(windowTouchesSource(ohioWindow, federalSource), false);
   });
 
+  test('a minimum-wage scheduled date is recognized too, not just the tax data shape', () => {
+    // data/minimum-wage/ nests under states/local/territories rather than
+    // sitting flat like data/states/ and data/local/ — found live: the
+    // regex here originally only matched the flat tax-data shape, so a
+    // Florida minimum-wage window existed (calendar.ts discovers it fine)
+    // but could never force-check any source, because this function
+    // silently returned false for every data/minimum-wage/ path.
+    const flWindow = {
+      kind: 'scheduled_effective_date' as const,
+      effectiveOn: '2026-09-30',
+      checkFrom: '2026-08-31',
+      checkUntil: '2026-10-30',
+      affects: ['data/minimum-wage/states/FL-2026.json#scheduledChanges[0].effectiveDate'],
+      why: 'test',
+    };
+    const flSource: RegisteredSource = { ...ohioLocal, jurisdiction: 'FL' };
+    assert.equal(windowTouchesSource(flWindow, flSource), true);
+    assert.equal(windowTouchesSource(flWindow, ohioLocal), false);
+
+    const asWindow = {
+      kind: 'scheduled_effective_date' as const,
+      effectiveOn: '2027-09-30',
+      checkFrom: '2027-08-31',
+      checkUntil: '2027-10-30',
+      affects: ['data/minimum-wage/territories/AS-2026.json#scheduledChanges[0].effectiveDate'],
+      why: 'test',
+    };
+    const asSource: RegisteredSource = { ...ohioLocal, jurisdiction: 'AS' };
+    assert.equal(windowTouchesSource(asWindow, asSource), true);
+  });
+
   test('a full sweep records a first capture, then reports it unchanged next time', async () => {
     const fetchImpl = stubFetch('municipal rates v1');
     const first = await sweep('2026-03-10', { sources: [ohioLocal], fetchImpl });

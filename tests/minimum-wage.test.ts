@@ -87,6 +87,83 @@ describe('minimum wage data integrity', () => {
     }
   });
 
+  test('no variants array anywhere contains two entries with the same id', () => {
+    // Found live: the AK and DC predecessor entries this file's own
+    // pred() generator wrote were both auto-named from effectiveTo alone
+    // (identical for the standard and tipped entries), producing two
+    // variants sharing one id in the same array. Not a resolution bug —
+    // historicalPredecessor() keys off historicalPredecessorOf, never id —
+    // but a duplicate id is exactly the kind of thing that silently breaks
+    // some FUTURE id-based lookup nobody has written yet, so it's asserted
+    // against now rather than left to be rediscovered by hand again.
+    const walk = (node: unknown, path: string) => {
+      if (Array.isArray(node)) {
+        node.forEach((n, i) => walk(n, `${path}[${i}]`));
+      } else if (node && typeof node === 'object') {
+        const o = node as Record<string, unknown>;
+        if (Array.isArray(o.variants)) {
+          const ids = (o.variants as Record<string, unknown>[])
+            .map((v) => v.id)
+            .filter((id): id is string => typeof id === 'string');
+          const seen = new Set<string>();
+          for (const id of ids) {
+            assert.ok(!seen.has(id), `${path}.variants has a duplicate id: '${id}'`);
+            seen.add(id);
+          }
+        }
+        for (const [k, v] of Object.entries(o)) walk(v, `${path}.${k}`);
+      }
+    };
+    for (const f of everyFile()) walk(JSON.parse(readFileSync(f, 'utf8')), f);
+  });
+
+  test('every local file has unique jurisdiction ids and names, so findLocality() never guesses', () => {
+    for (const f of readdirSync(join(DATA_ROOT, 'local')).filter((n) => n.endsWith('.json'))) {
+      const full = join(DATA_ROOT, 'local', f);
+      const d = JSON.parse(readFileSync(full, 'utf8')) as {
+        jurisdictions: { id: string; name: string }[];
+      };
+      const ids = d.jurisdictions.map((j) => j.id);
+      const names = d.jurisdictions.map((j) => j.name.toLowerCase());
+      assert.equal(new Set(ids).size, ids.length, `${f} has a duplicate jurisdiction id`);
+      assert.equal(new Set(names).size, names.length, `${f} has a duplicate jurisdiction name`);
+    }
+  });
+
+  test('a "not covered" variant never carries a numeric rate that could be mistaken for a real one', () => {
+    for (const f of readdirSync(join(DATA_ROOT, 'local')).filter((n) => n.endsWith('.json'))) {
+      const d = JSON.parse(readFileSync(join(DATA_ROOT, 'local', f), 'utf8')) as {
+        jurisdictions: { id: string; variants?: Record<string, unknown>[] }[];
+      };
+      for (const j of d.jurisdictions) {
+        for (const v of j.variants ?? []) {
+          if (v.notCovered) {
+            assert.equal(v.hourly, null, `${f}/${j.id}: a notCovered variant must not carry a real rate`);
+            assert.equal(v.hourlyCents, null, `${f}/${j.id}: a notCovered variant must not carry a real rate`);
+          }
+        }
+      }
+    }
+  });
+
+  test('every source cited anywhere carries a title, url and verifiedOn', () => {
+    for (const f of everyFile()) {
+      const d = JSON.parse(readFileSync(f, 'utf8')) as {
+        sources?: Record<string, unknown>[];
+        jurisdictions?: { id: string; sources?: Record<string, unknown>[] }[];
+      };
+      const checkAll = (sources: Record<string, unknown>[] | undefined, where: string) => {
+        for (const s of sources ?? []) {
+          for (const key of ['title', 'url', 'verifiedOn']) {
+            assert.ok(s[key], `${where} carries a source missing '${key}': ${JSON.stringify(s).slice(0, 80)}`);
+          }
+        }
+      };
+      checkAll(d.sources, f);
+      for (const j of d.jurisdictions ?? []) checkAll(j.sources, `${f}/${j.id}`);
+    }
+  });
+
   test('all 50 states, DC and 5 territories are present', () => {
     const states = readdirSync(join(DATA_ROOT, 'states')).filter((f) => f.endsWith('.json'));
     assert.equal(states.length, 51, 'expected 50 states + DC');
@@ -281,6 +358,43 @@ describe('state minimum wages', () => {
     // The ambiguous-default case surfaces a caveat rather than hiding the assumption.
     const defaulted = minimumWage({ checkDate: D, state: 'NY', region: 'downstate', tipped: true });
     assert.match(defaulted.considered.find((c) => c.level === 'state')!.caveat ?? '', /defaulted to/);
+  });
+
+  test('Oregon’s regional tipped floor is the REGION’s own rate, not the statewide one', () => {
+    // Found by the coverage script (examples/minimum-wage-coverage.ts),
+    // not by inspection: Oregon tags portland_metro/nonurban as STANDARD
+    // overrides only (it has no distinct tipped figure for either, since
+    // it bans tip credit everywhere) — before this fix, a tipped query
+    // for a region fell through all the way to the generic statewide
+    // tipped rate ($15.55) instead of that region's OWN standard rate,
+    // silently returning the SAME number for Portland metro and
+    // non-urban Oregon despite them being $2.25 apart. Exactly the same
+    // failure shape as Washington's local-ordinance tipped bug, just one
+    // level up (state regions rather than local ordinances).
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'OR', region: 'portland_metro', tipped: true }).cents,
+      1680,
+    );
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'OR', region: 'nonurban', tipped: true }).cents,
+      1455,
+    );
+    // Occupation is meaningless here (Oregon has no occupation split) —
+    // passing one must not change the answer or throw.
+    assert.equal(
+      minimumWage({
+        checkDate: D, state: 'OR', region: 'portland_metro', tipped: true, occupation: 'service_employee',
+      }).cents,
+      1680,
+    );
+    // And the fix must compose with the historical-predecessor axis too:
+    // Portland metro's own PRIOR tipped floor, not the state's.
+    assert.equal(
+      minimumWage({
+        checkDate: '2026-03-01', state: 'OR', region: 'portland_metro', tipped: true,
+      }).cents,
+      1630,
+    );
   });
 
   test('a region string is ignored, with a caveat, for a state that has none', () => {
@@ -657,6 +771,21 @@ describe('local minimum wages', () => {
     const local = answer.considered.find((c) => c.level === 'local')!;
     assert.equal(local.cents, undefined);
     assert.match(local.caveat!, /check the spelling/);
+  });
+
+  test('a NaN employeeCount is treated as "not supplied," never as "matches every tier"', () => {
+    // `NaN < x` and `NaN > x` are BOTH false in JS, so a naive size-tier
+    // check would have NaN satisfy every appliesWhen bound and silently
+    // resolve to whichever tier happens to be first in the array — found
+    // by fuzzing employeeCount with non-finite values, not by inspection.
+    // A real caller can produce NaN innocently: Number(formField) on an
+    // empty or invalid input.
+    const withNaN = minimumWage({
+      checkDate: D, state: 'WA', locality: 'burien', employeeCount: NaN,
+    });
+    const withUndefined = minimumWage({ checkDate: D, state: 'WA', locality: 'burien' });
+    assert.equal(withNaN.cents, withUndefined.cents);
+    assert.equal(withNaN.bindingLevel, withUndefined.bindingLevel);
   });
 });
 

@@ -170,8 +170,11 @@ export function windowTouchesSource(w: CalendarWindow, source: RegisteredSource)
     return source.level !== 'local';
   }
   // scheduled_effective_date: match on the jurisdiction in the file path.
+  // Covers both data/states|local/ (tax) and data/minimum-wage/states|local|
+  // territories/ (minimum wage) — the two-letter code sits in the same
+  // position relative to the FINAL directory segment in either shape.
   return w.affects.some((a) => {
-    const m = /data\/(?:states|local)\/([A-Z]{2})-/.exec(a);
+    const m = /data\/(?:minimum-wage\/)?(?:states|local|territories)\/([A-Z]{2})-/.exec(a);
     return m ? m[1] === source.jurisdiction : false;
   });
 }

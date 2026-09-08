@@ -19,6 +19,7 @@
     "coverage:geocode": "node examples/geocode-coverage.ts",
     "coverage:taxes": "node examples/tax-coverage.ts",
     "coverage:local": "node examples/local-tax-smoke-test.ts",
+    "coverage:minimum-wage": "node examples/minimum-wage-coverage.ts",
     "harvest": "node examples/harvest-sweep.ts",
     "harvest:daily": "node examples/harvest-daily.ts daily",
     "harvest:status": "node examples/harvest-daily.ts status",

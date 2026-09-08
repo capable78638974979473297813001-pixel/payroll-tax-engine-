@@ -115,7 +115,13 @@ function tippedCents(tipped: TippedMinimumWage | undefined): number | undefined 
 function sizeMatches(amount: MinimumWageAmount, employeeCount: number | undefined): boolean {
   const when = amount.appliesWhen;
   if (!when) return false;
-  if (employeeCount === undefined) return false;
+  // NaN must be treated as "not supplied," never as "matches everything."
+  // `NaN < x` and `NaN > x` are BOTH false in JS, so without this guard a
+  // NaN employeeCount (e.g. from Number(someInvalidInput) upstream) would
+  // silently satisfy every size bound and resolve to whichever tier
+  // happens to be first in the variants array — a wrong, arbitrary answer
+  // rather than an honest fallback to the headline rate.
+  if (employeeCount === undefined || Number.isNaN(employeeCount)) return false;
   if (when.employeeCountMin !== undefined && employeeCount < when.employeeCountMin) return false;
   if (when.employeeCountMax !== undefined && employeeCount > when.employeeCountMax) return false;
   return true;
@@ -319,13 +325,33 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
             `Multiple tipped occupation categories exist for '${query.region}'; defaulted to ` +
             `'food_service' since none was specified.`;
         }
+      } else if (!state.tipped.tipCreditAllowed) {
+        // No distinct TIPPED variant for this region (Oregon never tags
+        // one — Portland metro and non-urban have no tip credit either,
+        // same as the state), but the state allows NO tip credit anywhere,
+        // so the region's own STANDARD rate is the tipped cash floor. A
+        // real bug this closes: without this branch, a tipped query for
+        // Oregon's Portland metro silently returned the generic STATEWIDE
+        // $15.55 instead of Portland metro's own $16.80 — found by the
+        // coverage script printing the same figure for two different
+        // regions and flagging it as suspicious, the same failure shape
+        // already fixed once for Washington's local ordinances.
+        const std = resolveRegion(state.variants, 'standard', query.region, undefined, query.checkDate);
+        if (std.amount) {
+          regionMatched = true;
+          cents = toCents(std.amount);
+          basis =
+            `State law allows no tip credit — ${std.amount.label ?? query.region} region's own rate is the cash floor`;
+        } else if (!hasRegions(state.variants)) {
+          caveat = `${state.jurisdiction.name} has no named regions; 'region' was ignored.`;
+        }
       } else if (!hasRegions(state.variants)) {
         caveat = `${state.jurisdiction.name} has no named regions; 'region' was ignored.`;
       }
-      // Else: a real region with no distinct tipped variant (e.g. NY's
-      // 'upstate') — the baseline tipped rate already IS that region's
-      // food-service figure, so falling through to it is correct, not a
-      // fallback from an error.
+      // Else: a real region with no distinct tipped variant, in a state
+      // that DOES allow a tip credit (e.g. NY's 'upstate') — the baseline
+      // tipped rate already IS that region's food-service figure, so
+      // falling through to it is correct, not a fallback from an error.
     }
     if (!regionMatched) {
       const pred = historicalPredecessor(state.variants, 'tipped', query.checkDate);

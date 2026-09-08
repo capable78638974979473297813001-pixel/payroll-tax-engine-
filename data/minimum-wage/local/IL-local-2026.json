@@ -18,7 +18,7 @@
         "cashWageCents": 1296,
         "maxTipCredit": 4.09,
         "maxTipCreditCents": 409,
-        "note": "Chicago is PHASING OUT its tip credit entirely under the 2023 One Fair Wage ordinance: the tipped wage rises 8 percentage points of the full minimum wage each July 1 until it reaches 100% in 2028. $12.96 is 76% of $17.05 for the year beginning 2026-07-01."
+        "note": "Chicago's tip-credit phase-out under the 2023 One Fair Wage ordinance was PAUSED at 76% by a May 2026 City Council vote -- the originally-legislated jump to 84% did not happen on 2026-07-01 as planned. $12.96 is 76% of $17.05, unchanged in percentage terms from the prior year's $12.62 (also 76%, of $16.60). The next step is now 2028-07-01 (to 84%), with full parity delayed to 2030-07-01 for most employers -- and to 2033-07-01 for small businesses (21 or fewer employees), a slower carve-out that did not exist in the ordinance's original 2023 version. CORRECTED: an earlier version of this file's note described a straight '8 points a year to 100% by 2028' schedule that stopped being true the moment the pause passed."
       },
       "coverage": "Employers with four or more workers, for work performed in Chicago.",
       "sources": [
@@ -33,6 +33,12 @@
           "url": "https://www.amundsendavislaw.com/labor-employment-law-update/il-minimum-wage-2025-update-july-1-2025-increases-to-chicago-and-cook-county-minimum-wages-january-1-2025-increase-to-the-irs-mileage-rate",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "cross_source_confirmed this session: 'the minimum wage in Chicago increased from $16.20 per hour to $16.60 per hour' effective 2025-07-01, in effect through 2026-06-30. The 68% tipped figure is computed from Chicago's own published phase-out percentages (60% for 2024, 68% for 2025, 76% for 2026, ...), not independently re-verified as a dollar figure this pass -- flagged cross_source_confirmed rather than primary."
+        },
+        {
+          "title": "Chicago pauses its tip-credit phaseout at 76% (May 2026 City Council vote)",
+          "url": "https://www.cbsnews.com/chicago/news/chicago-minimum-wage-july-1-2026-tipped-workers-delayed/",
+          "verifiedOn": "2026-09-08",
+          "verifiedBy": "cross_source_confirmed this session across CBS Chicago, HR Source and Ogletree: the originally-legislated jump to 84% on 2026-07-01 was delayed to 2028-07-01 by a May 2026 City Council vote, holding both the July 2025 and July 2026 tipped figures at 76% of their respective full minimum wage ($12.62 and $12.96). CORRECTS an earlier version of this file, which mislabeled the July 2025 figure as 68% of $16.60 -- the right dollar amount ($12.62) reached via the wrong percentage, an error caught only by re-deriving the arithmetic rather than trusting the prose label."
         }
       ],
       "variants": [
@@ -54,8 +60,15 @@
           "historicalPredecessorOf": "tipped",
           "effectiveFrom": "2025-07-01",
           "effectiveTo": "2026-06-30",
-          "note": "68% of $16.60 under Chicago's own tip-credit phase-out schedule (2023 One Fair Wage ordinance), the step before the 76%-of-$17.05 figure this file's own tipped block carries.",
+          "note": "76% of $16.60 under Chicago's One Fair Wage phase-out (the step effective 2025-07-01), not 68% as an earlier draft of this file mislabeled it -- 68% was the PRIOR year's (2024-07-01) step. The dollar figure itself ($12.62) was correct throughout; only the percentage attributed to it was wrong. Confirmed the schedule was later PAUSED at 76% by a May 2026 City Council vote -- the originally-planned jump to 84% ($14.32) on 2026-07-01 did not happen, which is why this file's own CURRENT tipped figure ($12.96) is also 76% of $17.05, not 84%.",
           "confidence": "cross_source_confirmed"
+        }
+      ],
+      "scheduledChanges": [
+        {
+          "effectiveDate": "2028-07-01",
+          "tippedPercentOfMinimumWage": 0.84,
+          "note": "First step of the delayed schedule after the May 2026 pause. Full parity (100%) follows on 2030-07-01 for most employers; small businesses (21 or fewer employees) follow their own slower schedule, reaching parity only on 2033-07-01."
         }
       ]
     },
