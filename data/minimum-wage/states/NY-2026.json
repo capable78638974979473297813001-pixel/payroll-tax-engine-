@@ -1,0 +1,102 @@
+{
+  "jurisdiction": {
+    "level": "state",
+    "code": "NY",
+    "name": "New York"
+  },
+  "year": 2026,
+  "asOf": "2026-09-08",
+  "hasStateMinimumWage": true,
+  "standard": {
+    "hourly": 16.0,
+    "hourlyCents": 1600,
+    "effectiveFrom": "2026-01-01",
+    "coverage": "Remainder of New York State -- everywhere OUTSIDE New York City, Nassau, Suffolk and Westchester. Recorded as the standard because it is the lower of the two and applies to the larger land area; the downstate rate is in variants and must be used for those four jurisdictions.",
+    "note": "N.Y. Lab. Law 652 as amended in 2023: $16.00 upstate / $17.00 downstate for 2026, then CPI indexing from 2027."
+  },
+  "tipped": {
+    "tipCreditAllowed": true,
+    "cashWage": 10.7,
+    "cashWageCents": 1070,
+    "maxTipCredit": 5.3,
+    "maxTipCreditCents": 530,
+    "tippedEmployeeThreshold": null,
+    "note": "Upstate FOOD SERVICE worker cash wage. New York splits tipped employees into food service workers and 'service employees' with different credits, and does so separately in each region -- four tipped figures in total, all in variants."
+  },
+  "variants": [
+    {
+      "hourly": 17.0,
+      "hourlyCents": 1700,
+      "id": "downstate",
+      "label": "New York City, Nassau, Suffolk and Westchester counties",
+      "test": "Work performed in NYC or in Nassau, Suffolk or Westchester county.",
+      "note": "A payroll engine keyed on a bare two-letter state code cannot get New York right; this is a genuine county-level split inside a state file.",
+      "regionalOverrideOf": "standard"
+    },
+    {
+      "hourly": 11.35,
+      "hourlyCents": 1135,
+      "id": "downstate_food_service",
+      "label": "Food service worker cash wage (downstate)",
+      "maxTipCredit": 5.65,
+      "regionalOverrideOf": "tipped",
+      "region": "downstate",
+      "occupation": "food_service"
+    },
+    {
+      "hourly": 14.15,
+      "hourlyCents": 1415,
+      "id": "downstate_service_employee",
+      "label": "Service employee cash wage (downstate)",
+      "maxTipCredit": 2.85,
+      "regionalOverrideOf": "tipped",
+      "region": "downstate",
+      "occupation": "service_employee"
+    },
+    {
+      "hourly": 13.3,
+      "hourlyCents": 1330,
+      "id": "upstate_service_employee",
+      "label": "Service employee cash wage (remainder of state)",
+      "maxTipCredit": 2.7,
+      "regionalOverrideOf": "tipped",
+      "region": "upstate",
+      "occupation": "service_employee"
+    }
+  ],
+  "youthAndTraining": [],
+  "indexation": {
+    "indexed": true,
+    "basis": "CPI-W (Northeast region), beginning 2027",
+    "adjustmentDate": "01-01"
+  },
+  "scheduledChanges": [],
+  "sources": [
+    {
+      "title": "New York State Department of Labor -- Minimum Wage (rates effective 01/01/2026)",
+      "url": "https://dol.ny.gov/minimum-wage-0",
+      "verifiedOn": "2026-09-08",
+      "verifiedBy": "Fetched and read directly this session. Source of all six New York figures: $17.00 downstate / $16.00 remainder, food service worker cash wages of $11.35 / $10.70 (tip credits $5.65 / $5.30), and service employee cash wages of $14.15 / $13.30 (tip credits $2.85 / $2.70)."
+    },
+    {
+      "id": "dol-state-mw",
+      "title": "U.S. DOL Wage and Hour Division -- State Minimum Wage Laws (table current as of July 1, 2026)",
+      "url": "https://www.dol.gov/agencies/whd/minimum-wage/state",
+      "verifiedOn": "2026-09-08",
+      "verifiedBy": "Fetched and read directly this session. DOL's own state-by-state table is the spine of every standard rate in this database; where a state's own labor department was ALSO read directly, that source is listed too and wins on any disagreement (see South Dakota's tipped cash wage for the one case where they disagreed)."
+    },
+    {
+      "id": "dol-tipped-mw",
+      "title": "U.S. DOL Wage and Hour Division -- Minimum Wages for Tipped Employees (table current as of July 1, 2026)",
+      "url": "https://www.dol.gov/agencies/whd/state/minimum-wage/tipped",
+      "verifiedOn": "2026-09-08",
+      "verifiedBy": "Fetched and read directly this session. Source of the combined rate / maximum tip credit / minimum cash wage triple and the 'tipped employee' monthly-tips definition for every state and territory in this database."
+    }
+  ],
+  "knownGaps": [
+    "New York's HOME CARE AIDE minimum wage is a separate, higher figure set by Public Health Law 3614-f; NYSDOL publishes it in fact sheet P105, which was not read this pass. No figure is asserted here rather than guessed.",
+    "The hospitality and building-service wage orders carry their own allowances (uniform maintenance, meals, lodging) that can change the effective cash figure; not modelled.",
+    "This engine's own garnishment data (data/garnishment/state-overrides-2026.json) uses the LOWER $16.00 figure for New York's 30x minimum-wage floor and discloses that as a simplification. Both files are now consistent about the fact that there are two rates."
+  ],
+  "confidence": "primary_source_confirmed"
+}

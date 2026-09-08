@@ -165,6 +165,55 @@ JEDD/JEDZ districts, Portland's Metro Supportive Housing boundary — are
 looked up against their own government's boundary service, joined on the
 government's own ID, never on a name match.
 
+## Minimum wage
+
+A minimum wage is not a tax — it is a floor on gross pay, before any withholding
+happens — so it lives in its own dataset, `data/minimum-wage/`, with its own loader
+(`src/minimum-wage.ts`) and its own test suite. It covers the FLSA floor, all 50
+states plus DC, all five territories, **69 city and county ordinances** across ten
+states, and California's nine industry-wide rates (fast food, plus seven separately-scheduled
+SB 525 health care categories, plus the LA hotel-worker rate).
+
+The whole calculation is one rule, DOL's own: where federal, state and local minimum
+wage laws all cover the same hour of work, the employer owes the **highest** of them.
+So the levels are stored separately and merged at query time, never pre-flattened:
+
+```ts
+minimumWage({ checkDate: '2026-08-15', state: 'WA', locality: 'renton', employeeCount: 200 });
+// → 2157 cents. Renton's mid-size tier stepped up on July 1; the same query
+//   dated 2026-06-15 correctly returns 2057.
+```
+
+The answer always carries the levels that lost, so a caller can see why it is what it
+is. Some of what that shape is protecting against, all of it covered by tests:
+Albuquerque's standard rate has been overtaken by New Mexico's but its **tipped** rate
+still binds at more than double the state's; American Samoa has no single minimum wage
+at all but 18 industry rates set by federal law; Florida steps on September 30 and Santa
+Fe on March 1; Montana's $4.00 and Oklahoma's $2.00 are live state rates that must never
+be mistaken for the standard one; and the federal contractor rate a stale table still
+carries ($17.75 under EO 14026) was revoked in 2025.
+
+Two states — New York and Oregon — split their STANDARD rate itself by named geographic
+region (NYC/Nassau/Suffolk/Westchester vs. the rest of New York; Portland metro vs.
+standard vs. non-urban Oregon), and New York separately splits its TIPPED rate by
+occupation within each region. Neither axis is a headcount tier, so it needs its own
+query field rather than falling out of `employeeCount`:
+
+```ts
+minimumWage({ checkDate: D, state: 'NY', region: 'downstate' }).cents;              // 1700 — not 1600
+minimumWage({ checkDate: D, state: 'NY', region: 'upstate', tipped: true }).cents;  // 1070 (food_service, the default)
+minimumWage({ checkDate: D, state: 'NY', region: 'upstate', tipped: true, occupation: 'service_employee' }).cents; // 1330
+```
+
+The middle case is the one worth noticing: upstate's food-service tipped rate has no
+separate `variants` entry at all — it *is* the state's own baseline tipped figure — so a
+resolver that only ever looks inside `variants` for an occupation match would silently
+return the wrong number (or none) for it. `minimumWage()` falls through to the baseline
+correctly instead.
+
+See `data/minimum-wage/README.md` for the full sourcing story, the trap list, and the
+known gaps.
+
 ## Staying current without fetching at calculation time
 
 ```bash
