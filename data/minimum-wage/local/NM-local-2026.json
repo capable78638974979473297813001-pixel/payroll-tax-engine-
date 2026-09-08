@@ -17,7 +17,7 @@
         "tipCreditAllowed": false,
         "cashWage": 15.4,
         "cashWageCents": 1540,
-        "note": "Santa Fe's ordinance has no separate tipped rate; it instead lets an employer count tips toward the living wage for employees who customarily earn $100 or more a month in tips or commission, so the employee must still REACH $15.40 in combined pay."
+        "note": "Santa Fe's own official 2025 living-wage notice (Municipal Code Sec. 28-1, fetched and text-extracted directly from the city's PDF this pass) states the tip-counting rule verbatim -- 'workers who customarily receive more than one hundred dollars ($100) per month in tips or commissions: any tips or commissions received and retained by a worker shall be counted as wages and credited towards satisfaction of the Living Wage' -- but publishes NO separate minimum CASH wage figure anywhere in that document. A secondary search result claimed a $3.00 base cash wage for Santa Fe; that figure appears nowhere in the city's own notice and is almost certainly that source conflating New Mexico's STATEWIDE $3.00 tipped cash wage with Santa Fe's own (cash-wage-silent) ordinance. Modelled here as no tip credit and a $15.40 floor, since that is what the primary document actually supports -- not the $3.00 figure, which was checked and rejected rather than incorporated."
       },
       "scheduledChanges": [
         {
@@ -29,10 +29,10 @@
       ],
       "sources": [
         {
-          "title": "City of Santa Fe -- Living Wage",
-          "url": "https://santafenm.gov/economic-development/living-wage-in-the-city-of-santa-fe",
+          "title": "City of Santa Fe -- Living Wage Ordinance notice (Municipal Code Sec. 28-1 SFCC 1987)",
+          "url": "https://santafenm.gov/media/news_pdf/2025_Living_Wage_Ordinance.pdf",
           "verifiedOn": "2026-09-08",
-          "verifiedBy": "cross_source_confirmed this session: $15.40 effective 2026-03-01, up from $15.00, from a 2.68% Western-region CPI-W increase. The city's own living-wage page 404'd on a direct fetch this pass."
+          "verifiedBy": "PDF downloaded and its text extracted directly this session (WebFetch's own conversion returned only binary noise; decompressing the PDF's content streams and pulling the text-showing operators worked, same technique used for the American Samoa poster). This specific PDF is the ORDINANCE'S 2025 notice ($15.00/hour effective 2025-03-01); the 2026 $15.40 rate itself rests on the separate cross-sourced citation already carried above. Confirmed directly: the tip-counting rule quoted in the note, and that no minimum cash wage for tipped workers is published anywhere in the ordinance's own text."
         }
       ]
     },

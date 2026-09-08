@@ -171,7 +171,8 @@ A minimum wage is not a tax — it is a floor on gross pay, before any withholdi
 happens — so it lives in its own dataset, `data/minimum-wage/`, with its own loader
 (`src/minimum-wage.ts`) and its own test suite. It covers the FLSA floor, all 50
 states plus DC, all five territories, **69 city and county ordinances** across ten
-states, and California's two industry-wide rates.
+states, and California's nine industry-wide rates (fast food, plus seven separately-scheduled
+SB 525 health care categories, plus the LA hotel-worker rate).
 
 The whole calculation is one rule, DOL's own: where federal, state and local minimum
 wage laws all cover the same hour of work, the employer owes the **highest** of them.

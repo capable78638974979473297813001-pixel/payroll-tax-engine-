@@ -57,10 +57,10 @@
       "coverage": "All employers. Howard County's small-employer tier (fewer than 15 employees) rose from $15.50 to $16.00 on 2026-07-01, UNIFYING the county on a single rate for the first time -- a table still carrying two Howard County rates is out of date.",
       "sources": [
         {
-          "title": "Howard County, MD minimum wage -- July 1, 2026 unification at $16.00",
-          "url": "https://www.nfib.com/news/news/local-minimum-wage-increase-on-july-1-2026/",
+          "title": "Howard County, MD -- Minimum Wage schedule (Finance Department)",
+          "url": "https://www.howardcountymd.gov/finance/minimum-wage",
           "verifiedOn": "2026-09-08",
-          "verifiedBy": "cross_source_confirmed this session; Howard County's own page was not rendered directly this pass."
+          "verifiedBy": "Fetched and read directly this session at the county's own Finance Department page. Its own wage schedule table shows the small-employer tier reaching $16.00 on 2026-07-01, unifying with the county's single rate, and confirms that from 2027-01-01 onward increases are set by CPI-U rather than by council action."
         }
       ]
     }

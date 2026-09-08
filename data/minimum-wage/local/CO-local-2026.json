@@ -26,7 +26,7 @@
           "title": "City and County of Denver -- Denver Local Minimum Wage Adjusts to $19.29 per Hour for 2026",
           "url": "https://www.denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Department-of-Finance/News/2025/Denver-Local-Minimum-Wage-Adjusts-to-19.29-per-Hour-for-2026",
           "verifiedOn": "2026-09-08",
-          "verifiedBy": "cross_source_confirmed this session across Denver's own announcement and Denver Labor's citywide minimum wage page: $19.29 (up from $18.81) and $16.27 tipped food-and-beverage (up from $15.79), from a 2.56% Denver-Aurora-Lakewood CPI-W adjustment under D.R.M.C. ch. 58 art. XVI. Denver's own pages would not render directly this pass."
+          "verifiedBy": "Fetched and read directly this session at Denver Labor's own Citywide Minimum Wage page. Quoted: 'The local minimum wage in 2026 is $19.29 per hour' and 'Denver's minimum wage for qualified tipped workers in the food and beverage industry increased to $16.27 per hour, as long as they receive $3.02 in documented tips,' both effective 2026-01-01. (An earlier attempt this session, at the Department of Finance's press-release URL, 403'd; the Denver Labor page above is the ongoing authoritative page and fetched cleanly.)"
         }
       ]
     },
@@ -51,7 +51,7 @@
           "title": "City of Boulder -- Local Minimum Wage",
           "url": "https://bouldercolorado.gov/local-minimum-wage",
           "verifiedOn": "2026-09-08",
-          "verifiedBy": "cross_source_confirmed this session: $16.82 for 2026 with a $3.02 tip offset giving $13.80. Boulder County's own page (fetched directly) states the county aligned its schedule with the City of Boulder's, and carries the identical pair of figures."
+          "verifiedBy": "Fetched and read directly this session at the City of Boulder's own Local Minimum Wage page. Quoted: 'Beginning January 1, 2026: $16.82 per hour' and 'no more than $3.02 per hour in tip income, or tip credit, may be used to partially offset payment of this wage.' (An earlier attempt this session 404'd; confirmed reachable on retry.)"
         }
       ]
     },

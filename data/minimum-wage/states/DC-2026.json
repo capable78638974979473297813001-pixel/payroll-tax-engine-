@@ -57,6 +57,12 @@
       "url": "https://does.dc.gov/service/office-wage-hour-compliance-0",
       "verifiedOn": "2026-09-08",
       "verifiedBy": "cross_source_confirmed this session (the $18.40 rate and the $10.00 -> $10.30 tipped step on 2026-07-01, plus the amended Initiative 82 percentage schedule) across DOL's own tipped table and multiple independent employment-law summaries of the Council's 2025 amendment. DOES's own minimum wage page 404'd this pass."
+    },
+    {
+      "title": "DC Department of Employment Services, Office of Wage and Hour -- District of Columbia Minimum Wage Increase (public notice)",
+      "url": "https://does.dc.gov/sites/default/files/dc/sites/does/publication/attachments/2026%20Minimum%20Wage%20Increase%20Notice_0.pdf",
+      "verifiedOn": "2026-09-08",
+      "verifiedBy": "PDF downloaded and its text extracted directly this session (WebFetch's own conversion returned only binary noise; decompressing the PDF's content streams and pulling the text-showing operators worked). Quoted: 'Beginning July 1, 2026, the minimum wage in the District of Columbia will increase ... from $17.95 per hour to $18.40 per hour for all workers, regardless of size of employer' and 'As of July 1, 2026, the base minimum wage for tipped employees will increase from $10.00 per hour to $10.30.'"
     }
   ],
   "knownGaps": [

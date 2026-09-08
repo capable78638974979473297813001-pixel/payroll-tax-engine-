@@ -2,7 +2,7 @@
   "state": "CA",
   "year": 2026,
   "asOf": "2026-09-08",
-  "$comment": "Minimum wages California sets by INDUSTRY rather than by geography. They are not local ordinances and not the state minimum wage; a covered fast-food or health-care employee is owed the sectoral rate even in a city with no local ordinance at all, and even where the local ordinance is lower.",
+  "$comment": "Minimum wages California sets by INDUSTRY rather than by geography. They are not local ordinances and not the state minimum wage; a covered employee is owed the sectoral rate even in a city with no local ordinance at all, and even where the local ordinance is lower. CORRECTED 2026-09-08: this file originally collapsed SB 525's SEVEN distinct health-care employer categories into a false 'large systems vs. other facilities' binary, sourced only to secondary summaries because the DIR's own FAQ page could not be located on the first research pass. The real page was found on a second pass (it lives at a different URL than the generic minimum-wage landing page) and gives each of the seven categories its own multi-year step schedule -- they do NOT all converge on the same figure, and three of the seven (safety net hospitals, small counties, and by extension any employer misclassified into one of them) are still years away from $25.00 in 2026.",
   "sectors": [
     {
       "id": "fast_food",
@@ -11,28 +11,80 @@
       "hourlyCents": 2000,
       "effectiveFrom": "2024-04-01",
       "coverage": "Employees of limited-service restaurants that are part of a national chain with 60 or more establishments nationwide (AB 1228 / Labor Code 1475 et seq.), as set by the Fast Food Council.",
-      "note": "Unchanged at $20.00 for 2026 -- the Council has adopted no increase since the rate took effect.",
-      "confidence": "cross_source_confirmed"
+      "note": "Unchanged at $20.00 through 2026 -- the Council has statutory authority to raise it each year by the lesser of 3.5% or CPI growth, and has adopted no increase for 2025 or 2026.",
+      "confidence": "primary_source_confirmed"
     },
     {
       "id": "health_care_large_systems",
-      "name": "Health care workers -- large health systems, large hospitals and dialysis clinics",
+      "name": "Health care workers -- hospitals/health systems with 10,000+ full-time-equivalent employees, and dialysis clinics",
       "hourly": 25.0,
       "hourlyCents": 2500,
       "effectiveFrom": "2026-07-01",
-      "coverage": "SB 525 (Health & Safety Code 1182.14 et seq.) covered employees of large private hospitals, large integrated health systems and dialysis clinics.",
-      "note": "$23.00 from 2024-06-01, $24.00 from 2025-07-01, $25.00 from 2026-07-01.",
-      "confidence": "cross_source_confirmed"
+      "effectiveTo": "2027-12-31",
+      "coverage": "SB 525 (Health & Safety Code 1182.14). The fastest of the seven SB 525 schedules -- reaches $25.00 first.",
+      "note": "$23.00 from 2024-10-16, $24.00 from 2025-07-01, $25.00 from 2026-07-01 through 2027-12-31, then annual CPI adjustment from 2028-01-01.",
+      "confidence": "primary_source_confirmed"
     },
     {
-      "id": "health_care_other_facilities",
-      "name": "Health care workers -- other covered facilities, including skilled nursing facilities",
+      "id": "health_care_large_counties",
+      "name": "Health care workers -- counties with 5,000,000+ population",
+      "hourly": 25.0,
+      "hourlyCents": 2500,
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": "2027-12-31",
+      "coverage": "SB 525. Applies to county-run health care facilities; the county schedule starts 2025-01-01 rather than the private-sector 2024-10-16 start date, but converges onto the SAME $25.00 figure on the same 2026-07-01 date as the large-hospital tier.",
+      "note": "Effectively Los Angeles County -- the only California county at or above 5,000,000 population.",
+      "confidence": "primary_source_confirmed"
+    },
+    {
+      "id": "health_care_medium_counties",
+      "name": "Health care workers -- counties with 250,000-5,000,000 population",
       "hourly": 23.0,
       "hourlyCents": 2300,
       "effectiveFrom": "2026-07-01",
-      "coverage": "SB 525 covered employees at facilities outside the large-system, high-government-payor and clinic categories.",
-      "note": "Stepped to $23.00 on 2026-07-01, continuing toward $25.00 later in the SB 525 schedule.",
-      "confidence": "cross_source_confirmed"
+      "effectiveTo": "2028-06-30",
+      "coverage": "SB 525 county-operated facilities.",
+      "confidence": "primary_source_confirmed"
+    },
+    {
+      "id": "health_care_other_facilities",
+      "name": "Health care workers -- all other covered facilities not otherwise classified (includes skilled nursing facilities)",
+      "hourly": 23.0,
+      "hourlyCents": 2300,
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": "2028-06-30",
+      "coverage": "SB 525 covered employees at facilities outside every other listed category.",
+      "confidence": "primary_source_confirmed"
+    },
+    {
+      "id": "health_care_community_clinics",
+      "name": "Health care workers -- community clinics, rural health clinics, and urgent care clinics affiliated with either",
+      "hourly": 22.0,
+      "hourlyCents": 2200,
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": "2027-06-30",
+      "coverage": "SB 525.",
+      "confidence": "primary_source_confirmed"
+    },
+    {
+      "id": "health_care_safety_net_hospitals",
+      "name": "Health care workers -- safety net hospitals",
+      "hourly": 19.28,
+      "hourlyCents": 1928,
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": "2027-06-30",
+      "coverage": "SB 525. The SLOWEST of the seven schedules -- safety net hospitals do not reach $25.00 until 2033-2034, in recognition of their thinner margins.",
+      "confidence": "primary_source_confirmed"
+    },
+    {
+      "id": "health_care_small_counties",
+      "name": "Health care workers -- counties with fewer than 250,000 population",
+      "hourly": 19.28,
+      "hourlyCents": 1928,
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": "2027-06-30",
+      "coverage": "SB 525 county-operated facilities. On the same slow schedule as safety net hospitals.",
+      "confidence": "primary_source_confirmed"
     },
     {
       "id": "los_angeles_hotel",
@@ -51,16 +103,22 @@
   ],
   "sources": [
     {
-      "title": "California employment-law summaries of the July 1, 2026 sectoral wage steps (Fisher Phillips, CalChamber, SHRM, California Medical Association)",
-      "url": "https://www.fisherphillips.com/en/insights/insights/california-local-minimum-wage-increases-effective-july-1-2026",
+      "title": "California Department of Industrial Relations -- Health Care Worker Minimum Wage Frequently Asked Questions",
+      "url": "https://www.dir.ca.gov/dlse/Health-Care-Worker-Minimum-Wage-FAQ.htm",
       "verifiedOn": "2026-09-08",
-      "verifiedBy": "cross_source_confirmed this session across several independent California employment-law summaries for the fast-food $20.00, the SB 525 steps to $25.00 (large systems, hospitals and dialysis) and $23.00 (other covered facilities including skilled nursing) on 2026-07-01, and the Los Angeles hotel-worker $25.00 plus the $4.25 health-benefit supplement. The URL given is one of those summaries -- its own rate CHART is a PDF this session could not render, so the figures rest on the agreeing prose of several sources rather than on that chart. California DIR's own health-care minimum wage FAQ 404'd on a direct fetch. This is the weakest-sourced file in this database and is marked accordingly."
+      "verifiedBy": "Fetched and read directly this session -- the actual DIR FAQ page, found via search after the page's own generic /dlse/minimum_wage.htm landing page and a guessed URL both 404'd on the first research pass (that guessed URL is what the ORIGINAL version of this file cited as unreachable; the real page was findable all along, just not at the URL first tried). CORRECTED the sectoral file's own prior draft, which had folded SB 525's seven employer categories down to a false binary of 'large systems' vs 'other facilities' -- the DIR FAQ's own wage-schedule table gives seven categories, each on its own multi-year step schedule, and the figures below are transcribed from that table's July 1, 2026 column specifically."
+    },
+    {
+      "title": "California Department of Industrial Relations -- Fast Food Minimum Wage Frequently Asked Questions",
+      "url": "https://www.dir.ca.gov/dlse/Fast-Food-Minimum-Wage-FAQ.htm",
+      "verifiedOn": "2026-09-08",
+      "verifiedBy": "Fetched and read directly this session. Confirms $20.00/hour effective 2024-04-01, unchanged since, and that the Fast Food Council has statutory authority to raise it each year by the LESSER of 3.5% or CPI growth -- and has adopted no increase for 2025 or 2026."
     }
   ],
-  "confidence": "cross_source_confirmed",
+  "confidence": "primary_source_confirmed",
   "knownGaps": [
-    "SB 525 defines FOUR employer categories. Only the two whose 2026-07-01 figures were confirmed this session are asserted here; the high-government-payor/rural-independent hospital category and the clinic category exist and are on their own slower schedules, and no figure is guessed for them.",
     "Los Angeles also sets an airport-worker minimum wage, and Santa Monica, Long Beach, West Hollywood and Glendale each run hotel-worker ordinances. Those are real minimum wages that are deliberately NOT given figures here, because none was verified to a primary or double-secondary standard this session.",
-    "Whether a particular restaurant or facility is 'covered' is a legal determination under each statute's own definitions; this file carries rates, not coverage tests."
+    "Whether a particular restaurant or facility is 'covered', and which of the seven SB 525 categories a given health care facility falls into, is a legal determination under each statute's own definitions (FTE counts, county population as of the last federal census, clinic licensure type); this file carries rates, not that classification test.",
+    "The Health Care Worker Minimum Wage Clinic Waiver Program lets DIR grant an individual clinic a temporary waiver from SB 525 entirely; a waived clinic's real obligation can be lower than any figure in this file for a limited period. Not modelled."
   ]
 }

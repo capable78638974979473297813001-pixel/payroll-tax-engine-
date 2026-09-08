@@ -90,6 +90,12 @@
       "url": "https://www.nj.gov/labor/lwdhome/press/2025/20251001_Minimum_Wage.shtml",
       "verifiedOn": "2026-09-08",
       "verifiedBy": "cross_source_confirmed this session for $15.92 general, $15.23 seasonal/small, $14.20 agricultural and the $6.05 tipped cash wage. DOL's own tables independently carry $15.92 / $15.23 / $6.05."
+    },
+    {
+      "title": "New Jersey Office of Administrative Law -- Notice of Administrative Changes, Minimum Wage (N.J.A.C. 12:56-3.1/3.2/3.3), filed 2025-09-26",
+      "url": "https://www.nj.gov/labor/assets/PDFs/Legal%20Notices/Other/Public%20Notice%20Minimum%20Wage%202026_FINAL.pdf",
+      "verifiedOn": "2026-09-08",
+      "verifiedBy": "PDF downloaded and its text extracted directly this session. Confirms the CPI-W (U.S. City Average) methodology verbatim and the exact underlying index values: 'the CPI-W, U.S. City Average, in August 2024 was 308.640, and in August 2025 it was 317.306 ... an increase of 2.81 percent.' 2.81% applied to 2025's $15.49 general rate computes to $15.92 (matches this file's own figure); the document's later pages, where the per-category dollar figures for 2026 presumably appear, did not extract as readable text this pass -- those figures rest on the NJDOL press-release citation already carried above."
     }
   ],
   "knownGaps": [

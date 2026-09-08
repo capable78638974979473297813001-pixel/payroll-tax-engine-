@@ -447,6 +447,29 @@ describe('sectoral minimum wages', () => {
     // legal determination this engine has no input for.
     assert.equal(minimumWage({ checkDate: D, state: 'CA' }).cents, 1690);
   });
+
+  test('SB 525 has SEVEN health care schedules, not two — the slowest is nowhere near $25', () => {
+    // Caught on a re-check against DIR's own FAQ (not found on the first
+    // research pass): the first draft of this file collapsed seven
+    // separately-scheduled employer categories into a false binary of
+    // "large systems" vs. "other facilities". Safety net hospitals and
+    // small counties are on the SLOWEST schedule and don't reach $25.00
+    // until 2033-2034 — treating them as "other facilities" at $23.00
+    // would still overstate what they owe in 2026.
+    const sectors = Object.fromEntries(
+      sectoralMinimumWageRuleset('CA', D).map((s) => [s.id, s.hourlyCents]),
+    );
+    const healthCare = Object.keys(sectors).filter((id) => id.startsWith('health_care_'));
+    assert.equal(healthCare.length, 7);
+    assert.equal(sectors.health_care_safety_net_hospitals, 1928);
+    assert.equal(sectors.health_care_small_counties, 1928);
+    assert.equal(sectors.health_care_community_clinics, 2200);
+    assert.equal(sectors.health_care_medium_counties, 2300);
+    assert.equal(sectors.health_care_large_counties, 2500);
+    // Every category is still a real, above-state-minimum wage.
+    const state = stateMinimumWageRuleset('CA', D).standard!.hourlyCents;
+    for (const id of healthCare) assert.ok(sectors[id]! > state, id);
+  });
 });
 
 describe('consistency with the rest of the engine', () => {
