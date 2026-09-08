@@ -1,7 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 
 import { minimumWage, localMinimumWages } from '../src/minimum-wage.ts';
 import {
@@ -508,6 +508,41 @@ describe('consistency with the rest of the engine', () => {
           `${state}/${j.id}: local $${j.hourlyCents / 100} is below the state rate`,
         );
       }
+    }
+  });
+});
+
+describe('the Supabase Edge Function data bundle stays in sync', () => {
+  // scripts/build-data-bundle.ts snapshots every file under data/ into
+  // supabase/functions/_shared/data-bundle.ts for the Edge Function
+  // deployment, which has no filesystem of its own — see registry.ts's
+  // own doc comment on setDataReader(). Nothing regenerates that snapshot
+  // automatically; a data/ change with no re-run of that script ships an
+  // Edge Function that answers with LAST WEEK's rates forever, silently,
+  // because the deployed function has no way to know its bundle is stale.
+  // This is exactly the state this repo was in when the minimum-wage
+  // database was first added — the bundle predated the new data/
+  // minimum-wage/ folder entirely — so this guards a real regression,
+  // not a hypothetical one.
+  test('every minimum-wage file is present in the bundle and byte-identical to disk', async () => {
+    const { DATA_BUNDLE } = (await import(
+      '../supabase/functions/_shared/data-bundle.ts'
+    )) as { DATA_BUNDLE: Record<string, unknown> };
+
+    const files = everyFile();
+    assert.ok(files.length > 0);
+    for (const f of files) {
+      const relPath = join('minimum-wage', relative(DATA_ROOT, f)).replace(/\\/g, '/');
+      assert.ok(
+        Object.prototype.hasOwnProperty.call(DATA_BUNDLE, relPath),
+        `${relPath} is on disk but missing from the Edge Function bundle — ` +
+          `run \`node scripts/build-data-bundle.ts\` to regenerate it`,
+      );
+      assert.deepEqual(
+        DATA_BUNDLE[relPath],
+        JSON.parse(readFileSync(f, 'utf8')),
+        `${relPath} in the bundle no longer matches the file on disk — the bundle is stale`,
+      );
     }
   });
 });

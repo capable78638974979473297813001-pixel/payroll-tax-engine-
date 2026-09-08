@@ -151,9 +151,9 @@
   },
   "scheduledChanges": [
     {
-      "effectiveFrom": "2027-09-30",
       "change": "+$0.40 per hour to every industry rate",
-      "note": "Fair Minimum Wage Act of 2007 (P.L. 110-28) as amended by P.L. 114-61: $0.40 every three years on September 30 (2021, 2024, 2027, ...) until each rate reaches the federal minimum wage. The 2024-09-30 step is the one currently in effect; nothing changes on 2026-09-30."
+      "note": "Fair Minimum Wage Act of 2007 (P.L. 110-28) as amended by P.L. 114-61: $0.40 every three years on September 30 (2021, 2024, 2027, ...) until each rate reaches the federal minimum wage. The 2024-09-30 step is the one currently in effect; nothing changes on 2026-09-30.",
+      "effectiveDate": "2027-09-30"
     }
   ],
   "sources": [

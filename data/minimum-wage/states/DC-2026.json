@@ -32,9 +32,9 @@
   },
   "scheduledChanges": [
     {
-      "effectiveFrom": "2028-07-01",
       "tippedPercentOfMinimumWage": 0.6,
-      "note": "Next step of the amended Initiative 82 schedule; the standard rate continues to index each July 1."
+      "note": "Next step of the amended Initiative 82 schedule; the standard rate continues to index each July 1.",
+      "effectiveDate": "2028-07-01"
     }
   ],
   "sources": [

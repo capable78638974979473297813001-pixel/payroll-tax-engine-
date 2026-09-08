@@ -121,6 +121,32 @@ describe('calendar — scheduled effective dates from the data files', () => {
     }
   });
 
+  test('picks up minimum-wage scheduled changes, from the nested minimum-wage/ tree', () => {
+    // data/minimum-wage/ is nested (states/, local/, territories/, sectoral/
+    // subfolders, plus a federal-{year}.json directly inside) rather than
+    // flat like data/states/ and data/local/, so it needs its own recursive
+    // walk in dataFiles() — this is what proves that walk actually reaches
+    // every subfolder, not just the top level.
+    const all = scheduledEffectiveDates();
+    const mw = all.filter((w) => w.affects[0].includes('minimum-wage'));
+    assert.ok(mw.length >= 10, `expected scheduled changes from several minimum-wage files, got ${mw.length}`);
+    const paths = mw.map((w) => w.affects[0]);
+    assert.ok(paths.some((p) => p.includes('minimum-wage/states/')), 'a state file');
+    assert.ok(paths.some((p) => p.includes('minimum-wage/local/')), 'a local file');
+    assert.ok(paths.some((p) => p.includes('minimum-wage/territories/')), 'a territory file');
+
+    // Florida's step to $15.00 lands 2026-09-30 — the single nearest-term
+    // scheduled change in the whole minimum-wage database.
+    const fl = mw.find((w) => w.affects[0].includes('FL-2026'));
+    assert.ok(fl, 'Florida\'s scheduled $15.00 step should be discovered');
+    assert.equal(fl.effectiveOn, '2026-09-30');
+  });
+
+  test('Florida’s imminent step is due today, the same way Georgia’s was', () => {
+    const due = windowsDueOn('2026-09-08').map((w) => w.affects[0]);
+    assert.ok(due.some((p) => p.includes('FL-2026')));
+  });
+
   test('shiftDays crosses month and year boundaries correctly', () => {
     assert.equal(shiftDays('2026-01-01', -30), '2025-12-02');
     assert.equal(shiftDays('2026-12-31', 1), '2027-01-01');

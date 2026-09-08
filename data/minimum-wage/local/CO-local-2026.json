@@ -73,11 +73,11 @@
       "coverage": "UNINCORPORATED Boulder County only, including any employee performing four or more hours of work per week there. Incorporated towns in the county other than the City of Boulder follow the Colorado state rate.",
       "scheduledChanges": [
         {
-          "effectiveFrom": "2027-01-01",
           "hourly": 17.32,
           "hourlyCents": 1732,
           "tippedCashWage": 14.3,
-          "note": "The county adopted a published schedule through 2030 ($17.84 in 2028, $18.38 in 2029, $18.93 in 2030), each step an estimated 3% CPI increase for the Denver-Aurora-Lakewood area."
+          "note": "The county adopted a published schedule through 2030 ($17.84 in 2028, $18.38 in 2029, $18.93 in 2030), each step an estimated 3% CPI increase for the Denver-Aurora-Lakewood area.",
+          "effectiveDate": "2027-01-01"
         }
       ],
       "sources": [

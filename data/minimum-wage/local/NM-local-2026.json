@@ -21,10 +21,10 @@
       },
       "scheduledChanges": [
         {
-          "effectiveFrom": "2027-03-01",
           "hourly": 17.5,
           "hourlyCents": 1750,
-          "note": "A larger, separately adopted step, reported alongside the 2026 adjustment."
+          "note": "A larger, separately adopted step, reported alongside the 2026 adjustment.",
+          "effectiveDate": "2027-03-01"
         }
       ],
       "sources": [

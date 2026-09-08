@@ -48,12 +48,12 @@
   },
   "scheduledChanges": [
     {
-      "effectiveFrom": "2027-01-01",
       "hourly": 15.0,
       "hourlyCents": 1500,
       "tippedCashWage": 6.3,
       "tippedCashWageCents": 630,
-      "note": "Tipped rises to 42% of the minimum wage in 2027."
+      "note": "Tipped rises to 42% of the minimum wage in 2027.",
+      "effectiveDate": "2027-01-01"
     }
   ],
   "sources": [

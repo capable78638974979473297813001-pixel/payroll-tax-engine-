@@ -155,6 +155,23 @@ export function extractEffectiveDates(
   return found;
 }
 
+function walkJson(dir: string, relPrefix: string, out: string[]): void {
+  let entries: import('node:fs').Dirent[];
+  try {
+    entries = readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  for (const e of entries) {
+    const rel = join(relPrefix, e.name);
+    if (e.isDirectory()) {
+      walkJson(join(dir, e.name), rel, out);
+    } else if (e.name.endsWith('.json')) {
+      out.push(rel);
+    }
+  }
+}
+
 function dataFiles(): string[] {
   const out: string[] = [];
   for (const sub of ['federal', 'states', 'local']) {
@@ -169,6 +186,11 @@ function dataFiles(): string[] {
       if (f.endsWith('.json')) out.push(join(sub, f));
     }
   }
+  // minimum-wage/ is nested (federal-{year}.json directly inside, plus
+  // states/, territories/, local/ and sectoral/ subfolders) rather than
+  // flat like the three above, so it gets its own recursive walk rather
+  // than being force-fit into the one-level loop.
+  walkJson(join(DATA_ROOT, 'minimum-wage'), 'minimum-wage', out);
   return out;
 }
 

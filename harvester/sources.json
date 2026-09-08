@@ -1,5 +1,5 @@
 {
-  "comment": "Authoritative sources only. The organising principle: never monitor an individual municipality's own website. Monitor the state-level register that the municipality is legally required to report into. Ohio's ~600 municipalities collapse to one Department of Taxation file; Pennsylvania's ~2,500 Act 32 jurisdictions collapse to one DCED register. That is what turns '7,400 jurisdictions' into roughly 60 things to watch. Every entry's `url` resolves to a .gov (or state-designated register, tagged authority: 'state_register') domain -- checked 2026-09-03, none of the 105 point at a payroll vendor, aggregator, or other secondary source.",
+  "comment": "Authoritative sources only. The organising principle: never monitor an individual municipality's own website. Monitor the state-level register that the municipality is legally required to report into. Ohio's ~600 municipalities collapse to one Department of Taxation file; Pennsylvania's ~2,500 Act 32 jurisdictions collapse to one DCED register. That is what turns '7,400 jurisdictions' into roughly 60 things to watch. Every entry's `url` resolves to a .gov (or state-designated register, tagged authority: 'state_register') domain -- checked 2026-09-03, none of the 105 point at a payroll vendor, aggregator, or other secondary source. UPDATED 2026-09-08: 6 minimum-wage registers added (111 total) -- 3 DOL tables, the EO 13658 contractor-wage notice, and 2 local aggregators (UC Berkeley's national inventory and WA L&I's local-rates page). Minimum wage is a floor on gross pay, not a withholding tax, but the same watch-the-register discipline applies, and two of the six (dol-eo13658-contractor-minimum-wage and berkeley-local-minimum-wage-inventory) are tagged state_register/primary the same way the rest of this file distinguishes a .gov page from an aggregator with no official standing.",
   "checkCadence": {
     "$comment": "User-directed 2026-09-03: checkFrequency below now follows a two-tier cadence rather than the uniform 'monthly' most sources previously carried. 'daily' = OH, PA, MI, IN, AL, NJ, NY, OR, CO, plus federal (US) sources, since federal figures (FUTA credit reduction, SS wage base, etc.) feed every state's calculation. 'weekly' = every other jurisdiction. harvester/daily.ts's own sweep(asOf, { force: true }) call, which used to override checkFrequency entirely and check every source every day, was changed to force: false so this cadence actually takes effect -- see that file's own updated doc comment for why the previous 'check everything daily' default was a deliberate but now superseded choice, not an oversight being corrected.",
     "dailyJurisdictions": [
@@ -1779,6 +1779,106 @@
       ],
       "note": "SUPPLEMENTARY to nm-ui-rates, which carries the wage base but no rates. New Mexico publishes the two figures on different pages, so both are watched rather than forcing one page to serve for both.",
       "uiContent": "rates-only"
+    },
+    {
+      "id": "dol-state-minimum-wage",
+      "level": "federal",
+      "jurisdiction": "US",
+      "title": "US DOL \u2014 State Minimum Wage Laws",
+      "url": "https://www.dol.gov/agencies/whd/minimum-wage/state",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 51,
+      "checkFrequency": "weekly",
+      "expectedChange": "rolling \u2014 different states step on Jan 1, Mar 1, Jul 1 and Sep 30, so this page moves several times a year, not once",
+      "feeds": [
+        "data/minimum-wage/federal-{year}.json#standard",
+        "data/minimum-wage/states/{STATE}-{year}.json#standard"
+      ],
+      "note": "The single register data/minimum-wage/ is built from \u2014 same pattern as OH's Finder and PA's DCED collapsing thousands of local jurisdictions to one page, this collapses 50 states + DC to one. Registered alongside the two sources below (tipped, consolidated) because DOL publishes the standard rate, the tipped rate and a cross-check table as three SEPARATE pages that have been observed to update on different days within the same week."
+    },
+    {
+      "id": "dol-tipped-minimum-wage",
+      "level": "federal",
+      "jurisdiction": "US",
+      "title": "US DOL \u2014 Minimum Wages for Tipped Employees",
+      "url": "https://www.dol.gov/agencies/whd/state/minimum-wage/tipped",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 56,
+      "checkFrequency": "weekly",
+      "expectedChange": "rolling, same reason as dol-state-minimum-wage",
+      "feeds": [
+        "data/minimum-wage/federal-{year}.json#tipped",
+        "data/minimum-wage/states/{STATE}-{year}.json#tipped",
+        "data/minimum-wage/territories/{STATE}-{year}.json#tipped"
+      ],
+      "note": "Covers every state, DC and every territory this project tracks (PR, VI, GU, AS, MP) in one table \u2014 the tip-credit maximum, the cash wage and the tipped-employee monthly-tips threshold for each. This is the ONLY DOL table that carries the tipped-employee definition threshold; dol-state-minimum-wage does not."
+    },
+    {
+      "id": "dol-consolidated-minimum-wage",
+      "level": "federal",
+      "jurisdiction": "US",
+      "title": "US DOL \u2014 Consolidated Minimum Wage Table",
+      "url": "https://www.dol.gov/agencies/whd/mw-consolidated",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 56,
+      "checkFrequency": "weekly",
+      "expectedChange": "rolling, same reason as dol-state-minimum-wage",
+      "feeds": [
+        "data/minimum-wage/federal-{year}.json",
+        "data/minimum-wage/states/{STATE}-{year}.json"
+      ],
+      "note": "A THIRD, independent DOL table grouping every jurisdiction by whether it sits above, at, or below the federal floor, and separately naming the Montana/New Jersey/New York/Ohio/Oregon sub-rates. Kept as its own source rather than assumed identical to dol-state-minimum-wage: a genuine three-way cross-check, since a single mistyped DOL table would otherwise go undetected."
+    },
+    {
+      "id": "dol-eo13658-contractor-minimum-wage",
+      "level": "federal",
+      "jurisdiction": "US",
+      "title": "US DOL \u2014 Executive Order 13658 federal contractor minimum wage (annual rate change notice)",
+      "url": "https://www.dol.gov/agencies/whd/government-contracts/minimum-wage",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, a new rate notice each winter, effective the following May",
+      "feeds": [
+        "data/minimum-wage/federal-{year}.json#otherFederalMinimums.executiveOrder13658"
+      ],
+      "note": "Registered specifically because its sibling, Executive Order 14026, was REVOKED in March 2025 \u2014 a live example of exactly the failure mode this whole harvester exists to catch (a stale table paying a rate that no longer applies). Watches for the next annual EO 13658 step and for any future executive action that could revive, replace or further narrow either order."
+    },
+    {
+      "id": "berkeley-local-minimum-wage-inventory",
+      "level": "local",
+      "jurisdiction": "US",
+      "title": "UC Berkeley Labor Center \u2014 Inventory of US City and County Minimum Wage Ordinances",
+      "url": "https://laborcenter.berkeley.edu/inventory-of-us-city-and-county-minimum-wage-ordinances/",
+      "authority": "state_register",
+      "format": "html",
+      "coversJurisdictions": 69,
+      "checkFrequency": "weekly",
+      "expectedChange": "rolling \u2014 new ordinances are adopted and old ones repealed a few times a year",
+      "feeds": [
+        "data/minimum-wage/local/{STATE}-local-{year}.json"
+      ],
+      "note": "Not a .gov page \u2014 tagged state_register rather than primary because no single federal or state agency maintains a census of every local minimum wage ordinance nationwide. This is the source that tells this project WHICH local jurisdictions exist at all, so a rate change here does not by itself justify a data update; a NEW jurisdiction appearing (or a listed one disappearing, e.g. a repeal) is the signal to go verify that locality's own primary source, the same discipline already applied when this file was first built."
+    },
+    {
+      "id": "wa-li-local-minimum-wage",
+      "level": "local",
+      "jurisdiction": "WA",
+      "title": "Washington State L&I \u2014 Local Minimum Wage Rates",
+      "url": "https://lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates",
+      "authority": "state_register",
+      "format": "html",
+      "coversJurisdictions": 8,
+      "checkFrequency": "weekly",
+      "expectedChange": "annual for most tiers, but Renton and Everett step a second time on Jul 1 for their mid-size tier",
+      "feeds": [
+        "data/minimum-wage/local/WA-local-{year}.json"
+      ],
+      "note": "Exactly the OH-Finder/PA-DCED pattern applied to minimum wage: Washington's own L&I office aggregates all 8 of its cities' and counties' local ordinances onto one page, so this one register replaces watching 8 separate municipal sites. Already caught two real drift cases against secondary sources during this project's initial build (Burien and Renton)."
     }
   ],
   "uiCoverage": {

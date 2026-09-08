@@ -36,12 +36,12 @@
   },
   "scheduledChanges": [
     {
-      "effectiveFrom": "2026-09-30",
       "hourly": 15.0,
       "hourlyCents": 1500,
       "tippedCashWage": 11.98,
       "tippedCashWageCents": 1198,
-      "note": "Final legislated step of Amendment 2. VERY NEAR TERM relative to this file's asOf date."
+      "note": "Final legislated step of Amendment 2. VERY NEAR TERM relative to this file's asOf date.",
+      "effectiveDate": "2026-09-30"
     }
   ],
   "sources": [

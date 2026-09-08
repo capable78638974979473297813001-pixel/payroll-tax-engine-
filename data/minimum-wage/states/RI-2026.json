@@ -34,10 +34,10 @@
   },
   "scheduledChanges": [
     {
-      "effectiveFrom": "2027-01-01",
       "hourly": 17.0,
       "hourlyCents": 1700,
-      "note": "Final step of the 2025 amendment."
+      "note": "Final step of the 2025 amendment.",
+      "effectiveDate": "2027-01-01"
     }
   ],
   "sources": [

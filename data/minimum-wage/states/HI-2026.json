@@ -31,10 +31,10 @@
   },
   "scheduledChanges": [
     {
-      "effectiveFrom": "2028-01-01",
       "hourly": 18.0,
       "hourlyCents": 1800,
-      "note": "Final legislated step of Act 114 (2022)."
+      "note": "Final legislated step of Act 114 (2022).",
+      "effectiveDate": "2028-01-01"
     }
   ],
   "sources": [

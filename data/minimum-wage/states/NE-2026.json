@@ -50,8 +50,8 @@
   },
   "scheduledChanges": [
     {
-      "effectiveFrom": "2027-01-01",
-      "note": "First 1.75% step under LB 258; the exact figure is published by NDOL on 2026-10-15 and is deliberately NOT guessed here."
+      "note": "First 1.75% step under LB 258; the exact figure is published by NDOL on 2026-10-15 and is deliberately NOT guessed here.",
+      "effectiveDate": "2027-01-01"
     }
   ],
   "sources": [

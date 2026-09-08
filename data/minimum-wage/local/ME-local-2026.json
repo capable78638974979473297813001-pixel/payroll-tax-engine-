@@ -22,10 +22,10 @@
       },
       "scheduledChanges": [
         {
-          "effectiveFrom": "2027-01-01",
           "hourly": 17.75,
           "hourlyCents": 1775,
-          "note": "Second step of the November 2025 voter-approved amendment; $19.00 in 2028."
+          "note": "Second step of the November 2025 voter-approved amendment; $19.00 in 2028.",
+          "effectiveDate": "2027-01-01"
         }
       ],
       "sources": [

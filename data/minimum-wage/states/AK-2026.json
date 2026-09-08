@@ -33,10 +33,10 @@
   },
   "scheduledChanges": [
     {
-      "effectiveFrom": "2027-07-01",
       "hourly": 15.0,
       "hourlyCents": 1500,
-      "note": "Final legislated step of Ballot Measure 1 (2024)."
+      "note": "Final legislated step of Ballot Measure 1 (2024).",
+      "effectiveDate": "2027-07-01"
     }
   ],
   "sources": [
