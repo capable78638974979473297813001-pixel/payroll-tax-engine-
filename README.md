@@ -212,7 +212,11 @@ return the wrong number (or none) for it. `minimumWage()` falls through to the b
 correctly instead.
 
 See `data/minimum-wage/README.md` for the full sourcing story, the trap list, and the
-known gaps.
+known gaps. `npm run coverage:minimum-wage` runs every state, named region and local
+ordinance through the resolver and flags anything that looks wrong (a tipped figure
+above the standard rate, a region silently matching its neighbor's number) — the same
+"measure it, don't assert it" convention as `coverage:taxes` and `coverage:geocode`. It
+found the Oregon regional-tipped bug above; it now reports clean.
 
 ## Staying current without fetching at calculation time
 

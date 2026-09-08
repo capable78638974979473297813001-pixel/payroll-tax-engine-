@@ -325,13 +325,33 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
             `Multiple tipped occupation categories exist for '${query.region}'; defaulted to ` +
             `'food_service' since none was specified.`;
         }
+      } else if (!state.tipped.tipCreditAllowed) {
+        // No distinct TIPPED variant for this region (Oregon never tags
+        // one — Portland metro and non-urban have no tip credit either,
+        // same as the state), but the state allows NO tip credit anywhere,
+        // so the region's own STANDARD rate is the tipped cash floor. A
+        // real bug this closes: without this branch, a tipped query for
+        // Oregon's Portland metro silently returned the generic STATEWIDE
+        // $15.55 instead of Portland metro's own $16.80 — found by the
+        // coverage script printing the same figure for two different
+        // regions and flagging it as suspicious, the same failure shape
+        // already fixed once for Washington's local ordinances.
+        const std = resolveRegion(state.variants, 'standard', query.region, undefined, query.checkDate);
+        if (std.amount) {
+          regionMatched = true;
+          cents = toCents(std.amount);
+          basis =
+            `State law allows no tip credit — ${std.amount.label ?? query.region} region's own rate is the cash floor`;
+        } else if (!hasRegions(state.variants)) {
+          caveat = `${state.jurisdiction.name} has no named regions; 'region' was ignored.`;
+        }
       } else if (!hasRegions(state.variants)) {
         caveat = `${state.jurisdiction.name} has no named regions; 'region' was ignored.`;
       }
-      // Else: a real region with no distinct tipped variant (e.g. NY's
-      // 'upstate') — the baseline tipped rate already IS that region's
-      // food-service figure, so falling through to it is correct, not a
-      // fallback from an error.
+      // Else: a real region with no distinct tipped variant, in a state
+      // that DOES allow a tip credit (e.g. NY's 'upstate') — the baseline
+      // tipped rate already IS that region's food-service figure, so
+      // falling through to it is correct, not a fallback from an error.
     }
     if (!regionMatched) {
       const pred = historicalPredecessor(state.variants, 'tipped', query.checkDate);

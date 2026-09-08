@@ -360,6 +360,43 @@ describe('state minimum wages', () => {
     assert.match(defaulted.considered.find((c) => c.level === 'state')!.caveat ?? '', /defaulted to/);
   });
 
+  test('Oregon’s regional tipped floor is the REGION’s own rate, not the statewide one', () => {
+    // Found by the coverage script (examples/minimum-wage-coverage.ts),
+    // not by inspection: Oregon tags portland_metro/nonurban as STANDARD
+    // overrides only (it has no distinct tipped figure for either, since
+    // it bans tip credit everywhere) — before this fix, a tipped query
+    // for a region fell through all the way to the generic statewide
+    // tipped rate ($15.55) instead of that region's OWN standard rate,
+    // silently returning the SAME number for Portland metro and
+    // non-urban Oregon despite them being $2.25 apart. Exactly the same
+    // failure shape as Washington's local-ordinance tipped bug, just one
+    // level up (state regions rather than local ordinances).
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'OR', region: 'portland_metro', tipped: true }).cents,
+      1680,
+    );
+    assert.equal(
+      minimumWage({ checkDate: D, state: 'OR', region: 'nonurban', tipped: true }).cents,
+      1455,
+    );
+    // Occupation is meaningless here (Oregon has no occupation split) —
+    // passing one must not change the answer or throw.
+    assert.equal(
+      minimumWage({
+        checkDate: D, state: 'OR', region: 'portland_metro', tipped: true, occupation: 'service_employee',
+      }).cents,
+      1680,
+    );
+    // And the fix must compose with the historical-predecessor axis too:
+    // Portland metro's own PRIOR tipped floor, not the state's.
+    assert.equal(
+      minimumWage({
+        checkDate: '2026-03-01', state: 'OR', region: 'portland_metro', tipped: true,
+      }).cents,
+      1630,
+    );
+  });
+
   test('a region string is ignored, with a caveat, for a state that has none', () => {
     const answer = minimumWage({ checkDate: D, state: 'CA', region: 'los_angeles' });
     assert.equal(answer.cents, 1690); // California's ordinary state rate, unaffected
