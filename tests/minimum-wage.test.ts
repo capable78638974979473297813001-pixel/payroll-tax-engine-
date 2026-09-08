@@ -371,6 +371,32 @@ describe('local minimum wages', () => {
     assert.equal(august.cents, 2157);
   });
 
+  test('Saint Paul’s small and micro tiers also step mid-year, in both directions', () => {
+    // A gap this closes: the first draft of this file recorded only the
+    // POST-July-2026 small/micro figures (matching what's live on this
+    // file's own asOf date), even though the pre-July figures were already
+    // sitting in this same file's own prose the whole time. A checkDate
+    // query before July 1 would have wrongly fallen through to the
+    // macro/large rate for a small or micro employer instead of the true,
+    // lower figure they actually owed.
+    const smallJune = minimumWage({
+      checkDate: '2026-06-15', state: 'MN', locality: 'saint_paul', employeeCount: 50,
+    });
+    assert.equal(smallJune.cents, 1500);
+    const smallAugust = minimumWage({
+      checkDate: '2026-08-15', state: 'MN', locality: 'saint_paul', employeeCount: 50,
+    });
+    assert.equal(smallAugust.cents, 1637);
+    const microJune = minimumWage({
+      checkDate: '2026-06-15', state: 'MN', locality: 'saint_paul', employeeCount: 3,
+    });
+    assert.equal(microJune.cents, 1325);
+    const microAugust = minimumWage({
+      checkDate: '2026-08-15', state: 'MN', locality: 'saint_paul', employeeCount: 3,
+    });
+    assert.equal(microAugust.cents, 1425);
+  });
+
   test('an employer below a local size threshold falls back to the state rate', () => {
     // Burien does not reach employers with 20 or fewer employees at all —
     // they owe Washington's $17.13, not Burien's $21.63.
