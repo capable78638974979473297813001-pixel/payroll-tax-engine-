@@ -44,18 +44,23 @@ available the whole time and is now what it resolves to.
 
 ## Measured result
 
-**51 of 51 jurisdictions resolve to something better than Census's own
-interpolation**, correcting it by 8m to 269m (median 88m). Re-measured
-2026-09-08 after fixing a real regression (see "A second real bug" below)
-that had silently dropped this to 50/51.
+**50 of 51 jurisdictions resolve to something better than Census's own
+interpolation**, correcting it by 5m to 269m (median 90m), as of the
+LATEST run (2026-09-08, later the same day as the 51/51 measurement below
+it in this file's own history). North Dakota is the one sitting on
+`interpolated` this time — not Kentucky, and not a new bug: this is
+exactly the OSM/Nominatim-availability drift "These numbers still move"
+already describes, now demonstrated a second time on the same
+jurisdiction. Re-run the script yourself; expect this table to keep
+moving, because two of its tiers depend on services outside this repo.
 
 | Tier | Count |
 | --- | --- |
 | `rooftop` (authoritative) | 35 / 51 |
-| `rooftop-osm` (house-level, corroborated) | 13 / 51 |
+| `rooftop-osm` (house-level, corroborated) | 12 / 51 |
 | `neighbor` (block-level, authoritative) | 2 / 51 |
 | `parcel-centroid` (county GIS, gated) | 1 / 51 |
-| `interpolated` (no improvement available) | 0 / 51 |
+| `interpolated` (no improvement available) | 1 / 51 |
 
 ### A fifth tier: county tax-parcel centroids, and why it took two tries to get right
 
@@ -94,9 +99,29 @@ match exists; a parcel with a real, DIFFERENT address is never used, at
 any distance, at any size. `resolveRooftop()` then only lets a
 `parcel-centroid` result replace an existing `rooftop-osm` one when it is
 the numerically closer of the two to Census's own point — never merely
-by existing, so a state with no registered parcel source (every state but
-Pennsylvania, as of this pass — there is no national registry of these,
-only individually-verified counties) behaves exactly as before.
+by existing, so a state with no registered parcel source behaves exactly
+as before.
+
+**Two more sources added 2026-09-08, one county-scoped and one
+statewide.** City of Lansing, MI (`ADD_NUM`/`STDIR`/`STREET` schema —
+chasing Michigan's own documented zero-NAD-coverage gap) is
+correctness-verified but hasn't yet been observed to WIN over an existing
+`rooftop-osm` result, stated precisely rather than claimed as a win it
+isn't. Florida's Department of Revenue statewide cadastral layer is
+different in kind: ONE service built from all 67 counties' own certified
+tax rolls, the first non-county-scoped entry in this registry, and it DID
+produce a real, observed tier upgrade (300 S Duval St, Tallahassee →
+`parcel-centroid` at 118m, a 1,578 sqm single-building parcel). It also
+required actually building `siteAddressField` support in
+`classifyParcelAddress()` — declared in `ParcelSource`'s own type since
+this file's first version, but never wired up, because every source added
+before Florida happened to have split house-number/street columns.
+Building it surfaced a real, separate bug: `resolveParcelCentroid()`'s own
+target-address parsing (`parseAddressParts()`) didn't strip an
+apartment/unit suffix the way the source-side parser now does
+(`extractStreet()`), so a unit-numbered target address silently matched
+nothing. Both sides now go through `extractStreet()`. PA and MI were
+regression-checked live afterward and are unaffected.
 
 ### A second real bug: "Capital" vs "Capitol"
 
@@ -138,8 +163,12 @@ OSM point was being thrown out by a bare `streetKey()` comparison alone.
 Fixed by applying the same guarded fallback to `resolveOsmPoint()`; two
 regression tests added (`tests/geocode.test.ts`) pin both the fix itself
 and that a genuinely different street is still correctly refused. Kentucky
-resolves `rooftop-osm` at 9m again, and the full 51-jurisdiction measurement
-above is now 51/51 with zero left on `interpolated`.
+resolves `rooftop-osm` at 9m again — confirmed durably by the mocked
+regression test, which doesn't depend on live services. The *live*
+51-jurisdiction measurement touched 51/51 immediately after this fix
+landed, then dropped to 50/51 on a later run the same day when North
+Dakota's own OSM corroboration came and went — see "these numbers still
+move" below for why that's expected and not a sign the fix regressed.
 
 ### A real bug, found by chasing why Alaska sat on `interpolated`
 
@@ -173,13 +202,17 @@ NAD published East Boulevard Avenue in Bismarck densely (602, 604, 606,
 612, 624...) but nothing at or below the sample address's own number (600)
 to bracket from — tier 3 correctly refused rather than inventing a "below"
 point that doesn't exist. As of the 2026-09-08 measurement above, North
-Dakota now resolves `rooftop-osm` at 8m instead — OSM apparently gained
-(or Nominatim now surfaces) a corroborating house-level point it didn't
-before. Nothing in this project's own code changed to produce that; it's
-the normal kind of drift this section is about. Kentucky's own move in the
-OTHER direction over the same period was NOT this kind of drift — it was
-the real regression fixed above — which is exactly why a surprising drop
-is worth chasing to a root cause rather than filed under "numbers move."
+Dakota resolved `rooftop-osm` at 8m instead — OSM apparently gained (or
+Nominatim surfaced) a corroborating house-level point it didn't have
+before. A LATER run the same day put North Dakota straight back on
+`interpolated` — no code changed in between either time, which is the
+whole point of this section: `rooftop-osm` depends on a live crowd-sourced
+service answering the same way twice, and it won't always. Kentucky's own
+move in the OTHER direction over a similar period was NOT this kind of
+drift — it was the real regression fixed above — which is exactly why a
+surprising drop is worth chasing to a root cause (does the SAME address
+fail differently on retry, or does it fail the same way every time)
+rather than filed under "numbers move" on reflex.
 
 Two of the four tiers depend on services outside this repo — the National
 Address Database publishes on its own schedule, and `rooftop-osm` depends
@@ -225,7 +258,7 @@ Census's own answer, which is where this project started.
 | MS | `rooftop-osm` | 8m | — |
 | MT | `rooftop` | 112m | Montana State Library |
 | NC | `rooftop` | 82m | State of North Carolina |
-| ND | `rooftop-osm` | 8m | — (previously `interpolated` — see "these numbers still move" above) |
+| ND | `interpolated` | — | — (was `rooftop-osm` at 8m earlier the same day — see "these numbers still move" above; this row reflects the LATEST run) |
 | NE | `rooftop` | 50m | State of Nebraska |
 | NH | `rooftop-osm` | 28m | — |
 | NJ | `rooftop` | 88m | State of New Jersey |
