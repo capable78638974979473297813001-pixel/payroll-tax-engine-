@@ -1845,6 +1845,80 @@ describe('rooftop.ts — authoritative address points (real captured National Ad
         assert.equal(result, null, 'a 485,017 sqm parcel must never be trusted as a single building, however exact the address match');
       });
     });
+
+    describe('the parcel-centroid tier — Florida statewide cadastral (siteAddressField: one combined field, not split columns)', () => {
+      const FL_SOURCE = PARCEL_SOURCES.find((s) => s.state === 'FL')!;
+      const TALLAHASSEE_INTERPOLATED = { lat: 30.43813199863, lon: -84.280698266189 };
+
+      const squareRing = (lat: number, lon: number, sideMeters: number): number[][] => {
+        const dLat = sideMeters / 2 / 111_320;
+        const dLon = sideMeters / 2 / (111_320 * Math.cos((lat * Math.PI) / 180));
+        return [
+          [lon - dLon, lat - dLat],
+          [lon + dLon, lat - dLat],
+          [lon + dLon, lat + dLat],
+          [lon - dLon, lat + dLat],
+          [lon - dLon, lat - dLat],
+        ];
+      };
+
+      /** Real shape from Florida's own statewide layer: ONE combined field, apartment suffix included when present — the exact form splitSiteAddress() exists to parse. */
+      const flParcel = (opts: { phyAddr1: string; lat: number; lon: number; sideMeters: number }) => ({
+        attributes: { PHY_ADDR1: opts.phyAddr1 },
+        geometry: { rings: [squareRing(opts.lat, opts.lon, opts.sideMeters)] },
+      });
+
+      test('an exact match parses the combined PHY_ADDR1 field into house number + street, apartment suffix stripped', async () => {
+        const exact = flParcel({
+          phyAddr1: '300 S DUVAL ST APT 1007',
+          ...TALLAHASSEE_INTERPOLATED, sideMeters: 14,
+        });
+        const result = await resolveParcelCentroid(
+          '300 S Duval St Apt 1007, Tallahassee, FL 32301',
+          TALLAHASSEE_INTERPOLATED,
+          (async (url: string) => {
+            if (!String(url).startsWith(FL_SOURCE.queryUrl)) return new Response('[]', { status: 200 });
+            return new Response(JSON.stringify({ features: [exact] }), { status: 200 });
+          }) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.ok(result);
+        assert.equal(result!.source.state, 'FL');
+      });
+
+      test('a blank PHY_ADDR1 (the government-building pattern) is UNATTRIBUTED, not a false "other" rejection', async () => {
+        const unattributed = flParcel({ phyAddr1: ' ', ...TALLAHASSEE_INTERPOLATED, sideMeters: 14 });
+        const result = await resolveParcelCentroid(
+          '300 S Duval St, Tallahassee, FL 32301',
+          TALLAHASSEE_INTERPOLATED,
+          (async (url: string) => {
+            if (!String(url).startsWith(FL_SOURCE.queryUrl)) return new Response('[]', { status: 200 });
+            return new Response(JSON.stringify({ features: [unattributed] }), { status: 200 });
+          }) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.ok(result, 'an unattributed parcel should still be usable when it is the only candidate');
+      });
+
+      test('a real, different address in PHY_ADDR1 is NEVER used, however close it is', async () => {
+        const wrongAddress = flParcel({
+          phyAddr1: '111 E College Ave',
+          lat: TALLAHASSEE_INTERPOLATED.lat + 0.00002,
+          lon: TALLAHASSEE_INTERPOLATED.lon,
+          sideMeters: 14,
+        });
+        const result = await resolveParcelCentroid(
+          '300 S Duval St, Tallahassee, FL 32301',
+          TALLAHASSEE_INTERPOLATED,
+          (async (url: string) => {
+            if (!String(url).startsWith(FL_SOURCE.queryUrl)) return new Response('[]', { status: 200 });
+            return new Response(JSON.stringify({ features: [wrongAddress] }), { status: 200 });
+          }) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.equal(result, null);
+      });
+    });
   });
 });
 

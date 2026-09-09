@@ -52,7 +52,7 @@
  * project applies everywhere else.
  */
 import type { FetchOptions } from './census.ts';
-import { streetKey, streetKeyWithoutDirectionals, STREET_TYPES } from './buildings.ts';
+import { extractHouseNumber, extractStreet, streetKey, streetKeyWithoutDirectionals, STREET_TYPES } from './buildings.ts';
 import { parseAddressParts } from './rooftop.ts';
 
 /** A single county (or other sub-state) government's own parcel GIS service, individually verified. */
@@ -126,6 +126,42 @@ export const PARCEL_SOURCES: ParcelSource[] = [
     houseNumberField: 'ADD_NUM',
     streetNameField: 'STREET',
     source: 'City of Lansing GIS (data-lansing.opendata.arcgis.com)',
+  },
+  {
+    // The first STATEWIDE entry in this registry, not another single
+    // county — genuinely different in kind from every source above.
+    // Florida's Department of Revenue publishes ONE cadastral layer built
+    // from all 67 counties' own property appraiser tax rolls (the same
+    // NAL/NAP data each county already certifies annually for ad valorem
+    // tax purposes), so this single service answers for the whole state,
+    // the same breadth NAD itself has nationally — no per-county hunting
+    // needed for any other Florida county.
+    //
+    // Schema note: this layer has no split house-number/street columns at
+    // all — PHY_ADDR1 is ONE combined field ("400 S DUVAL ST APT 1007"),
+    // which is what siteAddressField exists for in this file's own
+    // ParcelSource type. It was declared from the start but never actually
+    // wired into classifyParcelAddress() until this source needed it —
+    // splitSiteAddress() (this file, above) closes that gap by reusing
+    // buildings.ts's own extractHouseNumber/extractStreet.
+    //
+    // Verified live 2026-09-08 near Florida's own sample address (400 S
+    // Monroe St, Tallahassee): the layer returns 512 features in a 300m
+    // box, correctly attributed ("300 S DUVAL ST APT 1007", etc., unit
+    // suffixes stripped and matched via the same directional/type-fallback
+    // passes every other source already gets). Not yet confirmed to WIN
+    // over Florida's existing rooftop-osm result for that specific address
+    // — stated precisely rather than assumed, same discipline as the
+    // Lansing source above — but this is a real, government-certified,
+    // statewide dataset that will matter for the many Florida addresses
+    // OSM doesn't cover as well as it happens to cover downtown
+    // Tallahassee.
+    state: 'FL',
+    jurisdictionLabel: 'Florida Department of Revenue (statewide cadastral)',
+    queryUrl:
+      'https://services9.arcgis.com/Gh9awoU677aKree0/arcgis/rest/services/Florida_Statewide_Cadastral/FeatureServer/0/query',
+    siteAddressField: 'PHY_ADDR1',
+    source: 'Florida Dept. of Revenue Property Tax Oversight (floridarevenue.com), via ArcGIS Online',
   },
 ];
 
@@ -290,15 +326,39 @@ function streetKeyWithoutType(street: string): string {
   return tokens.join(' ');
 }
 
+/**
+ * Split a source's own combined "400 S DUVAL ST APT 1007"-style field into
+ * the same {houseNumber, street} shape the split-field path already
+ * produces, reusing buildings.ts's own extractHouseNumber/extractStreet —
+ * built for a full one-line address (house number, then everything up to
+ * the first comma, minus any secondary-unit designator) but equally
+ * correct here since a site-address field has no trailing city/state to
+ * strip in the first place. Verified live against Florida's own statewide
+ * cadastral layer (PHY_ADDR1), whose one field carries exactly this shape,
+ * apartment suffixes included.
+ */
+function splitSiteAddress(combined: string): { number: string; street: string } {
+  return { number: extractHouseNumber(combined) ?? '', street: extractStreet(combined) ?? '' };
+}
+
 function classifyParcelAddress(
   attributes: Record<string, unknown>,
   source: ParcelSource,
   targetHouseNumber: string,
   targetStreet: string,
 ): 'exact' | 'unattributed' | 'other' {
-  if (!source.houseNumberField || !source.streetNameField) return 'other';
-  const rawNumber = String(attributes[source.houseNumberField] ?? '').trim();
-  const rawStreet = String(attributes[source.streetNameField] ?? '').trim();
+  let rawNumber: string;
+  let rawStreet: string;
+  if (source.houseNumberField && source.streetNameField) {
+    rawNumber = String(attributes[source.houseNumberField] ?? '').trim();
+    rawStreet = String(attributes[source.streetNameField] ?? '').trim();
+  } else if (source.siteAddressField) {
+    const split = splitSiteAddress(String(attributes[source.siteAddressField] ?? '').trim());
+    rawNumber = split.number;
+    rawStreet = split.street;
+  } else {
+    return 'other';
+  }
 
   if (rawNumber === '' || rawNumber === '0') return 'unattributed';
   if (rawNumber !== targetHouseNumber.trim()) return 'other';
@@ -355,6 +415,18 @@ export async function resolveParcelCentroid(
   const candidates = PARCEL_SOURCES.filter((s) => s.state === parts.state!.toUpperCase());
   if (candidates.length === 0) return null;
 
+  // parseAddressParts() (rooftop.ts) does NOT strip a secondary-unit
+  // designator from its own `street` field — unlike extractStreet()
+  // (buildings.ts), which splitSiteAddress() above already relies on to
+  // parse a SOURCE's own combined address field. Found live 2026-09-08 by
+  // this file's own test suite: "300 S Duval St Apt 1007" was comparing
+  // its dirty "S Duval St Apt 1007" against a source parcel's clean
+  // "S Duval St" (Florida's PHY_ADDR1, correctly stripped) and matching
+  // NOTHING — not a data problem, a genuine asymmetry between the two
+  // parsers this function was straddling. extractStreet() is the
+  // consistent choice here: it exists specifically to strip that suffix.
+  const targetStreet = extractStreet(oneLineAddress) ?? parts.street;
+
   for (const source of candidates) {
     let features: RawParcelFeature[];
     try {
@@ -383,7 +455,7 @@ export async function resolveParcelCentroid(
     for (const f of features) {
       const ring = f.geometry?.rings?.[0];
       if (!ring || ring.length < 3) continue;
-      const tier = classifyParcelAddress(f.attributes, source, parts.houseNumber, parts.street);
+      const tier = classifyParcelAddress(f.attributes, source, parts.houseNumber, targetStreet);
       if (tier === 'other') continue;
       const area = ringAreaSquareMeters(ring, interpolated.lat);
       if (area > MAX_TRUSTED_PARCEL_AREA_SQUARE_METERS) continue;
