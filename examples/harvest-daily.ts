@@ -17,9 +17,28 @@ const mode = process.argv[2] ?? 'daily';
 if (mode === 'status') {
   // Exit 1 when the monitor cannot vouch for itself, so a wrapper script
   // or another agent can branch on it without parsing prose.
+  //
+  // manualOnlyIds MUST be passed here — found live, not hypothesized: a
+  // real run (2026-09-01) produced a tracking issue titled "status red,
+  // sources unverified" whose OWN body then printed "HEALTHY — every
+  // source verified recently" two lines later. Cause: this call omitted
+  // the 5th assessHealth() argument (manualOnlyIds), which describeStatus()
+  // below passes correctly, so the six sources already known to be
+  // permanently unfetchable (ssa-wage-base, ks-ui-rates, ma-ui-rates,
+  // ma-withholding, nh-withholding, nv-ui-rates — see sources.json's own
+  // manualOnlyReason on each) counted as stale here but not there. Both
+  // this JSON status AND the exit code below were reading the wrong
+  // health value — permanently red, forever, for a condition the project
+  // already decided should never drag the whole monitor down. That is
+  // the exact "don't cry wolf" failure this file's own comment warns
+  // about, just one level up: the monitor about the monitor.
+  const sources = loadSources();
   const health = assessHealth(
     new Date().toISOString(),
-    loadSources().map((s) => s.id),
+    sources.map((s) => s.id),
+    undefined,
+    undefined,
+    sources.filter((s) => s.manualOnly).map((s) => s.id),
   );
   // `status --json` — for CI/automation to read health.status and
   // openFindings structurally, instead of regexing the prose report below.

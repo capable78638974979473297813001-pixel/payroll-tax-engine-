@@ -34,7 +34,13 @@ import {
   tigerwebServiceForDate,
   type MatchQuality,
 } from './census.ts';
-import { isInsidePortlandMetro, jeddAtPoint, type JeddDistrict } from './districts.ts';
+import {
+  isInsideCanbyTransitDistrict,
+  isInsidePortlandMetro,
+  jeddAtPoint,
+  oregonTransitDistrictAtPoint,
+  type JeddDistrict,
+} from './districts.ts';
 import { resolveRooftop, type AddressPointTier, type RooftopResult } from './rooftop.ts';
 import { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult } from './buildings.ts';
 import { crossCheckSafe, milesBetween, type NominatimResult } from './nominatim.ts';
@@ -56,7 +62,16 @@ export {
   type MatchQuality,
 } from './census.ts';
 export { crossCheckAddress, type NominatimResult } from './nominatim.ts';
-export { isInsidePortlandMetro, jeddAtPoint, type DistrictCheck, type JeddCheck, type JeddDistrict } from './districts.ts';
+export {
+  isInsideCanbyTransitDistrict,
+  isInsidePortlandMetro,
+  jeddAtPoint,
+  oregonTransitDistrictAtPoint,
+  type DistrictCheck,
+  type JeddCheck,
+  type JeddDistrict,
+  type OregonTransitDistrictCheck,
+} from './districts.ts';
 export { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult, type NearbyBuilding } from './buildings.ts';
 export {
   fetchAddressPointsNear,
@@ -70,6 +85,13 @@ export {
   type RooftopMatch,
   type RooftopResult,
 } from './rooftop.ts';
+export {
+  PARCEL_SOURCES,
+  MAX_TRUSTED_PARCEL_AREA_SQUARE_METERS,
+  resolveParcelCentroid,
+  type ParcelCentroidResult,
+  type ParcelSource,
+} from './parcel.ts';
 
 /**
  * A LARGE disagreement in resolved COORDINATES between Census and
@@ -131,11 +153,15 @@ export interface AddressResolution {
    *                    Crowd-sourced and corroborated, not authoritative.
    *   'neighbor'     — interpolated between the two nearest published
    *                    points on the same street. Block-level.
+   *   'parcel-centroid' — a county government's own tax-parcel polygon
+   *                    centroid, only ever used in place of 'rooftop-osm'
+   *                    when it measurably beats it — see parcel.ts and
+   *                    rooftop.ts's own AddressPointTier doc comment.
    *   'interpolated' — Census's own position along a TIGER address range,
    *                    which is what this project had before any of the
    *                    above existed.
    */
-  precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'interpolated';
+  precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'parcel-centroid' | 'interpolated';
   /** The coordinate the jurisdictions were actually resolved at. */
   coordinates: { lat: number; lon: number } | null;
   /** The authoritative-address-point lookup, whatever its outcome — including the distance between the two points, which is the size of the interpolation error this corrected. */
@@ -175,7 +201,7 @@ function attemptedMatches(resolved: ResolvedJurisdiction) {
  * that the school-district half needs a retry.
  */
 /** The tier names rooftop.ts reports, in the vocabulary a caller of this module reads. */
-function precisionForTier(tier: AddressPointTier): 'rooftop' | 'rooftop-osm' | 'neighbor' {
+function precisionForTier(tier: AddressPointTier): 'rooftop' | 'rooftop-osm' | 'neighbor' | 'parcel-centroid' {
   switch (tier) {
     case 'authoritative':
       return 'rooftop';
@@ -183,6 +209,8 @@ function precisionForTier(tier: AddressPointTier): 'rooftop' | 'rooftop-osm' | '
       return 'rooftop-osm';
     case 'authoritative-neighbors':
       return 'neighbor';
+    case 'parcel-centroid':
+      return 'parcel-centroid';
   }
 }
 
@@ -195,6 +223,8 @@ function describePoint(rooftop: RooftopResult): string {
       return "OpenStreetMap's own house-level point for it, which agrees with Census's position";
     case 'authoritative-neighbors':
       return `a position interpolated between the authoritative points for ${rooftop.neighbors!.below.houseNumber} and ${rooftop.neighbors!.above.houseNumber} on the same street`;
+    case 'parcel-centroid':
+      return `${rooftop.parcel!.source.jurisdictionLabel}'s own tax-parcel centroid for it (${rooftop.parcel!.areaSquareMeters.toFixed(0)} sqm), which lands closer to Census's position than OpenStreetMap's own point did`;
     default:
       return 'a corrected point';
   }
@@ -225,7 +255,7 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
   schoolDistrictLookupFailed: boolean;
   coordinates: { x: number; y: number };
   geographies: { incorporatedPlaces: string[]; counties: string[] };
-  precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'interpolated';
+  precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'parcel-centroid' | 'interpolated';
   point: { lat: number; lon: number };
   rooftop: RooftopResult;
   rooftopJurisdictionChanges: string[];
@@ -262,7 +292,7 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
 
   let geographies = geocoded.geographies;
   let point = interpolated;
-  let precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'interpolated' = 'interpolated';
+  let precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'parcel-centroid' | 'interpolated' = 'interpolated';
   let rooftopJurisdictionChanges: string[] = [];
   let schoolDistrictName: string | undefined;
   let schoolDistrictLookupFailed = false;
@@ -546,10 +576,12 @@ export interface EmployeeResolution {
  *     guidance for the SHS tax uses the same "work within" framing).
  *   - West Virginia's Municipal Service Fee: WORK address (duty-station
  *     based, westVirginiaMunicipalServiceFee()'s own doc comment).
- *   - Denver's Occupational Privilege Tax: WORK address sets
- *     certificate.locality = 'Denver', but denverOccupationalPrivilegeTax()
- *     ALSO needs certificate.denverMonthlyCompensation and
- *     certificate.denverOPTWithheldThisMonth — genuine payroll-history
+ *   - Colorado's Occupational Privilege Tax (Denver, Glendale, Greenwood
+ *     Village, Sheridan, or Aurora — matched by whichever city the WORK
+ *     address is actually in): sets certificate.locality to the matched
+ *     city name, but coloradoOccupationalPrivilegeTax() ALSO needs
+ *     certificate.localMonthlyCompensation and
+ *     certificate.localOPTWithheldThisMonth — genuine payroll-history
  *     facts no address can supply, surfaced via notResolvable below
  *     rather than silently left unset with no explanation.
  *
@@ -608,6 +640,18 @@ export async function resolveEmployee(
     fields.locality = work.resolved.wvServiceFeeCity;
   }
 
+  // Colorado's Occupational Privilege Tax: WORK address, duty-station
+  // based like WV's service fee — same matched-name mechanism. Found
+  // 2026-09-03: coloradoOccupationalPrivilegeTax() already computed all
+  // five cities (Denver, Glendale, Greenwood Village, Sheridan, Aurora —
+  // Aurora kept for its pre-2025-01-01 repeal date), but this resolver
+  // used to set only Denver's boolean flag, leaving the other four
+  // unreachable even though each is a plain Census incorporated place
+  // needing no special boundary at all.
+  if (work?.resolved?.coOptCity) {
+    fields.locality = work.resolved.coOptCity;
+  }
+
   const notResolvable: string[] = [];
   const workState = work?.resolved?.state ?? residence?.resolved?.state;
   if (workState === 'OR') {
@@ -628,9 +672,36 @@ export async function resolveEmployee(
         );
       }
     }
-    notResolvable.push(
-      "Oregon's TriMet and Lane Transit District boundaries (certificate.locality = 'TriMet'/'LTD') — both districts publish their boundaries only as downloadable files (developer.trimet.org/gis), not as a service this can query per address; must be supplied manually. See geocode/districts.ts.",
-    );
+    // Oregon's local transit payroll tax districts — TriMet, LTD, SCTD,
+    // Canby, Sandy, Wilsonville. All six are geographically disjoint (no
+    // real address sits in two at once — each was established explicitly
+    // to replace, not stack with, TriMet's own tax for that area, per
+    // each district's own transit-tax guide), so there's no precedence
+    // question in letting whichever check hits last win.
+    if (metroPoint) {
+      const transit = await oregonTransitDistrictAtPoint(metroPoint.lat, metroPoint.lon);
+      if (transit.attempted) {
+        if (transit.locality) fields.locality = transit.locality;
+      } else {
+        notResolvable.push(
+          "Oregon's TriMet/LTD/SCTD transit payroll excises (certificate.locality) — ODOT's own jurisdictions service could not be reached this call, so this was NOT determined either way. Retry before treating its absence as 'outside every district'. (Canby/Sandy/Wilsonville below aren't affected by this — they're resolved separately.)",
+        );
+      }
+
+      const canby = await isInsideCanbyTransitDistrict(metroPoint.lat, metroPoint.lon);
+      if (canby.attempted) {
+        if (canby.inside) fields.locality = 'CanbyTransit';
+      } else {
+        notResolvable.push(
+          "Canby's transit payroll excise (certificate.locality = 'CanbyTransit') — Oregon's own UGB boundary service could not be reached this call, so this was NOT determined either way. Retry before treating its absence as 'outside the district'.",
+        );
+      }
+    }
+    // Sandy and Wilsonville are simply their own city limits — no special
+    // boundary lookup needed, just the ordinary Census place match
+    // already computed above as workFlags.sandy/wilsonville.
+    if (workFlags?.sandy) fields.locality = 'SandyTransit';
+    if (workFlags?.wilsonville) fields.locality = 'SMART';
   }
   if (workFlags?.seattle) {
     notResolvable.push(
@@ -639,10 +710,9 @@ export async function resolveEmployee(
         "Both are payroll facts no address can answer. certificate.locality was set to 'Seattle'; those two still need caller input.",
     );
   }
-  if (workFlags?.denver) {
-    fields.locality = 'Denver';
+  if (work?.resolved?.coOptCity) {
     notResolvable.push(
-      "Denver's Occupational Privilege Tax needs certificate.denverMonthlyCompensation (this month's cumulative Denver-sourced pay so far) and certificate.denverOPTWithheldThisMonth — real payroll-history facts, not something any address can supply. certificate.locality was set to 'Denver'; those two fields still need caller input.",
+      `${work.resolved.coOptCity}'s Occupational Privilege Tax needs certificate.localMonthlyCompensation (this month's cumulative pay so far in the district) and certificate.localOPTWithheldThisMonth — real payroll-history facts, not something any address can supply. certificate.locality was set to '${work.resolved.coOptCity}'; those two fields still need caller input.`,
     );
   }
 

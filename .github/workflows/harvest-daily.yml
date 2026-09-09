@@ -14,9 +14,22 @@ name: Harvest daily
 # local time drifts by an hour twice a year. That drift is cosmetic — the
 # sweep still runs once a day either way — so it is left alone rather than
 # special-cased.
+#
+# Minute is :07, not :00 — found live, not theoretical: this workflow's
+# only real scheduled firing so far (2026-08-31) ran at 18:19 UTC, over
+# six hours late against this same '12:00' target, and the very next
+# day's firing never happened at all as of 1h17m past target (2026-09-01,
+# confirmed by checking the Actions API directly — zero schedule-triggered
+# runs that day). GitHub's own docs say exactly why: the schedule event
+# "can be delayed during periods of high load," and load peaks specifically
+# at the top of every hour, because that's the slot every other scheduled
+# workflow on the platform also requests by default. Every minute past
+# :00 draws a smaller crowd. This does not make GitHub's scheduler
+# reliable — it remains best-effort, full stop — but it is the one lever
+# available to reduce the delay, and the delay observed was not small.
 on:
   schedule:
-    - cron: '0 12 * * *'
+    - cron: '7 12 * * *'
   workflow_dispatch: {}
 
 # A second run must never start while one is still writing state — two
@@ -46,6 +59,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+
+      # Most of the registry is PDF sources, and harvester/fetch.ts shells
+      # out to pdftotext (poppler-utils) to read them. ubuntu-latest does
+      # NOT ship it, so without this step every PDF fetch fails with
+      # "pdftotext could not be found" — discovered from a real run
+      # (2026-08-31T18:20:58Z) that checked only 46 of 102 sources and
+      # failed the other 56, 95 of those on this exact error. A failed
+      # fetch is not "unchanged"; it is a source going dark, which is the
+      # one thing this workflow exists to never let happen silently.
+      - name: Install poppler-utils (pdftotext)
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends poppler-utils
 
       # gh issue create --label fails outright on a label that doesn't
       # exist yet; these two are created once, idempotently, so the later
@@ -152,7 +176,20 @@ jobs:
       # It opens when there is something unacknowledged, is edited in
       # place while that stays true, and closes itself once every open
       # finding has been dealt with via `npm run harvest:ack`.
-      - name: Reflect open findings as a single tracking issue
+      #
+      # Trigger condition deliberately covers TWO different things, not just
+      # one: openFindings (a document's content actually differs) AND
+      # health.status != green (a source has gone stale/unreadable, or the
+      # run itself never finished). Before this fix the trigger was
+      # openFindings alone — so a source that started 403ing every day, or
+      # a PDF extractor silently broken (this actually happened: see the
+      # "Install poppler-utils" step above, added after a real run failed to
+      # read 56 of 102 sources and nothing here said a word about it) would
+      # sit at "0 open findings" forever. Zero findings from a monitor that
+      # cannot read the document is not health, it's the exact silent gap
+      # this whole project exists to close — a change could be sitting
+      # behind that dead fetch and nobody would ever be told to go look.
+      - name: Reflect open findings and health as a single tracking issue
         if: always()
         run: |
           set -e
@@ -164,11 +201,12 @@ jobs:
           HEALTH=$(node examples/harvest-daily.ts status --json) || true
           echo "$HEALTH" > health.json
           OPEN_COUNT=$(node -e "console.log(JSON.parse(require('fs').readFileSync('health.json','utf8')).openFindings.length)")
+          HEALTH_STATUS=$(node -e "console.log(JSON.parse(require('fs').readFileSync('health.json','utf8')).status)")
           STATUS_TEXT=$(node examples/harvest-daily.ts status) || true
 
           EXISTING=$(gh issue list --label "$FINDINGS_LABEL" --state open --json number --jq '.[0].number' || true)
 
-          if [ "$OPEN_COUNT" -gt 0 ]; then
+          if [ "$OPEN_COUNT" -gt 0 ] || [ "$HEALTH_STATUS" != "green" ]; then
             BODY_FILE=$(mktemp)
             {
               echo "Automated — updated by the harvest-daily workflow, run ${{ github.run_id }}."
@@ -178,15 +216,18 @@ jobs:
               echo '```'
             } > "$BODY_FILE"
 
+            TITLE="Harvester: $OPEN_COUNT open finding(s)"
+            if [ "$HEALTH_STATUS" != "green" ]; then
+              TITLE="$TITLE — status $HEALTH_STATUS, sources unverified"
+            fi
+
             if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
-              gh issue edit "$EXISTING" --body-file "$BODY_FILE" \
-                --title "Harvester: $OPEN_COUNT open finding(s)"
+              gh issue edit "$EXISTING" --body-file "$BODY_FILE" --title "$TITLE"
             else
-              gh issue create --title "Harvester: $OPEN_COUNT open finding(s)" \
-                --body-file "$BODY_FILE" --label "$FINDINGS_LABEL"
+              gh issue create --title "$TITLE" --body-file "$BODY_FILE" --label "$FINDINGS_LABEL"
             fi
           elif [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
-            gh issue comment "$EXISTING" --body "All open findings acknowledged (or resolved) as of run ${{ github.run_id }}. Closing."
+            gh issue comment "$EXISTING" --body "All open findings acknowledged (or resolved), and every source verified fresh, as of run ${{ github.run_id }}. Closing."
             gh issue close "$EXISTING"
           fi
         env:

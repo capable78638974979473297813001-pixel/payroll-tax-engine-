@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { calculatePaycheck } from '../src/calculate.ts';
 import { futa } from '../src/taxes/federal.ts';
 import { dollars, overThreshold, underCap } from '../src/money.ts';
-import { makeTaxableWagesFn } from '../src/wages.ts';
+import { capElectiveDeferrals, makeTaxableWagesFn } from '../src/wages.ts';
 import type { Deduction, Earning, PaycheckInput } from '../src/types.ts';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -87,6 +87,103 @@ describe('taxable wage bases diverge per tax', () => {
 
   test('post-tax deductions never reduce any base', () => {
     assert.equal(wagesFor([]), dollars(3000));
+  });
+});
+
+describe('capElectiveDeferrals — IRC 402(g)/457/SIMPLE annual limits', () => {
+  // 2026 figures: section402gAggregate $24,500 (401k+403b combined),
+  // deferral457 $24,500 (separate), simple $17,000 (separate, lower).
+  const LIMITS = { section402gAggregate: 24500, deferral457: 24500, simple: 17000 };
+
+  test('under the limit: passed through unchanged', () => {
+    const deductions: Deduction[] = [
+      { code: '401K', category: 'deferral_401k', amount: dollars(1000) },
+    ];
+    assert.deepEqual(capElectiveDeferrals(deductions, undefined, LIMITS), deductions);
+  });
+
+  test('exactly at the limit (with prior YTD): still passed through unchanged', () => {
+    const deductions: Deduction[] = [
+      { code: '401K', category: 'deferral_401k', amount: dollars(500) },
+    ];
+    const ytd = { section402gAggregate: dollars(24000) };
+    assert.deepEqual(capElectiveDeferrals(deductions, ytd, LIMITS), deductions);
+  });
+
+  test('a single check that alone exceeds the annual limit splits into pretax + _OVER_LIMIT post-tax', () => {
+    // The exact case found during manual verification: $40,000 in one
+    // check against a $24,500 limit, no prior YTD.
+    const deductions: Deduction[] = [
+      { code: '401K', category: 'deferral_401k', amount: dollars(40000) },
+    ];
+    const result = capElectiveDeferrals(deductions, undefined, LIMITS);
+    assert.deepEqual(result, [
+      { code: '401K', category: 'deferral_401k', amount: dollars(24500) },
+      { code: '401K_OVER_LIMIT', category: null, amount: dollars(15500) },
+    ]);
+  });
+
+  test('prior YTD contributions shrink the room left this period', () => {
+    // $23,000 already contributed this year at this employer; a further
+    // $3,000 this period only has $1,500 of room left.
+    const deductions: Deduction[] = [
+      { code: '401K', category: 'deferral_401k', amount: dollars(3000) },
+    ];
+    const ytd = { section402gAggregate: dollars(23000) };
+    const result = capElectiveDeferrals(deductions, ytd, LIMITS);
+    assert.deepEqual(result, [
+      { code: '401K', category: 'deferral_401k', amount: dollars(1500) },
+      { code: '401K_OVER_LIMIT', category: null, amount: dollars(1500) },
+    ]);
+  });
+
+  test('401(k) and 403(b) share ONE combined limit, not two separate ones', () => {
+    // $15,000 to each in the same period = $30,000 combined, $5,500 over
+    // the shared $24,500 limit — split proportionally by processing order.
+    const deductions: Deduction[] = [
+      { code: '401K', category: 'deferral_401k', amount: dollars(15000) },
+      { code: '403B', category: 'deferral_403b', amount: dollars(15000) },
+    ];
+    const result = capElectiveDeferrals(deductions, undefined, LIMITS);
+    assert.deepEqual(result, [
+      { code: '401K', category: 'deferral_401k', amount: dollars(15000) },
+      { code: '403B', category: 'deferral_403b', amount: dollars(9500) },
+      { code: '403B_OVER_LIMIT', category: null, amount: dollars(5500) },
+    ]);
+  });
+
+  test('457(b) has its OWN separate limit, not aggregated with 401(k)', () => {
+    // $24,500 to a 401(k) AND $24,500 to a 457(b) in the same period —
+    // both fully at their own limit, neither reduces the other.
+    const deductions: Deduction[] = [
+      { code: '401K', category: 'deferral_401k', amount: dollars(24500) },
+      { code: '457', category: 'deferral_457', amount: dollars(24500) },
+    ];
+    assert.deepEqual(capElectiveDeferrals(deductions, undefined, LIMITS), deductions);
+  });
+
+  test('SIMPLE plans use their own separate, lower limit', () => {
+    const deductions: Deduction[] = [
+      { code: 'SIMPLE', category: 'deferral_simple', amount: dollars(18000) },
+    ];
+    const result = capElectiveDeferrals(deductions, undefined, LIMITS);
+    assert.deepEqual(result, [
+      { code: 'SIMPLE', category: 'deferral_simple', amount: dollars(17000) },
+      { code: 'SIMPLE_OVER_LIMIT', category: null, amount: dollars(1000) },
+    ]);
+  });
+
+  test('end to end: an over-limit 401(k) deduction is still fully FICA-taxable but only partly income-tax-exempt', () => {
+    const r = calculatePaycheck(input({
+      earnings: [{ code: 'REG', category: 'regular', amount: dollars(50000) }],
+      deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(40000) }],
+    }));
+    // $50,000 - $24,500 (the capped exempt portion) = $25,500 federal taxable.
+    assert.equal(r.taxes.find((t) => t.id === 'US_FIT')?.taxableWages, dollars(25500));
+    // FICA is unaffected by the cap — deferrals are always FICA wages, capped or not.
+    assert.equal(r.taxes.find((t) => t.id === 'US_SS_EE')?.taxableWages, dollars(50000));
+    // Net pay is unaffected: the full $40,000 still leaves the paycheck either way.
+    assert.equal(r.netPay, r.grossPay - dollars(40000) - r.employeeTaxTotal);
   });
 });
 
@@ -384,6 +481,43 @@ describe('supplemental wages — Pub 15 flat-rate method', () => {
     assert.equal(r.taxes.some((t) => t.id === 'US_FIT_SUPP'), false);
   });
 
+  test('BUG FIX: pretax deductions exceeding regular wages spill over onto the supplemental base too', () => {
+    // $500 regular wages, a $2,000 401(k) deferral, and a $5,000 bonus.
+    // Combined taxable = 500 + 5,000 - 2,000 = 3,500. Before this fix,
+    // federalSupplementalTax() taxed the raw, un-reduced $5,000 bonus
+    // (since pretax was applied only against the $500 regular side, with
+    // the $1,500 excess silently discarded rather than spilling onto the
+    // bonus) — $1,100 instead of the correct $770, a $330 over-withhold.
+    const r = calculatePaycheck(
+      input({
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(500) },
+          bonus(5000),
+        ],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(2000) }],
+      }),
+    );
+    assert.equal(amountOf(r, 'US_FIT'), 0); // regular side already correctly zero
+    assert.equal(amountOf(r, 'US_FIT_SUPP'), dollars(770)); // 3,500 × 22%, not 5,000 × 22% = 1,100
+  });
+
+  test('pretax spillover floors at $0 when pretax deductions exceed the ENTIRE combined base', () => {
+    // $500 regular + $1,000 bonus = $1,500 combined, but a $9,000 pretax
+    // deduction exceeds even that — both regular AND supplemental should
+    // be $0, not a negative figure silently clamped somewhere unexpected.
+    const r = calculatePaycheck(
+      input({
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(500) },
+          bonus(1000),
+        ],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(9000) }],
+      }),
+    );
+    assert.equal(amountOf(r, 'US_FIT'), 0);
+    assert.equal(amountOf(r, 'US_FIT_SUPP'), 0);
+  });
+
   test('an exempt W-4 withholds nothing on supplemental wages either', () => {
     const r = calculatePaycheck(
       input({
@@ -544,6 +678,60 @@ describe('Pennsylvania', () => {
     assert.equal(amountOf(r, 'PA_EIT'), dollars(45.0)); // 3,000 × 1.5% resident (higher than 1.0% nonresident)
   });
 
+  // Philadelphia (PSD 510101) FIXED 2026-09-04: this file's own snapshot of
+  // PA DCED's bulk register still carried FY2026's expired rate (3.74%),
+  // because Philadelphia collects its own Wage Tax directly, outside the
+  // Act 32/DCED system, on its own July 1 fiscal-year boundary. Corrected
+  // against phila.gov directly to FY2027's 3.735% resident rate.
+  test("Philadelphia's Wage Tax reflects the current FY2027 rate (3.735%), not the expired FY2026 one (3.74%)", () => {
+    const r = calculatePaycheck(
+      input({
+        workState: { code: 'PA', certificate: { workPSD: '510101', residencePSD: '510101' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_EIT'), dollars(112.05)); // 3,000 × 3.735%
+  });
+
+  // EIT low-income exemption (BUG FIXED 2026-09-02): PSD 100401 (Adams
+  // Twp) carries a municipal-only $5,000 threshold — residentEIT 0.5%,
+  // nonresidentEIT 1.0%, schoolDistrictEIT 0.5% (no schoolDistrictEitLIE
+  // on file), so estimated-annual-income below $5,000 exempts only the
+  // MUNICIPAL portion, never the school portion (which has no ordinance).
+  test('EIT low-income exemption: a nonresident earning below the threshold owes $0 (fully municipal, no school component)', () => {
+    const r = calculatePaycheck(
+      input({
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(150) }],
+        workState: { code: 'PA', certificate: { workPSD: '100401' } }, // out-of-state resident
+      }),
+    );
+    // $150 x 26 = $3,900/yr, below the $5,000 municipal threshold.
+    assert.equal(amountOf(r, 'PA_EIT'), 0);
+  });
+
+  test('EIT low-income exemption applies PARTIALLY, not all-or-nothing: exempts only the municipal portion, not the school portion', () => {
+    const r = calculatePaycheck(
+      input({
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(150) }],
+        workState: { code: 'PA', certificate: { workPSD: '100401', residencePSD: '100401' } },
+      }),
+    );
+    // Same $3,900/yr, below the $5,000 MUNICIPAL threshold only —
+    // schoolDistrictEitLIE isn't on file for this PSD, so the 0.5% school
+    // component still applies: $150 x 0.5% = $0.75, not $0 or $1.50.
+    assert.equal(amountOf(r, 'PA_EIT'), dollars(0.75));
+  });
+
+  test('EIT low-income exemption does not fire above the threshold', () => {
+    const r = calculatePaycheck(
+      input({
+        workState: { code: 'PA', certificate: { workPSD: '100401', residencePSD: '100401' } },
+      }),
+    );
+    // Default $3,000/period x 26 = $78,000/yr, well above $5,000 — full
+    // 1.0% combined resident rate applies (higher than 1.0% nonresident).
+    assert.equal(amountOf(r, 'PA_EIT'), dollars(30.0));
+  });
+
   test('LST prorates the $52/yr combined total across biweekly periods: $2.00/period', () => {
     const r = calculatePaycheck(
       input({
@@ -561,6 +749,51 @@ describe('Pennsylvania', () => {
       }),
     );
     assert.equal(amountOf(r, 'PA_LST'), 0);
+  });
+
+  // LST low-income exemption (BUG FIXED 2026-09-02): the old logic picked
+  // ONE threshold (municipal if present, else school's `||` fallback) and
+  // exempted the WHOLE combined LST off it — wrong whenever the two
+  // portions' own thresholds disagree. These two PSDs are exactly that
+  // shape, hand-picked from the real data (not invented).
+  test("LST low-income exemption with DIFFERENT municipal/school thresholds: only the portion below ITS OWN threshold is exempted", () => {
+    // PSD 650701 (Adamsburg Boro): municipal $47 LST, LIE $12,000;
+    // school $5 LST, LIE $3,200. Weekly $200 -> annualized $10,400 is
+    // below the municipal threshold but ABOVE the school one — the old
+    // `||` logic would have read the municipal $12,000 first and
+    // exempted the whole $52. Correct: only the $47 municipal portion is
+    // exempted; the $5 school portion is still owed = $5/52 = $0.0961,
+    // rounded down to $0.09.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(200) }],
+        workState: { code: 'PA', certificate: { workPSD: '650701', residencePSD: '650701' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_LST'), dollars(0.09));
+  });
+
+  test('LST low-income exemption where the MUNICIPAL portion is explicitly never-exempt ($0 threshold): the `||` fallback used to wrongly waive it too', () => {
+    // PSD 180105 (Beech Creek Boro): municipal $5 LST, LIE $0 (an
+    // explicit "never exempt" sentinel, not an absent field); school $5
+    // LST, LIE $12,000. Weekly $150 -> annualized $7,800, below the
+    // school threshold. Old code: `lst.lowIncomeExemption.municipal || ...
+    // .schoolDistrict` reads 0 as FALSY in JS and falls through to the
+    // school's $12,000, wrongly exempting the whole $10 including the
+    // never-exempt municipal $5. Correct: only the school's $5 portion is
+    // exempted; the municipal $5 is still owed = $5/52 = $0.0961, rounded
+    // down to $0.09 — same dollar figure as the test above, different
+    // mechanism (a false "fully exempt" from the old code would have
+    // produced $0 here, not $0.09).
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(150) }],
+        workState: { code: 'PA', certificate: { workPSD: '180105', residencePSD: '180105' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'PA_LST'), dollars(0.09));
   });
 
   // Secondary-employer dedup — closed 2026-09-06. PA DCED's own situs-
@@ -1132,6 +1365,32 @@ describe('Wisconsin', () => {
     const r = calculatePaycheck(input(wiState({ maritalStatus: 'single', exemptions: 1 })));
     assert.equal(r.taxes.some((t) => t.id === 'WI_SIT_SUPP'), false);
   });
+
+  test('BUG FIX: a pretax deduction exceeding regular wages spills onto the supplemental base too', () => {
+    // $500 regular, $800 401(k) deferral (exceeds regular by $300), $1,000
+    // bonus. Combined taxable = 500+1,000-800 = $700. Before this fix, the
+    // bonus was taxed on the raw, un-reduced $1,000 instead of $700.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(500) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+        ],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(800) }],
+        ...wiState({ maritalStatus: 'single', exemptions: 0 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'WI_SIT'), 0);
+    assert.equal(amountOf(r, 'WI_SIT_SUPP'), dollars(24.78)); // 700 × 3.54%, not 1,000 × 3.54%
+  });
+
+  test('an unrecognized maritalStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () => calculatePaycheck(input(wiState({ maritalStatus: 'divorced', exemptions: 0 }))),
+      /Unrecognized WI certificate\.maritalStatus/,
+    );
+  });
 });
 
 describe('Kentucky', () => {
@@ -1316,6 +1575,22 @@ describe('Kentucky', () => {
   // used below are real: Carlisle 1%, Caldwell County 1.5%, Dayton 2.5%,
   // Louisville Metro 2.2% resident / 1.45% nonresident.
   describe('Local Occupational Tax (KY_LOCAL)', () => {
+    // Somerset FIXED 2026-09-04: this entry was still on the pre-increase
+    // 0.6% rate, with a note that a reported two-phase increase toward
+    // 1.2% hadn't been confirmed enacted. It was — confirmed directly
+    // against the City of Somerset's own announcement — phased to 0.9% on
+    // 2025-07-01 and to the current 1.2% on 2026-01-01, both now past.
+    test("Somerset reflects the current 1.2% rate, not the superseded pre-2025 0.6% one", () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY', certificate: { workCity: 'Somerset' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(12.0));
+    });
+
     test('a single city, no county: flat rate on full wages', () => {
       const r = calculatePaycheck(
         input({
@@ -1409,6 +1684,38 @@ describe('Kentucky', () => {
         }),
       );
       assert.equal(amountOf(r, 'KY_LOCAL'), dollars(14.5));
+    });
+
+    // Lexington-Fayette WIRED 2026-09-04: previously a single flat 2.25%
+    // (LFUCG only). Fayette County Public Schools levies its own separate
+    // 0.5% RESIDENT-ONLY occupational tax, own withholding requirement, not
+    // blended into LFUCG's figure — reshaped into a resident/nonresident
+    // split (2.75%/2.25%) the same way Louisville's own school-board
+    // component already works, reusing kentuckyLocalTax()'s existing
+    // resident/nonresident logic with no code change to that function.
+    test('Lexington-Fayette resident: LFUCG (2.25%) + the separate FCPS school tax (0.5%) = 2.75%', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: {
+            code: 'KY',
+            certificate: { workCity: 'Lexington', residenceCity: 'Lexington' },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(27.5));
+    });
+
+    test("Lexington-Fayette nonresident worker: LFUCG only (2.25%) — FCPS's tax is resident-only", () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: { code: 'KY', certificate: { workCity: 'Lexington' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(22.5));
     });
 
     test('no certificate.workCity/workCounty: no KY_LOCAL line at all', () => {
@@ -1939,6 +2246,25 @@ describe('Minnesota', () => {
     assert.equal(r.taxes.some((t) => t.id === 'MN_SIT_SUPP'), false);
   });
 
+  test('BUG FIX: a pretax deduction exceeding regular wages spills onto the supplemental base too', () => {
+    // $200 regular, $600 401(k) deferral (exceeds regular by $400), $500
+    // bonus. Combined taxable = 200+500-600 = $100. Before this fix, the
+    // bonus was taxed on the raw, un-reduced $500 instead of $100.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(200) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(500) },
+        ],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(600) }],
+        ...mnState({ maritalStatus: 'single', allowances: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MN_SIT'), 0);
+    assert.equal(amountOf(r, 'MN_SIT_SUPP'), dollars(6.25)); // 100 × 6.25%, not 500 × 6.25%
+  });
+
   test('certificate.exempt zeroes BOTH the regular and supplemental lines (Form W-4MN Section 2)', () => {
     // Biweekly $2,000 regular + $500 bonus, single, 1 allowance — same
     // wages as the earlier supplemental fixture, which produced MN_SIT
@@ -1958,6 +2284,36 @@ describe('Minnesota', () => {
     );
     assert.equal(amountOf(r, 'MN_SIT'), 0);
     assert.equal(amountOf(r, 'MN_SIT_SUPP'), 0);
+  });
+
+  test('certificate.exempt as the STRING "false" throws instead of silently zeroing state tax — truthy is not the same as true', () => {
+    // The real risk this guards against: a caller serializing a boolean as
+    // a string (a form field, a DB column, JSON) sends "false" meaning
+    // "not exempt" — but "false" is truthy in JavaScript, so a bare `if
+    // (cert.exempt)` check would have silently withheld $0 of state tax
+    // for an employee who never claimed exemption.
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+            ...mnState({ maritalStatus: 'single', allowances: 0, exempt: 'false' }),
+          }),
+        ),
+      /Unrecognized certificate\.exempt/,
+    );
+  });
+
+  test('certificate.exempt as a real boolean false withholds normally, not exempt', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(605) }],
+        ...mnState({ maritalStatus: 'single', allowances: 0, exempt: false }),
+      }),
+    );
+    assert.ok(amountOf(r, 'MN_SIT') > 0);
   });
 
   test('certificate.additionalWithholding adds a flat per-period amount on top of the formula (W-4MN Section 1 Line 2)', () => {
@@ -2341,6 +2697,25 @@ describe('Montana', () => {
     assert.equal(amountOf(r, 'MT_SIT_SUPP'), dollars(25));
   });
 
+  test('BUG FIX: a pretax deduction exceeding regular wages spills onto the supplemental base too', () => {
+    // $200 regular, $600 401(k) deferral (exceeds regular by $400), $500
+    // bonus. Combined taxable = 200+500-600 = $100. Before this fix, the
+    // bonus was taxed on the raw, un-reduced $500 instead of $100.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'semimonthly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(200) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(500) },
+        ],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(600) }],
+        ...mtState({ filingStatus: 'single' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'MT_SIT'), 0);
+    assert.equal(amountOf(r, 'MT_SIT_SUPP'), dollars(5)); // 100 × 5%, not 500 × 5%
+  });
+
   test('reciprocity: a North Dakota resident working in Montana owes $0 MT income tax', () => {
     const r = calculatePaycheck(
       input({
@@ -2406,6 +2781,38 @@ describe('New York', () => {
       }),
     );
     assert.equal(amountOf(r, 'NY_SIT'), dollars(8.01));
+  });
+
+  test('BUG FIX: 401(k)/section-125/HSA/etc. pretax deductions reduce the NY_SIT base, not the full gross', () => {
+    // NY-2026.json's own top-level exemptPretax field was missing entirely
+    // until this fix, silently defaulting to an empty list — every NY
+    // paycheck with a pretax deduction was taxed on the FULL gross amount.
+    // Biweekly $2,000 regular, $500 401(k) deferral, single, 1 exemption.
+    // Taxable = 2,000-500 = $1,500. Table A allowance $323.10 (biweekly,
+    // single, 1 exemption). Net = 1,500-323.10 = $1,176.90, in the
+    // [535,1614) bracket: base $22.54 + 5.40% × (1,176.90-535) = 22.54 +
+    // 34.66260 = $57.20 (rounded).
+    const withDeferral = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(500) }],
+        ...nyState({ maritalStatus: 'single', exemptions: 1 }),
+      }),
+    );
+    assert.equal(amountOf(withDeferral, 'NY_SIT'), dollars(57.2));
+
+    // Cross-check: identical to a plain $1,500 paycheck with no deferral at
+    // all — proving the deferral genuinely reduced the base rather than
+    // coincidentally landing on the same number some other way.
+    const plainFifteenHundred = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1500) }],
+        ...nyState({ maritalStatus: 'single', exemptions: 1 }),
+      }),
+    );
+    assert.equal(amountOf(withDeferral, 'NY_SIT'), amountOf(plainFifteenHundred, 'NY_SIT'));
   });
 
   test('NYS-50-T-NYS Example 2: semimonthly $5,000, single, 1 exemption', () => {
@@ -2875,6 +3282,25 @@ describe('New York City', () => {
     assert.equal(amountOf(r, 'NY_NYC_SIT_SUPP'), dollars(42.50));
   });
 
+  test('BUG FIX: a pretax deduction exceeding regular wages spills onto the supplemental base too', () => {
+    // $200 regular, $900 401(k) deferral (exceeds regular by $700), $1,000
+    // bonus. Combined taxable = 200+1,000-900 = $300. Before this fix, the
+    // bonus was taxed on the raw, un-reduced $1,000 instead of $300.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(200) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+        ],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(900) }],
+        ...nycState({ maritalStatus: 'single', exemptions: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_NYC_SIT'), 0);
+    assert.equal(amountOf(r, 'NY_NYC_SIT_SUPP'), dollars(12.75)); // 300 × 4.25%, not 1,000 × 4.25%
+  });
+
   test('nycExemptions overrides the shared exemptions count when the two genuinely differ', () => {
     // Weekly $400, single, certificate.exemptions:3 (NYS/Yonkers) but
     // certificate.nycExemptions:1 (a genuinely different Line-2 count).
@@ -3016,6 +3442,26 @@ describe('Yonkers', () => {
     );
     // 1,000 x 0.0195975 = 19.5975 -> $19.60.
     assert.equal(amountOf(r, 'NY_YONKERS_SIT_SUPP'), dollars(19.60));
+  });
+
+  test('BUG FIX: a pretax deduction exceeding regular wages spills onto the supplemental base too', () => {
+    // $200 regular, $900 401(k) deferral (exceeds regular by $700), $1,000
+    // bonus. Combined taxable = 200+1,000-900 = $300. Before this fix, the
+    // bonus was taxed on the raw, un-reduced $1,000 instead of $300.
+    // 300 × 1.95975% = 5.87925 -> $5.88.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [
+          { code: 'REG', category: 'regular', amount: dollars(200) },
+          { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+        ],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(900) }],
+        ...residentState({ maritalStatus: 'single', exemptions: 2 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'NY_YONKERS_SIT'), 0);
+    assert.equal(amountOf(r, 'NY_YONKERS_SIT_SUPP'), dollars(5.88));
   });
 
   test('nonresident worker Example 1: weekly $75 -- below the no-withholding threshold', () => {
@@ -3510,6 +3956,26 @@ describe('New Jersey', () => {
     assert.equal(r.netPay, noLocality.netPay);
   });
 
+  test("Newark's payroll tax excludes federal pretax deferrals from its base, not NJ's own (empty) exempt list", () => {
+    // $1,000 regular with a $200 401(k) deferral. NJ's OWN state income
+    // tax is famously non-conforming (rules.exemptPretax === []) and
+    // would tax the full $1,000 — but Newark's ordinance tracks FEDERAL
+    // withholding wages, which exclude a 401(k) deferral. Taxable base
+    // should be $800, not $1,000: 1% x $800 = $8.00, not $10.00.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(200) }],
+        workState: { code: 'NJ', certificate: { locality: 'Newark' } },
+      }),
+    );
+    const line = r.taxes.find((t) => t.id === 'NEWARK_PAYROLL_ER');
+    assert.ok(line);
+    assert.equal(line.taxableWages, dollars(800));
+    assert.equal(line.amount, dollars(8.0));
+  });
+
   test('no Newark payroll tax line when the employee is not linked to a Newark locality', () => {
     const r = calculatePaycheck(
       input({
@@ -3799,12 +4265,27 @@ describe('Connecticut', () => {
     );
     // Annualized $52,000: exemption $0 (Code A phases to $0 at $35,000);
     // initial tax (Table B) $2,110; 2% phase-out add-back (Table C) $25;
-    // recapture (Table D) $0; credit (Table E) 0% (phased to $0 by $25,000).
-    // ($2,110+$25) ÷ 52 = $41.0577 → $41.06.
-    assert.equal(amountOf(r, 'CT_SIT'), dollars(41.06));
+    // recapture (Table D) $0; withholding $2,135. Table E credit at
+    // $52,000 (Code A): 1% (the $52,000-$52,500 band — BUG FIXED
+    // 2026-09-02, this file's own tableE data was previously missing most
+    // of Table E's real bands, including this one, and reached 0% far too
+    // early; see CT-2026.json's own knownGaps for the full fix, sourced
+    // directly from TPG-211's own Table E page). $2,135 × 0.99 = $2,113.65
+    // ÷ 52 = $40.6471... → $40.65.
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(40.65));
   });
 
-  test('Code D always gets $0 exemption and $0 credit regardless of income — same result as Code A here', () => {
+  test('Code D always gets $0 exemption and $0 credit regardless of income', () => {
+    // Same $2,135 withholding as Code A's own $52,000 case above (same
+    // income, and Code D's own $0 exemption matches Code A's at this
+    // level too), but Code D's credit is ALWAYS 0% (the 'ZERO' sentinel),
+    // not read from Table E at all — so unlike Code A's now-correctly-
+    // computed 1% credit at this exact income, Code D pays the full
+    // $2,135 ÷ 52 = $41.0577 → $41.06, genuinely more than Code A's
+    // $40.65 here. (Before the Table E fix above, both used to look the
+    // same only because Code A's OWN credit was wrongly computed as 0% at
+    // this income too — that coincidence is gone now that Table E is
+    // correct.)
     const r = calculatePaycheck(
       input({
         payFrequency: 'weekly',
@@ -3825,9 +4306,12 @@ describe('Connecticut', () => {
     );
     // Exemption at $30,000 (Code F): $14,000 → taxable $16,000. Table B
     // (A/D/F schedule): $200 + 4.5% × $6,000 = $470. Table C: $0 (below
-    // $56,500). Table D: $0. Table E credit at $30,000: 1% (the
-    // $26,500-$31,300 band). $470 × 0.99 = $465.30.
-    assert.equal(amountOf(r, 'CT_SIT'), dollars(465.3));
+    // $56,500). Table D: $0. Table E credit at $30,000 (Code F): 15% (the
+    // $26,500-$31,300 band — BUG FIXED 2026-09-02, this file's own
+    // tableE data previously had this band wrong at 1%; see
+    // CT-2026.json's own knownGaps for the full fix, sourced directly
+    // from TPG-211's own Table E page). $470 × 0.85 = $399.50.
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(399.5));
   });
 
   test('Code C, annual $600,000: high enough to trigger the Table D tax recapture', () => {
@@ -3890,7 +4374,7 @@ describe('Connecticut', () => {
         ...ctState({ withholdingCode: 'A' }),
       }),
     );
-    assert.equal(amountOf(base, 'CT_SIT'), dollars(41.06));
+    assert.equal(amountOf(base, 'CT_SIT'), dollars(40.65));
 
     const withLine2 = calculatePaycheck(
       input({
@@ -3899,7 +4383,7 @@ describe('Connecticut', () => {
         ...ctState({ withholdingCode: 'A', additionalWithholding: dollars(10) }),
       }),
     );
-    assert.equal(amountOf(withLine2, 'CT_SIT'), dollars(51.06));
+    assert.equal(amountOf(withLine2, 'CT_SIT'), dollars(50.65));
 
     const withLine3 = calculatePaycheck(
       input({
@@ -3908,7 +4392,7 @@ describe('Connecticut', () => {
         ...ctState({ withholdingCode: 'A', reducedWithholding: dollars(10) }),
       }),
     );
-    assert.equal(amountOf(withLine3, 'CT_SIT'), dollars(31.06));
+    assert.equal(amountOf(withLine3, 'CT_SIT'), dollars(30.65));
 
     const line3ExceedsTax = calculatePaycheck(
       input({
@@ -3943,7 +4427,7 @@ describe('Connecticut', () => {
         ...ctState({ withholdingCode: 'A' }),
       }),
     );
-    assert.equal(amountOf(r, 'CT_SIT'), dollars(41.06));
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(40.65));
   });
 
   test('CT Paid Leave: 0.5%, capped at the same wage base as federal Social Security', () => {
@@ -3978,8 +4462,10 @@ describe('Connecticut', () => {
     );
     // Annualized $41,600 taxable (down from $52,000): Table B $200+4.5%×
     // $31,600=$1,622; Table C at $41,600: $0 (below $50,250); Table D: $0;
-    // credit 0%. $1,622 ÷ 52 = $31.19230... → $31.19.
-    assert.equal(amountOf(r, 'CT_SIT'), dollars(31.19));
+    // Table E credit at $41,600 (Code A): 10% (the $27,000-$48,000 band —
+    // BUG FIXED 2026-09-02, same Table E fix as the other CT tests above).
+    // $1,622 × 0.90 = $1,459.80 ÷ 52 = $28.0730... → $28.07.
+    assert.equal(amountOf(r, 'CT_SIT'), dollars(28.07));
   });
 });
 
@@ -5821,6 +6307,13 @@ describe('Delaware', () => {
       assert.equal(amountOf(combined, 'DE_SIT'), amountOf(plain, 'DE_SIT'));
     });
   });
+
+  test('an unrecognized maritalStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () => calculatePaycheck(input(deState({ maritalStatus: 'divorced', exemptions: 0 }))),
+      /Unrecognized DE certificate\.maritalStatus/,
+    );
+  });
 });
 
 describe('Arizona', () => {
@@ -5957,6 +6450,20 @@ describe('Missouri', () => {
       }),
     );
     assert.equal(r.taxes.some((t) => t.id === 'KC_EARN' || t.id === 'STL_EARN'), false);
+  });
+
+  test('an unrecognized filingStatus throws rather than silently landing in the lowest-deduction bucket', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'monthly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(2916.67) }],
+            workState: { code: 'MO', certificate: { filingStatus: 'divorced' } },
+          }),
+        ),
+      /Unrecognized MO certificate\.filingStatus/,
+    );
   });
 });
 
@@ -6183,6 +6690,67 @@ describe('Oregon', () => {
     assert.equal(amountOf(r, 'LTD_ER'), dollars(8));
   });
 
+  test('Canby Area Transit tax rounds HALF-UP, not down like TriMet/LTD', () => {
+    // 837.50 x 0.006 = 5.025 -> rounds to $5.03 under this project's
+    // ordinary round-half-up (Math.round(502.5) = 503 cents), NOT $5.02
+    // the way TriMet's floor-based rounding would give.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(837.5) }],
+        workState: { code: 'OR', certificate: { locality: 'CanbyTransit' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'CANBY_TRANSIT_ER'), dollars(5.03));
+    assert.equal(r.taxes.some((t) => t.id === 'TRIMET_ER'), false);
+  });
+
+  test('Sandy transit tax fires off certificate.locality = SandyTransit', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR', certificate: { locality: 'SandyTransit' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'SANDY_TRANSIT_ER'), dollars(6));
+  });
+
+  test('Wilsonville (SMART) transit tax fires off certificate.locality = SMART', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR', certificate: { locality: 'SMART' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'SMART_ER'), dollars(5));
+  });
+
+  test('South Clackamas Transportation District tax fires off certificate.locality = SCTD', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR', certificate: { locality: 'SCTD' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'SCTD_ER'), dollars(5));
+  });
+
+  test('an unrecognised certificate.locality produces no Oregon transit district tax line at all', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+        workState: { code: 'OR', certificate: { locality: 'SomeOtherCity' } },
+      }),
+    );
+    for (const id of ['TRIMET_ER', 'LTD_ER', 'CANBY_TRANSIT_ER', 'SANDY_TRANSIT_ER', 'SMART_ER', 'SCTD_ER']) {
+      assert.equal(r.taxes.some((t) => t.id === id), false, `${id} should not fire`);
+    }
+  });
+
   test('Metro Supportive Housing Services Tax: nothing below the $200k YTD trigger, taxed above it', () => {
     // $5,000 this week, $199,000 already YTD -> crosses $200,000 mid-cheque:
     // only the $4,000 above the trigger is taxed, at 1% = $40.
@@ -6251,6 +6819,20 @@ describe('Oregon', () => {
     assert.equal(r.taxes.some((t) => t.id === 'OR_METRO_SHS'), true);
     assert.equal(amountOf(r, 'OR_METRO_SHS'), 0);
     assert.equal(amountOf(r, 'OR_MULTNOMAH_PFA'), 0);
+  });
+
+  test('an unrecognized maritalStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            workState: { code: 'OR', certificate: { maritalStatus: 'divorced', allowances: 0 } },
+          }),
+        ),
+      /Unrecognized OR certificate\.maritalStatus/,
+    );
   });
 });
 
@@ -6453,6 +7035,30 @@ describe('California', () => {
       assert.equal(r.taxes.some((t) => t.id === 'CA_SIT_SUPP_BONUS'), false);
       assert.equal(r.taxes.some((t) => t.id === 'CA_SIT_SUPP_OTHER'), false);
       assert.ok(amountOf(r, 'CA_SIT') > 0);
+    });
+
+    test('BUG FIX: a pretax deduction on a bonus-only cheque reduces the taxable base, allocated proportionally across bonus/other', () => {
+      // $1,000 bonus + $500 commission (both supplemental, no regular
+      // wages), employer elects the flat method, and a $1,000 401(k)
+      // deferral. Before this fix, the carve-out ignored pretax entirely —
+      // the deferral vanished and the full $1,500 was taxed. Raw total
+      // $1,500 less $1,000 pretax = $500 taxable, allocated proportionally
+      // (2:1 bonus:other, matching the raw 1,000:500 split): bonus
+      // $333.33 @ 10.23% = $34.10, other $166.67 @ 6.6% = $11.00.
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [
+            { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+            { code: 'COMM', category: 'supplemental', amount: dollars(500) },
+          ],
+          deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(1000) }],
+          workState: { code: 'CA', certificate: { regularAllowances: 0 } },
+          employer: { supplementalFlatRateElection: { CA: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'CA_SIT_SUPP_BONUS'), dollars(34.1));
+      assert.equal(amountOf(r, 'CA_SIT_SUPP_OTHER'), dollars(11.0));
     });
 
     test('DE 44: a bonus paid ALONGSIDE regular wages is required to be treated as regular wages, never the flat rate, even if elected', () => {
@@ -6832,6 +7438,13 @@ describe('Utah', () => {
     );
     assert.equal(amountOf(r, 'UT_SIT'), dollars(116));
   });
+
+  test('an unrecognized maritalStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () => calculatePaycheck(input(utState({ maritalStatus: 'divorced' }))),
+      /Unrecognized UT certificate\.maritalStatus/,
+    );
+  });
 });
 
 describe('Maryland', () => {
@@ -6924,6 +7537,20 @@ describe('Maryland', () => {
     assert.equal(amountOf(r, 'MD_SIT'), dollars(5309.5));
   });
 
+  test('certificate.nonresident as the STRING "false" throws instead of silently switching to the nonresident rate', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'annual',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(80000) }],
+            ...mdState({ filingStatus: 'single', exemptions: 0, nonresident: 'false' }),
+          }),
+        ),
+      /Unrecognized certificate\.nonresident/,
+    );
+  });
+
   test('reciprocity: a Pennsylvania resident working in Maryland owes $0 MD tax', () => {
     const r = calculatePaycheck(
       input({
@@ -6951,6 +7578,23 @@ describe('Maryland', () => {
         }),
       );
       assert.equal(amountOf(r, 'MD_SIT_SUPP'), dollars(970.0));
+    });
+
+    test('BUG FIX: a pretax deduction on a bonus-only cheque reduces the taxable base', () => {
+      // $10,000 bonus (the whole cheque), $3,000 401(k) deferral. Before
+      // this fix, the carve-out ignored pretax entirely — the deferral
+      // vanished and the full $10,000 was taxed. Correct: 10,000-3,000 =
+      // $7,000 @ 9.70% = $679.00, not $970.00.
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'BONUS', category: 'supplemental', amount: dollars(10000) }],
+          deductions: [{ code: '401K', category: 'deferral_401k', amount: dollars(3000) }],
+          ...mdState({ county: 'Allegany' }),
+          employer: { supplementalFlatRateElection: { MD: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'MD_SIT_SUPP'), dollars(679.0));
     });
 
     test('Anne Arundel (tiered local): the lump-sum rate uses the TOP of the tiered schedule (3.20%), same 9.70% combined', () => {
@@ -7023,6 +7667,13 @@ describe('Maryland', () => {
       );
       assert.equal(amountOf(r, 'MD_SIT'), amountOf(combined, 'MD_SIT'));
     });
+  });
+
+  test('an unrecognized filingStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () => calculatePaycheck(input(mdState({ filingStatus: 'divorced', county: 'Worcester' }))),
+      /Unrecognized MD certificate\.filingStatus/,
+    );
   });
 });
 
@@ -7121,6 +7772,24 @@ describe('District of Columbia', () => {
       }),
     );
     assert.equal(amountOf(r, 'DC_SIT'), 0);
+  });
+
+  test('certificate.nonresident as the STRING "false" throws instead of silently zeroing a real DC resident\'s tax', () => {
+    // The real risk this guards against: DC's own no-nonresident-tax rule
+    // makes this a genuinely dangerous field to get wrong in this
+    // direction — a true DC resident, wrongly read as nonresident, would
+    // have their entire DC withholding silently zeroed.
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'annual',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(200000) }],
+            ...dcState({ nonresident: 'false' }),
+          }),
+        ),
+      /Unrecognized certificate\.nonresident/,
+    );
   });
 });
 
@@ -7298,15 +7967,28 @@ describe('West Virginia', () => {
       assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(4.0));
     });
 
-    test('Weirton, monthly pay: $5.00/wk x 52 / 12 periods = $21.6666, rounded DOWN to $21.66', () => {
+    test('Weirton, monthly pay, check date on/after the 2026-05-14 rate increase: $5.00/wk x 52 / 12 periods = $21.6666, rounded DOWN to $21.66', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'monthly',
+          checkDate: '2026-05-14',
           earnings: [{ code: 'REG', category: 'regular', amount: dollars(4000) }],
           workState: { code: 'WV', certificate: { locality: 'Weirton' } },
         }),
       );
       assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(21.66));
+    });
+
+    test('Weirton, monthly pay, check date BEFORE the 2026-05-14 rate increase: pre-ordinance $2.00/wk applies instead', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'monthly',
+          checkDate: '2026-05-13',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(4000) }],
+          workState: { code: 'WV', certificate: { locality: 'Weirton' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(8.66));
     });
 
     test('no certificate.locality: no WV_LOCAL_FEE line at all', () => {
@@ -7397,11 +8079,15 @@ describe('West Virginia', () => {
       assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
     });
 
+    test('Glen Dale, weekly pay: work-location-based like Wheeling/Madison, no residency exception ($1.00/wk, Article 752 effective 2025-01-01)', () => {
+  });
+
     test('Glen Dale, resident duty station: Article 752 has no residency carve-out, so a resident is charged too ($1.00/wk)', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
           earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Glen Dale' } },
           workState: { code: 'WV', certificate: { locality: 'Glen Dale', residenceCity: 'Glen Dale' } },
         }),
       );
@@ -8790,6 +9476,13 @@ describe('New Mexico', () => {
     );
     assert.equal(amountOf(r, 'NM_SIT'), dollars(12.77));
   });
+
+  test('an unrecognized filingStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () => calculatePaycheck(input(nmState({ filingStatus: 'divorced' }))),
+      /Unrecognized NM certificate\.filingStatus/,
+    );
+  });
 });
 
 describe('Hawaii', () => {
@@ -9107,6 +9800,13 @@ describe('Oklahoma', () => {
     // $13.00 base (same as the absent-certificate case above) + $25.00 = $38.00.
     assert.equal(amountOf(r, 'OK_SIT'), dollars(38));
   });
+
+  test('an unrecognized filingStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () => calculatePaycheck(input(okState({ filingStatus: 'divorced' }))),
+      /Unrecognized OK certificate\.filingStatus/,
+    );
+  });
 });
 
 describe('Wyoming', () => {
@@ -9298,6 +9998,24 @@ describe('North Dakota', () => {
       assert.equal(amountOf(withAggregation, 'ND_SIT'), expectedMarginal);
     });
   });
+
+  test('Section 1: an unrecognized maritalStatus throws rather than silently falling through to single', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            checkDate: '2026-06-15',
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1500) }],
+            workState: {
+              code: 'ND',
+              certificate: { formVintage: 'pre_2020', maritalStatus: 'divorced', allowances: 2 },
+            },
+          }),
+        ),
+      /Unrecognized ND certificate\.maritalStatus/,
+    );
+  });
 });
 
 describe('effective dating', () => {
@@ -9396,6 +10114,36 @@ describe('state unemployment insurance, employer side (XX_SUI_ER)', () => {
       }),
     );
     assert.equal(amountOf(r, 'WA_SUI_ER'), dollars(36.0));
+  });
+
+  test("Kansas: a construction employer gets its own 5.55% rate, not the flat 1.75%", () => {
+    // $3,000 biweekly, well under the $15,100 wage base -- fully taxable.
+    const general = calculatePaycheck(suiInput({ workState: { code: 'KS', certificate: {} } }));
+    assert.equal(amountOf(general, 'KS_SUI_ER'), dollars(52.5)); // 1.75% * $3,000
+    assert.match(general.taxes.find((t) => t.id === 'KS_SUI_ER')?.detail ?? '', /new-employer rate \(no employer rate supplied/);
+
+    const construction = calculatePaycheck(
+      suiInput({
+        workState: { code: 'KS', certificate: {} },
+        employer: { suiIndustry: { KS: 'construction' } },
+      }),
+    );
+    assert.equal(amountOf(construction, 'KS_SUI_ER'), dollars(166.5)); // 5.55% * $3,000
+    assert.match(
+      construction.taxes.find((t) => t.id === 'KS_SUI_ER')?.detail ?? '',
+      /"construction" industry classification/,
+    );
+  });
+
+  test("Kansas: an explicit employer-supplied rate still overrides the industry rate", () => {
+    const r = calculatePaycheck(
+      suiInput({
+        workState: { code: 'KS', certificate: {} },
+        employer: { suiIndustry: { KS: 'construction' }, stateUnemploymentRate: { KS: 0.02 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'KS_SUI_ER'), dollars(60.0)); // 2% * $3,000, not 5.55%
+    assert.match(r.taxes.find((t) => t.id === 'KS_SUI_ER')?.detail ?? '', /own assigned rate/);
   });
 
   test('it is an employer cost, not withheld from the employee', () => {
@@ -9754,6 +10502,32 @@ describe('nonresident day-count de minimis', () => {
     const reciprocal = calculatePaycheck(away('IN', { county: 'Marion' }, 'OH'));
     assert.equal(amountOf(reciprocal, 'IN_SIT'), dollars(0));
     assert.ok(amountOf(reciprocal, 'IN_COUNTY') > dollars(0));
+  });
+
+  test('the day-count rule STACKS with reciprocity — a reciprocal-state resident who ALSO qualifies is never worse off than a non-reciprocal one', () => {
+    // BUG FIXED (found during manual cross-state testing, 2026-09-06):
+    // day-count used to be skipped entirely whenever reciprocity already
+    // exempted the state line, so a Kentucky resident (on IN's own
+    // reciprocalStates list) who independently satisfied the SAME 30-day/
+    // employer-eligibility facts as the TX resident above stayed stuck
+    // paying full Indiana county tax — strictly worse off than a resident
+    // of a state with NO relationship to Indiana at all, for identical
+    // day-count facts. Day-count is a genuinely separate legal basis
+    // (Departmental Notice #1 applies to any nonresident, not just a
+    // reciprocalStates resident) and must be checked independently of
+    // whether reciprocity already fired.
+    const kyWithDayCount = calculatePaycheck(
+      away('IN', { county: 'Marion', daysWorkedInStateThisYear: 10, nonresidentDeMinimisEligible: true }, 'KY'),
+    );
+    assert.equal(amountOf(kyWithDayCount, 'IN_SIT'), dollars(0));
+    assert.equal(amountOf(kyWithDayCount, 'IN_COUNTY'), dollars(0));
+
+    // Unchanged: a reciprocal-state resident who does NOT separately supply
+    // day-count facts still gets only the narrower reciprocity treatment —
+    // this fix adds a path, it doesn't grant an exemption nobody claimed.
+    const kyPlainReciprocity = calculatePaycheck(away('IN', { county: 'Marion' }, 'KY'));
+    assert.equal(amountOf(kyPlainReciprocity, 'IN_SIT'), dollars(0));
+    assert.ok(amountOf(kyPlainReciprocity, 'IN_COUNTY') > dollars(0));
   });
 });
 

@@ -255,14 +255,14 @@
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 47300,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
-    "newEmployerRate": 0.015,
-    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "newEmployerRate": null,
+    "newEmployerRateSource": "CORRECTED 2026-09-01: fetched Montana DLI's own 'Unemployment Insurance Contribution Taxable Wage Base & Rates for 2026' letter directly (uid.dli.mt.gov/_docs/contributions-bureau/Rate-Explanation.pdf). Quoted verbatim: 'Montana UI rating system... initially assigns each employer's rate according to their industry' -- 'Industry rates are the average UI rate of employers in each industry classification.' No single new-employer figure exists; the prior 1.5% (OnPay, secondary) is removed rather than kept as a wrong default. Modeled the same way Louisiana's identical mechanism already is: null + employerSuppliedRateRequired. The same letter also directly confirms wageBase ($47,300) and experienceRange (0.00%-6.12%, 'Schedule 1' for 2026) exactly as already recorded here.",
     "experienceRange": {
       "min": 0,
       "max": 0.0612
     },
-    "employerSuppliedRateRequired": false,
-    "confidence": "cross_source_confirmed"
+    "employerSuppliedRateRequired": true,
+    "confidence": "primary_source_confirmed"
   },
   "supplementalAggregation": {
     "supported": true,

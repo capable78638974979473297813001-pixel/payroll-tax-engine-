@@ -19,6 +19,18 @@
       "verifiedBy": "Downloaded and text-extracted directly. Covers NYS + NYC + Yonkers on ONE combined form: marital status (Single/HOH, Married, Married-but-withhold-at-higher-single-rate -- a THIRD checkbox, the same shape as Minnesota's W-4MN and Montana's MW-4, now a recurring pattern across states in this project), Line 1 = combined NYS+Yonkers allowance count, Line 2 = a SEPARATE NYC-only allowance count, Lines 3/4/5 = three SEPARATE additional-withholding dollar fields, one per jurisdiction (NYS/NYC/Yonkers) -- genuinely different from every other state's single additionalWithholding field, because NY's own form asks for three independent numbers on one certificate."
     }
   ],
+  "exemptPretax": [
+    "section125",
+    "hsa",
+    "fsa",
+    "dependent_care",
+    "deferral_401k",
+    "deferral_403b",
+    "deferral_457",
+    "deferral_simple",
+    "commuter"
+  ],
+  "exemptPretaxNote": "BUG FIXED 2026-09-02: this field was missing entirely from this file's top level -- NY_SIT, NY_NYC_SIT, and NY_YONKERS_SIT all read (rules.exemptPretax ?? []) generically, so its absence silently defaulted to an EMPTY list, meaning every NY/NYC/Yonkers paycheck with a 401(k)/section-125/HSA/FSA/etc. pretax deduction was taxed on the FULL gross amount instead of the pretax-reduced one -- a real, live over-withholding bug affecting every such paycheck, not a rare edge case. Found while auditing this project's supplemental-wage spillover mechanism, which surfaced the fact that NY's own top-level exemptPretax was undefined when every other state checked had one. This project's OWN existing documentation elsewhere in this same file (statePaidLeaveEmployee.exemptPretaxResolved, stateDisabilityEmployee.exemptPretaxResolved, and this file's own knownGaps) already refer to 'the shared NYS income-tax list' and 'NYS income tax's own base' as an established, populated thing PFL/DBL deliberately override with their own empty list -- strong internal evidence this field was always intended to exist and was lost, not deliberately left empty. CONFIRMED via tax.ny.gov's own withholding guidance (bus/wt/income_subject.htm, fetched directly): wages subject to NY withholding are those 'considered wages for federal income tax withholding purposes' -- i.e. NY explicitly conforms to the FEDERAL wage definition for withholding, the same conformity relationship Ohio's and California's own (already-populated) exemptPretax lists document. This is therefore the same 9-category federal-conforming list those two states use, not a guessed number -- primary-sourced to NY's own statement of conformity, not copied from OH/CA without basis.",
   "combinedAllowanceTable": {
     "$comment": "NYS-50-T-NYS's own 'Table A -- Combined deduction and exemption allowance (full year)' -- ENGINE-CONSUMED. Unlike every other state in this project, this is NOT a flat per-exemption dollar amount x count; it's a single precomputed dollar figure per (payPeriod, maritalStatus, exemptionCount 0-10) cell, confirmed to equal Table B (a payPeriod/maritalStatus-only deduction baseline) plus Table C (a payPeriod-only flat per-exemption increment, $19.25/week etc.) x count -- verified this identity holds exactly for every cell checked, so Table A is stored directly rather than Tables B+C separately, since Table A IS their sum, already computed by NY's own document.",
     "single": {
@@ -1943,7 +1955,7 @@
     "yonkersNonresidentWorker has no certificate field on IT-2104 at all -- it's an employer-determined fact about work location, not something the employee's own withholding certificate captures, the same category of gap as every other work-location determination this engine currently trusts the caller to resolve upstream.",
     "The recurring non-monotonic bracket-rate anomaly in NYS's OWN tables (a rate spike then drop-back near the top of every one of the 12 transcribed NYS schedules) remains unexplained -- NOT present in NYC's or Yonkers' tables (Yonkers reuses NYS's own tables directly, so it inherits the same anomaly, just scaled by 16.75%; NYC's own tables are smooth/monotonic throughout).",
     "Reciprocity confirmed (New York has none, with any state). Exemption counts above 10 extrapolate correctly for NYS, NYC, and (via the shared computeNYSStyleTax()) Yonkers residents. Nonresident alien handling is a CONFIRMED disclosed non-effect for ALL FOUR NY documents now (NYS-50-T-NYS, NYS-50-T-NYC, NYS-50-T-Y, and IT-2104 all searched directly for 'alien' -- zero mentions anywhere) -- Yonkers specifically was the one left unchecked before, now closed.",
-    "UNRESOLVED, disclosed rather than guessed: whether PFL's and DBL's own wage bases follow the SAME pretax exclusion list as NYS income tax withholding (exemptPretax, reused by both statePaidLeaveEmployeeTax() and stateDisabilityEmployeeTax() via ctx.taxableWagesFor()) was not independently confirmed. Found NY DOT Notice N-17-12 (fetched and read directly), which answers a RELATED but DIFFERENT question -- that PFL premiums themselves are deducted from 'employees' after-tax wages' (i.e. the premium isn't itself pretax-deductible from the employee's own income) -- not whether 401(k)/section-125 amounts are excluded from the wage BASE the 0.432%/0.5% rates apply TO. No primary source answering that specific question was found despite multiple targeted searches. This matters because Minnesota's own build in this project found a genuine case (UI wages explicitly NOT excluding 401(k)/cafeteria amounts, unlike income-tax withholding) where assuming parity between two different taxes' wage definitions would have been wrong -- the same risk exists here, unconfirmed either way.",
+    "RESOLVED 2026-09-02 (was previously unconfirmed despite multiple targeted searches): whether PFL's and DBL's own wage bases follow the SAME pretax exclusion list as NYS income tax withholding -- they don't, and PFL/DBL's own empty exemptPretax override (statePaidLeaveEmployee.exemptPretax/stateDisabilityEmployee.exemptPretax, both []) is correct as modelled. Confirmed directly from paidfamilyleave.ny.gov's own 'Cost and Deductions' page (fetched directly this pass): the premium is stated as '0.388% of their gross wages per pay period' -- NY's own PFL program site's own term of art is 'gross wages,' the same phrasing this file's own N-17-12 citation already established for the DIFFERENT (premium-is-after-tax) question, now confirmed for THIS question too from the state's own primary program page rather than assumed by analogy. 'Gross wages' is definitionally the unreduced figure, not a taxable-wages concept that would net out 401(k)/section-125 amounts first -- consistent with, not contradicting, this file's existing empty-list modelling. The Minnesota-style risk this note used to flag (UI wages NOT excluding 401(k) amounts unlike income-tax withholding, so assuming parity across two different taxes' wage definitions would be wrong) did not materialize here: PFL and DBL's wage base is confirmed gross, matching what was already coded, not silently assumed.",
     "RESOLVED: household-employee withholding is voluntary (NYS-50, quoted in this file's own voluntaryWithholdingEmploymentCategories block) -- wired via exemptEmploymentCategoryReason(), defaulting to $0 NY_SIT unless certificate.voluntaryWithholdingAgreement asserts an actual agreement is in place."
   ],
   "suiEmployer": {
@@ -1953,11 +1965,12 @@
     "newEmployerRate": 0.041,
     "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
     "experienceRange": {
-      "min": 0.004,
-      "max": 0.099
+      "min": 0.017,
+      "max": 0.095
     },
+    "experienceRangeSource": "Primary: NY DOL rate-information page (https://dol.ny.gov/unemployment-insurance-rate-information), 2026 Total Contribution Rates table -- lowest 1.7% (1.625% UI + 0.075% RSF), highest 9.5% (9.425% UI + 0.075% RSF). Replaces a stale 0.4%-9.9% figure that matched neither the UI-only nor total column.",
     "employerSuppliedRateRequired": false,
-    "confidence": "inherited_from_this_file"
+    "confidence": "primary_source_confirmed"
   },
   "supplementalAggregation": {
     "supported": true,

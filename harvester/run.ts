@@ -5,8 +5,10 @@ import { windowsDueOn, describeWindows } from './calendar.ts';
 import type { CalendarWindow } from './calendar.ts';
 import { fetchSource } from './fetch.ts';
 import type { FetchOptions, FetchResult } from './fetch.ts';
+import { fetchKyOccupationalDatabase } from './ky-occupational-fetch.ts';
 import { normalizeForComparison } from './normalize.ts';
 import { hasChanged, writeSnapshot, latestSnapshot } from './snapshot.ts';
+import { fetchWvHandbook } from './wv-handbook-fetch.ts';
 
 /**
  * One sweep of the outside world.
@@ -57,6 +59,23 @@ export interface RegisteredSource {
    */
   volatileByteRanges?: [number, number][];
   manualOnlyReason?: string;
+  /**
+   * This source's fetch is many requests, not one (see
+   * ky-occupational-fetch.ts) — checking it EVERY day the way every other,
+   * single-GET source is force-checked would be a disproportionate load
+   * for a figure that changes at most annually. Exempts it from the daily
+   * sweep's `force: true` so it follows its own checkFrequency instead;
+   * calendar windows (the annual new-year window, in particular) still
+   * force it regardless, same as any other source.
+   */
+  heavyFetch?: boolean;
+  /**
+   * Some sources are not a single GET at all — a WebForms page whose real
+   * content only appears after simulating its own postback flow, say.
+   * Naming the fetcher here keeps sweep() itself generic instead of
+   * special-casing this one source id inline.
+   */
+  customFetcher?: 'ky-occupational-full' | 'wv-handbook-current';
 }
 
 const FREQUENCY_DAYS: Record<CheckFrequency, number> = {
@@ -151,8 +170,11 @@ export function windowTouchesSource(w: CalendarWindow, source: RegisteredSource)
     return source.level !== 'local';
   }
   // scheduled_effective_date: match on the jurisdiction in the file path.
+  // Covers both data/states|local/ (tax) and data/minimum-wage/states|local|
+  // territories/ (minimum wage) — the two-letter code sits in the same
+  // position relative to the FINAL directory segment in either shape.
   return w.affects.some((a) => {
-    const m = /data\/(?:states|local)\/([A-Z]{2})-/.exec(a);
+    const m = /data\/(?:minimum-wage\/)?(?:states|local|territories)\/([A-Z]{2})-/.exec(a);
     return m ? m[1] === source.jurisdiction : false;
   });
 }
@@ -181,12 +203,20 @@ export async function sweep(asOf: string, options: SweepOptions = {}): Promise<S
       ...(lastCheckedAt ? { lastCheckedAt } : {}),
     };
 
-    if (!due && !options.force) {
+    // heavyFetch sources ignore `force` — see RegisteredSource.heavyFetch.
+    // A calendar window (forcedBy set above) still overrides even for these.
+    const forcedToday = options.force && !(source.heavyFetch && !forcedBy);
+    if (!due && !forcedToday) {
       entries.push({ ...base, outcome: 'skipped_not_due' });
       continue;
     }
 
-    const result: FetchResult = await fetchSource(source, options);
+    const result: FetchResult =
+      source.customFetcher === 'ky-occupational-full'
+        ? await fetchKyOccupationalDatabase(source, options)
+        : source.customFetcher === 'wv-handbook-current'
+          ? await fetchWvHandbook(source, options)
+          : await fetchSource(source, options);
     if (!result.ok) {
       entries.push({ ...base, outcome: 'fetch_failed', reason: result.reason });
       continue;

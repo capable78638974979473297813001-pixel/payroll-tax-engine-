@@ -8,3 +8,19 @@ export {
   hasStateRuleset,
   RulesetNotFoundError,
 } from './registry.ts';
+export { minimumWage, localMinimumWages } from './minimum-wage.ts';
+export type {
+  MinimumWageQuery,
+  MinimumWageAnswer,
+  MinimumWageCandidate,
+  MinimumWageLevel,
+} from './minimum-wage.ts';
+export {
+  federalMinimumWageRuleset,
+  stateMinimumWageRuleset,
+  hasStateMinimumWageRuleset,
+  localMinimumWageRuleset,
+  hasLocalMinimumWageRuleset,
+  sectoralMinimumWageRuleset,
+  hasSectoralMinimumWageRuleset,
+} from './registry.ts';

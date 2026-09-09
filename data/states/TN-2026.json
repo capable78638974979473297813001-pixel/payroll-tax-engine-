@@ -52,8 +52,9 @@
     "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
     "experienceRange": {
       "min": 0.0001,
-      "max": 0.023
+      "max": 0.1
     },
+    "experienceRangeSource": "Primary: TN Dept. of Labor's own Premium_Rate_Chart.pdf (tn.gov/content/dam/tn/workforce/documents/employers/Premium_Rate_Chart.pdf), Premium Table 6 (in effect all of 2026, Trust Fund $850M+): rates run 0.01% (reserve ratio 20.0+) to 10.00% (reserve ratio below -20.0). Corrects a stale 2.3% max that only covered positive-reserve-ratio employers and silently dropped every negative-reserve (deficit) row of the same table.",
     "employerSuppliedRateRequired": false,
     "confidence": "cross_source_confirmed"
   }

@@ -268,11 +268,125 @@ const DIRECTIONALS: Record<string, string> = {
 };
 
 /** Street-type suffixes, expanded for the same reason. Applied only at the END of the name — never at the front, so "St Clair Ave" doesn't become "Street Clair Avenue". */
-const STREET_TYPES: Record<string, string> = {
+export const STREET_TYPES: Record<string, string> = {
   st: 'street', str: 'street', ave: 'avenue', av: 'avenue', rd: 'road', blvd: 'boulevard',
   dr: 'drive', ln: 'lane', ct: 'court', pl: 'place', pkwy: 'parkway', pky: 'parkway',
   hwy: 'highway', cir: 'circle', ter: 'terrace', trl: 'trail', sq: 'square', expy: 'expressway',
 };
+
+/**
+ * Numbered streets are the one place streetKey() used to fail silently:
+ * found live against the National Address Database, Juneau, AK publishes
+ * "FOURTH Street" and "West FOURTH Street" — the word form — while every
+ * address this project or a caller writes says "4th St". Neither
+ * DIRECTIONALS nor STREET_TYPES touches this (it's the street NAME, not
+ * a prefix or suffix), so "120 4th St" against that data matched nothing
+ * at all: not tier 1 (exact), not tier 3 (neighbor bracket, since nothing
+ * on "4th" was found to bracket between) — a real address with a real
+ * published point, missed for a spelling difference alone. Nationally
+ * this is not an Alaska-only quirk: numbered streets are common, and
+ * which convention a state's address authority uses is arbitrary and
+ * inconsistent even within one state.
+ *
+ * These tables let ordinalRunAt() below recognise a run of number-words
+ * ending in an ordinal ("twenty first", "One Hundred Twenty-Fifth" — NYC
+ * goes at least that high) and collapse it to the digit form ("21st",
+ * "125th") every other source already uses, the same expand-to-one-
+ * canonical-form approach DIRECTIONALS and STREET_TYPES already use, just
+ * for numbers instead of compass points and abbreviations.
+ */
+const CARDINAL_ONES: Record<string, number> = {
+  one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9,
+};
+const CARDINAL_TENS: Record<string, number> = {
+  twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90,
+};
+const ORDINAL_ONES: Record<string, number> = {
+  first: 1, second: 2, third: 3, fourth: 4, fifth: 5, sixth: 6, seventh: 7, eighth: 8, ninth: 9,
+};
+const ORDINAL_TEENS: Record<string, number> = {
+  tenth: 10, eleventh: 11, twelfth: 12, thirteenth: 13, fourteenth: 14,
+  fifteenth: 15, sixteenth: 16, seventeenth: 17, eighteenth: 18, nineteenth: 19,
+};
+const ORDINAL_TENS: Record<string, number> = {
+  twentieth: 20, thirtieth: 30, fortieth: 40, fiftieth: 50,
+  sixtieth: 60, seventieth: 70, eightieth: 80, ninetieth: 90,
+};
+
+/** "1" -> "1st", "12" -> "12th", "23" -> "23rd" — English ordinal suffix, with the 11/12/13 exception. */
+function ordinalSuffix(n: number): string {
+  if (n % 100 >= 11 && n % 100 <= 13) return `${n}th`;
+  switch (n % 10) {
+    case 1: return `${n}st`;
+    case 2: return `${n}nd`;
+    case 3: return `${n}rd`;
+    default: return `${n}th`;
+  }
+}
+
+/**
+ * Try to read a number-word run starting at tokens[i] that ENDS in an
+ * ordinal word — "fourth" (1 token), "twenty first" (2), "one hundred
+ * twenty fifth" (4). Returns the digit-ordinal form and how many tokens
+ * it consumed, or null if tokens[i] doesn't start one. Greedy but
+ * unambiguous: English number-words have exactly one reading here, so
+ * there's no case where trying the longest run first could pick a wrong
+ * one over a right one the way there could be with, say, abbreviation
+ * expansion.
+ */
+function ordinalRunAt(tokens: string[], i: number): { text: string; length: number } | null {
+  const t0 = tokens[i];
+
+  // Longest: "one hundred twenty fifth" / "one hundred fifth" / "one hundredth".
+  if (t0 === 'one' && tokens[i + 1] === 'hundred') {
+    if (tokens[i + 2] !== undefined && CARDINAL_TENS[tokens[i + 2]] !== undefined && ORDINAL_ONES[tokens[i + 3]] !== undefined) {
+      return { text: ordinalSuffix(100 + CARDINAL_TENS[tokens[i + 2]] + ORDINAL_ONES[tokens[i + 3]]), length: 4 };
+    }
+    if (ORDINAL_TEENS[tokens[i + 2]] !== undefined) {
+      return { text: ordinalSuffix(100 + ORDINAL_TEENS[tokens[i + 2]]), length: 3 };
+    }
+    if (ORDINAL_TENS[tokens[i + 2]] !== undefined) {
+      return { text: ordinalSuffix(100 + ORDINAL_TENS[tokens[i + 2]]), length: 3 };
+    }
+    if (ORDINAL_ONES[tokens[i + 2]] !== undefined) {
+      return { text: ordinalSuffix(100 + ORDINAL_ONES[tokens[i + 2]]), length: 3 };
+    }
+  }
+  if (t0 === 'one' && tokens[i + 1] === 'hundredth') {
+    return { text: '100th', length: 2 };
+  }
+  if (t0 === 'hundredth') {
+    return { text: '100th', length: 1 };
+  }
+
+  // "twenty first" -> 21st.
+  if (CARDINAL_TENS[t0] !== undefined && ORDINAL_ONES[tokens[i + 1]] !== undefined) {
+    return { text: ordinalSuffix(CARDINAL_TENS[t0] + ORDINAL_ONES[tokens[i + 1]]), length: 2 };
+  }
+
+  // Single-word: "fourth", "eleventh", "twentieth".
+  if (ORDINAL_ONES[t0] !== undefined) return { text: ordinalSuffix(ORDINAL_ONES[t0]), length: 1 };
+  if (ORDINAL_TEENS[t0] !== undefined) return { text: ordinalSuffix(ORDINAL_TEENS[t0]), length: 1 };
+  if (ORDINAL_TENS[t0] !== undefined) return { text: ordinalSuffix(ORDINAL_TENS[t0]), length: 1 };
+
+  return null;
+}
+
+/** Scan a token list left to right, collapsing every number-word run ordinalRunAt() recognises into its digit form. Tokens that are already digits ("4th"), or aren't a number word at all ("broad"), pass through untouched. */
+function normalizeOrdinalTokens(tokens: string[]): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < tokens.length; ) {
+    const run = ordinalRunAt(tokens, i);
+    if (run) {
+      out.push(run.text);
+      i += run.length;
+    } else {
+      out.push(tokens[i]);
+      i += 1;
+    }
+  }
+  return out;
+}
 
 /**
  * Normalize a street name to a comparable key: lowercased, punctuation
@@ -287,7 +401,8 @@ const STREET_TYPES: Record<string, string> = {
  * address silently gets no authoritative point.
  */
 export function streetKey(street: string): string {
-  const tokens = street.toLowerCase().replace(/[.,#]/g, ' ').split(/\s+/).filter(Boolean);
+  const rawTokens = street.toLowerCase().replace(/[.,#-]/g, ' ').split(/\s+/).filter(Boolean);
+  const tokens = normalizeOrdinalTokens(rawTokens);
   const last = tokens.length - 1;
   const typePosition = last > 0 && DIRECTIONALS[tokens[last]] ? last - 1 : last;
   return tokens
@@ -319,6 +434,39 @@ export function streetKeyWithoutDirectionals(street: string): string {
   while (tokens.length > 1 && EXPANDED_DIRECTIONALS.has(tokens[0])) tokens.shift();
   while (tokens.length > 1 && EXPANDED_DIRECTIONALS.has(tokens[tokens.length - 1])) tokens.pop();
   return tokens.join(' ');
+}
+
+/**
+ * The street key with "capital"/"capitol" treated as one word.
+ *
+ * A verified real-world spelling split, not a guessed one: Census/USPS
+ * consistently write Kentucky's own seat-of-government street as "Capitol
+ * Ave" (the correct sense — the building), but Kentucky's own NAD
+ * submission spells every point on it "Capital Avenue" (the wrong-but-
+ * common homophone) — confirmed live 2026-09-02: 700 Capitol Ave,
+ * Frankfort, KY has zero matches on "capitol" and 29 points on "Capital
+ * Avenue" including one at house number 704, four doors from the target.
+ * The same misspelling recurs elsewhere for the same reason (it names a
+ * government building, and government data-entry gets its own building's
+ * name wrong often enough to be a pattern, not a fluke).
+ *
+ * Deliberately NOT folded into streetKey() itself, for the same reason
+ * streetKeyWithoutDirectionals() isn't: unlike a directional or a street
+ * type, "Capital" and "Capitol" are genuinely different words elsewhere
+ * (a real "Capital Blvd" financial-district street is not the same place
+ * as a "Capitol Blvd" near a statehouse), so this is a knowing fallback a
+ * caller reaches for after the exact and directional-fallback passes both
+ * find nothing — never the default comparison. matchAddressPoint() and
+ * neighborBracket() apply the same house-number and tight-cluster guards
+ * to this pass as they do to the directional fallback, so a coincidental
+ * same-number collision on an unrelated same-named street still can't
+ * produce a wrong point.
+ */
+export function streetKeyCapitolNormalized(street: string): string {
+  return streetKey(street)
+    .split(' ')
+    .map((token) => (token === 'capital' || token === 'capitol' ? 'capitol' : token))
+    .join(' ');
 }
 
 /** Extract the leading house number from a one-line address string (e.g. "90 W Broad St, Columbus, OH" -> "90"). Returns null when the address doesn't start with a number. */

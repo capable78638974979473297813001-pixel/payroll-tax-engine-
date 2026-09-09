@@ -41,7 +41,13 @@ import {
   parseAddressParts,
   resolveRooftop,
 } from '../geocode/rooftop.ts';
-import { isInsidePortlandMetro, jeddAtPoint } from '../geocode/districts.ts';
+import { resolveParcelCentroid, PARCEL_SOURCES } from '../geocode/parcel.ts';
+import {
+  isInsideCanbyTransitDistrict,
+  isInsidePortlandMetro,
+  jeddAtPoint,
+  oregonTransitDistrictAtPoint,
+} from '../geocode/districts.ts';
 
 const CHECK_DATE = '2026-08-15';
 
@@ -454,7 +460,7 @@ describe('resolve.ts — real captured Census geographies', () => {
     assert.equal(resolved.wvServiceFeeCity, null);
   });
 
-  test('Denver, CO: sets the denver flag', () => {
+  test('Denver, CO: matches coOptCity', () => {
     // Real Census result for 1437 Bannock St, Denver, CO 80202 — Denver
     // is itself a consolidated city-county government in Colorado too.
     const geo: CensusGeographies = {
@@ -464,10 +470,10 @@ describe('resolve.ts — real captured Census geographies', () => {
       counties: ['Denver County'],
     };
     const resolved = resolveJurisdiction(geo, CHECK_DATE);
-    assert.equal(resolved.flags.denver, true);
+    assert.equal(resolved.coOptCity, 'Denver');
   });
 
-  test('a Colorado address outside Denver leaves the denver flag false', () => {
+  test('a Colorado address outside every OPT city leaves coOptCity null', () => {
     const geo: CensusGeographies = {
       state: 'CO',
       incorporatedPlaces: ['Colorado Springs city'],
@@ -475,7 +481,51 @@ describe('resolve.ts — real captured Census geographies', () => {
       counties: ['El Paso County'],
     };
     const resolved = resolveJurisdiction(geo, CHECK_DATE);
-    assert.equal(resolved.flags.denver, false);
+    assert.equal(resolved.coOptCity, null);
+  });
+
+  test('Glendale, CO: matches coOptCity — found 2026-09-03, previously unreachable despite the tax computation already supporting it', () => {
+    const geo: CensusGeographies = {
+      state: 'CO',
+      incorporatedPlaces: ['Glendale city'],
+      countySubdivisions: [],
+      counties: ['Arapahoe County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.coOptCity, 'Glendale');
+  });
+
+  test('Greenwood Village, CO: matches coOptCity — a multi-word place name, not just single-word cities like the others', () => {
+    const geo: CensusGeographies = {
+      state: 'CO',
+      incorporatedPlaces: ['Greenwood Village city'],
+      countySubdivisions: [],
+      counties: ['Arapahoe County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.coOptCity, 'Greenwood Village');
+  });
+
+  test('Sheridan, CO: matches coOptCity', () => {
+    const geo: CensusGeographies = {
+      state: 'CO',
+      incorporatedPlaces: ['Sheridan city'],
+      countySubdivisions: [],
+      counties: ['Arapahoe County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.coOptCity, 'Sheridan');
+  });
+
+  test('Aurora, CO: matches coOptCity — kept resolvable despite the tax itself being repealed 2025-01-01, so a pre-repeal check date still computes it', () => {
+    const geo: CensusGeographies = {
+      state: 'CO',
+      incorporatedPlaces: ['Aurora city'],
+      countySubdivisions: [],
+      counties: ['Arapahoe County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.coOptCity, 'Aurora');
   });
 
   test('Wilmington, DE: sets the wilmington flag', () => {
@@ -812,6 +862,35 @@ describe('buildings.ts — the OpenStreetMap building-footprint check (real capt
 
     test('streetKey keeps genuinely different streets different', () => {
       assert.notEqual(streetKey('W Broad St'), streetKey('S Front St'));
+    });
+
+    test('streetKey makes digit and word forms of a numbered street compare equal — live NAD data for Juneau, AK publishes "FOURTH Street", not "4th St", and this address matched nothing at all before this normalization existed', () => {
+      assert.equal(streetKey('4th St'), streetKey('FOURTH Street'));
+      assert.equal(streetKey('3rd Ave'), streetKey('Third Avenue'));
+      assert.equal(streetKey('11th St'), streetKey('Eleventh Street'));
+      assert.equal(streetKey('20th St'), streetKey('Twentieth Street'));
+    });
+
+    test('streetKey collapses a two-word ordinal, spaced or hyphenated, to its digit form', () => {
+      assert.equal(streetKey('21st Ave'), streetKey('Twenty First Avenue'));
+      assert.equal(streetKey('21st Ave'), streetKey('Twenty-First Avenue'));
+      assert.equal(streetKey('99th St'), streetKey('Ninety Ninth Street'));
+    });
+
+    test('streetKey collapses three- and four-word ordinals into the triple-digit streets some cities (Manhattan) actually have', () => {
+      assert.equal(streetKey('100th St'), streetKey('One Hundredth Street'));
+      assert.equal(streetKey('105th St'), streetKey('One Hundred Fifth Street'));
+      assert.equal(streetKey('120th St'), streetKey('One Hundred Twentieth Street'));
+      assert.equal(streetKey('125th St'), streetKey('One Hundred Twenty Fifth Street'));
+    });
+
+    test('streetKey does not collapse a bare cardinal number that never resolves to an ordinal — "One World Way" names a place, not a numbered street', () => {
+      assert.equal(streetKey('One World Way'), 'one world way');
+    });
+
+    test('streetKey leaves an already-digit ordinal alone', () => {
+      assert.equal(streetKey('4th St'), '4th street');
+      assert.equal(streetKey('21st Ave'), '21st avenue');
     });
 
     test('extractHouseNumber reads the leading number, or null when there is none', () => {
@@ -1328,6 +1407,79 @@ describe('rooftop.ts — authoritative address points (real captured National Ad
       assert.equal(result.ambiguous, true);
       assert.ok(result.match!.spreadMeters > 200);
     });
+
+    test('North Dakota: an exact match found only by widening the search radius, after every normal-radius tier fails', async () => {
+      // The real case this tier exists for: North Dakota's own submission
+      // publishes 600 E Boulevard Ave, Bismarck — just 444m from Census's
+      // interpolated point, outside the normal 300m box. The first fetch
+      // (300m) returns no point at all; only the SECOND, wider fetch (600m)
+      // carries it, so this also proves the widened search is a genuine
+      // last resort rather than always querying at the larger radius.
+      let nadCalls = 0;
+      const growingRadius = (async (url: string) => {
+        const target = String(url);
+        if (target.includes('nominatim')) {
+          return new Response(JSON.stringify([]), { status: 200 }); // no OSM corroboration either
+        }
+        nadCalls++;
+        if (nadCalls === 1) return new Response(JSON.stringify({ features: [] }), { status: 200 });
+        return new Response(
+          JSON.stringify({
+            features: [
+              {
+                attributes: {
+                  AddNo_Full: '600',
+                  St_PreDir: 'East',
+                  St_Name: 'Boulevard',
+                  St_PosTyp: 'Avenue',
+                  Post_City: 'BISMARCK',
+                  Zip_Code: '58505',
+                  Placement: 'Unknown',
+                  NAD_Source: 'State of North Dakota',
+                  Latitude: 46.82067,
+                  Longitude: -100.7827,
+                },
+              },
+            ],
+          }),
+          { status: 200 },
+        );
+      }) as unknown as typeof fetch;
+
+      const result = await resolveRooftop(
+        '600 E Boulevard Ave, Bismarck, ND 58505',
+        { lat: 46.8168, lon: -100.7813 },
+        growingRadius,
+        FAST_NAD,
+      );
+      assert.equal(nadCalls, 2, 'expected exactly one narrow-radius NAD query, then one wide-radius NAD query');
+      assert.equal(result.found, true);
+      assert.equal(result.tier, 'authoritative');
+      assert.equal(result.match!.chosen.source, 'State of North Dakota');
+      assert.ok(
+        result.metersFromInterpolated! > 400 && result.metersFromInterpolated! < 500,
+        `expected roughly 444m, got ${result.metersFromInterpolated}`,
+      );
+    });
+
+    test('an OSM/parcel result already found at the normal radius is never displaced by a wide-radius retry', async () => {
+      // Same Columbus address the first test in this block uses, whose
+      // exact-match point already resolves within the normal 300m box —
+      // the wide-radius fallback must never even be attempted.
+      let calls = 0;
+      const countingFetch = (async () => {
+        calls++;
+        return new Response(JSON.stringify({ features: COLUMBUS_NAD }), { status: 200 });
+      }) as unknown as typeof fetch;
+      const result = await resolveRooftop(
+        '90 W Broad St, Columbus, OH 43215',
+        COLUMBUS_INTERPOLATED,
+        countingFetch,
+        FAST_NAD,
+      );
+      assert.equal(result.tier, 'authoritative');
+      assert.equal(calls, 1, 'a normal-radius match must not trigger a second, wider fetch');
+    });
   });
 
   /**
@@ -1483,6 +1635,196 @@ describe('rooftop.ts — authoritative address points (real captured National Ad
         assert.equal(nominatimCalled, false);
       });
     });
+
+    describe('the parcel-centroid tier — county tax-parcel data, gated hard against real misattribution', () => {
+      const PA_SOURCE = PARCEL_SOURCES.find((s) => s.state === 'PA')!;
+      const HARRISBURG_INTERPOLATED = { lat: 40.263316301322, lon: -76.884360658074 };
+
+      /** A square ring roughly sideMeters across, centered on (lat, lon). Good enough for area/centroid math at parcel scale. */
+      const squareRing = (lat: number, lon: number, sideMeters: number): number[][] => {
+        const dLat = sideMeters / 2 / 111_320;
+        const dLon = sideMeters / 2 / (111_320 * Math.cos((lat * Math.PI) / 180));
+        return [
+          [lon - dLon, lat - dLat],
+          [lon + dLon, lat - dLat],
+          [lon + dLon, lat + dLat],
+          [lon - dLon, lat + dLat],
+          [lon - dLon, lat - dLat],
+        ];
+      };
+
+      const parcelFeature = (opts: { houseNumber: string; street: string; lat: number; lon: number; sideMeters: number }) => ({
+        attributes: { house_numb: opts.houseNumber, street_nam: opts.street },
+        geometry: { rings: [squareRing(opts.lat, opts.lon, opts.sideMeters)] },
+      });
+
+      /** Routes by URL across all three services a resolution can call — NAD, Nominatim, and this one registered parcel source. */
+      const threeServiceFetch = (opts: { nad?: unknown[]; nominatim?: unknown[]; parcel?: unknown[] }) =>
+        (async (url: string) => {
+          const target = String(url);
+          if (target.includes('nominatim')) return new Response(JSON.stringify(opts.nominatim ?? []), { status: 200 });
+          if (target.startsWith(PA_SOURCE.queryUrl)) {
+            return new Response(JSON.stringify({ features: opts.parcel ?? [] }), { status: 200 });
+          }
+          return new Response(JSON.stringify({ features: opts.nad ?? [] }), { status: 200 });
+        }) as unknown as typeof fetch;
+
+      test('resolveParcelCentroid: an UNATTRIBUTED small parcel (no house number at all) is used when no exact match exists — the real Capitol case', async () => {
+        const result = await resolveParcelCentroid(
+          '501 N 3rd St, Harrisburg, PA 17120',
+          HARRISBURG_INTERPOLATED,
+          (async () =>
+            new Response(
+              JSON.stringify({
+                features: [parcelFeature({ houseNumber: '', street: '', ...HARRISBURG_INTERPOLATED, sideMeters: 17 })],
+              }),
+              { status: 200 },
+            )) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.ok(result);
+        assert.equal(result!.source.state, 'PA');
+        assert.ok(result!.areaSquareMeters < 300);
+      });
+
+      test('resolveParcelCentroid: NEVER uses a parcel with a real, different address, however close it is', async () => {
+        // The exact bug caught live: the nearest SMALL parcel to the target
+        // point was attributed to house number 400, not the target's 501 —
+        // a different, real building. Distance alone must never win.
+        const wrongAddress = parcelFeature({
+          houseNumber: '400',
+          street: '3RD',
+          lat: HARRISBURG_INTERPOLATED.lat + 0.00002,
+          lon: HARRISBURG_INTERPOLATED.lon,
+          sideMeters: 17,
+        });
+        const result = await resolveParcelCentroid(
+          '501 N 3rd St, Harrisburg, PA 17120',
+          HARRISBURG_INTERPOLATED,
+          (async () => new Response(JSON.stringify({ features: [wrongAddress] }), { status: 200 })) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.equal(result, null);
+      });
+
+      test('resolveParcelCentroid: an EXACT address match wins even when a closer unattributed parcel also exists', async () => {
+        const exact = parcelFeature({
+          houseNumber: '501',
+          street: 'N 3rd St',
+          lat: HARRISBURG_INTERPOLATED.lat + 0.0001,
+          lon: HARRISBURG_INTERPOLATED.lon,
+          sideMeters: 17,
+        });
+        const unattributedCloser = parcelFeature({
+          houseNumber: '',
+          street: '',
+          ...HARRISBURG_INTERPOLATED,
+          sideMeters: 17,
+        });
+        const result = await resolveParcelCentroid(
+          '501 N 3rd St, Harrisburg, PA 17120',
+          HARRISBURG_INTERPOLATED,
+          (async () =>
+            new Response(JSON.stringify({ features: [unattributedCloser, exact] }), { status: 200 })) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.ok(result);
+        assert.ok(result!.metersFromInterpolated > 5, 'should have picked the farther EXACT match, not the closer unattributed one');
+      });
+
+      test('resolveParcelCentroid: a directional/street-type mismatch ("3RD" vs "N 3rd St") still counts as exact', async () => {
+        const bareStreetName = parcelFeature({
+          houseNumber: '501',
+          street: '3RD',
+          ...HARRISBURG_INTERPOLATED,
+          sideMeters: 17,
+        });
+        const result = await resolveParcelCentroid(
+          '501 N 3rd St, Harrisburg, PA 17120',
+          HARRISBURG_INTERPOLATED,
+          (async () => new Response(JSON.stringify({ features: [bareStreetName] }), { status: 200 })) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.ok(result);
+      });
+
+      test('resolveParcelCentroid: an oversized parcel (a whole government campus) is rejected outright — the real Mississippi finding', async () => {
+        const wholeCampus = parcelFeature({
+          houseNumber: '',
+          street: '',
+          ...HARRISBURG_INTERPOLATED,
+          sideMeters: 300, // 90,000 sqm, an order of magnitude over the gate
+        });
+        const result = await resolveParcelCentroid(
+          '501 N 3rd St, Harrisburg, PA 17120',
+          HARRISBURG_INTERPOLATED,
+          (async () => new Response(JSON.stringify({ features: [wholeCampus] }), { status: 200 })) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.equal(result, null);
+      });
+
+      test('resolveParcelCentroid: no registered source for this state means no query is even attempted', async () => {
+        let called = false;
+        const result = await resolveParcelCentroid(
+          '400 High St, Jackson, MS 39201',
+          { lat: 32.305111271605, lon: -90.183041057541 },
+          (async () => {
+            called = true;
+            return new Response('{}', { status: 200 });
+          }) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.equal(result, null);
+        assert.equal(called, false);
+      });
+
+      test('resolveRooftop: a parcel centroid CLOSER than OSM wins the tier', async () => {
+        const closeParcel = parcelFeature({ houseNumber: '', street: '', ...HARRISBURG_INTERPOLATED, sideMeters: 17 });
+        const result = await resolveRooftop(
+          '501 N 3rd St, Harrisburg, PA 17120',
+          HARRISBURG_INTERPOLATED,
+          threeServiceFetch({
+            nad: [],
+            nominatim: osmHouse({
+              lat: HARRISBURG_INTERPOLATED.lat + 0.002,
+              lon: HARRISBURG_INTERPOLATED.lon,
+              houseNumber: '501',
+              road: 'North 3rd Street',
+            }),
+            parcel: [closeParcel],
+          }),
+          FAST,
+        );
+        assert.equal(result.tier, 'parcel-centroid');
+      });
+
+      test('resolveRooftop: OSM wins when it is CLOSER than the parcel centroid', async () => {
+        const farParcel = parcelFeature({
+          houseNumber: '',
+          street: '',
+          lat: HARRISBURG_INTERPOLATED.lat + 0.001,
+          lon: HARRISBURG_INTERPOLATED.lon,
+          sideMeters: 17,
+        });
+        const result = await resolveRooftop(
+          '501 N 3rd St, Harrisburg, PA 17120',
+          HARRISBURG_INTERPOLATED,
+          threeServiceFetch({
+            nad: [],
+            nominatim: osmHouse({
+              lat: HARRISBURG_INTERPOLATED.lat + 0.00002,
+              lon: HARRISBURG_INTERPOLATED.lon,
+              houseNumber: '501',
+              road: 'North 3rd Street',
+            }),
+            parcel: [farParcel],
+          }),
+          FAST,
+        );
+        assert.equal(result.tier, 'osm-corroborated');
+      });
+    });
   });
 });
 
@@ -1583,6 +1925,74 @@ describe('districts.ts — taxing boundaries that are not Census geographies (mo
 
     test('an unreachable service is attempted: false — distinct from "outside the district"', async () => {
       const result = await isInsidePortlandMetro(45.51224, -122.6587, throws, FAST);
+      assert.deepEqual(result, { attempted: false, inside: false });
+    });
+  });
+
+  describe("oregonTransitDistrictAtPoint — ODOT's unified statewide jurisdictions layer", () => {
+    /** The real shape ODOT's own service answers with — a point can be inside more than one nested jurisdiction at once (e.g. a county AND a transit district), so the payroll-tax lookup has to scan every feature, not just trust features[0]. */
+    const withNames = (...names: string[]) =>
+      json({ features: names.map((JRSDCT_NM) => ({ attributes: { JRSDCT_NM } })) });
+
+    test('a Portland point maps to TriMet by name', async () => {
+      const result = await oregonTransitDistrictAtPoint(
+        45.5152,
+        -122.6784,
+        withNames('Portland', 'Multnomah County', 'Tri County Metropolitan Mass Transit District of Oregon'),
+        FAST,
+      );
+      assert.deepEqual(result, { attempted: true, locality: 'TriMet' });
+    });
+
+    test('a Eugene point maps to LTD by name', async () => {
+      const result = await oregonTransitDistrictAtPoint(44.0521, -123.0868, withNames('Eugene', 'Lane Transit District'), FAST);
+      assert.deepEqual(result, { attempted: true, locality: 'LTD' });
+    });
+
+    test('a Molalla point maps to SCTD, not to the OTHER real feature (Molalla River School District) also returned', async () => {
+      const result = await oregonTransitDistrictAtPoint(
+        45.1487,
+        -122.5762,
+        withNames('Molalla', 'Clackamas County', 'South Clackamas Transit District', 'Molalla River School District'),
+        FAST,
+      );
+      assert.deepEqual(result, { attempted: true, locality: 'SCTD' });
+    });
+
+    test('a point inside a PROPERTY-tax-funded district (Rogue Valley) correctly answers no payroll-tax locality, not unknown', async () => {
+      const result = await oregonTransitDistrictAtPoint(42.3265, -122.8756, withNames('Medford', 'Rogue Valley Transportation District'), FAST);
+      assert.deepEqual(result, { attempted: true, locality: null });
+    });
+
+    test('a point inside no jurisdiction at all answers no locality', async () => {
+      const result = await oregonTransitDistrictAtPoint(45.51224, -122.6784, json({ features: [] }), FAST);
+      assert.deepEqual(result, { attempted: true, locality: null });
+    });
+
+    test('an unreachable service is attempted: false — distinct from "no payroll-tax district here"', async () => {
+      const result = await oregonTransitDistrictAtPoint(45.5152, -122.6784, throws, FAST);
+      assert.deepEqual(result, { attempted: false, locality: null });
+    });
+  });
+
+  describe("isInsideCanbyTransitDistrict — Oregon's own statewide UGB layer (DLCD)", () => {
+    test("a point inside Canby's own UGB comes back inside", async () => {
+      const result = await isInsideCanbyTransitDistrict(45.2607, -122.6903, json({ features: [{ attributes: { NAME: 'Canby' } }] }), FAST);
+      assert.deepEqual(result, { attempted: true, inside: true });
+    });
+
+    test("a point inside a DIFFERENT city's UGB (not Canby's) comes back outside, not a false positive", async () => {
+      const result = await isInsideCanbyTransitDistrict(45.5152, -122.6784, json({ features: [{ attributes: { NAME: 'Metro' } }] }), FAST);
+      assert.deepEqual(result, { attempted: true, inside: false });
+    });
+
+    test('a point inside no UGB at all comes back outside', async () => {
+      const result = await isInsideCanbyTransitDistrict(44.0582, -121.3153, json({ features: [] }), FAST);
+      assert.deepEqual(result, { attempted: true, inside: false });
+    });
+
+    test('an unreachable service is attempted: false — distinct from "outside the district"', async () => {
+      const result = await isInsideCanbyTransitDistrict(45.2607, -122.6903, throws, FAST);
       assert.deepEqual(result, { attempted: false, inside: false });
     });
   });

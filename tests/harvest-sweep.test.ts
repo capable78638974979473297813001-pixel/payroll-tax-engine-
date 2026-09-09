@@ -11,9 +11,12 @@ import {
   windowsDueOn,
 } from '../harvester/calendar.ts';
 import { fetchSource, isPdf } from '../harvester/fetch.ts';
+import { fetchKyOccupationalDatabase } from '../harvester/ky-occupational-fetch.ts';
 import { normalizeForComparison } from '../harvester/normalize.ts';
 import { isDue, windowTouchesSource, sweep } from '../harvester/run.ts';
 import type { RegisteredSource } from '../harvester/run.ts';
+import { writeSnapshot } from '../harvester/snapshot.ts';
+import { fetchWvHandbook } from '../harvester/wv-handbook-fetch.ts';
 
 const HARVESTER = join(import.meta.dirname, '..', 'harvester');
 
@@ -22,6 +25,7 @@ before(() => {
   // capture" vs "unchanged" is deterministic.
   rmSync(join(HARVESTER, 'snapshots', 'sweep-test-a'), { recursive: true, force: true });
   rmSync(join(HARVESTER, 'snapshots', 'sweep-test-b'), { recursive: true, force: true });
+  rmSync(join(HARVESTER, 'snapshots', 'sweep-test-heavy'), { recursive: true, force: true });
 });
 
 /**
@@ -117,6 +121,32 @@ describe('calendar — scheduled effective dates from the data files', () => {
     }
   });
 
+  test('picks up minimum-wage scheduled changes, from the nested minimum-wage/ tree', () => {
+    // data/minimum-wage/ is nested (states/, local/, territories/, sectoral/
+    // subfolders, plus a federal-{year}.json directly inside) rather than
+    // flat like data/states/ and data/local/, so it needs its own recursive
+    // walk in dataFiles() — this is what proves that walk actually reaches
+    // every subfolder, not just the top level.
+    const all = scheduledEffectiveDates();
+    const mw = all.filter((w) => w.affects[0].includes('minimum-wage'));
+    assert.ok(mw.length >= 10, `expected scheduled changes from several minimum-wage files, got ${mw.length}`);
+    const paths = mw.map((w) => w.affects[0]);
+    assert.ok(paths.some((p) => p.includes('minimum-wage/states/')), 'a state file');
+    assert.ok(paths.some((p) => p.includes('minimum-wage/local/')), 'a local file');
+    assert.ok(paths.some((p) => p.includes('minimum-wage/territories/')), 'a territory file');
+
+    // Florida's step to $15.00 lands 2026-09-30 — the single nearest-term
+    // scheduled change in the whole minimum-wage database.
+    const fl = mw.find((w) => w.affects[0].includes('FL-2026'));
+    assert.ok(fl, 'Florida\'s scheduled $15.00 step should be discovered');
+    assert.equal(fl.effectiveOn, '2026-09-30');
+  });
+
+  test('Florida’s imminent step is due today, the same way Georgia’s was', () => {
+    const due = windowsDueOn('2026-09-08').map((w) => w.affects[0]);
+    assert.ok(due.some((p) => p.includes('FL-2026')));
+  });
+
   test('shiftDays crosses month and year boundaries correctly', () => {
     assert.equal(shiftDays('2026-01-01', -30), '2025-12-02');
     assert.equal(shiftDays('2026-12-31', 1), '2027-01-01');
@@ -146,10 +176,38 @@ describe('fetch — failure modes are results, never exceptions', () => {
       fetchImpl: async () => {
         throw new Error('getaddrinfo ENOTFOUND');
       },
+      retryDelayMs: 0,
     });
     assert.equal(r.ok, false);
     if (r.ok) return;
     assert.match(r.reason, /ENOTFOUND/);
+  });
+
+  test('a network error is retried once before being reported', async () => {
+    let calls = 0;
+    const r = await fetchSource(src, {
+      fetchImpl: async () => {
+        calls++;
+        if (calls === 1) throw new Error('ECONNRESET');
+        return new Response('<html>rate 1.5%</html>', { headers: { 'content-type': 'text/html' } });
+      },
+      retryDelayMs: 0,
+    });
+    assert.equal(calls, 2);
+    assert.equal(r.ok, true);
+  });
+
+  test('a 403 is never retried — it is a settled answer, not a hiccup', async () => {
+    let calls = 0;
+    const r = await fetchSource(src, {
+      fetchImpl: async () => {
+        calls++;
+        return new Response('', { status: 403 });
+      },
+      retryDelayMs: 0,
+    });
+    assert.equal(calls, 1);
+    assert.equal(r.ok, false);
   });
 
   test('an empty 200 is a failure — a blank page is not a register', async () => {
@@ -311,6 +369,50 @@ describe('run — what is due today', () => {
     assert.equal(windowTouchesSource(wageBase, ohioLocal), false);
   });
 
+  test('heavyFetch sources are exempt from force: true — see ky-occupational-fetch.ts', async () => {
+    const heavySource: RegisteredSource = {
+      id: 'sweep-test-heavy',
+      level: 'local',
+      jurisdiction: 'KY',
+      title: 'Test heavy source',
+      url: 'https://example.invalid/heavy',
+      authority: 'state_register',
+      format: 'html',
+      checkFrequency: 'monthly',
+      heavyFetch: true,
+    };
+    // Seed a snapshot dated exactly `asOf`, so elapsedDays is 0 — genuinely
+    // not due under the monthly cadence, deterministically, regardless of
+    // whenever this test actually runs (never relying on the real clock,
+    // unlike computing "not due" from a past checkFrequency window).
+    writeSnapshot(heavySource.id, 'heavy content v1', '2026-03-01T00:00:00.000Z');
+
+    // Same day, `force: true` — an ordinary source would be re-checked
+    // regardless of cadence; a heavyFetch source should be skipped instead.
+    const forced = await sweep('2026-03-01', {
+      sources: [heavySource],
+      fetchImpl: stubFetch('heavy content v1'),
+      force: true,
+    });
+    assert.equal(forced.counts.skipped_not_due, 1);
+  });
+
+  test('a calendar window still forces a heavyFetch source, even without force: true', () => {
+    const heavySource: RegisteredSource = {
+      id: 'sweep-test-heavy',
+      level: 'local',
+      jurisdiction: 'KY',
+      title: 'Test heavy source',
+      url: 'https://example.invalid/heavy',
+      authority: 'state_register',
+      format: 'html',
+      checkFrequency: 'monthly',
+      heavyFetch: true,
+    };
+    const newYear = annualAnchors(2027)[0];
+    assert.equal(windowTouchesSource(newYear, heavySource), true);
+  });
+
   test("a state's scheduled date forces that state's sources only", () => {
     const ohioWindow = {
       kind: 'scheduled_effective_date' as const,
@@ -323,6 +425,37 @@ describe('run — what is due today', () => {
     assert.equal(windowTouchesSource(ohioWindow, ohioLocal), true);
     // Re-reading the IRS publication because Ohio changed is busywork.
     assert.equal(windowTouchesSource(ohioWindow, federalSource), false);
+  });
+
+  test('a minimum-wage scheduled date is recognized too, not just the tax data shape', () => {
+    // data/minimum-wage/ nests under states/local/territories rather than
+    // sitting flat like data/states/ and data/local/ — found live: the
+    // regex here originally only matched the flat tax-data shape, so a
+    // Florida minimum-wage window existed (calendar.ts discovers it fine)
+    // but could never force-check any source, because this function
+    // silently returned false for every data/minimum-wage/ path.
+    const flWindow = {
+      kind: 'scheduled_effective_date' as const,
+      effectiveOn: '2026-09-30',
+      checkFrom: '2026-08-31',
+      checkUntil: '2026-10-30',
+      affects: ['data/minimum-wage/states/FL-2026.json#scheduledChanges[0].effectiveDate'],
+      why: 'test',
+    };
+    const flSource: RegisteredSource = { ...ohioLocal, jurisdiction: 'FL' };
+    assert.equal(windowTouchesSource(flWindow, flSource), true);
+    assert.equal(windowTouchesSource(flWindow, ohioLocal), false);
+
+    const asWindow = {
+      kind: 'scheduled_effective_date' as const,
+      effectiveOn: '2027-09-30',
+      checkFrom: '2027-08-31',
+      checkUntil: '2027-10-30',
+      affects: ['data/minimum-wage/territories/AS-2026.json#scheduledChanges[0].effectiveDate'],
+      why: 'test',
+    };
+    const asSource: RegisteredSource = { ...ohioLocal, jurisdiction: 'AS' };
+    assert.equal(windowTouchesSource(asWindow, asSource), true);
   });
 
   test('a full sweep records a first capture, then reports it unchanged next time', async () => {
@@ -360,6 +493,7 @@ describe('run — what is due today', () => {
           ? new Response('', { status: 500 })
           : new Response('ok content', { status: 200, headers: { 'content-type': 'text/html' } }),
       force: true,
+      retryDelayMs: 0,
     });
     // One failed, but the other was still checked — a broken source must not
     // blind the harvester to the other fifty-nine.
@@ -378,5 +512,171 @@ describe('run — what is due today', () => {
       if (e.snapshotPath) assert.match(e.snapshotPath, /snapshots/);
       assert.ok(!e.snapshotPath?.includes(`${'data'}${'/'}states`));
     }
+  });
+});
+
+describe('ky-occupational-fetch — driving a WebForms postback for every district', () => {
+  const INITIAL_HTML = `<html><body>
+    <input type="hidden" id="__VIEWSTATE" value="VS1" />
+    <input type="hidden" id="__VIEWSTATEGENERATOR" value="GEN1" />
+    <input type="hidden" id="__EVENTVALIDATION" value="EV1" />
+    <select id="ContentPlaceHolder1_ddlDistricts">
+      <option value="2">Beta County</option>
+      <option value="1">Alpha City</option>
+    </select>
+  </body></html>`;
+
+  function detailHtml(name: string, rate: string): string {
+    return `<html><body>
+      <span id="ContentPlaceHolder1_FvDetails_TaxDistrictNameLabel">${name}</span>
+      <span id="ContentPlaceHolder1_FvDetails_OrdinanceLabel">O-1</span>
+      <span id="ContentPlaceHolder1_fvDetail_LblGross">Net Profits</span>
+      <span id="ContentPlaceHolder1_fvDetail_LblRate">${rate}</span>
+      <span id="ContentPlaceHolder1_fvDetail_LblMin"></span>
+      <span id="ContentPlaceHolder1_fvDetail_LblCap"></span>
+      <span id="ContentPlaceHolder1_fvDetail_ContactEMail">someone@example.gov</span>
+    </body></html>`;
+  }
+
+  function mockServer(districtHtml: Record<string, string | null>) {
+    return async (_url: string, init?: RequestInit) => {
+      if (!init || init.method !== 'POST') {
+        return new Response(INITIAL_HTML, {
+          status: 200,
+          headers: { 'content-type': 'text/html', 'set-cookie': 'ASP.NET_SessionId=abc123; path=/' },
+        });
+      }
+      const body = new URLSearchParams(String(init.body));
+      const id = body.get('ctl00$ContentPlaceHolder1$ddlDistricts') ?? '';
+      const html = districtHtml[id];
+      if (html === null || html === undefined) return new Response('', { status: 500 });
+      return new Response(html, { status: 200, headers: { 'content-type': 'text/html' } });
+    };
+  }
+
+  test('reads every district in one session and composes one document, sorted by id', async () => {
+    const fetchImpl = mockServer({
+      '1': detailHtml('Alpha City', '1.5%'),
+      '2': detailHtml('Beta County', '2%'),
+    });
+    const r = await fetchKyOccupationalDatabase(
+      { id: 'ky-occupational-rates', url: 'https://web.sos.ky.gov/occupationaltax/' },
+      { fetchImpl, requestDelayMs: 0 },
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    // Sorted by numeric id (1 before 2) even though the dropdown listed
+    // Beta (2) first — the composite document's order must not depend on
+    // the page's own markup order.
+    const alphaIdx = r.content.indexOf('Alpha City');
+    const betaIdx = r.content.indexOf('Beta County');
+    assert.ok(alphaIdx >= 0 && betaIdx >= 0 && alphaIdx < betaIdx);
+    assert.match(r.content, /rate=1\.5%/);
+    assert.match(r.content, /rate=2%/);
+  });
+
+  test('a rate change in ONE district changes the composite document', async () => {
+    const before = await fetchKyOccupationalDatabase(
+      { id: 'ky-occupational-rates', url: 'https://web.sos.ky.gov/occupationaltax/' },
+      { fetchImpl: mockServer({ '1': detailHtml('Alpha City', '1.5%'), '2': detailHtml('Beta County', '2%') }), requestDelayMs: 0 },
+    );
+    const after = await fetchKyOccupationalDatabase(
+      { id: 'ky-occupational-rates', url: 'https://web.sos.ky.gov/occupationaltax/' },
+      { fetchImpl: mockServer({ '1': detailHtml('Alpha City', '1.75%'), '2': detailHtml('Beta County', '2%') }), requestDelayMs: 0 },
+    );
+    assert.equal(before.ok, true);
+    assert.equal(after.ok, true);
+    if (!before.ok || !after.ok) return;
+    assert.notEqual(before.content, after.content);
+  });
+
+  test('never captures a contact email — administrative metadata, not tax content', async () => {
+    const r = await fetchKyOccupationalDatabase(
+      { id: 'ky-occupational-rates', url: 'https://web.sos.ky.gov/occupationaltax/' },
+      { fetchImpl: mockServer({ '1': detailHtml('Alpha City', '1.5%'), '2': detailHtml('Beta County', '2%') }), requestDelayMs: 0 },
+    );
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.doesNotMatch(r.content, /someone@example\.gov/);
+  });
+
+  test('one unreadable district fails the WHOLE fetch, never a silent partial roster', async () => {
+    const r = await fetchKyOccupationalDatabase(
+      { id: 'ky-occupational-rates', url: 'https://web.sos.ky.gov/occupationaltax/' },
+      { fetchImpl: mockServer({ '1': detailHtml('Alpha City', '1.5%'), '2': null }), requestDelayMs: 0 },
+    );
+    assert.equal(r.ok, false);
+    if (r.ok) return;
+    assert.match(r.reason, /Beta County/);
+  });
+
+  test('a missing session cookie or viewstate on the initial page is reported, not thrown', async () => {
+    const r = await fetchKyOccupationalDatabase(
+      { id: 'ky-occupational-rates', url: 'https://web.sos.ky.gov/occupationaltax/' },
+      {
+        fetchImpl: async () => new Response('<html>no viewstate here</html>', { status: 200 }),
+        requestDelayMs: 0,
+      },
+    );
+    assert.equal(r.ok, false);
+    if (r.ok) return;
+    assert.match(r.reason, /VIEWSTATE|cookie/);
+  });
+});
+
+describe('wv-handbook-fetch — resolving the CURRENT handbook edition, not a pinned one', () => {
+  const source = { id: 'wv-ui-rates', url: 'https://workforcewv.org/index/' };
+
+  function indexPage(handbookHref: string): string {
+    return `<html><body><a href="${handbookHref}">Employer Handbook</a></body></html>`;
+  }
+
+  test('follows the index page to whichever handbook edition it currently lists', async () => {
+    const fetchImpl = async (url: string) =>
+      String(url).includes('Employer-Handbook-Rev')
+        ? new Response('rate tables inside: 2.7%', { status: 200, headers: { 'content-type': 'text/html' } })
+        : new Response(indexPage('/wp-content/uploads/2025/02/Employer-Handbook-Rev.-02.25.pdf'), {
+            status: 200,
+            headers: { 'content-type': 'text/html' },
+          });
+    const r = await fetchWvHandbook(source, { fetchImpl });
+    assert.equal(r.ok, true);
+    if (!r.ok) return;
+    assert.match(r.content, /2\.7%/);
+  });
+
+  test('a NEW edition on the index page is followed automatically — no URL to update by hand', async () => {
+    const fetchImplOld = async (url: string) =>
+      String(url).includes('Employer-Handbook-Rev')
+        ? new Response('old edition content', { status: 200, headers: { 'content-type': 'text/html' } })
+        : new Response(indexPage('/wp-content/uploads/2024/06/Employer-Handbook-Rev.-06.24.pdf'), { status: 200 });
+    const fetchImplNew = async (url: string) =>
+      String(url).includes('Employer-Handbook-Rev')
+        ? new Response('new edition content', { status: 200, headers: { 'content-type': 'text/html' } })
+        : new Response(indexPage('/wp-content/uploads/2025/02/Employer-Handbook-Rev.-02.25.pdf'), { status: 200 });
+    const before = await fetchWvHandbook(source, { fetchImpl: fetchImplOld });
+    const after = await fetchWvHandbook(source, { fetchImpl: fetchImplNew });
+    assert.equal(before.ok, true);
+    assert.equal(after.ok, true);
+    if (!before.ok || !after.ok) return;
+    assert.notEqual(before.content, after.content);
+  });
+
+  test('a restructured index page with no handbook link is reported, not silently blank', async () => {
+    const r = await fetchWvHandbook(source, {
+      fetchImpl: async () => new Response('<html>no handbook link here</html>', { status: 200 }),
+    });
+    assert.equal(r.ok, false);
+    if (r.ok) return;
+    assert.match(r.reason, /Employer-Handbook/);
+  });
+
+  test('an index page that fails to load is reported like any other fetch failure', async () => {
+    const r = await fetchWvHandbook(source, {
+      fetchImpl: async () => new Response('', { status: 404 }),
+    });
+    assert.equal(r.ok, false);
+    if (r.ok) return;
+    assert.match(r.reason, /moved or been retired/i);
   });
 });

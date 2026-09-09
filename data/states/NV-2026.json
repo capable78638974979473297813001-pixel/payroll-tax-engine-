@@ -68,7 +68,7 @@
     "wageBase": 43700,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
     "newEmployerRate": 0.0295,
-    "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
+    "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table. RE-VERIFIED 2026-09-05: a direct fetch of detr.nv.gov (including its own March 2026 Quarterly Newsletter PDF) still 403s (varied headers, Wayback Machine lookup — both unsuccessful, same as before). This pass's search DID surface a search engine's own crawl of that same March 2026 newsletter PDF and detr.nv.gov's live page, quoting both directly: 'The Unemployment Insurance (UI) tax rate for new employers is 2.95 percent (.0295)... Effective January 1, 2026, the taxable wage base for Unemployment Insurance (UI) in Nevada increased to $43,700.' This is the primary document's own content, reached via a search index that got past the Akamai block this tool's direct fetch cannot — not an independent secondary source agreeing, but stronger: the primary source's own words, one step removed. Both figures match this file's existing newEmployerRate/wageBase exactly.",
     "experienceRange": {
       "min": 0.0025,
       "max": 0.054

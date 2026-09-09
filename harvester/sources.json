@@ -1,5 +1,21 @@
 {
-  "comment": "Authoritative sources only. The organising principle: never monitor an individual municipality's own website. Monitor the state-level register that the municipality is legally required to report into. Ohio's ~600 municipalities collapse to one Department of Taxation file; Pennsylvania's ~2,500 Act 32 jurisdictions collapse to one DCED register. That is what turns '7,400 jurisdictions' into roughly 60 things to watch.",
+  "comment": "Authoritative sources only. The organising principle: never monitor an individual municipality's own website. Monitor the state-level register that the municipality is legally required to report into. Ohio's ~600 municipalities collapse to one Department of Taxation file; Pennsylvania's ~2,500 Act 32 jurisdictions collapse to one DCED register. That is what turns '7,400 jurisdictions' into roughly 60 things to watch. Every entry's `url` resolves to a .gov (or state-designated register, tagged authority: 'state_register') domain -- checked 2026-09-03, none of the 105 point at a payroll vendor, aggregator, or other secondary source. UPDATED 2026-09-08: 6 minimum-wage registers added (111 total) -- 3 DOL tables, the EO 13658 contractor-wage notice, and 2 local aggregators (UC Berkeley's national inventory and WA L&I's local-rates page). Minimum wage is a floor on gross pay, not a withholding tax, but the same watch-the-register discipline applies, and two of the six (dol-eo13658-contractor-minimum-wage and berkeley-local-minimum-wage-inventory) are tagged state_register/primary the same way the rest of this file distinguishes a .gov page from an aggregator with no official standing.",
+  "checkCadence": {
+    "$comment": "User-directed 2026-09-03: checkFrequency below now follows a two-tier cadence rather than the uniform 'monthly' most sources previously carried. 'daily' = OH, PA, MI, IN, AL, NJ, NY, OR, CO, plus federal (US) sources, since federal figures (FUTA credit reduction, SS wage base, etc.) feed every state's calculation. 'weekly' = every other jurisdiction. harvester/daily.ts's own sweep(asOf, { force: true }) call, which used to override checkFrequency entirely and check every source every day, was changed to force: false so this cadence actually takes effect -- see that file's own updated doc comment for why the previous 'check everything daily' default was a deliberate but now superseded choice, not an oversight being corrected.",
+    "dailyJurisdictions": [
+      "OH",
+      "PA",
+      "MI",
+      "IN",
+      "AL",
+      "NJ",
+      "NY",
+      "OR",
+      "CO",
+      "US"
+    ],
+    "weeklyJurisdictions": "every other jurisdiction in this file"
+  },
   "sources": [
     {
       "id": "dol-futa-credit-reduction",
@@ -10,7 +26,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 50,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, finalised each November",
       "feeds": [
         "data/federal/{year}.json#futa.creditReductionStates"
@@ -25,7 +41,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 51,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published with a lag",
       "feeds": [
         "data/states/{STATE}-{year}.json#suiEmployer"
@@ -41,7 +57,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "weekly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov-Dec; mid-year revisions do happen after major legislation",
       "feeds": [
         "data/federal/{year}.json#incomeTax"
@@ -56,11 +72,13 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "weekly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, announced mid-October with the COLA",
       "feeds": [
         "data/federal/{year}.json#socialSecurity.wageBase"
-      ]
+      ],
+      "manualOnly": true,
+      "manualOnlyReason": "Confirmed HTTP 403 on every attempt from two real GitHub Actions runs (2026-08-31) and independently from this project's own sandbox, using Node's actual fetch with the full browser header set fetch.ts sends — not the curl-vs-Node client difference this project has seen elsewhere (e.g. Massachusetts, New Hampshire), where Node succeeded and curl alone was refused. This is Akamai/Cloudflare-style refusal of a cloud/datacenter IP range, which no header change fixes. One of the highest-value sources in the registry (the OASDI wage base), so excluded from the staleness test rather than pinning overall health red forever, but check it by hand each October when the COLA lands."
     },
     {
       "id": "ak-withholding",
@@ -71,7 +89,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/AK-{year}.json"
@@ -88,7 +106,7 @@
       "authority": "state_register",
       "format": "html",
       "coversJurisdictions": 25,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "rolling; ALM updates as member cities report",
       "feeds": [
         "data/local/AL-municipalities-{year}.json"
@@ -104,7 +122,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/AL-{year}.json#suiEmployer"
@@ -122,7 +140,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/AL-{year}.json"
@@ -137,7 +155,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/AR-{year}.json"
@@ -152,7 +170,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/AZ-{year}.json"
@@ -167,7 +185,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/CA-{year}.json#suiEmployer"
@@ -185,7 +203,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/CA-{year}.json"
@@ -200,7 +218,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/CO-{year}.json#suiEmployer"
@@ -218,7 +236,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/CO-{year}.json"
@@ -233,7 +251,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/CT-{year}.json#suiEmployer"
@@ -251,7 +269,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/CT-{year}.json"
@@ -266,7 +284,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "coversUI": true,
       "expectedChange": "annual; rate schedules are set each autumn for the following year",
       "feeds": [
@@ -284,7 +302,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/DC-{year}.json"
@@ -300,7 +318,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/DE-{year}.json#suiEmployer"
@@ -318,7 +336,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/DE-{year}.json"
@@ -333,7 +351,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/FL-{year}.json"
@@ -350,7 +368,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/GA-{year}.json#suiEmployer"
@@ -368,7 +386,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/GA-{year}.json"
@@ -383,7 +401,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/HI-{year}.json#suiEmployer"
@@ -401,7 +419,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/HI-{year}.json"
@@ -416,7 +434,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/IA-{year}.json#suiEmployer"
@@ -434,7 +452,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/IA-{year}.json"
@@ -449,7 +467,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/ID-{year}.json#suiEmployer"
@@ -467,7 +485,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/ID-{year}.json"
@@ -482,7 +500,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/IL-{year}.json#suiEmployer"
@@ -500,7 +518,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/IL-{year}.json"
@@ -515,7 +533,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 92,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, and Indiana genuinely does issue mid-year county rate changes",
       "feeds": [
         "data/local/IN-counties-{year}.json"
@@ -531,7 +549,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/IN-{year}.json#suiEmployer"
@@ -549,7 +567,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/IN-{year}.json"
@@ -564,14 +582,16 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/KS-{year}.json#suiEmployer"
       ],
       "note": "Watches the LABOUR department rather than the revenue department, which carries no UI figures. Verified to fetch and to contain wage-base and/or rate figures before being registered.",
       "coversUI": true,
-      "uiContent": "rates-only"
+      "uiContent": "unknown-no-snapshot",
+      "manualOnly": true,
+      "manualOnlyReason": "Confirmed HTTP 403 on every attempt from two real GitHub Actions runs (2026-08-31) and independently from this project's own sandbox, using Node's actual fetch with the full browser header set fetch.ts sends. Same cloud/datacenter-IP-refusal shape as ssa-wage-base above — see that entry's note for how this was distinguished from the curl-vs-Node client difference seen elsewhere. Excluded from the staleness test so it does not pin overall health red forever; check by hand each autumn when Kansas resets its rate schedule."
     },
     {
       "id": "ks-withholding",
@@ -582,7 +602,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/KS-{year}.json"
@@ -597,12 +617,30 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 59,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "rare for the statute itself; individual city/county rates change independently",
       "feeds": [
         "data/local/KY-occupational-{year}.json"
       ],
-      "note": "WEAK MONITORING TARGET, recorded honestly: this watches the STATUTE, not the rates. Kentucky has no central register of the ~225 local occupational taxes — the data file itself documents that its 59 confirmed entries were assembled by scraping the Secretary of State list and cross-checking individual ordinances. A rate change in one Kentucky city will NOT surface here. Registered anyway because a change to the enabling statute (rate caps, the KRS 68.197 credit mechanism) is itself worth catching, but treat KY local rates as verified-as-of their data file date, not monitored."
+      "note": "Watches the STATUTE only (rate caps, the KRS 68.197 credit mechanism) — a genuinely different signal from actual per-district rates, which as of 2026-09-01 are separately and directly monitored by ky-occupational-rates below. Kept as its own source rather than folded in: a statute amendment and a city raising its rate are different events worth distinguishing, and this one costs a single cheap GET."
+    },
+    {
+      "id": "ky-occupational-rates",
+      "level": "local",
+      "jurisdiction": "KY",
+      "title": "Kentucky Secretary of State — Occupational License Tax Database (KRS 67.766), all districts",
+      "url": "https://web.sos.ky.gov/occupationaltax/",
+      "authority": "state_register",
+      "format": "html",
+      "coversJurisdictions": 227,
+      "checkFrequency": "weekly",
+      "expectedChange": "rolling; most effective dates are 1 January, but a district can change its ordinance any time",
+      "feeds": [
+        "data/local/KY-occupational-{year}.json"
+      ],
+      "heavyFetch": true,
+      "customFetcher": "ky-occupational-full",
+      "note": "ADDED 2026-09-01, closing a real gap: this project's own data file already called this database 'Kentucky's PA-DCED/OH-Finder equivalent — an authoritative, state-run roster of 230 taxing districts', but nothing watched it, because it isn't a URL a plain GET can read: it's an ASP.NET WebForms page where the 227 district names load in a <select> but each district's actual rate only appears after a postback selecting it, into a panel that starts empty. harvester/ky-occupational-fetch.ts drives that postback for every district in one session (one GET for the viewstate/cookie, confirmed reusable across all 227 POSTs — verified by hand against three different districts before building this) and concatenates each district's name/ordinance/basis/rate/min/cap into one document, sorted by district id so only real content changes move the hash. Deliberately excludes each district's listed contact name/email/phone/address — administrative metadata and, for a real person's contact details, not something this project should be hashing and git-committing for no reason. Marked heavyFetch (227 requests, not 1) so the daily sweep's normal 'check everything, every day' does not force this specific source daily — see RegisteredSource.heavyFetch in run.ts — but the annual-new-year calendar window still forces it regardless, which is exactly when KY local rates actually move. A single unreadable district fails the WHOLE fetch rather than silently publishing a partial roster, matching this project's standing rule that a failed read is not the same as 'unchanged'."
     },
     {
       "id": "ky-ui-rates",
@@ -613,7 +651,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/KY-{year}.json#suiEmployer"
@@ -631,7 +669,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/KY-{year}.json"
@@ -646,7 +684,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/LA-{year}.json#suiEmployer"
@@ -664,7 +702,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/LA-{year}.json"
@@ -679,14 +717,16 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/MA-{year}.json#suiEmployer"
       ],
       "note": "Watches the LABOUR department, which is where UI figures live — the revenue department's withholding guide carries none. Found by searching per state after path-guessing failed: Michigan, for instance, is under /leo/bureaus-agencies/uia/, not the /uia/ every guess assumed. Verified to fetch AND to contain wage-base and/or rate figures before registering.",
       "coversUI": true,
-      "uiContent": "rates-only"
+      "uiContent": "unknown-no-snapshot",
+      "manualOnly": true,
+      "manualOnlyReason": "Confirmed HTTP 403 on every attempt from two real GitHub Actions runs (2026-08-31) and independently from this project's own sandbox, using Node's actual fetch with the full browser header set fetch.ts sends — a regression from when this URL was originally verified to succeed under Node (see ma-withholding below, blocked the same way as of this same audit). Excluded from the staleness test so it does not pin overall health red forever; check by hand each autumn when Massachusetts resets its rate schedule, and re-test from a residential network before re-enabling."
     },
     {
       "id": "ma-withholding",
@@ -697,12 +737,14 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/MA-{year}.json"
       ],
-      "note": "The authoritative document: Circular M, the withholding tables themselves. NOTE ON FETCHABILITY, corrected after testing: curl is refused by mass.gov with a 403 on every path, but Node fetch with a full browser header set succeeds and returns the real PDF (verified — the extracted text opens \"Commonwealth of Massachusetts Department of Revenue\"). An earlier version of this note claimed a hard bot wall; that was true of one client, not of the harvester. Deliberately NOT pointed at miltonma.gov's copy of Form M-4, which the state data file used as a research source: that is a town's mirror of a 2019-revision certificate, not the tables, and could vanish unnoticed."
+      "note": "The authoritative document: Circular M, the withholding tables themselves. NOTE ON FETCHABILITY, corrected after testing: curl is refused by mass.gov with a 403 on every path, but Node fetch with a full browser header set succeeds and returns the real PDF (verified — the extracted text opens \"Commonwealth of Massachusetts Department of Revenue\"). An earlier version of this note claimed a hard bot wall; that was true of one client, not of the harvester. Deliberately NOT pointed at miltonma.gov's copy of Form M-4, which the state data file used as a research source: that is a town's mirror of a 2019-revision certificate, not the tables, and could vanish unnoticed. REGRESSED as of 2026-09-01: the same Node fetch that used to succeed now gets HTTP 403 on this exact path, confirmed from two real GitHub Actions runs (2026-08-31) and independently from this project's sandbox — mass.gov's bot wall now appears to block the client itself (or its network range) rather than any missing header.",
+      "manualOnly": true,
+      "manualOnlyReason": "HTTP 403 on every attempt as of 2026-09-01 — see the note above; this used to work under Node fetch and no longer does. Excluded from the staleness test so it does not pin overall health red forever; check by hand each Nov-Jan when Massachusetts republishes Circular M, and re-test from a residential network before re-enabling."
     },
     {
       "id": "md-ui-rates",
@@ -713,7 +755,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/MD-{year}.json#suiEmployer"
@@ -731,7 +773,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/MD-{year}.json"
@@ -746,7 +788,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "coversUI": true,
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
@@ -764,7 +806,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/ME-{year}.json"
@@ -779,7 +821,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 24,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "rare; Michigan city income taxes require voter approval",
       "feeds": [
         "data/local/MI-cities-{year}.json"
@@ -794,7 +836,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/MI-{year}.json#suiEmployer"
@@ -812,7 +854,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/MI-{year}.json"
@@ -827,7 +869,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/MN-{year}.json#suiEmployer"
@@ -845,7 +887,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/MN-{year}.json"
@@ -860,7 +902,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/MO-{year}.json#suiEmployer"
@@ -878,7 +920,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/MO-{year}.json"
@@ -893,7 +935,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/MS-{year}.json#suiEmployer"
@@ -911,7 +953,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/MS-{year}.json"
@@ -926,7 +968,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/MT-{year}.json#suiEmployer"
@@ -944,7 +986,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/MT-{year}.json"
@@ -959,7 +1001,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/NC-{year}.json#suiEmployer"
@@ -977,7 +1019,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/NC-{year}.json"
@@ -992,7 +1034,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/ND-{year}.json#suiEmployer"
@@ -1010,11 +1052,29 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/ND-{year}.json"
       ]
+    },
+    {
+      "id": "ne-ui-rates",
+      "level": "state",
+      "jurisdiction": "NE",
+      "title": "Nebraska — unemployment insurance combined tax rates & taxable wage base",
+      "url": "https://dol.nebraska.gov/UITax/UnemploymentInsuranceTax/CombinedTaxRates",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "weekly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/NE-{year}.json#suiEmployer"
+      ],
+      "note": "ADDED 2026-09-01, closing a real gap: NE previously had no dedicated labor-department source at all, so its UI figures relied solely on the lagging annual DOL backstop (wage base only, no new-employer rate). Found via the labor department's own UITax portal homepage, not path-guessing. Verified directly: states 'New Employer Rate' 1.25% (Non-construction) and 'Taxable Wage Base' $9,000 for the standard category, both matching this state's own data file (newEmployerRate 0.0125, wageBase 9000) exactly. Also documents the higher $24,000 wage base for UI Tax Category 20 employers.",
+      "coversUI": true,
+      "uiContent": "wage-base-and-rates"
     },
     {
       "id": "ne-withholding",
@@ -1025,7 +1085,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/NE-{year}.json"
@@ -1040,33 +1100,34 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/NH-{year}.json"
       ],
-      "note": "New Hampshire levies no income tax and no wage tax, so the only payroll figure that moves is the unemployment wage base — this watches NH Employment Security rather than the law-firm client alert the state data file cites for the Interest & Dividends repeal, which is a one-time historical fact that will never change again. Fetches successfully (verified, 186KB) despite curl being 403'd, the same client-dependent refusal documented for Massachusetts.",
+      "note": "New Hampshire levies no income tax and no wage tax, so the only payroll figure that moves is the unemployment wage base — this watches NH Employment Security rather than the law-firm client alert the state data file cites for the Interest & Dividends repeal, which is a one-time historical fact that will never change again. Fetches successfully (verified, 186KB) despite curl being 403'd, the same client-dependent refusal documented for Massachusetts. REGRESSED as of 2026-09-01: the same Node fetch that used to succeed now gets HTTP 403, confirmed from two real GitHub Actions runs (2026-08-31) and independently from this project's sandbox.",
       "coversUI": true,
-      "uiContent": "rates-only"
+      "uiContent": "unknown-no-snapshot",
+      "manualOnly": true,
+      "manualOnlyReason": "HTTP 403 on every attempt as of 2026-09-01 — see the note above; this used to work under Node fetch and no longer does. Excluded from the staleness test so it does not pin overall health red forever; check by hand each autumn when NH resets its wage base, and re-test from a residential network before re-enabling."
     },
     {
       "id": "nj-ui-rates",
       "level": "state",
       "jurisdiction": "NJ",
       "title": "New Jersey — unemployment insurance taxable wage base",
-      "url": "https://www.nj.gov/labor/lwdhome/press/2025/20251229_newbenefitrates2026.shtml",
+      "url": "https://nj.gov/labor/ea/employer-services/rate-info/",
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/NJ-{year}.json#suiEmployer"
       ],
-      "note": "Carries BOTH the wage base and rates — but the URL is a DATED press release (/press/2025/20251229_...), so it can never change and will report green forever. Flagged datedUrlRisk and surfaced in status for that reason. The real fix is a standing rate page; nj.gov/labor/ea/employer-services/rate-info/ was tried and carries neither figure.",
+      "note": "FIXED 2026-09-01: previously a DATED press release (/press/2025/20251229_...) that could never change and would have reported green forever. An earlier note claimed nj.gov/labor/ea/employer-services/rate-info/ 'carries neither figure' — re-tested directly and that claim no longer holds (or was wrong): this exact URL currently states '2026 Taxable Wage Base ( UI and WF/SWF - workers and employers, TDI - employers ): $44,800', matching this state's own data file exactly, plus the current fiscal-year 'Notice of Employer Contribution Rates' and new-employer rate percentages (2.9825%, 6.0351%, 6.9825%). A standing page, not a dated one — it should update itself every year without needing a URL change.",
       "coversUI": true,
-      "datedUrlRisk": true,
-      "uiContent": "wage-base-and-rates"
+      "uiContent": "wage-base-only"
     },
     {
       "id": "nj-withholding",
@@ -1077,7 +1138,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/NJ-{year}.json"
@@ -1092,7 +1153,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/NM-{year}.json#suiEmployer"
@@ -1110,7 +1171,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/NM-{year}.json"
@@ -1125,14 +1186,16 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "coversUI": true,
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/NV-{year}.json#suiEmployer"
       ],
       "note": "Watches the LABOUR department, where UI figures live — the revenue department's withholding guide carries none. Verified to fetch AND to contain wage-base and rate figures before registering.",
-      "uiContent": "wage-base-and-rates"
+      "uiContent": "unknown-no-snapshot",
+      "manualOnly": true,
+      "manualOnlyReason": "Confirmed HTTP 403 on every attempt from two real GitHub Actions runs (2026-08-31) and independently from this project's own sandbox, using Node's actual fetch with the full browser header set fetch.ts sends. Excluded from the staleness test so it does not pin overall health red forever; check by hand each autumn when Nevada resets its rate schedule, and re-test from a residential network before re-enabling."
     },
     {
       "id": "nv-withholding",
@@ -1143,7 +1206,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/NV-{year}.json"
@@ -1158,7 +1221,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/NY-{year}.json#suiEmployer"
@@ -1176,7 +1239,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/NY-{year}.json"
@@ -1187,33 +1250,33 @@
       "level": "local",
       "jurisdiction": "OH",
       "title": "Ohio The Finder — JEDD/JEDZ tax rates (CSV)",
-      "url": "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/JEDTaxRates.csv",
+      "url": "https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FJEDTaxRates.csv",
       "authority": "primary",
       "format": "delimited",
       "coversJurisdictions": 200,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "rolling; JEDDs are created by contract between a township and a municipality",
       "feeds": [
         "data/local/OH-jedd-jedz-{year}.json"
       ],
-      "note": "A direct CSV API rather than a download page — columns are EffStartDate,EffEndDate,JEDD_ID,Name,Rate, so a future parser can diff rate-by-rate instead of document-by-document."
+      "note": "A direct CSV API rather than a download page — columns are EffStartDate,EffEndDate,JEDD_ID,Name,Rate, so a future parser can diff rate-by-rate instead of document-by-document. FIXED 2026-09-01: the direct api.thefinder.tax.ohio.gov URL 401s with {\"errorCode\":\"BFF4002\"} for any client — it is a backend-for-frontend API the public site's own browser bundle never calls directly either. Found by downloading and reading thefinder.tax.ohio.gov's own Next.js JS chunks: the site's file-download buttons all route through a SAME-ORIGIN proxy route, `/api/file-downloads/content?target=<url-encoded real API URL>`, which is what this URL now points at. Verified: 200, real CSV body, byte-identical across two fetches two seconds apart, so it hashes stably. If this ever 401s again, re-derive the proxy path from the current JS bundle rather than guessing headers — that is what fixed it this time after header/cookie/Referer guessing all failed."
     },
     {
       "id": "oh-municipal-rates",
       "level": "local",
       "jurisdiction": "OH",
       "title": "Ohio Dept of Taxation — Municipal Income Tax Rate Database (The Finder)",
-      "url": "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
+      "url": "https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FMuni%2FOHMuniRateTable.csv",
       "authority": "state_register",
       "format": "delimited",
       "coversJurisdictions": 600,
-      "checkFrequency": "weekly",
+      "checkFrequency": "daily",
       "expectedChange": "rolling; municipal rate changes take effect 1 Jan and 1 Jul",
       "keyField": "municipalityCode",
       "feeds": [
         "data/locals/OH-{year}.json"
       ],
-      "note": "Replaces monitoring ~600 individual village and city websites. UPGRADED from thefinder.tax.ohio.gov/?tab=fileDownloads — a download LANDING PAGE, which would have changed when the site was restyled and stayed still when a rate moved — to the CSV the page links to, which is the data itself. Columns are EffStartDate,EffEndDate,MuniCode,Name,Rate with rates as decimals ('.01000'), so a future parser can diff rate-by-rate. URL taken from data/local/OH-municipalities-2026.json's own source field."
+      "note": "Replaces monitoring ~600 individual village and city websites. UPGRADED from thefinder.tax.ohio.gov/?tab=fileDownloads — a download LANDING PAGE, which would have changed when the site was restyled and stayed still when a rate moved — to the CSV the page links to, which is the data itself. Columns are EffStartDate,EffEndDate,MuniCode,Name,Rate with rates as decimals ('.01000'), so a future parser can diff rate-by-rate. URL taken from data/local/OH-municipalities-2026.json's own source field. FIXED 2026-09-01: same HTTP 401 BFF4002 auth failure as oh-jedd-rates above, same underlying API — see that entry's note for the fix (the public site's own JS bundle reveals a same-origin proxy route, `/api/file-downloads/content?target=<url>`, which this URL now uses instead of calling api.thefinder.tax.ohio.gov directly). Verified: 200, 1083 rows of real municipal rate data including full rate-change history per municipality (e.g. Akron rising .02000 -> .02250 -> .02500 across three effective-date rows)."
     },
     {
       "id": "oh-school-district-rates",
@@ -1224,7 +1287,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 214,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; districts add, renew and let levies expire each January",
       "feeds": [
         "data/local/OH-school-districts-{year}.json"
@@ -1240,12 +1303,30 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/OH-{year}.json#suiEmployer"
       ],
       "note": "Watches the LABOUR department, where UI figures live — the revenue department's withholding guide carries none. Verified to fetch AND to contain wage-base and/or rate figures before registering.",
+      "coversUI": true,
+      "uiContent": "wage-base-and-rates"
+    },
+    {
+      "id": "ok-ui-rates",
+      "level": "state",
+      "jurisdiction": "OK",
+      "title": "Oklahoma — unemployment insurance contribution rates & taxable wage base",
+      "url": "https://oklahoma.gov/oesc/employers/tax/contribution-rates.html",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "weekly",
+      "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
+      "feeds": [
+        "data/states/OK-{year}.json#suiEmployer"
+      ],
+      "note": "ADDED 2026-09-01, closing a real gap: OK previously had no dedicated labor-department source at all, so its UI figures relied solely on the lagging annual DOL backstop (wage base only, no new-employer rate). Earlier research found OESC's employer login portal (eztaxexpress.oesc.state.ok.us) is not publicly fetchable; this page is OESC's own public Contribution Rates page instead, found by following oklahoma.gov/oesc's own employers section rather than path-guessing the old domain. Verified directly: states 'Taxable Wage Base $25,000', 'Range of Rates 0.2% to 5.8%', and 'the rate for newly established employers is 1.5%' — all matching this state's own data file (wageBase 25000, newEmployerRate 0.015) exactly.",
       "coversUI": true,
       "uiContent": "wage-base-and-rates"
     },
@@ -1258,7 +1339,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/OK-{year}.json"
@@ -1273,7 +1354,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/OR-{year}.json#suiEmployer"
@@ -1291,7 +1372,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/OR-{year}.json"
@@ -1306,7 +1387,7 @@
       "authority": "state_register",
       "format": "xls",
       "coversJurisdictions": 2500,
-      "checkFrequency": "weekly",
+      "checkFrequency": "daily",
       "expectedChange": "rolling; most changes effective 1 Jan",
       "keyField": "psdCode",
       "feeds": [
@@ -1336,7 +1417,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "rare; the 3.07% rate has been stable for years",
       "feeds": [
         "data/states/PA-{year}.json"
@@ -1351,7 +1432,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "daily",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/PA-{year}.json#suiEmployer"
@@ -1369,7 +1450,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/RI-{year}.json#suiEmployer"
@@ -1387,7 +1468,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/RI-{year}.json"
@@ -1402,7 +1483,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/SC-{year}.json#suiEmployer"
@@ -1420,7 +1501,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/SC-{year}.json"
@@ -1435,7 +1516,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/SD-{year}.json"
@@ -1452,7 +1533,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/TN-{year}.json"
@@ -1470,7 +1551,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/TX-{year}.json"
@@ -1488,7 +1569,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/UT-{year}.json#suiEmployer"
@@ -1506,7 +1587,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/UT-{year}.json"
@@ -1521,7 +1602,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/VA-{year}.json#suiEmployer"
@@ -1539,7 +1620,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/VA-{year}.json"
@@ -1554,7 +1635,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/VT-{year}.json#suiEmployer"
@@ -1572,7 +1653,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/VT-{year}.json"
@@ -1587,7 +1668,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/WA-{year}.json"
@@ -1605,7 +1686,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/WI-{year}.json#suiEmployer"
@@ -1623,7 +1704,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/WI-{year}.json"
@@ -1634,19 +1715,19 @@
       "level": "state",
       "jurisdiction": "WV",
       "title": "West Virginia — unemployment insurance employer rates & taxable wage base (Employer Handbook)",
-      "url": "https://workforcewv.org/wp-content/uploads/2024/06/Employer-Handbook-Rev.-06.24.pdf",
+      "url": "https://workforcewv.org/businesses/unemployment-tax-information/employer-resources/",
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; rate schedules and wage bases are set each autumn for the following year",
       "feeds": [
         "data/states/WV-{year}.json#suiEmployer"
       ],
-      "note": "Replaces a page that carried NEITHER figure. This handbook does carry both — but note the URL: /2024/06/Employer-Handbook-Rev.-06.24.pdf is a DATED, VERSIONED path, which makes it a deliberately compromised monitoring target. A frozen file cannot change, so it will hash stably forever and report green indefinitely, including long after WorkForce WV publishes a 2026 or 2027 edition at some other URL. That is a subtler failure than the empty page it replaces: an empty page at least never pretended to hold figures. It is registered because having the correct current numbers under watch beats having nothing, and flagged datedUrlRisk so the false-green is recorded rather than discovered later. THE REAL FIX is an index page that always points at the current handbook; workforcewv.org's own unemployment-tax-information, tax-filing-reporting and FAQ pages were all tried and none carries the figures. Re-check this URL each year against the site's publications list.",
+      "customFetcher": "wv-handbook-current",
+      "note": "FIXED 2026-09-01, and not a moment too soon: the OLD url (/2024/06/Employer-Handbook-Rev.-06.24.pdf) was exactly the false-green this note used to warn about, ALREADY HAPPENING — WV had published .../2025/02/Employer-Handbook-Rev.-02.25.pdf months earlier, and the old dated URL was still serving 200 with the stale 06.24 edition the whole time, discovered only by going and checking by hand. harvester/wv-handbook-fetch.ts now reads this standing employer-resources index page first, extracts whichever 'Employer-Handbook-Rev-*.pdf' link it currently lists, and reads THAT PDF's actual text — so a future edition is followed automatically and the real content (not just a filename) is what gets hashed. NOTE: the DATA FILE (data/states/WV-2026.json) has not been re-verified against the 02.25 edition as part of this fix — that is a data-correctness question, not a monitoring one, and is worth checking separately.",
       "coversUI": true,
-      "uiContent": "wage-base-and-rates",
-      "datedUrlRisk": true
+      "uiContent": "wage-base-and-rates"
     },
     {
       "id": "wv-withholding",
@@ -1657,7 +1738,7 @@
       "authority": "primary",
       "format": "pdf",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual, published Nov–Jan; mid-year changes happen after legislation (see this state's own data file for any scheduled effective date)",
       "feeds": [
         "data/states/WV-{year}.json"
@@ -1668,18 +1749,18 @@
       "level": "state",
       "jurisdiction": "WY",
       "title": "Wyoming — unemployment wage base / employer rates",
-      "url": "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-taxable-wage-base/unemployment-tax",
+      "url": "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-taxable-wage-base/",
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "quarterly",
+      "checkFrequency": "weekly",
       "expectedChange": "annual; unemployment wage base and employer rate schedule are set each autumn",
       "feeds": [
         "data/states/WY-{year}.json"
       ],
       "coversUI": true,
-      "note": "Upgraded to a page carrying BOTH the taxable wage base and rate figures, verified before swapping. The previous URL carried only one of the two.",
-      "uiContent": "wage-base-and-rates"
+      "note": "FIXED 2026-09-01, found during a manual (non-harvester) verification pass: the previous URL (this same path plus a trailing /unemployment-tax) had been reduced by the state to a pure prose description of the rate MECHANISM (base rate + four factors) with zero actual numbers anywhere on the page — confirmed by direct fetch, every apparent dollar-figure match was a CSS gradient RGB value, not tax content. The claim this note used to make, that it carried both figures verified before swapping, no longer held; the page had changed since. This parent URL (drop the /unemployment-tax suffix) carries the real year-by-year wage-base table and was verified directly: '2026 $33,800' matches this state's own data file exactly, and the table already lists 2027's $34,900 for next year. No rate percentage appears on this page either (checked directly, only CSS % values present) — this state's own data file already carries newEmployerRate: null, so that is not a regression, just consistent.",
+      "uiContent": "wage-base-only"
     },
     {
       "id": "nm-ui-rates-calc",
@@ -1690,7 +1771,7 @@
       "authority": "primary",
       "format": "html",
       "coversJurisdictions": 1,
-      "checkFrequency": "monthly",
+      "checkFrequency": "weekly",
       "coversUI": true,
       "expectedChange": "annual; rate schedules are set each autumn",
       "feeds": [
@@ -1698,6 +1779,106 @@
       ],
       "note": "SUPPLEMENTARY to nm-ui-rates, which carries the wage base but no rates. New Mexico publishes the two figures on different pages, so both are watched rather than forcing one page to serve for both.",
       "uiContent": "rates-only"
+    },
+    {
+      "id": "dol-state-minimum-wage",
+      "level": "federal",
+      "jurisdiction": "US",
+      "title": "US DOL \u2014 State Minimum Wage Laws",
+      "url": "https://www.dol.gov/agencies/whd/minimum-wage/state",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 51,
+      "checkFrequency": "weekly",
+      "expectedChange": "rolling \u2014 different states step on Jan 1, Mar 1, Jul 1 and Sep 30, so this page moves several times a year, not once",
+      "feeds": [
+        "data/minimum-wage/federal-{year}.json#standard",
+        "data/minimum-wage/states/{STATE}-{year}.json#standard"
+      ],
+      "note": "The single register data/minimum-wage/ is built from \u2014 same pattern as OH's Finder and PA's DCED collapsing thousands of local jurisdictions to one page, this collapses 50 states + DC to one. Registered alongside the two sources below (tipped, consolidated) because DOL publishes the standard rate, the tipped rate and a cross-check table as three SEPARATE pages that have been observed to update on different days within the same week."
+    },
+    {
+      "id": "dol-tipped-minimum-wage",
+      "level": "federal",
+      "jurisdiction": "US",
+      "title": "US DOL \u2014 Minimum Wages for Tipped Employees",
+      "url": "https://www.dol.gov/agencies/whd/state/minimum-wage/tipped",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 56,
+      "checkFrequency": "weekly",
+      "expectedChange": "rolling, same reason as dol-state-minimum-wage",
+      "feeds": [
+        "data/minimum-wage/federal-{year}.json#tipped",
+        "data/minimum-wage/states/{STATE}-{year}.json#tipped",
+        "data/minimum-wage/territories/{STATE}-{year}.json#tipped"
+      ],
+      "note": "Covers every state, DC and every territory this project tracks (PR, VI, GU, AS, MP) in one table \u2014 the tip-credit maximum, the cash wage and the tipped-employee monthly-tips threshold for each. This is the ONLY DOL table that carries the tipped-employee definition threshold; dol-state-minimum-wage does not."
+    },
+    {
+      "id": "dol-consolidated-minimum-wage",
+      "level": "federal",
+      "jurisdiction": "US",
+      "title": "US DOL \u2014 Consolidated Minimum Wage Table",
+      "url": "https://www.dol.gov/agencies/whd/mw-consolidated",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 56,
+      "checkFrequency": "weekly",
+      "expectedChange": "rolling, same reason as dol-state-minimum-wage",
+      "feeds": [
+        "data/minimum-wage/federal-{year}.json",
+        "data/minimum-wage/states/{STATE}-{year}.json"
+      ],
+      "note": "A THIRD, independent DOL table grouping every jurisdiction by whether it sits above, at, or below the federal floor, and separately naming the Montana/New Jersey/New York/Ohio/Oregon sub-rates. Kept as its own source rather than assumed identical to dol-state-minimum-wage: a genuine three-way cross-check, since a single mistyped DOL table would otherwise go undetected."
+    },
+    {
+      "id": "dol-eo13658-contractor-minimum-wage",
+      "level": "federal",
+      "jurisdiction": "US",
+      "title": "US DOL \u2014 Executive Order 13658 federal contractor minimum wage (annual rate change notice)",
+      "url": "https://www.dol.gov/agencies/whd/government-contracts/minimum-wage",
+      "authority": "primary",
+      "format": "html",
+      "coversJurisdictions": 1,
+      "checkFrequency": "monthly",
+      "expectedChange": "annual, a new rate notice each winter, effective the following May",
+      "feeds": [
+        "data/minimum-wage/federal-{year}.json#otherFederalMinimums.executiveOrder13658"
+      ],
+      "note": "Registered specifically because its sibling, Executive Order 14026, was REVOKED in March 2025 \u2014 a live example of exactly the failure mode this whole harvester exists to catch (a stale table paying a rate that no longer applies). Watches for the next annual EO 13658 step and for any future executive action that could revive, replace or further narrow either order."
+    },
+    {
+      "id": "berkeley-local-minimum-wage-inventory",
+      "level": "local",
+      "jurisdiction": "US",
+      "title": "UC Berkeley Labor Center \u2014 Inventory of US City and County Minimum Wage Ordinances",
+      "url": "https://laborcenter.berkeley.edu/inventory-of-us-city-and-county-minimum-wage-ordinances/",
+      "authority": "state_register",
+      "format": "html",
+      "coversJurisdictions": 69,
+      "checkFrequency": "weekly",
+      "expectedChange": "rolling \u2014 new ordinances are adopted and old ones repealed a few times a year",
+      "feeds": [
+        "data/minimum-wage/local/{STATE}-local-{year}.json"
+      ],
+      "note": "Not a .gov page \u2014 tagged state_register rather than primary because no single federal or state agency maintains a census of every local minimum wage ordinance nationwide. This is the source that tells this project WHICH local jurisdictions exist at all, so a rate change here does not by itself justify a data update; a NEW jurisdiction appearing (or a listed one disappearing, e.g. a repeal) is the signal to go verify that locality's own primary source, the same discipline already applied when this file was first built."
+    },
+    {
+      "id": "wa-li-local-minimum-wage",
+      "level": "local",
+      "jurisdiction": "WA",
+      "title": "Washington State L&I \u2014 Local Minimum Wage Rates",
+      "url": "https://lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates",
+      "authority": "state_register",
+      "format": "html",
+      "coversJurisdictions": 8,
+      "checkFrequency": "weekly",
+      "expectedChange": "annual for most tiers, but Renton and Everett step a second time on Jul 1 for their mid-size tier",
+      "feeds": [
+        "data/minimum-wage/local/WA-local-{year}.json"
+      ],
+      "note": "Exactly the OH-Finder/PA-DCED pattern applied to minimum wage: Washington's own L&I office aggregates all 8 of its cities' and counties' local ordinances onto one page, so this one register replaces watching 8 separate municipal sites. Already caught two real drift cases against secondary sources during this project's initial build (Burien and Renton)."
     }
   ],
   "uiCoverage": {
@@ -1730,12 +1911,14 @@
       "MT",
       "NC",
       "ND",
+      "NE",
       "NH",
       "NJ",
       "NM",
       "NV",
       "NY",
       "OH",
+      "OK",
       "OR",
       "PA",
       "RI",
@@ -1753,16 +1936,14 @@
     ],
     "backstopOnly": [
       "AR",
-      "AZ",
-      "NE",
-      "OK"
+      "AZ"
     ],
     "backstopOnlyMeaning": "These states have NO dedicated labour-department source registered, so their UI figures are covered only by dol-ui-wage-bases. That backstop is real but LAGS (DOL publishes annually; the 2024 edition is still newest as of 2026-08) and carries the taxable WAGE BASE only — not new-employer rates or rate schedules. Treat a UI change in these states as something that will be confirmed late, not caught promptly.",
-    "whyNotAllFifty": "Four passes of path-probing plus per-state searching took this from 10 states to 47. The last four resisted. ARKANSAS and ARIZONA refuse automated clients outright — HTTP 403 to every path and header combination tried, the same class of block as Texas's WAF, and no amount of URL-hunting fixes a refusal to serve. NEBRASKA and OKLAHOMA have live agency domains but roughly ten candidate paths each were tried across three passes and none carried rate or wage-base figures; both appear to put rates behind an employer login (neworks.nebraska.gov, eztaxexpress.oesc.state.ok.us), which is not fetchable and arguably not public. Nothing was registered for these four rather than registering a page that would look monitored without being monitored — the DC and Ohio department homepages were rejected on exactly that principle earlier, and both states were later found properly at dedicated tax pages. Their wage base is still covered by the lagging DOL report; their new-employer rates are not covered at all.",
+    "whyNotAllFifty": "Four passes of path-probing plus per-state searching took this from 10 states to 47, then a 2026-09-01 re-check found working sources for two of the remaining four: NEBRASKA's dol.nebraska.gov/UITax/UnemploymentInsuranceTax/CombinedTaxRates and OKLAHOMA's oklahoma.gov/oesc/employers/tax/contribution-rates.html both carry real, current wage-base and rate figures, verified against this project's own data files. The earlier claim that these two 'put rates behind an employer login' held for the specific portals originally tried (neworks.nebraska.gov, eztaxexpress.oesc.state.ok.us) but not for these two PUBLIC pages, found by browsing each department's own site structure rather than more path-guessing. ARKANSAS and ARIZONA still refuse automated clients outright — HTTP 403 to every path and even the bare domain root, re-confirmed 2026-09-01 — the same class of block as Texas's WAF and the six sources marked manualOnly elsewhere in this registry, and no amount of URL-hunting fixes a refusal to serve. Their wage base is still covered by the lagging DOL report; their new-employer rates are not covered at all.",
     "neverMonitorable": "An individual employer's EXPERIENCE-RATED contribution rate is not a jurisdiction constant — it depends on that employer's own layoff history and is assigned to them privately. No source can carry it, which is why the engine takes it from input.employer.stateUnemploymentRate and falls back to the published new-employer rate. Only the wage base and the published schedules are monitorable at all.",
     "howCoverageIsCounted": "From an explicit coversUI flag on each source, not inferred from the URL. The regex that preceded it mis-classified Florida — its reemployment-tax rate page IS Florida's UI source, but the domain contains no labour-ish word — which is the sort of quiet miscount that makes a coverage number worth less than the confidence it creates.",
     "contentAudit": {
-      "auditedOn": "2026-08-29",
+      "auditedOn": "2026-09-07",
       "method": "Each UI source's most recent capture searched for a taxable-wage-base phrase beside a dollar figure, and for percentage rate figures. Run against snapshots on disk.",
       "wageBaseAndRates": [
         "AK",
@@ -1783,9 +1964,9 @@
         "MS",
         "NC",
         "ND",
-        "NJ",
-        "NV",
+        "NE",
         "OH",
+        "OK",
         "OR",
         "PA",
         "RI",
@@ -1796,38 +1977,38 @@
         "VT",
         "WA",
         "WI",
-        "WV",
-        "WY"
+        "WV"
       ],
       "ratesOnly": [
         "AL",
         "DC",
         "GA",
         "IA",
-        "KS",
         "LA",
-        "MA",
         "MT",
-        "NH",
         "NM",
         "NY",
         "SC"
       ],
       "wageBaseOnly": [
         "CA",
+        "NJ",
         "NM",
-        "TN"
+        "TN",
+        "WY"
       ],
       "carriesNeither": [],
-      "noCaptureToCheck": [],
-      "wageBaseMonitoredCount": 36,
-      "rateMonitoredCount": 45,
-      "whatThisChanged": "The registration check accepted any page carrying a wage base OR rates, but every title claimed both. This audit separates them, and the result is materially weaker than the earlier headline: of 47 UI sources, only 29 states have a source that actually states a taxable WAGE BASE and 37 one that states RATES. Thirteen carry rates alone — verified as a property of the page, not a formatting mismatch: North Dakota, New York, Massachusetts, New Mexico, Iowa, South Carolina, Minnesota and Kansas contain no wage-base phrase anywhere. Four (Maryland, Minnesota, New Mexico, West Virginia) carry NEITHER and are now flagged monitoringGap, because a source that fetches cleanly while containing nothing is the failure this project already hit once with Pennsylvania's search form. Titles have been corrected to say what each source actually carries.",
-      "datedUrlRisk": [
-        "NJ",
-        "WV"
+      "noCaptureToCheck": [
+        "KS",
+        "MA",
+        "NH",
+        "NV"
       ],
-      "staleAfterUrlChanges": "STALE as of the MI/NJ/VA/WY/NM url changes in this commit: these counts and the per-source uiContent classifications were computed against the PREVIOUS urls. The changed sources have had their uiContent removed rather than left asserting something about a page they no longer point at — missing is honest, stale is not. Run `npm run harvest:daily` then `npm run harvest:audit` to recompute; the new urls were each verified by direct probe (MI, NJ, VA, WY carry both figures; NM's new page carries rates) but that verification is not the same as a recorded audit against a stored capture."
+      "wageBaseMonitoredCount": 37,
+      "rateMonitoredCount": 41,
+      "whatThisChanged": "The registration check accepted any page carrying a wage base OR rates, but every title claimed both. This audit separates them, and the result is materially weaker than the earlier headline: of 47 UI sources, only 29 states have a source that actually states a taxable WAGE BASE and 37 one that states RATES. Thirteen carry rates alone — verified as a property of the page, not a formatting mismatch: North Dakota, New York, Massachusetts, New Mexico, Iowa, South Carolina, Minnesota and Kansas contain no wage-base phrase anywhere. Four (Maryland, Minnesota, New Mexico, West Virginia) carry NEITHER and are now flagged monitoringGap, because a source that fetches cleanly while containing nothing is the failure this project already hit once with Pennsylvania's search form. Titles have been corrected to say what each source actually carries.",
+      "datedUrlRisk": [],
+      "staleAfterUrlChanges": "STALE as of the MI/NJ/VA/WY/NM url changes in this commit: these counts and the per-source uiContent classifications were computed against the PREVIOUS urls. The changed sources have had their uiContent removed rather than left asserting something about a page they no longer point at — missing is honest, stale is not. Run `npm run harvest:daily` then `npm run harvest:audit` to recompute; the new urls were each verified by direct probe (MI, NJ, VA, WY carry both figures; NM's new page carries rates) but that verification is not the same as a recorded audit against a stored capture. FURTHER STALE as of 2026-09-01: nj-ui-rates and wv-ui-rates were swapped to yet another URL each (see their own notes — the dated-URL fix), and ne-ui-rates/ok-ui-rates were added as entirely new sources, none of which are reflected in the arrays above. All four were verified by direct probe (stated figures matching each state's own data file exactly) but, again, that is not the same as a recorded audit against a stored capture — run the two commands above before trusting these counts."
     }
   }
 }

@@ -1948,7 +1948,7 @@
   ],
   "knownGaps": [
     "Rate expiration dates are embedded in the free-text name field rather than a structured dated field.",
-    "Not wired into the calculation engine at all -- no district-level resolution by address exists anywhere in this project.",
+    "STALE, CORRECTED 2026-09-02: this used to say the calculation side was entirely unwired AND that no district-level address resolution exists anywhere in this project. Both are now false and were left uncorrected after the fixes landed. Calculation: ohioSchoolDistrictTax() (src/taxes/state.ts) is wired and computes OH_SDIT off certificate.schoolDistrictCode. Address resolution: geocode/census.ts's fetchSchoolDistrictAtPoint()/fetchSchoolDistrictAtPointSafe() resolve a lat/lon to an Ohio school district via Census's own TIGERweb unified-school-district identify service, consumed by geocode/index.ts's resolveAddress() specifically for OH addresses. The only genuinely remaining gap is narrower than originally stated: resolveAddress() only exercises this school-district lookup for Ohio (geographies.state === 'OH'), so a caller resolving a non-OH address never gets a district code back -- structurally fine since only Ohio's SDIT reads one, not a bug.",
     "firstYearEffective is when the district FIRST adopted SDIT, not when the CURRENT 2026 rate took effect if renewed/changed since."
   ]
 }

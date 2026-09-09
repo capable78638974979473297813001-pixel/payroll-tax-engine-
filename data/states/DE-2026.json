@@ -185,11 +185,12 @@
     "newEmployerRate": 0.01,
     "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
     "experienceRange": {
-      "min": 0.006,
-      "max": 0.056
+      "min": 0.003,
+      "max": 0.054
     },
+    "experienceRangeSource": "Fixed 2026-09-01: this block previously read {0.006, 0.056}, a transcription slip that disagreed with both the live Delaware Merit Rate Table (labor.delaware.gov, Lowest Rate 0.3% / Highest Rate 5.4%) and this same file's own primary-sourced unemploymentInsurance.experiencedRateRange block elsewhere in the file ({lowest: 0.003, highest: 0.054}).",
     "employerSuppliedRateRequired": false,
-    "confidence": "inherited_from_this_file"
+    "confidence": "primary_source_confirmed"
   },
   "statePaidLeaveEmployer": {
     "totalRate": 0.008,
