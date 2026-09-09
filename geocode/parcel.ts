@@ -87,6 +87,46 @@ export const PARCEL_SOURCES: ParcelSource[] = [
     streetNameField: 'street_nam',
     source: 'Dauphin County IT/GIS (data-dauphinco.opendata.arcgis.com)',
   },
+  {
+    // Added chasing why Michigan's own sample address sits on rooftop-osm
+    // rather than rooftop: confirmed live (2026-09-08) that Michigan has
+    // NO National Address Database coverage at all near Lansing (0 points
+    // within 300m of 116 W Ottawa St) — not a query bug, a real statewide
+    // gap already documented in docs/geocoding-coverage.md. The City of
+    // Lansing's own open-data parcels layer is a correctness-verified
+    // addition, not yet an OBSERVED tier upgrade — stated precisely rather
+    // than oversold, because both addresses it was checked against
+    // resolved via OSM corroboration BEFORE this source was even
+    // considered (resolveRooftop() only lets a parcel centroid replace
+    // OSM's result by landing measurably closer to Census's own point,
+    // never merely by existing — see this file's own top comment), and
+    // OSM already had a decent point at both. What IS verified live:
+    // the ordinary address (116 W Ottawa St) returns an EXACT
+    // house-number/street match on a single 262 sqm building parcel, well
+    // under the size gate — correct evidence, just not the WINNING
+    // evidence this time. The state capitol address (100 N Capitol Ave)
+    // ALSO matches exactly, but on an 485,017 sqm parcel covering the
+    // entire capitol grounds — correctly REJECTED by
+    // MAX_TRUSTED_PARCEL_AREA_SQUARE_METERS, the identical "campus, not a
+    // building" failure mode already documented for Mississippi's own
+    // capitol parcel below. This source earns its place the same way
+    // Dauphin County's did: real, verified, correctly-gated data that will
+    // win outright for a Lansing address OSM doesn't cover or gets wrong,
+    // even though neither of the two addresses tested happened to need it.
+    // Field mapping note: this layer keeps the street's directional prefix
+    // in its OWN column (STDIR) separate from STREET ("OTTAWA ST",
+    // "CAPITOL AVE" — type suffix included, directional excluded) — the
+    // exact shape classifyParcelAddress's existing directional-fallback
+    // pass (one side has no directional) was already built to handle,
+    // verified live rather than assumed.
+    state: 'MI',
+    jurisdictionLabel: 'City of Lansing, MI',
+    queryUrl:
+      'https://services1.arcgis.com/pNPbgWy7hpfFGWoZ/arcgis/rest/services/CityParcels_2026/FeatureServer/1/query',
+    houseNumberField: 'ADD_NUM',
+    streetNameField: 'STREET',
+    source: 'City of Lansing GIS (data-lansing.opendata.arcgis.com)',
+  },
 ];
 
 /** No single building any US state government owns approaches this footprint — a government CAMPUS (Mississippi's capitol grounds parcel, verified live) runs to tens of thousands of square meters. Deliberately generous rather than tight: the goal is excluding multi-building complexes, not tuning for one building type. */

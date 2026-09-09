@@ -1785,6 +1785,66 @@ describe('rooftop.ts — authoritative address points (real captured National Ad
         assert.equal(result.tier, 'osm-corroborated');
       });
     });
+
+    describe('the parcel-centroid tier — City of Lansing, MI (ADD_NUM/STDIR/STREET schema, directional kept in its own column)', () => {
+      const MI_SOURCE = PARCEL_SOURCES.find((s) => s.state === 'MI')!;
+      const LANSING_INTERPOLATED = { lat: 42.734731127625, lon: -84.552604765658 };
+
+      const squareRing = (lat: number, lon: number, sideMeters: number): number[][] => {
+        const dLat = sideMeters / 2 / 111_320;
+        const dLon = sideMeters / 2 / (111_320 * Math.cos((lat * Math.PI) / 180));
+        return [
+          [lon - dLon, lat - dLat],
+          [lon + dLon, lat - dLat],
+          [lon + dLon, lat + dLat],
+          [lon - dLon, lat + dLat],
+          [lon - dLon, lat - dLat],
+        ];
+      };
+
+      /** Real shape from City of Lansing's own layer: directional lives in STDIR, STREET carries the type suffix but not the directional ("OTTAWA ST", not "W OTTAWA ST"). */
+      const lansingParcel = (opts: { addNum: string; stdir: string; street: string; lat: number; lon: number; sideMeters: number }) => ({
+        attributes: { ADD_NUM: opts.addNum, STDIR: opts.stdir, STREET: opts.street },
+        geometry: { rings: [squareRing(opts.lat, opts.lon, opts.sideMeters)] },
+      });
+
+      test('an exact ADD_NUM/STREET match resolves via the directional-fallback pass, even though STDIR is a separate column classifyParcelAddress never reads directly', async () => {
+        const exact = lansingParcel({
+          addNum: '116', stdir: 'W', street: 'OTTAWA ST',
+          ...LANSING_INTERPOLATED, sideMeters: 16,
+        });
+        const result = await resolveParcelCentroid(
+          '116 W Ottawa St, Lansing, MI 48933',
+          LANSING_INTERPOLATED,
+          (async (url: string) => {
+            if (!String(url).startsWith(MI_SOURCE.queryUrl)) return new Response('[]', { status: 200 });
+            return new Response(JSON.stringify({ features: [exact] }), { status: 200 });
+          }) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.ok(result);
+        assert.equal(result!.source.state, 'MI');
+        assert.ok(result!.areaSquareMeters < 300);
+      });
+
+      test('the real Michigan Capitol parcel (485,017 sqm — the entire capitol grounds) is correctly REJECTED by the size gate, the same "campus, not a building" outcome Mississippi\'s own capitol parcel produces', async () => {
+        const capitolGrounds = lansingParcel({
+          addNum: '100', stdir: 'N', street: 'CAPITOL AVE',
+          lat: 42.733618664461, lon: -84.553967598585,
+          sideMeters: 696, // side length giving ~485,000 sqm, matching the real parcel's live-measured area
+        });
+        const result = await resolveParcelCentroid(
+          '100 N Capitol Ave, Lansing, MI 48933',
+          { lat: 42.733618664461, lon: -84.553967598585 },
+          (async (url: string) => {
+            if (!String(url).startsWith(MI_SOURCE.queryUrl)) return new Response('[]', { status: 200 });
+            return new Response(JSON.stringify({ features: [capitolGrounds] }), { status: 200 });
+          }) as unknown as typeof fetch,
+          { baseBackoffMs: 0 },
+        );
+        assert.equal(result, null, 'a 485,017 sqm parcel must never be trusted as a single building, however exact the address match');
+      });
+    });
   });
 });
 
