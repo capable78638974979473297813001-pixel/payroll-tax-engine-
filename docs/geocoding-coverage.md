@@ -387,9 +387,18 @@ the six lines and nothing in `notResolvable`.
 
 ## Still not resolved, and why
 
-- **Four JEDD rate rows have no published boundary.** Ohio's boundary
-  layer carries 142 zones against 146 rate rows. An address inside one of
-  those four cannot be detected by coordinate, and nothing guesses.
+- **Twelve JEDD rate rows have no published boundary**, not four — this
+  count was itself wrong until a direct diff against Ohio's ArcGIS layer
+  corrected it (see `data/local/OH-jedd-jedz-2026.json`'s own
+  `knownGaps`, 2026-08-31 and 2026-09-03). Ohio's boundary layer carries
+  142 zones against 149 rate rows; three of the twelve gaps (Emerald
+  Park, Gateway, Shaker Square) are explained — they're City of
+  Cleveland "revenue sharing areas," a Cleveland-specific mechanism
+  under a different statute than the ORC 715.70-72 JEDD/JEDZ contracts
+  this layer tracks, so they were never going to be in it — but their
+  own boundary, if published anywhere, hasn't been found. The other nine
+  remain unexplained gaps. An address inside any of the twelve cannot be
+  detected by coordinate, and nothing guesses which.
 - **No CASS address validation.** A malformed or nonexistent address is
   not corrected, only resolved as best it can be or reported unmatched.
 - **Historical dates are gated by rate data, not boundaries.** The vintage
