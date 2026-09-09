@@ -881,6 +881,112 @@ describe('sectoral minimum wages', () => {
     const state = stateMinimumWageRuleset('CA', D).standard!.hourlyCents;
     for (const id of healthCare) assert.ok(sectors[id]! > state, id);
   });
+
+  test('the five city hotel/airport ordinances are each carried, and each beats its own city\'s general local rate where one exists', () => {
+    const sectors = Object.fromEntries(
+      sectoralMinimumWageRuleset('CA', D).map((s) => [s.id, s.hourlyCents]),
+    );
+    assert.equal(sectors.los_angeles_airport_worker, 2500);
+    assert.equal(sectors.santa_monica_hotel, 2500);
+    assert.equal(sectors.long_beach_hotel, 2650);
+    assert.equal(sectors.glendale_hotel, 2500);
+    assert.equal(sectors.west_hollywood_hotel, 2087);
+
+    // West Hollywood's hotel rate is genuinely NOT tied to Los Angeles's —
+    // it is well above the city's own general local minimum wage, but
+    // below the LA/Santa Monica/Glendale hotel figure, which is the whole
+    // reason it is stored as its own figure rather than derived from either.
+    const wehoGeneral = localMinimumWages('CA', D).find((j) => j.id === 'west_hollywood')!.hourlyCents!;
+    assert.ok(sectors.west_hollywood_hotel! > wehoGeneral);
+    assert.ok(sectors.west_hollywood_hotel! < sectors.los_angeles_hotel!);
+  });
+
+  test('New York’s home care aide wage is a separate, higher figure than Labor Law 652 in both regions', () => {
+    const sectors = Object.fromEntries(
+      sectoralMinimumWageRuleset('NY', D).map((s) => [s.id, s.hourlyCents]),
+    );
+    assert.equal(sectors.home_care_aide_downstate, 1965);
+    assert.equal(sectors.home_care_aide_upstate, 1865);
+
+    const downstate = minimumWage({ checkDate: D, state: 'NY', region: 'downstate' }).cents;
+    const upstate = minimumWage({ checkDate: D, state: 'NY' }).cents;
+    assert.ok(sectors.home_care_aide_downstate! > downstate);
+    assert.ok(sectors.home_care_aide_upstate! > upstate);
+  });
+});
+
+describe('coverage exemptions and exempt-salary thresholds (prose/reference fields, not read by minimumWage())', () => {
+  const readNY = () =>
+    JSON.parse(readFileSync(join(DATA_ROOT, 'states', 'NY-2026.json'), 'utf8')) as {
+      exemptions: {
+        categories: { id: string; label: string; statute: string }[];
+        electionWorkers: { conclusion: string; sources: unknown[] };
+      };
+      exemptSalaryThresholds: {
+        executiveAdministrative: {
+          downstate: { weekly: number; annualized: number };
+          upstate: { weekly: number; annualized: number };
+        };
+      };
+    };
+  const readFederal = () =>
+    JSON.parse(readFileSync(join(DATA_ROOT, 'federal-2026.json'), 'utf8')) as {
+      whiteCollarExemptions: {
+        standardSalaryLevel: { weekly: number; annualized: number };
+        highlyCompensatedEmployee: { annualized: number };
+        computerEmployee: { weekly: number; hourly: number; hourlyCents: number };
+      };
+      otherFederalMinimums: { electionWorkers: { status: string; note: string } };
+    };
+
+  test('NY Labor Law 651’s exemption list is complete and includes the government-employee category the election-worker analysis rests on', () => {
+    const ny = readNY();
+    const ids = ny.exemptions.categories.map((c) => c.id);
+    assert.equal(new Set(ids).size, ids.length, 'no duplicate exemption ids');
+    for (const required of [
+      'executive_administrative_professional',
+      'outside_salesperson',
+      'government_employee',
+      'farm_labor',
+      'computer_professional',
+    ]) {
+      assert.ok(ids.includes(required), `missing exemption category: ${required}`);
+    }
+  });
+
+  test('NY’s exempt-salary thresholds: downstate exceeds upstate, both exceed the federal floor, and weekly x 52 matches the annualized figure', () => {
+    const ny = readNY();
+    const federal = readFederal();
+    const { downstate, upstate } = ny.exemptSalaryThresholds.executiveAdministrative;
+    assert.ok(downstate.weekly > upstate.weekly);
+    for (const region of [downstate, upstate]) {
+      assert.ok(region.weekly > federal.whiteCollarExemptions.standardSalaryLevel.weekly);
+      assert.ok(
+        Math.abs(region.weekly * 52 - region.annualized) < 0.01,
+        `weekly x 52 should equal the annualized figure: ${region.weekly} x 52 != ${region.annualized}`,
+      );
+    }
+  });
+
+  test('federal white-collar exemption figures reflect the 2024 rule’s vacatur — the 2019 levels, not the vacated higher ones', () => {
+    const federal = readFederal();
+    assert.equal(federal.whiteCollarExemptions.standardSalaryLevel.weekly, 684);
+    assert.equal(federal.whiteCollarExemptions.standardSalaryLevel.annualized, 35568);
+    assert.equal(federal.whiteCollarExemptions.highlyCompensatedEmployee.annualized, 107432);
+    assert.equal(federal.whiteCollarExemptions.computerEmployee.hourly, 27.63);
+    assert.equal(federal.whiteCollarExemptions.computerEmployee.hourlyCents, 2763);
+  });
+
+  test('the election-worker minimum-wage question is documented consistently at both federal and NY level, as unsettled rather than a clean exemption', () => {
+    const ny = readNY();
+    const federal = readFederal();
+    assert.ok(ny.exemptions.electionWorkers.sources.length >= 3, 'expect multiple sources for a genuinely contested legal question');
+    assert.match(ny.exemptions.electionWorkers.conclusion, /judgment call|not a bright-line/);
+    assert.match(federal.otherFederalMinimums.electionWorkers.status, /not a bright-line/);
+    // Both entries must point at each other rather than silently duplicating
+    // or contradicting one another's analysis.
+    assert.match(federal.otherFederalMinimums.electionWorkers.note, /NY-2026\.json/);
+  });
 });
 
 describe('consistency with the rest of the engine', () => {

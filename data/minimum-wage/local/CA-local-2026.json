@@ -1024,7 +1024,7 @@
   "confidence": "cross_source_confirmed",
   "knownGaps": [
     "Employer-size tiers are recorded only where a city publishes one (Hayward, Novato, Sonoma). Cities not carrying a tier apply one rate to all employers.",
-    "Several California cities ALSO run sector-specific minimum wages (hotel and airport workers in Los Angeles, hotel workers in Santa Monica, Long Beach and West Hollywood). The Los Angeles and Santa Monica hotel figures are carried in sectoral/CA-sectoral-2026.json; the others are named there as gaps rather than given numbers.",
+    "Several California cities ALSO run sector-specific minimum wages (hotel and airport workers in Los Angeles, hotel workers in Santa Monica, Long Beach, Glendale and West Hollywood). All five are now carried in sectoral/CA-sectoral-2026.json rather than here -- Glendale has no general local minimum wage ordinance of its own, only its hotel-worker one, which is why it has no entry in THIS file's own jurisdictions list.",
     "A few of these ordinances exempt very small employers or government/nonprofit employers on their own terms; those coverage tests are not modelled per-city."
   ]
 }

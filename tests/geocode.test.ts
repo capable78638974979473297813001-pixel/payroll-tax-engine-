@@ -1407,6 +1407,79 @@ describe('rooftop.ts — authoritative address points (real captured National Ad
       assert.equal(result.ambiguous, true);
       assert.ok(result.match!.spreadMeters > 200);
     });
+
+    test('North Dakota: an exact match found only by widening the search radius, after every normal-radius tier fails', async () => {
+      // The real case this tier exists for: North Dakota's own submission
+      // publishes 600 E Boulevard Ave, Bismarck — just 444m from Census's
+      // interpolated point, outside the normal 300m box. The first fetch
+      // (300m) returns no point at all; only the SECOND, wider fetch (600m)
+      // carries it, so this also proves the widened search is a genuine
+      // last resort rather than always querying at the larger radius.
+      let nadCalls = 0;
+      const growingRadius = (async (url: string) => {
+        const target = String(url);
+        if (target.includes('nominatim')) {
+          return new Response(JSON.stringify([]), { status: 200 }); // no OSM corroboration either
+        }
+        nadCalls++;
+        if (nadCalls === 1) return new Response(JSON.stringify({ features: [] }), { status: 200 });
+        return new Response(
+          JSON.stringify({
+            features: [
+              {
+                attributes: {
+                  AddNo_Full: '600',
+                  St_PreDir: 'East',
+                  St_Name: 'Boulevard',
+                  St_PosTyp: 'Avenue',
+                  Post_City: 'BISMARCK',
+                  Zip_Code: '58505',
+                  Placement: 'Unknown',
+                  NAD_Source: 'State of North Dakota',
+                  Latitude: 46.82067,
+                  Longitude: -100.7827,
+                },
+              },
+            ],
+          }),
+          { status: 200 },
+        );
+      }) as unknown as typeof fetch;
+
+      const result = await resolveRooftop(
+        '600 E Boulevard Ave, Bismarck, ND 58505',
+        { lat: 46.8168, lon: -100.7813 },
+        growingRadius,
+        FAST_NAD,
+      );
+      assert.equal(nadCalls, 2, 'expected exactly one narrow-radius NAD query, then one wide-radius NAD query');
+      assert.equal(result.found, true);
+      assert.equal(result.tier, 'authoritative');
+      assert.equal(result.match!.chosen.source, 'State of North Dakota');
+      assert.ok(
+        result.metersFromInterpolated! > 400 && result.metersFromInterpolated! < 500,
+        `expected roughly 444m, got ${result.metersFromInterpolated}`,
+      );
+    });
+
+    test('an OSM/parcel result already found at the normal radius is never displaced by a wide-radius retry', async () => {
+      // Same Columbus address the first test in this block uses, whose
+      // exact-match point already resolves within the normal 300m box —
+      // the wide-radius fallback must never even be attempted.
+      let calls = 0;
+      const countingFetch = (async () => {
+        calls++;
+        return new Response(JSON.stringify({ features: COLUMBUS_NAD }), { status: 200 });
+      }) as unknown as typeof fetch;
+      const result = await resolveRooftop(
+        '90 W Broad St, Columbus, OH 43215',
+        COLUMBUS_INTERPOLATED,
+        countingFetch,
+        FAST_NAD,
+      );
+      assert.equal(result.tier, 'authoritative');
+      assert.equal(calls, 1, 'a normal-radius match must not trigger a second, wider fetch');
+    });
   });
 
   /**

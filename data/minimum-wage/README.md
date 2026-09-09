@@ -1,7 +1,7 @@
 # Minimum wage database
 
 Every federal, state, territorial and local minimum wage in the United States that
-this project could verify, as of **2026-09-08**.
+this project could verify, as of **2026-09-09**.
 
 This is a different kind of dataset from everything else in `data/`. The rest of the
 repo answers *what comes out of a paycheck*. These files answer the question that
@@ -39,7 +39,10 @@ federal-2026.json              the FLSA floor, the youth wage, and the federal
 states/XX-2026.json            50 states + DC
 territories/XX-2026.json       PR, VI, GU, AS, MP
 local/XX-local-2026.json       69 city and county ordinances across 10 states
-sectoral/CA-sectoral-2026.json minimum wages California sets by INDUSTRY, not geography
+sectoral/XX-sectoral-2026.json minimum wages a state sets by INDUSTRY/OCCUPATION, not
+                               geography -- California (fast food, health care, and the
+                               LA/Santa Monica/Long Beach/Glendale/West Hollywood hotel
+                               and airport ordinances) and New York (home care aides)
 ```
 
 Every file carries its own `sources` (title, URL, `verifiedOn`, and a `verifiedBy` note
@@ -163,10 +166,13 @@ absent rather than carried at zero.
 
 ## Known gaps
 
-- **Sector-specific ordinances are only partly covered.** California's fast food and
-  health care rates and the Los Angeles hotel rate are carried; the Los Angeles airport,
-  Santa Monica, Long Beach, West Hollywood and Glendale hotel ordinances are named but
-  given no figures, because none was verified to this database's standard.
+- **Sector-specific ordinances.** California's fast food and health care rates, the Los
+  Angeles hotel and airport worker rates, and the Santa Monica, Long Beach, Glendale and
+  West Hollywood hotel ordinances are all carried in `sectoral/CA-sectoral-2026.json`, as
+  is New York's home care aide minimum wage in `sectoral/NY-sectoral-2026.json`. The Los
+  Angeles airport/hotel figures rest on secondary sources rather than the ordinance's own
+  text, because every relevant city page and PDF returned HTTP 403 or 503 on direct fetch
+  when this pass was done — see that file's own sources for which ones and why.
 - **Coverage tests are not modelled.** Whether a particular employer is a "fast food
   restaurant," a covered health care facility, a Cook County municipality that opted out,
   or a SeaTac hospitality employer is a legal determination. This database carries rates,
@@ -179,8 +185,6 @@ absent rather than carried at zero.
   forbids one.
 - **Nebraska's Omaha and Lincoln ordinances are in active litigation** and are carried as
   not in effect. Re-verify before relying on either.
-- **New York's home care aide minimum wage** (Public Health Law 3614-f) is a separate,
-  higher figure published in NYSDOL fact sheet P105. No figure is asserted here.
 - **Effective dates that fall just after this file's `asOf`** are carried in
   `scheduledChanges` rather than applied — most urgently Florida's step to $15.00 on
   2026-09-30, three weeks after this database was compiled.

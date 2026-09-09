@@ -218,6 +218,36 @@ above the standard rate, a region silently matching its neighbor's number) — t
 "measure it, don't assert it" convention as `coverage:taxes` and `coverage:geocode`. It
 found the Oregon regional-tipped bug above; it now reports clean.
 
+### Who a rate doesn't apply to at all, and NY's own exempt-salary floor
+
+`states/NY-2026.json` also carries `exemptions` (New York Labor Law 651's full list
+excluding executives/administrators/professionals, outside salespeople, farm labor,
+government employees and a dozen other categories from the "employee" definition
+entirely — prose, not a machine-tested field, the same discipline as every other
+coverage question here) and `exemptSalaryThresholds` (the SALARY half of the
+executive/administrative exemption: $1,275/week downstate, $1,199.10/week upstate for
+2026, well above the federal $684/week floor carried in `federal-2026.json`'s own new
+`whiteCollarExemptions`). One entry inside `exemptions` is worth calling out
+specifically: **election inspectors and poll workers**, researched at both the federal
+and New York level and documented as genuinely unsettled — likely outside both the FLSA
+(as a "public agency volunteer" paid a nominal per-diem, 29 CFR 553.106) and New York's
+own Article 19 (via its ordinary government-employee exclusion, not an election-specific
+carve-out) — rather than asserting a clean exemption a court has never actually ruled on
+nationally.
+
+### Employee-count-triggered obligations that are not about wages at all
+
+`data/employer-thresholds/NY-2026.json` is a separate, deliberately out-of-band dataset
+answering a different question than anything above: at how many employees does an
+entire OTHER law start applying to a New York employer — paid sick leave's 4/99/100
+ladder (with a net-income test at the bottom tier that headcount alone can't answer),
+the state WARN Act's 50-employee/90-day-notice floor (stricter than federal WARN's
+100/60), federal ACA/FMLA/COBRA/Title VII/ADA/ADEA thresholds, and New York's own
+mini-COBRA filling exactly the gap federal COBRA's 20-employee floor leaves. None of it
+is wired into `calculatePaycheck()` — it changes what OTHER obligations exist, not what
+a given paycheck looks like — see that folder's own README for the full scope and its
+disclosed gaps.
+
 ## Staying current without fetching at calculation time
 
 ```bash
