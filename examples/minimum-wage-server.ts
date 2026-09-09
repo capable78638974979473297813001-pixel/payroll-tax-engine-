@@ -1,5 +1,5 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -33,6 +33,27 @@ import { isInsidePortlandMetro } from '../geocode/districts.ts';
 const PORT = Number(process.env.PORT ?? 4324);
 const HERE = dirname(fileURLToPath(import.meta.url));
 const HTML_PATH = join(HERE, 'minimum-wage-ui.html');
+const WAGE_DIR = join(HERE, '..', 'data', 'minimum-wage');
+
+/**
+ * Which years this deployment can actually answer for, read from the
+ * files on disk rather than hardcoded — rates are data in this project,
+ * so the set of answerable years is data too. Asking for a year with no
+ * ruleset is a normal mistake (a date picker defaulting to "today" in a
+ * year nobody has built yet), and it deserves a sentence that says which
+ * years DO exist rather than a raw file-not-found path.
+ */
+function availableYears(): number[] {
+  try {
+    return readdirSync(WAGE_DIR)
+      .map((f) => /^federal-(\d{4})\.json$/.exec(f)?.[1])
+      .filter((y): y is string => Boolean(y))
+      .map(Number)
+      .sort((a, b) => a - b);
+  } catch {
+    return [];
+  }
+}
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
   const payload = JSON.stringify(body);
@@ -74,6 +95,15 @@ interface LookupRequest {
   occupation?: 'food_service' | 'service_employee';
   checkDate?: string;
   hoursPerWeek?: number;
+  /**
+   * A geography this caller ALREADY resolved, so a second question about
+   * the same address (tipped instead of not, a different headcount, a
+   * different date) doesn't pay for the geocode again. Ignored whenever
+   * `address` is present — a fresh address always gets a fresh lookup.
+   */
+  places?: string[];
+  counties?: string[];
+  region?: string;
 }
 
 async function handleLookup(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -88,6 +118,24 @@ async function handleLookup(req: IncomingMessage, res: ServerResponse): Promise<
   const checkDate = (body.checkDate ?? new Date().toISOString().slice(0, 10)).trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(checkDate)) {
     sendJson(res, 400, { error: 'checkDate must be an ISO yyyy-mm-dd date.' });
+    return;
+  }
+
+  // Checked BEFORE any network call, so a date nobody has data for fails
+  // in milliseconds with a useful sentence rather than after a ten-second
+  // geocode and a raw file path.
+  const years = availableYears();
+  const year = Number(checkDate.slice(0, 4));
+  if (years.length > 0 && !years.includes(year)) {
+    sendJson(res, 400, {
+      error:
+        `No minimum wage data for ${year}. This build covers ` +
+        `${years.length === 1 ? years[0] : years.join(', ')}.`,
+      hint:
+        'Rates are data in this project, not code — a year is answerable once ' +
+        'data/minimum-wage/federal-<year>.json and its state files exist, each with its own source URL and verifiedOn date.',
+      availableYears: years,
+    });
     return;
   }
 
@@ -109,12 +157,17 @@ async function handleLookup(req: IncomingMessage, res: ServerResponse): Promise<
   const hoursPerWeek = Number.isFinite(Number(body.hoursPerWeek)) ? Number(body.hoursPerWeek) : 40;
 
   let state = explicitState;
-  let places: string[] = [];
-  let counties: string[] = [];
+  // A geography the caller already has. Only trusted when there's no
+  // address to resolve — an address on the request always wins.
+  let places: string[] = Array.isArray(body.places) ? body.places : [];
+  let counties: string[] = Array.isArray(body.counties) ? body.counties : [];
   let geocode: Record<string, unknown> | null = null;
-  let region: string | undefined;
+  let region: string | undefined = body.region?.trim() || undefined;
 
   if (address) {
+    places = [];
+    counties = [];
+    region = undefined;
     let resolution;
     try {
       resolution = await resolveAddress(address, { role: 'work', checkDate });
@@ -182,6 +235,10 @@ async function handleLookup(req: IncomingMessage, res: ServerResponse): Promise<
 
   const hourly = answer.wage.hourly;
   const round2 = (n: number) => Math.round(n * 100) / 100;
+
+  if (!address && (places.length > 0 || counties.length > 0)) {
+    geocode = { matched: true, reused: true, places, counties };
+  }
 
   sendJson(res, 200, {
     checkDate,
@@ -251,6 +308,13 @@ const server = createServer((req, res) => {
 
   if (req.method === 'POST' && url === '/api/minimum-wage') {
     handleLookup(req, res).catch((err) => sendJson(res, 500, { error: (err as Error).message }));
+    return;
+  }
+
+  if (req.method === 'GET' && url === '/api/meta') {
+    // Lets the UI bound its own date picker to the years that actually
+    // have data, instead of letting someone pick one and get an error.
+    sendJson(res, 200, { availableYears: availableYears() });
     return;
   }
 

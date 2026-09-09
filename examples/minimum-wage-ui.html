@@ -98,6 +98,10 @@
   }
   .busyNote { color: #8a94a0; }
   @keyframes pulse { 0%,100% { opacity: .25 } 50% { opacity: 1 } }
+  .stale {
+    background: var(--warn-bg); border: 1px solid var(--warn-border); border-radius: 4px;
+    padding: 8px 11px; font-size: 12.5px; margin-bottom: 10px;
+  }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -173,9 +177,10 @@
       <div class="field">
         <label for="checkDate">As of date</label>
         <input type="date" id="checkDate" />
-        <div class="hint">Rates step mid-year in several places — AK, DC and OR all move on July 1.</div>
+        <div class="hint" id="dateHint">Rates step mid-year in several places — AK, DC and OR all move on July 1.</div>
       </div>
 
+      <div id="stale" class="stale" hidden>Inputs changed — click to recalculate.</div>
       <button id="go" type="submit">Look up minimum wage</button>
       <div id="busy" class="busy" hidden>
         <span class="dot"></span>
@@ -225,8 +230,31 @@
 <script>
   var $ = function (id) { return document.getElementById(id); };
   var last = null;
+  // The geography a previous address lookup already resolved, so a second
+  // question about the same address never pays for the geocode again.
+  var cache = {};
 
   $('checkDate').value = new Date().toISOString().slice(0, 10);
+
+  // Bound the picker to the years that actually have rulesets, so a date
+  // with no data can't be chosen in the first place. Rates are data here,
+  // so which years are answerable is data too — the server reads it off
+  // the files on disk rather than carrying a hardcoded list.
+  fetch('/api/meta')
+    .then(function (r) { return r.json(); })
+    .then(function (m) {
+      var years = m.availableYears || [];
+      if (!years.length) return;
+      var lo = Math.min.apply(null, years), hi = Math.max.apply(null, years);
+      $('checkDate').min = lo + '-01-01';
+      $('checkDate').max = hi + '-12-31';
+      var current = Number($('checkDate').value.slice(0, 4));
+      if (years.indexOf(current) === -1) $('checkDate').value = hi + '-01-01';
+      $('dateHint').textContent =
+        'Data covers ' + (lo === hi ? lo : lo + '–' + hi)
+        + '. Rates step mid-year in several places — AK, DC and OR all move on July 1.';
+    })
+    .catch(function () {});
 
   // States are listed so the form works without geocoding at all.
   var STATES = ('AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND '
@@ -248,17 +276,33 @@
     });
   });
 
-  // Re-run on any change once there's a result on screen, so the page
-  // behaves like a live tool rather than a one-shot form.
-  ['employees', 'tipped', 'occupation', 'checkDate', 'locality'].forEach(function (id) {
-    $(id).addEventListener('change', function () { if (last) lookup(id === 'locality'); });
-  });
-  $('hours').addEventListener('change', function () { if (last) render(last); });
-  $('state').addEventListener('change', function () {
-    $('locality').innerHTML = '';
-    $('localityWrap').hidden = true;
-    if ($('state').value) lookup();
-  });
+  // The button is what calculates. Changing an input marks the answer on
+  // screen as stale rather than firing a lookup behind your back — which
+  // is what made ticking "tipped" feel broken: it silently kicked off
+  // another ten-second geocode.
+  ['employees', 'tipped', 'occupation', 'checkDate', 'locality', 'hours', 'state', 'address']
+    .forEach(function (id) {
+      var ev = (id === 'address') ? 'input' : 'change';
+      $(id).addEventListener(ev, function () {
+        // A new address invalidates the cached geography; everything else
+        // can be re-answered from it without touching the network.
+        if (id === 'address' && $('address').value.trim() !== (cache.address || '')) cache = {};
+        if (id === 'state') { $('locality').innerHTML = ''; $('localityWrap').hidden = true; cache = {}; }
+        if (last) markStale();
+      });
+    });
+
+  // Tipped only splits by occupation in New York, so that field appears
+  // only when it can change the answer.
+  $('tipped').addEventListener('change', syncOcc);
+  function syncOcc() {
+    $('occWrap').hidden = !($('tipped').checked && (last ? last.state : $('state').value) === 'NY');
+  }
+
+  function markStale() {
+    $('stale').hidden = false;
+    $('go').textContent = 'Recalculate';
+  }
 
   $('form').addEventListener('submit', function (e) { e.preventDefault(); lookup(); });
 
@@ -277,19 +321,7 @@
 
     $('err').hidden = true;
     $('go').disabled = true;
-    $('go').textContent = address && !state ? 'Resolving address…' : 'Looking up…';
-
-    // Geocoding an address is several live calls (Census, an authoritative
-    // address-point lookup, an independent cross-check), so it routinely
-    // takes the better part of ten seconds. Say so, rather than leaving a
-    // disabled button looking hung.
-    if (address && !state) {
-      $('busy').hidden = false;
-      clearTimeout(window.__slowTimer);
-      window.__slowTimer = setTimeout(function () {
-        $('busyNote').textContent = 'Still going — the address-point and cross-check lookups are the slow part.';
-      }, 4000);
-    }
+    $('go').textContent = 'Looking up…';
 
     var payload = {
       employeeCount: Number($('employees').value),
@@ -297,10 +329,36 @@
       tipped: $('tipped').checked,
       checkDate: $('checkDate').value
     };
-    // An explicit state wins and skips the network call entirely.
-    if (state) payload.state = state; else payload.address = address;
+
+    // Three ways to answer, cheapest first:
+    //   1. an explicit state       -> no network at all
+    //   2. a cached geography      -> no network, same address as last time
+    //   3. a fresh address         -> the full geocode
+    var reusing = false;
+    if (state) {
+      payload.state = state;
+    } else if (cache.address && cache.address === address && cache.state) {
+      payload.state = cache.state;
+      payload.places = cache.places;
+      payload.counties = cache.counties;
+      if (cache.region) payload.region = cache.region;
+      reusing = true;
+    } else {
+      payload.address = address;
+    }
     if ($('tipped').checked) payload.occupation = $('occupation').value;
-    if (useLocality && $('locality').value) payload.locality = $('locality').value;
+    if ($('locality').value && (useLocality || reusing || state)) payload.locality = $('locality').value;
+
+    // Only a genuine geocode is slow enough to need saying so — several
+    // live calls (Census, an authoritative address-point lookup, an
+    // independent cross-check). The other two paths return in milliseconds.
+    if (payload.address) {
+      $('busy').hidden = false;
+      clearTimeout(window.__slowTimer);
+      window.__slowTimer = setTimeout(function () {
+        $('busyNote').textContent = 'Still going — the address-point and cross-check lookups are the slow part.';
+      }, 4000);
+    }
 
     fetch('/api/minimum-wage', {
       method: 'POST',
@@ -311,6 +369,17 @@
       .then(function (res) {
         if (!res.ok) throw new Error(res.body.error + (res.body.hint ? ' — ' + res.body.hint : ''));
         last = res.body;
+        if (res.body.geocode && res.body.geocode.places && !res.body.geocode.reused) {
+          cache = {
+            address: address,
+            state: res.body.state,
+            places: res.body.geocode.places,
+            counties: res.body.geocode.counties,
+            region: res.body.region || undefined
+          };
+        }
+        $('stale').hidden = true;
+        $('go').textContent = 'Look up minimum wage';
         render(res.body, useLocality);
       })
       .catch(function (e) { showErr(e.message); })
