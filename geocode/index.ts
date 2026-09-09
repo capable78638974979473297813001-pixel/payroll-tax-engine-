@@ -46,6 +46,13 @@ import { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult 
 import { crossCheckSafe, milesBetween, type NominatimResult } from './nominatim.ts';
 import { namesEqual, stripCountySuffix, stripPlaceTypeSuffix } from './normalize.ts';
 import { resolveJurisdiction, toCertificateFields, type ResolvedJurisdiction } from './resolve.ts';
+import {
+  isNewYorkDownstate,
+  isOregonNonurbanCounty,
+  matchMinimumWageLocality,
+  type MinimumWageLocalityMatch,
+} from './minimumWageDistrict.ts';
+import { minimumWage, type MinimumWageAnswer, type MinimumWageQuery } from '../src/minimum-wage.ts';
 
 export type {
   CensusGeographies,
@@ -168,6 +175,8 @@ export interface AddressResolution {
   rooftop: RooftopResult | null;
   /** The Ohio JEDD/JEDZ containing this address, if any — a tax that exists on unincorporated land where no municipality does. Null everywhere outside Ohio, and wherever Ohio's boundary service couldn't be reached. */
   jedd: JeddDistrict | null;
+  /** The raw place/county names this address resolved to, AT THE POINT ACTUALLY USED (rooftop-corrected when available) — the same shape resolve.ts's own matchers read. Exposed so a caller (see resolveMinimumWage() below) can match against a DIFFERENT registry than this module's own certificate fields without re-geocoding. Null only when the address itself didn't match. */
+  geographies: { incorporatedPlaces: string[]; counties: string[] } | null;
   /** True when every field the address could plausibly need was 'matched' AND the geocode itself was high-confidence (narrow interpolation range, no fallback retry needed, no cross-check disagreement) — false means a human should look before this address goes live in certificate data. */
   fullyResolved: boolean;
   /** Plain-language reasons fullyResolved is false, if it is — empty when fullyResolved is true. */
@@ -453,6 +462,7 @@ export async function resolveAddress(
       coordinates: null,
       rooftop: null,
       jedd: null,
+      geographies: null,
       fullyResolved: false,
       lowConfidenceReasons: ['Census could not match this address at all, even after retrying with any apartment/suite/unit designator stripped.'],
     };
@@ -537,6 +547,7 @@ export async function resolveAddress(
     coordinates: point,
     rooftop,
     jedd,
+    geographies,
     fullyResolved: lowConfidenceReasons.length === 0,
     lowConfidenceReasons,
   };
@@ -722,4 +733,117 @@ export async function resolveEmployee(
   ];
 
   return { work, residence, certificateFields: fields, notResolvable, lowConfidenceReasons };
+}
+
+export interface MinimumWageResolution {
+  address: string;
+  matched: boolean;
+  /** The full computed answer — federal/state/local trail and the binding rate — null when the address itself didn't resolve. */
+  answer: MinimumWageAnswer | null;
+  /** Which local ordinance (if any) the address matched, and how confidently — see minimumWageDistrict.ts. */
+  localityMatch: MinimumWageLocalityMatch | null;
+  /** Which named region applied ('downstate' for NY, 'portland_metro'/'nonurban' for OR), or null where the state has none or the address falls in neither. */
+  region: string | null;
+  precision: AddressResolution['precision'];
+  lowConfidenceReasons: string[];
+}
+
+/**
+ * Resolve a work address straight to its binding minimum wage — the step
+ * missing between resolveAddress() (which answers "what jurisdiction is
+ * this") and minimumWage() (src/minimum-wage.ts), which answers "what does
+ * that jurisdiction require" but takes a locality/region id as INPUT
+ * rather than an address. geocode/minimumWageDistrict.ts is what bridges
+ * the two: it matches the geography resolveAddress() already resolved
+ * against every local ordinance and named region this project has data
+ * for, purely by name — no new registry, no hardcoded per-state table.
+ *
+ * employeeCount/tipped/occupation pass straight through uninterpreted:
+ * this function does not know or guess any of them. A caller who omits
+ * employeeCount in a jurisdiction that publishes a size tier gets exactly
+ * the behavior minimumWage() itself already documents for that case — the
+ * headline rate, with the trail saying a size tier existed and wasn't
+ * tested. That is deliberate: an address can tell you WHERE an employee
+ * works, never how many people their employer has.
+ *
+ * Oregon's Portland-metro region is the one match here that needs a
+ * SECOND live lookup beyond the address geocode itself
+ * (isInsidePortlandMetro's own boundary query, districts.ts) — the metro
+ * district's edge does not follow county lines, so no name-only
+ * comparison can answer it, the same reason Ohio's JEDD zones need a live
+ * polygon check rather than a Census place match. Every other region or
+ * local-ordinance match here is a pure name comparison against
+ * already-fetched geography, same as resolveAddress() itself.
+ */
+export async function resolveMinimumWage(
+  address: string,
+  checkDate: string,
+  opts: { employeeCount?: number; tipped?: boolean; occupation?: 'food_service' | 'service_employee' } = {},
+): Promise<MinimumWageResolution> {
+  const resolution = await resolveAddress(address, 'work', checkDate);
+  if (!resolution.matched || !resolution.resolved || !resolution.geographies) {
+    return {
+      address,
+      matched: false,
+      answer: null,
+      localityMatch: null,
+      region: null,
+      precision: resolution.precision,
+      lowConfidenceReasons: resolution.lowConfidenceReasons,
+    };
+  }
+
+  const state = resolution.resolved.state;
+  const geo = resolution.geographies;
+  const lowConfidenceReasons = [...resolution.lowConfidenceReasons];
+
+  const localityMatch = matchMinimumWageLocality(state, geo, checkDate);
+  if (localityMatch.confidence === 'ambiguous') {
+    lowConfidenceReasons.push(
+      `This address matched more than one local minimum-wage ordinance by name (${(localityMatch.candidates ?? [])
+        .map((c) => c.name)
+        .join(', ')}) — no local ordinance was applied; see matchMinimumWageLocality()'s candidate list.`,
+    );
+  }
+  if (localityMatch.confidence === 'matched' && localityMatch.heuristic) {
+    lowConfidenceReasons.push(
+      `${localityMatch.jurisdictionName}'s ordinance applies only to a county's UNINCORPORATED land, detected here as "no incorporated place matched at this point" — a heuristic, not a legal annexation record. Worth a human's confirmation for an address near a city's edge.`,
+    );
+  }
+
+  let region: string | null = null;
+  if (state === 'NY' && isNewYorkDownstate(geo)) {
+    region = 'downstate';
+  } else if (state === 'OR' && resolution.coordinates) {
+    const metro = await isInsidePortlandMetro(resolution.coordinates.lat, resolution.coordinates.lon);
+    if (metro.attempted) {
+      if (metro.inside) region = 'portland_metro';
+      else if (isOregonNonurbanCounty(geo.counties)) region = 'nonurban';
+    } else {
+      lowConfidenceReasons.push(
+        "Oregon's minimum wage has three geographic tiers, and Portland Metro's own boundary service could not be reached this call — the standard (middle) rate was used rather than checking whether this address falls inside the higher Portland-metro rate. Retry before relying on this figure near the metro boundary.",
+      );
+      if (isOregonNonurbanCounty(geo.counties)) region = 'nonurban';
+    }
+  }
+
+  const query: MinimumWageQuery = {
+    checkDate,
+    state,
+    locality: localityMatch.confidence === 'matched' ? (localityMatch.locality ?? undefined) : undefined,
+    region: region ?? undefined,
+    employeeCount: opts.employeeCount,
+    tipped: opts.tipped,
+    occupation: opts.occupation,
+  };
+
+  return {
+    address,
+    matched: true,
+    answer: minimumWage(query),
+    localityMatch,
+    region,
+    precision: resolution.precision,
+    lowConfidenceReasons,
+  };
 }

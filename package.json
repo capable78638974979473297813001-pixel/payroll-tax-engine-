@@ -16,6 +16,7 @@
     "ui:calculator": "node examples/calculator-server.ts",
     "demo:harvest": "node examples/harvest-demo.ts",
     "demo:geocode": "node examples/geocode-demo.ts",
+    "demo:minimum-wage-geocode": "node examples/minimum-wage-geocode-demo.ts",
     "coverage:geocode": "node examples/geocode-coverage.ts",
     "coverage:taxes": "node examples/tax-coverage.ts",
     "coverage:local": "node examples/local-tax-smoke-test.ts",

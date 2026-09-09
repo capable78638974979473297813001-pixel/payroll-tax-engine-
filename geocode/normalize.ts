@@ -50,6 +50,24 @@ export function stripPlaceTypeSuffix(name: string): string {
   return n;
 }
 
+/**
+ * Collapses a leading "St." to "Saint" so Census's own abbreviated place
+ * names ("St. Paul city") compare equal to a registry that spells the same
+ * name out in full ("Saint Paul") — found live 2026-09-08 chasing why a
+ * geocoded Saint Paul, MN address matched no local minimum-wage ordinance
+ * despite `saint_paul` being on file: Census returns "St. Paul city", a
+ * literal string mismatch against the data file's "Saint Paul", nothing
+ * subtler than that. Deliberately a SEPARATE function from namesEqual, the
+ * same "knowing fallback, never the default comparison" discipline this
+ * file's own stripPlaceTypeSuffix siblings already use — a caller matching
+ * against a registry that itself stores the ABBREVIATED form (as
+ * resolve.ts's own hardcoded "St. Louis" check does, matching Census's own
+ * spelling directly) has no need of this and should keep comparing as-is.
+ */
+export function normalizeSaintAbbreviation(name: string): string {
+  return name.replace(/^St\.?\s+/i, 'Saint ').trim();
+}
+
 /** "Marion County" -> "Marion". Indiana's own file stores the bare name. */
 export function stripCountySuffix(name: string): string {
   return name.replace(/\s+County\s*$/i, '').trim();

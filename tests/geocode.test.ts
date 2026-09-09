@@ -48,6 +48,11 @@ import {
   jeddAtPoint,
   oregonTransitDistrictAtPoint,
 } from '../geocode/districts.ts';
+import {
+  isNewYorkDownstate,
+  isOregonNonurbanCounty,
+  matchMinimumWageLocality,
+} from '../geocode/minimumWageDistrict.ts';
 
 const CHECK_DATE = '2026-08-15';
 
@@ -1949,6 +1954,183 @@ describe('districts.ts — taxing boundaries that are not Census geographies (mo
     test('an unreachable service is attempted: false — distinct from "outside the district"', async () => {
       const result = await isInsideCanbyTransitDistrict(45.2607, -122.6903, throws, FAST);
       assert.deepEqual(result, { attempted: false, inside: false });
+    });
+  });
+});
+
+/**
+ * minimumWageDistrict.ts — the bridge between an address's already-resolved
+ * geography and data/minimum-wage/local/'s ~66 ordinances plus NY/OR's
+ * named regions. Every case below is a REAL jurisdiction on file, checked
+ * against localMinimumWageRuleset('<state>', ...) directly (no fixture
+ * data — the whole point is that this matches whatever's actually on disk,
+ * the same "no hardcoded per-state table" property the module's own doc
+ * comment claims).
+ */
+describe('minimumWageDistrict.ts — address geography -> minimum-wage locality/region', () => {
+  const CHECK_DATE = '2026-08-15';
+
+  describe('matchMinimumWageLocality — plain city ordinances', () => {
+    test('matches Saint Paul MN despite Census\'s own abbreviated "St. Paul city" — found live 2026-09-08: this exact mismatch made a real geocoded address resolve no local ordinance at all before normalizeSaintAbbreviation() existed', () => {
+      const result = matchMinimumWageLocality(
+        'MN',
+        { incorporatedPlaces: ['St. Paul city'], counties: ['Ramsey County'] },
+        CHECK_DATE,
+      );
+      assert.equal(result.confidence, 'matched');
+      assert.equal(result.locality, 'saint_paul');
+    });
+
+    test('matches a straightforward city ordinance (Seattle)', () => {
+      const result = matchMinimumWageLocality(
+        'WA',
+        { incorporatedPlaces: ['Seattle city'], counties: ['King County'] },
+        CHECK_DATE,
+      );
+      assert.deepEqual(result, {
+        locality: 'seattle',
+        jurisdictionName: 'Seattle',
+        confidence: 'matched',
+        heuristic: false,
+      });
+    });
+
+    test('an address in a state with no local ordinance file resolves no_match, not a guess', () => {
+      const result = matchMinimumWageLocality(
+        'TX',
+        { incorporatedPlaces: ['Austin city'], counties: ['Travis County'] },
+        CHECK_DATE,
+      );
+      assert.equal(result.confidence, 'no_match');
+      assert.equal(result.locality, null);
+    });
+
+    test('an address inside a state WITH local ordinances, but not one of the named cities, resolves no_match', () => {
+      const result = matchMinimumWageLocality(
+        'WA',
+        { incorporatedPlaces: ['Spokane city'], counties: ['Spokane County'] },
+        CHECK_DATE,
+      );
+      assert.equal(result.confidence, 'no_match');
+    });
+  });
+
+  describe('matchMinimumWageLocality — unincorporated-only county ordinances (shape 1)', () => {
+    test('matches Los Angeles County\'s own ordinance when NO incorporated place covers the point', () => {
+      const result = matchMinimumWageLocality(
+        'CA',
+        { incorporatedPlaces: [], counties: ['Los Angeles County'] },
+        CHECK_DATE,
+      );
+      assert.equal(result.confidence, 'matched');
+      assert.equal(result.locality, 'los_angeles_county_unincorporated');
+      assert.equal(result.heuristic, true, 'the unincorporated-land match must disclose it is a heuristic');
+    });
+
+    test('does NOT match the county ordinance when an incorporated place covers the point — the city\'s own ordinance applies instead', () => {
+      const result = matchMinimumWageLocality(
+        'CA',
+        { incorporatedPlaces: ['Los Angeles city'], counties: ['Los Angeles County'] },
+        CHECK_DATE,
+      );
+      assert.equal(result.locality, 'los_angeles');
+      assert.equal(result.heuristic, false);
+    });
+
+    test('an incorporated place inside the SAME county that has no ordinance of its own still refuses the unincorporated-county match — a real town, just not on file', () => {
+      const result = matchMinimumWageLocality(
+        'CA',
+        { incorporatedPlaces: ['Compton city'], counties: ['Los Angeles County'] },
+        CHECK_DATE,
+      );
+      assert.equal(result.confidence, 'no_match');
+    });
+  });
+
+  describe('matchMinimumWageLocality — county-wide ordinances with no carve-out (shape 2)', () => {
+    test('matches Montgomery County MD county-wide, even with no incorporated place at the point', () => {
+      const result = matchMinimumWageLocality(
+        'MD',
+        { incorporatedPlaces: [], counties: ['Montgomery County'] },
+        CHECK_DATE,
+      );
+      assert.equal(result.locality, 'montgomery_county');
+      assert.equal(result.heuristic, false);
+    });
+
+    test('ALSO matches Montgomery County MD inside an incorporated town — unlike the unincorporated-only shape, incorporation does not disqualify it', () => {
+      const result = matchMinimumWageLocality(
+        'MD',
+        { incorporatedPlaces: ['Rockville city'], counties: ['Montgomery County'] },
+        CHECK_DATE,
+      );
+      assert.equal(result.locality, 'montgomery_county');
+    });
+  });
+
+  describe('matchMinimumWageLocality — county-wide minus one named city (shape 3)', () => {
+    test('Chicago itself matches its own city ordinance, not Cook County\'s', () => {
+      const result = matchMinimumWageLocality(
+        'IL',
+        { incorporatedPlaces: ['Chicago city'], counties: ['Cook County'] },
+        CHECK_DATE,
+      );
+      assert.equal(result.locality, 'chicago');
+    });
+
+    test('a DIFFERENT incorporated city inside Cook County matches the county ordinance — the carve-out excludes only the one named city', () => {
+      const result = matchMinimumWageLocality(
+        'IL',
+        { incorporatedPlaces: ['Evanston city'], counties: ['Cook County'] },
+        CHECK_DATE,
+      );
+      assert.equal(result.locality, 'cook_county');
+    });
+
+    test('unincorporated Cook County also matches the county ordinance — this carve-out is not an unincorporated-only shape', () => {
+      const result = matchMinimumWageLocality(
+        'IL',
+        { incorporatedPlaces: [], counties: ['Cook County'] },
+        CHECK_DATE,
+      );
+      assert.equal(result.locality, 'cook_county');
+    });
+
+    test('a different Illinois county with no ordinance resolves no_match', () => {
+      const result = matchMinimumWageLocality(
+        'IL',
+        { incorporatedPlaces: [], counties: ['Will County'] },
+        CHECK_DATE,
+      );
+      assert.equal(result.confidence, 'no_match');
+    });
+  });
+
+  describe('isOregonNonurbanCounty / isNewYorkDownstate — the named-region helpers', () => {
+    test('recognises one of Oregon\'s 18 statutorily-named non-urban counties', () => {
+      assert.equal(isOregonNonurbanCounty(['Douglas County']), true);
+      assert.equal(isOregonNonurbanCounty(['Wheeler County']), true);
+    });
+
+    test('a county not on Oregon\'s non-urban list (e.g. Multnomah, home of Portland metro) is not flagged non-urban', () => {
+      assert.equal(isOregonNonurbanCounty(['Multnomah County']), false);
+    });
+
+    test('New York City itself counts as downstate via its incorporated place, not a county name', () => {
+      assert.equal(
+        isNewYorkDownstate({ incorporatedPlaces: ['New York city'], counties: ['New York County'] }),
+        true,
+      );
+    });
+
+    test('Nassau/Suffolk/Westchester counties count as downstate even without NYC as the place', () => {
+      assert.equal(isNewYorkDownstate({ incorporatedPlaces: ['Hempstead village'], counties: ['Nassau County'] }), true);
+      assert.equal(isNewYorkDownstate({ incorporatedPlaces: [], counties: ['Suffolk County'] }), true);
+      assert.equal(isNewYorkDownstate({ incorporatedPlaces: [], counties: ['Westchester County'] }), true);
+    });
+
+    test('an upstate county is correctly NOT downstate', () => {
+      assert.equal(isNewYorkDownstate({ incorporatedPlaces: ['Albany city'], counties: ['Albany County'] }), false);
     });
   });
 });
