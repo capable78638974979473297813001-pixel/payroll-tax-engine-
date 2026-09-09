@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Minimum Wage Lookup</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --panel: #ffffff;
+    --border: #dfe3e8;
+    --text: #1b1f24;
+    --muted: #5c6672;
+    --accent: #1f4f7a;
+    --accent-ink: #ffffff;
+    --good-bg: #edf3f7;
+    --warn-bg: #fff7e6;
+    --warn-border: #f0c674;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-size: 14px; line-height: 1.45;
+  }
+  header { background: var(--accent); color: var(--accent-ink); padding: 18px 24px; }
+  header h1 { margin: 0; font-size: 19px; font-weight: 600; }
+  header p { margin: 4px 0 0; font-size: 13px; opacity: .88; }
+
+  main { max-width: 1060px; margin: 0 auto; padding: 22px 24px 60px; }
+  .cols { display: grid; grid-template-columns: 380px 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 880px) { .cols { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 18px; }
+  .panel h2 {
+    margin: 0 0 14px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+  }
+
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  input[type=text], input[type=number], input[type=date], select {
+    width: 100%; padding: 8px 10px; font-size: 14px; font-family: inherit;
+    border: 1px solid var(--border); border-radius: 4px; background: #fff; color: var(--text);
+  }
+  input:focus, select:focus { outline: 2px solid #b9d3ea; outline-offset: -1px; }
+  .field { margin-bottom: 13px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .check { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 13px; }
+  .check input { margin-top: 2px; }
+  .check span { font-size: 13px; }
+  .hint { font-size: 11.5px; color: var(--muted); margin-top: 4px; line-height: 1.45; }
+
+  button {
+    width: 100%; padding: 10px 14px; font-size: 14px; font-weight: 600; font-family: inherit;
+    background: var(--accent); color: #fff; border: 0; border-radius: 4px; cursor: pointer;
+  }
+  button:disabled { opacity: .55; cursor: default; }
+
+  .examples { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .examples a { color: var(--accent); cursor: pointer; text-decoration: underline; }
+
+  /* answer */
+  .answer { text-align: center; padding: 26px 18px; border-bottom: 1px solid var(--border); }
+  .answer .rate { font-family: var(--mono); font-size: 46px; font-weight: 700; letter-spacing: -1px; }
+  .answer .who { font-size: 14px; color: var(--muted); margin-top: 6px; }
+  .answer .who b { color: var(--text); }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  th { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+  td.num { text-align: right; font-family: var(--mono); }
+  tr.wins td { background: var(--good-bg); font-weight: 600; }
+  .tag {
+    font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .06em;
+    background: var(--accent); color: #fff; border-radius: 3px; padding: 1px 5px; margin-left: 6px;
+  }
+
+  .kv { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 13px; }
+  .kv .k { color: var(--muted); }
+  .kv .v { font-family: var(--mono); text-align: right; }
+
+  .msg { padding: 10px 12px; border-radius: 4px; font-size: 13px; margin-bottom: 14px; }
+  .msg.err { background: #fdeceb; border: 1px solid #f0b3ae; color: #8a2a20; }
+  .note { font-size: 12.5px; color: var(--muted); line-height: 1.55; margin-top: 10px; }
+  .warn {
+    background: var(--warn-bg); border: 1px solid var(--warn-border); border-radius: 4px;
+    padding: 10px 12px; font-size: 12.5px; margin-top: 14px; line-height: 1.5;
+  }
+  .warn ul { margin: 6px 0 0; padding-left: 18px; }
+  .placeholder { color: var(--muted); text-align: center; padding: 46px 20px; font-size: 14px; }
+  .busy {
+    display: flex; gap: 9px; align-items: flex-start; margin-top: 11px;
+    font-size: 12.5px; color: var(--muted); line-height: 1.5;
+  }
+  .busy .dot {
+    width: 9px; height: 9px; border-radius: 50%; background: var(--accent);
+    margin-top: 4px; flex: none; animation: pulse 1s ease-in-out infinite;
+  }
+  .busyNote { color: #8a94a0; }
+  @keyframes pulse { 0%,100% { opacity: .25 } 50% { opacity: 1 } }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Minimum Wage Lookup</h1>
+  <p>Federal, state, county and city floors all cover the same hour of work — the employer owes the highest one.</p>
+</header>
+
+<main>
+  <div id="err" class="msg err" hidden></div>
+
+  <div class="cols">
+    <!-- ---------- inputs ---------- -->
+    <form class="panel" id="form">
+      <h2>Employee</h2>
+
+      <div class="field">
+        <label for="address">Work address</label>
+        <input type="text" id="address" placeholder="400 Broad St, Seattle, WA 98109" autocomplete="off" />
+        <div class="hint">Where the hours are worked, not where the employee lives.</div>
+        <div class="examples">
+          Try:
+          <a data-ex="400 Broad St, Seattle, WA 98109">Seattle</a> ·
+          <a data-ex="233 S Wacker Dr, Chicago, IL 60606">Chicago</a> ·
+          <a data-ex="350 5th Ave, New York, NY 10118">NYC</a> ·
+          <a data-ex="301 Congress Ave, Austin, TX 78701">Austin</a>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="state">State</label>
+        <select id="state">
+          <option value="">Resolve from the address</option>
+        </select>
+        <div class="hint">Set this to skip geocoding entirely — useful if the address won't resolve.</div>
+      </div>
+
+      <div class="field" id="localityWrap" hidden>
+        <label for="locality">Local ordinance</label>
+        <select id="locality"></select>
+        <div class="hint">Resolved from the address. Override if you know better.</div>
+      </div>
+
+      <div class="two">
+        <div class="field">
+          <label for="employees">Number of employees</label>
+          <input type="number" id="employees" min="0" step="1" value="25" />
+        </div>
+        <div class="field">
+          <label for="hours">Hours / week</label>
+          <input type="number" id="hours" min="1" max="80" step="1" value="40" />
+        </div>
+      </div>
+      <div class="hint" style="margin-top:-8px;margin-bottom:13px">
+        Headcount only matters where a jurisdiction publishes a size tier — several do.
+      </div>
+
+      <label class="check" for="tipped">
+        <input type="checkbox" id="tipped" />
+        <span>Tipped employee <span class="hint" style="display:block;margin:0">Returns the cash wage owed before tips, where a tip credit is allowed at all.</span></span>
+      </label>
+
+      <div class="field" id="occWrap" hidden>
+        <label for="occupation">New York tipped category</label>
+        <select id="occupation">
+          <option value="food_service">Food service worker</option>
+          <option value="service_employee">Service employee (hotel / other hospitality)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="checkDate">As of date</label>
+        <input type="date" id="checkDate" />
+        <div class="hint">Rates step mid-year in several places — AK, DC and OR all move on July 1.</div>
+      </div>
+
+      <button id="go" type="submit">Look up minimum wage</button>
+      <div id="busy" class="busy" hidden>
+        <span class="dot"></span>
+        <span>Geocoding the address — this takes a few seconds.<br /><span id="busyNote" class="busyNote"></span></span>
+      </div>
+    </form>
+
+    <!-- ---------- result ---------- -->
+    <div>
+      <div class="panel" id="placeholder" style="padding:0">
+        <div class="placeholder">Enter a work address, or pick a state.</div>
+      </div>
+
+      <div id="out" hidden>
+        <div class="panel" style="padding:0">
+          <div class="answer">
+            <div class="rate" id="rate">—</div>
+            <div class="who" id="who">—</div>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Level</th><th>Jurisdiction</th><th class="num">Rate</th></tr>
+            </thead>
+            <tbody id="ladder"></tbody>
+          </table>
+        </div>
+
+        <div class="panel" id="payrollPanel" style="margin-top:16px" hidden>
+          <h2>At this floor</h2>
+          <div class="kv"><span class="k">Per employee, per year</span><span class="v" id="pEmp">—</span></div>
+          <div class="kv"><span class="k">All employees, per week</span><span class="v" id="pWeek">—</span></div>
+          <div class="kv"><span class="k">All employees, per year</span><span class="v" id="pYear">—</span></div>
+          <div class="note" id="pNote"></div>
+        </div>
+
+        <div class="panel" style="margin-top:16px">
+          <h2>How this resolved</h2>
+          <div id="geo"></div>
+          <div class="note" id="localityNote"></div>
+          <div id="warn"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  var $ = function (id) { return document.getElementById(id); };
+  var last = null;
+
+  $('checkDate').value = new Date().toISOString().slice(0, 10);
+
+  // States are listed so the form works without geocoding at all.
+  var STATES = ('AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND '
+    + 'OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY PR VI GU AS MP').split(' ');
+  STATES.forEach(function (s) {
+    var o = document.createElement('option');
+    o.value = s; o.textContent = s;
+    $('state').appendChild(o);
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-ex]'), function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      $('address').value = a.getAttribute('data-ex');
+      $('state').value = '';
+      $('locality').innerHTML = '';
+      $('localityWrap').hidden = true;
+      lookup();
+    });
+  });
+
+  // Re-run on any change once there's a result on screen, so the page
+  // behaves like a live tool rather than a one-shot form.
+  ['employees', 'tipped', 'occupation', 'checkDate', 'locality'].forEach(function (id) {
+    $(id).addEventListener('change', function () { if (last) lookup(id === 'locality'); });
+  });
+  $('hours').addEventListener('change', function () { if (last) render(last); });
+  $('state').addEventListener('change', function () {
+    $('locality').innerHTML = '';
+    $('localityWrap').hidden = true;
+    if ($('state').value) lookup();
+  });
+
+  $('form').addEventListener('submit', function (e) { e.preventDefault(); lookup(); });
+
+  function money(n) {
+    return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function short(n) { return '$' + Math.round(Number(n)).toLocaleString('en-US'); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function lookup(useLocality) {
+    var address = $('address').value.trim();
+    var state = $('state').value;
+    if (!address && !state) { showErr('Enter a work address, or pick a state.'); return; }
+
+    $('err').hidden = true;
+    $('go').disabled = true;
+    $('go').textContent = address && !state ? 'Resolving address…' : 'Looking up…';
+
+    // Geocoding an address is several live calls (Census, an authoritative
+    // address-point lookup, an independent cross-check), so it routinely
+    // takes the better part of ten seconds. Say so, rather than leaving a
+    // disabled button looking hung.
+    if (address && !state) {
+      $('busy').hidden = false;
+      clearTimeout(window.__slowTimer);
+      window.__slowTimer = setTimeout(function () {
+        $('busyNote').textContent = 'Still going — the address-point and cross-check lookups are the slow part.';
+      }, 4000);
+    }
+
+    var payload = {
+      employeeCount: Number($('employees').value),
+      hoursPerWeek: Number($('hours').value) || 40,
+      tipped: $('tipped').checked,
+      checkDate: $('checkDate').value
+    };
+    // An explicit state wins and skips the network call entirely.
+    if (state) payload.state = state; else payload.address = address;
+    if ($('tipped').checked) payload.occupation = $('occupation').value;
+    if (useLocality && $('locality').value) payload.locality = $('locality').value;
+
+    fetch('/api/minimum-wage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
+      .then(function (res) {
+        if (!res.ok) throw new Error(res.body.error + (res.body.hint ? ' — ' + res.body.hint : ''));
+        last = res.body;
+        render(res.body, useLocality);
+      })
+      .catch(function (e) { showErr(e.message); })
+      .then(function () {
+        clearTimeout(window.__slowTimer);
+        $('busy').hidden = true;
+        $('busyNote').textContent = '';
+        $('go').disabled = false;
+        $('go').textContent = 'Look up minimum wage';
+      });
+  }
+
+  function showErr(m) { $('err').textContent = m; $('err').hidden = false; }
+
+  function render(d, keepLocality) {
+    $('placeholder').hidden = true;
+    $('out').hidden = false;
+    $('occWrap').hidden = !($('tipped').checked && d.state === 'NY');
+
+    $('rate').textContent = money(d.hourly);
+    $('who').innerHTML =
+      'per hour — set by <b>' + esc(d.bindingJurisdiction) + '</b> (' + esc(d.bindingLevel) + ' law)'
+      + (d.tipped
+          ? (d.tipCreditAllowed
+              ? ', as the cash wage owed before tips'
+              : '. <b>No tip credit is allowed here</b>, so this is the full rate')
+          : '');
+
+    var body = $('ladder');
+    body.innerHTML = '';
+    (d.considered || []).forEach(function (c) {
+      var wins = c.level === d.bindingLevel && c.jurisdiction === d.bindingJurisdiction;
+      var tr = document.createElement('tr');
+      if (wins) tr.className = 'wins';
+      var amount = (c.cents === undefined || c.cents === null) ? '—' : money(c.cents / 100);
+      tr.innerHTML =
+        '<td>' + esc(c.level) + '</td>' +
+        '<td>' + esc(c.jurisdiction) + (wins ? '<span class="tag">binds</span>' : '') + '</td>' +
+        '<td class="num">' + amount + '</td>';
+      body.appendChild(tr);
+    });
+
+    if (d.payroll) {
+      var hours = Number($('hours').value) || d.payroll.hoursPerWeek;
+      var perEmp = d.hourly * hours * 52;
+      $('payrollPanel').hidden = false;
+      $('pEmp').textContent = short(perEmp);
+      $('pWeek').textContent = short(d.hourly * hours * d.payroll.employeeCount);
+      $('pYear').textContent = short(perEmp * d.payroll.employeeCount);
+      $('pNote').textContent =
+        d.payroll.employeeCount + ' employees × ' + hours + ' h/week at the floor. '
+        + 'A wage floor only — overtime, payroll taxes and benefits are not in this figure.';
+    } else {
+      $('payrollPanel').hidden = true;
+    }
+
+    var g = d.geocode || {};
+    var rows = [];
+    rows.push(['State', d.state]);
+    if (g.places) rows.push(['Place', g.places.length ? g.places.join(', ') : 'unincorporated (no incorporated place here)']);
+    if (g.counties && g.counties.length) rows.push(['County', g.counties.join(', ')]);
+    if (d.region) rows.push(['Region', d.region]);
+    if (g.precision) rows.push(['Geocode precision', g.precision]);
+    if (g.coordinates) rows.push(['Point', g.coordinates.lat.toFixed(5) + ', ' + g.coordinates.lon.toFixed(5)]);
+    if (!g.matched) rows.push(['Geocoding', 'skipped — state supplied directly']);
+    $('geo').innerHTML = rows.map(function (r) {
+      return '<div class="kv"><span class="k">' + esc(r[0]) + '</span><span class="v">' + esc(r[1]) + '</span></div>';
+    }).join('');
+
+    $('localityNote').textContent = (d.locality && d.locality.note) || '';
+
+    var avail = (d.locality && d.locality.available) || [];
+    if (avail.length) {
+      $('localityWrap').hidden = false;
+      if (!keepLocality) {
+        var sel = $('locality');
+        sel.innerHTML = '<option value="">None — state floor applies</option>';
+        avail.forEach(function (a) {
+          var o = document.createElement('option');
+          o.value = a.id;
+          o.textContent = a.name;
+          sel.appendChild(o);
+        });
+        sel.value = (d.locality.match && d.locality.match.id) || '';
+      }
+    } else {
+      $('localityWrap').hidden = true;
+    }
+
+    var reasons = g.lowConfidenceReasons || [];
+    $('warn').innerHTML = reasons.length
+      ? '<div class="warn"><b>Worth a look before relying on this address:</b><ul>'
+        + reasons.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul></div>'
+      : '';
+  }
+</script>
+
+</body>
+</html>

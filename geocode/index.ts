@@ -164,6 +164,19 @@ export interface AddressResolution {
   precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'parcel-centroid' | 'interpolated';
   /** The coordinate the jurisdictions were actually resolved at. */
   coordinates: { lat: number; lon: number } | null;
+  /**
+   * The raw Census geography names at the resolved point, before any
+   * registry matching. `resolved` above is the tax-registry view of this
+   * address; these are the plain place/county names underneath it, kept
+   * because not every consumer is a tax lookup — the minimum wage
+   * resolver matches city and county ordinances against these directly
+   * (see src/minimum-wage-address.ts).
+   *
+   * An EMPTY incorporatedPlaces array is meaningful, not missing data: it
+   * means the point falls on unincorporated land, which is exactly the
+   * condition an "unincorporated areas only" county ordinance requires.
+   */
+  geographies: { incorporatedPlaces: string[]; counties: string[] } | null;
   /** The authoritative-address-point lookup, whatever its outcome — including the distance between the two points, which is the size of the interpolation error this corrected. */
   rooftop: RooftopResult | null;
   /** The Ohio JEDD/JEDZ containing this address, if any — a tax that exists on unincorporated land where no municipality does. Null everywhere outside Ohio, and wherever Ohio's boundary service couldn't be reached. */
@@ -279,6 +292,7 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
       matchQuality: null,
       schoolDistrictLookupFailed: false,
       coordinates: null,
+      geographies: null,
       geographies: null,
       precision: 'interpolated',
       point: null,
@@ -451,6 +465,7 @@ export async function resolveAddress(
       crossCheck: null,
       precision: 'interpolated',
       coordinates: null,
+      geographies: null,
       rooftop: null,
       jedd: null,
       fullyResolved: false,
@@ -535,6 +550,10 @@ export async function resolveAddress(
     crossCheck,
     precision,
     coordinates: point,
+    geographies: {
+      incorporatedPlaces: geographies.incorporatedPlaces,
+      counties: geographies.counties,
+    },
     rooftop,
     jedd,
     fullyResolved: lowConfidenceReasons.length === 0,
