@@ -443,6 +443,13 @@
     if (g.counties && g.counties.length) rows.push(['County', g.counties.join(', ')]);
     if (d.region) rows.push(['Region', d.region]);
     if (g.precision) rows.push(['Geocode precision', g.precision]);
+    if (g.coordinateSource) {
+      rows.push(['Position from', ({
+        'census-address-range': 'Census address range',
+        'osm-structured': 'OpenStreetMap house point (Census had no range)',
+        'osm-freeform': 'OpenStreetMap area match (approximate)'
+      })[g.coordinateSource] || g.coordinateSource]);
+    }
     if (g.coordinates) rows.push(['Point', g.coordinates.lat.toFixed(5) + ', ' + g.coordinates.lon.toFixed(5)]);
     if (!g.matched) rows.push(['Geocoding', 'skipped — state supplied directly']);
     $('geo').innerHTML = rows.map(function (r) {

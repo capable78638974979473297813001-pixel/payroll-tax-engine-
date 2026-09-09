@@ -41,9 +41,9 @@ import {
   oregonTransitDistrictAtPoint,
   type JeddDistrict,
 } from './districts.ts';
-import { resolveRooftop, type AddressPointTier, type RooftopResult } from './rooftop.ts';
+import { parseAddressParts, resolveRooftop, type AddressPointTier, type RooftopResult } from './rooftop.ts';
 import { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult } from './buildings.ts';
-import { crossCheckSafe, milesBetween, type NominatimResult } from './nominatim.ts';
+import { crossCheckSafe, milesBetween, searchStructuredAddressSafe, type NominatimResult } from './nominatim.ts';
 import { namesEqual, stripCountySuffix, stripPlaceTypeSuffix } from './normalize.ts';
 import { resolveJurisdiction, toCertificateFields, type ResolvedJurisdiction } from './resolve.ts';
 
@@ -165,6 +165,14 @@ export interface AddressResolution {
   /** The coordinate the jurisdictions were actually resolved at. */
   coordinates: { lat: number; lon: number } | null;
   /**
+   * Which geocoder produced the coordinate. 'census-address-range' means
+   * the address was in Census's own TIGER ranges; the 'osm-*' values mean
+   * it was not, and OpenStreetMap supplied the point instead — at which
+   * stage the jurisdictions were resolved by testing that point against
+   * boundary polygons rather than from an address match.
+   */
+  coordinateSource: CoordinateSource | null;
+  /**
    * The raw Census geography names at the resolved point, before any
    * registry matching. `resolved` above is the tax-registry view of this
    * address; these are the plain place/county names underneath it, kept
@@ -261,6 +269,54 @@ function geographyDifferences(
   return differences;
 }
 
+/**
+ * Where the coordinate a resolution used actually came from. Reported so
+ * a reviewer can tell "Census had this address in its own ranges" from
+ * "no official range existed and OpenStreetMap supplied the point" —
+ * those deserve different amounts of trust, and collapsing them into one
+ * "matched" would hide that.
+ */
+export type CoordinateSource =
+  | 'census-address-range'
+  | 'osm-structured'
+  | 'osm-freeform';
+
+/**
+ * Get a coordinate for an address WITHOUT Census's address ranges.
+ *
+ * Tried in order of how specific the answer is:
+ *   1. OSM structured search at house rank — a real house-level point.
+ *   2. OSM free-text search — will happily return a street or town
+ *      centroid, which is still enough to answer which city and county
+ *      contain it, and is reported as the weaker source it is.
+ *
+ * Every step is failure-tolerant: a fallback that throws is a fallback
+ * that didn't help, never a reason to fail the whole resolution.
+ */
+async function coordinateFromFallbackGeocoders(
+  address: string,
+): Promise<{ lat: number; lon: number; source: CoordinateSource } | null> {
+  const parts = parseAddressParts(address);
+  if (parts.street) {
+    const structured = await searchStructuredAddressSafe({
+      street: parts.houseNumber ? `${parts.houseNumber} ${parts.street}` : parts.street,
+      city: parts.city ?? undefined,
+      state: parts.state ?? undefined,
+      postalcode: parts.postalcode ?? undefined,
+    });
+    if (structured.ok && structured.hit?.coordinates) {
+      return { ...structured.hit.coordinates, source: 'osm-structured' };
+    }
+  }
+
+  const free = await crossCheckSafe(address);
+  if (free.ok && free.result.matched && free.result.coordinates) {
+    return { ...free.result.coordinates, source: 'osm-freeform' };
+  }
+
+  return null;
+}
+
 async function geocodeAndResolve(address: string, checkDate: string): Promise<{
   resolved: ResolvedJurisdiction;
   matched: true;
@@ -272,6 +328,7 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
   point: { lat: number; lon: number };
   rooftop: RooftopResult;
   rooftopJurisdictionChanges: string[];
+  coordinateSource: CoordinateSource;
 } | {
   resolved: null;
   matched: false;
@@ -283,8 +340,59 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
   point: null;
   rooftop: null;
   rooftopJurisdictionChanges: never[];
+  coordinateSource: null;
 }> {
-  const geocoded = await geocodeAddress(address);
+  let geocoded = await geocodeAddress(address);
+  let coordinateSource: CoordinateSource = 'census-address-range';
+
+  // CENSUS IS ONE SOURCE OF A COORDINATE, NOT THE ANSWER.
+  //
+  // Census's address geocoder can only match an address that appears in
+  // its own TIGER address RANGES. New construction, recently annexed
+  // streets, rural routes and plenty of ordinary addresses simply are not
+  // in them, and when that happens it returns no match at all — which used
+  // to end the whole resolution, even though the jurisdiction question was
+  // still perfectly answerable.
+  //
+  // It is answerable because the two halves are independent:
+  //
+  //   1. WHERE IS THIS ADDRESS?  — any geocoder can answer. Census's
+  //      address ranges are one; OpenStreetMap's structured search is
+  //      another, and it holds house-level points for many addresses
+  //      TIGER has never heard of.
+  //   2. WHICH JURISDICTIONS CONTAIN THAT POINT? — this is a point-in-
+  //      polygon test against published boundary polygons, and it never
+  //      needed the address at all. fetchGeographiesAtPoint() asks
+  //      TIGERweb's own boundary service exactly that.
+  //
+  // So when step 1's first source comes up empty, fall through to the
+  // next one and then answer step 2 from the polygons. resolveRooftop()
+  // below still runs either way and can upgrade the point to a true
+  // rooftop position from the National Address Database.
+  if (!geocoded.matched || !geocoded.coordinates) {
+    const fallback = await coordinateFromFallbackGeocoders(address);
+    if (fallback) {
+      const atPoint = await fetchGeographiesAtPointSafe(fallback.lon, fallback.lat, fetch, {}, checkDate);
+      if (atPoint.ok && atPoint.result?.geographies) {
+        geocoded = {
+          matched: true,
+          coordinates: { x: fallback.lon, y: fallback.lat },
+          geographies: atPoint.result.geographies,
+          // No TIGER address range was involved, so there is no range
+          // width or side to report. Saying "matched via fallback" is the
+          // honest description of what happened.
+          matchQuality: {
+            addressRangeWidth: null,
+            matchedViaFallback: true,
+            side: null,
+            tigerLineId: null,
+          } as MatchQuality,
+        };
+        coordinateSource = fallback.source;
+      }
+    }
+  }
+
   if (!geocoded.matched || !geocoded.geographies || !geocoded.coordinates || !geocoded.matchQuality) {
     return {
       resolved: null,
@@ -293,11 +401,11 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
       schoolDistrictLookupFailed: false,
       coordinates: null,
       geographies: null,
-      geographies: null,
       precision: 'interpolated',
       point: null,
       rooftop: null,
       rooftopJurisdictionChanges: [],
+      coordinateSource: null,
     };
   }
 
@@ -370,6 +478,7 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
     point,
     rooftop,
     rooftopJurisdictionChanges,
+    coordinateSource,
   };
 }
 
@@ -454,6 +563,7 @@ export async function resolveAddress(
     point,
     rooftop,
     rooftopJurisdictionChanges,
+    coordinateSource,
   } = await geocodeAndResolve(address, checkDate);
   if (!matched) {
     return {
@@ -466,6 +576,7 @@ export async function resolveAddress(
       precision: 'interpolated',
       coordinates: null,
       geographies: null,
+      coordinateSource: null,
       rooftop: null,
       jedd: null,
       fullyResolved: false,
@@ -494,6 +605,21 @@ export async function resolveAddress(
   const crossCheck = await runCrossCheck(address, geographies, { x: point.lon, y: point.lat });
 
   const lowConfidenceReasons: string[] = [];
+  // Census had no address range for this one, so the point came from
+  // OpenStreetMap and the jurisdictions were resolved by testing that
+  // point against boundary polygons. That is a real answer — but it rests
+  // on a crowd-sourced position rather than an official address range, so
+  // a reviewer should know which of the two produced it.
+  if (coordinateSource === 'osm-structured') {
+    lowConfidenceReasons.push(
+      "Census had no address range for this address, so OpenStreetMap's house-level point was used instead and the jurisdictions were resolved by testing that point against boundary polygons. The jurisdiction answer is a genuine point-in-polygon result; the POSITION it was tested at is crowd-sourced rather than official.",
+    );
+  }
+  if (coordinateSource === 'osm-freeform') {
+    lowConfidenceReasons.push(
+      "Census had no address range for this address, and OpenStreetMap had no house-level point either — the position used is OSM's free-text result, which can be a street or town centroid rather than the building. Good enough to place the address in a city or county; NOT good enough to trust near a jurisdiction line.",
+    );
+  }
   const anyFieldAmbiguous = attemptedMatches(resolved).some((m) => m!.confidence === 'ambiguous');
   if (anyFieldAmbiguous) {
     lowConfidenceReasons.push('One or more jurisdiction fields matched more than one candidate — see the ambiguous FieldMatch(es) in `resolved` for the candidate list.');
@@ -554,6 +680,7 @@ export async function resolveAddress(
       incorporatedPlaces: geographies.incorporatedPlaces,
       counties: geographies.counties,
     },
+    coordinateSource,
     rooftop,
     jedd,
     fullyResolved: lowConfidenceReasons.length === 0,

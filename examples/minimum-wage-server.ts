@@ -194,6 +194,7 @@ async function handleLookup(req: IncomingMessage, res: ServerResponse): Promise<
     geocode = {
       matched: true,
       precision: resolution.precision,
+      coordinateSource: resolution.coordinateSource,
       coordinates: resolution.coordinates,
       places,
       counties,
