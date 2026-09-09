@@ -44,16 +44,18 @@ available the whole time and is now what it resolves to.
 
 ## Measured result
 
-**50 of 51 jurisdictions resolve to something better than Census's own
-interpolation**, correcting it by 5m to 269m (median 90m).
+**51 of 51 jurisdictions resolve to something better than Census's own
+interpolation**, correcting it by 8m to 269m (median 88m). Re-measured
+2026-09-08 after fixing a real regression (see "A second real bug" below)
+that had silently dropped this to 50/51.
 
 | Tier | Count |
 | --- | --- |
 | `rooftop` (authoritative) | 35 / 51 |
-| `rooftop-osm` (house-level, corroborated) | 12 / 51 |
+| `rooftop-osm` (house-level, corroborated) | 13 / 51 |
 | `neighbor` (block-level, authoritative) | 2 / 51 |
 | `parcel-centroid` (county GIS, gated) | 1 / 51 |
-| `interpolated` (no improvement available) | 1 / 51 |
+| `interpolated` (no improvement available) | 0 / 51 |
 
 ### A fifth tier: county tax-parcel centroids, and why it took two tries to get right
 
@@ -118,6 +120,27 @@ bracket that wide — but the fix is real for any Kentucky address on that
 street (or elsewhere the same misspelling recurs) that does have a close
 enough match.
 
+### A third real bug, found by a full-system audit: the same fix never reached the OSM tier
+
+Re-audited live 2026-09-08 (running `npm run coverage:geocode` end to end
+rather than reasoning about the code in the abstract) and found Kentucky
+had regressed past `rooftop-osm` all the way to plain `interpolated` — a
+bigger drop than the "these numbers still move" section below describes,
+and worth chasing rather than assuming it was ordinary drift. Root cause:
+`streetKeyCapitolNormalized()`'s guarded fallback (see above) had only
+ever been wired into `matchAddressPoint()` and `neighborBracket()` — the
+two NAD-matching functions — never into `resolveOsmPoint()`'s own
+road-name comparison. OSM/Nominatim's own road tag for the same Frankfort
+street carries the identical "Capital Avenue" misspelling KY's NAD
+submission does (confirmed live: Nominatim returns a rank-30,
+house-number-exact hit for "700 Capital Avenue"), so a real, corroborating
+OSM point was being thrown out by a bare `streetKey()` comparison alone.
+Fixed by applying the same guarded fallback to `resolveOsmPoint()`; two
+regression tests added (`tests/geocode.test.ts`) pin both the fix itself
+and that a genuinely different street is still correctly refused. Kentucky
+resolves `rooftop-osm` at 9m again, and the full 51-jurisdiction measurement
+above is now 51/51 with zero left on `interpolated`.
+
 ### A real bug, found by chasing why Alaska sat on `interpolated`
 
 Re-measured 2026-09-01 at a caller's explicit request for rooftop
@@ -144,15 +167,19 @@ and its new tests in `tests/geocode.test.ts`. Alaska now resolves
 
 ### These numbers still move, and that is not a bug
 
-An earlier run of this same script recorded 51/51, with 16 on
-`rooftop-osm` and none left on `interpolated`. North Dakota has sat on
-`interpolated` on multiple runs since, for a different and genuine
-reason, checked directly: NAD publishes East Boulevard Avenue in Bismarck
-densely (602, 604, 606, 612, 624...) but nothing at or below the sample
-address's own number (600) to bracket from — tier 3 correctly refuses
-rather than inventing a "below" point that doesn't exist. That is a real
-data gap in what North Dakota has published, not a bug this project's own
-code can fix.
+An earlier run of this same script recorded 50/51 with North Dakota stuck
+on `interpolated`, for a genuine data reason checked directly at the time:
+NAD published East Boulevard Avenue in Bismarck densely (602, 604, 606,
+612, 624...) but nothing at or below the sample address's own number (600)
+to bracket from — tier 3 correctly refused rather than inventing a "below"
+point that doesn't exist. As of the 2026-09-08 measurement above, North
+Dakota now resolves `rooftop-osm` at 8m instead — OSM apparently gained
+(or Nominatim now surfaces) a corroborating house-level point it didn't
+before. Nothing in this project's own code changed to produce that; it's
+the normal kind of drift this section is about. Kentucky's own move in the
+OTHER direction over the same period was NOT this kind of drift — it was
+the real regression fixed above — which is exactly why a surprising drop
+is worth chasing to a root cause rather than filed under "numbers move."
 
 Two of the four tiers depend on services outside this repo — the National
 Address Database publishes on its own schedule, and `rooftop-osm` depends
@@ -198,7 +225,7 @@ Census's own answer, which is where this project started.
 | MS | `rooftop-osm` | 8m | — |
 | MT | `rooftop` | 112m | Montana State Library |
 | NC | `rooftop` | 82m | State of North Carolina |
-| ND | `interpolated` | — | — (genuine data gap: NAD has no point at or below house number 600 on East Boulevard Ave to bracket from — see above) |
+| ND | `rooftop-osm` | 8m | — (previously `interpolated` — see "these numbers still move" above) |
 | NE | `rooftop` | 50m | State of Nebraska |
 | NH | `rooftop-osm` | 28m | — |
 | NJ | `rooftop` | 88m | State of New Jersey |
