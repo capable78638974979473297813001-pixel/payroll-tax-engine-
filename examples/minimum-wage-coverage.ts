@@ -1,5 +1,5 @@
 import { minimumWage, localMinimumWages } from '../src/minimum-wage.ts';
-import { stateMinimumWageRuleset } from '../src/registry.ts';
+import { stateMinimumWageRuleset, sectoralMinimumWageRuleset } from '../src/registry.ts';
 import { readdirSync } from 'node:fs';
 
 /**
@@ -82,6 +82,28 @@ for (const [state, regions] of [
   }
 }
 
+console.log('\n=== Every sectoral (industry/occupation) minimum wage ===\n');
+
+const sectoralFiles = readdirSync('data/minimum-wage/sectoral');
+let sectoralCount = 0;
+
+for (const f of sectoralFiles) {
+  const stateCode = f.slice(0, 2);
+  const state = minimumWage({ checkDate: CHECK_DATE, state: stateCode });
+  for (const sector of sectoralMinimumWageRuleset(stateCode, CHECK_DATE)) {
+    sectoralCount++;
+    const flags: string[] = [];
+    if (sector.hourlyCents <= state.cents) flags.push('does not exceed the state standard rate');
+    const line = `  ${stateCode} ${sector.id.padEnd(32)}${fmt(sector.hourlyCents)}`;
+    if (flags.length) {
+      console.log(RED(`${line}  ⚠ ${flags.join('; ')}`));
+      suspicious++;
+    } else {
+      console.log(line);
+    }
+  }
+}
+
 console.log('\n=== Every local ordinance ===\n');
 
 const localFiles = readdirSync('data/minimum-wage/local');
@@ -125,8 +147,9 @@ for (const f of localFiles) {
 
 console.log(
   `\n${DIM(
-    `Checked ${stateFiles.length + territoryFiles.length} states/territories, 4 named regions, and ` +
-      `${localCount} local ordinances at ${CHECK_DATE}. ${suspicious} flagged for a closer look.`,
+    `Checked ${stateFiles.length + territoryFiles.length} states/territories, 4 named regions, ` +
+      `${sectoralCount} sectoral rates, and ${localCount} local ordinances at ${CHECK_DATE}. ` +
+      `${suspicious} flagged for a closer look.`,
   )}`,
 );
 console.log(

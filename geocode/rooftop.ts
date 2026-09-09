@@ -74,6 +74,35 @@ const NAD_QUERY =
 /** How far around the interpolated point to look for the authoritative one. Interpolation error is a block-scale error — 300m covers it generously while keeping the response small enough to stay under the service's 2000-record cap even in a dense downtown (the Columbus test box returns ~227). */
 const SEARCH_RADIUS_METERS = 300;
 
+/**
+ * A second, wider radius tried ONLY for an exact house-number-and-street
+ * match, and ONLY after every tier has already come up empty at the
+ * normal radius — never for the neighbor-bracket tier, which relies on
+ * the narrow radius itself as its implicit "this is close to the target"
+ * guard (neighborBracket() has no separate distance-to-interpolated check
+ * of its own; widening its input radius would let it bracket two real
+ * points that are near EACH OTHER but both far from the address actually
+ * asked for).
+ *
+ * Exists because of a real, verified case: North Dakota's capitol address
+ * (600 E Boulevard Ave, Bismarck) sits on East Boulevard Avenue, which
+ * NAD publishes densely — but the point actually tagged house number 600
+ * sits 443m from Census's own interpolated position for it, well outside
+ * the normal 300m box, while the correctly-sequenced 604/608/612 points
+ * nearby all fall within it. The likely reason is the same one already
+ * documented for Pennsylvania's and Mississippi's capitol buildings in
+ * parcel.ts: a large government campus can have its assigned address
+ * point sited at the actual building or driveway entrance, set well back
+ * from where a TIGER/Line address range would place a curb interpolation.
+ * An exact match on house number AND street name is strong enough
+ * evidence on its own that widening the search for it — but ONLY as a
+ * last resort, after nothing closer has already succeeded — is safe: it
+ * can only improve an address that would otherwise be reported as
+ * uncorrected `interpolated`, never override a tier that already found
+ * something at the normal radius.
+ */
+const WIDE_SEARCH_RADIUS_METERS = 600;
+
 /** A NAD point this far from the rest of its own match group means the group isn't one building — most likely the same house number on the same street name in two different places inside the search box. Reported rather than silently averaged. */
 const IMPLAUSIBLE_SPREAD_METERS = 120;
 
@@ -664,6 +693,41 @@ export async function resolveRooftop(
     };
   }
 
+  // Last resort — an exact match, but only found by looking further than
+  // the normal radius. Tried only when NOTHING else worked (see
+  // WIDE_SEARCH_RADIUS_METERS's own doc comment for why this is safe: it
+  // can only improve an otherwise-`interpolated` result, never displace a
+  // tier that already succeeded), and only when this call is itself at
+  // the default radius — a caller who explicitly passed a custom
+  // radiusMeters gets exactly the search they asked for, not a silently
+  // widened one.
+  if (radiusMeters === SEARCH_RADIUS_METERS) {
+    const wider = await fetchAddressPointsNear(
+      interpolated.lat,
+      interpolated.lon,
+      WIDE_SEARCH_RADIUS_METERS,
+      fetchImpl,
+      retryOptions,
+    );
+    if (wider.ok) {
+      const wideMatch = matchAddressPoint(oneLineAddress, wider.points);
+      if (wideMatch) {
+        return {
+          attempted: true,
+          found: true,
+          tier: 'authoritative',
+          point: wideMatch.point,
+          match: wideMatch,
+          neighbors: null,
+          osm: null,
+          parcel: null,
+          metersFromInterpolated: metersBetween(interpolated, wideMatch.point),
+          ambiguous: wideMatch.spreadMeters > IMPLAUSIBLE_SPREAD_METERS,
+        };
+      }
+    }
+  }
+
   return { ...empty, attempted: fetched.ok };
 }
 
@@ -720,4 +784,5 @@ export {
   MAX_NEIGHBOR_SPAN_METERS,
   OSM_CORROBORATION_METERS,
   SEARCH_RADIUS_METERS,
+  WIDE_SEARCH_RADIUS_METERS,
 };

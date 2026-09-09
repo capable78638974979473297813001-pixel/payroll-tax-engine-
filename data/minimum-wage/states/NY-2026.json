@@ -94,7 +94,7 @@
     }
   ],
   "knownGaps": [
-    "New York's HOME CARE AIDE minimum wage is a separate, higher figure set by Public Health Law 3614-f; NYSDOL publishes it in fact sheet P105, which was not read this pass. No figure is asserted here rather than guessed.",
+    "New York's HOME CARE AIDE minimum wage is a separate, higher figure set by Public Health Law 3614-f -- $19.65 downstate / $18.65 upstate from 2026-01-01 -- and is now carried in sectoral/NY-sectoral-2026.json rather than here, the same way California keeps its fast-food and health-care sectoral rates out of its own state file.",
     "The hospitality and building-service wage orders carry their own allowances (uniform maintenance, meals, lodging) that can change the effective cash figure; not modelled.",
     "This engine's own garnishment data (data/garnishment/state-overrides-2026.json) uses the LOWER $16.00 figure for New York's 30x minimum-wage floor and discloses that as a simplification. Both files are now consistent about the fact that there are two rates."
   ],

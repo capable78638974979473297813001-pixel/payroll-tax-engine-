@@ -44,16 +44,16 @@ available the whole time and is now what it resolves to.
 
 ## Measured result
 
-**50 of 51 jurisdictions resolve to something better than Census's own
-interpolation**, correcting it by 5m to 269m (median 90m).
+**51 of 51 jurisdictions resolve to something better than Census's own
+interpolation**, correcting it by 5m to 444m (median 90m).
 
 | Tier | Count |
 | --- | --- |
-| `rooftop` (authoritative) | 35 / 51 |
+| `rooftop` (authoritative) | 36 / 51 |
 | `rooftop-osm` (house-level, corroborated) | 12 / 51 |
 | `neighbor` (block-level, authoritative) | 2 / 51 |
 | `parcel-centroid` (county GIS, gated) | 1 / 51 |
-| `interpolated` (no improvement available) | 1 / 51 |
+| `interpolated` (no improvement available) | 0 / 51 |
 
 ### A fifth tier: county tax-parcel centroids, and why it took two tries to get right
 
@@ -142,17 +142,43 @@ expand-to-one-canonical-form approach already used for directionals
 and its new tests in `tests/geocode.test.ts`. Alaska now resolves
 `rooftop` at 14m, its correct tier all along.
 
-### These numbers still move, and that is not a bug
+### North Dakota: a "genuine data gap" that turned out to be a search-radius bug
 
-An earlier run of this same script recorded 51/51, with 16 on
-`rooftop-osm` and none left on `interpolated`. North Dakota has sat on
-`interpolated` on multiple runs since, for a different and genuine
-reason, checked directly: NAD publishes East Boulevard Avenue in Bismarck
-densely (602, 604, 606, 612, 624...) but nothing at or below the sample
-address's own number (600) to bracket from — tier 3 correctly refuses
-rather than inventing a "below" point that doesn't exist. That is a real
-data gap in what North Dakota has published, not a bug this project's own
-code can fix.
+For several runs this table carried North Dakota as `interpolated`,
+diagnosed as a real data gap: NAD publishes East Boulevard Avenue in
+Bismarck densely (602, 604, 606, 612, 624...) but nothing at or below the
+sample address's own number (600) to bracket from, so tier 2 (neighbor
+bracket) correctly refused rather than invent a "below" point that didn't
+exist. That diagnosis was right about tier 2 — and wrong about the
+overall conclusion, because it never asked why tier 1 (exact match) also
+failed.
+
+Re-checked 2026-09-09 by querying NAD directly around the interpolated
+point: North Dakota's own submission DOES publish a point for house
+number 600 on East Boulevard Avenue — it just sits 444m away, well
+outside the 300m box every tier's search was built from. It was never
+fetched, so tier 1 never even saw it to compare against. The likely
+reason echoes something already documented for Pennsylvania's and
+Mississippi's capitol buildings in `geocode/parcel.ts`: a large government
+campus's assigned address point can sit at the actual building or
+driveway entrance, set well back from where an ordinary residential
+address's number would place it.
+
+`resolveRooftop()` now tries one more time at a wider 600m radius — but
+ONLY for an exact house-number-and-street match, and ONLY after every
+other tier has already failed at the normal radius (see
+`WIDE_SEARCH_RADIUS_METERS`'s own doc comment in `geocode/rooftop.ts` for
+why this is safe: it can only turn an `interpolated` result into a
+`rooftop` one, never displace a tier that already succeeded, and it
+deliberately does NOT extend to the neighbor-bracket tier, which relies
+on the narrow radius itself — rather than a distance check of its own —
+to keep from bracketing two points that are near each other but both far
+from the address actually asked for). Verified against the full 51-
+jurisdiction run: every other state's tier and correction distance came
+back byte-for-byte identical to the run before this change; only North
+Dakota moved, from `interpolated` to `rooftop` at 444m.
+
+### These numbers still move, and that is not a bug
 
 Two of the four tiers depend on services outside this repo — the National
 Address Database publishes on its own schedule, and `rooftop-osm` depends
@@ -198,7 +224,7 @@ Census's own answer, which is where this project started.
 | MS | `rooftop-osm` | 8m | — |
 | MT | `rooftop` | 112m | Montana State Library |
 | NC | `rooftop` | 82m | State of North Carolina |
-| ND | `interpolated` | — | — (genuine data gap: NAD has no point at or below house number 600 on East Boulevard Ave to bracket from — see above) |
+| ND | `rooftop` | 444m | State of North Dakota |
 | NE | `rooftop` | 50m | State of Nebraska |
 | NH | `rooftop-osm` | 28m | — |
 | NJ | `rooftop` | 88m | State of New Jersey |
@@ -213,7 +239,7 @@ Census's own answer, which is where this project started.
 | SC | `rooftop-osm` | 107m | — |
 | SD | `rooftop-osm` | 104m | — |
 | TN | `rooftop` | 90m | Tennessee STS GIS Services |
-| TX | `rooftop-osm` | 8m | — |
+| TX | `rooftop-osm` | 5m | — |
 | UT | `rooftop` | 187m | Utah Geospatial Resource Center |
 | VA | `rooftop` | 170m | Virginia Geographic Information Network |
 | VT | `rooftop` | 138m | Vermont Enhanced 911 Board |

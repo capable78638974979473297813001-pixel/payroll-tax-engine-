@@ -881,6 +881,38 @@ describe('sectoral minimum wages', () => {
     const state = stateMinimumWageRuleset('CA', D).standard!.hourlyCents;
     for (const id of healthCare) assert.ok(sectors[id]! > state, id);
   });
+
+  test('the five city hotel/airport ordinances are each carried, and each beats its own city\'s general local rate where one exists', () => {
+    const sectors = Object.fromEntries(
+      sectoralMinimumWageRuleset('CA', D).map((s) => [s.id, s.hourlyCents]),
+    );
+    assert.equal(sectors.los_angeles_airport_worker, 2500);
+    assert.equal(sectors.santa_monica_hotel, 2500);
+    assert.equal(sectors.long_beach_hotel, 2650);
+    assert.equal(sectors.glendale_hotel, 2500);
+    assert.equal(sectors.west_hollywood_hotel, 2087);
+
+    // West Hollywood's hotel rate is genuinely NOT tied to Los Angeles's —
+    // it is well above the city's own general local minimum wage, but
+    // below the LA/Santa Monica/Glendale hotel figure, which is the whole
+    // reason it is stored as its own figure rather than derived from either.
+    const wehoGeneral = localMinimumWages('CA', D).find((j) => j.id === 'west_hollywood')!.hourlyCents!;
+    assert.ok(sectors.west_hollywood_hotel! > wehoGeneral);
+    assert.ok(sectors.west_hollywood_hotel! < sectors.los_angeles_hotel!);
+  });
+
+  test('New York’s home care aide wage is a separate, higher figure than Labor Law 652 in both regions', () => {
+    const sectors = Object.fromEntries(
+      sectoralMinimumWageRuleset('NY', D).map((s) => [s.id, s.hourlyCents]),
+    );
+    assert.equal(sectors.home_care_aide_downstate, 1965);
+    assert.equal(sectors.home_care_aide_upstate, 1865);
+
+    const downstate = minimumWage({ checkDate: D, state: 'NY', region: 'downstate' }).cents;
+    const upstate = minimumWage({ checkDate: D, state: 'NY' }).cents;
+    assert.ok(sectors.home_care_aide_downstate! > downstate);
+    assert.ok(sectors.home_care_aide_upstate! > upstate);
+  });
 });
 
 describe('consistency with the rest of the engine', () => {
