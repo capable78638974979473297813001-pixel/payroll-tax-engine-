@@ -701,7 +701,23 @@ async function resolveOsmPoint(
   // lower one and is not an address point at all.
   if (hit.placeRank !== 30 || !hit.coordinates) return null;
   if (hit.houseNumber !== parts.houseNumber) return null;
-  if (hit.road && streetKey(hit.road) !== streetKey(parts.street)) return null;
+  // Same knowing fallback matchAddressPoint()/neighborBracket() already
+  // apply to NAD's own street names — see streetKeyCapitolNormalized()'s
+  // doc comment for why this is a verified, specific spelling split and
+  // not a guess. Needed here too: OSM/Nominatim's own road tag for
+  // Kentucky's state-capitol street carries the same "Capital Avenue"
+  // misspelling KY's own NAD submission does (confirmed live 2026-09-08 —
+  // without this fallback, a genuine rank-30, house-number-exact OSM hit
+  // for 700 Capitol Ave, Frankfort was being thrown away for a street-name
+  // mismatch alone, dropping that address all the way to `interpolated`
+  // instead of the `rooftop-osm` result this tier exists to provide).
+  if (
+    hit.road &&
+    streetKey(hit.road) !== streetKey(parts.street) &&
+    streetKeyCapitolNormalized(hit.road) !== streetKeyCapitolNormalized(parts.street)
+  ) {
+    return null;
+  }
 
   const metersFromInterpolated = metersBetween(interpolated, hit.coordinates);
   if (metersFromInterpolated > OSM_CORROBORATION_METERS) return null;

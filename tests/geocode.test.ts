@@ -1547,6 +1547,34 @@ describe('rooftop.ts — authoritative address points (real captured National Ad
         assert.equal(result.found, false);
       });
 
+      test('accepts an OSM hit on "Capital Avenue" for a target address written "Capitol Ave" — the same real spelling split confirmed on NAD (see streetKeyCapitolNormalized), found live 2026-09-08 also affecting OSM/Nominatim\'s own road tag for Kentucky\'s capitol street and previously NOT bridged on this tier: a genuine rank-30, house-number-exact OSM hit for 700 Capitol Ave, Frankfort was being thrown out by a bare streetKey() comparison alone, dropping that address all the way to `interpolated`', async () => {
+        const result = await resolveRooftop(
+          '700 Capitol Ave, Frankfort, KY 40601',
+          { lat: 38.18960840686, lon: -84.875198504445 },
+          twoServiceFetch({
+            nad: [],
+            nominatim: osmHouse({ lat: 38.189526, lon: -84.875227, houseNumber: '700', road: 'Capital Avenue' }),
+          }),
+          FAST,
+        );
+        assert.equal(result.found, true);
+        assert.equal(result.tier, 'osm-corroborated');
+        assert.deepEqual(result.point, { lat: 38.189526, lon: -84.875227 });
+      });
+
+      test('still refuses a GENUINELY different street sharing no word with the target, capitol-normalization or not', async () => {
+        const result = await resolveRooftop(
+          '400 S Monroe St, Tallahassee, FL 32399',
+          { lat: 30.43854, lon: -84.28186 },
+          twoServiceFetch({
+            nad: [],
+            nominatim: osmHouse({ lat: 30.4385, lon: -84.2818, houseNumber: '400', road: 'North Adams Street' }),
+          }),
+          FAST,
+        );
+        assert.equal(result.found, false);
+      });
+
       test('an authoritative point always wins — the OSM service is never even asked', async () => {
         let nominatimCalled = false;
         const spyFetch = (async (url: string) => {
