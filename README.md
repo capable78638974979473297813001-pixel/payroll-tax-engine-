@@ -147,23 +147,53 @@ error. `geocode/resolve.ts` runs an address through five tiers, each of which
 
 Measured, not assumed — `npm run coverage:geocode` resolves one real address
 per jurisdiction through this exact pipeline and reports which tier answered.
-A run just now: **35/51 land on authoritative rooftop points, 12/51 on
+A run just now: **36/51 land on authoritative rooftop points, 12/51 on
 OSM-corroborated house-level points, 2/51 on a between-published-points
 `neighbor` estimate, 1/51 on a county parcel centroid (Pennsylvania, 68m —
 see Known gaps for the story and the failure mode it took two tries to
-close), and 1/51 falls all the way back to Census's own interpolation**
-(North Dakota this run: nothing published at or below that address's own
-house number to bracket from). These counts are a live measurement, not a
-fixed claim — they move day to day as OSM/NAD coverage changes underneath
-the pipeline, so re-run the command above rather than trusting a number
-written down here; see `docs/geocoding-coverage.md`'s own "these numbers
-still move" section. Building footprints add a third,
+close), and 0/51 fall back to Census's own interpolation** — North Dakota,
+the last holdout, turned out to have a real published point after all, just
+444m from Census's interpolated position and outside the pipeline's normal
+search radius (see `docs/geocoding-coverage.md`'s own writeup of that fix).
+These counts are a live measurement, not a fixed claim — they move day to
+day as OSM/NAD coverage changes underneath the pipeline, so re-run the
+command above rather than trusting a number written down here; see that same
+doc's "these numbers still move" section. Building footprints add a third,
 independent cross-check where OSM has traced the structure.
 
 Once a coordinate is resolved, jurisdictions not published by Census — Ohio's
 JEDD/JEDZ districts, Portland's Metro Supportive Housing boundary — are
 looked up against their own government's boundary service, joined on the
 government's own ID, never on a name match.
+
+## Resident vs. nonresident: which input actually controls it
+
+There is no single `isResident: boolean` field, because US employers don't
+have one rule to represent — real statutes decide residency five genuinely
+different ways, and treating them as interchangeable is exactly the kind of
+mistake that produces a confidently-wrong paycheck. Every mechanism below
+defaults to the LESS generous outcome when its input is missing (full tax,
+never a silent exemption) — the same convention this whole engine uses for
+every other optional certificate field.
+
+| Mechanism | Set this | What it decides |
+| --- | --- | --- |
+| Cross-state reciprocity | `input.residenceState` (a full `{ code, certificate }`, separate from `input.workState`) | Whether the WORK state's income tax applies at all to a resident of a different, agreeing state — see `rules.reciprocity.reciprocalStates` per state. Two states need an extra assertion on `residenceState.certificate` beyond bare residence: Kentucky/Virginia's daily-commute condition (`dailyCommuter: true`) and Arizona's Form-WEC credit-eligibility condition for CA/IN/OR/VA residents (`nonresidentCreditEligible: true`) — both absent-means-no-exemption. |
+| Maryland's local tax | `workState.certificate.nonresident: true/false` | Switches between the employee's COUNTY rate (resident) and a flat 2.25% "Special Nonresident Rate" that replaces it entirely. |
+| DC | `workState.certificate.nonresident: true/false` | `true` zeroes DC income tax completely — the Home Rule Act bars DC from taxing nonresident commuters at all, not a rate difference. |
+| Kentucky local (Louisville Metro, Lexington-Fayette, Lyndon, Middletown, Lynnview) | `workState.certificate.residenceCity` (compared by name against the work jurisdiction) | Whether that ONE jurisdiction's resident or nonresident rate applies — no separate boolean; the engine derives it by matching city names. |
+| Michigan's 24 taxing cities | `workState.certificate.residenceCity` AND `workState.certificate.workCity` | NOT an either/or: a resident of one taxing city who works in a DIFFERENT taxing city owes BOTH cities' tax (resident rate at home, nonresident rate at work) — same city on both sides taxes once, at the resident rate. |
+| Pennsylvania's ~2,600 Act 32 EIT jurisdictions | `workState.certificate.residencePSD` AND `workState.certificate.workPSD` | The engine computes BOTH sides' combined municipal+school rate and withholds the HIGHER one — real PA law, not a simplification. |
+| NYC | `workState.certificate.nycResident: true/false` | Whether the NYC resident tax layers on top of NYS tax at all (NYC does not tax nonresidents — no rate for them exists to switch to). |
+| Yonkers | `workState.certificate.yonkersResident` / `yonkersNonresidentWorker` (two independent booleans) | Resident surcharge (16.75% of the NYS-style base tax) vs. a structurally different flat nonresident-earnings tax. Both `true` at once resolves to resident (a real caller can't actually produce this — Form IT-2104 has one residency checkbox — but the engine picks a defined answer rather than an undefined one). |
+
+Every boolean above is validated strictly: `true`/`false`/absent are the only
+accepted values, and anything else — including the string `"false"`, which
+is truthy in JavaScript — throws rather than being silently misread. That
+guard (`resolveCertBoolean()` in `src/taxes/state.ts`) closed a real gap
+found auditing this table: Yonkers' two flags were read as bare `if`
+checks until this pass, the one place in this cluster that didn't already
+have it.
 
 ## Minimum wage
 

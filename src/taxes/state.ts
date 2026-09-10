@@ -952,14 +952,33 @@ function exemptEmploymentCategoryReason(
  * value is accepted; anything else throws rather than silently guessing
  * which way "exempt" was meant.
  */
-function resolveCertExempt(cert: Record<string, unknown>): boolean {
-  const raw = cert.exempt;
+/**
+ * Read a certificate field that must be a real boolean or absent — never a
+ * string, number, or anything else that merely LOOKS like one (a caller-
+ * supplied "false" string is truthy under a bare `if` check, which is
+ * exactly backwards). Absent/null defaults to false, the same "missing
+ * input changes nothing" convention every optional certificate field in
+ * this engine already follows. Generalized from resolveCertExempt and
+ * resolveCertNonresident, which were identical apart from the field name —
+ * reused a third time by yonkersLocalTax()/yonkersSupplementalTax()'s own
+ * certificate.yonkersResident/yonkersNonresidentWorker flags, which used to
+ * skip this validation entirely (a real, if narrow, risk: NYS-50-T-Y's own
+ * residency flags deciding a 16.75%-of-NYS-tax surcharge vs. a flat
+ * nonresident rate is exactly the kind of "wrong branch, no error" failure
+ * this helper exists to prevent).
+ */
+function resolveCertBoolean(cert: Record<string, unknown>, field: string): boolean {
+  const raw = cert[field];
   if (raw === undefined || raw === null) return false;
   if (raw === true || raw === false) return raw;
   throw new Error(
-    `Unrecognized certificate.exempt ${JSON.stringify(raw)} — expected a real boolean (true/false), not a string ` +
-      `or other value that merely LOOKS like one.`,
+    `Unrecognized certificate.${field} ${JSON.stringify(raw)} — expected a real boolean (true/false), not a ` +
+      `string or other value that merely LOOKS like one.`,
   );
+}
+
+function resolveCertExempt(cert: Record<string, unknown>): boolean {
+  return resolveCertBoolean(cert, 'exempt');
 }
 
 /**
@@ -978,13 +997,7 @@ function resolveCertExempt(cert: Record<string, unknown>): boolean {
  * anything else throws.
  */
 function resolveCertNonresident(cert: Record<string, unknown>): boolean {
-  const raw = cert.nonresident;
-  if (raw === undefined || raw === null) return false;
-  if (raw === true || raw === false) return raw;
-  throw new Error(
-    `Unrecognized certificate.nonresident ${JSON.stringify(raw)} — expected a real boolean (true/false), not a ` +
-      `string or other value that merely LOOKS like one.`,
-  );
+  return resolveCertBoolean(cert, 'nonresident');
 }
 
 /**
@@ -2128,7 +2141,7 @@ function bracketFlatAllowance(
   // a 2020+-style form, so Table 2 is what's actually reused; that
   // discrepancy in MN's own source text is disclosed in MN-2026.json rather
   // than silently resolved.
-  const nraAdjustment = cert.nonresidentAlien
+  const nraAdjustment = resolveCertBoolean(cert, 'nonresidentAlien')
     ? dollars(
         federalRuleset(input.checkDate).incomeTax.nonresidentAlienAdjustment[
           input.payFrequency
@@ -3270,7 +3283,7 @@ function nycLocalTax(
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (!cert.nycResident) return null;
+  if (!resolveCertBoolean(cert, 'nycResident')) return null;
 
   const cfg = rules.nycLocalTax as NYCLocalTaxConfig | undefined;
   if (!cfg) return null;
@@ -3354,7 +3367,7 @@ function nycSupplementalTax(
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (!cert.nycResident) return null;
+  if (!resolveCertBoolean(cert, 'nycResident')) return null;
 
   const rawSupplementalCash = supplementalEarnings(input.earnings);
   if (rawSupplementalCash <= 0) return null;
@@ -3450,7 +3463,17 @@ function yonkersLocalTax(
   const extraYonkers = Number(cert.additionalWithholdingYonkers ?? 0);
   const extra = extraYonkers > 0 ? extraYonkers : 0;
 
-  if (cert.yonkersResident) {
+  // Both flags true at once is a caller error this project has already
+  // decided how to handle (see tests/engine.test.ts's own "resident status
+  // wins if a caller somehow sets both flags at once"): resident status
+  // takes precedence, the same "the more protective/larger obligation
+  // wins an ambiguous case" direction used elsewhere in this engine,
+  // rather than throwing on a combination a real Form IT-2104 can't
+  // actually produce (an employee checks one residency box, not both).
+  const yonkersResident = resolveCertBoolean(cert, 'yonkersResident');
+  const yonkersNonresidentWorker = resolveCertBoolean(cert, 'yonkersNonresidentWorker');
+
+  if (yonkersResident) {
     const nyCfg = rules as unknown as NYRulesetShape;
     const base = computeNYSStyleTax(input, ctx, rules, nyCfg);
     const baseAmount = applyRate(base.amount, cfg.residentSurcharge.rate);
@@ -3474,7 +3497,7 @@ function yonkersLocalTax(
     };
   }
 
-  if (cert.yonkersNonresidentWorker) {
+  if (yonkersNonresidentWorker) {
     const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
     const fullBase = ctx.taxableWagesFor(exempt);
     const supplementalCash = supplementalEarnings(input.earnings);
@@ -3551,10 +3574,16 @@ function yonkersSupplementalTax(
   const rawSupplementalCash = supplementalEarnings(input.earnings);
   if (rawSupplementalCash <= 0) return null;
 
+  // Both flags true at once: resident status wins — see yonkersLocalTax()'s
+  // own doc comment on this same precedence choice, already locked in by
+  // an existing test.
+  const yonkersResident = resolveCertBoolean(cert, 'yonkersResident');
+  const yonkersNonresidentWorker = resolveCertBoolean(cert, 'yonkersNonresidentWorker');
+
   let rate: number;
-  if (cert.yonkersResident) {
+  if (yonkersResident) {
     rate = cfg.residentSupplementalRate;
-  } else if (cert.yonkersNonresidentWorker) {
+  } else if (yonkersNonresidentWorker) {
     rate = cfg.nonresidentSupplementalRate;
   } else {
     return null;
@@ -3767,7 +3796,8 @@ function bracketTwoStatusPerPeriod(
   // Form ID W-4's own NRA instructions: "Check the 'A' box (Single)
   // withholding regardless of your marital status" — forced, not merely
   // defaulted, so this overrides whatever certificate.maritalStatus says.
-  const maritalStatus = cert.nonresidentAlien ? 'single' : resolveIDMaritalStatus(cert);
+  const isNRA = resolveCertBoolean(cert, 'nonresidentAlien');
+  const maritalStatus = isNRA ? 'single' : resolveIDMaritalStatus(cert);
 
   const brackets = cfg.brackets[maritalStatus][input.payFrequency];
   if (!brackets) {
@@ -3778,7 +3808,7 @@ function bracketTwoStatusPerPeriod(
   }
   const bracket = findWIBracket(brackets, taxableWages);
   const excess = taxableWages - dollars(bracket.from);
-  const nraAdjustment = cert.nonresidentAlien
+  const nraAdjustment = isNRA
     ? dollars(cfg.nonresidentAlienAdjustment?.[input.payFrequency] ?? 0)
     : 0;
   const amount = dollars(bracket.base) + applyRate(excess, bracket.rate) + nraAdjustment;
@@ -4444,7 +4474,7 @@ function newarkPayrollTaxEmployer(
   const exempt = federalRuleset(input.checkDate).incomeTax.exemptPretax as PretaxCategory[];
   const taxableWages = ctx.taxableWagesFor(exempt);
 
-  if (cert.newarkResidentApportionmentExcluded) {
+  if (resolveCertBoolean(cert, 'newarkResidentApportionmentExcluded')) {
     return {
       id: 'NEWARK_PAYROLL_ER',
       name: 'Newark Payroll Tax (Employer)',
@@ -8002,7 +8032,7 @@ function northCarolinaWithholding(
   // computed generically here rather than hardcoded, which also covers
   // the daily/quarterly/semiannual/annual frequencies NC-30's own chart
   // doesn't publish.
-  const isNRA = Boolean(cert.nonresidentAlien);
+  const isNRA = resolveCertBoolean(cert, 'nonresidentAlien');
   const isHoH = !isNRA && cert.filingStatus === 'head_of_household';
   const standardDeduction = dollars(
     isHoH

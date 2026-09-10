@@ -3537,6 +3537,73 @@ describe('Yonkers', () => {
     assert.equal(amountOf(r, 'NY_YONKERS_SIT'), dollars(1.34));
   });
 
+  describe('BUG FIX: yonkersResident/yonkersNonresidentWorker used to be read as bare truthy values', () => {
+    // Found auditing every resident/nonresident flag in this engine for the
+    // same risk resolveCertNonresident/resolveCertExempt were already
+    // written to guard against (see their own doc comments): a caller who
+    // sends the STRING "false" for a boolean field gets treated as true
+    // under a bare `if` check, because non-empty strings are truthy in JS.
+    // yonkersLocalTax() and yonkersSupplementalTax() read
+    // certificate.yonkersResident/yonkersNonresidentWorker directly with no
+    // such guard — a real gap given NYS-50-T-Y's own residency flags decide
+    // between a 16.75%-of-NYS-tax surcharge and a completely different flat
+    // nonresident rate. Both functions now go through the same
+    // resolveCertBoolean() helper resolveCertExempt/resolveCertNonresident
+    // already used, generalized to take a field name.
+    test('yonkersResident: "false" (a string) throws rather than being silently treated as true', () => {
+      assert.throws(
+        () =>
+          calculatePaycheck(
+            input({
+              payFrequency: 'weekly',
+              earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+              workState: {
+                code: 'NY',
+                certificate: { maritalStatus: 'single', exemptions: 3, yonkersResident: 'false' },
+              },
+            }),
+          ),
+        /Unrecognized certificate\.yonkersResident/,
+      );
+    });
+
+    test('yonkersNonresidentWorker: "false" (a string) throws the same way', () => {
+      assert.throws(
+        () =>
+          calculatePaycheck(
+            input({
+              payFrequency: 'weekly',
+              earnings: [{ code: 'REG', category: 'regular', amount: dollars(1500) }],
+              workState: {
+                code: 'NY',
+                certificate: { maritalStatus: 'single', yonkersNonresidentWorker: 'false' },
+              },
+            }),
+          ),
+        /Unrecognized certificate\.yonkersNonresidentWorker/,
+      );
+    });
+
+    test('a real boolean false on both flags correctly produces no Yonkers tax line at all', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+          workState: {
+            code: 'NY',
+            certificate: {
+              maritalStatus: 'single',
+              exemptions: 3,
+              yonkersResident: false,
+              yonkersNonresidentWorker: false,
+            },
+          },
+        }),
+      );
+      assert.equal(r.taxes.find((t) => t.id === 'NY_YONKERS_SIT'), undefined);
+    });
+  });
+
   test('additionalWithholdingYonkers (IT-2104 Line 5) adds a flat amount for RESIDENTS, distinct from Lines 3/4', () => {
     // Same wages as resident Example 1 ($1.34 base), plus
     // certificate.additionalWithholdingYonkers:dollars(5) AND
@@ -8097,6 +8164,27 @@ describe('North Carolina', () => {
         assert.equal(amountOf(r, 'NC_SIT'), dollars(expected));
       });
     }
+
+    test('BUG FIX: nonresidentAlien: "false" (a string) throws rather than being silently treated as true', () => {
+      // Same class of bug already guarded against on certificate.exempt and
+      // certificate.nonresident (see resolveCertBoolean's own doc comment):
+      // this file's own line 8035 used to read Boolean(cert.nonresidentAlien)
+      // directly, which the guard function's OWN doc comment already named
+      // as the specific anti-pattern that doesn't work — Boolean("false") is
+      // true. Closed the same session this table was written, across all 4
+      // call sites (Minnesota, Idaho x2, North Carolina).
+      assert.throws(
+        () =>
+          calculatePaycheck(
+            input({
+              payFrequency: 'monthly',
+              earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+              ...ncState({ nonresidentAlien: 'false' }),
+            }),
+          ),
+        /Unrecognized certificate\.nonresidentAlien/,
+      );
+    });
 
     test('forces Single status and 0 allowances even if the certificate claims otherwise', () => {
       const r = calculatePaycheck(
