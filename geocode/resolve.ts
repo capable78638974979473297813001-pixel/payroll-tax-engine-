@@ -126,6 +126,7 @@ function matchPAJurisdiction(
   censusCounties: string[],
   countySubdivisions: string[],
   checkDate: string,
+  censusSchoolDistrictName?: string,
 ): FieldMatch<PALocalEntry> {
   const all = allPALocalJurisdictions(checkDate);
   const countyNames = censusCounties.map((c) => stripCountySuffix(c).toUpperCase());
@@ -138,6 +139,30 @@ function matchPAJurisdiction(
     if (countyOk && muniOk && !candidates.includes(entry)) candidates.push(entry);
   }
   if (candidates.length === 1) return { confidence: 'matched', entry: candidates[0] };
+
+  // A PSD code is keyed on (municipality x SCHOOL DISTRICT), so a
+  // municipality split across districts has several of them and county +
+  // municipality alone genuinely cannot choose. Lancaster City is exactly
+  // this: three PSDs (360399 Conestoga Valley, 360999 Lampeter-Strasburg,
+  // 361001 Lancaster SD), and before this the whole address resolved to
+  // NO PSD at all -- so PA local tax silently could not be computed from
+  // an address there, which is how a Lancaster resident ended up taxed at
+  // the 1.00% nonresident rate instead of their real 1.60%.
+  //
+  // The school district boundary IS published, and this project already
+  // reads it at the resolved point for Ohio's SDIT. Reusing that name,
+  // and Ohio's own key normalizer, picks the right PSD without guessing.
+  // Deliberately only a TIE-BREAK: if the district name matches nothing,
+  // or still matches several, the answer stays 'ambiguous' rather than
+  // becoming a confident wrong PSD.
+  if (candidates.length > 1 && censusSchoolDistrictName) {
+    const wanted = schoolDistrictKeyFromCensusName(censusSchoolDistrictName);
+    const byDistrict = candidates.filter((c) =>
+      schoolDistrictKeysMatch(wanted, schoolDistrictKeyFromDataFileName(c.schoolDistrict)),
+    );
+    if (byDistrict.length === 1) return { confidence: 'matched', entry: byDistrict[0] };
+  }
+
   if (candidates.length > 1) return { confidence: 'ambiguous', entry: null, candidates };
   return { confidence: 'no_match', entry: null };
 }
@@ -411,7 +436,7 @@ export function resolveJurisdiction(
     result.county = matchCountyByName('IN', geo.counties, checkDate);
   }
   if (state === 'PA') {
-    result.paJurisdiction = matchPAJurisdiction(geo.counties, geo.countySubdivisions, checkDate);
+    result.paJurisdiction = matchPAJurisdiction(geo.counties, geo.countySubdivisions, checkDate, ohSchoolDistrictName);
   }
   if (state === 'MD') {
     result.mdCounty = matchMDCounty(geo.incorporatedPlaces, geo.counties, checkDate);

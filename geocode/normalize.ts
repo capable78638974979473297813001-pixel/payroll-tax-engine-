@@ -126,6 +126,16 @@ export function schoolDistrictKeyFromDataFileName(dataFileName: string): SchoolD
   if (last && OH_SD_ABBREVIATIONS.includes(last)) {
     return { base: CASE_FOLD(tokens.slice(0, -1).join(' ')), type: last };
   }
+  // PA's DCED file spells the same thing "LANCASTER S D" / "CONESTOGA
+  // VALLEY S D" -- "School District" abbreviated to two separate letters.
+  // Census writes "Lancaster School District", which the census-side key
+  // already reduces to "LANCASTER", so without this the two never meet
+  // and every PA municipality split across school districts stays
+  // unresolvable. Stripped only at the END, so a district genuinely
+  // named "... S D Something" is untouched.
+  if (tokens.length >= 3 && tokens[tokens.length - 2]?.toUpperCase() === 'S' && last === 'D') {
+    return { base: CASE_FOLD(tokens.slice(0, -2).join(' ')), type: null };
+  }
   return { base: CASE_FOLD(withoutNote), type: null };
 }
 

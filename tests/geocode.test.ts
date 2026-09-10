@@ -1997,3 +1997,35 @@ describe('districts.ts — taxing boundaries that are not Census geographies (mo
     });
   });
 });
+
+describe('PA PSD codes are keyed on municipality AND school district', () => {
+  // Lancaster City is split across three school districts, so it has three
+  // PSD codes -- 360399 (Conestoga Valley), 360999 (Lampeter-Strasburg) and
+  // 361001 (Lancaster SD) -- all sharing the same 1.60% resident / 1.00%
+  // nonresident rates. County + municipality alone cannot choose between
+  // them, and before this the whole address resolved to NO PSD, so PA local
+  // tax silently could not be computed from an address there.
+  test('the census school-district name matches PA DCED\'s "S D" spelling', () => {
+    const census = schoolDistrictKeyFromCensusName('Lancaster School District');
+    assert.equal(census.base, schoolDistrictKeyFromDataFileName('LANCASTER S D').base);
+    assert.ok(
+      schoolDistrictKeysMatch(census, schoolDistrictKeyFromDataFileName('LANCASTER S D')),
+      'Census "Lancaster School District" must match DCED "LANCASTER S D"',
+    );
+  });
+
+  test('a different district in the same city does NOT match', () => {
+    const census = schoolDistrictKeyFromCensusName('Lancaster School District');
+    assert.equal(
+      schoolDistrictKeysMatch(census, schoolDistrictKeyFromDataFileName('CONESTOGA VALLEY S D')),
+      false,
+      'the tie-break must not collapse two genuinely different districts',
+    );
+  });
+
+  test('the "S D" strip only fires on a trailing pair, not mid-name', () => {
+    // A district whose name merely CONTAINS an S or D token keeps it.
+    assert.equal(schoolDistrictKeyFromDataFileName('SOUTH S D').base, 'SOUTH');
+    assert.equal(schoolDistrictKeyFromDataFileName('BIG SPRING').base, 'BIG SPRING');
+  });
+});
