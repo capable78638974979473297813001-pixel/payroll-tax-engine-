@@ -6218,6 +6218,82 @@ describe('Arizona', () => {
       /Unrecognized AZ certificate\.electedRate/,
     );
   });
+
+  describe('reciprocity (Form WEC) — conditional on nonresident-credit eligibility, not bare residence', () => {
+    // Arizona's own bug class: unlike IL/IN/KY/MI/MN/OH/PA/WI's unconditional
+    // "resides there" pacts, Form WEC only exempts a CA/IN/OR/VA resident who
+    // is ALSO "allowed to claim a tax credit... on Form 140NR" — modelled via
+    // reciprocity.creditEligibilityRequiredStates and
+    // certificate.nonresidentCreditEligible on the EMPLOYEE'S OWN
+    // (residence-state) certificate, the same default-safe shape Kentucky/
+    // Virginia's dailyCommuter gate already uses.
+    test('a California resident with no eligibility assertion owes FULL Arizona tax, not $0', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+          workState: { code: 'AZ' },
+          residenceState: { code: 'CA' },
+        }),
+      );
+      assert.equal(amountOf(r, 'AZ_SIT'), dollars(60)); // default 2.0%, same as no-form-on-file
+    });
+
+    test('a California resident who asserts nonresidentCreditEligible gets the exemption', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+          workState: { code: 'AZ' },
+          residenceState: { code: 'CA', certificate: { nonresidentCreditEligible: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'AZ_SIT'), 0);
+    });
+
+    test('all four states (CA/IN/OR/VA) use the same eligibility gate', () => {
+      for (const residence of ['CA', 'IN', 'OR', 'VA']) {
+        const r = calculatePaycheck(
+          input({
+            payFrequency: 'biweekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+            workState: { code: 'AZ' },
+            residenceState: { code: residence, certificate: { nonresidentCreditEligible: true } },
+          }),
+        );
+        assert.equal(amountOf(r, 'AZ_SIT'), 0, `${residence} resident should owe $0 AZ tax`);
+      }
+    });
+
+    test('a non-reciprocal-state resident (Texas) gets no exemption even with the flag asserted', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+          workState: { code: 'AZ' },
+          residenceState: { code: 'TX', certificate: { nonresidentCreditEligible: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'AZ_SIT'), dollars(60));
+    });
+
+    test('the asymmetry Oregon\'s own guide confirms: an Arizona resident working in Oregon gets no matching OR exemption', () => {
+      // OR-2026.json's own reciprocity.rule: "NONE" — Oregon withholds from
+      // every nonresident regardless of home state. This is the OTHER
+      // direction of the one-directional relationship AZ's own data
+      // discloses (orAsymmetryConfirmed): the AZ exemption for OR residents
+      // above has no mirror image here.
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'monthly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(4000) }],
+          workState: { code: 'OR', certificate: { maritalStatus: 'single', allowances: 0 } },
+          residenceState: { code: 'AZ', certificate: { nonresidentCreditEligible: true } },
+        }),
+      );
+      assert.ok(amountOf(r, 'OR_SIT') > 0, 'Oregon must still withhold from an Arizona resident');
+    });
+  });
 });
 
 describe('Missouri', () => {

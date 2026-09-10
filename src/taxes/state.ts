@@ -97,8 +97,9 @@ export function stateIncomeTax(
 
   // Reciprocity and the nonresident de minimis threshold are both read
   // generically off rules.reciprocity, so every state file that already
-  // documents reciprocalStates (IL/IN/KY/MI/MN/OH/PA/WI) goes live the
-  // moment a caller populates input.residenceState — no per-state code
+  // documents reciprocalStates (AZ/IA/IL/IN/KY/MD/MI/MN/MT/ND/NJ/OH/PA/VA/
+  // WI/WV, plus DC's own structurally-different blanket exemption) goes
+  // live the moment a caller populates input.residenceState — no per-state code
   // change needed, matching this file's "data-only" ethos. Reciprocity is
   // checked first; de minimis only matters when reciprocity didn't already
   // resolve it.
@@ -536,6 +537,19 @@ interface ReciprocityConfig {
   // reciprocalStates list has no way to represent this — the ONLY
   // difference between a commuter-only entry and an ordinary one is here.
   commuterOnlyStates?: string[];
+  // Arizona's own bug class: a DIFFERENT kind of conditional entry from
+  // commuterOnlyStates above. Arizona's Form WEC does not grant an
+  // unconditional exemption to residents of California/Indiana/Oregon/
+  // Virginia — it requires the employee be "ALLOWED to claim a tax credit
+  // against your Arizona tax for taxes paid to your state of residence on
+  // Form 140NR." That is a nonresident-tax-CREDIT-eligibility test, not a
+  // commuting pattern, so it needs its own flag rather than overloading
+  // commuterOnlyStates — the certificate field it reads
+  // (certificate.nonresidentCreditEligible) is deliberately named
+  // differently from dailyCommuter for the same reason. Same default-safe
+  // direction as commuterOnlyStates: an absent or false flag means NO
+  // exemption, never a silently-granted one a real Form 140NR might deny.
+  creditEligibilityRequiredStates?: string[];
   // Pennsylvania-originated (REV-419): once this state's own reciprocity
   // exemption fires for a resident of a reciprocalStates entry, ALSO emit
   // an additional line for that employee's residence-state tax on the same
@@ -741,6 +755,16 @@ function reciprocityExemptionReason(
   if (reciprocity?.commuterOnlyStates?.includes(residence)) {
     const dailyCommuter = input.residenceState?.certificate?.dailyCommuter === true;
     if (!dailyCommuter) return null;
+  }
+
+  // Arizona's own bug class — see creditEligibilityRequiredStates's own doc
+  // comment. A resident of one of these states gets the exemption only if
+  // the caller affirmatively asserts they qualify for the underlying
+  // nonresident tax credit; absent that assertion, no exemption, the same
+  // default-safe direction commuterOnlyStates already uses above.
+  if (reciprocity?.creditEligibilityRequiredStates?.includes(residence)) {
+    const creditEligible = input.residenceState?.certificate?.nonresidentCreditEligible === true;
+    if (!creditEligible) return null;
   }
 
   return (

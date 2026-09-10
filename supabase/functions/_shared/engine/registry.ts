@@ -125,6 +125,22 @@ export interface FederalRuleset {
     wageBase: number;
     exemptPretax: string[];
   };
+  /**
+   * IRC annual elective-deferral limits, in dollars — the ceiling on how
+   * much of a 401(k)/403(b)/457(b)/SIMPLE deduction can actually be
+   * pretax-exempt this calendar year, not just how much a plan lets an
+   * employee defer. See capElectiveDeferrals() in wages.ts for how these
+   * are applied (standard limits only — no catch-up, see that function's
+   * own doc comment for why).
+   */
+  electiveDeferralLimits: {
+    /** 401(k) and 403(b) share ONE combined IRC 402(g) limit. */
+    section402gAggregate: number;
+    /** A governmental/tax-exempt 457(b) plan's OWN separate limit — not aggregated with 401(k)/403(b). */
+    deferral457: number;
+    /** A SIMPLE plan's own separate, lower limit (IRC 408(p)/401(k) SIMPLE). */
+    simple: number;
+  };
 }
 
 export function federalRuleset(checkDate: string): FederalRuleset {
@@ -212,6 +228,10 @@ export interface PALocalEntry {
   nonresidentEIT: number;
   schoolDistrictEIT: number;
   totalResidentEIT: number;
+  /** Act 511/319's own EIT low-income exemption threshold (estimated annual earned income) for this jurisdiction's MUNICIPAL EIT portion — below it, that portion (residentEIT on a resident's own entry, nonresidentEIT on a work entry) is exempt entirely. Present on only 49 of 2,627 entries; absent means no municipal EIT exemption ordinance is on file for this PSD. */
+  municipalEitLIE?: number;
+  /** Same mechanism as municipalEitLIE, but for the SCHOOL DISTRICT's own EIT portion (schoolDistrictEIT) — only ever relevant on a RESIDENT's own entry, since school district EIT is levied on residents, not nonresidents. */
+  schoolDistrictEitLIE?: number;
   lst?: {
     municipal: number;
     schoolDistrict: number;
@@ -319,7 +339,7 @@ interface KYOccupationalRegistryFile {
       }
     >;
     louisvilleMetro: { residentRate: number; nonresidentRate: number };
-    lexingtonFayette: { rate: number };
+    lexingtonFayette: { residentRate: number; nonresidentRate: number };
   };
 }
 
@@ -330,14 +350,17 @@ export function hasKYOccupationalRuleset(checkDate: string): boolean {
 
 /**
  * Every Kentucky city/county/consolidated-government jurisdiction that has
- * a CONFIRMED wage-withholding rate — i.e. the 39 entries (37 from the
- * scraped 225 + Louisville Metro + Lexington-Fayette) this project's own
- * normalization pass could safely reduce to a decimal figure, out of 225
- * scraped plus the 2 consolidated governments. The other ~188 scraped
- * entries (Net-Profits-only categories, ambiguous multi-base figures,
- * tiered schedules, flat fees) are deliberately EXCLUDED here — they have
- * no confirmed wage rate to return, the same "don't guess" discipline as
- * every other registry function in this file.
+ * a CONFIRMED wage-withholding rate — as of 2026-08-31, 250 entries (248
+ * from the scraped 250 + Louisville Metro + Lexington-Fayette), the
+ * overwhelming majority cross-checked against the Kentucky League of
+ * Cities' own official statewide FY2023 occupational tax survey (a
+ * dedicated Payroll Tax Rate column — see that file's own knownGaps for
+ * the corrections it caught). Only 2 scraped entries are deliberately
+ * EXCLUDED, and both are understood rather than unresolved — see
+ * data/local/KY-occupational-<year>.json's own jurisdictions.coverage
+ * field for which two and why. This count has moved several times before
+ * settling here — verify against that file and allKYJurisdictions()'s own
+ * runtime output before citing it again regardless.
  */
 export function allKYJurisdictions(checkDate: string): KYJurisdictionEntry[] {
   const file = loadJson<KYOccupationalRegistryFile>(
@@ -371,9 +394,9 @@ export function allKYJurisdictions(checkDate: string): KYJurisdictionEntry[] {
   });
   entries.push({
     name: 'Lexington',
-    wageRateDecimal: file.jurisdictions.lexingtonFayette.rate,
-    wageRateResidentDecimal: null,
-    wageRateNonresidentDecimal: null,
+    wageRateDecimal: null,
+    wageRateResidentDecimal: file.jurisdictions.lexingtonFayette.residentRate,
+    wageRateNonresidentDecimal: file.jurisdictions.lexingtonFayette.nonresidentRate,
     capAtSSWageBase: false,
   });
 
@@ -571,4 +594,410 @@ export function allOHSchoolDistricts(checkDate: string): OHSchoolDistrictEntry[]
     join('local', `OH-school-districts-${yearOf(checkDate)}.json`),
   );
   return file.districts;
+}
+
+export interface GarnishmentSource {
+  title: string;
+  url: string;
+  verifiedOn: string;
+  verifiedBy?: string;
+}
+
+export interface GarnishmentFederalRuleset {
+  year: number;
+  sources: GarnishmentSource[];
+  federalMinimumHourlyWage: number;
+  ordinaryGarnishment: {
+    maxDisposableEarningsFraction: number;
+    minimumWageWeeklyMultiplier: number;
+  };
+  supportOrder: {
+    supportingOtherFamilyFraction: number;
+    notSupportingOtherFamilyFraction: number;
+    arrearsBonusFraction: number;
+  };
+  studentLoanDefault: {
+    maxDisposableEarningsFraction: number;
+    minimumWageWeeklyMultiplier: number;
+  };
+}
+
+/** The CCPA's federal garnishment ceilings — see data/garnishment/federal-*.json. */
+export function garnishmentFederalRuleset(checkDate: string): GarnishmentFederalRuleset {
+  return loadJson<GarnishmentFederalRuleset>(
+    join('garnishment', `federal-${yearOf(checkDate)}.json`),
+  );
+}
+
+/** One "lesser of X% of gross/disposable" test — a state's cap is the MINIMUM across every entry here (plus the minimum-wage floor, if this state's ordinaryGarnishment block also sets one). */
+export interface GarnishmentCapFraction {
+  basis: 'gross' | 'disposable';
+  fraction: number;
+}
+
+/**
+ * A cliff bracket keyed on multiples of the applicable weekly minimum wage —
+ * Minnesota's shape (Minn. Stat. 571.922). Unlike the federal "lesser of a
+ * fraction or the amount over a floor" rule, crossing a threshold here puts
+ * the WHOLE disposable-earnings figure into that bracket's flat fraction,
+ * not just the excess above it. Disposable earnings at or below the lowest
+ * tier's minMultiplier are fully exempt (no tier matches).
+ */
+export interface GarnishmentTier {
+  minMultiplier: number;
+  /** null means "and above" — the top, uncapped bracket. */
+  maxMultiplier: number | null;
+  fraction: number;
+}
+
+/**
+ * A cliff bracket keyed on a FIXED gross-weekly dollar threshold rather than
+ * a multiple of minimum wage — Nevada's shape (NRS 31.295). The matching
+ * tier's fraction applies to DISPOSABLE earnings; which tier matches is
+ * decided by GROSS. Evaluated in ascending order; the first tier whose
+ * maxGrossWeekly is at or above this period's gross wins (null = the
+ * top, unbounded bracket).
+ */
+export interface GarnishmentGrossWeeklyTier {
+  maxGrossWeekly: number | null;
+  fraction: number;
+}
+
+/**
+ * A MARGINAL (not cliff) bracket schedule denominated in MONTHLY disposable
+ * earnings — Hawaii's shape (Haw. Rev. Stat. 652-1). Unlike GarnishmentTier,
+ * each bracket's fraction applies only to the slice of disposable earnings
+ * actually falling within it, the same way an income tax bracket works, and
+ * the monthly-denominated breakpoints are prorated to whatever pay
+ * frequency the paycheck actually uses. Brackets are ascending by
+ * `upToMonthly`; null means the top, unbounded bracket.
+ */
+export interface GarnishmentMarginalBracket {
+  upToMonthly: number | null;
+  fraction: number;
+}
+
+/**
+ * New Jersey's income-tier test (N.J. Stat. 2A:17-56(a)): a judgment
+ * creditor may take at most `belowThresholdFraction` while the debtor's
+ * ANNUALIZED income is at or under `thresholdMultipleOfPoverty` times the
+ * HHS federal poverty guideline for their own household size — a real
+ * number this project didn't track anywhere else, so it is carried here
+ * rather than assumed. Above that threshold the statute itself sets no
+ * fixed number ("the court... may order a larger percentage"), so this
+ * project falls through to the plain federal CCPA default in that case —
+ * disclosed as a modelling choice, not a verbatim NJ figure. Requires the
+ * caller to supply `GarnishmentOrder.householdSize`; absent that fact, this
+ * engine does not guess it and falls through to the same federal default,
+ * exactly the way an unset `headOfFamily` is never assumed true.
+ */
+export interface GarnishmentPovertyGuidelineTier {
+  belowThresholdFraction: number;
+  /** What `belowThresholdFraction` applies to — NJ's own statute text ("wages... earnings... due and owing") reads as gross, not the CCPA's narrower "disposable earnings" term of art. */
+  basis: 'gross' | 'disposable';
+  thresholdMultipleOfPoverty: number;
+  /** HHS poverty guideline for a household of 1 — 48 contiguous states + DC table (NJ is not AK/HI). Re-published every January; re-verify yearly. */
+  povertyGuidelineBase: number;
+  /** Added per household member beyond 1, same HHS table. */
+  povertyGuidelinePerAdditionalPerson: number;
+  /** A separate flat WEEKLY dollar amount exempt from execution regardless of the percentage test — N.J. Stat. 2A:17-50's $48, distinct from the poverty-guideline mechanism above. */
+  flatWeeklyExemption?: number;
+}
+
+/**
+ * One state's (or one head-of-family variant's) full garnishment formula.
+ * Every field is optional because a formula can be built from any ONE of
+ * capFractions/tiers/grossWeeklyTiers/marginalMonthlyBrackets/
+ * povertyGuidelineTier (mutually exclusive in practice — a real state
+ * statute uses exactly one shape) plus an optional minimum-wage floor
+ * layered on top of capFractions specifically (see
+ * minimumWageWeeklyMultiplier's own doc comment).
+ */
+export interface GarnishmentFormula {
+  /**
+   * The minimum-wage floor's own multiplier and hourly figure, layered on
+   * top of `capFractions` only. BOTH optional together — omit both when the
+   * state's formula has no separate floor test (e.g. Delaware's flat 15%,
+   * already more protective than the federal floor at every realistic
+   * income level) or when the shape used (tiers/grossWeeklyTiers/
+   * marginalMonthlyBrackets) is already self-contained. stateMinimumHourlyWage
+   * is pre-resolved to whichever of that state's own minimum wage or the
+   * federal $7.25 is GREATER, at authoring time — see this file's own
+   * per-state $note for which one actually won and when to re-check it.
+   */
+  minimumWageWeeklyMultiplier?: number;
+  stateMinimumHourlyWage?: number;
+  /**
+   * What fraction of the excess over the minimum-wage floor is actually
+   * reachable — every state in this file except California takes the
+   * FULL excess (the federal CCPA's own rule: disposable earnings minus the
+   * floor, no further scaling), so this defaults to 1.0 (100%) when omitted
+   * and every existing entry's behavior is unchanged. California's own
+   * formula (Cal. Civ. Proc. Code § 706.050) is the one exception found so
+   * far: only 40% of the amount by which disposable earnings exceed 48x the
+   * applicable minimum wage is reachable, not the full excess — set to 0.40
+   * there. Only meaningful alongside `capFractions` plus a minimum-wage
+   * floor; ignored otherwise.
+   */
+  minimumWageExcessFraction?: number;
+  /** Shape A — the lesser of one or more straight fractions (of gross and/or disposable earnings), e.g. Illinois, Connecticut, New York, Massachusetts, Delaware, Colorado, Washington. */
+  capFractions?: GarnishmentCapFraction[];
+  /** Shape B — a cliff-bracket schedule keyed on multiples of minimum wage, e.g. Minnesota. */
+  tiers?: GarnishmentTier[];
+  /** Shape C — a cliff-bracket schedule keyed on a fixed gross-weekly dollar threshold, e.g. Nevada. */
+  grossWeeklyTiers?: GarnishmentGrossWeeklyTier[];
+  /** Shape D — a MARGINAL bracket schedule denominated in monthly dollars, e.g. Hawaii. */
+  marginalMonthlyBrackets?: GarnishmentMarginalBracket[];
+  /** Shape E — an income-tier test keyed to the debtor's household size against the HHS federal poverty guideline, e.g. New Jersey. */
+  povertyGuidelineTier?: GarnishmentPovertyGuidelineTier;
+  /**
+   * A flat per-dependent WEEKLY dollar reduction applied to the computed cap
+   * (after the fraction/floor test, before clamping at zero) — North
+   * Dakota's $20/dependent (N.D. Cent. Code 32-09.1-06). Only meaningful
+   * alongside `capFractions`; requires the order's own `dependents` count
+   * (see GarnishmentOrder) — absent or 0 dependents means no reduction.
+   */
+  perDependentWeeklyReduction?: number;
+}
+
+export interface GarnishmentStateOverride {
+  /** True where state law bars ordinary consumer/creditor garnishment outright (TX, PA, NC, SC). Never affects support orders or federal student loan default — those preempt state wage exemptions entirely. */
+  ordinaryGarnishmentProhibited?: boolean;
+  /**
+   * A status-conditioned full exemption from ordinary garnishment — Florida's
+   * "head of family" rule (Fla. Stat. 222.11), the only one of these this
+   * project has researched. The caller asserts the qualifying fact on the
+   * GarnishmentOrder itself (`headOfFamily`), same discipline as every other
+   * eligibility flag this engine refuses to guess; `waivableInWriting: true`
+   * means the debtor can waive it (`wageExemptionWaivedInWriting: true` on
+   * the order), in which case this state's ordinaryGarnishment/federal-default
+   * rule applies as if the exemption were never there.
+   */
+  fullExemption?: {
+    qualifyingFlag: 'headOfFamily';
+    waivableInWriting: boolean;
+  };
+  ordinaryGarnishment?: GarnishmentFormula;
+  /**
+   * Applies INSTEAD of ordinaryGarnishment/the federal default whenever
+   * order.headOfFamily is true — Missouri's own reduced-percentage variant
+   * (Mo. Rev. Stat. 525.030: 10% instead of the ordinary 25%), distinct from
+   * Florida's all-or-nothing `fullExemption` above. Checked before
+   * `fullExemption`, so a state could in principle carry both (none
+   * currently does).
+   */
+  headOfFamilyOrdinaryGarnishment?: GarnishmentFormula;
+  sources: GarnishmentSource[];
+  $note?: string;
+  knownGap?: string;
+}
+
+interface GarnishmentStateOverrideFile {
+  year: number;
+  states: Record<string, GarnishmentStateOverride>;
+}
+
+/**
+ * A state's own departure from the federal CCPA ordinary-garnishment
+ * default, if this project has researched one — undefined means "use the
+ * federal default," never "confirmed no departure exists." See
+ * data/garnishment/state-overrides-*.json's own $scopeNote.
+ */
+export function garnishmentStateOverride(
+  code: string,
+  checkDate: string,
+): GarnishmentStateOverride | undefined {
+  const file = loadJson<GarnishmentStateOverrideFile>(
+    join('garnishment', `state-overrides-${yearOf(checkDate)}.json`),
+  );
+  return file.states[code.toUpperCase()];
+}
+
+// ---------------------------------------------------------------------------
+// Minimum wage — data/minimum-wage/
+//
+// A separate dataset from everything above it in this file. Every other
+// ruleset here answers "what is withheld from this paycheck"; these answer
+// "how low may the paycheck itself go," which is a floor on GROSS pay, not
+// a tax. They live in their own folder for that reason, and the loaders
+// below deliberately mirror the same shape as the tax loaders so the
+// swappable dataReader (Edge Function bundling, tests) covers them too.
+// ---------------------------------------------------------------------------
+
+/** One published hourly figure, carried as both dollars and cents. */
+export interface MinimumWageAmount {
+  hourly: number;
+  hourlyCents: number;
+  id?: string;
+  label?: string;
+  test?: string;
+  note?: string;
+  effectiveFrom?: string;
+  effectiveTo?: string;
+  /** Machine-readable employer-size test, where the jurisdiction's tier is a headcount. */
+  appliesWhen?: { employeeCountMin?: number; employeeCountMax?: number };
+  /** True where the tier means "this ordinance does not reach this employer at all." */
+  notCovered?: boolean;
+  /**
+   * Marks a variant as a named geographic sub-region overriding the
+   * standard or tipped figure entirely (New York's downstate counties,
+   * Oregon's Portland metro/non-urban tiers) — selected via
+   * MinimumWageQuery.region, never via employeeCount.
+   */
+  regionalOverrideOf?: 'standard' | 'tipped';
+  /** The region this tipped-rate variant belongs to, matched against MinimumWageQuery.region. */
+  region?: string;
+  /** New York's own tipped-employee occupation split; matched against MinimumWageQuery.occupation. */
+  occupation?: 'food_service' | 'service_employee';
+  /**
+   * Marks this variant as the rate that was in effect BEFORE the headline
+   * `standard`/`tipped` figure took over mid-YEAR — e.g. Alaska's $13.00
+   * from 2025-07-01 through 2026-06-30, before its $14.00 step on
+   * 2026-07-01. Selected purely by `effectiveFrom`/`effectiveTo` covering
+   * `checkDate`, with no size or region test — this project's data
+   * represents the state of the world AS OF its own `asOf` date, not a
+   * full year-round history, so this field exists ONLY where a checkDate
+   * earlier in the same calendar year would otherwise get the wrong,
+   * later-in-the-year figure.
+   */
+  historicalPredecessorOf?: 'standard' | 'tipped';
+  [key: string]: unknown;
+}
+
+export interface TippedMinimumWage {
+  tipCreditAllowed: boolean;
+  cashWage: number;
+  cashWageCents: number;
+  maxTipCredit?: number;
+  maxTipCreditCents?: number;
+  tippedEmployeeThreshold?: { amount: number; period: string; note?: string } | null;
+  note?: string;
+}
+
+export interface MinimumWageJurisdiction extends MinimumWageAmount {
+  id: string;
+  name: string;
+  level: string;
+  tipped?: TippedMinimumWage;
+  variants?: MinimumWageAmount[];
+  coverage?: string;
+  status?: string;
+}
+
+export interface FederalMinimumWageRuleset {
+  jurisdiction: { level: string; code: string; name: string };
+  year: number;
+  asOf: string;
+  standard: MinimumWageAmount;
+  tipped: TippedMinimumWage;
+  youthAndTraining: MinimumWageAmount[];
+  [key: string]: unknown;
+}
+
+export interface StateMinimumWageRuleset {
+  jurisdiction: { level: string; code: string; name: string };
+  year: number;
+  asOf: string;
+  hasStateMinimumWage?: boolean;
+  /** Null only for American Samoa, whose federal floor is 18 industry rates instead. */
+  standard: MinimumWageAmount | null;
+  tipped: TippedMinimumWage;
+  variants?: MinimumWageAmount[];
+  youthAndTraining?: MinimumWageAmount[];
+  industryRates?: MinimumWageAmount[];
+  sources: { title: string; url: string; verifiedOn: string }[];
+  [key: string]: unknown;
+}
+
+export interface LocalMinimumWageFile {
+  state: string;
+  year: number;
+  asOf: string;
+  jurisdictions: MinimumWageJurisdiction[];
+  [key: string]: unknown;
+}
+
+export function federalMinimumWageRuleset(checkDate: string): FederalMinimumWageRuleset {
+  return loadJson<FederalMinimumWageRuleset>(
+    join('minimum-wage', `federal-${yearOf(checkDate)}.json`),
+  );
+}
+
+/**
+ * One state's, DC's or a territory's own minimum wage ruleset. States and
+ * territories live in sibling folders because a territory is not a state
+ * anywhere else in this engine either; this resolves whichever exists.
+ */
+export function stateMinimumWageRuleset(
+  code: string,
+  checkDate: string,
+): StateMinimumWageRuleset {
+  const upper = code.toUpperCase();
+  const year = yearOf(checkDate);
+  const statePath = join('minimum-wage', 'states', `${upper}-${year}.json`);
+  if (dataFileExists(statePath)) {
+    return loadJson<StateMinimumWageRuleset>(statePath);
+  }
+  return loadJson<StateMinimumWageRuleset>(
+    join('minimum-wage', 'territories', `${upper}-${year}.json`),
+  );
+}
+
+export function hasStateMinimumWageRuleset(code: string, checkDate: string): boolean {
+  const upper = code.toUpperCase();
+  const year = yearOf(checkDate);
+  return (
+    dataFileExists(join('minimum-wage', 'states', `${upper}-${year}.json`)) ||
+    dataFileExists(join('minimum-wage', 'territories', `${upper}-${year}.json`))
+  );
+}
+
+export function hasLocalMinimumWageRuleset(stateCode: string, checkDate: string): boolean {
+  return dataFileExists(
+    join('minimum-wage', 'local', `${stateCode.toUpperCase()}-local-${yearOf(checkDate)}.json`),
+  );
+}
+
+/**
+ * Every local minimum wage ordinance this project has researched in one
+ * state. An empty result means "no ordinance file for this state," which is
+ * NOT the same as "no locality in this state has one" — see the folder's
+ * own README for what was canvassed.
+ */
+export function localMinimumWageRuleset(
+  stateCode: string,
+  checkDate: string,
+): MinimumWageJurisdiction[] {
+  if (!hasLocalMinimumWageRuleset(stateCode, checkDate)) return [];
+  const file = loadJson<LocalMinimumWageFile>(
+    join('minimum-wage', 'local', `${stateCode.toUpperCase()}-local-${yearOf(checkDate)}.json`),
+  );
+  return file.jurisdictions;
+}
+
+export interface SectoralMinimumWageFile {
+  state: string;
+  year: number;
+  sectors: (MinimumWageAmount & { id: string; name: string; coverage: string })[];
+  [key: string]: unknown;
+}
+
+export function hasSectoralMinimumWageRuleset(stateCode: string, checkDate: string): boolean {
+  return dataFileExists(
+    join('minimum-wage', 'sectoral', `${stateCode.toUpperCase()}-sectoral-${yearOf(checkDate)}.json`),
+  );
+}
+
+export function sectoralMinimumWageRuleset(
+  stateCode: string,
+  checkDate: string,
+): SectoralMinimumWageFile['sectors'] {
+  if (!hasSectoralMinimumWageRuleset(stateCode, checkDate)) return [];
+  return loadJson<SectoralMinimumWageFile>(
+    join(
+      'minimum-wage',
+      'sectoral',
+      `${stateCode.toUpperCase()}-sectoral-${yearOf(checkDate)}.json`,
+    ),
+  ).sectors;
 }
