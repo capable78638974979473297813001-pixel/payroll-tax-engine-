@@ -8,6 +8,7 @@ import {
   type MinimumWageJurisdiction,
   type TippedMinimumWage,
 } from './registry.ts';
+import { resolveCertBoolean } from './validate.ts';
 
 /**
  * The minimum wage side of this engine.
@@ -272,13 +273,26 @@ export function localMinimumWages(
 export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
   const considered: MinimumWageCandidate[] = [];
 
+  // query.tipped is typed boolean, but MinimumWageQuery reaches this
+  // function from outside TypeScript's reach too (this engine's shared
+  // module is re-exported for a JSON API — see supabase/functions/_shared/
+  // engine/index.ts) — the same class of gap already fixed for
+  // certificate.exempt/nonresident and w4.exempt in taxes/state.ts and
+  // taxes/federal.ts. A stray string "false" reaching here would silently
+  // switch a caller from the standard rate to the TIPPED cash floor, or
+  // vice versa — resolved once, strictly, rather than re-read as a bare
+  // truthy value at each of the 4 call sites below (one of which,
+  // tipCreditAllowed's own computation further down, already used the
+  // correct `=== true` form — now all five agree).
+  const tipped = resolveCertBoolean(query as unknown as Record<string, unknown>, 'tipped');
+
   const fed = federalMinimumWageRuleset(query.checkDate);
-  const fedCents = query.tipped ? tippedCents(fed.tipped)! : toCents(fed.standard);
+  const fedCents = tipped ? tippedCents(fed.tipped)! : toCents(fed.standard);
   considered.push({
     level: 'federal',
     jurisdiction: 'United States (FLSA)',
     cents: fedCents,
-    basis: query.tipped
+    basis: tipped
       ? 'FLSA tipped cash wage (29 U.S.C. 203(m))'
       : 'FLSA minimum wage (29 U.S.C. 206(a))',
   });
@@ -303,7 +317,7 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
         'American Samoa has 18 industry-specific federal minimum wages ranging from $5.78 to ' +
         '$7.19; read industryRates from its ruleset and pick the employer’s own industry.',
     });
-  } else if (query.tipped) {
+  } else if (tipped) {
     let cents = tippedCents(state.tipped);
     let basis = state.tipped.tipCreditAllowed
       ? 'State tipped cash wage'
@@ -419,7 +433,7 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
         basis: `Ordinance not applied — ${found.status}`,
         caveat: found.note as string | undefined,
       });
-    } else if (query.tipped) {
+    } else if (tipped) {
       if (found.tipped) {
         const pred = historicalPredecessor(found.variants, 'tipped', query.checkDate);
         considered.push({
@@ -496,7 +510,7 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
   }
 
   const tipCreditAllowed =
-    query.tipped === true
+    tipped
       ? binding.level === 'federal'
         ? fed.tipped.tipCreditAllowed
         : binding.level === 'state'
