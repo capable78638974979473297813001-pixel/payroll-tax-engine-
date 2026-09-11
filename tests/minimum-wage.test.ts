@@ -220,6 +220,21 @@ describe('federal minimum wage', () => {
     assert.equal(other.executiveOrder13658!.hourlyCents, 1365);
     assert.equal(other.executiveOrder13658!.effectiveFrom, '2026-05-11');
   });
+
+  test('BUG FIX: query.tipped: "false" (a string) throws rather than being silently treated as true', () => {
+    // query.tipped is typed `boolean` in MinimumWageQuery, but this
+    // engine's minimum-wage module is also re-exported for a JSON API
+    // (supabase/functions/_shared/engine/index.ts), where nothing enforces
+    // that at runtime. Before this fix, a bare `query.tipped ? ... : ...`
+    // check at 4 separate call sites would have silently returned the
+    // TIPPED cash floor instead of the standard rate for a string "false" —
+    // the same bug class already fixed for certificate.exempt/nonresident
+    // in taxes/state.ts and w4.exempt in taxes/federal.ts.
+    assert.throws(
+      () => minimumWage({ checkDate: D, state: 'CA', tipped: 'false' as unknown as boolean }),
+      /Unrecognized certificate\.tipped/,
+    );
+  });
 });
 
 describe('state minimum wages', () => {

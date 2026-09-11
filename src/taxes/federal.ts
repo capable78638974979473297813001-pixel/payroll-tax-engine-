@@ -18,6 +18,7 @@ import type {
   TaxLine,
 } from '../types.ts';
 import { cashEarnings, supplementalEarnings } from '../wages.ts';
+import { resolveCertBoolean } from '../validate.ts';
 
 /**
  * Pub 15-T publishes one schedule for "Single or Married Filing Separately".
@@ -77,7 +78,14 @@ export function federalIncomeTax(
   // employee's Form W-2 and doesn't increase the income tax liability"),
   // so it's tracked separately and only folded into the ANNUALIZED figure
   // below, not into the TaxLine's own taxableWages field.
-  const nraAdjustment = w4.nonresidentAlien
+  // w4 is typed FederalW4 (nonresidentAlien/exempt both declared boolean),
+  // but that only binds a TypeScript caller — this engine is also served
+  // as a JSON API (supabase/functions/calculate-paycheck), where nothing
+  // stops a string "false" arriving on the wire. resolveCertBoolean()
+  // catches that the same way it now does for every certificate.* boolean
+  // in taxes/state.ts, rather than trusting the type annotation alone.
+  const w4Raw = w4 as unknown as Record<string, unknown>;
+  const nraAdjustment = resolveCertBoolean(w4Raw, 'nonresidentAlien')
     ? dollars(cfg.nonresidentAlienAdjustment[input.payFrequency] ?? 0)
     : 0;
 
@@ -91,7 +99,7 @@ export function federalIncomeTax(
     detail,
   });
 
-  if (w4.exempt) {
+  if (resolveCertBoolean(w4Raw, 'exempt')) {
     return line(0, 'Employee claimed exempt on Form W-4');
   }
 

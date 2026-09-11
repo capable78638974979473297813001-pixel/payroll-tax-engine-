@@ -265,6 +265,35 @@ describe('federal income tax — Pub 15-T Worksheet 1A', () => {
     assert.equal(amountOf(r, 'US_SS_EE'), dollars(186));
   });
 
+  test('BUG FIX: w4.exempt: "false" (a string) throws rather than being silently treated as true', () => {
+    // w4.exempt is typed `boolean` in FederalW4, but that only binds a
+    // TypeScript caller — this engine is also served as a JSON API
+    // (supabase/functions/calculate-paycheck), where nothing stops a
+    // string "false" arriving on the wire. Before this fix, `if
+    // (w4.exempt)` would have zeroed FEDERAL income tax on every such
+    // paycheck — the highest-stakes instance of a bug class already fixed
+    // for certificate.exempt/nonresident in taxes/state.ts.
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({ federalW4: { ...input().federalW4, exempt: 'false' as unknown as boolean } }),
+        ),
+      /Unrecognized certificate\.exempt/,
+    );
+  });
+
+  test('BUG FIX: w4.nonresidentAlien: "false" (a string) throws the same way', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            federalW4: { ...input().federalW4, nonresidentAlien: 'false' as unknown as boolean },
+          }),
+        ),
+      /Unrecognized certificate\.nonresidentAlien/,
+    );
+  });
+
   test('low wages land in the 0% bracket', () => {
     const r = calculatePaycheck(
       input({
@@ -5222,6 +5251,33 @@ describe('Washington', () => {
     );
     assert.equal(employerSide.taxes.some((t) => t.id === 'WA_PFML_ER'), false);
   });
+
+  test('BUG FIX: paidLeaveExempt/wacaresExempt/employerLiableForPaidLeaveShare: "false" (strings) throw', () => {
+    // All three used to be read as bare truthy values — a string "false"
+    // for paidLeaveExempt or wacaresExempt would have silently zeroed a
+    // real premium; for employerLiableForPaidLeaveShare (read as `!cert.…`)
+    // a string "false" is truthy, so `!"false"` is false, meaning the
+    // gate would have WRONGLY treated the employer as liable.
+    const base = {
+      payFrequency: 'weekly' as const,
+      earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(1000) }],
+    };
+    assert.throws(
+      () => calculatePaycheck(input({ ...base, ...waState({ paidLeaveExempt: 'false' }) })),
+      /Unrecognized certificate\.paidLeaveExempt/,
+    );
+    assert.throws(
+      () => calculatePaycheck(input({ ...base, ...waState({ wacaresExempt: 'false' }) })),
+      /Unrecognized certificate\.wacaresExempt/,
+    );
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({ ...base, ...waState({ paidLeaveExempt: true, employerLiableForPaidLeaveShare: 'false' }) }),
+        ),
+      /Unrecognized certificate\.employerLiableForPaidLeaveShare/,
+    );
+  });
 });
 
 describe('Massachusetts', () => {
@@ -5312,6 +5368,34 @@ describe('Massachusetts', () => {
       }),
     );
     assert.equal(amountOf(blind, 'MA_SIT'), dollars(93.65));
+  });
+
+  test('BUG FIX: headOfHousehold/blind: "false" (strings) throw rather than being silently treated as true', () => {
+    // Both credits used to be read as bare truthy values — a string "false"
+    // for either would have granted a credit (under-withholding tax) that
+    // a real Form M-4 doesn't actually claim.
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+            ...maState({ personalExemptionCode: 1, headOfHousehold: 'false' }),
+          }),
+        ),
+      /Unrecognized certificate\.headOfHousehold/,
+    );
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+            ...maState({ personalExemptionCode: 1, blind: 'false' }),
+          }),
+        ),
+      /Unrecognized certificate\.blind/,
+    );
   });
 
   test('Fair Share Amendment 4% surtax applies to annualized net wages above $1,107,750', () => {
@@ -6260,6 +6344,20 @@ describe('Arizona', () => {
       }),
     );
     assert.equal(amountOf(r, 'AZ_SIT'), 0);
+  });
+
+  test('BUG FIX: zeroElection: "false" (a string) throws rather than being silently treated as true', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'biweekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+            ...azState({ zeroElection: 'false' }),
+          }),
+        ),
+      /Unrecognized certificate\.zeroElection/,
+    );
   });
 
   test('an elected rate outside Form A-4\'s 7 published options throws rather than silently applying it', () => {

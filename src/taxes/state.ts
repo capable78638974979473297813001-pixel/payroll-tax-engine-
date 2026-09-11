@@ -41,6 +41,7 @@ import {
 } from '../registry.ts';
 import { federalIncomeTax } from './federal.ts';
 import { cashEarnings, supplementalEarnings } from '../wages.ts';
+import { resolveCertBoolean } from '../validate.ts';
 import type {
   ComputeContext,
   PaycheckInput,
@@ -940,43 +941,19 @@ function exemptEmploymentCategoryReason(
 }
 
 /**
- * certificate.exempt is read as a bare JS truthy value at three call sites
- * below, and truthiness is the wrong test for it: the STRING "false" (or
- * "0", or "no") is truthy in JavaScript, so a caller who means "not exempt"
- * but serializes it as a string — a very plausible shape coming from a
- * form field, a database column, or JSON — would silently have this
- * employee's ENTIRE state income tax zeroed out (applyStateWithholdingExemption
- * below) with no error. There is no per-state type for `certificate` the
- * way federalW4.exempt has (certificate varies too much by state to type
- * narrowly), so nothing else catches this. Only a real boolean or an absent
- * value is accepted; anything else throws rather than silently guessing
- * which way "exempt" was meant.
+ * certificate.exempt (and every other boolean-shaped certificate field in
+ * this file — nonresident, the two Yonkers flags, paidLeaveExempt,
+ * wacaresExempt, zeroElection, and more) needs the SAME guard: a bare JS
+ * truthy check misreads the STRING "false" (or "0", or "no") as true, since
+ * non-empty strings are truthy in JavaScript. There is no per-state type
+ * for `certificate` the way federalW4.exempt has (certificate varies too
+ * much by state to type narrowly), so nothing else catches this at the
+ * type level. resolveCertBoolean() now lives in ../validate.ts — shared
+ * with federal.ts, whose own w4.exempt had the identical gap despite BEING
+ * typed `boolean` in PaycheckInput, because this engine is served over
+ * HTTP (supabase/functions/calculate-paycheck) where no compiler stands
+ * between the wire and this code.
  */
-/**
- * Read a certificate field that must be a real boolean or absent — never a
- * string, number, or anything else that merely LOOKS like one (a caller-
- * supplied "false" string is truthy under a bare `if` check, which is
- * exactly backwards). Absent/null defaults to false, the same "missing
- * input changes nothing" convention every optional certificate field in
- * this engine already follows. Generalized from resolveCertExempt and
- * resolveCertNonresident, which were identical apart from the field name —
- * reused a third time by yonkersLocalTax()/yonkersSupplementalTax()'s own
- * certificate.yonkersResident/yonkersNonresidentWorker flags, which used to
- * skip this validation entirely (a real, if narrow, risk: NYS-50-T-Y's own
- * residency flags deciding a 16.75%-of-NYS-tax surcharge vs. a flat
- * nonresident rate is exactly the kind of "wrong branch, no error" failure
- * this helper exists to prevent).
- */
-function resolveCertBoolean(cert: Record<string, unknown>, field: string): boolean {
-  const raw = cert[field];
-  if (raw === undefined || raw === null) return false;
-  if (raw === true || raw === false) return raw;
-  throw new Error(
-    `Unrecognized certificate.${field} ${JSON.stringify(raw)} — expected a real boolean (true/false), not a ` +
-      `string or other value that merely LOOKS like one.`,
-  );
-}
-
 function resolveCertExempt(cert: Record<string, unknown>): boolean {
   return resolveCertBoolean(cert, 'exempt');
 }
@@ -2292,7 +2269,7 @@ function statePaidLeaveEmployeeTax(
   // never expected to set this field, so their existing behavior is
   // unaffected either way.
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.paidLeaveExempt) {
+  if (resolveCertBoolean(cert, 'paidLeaveExempt')) {
     return {
       id: `${rules.code}_PFML_EE`,
       name: `${rules.name} Paid Leave (Employee)`,
@@ -2414,7 +2391,7 @@ function statePaidLeaveElectedEmployeeShare(
   if (rules.statePaidLeaveEmployee) return null;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.paidLeaveExempt) return null;
+  if (resolveCertBoolean(cert, 'paidLeaveExempt')) return null;
 
   const resolved = resolvePaidLeaveRate(input, rules, cfg);
   if (!resolved) return null;
@@ -2477,12 +2454,12 @@ function statePaidLeaveEmployerTax(
   // A programme with no size threshold at all (DC's Universal Paid Leave)
   // applies to every covered employer, so demanding the caller assert
   // liability first would just suppress a tax that is always due.
-  if (cfg.employerSizeGated !== false && !cert.employerLiableForPaidLeaveShare) return null;
+  if (cfg.employerSizeGated !== false && !resolveCertBoolean(cert, 'employerLiableForPaidLeaveShare')) return null;
   // Same exemption gate as statePaidLeaveEmployeeTax() — an exempt employee
   // (federal, Tribal, self-employed opt-out, etc.) generates no premium at
   // all, employee or employer share, since there's no total premium to
   // split in the first place.
-  if (cert.paidLeaveExempt) return null;
+  if (resolveCertBoolean(cert, 'paidLeaveExempt')) return null;
 
   const exempt = (cfg.exemptPretax ?? rules.exemptPretax ?? []) as PretaxCategory[];
   const currentWages = ctx.taxableWagesFor(exempt);
@@ -2562,7 +2539,7 @@ function stateLongTermCareEmployeeTax(
   // zeroStateIncomeTaxLines()) and Washington has no income tax at all —
   // this is a genuinely separate levy with its own exemption concept.
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.wacaresExempt) {
+  if (resolveCertBoolean(cert, 'wacaresExempt')) {
     return {
       id: `${rules.code}_LTC_EE`,
       name: `${rules.name} Long-Term Care (Employee)`,
@@ -2621,7 +2598,7 @@ function resolveMTSchedule(cert: Record<string, unknown>): MTSchedule {
     return 'single_mfs_bothWorking';
   }
   if (filingStatus === 'mfj' || filingStatus === 'qss') {
-    return cert.bothSpousesWorking ? 'single_mfs_bothWorking' : 'mfj_qss';
+    return resolveCertBoolean(cert, 'bothSpousesWorking') ? 'single_mfs_bothWorking' : 'mfj_qss';
   }
   if (filingStatus === 'hoh') return 'hoh';
   throw new Error(
@@ -5223,8 +5200,10 @@ function flatRateSurtaxCredit(
   const excess = annualNetWages - dollars(bracket.from);
   const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
 
-  const hohCredit = cert.headOfHousehold ? dollars(cfg.creditsAnnual.headOfHousehold) / periodsPerYear : 0;
-  const blindCredit = cert.blind ? dollars(cfg.creditsAnnual.blind) / periodsPerYear : 0;
+  const hohCredit = resolveCertBoolean(cert, 'headOfHousehold')
+    ? dollars(cfg.creditsAnnual.headOfHousehold) / periodsPerYear
+    : 0;
+  const blindCredit = resolveCertBoolean(cert, 'blind') ? dollars(cfg.creditsAnnual.blind) / periodsPerYear : 0;
 
   const amount = atLeastZero(roundHalfUp(annualTax / periodsPerYear - hohCredit - blindCredit));
   const netWagesRounded = roundHalfUp(netWages);
@@ -5714,7 +5693,7 @@ function employeeElectedFlat(
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
 
-  if (cert.zeroElection) {
+  if (resolveCertBoolean(cert, 'zeroElection')) {
     return {
       id: `${rules.code}_SIT`,
       name: `${rules.name} Income Tax`,
@@ -6294,7 +6273,7 @@ function portlandAreaLocalTax(
   const currentWages = ctx.taxableWagesFor(exempt);
   const lines: TaxLine[] = [];
 
-  if (cert.metroDistrict) {
+  if (resolveCertBoolean(cert, 'metroDistrict')) {
     const ytd = input.ytd.localIncomeTax?.['OR_METRO'] ?? 0;
     const threshold = dollars(cfg.metroSHS.threshold);
     const taxableExcess = overThreshold(currentWages, ytd, threshold);
@@ -6312,7 +6291,7 @@ function portlandAreaLocalTax(
     });
   }
 
-  if (cert.multnomahCounty) {
+  if (resolveCertBoolean(cert, 'multnomahCounty')) {
     const ytd = input.ytd.localIncomeTax?.['OR_MULTNOMAH'] ?? 0;
     const tier1Threshold = dollars(cfg.multnomahPFA.tier1Threshold);
     const tier2Threshold = dollars(cfg.multnomahPFA.tier2Threshold);
