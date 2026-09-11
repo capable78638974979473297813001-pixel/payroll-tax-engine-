@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import { calculatePaycheck } from '../src/calculate.ts';
 import { futa } from '../src/taxes/federal.ts';
-import { dollars, overThreshold, underCap } from '../src/money.ts';
+import { atLeastZero, dollars, overThreshold, roundHalfUp, underCap } from '../src/money.ts';
 import { capElectiveDeferrals, makeTaxableWagesFn } from '../src/wages.ts';
 import type { Deduction, Earning, PaycheckInput } from '../src/types.ts';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -59,6 +59,51 @@ describe('money primitives', () => {
       overThreshold(dollars(10_000), dollars(195_000), dollars(200_000)),
       dollars(5_000),
     );
+  });
+
+  describe('BUG FIX: NaN used to pass through silently — atLeastZero returned 0, roundHalfUp returned NaN', () => {
+    // Found auditing the engine for the same "malformed input, no error"
+    // bug class already fixed for booleans (resolveCertBoolean): dozens of
+    // call sites across taxes/state.ts read a numeric certificate field as
+    // `Number(cert.someField ?? 0)`, which produces NaN for anything
+    // Number() can't parse rather than throwing. NaN then reached these two
+    // universal arithmetic primitives — every tax line in this engine
+    // passes through at least one of them. atLeastZero's `cents > 0 ? … :
+    // 0` is false for NaN either way, so it silently returned 0: a
+    // malformed certificate.exemptions could make a whole state's income
+    // tax line report a confident $0 with no error. roundHalfUp's `raw >=
+    // 0` is likewise false for NaN, so it took the false branch and
+    // returned NaN itself — not silently wrong, but not caught either,
+    // until it serialized to JSON as `null`. Both now throw immediately.
+    test('atLeastZero(NaN) throws instead of silently returning 0', () => {
+      assert.throws(() => atLeastZero(NaN), /atLeastZero\(NaN\)/);
+    });
+
+    test('roundHalfUp(NaN) throws instead of silently returning NaN', () => {
+      assert.throws(() => roundHalfUp(NaN), /roundHalfUp\(NaN\)/);
+    });
+
+    test('a malformed numeric certificate field now throws end to end instead of producing a confident $0', () => {
+      // Reproduces the exact live failure this fix closes: Wisconsin's own
+      // income tax formula subtracts exemptions x $400 from annualized net
+      // wages via atLeastZero() — a non-numeric certificate.exemptions used
+      // to make WI_SIT silently report $0 (with a detail string reading
+      // "less $NaN.NaN exemptions" that nothing forced a caller to notice).
+      assert.throws(
+        () =>
+          calculatePaycheck(
+            input({
+              workState: { code: 'WI', certificate: { exemptions: 'two' } },
+            }),
+          ),
+        /atLeastZero\(NaN\)/,
+      );
+    });
+
+    test('Infinity is caught too, not just NaN', () => {
+      assert.throws(() => atLeastZero(Infinity - Infinity), /atLeastZero\(NaN\)/);
+      assert.throws(() => roundHalfUp(1 / 0), /roundHalfUp\(Infinity\)/);
+    });
   });
 });
 
@@ -8501,6 +8546,27 @@ describe('Alabama', () => {
     // [$3,000+, base $110, 5%]: 110 + 5%x(23,025-3,000=20,025=$1,001.25)
     // = $1,111.25/yr / 52 = $21.37 (roundHalfUp of 21.370192...).
     assert.equal(amountOf(r, 'AL_SIT'), dollars(21.37));
+  });
+
+  test('BUG FIX: an unrecognized alabamaExemptionCode throws rather than silently defaulting to single', () => {
+    // resolveALDeductionKey() and alabamaPersonalExemption() used to fall
+    // through to the single/'0' case for ANY code they didn't explicitly
+    // recognize, not just '0'/'S' — a typo'd code (e.g. 'Mrs' instead of
+    // 'M', or a copy-pasted field from a different state) would have
+    // silently under-withheld a married or head-of-family employee as a
+    // single filer, with no error. Same anti-pattern this project's own
+    // Arizona electedRate fix already closed for a different field.
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+            workState: { code: 'AL', certificate: { alabamaExemptionCode: 'Mrs' } },
+          }),
+        ),
+      /Unrecognized AL certificate\.alabamaExemptionCode/,
+    );
   });
 
   // Municipal Occupational Tax (AL_LOCAL) — sourced from the Alabama

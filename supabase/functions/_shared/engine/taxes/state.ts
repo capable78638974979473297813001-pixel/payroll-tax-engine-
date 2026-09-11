@@ -8301,13 +8301,31 @@ interface ALConfig {
   brackets: { nonMarried: WIBracket[]; married: WIBracket[] };
 }
 
+/**
+ * BUG FIX: this and alabamaPersonalExemption() below used to fall through
+ * to the single/'0' case for ANY unrecognized code, not just the two that
+ * legitimately mean that ('0' and 'S') — the same silent-default-on-typo
+ * risk this project's own Arizona electedRate fix explicitly named as the
+ * anti-pattern to avoid ("every other state's own enum-like certificate
+ * field... throws on an unrecognized value; this was the one exception").
+ * A caller who sends a typo'd or malformed code (a copy-paste of a
+ * different state's field, 'Mrs' instead of 'M', etc.) now gets a loud
+ * error instead of silently under-withholding as a single filer. '0' or
+ * 'S' -- Alabama's own two single-status codes -- and no certificate at
+ * all (alabamaWithholding() already defaults that to '0' before calling
+ * here) are the only inputs treated as 'single_0'.
+ */
 function resolveALDeductionKey(
   code: string,
 ): keyof ALConfig['standardDeduction'] {
+  if (code === '0' || code === 'S') return 'single_0';
   if (code === 'MS') return 'marriedFilingSeparately';
   if (code === 'M') return 'marriedFilingJointly';
   if (code === 'H') return 'headOfFamily';
-  return 'single_0'; // '0' or 'S', or no certificate on file
+  throw new Error(
+    `Unrecognized AL certificate.alabamaExemptionCode ${JSON.stringify(code)} — expected one of ` +
+      `'0', 'S', 'MS', 'M', or 'H' (Form A-4's own exemption codes).`,
+  );
 }
 
 function alabamaStandardDeduction(cfg: ALStandardDeductionStep, gi: number): number {
@@ -8323,11 +8341,15 @@ function alabamaStandardDeduction(cfg: ALStandardDeductionStep, gi: number): num
 }
 
 function alabamaPersonalExemption(cfg: ALConfig['personalExemption'], code: string): number {
+  if (code === '0') return dollars(cfg.code0);
   if (code === 'S') return dollars(cfg.codeS);
   if (code === 'MS') return dollars(cfg.codeMS);
   if (code === 'M') return dollars(cfg.codeM);
   if (code === 'H') return dollars(cfg.codeH);
-  return dollars(cfg.code0); // '0' or unset
+  throw new Error(
+    `Unrecognized AL certificate.alabamaExemptionCode ${JSON.stringify(code)} — expected one of ` +
+      `'0', 'S', 'MS', 'M', or 'H' (Form A-4's own exemption codes).`,
+  );
 }
 
 function alabamaDependentPerUnit(
