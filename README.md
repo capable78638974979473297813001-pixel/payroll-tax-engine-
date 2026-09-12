@@ -5,9 +5,10 @@ arithmetic, effective-dated rulesets loaded from JSON — every jurisdiction,
 federal through local, computed by the same driver.
 
 ```bash
-npm test                  # 1000+ tests
+npm test                  # 1200+ tests
 npm run demo               # prints a worked paystub
 npm run demo:garnishment   # same, layered with a child-support + creditor garnishment
+npm run demo:payroll       # a full payroll RUN: two employees, draft -> approve -> paystubs -> a real NACHA ACH file
 npm run ui:calculator      # any-state calculator UI, address-based local tax lookup
 ```
 
@@ -36,6 +37,52 @@ is hardcoded in a `.ts` file, and there is no fallback default — a missing
 ruleset throws rather than quietly returning zero, and a state with no single
 new-employer UI rate (industry-assigned) requires the caller to supply one
 rather than silently computing with a wrong number.
+
+## Payroll processing (`payroll/`)
+
+The tax engine (`src/`) is deliberately a stateless per-cheque function — no
+employee records, no memory of the last paycheck. `payroll/` is the layer a
+real payroll company runs on top of it: company/employee records, a pay
+schedule (`payroll/schedule.ts`), running an actual pay cycle from draft
+through approval (`payroll/run.ts`), rolling each approved run into every
+employee's running YTD so the engine's own wage-base caps see it on the next
+one (`payroll/ytd.ts`), splitting net pay across direct deposit accounts and
+writing a real NACHA ACH file (`payroll/directDeposit.ts`), and rendering a
+paystub (`payroll/paystub.ts`). `npm run demo:payroll` runs the whole
+lifecycle for two employees — one salaried, one hourly with overtime and a
+child-support order — end to end, paystubs and ACH file included.
+
+Persistence follows the same convention `site/lib/store.ts` already
+established for the API-key product: a file-backed store
+(`payroll/store.ts`) that mirrors a canonical, normalized schema
+(`db/payroll-schema.sql`) closely enough that swapping in real queries later
+is mechanical, because this project's Supabase instance isn't linked to a
+live URL from this environment.
+
+Two YTD trackers are explicitly NOT derived generically, and `payroll/ytd.ts`
+own header comment says so rather than force-fitting them: Seattle's
+per-employee payroll-expense compensation band (the tax line itself only
+reports the portion already above threshold, not the full period
+compensation a running total needs) and Kentucky's two-city SS-wage-base
+credit (Walton/Florence combine into one `KY_LOCAL` tax line with no way to
+recover each city's own half from the output). Both need the caller to track
+that one figure directly — the same "caller-supplied, never guessed"
+discipline `src/types.ts`'s own `EmployerContext` uses throughout the tax
+engine itself. Everything else — every wage-base cap, every state-keyed
+UC/PFML/SDI/LTC tracker, the Additional Medicare threshold, RUIA's monthly
+reset — accumulates correctly across runs, proven in `tests/payroll.test.ts`
+by literally crossing the 2026 Social Security wage base and the Additional
+Medicare threshold across two periods and checking the exact cent figure
+that lands.
+
+What `payroll/` does NOT attempt, named plainly rather than left to be
+discovered: quarterly/annual tax FILING (941/940, state UI returns, W-2/1099
+generation), benefits carrier EDI, time-and-attendance beyond a plain
+hours-per-period input, a live bank-linking integration (see
+`payroll/directDeposit.ts`'s own header note on the account-number custody
+boundary a real system draws that this one doesn't attempt to build), and
+any UI beyond the plain-text paystub and the worked demo script. Each is a
+real, separate subsystem a full HCM platform builds — not a corner cut here.
 
 ## The one idea that matters
 
