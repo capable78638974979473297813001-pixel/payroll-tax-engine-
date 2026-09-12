@@ -1325,6 +1325,42 @@ describe('rooftop.ts — authoritative address points (real captured National Ad
       assert.deepEqual(match?.point, { lat: 39.290878, lon: -76.610511 });
     });
 
+    test('Detroit: matches when the authority publishes the street with NO type at all ("ST ANTOINE" vs "St Antoine St")', async () => {
+      const detroitNad = [
+        {
+          attributes: {
+            AddNo_Full: '1901',
+            St_Name: 'St Antoine',
+            Inc_Muni: 'Detroit',
+            Post_City: 'Detroit',
+            Zip_Code: '48226',
+            Placement: 'Unknown',
+            NAD_Source: 'Wayne County',
+            Latitude: 42.335,
+            Longitude: -83.041,
+          },
+        },
+      ];
+      const match = matchAddressPoint('1901 St Antoine St, Detroit, MI 48226', await asPoints(detroitNad));
+      assert.equal(match?.streetTypeFallback, true);
+      assert.equal(match?.chosen.street, 'St Antoine');
+      assert.deepEqual(match?.point, { lat: 42.335, lon: -83.041 });
+    });
+
+    test('the street-type fallback NEVER crosses two genuinely different streets — "Main Street" and "Main Avenue" a block apart must not average into a point on neither', async () => {
+      // The exact risk streetTypeFallback's own doc comment names: a grid
+      // city can carry the same house number on both. Neither type matches
+      // the target's own ("Main Rd") exactly, so both only surface once the
+      // type is stripped down to "main" — and the tight-cluster guard must
+      // reject them rather than average two real, distant buildings.
+      const gridCity = [
+        { attributes: { AddNo_Full: '100', St_Name: 'Main', St_PosTyp: 'Street', Latitude: 39.9, Longitude: -83.0 } },
+        { attributes: { AddNo_Full: '100', St_Name: 'Main', St_PosTyp: 'Avenue', Latitude: 39.905, Longitude: -83.0 } },
+      ];
+      const match = matchAddressPoint('100 Main Rd, Columbus, OH 43215', await asPoints(gridCity));
+      assert.equal(match, null);
+    });
+
     test('Birmingham: matches a street whose type sits BEFORE its directional', async () => {
       const match = matchAddressPoint('710 20th St N, Birmingham, AL 35203', await asPoints(BIRMINGHAM_NAD));
       assert.equal(match?.directionalFallback, false);

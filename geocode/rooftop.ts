@@ -326,6 +326,8 @@ export interface RooftopMatch {
   directionalFallback: boolean;
   /** True when the street names only matched after treating "Capital"/"Capitol" as the same word (Kentucky's own NAD submission spells Frankfort's state-capitol street "Capital Avenue"; Census/USPS spell the same street "Capitol Ave"). See streetKeyCapitolNormalized()'s own doc comment. Same tight-cluster guard as directionalFallback. */
   capitolFallback: boolean;
+  /** True when the street names only matched after dropping the street TYPE ("St" vs "Ave") — NAD's Wayne County file publishes Detroit's 1901 St Antoine as street "ST ANTOINE" with no type at all. Riskier than the directional or capitol fallback (a grid city really can carry the same house number on both "Main St" and "Main Ave"), so it leans on the same tight-cluster guard those use. See streetKeyWithoutType()'s own doc comment. */
+  streetTypeFallback: boolean;
 }
 
 /**
@@ -394,14 +396,25 @@ export function matchAddressPoint(oneLineAddress: string, points: AddressPoint[]
   //
   // Riskier than the directional pass, because "Main St" and "Main Ave"
   // both reduce to "main" and a grid city really does carry the same house
-  // number on both. TODO(human) below decides how to keep that safe.
+  // number on both. Same tight-cluster guard as the directional and
+  // capitol passes above: only accepted when every surviving candidate
+  // lands within IMPLAUSIBLE_SPREAD_METERS of the group's own centre, so
+  // two genuinely different streets sharing a house number don't get
+  // averaged into a point in the middle of neither.
   let streetTypeFallback = false;
   if (matches.length === 0) {
     const targetCore = streetKeyWithoutType(targetStreetRaw);
     const loose = sameNumber.filter((p) => streetKeyWithoutType(p.street!) === targetCore);
-    // TODO(human): decide whether `loose` is safe to accept, and set
-    // `matches = loose; streetTypeFallback = true;` only when it is.
-    // See the Learn by Doing note for the trade-offs to weigh.
+    if (loose.length > 0) {
+      const looseCentre = {
+        lat: loose.reduce((sum, p) => sum + p.lat, 0) / loose.length,
+        lon: loose.reduce((sum, p) => sum + p.lon, 0) / loose.length,
+      };
+      if (Math.max(...loose.map((p) => metersBetween(looseCentre, p))) <= IMPLAUSIBLE_SPREAD_METERS) {
+        matches = loose;
+        streetTypeFallback = true;
+      }
+    }
   }
 
   let capitolFallback = false;
@@ -449,6 +462,7 @@ export function matchAddressPoint(oneLineAddress: string, points: AddressPoint[]
     matchedUnit: Boolean(unitMatch),
     directionalFallback,
     capitolFallback,
+    streetTypeFallback,
   };
 }
 
