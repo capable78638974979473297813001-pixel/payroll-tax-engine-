@@ -758,6 +758,48 @@ export interface GarnishmentFormula {
    * (see GarnishmentOrder) — absent or 0 dependents means no reduction.
    */
   perDependentWeeklyReduction?: number;
+  /**
+   * A flat per-week dollar floor — a legislated figure, not derived from
+   * any minimum wage — layered on top of `capFractions` the same way
+   * `minimumWageWeeklyMultiplier` is. Alaska's own shape (AS 09.38.030(a)):
+   * $473/week exempt regardless of the 25%-of-disposable fraction, i.e.
+   * the state's OWN dollar figure substitutes for "30x minimum wage" in
+   * the usual CCPA-shaped test. Mutually exclusive with
+   * `minimumWageWeeklyMultiplier` in practice — a state's floor is either
+   * minimum-wage-derived or a flat legislated dollar amount, never both.
+   */
+  flatWeeklyFloor?: number;
+  /**
+   * The higher flat floor that applies instead of `flatWeeklyFloor` when
+   * `GarnishmentOrder.soleHouseholdSupport` is true — Alaska's $743/week
+   * (AS 09.38.050(b)), available only once the debtor has filed the
+   * court affidavit asserting their earnings alone support their
+   * household. Only meaningful alongside `flatWeeklyFloor`.
+   */
+  flatWeeklyFloorSoleSupport?: number;
+  /**
+   * Iowa's own ADDITIONAL layer (Iowa Code 642.21): a cumulative CALENDAR-
+   * YEAR dollar cap per judgment creditor, on top of whichever per-paycheck
+   * shape above already applies (Iowa's is the plain federal CCPA test —
+   * capFractions 25%/30x-federal — so this tier cap is a genuinely
+   * SEPARATE, more restrictive ceiling layered over it, not a replacement).
+   * Selected by the debtor's own earnings "reasonably expected" for the
+   * year (GarnishmentOrder.expectedAnnualEarnings) — ascending by
+   * `belowAnnualEarnings`, null meaning the top unbounded tier. Requires
+   * the caller to supply that expectation; absent, this engine does not
+   * guess a tier and the extra annual layer simply doesn't apply (the
+   * per-paycheck shape above still does).
+   */
+  annualCapTiers?: GarnishmentAnnualCapTier[];
+}
+
+export interface GarnishmentAnnualCapTier {
+  /** Upper bound (exclusive) of "reasonably expected annual earnings" this tier covers — null means the top, unbounded tier. */
+  belowAnnualEarnings: number | null;
+  /** A flat annual dollar cap for this tier (Iowa's own $250/$400/$800/$1,500/$2,000 tiers). Mutually exclusive with `maxAnnualFractionOfEarnings`. */
+  maxAnnualCents?: number;
+  /** A tier defined as a FRACTION of the debtor's own expected annual earnings instead of a flat dollar figure — Iowa's own top tier ($50k+ expected earnings: 10% of expected earnings, not a fixed dollar cap). Mutually exclusive with `maxAnnualCents`. */
+  maxAnnualFractionOfEarnings?: number;
 }
 
 export interface GarnishmentStateOverride {

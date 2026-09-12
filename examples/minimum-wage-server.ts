@@ -170,7 +170,7 @@ async function handleLookup(req: IncomingMessage, res: ServerResponse): Promise<
     region = undefined;
     let resolution;
     try {
-      resolution = await resolveAddress(address, { role: 'work', checkDate });
+      resolution = await resolveAddress(address, 'work', checkDate);
     } catch (err) {
       sendJson(res, 502, {
         error: `Address lookup failed: ${(err as Error).message}`,
@@ -191,9 +191,20 @@ async function handleLookup(req: IncomingMessage, res: ServerResponse): Promise<
     state = resolution.resolved.state;
     places = resolution.geographies?.incorporatedPlaces ?? [];
     counties = resolution.geographies?.counties ?? [];
+    // rooftopSource/correctionMeters expose the SAME detail
+    // resolution.rooftop already carries (geocode/rooftop.ts) that this
+    // endpoint used to drop on the floor — a caller (or minimum-wage-ui.html
+    // below) previously had no way to tell a genuine authoritative address
+    // point (National Address Database, or the local OpenAddresses/NAD-bulk
+    // index built by scripts/build-address-index.ts + build-nad-index.ts)
+    // apart from a plain Census curb-level guess; both looked like bare
+    // precision: 'rooftop' vs 'interpolated' strings with nothing behind them.
+    const r = resolution.rooftop;
     geocode = {
       matched: true,
       precision: resolution.precision,
+      rooftopSource: r?.match?.chosen.source ?? r?.osm?.road ?? r?.parcel?.source.jurisdictionLabel ?? null,
+      correctionMeters: r?.metersFromInterpolated ?? null,
       coordinateSource: resolution.coordinateSource,
       coordinates: resolution.coordinates,
       places,

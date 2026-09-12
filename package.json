@@ -29,6 +29,9 @@
     "harvest:audit": "node examples/harvest-daily.ts audit",
     "edge:build": "node scripts/build-edge-function.ts && node scripts/build-data-bundle.ts",
     "edge:key": "node scripts/generate-api-key.ts",
+    "address-index:build": "node scripts/build-address-index.ts --all",
+    "address-index:build-nad": "node scripts/build-nad-index.ts",
+    "address-index:stats": "node scripts/address-index-stats.ts",
     "ui:minimum-wage": "node examples/minimum-wage-server.ts"
   },
   "license": "MIT"

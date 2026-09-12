@@ -749,4 +749,108 @@ describe('more state overrides — cliff-on-dollar, marginal-bracket and head-of
     ], 'NJ');
     assert.equal(flatFloorBinds.totalWithheld, dollars(2));
   });
+
+  test('Arizona: lesser of 10% of disposable and disposable over 60x its own $15.15 minimum wage (Prop 209)', () => {
+    // $1000 disposable: 10% = $100; floor excess = $1000 - 60*$15.15
+    // ($909.00) = $91.00 (smaller).
+    const r = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'AZ');
+    assert.equal(r.totalWithheld, dollars(91));
+
+    // Below the $909.00 floor: fully exempt, even though 10% of gross
+    // alone would allow something.
+    const belowFloor = run(paycheckOf(dollars(900), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'AZ');
+    assert.equal(belowFloor.totalWithheld, 0);
+  });
+
+  test("Alaska: greater of $473/week (or $743 sole-support) exempt, or 75% of disposable — flat-dollar floor, not minimum-wage-derived", () => {
+    // $1000 disposable: 25% = $250; flat floor excess = $1000 - $473 =
+    // $527 (25% is smaller — the ordinary case, high income).
+    const highIncome = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'AK');
+    assert.equal(highIncome.totalWithheld, dollars(250));
+
+    // $600 disposable: 25% = $150; flat floor excess = $600 - $473 = $127
+    // (the floor is smaller here — the low-income case the flat dollar
+    // figure exists to protect).
+    const lowIncome = run(paycheckOf(dollars(600), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'AK');
+    assert.equal(lowIncome.totalWithheld, dollars(127));
+
+    // Same $600, but the debtor has filed the sole-support affidavit:
+    // floor rises to $743, exceeding disposable entirely -> $0 withheld.
+    const soleSupport = run(paycheckOf(dollars(600), 0), [
+      order({ id: 'A', type: 'consumer_creditor', soleHouseholdSupport: true }),
+    ], 'AK');
+    assert.equal(soleSupport.totalWithheld, 0);
+  });
+
+  test('Iowa: the plain federal 25%/30x test, further capped by a CUMULATIVE annual dollar limit per creditor', () => {
+    // $1000 disposable: federal weekly cap = lesser of 25%=$250 or
+    // disposable-over-$217.50=$782.50 -> $250. Expected annual earnings
+    // $10,000 is under the $12,000 tier -> $250/year cap. With $200
+    // already garnished this year, only $50 of annual room remains,
+    // which binds tighter than the $250 weekly federal cap.
+    const annualCapBinds = run(paycheckOf(dollars(1000), 0), [
+      order({
+        id: 'A',
+        type: 'consumer_creditor',
+        expectedAnnualEarnings: dollars(10000),
+        garnishedThisYearForThisOrder: dollars(200),
+      }),
+    ], 'IA');
+    assert.equal(annualCapBinds.totalWithheld, dollars(50));
+
+    // Same paycheck, no expectedAnnualEarnings supplied at all: the extra
+    // annual layer never applies (never guessed), so the plain federal
+    // weekly cap governs unchanged.
+    const noAnnualFact = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'IA');
+    assert.equal(noAnnualFact.totalWithheld, dollars(250));
+
+    // A high earner ($60,000 expected) falls in the top, percentage tier:
+    // 10% of $60,000 = $6,000/year. With nothing garnished yet this year,
+    // the full $250 weekly federal cap has plenty of annual room left.
+    const topTier = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor', expectedAnnualEarnings: dollars(60000) }),
+    ], 'IA');
+    assert.equal(topTier.totalWithheld, dollars(250));
+  });
+
+  test('Oregon: lesser of 25% of disposable and disposable over its own flat $254/week floor', () => {
+    // $1000 disposable: 25% = $250; floor excess = $1000-$254 = $746
+    // (25% is smaller — the ordinary, higher-income case).
+    const higherIncome = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'OR');
+    assert.equal(higherIncome.totalWithheld, dollars(250));
+
+    // $300 disposable: 25% = $75; floor excess = $300-$254 = $46
+    // (the flat floor is smaller — the low-income case it exists to protect).
+    const lowerIncome = run(paycheckOf(dollars(300), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'OR');
+    assert.equal(lowerIncome.totalWithheld, dollars(46));
+  });
+
+  test('Tennessee: the plain federal 25%/30x test, reduced $2.50/week per qualifying dependent child', () => {
+    // $1000 disposable: 25% = $250 (30x-federal floor excess is larger,
+    // $782.50, so 25% governs) less 2 x $2.50 = $5 -> $245.
+    const withDependents = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor', dependents: 2 }),
+    ], 'TN');
+    assert.equal(withDependents.totalWithheld, dollars(245));
+
+    // Same paycheck, no dependents asserted: no reduction, plain $250.
+    const noDependents = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'TN');
+    assert.equal(noDependents.totalWithheld, dollars(250));
+  });
 });

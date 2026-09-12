@@ -23,7 +23,7 @@ npm run ui:calculator      # any-state calculator UI, address-based local tax lo
 | State UC/SDI/PFML/LTC (employee-paid) | 14 states + DC, wherever the state actually levies one |
 | Local income tax | Every state known to levy one, at the depth each state's own public data allows: OH (~600 municipalities + school districts + JEDD/JEDZ), PA (~2,600 Act 32 EIT/LST jurisdictions), MI (24 cities — the full statewide list), KY (227 occupational districts), IN (92/92 counties), AL (25/25 municipalities), MD (24 counties + Baltimore City, wired into the state ruleset), NYC + Yonkers, Kansas City/St. Louis earnings tax, Newark payroll tax, Portland Metro/Multnomah + TriMet/LTD transit excise, Denver-cluster Colorado OPT, Wilmington wage tax, Seattle's JumpStart payroll tax, WV municipal service fees (10 cities — see below, the one state with no central registry to bulk-load from) |
 | Reciprocity / multi-state | Wired generically off each state's own `reciprocalStates` — IL/IN/KY/MI/MN/OH/PA/WI's bilateral agreements, DC's blanket nonresident exemption, WV's 5-state cluster |
-| Garnishments (court-ordered / administrative) | CCPA federal ceilings for ordinary consumer/creditor judgment, child support/alimony (50/55/60/65%), and federal student loan default (34 CFR 34.19) — multiple simultaneous orders share one aggregate ceiling, never stacked. 22 states' own departures researched and modelled across 5 distinct formula shapes: TX/PA/NC/SC bar ordinary garnishment outright; FL exempts a "head of family" debtor at any income; MO gives one a reduced 10% instead; IL/NY/MA/CT/DE/CO/WA/WI/ME/VT/MD cap it by a flat-fraction formula (of gross and/or disposable, plus a minimum-wage floor — VT resolves a real dual-rule statute to the more protective consumer-credit-transaction figure, MD's floor uses its own $15.00 state minimum wage in place of the federal one); ND applies that same flat-fraction shape with an added $20/week-per-dependent reduction; MN cliff-brackets by income (10/15/25%, the WHOLE amount reclassified at each threshold); NV cliff-brackets on a fixed gross-weekly dollar line instead; HI uses genuine MARGINAL brackets (5%/10%/20%, only the slice within each band, income-tax-bracket style); NJ ties its 10% cap to the debtor's household size against the HHS federal poverty guideline, reverting to the federal default above 250% of it (the statute leaves that case to court discretion, not a fixed number). Every other state uses the federal default as an unconfirmed baseline, not a researched "no departure exists." Federal tax levies are out of scope (IRS Pub 1494's own table, not a fixed CCPA fraction) — see `src/garnishment.ts` and `data/garnishment/state-overrides-2026.json` |
+| Garnishments (court-ordered / administrative) | CCPA federal ceilings for ordinary consumer/creditor judgment, child support/alimony (50/55/60/65%), and federal student loan default (34 CFR 34.19) — multiple simultaneous orders share one aggregate ceiling, never stacked. **All 51 jurisdictions researched** — 32 states carry a modelled departure across 7 distinct formula shapes (flat-fraction + minimum-wage floor, a flat-dollar legislated floor, per-dependent reduction, cliff-bracket tiers on minimum-wage multiples or a fixed gross-weekly dollar line, marginal brackets, a poverty-guideline income tier, and Iowa's own cumulative-annual-dollar cap — the only shape spanning multiple paychecks); 10 states (Georgia, Alabama, Louisiana, Michigan, Montana, Ohio, Oklahoma, Rhode Island, Utah, Wyoming) confirmed to have no departure at all; Arkansas/Mississippi/New Hampshire carry a disclosed structural nuance (a narrow occupational carve-out, a service-date grace period, and a trustee-process mismatch respectively) rather than a full formula. Federal tax levies are out of scope (IRS Pub 1494's own table, not a fixed CCPA fraction) — see `src/garnishment.ts` and `data/garnishment/state-overrides-2026.json` |
 | Address → jurisdiction | Five-tier geocoding pipeline that PREFERS rooftop precision and refuses to guess when it can't get there (see below) — a live run lands 35/51 on an authoritative rooftop point, not all 51, plus a gated county-parcel fallback (1 state, so far) for where the free federal registry has nothing at all; measured every run, not assumed, and the split moves day to day |
 | Staying current | Automated daily harvester watching 105 registered sources, human review gate before anything reaches `data/` |
 
@@ -436,15 +436,17 @@ visible instead of overwritten silently.
   finals (CA 1.2%, VI 4.5%) ride along as `priorYear` reference only. What
   is genuinely not automated is populating that map once DOL does publish —
   it still needs a human edit to `data/federal/2026.json`.
-- **Garnishment state overrides are researched and modelled for 29 states**
-  (up from 22 — California, New Mexico, South Dakota, Virginia, West
-  Virginia, DC and Nebraska were added in a dedicated pass through the
-  previously-"unconfirmed-federal-default" states, rather than assumed to
-  match federal law), plus Georgia confirmed to have no departure at all
-  (its own statute just re-enacts the federal CCPA rule verbatim — a
-  researched *confirmation of absence*, a stronger claim than the ~20
-  states still simply not yet looked at), across 6 distinct formula shapes
-  (`GarnishmentFormula` in `src/registry.ts`):
+- **All 51 jurisdictions' garnishment law is now researched — none left as
+  an unconfirmed federal-default guess.** 32 states carry a modelled
+  departure from the plain federal CCPA formula; 10 (Georgia, Alabama,
+  Louisiana, Michigan, Montana, Ohio, Oklahoma, Rhode Island, Utah,
+  Wyoming) were actively researched and *confirmed* to have no departure at
+  all — a stronger claim than simple absence would have been; the
+  remaining few (Arkansas, Mississippi, New Hampshire) carry a real,
+  disclosed structural nuance this engine's per-paycheck model can't fully
+  capture (see below), rather than a silently-assumed match. Seven
+  distinct formula shapes now exist (`GarnishmentFormula` in
+  `src/registry.ts`):
   TX, PA, NC, SC bar ordinary consumer garnishment outright; FL exempts a
   "head of family" debtor at any income (until affirmatively waived in
   writing); MO gives a head-of-family debtor a reduced 10% instead of a full
@@ -494,12 +496,40 @@ visible instead of overwritten silently.
   `workState` was unknowingly relying on that absence to isolate the plain
   federal formula, and would have silently started computing California's
   new real formula instead the moment it shipped; the default was moved to
-  `'AL'` (confirmed to have no departure) before any of this landed. The
-  remaining ~20 states still compute ordinary garnishment against the plain
-  federal CCPA default as an unconfirmed baseline, not a researched "no
-  state departure exists" — see
-  `data/garnishment/state-overrides-2026.json`'s own `$scopeNote` for
-  exactly which. Several modelled states also set higher LOCAL minimum
+  `'AL'` (confirmed to have no departure) before any of this landed.
+  A later pass researched the remaining 21 states outright rather than
+  leave them as an unconfirmed baseline: Arizona's Prop 209 cut ordinary
+  garnishment to 10%/60x its own $15.15 minimum wage; Alaska needed a
+  **genuinely new flat-dollar-floor shape** (`flatWeeklyFloor` /
+  `flatWeeklyFloorSoleSupport`) since its $473/$743-per-week figures are
+  legislated dollar amounts, not a minimum-wage multiple — Oregon's own
+  $254/week floor reuses the same shape; Tennessee reuses the existing
+  per-dependent-reduction mechanism ND already established, at its own
+  $2.50/week figure, gated on the debtor actually informing the employer;
+  Iowa needed a **genuinely new seventh shape**, `annualCapTiers` — the
+  only one in this file that caps a CUMULATIVE total across an entire
+  calendar year rather than one paycheck at a time, keyed to the debtor's
+  own earnings "reasonably expected" for the year
+  (`GarnishmentOrder.expectedAnnualEarnings`, a projection this engine
+  can't derive from any single paycheck) with a running per-creditor
+  annual total the caller maintains (`.garnishedThisYearForThisOrder`).
+  Idaho, Indiana, Kansas, Kentucky, Alabama, Louisiana, Michigan, Montana,
+  Ohio, Oklahoma, Rhode Island, Utah and Wyoming all turned out to
+  re-enact the plain federal test verbatim — confirmed, not assumed, the
+  same class of finding as Georgia's. Arkansas's real departure
+  (A.C.A. § 16-66-208) turned out to protect only a narrow, statutorily-
+  undefined occupational category ("laborers and mechanics") at a dollar
+  figure smaller than the federal floor already in place regardless, so
+  it's disclosed rather than force-fit; Mississippi's real departure is a
+  30-day post-service grace period this engine's one-paycheck-at-a-time
+  model has no "days since service" concept to represent; New
+  Hampshire's trustee process is the most structurally different of all —
+  wages earned *after* a writ is served are exempt outright, so there is
+  no ongoing per-paycheck percentage to compute at all for a standing
+  garnishment order the way every other state in this file has, closest
+  in practical effect to a prohibition without literally being one. See
+  `data/garnishment/state-overrides-2026.json`'s own `$scopeNote` for the
+  complete state-by-state accounting. Several modelled states also set higher LOCAL minimum
   wages this file doesn't reach (Denver/Boulder in CO, Minneapolis/St. Paul
   in MN, NYC/Long Island/Westchester in NY, Portland in ME, and now several
   New Mexico and California cities/counties too) — disclosed per-state, not
@@ -510,44 +540,44 @@ visible instead of overwritten silently.
   engine's own proportional rule when their combined demand exceeds the
   shared ceiling — a live case defers to the state child-support-
   enforcement agency's own allocation rule instead.
-- **West Virginia's municipal service fee is the one local tax with no
-  central registry to bulk-load from.** WV Code 8-13-13 lets any of ~230
-  chartered municipalities levy the fee independently; unlike every other
-  state above, there is no Ohio-Finder- or Kentucky-SOS-style state
-  database to pull a complete list from — confirmed by a dedicated search,
-  not assumed. 10 cities are on file (Charleston, Huntington, Morgantown,
-  Parkersburg, Wheeling, Weirton, Fairmont, Madison, Romney, Montgomery),
-  each individually ordinance-sourced, and more exist that aren't yet
-  researched. A WV city missing from `serviceFeeCities` in
-  `data/states/WV-2026.json` means "not yet looked up," never "confirmed no
-  fee" — closing this one requires reading roughly 220 more municipal codes
-  one at a time, not finding one more source. A fresh research pass
-  (2026-09-05) retried the previously-blocked leads (still blocked) and
-  surfaced a genuinely new, DISTINCT mechanism worth naming even though no
-  city was added: WV Code § 7-20-12 lets any COUNTY (not municipality)
-  impose its own countywide service fee via the same payroll-withholding
-  shape, but only after a voter referendum most counties don't appear to
-  have run — no confirmed instance was found anywhere in the state, so
-  nothing was added, but a future pass should check county-commission
-  records rather than assume this is purely a municipal-level tax. That
-  same pass also caught a real error in an existing city — Charleston's
-  rate was 2.50 with no citation behind it at all; the city's own official
-  fee-overview PDF puts it at 3.00/week, corroborated independently by its
-  own ordinance text and a federal payroll bulletin, both dating the same
-  2018 increase — and ran down four newly-found "Municipal Service Fee"
-  ordinances (Nitro, Weston, Dunbar, Mannington) that all turned out to be
-  the WRONG shape once actually read: a flat charge billed to property
-  owners or per building unit, not the per-employee payroll withholding
-  this engine models, the same class of exclusion as Chester's fee. That
-  turned into a structural finding worth naming: WV Code 8-13-13 is being
-  used by far more than 10 cities, but seemingly mostly for a
-  property-billed fee rather than the payroll-withheld one — a newly-found
-  city's ordinance needs its basis checked every time, not assumed. A
-  further pass (2026-09-06) chased the one open lead the prior pass flagged
-  as worth a human phone call (Shinnston) and searched broadly for any 2026
-  council vote on a new fee — found nothing new either way; the conclusion
-  stands that this needs a records request or a city-by-city canvass, not
-  more web search.
+- **West Virginia's municipal service fee has NO central registry to
+  bulk-load from — confirmed, not assumed, by a genuinely completed
+  canvass, not just repeated keyword search.** WV Code 8-13-13 lets any of
+  ~230 chartered municipalities levy the fee independently, with no
+  Ohio-Finder- or Kentucky-SOS-style state database to pull a complete list
+  from. Six early passes tried keyword/aggregator search (news coverage,
+  payroll-industry compilers, state agency pages, an academic study blocked
+  by a Cloudflare challenge) and kept converging on the same 9-10 well-known
+  cities. A later pass abandoned keyword search for an actual **city-by-city
+  canvass of the full ~230-municipality roster** (`localIncomeTax.
+  canvassProgress` in `data/states/WV-2026.json` — `notYetChecked` is now
+  genuinely empty, not just small) and found exactly ONE more real city out
+  of the ~160 towns nobody had individually checked before: **11 cities are
+  now confirmed** (Charleston, Huntington, Morgantown, Parkersburg, Wheeling,
+  Weirton, Fairmont, Madison, Romney, Montgomery, Glen Dale), each
+  individually ordinance-sourced. That roughly 1-in-160 hit rate among
+  never-before-checked towns is itself informative — it means the true
+  universe of adopters is genuinely small, not merely under-searched, which
+  is why this is now treated as closed rather than perpetually "20% done."
+  A WV city absent from `serviceFeeCities` now means "individually checked
+  and found no evidence," not "not yet looked up" — the one exception is a
+  single Home Rule filing (Shinnston) that exists only as a non-OCR'd scanned
+  PDF this project has no tooling to read. Several real "Municipal Service
+  Fee"-titled ordinances were run down and correctly excluded rather than
+  assumed to match: Nitro, Weston, Dunbar, Mannington, Chester, Bridgeport,
+  Bluefield, Wellsburg and Paden City all turned out to be the WRONG shape —
+  a flat charge billed to property owners, households, or per building unit,
+  not the per-employee payroll withholding this engine models. That
+  structural finding is worth naming on its own: WV Code 8-13-13 is used by
+  far more than 11 cities, but mostly for a property-billed fee, so a
+  newly-found "service fee" ordinance is a coin flip needing its basis
+  checked every time, never assumed. Separately, WV Code § 7-20-12 lets any
+  COUNTY (not municipality) impose an equivalent countywide fee, but only
+  after a voter referendum — no county has been found to have actually run
+  one, so nothing is modelled there. What remains genuinely open needs a
+  records request to the WV State Auditor or Municipal Home Rule Board, or a
+  live phone canvass of town clerks — not more web search, which this
+  file's own `canvassProgress.$status` documents as exhausted.
 - **Structurally out of scope, not missing:** a few real local levies exist
   that no per-paycheck engine can compute at all — New York's MCTMT and San
   Francisco's Administrative Office Tax are both quarterly taxes on an

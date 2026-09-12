@@ -25,3 +25,20 @@ supabase/.temp/
 # not project configuration. See site/lib/store.ts.
 site/.data/
 
+
+# OpenAddresses bulk extracts — ~5GB, re-downloadable from data.openaddresses.io.
+# Never committed: it is upstream data, not this project's own.
+data/address-points/raw/
+
+# The National Address Database's own bulk text-file export (~7.6GB
+# zipped) — re-downloadable from transportation.gov/gis/national-address-
+# database. Same reasoning as raw/ above: upstream data, not ours.
+data/address-points/nad-raw/
+
+# The built local address index itself (scripts/build-address-index.ts's
+# output) — tens of GB once fully built. A derived artifact rebuilt from
+# raw/ on demand, not this project's own data, and the WAL/SHM sidecar
+# files SQLite leaves behind mid-build are transient too.
+data/address-points/address-points.db
+data/address-points/address-points.db-wal
+data/address-points/address-points.db-shm

@@ -442,7 +442,14 @@
     if (g.places) rows.push(['Place', g.places.length ? g.places.join(', ') : 'unincorporated (no incorporated place here)']);
     if (g.counties && g.counties.length) rows.push(['County', g.counties.join(', ')]);
     if (d.region) rows.push(['Region', d.region]);
-    if (g.precision) rows.push(['Geocode precision', g.precision]);
+    if (g.precision) {
+      var precisionLabel = g.precision;
+      if (g.rooftopSource) precisionLabel += ' — published by ' + g.rooftopSource;
+      if (typeof g.correctionMeters === 'number') {
+        precisionLabel += ' (corrected ' + Math.round(g.correctionMeters) + 'm from Census\'s curb-level estimate)';
+      }
+      rows.push(['Geocode precision', precisionLabel]);
+    }
     if (g.coordinateSource) {
       rows.push(['Position from', ({
         'census-address-range': 'Census address range',

@@ -357,7 +357,7 @@
       "trendNote": "New employer rate rose from 2.7% (2023-2025) to 2.85% in 2026; construction-industry new employer rate rose from 5.6% to 5.85% correspondingly — both confirmed in the same primary table, same year-over-year pattern."
     },
     "confidence": "primary_source_confirmed — read directly from ODJFS's own published table, all four years shown for cross-year sanity-checking.",
-    "knownGap": "Not modelled in the engine. Same structural note as Michigan: experience-rated (lowest/highest range shown; an individual employer's actual rate is assigned, not looked up as a constant)."
+    "knownGap": "This state's UI rate is experience-rated (lowest/highest range shown; an individual employer's actual rate is assigned, not looked up as a constant), which is why stateUnemploymentEmployerTax() (src/taxes/state.ts) takes the caller-supplied rate (input.employer.stateUnemploymentRate) when given."
   },
   "schoolDistrictIncomeTax": {
     "$comment": "A tax category Michigan does NOT have — Ohio school districts may independently levy an income tax (SDIT), separate from and in addition to state + municipal income tax. This is real added complexity specific to Ohio.",

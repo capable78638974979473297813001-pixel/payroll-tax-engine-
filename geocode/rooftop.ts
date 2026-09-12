@@ -51,10 +51,11 @@
  *   - This is positional precision, not address VALIDATION. A typo'd or
  *     nonexistent address doesn't become valid because no point matched.
  */
-import { streetKey, streetKeyCapitolNormalized, streetKeyWithoutDirectionals } from './buildings.ts';
+import { streetKey, streetKeyCapitolNormalized, streetKeyWithoutDirectionals, streetKeyWithoutType } from './buildings.ts';
 import type { FetchOptions } from './census.ts';
 import { searchStructuredAddressSafe } from './nominatim.ts';
 import { resolveParcelCentroid, type ParcelCentroidResult } from './parcel.ts';
+import { localAddressPointsNear } from './local-address-index.ts';
 
 /**
  * The National Address Database, published by the US Department of
@@ -386,6 +387,23 @@ export function matchAddressPoint(oneLineAddress: string, points: AddressPoint[]
     }
   }
 
+  // Fourth pass: one side writes the street TYPE and the other doesn't.
+  // Verified live -- Detroit's Wayne County file publishes 1901 St Antoine
+  // as "ST ANTOINE" while the address is written "1901 St Antoine St", so
+  // the exact key comparison misses the correct building outright.
+  //
+  // Riskier than the directional pass, because "Main St" and "Main Ave"
+  // both reduce to "main" and a grid city really does carry the same house
+  // number on both. TODO(human) below decides how to keep that safe.
+  let streetTypeFallback = false;
+  if (matches.length === 0) {
+    const targetCore = streetKeyWithoutType(targetStreetRaw);
+    const loose = sameNumber.filter((p) => streetKeyWithoutType(p.street!) === targetCore);
+    // TODO(human): decide whether `loose` is safe to accept, and set
+    // `matches = loose; streetTypeFallback = true;` only when it is.
+    // See the Learn by Doing note for the trade-offs to weigh.
+  }
+
   let capitolFallback = false;
   if (matches.length === 0) {
     // Third pass, narrower than it looks: see streetKeyCapitolNormalized()'s
@@ -583,13 +601,52 @@ export interface RooftopResult {
  * Resolve one address to an authoritative rooftop coordinate, given
  * Census's interpolated point to search around. Never throws.
  */
+/**
+ * NAD and OpenAddresses often carry the SAME county's points, because
+ * OpenAddresses ingests some of the same state files NAD does. Two copies
+ * of one address would let neighborBracket() "bracket" a point with
+ * itself, so identity is house number + street + a ~1m coordinate
+ * rounding, keeping whichever was seen first (NAD, since it is merged
+ * first and carries a Placement field OpenAddresses lacks).
+ */
+function dedupePoints(points: AddressPoint[]): AddressPoint[] {
+  const seen = new Set<string>();
+  const out: AddressPoint[] = [];
+  for (const p of points) {
+    const key = `${(p.houseNumber ?? '').toLowerCase()}|${(p.street ?? '').toLowerCase()}|${p.lat.toFixed(5)}|${p.lon.toFixed(5)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(p);
+  }
+  return out;
+}
+
 export async function resolveRooftop(
   oneLineAddress: string,
   interpolated: { lat: number; lon: number },
   fetchImpl: typeof fetch = fetch,
   retryOptions: FetchOptions = {},
   radiusMeters: number = SEARCH_RADIUS_METERS,
+  /**
+   * The local address index — OpenAddresses' per-county extracts and NAD's
+   * own bulk text file, both loaded into the same table (scripts/
+   * build-address-index.ts and scripts/build-nad-index.ts). Injectable for
+   * the same reason fetchImpl is: a fixture-driven test supplies its own
+   * network, and it must be able to supply its own local index too, or it
+   * stops being hermetic the moment someone builds the multi-GB database on
+   * their machine. Caught exactly that way -- three tests began failing
+   * because they were silently reading real Detroit data.
+   */
+  localPointsImpl?: (lat: number, lon: number, radius: number) => AddressPoint[],
 ): Promise<RooftopResult> {
+  // A caller that injected its own fetch supplied its own world -- almost
+  // always a fixture-driven test. Reading the real on-disk index there
+  // would make the same test pass or fail depending on whether someone
+  // had run scripts/build-address-index.ts on that machine. Caught
+  // exactly that way: three hermetic tests started reading live Detroit
+  // data. An explicit localPointsImpl always wins over this default.
+  const readLocal =
+    localPointsImpl ?? (fetchImpl === globalThis.fetch ? localAddressPointsNear : () => []);
   const empty = {
     found: false as const,
     tier: null,
@@ -609,7 +666,21 @@ export async function resolveRooftop(
     fetchImpl,
     retryOptions,
   );
-  const points = fetched.ok ? fetched.points : [];
+
+  // The LOCAL index is merged with NAD's own LIVE answer rather than
+  // replacing it, because the local index (even with NAD's own bulk file
+  // loaded into it — see scripts/build-nad-index.ts) is a point-in-time
+  // snapshot and the live service can carry a point published since. NAD
+  // and OpenAddresses are themselves merged the same way inside that local
+  // index: neither is a superset of the other — NAD is dense in
+  // Philadelphia and empty in Pittsburgh; OpenAddresses is the reverse in
+  // several states. Merging means every tier below — exact match, neighbour
+  // bracket, the wider exact-match retry — sees whichever source actually
+  // published this address, with no extra branching.
+  //
+  // Absent index = empty array = behaviour identical to before it existed.
+  const local = readLocal(interpolated.lat, interpolated.lon, radiusMeters);
+  const points = dedupePoints([...(fetched.ok ? fetched.points : []), ...local]);
 
   // Tier 1 — a point published for this exact address.
   const match = matchAddressPoint(oneLineAddress, points);
@@ -702,6 +773,7 @@ export async function resolveRooftop(
   // radiusMeters gets exactly the search they asked for, not a silently
   // widened one.
   if (radiusMeters === SEARCH_RADIUS_METERS) {
+    const widerLocal = readLocal(interpolated.lat, interpolated.lon, WIDE_SEARCH_RADIUS_METERS);
     const wider = await fetchAddressPointsNear(
       interpolated.lat,
       interpolated.lon,
@@ -709,8 +781,9 @@ export async function resolveRooftop(
       fetchImpl,
       retryOptions,
     );
-    if (wider.ok) {
-      const wideMatch = matchAddressPoint(oneLineAddress, wider.points);
+    const widePoints = dedupePoints([...(wider.ok ? wider.points : []), ...widerLocal]);
+    if (widePoints.length > 0) {
+      const wideMatch = matchAddressPoint(oneLineAddress, widePoints);
       if (wideMatch) {
         return {
           attempted: true,

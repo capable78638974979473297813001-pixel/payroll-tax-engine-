@@ -620,6 +620,32 @@
     el.textContent = text;
   }
 
+  // Every resolveAddress() result already carries `precision` and the full
+  // `rooftop` tier detail (geocode/rooftop.ts) — but until now this UI only
+  // ever read matchQuality and certificateFields from it, so a lookup that
+  // WAS resolved to an authoritative address point (from the National
+  // Address Database or the local OpenAddresses/NAD-bulk index built by
+  // scripts/build-address-index.ts + scripts/build-nad-index.ts) looked
+  // identical, on screen, to one that fell back to Census's own curb-level
+  // interpolation. This renders which one actually happened.
+  function describePrecision(resolution) {
+    const r = resolution.rooftop;
+    const meters = r && r.metersFromInterpolated != null ? Math.round(r.metersFromInterpolated) : null;
+    const corrected = meters ? `, corrected ${meters}m from Census's curb-level estimate` : '';
+    switch (resolution.precision) {
+      case 'rooftop':
+        return `📍 rooftop (authoritative) — published by ${(r && r.match && r.match.chosen.source) || 'the local address authority'}${corrected}`;
+      case 'rooftop-osm':
+        return `📍 rooftop-osm (OpenStreetMap, corroborated against Census)${corrected}`;
+      case 'neighbor':
+        return `📍 neighbor (interpolated between two real published address points${r && r.neighbors ? `, ${Math.round(r.neighbors.spanMeters)}m apart` : ''})${corrected}`;
+      case 'parcel-centroid':
+        return `📍 parcel-centroid (${(r && r.parcel && r.parcel.source.jurisdictionLabel) || 'a county'}'s own tax-parcel data)${corrected}`;
+      default:
+        return `📍 interpolated — Census's own curb-level estimate; no authoritative address point found nearby`;
+    }
+  }
+
   // resolveEmployee() (geocode/index.ts) resolves work + residence TOGETHER
   // because several taxes are keyed off comparing both — NYC/Yonkers
   // residency, Missouri's KC/St. Louis earnings tax (either address puts you
@@ -661,10 +687,14 @@
     await renderResidenceStateFields();
 
     const matchLines = [];
-    if (data.work && data.work.matched) matchLines.push(`Work matched: ${data.work.matchQuality.matchedAddress} → ${workState}`);
-    else if (data.work) matchLines.push(`Work address NOT matched.`);
-    if (data.residence && data.residence.matched) matchLines.push(`Residence matched: ${data.residence.matchQuality.matchedAddress} → ${residenceState}`);
-    else if (data.residence) matchLines.push(`Residence address NOT matched.`);
+    if (data.work && data.work.matched) {
+      matchLines.push(`Work matched: ${data.work.matchQuality.matchedAddress} → ${workState}`);
+      matchLines.push('  ' + describePrecision(data.work));
+    } else if (data.work) matchLines.push(`Work address NOT matched.`);
+    if (data.residence && data.residence.matched) {
+      matchLines.push(`Residence matched: ${data.residence.matchQuality.matchedAddress} → ${residenceState}`);
+      matchLines.push('  ' + describePrecision(data.residence));
+    } else if (data.residence) matchLines.push(`Residence address NOT matched.`);
 
     let msg = matchLines.join('\n');
     if (filled.length) msg += `\nAuto-filled: ${filled.join(', ')}`;
