@@ -41,6 +41,7 @@ import {
 } from '../registry.ts';
 import { federalIncomeTax } from './federal.ts';
 import { cashEarnings, supplementalEarnings } from '../wages.ts';
+import { resolveCertBoolean } from '../validate.ts';
 import type {
   ComputeContext,
   PaycheckInput,
@@ -97,8 +98,9 @@ export function stateIncomeTax(
 
   // Reciprocity and the nonresident de minimis threshold are both read
   // generically off rules.reciprocity, so every state file that already
-  // documents reciprocalStates (IL/IN/KY/MI/MN/OH/PA/WI) goes live the
-  // moment a caller populates input.residenceState — no per-state code
+  // documents reciprocalStates (AZ/IA/IL/IN/KY/MD/MI/MN/MT/ND/NJ/OH/PA/VA/
+  // WI/WV, plus DC's own structurally-different blanket exemption) goes
+  // live the moment a caller populates input.residenceState — no per-state code
   // change needed, matching this file's "data-only" ethos. Reciprocity is
   // checked first; de minimis only matters when reciprocity didn't already
   // resolve it.
@@ -108,13 +110,28 @@ export function stateIncomeTax(
   // nothing no matter where the worker lives.
   const categoryReason = exemptEmploymentCategoryReason(input, rules);
   const reciprocityReason = categoryReason ? null : reciprocityExemptionReason(input, rules);
-  const dayCountReason =
-    categoryReason || reciprocityReason ? null : nonresidentDayCountReason(input, rules);
+  // BUG FIXED (found during manual cross-state testing, 2026-09-06): the
+  // day-count rule is a genuinely SEPARATE legal basis from reciprocity —
+  // Indiana's own 30-day rule (Departmental Notice #1) applies to ANY
+  // nonresident, not just a resident of one of its reciprocalStates, and it
+  // reaches FURTHER than bare reciprocity (it also exempts county tax,
+  // which WH-47 reciprocity explicitly does not — see IN-2026.json's own
+  // "critical gotcha"). This used to be skipped the moment reciprocityReason
+  // already applied, which meant a Kentucky resident who ALSO independently
+  // qualified for the 30-day rule stayed stuck paying full Indiana county
+  // tax, while an otherwise-identical California resident (no relationship
+  // to Indiana at all) got BOTH state and county zeroed under the exact
+  // same day-count facts — a reciprocal-state resident ending up strictly
+  // WORSE off than a non-reciprocal one is backwards, and nothing in
+  // Indiana's own data disclosed it as intentional. Only an employment-
+  // CATEGORY exemption (broader than residence entirely) should still
+  // short-circuit this check.
+  const dayCountReason = categoryReason ? null : nonresidentDayCountReason(input, rules);
   const deMinimisReason =
     categoryReason || reciprocityReason || dayCountReason
       ? null
       : nonresidentDeMinimisReason(input, ctx, rules);
-  const exemptReason = categoryReason ?? reciprocityReason ?? dayCountReason ?? deMinimisReason;
+  const exemptReason = categoryReason ?? dayCountReason ?? reciprocityReason ?? deMinimisReason;
   if (exemptReason) {
     // Indiana's day-count rule reaches its county tax too, which is a
     // separate line id — every other exemption here is state-tax-only.
@@ -521,6 +538,19 @@ interface ReciprocityConfig {
   // reciprocalStates list has no way to represent this — the ONLY
   // difference between a commuter-only entry and an ordinary one is here.
   commuterOnlyStates?: string[];
+  // Arizona's own bug class: a DIFFERENT kind of conditional entry from
+  // commuterOnlyStates above. Arizona's Form WEC does not grant an
+  // unconditional exemption to residents of California/Indiana/Oregon/
+  // Virginia — it requires the employee be "ALLOWED to claim a tax credit
+  // against your Arizona tax for taxes paid to your state of residence on
+  // Form 140NR." That is a nonresident-tax-CREDIT-eligibility test, not a
+  // commuting pattern, so it needs its own flag rather than overloading
+  // commuterOnlyStates — the certificate field it reads
+  // (certificate.nonresidentCreditEligible) is deliberately named
+  // differently from dailyCommuter for the same reason. Same default-safe
+  // direction as commuterOnlyStates: an absent or false flag means NO
+  // exemption, never a silently-granted one a real Form 140NR might deny.
+  creditEligibilityRequiredStates?: string[];
   // Pennsylvania-originated (REV-419): once this state's own reciprocity
   // exemption fires for a resident of a reciprocalStates entry, ALSO emit
   // an additional line for that employee's residence-state tax on the same
@@ -728,6 +758,16 @@ function reciprocityExemptionReason(
     if (!dailyCommuter) return null;
   }
 
+  // Arizona's own bug class — see creditEligibilityRequiredStates's own doc
+  // comment. A resident of one of these states gets the exemption only if
+  // the caller affirmatively asserts they qualify for the underlying
+  // nonresident tax credit; absent that assertion, no exemption, the same
+  // default-safe direction commuterOnlyStates already uses above.
+  if (reciprocity?.creditEligibilityRequiredStates?.includes(residence)) {
+    const creditEligible = input.residenceState?.certificate?.nonresidentCreditEligible === true;
+    if (!creditEligible) return null;
+  }
+
   return (
     `$0 — reciprocity exemption: employee resides in ${residence}, which has an ` +
     `active reciprocal agreement with ${rules.code}. Assumes the required reciprocity ` +
@@ -901,6 +941,43 @@ function exemptEmploymentCategoryReason(
 }
 
 /**
+ * certificate.exempt (and every other boolean-shaped certificate field in
+ * this file — nonresident, the two Yonkers flags, paidLeaveExempt,
+ * wacaresExempt, zeroElection, and more) needs the SAME guard: a bare JS
+ * truthy check misreads the STRING "false" (or "0", or "no") as true, since
+ * non-empty strings are truthy in JavaScript. There is no per-state type
+ * for `certificate` the way federalW4.exempt has (certificate varies too
+ * much by state to type narrowly), so nothing else catches this at the
+ * type level. resolveCertBoolean() now lives in ../validate.ts — shared
+ * with federal.ts, whose own w4.exempt had the identical gap despite BEING
+ * typed `boolean` in PaycheckInput, because this engine is served over
+ * HTTP (supabase/functions/calculate-paycheck) where no compiler stands
+ * between the wire and this code.
+ */
+function resolveCertExempt(cert: Record<string, unknown>): boolean {
+  return resolveCertBoolean(cert, 'exempt');
+}
+
+/**
+ * certificate.nonresident has the same class of risk as certificate.exempt
+ * above, and a genuinely worse failure mode where it's used: Maryland's
+ * marylandWithholding() switches its ENTIRE local-tax mechanism on this
+ * flag (the ordinary county rate vs. the Special Nonresident Rate), and
+ * DC's dcWithholding() short-circuits to a flat $0 for a nonresident,
+ * because DC is federally barred from taxing nonresident commuters. A
+ * caller who means "not nonresident" (i.e. a resident) but sends the
+ * STRING "false" would, under a bare truthy check, be silently treated as
+ * a nonresident — for DC specifically, that means a real DC resident gets
+ * $0 DC income tax withheld. One of the three existing call sites already
+ * wrapped this in Boolean(...), which does not help: Boolean("false") is
+ * also true. Only a real boolean or an absent value is accepted here;
+ * anything else throws.
+ */
+function resolveCertNonresident(cert: Record<string, unknown>): boolean {
+  return resolveCertBoolean(cert, 'nonresident');
+}
+
+/**
  * Employee-claimed exemption from state withholding (Minnesota's W-4MN
  * Section 2 is the first concrete, enumerable example in this project, but
  * read generically off certificate.exempt so any future state's own
@@ -916,7 +993,7 @@ function applyStateWithholdingExemption(
   lines: TaxLine[],
 ): TaxLine[] {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (!cert.exempt) return lines;
+  if (!resolveCertExempt(cert)) return lines;
 
   // A state can recognise several DIFFERENT exemptions that all arrive as
   // the same boolean — Alabama alone honours four federal statutes (air
@@ -956,7 +1033,7 @@ function applyAdditionalStateWithholding(
   lines: TaxLine[],
 ): TaxLine[] {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.exempt) return lines;
+  if (resolveCertExempt(cert)) return lines;
 
   // Montana's Form MW-4 is explicit that its own "extra withholding" (line
   // 3) and "specified withholding" (line 4) are mutually exclusive — "If
@@ -1006,7 +1083,7 @@ function applyReducedStateWithholding(
   lines: TaxLine[],
 ): TaxLine[] {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.exempt) return lines;
+  if (resolveCertExempt(cert)) return lines;
 
   const reduction = Number(cert.reducedWithholding ?? 0);
   if (reduction <= 0) return lines;
@@ -1244,14 +1321,14 @@ function incomeTaxLinesByMethod(
     case 'bracket_federal_subtraction_phaseout':
       return [oregonWithholding(input, ctx, rules)];
     case 'bracket_per_period_three_status':
-      return [californiaWithholding(input, ctx, rules), ...californiaSupplementalTax(input, rules)];
+      return [californiaWithholding(input, ctx, rules), ...californiaSupplementalTax(input, ctx, rules)];
     case 'flat_rate_status_deduction':
       return [coloradoWithholding(input, ctx, rules)];
     case 'flat_rate_phaseout_allowance':
       return [utahWithholding(input, ctx, rules)];
     case 'bracket_state_plus_local': {
       const lines: TaxLine[] = [marylandWithholding(input, ctx, rules)];
-      const supplemental = marylandSupplementalTax(input, rules);
+      const supplemental = marylandSupplementalTax(input, ctx, rules);
       if (supplemental) lines.push(supplemental);
       return lines;
     }
@@ -1327,6 +1404,14 @@ interface SUIEmployerConfig {
   newEmployerRate: number | null;
   experienceRange: { min: number; max: number } | null;
   employerSuppliedRateRequired?: boolean;
+  /**
+   * Overrides newEmployerRate for a specific industry, keyed by the same
+   * string EmployerContext.suiIndustry uses — Kansas's 5.55% construction
+   * rate vs. 1.75% for everyone else (see that field's own doc comment).
+   * Checked before newEmployerRate, never before an explicit
+   * input.employer.stateUnemploymentRate supplied for this state.
+   */
+  industryNewEmployerRates?: Record<string, number>;
 }
 
 /**
@@ -1368,7 +1453,9 @@ function stateUnemploymentEmployerTax(
   if (!cfg) return null;
 
   const supplied = input.employer?.stateUnemploymentRate?.[rules.code];
-  const rate = supplied ?? cfg.newEmployerRate;
+  const industry = input.employer?.suiIndustry?.[rules.code];
+  const industryRate = industry === undefined ? undefined : cfg.industryNewEmployerRates?.[industry];
+  const rate = supplied ?? industryRate ?? cfg.newEmployerRate;
   if (rate === null || rate === undefined) return null;
 
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
@@ -1379,9 +1466,11 @@ function stateUnemploymentEmployerTax(
   const amount = applyRate(taxableWages, rate);
 
   const rateSource =
-    supplied === undefined
-      ? "the state's published new-employer rate (no employer rate supplied — see input.employer.stateUnemploymentRate)"
-      : "this employer's own assigned rate";
+    supplied !== undefined
+      ? "this employer's own assigned rate"
+      : industryRate !== undefined
+        ? `the state's published new-employer rate for its "${industry}" industry classification (see input.employer.suiIndustry)`
+        : "the state's published new-employer rate (no employer rate supplied — see input.employer.stateUnemploymentRate)";
 
   return {
     id: `${rules.code}_SUI_ER`,
@@ -1820,6 +1909,22 @@ function findWIBracket(brackets: WIBracket[], annualNetWage: number): WIBracket 
  * taxes/federal.ts already uses, so the two lines together still cover the
  * full base exactly once.
  */
+/**
+ * WI's own formula only distinguishes single vs. married — head-of-household
+ * has no third band in Publication W-166, so it maps to 'single' by
+ * convention (a disclosed simplification, not a WI-published rule).
+ * Anything other than that or an explicit 'married' throws, rather than
+ * silently taxing a married employee at the single rate on a typo — the
+ * same guard already applied to Minnesota/New York/Idaho/Iowa/Maine/
+ * California's own status resolvers.
+ */
+function resolveWIMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  const raw = cert.maritalStatus;
+  if (raw === undefined || raw === null || raw === 'single') return 'single';
+  if (raw === 'married') return 'married';
+  throw new Error(`Unrecognized WI certificate.maritalStatus ${JSON.stringify(raw)} — expected 'single' or 'married'.`);
+}
+
 function bracketPhaseoutDeduction(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -1833,10 +1938,7 @@ function bracketPhaseoutDeduction(
   const annualWages = taxableWages * ctx.periodsPerYear;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  // WI's own formula only distinguishes single vs. married — head-of-household
-  // has no third band in Publication W-166, so it maps to 'single' by
-  // convention (a disclosed simplification, not a WI-published rule).
-  const maritalStatus = cert.maritalStatus === 'married' ? 'married' : 'single';
+  const maritalStatus = resolveWIMaritalStatus(cert);
   const exemptions = Number(cert.exemptions ?? 0);
 
   const band = cfg.standardDeduction[maritalStatus];
@@ -1887,20 +1989,28 @@ function bracketPhaseoutDeduction(
  * bracket's marginal RATE flatly to the supplemental payment — no base
  * added, unlike the regular-wages bracket lookup. Returns null when there's
  * no supplemental income, so a plain paycheck is unaffected.
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * the taxED amount used the raw supplementalCash even though pretax
+ * deductions exceeding regular wages should spill onto it. regularWages
+ * below was ALREADY correctly net of that spillover (used to pick the
+ * bracket RATE) — only the amount actually multiplied by that rate was
+ * wrong. Fixed the same way: Math.min(fullBase, supplementalCash).
  */
 function bracketSupplementalTax(
   input: PaycheckInput,
   ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine | null {
-  const supplementalCash = supplementalEarnings(input.earnings);
-  if (supplementalCash <= 0) return null;
+  const rawSupplementalCash = supplementalEarnings(input.earnings);
+  if (rawSupplementalCash <= 0) return null;
 
   const cfg = rules.bracketPhaseoutDeduction as BracketPhaseoutConfig;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const fullBase = ctx.taxableWagesFor(exempt);
-  const regularWages = atLeastZero(fullBase - supplementalCash);
+  const regularWages = atLeastZero(fullBase - rawSupplementalCash);
   const estimatedAnnualSalary = regularWages * ctx.periodsPerYear;
+  const supplementalCash = Math.min(fullBase, rawSupplementalCash);
 
   const bracket = findWIBracket(cfg.brackets, estimatedAnnualSalary);
   const amount = applyRate(supplementalCash, bracket.rate);
@@ -1914,7 +2024,11 @@ function bracketSupplementalTax(
     amount,
     detail:
       `${fmt(supplementalCash)} @ ${(bracket.rate * 100).toFixed(2)}% flat ` +
-      `(estimated annual gross salary ${fmt(estimatedAnnualSalary)} falls in this bracket)`,
+      `(estimated annual gross salary ${fmt(estimatedAnnualSalary)} falls in this bracket)` +
+      (supplementalCash < rawSupplementalCash
+        ? ` — reduced from the raw ${fmt(rawSupplementalCash)}: pretax deductions exceeded regular wages, ` +
+          `and that excess spills onto the supplemental base too`
+        : ''),
   };
 }
 
@@ -2004,7 +2118,7 @@ function bracketFlatAllowance(
   // a 2020+-style form, so Table 2 is what's actually reused; that
   // discrepancy in MN's own source text is disclosed in MN-2026.json rather
   // than silently resolved.
-  const nraAdjustment = cert.nonresidentAlien
+  const nraAdjustment = resolveCertBoolean(cert, 'nonresidentAlien')
     ? dollars(
         federalRuleset(input.checkDate).incomeTax.nonresidentAlienAdjustment[
           input.payFrequency
@@ -2063,16 +2177,23 @@ function bracketFlatAllowance(
  * allowances employees claim." Returns null when there's no supplemental
  * income, so a plain paycheck is unaffected — same convention as Wisconsin's
  * bracketSupplementalTax().
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * pretax deductions exceeding regular wages must spill onto the
+ * supplemental base too. Fixed via Math.min(fullBase, supplementalCash).
  */
 function flatRateSupplementalTax(
   input: PaycheckInput,
-  _ctx: ComputeContext,
+  ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine | null {
-  const supplementalCash = supplementalEarnings(input.earnings);
-  if (supplementalCash <= 0) return null;
+  const rawSupplementalCash = supplementalEarnings(input.earnings);
+  if (rawSupplementalCash <= 0) return null;
 
   const cfg = rules.bracketFlatAllowance as BracketFlatAllowanceConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  const supplementalCash = Math.min(fullBase, rawSupplementalCash);
   const amount = applyRate(supplementalCash, cfg.supplementalRate);
 
   return {
@@ -2082,7 +2203,12 @@ function flatRateSupplementalTax(
     jurisdiction: 'state',
     taxableWages: supplementalCash,
     amount,
-    detail: `${fmt(supplementalCash)} @ ${(cfg.supplementalRate * 100).toFixed(2)}% flat, regardless of allowances or bracket`,
+    detail:
+      `${fmt(supplementalCash)} @ ${(cfg.supplementalRate * 100).toFixed(2)}% flat, regardless of allowances or bracket` +
+      (supplementalCash < rawSupplementalCash
+        ? ` — reduced from the raw ${fmt(rawSupplementalCash)}: pretax deductions exceeded regular wages, ` +
+          `and that excess spills onto the supplemental base too`
+        : ''),
   };
 }
 
@@ -2143,7 +2269,7 @@ function statePaidLeaveEmployeeTax(
   // never expected to set this field, so their existing behavior is
   // unaffected either way.
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.paidLeaveExempt) {
+  if (resolveCertBoolean(cert, 'paidLeaveExempt')) {
     return {
       id: `${rules.code}_PFML_EE`,
       name: `${rules.name} Paid Leave (Employee)`,
@@ -2265,7 +2391,7 @@ function statePaidLeaveElectedEmployeeShare(
   if (rules.statePaidLeaveEmployee) return null;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.paidLeaveExempt) return null;
+  if (resolveCertBoolean(cert, 'paidLeaveExempt')) return null;
 
   const resolved = resolvePaidLeaveRate(input, rules, cfg);
   if (!resolved) return null;
@@ -2328,12 +2454,12 @@ function statePaidLeaveEmployerTax(
   // A programme with no size threshold at all (DC's Universal Paid Leave)
   // applies to every covered employer, so demanding the caller assert
   // liability first would just suppress a tax that is always due.
-  if (cfg.employerSizeGated !== false && !cert.employerLiableForPaidLeaveShare) return null;
+  if (cfg.employerSizeGated !== false && !resolveCertBoolean(cert, 'employerLiableForPaidLeaveShare')) return null;
   // Same exemption gate as statePaidLeaveEmployeeTax() — an exempt employee
   // (federal, Tribal, self-employed opt-out, etc.) generates no premium at
   // all, employee or employer share, since there's no total premium to
   // split in the first place.
-  if (cert.paidLeaveExempt) return null;
+  if (resolveCertBoolean(cert, 'paidLeaveExempt')) return null;
 
   const exempt = (cfg.exemptPretax ?? rules.exemptPretax ?? []) as PretaxCategory[];
   const currentWages = ctx.taxableWagesFor(exempt);
@@ -2413,7 +2539,7 @@ function stateLongTermCareEmployeeTax(
   // zeroStateIncomeTaxLines()) and Washington has no income tax at all —
   // this is a genuinely separate levy with its own exemption concept.
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.wacaresExempt) {
+  if (resolveCertBoolean(cert, 'wacaresExempt')) {
     return {
       id: `${rules.code}_LTC_EE`,
       name: `${rules.name} Long-Term Care (Employee)`,
@@ -2472,7 +2598,7 @@ function resolveMTSchedule(cert: Record<string, unknown>): MTSchedule {
     return 'single_mfs_bothWorking';
   }
   if (filingStatus === 'mfj' || filingStatus === 'qss') {
-    return cert.bothSpousesWorking ? 'single_mfs_bothWorking' : 'mfj_qss';
+    return resolveCertBoolean(cert, 'bothSpousesWorking') ? 'single_mfs_bothWorking' : 'mfj_qss';
   }
   if (filingStatus === 'hoh') return 'hoh';
   throw new Error(
@@ -2597,21 +2723,31 @@ function bracketPerPeriodGross(
  * Montana's supplemental wages "Method 3" — a flat 5.00% of the supplemental
  * payment alone, the only one of the guide's three separately-paid-
  * supplemental methods that doesn't require reaching into a different
- * payroll period's wages (Methods 1/2 both combine the supplemental with
- * SOME period's regular wages first — not modelled, same class of gap as
- * Kentucky's supplementalTreatment.engineGap). Returns null when there's no
+ * payroll period's wages. Methods 1/2 (which DO combine the supplemental
+ * with some period's regular wages first) are wired separately, generically,
+ * via aggregateWithPriorRegularPayment() — gated on
+ * rules.supplementalAggregation.supported (true for Montana, see
+ * MT-2026.json's own comment) and firing only when the caller supplies
+ * input.priorRegularPayment; Method 3 here is what fires instead when no
+ * prior payment is given, not a stand-in for Methods 1/2 being unmodelled.
+ * Proven for both paths in tests/engine.test.ts, describe('Montana Methods
+ * 1/2 and the New Mexico monthly floor'). Returns null when there's no
  * supplemental income, or when MW-4 line 4 (specifiedWithholding) is active
  * — the form's own instruction to skip lines 1-3 when line 4 is used applies
  * here too: a flat specified amount replaces ALL of this employee's
  * withholding for the period, not just the regular-wages line.
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * pretax deductions exceeding regular wages must spill onto the
+ * supplemental base too. Fixed via Math.min(fullBase, supplementalCash).
  */
 function montanaSupplementalTax(
   input: PaycheckInput,
-  _ctx: ComputeContext,
+  ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine | null {
-  const supplementalCash = supplementalEarnings(input.earnings);
-  if (supplementalCash <= 0) return null;
+  const rawSupplementalCash = supplementalEarnings(input.earnings);
+  if (rawSupplementalCash <= 0) return null;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   if (Number(cert.specifiedWithholding ?? 0) > 0) return null;
@@ -2621,6 +2757,10 @@ function montanaSupplementalTax(
   // top of a bonus already taxed through the regular formula.
   const cfg = rules.supplementalWages as { flatRate: number } | undefined;
   if (!cfg) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  const supplementalCash = Math.min(fullBase, rawSupplementalCash);
 
   const rate = cfg.flatRate;
   const amount = toWholeDollars(applyRate(supplementalCash, rate));
@@ -2632,7 +2772,12 @@ function montanaSupplementalTax(
     jurisdiction: 'state',
     taxableWages: supplementalCash,
     amount,
-    detail: `${fmt(supplementalCash)} @ ${(rate * 100).toFixed(2)}% flat (Method 3), rounded to the nearest dollar`,
+    detail:
+      `${fmt(supplementalCash)} @ ${(rate * 100).toFixed(2)}% flat (Method 3), rounded to the nearest dollar` +
+      (supplementalCash < rawSupplementalCash
+        ? ` — reduced from the raw ${fmt(rawSupplementalCash)}: pretax deductions exceeded regular wages, ` +
+          `and that excess spills onto the supplemental base too`
+        : ''),
   };
 }
 
@@ -3026,14 +3171,26 @@ interface SupplementalWagesConfig {
  * says aggregate, and aggregation is what the regular method already does.
  * And a state that merely PERMITS the flat method leaves the choice to the
  * employer, so nothing fires until the employer says so.
+ *
+ * BUG FIXED 2026-09-02, same root cause and same fix shape as the identical
+ * bug just fixed in federal.ts's federalSupplementalTax(): a pretax
+ * deduction is applied against the REGULAR portion first (see this
+ * function's own callers — incomeTaxLines() builds a regularCtx that
+ * subtracts supplementalCash from the full base, and flatRate() does the
+ * same), so when pretax EXCEEDS regular wages, the excess must spill onto
+ * the supplemental base too rather than vanish. This function used to tax
+ * the raw, un-reduced supplementalCash regardless. Fixed the same way:
+ * cap it at ctx.taxableWagesFor(rules.exemptPretax)'s own combined base —
+ * algebraically Math.min(fullBase, supplementalCash), for the same reason
+ * proven in federalSupplementalTax()'s own doc comment.
  */
 function flatRateSupplementalFromConfig(
   input: PaycheckInput,
-  _ctx: ComputeContext,
+  ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine | null {
-  const supplementalCash = supplementalEarnings(input.earnings);
-  if (supplementalCash <= 0) return null;
+  const rawSupplementalCash = supplementalEarnings(input.earnings);
+  if (rawSupplementalCash <= 0) return null;
 
   const cfg = rules.supplementalWages as SupplementalWagesConfig | undefined;
   if (!cfg) return null;
@@ -3043,9 +3200,14 @@ function flatRateSupplementalFromConfig(
   }
 
   if (cfg.appliesWhen === 'paid_separately') {
-    const regularCash = cashEarnings(input.earnings) - supplementalCash;
+    const regularCash = cashEarnings(input.earnings) - rawSupplementalCash;
     if (regularCash > 0) return null;
   }
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  const supplementalCash = Math.min(fullBase, rawSupplementalCash);
+  const spillover = rawSupplementalCash - supplementalCash;
 
   const amount = applyRate(supplementalCash, cfg.flatRate);
 
@@ -3059,7 +3221,11 @@ function flatRateSupplementalFromConfig(
     detail:
       `${fmt(supplementalCash)} @ ${(cfg.flatRate * 100).toFixed(2)}% flat` +
       (cfg.appliesWhen === 'paid_separately' ? ', paid on its own cheque' : '') +
-      (cfg.election === 'employer_option' ? ' (employer elected this method over aggregation)' : ''),
+      (cfg.election === 'employer_option' ? ' (employer elected this method over aggregation)' : '') +
+      (spillover > 0
+        ? ` — reduced from the raw ${fmt(rawSupplementalCash)}: pretax deductions exceeded regular ` +
+          `wages by ${fmt(spillover)}, and that excess spills onto the supplemental base too`
+        : ''),
   };
 }
 
@@ -3094,7 +3260,7 @@ function nycLocalTax(
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (!cert.nycResident) return null;
+  if (!resolveCertBoolean(cert, 'nycResident')) return null;
 
   const cfg = rules.nycLocalTax as NYCLocalTaxConfig | undefined;
   if (!cfg) return null;
@@ -3166,21 +3332,29 @@ function nycLocalTax(
  * emitting a distinctly-prefixed id, since this is a separate LOCAL levy,
  * not the state one. Only applies when certificate.nycResident is true — no
  * supplemental line for a non-NYC-resident regardless of supplemental pay.
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * pretax deductions exceeding regular wages must spill onto the
+ * supplemental base too. Fixed via Math.min(fullBase, supplementalCash),
+ * using the same rules.exemptPretax list nycLocalTax() itself reads.
  */
 function nycSupplementalTax(
   input: PaycheckInput,
-  _ctx: ComputeContext,
+  ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (!cert.nycResident) return null;
+  if (!resolveCertBoolean(cert, 'nycResident')) return null;
 
-  const supplementalCash = supplementalEarnings(input.earnings);
-  if (supplementalCash <= 0) return null;
+  const rawSupplementalCash = supplementalEarnings(input.earnings);
+  if (rawSupplementalCash <= 0) return null;
 
   const cfg = rules.nycLocalTax as NYCLocalTaxConfig | undefined;
   if (!cfg) return null;
 
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  const supplementalCash = Math.min(fullBase, rawSupplementalCash);
   const amount = applyRate(supplementalCash, cfg.supplementalRate);
 
   return {
@@ -3190,7 +3364,12 @@ function nycSupplementalTax(
     jurisdiction: 'local',
     taxableWages: supplementalCash,
     amount,
-    detail: `${fmt(supplementalCash)} @ ${(cfg.supplementalRate * 100).toFixed(2)}% flat`,
+    detail:
+      `${fmt(supplementalCash)} @ ${(cfg.supplementalRate * 100).toFixed(2)}% flat` +
+      (supplementalCash < rawSupplementalCash
+        ? ` — reduced from the raw ${fmt(rawSupplementalCash)}: pretax deductions exceeded regular wages, ` +
+          `and that excess spills onto the supplemental base too`
+        : ''),
   };
 }
 
@@ -3261,7 +3440,17 @@ function yonkersLocalTax(
   const extraYonkers = Number(cert.additionalWithholdingYonkers ?? 0);
   const extra = extraYonkers > 0 ? extraYonkers : 0;
 
-  if (cert.yonkersResident) {
+  // Both flags true at once is a caller error this project has already
+  // decided how to handle (see tests/engine.test.ts's own "resident status
+  // wins if a caller somehow sets both flags at once"): resident status
+  // takes precedence, the same "the more protective/larger obligation
+  // wins an ambiguous case" direction used elsewhere in this engine,
+  // rather than throwing on a combination a real Form IT-2104 can't
+  // actually produce (an employee checks one residency box, not both).
+  const yonkersResident = resolveCertBoolean(cert, 'yonkersResident');
+  const yonkersNonresidentWorker = resolveCertBoolean(cert, 'yonkersNonresidentWorker');
+
+  if (yonkersResident) {
     const nyCfg = rules as unknown as NYRulesetShape;
     const base = computeNYSStyleTax(input, ctx, rules, nyCfg);
     const baseAmount = applyRate(base.amount, cfg.residentSurcharge.rate);
@@ -3285,7 +3474,7 @@ function yonkersLocalTax(
     };
   }
 
-  if (cert.yonkersNonresidentWorker) {
+  if (yonkersNonresidentWorker) {
     const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
     const fullBase = ctx.taxableWagesFor(exempt);
     const supplementalCash = supplementalEarnings(input.earnings);
@@ -3344,28 +3533,42 @@ function yonkersLocalTax(
  * separate supplemental treatment needed since that tax is already flat
  * with no bracket to bypass, unlike every rate-schedule-based supplemental
  * method elsewhere in this project.
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * pretax deductions exceeding regular wages must spill onto the
+ * supplemental base too. Fixed via Math.min(fullBase, supplementalCash),
+ * using the same rules.exemptPretax list yonkersLocalTax() itself reads.
  */
 function yonkersSupplementalTax(
   input: PaycheckInput,
-  _ctx: ComputeContext,
+  ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const cfg = rules.yonkersLocalTax as YonkersLocalTaxConfig | undefined;
   if (!cfg) return null;
 
-  const supplementalCash = supplementalEarnings(input.earnings);
-  if (supplementalCash <= 0) return null;
+  const rawSupplementalCash = supplementalEarnings(input.earnings);
+  if (rawSupplementalCash <= 0) return null;
+
+  // Both flags true at once: resident status wins — see yonkersLocalTax()'s
+  // own doc comment on this same precedence choice, already locked in by
+  // an existing test.
+  const yonkersResident = resolveCertBoolean(cert, 'yonkersResident');
+  const yonkersNonresidentWorker = resolveCertBoolean(cert, 'yonkersNonresidentWorker');
 
   let rate: number;
-  if (cert.yonkersResident) {
+  if (yonkersResident) {
     rate = cfg.residentSupplementalRate;
-  } else if (cert.yonkersNonresidentWorker) {
+  } else if (yonkersNonresidentWorker) {
     rate = cfg.nonresidentSupplementalRate;
   } else {
     return null;
   }
 
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  const supplementalCash = Math.min(fullBase, rawSupplementalCash);
   const amount = applyRate(supplementalCash, rate);
 
   return {
@@ -3375,7 +3578,12 @@ function yonkersSupplementalTax(
     jurisdiction: 'local',
     taxableWages: supplementalCash,
     amount,
-    detail: `${fmt(supplementalCash)} @ ${(rate * 100).toFixed(4)}% flat`,
+    detail:
+      `${fmt(supplementalCash)} @ ${(rate * 100).toFixed(4)}% flat` +
+      (supplementalCash < rawSupplementalCash
+        ? ` — reduced from the raw ${fmt(rawSupplementalCash)}: pretax deductions exceeded regular wages, ` +
+          `and that excess spills onto the supplemental base too`
+        : ''),
   };
 }
 
@@ -3565,7 +3773,8 @@ function bracketTwoStatusPerPeriod(
   // Form ID W-4's own NRA instructions: "Check the 'A' box (Single)
   // withholding regardless of your marital status" — forced, not merely
   // defaulted, so this overrides whatever certificate.maritalStatus says.
-  const maritalStatus = cert.nonresidentAlien ? 'single' : resolveIDMaritalStatus(cert);
+  const isNRA = resolveCertBoolean(cert, 'nonresidentAlien');
+  const maritalStatus = isNRA ? 'single' : resolveIDMaritalStatus(cert);
 
   const brackets = cfg.brackets[maritalStatus][input.payFrequency];
   if (!brackets) {
@@ -3576,7 +3785,7 @@ function bracketTwoStatusPerPeriod(
   }
   const bracket = findWIBracket(brackets, taxableWages);
   const excess = taxableWages - dollars(bracket.from);
-  const nraAdjustment = cert.nonresidentAlien
+  const nraAdjustment = isNRA
     ? dollars(cfg.nonresidentAlienAdjustment?.[input.payFrequency] ?? 0)
     : 0;
   const amount = dollars(bracket.base) + applyRate(excess, bracket.rate) + nraAdjustment;
@@ -3982,8 +4191,14 @@ function resolveMFJMaritalStatus(cert: Record<string, unknown>): 'single' | 'mar
  * paid at the SAME time as regular wages already aggregate correctly
  * through this function via the normal taxableWagesFor() base, no
  * special-casing needed — the same convention as Kentucky/Idaho/
- * Connecticut/Iowa. Nebraska's own supplemental rule (flat 3.5%,
- * documented in NE-2026.json) is likewise not modelled here.
+ * Connecticut/Iowa. Nebraska's own OPTIONAL flat-3.5% supplemental rule
+ * (Circular EN permits it as an alternative to aggregation, employer's
+ * choice) is wired separately and generically via
+ * flatRateSupplementalFromConfig() off rules.supplementalWages, gated on
+ * input.employer.supplementalFlatRateElection — not handled inside this
+ * function, but not unmodelled either. See NE-2026.json's own
+ * supplementalWages block and tests/engine.test.ts's "Nebraska's elected
+ * 3.5% is its own figure, not its top marginal rate".
  */
 function bracketPerPeriodAllowance(
   input: PaycheckInput,
@@ -4208,10 +4423,19 @@ interface NewarkPayrollTaxConfig {
  *     employer's 50% threshold.
  *
  * Taxable base is federal-withholding wages ("subject to withholding by
- * the employer for Federal income tax purposes") — reuses
- * rules.exemptPretax, the same NJ-wide conformity list, since the
- * ordinance's own wage definition tracks the federal one, not NJ's own
- * (non-conforming, gross-wages) state income tax base.
+ * the employer for Federal income tax purposes") — reads the FEDERAL
+ * income-tax exclusion list (federalRuleset().incomeTax.exemptPretax:
+ * section125/hsa/fsa/dependent_care/401k/403b/457/simple/commuter), not
+ * rules.exemptPretax (NJ's OWN state-income-tax list). BUG FIXED
+ * 2026-09-02: this used to read rules.exemptPretax, which for New Jersey
+ * is genuinely EMPTY — NJ's state income tax is famously non-conforming
+ * and taxes 401(k)/cafeteria-125/HSA/FSA/commuter contributions as gross
+ * wages — so it silently taxed the Newark employer levy on the FULL gross
+ * wage including pretax deferrals, directly contradicting this same doc
+ * comment's own next sentence ("tracks the federal one, not NJ's own...
+ * base"). Over-collected by 1% of every pretax deferral dollar on every
+ * Newark paycheck with one. See tests/engine.test.ts's Newark describe
+ * block for the before/after figures.
  */
 function newarkPayrollTaxEmployer(
   input: PaycheckInput,
@@ -4224,10 +4448,10 @@ function newarkPayrollTaxEmployer(
   const cfg = rules.newarkPayrollTax as NewarkPayrollTaxConfig | undefined;
   if (!cfg) return null;
 
-  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const exempt = federalRuleset(input.checkDate).incomeTax.exemptPretax as PretaxCategory[];
   const taxableWages = ctx.taxableWagesFor(exempt);
 
-  if (cert.newarkResidentApportionmentExcluded) {
+  if (resolveCertBoolean(cert, 'newarkResidentApportionmentExcluded')) {
     return {
       id: 'NEWARK_PAYROLL_ER',
       name: 'Newark Payroll Tax (Employer)',
@@ -4477,7 +4701,10 @@ function coloradoOccupationalPrivilegeTax(
 }
 
 interface WVServiceFeeCityConfig {
-  weeklyRate: number; // dollars per week
+  weeklyRate: number; // dollars per week, effective on/after rateEffectiveDate (or always, if that field is absent)
+  nonResidentOnly?: boolean; // Fairmont: only non-resident duty-station employees are payroll-withheld; residents are billed directly, not through payroll (see WV-2026.json's serviceFeeCities.Fairmont note)
+  priorWeeklyRate?: number; // Weirton: the rate in effect before rateEffectiveDate — undefined for every city with no known rate history
+  rateEffectiveDate?: string; // ISO yyyy-mm-dd the CURRENT weeklyRate took effect; a check date before this uses priorWeeklyRate instead
 }
 
 /**
@@ -4500,17 +4727,29 @@ interface WVServiceFeeCityConfig {
  * as Newark's/Denver's/Missouri's local taxes — this engine does not
  * resolve an address to a city itself.
  *
+ * Fairmont (added 2026-08-31) is a genuine exception to the work-location-
+ * for-everyone rule: its own Ordinance No. 1812 withholds the fee only from
+ * NON-resident duty-station employees — residents are billed an $8.67/month
+ * fee directly, not through payroll — so its config carries
+ * nonResidentOnly:true and is skipped here when certificate.residenceCity
+ * also names Fairmont.
+ *
  * NOT modelled, disclosed rather than guessed at: Wheeling's own 30-
  * consecutive-day-in-the-city threshold before the fee first attaches
  * (no employment-duration input exists anywhere in this engine — every
  * duty-station-in-Wheeling case is treated as already past the
- * threshold); the multi-job dedup rule (an employee working multiple jobs
- * in the same WV city is only assessed once — the same class of
+ * threshold); and the multi-job dedup rule (an employee working multiple
+ * jobs in the same WV city is only assessed once — the same class of
  * un-modelled multi-employer coordination as Newark's Form-based
- * exemption elsewhere in this project); and Weirton's mid-2026 rate
- * change from $2.00 to $5.00/week has no effective-dating mechanism (this
- * function always uses the current $5.00 figure, correct only for check
- * dates on/after the ordinance's ~2026-05-14 effective date).
+ * exemption elsewhere in this project).
+ *
+ * Weirton's mid-2026 rate change ($2.00/week through 2026-05-13, then
+ * $5.00/week from Ordinance 2272's 2026-05-14 effective date onward, per
+ * WV-2026.json's own serviceFeeCities.Weirton note) IS effective-dated,
+ * via priorWeeklyRate/rateEffectiveDate on the city config — the same
+ * class of gap Ohio's HB96 had before midYearEffectiveDating existed, but
+ * scoped per-city rather than per-state since only one WV city in this
+ * file has a documented rate history so far.
  */
 function westVirginiaMunicipalServiceFee(
   input: PaycheckInput,
@@ -4526,7 +4765,18 @@ function westVirginiaMunicipalServiceFee(
   const city = cities?.[locality];
   if (!city) return null;
 
-  const annualFee = dollars(city.weeklyRate) * 52;
+  if (city.nonResidentOnly) {
+    const residenceCityName = typeof cert.residenceCity === 'string' ? cert.residenceCity : undefined;
+    if (residenceCityName?.toLowerCase() === locality.toLowerCase()) return null;
+  }
+
+  const usePriorRate =
+    city.rateEffectiveDate !== undefined &&
+    city.priorWeeklyRate !== undefined &&
+    input.checkDate < city.rateEffectiveDate;
+  const weeklyRate = usePriorRate ? city.priorWeeklyRate! : city.weeklyRate;
+
+  const annualFee = dollars(weeklyRate) * 52;
   const amount = roundDownToCent(annualFee / ctx.periodsPerYear);
 
   return {
@@ -4537,9 +4787,12 @@ function westVirginiaMunicipalServiceFee(
     taxableWages: 0,
     amount,
     detail:
-      `$${city.weeklyRate}/week flat fee (WV Code 8-13-13), annualized (×52) and divided across ` +
-      `${ctx.periodsPerYear} pay periods/yr, rounded down to the cent (same convention as PA's LST) ` +
-      `— certificate.locality = "${locality}"`,
+      `$${weeklyRate}/week flat fee (WV Code 8-13-13)` +
+      (usePriorRate
+        ? ` — pre-${city.rateEffectiveDate} rate, since the check date is before the ordinance's own effective date`
+        : '') +
+      `, annualized (×52) and divided across ${ctx.periodsPerYear} pay periods/yr, rounded down to ` +
+      `the cent (same convention as PA's LST) — certificate.locality = "${locality}"`,
   };
 }
 
@@ -4599,14 +4852,19 @@ function alabamaLocalTax(
  * Kentucky's city/county/consolidated-government Occupational Tax — the
  * most structurally complex local tax in this project, reading
  * data/local/KY-occupational-2026.json via registry.ts's
- * allKYJurisdictions()/kyJurisdictionRuleset() (the 39-of-225-plus-2
- * CONFIRMED subset that project's own rate-normalization pass could
- * safely reduce to a decimal — see that file's own jurisdictions.
- * normalizationPass block). A city not in this confirmed set correctly
- * produces no line at all — most of the ~188 unconfirmed scraped entries
- * genuinely DO levy a tax, this engine just doesn't have a safe enough
- * number for them yet, so silence here means "not confirmed," never "no
- * tax."
+ * allKYJurisdictions()/kyJurisdictionRuleset() (a CONFIRMED subset — 250
+ * as of the last count (248 scraped + Louisville Metro + Lexington-
+ * Fayette; STALE FIGURE FIXED 2026-09-02, this used to say 131 — see
+ * that function's own doc comment for the current number and how to
+ * re-verify it). A city not in this confirmed set correctly produces no
+ * line at all. STALE CLAIM ALSO FIXED: this used to say silence mostly
+ * meant "one of ~188 unconfirmed scraped entries this engine doesn't
+ * have a safe rate for yet" — a leftover from a much earlier, lower-
+ * confirmation-count state of this file. Today only 2 scraped entries
+ * are deliberately excluded (see allKYJurisdictions()'s own doc comment
+ * for which two and why); silence for any other name means either one
+ * of those 2, or genuinely no KY occupational tax at that jurisdiction,
+ * not an unconfirmed-but-real gap.
  *
  * Two genuinely novel mechanisms, both required to make this correct
  * rather than just present:
@@ -4630,21 +4888,35 @@ function alabamaLocalTax(
  *    the county it sits in, at ONE work location — not a home-vs-work
  *    comparison the way Ohio's is). Fires only when the caller supplies
  *    BOTH certificate.workCity AND certificate.workCounty and BOTH
- *    resolve — Jefferson County (Louisville Metro) and Fayette County
- *    (Lexington-Fayette) never trigger this by construction, since both
- *    are consolidated governments registered under a single "Louisville"/
- *    "Lexington" entry rather than a separate city+county pair. This
- *    ASSUMES the confirmed county is in KRS 68.197's 30,000-300,000-
+ *    resolve. CORRECTED 2026-09-02: this used to claim Jefferson County
+ *    (Louisville Metro) and Fayette County (Lexington-Fayette) "never
+ *    trigger this by construction" because they're only registered as
+ *    consolidated "Louisville"/"Lexington" entries — false. The data
+ *    file ALSO carries separate scraped entries literally named
+ *    "Jefferson County" (1.25%) and "Fayette County" (2.25%), added in a
+ *    later pass from KACo's own county table, so certificate.workCounty
+ *    = "Jefferson County" alongside certificate.workCity = "Louisville"
+ *    DOES resolve both and fire this branch. The computed DOLLAR TOTAL
+ *    stays correct regardless — the county rate is ≤ the city rate in
+ *    both cases, so the KRS 68.197(6)-(7) credit floors the county net
+ *    to $0 either way — but a caller supplying both fields would get a
+ *    detail string describing a real credit between Louisville Metro and
+ *    a Jefferson County Fiscal Court levy that, as a legal matter,
+ *    doesn't separately exist once consolidated into Metro government;
+ *    a cosmetic/detail-string accuracy issue, not a dollar-amount one.
+ *    This ASSUMES the confirmed county is in KRS 68.197's 30,000-300,000-
  *    population credit tier — not individually verified per county (the
  *    data file itself couldn't locate a statute for counties under
  *    30,000 population at all), the same "treat the floor as the
  *    safe-default assumption" disclosure Ohio's own interMunicipalCredit
  *    already carries.
  *
- * Louisville Metro and Lyndon/Middletown (which inherit its rate) are the
- * only entries with a resident/nonresident split (MI-cities-style) rather
- * than one flat rate — resolved via certificate.residenceCity matching
- * the SAME jurisdiction name as workCity, the same sameCity idiom
+ * Louisville Metro, Lyndon/Middletown (which inherit its rate), and
+ * Lynnview (same Jefferson-County-inherited rate; CORRECTED 2026-09-02 —
+ * this list previously omitted it) are the only entries with a
+ * resident/nonresident split (MI-cities-style) rather than one flat rate
+ * — resolved via certificate.residenceCity matching the SAME jurisdiction
+ * name as workCity, the same sameCity idiom
  * michiganLocalTax() already established.
  */
 function kentuckyLocalTax(
@@ -4928,8 +5200,10 @@ function flatRateSurtaxCredit(
   const excess = annualNetWages - dollars(bracket.from);
   const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
 
-  const hohCredit = cert.headOfHousehold ? dollars(cfg.creditsAnnual.headOfHousehold) / periodsPerYear : 0;
-  const blindCredit = cert.blind ? dollars(cfg.creditsAnnual.blind) / periodsPerYear : 0;
+  const hohCredit = resolveCertBoolean(cert, 'headOfHousehold')
+    ? dollars(cfg.creditsAnnual.headOfHousehold) / periodsPerYear
+    : 0;
+  const blindCredit = resolveCertBoolean(cert, 'blind') ? dollars(cfg.creditsAnnual.blind) / periodsPerYear : 0;
 
   const amount = atLeastZero(roundHalfUp(annualTax / periodsPerYear - hohCredit - blindCredit));
   const netWagesRounded = roundHalfUp(netWages);
@@ -5122,13 +5396,17 @@ interface OhioPeriodTable {
  * table — the same "per-period table, no annual division" shape already
  * established for Montana/NY/New Jersey/Kansas.
  *
- * Uses rules.periodTables (the August 1, 2026-onward table) unconditionally
- * for any 2026 check date — see OH-2026.json's own midYearEffectiveDating
- * note for why: this engine's ruleset lookup is year-only, with no
- * mechanism yet to switch to priorTable2026 for a pre-August check date.
- * That mechanism gap is real and disclosed, and deliberately NOT solved
- * here — a much bigger change (registry.ts's yearOf()/date-range lookup)
- * than fixing the missing dispatch case this function addresses.
+ * STALE COMMENT FIXED (2026-09-02): this used to say periodTables (the
+ * August 1, 2026-onward table) was read unconditionally for any 2026 check
+ * date, with no mechanism to switch to priorTable2026 for a pre-August
+ * one. That claim was already false by the time it was written — the
+ * function body below has switched between the two off
+ * rules.midYearEffectiveDating.thresholdDate since this same file's
+ * mid-year-dating pass (see OH-2026.json's own
+ * midYearEffectiveDating.mechanismStatus, marked CLOSED, and this file's
+ * own knownGaps entry for the same fix). Left the doc comment
+ * contradicting the code for one pass — corrected here, no behavior
+ * change.
  */
 function ohioWithholding(
   input: PaycheckInput,
@@ -5267,8 +5545,19 @@ function delawareCertificateStatus(
   // project uses everywhere else, here made a direct quote rather than an
   // inferred convention. MFS uses the single-column standard deduction per
   // the Guide's own third worked example; only 'mfj' selects the married
-  // (double) figure.
-  const maritalStatus = cert.maritalStatus === 'mfj' ? 'married' : 'single';
+  // (double) figure. Anything else defined throws rather than silently
+  // taxing a married ('mfj') employee at the single rate on a typo.
+  const raw = cert.maritalStatus;
+  let maritalStatus: 'single' | 'married';
+  if (raw === undefined || raw === null || raw === 'single' || raw === 'mfs') {
+    maritalStatus = 'single';
+  } else if (raw === 'mfj') {
+    maritalStatus = 'married';
+  } else {
+    throw new Error(
+      `Unrecognized DE certificate.maritalStatus ${JSON.stringify(raw)} — expected 'single', 'mfs', or 'mfj'.`,
+    );
+  }
   const exemptions = Number(cert.exemptions ?? 0);
   return { maritalStatus, exemptions };
 }
@@ -5404,7 +5693,7 @@ function employeeElectedFlat(
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
 
-  if (cert.zeroElection) {
+  if (resolveCertBoolean(cert, 'zeroElection')) {
     return {
       id: `${rules.code}_SIT`,
       name: `${rules.name} Income Tax`,
@@ -5464,8 +5753,24 @@ function resolveMOFilingStatus(
   // Form MO W-4's own default box order and this project's standing
   // no-certificate convention both land here: 'Single or Married Spouse
   // Works or Married Filing Separate' is the form's FIRST checkbox and
-  // covers three real filing situations under one shared deduction figure.
-  return 'singleOrMarriedSpouseWorksOrMFS';
+  // covers three real filing situations under one shared deduction figure
+  // (per this file's own standardDeductionComment) — 'single',
+  // 'married_spouse_works', and 'mfs' are all explicit synonyms for it.
+  // Anything else defined throws rather than silently landing an
+  // unrecognized status in the lowest-deduction bucket.
+  if (
+    raw === undefined ||
+    raw === null ||
+    raw === 'single' ||
+    raw === 'married_spouse_works' ||
+    raw === 'mfs'
+  ) {
+    return 'singleOrMarriedSpouseWorksOrMFS';
+  }
+  throw new Error(
+    `Unrecognized MO certificate.filingStatus ${JSON.stringify(raw)} — expected 'single', 'married_spouse_works', ` +
+      `'mfs', 'married_spouse_does_not_work', or 'head_of_household'.`,
+  );
 }
 
 /**
@@ -5624,6 +5929,18 @@ function findORCapTier(schedule: ORCapTier[], annualWages: number): ORCapTier {
  * since Oregon's own rule is about no OR-W-4 being on file at all, not
  * about an employee who filed one claiming single/zero allowances.
  */
+/**
+ * Oregon's own OR-W-4 vocabulary is a plain single/married checkbox — no
+ * separate head-of-household band. Throws on anything else defined rather
+ * than silently taxing a married employee at the single rate on a typo.
+ */
+function resolveORMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  const raw = cert.maritalStatus;
+  if (raw === undefined || raw === null || raw === 'single') return 'single';
+  if (raw === 'married') return 'married';
+  throw new Error(`Unrecognized OR certificate.maritalStatus ${JSON.stringify(raw)} — expected 'single' or 'married'.`);
+}
+
 function oregonWithholding(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -5656,7 +5973,7 @@ function oregonWithholding(
   const annualWages = periodWages * multiplier;
 
   const cert = input.workState.certificate as Record<string, unknown>;
-  const maritalStatusBox = cert.maritalStatus === 'married' ? 'married' : 'single';
+  const maritalStatusBox = resolveORMaritalStatus(cert);
   const allowances = Number(cert.allowances ?? 0);
   const promoted = maritalStatusBox === 'married' || allowances >= 3;
 
@@ -5839,22 +6156,45 @@ function stLouisPayrollExpenseTaxEmployer(
 interface ORTransitDistrictConfig {
   triMet?: { rate: number };
   laneTransit?: { rate: number };
+  canby?: { rate: number };
+  sandy?: { rate: number };
+  wilsonville?: { rate: number };
+  sctd?: { rate: number };
 }
 
 /**
- * Oregon's TriMet / Lane Transit District payroll excises — EMPLOYER-paid
- * (Oregon's own guide: "The transit tax is imposed directly on the
- * employer"), on payroll for services performed within the district.
- * Dispatched off certificate.locality ('TriMet' or 'LTD'), the same
- * caller-resolved-locality shape as Newark's and Missouri's local taxes.
- *
- * TriMet rounds DOWN to the nearest cent, not this project's usual
- * round-half-up — Oregon's own Combined Payroll Tax Report Instructions,
- * quoted verbatim: "Multiply box 5a by box 6a. Round down to the nearest
- * cent." Applied to LTD too, since the combined report's own box-6a/6b
- * instructions for the two districts are structurally parallel and no
- * contrary instruction was found for LTD specifically — disclosed as an
- * assumption, not independently confirmed for LTD's own box.
+ * Every Oregon local transit payroll district this engine knows how to
+ * compute, keyed by the certificate.locality value geocode/districts.ts
+ * resolves. TriMet and LTD are administered through Oregon's own
+ * Combined Payroll Tax Report, whose explicit instruction ("round down to
+ * the nearest cent") both districts' boxes share. The other four — Canby,
+ * Sandy, SMART/Wilsonville, SCTD — are administered independently by each
+ * city/district, and none of their own guides state a rounding rule (see
+ * data/states/OR-2026.json's tripDistrictPayrollTaxes entries for each),
+ * so those four use this project's ordinary round-half-up instead of
+ * assuming TriMet's convention carries over to a government that never
+ * said so.
+ */
+const OR_TRANSIT_DISTRICTS: Record<
+  string,
+  { configKey: keyof ORTransitDistrictConfig; name: string; idSuffix: string; roundsDown: boolean }
+> = {
+  TriMet: { configKey: 'triMet', name: 'TriMet Transit District Tax', idSuffix: 'TRIMET_ER', roundsDown: true },
+  LTD: { configKey: 'laneTransit', name: 'Lane Transit District Tax', idSuffix: 'LTD_ER', roundsDown: true },
+  CanbyTransit: { configKey: 'canby', name: 'Canby Area Transit Tax', idSuffix: 'CANBY_TRANSIT_ER', roundsDown: false },
+  SandyTransit: { configKey: 'sandy', name: 'Sandy Transit Tax', idSuffix: 'SANDY_TRANSIT_ER', roundsDown: false },
+  SMART: { configKey: 'wilsonville', name: 'Wilsonville (SMART) Transit Tax', idSuffix: 'SMART_ER', roundsDown: false },
+  SCTD: { configKey: 'sctd', name: 'South Clackamas Transportation District Tax', idSuffix: 'SCTD_ER', roundsDown: false },
+};
+
+/**
+ * Oregon's local transit payroll excises — EMPLOYER-paid (Oregon's own
+ * guide: "The transit tax is imposed directly on the employer"), on
+ * payroll for services performed within the district. Dispatched off
+ * certificate.locality, the same caller-resolved-locality shape as
+ * Newark's and Missouri's local taxes. See OR_TRANSIT_DISTRICTS above for
+ * which of Oregon's six payroll-tax-funded districts this covers and
+ * which rounding rule applies to each.
  */
 function oregonTransitDistrictTaxEmployer(
   input: PaycheckInput,
@@ -5862,28 +6202,28 @@ function oregonTransitDistrictTaxEmployer(
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  const district = cert.locality;
-  if (district !== 'TriMet' && district !== 'LTD') return null;
+  const district = typeof cert.locality === 'string' ? cert.locality : undefined;
+  const meta = district ? OR_TRANSIT_DISTRICTS[district] : undefined;
+  if (!meta) return null;
 
   const cfg = rules.tripDistrictPayrollTaxes as ORTransitDistrictConfig | undefined;
-  if (!cfg) return null;
-  const rate = district === 'TriMet' ? cfg.triMet?.rate : cfg.laneTransit?.rate;
+  const rate = cfg?.[meta.configKey]?.rate;
   if (rate === undefined) return null;
 
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const taxableWages = ctx.taxableWagesFor(exempt);
-  const amount = Math.floor(taxableWages * rate);
-  const name = district === 'TriMet' ? 'TriMet Transit District Tax' : 'Lane Transit District Tax';
-  const idSuffix = district === 'TriMet' ? 'TRIMET_ER' : 'LTD_ER';
+  const amount = meta.roundsDown ? Math.floor(taxableWages * rate) : roundHalfUp(taxableWages * rate);
 
   return {
-    id: idSuffix,
-    name,
+    id: meta.idSuffix,
+    name: meta.name,
     payer: 'employer',
     jurisdiction: 'local',
     taxableWages,
     amount,
-    detail: `${fmt(taxableWages)} @ ${(rate * 100).toFixed(4)}%, rounded DOWN to the nearest cent per Oregon's own instructions`,
+    detail: meta.roundsDown
+      ? `${fmt(taxableWages)} @ ${(rate * 100).toFixed(4)}%, rounded DOWN to the nearest cent per Oregon's own instructions`
+      : `${fmt(taxableWages)} @ ${(rate * 100).toFixed(4)}%`,
   };
 }
 
@@ -5933,7 +6273,7 @@ function portlandAreaLocalTax(
   const currentWages = ctx.taxableWagesFor(exempt);
   const lines: TaxLine[] = [];
 
-  if (cert.metroDistrict) {
+  if (resolveCertBoolean(cert, 'metroDistrict')) {
     const ytd = input.ytd.localIncomeTax?.['OR_METRO'] ?? 0;
     const threshold = dollars(cfg.metroSHS.threshold);
     const taxableExcess = overThreshold(currentWages, ytd, threshold);
@@ -5951,7 +6291,7 @@ function portlandAreaLocalTax(
     });
   }
 
-  if (cert.multnomahCounty) {
+  if (resolveCertBoolean(cert, 'multnomahCounty')) {
     const ytd = input.ytd.localIncomeTax?.['OR_MULTNOMAH'] ?? 0;
     const tier1Threshold = dollars(cfg.multnomahPFA.tier1Threshold);
     const tier2Threshold = dollars(cfg.multnomahPFA.tier2Threshold);
@@ -6061,8 +6401,15 @@ interface CASupplementalConfig {
  * employer to have elected it (rules.supplementalWages.election is always
  * 'employer_option' for California; nothing here is a state mandate the
  * way Ohio's 2.75% is).
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * a pretax deduction on this bonus-only cheque reduces the taxable base
+ * regardless of the flat method, but this used to return the raw
+ * supplementalCash uncapped. Fixed via Math.min(fullBase, supplementalCash)
+ * — the general form here since regularCashOnly is always 0 by this
+ * function's own gate (no separate "regular portion" to spill past).
  */
-function caSupplementalCarveOut(input: PaycheckInput, rules: StateRuleset): Cents {
+function caSupplementalCarveOut(input: PaycheckInput, ctx: ComputeContext, rules: StateRuleset): Cents {
   const cfg = rules.supplementalWages as CASupplementalConfig | undefined;
   if (!cfg) return 0;
 
@@ -6074,7 +6421,11 @@ function caSupplementalCarveOut(input: PaycheckInput, rules: StateRuleset): Cent
 
   const elected =
     cfg.election !== 'employer_option' || input.employer?.supplementalFlatRateElection?.[rules.code] === true;
-  return elected ? supplementalCash : 0;
+  if (!elected) return 0;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  return Math.min(fullBase, supplementalCash);
 }
 
 /**
@@ -6103,19 +6454,42 @@ function caSupplementalCarveOut(input: PaycheckInput, rules: StateRuleset): Cent
  * directions DE 44 actually describes (the "other" bucket IS the general
  * case in the source's own structure, not a guess this project is making
  * on top of it).
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * caSupplementalCarveOut() now correctly caps the TOTAL at this cheque's
+ * pretax-reduced base, but this function used to re-derive bonusCents/
+ * otherCents straight from the raw earnings, ignoring that cap entirely —
+ * so a pretax deduction on a bonus-only cheque was silently dropped from
+ * this calculation altogether. When carveOut is less than the raw total
+ * (a pretax deduction reduced the base), the shortfall is allocated
+ * PROPORTIONALLY across the two categories — DE 44 itself says nothing
+ * about which category a deduction should reduce first when both are
+ * present on the same cheque, so proportional allocation is this
+ * project's own inferred, disclosed convention, not a DE 44 rule.
  */
-function californiaSupplementalTax(input: PaycheckInput, rules: StateRuleset): TaxLine[] {
-  const carveOut = caSupplementalCarveOut(input, rules);
+function californiaSupplementalTax(input: PaycheckInput, ctx: ComputeContext, rules: StateRuleset): TaxLine[] {
+  const carveOut = caSupplementalCarveOut(input, ctx, rules);
   if (carveOut <= 0) return [];
 
   const cfg = rules.supplementalWages as CASupplementalConfig;
-  let bonusCents = 0;
-  let otherCents = 0;
+  let rawBonusCents = 0;
+  let rawOtherCents = 0;
   for (const e of input.earnings) {
     if (e.category !== 'supplemental') continue;
-    if (/bonus|stock/i.test(e.code)) bonusCents += e.amount;
-    else otherCents += e.amount;
+    if (/bonus|stock/i.test(e.code)) rawBonusCents += e.amount;
+    else rawOtherCents += e.amount;
   }
+  const rawTotal = rawBonusCents + rawOtherCents;
+  const spilled = rawTotal - carveOut;
+
+  // Proportional allocation of the pretax reduction, largest-remainder
+  // style: round the bonus share once, then assign the exact remainder to
+  // "other" rather than rounding both independently, so the two lines
+  // always sum to exactly carveOut (never a stray penny off from double
+  // rounding).
+  const bonusCents =
+    spilled > 0 && rawTotal > 0 ? Math.round((rawBonusCents / rawTotal) * carveOut) : rawBonusCents;
+  const otherCents = spilled > 0 ? carveOut - bonusCents : rawOtherCents;
 
   const lines: TaxLine[] = [];
   if (bonusCents > 0) {
@@ -6128,7 +6502,12 @@ function californiaSupplementalTax(input: PaycheckInput, rules: StateRuleset): T
       amount: applyRate(bonusCents, cfg.bonusAndStockOptionRate),
       detail:
         `${fmt(bonusCents)} @ ${(cfg.bonusAndStockOptionRate * 100).toFixed(2)}% flat — bonuses and stock ` +
-        `options, no withholding allowances applied (DE 44, employer elected the flat method over aggregation)`,
+        `options, no withholding allowances applied (DE 44, employer elected the flat method over aggregation)` +
+        (spilled > 0
+          ? ` — reduced from the raw ${fmt(rawBonusCents)}: pretax deductions reduced the taxable base by ` +
+            `${fmt(spilled)}, allocated proportionally across bonus/other (this project's own inferred ` +
+            `convention, not a DE 44 rule)`
+          : ''),
     });
   }
   if (otherCents > 0) {
@@ -6142,7 +6521,12 @@ function californiaSupplementalTax(input: PaycheckInput, rules: StateRuleset): T
       detail:
         `${fmt(otherCents)} @ ${(cfg.otherRate * 100).toFixed(2)}% flat — overtime pay, commissions, sales ` +
         `awards, severance, vacation pay etc., no withholding allowances applied (DE 44, employer elected the ` +
-        `flat method over aggregation)`,
+        `flat method over aggregation)` +
+        (spilled > 0
+          ? ` — reduced from the raw ${fmt(rawOtherCents)}: pretax deductions reduced the taxable base by ` +
+            `${fmt(spilled)}, allocated proportionally across bonus/other (this project's own inferred ` +
+            `convention, not a DE 44 rule)`
+          : ''),
     });
   }
   return lines;
@@ -6196,7 +6580,7 @@ function californiaWithholding(
   // other case — combined with regular wages on the same cheque, no
   // employer election, no supplemental config at all — leaves the dollars
   // right where DE 44 puts them: in the ordinary base, taxed once, here.
-  const periodWages = atLeastZero(fullBase - caSupplementalCarveOut(input, rules));
+  const periodWages = atLeastZero(fullBase - caSupplementalCarveOut(input, ctx, rules));
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const status = resolveCAFilingStatus(cert);
@@ -6354,8 +6738,16 @@ interface UTConfig {
 
 function resolveUTMaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
   // Publication 14's own note: "Use the Single column for taxpayers who
-  // file as head-of-household on their federal return."
-  return cert.maritalStatus === 'married' ? 'married' : 'single';
+  // file as head-of-household on their federal return." — 'hoh' is a real,
+  // tested value that deliberately maps here, not a typo. Anything else
+  // defined throws rather than silently taxing a married employee at the
+  // single rate.
+  const raw = cert.maritalStatus;
+  if (raw === undefined || raw === null || raw === 'single' || raw === 'hoh') return 'single';
+  if (raw === 'married') return 'married';
+  throw new Error(
+    `Unrecognized UT certificate.maritalStatus ${JSON.stringify(raw)} — expected 'single', 'hoh', or 'married'.`,
+  );
 }
 
 /**
@@ -6453,7 +6845,10 @@ interface MDLumpSumBonusConfig {
 }
 
 function resolveMDFilingStatus(cert: Record<string, unknown>): 'single' | 'mfjHoh' {
-  return cert.filingStatus === 'mfjHoh' ? 'mfjHoh' : 'single';
+  const raw = cert.filingStatus;
+  if (raw === undefined || raw === null || raw === 'single') return 'single';
+  if (raw === 'mfjHoh') return 'mfjHoh';
+  throw new Error(`Unrecognized MD certificate.filingStatus ${JSON.stringify(raw)} — expected 'single' or 'mfjHoh'.`);
 }
 
 /**
@@ -6496,9 +6891,17 @@ function mdCountyTopRate(countyName: string | undefined, rules: StateRuleset): n
  * RESIDENTS: the guide's own phrase is "the county of residence," which
  * presumes one, and this project has no primary-sourced lump-sum figure
  * for the Special Nonresident Rate case.
+ *
+ * BUG FIXED 2026-09-02, same class as federalSupplementalTax()'s own fix:
+ * a pretax deduction on this bonus-only cheque reduces the taxable base
+ * regardless of the flat method, but this used to return the raw
+ * supplementalCash uncapped. Fixed via Math.min(fullBase, supplementalCash)
+ * — the general form here since regularCashOnly is always 0 by this
+ * function's own gate (no separate "regular portion" to spill past).
  */
 function mdSupplementalCarveOut(
   input: PaycheckInput,
+  ctx: ComputeContext,
   rules: StateRuleset,
 ): { cash: Cents; rate: number } | null {
   const cfg = rules.lumpSumBonusWithholding as MDLumpSumBonusConfig | undefined;
@@ -6513,12 +6916,14 @@ function mdSupplementalCarveOut(
   }
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.nonresident) return null;
+  if (resolveCertNonresident(cert)) return null;
 
   const countyRate = mdCountyTopRate(cert.county as string | undefined, rules);
   if (countyRate === undefined) return null;
 
-  return { cash: supplementalCash, rate: cfg.topStateRate + countyRate };
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const fullBase = ctx.taxableWagesFor(exempt);
+  return { cash: Math.min(fullBase, supplementalCash), rate: cfg.topStateRate + countyRate };
 }
 
 /**
@@ -6531,10 +6936,11 @@ function mdSupplementalCarveOut(
  * ordinary formula, just at each rate's own ceiling instead of a bracket
  * lookup.
  */
-function marylandSupplementalTax(input: PaycheckInput, rules: StateRuleset): TaxLine | null {
-  const carve = mdSupplementalCarveOut(input, rules);
+function marylandSupplementalTax(input: PaycheckInput, ctx: ComputeContext, rules: StateRuleset): TaxLine | null {
+  const carve = mdSupplementalCarveOut(input, ctx, rules);
   if (!carve) return null;
 
+  const rawSupplementalCash = supplementalEarnings(input.earnings);
   const amount = applyRate(carve.cash, carve.rate);
   return {
     id: `${rules.code}_SIT_SUPP`,
@@ -6546,7 +6952,11 @@ function marylandSupplementalTax(input: PaycheckInput, rules: StateRuleset): Tax
     detail:
       `${fmt(carve.cash)} @ ${(carve.rate * 100).toFixed(2)}% flat — highest state rate (6.50%) plus the ` +
       `highest local rate for the county of residence (Employer Withholding Guide, employer elected the ` +
-      `lump-sum method over the ordinary combined table)`,
+      `lump-sum method over the ordinary combined table)` +
+      (carve.cash < rawSupplementalCash
+        ? ` — reduced from the raw ${fmt(rawSupplementalCash)}: pretax deductions exceeded regular wages, ` +
+          `and that excess spills onto the supplemental base too`
+        : ''),
   };
 }
 
@@ -6582,7 +6992,7 @@ function marylandWithholding(
   // Carved out only when marylandSupplementalTax() is actually about to
   // tax it separately at the flat lump-sum rate — see that function's own
   // doc comment; every other cheque leaves the dollars right here.
-  const carve = mdSupplementalCarveOut(input, rules);
+  const carve = mdSupplementalCarveOut(input, ctx, rules);
   const periodWages = atLeastZero(ctx.taxableWagesFor(exempt) - (carve?.cash ?? 0));
   const annualWages = periodWages * ctx.periodsPerYear;
 
@@ -6604,7 +7014,7 @@ function marylandWithholding(
 
   let localTax: number;
   let localNote: string;
-  const nonresident = Boolean(cert.nonresident);
+  const nonresident = resolveCertNonresident(cert);
   if (nonresident) {
     localTax = applyRate(taxableIncome, cfg.nonresidentSpecialRate);
     localNote = `nonresident, Special ${(cfg.nonresidentSpecialRate * 100).toFixed(2)}% rate`;
@@ -6739,7 +7149,7 @@ function dcWithholding(
   const periodWages = ctx.taxableWagesFor(exempt);
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.nonresident) {
+  if (resolveCertNonresident(cert)) {
     return {
       id: `${rules.code}_SIT`,
       name: `${rules.name} Income Tax`,
@@ -7031,6 +7441,30 @@ function westVirginiaSupplementalAnnualMarginal(
  * underlying PA "compensation" concept, but that specific equivalence for
  * the LOCAL tax specifically was not independently sourced this pass.
  * Flagged in PA-2026.json's knownGaps, not silently assumed away.
+ *
+ * EIT low-income exemption (BUG FIXED 2026-09-02): 49 of 2,627
+ * jurisdictions carry municipalEitLIE/schoolDistrictEitLIE — an Act
+ * 511/319 ordinance exempting estimated-annual-earned-income below a
+ * threshold from that JURISDICTION's own portion of EIT. This data
+ * existed in the file but was never read here — every employee in one of
+ * those 49 places was over-withheld regardless of income. Fixed by
+ * decomposing each side's rate into its municipal (residentEIT /
+ * nonresidentEIT) and school (schoolDistrictEIT, resident side only —
+ * school EIT is levied on residents, not nonresidents) components and
+ * independently testing each against its OWN threshold before
+ * recombining — NOT a single combined-rate threshold test, because 48 of
+ * the 49 jurisdictions have only ONE of the two thresholds set (36
+ * municipal-only, 12 school-only), so naively exempting the whole
+ * combined rate off either one alone would silently over-exempt the
+ * portion that carries no ordinance (the same asymmetric-threshold shape
+ * already disclosed, unfixed, for this file's LST low-income exemption —
+ * see PA-2026.json's own knownGaps for why LST's case is structurally
+ * harder: this engine emits ONE combined PA_LST line with no muni/school
+ * split to decompose, unlike EIT's rate inputs which already arrive
+ * pre-split). Only 1 jurisdiction (PSD 720501, Penn Hills Twp) has both
+ * thresholds set, and they're numerically equal ($2,000 each), so no
+ * jurisdiction in the current data exercises a case where the two
+ * thresholds genuinely disagree.
  */
 function pennsylvaniaLocalTax(
   input: PaycheckInput,
@@ -7071,14 +7505,33 @@ function pennsylvaniaLocalTax(
     residencePSD && residencePSD !== '88000'
       ? paLocalRuleset(residencePSD, input.checkDate)
       : undefined;
-  const residentRate = residenceEntry ? residenceEntry.totalResidentEIT : 0;
-  const nonresidentRate = workEntry.nonresidentEIT;
-  const rate = Math.max(residentRate, nonresidentRate);
-  const higherSide = residentRate >= nonresidentRate ? 'resident' : 'nonresident';
 
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const taxableWages = ctx.taxableWagesFor(exempt);
+  const estimatedAnnualWages = taxableWages * ctx.periodsPerYear;
+  const belowLIE = (threshold: number | undefined): boolean =>
+    threshold !== undefined && estimatedAnnualWages < dollars(threshold);
+
+  // Each side's rate is the sum of its OWN municipal/school components,
+  // each independently gated by ITS OWN low-income-exemption threshold —
+  // see this function's own doc comment for why a single combined-rate
+  // threshold test would be wrong for the 48 jurisdictions that carry
+  // only one of the two thresholds.
+  const residentRate = residenceEntry
+    ? (belowLIE(residenceEntry.municipalEitLIE) ? 0 : residenceEntry.residentEIT) +
+      (belowLIE(residenceEntry.schoolDistrictEitLIE) ? 0 : residenceEntry.schoolDistrictEIT)
+    : 0;
+  const nonresidentRate = belowLIE(workEntry.municipalEitLIE) ? 0 : workEntry.nonresidentEIT;
+  const rate = Math.max(residentRate, nonresidentRate);
+  const higherSide = residentRate >= nonresidentRate ? 'resident' : 'nonresident';
+
   const eitAmount = applyRate(taxableWages, rate);
+
+  const lieApplied =
+    belowLIE(workEntry.municipalEitLIE) ||
+    (residenceEntry
+      ? belowLIE(residenceEntry.municipalEitLIE) || belowLIE(residenceEntry.schoolDistrictEitLIE)
+      : false);
 
   const eitLine: TaxLine = {
     id: 'PA_EIT',
@@ -7090,7 +7543,11 @@ function pennsylvaniaLocalTax(
     detail:
       `${fmt(taxableWages)} @ ${(rate * 100).toFixed(2)}% (the ${higherSide} rate is higher) — resident ` +
       `${(residentRate * 100).toFixed(2)}% (PSD ${residencePSD ?? '88000/out-of-state'}) vs. work-location ` +
-      `nonresident ${(nonresidentRate * 100).toFixed(2)}% (PSD ${workPSD}, ${workEntry.municipality})`,
+      `nonresident ${(nonresidentRate * 100).toFixed(2)}% (PSD ${workPSD}, ${workEntry.municipality})` +
+      (lieApplied
+        ? ` — reduced by a low-income exemption (estimated annual earned income ${fmt(estimatedAnnualWages)} ` +
+          `below at least one jurisdiction's own EIT threshold)`
+        : ''),
   };
 
   const lines: TaxLine[] = [eitLine];
@@ -7433,9 +7890,26 @@ function ohioSchoolDistrictTax(
  * Low-income exemption: estimates ANNUAL wages by annualizing this one
  * cheque (periodWages × periodsPerYear) — the same approximation
  * nonresidentDeMinimisReason() already makes elsewhere in this file, not
- * a true year-to-date figure. Uses the municipal LIE threshold if
- * present, falling back to the school district's, matching how the
- * combined municipal+school total is what's actually being exempted.
+ * a true year-to-date figure.
+ *
+ * BUG FIXED 2026-09-02: this used to pick ONE threshold — municipal if
+ * present, else school district's — and exempt the WHOLE combined
+ * lst.total off it. Real data breaks that in both directions: 73
+ * jurisdictions have both thresholds present but DIFFERENT (e.g. PSD
+ * 650701, municipal LIE $12,000 vs. school LIE $3,200), where picking
+ * only the municipal figure over-exempts anyone earning between the two;
+ * 33 more have the municipal portion's own threshold explicitly $0
+ * ("never exempt" — lowIncomeExemption's own $0 sentinel, not an absent
+ * field) while the school portion IS exempt at a real threshold (e.g.
+ * PSD 180105, municipal $5 LST never exempt, school $5 LST exempt under
+ * $12,000), where the old `||` fallthrough read the school's threshold
+ * and wrongly waived the WHOLE $10 including the never-exempt municipal
+ * $5. Fixed by testing each portion (lst.municipal, lst.schoolDistrict —
+ * confirmed to always sum to lst.total across all 2,627 jurisdictions)
+ * against its OWN threshold independently, then summing whichever
+ * portions survive — still emits ONE combined PA_LST line (this
+ * project's existing output shape, unchanged), just computed correctly
+ * underneath it.
  */
 function pennsylvaniaLST(
   ctx: ComputeContext,
@@ -7449,8 +7923,12 @@ function pennsylvaniaLST(
   const periodWages = ctx.taxableWagesFor(exempt);
   const estimatedAnnualWages = periodWages * ctx.periodsPerYear;
 
-  const lie = lst.lowIncomeExemption?.municipal || lst.lowIncomeExemption?.schoolDistrict;
-  if (lie && estimatedAnnualWages < dollars(lie)) {
+  const belowLIE = (threshold: number | undefined): boolean =>
+    threshold !== undefined && threshold > 0 && estimatedAnnualWages < dollars(threshold);
+  const municipalExempt = belowLIE(lst.lowIncomeExemption?.municipal);
+  const schoolExempt = belowLIE(lst.lowIncomeExemption?.schoolDistrict);
+
+  if (municipalExempt && schoolExempt) {
     return {
       id: 'PA_LST',
       name: 'PA Local Services Tax',
@@ -7460,11 +7938,13 @@ function pennsylvaniaLST(
       amount: 0,
       detail:
         `$0 — estimated annual wages ${fmt(estimatedAnnualWages)} (this cheque annualized, not a true ` +
-        `YTD figure) fall below the $${lie.toLocaleString()} Act 32 low-income exemption threshold`,
+        `YTD figure) fall below BOTH the municipal ($${lst.lowIncomeExemption?.municipal.toLocaleString()}) ` +
+        `and school district ($${lst.lowIncomeExemption?.schoolDistrict.toLocaleString()}) Act 32 ` +
+        `low-income exemption thresholds`,
     };
   }
 
-  const annualLST = dollars(lst.total);
+  const annualLST = dollars(municipalExempt ? 0 : lst.municipal) + dollars(schoolExempt ? 0 : lst.schoolDistrict);
   const perPeriod = roundDownToCent(annualLST / ctx.periodsPerYear);
 
   return {
@@ -7476,7 +7956,13 @@ function pennsylvaniaLST(
     amount: perPeriod,
     detail:
       `${fmt(annualLST)}/yr ÷ ${ctx.periodsPerYear} periods, rounded DOWN to the cent (Act 32's own ` +
-      `proration rule, the opposite direction from every other tax in this engine) = ${fmt(perPeriod)}/period`,
+      `proration rule, the opposite direction from every other tax in this engine) = ${fmt(perPeriod)}/period` +
+      (municipalExempt
+        ? ` — municipal portion ($${lst.municipal}) exempted, estimated annual wages below its own $${lst.lowIncomeExemption?.municipal.toLocaleString()} threshold`
+        : '') +
+      (schoolExempt
+        ? ` — school district portion ($${lst.schoolDistrict}) exempted, estimated annual wages below its own $${lst.lowIncomeExemption?.schoolDistrict.toLocaleString()} threshold`
+        : ''),
   };
 }
 
@@ -7525,7 +8011,7 @@ function northCarolinaWithholding(
   // computed generically here rather than hardcoded, which also covers
   // the daily/quarterly/semiannual/annual frequencies NC-30's own chart
   // doesn't publish.
-  const isNRA = Boolean(cert.nonresidentAlien);
+  const isNRA = resolveCertBoolean(cert, 'nonresidentAlien');
   const isHoH = !isNRA && cert.filingStatus === 'head_of_household';
   const standardDeduction = dollars(
     isHoH
@@ -7815,13 +8301,31 @@ interface ALConfig {
   brackets: { nonMarried: WIBracket[]; married: WIBracket[] };
 }
 
+/**
+ * BUG FIX: this and alabamaPersonalExemption() below used to fall through
+ * to the single/'0' case for ANY unrecognized code, not just the two that
+ * legitimately mean that ('0' and 'S') — the same silent-default-on-typo
+ * risk this project's own Arizona electedRate fix explicitly named as the
+ * anti-pattern to avoid ("every other state's own enum-like certificate
+ * field... throws on an unrecognized value; this was the one exception").
+ * A caller who sends a typo'd or malformed code (a copy-paste of a
+ * different state's field, 'Mrs' instead of 'M', etc.) now gets a loud
+ * error instead of silently under-withholding as a single filer. '0' or
+ * 'S' -- Alabama's own two single-status codes -- and no certificate at
+ * all (alabamaWithholding() already defaults that to '0' before calling
+ * here) are the only inputs treated as 'single_0'.
+ */
 function resolveALDeductionKey(
   code: string,
 ): keyof ALConfig['standardDeduction'] {
+  if (code === '0' || code === 'S') return 'single_0';
   if (code === 'MS') return 'marriedFilingSeparately';
   if (code === 'M') return 'marriedFilingJointly';
   if (code === 'H') return 'headOfFamily';
-  return 'single_0'; // '0' or 'S', or no certificate on file
+  throw new Error(
+    `Unrecognized AL certificate.alabamaExemptionCode ${JSON.stringify(code)} — expected one of ` +
+      `'0', 'S', 'MS', 'M', or 'H' (Form A-4's own exemption codes).`,
+  );
 }
 
 function alabamaStandardDeduction(cfg: ALStandardDeductionStep, gi: number): number {
@@ -7837,11 +8341,15 @@ function alabamaStandardDeduction(cfg: ALStandardDeductionStep, gi: number): num
 }
 
 function alabamaPersonalExemption(cfg: ALConfig['personalExemption'], code: string): number {
+  if (code === '0') return dollars(cfg.code0);
   if (code === 'S') return dollars(cfg.codeS);
   if (code === 'MS') return dollars(cfg.codeMS);
   if (code === 'M') return dollars(cfg.codeM);
   if (code === 'H') return dollars(cfg.codeH);
-  return dollars(cfg.code0); // '0' or unset
+  throw new Error(
+    `Unrecognized AL certificate.alabamaExemptionCode ${JSON.stringify(code)} — expected one of ` +
+      `'0', 'S', 'MS', 'M', or 'H' (Form A-4's own exemption codes).`,
+  );
 }
 
 function alabamaDependentPerUnit(
@@ -8207,10 +8715,20 @@ type NMFilingStatus = 'single' | 'married' | 'hoh';
 // state a no-form default, since there is no NM-specific form to fail to
 // file).
 function resolveNMFilingStatus(cert: Record<string, unknown>): NMFilingStatus {
+  // Reuses the SAME vocabulary as federalW4 (single/married_joint/
+  // married_separate/head_of_household) per this file's own
+  // filingStatusNote — 'married_separate' deliberately bundles into
+  // 'single', the same bundling the federal 2020+ W-4 checkbox itself
+  // uses. Anything else defined throws rather than silently taxing a
+  // married employee at the single rate on a typo.
   const raw = cert.filingStatus;
+  if (raw === undefined || raw === null || raw === 'single' || raw === 'married_separate') return 'single';
   if (raw === 'married_joint') return 'married';
   if (raw === 'head_of_household') return 'hoh';
-  return 'single';
+  throw new Error(
+    `Unrecognized NM certificate.filingStatus ${JSON.stringify(raw)} — expected 'single', 'married_separate', ` +
+      `'married_joint', or 'head_of_household'.`,
+  );
 }
 
 /**
@@ -8438,6 +8956,25 @@ interface OKConfig {
  * (0.25%-4.75%) into these 4 (0%-4.5%) for 2026, independently corroborated
  * by a second source before trusting the reconstructed table.
  */
+/**
+ * OW-2's own vocabulary: 'married_withhold_as_single' is the pre-2020-W-4-
+ * style checkbox for a married employee electing single-rate withholding
+ * — a real, deliberate value, not a typo — and maps to the single table
+ * exactly like every other state's equivalent checkbox in this project.
+ * Anything else defined throws rather than silently taxing a married
+ * employee at the single rate.
+ */
+function resolveOKFilingStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  const raw = cert.filingStatus;
+  if (raw === undefined || raw === null || raw === 'single' || raw === 'married_withhold_as_single') {
+    return 'single';
+  }
+  if (raw === 'married') return 'married';
+  throw new Error(
+    `Unrecognized OK certificate.filingStatus ${JSON.stringify(raw)} — expected 'single', 'married', or 'married_withhold_as_single'.`,
+  );
+}
+
 function oklahomaWithholding(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -8448,8 +8985,7 @@ function oklahomaWithholding(
   const periodWages = ctx.taxableWagesFor(exempt);
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  const statusRaw = (cert.filingStatus as string) ?? 'single';
-  const status = statusRaw === 'married' ? 'married' : 'single';
+  const status = resolveOKFilingStatus(cert);
 
   const period = input.payFrequency;
   const allowanceAmount = cfg.allowanceAmount[period];
@@ -8520,6 +9056,19 @@ function oklahomaWithholding(
  * Section 1's copy, corrected in data/states/ND-2026.json rather than
  * silently worked around in code.
  */
+/**
+ * Section 1 (pre-2020 federal W-4 on file) reads its own ND-specific
+ * certificate.maritalStatus, distinct from Section 2's federalW4.filingStatus
+ * dispatch below. Throws on anything other than single/married rather than
+ * silently taxing a married employee at the single rate on a typo.
+ */
+function resolveNDSection1MaritalStatus(cert: Record<string, unknown>): 'single' | 'married' {
+  const raw = cert.maritalStatus;
+  if (raw === undefined || raw === null || raw === 'single') return 'single';
+  if (raw === 'married') return 'married';
+  throw new Error(`Unrecognized ND certificate.maritalStatus ${JSON.stringify(raw)} — expected 'single' or 'married'.`);
+}
+
 function northDakotaWithholding(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -8542,7 +9091,7 @@ function northDakotaWithholding(
 
   if (cert.formVintage === 'pre_2020') {
     const section1 = structure.section1_preFederal2020W4;
-    const status = cert.maritalStatus === 'married' ? 'married' : 'single';
+    const status = resolveNDSection1MaritalStatus(cert);
     const allowanceAmount = section1.allowanceAmountByPeriod[period];
     if (allowanceAmount === undefined) {
       throw new Error(

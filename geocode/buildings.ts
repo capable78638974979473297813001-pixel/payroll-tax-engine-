@@ -436,6 +436,31 @@ export function streetKeyWithoutDirectionals(street: string): string {
   return tokens.join(' ');
 }
 
+/** Every street-type word in the fully-expanded form streetKey() produces ("street", "avenue", ...) — used to compare street names when one source writes the type and the other doesn't. */
+const EXPANDED_STREET_TYPES = new Set(Object.values(STREET_TYPES));
+
+/**
+ * The street key with a trailing street TYPE removed:
+ * "st antoine street" -> "st antoine".
+ *
+ * Exists because OpenAddresses and NAD disagree about whether the type
+ * belongs in the name at all. Verified live: Detroit's Wayne County file
+ * publishes 1901 St Antoine as street "ST ANTOINE", while the address is
+ * universally written "1901 St Antoine St" — so an exact key comparison
+ * misses a point that is unambiguously the right building.
+ *
+ * Deliberately a SEPARATE function, and used only as a knowing fallback,
+ * for the same reason streetKeyWithoutDirectionals() is: dropping the
+ * type makes "Main St" and "Main Ave" compare equal, and in a grid city
+ * those are two different streets that can carry the same house number.
+ * The caller is responsible for the cluster guard that makes that safe.
+ */
+export function streetKeyWithoutType(street: string): string {
+  const tokens = streetKey(street).split(' ');
+  while (tokens.length > 1 && EXPANDED_STREET_TYPES.has(tokens[tokens.length - 1])) tokens.pop();
+  return tokens.join(' ');
+}
+
 /**
  * The street key with "capital"/"capitol" treated as one word.
  *

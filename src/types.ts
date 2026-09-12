@@ -409,8 +409,18 @@ export interface PaycheckInput {
     /** State income tax actually withheld from it. */
     stateIncomeTaxWithheld?: Cents;
   };
-  /** Work state (and eventually residence state for reciprocity). */
+  /** Where the work is performed — whose state income tax rules run. */
   workState?: StateWithholding;
+  /**
+   * Where the employee lives — omit it and every residence-based rule
+   * (reciprocity, nonresident allocation, day-count/dollar de minimis
+   * thresholds, resident-working-elsewhere credits) simply doesn't fire,
+   * the same "absent input changes nothing" convention used everywhere
+   * else in this engine. Set it whenever workState and the employee's home
+   * state differ; a same-state employee needs it too only if a rule keys
+   * off residenceState.certificate specifically (e.g. a reciprocity
+   * eligibility flag) rather than off workState.code alone.
+   */
   residenceState?: StateWithholding;
   /**
    * Whether to withhold the RESIDENCE state's own tax on top of (or instead

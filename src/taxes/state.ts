@@ -41,6 +41,7 @@ import {
 } from '../registry.ts';
 import { federalIncomeTax } from './federal.ts';
 import { cashEarnings, supplementalEarnings } from '../wages.ts';
+import { resolveCertBoolean } from '../validate.ts';
 import type {
   ComputeContext,
   EmployerContext,
@@ -98,8 +99,9 @@ export function stateIncomeTax(
 
   // Reciprocity and the nonresident de minimis threshold are both read
   // generically off rules.reciprocity, so every state file that already
-  // documents reciprocalStates (IL/IN/KY/MI/MN/OH/PA/WI) goes live the
-  // moment a caller populates input.residenceState — no per-state code
+  // documents reciprocalStates (AZ/IA/IL/IN/KY/MD/MI/MN/MT/ND/NJ/OH/PA/VA/
+  // WI/WV, plus DC's own structurally-different blanket exemption) goes
+  // live the moment a caller populates input.residenceState — no per-state code
   // change needed, matching this file's "data-only" ethos. Reciprocity is
   // checked first; de minimis only matters when reciprocity didn't already
   // resolve it.
@@ -616,6 +618,19 @@ interface ReciprocityConfig {
   // reciprocalStates list has no way to represent this — the ONLY
   // difference between a commuter-only entry and an ordinary one is here.
   commuterOnlyStates?: string[];
+  // Arizona's own bug class: a DIFFERENT kind of conditional entry from
+  // commuterOnlyStates above. Arizona's Form WEC does not grant an
+  // unconditional exemption to residents of California/Indiana/Oregon/
+  // Virginia — it requires the employee be "ALLOWED to claim a tax credit
+  // against your Arizona tax for taxes paid to your state of residence on
+  // Form 140NR." That is a nonresident-tax-CREDIT-eligibility test, not a
+  // commuting pattern, so it needs its own flag rather than overloading
+  // commuterOnlyStates — the certificate field it reads
+  // (certificate.nonresidentCreditEligible) is deliberately named
+  // differently from dailyCommuter for the same reason. Same default-safe
+  // direction as commuterOnlyStates: an absent or false flag means NO
+  // exemption, never a silently-granted one a real Form 140NR might deny.
+  creditEligibilityRequiredStates?: string[];
   // Pennsylvania-originated (REV-419): once this state's own reciprocity
   // exemption fires for a resident of a reciprocalStates entry, ALSO emit
   // an additional line for that employee's residence-state tax on the same
@@ -823,6 +838,16 @@ function reciprocityExemptionReason(
     if (!dailyCommuter) return null;
   }
 
+  // Arizona's own bug class — see creditEligibilityRequiredStates's own doc
+  // comment. A resident of one of these states gets the exemption only if
+  // the caller affirmatively asserts they qualify for the underlying
+  // nonresident tax credit; absent that assertion, no exemption, the same
+  // default-safe direction commuterOnlyStates already uses above.
+  if (reciprocity?.creditEligibilityRequiredStates?.includes(residence)) {
+    const creditEligible = input.residenceState?.certificate?.nonresidentCreditEligible === true;
+    if (!creditEligible) return null;
+  }
+
   return (
     `$0 — reciprocity exemption: employee resides in ${residence}, which has an ` +
     `active reciprocal agreement with ${rules.code}. Assumes the required reciprocity ` +
@@ -996,26 +1021,21 @@ function exemptEmploymentCategoryReason(
 }
 
 /**
- * certificate.exempt is read as a bare JS truthy value at three call sites
- * below, and truthiness is the wrong test for it: the STRING "false" (or
- * "0", or "no") is truthy in JavaScript, so a caller who means "not exempt"
- * but serializes it as a string — a very plausible shape coming from a
- * form field, a database column, or JSON — would silently have this
- * employee's ENTIRE state income tax zeroed out (applyStateWithholdingExemption
- * below) with no error. There is no per-state type for `certificate` the
- * way federalW4.exempt has (certificate varies too much by state to type
- * narrowly), so nothing else catches this. Only a real boolean or an absent
- * value is accepted; anything else throws rather than silently guessing
- * which way "exempt" was meant.
+ * certificate.exempt (and every other boolean-shaped certificate field in
+ * this file — nonresident, the two Yonkers flags, paidLeaveExempt,
+ * wacaresExempt, zeroElection, and more) needs the SAME guard: a bare JS
+ * truthy check misreads the STRING "false" (or "0", or "no") as true, since
+ * non-empty strings are truthy in JavaScript. There is no per-state type
+ * for `certificate` the way federalW4.exempt has (certificate varies too
+ * much by state to type narrowly), so nothing else catches this at the
+ * type level. resolveCertBoolean() now lives in ../validate.ts — shared
+ * with federal.ts, whose own w4.exempt had the identical gap despite BEING
+ * typed `boolean` in PaycheckInput, because this engine is served over
+ * HTTP (supabase/functions/calculate-paycheck) where no compiler stands
+ * between the wire and this code.
  */
 function resolveCertExempt(cert: Record<string, unknown>): boolean {
-  const raw = cert.exempt;
-  if (raw === undefined || raw === null) return false;
-  if (raw === true || raw === false) return raw;
-  throw new Error(
-    `Unrecognized certificate.exempt ${JSON.stringify(raw)} — expected a real boolean (true/false), not a string ` +
-      `or other value that merely LOOKS like one.`,
-  );
+  return resolveCertBoolean(cert, 'exempt');
 }
 
 /**
@@ -1034,13 +1054,7 @@ function resolveCertExempt(cert: Record<string, unknown>): boolean {
  * anything else throws.
  */
 function resolveCertNonresident(cert: Record<string, unknown>): boolean {
-  const raw = cert.nonresident;
-  if (raw === undefined || raw === null) return false;
-  if (raw === true || raw === false) return raw;
-  throw new Error(
-    `Unrecognized certificate.nonresident ${JSON.stringify(raw)} — expected a real boolean (true/false), not a ` +
-      `string or other value that merely LOOKS like one.`,
-  );
+  return resolveCertBoolean(cert, 'nonresident');
 }
 
 /**
@@ -2215,7 +2229,7 @@ function bracketFlatAllowance(
   // a 2020+-style form, so Table 2 is what's actually reused; that
   // discrepancy in MN's own source text is disclosed in MN-2026.json rather
   // than silently resolved.
-  const nraAdjustment = cert.nonresidentAlien
+  const nraAdjustment = resolveCertBoolean(cert, 'nonresidentAlien')
     ? dollars(
         federalRuleset(input.checkDate).incomeTax.nonresidentAlienAdjustment[
           input.payFrequency
@@ -2391,7 +2405,7 @@ function statePaidLeaveEmployeeTax(
   // never expected to set this field, so their existing behavior is
   // unaffected either way.
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.paidLeaveExempt) {
+  if (resolveCertBoolean(cert, 'paidLeaveExempt')) {
     return {
       id: `${rules.code}_PFML_EE`,
       name: `${rules.name} Paid Leave (Employee)`,
@@ -2513,7 +2527,7 @@ function statePaidLeaveElectedEmployeeShare(
   if (rules.statePaidLeaveEmployee) return null;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.paidLeaveExempt) return null;
+  if (resolveCertBoolean(cert, 'paidLeaveExempt')) return null;
 
   const resolved = resolvePaidLeaveRate(input, rules, cfg);
   if (!resolved) return null;
@@ -2577,12 +2591,12 @@ function statePaidLeaveEmployerTax(
   // A programme with no size threshold at all (DC's Universal Paid Leave)
   // applies to every covered employer, so demanding the caller assert
   // liability first would just suppress a tax that is always due.
-  if (cfg.employerSizeGated !== false && !cert.employerLiableForPaidLeaveShare) return null;
+  if (cfg.employerSizeGated !== false && !resolveCertBoolean(cert, 'employerLiableForPaidLeaveShare')) return null;
   // Same exemption gate as statePaidLeaveEmployeeTax() — an exempt employee
   // (federal, Tribal, self-employed opt-out, etc.) generates no premium at
   // all, employee or employer share, since there's no total premium to
   // split in the first place.
-  if (cert.paidLeaveExempt) return null;
+  if (resolveCertBoolean(cert, 'paidLeaveExempt')) return null;
 
   const exempt = (cfg.exemptPretax ?? rules.exemptPretax ?? []) as PretaxCategory[];
   const currentWages = ctx.taxableWagesFor(exempt);
@@ -2663,7 +2677,7 @@ function stateLongTermCareEmployeeTax(
   // zeroStateIncomeTaxLines()) and Washington has no income tax at all —
   // this is a genuinely separate levy with its own exemption concept.
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.wacaresExempt) {
+  if (resolveCertBoolean(cert, 'wacaresExempt')) {
     return {
       id: `${rules.code}_LTC_EE`,
       name: `${rules.name} Long-Term Care (Employee)`,
@@ -2722,7 +2736,7 @@ function resolveMTSchedule(cert: Record<string, unknown>): MTSchedule {
     return 'single_mfs_bothWorking';
   }
   if (filingStatus === 'mfj' || filingStatus === 'qss') {
-    return cert.bothSpousesWorking ? 'single_mfs_bothWorking' : 'mfj_qss';
+    return resolveCertBoolean(cert, 'bothSpousesWorking') ? 'single_mfs_bothWorking' : 'mfj_qss';
   }
   if (filingStatus === 'hoh') return 'hoh';
   throw new Error(
@@ -3384,7 +3398,7 @@ function nycLocalTax(
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (!cert.nycResident) return null;
+  if (!resolveCertBoolean(cert, 'nycResident')) return null;
 
   const cfg = rules.nycLocalTax as NYCLocalTaxConfig | undefined;
   if (!cfg) return null;
@@ -3468,7 +3482,7 @@ function nycSupplementalTax(
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (!cert.nycResident) return null;
+  if (!resolveCertBoolean(cert, 'nycResident')) return null;
 
   const rawSupplementalCash = supplementalEarnings(input.earnings);
   if (rawSupplementalCash <= 0) return null;
@@ -3564,7 +3578,17 @@ function yonkersLocalTax(
   const extraYonkers = Number(cert.additionalWithholdingYonkers ?? 0);
   const extra = extraYonkers > 0 ? extraYonkers : 0;
 
-  if (cert.yonkersResident) {
+  // Both flags true at once is a caller error this project has already
+  // decided how to handle (see tests/engine.test.ts's own "resident status
+  // wins if a caller somehow sets both flags at once"): resident status
+  // takes precedence, the same "the more protective/larger obligation
+  // wins an ambiguous case" direction used elsewhere in this engine,
+  // rather than throwing on a combination a real Form IT-2104 can't
+  // actually produce (an employee checks one residency box, not both).
+  const yonkersResident = resolveCertBoolean(cert, 'yonkersResident');
+  const yonkersNonresidentWorker = resolveCertBoolean(cert, 'yonkersNonresidentWorker');
+
+  if (yonkersResident) {
     const nyCfg = rules as unknown as NYRulesetShape;
     const base = computeNYSStyleTax(input, ctx, rules, nyCfg);
     const baseAmount = applyRate(base.amount, cfg.residentSurcharge.rate);
@@ -3588,7 +3612,7 @@ function yonkersLocalTax(
     };
   }
 
-  if (cert.yonkersNonresidentWorker) {
+  if (yonkersNonresidentWorker) {
     const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
     const fullBase = ctx.taxableWagesFor(exempt);
     const supplementalCash = supplementalEarnings(input.earnings);
@@ -3665,10 +3689,16 @@ function yonkersSupplementalTax(
   const rawSupplementalCash = supplementalEarnings(input.earnings);
   if (rawSupplementalCash <= 0) return null;
 
+  // Both flags true at once: resident status wins — see yonkersLocalTax()'s
+  // own doc comment on this same precedence choice, already locked in by
+  // an existing test.
+  const yonkersResident = resolveCertBoolean(cert, 'yonkersResident');
+  const yonkersNonresidentWorker = resolveCertBoolean(cert, 'yonkersNonresidentWorker');
+
   let rate: number;
-  if (cert.yonkersResident) {
+  if (yonkersResident) {
     rate = cfg.residentSupplementalRate;
-  } else if (cert.yonkersNonresidentWorker) {
+  } else if (yonkersNonresidentWorker) {
     rate = cfg.nonresidentSupplementalRate;
   } else {
     return null;
@@ -3881,7 +3911,8 @@ function bracketTwoStatusPerPeriod(
   // Form ID W-4's own NRA instructions: "Check the 'A' box (Single)
   // withholding regardless of your marital status" — forced, not merely
   // defaulted, so this overrides whatever certificate.maritalStatus says.
-  const maritalStatus = cert.nonresidentAlien ? 'single' : resolveIDMaritalStatus(cert);
+  const isNRA = resolveCertBoolean(cert, 'nonresidentAlien');
+  const maritalStatus = isNRA ? 'single' : resolveIDMaritalStatus(cert);
 
   const brackets = cfg.brackets[maritalStatus][input.payFrequency];
   if (!brackets) {
@@ -3892,7 +3923,7 @@ function bracketTwoStatusPerPeriod(
   }
   const bracket = findWIBracket(brackets, taxableWages);
   const excess = taxableWages - dollars(bracket.from);
-  const nraAdjustment = cert.nonresidentAlien
+  const nraAdjustment = isNRA
     ? dollars(cfg.nonresidentAlienAdjustment?.[input.payFrequency] ?? 0)
     : 0;
   const amount = dollars(bracket.base) + applyRate(excess, bracket.rate) + nraAdjustment;
@@ -4558,7 +4589,7 @@ function newarkPayrollTaxEmployer(
   const exempt = federalRuleset(input.checkDate).incomeTax.exemptPretax as PretaxCategory[];
   const taxableWages = ctx.taxableWagesFor(exempt);
 
-  if (cert.newarkResidentApportionmentExcluded) {
+  if (resolveCertBoolean(cert, 'newarkResidentApportionmentExcluded')) {
     return {
       id: 'NEWARK_PAYROLL_ER',
       name: 'Newark Payroll Tax (Employer)',
@@ -5408,8 +5439,10 @@ function flatRateSurtaxCredit(
   const excess = annualNetWages - dollars(bracket.from);
   const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
 
-  const hohCredit = cert.headOfHousehold ? dollars(cfg.creditsAnnual.headOfHousehold) / periodsPerYear : 0;
-  const blindCredit = cert.blind ? dollars(cfg.creditsAnnual.blind) / periodsPerYear : 0;
+  const hohCredit = resolveCertBoolean(cert, 'headOfHousehold')
+    ? dollars(cfg.creditsAnnual.headOfHousehold) / periodsPerYear
+    : 0;
+  const blindCredit = resolveCertBoolean(cert, 'blind') ? dollars(cfg.creditsAnnual.blind) / periodsPerYear : 0;
 
   const amount = atLeastZero(roundHalfUp(annualTax / periodsPerYear - hohCredit - blindCredit));
   const netWagesRounded = roundHalfUp(netWages);
@@ -5899,7 +5932,7 @@ function employeeElectedFlat(
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
 
-  if (cert.zeroElection) {
+  if (resolveCertBoolean(cert, 'zeroElection')) {
     return {
       id: `${rules.code}_SIT`,
       name: `${rules.name} Income Tax`,
@@ -6479,7 +6512,7 @@ function portlandAreaLocalTax(
   const currentWages = ctx.taxableWagesFor(exempt);
   const lines: TaxLine[] = [];
 
-  if (cert.metroDistrict) {
+  if (resolveCertBoolean(cert, 'metroDistrict')) {
     const ytd = input.ytd.localIncomeTax?.['OR_METRO'] ?? 0;
     const threshold = dollars(cfg.metroSHS.threshold);
     const taxableExcess = overThreshold(currentWages, ytd, threshold);
@@ -6497,7 +6530,7 @@ function portlandAreaLocalTax(
     });
   }
 
-  if (cert.multnomahCounty) {
+  if (resolveCertBoolean(cert, 'multnomahCounty')) {
     const ytd = input.ytd.localIncomeTax?.['OR_MULTNOMAH'] ?? 0;
     const tier1Threshold = dollars(cfg.multnomahPFA.tier1Threshold);
     const tier2Threshold = dollars(cfg.multnomahPFA.tier2Threshold);
@@ -8297,7 +8330,7 @@ function northCarolinaWithholding(
   // computed generically here rather than hardcoded, which also covers
   // the daily/quarterly/semiannual/annual frequencies NC-30's own chart
   // doesn't publish.
-  const isNRA = Boolean(cert.nonresidentAlien);
+  const isNRA = resolveCertBoolean(cert, 'nonresidentAlien');
   const isHoH = !isNRA && cert.filingStatus === 'head_of_household';
   const standardDeduction = dollars(
     isHoH
@@ -8587,13 +8620,31 @@ interface ALConfig {
   brackets: { nonMarried: WIBracket[]; married: WIBracket[] };
 }
 
+/**
+ * BUG FIX: this and alabamaPersonalExemption() below used to fall through
+ * to the single/'0' case for ANY unrecognized code, not just the two that
+ * legitimately mean that ('0' and 'S') — the same silent-default-on-typo
+ * risk this project's own Arizona electedRate fix explicitly named as the
+ * anti-pattern to avoid ("every other state's own enum-like certificate
+ * field... throws on an unrecognized value; this was the one exception").
+ * A caller who sends a typo'd or malformed code (a copy-paste of a
+ * different state's field, 'Mrs' instead of 'M', etc.) now gets a loud
+ * error instead of silently under-withholding as a single filer. '0' or
+ * 'S' -- Alabama's own two single-status codes -- and no certificate at
+ * all (alabamaWithholding() already defaults that to '0' before calling
+ * here) are the only inputs treated as 'single_0'.
+ */
 function resolveALDeductionKey(
   code: string,
 ): keyof ALConfig['standardDeduction'] {
+  if (code === '0' || code === 'S') return 'single_0';
   if (code === 'MS') return 'marriedFilingSeparately';
   if (code === 'M') return 'marriedFilingJointly';
   if (code === 'H') return 'headOfFamily';
-  return 'single_0'; // '0' or 'S', or no certificate on file
+  throw new Error(
+    `Unrecognized AL certificate.alabamaExemptionCode ${JSON.stringify(code)} — expected one of ` +
+      `'0', 'S', 'MS', 'M', or 'H' (Form A-4's own exemption codes).`,
+  );
 }
 
 function alabamaStandardDeduction(cfg: ALStandardDeductionStep, gi: number): number {
@@ -8609,11 +8660,15 @@ function alabamaStandardDeduction(cfg: ALStandardDeductionStep, gi: number): num
 }
 
 function alabamaPersonalExemption(cfg: ALConfig['personalExemption'], code: string): number {
+  if (code === '0') return dollars(cfg.code0);
   if (code === 'S') return dollars(cfg.codeS);
   if (code === 'MS') return dollars(cfg.codeMS);
   if (code === 'M') return dollars(cfg.codeM);
   if (code === 'H') return dollars(cfg.codeH);
-  return dollars(cfg.code0); // '0' or unset
+  throw new Error(
+    `Unrecognized AL certificate.alabamaExemptionCode ${JSON.stringify(code)} — expected one of ` +
+      `'0', 'S', 'MS', 'M', or 'H' (Form A-4's own exemption codes).`,
+  );
 }
 
 function alabamaDependentPerUnit(

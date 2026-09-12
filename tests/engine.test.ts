@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import { calculatePaycheck } from '../src/calculate.ts';
 import { futa } from '../src/taxes/federal.ts';
-import { dollars, overThreshold, underCap } from '../src/money.ts';
+import { atLeastZero, dollars, overThreshold, roundHalfUp, underCap } from '../src/money.ts';
 import { capElectiveDeferrals, makeTaxableWagesFn } from '../src/wages.ts';
 import type { Deduction, Earning, PaycheckInput } from '../src/types.ts';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -59,6 +59,51 @@ describe('money primitives', () => {
       overThreshold(dollars(10_000), dollars(195_000), dollars(200_000)),
       dollars(5_000),
     );
+  });
+
+  describe('BUG FIX: NaN used to pass through silently — atLeastZero returned 0, roundHalfUp returned NaN', () => {
+    // Found auditing the engine for the same "malformed input, no error"
+    // bug class already fixed for booleans (resolveCertBoolean): dozens of
+    // call sites across taxes/state.ts read a numeric certificate field as
+    // `Number(cert.someField ?? 0)`, which produces NaN for anything
+    // Number() can't parse rather than throwing. NaN then reached these two
+    // universal arithmetic primitives — every tax line in this engine
+    // passes through at least one of them. atLeastZero's `cents > 0 ? … :
+    // 0` is false for NaN either way, so it silently returned 0: a
+    // malformed certificate.exemptions could make a whole state's income
+    // tax line report a confident $0 with no error. roundHalfUp's `raw >=
+    // 0` is likewise false for NaN, so it took the false branch and
+    // returned NaN itself — not silently wrong, but not caught either,
+    // until it serialized to JSON as `null`. Both now throw immediately.
+    test('atLeastZero(NaN) throws instead of silently returning 0', () => {
+      assert.throws(() => atLeastZero(NaN), /atLeastZero\(NaN\)/);
+    });
+
+    test('roundHalfUp(NaN) throws instead of silently returning NaN', () => {
+      assert.throws(() => roundHalfUp(NaN), /roundHalfUp\(NaN\)/);
+    });
+
+    test('a malformed numeric certificate field now throws end to end instead of producing a confident $0', () => {
+      // Reproduces the exact live failure this fix closes: Wisconsin's own
+      // income tax formula subtracts exemptions x $400 from annualized net
+      // wages via atLeastZero() — a non-numeric certificate.exemptions used
+      // to make WI_SIT silently report $0 (with a detail string reading
+      // "less $NaN.NaN exemptions" that nothing forced a caller to notice).
+      assert.throws(
+        () =>
+          calculatePaycheck(
+            input({
+              workState: { code: 'WI', certificate: { exemptions: 'two' } },
+            }),
+          ),
+        /atLeastZero\(NaN\)/,
+      );
+    });
+
+    test('Infinity is caught too, not just NaN', () => {
+      assert.throws(() => atLeastZero(Infinity - Infinity), /atLeastZero\(NaN\)/);
+      assert.throws(() => roundHalfUp(1 / 0), /roundHalfUp\(Infinity\)/);
+    });
   });
 });
 
@@ -263,6 +308,35 @@ describe('federal income tax — Pub 15-T Worksheet 1A', () => {
     );
     assert.equal(amountOf(r, 'US_FIT'), 0);
     assert.equal(amountOf(r, 'US_SS_EE'), dollars(186));
+  });
+
+  test('BUG FIX: w4.exempt: "false" (a string) throws rather than being silently treated as true', () => {
+    // w4.exempt is typed `boolean` in FederalW4, but that only binds a
+    // TypeScript caller — this engine is also served as a JSON API
+    // (supabase/functions/calculate-paycheck), where nothing stops a
+    // string "false" arriving on the wire. Before this fix, `if
+    // (w4.exempt)` would have zeroed FEDERAL income tax on every such
+    // paycheck — the highest-stakes instance of a bug class already fixed
+    // for certificate.exempt/nonresident in taxes/state.ts.
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({ federalW4: { ...input().federalW4, exempt: 'false' as unknown as boolean } }),
+        ),
+      /Unrecognized certificate\.exempt/,
+    );
+  });
+
+  test('BUG FIX: w4.nonresidentAlien: "false" (a string) throws the same way', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            federalW4: { ...input().federalW4, nonresidentAlien: 'false' as unknown as boolean },
+          }),
+        ),
+      /Unrecognized certificate\.nonresidentAlien/,
+    );
   });
 
   test('low wages land in the 0% bracket', () => {
@@ -3563,6 +3637,73 @@ describe('Yonkers', () => {
     assert.equal(amountOf(r, 'NY_YONKERS_SIT'), dollars(1.34));
   });
 
+  describe('BUG FIX: yonkersResident/yonkersNonresidentWorker used to be read as bare truthy values', () => {
+    // Found auditing every resident/nonresident flag in this engine for the
+    // same risk resolveCertNonresident/resolveCertExempt were already
+    // written to guard against (see their own doc comments): a caller who
+    // sends the STRING "false" for a boolean field gets treated as true
+    // under a bare `if` check, because non-empty strings are truthy in JS.
+    // yonkersLocalTax() and yonkersSupplementalTax() read
+    // certificate.yonkersResident/yonkersNonresidentWorker directly with no
+    // such guard — a real gap given NYS-50-T-Y's own residency flags decide
+    // between a 16.75%-of-NYS-tax surcharge and a completely different flat
+    // nonresident rate. Both functions now go through the same
+    // resolveCertBoolean() helper resolveCertExempt/resolveCertNonresident
+    // already used, generalized to take a field name.
+    test('yonkersResident: "false" (a string) throws rather than being silently treated as true', () => {
+      assert.throws(
+        () =>
+          calculatePaycheck(
+            input({
+              payFrequency: 'weekly',
+              earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+              workState: {
+                code: 'NY',
+                certificate: { maritalStatus: 'single', exemptions: 3, yonkersResident: 'false' },
+              },
+            }),
+          ),
+        /Unrecognized certificate\.yonkersResident/,
+      );
+    });
+
+    test('yonkersNonresidentWorker: "false" (a string) throws the same way', () => {
+      assert.throws(
+        () =>
+          calculatePaycheck(
+            input({
+              payFrequency: 'weekly',
+              earnings: [{ code: 'REG', category: 'regular', amount: dollars(1500) }],
+              workState: {
+                code: 'NY',
+                certificate: { maritalStatus: 'single', yonkersNonresidentWorker: 'false' },
+              },
+            }),
+          ),
+        /Unrecognized certificate\.yonkersNonresidentWorker/,
+      );
+    });
+
+    test('a real boolean false on both flags correctly produces no Yonkers tax line at all', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
+          workState: {
+            code: 'NY',
+            certificate: {
+              maritalStatus: 'single',
+              exemptions: 3,
+              yonkersResident: false,
+              yonkersNonresidentWorker: false,
+            },
+          },
+        }),
+      );
+      assert.equal(r.taxes.find((t) => t.id === 'NY_YONKERS_SIT'), undefined);
+    });
+  });
+
   test('additionalWithholdingYonkers (IT-2104 Line 5) adds a flat amount for RESIDENTS, distinct from Lines 3/4', () => {
     // Same wages as resident Example 1 ($1.34 base), plus
     // certificate.additionalWithholdingYonkers:dollars(5) AND
@@ -5202,6 +5343,33 @@ describe('Washington', () => {
     );
     assert.equal(employerSide.taxes.some((t) => t.id === 'WA_PFML_ER'), false);
   });
+
+  test('BUG FIX: paidLeaveExempt/wacaresExempt/employerLiableForPaidLeaveShare: "false" (strings) throw', () => {
+    // All three used to be read as bare truthy values — a string "false"
+    // for paidLeaveExempt or wacaresExempt would have silently zeroed a
+    // real premium; for employerLiableForPaidLeaveShare (read as `!cert.…`)
+    // a string "false" is truthy, so `!"false"` is false, meaning the
+    // gate would have WRONGLY treated the employer as liable.
+    const base = {
+      payFrequency: 'weekly' as const,
+      earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(1000) }],
+    };
+    assert.throws(
+      () => calculatePaycheck(input({ ...base, ...waState({ paidLeaveExempt: 'false' }) })),
+      /Unrecognized certificate\.paidLeaveExempt/,
+    );
+    assert.throws(
+      () => calculatePaycheck(input({ ...base, ...waState({ wacaresExempt: 'false' }) })),
+      /Unrecognized certificate\.wacaresExempt/,
+    );
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({ ...base, ...waState({ paidLeaveExempt: true, employerLiableForPaidLeaveShare: 'false' }) }),
+        ),
+      /Unrecognized certificate\.employerLiableForPaidLeaveShare/,
+    );
+  });
 });
 
 describe('Massachusetts', () => {
@@ -5292,6 +5460,34 @@ describe('Massachusetts', () => {
       }),
     );
     assert.equal(amountOf(blind, 'MA_SIT'), dollars(93.65));
+  });
+
+  test('BUG FIX: headOfHousehold/blind: "false" (strings) throw rather than being silently treated as true', () => {
+    // Both credits used to be read as bare truthy values — a string "false"
+    // for either would have granted a credit (under-withholding tax) that
+    // a real Form M-4 doesn't actually claim.
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+            ...maState({ personalExemptionCode: 1, headOfHousehold: 'false' }),
+          }),
+        ),
+      /Unrecognized certificate\.headOfHousehold/,
+    );
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+            ...maState({ personalExemptionCode: 1, blind: 'false' }),
+          }),
+        ),
+      /Unrecognized certificate\.blind/,
+    );
   });
 
   test('Fair Share Amendment 4% surtax applies to annualized net wages above $1,107,750', () => {
@@ -6357,6 +6553,20 @@ describe('Arizona', () => {
     assert.equal(amountOf(r, 'AZ_SIT'), 0);
   });
 
+  test('BUG FIX: zeroElection: "false" (a string) throws rather than being silently treated as true', () => {
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'biweekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+            ...azState({ zeroElection: 'false' }),
+          }),
+        ),
+      /Unrecognized certificate\.zeroElection/,
+    );
+  });
+
   test('an elected rate outside Form A-4\'s 7 published options throws rather than silently applying it', () => {
     // Found during an audit pass: the original implementation cast
     // certificate.electedRate straight to a number and applied it via
@@ -6379,6 +6589,82 @@ describe('Arizona', () => {
         ),
       /Unrecognized AZ certificate\.electedRate/,
     );
+  });
+
+  describe('reciprocity (Form WEC) — conditional on nonresident-credit eligibility, not bare residence', () => {
+    // Arizona's own bug class: unlike IL/IN/KY/MI/MN/OH/PA/WI's unconditional
+    // "resides there" pacts, Form WEC only exempts a CA/IN/OR/VA resident who
+    // is ALSO "allowed to claim a tax credit... on Form 140NR" — modelled via
+    // reciprocity.creditEligibilityRequiredStates and
+    // certificate.nonresidentCreditEligible on the EMPLOYEE'S OWN
+    // (residence-state) certificate, the same default-safe shape Kentucky/
+    // Virginia's dailyCommuter gate already uses.
+    test('a California resident with no eligibility assertion owes FULL Arizona tax, not $0', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+          workState: { code: 'AZ' },
+          residenceState: { code: 'CA' },
+        }),
+      );
+      assert.equal(amountOf(r, 'AZ_SIT'), dollars(60)); // default 2.0%, same as no-form-on-file
+    });
+
+    test('a California resident who asserts nonresidentCreditEligible gets the exemption', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+          workState: { code: 'AZ' },
+          residenceState: { code: 'CA', certificate: { nonresidentCreditEligible: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'AZ_SIT'), 0);
+    });
+
+    test('all four states (CA/IN/OR/VA) use the same eligibility gate', () => {
+      for (const residence of ['CA', 'IN', 'OR', 'VA']) {
+        const r = calculatePaycheck(
+          input({
+            payFrequency: 'biweekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+            workState: { code: 'AZ' },
+            residenceState: { code: residence, certificate: { nonresidentCreditEligible: true } },
+          }),
+        );
+        assert.equal(amountOf(r, 'AZ_SIT'), 0, `${residence} resident should owe $0 AZ tax`);
+      }
+    });
+
+    test('a non-reciprocal-state resident (Texas) gets no exemption even with the flag asserted', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+          workState: { code: 'AZ' },
+          residenceState: { code: 'TX', certificate: { nonresidentCreditEligible: true } },
+        }),
+      );
+      assert.equal(amountOf(r, 'AZ_SIT'), dollars(60));
+    });
+
+    test('the asymmetry Oregon\'s own guide confirms: an Arizona resident working in Oregon gets no matching OR exemption', () => {
+      // OR-2026.json's own reciprocity.rule: "NONE" — Oregon withholds from
+      // every nonresident regardless of home state. This is the OTHER
+      // direction of the one-directional relationship AZ's own data
+      // discloses (orAsymmetryConfirmed): the AZ exemption for OR residents
+      // above has no mirror image here.
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'monthly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(4000) }],
+          workState: { code: 'OR', certificate: { maritalStatus: 'single', allowances: 0 } },
+          residenceState: { code: 'AZ', certificate: { nonresidentCreditEligible: true } },
+        }),
+      );
+      assert.ok(amountOf(r, 'OR_SIT') > 0, 'Oregon must still withhold from an Arizona resident');
+    });
   });
 });
 
@@ -8342,6 +8628,27 @@ describe('North Carolina', () => {
       });
     }
 
+    test('BUG FIX: nonresidentAlien: "false" (a string) throws rather than being silently treated as true', () => {
+      // Same class of bug already guarded against on certificate.exempt and
+      // certificate.nonresident (see resolveCertBoolean's own doc comment):
+      // this file's own line 8035 used to read Boolean(cert.nonresidentAlien)
+      // directly, which the guard function's OWN doc comment already named
+      // as the specific anti-pattern that doesn't work — Boolean("false") is
+      // true. Closed the same session this table was written, across all 4
+      // call sites (Minnesota, Idaho x2, North Carolina).
+      assert.throws(
+        () =>
+          calculatePaycheck(
+            input({
+              payFrequency: 'monthly',
+              earnings: [{ code: 'REG', category: 'regular', amount: dollars(5000) }],
+              ...ncState({ nonresidentAlien: 'false' }),
+            }),
+          ),
+        /Unrecognized certificate\.nonresidentAlien/,
+      );
+    });
+
     test('forces Single status and 0 allowances even if the certificate claims otherwise', () => {
       const r = calculatePaycheck(
         input({
@@ -8559,6 +8866,27 @@ describe('Alabama', () => {
     // [$3,000+, base $110, 5%]: 110 + 5%x(23,025-3,000=20,025=$1,001.25)
     // = $1,111.25/yr / 52 = $21.37 (roundHalfUp of 21.370192...).
     assert.equal(amountOf(r, 'AL_SIT'), dollars(21.37));
+  });
+
+  test('BUG FIX: an unrecognized alabamaExemptionCode throws rather than silently defaulting to single', () => {
+    // resolveALDeductionKey() and alabamaPersonalExemption() used to fall
+    // through to the single/'0' case for ANY code they didn't explicitly
+    // recognize, not just '0'/'S' — a typo'd code (e.g. 'Mrs' instead of
+    // 'M', or a copy-pasted field from a different state) would have
+    // silently under-withheld a married or head-of-family employee as a
+    // single filer, with no error. Same anti-pattern this project's own
+    // Arizona electedRate fix already closed for a different field.
+    assert.throws(
+      () =>
+        calculatePaycheck(
+          input({
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(500) }],
+            workState: { code: 'AL', certificate: { alabamaExemptionCode: 'Mrs' } },
+          }),
+        ),
+      /Unrecognized AL certificate\.alabamaExemptionCode/,
+    );
   });
 
   // Municipal Occupational Tax (AL_LOCAL) — sourced from the Alabama
