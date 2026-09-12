@@ -134,7 +134,14 @@ export function computeEmployeePaycheck(
     posttaxDeductions: result.posttaxDeductions,
     garnishmentTotal: garnishment?.totalWithheld ?? 0,
     netPayAfterGarnishment,
-    taxLines: result.taxes.map((t) => ({ id: t.id, name: t.name, payer: t.payer, taxableWages: t.taxableWages, amount: t.amount })),
+    taxLines: result.taxes.map((t) => ({
+      id: t.id,
+      name: t.name,
+      payer: t.payer,
+      jurisdiction: t.jurisdiction,
+      taxableWages: t.taxableWages,
+      amount: t.amount,
+    })),
     garnishmentLines: garnishment?.lines.map((g) => ({ orderId: g.orderId, withheld: g.withheld, detail: g.detail })) ?? [],
     depositAllocations,
   };

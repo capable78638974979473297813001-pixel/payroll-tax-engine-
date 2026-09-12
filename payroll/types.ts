@@ -149,7 +149,14 @@ export interface PayRunLine {
   /** Net pay after garnishments are withheld — what direct deposit actually moves. */
   netPayAfterGarnishment: Cents;
   /** taxableWages is carried alongside amount (not just for display) so an approved run can be rolled into YTD later purely from this persisted line — see ytd.ts's own accumulateYtd(), which reads exactly these two fields. */
-  taxLines: { id: string; name: string; payer: 'employee' | 'employer'; taxableWages: Cents; amount: Cents }[];
+  taxLines: {
+    id: string;
+    name: string;
+    payer: 'employee' | 'employer';
+    jurisdiction: 'federal' | 'state' | 'local';
+    taxableWages: Cents;
+    amount: Cents;
+  }[];
   garnishmentLines: { orderId: string; withheld: Cents; detail: string }[];
   depositAllocations: { accountId: string; amount: Cents }[];
 }

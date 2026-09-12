@@ -10,6 +10,7 @@ npm run demo               # prints a worked paystub
 npm run demo:garnishment   # same, layered with a child-support + creditor garnishment
 npm run demo:payroll       # a full payroll RUN: two employees, draft -> approve -> paystubs -> a real NACHA ACH file
 npm run ui:calculator      # any-state calculator UI, address-based local tax lookup
+npm run ui:payroll         # payroll admin UI: run payroll, view paystubs, Form 941, W-2 -- backed by payroll/store.ts
 ```
 
 ## Status
@@ -48,9 +49,13 @@ through approval (`payroll/run.ts`), rolling each approved run into every
 employee's running YTD so the engine's own wage-base caps see it on the next
 one (`payroll/ytd.ts`), splitting net pay across direct deposit accounts and
 writing a real NACHA ACH file (`payroll/directDeposit.ts`), and rendering a
-paystub (`payroll/paystub.ts`). `npm run demo:payroll` runs the whole
-lifecycle for two employees — one salaried, one hourly with overtime and a
-child-support order — end to end, paystubs and ACH file included.
+paystub (`payroll/paystub.ts`), and rolling a company's approved run history
+into the liability figures Form 941 itself reports and the core W-2 boxes
+(`payroll/filings.ts`). `npm run demo:payroll` runs the whole lifecycle for
+two employees — one salaried, one hourly with overtime and a child-support
+order — end to end, paystubs and ACH file included; `npm run ui:payroll`
+puts a small admin UI in front of the same store — run payroll, view a
+paystub, pull a quarter's Form 941 or an employee's W-2.
 
 Persistence follows the same convention `site/lib/store.ts` already
 established for the API-key product: a file-backed store
@@ -75,14 +80,24 @@ by literally crossing the 2026 Social Security wage base and the Additional
 Medicare threshold across two periods and checking the exact cent figure
 that lands.
 
-What `payroll/` does NOT attempt, named plainly rather than left to be
-discovered: quarterly/annual tax FILING (941/940, state UI returns, W-2/1099
-generation), benefits carrier EDI, time-and-attendance beyond a plain
-hours-per-period input, a live bank-linking integration (see
-`payroll/directDeposit.ts`'s own header note on the account-number custody
-boundary a real system draws that this one doesn't attempt to build), and
-any UI beyond the plain-text paystub and the worked demo script. Each is a
-real, separate subsystem a full HCM platform builds — not a corner cut here.
+`payroll/filings.ts` computes Form 941's own liability lines (1-6: headcount,
+wages, federal income tax withheld, Social Security and Medicare wages and
+tax, Additional Medicare) and W-2 boxes 1-6/10/12/15-20, purely as ROLLUPS of
+tax lines the engine already produced — no new tax logic, so a wrong figure
+there is a wrong sum, never a wrong calculation. It deliberately does NOT
+prepare a filable return or PDF, does not implement Form 941's credits and
+adjustments (COBRA assistance, leave credits, the research-credit payroll
+offset — none of which PaycheckInput models an input for), and does not
+generate Form 940 (annual FUTA follows the same rollup shape but isn't
+built) — see that module's own header comment.
+
+What `payroll/` still does NOT attempt, named plainly rather than left to be
+discovered: e-filing anything, benefits carrier EDI, time-and-attendance
+beyond a plain hours-per-period input, and a live bank-linking integration
+(see `payroll/directDeposit.ts`'s own header note on the account-number
+custody boundary a real system draws that this one doesn't attempt to
+build). Each is a real, separate subsystem a full HCM platform builds — not
+a corner cut here.
 
 ## The one idea that matters
 

@@ -22,3 +22,5 @@ export type { EmployeePaycheckComputation } from './engine.ts';
 export { activeEmployeesFor, approvePayRun, draftPayRun, recalculatePayRun, voidPayRun, ytdForCheckDate } from './run.ts';
 export type { ApprovedPayRun } from './run.ts';
 export { renderPaystubText } from './paystub.ts';
+export { computeForm941, computeW2, computeW2FromEmployee } from './filings.ts';
+export type { Form941Summary, W2LocalWages, W2StateWages, W2Summary } from './filings.ts';

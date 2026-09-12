@@ -7,7 +7,7 @@
     "node": ">=22.6.0"
   },
   "scripts": {
-    "test": "node --test tests/engine.test.ts tests/harvester.test.ts tests/geocode.test.ts tests/alabama.test.ts tests/harvest-sweep.test.ts tests/harvest-journal.test.ts tests/garnishment.test.ts tests/minimum-wage.test.ts tests/employer-thresholds.test.ts tests/minimum-wage-address.test.ts tests/payroll.test.ts",
+    "test": "node --test tests/engine.test.ts tests/harvester.test.ts tests/geocode.test.ts tests/alabama.test.ts tests/harvest-sweep.test.ts tests/harvest-journal.test.ts tests/garnishment.test.ts tests/minimum-wage.test.ts tests/employer-thresholds.test.ts tests/minimum-wage-address.test.ts tests/payroll.test.ts tests/payroll-filings.test.ts",
     "demo": "node examples/demo.ts",
     "demo:garnishment": "node examples/garnishment-demo.ts",
     "demo:payroll": "node examples/payroll-demo.ts",
@@ -33,7 +33,8 @@
     "address-index:build": "node scripts/build-address-index.ts --all",
     "address-index:build-nad": "node scripts/build-nad-index.ts",
     "address-index:stats": "node scripts/address-index-stats.ts",
-    "ui:minimum-wage": "node examples/minimum-wage-server.ts"
+    "ui:minimum-wage": "node examples/minimum-wage-server.ts",
+    "ui:payroll": "node examples/payroll-server.ts"
   },
   "license": "MIT"
 }

@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Payroll Admin</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --panel: #ffffff;
+    --border: #dfe3e8;
+    --text: #1b1f24;
+    --muted: #5c6672;
+    --accent: #1f4f7a;
+    --accent-ink: #ffffff;
+    --good-bg: #edf3f7;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  header { background: var(--accent); color: var(--accent-ink); padding: 18px 24px; }
+  header h1 { margin: 0; font-size: 19px; font-weight: 600; }
+  header p { margin: 4px 0 0; font-size: 13px; opacity: 0.88; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px; display: grid; gap: 16px; }
+  section { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; }
+  section h2 { margin: 0 0 10px; font-size: 15px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  th { color: var(--muted); font-weight: 600; }
+  button {
+    background: var(--accent); color: var(--accent-ink); border: none; border-radius: 5px;
+    padding: 8px 14px; font-size: 13px; cursor: pointer;
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.secondary { background: var(--good-bg); color: var(--text); border: 1px solid var(--border); }
+  pre {
+    background: #0f1720; color: #dbe4ee; padding: 12px 14px; border-radius: 6px;
+    font-family: var(--mono); font-size: 12.5px; overflow-x: auto; white-space: pre-wrap;
+  }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  select, input { padding: 6px 8px; border: 1px solid var(--border); border-radius: 5px; font-size: 13px; }
+  .muted { color: var(--muted); }
+  .status { font-size: 13px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Payroll Admin</h1>
+  <p>Backed directly by payroll/store.ts — a company, its employees, and every pay run that's ever been approved.</p>
+</header>
+<main>
+  <section id="company-section">
+    <h2>Company</h2>
+    <div id="company-info" class="muted">Loading…</div>
+  </section>
+
+  <section>
+    <h2>Employees</h2>
+    <table id="employees-table">
+      <thead><tr><th>Name</th><th>Pay type</th><th>Residence</th><th>YTD Social Security wages</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Run payroll</h2>
+    <div class="row">
+      <span id="next-period" class="muted">Loading…</span>
+      <button id="run-btn" disabled>Run next payroll</button>
+    </div>
+    <div id="run-status" class="status"></div>
+  </section>
+
+  <section>
+    <h2>Pay run history</h2>
+    <table id="runs-table">
+      <thead><tr><th>Check date</th><th>Period</th><th>Status</th><th>Employees</th><th>Paystubs</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <pre id="paystub-view" hidden></pre>
+  </section>
+
+  <section>
+    <h2>Form 941 (quarterly)</h2>
+    <div class="row">
+      <input id="f941-year" type="number" value="2026" style="width:90px" />
+      <select id="f941-quarter">
+        <option value="1">Q1</option><option value="2">Q2</option><option value="3">Q3</option><option value="4">Q4</option>
+      </select>
+      <button class="secondary" id="f941-btn">View</button>
+    </div>
+    <pre id="f941-view"></pre>
+  </section>
+
+  <section>
+    <h2>W-2 (annual)</h2>
+    <div class="row">
+      <select id="w2-employee"></select>
+      <input id="w2-year" type="number" value="2026" style="width:90px" />
+      <button class="secondary" id="w2-btn">View</button>
+    </div>
+    <pre id="w2-view"></pre>
+  </section>
+</main>
+
+<script>
+let company = null;
+let employees = [];
+
+function fmtCents(c) {
+  const neg = c < 0;
+  const abs = Math.abs(c);
+  return (neg ? '-$' : '$') + (abs / 100).toFixed(2);
+}
+
+async function api(path, options) {
+  const res = await fetch(path, options);
+  const body = await res.json();
+  if (!res.ok) throw new Error(body.error || res.statusText);
+  return body;
+}
+
+async function loadCompany() {
+  const { companies } = await api('/api/companies');
+  company = companies[0];
+  document.getElementById('company-info').innerHTML =
+    `<strong>${company.legalName}</strong> · EIN ${company.ein} · home state ${company.homeState} · ` +
+    `${company.paySchedule.frequency} pay schedule`;
+}
+
+async function loadEmployees() {
+  const { employees: list } = await api(`/api/companies/${company.id}/employees`);
+  employees = list;
+  const tbody = document.querySelector('#employees-table tbody');
+  tbody.innerHTML = list.map((e) => `
+    <tr>
+      <td>${e.firstName} ${e.lastName}</td>
+      <td>${e.payType.kind === 'salary' ? fmtCents(e.payType.annualSalary) + '/yr' : fmtCents(e.payType.hourlyRate) + '/hr'}</td>
+      <td>${e.residenceState.code}</td>
+      <td>${fmtCents(e.ytd.socialSecurity || 0)}</td>
+    </tr>`).join('');
+
+  const w2select = document.getElementById('w2-employee');
+  w2select.innerHTML = list.map((e) => `<option value="${e.id}">${e.firstName} ${e.lastName}</option>`).join('');
+}
+
+async function loadNextPeriod() {
+  const { period } = await api(`/api/companies/${company.id}/next-period`);
+  const el = document.getElementById('next-period');
+  const btn = document.getElementById('run-btn');
+  if (!period) {
+    el.textContent = 'No more scheduled periods available.';
+    btn.disabled = true;
+    return;
+  }
+  el.textContent = `Next period: ${period.periodStart} to ${period.periodEnd}, check date ${period.checkDate}`;
+  btn.disabled = false;
+}
+
+async function loadRuns() {
+  const { payRuns } = await api(`/api/companies/${company.id}/pay-runs`);
+  const tbody = document.querySelector('#runs-table tbody');
+  tbody.innerHTML = payRuns.map((r) => `
+    <tr>
+      <td>${r.checkDate}</td>
+      <td>${r.periodStart} – ${r.periodEnd}</td>
+      <td>${r.status}</td>
+      <td>${r.lines.length}</td>
+      <td>${r.lines.map((l) => `<a href="#" data-run="${r.id}" data-emp="${l.employeeId}" class="paystub-link">${l.employeeId}</a>`).join(' · ')}</td>
+    </tr>`).join('');
+
+  tbody.querySelectorAll('.paystub-link').forEach((a) => {
+    a.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      const text = await fetch(`/api/pay-runs/${a.dataset.run}/paystub/${a.dataset.emp}`).then((r) => r.text());
+      const view = document.getElementById('paystub-view');
+      view.hidden = false;
+      view.textContent = text;
+    });
+  });
+}
+
+async function refreshAll() {
+  await loadCompany();
+  await Promise.all([loadEmployees(), loadNextPeriod(), loadRuns()]);
+}
+
+document.getElementById('run-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('run-btn');
+  const status = document.getElementById('run-status');
+  btn.disabled = true;
+  status.textContent = 'Running payroll…';
+  try {
+    const { payRun } = await api(`/api/companies/${company.id}/run-payroll`, { method: 'POST' });
+    status.textContent = `Approved run ${payRun.id} for ${payRun.checkDate} — ${payRun.lines.length} employee(s) paid.`;
+    await Promise.all([loadEmployees(), loadNextPeriod(), loadRuns()]);
+  } catch (err) {
+    status.textContent = 'Error: ' + err.message;
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('f941-btn').addEventListener('click', async () => {
+  const year = document.getElementById('f941-year').value;
+  const quarter = document.getElementById('f941-quarter').value;
+  const view = document.getElementById('f941-view');
+  try {
+    const { form941 } = await api(`/api/companies/${company.id}/941?year=${year}&quarter=${quarter}`);
+    view.textContent = JSON.stringify(form941, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('w2-btn').addEventListener('click', async () => {
+  const employeeId = document.getElementById('w2-employee').value;
+  const year = document.getElementById('w2-year').value;
+  const view = document.getElementById('w2-view');
+  try {
+    const { w2 } = await api(`/api/employees/${employeeId}/w2?year=${year}`);
+    view.textContent = JSON.stringify(w2, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+refreshAll().catch((err) => {
+  document.getElementById('company-info').textContent = 'Error: ' + err.message;
+});
+</script>
+</body>
+</html>
