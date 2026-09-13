@@ -368,6 +368,25 @@
   </section>
 
   <section>
+    <h2>Pregnant Workers Fairness Act</h2>
+    <p class="muted" style="margin-top:0">Covers employers with 15+ employees, in effect since June 27, 2023. Four specific accommodations (water access, additional restroom breaks, sitting/standing as needed, additional eating/drinking breaks) are "predictable assessments" the EEOC says are reasonable in virtually every case — no medical documentation may be required for those. Every other accommodation still goes through PWFA's general reasonable-accommodation-unless-undue-hardship standard, which this project doesn't evaluate (a fact-specific judgment, same as the ADA's own).</p>
+    <div class="row">
+      <input id="pwfa-employee-count" type="number" placeholder="Employer headcount" style="width:170px" />
+      <input id="pwfa-request-date" type="date" />
+      <select id="pwfa-accommodation">
+        <option value="water_access">Water access</option>
+        <option value="additional_restroom_breaks">Additional restroom breaks</option>
+        <option value="sit_or_stand_as_needed">Sit or stand as needed</option>
+        <option value="additional_eating_drinking_breaks">Additional eating/drinking breaks</option>
+        <option value="temporary_reassignment">Temporary reassignment (not predictable)</option>
+        <option value="telework">Telework (not predictable)</option>
+      </select>
+      <button class="secondary" id="pwfa-calc-btn">Calculate</button>
+    </div>
+    <pre id="pwfa-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -1252,6 +1271,28 @@ document.getElementById('bw-calc-btn').addEventListener('click', async () => {
       `Backup withholding required: ${result.backupWithholdingRequired ? 'YES' : 'No'}\n` +
       `Backup withholding amount (24%): ${fmtCents(result.backupWithholdingAmount)}\n` +
       `Net payment: ${fmtCents(result.netPayment)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('pwfa-request-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('pwfa-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('pwfa-view');
+  const employeeCount = Number(document.getElementById('pwfa-employee-count').value) || 0;
+  const requestDate = document.getElementById('pwfa-request-date').value;
+  const accommodation = document.getElementById('pwfa-accommodation').value;
+  try {
+    const result = await api('/api/pwfa/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCount, requestDate, accommodation }),
+    });
+    view.textContent =
+      `Employer covered (15+): ${result.employerCovered ? 'YES' : 'No'}\n` +
+      `Law in effect on this date: ${result.lawInEffect ? 'YES' : 'No'}\n` +
+      `Predictable assessment (always reasonable): ${result.isPredictableAssessment ? 'YES' : 'No'}\n` +
+      `Medical documentation may be required: ${result.medicalDocumentationRequired ? 'YES' : 'No'}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

@@ -196,6 +196,24 @@ Beyond the pay-run engine itself, three more real HR pieces:
   of that test, the same kind of boundary `payroll/warnAct.ts`'s own
   exception-guidance functions draw around a legal judgment with no
   formula to compute. Wired into the admin UI as a calculator.
+- `payroll/pwfa.ts`: the federal Pregnant Workers Fairness Act (effective
+  June 27, 2023; EEOC final regulations at 29 C.F.R. Part 1636, effective
+  June 18, 2024) — live-verified against EEOC's own materials, corroborated
+  across multiple independent legal sources for its regulation's exact
+  wording. Covers employers with 15+ employees. Models the one part of
+  this law reducible to a clean rule: the EEOC's own "predictable
+  assessment" concept (29 C.F.R. § 1636.3(k)) — four specific
+  accommodations (water access, additional restroom breaks, sitting or
+  standing as needed, additional eating/drinking breaks) the regulation
+  says will, in virtually every case, be reasonable without an
+  individualized undue-hardship analysis, for which the employee's own
+  self-confirmation is enough and medical documentation may never be
+  required. Every OTHER accommodation still goes through PWFA's general
+  reasonable-accommodation-unless-undue-hardship standard (borrowed from
+  the ADA), which this module deliberately doesn't evaluate — the same
+  "no formula for a legal judgment" boundary `payroll/warnAct.ts`'s own
+  exception guidance and `payroll/pumpAct.ts`'s own small-employer
+  exemption already draw. Wired into the admin UI as a calculator.
 - `payroll/pto.ts`: accrual (per hour worked or per pay period), a
   balance that never goes negative, an accrual cap, annual carryover with
   its own cap, and a payout as an ordinary taxable Earning.

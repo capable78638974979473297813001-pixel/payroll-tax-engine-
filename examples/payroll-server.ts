@@ -80,6 +80,10 @@ import {
   isBackupWithholdingRequired,
   backupWithholdingAmount,
   netPaymentAfterBackupWithholding,
+  isPwfaCoveredEmployer,
+  isPwfaInEffect,
+  isPredictableAssessmentAccommodation,
+  requiresMedicalDocumentation,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1748,6 +1752,21 @@ const server = createServer(async (req, res) => {
         backupWithholdingRequired: required,
         backupWithholdingAmount: required ? backupWithholdingAmount(grossCents) : 0,
         netPayment: netPaymentAfterBackupWithholding(grossCents, required),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Pregnant Workers Fairness Act calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/pwfa/calculator') {
+      const body = await parseJsonBody<{ employeeCount: number; requestDate: string; accommodation: string }>(req);
+      sendJson(res, 200, {
+        employerCovered: isPwfaCoveredEmployer(body.employeeCount),
+        lawInEffect: isPwfaInEffect(body.requestDate),
+        isPredictableAssessment: isPredictableAssessmentAccommodation(body.accommodation),
+        medicalDocumentationRequired: requiresMedicalDocumentation(body.accommodation),
       });
       return;
     }

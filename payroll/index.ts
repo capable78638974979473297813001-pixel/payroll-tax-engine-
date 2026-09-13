@@ -234,6 +234,15 @@ export {
   netPaymentAfterBackupWithholding,
 } from './backupWithholding.ts';
 export type { BackupWithholdingPaymentType } from './backupWithholding.ts';
+export {
+  PWFA_EMPLOYER_THRESHOLD,
+  PWFA_EFFECTIVE_DATE,
+  isPwfaCoveredEmployer,
+  isPwfaInEffect,
+  isPredictableAssessmentAccommodation,
+  requiresMedicalDocumentation,
+} from './pwfa.ts';
+export type { PwfaPredictableAssessmentAccommodation } from './pwfa.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';
