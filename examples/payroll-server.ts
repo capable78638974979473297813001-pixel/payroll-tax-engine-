@@ -358,6 +358,29 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    // A dedicated route, not folded into the generic PATCH above: a W-4
+    // change directly changes federal withholding on someone's very next
+    // paycheck, the same "real, sensitive, auditable event deserves its
+    // own deliberate handling" reasoning the PATCH route's own header
+    // comment gives for excluding it. Self-service employees hit this
+    // same route (see examples/employee-portal.html) — actor in the
+    // audit log is always AUDIT_ACTOR ('admin') here too, since this
+    // demo has no real per-employee auth session to attribute the change
+    // to instead (same disclosed limitation as payroll/auditLog.ts's own
+    // header).
+    const federalW4Match = req.url?.match(/^\/api\/employees\/([^/]+)\/federal-w4$/);
+    if (req.method === 'POST' && federalW4Match) {
+      const employeeId = decodeURIComponent(federalW4Match[1]);
+      const employee = getEmployee(employeeId);
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const federalW4 = await parseJsonBody<Employee['federalW4']>(req);
+      const updated: Employee = { ...employee, federalW4 };
+      saveEmployee(updated);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'employee.federal_w4_updated', 'Employee', employeeId, {}));
+      sendJson(res, 200, { employee: updated });
+      return;
+    }
+
     const selfServiceMatch = req.url?.match(/^\/api\/employees\/([^/]+)\/self-service$/);
     if (req.method === 'GET' && selfServiceMatch) {
       const employee = getEmployee(decodeURIComponent(selfServiceMatch[1]));
@@ -389,6 +412,7 @@ const server = createServer(async (req, res) => {
           department: employee.department,
           payType: employee.payType,
           hireDate: employee.hireDate,
+          federalW4: employee.federalW4,
         },
         companyName: company.legalName,
         myPayRuns,

@@ -329,6 +329,12 @@ Beyond the pay-run engine itself, three more real HR pieces:
   to the requesting employee's own line before returning anything — an
   employee's view must never leak a coworker's pay, so that filter lives
   once at the API boundary rather than trusted to every future caller.
+  The portal now also shows and lets the employee update their own Form
+  W-4 directly — a new `POST /api/employees/:id/federal-w4` route kept
+  deliberately separate from the generic employee-profile PATCH route
+  (which explicitly excludes `federalW4` in its own header comment): a
+  W-4 change directly changes federal withholding on the very next
+  paycheck, a real, sensitive, auditable event on its own.
 
 - `payroll/form1095c.ts`: turns `payroll/aca.ts`'s own Line 14/16 code
   functions into an actual 12-month Form 1095-C for one real employee,

@@ -91,6 +91,32 @@
     <h2>My I-9 status</h2>
     <div id="i9-status" class="muted">—</div>
   </section>
+
+  <section>
+    <h2>My Form W-4</h2>
+    <p class="muted" style="margin-top:0">Changes here affect federal withholding on your very next paycheck.</p>
+    <div class="row">
+      <select id="w4-filing-status">
+        <option value="single">Single</option>
+        <option value="married_joint">Married filing jointly</option>
+        <option value="married_separate">Married filing separately</option>
+        <option value="head_of_household">Head of household</option>
+      </select>
+      <label><input type="checkbox" id="w4-multiple-jobs" /> Multiple jobs / spouse works (Step 2)</label>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <input id="w4-dependent-credit" type="number" placeholder="Dependent credit ($/yr, Step 3)" style="width:220px" />
+      <input id="w4-other-income" type="number" placeholder="Other income ($/yr, Step 4a)" style="width:200px" />
+    </div>
+    <div class="row" style="margin-top:8px">
+      <input id="w4-deductions" type="number" placeholder="Extra deductions ($/yr, Step 4b)" style="width:220px" />
+      <input id="w4-extra-withholding" type="number" placeholder="Extra withholding ($/paycheck, Step 4c)" style="width:250px" />
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="secondary" id="w4-save-btn">Save W-4</button>
+    </div>
+    <pre id="w4-view"></pre>
+  </section>
 </main>
 
 <script>
@@ -167,6 +193,14 @@ async function loadSelfService(employeeId) {
 
   document.getElementById('i9-status').textContent = `Status: ${data.i9Status}`;
 
+  const w4 = data.employee.federalW4;
+  document.getElementById('w4-filing-status').value = w4.filingStatus;
+  document.getElementById('w4-multiple-jobs').checked = w4.multipleJobs;
+  document.getElementById('w4-dependent-credit').value = w4.dependentCredit / 100;
+  document.getElementById('w4-other-income').value = w4.otherIncome / 100;
+  document.getElementById('w4-deductions').value = w4.deductions / 100;
+  document.getElementById('w4-extra-withholding').value = w4.extraWithholding / 100;
+
   await loadMyPtoRequests();
 }
 
@@ -210,6 +244,27 @@ document.getElementById('pto-request-btn').addEventListener('click', async () =>
     });
     view.textContent = 'Request submitted — pending manager approval.';
     await loadMyPtoRequests();
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('w4-save-btn').addEventListener('click', async () => {
+  const view = document.getElementById('w4-view');
+  if (!currentEmployeeId) return (view.textContent = 'Pick yourself above first.');
+  const federalW4 = {
+    filingStatus: document.getElementById('w4-filing-status').value,
+    multipleJobs: document.getElementById('w4-multiple-jobs').checked,
+    dependentCredit: Math.round(Number(document.getElementById('w4-dependent-credit').value) * 100) || 0,
+    otherIncome: Math.round(Number(document.getElementById('w4-other-income').value) * 100) || 0,
+    deductions: Math.round(Number(document.getElementById('w4-deductions').value) * 100) || 0,
+    extraWithholding: Math.round(Number(document.getElementById('w4-extra-withholding').value) * 100) || 0,
+  };
+  try {
+    await api(`/api/employees/${currentEmployeeId}/federal-w4`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(federalW4),
+    });
+    view.textContent = 'W-4 saved — takes effect on your next paycheck.';
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
