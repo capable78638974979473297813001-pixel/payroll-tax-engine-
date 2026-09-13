@@ -487,4 +487,63 @@ CREATE TABLE candidate (
   offer             JSONB
 );
 
+-- ----------------------------------------------------------------------------
+-- 1099 contractors
+-- ----------------------------------------------------------------------------
+-- See payroll/contractors.ts's own header comment: a genuinely different
+-- population from employee (no W-4, no withholding), tracked only far
+-- enough to answer Form 1099-NEC's own reporting-threshold question.
+
+CREATE TABLE contractor (
+  id                        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id                UUID NOT NULL REFERENCES company (id),
+  legal_name                TEXT NOT NULL,
+  -- SSN (individual) or EIN (business) -- same production boundary as
+  -- employee.ssn: a real system tokenizes/encrypts this column rather
+  -- than storing it plainly the way this demo-scale store does.
+  tin                       TEXT NOT NULL,
+  address                   TEXT NOT NULL,
+  active                    BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE contractor_direct_deposit_account (
+  contractor_id     UUID PRIMARY KEY REFERENCES contractor (id) ON DELETE CASCADE,
+  routing_number    CHAR(9) NOT NULL,
+  account_number    TEXT NOT NULL,
+  account_type      deposit_account_type NOT NULL
+);
+
+CREATE TABLE contractor_payment (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  contractor_id     UUID NOT NULL REFERENCES contractor (id),
+  payment_date      DATE NOT NULL,
+  amount_cents      BIGINT NOT NULL,
+  description       TEXT
+);
+
+-- ----------------------------------------------------------------------------
+-- Audit log
+-- ----------------------------------------------------------------------------
+-- See payroll/auditLog.ts's own header comment: an append-only record of
+-- who did what to which record, attached at the points this project
+-- actually mutates state on someone's behalf. entity_id is deliberately
+-- untyped (TEXT, no foreign key) because a single audit trail spans many
+-- different entity tables (company, employee, pay_run, candidate, ...)
+-- and a real FK would have to pick just one.
+
+CREATE TABLE audit_log (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  occurred_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  -- Hardcoded to 'admin' by this demo-scale build, which has no real
+  -- login -- see payroll/auditLog.ts's own header comment. A real
+  -- deployment wires this to its own session/auth layer's user id.
+  actor         TEXT NOT NULL,
+  action        TEXT NOT NULL,
+  entity_type   TEXT NOT NULL,
+  entity_id     TEXT NOT NULL,
+  details       JSONB
+);
+
+CREATE INDEX audit_log_entity_id_idx ON audit_log (entity_id);
+
 COMMIT;
