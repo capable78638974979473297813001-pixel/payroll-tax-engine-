@@ -176,6 +176,18 @@ export {
   restPeriodPremium,
   dailyMealAndRestPremium,
 } from './mealRestBreaks.ts';
+export {
+  NY_WAGE_NOTICE_RETENTION_YEARS,
+  NY_WAGE_NOTICE_DAILY_PENALTY,
+  NY_WAGE_NOTICE_MAX_DAMAGES,
+  NY_WAGE_STATEMENT_DAILY_PENALTY,
+  NY_WAGE_STATEMENT_MAX_DAMAGES,
+  nyWageNoticeComplianceIssues,
+  isNewNoticeRequiredForRateChange,
+  estimatedNoticeViolationDamages,
+  estimatedWageStatementViolationDamages,
+} from './nyWageNotice.ts';
+export type { NyWageBasisOfPay, NyWageNotice } from './nyWageNotice.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

@@ -58,6 +58,10 @@ import {
   isSecondMealPeriodWaivable,
   restBreaksRequired,
   dailyMealAndRestPremium,
+  nyWageNoticeComplianceIssues,
+  isNewNoticeRequiredForRateChange,
+  estimatedNoticeViolationDamages,
+  estimatedWageStatementViolationDamages,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -111,6 +115,7 @@ import type { BenefitPlan, CoverageTier } from '../payroll/benefits.ts';
 import type { Contractor } from '../payroll/contractors.ts';
 import type { EverifyCase, EverifyCaseStatus } from '../payroll/everify.ts';
 import type { HdhpCoverageTier } from '../payroll/hsaFsaLimits.ts';
+import type { NyWageBasisOfPay } from '../payroll/nyWageNotice.ts';
 import type { I9Record } from '../payroll/i9.ts';
 import type { Candidate, CandidateStage, OfferDetails } from '../payroll/onboarding.ts';
 import type { TerminationReason } from '../payroll/termination.ts';
@@ -1590,6 +1595,43 @@ const server = createServer(async (req, res) => {
         secondMealPeriodWaivable: isSecondMealPeriodWaivable(body.hoursWorked, body.firstMealPeriodWaived),
         restBreaksRequired: restBreaksRequired(body.hoursWorked),
         premiumOwed: dailyMealAndRestPremium(body.mealPeriodViolationOccurred, body.restPeriodViolationOccurred, dollars(body.regularRateDollars)),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // New York wage notice calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/ny-wage-notice/calculator') {
+      const body = await parseJsonBody<{
+        rateOfPayDollars?: number;
+        basisOfPay?: NyWageBasisOfPay;
+        allowancesClaimedDollars?: number;
+        regularPayDay?: string;
+        employerLegalName?: string;
+        employerAddress?: string;
+        employerPhone?: string;
+        isRateIncrease: boolean;
+        willAppearOnNextWageStatement: boolean;
+        isHospitalityIndustry: boolean;
+        daysWithoutCompliantNotice: number;
+        daysWithoutCompliantStatement: number;
+      }>(req);
+      const issues = nyWageNoticeComplianceIssues({
+        rateOfPayCents: body.rateOfPayDollars === undefined ? undefined : dollars(body.rateOfPayDollars),
+        basisOfPay: body.basisOfPay,
+        allowancesClaimedCents: body.allowancesClaimedDollars === undefined ? undefined : dollars(body.allowancesClaimedDollars),
+        regularPayDay: body.regularPayDay,
+        employerLegalName: body.employerLegalName,
+        employerAddress: body.employerAddress,
+        employerPhone: body.employerPhone,
+      });
+      sendJson(res, 200, {
+        noticeComplianceIssues: issues,
+        newNoticeRequiredForRateChange: isNewNoticeRequiredForRateChange(body.isRateIncrease, body.willAppearOnNextWageStatement, body.isHospitalityIndustry),
+        estimatedNoticeViolationDamages: estimatedNoticeViolationDamages(body.daysWithoutCompliantNotice),
+        estimatedWageStatementViolationDamages: estimatedWageStatementViolationDamages(body.daysWithoutCompliantStatement),
       });
       return;
     }

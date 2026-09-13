@@ -571,6 +571,30 @@ Beyond the pay-run engine itself, three more real HR pieces:
   into the admin UI's "State employer registrations" panel. Does not
   itself file a registration (each state's own online application is
   real, separate infrastructure) or track how long one takes to process.
+- `payroll/nyWageNotice.ts`: New York's Wage Theft Prevention Act (Labor
+  Law § 195) — live-verified against NY DOL's own WTPA FAQ. Validates
+  every field the at-hire "Notice and Acknowledgement of Pay Rate and
+  Payday" must contain (flagging every missing one, not just the first,
+  the same pattern `payroll/fmla.ts`'s eligibility check uses) — including
+  that allowances claimed must be STATED even when zero, not merely
+  omitted. Decides whether a pay-rate change needs a brand-new notice:
+  a decrease always does; a non-hospitality increase doesn't if it will
+  show on the next wage statement instead; the hospitality industry
+  needs one for every change, no wage-statement substitute available at
+  all. Also estimates DOL's own per-day civil penalty exposure — $50/day
+  for a notice violation, $250/day for a wage-statement violation, each
+  independently capped at $5,000/worker (`estimatedNoticeViolationDamages()`
+  and its wage-statement counterpart both clamp to that cap, so damages
+  never appear to keep growing past it the way a naive `days * rate`
+  calculation would). Same NY-specific scope this project's own
+  `data/minimum-wage/states/NY-2026.json` and
+  `data/employer-thresholds/NY-2026.json` already carry — every other
+  state's own wage-notice law remains a disclosed gap, the same boundary
+  `payroll/paidSickLeave.ts` and `payroll/workersComp.ts` draw around
+  their own single-jurisdiction scope. Does not generate or translate the
+  notice document itself, or track retaliation claims (a genuinely
+  separate § 215 cause of action). Wired into the admin UI as a
+  calculator.
 - `payroll/complianceDashboard.ts`: one screen for every compliance check
   above — minimum wage, Form I-9, E-Verify, PRWORA new-hire reporting, and
   state registration — pure aggregation, the same "no new business logic,

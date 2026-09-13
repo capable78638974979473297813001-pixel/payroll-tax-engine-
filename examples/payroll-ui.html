@@ -256,6 +256,42 @@
   </section>
 
   <section>
+    <h2>New York wage notice (WTPA)</h2>
+    <p class="muted" style="margin-top:0">Checks a Notice and Acknowledgement of Pay Rate and Payday for every field NY Labor Law § 195(1) requires, whether a rate change needs a brand-new notice, and the DOL's own per-day penalty exposure ($50/day for a notice violation, $250/day for a wage-statement violation, each capped at $5,000/worker). This project doesn't generate or translate the notice document itself.</p>
+    <div class="row">
+      <input id="nywn-rate" type="number" placeholder="Rate of pay ($)" style="width:150px" />
+      <select id="nywn-basis">
+        <option value="hourly">Hourly</option>
+        <option value="shift">Shift</option>
+        <option value="day">Day</option>
+        <option value="week">Week</option>
+        <option value="salary">Salary</option>
+        <option value="piece">Piece</option>
+        <option value="commission">Commission</option>
+        <option value="other">Other</option>
+      </select>
+      <input id="nywn-allowances" type="number" placeholder="Allowances claimed ($, 0 if none)" style="width:230px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="nywn-payday" placeholder="Regular payday (e.g. Friday)" style="width:200px" />
+      <input id="nywn-employer-name" placeholder="Employer legal name" style="width:200px" />
+      <input id="nywn-employer-address" placeholder="Employer address" style="width:220px" />
+      <input id="nywn-employer-phone" placeholder="Employer phone" style="width:170px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="muted"><input type="checkbox" id="nywn-is-increase" checked /> This is a rate increase</label>
+      <label class="muted"><input type="checkbox" id="nywn-on-statement" /> Will appear on next wage statement</label>
+      <label class="muted"><input type="checkbox" id="nywn-hospitality" /> Hospitality industry</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="nywn-days-notice" type="number" placeholder="Days without compliant notice" style="width:220px" value="0" />
+      <input id="nywn-days-statement" type="number" placeholder="Days without compliant statement" style="width:230px" value="0" />
+      <button class="secondary" id="nywn-calc-btn">Calculate</button>
+    </div>
+    <pre id="nywn-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -1002,6 +1038,40 @@ document.getElementById('mrb-calc-btn').addEventListener('click', async () => {
       `Second meal period required: ${result.secondMealPeriodRequired ? 'YES' : 'No'} (waivable: ${result.secondMealPeriodWaivable ? 'YES' : 'No'})\n` +
       `Rest breaks required: ${result.restBreaksRequired}\n` +
       `Premium owed today: ${fmtCents(result.premiumOwed)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('nywn-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('nywn-view');
+  const rateOfPayDollars = document.getElementById('nywn-rate').value === '' ? undefined : Number(document.getElementById('nywn-rate').value);
+  const basisOfPay = document.getElementById('nywn-basis').value;
+  const allowancesClaimedDollars = document.getElementById('nywn-allowances').value === '' ? undefined : Number(document.getElementById('nywn-allowances').value);
+  const regularPayDay = document.getElementById('nywn-payday').value || undefined;
+  const employerLegalName = document.getElementById('nywn-employer-name').value || undefined;
+  const employerAddress = document.getElementById('nywn-employer-address').value || undefined;
+  const employerPhone = document.getElementById('nywn-employer-phone').value || undefined;
+  const isRateIncrease = document.getElementById('nywn-is-increase').checked;
+  const willAppearOnNextWageStatement = document.getElementById('nywn-on-statement').checked;
+  const isHospitalityIndustry = document.getElementById('nywn-hospitality').checked;
+  const daysWithoutCompliantNotice = Number(document.getElementById('nywn-days-notice').value) || 0;
+  const daysWithoutCompliantStatement = Number(document.getElementById('nywn-days-statement').value) || 0;
+  try {
+    const result = await api('/api/ny-wage-notice/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        rateOfPayDollars, basisOfPay, allowancesClaimedDollars, regularPayDay,
+        employerLegalName, employerAddress, employerPhone,
+        isRateIncrease, willAppearOnNextWageStatement, isHospitalityIndustry,
+        daysWithoutCompliantNotice, daysWithoutCompliantStatement,
+      }),
+    });
+    view.textContent =
+      (result.noticeComplianceIssues.length === 0 ? 'Notice is complete.' : 'Notice issues:\n' + result.noticeComplianceIssues.map((i) => '- ' + i).join('\n')) +
+      `\nNew notice required for this rate change: ${result.newNoticeRequiredForRateChange ? 'YES' : 'No'}\n` +
+      `Estimated notice-violation exposure: ${fmtCents(result.estimatedNoticeViolationDamages)}\n` +
+      `Estimated wage-statement-violation exposure: ${fmtCents(result.estimatedWageStatementViolationDamages)}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
