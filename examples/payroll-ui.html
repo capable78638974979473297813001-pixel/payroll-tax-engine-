@@ -328,6 +328,27 @@
   </section>
 
   <section>
+    <h2>Federal PUMP Act</h2>
+    <p class="muted" style="margin-top:0">Break time to express milk is required for 1 year after the child's birth. Employers under 50 employees (counted across all worksites) may qualify for an undue-hardship exemption — this only checks the headcount half of that test, not the fact-specific hardship showing. Pay is required unless the employee is completely relieved of duty AND the break doesn't coincide with an already-paid break. The space must be shielded from view, free from intrusion, and never a bathroom.</p>
+    <div class="row">
+      <input id="pump-birth-date" type="date" />
+      <input id="pump-as-of-date" type="date" />
+      <input id="pump-employee-count" type="number" placeholder="Employer headcount (all worksites)" style="width:250px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="muted"><input type="checkbox" id="pump-relieved" checked /> Completely relieved of duty</label>
+      <label class="muted"><input type="checkbox" id="pump-coincides" /> Coincides with an already-paid break</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="muted"><input type="checkbox" id="pump-is-bathroom" /> Space is a bathroom</label>
+      <label class="muted"><input type="checkbox" id="pump-shielded" checked /> Shielded from view</label>
+      <label class="muted"><input type="checkbox" id="pump-free-intrusion" checked /> Free from intrusion</label>
+      <button class="secondary" id="pump-calc-btn">Calculate</button>
+    </div>
+    <pre id="pump-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -1155,6 +1176,39 @@ document.getElementById('cabl-calc-btn').addEventListener('click', async () => {
       `This leave date is timely: ${result.leaveTimely ? 'YES' : 'No'}\n` +
       `Documentation request deadline: ${result.documentationRequestDeadline}\n` +
       `Paid days: ${result.paidDays} | Unpaid days: ${result.unpaidDays}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('pump-birth-date').value = new Date().toISOString().slice(0, 10);
+document.getElementById('pump-as-of-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('pump-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('pump-view');
+  const childBirthDate = document.getElementById('pump-birth-date').value;
+  const asOfDate = document.getElementById('pump-as-of-date').value;
+  const totalEmployeeCountAllWorksites = Number(document.getElementById('pump-employee-count').value) || 0;
+  const isCompletelyRelievedOfDuty = document.getElementById('pump-relieved').checked;
+  const coincidesWithAlreadyPaidBreak = document.getElementById('pump-coincides').checked;
+  const isBathroom = document.getElementById('pump-is-bathroom').checked;
+  const isShieldedFromView = document.getElementById('pump-shielded').checked;
+  const isFreeFromIntrusion = document.getElementById('pump-free-intrusion').checked;
+  try {
+    const result = await api('/api/pump-act/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        childBirthDate, asOfDate, totalEmployeeCountAllWorksites,
+        isCompletelyRelievedOfDuty, coincidesWithAlreadyPaidBreak,
+        isBathroom, isShieldedFromView, isFreeFromIntrusion,
+      }),
+    });
+    view.textContent =
+      `Coverage ends: ${result.coverageEndDate}\n` +
+      `Within coverage period: ${result.withinCoveragePeriod ? 'YES' : 'No'}\n` +
+      `May qualify for small-employer exemption (headcount only — still needs an undue-hardship showing): ${result.mayQualifyForSmallEmployerExemption ? 'YES' : 'No'}\n` +
+      `Payment required for this break: ${result.paymentRequired ? 'YES' : 'No'}\n` +
+      `Space is compliant: ${result.compliantSpace ? 'YES' : 'No'}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

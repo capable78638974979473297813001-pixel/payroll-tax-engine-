@@ -215,6 +215,15 @@ export {
   caBereavementLeaveUnpaidDays,
 } from './caBereavementLeave.ts';
 export type { CaBereavementCoveredRelationship } from './caBereavementLeave.ts';
+export {
+  PUMP_ACT_COVERAGE_MONTHS_AFTER_BIRTH,
+  PUMP_ACT_SMALL_EMPLOYER_THRESHOLD,
+  pumpActCoverageEndDate,
+  isWithinPumpActCoveragePeriod,
+  mayQualifyForSmallEmployerExemption,
+  isPumpBreakPaymentRequired,
+  isCompliantPumpingSpace,
+} from './pumpAct.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

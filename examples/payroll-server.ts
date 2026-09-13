@@ -71,6 +71,11 @@ import {
   caBereavementDocumentationRequestDeadline,
   caBereavementLeavePaidDays,
   caBereavementLeaveUnpaidDays,
+  pumpActCoverageEndDate,
+  isWithinPumpActCoveragePeriod,
+  mayQualifyForSmallEmployerExemption,
+  isPumpBreakPaymentRequired,
+  isCompliantPumpingSpace,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1689,6 +1694,31 @@ const server = createServer(async (req, res) => {
         documentationRequestDeadline: caBereavementDocumentationRequestDeadline(body.leaveDate),
         paidDays: caBereavementLeavePaidDays(body.existingPolicyPaidDays),
         unpaidDays: caBereavementLeaveUnpaidDays(body.existingPolicyPaidDays),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Federal PUMP Act calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/pump-act/calculator') {
+      const body = await parseJsonBody<{
+        childBirthDate: string;
+        asOfDate: string;
+        totalEmployeeCountAllWorksites: number;
+        isCompletelyRelievedOfDuty: boolean;
+        coincidesWithAlreadyPaidBreak: boolean;
+        isBathroom: boolean;
+        isShieldedFromView: boolean;
+        isFreeFromIntrusion: boolean;
+      }>(req);
+      sendJson(res, 200, {
+        coverageEndDate: pumpActCoverageEndDate(body.childBirthDate),
+        withinCoveragePeriod: isWithinPumpActCoveragePeriod(body.childBirthDate, body.asOfDate),
+        mayQualifyForSmallEmployerExemption: mayQualifyForSmallEmployerExemption(body.totalEmployeeCountAllWorksites),
+        paymentRequired: isPumpBreakPaymentRequired(body.isCompletelyRelievedOfDuty, body.coincidesWithAlreadyPaidBreak),
+        compliantSpace: isCompliantPumpingSpace(body.isBathroom, body.isShieldedFromView, body.isFreeFromIntrusion),
       });
       return;
     }

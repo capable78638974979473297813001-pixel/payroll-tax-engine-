@@ -180,6 +180,22 @@ Beyond the pay-run engine itself, three more real HR pieces:
   whether one happened at all is a fact this module takes as an input,
   not one it derives from punch data. Wired into the admin UI as a
   calculator.
+- `payroll/pumpAct.ts`: the federal PUMP Act (Providing Urgent Maternal
+  Protections for Nursing Mothers Act, amending FLSA § 7(r), effective
+  2023) — live-verified against DOL's own Fact Sheet #73. Break time to
+  express milk runs for 1 year after the child's birth; pay is required
+  unless the employee is BOTH completely relieved of duty AND the break
+  doesn't coincide with a break period that's already paid for everyone
+  else (a nursing employee can never be paid less than a non-nursing
+  coworker for the same paid rest break); the space must be shielded from
+  view, free from intrusion, and — however private — never a bathroom.
+  An employer under 50 employees (counted across ALL worksites) may
+  qualify for an exemption, but only with a fact-specific "undue
+  hardship" showing weighed against its size, resources, and structure —
+  `mayQualifyForSmallEmployerExemption()` checks only the headcount half
+  of that test, the same kind of boundary `payroll/warnAct.ts`'s own
+  exception-guidance functions draw around a legal judgment with no
+  formula to compute. Wired into the admin UI as a calculator.
 - `payroll/pto.ts`: accrual (per hour worked or per pay period), a
   balance that never goes negative, an accrual cap, annual carryover with
   its own cap, and a payout as an ordinary taxable Earning.
