@@ -14,6 +14,7 @@ import {
   acceptOffer,
   approvePayRun,
   classifyWeeklyHours,
+  checkStateRegistrationCompliance,
   compute1099Nec,
   computeCompanyReport,
   computeForm940,
@@ -49,6 +50,7 @@ import {
 } from '../payroll/index.ts';
 import type { EmployeeMonthlyHours } from '../payroll/aca.ts';
 import type { DirectDepositVerification } from '../payroll/directDepositVerification.ts';
+import type { StateEmployerRegistration } from '../payroll/types.ts';
 import type { BenefitPlan, CoverageTier } from '../payroll/benefits.ts';
 import type { Contractor } from '../payroll/contractors.ts';
 import type { I9Record } from '../payroll/i9.ts';
@@ -715,6 +717,41 @@ const server = createServer(async (req, res) => {
         .map((employee) => ({ employeeId: employee.id, issues: i9ComplianceIssues(employee, getI9Record(employee.id) ?? undefined, asOfDate) }))
         .filter((f) => f.issues.length > 0);
       sendJson(res, 200, { findings });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // State employer registrations (SUI/withholding)
+    // ------------------------------------------------------------------
+
+    const stateRegistrationsMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/state-registrations$/);
+    if (req.method === 'GET' && stateRegistrationsMatch) {
+      const company = getCompany(decodeURIComponent(stateRegistrationsMatch[1]));
+      if (!company) return sendJson(res, 404, { error: 'No such company.' });
+      sendJson(res, 200, { registrations: company.stateRegistrations ?? [] });
+      return;
+    }
+    if (req.method === 'POST' && stateRegistrationsMatch) {
+      const companyId = decodeURIComponent(stateRegistrationsMatch[1]);
+      const company = getCompany(companyId);
+      if (!company) return sendJson(res, 404, { error: 'No such company.' });
+      const body = await parseJsonBody<StateEmployerRegistration>(req);
+      const existing = (company.stateRegistrations ?? []).filter((r) => r.stateCode !== body.stateCode);
+      const updated: Company = { ...company, stateRegistrations: [...existing, body] };
+      saveCompany(updated);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'state_registration.saved', 'Company', companyId, { stateCode: body.stateCode }));
+      sendJson(res, 200, { registrations: updated.stateRegistrations });
+      return;
+    }
+
+    const stateRegistrationComplianceMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/state-registration-compliance$/);
+    if (req.method === 'GET' && stateRegistrationComplianceMatch) {
+      const companyId = decodeURIComponent(stateRegistrationComplianceMatch[1]);
+      const company = getCompany(companyId);
+      if (!company) return sendJson(res, 404, { error: 'No such company.' });
+      const asOfDate = url.searchParams.get('asOfDate') ?? new Date().toISOString().slice(0, 10);
+      const issues = checkStateRegistrationCompliance(company, employeesForCompany(companyId), asOfDate);
+      sendJson(res, 200, { issues });
       return;
     }
 

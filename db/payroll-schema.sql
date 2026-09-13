@@ -74,6 +74,22 @@ CREATE TABLE company (
   CHECK (pay_schedule_frequency NOT IN ('weekly', 'biweekly') OR anchor_period_start IS NOT NULL)
 );
 
+-- See payroll/stateRegistration.ts's own header: which states this
+-- employer has actually registered with for SUI (and, where tracked,
+-- withholding) purposes -- a fact distinct from employer_context's own
+-- state_unemployment_rate above, which the tax engine needs regardless of
+-- whether registration itself has been tracked here.
+CREATE TABLE company_state_registration (
+  company_id                UUID NOT NULL REFERENCES company (id),
+  state_code                CHAR(2) NOT NULL,
+  sui_account_number        TEXT NOT NULL,
+  sui_rate                  NUMERIC(6,4) NOT NULL,
+  withholding_account_number TEXT,
+  registered_date           DATE NOT NULL,
+
+  PRIMARY KEY (company_id, state_code)
+);
+
 -- ----------------------------------------------------------------------------
 -- Employees
 -- ----------------------------------------------------------------------------

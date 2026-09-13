@@ -125,6 +125,25 @@
   </section>
 
   <section>
+    <h2>State employer registrations</h2>
+    <p class="muted" style="margin-top:0">A multi-state employer must register for unemployment (and usually withholding) tax in every state it has employees working in before running payroll there — this compares that against who's actually on the books.</p>
+    <div class="row">
+      <input id="sr-state" placeholder="State code (e.g. CA)" style="width:130px" maxlength="2" />
+      <input id="sr-sui-account" placeholder="SUI account number" style="width:170px" />
+      <input id="sr-sui-rate" type="number" step="0.001" placeholder="SUI rate (e.g. 0.027)" style="width:170px" />
+      <button class="secondary" id="sr-add-btn">Save registration</button>
+    </div>
+    <table id="sr-table">
+      <thead><tr><th>State</th><th>SUI account</th><th>SUI rate</th><th>Registered</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="row" style="margin-top:8px">
+      <button class="secondary" id="sr-check-btn">Check compliance</button>
+    </div>
+    <pre id="sr-view"></pre>
+  </section>
+
+  <section>
     <h2>Employees</h2>
     <table id="employees-table">
       <thead><tr><th>Name</th><th>Pay type</th><th>Residence</th><th>YTD Social Security wages</th></tr></thead>
@@ -669,9 +688,42 @@ async function refreshAll(preferredCompanyId) {
   await Promise.all([
     loadEmployees(), loadNextPeriod(), loadRuns(), loadReport(), loadAuditLog(),
     loadPtoPolicies(), loadBenefitPlans(), loadJobPostings(), loadCandidates(), loadContractors(),
+    loadStateRegistrations(),
   ]);
   await loadGarnishments();
 }
+
+async function loadStateRegistrations() {
+  const { registrations } = await api(`/api/companies/${company.id}/state-registrations`);
+  const tbody = document.querySelector('#sr-table tbody');
+  tbody.innerHTML = registrations.length === 0
+    ? '<tr><td colspan="4" class="muted">No state registrations on file.</td></tr>'
+    : registrations.map((r) => `
+      <tr>
+        <td>${r.stateCode}</td>
+        <td>${r.suiAccountNumber}</td>
+        <td>${(r.suiRate * 100).toFixed(2)}%</td>
+        <td>${r.registeredDate}</td>
+      </tr>`).join('');
+}
+document.getElementById('sr-add-btn').addEventListener('click', async () => {
+  const stateCode = document.getElementById('sr-state').value.toUpperCase();
+  const suiAccountNumber = document.getElementById('sr-sui-account').value;
+  const suiRate = Number(document.getElementById('sr-sui-rate').value) || 0;
+  if (!stateCode) return;
+  await api(`/api/companies/${company.id}/state-registrations`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ stateCode, suiAccountNumber, suiRate, registeredDate: new Date().toISOString().slice(0, 10) }),
+  });
+  await loadStateRegistrations();
+});
+document.getElementById('sr-check-btn').addEventListener('click', async () => {
+  const view = document.getElementById('sr-view');
+  const { issues } = await api(`/api/companies/${company.id}/state-registration-compliance`);
+  view.textContent = issues.length === 0
+    ? 'No findings — every active employee\'s work state has a matching registration.'
+    : JSON.stringify(issues, null, 2);
+});
 
 async function loadGarnishments() {
   const employeeId = document.getElementById('garn-employee').value;

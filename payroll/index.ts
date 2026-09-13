@@ -9,6 +9,7 @@ export type {
   PayRunStatus,
   PayScheduleConfig,
   PayScheduleFrequency,
+  StateEmployerRegistration,
   TimeEntry,
 } from './types.ts';
 export { generatePayPeriods, periodForCheckDate } from './schedule.ts';
@@ -28,6 +29,8 @@ export {
   verifyMicroDeposits,
 } from './directDepositVerification.ts';
 export type { DirectDepositVerification, MicroDepositVerifyResult, VerificationMethod, VerificationStatus } from './directDepositVerification.ts';
+export { checkStateRegistrationCompliance } from './stateRegistration.ts';
+export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildPaycheckInput, computeEmployeePaycheck } from './engine.ts';
 export type { EmployeePaycheckComputation } from './engine.ts';
 export { activeEmployeesFor, approvePayRun, draftPayRun, recalculatePayRun, voidPayRun, ytdForCheckDate } from './run.ts';

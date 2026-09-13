@@ -37,6 +37,19 @@ export interface Company {
   employerContext?: EmployerContext;
   /** One-line mailing address — only consumed by payroll/newHireReporting.ts, which needs it on every report. Optional because nothing in payroll processing itself requires it. */
   address?: string;
+  /** Which states this employer has actually registered with for unemployment (and, where tracked, withholding) tax purposes — see payroll/stateRegistration.ts. Absent/empty means no registrations on file, not "not applicable"; a multi-state employer with active employees in an unregistered state is a real compliance gap that module surfaces as a finding. */
+  stateRegistrations?: StateEmployerRegistration[];
+}
+
+/** One state's employer registration — the account numbers a state unemployment/withholding agency actually assigns once an employer registers, as opposed to `EmployerContext.stateUnemploymentRate`'s own bare rate figure, which the tax engine needs regardless of whether registration has been tracked here. */
+export interface StateEmployerRegistration {
+  stateCode: string;
+  suiAccountNumber: string;
+  /** This state's own contribution rate as of the account's LAST reported rate notice — kept here as the admin-facing record of what the state told the employer, separate from EmployerContext.stateUnemploymentRate (what the tax engine is actually configured to use), so the two can be checked against each other. */
+  suiRate: number;
+  /** Not every state runs employer withholding registration through the same agency as its own unemployment insurance account — absent where this employer hasn't tracked one, or where the state has no separate withholding tax at all. */
+  withholdingAccountNumber?: string;
+  registeredDate: string; // ISO yyyy-mm-dd
 }
 
 export type PayScheduleFrequency = Extract<PayFrequency, 'weekly' | 'biweekly' | 'semimonthly' | 'monthly'>;

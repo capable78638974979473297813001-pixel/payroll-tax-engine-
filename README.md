@@ -267,6 +267,22 @@ Beyond the pay-run engine itself, three more real HR pieces:
   holder should be able to confirm" boundary a real system's split
   between its ACH-origination backend and its employee-facing API draws.
 
+- `payroll/stateRegistration.ts`: a multi-state employer must actually
+  REGISTER with a state's unemployment (and usually withholding) agency —
+  get a real account number — before it can legally run payroll for
+  someone working there, a genuinely different fact from `EmployerContext`
+  merely being told what rate to use. Compares "which states do our
+  active employees actually work in" against "which states has this
+  employer told us it's registered in," surfacing a `not_registered`
+  finding for any gap and a `rate_mismatch` finding when a registration IS
+  on file but its own last-reported rate no longer matches what the tax
+  engine is configured to use for that state — a real catch, since a
+  stale rate there silently mis-computes every SUI line in that state
+  without anything about the calculation itself looking broken. Wired
+  into the admin UI's "State employer registrations" panel. Does not
+  itself file a registration (each state's own online application is
+  real, separate infrastructure) or track how long one takes to process.
+
 `Employee` also carries plain Core-HR fields now (`jobTitle`,
 `department`, `managerId`) — purely descriptive, the natural spine for an
 employee directory or org chart, though no such view is built yet.
