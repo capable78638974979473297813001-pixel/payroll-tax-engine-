@@ -154,6 +154,29 @@ Beyond the pay-run engine itself, three more real HR pieces:
   a cancel action, the admin UI's PTO panel gets a "Pending PTO requests"
   worklist with approve/deny (approving calls the same usePto() balance
   arithmetic; denying never touches the balance at all).
+- `payroll/paidSickLeave.ts`: California's own mandatory paid-sick-leave
+  law (Healthy Workplaces, Healthy Families Act, Labor Code §245 et seq.,
+  as amended by SB 616 effective January 1, 2024) — the first of the
+  roughly two dozen states' (and many more cities') own mandatory
+  accrual laws `payroll/pto.ts`'s own header comment names as a disclosed
+  gap in its generic policy engine. 1 hour accrued per 30 hours worked,
+  capped at 80 hours; usage capped at 40 hours/year even when the balance
+  is higher; unusable until the 90th day of employment (hire date itself
+  counts as day 1); and a rehire within 12 months of separation must have
+  its prior unused balance restored, unless it was already paid out.
+  Also compares a company's configured PTO policy against this floor
+  (`caPaidSickLeavePolicyComplianceIssues()`) for the DIR-sanctioned case
+  where an existing PTO plan doubles as sick-leave compliance — checking
+  the accrual rate and both caps a `PtoPolicy` can express, though a
+  'perPayPeriod' policy's effective hourly rate depends on hours actually
+  worked, which isn't tracked at the policy level, so that method is
+  checked on its caps only, never its rate. Every other state/city's own
+  law remains the same disclosed gap `payroll/newHireReporting.ts` and
+  `payroll/workersComp.ts` already draw around their own single-
+  jurisdiction scope. Wired into the admin UI as a calculator (like FMLA's
+  own eligibility panel above) rather than a tracked balance, since this
+  project doesn't maintain a per-employee cumulative-hours-worked figure
+  to accrue against automatically.
 - `payroll/newHireReporting.ts`: the federal PRWORA new-hire report every
   employer owes on every hire (42 U.S.C. § 653a) — the required data
   elements and 20-day federal default deadline, refusing to build a report

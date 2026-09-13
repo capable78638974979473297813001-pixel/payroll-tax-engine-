@@ -168,6 +168,22 @@
   </section>
 
   <section>
+    <h2>California paid sick leave</h2>
+    <p class="muted" style="margin-top:0">California only — accrual is 1 hour per 30 hours worked, capped at 80 hours; use is capped at 40 hours/year even if the balance is higher; and leave can't be used until the 90th day of employment. This project doesn't track cumulative hours worked or a running CA sick-leave balance, so both are entered directly.</p>
+    <div class="row">
+      <input id="sick-hire-date" type="date" />
+      <input id="sick-as-of-date" type="date" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="sick-current-balance" type="number" placeholder="Current balance (hours)" style="width:190px" value="0" />
+      <input id="sick-hours-worked" type="number" placeholder="Hours worked since last accrual" style="width:230px" value="0" />
+      <input id="sick-hours-used" type="number" placeholder="Hours used this year" style="width:180px" value="0" />
+      <button class="secondary" id="sick-calc-btn">Calculate</button>
+    </div>
+    <pre id="sick-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -791,6 +807,30 @@ document.getElementById('wc-calc-btn').addEventListener('click', async () => {
       body: JSON.stringify({ grossWages, overtimePremiumPortion, workStateCode, ratePerHundredOfPayroll, experienceModificationFactor }),
     });
     view.textContent = `Subject payroll: ${fmtCents(result.subjectWages)}\nEstimated premium: ${fmtCents(result.premium)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('sick-hire-date').value = new Date().toISOString().slice(0, 10);
+document.getElementById('sick-as-of-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('sick-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('sick-view');
+  const hireDate = document.getElementById('sick-hire-date').value;
+  const asOfDate = document.getElementById('sick-as-of-date').value;
+  const currentBalanceHours = Number(document.getElementById('sick-current-balance').value) || 0;
+  const hoursWorkedSinceLastAccrual = Number(document.getElementById('sick-hours-worked').value) || 0;
+  const hoursUsedThisYear = Number(document.getElementById('sick-hours-used').value) || 0;
+  try {
+    const result = await api('/api/paid-sick-leave/ca-calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hireDate, asOfDate, currentBalanceHours, hoursWorkedSinceLastAccrual, hoursUsedThisYear }),
+    });
+    view.textContent =
+      `Eligible to use sick leave starting: ${result.useEligibleDate}${result.isEligibleToUseToday ? ' (already eligible)' : ' (not yet eligible)'}\n` +
+      `New balance after accrual: ${result.newBalanceHours.toFixed(2)} hours\n` +
+      `Usable now (after the 40h/year usage cap): ${result.maxUsableHours.toFixed(2)} hours`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

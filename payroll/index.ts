@@ -86,6 +86,23 @@ export {
   tncReferralDeadline,
 } from './everify.ts';
 export type { EverifyCase, EverifyCaseStatus } from './everify.ts';
+export {
+  CA_SICK_LEAVE_ACCRUAL_CAP_HOURS,
+  CA_SICK_LEAVE_ACCRUAL_HOURS_PER_HOURS_WORKED,
+  CA_SICK_LEAVE_ANNUAL_USAGE_CAP_HOURS,
+  CA_SICK_LEAVE_ELIGIBILITY_MIN_DAYS_WORKED,
+  CA_SICK_LEAVE_FRONT_LOAD_HOURS,
+  CA_SICK_LEAVE_REINSTATEMENT_WINDOW_MONTHS,
+  CA_SICK_LEAVE_USE_WAITING_PERIOD_DAYS,
+  accrueCaSickLeaveHours,
+  caPaidSickLeavePolicyComplianceIssues,
+  caSickLeaveBalanceToReinstate,
+  caSickLeaveReinstatementDeadline,
+  caSickLeaveUseEligibleDate,
+  isCaSickLeaveReinstatementRequired,
+  isEligibleToUseCaSickLeave,
+  maxUsableCaSickLeaveHours,
+} from './paidSickLeave.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

@@ -31,6 +31,10 @@ import {
   checkFmlaEligibility,
   workersCompPremium,
   workersCompSubjectWages,
+  accrueCaSickLeaveHours,
+  caSickLeaveUseEligibleDate,
+  isEligibleToUseCaSickLeave,
+  maxUsableCaSickLeaveHours,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1440,6 +1444,28 @@ const server = createServer(async (req, res) => {
       const subjectWages = workersCompSubjectWages(dollars(body.grossWages), dollars(body.overtimePremiumPortion), body.workStateCode);
       const premium = workersCompPremium(subjectWages, dollars(body.ratePerHundredOfPayroll), body.experienceModificationFactor);
       sendJson(res, 200, { subjectWages, premium });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // California paid sick leave calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/paid-sick-leave/ca-calculator') {
+      const body = await parseJsonBody<{
+        hireDate: string;
+        asOfDate: string;
+        currentBalanceHours: number;
+        hoursWorkedSinceLastAccrual: number;
+        hoursUsedThisYear: number;
+      }>(req);
+      const newBalanceHours = accrueCaSickLeaveHours(body.currentBalanceHours, body.hoursWorkedSinceLastAccrual);
+      sendJson(res, 200, {
+        useEligibleDate: caSickLeaveUseEligibleDate(body.hireDate),
+        isEligibleToUseToday: isEligibleToUseCaSickLeave(body.hireDate, body.asOfDate),
+        newBalanceHours,
+        maxUsableHours: maxUsableCaSickLeaveHours(newBalanceHours, body.hoursUsedThisYear),
+      });
       return;
     }
 
