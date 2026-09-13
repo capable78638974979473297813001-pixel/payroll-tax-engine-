@@ -35,6 +35,10 @@ import {
   caSickLeaveUseEligibleDate,
   isEligibleToUseCaSickLeave,
   maxUsableCaSickLeaveHours,
+  annualElectiveDeferralLimit,
+  cappedDeferralForPayPeriod,
+  isRothCatchUpRequired,
+  remainingElectiveDeferralRoom,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1465,6 +1469,26 @@ const server = createServer(async (req, res) => {
         isEligibleToUseToday: isEligibleToUseCaSickLeave(body.hireDate, body.asOfDate),
         newBalanceHours,
         maxUsableHours: maxUsableCaSickLeaveHours(newBalanceHours, body.hoursUsedThisYear),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // 401(k) elective deferral limit calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/retirement-limits/401k-calculator') {
+      const body = await parseJsonBody<{
+        age: number;
+        ytdElectiveDeferrals: number;
+        requestedDeferral: number;
+        priorYearFicaWagesFromThisEmployer: number;
+      }>(req);
+      sendJson(res, 200, {
+        annualLimit: annualElectiveDeferralLimit(body.age),
+        remainingRoom: remainingElectiveDeferralRoom(dollars(body.ytdElectiveDeferrals), body.age),
+        cappedDeferral: cappedDeferralForPayPeriod(dollars(body.requestedDeferral), dollars(body.ytdElectiveDeferrals), body.age),
+        rothCatchUpRequired: isRothCatchUpRequired(body.age, dollars(body.priorYearFicaWagesFromThisEmployer)),
       });
       return;
     }

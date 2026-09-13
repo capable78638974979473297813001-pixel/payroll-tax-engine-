@@ -221,6 +221,25 @@ Beyond the pay-run engine itself, three more real HR pieces:
   hand, one row per election (including a since-ended one, with its own
   end date, since a carrier reconciling its own records needs to see who
   DROPPED coverage too, not just who currently has it).
+- `payroll/retirementLimits.ts`: 401(k)/403(b)/governmental 457(b)
+  elective deferral limits (IRC §402(g)) and catch-up contributions (IRC
+  §414(v), expanded by SECURE 2.0) — 2026's $24,500 base limit, +$8,000
+  standard catch-up at 50+, or +$11,250 enhanced catch-up specifically for
+  ages 60 through 63 (larger than the standard catch-up, not additive to
+  it), plus SECURE 2.0 §603's mandatory-Roth-catch-up rule for anyone 50+
+  whose PRIOR-YEAR FICA wages from THIS employer strictly exceeded
+  $150,000 (not prorated or aggregated across employers), effective for
+  2026 (measured against 2025 wages). Pure calculation over a caller-
+  supplied age and YTD elective-deferral total — this project's Employee
+  type has no birth-date field, so age is a parameter here, the same
+  "take the figure directly rather than force a schema change to compute
+  it" choice `payroll/workersComp.ts` makes for subject wages. Does not
+  track that YTD total itself (a real but separate wiring task for
+  `payroll/ytd.ts`) or the IRC §415(c) annual-additions limit, which
+  combines employee AND employer contributions and is a different, larger
+  figure left out entirely. Wired into the admin UI as a calculator, the
+  same "entered directly" pattern the FMLA and workers'-comp panels above
+  already use for figures this project doesn't track per employee.
 - `payroll/compliance.ts`: wires `src/minimum-wage.ts` — already this
   project's own source of truth, the same one `npm run
   coverage:minimum-wage` measures every state/locality against — directly

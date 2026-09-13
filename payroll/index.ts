@@ -103,6 +103,20 @@ export {
   isEligibleToUseCaSickLeave,
   maxUsableCaSickLeaveHours,
 } from './paidSickLeave.ts';
+export {
+  ELECTIVE_DEFERRAL_LIMIT_2026,
+  CATCH_UP_LIMIT_2026,
+  ENHANCED_CATCH_UP_LIMIT_2026,
+  ROTH_CATCH_UP_WAGE_THRESHOLD_2026,
+  CATCH_UP_MINIMUM_AGE,
+  ENHANCED_CATCH_UP_MIN_AGE,
+  ENHANCED_CATCH_UP_MAX_AGE,
+  applicableCatchUpLimit,
+  annualElectiveDeferralLimit,
+  remainingElectiveDeferralRoom,
+  cappedDeferralForPayPeriod,
+  isRothCatchUpRequired,
+} from './retirementLimits.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

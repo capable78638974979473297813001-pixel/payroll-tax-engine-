@@ -184,6 +184,19 @@
   </section>
 
   <section>
+    <h2>401(k) elective deferral limit</h2>
+    <p class="muted" style="margin-top:0">2026 IRS limits: $24,500 base, +$8,000 catch-up at 50+, or +$11,250 enhanced catch-up for ages 60-63 specifically (SECURE 2.0). A participant 50+ whose prior-year FICA wages from this employer exceeded $150,000 must make all catch-up contributions as Roth. This project doesn't track employee age or a running elective-deferral YTD total, so all three are entered directly.</p>
+    <div class="row">
+      <input id="ret401k-age" type="number" placeholder="Age" style="width:100px" />
+      <input id="ret401k-ytd" type="number" placeholder="YTD elective deferrals ($)" style="width:220px" />
+      <input id="ret401k-requested" type="number" placeholder="Requested this period ($)" style="width:220px" />
+      <input id="ret401k-prior-wages" type="number" placeholder="Prior-year FICA wages ($)" style="width:220px" value="0" />
+      <button class="secondary" id="ret401k-calc-btn">Calculate</button>
+    </div>
+    <pre id="ret401k-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -831,6 +844,27 @@ document.getElementById('sick-calc-btn').addEventListener('click', async () => {
       `Eligible to use sick leave starting: ${result.useEligibleDate}${result.isEligibleToUseToday ? ' (already eligible)' : ' (not yet eligible)'}\n` +
       `New balance after accrual: ${result.newBalanceHours.toFixed(2)} hours\n` +
       `Usable now (after the 40h/year usage cap): ${result.maxUsableHours.toFixed(2)} hours`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('ret401k-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('ret401k-view');
+  const age = Number(document.getElementById('ret401k-age').value) || 0;
+  const ytdElectiveDeferrals = Number(document.getElementById('ret401k-ytd').value) || 0;
+  const requestedDeferral = Number(document.getElementById('ret401k-requested').value) || 0;
+  const priorYearFicaWagesFromThisEmployer = Number(document.getElementById('ret401k-prior-wages').value) || 0;
+  try {
+    const result = await api('/api/retirement-limits/401k-calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ age, ytdElectiveDeferrals, requestedDeferral, priorYearFicaWagesFromThisEmployer }),
+    });
+    view.textContent =
+      `Annual limit at age ${age}: ${fmtCents(result.annualLimit)}\n` +
+      `Remaining room this year: ${fmtCents(result.remainingRoom)}\n` +
+      `This period's deferral, capped to remaining room: ${fmtCents(result.cappedDeferral)}\n` +
+      `Roth catch-up required: ${result.rothCatchUpRequired ? 'YES' : 'No'}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
