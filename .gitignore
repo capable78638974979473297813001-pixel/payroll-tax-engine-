@@ -25,6 +25,11 @@ supabase/.temp/
 # not project configuration. See site/lib/store.ts.
 site/.data/
 
+# payroll/.data is the same pattern for companies/employees/pay runs --
+# this machine's local test data, not project configuration. See
+# payroll/store.ts.
+payroll/.data/
+
 
 # OpenAddresses bulk extracts — ~5GB, re-downloadable from data.openaddresses.io.
 # Never committed: it is upstream data, not this project's own.

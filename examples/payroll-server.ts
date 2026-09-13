@@ -1,0 +1,1028 @@
+import { createServer } from 'node:http';
+import type { IncomingMessage, ServerResponse } from 'node:http';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+import { randomUUID } from 'node:crypto';
+import { dollars } from '../src/money.ts';
+import {
+  accruePto,
+  activeEmployeesFor,
+  auditLogEntry,
+  advanceCandidate,
+  acceptOffer,
+  approvePayRun,
+  classifyWeeklyHours,
+  checkStateRegistrationCompliance,
+  compute1099Nec,
+  computeCompanyReport,
+  computeForm940,
+  computeForm941,
+  computeW2FromEmployee,
+  declineOffer,
+  applyElection,
+  determineAleStatus,
+  draftPayRun,
+  emptyPtoBalance,
+  extendOffer,
+  fplSafeHarborMonthlyCeiling,
+  freshYearToDate,
+  generatePayPeriods,
+  hireCandidate,
+  i9ComplianceIssues,
+  i9Deadlines,
+  i9Status,
+  initiateMicroDepositVerification,
+  initiatePrenoteVerification,
+  isAffordableUnderW2SafeHarbor,
+  overtimeRuleForState,
+  pairPunchesIntoDailyHours,
+  ratePayHourlySafeHarborMonthlyCeiling,
+  ratePaySalariedSafeHarborMonthlyCeiling,
+  recordContractorPayment,
+  renderPaystubText,
+  renderPayrollRegister,
+  resolvePrenoteVerification,
+  terminateEmployee,
+  usePto,
+  verifyMicroDeposits,
+} from '../payroll/index.ts';
+import type { EmployeeMonthlyHours } from '../payroll/aca.ts';
+import type { DirectDepositVerification } from '../payroll/directDepositVerification.ts';
+import type { StateEmployerRegistration } from '../payroll/types.ts';
+import type { BenefitPlan, CoverageTier } from '../payroll/benefits.ts';
+import type { Contractor } from '../payroll/contractors.ts';
+import type { I9Record } from '../payroll/i9.ts';
+import type { Candidate, CandidateStage, OfferDetails } from '../payroll/onboarding.ts';
+import type { TerminationReason } from '../payroll/termination.ts';
+import type { GarnishmentOrder } from '../src/garnishment.ts';
+import {
+  addAuditLogEntry,
+  addTimePunch,
+  allCompanies,
+  auditLogForEntityIds,
+  benefitElectionsForEmployee,
+  benefitPlansForCompany,
+  candidatesForCompany,
+  contractorsForCompany,
+  employeesForCompany,
+  getBenefitPlan,
+  getCandidate,
+  getCompany,
+  getContractor,
+  getDirectDepositVerification,
+  getEmployee,
+  getI9Record,
+  getPayRun,
+  getPtoBalance,
+  getPtoPolicy,
+  jobPostingsForCompany,
+  paymentsForContractor,
+  payRunsForCompany,
+  ptoBalancesForEmployee,
+  ptoPoliciesForCompany,
+  saveBenefitElection,
+  saveBenefitPlan,
+  saveCandidate,
+  saveCompany,
+  saveContractor,
+  saveContractorPayment,
+  saveDirectDepositVerification,
+  saveEmployee,
+  saveEmployees,
+  saveI9Record,
+  saveJobPosting,
+  savePayRun,
+  savePtoBalance,
+  savePtoPolicy,
+  timePunchesForEmployee,
+} from '../payroll/store.ts';
+import { PERIODS_PER_YEAR } from '../src/types.ts';
+import type { Company, Employee } from '../payroll/types.ts';
+
+/**
+ * A small admin UI for running payroll — the piece README.md's own
+ * Payroll processing section names as still missing ("any UI beyond the
+ * plain-text paystub and the worked demo script"). Backed directly by
+ * payroll/store.ts, the same file-backed store the demo script bypasses
+ * by building everything in memory; this is what a real session of
+ * "open the app, click run payroll" looks like against it.
+ *
+ *   npm run ui:payroll
+ *   then open http://localhost:4323
+ *
+ * On first run, with an empty store, this seeds one demo company (the
+ * same Riverside Bakery / Alice+Bob data examples/payroll-demo.ts builds
+ * in memory) so there's something to click on immediately.
+ */
+
+const PORT = Number(process.env.PORT ?? 4323);
+// This demo-scale server has no real login (see payroll/auditLog.ts's own
+// header comment on that boundary) — every entry it writes names this
+// fixed actor, which a real deployment replaces with its own session user.
+const AUDIT_ACTOR = 'admin';
+const HERE = dirname(fileURLToPath(import.meta.url));
+const HTML_PATH = join(HERE, 'payroll-ui.html');
+const PORTAL_HTML_PATH = join(HERE, 'employee-portal.html');
+
+function seedDemoDataIfEmpty(): void {
+  const existing = getCompany('co-demo');
+  if (existing) return;
+
+  const company: Company = {
+    id: 'co-demo',
+    legalName: 'Riverside Bakery LLC',
+    ein: '84-1234567',
+    homeState: 'IL',
+    paySchedule: { frequency: 'biweekly', anchorPeriodStart: '2026-01-04', checkDateLagDays: 5 },
+  };
+  const alice: Employee = {
+    id: 'emp-alice',
+    companyId: company.id,
+    firstName: 'Alice',
+    lastName: 'Nguyen',
+    hireDate: '2024-03-01',
+    employmentCategory: 'standard',
+    payType: { kind: 'salary', annualSalary: dollars(78_000) },
+    residenceState: { code: 'IL' },
+    federalW4: {
+      filingStatus: 'married_joint',
+      multipleJobs: false,
+      dependentCredit: dollars(2_000),
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    deductionPlans: [
+      { id: 'dp-401k', code: '401K', category: 'deferral_401k', amount: { kind: 'percentOfGross', percent: 6 }, active: true },
+      { id: 'dp-health', code: 'HEALTH', category: 'section125', amount: { kind: 'flat', cents: dollars(120) }, active: true },
+    ],
+    directDepositAccounts: [
+      { id: 'dd-alice', routingNumber: '021000021', accountNumber: '4441002233', accountType: 'checking', allocation: { kind: 'remainder' } },
+    ],
+    garnishmentOrders: [],
+    ytd: freshYearToDate(),
+    ytdYear: 2026,
+  };
+  const bob: Employee = {
+    id: 'emp-bob',
+    companyId: company.id,
+    firstName: 'Bob',
+    lastName: 'Carter',
+    hireDate: '2025-07-15',
+    employmentCategory: 'standard',
+    payType: { kind: 'hourly', hourlyRate: dollars(22) },
+    residenceState: { code: 'IL' },
+    federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+    deductionPlans: [],
+    directDepositAccounts: [
+      { id: 'dd-bob-checking', routingNumber: '021000021', accountNumber: '990044556', accountType: 'checking', allocation: { kind: 'remainder' } },
+    ],
+    garnishmentOrders: [{ id: 'ORDER-1', type: 'child_support', amountOrdered: dollars(150), supportingOtherFamily: false }],
+    ytd: freshYearToDate(),
+    ytdYear: 2026,
+  };
+
+  saveCompany(company);
+  saveEmployees([alice, bob]);
+}
+
+function sendJson(res: ServerResponse, status: number, body: unknown): void {
+  const payload = JSON.stringify(body);
+  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(payload) });
+  res.end(payload);
+}
+
+class BadJsonError extends Error {}
+
+async function parseJsonBody<T>(req: IncomingMessage): Promise<T> {
+  const raw = await readBody(req);
+  try {
+    return raw ? (JSON.parse(raw) as T) : ({} as T);
+  } catch {
+    throw new BadJsonError('Request body was not valid JSON.');
+  }
+}
+
+function readBody(req: IncomingMessage): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    req.on('data', (chunk) => {
+      data += chunk;
+      if (data.length > 1_000_000) {
+        reject(new Error('Request body too large.'));
+        req.destroy();
+      }
+    });
+    req.on('end', () => resolve(data));
+    req.on('error', reject);
+  });
+}
+
+/** The next period this company's schedule hasn't already run payroll for, found by walking its own calendar rather than assuming "today". */
+function nextUnrunPeriod(company: Company): { periodStart: string; periodEnd: string; checkDate: string } | null {
+  const runs = payRunsForCompany(company.id).filter((r) => r.status !== 'voided');
+  const ranCheckDates = new Set(runs.map((r) => r.checkDate));
+  for (const year of [2026, 2027]) {
+    for (const period of generatePayPeriods(company.paySchedule, year)) {
+      if (!ranCheckDates.has(period.checkDate)) return period;
+    }
+  }
+  return null;
+}
+
+/**
+ * "The next regular payday" a departing employee would have been paid on
+ * — a DIFFERENT question from nextUnrunPeriod() above, which tracks
+ * where the payroll-RUN workflow left off regardless of what date it is
+ * today. A termination on June 15th needs the payday on or after June
+ * 15th, not "whichever period this demo company hasn't gotten around to
+ * running yet" (which could be much earlier, if payroll runs are behind).
+ */
+function nextPayDateOnOrAfter(company: Company, date: string): string | null {
+  const year = Number(date.slice(0, 4));
+  for (const y of [year, year + 1]) {
+    const onOrAfter = generatePayPeriods(company.paySchedule, y)
+      .map((p) => p.checkDate)
+      .filter((checkDate) => checkDate >= date)
+      .sort();
+    if (onOrAfter.length > 0) return onOrAfter[0];
+  }
+  return null;
+}
+
+const server = createServer(async (req, res) => {
+  try {
+    if (req.method === 'GET' && (req.url === '/' || req.url === '/index.html')) {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(readFileSync(HTML_PATH, 'utf8'));
+      return;
+    }
+
+    if (req.method === 'GET' && req.url === '/portal') {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(readFileSync(PORTAL_HTML_PATH, 'utf8'));
+      return;
+    }
+
+    if (req.method === 'GET' && req.url === '/api/companies') {
+      sendJson(res, 200, { companies: allCompanies() });
+      return;
+    }
+
+    const employeesMatch = req.url?.match(/^\/api\/companies\/([^/]+)\/employees$/);
+    if (req.method === 'GET' && employeesMatch) {
+      sendJson(res, 200, { employees: employeesForCompany(decodeURIComponent(employeesMatch[1])) });
+      return;
+    }
+
+    const selfServiceMatch = req.url?.match(/^\/api\/employees\/([^/]+)\/self-service$/);
+    if (req.method === 'GET' && selfServiceMatch) {
+      const employee = getEmployee(decodeURIComponent(selfServiceMatch[1]));
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const company = getCompany(employee.companyId)!;
+
+      // Only THIS employee's own line out of every run they appear in —
+      // an employee's own view must never leak a coworker's pay, even in
+      // a demo with no real access control otherwise enforcing that.
+      const myPayRuns = payRunsForCompany(employee.companyId)
+        .filter((r) => r.status === 'approved')
+        .map((r) => ({
+          payRunId: r.id,
+          checkDate: r.checkDate,
+          periodStart: r.periodStart,
+          periodEnd: r.periodEnd,
+          line: r.lines.find((l) => l.employeeId === employee.id) ?? null,
+        }))
+        .filter((r) => r.line !== null);
+
+      const i9Record = getI9Record(employee.id) ?? { employeeId: employee.id };
+
+      sendJson(res, 200, {
+        employee: {
+          id: employee.id,
+          firstName: employee.firstName,
+          lastName: employee.lastName,
+          jobTitle: employee.jobTitle,
+          department: employee.department,
+          payType: employee.payType,
+          hireDate: employee.hireDate,
+        },
+        companyName: company.legalName,
+        myPayRuns,
+        ptoBalances: ptoBalancesForEmployee(employee.id),
+        benefitElections: benefitElectionsForEmployee(employee.id).filter((e) => e.endDate === undefined),
+        i9Status: i9Status(i9Record),
+      });
+      return;
+    }
+
+    const runsMatch = req.url?.match(/^\/api\/companies\/([^/]+)\/pay-runs$/);
+    if (req.method === 'GET' && runsMatch) {
+      sendJson(res, 200, { payRuns: payRunsForCompany(decodeURIComponent(runsMatch[1])) });
+      return;
+    }
+
+    const nextPeriodMatch = req.url?.match(/^\/api\/companies\/([^/]+)\/next-period$/);
+    if (req.method === 'GET' && nextPeriodMatch) {
+      const company = getCompany(decodeURIComponent(nextPeriodMatch[1]));
+      if (!company) return sendJson(res, 404, { error: 'No such company.' });
+      sendJson(res, 200, { period: nextUnrunPeriod(company) });
+      return;
+    }
+
+    const runPayrollMatch = req.url?.match(/^\/api\/companies\/([^/]+)\/run-payroll$/);
+    if (req.method === 'POST' && runPayrollMatch) {
+      const company = getCompany(decodeURIComponent(runPayrollMatch[1]));
+      if (!company) return sendJson(res, 404, { error: 'No such company.' });
+      const period = nextUnrunPeriod(company);
+      if (!period) return sendJson(res, 409, { error: 'No unrun period found on this schedule for 2026-2027.' });
+
+      const employees = employeesForCompany(company.id);
+      const active = activeEmployeesFor(company, employees, period.checkDate);
+      if (active.length === 0) return sendJson(res, 409, { error: 'No active employees for this period.' });
+
+      // Hourly employees are paid $0 for any period nobody reports hours
+      // for — that's the tax engine's own "absent input changes nothing"
+      // convention working correctly, not a bug, but it means an admin
+      // running payroll from this UI must be able to supply them. The
+      // request body is optional so existing salaried-only companies
+      // (and every test/demo script that calls this endpoint directly)
+      // keep working with no body at all.
+      const rawBody = await readBody(req);
+      let timeEntries: { employeeId: string; regularHours: number; overtimeHours: number }[] = [];
+      if (rawBody) {
+        try {
+          const parsed = JSON.parse(rawBody) as { timeEntries?: typeof timeEntries };
+          timeEntries = parsed.timeEntries ?? [];
+        } catch {
+          return sendJson(res, 400, { error: 'Request body was not valid JSON.' });
+        }
+      }
+
+      const draft = draftPayRun(company, employees, period.periodStart, period.periodEnd, period.checkDate, timeEntries);
+      const { run: approved, updatedEmployees } = approvePayRun(draft, employees);
+      saveEmployees(updatedEmployees);
+      savePayRun(approved);
+      addAuditLogEntry(
+        auditLogEntry(AUDIT_ACTOR, 'pay_run.approved', 'PayRun', approved.id, {
+          checkDate: approved.checkDate,
+          employeeCount: approved.lines.length,
+          minimumWageIssueCount: approved.minimumWageIssues.length,
+        }),
+      );
+      sendJson(res, 200, { payRun: approved });
+      return;
+    }
+
+    const paystubMatch = req.url?.match(/^\/api\/pay-runs\/([^/]+)\/paystub\/([^/]+)$/);
+    if (req.method === 'GET' && paystubMatch) {
+      const run = getPayRun(decodeURIComponent(paystubMatch[1]));
+      const employeeId = decodeURIComponent(paystubMatch[2]);
+      if (!run) return sendJson(res, 404, { error: 'No such pay run.' });
+      const company = getCompany(run.companyId);
+      const employee = getEmployee(employeeId);
+      const line = run.lines.find((l) => l.employeeId === employeeId);
+      if (!company || !employee || !line) return sendJson(res, 404, { error: 'No such paystub.' });
+      const text = renderPaystubText(company, employee, run, line);
+      res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end(text);
+      return;
+    }
+
+    const url = new URL(req.url ?? '/', 'http://localhost');
+
+    const form941Match = url.pathname.match(/^\/api\/companies\/([^/]+)\/941$/);
+    if (req.method === 'GET' && form941Match) {
+      const companyId = decodeURIComponent(form941Match[1]);
+      const year = Number(url.searchParams.get('year'));
+      const quarter = Number(url.searchParams.get('quarter')) as 1 | 2 | 3 | 4;
+      if (!year || ![1, 2, 3, 4].includes(quarter)) return sendJson(res, 400, { error: 'year and quarter (1-4) are required.' });
+      const runs = payRunsForCompany(companyId);
+      sendJson(res, 200, { form941: computeForm941(companyId, year, quarter, runs) });
+      return;
+    }
+
+    const w2Match = url.pathname.match(/^\/api\/employees\/([^/]+)\/w2$/);
+    if (req.method === 'GET' && w2Match) {
+      const employee = getEmployee(decodeURIComponent(w2Match[1]));
+      const year = Number(url.searchParams.get('year'));
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      if (!year) return sendJson(res, 400, { error: 'year is required.' });
+      const runs = payRunsForCompany(employee.companyId);
+      sendJson(res, 200, { w2: computeW2FromEmployee(employee, year, runs) });
+      return;
+    }
+
+    const form940Match = url.pathname.match(/^\/api\/companies\/([^/]+)\/940$/);
+    if (req.method === 'GET' && form940Match) {
+      const companyId = decodeURIComponent(form940Match[1]);
+      const year = Number(url.searchParams.get('year'));
+      if (!year) return sendJson(res, 400, { error: 'year is required.' });
+      sendJson(res, 200, { form940: computeForm940(companyId, year, payRunsForCompany(companyId)) });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Benefits
+    // ------------------------------------------------------------------
+
+    const benefitPlansMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/benefit-plans$/);
+    if (req.method === 'GET' && benefitPlansMatch) {
+      sendJson(res, 200, { benefitPlans: benefitPlansForCompany(decodeURIComponent(benefitPlansMatch[1])) });
+      return;
+    }
+    if (req.method === 'POST' && benefitPlansMatch) {
+      const companyId = decodeURIComponent(benefitPlansMatch[1]);
+      const body = await parseJsonBody<Omit<BenefitPlan, 'id' | 'companyId'>>(req);
+      const plan: BenefitPlan = { id: randomUUID(), companyId, ...body };
+      saveBenefitPlan(plan);
+      sendJson(res, 200, { benefitPlan: plan });
+      return;
+    }
+
+    const electionsMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/benefit-elections$/);
+    if (req.method === 'GET' && electionsMatch) {
+      sendJson(res, 200, { benefitElections: benefitElectionsForEmployee(decodeURIComponent(electionsMatch[1])) });
+      return;
+    }
+    if (req.method === 'POST' && electionsMatch) {
+      const employeeId = decodeURIComponent(electionsMatch[1]);
+      const employee = getEmployee(employeeId);
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const company = getCompany(employee.companyId)!;
+      const body = await parseJsonBody<{ planId: string; coverageTier: CoverageTier; effectiveDate: string }>(req);
+      const plan = getBenefitPlan(body.planId);
+      if (!plan) return sendJson(res, 404, { error: 'No such benefit plan.' });
+
+      const periodsPerYear = PERIODS_PER_YEAR[company.paySchedule.frequency];
+      const result = applyElection(
+        employee,
+        benefitElectionsForEmployee(employeeId),
+        plan,
+        body.coverageTier,
+        body.effectiveDate,
+        periodsPerYear,
+      );
+      for (const ended of result.endedElections) saveBenefitElection(ended);
+      saveBenefitElection(result.election);
+      saveEmployee(result.employee);
+      addAuditLogEntry(
+        auditLogEntry(AUDIT_ACTOR, 'benefit_election.applied', 'Employee', employeeId, {
+          planId: plan.id,
+          coverageTier: body.coverageTier,
+          supersededElectionIds: result.endedElections.map((e) => e.id),
+        }),
+      );
+      sendJson(res, 200, { election: result.election, employee: result.employee });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Recruiting / onboarding
+    // ------------------------------------------------------------------
+
+    const jobPostingsMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/job-postings$/);
+    if (req.method === 'GET' && jobPostingsMatch) {
+      sendJson(res, 200, { jobPostings: jobPostingsForCompany(decodeURIComponent(jobPostingsMatch[1])) });
+      return;
+    }
+    if (req.method === 'POST' && jobPostingsMatch) {
+      const companyId = decodeURIComponent(jobPostingsMatch[1]);
+      const body = await parseJsonBody<{ title: string; department?: string }>(req);
+      const posting = { id: randomUUID(), companyId, title: body.title, department: body.department, openedAt: new Date().toISOString().slice(0, 10) };
+      saveJobPosting(posting);
+      sendJson(res, 200, { jobPosting: posting });
+      return;
+    }
+
+    const candidatesMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/candidates$/);
+    if (req.method === 'GET' && candidatesMatch) {
+      sendJson(res, 200, { candidates: candidatesForCompany(decodeURIComponent(candidatesMatch[1])) });
+      return;
+    }
+    if (req.method === 'POST' && candidatesMatch) {
+      const body = await parseJsonBody<{ jobPostingId: string; firstName: string; lastName: string; email: string }>(req);
+      const candidate: Candidate = {
+        id: randomUUID(),
+        jobPostingId: body.jobPostingId,
+        firstName: body.firstName,
+        lastName: body.lastName,
+        email: body.email,
+        stage: 'applied',
+        appliedAt: new Date().toISOString().slice(0, 10),
+      };
+      saveCandidate(candidate);
+      sendJson(res, 200, { candidate });
+      return;
+    }
+
+    const candidateActionMatch = url.pathname.match(/^\/api\/candidates\/([^/]+)\/(advance|extend-offer|accept|decline|hire)$/);
+    if (req.method === 'POST' && candidateActionMatch) {
+      const candidate = getCandidate(decodeURIComponent(candidateActionMatch[1]));
+      if (!candidate) return sendJson(res, 404, { error: 'No such candidate.' });
+      const action = candidateActionMatch[2];
+
+      if (action === 'advance') {
+        const body = await parseJsonBody<{ to: Exclude<CandidateStage, 'offer_extended' | 'hired'> }>(req);
+        const updated = advanceCandidate(candidate, body.to);
+        saveCandidate(updated);
+        return sendJson(res, 200, { candidate: updated });
+      }
+      if (action === 'extend-offer') {
+        const body = await parseJsonBody<{ offer: OfferDetails }>(req);
+        const updated = extendOffer(candidate, body.offer);
+        saveCandidate(updated);
+        return sendJson(res, 200, { candidate: updated });
+      }
+      if (action === 'accept') {
+        const updated = acceptOffer(candidate);
+        saveCandidate(updated);
+        return sendJson(res, 200, { candidate: updated });
+      }
+      if (action === 'decline') {
+        const updated = declineOffer(candidate);
+        saveCandidate(updated);
+        return sendJson(res, 200, { candidate: updated });
+      }
+      // action === 'hire'
+      const body = await parseJsonBody<{
+        companyId: string;
+        federalW4: Employee['federalW4'];
+        residenceState: Employee['residenceState'];
+      }>(req);
+      const { employee, candidate: hired } = hireCandidate(candidate, body.companyId, body.federalW4, body.residenceState);
+      saveEmployee(employee);
+      saveCandidate(hired);
+      addAuditLogEntry(
+        auditLogEntry(AUDIT_ACTOR, 'candidate.hired', 'Employee', employee.id, { candidateId: candidate.id, hireDate: employee.hireDate }),
+      );
+      sendJson(res, 200, { employee, candidate: hired });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Termination / offboarding
+    // ------------------------------------------------------------------
+
+    const terminateMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/terminate$/);
+    if (req.method === 'POST' && terminateMatch) {
+      const employee = getEmployee(decodeURIComponent(terminateMatch[1]));
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const company = getCompany(employee.companyId)!;
+      const body = await parseJsonBody<{
+        terminationDate: string;
+        reason: TerminationReason;
+        employerPolicyPaysOutPto: boolean;
+        ptoPolicyId?: string;
+      }>(req);
+
+      const nextRegularPayDate = nextPayDateOnOrAfter(company, body.terminationDate) ?? body.terminationDate;
+      const ptoBalance = body.ptoPolicyId ? getPtoBalance(employee.id, body.ptoPolicyId) : ptoBalancesForEmployee(employee.id)[0] ?? null;
+
+      const result = terminateEmployee(employee, body.terminationDate, body.reason, nextRegularPayDate, ptoBalance, body.employerPolicyPaysOutPto);
+      saveEmployee(result.employee);
+      addAuditLogEntry(
+        auditLogEntry(AUDIT_ACTOR, 'employee.terminated', 'Employee', employee.id, {
+          reason: body.reason,
+          terminationDate: body.terminationDate,
+          finalPayDueDate: result.finalPay.dueDate,
+          ptoPayoutHours: result.ptoPayoutHours,
+        }),
+      );
+      sendJson(res, 200, result);
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Time & attendance
+    // ------------------------------------------------------------------
+
+    const punchesMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/punches$/);
+    if (req.method === 'GET' && punchesMatch) {
+      sendJson(res, 200, { punches: timePunchesForEmployee(decodeURIComponent(punchesMatch[1])) });
+      return;
+    }
+    if (req.method === 'POST' && punchesMatch) {
+      const employeeId = decodeURIComponent(punchesMatch[1]);
+      const body = await parseJsonBody<{ timestamp: string; type: 'clock_in' | 'clock_out' }>(req);
+      const punch = { employeeId, timestamp: body.timestamp, type: body.type };
+      addTimePunch(punch);
+      sendJson(res, 200, { punch });
+      return;
+    }
+
+    const classifiedHoursMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/classified-hours$/);
+    if (req.method === 'GET' && classifiedHoursMatch) {
+      const employee = getEmployee(decodeURIComponent(classifiedHoursMatch[1]));
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const company = getCompany(employee.companyId)!;
+      const periodStart = url.searchParams.get('periodStart');
+      const periodEnd = url.searchParams.get('periodEnd');
+      if (!periodStart || !periodEnd) return sendJson(res, 400, { error: 'periodStart and periodEnd are required.' });
+
+      const punches = timePunchesForEmployee(employee.id).filter((p) => {
+        const date = p.timestamp.slice(0, 10);
+        return date >= periodStart && date <= periodEnd;
+      });
+      const dailyHours = pairPunchesIntoDailyHours(punches);
+      const stateCode = employee.workState?.code ?? company.homeState;
+      const classification = classifyWeeklyHours(dailyHours, overtimeRuleForState(stateCode));
+      sendJson(res, 200, { dailyHours, classification });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // PTO
+    // ------------------------------------------------------------------
+
+    const ptoPoliciesMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/pto-policies$/);
+    if (req.method === 'GET' && ptoPoliciesMatch) {
+      sendJson(res, 200, { ptoPolicies: ptoPoliciesForCompany(decodeURIComponent(ptoPoliciesMatch[1])) });
+      return;
+    }
+    if (req.method === 'POST' && ptoPoliciesMatch) {
+      const body = await parseJsonBody<Omit<import('../payroll/pto.ts').PtoPolicy, 'id'>>(req);
+      const policy = { id: randomUUID(), ...body };
+      savePtoPolicy(policy);
+      sendJson(res, 200, { ptoPolicy: policy });
+      return;
+    }
+
+    const ptoBalancesMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/pto-balances$/);
+    if (req.method === 'GET' && ptoBalancesMatch) {
+      sendJson(res, 200, { ptoBalances: ptoBalancesForEmployee(decodeURIComponent(ptoBalancesMatch[1])) });
+      return;
+    }
+
+    const ptoAccrueMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/pto-accrue$/);
+    if (req.method === 'POST' && ptoAccrueMatch) {
+      const employeeId = decodeURIComponent(ptoAccrueMatch[1]);
+      const body = await parseJsonBody<{ policyId: string; hoursWorkedThisPeriod?: number }>(req);
+      const policy = getPtoPolicy(body.policyId);
+      if (!policy) return sendJson(res, 404, { error: 'No such PTO policy.' });
+      const current = getPtoBalance(employeeId, body.policyId) ?? emptyPtoBalance(employeeId, body.policyId);
+      const updated = accruePto(current, policy, body.hoursWorkedThisPeriod ?? 0);
+      savePtoBalance(updated);
+      sendJson(res, 200, { ptoBalance: updated });
+      return;
+    }
+
+    const ptoUseMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/pto-use$/);
+    if (req.method === 'POST' && ptoUseMatch) {
+      const employeeId = decodeURIComponent(ptoUseMatch[1]);
+      const body = await parseJsonBody<{ policyId: string; hours: number }>(req);
+      const current = getPtoBalance(employeeId, body.policyId) ?? emptyPtoBalance(employeeId, body.policyId);
+      const result = usePto(current, body.hours);
+      if (result.approved) savePtoBalance(result.balance);
+      sendJson(res, 200, result);
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // I-9
+    // ------------------------------------------------------------------
+
+    const i9Match = url.pathname.match(/^\/api\/employees\/([^/]+)\/i9$/);
+    if (req.method === 'GET' && i9Match) {
+      const employee = getEmployee(decodeURIComponent(i9Match[1]));
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const record = getI9Record(employee.id) ?? { employeeId: employee.id };
+      sendJson(res, 200, {
+        record,
+        status: i9Status(record),
+        deadlines: i9Deadlines(employee.hireDate),
+        issues: i9ComplianceIssues(employee, record, new Date().toISOString().slice(0, 10)),
+      });
+      return;
+    }
+    if (req.method === 'POST' && i9Match) {
+      const employeeId = decodeURIComponent(i9Match[1]);
+      const body = await parseJsonBody<{ section: 1 | 2; completedAt: string }>(req);
+      const existing: I9Record = getI9Record(employeeId) ?? { employeeId };
+      const updated: I9Record =
+        body.section === 1 ? { ...existing, section1CompletedAt: body.completedAt } : { ...existing, section2CompletedAt: body.completedAt };
+      saveI9Record(updated);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, `i9.section${body.section}_completed`, 'Employee', employeeId, { completedAt: body.completedAt }));
+      sendJson(res, 200, { record: updated, status: i9Status(updated) });
+      return;
+    }
+
+    const i9ComplianceMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/i9-compliance$/);
+    if (req.method === 'GET' && i9ComplianceMatch) {
+      const companyId = decodeURIComponent(i9ComplianceMatch[1]);
+      const asOfDate = url.searchParams.get('asOfDate') ?? new Date().toISOString().slice(0, 10);
+      const findings = employeesForCompany(companyId)
+        .map((employee) => ({ employeeId: employee.id, issues: i9ComplianceIssues(employee, getI9Record(employee.id) ?? undefined, asOfDate) }))
+        .filter((f) => f.issues.length > 0);
+      sendJson(res, 200, { findings });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // State employer registrations (SUI/withholding)
+    // ------------------------------------------------------------------
+
+    const stateRegistrationsMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/state-registrations$/);
+    if (req.method === 'GET' && stateRegistrationsMatch) {
+      const company = getCompany(decodeURIComponent(stateRegistrationsMatch[1]));
+      if (!company) return sendJson(res, 404, { error: 'No such company.' });
+      sendJson(res, 200, { registrations: company.stateRegistrations ?? [] });
+      return;
+    }
+    if (req.method === 'POST' && stateRegistrationsMatch) {
+      const companyId = decodeURIComponent(stateRegistrationsMatch[1]);
+      const company = getCompany(companyId);
+      if (!company) return sendJson(res, 404, { error: 'No such company.' });
+      const body = await parseJsonBody<StateEmployerRegistration>(req);
+      const existing = (company.stateRegistrations ?? []).filter((r) => r.stateCode !== body.stateCode);
+      const updated: Company = { ...company, stateRegistrations: [...existing, body] };
+      saveCompany(updated);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'state_registration.saved', 'Company', companyId, { stateCode: body.stateCode }));
+      sendJson(res, 200, { registrations: updated.stateRegistrations });
+      return;
+    }
+
+    const stateRegistrationComplianceMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/state-registration-compliance$/);
+    if (req.method === 'GET' && stateRegistrationComplianceMatch) {
+      const companyId = decodeURIComponent(stateRegistrationComplianceMatch[1]);
+      const company = getCompany(companyId);
+      if (!company) return sendJson(res, 404, { error: 'No such company.' });
+      const asOfDate = url.searchParams.get('asOfDate') ?? new Date().toISOString().slice(0, 10);
+      const issues = checkStateRegistrationCompliance(company, employeesForCompany(companyId), asOfDate);
+      sendJson(res, 200, { issues });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Garnishment orders
+    // ------------------------------------------------------------------
+
+    const garnishmentMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/garnishment-orders$/);
+    if (req.method === 'GET' && garnishmentMatch) {
+      const employee = getEmployee(decodeURIComponent(garnishmentMatch[1]));
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      sendJson(res, 200, { garnishmentOrders: employee.garnishmentOrders });
+      return;
+    }
+    if (req.method === 'POST' && garnishmentMatch) {
+      const employeeId = decodeURIComponent(garnishmentMatch[1]);
+      const employee = getEmployee(employeeId);
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const body = await parseJsonBody<Omit<GarnishmentOrder, 'id'>>(req);
+      const order: GarnishmentOrder = { id: randomUUID(), ...body };
+      const updated: Employee = { ...employee, garnishmentOrders: [...employee.garnishmentOrders, order] };
+      saveEmployee(updated);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'garnishment_order.added', 'Employee', employeeId, { orderId: order.id, type: order.type }));
+      sendJson(res, 200, { garnishmentOrders: updated.garnishmentOrders });
+      return;
+    }
+
+    const garnishmentDeleteMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/garnishment-orders\/([^/]+)$/);
+    if (req.method === 'DELETE' && garnishmentDeleteMatch) {
+      const employeeId = decodeURIComponent(garnishmentDeleteMatch[1]);
+      const orderId = decodeURIComponent(garnishmentDeleteMatch[2]);
+      const employee = getEmployee(employeeId);
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const updated: Employee = { ...employee, garnishmentOrders: employee.garnishmentOrders.filter((o) => o.id !== orderId) };
+      saveEmployee(updated);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'garnishment_order.removed', 'Employee', employeeId, { orderId }));
+      sendJson(res, 200, { garnishmentOrders: updated.garnishmentOrders });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Direct deposit accounts and verification
+    // ------------------------------------------------------------------
+
+    /** Strips microDepositAmounts before a verification record leaves this server — see payroll/directDepositVerification.ts's own header on why an API response must never carry them. */
+    function safeVerificationView(v: DirectDepositVerification) {
+      const { microDepositAmounts: _omit, ...safe } = v;
+      return safe;
+    }
+
+    const directDepositAccountsMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/direct-deposit-accounts$/);
+    if (req.method === 'GET' && directDepositAccountsMatch) {
+      const employee = getEmployee(decodeURIComponent(directDepositAccountsMatch[1]));
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      sendJson(res, 200, { accounts: employee.directDepositAccounts });
+      return;
+    }
+    if (req.method === 'POST' && directDepositAccountsMatch) {
+      const employeeId = decodeURIComponent(directDepositAccountsMatch[1]);
+      const employee = getEmployee(employeeId);
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const body = await parseJsonBody<Omit<Employee['directDepositAccounts'][number], 'id'>>(req);
+      const account = { id: randomUUID(), ...body };
+      const updated: Employee = { ...employee, directDepositAccounts: [...employee.directDepositAccounts, account] };
+      saveEmployee(updated);
+      sendJson(res, 200, { accounts: updated.directDepositAccounts });
+      return;
+    }
+
+    const initiateVerificationMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/direct-deposit-accounts\/([^/]+)\/initiate-verification$/);
+    if (req.method === 'POST' && initiateVerificationMatch) {
+      const employeeId = decodeURIComponent(initiateVerificationMatch[1]);
+      const accountId = decodeURIComponent(initiateVerificationMatch[2]);
+      const employee = getEmployee(employeeId);
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      if (!employee.directDepositAccounts.some((a) => a.id === accountId)) return sendJson(res, 404, { error: 'No such account.' });
+      const body = await parseJsonBody<{ method: 'prenote' | 'micro-deposit'; date: string }>(req);
+      const verification = body.method === 'prenote'
+        ? initiatePrenoteVerification(accountId, body.date)
+        : initiateMicroDepositVerification(accountId, body.date);
+      saveDirectDepositVerification(verification);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, `direct_deposit_verification.${body.method}_initiated`, 'Employee', employeeId, { accountId }));
+      // Demo-only: this server has no real bank to actually move the micro-deposits or prenote through, so the
+      // generated amounts are surfaced here for a human to key into the "verify micro deposits" step below rather
+      // than being lost — a real deployment's ACH origination pipeline is what would actually deposit them, and
+      // no OTHER endpoint (see the GET below) ever exposes this field again once initiated.
+      sendJson(res, 200, { verification });
+      return;
+    }
+
+    const verificationStatusMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/direct-deposit-accounts\/([^/]+)\/verification$/);
+    if (req.method === 'GET' && verificationStatusMatch) {
+      const accountId = decodeURIComponent(verificationStatusMatch[2]);
+      const verification = getDirectDepositVerification(accountId);
+      if (!verification) return sendJson(res, 404, { error: 'No verification on file for this account.' });
+      sendJson(res, 200, { verification: safeVerificationView(verification) });
+      return;
+    }
+
+    const resolvePrenoteMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/direct-deposit-accounts\/([^/]+)\/resolve-prenote$/);
+    if (req.method === 'POST' && resolvePrenoteMatch) {
+      const employeeId = decodeURIComponent(resolvePrenoteMatch[1]);
+      const accountId = decodeURIComponent(resolvePrenoteMatch[2]);
+      const verification = getDirectDepositVerification(accountId);
+      if (!verification) return sendJson(res, 404, { error: 'No verification on file for this account.' });
+      const body = await parseJsonBody<{ asOfDate: string; receivedReturnOrNoc?: boolean }>(req);
+      const resolved = resolvePrenoteVerification(verification, body.asOfDate, body.receivedReturnOrNoc ?? false);
+      saveDirectDepositVerification(resolved);
+      if (resolved.status !== verification.status) {
+        addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, `direct_deposit_verification.${resolved.status}`, 'Employee', employeeId, { accountId }));
+      }
+      sendJson(res, 200, { verification: safeVerificationView(resolved) });
+      return;
+    }
+
+    const verifyMicroDepositsMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/direct-deposit-accounts\/([^/]+)\/verify-micro-deposits$/);
+    if (req.method === 'POST' && verifyMicroDepositsMatch) {
+      const employeeId = decodeURIComponent(verifyMicroDepositsMatch[1]);
+      const accountId = decodeURIComponent(verifyMicroDepositsMatch[2]);
+      const verification = getDirectDepositVerification(accountId);
+      if (!verification) return sendJson(res, 404, { error: 'No verification on file for this account.' });
+      const body = await parseJsonBody<{ amounts: [number, number] }>(req);
+      const { verification: updated, correct } = verifyMicroDeposits(verification, body.amounts);
+      saveDirectDepositVerification(updated);
+      if (updated.status !== verification.status) {
+        addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, `direct_deposit_verification.${updated.status}`, 'Employee', employeeId, { accountId }));
+      }
+      sendJson(res, 200, { correct, verification: safeVerificationView(updated) });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Companies (create) and reports
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/companies') {
+      const body = await parseJsonBody<Omit<Company, 'id'>>(req);
+      const created: Company = { id: randomUUID(), ...body };
+      saveCompany(created);
+      sendJson(res, 200, { company: created });
+      return;
+    }
+
+    const reportMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/report$/);
+    if (req.method === 'GET' && reportMatch) {
+      const companyId = decodeURIComponent(reportMatch[1]);
+      const company = getCompany(companyId);
+      if (!company) return sendJson(res, 404, { error: 'No such company.' });
+      const asOfDate = url.searchParams.get('asOfDate') ?? new Date().toISOString().slice(0, 10);
+      const report = computeCompanyReport(company, employeesForCompany(companyId), payRunsForCompany(companyId), asOfDate);
+      sendJson(res, 200, { report });
+      return;
+    }
+
+    const auditLogMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/audit-log$/);
+    if (req.method === 'GET' && auditLogMatch) {
+      const companyId = decodeURIComponent(auditLogMatch[1]);
+      const entityIds = [
+        companyId,
+        ...employeesForCompany(companyId).map((e) => e.id),
+        ...payRunsForCompany(companyId).map((r) => r.id),
+      ];
+      sendJson(res, 200, { auditLog: auditLogForEntityIds(entityIds) });
+      return;
+    }
+
+    const registerMatch = url.pathname.match(/^\/api\/pay-runs\/([^/]+)\/register$/);
+    if (req.method === 'GET' && registerMatch) {
+      const payRun = getPayRun(decodeURIComponent(registerMatch[1]));
+      if (!payRun) return sendJson(res, 404, { error: 'No such pay run.' });
+      const csv = renderPayrollRegister(employeesForCompany(payRun.companyId), payRun);
+      res.writeHead(200, { 'Content-Type': 'text/csv; charset=utf-8' });
+      res.end(csv);
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // 1099 contractors
+    // ------------------------------------------------------------------
+
+    const contractorsMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/contractors$/);
+    if (req.method === 'GET' && contractorsMatch) {
+      sendJson(res, 200, { contractors: contractorsForCompany(decodeURIComponent(contractorsMatch[1])) });
+      return;
+    }
+    if (req.method === 'POST' && contractorsMatch) {
+      const companyId = decodeURIComponent(contractorsMatch[1]);
+      const body = await parseJsonBody<{ legalName: string; tin: string; address: string }>(req);
+      const contractor: Contractor = { id: randomUUID(), companyId, active: true, ...body };
+      saveContractor(contractor);
+      sendJson(res, 200, { contractor });
+      return;
+    }
+
+    const contractorPaymentsMatch = url.pathname.match(/^\/api\/contractors\/([^/]+)\/payments$/);
+    if (req.method === 'GET' && contractorPaymentsMatch) {
+      sendJson(res, 200, { payments: paymentsForContractor(decodeURIComponent(contractorPaymentsMatch[1])) });
+      return;
+    }
+    if (req.method === 'POST' && contractorPaymentsMatch) {
+      const contractorId = decodeURIComponent(contractorPaymentsMatch[1]);
+      if (!getContractor(contractorId)) return sendJson(res, 404, { error: 'No such contractor.' });
+      const body = await parseJsonBody<{ amount: number; paymentDate: string; description?: string }>(req);
+      const payment = recordContractorPayment(contractorId, body.amount, body.paymentDate, body.description);
+      saveContractorPayment(payment);
+      sendJson(res, 200, { payment });
+      return;
+    }
+
+    const contractor1099Match = url.pathname.match(/^\/api\/contractors\/([^/]+)\/1099$/);
+    if (req.method === 'GET' && contractor1099Match) {
+      const contractorId = decodeURIComponent(contractor1099Match[1]);
+      const year = Number(url.searchParams.get('year'));
+      if (!year) return sendJson(res, 400, { error: 'year is required.' });
+      sendJson(res, 200, { form1099: compute1099Nec(contractorId, year, paymentsForContractor(contractorId)) });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // ACA — Applicable Large Employer status and affordability checks
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/aca/ale-status') {
+      const body = await parseJsonBody<{ hours: EmployeeMonthlyHours[] }>(req);
+      try {
+        sendJson(res, 200, { determination: determineAleStatus(body.hours ?? []) });
+      } catch (err) {
+        sendJson(res, 400, { error: err instanceof Error ? err.message : String(err) });
+      }
+      return;
+    }
+
+    if (req.method === 'POST' && url.pathname === '/api/aca/affordability-check') {
+      const body = await parseJsonBody<{
+        safeHarbor: 'fpl' | 'rate-of-pay-hourly' | 'rate-of-pay-salaried' | 'w2';
+        affordabilityPercentage: number;
+        employeeMonthlyContribution?: number;
+        employeeAnnualContribution?: number;
+        federalPovertyLineAnnual?: number;
+        hourlyRate?: number;
+        monthlySalary?: number;
+        annualBox1Wages?: number;
+      }>(req);
+      const pct = body.affordabilityPercentage;
+      if (body.safeHarbor === 'fpl') {
+        const ceiling = fplSafeHarborMonthlyCeiling(dollars(body.federalPovertyLineAnnual ?? 0), pct);
+        sendJson(res, 200, { ceilingCents: ceiling, affordable: dollars(body.employeeMonthlyContribution ?? 0) <= ceiling });
+      } else if (body.safeHarbor === 'rate-of-pay-hourly') {
+        const ceiling = ratePayHourlySafeHarborMonthlyCeiling(dollars(body.hourlyRate ?? 0), pct);
+        sendJson(res, 200, { ceilingCents: ceiling, affordable: dollars(body.employeeMonthlyContribution ?? 0) <= ceiling });
+      } else if (body.safeHarbor === 'rate-of-pay-salaried') {
+        const ceiling = ratePaySalariedSafeHarborMonthlyCeiling(dollars(body.monthlySalary ?? 0), pct);
+        sendJson(res, 200, { ceilingCents: ceiling, affordable: dollars(body.employeeMonthlyContribution ?? 0) <= ceiling });
+      } else if (body.safeHarbor === 'w2') {
+        const affordable = isAffordableUnderW2SafeHarbor(dollars(body.employeeAnnualContribution ?? 0), dollars(body.annualBox1Wages ?? 0), pct);
+        sendJson(res, 200, { affordable });
+      } else {
+        sendJson(res, 400, { error: 'Unknown safeHarbor.' });
+      }
+      return;
+    }
+
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not found');
+  } catch (err) {
+    const status = err instanceof BadJsonError ? 400 : 500;
+    sendJson(res, status, { error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+seedDemoDataIfEmpty();
+server.listen(PORT, () => {
+  console.log(`Payroll admin UI: http://localhost:${PORT}`);
+});

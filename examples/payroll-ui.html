@@ -1,0 +1,1218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Payroll Admin</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --panel: #ffffff;
+    --border: #dfe3e8;
+    --text: #1b1f24;
+    --muted: #5c6672;
+    --accent: #1f4f7a;
+    --accent-ink: #ffffff;
+    --good-bg: #edf3f7;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  header { background: var(--accent); color: var(--accent-ink); padding: 18px 24px; }
+  header h1 { margin: 0; font-size: 19px; font-weight: 600; }
+  header p { margin: 4px 0 0; font-size: 13px; opacity: 0.88; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px; display: grid; gap: 16px; }
+  section { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; }
+  section h2 { margin: 0 0 10px; font-size: 15px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  th { color: var(--muted); font-weight: 600; }
+  button {
+    background: var(--accent); color: var(--accent-ink); border: none; border-radius: 5px;
+    padding: 8px 14px; font-size: 13px; cursor: pointer;
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.secondary { background: var(--good-bg); color: var(--text); border: 1px solid var(--border); }
+  pre {
+    background: #0f1720; color: #dbe4ee; padding: 12px 14px; border-radius: 6px;
+    font-family: var(--mono); font-size: 12.5px; overflow-x: auto; white-space: pre-wrap;
+  }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  select, input { padding: 6px 8px; border: 1px solid var(--border); border-radius: 5px; font-size: 13px; }
+  .muted { color: var(--muted); }
+  .status { font-size: 13px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Payroll Admin</h1>
+  <p>Backed directly by payroll/store.ts — a company, its employees, and every pay run that's ever been approved.
+  See the <a href="/portal" style="color:#cfe3f5">employee self-service portal</a> for the other side of this.</p>
+</header>
+<main>
+  <section id="company-section">
+    <h2>Company</h2>
+    <div class="row">
+      <select id="company-select"></select>
+      <button class="secondary" id="new-company-btn">+ New company</button>
+    </div>
+    <div id="company-info" class="muted">Loading…</div>
+  </section>
+
+  <section>
+    <h2>Headcount &amp; payroll cost report</h2>
+    <pre id="report-view"></pre>
+  </section>
+
+  <section>
+    <h2>Audit log</h2>
+    <div class="row"><button class="secondary" id="audit-refresh-btn">Refresh</button></div>
+    <table id="audit-table">
+      <thead><tr><th>When</th><th>Action</th><th>Entity</th><th>Details</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>ACA compliance</h2>
+    <p class="muted" style="margin-top:0">Applicable Large Employer status needs real hours-of-service history this demo doesn't track long-term — paste 12 months of it below (one row per employee per month) rather than guessing from today's headcount.</p>
+    <div class="row">
+      <textarea id="aca-hours-input" rows="4" style="flex:1; font-family:var(--mono); font-size:12px" placeholder='[{"employeeId":"e1","month":"2025-01","hoursOfService":160}, ...]'></textarea>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="secondary" id="aca-ale-btn">Compute ALE status</button>
+    </div>
+    <pre id="aca-ale-view"></pre>
+
+    <h3 style="margin-top:16px">Affordability safe harbor check</h3>
+    <div class="row">
+      <select id="aca-safe-harbor-select">
+        <option value="fpl">Federal Poverty Line</option>
+        <option value="rate-of-pay-hourly">Rate of Pay (hourly)</option>
+        <option value="rate-of-pay-salaried">Rate of Pay (salaried)</option>
+        <option value="w2">Form W-2 (full year)</option>
+      </select>
+      <select id="aca-affordability-year">
+        <option value="0.0996">2026 (9.96%)</option>
+        <option value="0.0902">2025 (9.02%)</option>
+      </select>
+    </div>
+    <div class="row" id="aca-fpl-fields" style="margin-top:6px">
+      <input id="aca-fpl-annual" type="number" placeholder="Annual FPL ($)" value="15650" style="width:170px" />
+      <input id="aca-monthly-contribution" type="number" placeholder="Employee monthly contribution ($)" style="width:220px" />
+    </div>
+    <div class="row" id="aca-hourly-fields" style="margin-top:6px" hidden>
+      <input id="aca-hourly-rate" type="number" placeholder="Hourly rate ($)" style="width:140px" />
+    </div>
+    <div class="row" id="aca-salaried-fields" style="margin-top:6px" hidden>
+      <input id="aca-monthly-salary" type="number" placeholder="Monthly salary ($)" style="width:160px" />
+    </div>
+    <div class="row" id="aca-w2-fields" style="margin-top:6px" hidden>
+      <input id="aca-annual-contribution" type="number" placeholder="Employee annual contribution ($)" style="width:220px" />
+      <input id="aca-box1-wages" type="number" placeholder="Annual Box 1 wages ($)" style="width:200px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="secondary" id="aca-affordability-btn">Check affordability</button>
+    </div>
+    <pre id="aca-affordability-view"></pre>
+  </section>
+
+  <section>
+    <h2>State employer registrations</h2>
+    <p class="muted" style="margin-top:0">A multi-state employer must register for unemployment (and usually withholding) tax in every state it has employees working in before running payroll there — this compares that against who's actually on the books.</p>
+    <div class="row">
+      <input id="sr-state" placeholder="State code (e.g. CA)" style="width:130px" maxlength="2" />
+      <input id="sr-sui-account" placeholder="SUI account number" style="width:170px" />
+      <input id="sr-sui-rate" type="number" step="0.001" placeholder="SUI rate (e.g. 0.027)" style="width:170px" />
+      <button class="secondary" id="sr-add-btn">Save registration</button>
+    </div>
+    <table id="sr-table">
+      <thead><tr><th>State</th><th>SUI account</th><th>SUI rate</th><th>Registered</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="row" style="margin-top:8px">
+      <button class="secondary" id="sr-check-btn">Check compliance</button>
+    </div>
+    <pre id="sr-view"></pre>
+  </section>
+
+  <section>
+    <h2>Employees</h2>
+    <table id="employees-table">
+      <thead><tr><th>Name</th><th>Pay type</th><th>Residence</th><th>YTD Social Security wages</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Run payroll</h2>
+    <div class="row">
+      <span id="next-period" class="muted">Loading…</span>
+    </div>
+    <table id="hours-table">
+      <thead><tr><th>Hourly employee</th><th>Regular hours</th><th>Overtime hours</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="row" style="margin-top:10px">
+      <button id="run-btn" disabled>Run next payroll</button>
+    </div>
+    <div id="run-status" class="status"></div>
+  </section>
+
+  <section>
+    <h2>Pay run history</h2>
+    <table id="runs-table">
+      <thead><tr><th>Check date</th><th>Period</th><th>Status</th><th>Employees</th><th>Paystubs</th><th>Register</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <pre id="paystub-view" hidden></pre>
+    <pre id="register-view" hidden></pre>
+  </section>
+
+  <section>
+    <h2>Form 941 (quarterly)</h2>
+    <div class="row">
+      <input id="f941-year" type="number" value="2026" style="width:90px" />
+      <select id="f941-quarter">
+        <option value="1">Q1</option><option value="2">Q2</option><option value="3">Q3</option><option value="4">Q4</option>
+      </select>
+      <button class="secondary" id="f941-btn">View</button>
+    </div>
+    <pre id="f941-view"></pre>
+  </section>
+
+  <section>
+    <h2>Form 940 (annual FUTA)</h2>
+    <div class="row">
+      <input id="f940-year" type="number" value="2026" style="width:90px" />
+      <button class="secondary" id="f940-btn">View</button>
+    </div>
+    <pre id="f940-view"></pre>
+  </section>
+
+  <section>
+    <h2>W-2 (annual)</h2>
+    <div class="row">
+      <select id="w2-employee"></select>
+      <input id="w2-year" type="number" value="2026" style="width:90px" />
+      <button class="secondary" id="w2-btn">View</button>
+    </div>
+    <pre id="w2-view"></pre>
+  </section>
+
+  <section>
+    <h2>Time clock</h2>
+    <div class="row">
+      <select id="clock-employee"></select>
+      <input id="clock-time" type="datetime-local" />
+      <button class="secondary" id="clock-in-btn">Clock in</button>
+      <button class="secondary" id="clock-out-btn">Clock out</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <span class="muted">Classified hours for the run-payroll period above:</span>
+      <button class="secondary" id="classify-btn">Compute from punches</button>
+    </div>
+    <pre id="classify-view"></pre>
+  </section>
+
+  <section>
+    <h2>PTO</h2>
+    <div class="row">
+      <input id="pto-policy-name" placeholder="Policy name" value="Standard PTO" />
+      <input id="pto-hours-per-period" type="number" value="4" style="width:80px" title="Hours per pay period" />
+      <button class="secondary" id="pto-create-policy-btn">Create policy</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <select id="pto-policy"></select>
+      <select id="pto-employee"></select>
+      <button class="secondary" id="pto-accrue-btn">Accrue this period</button>
+      <input id="pto-use-hours" type="number" placeholder="Hours to use" style="width:110px" />
+      <button class="secondary" id="pto-use-btn">Request time off</button>
+    </div>
+    <pre id="pto-view"></pre>
+  </section>
+
+  <section>
+    <h2>Terminate an employee</h2>
+    <div class="row">
+      <select id="term-employee"></select>
+      <input id="term-date" type="date" />
+      <select id="term-reason">
+        <option value="involuntary">Involuntary</option>
+        <option value="layoff">Layoff</option>
+        <option value="voluntary_with_notice">Voluntary (72h+ notice)</option>
+        <option value="voluntary_without_notice">Voluntary (no notice)</option>
+      </select>
+      <label><input type="checkbox" id="term-pto-payout" /> Pay out PTO</label>
+      <button id="term-btn">Terminate</button>
+    </div>
+    <pre id="term-view"></pre>
+  </section>
+
+  <section>
+    <h2>Form I-9 (employment eligibility)</h2>
+    <div class="row">
+      <select id="i9-employee"></select>
+      <button class="secondary" id="i9-view-btn">View status</button>
+      <input id="i9-date" type="date" />
+      <button class="secondary" id="i9-section1-btn">Mark Section 1 complete</button>
+      <button class="secondary" id="i9-section2-btn">Mark Section 2 complete</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="secondary" id="i9-compliance-btn">Show company-wide compliance findings</button>
+    </div>
+    <pre id="i9-view"></pre>
+  </section>
+
+  <section>
+    <h2>Garnishment orders</h2>
+    <div class="row">
+      <select id="garn-employee"></select>
+      <select id="garn-type">
+        <option value="consumer_creditor">Consumer/creditor judgment</option>
+        <option value="child_support">Child support</option>
+        <option value="federal_student_loan_default">Federal student loan default</option>
+      </select>
+      <input id="garn-amount" type="number" placeholder="Amount ordered ($/period)" style="width:180px" />
+      <button class="secondary" id="garn-add-btn">Add order</button>
+    </div>
+    <table id="garn-table">
+      <thead><tr><th>Type</th><th>Amount ordered</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Direct deposit accounts</h2>
+    <div class="row">
+      <select id="dd-employee"></select>
+      <button class="secondary" id="dd-refresh-btn">Load accounts</button>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="dd-routing" placeholder="Routing number" style="width:150px" />
+      <input id="dd-account" placeholder="Account number" style="width:150px" />
+      <select id="dd-account-type">
+        <option value="checking">Checking</option>
+        <option value="savings">Savings</option>
+      </select>
+      <button class="secondary" id="dd-add-btn">Add account (remainder allocation)</button>
+    </div>
+    <table id="dd-table">
+      <thead><tr><th>Routing</th><th>Account</th><th>Type</th><th>Verification</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <pre id="dd-view"></pre>
+  </section>
+
+  <section>
+    <h2>Benefits</h2>
+    <div class="row">
+      <input id="benefit-name" placeholder="Plan name" value="PPO Medical" />
+      <input id="benefit-employee-only" type="number" placeholder="Employee-only $/mo" value="500" style="width:170px" />
+      <input id="benefit-family" type="number" placeholder="Family $/mo" value="1200" style="width:130px" />
+      <input id="benefit-employer-pct" type="number" placeholder="Employer %" value="80" style="width:100px" />
+      <button class="secondary" id="benefit-create-btn">Create plan</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <select id="benefit-plan"></select>
+      <select id="benefit-employee"></select>
+      <select id="benefit-tier">
+        <option value="employee_only">Employee only</option>
+        <option value="family">Family</option>
+      </select>
+      <button class="secondary" id="benefit-elect-btn">Elect (effective next check date)</button>
+    </div>
+    <pre id="benefit-view"></pre>
+  </section>
+
+  <section>
+    <h2>Recruiting</h2>
+    <div class="row">
+      <input id="job-title" placeholder="Job title" value="Baker" />
+      <button class="secondary" id="job-create-btn">Post job</button>
+      <select id="job-posting"></select>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <input id="cand-first" placeholder="First name" />
+      <input id="cand-last" placeholder="Last name" />
+      <input id="cand-email" placeholder="Email" />
+      <button class="secondary" id="cand-create-btn">Add candidate</button>
+    </div>
+    <table id="candidates-table">
+      <thead><tr><th>Name</th><th>Stage</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <pre id="recruiting-view"></pre>
+  </section>
+
+  <section>
+    <h2>1099 contractors</h2>
+    <div class="row">
+      <input id="contractor-name" placeholder="Legal name" />
+      <input id="contractor-tin" placeholder="TIN (SSN or EIN)" />
+      <input id="contractor-address" placeholder="Address" />
+      <button class="secondary" id="contractor-create-btn">Add contractor</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <select id="contractor-select"></select>
+      <input id="contractor-payment-amount" type="number" placeholder="Payment amount ($)" style="width:170px" />
+      <input id="contractor-payment-date" type="date" />
+      <button class="secondary" id="contractor-pay-btn">Record payment</button>
+      <input id="contractor-1099-year" type="number" value="2026" style="width:90px" />
+      <button class="secondary" id="contractor-1099-btn">View 1099-NEC status</button>
+    </div>
+    <pre id="contractor-view"></pre>
+  </section>
+</main>
+
+<script>
+let company = null;
+let employees = [];
+
+function fmtCents(c) {
+  const neg = c < 0;
+  const abs = Math.abs(c);
+  return (neg ? '-$' : '$') + (abs / 100).toFixed(2);
+}
+
+async function api(path, options) {
+  const res = await fetch(path, options);
+  const body = await res.json();
+  if (!res.ok) throw new Error(body.error || res.statusText);
+  return body;
+}
+
+let allLoadedCompanies = [];
+
+async function loadCompany(preferredId) {
+  const { companies } = await api('/api/companies');
+  allLoadedCompanies = companies;
+  const select = document.getElementById('company-select');
+  select.innerHTML = companies.map((c) => `<option value="${c.id}">${c.legalName}</option>`).join('');
+  const targetId = preferredId && companies.some((c) => c.id === preferredId) ? preferredId : companies[0].id;
+  select.value = targetId;
+  company = companies.find((c) => c.id === targetId);
+  document.getElementById('company-info').innerHTML =
+    `<strong>${company.legalName}</strong> · EIN ${company.ein} · home state ${company.homeState} · ` +
+    `${company.paySchedule.frequency} pay schedule`;
+}
+
+document.getElementById('company-select').addEventListener('change', async (ev) => {
+  await refreshAll(ev.target.value);
+});
+
+document.getElementById('new-company-btn').addEventListener('click', async () => {
+  const legalName = prompt('Legal name', 'New Company LLC');
+  if (!legalName) return;
+  const ein = prompt('EIN', '00-0000000') || '00-0000000';
+  const homeState = (prompt('Home state (2-letter)', 'TX') || 'TX').toUpperCase();
+  const frequency = prompt('Pay frequency (weekly/biweekly/semimonthly/monthly)', 'biweekly') || 'biweekly';
+  const paySchedule = frequency === 'semimonthly' || frequency === 'monthly'
+    ? { frequency, checkDateLagDays: 5 }
+    : { frequency, anchorPeriodStart: new Date().toISOString().slice(0, 10), checkDateLagDays: 5 };
+  const { company: created } = await api('/api/companies', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ legalName, ein, homeState, paySchedule }),
+  });
+  await refreshAll(created.id);
+});
+
+async function loadReport() {
+  const { report } = await api(`/api/companies/${company.id}/report`);
+  document.getElementById('report-view').textContent = JSON.stringify(report, null, 2);
+}
+
+async function loadAuditLog() {
+  const { auditLog } = await api(`/api/companies/${company.id}/audit-log`);
+  const tbody = document.querySelector('#audit-table tbody');
+  tbody.innerHTML = auditLog.length === 0
+    ? '<tr><td colspan="4" class="muted">No activity yet.</td></tr>'
+    : auditLog.map((e) => `
+      <tr>
+        <td>${new Date(e.timestamp).toLocaleString()}</td>
+        <td>${e.action}</td>
+        <td>${e.entityType} ${e.entityId.slice(0, 8)}</td>
+        <td>${e.details ? JSON.stringify(e.details) : ''}</td>
+      </tr>`).join('');
+}
+document.getElementById('audit-refresh-btn').addEventListener('click', loadAuditLog);
+
+document.getElementById('aca-ale-btn').addEventListener('click', async () => {
+  const view = document.getElementById('aca-ale-view');
+  let hours;
+  try {
+    hours = JSON.parse(document.getElementById('aca-hours-input').value || '[]');
+  } catch (err) {
+    view.textContent = 'Could not parse hours JSON: ' + err.message;
+    return;
+  }
+  try {
+    const { determination } = await api('/api/aca/ale-status', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hours }),
+    });
+    view.textContent = JSON.stringify(determination, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('aca-safe-harbor-select').addEventListener('change', (ev) => {
+  document.getElementById('aca-fpl-fields').hidden = ev.target.value !== 'fpl';
+  document.getElementById('aca-hourly-fields').hidden = ev.target.value !== 'rate-of-pay-hourly';
+  document.getElementById('aca-salaried-fields').hidden = ev.target.value !== 'rate-of-pay-salaried';
+  document.getElementById('aca-w2-fields').hidden = ev.target.value !== 'w2';
+});
+
+document.getElementById('aca-affordability-btn').addEventListener('click', async () => {
+  const view = document.getElementById('aca-affordability-view');
+  const safeHarbor = document.getElementById('aca-safe-harbor-select').value;
+  const affordabilityPercentage = Number(document.getElementById('aca-affordability-year').value);
+  const body = { safeHarbor, affordabilityPercentage };
+  if (safeHarbor === 'fpl') {
+    body.federalPovertyLineAnnual = Number(document.getElementById('aca-fpl-annual').value) || 0;
+    body.employeeMonthlyContribution = Number(document.getElementById('aca-monthly-contribution').value) || 0;
+  } else if (safeHarbor === 'rate-of-pay-hourly') {
+    body.hourlyRate = Number(document.getElementById('aca-hourly-rate').value) || 0;
+    body.employeeMonthlyContribution = Number(document.getElementById('aca-monthly-contribution').value) || 0;
+  } else if (safeHarbor === 'rate-of-pay-salaried') {
+    body.monthlySalary = Number(document.getElementById('aca-monthly-salary').value) || 0;
+    body.employeeMonthlyContribution = Number(document.getElementById('aca-monthly-contribution').value) || 0;
+  } else {
+    body.employeeAnnualContribution = Number(document.getElementById('aca-annual-contribution').value) || 0;
+    body.annualBox1Wages = Number(document.getElementById('aca-box1-wages').value) || 0;
+  }
+  try {
+    const result = await api('/api/aca/affordability-check', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    });
+    view.textContent = result.ceilingCents !== undefined
+      ? `Monthly ceiling: ${fmtCents(result.ceilingCents)} — ${result.affordable ? 'AFFORDABLE' : 'NOT affordable'}`
+      : (result.affordable ? 'AFFORDABLE' : 'NOT affordable');
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+const DEFAULT_FULL_TIME_HOURS = { weekly: 40, biweekly: 80, semimonthly: 86.67, monthly: 173.33 };
+
+async function loadEmployees() {
+  const { employees: list } = await api(`/api/companies/${company.id}/employees`);
+  employees = list;
+  const tbody = document.querySelector('#employees-table tbody');
+  tbody.innerHTML = list.map((e) => `
+    <tr>
+      <td>${e.firstName} ${e.lastName}</td>
+      <td>${e.payType.kind === 'salary' ? fmtCents(e.payType.annualSalary) + '/yr' : fmtCents(e.payType.hourlyRate) + '/hr'}</td>
+      <td>${e.residenceState.code}</td>
+      <td>${fmtCents(e.ytd.socialSecurity || 0)}</td>
+    </tr>`).join('');
+
+  const employeeOptions = list.map((e) => `<option value="${e.id}">${e.firstName} ${e.lastName}</option>`).join('');
+  for (const id of ['w2-employee', 'clock-employee', 'pto-employee', 'term-employee', 'benefit-employee', 'i9-employee', 'garn-employee', 'dd-employee']) {
+    document.getElementById(id).innerHTML = employeeOptions;
+  }
+
+  const hourly = list.filter((e) => e.payType.kind === 'hourly');
+  const defaultHours = DEFAULT_FULL_TIME_HOURS[company.paySchedule.frequency] ?? 0;
+  const hoursBody = document.querySelector('#hours-table tbody');
+  hoursBody.innerHTML = hourly.length === 0
+    ? '<tr><td colspan="3" class="muted">No hourly employees.</td></tr>'
+    : hourly.map((e) => `
+      <tr>
+        <td>${e.firstName} ${e.lastName}</td>
+        <td><input type="number" step="0.01" min="0" class="regular-hours" data-emp="${e.id}" value="${defaultHours}" style="width:90px" /></td>
+        <td><input type="number" step="0.01" min="0" class="overtime-hours" data-emp="${e.id}" value="0" style="width:90px" /></td>
+      </tr>`).join('');
+}
+
+function collectTimeEntries() {
+  return [...document.querySelectorAll('#hours-table .regular-hours')].map((input) => {
+    const employeeId = input.dataset.emp;
+    const overtimeInput = document.querySelector(`#hours-table .overtime-hours[data-emp="${employeeId}"]`);
+    return {
+      employeeId,
+      regularHours: Number(input.value) || 0,
+      overtimeHours: Number(overtimeInput.value) || 0,
+    };
+  });
+}
+
+let currentPeriod = null;
+
+async function loadNextPeriod() {
+  const { period } = await api(`/api/companies/${company.id}/next-period`);
+  currentPeriod = period;
+  const el = document.getElementById('next-period');
+  const btn = document.getElementById('run-btn');
+  if (!period) {
+    el.textContent = 'No more scheduled periods available.';
+    btn.disabled = true;
+    return;
+  }
+  el.textContent = `Next period: ${period.periodStart} to ${period.periodEnd}, check date ${period.checkDate}`;
+  btn.disabled = false;
+}
+
+async function loadRuns() {
+  const { payRuns } = await api(`/api/companies/${company.id}/pay-runs`);
+  const tbody = document.querySelector('#runs-table tbody');
+  tbody.innerHTML = payRuns.map((r) => `
+    <tr>
+      <td>${r.checkDate}</td>
+      <td>${r.periodStart} – ${r.periodEnd}</td>
+      <td>${r.status}</td>
+      <td>${r.lines.length}</td>
+      <td>${r.lines.map((l) => `<a href="#" data-run="${r.id}" data-emp="${l.employeeId}" class="paystub-link">${l.employeeId}</a>`).join(' · ')}</td>
+      <td><a href="#" data-run="${r.id}" class="register-link">CSV</a></td>
+    </tr>`).join('');
+
+  tbody.querySelectorAll('.paystub-link').forEach((a) => {
+    a.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      const text = await fetch(`/api/pay-runs/${a.dataset.run}/paystub/${a.dataset.emp}`).then((r) => r.text());
+      const view = document.getElementById('paystub-view');
+      view.hidden = false;
+      view.textContent = text;
+    });
+  });
+
+  tbody.querySelectorAll('.register-link').forEach((a) => {
+    a.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      const text = await fetch(`/api/pay-runs/${a.dataset.run}/register`).then((r) => r.text());
+      const view = document.getElementById('register-view');
+      view.hidden = false;
+      view.textContent = text;
+    });
+  });
+}
+
+async function loadPtoPolicies() {
+  const { ptoPolicies } = await api(`/api/companies/${company.id}/pto-policies`);
+  document.getElementById('pto-policy').innerHTML = ptoPolicies.length === 0
+    ? '<option value="">(no policies yet)</option>'
+    : ptoPolicies.map((p) => `<option value="${p.id}">${p.name}</option>`).join('');
+}
+
+async function loadBenefitPlans() {
+  const { benefitPlans } = await api(`/api/companies/${company.id}/benefit-plans`);
+  document.getElementById('benefit-plan').innerHTML = benefitPlans.length === 0
+    ? '<option value="">(no plans yet)</option>'
+    : benefitPlans.map((p) => `<option value="${p.id}">${p.name}</option>`).join('');
+}
+
+async function loadJobPostings() {
+  const { jobPostings } = await api(`/api/companies/${company.id}/job-postings`);
+  document.getElementById('job-posting').innerHTML = jobPostings.length === 0
+    ? '<option value="">(post a job first)</option>'
+    : jobPostings.map((p) => `<option value="${p.id}">${p.title}</option>`).join('');
+  return jobPostings;
+}
+
+const CANDIDATE_ACTIONS = {
+  applied: [['screening', 'Advance to screening'], ['rejected', 'Reject']],
+  screening: [['interviewing', 'Advance to interviewing'], ['rejected', 'Reject']],
+  interviewing: [['__offer__', 'Extend offer'], ['rejected', 'Reject']],
+  offer_extended: [['__accept__', 'Accept offer'], ['__decline__', 'Decline offer']],
+  offer_accepted: [['__hire__', 'Hire']],
+  offer_declined: [],
+  hired: [],
+  rejected: [],
+};
+
+async function loadCandidates() {
+  const { candidates } = await api(`/api/companies/${company.id}/candidates`);
+  const tbody = document.querySelector('#candidates-table tbody');
+  tbody.innerHTML = candidates.length === 0
+    ? '<tr><td colspan="3" class="muted">No candidates yet.</td></tr>'
+    : candidates.map((c) => `
+      <tr>
+        <td>${c.firstName} ${c.lastName}</td>
+        <td>${c.stage}</td>
+        <td>${CANDIDATE_ACTIONS[c.stage].map(([action, label]) => `<button class="secondary cand-action" data-cand="${c.id}" data-action="${action}">${label}</button>`).join(' ')}</td>
+      </tr>`).join('');
+
+  tbody.querySelectorAll('.cand-action').forEach((btn) => {
+    btn.addEventListener('click', () => handleCandidateAction(btn.dataset.cand, btn.dataset.action));
+  });
+}
+
+async function handleCandidateAction(candidateId, action) {
+  const view = document.getElementById('recruiting-view');
+  try {
+    if (action === '__offer__') {
+      const hourly = confirm('Hourly? Cancel = salary');
+      const payType = hourly
+        ? { kind: 'hourly', hourlyRate: Number(prompt('Hourly rate ($)', '20')) * 100 }
+        : { kind: 'salary', annualSalary: Number(prompt('Annual salary ($)', '60000')) * 100 };
+      const startDate = prompt('Start date (YYYY-MM-DD)', currentPeriod?.checkDate ?? '2026-02-01');
+      const offer = { payType, startDate, workState: { code: company.homeState } };
+      const { candidate } = await api(`/api/candidates/${candidateId}/extend-offer`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ offer }),
+      });
+      view.textContent = JSON.stringify(candidate, null, 2);
+    } else if (action === '__accept__') {
+      const { candidate } = await api(`/api/candidates/${candidateId}/accept`, { method: 'POST' });
+      view.textContent = JSON.stringify(candidate, null, 2);
+    } else if (action === '__decline__') {
+      const { candidate } = await api(`/api/candidates/${candidateId}/decline`, { method: 'POST' });
+      view.textContent = JSON.stringify(candidate, null, 2);
+    } else if (action === '__hire__') {
+      const federalW4 = { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 };
+      const { employee, candidate } = await api(`/api/candidates/${candidateId}/hire`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyId: company.id, federalW4, residenceState: { code: company.homeState } }),
+      });
+      view.textContent = `Hired as employee ${employee.id}\n` + JSON.stringify(candidate, null, 2);
+      await loadEmployees();
+    } else {
+      const { candidate } = await api(`/api/candidates/${candidateId}/advance`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: action }),
+      });
+      view.textContent = JSON.stringify(candidate, null, 2);
+    }
+    await loadCandidates();
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+}
+
+async function refreshAll(preferredCompanyId) {
+  await loadCompany(preferredCompanyId);
+  await Promise.all([
+    loadEmployees(), loadNextPeriod(), loadRuns(), loadReport(), loadAuditLog(),
+    loadPtoPolicies(), loadBenefitPlans(), loadJobPostings(), loadCandidates(), loadContractors(),
+    loadStateRegistrations(),
+  ]);
+  await loadGarnishments();
+}
+
+async function loadStateRegistrations() {
+  const { registrations } = await api(`/api/companies/${company.id}/state-registrations`);
+  const tbody = document.querySelector('#sr-table tbody');
+  tbody.innerHTML = registrations.length === 0
+    ? '<tr><td colspan="4" class="muted">No state registrations on file.</td></tr>'
+    : registrations.map((r) => `
+      <tr>
+        <td>${r.stateCode}</td>
+        <td>${r.suiAccountNumber}</td>
+        <td>${(r.suiRate * 100).toFixed(2)}%</td>
+        <td>${r.registeredDate}</td>
+      </tr>`).join('');
+}
+document.getElementById('sr-add-btn').addEventListener('click', async () => {
+  const stateCode = document.getElementById('sr-state').value.toUpperCase();
+  const suiAccountNumber = document.getElementById('sr-sui-account').value;
+  const suiRate = Number(document.getElementById('sr-sui-rate').value) || 0;
+  if (!stateCode) return;
+  await api(`/api/companies/${company.id}/state-registrations`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ stateCode, suiAccountNumber, suiRate, registeredDate: new Date().toISOString().slice(0, 10) }),
+  });
+  await loadStateRegistrations();
+});
+document.getElementById('sr-check-btn').addEventListener('click', async () => {
+  const view = document.getElementById('sr-view');
+  const { issues } = await api(`/api/companies/${company.id}/state-registration-compliance`);
+  view.textContent = issues.length === 0
+    ? 'No findings — every active employee\'s work state has a matching registration.'
+    : JSON.stringify(issues, null, 2);
+});
+
+async function loadGarnishments() {
+  const employeeId = document.getElementById('garn-employee').value;
+  if (!employeeId) return;
+  const { garnishmentOrders } = await api(`/api/employees/${employeeId}/garnishment-orders`);
+  const tbody = document.querySelector('#garn-table tbody');
+  tbody.innerHTML = garnishmentOrders.length === 0
+    ? '<tr><td colspan="3" class="muted">No garnishment orders.</td></tr>'
+    : garnishmentOrders.map((o) => `
+      <tr>
+        <td>${o.type}</td>
+        <td>${fmtCents(o.amountOrdered)}</td>
+        <td><button class="secondary garn-remove" data-order="${o.id}">Remove</button></td>
+      </tr>`).join('');
+  tbody.querySelectorAll('.garn-remove').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      await api(`/api/employees/${employeeId}/garnishment-orders/${btn.dataset.order}`, { method: 'DELETE' });
+      await loadGarnishments();
+    });
+  });
+}
+document.getElementById('garn-employee').addEventListener('change', loadGarnishments);
+document.getElementById('garn-add-btn').addEventListener('click', async () => {
+  const employeeId = document.getElementById('garn-employee').value;
+  const type = document.getElementById('garn-type').value;
+  const amountOrdered = Math.round(Number(document.getElementById('garn-amount').value) * 100) || 0;
+  await api(`/api/employees/${employeeId}/garnishment-orders`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type, amountOrdered }),
+  });
+  await loadGarnishments();
+});
+
+async function loadDirectDepositAccounts() {
+  const employeeId = document.getElementById('dd-employee').value;
+  if (!employeeId) return;
+  const { accounts } = await api(`/api/employees/${employeeId}/direct-deposit-accounts`);
+  const tbody = document.querySelector('#dd-table tbody');
+  if (accounts.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">No accounts on file.</td></tr>';
+    return;
+  }
+  const rows = await Promise.all(accounts.map(async (a) => {
+    let verification = null;
+    try {
+      ({ verification } = await api(`/api/employees/${employeeId}/direct-deposit-accounts/${a.id}/verification`));
+    } catch {
+      // No verification initiated yet -- a real, valid state, not an error.
+    }
+    const statusText = verification ? `${verification.method}: ${verification.status}` : 'not verified';
+    return `
+      <tr data-account="${a.id}">
+        <td>${a.routingNumber}</td>
+        <td>${a.accountNumber}</td>
+        <td>${a.accountType}</td>
+        <td>${statusText}</td>
+        <td>
+          <button class="secondary dd-prenote" data-account="${a.id}">Send prenote</button>
+          <button class="secondary dd-microdeposit" data-account="${a.id}">Send micro-deposits</button>
+          ${verification && verification.method === 'prenote' && verification.status === 'pending' ? `<button class="secondary dd-resolve-prenote" data-account="${a.id}">Check prenote status</button>` : ''}
+          ${verification && verification.method === 'micro-deposit' && verification.status === 'pending' ? `<button class="secondary dd-verify-microdeposit" data-account="${a.id}">Enter amounts</button>` : ''}
+        </td>
+      </tr>`;
+  }));
+  tbody.innerHTML = rows.join('');
+
+  tbody.querySelectorAll('.dd-prenote').forEach((btn) => btn.addEventListener('click', async () => {
+    const employeeId = document.getElementById('dd-employee').value;
+    const today = new Date().toISOString().slice(0, 10);
+    const result = await api(`/api/employees/${employeeId}/direct-deposit-accounts/${btn.dataset.account}/initiate-verification`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ method: 'prenote', date: today }),
+    });
+    document.getElementById('dd-view').textContent =
+      `Prenote sent (settlement date ${result.verification.settlementDate}). NACHA requires waiting 3 business days with no return/NOC before a live entry may follow.`;
+    await loadDirectDepositAccounts();
+  }));
+
+  tbody.querySelectorAll('.dd-microdeposit').forEach((btn) => btn.addEventListener('click', async () => {
+    const employeeId = document.getElementById('dd-employee').value;
+    const today = new Date().toISOString().slice(0, 10);
+    const result = await api(`/api/employees/${employeeId}/direct-deposit-accounts/${btn.dataset.account}/initiate-verification`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ method: 'micro-deposit', date: today }),
+    });
+    const [a, b] = result.verification.microDepositAmounts;
+    document.getElementById('dd-view').textContent =
+      `Micro-deposits sent: ${fmtCents(a)} and ${fmtCents(b)} (shown here only because this demo has no real bank to actually deposit them — a real system would never return these amounts to anyone but the ACH origination pipeline itself).`;
+    await loadDirectDepositAccounts();
+  }));
+
+  tbody.querySelectorAll('.dd-resolve-prenote').forEach((btn) => btn.addEventListener('click', async () => {
+    const employeeId = document.getElementById('dd-employee').value;
+    const asOfDate = prompt('Check status as of date (YYYY-MM-DD)', new Date().toISOString().slice(0, 10));
+    if (!asOfDate) return;
+    const receivedReturnOrNoc = confirm('Was a return or Notification of Change received for this prenote?');
+    const result = await api(`/api/employees/${employeeId}/direct-deposit-accounts/${btn.dataset.account}/resolve-prenote`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ asOfDate, receivedReturnOrNoc }),
+    });
+    document.getElementById('dd-view').textContent = `Prenote status: ${result.verification.status}`;
+    await loadDirectDepositAccounts();
+  }));
+
+  tbody.querySelectorAll('.dd-verify-microdeposit').forEach((btn) => btn.addEventListener('click', async () => {
+    const employeeId = document.getElementById('dd-employee').value;
+    const a = Number(prompt('First deposit amount, in cents'));
+    const b = Number(prompt('Second deposit amount, in cents'));
+    const result = await api(`/api/employees/${employeeId}/direct-deposit-accounts/${btn.dataset.account}/verify-micro-deposits`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amounts: [a, b] }),
+    });
+    document.getElementById('dd-view').textContent = result.correct
+      ? 'Verified!'
+      : `Not a match — ${result.verification.attemptsRemaining} attempt(s) remaining. Status: ${result.verification.status}.`;
+    await loadDirectDepositAccounts();
+  }));
+}
+document.getElementById('dd-employee').addEventListener('change', loadDirectDepositAccounts);
+document.getElementById('dd-refresh-btn').addEventListener('click', loadDirectDepositAccounts);
+document.getElementById('dd-add-btn').addEventListener('click', async () => {
+  const employeeId = document.getElementById('dd-employee').value;
+  if (!employeeId) return;
+  const routingNumber = document.getElementById('dd-routing').value;
+  const accountNumber = document.getElementById('dd-account').value;
+  const accountType = document.getElementById('dd-account-type').value;
+  await api(`/api/employees/${employeeId}/direct-deposit-accounts`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ routingNumber, accountNumber, accountType, allocation: { kind: 'remainder' } }),
+  });
+  await loadDirectDepositAccounts();
+});
+
+document.getElementById('run-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('run-btn');
+  const status = document.getElementById('run-status');
+  btn.disabled = true;
+  status.textContent = 'Running payroll…';
+  try {
+    const timeEntries = collectTimeEntries();
+    const { payRun } = await api(`/api/companies/${company.id}/run-payroll`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ timeEntries }),
+    });
+    const warning = payRun.minimumWageIssues.length > 0
+      ? ` ⚠ ${payRun.minimumWageIssues.length} minimum-wage issue(s) — see console.`
+      : '';
+    if (payRun.minimumWageIssues.length > 0) console.warn('Minimum wage issues:', payRun.minimumWageIssues);
+    status.textContent = `Approved run ${payRun.id} for ${payRun.checkDate} — ${payRun.lines.length} employee(s) paid.${warning}`;
+    await Promise.all([loadEmployees(), loadNextPeriod(), loadRuns(), loadReport(), loadAuditLog()]);
+  } catch (err) {
+    status.textContent = 'Error: ' + err.message;
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('f941-btn').addEventListener('click', async () => {
+  const year = document.getElementById('f941-year').value;
+  const quarter = document.getElementById('f941-quarter').value;
+  const view = document.getElementById('f941-view');
+  try {
+    const { form941 } = await api(`/api/companies/${company.id}/941?year=${year}&quarter=${quarter}`);
+    view.textContent = JSON.stringify(form941, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('w2-btn').addEventListener('click', async () => {
+  const employeeId = document.getElementById('w2-employee').value;
+  const year = document.getElementById('w2-year').value;
+  const view = document.getElementById('w2-view');
+  try {
+    const { w2 } = await api(`/api/employees/${employeeId}/w2?year=${year}`);
+    view.textContent = JSON.stringify(w2, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('f940-btn').addEventListener('click', async () => {
+  const year = document.getElementById('f940-year').value;
+  const view = document.getElementById('f940-view');
+  try {
+    const { form940 } = await api(`/api/companies/${company.id}/940?year=${year}`);
+    view.textContent = JSON.stringify(form940, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+// ----------------------------------------------------------------------
+// Time clock
+// ----------------------------------------------------------------------
+
+function currentDatetimeLocal() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 16);
+}
+document.getElementById('clock-time').value = currentDatetimeLocal();
+
+async function punch(type) {
+  const employeeId = document.getElementById('clock-employee').value;
+  const timestamp = document.getElementById('clock-time').value;
+  const view = document.getElementById('classify-view');
+  try {
+    await api(`/api/employees/${employeeId}/punches`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ timestamp, type }),
+    });
+    view.textContent = `Recorded ${type} for ${timestamp}.`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+}
+document.getElementById('clock-in-btn').addEventListener('click', () => punch('clock_in'));
+document.getElementById('clock-out-btn').addEventListener('click', () => punch('clock_out'));
+
+document.getElementById('classify-btn').addEventListener('click', async () => {
+  const view = document.getElementById('classify-view');
+  if (!currentPeriod) {
+    view.textContent = 'No open pay period to classify against.';
+    return;
+  }
+  const employeeId = document.getElementById('clock-employee').value;
+  try {
+    const result = await api(
+      `/api/employees/${employeeId}/classified-hours?periodStart=${currentPeriod.periodStart}&periodEnd=${currentPeriod.periodEnd}`,
+    );
+    view.textContent = JSON.stringify(result, null, 2);
+    // Feed the classification straight into the run-payroll hours table,
+    // so a company actually using the time clock doesn't have to
+    // retype the numbers it just computed.
+    const regularInput = document.querySelector(`#hours-table .regular-hours[data-emp="${employeeId}"]`);
+    const overtimeInput = document.querySelector(`#hours-table .overtime-hours[data-emp="${employeeId}"]`);
+    if (regularInput) regularInput.value = result.classification.regularHours;
+    if (overtimeInput) overtimeInput.value = result.classification.overtimeHours;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+// ----------------------------------------------------------------------
+// PTO
+// ----------------------------------------------------------------------
+
+document.getElementById('pto-create-policy-btn').addEventListener('click', async () => {
+  const view = document.getElementById('pto-view');
+  try {
+    const name = document.getElementById('pto-policy-name').value;
+    const hoursPerPeriod = Number(document.getElementById('pto-hours-per-period').value) || 0;
+    const { ptoPolicy } = await api(`/api/companies/${company.id}/pto-policies`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, accrual: { kind: 'perPayPeriod', hoursPerPeriod } }),
+    });
+    view.textContent = JSON.stringify(ptoPolicy, null, 2);
+    await loadPtoPolicies();
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('pto-accrue-btn').addEventListener('click', async () => {
+  const view = document.getElementById('pto-view');
+  const policyId = document.getElementById('pto-policy').value;
+  const employeeId = document.getElementById('pto-employee').value;
+  if (!policyId) return (view.textContent = 'Create a PTO policy first.');
+  try {
+    const { ptoBalance } = await api(`/api/employees/${employeeId}/pto-accrue`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ policyId }),
+    });
+    view.textContent = JSON.stringify(ptoBalance, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('pto-use-btn').addEventListener('click', async () => {
+  const view = document.getElementById('pto-view');
+  const policyId = document.getElementById('pto-policy').value;
+  const employeeId = document.getElementById('pto-employee').value;
+  const hours = Number(document.getElementById('pto-use-hours').value) || 0;
+  if (!policyId) return (view.textContent = 'Create a PTO policy first.');
+  try {
+    const result = await api(`/api/employees/${employeeId}/pto-use`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ policyId, hours }),
+    });
+    view.textContent = JSON.stringify(result, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+// ----------------------------------------------------------------------
+// Termination
+// ----------------------------------------------------------------------
+
+document.getElementById('term-btn').addEventListener('click', async () => {
+  const view = document.getElementById('term-view');
+  const employeeId = document.getElementById('term-employee').value;
+  const terminationDate = document.getElementById('term-date').value;
+  const reason = document.getElementById('term-reason').value;
+  const employerPolicyPaysOutPto = document.getElementById('term-pto-payout').checked;
+  if (!terminationDate) return (view.textContent = 'Pick a termination date.');
+  try {
+    const result = await api(`/api/employees/${employeeId}/terminate`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ terminationDate, reason, employerPolicyPaysOutPto }),
+    });
+    view.textContent = JSON.stringify({ finalPay: result.finalPay, ptoPayoutHours: result.ptoPayoutHours }, null, 2);
+    await Promise.all([loadEmployees(), loadReport(), loadAuditLog()]);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+// ----------------------------------------------------------------------
+// Benefits
+// ----------------------------------------------------------------------
+
+document.getElementById('benefit-create-btn').addEventListener('click', async () => {
+  const view = document.getElementById('benefit-view');
+  try {
+    const name = document.getElementById('benefit-name').value;
+    const employeeOnly = Math.round(Number(document.getElementById('benefit-employee-only').value) * 100);
+    const family = Math.round(Number(document.getElementById('benefit-family').value) * 100);
+    const employerContributionFraction = Number(document.getElementById('benefit-employer-pct').value) / 100;
+    const { benefitPlan } = await api(`/api/companies/${company.id}/benefit-plans`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name, category: 'section125',
+        monthlyPremiumByTier: { employee_only: employeeOnly, family },
+        employerContributionFraction,
+      }),
+    });
+    view.textContent = JSON.stringify(benefitPlan, null, 2);
+    await loadBenefitPlans();
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('benefit-elect-btn').addEventListener('click', async () => {
+  const view = document.getElementById('benefit-view');
+  const planId = document.getElementById('benefit-plan').value;
+  const employeeId = document.getElementById('benefit-employee').value;
+  const coverageTier = document.getElementById('benefit-tier').value;
+  if (!planId) return (view.textContent = 'Create a benefit plan first.');
+  try {
+    const effectiveDate = currentPeriod?.checkDate ?? new Date().toISOString().slice(0, 10);
+    const result = await api(`/api/employees/${employeeId}/benefit-elections`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ planId, coverageTier, effectiveDate }),
+    });
+    view.textContent = JSON.stringify(result.election, null, 2);
+    await Promise.all([loadEmployees(), loadAuditLog()]);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+// ----------------------------------------------------------------------
+// Recruiting
+// ----------------------------------------------------------------------
+
+document.getElementById('job-create-btn').addEventListener('click', async () => {
+  const title = document.getElementById('job-title').value;
+  await api(`/api/companies/${company.id}/job-postings`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title }),
+  });
+  await loadJobPostings();
+});
+
+document.getElementById('cand-create-btn').addEventListener('click', async () => {
+  const view = document.getElementById('recruiting-view');
+  const jobPostingId = document.getElementById('job-posting').value;
+  const firstName = document.getElementById('cand-first').value;
+  const lastName = document.getElementById('cand-last').value;
+  const email = document.getElementById('cand-email').value;
+  if (!jobPostingId) return (view.textContent = 'Post a job first.');
+  try {
+    await api(`/api/companies/${company.id}/candidates`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jobPostingId, firstName, lastName, email }),
+    });
+    await loadCandidates();
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+// ----------------------------------------------------------------------
+// 1099 contractors
+// ----------------------------------------------------------------------
+
+document.getElementById('contractor-payment-date').value = new Date().toISOString().slice(0, 10);
+
+async function loadContractors() {
+  const { contractors } = await api(`/api/companies/${company.id}/contractors`);
+  document.getElementById('contractor-select').innerHTML = contractors.length === 0
+    ? '<option value="">(add a contractor first)</option>'
+    : contractors.map((c) => `<option value="${c.id}">${c.legalName}</option>`).join('');
+}
+
+document.getElementById('contractor-create-btn').addEventListener('click', async () => {
+  const legalName = document.getElementById('contractor-name').value;
+  const tin = document.getElementById('contractor-tin').value;
+  const address = document.getElementById('contractor-address').value;
+  const view = document.getElementById('contractor-view');
+  try {
+    await api(`/api/companies/${company.id}/contractors`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ legalName, tin, address }),
+    });
+    await loadContractors();
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('contractor-pay-btn').addEventListener('click', async () => {
+  const contractorId = document.getElementById('contractor-select').value;
+  const amount = Math.round(Number(document.getElementById('contractor-payment-amount').value) * 100) || 0;
+  const paymentDate = document.getElementById('contractor-payment-date').value;
+  const view = document.getElementById('contractor-view');
+  if (!contractorId) return (view.textContent = 'Add a contractor first.');
+  try {
+    const { payment } = await api(`/api/contractors/${contractorId}/payments`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, paymentDate }),
+    });
+    view.textContent = JSON.stringify(payment, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('contractor-1099-btn').addEventListener('click', async () => {
+  const contractorId = document.getElementById('contractor-select').value;
+  const year = document.getElementById('contractor-1099-year').value;
+  const view = document.getElementById('contractor-view');
+  if (!contractorId) return (view.textContent = 'Add a contractor first.');
+  try {
+    const { form1099 } = await api(`/api/contractors/${contractorId}/1099?year=${year}`);
+    view.textContent = JSON.stringify(form1099, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+// ----------------------------------------------------------------------
+// I-9
+// ----------------------------------------------------------------------
+
+document.getElementById('i9-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('i9-view-btn').addEventListener('click', async () => {
+  const employeeId = document.getElementById('i9-employee').value;
+  const view = document.getElementById('i9-view');
+  try {
+    const result = await api(`/api/employees/${employeeId}/i9`);
+    view.textContent = JSON.stringify(result, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+async function markI9Section(section) {
+  const employeeId = document.getElementById('i9-employee').value;
+  const completedAt = document.getElementById('i9-date').value;
+  const view = document.getElementById('i9-view');
+  try {
+    const result = await api(`/api/employees/${employeeId}/i9`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ section, completedAt }),
+    });
+    view.textContent = JSON.stringify(result, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+}
+document.getElementById('i9-section1-btn').addEventListener('click', () => markI9Section(1));
+document.getElementById('i9-section2-btn').addEventListener('click', () => markI9Section(2));
+
+document.getElementById('i9-compliance-btn').addEventListener('click', async () => {
+  const view = document.getElementById('i9-view');
+  try {
+    const { findings } = await api(`/api/companies/${company.id}/i9-compliance`);
+    view.textContent = findings.length === 0 ? 'No overdue I-9 findings.' : JSON.stringify(findings, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+refreshAll().catch((err) => {
+  document.getElementById('company-info').textContent = 'Error: ' + err.message;
+});
+</script>
+</body>
+</html>

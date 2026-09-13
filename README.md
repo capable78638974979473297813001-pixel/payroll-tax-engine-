@@ -5,10 +5,12 @@ arithmetic, effective-dated rulesets loaded from JSON — every jurisdiction,
 federal through local, computed by the same driver.
 
 ```bash
-npm test                  # 1000+ tests
+npm test                  # 1200+ tests
 npm run demo               # prints a worked paystub
 npm run demo:garnishment   # same, layered with a child-support + creditor garnishment
+npm run demo:payroll       # a full payroll RUN: two employees, draft -> approve -> paystubs -> a real NACHA ACH file
 npm run ui:calculator      # any-state calculator UI, address-based local tax lookup
+npm run ui:payroll         # payroll admin UI: run payroll, view paystubs, Form 941, W-2 -- backed by payroll/store.ts
 ```
 
 ## Status
@@ -36,6 +38,262 @@ is hardcoded in a `.ts` file, and there is no fallback default — a missing
 ruleset throws rather than quietly returning zero, and a state with no single
 new-employer UI rate (industry-assigned) requires the caller to supply one
 rather than silently computing with a wrong number.
+
+## Payroll processing (`payroll/`)
+
+The tax engine (`src/`) is deliberately a stateless per-cheque function — no
+employee records, no memory of the last paycheck. `payroll/` is the layer a
+real payroll company runs on top of it: company/employee records, a pay
+schedule (`payroll/schedule.ts`), running an actual pay cycle from draft
+through approval (`payroll/run.ts`), rolling each approved run into every
+employee's running YTD so the engine's own wage-base caps see it on the next
+one (`payroll/ytd.ts`), splitting net pay across direct deposit accounts and
+writing a real NACHA ACH file (`payroll/directDeposit.ts`), and rendering a
+paystub (`payroll/paystub.ts`), and rolling a company's approved run history
+into the liability figures Form 941 itself reports and the core W-2 boxes
+(`payroll/filings.ts`). `npm run demo:payroll` runs the whole lifecycle for
+two employees — one salaried, one hourly with overtime and a child-support
+order — end to end, paystubs and ACH file included; `npm run ui:payroll`
+puts a small admin UI in front of the same store, wired to every module
+below rather than just the pay-run core: run payroll (hours pulled
+straight from clock punches when there are any), view a paystub, pull a
+quarter's Form 941/940 or an employee's W-2, clock in/out, accrue and
+spend PTO, elect a benefit plan, run a candidate through the recruiting
+pipeline into a real hire, terminate an employee with the correct
+final-pay date and PTO payout, track Form I-9 status and deadlines,
+manage garnishment orders, switch between or create multiple companies,
+pull a headcount/payroll-cost report and a payroll-register CSV, and
+pay and track 1099 contractors toward their own Form 1099-NEC. Checked
+end to end in an actual
+browser (Playwright), not just against the API.
+
+Persistence follows the same convention `site/lib/store.ts` already
+established for the API-key product: a file-backed store
+(`payroll/store.ts`) that mirrors a canonical, normalized schema
+(`db/payroll-schema.sql`) closely enough that swapping in real queries later
+is mechanical, because this project's Supabase instance isn't linked to a
+live URL from this environment.
+
+Two YTD trackers are explicitly NOT derived generically, and `payroll/ytd.ts`
+own header comment says so rather than force-fitting them: Seattle's
+per-employee payroll-expense compensation band (the tax line itself only
+reports the portion already above threshold, not the full period
+compensation a running total needs) and Kentucky's two-city SS-wage-base
+credit (Walton/Florence combine into one `KY_LOCAL` tax line with no way to
+recover each city's own half from the output). Both need the caller to track
+that one figure directly — the same "caller-supplied, never guessed"
+discipline `src/types.ts`'s own `EmployerContext` uses throughout the tax
+engine itself. Everything else — every wage-base cap, every state-keyed
+UC/PFML/SDI/LTC tracker, the Additional Medicare threshold, RUIA's monthly
+reset — accumulates correctly across runs, proven in `tests/payroll.test.ts`
+by literally crossing the 2026 Social Security wage base and the Additional
+Medicare threshold across two periods and checking the exact cent figure
+that lands.
+
+`payroll/filings.ts` computes Form 941's own liability lines (1-6: headcount,
+wages, federal income tax withheld, Social Security and Medicare wages and
+tax, Additional Medicare), Form 940's annual FUTA liability lines, and W-2
+boxes 1-6/10/12/15-20, purely as ROLLUPS of tax lines the engine already
+produced — no new tax logic, so a wrong figure there is a wrong sum, never a
+wrong calculation. It deliberately does NOT prepare a filable return or PDF,
+and does not implement Form 941's credits and adjustments (COBRA assistance,
+leave credits, the research-credit payroll offset — none of which
+PaycheckInput models an input for) — see that module's own header comment.
+
+Beyond the pay-run engine itself, three more real HR pieces:
+
+- `payroll/timeAndAttendance.ts` turns raw clock punches into classified
+  regular/overtime/double-time hours. Models the federal FLSA weekly-40
+  test everywhere, plus California's own daily 8/12-hour and
+  7th-consecutive-day rules (Cal. Labor Code § 510) — the interaction
+  between a DAILY rule and the weekly-40 test (hours already paid at a
+  daily premium don't ALSO count toward the weekly test) is exactly the
+  kind of naive-implementation trap this project's tests exist to catch.
+  Alaska/Nevada/Colorado's own daily-OT variants are NOT modelled —
+  disclosed in that module's own header, the same "real legal research
+  this pass didn't do" category as `payroll/newHireReporting.ts`'s
+  per-state reporting deadlines (federal law's own 20-day default applies
+  everywhere here; several states genuinely require faster reporting, not
+  yet researched state by state) and `payroll/pto.ts`'s deliberate choice
+  to model PTO as a configurable EMPLOYER policy engine rather than the
+  ~20 states' own mandatory paid-sick-leave accrual laws.
+- `payroll/pto.ts`: accrual (per hour worked or per pay period), a
+  balance that never goes negative, an accrual cap, annual carryover with
+  its own cap, and a payout as an ordinary taxable Earning.
+- `payroll/newHireReporting.ts`: the federal PRWORA new-hire report every
+  employer owes on every hire (42 U.S.C. § 653a) — the required data
+  elements and 20-day federal default deadline, refusing to build a report
+  missing an SSN or address rather than filing an incomplete one.
+- `payroll/benefits.ts`: define a plan's own per-tier premium once (never
+  a generic multiplier — a real plan prices employee+spouse,
+  employee+children and family independently), let an employee's election
+  drive their own payroll deduction automatically (`applyElection()` —
+  re-electing the SAME plan at a new tier ends the prior election and its
+  deduction so the two never run concurrently; electing a DIFFERENT plan
+  deliberately leaves an existing one untouched, since this module has no
+  concept of mutually-exclusive plan categories like medical-vs-dental),
+  and gate a mid-year election change on either the employer's
+  open-enrollment window or a genuine qualifying life event (IRC § 125's
+  own cafeteria-plan rule) — isolved's own materials describe this exact
+  idea as "set up your benefit plans once, driving enrollment and
+  deductions throughout the system." No carrier integration (EDI 834,
+  eligibility verification, ACA 1095-C reporting) — that's real, separate
+  infrastructure, not built
+  here.
+- `payroll/compliance.ts`: wires `src/minimum-wage.ts` — already this
+  project's own source of truth, the same one `npm run
+  coverage:minimum-wage` measures every state/locality against — directly
+  into a pay run, so an hourly employee paid below the binding floor for
+  their work location is a surfaced FINDING (`PayRun.minimumWageIssues`),
+  never silently paid anyway. The closest this project comes to isolved's
+  own "AI catches potential errors" claim, done as an ordinary, auditable
+  function instead of an opaque model.
+- `payroll/onboarding.ts`: a candidate pipeline (applied → screening →
+  interviewing → offer → hired/rejected/declined) with an explicit state
+  machine — an impossible jump (straight from "applied" to "hired") throws
+  rather than silently succeeding — ending in `hireCandidate()`, which
+  turns an accepted offer directly into the real `Employee` record
+  `payroll/run.ts` can pay. Requires a real `FederalW4` rather than
+  defaulting one: a fabricated W-4 would silently mis-withhold someone's
+  very first paycheck, the same class of guessed input the tax engine
+  itself refuses to invent.
+- `payroll/termination.ts`: final-paycheck timing and PTO/vacation payout
+  at offboarding — genuinely different rules depending on WHY someone
+  left, which federal law does not set a deadline for at all (FLSA has no
+  final-paycheck clock; the safe floor is "no later than the next regular
+  payday"). California is researched and cited (Cal. Labor Code §§
+  201-203: immediate pay on involuntary termination/layoff, last-day-
+  worked or 72-hour deadlines on resignation depending on notice given)
+  because it is also the researched case for something naive payroll
+  software gets wrong in the other direction: Cal. Labor Code § 227.3
+  makes earned vacation NON-FORFEITABLE — an employer's own "use it or
+  lose it" carryover cap (`payroll/pto.ts`'s own `annualCarryoverCapHours`)
+  is not just unenforced but flatly illegal there, and
+  `isVacationPayoutMandatory()`/`finalPtoPayoutHours()` override the
+  employer's own policy accordingly. Every other state falls back to the
+  federal floor and the employer's own PTO-payout policy — the same
+  "disclosed, not guessed" choice as this module's own per-state deadline
+  research.
+- `payroll/i9.ts`: Form I-9 employment eligibility verification (8 U.S.C.
+  § 1324a) — the one compliance step required for EVERY US hire regardless
+  of state, unlike the new-hire report above. Section 1's deadline is the
+  first day of employment; Section 2's is 3 BUSINESS days after (with a
+  verified worked example: a Monday hire is due that Thursday), pulled in
+  to the first day itself when the job won't last 3 business days at all.
+  Retention runs until the LATER of 3 years after hire or 1 year after
+  termination — never the naive "always 3 years," which a short-tenure
+  employee terminated near the 3-year mark would get wrong. Tracks status
+  and surfaces missed deadlines as findings; does not verify that a
+  presented document is genuine, run E-Verify, or handle reverification of
+  an expiring work authorization.
+- `payroll/reports.ts`: headcount (as of any date, using the exact same
+  active/terminated logic a real pay run does), a department breakdown,
+  YTD payroll cost — gross pay AND the employer's own tax cost, not just
+  what employees were paid — and a payroll-register CSV export (one row
+  per employee per run, plus a self-checking TOTAL row) for a
+  general-ledger import, all as pure rollups over records this project
+  already maintains.
+- `payroll/contractors.ts`: 1099 contractors — a genuinely different
+  population from `Employee` (no W-4, no withholding at all; a contractor
+  owes their own self-employment tax) — payments, and Form 1099-NEC's own
+  reporting-threshold determination. Uses the real, LIVE-VERIFIED 2026
+  figure: the One Big Beautiful Bill Act raised the threshold from its
+  long-standing $600 to $2,000 effective for 2026 payments, confirmed via
+  source review rather than relying on trained-in memory that would have
+  been quietly wrong for the exact year this project targets. Does not
+  distinguish an employee-vs-contractor misclassification question, and
+  does not model backup withholding for an invalid TIN.
+
+- `payroll/auditLog.ts`: an append-only record of who did what to which
+  record, attached at the six points where this project actually mutates
+  state on someone's behalf — pay-run approval, termination, a candidate
+  hire, adding/removing a garnishment order, a benefit election, and
+  completing an I-9 section — surfaced per company in the admin UI rather
+  than left to be reconstructed from timestamps alone. The `actor` field is
+  hardcoded to `'admin'`: this demo-scale build has no real login, and the
+  module deliberately does not invent a session/auth layer to fill that
+  gap — a real deployment wires `actor` to whatever it already has.
+- An employee self-service portal (`npm run ui:payroll` also serves it at
+  `/portal`, separate from the admin UI at `/`): an employee picks their
+  own name (no real auth, same disclosed limitation as the audit log's
+  actor field) and sees only their own paystubs, PTO balance, active
+  benefit elections, and I-9 status, plus a "request time off" action
+  wired straight to `payroll/pto.ts`'s own `usePto()`. The backing
+  aggregation endpoint explicitly filters a company's pay-run lines down
+  to the requesting employee's own line before returning anything — an
+  employee's view must never leak a coworker's pay, so that filter lives
+  once at the API boundary rather than trusted to every future caller.
+
+- `payroll/aca.ts`: ACA Employer Shared Responsibility (§4980H) — Applicable
+  Large Employer determination (averaging full-time + full-time-equivalent
+  headcount across 12 months, the same 130-hours/120-hours-divisor formula
+  IRS.gov's own ALE page defines), the three affordability safe harbors
+  (Federal Poverty Line, Rate of Pay, Form W-2) with the LIVE-VERIFIED 2026
+  affordability percentage (9.96%, per Rev. Proc. 2025-25 — up from 2025's
+  9.02% and the highest on record, reflecting a new HHS premium-growth
+  methodology), §4980H(a)/(b) penalty exposure estimation at the 2026 Rev.
+  Proc. 2025-26 dollar figures, and Form 1095-C Part II Line 14/16 offer
+  and safe-harbor code assignment. Deliberately does NOT model Individual
+  Coverage HRA codes (1G, 1L-1U), conditional spousal-offer codes (1J/1K),
+  the multiemployer interim-rule code (2E), or the TRICARE/VA ALE headcount
+  exclusion — real, separate pieces of the same form this pass didn't
+  build, named in the module's own header rather than silently missing.
+  Takes hours-of-service as a caller-supplied input rather than deriving it
+  from pay run history: `PayRunLine` retains only the dollar amounts a
+  paycheck produced, not the hours behind them, so this module cannot
+  reconstruct a year of hours on its own yet. The admin UI's "ACA
+  compliance" panel wires both the ALE calculator (paste 12 months of
+  hours as JSON) and the affordability safe-harbor checker to this module
+  directly, computed server-side in integer cents rather than in browser
+  floating point.
+
+- `payroll/directDepositVerification.ts`: verifying a bank account BEFORE
+  a real paycheck moves through it — the two methods real payroll
+  companies actually use. A PRENOTE is a zero-dollar NACHA entry
+  (transaction codes 23/33, newly supported by `payroll/directDeposit.ts`'s
+  own `buildNachaFile()` alongside the ordinary 22/32 live codes); NACHA's
+  own Operating Rules require waiting at least 3 BUSINESS days after its
+  settlement date with no return or Notification of Change before a live
+  entry may follow — LIVE-VERIFIED as the current figure (a prior rule
+  required 6 business days). MICRO-DEPOSIT verification sends two small
+  (1-45 cent) live credits and asks the account holder to report both
+  amounts back — proof they can see the actual resulting bank statement —
+  with a 3-attempt cap bounding the ~2,000-combination guess space against
+  brute force. The admin UI's "Direct deposit accounts" panel wires both
+  end to end, and the generated micro-deposit amounts are deliberately
+  never returned by the ordinary verification-status endpoint (only once,
+  at the moment of initiation, since this demo has no real bank to
+  actually deposit them) — the same "never expose what only the account
+  holder should be able to confirm" boundary a real system's split
+  between its ACH-origination backend and its employee-facing API draws.
+
+- `payroll/stateRegistration.ts`: a multi-state employer must actually
+  REGISTER with a state's unemployment (and usually withholding) agency —
+  get a real account number — before it can legally run payroll for
+  someone working there, a genuinely different fact from `EmployerContext`
+  merely being told what rate to use. Compares "which states do our
+  active employees actually work in" against "which states has this
+  employer told us it's registered in," surfacing a `not_registered`
+  finding for any gap and a `rate_mismatch` finding when a registration IS
+  on file but its own last-reported rate no longer matches what the tax
+  engine is configured to use for that state — a real catch, since a
+  stale rate there silently mis-computes every SUI line in that state
+  without anything about the calculation itself looking broken. Wired
+  into the admin UI's "State employer registrations" panel. Does not
+  itself file a registration (each state's own online application is
+  real, separate infrastructure) or track how long one takes to process.
+
+`Employee` also carries plain Core-HR fields now (`jobTitle`,
+`department`, `managerId`) — purely descriptive, the natural spine for an
+employee directory or org chart, though no such view is built yet.
+
+What `payroll/` still does NOT attempt, named plainly rather than left to be
+discovered: e-filing anything, benefits carrier EDI (named above), and a
+live bank-linking integration (see `payroll/directDeposit.ts`'s own header
+note on the account-number custody boundary a real system draws that this
+one doesn't attempt to build — the same custody boundary `payroll/
+newHireReporting.ts`'s own doc comment draws for a raw SSN). Each is a real,
+separate subsystem a full HCM platform builds — not a corner cut here.
 
 ## The one idea that matters
 

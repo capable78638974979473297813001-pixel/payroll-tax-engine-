@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Employee Self-Service</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --panel: #ffffff;
+    --border: #dfe3e8;
+    --text: #1b1f24;
+    --muted: #5c6672;
+    --accent: #2f6b3a;
+    --accent-ink: #ffffff;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.4; }
+  header { background: var(--accent); color: var(--accent-ink); padding: 18px 24px; }
+  header h1 { margin: 0; font-size: 19px; font-weight: 600; }
+  header p { margin: 4px 0 0; font-size: 13px; opacity: 0.88; }
+  header a { color: #d7f0dc; }
+  main { max-width: 800px; margin: 0 auto; padding: 20px; display: grid; gap: 16px; }
+  section { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; }
+  section h2 { margin: 0 0 10px; font-size: 15px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  th { color: var(--muted); font-weight: 600; }
+  button { background: var(--accent); color: var(--accent-ink); border: none; border-radius: 5px; padding: 8px 14px; font-size: 13px; cursor: pointer; }
+  button.secondary { background: #edf3ee; color: var(--text); border: 1px solid var(--border); }
+  pre { background: #0f1720; color: #dbe4ee; padding: 12px 14px; border-radius: 6px; font-family: var(--mono); font-size: 12.5px; overflow-x: auto; white-space: pre-wrap; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  select, input { padding: 6px 8px; border: 1px solid var(--border); border-radius: 5px; font-size: 13px; }
+  .muted { color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Employee Self-Service</h1>
+  <p>Pick your own name below — this demo has no real login (see <a href="/">the admin UI</a> for the HR/payroll side).</p>
+</header>
+<main>
+  <section>
+    <div class="row">
+      <select id="employee-select"></select>
+      <button class="secondary" id="load-btn">View my info</button>
+    </div>
+    <div id="employee-info" class="muted" style="margin-top:10px">Pick yourself above.</div>
+  </section>
+
+  <section>
+    <h2>My paystubs</h2>
+    <table id="paystubs-table">
+      <thead><tr><th>Check date</th><th>Gross</th><th>Net</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <pre id="paystub-view" hidden></pre>
+  </section>
+
+  <section>
+    <h2>My PTO</h2>
+    <table id="pto-table">
+      <thead><tr><th>Policy</th><th>Balance (hrs)</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="row" style="margin-top:8px">
+      <select id="pto-policy-select"></select>
+      <input id="pto-request-hours" type="number" placeholder="Hours requested" style="width:160px" />
+      <button class="secondary" id="pto-request-btn">Request time off</button>
+    </div>
+    <pre id="pto-request-view"></pre>
+  </section>
+
+  <section>
+    <h2>My benefits</h2>
+    <table id="benefits-table">
+      <thead><tr><th>Plan</th><th>Coverage tier</th><th>Effective</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>My I-9 status</h2>
+    <div id="i9-status" class="muted">—</div>
+  </section>
+</main>
+
+<script>
+let employees = [];
+let currentEmployeeId = null;
+
+async function api(path, options) {
+  const res = await fetch(path, options);
+  const body = await res.json();
+  if (!res.ok) throw new Error(body.error || res.statusText);
+  return body;
+}
+
+function fmtCents(c) {
+  const neg = c < 0;
+  const abs = Math.abs(c);
+  return (neg ? '-$' : '$') + (abs / 100).toFixed(2);
+}
+
+async function loadEmployeeList() {
+  const { companies } = await api('/api/companies');
+  const allEmployees = [];
+  for (const c of companies) {
+    const { employees: list } = await api(`/api/companies/${c.id}/employees`);
+    allEmployees.push(...list);
+  }
+  employees = allEmployees;
+  document.getElementById('employee-select').innerHTML =
+    employees.map((e) => `<option value="${e.id}">${e.firstName} ${e.lastName}</option>`).join('');
+}
+
+async function loadSelfService(employeeId) {
+  currentEmployeeId = employeeId;
+  const data = await api(`/api/employees/${employeeId}/self-service`);
+
+  document.getElementById('employee-info').innerHTML =
+    `<strong>${data.employee.firstName} ${data.employee.lastName}</strong>` +
+    (data.employee.jobTitle ? ` · ${data.employee.jobTitle}` : '') +
+    (data.employee.department ? ` · ${data.employee.department}` : '') +
+    ` · ${data.companyName} · hired ${data.employee.hireDate}`;
+
+  const paystubsBody = document.querySelector('#paystubs-table tbody');
+  paystubsBody.innerHTML = data.myPayRuns.length === 0
+    ? '<tr><td colspan="4" class="muted">No paystubs yet.</td></tr>'
+    : data.myPayRuns.map((r) => `
+      <tr>
+        <td>${r.checkDate}</td>
+        <td>${fmtCents(r.line.grossPay)}</td>
+        <td>${fmtCents(r.line.netPayAfterGarnishment)}</td>
+        <td><a href="#" data-run="${r.payRunId}" class="paystub-link">View</a></td>
+      </tr>`).join('');
+  paystubsBody.querySelectorAll('.paystub-link').forEach((a) => {
+    a.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      const text = await fetch(`/api/pay-runs/${a.dataset.run}/paystub/${employeeId}`).then((r) => r.text());
+      const view = document.getElementById('paystub-view');
+      view.hidden = false;
+      view.textContent = text;
+    });
+  });
+
+  const ptoBody = document.querySelector('#pto-table tbody');
+  ptoBody.innerHTML = data.ptoBalances.length === 0
+    ? '<tr><td colspan="2" class="muted">No PTO policy enrolled.</td></tr>'
+    : data.ptoBalances.map((b) => `<tr><td>${b.policyId.slice(0, 8)}</td><td>${b.balanceHours}</td></tr>`).join('');
+  document.getElementById('pto-policy-select').innerHTML = data.ptoBalances.length === 0
+    ? '<option value="">(none)</option>'
+    : data.ptoBalances.map((b) => `<option value="${b.policyId}">${b.policyId.slice(0, 8)} (${b.balanceHours} hrs)</option>`).join('');
+
+  const benefitsBody = document.querySelector('#benefits-table tbody');
+  benefitsBody.innerHTML = data.benefitElections.length === 0
+    ? '<tr><td colspan="3" class="muted">No active benefit elections.</td></tr>'
+    : data.benefitElections.map((e) => `<tr><td>${e.planId.slice(0, 8)}</td><td>${e.coverageTier}</td><td>${e.effectiveDate}</td></tr>`).join('');
+
+  document.getElementById('i9-status').textContent = `Status: ${data.i9Status}`;
+}
+
+document.getElementById('load-btn').addEventListener('click', () => {
+  const employeeId = document.getElementById('employee-select').value;
+  loadSelfService(employeeId).catch((err) => {
+    document.getElementById('employee-info').textContent = 'Error: ' + err.message;
+  });
+});
+
+document.getElementById('pto-request-btn').addEventListener('click', async () => {
+  const view = document.getElementById('pto-request-view');
+  if (!currentEmployeeId) return (view.textContent = 'Pick yourself above first.');
+  const policyId = document.getElementById('pto-policy-select').value;
+  const hours = Number(document.getElementById('pto-request-hours').value) || 0;
+  if (!policyId) return (view.textContent = 'No PTO policy to request against.');
+  try {
+    const result = await api(`/api/employees/${currentEmployeeId}/pto-use`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ policyId, hours }),
+    });
+    view.textContent = result.approved
+      ? `Approved. New balance: ${result.balance.balanceHours} hours.`
+      : `Not enough balance — short by ${result.shortfallHours} hours.`;
+    await loadSelfService(currentEmployeeId);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+loadEmployeeList().catch((err) => {
+  document.getElementById('employee-info').textContent = 'Error: ' + err.message;
+});
+</script>
+</body>
+</html>
