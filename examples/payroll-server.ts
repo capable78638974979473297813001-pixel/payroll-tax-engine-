@@ -21,23 +21,29 @@ import {
   computeW2FromEmployee,
   declineOffer,
   applyElection,
+  determineAleStatus,
   draftPayRun,
   emptyPtoBalance,
   extendOffer,
+  fplSafeHarborMonthlyCeiling,
   freshYearToDate,
   generatePayPeriods,
   hireCandidate,
   i9ComplianceIssues,
   i9Deadlines,
   i9Status,
+  isAffordableUnderW2SafeHarbor,
   overtimeRuleForState,
   pairPunchesIntoDailyHours,
+  ratePayHourlySafeHarborMonthlyCeiling,
+  ratePaySalariedSafeHarborMonthlyCeiling,
   recordContractorPayment,
   renderPaystubText,
   renderPayrollRegister,
   terminateEmployee,
   usePto,
 } from '../payroll/index.ts';
+import type { EmployeeMonthlyHours } from '../payroll/aca.ts';
 import type { BenefitPlan, CoverageTier } from '../payroll/benefits.ts';
 import type { Contractor } from '../payroll/contractors.ts';
 import type { I9Record } from '../payroll/i9.ts';
@@ -826,6 +832,50 @@ const server = createServer(async (req, res) => {
       const year = Number(url.searchParams.get('year'));
       if (!year) return sendJson(res, 400, { error: 'year is required.' });
       sendJson(res, 200, { form1099: compute1099Nec(contractorId, year, paymentsForContractor(contractorId)) });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // ACA — Applicable Large Employer status and affordability checks
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/aca/ale-status') {
+      const body = await parseJsonBody<{ hours: EmployeeMonthlyHours[] }>(req);
+      try {
+        sendJson(res, 200, { determination: determineAleStatus(body.hours ?? []) });
+      } catch (err) {
+        sendJson(res, 400, { error: err instanceof Error ? err.message : String(err) });
+      }
+      return;
+    }
+
+    if (req.method === 'POST' && url.pathname === '/api/aca/affordability-check') {
+      const body = await parseJsonBody<{
+        safeHarbor: 'fpl' | 'rate-of-pay-hourly' | 'rate-of-pay-salaried' | 'w2';
+        affordabilityPercentage: number;
+        employeeMonthlyContribution?: number;
+        employeeAnnualContribution?: number;
+        federalPovertyLineAnnual?: number;
+        hourlyRate?: number;
+        monthlySalary?: number;
+        annualBox1Wages?: number;
+      }>(req);
+      const pct = body.affordabilityPercentage;
+      if (body.safeHarbor === 'fpl') {
+        const ceiling = fplSafeHarborMonthlyCeiling(dollars(body.federalPovertyLineAnnual ?? 0), pct);
+        sendJson(res, 200, { ceilingCents: ceiling, affordable: dollars(body.employeeMonthlyContribution ?? 0) <= ceiling });
+      } else if (body.safeHarbor === 'rate-of-pay-hourly') {
+        const ceiling = ratePayHourlySafeHarborMonthlyCeiling(dollars(body.hourlyRate ?? 0), pct);
+        sendJson(res, 200, { ceilingCents: ceiling, affordable: dollars(body.employeeMonthlyContribution ?? 0) <= ceiling });
+      } else if (body.safeHarbor === 'rate-of-pay-salaried') {
+        const ceiling = ratePaySalariedSafeHarborMonthlyCeiling(dollars(body.monthlySalary ?? 0), pct);
+        sendJson(res, 200, { ceilingCents: ceiling, affordable: dollars(body.employeeMonthlyContribution ?? 0) <= ceiling });
+      } else if (body.safeHarbor === 'w2') {
+        const affordable = isAffordableUnderW2SafeHarbor(dollars(body.employeeAnnualContribution ?? 0), dollars(body.annualBox1Wages ?? 0), pct);
+        sendJson(res, 200, { affordable });
+      } else {
+        sendJson(res, 400, { error: 'Unknown safeHarbor.' });
+      }
       return;
     }
 

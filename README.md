@@ -224,6 +224,29 @@ Beyond the pay-run engine itself, three more real HR pieces:
   employee's view must never leak a coworker's pay, so that filter lives
   once at the API boundary rather than trusted to every future caller.
 
+- `payroll/aca.ts`: ACA Employer Shared Responsibility (§4980H) — Applicable
+  Large Employer determination (averaging full-time + full-time-equivalent
+  headcount across 12 months, the same 130-hours/120-hours-divisor formula
+  IRS.gov's own ALE page defines), the three affordability safe harbors
+  (Federal Poverty Line, Rate of Pay, Form W-2) with the LIVE-VERIFIED 2026
+  affordability percentage (9.96%, per Rev. Proc. 2025-25 — up from 2025's
+  9.02% and the highest on record, reflecting a new HHS premium-growth
+  methodology), §4980H(a)/(b) penalty exposure estimation at the 2026 Rev.
+  Proc. 2025-26 dollar figures, and Form 1095-C Part II Line 14/16 offer
+  and safe-harbor code assignment. Deliberately does NOT model Individual
+  Coverage HRA codes (1G, 1L-1U), conditional spousal-offer codes (1J/1K),
+  the multiemployer interim-rule code (2E), or the TRICARE/VA ALE headcount
+  exclusion — real, separate pieces of the same form this pass didn't
+  build, named in the module's own header rather than silently missing.
+  Takes hours-of-service as a caller-supplied input rather than deriving it
+  from pay run history: `PayRunLine` retains only the dollar amounts a
+  paycheck produced, not the hours behind them, so this module cannot
+  reconstruct a year of hours on its own yet. The admin UI's "ACA
+  compliance" panel wires both the ALE calculator (paste 12 months of
+  hours as JSON) and the affordability safe-harbor checker to this module
+  directly, computed server-side in integer cents rather than in browser
+  floating point.
+
 `Employee` also carries plain Core-HR fields now (`jobTitle`,
 `department`, `managerId`) — purely descriptive, the natural spine for an
 employee directory or org chart, though no such view is built yet.

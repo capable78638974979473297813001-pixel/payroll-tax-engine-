@@ -70,3 +70,26 @@ export { compute1099Nec, FORM_1099_NEC_THRESHOLD_2026, recordContractorPayment }
 export type { Contractor, ContractorPayment, Form1099NecSummary } from './contractors.ts';
 export { auditLogEntry } from './auditLog.ts';
 export type { AuditLogEntry } from './auditLog.ts';
+export {
+  ACA_AFFORDABILITY_PERCENTAGE_2025,
+  ACA_AFFORDABILITY_PERCENTAGE_2026,
+  ACA_FTE_HOURS_DIVISOR,
+  ACA_FULL_TIME_HOURS_PER_MONTH,
+  ACA_MINIMUM_VALUE_THRESHOLD,
+  ALE_THRESHOLD,
+  ESRP_4980H_A_ANNUAL_PENALTY_2026,
+  ESRP_4980H_A_EXCLUDED_HEADCOUNT,
+  ESRP_4980H_B_ANNUAL_PENALTY_2026,
+  FEDERAL_POVERTY_LINE_2025_ANNUAL,
+  FEDERAL_POVERTY_LINE_2026_ANNUAL,
+  determineAleStatus,
+  estimate4980hAAnnualExposure,
+  estimate4980hBAnnualExposure,
+  fplSafeHarborMonthlyCeiling,
+  isAffordableUnderW2SafeHarbor,
+  lineFourteenCode,
+  lineSixteenCode,
+  ratePayHourlySafeHarborMonthlyCeiling,
+  ratePaySalariedSafeHarborMonthlyCeiling,
+} from './aca.ts';
+export type { AleDetermination, CoverageOffer, EmployeeMonthlyHours, Line14Code, Line16Code, Line16Inputs, MonthlyAleCounts } from './aca.ts';

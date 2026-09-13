@@ -81,6 +81,50 @@
   </section>
 
   <section>
+    <h2>ACA compliance</h2>
+    <p class="muted" style="margin-top:0">Applicable Large Employer status needs real hours-of-service history this demo doesn't track long-term — paste 12 months of it below (one row per employee per month) rather than guessing from today's headcount.</p>
+    <div class="row">
+      <textarea id="aca-hours-input" rows="4" style="flex:1; font-family:var(--mono); font-size:12px" placeholder='[{"employeeId":"e1","month":"2025-01","hoursOfService":160}, ...]'></textarea>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="secondary" id="aca-ale-btn">Compute ALE status</button>
+    </div>
+    <pre id="aca-ale-view"></pre>
+
+    <h3 style="margin-top:16px">Affordability safe harbor check</h3>
+    <div class="row">
+      <select id="aca-safe-harbor-select">
+        <option value="fpl">Federal Poverty Line</option>
+        <option value="rate-of-pay-hourly">Rate of Pay (hourly)</option>
+        <option value="rate-of-pay-salaried">Rate of Pay (salaried)</option>
+        <option value="w2">Form W-2 (full year)</option>
+      </select>
+      <select id="aca-affordability-year">
+        <option value="0.0996">2026 (9.96%)</option>
+        <option value="0.0902">2025 (9.02%)</option>
+      </select>
+    </div>
+    <div class="row" id="aca-fpl-fields" style="margin-top:6px">
+      <input id="aca-fpl-annual" type="number" placeholder="Annual FPL ($)" value="15650" style="width:170px" />
+      <input id="aca-monthly-contribution" type="number" placeholder="Employee monthly contribution ($)" style="width:220px" />
+    </div>
+    <div class="row" id="aca-hourly-fields" style="margin-top:6px" hidden>
+      <input id="aca-hourly-rate" type="number" placeholder="Hourly rate ($)" style="width:140px" />
+    </div>
+    <div class="row" id="aca-salaried-fields" style="margin-top:6px" hidden>
+      <input id="aca-monthly-salary" type="number" placeholder="Monthly salary ($)" style="width:160px" />
+    </div>
+    <div class="row" id="aca-w2-fields" style="margin-top:6px" hidden>
+      <input id="aca-annual-contribution" type="number" placeholder="Employee annual contribution ($)" style="width:220px" />
+      <input id="aca-box1-wages" type="number" placeholder="Annual Box 1 wages ($)" style="width:200px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="secondary" id="aca-affordability-btn">Check affordability</button>
+    </div>
+    <pre id="aca-affordability-view"></pre>
+  </section>
+
+  <section>
     <h2>Employees</h2>
     <table id="employees-table">
       <thead><tr><th>Name</th><th>Pay type</th><th>Residence</th><th>YTD Social Security wages</th></tr></thead>
@@ -357,6 +401,62 @@ async function loadAuditLog() {
       </tr>`).join('');
 }
 document.getElementById('audit-refresh-btn').addEventListener('click', loadAuditLog);
+
+document.getElementById('aca-ale-btn').addEventListener('click', async () => {
+  const view = document.getElementById('aca-ale-view');
+  let hours;
+  try {
+    hours = JSON.parse(document.getElementById('aca-hours-input').value || '[]');
+  } catch (err) {
+    view.textContent = 'Could not parse hours JSON: ' + err.message;
+    return;
+  }
+  try {
+    const { determination } = await api('/api/aca/ale-status', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hours }),
+    });
+    view.textContent = JSON.stringify(determination, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('aca-safe-harbor-select').addEventListener('change', (ev) => {
+  document.getElementById('aca-fpl-fields').hidden = ev.target.value !== 'fpl';
+  document.getElementById('aca-hourly-fields').hidden = ev.target.value !== 'rate-of-pay-hourly';
+  document.getElementById('aca-salaried-fields').hidden = ev.target.value !== 'rate-of-pay-salaried';
+  document.getElementById('aca-w2-fields').hidden = ev.target.value !== 'w2';
+});
+
+document.getElementById('aca-affordability-btn').addEventListener('click', async () => {
+  const view = document.getElementById('aca-affordability-view');
+  const safeHarbor = document.getElementById('aca-safe-harbor-select').value;
+  const affordabilityPercentage = Number(document.getElementById('aca-affordability-year').value);
+  const body = { safeHarbor, affordabilityPercentage };
+  if (safeHarbor === 'fpl') {
+    body.federalPovertyLineAnnual = Number(document.getElementById('aca-fpl-annual').value) || 0;
+    body.employeeMonthlyContribution = Number(document.getElementById('aca-monthly-contribution').value) || 0;
+  } else if (safeHarbor === 'rate-of-pay-hourly') {
+    body.hourlyRate = Number(document.getElementById('aca-hourly-rate').value) || 0;
+    body.employeeMonthlyContribution = Number(document.getElementById('aca-monthly-contribution').value) || 0;
+  } else if (safeHarbor === 'rate-of-pay-salaried') {
+    body.monthlySalary = Number(document.getElementById('aca-monthly-salary').value) || 0;
+    body.employeeMonthlyContribution = Number(document.getElementById('aca-monthly-contribution').value) || 0;
+  } else {
+    body.employeeAnnualContribution = Number(document.getElementById('aca-annual-contribution').value) || 0;
+    body.annualBox1Wages = Number(document.getElementById('aca-box1-wages').value) || 0;
+  }
+  try {
+    const result = await api('/api/aca/affordability-check', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    });
+    view.textContent = result.ceilingCents !== undefined
+      ? `Monthly ceiling: ${fmtCents(result.ceilingCents)} — ${result.affordable ? 'AFFORDABLE' : 'NOT affordable'}`
+      : (result.affordable ? 'AFFORDABLE' : 'NOT affordable');
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
 
 const DEFAULT_FULL_TIME_HOURS = { weekly: 40, biweekly: 80, semimonthly: 86.67, monthly: 173.33 };
 
