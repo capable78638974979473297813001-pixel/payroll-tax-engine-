@@ -33,6 +33,8 @@ export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';
 export type { OrgChartNode, OrgChartResult } from './orgChart.ts';
+export { compute1095CForEmployee } from './form1095c.ts';
+export type { EmployerCoverageOfferPolicy, Form1095CMonth, Form1095CSummary } from './form1095c.ts';
 export { buildPaycheckInput, computeEmployeePaycheck } from './engine.ts';
 export type { EmployeePaycheckComputation } from './engine.ts';
 export { activeEmployeesFor, approvePayRun, draftPayRun, recalculatePayRun, voidPayRun, ytdForCheckDate } from './run.ts';

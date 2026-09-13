@@ -130,6 +130,39 @@
   </section>
 
   <section>
+    <h2>Form 1095-C</h2>
+    <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
+    <div class="row">
+      <select id="f1095c-employee"></select>
+      <input id="f1095c-year" type="number" placeholder="Year" value="2026" style="width:100px" />
+      <label class="muted"><input type="checkbox" id="f1095c-fulltime" checked /> Full-time all year</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="muted"><input type="checkbox" id="f1095c-offered-mec" checked /> Offered MEC</label>
+      <label class="muted"><input type="checkbox" id="f1095c-offered-mv" checked /> Offered minimum value</label>
+      <label class="muted"><input type="checkbox" id="f1095c-offered-spouse" checked /> Offered to spouse</label>
+      <label class="muted"><input type="checkbox" id="f1095c-offered-deps" checked /> Offered to dependents</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="f1095c-contribution" type="number" placeholder="Employee monthly contribution ($)" value="100" style="width:220px" />
+      <input id="f1095c-qualifying-ceiling" type="number" placeholder="Qualifying offer ceiling ($/mo)" value="129.90" style="width:220px" />
+      <select id="f1095c-safe-harbor">
+        <option value="">No safe harbor</option>
+        <option value="fpl">FPL</option>
+        <option value="rate-of-pay">Rate of pay</option>
+        <option value="w2">W-2</option>
+      </select>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="secondary" id="f1095c-generate-btn">Generate Form 1095-C</button>
+    </div>
+    <table id="f1095c-table">
+      <thead><tr><th>Month</th><th>Line 14</th><th>Line 16</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section>
     <h2>State employer registrations</h2>
     <p class="muted" style="margin-top:0">A multi-state employer must register for unemployment (and usually withholding) tax in every state it has employees working in before running payroll there — this compares that against who's actually on the books.</p>
     <div class="row">
@@ -520,6 +553,33 @@ document.getElementById('aca-affordability-btn').addEventListener('click', async
   }
 });
 
+document.getElementById('f1095c-generate-btn').addEventListener('click', async () => {
+  const tbody = document.querySelector('#f1095c-table tbody');
+  const employeeId = document.getElementById('f1095c-employee').value;
+  if (!employeeId) return;
+  const year = Number(document.getElementById('f1095c-year').value) || new Date().getFullYear();
+  const isFullTimeAllYear = document.getElementById('f1095c-fulltime').checked;
+  const safeHarbor = document.getElementById('f1095c-safe-harbor').value;
+  const policy = {
+    offeredMinimumEssentialCoverage: document.getElementById('f1095c-offered-mec').checked,
+    offeredMinimumValue: document.getElementById('f1095c-offered-mv').checked,
+    offeredToSpouse: document.getElementById('f1095c-offered-spouse').checked,
+    offeredToDependents: document.getElementById('f1095c-offered-deps').checked,
+    employeeMonthlyContribution: Math.round(Number(document.getElementById('f1095c-contribution').value) * 100) || 0,
+    qualifyingOfferMonthlyCeiling: Math.round(Number(document.getElementById('f1095c-qualifying-ceiling').value) * 100) || 0,
+    affordabilitySafeHarborUsed: safeHarbor || undefined,
+  };
+  try {
+    const { form1095c } = await api(`/api/employees/${employeeId}/1095c`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ year, isFullTimeAllYear, policy }),
+    });
+    tbody.innerHTML = form1095c.months.map((m) => `
+      <tr><td>${m.month}</td><td>${m.line14}</td><td>${m.line16 ?? '—'}</td></tr>`).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="3" class="muted">Error: ${err.message}</td></tr>`;
+  }
+});
+
 const DEFAULT_FULL_TIME_HOURS = { weekly: 40, biweekly: 80, semimonthly: 86.67, monthly: 173.33 };
 
 async function loadEmployees() {
@@ -556,7 +616,7 @@ async function loadEmployees() {
   }));
 
   const employeeOptions = list.map((e) => `<option value="${e.id}">${e.firstName} ${e.lastName}</option>`).join('');
-  for (const id of ['w2-employee', 'clock-employee', 'pto-employee', 'term-employee', 'benefit-employee', 'i9-employee', 'garn-employee', 'dd-employee']) {
+  for (const id of ['w2-employee', 'clock-employee', 'pto-employee', 'term-employee', 'benefit-employee', 'i9-employee', 'garn-employee', 'dd-employee', 'f1095c-employee']) {
     document.getElementById(id).innerHTML = employeeOptions;
   }
 

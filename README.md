@@ -231,6 +231,20 @@ Beyond the pay-run engine itself, three more real HR pieces:
   employee's view must never leak a coworker's pay, so that filter lives
   once at the API boundary rather than trusted to every future caller.
 
+- `payroll/form1095c.ts`: turns `payroll/aca.ts`'s own Line 14/16 code
+  functions into an actual 12-month Form 1095-C for one real employee,
+  using data this project already has — hire/termination dates decide
+  the 1H/2A months automatically, and `BenefitElection` history decides
+  which months are enrolled (2C). Disclosed rather than modeled: this
+  project has no month-by-month coverage-OFFER tracking (only enrollment
+  history), so one `EmployerCoverageOfferPolicy` is applied to every
+  month the employee was employed — right for a stable plan year, wrong
+  the month an employer's own terms actually change mid-year, which the
+  caller must handle by calling again with a new policy rather than this
+  module guessing when that happened. Full-time status is a single
+  caller-supplied fact for the year, the same "hours-of-service must be
+  supplied, not derived" boundary `payroll/aca.ts`'s own ALE
+  determination draws. Wired into the admin UI as a "Form 1095-C" panel.
 - `payroll/aca.ts`: ACA Employer Shared Responsibility (§4980H) — Applicable
   Large Employer determination (averaging full-time + full-time-equivalent
   headcount across 12 months, the same 130-hours/120-hours-divisor formula

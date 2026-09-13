@@ -24,6 +24,7 @@ import {
   applyElection,
   buildOrgChart,
   canElectBenefit,
+  compute1095CForEmployee,
   determineAleStatus,
   draftPayRun,
   emptyPtoBalance,
@@ -51,6 +52,7 @@ import {
   verifyMicroDeposits,
 } from '../payroll/index.ts';
 import type { EmployeeMonthlyHours } from '../payroll/aca.ts';
+import type { EmployerCoverageOfferPolicy } from '../payroll/form1095c.ts';
 import type { DirectDepositVerification } from '../payroll/directDepositVerification.ts';
 import type { StateEmployerRegistration } from '../payroll/types.ts';
 import type { BenefitPlan, CoverageTier } from '../payroll/benefits.ts';
@@ -1081,6 +1083,17 @@ const server = createServer(async (req, res) => {
       } else {
         sendJson(res, 400, { error: 'Unknown safeHarbor.' });
       }
+      return;
+    }
+
+    const form1095cMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/1095c$/);
+    if (req.method === 'POST' && form1095cMatch) {
+      const employeeId = decodeURIComponent(form1095cMatch[1]);
+      const employee = getEmployee(employeeId);
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const body = await parseJsonBody<{ year: number; isFullTimeAllYear: boolean; policy: EmployerCoverageOfferPolicy }>(req);
+      const summary = compute1095CForEmployee(employee, benefitElectionsForEmployee(employeeId), body.isFullTimeAllYear, body.policy, body.year);
+      sendJson(res, 200, { form1095c: summary });
       return;
     }
 
