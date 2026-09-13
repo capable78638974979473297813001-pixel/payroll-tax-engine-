@@ -72,6 +72,8 @@ export {
   fmlaHoursRemaining,
 } from './fmla.ts';
 export type { FmlaEligibilityInput, FmlaEligibilityResult } from './fmla.ts';
+export { buildGlJournalEntries, renderGlJournalCsv } from './glExport.ts';
+export type { GlAccountMapping, GlJournalLine } from './glExport.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

@@ -246,6 +246,30 @@
   </section>
 
   <section>
+    <h2>GL journal export</h2>
+    <p class="muted" style="margin-top:0">One summarized journal entry per pay run — debits always equal credits exactly, or this refuses to produce the CSV at all. Account codes are your own chart of accounts; this has no opinion on what they should be.</p>
+    <div class="row">
+      <select id="gl-pay-run"></select>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="gl-wages-expense" placeholder="Wages expense account" value="6000" style="width:140px" />
+      <input id="gl-employer-tax-expense" placeholder="Employer tax expense account" value="6100" style="width:170px" />
+      <input id="gl-federal-tax-payable" placeholder="Federal tax payable account" value="2100" style="width:160px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="gl-state-tax-payable" placeholder="State tax payable account" value="2110" style="width:150px" />
+      <input id="gl-local-tax-payable" placeholder="Local tax payable account" value="2120" style="width:150px" />
+      <input id="gl-net-pay-payable" placeholder="Net pay payable account" value="2200" style="width:150px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="gl-garnishment-payable" placeholder="Garnishment payable account" value="2300" style="width:170px" />
+      <input id="gl-benefit-payable" placeholder="Benefit deduction payable account" value="2400" style="width:190px" />
+      <button class="secondary" id="gl-export-btn">Generate journal CSV</button>
+    </div>
+    <pre id="gl-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 941 (quarterly)</h2>
     <div class="row">
       <input id="f941-year" type="number" value="2026" style="width:90px" />
@@ -851,6 +875,7 @@ async function loadRuns() {
   document.getElementById('deposit-pay-run').innerHTML = payRuns.length === 0
     ? '<option value="">(no runs yet)</option>'
     : payRuns.map((r) => `<option value="${r.id}">${r.checkDate} (${r.status})</option>`).join('');
+  document.getElementById('gl-pay-run').innerHTML = document.getElementById('deposit-pay-run').innerHTML;
 }
 
 async function loadPtoPolicies() {
@@ -1219,6 +1244,36 @@ document.getElementById('deposit-deadline-btn').addEventListener('click', async 
     view.textContent = `Accumulated federal liability: ${fmtCents(result.accumulatedLiability)}\n` +
       (result.nextDayRuleTriggered ? '$100,000 NEXT-DAY RULE TRIGGERED — ' : '') +
       `Deposit deadline: ${result.deadline}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('gl-export-btn').addEventListener('click', async () => {
+  const view = document.getElementById('gl-view');
+  const payRunId = document.getElementById('gl-pay-run').value;
+  if (!payRunId) return (view.textContent = 'No pay runs yet.');
+  const mapping = {
+    wagesExpense: document.getElementById('gl-wages-expense').value,
+    employerTaxExpense: document.getElementById('gl-employer-tax-expense').value,
+    federalTaxPayable: document.getElementById('gl-federal-tax-payable').value,
+    stateTaxPayable: document.getElementById('gl-state-tax-payable').value,
+    localTaxPayable: document.getElementById('gl-local-tax-payable').value,
+    netPayPayable: document.getElementById('gl-net-pay-payable').value,
+    garnishmentPayable: document.getElementById('gl-garnishment-payable').value,
+    benefitDeductionPayable: document.getElementById('gl-benefit-payable').value,
+  };
+  try {
+    const res = await fetch(`/api/pay-runs/${payRunId}/gl-journal`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(mapping),
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      const body = JSON.parse(text);
+      view.textContent = 'Error: ' + body.error;
+      return;
+    }
+    view.textContent = text;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

@@ -62,6 +62,7 @@ import {
   ratePaySalariedSafeHarborMonthlyCeiling,
   recordContractorPayment,
   renderCarrierEligibilityRoster,
+  renderGlJournalCsv,
   renderPaystubText,
   renderPayrollRegister,
   resolvePrenoteVerification,
@@ -71,6 +72,7 @@ import {
 } from '../payroll/index.ts';
 import type { EmployeeMonthlyHours } from '../payroll/aca.ts';
 import type { EmployerCoverageOfferPolicy } from '../payroll/form1095c.ts';
+import type { GlAccountMapping } from '../payroll/glExport.ts';
 import type { DirectHireInput } from '../payroll/onboarding.ts';
 import type { DirectDepositVerification } from '../payroll/directDepositVerification.ts';
 import type { StateEmployerRegistration } from '../payroll/types.ts';
@@ -1247,6 +1249,21 @@ const server = createServer(async (req, res) => {
       const csv = renderPayrollRegister(employeesForCompany(payRun.companyId), payRun);
       res.writeHead(200, { 'Content-Type': 'text/csv; charset=utf-8' });
       res.end(csv);
+      return;
+    }
+
+    const glJournalMatch = url.pathname.match(/^\/api\/pay-runs\/([^/]+)\/gl-journal$/);
+    if (req.method === 'POST' && glJournalMatch) {
+      const payRun = getPayRun(decodeURIComponent(glJournalMatch[1]));
+      if (!payRun) return sendJson(res, 404, { error: 'No such pay run.' });
+      const mapping = await parseJsonBody<GlAccountMapping>(req);
+      try {
+        const csv = renderGlJournalCsv(payRun, mapping);
+        res.writeHead(200, { 'Content-Type': 'text/csv; charset=utf-8' });
+        res.end(csv);
+      } catch (err) {
+        sendJson(res, 400, { error: err instanceof Error ? err.message : String(err) });
+      }
       return;
     }
 

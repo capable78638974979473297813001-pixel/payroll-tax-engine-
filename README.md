@@ -299,6 +299,24 @@ Beyond the pay-run engine itself, three more real HR pieces:
   per employee per run, plus a self-checking TOTAL row) for a
   general-ledger import, all as pure rollups over records this project
   already maintains.
+- `payroll/glExport.ts`: one summarized general-ledger journal entry per
+  pay run — the level a real payroll system actually posts to accounting
+  software at (company-wide per run, not one line per employee, which is
+  what `renderPayrollRegister()` above is already for). The one idea
+  that matters here, the same discipline this project's own tax engine
+  applies everywhere: total debits must equal total credits, always —
+  `buildGlJournalEntries()` asserts the balance itself and THROWS rather
+  than returning a silently unbalanced entry, the same "prove it, don't
+  just compute it and hope" standard the payroll register's own
+  self-checking TOTAL row sets. Splits tax payable by jurisdiction
+  (federal/state/local, combining employee-withheld and employer-owed
+  amounts into the same payable, since both get remitted to the same
+  agency) using `PayRunLine.taxLines`'s own jurisdiction field. Has no
+  opinion on a chart of accounts — every account code is caller-supplied
+  — and does not post the entry to any actual accounting system (a real,
+  separate integration, the same "disclosed, not built" boundary drawn
+  around e-filing and carrier EDI elsewhere). Wired into the admin UI as
+  a "GL journal export" panel.
 - `payroll/contractors.ts`: 1099 contractors — a genuinely different
   population from `Employee` (no W-4, no withholding at all; a contractor
   owes their own self-employment tax) — payments, and Form 1099-NEC's own
