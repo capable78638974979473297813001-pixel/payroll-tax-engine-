@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import type { AuditLogEntry } from './auditLog.ts';
 import type { BenefitElection, BenefitPlan } from './benefits.ts';
 import type { Contractor, ContractorPayment } from './contractors.ts';
+import type { DirectDepositVerification } from './directDepositVerification.ts';
 import type { I9Record } from './i9.ts';
 import type { Candidate, JobPosting } from './onboarding.ts';
 import type { PtoBalance, PtoPolicy } from './pto.ts';
@@ -46,6 +47,8 @@ interface DB {
   contractors: Record<string, Contractor>;
   contractorPayments: ContractorPayment[];
   auditLog: AuditLogEntry[];
+  /** Keyed by accountId — see payroll/directDepositVerification.ts. A real system's schema would allow more than one historical attempt per account; this demo store keeps only the current one. */
+  directDepositVerifications: Record<string, DirectDepositVerification>;
 }
 
 function emptyDb(): DB {
@@ -64,6 +67,7 @@ function emptyDb(): DB {
     contractors: {},
     contractorPayments: [],
     auditLog: [],
+    directDepositVerifications: {},
   };
 }
 
@@ -94,6 +98,7 @@ function load(): DB {
       contractors: parsed.contractors ?? base.contractors,
       contractorPayments: parsed.contractorPayments ?? base.contractorPayments,
       auditLog: parsed.auditLog ?? base.auditLog,
+      directDepositVerifications: parsed.directDepositVerifications ?? base.directDepositVerifications,
     };
   } catch {
     return emptyDb();
@@ -356,4 +361,18 @@ export function addAuditLogEntry(entry: AuditLogEntry): void {
 export function auditLogForEntityIds(entityIds: readonly string[]): AuditLogEntry[] {
   const idSet = new Set(entityIds);
   return readPayrollDb((db) => db.auditLog.filter((e) => idSet.has(e.entityId)).sort((a, b) => b.timestamp.localeCompare(a.timestamp)));
+}
+
+// ----------------------------------------------------------------------------
+// Direct deposit verification
+// ----------------------------------------------------------------------------
+
+export function saveDirectDepositVerification(verification: DirectDepositVerification): void {
+  withPayrollDb((db) => {
+    db.directDepositVerifications[verification.accountId] = verification;
+  });
+}
+
+export function getDirectDepositVerification(accountId: string): DirectDepositVerification | null {
+  return readPayrollDb((db) => db.directDepositVerifications[accountId] ?? null);
 }

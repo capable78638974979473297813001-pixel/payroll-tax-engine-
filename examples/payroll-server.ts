@@ -32,6 +32,8 @@ import {
   i9ComplianceIssues,
   i9Deadlines,
   i9Status,
+  initiateMicroDepositVerification,
+  initiatePrenoteVerification,
   isAffordableUnderW2SafeHarbor,
   overtimeRuleForState,
   pairPunchesIntoDailyHours,
@@ -40,10 +42,13 @@ import {
   recordContractorPayment,
   renderPaystubText,
   renderPayrollRegister,
+  resolvePrenoteVerification,
   terminateEmployee,
   usePto,
+  verifyMicroDeposits,
 } from '../payroll/index.ts';
 import type { EmployeeMonthlyHours } from '../payroll/aca.ts';
+import type { DirectDepositVerification } from '../payroll/directDepositVerification.ts';
 import type { BenefitPlan, CoverageTier } from '../payroll/benefits.ts';
 import type { Contractor } from '../payroll/contractors.ts';
 import type { I9Record } from '../payroll/i9.ts';
@@ -64,6 +69,7 @@ import {
   getCandidate,
   getCompany,
   getContractor,
+  getDirectDepositVerification,
   getEmployee,
   getI9Record,
   getPayRun,
@@ -80,6 +86,7 @@ import {
   saveCompany,
   saveContractor,
   saveContractorPayment,
+  saveDirectDepositVerification,
   saveEmployee,
   saveEmployees,
   saveI9Record,
@@ -745,6 +752,97 @@ const server = createServer(async (req, res) => {
       saveEmployee(updated);
       addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'garnishment_order.removed', 'Employee', employeeId, { orderId }));
       sendJson(res, 200, { garnishmentOrders: updated.garnishmentOrders });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Direct deposit accounts and verification
+    // ------------------------------------------------------------------
+
+    /** Strips microDepositAmounts before a verification record leaves this server — see payroll/directDepositVerification.ts's own header on why an API response must never carry them. */
+    function safeVerificationView(v: DirectDepositVerification) {
+      const { microDepositAmounts: _omit, ...safe } = v;
+      return safe;
+    }
+
+    const directDepositAccountsMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/direct-deposit-accounts$/);
+    if (req.method === 'GET' && directDepositAccountsMatch) {
+      const employee = getEmployee(decodeURIComponent(directDepositAccountsMatch[1]));
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      sendJson(res, 200, { accounts: employee.directDepositAccounts });
+      return;
+    }
+    if (req.method === 'POST' && directDepositAccountsMatch) {
+      const employeeId = decodeURIComponent(directDepositAccountsMatch[1]);
+      const employee = getEmployee(employeeId);
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const body = await parseJsonBody<Omit<Employee['directDepositAccounts'][number], 'id'>>(req);
+      const account = { id: randomUUID(), ...body };
+      const updated: Employee = { ...employee, directDepositAccounts: [...employee.directDepositAccounts, account] };
+      saveEmployee(updated);
+      sendJson(res, 200, { accounts: updated.directDepositAccounts });
+      return;
+    }
+
+    const initiateVerificationMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/direct-deposit-accounts\/([^/]+)\/initiate-verification$/);
+    if (req.method === 'POST' && initiateVerificationMatch) {
+      const employeeId = decodeURIComponent(initiateVerificationMatch[1]);
+      const accountId = decodeURIComponent(initiateVerificationMatch[2]);
+      const employee = getEmployee(employeeId);
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      if (!employee.directDepositAccounts.some((a) => a.id === accountId)) return sendJson(res, 404, { error: 'No such account.' });
+      const body = await parseJsonBody<{ method: 'prenote' | 'micro-deposit'; date: string }>(req);
+      const verification = body.method === 'prenote'
+        ? initiatePrenoteVerification(accountId, body.date)
+        : initiateMicroDepositVerification(accountId, body.date);
+      saveDirectDepositVerification(verification);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, `direct_deposit_verification.${body.method}_initiated`, 'Employee', employeeId, { accountId }));
+      // Demo-only: this server has no real bank to actually move the micro-deposits or prenote through, so the
+      // generated amounts are surfaced here for a human to key into the "verify micro deposits" step below rather
+      // than being lost — a real deployment's ACH origination pipeline is what would actually deposit them, and
+      // no OTHER endpoint (see the GET below) ever exposes this field again once initiated.
+      sendJson(res, 200, { verification });
+      return;
+    }
+
+    const verificationStatusMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/direct-deposit-accounts\/([^/]+)\/verification$/);
+    if (req.method === 'GET' && verificationStatusMatch) {
+      const accountId = decodeURIComponent(verificationStatusMatch[2]);
+      const verification = getDirectDepositVerification(accountId);
+      if (!verification) return sendJson(res, 404, { error: 'No verification on file for this account.' });
+      sendJson(res, 200, { verification: safeVerificationView(verification) });
+      return;
+    }
+
+    const resolvePrenoteMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/direct-deposit-accounts\/([^/]+)\/resolve-prenote$/);
+    if (req.method === 'POST' && resolvePrenoteMatch) {
+      const employeeId = decodeURIComponent(resolvePrenoteMatch[1]);
+      const accountId = decodeURIComponent(resolvePrenoteMatch[2]);
+      const verification = getDirectDepositVerification(accountId);
+      if (!verification) return sendJson(res, 404, { error: 'No verification on file for this account.' });
+      const body = await parseJsonBody<{ asOfDate: string; receivedReturnOrNoc?: boolean }>(req);
+      const resolved = resolvePrenoteVerification(verification, body.asOfDate, body.receivedReturnOrNoc ?? false);
+      saveDirectDepositVerification(resolved);
+      if (resolved.status !== verification.status) {
+        addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, `direct_deposit_verification.${resolved.status}`, 'Employee', employeeId, { accountId }));
+      }
+      sendJson(res, 200, { verification: safeVerificationView(resolved) });
+      return;
+    }
+
+    const verifyMicroDepositsMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/direct-deposit-accounts\/([^/]+)\/verify-micro-deposits$/);
+    if (req.method === 'POST' && verifyMicroDepositsMatch) {
+      const employeeId = decodeURIComponent(verifyMicroDepositsMatch[1]);
+      const accountId = decodeURIComponent(verifyMicroDepositsMatch[2]);
+      const verification = getDirectDepositVerification(accountId);
+      if (!verification) return sendJson(res, 404, { error: 'No verification on file for this account.' });
+      const body = await parseJsonBody<{ amounts: [number, number] }>(req);
+      const { verification: updated, correct } = verifyMicroDeposits(verification, body.amounts);
+      saveDirectDepositVerification(updated);
+      if (updated.status !== verification.status) {
+        addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, `direct_deposit_verification.${updated.status}`, 'Employee', employeeId, { accountId }));
+      }
+      sendJson(res, 200, { correct, verification: safeVerificationView(updated) });
       return;
     }
 

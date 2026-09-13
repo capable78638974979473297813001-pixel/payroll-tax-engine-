@@ -271,6 +271,28 @@
   </section>
 
   <section>
+    <h2>Direct deposit accounts</h2>
+    <div class="row">
+      <select id="dd-employee"></select>
+      <button class="secondary" id="dd-refresh-btn">Load accounts</button>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="dd-routing" placeholder="Routing number" style="width:150px" />
+      <input id="dd-account" placeholder="Account number" style="width:150px" />
+      <select id="dd-account-type">
+        <option value="checking">Checking</option>
+        <option value="savings">Savings</option>
+      </select>
+      <button class="secondary" id="dd-add-btn">Add account (remainder allocation)</button>
+    </div>
+    <table id="dd-table">
+      <thead><tr><th>Routing</th><th>Account</th><th>Type</th><th>Verification</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <pre id="dd-view"></pre>
+  </section>
+
+  <section>
     <h2>Benefits</h2>
     <div class="row">
       <input id="benefit-name" placeholder="Plan name" value="PPO Medical" />
@@ -473,7 +495,7 @@ async function loadEmployees() {
     </tr>`).join('');
 
   const employeeOptions = list.map((e) => `<option value="${e.id}">${e.firstName} ${e.lastName}</option>`).join('');
-  for (const id of ['w2-employee', 'clock-employee', 'pto-employee', 'term-employee', 'benefit-employee', 'i9-employee', 'garn-employee']) {
+  for (const id of ['w2-employee', 'clock-employee', 'pto-employee', 'term-employee', 'benefit-employee', 'i9-employee', 'garn-employee', 'dd-employee']) {
     document.getElementById(id).innerHTML = employeeOptions;
   }
 
@@ -680,6 +702,102 @@ document.getElementById('garn-add-btn').addEventListener('click', async () => {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type, amountOrdered }),
   });
   await loadGarnishments();
+});
+
+async function loadDirectDepositAccounts() {
+  const employeeId = document.getElementById('dd-employee').value;
+  if (!employeeId) return;
+  const { accounts } = await api(`/api/employees/${employeeId}/direct-deposit-accounts`);
+  const tbody = document.querySelector('#dd-table tbody');
+  if (accounts.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="muted">No accounts on file.</td></tr>';
+    return;
+  }
+  const rows = await Promise.all(accounts.map(async (a) => {
+    let verification = null;
+    try {
+      ({ verification } = await api(`/api/employees/${employeeId}/direct-deposit-accounts/${a.id}/verification`));
+    } catch {
+      // No verification initiated yet -- a real, valid state, not an error.
+    }
+    const statusText = verification ? `${verification.method}: ${verification.status}` : 'not verified';
+    return `
+      <tr data-account="${a.id}">
+        <td>${a.routingNumber}</td>
+        <td>${a.accountNumber}</td>
+        <td>${a.accountType}</td>
+        <td>${statusText}</td>
+        <td>
+          <button class="secondary dd-prenote" data-account="${a.id}">Send prenote</button>
+          <button class="secondary dd-microdeposit" data-account="${a.id}">Send micro-deposits</button>
+          ${verification && verification.method === 'prenote' && verification.status === 'pending' ? `<button class="secondary dd-resolve-prenote" data-account="${a.id}">Check prenote status</button>` : ''}
+          ${verification && verification.method === 'micro-deposit' && verification.status === 'pending' ? `<button class="secondary dd-verify-microdeposit" data-account="${a.id}">Enter amounts</button>` : ''}
+        </td>
+      </tr>`;
+  }));
+  tbody.innerHTML = rows.join('');
+
+  tbody.querySelectorAll('.dd-prenote').forEach((btn) => btn.addEventListener('click', async () => {
+    const employeeId = document.getElementById('dd-employee').value;
+    const today = new Date().toISOString().slice(0, 10);
+    const result = await api(`/api/employees/${employeeId}/direct-deposit-accounts/${btn.dataset.account}/initiate-verification`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ method: 'prenote', date: today }),
+    });
+    document.getElementById('dd-view').textContent =
+      `Prenote sent (settlement date ${result.verification.settlementDate}). NACHA requires waiting 3 business days with no return/NOC before a live entry may follow.`;
+    await loadDirectDepositAccounts();
+  }));
+
+  tbody.querySelectorAll('.dd-microdeposit').forEach((btn) => btn.addEventListener('click', async () => {
+    const employeeId = document.getElementById('dd-employee').value;
+    const today = new Date().toISOString().slice(0, 10);
+    const result = await api(`/api/employees/${employeeId}/direct-deposit-accounts/${btn.dataset.account}/initiate-verification`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ method: 'micro-deposit', date: today }),
+    });
+    const [a, b] = result.verification.microDepositAmounts;
+    document.getElementById('dd-view').textContent =
+      `Micro-deposits sent: ${fmtCents(a)} and ${fmtCents(b)} (shown here only because this demo has no real bank to actually deposit them — a real system would never return these amounts to anyone but the ACH origination pipeline itself).`;
+    await loadDirectDepositAccounts();
+  }));
+
+  tbody.querySelectorAll('.dd-resolve-prenote').forEach((btn) => btn.addEventListener('click', async () => {
+    const employeeId = document.getElementById('dd-employee').value;
+    const asOfDate = prompt('Check status as of date (YYYY-MM-DD)', new Date().toISOString().slice(0, 10));
+    if (!asOfDate) return;
+    const receivedReturnOrNoc = confirm('Was a return or Notification of Change received for this prenote?');
+    const result = await api(`/api/employees/${employeeId}/direct-deposit-accounts/${btn.dataset.account}/resolve-prenote`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ asOfDate, receivedReturnOrNoc }),
+    });
+    document.getElementById('dd-view').textContent = `Prenote status: ${result.verification.status}`;
+    await loadDirectDepositAccounts();
+  }));
+
+  tbody.querySelectorAll('.dd-verify-microdeposit').forEach((btn) => btn.addEventListener('click', async () => {
+    const employeeId = document.getElementById('dd-employee').value;
+    const a = Number(prompt('First deposit amount, in cents'));
+    const b = Number(prompt('Second deposit amount, in cents'));
+    const result = await api(`/api/employees/${employeeId}/direct-deposit-accounts/${btn.dataset.account}/verify-micro-deposits`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amounts: [a, b] }),
+    });
+    document.getElementById('dd-view').textContent = result.correct
+      ? 'Verified!'
+      : `Not a match — ${result.verification.attemptsRemaining} attempt(s) remaining. Status: ${result.verification.status}.`;
+    await loadDirectDepositAccounts();
+  }));
+}
+document.getElementById('dd-employee').addEventListener('change', loadDirectDepositAccounts);
+document.getElementById('dd-refresh-btn').addEventListener('click', loadDirectDepositAccounts);
+document.getElementById('dd-add-btn').addEventListener('click', async () => {
+  const employeeId = document.getElementById('dd-employee').value;
+  if (!employeeId) return;
+  const routingNumber = document.getElementById('dd-routing').value;
+  const accountNumber = document.getElementById('dd-account').value;
+  const accountType = document.getElementById('dd-account-type').value;
+  await api(`/api/employees/${employeeId}/direct-deposit-accounts`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ routingNumber, accountNumber, accountType, allocation: { kind: 'remainder' } }),
+  });
+  await loadDirectDepositAccounts();
 });
 
 document.getElementById('run-btn').addEventListener('click', async () => {

@@ -118,6 +118,14 @@ export interface AchCredit {
   /** Employee id, carried into the entry's own Individual Identification Number field — lets a returned entry be traced back without cross-referencing the batch by name alone. */
   individualId: string;
   individualName: string;
+  /**
+   * 'prenote' emits NACHA's own zero-dollar account-verification entry
+   * (transaction code 23 checking / 33 savings) instead of an ordinary
+   * live credit (22/32) — see payroll/directDepositVerification.ts,
+   * which is the only caller that should ever set this. Defaults to
+   * 'live' so every existing payroll-run caller is unaffected.
+   */
+  entryType?: 'live' | 'prenote';
 }
 
 export interface AchFileConfig {
@@ -182,6 +190,9 @@ export function buildNachaFile(credits: readonly AchCredit[], config: AchFileCon
     if (!validateRoutingNumber(c.routingNumber)) {
       throw new Error(`Invalid routing number checksum: ${c.routingNumber} (individual ${c.individualId})`);
     }
+    if (c.entryType === 'prenote' && c.amount !== 0) {
+      throw new Error(`A prenote entry must carry a zero dollar amount, got ${c.amount} cents (individual ${c.individualId})`);
+    }
   }
   if (!validateRoutingNumber(config.originRoutingNumber)) {
     throw new Error(`Invalid origin routing number checksum: ${config.originRoutingNumber}`);
@@ -229,7 +240,9 @@ export function buildNachaFile(credits: readonly AchCredit[], config: AchFileCon
   let entryHashAccumulator = 0;
 
   for (const credit of credits) {
-    const transactionCode = credit.accountType === 'checking' ? '22' : '32';
+    const transactionCode = credit.entryType === 'prenote'
+      ? (credit.accountType === 'checking' ? '23' : '33')
+      : (credit.accountType === 'checking' ? '22' : '32');
     entryHashAccumulator += Number(firstEight(credit.routingNumber));
     totalCredits += credit.amount;
     const entry =

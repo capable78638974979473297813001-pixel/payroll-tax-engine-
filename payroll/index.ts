@@ -17,6 +17,17 @@ export { accumulateYtd, freshYearToDate } from './ytd.ts';
 export type { YtdAccumulatorInput } from './ytd.ts';
 export { allocateNetPay, buildNachaFile, validateRoutingNumber } from './directDeposit.ts';
 export type { AchCredit, AchFileConfig, DepositAllocation } from './directDeposit.ts';
+export {
+  MICRO_DEPOSIT_MAX_ATTEMPTS,
+  PRENOTE_WAITING_PERIOD_BUSINESS_DAYS,
+  buildMicroDepositCredits,
+  buildPrenoteCredit,
+  initiateMicroDepositVerification,
+  initiatePrenoteVerification,
+  resolvePrenoteVerification,
+  verifyMicroDeposits,
+} from './directDepositVerification.ts';
+export type { DirectDepositVerification, MicroDepositVerifyResult, VerificationMethod, VerificationStatus } from './directDepositVerification.ts';
 export { buildPaycheckInput, computeEmployeePaycheck } from './engine.ts';
 export type { EmployeePaycheckComputation } from './engine.ts';
 export { activeEmployeesFor, approvePayRun, draftPayRun, recalculatePayRun, voidPayRun, ytdForCheckDate } from './run.ts';

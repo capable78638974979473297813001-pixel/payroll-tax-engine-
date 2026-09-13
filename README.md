@@ -247,6 +247,26 @@ Beyond the pay-run engine itself, three more real HR pieces:
   directly, computed server-side in integer cents rather than in browser
   floating point.
 
+- `payroll/directDepositVerification.ts`: verifying a bank account BEFORE
+  a real paycheck moves through it — the two methods real payroll
+  companies actually use. A PRENOTE is a zero-dollar NACHA entry
+  (transaction codes 23/33, newly supported by `payroll/directDeposit.ts`'s
+  own `buildNachaFile()` alongside the ordinary 22/32 live codes); NACHA's
+  own Operating Rules require waiting at least 3 BUSINESS days after its
+  settlement date with no return or Notification of Change before a live
+  entry may follow — LIVE-VERIFIED as the current figure (a prior rule
+  required 6 business days). MICRO-DEPOSIT verification sends two small
+  (1-45 cent) live credits and asks the account holder to report both
+  amounts back — proof they can see the actual resulting bank statement —
+  with a 3-attempt cap bounding the ~2,000-combination guess space against
+  brute force. The admin UI's "Direct deposit accounts" panel wires both
+  end to end, and the generated micro-deposit amounts are deliberately
+  never returned by the ordinary verification-status endpoint (only once,
+  at the moment of initiation, since this demo has no real bank to
+  actually deposit them) — the same "never expose what only the account
+  holder should be able to confirm" boundary a real system's split
+  between its ACH-origination backend and its employee-facing API draws.
+
 `Employee` also carries plain Core-HR fields now (`jobTitle`,
 `department`, `managerId`) — purely descriptive, the natural spine for an
 employee directory or org chart, though no such view is built yet.
