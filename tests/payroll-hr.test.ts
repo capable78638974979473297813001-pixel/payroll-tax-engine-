@@ -14,8 +14,43 @@ import type { DailyHours, TimePunch } from '../payroll/timeAndAttendance.ts';
 import { accruePto, applyAnnualCarryover, emptyPtoBalance, ptoPayoutEarning, usePto } from '../payroll/pto.ts';
 import type { PtoPolicy } from '../payroll/pto.ts';
 import { buildNewHireReport, deadlineDaysForState, FEDERAL_DEFAULT_DEADLINE_DAYS } from '../payroll/newHireReporting.ts';
+import { checkMinimumWageCompliance, checkMinimumWageComplianceForCompany } from '../payroll/compliance.ts';
+import { deductionPlanFromElection, employeeMonthlyPremium, isElectionChangeAllowed, perPeriodDeductionAmount } from '../payroll/benefits.ts';
+import type { BenefitElection, BenefitPlan } from '../payroll/benefits.ts';
+import { minimumWage } from '../src/minimum-wage.ts';
 import type { Company, Employee } from '../payroll/types.ts';
 import { freshYearToDate } from '../payroll/ytd.ts';
+
+function baseEmployee(overrides: Partial<Employee> = {}): Employee {
+  return {
+    id: 'e1',
+    companyId: 'co-1',
+    firstName: 'Jamie',
+    lastName: 'Rivera',
+    hireDate: '2024-01-01',
+    employmentCategory: 'standard',
+    payType: { kind: 'hourly', hourlyRate: dollars(20) },
+    residenceState: { code: 'TX' },
+    federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+    deductionPlans: [],
+    directDepositAccounts: [],
+    garnishmentOrders: [],
+    ytd: freshYearToDate(),
+    ytdYear: 2026,
+    ...overrides,
+  };
+}
+
+function baseCompany(overrides: Partial<Company> = {}): Company {
+  return {
+    id: 'co-1',
+    legalName: 'Test Co',
+    ein: '12-3456789',
+    homeState: 'TX',
+    paySchedule: { frequency: 'biweekly', anchorPeriodStart: '2026-01-04', checkDateLagDays: 5 },
+    ...overrides,
+  };
+}
 
 // ============================================================================
 // Time & attendance: pairing punches
@@ -258,5 +293,110 @@ describe('new-hire reporting (payroll/newHireReporting.ts)', () => {
   test('refuses to build a report for an employee missing an SSN or mailing address, rather than filing an incomplete one', () => {
     assert.throws(() => buildNewHireReport(company(), employee({ ssn: undefined })), /SSN/);
     assert.throws(() => buildNewHireReport(company(), employee({ mailingAddress: undefined })), /mailing address/);
+  });
+});
+
+// ============================================================================
+// Minimum wage compliance
+// ============================================================================
+
+describe('minimum wage compliance checking (payroll/compliance.ts)', () => {
+  test('flags an hourly employee paid below the binding floor for their work state, with the exact shortfall', () => {
+    const answer = minimumWage({ checkDate: '2026-01-15', state: 'CA' });
+    const employee = baseEmployee({ payType: { kind: 'hourly', hourlyRate: answer.cents - 100 }, workState: { code: 'CA' } });
+    const issue = checkMinimumWageCompliance(baseCompany({ homeState: 'CA' }), employee, '2026-01-15');
+    assert.ok(issue);
+    assert.equal(issue!.applicableRateCents, answer.cents);
+    assert.equal(issue!.employeeRateCents, answer.cents - 100);
+    assert.equal(issue!.shortfallCents, 100);
+    assert.equal(issue!.jurisdiction, answer.bindingJurisdiction);
+  });
+
+  test('an hourly employee paid AT OR ABOVE the binding floor produces no issue at all', () => {
+    const answer = minimumWage({ checkDate: '2026-01-15', state: 'TX' });
+    const employee = baseEmployee({ payType: { kind: 'hourly', hourlyRate: answer.cents + 500 }, workState: { code: 'TX' } });
+    assert.equal(checkMinimumWageCompliance(baseCompany({ homeState: 'TX' }), employee, '2026-01-15'), null);
+  });
+
+  test('a salaried employee is never evaluated, however low the implied rate might be', () => {
+    const employee = baseEmployee({ payType: { kind: 'salary', annualSalary: 1 } });
+    assert.equal(checkMinimumWageCompliance(baseCompany(), employee, '2026-01-15'), null);
+  });
+
+  test('an employee with no explicit workState is checked against the COMPANY\'s own home state', () => {
+    const answer = minimumWage({ checkDate: '2026-01-15', state: 'CA' });
+    const employee = baseEmployee({ payType: { kind: 'hourly', hourlyRate: answer.cents - 50 } }); // no workState set
+    const issue = checkMinimumWageCompliance(baseCompany({ homeState: 'CA' }), employee, '2026-01-15');
+    assert.ok(issue);
+  });
+
+  test('checking a whole company returns only the real violations, never a clean-bill entry for a compliant employee', () => {
+    const answer = minimumWage({ checkDate: '2026-01-15', state: 'TX' });
+    const violator = baseEmployee({ id: 'low', payType: { kind: 'hourly', hourlyRate: answer.cents - 200 } });
+    const compliant = baseEmployee({ id: 'ok', payType: { kind: 'hourly', hourlyRate: answer.cents + 200 } });
+    const salaried = baseEmployee({ id: 'salaried', payType: { kind: 'salary', annualSalary: dollars(50_000) } });
+    const issues = checkMinimumWageComplianceForCompany(baseCompany(), [violator, compliant, salaried], '2026-01-15');
+    assert.deepEqual(issues.map((i) => i.employeeId), ['low']);
+  });
+});
+
+// ============================================================================
+// Benefits administration
+// ============================================================================
+
+describe('benefits: plans, elections, and the deduction they produce (payroll/benefits.ts)', () => {
+  function medicalPlan(overrides: Partial<BenefitPlan> = {}): BenefitPlan {
+    return {
+      id: 'plan-medical',
+      companyId: 'co-1',
+      name: 'PPO Medical',
+      category: 'section125',
+      monthlyPremiumByTier: { employee_only: dollars(500), employee_spouse: dollars(900), family: dollars(1_200) },
+      employerContributionFraction: 0.8,
+      ...overrides,
+    };
+  }
+
+  test('the employee\'s own monthly cost is the tier\'s full premium less the employer\'s contribution', () => {
+    const plan = medicalPlan();
+    assert.equal(employeeMonthlyPremium(plan, 'employee_only'), dollars(100)); // 500 * (1 - 0.8)
+    assert.equal(employeeMonthlyPremium(plan, 'family'), dollars(240)); // 1200 * 0.2
+  });
+
+  test('a plan with no premium defined for the requested tier throws rather than silently charging $0', () => {
+    const plan = medicalPlan({ monthlyPremiumByTier: { employee_only: dollars(500) } });
+    assert.throws(() => employeeMonthlyPremium(plan, 'family'), /no premium defined/);
+  });
+
+  test('a monthly cost is annualized (x12) before being sliced per period, matching hand-computed cents exactly', () => {
+    // $120/month = $14,400 cents/year. Biweekly (26/yr): 14400/26 =
+    // 553.84... -> 554 cents ($5.54)? No — dollars(120) is already CENTS
+    // (12,000), so the annual figure is 144,000 cents: 144,000/26 =
+    // 5538.46... -> 5538 cents ($55.38). Semimonthly (24/yr): 144,000/24 =
+    // exactly 6,000 cents ($60.00).
+    assert.equal(perPeriodDeductionAmount(dollars(120), 26), 5_538);
+    assert.equal(perPeriodDeductionAmount(dollars(120), 24), dollars(60));
+  });
+
+  test('an active election produces an active DeductionPlan; a superseded one (endDate set) produces an inactive one', () => {
+    const plan = medicalPlan();
+    const active: BenefitElection = { id: 'el-1', employeeId: 'e1', planId: plan.id, coverageTier: 'employee_only', effectiveDate: '2026-01-01' };
+    const ended: BenefitElection = { ...active, id: 'el-2', endDate: '2026-06-30' };
+
+    const activeDeduction = deductionPlanFromElection(plan, active, 26);
+    assert.equal(activeDeduction.active, true);
+    assert.equal(activeDeduction.category, 'section125');
+    // Employee cost is $100/month (500 * 0.2) = 10,000 cents/yr *12 =
+    // 120,000 cents; /26 periods = 4615.38... -> 4615 cents.
+    assert.equal(activeDeduction.amount.kind === 'flat' && activeDeduction.amount.cents, 4_615);
+
+    assert.equal(deductionPlanFromElection(plan, ended, 26).active, false);
+  });
+
+  test('election changes are allowed inside the open enrollment window, or anytime with a qualifying life event, and refused otherwise', () => {
+    const window = { start: '2026-11-01', end: '2026-11-15' };
+    assert.equal(isElectionChangeAllowed('2026-11-10', window, false), true);
+    assert.equal(isElectionChangeAllowed('2026-06-01', window, false), false);
+    assert.equal(isElectionChangeAllowed('2026-06-01', window, true), true, 'a genuine qualifying life event overrides the window');
   });
 });

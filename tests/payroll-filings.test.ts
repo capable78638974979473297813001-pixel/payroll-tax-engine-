@@ -39,6 +39,7 @@ function run(overrides: Partial<PayRun> & { id: string; checkDate: string; lines
     periodEnd: '2026-01-14',
     status: 'approved',
     createdAt: '2026-01-01T00:00:00Z',
+    minimumWageIssues: [],
     ...overrides,
   };
 }

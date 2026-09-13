@@ -151,7 +151,6 @@ const server = createServer(async (req, res) => {
     }
 
     if (req.method === 'GET' && req.url === '/api/companies') {
-      seedDemoDataIfEmpty();
       const company = getCompany('co-demo')!;
       sendJson(res, 200, { companies: [company] });
       return;
@@ -188,7 +187,25 @@ const server = createServer(async (req, res) => {
       const active = activeEmployeesFor(company, employees, period.checkDate);
       if (active.length === 0) return sendJson(res, 409, { error: 'No active employees for this period.' });
 
-      const draft = draftPayRun(company, employees, period.periodStart, period.periodEnd, period.checkDate);
+      // Hourly employees are paid $0 for any period nobody reports hours
+      // for — that's the tax engine's own "absent input changes nothing"
+      // convention working correctly, not a bug, but it means an admin
+      // running payroll from this UI must be able to supply them. The
+      // request body is optional so existing salaried-only companies
+      // (and every test/demo script that calls this endpoint directly)
+      // keep working with no body at all.
+      const rawBody = await readBody(req);
+      let timeEntries: { employeeId: string; regularHours: number; overtimeHours: number }[] = [];
+      if (rawBody) {
+        try {
+          const parsed = JSON.parse(rawBody) as { timeEntries?: typeof timeEntries };
+          timeEntries = parsed.timeEntries ?? [];
+        } catch {
+          return sendJson(res, 400, { error: 'Request body was not valid JSON.' });
+        }
+      }
+
+      const draft = draftPayRun(company, employees, period.periodStart, period.periodEnd, period.checkDate, timeEntries);
       const { run: approved, updatedEmployees } = approvePayRun(draft, employees);
       saveEmployees(updatedEmployees);
       savePayRun(approved);
@@ -242,6 +259,7 @@ const server = createServer(async (req, res) => {
   }
 });
 
+seedDemoDataIfEmpty();
 server.listen(PORT, () => {
   console.log(`Payroll admin UI: http://localhost:${PORT}`);
 });

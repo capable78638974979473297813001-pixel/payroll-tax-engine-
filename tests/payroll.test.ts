@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { dollars } from '../src/money.ts';
 import type { PaycheckInput } from '../src/types.ts';
 import type { GarnishmentOrder } from '../src/garnishment.ts';
+import { minimumWage } from '../src/minimum-wage.ts';
 
 import { generatePayPeriods, periodForCheckDate } from '../payroll/schedule.ts';
 import type { PayScheduleConfig } from '../payroll/types.ts';
@@ -573,6 +574,22 @@ describe('running payroll across a company\'s employees (payroll/run.ts)', () =>
     ]);
     assert.equal(run.status, 'draft');
     assert.equal(run.lines.length, 2);
+    assert.deepEqual(run.minimumWageIssues, [], 'both employees here are paid well above minimum wage');
+  });
+
+  test('a draft run flags an hourly employee paid below the binding minimum wage, and leaves a compliant one out entirely', () => {
+    const company = texasCompany();
+    const floor = minimumWage({ checkDate: '2026-01-22', state: 'TX' });
+    const employees = [
+      hourlyEmployee({ id: 'underpaid', payType: { kind: 'hourly', hourlyRate: floor.cents - 50 } }),
+      hourlyEmployee({ id: 'compliant', payType: { kind: 'hourly', hourlyRate: floor.cents + 500 } }),
+    ];
+    const run = draftPayRun(company, employees, '2026-01-04', '2026-01-17', '2026-01-22', [
+      timeEntryFor('underpaid'),
+      timeEntryFor('compliant'),
+    ]);
+    assert.deepEqual(run.minimumWageIssues.map((i) => i.employeeId), ['underpaid']);
+    assert.equal(run.minimumWageIssues[0].shortfallCents, 50);
   });
 
   test('recalculatePayRun refuses to touch anything but a draft', () => {

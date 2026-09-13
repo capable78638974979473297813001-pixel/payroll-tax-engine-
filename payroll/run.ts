@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { checkMinimumWageComplianceForCompany } from './compliance.ts';
 import { computeEmployeePaycheck } from './engine.ts';
 import type { Company, Employee, ExtendedYearToDate, PayRun, PayRunLine, TimeEntry } from './types.ts';
 import { accumulateYtd, freshYearToDate } from './ytd.ts';
@@ -39,7 +40,8 @@ export function draftPayRun(
   timeEntries: readonly TimeEntry[] = [],
 ): PayRun {
   const timeEntryByEmployee = new Map(timeEntries.map((t) => [t.employeeId, t]));
-  const lines: PayRunLine[] = activeEmployeesFor(company, employees, checkDate).map((employee) => {
+  const active = activeEmployeesFor(company, employees, checkDate);
+  const lines: PayRunLine[] = active.map((employee) => {
     const effectiveEmployee: Employee = { ...employee, ytd: ytdForCheckDate(employee, checkDate) };
     return computeEmployeePaycheck(company, effectiveEmployee, checkDate, timeEntryByEmployee.get(employee.id)).line;
   });
@@ -53,6 +55,7 @@ export function draftPayRun(
     status: 'draft',
     lines,
     createdAt: new Date().toISOString(),
+    minimumWageIssues: checkMinimumWageComplianceForCompany(company, active, checkDate),
   };
 }
 

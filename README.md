@@ -114,12 +114,35 @@ Beyond the pay-run engine itself, three more real HR pieces:
   employer owes on every hire (42 U.S.C. § 653a) — the required data
   elements and 20-day federal default deadline, refusing to build a report
   missing an SSN or address rather than filing an incomplete one.
+- `payroll/benefits.ts`: define a plan's own per-tier premium once (never
+  a generic multiplier — a real plan prices employee+spouse,
+  employee+children and family independently), let an employee's election
+  drive their own payroll deduction automatically, and gate a mid-year
+  election change on either the employer's open-enrollment window or a
+  genuine qualifying life event (IRC § 125's own cafeteria-plan rule) —
+  isolved's own materials describe this exact idea as "set up your
+  benefit plans once, driving enrollment and deductions throughout the
+  system." No carrier integration (EDI 834, eligibility verification, ACA
+  1095-C reporting) — that's real, separate infrastructure, not built
+  here.
+- `payroll/compliance.ts`: wires `src/minimum-wage.ts` — already this
+  project's own source of truth, the same one `npm run
+  coverage:minimum-wage` measures every state/locality against — directly
+  into a pay run, so an hourly employee paid below the binding floor for
+  their work location is a surfaced FINDING (`PayRun.minimumWageIssues`),
+  never silently paid anyway. The closest this project comes to isolved's
+  own "AI catches potential errors" claim, done as an ordinary, auditable
+  function instead of an opaque model.
+
+`Employee` also carries plain Core-HR fields now (`jobTitle`,
+`department`, `managerId`) — purely descriptive, the natural spine for an
+employee directory or org chart, though no such view is built yet.
 
 What `payroll/` still does NOT attempt, named plainly rather than left to be
-discovered: e-filing anything, benefits carrier EDI, and a live
-bank-linking integration (see `payroll/directDeposit.ts`'s own header note
-on the account-number custody boundary a real system draws that this one
-doesn't attempt to build — the same custody boundary `payroll/
+discovered: e-filing anything, benefits carrier EDI (named above), and a
+live bank-linking integration (see `payroll/directDeposit.ts`'s own header
+note on the account-number custody boundary a real system draws that this
+one doesn't attempt to build — the same custody boundary `payroll/
 newHireReporting.ts`'s own doc comment draws for a raw SSN). Each is a real,
 separate subsystem a full HCM platform builds — not a corner cut here.
 

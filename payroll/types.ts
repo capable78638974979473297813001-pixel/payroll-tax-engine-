@@ -112,6 +112,11 @@ export interface Employee {
   lastName: string;
   hireDate: string; // ISO yyyy-mm-dd
   terminationDate?: string;
+  /** Core-HR org structure — purely descriptive, nothing in payroll processing itself reads these. An employee directory / org chart view is the natural consumer. */
+  jobTitle?: string;
+  department?: string;
+  /** Another Employee.id — this employee's manager, for an org chart. Left as a plain id rather than a nested reference so an Employee record never has to embed another one. */
+  managerId?: string;
   employmentCategory: EmploymentCategory;
   payType: { kind: 'hourly'; hourlyRate: Cents } | { kind: 'salary'; annualSalary: Cents };
   /** Where the employee lives — drives residence-based rules; see PaycheckInput.residenceState's own doc comment. */
@@ -189,4 +194,6 @@ export interface PayRun {
   lines: PayRunLine[];
   createdAt: string;
   approvedAt?: string;
+  /** Minimum-wage findings for this run's own check date — see payroll/compliance.ts. Empty array means checked and clean, not "not checked" (draftPayRun() always populates this). */
+  minimumWageIssues: { employeeId: string; jurisdiction: string; applicableRateCents: Cents; employeeRateCents: Cents; shortfallCents: Cents }[];
 }

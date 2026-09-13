@@ -37,3 +37,12 @@ export { accruePto, applyAnnualCarryover, emptyPtoBalance, ptoPayoutEarning, use
 export type { PtoAccrualMethod, PtoBalance, PtoPolicy, PtoUsageResult } from './pto.ts';
 export { buildNewHireReport, deadlineDaysForState, FEDERAL_DEFAULT_DEADLINE_DAYS } from './newHireReporting.ts';
 export type { NewHireReport } from './newHireReporting.ts';
+export { checkMinimumWageCompliance, checkMinimumWageComplianceForCompany } from './compliance.ts';
+export type { MinimumWageComplianceIssue } from './compliance.ts';
+export {
+  deductionPlanFromElection,
+  employeeMonthlyPremium,
+  isElectionChangeAllowed,
+  perPeriodDeductionAmount,
+} from './benefits.ts';
+export type { BenefitElection, BenefitPlan, CoverageTier } from './benefits.ts';
