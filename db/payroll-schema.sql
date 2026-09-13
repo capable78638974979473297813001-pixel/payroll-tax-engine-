@@ -309,6 +309,27 @@ CREATE TABLE pto_balance (
   PRIMARY KEY (employee_id, pto_policy_id)
 );
 
+-- See payroll/ptoRequest.ts's own header: the employee-facing
+-- pending/approved/denied/cancelled workflow, distinct from directly
+-- adjusting pto_balance above.
+CREATE TYPE pto_request_status AS ENUM ('pending', 'approved', 'denied', 'cancelled');
+
+CREATE TABLE pto_request (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  employee_id       UUID NOT NULL REFERENCES employee (id),
+  pto_policy_id     UUID NOT NULL REFERENCES pto_policy (id),
+  hours_requested   NUMERIC(7,2) NOT NULL,
+  start_date        DATE NOT NULL,
+  end_date          DATE NOT NULL,
+  requested_at      DATE NOT NULL,
+  status            pto_request_status NOT NULL DEFAULT 'pending',
+  reviewed_by       TEXT,
+  reviewed_at       DATE,
+  denial_reason     TEXT,
+
+  CHECK (end_date >= start_date)
+);
+
 -- ----------------------------------------------------------------------------
 -- Pay runs
 -- ----------------------------------------------------------------------------

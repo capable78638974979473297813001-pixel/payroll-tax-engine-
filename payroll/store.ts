@@ -8,6 +8,7 @@ import type { DirectDepositVerification } from './directDepositVerification.ts';
 import type { I9Record } from './i9.ts';
 import type { Candidate, JobPosting } from './onboarding.ts';
 import type { PtoBalance, PtoPolicy } from './pto.ts';
+import type { PtoRequest } from './ptoRequest.ts';
 import type { TimePunch } from './timeAndAttendance.ts';
 import type { Company, Employee, PayRun } from './types.ts';
 
@@ -51,6 +52,7 @@ interface DB {
   directDepositVerifications: Record<string, DirectDepositVerification>;
   /** employeeId -> the ISO date this employer told the store its PRWORA new-hire report was actually filed — see payroll/newHireReporting.ts's own newHireReportingIssuesForCompany(). Filing itself (submission to a state workforce agency) is out of scope the same way every other e-filing is in this project; this only tracks that a human said it was done. */
   newHireReportsFiled: Record<string, string>;
+  ptoRequests: Record<string, PtoRequest>;
 }
 
 function emptyDb(): DB {
@@ -71,6 +73,7 @@ function emptyDb(): DB {
     auditLog: [],
     directDepositVerifications: {},
     newHireReportsFiled: {},
+    ptoRequests: {},
   };
 }
 
@@ -103,6 +106,7 @@ function load(): DB {
       auditLog: parsed.auditLog ?? base.auditLog,
       directDepositVerifications: parsed.directDepositVerifications ?? base.directDepositVerifications,
       newHireReportsFiled: parsed.newHireReportsFiled ?? base.newHireReportsFiled,
+      ptoRequests: parsed.ptoRequests ?? base.ptoRequests,
     };
   } catch {
     return emptyDb();
@@ -399,4 +403,28 @@ export function markNewHireReportFiled(employeeId: string, filedAt: string): voi
 
 export function newHireReportFiledEmployeeIds(): Set<string> {
   return readPayrollDb((db) => new Set(Object.keys(db.newHireReportsFiled)));
+}
+
+// ----------------------------------------------------------------------------
+// PTO requests
+// ----------------------------------------------------------------------------
+
+export function savePtoRequest(request: PtoRequest): void {
+  withPayrollDb((db) => {
+    db.ptoRequests[request.id] = request;
+  });
+}
+
+export function getPtoRequest(id: string): PtoRequest | null {
+  return readPayrollDb((db) => db.ptoRequests[id] ?? null);
+}
+
+export function ptoRequestsForEmployee(employeeId: string): PtoRequest[] {
+  return readPayrollDb((db) => Object.values(db.ptoRequests).filter((r) => r.employeeId === employeeId));
+}
+
+/** Every PTO request for any of these employee ids — for a company-wide worklist, since PtoRequest carries no companyId of its own (same reason benefitElectionsForEmployeeIds() exists). */
+export function ptoRequestsForEmployeeIds(employeeIds: readonly string[]): PtoRequest[] {
+  const idSet = new Set(employeeIds);
+  return readPayrollDb((db) => Object.values(db.ptoRequests).filter((r) => idSet.has(r.employeeId)));
 }

@@ -120,6 +120,19 @@ Beyond the pay-run engine itself, three more real HR pieces:
 - `payroll/pto.ts`: accrual (per hour worked or per pay period), a
   balance that never goes negative, an accrual cap, annual carryover with
   its own cap, and a payout as an ordinary taxable Earning.
+- `payroll/ptoRequest.ts`: the employee-facing side real time-off actually
+  needs — a request that sits PENDING until a manager decides it, rather
+  than usePto() applying instantly with no review step at all (which is
+  what both UIs did before this round). A request exceeding the balance
+  stays pending rather than being silently auto-denied, so a manager can
+  either deny it outright or wait for more accrual — never a partial
+  grant. Cancellation only works while still pending; withdrawing an
+  already-approved request would need to refund hours back to the
+  balance, a real feature not attempted here. Wired into both UIs: the
+  employee portal submits a dated request and shows its own history with
+  a cancel action, the admin UI's PTO panel gets a "Pending PTO requests"
+  worklist with approve/deny (approving calls the same usePto() balance
+  arithmetic; denying never touches the balance at all).
 - `payroll/newHireReporting.ts`: the federal PRWORA new-hire report every
   employer owes on every hire (42 U.S.C. § 653a) — the required data
   elements and 20-day federal default deadline, refusing to build a report

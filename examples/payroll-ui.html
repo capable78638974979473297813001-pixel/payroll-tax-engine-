@@ -291,9 +291,15 @@
       <select id="pto-employee"></select>
       <button class="secondary" id="pto-accrue-btn">Accrue this period</button>
       <input id="pto-use-hours" type="number" placeholder="Hours to use" style="width:110px" />
-      <button class="secondary" id="pto-use-btn">Request time off</button>
+      <button class="secondary" id="pto-use-btn">Record usage directly</button>
     </div>
     <pre id="pto-view"></pre>
+    <h3 style="margin-top:12px">Pending PTO requests</h3>
+    <p class="muted" style="margin-top:0">Submitted through the employee self-service portal — approving deducts the balance, denying does not.</p>
+    <table id="pto-requests-table">
+      <thead><tr><th>Employee</th><th>Dates</th><th>Hours</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
   </section>
 
   <section>
@@ -889,7 +895,7 @@ async function refreshAll(preferredCompanyId) {
     loadStateRegistrations(), loadOrgChart(),
   ]);
   // These read the `employees` array loadEmployees() just populated, so they run after it rather than racing it inside the Promise.all above.
-  await Promise.all([loadGarnishments(), loadNewHireReporting(), loadComplianceDashboard()]);
+  await Promise.all([loadGarnishments(), loadNewHireReporting(), loadComplianceDashboard(), loadPtoRequests()]);
 }
 
 function renderOrgNode(node) {
@@ -1230,6 +1236,38 @@ document.getElementById('pto-use-btn').addEventListener('click', async () => {
     view.textContent = 'Error: ' + err.message;
   }
 });
+
+async function loadPtoRequests() {
+  const { requests } = await api(`/api/companies/${company.id}/pto-requests`);
+  const pending = requests.filter((r) => r.status === 'pending');
+  const tbody = document.querySelector('#pto-requests-table tbody');
+  tbody.innerHTML = pending.length === 0
+    ? '<tr><td colspan="5" class="muted">No pending requests.</td></tr>'
+    : pending.map((r) => `
+      <tr>
+        <td>${employeeNameFor(r.employeeId)}</td>
+        <td>${r.startDate} to ${r.endDate}</td>
+        <td>${r.hoursRequested}</td>
+        <td>${r.status}</td>
+        <td>
+          <button class="secondary pto-req-approve" data-req="${r.id}">Approve</button>
+          <button class="secondary pto-req-deny" data-req="${r.id}">Deny</button>
+        </td>
+      </tr>`).join('');
+
+  tbody.querySelectorAll('.pto-req-approve').forEach((btn) => btn.addEventListener('click', async () => {
+    const result = await api(`/api/pto-requests/${btn.dataset.req}/approve`, { method: 'POST' });
+    if (!result.approved) alert(`Not enough balance — short by ${result.shortfallHours} hours. Request left pending.`);
+    await Promise.all([loadPtoRequests(), loadAuditLog(), loadComplianceDashboard()]);
+  }));
+  tbody.querySelectorAll('.pto-req-deny').forEach((btn) => btn.addEventListener('click', async () => {
+    const reason = prompt('Reason for denial (optional)') || undefined;
+    await api(`/api/pto-requests/${btn.dataset.req}/deny`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason }),
+    });
+    await Promise.all([loadPtoRequests(), loadAuditLog()]);
+  }));
+}
 
 // ----------------------------------------------------------------------
 // Termination

@@ -13,8 +13,12 @@ import {
   advanceCandidate,
   acceptOffer,
   approvePayRun,
+  approvePtoRequest,
+  cancelPtoRequest,
   classifyWeeklyHours,
   checkStateRegistrationCompliance,
+  createPtoRequest,
+  denyPtoRequest,
   compute1099Nec,
   computeCompanyReport,
   computeForm940,
@@ -88,6 +92,7 @@ import {
   getPayRun,
   getPtoBalance,
   getPtoPolicy,
+  getPtoRequest,
   jobPostingsForCompany,
   markNewHireReportFiled,
   newHireReportFiledEmployeeIds,
@@ -95,6 +100,8 @@ import {
   payRunsForCompany,
   ptoBalancesForEmployee,
   ptoPoliciesForCompany,
+  ptoRequestsForEmployee,
+  ptoRequestsForEmployeeIds,
   saveBenefitElection,
   saveBenefitPlan,
   saveCandidate,
@@ -109,6 +116,7 @@ import {
   savePayRun,
   savePtoBalance,
   savePtoPolicy,
+  savePtoRequest,
   timePunchesForEmployee,
 } from '../payroll/store.ts';
 import { PERIODS_PER_YEAR } from '../src/types.ts';
@@ -747,6 +755,87 @@ const server = createServer(async (req, res) => {
       const result = usePto(current, body.hours);
       if (result.approved) savePtoBalance(result.balance);
       sendJson(res, 200, result);
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // PTO requests — the employee-facing pending/approve/deny workflow,
+    // distinct from the direct admin-side pto-use above.
+    // ------------------------------------------------------------------
+
+    const ptoRequestsMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/pto-requests$/);
+    if (req.method === 'GET' && ptoRequestsMatch) {
+      sendJson(res, 200, { requests: ptoRequestsForEmployee(decodeURIComponent(ptoRequestsMatch[1])) });
+      return;
+    }
+    if (req.method === 'POST' && ptoRequestsMatch) {
+      const employeeId = decodeURIComponent(ptoRequestsMatch[1]);
+      const body = await parseJsonBody<{ policyId: string; hoursRequested: number; startDate: string; endDate: string }>(req);
+      try {
+        const request = createPtoRequest(employeeId, body.policyId, body.hoursRequested, body.startDate, body.endDate, new Date().toISOString().slice(0, 10));
+        savePtoRequest(request);
+        sendJson(res, 200, { request });
+      } catch (err) {
+        sendJson(res, 400, { error: err instanceof Error ? err.message : String(err) });
+      }
+      return;
+    }
+
+    const companyPtoRequestsMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/pto-requests$/);
+    if (req.method === 'GET' && companyPtoRequestsMatch) {
+      const companyId = decodeURIComponent(companyPtoRequestsMatch[1]);
+      const employeeIds = employeesForCompany(companyId).map((e) => e.id);
+      sendJson(res, 200, { requests: ptoRequestsForEmployeeIds(employeeIds) });
+      return;
+    }
+
+    const ptoRequestApproveMatch = url.pathname.match(/^\/api\/pto-requests\/([^/]+)\/approve$/);
+    if (req.method === 'POST' && ptoRequestApproveMatch) {
+      const requestId = decodeURIComponent(ptoRequestApproveMatch[1]);
+      const request = getPtoRequest(requestId);
+      if (!request) return sendJson(res, 404, { error: 'No such PTO request.' });
+      try {
+        const current = getPtoBalance(request.employeeId, request.policyId) ?? emptyPtoBalance(request.employeeId, request.policyId);
+        const result = approvePtoRequest(request, current, AUDIT_ACTOR, new Date().toISOString().slice(0, 10));
+        savePtoRequest(result.request);
+        if (result.approved) savePtoBalance(result.balance);
+        addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'pto_request.approved', 'Employee', request.employeeId, { requestId, approved: result.approved }));
+        sendJson(res, 200, { request: result.request, balance: result.balance, approved: result.approved, shortfallHours: result.shortfallHours });
+      } catch (err) {
+        sendJson(res, 400, { error: err instanceof Error ? err.message : String(err) });
+      }
+      return;
+    }
+
+    const ptoRequestDenyMatch = url.pathname.match(/^\/api\/pto-requests\/([^/]+)\/deny$/);
+    if (req.method === 'POST' && ptoRequestDenyMatch) {
+      const requestId = decodeURIComponent(ptoRequestDenyMatch[1]);
+      const request = getPtoRequest(requestId);
+      if (!request) return sendJson(res, 404, { error: 'No such PTO request.' });
+      const body = await parseJsonBody<{ reason?: string }>(req);
+      try {
+        const denied = denyPtoRequest(request, AUDIT_ACTOR, new Date().toISOString().slice(0, 10), body.reason);
+        savePtoRequest(denied);
+        addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'pto_request.denied', 'Employee', request.employeeId, { requestId, reason: body.reason }));
+        sendJson(res, 200, { request: denied });
+      } catch (err) {
+        sendJson(res, 400, { error: err instanceof Error ? err.message : String(err) });
+      }
+      return;
+    }
+
+    const ptoRequestCancelMatch = url.pathname.match(/^\/api\/pto-requests\/([^/]+)\/cancel$/);
+    if (req.method === 'POST' && ptoRequestCancelMatch) {
+      const requestId = decodeURIComponent(ptoRequestCancelMatch[1]);
+      const request = getPtoRequest(requestId);
+      if (!request) return sendJson(res, 404, { error: 'No such PTO request.' });
+      try {
+        const cancelled = cancelPtoRequest(request);
+        savePtoRequest(cancelled);
+        sendJson(res, 200, { request: cancelled });
+      } catch (err) {
+        sendJson(res, 400, { error: err instanceof Error ? err.message : String(err) });
+      }
       return;
     }
 
