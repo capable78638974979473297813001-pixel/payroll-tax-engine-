@@ -48,6 +48,11 @@
   select, input { padding: 6px 8px; border: 1px solid var(--border); border-radius: 5px; font-size: 13px; }
   .muted { color: var(--muted); }
   .status { font-size: 13px; margin-top: 8px; }
+  .org-tree, .org-tree ul { list-style: none; margin: 0; padding-left: 20px; }
+  .org-tree { padding-left: 0; }
+  .org-tree li { margin: 4px 0; border-left: 2px solid var(--border); padding-left: 10px; }
+  .org-node-name { font-weight: 600; }
+  .org-node-title { color: var(--muted); font-size: 12.5px; }
 </style>
 </head>
 <body>
@@ -141,6 +146,11 @@
       <button class="secondary" id="sr-check-btn">Check compliance</button>
     </div>
     <pre id="sr-view"></pre>
+  </section>
+
+  <section>
+    <h2>Org chart</h2>
+    <div id="org-chart-view" class="muted">Loading…</div>
   </section>
 
   <section>
@@ -699,9 +709,28 @@ async function refreshAll(preferredCompanyId) {
   await Promise.all([
     loadEmployees(), loadNextPeriod(), loadRuns(), loadReport(), loadAuditLog(),
     loadPtoPolicies(), loadBenefitPlans(), loadJobPostings(), loadCandidates(), loadContractors(),
-    loadStateRegistrations(),
+    loadStateRegistrations(), loadOrgChart(),
   ]);
   await loadGarnishments();
+}
+
+function renderOrgNode(node) {
+  const title = [node.jobTitle, node.department].filter(Boolean).join(' · ');
+  const children = node.reports.length > 0 ? `<ul>${node.reports.map((r) => `<li>${renderOrgNode(r)}</li>`).join('')}</ul>` : '';
+  return `<span class="org-node-name">${node.name}</span>${title ? ` <span class="org-node-title">(${title})</span>` : ''}${children}`;
+}
+
+async function loadOrgChart() {
+  const { chart } = await api(`/api/companies/${company.id}/org-chart`);
+  const view = document.getElementById('org-chart-view');
+  if (chart.roots.length === 0) {
+    view.innerHTML = '<span class="muted">No active employees.</span>';
+  } else {
+    view.innerHTML = `<ul class="org-tree">${chart.roots.map((r) => `<li>${renderOrgNode(r)}</li>`).join('')}</ul>`;
+  }
+  if (chart.employeeIdsInCycles.length > 0) {
+    view.innerHTML += `<p class="muted">Excluded from the chart — a manager-reporting cycle was detected among these employee ids: ${chart.employeeIdsInCycles.join(', ')}. Fix the managerId fields on these records.</p>`;
+  }
 }
 
 async function loadStateRegistrations() {

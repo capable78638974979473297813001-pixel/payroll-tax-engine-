@@ -292,7 +292,18 @@ Beyond the pay-run engine itself, three more real HR pieces:
 
 `Employee` also carries plain Core-HR fields now (`jobTitle`,
 `department`, `managerId`) — purely descriptive, the natural spine for an
-employee directory or org chart, though no such view is built yet.
+employee directory or org chart. `payroll/orgChart.ts` is that view:
+`buildOrgChart()` turns `managerId` into an actual tree, handling the two
+shapes a naive version gets wrong rather than crashing or silently
+mis-rendering — a DANGLING manager reference (points to someone
+terminated, in another company, or just not found) is promoted to a root
+rather than dropped, and a CYCLE (A manages B manages A, however
+indirect) is detected and its members excluded from the tree and
+reported separately; an employee who merely reports INTO a cycle without
+being part of it is correctly left out of that exclusion and promoted to
+a root of their own, so nobody silently vanishes from the chart. Wired
+into the admin UI as a nested list under a new "Org chart" section.
+
 
 What `payroll/` still does NOT attempt, named plainly rather than left to be
 discovered: e-filing anything, benefits carrier EDI (named above), and a

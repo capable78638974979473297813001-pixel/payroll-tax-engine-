@@ -22,6 +22,7 @@ import {
   computeW2FromEmployee,
   declineOffer,
   applyElection,
+  buildOrgChart,
   canElectBenefit,
   determineAleStatus,
   draftPayRun,
@@ -921,6 +922,16 @@ const server = createServer(async (req, res) => {
       const asOfDate = url.searchParams.get('asOfDate') ?? new Date().toISOString().slice(0, 10);
       const report = computeCompanyReport(company, employeesForCompany(companyId), payRunsForCompany(companyId), asOfDate);
       sendJson(res, 200, { report });
+      return;
+    }
+
+    const orgChartMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/org-chart$/);
+    if (req.method === 'GET' && orgChartMatch) {
+      const companyId = decodeURIComponent(orgChartMatch[1]);
+      const company = getCompany(companyId);
+      if (!company) return sendJson(res, 404, { error: 'No such company.' });
+      const asOfDate = url.searchParams.get('asOfDate') ?? new Date().toISOString().slice(0, 10);
+      sendJson(res, 200, { chart: buildOrgChart(company, employeesForCompany(companyId), asOfDate) });
       return;
     }
 
