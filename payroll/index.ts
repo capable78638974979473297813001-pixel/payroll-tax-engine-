@@ -29,6 +29,22 @@ export {
   verifyMicroDeposits,
 } from './directDepositVerification.ts';
 export type { DirectDepositVerification, MicroDepositVerifyResult, VerificationMethod, VerificationStatus } from './directDepositVerification.ts';
+export {
+  DE_MINIMIS_QUARTERLY_THRESHOLD,
+  LOOKBACK_PERIOD_THRESHOLD,
+  MONTHLY_DEPOSIT_DAY_OF_MONTH,
+  NEXT_DAY_DEPOSIT_THRESHOLD,
+  depositDeadlineFor,
+  determineDepositorSchedule,
+  lookbackPeriodQuarters,
+  monthlyDepositDeadline,
+  nextBusinessDay,
+  nextDayDepositRuleApplies,
+  nextDayRuleChangesFutureSchedule,
+  qualifiesForDeMinimisException,
+  semiweeklyDepositDeadline,
+} from './depositSchedule.ts';
+export type { DepositorSchedule } from './depositSchedule.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

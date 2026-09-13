@@ -246,6 +246,21 @@
   </section>
 
   <section>
+    <h2>Federal deposit schedule</h2>
+    <p class="muted" style="margin-top:0">A separate question from Form 941 itself: WHEN withheld taxes are due. Depends on the employer's own lookback-period liability (the 4 quarters ending 12 months before this year started) — a new employer with no history defaults to monthly.</p>
+    <div class="row">
+      <input id="deposit-year" type="number" value="2026" style="width:90px" />
+      <button class="secondary" id="deposit-schedule-btn">Check depositor status</button>
+    </div>
+    <pre id="deposit-schedule-view"></pre>
+    <div class="row" style="margin-top:8px">
+      <select id="deposit-pay-run"></select>
+      <button class="secondary" id="deposit-deadline-btn">Deposit deadline for this run</button>
+    </div>
+    <pre id="deposit-deadline-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 940 (annual FUTA)</h2>
     <div class="row">
       <input id="f940-year" type="number" value="2026" style="width:90px" />
@@ -793,6 +808,10 @@ async function loadRuns() {
       view.textContent = text;
     });
   });
+
+  document.getElementById('deposit-pay-run').innerHTML = payRuns.length === 0
+    ? '<option value="">(no runs yet)</option>'
+    : payRuns.map((r) => `<option value="${r.id}">${r.checkDate} (${r.status})</option>`).join('');
 }
 
 async function loadPtoPolicies() {
@@ -1107,6 +1126,34 @@ document.getElementById('f941-btn').addEventListener('click', async () => {
   try {
     const { form941 } = await api(`/api/companies/${company.id}/941?year=${year}&quarter=${quarter}`);
     view.textContent = JSON.stringify(form941, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('deposit-schedule-btn').addEventListener('click', async () => {
+  const year = document.getElementById('deposit-year').value;
+  const view = document.getElementById('deposit-schedule-view');
+  try {
+    const result = await api(`/api/companies/${company.id}/deposit-schedule?year=${year}`);
+    view.textContent = result.hasAnyLookbackData
+      ? `${result.schedule.toUpperCase()} schedule depositor (lookback liability: ${fmtCents(result.lookbackPeriodTotalLiability)})`
+      : `${result.schedule.toUpperCase()} schedule depositor (no lookback-period pay run history — new-employer default)`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('deposit-deadline-btn').addEventListener('click', async () => {
+  const payRunId = document.getElementById('deposit-pay-run').value;
+  const view = document.getElementById('deposit-deadline-view');
+  if (!payRunId) return (view.textContent = 'No pay runs yet.');
+  try {
+    const scheduleResult = await api(`/api/companies/${company.id}/deposit-schedule?year=${document.getElementById('deposit-year').value}`);
+    const result = await api(`/api/pay-runs/${payRunId}/deposit-deadline?schedule=${scheduleResult.schedule}`);
+    view.textContent = `Accumulated federal liability: ${fmtCents(result.accumulatedLiability)}\n` +
+      (result.nextDayRuleTriggered ? '$100,000 NEXT-DAY RULE TRIGGERED — ' : '') +
+      `Deposit deadline: ${result.deadline}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

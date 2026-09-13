@@ -30,7 +30,9 @@ import {
   canElectBenefit,
   compute1095CForEmployee,
   computeComplianceDashboard,
+  depositDeadlineFor,
   determineAleStatus,
+  determineDepositorSchedule,
   directHire,
   buildNewHireReport,
   draftPayRun,
@@ -46,7 +48,9 @@ import {
   initiateMicroDepositVerification,
   initiatePrenoteVerification,
   isAffordableUnderW2SafeHarbor,
+  lookbackPeriodQuarters,
   newHireReportingIssuesForCompany,
+  nextDayDepositRuleApplies,
   overtimeRuleForState,
   pairPunchesIntoDailyHours,
   ratePayHourlySafeHarborMonthlyCeiling,
@@ -473,6 +477,38 @@ const server = createServer(async (req, res) => {
       if (!year || ![1, 2, 3, 4].includes(quarter)) return sendJson(res, 400, { error: 'year and quarter (1-4) are required.' });
       const runs = payRunsForCompany(companyId);
       sendJson(res, 200, { form941: computeForm941(companyId, year, quarter, runs) });
+      return;
+    }
+
+    const depositScheduleMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/deposit-schedule$/);
+    if (req.method === 'GET' && depositScheduleMatch) {
+      const companyId = decodeURIComponent(depositScheduleMatch[1]);
+      const year = Number(url.searchParams.get('year')) || new Date().getFullYear();
+      const runs = payRunsForCompany(companyId);
+      const quarters = lookbackPeriodQuarters(year).map(({ year: y, quarter: q }) => ({
+        year: y,
+        quarter: q,
+        totalTaxesBeforeAdjustments: computeForm941(companyId, y, q, runs).totalTaxesBeforeAdjustments,
+      }));
+      const lookbackPeriodTotalLiability = quarters.reduce((sum, q) => sum + q.totalTaxesBeforeAdjustments, 0);
+      const hasAnyLookbackData = quarters.some((q) => q.totalTaxesBeforeAdjustments > 0);
+      const schedule = determineDepositorSchedule(hasAnyLookbackData ? lookbackPeriodTotalLiability : undefined);
+      sendJson(res, 200, { schedule, lookbackPeriodTotalLiability, quarters, hasAnyLookbackData });
+      return;
+    }
+
+    const depositDeadlineMatch = url.pathname.match(/^\/api\/pay-runs\/([^/]+)\/deposit-deadline$/);
+    if (req.method === 'GET' && depositDeadlineMatch) {
+      const payRun = getPayRun(decodeURIComponent(depositDeadlineMatch[1]));
+      if (!payRun) return sendJson(res, 404, { error: 'No such pay run.' });
+      const schedule = (url.searchParams.get('schedule') as 'monthly' | 'semiweekly' | null) ?? 'monthly';
+      const accumulatedLiability = payRun.lines.reduce(
+        (sum, line) => sum + line.taxLines.filter((t) => t.jurisdiction === 'federal').reduce((s, t) => s + t.amount, 0),
+        0,
+      );
+      const nextDayRuleTriggered = nextDayDepositRuleApplies(accumulatedLiability);
+      const deadline = depositDeadlineFor(schedule, payRun.checkDate, accumulatedLiability);
+      sendJson(res, 200, { accumulatedLiability, nextDayRuleTriggered, deadline });
       return;
     }
 

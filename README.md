@@ -100,6 +100,27 @@ and does not implement Form 941's credits and adjustments (COBRA assistance,
 leave credits, the research-credit payroll offset — none of which
 PaycheckInput models an input for) — see that module's own header comment.
 
+`payroll/depositSchedule.ts` answers a genuinely separate question Form
+941 itself doesn't: WHEN withheld taxes are actually due, independent of
+whether the withholding itself was computed correctly. LIVE-VERIFIED
+against IRS Notice 931 and Publication 15, both "for use in 2026": the
+lookback-period rule (4 quarters ending 12 months before the year
+starts) that sets an employer's own $50,000 monthly-vs-semiweekly
+threshold, the Wednesday/Friday semiweekly deposit table, the $100,000
+next-day rule (which permanently flips a monthly depositor to semiweekly
+the moment it's triggered), and the $2,500 de minimis exception that
+lets a small quarterly liability just ride on the quarterly return
+instead. Discloses a real approximation rather than hiding it: the IRS's
+own lookback threshold is measured against Form 941's Line 12 (after
+credits/adjustments), which this project doesn't model — it uses Line 6
+(before adjustments) instead, identical for the common case of an
+employer claiming none, an overestimate for one that does. Wired into
+the admin UI's "Federal deposit schedule" panel, which computes an
+employer's own lookback total directly from its actual pay run history
+via `payroll/filings.ts`'s own `computeForm941()`, and the deposit
+deadline for any specific approved run from that run's own recorded
+federal tax lines — real integration, not a second data-entry form.
+
 Beyond the pay-run engine itself, three more real HR pieces:
 
 - `payroll/timeAndAttendance.ts` turns raw clock punches into classified
