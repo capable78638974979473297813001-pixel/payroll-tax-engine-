@@ -69,9 +69,17 @@ CREATE TABLE company (
   employer_context          JSONB NOT NULL DEFAULT '{}'::JSONB,
   -- Only consumed by new-hire reporting (see payroll/newHireReporting.ts) — nothing in payroll processing itself needs it.
   address                   TEXT,
+  -- This year's annual open-enrollment window for benefit ELECTION
+  -- CHANGES -- see payroll/benefits.ts's own canElectBenefit(). A new
+  -- hire's first-ever election is unaffected by these columns being
+  -- NULL; a later change is refused outside the window without a
+  -- qualifying life event.
+  open_enrollment_start     DATE,
+  open_enrollment_end       DATE,
   created_at                TIMESTAMPTZ NOT NULL DEFAULT now(),
 
-  CHECK (pay_schedule_frequency NOT IN ('weekly', 'biweekly') OR anchor_period_start IS NOT NULL)
+  CHECK (pay_schedule_frequency NOT IN ('weekly', 'biweekly') OR anchor_period_start IS NOT NULL),
+  CHECK ((open_enrollment_start IS NULL) = (open_enrollment_end IS NULL))
 );
 
 -- See payroll/stateRegistration.ts's own header: which states this

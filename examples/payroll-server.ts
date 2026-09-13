@@ -22,6 +22,7 @@ import {
   computeW2FromEmployee,
   declineOffer,
   applyElection,
+  canElectBenefit,
   determineAleStatus,
   draftPayRun,
   emptyPtoBalance,
@@ -452,14 +453,18 @@ const server = createServer(async (req, res) => {
       const employee = getEmployee(employeeId);
       if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
       const company = getCompany(employee.companyId)!;
-      const body = await parseJsonBody<{ planId: string; coverageTier: CoverageTier; effectiveDate: string }>(req);
+      const body = await parseJsonBody<{ planId: string; coverageTier: CoverageTier; effectiveDate: string; hasQualifyingLifeEvent?: boolean }>(req);
       const plan = getBenefitPlan(body.planId);
       if (!plan) return sendJson(res, 404, { error: 'No such benefit plan.' });
+
+      const priorElections = benefitElectionsForEmployee(employeeId);
+      const eligibility = canElectBenefit(priorElections, body.effectiveDate, company.openEnrollmentWindow, body.hasQualifyingLifeEvent ?? false);
+      if (!eligibility.allowed) return sendJson(res, 400, { error: eligibility.reason });
 
       const periodsPerYear = PERIODS_PER_YEAR[company.paySchedule.frequency];
       const result = applyElection(
         employee,
-        benefitElectionsForEmployee(employeeId),
+        priorElections,
         plan,
         body.coverageTier,
         body.effectiveDate,
@@ -752,6 +757,19 @@ const server = createServer(async (req, res) => {
       const asOfDate = url.searchParams.get('asOfDate') ?? new Date().toISOString().slice(0, 10);
       const issues = checkStateRegistrationCompliance(company, employeesForCompany(companyId), asOfDate);
       sendJson(res, 200, { issues });
+      return;
+    }
+
+    const openEnrollmentMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/open-enrollment-window$/);
+    if (req.method === 'POST' && openEnrollmentMatch) {
+      const companyId = decodeURIComponent(openEnrollmentMatch[1]);
+      const company = getCompany(companyId);
+      if (!company) return sendJson(res, 404, { error: 'No such company.' });
+      const body = await parseJsonBody<{ start: string; end: string }>(req);
+      const updated: Company = { ...company, openEnrollmentWindow: body };
+      saveCompany(updated);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'open_enrollment_window.set', 'Company', companyId, body));
+      sendJson(res, 200, { company: updated });
       return;
     }
 

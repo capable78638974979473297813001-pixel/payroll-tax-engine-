@@ -55,12 +55,13 @@ export { checkMinimumWageCompliance, checkMinimumWageComplianceForCompany } from
 export type { MinimumWageComplianceIssue } from './compliance.ts';
 export {
   applyElection,
+  canElectBenefit,
   deductionPlanFromElection,
   employeeMonthlyPremium,
   isElectionChangeAllowed,
   perPeriodDeductionAmount,
 } from './benefits.ts';
-export type { ApplyElectionResult, BenefitElection, BenefitPlan, CoverageTier } from './benefits.ts';
+export type { ApplyElectionResult, BenefitElection, BenefitPlan, CoverageTier, ElectionEligibility } from './benefits.ts';
 export {
   acceptOffer,
   advanceCandidate,

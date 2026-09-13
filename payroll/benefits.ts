@@ -150,3 +150,49 @@ export function isElectionChangeAllowed(
   const inWindow = requestDate >= openEnrollmentWindow.start && requestDate <= openEnrollmentWindow.end;
   return inWindow || hasQualifyingLifeEvent;
 }
+
+export interface ElectionEligibility {
+  allowed: boolean;
+  /** Present only when allowed is false — why, in a form fit to surface straight to whoever's requesting the election. */
+  reason?: string;
+}
+
+/**
+ * The gate a real election request actually needs, one level above
+ * isElectionChangeAllowed(): a brand-new hire's FIRST-EVER benefit
+ * election isn't a "change" IRC § 125 restricts at all — there's no prior
+ * election to protect the cafeteria plan's tax treatment from being
+ * gamed mid-year — so it's always allowed regardless of window or life
+ * event. Only once an employee already holds an election does the
+ * window/qualifying-event rule bind. A company with no open-enrollment
+ * window configured at all is treated as a real configuration gap, not a
+ * silent "anything goes": rather than letting every change through
+ * because there's nothing to check it against, this refuses the change
+ * and says so, the same "won't build an incomplete answer" choice
+ * payroll/newHireReporting.ts's own buildNewHireReport() makes for a
+ * report missing required data.
+ */
+export function canElectBenefit(
+  existingElections: readonly BenefitElection[],
+  requestDate: string,
+  openEnrollmentWindow: { start: string; end: string } | undefined,
+  hasQualifyingLifeEvent: boolean,
+): ElectionEligibility {
+  if (existingElections.length === 0) return { allowed: true };
+
+  if (!openEnrollmentWindow) {
+    return {
+      allowed: false,
+      reason: 'No open enrollment window is configured for this company. A mid-year election change needs either an active open enrollment window or a genuine qualifying life event.',
+    };
+  }
+
+  if (isElectionChangeAllowed(requestDate, openEnrollmentWindow, hasQualifyingLifeEvent)) {
+    return { allowed: true };
+  }
+
+  return {
+    allowed: false,
+    reason: `${requestDate} falls outside the open enrollment window (${openEnrollmentWindow.start} to ${openEnrollmentWindow.end}) and no qualifying life event was asserted.`,
+  };
+}

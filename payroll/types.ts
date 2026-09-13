@@ -39,6 +39,8 @@ export interface Company {
   address?: string;
   /** Which states this employer has actually registered with for unemployment (and, where tracked, withholding) tax purposes — see payroll/stateRegistration.ts. Absent/empty means no registrations on file, not "not applicable"; a multi-state employer with active employees in an unregistered state is a real compliance gap that module surfaces as a finding. */
   stateRegistrations?: StateEmployerRegistration[];
+  /** This year's annual open-enrollment window (ISO dates) for benefit ELECTION CHANGES — see payroll/benefits.ts's own canElectBenefit(). Absent means no window is configured; a new hire's first-ever election is always allowed regardless, but any later change is refused outside a configured window unless a genuine qualifying life event is asserted. */
+  openEnrollmentWindow?: { start: string; end: string };
 }
 
 /** One state's employer registration — the account numbers a state unemployment/withholding agency actually assigns once an employer registers, as opposed to `EmployerContext.stateUnemploymentRate`'s own bare rate figure, which the tax engine needs regardless of whether registration has been tracked here. */

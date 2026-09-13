@@ -321,12 +321,20 @@
       <button class="secondary" id="benefit-create-btn">Create plan</button>
     </div>
     <div class="row" style="margin-top:8px">
+      <label class="muted">Open enrollment window:</label>
+      <input id="oe-start" type="date" />
+      <input id="oe-end" type="date" />
+      <button class="secondary" id="oe-save-btn">Save window</button>
+      <span id="oe-current" class="muted"></span>
+    </div>
+    <div class="row" style="margin-top:8px">
       <select id="benefit-plan"></select>
       <select id="benefit-employee"></select>
       <select id="benefit-tier">
         <option value="employee_only">Employee only</option>
         <option value="family">Family</option>
       </select>
+      <label class="muted"><input type="checkbox" id="benefit-qle" /> Qualifying life event</label>
       <button class="secondary" id="benefit-elect-btn">Elect (effective next check date)</button>
     </div>
     <pre id="benefit-view"></pre>
@@ -402,6 +410,9 @@ async function loadCompany(preferredId) {
   document.getElementById('company-info').innerHTML =
     `<strong>${company.legalName}</strong> · EIN ${company.ein} · home state ${company.homeState} · ` +
     `${company.paySchedule.frequency} pay schedule`;
+  document.getElementById('oe-current').textContent = company.openEnrollmentWindow
+    ? `Current window: ${company.openEnrollmentWindow.start} to ${company.openEnrollmentWindow.end}`
+    : 'No open enrollment window configured — only a first-ever election or a qualifying life event will be allowed.';
 }
 
 document.getElementById('company-select').addEventListener('change', async (ev) => {
@@ -1070,14 +1081,25 @@ document.getElementById('benefit-elect-btn').addEventListener('click', async () 
   if (!planId) return (view.textContent = 'Create a benefit plan first.');
   try {
     const effectiveDate = currentPeriod?.checkDate ?? new Date().toISOString().slice(0, 10);
+    const hasQualifyingLifeEvent = document.getElementById('benefit-qle').checked;
     const result = await api(`/api/employees/${employeeId}/benefit-elections`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ planId, coverageTier, effectiveDate }),
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ planId, coverageTier, effectiveDate, hasQualifyingLifeEvent }),
     });
     view.textContent = JSON.stringify(result.election, null, 2);
     await Promise.all([loadEmployees(), loadAuditLog()]);
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
+});
+
+document.getElementById('oe-save-btn').addEventListener('click', async () => {
+  const start = document.getElementById('oe-start').value;
+  const end = document.getElementById('oe-end').value;
+  if (!start || !end) return;
+  const { company: updated } = await api(`/api/companies/${company.id}/open-enrollment-window`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ start, end }),
+  });
+  document.getElementById('oe-current').textContent = `Current window: ${updated.openEnrollmentWindow.start} to ${updated.openEnrollmentWindow.end}`;
 });
 
 // ----------------------------------------------------------------------

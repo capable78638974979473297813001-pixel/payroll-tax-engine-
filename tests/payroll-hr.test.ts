@@ -15,7 +15,7 @@ import { accruePto, applyAnnualCarryover, emptyPtoBalance, ptoPayoutEarning, use
 import type { PtoPolicy } from '../payroll/pto.ts';
 import { buildNewHireReport, deadlineDaysForState, FEDERAL_DEFAULT_DEADLINE_DAYS } from '../payroll/newHireReporting.ts';
 import { checkMinimumWageCompliance, checkMinimumWageComplianceForCompany } from '../payroll/compliance.ts';
-import { applyElection, deductionPlanFromElection, employeeMonthlyPremium, isElectionChangeAllowed, perPeriodDeductionAmount } from '../payroll/benefits.ts';
+import { applyElection, canElectBenefit, deductionPlanFromElection, employeeMonthlyPremium, isElectionChangeAllowed, perPeriodDeductionAmount } from '../payroll/benefits.ts';
 import type { BenefitElection, BenefitPlan } from '../payroll/benefits.ts';
 import { minimumWage } from '../src/minimum-wage.ts';
 import type { Company, Employee } from '../payroll/types.ts';
@@ -401,6 +401,41 @@ describe('benefits: plans, elections, and the deduction they produce (payroll/be
     assert.equal(isElectionChangeAllowed('2026-11-10', window, false), true);
     assert.equal(isElectionChangeAllowed('2026-06-01', window, false), false);
     assert.equal(isElectionChangeAllowed('2026-06-01', window, true), true, 'a genuine qualifying life event overrides the window');
+  });
+
+  test('canElectBenefit: a brand-new hire\'s first-ever election is always allowed, regardless of window or life event', () => {
+    const result = canElectBenefit([], '2026-06-01', undefined, false);
+    assert.equal(result.allowed, true);
+    assert.equal(result.reason, undefined);
+  });
+
+  test('canElectBenefit: a change with no open enrollment window configured at all is refused, not silently allowed', () => {
+    const existing: BenefitElection = { id: 'el-1', employeeId: 'e1', planId: 'plan-medical', coverageTier: 'employee_only', effectiveDate: '2026-01-01' };
+    const result = canElectBenefit([existing], '2026-06-01', undefined, false);
+    assert.equal(result.allowed, false);
+    assert.match(result.reason!, /No open enrollment window is configured/);
+  });
+
+  test('canElectBenefit: a change inside a configured window is allowed', () => {
+    const existing: BenefitElection = { id: 'el-1', employeeId: 'e1', planId: 'plan-medical', coverageTier: 'employee_only', effectiveDate: '2026-01-01' };
+    const window = { start: '2026-11-01', end: '2026-11-15' };
+    const result = canElectBenefit([existing], '2026-11-10', window, false);
+    assert.equal(result.allowed, true);
+  });
+
+  test('canElectBenefit: a change outside the window with no qualifying life event is refused with a specific reason', () => {
+    const existing: BenefitElection = { id: 'el-1', employeeId: 'e1', planId: 'plan-medical', coverageTier: 'employee_only', effectiveDate: '2026-01-01' };
+    const window = { start: '2026-11-01', end: '2026-11-15' };
+    const result = canElectBenefit([existing], '2026-06-01', window, false);
+    assert.equal(result.allowed, false);
+    assert.match(result.reason!, /falls outside the open enrollment window/);
+  });
+
+  test('canElectBenefit: a genuine qualifying life event overrides the window even with one configured', () => {
+    const existing: BenefitElection = { id: 'el-1', employeeId: 'e1', planId: 'plan-medical', coverageTier: 'employee_only', effectiveDate: '2026-01-01' };
+    const window = { start: '2026-11-01', end: '2026-11-15' };
+    const result = canElectBenefit([existing], '2026-06-01', window, true);
+    assert.equal(result.allowed, true);
   });
 
   test('applyElection: re-electing the SAME plan (a tier change) ends the prior election and its deduction, leaving exactly one deduction for that plan', () => {

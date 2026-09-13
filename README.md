@@ -134,11 +134,18 @@ Beyond the pay-run engine itself, three more real HR pieces:
   concept of mutually-exclusive plan categories like medical-vs-dental),
   and gate a mid-year election change on either the employer's
   open-enrollment window or a genuine qualifying life event (IRC § 125's
-  own cafeteria-plan rule) — isolved's own materials describe this exact
-  idea as "set up your benefit plans once, driving enrollment and
-  deductions throughout the system." No carrier integration (EDI 834,
-  eligibility verification, ACA 1095-C reporting) — that's real, separate
-  infrastructure, not built
+  own cafeteria-plan rule, `canElectBenefit()`) — isolved's own materials
+  describe this exact idea as "set up your benefit plans once, driving
+  enrollment and deductions throughout the system." A brand-new hire's
+  FIRST-EVER election is always allowed regardless of the window, since
+  there's no prior election for the rule to protect; a company with no
+  open-enrollment window configured at all REFUSES a later change rather
+  than silently letting it through with nothing to check it against — the
+  admin UI's benefits panel wires the actual server-side gate (it used to
+  apply every election unconditionally), lets an admin set the window,
+  and offers a qualifying-life-event checkbox to override it. No carrier
+  integration (EDI 834, eligibility verification, ACA 1095-C reporting) —
+  that's real, separate infrastructure, not built
   here.
 - `payroll/compliance.ts`: wires `src/minimum-wage.ts` — already this
   project's own source of truth, the same one `npm run
