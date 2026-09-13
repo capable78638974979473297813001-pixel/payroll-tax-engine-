@@ -391,10 +391,18 @@
         <option value="checking">Checking</option>
         <option value="savings">Savings</option>
       </select>
-      <button class="secondary" id="dd-add-btn">Add account (remainder allocation)</button>
+      <select id="dd-allocation-kind">
+        <option value="remainder">Remainder (whatever's left)</option>
+        <option value="percent">Percent of net</option>
+        <option value="flatAmount">Flat amount</option>
+      </select>
+      <input id="dd-allocation-value" type="number" placeholder="% or $" style="width:100px" hidden />
+      <input id="dd-priority" type="number" placeholder="Priority (lower funds first)" style="width:170px" hidden />
+      <button class="secondary" id="dd-add-btn">Add account</button>
     </div>
+    <p class="muted" style="margin-top:4px">Fixed/percent accounts fund in priority order (lowest first); at most one account may be "remainder," always funded last with whatever's left.</p>
     <table id="dd-table">
-      <thead><tr><th>Routing</th><th>Account</th><th>Type</th><th>Verification</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Routing</th><th>Account</th><th>Type</th><th>Allocation</th><th>Verification</th><th>Actions</th></tr></thead>
       <tbody></tbody>
     </table>
     <pre id="dd-view"></pre>
@@ -1000,13 +1008,19 @@ document.getElementById('garn-add-btn').addEventListener('click', async () => {
   await loadGarnishments();
 });
 
+function allocationLabel(allocation) {
+  if (allocation.kind === 'remainder') return 'Remainder';
+  if (allocation.kind === 'percent') return `${allocation.percentOfNet}% of net`;
+  return fmtCents(allocation.amount) + ' flat';
+}
+
 async function loadDirectDepositAccounts() {
   const employeeId = document.getElementById('dd-employee').value;
   if (!employeeId) return;
   const { accounts } = await api(`/api/employees/${employeeId}/direct-deposit-accounts`);
   const tbody = document.querySelector('#dd-table tbody');
   if (accounts.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="muted">No accounts on file.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="muted">No accounts on file.</td></tr>';
     return;
   }
   const rows = await Promise.all(accounts.map(async (a) => {
@@ -1022,6 +1036,7 @@ async function loadDirectDepositAccounts() {
         <td>${a.routingNumber}</td>
         <td>${a.accountNumber}</td>
         <td>${a.accountType}</td>
+        <td>${allocationLabel(a.allocation)}${a.priority !== undefined && a.priority !== null ? ` (priority ${a.priority})` : ''}</td>
         <td>${statusText}</td>
         <td>
           <button class="secondary dd-prenote" data-account="${a.id}">Send prenote</button>
@@ -1083,17 +1098,36 @@ async function loadDirectDepositAccounts() {
 }
 document.getElementById('dd-employee').addEventListener('change', loadDirectDepositAccounts);
 document.getElementById('dd-refresh-btn').addEventListener('click', loadDirectDepositAccounts);
+document.getElementById('dd-allocation-kind').addEventListener('change', (ev) => {
+  const kind = ev.target.value;
+  document.getElementById('dd-allocation-value').hidden = kind === 'remainder';
+  document.getElementById('dd-priority').hidden = kind === 'remainder';
+});
+
 document.getElementById('dd-add-btn').addEventListener('click', async () => {
   const employeeId = document.getElementById('dd-employee').value;
   if (!employeeId) return;
   const routingNumber = document.getElementById('dd-routing').value;
   const accountNumber = document.getElementById('dd-account').value;
   const accountType = document.getElementById('dd-account-type').value;
-  await api(`/api/employees/${employeeId}/direct-deposit-accounts`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ routingNumber, accountNumber, accountType, allocation: { kind: 'remainder' } }),
-  });
-  await loadDirectDepositAccounts();
+  const kind = document.getElementById('dd-allocation-kind').value;
+  const rawValue = Number(document.getElementById('dd-allocation-value').value) || 0;
+  const priorityInput = document.getElementById('dd-priority').value;
+  const allocation = kind === 'remainder'
+    ? { kind: 'remainder' }
+    : kind === 'percent'
+      ? { kind: 'percent', percentOfNet: rawValue }
+      : { kind: 'flatAmount', amount: Math.round(rawValue * 100) };
+  const body = { routingNumber, accountNumber, accountType, allocation };
+  if (kind !== 'remainder' && priorityInput) body.priority = Number(priorityInput);
+  try {
+    await api(`/api/employees/${employeeId}/direct-deposit-accounts`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    });
+    await loadDirectDepositAccounts();
+  } catch (err) {
+    document.getElementById('dd-view').textContent = 'Error: ' + err.message;
+  }
 });
 
 document.getElementById('run-btn').addEventListener('click', async () => {

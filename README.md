@@ -368,6 +368,11 @@ Beyond the pay-run engine itself, three more real HR pieces:
   actually deposit them) — the same "never expose what only the account
   holder should be able to confirm" boundary a real system's split
   between its ACH-origination backend and its employee-facing API draws.
+  The "Add account" form only ever built a 'remainder' allocation until
+  this round, even though `allocateNetPay()` itself has supported flat-
+  dollar and percent-of-net splits with a priority order since the
+  module was first built — a real UI gap, not a library one. The form
+  now exposes all three allocation kinds and a priority field.
 
 - `payroll/stateRegistration.ts`: a multi-state employer must actually
   REGISTER with a state's unemployment (and usually withholding) agency —
