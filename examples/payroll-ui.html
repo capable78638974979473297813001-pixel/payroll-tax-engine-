@@ -71,6 +71,16 @@
     <div id="company-info" class="muted">Loading…</div>
   </section>
 
+  <section id="compliance-dashboard-section">
+    <h2>Compliance dashboard</h2>
+    <p class="muted" style="margin-top:0">Every compliance check this project runs — minimum wage, Form I-9, PRWORA new-hire reporting, and state employer registration — aggregated in one place. Each finding is produced by, and links to, the same check available in its own section below.</p>
+    <div id="compliance-summary" class="muted">Loading…</div>
+    <table id="compliance-table">
+      <thead><tr><th>Category</th><th>Employee</th><th>Finding</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
   <section>
     <h2>Headcount &amp; payroll cost report</h2>
     <pre id="report-view"></pre>
@@ -441,6 +451,11 @@
 let company = null;
 let employees = [];
 
+function employeeNameFor(id) {
+  const e = employees.find((emp) => emp.id === id);
+  return e ? `${e.firstName} ${e.lastName}` : id;
+}
+
 function fmtCents(c) {
   const neg = c < 0;
   const abs = Math.abs(c);
@@ -513,7 +528,7 @@ document.getElementById('add-employee-btn').addEventListener('click', async () =
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ firstName, lastName, hireDate, payType, residenceState, jobTitle, department, ssn, mailingAddress, federalW4 }),
     });
-    await Promise.all([loadEmployees(), loadOrgChart(), loadAuditLog(), loadNewHireReporting()]);
+    await Promise.all([loadEmployees(), loadOrgChart(), loadAuditLog(), loadNewHireReporting(), loadComplianceDashboard()]);
   } catch (err) {
     alert('Error: ' + err.message);
   }
@@ -522,6 +537,42 @@ document.getElementById('add-employee-btn').addEventListener('click', async () =
 async function loadReport() {
   const { report } = await api(`/api/companies/${company.id}/report`);
   document.getElementById('report-view').textContent = JSON.stringify(report, null, 2);
+}
+
+async function loadComplianceDashboard() {
+  const { dashboard } = await api(`/api/companies/${company.id}/compliance-dashboard`);
+  const summary = document.getElementById('compliance-summary');
+  const tbody = document.querySelector('#compliance-table tbody');
+
+  if (dashboard.totalIssueCount === 0) {
+    summary.textContent = 'Nothing needs attention as of ' + dashboard.asOfDate + '.';
+    tbody.innerHTML = '';
+    return;
+  }
+  summary.textContent = `${dashboard.totalIssueCount} item(s) need attention as of ${dashboard.asOfDate}:`;
+
+  const rows = [];
+  for (const i of dashboard.minimumWageIssues) {
+    rows.push(['Minimum wage', employeeNameFor(i.employeeId), `Paid ${fmtCents(i.employeeRateCents)}/hr, below the ${fmtCents(i.applicableRateCents)}/hr floor in ${i.jurisdiction} (short ${fmtCents(i.shortfallCents)})`]);
+  }
+  for (const entry of dashboard.i9Issues) {
+    for (const issue of entry.issues) rows.push(['Form I-9', employeeNameFor(entry.employeeId), issue]);
+  }
+  const nhrLabel = { missing_data: 'Missing SSN/address', overdue: 'OVERDUE', due_soon: 'Due soon' };
+  for (const i of dashboard.newHireReportingIssues) {
+    rows.push(['New-hire reporting', employeeNameFor(i.employeeId), `${nhrLabel[i.kind]}${i.dueBy ? ' (due ' + i.dueBy + ')' : ''}`]);
+  }
+  for (const i of dashboard.stateRegistrationIssues) {
+    rows.push([
+      'State registration',
+      i.employeeIds.map(employeeNameFor).join(', '),
+      i.kind === 'not_registered'
+        ? `No SUI/withholding registration on file for ${i.stateCode}`
+        : `${i.stateCode} registration rate (${(i.registeredRate * 100).toFixed(2)}%) doesn't match the configured rate (${(i.configuredRate * 100).toFixed(2)}%)`,
+    ]);
+  }
+
+  tbody.innerHTML = rows.map(([category, who, finding]) => `<tr><td>${category}</td><td>${who}</td><td>${finding}</td></tr>`).join('');
 }
 
 async function loadAuditLog() {
@@ -651,7 +702,7 @@ async function loadEmployees() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jobTitle: jobTitle || null, department: department || null, managerId: managerId || null }),
       });
-      await Promise.all([loadEmployees(), loadOrgChart(), loadAuditLog()]);
+      await Promise.all([loadEmployees(), loadOrgChart(), loadAuditLog(), loadComplianceDashboard()]);
     } catch (err) {
       alert('Error: ' + err.message);
     }
@@ -837,7 +888,7 @@ async function refreshAll(preferredCompanyId) {
     loadStateRegistrations(), loadOrgChart(),
   ]);
   // These read the `employees` array loadEmployees() just populated, so they run after it rather than racing it inside the Promise.all above.
-  await Promise.all([loadGarnishments(), loadNewHireReporting()]);
+  await Promise.all([loadGarnishments(), loadNewHireReporting(), loadComplianceDashboard()]);
 }
 
 function renderOrgNode(node) {
@@ -1035,7 +1086,7 @@ document.getElementById('run-btn').addEventListener('click', async () => {
       : '';
     if (payRun.minimumWageIssues.length > 0) console.warn('Minimum wage issues:', payRun.minimumWageIssues);
     status.textContent = `Approved run ${payRun.id} for ${payRun.checkDate} — ${payRun.lines.length} employee(s) paid.${warning}`;
-    await Promise.all([loadEmployees(), loadNextPeriod(), loadRuns(), loadReport(), loadAuditLog()]);
+    await Promise.all([loadEmployees(), loadNextPeriod(), loadRuns(), loadReport(), loadAuditLog(), loadComplianceDashboard()]);
   } catch (err) {
     status.textContent = 'Error: ' + err.message;
     btn.disabled = false;
@@ -1196,7 +1247,7 @@ document.getElementById('term-btn').addEventListener('click', async () => {
       body: JSON.stringify({ terminationDate, reason, employerPolicyPaysOutPto }),
     });
     view.textContent = JSON.stringify({ finalPay: result.finalPay, ptoPayoutHours: result.ptoPayoutHours }, null, 2);
-    await Promise.all([loadEmployees(), loadReport(), loadAuditLog()]);
+    await Promise.all([loadEmployees(), loadReport(), loadAuditLog(), loadComplianceDashboard()]);
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
@@ -1241,7 +1292,7 @@ document.getElementById('benefit-elect-btn').addEventListener('click', async () 
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ planId, coverageTier, effectiveDate, hasQualifyingLifeEvent }),
     });
     view.textContent = JSON.stringify(result.election, null, 2);
-    await Promise.all([loadEmployees(), loadAuditLog()]);
+    await Promise.all([loadEmployees(), loadAuditLog(), loadComplianceDashboard()]);
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
@@ -1390,16 +1441,12 @@ document.getElementById('i9-compliance-btn').addEventListener('click', async () 
 async function loadNewHireReporting() {
   const { issues } = await api(`/api/companies/${company.id}/new-hire-reporting`);
   const tbody = document.querySelector('#nhr-table tbody');
-  const nameFor = (id) => {
-    const e = employees.find((emp) => emp.id === id);
-    return e ? `${e.firstName} ${e.lastName}` : id;
-  };
   const findingLabel = { missing_data: 'Missing data', overdue: 'OVERDUE', due_soon: 'Due soon' };
   tbody.innerHTML = issues.length === 0
     ? '<tr><td colspan="4" class="muted">Nothing outstanding.</td></tr>'
     : issues.map((i) => `
       <tr>
-        <td>${nameFor(i.employeeId)}</td>
+        <td>${employeeNameFor(i.employeeId)}</td>
         <td>${findingLabel[i.kind]}${i.missingFields ? ' (' + i.missingFields.join(', ') + ')' : ''}</td>
         <td>${i.dueBy ?? '—'}</td>
         <td>

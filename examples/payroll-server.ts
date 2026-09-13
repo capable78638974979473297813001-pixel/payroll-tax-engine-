@@ -25,6 +25,7 @@ import {
   buildOrgChart,
   canElectBenefit,
   compute1095CForEmployee,
+  computeComplianceDashboard,
   determineAleStatus,
   directHire,
   buildNewHireReport,
@@ -784,6 +785,23 @@ const server = createServer(async (req, res) => {
         .map((employee) => ({ employeeId: employee.id, issues: i9ComplianceIssues(employee, getI9Record(employee.id) ?? undefined, asOfDate) }))
         .filter((f) => f.issues.length > 0);
       sendJson(res, 200, { findings });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Compliance dashboard — every check below, in one place
+    // ------------------------------------------------------------------
+
+    const complianceDashboardMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/compliance-dashboard$/);
+    if (req.method === 'GET' && complianceDashboardMatch) {
+      const companyId = decodeURIComponent(complianceDashboardMatch[1]);
+      const company = getCompany(companyId);
+      if (!company) return sendJson(res, 404, { error: 'No such company.' });
+      const asOfDate = url.searchParams.get('asOfDate') ?? new Date().toISOString().slice(0, 10);
+      const employees = employeesForCompany(companyId);
+      const i9Records = new Map(employees.map((e) => [e.id, getI9Record(e.id)]).filter((entry): entry is [string, I9Record] => entry[1] !== null));
+      const dashboard = computeComplianceDashboard(company, employees, i9Records, newHireReportFiledEmployeeIds(), asOfDate);
+      sendJson(res, 200, { dashboard });
       return;
     }
 

@@ -322,6 +322,19 @@ Beyond the pay-run engine itself, three more real HR pieces:
   into the admin UI's "State employer registrations" panel. Does not
   itself file a registration (each state's own online application is
   real, separate infrastructure) or track how long one takes to process.
+- `payroll/complianceDashboard.ts`: one screen for every compliance check
+  above — minimum wage, Form I-9, PRWORA new-hire reporting, and state
+  registration — pure aggregation, the same "no new business logic, just
+  call what already exists and collect the results" discipline
+  `payroll/reports.ts` applies to its own rollups: a wrong dashboard entry
+  would be a wrong call site, never a new wrong calculation. Before this,
+  an admin had to know to click into four separate panels to find out
+  whether anything needed attention at all — a genuinely dangerous gap
+  for a compliance-shaped product, where the whole point is that someone
+  forgets to go looking. Sits at the top of the admin UI, immediately
+  below the company selector, and refreshes after every action that
+  could change what it reports (a hire, a termination, an approved pay
+  run, a benefit election, a state registration).
 
 `Employee` also carries plain Core-HR fields now (`jobTitle`,
 `department`, `managerId`) — purely descriptive, the natural spine for an

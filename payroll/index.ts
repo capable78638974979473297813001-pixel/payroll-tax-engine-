@@ -35,6 +35,8 @@ export { buildOrgChart } from './orgChart.ts';
 export type { OrgChartNode, OrgChartResult } from './orgChart.ts';
 export { compute1095CForEmployee } from './form1095c.ts';
 export type { EmployerCoverageOfferPolicy, Form1095CMonth, Form1095CSummary } from './form1095c.ts';
+export { computeComplianceDashboard } from './complianceDashboard.ts';
+export type { ComplianceDashboard, I9DashboardEntry } from './complianceDashboard.ts';
 export { buildPaycheckInput, computeEmployeePaycheck } from './engine.ts';
 export type { EmployeePaycheckComputation } from './engine.ts';
 export { activeEmployeesFor, approvePayRun, draftPayRun, recalculatePayRun, voidPayRun, ytdForCheckDate } from './run.ts';
