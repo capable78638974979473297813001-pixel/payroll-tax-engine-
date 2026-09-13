@@ -45,6 +45,22 @@ export {
   semiweeklyDepositDeadline,
 } from './depositSchedule.ts';
 export type { DepositorSchedule } from './depositSchedule.ts';
+export {
+  COBRA_SMALL_EMPLOYER_THRESHOLD,
+  ELECTION_NOTICE_DEADLINE_DAYS,
+  ELECTION_PERIOD_DAYS,
+  INITIAL_PREMIUM_DEADLINE_DAYS,
+  PREMIUM_CAP_FRACTION,
+  continuationCoverageEndDate,
+  electionDeadline,
+  electionNoticeDeadline,
+  initialPremiumDeadline,
+  isCobraApplicable,
+  isQualifyingTermination,
+  maximumMonthlyPremium,
+  qualifyingEventDurationMonths,
+} from './cobra.ts';
+export type { CobraQualifyingEventReason } from './cobra.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

@@ -30,6 +30,7 @@ import {
   canElectBenefit,
   compute1095CForEmployee,
   computeComplianceDashboard,
+  continuationCoverageEndDate,
   depositDeadlineFor,
   determineAleStatus,
   determineDepositorSchedule,
@@ -47,7 +48,10 @@ import {
   i9Status,
   initiateMicroDepositVerification,
   initiatePrenoteVerification,
+  electionNoticeDeadline,
   isAffordableUnderW2SafeHarbor,
+  isCobraApplicable,
+  isQualifyingTermination,
   lookbackPeriodQuarters,
   newHireReportingIssuesForCompany,
   nextDayDepositRuleApplies,
@@ -705,7 +709,24 @@ const server = createServer(async (req, res) => {
           ptoPayoutHours: result.ptoPayoutHours,
         }),
       );
-      sendJson(res, 200, result);
+
+      // Current headcount stands in for "typical employee count in the
+      // PRIOR calendar year" (see payroll/cobra.ts's own header on why
+      // this project doesn't track that history) — a real simplification,
+      // disclosed in the response itself rather than silently assumed.
+      const currentHeadcount = employeesForCompany(company.id).length;
+      const cobra = !isQualifyingTermination(body.reason)
+        ? { applicable: false, reason: 'Termination for gross misconduct is not a COBRA qualifying event.' }
+        : !isCobraApplicable(currentHeadcount)
+          ? { applicable: false, reason: `Employer headcount (${currentHeadcount}) is below the 20-employee COBRA threshold (measured here from CURRENT headcount, not last year's — see this project's own disclosed simplification).` }
+          : {
+              applicable: true,
+              qualifyingEventDate: body.terminationDate,
+              electionNoticeDeadline: electionNoticeDeadline(body.terminationDate),
+              continuationCoverageEndDate: continuationCoverageEndDate(body.terminationDate, 'termination'),
+            };
+
+      sendJson(res, 200, { ...result, cobra });
       return;
     }
 

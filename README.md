@@ -237,7 +237,31 @@ Beyond the pay-run engine itself, three more real HR pieces:
   employer's own policy accordingly. Every other state falls back to the
   federal floor and the employer's own PTO-payout policy — the same
   "disclosed, not guessed" choice as this module's own per-state deadline
-  research.
+  research. Also carries `TerminationReason`'s new `'gross_misconduct'`
+  value — still due immediate final pay like any other employer-initiated
+  separation, but the one reason `payroll/cobra.ts` treats as NOT a COBRA
+  qualifying event at all.
+- `payroll/cobra.ts`: COBRA continuation coverage (29 U.S.C. § 1161 et
+  seq.), LIVE-VERIFIED against the Department of Labor's own Employer's
+  Guide and worker FAQ. The 20-employee small-employer exemption; 18
+  months for termination/reduced-hours, 36 for every other qualifying
+  event DOL recognizes; the 44-day election-notice deadline, the 60-day
+  election period (from the LATER of coverage loss or notice provided),
+  the 45-day first-premium deadline; and the 102%-of-cost premium cap.
+  Wired directly into the termination workflow: terminating an employee
+  now returns a `cobra` block alongside final pay and PTO payout,
+  computed from the SAME termination reason and date already entered —
+  applicable and its dates for an ordinary termination at a 20+-employee
+  company, a plain "not a qualifying event" for gross misconduct, or "too
+  small" below the threshold. Does not generate the election notice
+  document itself or track an actual election/payment history — real,
+  separate persistence and document-generation concerns, the same
+  "disclosed, not built" boundary this project draws around e-filing
+  elsewhere. Discloses its one simplification openly rather than hiding
+  it: COBRA's own 20-employee test is measured against the PRIOR
+  calendar year's typical headcount, which this project doesn't track
+  historically, so current headcount stands in — visible in the
+  ineligibility message itself when it's the reason.
 - `payroll/i9.ts`: Form I-9 employment eligibility verification (8 U.S.C.
   § 1324a) — the one compliance step required for EVERY US hire regardless
   of state, unlike the new-hire report above. Section 1's deadline is the

@@ -628,6 +628,10 @@ describe('final pay timing (payroll/termination.ts)', () => {
     assert.equal(finalPayDueDate('CA', '2026-06-10', 'layoff', '2026-06-20').dueDate, '2026-06-10');
   });
 
+  test('California: a termination for gross misconduct is still employer-initiated, so it follows the same immediate-pay rule as an ordinary involuntary termination', () => {
+    assert.equal(finalPayDueDate('CA', '2026-06-10', 'gross_misconduct', '2026-06-20').dueDate, '2026-06-10');
+  });
+
   test('California: resignation WITH 72+ hours notice is due on the last day worked', () => {
     assert.equal(finalPayDueDate('CA', '2026-06-10', 'voluntary_with_notice', '2026-06-20').dueDate, '2026-06-10');
   });

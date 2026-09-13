@@ -327,6 +327,7 @@
         <option value="layoff">Layoff</option>
         <option value="voluntary_with_notice">Voluntary (72h+ notice)</option>
         <option value="voluntary_without_notice">Voluntary (no notice)</option>
+        <option value="gross_misconduct">Gross misconduct</option>
       </select>
       <label><input type="checkbox" id="term-pto-payout" /> Pay out PTO</label>
       <button id="term-btn">Terminate</button>
@@ -1332,7 +1333,7 @@ document.getElementById('term-btn').addEventListener('click', async () => {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ terminationDate, reason, employerPolicyPaysOutPto }),
     });
-    view.textContent = JSON.stringify({ finalPay: result.finalPay, ptoPayoutHours: result.ptoPayoutHours }, null, 2);
+    view.textContent = JSON.stringify({ finalPay: result.finalPay, ptoPayoutHours: result.ptoPayoutHours, cobra: result.cobra }, null, 2);
     await Promise.all([loadEmployees(), loadReport(), loadAuditLog(), loadComplianceDashboard()]);
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
