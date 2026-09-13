@@ -47,6 +47,11 @@ import {
   dependentCareFsaLimit,
   remainingDependentCareFsaRoom,
   cappedDependentCareFsaContributionForPayPeriod,
+  isWarnCoveredEmployer,
+  isPlantClosing,
+  isMassLayoff,
+  warnNoticeDeadline,
+  isWarnNoticeLate,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1531,6 +1536,31 @@ const server = createServer(async (req, res) => {
           dollars(body.ytdDependentCareFsaContributions),
           body.isMarriedFilingSeparately,
         ),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Federal WARN Act calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/warn-act/calculator') {
+      const body = await parseJsonBody<{
+        employeeCountExcludingPartTime: number;
+        employeesLosingEmploymentExcludingPartTime: number;
+        activeWorkforceAtSiteBeforeLayoff: number;
+        plannedActionDate: string;
+        noticeServedDate?: string;
+      }>(req);
+      const plantClosing = isPlantClosing(body.employeesLosingEmploymentExcludingPartTime);
+      const massLayoff = !plantClosing && isMassLayoff(body.employeesLosingEmploymentExcludingPartTime, body.activeWorkforceAtSiteBeforeLayoff);
+      sendJson(res, 200, {
+        isCoveredEmployer: isWarnCoveredEmployer(body.employeeCountExcludingPartTime),
+        isPlantClosing: plantClosing,
+        isMassLayoff: massLayoff,
+        noticeRequired: plantClosing || massLayoff,
+        noticeDeadline: warnNoticeDeadline(body.plannedActionDate),
+        noticeLate: body.noticeServedDate ? isWarnNoticeLate(body.noticeServedDate, body.plannedActionDate) : null,
       });
       return;
     }

@@ -300,6 +300,34 @@ Beyond the pay-run engine itself, three more real HR pieces:
   value — still due immediate final pay like any other employer-initiated
   separation, but the one reason `payroll/cobra.ts` treats as NOT a COBRA
   qualifying event at all.
+- `payroll/warnAct.ts`: the federal WARN Act (29 U.S.C. § 2101 et seq.),
+  live-verified against the statutory text itself. A covered employer has
+  100+ employees (excluding part-time — under 20 hours/week average OR
+  under 6 of the past 12 months' tenure); a "plant closing" is 50+
+  employees losing employment at one site within any 30-day period; a
+  "mass layoff" is 500+ regardless of workforce share, OR 50-499 that's
+  ALSO at least one-third of the site's active workforce (a large count
+  at a huge site can still miss it — `isMassLayoff()` checks both
+  conditions, not just the headcount); 60 days' advance written notice is
+  required; and — the one piece of this law with real teeth for a payroll
+  system to get right — smaller employment-loss groups at the same site
+  within a 90-day window are AGGREGATED toward these minimums unless the
+  employer proves they're separate and distinct actions. Only the
+  natural-disaster exception eliminates notice outright; the faltering-
+  company and unforeseeable-business-circumstances exceptions still
+  require notice "as soon as practicable," a case-specific judgment the
+  statute sets no formula for — `warnExceptionGuidance()` states each
+  exception's own legal basis rather than computing a shortened period
+  that doesn't exist to compute. This project has no "layoff event"
+  spanning multiple employees, so every headcount is a caller-supplied
+  parameter, the same choice `payroll/cobra.ts` makes for its own
+  headcount input. FEDERAL ONLY — many states run stricter mini-WARN acts
+  (this project's own `data/employer-thresholds/NY-2026.json` already
+  names New York's own 50-employee/90-day-notice floor as a separate
+  figure); every other state's own law remains a disclosed gap, the same
+  boundary `payroll/paidSickLeave.ts` and `payroll/workersComp.ts` draw
+  around their own single-jurisdiction scope. Wired into the admin UI as
+  a calculator.
 - `payroll/cobra.ts`: COBRA continuation coverage (29 U.S.C. § 1161 et
   seq.), LIVE-VERIFIED against the Department of Labor's own Employer's
   Guide and worker FAQ. The 20-employee small-employer exemption; 18

@@ -224,6 +224,22 @@
   </section>
 
   <section>
+    <h2>Federal WARN Act</h2>
+    <p class="muted" style="margin-top:0">Covers employers with 100+ employees (excluding part-time). A plant closing needs 50+ affected employees at one site; a mass layoff needs 500+, or 50+ AND at least one-third of the site's workforce. 60 days' advance written notice is required. This project doesn't track a "layoff event" spanning multiple employees, so every count is entered directly. Federal only — many states run their own stricter mini-WARN laws, not modeled here.</p>
+    <div class="row">
+      <input id="warn-employer-count" type="number" placeholder="Employer headcount (excl. part-time)" style="width:240px" />
+      <input id="warn-affected-count" type="number" placeholder="Employees losing employment" style="width:220px" />
+      <input id="warn-site-workforce" type="number" placeholder="Active workforce at site before layoff" style="width:260px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="warn-planned-date" type="date" />
+      <input id="warn-notice-date" type="date" />
+      <button class="secondary" id="warn-calc-btn">Check WARN status</button>
+    </div>
+    <pre id="warn-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -922,6 +938,32 @@ document.getElementById('hf-calc-btn').addEventListener('click', async () => {
       `HSA annual limit: ${fmtCents(result.hsaAnnualLimit)} | remaining: ${fmtCents(result.hsaRemainingRoom)} | this period capped: ${fmtCents(result.hsaCappedContribution)}\n` +
       `Health FSA remaining: ${fmtCents(result.healthFsaRemainingRoom)} | this period capped: ${fmtCents(result.healthFsaCappedContribution)}\n` +
       `Dependent-care FSA annual limit: ${fmtCents(result.dependentCareFsaAnnualLimit)} | remaining: ${fmtCents(result.dependentCareFsaRemainingRoom)} | this period capped: ${fmtCents(result.dependentCareFsaCappedContribution)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('warn-planned-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('warn-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('warn-view');
+  const employeeCountExcludingPartTime = Number(document.getElementById('warn-employer-count').value) || 0;
+  const employeesLosingEmploymentExcludingPartTime = Number(document.getElementById('warn-affected-count').value) || 0;
+  const activeWorkforceAtSiteBeforeLayoff = Number(document.getElementById('warn-site-workforce').value) || 0;
+  const plannedActionDate = document.getElementById('warn-planned-date').value;
+  const noticeServedDate = document.getElementById('warn-notice-date').value || undefined;
+  try {
+    const result = await api('/api/warn-act/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCountExcludingPartTime, employeesLosingEmploymentExcludingPartTime, activeWorkforceAtSiteBeforeLayoff, plannedActionDate, noticeServedDate }),
+    });
+    view.textContent =
+      `Covered employer (100+): ${result.isCoveredEmployer ? 'YES' : 'No'}\n` +
+      `Plant closing: ${result.isPlantClosing ? 'YES' : 'No'}\n` +
+      `Mass layoff: ${result.isMassLayoff ? 'YES' : 'No'}\n` +
+      `Notice required: ${result.noticeRequired ? 'YES' : 'No'}\n` +
+      `Notice deadline (60 days before): ${result.noticeDeadline}` +
+      (result.noticeLate === null ? '' : `\nNotice served ${result.noticeLate ? 'LATE' : 'on time'}`);
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

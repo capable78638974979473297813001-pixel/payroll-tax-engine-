@@ -136,6 +136,27 @@ export {
   cappedDependentCareFsaContributionForPayPeriod,
 } from './hsaFsaLimits.ts';
 export type { HdhpCoverageTier } from './hsaFsaLimits.ts';
+export {
+  WARN_EMPLOYER_THRESHOLD,
+  WARN_PART_TIME_HOURS_PER_WEEK_THRESHOLD,
+  WARN_PART_TIME_TENURE_MONTHS_THRESHOLD,
+  WARN_PLANT_CLOSING_MINIMUM_EMPLOYEES,
+  WARN_MASS_LAYOFF_MINIMUM_EMPLOYEES,
+  WARN_MASS_LAYOFF_MINIMUM_FRACTION_OF_WORKFORCE,
+  WARN_MASS_LAYOFF_LARGE_THRESHOLD,
+  WARN_NOTICE_PERIOD_DAYS,
+  WARN_AGGREGATION_WINDOW_DAYS,
+  isPartTimeForWarnPurposes,
+  isWarnCoveredEmployer,
+  isPlantClosing,
+  isMassLayoff,
+  warnNoticeDeadline,
+  isWarnNoticeLate,
+  areWithinWarnAggregationWindow,
+  isWarnNoticeRequirementEliminated,
+  warnExceptionGuidance,
+} from './warnAct.ts';
+export type { WarnExceptionReason } from './warnAct.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';
