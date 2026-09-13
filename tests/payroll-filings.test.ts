@@ -2,7 +2,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { dollars } from '../src/money.ts';
-import { computeForm941, computeW2, computeW2FromEmployee } from '../payroll/filings.ts';
+import { computeForm940, computeForm941, computeW2, computeW2FromEmployee } from '../payroll/filings.ts';
 import { approvePayRun, draftPayRun, freshYearToDate, generatePayPeriods } from '../payroll/index.ts';
 import type { Company, DeductionPlan, Employee, PayRun, PayRunLine } from '../payroll/types.ts';
 
@@ -392,5 +392,55 @@ describe('filings computed from a REAL year of approved pay runs (integration)',
 
     // The 8% 401(k) deferral is exactly 8% of the true annual total paid.
     assert.deepEqual(w2.box12, [{ code: 'D', amount: Math.round(totalWagesPaid * 0.08) }]);
+  });
+});
+
+describe('Form 940 annual FUTA rollup (payroll/filings.ts)', () => {
+  test('sums total payments and taxable FUTA wages/tax across the whole year, ignoring a different year and a different company', () => {
+    const thisYear = run({
+      id: 'r1',
+      checkDate: '2026-03-15',
+      lines: [
+        line({
+          employeeId: 'e1',
+          grossPay: dollars(5_000),
+          taxLines: [{ id: 'US_FUTA', name: 'FUTA', payer: 'employer', jurisdiction: 'federal', taxableWages: dollars(5_000), amount: dollars(30) }],
+        }),
+      ],
+    });
+    const laterInYear = run({
+      id: 'r2',
+      checkDate: '2026-09-15',
+      lines: [
+        line({
+          employeeId: 'e1',
+          grossPay: dollars(5_000),
+          // The FUTA wage base ($7,000/yr) has already been met by this
+          // point — the engine itself would report $0 taxable, exactly
+          // like this fixture does, and the rollup must not invent more.
+          taxLines: [{ id: 'US_FUTA', name: 'FUTA', payer: 'employer', jurisdiction: 'federal', taxableWages: 0, amount: 0 }],
+        }),
+      ],
+    });
+    const otherYear = run({ id: 'r3', checkDate: '2027-01-15', lines: [line({ employeeId: 'e1', grossPay: dollars(999_999) })] });
+    const otherCompany = run({ id: 'r4', companyId: 'co-OTHER', checkDate: '2026-04-15', lines: [line({ employeeId: 'e1', grossPay: dollars(999_999) })] });
+
+    const summary = computeForm940('co-1', 2026, [thisYear, laterInYear, otherYear, otherCompany]);
+    assert.equal(summary.totalPayments, dollars(10_000));
+    assert.equal(summary.totalTaxableFutaWages, dollars(5_000));
+    assert.equal(summary.futaTax, dollars(30));
+    assert.equal(summary.exemptPaymentsAndExcessOverWageBase, dollars(5_000), 'the $5,000 paid after the wage base was already met');
+  });
+
+  test('a company with no approved runs for the year reports all zeros, not a missing/undefined summary', () => {
+    const summary = computeForm940('co-1', 2026, []);
+    assert.deepEqual(summary, {
+      companyId: 'co-1',
+      year: 2026,
+      totalPayments: 0,
+      exemptPaymentsAndExcessOverWageBase: 0,
+      totalTaxableFutaWages: 0,
+      futaTax: 0,
+    });
   });
 });

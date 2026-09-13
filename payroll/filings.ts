@@ -11,15 +11,14 @@ import type { Company, DeductionPlan, Employee, PayRun, PayRunLine } from './typ
  * number here is a wrong ROLLUP, never a wrong CALCULATION (that stays the
  * tax engine's job).
  *
- * SCOPE, stated plainly: this computes the LIABILITY figures Form 941
- * itself reports (lines 1-6) and the core W-2 boxes (1-6, 10, 12, 15-20).
+ * SCOPE, stated plainly: this computes the LIABILITY figures Form 941 and
+ * Form 940 themselves report and the core W-2 boxes (1-6, 10, 12, 15-20).
  * It does NOT prepare a filable return or PDF, does not handle Form 941's
  * credits/adjustments (COBRA premium assistance, sick/family leave credits
  * under FFCRA-successor provisions, the research credit payroll offset —
- * none of which this engine's PaycheckInput models an input for), does not
- * generate Form 940 (FUTA is annual and follows the same rollup shape, but
- * isn't implemented here), and does not e-file anything. Those are real,
- * separate pieces of a filing subsystem, not corners cut in this one.
+ * none of which this engine's PaycheckInput models an input for), and does
+ * not e-file anything. Those are real, separate pieces of a filing
+ * subsystem, not corners cut in this one.
  */
 
 function quarterMonths(quarter: 1 | 2 | 3 | 4): [number, number, number] {
@@ -282,4 +281,54 @@ export function computeW2FromEmployee(employee: Employee, year: number, approved
 
 function deductionPlanAmountForPeriod(plan: DeductionPlan, periodGrossPay: Cents): Cents {
   return plan.amount.kind === 'flat' ? plan.amount.cents : Math.round(periodGrossPay * (plan.amount.percent / 100));
+}
+
+export interface Form940Summary {
+  companyId: string;
+  year: number;
+  /** Line 3: total payments to all employees this year, before any exemption or wage-base exclusion. */
+  totalPayments: Cents;
+  /**
+   * Lines 4+5 combined: payments exempt from FUTA entirely (fringe
+   * benefits, retirement contributions, etc.) PLUS each employee's own
+   * payments above the $7,000 FUTA wage base — reported as ONE figure
+   * because totalPayments minus this equals line 7 exactly, and this
+   * engine's PayRunLine doesn't retain enough per-earning-category detail
+   * to split "exempt payment types" from "excess over the wage base"
+   * separately (the same disclosed limitation class as W-2 box 12 needing
+   * the employee's OWN deductionPlans rather than pay-run history alone —
+   * see computeW2FromEmployee()'s own header comment). A filer completing
+   * the literal two-line form needs that split; the total LIABILITY this
+   * module computes does not depend on it.
+   */
+  exemptPaymentsAndExcessOverWageBase: Cents;
+  /** Line 7: total taxable FUTA wages — read directly off US_FUTA's own taxableWages, which the engine already nets against both exemptions and the wage base correctly. */
+  totalTaxableFutaWages: Cents;
+  /** Line 8 (this project's terms: the actual FUTA tax liability) — US_FUTA's own amount, already at the correct net rate including any state credit-reduction addition. */
+  futaTax: Cents;
+}
+
+export function computeForm940(companyId: string, year: number, approvedRuns: readonly PayRun[]): Form940Summary {
+  const runsInYear = approvedRuns.filter((r) => r.companyId === companyId && r.status === 'approved' && r.checkDate.startsWith(String(year)));
+
+  let totalPayments = 0;
+  let totalTaxableFutaWages = 0;
+  let futaTax = 0;
+
+  for (const run of runsInYear) {
+    for (const line of run.lines) {
+      totalPayments += line.grossPay;
+      totalTaxableFutaWages += sumTaxLine(line, 'US_FUTA', 'taxableWages');
+      futaTax += sumTaxLine(line, 'US_FUTA', 'amount');
+    }
+  }
+
+  return {
+    companyId,
+    year,
+    totalPayments,
+    exemptPaymentsAndExcessOverWageBase: totalPayments - totalTaxableFutaWages,
+    totalTaxableFutaWages,
+    futaTax,
+  };
 }

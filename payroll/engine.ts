@@ -22,8 +22,9 @@ import type { Company, Employee, PayRunLine, TimeEntry } from './types.ts';
  */
 
 const OVERTIME_MULTIPLIER = 1.5;
+const DOUBLE_TIME_MULTIPLIER = 2;
 
-/** Regular + overtime pay for the period from an hourly employee's own rate and reported hours, or a salaried employee's own period slice of their annual salary. Overtime is priced at 1.5x but reported under the SAME 'regular' EarningCategory as straight time — real payroll practice taxes overtime paid on the same cheque as regular wages via the ordinary method, not the flat supplemental rate reserved for a bonus or commission paid as identifiably separate compensation (see EarningCategory's own doc comment in src/types.ts). */
+/** Regular + overtime (+ double time, + PTO) pay for the period from an hourly employee's own rate and reported hours, or a salaried employee's own period slice of their annual salary. Every multiplier is reported under the SAME 'regular' EarningCategory as straight time — real payroll practice taxes overtime/double-time/PTO paid on the same cheque as regular wages via the ordinary method, not the flat supplemental rate reserved for a bonus or commission paid as identifiably separate compensation (see EarningCategory's own doc comment in src/types.ts). */
 function baseEarnings(employee: Employee, timeEntry: TimeEntry | undefined, periodsPerYear: number): Earning[] {
   if (employee.payType.kind === 'salary') {
     return [{ code: 'REG', category: 'regular', amount: Math.round(employee.payType.annualSalary / periodsPerYear) }];
@@ -36,6 +37,14 @@ function baseEarnings(employee: Employee, timeEntry: TimeEntry | undefined, peri
   if (entry.overtimeHours > 0) {
     const overtimePay = Math.round(employee.payType.hourlyRate * OVERTIME_MULTIPLIER * entry.overtimeHours);
     earnings.push({ code: 'OT', category: 'regular', amount: overtimePay });
+  }
+  if (entry.doubleTimeHours && entry.doubleTimeHours > 0) {
+    const doubleTimePay = Math.round(employee.payType.hourlyRate * DOUBLE_TIME_MULTIPLIER * entry.doubleTimeHours);
+    earnings.push({ code: 'DT', category: 'regular', amount: doubleTimePay });
+  }
+  if (entry.ptoHours && entry.ptoHours > 0) {
+    const ptoPay = Math.round(employee.payType.hourlyRate * entry.ptoHours);
+    earnings.push({ code: 'PTO', category: 'regular', amount: ptoPay });
   }
   return earnings;
 }

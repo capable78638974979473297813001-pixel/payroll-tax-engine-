@@ -35,6 +35,8 @@ export interface Company {
   paySchedule: PayScheduleConfig;
   /** Facts the tax engine needs about the EMPLOYER side and can't derive — see EmployerContext's own doc comments. Applies to every employee's paycheck unless a specific run input overrides it. */
   employerContext?: EmployerContext;
+  /** One-line mailing address — only consumed by payroll/newHireReporting.ts, which needs it on every report. Optional because nothing in payroll processing itself requires it. */
+  address?: string;
 }
 
 export type PayScheduleFrequency = Extract<PayFrequency, 'weekly' | 'biweekly' | 'semimonthly' | 'monthly'>;
@@ -124,6 +126,18 @@ export interface Employee {
   ytd: ExtendedYearToDate;
   /** The calendar year `ytd` reflects — a check date landing in a new year resets every accumulator to zero before that cheque runs, the same "one calendar year, then start over" rule the tax engine's own wage bases assume. */
   ytdYear: number;
+  /**
+   * Only consumed by payroll/newHireReporting.ts, which is required by
+   * federal law to report both. PRODUCTION BOUNDARY, same discipline as
+   * payroll/directDeposit.ts's own header note on bank account numbers: a
+   * real system never holds a raw SSN in a plain JSON file the way this
+   * demo-scale store does — it belongs in a tokenizing vault or an
+   * encrypted, access-controlled column, not application-level state.
+   * Optional because nothing in payroll PROCESSING itself needs an SSN;
+   * only the new-hire report does.
+   */
+  ssn?: string;
+  mailingAddress?: string;
 }
 
 /** Hours reported for one employee for one pay period — irrelevant to salaried employees, who are paid the same regardless of hours logged. */
@@ -131,6 +145,10 @@ export interface TimeEntry {
   employeeId: string;
   regularHours: number;
   overtimeHours: number;
+  /** Hours at 2x the hourly rate — a state daily-double-time rule (California's own 12-hour/day and 7th-consecutive-day thresholds; see payroll/timeAndAttendance.ts) or an employer policy. Absent or 0 for every jurisdiction that has no such concept, which is most of them. */
+  doubleTimeHours?: number;
+  /** Paid time off taken this period, at the employee's own regular rate — see payroll/pto.ts. Hourly employees only; a salaried employee's pay doesn't change whether a period's hours were worked or taken as PTO. */
+  ptoHours?: number;
   /** Cash paid outside the regular hourly/salary formula this period — a bonus, commission, or reimbursement, tagged with the same EarningCategory the engine uses to decide taxability. */
   extraEarnings?: { category: 'supplemental' | 'reimbursement' | 'imputed'; code: string; amount: Cents }[];
 }

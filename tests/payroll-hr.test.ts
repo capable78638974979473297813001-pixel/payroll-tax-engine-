@@ -1,0 +1,262 @@
+import { test, describe } from 'node:test';
+import assert from 'node:assert/strict';
+
+import { dollars } from '../src/money.ts';
+import {
+  CALIFORNIA_OVERTIME_RULE,
+  FEDERAL_OVERTIME_RULE,
+  classifyWeeklyHours,
+  earningsFromWeeklyHours,
+  overtimeRuleForState,
+  pairPunchesIntoDailyHours,
+} from '../payroll/timeAndAttendance.ts';
+import type { DailyHours, TimePunch } from '../payroll/timeAndAttendance.ts';
+import { accruePto, applyAnnualCarryover, emptyPtoBalance, ptoPayoutEarning, usePto } from '../payroll/pto.ts';
+import type { PtoPolicy } from '../payroll/pto.ts';
+import { buildNewHireReport, deadlineDaysForState, FEDERAL_DEFAULT_DEADLINE_DAYS } from '../payroll/newHireReporting.ts';
+import type { Company, Employee } from '../payroll/types.ts';
+import { freshYearToDate } from '../payroll/ytd.ts';
+
+// ============================================================================
+// Time & attendance: pairing punches
+// ============================================================================
+
+describe('pairing raw punches into daily hours (payroll/timeAndAttendance.ts)', () => {
+  test('a clean 9-to-5 with an hour for lunch nets 7 worked hours, the lunch hour excluded automatically', () => {
+    const punches: TimePunch[] = [
+      { employeeId: 'e1', timestamp: '2026-01-05T09:00:00', type: 'clock_in' },
+      { employeeId: 'e1', timestamp: '2026-01-05T12:00:00', type: 'clock_out' },
+      { employeeId: 'e1', timestamp: '2026-01-05T13:00:00', type: 'clock_in' },
+      { employeeId: 'e1', timestamp: '2026-01-05T17:00:00', type: 'clock_out' },
+    ];
+    const days = pairPunchesIntoDailyHours(punches);
+    assert.deepEqual(days, [{ date: '2026-01-05', hoursWorked: 7 }]);
+  });
+
+  test('punches across multiple days are grouped by their own clock-in date, sorted', () => {
+    const punches: TimePunch[] = [
+      { employeeId: 'e1', timestamp: '2026-01-06T09:00:00', type: 'clock_in' },
+      { employeeId: 'e1', timestamp: '2026-01-06T17:00:00', type: 'clock_out' },
+      { employeeId: 'e1', timestamp: '2026-01-05T09:00:00', type: 'clock_in' },
+      { employeeId: 'e1', timestamp: '2026-01-05T17:00:00', type: 'clock_out' },
+    ];
+    const days = pairPunchesIntoDailyHours(punches);
+    assert.deepEqual(days.map((d) => d.date), ['2026-01-05', '2026-01-06']);
+  });
+
+  test('an odd number of punches (a missing clock-out) throws rather than guessing', () => {
+    const punches: TimePunch[] = [{ employeeId: 'e1', timestamp: '2026-01-05T09:00:00', type: 'clock_in' }];
+    assert.throws(() => pairPunchesIntoDailyHours(punches), /Unpaired punch/);
+  });
+
+  test('two clock_ins in a row (a broken alternation) throws rather than silently pairing wrong', () => {
+    const punches: TimePunch[] = [
+      { employeeId: 'e1', timestamp: '2026-01-05T09:00:00', type: 'clock_in' },
+      { employeeId: 'e1', timestamp: '2026-01-05T10:00:00', type: 'clock_in' },
+    ];
+    assert.throws(() => pairPunchesIntoDailyHours(punches), /alternation/);
+  });
+});
+
+// ============================================================================
+// Overtime classification
+// ============================================================================
+
+describe('overtime rule lookup (payroll/timeAndAttendance.ts)', () => {
+  test('California gets its own daily rule; every other state falls back to the federal weekly-only rule', () => {
+    assert.deepEqual(overtimeRuleForState('CA'), CALIFORNIA_OVERTIME_RULE);
+    assert.deepEqual(overtimeRuleForState('TX'), FEDERAL_OVERTIME_RULE);
+    assert.deepEqual(overtimeRuleForState('ZZ'), FEDERAL_OVERTIME_RULE, 'an unknown code still gets the safe federal floor, not a throw');
+  });
+});
+
+describe('classifying a workweek (payroll/timeAndAttendance.ts)', () => {
+  function days(hours: number[]): DailyHours[] {
+    const dates = ['2026-01-05', '2026-01-06', '2026-01-07', '2026-01-08', '2026-01-09', '2026-01-10', '2026-01-11'];
+    return hours.map((h, i) => ({ date: dates[i], hoursWorked: h }));
+  }
+
+  test('federal rule: only the weekly 40-hour test applies, no daily concept at all', () => {
+    // Six days at 7 hours each = 42 total; no single day is anywhere near
+    // "long", so a daily-rule state would find zero overtime here — the
+    // federal rule must still find the 2 hours over 40.
+    const result = classifyWeeklyHours(days([7, 7, 7, 7, 7, 7]), FEDERAL_OVERTIME_RULE);
+    assert.deepEqual(result, { regularHours: 40, overtimeHours: 2, doubleTimeHours: 0 });
+  });
+
+  test('California: a 10-hour day and a 13-hour day, each priced by ITS OWN daily thresholds, summed correctly', () => {
+    // Day 1: 10h -> 8 regular + 2 OT. Day 2: 13h -> 8 regular + 4 OT (up to
+    // the 12h mark) + 1 DT (past it). Three more plain 8h days. Week total
+    // stays under 40 in the "regular" pool, so no weekly reclassification.
+    const result = classifyWeeklyHours(days([10, 13, 8, 8, 8]), CALIFORNIA_OVERTIME_RULE);
+    assert.deepEqual(result, { regularHours: 40, overtimeHours: 6, doubleTimeHours: 1 });
+    // Every worked hour must be accounted for exactly once.
+    assert.equal(result.regularHours + result.overtimeHours + result.doubleTimeHours, 10 + 13 + 8 + 8 + 8);
+  });
+
+  test('California: hours already paid at a DAILY premium are excluded from the weekly-40 regular pool, never double-counted into weekly OT too', () => {
+    // 5 days at exactly 8h/day (the daily threshold itself, so no daily OT
+    // triggers) = 40 hours total, landing EXACTLY on the weekly threshold
+    // too. Nothing here should be overtime under either test.
+    const result = classifyWeeklyHours(days([8, 8, 8, 8, 8]), CALIFORNIA_OVERTIME_RULE);
+    assert.deepEqual(result, { regularHours: 40, overtimeHours: 0, doubleTimeHours: 0 });
+  });
+
+  test("California's 7th-consecutive-day rule: only fires when all 7 days of the workweek were worked, and reclassifies that day's own straight time into overtime", () => {
+    // Six 8-hour days plus a 7th day at 10 hours. Worked out by hand:
+    // days 1-6 contribute 8h "regular" each to the pool (48 total); the
+    // weekly-40 cap reclassifies 8 of those 48 into overtime. The 7th day
+    // itself is priced under the special rule regardless of the ordinary
+    // 8/12 daily split: first 8h at 1.5x (added on top of the weekly-cap
+    // overtime), the remaining 2h at 2x.
+    const sevenDays = days([8, 8, 8, 8, 8, 8, 10]);
+    const result = classifyWeeklyHours(sevenDays, CALIFORNIA_OVERTIME_RULE);
+    assert.deepEqual(result, { regularHours: 40, overtimeHours: 16, doubleTimeHours: 2 });
+    assert.equal(result.regularHours + result.overtimeHours + result.doubleTimeHours, 8 * 6 + 10);
+  });
+
+  test('a 6-day week (not 7) never triggers the 7th-consecutive-day rule, even under the California ruleset', () => {
+    const sixDays = days([8, 8, 8, 8, 8, 12]);
+    const result = classifyWeeklyHours(sixDays, CALIFORNIA_OVERTIME_RULE);
+    // Day 6 at 12h -> 8 regular + 4 OT (exactly at the 12h double-time line, not past it).
+    // Pool: 8*5 + 8 = 48 regular candidates -> capped at 40, 8 reclassified to weekly OT.
+    assert.deepEqual(result, { regularHours: 40, overtimeHours: 12, doubleTimeHours: 0 });
+  });
+});
+
+describe('pricing classified hours into Earnings (payroll/timeAndAttendance.ts)', () => {
+  test('regular, overtime and double time are each their own line at the right multiplier', () => {
+    const earnings = earningsFromWeeklyHours(dollars(20), { regularHours: 40, overtimeHours: 6, doubleTimeHours: 1 });
+    assert.deepEqual(earnings, [
+      { code: 'REG', category: 'regular', amount: dollars(800) },
+      { code: 'OT', category: 'regular', amount: dollars(180) },
+      { code: 'DT', category: 'regular', amount: dollars(40) },
+    ]);
+  });
+
+  test('zero overtime/double-time produces no line for either, not a $0 line', () => {
+    const earnings = earningsFromWeeklyHours(dollars(20), { regularHours: 40, overtimeHours: 0, doubleTimeHours: 0 });
+    assert.deepEqual(earnings, [{ code: 'REG', category: 'regular', amount: dollars(800) }]);
+  });
+});
+
+// ============================================================================
+// PTO accrual
+// ============================================================================
+
+describe('PTO accrual and usage (payroll/pto.ts)', () => {
+  test('perPayPeriod accrual adds a fixed amount regardless of hours worked', () => {
+    const policy: PtoPolicy = { id: 'p1', name: 'Standard PTO', accrual: { kind: 'perPayPeriod', hoursPerPeriod: 4 } };
+    let balance = emptyPtoBalance('e1', 'p1');
+    balance = accruePto(balance, policy, 0);
+    assert.equal(balance.balanceHours, 4);
+    assert.equal(balance.ytdAccruedHours, 4);
+  });
+
+  test('perHourWorked accrual scales with the hours passed in', () => {
+    const policy: PtoPolicy = { id: 'p1', name: 'Accrued PTO', accrual: { kind: 'perHourWorked', hoursAccruedPerHourWorked: 0.04 } }; // ~1hr per 25 worked
+    let balance = emptyPtoBalance('e1', 'p1');
+    balance = accruePto(balance, policy, 80); // a biweekly full-time period
+    assert.equal(balance.balanceHours, 3.2);
+  });
+
+  test('accrual stops crediting past maxBalanceHours — the balance caps, and ytdAccrued only counts what actually fit', () => {
+    const policy: PtoPolicy = { id: 'p1', name: 'Capped PTO', accrual: { kind: 'perPayPeriod', hoursPerPeriod: 10 }, maxBalanceHours: 15 };
+    let balance = emptyPtoBalance('e1', 'p1');
+    balance = accruePto(balance, policy); // 0 -> 10
+    balance = accruePto(balance, policy); // would be 20, capped to 15
+    assert.equal(balance.balanceHours, 15);
+    assert.equal(balance.ytdAccruedHours, 15, 'only the 15 that actually landed in the balance counts as accrued');
+  });
+
+  test('using PTO within the balance succeeds and reduces it exactly', () => {
+    const policy: PtoPolicy = { id: 'p1', name: 'PTO', accrual: { kind: 'perPayPeriod', hoursPerPeriod: 20 } };
+    const balance = accruePto(emptyPtoBalance('e1', 'p1'), policy);
+    const result = usePto(balance, 8);
+    assert.equal(result.approved, true);
+    assert.equal(result.shortfallHours, 0);
+    assert.equal(result.balance.balanceHours, 12);
+    assert.equal(result.balance.ytdUsedHours, 8);
+  });
+
+  test('requesting more than the balance is refused outright, not partially granted, and the balance is untouched', () => {
+    const policy: PtoPolicy = { id: 'p1', name: 'PTO', accrual: { kind: 'perPayPeriod', hoursPerPeriod: 5 } };
+    const balance = accruePto(emptyPtoBalance('e1', 'p1'), policy);
+    const result = usePto(balance, 12);
+    assert.equal(result.approved, false);
+    assert.equal(result.shortfallHours, 7);
+    assert.equal(result.balance.balanceHours, 5, 'an unapproved request must not touch the balance at all');
+  });
+
+  test('annual carryover clamps to the policy cap and resets YTD counters, leaving the balance itself alone below the cap', () => {
+    const policy: PtoPolicy = { id: 'p1', name: 'PTO', accrual: { kind: 'perPayPeriod', hoursPerPeriod: 1 }, annualCarryoverCapHours: 40 };
+    const overCap = { employeeId: 'e1', policyId: 'p1', balanceHours: 60, ytdAccruedHours: 26, ytdUsedHours: 10 };
+    const rolled = applyAnnualCarryover(overCap, policy);
+    assert.equal(rolled.balanceHours, 40);
+    assert.equal(rolled.ytdAccruedHours, 0);
+    assert.equal(rolled.ytdUsedHours, 0);
+
+    const underCap = { employeeId: 'e1', policyId: 'p1', balanceHours: 12, ytdAccruedHours: 26, ytdUsedHours: 10 };
+    assert.equal(applyAnnualCarryover(underCap, policy).balanceHours, 12);
+  });
+
+  test('a PTO payout is an ordinary Earning at the hourly rate, and does not itself touch the balance', () => {
+    const earning = ptoPayoutEarning(dollars(25), 16);
+    assert.deepEqual(earning, { code: 'PTO_PAYOUT', category: 'regular', amount: dollars(400) });
+  });
+});
+
+// ============================================================================
+// New-hire reporting
+// ============================================================================
+
+describe('new-hire reporting (payroll/newHireReporting.ts)', () => {
+  function company(): Company {
+    return { id: 'co-1', legalName: 'Acme LLC', ein: '12-3456789', homeState: 'TX', address: '1 Main St, Austin, TX 78701', paySchedule: { frequency: 'biweekly', anchorPeriodStart: '2026-01-04', checkDateLagDays: 5 } };
+  }
+  function employee(overrides: Partial<Employee> = {}): Employee {
+    return {
+      id: 'e1',
+      companyId: 'co-1',
+      firstName: 'Jordan',
+      lastName: 'Lee',
+      hireDate: '2026-03-01',
+      employmentCategory: 'standard',
+      payType: { kind: 'hourly', hourlyRate: dollars(20) },
+      residenceState: { code: 'TX' },
+      federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+      deductionPlans: [],
+      directDepositAccounts: [],
+      garnishmentOrders: [],
+      ytd: freshYearToDate(),
+      ytdYear: 2026,
+      ssn: '123-45-6789',
+      mailingAddress: '2 Oak Ave, Austin, TX 78702',
+      ...overrides,
+    };
+  }
+
+  test('the federal default deadline is 20 days, applied to every state absent a researched override', () => {
+    assert.equal(FEDERAL_DEFAULT_DEADLINE_DAYS, 20);
+    assert.equal(deadlineDaysForState('TX'), 20);
+    assert.equal(deadlineDaysForState('CA'), 20);
+  });
+
+  test('builds a complete report with the employee\'s own work state as the reporting destination and hireDate + 20 days as the due date', () => {
+    const report = buildNewHireReport(company(), employee({ workState: { code: 'CA' } }));
+    assert.equal(report.reportToState, 'CA');
+    assert.equal(report.dueBy, '2026-03-21');
+    assert.equal(report.employee.ssn, '123-45-6789');
+    assert.equal(report.employer.ein, '12-3456789');
+  });
+
+  test('an employee with no explicit workState reports to the company\'s own home state', () => {
+    const report = buildNewHireReport(company(), employee());
+    assert.equal(report.reportToState, 'TX');
+  });
+
+  test('refuses to build a report for an employee missing an SSN or mailing address, rather than filing an incomplete one', () => {
+    assert.throws(() => buildNewHireReport(company(), employee({ ssn: undefined })), /SSN/);
+    assert.throws(() => buildNewHireReport(company(), employee({ mailingAddress: undefined })), /mailing address/);
+  });
+});

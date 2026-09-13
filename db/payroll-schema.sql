@@ -67,6 +67,8 @@ CREATE TABLE company (
   -- column per field: the set of facts a caller must supply grows with the
   -- jurisdiction surface, not with this schema.
   employer_context          JSONB NOT NULL DEFAULT '{}'::JSONB,
+  -- Only consumed by new-hire reporting (see payroll/newHireReporting.ts) — nothing in payroll processing itself needs it.
+  address                   TEXT,
   created_at                TIMESTAMPTZ NOT NULL DEFAULT now(),
 
   CHECK (pay_schedule_frequency NOT IN ('weekly', 'biweekly') OR anchor_period_start IS NOT NULL)
@@ -110,6 +112,14 @@ CREATE TABLE employee (
   w4_deductions_cents    BIGINT NOT NULL DEFAULT 0,
   w4_extra_withholding_cents BIGINT NOT NULL DEFAULT 0,
   w4_exempt              BOOLEAN NOT NULL DEFAULT FALSE,
+  -- Only consumed by new-hire reporting (payroll/newHireReporting.ts).
+  -- PRODUCTION BOUNDARY: a real system NEVER stores a raw SSN in a plain
+  -- column like this — see that module's own doc comment on Employee.ssn
+  -- for the same custody discipline direct_deposit_account already draws
+  -- for bank account numbers. This column is the shape, not the security
+  -- model; a real deployment replaces it with a tokenized/encrypted store.
+  ssn                    TEXT,
+  mailing_address        TEXT,
   created_at             TIMESTAMPTZ NOT NULL DEFAULT now(),
 
   CHECK (pay_type <> 'hourly' OR hourly_rate_cents IS NOT NULL),
@@ -205,8 +215,68 @@ CREATE TABLE time_entry (
   pay_run_id        UUID,                -- filled once the run it belongs to exists; see pay_run below
   regular_hours     NUMERIC(6,2) NOT NULL DEFAULT 0,
   overtime_hours    NUMERIC(6,2) NOT NULL DEFAULT 0,
+  double_time_hours NUMERIC(6,2) NOT NULL DEFAULT 0,   -- see payroll/timeAndAttendance.ts's own daily/7th-consecutive-day rules
+  pto_hours         NUMERIC(6,2) NOT NULL DEFAULT 0,
   extra_earnings    JSONB NOT NULL DEFAULT '[]'::JSONB,  -- [{category, code, amount}] — bonuses/reimbursements reported alongside hours
   UNIQUE (employee_id, pay_run_id)
+);
+
+-- Raw clock punches, the source data time_entry's regular/overtime/double-
+-- time columns are DERIVED from (see payroll/timeAndAttendance.ts's own
+-- pairPunchesIntoDailyHours() and classifyWeeklyHours()) — kept as its own
+-- immutable event log rather than overwritten, the same "the raw fact
+-- outlives the rollup built from it" principle source_snapshot applies to
+-- a harvested rate in db/schema.sql.
+
+CREATE TYPE punch_type AS ENUM ('clock_in', 'clock_out');
+
+CREATE TABLE time_punch (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  employee_id   UUID NOT NULL REFERENCES employee (id),
+  punch_time    TIMESTAMP NOT NULL,   -- workplace-local, no timezone conversion — see TimePunch's own doc comment
+  punch_type    punch_type NOT NULL
+);
+
+CREATE INDEX time_punch_employee ON time_punch (employee_id, punch_time);
+
+-- ----------------------------------------------------------------------------
+-- PTO accrual
+-- ----------------------------------------------------------------------------
+-- See payroll/pto.ts's own header comment: this models an EMPLOYER POLICY
+-- engine, not the ~20 states' own mandatory paid-sick-leave accrual laws
+-- (a separate, unresearched legal-data project of the same shape as the
+-- minimum-wage database).
+
+CREATE TYPE pto_accrual_kind AS ENUM ('perHourWorked', 'perPayPeriod');
+
+CREATE TABLE pto_policy (
+  id                        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id                UUID NOT NULL REFERENCES company (id),
+  name                      TEXT NOT NULL,
+  accrual_kind              pto_accrual_kind NOT NULL,
+  hours_accrued_per_hour_worked NUMERIC(6,4),   -- accrual_kind = 'perHourWorked'
+  hours_per_pay_period      NUMERIC(6,2),        -- accrual_kind = 'perPayPeriod'
+  max_balance_hours         NUMERIC(7,2),
+  annual_carryover_cap_hours NUMERIC(7,2),
+
+  CHECK (accrual_kind <> 'perHourWorked' OR hours_accrued_per_hour_worked IS NOT NULL),
+  CHECK (accrual_kind <> 'perPayPeriod' OR hours_per_pay_period IS NOT NULL)
+);
+
+-- One row per (employee, policy) — a running balance, not an event log;
+-- payroll/pto.ts's accruePto()/usePto() each return the NEXT balance to
+-- overwrite this row with, the same "derived, kept current, never
+-- hand-edited" discipline this file's own header comment states for
+-- employee_ytd below.
+
+CREATE TABLE pto_balance (
+  employee_id       UUID NOT NULL REFERENCES employee (id),
+  pto_policy_id     UUID NOT NULL REFERENCES pto_policy (id),
+  balance_hours     NUMERIC(7,2) NOT NULL DEFAULT 0,
+  ytd_accrued_hours NUMERIC(7,2) NOT NULL DEFAULT 0,
+  ytd_used_hours    NUMERIC(7,2) NOT NULL DEFAULT 0,
+
+  PRIMARY KEY (employee_id, pto_policy_id)
 );
 
 -- ----------------------------------------------------------------------------
@@ -319,6 +389,23 @@ CREATE TABLE employee_ytd (
   local_income_tax               JSONB NOT NULL DEFAULT '{}'::JSONB,   -- also where KY's per-jurisdiction keys live, see payroll/ytd.ts
 
   PRIMARY KEY (employee_id, year)
+);
+
+-- ----------------------------------------------------------------------------
+-- New-hire reports
+-- ----------------------------------------------------------------------------
+-- One row per report actually built for a new hire — a log of what was
+-- reported and by when it was due, not a queue payroll processing itself
+-- reads. See payroll/newHireReporting.ts's own header comment on the
+-- federal PRWORA requirement this exists to track.
+
+CREATE TABLE new_hire_report (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  employee_id       UUID NOT NULL REFERENCES employee (id),
+  report_to_state   CHAR(2) NOT NULL,
+  due_by            DATE NOT NULL,
+  built_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+  filed_at          TIMESTAMPTZ   -- NULL until someone actually submits it to the state agency
 );
 
 COMMIT;

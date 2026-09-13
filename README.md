@@ -82,22 +82,46 @@ that lands.
 
 `payroll/filings.ts` computes Form 941's own liability lines (1-6: headcount,
 wages, federal income tax withheld, Social Security and Medicare wages and
-tax, Additional Medicare) and W-2 boxes 1-6/10/12/15-20, purely as ROLLUPS of
-tax lines the engine already produced — no new tax logic, so a wrong figure
-there is a wrong sum, never a wrong calculation. It deliberately does NOT
-prepare a filable return or PDF, does not implement Form 941's credits and
-adjustments (COBRA assistance, leave credits, the research-credit payroll
-offset — none of which PaycheckInput models an input for), and does not
-generate Form 940 (annual FUTA follows the same rollup shape but isn't
-built) — see that module's own header comment.
+tax, Additional Medicare), Form 940's annual FUTA liability lines, and W-2
+boxes 1-6/10/12/15-20, purely as ROLLUPS of tax lines the engine already
+produced — no new tax logic, so a wrong figure there is a wrong sum, never a
+wrong calculation. It deliberately does NOT prepare a filable return or PDF,
+and does not implement Form 941's credits and adjustments (COBRA assistance,
+leave credits, the research-credit payroll offset — none of which
+PaycheckInput models an input for) — see that module's own header comment.
+
+Beyond the pay-run engine itself, three more real HR pieces:
+
+- `payroll/timeAndAttendance.ts` turns raw clock punches into classified
+  regular/overtime/double-time hours. Models the federal FLSA weekly-40
+  test everywhere, plus California's own daily 8/12-hour and
+  7th-consecutive-day rules (Cal. Labor Code § 510) — the interaction
+  between a DAILY rule and the weekly-40 test (hours already paid at a
+  daily premium don't ALSO count toward the weekly test) is exactly the
+  kind of naive-implementation trap this project's tests exist to catch.
+  Alaska/Nevada/Colorado's own daily-OT variants are NOT modelled —
+  disclosed in that module's own header, the same "real legal research
+  this pass didn't do" category as `payroll/newHireReporting.ts`'s
+  per-state reporting deadlines (federal law's own 20-day default applies
+  everywhere here; several states genuinely require faster reporting, not
+  yet researched state by state) and `payroll/pto.ts`'s deliberate choice
+  to model PTO as a configurable EMPLOYER policy engine rather than the
+  ~20 states' own mandatory paid-sick-leave accrual laws.
+- `payroll/pto.ts`: accrual (per hour worked or per pay period), a
+  balance that never goes negative, an accrual cap, annual carryover with
+  its own cap, and a payout as an ordinary taxable Earning.
+- `payroll/newHireReporting.ts`: the federal PRWORA new-hire report every
+  employer owes on every hire (42 U.S.C. § 653a) — the required data
+  elements and 20-day federal default deadline, refusing to build a report
+  missing an SSN or address rather than filing an incomplete one.
 
 What `payroll/` still does NOT attempt, named plainly rather than left to be
-discovered: e-filing anything, benefits carrier EDI, time-and-attendance
-beyond a plain hours-per-period input, and a live bank-linking integration
-(see `payroll/directDeposit.ts`'s own header note on the account-number
-custody boundary a real system draws that this one doesn't attempt to
-build). Each is a real, separate subsystem a full HCM platform builds — not
-a corner cut here.
+discovered: e-filing anything, benefits carrier EDI, and a live
+bank-linking integration (see `payroll/directDeposit.ts`'s own header note
+on the account-number custody boundary a real system draws that this one
+doesn't attempt to build — the same custody boundary `payroll/
+newHireReporting.ts`'s own doc comment draws for a raw SSN). Each is a real,
+separate subsystem a full HCM platform builds — not a corner cut here.
 
 ## The one idea that matters
 
