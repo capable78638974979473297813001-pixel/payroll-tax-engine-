@@ -205,6 +205,12 @@ export function benefitElectionsForEmployee(employeeId: string): BenefitElection
   return readPayrollDb((db) => Object.values(db.benefitElections).filter((e) => e.employeeId === employeeId));
 }
 
+/** Every election belonging to any of these employee ids — for a company-wide rollup (payroll/benefits.ts's own renderCarrierEligibilityRoster()) where BenefitElection itself carries no companyId of its own to filter on directly. */
+export function benefitElectionsForEmployeeIds(employeeIds: readonly string[]): BenefitElection[] {
+  const idSet = new Set(employeeIds);
+  return readPayrollDb((db) => Object.values(db.benefitElections).filter((e) => idSet.has(e.employeeId)));
+}
+
 // ----------------------------------------------------------------------------
 // Recruiting / onboarding
 // ----------------------------------------------------------------------------

@@ -156,10 +156,14 @@ Beyond the pay-run engine itself, three more real HR pieces:
   than silently letting it through with nothing to check it against — the
   admin UI's benefits panel wires the actual server-side gate (it used to
   apply every election unconditionally), lets an admin set the window,
-  and offers a qualifying-life-event checkbox to override it. No carrier
-  integration (EDI 834, eligibility verification, ACA 1095-C reporting) —
-  that's real, separate infrastructure, not built
-  here.
+  and offers a qualifying-life-event checkbox to override it. Still no
+  EDI 834 or real-time carrier eligibility verification — real, separate
+  integrations not built here — but `renderCarrierEligibilityRoster()` is
+  the realistic middle ground many actual small-to-mid employers use
+  instead: a plain CSV a human at the carrier keys in or reconciles by
+  hand, one row per election (including a since-ended one, with its own
+  end date, since a carrier reconciling its own records needs to see who
+  DROPPED coverage too, not just who currently has it).
 - `payroll/compliance.ts`: wires `src/minimum-wage.ts` — already this
   project's own source of truth, the same one `npm run
   coverage:minimum-wage` measures every state/locality against — directly

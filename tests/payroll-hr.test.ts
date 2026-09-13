@@ -15,7 +15,7 @@ import { accruePto, applyAnnualCarryover, emptyPtoBalance, ptoPayoutEarning, use
 import type { PtoPolicy } from '../payroll/pto.ts';
 import { buildNewHireReport, deadlineDaysForState, FEDERAL_DEFAULT_DEADLINE_DAYS, newHireReportingIssuesForCompany } from '../payroll/newHireReporting.ts';
 import { checkMinimumWageCompliance, checkMinimumWageComplianceForCompany } from '../payroll/compliance.ts';
-import { applyElection, canElectBenefit, deductionPlanFromElection, employeeMonthlyPremium, isElectionChangeAllowed, perPeriodDeductionAmount } from '../payroll/benefits.ts';
+import { applyElection, canElectBenefit, deductionPlanFromElection, employeeMonthlyPremium, isElectionChangeAllowed, perPeriodDeductionAmount, renderCarrierEligibilityRoster } from '../payroll/benefits.ts';
 import type { BenefitElection, BenefitPlan } from '../payroll/benefits.ts';
 import { minimumWage } from '../src/minimum-wage.ts';
 import type { Company, Employee } from '../payroll/types.ts';
@@ -536,6 +536,85 @@ describe('benefits: plans, elections, and the deduction they produce (payroll/be
     assert.equal(result.endedElections.length, 0, 'a different plan must never end an unrelated one');
     assert.equal(result.employee.deductionPlans.find((d) => d.code === 'PPO Medical')?.active, true, 'the existing medical deduction must be untouched');
     assert.ok(result.employee.deductionPlans.find((d) => d.code === 'Dental PPO'), 'the new dental deduction must be added');
+  });
+});
+
+describe('carrier eligibility roster export (payroll/benefits.ts)', () => {
+  function medicalPlan(overrides: Partial<BenefitPlan> = {}): BenefitPlan {
+    return {
+      id: 'plan-medical',
+      companyId: 'co-1',
+      name: 'PPO Medical',
+      category: 'section125',
+      monthlyPremiumByTier: { employee_only: dollars(500), employee_spouse: dollars(900), family: dollars(1_200) },
+      employerContributionFraction: 0.8,
+      ...overrides,
+    };
+  }
+  const plan = medicalPlan();
+  const alice = baseEmployee({ id: 'alice', firstName: 'Alice', lastName: 'Anders' });
+  const bob = baseEmployee({ id: 'bob', firstName: 'Bob', lastName: 'Baxter' });
+
+  test('renders a header row plus one row per election for the given plan, sorted by employee name', () => {
+    const elections: BenefitElection[] = [
+      { id: 'el-2', employeeId: 'bob', planId: plan.id, coverageTier: 'employee_only', effectiveDate: '2026-01-01' },
+      { id: 'el-1', employeeId: 'alice', planId: plan.id, coverageTier: 'family', effectiveDate: '2026-01-01' },
+    ];
+    const csv = renderCarrierEligibilityRoster([alice, bob], plan, elections);
+    const lines = csv.trim().split('\n');
+    assert.equal(lines.length, 3); // header + 2 rows
+    assert.equal(lines[0], 'Employee Name,Coverage Tier,Effective Date,End Date,Status,Employee Monthly Cost,Employer Monthly Cost');
+    assert.ok(lines[1].startsWith('Alice Anders,'), 'Alice must sort before Bob');
+    assert.ok(lines[2].startsWith('Bob Baxter,'));
+  });
+
+  test('an election for a DIFFERENT plan is excluded entirely', () => {
+    const elections: BenefitElection[] = [
+      { id: 'el-1', employeeId: 'alice', planId: 'some-other-plan', coverageTier: 'employee_only', effectiveDate: '2026-01-01' },
+    ];
+    const csv = renderCarrierEligibilityRoster([alice], plan, elections);
+    assert.equal(csv.trim().split('\n').length, 1); // header only
+  });
+
+  test('a since-ended election is included with its own end date and a Terminated status, not dropped', () => {
+    const elections: BenefitElection[] = [
+      { id: 'el-1', employeeId: 'alice', planId: plan.id, coverageTier: 'employee_only', effectiveDate: '2026-01-01', endDate: '2026-06-30' },
+    ];
+    const csv = renderCarrierEligibilityRoster([alice], plan, elections);
+    const row = csv.trim().split('\n')[1];
+    assert.match(row, /2026-06-30,Terminated/);
+  });
+
+  test('an active election has an empty end date and an Active status', () => {
+    const elections: BenefitElection[] = [
+      { id: 'el-1', employeeId: 'alice', planId: plan.id, coverageTier: 'employee_only', effectiveDate: '2026-01-01' },
+    ];
+    const csv = renderCarrierEligibilityRoster([alice], plan, elections);
+    const row = csv.trim().split('\n')[1];
+    assert.match(row, /,,Active,/);
+  });
+
+  test('employee and employer monthly cost columns split the full premium correctly', () => {
+    // medicalPlan(): employee_only $500/mo, 80% employer-paid -> employee $100, employer $400.
+    const elections: BenefitElection[] = [
+      { id: 'el-1', employeeId: 'alice', planId: plan.id, coverageTier: 'employee_only', effectiveDate: '2026-01-01' },
+    ];
+    const csv = renderCarrierEligibilityRoster([alice], plan, elections);
+    const row = csv.trim().split('\n')[1];
+    assert.ok(row.endsWith('100.00,400.00'), `expected costs 100.00,400.00, got: ${row}`);
+  });
+
+  test('an election for an employee not in the supplied employee list falls back to the raw employee id', () => {
+    const elections: BenefitElection[] = [
+      { id: 'el-1', employeeId: 'unknown-emp', planId: plan.id, coverageTier: 'employee_only', effectiveDate: '2026-01-01' },
+    ];
+    const csv = renderCarrierEligibilityRoster([], plan, elections);
+    assert.ok(csv.includes('unknown-emp'));
+  });
+
+  test('no elections for this plan produces just the header row', () => {
+    const csv = renderCarrierEligibilityRoster([alice], plan, []);
+    assert.equal(csv.trim(), 'Employee Name,Coverage Tier,Effective Date,End Date,Status,Employee Monthly Cost,Employer Monthly Cost');
   });
 });
 

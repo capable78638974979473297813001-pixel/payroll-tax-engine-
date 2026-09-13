@@ -66,6 +66,7 @@ export {
   employeeMonthlyPremium,
   isElectionChangeAllowed,
   perPeriodDeductionAmount,
+  renderCarrierEligibilityRoster,
 } from './benefits.ts';
 export type { ApplyElectionResult, BenefitElection, BenefitPlan, CoverageTier, ElectionEligibility } from './benefits.ts';
 export {

@@ -48,6 +48,7 @@ import {
   ratePayHourlySafeHarborMonthlyCeiling,
   ratePaySalariedSafeHarborMonthlyCeiling,
   recordContractorPayment,
+  renderCarrierEligibilityRoster,
   renderPaystubText,
   renderPayrollRegister,
   resolvePrenoteVerification,
@@ -72,6 +73,7 @@ import {
   allCompanies,
   auditLogForEntityIds,
   benefitElectionsForEmployee,
+  benefitElectionsForEmployeeIds,
   benefitPlansForCompany,
   candidatesForCompany,
   contractorsForCompany,
@@ -1072,6 +1074,18 @@ const server = createServer(async (req, res) => {
       const payRun = getPayRun(decodeURIComponent(registerMatch[1]));
       if (!payRun) return sendJson(res, 404, { error: 'No such pay run.' });
       const csv = renderPayrollRegister(employeesForCompany(payRun.companyId), payRun);
+      res.writeHead(200, { 'Content-Type': 'text/csv; charset=utf-8' });
+      res.end(csv);
+      return;
+    }
+
+    const carrierRosterMatch = url.pathname.match(/^\/api\/benefit-plans\/([^/]+)\/carrier-roster$/);
+    if (req.method === 'GET' && carrierRosterMatch) {
+      const plan = getBenefitPlan(decodeURIComponent(carrierRosterMatch[1]));
+      if (!plan) return sendJson(res, 404, { error: 'No such benefit plan.' });
+      const companyEmployees = employeesForCompany(plan.companyId);
+      const elections = benefitElectionsForEmployeeIds(companyEmployees.map((e) => e.id));
+      const csv = renderCarrierEligibilityRoster(companyEmployees, plan, elections);
       res.writeHead(200, { 'Content-Type': 'text/csv; charset=utf-8' });
       res.end(csv);
       return;

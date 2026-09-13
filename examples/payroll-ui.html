@@ -403,6 +403,7 @@
       </select>
       <label class="muted"><input type="checkbox" id="benefit-qle" /> Qualifying life event</label>
       <button class="secondary" id="benefit-elect-btn">Elect (effective next check date)</button>
+      <button class="secondary" id="benefit-roster-btn">View carrier eligibility roster (CSV)</button>
     </div>
     <pre id="benefit-view"></pre>
   </section>
@@ -1296,6 +1297,14 @@ document.getElementById('benefit-elect-btn').addEventListener('click', async () 
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
+});
+
+document.getElementById('benefit-roster-btn').addEventListener('click', async () => {
+  const view = document.getElementById('benefit-view');
+  const planId = document.getElementById('benefit-plan').value;
+  if (!planId) return (view.textContent = 'Create a benefit plan first.');
+  const csv = await fetch(`/api/benefit-plans/${planId}/carrier-roster`).then((r) => r.text());
+  view.textContent = csv;
 });
 
 document.getElementById('oe-save-btn').addEventListener('click', async () => {

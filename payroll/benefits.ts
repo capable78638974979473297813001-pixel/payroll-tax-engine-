@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { Cents } from '../src/money.ts';
 import type { PretaxCategory } from '../src/types.ts';
+import { csvField } from './reports.ts';
 import type { DeductionPlan, Employee } from './types.ts';
 
 /**
@@ -10,12 +11,16 @@ import type { DeductionPlan, Employee } from './types.ts';
  * plans once, driving enrollment and deductions throughout the system."
  *
  * SCOPE: this is plan definition, election, and the arithmetic that turns
- * an election into a payroll deduction. It does NOT talk to a carrier
- * (EDI 834 enrollment files, eligibility verification, ACA 1095-C
- * reporting) — those are real, separate integrations a full benefits
- * subsystem needs, not modelled here, the same "disclosed, not built"
- * choice this project makes for e-filing and bank-linking elsewhere (see
- * payroll/directDeposit.ts and payroll/filings.ts's own header comments).
+ * an election into a payroll deduction. It does NOT speak a carrier's own
+ * EDI 834 enrollment-transaction format or do real-time eligibility
+ * verification against a carrier's system — those are real, separate
+ * integrations a full benefits subsystem needs, not modelled here, the
+ * same "disclosed, not built" choice this project makes for e-filing and
+ * bank-linking elsewhere (see payroll/directDeposit.ts and
+ * payroll/filings.ts's own header comments). `renderCarrierEligibilityRoster()`
+ * is the realistic middle ground many actual small-to-mid employers use
+ * instead of EDI 834 when their carrier or broker doesn't support it: a
+ * plain roster file a human at the carrier keys in or reconciles by hand.
  */
 
 export type CoverageTier = 'employee_only' | 'employee_spouse' | 'employee_children' | 'family';
@@ -195,4 +200,50 @@ export function canElectBenefit(
     allowed: false,
     reason: `${requestDate} falls outside the open enrollment window (${openEnrollmentWindow.start} to ${openEnrollmentWindow.end}) and no qualifying life event was asserted.`,
   };
+}
+
+/**
+ * A plain CSV roster of everyone electing ONE plan — the "who's enrolled
+ * in what, since when" file a carrier without EDI 834 support actually
+ * asks a small employer to send by hand, one row per election (including
+ * a since-ended one, with its own end date) rather than only current
+ * enrollment: a carrier reconciling its own records wants to see who
+ * DROPPED coverage and when, not just who currently has it. Sorted by
+ * employee name, then effective date, so a human skimming the file finds
+ * a given person's own history grouped together.
+ */
+export function renderCarrierEligibilityRoster(
+  employees: readonly Employee[],
+  plan: BenefitPlan,
+  elections: readonly BenefitElection[],
+): string {
+  const byId = new Map(employees.map((e) => [e.id, e]));
+  const header = ['Employee Name', 'Coverage Tier', 'Effective Date', 'End Date', 'Status', 'Employee Monthly Cost', 'Employer Monthly Cost'];
+
+  const rows = elections
+    .filter((e) => e.planId === plan.id)
+    .map((election) => {
+      const employee = byId.get(election.employeeId);
+      const name = employee ? `${employee.firstName} ${employee.lastName}` : election.employeeId;
+      const employeeCost = employeeMonthlyPremium(plan, election.coverageTier);
+      const fullPremium = plan.monthlyPremiumByTier[election.coverageTier];
+      const employerCost = fullPremium === undefined ? 0 : fullPremium - employeeCost;
+      return {
+        sortKey: [name, election.effectiveDate] as const,
+        row: [
+          name,
+          election.coverageTier,
+          election.effectiveDate,
+          election.endDate ?? '',
+          election.endDate ? 'Terminated' : 'Active',
+          (employeeCost / 100).toFixed(2),
+          (employerCost / 100).toFixed(2),
+        ],
+      };
+    })
+    .sort((a, b) => a.sortKey[0].localeCompare(b.sortKey[0]) || a.sortKey[1].localeCompare(b.sortKey[1]))
+    .map((entry) => entry.row);
+
+  const lines = [header, ...rows];
+  return lines.map((row) => row.map(csvField).join(',')).join('\n') + '\n';
 }
