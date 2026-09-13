@@ -316,6 +316,31 @@ Beyond the pay-run engine itself, three more real HR pieces:
   figure left out entirely. Wired into the admin UI as a calculator, the
   same "entered directly" pattern the FMLA and workers'-comp panels above
   already use for figures this project doesn't track per employee.
+- `payroll/calSavers.ts`: CalSavers, California's state-run auto-IRA
+  program (Gov. Code §§ 100000 et seq.) — live-verified against the
+  program's own site and the statute's own penalty text. Effective
+  January 1, 2026, EVERY California employer with 1+ employees and no
+  qualified retirement plan of its own must register with CalSavers or
+  certify an exemption — the size-tiered phase-in schedule that used to
+  matter has fully run its course as of this project's own current date.
+  Default auto-enrollment starts at 5%, escalating 1 percentage point per
+  year up to an 8% cap (`calSaversDefaultContributionRate()` computes
+  this in integer basis points rather than adding floating-point
+  percentages directly — `0.05 + 0.01` is `0.060000000000000005` in IEEE
+  754, not the exact `0.06` a rate comparison needs, the same "never let
+  floating point drift into a figure that must compare exactly"
+  discipline `src/money.ts` applies to dollar amounts via integer cents,
+  here applied to a percentage instead). FTB penalties run $250/eligible
+  employee, plus an ADDITIONAL $500/employee once noncompliance continues
+  (total exposure $750/employee) — the exact number of days after the
+  first FTB notice that triggers the additional penalty couldn't be
+  independently verified, so "does noncompliance continue" is a caller-
+  supplied fact here rather than a computed deadline, the same choice
+  `payroll/cobra.ts` and `payroll/warnAct.ts` make for their own caller-
+  supplied headcounts. California only — other states' own auto-IRA
+  programs (OregonSaves, Illinois Secure Choice, and others, each with
+  different figures) remain a disclosed gap. Wired into the admin UI as a
+  calculator.
 - `payroll/hsaFsaLimits.ts`: HSA (IRC §223), health FSA, and dependent-care
   FSA (§129 DCAP) annual contribution limits for 2026 — $4,400 self-only /
   $8,750 family HSA, +$1,000 catch-up at 55+ with NO upper age cutoff

@@ -243,6 +243,17 @@ export {
   requiresMedicalDocumentation,
 } from './pwfa.ts';
 export type { PwfaPredictableAssessmentAccommodation } from './pwfa.ts';
+export {
+  CALSAVERS_EFFECTIVE_DATE,
+  CALSAVERS_DEFAULT_CONTRIBUTION_RATE,
+  CALSAVERS_ANNUAL_ESCALATION_RATE,
+  CALSAVERS_MAX_CONTRIBUTION_RATE,
+  CALSAVERS_FIRST_PENALTY_PER_EMPLOYEE,
+  CALSAVERS_ADDITIONAL_PENALTY_PER_EMPLOYEE,
+  isCalSaversMandatory,
+  calSaversDefaultContributionRate,
+  calSaversPenaltyExposure,
+} from './calSavers.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

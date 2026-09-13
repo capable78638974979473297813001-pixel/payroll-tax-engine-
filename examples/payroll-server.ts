@@ -84,6 +84,9 @@ import {
   isPwfaInEffect,
   isPredictableAssessmentAccommodation,
   requiresMedicalDocumentation,
+  isCalSaversMandatory,
+  calSaversDefaultContributionRate,
+  calSaversPenaltyExposure,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1767,6 +1770,27 @@ const server = createServer(async (req, res) => {
         lawInEffect: isPwfaInEffect(body.requestDate),
         isPredictableAssessment: isPredictableAssessmentAccommodation(body.accommodation),
         medicalDocumentationRequired: requiresMedicalDocumentation(body.accommodation),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // CalSavers calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/calsavers/calculator') {
+      const body = await parseJsonBody<{
+        employeeCount: number;
+        hasQualifiedRetirementPlan: boolean;
+        asOfDate: string;
+        fullYearsEnrolled: number;
+        eligibleEmployeeCount: number;
+        noncomplianceContinues: boolean;
+      }>(req);
+      sendJson(res, 200, {
+        mandatory: isCalSaversMandatory(body.employeeCount, body.hasQualifiedRetirementPlan, body.asOfDate),
+        defaultContributionRate: calSaversDefaultContributionRate(body.fullYearsEnrolled),
+        penaltyExposure: calSaversPenaltyExposure(body.eligibleEmployeeCount, body.noncomplianceContinues),
       });
       return;
     }
