@@ -121,6 +121,9 @@ CREATE TABLE employee (
   job_title              TEXT,
   department             TEXT,
   manager_id             UUID REFERENCES employee (id),
+  -- See payroll/workersComp.ts's own header: an insurer/rating-bureau
+  -- assignment, not something this project derives from a job title.
+  workers_comp_class_code TEXT,
   employment_category    employment_category NOT NULL DEFAULT 'standard',
   pay_type               pay_type_kind NOT NULL,
   hourly_rate_cents      BIGINT,                   -- pay_type = 'hourly'

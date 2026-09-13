@@ -132,6 +132,8 @@ export interface Employee {
   department?: string;
   /** Another Employee.id — this employee's manager, for an org chart. Left as a plain id rather than a nested reference so an Employee record never has to embed another one. */
   managerId?: string;
+  /** This employee's own workers' compensation classification — see payroll/workersComp.ts's own header on why the code and its rate are caller-supplied (an insurer/rating bureau assignment, not something this project derives from a job title). */
+  workersCompClassCode?: string;
   employmentCategory: EmploymentCategory;
   payType: { kind: 'hourly'; hourlyRate: Cents } | { kind: 'salary'; annualSalary: Cents };
   /** Where the employee lives — drives residence-based rules; see PaycheckInput.residenceState's own doc comment. */

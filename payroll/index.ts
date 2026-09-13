@@ -74,6 +74,8 @@ export {
 export type { FmlaEligibilityInput, FmlaEligibilityResult } from './fmla.ts';
 export { buildGlJournalEntries, renderGlJournalCsv } from './glExport.ts';
 export type { GlAccountMapping, GlJournalLine } from './glExport.ts';
+export { STATES_NOT_EXCLUDING_OVERTIME_PREMIUM, workersCompPremium, workersCompSubjectWages } from './workersComp.ts';
+export type { WorkersCompClassCode } from './workersComp.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

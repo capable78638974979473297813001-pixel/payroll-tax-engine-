@@ -152,6 +152,22 @@
   </section>
 
   <section>
+    <h2>Workers' comp premium estimate</h2>
+    <p class="muted" style="margin-top:0">Standard NCCI formula: (subject payroll ÷ 100) × classification rate × experience mod. The overtime PREMIUM portion (the extra half of time-and-a-half) is excluded from subject payroll everywhere except Pennsylvania and Delaware. Class codes, rates, and the experience mod are all figures only an insurer or rating bureau assigns — entered directly, not looked up.</p>
+    <div class="row">
+      <input id="wc-gross-wages" type="number" placeholder="Gross wages ($)" style="width:150px" />
+      <input id="wc-ot-premium" type="number" placeholder="OT premium portion ($)" style="width:180px" value="0" />
+      <input id="wc-state" placeholder="Work state (2-letter)" style="width:150px" maxlength="2" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="wc-rate" type="number" step="0.01" placeholder="Rate per $100 of payroll" style="width:200px" />
+      <input id="wc-exmod" type="number" step="0.01" placeholder="Experience mod (e.g. 1.0)" style="width:200px" value="1.0" />
+      <button class="secondary" id="wc-calc-btn">Estimate premium</button>
+    </div>
+    <pre id="wc-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -731,6 +747,24 @@ document.getElementById('fmla-check-btn').addEventListener('click', async () => 
   }
 });
 
+document.getElementById('wc-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('wc-view');
+  const grossWages = Number(document.getElementById('wc-gross-wages').value) || 0;
+  const overtimePremiumPortion = Number(document.getElementById('wc-ot-premium').value) || 0;
+  const workStateCode = (document.getElementById('wc-state').value || '').toUpperCase();
+  const ratePerHundredOfPayroll = Number(document.getElementById('wc-rate').value) || 0;
+  const experienceModificationFactor = Number(document.getElementById('wc-exmod').value) || 1.0;
+  try {
+    const result = await api('/api/workers-comp/premium-estimate', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ grossWages, overtimePremiumPortion, workStateCode, ratePerHundredOfPayroll, experienceModificationFactor }),
+    });
+    view.textContent = `Subject payroll: ${fmtCents(result.subjectWages)}\nEstimated premium: ${fmtCents(result.premium)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
 document.getElementById('f1095c-generate-btn').addEventListener('click', async () => {
   const tbody = document.querySelector('#f1095c-table tbody');
   const employeeId = document.getElementById('f1095c-employee').value;
@@ -782,10 +816,12 @@ async function loadEmployees() {
     const managerChoices = list.filter((e) => e.id !== employeeId).map((e) => `${e.id} = ${e.firstName} ${e.lastName}`).join('\n');
     const managerId = prompt(`Manager employee id (blank to clear)\n\nAvailable:\n${managerChoices}`, current.managerId ?? '');
     if (managerId === null) return;
+    const workersCompClassCode = prompt('Workers\' comp class code (blank to clear)', current.workersCompClassCode ?? '');
+    if (workersCompClassCode === null) return;
     try {
       await api(`/api/employees/${employeeId}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jobTitle: jobTitle || null, department: department || null, managerId: managerId || null }),
+        body: JSON.stringify({ jobTitle: jobTitle || null, department: department || null, managerId: managerId || null, workersCompClassCode: workersCompClassCode || null }),
       });
       await Promise.all([loadEmployees(), loadOrgChart(), loadAuditLog(), loadComplianceDashboard()]);
     } catch (err) {

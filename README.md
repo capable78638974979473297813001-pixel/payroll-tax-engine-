@@ -317,6 +317,24 @@ Beyond the pay-run engine itself, three more real HR pieces:
   separate integration, the same "disclosed, not built" boundary drawn
   around e-filing and carrier EDI elsewhere). Wired into the admin UI as
   a "GL journal export" panel.
+- `payroll/workersComp.ts`: workers' compensation — a STATE-regulated
+  coverage (unlike the federal taxes this engine otherwise computes),
+  administered mostly through NCCI. The standard premium formula
+  (subject payroll ÷ 100 × classification rate × experience mod), with
+  the real subtlety a naive implementation gets wrong: only the
+  overtime PREMIUM portion (the extra half of time-and-a-half, not the
+  whole overtime payment) is excluded from subject payroll — and
+  Pennsylvania and Delaware don't even allow that exclusion, a fact
+  corroborated across several independent industry sources (disclosed,
+  same as `payroll/aca.ts`'s own FPL-figure caveat, as not confirmed
+  against NCCI's own Basic Manual text directly, which sits behind a
+  login this session couldn't reach). Class codes, their rates, and the
+  experience mod itself are all insurer/rating-bureau assignments this
+  project takes as caller-supplied facts, never derives from a job
+  title — `Employee` gains an optional `workersCompClassCode` field for
+  the assignment itself. Wired into the admin UI as a premium estimator,
+  and the employee-edit flow can now assign a class code alongside
+  job title, department, and manager.
 - `payroll/contractors.ts`: 1099 contractors — a genuinely different
   population from `Employee` (no W-4, no withholding at all; a contractor
   owes their own self-employment tax) — payments, and Form 1099-NEC's own

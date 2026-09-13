@@ -29,6 +29,8 @@ import {
   buildOrgChart,
   canElectBenefit,
   checkFmlaEligibility,
+  workersCompPremium,
+  workersCompSubjectWages,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -320,7 +322,8 @@ const server = createServer(async (req, res) => {
     }
 
     // Core-HR profile fields only — jobTitle/department/managerId (the org
-    // chart's own spine), pay type, and work/residence state. Deliberately
+    // chart's own spine), pay type, work/residence state, and workers'
+    // comp class code. Deliberately
     // NOT a path to touch ytd, deductionPlans, directDepositAccounts,
     // garnishmentOrders, federalW4, ssn or mailingAddress: those already
     // have their own dedicated, more careful flows (or are sensitive
@@ -340,6 +343,7 @@ const server = createServer(async (req, res) => {
         payType?: Employee['payType'];
         workState?: { code: string } | null;
         residenceState?: { code: string };
+        workersCompClassCode?: string | null;
       }>(req);
 
       if (body.managerId === employeeId) {
@@ -353,6 +357,7 @@ const server = createServer(async (req, res) => {
       if (body.payType) updated.payType = body.payType;
       if ('workState' in body) updated.workState = body.workState ?? undefined;
       if (body.residenceState) updated.residenceState = body.residenceState;
+      if ('workersCompClassCode' in body) updated.workersCompClassCode = body.workersCompClassCode ?? undefined;
 
       saveEmployee(updated);
       addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'employee.updated', 'Employee', employeeId, body));
@@ -1372,6 +1377,24 @@ const server = createServer(async (req, res) => {
     if (req.method === 'POST' && url.pathname === '/api/fmla/eligibility') {
       const body = await parseJsonBody<{ monthsEmployed: number; hoursOfServicePastTwelveMonths: number; employeeCountAtWorksite: number }>(req);
       sendJson(res, 200, { result: checkFmlaEligibility(body) });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Workers' compensation premium estimate
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/workers-comp/premium-estimate') {
+      const body = await parseJsonBody<{
+        grossWages: number;
+        overtimePremiumPortion: number;
+        workStateCode: string;
+        ratePerHundredOfPayroll: number;
+        experienceModificationFactor: number;
+      }>(req);
+      const subjectWages = workersCompSubjectWages(dollars(body.grossWages), dollars(body.overtimePremiumPortion), body.workStateCode);
+      const premium = workersCompPremium(subjectWages, dollars(body.ratePerHundredOfPayroll), body.experienceModificationFactor);
+      sendJson(res, 200, { subjectWages, premium });
       return;
     }
 
