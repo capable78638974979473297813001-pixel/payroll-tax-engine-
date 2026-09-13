@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { EmploymentCategory, FederalW4, StateWithholding } from '../src/types.ts';
 import { freshYearToDate } from './ytd.ts';
 import type { Employee } from './types.ts';
@@ -138,4 +139,54 @@ export function hireCandidate(
   };
 
   return { employee, candidate: { ...candidate, stage: 'hired' } };
+}
+
+/**
+ * A real employee record for someone who never went through this
+ * project's own recruiting pipeline at all — the case hireCandidate()
+ * doesn't cover: onboarding an EXISTING workforce onto the platform for
+ * the first time (a new customer switching payroll providers with staff
+ * already employed), or a hire an employer tracked entirely outside this
+ * system. Builds the identical Employee shape hireCandidate() produces,
+ * so payroll/run.ts and everything downstream of it treats a directly
+ * added employee no differently from one hired through the pipeline.
+ *
+ * Requires a real FederalW4, same as hireCandidate() — a fabricated one
+ * would silently mis-withhold this person's very first paycheck here,
+ * the same class of guessed input the tax engine itself refuses to
+ * invent.
+ */
+export interface DirectHireInput {
+  firstName: string;
+  lastName: string;
+  hireDate: string;
+  jobTitle?: string;
+  department?: string;
+  employmentCategory?: EmploymentCategory;
+  payType: Employee['payType'];
+  residenceState: StateWithholding;
+  workState?: StateWithholding;
+  federalW4: FederalW4;
+}
+
+export function directHire(companyId: string, input: DirectHireInput): Employee {
+  return {
+    id: randomUUID(),
+    companyId,
+    firstName: input.firstName,
+    lastName: input.lastName,
+    hireDate: input.hireDate,
+    jobTitle: input.jobTitle,
+    department: input.department,
+    employmentCategory: input.employmentCategory ?? 'standard',
+    payType: input.payType,
+    residenceState: input.residenceState,
+    workState: input.workState,
+    federalW4: input.federalW4,
+    deductionPlans: [],
+    directDepositAccounts: [],
+    garnishmentOrders: [],
+    ytd: freshYearToDate(),
+    ytdYear: Number(input.hireDate.slice(0, 4)),
+  };
 }

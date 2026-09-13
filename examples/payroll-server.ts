@@ -26,6 +26,7 @@ import {
   canElectBenefit,
   compute1095CForEmployee,
   determineAleStatus,
+  directHire,
   draftPayRun,
   emptyPtoBalance,
   extendOffer,
@@ -53,6 +54,7 @@ import {
 } from '../payroll/index.ts';
 import type { EmployeeMonthlyHours } from '../payroll/aca.ts';
 import type { EmployerCoverageOfferPolicy } from '../payroll/form1095c.ts';
+import type { DirectHireInput } from '../payroll/onboarding.ts';
 import type { DirectDepositVerification } from '../payroll/directDepositVerification.ts';
 import type { StateEmployerRegistration } from '../payroll/types.ts';
 import type { BenefitPlan, CoverageTier } from '../payroll/benefits.ts';
@@ -278,6 +280,16 @@ const server = createServer(async (req, res) => {
     const employeesMatch = req.url?.match(/^\/api\/companies\/([^/]+)\/employees$/);
     if (req.method === 'GET' && employeesMatch) {
       sendJson(res, 200, { employees: employeesForCompany(decodeURIComponent(employeesMatch[1])) });
+      return;
+    }
+    if (req.method === 'POST' && employeesMatch) {
+      const companyId = decodeURIComponent(employeesMatch[1]);
+      if (!getCompany(companyId)) return sendJson(res, 404, { error: 'No such company.' });
+      const body = await parseJsonBody<DirectHireInput>(req);
+      const employee = directHire(companyId, body);
+      saveEmployee(employee);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'employee.direct_hire', 'Employee', employee.id, { firstName: employee.firstName, lastName: employee.lastName }));
+      sendJson(res, 200, { employee });
       return;
     }
 

@@ -70,10 +70,11 @@ export {
   acceptOffer,
   advanceCandidate,
   declineOffer,
+  directHire,
   extendOffer,
   hireCandidate,
 } from './onboarding.ts';
-export type { Candidate, CandidateStage, JobPosting, OfferDetails } from './onboarding.ts';
+export type { Candidate, CandidateStage, DirectHireInput, JobPosting, OfferDetails } from './onboarding.ts';
 export {
   finalPayDueDate,
   finalPtoPayoutHours,

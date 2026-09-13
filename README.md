@@ -163,7 +163,13 @@ Beyond the pay-run engine itself, three more real HR pieces:
   `payroll/run.ts` can pay. Requires a real `FederalW4` rather than
   defaulting one: a fabricated W-4 would silently mis-withhold someone's
   very first paycheck, the same class of guessed input the tax engine
-  itself refuses to invent.
+  itself refuses to invent. `directHire()` is the same module's other
+  door in: the identical `Employee` shape, for the case the recruiting
+  pipeline doesn't cover at all — onboarding an EXISTING workforce onto
+  the platform for the first time, with no candidate or offer ever
+  recorded here. Wired into the admin UI as "+ Add employee directly" on
+  the Employees section, backed by a new `POST /api/companies/:id/employees`
+  route, audit-logged the same as a pipeline hire.
 - `payroll/termination.ts`: final-paycheck timing and PTO/vacation payout
   at offboarding — genuinely different rules depending on WHY someone
   left, which federal law does not set a deadline for at all (FLSA has no

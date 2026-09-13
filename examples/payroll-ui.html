@@ -188,6 +188,10 @@
 
   <section>
     <h2>Employees</h2>
+    <div class="row">
+      <button class="secondary" id="add-employee-btn">+ Add employee directly</button>
+      <span class="muted">(for onboarding existing staff — a new hire from a job posting instead goes through Recruiting below)</span>
+    </div>
     <table id="employees-table">
       <thead><tr><th>Name</th><th>Pay type</th><th>Residence</th><th>YTD Social Security wages</th><th></th></tr></thead>
       <tbody></tbody>
@@ -475,6 +479,32 @@ document.getElementById('new-company-btn').addEventListener('click', async () =>
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ legalName, ein, homeState, paySchedule }),
   });
   await refreshAll(created.id);
+});
+
+document.getElementById('add-employee-btn').addEventListener('click', async () => {
+  const firstName = prompt('First name');
+  if (!firstName) return;
+  const lastName = prompt('Last name');
+  if (!lastName) return;
+  const hireDate = prompt('Hire date (YYYY-MM-DD)', new Date().toISOString().slice(0, 10));
+  if (!hireDate) return;
+  const payKind = (prompt('Pay type (hourly/salary)', 'hourly') || 'hourly').toLowerCase();
+  const payType = payKind === 'salary'
+    ? { kind: 'salary', annualSalary: Math.round(Number(prompt('Annual salary ($)', '60000')) * 100) }
+    : { kind: 'hourly', hourlyRate: Math.round(Number(prompt('Hourly rate ($)', '20')) * 100) };
+  const residenceState = { code: (prompt('Residence state (2-letter)', company.homeState) || company.homeState).toUpperCase() };
+  const jobTitle = prompt('Job title (optional)') || undefined;
+  const department = prompt('Department (optional)') || undefined;
+  const federalW4 = { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 };
+  try {
+    await api(`/api/companies/${company.id}/employees`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstName, lastName, hireDate, payType, residenceState, jobTitle, department, federalW4 }),
+    });
+    await Promise.all([loadEmployees(), loadOrgChart(), loadAuditLog()]);
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
 });
 
 async function loadReport() {

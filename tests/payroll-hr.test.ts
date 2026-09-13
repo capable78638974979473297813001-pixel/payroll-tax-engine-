@@ -21,7 +21,7 @@ import { minimumWage } from '../src/minimum-wage.ts';
 import type { Company, Employee } from '../payroll/types.ts';
 import { freshYearToDate } from '../payroll/ytd.ts';
 import { finalPayDueDate, finalPtoPayoutHours, isVacationPayoutMandatory, terminateEmployee } from '../payroll/termination.ts';
-import { acceptOffer, advanceCandidate, declineOffer, extendOffer, hireCandidate } from '../payroll/onboarding.ts';
+import { acceptOffer, advanceCandidate, declineOffer, directHire, extendOffer, hireCandidate } from '../payroll/onboarding.ts';
 import type { Candidate, OfferDetails } from '../payroll/onboarding.ts';
 
 function baseEmployee(overrides: Partial<Employee> = {}): Employee {
@@ -611,5 +611,75 @@ describe('hiring a candidate produces a real Employee record (payroll/onboarding
     const notYetAccepted = { ...acceptedCandidate(), stage: 'offer_extended' as const };
     const w4: import('../src/types.ts').FederalW4 = { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 };
     assert.throws(() => hireCandidate(notYetAccepted, 'co-1', w4, { code: 'NY' }));
+  });
+});
+
+describe('directHire: onboarding an existing employee outside the recruiting pipeline (payroll/onboarding.ts)', () => {
+  const w4: import('../src/types.ts').FederalW4 = { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 };
+
+  test('builds a real Employee record with a fresh id, YTD, and empty deduction/deposit/garnishment lists', () => {
+    const employee = directHire('co-1', {
+      firstName: 'Dana',
+      lastName: 'Ortiz',
+      hireDate: '2026-05-01',
+      jobTitle: 'Shift Lead',
+      department: 'Kitchen',
+      payType: { kind: 'hourly', hourlyRate: dollars(22) },
+      residenceState: { code: 'IL' },
+      federalW4: w4,
+    });
+
+    assert.equal(employee.companyId, 'co-1');
+    assert.equal(employee.firstName, 'Dana');
+    assert.equal(employee.lastName, 'Ortiz');
+    assert.equal(employee.hireDate, '2026-05-01');
+    assert.equal(employee.jobTitle, 'Shift Lead');
+    assert.equal(employee.department, 'Kitchen');
+    assert.deepEqual(employee.payType, { kind: 'hourly', hourlyRate: dollars(22) });
+    assert.equal(employee.ytdYear, 2026);
+    assert.deepEqual(employee.ytd, freshYearToDate());
+    assert.deepEqual(employee.deductionPlans, []);
+    assert.deepEqual(employee.directDepositAccounts, []);
+    assert.deepEqual(employee.garnishmentOrders, []);
+    assert.ok(employee.id.length > 0);
+  });
+
+  test('two direct hires get distinct ids', () => {
+    const input = {
+      firstName: 'A', lastName: 'B', hireDate: '2026-01-01',
+      payType: { kind: 'hourly' as const, hourlyRate: dollars(20) },
+      residenceState: { code: 'TX' }, federalW4: w4,
+    };
+    const first = directHire('co-1', input);
+    const second = directHire('co-1', input);
+    assert.notEqual(first.id, second.id);
+  });
+
+  test('defaults employmentCategory to standard when not supplied', () => {
+    const employee = directHire('co-1', {
+      firstName: 'A', lastName: 'B', hireDate: '2026-01-01',
+      payType: { kind: 'salary', annualSalary: dollars(60_000) },
+      residenceState: { code: 'TX' }, federalW4: w4,
+    });
+    assert.equal(employee.employmentCategory, 'standard');
+  });
+
+  test('an explicit employmentCategory overrides the default', () => {
+    const employee = directHire('co-1', {
+      firstName: 'A', lastName: 'B', hireDate: '2026-01-01',
+      employmentCategory: 'household',
+      payType: { kind: 'hourly', hourlyRate: dollars(18) },
+      residenceState: { code: 'TX' }, federalW4: w4,
+    });
+    assert.equal(employee.employmentCategory, 'household');
+  });
+
+  test('workState is optional and omitted defaults to undefined, matching hireCandidate\'s own convention', () => {
+    const employee = directHire('co-1', {
+      firstName: 'A', lastName: 'B', hireDate: '2026-01-01',
+      payType: { kind: 'hourly', hourlyRate: dollars(18) },
+      residenceState: { code: 'TX' }, federalW4: w4,
+    });
+    assert.equal(employee.workState, undefined);
   });
 });
