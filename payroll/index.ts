@@ -53,8 +53,8 @@ export {
 export type { DailyHours, OvertimeRule, TimePunch, WeeklyHoursClassification } from './timeAndAttendance.ts';
 export { accruePto, applyAnnualCarryover, emptyPtoBalance, ptoPayoutEarning, usePto } from './pto.ts';
 export type { PtoAccrualMethod, PtoBalance, PtoPolicy, PtoUsageResult } from './pto.ts';
-export { buildNewHireReport, deadlineDaysForState, FEDERAL_DEFAULT_DEADLINE_DAYS } from './newHireReporting.ts';
-export type { NewHireReport } from './newHireReporting.ts';
+export { buildNewHireReport, deadlineDaysForState, FEDERAL_DEFAULT_DEADLINE_DAYS, newHireReportingIssuesForCompany } from './newHireReporting.ts';
+export type { NewHireReport, NewHireReportingIssue, NewHireReportingIssueKind } from './newHireReporting.ts';
 export { checkMinimumWageCompliance, checkMinimumWageComplianceForCompany } from './compliance.ts';
 export type { MinimumWageComplianceIssue } from './compliance.ts';
 export {

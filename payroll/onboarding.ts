@@ -111,6 +111,9 @@ export function hireCandidate(
   companyId: string,
   federalW4: FederalW4,
   residenceState: StateWithholding,
+  /** Optional here, but required before payroll/newHireReporting.ts's own buildNewHireReport() can produce the report PRWORA obligates every employer to file within 20 days of this hire — see DirectHireInput's own doc comment on the same two fields. */
+  ssn?: string,
+  mailingAddress?: string,
 ): { employee: Employee; candidate: Candidate } {
   if (candidate.stage !== 'offer_accepted') {
     throw new Error(`Cannot hire candidate ${candidate.id}: offer is not accepted (stage is "${candidate.stage}")`);
@@ -131,6 +134,8 @@ export function hireCandidate(
     residenceState,
     workState: offer.workState,
     federalW4,
+    ssn,
+    mailingAddress,
     deductionPlans: [],
     directDepositAccounts: [],
     garnishmentOrders: [],
@@ -167,6 +172,9 @@ export interface DirectHireInput {
   residenceState: StateWithholding;
   workState?: StateWithholding;
   federalW4: FederalW4;
+  /** Both optional here, but required before payroll/newHireReporting.ts's own buildNewHireReport() can produce the report PRWORA obligates every employer to file within 20 days of THIS hire — omitting them doesn't skip that obligation, it just leaves it as an outstanding compliance finding until they're filled in. */
+  ssn?: string;
+  mailingAddress?: string;
 }
 
 export function directHire(companyId: string, input: DirectHireInput): Employee {
@@ -183,6 +191,8 @@ export function directHire(companyId: string, input: DirectHireInput): Employee 
     residenceState: input.residenceState,
     workState: input.workState,
     federalW4: input.federalW4,
+    ssn: input.ssn,
+    mailingAddress: input.mailingAddress,
     deductionPlans: [],
     directDepositAccounts: [],
     garnishmentOrders: [],

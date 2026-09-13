@@ -27,6 +27,7 @@ import {
   compute1095CForEmployee,
   determineAleStatus,
   directHire,
+  buildNewHireReport,
   draftPayRun,
   emptyPtoBalance,
   extendOffer,
@@ -40,6 +41,7 @@ import {
   initiateMicroDepositVerification,
   initiatePrenoteVerification,
   isAffordableUnderW2SafeHarbor,
+  newHireReportingIssuesForCompany,
   overtimeRuleForState,
   pairPunchesIntoDailyHours,
   ratePayHourlySafeHarborMonthlyCeiling,
@@ -84,6 +86,8 @@ import {
   getPtoBalance,
   getPtoPolicy,
   jobPostingsForCompany,
+  markNewHireReportFiled,
+  newHireReportFiledEmployeeIds,
   paymentsForContractor,
   payRunsForCompany,
   ptoBalancesForEmployee,
@@ -612,8 +616,10 @@ const server = createServer(async (req, res) => {
         companyId: string;
         federalW4: Employee['federalW4'];
         residenceState: Employee['residenceState'];
+        ssn?: string;
+        mailingAddress?: string;
       }>(req);
-      const { employee, candidate: hired } = hireCandidate(candidate, body.companyId, body.federalW4, body.residenceState);
+      const { employee, candidate: hired } = hireCandidate(candidate, body.companyId, body.federalW4, body.residenceState, body.ssn, body.mailingAddress);
       saveEmployee(employee);
       saveCandidate(hired);
       addAuditLogEntry(
@@ -778,6 +784,47 @@ const server = createServer(async (req, res) => {
         .map((employee) => ({ employeeId: employee.id, issues: i9ComplianceIssues(employee, getI9Record(employee.id) ?? undefined, asOfDate) }))
         .filter((f) => f.issues.length > 0);
       sendJson(res, 200, { findings });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // New-hire reporting (PRWORA)
+    // ------------------------------------------------------------------
+
+    const newHireReportingMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/new-hire-reporting$/);
+    if (req.method === 'GET' && newHireReportingMatch) {
+      const companyId = decodeURIComponent(newHireReportingMatch[1]);
+      const company = getCompany(companyId);
+      if (!company) return sendJson(res, 404, { error: 'No such company.' });
+      const asOfDate = url.searchParams.get('asOfDate') ?? new Date().toISOString().slice(0, 10);
+      const issues = newHireReportingIssuesForCompany(company, employeesForCompany(companyId), newHireReportFiledEmployeeIds(), asOfDate);
+      sendJson(res, 200, { issues });
+      return;
+    }
+
+    const newHireReportMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/new-hire-report$/);
+    if (req.method === 'GET' && newHireReportMatch) {
+      const employeeId = decodeURIComponent(newHireReportMatch[1]);
+      const employee = getEmployee(employeeId);
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const company = getCompany(employee.companyId)!;
+      try {
+        sendJson(res, 200, { report: buildNewHireReport(company, employee) });
+      } catch (err) {
+        sendJson(res, 400, { error: err instanceof Error ? err.message : String(err) });
+      }
+      return;
+    }
+
+    const newHireReportFiledMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/new-hire-report\/mark-filed$/);
+    if (req.method === 'POST' && newHireReportFiledMatch) {
+      const employeeId = decodeURIComponent(newHireReportFiledMatch[1]);
+      if (!getEmployee(employeeId)) return sendJson(res, 404, { error: 'No such employee.' });
+      const body = await parseJsonBody<{ filedAt?: string }>(req);
+      const filedAt = body.filedAt ?? new Date().toISOString().slice(0, 10);
+      markNewHireReportFiled(employeeId, filedAt);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'new_hire_report.marked_filed', 'Employee', employeeId, { filedAt }));
+      sendJson(res, 200, { employeeId, filedAt });
       return;
     }
 

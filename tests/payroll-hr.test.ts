@@ -13,7 +13,7 @@ import {
 import type { DailyHours, TimePunch } from '../payroll/timeAndAttendance.ts';
 import { accruePto, applyAnnualCarryover, emptyPtoBalance, ptoPayoutEarning, usePto } from '../payroll/pto.ts';
 import type { PtoPolicy } from '../payroll/pto.ts';
-import { buildNewHireReport, deadlineDaysForState, FEDERAL_DEFAULT_DEADLINE_DAYS } from '../payroll/newHireReporting.ts';
+import { buildNewHireReport, deadlineDaysForState, FEDERAL_DEFAULT_DEADLINE_DAYS, newHireReportingIssuesForCompany } from '../payroll/newHireReporting.ts';
 import { checkMinimumWageCompliance, checkMinimumWageComplianceForCompany } from '../payroll/compliance.ts';
 import { applyElection, canElectBenefit, deductionPlanFromElection, employeeMonthlyPremium, isElectionChangeAllowed, perPeriodDeductionAmount } from '../payroll/benefits.ts';
 import type { BenefitElection, BenefitPlan } from '../payroll/benefits.ts';
@@ -296,6 +296,75 @@ describe('new-hire reporting (payroll/newHireReporting.ts)', () => {
   test('refuses to build a report for an employee missing an SSN or mailing address, rather than filing an incomplete one', () => {
     assert.throws(() => buildNewHireReport(company(), employee({ ssn: undefined })), /SSN/);
     assert.throws(() => buildNewHireReport(company(), employee({ mailingAddress: undefined })), /mailing address/);
+  });
+});
+
+describe('new-hire reporting compliance worklist (payroll/newHireReporting.ts)', () => {
+  function company(): Company {
+    return { id: 'co-1', legalName: 'Acme LLC', ein: '12-3456789', homeState: 'TX', paySchedule: { frequency: 'biweekly', anchorPeriodStart: '2026-01-04', checkDateLagDays: 5 } };
+  }
+  function employee(overrides: Partial<Employee> = {}): Employee {
+    return {
+      id: 'e1',
+      companyId: 'co-1',
+      firstName: 'Jordan',
+      lastName: 'Lee',
+      hireDate: '2026-03-01',
+      employmentCategory: 'standard',
+      payType: { kind: 'hourly', hourlyRate: dollars(20) },
+      residenceState: { code: 'TX' },
+      federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+      deductionPlans: [],
+      directDepositAccounts: [],
+      garnishmentOrders: [],
+      ytd: freshYearToDate(),
+      ytdYear: 2026,
+      ssn: '123-45-6789',
+      mailingAddress: '2 Oak Ave, Austin, TX 78702',
+      ...overrides,
+    };
+  }
+
+  test('an employee missing an SSN or mailing address is a missing_data finding, not silently skipped', () => {
+    const issues = newHireReportingIssuesForCompany(company(), [employee({ ssn: undefined })], new Set(), '2026-03-10');
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].kind, 'missing_data');
+    assert.deepEqual(issues[0].missingFields, ['ssn']);
+  });
+
+  test('missing BOTH fields lists both', () => {
+    const issues = newHireReportingIssuesForCompany(company(), [employee({ ssn: undefined, mailingAddress: undefined })], new Set(), '2026-03-10');
+    assert.deepEqual(issues[0].missingFields, ['ssn', 'mailingAddress']);
+  });
+
+  test('a deadline already in the past is an overdue finding', () => {
+    // hireDate 2026-03-01 + 20 days = 2026-03-21; asOfDate well after that.
+    const issues = newHireReportingIssuesForCompany(company(), [employee()], new Set(), '2026-04-01');
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].kind, 'overdue');
+    assert.equal(issues[0].dueBy, '2026-03-21');
+  });
+
+  test('a deadline within the due-soon window (default 5 days) but not yet passed is due_soon', () => {
+    const issues = newHireReportingIssuesForCompany(company(), [employee()], new Set(), '2026-03-18');
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].kind, 'due_soon');
+  });
+
+  test('a deadline safely in the future produces no finding at all', () => {
+    const issues = newHireReportingIssuesForCompany(company(), [employee()], new Set(), '2026-03-01');
+    assert.deepEqual(issues, []);
+  });
+
+  test('an employee already recorded as filed is skipped entirely, even if overdue', () => {
+    const issues = newHireReportingIssuesForCompany(company(), [employee()], new Set(['e1']), '2026-04-01');
+    assert.deepEqual(issues, []);
+  });
+
+  test('the due-soon window is configurable', () => {
+    const issues = newHireReportingIssuesForCompany(company(), [employee()], new Set(), '2026-03-01', 30);
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].kind, 'due_soon');
   });
 });
 

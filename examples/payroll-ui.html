@@ -319,6 +319,16 @@
   </section>
 
   <section>
+    <h2>New-hire reporting (PRWORA)</h2>
+    <p class="muted" style="margin-top:0">Every employer owes a report to the employee's own work-state workforce agency within 20 days of each hire. This project doesn't e-file it — it tracks the worklist and lets you view/copy the report and mark it filed once you have.</p>
+    <table id="nhr-table">
+      <thead><tr><th>Employee</th><th>Finding</th><th>Due by</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <pre id="nhr-view"></pre>
+  </section>
+
+  <section>
     <h2>Garnishment orders</h2>
     <div class="row">
       <select id="garn-employee"></select>
@@ -495,13 +505,15 @@ document.getElementById('add-employee-btn').addEventListener('click', async () =
   const residenceState = { code: (prompt('Residence state (2-letter)', company.homeState) || company.homeState).toUpperCase() };
   const jobTitle = prompt('Job title (optional)') || undefined;
   const department = prompt('Department (optional)') || undefined;
+  const ssn = prompt('SSN (optional now, but required before a PRWORA new-hire report can be filed for this person)') || undefined;
+  const mailingAddress = prompt('Mailing address (same requirement as SSN)') || undefined;
   const federalW4 = { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 };
   try {
     await api(`/api/companies/${company.id}/employees`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ firstName, lastName, hireDate, payType, residenceState, jobTitle, department, federalW4 }),
+      body: JSON.stringify({ firstName, lastName, hireDate, payType, residenceState, jobTitle, department, ssn, mailingAddress, federalW4 }),
     });
-    await Promise.all([loadEmployees(), loadOrgChart(), loadAuditLog()]);
+    await Promise.all([loadEmployees(), loadOrgChart(), loadAuditLog(), loadNewHireReporting()]);
   } catch (err) {
     alert('Error: ' + err.message);
   }
@@ -797,12 +809,14 @@ async function handleCandidateAction(candidateId, action) {
       view.textContent = JSON.stringify(candidate, null, 2);
     } else if (action === '__hire__') {
       const federalW4 = { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 };
+      const ssn = prompt('SSN (optional now, but required before a PRWORA new-hire report can be filed for this person)') || undefined;
+      const mailingAddress = prompt('Mailing address (same requirement as SSN)') || undefined;
       const { employee, candidate } = await api(`/api/candidates/${candidateId}/hire`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ companyId: company.id, federalW4, residenceState: { code: company.homeState } }),
+        body: JSON.stringify({ companyId: company.id, federalW4, residenceState: { code: company.homeState }, ssn, mailingAddress }),
       });
       view.textContent = `Hired as employee ${employee.id}\n` + JSON.stringify(candidate, null, 2);
-      await loadEmployees();
+      await Promise.all([loadEmployees(), loadNewHireReporting()]);
     } else {
       const { candidate } = await api(`/api/candidates/${candidateId}/advance`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: action }),
@@ -822,7 +836,8 @@ async function refreshAll(preferredCompanyId) {
     loadPtoPolicies(), loadBenefitPlans(), loadJobPostings(), loadCandidates(), loadContractors(),
     loadStateRegistrations(), loadOrgChart(),
   ]);
-  await loadGarnishments();
+  // These read the `employees` array loadEmployees() just populated, so they run after it rather than racing it inside the Promise.all above.
+  await Promise.all([loadGarnishments(), loadNewHireReporting()]);
 }
 
 function renderOrgNode(node) {
@@ -1371,6 +1386,41 @@ document.getElementById('i9-compliance-btn').addEventListener('click', async () 
     view.textContent = 'Error: ' + err.message;
   }
 });
+
+async function loadNewHireReporting() {
+  const { issues } = await api(`/api/companies/${company.id}/new-hire-reporting`);
+  const tbody = document.querySelector('#nhr-table tbody');
+  const nameFor = (id) => {
+    const e = employees.find((emp) => emp.id === id);
+    return e ? `${e.firstName} ${e.lastName}` : id;
+  };
+  const findingLabel = { missing_data: 'Missing data', overdue: 'OVERDUE', due_soon: 'Due soon' };
+  tbody.innerHTML = issues.length === 0
+    ? '<tr><td colspan="4" class="muted">Nothing outstanding.</td></tr>'
+    : issues.map((i) => `
+      <tr>
+        <td>${nameFor(i.employeeId)}</td>
+        <td>${findingLabel[i.kind]}${i.missingFields ? ' (' + i.missingFields.join(', ') + ')' : ''}</td>
+        <td>${i.dueBy ?? '—'}</td>
+        <td>
+          ${i.kind !== 'missing_data' ? `<button class="secondary nhr-view" data-emp="${i.employeeId}">View report</button> <button class="secondary nhr-mark-filed" data-emp="${i.employeeId}">Mark filed</button>` : ''}
+        </td>
+      </tr>`).join('');
+
+  tbody.querySelectorAll('.nhr-view').forEach((btn) => btn.addEventListener('click', async () => {
+    const view = document.getElementById('nhr-view');
+    try {
+      const { report } = await api(`/api/employees/${btn.dataset.emp}/new-hire-report`);
+      view.textContent = JSON.stringify(report, null, 2);
+    } catch (err) {
+      view.textContent = 'Error: ' + err.message;
+    }
+  }));
+  tbody.querySelectorAll('.nhr-mark-filed').forEach((btn) => btn.addEventListener('click', async () => {
+    await api(`/api/employees/${btn.dataset.emp}/new-hire-report/mark-filed`, { method: 'POST' });
+    await loadNewHireReporting();
+  }));
+}
 
 refreshAll().catch((err) => {
   document.getElementById('company-info').textContent = 'Error: ' + err.message;

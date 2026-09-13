@@ -123,7 +123,20 @@ Beyond the pay-run engine itself, three more real HR pieces:
 - `payroll/newHireReporting.ts`: the federal PRWORA new-hire report every
   employer owes on every hire (42 U.S.C. § 653a) — the required data
   elements and 20-day federal default deadline, refusing to build a report
-  missing an SSN or address rather than filing an incomplete one.
+  missing an SSN or address rather than filing an incomplete one. Before
+  this round the function existed but nothing ever CALLED it: neither
+  hire path (`hireCandidate()` nor `directHire()`) collected an SSN or
+  mailing address, and no server route ever built a report — every single
+  hire was silently unreportable. `newHireReportingIssuesForCompany()`
+  closes the loop as a company-wide worklist (missing data, overdue, due
+  soon), both hire flows now ask for the two required fields (optional at
+  hire time, but flagged immediately as outstanding if skipped), and the
+  admin UI's new "New-hire reporting" panel views/copies a built report
+  and marks it filed. Filing itself — actual submission to a state
+  workforce agency — is out of scope the same way every other e-filing is
+  in this project; the "mark filed" action only records that a human did
+  it, the same `db/payroll-schema.sql`'s own `new_hire_report.filed_at`
+  column already anticipated.
 - `payroll/benefits.ts`: define a plan's own per-tier premium once (never
   a generic multiplier — a real plan prices employee+spouse,
   employee+children and family independently), let an employee's election

@@ -49,6 +49,8 @@ interface DB {
   auditLog: AuditLogEntry[];
   /** Keyed by accountId — see payroll/directDepositVerification.ts. A real system's schema would allow more than one historical attempt per account; this demo store keeps only the current one. */
   directDepositVerifications: Record<string, DirectDepositVerification>;
+  /** employeeId -> the ISO date this employer told the store its PRWORA new-hire report was actually filed — see payroll/newHireReporting.ts's own newHireReportingIssuesForCompany(). Filing itself (submission to a state workforce agency) is out of scope the same way every other e-filing is in this project; this only tracks that a human said it was done. */
+  newHireReportsFiled: Record<string, string>;
 }
 
 function emptyDb(): DB {
@@ -68,6 +70,7 @@ function emptyDb(): DB {
     contractorPayments: [],
     auditLog: [],
     directDepositVerifications: {},
+    newHireReportsFiled: {},
   };
 }
 
@@ -99,6 +102,7 @@ function load(): DB {
       contractorPayments: parsed.contractorPayments ?? base.contractorPayments,
       auditLog: parsed.auditLog ?? base.auditLog,
       directDepositVerifications: parsed.directDepositVerifications ?? base.directDepositVerifications,
+      newHireReportsFiled: parsed.newHireReportsFiled ?? base.newHireReportsFiled,
     };
   } catch {
     return emptyDb();
@@ -375,4 +379,18 @@ export function saveDirectDepositVerification(verification: DirectDepositVerific
 
 export function getDirectDepositVerification(accountId: string): DirectDepositVerification | null {
   return readPayrollDb((db) => db.directDepositVerifications[accountId] ?? null);
+}
+
+// ----------------------------------------------------------------------------
+// New-hire reporting
+// ----------------------------------------------------------------------------
+
+export function markNewHireReportFiled(employeeId: string, filedAt: string): void {
+  withPayrollDb((db) => {
+    db.newHireReportsFiled[employeeId] = filedAt;
+  });
+}
+
+export function newHireReportFiledEmployeeIds(): Set<string> {
+  return readPayrollDb((db) => new Set(Object.keys(db.newHireReportsFiled)));
 }
