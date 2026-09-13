@@ -28,6 +28,7 @@ import {
   applyElection,
   buildOrgChart,
   canElectBenefit,
+  checkFmlaEligibility,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1320,6 +1321,16 @@ const server = createServer(async (req, res) => {
       } else {
         sendJson(res, 400, { error: 'Unknown safeHarbor.' });
       }
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // FMLA eligibility
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/fmla/eligibility') {
+      const body = await parseJsonBody<{ monthsEmployed: number; hoursOfServicePastTwelveMonths: number; employeeCountAtWorksite: number }>(req);
+      sendJson(res, 200, { result: checkFmlaEligibility(body) });
       return;
     }
 

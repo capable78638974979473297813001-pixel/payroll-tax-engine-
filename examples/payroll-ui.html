@@ -140,6 +140,18 @@
   </section>
 
   <section>
+    <h2>FMLA eligibility</h2>
+    <p class="muted" style="margin-top:0">The 3-part test (12 months employed, 1,250 hours of service in the past 12 months, 50+ employees within 75 miles of the worksite) — all three must hold. This project doesn't track employment history or worksite geography, so each figure is entered directly.</p>
+    <div class="row">
+      <input id="fmla-months" type="number" placeholder="Months employed" style="width:160px" />
+      <input id="fmla-hours" type="number" placeholder="Hours of service (past 12mo)" style="width:200px" />
+      <input id="fmla-worksite-count" type="number" placeholder="Employees within 75mi" style="width:180px" />
+      <button class="secondary" id="fmla-check-btn">Check eligibility</button>
+    </div>
+    <pre id="fmla-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -672,6 +684,24 @@ document.getElementById('aca-affordability-btn').addEventListener('click', async
     view.textContent = result.ceilingCents !== undefined
       ? `Monthly ceiling: ${fmtCents(result.ceilingCents)} — ${result.affordable ? 'AFFORDABLE' : 'NOT affordable'}`
       : (result.affordable ? 'AFFORDABLE' : 'NOT affordable');
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('fmla-check-btn').addEventListener('click', async () => {
+  const view = document.getElementById('fmla-view');
+  const monthsEmployed = Number(document.getElementById('fmla-months').value) || 0;
+  const hoursOfServicePastTwelveMonths = Number(document.getElementById('fmla-hours').value) || 0;
+  const employeeCountAtWorksite = Number(document.getElementById('fmla-worksite-count').value) || 0;
+  try {
+    const { result } = await api('/api/fmla/eligibility', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ monthsEmployed, hoursOfServicePastTwelveMonths, employeeCountAtWorksite }),
+    });
+    view.textContent = result.eligible
+      ? 'ELIGIBLE — all three prongs met.'
+      : 'NOT eligible:\n' + result.reasons.map((r) => '- ' + r).join('\n');
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

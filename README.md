@@ -262,6 +262,24 @@ Beyond the pay-run engine itself, three more real HR pieces:
   calendar year's typical headcount, which this project doesn't track
   historically, so current headcount stands in — visible in the
   ineligibility message itself when it's the reason.
+- `payroll/fmla.ts`: FMLA job-protected leave (29 U.S.C. § 2601 et seq.),
+  LIVE-VERIFIED against the Department of Labor's own Fact Sheet #28. The
+  three-prong eligibility test is CONJUNCTIVE — 12 months employed, 1,250
+  hours of service in the preceding 12 months (only hours actually
+  worked, never paid leave), and 50+ employees within 75 miles of the
+  worksite — and `checkFmlaEligibility()` reports every failing prong at
+  once, not just the first, since each is independently actionable.
+  Leave entitlement itself scales with an employee's own regular
+  schedule (`fmlaHoursEntitlement()`: 12 weeks x their weekly hours, not
+  a flat 480 regardless of full- or part-time status). Deliberately its
+  own headcount concept, not reused from ACA's Applicable Large Employer
+  test or COBRA's small-employer exemption — three different statutes,
+  three different definitions of "how many employees, counted how."
+  Wired into the admin UI as an "FMLA eligibility" calculator. Does not
+  track an actual leave request end to end (dates, approval, return-to-
+  work) — a real, separate persistence workflow not built here, the same
+  category of gap as PTO's own request/approval workflow was before this
+  session, disclosed rather than silently assumed away.
 - `payroll/i9.ts`: Form I-9 employment eligibility verification (8 U.S.C.
   § 1324a) — the one compliance step required for EVERY US hire regardless
   of state, unlike the new-hire report above. Section 1's deadline is the

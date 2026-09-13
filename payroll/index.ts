@@ -61,6 +61,17 @@ export {
   qualifyingEventDurationMonths,
 } from './cobra.ts';
 export type { CobraQualifyingEventReason } from './cobra.ts';
+export {
+  FMLA_COVERED_EMPLOYER_THRESHOLD,
+  FMLA_MINIMUM_HOURS_OF_SERVICE,
+  FMLA_MINIMUM_MONTHS_EMPLOYED,
+  FMLA_STANDARD_LEAVE_WEEKS,
+  FMLA_WORKSITE_EMPLOYEE_THRESHOLD,
+  checkFmlaEligibility,
+  fmlaHoursEntitlement,
+  fmlaHoursRemaining,
+} from './fmla.ts';
+export type { FmlaEligibilityInput, FmlaEligibilityResult } from './fmla.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';
