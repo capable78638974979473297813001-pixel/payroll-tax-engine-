@@ -188,6 +188,18 @@ export {
   estimatedWageStatementViolationDamages,
 } from './nyWageNotice.ts';
 export type { NyWageBasisOfPay, NyWageNotice } from './nyWageNotice.ts';
+export {
+  FLSA_STANDARD_SALARY_LEVEL_WEEKLY,
+  FLSA_STANDARD_SALARY_LEVEL_ANNUAL,
+  FLSA_COMPUTER_EMPLOYEE_HOURLY_RATE,
+  FLSA_HCE_ANNUAL_COMPENSATION_THRESHOLD,
+  requiresSalaryLevelTest,
+  meetsStandardSalaryLevelTest,
+  meetsComputerEmployeeSalaryLevelTest,
+  meetsHighlyCompensatedEmployeeTest,
+  meetsSalaryLevelRequirement,
+} from './flsaExemption.ts';
+export type { FlsaExemptionCategory } from './flsaExemption.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

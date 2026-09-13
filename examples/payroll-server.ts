@@ -62,6 +62,8 @@ import {
   isNewNoticeRequiredForRateChange,
   estimatedNoticeViolationDamages,
   estimatedWageStatementViolationDamages,
+  meetsSalaryLevelRequirement,
+  requiresSalaryLevelTest,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -116,6 +118,7 @@ import type { Contractor } from '../payroll/contractors.ts';
 import type { EverifyCase, EverifyCaseStatus } from '../payroll/everify.ts';
 import type { HdhpCoverageTier } from '../payroll/hsaFsaLimits.ts';
 import type { NyWageBasisOfPay } from '../payroll/nyWageNotice.ts';
+import type { FlsaExemptionCategory } from '../payroll/flsaExemption.ts';
 import type { I9Record } from '../payroll/i9.ts';
 import type { Candidate, CandidateStage, OfferDetails } from '../payroll/onboarding.ts';
 import type { TerminationReason } from '../payroll/termination.ts';
@@ -1632,6 +1635,29 @@ const server = createServer(async (req, res) => {
         newNoticeRequiredForRateChange: isNewNoticeRequiredForRateChange(body.isRateIncrease, body.willAppearOnNextWageStatement, body.isHospitalityIndustry),
         estimatedNoticeViolationDamages: estimatedNoticeViolationDamages(body.daysWithoutCompliantNotice),
         estimatedWageStatementViolationDamages: estimatedWageStatementViolationDamages(body.daysWithoutCompliantStatement),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // FLSA white-collar exemption salary-level calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/flsa-exemption/calculator') {
+      const body = await parseJsonBody<{
+        category: FlsaExemptionCategory;
+        weeklySalaryDollars: number | null;
+        hourlyRateDollars: number | null;
+        totalAnnualCompensationDollars: number | null;
+      }>(req);
+      sendJson(res, 200, {
+        salaryLevelTestRequired: requiresSalaryLevelTest(body.category),
+        meetsSalaryLevelRequirement: meetsSalaryLevelRequirement(
+          body.category,
+          body.weeklySalaryDollars === null ? null : dollars(body.weeklySalaryDollars),
+          body.hourlyRateDollars === null ? null : dollars(body.hourlyRateDollars),
+          body.totalAnnualCompensationDollars === null ? null : dollars(body.totalAnnualCompensationDollars),
+        ),
       });
       return;
     }

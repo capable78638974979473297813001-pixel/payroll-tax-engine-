@@ -138,6 +138,28 @@ Beyond the pay-run engine itself, three more real HR pieces:
   yet researched state by state) and `payroll/pto.ts`'s deliberate choice
   to model PTO as a configurable EMPLOYER policy engine rather than the
   ~20 states' own mandatory paid-sick-leave accrual laws.
+- `payroll/flsaExemption.ts`: the federal FLSA "white collar" overtime
+  exemption's salary/compensation LEVEL prong (29 C.F.R. Part 541) — live-
+  verified against DOL's own currently-published figures, with a
+  deliberately prominent litigation note: the Department's 2024 rule,
+  which would have raised these thresholds and added automatic future
+  updates, was VACATED nationwide by a federal court in November 2024
+  (*State of Texas v. Dep't of Labor*), so DOL's own site — and this
+  module — currently uses the pre-2024 ("2019 rule") levels: $684/week
+  standard, $107,432/year for the highly-compensated-employee test
+  (which needs BOTH that annual figure AND the $684/week floor — a huge
+  bonus doesn't waive the weekly minimum), and computer employees'
+  distinctive either/or choice of $684/week OR $27.63/hour. Outside sales
+  is the one category with NO salary floor at all, decided entirely on
+  duties. Deliberately checks ONLY this one prong: every §541 exemption
+  also needs a passing DUTIES test (what the employee actually does) and
+  a SALARY BASIS test (paid a predetermined amount not docked for
+  quality/quantity of work, with a short list of permitted exceptions) —
+  both fact-specific legal judgments, not formulas, the same kind of
+  scope boundary `payroll/warnAct.ts`'s own exception-guidance functions
+  draw around "notice as soon as practicable." A passing result here is
+  necessary, never sufficient, for actual exempt status. Wired into the
+  admin UI as a calculator.
 - `payroll/mealRestBreaks.ts`: California's own meal/rest period rules
   (Labor Code §§ 226.7, 512) — a first meal period required past 5 hours
   (waivable at or under 6), a second past 10 hours (waivable at or under
