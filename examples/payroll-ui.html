@@ -96,10 +96,11 @@
   <section>
     <h2>Pay run history</h2>
     <table id="runs-table">
-      <thead><tr><th>Check date</th><th>Period</th><th>Status</th><th>Employees</th><th>Paystubs</th></tr></thead>
+      <thead><tr><th>Check date</th><th>Period</th><th>Status</th><th>Employees</th><th>Paystubs</th><th>Register</th></tr></thead>
       <tbody></tbody>
     </table>
     <pre id="paystub-view" hidden></pre>
+    <pre id="register-view" hidden></pre>
   </section>
 
   <section>
@@ -255,6 +256,25 @@
     </table>
     <pre id="recruiting-view"></pre>
   </section>
+
+  <section>
+    <h2>1099 contractors</h2>
+    <div class="row">
+      <input id="contractor-name" placeholder="Legal name" />
+      <input id="contractor-tin" placeholder="TIN (SSN or EIN)" />
+      <input id="contractor-address" placeholder="Address" />
+      <button class="secondary" id="contractor-create-btn">Add contractor</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <select id="contractor-select"></select>
+      <input id="contractor-payment-amount" type="number" placeholder="Payment amount ($)" style="width:170px" />
+      <input id="contractor-payment-date" type="date" />
+      <button class="secondary" id="contractor-pay-btn">Record payment</button>
+      <input id="contractor-1099-year" type="number" value="2026" style="width:90px" />
+      <button class="secondary" id="contractor-1099-btn">View 1099-NEC status</button>
+    </div>
+    <pre id="contractor-view"></pre>
+  </section>
 </main>
 
 <script>
@@ -383,6 +403,7 @@ async function loadRuns() {
       <td>${r.status}</td>
       <td>${r.lines.length}</td>
       <td>${r.lines.map((l) => `<a href="#" data-run="${r.id}" data-emp="${l.employeeId}" class="paystub-link">${l.employeeId}</a>`).join(' · ')}</td>
+      <td><a href="#" data-run="${r.id}" class="register-link">CSV</a></td>
     </tr>`).join('');
 
   tbody.querySelectorAll('.paystub-link').forEach((a) => {
@@ -390,6 +411,16 @@ async function loadRuns() {
       ev.preventDefault();
       const text = await fetch(`/api/pay-runs/${a.dataset.run}/paystub/${a.dataset.emp}`).then((r) => r.text());
       const view = document.getElementById('paystub-view');
+      view.hidden = false;
+      view.textContent = text;
+    });
+  });
+
+  tbody.querySelectorAll('.register-link').forEach((a) => {
+    a.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      const text = await fetch(`/api/pay-runs/${a.dataset.run}/register`).then((r) => r.text());
+      const view = document.getElementById('register-view');
       view.hidden = false;
       view.textContent = text;
     });
@@ -490,7 +521,7 @@ async function refreshAll(preferredCompanyId) {
   await loadCompany(preferredCompanyId);
   await Promise.all([
     loadEmployees(), loadNextPeriod(), loadRuns(), loadReport(),
-    loadPtoPolicies(), loadBenefitPlans(), loadJobPostings(), loadCandidates(),
+    loadPtoPolicies(), loadBenefitPlans(), loadJobPostings(), loadCandidates(), loadContractors(),
   ]);
   await loadGarnishments();
 }
@@ -779,6 +810,63 @@ document.getElementById('cand-create-btn').addEventListener('click', async () =>
       body: JSON.stringify({ jobPostingId, firstName, lastName, email }),
     });
     await loadCandidates();
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+// ----------------------------------------------------------------------
+// 1099 contractors
+// ----------------------------------------------------------------------
+
+document.getElementById('contractor-payment-date').value = new Date().toISOString().slice(0, 10);
+
+async function loadContractors() {
+  const { contractors } = await api(`/api/companies/${company.id}/contractors`);
+  document.getElementById('contractor-select').innerHTML = contractors.length === 0
+    ? '<option value="">(add a contractor first)</option>'
+    : contractors.map((c) => `<option value="${c.id}">${c.legalName}</option>`).join('');
+}
+
+document.getElementById('contractor-create-btn').addEventListener('click', async () => {
+  const legalName = document.getElementById('contractor-name').value;
+  const tin = document.getElementById('contractor-tin').value;
+  const address = document.getElementById('contractor-address').value;
+  const view = document.getElementById('contractor-view');
+  try {
+    await api(`/api/companies/${company.id}/contractors`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ legalName, tin, address }),
+    });
+    await loadContractors();
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('contractor-pay-btn').addEventListener('click', async () => {
+  const contractorId = document.getElementById('contractor-select').value;
+  const amount = Math.round(Number(document.getElementById('contractor-payment-amount').value) * 100) || 0;
+  const paymentDate = document.getElementById('contractor-payment-date').value;
+  const view = document.getElementById('contractor-view');
+  if (!contractorId) return (view.textContent = 'Add a contractor first.');
+  try {
+    const { payment } = await api(`/api/contractors/${contractorId}/payments`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, paymentDate }),
+    });
+    view.textContent = JSON.stringify(payment, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('contractor-1099-btn').addEventListener('click', async () => {
+  const contractorId = document.getElementById('contractor-select').value;
+  const year = document.getElementById('contractor-1099-year').value;
+  const view = document.getElementById('contractor-view');
+  if (!contractorId) return (view.textContent = 'Add a contractor first.');
+  try {
+    const { form1099 } = await api(`/api/contractors/${contractorId}/1099?year=${year}`);
+    view.textContent = JSON.stringify(form1099, null, 2);
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

@@ -13,6 +13,7 @@ import {
   acceptOffer,
   approvePayRun,
   classifyWeeklyHours,
+  compute1099Nec,
   computeCompanyReport,
   computeForm940,
   computeForm941,
@@ -30,11 +31,14 @@ import {
   i9Status,
   overtimeRuleForState,
   pairPunchesIntoDailyHours,
+  recordContractorPayment,
   renderPaystubText,
+  renderPayrollRegister,
   terminateEmployee,
   usePto,
 } from '../payroll/index.ts';
 import type { BenefitPlan, CoverageTier } from '../payroll/benefits.ts';
+import type { Contractor } from '../payroll/contractors.ts';
 import type { I9Record } from '../payroll/i9.ts';
 import type { Candidate, CandidateStage, OfferDetails } from '../payroll/onboarding.ts';
 import type { TerminationReason } from '../payroll/termination.ts';
@@ -45,16 +49,19 @@ import {
   benefitElectionsForEmployee,
   benefitPlansForCompany,
   candidatesForCompany,
+  contractorsForCompany,
   employeesForCompany,
   getBenefitPlan,
   getCandidate,
   getCompany,
+  getContractor,
   getEmployee,
   getI9Record,
   getPayRun,
   getPtoBalance,
   getPtoPolicy,
   jobPostingsForCompany,
+  paymentsForContractor,
   payRunsForCompany,
   ptoBalancesForEmployee,
   ptoPoliciesForCompany,
@@ -62,6 +69,8 @@ import {
   saveBenefitPlan,
   saveCandidate,
   saveCompany,
+  saveContractor,
+  saveContractorPayment,
   saveEmployee,
   saveEmployees,
   saveI9Record,
@@ -670,6 +679,58 @@ const server = createServer(async (req, res) => {
       const asOfDate = url.searchParams.get('asOfDate') ?? new Date().toISOString().slice(0, 10);
       const report = computeCompanyReport(company, employeesForCompany(companyId), payRunsForCompany(companyId), asOfDate);
       sendJson(res, 200, { report });
+      return;
+    }
+
+    const registerMatch = url.pathname.match(/^\/api\/pay-runs\/([^/]+)\/register$/);
+    if (req.method === 'GET' && registerMatch) {
+      const payRun = getPayRun(decodeURIComponent(registerMatch[1]));
+      if (!payRun) return sendJson(res, 404, { error: 'No such pay run.' });
+      const csv = renderPayrollRegister(employeesForCompany(payRun.companyId), payRun);
+      res.writeHead(200, { 'Content-Type': 'text/csv; charset=utf-8' });
+      res.end(csv);
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // 1099 contractors
+    // ------------------------------------------------------------------
+
+    const contractorsMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/contractors$/);
+    if (req.method === 'GET' && contractorsMatch) {
+      sendJson(res, 200, { contractors: contractorsForCompany(decodeURIComponent(contractorsMatch[1])) });
+      return;
+    }
+    if (req.method === 'POST' && contractorsMatch) {
+      const companyId = decodeURIComponent(contractorsMatch[1]);
+      const body = await parseJsonBody<{ legalName: string; tin: string; address: string }>(req);
+      const contractor: Contractor = { id: randomUUID(), companyId, active: true, ...body };
+      saveContractor(contractor);
+      sendJson(res, 200, { contractor });
+      return;
+    }
+
+    const contractorPaymentsMatch = url.pathname.match(/^\/api\/contractors\/([^/]+)\/payments$/);
+    if (req.method === 'GET' && contractorPaymentsMatch) {
+      sendJson(res, 200, { payments: paymentsForContractor(decodeURIComponent(contractorPaymentsMatch[1])) });
+      return;
+    }
+    if (req.method === 'POST' && contractorPaymentsMatch) {
+      const contractorId = decodeURIComponent(contractorPaymentsMatch[1]);
+      if (!getContractor(contractorId)) return sendJson(res, 404, { error: 'No such contractor.' });
+      const body = await parseJsonBody<{ amount: number; paymentDate: string; description?: string }>(req);
+      const payment = recordContractorPayment(contractorId, body.amount, body.paymentDate, body.description);
+      saveContractorPayment(payment);
+      sendJson(res, 200, { payment });
+      return;
+    }
+
+    const contractor1099Match = url.pathname.match(/^\/api\/contractors\/([^/]+)\/1099$/);
+    if (req.method === 'GET' && contractor1099Match) {
+      const contractorId = decodeURIComponent(contractor1099Match[1]);
+      const year = Number(url.searchParams.get('year'));
+      if (!year) return sendJson(res, 400, { error: 'year is required.' });
+      sendJson(res, 200, { form1099: compute1099Nec(contractorId, year, paymentsForContractor(contractorId)) });
       return;
     }
 

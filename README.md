@@ -62,7 +62,9 @@ spend PTO, elect a benefit plan, run a candidate through the recruiting
 pipeline into a real hire, terminate an employee with the correct
 final-pay date and PTO payout, track Form I-9 status and deadlines,
 manage garnishment orders, switch between or create multiple companies,
-and pull a headcount/payroll-cost report. Checked end to end in an actual
+pull a headcount/payroll-cost report and a payroll-register CSV, and
+pay and track 1099 contractors toward their own Form 1099-NEC. Checked
+end to end in an actual
 browser (Playwright), not just against the API.
 
 Persistence follows the same convention `site/lib/store.ts` already
@@ -186,9 +188,21 @@ Beyond the pay-run engine itself, three more real HR pieces:
   an expiring work authorization.
 - `payroll/reports.ts`: headcount (as of any date, using the exact same
   active/terminated logic a real pay run does), a department breakdown,
-  and YTD payroll cost — gross pay AND the employer's own tax cost, not
-  just what employees were paid — as pure rollups over records this
-  project already maintains.
+  YTD payroll cost — gross pay AND the employer's own tax cost, not just
+  what employees were paid — and a payroll-register CSV export (one row
+  per employee per run, plus a self-checking TOTAL row) for a
+  general-ledger import, all as pure rollups over records this project
+  already maintains.
+- `payroll/contractors.ts`: 1099 contractors — a genuinely different
+  population from `Employee` (no W-4, no withholding at all; a contractor
+  owes their own self-employment tax) — payments, and Form 1099-NEC's own
+  reporting-threshold determination. Uses the real, LIVE-VERIFIED 2026
+  figure: the One Big Beautiful Bill Act raised the threshold from its
+  long-standing $600 to $2,000 effective for 2026 payments, confirmed via
+  source review rather than relying on trained-in memory that would have
+  been quietly wrong for the exact year this project targets. Does not
+  distinguish an employee-vs-contractor misclassification question, and
+  does not model backup withholding for an invalid TIN.
 
 `Employee` also carries plain Core-HR fields now (`jobTitle`,
 `department`, `managerId`) — purely descriptive, the natural spine for an

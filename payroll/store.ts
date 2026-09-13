@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { BenefitElection, BenefitPlan } from './benefits.ts';
+import type { Contractor, ContractorPayment } from './contractors.ts';
 import type { I9Record } from './i9.ts';
 import type { Candidate, JobPosting } from './onboarding.ts';
 import type { PtoBalance, PtoPolicy } from './pto.ts';
@@ -41,6 +42,8 @@ interface DB {
   ptoBalances: Record<string, PtoBalance>;
   timePunches: TimePunch[];
   i9Records: Record<string, I9Record>;
+  contractors: Record<string, Contractor>;
+  contractorPayments: ContractorPayment[];
 }
 
 function emptyDb(): DB {
@@ -56,6 +59,8 @@ function emptyDb(): DB {
     ptoBalances: {},
     timePunches: [],
     i9Records: {},
+    contractors: {},
+    contractorPayments: [],
   };
 }
 
@@ -83,6 +88,8 @@ function load(): DB {
       ptoBalances: parsed.ptoBalances ?? base.ptoBalances,
       timePunches: parsed.timePunches ?? base.timePunches,
       i9Records: parsed.i9Records ?? base.i9Records,
+      contractors: parsed.contractors ?? base.contractors,
+      contractorPayments: parsed.contractorPayments ?? base.contractorPayments,
     };
   } catch {
     return emptyDb();
@@ -293,4 +300,32 @@ export function saveI9Record(record: I9Record): void {
 
 export function getI9Record(employeeId: string): I9Record | null {
   return readPayrollDb((db) => db.i9Records[employeeId] ?? null);
+}
+
+// ----------------------------------------------------------------------------
+// 1099 contractors
+// ----------------------------------------------------------------------------
+
+export function saveContractor(contractor: Contractor): void {
+  withPayrollDb((db) => {
+    db.contractors[contractor.id] = contractor;
+  });
+}
+
+export function getContractor(id: string): Contractor | null {
+  return readPayrollDb((db) => db.contractors[id] ?? null);
+}
+
+export function contractorsForCompany(companyId: string): Contractor[] {
+  return readPayrollDb((db) => Object.values(db.contractors).filter((c) => c.companyId === companyId));
+}
+
+export function saveContractorPayment(payment: ContractorPayment): void {
+  withPayrollDb((db) => {
+    db.contractorPayments.push(payment);
+  });
+}
+
+export function paymentsForContractor(contractorId: string): ContractorPayment[] {
+  return readPayrollDb((db) => db.contractorPayments.filter((p) => p.contractorId === contractorId));
 }

@@ -2,7 +2,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { dollars } from '../src/money.ts';
-import { computeCompanyReport } from '../payroll/reports.ts';
+import { computeCompanyReport, renderPayrollRegister } from '../payroll/reports.ts';
 import { freshYearToDate } from '../payroll/ytd.ts';
 import type { Company, Employee, PayRun, PayRunLine } from '../payroll/types.ts';
 
@@ -107,5 +107,41 @@ describe('company reports (payroll/reports.ts)', () => {
     const runs: PayRun[] = [run({ id: 'r1', companyId: 'co-OTHER', checkDate: '2026-01-22', lines: [line('e1', dollars(50_000), 0, 0)] })];
     const report = computeCompanyReport(company(), [employee({ id: 'e1' })], runs, '2026-06-15');
     assert.equal(report.ytdGrossPay, 0);
+  });
+});
+
+describe('the payroll register CSV (payroll/reports.ts)', () => {
+  test('one row per employee, resolved by name, plus a TOTAL row whose figures actually sum the individual rows', () => {
+    const employees = [employee({ id: 'e1', firstName: 'Ada', lastName: 'Lovelace' }), employee({ id: 'e2', firstName: 'Grace', lastName: 'Hopper' })];
+    const payRun = run({
+      id: 'r1',
+      checkDate: '2026-01-22',
+      lines: [line('e1', dollars(3_000), dollars(500), dollars(400)), line('e2', dollars(2_000), dollars(300), dollars(250))],
+    });
+
+    const csv = renderPayrollRegister(employees, payRun);
+    const rows = csv.trim().split('\n').map((r) => r.split(','));
+
+    assert.deepEqual(rows[0], ['Employee', 'Gross Pay', 'Employee Taxes', 'Employer Taxes', 'Pretax Deductions', 'Posttax Deductions', 'Garnishments', 'Net Pay']);
+    // e1: gross $3,000, employee taxes $500 -> net (per the line() helper's
+    // own netPay = grossPay - employeeTaxTotal) is exactly $2,500.00.
+    assert.deepEqual(rows[1], ['Ada Lovelace', '3000.00', '500.00', '400.00', '0.00', '0.00', '0.00', '2500.00']);
+    assert.equal(rows[2][0], 'Grace Hopper');
+    assert.equal(rows[3][0], 'TOTAL');
+    assert.equal(rows[3][1], '5000.00', 'gross pay total must be the sum of both employees\' own gross pay');
+    assert.equal(rows[3][2], '800.00');
+  });
+
+  test('an employee name containing a comma is quoted, keeping the CSV well-formed', () => {
+    const employees = [employee({ id: 'e1', firstName: 'Smith', lastName: 'Jr, John' })];
+    const payRun = run({ id: 'r1', checkDate: '2026-01-22', lines: [line('e1', dollars(1_000), 0, 0)] });
+    const csv = renderPayrollRegister(employees, payRun);
+    assert.match(csv, /"Smith Jr, John"/);
+  });
+
+  test('an employee id with no matching record falls back to the raw id rather than throwing', () => {
+    const payRun = run({ id: 'r1', checkDate: '2026-01-22', lines: [line('unknown-emp', dollars(1_000), 0, 0)] });
+    const csv = renderPayrollRegister([], payRun);
+    assert.match(csv, /unknown-emp/);
   });
 });
