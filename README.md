@@ -490,6 +490,27 @@ Beyond the pay-run engine itself, three more real HR pieces:
   `isWithinCumulativeServiceLimit()` takes the caller's own already-
   adjusted cumulative-service figure rather than computing the exceptions
   itself. Wired into the admin UI as a calculator.
+- `payroll/waitingTimePenalty.ts`: California's "waiting time" penalty for
+  a late final paycheck (Labor Code § 203) — live-verified against DIR's
+  own FAQ, corroborated on the daily-rate methodology across multiple
+  independent CA employment-law sources. The natural companion to
+  `payroll/termination.ts`'s own `finalPayDueDate()`, which computes WHEN
+  final wages are due but stops there — this computes what's owed once
+  that deadline is missed: a full day's wages (hourly rate × normal daily
+  hours) for every CALENDAR day late — weekends and holidays count,
+  unlike the business-day counting this project uses elsewhere — capped
+  at 30 days (matches DIR's own worked example exactly: $120/day × 10
+  days late = $1,200). Deliberately does NOT evaluate the statute's
+  "good faith dispute" defense (an employer who honestly and reasonably
+  disputes the wages owed may avoid the penalty entirely), a fact-
+  specific judgment about the employer's own state of mind, not a
+  formula — the same boundary `payroll/warnAct.ts`'s own exception
+  guidance draws. California only, the same single-jurisdiction scope
+  `payroll/paidSickLeave.ts` and `payroll/workersComp.ts` already use —
+  New York's own late-final-pay liquidated-damages provisions (NYLL
+  § 198) are a different statute with different figures, not modeled.
+  Wired into the admin UI right after the termination panel, whose own
+  `finalPay.dueDate` auto-fills this calculator's due-date field.
 - `payroll/caBereavementLeave.ts`: California bereavement leave (AB 1949,
   Gov. Code § 12945.7, effective 2023) — live-verified against the bill's
   own statutory text. Covers employers with 5+ employees, for an

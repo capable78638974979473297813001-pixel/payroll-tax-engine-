@@ -639,6 +639,19 @@
   </section>
 
   <section>
+    <h2>California waiting time penalty</h2>
+    <p class="muted" style="margin-top:0">Cal. Labor Code § 203: a full day's wages (hourly rate × normal daily hours) for every CALENDAR day a final paycheck is late — weekends and holidays count — capped at 30 days. A good-faith dispute over the wages owed can be a full defense, which this project doesn't evaluate (a fact-specific judgment about the employer's own state of mind).</p>
+    <div class="row">
+      <input id="wtp-due-date" type="date" />
+      <input id="wtp-paid-date" type="date" />
+      <input id="wtp-hourly-rate" type="number" placeholder="Hourly rate ($)" style="width:150px" />
+      <input id="wtp-daily-hours" type="number" placeholder="Normal daily hours" style="width:170px" value="8" />
+      <button class="secondary" id="wtp-calc-btn">Calculate</button>
+    </div>
+    <pre id="wtp-view"></pre>
+  </section>
+
+  <section>
     <h2>Form I-9 (employment eligibility)</h2>
     <div class="row">
       <select id="i9-employee"></select>
@@ -2104,6 +2117,30 @@ document.getElementById('term-btn').addEventListener('click', async () => {
     });
     view.textContent = JSON.stringify({ finalPay: result.finalPay, ptoPayoutHours: result.ptoPayoutHours, cobra: result.cobra }, null, 2);
     await Promise.all([loadEmployees(), loadReport(), loadAuditLog(), loadComplianceDashboard()]);
+    if (result.finalPay && result.finalPay.dueDate) document.getElementById('wtp-due-date').value = result.finalPay.dueDate;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('wtp-paid-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('wtp-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('wtp-view');
+  const dueDate = document.getElementById('wtp-due-date').value;
+  const actualPaymentDate = document.getElementById('wtp-paid-date').value;
+  const hourlyRateDollars = Number(document.getElementById('wtp-hourly-rate').value) || 0;
+  const normalDailyHours = Number(document.getElementById('wtp-daily-hours').value) || 8;
+  if (!dueDate || !actualPaymentDate) return (view.textContent = 'Pick both a due date and an actual payment date.');
+  try {
+    const result = await api('/api/waiting-time-penalty/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dueDate, actualPaymentDate, hourlyRateDollars, normalDailyHours }),
+    });
+    view.textContent =
+      `Days late: ${result.daysLate}\n` +
+      `Daily rate: ${fmtCents(result.dailyRate)}\n` +
+      `Penalty amount: ${fmtCents(result.penaltyAmount)}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

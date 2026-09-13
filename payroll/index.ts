@@ -271,6 +271,12 @@ export {
   userraMaxHealthContinuationPremium,
 } from './userra.ts';
 export type { UserraReemploymentTier } from './userra.ts';
+export {
+  WAITING_TIME_PENALTY_MAX_DAYS,
+  waitingTimePenaltyDaysLate,
+  waitingTimeDailyRate,
+  waitingTimePenaltyAmount,
+} from './waitingTimePenalty.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

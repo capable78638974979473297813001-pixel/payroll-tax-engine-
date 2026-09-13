@@ -93,6 +93,9 @@ import {
   userraDisabilityReportDeadline,
   isHealthContinuationElectionRequired,
   userraMaxHealthContinuationPremium,
+  waitingTimePenaltyDaysLate,
+  waitingTimeDailyRate,
+  waitingTimePenaltyAmount,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1819,6 +1822,22 @@ const server = createServer(async (req, res) => {
         disabilityReportDeadline: userraDisabilityReportDeadline(body.serviceCompletionDate),
         healthContinuationElectionRequired: isHealthContinuationElectionRequired(body.serviceDurationDays),
         maxHealthContinuationPremium: userraMaxHealthContinuationPremium(dollars(body.fullMonthlyPremiumDollars)),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // California waiting time penalty calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/waiting-time-penalty/calculator') {
+      const body = await parseJsonBody<{ dueDate: string; actualPaymentDate: string; hourlyRateDollars: number; normalDailyHours: number }>(req);
+      const daysLate = waitingTimePenaltyDaysLate(body.dueDate, body.actualPaymentDate);
+      const dailyRate = waitingTimeDailyRate(dollars(body.hourlyRateDollars), body.normalDailyHours);
+      sendJson(res, 200, {
+        daysLate,
+        dailyRate,
+        penaltyAmount: waitingTimePenaltyAmount(dailyRate, daysLate),
       });
       return;
     }
