@@ -200,6 +200,21 @@ export {
   meetsSalaryLevelRequirement,
 } from './flsaExemption.ts';
 export type { FlsaExemptionCategory } from './flsaExemption.ts';
+export {
+  CA_BEREAVEMENT_LEAVE_EMPLOYER_THRESHOLD,
+  CA_BEREAVEMENT_LEAVE_MIN_TENURE_DAYS,
+  CA_BEREAVEMENT_LEAVE_DAYS,
+  CA_BEREAVEMENT_LEAVE_COMPLETION_WINDOW_MONTHS,
+  CA_BEREAVEMENT_DOCUMENTATION_REQUEST_WINDOW_DAYS,
+  isCaBereavementLeaveEmployerCovered,
+  isCaBereavementLeaveEligible,
+  caBereavementLeaveCompletionDeadline,
+  isCaBereavementLeaveTimely,
+  caBereavementDocumentationRequestDeadline,
+  caBereavementLeavePaidDays,
+  caBereavementLeaveUnpaidDays,
+} from './caBereavementLeave.ts';
+export type { CaBereavementCoveredRelationship } from './caBereavementLeave.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

@@ -64,6 +64,13 @@ import {
   estimatedWageStatementViolationDamages,
   meetsSalaryLevelRequirement,
   requiresSalaryLevelTest,
+  isCaBereavementLeaveEmployerCovered,
+  isCaBereavementLeaveEligible,
+  caBereavementLeaveCompletionDeadline,
+  isCaBereavementLeaveTimely,
+  caBereavementDocumentationRequestDeadline,
+  caBereavementLeavePaidDays,
+  caBereavementLeaveUnpaidDays,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1658,6 +1665,30 @@ const server = createServer(async (req, res) => {
           body.hourlyRateDollars === null ? null : dollars(body.hourlyRateDollars),
           body.totalAnnualCompensationDollars === null ? null : dollars(body.totalAnnualCompensationDollars),
         ),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // California bereavement leave calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/ca-bereavement-leave/calculator') {
+      const body = await parseJsonBody<{
+        employeeCount: number;
+        daysEmployedBeforeLeaveStarts: number;
+        dateOfDeath: string;
+        leaveDate: string;
+        existingPolicyPaidDays: number;
+      }>(req);
+      sendJson(res, 200, {
+        employerCovered: isCaBereavementLeaveEmployerCovered(body.employeeCount),
+        employeeEligible: isCaBereavementLeaveEligible(body.daysEmployedBeforeLeaveStarts),
+        completionDeadline: caBereavementLeaveCompletionDeadline(body.dateOfDeath),
+        leaveTimely: isCaBereavementLeaveTimely(body.dateOfDeath, body.leaveDate),
+        documentationRequestDeadline: caBereavementDocumentationRequestDeadline(body.leaveDate),
+        paidDays: caBereavementLeavePaidDays(body.existingPolicyPaidDays),
+        unpaidDays: caBereavementLeaveUnpaidDays(body.existingPolicyPaidDays),
       });
       return;
     }

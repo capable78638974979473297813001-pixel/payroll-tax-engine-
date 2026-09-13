@@ -409,6 +409,26 @@ Beyond the pay-run engine itself, three more real HR pieces:
   work) — a real, separate persistence workflow not built here, the same
   category of gap as PTO's own request/approval workflow was before this
   session, disclosed rather than silently assumed away.
+- `payroll/caBereavementLeave.ts`: California bereavement leave (AB 1949,
+  Gov. Code § 12945.7, effective 2023) — live-verified against the bill's
+  own statutory text. Covers employers with 5+ employees, for an
+  employee with 30+ days of tenure, up to 5 days per qualifying death
+  (spouse, child, parent, sibling, grandparent, grandchild, domestic
+  partner, or parent-in-law), which need not be taken consecutively but
+  must be completed within 3 months of the death. The statute doesn't
+  mandate PAID leave on its own — it's paid only to whatever extent an
+  employer's own existing policy already covers it, with the remainder
+  unpaid (`caBereavementLeavePaidDays()`/`caBereavementLeaveUnpaidDays()`
+  always sum to exactly 5, so a more generous existing policy reduces the
+  unpaid portion but never creates additional MANDATED paid days beyond
+  the 5-day total). California only, the same single-jurisdiction scope
+  `payroll/paidSickLeave.ts` and `payroll/workersComp.ts` already draw —
+  several other states have their own bereavement-leave mandates with
+  different thresholds, which remain a disclosed gap. This project has no
+  leave-request workflow for this leave type (unlike
+  `payroll/ptoRequest.ts`'s own PTO state machine), the same category of
+  gap `payroll/fmla.ts` discloses for FMLA leave requests. Wired into the
+  admin UI as a calculator.
 - `payroll/i9.ts`: Form I-9 employment eligibility verification (8 U.S.C.
   § 1324a) — the one compliance step required for EVERY US hire regardless
   of state, unlike the new-hire report above. Section 1's deadline is the
