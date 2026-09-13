@@ -39,6 +39,14 @@ import {
   cappedDeferralForPayPeriod,
   isRothCatchUpRequired,
   remainingElectiveDeferralRoom,
+  hsaContributionLimit,
+  remainingHsaContributionRoom,
+  cappedHsaContributionForPayPeriod,
+  remainingHealthFsaRoom,
+  cappedHealthFsaContributionForPayPeriod,
+  dependentCareFsaLimit,
+  remainingDependentCareFsaRoom,
+  cappedDependentCareFsaContributionForPayPeriod,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -91,6 +99,7 @@ import type { StateEmployerRegistration } from '../payroll/types.ts';
 import type { BenefitPlan, CoverageTier } from '../payroll/benefits.ts';
 import type { Contractor } from '../payroll/contractors.ts';
 import type { EverifyCase, EverifyCaseStatus } from '../payroll/everify.ts';
+import type { HdhpCoverageTier } from '../payroll/hsaFsaLimits.ts';
 import type { I9Record } from '../payroll/i9.ts';
 import type { Candidate, CandidateStage, OfferDetails } from '../payroll/onboarding.ts';
 import type { TerminationReason } from '../payroll/termination.ts';
@@ -1489,6 +1498,39 @@ const server = createServer(async (req, res) => {
         remainingRoom: remainingElectiveDeferralRoom(dollars(body.ytdElectiveDeferrals), body.age),
         cappedDeferral: cappedDeferralForPayPeriod(dollars(body.requestedDeferral), dollars(body.ytdElectiveDeferrals), body.age),
         rothCatchUpRequired: isRothCatchUpRequired(body.age, dollars(body.priorYearFicaWagesFromThisEmployer)),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // HSA / FSA / dependent-care FSA contribution limit calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/hsa-fsa-limits/calculator') {
+      const body = await parseJsonBody<{
+        age: number;
+        hdhpCoverageTier: HdhpCoverageTier;
+        ytdHsaContributions: number;
+        requestedHsaContribution: number;
+        ytdHealthFsaContributions: number;
+        requestedHealthFsaContribution: number;
+        isMarriedFilingSeparately: boolean;
+        ytdDependentCareFsaContributions: number;
+        requestedDependentCareFsaContribution: number;
+      }>(req);
+      sendJson(res, 200, {
+        hsaAnnualLimit: hsaContributionLimit(body.hdhpCoverageTier, body.age),
+        hsaRemainingRoom: remainingHsaContributionRoom(dollars(body.ytdHsaContributions), body.hdhpCoverageTier, body.age),
+        hsaCappedContribution: cappedHsaContributionForPayPeriod(dollars(body.requestedHsaContribution), dollars(body.ytdHsaContributions), body.hdhpCoverageTier, body.age),
+        healthFsaRemainingRoom: remainingHealthFsaRoom(dollars(body.ytdHealthFsaContributions)),
+        healthFsaCappedContribution: cappedHealthFsaContributionForPayPeriod(dollars(body.requestedHealthFsaContribution), dollars(body.ytdHealthFsaContributions)),
+        dependentCareFsaAnnualLimit: dependentCareFsaLimit(body.isMarriedFilingSeparately),
+        dependentCareFsaRemainingRoom: remainingDependentCareFsaRoom(dollars(body.ytdDependentCareFsaContributions), body.isMarriedFilingSeparately),
+        dependentCareFsaCappedContribution: cappedDependentCareFsaContributionForPayPeriod(
+          dollars(body.requestedDependentCareFsaContribution),
+          dollars(body.ytdDependentCareFsaContributions),
+          body.isMarriedFilingSeparately,
+        ),
       });
       return;
     }

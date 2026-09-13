@@ -240,6 +240,23 @@ Beyond the pay-run engine itself, three more real HR pieces:
   figure left out entirely. Wired into the admin UI as a calculator, the
   same "entered directly" pattern the FMLA and workers'-comp panels above
   already use for figures this project doesn't track per employee.
+- `payroll/hsaFsaLimits.ts`: HSA (IRC §223), health FSA, and dependent-care
+  FSA (§129 DCAP) annual contribution limits for 2026 — $4,400 self-only /
+  $8,750 family HSA, +$1,000 catch-up at 55+ with NO upper age cutoff
+  (unlike the 401(k) catch-up's 60-63 enhanced window, this one just keeps
+  applying); $3,400 health FSA (with a separate $680 carryover figure IRS
+  Rev. Proc. 2025-32 also sets, though a plan may only offer carryover OR
+  a grace period, never both, which this module doesn't decide); and
+  $7,500 dependent-care FSA ($3,750 married filing separately) — OBBBA's
+  first permanent increase to that figure since 1986. Same "pure
+  contribution-limit math over caller-supplied inputs" scope as
+  `payroll/retirementLimits.ts`: does not determine HSA ELIGIBILITY itself
+  (actual HDHP enrollment, not also being on Medicare or other
+  disqualifying coverage) or prorate the annual limit for a partial year
+  of HDHP coverage (HSA's own "last-month rule" and 13-month testing
+  period), both disclosed gaps rather than partial, unreliable attempts.
+  Wired into the admin UI as a calculator alongside the 401(k) panel
+  above.
 - `payroll/compliance.ts`: wires `src/minimum-wage.ts` — already this
   project's own source of truth, the same one `npm run
   coverage:minimum-wage` measures every state/locality against — directly

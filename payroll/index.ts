@@ -117,6 +117,25 @@ export {
   cappedDeferralForPayPeriod,
   isRothCatchUpRequired,
 } from './retirementLimits.ts';
+export {
+  HSA_SELF_ONLY_LIMIT_2026,
+  HSA_FAMILY_LIMIT_2026,
+  HSA_CATCH_UP_LIMIT_2026,
+  HSA_CATCH_UP_MINIMUM_AGE,
+  HEALTH_FSA_LIMIT_2026,
+  HEALTH_FSA_CARRYOVER_LIMIT_2026,
+  DEPENDENT_CARE_FSA_LIMIT_2026,
+  DEPENDENT_CARE_FSA_LIMIT_MFS_2026,
+  hsaContributionLimit,
+  remainingHsaContributionRoom,
+  cappedHsaContributionForPayPeriod,
+  remainingHealthFsaRoom,
+  cappedHealthFsaContributionForPayPeriod,
+  dependentCareFsaLimit,
+  remainingDependentCareFsaRoom,
+  cappedDependentCareFsaContributionForPayPeriod,
+} from './hsaFsaLimits.ts';
+export type { HdhpCoverageTier } from './hsaFsaLimits.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

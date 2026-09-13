@@ -197,6 +197,33 @@
   </section>
 
   <section>
+    <h2>HSA / FSA contribution limits</h2>
+    <p class="muted" style="margin-top:0">2026 IRS limits: HSA $4,400 self-only / $8,750 family, +$1,000 catch-up at 55+ with no upper age cutoff; health FSA $3,400 (up to $680 may carry over, plan-dependent); dependent-care FSA $7,500 ($3,750 married filing separately, per OBBBA). This project doesn't verify HDHP eligibility itself or track running YTD contributions, so all figures are entered directly.</p>
+    <div class="row">
+      <input id="hf-age" type="number" placeholder="Age" style="width:100px" />
+      <select id="hf-hdhp-tier">
+        <option value="self_only">HDHP: self-only</option>
+        <option value="family">HDHP: family</option>
+      </select>
+      <label class="muted"><input type="checkbox" id="hf-mfs" /> Married filing separately</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="hf-hsa-ytd" type="number" placeholder="HSA YTD ($)" style="width:150px" value="0" />
+      <input id="hf-hsa-requested" type="number" placeholder="HSA this period ($)" style="width:170px" value="0" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="hf-fsa-ytd" type="number" placeholder="Health FSA YTD ($)" style="width:170px" value="0" />
+      <input id="hf-fsa-requested" type="number" placeholder="Health FSA this period ($)" style="width:200px" value="0" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="hf-dcfsa-ytd" type="number" placeholder="Dependent-care FSA YTD ($)" style="width:210px" value="0" />
+      <input id="hf-dcfsa-requested" type="number" placeholder="Dependent-care FSA this period ($)" style="width:240px" value="0" />
+      <button class="secondary" id="hf-calc-btn">Calculate</button>
+    </div>
+    <pre id="hf-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -865,6 +892,36 @@ document.getElementById('ret401k-calc-btn').addEventListener('click', async () =
       `Remaining room this year: ${fmtCents(result.remainingRoom)}\n` +
       `This period's deferral, capped to remaining room: ${fmtCents(result.cappedDeferral)}\n` +
       `Roth catch-up required: ${result.rothCatchUpRequired ? 'YES' : 'No'}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('hf-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('hf-view');
+  const age = Number(document.getElementById('hf-age').value) || 0;
+  const hdhpCoverageTier = document.getElementById('hf-hdhp-tier').value;
+  const isMarriedFilingSeparately = document.getElementById('hf-mfs').checked;
+  const ytdHsaContributions = Number(document.getElementById('hf-hsa-ytd').value) || 0;
+  const requestedHsaContribution = Number(document.getElementById('hf-hsa-requested').value) || 0;
+  const ytdHealthFsaContributions = Number(document.getElementById('hf-fsa-ytd').value) || 0;
+  const requestedHealthFsaContribution = Number(document.getElementById('hf-fsa-requested').value) || 0;
+  const ytdDependentCareFsaContributions = Number(document.getElementById('hf-dcfsa-ytd').value) || 0;
+  const requestedDependentCareFsaContribution = Number(document.getElementById('hf-dcfsa-requested').value) || 0;
+  try {
+    const result = await api('/api/hsa-fsa-limits/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        age, hdhpCoverageTier, isMarriedFilingSeparately,
+        ytdHsaContributions, requestedHsaContribution,
+        ytdHealthFsaContributions, requestedHealthFsaContribution,
+        ytdDependentCareFsaContributions, requestedDependentCareFsaContribution,
+      }),
+    });
+    view.textContent =
+      `HSA annual limit: ${fmtCents(result.hsaAnnualLimit)} | remaining: ${fmtCents(result.hsaRemainingRoom)} | this period capped: ${fmtCents(result.hsaCappedContribution)}\n` +
+      `Health FSA remaining: ${fmtCents(result.healthFsaRemainingRoom)} | this period capped: ${fmtCents(result.healthFsaCappedContribution)}\n` +
+      `Dependent-care FSA annual limit: ${fmtCents(result.dependentCareFsaAnnualLimit)} | remaining: ${fmtCents(result.dependentCareFsaRemainingRoom)} | this period capped: ${fmtCents(result.dependentCareFsaCappedContribution)}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
