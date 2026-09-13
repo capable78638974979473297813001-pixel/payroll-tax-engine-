@@ -46,6 +46,8 @@ import {
   freshYearToDate,
   generatePayPeriods,
   hireCandidate,
+  caseCreationDeadline,
+  everifyComplianceIssues,
   i9ComplianceIssues,
   i9Deadlines,
   i9Status,
@@ -80,6 +82,7 @@ import type { DirectDepositVerification } from '../payroll/directDepositVerifica
 import type { StateEmployerRegistration } from '../payroll/types.ts';
 import type { BenefitPlan, CoverageTier } from '../payroll/benefits.ts';
 import type { Contractor } from '../payroll/contractors.ts';
+import type { EverifyCase, EverifyCaseStatus } from '../payroll/everify.ts';
 import type { I9Record } from '../payroll/i9.ts';
 import type { Candidate, CandidateStage, OfferDetails } from '../payroll/onboarding.ts';
 import type { TerminationReason } from '../payroll/termination.ts';
@@ -101,6 +104,7 @@ import {
   getContractor,
   getDirectDepositVerification,
   getEmployee,
+  getEverifyCase,
   getI9Record,
   getPayRun,
   getPtoBalance,
@@ -124,6 +128,7 @@ import {
   saveDirectDepositVerification,
   saveEmployee,
   saveEmployees,
+  saveEverifyCase,
   saveI9Record,
   saveJobPosting,
   savePayRun,
@@ -969,6 +974,45 @@ const server = createServer(async (req, res) => {
     }
 
     // ------------------------------------------------------------------
+    // E-Verify case tracking
+    // ------------------------------------------------------------------
+
+    const everifyMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/everify$/);
+    if (req.method === 'GET' && everifyMatch) {
+      const employee = getEmployee(decodeURIComponent(everifyMatch[1]));
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const everifyCase = getEverifyCase(employee.id) ?? { employeeId: employee.id, status: 'not_created' as const };
+      sendJson(res, 200, {
+        case: everifyCase,
+        caseCreationDeadline: caseCreationDeadline(employee.hireDate),
+        issues: everifyComplianceIssues(employee, everifyCase, new Date().toISOString().slice(0, 10)),
+      });
+      return;
+    }
+    if (req.method === 'POST' && everifyMatch) {
+      const employeeId = decodeURIComponent(everifyMatch[1]);
+      if (!getEmployee(employeeId)) return sendJson(res, 404, { error: 'No such employee.' });
+      const body = await parseJsonBody<{ status: EverifyCaseStatus; caseNumber?: string; createdAt?: string; tncIssuedAt?: string }>(req);
+      const existing = getEverifyCase(employeeId) ?? { employeeId, status: 'not_created' as const };
+      const updated = { ...existing, ...body };
+      saveEverifyCase(updated);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'everify.case_updated', 'Employee', employeeId, { status: updated.status }));
+      sendJson(res, 200, { case: updated });
+      return;
+    }
+
+    const everifyComplianceMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/everify-compliance$/);
+    if (req.method === 'GET' && everifyComplianceMatch) {
+      const companyId = decodeURIComponent(everifyComplianceMatch[1]);
+      const asOfDate = url.searchParams.get('asOfDate') ?? new Date().toISOString().slice(0, 10);
+      const findings = employeesForCompany(companyId)
+        .map((employee) => ({ employeeId: employee.id, issues: everifyComplianceIssues(employee, getEverifyCase(employee.id) ?? undefined, asOfDate) }))
+        .filter((f) => f.issues.length > 0);
+      sendJson(res, 200, { findings });
+      return;
+    }
+
+    // ------------------------------------------------------------------
     // Compliance dashboard — every check below, in one place
     // ------------------------------------------------------------------
 
@@ -980,7 +1024,8 @@ const server = createServer(async (req, res) => {
       const asOfDate = url.searchParams.get('asOfDate') ?? new Date().toISOString().slice(0, 10);
       const employees = employeesForCompany(companyId);
       const i9Records = new Map(employees.map((e) => [e.id, getI9Record(e.id)]).filter((entry): entry is [string, I9Record] => entry[1] !== null));
-      const dashboard = computeComplianceDashboard(company, employees, i9Records, newHireReportFiledEmployeeIds(), asOfDate);
+      const everifyCases = new Map(employees.map((e) => [e.id, getEverifyCase(e.id)]).filter((entry): entry is [string, EverifyCase] => entry[1] !== null));
+      const dashboard = computeComplianceDashboard(company, employees, i9Records, everifyCases, newHireReportFiledEmployeeIds(), asOfDate);
       sendJson(res, 200, { dashboard });
       return;
     }

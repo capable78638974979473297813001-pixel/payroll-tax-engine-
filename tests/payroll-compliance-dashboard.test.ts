@@ -48,12 +48,14 @@ describe('compliance dashboard (payroll/complianceDashboard.ts)', () => {
     });
     const employee = baseEmployee({ hireDate: '2020-01-01', payType: { kind: 'hourly', hourlyRate: dollars(20) } });
     const i9Records = new Map<string, I9Record>([[employee.id, { employeeId: employee.id, section1CompletedAt: '2020-01-01', section2CompletedAt: '2020-01-02' }]]);
+    const everifyCases = new Map([[employee.id, { employeeId: employee.id, status: 'employment_authorized' as const }]]);
     const filed = new Set([employee.id]);
 
-    const dashboard = computeComplianceDashboard(company, [employee], i9Records, filed, '2026-06-01');
+    const dashboard = computeComplianceDashboard(company, [employee], i9Records, everifyCases, filed, '2026-06-01');
     assert.equal(dashboard.totalIssueCount, 0);
     assert.deepEqual(dashboard.minimumWageIssues, []);
     assert.deepEqual(dashboard.i9Issues, []);
+    assert.deepEqual(dashboard.everifyIssues, []);
     assert.deepEqual(dashboard.newHireReportingIssues, []);
     assert.deepEqual(dashboard.stateRegistrationIssues, []);
   });
@@ -61,7 +63,7 @@ describe('compliance dashboard (payroll/complianceDashboard.ts)', () => {
   test('a below-minimum-wage hourly employee surfaces in minimumWageIssues', () => {
     const company = baseCompany({ homeState: 'TX' });
     const employee = baseEmployee({ payType: { kind: 'hourly', hourlyRate: 1 } }); // 1 cent/hour, always below any floor
-    const dashboard = computeComplianceDashboard(company, [employee], new Map(), new Set([employee.id]), '2026-06-01');
+    const dashboard = computeComplianceDashboard(company, [employee], new Map(), new Map(), new Set([employee.id]), '2026-06-01');
     assert.equal(dashboard.minimumWageIssues.length, 1);
     assert.equal(dashboard.minimumWageIssues[0].employeeId, employee.id);
   });
@@ -69,7 +71,7 @@ describe('compliance dashboard (payroll/complianceDashboard.ts)', () => {
   test('a missing I-9 record with a long-past hire date surfaces in i9Issues', () => {
     const company = baseCompany();
     const employee = baseEmployee({ hireDate: '2020-01-01' });
-    const dashboard = computeComplianceDashboard(company, [employee], new Map(), new Set([employee.id]), '2026-06-01');
+    const dashboard = computeComplianceDashboard(company, [employee], new Map(), new Map(), new Set([employee.id]), '2026-06-01');
     assert.equal(dashboard.i9Issues.length, 1);
     assert.equal(dashboard.i9Issues[0].employeeId, employee.id);
     assert.ok(dashboard.i9Issues[0].issues.length > 0);
@@ -78,7 +80,7 @@ describe('compliance dashboard (payroll/complianceDashboard.ts)', () => {
   test('an unfiled new hire surfaces in newHireReportingIssues', () => {
     const company = baseCompany();
     const employee = baseEmployee({ hireDate: '2026-01-01' });
-    const dashboard = computeComplianceDashboard(company, [employee], new Map(), new Set(), '2026-06-01');
+    const dashboard = computeComplianceDashboard(company, [employee], new Map(), new Map(), new Set(), '2026-06-01');
     assert.equal(dashboard.newHireReportingIssues.length, 1);
     assert.equal(dashboard.newHireReportingIssues[0].employeeId, employee.id);
   });
@@ -86,7 +88,7 @@ describe('compliance dashboard (payroll/complianceDashboard.ts)', () => {
   test('an employee working in an unregistered state surfaces in stateRegistrationIssues', () => {
     const company = baseCompany({ homeState: 'TX' });
     const employee = baseEmployee({ workState: { code: 'CA' } });
-    const dashboard = computeComplianceDashboard(company, [employee], new Map(), new Set([employee.id]), '2026-06-01');
+    const dashboard = computeComplianceDashboard(company, [employee], new Map(), new Map(), new Set([employee.id]), '2026-06-01');
     assert.equal(dashboard.stateRegistrationIssues.length, 1);
     assert.equal(dashboard.stateRegistrationIssues[0].stateCode, 'CA');
   });
@@ -97,10 +99,11 @@ describe('compliance dashboard (payroll/complianceDashboard.ts)', () => {
       baseEmployee({ id: 'e1', payType: { kind: 'hourly', hourlyRate: 1 }, hireDate: '2020-01-01' }), // minimum wage + I-9
       baseEmployee({ id: 'e2', hireDate: '2026-01-01', workState: { code: 'CA' } }), // new-hire reporting + state registration
     ];
-    const dashboard = computeComplianceDashboard(company, employees, new Map(), new Set(), '2026-06-01');
+    const dashboard = computeComplianceDashboard(company, employees, new Map(), new Map(), new Set(), '2026-06-01');
     const expectedTotal =
       dashboard.minimumWageIssues.length +
       dashboard.i9Issues.reduce((sum, e) => sum + e.issues.length, 0) +
+      dashboard.everifyIssues.reduce((sum, e) => sum + e.issues.length, 0) +
       dashboard.newHireReportingIssues.length +
       dashboard.stateRegistrationIssues.length;
     assert.equal(dashboard.totalIssueCount, expectedTotal);
@@ -110,7 +113,23 @@ describe('compliance dashboard (payroll/complianceDashboard.ts)', () => {
   test('an employee with no I-9 issues at all is excluded from i9Issues rather than listed with an empty array', () => {
     const company = baseCompany();
     const employee = baseEmployee({ hireDate: '2026-06-01' }); // hired today, nothing overdue yet
-    const dashboard = computeComplianceDashboard(company, [employee], new Map(), new Set([employee.id]), '2026-06-01');
+    const dashboard = computeComplianceDashboard(company, [employee], new Map(), new Map(), new Set([employee.id]), '2026-06-01');
     assert.deepEqual(dashboard.i9Issues, []);
+  });
+
+  test('a missing E-Verify case past its own creation deadline surfaces in everifyIssues', () => {
+    const company = baseCompany();
+    const employee = baseEmployee({ hireDate: '2020-01-01' });
+    const dashboard = computeComplianceDashboard(company, [employee], new Map(), new Map(), new Set([employee.id]), '2026-06-01');
+    assert.equal(dashboard.everifyIssues.length, 1);
+    assert.equal(dashboard.everifyIssues[0].employeeId, employee.id);
+  });
+
+  test('an E-Verify case already employment_authorized produces no everify finding', () => {
+    const company = baseCompany();
+    const employee = baseEmployee({ hireDate: '2020-01-01' });
+    const everifyCases = new Map([[employee.id, { employeeId: employee.id, status: 'employment_authorized' as const }]]);
+    const dashboard = computeComplianceDashboard(company, [employee], new Map(), everifyCases, new Set([employee.id]), '2026-06-01');
+    assert.deepEqual(dashboard.everifyIssues, []);
   });
 });

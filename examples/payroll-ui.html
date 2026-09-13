@@ -403,6 +403,34 @@
   </section>
 
   <section>
+    <h2>E-Verify</h2>
+    <p class="muted" style="margin-top:0">Tracks E-Verify case creation and tentative-nonconfirmation deadlines only. This project doesn't determine whether an employer is even required to use E-Verify (a per-state/size/industry legal question) or integrate with the real E-Verify system.</p>
+    <div class="row">
+      <select id="everify-employee"></select>
+      <button class="secondary" id="everify-view-btn">View status</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <input id="everify-case-number" placeholder="Case number" />
+      <select id="everify-status">
+        <option value="not_created">Not created</option>
+        <option value="pending">Pending</option>
+        <option value="employment_authorized">Employment authorized</option>
+        <option value="tentative_nonconfirmation">Tentative nonconfirmation</option>
+        <option value="final_nonconfirmation">Final nonconfirmation</option>
+        <option value="closed">Closed</option>
+      </select>
+      <input id="everify-date" type="date" />
+      <button class="secondary" id="everify-created-btn">Set as created date</button>
+      <button class="secondary" id="everify-tnc-btn">Set as TNC issued date</button>
+      <button id="everify-save-btn">Save status</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="secondary" id="everify-compliance-btn">Show company-wide compliance findings</button>
+    </div>
+    <pre id="everify-view"></pre>
+  </section>
+
+  <section>
     <h2>New-hire reporting (PRWORA)</h2>
     <p class="muted" style="margin-top:0">Every employer owes a report to the employee's own work-state workforce agency within 20 days of each hire. This project doesn't e-file it — it tracks the worklist and lets you view/copy the report and mark it filed once you have.</p>
     <table id="nhr-table">
@@ -641,6 +669,9 @@ async function loadComplianceDashboard() {
   for (const entry of dashboard.i9Issues) {
     for (const issue of entry.issues) rows.push(['Form I-9', employeeNameFor(entry.employeeId), issue]);
   }
+  for (const entry of dashboard.everifyIssues) {
+    for (const issue of entry.issues) rows.push(['E-Verify', employeeNameFor(entry.employeeId), issue]);
+  }
   const nhrLabel = { missing_data: 'Missing SSN/address', overdue: 'OVERDUE', due_soon: 'Due soon' };
   for (const i of dashboard.newHireReportingIssues) {
     rows.push(['New-hire reporting', employeeNameFor(i.employeeId), `${nhrLabel[i.kind]}${i.dueBy ? ' (due ' + i.dueBy + ')' : ''}`]);
@@ -830,7 +861,7 @@ async function loadEmployees() {
   }));
 
   const employeeOptions = list.map((e) => `<option value="${e.id}">${e.firstName} ${e.lastName}</option>`).join('');
-  for (const id of ['w2-employee', 'clock-employee', 'pto-employee', 'term-employee', 'benefit-employee', 'i9-employee', 'garn-employee', 'dd-employee', 'f1095c-employee']) {
+  for (const id of ['w2-employee', 'clock-employee', 'pto-employee', 'term-employee', 'benefit-employee', 'i9-employee', 'everify-employee', 'garn-employee', 'dd-employee', 'f1095c-employee']) {
     document.getElementById(id).innerHTML = employeeOptions;
   }
 
@@ -1683,6 +1714,61 @@ document.getElementById('i9-compliance-btn').addEventListener('click', async () 
   try {
     const { findings } = await api(`/api/companies/${company.id}/i9-compliance`);
     view.textContent = findings.length === 0 ? 'No overdue I-9 findings.' : JSON.stringify(findings, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+// ----------------------------------------------------------------------
+// E-Verify
+// ----------------------------------------------------------------------
+
+document.getElementById('everify-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('everify-view-btn').addEventListener('click', async () => {
+  const employeeId = document.getElementById('everify-employee').value;
+  const view = document.getElementById('everify-view');
+  try {
+    const result = await api(`/api/employees/${employeeId}/everify`);
+    view.textContent = JSON.stringify(result, null, 2);
+    document.getElementById('everify-case-number').value = result.case.caseNumber ?? '';
+    document.getElementById('everify-status').value = result.case.status;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('everify-created-btn').addEventListener('click', async () => {
+  await saveEverifyCase({ createdAt: document.getElementById('everify-date').value });
+});
+document.getElementById('everify-tnc-btn').addEventListener('click', async () => {
+  await saveEverifyCase({ tncIssuedAt: document.getElementById('everify-date').value });
+});
+document.getElementById('everify-save-btn').addEventListener('click', async () => {
+  await saveEverifyCase({});
+});
+
+async function saveEverifyCase(extra) {
+  const employeeId = document.getElementById('everify-employee').value;
+  const view = document.getElementById('everify-view');
+  const caseNumber = document.getElementById('everify-case-number').value;
+  const status = document.getElementById('everify-status').value;
+  try {
+    const result = await api(`/api/employees/${employeeId}/everify`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status, ...(caseNumber ? { caseNumber } : {}), ...extra }),
+    });
+    view.textContent = JSON.stringify(result, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+}
+
+document.getElementById('everify-compliance-btn').addEventListener('click', async () => {
+  const view = document.getElementById('everify-view');
+  try {
+    const { findings } = await api(`/api/companies/${company.id}/everify-compliance`);
+    view.textContent = findings.length === 0 ? 'No overdue E-Verify findings.' : JSON.stringify(findings, null, 2);
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

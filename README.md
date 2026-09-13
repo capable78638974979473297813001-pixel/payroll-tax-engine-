@@ -292,6 +292,21 @@ Beyond the pay-run engine itself, three more real HR pieces:
   and surfaces missed deadlines as findings; does not verify that a
   presented document is genuine, run E-Verify, or handle reverification of
   an expiring work authorization.
+- `payroll/everify.ts`: E-Verify case tracking — the case must be created
+  within 3 business days of hire, and a tentative nonconfirmation (TNC)
+  must be referred to the employee within 10 business days of being
+  issued, who then has 8 business days to contest it (all figures pulled
+  from DHS/USCIS's own E-Verify User Manual). Tracks status and surfaces
+  missed deadlines as findings the same way `payroll/i9.ts` does, and
+  deliberately does NOT decide whether an employer is even required to use
+  E-Verify at all — a genuinely complex per-state/size/industry legal
+  question (roughly a dozen states mandate it for some or all private
+  employers at varying size thresholds, several only for public employers
+  or state contractors, and it's federal law only for federal contractors
+  and agencies under FAR subpart 22.18) — the same "disclosed, not
+  guessed" scope boundary `payroll/newHireReporting.ts` draws around its
+  own per-state deadline gap. Does not integrate with the real E-Verify
+  system; case numbers and statuses are recorded, not submitted anywhere.
 - `payroll/reports.ts`: headcount (as of any date, using the exact same
   active/terminated logic a real pay run does), a department breakdown,
   YTD payroll cost — gross pay AND the employer's own tax cost, not just
@@ -450,18 +465,18 @@ Beyond the pay-run engine itself, three more real HR pieces:
   itself file a registration (each state's own online application is
   real, separate infrastructure) or track how long one takes to process.
 - `payroll/complianceDashboard.ts`: one screen for every compliance check
-  above — minimum wage, Form I-9, PRWORA new-hire reporting, and state
-  registration — pure aggregation, the same "no new business logic, just
-  call what already exists and collect the results" discipline
+  above — minimum wage, Form I-9, E-Verify, PRWORA new-hire reporting, and
+  state registration — pure aggregation, the same "no new business logic,
+  just call what already exists and collect the results" discipline
   `payroll/reports.ts` applies to its own rollups: a wrong dashboard entry
   would be a wrong call site, never a new wrong calculation. Before this,
-  an admin had to know to click into four separate panels to find out
+  an admin had to know to click into several separate panels to find out
   whether anything needed attention at all — a genuinely dangerous gap
   for a compliance-shaped product, where the whole point is that someone
   forgets to go looking. Sits at the top of the admin UI, immediately
   below the company selector, and refreshes after every action that
   could change what it reports (a hire, a termination, an approved pay
-  run, a benefit election, a state registration).
+  run, a benefit election, a state registration, an E-Verify case update).
 
 `Employee` also carries plain Core-HR fields now (`jobTitle`,
 `department`, `managerId`) — purely descriptive, the natural spine for an

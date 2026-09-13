@@ -5,6 +5,7 @@ import type { AuditLogEntry } from './auditLog.ts';
 import type { BenefitElection, BenefitPlan } from './benefits.ts';
 import type { Contractor, ContractorPayment } from './contractors.ts';
 import type { DirectDepositVerification } from './directDepositVerification.ts';
+import type { EverifyCase } from './everify.ts';
 import type { I9Record } from './i9.ts';
 import type { Candidate, JobPosting } from './onboarding.ts';
 import type { PtoBalance, PtoPolicy } from './pto.ts';
@@ -53,6 +54,7 @@ interface DB {
   /** employeeId -> the ISO date this employer told the store its PRWORA new-hire report was actually filed — see payroll/newHireReporting.ts's own newHireReportingIssuesForCompany(). Filing itself (submission to a state workforce agency) is out of scope the same way every other e-filing is in this project; this only tracks that a human said it was done. */
   newHireReportsFiled: Record<string, string>;
   ptoRequests: Record<string, PtoRequest>;
+  everifyCases: Record<string, EverifyCase>;
 }
 
 function emptyDb(): DB {
@@ -74,6 +76,7 @@ function emptyDb(): DB {
     directDepositVerifications: {},
     newHireReportsFiled: {},
     ptoRequests: {},
+    everifyCases: {},
   };
 }
 
@@ -107,6 +110,7 @@ function load(): DB {
       directDepositVerifications: parsed.directDepositVerifications ?? base.directDepositVerifications,
       newHireReportsFiled: parsed.newHireReportsFiled ?? base.newHireReportsFiled,
       ptoRequests: parsed.ptoRequests ?? base.ptoRequests,
+      everifyCases: parsed.everifyCases ?? base.everifyCases,
     };
   } catch {
     return emptyDb();
@@ -427,4 +431,18 @@ export function ptoRequestsForEmployee(employeeId: string): PtoRequest[] {
 export function ptoRequestsForEmployeeIds(employeeIds: readonly string[]): PtoRequest[] {
   const idSet = new Set(employeeIds);
   return readPayrollDb((db) => Object.values(db.ptoRequests).filter((r) => idSet.has(r.employeeId)));
+}
+
+// ----------------------------------------------------------------------------
+// E-Verify
+// ----------------------------------------------------------------------------
+
+export function saveEverifyCase(everifyCase: EverifyCase): void {
+  withPayrollDb((db) => {
+    db.everifyCases[everifyCase.employeeId] = everifyCase;
+  });
+}
+
+export function getEverifyCase(employeeId: string): EverifyCase | null {
+  return readPayrollDb((db) => db.everifyCases[employeeId] ?? null);
 }

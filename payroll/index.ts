@@ -76,6 +76,16 @@ export { buildGlJournalEntries, renderGlJournalCsv } from './glExport.ts';
 export type { GlAccountMapping, GlJournalLine } from './glExport.ts';
 export { STATES_NOT_EXCLUDING_OVERTIME_PREMIUM, workersCompPremium, workersCompSubjectWages } from './workersComp.ts';
 export type { WorkersCompClassCode } from './workersComp.ts';
+export {
+  CASE_CREATION_DEADLINE_BUSINESS_DAYS,
+  EMPLOYEE_CONTEST_DEADLINE_BUSINESS_DAYS,
+  TNC_REFERRAL_DEADLINE_BUSINESS_DAYS,
+  caseCreationDeadline,
+  employeeContestDeadline,
+  everifyComplianceIssues,
+  tncReferralDeadline,
+} from './everify.ts';
+export type { EverifyCase, EverifyCaseStatus } from './everify.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

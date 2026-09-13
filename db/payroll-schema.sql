@@ -463,6 +463,28 @@ CREATE TABLE new_hire_report (
 );
 
 -- ----------------------------------------------------------------------------
+-- E-Verify
+-- ----------------------------------------------------------------------------
+-- One row per employee — a case status, not an event log. See
+-- payroll/everify.ts's own header comment: tracks case-creation and
+-- tentative-nonconfirmation deadlines only, never determines whether an
+-- employer is required to use E-Verify at all, and never integrates with
+-- the real E-Verify system.
+
+CREATE TYPE everify_case_status AS ENUM (
+  'not_created', 'pending', 'employment_authorized',
+  'tentative_nonconfirmation', 'final_nonconfirmation', 'closed'
+);
+
+CREATE TABLE everify_case (
+  employee_id     UUID PRIMARY KEY REFERENCES employee (id),
+  case_number     TEXT,
+  status          everify_case_status NOT NULL DEFAULT 'not_created',
+  created_at      DATE,
+  tnc_issued_at   DATE
+);
+
+-- ----------------------------------------------------------------------------
 -- Benefits administration
 -- ----------------------------------------------------------------------------
 -- See payroll/benefits.ts's own header comment: plan definition and
