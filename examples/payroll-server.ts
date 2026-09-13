@@ -52,6 +52,12 @@ import {
   isMassLayoff,
   warnNoticeDeadline,
   isWarnNoticeLate,
+  isFirstMealPeriodRequired,
+  isFirstMealPeriodWaivable,
+  isSecondMealPeriodRequired,
+  isSecondMealPeriodWaivable,
+  restBreaksRequired,
+  dailyMealAndRestPremium,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1561,6 +1567,29 @@ const server = createServer(async (req, res) => {
         noticeRequired: plantClosing || massLayoff,
         noticeDeadline: warnNoticeDeadline(body.plannedActionDate),
         noticeLate: body.noticeServedDate ? isWarnNoticeLate(body.noticeServedDate, body.plannedActionDate) : null,
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // California meal/rest break calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/meal-rest-breaks/ca-calculator') {
+      const body = await parseJsonBody<{
+        hoursWorked: number;
+        firstMealPeriodWaived: boolean;
+        regularRateDollars: number;
+        mealPeriodViolationOccurred: boolean;
+        restPeriodViolationOccurred: boolean;
+      }>(req);
+      sendJson(res, 200, {
+        firstMealPeriodRequired: isFirstMealPeriodRequired(body.hoursWorked),
+        firstMealPeriodWaivable: isFirstMealPeriodWaivable(body.hoursWorked),
+        secondMealPeriodRequired: isSecondMealPeriodRequired(body.hoursWorked),
+        secondMealPeriodWaivable: isSecondMealPeriodWaivable(body.hoursWorked, body.firstMealPeriodWaived),
+        restBreaksRequired: restBreaksRequired(body.hoursWorked),
+        premiumOwed: dailyMealAndRestPremium(body.mealPeriodViolationOccurred, body.restPeriodViolationOccurred, dollars(body.regularRateDollars)),
       });
       return;
     }

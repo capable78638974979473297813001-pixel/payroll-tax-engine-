@@ -138,6 +138,26 @@ Beyond the pay-run engine itself, three more real HR pieces:
   yet researched state by state) and `payroll/pto.ts`'s deliberate choice
   to model PTO as a configurable EMPLOYER policy engine rather than the
   ~20 states' own mandatory paid-sick-leave accrual laws.
+- `payroll/mealRestBreaks.ts`: California's own meal/rest period rules
+  (Labor Code §§ 226.7, 512) — a first meal period required past 5 hours
+  (waivable at or under 6), a second past 10 hours (waivable at or under
+  12, only if the first wasn't waived), and rest breaks on the DLSE's own
+  "10 minutes per 4-hour block, or major fraction thereof" schedule
+  (`restBreaksRequired()`'s hand-verified boundary cases: 6 hours is
+  still 1 break, just over 6 is 2; 10 hours is still 2, just over 10 is
+  3). The one detail that matters most for actually getting the premium
+  right: the DLSE's own long-standing enforcement position caps the "one
+  additional hour of pay" penalty at ONE per category per workday,
+  however many individual meal or rest breaks were actually missed that
+  day — this module's functions take a single violation-occurred BOOLEAN
+  per category rather than a count, which structurally enforces that cap
+  instead of relying on a caller to remember it separately. California
+  only, the same single-jurisdiction scope `payroll/paidSickLeave.ts` and
+  `payroll/workersComp.ts` already draw; this project's own timekeeping
+  has no notion of when a break was actually taken during a shift, so
+  whether one happened at all is a fact this module takes as an input,
+  not one it derives from punch data. Wired into the admin UI as a
+  calculator.
 - `payroll/pto.ts`: accrual (per hour worked or per pay period), a
   balance that never goes negative, an accrual cap, annual carryover with
   its own cap, and a payout as an ordinary taxable Earning.

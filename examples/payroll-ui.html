@@ -240,6 +240,22 @@
   </section>
 
   <section>
+    <h2>California meal &amp; rest breaks</h2>
+    <p class="muted" style="margin-top:0">A first meal period is required past 5 hours worked (waivable at or under 6); a second past 10 hours (waivable at or under 12, only if the first wasn't waived). Rest breaks follow "10 minutes per 4 hours or major fraction thereof." Each of the meal/rest premiums is capped at one hour of pay per workday regardless of how many breaks were missed that day — enter whether ANY violation of that type happened, not a count. This project doesn't detect break timing from punch data, so hours worked and violation flags are entered directly.</p>
+    <div class="row">
+      <input id="mrb-hours" type="number" step="0.01" placeholder="Hours worked" style="width:140px" />
+      <label class="muted"><input type="checkbox" id="mrb-first-waived" /> First meal period waived</label>
+      <input id="mrb-rate" type="number" placeholder="Regular rate ($/hr)" style="width:170px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="muted"><input type="checkbox" id="mrb-meal-violation" /> Meal violation occurred</label>
+      <label class="muted"><input type="checkbox" id="mrb-rest-violation" /> Rest violation occurred</label>
+      <button class="secondary" id="mrb-calc-btn">Calculate</button>
+    </div>
+    <pre id="mrb-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -964,6 +980,28 @@ document.getElementById('warn-calc-btn').addEventListener('click', async () => {
       `Notice required: ${result.noticeRequired ? 'YES' : 'No'}\n` +
       `Notice deadline (60 days before): ${result.noticeDeadline}` +
       (result.noticeLate === null ? '' : `\nNotice served ${result.noticeLate ? 'LATE' : 'on time'}`);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('mrb-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('mrb-view');
+  const hoursWorked = Number(document.getElementById('mrb-hours').value) || 0;
+  const firstMealPeriodWaived = document.getElementById('mrb-first-waived').checked;
+  const regularRateDollars = Number(document.getElementById('mrb-rate').value) || 0;
+  const mealPeriodViolationOccurred = document.getElementById('mrb-meal-violation').checked;
+  const restPeriodViolationOccurred = document.getElementById('mrb-rest-violation').checked;
+  try {
+    const result = await api('/api/meal-rest-breaks/ca-calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hoursWorked, firstMealPeriodWaived, regularRateDollars, mealPeriodViolationOccurred, restPeriodViolationOccurred }),
+    });
+    view.textContent =
+      `First meal period required: ${result.firstMealPeriodRequired ? 'YES' : 'No'} (waivable: ${result.firstMealPeriodWaivable ? 'YES' : 'No'})\n` +
+      `Second meal period required: ${result.secondMealPeriodRequired ? 'YES' : 'No'} (waivable: ${result.secondMealPeriodWaivable ? 'YES' : 'No'})\n` +
+      `Rest breaks required: ${result.restBreaksRequired}\n` +
+      `Premium owed today: ${fmtCents(result.premiumOwed)}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

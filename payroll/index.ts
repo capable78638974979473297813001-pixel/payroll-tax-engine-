@@ -157,6 +157,25 @@ export {
   warnExceptionGuidance,
 } from './warnAct.ts';
 export type { WarnExceptionReason } from './warnAct.ts';
+export {
+  CA_FIRST_MEAL_PERIOD_DEADLINE_HOURS,
+  CA_FIRST_MEAL_WAIVER_MAX_HOURS,
+  CA_SECOND_MEAL_PERIOD_THRESHOLD_HOURS,
+  CA_SECOND_MEAL_WAIVER_MAX_HOURS,
+  CA_MEAL_PERIOD_MINIMUM_MINUTES,
+  CA_REST_BREAK_EXEMPTION_THRESHOLD_HOURS,
+  CA_REST_BREAK_MINUTES,
+  CA_BREAK_PREMIUM_HOURS,
+  isFirstMealPeriodRequired,
+  isFirstMealPeriodWaivable,
+  isSecondMealPeriodRequired,
+  isSecondMealPeriodWaivable,
+  isRestBreakRequired,
+  restBreaksRequired,
+  mealPeriodPremium,
+  restPeriodPremium,
+  dailyMealAndRestPremium,
+} from './mealRestBreaks.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';
