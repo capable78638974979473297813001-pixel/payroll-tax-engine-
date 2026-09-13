@@ -53,7 +53,8 @@
 <body>
 <header>
   <h1>Payroll Admin</h1>
-  <p>Backed directly by payroll/store.ts — a company, its employees, and every pay run that's ever been approved.</p>
+  <p>Backed directly by payroll/store.ts — a company, its employees, and every pay run that's ever been approved.
+  See the <a href="/portal" style="color:#cfe3f5">employee self-service portal</a> for the other side of this.</p>
 </header>
 <main>
   <section id="company-section">
@@ -68,6 +69,15 @@
   <section>
     <h2>Headcount &amp; payroll cost report</h2>
     <pre id="report-view"></pre>
+  </section>
+
+  <section>
+    <h2>Audit log</h2>
+    <div class="row"><button class="secondary" id="audit-refresh-btn">Refresh</button></div>
+    <table id="audit-table">
+      <thead><tr><th>When</th><th>Action</th><th>Entity</th><th>Details</th></tr></thead>
+      <tbody></tbody>
+    </table>
   </section>
 
   <section>
@@ -333,6 +343,21 @@ async function loadReport() {
   document.getElementById('report-view').textContent = JSON.stringify(report, null, 2);
 }
 
+async function loadAuditLog() {
+  const { auditLog } = await api(`/api/companies/${company.id}/audit-log`);
+  const tbody = document.querySelector('#audit-table tbody');
+  tbody.innerHTML = auditLog.length === 0
+    ? '<tr><td colspan="4" class="muted">No activity yet.</td></tr>'
+    : auditLog.map((e) => `
+      <tr>
+        <td>${new Date(e.timestamp).toLocaleString()}</td>
+        <td>${e.action}</td>
+        <td>${e.entityType} ${e.entityId.slice(0, 8)}</td>
+        <td>${e.details ? JSON.stringify(e.details) : ''}</td>
+      </tr>`).join('');
+}
+document.getElementById('audit-refresh-btn').addEventListener('click', loadAuditLog);
+
 const DEFAULT_FULL_TIME_HOURS = { weekly: 40, biweekly: 80, semimonthly: 86.67, monthly: 173.33 };
 
 async function loadEmployees() {
@@ -520,7 +545,7 @@ async function handleCandidateAction(candidateId, action) {
 async function refreshAll(preferredCompanyId) {
   await loadCompany(preferredCompanyId);
   await Promise.all([
-    loadEmployees(), loadNextPeriod(), loadRuns(), loadReport(),
+    loadEmployees(), loadNextPeriod(), loadRuns(), loadReport(), loadAuditLog(),
     loadPtoPolicies(), loadBenefitPlans(), loadJobPostings(), loadCandidates(), loadContractors(),
   ]);
   await loadGarnishments();
@@ -574,7 +599,7 @@ document.getElementById('run-btn').addEventListener('click', async () => {
       : '';
     if (payRun.minimumWageIssues.length > 0) console.warn('Minimum wage issues:', payRun.minimumWageIssues);
     status.textContent = `Approved run ${payRun.id} for ${payRun.checkDate} — ${payRun.lines.length} employee(s) paid.${warning}`;
-    await Promise.all([loadEmployees(), loadNextPeriod(), loadRuns()]);
+    await Promise.all([loadEmployees(), loadNextPeriod(), loadRuns(), loadReport(), loadAuditLog()]);
   } catch (err) {
     status.textContent = 'Error: ' + err.message;
     btn.disabled = false;
@@ -735,7 +760,7 @@ document.getElementById('term-btn').addEventListener('click', async () => {
       body: JSON.stringify({ terminationDate, reason, employerPolicyPaysOutPto }),
     });
     view.textContent = JSON.stringify({ finalPay: result.finalPay, ptoPayoutHours: result.ptoPayoutHours }, null, 2);
-    await loadEmployees();
+    await Promise.all([loadEmployees(), loadReport(), loadAuditLog()]);
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
@@ -779,7 +804,7 @@ document.getElementById('benefit-elect-btn').addEventListener('click', async () 
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ planId, coverageTier, effectiveDate }),
     });
     view.textContent = JSON.stringify(result.election, null, 2);
-    await loadEmployees();
+    await Promise.all([loadEmployees(), loadAuditLog()]);
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

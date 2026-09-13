@@ -204,6 +204,26 @@ Beyond the pay-run engine itself, three more real HR pieces:
   distinguish an employee-vs-contractor misclassification question, and
   does not model backup withholding for an invalid TIN.
 
+- `payroll/auditLog.ts`: an append-only record of who did what to which
+  record, attached at the six points where this project actually mutates
+  state on someone's behalf — pay-run approval, termination, a candidate
+  hire, adding/removing a garnishment order, a benefit election, and
+  completing an I-9 section — surfaced per company in the admin UI rather
+  than left to be reconstructed from timestamps alone. The `actor` field is
+  hardcoded to `'admin'`: this demo-scale build has no real login, and the
+  module deliberately does not invent a session/auth layer to fill that
+  gap — a real deployment wires `actor` to whatever it already has.
+- An employee self-service portal (`npm run ui:payroll` also serves it at
+  `/portal`, separate from the admin UI at `/`): an employee picks their
+  own name (no real auth, same disclosed limitation as the audit log's
+  actor field) and sees only their own paystubs, PTO balance, active
+  benefit elections, and I-9 status, plus a "request time off" action
+  wired straight to `payroll/pto.ts`'s own `usePto()`. The backing
+  aggregation endpoint explicitly filters a company's pay-run lines down
+  to the requesting employee's own line before returning anything — an
+  employee's view must never leak a coworker's pay, so that filter lives
+  once at the API boundary rather than trusted to every future caller.
+
 `Employee` also carries plain Core-HR fields now (`jobTitle`,
 `department`, `managerId`) — purely descriptive, the natural spine for an
 employee directory or org chart, though no such view is built yet.

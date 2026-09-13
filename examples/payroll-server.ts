@@ -9,6 +9,7 @@ import { dollars } from '../src/money.ts';
 import {
   accruePto,
   activeEmployeesFor,
+  auditLogEntry,
   advanceCandidate,
   acceptOffer,
   approvePayRun,
@@ -44,8 +45,10 @@ import type { Candidate, CandidateStage, OfferDetails } from '../payroll/onboard
 import type { TerminationReason } from '../payroll/termination.ts';
 import type { GarnishmentOrder } from '../src/garnishment.ts';
 import {
+  addAuditLogEntry,
   addTimePunch,
   allCompanies,
+  auditLogForEntityIds,
   benefitElectionsForEmployee,
   benefitPlansForCompany,
   candidatesForCompany,
@@ -100,8 +103,13 @@ import type { Company, Employee } from '../payroll/types.ts';
  */
 
 const PORT = Number(process.env.PORT ?? 4323);
+// This demo-scale server has no real login (see payroll/auditLog.ts's own
+// header comment on that boundary) — every entry it writes names this
+// fixed actor, which a real deployment replaces with its own session user.
+const AUDIT_ACTOR = 'admin';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const HTML_PATH = join(HERE, 'payroll-ui.html');
+const PORTAL_HTML_PATH = join(HERE, 'employee-portal.html');
 
 function seedDemoDataIfEmpty(): void {
   const existing = getCompany('co-demo');
@@ -237,6 +245,12 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    if (req.method === 'GET' && req.url === '/portal') {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(readFileSync(PORTAL_HTML_PATH, 'utf8'));
+      return;
+    }
+
     if (req.method === 'GET' && req.url === '/api/companies') {
       sendJson(res, 200, { companies: allCompanies() });
       return;
@@ -245,6 +259,47 @@ const server = createServer(async (req, res) => {
     const employeesMatch = req.url?.match(/^\/api\/companies\/([^/]+)\/employees$/);
     if (req.method === 'GET' && employeesMatch) {
       sendJson(res, 200, { employees: employeesForCompany(decodeURIComponent(employeesMatch[1])) });
+      return;
+    }
+
+    const selfServiceMatch = req.url?.match(/^\/api\/employees\/([^/]+)\/self-service$/);
+    if (req.method === 'GET' && selfServiceMatch) {
+      const employee = getEmployee(decodeURIComponent(selfServiceMatch[1]));
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const company = getCompany(employee.companyId)!;
+
+      // Only THIS employee's own line out of every run they appear in —
+      // an employee's own view must never leak a coworker's pay, even in
+      // a demo with no real access control otherwise enforcing that.
+      const myPayRuns = payRunsForCompany(employee.companyId)
+        .filter((r) => r.status === 'approved')
+        .map((r) => ({
+          payRunId: r.id,
+          checkDate: r.checkDate,
+          periodStart: r.periodStart,
+          periodEnd: r.periodEnd,
+          line: r.lines.find((l) => l.employeeId === employee.id) ?? null,
+        }))
+        .filter((r) => r.line !== null);
+
+      const i9Record = getI9Record(employee.id) ?? { employeeId: employee.id };
+
+      sendJson(res, 200, {
+        employee: {
+          id: employee.id,
+          firstName: employee.firstName,
+          lastName: employee.lastName,
+          jobTitle: employee.jobTitle,
+          department: employee.department,
+          payType: employee.payType,
+          hireDate: employee.hireDate,
+        },
+        companyName: company.legalName,
+        myPayRuns,
+        ptoBalances: ptoBalancesForEmployee(employee.id),
+        benefitElections: benefitElectionsForEmployee(employee.id).filter((e) => e.endDate === undefined),
+        i9Status: i9Status(i9Record),
+      });
       return;
     }
 
@@ -295,6 +350,13 @@ const server = createServer(async (req, res) => {
       const { run: approved, updatedEmployees } = approvePayRun(draft, employees);
       saveEmployees(updatedEmployees);
       savePayRun(approved);
+      addAuditLogEntry(
+        auditLogEntry(AUDIT_ACTOR, 'pay_run.approved', 'PayRun', approved.id, {
+          checkDate: approved.checkDate,
+          employeeCount: approved.lines.length,
+          minimumWageIssueCount: approved.minimumWageIssues.length,
+        }),
+      );
       sendJson(res, 200, { payRun: approved });
       return;
     }
@@ -391,6 +453,13 @@ const server = createServer(async (req, res) => {
       for (const ended of result.endedElections) saveBenefitElection(ended);
       saveBenefitElection(result.election);
       saveEmployee(result.employee);
+      addAuditLogEntry(
+        auditLogEntry(AUDIT_ACTOR, 'benefit_election.applied', 'Employee', employeeId, {
+          planId: plan.id,
+          coverageTier: body.coverageTier,
+          supersededElectionIds: result.endedElections.map((e) => e.id),
+        }),
+      );
       sendJson(res, 200, { election: result.election, employee: result.employee });
       return;
     }
@@ -471,6 +540,9 @@ const server = createServer(async (req, res) => {
       const { employee, candidate: hired } = hireCandidate(candidate, body.companyId, body.federalW4, body.residenceState);
       saveEmployee(employee);
       saveCandidate(hired);
+      addAuditLogEntry(
+        auditLogEntry(AUDIT_ACTOR, 'candidate.hired', 'Employee', employee.id, { candidateId: candidate.id, hireDate: employee.hireDate }),
+      );
       sendJson(res, 200, { employee, candidate: hired });
       return;
     }
@@ -496,6 +568,14 @@ const server = createServer(async (req, res) => {
 
       const result = terminateEmployee(employee, body.terminationDate, body.reason, nextRegularPayDate, ptoBalance, body.employerPolicyPaysOutPto);
       saveEmployee(result.employee);
+      addAuditLogEntry(
+        auditLogEntry(AUDIT_ACTOR, 'employee.terminated', 'Employee', employee.id, {
+          reason: body.reason,
+          terminationDate: body.terminationDate,
+          finalPayDueDate: result.finalPay.dueDate,
+          ptoPayoutHours: result.ptoPayoutHours,
+        }),
+      );
       sendJson(res, 200, result);
       return;
     }
@@ -609,6 +689,7 @@ const server = createServer(async (req, res) => {
       const updated: I9Record =
         body.section === 1 ? { ...existing, section1CompletedAt: body.completedAt } : { ...existing, section2CompletedAt: body.completedAt };
       saveI9Record(updated);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, `i9.section${body.section}_completed`, 'Employee', employeeId, { completedAt: body.completedAt }));
       sendJson(res, 200, { record: updated, status: i9Status(updated) });
       return;
     }
@@ -643,6 +724,7 @@ const server = createServer(async (req, res) => {
       const order: GarnishmentOrder = { id: randomUUID(), ...body };
       const updated: Employee = { ...employee, garnishmentOrders: [...employee.garnishmentOrders, order] };
       saveEmployee(updated);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'garnishment_order.added', 'Employee', employeeId, { orderId: order.id, type: order.type }));
       sendJson(res, 200, { garnishmentOrders: updated.garnishmentOrders });
       return;
     }
@@ -655,6 +737,7 @@ const server = createServer(async (req, res) => {
       if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
       const updated: Employee = { ...employee, garnishmentOrders: employee.garnishmentOrders.filter((o) => o.id !== orderId) };
       saveEmployee(updated);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'garnishment_order.removed', 'Employee', employeeId, { orderId }));
       sendJson(res, 200, { garnishmentOrders: updated.garnishmentOrders });
       return;
     }
@@ -679,6 +762,18 @@ const server = createServer(async (req, res) => {
       const asOfDate = url.searchParams.get('asOfDate') ?? new Date().toISOString().slice(0, 10);
       const report = computeCompanyReport(company, employeesForCompany(companyId), payRunsForCompany(companyId), asOfDate);
       sendJson(res, 200, { report });
+      return;
+    }
+
+    const auditLogMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/audit-log$/);
+    if (req.method === 'GET' && auditLogMatch) {
+      const companyId = decodeURIComponent(auditLogMatch[1]);
+      const entityIds = [
+        companyId,
+        ...employeesForCompany(companyId).map((e) => e.id),
+        ...payRunsForCompany(companyId).map((r) => r.id),
+      ];
+      sendJson(res, 200, { auditLog: auditLogForEntityIds(entityIds) });
       return;
     }
 

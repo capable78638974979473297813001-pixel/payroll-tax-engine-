@@ -68,3 +68,5 @@ export { computeCompanyReport, renderPayrollRegister } from './reports.ts';
 export type { CompanyReport, DepartmentHeadcount } from './reports.ts';
 export { compute1099Nec, FORM_1099_NEC_THRESHOLD_2026, recordContractorPayment } from './contractors.ts';
 export type { Contractor, ContractorPayment, Form1099NecSummary } from './contractors.ts';
+export { auditLogEntry } from './auditLog.ts';
+export type { AuditLogEntry } from './auditLog.ts';

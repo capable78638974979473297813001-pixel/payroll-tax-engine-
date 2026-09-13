@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { AuditLogEntry } from './auditLog.ts';
 import type { BenefitElection, BenefitPlan } from './benefits.ts';
 import type { Contractor, ContractorPayment } from './contractors.ts';
 import type { I9Record } from './i9.ts';
@@ -44,6 +45,7 @@ interface DB {
   i9Records: Record<string, I9Record>;
   contractors: Record<string, Contractor>;
   contractorPayments: ContractorPayment[];
+  auditLog: AuditLogEntry[];
 }
 
 function emptyDb(): DB {
@@ -61,6 +63,7 @@ function emptyDb(): DB {
     i9Records: {},
     contractors: {},
     contractorPayments: [],
+    auditLog: [],
   };
 }
 
@@ -90,6 +93,7 @@ function load(): DB {
       i9Records: parsed.i9Records ?? base.i9Records,
       contractors: parsed.contractors ?? base.contractors,
       contractorPayments: parsed.contractorPayments ?? base.contractorPayments,
+      auditLog: parsed.auditLog ?? base.auditLog,
     };
   } catch {
     return emptyDb();
@@ -328,4 +332,28 @@ export function saveContractorPayment(payment: ContractorPayment): void {
 
 export function paymentsForContractor(contractorId: string): ContractorPayment[] {
   return readPayrollDb((db) => db.contractorPayments.filter((p) => p.contractorId === contractorId));
+}
+
+// ----------------------------------------------------------------------------
+// Audit log
+// ----------------------------------------------------------------------------
+
+export function addAuditLogEntry(entry: AuditLogEntry): void {
+  withPayrollDb((db) => {
+    db.auditLog.push(entry);
+  });
+}
+
+/**
+ * Newest first — the order an admin actually wants to read a log in.
+ * `entityIds` is the caller's own list of ids it considers "this
+ * company's" (the company id itself, its employee ids, its pay run ids,
+ * ...) since an AuditLogEntry doesn't carry a companyId of its own — most
+ * entity types it logs (Employee, PayRun, GarnishmentOrder) already
+ * belong to exactly one company, so re-deriving that link here would
+ * just duplicate what the caller already knows from its own records.
+ */
+export function auditLogForEntityIds(entityIds: readonly string[]): AuditLogEntry[] {
+  const idSet = new Set(entityIds);
+  return readPayrollDb((db) => db.auditLog.filter((e) => idSet.has(e.entityId)).sort((a, b) => b.timestamp.localeCompare(a.timestamp)));
 }
