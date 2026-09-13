@@ -46,3 +46,18 @@ export {
   perPeriodDeductionAmount,
 } from './benefits.ts';
 export type { BenefitElection, BenefitPlan, CoverageTier } from './benefits.ts';
+export {
+  acceptOffer,
+  advanceCandidate,
+  declineOffer,
+  extendOffer,
+  hireCandidate,
+} from './onboarding.ts';
+export type { Candidate, CandidateStage, JobPosting, OfferDetails } from './onboarding.ts';
+export {
+  finalPayDueDate,
+  finalPtoPayoutHours,
+  isVacationPayoutMandatory,
+  terminateEmployee,
+} from './termination.ts';
+export type { FinalPayResult, TerminationReason, TerminationResult } from './termination.ts';

@@ -91,6 +91,12 @@ CREATE TABLE employee (
   last_name              TEXT NOT NULL,
   hire_date              DATE NOT NULL,
   termination_date       DATE,
+  -- Core-HR org structure, purely descriptive -- nothing in payroll
+  -- processing itself reads these. manager_id is deliberately just
+  -- another employee id (self-referencing), not a separate org table.
+  job_title              TEXT,
+  department             TEXT,
+  manager_id             UUID REFERENCES employee (id),
   employment_category    employment_category NOT NULL DEFAULT 'standard',
   pay_type               pay_type_kind NOT NULL,
   hourly_rate_cents      BIGINT,                   -- pay_type = 'hourly'
@@ -406,6 +412,79 @@ CREATE TABLE new_hire_report (
   due_by            DATE NOT NULL,
   built_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
   filed_at          TIMESTAMPTZ   -- NULL until someone actually submits it to the state agency
+);
+
+-- ----------------------------------------------------------------------------
+-- Benefits administration
+-- ----------------------------------------------------------------------------
+-- See payroll/benefits.ts's own header comment: plan definition and
+-- election only, no carrier EDI/eligibility/ACA reporting.
+
+CREATE TYPE coverage_tier AS ENUM ('employee_only', 'employee_spouse', 'employee_children', 'family');
+
+CREATE TABLE benefit_plan (
+  id                            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id                    UUID NOT NULL REFERENCES company (id),
+  name                          TEXT NOT NULL,
+  pretax_category               pretax_category,   -- NULL = post-tax benefit
+  employer_contribution_fraction NUMERIC(4,3) NOT NULL   -- 0.000-1.000
+);
+
+-- One row per (plan, tier) rather than four nullable columns — a plan may
+-- offer any subset of the four tiers, and this stays extensible the same
+-- way tax_bracket (db/schema.sql) is one row per bracket rather than a
+-- fixed column per rate.
+CREATE TABLE benefit_plan_tier_premium (
+  benefit_plan_id   UUID NOT NULL REFERENCES benefit_plan (id) ON DELETE CASCADE,
+  coverage_tier     coverage_tier NOT NULL,
+  monthly_premium_cents BIGINT NOT NULL,
+
+  PRIMARY KEY (benefit_plan_id, coverage_tier)
+);
+
+CREATE TABLE benefit_election (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  employee_id       UUID NOT NULL REFERENCES employee (id),
+  benefit_plan_id   UUID NOT NULL REFERENCES benefit_plan (id),
+  coverage_tier     coverage_tier NOT NULL,
+  effective_date    DATE NOT NULL,
+  end_date          DATE   -- NULL = currently active
+);
+
+-- ----------------------------------------------------------------------------
+-- Recruiting / onboarding
+-- ----------------------------------------------------------------------------
+-- See payroll/onboarding.ts's own header comment: pipeline tracking and
+-- the hire handoff only, no job-board posting or background-check
+-- integration.
+
+CREATE TYPE candidate_stage AS ENUM (
+  'applied', 'screening', 'interviewing', 'offer_extended', 'offer_accepted', 'offer_declined', 'hired', 'rejected'
+);
+
+CREATE TABLE job_posting (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id    UUID NOT NULL REFERENCES company (id),
+  title         TEXT NOT NULL,
+  department    TEXT,
+  opened_at     DATE NOT NULL,
+  closed_at     DATE
+);
+
+CREATE TABLE candidate (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  job_posting_id    UUID NOT NULL REFERENCES job_posting (id),
+  first_name        TEXT NOT NULL,
+  last_name         TEXT NOT NULL,
+  email             TEXT NOT NULL,
+  stage             candidate_stage NOT NULL DEFAULT 'applied',
+  applied_at        DATE NOT NULL,
+  -- The accepted/extended offer's own terms — see OfferDetails in
+  -- payroll/onboarding.ts. JSONB because its shape mirrors Employee's own
+  -- payType/workState/jobTitle fields, which are themselves varied enough
+  -- (hourly vs salary) that a fixed column set would just duplicate the
+  -- employee table's own CHECK constraints here.
+  offer             JSONB
 );
 
 COMMIT;

@@ -20,6 +20,9 @@ import type { BenefitElection, BenefitPlan } from '../payroll/benefits.ts';
 import { minimumWage } from '../src/minimum-wage.ts';
 import type { Company, Employee } from '../payroll/types.ts';
 import { freshYearToDate } from '../payroll/ytd.ts';
+import { finalPayDueDate, finalPtoPayoutHours, isVacationPayoutMandatory, terminateEmployee } from '../payroll/termination.ts';
+import { acceptOffer, advanceCandidate, declineOffer, extendOffer, hireCandidate } from '../payroll/onboarding.ts';
+import type { Candidate, OfferDetails } from '../payroll/onboarding.ts';
 
 function baseEmployee(overrides: Partial<Employee> = {}): Employee {
   return {
@@ -398,5 +401,149 @@ describe('benefits: plans, elections, and the deduction they produce (payroll/be
     assert.equal(isElectionChangeAllowed('2026-11-10', window, false), true);
     assert.equal(isElectionChangeAllowed('2026-06-01', window, false), false);
     assert.equal(isElectionChangeAllowed('2026-06-01', window, true), true, 'a genuine qualifying life event overrides the window');
+  });
+});
+
+// ============================================================================
+// Termination / offboarding
+// ============================================================================
+
+describe('final pay timing (payroll/termination.ts)', () => {
+  test('California: involuntary termination and layoff are due IMMEDIATELY, same day', () => {
+    assert.equal(finalPayDueDate('CA', '2026-06-10', 'involuntary', '2026-06-20').dueDate, '2026-06-10');
+    assert.equal(finalPayDueDate('CA', '2026-06-10', 'layoff', '2026-06-20').dueDate, '2026-06-10');
+  });
+
+  test('California: resignation WITH 72+ hours notice is due on the last day worked', () => {
+    assert.equal(finalPayDueDate('CA', '2026-06-10', 'voluntary_with_notice', '2026-06-20').dueDate, '2026-06-10');
+  });
+
+  test('California: resignation WITHOUT notice is due within 72 hours (approximated as 3 calendar days)', () => {
+    assert.equal(finalPayDueDate('CA', '2026-06-10', 'voluntary_without_notice', '2026-06-20').dueDate, '2026-06-13');
+  });
+
+  test('every other state falls back to the federal floor: no later than the next regular payday', () => {
+    const result = finalPayDueDate('TX', '2026-06-10', 'involuntary', '2026-06-20');
+    assert.equal(result.dueDate, '2026-06-20');
+    assert.match(result.rule, /federal floor/);
+  });
+});
+
+describe('mandatory PTO/vacation payout at termination (payroll/termination.ts)', () => {
+  const balance = { employeeId: 'e1', policyId: 'p1', balanceHours: 40, ytdAccruedHours: 40, ytdUsedHours: 0 };
+
+  test('California NEVER allows forfeiture — the full balance is owed regardless of the employer\'s own policy', () => {
+    assert.equal(isVacationPayoutMandatory('CA'), true);
+    assert.equal(finalPtoPayoutHours(balance, 'CA', false), 40, 'even an employer policy of NOT paying it out is overridden in California');
+  });
+
+  test('elsewhere, payout follows the employer\'s own policy', () => {
+    assert.equal(finalPtoPayoutHours(balance, 'TX', true), 40);
+    assert.equal(finalPtoPayoutHours(balance, 'TX', false), 0);
+  });
+
+  test('no balance on file at all means no payout, anywhere', () => {
+    assert.equal(finalPtoPayoutHours(null, 'CA', true), 0);
+  });
+});
+
+describe('the full termination workflow (payroll/termination.ts)', () => {
+  test('sets the employee\'s terminationDate and resolves both the final-pay deadline and the PTO payout together', () => {
+    const employee = baseEmployee({ workState: { code: 'CA' } });
+    const balance = { employeeId: 'e1', policyId: 'p1', balanceHours: 12, ytdAccruedHours: 12, ytdUsedHours: 0 };
+    const result = terminateEmployee(employee, '2026-06-10', 'involuntary', '2026-06-20', balance, false);
+    assert.equal(result.employee.terminationDate, '2026-06-10');
+    assert.equal(result.finalPay.dueDate, '2026-06-10');
+    assert.equal(result.ptoPayoutHours, 12);
+  });
+
+  test('falls back to the employee\'s own residenceState when no workState is set', () => {
+    const employee = baseEmployee({ residenceState: { code: 'CA' } });
+    const result = terminateEmployee(employee, '2026-06-10', 'involuntary', '2026-06-20', null, false);
+    assert.equal(result.finalPay.dueDate, '2026-06-10');
+  });
+});
+
+// ============================================================================
+// Recruiting / onboarding pipeline
+// ============================================================================
+
+describe('candidate pipeline stage transitions (payroll/onboarding.ts)', () => {
+  function candidate(overrides: Partial<Candidate> = {}): Candidate {
+    return { id: 'cand-1', jobPostingId: 'job-1', firstName: 'Sam', lastName: 'Okafor', email: 's@example.com', stage: 'applied', appliedAt: '2026-01-01', ...overrides };
+  }
+
+  test('a normal forward path (applied -> screening -> interviewing -> offer -> accepted -> hired) is allowed step by step', () => {
+    let c = candidate();
+    c = advanceCandidate(c, 'screening');
+    c = advanceCandidate(c, 'interviewing');
+    const offer: OfferDetails = { payType: { kind: 'hourly', hourlyRate: dollars(25) }, startDate: '2026-03-01', workState: { code: 'TX' } };
+    c = extendOffer(c, offer);
+    assert.equal(c.stage, 'offer_extended');
+    c = acceptOffer(c);
+    assert.equal(c.stage, 'offer_accepted');
+  });
+
+  test('rejecting a candidate is allowed from any active (non-terminal) stage', () => {
+    assert.equal(advanceCandidate(candidate({ stage: 'applied' }), 'rejected').stage, 'rejected');
+    assert.equal(advanceCandidate(candidate({ stage: 'interviewing' }), 'rejected').stage, 'rejected');
+  });
+
+  test('an impossible jump (applied straight to interviewing, skipping screening) throws', () => {
+    assert.throws(() => advanceCandidate(candidate({ stage: 'applied' }), 'interviewing'));
+  });
+
+  test('a terminal stage (rejected, hired, offer_declined) can never move again', () => {
+    assert.throws(() => advanceCandidate(candidate({ stage: 'rejected' }), 'screening'));
+    assert.throws(() => acceptOffer(candidate({ stage: 'offer_declined' })));
+  });
+
+  test('declining an offer is a real, distinct outcome from rejection', () => {
+    const offer: OfferDetails = { payType: { kind: 'salary', annualSalary: dollars(90_000) }, startDate: '2026-03-01', workState: { code: 'TX' } };
+    const c = declineOffer(extendOffer(candidate({ stage: 'interviewing' }), offer));
+    assert.equal(c.stage, 'offer_declined');
+  });
+});
+
+describe('hiring a candidate produces a real Employee record (payroll/onboarding.ts)', () => {
+  function acceptedCandidate(): Candidate {
+    const offer: OfferDetails = {
+      payType: { kind: 'salary', annualSalary: dollars(85_000) },
+      startDate: '2026-04-01',
+      workState: { code: 'NY' },
+      jobTitle: 'Software Engineer',
+      department: 'Engineering',
+    };
+    return {
+      id: 'cand-2',
+      jobPostingId: 'job-2',
+      firstName: 'Priya',
+      lastName: 'Menon',
+      email: 'p@example.com',
+      stage: 'offer_accepted',
+      appliedAt: '2026-01-01',
+      offer,
+    };
+  }
+
+  test('builds an Employee whose hireDate, pay, work state, title and department all come from the accepted offer', () => {
+    const w4: import('../src/types.ts').FederalW4 = { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 };
+    const { employee, candidate: hired } = hireCandidate(acceptedCandidate(), 'co-1', w4, { code: 'NY' });
+
+    assert.equal(hired.stage, 'hired');
+    assert.equal(employee.hireDate, '2026-04-01');
+    assert.equal(employee.jobTitle, 'Software Engineer');
+    assert.equal(employee.department, 'Engineering');
+    assert.deepEqual(employee.payType, { kind: 'salary', annualSalary: dollars(85_000) });
+    assert.equal(employee.workState?.code, 'NY');
+    assert.equal(employee.ytdYear, 2026);
+    assert.deepEqual(employee.ytd, freshYearToDate());
+    assert.deepEqual(employee.deductionPlans, []);
+  });
+
+  test('refuses to hire a candidate whose offer was never accepted', () => {
+    const notYetAccepted = { ...acceptedCandidate(), stage: 'offer_extended' as const };
+    const w4: import('../src/types.ts').FederalW4 = { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 };
+    assert.throws(() => hireCandidate(notYetAccepted, 'co-1', w4, { code: 'NY' }));
   });
 });

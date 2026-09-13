@@ -133,6 +133,32 @@ Beyond the pay-run engine itself, three more real HR pieces:
   never silently paid anyway. The closest this project comes to isolved's
   own "AI catches potential errors" claim, done as an ordinary, auditable
   function instead of an opaque model.
+- `payroll/onboarding.ts`: a candidate pipeline (applied → screening →
+  interviewing → offer → hired/rejected/declined) with an explicit state
+  machine — an impossible jump (straight from "applied" to "hired") throws
+  rather than silently succeeding — ending in `hireCandidate()`, which
+  turns an accepted offer directly into the real `Employee` record
+  `payroll/run.ts` can pay. Requires a real `FederalW4` rather than
+  defaulting one: a fabricated W-4 would silently mis-withhold someone's
+  very first paycheck, the same class of guessed input the tax engine
+  itself refuses to invent.
+- `payroll/termination.ts`: final-paycheck timing and PTO/vacation payout
+  at offboarding — genuinely different rules depending on WHY someone
+  left, which federal law does not set a deadline for at all (FLSA has no
+  final-paycheck clock; the safe floor is "no later than the next regular
+  payday"). California is researched and cited (Cal. Labor Code §§
+  201-203: immediate pay on involuntary termination/layoff, last-day-
+  worked or 72-hour deadlines on resignation depending on notice given)
+  because it is also the researched case for something naive payroll
+  software gets wrong in the other direction: Cal. Labor Code § 227.3
+  makes earned vacation NON-FORFEITABLE — an employer's own "use it or
+  lose it" carryover cap (`payroll/pto.ts`'s own `annualCarryoverCapHours`)
+  is not just unenforced but flatly illegal there, and
+  `isVacationPayoutMandatory()`/`finalPtoPayoutHours()` override the
+  employer's own policy accordingly. Every other state falls back to the
+  federal floor and the employer's own PTO-payout policy — the same
+  "disclosed, not guessed" choice as this module's own per-state deadline
+  research.
 
 `Employee` also carries plain Core-HR fields now (`jobTitle`,
 `department`, `managerId`) — purely descriptive, the natural spine for an
