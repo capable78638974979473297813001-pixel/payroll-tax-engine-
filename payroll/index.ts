@@ -62,3 +62,7 @@ export {
   terminateEmployee,
 } from './termination.ts';
 export type { FinalPayResult, TerminationReason, TerminationResult } from './termination.ts';
+export { i9ComplianceIssues, i9Deadlines, i9RetentionDueDate, i9Status } from './i9.ts';
+export type { I9Deadlines, I9Record, I9Status } from './i9.ts';
+export { computeCompanyReport } from './reports.ts';
+export type { CompanyReport, DepartmentHeadcount } from './reports.ts';

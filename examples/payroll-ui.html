@@ -58,7 +58,16 @@
 <main>
   <section id="company-section">
     <h2>Company</h2>
+    <div class="row">
+      <select id="company-select"></select>
+      <button class="secondary" id="new-company-btn">+ New company</button>
+    </div>
     <div id="company-info" class="muted">Loading…</div>
+  </section>
+
+  <section>
+    <h2>Headcount &amp; payroll cost report</h2>
+    <pre id="report-view"></pre>
   </section>
 
   <section>
@@ -174,6 +183,39 @@
   </section>
 
   <section>
+    <h2>Form I-9 (employment eligibility)</h2>
+    <div class="row">
+      <select id="i9-employee"></select>
+      <button class="secondary" id="i9-view-btn">View status</button>
+      <input id="i9-date" type="date" />
+      <button class="secondary" id="i9-section1-btn">Mark Section 1 complete</button>
+      <button class="secondary" id="i9-section2-btn">Mark Section 2 complete</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="secondary" id="i9-compliance-btn">Show company-wide compliance findings</button>
+    </div>
+    <pre id="i9-view"></pre>
+  </section>
+
+  <section>
+    <h2>Garnishment orders</h2>
+    <div class="row">
+      <select id="garn-employee"></select>
+      <select id="garn-type">
+        <option value="consumer_creditor">Consumer/creditor judgment</option>
+        <option value="child_support">Child support</option>
+        <option value="federal_student_loan_default">Federal student loan default</option>
+      </select>
+      <input id="garn-amount" type="number" placeholder="Amount ordered ($/period)" style="width:180px" />
+      <button class="secondary" id="garn-add-btn">Add order</button>
+    </div>
+    <table id="garn-table">
+      <thead><tr><th>Type</th><th>Amount ordered</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section>
     <h2>Benefits</h2>
     <div class="row">
       <input id="benefit-name" placeholder="Plan name" value="PPO Medical" />
@@ -232,12 +274,43 @@ async function api(path, options) {
   return body;
 }
 
-async function loadCompany() {
+let allLoadedCompanies = [];
+
+async function loadCompany(preferredId) {
   const { companies } = await api('/api/companies');
-  company = companies[0];
+  allLoadedCompanies = companies;
+  const select = document.getElementById('company-select');
+  select.innerHTML = companies.map((c) => `<option value="${c.id}">${c.legalName}</option>`).join('');
+  const targetId = preferredId && companies.some((c) => c.id === preferredId) ? preferredId : companies[0].id;
+  select.value = targetId;
+  company = companies.find((c) => c.id === targetId);
   document.getElementById('company-info').innerHTML =
     `<strong>${company.legalName}</strong> · EIN ${company.ein} · home state ${company.homeState} · ` +
     `${company.paySchedule.frequency} pay schedule`;
+}
+
+document.getElementById('company-select').addEventListener('change', async (ev) => {
+  await refreshAll(ev.target.value);
+});
+
+document.getElementById('new-company-btn').addEventListener('click', async () => {
+  const legalName = prompt('Legal name', 'New Company LLC');
+  if (!legalName) return;
+  const ein = prompt('EIN', '00-0000000') || '00-0000000';
+  const homeState = (prompt('Home state (2-letter)', 'TX') || 'TX').toUpperCase();
+  const frequency = prompt('Pay frequency (weekly/biweekly/semimonthly/monthly)', 'biweekly') || 'biweekly';
+  const paySchedule = frequency === 'semimonthly' || frequency === 'monthly'
+    ? { frequency, checkDateLagDays: 5 }
+    : { frequency, anchorPeriodStart: new Date().toISOString().slice(0, 10), checkDateLagDays: 5 };
+  const { company: created } = await api('/api/companies', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ legalName, ein, homeState, paySchedule }),
+  });
+  await refreshAll(created.id);
+});
+
+async function loadReport() {
+  const { report } = await api(`/api/companies/${company.id}/report`);
+  document.getElementById('report-view').textContent = JSON.stringify(report, null, 2);
 }
 
 const DEFAULT_FULL_TIME_HOURS = { weekly: 40, biweekly: 80, semimonthly: 86.67, monthly: 173.33 };
@@ -255,7 +328,7 @@ async function loadEmployees() {
     </tr>`).join('');
 
   const employeeOptions = list.map((e) => `<option value="${e.id}">${e.firstName} ${e.lastName}</option>`).join('');
-  for (const id of ['w2-employee', 'clock-employee', 'pto-employee', 'term-employee', 'benefit-employee']) {
+  for (const id of ['w2-employee', 'clock-employee', 'pto-employee', 'term-employee', 'benefit-employee', 'i9-employee', 'garn-employee']) {
     document.getElementById(id).innerHTML = employeeOptions;
   }
 
@@ -413,13 +486,45 @@ async function handleCandidateAction(candidateId, action) {
   }
 }
 
-async function refreshAll() {
-  await loadCompany();
+async function refreshAll(preferredCompanyId) {
+  await loadCompany(preferredCompanyId);
   await Promise.all([
-    loadEmployees(), loadNextPeriod(), loadRuns(),
+    loadEmployees(), loadNextPeriod(), loadRuns(), loadReport(),
     loadPtoPolicies(), loadBenefitPlans(), loadJobPostings(), loadCandidates(),
   ]);
+  await loadGarnishments();
 }
+
+async function loadGarnishments() {
+  const employeeId = document.getElementById('garn-employee').value;
+  if (!employeeId) return;
+  const { garnishmentOrders } = await api(`/api/employees/${employeeId}/garnishment-orders`);
+  const tbody = document.querySelector('#garn-table tbody');
+  tbody.innerHTML = garnishmentOrders.length === 0
+    ? '<tr><td colspan="3" class="muted">No garnishment orders.</td></tr>'
+    : garnishmentOrders.map((o) => `
+      <tr>
+        <td>${o.type}</td>
+        <td>${fmtCents(o.amountOrdered)}</td>
+        <td><button class="secondary garn-remove" data-order="${o.id}">Remove</button></td>
+      </tr>`).join('');
+  tbody.querySelectorAll('.garn-remove').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      await api(`/api/employees/${employeeId}/garnishment-orders/${btn.dataset.order}`, { method: 'DELETE' });
+      await loadGarnishments();
+    });
+  });
+}
+document.getElementById('garn-employee').addEventListener('change', loadGarnishments);
+document.getElementById('garn-add-btn').addEventListener('click', async () => {
+  const employeeId = document.getElementById('garn-employee').value;
+  const type = document.getElementById('garn-type').value;
+  const amountOrdered = Math.round(Number(document.getElementById('garn-amount').value) * 100) || 0;
+  await api(`/api/employees/${employeeId}/garnishment-orders`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type, amountOrdered }),
+  });
+  await loadGarnishments();
+});
 
 document.getElementById('run-btn').addEventListener('click', async () => {
   const btn = document.getElementById('run-btn');
@@ -674,6 +779,49 @@ document.getElementById('cand-create-btn').addEventListener('click', async () =>
       body: JSON.stringify({ jobPostingId, firstName, lastName, email }),
     });
     await loadCandidates();
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+// ----------------------------------------------------------------------
+// I-9
+// ----------------------------------------------------------------------
+
+document.getElementById('i9-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('i9-view-btn').addEventListener('click', async () => {
+  const employeeId = document.getElementById('i9-employee').value;
+  const view = document.getElementById('i9-view');
+  try {
+    const result = await api(`/api/employees/${employeeId}/i9`);
+    view.textContent = JSON.stringify(result, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+async function markI9Section(section) {
+  const employeeId = document.getElementById('i9-employee').value;
+  const completedAt = document.getElementById('i9-date').value;
+  const view = document.getElementById('i9-view');
+  try {
+    const result = await api(`/api/employees/${employeeId}/i9`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ section, completedAt }),
+    });
+    view.textContent = JSON.stringify(result, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+}
+document.getElementById('i9-section1-btn').addEventListener('click', () => markI9Section(1));
+document.getElementById('i9-section2-btn').addEventListener('click', () => markI9Section(2));
+
+document.getElementById('i9-compliance-btn').addEventListener('click', async () => {
+  const view = document.getElementById('i9-view');
+  try {
+    const { findings } = await api(`/api/companies/${company.id}/i9-compliance`);
+    view.textContent = findings.length === 0 ? 'No overdue I-9 findings.' : JSON.stringify(findings, null, 2);
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

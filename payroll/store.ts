@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { BenefitElection, BenefitPlan } from './benefits.ts';
+import type { I9Record } from './i9.ts';
 import type { Candidate, JobPosting } from './onboarding.ts';
 import type { PtoBalance, PtoPolicy } from './pto.ts';
 import type { TimePunch } from './timeAndAttendance.ts';
@@ -39,6 +40,7 @@ interface DB {
   /** Keyed by `${employeeId}:${policyId}` — PtoBalance's own composite key, see db/payroll-schema.sql's pto_balance table. */
   ptoBalances: Record<string, PtoBalance>;
   timePunches: TimePunch[];
+  i9Records: Record<string, I9Record>;
 }
 
 function emptyDb(): DB {
@@ -53,6 +55,7 @@ function emptyDb(): DB {
     ptoPolicies: {},
     ptoBalances: {},
     timePunches: [],
+    i9Records: {},
   };
 }
 
@@ -79,6 +82,7 @@ function load(): DB {
       ptoPolicies: parsed.ptoPolicies ?? base.ptoPolicies,
       ptoBalances: parsed.ptoBalances ?? base.ptoBalances,
       timePunches: parsed.timePunches ?? base.timePunches,
+      i9Records: parsed.i9Records ?? base.i9Records,
     };
   } catch {
     return emptyDb();
@@ -109,6 +113,10 @@ export function saveCompany(company: Company): void {
 
 export function getCompany(id: string): Company | null {
   return readPayrollDb((db) => db.companies[id] ?? null);
+}
+
+export function allCompanies(): Company[] {
+  return readPayrollDb((db) => Object.values(db.companies));
 }
 
 export function saveEmployee(employee: Employee): void {
@@ -271,4 +279,18 @@ export function addTimePunch(punch: TimePunch): void {
 
 export function timePunchesForEmployee(employeeId: string): TimePunch[] {
   return readPayrollDb((db) => db.timePunches.filter((p) => p.employeeId === employeeId));
+}
+
+// ----------------------------------------------------------------------------
+// I-9
+// ----------------------------------------------------------------------------
+
+export function saveI9Record(record: I9Record): void {
+  withPayrollDb((db) => {
+    db.i9Records[record.employeeId] = record;
+  });
+}
+
+export function getI9Record(employeeId: string): I9Record | null {
+  return readPayrollDb((db) => db.i9Records[employeeId] ?? null);
 }

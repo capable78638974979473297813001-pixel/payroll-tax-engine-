@@ -59,9 +59,11 @@ below rather than just the pay-run core: run payroll (hours pulled
 straight from clock punches when there are any), view a paystub, pull a
 quarter's Form 941/940 or an employee's W-2, clock in/out, accrue and
 spend PTO, elect a benefit plan, run a candidate through the recruiting
-pipeline into a real hire, and terminate an employee with the correct
-final-pay date and PTO payout. Checked end to end in an actual browser
-(Playwright), not just against the API.
+pipeline into a real hire, terminate an employee with the correct
+final-pay date and PTO payout, track Form I-9 status and deadlines,
+manage garnishment orders, switch between or create multiple companies,
+and pull a headcount/payroll-cost report. Checked end to end in an actual
+browser (Playwright), not just against the API.
 
 Persistence follows the same convention `site/lib/store.ts` already
 established for the API-key product: a file-backed store
@@ -170,6 +172,23 @@ Beyond the pay-run engine itself, three more real HR pieces:
   federal floor and the employer's own PTO-payout policy — the same
   "disclosed, not guessed" choice as this module's own per-state deadline
   research.
+- `payroll/i9.ts`: Form I-9 employment eligibility verification (8 U.S.C.
+  § 1324a) — the one compliance step required for EVERY US hire regardless
+  of state, unlike the new-hire report above. Section 1's deadline is the
+  first day of employment; Section 2's is 3 BUSINESS days after (with a
+  verified worked example: a Monday hire is due that Thursday), pulled in
+  to the first day itself when the job won't last 3 business days at all.
+  Retention runs until the LATER of 3 years after hire or 1 year after
+  termination — never the naive "always 3 years," which a short-tenure
+  employee terminated near the 3-year mark would get wrong. Tracks status
+  and surfaces missed deadlines as findings; does not verify that a
+  presented document is genuine, run E-Verify, or handle reverification of
+  an expiring work authorization.
+- `payroll/reports.ts`: headcount (as of any date, using the exact same
+  active/terminated logic a real pay run does), a department breakdown,
+  and YTD payroll cost — gross pay AND the employer's own tax cost, not
+  just what employees were paid — as pure rollups over records this
+  project already maintains.
 
 `Employee` also carries plain Core-HR fields now (`jobTitle`,
 `department`, `managerId`) — purely descriptive, the natural spine for an

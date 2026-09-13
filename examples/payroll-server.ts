@@ -13,6 +13,7 @@ import {
   acceptOffer,
   approvePayRun,
   classifyWeeklyHours,
+  computeCompanyReport,
   computeForm940,
   computeForm941,
   computeW2FromEmployee,
@@ -24,6 +25,9 @@ import {
   freshYearToDate,
   generatePayPeriods,
   hireCandidate,
+  i9ComplianceIssues,
+  i9Deadlines,
+  i9Status,
   overtimeRuleForState,
   pairPunchesIntoDailyHours,
   renderPaystubText,
@@ -31,10 +35,13 @@ import {
   usePto,
 } from '../payroll/index.ts';
 import type { BenefitPlan, CoverageTier } from '../payroll/benefits.ts';
+import type { I9Record } from '../payroll/i9.ts';
 import type { Candidate, CandidateStage, OfferDetails } from '../payroll/onboarding.ts';
 import type { TerminationReason } from '../payroll/termination.ts';
+import type { GarnishmentOrder } from '../src/garnishment.ts';
 import {
   addTimePunch,
+  allCompanies,
   benefitElectionsForEmployee,
   benefitPlansForCompany,
   candidatesForCompany,
@@ -43,6 +50,7 @@ import {
   getCandidate,
   getCompany,
   getEmployee,
+  getI9Record,
   getPayRun,
   getPtoBalance,
   getPtoPolicy,
@@ -56,6 +64,7 @@ import {
   saveCompany,
   saveEmployee,
   saveEmployees,
+  saveI9Record,
   saveJobPosting,
   savePayRun,
   savePtoBalance,
@@ -220,8 +229,7 @@ const server = createServer(async (req, res) => {
     }
 
     if (req.method === 'GET' && req.url === '/api/companies') {
-      const company = getCompany('co-demo')!;
-      sendJson(res, 200, { companies: [company] });
+      sendJson(res, 200, { companies: allCompanies() });
       return;
     }
 
@@ -565,6 +573,103 @@ const server = createServer(async (req, res) => {
       const result = usePto(current, body.hours);
       if (result.approved) savePtoBalance(result.balance);
       sendJson(res, 200, result);
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // I-9
+    // ------------------------------------------------------------------
+
+    const i9Match = url.pathname.match(/^\/api\/employees\/([^/]+)\/i9$/);
+    if (req.method === 'GET' && i9Match) {
+      const employee = getEmployee(decodeURIComponent(i9Match[1]));
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const record = getI9Record(employee.id) ?? { employeeId: employee.id };
+      sendJson(res, 200, {
+        record,
+        status: i9Status(record),
+        deadlines: i9Deadlines(employee.hireDate),
+        issues: i9ComplianceIssues(employee, record, new Date().toISOString().slice(0, 10)),
+      });
+      return;
+    }
+    if (req.method === 'POST' && i9Match) {
+      const employeeId = decodeURIComponent(i9Match[1]);
+      const body = await parseJsonBody<{ section: 1 | 2; completedAt: string }>(req);
+      const existing: I9Record = getI9Record(employeeId) ?? { employeeId };
+      const updated: I9Record =
+        body.section === 1 ? { ...existing, section1CompletedAt: body.completedAt } : { ...existing, section2CompletedAt: body.completedAt };
+      saveI9Record(updated);
+      sendJson(res, 200, { record: updated, status: i9Status(updated) });
+      return;
+    }
+
+    const i9ComplianceMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/i9-compliance$/);
+    if (req.method === 'GET' && i9ComplianceMatch) {
+      const companyId = decodeURIComponent(i9ComplianceMatch[1]);
+      const asOfDate = url.searchParams.get('asOfDate') ?? new Date().toISOString().slice(0, 10);
+      const findings = employeesForCompany(companyId)
+        .map((employee) => ({ employeeId: employee.id, issues: i9ComplianceIssues(employee, getI9Record(employee.id) ?? undefined, asOfDate) }))
+        .filter((f) => f.issues.length > 0);
+      sendJson(res, 200, { findings });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Garnishment orders
+    // ------------------------------------------------------------------
+
+    const garnishmentMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/garnishment-orders$/);
+    if (req.method === 'GET' && garnishmentMatch) {
+      const employee = getEmployee(decodeURIComponent(garnishmentMatch[1]));
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      sendJson(res, 200, { garnishmentOrders: employee.garnishmentOrders });
+      return;
+    }
+    if (req.method === 'POST' && garnishmentMatch) {
+      const employeeId = decodeURIComponent(garnishmentMatch[1]);
+      const employee = getEmployee(employeeId);
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const body = await parseJsonBody<Omit<GarnishmentOrder, 'id'>>(req);
+      const order: GarnishmentOrder = { id: randomUUID(), ...body };
+      const updated: Employee = { ...employee, garnishmentOrders: [...employee.garnishmentOrders, order] };
+      saveEmployee(updated);
+      sendJson(res, 200, { garnishmentOrders: updated.garnishmentOrders });
+      return;
+    }
+
+    const garnishmentDeleteMatch = url.pathname.match(/^\/api\/employees\/([^/]+)\/garnishment-orders\/([^/]+)$/);
+    if (req.method === 'DELETE' && garnishmentDeleteMatch) {
+      const employeeId = decodeURIComponent(garnishmentDeleteMatch[1]);
+      const orderId = decodeURIComponent(garnishmentDeleteMatch[2]);
+      const employee = getEmployee(employeeId);
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const updated: Employee = { ...employee, garnishmentOrders: employee.garnishmentOrders.filter((o) => o.id !== orderId) };
+      saveEmployee(updated);
+      sendJson(res, 200, { garnishmentOrders: updated.garnishmentOrders });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Companies (create) and reports
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/companies') {
+      const body = await parseJsonBody<Omit<Company, 'id'>>(req);
+      const created: Company = { id: randomUUID(), ...body };
+      saveCompany(created);
+      sendJson(res, 200, { company: created });
+      return;
+    }
+
+    const reportMatch = url.pathname.match(/^\/api\/companies\/([^/]+)\/report$/);
+    if (req.method === 'GET' && reportMatch) {
+      const companyId = decodeURIComponent(reportMatch[1]);
+      const company = getCompany(companyId);
+      if (!company) return sendJson(res, 404, { error: 'No such company.' });
+      const asOfDate = url.searchParams.get('asOfDate') ?? new Date().toISOString().slice(0, 10);
+      const report = computeCompanyReport(company, employeesForCompany(companyId), payRunsForCompany(companyId), asOfDate);
+      sendJson(res, 200, { report });
       return;
     }
 
