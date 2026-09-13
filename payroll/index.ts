@@ -40,12 +40,13 @@ export type { NewHireReport } from './newHireReporting.ts';
 export { checkMinimumWageCompliance, checkMinimumWageComplianceForCompany } from './compliance.ts';
 export type { MinimumWageComplianceIssue } from './compliance.ts';
 export {
+  applyElection,
   deductionPlanFromElection,
   employeeMonthlyPremium,
   isElectionChangeAllowed,
   perPeriodDeductionAmount,
 } from './benefits.ts';
-export type { BenefitElection, BenefitPlan, CoverageTier } from './benefits.ts';
+export type { ApplyElectionResult, BenefitElection, BenefitPlan, CoverageTier } from './benefits.ts';
 export {
   acceptOffer,
   advanceCandidate,

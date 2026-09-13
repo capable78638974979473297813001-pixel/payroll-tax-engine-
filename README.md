@@ -54,8 +54,14 @@ into the liability figures Form 941 itself reports and the core W-2 boxes
 (`payroll/filings.ts`). `npm run demo:payroll` runs the whole lifecycle for
 two employees — one salaried, one hourly with overtime and a child-support
 order — end to end, paystubs and ACH file included; `npm run ui:payroll`
-puts a small admin UI in front of the same store — run payroll, view a
-paystub, pull a quarter's Form 941 or an employee's W-2.
+puts a small admin UI in front of the same store, wired to every module
+below rather than just the pay-run core: run payroll (hours pulled
+straight from clock punches when there are any), view a paystub, pull a
+quarter's Form 941/940 or an employee's W-2, clock in/out, accrue and
+spend PTO, elect a benefit plan, run a candidate through the recruiting
+pipeline into a real hire, and terminate an employee with the correct
+final-pay date and PTO payout. Checked end to end in an actual browser
+(Playwright), not just against the API.
 
 Persistence follows the same convention `site/lib/store.ts` already
 established for the API-key product: a file-backed store
@@ -117,13 +123,18 @@ Beyond the pay-run engine itself, three more real HR pieces:
 - `payroll/benefits.ts`: define a plan's own per-tier premium once (never
   a generic multiplier — a real plan prices employee+spouse,
   employee+children and family independently), let an employee's election
-  drive their own payroll deduction automatically, and gate a mid-year
-  election change on either the employer's open-enrollment window or a
-  genuine qualifying life event (IRC § 125's own cafeteria-plan rule) —
-  isolved's own materials describe this exact idea as "set up your
-  benefit plans once, driving enrollment and deductions throughout the
-  system." No carrier integration (EDI 834, eligibility verification, ACA
-  1095-C reporting) — that's real, separate infrastructure, not built
+  drive their own payroll deduction automatically (`applyElection()` —
+  re-electing the SAME plan at a new tier ends the prior election and its
+  deduction so the two never run concurrently; electing a DIFFERENT plan
+  deliberately leaves an existing one untouched, since this module has no
+  concept of mutually-exclusive plan categories like medical-vs-dental),
+  and gate a mid-year election change on either the employer's
+  open-enrollment window or a genuine qualifying life event (IRC § 125's
+  own cafeteria-plan rule) — isolved's own materials describe this exact
+  idea as "set up your benefit plans once, driving enrollment and
+  deductions throughout the system." No carrier integration (EDI 834,
+  eligibility verification, ACA 1095-C reporting) — that's real, separate
+  infrastructure, not built
   here.
 - `payroll/compliance.ts`: wires `src/minimum-wage.ts` — already this
   project's own source of truth, the same one `npm run

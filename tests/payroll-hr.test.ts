@@ -15,7 +15,7 @@ import { accruePto, applyAnnualCarryover, emptyPtoBalance, ptoPayoutEarning, use
 import type { PtoPolicy } from '../payroll/pto.ts';
 import { buildNewHireReport, deadlineDaysForState, FEDERAL_DEFAULT_DEADLINE_DAYS } from '../payroll/newHireReporting.ts';
 import { checkMinimumWageCompliance, checkMinimumWageComplianceForCompany } from '../payroll/compliance.ts';
-import { deductionPlanFromElection, employeeMonthlyPremium, isElectionChangeAllowed, perPeriodDeductionAmount } from '../payroll/benefits.ts';
+import { applyElection, deductionPlanFromElection, employeeMonthlyPremium, isElectionChangeAllowed, perPeriodDeductionAmount } from '../payroll/benefits.ts';
 import type { BenefitElection, BenefitPlan } from '../payroll/benefits.ts';
 import { minimumWage } from '../src/minimum-wage.ts';
 import type { Company, Employee } from '../payroll/types.ts';
@@ -401,6 +401,37 @@ describe('benefits: plans, elections, and the deduction they produce (payroll/be
     assert.equal(isElectionChangeAllowed('2026-11-10', window, false), true);
     assert.equal(isElectionChangeAllowed('2026-06-01', window, false), false);
     assert.equal(isElectionChangeAllowed('2026-06-01', window, true), true, 'a genuine qualifying life event overrides the window');
+  });
+
+  test('applyElection: re-electing the SAME plan (a tier change) ends the prior election and its deduction, leaving exactly one deduction for that plan', () => {
+    const plan = medicalPlan();
+    const employeeWithPriorElection = baseEmployee({
+      deductionPlans: [{ id: 'benefit-el-1', code: 'PPO Medical', category: 'section125', amount: { kind: 'flat', cents: dollars(100) }, active: true }],
+    });
+    const priorElection: BenefitElection = { id: 'el-1', employeeId: 'e1', planId: plan.id, coverageTier: 'employee_only', effectiveDate: '2026-01-01' };
+
+    const result = applyElection(employeeWithPriorElection, [priorElection], plan, 'family', '2026-07-01', 26);
+
+    assert.equal(result.endedElections.length, 1);
+    assert.equal(result.endedElections[0].endDate, '2026-07-01');
+    const planDeductions = result.employee.deductionPlans.filter((d) => d.code === 'PPO Medical');
+    assert.equal(planDeductions.length, 1, 'the old tier\'s deduction must be gone, not left running alongside the new one');
+    assert.equal(planDeductions[0].id, `benefit-${result.election.id}`);
+  });
+
+  test('applyElection: electing a DIFFERENT plan never touches an existing election for an unrelated plan — both run concurrently', () => {
+    const medical = medicalPlan();
+    const dental = medicalPlan({ id: 'plan-dental', name: 'Dental PPO', monthlyPremiumByTier: { employee_only: dollars(40) } });
+    const employeeWithMedical = baseEmployee({
+      deductionPlans: [{ id: 'benefit-el-medical', code: 'PPO Medical', category: 'section125', amount: { kind: 'flat', cents: dollars(100) }, active: true }],
+    });
+    const medicalElection: BenefitElection = { id: 'el-medical', employeeId: 'e1', planId: medical.id, coverageTier: 'employee_only', effectiveDate: '2026-01-01' };
+
+    const result = applyElection(employeeWithMedical, [medicalElection], dental, 'employee_only', '2026-07-01', 26);
+
+    assert.equal(result.endedElections.length, 0, 'a different plan must never end an unrelated one');
+    assert.equal(result.employee.deductionPlans.find((d) => d.code === 'PPO Medical')?.active, true, 'the existing medical deduction must be untouched');
+    assert.ok(result.employee.deductionPlans.find((d) => d.code === 'Dental PPO'), 'the new dental deduction must be added');
   });
 });
 

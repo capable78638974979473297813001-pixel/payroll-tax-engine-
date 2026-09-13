@@ -1,6 +1,7 @@
+import { randomUUID } from 'node:crypto';
 import type { Cents } from '../src/money.ts';
 import type { PretaxCategory } from '../src/types.ts';
-import type { DeductionPlan } from './types.ts';
+import type { DeductionPlan, Employee } from './types.ts';
 
 /**
  * Benefits administration: define a plan once, let every employee's own
@@ -76,6 +77,57 @@ export function deductionPlanFromElection(plan: BenefitPlan, election: BenefitEl
     category: plan.category,
     amount: { kind: 'flat', cents: perPeriodDeductionAmount(monthlyEmployeeCost, periodsPerYear) },
     active: election.endDate === undefined,
+  };
+}
+
+export interface ApplyElectionResult {
+  employee: Employee;
+  election: BenefitElection;
+  /** Any prior election(s) this one superseded, now with endDate set — the caller persists these too, so a later report of "when was this plan actually active" is accurate. */
+  endedElections: BenefitElection[];
+}
+
+/**
+ * The full "employee elects a benefit" operation, in one place so this
+ * logic is unit-tested rather than living inline in a request handler:
+ * ends any PRIOR active election for the SAME plan (a tier change, or a
+ * genuine re-election) so its deduction never keeps running alongside the
+ * new one, creates the new election, and returns the employee with
+ * `deductionPlans` updated to match.
+ *
+ * Electing a DIFFERENT plan — adding dental on top of an existing medical
+ * election, say — is deliberately NOT treated as superseding anything.
+ * This module has no concept of mutually-exclusive plan CATEGORIES (real
+ * benefits administration usually enforces that via a plan "type" —
+ * medical/dental/vision/life — so electing a new medical plan replaces
+ * the old one but a new dental plan doesn't touch it); modelling that
+ * grouping is real, unbuilt scope, not a bug in what's here. Two
+ * unrelated plans running concurrently is the correct, intended outcome
+ * today.
+ */
+export function applyElection(
+  employee: Employee,
+  existingElections: readonly BenefitElection[],
+  plan: BenefitPlan,
+  coverageTier: CoverageTier,
+  effectiveDate: string,
+  periodsPerYear: number,
+): ApplyElectionResult {
+  const endedElections = existingElections
+    .filter((e) => e.planId === plan.id && e.endDate === undefined)
+    .map((e) => ({ ...e, endDate: effectiveDate }));
+  const endedDeductionIds = new Set(endedElections.map((e) => `benefit-${e.id}`));
+
+  const election: BenefitElection = { id: randomUUID(), employeeId: employee.id, planId: plan.id, coverageTier, effectiveDate };
+  const newDeduction = deductionPlanFromElection(plan, election, periodsPerYear);
+
+  return {
+    employee: {
+      ...employee,
+      deductionPlans: [...employee.deductionPlans.filter((d) => !endedDeductionIds.has(d.id)), newDeduction],
+    },
+    election,
+    endedElections,
   };
 }
 

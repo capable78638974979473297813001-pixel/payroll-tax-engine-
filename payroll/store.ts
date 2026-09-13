@@ -1,6 +1,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { BenefitElection, BenefitPlan } from './benefits.ts';
+import type { Candidate, JobPosting } from './onboarding.ts';
+import type { PtoBalance, PtoPolicy } from './pto.ts';
+import type { TimePunch } from './timeAndAttendance.ts';
 import type { Company, Employee, PayRun } from './types.ts';
 
 /**
@@ -27,10 +31,29 @@ interface DB {
   companies: Record<string, Company>;
   employees: Record<string, Employee>;
   payRuns: Record<string, PayRun>;
+  benefitPlans: Record<string, BenefitPlan>;
+  benefitElections: Record<string, BenefitElection>;
+  jobPostings: Record<string, JobPosting>;
+  candidates: Record<string, Candidate>;
+  ptoPolicies: Record<string, PtoPolicy>;
+  /** Keyed by `${employeeId}:${policyId}` — PtoBalance's own composite key, see db/payroll-schema.sql's pto_balance table. */
+  ptoBalances: Record<string, PtoBalance>;
+  timePunches: TimePunch[];
 }
 
 function emptyDb(): DB {
-  return { companies: {}, employees: {}, payRuns: {} };
+  return {
+    companies: {},
+    employees: {},
+    payRuns: {},
+    benefitPlans: {},
+    benefitElections: {},
+    jobPostings: {},
+    candidates: {},
+    ptoPolicies: {},
+    ptoBalances: {},
+    timePunches: [],
+  };
 }
 
 function ensureDataDir(): void {
@@ -49,6 +72,13 @@ function load(): DB {
       companies: parsed.companies ?? base.companies,
       employees: parsed.employees ?? base.employees,
       payRuns: parsed.payRuns ?? base.payRuns,
+      benefitPlans: parsed.benefitPlans ?? base.benefitPlans,
+      benefitElections: parsed.benefitElections ?? base.benefitElections,
+      jobPostings: parsed.jobPostings ?? base.jobPostings,
+      candidates: parsed.candidates ?? base.candidates,
+      ptoPolicies: parsed.ptoPolicies ?? base.ptoPolicies,
+      ptoBalances: parsed.ptoBalances ?? base.ptoBalances,
+      timePunches: parsed.timePunches ?? base.timePunches,
     };
   } catch {
     return emptyDb();
@@ -117,4 +147,128 @@ export function payRunsForCompany(companyId: string): PayRun[] {
       .filter((r) => r.companyId === companyId)
       .sort((a, b) => a.checkDate.localeCompare(b.checkDate)),
   );
+}
+
+// ----------------------------------------------------------------------------
+// Benefits
+// ----------------------------------------------------------------------------
+
+export function saveBenefitPlan(plan: BenefitPlan): void {
+  withPayrollDb((db) => {
+    db.benefitPlans[plan.id] = plan;
+  });
+}
+
+export function benefitPlansForCompany(companyId: string): BenefitPlan[] {
+  return readPayrollDb((db) => Object.values(db.benefitPlans).filter((p) => p.companyId === companyId));
+}
+
+export function getBenefitPlan(id: string): BenefitPlan | null {
+  return readPayrollDb((db) => db.benefitPlans[id] ?? null);
+}
+
+export function saveBenefitElection(election: BenefitElection): void {
+  withPayrollDb((db) => {
+    db.benefitElections[election.id] = election;
+  });
+}
+
+export function benefitElectionsForEmployee(employeeId: string): BenefitElection[] {
+  return readPayrollDb((db) => Object.values(db.benefitElections).filter((e) => e.employeeId === employeeId));
+}
+
+// ----------------------------------------------------------------------------
+// Recruiting / onboarding
+// ----------------------------------------------------------------------------
+
+export function saveJobPosting(posting: JobPosting): void {
+  withPayrollDb((db) => {
+    db.jobPostings[posting.id] = posting;
+  });
+}
+
+export function jobPostingsForCompany(companyId: string): JobPosting[] {
+  return readPayrollDb((db) => Object.values(db.jobPostings).filter((p) => p.companyId === companyId));
+}
+
+export function getJobPosting(id: string): JobPosting | null {
+  return readPayrollDb((db) => db.jobPostings[id] ?? null);
+}
+
+export function saveCandidate(candidate: Candidate): void {
+  withPayrollDb((db) => {
+    db.candidates[candidate.id] = candidate;
+  });
+}
+
+export function getCandidate(id: string): Candidate | null {
+  return readPayrollDb((db) => db.candidates[id] ?? null);
+}
+
+export function candidatesForJobPosting(jobPostingId: string): Candidate[] {
+  return readPayrollDb((db) => Object.values(db.candidates).filter((c) => c.jobPostingId === jobPostingId));
+}
+
+export function candidatesForCompany(companyId: string): Candidate[] {
+  return readPayrollDb((db) => {
+    const postingIds = new Set(Object.values(db.jobPostings).filter((p) => p.companyId === companyId).map((p) => p.id));
+    return Object.values(db.candidates).filter((c) => postingIds.has(c.jobPostingId));
+  });
+}
+
+// ----------------------------------------------------------------------------
+// PTO
+// ----------------------------------------------------------------------------
+
+export function savePtoPolicy(policy: PtoPolicy): void {
+  withPayrollDb((db) => {
+    db.ptoPolicies[policy.id] = policy;
+  });
+}
+
+export function ptoPoliciesForCompany(companyId: string): PtoPolicy[] {
+  // PtoPolicy itself carries no companyId (see payroll/pto.ts) — callers
+  // key it by their OWN company's known policy ids instead. This helper
+  // exists anyway for the common case of one company, one shared policy
+  // set, by returning every policy on file; a multi-company deployment
+  // built on this store would need to add that column itself, the same
+  // "extend the shape when you actually need it" convention this file
+  // uses throughout rather than pre-building for a case with no caller yet.
+  return readPayrollDb((db) => Object.values(db.ptoPolicies));
+}
+
+export function getPtoPolicy(id: string): PtoPolicy | null {
+  return readPayrollDb((db) => db.ptoPolicies[id] ?? null);
+}
+
+function ptoBalanceKey(employeeId: string, policyId: string): string {
+  return `${employeeId}:${policyId}`;
+}
+
+export function savePtoBalance(balance: PtoBalance): void {
+  withPayrollDb((db) => {
+    db.ptoBalances[ptoBalanceKey(balance.employeeId, balance.policyId)] = balance;
+  });
+}
+
+export function getPtoBalance(employeeId: string, policyId: string): PtoBalance | null {
+  return readPayrollDb((db) => db.ptoBalances[ptoBalanceKey(employeeId, policyId)] ?? null);
+}
+
+export function ptoBalancesForEmployee(employeeId: string): PtoBalance[] {
+  return readPayrollDb((db) => Object.values(db.ptoBalances).filter((b) => b.employeeId === employeeId));
+}
+
+// ----------------------------------------------------------------------------
+// Time & attendance
+// ----------------------------------------------------------------------------
+
+export function addTimePunch(punch: TimePunch): void {
+  withPayrollDb((db) => {
+    db.timePunches.push(punch);
+  });
+}
+
+export function timePunchesForEmployee(employeeId: string): TimePunch[] {
+  return readPayrollDb((db) => db.timePunches.filter((p) => p.employeeId === employeeId));
 }
