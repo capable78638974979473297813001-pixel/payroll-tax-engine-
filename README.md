@@ -523,9 +523,27 @@ Beyond the pay-run engine itself, three more real HR pieces:
   long-standing $600 to $2,000 effective for 2026 payments, confirmed via
   source review rather than relying on trained-in memory that would have
   been quietly wrong for the exact year this project targets. Does not
-  distinguish an employee-vs-contractor misclassification question, and
-  does not model backup withholding for an invalid TIN.
-
+  distinguish an employee-vs-contractor misclassification question.
+  Backup withholding for an invalid TIN is now modeled separately — see
+  `payroll/backupWithholding.ts` below.
+- `payroll/backupWithholding.ts`: IRS backup withholding (26 U.S.C.
+  § 3406) for a missing/invalid TIN — live-verified against IRS.gov
+  directly, including the one detail that matters most for THIS
+  project's own 1099-NEC contractor payments: the IRS's 60-day
+  "awaiting-TIN" grace period applies ONLY to interest, dividends, and
+  certain broker payments — nonemployee compensation is, in the IRS's own
+  words, "subject to backup withholding immediately, even if the payee
+  has applied for and is awaiting a TIN." `isBackupWithholdingRequired()`
+  encodes that asymmetry directly: a contractor payment with no TIN on
+  file is withheld from day one, while an interest/dividend payment gets
+  the full 60 days first. Flat 24% rate, applied to the gross payment.
+  Deliberately does NOT model the "B notice" procedural workflow (the
+  IRS's CP2100/CP2100A mismatch notices, first-vs-second-notice
+  consequences within a 3-year window, payee response deadlines) — this
+  project couldn't independently verify those figures with the same
+  confidence as the rate and TIN-type distinction above, so rather than
+  guess at a compliance deadline, it's left out entirely, the same
+  "disclosed, not guessed" discipline as everywhere else in this project.
 - `payroll/auditLog.ts`: an append-only record of who did what to which
   record, attached at the six points where this project actually mutates
   state on someone's behalf — pay-run approval, termination, a candidate

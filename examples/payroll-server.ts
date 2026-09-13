@@ -76,6 +76,10 @@ import {
   mayQualifyForSmallEmployerExemption,
   isPumpBreakPaymentRequired,
   isCompliantPumpingSpace,
+  isWithinAwaitingTinGracePeriod,
+  isBackupWithholdingRequired,
+  backupWithholdingAmount,
+  netPaymentAfterBackupWithholding,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -130,6 +134,7 @@ import type { Contractor } from '../payroll/contractors.ts';
 import type { EverifyCase, EverifyCaseStatus } from '../payroll/everify.ts';
 import type { HdhpCoverageTier } from '../payroll/hsaFsaLimits.ts';
 import type { NyWageBasisOfPay } from '../payroll/nyWageNotice.ts';
+import type { BackupWithholdingPaymentType } from '../payroll/backupWithholding.ts';
 import type { FlsaExemptionCategory } from '../payroll/flsaExemption.ts';
 import type { I9Record } from '../payroll/i9.ts';
 import type { Candidate, CandidateStage, OfferDetails } from '../payroll/onboarding.ts';
@@ -1719,6 +1724,30 @@ const server = createServer(async (req, res) => {
         mayQualifyForSmallEmployerExemption: mayQualifyForSmallEmployerExemption(body.totalEmployeeCountAllWorksites),
         paymentRequired: isPumpBreakPaymentRequired(body.isCompletelyRelievedOfDuty, body.coincidesWithAlreadyPaidBreak),
         compliantSpace: isCompliantPumpingSpace(body.isBathroom, body.isShieldedFromView, body.isFreeFromIntrusion),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Backup withholding calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/backup-withholding/calculator') {
+      const body = await parseJsonBody<{
+        paymentType: BackupWithholdingPaymentType;
+        hasValidTinOnFile: boolean;
+        awaitingTinCertificateDate: string | null;
+        paymentDate: string;
+        grossPaymentDollars: number;
+      }>(req);
+      const withinGracePeriod = body.awaitingTinCertificateDate !== null && isWithinAwaitingTinGracePeriod(body.awaitingTinCertificateDate, body.paymentDate);
+      const required = isBackupWithholdingRequired(body.paymentType, body.hasValidTinOnFile, withinGracePeriod);
+      const grossCents = dollars(body.grossPaymentDollars);
+      sendJson(res, 200, {
+        withinAwaitingTinGracePeriod: withinGracePeriod,
+        backupWithholdingRequired: required,
+        backupWithholdingAmount: required ? backupWithholdingAmount(grossCents) : 0,
+        netPayment: netPaymentAfterBackupWithholding(grossCents, required),
       });
       return;
     }

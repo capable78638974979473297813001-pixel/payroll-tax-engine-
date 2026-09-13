@@ -224,6 +224,16 @@ export {
   isPumpBreakPaymentRequired,
   isCompliantPumpingSpace,
 } from './pumpAct.ts';
+export {
+  BACKUP_WITHHOLDING_RATE,
+  AWAITING_TIN_GRACE_PERIOD_DAYS,
+  awaitingTinGracePeriodEndDate,
+  isWithinAwaitingTinGracePeriod,
+  isBackupWithholdingRequired,
+  backupWithholdingAmount,
+  netPaymentAfterBackupWithholding,
+} from './backupWithholding.ts';
+export type { BackupWithholdingPaymentType } from './backupWithholding.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

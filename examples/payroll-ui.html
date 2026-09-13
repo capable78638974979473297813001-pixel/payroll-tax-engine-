@@ -349,6 +349,25 @@
   </section>
 
   <section>
+    <h2>Backup withholding</h2>
+    <p class="muted" style="margin-top:0">24% federal withholding when a payee has no valid TIN on file. The IRS's own awaiting-TIN 60-day grace period applies ONLY to interest/dividend payments — nonemployee compensation (1099-NEC contractor payments) is withheld immediately with no grace period at all, even while a TIN application is pending. This project doesn't model the B-notice procedural workflow (CP2100/CP2100A mismatch notices).</p>
+    <div class="row">
+      <select id="bw-payment-type">
+        <option value="nonemployee_compensation">Nonemployee compensation (1099-NEC)</option>
+        <option value="interest_or_dividends">Interest / dividends</option>
+      </select>
+      <label class="muted"><input type="checkbox" id="bw-has-tin" /> Valid TIN on file</label>
+      <input id="bw-tin-cert-date" type="date" placeholder="Awaiting-TIN certificate date" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="bw-payment-date" type="date" />
+      <input id="bw-gross" type="number" placeholder="Gross payment ($)" style="width:170px" />
+      <button class="secondary" id="bw-calc-btn">Calculate</button>
+    </div>
+    <pre id="bw-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -1209,6 +1228,30 @@ document.getElementById('pump-calc-btn').addEventListener('click', async () => {
       `May qualify for small-employer exemption (headcount only — still needs an undue-hardship showing): ${result.mayQualifyForSmallEmployerExemption ? 'YES' : 'No'}\n` +
       `Payment required for this break: ${result.paymentRequired ? 'YES' : 'No'}\n` +
       `Space is compliant: ${result.compliantSpace ? 'YES' : 'No'}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('bw-payment-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('bw-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('bw-view');
+  const paymentType = document.getElementById('bw-payment-type').value;
+  const hasValidTinOnFile = document.getElementById('bw-has-tin').checked;
+  const awaitingTinCertificateDate = document.getElementById('bw-tin-cert-date').value || null;
+  const paymentDate = document.getElementById('bw-payment-date').value;
+  const grossPaymentDollars = Number(document.getElementById('bw-gross').value) || 0;
+  try {
+    const result = await api('/api/backup-withholding/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paymentType, hasValidTinOnFile, awaitingTinCertificateDate, paymentDate, grossPaymentDollars }),
+    });
+    view.textContent =
+      `Within awaiting-TIN grace period: ${result.withinAwaitingTinGracePeriod ? 'YES' : 'No'}\n` +
+      `Backup withholding required: ${result.backupWithholdingRequired ? 'YES' : 'No'}\n` +
+      `Backup withholding amount (24%): ${fmtCents(result.backupWithholdingAmount)}\n` +
+      `Net payment: ${fmtCents(result.netPayment)}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
