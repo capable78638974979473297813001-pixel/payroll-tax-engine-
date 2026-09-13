@@ -468,6 +468,28 @@ Beyond the pay-run engine itself, three more real HR pieces:
   work) — a real, separate persistence workflow not built here, the same
   category of gap as PTO's own request/approval workflow was before this
   session, disclosed rather than silently assumed away.
+- `payroll/userra.ts`: USERRA military-service reemployment rights
+  (38 U.S.C. § 4301 et seq.) — live-verified against DOL's own VETS Fact
+  Sheet #2. Unlike every OTHER single-jurisdiction module in this
+  project, USERRA has NO employer-size threshold at all — it covers
+  every employer, public or private, regardless of size, so there is
+  deliberately no `isUserraCoveredEmployer()` function here. The
+  reemployment-application deadline is purely a function of how long the
+  service lasted: under 31 days means reporting at the start of the next
+  scheduled work period (not a fixed day count); 31-180 days means
+  applying within 14 days of release; over 180 days means 90 days.
+  Health coverage may be continued for up to 24 months at up to 102% of
+  the full premium for service beyond 30 days (shorter service continues
+  coverage automatically, no election needed). Deliberately does NOT
+  evaluate the "escalator principle" (reemployment into the position,
+  seniority, and pay the service member would have ATTAINED had they not
+  been absent, not merely their prior position) or the 5-year cumulative-
+  service limit's own statutory exceptions (an initial enlistment over 5
+  years, periodic Guard/Reserve training, war/national-emergency active-
+  duty extensions) — both fact-specific determinations, not formulas, so
+  `isWithinCumulativeServiceLimit()` takes the caller's own already-
+  adjusted cumulative-service figure rather than computing the exceptions
+  itself. Wired into the admin UI as a calculator.
 - `payroll/caBereavementLeave.ts`: California bereavement leave (AB 1949,
   Gov. Code § 12945.7, effective 2023) — live-verified against the bill's
   own statutory text. Covers employers with 5+ employees, for an

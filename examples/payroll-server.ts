@@ -87,6 +87,12 @@ import {
   isCalSaversMandatory,
   calSaversDefaultContributionRate,
   calSaversPenaltyExposure,
+  userraReemploymentTier,
+  userraApplicationDeadlineDays,
+  isWithinCumulativeServiceLimit,
+  userraDisabilityReportDeadline,
+  isHealthContinuationElectionRequired,
+  userraMaxHealthContinuationPremium,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1791,6 +1797,28 @@ const server = createServer(async (req, res) => {
         mandatory: isCalSaversMandatory(body.employeeCount, body.hasQualifiedRetirementPlan, body.asOfDate),
         defaultContributionRate: calSaversDefaultContributionRate(body.fullYearsEnrolled),
         penaltyExposure: calSaversPenaltyExposure(body.eligibleEmployeeCount, body.noncomplianceContinues),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // USERRA calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/userra/calculator') {
+      const body = await parseJsonBody<{
+        serviceDurationDays: number;
+        cumulativeServiceYearsExcludingExceptions: number;
+        serviceCompletionDate: string;
+        fullMonthlyPremiumDollars: number;
+      }>(req);
+      sendJson(res, 200, {
+        tier: userraReemploymentTier(body.serviceDurationDays),
+        applicationDeadlineDays: userraApplicationDeadlineDays(body.serviceDurationDays),
+        withinCumulativeServiceLimit: isWithinCumulativeServiceLimit(body.cumulativeServiceYearsExcludingExceptions),
+        disabilityReportDeadline: userraDisabilityReportDeadline(body.serviceCompletionDate),
+        healthContinuationElectionRequired: isHealthContinuationElectionRequired(body.serviceDurationDays),
+        maxHealthContinuationPremium: userraMaxHealthContinuationPremium(dollars(body.fullMonthlyPremiumDollars)),
       });
       return;
     }

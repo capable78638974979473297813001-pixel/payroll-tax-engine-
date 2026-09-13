@@ -404,6 +404,21 @@
   </section>
 
   <section>
+    <h2>USERRA (military leave reemployment)</h2>
+    <p class="muted" style="margin-top:0">Applies to every employer regardless of size — no small-employer exemption at all. The application deadline depends purely on how long the service lasted: under 31 days means reporting at the start of the next scheduled work period; 31-180 days means applying within 14 days of release; over 180 days means applying within 90 days. Health coverage may be continued for up to 24 months at up to 102% of premium (service over 30 days only — shorter service continues coverage automatically).</p>
+    <div class="row">
+      <input id="userra-service-days" type="number" placeholder="Service duration (days)" style="width:180px" />
+      <input id="userra-cumulative-years" type="number" step="0.1" placeholder="Cumulative service (years, exceptions excluded)" style="width:280px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="userra-completion-date" type="date" />
+      <input id="userra-premium" type="number" placeholder="Full monthly premium ($)" style="width:200px" />
+      <button class="secondary" id="userra-calc-btn">Calculate</button>
+    </div>
+    <pre id="userra-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -1334,6 +1349,31 @@ document.getElementById('cs-calc-btn').addEventListener('click', async () => {
       `CalSavers mandatory: ${result.mandatory ? 'YES' : 'No'}\n` +
       `Default contribution rate at ${fullYearsEnrolled} year(s) enrolled: ${(result.defaultContributionRate * 100).toFixed(0)}%\n` +
       `Penalty exposure: ${fmtCents(result.penaltyExposure)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('userra-completion-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('userra-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('userra-view');
+  const serviceDurationDays = Number(document.getElementById('userra-service-days').value) || 0;
+  const cumulativeServiceYearsExcludingExceptions = Number(document.getElementById('userra-cumulative-years').value) || 0;
+  const serviceCompletionDate = document.getElementById('userra-completion-date').value;
+  const fullMonthlyPremiumDollars = Number(document.getElementById('userra-premium').value) || 0;
+  try {
+    const result = await api('/api/userra/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ serviceDurationDays, cumulativeServiceYearsExcludingExceptions, serviceCompletionDate, fullMonthlyPremiumDollars }),
+    });
+    view.textContent =
+      `Reemployment tier: ${result.tier}\n` +
+      `Application deadline: ${result.applicationDeadlineDays} day(s) after release (0 = report at next scheduled work period)\n` +
+      `Within 5-year cumulative service limit: ${result.withinCumulativeServiceLimit ? 'YES' : 'No'}\n` +
+      `Disability-convalescence report deadline: ${result.disabilityReportDeadline}\n` +
+      `Health continuation election required: ${result.healthContinuationElectionRequired ? 'YES' : 'No (coverage continues automatically)'}\n` +
+      `Max health continuation premium (102%): ${fmtCents(result.maxHealthContinuationPremium)}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

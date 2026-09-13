@@ -254,6 +254,23 @@ export {
   calSaversDefaultContributionRate,
   calSaversPenaltyExposure,
 } from './calSavers.ts';
+export {
+  USERRA_CUMULATIVE_SERVICE_LIMIT_YEARS,
+  USERRA_IMMEDIATE_RETURN_THRESHOLD_DAYS,
+  USERRA_MEDIUM_SERVICE_APPLICATION_DEADLINE_DAYS,
+  USERRA_MEDIUM_SERVICE_MAX_DAYS,
+  USERRA_LONG_SERVICE_APPLICATION_DEADLINE_DAYS,
+  USERRA_DISABILITY_REPORT_DEADLINE_YEARS,
+  USERRA_HEALTH_CONTINUATION_MAX_MONTHS,
+  USERRA_HEALTH_CONTINUATION_MAX_PREMIUM_FRACTION,
+  userraReemploymentTier,
+  userraApplicationDeadlineDays,
+  isWithinCumulativeServiceLimit,
+  userraDisabilityReportDeadline,
+  isHealthContinuationElectionRequired,
+  userraMaxHealthContinuationPremium,
+} from './userra.ts';
+export type { UserraReemploymentTier } from './userra.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';
