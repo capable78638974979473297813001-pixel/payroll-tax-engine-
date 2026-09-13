@@ -279,6 +279,47 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    // Core-HR profile fields only — jobTitle/department/managerId (the org
+    // chart's own spine), pay type, and work/residence state. Deliberately
+    // NOT a path to touch ytd, deductionPlans, directDepositAccounts,
+    // garnishmentOrders, federalW4, ssn or mailingAddress: those already
+    // have their own dedicated, more careful flows (or are sensitive
+    // enough that a generic "patch anything" route is the wrong shape for
+    // them), the same "no shortcut around the real workflow" boundary
+    // payroll/termination.ts's own terminateEmployee() draws against
+    // just setting terminationDate by hand.
+    const employeeUpdateMatch = req.url?.match(/^\/api\/employees\/([^/]+)$/);
+    if (req.method === 'PATCH' && employeeUpdateMatch) {
+      const employeeId = decodeURIComponent(employeeUpdateMatch[1]);
+      const employee = getEmployee(employeeId);
+      if (!employee) return sendJson(res, 404, { error: 'No such employee.' });
+      const body = await parseJsonBody<{
+        jobTitle?: string | null;
+        department?: string | null;
+        managerId?: string | null;
+        payType?: Employee['payType'];
+        workState?: { code: string } | null;
+        residenceState?: { code: string };
+      }>(req);
+
+      if (body.managerId === employeeId) {
+        return sendJson(res, 400, { error: 'An employee cannot be their own manager.' });
+      }
+
+      const updated: Employee = { ...employee };
+      if ('jobTitle' in body) updated.jobTitle = body.jobTitle ?? undefined;
+      if ('department' in body) updated.department = body.department ?? undefined;
+      if ('managerId' in body) updated.managerId = body.managerId ?? undefined;
+      if (body.payType) updated.payType = body.payType;
+      if ('workState' in body) updated.workState = body.workState ?? undefined;
+      if (body.residenceState) updated.residenceState = body.residenceState;
+
+      saveEmployee(updated);
+      addAuditLogEntry(auditLogEntry(AUDIT_ACTOR, 'employee.updated', 'Employee', employeeId, body));
+      sendJson(res, 200, { employee: updated });
+      return;
+    }
+
     const selfServiceMatch = req.url?.match(/^\/api\/employees\/([^/]+)\/self-service$/);
     if (req.method === 'GET' && selfServiceMatch) {
       const employee = getEmployee(decodeURIComponent(selfServiceMatch[1]));

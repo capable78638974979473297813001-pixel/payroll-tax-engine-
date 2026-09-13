@@ -156,7 +156,7 @@
   <section>
     <h2>Employees</h2>
     <table id="employees-table">
-      <thead><tr><th>Name</th><th>Pay type</th><th>Residence</th><th>YTD Social Security wages</th></tr></thead>
+      <thead><tr><th>Name</th><th>Pay type</th><th>Residence</th><th>YTD Social Security wages</th><th></th></tr></thead>
       <tbody></tbody>
     </table>
   </section>
@@ -528,11 +528,32 @@ async function loadEmployees() {
   const tbody = document.querySelector('#employees-table tbody');
   tbody.innerHTML = list.map((e) => `
     <tr>
-      <td>${e.firstName} ${e.lastName}</td>
+      <td>${e.firstName} ${e.lastName}${e.jobTitle ? ` <span class="muted">(${e.jobTitle}${e.department ? ' · ' + e.department : ''})</span>` : ''}</td>
       <td>${e.payType.kind === 'salary' ? fmtCents(e.payType.annualSalary) + '/yr' : fmtCents(e.payType.hourlyRate) + '/hr'}</td>
       <td>${e.residenceState.code}</td>
       <td>${fmtCents(e.ytd.socialSecurity || 0)}</td>
+      <td><button class="secondary emp-edit-btn" data-emp="${e.id}">Edit</button></td>
     </tr>`).join('');
+  tbody.querySelectorAll('.emp-edit-btn').forEach((btn) => btn.addEventListener('click', async () => {
+    const employeeId = btn.dataset.emp;
+    const current = list.find((e) => e.id === employeeId);
+    const jobTitle = prompt('Job title (blank to clear)', current.jobTitle ?? '');
+    if (jobTitle === null) return;
+    const department = prompt('Department (blank to clear)', current.department ?? '');
+    if (department === null) return;
+    const managerChoices = list.filter((e) => e.id !== employeeId).map((e) => `${e.id} = ${e.firstName} ${e.lastName}`).join('\n');
+    const managerId = prompt(`Manager employee id (blank to clear)\n\nAvailable:\n${managerChoices}`, current.managerId ?? '');
+    if (managerId === null) return;
+    try {
+      await api(`/api/employees/${employeeId}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobTitle: jobTitle || null, department: department || null, managerId: managerId || null }),
+      });
+      await Promise.all([loadEmployees(), loadOrgChart(), loadAuditLog()]);
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  }));
 
   const employeeOptions = list.map((e) => `<option value="${e.id}">${e.firstName} ${e.lastName}</option>`).join('');
   for (const id of ['w2-employee', 'clock-employee', 'pto-employee', 'term-employee', 'benefit-employee', 'i9-employee', 'garn-employee', 'dd-employee']) {

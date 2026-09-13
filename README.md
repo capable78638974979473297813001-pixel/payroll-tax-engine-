@@ -302,7 +302,16 @@ indirect) is detected and its members excluded from the tree and
 reported separately; an employee who merely reports INTO a cycle without
 being part of it is correctly left out of that exclusion and promoted to
 a root of their own, so nobody silently vanishes from the chart. Wired
-into the admin UI as a nested list under a new "Org chart" section.
+into the admin UI as a nested list under a new "Org chart" section, with
+an actual way to set `jobTitle`/`department`/`managerId` behind it: a new
+`PATCH /api/employees/:id` route (Core-HR profile fields and pay
+type/work state only — deliberately not a path to YTD, deduction plans,
+direct deposit accounts, garnishment orders, or the federal W-4, which
+already have their own dedicated, more careful flows) and an "Edit"
+button on the employees table. Before this round, `jobTitle`/`department`/
+`managerId` could only ever be set at hire time through the recruiting
+pipeline — there was no way to promote someone, move them to a new
+department, or change their manager on an existing record at all.
 
 
 What `payroll/` still does NOT attempt, named plainly rather than left to be
