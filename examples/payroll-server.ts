@@ -96,6 +96,8 @@ import {
   waitingTimePenaltyDaysLate,
   waitingTimeDailyRate,
   waitingTimePenaltyAmount,
+  caWageStatementComplianceIssues,
+  caWageStatementPenaltyExposure,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -151,6 +153,7 @@ import type { EverifyCase, EverifyCaseStatus } from '../payroll/everify.ts';
 import type { HdhpCoverageTier } from '../payroll/hsaFsaLimits.ts';
 import type { NyWageBasisOfPay } from '../payroll/nyWageNotice.ts';
 import type { BackupWithholdingPaymentType } from '../payroll/backupWithholding.ts';
+import type { CaHourlyRateLine } from '../payroll/caWageStatement.ts';
 import type { FlsaExemptionCategory } from '../payroll/flsaExemption.ts';
 import type { I9Record } from '../payroll/i9.ts';
 import type { Candidate, CandidateStage, OfferDetails } from '../payroll/onboarding.ts';
@@ -1838,6 +1841,51 @@ const server = createServer(async (req, res) => {
         daysLate,
         dailyRate,
         penaltyAmount: waitingTimePenaltyAmount(dailyRate, daysLate),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // California itemized wage statement calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/ca-wage-statement/calculator') {
+      const body = await parseJsonBody<{
+        grossWagesDollars?: number;
+        isExemptSalaried: boolean;
+        totalHoursWorked: number | null;
+        isPieceRateWork: boolean;
+        pieceRateUnitsEarned: number | null;
+        deductionsDollars?: number;
+        netWagesDollars?: number;
+        payPeriodStart?: string;
+        payPeriodEnd?: string;
+        employeeName?: string;
+        lastFourSsn?: string;
+        employerLegalName?: string;
+        employerAddress?: string;
+        hourlyRateLines: CaHourlyRateLine[];
+        payPeriodsWithViolations: number;
+      }>(req);
+      const issues = caWageStatementComplianceIssues({
+        grossWagesCents: body.grossWagesDollars === undefined ? undefined : dollars(body.grossWagesDollars),
+        isExemptSalaried: body.isExemptSalaried,
+        totalHoursWorked: body.totalHoursWorked,
+        isPieceRateWork: body.isPieceRateWork,
+        pieceRateUnitsEarned: body.pieceRateUnitsEarned,
+        deductionsCents: body.deductionsDollars === undefined ? undefined : dollars(body.deductionsDollars),
+        netWagesCents: body.netWagesDollars === undefined ? undefined : dollars(body.netWagesDollars),
+        payPeriodStart: body.payPeriodStart,
+        payPeriodEnd: body.payPeriodEnd,
+        employeeName: body.employeeName,
+        lastFourSsn: body.lastFourSsn,
+        employerLegalName: body.employerLegalName,
+        employerAddress: body.employerAddress,
+        hourlyRateLines: body.hourlyRateLines,
+      });
+      sendJson(res, 200, {
+        complianceIssues: issues,
+        penaltyExposure: caWageStatementPenaltyExposure(body.payPeriodsWithViolations),
       });
       return;
     }

@@ -757,6 +757,29 @@ Beyond the pay-run engine itself, three more real HR pieces:
   notice document itself, or track retaliation claims (a genuinely
   separate § 215 cause of action). Wired into the admin UI as a
   calculator.
+- `payroll/caWageStatement.ts`: California's itemized wage statement
+  requirements (Labor Code § 226(a)) — live-verified against DIR's own
+  FAQ and the statute's own penalty text. Validates all nine required
+  items (gross wages, total hours worked, piece-rate units if
+  applicable, all deductions, net wages, the pay period's inclusive
+  dates, employee name and last-4 SSN, employer legal name AND address,
+  and every applicable hourly rate with its own hours), flagging each
+  missing one at once. THE GAP THIS FILLS: this project's own
+  `payroll/paystub.ts` renders gross pay, taxes, deductions,
+  garnishments, and net pay, but doesn't currently include hours worked,
+  the applicable hourly rate(s), the employee's truncated SSN, or the
+  employer's address — this module doesn't rewrite the renderer, it
+  checks whatever data a caller assembles against the statute, the same
+  "compliance CHECK, not a rewrite of the thing being checked" choice
+  `payroll/nyWageNotice.ts` makes for its own at-hire notice. Also
+  computes the statute's own tiered penalty ($50 first affected pay
+  period, $100 each one after, capped at $4,000/employee) — assuming the
+  "knowing and intentional" element the statute requires is met, a fact-
+  specific state-of-mind question this module doesn't evaluate, the same
+  boundary `payroll/warnAct.ts`'s own exception guidance draws. A
+  genuinely different, additional set of requirements from
+  `payroll/nyWageNotice.ts`'s own New York rules — California only.
+  Wired into the admin UI as a calculator.
 - `payroll/complianceDashboard.ts`: one screen for every compliance check
   above — minimum wage, Form I-9, E-Verify, PRWORA new-hire reporting, and
   state registration — pure aggregation, the same "no new business logic,

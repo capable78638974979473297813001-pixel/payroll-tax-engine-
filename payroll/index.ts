@@ -277,6 +277,14 @@ export {
   waitingTimeDailyRate,
   waitingTimePenaltyAmount,
 } from './waitingTimePenalty.ts';
+export {
+  CA_WAGE_STATEMENT_FIRST_VIOLATION_PENALTY,
+  CA_WAGE_STATEMENT_SUBSEQUENT_VIOLATION_PENALTY,
+  CA_WAGE_STATEMENT_MAX_AGGREGATE_PENALTY,
+  caWageStatementComplianceIssues,
+  caWageStatementPenaltyExposure,
+} from './caWageStatement.ts';
+export type { CaHourlyRateLine, CaWageStatementData } from './caWageStatement.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

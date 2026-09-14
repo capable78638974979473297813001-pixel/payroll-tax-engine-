@@ -419,6 +419,34 @@
   </section>
 
   <section>
+    <h2>California itemized wage statement</h2>
+    <p class="muted" style="margin-top:0">Checks a pay stub against every item Labor Code § 226(a) requires — this project's own paystub renderer doesn't currently include total hours worked, hourly rates and hours at each rate, the last 4 of the employee's SSN, or the employer's address, so those are entered directly here. Penalty exposure (a "knowing and intentional" failure only, not evaluated here) is $50 for the first affected pay period, $100 for each after that, capped at $4,000/employee.</p>
+    <div class="row">
+      <input id="cws-gross" type="number" placeholder="Gross wages ($)" style="width:150px" />
+      <input id="cws-deductions" type="number" placeholder="Deductions ($)" style="width:150px" value="0" />
+      <input id="cws-net" type="number" placeholder="Net wages ($)" style="width:150px" />
+      <label class="muted"><input type="checkbox" id="cws-exempt" /> Exempt salaried</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="cws-hours" type="number" placeholder="Total hours worked" style="width:170px" />
+      <input id="cws-rate" type="number" placeholder="Hourly rate ($)" style="width:150px" />
+      <input id="cws-period-start" type="date" />
+      <input id="cws-period-end" type="date" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="cws-name" placeholder="Employee name" style="width:180px" />
+      <input id="cws-ssn4" placeholder="Last 4 of SSN" maxlength="4" style="width:120px" />
+      <input id="cws-employer-name" placeholder="Employer legal name" style="width:180px" />
+      <input id="cws-employer-address" placeholder="Employer address" style="width:200px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="cws-violation-periods" type="number" placeholder="Pay periods with violations" style="width:220px" value="0" />
+      <button class="secondary" id="cws-calc-btn">Calculate</button>
+    </div>
+    <pre id="cws-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -1387,6 +1415,41 @@ document.getElementById('userra-calc-btn').addEventListener('click', async () =>
       `Disability-convalescence report deadline: ${result.disabilityReportDeadline}\n` +
       `Health continuation election required: ${result.healthContinuationElectionRequired ? 'YES' : 'No (coverage continues automatically)'}\n` +
       `Max health continuation premium (102%): ${fmtCents(result.maxHealthContinuationPremium)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('cws-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('cws-view');
+  const grossWagesDollars = document.getElementById('cws-gross').value === '' ? undefined : Number(document.getElementById('cws-gross').value);
+  const deductionsDollars = document.getElementById('cws-deductions').value === '' ? undefined : Number(document.getElementById('cws-deductions').value);
+  const netWagesDollars = document.getElementById('cws-net').value === '' ? undefined : Number(document.getElementById('cws-net').value);
+  const isExemptSalaried = document.getElementById('cws-exempt').checked;
+  const hoursVal = document.getElementById('cws-hours').value;
+  const totalHoursWorked = hoursVal === '' ? null : Number(hoursVal);
+  const rateVal = document.getElementById('cws-rate').value;
+  const hourlyRateLines = rateVal === '' || totalHoursWorked === null ? [] : [{ hourlyRateCents: Math.round(Number(rateVal) * 100), hoursAtThisRate: totalHoursWorked }];
+  const payPeriodStart = document.getElementById('cws-period-start').value || undefined;
+  const payPeriodEnd = document.getElementById('cws-period-end').value || undefined;
+  const employeeName = document.getElementById('cws-name').value || undefined;
+  const lastFourSsn = document.getElementById('cws-ssn4').value || undefined;
+  const employerLegalName = document.getElementById('cws-employer-name').value || undefined;
+  const employerAddress = document.getElementById('cws-employer-address').value || undefined;
+  const payPeriodsWithViolations = Number(document.getElementById('cws-violation-periods').value) || 0;
+  try {
+    const result = await api('/api/ca-wage-statement/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        grossWagesDollars, deductionsDollars, netWagesDollars, isExemptSalaried,
+        totalHoursWorked, isPieceRateWork: false, pieceRateUnitsEarned: null,
+        payPeriodStart, payPeriodEnd, employeeName, lastFourSsn,
+        employerLegalName, employerAddress, hourlyRateLines, payPeriodsWithViolations,
+      }),
+    });
+    view.textContent =
+      (result.complianceIssues.length === 0 ? 'Statement is complete.' : 'Compliance issues:\n' + result.complianceIssues.map((i) => '- ' + i).join('\n')) +
+      `\nPenalty exposure: ${fmtCents(result.penaltyExposure)}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
