@@ -80,3 +80,59 @@ export function buildNewHireReport(company: Company, employee: Employee): NewHir
     dueBy: addDays(employee.hireDate, deadlineDays),
   };
 }
+
+export type NewHireReportingIssueKind = 'missing_data' | 'overdue' | 'due_soon';
+
+export interface NewHireReportingIssue {
+  employeeId: string;
+  kind: NewHireReportingIssueKind;
+  /** 'missing_data' only: which of buildNewHireReport()'s own required fields aren't on file yet. */
+  missingFields?: ('ssn' | 'mailingAddress')[];
+  /** Present once ssn/mailingAddress are both on file, i.e. for 'overdue' and 'due_soon'. */
+  reportToState?: string;
+  dueBy?: string;
+}
+
+/**
+ * Every ACTIVE new-hire reporting obligation this company hasn't
+ * discharged yet — an employee already recorded in `filedEmployeeIds` is
+ * skipped entirely, since PRWORA's own obligation is "report once per
+ * hire," not a recurring check. Three findings, in the order a real
+ * payroll admin would want to act on them: 'missing_data' (can't even
+ * build the report — the same two fields buildNewHireReport() itself
+ * refuses to guess), 'overdue' (the deadline has already passed), and
+ * 'due_soon' (within `dueSoonWithinDays` of the deadline, not yet late).
+ * An employee whose deadline is neither passed nor approaching produces
+ * no finding at all — this is a worklist, not a status report on every
+ * hire ever made.
+ */
+export function newHireReportingIssuesForCompany(
+  company: Company,
+  employees: readonly Employee[],
+  filedEmployeeIds: ReadonlySet<string>,
+  asOfDate: string,
+  dueSoonWithinDays = 5,
+): NewHireReportingIssue[] {
+  const issues: NewHireReportingIssue[] = [];
+
+  for (const employee of employees) {
+    if (filedEmployeeIds.has(employee.id)) continue;
+
+    const missingFields: ('ssn' | 'mailingAddress')[] = [];
+    if (!employee.ssn) missingFields.push('ssn');
+    if (!employee.mailingAddress) missingFields.push('mailingAddress');
+    if (missingFields.length > 0) {
+      issues.push({ employeeId: employee.id, kind: 'missing_data', missingFields });
+      continue;
+    }
+
+    const report = buildNewHireReport(company, employee);
+    if (report.dueBy < asOfDate) {
+      issues.push({ employeeId: employee.id, kind: 'overdue', reportToState: report.reportToState, dueBy: report.dueBy });
+    } else if (report.dueBy <= addDays(asOfDate, dueSoonWithinDays)) {
+      issues.push({ employeeId: employee.id, kind: 'due_soon', reportToState: report.reportToState, dueBy: report.dueBy });
+    }
+  }
+
+  return issues;
+}

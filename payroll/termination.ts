@@ -20,7 +20,18 @@ import type { Employee } from './types.ts';
  * this project has not yet researched state by state.
  */
 
-export type TerminationReason = 'voluntary_with_notice' | 'voluntary_without_notice' | 'involuntary' | 'layoff';
+/**
+ * 'gross_misconduct' is a genuinely distinct sub-case of an
+ * employer-initiated separation, called out on its own rather than
+ * folded into 'involuntary': it's still due immediate final pay under
+ * the same rule as any other involuntary termination (the employer
+ * ended it, same as a layoff), but it's the ONE termination reason that
+ * disqualifies someone from COBRA continuation coverage (see
+ * payroll/cobra.ts's own header) — a fact this module's own
+ * finalPayDueDate() doesn't need, but the termination workflow as a
+ * whole does.
+ */
+export type TerminationReason = 'voluntary_with_notice' | 'voluntary_without_notice' | 'involuntary' | 'layoff' | 'gross_misconduct';
 
 export interface FinalPayResult {
   dueDate: string; // ISO yyyy-mm-dd
@@ -47,7 +58,7 @@ export function finalPayDueDate(
   nextRegularPayDate: string,
 ): FinalPayResult {
   if (stateCode === 'CA') {
-    if (reason === 'involuntary' || reason === 'layoff') {
+    if (reason === 'involuntary' || reason === 'layoff' || reason === 'gross_misconduct') {
       return { dueDate: terminationDate, rule: 'Cal. Labor Code § 201: wages due IMMEDIATELY upon involuntary termination or layoff.' };
     }
     if (reason === 'voluntary_with_notice') {

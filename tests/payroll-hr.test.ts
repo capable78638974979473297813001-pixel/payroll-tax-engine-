@@ -13,15 +13,15 @@ import {
 import type { DailyHours, TimePunch } from '../payroll/timeAndAttendance.ts';
 import { accruePto, applyAnnualCarryover, emptyPtoBalance, ptoPayoutEarning, usePto } from '../payroll/pto.ts';
 import type { PtoPolicy } from '../payroll/pto.ts';
-import { buildNewHireReport, deadlineDaysForState, FEDERAL_DEFAULT_DEADLINE_DAYS } from '../payroll/newHireReporting.ts';
+import { buildNewHireReport, deadlineDaysForState, FEDERAL_DEFAULT_DEADLINE_DAYS, newHireReportingIssuesForCompany } from '../payroll/newHireReporting.ts';
 import { checkMinimumWageCompliance, checkMinimumWageComplianceForCompany } from '../payroll/compliance.ts';
-import { applyElection, deductionPlanFromElection, employeeMonthlyPremium, isElectionChangeAllowed, perPeriodDeductionAmount } from '../payroll/benefits.ts';
+import { applyElection, canElectBenefit, deductionPlanFromElection, employeeMonthlyPremium, isElectionChangeAllowed, perPeriodDeductionAmount, renderCarrierEligibilityRoster } from '../payroll/benefits.ts';
 import type { BenefitElection, BenefitPlan } from '../payroll/benefits.ts';
 import { minimumWage } from '../src/minimum-wage.ts';
 import type { Company, Employee } from '../payroll/types.ts';
 import { freshYearToDate } from '../payroll/ytd.ts';
 import { finalPayDueDate, finalPtoPayoutHours, isVacationPayoutMandatory, terminateEmployee } from '../payroll/termination.ts';
-import { acceptOffer, advanceCandidate, declineOffer, extendOffer, hireCandidate } from '../payroll/onboarding.ts';
+import { acceptOffer, advanceCandidate, declineOffer, directHire, extendOffer, hireCandidate } from '../payroll/onboarding.ts';
 import type { Candidate, OfferDetails } from '../payroll/onboarding.ts';
 
 function baseEmployee(overrides: Partial<Employee> = {}): Employee {
@@ -299,6 +299,75 @@ describe('new-hire reporting (payroll/newHireReporting.ts)', () => {
   });
 });
 
+describe('new-hire reporting compliance worklist (payroll/newHireReporting.ts)', () => {
+  function company(): Company {
+    return { id: 'co-1', legalName: 'Acme LLC', ein: '12-3456789', homeState: 'TX', paySchedule: { frequency: 'biweekly', anchorPeriodStart: '2026-01-04', checkDateLagDays: 5 } };
+  }
+  function employee(overrides: Partial<Employee> = {}): Employee {
+    return {
+      id: 'e1',
+      companyId: 'co-1',
+      firstName: 'Jordan',
+      lastName: 'Lee',
+      hireDate: '2026-03-01',
+      employmentCategory: 'standard',
+      payType: { kind: 'hourly', hourlyRate: dollars(20) },
+      residenceState: { code: 'TX' },
+      federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+      deductionPlans: [],
+      directDepositAccounts: [],
+      garnishmentOrders: [],
+      ytd: freshYearToDate(),
+      ytdYear: 2026,
+      ssn: '123-45-6789',
+      mailingAddress: '2 Oak Ave, Austin, TX 78702',
+      ...overrides,
+    };
+  }
+
+  test('an employee missing an SSN or mailing address is a missing_data finding, not silently skipped', () => {
+    const issues = newHireReportingIssuesForCompany(company(), [employee({ ssn: undefined })], new Set(), '2026-03-10');
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].kind, 'missing_data');
+    assert.deepEqual(issues[0].missingFields, ['ssn']);
+  });
+
+  test('missing BOTH fields lists both', () => {
+    const issues = newHireReportingIssuesForCompany(company(), [employee({ ssn: undefined, mailingAddress: undefined })], new Set(), '2026-03-10');
+    assert.deepEqual(issues[0].missingFields, ['ssn', 'mailingAddress']);
+  });
+
+  test('a deadline already in the past is an overdue finding', () => {
+    // hireDate 2026-03-01 + 20 days = 2026-03-21; asOfDate well after that.
+    const issues = newHireReportingIssuesForCompany(company(), [employee()], new Set(), '2026-04-01');
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].kind, 'overdue');
+    assert.equal(issues[0].dueBy, '2026-03-21');
+  });
+
+  test('a deadline within the due-soon window (default 5 days) but not yet passed is due_soon', () => {
+    const issues = newHireReportingIssuesForCompany(company(), [employee()], new Set(), '2026-03-18');
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].kind, 'due_soon');
+  });
+
+  test('a deadline safely in the future produces no finding at all', () => {
+    const issues = newHireReportingIssuesForCompany(company(), [employee()], new Set(), '2026-03-01');
+    assert.deepEqual(issues, []);
+  });
+
+  test('an employee already recorded as filed is skipped entirely, even if overdue', () => {
+    const issues = newHireReportingIssuesForCompany(company(), [employee()], new Set(['e1']), '2026-04-01');
+    assert.deepEqual(issues, []);
+  });
+
+  test('the due-soon window is configurable', () => {
+    const issues = newHireReportingIssuesForCompany(company(), [employee()], new Set(), '2026-03-01', 30);
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0].kind, 'due_soon');
+  });
+});
+
 // ============================================================================
 // Minimum wage compliance
 // ============================================================================
@@ -403,6 +472,41 @@ describe('benefits: plans, elections, and the deduction they produce (payroll/be
     assert.equal(isElectionChangeAllowed('2026-06-01', window, true), true, 'a genuine qualifying life event overrides the window');
   });
 
+  test('canElectBenefit: a brand-new hire\'s first-ever election is always allowed, regardless of window or life event', () => {
+    const result = canElectBenefit([], '2026-06-01', undefined, false);
+    assert.equal(result.allowed, true);
+    assert.equal(result.reason, undefined);
+  });
+
+  test('canElectBenefit: a change with no open enrollment window configured at all is refused, not silently allowed', () => {
+    const existing: BenefitElection = { id: 'el-1', employeeId: 'e1', planId: 'plan-medical', coverageTier: 'employee_only', effectiveDate: '2026-01-01' };
+    const result = canElectBenefit([existing], '2026-06-01', undefined, false);
+    assert.equal(result.allowed, false);
+    assert.match(result.reason!, /No open enrollment window is configured/);
+  });
+
+  test('canElectBenefit: a change inside a configured window is allowed', () => {
+    const existing: BenefitElection = { id: 'el-1', employeeId: 'e1', planId: 'plan-medical', coverageTier: 'employee_only', effectiveDate: '2026-01-01' };
+    const window = { start: '2026-11-01', end: '2026-11-15' };
+    const result = canElectBenefit([existing], '2026-11-10', window, false);
+    assert.equal(result.allowed, true);
+  });
+
+  test('canElectBenefit: a change outside the window with no qualifying life event is refused with a specific reason', () => {
+    const existing: BenefitElection = { id: 'el-1', employeeId: 'e1', planId: 'plan-medical', coverageTier: 'employee_only', effectiveDate: '2026-01-01' };
+    const window = { start: '2026-11-01', end: '2026-11-15' };
+    const result = canElectBenefit([existing], '2026-06-01', window, false);
+    assert.equal(result.allowed, false);
+    assert.match(result.reason!, /falls outside the open enrollment window/);
+  });
+
+  test('canElectBenefit: a genuine qualifying life event overrides the window even with one configured', () => {
+    const existing: BenefitElection = { id: 'el-1', employeeId: 'e1', planId: 'plan-medical', coverageTier: 'employee_only', effectiveDate: '2026-01-01' };
+    const window = { start: '2026-11-01', end: '2026-11-15' };
+    const result = canElectBenefit([existing], '2026-06-01', window, true);
+    assert.equal(result.allowed, true);
+  });
+
   test('applyElection: re-electing the SAME plan (a tier change) ends the prior election and its deduction, leaving exactly one deduction for that plan', () => {
     const plan = medicalPlan();
     const employeeWithPriorElection = baseEmployee({
@@ -435,6 +539,85 @@ describe('benefits: plans, elections, and the deduction they produce (payroll/be
   });
 });
 
+describe('carrier eligibility roster export (payroll/benefits.ts)', () => {
+  function medicalPlan(overrides: Partial<BenefitPlan> = {}): BenefitPlan {
+    return {
+      id: 'plan-medical',
+      companyId: 'co-1',
+      name: 'PPO Medical',
+      category: 'section125',
+      monthlyPremiumByTier: { employee_only: dollars(500), employee_spouse: dollars(900), family: dollars(1_200) },
+      employerContributionFraction: 0.8,
+      ...overrides,
+    };
+  }
+  const plan = medicalPlan();
+  const alice = baseEmployee({ id: 'alice', firstName: 'Alice', lastName: 'Anders' });
+  const bob = baseEmployee({ id: 'bob', firstName: 'Bob', lastName: 'Baxter' });
+
+  test('renders a header row plus one row per election for the given plan, sorted by employee name', () => {
+    const elections: BenefitElection[] = [
+      { id: 'el-2', employeeId: 'bob', planId: plan.id, coverageTier: 'employee_only', effectiveDate: '2026-01-01' },
+      { id: 'el-1', employeeId: 'alice', planId: plan.id, coverageTier: 'family', effectiveDate: '2026-01-01' },
+    ];
+    const csv = renderCarrierEligibilityRoster([alice, bob], plan, elections);
+    const lines = csv.trim().split('\n');
+    assert.equal(lines.length, 3); // header + 2 rows
+    assert.equal(lines[0], 'Employee Name,Coverage Tier,Effective Date,End Date,Status,Employee Monthly Cost,Employer Monthly Cost');
+    assert.ok(lines[1].startsWith('Alice Anders,'), 'Alice must sort before Bob');
+    assert.ok(lines[2].startsWith('Bob Baxter,'));
+  });
+
+  test('an election for a DIFFERENT plan is excluded entirely', () => {
+    const elections: BenefitElection[] = [
+      { id: 'el-1', employeeId: 'alice', planId: 'some-other-plan', coverageTier: 'employee_only', effectiveDate: '2026-01-01' },
+    ];
+    const csv = renderCarrierEligibilityRoster([alice], plan, elections);
+    assert.equal(csv.trim().split('\n').length, 1); // header only
+  });
+
+  test('a since-ended election is included with its own end date and a Terminated status, not dropped', () => {
+    const elections: BenefitElection[] = [
+      { id: 'el-1', employeeId: 'alice', planId: plan.id, coverageTier: 'employee_only', effectiveDate: '2026-01-01', endDate: '2026-06-30' },
+    ];
+    const csv = renderCarrierEligibilityRoster([alice], plan, elections);
+    const row = csv.trim().split('\n')[1];
+    assert.match(row, /2026-06-30,Terminated/);
+  });
+
+  test('an active election has an empty end date and an Active status', () => {
+    const elections: BenefitElection[] = [
+      { id: 'el-1', employeeId: 'alice', planId: plan.id, coverageTier: 'employee_only', effectiveDate: '2026-01-01' },
+    ];
+    const csv = renderCarrierEligibilityRoster([alice], plan, elections);
+    const row = csv.trim().split('\n')[1];
+    assert.match(row, /,,Active,/);
+  });
+
+  test('employee and employer monthly cost columns split the full premium correctly', () => {
+    // medicalPlan(): employee_only $500/mo, 80% employer-paid -> employee $100, employer $400.
+    const elections: BenefitElection[] = [
+      { id: 'el-1', employeeId: 'alice', planId: plan.id, coverageTier: 'employee_only', effectiveDate: '2026-01-01' },
+    ];
+    const csv = renderCarrierEligibilityRoster([alice], plan, elections);
+    const row = csv.trim().split('\n')[1];
+    assert.ok(row.endsWith('100.00,400.00'), `expected costs 100.00,400.00, got: ${row}`);
+  });
+
+  test('an election for an employee not in the supplied employee list falls back to the raw employee id', () => {
+    const elections: BenefitElection[] = [
+      { id: 'el-1', employeeId: 'unknown-emp', planId: plan.id, coverageTier: 'employee_only', effectiveDate: '2026-01-01' },
+    ];
+    const csv = renderCarrierEligibilityRoster([], plan, elections);
+    assert.ok(csv.includes('unknown-emp'));
+  });
+
+  test('no elections for this plan produces just the header row', () => {
+    const csv = renderCarrierEligibilityRoster([alice], plan, []);
+    assert.equal(csv.trim(), 'Employee Name,Coverage Tier,Effective Date,End Date,Status,Employee Monthly Cost,Employer Monthly Cost');
+  });
+});
+
 // ============================================================================
 // Termination / offboarding
 // ============================================================================
@@ -443,6 +626,10 @@ describe('final pay timing (payroll/termination.ts)', () => {
   test('California: involuntary termination and layoff are due IMMEDIATELY, same day', () => {
     assert.equal(finalPayDueDate('CA', '2026-06-10', 'involuntary', '2026-06-20').dueDate, '2026-06-10');
     assert.equal(finalPayDueDate('CA', '2026-06-10', 'layoff', '2026-06-20').dueDate, '2026-06-10');
+  });
+
+  test('California: a termination for gross misconduct is still employer-initiated, so it follows the same immediate-pay rule as an ordinary involuntary termination', () => {
+    assert.equal(finalPayDueDate('CA', '2026-06-10', 'gross_misconduct', '2026-06-20').dueDate, '2026-06-10');
   });
 
   test('California: resignation WITH 72+ hours notice is due on the last day worked', () => {
@@ -576,5 +763,75 @@ describe('hiring a candidate produces a real Employee record (payroll/onboarding
     const notYetAccepted = { ...acceptedCandidate(), stage: 'offer_extended' as const };
     const w4: import('../src/types.ts').FederalW4 = { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 };
     assert.throws(() => hireCandidate(notYetAccepted, 'co-1', w4, { code: 'NY' }));
+  });
+});
+
+describe('directHire: onboarding an existing employee outside the recruiting pipeline (payroll/onboarding.ts)', () => {
+  const w4: import('../src/types.ts').FederalW4 = { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 };
+
+  test('builds a real Employee record with a fresh id, YTD, and empty deduction/deposit/garnishment lists', () => {
+    const employee = directHire('co-1', {
+      firstName: 'Dana',
+      lastName: 'Ortiz',
+      hireDate: '2026-05-01',
+      jobTitle: 'Shift Lead',
+      department: 'Kitchen',
+      payType: { kind: 'hourly', hourlyRate: dollars(22) },
+      residenceState: { code: 'IL' },
+      federalW4: w4,
+    });
+
+    assert.equal(employee.companyId, 'co-1');
+    assert.equal(employee.firstName, 'Dana');
+    assert.equal(employee.lastName, 'Ortiz');
+    assert.equal(employee.hireDate, '2026-05-01');
+    assert.equal(employee.jobTitle, 'Shift Lead');
+    assert.equal(employee.department, 'Kitchen');
+    assert.deepEqual(employee.payType, { kind: 'hourly', hourlyRate: dollars(22) });
+    assert.equal(employee.ytdYear, 2026);
+    assert.deepEqual(employee.ytd, freshYearToDate());
+    assert.deepEqual(employee.deductionPlans, []);
+    assert.deepEqual(employee.directDepositAccounts, []);
+    assert.deepEqual(employee.garnishmentOrders, []);
+    assert.ok(employee.id.length > 0);
+  });
+
+  test('two direct hires get distinct ids', () => {
+    const input = {
+      firstName: 'A', lastName: 'B', hireDate: '2026-01-01',
+      payType: { kind: 'hourly' as const, hourlyRate: dollars(20) },
+      residenceState: { code: 'TX' }, federalW4: w4,
+    };
+    const first = directHire('co-1', input);
+    const second = directHire('co-1', input);
+    assert.notEqual(first.id, second.id);
+  });
+
+  test('defaults employmentCategory to standard when not supplied', () => {
+    const employee = directHire('co-1', {
+      firstName: 'A', lastName: 'B', hireDate: '2026-01-01',
+      payType: { kind: 'salary', annualSalary: dollars(60_000) },
+      residenceState: { code: 'TX' }, federalW4: w4,
+    });
+    assert.equal(employee.employmentCategory, 'standard');
+  });
+
+  test('an explicit employmentCategory overrides the default', () => {
+    const employee = directHire('co-1', {
+      firstName: 'A', lastName: 'B', hireDate: '2026-01-01',
+      employmentCategory: 'household',
+      payType: { kind: 'hourly', hourlyRate: dollars(18) },
+      residenceState: { code: 'TX' }, federalW4: w4,
+    });
+    assert.equal(employee.employmentCategory, 'household');
+  });
+
+  test('workState is optional and omitted defaults to undefined, matching hireCandidate\'s own convention', () => {
+    const employee = directHire('co-1', {
+      firstName: 'A', lastName: 'B', hireDate: '2026-01-01',
+      payType: { kind: 'hourly', hourlyRate: dollars(18) },
+      residenceState: { code: 'TX' }, federalW4: w4,
+    });
+    assert.equal(employee.workState, undefined);
   });
 });

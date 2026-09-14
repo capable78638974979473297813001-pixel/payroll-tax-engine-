@@ -80,8 +80,8 @@ export function computeCompanyReport(
   };
 }
 
-/** Wraps a field in quotes (doubling any internal quotes) only when it actually needs it — a plain number or word stays bare, matching how a spreadsheet itself would round-trip this file. */
-function csvField(value: string | number): string {
+/** Wraps a field in quotes (doubling any internal quotes) only when it actually needs it — a plain number or word stays bare, matching how a spreadsheet itself would round-trip this file. Exported for other CSV exports in this project (payroll/benefits.ts's own carrier eligibility roster) rather than reimplemented per module. */
+export function csvField(value: string | number): string {
   const s = String(value);
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }

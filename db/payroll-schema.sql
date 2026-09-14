@@ -69,9 +69,17 @@ CREATE TABLE company (
   employer_context          JSONB NOT NULL DEFAULT '{}'::JSONB,
   -- Only consumed by new-hire reporting (see payroll/newHireReporting.ts) — nothing in payroll processing itself needs it.
   address                   TEXT,
+  -- This year's annual open-enrollment window for benefit ELECTION
+  -- CHANGES -- see payroll/benefits.ts's own canElectBenefit(). A new
+  -- hire's first-ever election is unaffected by these columns being
+  -- NULL; a later change is refused outside the window without a
+  -- qualifying life event.
+  open_enrollment_start     DATE,
+  open_enrollment_end       DATE,
   created_at                TIMESTAMPTZ NOT NULL DEFAULT now(),
 
-  CHECK (pay_schedule_frequency NOT IN ('weekly', 'biweekly') OR anchor_period_start IS NOT NULL)
+  CHECK (pay_schedule_frequency NOT IN ('weekly', 'biweekly') OR anchor_period_start IS NOT NULL),
+  CHECK ((open_enrollment_start IS NULL) = (open_enrollment_end IS NULL))
 );
 
 -- See payroll/stateRegistration.ts's own header: which states this
@@ -113,6 +121,9 @@ CREATE TABLE employee (
   job_title              TEXT,
   department             TEXT,
   manager_id             UUID REFERENCES employee (id),
+  -- See payroll/workersComp.ts's own header: an insurer/rating-bureau
+  -- assignment, not something this project derives from a job title.
+  workers_comp_class_code TEXT,
   employment_category    employment_category NOT NULL DEFAULT 'standard',
   pay_type               pay_type_kind NOT NULL,
   hourly_rate_cents      BIGINT,                   -- pay_type = 'hourly'
@@ -301,6 +312,27 @@ CREATE TABLE pto_balance (
   PRIMARY KEY (employee_id, pto_policy_id)
 );
 
+-- See payroll/ptoRequest.ts's own header: the employee-facing
+-- pending/approved/denied/cancelled workflow, distinct from directly
+-- adjusting pto_balance above.
+CREATE TYPE pto_request_status AS ENUM ('pending', 'approved', 'denied', 'cancelled');
+
+CREATE TABLE pto_request (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  employee_id       UUID NOT NULL REFERENCES employee (id),
+  pto_policy_id     UUID NOT NULL REFERENCES pto_policy (id),
+  hours_requested   NUMERIC(7,2) NOT NULL,
+  start_date        DATE NOT NULL,
+  end_date          DATE NOT NULL,
+  requested_at      DATE NOT NULL,
+  status            pto_request_status NOT NULL DEFAULT 'pending',
+  reviewed_by       TEXT,
+  reviewed_at       DATE,
+  denial_reason     TEXT,
+
+  CHECK (end_date >= start_date)
+);
+
 -- ----------------------------------------------------------------------------
 -- Pay runs
 -- ----------------------------------------------------------------------------
@@ -428,6 +460,28 @@ CREATE TABLE new_hire_report (
   due_by            DATE NOT NULL,
   built_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
   filed_at          TIMESTAMPTZ   -- NULL until someone actually submits it to the state agency
+);
+
+-- ----------------------------------------------------------------------------
+-- E-Verify
+-- ----------------------------------------------------------------------------
+-- One row per employee — a case status, not an event log. See
+-- payroll/everify.ts's own header comment: tracks case-creation and
+-- tentative-nonconfirmation deadlines only, never determines whether an
+-- employer is required to use E-Verify at all, and never integrates with
+-- the real E-Verify system.
+
+CREATE TYPE everify_case_status AS ENUM (
+  'not_created', 'pending', 'employment_authorized',
+  'tentative_nonconfirmation', 'final_nonconfirmation', 'closed'
+);
+
+CREATE TABLE everify_case (
+  employee_id     UUID PRIMARY KEY REFERENCES employee (id),
+  case_number     TEXT,
+  status          everify_case_status NOT NULL DEFAULT 'not_created',
+  created_at      DATE,
+  tnc_issued_at   DATE
 );
 
 -- ----------------------------------------------------------------------------

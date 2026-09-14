@@ -48,6 +48,11 @@
   select, input { padding: 6px 8px; border: 1px solid var(--border); border-radius: 5px; font-size: 13px; }
   .muted { color: var(--muted); }
   .status { font-size: 13px; margin-top: 8px; }
+  .org-tree, .org-tree ul { list-style: none; margin: 0; padding-left: 20px; }
+  .org-tree { padding-left: 0; }
+  .org-tree li { margin: 4px 0; border-left: 2px solid var(--border); padding-left: 10px; }
+  .org-node-name { font-weight: 600; }
+  .org-node-title { color: var(--muted); font-size: 12.5px; }
 </style>
 </head>
 <body>
@@ -64,6 +69,16 @@
       <button class="secondary" id="new-company-btn">+ New company</button>
     </div>
     <div id="company-info" class="muted">Loading…</div>
+  </section>
+
+  <section id="compliance-dashboard-section">
+    <h2>Compliance dashboard</h2>
+    <p class="muted" style="margin-top:0">Every compliance check this project runs — minimum wage, Form I-9, PRWORA new-hire reporting, and state employer registration — aggregated in one place. Each finding is produced by, and links to, the same check available in its own section below.</p>
+    <div id="compliance-summary" class="muted">Loading…</div>
+    <table id="compliance-table">
+      <thead><tr><th>Category</th><th>Employee</th><th>Finding</th></tr></thead>
+      <tbody></tbody>
+    </table>
   </section>
 
   <section>
@@ -125,6 +140,685 @@
   </section>
 
   <section>
+    <h2>FMLA eligibility</h2>
+    <p class="muted" style="margin-top:0">The 3-part test (12 months employed, 1,250 hours of service in the past 12 months, 50+ employees within 75 miles of the worksite) — all three must hold. This project doesn't track employment history or worksite geography, so each figure is entered directly.</p>
+    <div class="row">
+      <input id="fmla-months" type="number" placeholder="Months employed" style="width:160px" />
+      <input id="fmla-hours" type="number" placeholder="Hours of service (past 12mo)" style="width:200px" />
+      <input id="fmla-worksite-count" type="number" placeholder="Employees within 75mi" style="width:180px" />
+      <button class="secondary" id="fmla-check-btn">Check eligibility</button>
+    </div>
+    <pre id="fmla-view"></pre>
+  </section>
+
+  <section>
+    <h2>Workers' comp premium estimate</h2>
+    <p class="muted" style="margin-top:0">Standard NCCI formula: (subject payroll ÷ 100) × classification rate × experience mod. The overtime PREMIUM portion (the extra half of time-and-a-half) is excluded from subject payroll everywhere except Pennsylvania and Delaware. Class codes, rates, and the experience mod are all figures only an insurer or rating bureau assigns — entered directly, not looked up.</p>
+    <div class="row">
+      <input id="wc-gross-wages" type="number" placeholder="Gross wages ($)" style="width:150px" />
+      <input id="wc-ot-premium" type="number" placeholder="OT premium portion ($)" style="width:180px" value="0" />
+      <input id="wc-state" placeholder="Work state (2-letter)" style="width:150px" maxlength="2" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="wc-rate" type="number" step="0.01" placeholder="Rate per $100 of payroll" style="width:200px" />
+      <input id="wc-exmod" type="number" step="0.01" placeholder="Experience mod (e.g. 1.0)" style="width:200px" value="1.0" />
+      <button class="secondary" id="wc-calc-btn">Estimate premium</button>
+    </div>
+    <pre id="wc-view"></pre>
+  </section>
+
+  <section>
+    <h2>California paid sick leave</h2>
+    <p class="muted" style="margin-top:0">California only — accrual is 1 hour per 30 hours worked, capped at 80 hours; use is capped at 40 hours/year even if the balance is higher; and leave can't be used until the 90th day of employment. This project doesn't track cumulative hours worked or a running CA sick-leave balance, so both are entered directly.</p>
+    <div class="row">
+      <input id="sick-hire-date" type="date" />
+      <input id="sick-as-of-date" type="date" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="sick-current-balance" type="number" placeholder="Current balance (hours)" style="width:190px" value="0" />
+      <input id="sick-hours-worked" type="number" placeholder="Hours worked since last accrual" style="width:230px" value="0" />
+      <input id="sick-hours-used" type="number" placeholder="Hours used this year" style="width:180px" value="0" />
+      <button class="secondary" id="sick-calc-btn">Calculate</button>
+    </div>
+    <pre id="sick-view"></pre>
+  </section>
+
+  <section>
+    <h2>401(k) elective deferral limit</h2>
+    <p class="muted" style="margin-top:0">2026 IRS limits: $24,500 base, +$8,000 catch-up at 50+, or +$11,250 enhanced catch-up for ages 60-63 specifically (SECURE 2.0). A participant 50+ whose prior-year FICA wages from this employer exceeded $150,000 must make all catch-up contributions as Roth. This project doesn't track employee age or a running elective-deferral YTD total, so all three are entered directly.</p>
+    <div class="row">
+      <input id="ret401k-age" type="number" placeholder="Age" style="width:100px" />
+      <input id="ret401k-ytd" type="number" placeholder="YTD elective deferrals ($)" style="width:220px" />
+      <input id="ret401k-requested" type="number" placeholder="Requested this period ($)" style="width:220px" />
+      <input id="ret401k-prior-wages" type="number" placeholder="Prior-year FICA wages ($)" style="width:220px" value="0" />
+      <button class="secondary" id="ret401k-calc-btn">Calculate</button>
+    </div>
+    <pre id="ret401k-view"></pre>
+  </section>
+
+  <section>
+    <h2>HSA / FSA contribution limits</h2>
+    <p class="muted" style="margin-top:0">2026 IRS limits: HSA $4,400 self-only / $8,750 family, +$1,000 catch-up at 55+ with no upper age cutoff; health FSA $3,400 (up to $680 may carry over, plan-dependent); dependent-care FSA $7,500 ($3,750 married filing separately, per OBBBA). This project doesn't verify HDHP eligibility itself or track running YTD contributions, so all figures are entered directly.</p>
+    <div class="row">
+      <input id="hf-age" type="number" placeholder="Age" style="width:100px" />
+      <select id="hf-hdhp-tier">
+        <option value="self_only">HDHP: self-only</option>
+        <option value="family">HDHP: family</option>
+      </select>
+      <label class="muted"><input type="checkbox" id="hf-mfs" /> Married filing separately</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="hf-hsa-ytd" type="number" placeholder="HSA YTD ($)" style="width:150px" value="0" />
+      <input id="hf-hsa-requested" type="number" placeholder="HSA this period ($)" style="width:170px" value="0" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="hf-fsa-ytd" type="number" placeholder="Health FSA YTD ($)" style="width:170px" value="0" />
+      <input id="hf-fsa-requested" type="number" placeholder="Health FSA this period ($)" style="width:200px" value="0" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="hf-dcfsa-ytd" type="number" placeholder="Dependent-care FSA YTD ($)" style="width:210px" value="0" />
+      <input id="hf-dcfsa-requested" type="number" placeholder="Dependent-care FSA this period ($)" style="width:240px" value="0" />
+      <button class="secondary" id="hf-calc-btn">Calculate</button>
+    </div>
+    <pre id="hf-view"></pre>
+  </section>
+
+  <section>
+    <h2>Federal WARN Act</h2>
+    <p class="muted" style="margin-top:0">Covers employers with 100+ employees (excluding part-time). A plant closing needs 50+ affected employees at one site; a mass layoff needs 500+, or 50+ AND at least one-third of the site's workforce. 60 days' advance written notice is required. This project doesn't track a "layoff event" spanning multiple employees, so every count is entered directly. Federal only — many states run their own stricter mini-WARN laws, not modeled here.</p>
+    <div class="row">
+      <input id="warn-employer-count" type="number" placeholder="Employer headcount (excl. part-time)" style="width:240px" />
+      <input id="warn-affected-count" type="number" placeholder="Employees losing employment" style="width:220px" />
+      <input id="warn-site-workforce" type="number" placeholder="Active workforce at site before layoff" style="width:260px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="warn-planned-date" type="date" />
+      <input id="warn-notice-date" type="date" />
+      <button class="secondary" id="warn-calc-btn">Check WARN status</button>
+    </div>
+    <pre id="warn-view"></pre>
+  </section>
+
+  <section>
+    <h2>California meal &amp; rest breaks</h2>
+    <p class="muted" style="margin-top:0">A first meal period is required past 5 hours worked (waivable at or under 6); a second past 10 hours (waivable at or under 12, only if the first wasn't waived). Rest breaks follow "10 minutes per 4 hours or major fraction thereof." Each of the meal/rest premiums is capped at one hour of pay per workday regardless of how many breaks were missed that day — enter whether ANY violation of that type happened, not a count. This project doesn't detect break timing from punch data, so hours worked and violation flags are entered directly.</p>
+    <div class="row">
+      <input id="mrb-hours" type="number" step="0.01" placeholder="Hours worked" style="width:140px" />
+      <label class="muted"><input type="checkbox" id="mrb-first-waived" /> First meal period waived</label>
+      <input id="mrb-rate" type="number" placeholder="Regular rate ($/hr)" style="width:170px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="muted"><input type="checkbox" id="mrb-meal-violation" /> Meal violation occurred</label>
+      <label class="muted"><input type="checkbox" id="mrb-rest-violation" /> Rest violation occurred</label>
+      <button class="secondary" id="mrb-calc-btn">Calculate</button>
+    </div>
+    <pre id="mrb-view"></pre>
+  </section>
+
+  <section>
+    <h2>New York wage notice (WTPA)</h2>
+    <p class="muted" style="margin-top:0">Checks a Notice and Acknowledgement of Pay Rate and Payday for every field NY Labor Law § 195(1) requires, whether a rate change needs a brand-new notice, and the DOL's own per-day penalty exposure ($50/day for a notice violation, $250/day for a wage-statement violation, each capped at $5,000/worker). This project doesn't generate or translate the notice document itself.</p>
+    <div class="row">
+      <input id="nywn-rate" type="number" placeholder="Rate of pay ($)" style="width:150px" />
+      <select id="nywn-basis">
+        <option value="hourly">Hourly</option>
+        <option value="shift">Shift</option>
+        <option value="day">Day</option>
+        <option value="week">Week</option>
+        <option value="salary">Salary</option>
+        <option value="piece">Piece</option>
+        <option value="commission">Commission</option>
+        <option value="other">Other</option>
+      </select>
+      <input id="nywn-allowances" type="number" placeholder="Allowances claimed ($, 0 if none)" style="width:230px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="nywn-payday" placeholder="Regular payday (e.g. Friday)" style="width:200px" />
+      <input id="nywn-employer-name" placeholder="Employer legal name" style="width:200px" />
+      <input id="nywn-employer-address" placeholder="Employer address" style="width:220px" />
+      <input id="nywn-employer-phone" placeholder="Employer phone" style="width:170px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="muted"><input type="checkbox" id="nywn-is-increase" checked /> This is a rate increase</label>
+      <label class="muted"><input type="checkbox" id="nywn-on-statement" /> Will appear on next wage statement</label>
+      <label class="muted"><input type="checkbox" id="nywn-hospitality" /> Hospitality industry</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="nywn-days-notice" type="number" placeholder="Days without compliant notice" style="width:220px" value="0" />
+      <input id="nywn-days-statement" type="number" placeholder="Days without compliant statement" style="width:230px" value="0" />
+      <button class="secondary" id="nywn-calc-btn">Calculate</button>
+    </div>
+    <pre id="nywn-view"></pre>
+  </section>
+
+  <section>
+    <h2>FLSA overtime exemption salary level</h2>
+    <p class="muted" style="margin-top:0">Checks ONLY the salary/compensation floor DOL currently publishes: $684/week standard (executive, administrative, professional), $684/week OR $27.63/hour for computer employees, $684/week PLUS $107,432/year total comp for highly compensated, and no floor at all for outside sales. This is necessary but never sufficient for exempt status — the duties test and salary-basis test are fact-specific judgments this project doesn't evaluate.</p>
+    <div class="row">
+      <select id="flsa-category">
+        <option value="executive">Executive</option>
+        <option value="administrative">Administrative</option>
+        <option value="professional">Professional</option>
+        <option value="computer">Computer employee</option>
+        <option value="highly_compensated">Highly compensated employee</option>
+        <option value="outside_sales">Outside sales</option>
+      </select>
+      <input id="flsa-weekly-salary" type="number" placeholder="Weekly salary ($)" style="width:170px" />
+      <input id="flsa-hourly-rate" type="number" step="0.01" placeholder="Hourly rate ($, computer only)" style="width:220px" />
+      <input id="flsa-annual-comp" type="number" placeholder="Total annual comp ($, HCE only)" style="width:230px" />
+      <button class="secondary" id="flsa-calc-btn">Check salary level</button>
+    </div>
+    <pre id="flsa-view"></pre>
+  </section>
+
+  <section>
+    <h2>California bereavement leave</h2>
+    <p class="muted" style="margin-top:0">Covers employers with 5+ employees, for an employee with 30+ days of tenure, up to 5 days per death of a spouse/child/parent/sibling/grandparent/grandchild/domestic partner/parent-in-law, completed within 3 months of the death. Only paid to whatever extent an existing policy already pays for it — the remainder is unpaid. This project has no leave-request workflow for this leave type, so dates and policy figures are entered directly.</p>
+    <div class="row">
+      <input id="cabl-employee-count" type="number" placeholder="Employer headcount" style="width:160px" />
+      <input id="cabl-tenure-days" type="number" placeholder="Days employed before leave" style="width:200px" />
+      <input id="cabl-existing-paid-days" type="number" placeholder="Existing policy paid days" style="width:200px" value="0" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="cabl-death-date" type="date" />
+      <input id="cabl-leave-date" type="date" />
+      <button class="secondary" id="cabl-calc-btn">Calculate</button>
+    </div>
+    <pre id="cabl-view"></pre>
+  </section>
+
+  <section>
+    <h2>Federal PUMP Act</h2>
+    <p class="muted" style="margin-top:0">Break time to express milk is required for 1 year after the child's birth. Employers under 50 employees (counted across all worksites) may qualify for an undue-hardship exemption — this only checks the headcount half of that test, not the fact-specific hardship showing. Pay is required unless the employee is completely relieved of duty AND the break doesn't coincide with an already-paid break. The space must be shielded from view, free from intrusion, and never a bathroom.</p>
+    <div class="row">
+      <input id="pump-birth-date" type="date" />
+      <input id="pump-as-of-date" type="date" />
+      <input id="pump-employee-count" type="number" placeholder="Employer headcount (all worksites)" style="width:250px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="muted"><input type="checkbox" id="pump-relieved" checked /> Completely relieved of duty</label>
+      <label class="muted"><input type="checkbox" id="pump-coincides" /> Coincides with an already-paid break</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="muted"><input type="checkbox" id="pump-is-bathroom" /> Space is a bathroom</label>
+      <label class="muted"><input type="checkbox" id="pump-shielded" checked /> Shielded from view</label>
+      <label class="muted"><input type="checkbox" id="pump-free-intrusion" checked /> Free from intrusion</label>
+      <button class="secondary" id="pump-calc-btn">Calculate</button>
+    </div>
+    <pre id="pump-view"></pre>
+  </section>
+
+  <section>
+    <h2>Backup withholding</h2>
+    <p class="muted" style="margin-top:0">24% federal withholding when a payee has no valid TIN on file. The IRS's own awaiting-TIN 60-day grace period applies ONLY to interest/dividend payments — nonemployee compensation (1099-NEC contractor payments) is withheld immediately with no grace period at all, even while a TIN application is pending. This project doesn't model the B-notice procedural workflow (CP2100/CP2100A mismatch notices).</p>
+    <div class="row">
+      <select id="bw-payment-type">
+        <option value="nonemployee_compensation">Nonemployee compensation (1099-NEC)</option>
+        <option value="interest_or_dividends">Interest / dividends</option>
+      </select>
+      <label class="muted"><input type="checkbox" id="bw-has-tin" /> Valid TIN on file</label>
+      <input id="bw-tin-cert-date" type="date" placeholder="Awaiting-TIN certificate date" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="bw-payment-date" type="date" />
+      <input id="bw-gross" type="number" placeholder="Gross payment ($)" style="width:170px" />
+      <button class="secondary" id="bw-calc-btn">Calculate</button>
+    </div>
+    <pre id="bw-view"></pre>
+  </section>
+
+  <section>
+    <h2>Pregnant Workers Fairness Act</h2>
+    <p class="muted" style="margin-top:0">Covers employers with 15+ employees, in effect since June 27, 2023. Four specific accommodations (water access, additional restroom breaks, sitting/standing as needed, additional eating/drinking breaks) are "predictable assessments" the EEOC says are reasonable in virtually every case — no medical documentation may be required for those. Every other accommodation still goes through PWFA's general reasonable-accommodation-unless-undue-hardship standard, which this project doesn't evaluate (a fact-specific judgment, same as the ADA's own).</p>
+    <div class="row">
+      <input id="pwfa-employee-count" type="number" placeholder="Employer headcount" style="width:170px" />
+      <input id="pwfa-request-date" type="date" />
+      <select id="pwfa-accommodation">
+        <option value="water_access">Water access</option>
+        <option value="additional_restroom_breaks">Additional restroom breaks</option>
+        <option value="sit_or_stand_as_needed">Sit or stand as needed</option>
+        <option value="additional_eating_drinking_breaks">Additional eating/drinking breaks</option>
+        <option value="temporary_reassignment">Temporary reassignment (not predictable)</option>
+        <option value="telework">Telework (not predictable)</option>
+      </select>
+      <button class="secondary" id="pwfa-calc-btn">Calculate</button>
+    </div>
+    <pre id="pwfa-view"></pre>
+  </section>
+
+  <section>
+    <h2>CalSavers</h2>
+    <p class="muted" style="margin-top:0">Effective January 1, 2026, every California employer with 1+ employees and no qualified retirement plan of its own must register with CalSavers or certify an exemption. Default auto-enrollment starts at 5%, escalating 1 point/year up to 8%. FTB penalties run $250/eligible employee, plus another $500/employee (total $750) once noncompliance continues. See the Illinois Secure Choice and OregonSaves panels below for those states' own genuinely different coverage tests and penalty structures.</p>
+    <div class="row">
+      <input id="cs-employee-count" type="number" placeholder="Employee count" style="width:150px" />
+      <label class="muted"><input type="checkbox" id="cs-has-plan" /> Already has a qualified retirement plan</label>
+      <input id="cs-as-of-date" type="date" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="cs-years-enrolled" type="number" placeholder="Full years enrolled (rate escalation)" style="width:230px" value="0" />
+      <input id="cs-eligible-count" type="number" placeholder="Eligible employees (penalty calc)" style="width:220px" />
+      <label class="muted"><input type="checkbox" id="cs-continues" /> Noncompliance continues</label>
+      <button class="secondary" id="cs-calc-btn">Calculate</button>
+    </div>
+    <pre id="cs-view"></pre>
+  </section>
+
+  <section>
+    <h2>USERRA (military leave reemployment)</h2>
+    <p class="muted" style="margin-top:0">Applies to every employer regardless of size — no small-employer exemption at all. The application deadline depends purely on how long the service lasted: under 31 days means reporting at the start of the next scheduled work period; 31-180 days means applying within 14 days of release; over 180 days means applying within 90 days. Health coverage may be continued for up to 24 months at up to 102% of premium (service over 30 days only — shorter service continues coverage automatically).</p>
+    <div class="row">
+      <input id="userra-service-days" type="number" placeholder="Service duration (days)" style="width:180px" />
+      <input id="userra-cumulative-years" type="number" step="0.1" placeholder="Cumulative service (years, exceptions excluded)" style="width:280px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="userra-completion-date" type="date" />
+      <input id="userra-premium" type="number" placeholder="Full monthly premium ($)" style="width:200px" />
+      <button class="secondary" id="userra-calc-btn">Calculate</button>
+    </div>
+    <pre id="userra-view"></pre>
+  </section>
+
+  <section>
+    <h2>California itemized wage statement</h2>
+    <p class="muted" style="margin-top:0">Checks a pay stub against every item Labor Code § 226(a) requires — this project's own paystub renderer doesn't currently include total hours worked, hourly rates and hours at each rate, the last 4 of the employee's SSN, or the employer's address, so those are entered directly here. Penalty exposure (a "knowing and intentional" failure only, not evaluated here) is $50 for the first affected pay period, $100 for each after that, capped at $4,000/employee.</p>
+    <div class="row">
+      <input id="cws-gross" type="number" placeholder="Gross wages ($)" style="width:150px" />
+      <input id="cws-deductions" type="number" placeholder="Deductions ($)" style="width:150px" value="0" />
+      <input id="cws-net" type="number" placeholder="Net wages ($)" style="width:150px" />
+      <label class="muted"><input type="checkbox" id="cws-exempt" /> Exempt salaried</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="cws-hours" type="number" placeholder="Total hours worked" style="width:170px" />
+      <input id="cws-rate" type="number" placeholder="Hourly rate ($)" style="width:150px" />
+      <input id="cws-period-start" type="date" />
+      <input id="cws-period-end" type="date" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="cws-name" placeholder="Employee name" style="width:180px" />
+      <input id="cws-ssn4" placeholder="Last 4 of SSN" maxlength="4" style="width:120px" />
+      <input id="cws-employer-name" placeholder="Employer legal name" style="width:180px" />
+      <input id="cws-employer-address" placeholder="Employer address" style="width:200px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="cws-violation-periods" type="number" placeholder="Pay periods with violations" style="width:220px" value="0" />
+      <button class="secondary" id="cws-calc-btn">Calculate</button>
+    </div>
+    <pre id="cws-view"></pre>
+  </section>
+
+  <section>
+    <h2>Illinois Secure Choice</h2>
+    <p class="muted" style="margin-top:0">Covers employers with 5+ employees AND 2+ years in business AND no qualified retirement plan — all three conditions, unlike CalSavers' own single headcount test. Default auto-enrollment is 5% (no confirmed automatic escalation, unlike CalSavers). Penalties run $250/employee for the first noncompliant calendar year and $500/employee for each subsequent one (need not be consecutive) — a different structure from CalSavers' own. Curing within 120 days of an IDOR notice avoids the assessment.</p>
+    <div class="row">
+      <input id="ilsc-employee-count" type="number" placeholder="Employee count" style="width:150px" />
+      <input id="ilsc-years-business" type="number" placeholder="Years in business" style="width:160px" />
+      <label class="muted"><input type="checkbox" id="ilsc-has-plan" /> Already has a qualified plan</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="ilsc-eligible-count" type="number" placeholder="Eligible employees (penalty)" style="width:220px" />
+      <input id="ilsc-years-noncompliant" type="number" placeholder="Noncompliant calendar years" style="width:220px" value="0" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="ilsc-notice-date" type="date" />
+      <input id="ilsc-as-of-date" type="date" />
+      <button class="secondary" id="ilsc-calc-btn">Calculate</button>
+    </div>
+    <pre id="ilsc-view"></pre>
+  </section>
+
+  <section>
+    <h2>OregonSaves</h2>
+    <p class="muted" style="margin-top:0">The simplest coverage test of the three auto-IRA programs modeled here: NO employee-count threshold beyond 1+ employees, and NO years-in-business test at all. Default auto-enrollment is 5%, escalating 1 point/year up to a 10% ceiling (five years to reach it) — the same escalation shape as CalSavers, but a different cap (10% vs. 8%). Penalties run $100/affected employee, but CAPPED at $5,000 per calendar year per employer — unlike CalSavers' or Illinois Secure Choice's own uncapped per-employee penalties.</p>
+    <div class="row">
+      <input id="ors-employee-count" type="number" placeholder="Employee count" style="width:150px" />
+      <label class="muted"><input type="checkbox" id="ors-has-plan" /> Already has a qualified plan</label>
+      <input id="ors-years-enrolled" type="number" placeholder="Full years enrolled" style="width:190px" value="0" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="ors-affected-count" type="number" placeholder="Affected employees (penalty)" style="width:230px" />
+      <button class="secondary" id="ors-calc-btn">Calculate</button>
+    </div>
+    <pre id="ors-view"></pre>
+  </section>
+
+  <section>
+    <h2>FLSA tip credit and tip pooling</h2>
+    <p class="muted" style="margin-top:0">Wires src/minimum-wage.ts directly rather than re-deriving any state's own tip-credit rules here — that engine already knows which states (CA, MN, MT, NV, OR, WA, AK, Guam, Flagstaff AZ) allow NO tip credit at all. Federal max tip credit is $5.12/hour ($7.25 - $2.13). If actual cash wages plus tips received fall short of the full minimum wage for the hours worked, the employer owes the exact gap. Tip pool eligibility: a manager or supervisor is NEVER eligible, regardless of tip-credit status; where the employer takes a tip credit, only customarily-tipped employees may be pooled (back-of-house excluded); with no tip credit taken, every non-management employee is eligible.</p>
+    <div class="row">
+      <input id="tc-check-date" type="date" />
+      <input id="tc-state" type="text" placeholder="State (e.g. TX, CA)" style="width:150px" maxlength="2" />
+      <input id="tc-hours" type="number" placeholder="Hours worked" style="width:150px" />
+      <input id="tc-tips" type="number" placeholder="Tips received ($)" style="width:180px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="muted"><input type="checkbox" id="tc-manager" /> Manager/supervisor</label>
+      <label class="muted"><input type="checkbox" id="tc-customarily-tipped" checked /> Customarily receives tips</label>
+      <label class="muted"><input type="checkbox" id="tc-credit-taken" checked /> Employer takes tip credit</label>
+      <button class="secondary" id="tc-calc-btn">Calculate</button>
+    </div>
+    <pre id="tc-view"></pre>
+  </section>
+
+  <section>
+    <h2>California pay data reporting</h2>
+    <p class="muted" style="margin-top:0">Every constant here is copied verbatim from CRD's own Reporting Year 2025 handbook, since earlier research surfaced conflicting third-party figures for the top pay band boundary ($208,000 vs. $239,200) that only the primary source resolved. Two independent 100-employee tests — a payroll employee report and a labor contractor employee report — never combined for threshold purposes. 12 pay bands based on W-2 Box 5 earnings. Filing deadline is the second Wednesday of May, the year after the reporting year. Penalties run up to $100/employee for a first failure to file, up to $200/employee for a subsequent one.</p>
+    <div class="row">
+      <input id="cpdr-payroll-count" type="number" placeholder="Payroll employee count" style="width:200px" />
+      <input id="cpdr-contractor-count" type="number" placeholder="Labor contractor employee count" style="width:260px" />
+      <input id="cpdr-earnings" type="number" placeholder="Annual earnings ($, W-2 Box 5)" style="width:250px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="cpdr-reporting-year" type="number" placeholder="Reporting year (e.g. 2025)" style="width:230px" />
+      <input id="cpdr-penalty-count" type="number" placeholder="Employees affected (penalty)" style="width:240px" />
+      <label class="muted"><input type="checkbox" id="cpdr-subsequent" /> Subsequent failure</label>
+      <button class="secondary" id="cpdr-calc-btn">Calculate</button>
+    </div>
+    <pre id="cpdr-view"></pre>
+  </section>
+
+  <section>
+    <h2>State mini-WARN acts</h2>
+    <p class="muted" style="margin-top:0">Three states only, deliberately. New York keeps federal WARN's own two-branch shape (flat plant-closing threshold, separate percentage-based mass-layoff formula) at half federal's numbers, with a 90-day notice period. New Jersey and California each use a SINGLE flat threshold instead, no percentage test at all — New Jersey counts its 100-employee employer threshold NATIONWIDE (any status), and uniquely requires mandatory severance (1 week/year of service) regardless of notice adequacy, plus a 4-week penalty if notice was inadequate. California adds an independent 100-mile relocation trigger. Every other state's own mini-WARN law remains a disclosed gap.</p>
+    <div class="row">
+      <select id="mw-state" style="width:120px">
+        <option value="NY">New York</option>
+        <option value="NJ">New Jersey</option>
+        <option value="CA">California</option>
+      </select>
+      <input id="mw-employer-headcount" type="number" placeholder="Employer headcount" style="width:190px" />
+      <input id="mw-employees-affected" type="number" placeholder="Employees affected" style="width:190px" />
+      <input id="mw-active-workforce" type="number" placeholder="Active workforce at site (NY only)" style="width:260px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="mw-relocation-miles" type="number" placeholder="Relocation distance (miles, CA only)" style="width:260px" />
+      <input id="mw-planned-date" type="date" placeholder="Planned action date" style="width:190px" />
+      <input id="mw-notice-date" type="date" placeholder="Notice served date" style="width:190px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="mw-years-service" type="number" placeholder="Full years of service (NJ only)" style="width:230px" />
+      <input id="mw-weekly-pay" type="number" placeholder="Weekly pay ($, NJ only)" style="width:200px" />
+      <label class="muted"><input type="checkbox" id="mw-notice-adequate" checked /> Notice was adequate (NJ only)</label>
+      <button class="secondary" id="mw-calc-btn">Calculate</button>
+    </div>
+    <pre id="mw-view"></pre>
+  </section>
+
+  <section>
+    <h2>Oregon Fair Work Week Act</h2>
+    <p class="muted" style="margin-top:0">Oregon is the only STATEWIDE predictive-scheduling law (Chicago, NYC, Philadelphia, SF, and Seattle each run their own separate city ordinances, not modeled here). Covers employers with 500+ employees WORLDWIDE, for non-exempt hourly employees only. Two genuinely different pay formulas: an ADDITIVE change (adding time, or a new shift) owes a flat ONE HOUR of pay regardless of how much was added; a SUBTRACTIVE change (cutting hours) owes HALF the regular rate for EACH scheduled hour not worked — this one scales with the size of the cut. A change of 30 minutes or less owes nothing. Shifts must have at least 10 hours of rest between them; hours worked during that rest period are paid at 1.5x even with consent.</p>
+    <div class="row">
+      <input id="ofww-employee-count" type="number" placeholder="Employee count (worldwide)" style="width:220px" />
+      <label class="muted"><input type="checkbox" id="ofww-nonexempt" checked /> Non-exempt hourly employee</label>
+      <input id="ofww-rate" type="number" placeholder="Regular rate ($/hr)" style="width:180px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="ofww-change-minutes" type="number" placeholder="Change size (minutes)" style="width:190px" />
+      <input id="ofww-hours-not-worked" type="number" placeholder="Scheduled hours not worked" style="width:230px" />
+      <input id="ofww-hours-between-shifts" type="number" placeholder="Hours between shifts" style="width:190px" />
+      <input id="ofww-hours-in-rest" type="number" placeholder="Hours worked in rest period" style="width:230px" />
+      <button class="secondary" id="ofww-calc-btn">Calculate</button>
+    </div>
+    <pre id="ofww-view"></pre>
+  </section>
+
+  <section>
+    <h2>New York Paid Family Leave</h2>
+    <p class="muted" style="margin-top:0">Full-time (20+ hrs/week) eligible after 26 consecutive weeks; part-time eligible after 175 days worked (need not be consecutive). The weekly benefit is 67% of the employee's own average weekly wage, capped at 67% of the 2026 statewide average ($1,833.63/week), for $1,228.53 max/week. This project's core tax engine already computes the PFL payroll withholding correctly (data/states/NY-2026.json) — this panel is the benefit side only, which isn't modeled anywhere else.</p>
+    <div class="row">
+      <input id="nypfl-hours" type="number" placeholder="Hours/week" style="width:130px" />
+      <input id="nypfl-weeks" type="number" placeholder="Consecutive weeks employed" style="width:220px" value="0" />
+      <input id="nypfl-days" type="number" placeholder="Total days worked (part-time)" style="width:230px" value="0" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="nypfl-avg-wage" type="number" placeholder="Average weekly wage ($)" style="width:220px" />
+      <button class="secondary" id="nypfl-calc-btn">Calculate</button>
+    </div>
+    <pre id="nypfl-view"></pre>
+  </section>
+
+  <section>
+    <h2>New Jersey Family Leave Insurance</h2>
+    <p class="muted" style="margin-top:0">Eligible via 20+ base weeks each earning $310+, OR $15,500+ in total base-year earnings. The benefit is 85% of average weekly wage, capped at $1,119/week for 2026. Up to 12 weeks continuous, or up to 56 days (8 weeks) intermittent, within a 12-month period — separate caps, not additive. As with NY PFL, this project's core tax engine already computes the FLI payroll withholding correctly; this panel is the benefit side only.</p>
+    <div class="row">
+      <input id="njfli-base-weeks" type="number" placeholder="Base weeks worked" style="width:160px" />
+      <input id="njfli-weekly-earnings" type="number" placeholder="Weekly earnings ($)" style="width:180px" />
+      <input id="njfli-annual-earnings" type="number" placeholder="Base-year earnings ($)" style="width:200px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="njfli-avg-wage" type="number" placeholder="Average weekly wage ($)" style="width:220px" />
+      <input id="njfli-cont-used" type="number" placeholder="Continuous weeks already used" style="width:230px" value="0" />
+      <input id="njfli-intermit-used" type="number" placeholder="Intermittent days already used" style="width:230px" value="0" />
+      <button class="secondary" id="njfli-calc-btn">Calculate</button>
+    </div>
+    <pre id="njfli-view"></pre>
+  </section>
+
+  <section>
+    <h2>Massachusetts PFML</h2>
+    <p class="muted" style="margin-top:0">A genuinely different, TIERED benefit formula: 80% of average weekly wage up to 50% of the 2026 state average weekly wage ($961.24), plus 50% of any amount above that, capped at $1,230.39/week. Eligible only if base-period earnings are both at least $6,300 AND strictly more than 30x the computed weekly benefit. This project's core tax engine already computes the PFML payroll withholding correctly; this panel is the benefit side only.</p>
+    <div class="row">
+      <input id="mapfml-avg-wage" type="number" placeholder="Average weekly wage ($)" style="width:220px" />
+      <input id="mapfml-base-earnings" type="number" placeholder="Base-period earnings ($)" style="width:220px" />
+      <button class="secondary" id="mapfml-calc-btn">Calculate</button>
+    </div>
+    <pre id="mapfml-view"></pre>
+  </section>
+
+  <section>
+    <h2>California Family Rights Act (CFRA)</h2>
+    <p class="muted" style="margin-top:0">Covers employers with just 5+ employees statewide — much lower than FMLA's own 50-employee/75-mile worksite test, which CFRA eliminated in 2021. Tenure must be MORE than 12 months (exactly 12 does not qualify, unlike FMLA's inclusive test), plus 1,250 hours of service. 12 weeks of leave, scaled by the employee's own schedule. An employer may limit "designated person" leave to 1 person per 12-month period.</p>
+    <div class="row">
+      <input id="cfra-months" type="number" placeholder="Months employed" style="width:160px" />
+      <input id="cfra-hours" type="number" placeholder="Hours of service (past 12mo)" style="width:200px" />
+      <input id="cfra-employee-count" type="number" placeholder="Employer headcount" style="width:180px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="cfra-weekly-hours" type="number" placeholder="Regular weekly hours" style="width:180px" />
+      <input id="cfra-hours-used" type="number" placeholder="Hours used this period" style="width:200px" value="0" />
+      <input id="cfra-designated-used" type="number" placeholder="Designated persons used" style="width:200px" value="0" />
+      <button class="secondary" id="cfra-calc-btn">Check eligibility</button>
+    </div>
+    <pre id="cfra-view"></pre>
+  </section>
+
+  <section>
+    <h2>Washington PFML</h2>
+    <p class="muted" style="margin-top:0">Eligible with 820+ hours worked in a rolling 12-month qualifying period. A third distinct benefit formula in this project: 90% of average weekly wage up to half the 2026 state average weekly wage ($915), plus 50% above that, capped at $1,647/week — but with its own $100/week floor, except an employee earning under $100/week gets their full wage instead of the floor. This project's core tax engine already computes the PFML payroll withholding correctly; this panel is the benefit side only.</p>
+    <div class="row">
+      <input id="wapfml-hours" type="number" placeholder="Hours worked (qualifying period)" style="width:250px" />
+      <input id="wapfml-avg-wage" type="number" placeholder="Average weekly wage ($)" style="width:220px" />
+      <button class="secondary" id="wapfml-calc-btn">Calculate</button>
+    </div>
+    <pre id="wapfml-view"></pre>
+  </section>
+
+  <section>
+    <h2>Colorado FAMLI</h2>
+    <p class="muted" style="margin-top:0">A fourth two-tier PFML benefit formula: 90% of average weekly wage up to 50% of the 2026-2027 state average weekly wage ($804.46), plus 50% above that, capped at $1,448.02/week (90% of the full state average weekly wage). Eligibility is a single, simple test — at least $2,500 in base-period earnings from any combination of employers, with no minimum tenure or hours-worked requirement. Standard leave is 12 weeks, extending to 16 for pregnancy or childbirth complications. This project's core tax engine already computes the FAMLI payroll withholding correctly; this panel is the benefit side only.</p>
+    <div class="row">
+      <input id="cofamli-avg-wage" type="number" placeholder="Average weekly wage ($)" style="width:220px" />
+      <input id="cofamli-base-earnings" type="number" placeholder="Base-period earnings ($)" style="width:220px" />
+      <label><input id="cofamli-complications" type="checkbox" /> Pregnancy/childbirth complications</label>
+      <button class="secondary" id="cofamli-calc-btn">Calculate</button>
+    </div>
+    <pre id="cofamli-view"></pre>
+  </section>
+
+  <section>
+    <h2>Paid Leave Oregon</h2>
+    <p class="muted" style="margin-top:0">A genuinely different shape from every other state PFL module here: 100% wage replacement (not a fraction) up to 65% of the 2026-2027 state average weekly wage ($916.58), then 50% of any amount above that. Both the floor ($70.51) and the cap ($1,692.16) are defined as percentages of the state average weekly wage (5% and 120%) rather than separately-published flat figures. Eligible with at least $1,000 in base-year Oregon wages — no other test. Standard leave is 12 weeks, extending to 14 for a pregnancy/childbirth-related medical condition (available only to the parent who gave birth). This project's core tax engine already computes the payroll withholding correctly; this panel is the benefit side only.</p>
+    <div class="row">
+      <input id="orpl-avg-wage" type="number" placeholder="Average weekly wage ($)" style="width:220px" />
+      <input id="orpl-base-earnings" type="number" placeholder="Base-year earnings ($)" style="width:220px" />
+      <label><input id="orpl-pregnancy" type="checkbox" /> Pregnancy/childbirth-related condition</label>
+      <button class="secondary" id="orpl-calc-btn">Calculate</button>
+    </div>
+    <pre id="orpl-view"></pre>
+  </section>
+
+  <section>
+    <h2>Connecticut Paid Leave</h2>
+    <p class="muted" style="margin-top:0">The only sibling formula pegged to the state MINIMUM WAGE rather than a state average weekly wage: 95% replacement up to 40x the 2026 CT minimum wage ($677.60), then 60% of the excess, capped at 60x the minimum wage ($1,016.40) — both figures rise automatically whenever the minimum wage does. Eligibility is TWO independent tests: at least $2,325 in the single highest-earning quarter of the base period, AND currently employed or separated within the past 12 weeks. This project's core tax engine already computes the payroll withholding correctly; this panel is the benefit side only.</p>
+    <div class="row">
+      <input id="ctpl-avg-wage" type="number" placeholder="Average weekly wage ($)" style="width:220px" />
+      <input id="ctpl-quarter-earnings" type="number" placeholder="Highest quarter earnings ($)" style="width:240px" />
+      <label><input id="ctpl-currently-employed" type="checkbox" checked /> Currently employed</label>
+      <input id="ctpl-weeks-since-separation" type="number" placeholder="Weeks since separation" style="width:190px" />
+      <button class="secondary" id="ctpl-calc-btn">Calculate</button>
+    </div>
+    <pre id="ctpl-view"></pre>
+  </section>
+
+  <section>
+    <h2>Maine PFML</h2>
+    <p class="muted" style="margin-top:0">The only sibling module that rounds DOWN to the whole dollar at every step (matching Maine's own published worksheet), not to the nearest cent: 90% replacement up to 50% of the 2026-2027 state average weekly wage ($624, floored), then 66% of the excess, capped at the full state average weekly wage ($1,249.12) — not a percentage of it. Eligible with base-period earnings of at least 6x the state average weekly wage ($7,494.72) — no other test. All covered reasons draw on the same combined 12-week annual allowance. This project's core tax engine already computes the payroll withholding correctly; this panel is the benefit side only.</p>
+    <div class="row">
+      <input id="mepfml-avg-wage" type="number" placeholder="Average weekly wage ($)" style="width:220px" />
+      <input id="mepfml-base-earnings" type="number" placeholder="Base-period earnings ($)" style="width:220px" />
+      <button class="secondary" id="mepfml-calc-btn">Calculate</button>
+    </div>
+    <pre id="mepfml-view"></pre>
+  </section>
+
+  <section>
+    <h2>State non-compete bans and thresholds</h2>
+    <p class="muted" style="margin-top:0">Six jurisdictions only, deliberately: California, North Dakota, and Oklahoma void every employee non-compete outright; Minnesota's own ban is NOT retroactive (void only from 2023-07-01 forward). Colorado, Illinois, Washington, and Oregon instead use FOUR genuinely different threshold mechanisms — Colorado derives its non-solicit threshold as a fixed 60% of its non-compete threshold; Illinois uses two fixed dollar figures on a step schedule (not CPI-adjusted); Washington publishes separate figures for employees vs. independent contractors, and its own threshold regime sunsets to a near-total ban on 2027-06-30; Oregon requires a salary threshold AND a 12-month max term AND 14 days' advance written notice, all three at once. Every other state's own rule is a disclosed gap.</p>
+    <div class="row">
+      <select id="nc-state" style="width:200px">
+        <option value="CA">California (total ban)</option>
+        <option value="MN">Minnesota (total ban, not retroactive)</option>
+        <option value="ND">North Dakota (total ban)</option>
+        <option value="OK">Oklahoma (total ban)</option>
+        <option value="CO">Colorado (threshold)</option>
+        <option value="IL">Illinois (threshold)</option>
+        <option value="WA">Washington (threshold, sunsets 2027-06-30)</option>
+        <option value="OR">Oregon (threshold + duration + notice)</option>
+      </select>
+      <input id="nc-comp" type="number" placeholder="Annual compensation ($)" style="width:220px" />
+      <label><input id="nc-contractor" type="checkbox" /> Independent contractor (WA only)</label>
+    </div>
+    <div class="row">
+      <input id="nc-asof" type="date" placeholder="As-of / agreement date" style="width:190px" />
+      <input id="nc-term" type="number" placeholder="Term (months, OR only)" style="width:190px" />
+      <input id="nc-notice" type="number" placeholder="Advance notice (days, OR only)" style="width:220px" />
+      <button class="secondary" id="nc-calc-btn">Calculate</button>
+    </div>
+    <pre id="nc-view"></pre>
+  </section>
+
+  <section>
+    <h2>COBRA general notice</h2>
+    <p class="muted" style="margin-top:0">Distinct from the election notice above: due within 90 days of first becoming covered under the plan, or sooner if an election notice is already required by then. Penalty exposure: up to $110/day per affected beneficiary (ERISA §502(c)(1), court-assessed, not inflation-adjusted), plus a separate IRS excise tax of $100/day (or $200/day if more than one family member is affected — not the single rate doubled).</p>
+    <div class="row">
+      <input id="cgn-first-coverage" type="date" />
+      <input id="cgn-election-deadline" type="date" placeholder="Election notice deadline (if applicable)" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="cgn-days-late" type="number" placeholder="Days late" style="width:130px" value="0" />
+      <input id="cgn-beneficiary-count" type="number" placeholder="Affected beneficiaries" style="width:200px" value="1" />
+      <label class="muted"><input type="checkbox" id="cgn-multi-family" /> More than one family member affected</label>
+      <button class="secondary" id="cgn-calc-btn">Calculate</button>
+    </div>
+    <pre id="cgn-view"></pre>
+  </section>
+
+  <section>
+    <h2>California Fair Chance Act (ban the box)</h2>
+    <p class="muted" style="margin-top:0">Covers employers with 5+ employees. Criminal history may only be inquired about once a conditional offer has been made. If rescinding an offer over conviction history, an applicant gets at least 5 business days to respond, extended by 5 more if they dispute the report. A mailed notice without delivery confirmation is deemed received 5/10/20 calendar days later depending on the address. This project doesn't evaluate the individualized-assessment factors themselves (nature of offense, time elapsed, nature of job) — a fact-specific judgment.</p>
+    <div class="row">
+      <input id="fca-employee-count" type="number" placeholder="Employee count" style="width:150px" />
+      <label class="muted"><input type="checkbox" id="fca-conditional-offer" /> Conditional offer made</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="fca-notice-date" type="date" placeholder="Preliminary notice date" />
+      <input id="fca-mailed-date" type="date" placeholder="Mailed date" />
+      <select id="fca-address-type">
+        <option value="california">California address</option>
+        <option value="other_us">Other US address</option>
+        <option value="international">International address</option>
+      </select>
+      <button class="secondary" id="fca-calc-btn">Calculate</button>
+    </div>
+    <pre id="fca-view"></pre>
+  </section>
+
+  <section>
+    <h2>California salary history ban / pay scale transparency</h2>
+    <p class="muted" style="margin-top:0">The salary history inquiry ban and the on-request pay-scale disclosures (to applicants and current employees) apply to EVERY California employer, regardless of size. Only the job-POSTING pay-scale requirement has a 15-employee floor. A first job-posting violation carries no penalty if all postings are demonstrably updated; otherwise the Labor Commissioner's civil penalty runs $100-$10,000.</p>
+    <div class="row">
+      <input id="shb-employee-count" type="number" placeholder="Employee count" style="width:150px" />
+      <label class="muted"><input type="checkbox" id="shb-first-violation" /> First violation</label>
+      <label class="muted"><input type="checkbox" id="shb-postings-updated" /> All postings now updated</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="shb-considered-penalty" type="number" placeholder="Considered penalty ($)" style="width:200px" />
+      <button class="secondary" id="shb-calc-btn">Calculate</button>
+    </div>
+    <pre id="shb-view"></pre>
+  </section>
+
+  <section>
+    <h2>New York pay transparency</h2>
+    <p class="muted" style="margin-top:0">Labor Law § 194-b: employers with 4+ employees must disclose compensation ranges and job descriptions in postings for jobs, promotions, and transfers performed at least in part in New York. Flat civil penalty tiers — $1,000 first violation, $2,000 second, $3,000 for the third and every one after (never escalating further). A genuinely different penalty shape from California's own $100-$10,000 discretionary range.</p>
+    <div class="row">
+      <input id="nypt-employee-count" type="number" placeholder="Employee count" style="width:150px" />
+      <input id="nypt-violation-number" type="number" placeholder="Violation number (1st, 2nd, ...)" style="width:230px" />
+      <button class="secondary" id="nypt-calc-btn">Calculate</button>
+    </div>
+    <pre id="nypt-view"></pre>
+  </section>
+
+  <section>
+    <h2>Colorado Equal Pay for Equal Work Act (Part 2)</h2>
+    <p class="muted" style="margin-top:0">C.R.S. §§ 8-5-201 to 8-5-203: NO employer-size threshold at all for job-posting compensation disclosure or promotional-opportunity notice — any employer with a Colorado job opening is covered. The one carve-out is temporal and remote-workforce-based, not size-based: through July 1, 2029, an out-of-state employer with fewer than 15 fully-remote Colorado employees owes notice only for remote openings. Fines run $500-$10,000 per violation; a written complaint may be filed within one year of learning of a violation.</p>
+    <div class="row">
+      <label><input id="coepewa-physically-located" type="checkbox" /> Employer physically located in Colorado</label>
+      <input id="coepewa-employee-count" type="number" placeholder="Colorado employee count" style="width:190px" />
+      <label><input id="coepewa-fully-remote" type="checkbox" /> All Colorado employees fully remote</label>
+    </div>
+    <div class="row">
+      <input id="coepewa-decision-date" type="date" placeholder="Promotion decision date" style="width:190px" />
+      <input id="coepewa-learned-date" type="date" placeholder="Date violation was learned of" style="width:220px" />
+      <input id="coepewa-penalties" type="text" placeholder="Considered per-violation penalties ($), comma-separated" style="width:340px" />
+      <button class="secondary" id="coepewa-calc-btn">Calculate</button>
+    </div>
+    <pre id="coepewa-view"></pre>
+  </section>
+
+  <section>
+    <h2>Form 1095-C</h2>
+    <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
+    <div class="row">
+      <select id="f1095c-employee"></select>
+      <input id="f1095c-year" type="number" placeholder="Year" value="2026" style="width:100px" />
+      <label class="muted"><input type="checkbox" id="f1095c-fulltime" checked /> Full-time all year</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="muted"><input type="checkbox" id="f1095c-offered-mec" checked /> Offered MEC</label>
+      <label class="muted"><input type="checkbox" id="f1095c-offered-mv" checked /> Offered minimum value</label>
+      <label class="muted"><input type="checkbox" id="f1095c-offered-spouse" checked /> Offered to spouse</label>
+      <label class="muted"><input type="checkbox" id="f1095c-offered-deps" checked /> Offered to dependents</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="f1095c-contribution" type="number" placeholder="Employee monthly contribution ($)" value="100" style="width:220px" />
+      <input id="f1095c-qualifying-ceiling" type="number" placeholder="Qualifying offer ceiling ($/mo)" value="129.90" style="width:220px" />
+      <select id="f1095c-safe-harbor">
+        <option value="">No safe harbor</option>
+        <option value="fpl">FPL</option>
+        <option value="rate-of-pay">Rate of pay</option>
+        <option value="w2">W-2</option>
+      </select>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="secondary" id="f1095c-generate-btn">Generate Form 1095-C</button>
+    </div>
+    <table id="f1095c-table">
+      <thead><tr><th>Month</th><th>Line 14</th><th>Line 16</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section>
     <h2>State employer registrations</h2>
     <p class="muted" style="margin-top:0">A multi-state employer must register for unemployment (and usually withholding) tax in every state it has employees working in before running payroll there — this compares that against who's actually on the books.</p>
     <div class="row">
@@ -144,9 +838,18 @@
   </section>
 
   <section>
+    <h2>Org chart</h2>
+    <div id="org-chart-view" class="muted">Loading…</div>
+  </section>
+
+  <section>
     <h2>Employees</h2>
+    <div class="row">
+      <button class="secondary" id="add-employee-btn">+ Add employee directly</button>
+      <span class="muted">(for onboarding existing staff — a new hire from a job posting instead goes through Recruiting below)</span>
+    </div>
     <table id="employees-table">
-      <thead><tr><th>Name</th><th>Pay type</th><th>Residence</th><th>YTD Social Security wages</th></tr></thead>
+      <thead><tr><th>Name</th><th>Pay type</th><th>Residence</th><th>YTD Social Security wages</th><th></th></tr></thead>
       <tbody></tbody>
     </table>
   </section>
@@ -177,6 +880,30 @@
   </section>
 
   <section>
+    <h2>GL journal export</h2>
+    <p class="muted" style="margin-top:0">One summarized journal entry per pay run — debits always equal credits exactly, or this refuses to produce the CSV at all. Account codes are your own chart of accounts; this has no opinion on what they should be.</p>
+    <div class="row">
+      <select id="gl-pay-run"></select>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="gl-wages-expense" placeholder="Wages expense account" value="6000" style="width:140px" />
+      <input id="gl-employer-tax-expense" placeholder="Employer tax expense account" value="6100" style="width:170px" />
+      <input id="gl-federal-tax-payable" placeholder="Federal tax payable account" value="2100" style="width:160px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="gl-state-tax-payable" placeholder="State tax payable account" value="2110" style="width:150px" />
+      <input id="gl-local-tax-payable" placeholder="Local tax payable account" value="2120" style="width:150px" />
+      <input id="gl-net-pay-payable" placeholder="Net pay payable account" value="2200" style="width:150px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="gl-garnishment-payable" placeholder="Garnishment payable account" value="2300" style="width:170px" />
+      <input id="gl-benefit-payable" placeholder="Benefit deduction payable account" value="2400" style="width:190px" />
+      <button class="secondary" id="gl-export-btn">Generate journal CSV</button>
+    </div>
+    <pre id="gl-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 941 (quarterly)</h2>
     <div class="row">
       <input id="f941-year" type="number" value="2026" style="width:90px" />
@@ -186,6 +913,21 @@
       <button class="secondary" id="f941-btn">View</button>
     </div>
     <pre id="f941-view"></pre>
+  </section>
+
+  <section>
+    <h2>Federal deposit schedule</h2>
+    <p class="muted" style="margin-top:0">A separate question from Form 941 itself: WHEN withheld taxes are due. Depends on the employer's own lookback-period liability (the 4 quarters ending 12 months before this year started) — a new employer with no history defaults to monthly.</p>
+    <div class="row">
+      <input id="deposit-year" type="number" value="2026" style="width:90px" />
+      <button class="secondary" id="deposit-schedule-btn">Check depositor status</button>
+    </div>
+    <pre id="deposit-schedule-view"></pre>
+    <div class="row" style="margin-top:8px">
+      <select id="deposit-pay-run"></select>
+      <button class="secondary" id="deposit-deadline-btn">Deposit deadline for this run</button>
+    </div>
+    <pre id="deposit-deadline-view"></pre>
   </section>
 
   <section>
@@ -234,9 +976,15 @@
       <select id="pto-employee"></select>
       <button class="secondary" id="pto-accrue-btn">Accrue this period</button>
       <input id="pto-use-hours" type="number" placeholder="Hours to use" style="width:110px" />
-      <button class="secondary" id="pto-use-btn">Request time off</button>
+      <button class="secondary" id="pto-use-btn">Record usage directly</button>
     </div>
     <pre id="pto-view"></pre>
+    <h3 style="margin-top:12px">Pending PTO requests</h3>
+    <p class="muted" style="margin-top:0">Submitted through the employee self-service portal — approving deducts the balance, denying does not.</p>
+    <table id="pto-requests-table">
+      <thead><tr><th>Employee</th><th>Dates</th><th>Hours</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
   </section>
 
   <section>
@@ -249,11 +997,25 @@
         <option value="layoff">Layoff</option>
         <option value="voluntary_with_notice">Voluntary (72h+ notice)</option>
         <option value="voluntary_without_notice">Voluntary (no notice)</option>
+        <option value="gross_misconduct">Gross misconduct</option>
       </select>
       <label><input type="checkbox" id="term-pto-payout" /> Pay out PTO</label>
       <button id="term-btn">Terminate</button>
     </div>
     <pre id="term-view"></pre>
+  </section>
+
+  <section>
+    <h2>California waiting time penalty</h2>
+    <p class="muted" style="margin-top:0">Cal. Labor Code § 203: a full day's wages (hourly rate × normal daily hours) for every CALENDAR day a final paycheck is late — weekends and holidays count — capped at 30 days. A good-faith dispute over the wages owed can be a full defense, which this project doesn't evaluate (a fact-specific judgment about the employer's own state of mind).</p>
+    <div class="row">
+      <input id="wtp-due-date" type="date" />
+      <input id="wtp-paid-date" type="date" />
+      <input id="wtp-hourly-rate" type="number" placeholder="Hourly rate ($)" style="width:150px" />
+      <input id="wtp-daily-hours" type="number" placeholder="Normal daily hours" style="width:170px" value="8" />
+      <button class="secondary" id="wtp-calc-btn">Calculate</button>
+    </div>
+    <pre id="wtp-view"></pre>
   </section>
 
   <section>
@@ -269,6 +1031,44 @@
       <button class="secondary" id="i9-compliance-btn">Show company-wide compliance findings</button>
     </div>
     <pre id="i9-view"></pre>
+  </section>
+
+  <section>
+    <h2>E-Verify</h2>
+    <p class="muted" style="margin-top:0">Tracks E-Verify case creation and tentative-nonconfirmation deadlines only. This project doesn't determine whether an employer is even required to use E-Verify (a per-state/size/industry legal question) or integrate with the real E-Verify system.</p>
+    <div class="row">
+      <select id="everify-employee"></select>
+      <button class="secondary" id="everify-view-btn">View status</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <input id="everify-case-number" placeholder="Case number" />
+      <select id="everify-status">
+        <option value="not_created">Not created</option>
+        <option value="pending">Pending</option>
+        <option value="employment_authorized">Employment authorized</option>
+        <option value="tentative_nonconfirmation">Tentative nonconfirmation</option>
+        <option value="final_nonconfirmation">Final nonconfirmation</option>
+        <option value="closed">Closed</option>
+      </select>
+      <input id="everify-date" type="date" />
+      <button class="secondary" id="everify-created-btn">Set as created date</button>
+      <button class="secondary" id="everify-tnc-btn">Set as TNC issued date</button>
+      <button id="everify-save-btn">Save status</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="secondary" id="everify-compliance-btn">Show company-wide compliance findings</button>
+    </div>
+    <pre id="everify-view"></pre>
+  </section>
+
+  <section>
+    <h2>New-hire reporting (PRWORA)</h2>
+    <p class="muted" style="margin-top:0">Every employer owes a report to the employee's own work-state workforce agency within 20 days of each hire. This project doesn't e-file it — it tracks the worklist and lets you view/copy the report and mark it filed once you have.</p>
+    <table id="nhr-table">
+      <thead><tr><th>Employee</th><th>Finding</th><th>Due by</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <pre id="nhr-view"></pre>
   </section>
 
   <section>
@@ -302,10 +1102,18 @@
         <option value="checking">Checking</option>
         <option value="savings">Savings</option>
       </select>
-      <button class="secondary" id="dd-add-btn">Add account (remainder allocation)</button>
+      <select id="dd-allocation-kind">
+        <option value="remainder">Remainder (whatever's left)</option>
+        <option value="percent">Percent of net</option>
+        <option value="flatAmount">Flat amount</option>
+      </select>
+      <input id="dd-allocation-value" type="number" placeholder="% or $" style="width:100px" hidden />
+      <input id="dd-priority" type="number" placeholder="Priority (lower funds first)" style="width:170px" hidden />
+      <button class="secondary" id="dd-add-btn">Add account</button>
     </div>
+    <p class="muted" style="margin-top:4px">Fixed/percent accounts fund in priority order (lowest first); at most one account may be "remainder," always funded last with whatever's left.</p>
     <table id="dd-table">
-      <thead><tr><th>Routing</th><th>Account</th><th>Type</th><th>Verification</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Routing</th><th>Account</th><th>Type</th><th>Allocation</th><th>Verification</th><th>Actions</th></tr></thead>
       <tbody></tbody>
     </table>
     <pre id="dd-view"></pre>
@@ -321,13 +1129,22 @@
       <button class="secondary" id="benefit-create-btn">Create plan</button>
     </div>
     <div class="row" style="margin-top:8px">
+      <label class="muted">Open enrollment window:</label>
+      <input id="oe-start" type="date" />
+      <input id="oe-end" type="date" />
+      <button class="secondary" id="oe-save-btn">Save window</button>
+      <span id="oe-current" class="muted"></span>
+    </div>
+    <div class="row" style="margin-top:8px">
       <select id="benefit-plan"></select>
       <select id="benefit-employee"></select>
       <select id="benefit-tier">
         <option value="employee_only">Employee only</option>
         <option value="family">Family</option>
       </select>
+      <label class="muted"><input type="checkbox" id="benefit-qle" /> Qualifying life event</label>
       <button class="secondary" id="benefit-elect-btn">Elect (effective next check date)</button>
+      <button class="secondary" id="benefit-roster-btn">View carrier eligibility roster (CSV)</button>
     </div>
     <pre id="benefit-view"></pre>
   </section>
@@ -376,6 +1193,11 @@
 let company = null;
 let employees = [];
 
+function employeeNameFor(id) {
+  const e = employees.find((emp) => emp.id === id);
+  return e ? `${e.firstName} ${e.lastName}` : id;
+}
+
 function fmtCents(c) {
   const neg = c < 0;
   const abs = Math.abs(c);
@@ -402,6 +1224,9 @@ async function loadCompany(preferredId) {
   document.getElementById('company-info').innerHTML =
     `<strong>${company.legalName}</strong> · EIN ${company.ein} · home state ${company.homeState} · ` +
     `${company.paySchedule.frequency} pay schedule`;
+  document.getElementById('oe-current').textContent = company.openEnrollmentWindow
+    ? `Current window: ${company.openEnrollmentWindow.start} to ${company.openEnrollmentWindow.end}`
+    : 'No open enrollment window configured — only a first-ever election or a qualifying life event will be allowed.';
 }
 
 document.getElementById('company-select').addEventListener('change', async (ev) => {
@@ -423,9 +1248,76 @@ document.getElementById('new-company-btn').addEventListener('click', async () =>
   await refreshAll(created.id);
 });
 
+document.getElementById('add-employee-btn').addEventListener('click', async () => {
+  const firstName = prompt('First name');
+  if (!firstName) return;
+  const lastName = prompt('Last name');
+  if (!lastName) return;
+  const hireDate = prompt('Hire date (YYYY-MM-DD)', new Date().toISOString().slice(0, 10));
+  if (!hireDate) return;
+  const payKind = (prompt('Pay type (hourly/salary)', 'hourly') || 'hourly').toLowerCase();
+  const payType = payKind === 'salary'
+    ? { kind: 'salary', annualSalary: Math.round(Number(prompt('Annual salary ($)', '60000')) * 100) }
+    : { kind: 'hourly', hourlyRate: Math.round(Number(prompt('Hourly rate ($)', '20')) * 100) };
+  const residenceState = { code: (prompt('Residence state (2-letter)', company.homeState) || company.homeState).toUpperCase() };
+  const jobTitle = prompt('Job title (optional)') || undefined;
+  const department = prompt('Department (optional)') || undefined;
+  const ssn = prompt('SSN (optional now, but required before a PRWORA new-hire report can be filed for this person)') || undefined;
+  const mailingAddress = prompt('Mailing address (same requirement as SSN)') || undefined;
+  const federalW4 = { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 };
+  try {
+    await api(`/api/companies/${company.id}/employees`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstName, lastName, hireDate, payType, residenceState, jobTitle, department, ssn, mailingAddress, federalW4 }),
+    });
+    await Promise.all([loadEmployees(), loadOrgChart(), loadAuditLog(), loadNewHireReporting(), loadComplianceDashboard()]);
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+});
+
 async function loadReport() {
   const { report } = await api(`/api/companies/${company.id}/report`);
   document.getElementById('report-view').textContent = JSON.stringify(report, null, 2);
+}
+
+async function loadComplianceDashboard() {
+  const { dashboard } = await api(`/api/companies/${company.id}/compliance-dashboard`);
+  const summary = document.getElementById('compliance-summary');
+  const tbody = document.querySelector('#compliance-table tbody');
+
+  if (dashboard.totalIssueCount === 0) {
+    summary.textContent = 'Nothing needs attention as of ' + dashboard.asOfDate + '.';
+    tbody.innerHTML = '';
+    return;
+  }
+  summary.textContent = `${dashboard.totalIssueCount} item(s) need attention as of ${dashboard.asOfDate}:`;
+
+  const rows = [];
+  for (const i of dashboard.minimumWageIssues) {
+    rows.push(['Minimum wage', employeeNameFor(i.employeeId), `Paid ${fmtCents(i.employeeRateCents)}/hr, below the ${fmtCents(i.applicableRateCents)}/hr floor in ${i.jurisdiction} (short ${fmtCents(i.shortfallCents)})`]);
+  }
+  for (const entry of dashboard.i9Issues) {
+    for (const issue of entry.issues) rows.push(['Form I-9', employeeNameFor(entry.employeeId), issue]);
+  }
+  for (const entry of dashboard.everifyIssues) {
+    for (const issue of entry.issues) rows.push(['E-Verify', employeeNameFor(entry.employeeId), issue]);
+  }
+  const nhrLabel = { missing_data: 'Missing SSN/address', overdue: 'OVERDUE', due_soon: 'Due soon' };
+  for (const i of dashboard.newHireReportingIssues) {
+    rows.push(['New-hire reporting', employeeNameFor(i.employeeId), `${nhrLabel[i.kind]}${i.dueBy ? ' (due ' + i.dueBy + ')' : ''}`]);
+  }
+  for (const i of dashboard.stateRegistrationIssues) {
+    rows.push([
+      'State registration',
+      i.employeeIds.map(employeeNameFor).join(', '),
+      i.kind === 'not_registered'
+        ? `No SUI/withholding registration on file for ${i.stateCode}`
+        : `${i.stateCode} registration rate (${(i.registeredRate * 100).toFixed(2)}%) doesn't match the configured rate (${(i.configuredRate * 100).toFixed(2)}%)`,
+    ]);
+  }
+
+  tbody.innerHTML = rows.map(([category, who, finding]) => `<tr><td>${category}</td><td>${who}</td><td>${finding}</td></tr>`).join('');
 }
 
 async function loadAuditLog() {
@@ -499,6 +1391,925 @@ document.getElementById('aca-affordability-btn').addEventListener('click', async
   }
 });
 
+document.getElementById('fmla-check-btn').addEventListener('click', async () => {
+  const view = document.getElementById('fmla-view');
+  const monthsEmployed = Number(document.getElementById('fmla-months').value) || 0;
+  const hoursOfServicePastTwelveMonths = Number(document.getElementById('fmla-hours').value) || 0;
+  const employeeCountAtWorksite = Number(document.getElementById('fmla-worksite-count').value) || 0;
+  try {
+    const { result } = await api('/api/fmla/eligibility', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ monthsEmployed, hoursOfServicePastTwelveMonths, employeeCountAtWorksite }),
+    });
+    view.textContent = result.eligible
+      ? 'ELIGIBLE — all three prongs met.'
+      : 'NOT eligible:\n' + result.reasons.map((r) => '- ' + r).join('\n');
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('wc-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('wc-view');
+  const grossWages = Number(document.getElementById('wc-gross-wages').value) || 0;
+  const overtimePremiumPortion = Number(document.getElementById('wc-ot-premium').value) || 0;
+  const workStateCode = (document.getElementById('wc-state').value || '').toUpperCase();
+  const ratePerHundredOfPayroll = Number(document.getElementById('wc-rate').value) || 0;
+  const experienceModificationFactor = Number(document.getElementById('wc-exmod').value) || 1.0;
+  try {
+    const result = await api('/api/workers-comp/premium-estimate', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ grossWages, overtimePremiumPortion, workStateCode, ratePerHundredOfPayroll, experienceModificationFactor }),
+    });
+    view.textContent = `Subject payroll: ${fmtCents(result.subjectWages)}\nEstimated premium: ${fmtCents(result.premium)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('sick-hire-date').value = new Date().toISOString().slice(0, 10);
+document.getElementById('sick-as-of-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('sick-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('sick-view');
+  const hireDate = document.getElementById('sick-hire-date').value;
+  const asOfDate = document.getElementById('sick-as-of-date').value;
+  const currentBalanceHours = Number(document.getElementById('sick-current-balance').value) || 0;
+  const hoursWorkedSinceLastAccrual = Number(document.getElementById('sick-hours-worked').value) || 0;
+  const hoursUsedThisYear = Number(document.getElementById('sick-hours-used').value) || 0;
+  try {
+    const result = await api('/api/paid-sick-leave/ca-calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hireDate, asOfDate, currentBalanceHours, hoursWorkedSinceLastAccrual, hoursUsedThisYear }),
+    });
+    view.textContent =
+      `Eligible to use sick leave starting: ${result.useEligibleDate}${result.isEligibleToUseToday ? ' (already eligible)' : ' (not yet eligible)'}\n` +
+      `New balance after accrual: ${result.newBalanceHours.toFixed(2)} hours\n` +
+      `Usable now (after the 40h/year usage cap): ${result.maxUsableHours.toFixed(2)} hours`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('ret401k-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('ret401k-view');
+  const age = Number(document.getElementById('ret401k-age').value) || 0;
+  const ytdElectiveDeferrals = Number(document.getElementById('ret401k-ytd').value) || 0;
+  const requestedDeferral = Number(document.getElementById('ret401k-requested').value) || 0;
+  const priorYearFicaWagesFromThisEmployer = Number(document.getElementById('ret401k-prior-wages').value) || 0;
+  try {
+    const result = await api('/api/retirement-limits/401k-calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ age, ytdElectiveDeferrals, requestedDeferral, priorYearFicaWagesFromThisEmployer }),
+    });
+    view.textContent =
+      `Annual limit at age ${age}: ${fmtCents(result.annualLimit)}\n` +
+      `Remaining room this year: ${fmtCents(result.remainingRoom)}\n` +
+      `This period's deferral, capped to remaining room: ${fmtCents(result.cappedDeferral)}\n` +
+      `Roth catch-up required: ${result.rothCatchUpRequired ? 'YES' : 'No'}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('hf-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('hf-view');
+  const age = Number(document.getElementById('hf-age').value) || 0;
+  const hdhpCoverageTier = document.getElementById('hf-hdhp-tier').value;
+  const isMarriedFilingSeparately = document.getElementById('hf-mfs').checked;
+  const ytdHsaContributions = Number(document.getElementById('hf-hsa-ytd').value) || 0;
+  const requestedHsaContribution = Number(document.getElementById('hf-hsa-requested').value) || 0;
+  const ytdHealthFsaContributions = Number(document.getElementById('hf-fsa-ytd').value) || 0;
+  const requestedHealthFsaContribution = Number(document.getElementById('hf-fsa-requested').value) || 0;
+  const ytdDependentCareFsaContributions = Number(document.getElementById('hf-dcfsa-ytd').value) || 0;
+  const requestedDependentCareFsaContribution = Number(document.getElementById('hf-dcfsa-requested').value) || 0;
+  try {
+    const result = await api('/api/hsa-fsa-limits/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        age, hdhpCoverageTier, isMarriedFilingSeparately,
+        ytdHsaContributions, requestedHsaContribution,
+        ytdHealthFsaContributions, requestedHealthFsaContribution,
+        ytdDependentCareFsaContributions, requestedDependentCareFsaContribution,
+      }),
+    });
+    view.textContent =
+      `HSA annual limit: ${fmtCents(result.hsaAnnualLimit)} | remaining: ${fmtCents(result.hsaRemainingRoom)} | this period capped: ${fmtCents(result.hsaCappedContribution)}\n` +
+      `Health FSA remaining: ${fmtCents(result.healthFsaRemainingRoom)} | this period capped: ${fmtCents(result.healthFsaCappedContribution)}\n` +
+      `Dependent-care FSA annual limit: ${fmtCents(result.dependentCareFsaAnnualLimit)} | remaining: ${fmtCents(result.dependentCareFsaRemainingRoom)} | this period capped: ${fmtCents(result.dependentCareFsaCappedContribution)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('warn-planned-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('warn-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('warn-view');
+  const employeeCountExcludingPartTime = Number(document.getElementById('warn-employer-count').value) || 0;
+  const employeesLosingEmploymentExcludingPartTime = Number(document.getElementById('warn-affected-count').value) || 0;
+  const activeWorkforceAtSiteBeforeLayoff = Number(document.getElementById('warn-site-workforce').value) || 0;
+  const plannedActionDate = document.getElementById('warn-planned-date').value;
+  const noticeServedDate = document.getElementById('warn-notice-date').value || undefined;
+  try {
+    const result = await api('/api/warn-act/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCountExcludingPartTime, employeesLosingEmploymentExcludingPartTime, activeWorkforceAtSiteBeforeLayoff, plannedActionDate, noticeServedDate }),
+    });
+    view.textContent =
+      `Covered employer (100+): ${result.isCoveredEmployer ? 'YES' : 'No'}\n` +
+      `Plant closing: ${result.isPlantClosing ? 'YES' : 'No'}\n` +
+      `Mass layoff: ${result.isMassLayoff ? 'YES' : 'No'}\n` +
+      `Notice required: ${result.noticeRequired ? 'YES' : 'No'}\n` +
+      `Notice deadline (60 days before): ${result.noticeDeadline}` +
+      (result.noticeLate === null ? '' : `\nNotice served ${result.noticeLate ? 'LATE' : 'on time'}`);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('mrb-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('mrb-view');
+  const hoursWorked = Number(document.getElementById('mrb-hours').value) || 0;
+  const firstMealPeriodWaived = document.getElementById('mrb-first-waived').checked;
+  const regularRateDollars = Number(document.getElementById('mrb-rate').value) || 0;
+  const mealPeriodViolationOccurred = document.getElementById('mrb-meal-violation').checked;
+  const restPeriodViolationOccurred = document.getElementById('mrb-rest-violation').checked;
+  try {
+    const result = await api('/api/meal-rest-breaks/ca-calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hoursWorked, firstMealPeriodWaived, regularRateDollars, mealPeriodViolationOccurred, restPeriodViolationOccurred }),
+    });
+    view.textContent =
+      `First meal period required: ${result.firstMealPeriodRequired ? 'YES' : 'No'} (waivable: ${result.firstMealPeriodWaivable ? 'YES' : 'No'})\n` +
+      `Second meal period required: ${result.secondMealPeriodRequired ? 'YES' : 'No'} (waivable: ${result.secondMealPeriodWaivable ? 'YES' : 'No'})\n` +
+      `Rest breaks required: ${result.restBreaksRequired}\n` +
+      `Premium owed today: ${fmtCents(result.premiumOwed)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('nywn-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('nywn-view');
+  const rateOfPayDollars = document.getElementById('nywn-rate').value === '' ? undefined : Number(document.getElementById('nywn-rate').value);
+  const basisOfPay = document.getElementById('nywn-basis').value;
+  const allowancesClaimedDollars = document.getElementById('nywn-allowances').value === '' ? undefined : Number(document.getElementById('nywn-allowances').value);
+  const regularPayDay = document.getElementById('nywn-payday').value || undefined;
+  const employerLegalName = document.getElementById('nywn-employer-name').value || undefined;
+  const employerAddress = document.getElementById('nywn-employer-address').value || undefined;
+  const employerPhone = document.getElementById('nywn-employer-phone').value || undefined;
+  const isRateIncrease = document.getElementById('nywn-is-increase').checked;
+  const willAppearOnNextWageStatement = document.getElementById('nywn-on-statement').checked;
+  const isHospitalityIndustry = document.getElementById('nywn-hospitality').checked;
+  const daysWithoutCompliantNotice = Number(document.getElementById('nywn-days-notice').value) || 0;
+  const daysWithoutCompliantStatement = Number(document.getElementById('nywn-days-statement').value) || 0;
+  try {
+    const result = await api('/api/ny-wage-notice/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        rateOfPayDollars, basisOfPay, allowancesClaimedDollars, regularPayDay,
+        employerLegalName, employerAddress, employerPhone,
+        isRateIncrease, willAppearOnNextWageStatement, isHospitalityIndustry,
+        daysWithoutCompliantNotice, daysWithoutCompliantStatement,
+      }),
+    });
+    view.textContent =
+      (result.noticeComplianceIssues.length === 0 ? 'Notice is complete.' : 'Notice issues:\n' + result.noticeComplianceIssues.map((i) => '- ' + i).join('\n')) +
+      `\nNew notice required for this rate change: ${result.newNoticeRequiredForRateChange ? 'YES' : 'No'}\n` +
+      `Estimated notice-violation exposure: ${fmtCents(result.estimatedNoticeViolationDamages)}\n` +
+      `Estimated wage-statement-violation exposure: ${fmtCents(result.estimatedWageStatementViolationDamages)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('flsa-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('flsa-view');
+  const category = document.getElementById('flsa-category').value;
+  const weeklySalaryDollars = document.getElementById('flsa-weekly-salary').value === '' ? null : Number(document.getElementById('flsa-weekly-salary').value);
+  const hourlyRateDollars = document.getElementById('flsa-hourly-rate').value === '' ? null : Number(document.getElementById('flsa-hourly-rate').value);
+  const totalAnnualCompensationDollars = document.getElementById('flsa-annual-comp').value === '' ? null : Number(document.getElementById('flsa-annual-comp').value);
+  try {
+    const result = await api('/api/flsa-exemption/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category, weeklySalaryDollars, hourlyRateDollars, totalAnnualCompensationDollars }),
+    });
+    view.textContent =
+      `Salary-level test required for this category: ${result.salaryLevelTestRequired ? 'YES' : 'No (outside sales has none)'}\n` +
+      `Meets salary-level requirement: ${result.meetsSalaryLevelRequirement ? 'YES' : 'No'}\n` +
+      `(Still requires a passing duties test and salary-basis test, not checked here, before exempt status is actually established.)`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('cabl-death-date').value = new Date().toISOString().slice(0, 10);
+document.getElementById('cabl-leave-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('cabl-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('cabl-view');
+  const employeeCount = Number(document.getElementById('cabl-employee-count').value) || 0;
+  const daysEmployedBeforeLeaveStarts = Number(document.getElementById('cabl-tenure-days').value) || 0;
+  const existingPolicyPaidDays = Number(document.getElementById('cabl-existing-paid-days').value) || 0;
+  const dateOfDeath = document.getElementById('cabl-death-date').value;
+  const leaveDate = document.getElementById('cabl-leave-date').value;
+  try {
+    const result = await api('/api/ca-bereavement-leave/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCount, daysEmployedBeforeLeaveStarts, dateOfDeath, leaveDate, existingPolicyPaidDays }),
+    });
+    view.textContent =
+      `Employer covered (5+): ${result.employerCovered ? 'YES' : 'No'}\n` +
+      `Employee eligible (30+ days tenure): ${result.employeeEligible ? 'YES' : 'No'}\n` +
+      `Completion deadline (3 months after death): ${result.completionDeadline}\n` +
+      `This leave date is timely: ${result.leaveTimely ? 'YES' : 'No'}\n` +
+      `Documentation request deadline: ${result.documentationRequestDeadline}\n` +
+      `Paid days: ${result.paidDays} | Unpaid days: ${result.unpaidDays}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('pump-birth-date').value = new Date().toISOString().slice(0, 10);
+document.getElementById('pump-as-of-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('pump-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('pump-view');
+  const childBirthDate = document.getElementById('pump-birth-date').value;
+  const asOfDate = document.getElementById('pump-as-of-date').value;
+  const totalEmployeeCountAllWorksites = Number(document.getElementById('pump-employee-count').value) || 0;
+  const isCompletelyRelievedOfDuty = document.getElementById('pump-relieved').checked;
+  const coincidesWithAlreadyPaidBreak = document.getElementById('pump-coincides').checked;
+  const isBathroom = document.getElementById('pump-is-bathroom').checked;
+  const isShieldedFromView = document.getElementById('pump-shielded').checked;
+  const isFreeFromIntrusion = document.getElementById('pump-free-intrusion').checked;
+  try {
+    const result = await api('/api/pump-act/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        childBirthDate, asOfDate, totalEmployeeCountAllWorksites,
+        isCompletelyRelievedOfDuty, coincidesWithAlreadyPaidBreak,
+        isBathroom, isShieldedFromView, isFreeFromIntrusion,
+      }),
+    });
+    view.textContent =
+      `Coverage ends: ${result.coverageEndDate}\n` +
+      `Within coverage period: ${result.withinCoveragePeriod ? 'YES' : 'No'}\n` +
+      `May qualify for small-employer exemption (headcount only — still needs an undue-hardship showing): ${result.mayQualifyForSmallEmployerExemption ? 'YES' : 'No'}\n` +
+      `Payment required for this break: ${result.paymentRequired ? 'YES' : 'No'}\n` +
+      `Space is compliant: ${result.compliantSpace ? 'YES' : 'No'}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('bw-payment-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('bw-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('bw-view');
+  const paymentType = document.getElementById('bw-payment-type').value;
+  const hasValidTinOnFile = document.getElementById('bw-has-tin').checked;
+  const awaitingTinCertificateDate = document.getElementById('bw-tin-cert-date').value || null;
+  const paymentDate = document.getElementById('bw-payment-date').value;
+  const grossPaymentDollars = Number(document.getElementById('bw-gross').value) || 0;
+  try {
+    const result = await api('/api/backup-withholding/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paymentType, hasValidTinOnFile, awaitingTinCertificateDate, paymentDate, grossPaymentDollars }),
+    });
+    view.textContent =
+      `Within awaiting-TIN grace period: ${result.withinAwaitingTinGracePeriod ? 'YES' : 'No'}\n` +
+      `Backup withholding required: ${result.backupWithholdingRequired ? 'YES' : 'No'}\n` +
+      `Backup withholding amount (24%): ${fmtCents(result.backupWithholdingAmount)}\n` +
+      `Net payment: ${fmtCents(result.netPayment)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('pwfa-request-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('pwfa-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('pwfa-view');
+  const employeeCount = Number(document.getElementById('pwfa-employee-count').value) || 0;
+  const requestDate = document.getElementById('pwfa-request-date').value;
+  const accommodation = document.getElementById('pwfa-accommodation').value;
+  try {
+    const result = await api('/api/pwfa/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCount, requestDate, accommodation }),
+    });
+    view.textContent =
+      `Employer covered (15+): ${result.employerCovered ? 'YES' : 'No'}\n` +
+      `Law in effect on this date: ${result.lawInEffect ? 'YES' : 'No'}\n` +
+      `Predictable assessment (always reasonable): ${result.isPredictableAssessment ? 'YES' : 'No'}\n` +
+      `Medical documentation may be required: ${result.medicalDocumentationRequired ? 'YES' : 'No'}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('cs-as-of-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('cs-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('cs-view');
+  const employeeCount = Number(document.getElementById('cs-employee-count').value) || 0;
+  const hasQualifiedRetirementPlan = document.getElementById('cs-has-plan').checked;
+  const asOfDate = document.getElementById('cs-as-of-date').value;
+  const fullYearsEnrolled = Number(document.getElementById('cs-years-enrolled').value) || 0;
+  const eligibleEmployeeCount = Number(document.getElementById('cs-eligible-count').value) || 0;
+  const noncomplianceContinues = document.getElementById('cs-continues').checked;
+  try {
+    const result = await api('/api/calsavers/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCount, hasQualifiedRetirementPlan, asOfDate, fullYearsEnrolled, eligibleEmployeeCount, noncomplianceContinues }),
+    });
+    view.textContent =
+      `CalSavers mandatory: ${result.mandatory ? 'YES' : 'No'}\n` +
+      `Default contribution rate at ${fullYearsEnrolled} year(s) enrolled: ${(result.defaultContributionRate * 100).toFixed(0)}%\n` +
+      `Penalty exposure: ${fmtCents(result.penaltyExposure)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('userra-completion-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('userra-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('userra-view');
+  const serviceDurationDays = Number(document.getElementById('userra-service-days').value) || 0;
+  const cumulativeServiceYearsExcludingExceptions = Number(document.getElementById('userra-cumulative-years').value) || 0;
+  const serviceCompletionDate = document.getElementById('userra-completion-date').value;
+  const fullMonthlyPremiumDollars = Number(document.getElementById('userra-premium').value) || 0;
+  try {
+    const result = await api('/api/userra/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ serviceDurationDays, cumulativeServiceYearsExcludingExceptions, serviceCompletionDate, fullMonthlyPremiumDollars }),
+    });
+    view.textContent =
+      `Reemployment tier: ${result.tier}\n` +
+      `Application deadline: ${result.applicationDeadlineDays} day(s) after release (0 = report at next scheduled work period)\n` +
+      `Within 5-year cumulative service limit: ${result.withinCumulativeServiceLimit ? 'YES' : 'No'}\n` +
+      `Disability-convalescence report deadline: ${result.disabilityReportDeadline}\n` +
+      `Health continuation election required: ${result.healthContinuationElectionRequired ? 'YES' : 'No (coverage continues automatically)'}\n` +
+      `Max health continuation premium (102%): ${fmtCents(result.maxHealthContinuationPremium)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('cws-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('cws-view');
+  const grossWagesDollars = document.getElementById('cws-gross').value === '' ? undefined : Number(document.getElementById('cws-gross').value);
+  const deductionsDollars = document.getElementById('cws-deductions').value === '' ? undefined : Number(document.getElementById('cws-deductions').value);
+  const netWagesDollars = document.getElementById('cws-net').value === '' ? undefined : Number(document.getElementById('cws-net').value);
+  const isExemptSalaried = document.getElementById('cws-exempt').checked;
+  const hoursVal = document.getElementById('cws-hours').value;
+  const totalHoursWorked = hoursVal === '' ? null : Number(hoursVal);
+  const rateVal = document.getElementById('cws-rate').value;
+  const hourlyRateLines = rateVal === '' || totalHoursWorked === null ? [] : [{ hourlyRateCents: Math.round(Number(rateVal) * 100), hoursAtThisRate: totalHoursWorked }];
+  const payPeriodStart = document.getElementById('cws-period-start').value || undefined;
+  const payPeriodEnd = document.getElementById('cws-period-end').value || undefined;
+  const employeeName = document.getElementById('cws-name').value || undefined;
+  const lastFourSsn = document.getElementById('cws-ssn4').value || undefined;
+  const employerLegalName = document.getElementById('cws-employer-name').value || undefined;
+  const employerAddress = document.getElementById('cws-employer-address').value || undefined;
+  const payPeriodsWithViolations = Number(document.getElementById('cws-violation-periods').value) || 0;
+  try {
+    const result = await api('/api/ca-wage-statement/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        grossWagesDollars, deductionsDollars, netWagesDollars, isExemptSalaried,
+        totalHoursWorked, isPieceRateWork: false, pieceRateUnitsEarned: null,
+        payPeriodStart, payPeriodEnd, employeeName, lastFourSsn,
+        employerLegalName, employerAddress, hourlyRateLines, payPeriodsWithViolations,
+      }),
+    });
+    view.textContent =
+      (result.complianceIssues.length === 0 ? 'Statement is complete.' : 'Compliance issues:\n' + result.complianceIssues.map((i) => '- ' + i).join('\n')) +
+      `\nPenalty exposure: ${fmtCents(result.penaltyExposure)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('ilsc-notice-date').value = new Date().toISOString().slice(0, 10);
+document.getElementById('ilsc-as-of-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('ilsc-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('ilsc-view');
+  const employeeCount = Number(document.getElementById('ilsc-employee-count').value) || 0;
+  const yearsInBusiness = Number(document.getElementById('ilsc-years-business').value) || 0;
+  const hasQualifiedRetirementPlan = document.getElementById('ilsc-has-plan').checked;
+  const eligibleEmployeeCount = Number(document.getElementById('ilsc-eligible-count').value) || 0;
+  const noncompliantCalendarYears = Number(document.getElementById('ilsc-years-noncompliant').value) || 0;
+  const noticeIssueDate = document.getElementById('ilsc-notice-date').value;
+  const asOfDate = document.getElementById('ilsc-as-of-date').value;
+  try {
+    const result = await api('/api/il-secure-choice/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCount, yearsInBusiness, hasQualifiedRetirementPlan, eligibleEmployeeCount, noncompliantCalendarYears, noticeIssueDate, asOfDate }),
+    });
+    view.textContent =
+      `Secure Choice mandatory: ${result.mandatory ? 'YES' : 'No'}\n` +
+      `Penalty exposure: ${fmtCents(result.penaltyExposure)}\n` +
+      `Cure deadline (120 days after notice): ${result.cureDeadline}\n` +
+      `Within cure period: ${result.withinCurePeriod ? 'YES' : 'No'}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('ors-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('ors-view');
+  const employeeCount = Number(document.getElementById('ors-employee-count').value) || 0;
+  const hasQualifiedRetirementPlan = document.getElementById('ors-has-plan').checked;
+  const fullYearsEnrolled = Number(document.getElementById('ors-years-enrolled').value) || 0;
+  const affectedEmployeeCount = Number(document.getElementById('ors-affected-count').value) || 0;
+  try {
+    const result = await api('/api/oregon-saves/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCount, hasQualifiedRetirementPlan, fullYearsEnrolled, affectedEmployeeCount }),
+    });
+    view.textContent =
+      `OregonSaves mandatory: ${result.mandatory ? 'YES' : 'No'}\n` +
+      `Contribution rate: ${(result.contributionRate * 100).toFixed(0)}%\n` +
+      `Penalty exposure (capped at $5,000/year): ${fmtCents(result.penaltyExposure)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('tc-check-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('tc-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('tc-view');
+  const checkDate = document.getElementById('tc-check-date').value;
+  const state = document.getElementById('tc-state').value.toUpperCase();
+  const hoursWorked = Number(document.getElementById('tc-hours').value) || 0;
+  const tipsReceivedDollars = Number(document.getElementById('tc-tips').value) || 0;
+  const isManagerOrSupervisor = document.getElementById('tc-manager').checked;
+  const customarilyReceivesTips = document.getElementById('tc-customarily-tipped').checked;
+  const employerTakesTipCredit = document.getElementById('tc-credit-taken').checked;
+  try {
+    const result = await api('/api/tip-credit/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ checkDate, state, hoursWorked, tipsReceivedDollars, isManagerOrSupervisor, customarilyReceivesTips, employerTakesTipCredit }),
+    });
+    view.textContent =
+      `Binding jurisdiction allows tip credit: ${result.stateAnswer.tipCreditAllowed ? 'YES' : 'NO'}\n` +
+      `Cash floor: ${fmtCents(result.stateAnswer.cashFloorCentsPerHour)}/hr | Standard floor: ${fmtCents(result.stateAnswer.standardFloorCentsPerHour)}/hr\n` +
+      `Max tip credit: ${fmtCents(result.stateAnswer.maxTipCreditCentsPerHour)}/hr\n` +
+      `Tip credit shortfall owed: ${fmtCents(result.shortfall)}\n` +
+      `Eligible for tip pool: ${result.tipPoolEligible ? 'YES' : 'NO'}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('cpdr-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('cpdr-view');
+  const payrollEmployeeCount = Number(document.getElementById('cpdr-payroll-count').value) || 0;
+  const laborContractorEmployeeCount = Number(document.getElementById('cpdr-contractor-count').value) || 0;
+  const annualEarningsDollars = Number(document.getElementById('cpdr-earnings').value) || 0;
+  const reportingYear = Number(document.getElementById('cpdr-reporting-year').value) || 0;
+  const penaltyEmployeeCount = Number(document.getElementById('cpdr-penalty-count').value) || 0;
+  const isSubsequentFailure = document.getElementById('cpdr-subsequent').checked;
+  try {
+    const result = await api('/api/ca-pay-data-report/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payrollEmployeeCount, laborContractorEmployeeCount, annualEarningsDollars, reportingYear, penaltyEmployeeCount, isSubsequentFailure }),
+    });
+    view.textContent =
+      `Payroll employee report required: ${result.requirement.payrollReportRequired ? 'YES' : 'No'}\n` +
+      `Labor contractor employee report required: ${result.requirement.laborContractorReportRequired ? 'YES' : 'No'}\n` +
+      `Pay band: ${result.payBand} of 12\n` +
+      `Filing deadline: ${result.filingDeadline}\n` +
+      `Penalty exposure (up to): ${fmtCents(result.penaltyExposure)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('mw-planned-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('mw-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('mw-view');
+  const state = document.getElementById('mw-state').value;
+  const employerHeadcount = Number(document.getElementById('mw-employer-headcount').value) || 0;
+  const employeesAffected = Number(document.getElementById('mw-employees-affected').value) || 0;
+  const activeWorkforceAtSite = Number(document.getElementById('mw-active-workforce').value) || 0;
+  const relocationDistanceMiles = Number(document.getElementById('mw-relocation-miles').value) || 0;
+  const plannedActionDate = document.getElementById('mw-planned-date').value;
+  const noticeServedDate = document.getElementById('mw-notice-date').value;
+  const fullYearsOfService = Number(document.getElementById('mw-years-service').value) || 0;
+  const weeklyPayDollars = Number(document.getElementById('mw-weekly-pay').value) || 0;
+  const noticeWasAdequate = document.getElementById('mw-notice-adequate').checked;
+  try {
+    const result = await api('/api/mini-warn/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ state, employerHeadcount, employeesAffected, activeWorkforceAtSite, relocationDistanceMiles, plannedActionDate, noticeServedDate, fullYearsOfService, weeklyPayDollars, noticeWasAdequate }),
+    });
+    const lines = [`Notice period: ${result.noticePeriodDays} days`, `Notice deadline: ${result.noticeDeadline}`];
+    if (state === 'NY') {
+      lines.push(`Covered employer: ${result.coveredEmployer ? 'YES' : 'No'}`);
+      lines.push(`Plant closing: ${result.plantClosing ? 'YES' : 'No'}`);
+      lines.push(`Mass layoff: ${result.massLayoff ? 'YES' : 'No'}`);
+    } else if (state === 'NJ') {
+      lines.push(`Covered employer (nationwide count): ${result.coveredEmployer ? 'YES' : 'No'}`);
+      lines.push(`Triggered: ${result.triggered ? 'YES' : 'No'}`);
+      lines.push(`Severance owed: ${fmtCents(result.severanceOwed)}`);
+    } else if (state === 'CA') {
+      lines.push(`Covered employer: ${result.coveredEmployer ? 'YES' : 'No'}`);
+      lines.push(`Triggered (headcount): ${result.triggered ? 'YES' : 'No'}`);
+      lines.push(`Triggered (relocation): ${result.relocationTriggered ? 'YES' : 'No'}`);
+    }
+    view.textContent = lines.join('\n');
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('ofww-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('ofww-view');
+  const employeeCountWorldwide = Number(document.getElementById('ofww-employee-count').value) || 0;
+  const isNonExemptHourlyEmployee = document.getElementById('ofww-nonexempt').checked;
+  const regularRateDollars = Number(document.getElementById('ofww-rate').value) || 0;
+  const changeMinutes = Number(document.getElementById('ofww-change-minutes').value) || 0;
+  const scheduledHoursNotWorked = Number(document.getElementById('ofww-hours-not-worked').value) || 0;
+  const hoursBetweenShifts = Number(document.getElementById('ofww-hours-between-shifts').value) || 0;
+  const hoursWorkedDuringRestPeriod = Number(document.getElementById('ofww-hours-in-rest').value) || 0;
+  try {
+    const result = await api('/api/or-fair-work-week/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCountWorldwide, isNonExemptHourlyEmployee, changeMinutes, regularRateDollars, scheduledHoursNotWorked, hoursBetweenShifts, hoursWorkedDuringRestPeriod }),
+    });
+    view.textContent =
+      `Covered employer: ${result.coveredEmployer ? 'YES' : 'No'}\n` +
+      `Change is de minimis (<=30 min): ${result.deMinimis ? 'YES' : 'No'}\n` +
+      `Additive-change pay (flat 1 hour): ${fmtCents(result.additiveChangePay)}\n` +
+      `Subtractive-change pay (0.5x per hour not worked): ${fmtCents(result.subtractiveChangePay)}\n` +
+      `Rest period violation: ${result.restPeriodViolation ? 'YES' : 'No'}\n` +
+      `Rest period premium pay (1.5x): ${fmtCents(result.restPeriodPremiumPay)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('nypfl-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('nypfl-view');
+  const hoursPerWeek = Number(document.getElementById('nypfl-hours').value) || 0;
+  const consecutiveWeeksEmployed = Number(document.getElementById('nypfl-weeks').value) || 0;
+  const totalDaysWorked = Number(document.getElementById('nypfl-days').value) || 0;
+  const averageWeeklyWageDollars = Number(document.getElementById('nypfl-avg-wage').value) || 0;
+  try {
+    const result = await api('/api/ny-pfl/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hoursPerWeek, consecutiveWeeksEmployed, totalDaysWorked, averageWeeklyWageDollars }),
+    });
+    view.textContent =
+      `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
+      `Weekly benefit (67%, capped): ${fmtCents(result.weeklyBenefit)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('njfli-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('njfli-view');
+  const baseWeeksWorked = Number(document.getElementById('njfli-base-weeks').value) || 0;
+  const weeklyEarningsDollars = Number(document.getElementById('njfli-weekly-earnings').value) || 0;
+  const baseYearEarningsDollars = Number(document.getElementById('njfli-annual-earnings').value) || 0;
+  const averageWeeklyWageDollars = Number(document.getElementById('njfli-avg-wage').value) || 0;
+  const continuousWeeksAlreadyUsed = Number(document.getElementById('njfli-cont-used').value) || 0;
+  const intermittentDaysAlreadyUsed = Number(document.getElementById('njfli-intermit-used').value) || 0;
+  try {
+    const result = await api('/api/nj-fli/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ baseWeeksWorked, weeklyEarningsDollars, baseYearEarningsDollars, averageWeeklyWageDollars, continuousWeeksAlreadyUsed, intermittentDaysAlreadyUsed }),
+    });
+    view.textContent =
+      `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
+      `Weekly benefit (85%, capped): ${fmtCents(result.weeklyBenefit)}\n` +
+      `Remaining continuous weeks: ${result.remainingContinuousWeeks}\n` +
+      `Remaining intermittent days: ${result.remainingIntermittentDays}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('mapfml-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('mapfml-view');
+  const averageWeeklyWageDollars = Number(document.getElementById('mapfml-avg-wage').value) || 0;
+  const basePeriodEarningsDollars = Number(document.getElementById('mapfml-base-earnings').value) || 0;
+  try {
+    const result = await api('/api/ma-pfml/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ averageWeeklyWageDollars, basePeriodEarningsDollars }),
+    });
+    view.textContent =
+      `Weekly benefit (tiered 80%/50%, capped): ${fmtCents(result.weeklyBenefit)}\n` +
+      `Eligible: ${result.eligible ? 'YES' : 'No'}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('cfra-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('cfra-view');
+  const monthsEmployed = Number(document.getElementById('cfra-months').value) || 0;
+  const hoursOfServicePastTwelveMonths = Number(document.getElementById('cfra-hours').value) || 0;
+  const employeeCount = Number(document.getElementById('cfra-employee-count').value) || 0;
+  const regularlyScheduledWeeklyHours = Number(document.getElementById('cfra-weekly-hours').value) || 0;
+  const hoursUsedThisPeriod = Number(document.getElementById('cfra-hours-used').value) || 0;
+  const designatedPersonsUsedThisPeriod = Number(document.getElementById('cfra-designated-used').value) || 0;
+  try {
+    const result = await api('/api/cfra/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ monthsEmployed, hoursOfServicePastTwelveMonths, employeeCount, regularlyScheduledWeeklyHours, hoursUsedThisPeriod, designatedPersonsUsedThisPeriod }),
+    });
+    view.textContent =
+      `Eligible: ${result.eligibility.eligible ? 'YES' : 'No'}` +
+      (result.eligibility.reasons.length > 0 ? '\n' + result.eligibility.reasons.map((r) => '- ' + r).join('\n') : '') +
+      `\nTotal entitlement hours: ${result.totalEntitlementHours}\n` +
+      `Remaining hours: ${result.remainingHours}\n` +
+      `Remaining designated persons: ${result.remainingDesignatedPersons}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('wapfml-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('wapfml-view');
+  const hoursWorkedInQualifyingPeriod = Number(document.getElementById('wapfml-hours').value) || 0;
+  const averageWeeklyWageDollars = Number(document.getElementById('wapfml-avg-wage').value) || 0;
+  try {
+    const result = await api('/api/wa-pfml/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hoursWorkedInQualifyingPeriod, averageWeeklyWageDollars }),
+    });
+    view.textContent =
+      `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
+      `Weekly benefit (90%/50% tiered, floor/capped): ${fmtCents(result.weeklyBenefit)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('cofamli-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('cofamli-view');
+  const averageWeeklyWageDollars = Number(document.getElementById('cofamli-avg-wage').value) || 0;
+  const basePeriodEarningsDollars = Number(document.getElementById('cofamli-base-earnings').value) || 0;
+  const hasPregnancyOrChildbirthComplications = document.getElementById('cofamli-complications').checked;
+  try {
+    const result = await api('/api/co-famli/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ averageWeeklyWageDollars, basePeriodEarningsDollars, hasPregnancyOrChildbirthComplications }),
+    });
+    view.textContent =
+      `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
+      `Weekly benefit (90%/50% tiered, capped): ${fmtCents(result.weeklyBenefit)}\n` +
+      `Max leave weeks available: ${result.maxWeeksAvailable}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('orpl-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('orpl-view');
+  const averageWeeklyWageDollars = Number(document.getElementById('orpl-avg-wage').value) || 0;
+  const baseYearEarningsDollars = Number(document.getElementById('orpl-base-earnings').value) || 0;
+  const hasPregnancyOrChildbirthRelatedCondition = document.getElementById('orpl-pregnancy').checked;
+  try {
+    const result = await api('/api/or-paid-leave/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ averageWeeklyWageDollars, baseYearEarningsDollars, hasPregnancyOrChildbirthRelatedCondition }),
+    });
+    view.textContent =
+      `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
+      `Weekly benefit (100%/50% tiered, floor/capped): ${fmtCents(result.weeklyBenefit)}\n` +
+      `Max leave weeks available: ${result.maxWeeksAvailable}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('ctpl-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('ctpl-view');
+  const averageWeeklyWageDollars = Number(document.getElementById('ctpl-avg-wage').value) || 0;
+  const highestQuarterEarningsDollars = Number(document.getElementById('ctpl-quarter-earnings').value) || 0;
+  const isCurrentlyEmployed = document.getElementById('ctpl-currently-employed').checked;
+  const weeksSinceSeparation = Number(document.getElementById('ctpl-weeks-since-separation').value) || 0;
+  try {
+    const result = await api('/api/ct-paid-leave/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ averageWeeklyWageDollars, highestQuarterEarningsDollars, isCurrentlyEmployed, weeksSinceSeparation }),
+    });
+    view.textContent =
+      `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
+      `Weekly benefit (95%/60% tiered, capped): ${fmtCents(result.weeklyBenefit)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('mepfml-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('mepfml-view');
+  const averageWeeklyWageDollars = Number(document.getElementById('mepfml-avg-wage').value) || 0;
+  const basePeriodEarningsDollars = Number(document.getElementById('mepfml-base-earnings').value) || 0;
+  try {
+    const result = await api('/api/me-pfml/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ averageWeeklyWageDollars, basePeriodEarningsDollars }),
+    });
+    view.textContent =
+      `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
+      `Weekly benefit (90%/66% tiered, floored, capped): ${fmtCents(result.weeklyBenefit)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('nc-asof').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('nc-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('nc-view');
+  const state = document.getElementById('nc-state').value;
+  const annualCompensationDollars = Number(document.getElementById('nc-comp').value) || 0;
+  const isIndependentContractor = document.getElementById('nc-contractor').checked;
+  const asOfDate = document.getElementById('nc-asof').value;
+  const termMonths = Number(document.getElementById('nc-term').value) || 0;
+  const advanceNoticeDays = Number(document.getElementById('nc-notice').value) || 0;
+  try {
+    const result = await api('/api/non-compete/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ state, annualCompensationDollars, isIndependentContractor, asOfDate, termMonths, advanceNoticeDays }),
+    });
+    if (result.kind === 'total_ban') {
+      view.textContent = `Enforceable: ${result.enforceable ? 'YES' : 'NO (void — total ban state)'}`;
+    } else if (result.kind === 'threshold') {
+      const lines = [`Non-compete enforceable: ${result.nonCompeteEnforceable ? 'YES' : 'NO'}`];
+      if ('nonSolicitEnforceable' in result) {
+        lines.push(`Non-solicit enforceable: ${result.nonSolicitEnforceable ? 'YES' : 'NO'}`);
+      }
+      if ('nonSolicitThreshold' in result) {
+        lines.push(`Non-solicit threshold: ${fmtCents(result.nonSolicitThreshold)}`);
+      }
+      view.textContent = lines.join('\n');
+    } else {
+      view.textContent = 'Not modeled for this state.';
+    }
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('cgn-first-coverage').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('cgn-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('cgn-view');
+  const firstCoverageDate = document.getElementById('cgn-first-coverage').value;
+  const electionNoticeDeadlineIfApplicable = document.getElementById('cgn-election-deadline').value || null;
+  const daysLate = Number(document.getElementById('cgn-days-late').value) || 0;
+  const affectedBeneficiaryCount = Number(document.getElementById('cgn-beneficiary-count').value) || 0;
+  const moreThanOneFamilyMemberAffected = document.getElementById('cgn-multi-family').checked;
+  try {
+    const result = await api('/api/cobra/general-notice-calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstCoverageDate, electionNoticeDeadlineIfApplicable, daysLate, affectedBeneficiaryCount, moreThanOneFamilyMemberAffected }),
+    });
+    view.textContent =
+      `Standard 90-day deadline: ${result.standardDeadline}\n` +
+      `Applicable deadline (earlier of the two): ${result.applicableDeadline}\n` +
+      `ERISA §502(c)(1) penalty exposure: ${fmtCents(result.erisaPenaltyExposure)}\n` +
+      `IRS excise tax exposure: ${fmtCents(result.exciseTaxExposure)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('fca-notice-date').value = new Date().toISOString().slice(0, 10);
+document.getElementById('fca-mailed-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('fca-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('fca-view');
+  const employeeCount = Number(document.getElementById('fca-employee-count').value) || 0;
+  const conditionalOfferMade = document.getElementById('fca-conditional-offer').checked;
+  const preliminaryNoticeDate = document.getElementById('fca-notice-date').value;
+  const mailedDate = document.getElementById('fca-mailed-date').value;
+  const addressType = document.getElementById('fca-address-type').value;
+  try {
+    const result = await api('/api/fair-chance-act/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCount, conditionalOfferMade, preliminaryNoticeDate, mailedDate, addressType }),
+    });
+    view.textContent =
+      `Covered employer (5+): ${result.coveredEmployer ? 'YES' : 'No'}\n` +
+      `Criminal history inquiry permitted: ${result.inquiryPermitted ? 'YES' : 'No'}\n` +
+      `Response deadline (5 business days): ${result.responseDeadline}\n` +
+      `Extended response deadline (if disputed): ${result.extendedResponseDeadline}\n` +
+      `Deemed-received date for mailed notice: ${result.deemedReceivedDate}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('shb-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('shb-view');
+  const employeeCount = Number(document.getElementById('shb-employee-count').value) || 0;
+  const isFirstViolation = document.getElementById('shb-first-violation').checked;
+  const allJobPostingsNowUpdated = document.getElementById('shb-postings-updated').checked;
+  const consideredPenaltyDollars = Number(document.getElementById('shb-considered-penalty').value) || 0;
+  try {
+    const result = await api('/api/salary-history-ban/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCount, isFirstViolation, allJobPostingsNowUpdated, consideredPenaltyDollars }),
+    });
+    view.textContent =
+      `Job posting pay scale required (15+ employees): ${result.jobPostingPayScaleRequired ? 'YES' : 'No'}\n` +
+      `Penalty owed: ${fmtCents(result.penaltyOwed)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('nypt-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('nypt-view');
+  const employeeCount = Number(document.getElementById('nypt-employee-count').value) || 0;
+  const violationNumber = Number(document.getElementById('nypt-violation-number').value) || 0;
+  try {
+    const result = await api('/api/ny-pay-transparency/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCount, violationNumber }),
+    });
+    view.textContent =
+      `Disclosure required (4+ employees): ${result.required ? 'YES' : 'No'}\n` +
+      `Penalty for violation #${violationNumber}: ${fmtCents(result.penalty)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('coepewa-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('coepewa-view');
+  const employerPhysicallyLocatedInColorado = document.getElementById('coepewa-physically-located').checked;
+  const coloradoEmployeeCount = Number(document.getElementById('coepewa-employee-count').value) || 0;
+  const allColoradoEmployeesFullyRemote = document.getElementById('coepewa-fully-remote').checked;
+  const decisionDate = document.getElementById('coepewa-decision-date').value;
+  const dateLearnedOfViolation = document.getElementById('coepewa-learned-date').value;
+  const consideredPerViolationPenalties = document.getElementById('coepewa-penalties').value
+    .split(',')
+    .map((s) => Number(s.trim()) * 100)
+    .filter((n) => !Number.isNaN(n) && n > 0);
+  try {
+    const result = await api('/api/co-epewa/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        employerPhysicallyLocatedInColorado,
+        coloradoEmployeeCount,
+        allColoradoEmployeesFullyRemote,
+        decisionDate,
+        dateLearnedOfViolation,
+        consideredPerViolationPenalties,
+      }),
+    });
+    view.textContent =
+      `Promotional notice scope: ${result.noticeScope}\n` +
+      `Complaint deadline: ${result.complaintDeadline}\n` +
+      `Total penalty (clamped $500-$10,000 per violation): ${fmtCents(result.totalPenalty)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('f1095c-generate-btn').addEventListener('click', async () => {
+  const tbody = document.querySelector('#f1095c-table tbody');
+  const employeeId = document.getElementById('f1095c-employee').value;
+  if (!employeeId) return;
+  const year = Number(document.getElementById('f1095c-year').value) || new Date().getFullYear();
+  const isFullTimeAllYear = document.getElementById('f1095c-fulltime').checked;
+  const safeHarbor = document.getElementById('f1095c-safe-harbor').value;
+  const policy = {
+    offeredMinimumEssentialCoverage: document.getElementById('f1095c-offered-mec').checked,
+    offeredMinimumValue: document.getElementById('f1095c-offered-mv').checked,
+    offeredToSpouse: document.getElementById('f1095c-offered-spouse').checked,
+    offeredToDependents: document.getElementById('f1095c-offered-deps').checked,
+    employeeMonthlyContribution: Math.round(Number(document.getElementById('f1095c-contribution').value) * 100) || 0,
+    qualifyingOfferMonthlyCeiling: Math.round(Number(document.getElementById('f1095c-qualifying-ceiling').value) * 100) || 0,
+    affordabilitySafeHarborUsed: safeHarbor || undefined,
+  };
+  try {
+    const { form1095c } = await api(`/api/employees/${employeeId}/1095c`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ year, isFullTimeAllYear, policy }),
+    });
+    tbody.innerHTML = form1095c.months.map((m) => `
+      <tr><td>${m.month}</td><td>${m.line14}</td><td>${m.line16 ?? '—'}</td></tr>`).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="3" class="muted">Error: ${err.message}</td></tr>`;
+  }
+});
+
 const DEFAULT_FULL_TIME_HOURS = { weekly: 40, biweekly: 80, semimonthly: 86.67, monthly: 173.33 };
 
 async function loadEmployees() {
@@ -507,14 +2318,37 @@ async function loadEmployees() {
   const tbody = document.querySelector('#employees-table tbody');
   tbody.innerHTML = list.map((e) => `
     <tr>
-      <td>${e.firstName} ${e.lastName}</td>
+      <td>${e.firstName} ${e.lastName}${e.jobTitle ? ` <span class="muted">(${e.jobTitle}${e.department ? ' · ' + e.department : ''})</span>` : ''}</td>
       <td>${e.payType.kind === 'salary' ? fmtCents(e.payType.annualSalary) + '/yr' : fmtCents(e.payType.hourlyRate) + '/hr'}</td>
       <td>${e.residenceState.code}</td>
       <td>${fmtCents(e.ytd.socialSecurity || 0)}</td>
+      <td><button class="secondary emp-edit-btn" data-emp="${e.id}">Edit</button></td>
     </tr>`).join('');
+  tbody.querySelectorAll('.emp-edit-btn').forEach((btn) => btn.addEventListener('click', async () => {
+    const employeeId = btn.dataset.emp;
+    const current = list.find((e) => e.id === employeeId);
+    const jobTitle = prompt('Job title (blank to clear)', current.jobTitle ?? '');
+    if (jobTitle === null) return;
+    const department = prompt('Department (blank to clear)', current.department ?? '');
+    if (department === null) return;
+    const managerChoices = list.filter((e) => e.id !== employeeId).map((e) => `${e.id} = ${e.firstName} ${e.lastName}`).join('\n');
+    const managerId = prompt(`Manager employee id (blank to clear)\n\nAvailable:\n${managerChoices}`, current.managerId ?? '');
+    if (managerId === null) return;
+    const workersCompClassCode = prompt('Workers\' comp class code (blank to clear)', current.workersCompClassCode ?? '');
+    if (workersCompClassCode === null) return;
+    try {
+      await api(`/api/employees/${employeeId}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobTitle: jobTitle || null, department: department || null, managerId: managerId || null, workersCompClassCode: workersCompClassCode || null }),
+      });
+      await Promise.all([loadEmployees(), loadOrgChart(), loadAuditLog(), loadComplianceDashboard()]);
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  }));
 
   const employeeOptions = list.map((e) => `<option value="${e.id}">${e.firstName} ${e.lastName}</option>`).join('');
-  for (const id of ['w2-employee', 'clock-employee', 'pto-employee', 'term-employee', 'benefit-employee', 'i9-employee', 'garn-employee', 'dd-employee']) {
+  for (const id of ['w2-employee', 'clock-employee', 'pto-employee', 'term-employee', 'benefit-employee', 'i9-employee', 'everify-employee', 'garn-employee', 'dd-employee', 'f1095c-employee']) {
     document.getElementById(id).innerHTML = employeeOptions;
   }
 
@@ -591,6 +2425,11 @@ async function loadRuns() {
       view.textContent = text;
     });
   });
+
+  document.getElementById('deposit-pay-run').innerHTML = payRuns.length === 0
+    ? '<option value="">(no runs yet)</option>'
+    : payRuns.map((r) => `<option value="${r.id}">${r.checkDate} (${r.status})</option>`).join('');
+  document.getElementById('gl-pay-run').innerHTML = document.getElementById('deposit-pay-run').innerHTML;
 }
 
 async function loadPtoPolicies() {
@@ -665,12 +2504,14 @@ async function handleCandidateAction(candidateId, action) {
       view.textContent = JSON.stringify(candidate, null, 2);
     } else if (action === '__hire__') {
       const federalW4 = { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 };
+      const ssn = prompt('SSN (optional now, but required before a PRWORA new-hire report can be filed for this person)') || undefined;
+      const mailingAddress = prompt('Mailing address (same requirement as SSN)') || undefined;
       const { employee, candidate } = await api(`/api/candidates/${candidateId}/hire`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ companyId: company.id, federalW4, residenceState: { code: company.homeState } }),
+        body: JSON.stringify({ companyId: company.id, federalW4, residenceState: { code: company.homeState }, ssn, mailingAddress }),
       });
       view.textContent = `Hired as employee ${employee.id}\n` + JSON.stringify(candidate, null, 2);
-      await loadEmployees();
+      await Promise.all([loadEmployees(), loadNewHireReporting()]);
     } else {
       const { candidate } = await api(`/api/candidates/${candidateId}/advance`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: action }),
@@ -688,9 +2529,29 @@ async function refreshAll(preferredCompanyId) {
   await Promise.all([
     loadEmployees(), loadNextPeriod(), loadRuns(), loadReport(), loadAuditLog(),
     loadPtoPolicies(), loadBenefitPlans(), loadJobPostings(), loadCandidates(), loadContractors(),
-    loadStateRegistrations(),
+    loadStateRegistrations(), loadOrgChart(),
   ]);
-  await loadGarnishments();
+  // These read the `employees` array loadEmployees() just populated, so they run after it rather than racing it inside the Promise.all above.
+  await Promise.all([loadGarnishments(), loadNewHireReporting(), loadComplianceDashboard(), loadPtoRequests()]);
+}
+
+function renderOrgNode(node) {
+  const title = [node.jobTitle, node.department].filter(Boolean).join(' · ');
+  const children = node.reports.length > 0 ? `<ul>${node.reports.map((r) => `<li>${renderOrgNode(r)}</li>`).join('')}</ul>` : '';
+  return `<span class="org-node-name">${node.name}</span>${title ? ` <span class="org-node-title">(${title})</span>` : ''}${children}`;
+}
+
+async function loadOrgChart() {
+  const { chart } = await api(`/api/companies/${company.id}/org-chart`);
+  const view = document.getElementById('org-chart-view');
+  if (chart.roots.length === 0) {
+    view.innerHTML = '<span class="muted">No active employees.</span>';
+  } else {
+    view.innerHTML = `<ul class="org-tree">${chart.roots.map((r) => `<li>${renderOrgNode(r)}</li>`).join('')}</ul>`;
+  }
+  if (chart.employeeIdsInCycles.length > 0) {
+    view.innerHTML += `<p class="muted">Excluded from the chart — a manager-reporting cycle was detected among these employee ids: ${chart.employeeIdsInCycles.join(', ')}. Fix the managerId fields on these records.</p>`;
+  }
 }
 
 async function loadStateRegistrations() {
@@ -756,13 +2617,19 @@ document.getElementById('garn-add-btn').addEventListener('click', async () => {
   await loadGarnishments();
 });
 
+function allocationLabel(allocation) {
+  if (allocation.kind === 'remainder') return 'Remainder';
+  if (allocation.kind === 'percent') return `${allocation.percentOfNet}% of net`;
+  return fmtCents(allocation.amount) + ' flat';
+}
+
 async function loadDirectDepositAccounts() {
   const employeeId = document.getElementById('dd-employee').value;
   if (!employeeId) return;
   const { accounts } = await api(`/api/employees/${employeeId}/direct-deposit-accounts`);
   const tbody = document.querySelector('#dd-table tbody');
   if (accounts.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="muted">No accounts on file.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="muted">No accounts on file.</td></tr>';
     return;
   }
   const rows = await Promise.all(accounts.map(async (a) => {
@@ -778,6 +2645,7 @@ async function loadDirectDepositAccounts() {
         <td>${a.routingNumber}</td>
         <td>${a.accountNumber}</td>
         <td>${a.accountType}</td>
+        <td>${allocationLabel(a.allocation)}${a.priority !== undefined && a.priority !== null ? ` (priority ${a.priority})` : ''}</td>
         <td>${statusText}</td>
         <td>
           <button class="secondary dd-prenote" data-account="${a.id}">Send prenote</button>
@@ -839,17 +2707,36 @@ async function loadDirectDepositAccounts() {
 }
 document.getElementById('dd-employee').addEventListener('change', loadDirectDepositAccounts);
 document.getElementById('dd-refresh-btn').addEventListener('click', loadDirectDepositAccounts);
+document.getElementById('dd-allocation-kind').addEventListener('change', (ev) => {
+  const kind = ev.target.value;
+  document.getElementById('dd-allocation-value').hidden = kind === 'remainder';
+  document.getElementById('dd-priority').hidden = kind === 'remainder';
+});
+
 document.getElementById('dd-add-btn').addEventListener('click', async () => {
   const employeeId = document.getElementById('dd-employee').value;
   if (!employeeId) return;
   const routingNumber = document.getElementById('dd-routing').value;
   const accountNumber = document.getElementById('dd-account').value;
   const accountType = document.getElementById('dd-account-type').value;
-  await api(`/api/employees/${employeeId}/direct-deposit-accounts`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ routingNumber, accountNumber, accountType, allocation: { kind: 'remainder' } }),
-  });
-  await loadDirectDepositAccounts();
+  const kind = document.getElementById('dd-allocation-kind').value;
+  const rawValue = Number(document.getElementById('dd-allocation-value').value) || 0;
+  const priorityInput = document.getElementById('dd-priority').value;
+  const allocation = kind === 'remainder'
+    ? { kind: 'remainder' }
+    : kind === 'percent'
+      ? { kind: 'percent', percentOfNet: rawValue }
+      : { kind: 'flatAmount', amount: Math.round(rawValue * 100) };
+  const body = { routingNumber, accountNumber, accountType, allocation };
+  if (kind !== 'remainder' && priorityInput) body.priority = Number(priorityInput);
+  try {
+    await api(`/api/employees/${employeeId}/direct-deposit-accounts`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    });
+    await loadDirectDepositAccounts();
+  } catch (err) {
+    document.getElementById('dd-view').textContent = 'Error: ' + err.message;
+  }
 });
 
 document.getElementById('run-btn').addEventListener('click', async () => {
@@ -869,7 +2756,7 @@ document.getElementById('run-btn').addEventListener('click', async () => {
       : '';
     if (payRun.minimumWageIssues.length > 0) console.warn('Minimum wage issues:', payRun.minimumWageIssues);
     status.textContent = `Approved run ${payRun.id} for ${payRun.checkDate} — ${payRun.lines.length} employee(s) paid.${warning}`;
-    await Promise.all([loadEmployees(), loadNextPeriod(), loadRuns(), loadReport(), loadAuditLog()]);
+    await Promise.all([loadEmployees(), loadNextPeriod(), loadRuns(), loadReport(), loadAuditLog(), loadComplianceDashboard()]);
   } catch (err) {
     status.textContent = 'Error: ' + err.message;
     btn.disabled = false;
@@ -883,6 +2770,64 @@ document.getElementById('f941-btn').addEventListener('click', async () => {
   try {
     const { form941 } = await api(`/api/companies/${company.id}/941?year=${year}&quarter=${quarter}`);
     view.textContent = JSON.stringify(form941, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('deposit-schedule-btn').addEventListener('click', async () => {
+  const year = document.getElementById('deposit-year').value;
+  const view = document.getElementById('deposit-schedule-view');
+  try {
+    const result = await api(`/api/companies/${company.id}/deposit-schedule?year=${year}`);
+    view.textContent = result.hasAnyLookbackData
+      ? `${result.schedule.toUpperCase()} schedule depositor (lookback liability: ${fmtCents(result.lookbackPeriodTotalLiability)})`
+      : `${result.schedule.toUpperCase()} schedule depositor (no lookback-period pay run history — new-employer default)`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('deposit-deadline-btn').addEventListener('click', async () => {
+  const payRunId = document.getElementById('deposit-pay-run').value;
+  const view = document.getElementById('deposit-deadline-view');
+  if (!payRunId) return (view.textContent = 'No pay runs yet.');
+  try {
+    const scheduleResult = await api(`/api/companies/${company.id}/deposit-schedule?year=${document.getElementById('deposit-year').value}`);
+    const result = await api(`/api/pay-runs/${payRunId}/deposit-deadline?schedule=${scheduleResult.schedule}`);
+    view.textContent = `Accumulated federal liability: ${fmtCents(result.accumulatedLiability)}\n` +
+      (result.nextDayRuleTriggered ? '$100,000 NEXT-DAY RULE TRIGGERED — ' : '') +
+      `Deposit deadline: ${result.deadline}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('gl-export-btn').addEventListener('click', async () => {
+  const view = document.getElementById('gl-view');
+  const payRunId = document.getElementById('gl-pay-run').value;
+  if (!payRunId) return (view.textContent = 'No pay runs yet.');
+  const mapping = {
+    wagesExpense: document.getElementById('gl-wages-expense').value,
+    employerTaxExpense: document.getElementById('gl-employer-tax-expense').value,
+    federalTaxPayable: document.getElementById('gl-federal-tax-payable').value,
+    stateTaxPayable: document.getElementById('gl-state-tax-payable').value,
+    localTaxPayable: document.getElementById('gl-local-tax-payable').value,
+    netPayPayable: document.getElementById('gl-net-pay-payable').value,
+    garnishmentPayable: document.getElementById('gl-garnishment-payable').value,
+    benefitDeductionPayable: document.getElementById('gl-benefit-payable').value,
+  };
+  try {
+    const res = await fetch(`/api/pay-runs/${payRunId}/gl-journal`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(mapping),
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      const body = JSON.parse(text);
+      view.textContent = 'Error: ' + body.error;
+      return;
+    }
+    view.textContent = text;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
@@ -1013,6 +2958,38 @@ document.getElementById('pto-use-btn').addEventListener('click', async () => {
   }
 });
 
+async function loadPtoRequests() {
+  const { requests } = await api(`/api/companies/${company.id}/pto-requests`);
+  const pending = requests.filter((r) => r.status === 'pending');
+  const tbody = document.querySelector('#pto-requests-table tbody');
+  tbody.innerHTML = pending.length === 0
+    ? '<tr><td colspan="5" class="muted">No pending requests.</td></tr>'
+    : pending.map((r) => `
+      <tr>
+        <td>${employeeNameFor(r.employeeId)}</td>
+        <td>${r.startDate} to ${r.endDate}</td>
+        <td>${r.hoursRequested}</td>
+        <td>${r.status}</td>
+        <td>
+          <button class="secondary pto-req-approve" data-req="${r.id}">Approve</button>
+          <button class="secondary pto-req-deny" data-req="${r.id}">Deny</button>
+        </td>
+      </tr>`).join('');
+
+  tbody.querySelectorAll('.pto-req-approve').forEach((btn) => btn.addEventListener('click', async () => {
+    const result = await api(`/api/pto-requests/${btn.dataset.req}/approve`, { method: 'POST' });
+    if (!result.approved) alert(`Not enough balance — short by ${result.shortfallHours} hours. Request left pending.`);
+    await Promise.all([loadPtoRequests(), loadAuditLog(), loadComplianceDashboard()]);
+  }));
+  tbody.querySelectorAll('.pto-req-deny').forEach((btn) => btn.addEventListener('click', async () => {
+    const reason = prompt('Reason for denial (optional)') || undefined;
+    await api(`/api/pto-requests/${btn.dataset.req}/deny`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason }),
+    });
+    await Promise.all([loadPtoRequests(), loadAuditLog()]);
+  }));
+}
+
 // ----------------------------------------------------------------------
 // Termination
 // ----------------------------------------------------------------------
@@ -1029,8 +3006,32 @@ document.getElementById('term-btn').addEventListener('click', async () => {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ terminationDate, reason, employerPolicyPaysOutPto }),
     });
-    view.textContent = JSON.stringify({ finalPay: result.finalPay, ptoPayoutHours: result.ptoPayoutHours }, null, 2);
-    await Promise.all([loadEmployees(), loadReport(), loadAuditLog()]);
+    view.textContent = JSON.stringify({ finalPay: result.finalPay, ptoPayoutHours: result.ptoPayoutHours, cobra: result.cobra }, null, 2);
+    await Promise.all([loadEmployees(), loadReport(), loadAuditLog(), loadComplianceDashboard()]);
+    if (result.finalPay && result.finalPay.dueDate) document.getElementById('wtp-due-date').value = result.finalPay.dueDate;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('wtp-paid-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('wtp-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('wtp-view');
+  const dueDate = document.getElementById('wtp-due-date').value;
+  const actualPaymentDate = document.getElementById('wtp-paid-date').value;
+  const hourlyRateDollars = Number(document.getElementById('wtp-hourly-rate').value) || 0;
+  const normalDailyHours = Number(document.getElementById('wtp-daily-hours').value) || 8;
+  if (!dueDate || !actualPaymentDate) return (view.textContent = 'Pick both a due date and an actual payment date.');
+  try {
+    const result = await api('/api/waiting-time-penalty/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dueDate, actualPaymentDate, hourlyRateDollars, normalDailyHours }),
+    });
+    view.textContent =
+      `Days late: ${result.daysLate}\n` +
+      `Daily rate: ${fmtCents(result.dailyRate)}\n` +
+      `Penalty amount: ${fmtCents(result.penaltyAmount)}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
@@ -1070,14 +3071,33 @@ document.getElementById('benefit-elect-btn').addEventListener('click', async () 
   if (!planId) return (view.textContent = 'Create a benefit plan first.');
   try {
     const effectiveDate = currentPeriod?.checkDate ?? new Date().toISOString().slice(0, 10);
+    const hasQualifyingLifeEvent = document.getElementById('benefit-qle').checked;
     const result = await api(`/api/employees/${employeeId}/benefit-elections`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ planId, coverageTier, effectiveDate }),
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ planId, coverageTier, effectiveDate, hasQualifyingLifeEvent }),
     });
     view.textContent = JSON.stringify(result.election, null, 2);
-    await Promise.all([loadEmployees(), loadAuditLog()]);
+    await Promise.all([loadEmployees(), loadAuditLog(), loadComplianceDashboard()]);
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
+});
+
+document.getElementById('benefit-roster-btn').addEventListener('click', async () => {
+  const view = document.getElementById('benefit-view');
+  const planId = document.getElementById('benefit-plan').value;
+  if (!planId) return (view.textContent = 'Create a benefit plan first.');
+  const csv = await fetch(`/api/benefit-plans/${planId}/carrier-roster`).then((r) => r.text());
+  view.textContent = csv;
+});
+
+document.getElementById('oe-save-btn').addEventListener('click', async () => {
+  const start = document.getElementById('oe-start').value;
+  const end = document.getElementById('oe-end').value;
+  if (!start || !end) return;
+  const { company: updated } = await api(`/api/companies/${company.id}/open-enrollment-window`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ start, end }),
+  });
+  document.getElementById('oe-current').textContent = `Current window: ${updated.openEnrollmentWindow.start} to ${updated.openEnrollmentWindow.end}`;
 });
 
 // ----------------------------------------------------------------------
@@ -1209,6 +3229,92 @@ document.getElementById('i9-compliance-btn').addEventListener('click', async () 
     view.textContent = 'Error: ' + err.message;
   }
 });
+
+// ----------------------------------------------------------------------
+// E-Verify
+// ----------------------------------------------------------------------
+
+document.getElementById('everify-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('everify-view-btn').addEventListener('click', async () => {
+  const employeeId = document.getElementById('everify-employee').value;
+  const view = document.getElementById('everify-view');
+  try {
+    const result = await api(`/api/employees/${employeeId}/everify`);
+    view.textContent = JSON.stringify(result, null, 2);
+    document.getElementById('everify-case-number').value = result.case.caseNumber ?? '';
+    document.getElementById('everify-status').value = result.case.status;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('everify-created-btn').addEventListener('click', async () => {
+  await saveEverifyCase({ createdAt: document.getElementById('everify-date').value });
+});
+document.getElementById('everify-tnc-btn').addEventListener('click', async () => {
+  await saveEverifyCase({ tncIssuedAt: document.getElementById('everify-date').value });
+});
+document.getElementById('everify-save-btn').addEventListener('click', async () => {
+  await saveEverifyCase({});
+});
+
+async function saveEverifyCase(extra) {
+  const employeeId = document.getElementById('everify-employee').value;
+  const view = document.getElementById('everify-view');
+  const caseNumber = document.getElementById('everify-case-number').value;
+  const status = document.getElementById('everify-status').value;
+  try {
+    const result = await api(`/api/employees/${employeeId}/everify`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status, ...(caseNumber ? { caseNumber } : {}), ...extra }),
+    });
+    view.textContent = JSON.stringify(result, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+}
+
+document.getElementById('everify-compliance-btn').addEventListener('click', async () => {
+  const view = document.getElementById('everify-view');
+  try {
+    const { findings } = await api(`/api/companies/${company.id}/everify-compliance`);
+    view.textContent = findings.length === 0 ? 'No overdue E-Verify findings.' : JSON.stringify(findings, null, 2);
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+async function loadNewHireReporting() {
+  const { issues } = await api(`/api/companies/${company.id}/new-hire-reporting`);
+  const tbody = document.querySelector('#nhr-table tbody');
+  const findingLabel = { missing_data: 'Missing data', overdue: 'OVERDUE', due_soon: 'Due soon' };
+  tbody.innerHTML = issues.length === 0
+    ? '<tr><td colspan="4" class="muted">Nothing outstanding.</td></tr>'
+    : issues.map((i) => `
+      <tr>
+        <td>${employeeNameFor(i.employeeId)}</td>
+        <td>${findingLabel[i.kind]}${i.missingFields ? ' (' + i.missingFields.join(', ') + ')' : ''}</td>
+        <td>${i.dueBy ?? '—'}</td>
+        <td>
+          ${i.kind !== 'missing_data' ? `<button class="secondary nhr-view" data-emp="${i.employeeId}">View report</button> <button class="secondary nhr-mark-filed" data-emp="${i.employeeId}">Mark filed</button>` : ''}
+        </td>
+      </tr>`).join('');
+
+  tbody.querySelectorAll('.nhr-view').forEach((btn) => btn.addEventListener('click', async () => {
+    const view = document.getElementById('nhr-view');
+    try {
+      const { report } = await api(`/api/employees/${btn.dataset.emp}/new-hire-report`);
+      view.textContent = JSON.stringify(report, null, 2);
+    } catch (err) {
+      view.textContent = 'Error: ' + err.message;
+    }
+  }));
+  tbody.querySelectorAll('.nhr-mark-filed').forEach((btn) => btn.addEventListener('click', async () => {
+    await api(`/api/employees/${btn.dataset.emp}/new-hire-report/mark-filed`, { method: 'POST' });
+    await loadNewHireReporting();
+  }));
+}
 
 refreshAll().catch((err) => {
   document.getElementById('company-info').textContent = 'Error: ' + err.message;

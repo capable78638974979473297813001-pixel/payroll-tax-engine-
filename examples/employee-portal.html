@@ -66,10 +66,17 @@
     </table>
     <div class="row" style="margin-top:8px">
       <select id="pto-policy-select"></select>
+      <input id="pto-request-start" type="date" />
+      <input id="pto-request-end" type="date" />
       <input id="pto-request-hours" type="number" placeholder="Hours requested" style="width:160px" />
       <button class="secondary" id="pto-request-btn">Request time off</button>
     </div>
     <pre id="pto-request-view"></pre>
+    <h3 style="margin-top:12px">My requests</h3>
+    <table id="pto-requests-table">
+      <thead><tr><th>Dates</th><th>Hours</th><th>Status</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
   </section>
 
   <section>
@@ -83,6 +90,32 @@
   <section>
     <h2>My I-9 status</h2>
     <div id="i9-status" class="muted">—</div>
+  </section>
+
+  <section>
+    <h2>My Form W-4</h2>
+    <p class="muted" style="margin-top:0">Changes here affect federal withholding on your very next paycheck.</p>
+    <div class="row">
+      <select id="w4-filing-status">
+        <option value="single">Single</option>
+        <option value="married_joint">Married filing jointly</option>
+        <option value="married_separate">Married filing separately</option>
+        <option value="head_of_household">Head of household</option>
+      </select>
+      <label><input type="checkbox" id="w4-multiple-jobs" /> Multiple jobs / spouse works (Step 2)</label>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <input id="w4-dependent-credit" type="number" placeholder="Dependent credit ($/yr, Step 3)" style="width:220px" />
+      <input id="w4-other-income" type="number" placeholder="Other income ($/yr, Step 4a)" style="width:200px" />
+    </div>
+    <div class="row" style="margin-top:8px">
+      <input id="w4-deductions" type="number" placeholder="Extra deductions ($/yr, Step 4b)" style="width:220px" />
+      <input id="w4-extra-withholding" type="number" placeholder="Extra withholding ($/paycheck, Step 4c)" style="width:250px" />
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="secondary" id="w4-save-btn">Save W-4</button>
+    </div>
+    <pre id="w4-view"></pre>
   </section>
 </main>
 
@@ -159,6 +192,34 @@ async function loadSelfService(employeeId) {
     : data.benefitElections.map((e) => `<tr><td>${e.planId.slice(0, 8)}</td><td>${e.coverageTier}</td><td>${e.effectiveDate}</td></tr>`).join('');
 
   document.getElementById('i9-status').textContent = `Status: ${data.i9Status}`;
+
+  const w4 = data.employee.federalW4;
+  document.getElementById('w4-filing-status').value = w4.filingStatus;
+  document.getElementById('w4-multiple-jobs').checked = w4.multipleJobs;
+  document.getElementById('w4-dependent-credit').value = w4.dependentCredit / 100;
+  document.getElementById('w4-other-income').value = w4.otherIncome / 100;
+  document.getElementById('w4-deductions').value = w4.deductions / 100;
+  document.getElementById('w4-extra-withholding').value = w4.extraWithholding / 100;
+
+  await loadMyPtoRequests();
+}
+
+async function loadMyPtoRequests() {
+  const { requests } = await api(`/api/employees/${currentEmployeeId}/pto-requests`);
+  const tbody = document.querySelector('#pto-requests-table tbody');
+  tbody.innerHTML = requests.length === 0
+    ? '<tr><td colspan="4" class="muted">No requests yet.</td></tr>'
+    : requests.map((r) => `
+      <tr>
+        <td>${r.startDate} to ${r.endDate}</td>
+        <td>${r.hoursRequested}</td>
+        <td>${r.status}${r.denialReason ? ' (' + r.denialReason + ')' : ''}</td>
+        <td>${r.status === 'pending' ? `<button class="secondary pto-cancel-btn" data-req="${r.id}">Cancel</button>` : ''}</td>
+      </tr>`).join('');
+  tbody.querySelectorAll('.pto-cancel-btn').forEach((btn) => btn.addEventListener('click', async () => {
+    await api(`/api/pto-requests/${btn.dataset.req}/cancel`, { method: 'POST' });
+    await loadMyPtoRequests();
+  }));
 }
 
 document.getElementById('load-btn').addEventListener('click', () => {
@@ -172,16 +233,38 @@ document.getElementById('pto-request-btn').addEventListener('click', async () =>
   const view = document.getElementById('pto-request-view');
   if (!currentEmployeeId) return (view.textContent = 'Pick yourself above first.');
   const policyId = document.getElementById('pto-policy-select').value;
-  const hours = Number(document.getElementById('pto-request-hours').value) || 0;
+  const hoursRequested = Number(document.getElementById('pto-request-hours').value) || 0;
+  const startDate = document.getElementById('pto-request-start').value;
+  const endDate = document.getElementById('pto-request-end').value;
   if (!policyId) return (view.textContent = 'No PTO policy to request against.');
+  if (!startDate || !endDate) return (view.textContent = 'Pick a start and end date.');
   try {
-    const result = await api(`/api/employees/${currentEmployeeId}/pto-use`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ policyId, hours }),
+    await api(`/api/employees/${currentEmployeeId}/pto-requests`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ policyId, hoursRequested, startDate, endDate }),
     });
-    view.textContent = result.approved
-      ? `Approved. New balance: ${result.balance.balanceHours} hours.`
-      : `Not enough balance — short by ${result.shortfallHours} hours.`;
-    await loadSelfService(currentEmployeeId);
+    view.textContent = 'Request submitted — pending manager approval.';
+    await loadMyPtoRequests();
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('w4-save-btn').addEventListener('click', async () => {
+  const view = document.getElementById('w4-view');
+  if (!currentEmployeeId) return (view.textContent = 'Pick yourself above first.');
+  const federalW4 = {
+    filingStatus: document.getElementById('w4-filing-status').value,
+    multipleJobs: document.getElementById('w4-multiple-jobs').checked,
+    dependentCredit: Math.round(Number(document.getElementById('w4-dependent-credit').value) * 100) || 0,
+    otherIncome: Math.round(Number(document.getElementById('w4-other-income').value) * 100) || 0,
+    deductions: Math.round(Number(document.getElementById('w4-deductions').value) * 100) || 0,
+    extraWithholding: Math.round(Number(document.getElementById('w4-extra-withholding').value) * 100) || 0,
+  };
+  try {
+    await api(`/api/employees/${currentEmployeeId}/federal-w4`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(federalW4),
+    });
+    view.textContent = 'W-4 saved — takes effect on your next paycheck.';
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
