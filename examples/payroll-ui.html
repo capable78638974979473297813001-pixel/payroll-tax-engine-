@@ -562,6 +562,19 @@
   </section>
 
   <section>
+    <h2>Connecticut Paid Leave</h2>
+    <p class="muted" style="margin-top:0">The only sibling formula pegged to the state MINIMUM WAGE rather than a state average weekly wage: 95% replacement up to 40x the 2026 CT minimum wage ($677.60), then 60% of the excess, capped at 60x the minimum wage ($1,016.40) — both figures rise automatically whenever the minimum wage does. Eligibility is TWO independent tests: at least $2,325 in the single highest-earning quarter of the base period, AND currently employed or separated within the past 12 weeks. This project's core tax engine already computes the payroll withholding correctly; this panel is the benefit side only.</p>
+    <div class="row">
+      <input id="ctpl-avg-wage" type="number" placeholder="Average weekly wage ($)" style="width:220px" />
+      <input id="ctpl-quarter-earnings" type="number" placeholder="Highest quarter earnings ($)" style="width:240px" />
+      <label><input id="ctpl-currently-employed" type="checkbox" checked /> Currently employed</label>
+      <input id="ctpl-weeks-since-separation" type="number" placeholder="Weeks since separation" style="width:190px" />
+      <button class="secondary" id="ctpl-calc-btn">Calculate</button>
+    </div>
+    <pre id="ctpl-view"></pre>
+  </section>
+
+  <section>
     <h2>COBRA general notice</h2>
     <p class="muted" style="margin-top:0">Distinct from the election notice above: due within 90 days of first becoming covered under the plan, or sooner if an election notice is already required by then. Penalty exposure: up to $110/day per affected beneficiary (ERISA §502(c)(1), court-assessed, not inflation-adjusted), plus a separate IRS excise tax of $100/day (or $200/day if more than one family member is affected — not the single rate doubled).</p>
     <div class="row">
@@ -1809,6 +1822,25 @@ document.getElementById('orpl-calc-btn').addEventListener('click', async () => {
       `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
       `Weekly benefit (100%/50% tiered, floor/capped): ${fmtCents(result.weeklyBenefit)}\n` +
       `Max leave weeks available: ${result.maxWeeksAvailable}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('ctpl-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('ctpl-view');
+  const averageWeeklyWageDollars = Number(document.getElementById('ctpl-avg-wage').value) || 0;
+  const highestQuarterEarningsDollars = Number(document.getElementById('ctpl-quarter-earnings').value) || 0;
+  const isCurrentlyEmployed = document.getElementById('ctpl-currently-employed').checked;
+  const weeksSinceSeparation = Number(document.getElementById('ctpl-weeks-since-separation').value) || 0;
+  try {
+    const result = await api('/api/ct-paid-leave/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ averageWeeklyWageDollars, highestQuarterEarningsDollars, isCurrentlyEmployed, weeksSinceSeparation }),
+    });
+    view.textContent =
+      `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
+      `Weekly benefit (95%/60% tiered, capped): ${fmtCents(result.weeklyBenefit)}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

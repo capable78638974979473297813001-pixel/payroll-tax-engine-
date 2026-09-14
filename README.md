@@ -1035,6 +1035,21 @@ Beyond the pay-run engine itself, three more real HR pieces:
   withholding/benefit scope split as its four PFL siblings —
   `data/states/OR-2026.json`'s own config already computes the payroll
   withholding correctly. Wired into the admin UI as a calculator.
+- `payroll/ctPaidLeave.ts`: Connecticut Paid Leave (CTPL) — a SIXTH
+  distinct benefit formula, and the only one of the six pegged to the
+  state MINIMUM WAGE rather than a state average weekly wage: 95%
+  replacement up to 40x the 2026 Connecticut minimum wage ($677.60), then
+  60% of the excess, capped at 60x the same minimum wage ($1,016.40) —
+  both figures rise automatically whenever the minimum wage does, unlike
+  every other sibling module's own SAWW-derived figures, which are
+  separately republished each benefit year. Eligibility is TWO
+  independent tests, not one: at least $2,325 earned in the SINGLE
+  highest-earning quarter of the base period (the only sibling module
+  pegged to one quarter rather than total base-period earnings), AND
+  currently employed or separated from employment within the past 12
+  weeks. Same withholding/benefit scope split as its five PFL siblings —
+  `data/states/CT-2026.json`'s own config already computes CTPL's payroll
+  withholding correctly. Wired into the admin UI as a calculator.
 - `payroll/complianceDashboard.ts`: one screen for every compliance check
   above — minimum wage, Form I-9, E-Verify, PRWORA new-hire reporting, and
   state registration — pure aggregation, the same "no new business logic,

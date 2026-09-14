@@ -141,6 +141,8 @@ import {
   orPaidLeaveWeeklyBenefit,
   isOrPaidLeaveEligible,
   orPaidLeaveMaxWeeksAvailable,
+  ctPaidLeaveWeeklyBenefit,
+  isCtPaidLeaveEligible,
   depositDeadlineFor,
   determineAleStatus,
   determineDepositorSchedule,
@@ -2042,6 +2044,28 @@ const server = createServer(async (req, res) => {
         weeklyBenefit,
         eligible: isOrPaidLeaveEligible(dollars(body.baseYearEarningsDollars)),
         maxWeeksAvailable: orPaidLeaveMaxWeeksAvailable(body.hasPregnancyOrChildbirthRelatedCondition),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Connecticut Paid Leave calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/ct-paid-leave/calculator') {
+      const body = await parseJsonBody<{
+        averageWeeklyWageDollars: number;
+        highestQuarterEarningsDollars: number;
+        isCurrentlyEmployed: boolean;
+        weeksSinceSeparation: number;
+      }>(req);
+      sendJson(res, 200, {
+        weeklyBenefit: ctPaidLeaveWeeklyBenefit(dollars(body.averageWeeklyWageDollars)),
+        eligible: isCtPaidLeaveEligible(
+          dollars(body.highestQuarterEarningsDollars),
+          body.isCurrentlyEmployed,
+          body.weeksSinceSeparation,
+        ),
       });
       return;
     }

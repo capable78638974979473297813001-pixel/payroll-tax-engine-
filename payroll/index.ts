@@ -454,6 +454,21 @@ export {
   isOrPaidLeaveEligible,
   orPaidLeaveMaxWeeksAvailable,
 } from './orPaidLeave.ts';
+export {
+  CT_PAID_LEAVE_MINIMUM_WAGE_2026,
+  CT_PAID_LEAVE_THRESHOLD_MINIMUM_WAGE_MULTIPLE,
+  CT_PAID_LEAVE_MAX_BENEFIT_MINIMUM_WAGE_MULTIPLE,
+  CT_PAID_LEAVE_LOWER_TIER_REPLACEMENT_RATE,
+  CT_PAID_LEAVE_UPPER_TIER_REPLACEMENT_RATE,
+  CT_PAID_LEAVE_MIN_HIGHEST_QUARTER_EARNINGS,
+  CT_PAID_LEAVE_MAX_WEEKS_SINCE_SEPARATION,
+  ctPaidLeaveTierThreshold,
+  ctPaidLeaveMaxWeeklyBenefit,
+  ctPaidLeaveWeeklyBenefit,
+  ctMeetsHighestQuarterEarningsTest,
+  ctMeetsRecentEmploymentTest,
+  isCtPaidLeaveEligible,
+} from './ctPaidLeave.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';
