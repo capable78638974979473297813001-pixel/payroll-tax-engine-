@@ -135,6 +135,9 @@ import {
   coPromotionalNoticeScope,
   coEpewaComplaintDeadline,
   coEpewaTotalPenalty,
+  coFamliWeeklyBenefit,
+  isCoFamliEligible,
+  coFamliMaxWeeksAvailable,
   depositDeadlineFor,
   determineAleStatus,
   determineDepositorSchedule,
@@ -1998,6 +2001,25 @@ const server = createServer(async (req, res) => {
       sendJson(res, 200, {
         weeklyBenefit,
         eligible: isMaPfmlEligible(dollars(body.basePeriodEarningsDollars), weeklyBenefit),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Colorado FAMLI calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/co-famli/calculator') {
+      const body = await parseJsonBody<{
+        averageWeeklyWageDollars: number;
+        basePeriodEarningsDollars: number;
+        hasPregnancyOrChildbirthComplications: boolean;
+      }>(req);
+      const weeklyBenefit = coFamliWeeklyBenefit(dollars(body.averageWeeklyWageDollars));
+      sendJson(res, 200, {
+        weeklyBenefit,
+        eligible: isCoFamliEligible(dollars(body.basePeriodEarningsDollars)),
+        maxWeeksAvailable: coFamliMaxWeeksAvailable(body.hasPregnancyOrChildbirthComplications),
       });
       return;
     }

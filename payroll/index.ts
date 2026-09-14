@@ -423,6 +423,20 @@ export {
   coEpewaTotalPenalty,
 } from './coEpewa.ts';
 export type { CoPromotionalNoticeScope, CoPromotionalNoticeScopeInput } from './coEpewa.ts';
+export {
+  CO_FAMLI_STATE_AVERAGE_WEEKLY_WAGE_2026,
+  CO_FAMLI_LOWER_TIER_REPLACEMENT_RATE,
+  CO_FAMLI_UPPER_TIER_REPLACEMENT_RATE,
+  CO_FAMLI_MIN_BASE_PERIOD_EARNINGS,
+  CO_FAMLI_STANDARD_LEAVE_MAX_WEEKS,
+  CO_FAMLI_PREGNANCY_COMPLICATIONS_ADDITIONAL_WEEKS,
+  CO_FAMLI_COMBINED_MAX_WEEKS,
+  coFamliTierThreshold,
+  coFamliMaxWeeklyBenefit,
+  coFamliWeeklyBenefit,
+  isCoFamliEligible,
+  coFamliMaxWeeksAvailable,
+} from './coFamli.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

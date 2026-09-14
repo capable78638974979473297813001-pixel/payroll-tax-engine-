@@ -1000,6 +1000,24 @@ Beyond the pay-run engine itself, three more real HR pieces:
   combined qualifying events up to 16, pregnancy/birth complications up
   to 18) and are exposed as separate constants rather than one summary
   figure. Wired into the admin UI as a calculator.
+- `payroll/coFamli.ts`: Colorado Family and Medical Leave Insurance
+  (FAMLI) — a FOURTH distinct benefit formula among this project's state
+  PFL modules, live-verified for the 2026-2027 benefit year. Like
+  Massachusetts and Washington, FAMLI uses a two-tier calculation (90%
+  replacement below 50% of the state average weekly wage, 50% above), but
+  its maximum weekly benefit is defined directly as 90% of the FULL state
+  average weekly wage rather than a separately-published flat figure —
+  confirmed by cross-checking that 90% × SAWW reproduces the
+  independently-reported maximum for two different benefit years.
+  Eligibility is the simplest of any sibling module: a single test, at
+  least $2,500 in base-period earnings from any combination of employers,
+  with no minimum tenure or hours-worked requirement at all (genuinely
+  simpler than Massachusetts's own two-part 30x-earnings test). Standard
+  leave is 12 weeks, extending to 16 for pregnancy or childbirth
+  complications. Same withholding/benefit scope split as its three PFL
+  siblings — `data/states/CO-2026.json`'s own config already computes the
+  FAMLI payroll withholding correctly. Wired into the admin UI as a
+  calculator.
 - `payroll/complianceDashboard.ts`: one screen for every compliance check
   above — minimum wage, Form I-9, E-Verify, PRWORA new-hire reporting, and
   state registration — pure aggregation, the same "no new business logic,

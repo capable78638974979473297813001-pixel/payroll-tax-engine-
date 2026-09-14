@@ -538,6 +538,18 @@
   </section>
 
   <section>
+    <h2>Colorado FAMLI</h2>
+    <p class="muted" style="margin-top:0">A fourth two-tier PFML benefit formula: 90% of average weekly wage up to 50% of the 2026-2027 state average weekly wage ($804.46), plus 50% above that, capped at $1,448.02/week (90% of the full state average weekly wage). Eligibility is a single, simple test — at least $2,500 in base-period earnings from any combination of employers, with no minimum tenure or hours-worked requirement. Standard leave is 12 weeks, extending to 16 for pregnancy or childbirth complications. This project's core tax engine already computes the FAMLI payroll withholding correctly; this panel is the benefit side only.</p>
+    <div class="row">
+      <input id="cofamli-avg-wage" type="number" placeholder="Average weekly wage ($)" style="width:220px" />
+      <input id="cofamli-base-earnings" type="number" placeholder="Base-period earnings ($)" style="width:220px" />
+      <label><input id="cofamli-complications" type="checkbox" /> Pregnancy/childbirth complications</label>
+      <button class="secondary" id="cofamli-calc-btn">Calculate</button>
+    </div>
+    <pre id="cofamli-view"></pre>
+  </section>
+
+  <section>
     <h2>COBRA general notice</h2>
     <p class="muted" style="margin-top:0">Distinct from the election notice above: due within 90 days of first becoming covered under the plan, or sooner if an election notice is already required by then. Penalty exposure: up to $110/day per affected beneficiary (ERISA §502(c)(1), court-assessed, not inflation-adjusted), plus a separate IRS excise tax of $100/day (or $200/day if more than one family member is affected — not the single rate doubled).</p>
     <div class="row">
@@ -1747,6 +1759,25 @@ document.getElementById('wapfml-calc-btn').addEventListener('click', async () =>
     view.textContent =
       `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
       `Weekly benefit (90%/50% tiered, floor/capped): ${fmtCents(result.weeklyBenefit)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('cofamli-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('cofamli-view');
+  const averageWeeklyWageDollars = Number(document.getElementById('cofamli-avg-wage').value) || 0;
+  const basePeriodEarningsDollars = Number(document.getElementById('cofamli-base-earnings').value) || 0;
+  const hasPregnancyOrChildbirthComplications = document.getElementById('cofamli-complications').checked;
+  try {
+    const result = await api('/api/co-famli/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ averageWeeklyWageDollars, basePeriodEarningsDollars, hasPregnancyOrChildbirthComplications }),
+    });
+    view.textContent =
+      `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
+      `Weekly benefit (90%/50% tiered, capped): ${fmtCents(result.weeklyBenefit)}\n` +
+      `Max leave weeks available: ${result.maxWeeksAvailable}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
