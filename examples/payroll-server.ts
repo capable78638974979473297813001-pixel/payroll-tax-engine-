@@ -110,6 +110,10 @@ import {
   njFliRemainingIntermittentDays,
   maPfmlWeeklyBenefit,
   isMaPfmlEligible,
+  checkCfraEligibility,
+  cfraHoursEntitlement,
+  cfraHoursRemaining,
+  cfraDesignatedPersonsRemaining,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1975,6 +1979,34 @@ const server = createServer(async (req, res) => {
       sendJson(res, 200, {
         weeklyBenefit,
         eligible: isMaPfmlEligible(dollars(body.basePeriodEarningsDollars), weeklyBenefit),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // CFRA (California Family Rights Act) calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/cfra/calculator') {
+      const body = await parseJsonBody<{
+        monthsEmployed: number;
+        hoursOfServicePastTwelveMonths: number;
+        employeeCount: number;
+        regularlyScheduledWeeklyHours: number;
+        hoursUsedThisPeriod: number;
+        designatedPersonsUsedThisPeriod: number;
+      }>(req);
+      const eligibility = checkCfraEligibility({
+        monthsEmployed: body.monthsEmployed,
+        hoursOfServicePastTwelveMonths: body.hoursOfServicePastTwelveMonths,
+        employeeCount: body.employeeCount,
+      });
+      const totalEntitlementHours = cfraHoursEntitlement(body.regularlyScheduledWeeklyHours);
+      sendJson(res, 200, {
+        eligibility,
+        totalEntitlementHours,
+        remainingHours: cfraHoursRemaining(totalEntitlementHours, body.hoursUsedThisPeriod),
+        remainingDesignatedPersons: cfraDesignatedPersonsRemaining(body.designatedPersonsUsedThisPeriod),
       });
       return;
     }

@@ -489,6 +489,27 @@ Beyond the pay-run engine itself, three more real HR pieces:
   work) — a real, separate persistence workflow not built here, the same
   category of gap as PTO's own request/approval workflow was before this
   session, disclosed rather than silently assumed away.
+- `payroll/cfra.ts`: the California Family Rights Act (Gov. Code
+  § 12945.2) — live-verified by reading CRD's own factsheet directly, a
+  discipline that caught a real error: an earlier automated extraction of
+  the SAME PDF mislabeled CFRA's employer threshold as 50, when that
+  figure was the document quoting the OLD pre-2021 rule it explicitly
+  describes as ELIMINATED — reading the source directly rather than
+  trusting one extraction pass caught it before it reached this file. A
+  genuinely different statute from FMLA, not a copy: CFRA covers
+  employers with just 5+ employees STATEWIDE (no worksite-mileage
+  aggregation test at all, unlike FMLA's own 75-mile rule), and its
+  tenure prong is a STRICT inequality — "more than 12 months," so exactly
+  12 months does not qualify, unlike FMLA's own inclusive "at least 12
+  months" wording that `payroll/fmla.ts`'s own eligibility check
+  correctly treats differently. Also models the 2023 "designated person"
+  expansion (an employer may limit an employee to 1 per 12-month period).
+  Deliberately does NOT model CFRA's interaction with California
+  Pregnancy Disability Leave — research surfaced an unverifiable "16
+  combined weeks" figure that directly contradicts PDL's own known
+  multi-month duration, so rather than repeat a figure this project
+  couldn't corroborate, that interaction is left out entirely. Wired into
+  the admin UI as a calculator.
 - `payroll/userra.ts`: USERRA military-service reemployment rights
   (38 U.S.C. § 4301 et seq.) — live-verified against DOL's own VETS Fact
   Sheet #2. Unlike every OTHER single-jurisdiction module in this

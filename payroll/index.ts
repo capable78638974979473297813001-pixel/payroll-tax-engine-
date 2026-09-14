@@ -342,6 +342,19 @@ export {
   maMeetsThirtyTimesBenefitTest,
   isMaPfmlEligible,
 } from './maPfml.ts';
+export {
+  CFRA_EMPLOYER_THRESHOLD,
+  CFRA_MIN_MONTHS_EMPLOYED,
+  CFRA_MIN_HOURS_OF_SERVICE,
+  CFRA_LEAVE_WEEKS,
+  CFRA_DESIGNATED_PERSONS_PER_YEAR,
+  CFRA_UNFORESEEABLE_NOTICE_DAYS,
+  checkCfraEligibility,
+  cfraHoursEntitlement,
+  cfraHoursRemaining,
+  cfraDesignatedPersonsRemaining,
+} from './cfra.ts';
+export type { CfraEligibilityInput, CfraEligibilityResult } from './cfra.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

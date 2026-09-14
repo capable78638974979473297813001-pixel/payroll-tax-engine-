@@ -510,6 +510,23 @@
   </section>
 
   <section>
+    <h2>California Family Rights Act (CFRA)</h2>
+    <p class="muted" style="margin-top:0">Covers employers with just 5+ employees statewide — much lower than FMLA's own 50-employee/75-mile worksite test, which CFRA eliminated in 2021. Tenure must be MORE than 12 months (exactly 12 does not qualify, unlike FMLA's inclusive test), plus 1,250 hours of service. 12 weeks of leave, scaled by the employee's own schedule. An employer may limit "designated person" leave to 1 person per 12-month period.</p>
+    <div class="row">
+      <input id="cfra-months" type="number" placeholder="Months employed" style="width:160px" />
+      <input id="cfra-hours" type="number" placeholder="Hours of service (past 12mo)" style="width:200px" />
+      <input id="cfra-employee-count" type="number" placeholder="Employer headcount" style="width:180px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="cfra-weekly-hours" type="number" placeholder="Regular weekly hours" style="width:180px" />
+      <input id="cfra-hours-used" type="number" placeholder="Hours used this period" style="width:200px" value="0" />
+      <input id="cfra-designated-used" type="number" placeholder="Designated persons used" style="width:200px" value="0" />
+      <button class="secondary" id="cfra-calc-btn">Check eligibility</button>
+    </div>
+    <pre id="cfra-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -1599,6 +1616,30 @@ document.getElementById('mapfml-calc-btn').addEventListener('click', async () =>
     view.textContent =
       `Weekly benefit (tiered 80%/50%, capped): ${fmtCents(result.weeklyBenefit)}\n` +
       `Eligible: ${result.eligible ? 'YES' : 'No'}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('cfra-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('cfra-view');
+  const monthsEmployed = Number(document.getElementById('cfra-months').value) || 0;
+  const hoursOfServicePastTwelveMonths = Number(document.getElementById('cfra-hours').value) || 0;
+  const employeeCount = Number(document.getElementById('cfra-employee-count').value) || 0;
+  const regularlyScheduledWeeklyHours = Number(document.getElementById('cfra-weekly-hours').value) || 0;
+  const hoursUsedThisPeriod = Number(document.getElementById('cfra-hours-used').value) || 0;
+  const designatedPersonsUsedThisPeriod = Number(document.getElementById('cfra-designated-used').value) || 0;
+  try {
+    const result = await api('/api/cfra/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ monthsEmployed, hoursOfServicePastTwelveMonths, employeeCount, regularlyScheduledWeeklyHours, hoursUsedThisPeriod, designatedPersonsUsedThisPeriod }),
+    });
+    view.textContent =
+      `Eligible: ${result.eligibility.eligible ? 'YES' : 'No'}` +
+      (result.eligibility.reasons.length > 0 ? '\n' + result.eligibility.reasons.map((r) => '- ' + r).join('\n') : '') +
+      `\nTotal entitlement hours: ${result.totalEntitlementHours}\n` +
+      `Remaining hours: ${result.remainingHours}\n` +
+      `Remaining designated persons: ${result.remainingDesignatedPersons}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
