@@ -104,6 +104,9 @@ import {
   isOregonSavesMandatory,
   oregonSavesContributionRate,
   oregonSavesPenaltyExposure,
+  stateTipCredit,
+  tipCreditShortfall,
+  isEligibleForTipPool,
   isWithinIlSecureChoiceCurePeriod,
   isPflEligible,
   nyPflWeeklyBenefit,
@@ -2172,6 +2175,38 @@ const server = createServer(async (req, res) => {
         mandatory: isOregonSavesMandatory(body.employeeCount, body.hasQualifiedRetirementPlan),
         contributionRate: oregonSavesContributionRate(body.fullYearsEnrolled),
         penaltyExposure: oregonSavesPenaltyExposure(body.affectedEmployeeCount),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // FLSA tip credit calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/tip-credit/calculator') {
+      const body = await parseJsonBody<{
+        checkDate: string;
+        state: string;
+        hoursWorked: number;
+        tipsReceivedDollars: number;
+        isManagerOrSupervisor: boolean;
+        customarilyReceivesTips: boolean;
+        employerTakesTipCredit: boolean;
+      }>(req);
+      const stateAnswer = stateTipCredit(body.checkDate, body.state);
+      sendJson(res, 200, {
+        stateAnswer,
+        shortfall: tipCreditShortfall({
+          hoursWorked: body.hoursWorked,
+          cashWageCentsPerHour: stateAnswer.cashFloorCentsPerHour,
+          tipsReceivedCents: dollars(body.tipsReceivedDollars),
+          requiredMinimumWageCentsPerHour: stateAnswer.standardFloorCentsPerHour,
+        }),
+        tipPoolEligible: isEligibleForTipPool({
+          isManagerOrSupervisor: body.isManagerOrSupervisor,
+          customarilyReceivesTips: body.customarilyReceivesTips,
+          employerTakesTipCredit: body.employerTakesTipCredit,
+        }),
       });
       return;
     }

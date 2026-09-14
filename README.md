@@ -401,6 +401,29 @@ Beyond the pay-run engine itself, three more real HR pieces:
   never silently paid anyway. The closest this project comes to isolved's
   own "AI catches potential errors" claim, done as an ordinary, auditable
   function instead of an opaque model.
+- `payroll/tipCredit.ts`: FLSA tip credit shortfall and tip pooling
+  eligibility — live-verified against DOL's own tip-regulations page and
+  its January 14, 2025 clarification on manager/supervisor tip-pool
+  exclusion. Wires `src/minimum-wage.ts` directly, the same pattern
+  `payroll/compliance.ts` established, rather than re-deriving any
+  state's own tip-credit rules here — that engine already knows which
+  states (CA, MN, MT, NV, OR, WA, AK, Guam, Flagstaff AZ) allow NO tip
+  credit at all. Adds the two things that require an actual pay period's
+  own facts, not just a jurisdiction and date: `tipCreditShortfall()`
+  computes exactly how much an employer must make up when actual cash
+  wages plus tips received (a slow shift, a bad night) fall short of the
+  full minimum wage for the hours worked, per 29 U.S.C. § 203(m)(2)(A);
+  `isEligibleForTipPool()` implements DOL's current rule, which turns on
+  two independent facts — a manager or supervisor is NEVER eligible,
+  regardless of tip-credit status, and where the employer DOES take a
+  tip credit, eligibility narrows further to only employees who
+  customarily and regularly receive tips (back-of-house staff excluded),
+  a restriction that disappears once the employer pays full minimum wage
+  in cash and claims no credit. Does not evaluate the federal "80/20/30"
+  dual-jobs rule — a minute-by-minute judgment this project has no
+  duty-tracking model to check against, the same kind of scope boundary
+  `payroll/warnAct.ts`'s own exception guidance draws. Wired into the
+  admin UI as a calculator.
 - `payroll/onboarding.ts`: a candidate pipeline (applied → screening →
   interviewing → offer → hired/rejected/declined) with an explicit state
   machine — an impossible jump (straight from "applied" to "hired") throws

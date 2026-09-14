@@ -520,6 +520,15 @@ export {
   oregonSavesContributionRate,
   oregonSavesPenaltyExposure,
 } from './oregonSaves.ts';
+export type { StateTipCreditAnswer, TipCreditShortfallInput, TipPoolEligibilityInput } from './tipCredit.ts';
+export {
+  FEDERAL_MINIMUM_WAGE_PER_HOUR,
+  FEDERAL_TIPPED_CASH_WAGE_PER_HOUR,
+  federalMaxTipCreditPerHour,
+  stateTipCredit,
+  tipCreditShortfall,
+  isEligibleForTipPool,
+} from './tipCredit.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

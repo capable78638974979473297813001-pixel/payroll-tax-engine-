@@ -482,6 +482,24 @@
   </section>
 
   <section>
+    <h2>FLSA tip credit and tip pooling</h2>
+    <p class="muted" style="margin-top:0">Wires src/minimum-wage.ts directly rather than re-deriving any state's own tip-credit rules here — that engine already knows which states (CA, MN, MT, NV, OR, WA, AK, Guam, Flagstaff AZ) allow NO tip credit at all. Federal max tip credit is $5.12/hour ($7.25 - $2.13). If actual cash wages plus tips received fall short of the full minimum wage for the hours worked, the employer owes the exact gap. Tip pool eligibility: a manager or supervisor is NEVER eligible, regardless of tip-credit status; where the employer takes a tip credit, only customarily-tipped employees may be pooled (back-of-house excluded); with no tip credit taken, every non-management employee is eligible.</p>
+    <div class="row">
+      <input id="tc-check-date" type="date" />
+      <input id="tc-state" type="text" placeholder="State (e.g. TX, CA)" style="width:150px" maxlength="2" />
+      <input id="tc-hours" type="number" placeholder="Hours worked" style="width:150px" />
+      <input id="tc-tips" type="number" placeholder="Tips received ($)" style="width:180px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="muted"><input type="checkbox" id="tc-manager" /> Manager/supervisor</label>
+      <label class="muted"><input type="checkbox" id="tc-customarily-tipped" checked /> Customarily receives tips</label>
+      <label class="muted"><input type="checkbox" id="tc-credit-taken" checked /> Employer takes tip credit</label>
+      <button class="secondary" id="tc-calc-btn">Calculate</button>
+    </div>
+    <pre id="tc-view"></pre>
+  </section>
+
+  <section>
     <h2>New York Paid Family Leave</h2>
     <p class="muted" style="margin-top:0">Full-time (20+ hrs/week) eligible after 26 consecutive weeks; part-time eligible after 175 days worked (need not be consecutive). The weekly benefit is 67% of the employee's own average weekly wage, capped at 67% of the 2026 statewide average ($1,833.63/week), for $1,228.53 max/week. This project's core tax engine already computes the PFL payroll withholding correctly (data/states/NY-2026.json) — this panel is the benefit side only, which isn't modeled anywhere else.</p>
     <div class="row">
@@ -1756,6 +1774,33 @@ document.getElementById('ors-calc-btn').addEventListener('click', async () => {
       `OregonSaves mandatory: ${result.mandatory ? 'YES' : 'No'}\n` +
       `Contribution rate: ${(result.contributionRate * 100).toFixed(0)}%\n` +
       `Penalty exposure (capped at $5,000/year): ${fmtCents(result.penaltyExposure)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('tc-check-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('tc-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('tc-view');
+  const checkDate = document.getElementById('tc-check-date').value;
+  const state = document.getElementById('tc-state').value.toUpperCase();
+  const hoursWorked = Number(document.getElementById('tc-hours').value) || 0;
+  const tipsReceivedDollars = Number(document.getElementById('tc-tips').value) || 0;
+  const isManagerOrSupervisor = document.getElementById('tc-manager').checked;
+  const customarilyReceivesTips = document.getElementById('tc-customarily-tipped').checked;
+  const employerTakesTipCredit = document.getElementById('tc-credit-taken').checked;
+  try {
+    const result = await api('/api/tip-credit/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ checkDate, state, hoursWorked, tipsReceivedDollars, isManagerOrSupervisor, customarilyReceivesTips, employerTakesTipCredit }),
+    });
+    view.textContent =
+      `Binding jurisdiction allows tip credit: ${result.stateAnswer.tipCreditAllowed ? 'YES' : 'NO'}\n` +
+      `Cash floor: ${fmtCents(result.stateAnswer.cashFloorCentsPerHour)}/hr | Standard floor: ${fmtCents(result.stateAnswer.standardFloorCentsPerHour)}/hr\n` +
+      `Max tip credit: ${fmtCents(result.stateAnswer.maxTipCreditCentsPerHour)}/hr\n` +
+      `Tip credit shortfall owed: ${fmtCents(result.shortfall)}\n` +
+      `Eligible for tip pool: ${result.tipPoolEligible ? 'YES' : 'NO'}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
