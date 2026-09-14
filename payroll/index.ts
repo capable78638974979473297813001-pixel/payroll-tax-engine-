@@ -541,6 +541,37 @@ export {
   caPayDataFilingDeadline,
   caPayDataPenaltyExposure,
 } from './caPayDataReport.ts';
+export type { MiniWarnState } from './miniWarnActs.ts';
+export {
+  NY_WARN_EMPLOYER_THRESHOLD,
+  NY_WARN_PLANT_CLOSING_MINIMUM_EMPLOYEES,
+  NY_WARN_MASS_LAYOFF_MINIMUM_EMPLOYEES,
+  NY_WARN_MASS_LAYOFF_MINIMUM_FRACTION_OF_WORKFORCE,
+  NY_WARN_MASS_LAYOFF_LARGE_THRESHOLD,
+  NY_WARN_NOTICE_PERIOD_DAYS,
+  NJ_WARN_EMPLOYER_THRESHOLD,
+  NJ_WARN_TRIGGER_MINIMUM_EMPLOYEES,
+  NJ_WARN_NOTICE_PERIOD_DAYS,
+  NJ_WARN_SEVERANCE_WEEKS_PER_YEAR_OF_SERVICE,
+  NJ_WARN_INADEQUATE_NOTICE_PENALTY_WEEKS,
+  CA_WARN_EMPLOYER_THRESHOLD,
+  CA_WARN_TRIGGER_MINIMUM_EMPLOYEES,
+  CA_WARN_RELOCATION_DISTANCE_MILES,
+  CA_WARN_NOTICE_PERIOD_DAYS,
+  miniWarnNoticePeriodDays,
+  isNyWarnCoveredEmployer,
+  isNyPlantClosing,
+  isNyMassLayoff,
+  isNjWarnCoveredEmployer,
+  isNjWarnTriggered,
+  njMandatorySeverance,
+  njTotalSeveranceOwed,
+  isCaWarnCoveredEmployer,
+  isCaWarnTriggered,
+  isCaWarnRelocationTriggered,
+  miniWarnNoticeDeadline,
+  isMiniWarnNoticeLate,
+} from './miniWarnActs.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

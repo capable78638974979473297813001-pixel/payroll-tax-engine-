@@ -597,6 +597,29 @@ Beyond the pay-run engine itself, three more real HR pieces:
   boundary `payroll/paidSickLeave.ts` and `payroll/workersComp.ts` draw
   around their own single-jurisdiction scope. Wired into the admin UI as
   a calculator.
+- `payroll/miniWarnActs.ts`: state mini-WARN acts — the disclosed gap
+  `payroll/warnAct.ts`'s own header names. THREE STATES ONLY,
+  deliberately: New York, New Jersey, and California, each live-verified
+  against primary/corroborating sources. A genuine STRUCTURAL difference,
+  not just different numbers: New York keeps federal WARN's own
+  two-category shape — a flat plant-closing threshold and a separate
+  percentage-based mass-layoff formula (25+ AND at least one-third of the
+  site's workforce, OR 250+ regardless of percentage) — at half federal's
+  numbers, with a 90-day notice period. New Jersey and California each
+  use a SINGLE FLAT THRESHOLD instead, no percentage test at all —
+  conflating NY's two-branch formula with either state's simpler
+  one-branch rule would be exactly the mistake `payroll/cobra.ts`'s own
+  header warns against. New Jersey's own employer-size test is also
+  structurally different: it counts every employee NATIONWIDE (any
+  status), the broadest counting rule of the three, and it's the only one
+  requiring MANDATORY SEVERANCE PAY (one week per full year of service,
+  owed regardless of notice adequacy under the 2023 amendments), with an
+  additional flat 4-week penalty when the required 90-day notice wasn't
+  given in full. California adds an independent 100-mile relocation
+  trigger alongside its own flat 50-employee headcount test, with a
+  60-day notice period matching federal WARN. Every other state's own
+  mini-WARN law remains a disclosed gap. Wired into the admin UI as a
+  calculator.
 - `payroll/cobra.ts`: COBRA continuation coverage (29 U.S.C. § 1161 et
   seq.), LIVE-VERIFIED against the Department of Labor's own Employer's
   Guide and worker FAQ. The 20-employee small-employer exemption; 18

@@ -111,6 +111,17 @@ import {
   classifyCaPayBand,
   caPayDataFilingDeadline,
   caPayDataPenaltyExposure,
+  miniWarnNoticePeriodDays,
+  isNyWarnCoveredEmployer,
+  isNyPlantClosing,
+  isNyMassLayoff,
+  isNjWarnCoveredEmployer,
+  isNjWarnTriggered,
+  njTotalSeveranceOwed,
+  isCaWarnCoveredEmployer,
+  isCaWarnTriggered,
+  isCaWarnRelocationTriggered,
+  miniWarnNoticeDeadline,
   isWithinIlSecureChoiceCurePeriod,
   isPflEligible,
   nyPflWeeklyBenefit,
@@ -2234,6 +2245,44 @@ const server = createServer(async (req, res) => {
         filingDeadline: caPayDataFilingDeadline(body.reportingYear),
         penaltyExposure: caPayDataPenaltyExposure(body.penaltyEmployeeCount, body.isSubsequentFailure),
       });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // State mini-WARN act calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/mini-warn/calculator') {
+      const body = await parseJsonBody<{
+        state: 'NY' | 'NJ' | 'CA';
+        employerHeadcount: number;
+        employeesAffected: number;
+        activeWorkforceAtSite: number;
+        relocationDistanceMiles: number;
+        plannedActionDate: string;
+        noticeServedDate: string;
+        fullYearsOfService: number;
+        weeklyPayDollars: number;
+        noticeWasAdequate: boolean;
+      }>(req);
+      const result: Record<string, unknown> = {
+        noticePeriodDays: miniWarnNoticePeriodDays(body.state),
+        noticeDeadline: miniWarnNoticeDeadline(body.state, body.plannedActionDate),
+      };
+      if (body.state === 'NY') {
+        result.coveredEmployer = isNyWarnCoveredEmployer(body.employerHeadcount);
+        result.plantClosing = isNyPlantClosing(body.employeesAffected);
+        result.massLayoff = isNyMassLayoff(body.employeesAffected, body.activeWorkforceAtSite);
+      } else if (body.state === 'NJ') {
+        result.coveredEmployer = isNjWarnCoveredEmployer(body.employerHeadcount);
+        result.triggered = isNjWarnTriggered(body.employeesAffected);
+        result.severanceOwed = njTotalSeveranceOwed(body.fullYearsOfService, dollars(body.weeklyPayDollars), body.noticeWasAdequate);
+      } else if (body.state === 'CA') {
+        result.coveredEmployer = isCaWarnCoveredEmployer(body.employerHeadcount);
+        result.triggered = isCaWarnTriggered(body.employeesAffected);
+        result.relocationTriggered = isCaWarnRelocationTriggered(body.relocationDistanceMiles);
+      }
+      sendJson(res, 200, result);
       return;
     }
 
