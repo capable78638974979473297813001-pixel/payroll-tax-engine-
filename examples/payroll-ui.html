@@ -600,6 +600,23 @@
   </section>
 
   <section>
+    <h2>Colorado Equal Pay for Equal Work Act (Part 2)</h2>
+    <p class="muted" style="margin-top:0">C.R.S. §§ 8-5-201 to 8-5-203: NO employer-size threshold at all for job-posting compensation disclosure or promotional-opportunity notice — any employer with a Colorado job opening is covered. The one carve-out is temporal and remote-workforce-based, not size-based: through July 1, 2029, an out-of-state employer with fewer than 15 fully-remote Colorado employees owes notice only for remote openings. Fines run $500-$10,000 per violation; a written complaint may be filed within one year of learning of a violation.</p>
+    <div class="row">
+      <label><input id="coepewa-physically-located" type="checkbox" /> Employer physically located in Colorado</label>
+      <input id="coepewa-employee-count" type="number" placeholder="Colorado employee count" style="width:190px" />
+      <label><input id="coepewa-fully-remote" type="checkbox" /> All Colorado employees fully remote</label>
+    </div>
+    <div class="row">
+      <input id="coepewa-decision-date" type="date" placeholder="Promotion decision date" style="width:190px" />
+      <input id="coepewa-learned-date" type="date" placeholder="Date violation was learned of" style="width:220px" />
+      <input id="coepewa-penalties" type="text" placeholder="Considered per-violation penalties ($), comma-separated" style="width:340px" />
+      <button class="secondary" id="coepewa-calc-btn">Calculate</button>
+    </div>
+    <pre id="coepewa-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -1816,6 +1833,38 @@ document.getElementById('nypt-calc-btn').addEventListener('click', async () => {
     view.textContent =
       `Disclosure required (4+ employees): ${result.required ? 'YES' : 'No'}\n` +
       `Penalty for violation #${violationNumber}: ${fmtCents(result.penalty)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('coepewa-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('coepewa-view');
+  const employerPhysicallyLocatedInColorado = document.getElementById('coepewa-physically-located').checked;
+  const coloradoEmployeeCount = Number(document.getElementById('coepewa-employee-count').value) || 0;
+  const allColoradoEmployeesFullyRemote = document.getElementById('coepewa-fully-remote').checked;
+  const decisionDate = document.getElementById('coepewa-decision-date').value;
+  const dateLearnedOfViolation = document.getElementById('coepewa-learned-date').value;
+  const consideredPerViolationPenalties = document.getElementById('coepewa-penalties').value
+    .split(',')
+    .map((s) => Number(s.trim()) * 100)
+    .filter((n) => !Number.isNaN(n) && n > 0);
+  try {
+    const result = await api('/api/co-epewa/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        employerPhysicallyLocatedInColorado,
+        coloradoEmployeeCount,
+        allColoradoEmployeesFullyRemote,
+        decisionDate,
+        dateLearnedOfViolation,
+        consideredPerViolationPenalties,
+      }),
+    });
+    view.textContent =
+      `Promotional notice scope: ${result.noticeScope}\n` +
+      `Complaint deadline: ${result.complaintDeadline}\n` +
+      `Total penalty (clamped $500-$10,000 per violation): ${fmtCents(result.totalPenalty)}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

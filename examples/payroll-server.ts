@@ -132,6 +132,9 @@ import {
   salaryHistoryBanPenaltyOwed,
   isNyPayTransparencyRequired,
   nyPayTransparencyPenaltyForViolationNumber,
+  coPromotionalNoticeScope,
+  coEpewaComplaintDeadline,
+  coEpewaTotalPenalty,
   depositDeadlineFor,
   determineAleStatus,
   determineDepositorSchedule,
@@ -2110,6 +2113,32 @@ const server = createServer(async (req, res) => {
       sendJson(res, 200, {
         required: isNyPayTransparencyRequired(body.employeeCount),
         penalty: nyPayTransparencyPenaltyForViolationNumber(body.violationNumber),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Colorado Equal Pay for Equal Work Act, Part 2 calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/co-epewa/calculator') {
+      const body = await parseJsonBody<{
+        employerPhysicallyLocatedInColorado: boolean;
+        coloradoEmployeeCount: number;
+        allColoradoEmployeesFullyRemote: boolean;
+        decisionDate: string;
+        dateLearnedOfViolation: string;
+        consideredPerViolationPenalties: number[];
+      }>(req);
+      sendJson(res, 200, {
+        noticeScope: coPromotionalNoticeScope({
+          employerPhysicallyLocatedInColorado: body.employerPhysicallyLocatedInColorado,
+          coloradoEmployeeCount: body.coloradoEmployeeCount,
+          allColoradoEmployeesFullyRemote: body.allColoradoEmployeesFullyRemote,
+          decisionDate: body.decisionDate,
+        }),
+        complaintDeadline: coEpewaComplaintDeadline(body.dateLearnedOfViolation),
+        totalPenalty: coEpewaTotalPenalty(body.consideredPerViolationPenalties ?? []),
       });
       return;
     }

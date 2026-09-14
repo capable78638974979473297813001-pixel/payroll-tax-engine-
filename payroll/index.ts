@@ -411,6 +411,18 @@ export {
   isNyPayTransparencyRequired,
   nyPayTransparencyPenaltyForViolationNumber,
 } from './nyPayTransparency.ts';
+export {
+  CO_EPEWA_PENALTY_MIN,
+  CO_EPEWA_PENALTY_MAX,
+  CO_EPEWA_COMPLAINT_DEADLINE_YEARS,
+  CO_EPEWA_REMOTE_EXCEPTION_EMPLOYEE_THRESHOLD,
+  CO_EPEWA_REMOTE_EXCEPTION_SUNSET_DATE,
+  coPromotionalNoticeScope,
+  coEpewaComplaintDeadline,
+  clampCoEpewaPenalty,
+  coEpewaTotalPenalty,
+} from './coEpewa.ts';
+export type { CoPromotionalNoticeScope, CoPromotionalNoticeScopeInput } from './coEpewa.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

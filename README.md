@@ -462,6 +462,28 @@ Beyond the pay-run engine itself, three more real HR pieces:
   range is a fact-specific determination, not a formula) — the same kind
   of scope boundary `payroll/warnAct.ts`'s own exception guidance draws.
   New York only. Wired into the admin UI as a calculator.
+- `payroll/coEpewa.ts`: a third pay-transparency module, Colorado's Equal
+  Pay for Equal Work Act, Part 2 (C.R.S. §§ 8-5-201 to 8-5-203) —
+  live-verified against the statute's own text and CDLE guidance
+  (corroborated across independent sources, since CDLE's own site blocks
+  automated fetches). Structured differently again from both siblings: NO
+  employer-size threshold at all for job-posting compensation disclosure
+  or promotional-opportunity notice — any employer with a Colorado job
+  opening is covered, full stop. The one carve-out is temporal and
+  remote-workforce-based rather than size-based: through July 1, 2029, an
+  employer with no Colorado location and fewer than 15 fully-remote
+  Colorado employees owes promotional notice only for remote openings,
+  not every opening company-wide (the compensation-disclosure duty itself
+  still applies in full). Conflating that carve-out with the OTHER two
+  statutes' own size thresholds would be exactly the mistake
+  `payroll/cobra.ts`'s own header warns against. Also models the
+  $500-$10,000 per-violation penalty range (summed across independently-
+  clamped violations, since the statute is explicitly per-violation) and
+  the one-year complaint deadline. Does not evaluate whether a disclosed
+  range is the employer's genuine good-faith expectation, and does not
+  model Part 1's separate wage-discrimination claims — a distinct
+  statutory scheme. Colorado only. Wired into the admin UI as a
+  calculator.
 - `payroll/termination.ts`: final-paycheck timing and PTO/vacation payout
   at offboarding — genuinely different rules depending on WHY someone
   left, which federal law does not set a deadline for at all (FLSA has no
