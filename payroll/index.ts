@@ -394,6 +394,15 @@ export {
   fairChanceComplaintDeadline,
 } from './fairChanceAct.ts';
 export type { FairChanceMailingAddressType } from './fairChanceAct.ts';
+export {
+  SALARY_HISTORY_JOB_POSTING_EMPLOYER_THRESHOLD,
+  SALARY_HISTORY_BAN_MIN_PENALTY,
+  SALARY_HISTORY_BAN_MAX_PENALTY,
+  isJobPostingPayScaleRequired,
+  isFirstViolationPenaltyWaived,
+  clampSalaryHistoryBanPenalty,
+  salaryHistoryBanPenaltyOwed,
+} from './salaryHistoryBan.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

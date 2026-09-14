@@ -128,6 +128,8 @@ import {
   fairChanceResponseDeadline,
   fairChanceExtendedResponseDeadline,
   fairChanceDeemedReceivedDate,
+  isJobPostingPayScaleRequired,
+  salaryHistoryBanPenaltyOwed,
   depositDeadlineFor,
   determineAleStatus,
   determineDepositorSchedule,
@@ -2075,6 +2077,24 @@ const server = createServer(async (req, res) => {
         responseDeadline: fairChanceResponseDeadline(body.preliminaryNoticeDate),
         extendedResponseDeadline: fairChanceExtendedResponseDeadline(body.preliminaryNoticeDate),
         deemedReceivedDate: fairChanceDeemedReceivedDate(body.mailedDate, body.addressType),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // California salary history ban / pay scale transparency calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/salary-history-ban/calculator') {
+      const body = await parseJsonBody<{
+        employeeCount: number;
+        isFirstViolation: boolean;
+        allJobPostingsNowUpdated: boolean;
+        consideredPenaltyDollars: number;
+      }>(req);
+      sendJson(res, 200, {
+        jobPostingPayScaleRequired: isJobPostingPayScaleRequired(body.employeeCount),
+        penaltyOwed: salaryHistoryBanPenaltyOwed(body.isFirstViolation, body.allJobPostingsNowUpdated, dollars(body.consideredPenaltyDollars)),
       });
       return;
     }

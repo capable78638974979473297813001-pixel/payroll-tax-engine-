@@ -574,6 +574,21 @@
   </section>
 
   <section>
+    <h2>California salary history ban / pay scale transparency</h2>
+    <p class="muted" style="margin-top:0">The salary history inquiry ban and the on-request pay-scale disclosures (to applicants and current employees) apply to EVERY California employer, regardless of size. Only the job-POSTING pay-scale requirement has a 15-employee floor. A first job-posting violation carries no penalty if all postings are demonstrably updated; otherwise the Labor Commissioner's civil penalty runs $100-$10,000.</p>
+    <div class="row">
+      <input id="shb-employee-count" type="number" placeholder="Employee count" style="width:150px" />
+      <label class="muted"><input type="checkbox" id="shb-first-violation" /> First violation</label>
+      <label class="muted"><input type="checkbox" id="shb-postings-updated" /> All postings now updated</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="shb-considered-penalty" type="number" placeholder="Considered penalty ($)" style="width:200px" />
+      <button class="secondary" id="shb-calc-btn">Calculate</button>
+    </div>
+    <pre id="shb-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -1754,6 +1769,25 @@ document.getElementById('fca-calc-btn').addEventListener('click', async () => {
       `Response deadline (5 business days): ${result.responseDeadline}\n` +
       `Extended response deadline (if disputed): ${result.extendedResponseDeadline}\n` +
       `Deemed-received date for mailed notice: ${result.deemedReceivedDate}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('shb-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('shb-view');
+  const employeeCount = Number(document.getElementById('shb-employee-count').value) || 0;
+  const isFirstViolation = document.getElementById('shb-first-violation').checked;
+  const allJobPostingsNowUpdated = document.getElementById('shb-postings-updated').checked;
+  const consideredPenaltyDollars = Number(document.getElementById('shb-considered-penalty').value) || 0;
+  try {
+    const result = await api('/api/salary-history-ban/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCount, isFirstViolation, allJobPostingsNowUpdated, consideredPenaltyDollars }),
+    });
+    view.textContent =
+      `Job posting pay scale required (15+ employees): ${result.jobPostingPayScaleRequired ? 'YES' : 'No'}\n` +
+      `Penalty owed: ${fmtCents(result.penaltyOwed)}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

@@ -423,6 +423,26 @@ Beyond the pay-run engine itself, three more real HR pieces:
   California only — other jurisdictions' own ban-the-box ordinances
   (including Los Angeles's own separate municipal ordinance) remain a
   disclosed gap. Wired into the admin UI as a calculator.
+- `payroll/salaryHistoryBan.ts`: California's salary history ban and pay
+  scale transparency requirements (Labor Code § 432.3, tightened by SB
+  642 effective 2026) — live-verified against the statute's own text.
+  FOUR different rules, only ONE of which has an employer-size threshold
+  — a genuine subtlety this module encodes explicitly rather than
+  treating the statute as one uniform rule: the salary-history inquiry
+  ban, providing the pay scale to an applicant on reasonable request, and
+  providing it to a current employee for their own position all apply to
+  EVERY employer regardless of size; only including the pay scale in a
+  JOB POSTING carries the 15-employee floor. Deliberately offers no
+  generic "is this employer covered" function, since that would
+  misrepresent the first three rules as conditional when they aren't.
+  Also models the statute's own first-violation penalty waiver (no
+  penalty if the employer demonstrates every posting has since been
+  corrected) and clamps any considered penalty into the $100-$10,000
+  civil-penalty range the Labor Commissioner may otherwise assess. Does
+  not evaluate SB 642's own "good faith estimate" standard for what
+  counts as a compliant range — a fact-specific judgment, the same kind
+  of boundary `payroll/warnAct.ts`'s own exception guidance draws.
+  California only. Wired into the admin UI as a calculator.
 - `payroll/termination.ts`: final-paycheck timing and PTO/vacation payout
   at offboarding — genuinely different rules depending on WHY someone
   left, which federal law does not set a deadline for at all (FLSA has no
