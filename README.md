@@ -180,6 +180,32 @@ Beyond the pay-run engine itself, three more real HR pieces:
   whether one happened at all is a fact this module takes as an input,
   not one it derives from punch data. Wired into the admin UI as a
   calculator.
+- `payroll/orFairWorkWeek.ts`: Oregon's Fair Work Week Act (S.B. 828
+  (2017); predictability-pay formula at ORS 653.455) — live-verified
+  against a law-review article quoting the statute's own section numbers
+  directly, corroborated against an independent source's own paraphrase
+  of the same two pay formulas and full exception list. Oregon remains
+  the only STATEWIDE predictive-scheduling law in the country — Chicago,
+  NYC, Philadelphia, SF, and Seattle each run their own municipal
+  ordinances, which remain a disclosed gap. Coverage is narrow: 500+
+  employees WORLDWIDE, in "retail trade" (includes hotels, motels, food
+  service), for non-exempt HOURLY employees only. TWO GENUINELY
+  DIFFERENT PAY FORMULAS, not one flat rate: an ADDITIVE change (adding
+  time, a new shift) owes a flat ONE HOUR of pay regardless of how much
+  was added — a cancelled 8-hour shift added back the next day still
+  owes only one hour extra; a SUBTRACTIVE change (cutting hours) owes
+  HALF the regular rate for EACH scheduled hour not worked — this one
+  scales with the size of the cut, the opposite shape from the additive
+  formula. A change of 30 minutes or less owes nothing. Shifts need at
+  least 10 hours of rest between them; hours worked during that rest
+  period are paid at 1.5x even with consent. Exposes the statute's own
+  nine-item exception list (`orFairWorkWeekExceptionGuidance()`) the
+  same `warnExceptionGuidance()`-style pattern `payroll/warnAct.ts`
+  already uses, rather than attempting to compute whether a real-world
+  change qualifies — "legitimate disciplinary reasons for just cause" is
+  a fact-specific judgment call with no formula, the same scope boundary
+  `payroll/warnAct.ts`'s own exception guidance draws. Wired into the
+  admin UI as a calculator.
 - `payroll/pumpAct.ts`: the federal PUMP Act (Providing Urgent Maternal
   Protections for Nursing Mothers Act, amending FLSA § 7(r), effective
   2023) — live-verified against DOL's own Fact Sheet #73. Break time to

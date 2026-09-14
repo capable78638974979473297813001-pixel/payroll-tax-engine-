@@ -122,6 +122,12 @@ import {
   isCaWarnTriggered,
   isCaWarnRelocationTriggered,
   miniWarnNoticeDeadline,
+  isOrFairWorkWeekCoveredEmployer,
+  isOrFairWorkWeekChangeDeMinimis,
+  orFairWorkWeekAdditiveChangePay,
+  orFairWorkWeekSubtractiveChangePay,
+  isOrFairWorkWeekRestPeriodViolation,
+  orFairWorkWeekRestPeriodPremiumPay,
   isWithinIlSecureChoiceCurePeriod,
   isPflEligible,
   nyPflWeeklyBenefit,
@@ -2283,6 +2289,32 @@ const server = createServer(async (req, res) => {
         result.relocationTriggered = isCaWarnRelocationTriggered(body.relocationDistanceMiles);
       }
       sendJson(res, 200, result);
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Oregon Fair Work Week Act calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/or-fair-work-week/calculator') {
+      const body = await parseJsonBody<{
+        employeeCountWorldwide: number;
+        isNonExemptHourlyEmployee: boolean;
+        changeMinutes: number;
+        regularRateDollars: number;
+        scheduledHoursNotWorked: number;
+        hoursBetweenShifts: number;
+        hoursWorkedDuringRestPeriod: number;
+      }>(req);
+      const rate = dollars(body.regularRateDollars);
+      sendJson(res, 200, {
+        coveredEmployer: isOrFairWorkWeekCoveredEmployer(body.employeeCountWorldwide, body.isNonExemptHourlyEmployee),
+        deMinimis: isOrFairWorkWeekChangeDeMinimis(body.changeMinutes),
+        additiveChangePay: orFairWorkWeekAdditiveChangePay(rate),
+        subtractiveChangePay: orFairWorkWeekSubtractiveChangePay(rate, body.scheduledHoursNotWorked),
+        restPeriodViolation: isOrFairWorkWeekRestPeriodViolation(body.hoursBetweenShifts),
+        restPeriodPremiumPay: orFairWorkWeekRestPeriodPremiumPay(rate, body.hoursWorkedDuringRestPeriod),
+      });
       return;
     }
 

@@ -572,6 +572,26 @@ export {
   miniWarnNoticeDeadline,
   isMiniWarnNoticeLate,
 } from './miniWarnActs.ts';
+export type { OrFairWorkWeekExceptionReason } from './orFairWorkWeek.ts';
+export {
+  OR_FAIR_WORK_WEEK_EMPLOYER_THRESHOLD,
+  OR_FAIR_WORK_WEEK_ADVANCE_NOTICE_DAYS,
+  OR_FAIR_WORK_WEEK_DE_MINIMIS_MINUTES,
+  OR_FAIR_WORK_WEEK_ADDITIVE_CHANGE_HOURS,
+  OR_FAIR_WORK_WEEK_SUBTRACTIVE_CHANGE_RATE,
+  OR_FAIR_WORK_WEEK_REST_PERIOD_HOURS,
+  OR_FAIR_WORK_WEEK_REST_PERIOD_PREMIUM_RATE,
+  OR_FAIR_WORK_WEEK_PENALTY_MIN,
+  OR_FAIR_WORK_WEEK_PENALTY_MAX,
+  orFairWorkWeekExceptionGuidance,
+  isOrFairWorkWeekCoveredEmployer,
+  isOrFairWorkWeekChangeDeMinimis,
+  orFairWorkWeekAdditiveChangePay,
+  orFairWorkWeekSubtractiveChangePay,
+  isOrFairWorkWeekRestPeriodViolation,
+  orFairWorkWeekRestPeriodPremiumPay,
+  clampOrFairWorkWeekPenalty,
+} from './orFairWorkWeek.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';
