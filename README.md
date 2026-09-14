@@ -840,6 +840,26 @@ Beyond the pay-run engine itself, three more real HR pieces:
   countdowns (`njFliRemainingContinuousWeeks()`/
   `njFliRemainingIntermittentDays()`), not a single pool split two ways.
   Wired into the admin UI as a calculator.
+- `payroll/maPfml.ts`: Massachusetts Paid Family and Medical Leave — the
+  same withholding/benefit scope split as `payroll/nyPfl.ts` and
+  `payroll/njFli.ts` (the core tax engine already correctly computes
+  the payroll withholding, per `data/states/MA-2026.json`'s own
+  extensively statute-confirmed config), but a GENUINELY DIFFERENT
+  benefit formula from either: Massachusetts uses a TWO-TIER calculation
+  rather than a flat percentage — 80% of average weekly wage up to 50% of
+  the state average weekly wage (MAAWW), plus only 50% of whatever falls
+  above that threshold, each tier rounded independently before summing
+  and capping at the maximum weekly benefit (`maPfmlWeeklyBenefit()`
+  hand-verified to the cent: an $1,200 average weekly wage against the
+  2026 MAAWW produces exactly $888.37, not a third-party blog's own
+  worked example of $888.38, which this project's own independent
+  arithmetic doesn't reproduce and therefore doesn't rely on). Eligibility
+  is its own two-part test — base-period earnings of at least $6,300 AND
+  strictly more than 30 times the employee's own COMPUTED weekly benefit
+  (a genuine sequencing dependency: the second test can't run without the
+  first module's own benefit output, so the two are exposed as separate
+  functions rather than one that hides the dependency). Wired into the
+  admin UI as a calculator.
 - `payroll/complianceDashboard.ts`: one screen for every compliance check
   above — minimum wage, Form I-9, E-Verify, PRWORA new-hire reporting, and
   state registration — pure aggregation, the same "no new business logic,

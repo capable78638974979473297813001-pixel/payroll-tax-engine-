@@ -325,6 +325,23 @@ export {
   njFliRemainingContinuousWeeks,
   njFliRemainingIntermittentDays,
 } from './njFli.ts';
+export {
+  MA_PFML_STATE_AVERAGE_WEEKLY_WAGE_2026,
+  MA_PFML_LOWER_TIER_REPLACEMENT_RATE,
+  MA_PFML_UPPER_TIER_REPLACEMENT_RATE,
+  MA_PFML_MAX_WEEKLY_BENEFIT_2026,
+  MA_PFML_MIN_BASE_PERIOD_EARNINGS_2026,
+  MA_PFML_MIN_EARNINGS_BENEFIT_MULTIPLE,
+  MA_PFML_FAMILY_LEAVE_MAX_WEEKS,
+  MA_PFML_MEDICAL_LEAVE_MAX_WEEKS,
+  MA_PFML_MILITARY_CAREGIVER_LEAVE_MAX_WEEKS,
+  MA_PFML_COMBINED_MAX_WEEKS_PER_BENEFIT_YEAR,
+  maPfmlTierThreshold,
+  maPfmlWeeklyBenefit,
+  maMeetsMinimumEarningsTest,
+  maMeetsThirtyTimesBenefitTest,
+  isMaPfmlEligible,
+} from './maPfml.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

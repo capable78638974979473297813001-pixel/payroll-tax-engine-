@@ -108,6 +108,8 @@ import {
   njFliWeeklyBenefit,
   njFliRemainingContinuousWeeks,
   njFliRemainingIntermittentDays,
+  maPfmlWeeklyBenefit,
+  isMaPfmlEligible,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1959,6 +1961,20 @@ const server = createServer(async (req, res) => {
         weeklyBenefit: njFliWeeklyBenefit(dollars(body.averageWeeklyWageDollars)),
         remainingContinuousWeeks: njFliRemainingContinuousWeeks(body.continuousWeeksAlreadyUsed),
         remainingIntermittentDays: njFliRemainingIntermittentDays(body.intermittentDaysAlreadyUsed),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Massachusetts PFML calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/ma-pfml/calculator') {
+      const body = await parseJsonBody<{ averageWeeklyWageDollars: number; basePeriodEarningsDollars: number }>(req);
+      const weeklyBenefit = maPfmlWeeklyBenefit(dollars(body.averageWeeklyWageDollars));
+      sendJson(res, 200, {
+        weeklyBenefit,
+        eligible: isMaPfmlEligible(dollars(body.basePeriodEarningsDollars), weeklyBenefit),
       });
       return;
     }

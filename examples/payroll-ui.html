@@ -499,6 +499,17 @@
   </section>
 
   <section>
+    <h2>Massachusetts PFML</h2>
+    <p class="muted" style="margin-top:0">A genuinely different, TIERED benefit formula: 80% of average weekly wage up to 50% of the 2026 state average weekly wage ($961.24), plus 50% of any amount above that, capped at $1,230.39/week. Eligible only if base-period earnings are both at least $6,300 AND strictly more than 30x the computed weekly benefit. This project's core tax engine already computes the PFML payroll withholding correctly; this panel is the benefit side only.</p>
+    <div class="row">
+      <input id="mapfml-avg-wage" type="number" placeholder="Average weekly wage ($)" style="width:220px" />
+      <input id="mapfml-base-earnings" type="number" placeholder="Base-period earnings ($)" style="width:220px" />
+      <button class="secondary" id="mapfml-calc-btn">Calculate</button>
+    </div>
+    <pre id="mapfml-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -1571,6 +1582,23 @@ document.getElementById('njfli-calc-btn').addEventListener('click', async () => 
       `Weekly benefit (85%, capped): ${fmtCents(result.weeklyBenefit)}\n` +
       `Remaining continuous weeks: ${result.remainingContinuousWeeks}\n` +
       `Remaining intermittent days: ${result.remainingIntermittentDays}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('mapfml-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('mapfml-view');
+  const averageWeeklyWageDollars = Number(document.getElementById('mapfml-avg-wage').value) || 0;
+  const basePeriodEarningsDollars = Number(document.getElementById('mapfml-base-earnings').value) || 0;
+  try {
+    const result = await api('/api/ma-pfml/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ averageWeeklyWageDollars, basePeriodEarningsDollars }),
+    });
+    view.textContent =
+      `Weekly benefit (tiered 80%/50%, capped): ${fmtCents(result.weeklyBenefit)}\n` +
+      `Eligible: ${result.eligible ? 'YES' : 'No'}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
