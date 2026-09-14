@@ -101,6 +101,9 @@ import {
   isIlSecureChoiceMandatory,
   ilSecureChoicePenaltyExposure,
   ilSecureChoiceCureDeadline,
+  isOregonSavesMandatory,
+  oregonSavesContributionRate,
+  oregonSavesPenaltyExposure,
   isWithinIlSecureChoiceCurePeriod,
   isPflEligible,
   nyPflWeeklyBenefit,
@@ -2151,6 +2154,25 @@ const server = createServer(async (req, res) => {
         return;
       }
       sendJson(res, 200, { kind: 'not_modeled' });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // OregonSaves calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/oregon-saves/calculator') {
+      const body = await parseJsonBody<{
+        employeeCount: number;
+        hasQualifiedRetirementPlan: boolean;
+        fullYearsEnrolled: number;
+        affectedEmployeeCount: number;
+      }>(req);
+      sendJson(res, 200, {
+        mandatory: isOregonSavesMandatory(body.employeeCount, body.hasQualifiedRetirementPlan),
+        contributionRate: oregonSavesContributionRate(body.fullYearsEnrolled),
+        penaltyExposure: oregonSavesPenaltyExposure(body.affectedEmployeeCount),
+      });
       return;
     }
 

@@ -362,6 +362,20 @@ Beyond the pay-run engine itself, three more real HR pieces:
   source consulted — only the flat 5% default is modeled, rather than
   guessing an escalation exists by analogy to CalSavers. Wired into the
   admin UI as a calculator.
+- `payroll/oregonSaves.ts`: OregonSaves, a THIRD state-run auto-IRA
+  module alongside `payroll/calSavers.ts` and
+  `payroll/ilSecureChoice.ts`, again deliberately its own module with its
+  own constants. The simplest coverage test of the three: NO employee-
+  count threshold beyond 1+ employees and NO years-in-business test at
+  all (Illinois requires 5+ employees AND 2+ years in business).
+  Escalation matches CalSavers' own +1 point/year shape but caps at a
+  different ceiling — 10%, not CalSavers' 8% — reached after five full
+  years enrolled. The penalty structure is also genuinely different:
+  $100 per affected employee, but CAPPED AT $5,000 PER CALENDAR YEAR per
+  employer, unlike CalSavers' or Illinois Secure Choice's own uncapped
+  per-employee penalties — so a large noncompliant employer's exposure
+  here can be lower, not higher, than a small one's per-employee rate
+  alone would suggest. Wired into the admin UI as a calculator.
 - `payroll/hsaFsaLimits.ts`: HSA (IRC §223), health FSA, and dependent-care
   FSA (§129 DCAP) annual contribution limits for 2026 — $4,400 self-only /
   $8,750 family HSA, +$1,000 catch-up at 55+ with NO upper age cutoff

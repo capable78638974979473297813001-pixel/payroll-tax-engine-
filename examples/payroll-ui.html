@@ -388,7 +388,7 @@
 
   <section>
     <h2>CalSavers</h2>
-    <p class="muted" style="margin-top:0">Effective January 1, 2026, every California employer with 1+ employees and no qualified retirement plan of its own must register with CalSavers or certify an exemption. Default auto-enrollment starts at 5%, escalating 1 point/year up to 8%. FTB penalties run $250/eligible employee, plus another $500/employee (total $750) once noncompliance continues. Other states' own auto-IRA programs (OregonSaves, Illinois Secure Choice, etc.) aren't modeled here.</p>
+    <p class="muted" style="margin-top:0">Effective January 1, 2026, every California employer with 1+ employees and no qualified retirement plan of its own must register with CalSavers or certify an exemption. Default auto-enrollment starts at 5%, escalating 1 point/year up to 8%. FTB penalties run $250/eligible employee, plus another $500/employee (total $750) once noncompliance continues. See the Illinois Secure Choice and OregonSaves panels below for those states' own genuinely different coverage tests and penalty structures.</p>
     <div class="row">
       <input id="cs-employee-count" type="number" placeholder="Employee count" style="width:150px" />
       <label class="muted"><input type="checkbox" id="cs-has-plan" /> Already has a qualified retirement plan</label>
@@ -464,6 +464,21 @@
       <button class="secondary" id="ilsc-calc-btn">Calculate</button>
     </div>
     <pre id="ilsc-view"></pre>
+  </section>
+
+  <section>
+    <h2>OregonSaves</h2>
+    <p class="muted" style="margin-top:0">The simplest coverage test of the three auto-IRA programs modeled here: NO employee-count threshold beyond 1+ employees, and NO years-in-business test at all. Default auto-enrollment is 5%, escalating 1 point/year up to a 10% ceiling (five years to reach it) — the same escalation shape as CalSavers, but a different cap (10% vs. 8%). Penalties run $100/affected employee, but CAPPED at $5,000 per calendar year per employer — unlike CalSavers' or Illinois Secure Choice's own uncapped per-employee penalties.</p>
+    <div class="row">
+      <input id="ors-employee-count" type="number" placeholder="Employee count" style="width:150px" />
+      <label class="muted"><input type="checkbox" id="ors-has-plan" /> Already has a qualified plan</label>
+      <input id="ors-years-enrolled" type="number" placeholder="Full years enrolled" style="width:190px" value="0" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="ors-affected-count" type="number" placeholder="Affected employees (penalty)" style="width:230px" />
+      <button class="secondary" id="ors-calc-btn">Calculate</button>
+    </div>
+    <pre id="ors-view"></pre>
   </section>
 
   <section>
@@ -1721,6 +1736,26 @@ document.getElementById('ilsc-calc-btn').addEventListener('click', async () => {
       `Penalty exposure: ${fmtCents(result.penaltyExposure)}\n` +
       `Cure deadline (120 days after notice): ${result.cureDeadline}\n` +
       `Within cure period: ${result.withinCurePeriod ? 'YES' : 'No'}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('ors-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('ors-view');
+  const employeeCount = Number(document.getElementById('ors-employee-count').value) || 0;
+  const hasQualifiedRetirementPlan = document.getElementById('ors-has-plan').checked;
+  const fullYearsEnrolled = Number(document.getElementById('ors-years-enrolled').value) || 0;
+  const affectedEmployeeCount = Number(document.getElementById('ors-affected-count').value) || 0;
+  try {
+    const result = await api('/api/oregon-saves/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCount, hasQualifiedRetirementPlan, fullYearsEnrolled, affectedEmployeeCount }),
+    });
+    view.textContent =
+      `OregonSaves mandatory: ${result.mandatory ? 'YES' : 'No'}\n` +
+      `Contribution rate: ${(result.contributionRate * 100).toFixed(0)}%\n` +
+      `Penalty exposure (capped at $5,000/year): ${fmtCents(result.penaltyExposure)}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

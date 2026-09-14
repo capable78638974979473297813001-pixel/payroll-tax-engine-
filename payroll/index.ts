@@ -509,6 +509,17 @@ export {
   OR_NON_COMPETE_MIN_ADVANCE_NOTICE_DAYS,
   isOrNonCompeteEnforceable,
 } from './nonCompeteBans.ts';
+export {
+  OREGON_SAVES_EMPLOYER_THRESHOLD,
+  OREGON_SAVES_DEFAULT_CONTRIBUTION_RATE,
+  OREGON_SAVES_ANNUAL_ESCALATION_RATE,
+  OREGON_SAVES_MAX_CONTRIBUTION_RATE,
+  OREGON_SAVES_PENALTY_PER_EMPLOYEE,
+  OREGON_SAVES_MAX_PENALTY_PER_CALENDAR_YEAR,
+  isOregonSavesMandatory,
+  oregonSavesContributionRate,
+  oregonSavesPenaltyExposure,
+} from './oregonSaves.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';
