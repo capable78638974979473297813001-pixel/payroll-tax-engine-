@@ -128,6 +128,12 @@ import {
   orFairWorkWeekSubtractiveChangePay,
   isOrFairWorkWeekRestPeriodViolation,
   orFairWorkWeekRestPeriodPremiumPay,
+  isSecureAutoEnrollmentMandatory,
+  isSecureAutoEnrollmentInitialRateValid,
+  isSecureAutoEnrollmentCeilingValid,
+  secureAutoEnrollmentRateForPlanYear,
+  secureAutoEnrollmentWithdrawalDeadline,
+  isWithinSecureAutoEnrollmentWithdrawalWindow,
   isWithinIlSecureChoiceCurePeriod,
   isPflEligible,
   nyPflWeeklyBenefit,
@@ -2314,6 +2320,44 @@ const server = createServer(async (req, res) => {
         subtractiveChangePay: orFairWorkWeekSubtractiveChangePay(rate, body.scheduledHoursNotWorked),
         restPeriodViolation: isOrFairWorkWeekRestPeriodViolation(body.hoursBetweenShifts),
         restPeriodPremiumPay: orFairWorkWeekRestPeriodPremiumPay(rate, body.hoursWorkedDuringRestPeriod),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // SECURE 2.0 auto-enrollment mandate calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/secure-auto-enrollment/calculator') {
+      const body = await parseJsonBody<{
+        planEstablishedDate: string;
+        employeeCount: number;
+        yearsInExistence: number;
+        isGovernmentalPlan: boolean;
+        isChurchPlan: boolean;
+        isSimple401kPlan: boolean;
+        planYearStartDate: string;
+        initialRate: number;
+        ceiling: number;
+        fullPlanYearsElapsed: number;
+        firstDefaultContributionDate: string;
+        withdrawalRequestDate: string;
+      }>(req);
+      const exemption = {
+        planEstablishedDate: body.planEstablishedDate,
+        employeeCount: body.employeeCount,
+        yearsInExistence: body.yearsInExistence,
+        isGovernmentalPlan: body.isGovernmentalPlan,
+        isChurchPlan: body.isChurchPlan,
+        isSimple401kPlan: body.isSimple401kPlan,
+      };
+      sendJson(res, 200, {
+        mandatory: isSecureAutoEnrollmentMandatory(exemption, body.planYearStartDate),
+        initialRateValid: isSecureAutoEnrollmentInitialRateValid(body.initialRate),
+        ceilingValid: isSecureAutoEnrollmentCeilingValid(body.ceiling),
+        rateForPlanYear: secureAutoEnrollmentRateForPlanYear(body.initialRate, body.ceiling, body.fullPlanYearsElapsed),
+        withdrawalDeadline: secureAutoEnrollmentWithdrawalDeadline(body.firstDefaultContributionDate),
+        withinWithdrawalWindow: isWithinSecureAutoEnrollmentWithdrawalWindow(body.firstDefaultContributionDate, body.withdrawalRequestDate),
       });
       return;
     }

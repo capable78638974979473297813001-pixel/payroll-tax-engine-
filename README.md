@@ -342,6 +342,30 @@ Beyond the pay-run engine itself, three more real HR pieces:
   figure left out entirely. Wired into the admin UI as a calculator, the
   same "entered directly" pattern the FMLA and workers'-comp panels above
   already use for figures this project doesn't track per employee.
+- `payroll/secureAutoEnrollment.ts`: SECURE 2.0 Act § 101's mandatory
+  automatic-enrollment requirement for new 401(k)/403(b) plans — live-
+  verified across multiple independent retirement-plan-administrator
+  sources for the same rate bounds, exemption list, and effective date.
+  TWO DATES MATTER, NOT ONE: a plan is subject to the mandate only if
+  established on or after December 29, 2022 (the Act's own enactment
+  date — everything before is permanently grandfathered), AND the
+  mandate itself only bites for plan years beginning on or after
+  January 1, 2025 — `isSecureAutoEnrollmentMandatory()` checks both
+  dates plus six independent exemptions (pre-enactment plan, fewer than
+  10 employees, fewer than 3 years in business, governmental plan,
+  church plan, SIMPLE 401(k) plan) at once, rather than treating
+  "established after enactment" as sufficient on its own. THE
+  ESCALATING-RATE RULE IS A RANGE, NOT A SINGLE NUMBER: the statute
+  fixes bounds (initial rate 3%-10%, eventual ceiling 10%-15%, at least
+  1 point/year escalation) but leaves the plan sponsor free to choose
+  the exact initial rate and ceiling within those bounds —
+  `secureAutoEnrollmentRateForPlanYear()` takes the sponsor's own chosen
+  figures as inputs rather than assuming a single "the" rate exists to
+  compute. Also models the 90-day penalty-free permissible-withdrawal
+  window for auto-enrolled participants. Does not model the contribution
+  LIMITS themselves (already `payroll/retirementLimits.ts`'s own scope)
+  or QDIA investment-menu selection. Wired into the admin UI as a
+  calculator.
 - `payroll/calSavers.ts`: CalSavers, California's state-run auto-IRA
   program (Gov. Code §§ 100000 et seq.) — live-verified against the
   program's own site and the statute's own penalty text. Effective

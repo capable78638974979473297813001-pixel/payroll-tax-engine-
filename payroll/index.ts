@@ -592,6 +592,26 @@ export {
   orFairWorkWeekRestPeriodPremiumPay,
   clampOrFairWorkWeekPenalty,
 } from './orFairWorkWeek.ts';
+export type { SecureAutoEnrollmentExemptionInput } from './secureAutoEnrollment.ts';
+export {
+  SECURE_AUTO_ENROLLMENT_ACT_ENACTMENT_DATE,
+  SECURE_AUTO_ENROLLMENT_FIRST_MANDATORY_PLAN_YEAR_START,
+  SECURE_AUTO_ENROLLMENT_SMALL_EMPLOYER_THRESHOLD,
+  SECURE_AUTO_ENROLLMENT_NEW_BUSINESS_MIN_YEARS,
+  SECURE_AUTO_ENROLLMENT_MIN_INITIAL_RATE,
+  SECURE_AUTO_ENROLLMENT_MAX_INITIAL_RATE,
+  SECURE_AUTO_ENROLLMENT_MIN_ANNUAL_ESCALATION,
+  SECURE_AUTO_ENROLLMENT_MIN_ESCALATION_CEILING,
+  SECURE_AUTO_ENROLLMENT_MAX_RATE,
+  SECURE_AUTO_ENROLLMENT_WITHDRAWAL_WINDOW_DAYS,
+  isSecureAutoEnrollmentExempt,
+  isSecureAutoEnrollmentMandatory,
+  isSecureAutoEnrollmentInitialRateValid,
+  isSecureAutoEnrollmentCeilingValid,
+  secureAutoEnrollmentRateForPlanYear,
+  secureAutoEnrollmentWithdrawalDeadline,
+  isWithinSecureAutoEnrollmentWithdrawalWindow,
+} from './secureAutoEnrollment.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';
