@@ -1068,6 +1068,33 @@ Beyond the pay-run engine itself, three more real HR pieces:
   six PFL siblings — `data/states/ME-2026.json`'s own config already
   computes Maine PFML's payroll withholding correctly. Wired into the
   admin UI as a calculator.
+- `payroll/nonCompeteBans.ts`: state non-compete bans and salary
+  thresholds — six jurisdictions only, deliberately, since this is a
+  rapidly moving area and every other state's own rule is a disclosed
+  gap. California, North Dakota, and Oklahoma void every employee
+  non-compete outright; Minnesota's own ban is NOT retroactive (void
+  only for agreements from 2023-07-01 forward — a genuinely different
+  case from the other three total-ban states). Colorado, Illinois,
+  Washington, and Oregon use FOUR genuinely different threshold
+  mechanisms, not one shared formula: Colorado derives its
+  non-solicitation threshold as a fixed 60% of its own non-compete
+  threshold ($130,014 → $78,008.40) rather than an independently
+  published figure; Illinois uses two fixed dollar figures on a step
+  schedule with no CPI adjustment at all ($75,000/$45,000 through 2026,
+  stepping to $80,000/$47,500 on 2027-01-01); Washington publishes
+  separate CPI-adjusted figures for employees ($126,858.83) vs.
+  independent contractors ($317,147.09) — roughly 2.5x apart — live-
+  verified directly against the Washington State Register's own
+  calculated-figure filing, and its own threshold regime itself sunsets
+  to a near-total ban on 2027-06-30 under HB 1155
+  (`isWaNonCompeteEnforceable()` takes the relevant date as an explicit
+  input rather than assuming today's law is permanent); Oregon requires
+  a salary threshold ($119,541) AND a 12-month maximum term AND 14 days'
+  advance written notice, all three at once. Does not evaluate common-law
+  reasonableness balancing tests in the many states with no statutory
+  threshold at all — a fact-specific judgment, the same kind of scope
+  boundary `payroll/warnAct.ts`'s own exception guidance draws. Wired
+  into the admin UI as a calculator.
 - `payroll/complianceDashboard.ts`: one screen for every compliance check
   above — minimum wage, Form I-9, E-Verify, PRWORA new-hire reporting, and
   state registration — pure aggregation, the same "no new business logic,

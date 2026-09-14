@@ -586,6 +586,32 @@
   </section>
 
   <section>
+    <h2>State non-compete bans and thresholds</h2>
+    <p class="muted" style="margin-top:0">Six jurisdictions only, deliberately: California, North Dakota, and Oklahoma void every employee non-compete outright; Minnesota's own ban is NOT retroactive (void only from 2023-07-01 forward). Colorado, Illinois, Washington, and Oregon instead use FOUR genuinely different threshold mechanisms — Colorado derives its non-solicit threshold as a fixed 60% of its non-compete threshold; Illinois uses two fixed dollar figures on a step schedule (not CPI-adjusted); Washington publishes separate figures for employees vs. independent contractors, and its own threshold regime sunsets to a near-total ban on 2027-06-30; Oregon requires a salary threshold AND a 12-month max term AND 14 days' advance written notice, all three at once. Every other state's own rule is a disclosed gap.</p>
+    <div class="row">
+      <select id="nc-state" style="width:200px">
+        <option value="CA">California (total ban)</option>
+        <option value="MN">Minnesota (total ban, not retroactive)</option>
+        <option value="ND">North Dakota (total ban)</option>
+        <option value="OK">Oklahoma (total ban)</option>
+        <option value="CO">Colorado (threshold)</option>
+        <option value="IL">Illinois (threshold)</option>
+        <option value="WA">Washington (threshold, sunsets 2027-06-30)</option>
+        <option value="OR">Oregon (threshold + duration + notice)</option>
+      </select>
+      <input id="nc-comp" type="number" placeholder="Annual compensation ($)" style="width:220px" />
+      <label><input id="nc-contractor" type="checkbox" /> Independent contractor (WA only)</label>
+    </div>
+    <div class="row">
+      <input id="nc-asof" type="date" placeholder="As-of / agreement date" style="width:190px" />
+      <input id="nc-term" type="number" placeholder="Term (months, OR only)" style="width:190px" />
+      <input id="nc-notice" type="number" placeholder="Advance notice (days, OR only)" style="width:220px" />
+      <button class="secondary" id="nc-calc-btn">Calculate</button>
+    </div>
+    <pre id="nc-view"></pre>
+  </section>
+
+  <section>
     <h2>COBRA general notice</h2>
     <p class="muted" style="margin-top:0">Distinct from the election notice above: due within 90 days of first becoming covered under the plan, or sooner if an election notice is already required by then. Penalty exposure: up to $110/day per affected beneficiary (ERISA §502(c)(1), court-assessed, not inflation-adjusted), plus a separate IRS excise tax of $100/day (or $200/day if more than one family member is affected — not the single rate doubled).</p>
     <div class="row">
@@ -1869,6 +1895,40 @@ document.getElementById('mepfml-calc-btn').addEventListener('click', async () =>
     view.textContent =
       `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
       `Weekly benefit (90%/66% tiered, floored, capped): ${fmtCents(result.weeklyBenefit)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('nc-asof').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('nc-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('nc-view');
+  const state = document.getElementById('nc-state').value;
+  const annualCompensationDollars = Number(document.getElementById('nc-comp').value) || 0;
+  const isIndependentContractor = document.getElementById('nc-contractor').checked;
+  const asOfDate = document.getElementById('nc-asof').value;
+  const termMonths = Number(document.getElementById('nc-term').value) || 0;
+  const advanceNoticeDays = Number(document.getElementById('nc-notice').value) || 0;
+  try {
+    const result = await api('/api/non-compete/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ state, annualCompensationDollars, isIndependentContractor, asOfDate, termMonths, advanceNoticeDays }),
+    });
+    if (result.kind === 'total_ban') {
+      view.textContent = `Enforceable: ${result.enforceable ? 'YES' : 'NO (void — total ban state)'}`;
+    } else if (result.kind === 'threshold') {
+      const lines = [`Non-compete enforceable: ${result.nonCompeteEnforceable ? 'YES' : 'NO'}`];
+      if ('nonSolicitEnforceable' in result) {
+        lines.push(`Non-solicit enforceable: ${result.nonSolicitEnforceable ? 'YES' : 'NO'}`);
+      }
+      if ('nonSolicitThreshold' in result) {
+        lines.push(`Non-solicit threshold: ${fmtCents(result.nonSolicitThreshold)}`);
+      }
+      view.textContent = lines.join('\n');
+    } else {
+      view.textContent = 'Not modeled for this state.';
+    }
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

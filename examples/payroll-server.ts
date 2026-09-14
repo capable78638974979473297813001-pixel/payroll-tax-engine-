@@ -145,6 +145,14 @@ import {
   isCtPaidLeaveEligible,
   mePfmlWeeklyBenefit,
   isMePfmlEligible,
+  isNonCompeteVoidInTotalBanState,
+  isCoNonCompeteEnforceable,
+  isCoNonSolicitEnforceable,
+  coNonSolicitThreshold2026,
+  isIlNonCompeteEnforceable,
+  isIlNonSolicitEnforceable,
+  isWaNonCompeteEnforceable,
+  isOrNonCompeteEnforceable,
   depositDeadlineFor,
   determineAleStatus,
   determineDepositorSchedule,
@@ -2082,6 +2090,67 @@ const server = createServer(async (req, res) => {
         weeklyBenefit: mePfmlWeeklyBenefit(dollars(body.averageWeeklyWageDollars)),
         eligible: isMePfmlEligible(dollars(body.basePeriodEarningsDollars)),
       });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // State non-compete ban/threshold calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/non-compete/calculator') {
+      const body = await parseJsonBody<{
+        state: string;
+        annualCompensationDollars: number;
+        isIndependentContractor: boolean;
+        asOfDate: string;
+        termMonths: number;
+        advanceNoticeDays: number;
+      }>(req);
+      const comp = dollars(body.annualCompensationDollars);
+      const totalBanStates = ['CA', 'MN', 'ND', 'OK'];
+      if (totalBanStates.includes(body.state)) {
+        sendJson(res, 200, {
+          kind: 'total_ban',
+          enforceable: !isNonCompeteVoidInTotalBanState(body.state as 'CA' | 'MN' | 'ND' | 'OK', body.asOfDate),
+        });
+        return;
+      }
+      if (body.state === 'CO') {
+        sendJson(res, 200, {
+          kind: 'threshold',
+          nonCompeteEnforceable: isCoNonCompeteEnforceable(comp),
+          nonSolicitEnforceable: isCoNonSolicitEnforceable(comp),
+          nonSolicitThreshold: coNonSolicitThreshold2026(),
+        });
+        return;
+      }
+      if (body.state === 'IL') {
+        sendJson(res, 200, {
+          kind: 'threshold',
+          nonCompeteEnforceable: isIlNonCompeteEnforceable(comp, body.asOfDate),
+          nonSolicitEnforceable: isIlNonSolicitEnforceable(comp, body.asOfDate),
+        });
+        return;
+      }
+      if (body.state === 'WA') {
+        sendJson(res, 200, {
+          kind: 'threshold',
+          nonCompeteEnforceable: isWaNonCompeteEnforceable(comp, body.isIndependentContractor, body.asOfDate),
+        });
+        return;
+      }
+      if (body.state === 'OR') {
+        sendJson(res, 200, {
+          kind: 'threshold',
+          nonCompeteEnforceable: isOrNonCompeteEnforceable({
+            annualCompensationCents: comp,
+            termMonths: body.termMonths,
+            advanceNoticeDays: body.advanceNoticeDays,
+          }),
+        });
+        return;
+      }
+      sendJson(res, 200, { kind: 'not_modeled' });
       return;
     }
 

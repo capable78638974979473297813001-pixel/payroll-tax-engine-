@@ -482,6 +482,33 @@ export {
   mePfmlMinBasePeriodEarnings,
   isMePfmlEligible,
 } from './mePfml.ts';
+export type { NonCompeteTotalBanState, NonCompeteThresholdState, OrNonCompeteEnforceabilityInput } from './nonCompeteBans.ts';
+export {
+  MN_NON_COMPETE_BAN_EFFECTIVE_DATE,
+  isNonCompeteVoidInTotalBanState,
+  CO_NON_COMPETE_THRESHOLD_2026,
+  CO_NON_SOLICIT_THRESHOLD_FRACTION,
+  coNonSolicitThreshold2026,
+  isCoNonCompeteEnforceable,
+  isCoNonSolicitEnforceable,
+  IL_NON_COMPETE_THRESHOLD_STEP_DATE_2027,
+  IL_NON_COMPETE_THRESHOLD_THROUGH_2026,
+  IL_NON_SOLICIT_THRESHOLD_THROUGH_2026,
+  IL_NON_COMPETE_THRESHOLD_FROM_2027,
+  IL_NON_SOLICIT_THRESHOLD_FROM_2027,
+  ilNonCompeteThreshold,
+  ilNonSolicitThreshold,
+  isIlNonCompeteEnforceable,
+  isIlNonSolicitEnforceable,
+  WA_NON_COMPETE_TOTAL_BAN_EFFECTIVE_DATE,
+  WA_NON_COMPETE_EMPLOYEE_THRESHOLD_2026,
+  WA_NON_COMPETE_INDEPENDENT_CONTRACTOR_THRESHOLD_2026,
+  isWaNonCompeteEnforceable,
+  OR_NON_COMPETE_THRESHOLD_2026,
+  OR_NON_COMPETE_MAX_DURATION_MONTHS,
+  OR_NON_COMPETE_MIN_ADVANCE_NOTICE_DAYS,
+  isOrNonCompeteEnforceable,
+} from './nonCompeteBans.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';
