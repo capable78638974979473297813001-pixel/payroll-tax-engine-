@@ -437,6 +437,23 @@ export {
   isCoFamliEligible,
   coFamliMaxWeeksAvailable,
 } from './coFamli.ts';
+export {
+  OR_PAID_LEAVE_STATE_AVERAGE_WEEKLY_WAGE_2026,
+  OR_PAID_LEAVE_TIER_THRESHOLD_FRACTION,
+  OR_PAID_LEAVE_UPPER_TIER_REPLACEMENT_RATE,
+  OR_PAID_LEAVE_MIN_BENEFIT_FRACTION,
+  OR_PAID_LEAVE_MAX_BENEFIT_FRACTION,
+  OR_PAID_LEAVE_MIN_BASE_YEAR_EARNINGS,
+  OR_PAID_LEAVE_STANDARD_MAX_WEEKS,
+  OR_PAID_LEAVE_PREGNANCY_CHILDBIRTH_ADDITIONAL_WEEKS,
+  OR_PAID_LEAVE_COMBINED_MAX_WEEKS,
+  orPaidLeaveTierThreshold,
+  orPaidLeaveMinWeeklyBenefit,
+  orPaidLeaveMaxWeeklyBenefit,
+  orPaidLeaveWeeklyBenefit,
+  isOrPaidLeaveEligible,
+  orPaidLeaveMaxWeeksAvailable,
+} from './orPaidLeave.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

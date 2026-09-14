@@ -138,6 +138,9 @@ import {
   coFamliWeeklyBenefit,
   isCoFamliEligible,
   coFamliMaxWeeksAvailable,
+  orPaidLeaveWeeklyBenefit,
+  isOrPaidLeaveEligible,
+  orPaidLeaveMaxWeeksAvailable,
   depositDeadlineFor,
   determineAleStatus,
   determineDepositorSchedule,
@@ -2020,6 +2023,25 @@ const server = createServer(async (req, res) => {
         weeklyBenefit,
         eligible: isCoFamliEligible(dollars(body.basePeriodEarningsDollars)),
         maxWeeksAvailable: coFamliMaxWeeksAvailable(body.hasPregnancyOrChildbirthComplications),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Paid Leave Oregon calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/or-paid-leave/calculator') {
+      const body = await parseJsonBody<{
+        averageWeeklyWageDollars: number;
+        baseYearEarningsDollars: number;
+        hasPregnancyOrChildbirthRelatedCondition: boolean;
+      }>(req);
+      const weeklyBenefit = orPaidLeaveWeeklyBenefit(dollars(body.averageWeeklyWageDollars));
+      sendJson(res, 200, {
+        weeklyBenefit,
+        eligible: isOrPaidLeaveEligible(dollars(body.baseYearEarningsDollars)),
+        maxWeeksAvailable: orPaidLeaveMaxWeeksAvailable(body.hasPregnancyOrChildbirthRelatedCondition),
       });
       return;
     }

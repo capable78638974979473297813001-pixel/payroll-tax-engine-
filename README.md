@@ -1018,6 +1018,23 @@ Beyond the pay-run engine itself, three more real HR pieces:
   siblings — `data/states/CO-2026.json`'s own config already computes the
   FAMLI payroll withholding correctly. Wired into the admin UI as a
   calculator.
+- `payroll/orPaidLeave.ts`: Paid Leave Oregon (ORS 657B) — a FIFTH
+  distinct benefit formula, live-verified for benefit years beginning on
+  or after June 28, 2026 (cross-checked arithmetically: the independently
+  reported $1,692.16 maximum is exactly 120% of the reported $1,410.13
+  state average weekly wage, and the reported $70.51 minimum is exactly
+  5% of it). The most generous replacement rate of any sibling module —
+  100% (not a fraction) of average weekly wage up to 65% of the state
+  average weekly wage, then 50% of the excess — and the only one of the
+  five with BOTH its floor and its cap defined as percentages of the
+  state average weekly wage (5% and 120%) rather than separately-
+  published flat dollar figures. Eligibility is a single test — at least
+  $1,000 in base-year Oregon wages, no other requirement. Standard leave
+  is 12 weeks, extending to 14 for a pregnancy/childbirth-related medical
+  condition (available only to the parent who gave birth). Same
+  withholding/benefit scope split as its four PFL siblings —
+  `data/states/OR-2026.json`'s own config already computes the payroll
+  withholding correctly. Wired into the admin UI as a calculator.
 - `payroll/complianceDashboard.ts`: one screen for every compliance check
   above — minimum wage, Form I-9, E-Verify, PRWORA new-hire reporting, and
   state registration — pure aggregation, the same "no new business logic,

@@ -550,6 +550,18 @@
   </section>
 
   <section>
+    <h2>Paid Leave Oregon</h2>
+    <p class="muted" style="margin-top:0">A genuinely different shape from every other state PFL module here: 100% wage replacement (not a fraction) up to 65% of the 2026-2027 state average weekly wage ($916.58), then 50% of any amount above that. Both the floor ($70.51) and the cap ($1,692.16) are defined as percentages of the state average weekly wage (5% and 120%) rather than separately-published flat figures. Eligible with at least $1,000 in base-year Oregon wages — no other test. Standard leave is 12 weeks, extending to 14 for a pregnancy/childbirth-related medical condition (available only to the parent who gave birth). This project's core tax engine already computes the payroll withholding correctly; this panel is the benefit side only.</p>
+    <div class="row">
+      <input id="orpl-avg-wage" type="number" placeholder="Average weekly wage ($)" style="width:220px" />
+      <input id="orpl-base-earnings" type="number" placeholder="Base-year earnings ($)" style="width:220px" />
+      <label><input id="orpl-pregnancy" type="checkbox" /> Pregnancy/childbirth-related condition</label>
+      <button class="secondary" id="orpl-calc-btn">Calculate</button>
+    </div>
+    <pre id="orpl-view"></pre>
+  </section>
+
+  <section>
     <h2>COBRA general notice</h2>
     <p class="muted" style="margin-top:0">Distinct from the election notice above: due within 90 days of first becoming covered under the plan, or sooner if an election notice is already required by then. Penalty exposure: up to $110/day per affected beneficiary (ERISA §502(c)(1), court-assessed, not inflation-adjusted), plus a separate IRS excise tax of $100/day (or $200/day if more than one family member is affected — not the single rate doubled).</p>
     <div class="row">
@@ -1777,6 +1789,25 @@ document.getElementById('cofamli-calc-btn').addEventListener('click', async () =
     view.textContent =
       `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
       `Weekly benefit (90%/50% tiered, capped): ${fmtCents(result.weeklyBenefit)}\n` +
+      `Max leave weeks available: ${result.maxWeeksAvailable}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('orpl-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('orpl-view');
+  const averageWeeklyWageDollars = Number(document.getElementById('orpl-avg-wage').value) || 0;
+  const baseYearEarningsDollars = Number(document.getElementById('orpl-base-earnings').value) || 0;
+  const hasPregnancyOrChildbirthRelatedCondition = document.getElementById('orpl-pregnancy').checked;
+  try {
+    const result = await api('/api/or-paid-leave/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ averageWeeklyWageDollars, baseYearEarningsDollars, hasPregnancyOrChildbirthRelatedCondition }),
+    });
+    view.textContent =
+      `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
+      `Weekly benefit (100%/50% tiered, floor/capped): ${fmtCents(result.weeklyBenefit)}\n` +
       `Max leave weeks available: ${result.maxWeeksAvailable}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
