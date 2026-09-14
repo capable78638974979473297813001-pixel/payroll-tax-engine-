@@ -119,6 +119,10 @@ import {
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
+  generalNoticeDeadline,
+  generalNoticeDeadlineGivenPossibleElectionNotice,
+  erisaNoticePenaltyExposure,
+  exciseTaxExposure,
   depositDeadlineFor,
   determineAleStatus,
   determineDepositorSchedule,
@@ -2022,6 +2026,27 @@ const server = createServer(async (req, res) => {
       sendJson(res, 200, {
         eligible: isWaPfmlEligible(body.hoursWorkedInQualifyingPeriod),
         weeklyBenefit: waPfmlWeeklyBenefit(dollars(body.averageWeeklyWageDollars)),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // COBRA general notice calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/cobra/general-notice-calculator') {
+      const body = await parseJsonBody<{
+        firstCoverageDate: string;
+        electionNoticeDeadlineIfApplicable: string | null;
+        daysLate: number;
+        affectedBeneficiaryCount: number;
+        moreThanOneFamilyMemberAffected: boolean;
+      }>(req);
+      sendJson(res, 200, {
+        standardDeadline: generalNoticeDeadline(body.firstCoverageDate),
+        applicableDeadline: generalNoticeDeadlineGivenPossibleElectionNotice(body.firstCoverageDate, body.electionNoticeDeadlineIfApplicable),
+        erisaPenaltyExposure: erisaNoticePenaltyExposure(body.daysLate, body.affectedBeneficiaryCount),
+        exciseTaxExposure: exciseTaxExposure(body.daysLate, body.moreThanOneFamilyMemberAffected),
       });
       return;
     }

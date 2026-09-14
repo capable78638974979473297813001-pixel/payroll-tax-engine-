@@ -59,6 +59,14 @@ export {
   isQualifyingTermination,
   maximumMonthlyPremium,
   qualifyingEventDurationMonths,
+  GENERAL_NOTICE_DEADLINE_DAYS,
+  ERISA_NOTICE_PENALTY_PER_DAY,
+  EXCISE_TAX_PER_DAY_SINGLE_BENEFICIARY,
+  EXCISE_TAX_PER_DAY_MULTIPLE_BENEFICIARIES,
+  generalNoticeDeadline,
+  generalNoticeDeadlineGivenPossibleElectionNotice,
+  erisaNoticePenaltyExposure,
+  exciseTaxExposure,
 } from './cobra.ts';
 export type { CobraQualifyingEventReason } from './cobra.ts';
 export {

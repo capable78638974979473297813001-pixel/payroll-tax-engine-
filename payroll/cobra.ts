@@ -1,4 +1,5 @@
 import type { Cents } from '../src/money.ts';
+import { dollars } from '../src/money.ts';
 import type { TerminationReason } from './termination.ts';
 
 /**
@@ -11,17 +12,21 @@ import type { TerminationReason } from './termination.ts';
  * Coverage Under COBRA" and its FAQ for workers, not assumed from
  * trained memory.
  *
- * SCOPE: this module answers the four questions a real termination
- * workflow actually needs — does COBRA even apply here, how long is the
+ * SCOPE: this module answers the questions a real termination workflow
+ * actually needs — does COBRA even apply here, how long is the
  * continuation period, when is the election notice/election/first
  * premium each due, and what's the maximum premium — as pure functions
- * over dates and a qualifying-event reason. It does NOT generate the
- * election notice document itself (a real, separate compliance document
- * with its own required content, the same "disclosed, not built"
- * boundary this project draws around e-filing and carrier EDI elsewhere)
- * and does not track a beneficiary's actual election or premium payment
- * history — those are a genuinely separate persistence concern from the
- * dates and dollar figures this module computes.
+ * over dates and a qualifying-event reason. It also answers the separate
+ * GENERAL NOTICE question (due at first coverage, before any qualifying
+ * event) and the civil/excise penalty exposure for a late notice under
+ * either one — see the dedicated section near the bottom of this file.
+ * It does NOT generate either notice document itself (a real, separate
+ * compliance document with its own required content, the same
+ * "disclosed, not built" boundary this project draws around e-filing and
+ * carrier EDI elsewhere) and does not track a beneficiary's actual
+ * election or premium payment history — those are a genuinely separate
+ * persistence concern from the dates and dollar figures this module
+ * computes.
  *
  * SMALL-EMPLOYER EXEMPTION: COBRA itself only binds an employer with 20
  * or more employees on a typical business day in the PRECEDING calendar
@@ -114,4 +119,53 @@ export function maximumMonthlyPremium(fullMonthlyCostOfCoverage: Cents): Cents {
 /** The last day continuation coverage may run, given when the qualifying event happened and which duration applies. */
 export function continuationCoverageEndDate(qualifyingEventDate: string, reason: CobraQualifyingEventReason): string {
   return addMonths(qualifyingEventDate, qualifyingEventDurationMonths(reason));
+}
+
+/**
+ * THE GENERAL NOTICE (distinct from everything above, which concerns the
+ * ELECTION notice given at a QUALIFYING EVENT): the plan must tell a
+ * newly-covered employee and spouse about their COBRA rights up front,
+ * before any qualifying event has even happened — a separate DOL
+ * requirement (29 C.F.R. § 2590.606-1) this module didn't previously
+ * model. LIVE-VERIFIED against DOL's own final COBRA notice
+ * regulations, corroborated across multiple independent benefits-
+ * compliance sources for the exact figures, fetched 2026-09-14.
+ */
+
+/** DOL: the general notice is due within this many days of first becoming covered under the plan — UNLESS the election notice would already be due sooner (a new hire who has a qualifying event almost immediately doesn't get the full 90 days to receive general-notice information that's now moot). */
+export const GENERAL_NOTICE_DEADLINE_DAYS = 90;
+
+export function generalNoticeDeadline(firstCoverageDate: string): string {
+  return addDays(firstCoverageDate, GENERAL_NOTICE_DEADLINE_DAYS);
+}
+
+/**
+ * DOL's own rule is "the EARLIER of" the 90-day general-notice deadline
+ * or the date an election notice is itself already required — so a
+ * qualifying event happening almost immediately after coverage begins
+ * pulls this deadline in, rather than leaving the full 90 days on the
+ * clock for information that would already be moot.
+ */
+export function generalNoticeDeadlineGivenPossibleElectionNotice(firstCoverageDate: string, electionNoticeDeadlineIfApplicable: string | null): string {
+  const standardDeadline = generalNoticeDeadline(firstCoverageDate);
+  if (electionNoticeDeadlineIfApplicable === null) return standardDeadline;
+  return electionNoticeDeadlineIfApplicable < standardDeadline ? electionNoticeDeadlineIfApplicable : standardDeadline;
+}
+
+/** ERISA § 502(c)(1): the maximum a COURT may assess, per day, per affected qualified beneficiary, for a COBRA notice failure — a fixed statutory maximum NOT subject to the annual inflation adjustment DOL applies to its own administratively-assessed penalties elsewhere, confirmed unchanged for 2026. */
+export const ERISA_NOTICE_PENALTY_PER_DAY: Cents = dollars(110);
+
+/** IRC § 4980B: the excise tax for a COBRA continuation-coverage failure — per affected qualified beneficiary per day, UNLESS more than one family member is affected, in which case the higher per-day figure applies instead (not additively on top of the per-beneficiary figure). */
+export const EXCISE_TAX_PER_DAY_SINGLE_BENEFICIARY: Cents = dollars(100);
+export const EXCISE_TAX_PER_DAY_MULTIPLE_BENEFICIARIES: Cents = dollars(200);
+
+/** Total ERISA §502(c)(1) exposure — the per-day maximum times the number of days late, times the number of affected qualified beneficiaries (each beneficiary's own notice failure is counted separately, unlike the IRS excise tax's per-family-unit structure below). */
+export function erisaNoticePenaltyExposure(daysLate: number, affectedBeneficiaryCount: number): Cents {
+  return ERISA_NOTICE_PENALTY_PER_DAY * Math.max(0, daysLate) * Math.max(0, affectedBeneficiaryCount);
+}
+
+/** Total IRC §4980B excise tax exposure — the per-day rate (the higher, family-wide rate if more than one family member was affected, not the per-beneficiary rate multiplied out) times the number of days the failure continued. */
+export function exciseTaxExposure(daysLate: number, moreThanOneFamilyMemberAffected: boolean): Cents {
+  const perDayRate = moreThanOneFamilyMemberAffected ? EXCISE_TAX_PER_DAY_MULTIPLE_BENEFICIARIES : EXCISE_TAX_PER_DAY_SINGLE_BENEFICIARY;
+  return perDayRate * Math.max(0, daysLate);
 }

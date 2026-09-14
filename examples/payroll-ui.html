@@ -538,6 +538,22 @@
   </section>
 
   <section>
+    <h2>COBRA general notice</h2>
+    <p class="muted" style="margin-top:0">Distinct from the election notice above: due within 90 days of first becoming covered under the plan, or sooner if an election notice is already required by then. Penalty exposure: up to $110/day per affected beneficiary (ERISA §502(c)(1), court-assessed, not inflation-adjusted), plus a separate IRS excise tax of $100/day (or $200/day if more than one family member is affected — not the single rate doubled).</p>
+    <div class="row">
+      <input id="cgn-first-coverage" type="date" />
+      <input id="cgn-election-deadline" type="date" placeholder="Election notice deadline (if applicable)" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="cgn-days-late" type="number" placeholder="Days late" style="width:130px" value="0" />
+      <input id="cgn-beneficiary-count" type="number" placeholder="Affected beneficiaries" style="width:200px" value="1" />
+      <label class="muted"><input type="checkbox" id="cgn-multi-family" /> More than one family member affected</label>
+      <button class="secondary" id="cgn-calc-btn">Calculate</button>
+    </div>
+    <pre id="cgn-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -1668,6 +1684,30 @@ document.getElementById('wapfml-calc-btn').addEventListener('click', async () =>
     view.textContent =
       `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
       `Weekly benefit (90%/50% tiered, floor/capped): ${fmtCents(result.weeklyBenefit)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('cgn-first-coverage').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('cgn-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('cgn-view');
+  const firstCoverageDate = document.getElementById('cgn-first-coverage').value;
+  const electionNoticeDeadlineIfApplicable = document.getElementById('cgn-election-deadline').value || null;
+  const daysLate = Number(document.getElementById('cgn-days-late').value) || 0;
+  const affectedBeneficiaryCount = Number(document.getElementById('cgn-beneficiary-count').value) || 0;
+  const moreThanOneFamilyMemberAffected = document.getElementById('cgn-multi-family').checked;
+  try {
+    const result = await api('/api/cobra/general-notice-calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstCoverageDate, electionNoticeDeadlineIfApplicable, daysLate, affectedBeneficiaryCount, moreThanOneFamilyMemberAffected }),
+    });
+    view.textContent =
+      `Standard 90-day deadline: ${result.standardDeadline}\n` +
+      `Applicable deadline (earlier of the two): ${result.applicableDeadline}\n` +
+      `ERISA §502(c)(1) penalty exposure: ${fmtCents(result.erisaPenaltyExposure)}\n` +
+      `IRS excise tax exposure: ${fmtCents(result.exciseTaxExposure)}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

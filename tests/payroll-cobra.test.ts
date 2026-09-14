@@ -12,6 +12,14 @@ import {
   isQualifyingTermination,
   maximumMonthlyPremium,
   qualifyingEventDurationMonths,
+  GENERAL_NOTICE_DEADLINE_DAYS,
+  ERISA_NOTICE_PENALTY_PER_DAY,
+  EXCISE_TAX_PER_DAY_SINGLE_BENEFICIARY,
+  EXCISE_TAX_PER_DAY_MULTIPLE_BENEFICIARIES,
+  generalNoticeDeadline,
+  generalNoticeDeadlineGivenPossibleElectionNotice,
+  erisaNoticePenaltyExposure,
+  exciseTaxExposure,
 } from '../payroll/cobra.ts';
 
 describe('COBRA employer applicability (payroll/cobra.ts)', () => {
@@ -75,5 +83,43 @@ describe('COBRA deadlines (payroll/cobra.ts)', () => {
 describe('COBRA premium cap (payroll/cobra.ts)', () => {
   test('the maximum premium is 102% of the plan\'s own full cost of coverage', () => {
     assert.equal(maximumMonthlyPremium(dollars(500)), dollars(510));
+  });
+});
+
+describe('COBRA general notice (payroll/cobra.ts)', () => {
+  test('the general notice deadline is 90 days after first coverage', () => {
+    assert.equal(generalNoticeDeadline('2026-01-01'), '2026-04-01');
+    assert.equal(GENERAL_NOTICE_DEADLINE_DAYS, 90);
+  });
+
+  test('with no election notice pending, the standard 90-day deadline applies', () => {
+    assert.equal(generalNoticeDeadlineGivenPossibleElectionNotice('2026-01-01', null), '2026-04-01');
+  });
+
+  test('an election notice due EARLIER than the standard 90-day deadline pulls the general notice deadline in with it', () => {
+    assert.equal(generalNoticeDeadlineGivenPossibleElectionNotice('2026-01-01', '2026-02-15'), '2026-02-15');
+  });
+
+  test('an election notice due LATER than the standard 90-day deadline does not push the general notice deadline out', () => {
+    assert.equal(generalNoticeDeadlineGivenPossibleElectionNotice('2026-01-01', '2026-06-01'), '2026-04-01');
+  });
+
+  test('ERISA penalty exposure is $110/day per affected beneficiary', () => {
+    assert.equal(erisaNoticePenaltyExposure(10, 1), 10 * ERISA_NOTICE_PENALTY_PER_DAY);
+    assert.equal(erisaNoticePenaltyExposure(10, 3), 10 * 3 * ERISA_NOTICE_PENALTY_PER_DAY);
+  });
+
+  test('ERISA penalty exposure is zero for zero days late or zero affected beneficiaries', () => {
+    assert.equal(erisaNoticePenaltyExposure(0, 3), 0);
+    assert.equal(erisaNoticePenaltyExposure(10, 0), 0);
+  });
+
+  test('excise tax uses the single-beneficiary per-day rate when only one family member is affected', () => {
+    assert.equal(exciseTaxExposure(10, false), 10 * EXCISE_TAX_PER_DAY_SINGLE_BENEFICIARY);
+  });
+
+  test('excise tax uses the family-wide per-day rate when more than one family member is affected', () => {
+    assert.equal(exciseTaxExposure(10, true), 10 * EXCISE_TAX_PER_DAY_MULTIPLE_BENEFICIARIES);
+    assert.notEqual(exciseTaxExposure(10, true), exciseTaxExposure(10, false));
   });
 });

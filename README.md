@@ -470,7 +470,22 @@ Beyond the pay-run engine itself, three more real HR pieces:
   it: COBRA's own 20-employee test is measured against the PRIOR
   calendar year's typical headcount, which this project doesn't track
   historically, so current headcount stands in — visible in the
-  ineligibility message itself when it's the reason.
+  ineligibility message itself when it's the reason. Also computes the
+  GENERAL NOTICE deadline — a separate DOL requirement (29 C.F.R.
+  § 2590.606-1), due at first coverage rather than at a qualifying event:
+  the earlier of 90 days after first becoming covered, or the date an
+  election notice would already be due (a qualifying event happening
+  almost immediately after coverage begins pulls the deadline in, rather
+  than leaving 90 days on the clock for information that's already
+  moot) — plus the two independent penalty exposures for a late notice
+  under either statute: ERISA §502(c)(1)'s court-assessed $110/day per
+  affected beneficiary (a fixed statutory maximum, confirmed NOT subject
+  to DOL's own annual inflation adjustment for 2026, unlike several other
+  ERISA penalties), and the IRC §4980B excise tax's $100/day per
+  beneficiary — or $200/day, not the $100 rate doubled, if more than one
+  family member is affected. Wired into the admin UI as its own
+  calculator, separate from the termination workflow's existing
+  qualifying-event COBRA block.
 - `payroll/fmla.ts`: FMLA job-protected leave (29 U.S.C. § 2601 et seq.),
   LIVE-VERIFIED against the Department of Labor's own Fact Sheet #28. The
   three-prong eligibility test is CONJUNCTIVE — 12 months employed, 1,250
