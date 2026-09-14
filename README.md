@@ -341,6 +341,27 @@ Beyond the pay-run engine itself, three more real HR pieces:
   programs (OregonSaves, Illinois Secure Choice, and others, each with
   different figures) remain a disclosed gap. Wired into the admin UI as a
   calculator.
+- `payroll/ilSecureChoice.ts`: Illinois Secure Choice, the state-run
+  auto-IRA program (820 ILCS 80/) — live-verified against the Illinois
+  Department of Revenue's own enforcement bulletin and the Illinois
+  State Treasurer's own program page. The natural companion to
+  `payroll/calSavers.ts` for this project's own demo company, whose home
+  state is Illinois — and a genuinely DIFFERENT set of rules, not a
+  copy: coverage requires ALL THREE of 5+ employees, 2+ years in
+  business, and no qualified plan (CalSavers has no years-in-business
+  test at all), and penalties follow a per-YEAR structure — $250/employee
+  for the first noncompliant calendar year, $500/employee for each
+  subsequent one, which need not be consecutive — rather than CalSavers'
+  own per-employee flat-plus-additional model. This module deliberately
+  reuses none of `payroll/calSavers.ts`'s own constants or functions even
+  where the concepts rhyme, the same discipline `payroll/cobra.ts`'s own
+  header applies against reusing another statute's headcount definition.
+  An employer that cures within 120 days of an IDOR notice avoids the
+  assessment entirely. DISCLOSED GAP: unlike CalSavers, no automatic
+  contribution-rate escalation could be confirmed from either primary
+  source consulted — only the flat 5% default is modeled, rather than
+  guessing an escalation exists by analogy to CalSavers. Wired into the
+  admin UI as a calculator.
 - `payroll/hsaFsaLimits.ts`: HSA (IRC §223), health FSA, and dependent-care
   FSA (§129 DCAP) annual contribution limits for 2026 — $4,400 self-only /
   $8,750 family HSA, +$1,000 catch-up at 55+ with NO upper age cutoff

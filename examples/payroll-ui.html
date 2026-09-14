@@ -447,6 +447,26 @@
   </section>
 
   <section>
+    <h2>Illinois Secure Choice</h2>
+    <p class="muted" style="margin-top:0">Covers employers with 5+ employees AND 2+ years in business AND no qualified retirement plan — all three conditions, unlike CalSavers' own single headcount test. Default auto-enrollment is 5% (no confirmed automatic escalation, unlike CalSavers). Penalties run $250/employee for the first noncompliant calendar year and $500/employee for each subsequent one (need not be consecutive) — a different structure from CalSavers' own. Curing within 120 days of an IDOR notice avoids the assessment.</p>
+    <div class="row">
+      <input id="ilsc-employee-count" type="number" placeholder="Employee count" style="width:150px" />
+      <input id="ilsc-years-business" type="number" placeholder="Years in business" style="width:160px" />
+      <label class="muted"><input type="checkbox" id="ilsc-has-plan" /> Already has a qualified plan</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="ilsc-eligible-count" type="number" placeholder="Eligible employees (penalty)" style="width:220px" />
+      <input id="ilsc-years-noncompliant" type="number" placeholder="Noncompliant calendar years" style="width:220px" value="0" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="ilsc-notice-date" type="date" />
+      <input id="ilsc-as-of-date" type="date" />
+      <button class="secondary" id="ilsc-calc-btn">Calculate</button>
+    </div>
+    <pre id="ilsc-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -1450,6 +1470,33 @@ document.getElementById('cws-calc-btn').addEventListener('click', async () => {
     view.textContent =
       (result.complianceIssues.length === 0 ? 'Statement is complete.' : 'Compliance issues:\n' + result.complianceIssues.map((i) => '- ' + i).join('\n')) +
       `\nPenalty exposure: ${fmtCents(result.penaltyExposure)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('ilsc-notice-date').value = new Date().toISOString().slice(0, 10);
+document.getElementById('ilsc-as-of-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('ilsc-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('ilsc-view');
+  const employeeCount = Number(document.getElementById('ilsc-employee-count').value) || 0;
+  const yearsInBusiness = Number(document.getElementById('ilsc-years-business').value) || 0;
+  const hasQualifiedRetirementPlan = document.getElementById('ilsc-has-plan').checked;
+  const eligibleEmployeeCount = Number(document.getElementById('ilsc-eligible-count').value) || 0;
+  const noncompliantCalendarYears = Number(document.getElementById('ilsc-years-noncompliant').value) || 0;
+  const noticeIssueDate = document.getElementById('ilsc-notice-date').value;
+  const asOfDate = document.getElementById('ilsc-as-of-date').value;
+  try {
+    const result = await api('/api/il-secure-choice/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCount, yearsInBusiness, hasQualifiedRetirementPlan, eligibleEmployeeCount, noncompliantCalendarYears, noticeIssueDate, asOfDate }),
+    });
+    view.textContent =
+      `Secure Choice mandatory: ${result.mandatory ? 'YES' : 'No'}\n` +
+      `Penalty exposure: ${fmtCents(result.penaltyExposure)}\n` +
+      `Cure deadline (120 days after notice): ${result.cureDeadline}\n` +
+      `Within cure period: ${result.withinCurePeriod ? 'YES' : 'No'}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

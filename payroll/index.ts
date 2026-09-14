@@ -285,6 +285,18 @@ export {
   caWageStatementPenaltyExposure,
 } from './caWageStatement.ts';
 export type { CaHourlyRateLine, CaWageStatementData } from './caWageStatement.ts';
+export {
+  IL_SECURE_CHOICE_EMPLOYER_THRESHOLD,
+  IL_SECURE_CHOICE_MIN_YEARS_IN_BUSINESS,
+  IL_SECURE_CHOICE_DEFAULT_CONTRIBUTION_RATE,
+  IL_SECURE_CHOICE_TIER1_PENALTY_PER_EMPLOYEE,
+  IL_SECURE_CHOICE_TIER2_PENALTY_PER_EMPLOYEE,
+  IL_SECURE_CHOICE_CURE_PERIOD_DAYS,
+  isIlSecureChoiceMandatory,
+  ilSecureChoicePenaltyExposure,
+  ilSecureChoiceCureDeadline,
+  isWithinIlSecureChoiceCurePeriod,
+} from './ilSecureChoice.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

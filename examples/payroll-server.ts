@@ -98,6 +98,10 @@ import {
   waitingTimePenaltyAmount,
   caWageStatementComplianceIssues,
   caWageStatementPenaltyExposure,
+  isIlSecureChoiceMandatory,
+  ilSecureChoicePenaltyExposure,
+  ilSecureChoiceCureDeadline,
+  isWithinIlSecureChoiceCurePeriod,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1886,6 +1890,29 @@ const server = createServer(async (req, res) => {
       sendJson(res, 200, {
         complianceIssues: issues,
         penaltyExposure: caWageStatementPenaltyExposure(body.payPeriodsWithViolations),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Illinois Secure Choice calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/il-secure-choice/calculator') {
+      const body = await parseJsonBody<{
+        employeeCount: number;
+        yearsInBusiness: number;
+        hasQualifiedRetirementPlan: boolean;
+        eligibleEmployeeCount: number;
+        noncompliantCalendarYears: number;
+        noticeIssueDate: string;
+        asOfDate: string;
+      }>(req);
+      sendJson(res, 200, {
+        mandatory: isIlSecureChoiceMandatory(body.employeeCount, body.yearsInBusiness, body.hasQualifiedRetirementPlan),
+        penaltyExposure: ilSecureChoicePenaltyExposure(body.eligibleEmployeeCount, body.noncompliantCalendarYears),
+        cureDeadline: ilSecureChoiceCureDeadline(body.noticeIssueDate),
+        withinCurePeriod: isWithinIlSecureChoiceCurePeriod(body.noticeIssueDate, body.asOfDate),
       });
       return;
     }
