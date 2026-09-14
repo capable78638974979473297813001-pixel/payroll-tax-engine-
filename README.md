@@ -424,6 +424,34 @@ Beyond the pay-run engine itself, three more real HR pieces:
   duty-tracking model to check against, the same kind of scope boundary
   `payroll/warnAct.ts`'s own exception guidance draws. Wired into the
   admin UI as a calculator.
+- `payroll/caPayDataReport.ts`: California pay data reporting (Gov. Code
+  § 12999) — live-verified by reading CRD's own "California Pay Data
+  Reporting Handbook, Reporting Year 2025" directly; every constant here
+  (the 12 pay bands, the 10 job categories, the penalties, the filing-
+  deadline rule) is copied verbatim from that handbook's own tables
+  rather than reconstructed from a secondary source, since earlier
+  research surfaced conflicting third-party figures for the top pay band
+  boundary ($208,000 vs. $239,200) that only the primary handbook
+  resolved. TWO INDEPENDENT REPORT TYPES, each with its own 100-employee
+  test never combined with the other: a payroll employee report (100+ of
+  the employer's own employees) and a labor contractor employee report
+  (100+ workers supplied through labor contractors) —
+  `caPayDataReportRequired()` returns both answers rather than a single
+  boolean, since collapsing them would misrepresent an employer owing
+  only one report type as owing neither or both. `caPayDataFilingDeadline()`
+  computes the second Wednesday of May in the year after the reporting
+  year, hand-verified to reproduce the handbook's own stated May 13, 2026
+  deadline for Reporting Year 2025 exactly. Penalties run up to $100/
+  employee for a first failure to file, up to $200/employee for a
+  subsequent one — court-ordered ceilings, not flat mandatory amounts.
+  Does not model the "integrated enterprise" test for combining
+  affiliated entities' headcounts — a multi-factor judgment call with no
+  closed-form answer, the same kind of scope boundary
+  `payroll/warnAct.ts`'s own exception guidance draws — nor the race/
+  ethnicity/sex reporting categories or mean/median hourly rate
+  calculations, which are aggregation and self-identification questions
+  this project's own `Employee` type has no fields to answer. Wired into
+  the admin UI as a calculator.
 - `payroll/onboarding.ts`: a candidate pipeline (applied → screening →
   interviewing → offer → hired/rejected/declined) with an explicit state
   machine — an impossible jump (straight from "applied" to "hired") throws

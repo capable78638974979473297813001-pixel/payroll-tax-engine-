@@ -529,6 +529,18 @@ export {
   tipCreditShortfall,
   isEligibleForTipPool,
 } from './tipCredit.ts';
+export type { CaPayDataJobCategory, CaPayDataReportRequirement } from './caPayDataReport.ts';
+export {
+  CA_PAY_DATA_EMPLOYER_THRESHOLD,
+  CA_PAY_DATA_JOB_CATEGORIES,
+  CA_PAY_DATA_PAY_BANDS,
+  CA_PAY_DATA_PENALTY_FIRST_FAILURE,
+  CA_PAY_DATA_PENALTY_SUBSEQUENT_FAILURE,
+  caPayDataReportRequired,
+  classifyCaPayBand,
+  caPayDataFilingDeadline,
+  caPayDataPenaltyExposure,
+} from './caPayDataReport.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

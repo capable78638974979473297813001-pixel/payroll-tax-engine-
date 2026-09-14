@@ -107,6 +107,10 @@ import {
   stateTipCredit,
   tipCreditShortfall,
   isEligibleForTipPool,
+  caPayDataReportRequired,
+  classifyCaPayBand,
+  caPayDataFilingDeadline,
+  caPayDataPenaltyExposure,
   isWithinIlSecureChoiceCurePeriod,
   isPflEligible,
   nyPflWeeklyBenefit,
@@ -2207,6 +2211,28 @@ const server = createServer(async (req, res) => {
           customarilyReceivesTips: body.customarilyReceivesTips,
           employerTakesTipCredit: body.employerTakesTipCredit,
         }),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // California pay data reporting calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/ca-pay-data-report/calculator') {
+      const body = await parseJsonBody<{
+        payrollEmployeeCount: number;
+        laborContractorEmployeeCount: number;
+        annualEarningsDollars: number;
+        reportingYear: number;
+        penaltyEmployeeCount: number;
+        isSubsequentFailure: boolean;
+      }>(req);
+      sendJson(res, 200, {
+        requirement: caPayDataReportRequired(body.payrollEmployeeCount, body.laborContractorEmployeeCount),
+        payBand: classifyCaPayBand(dollars(body.annualEarningsDollars)),
+        filingDeadline: caPayDataFilingDeadline(body.reportingYear),
+        penaltyExposure: caPayDataPenaltyExposure(body.penaltyEmployeeCount, body.isSubsequentFailure),
       });
       return;
     }
