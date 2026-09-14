@@ -801,6 +801,27 @@ Beyond the pay-run engine itself, three more real HR pieces:
   genuinely different, additional set of requirements from
   `payroll/nyWageNotice.ts`'s own New York rules — California only.
   Wired into the admin UI as a calculator.
+- `payroll/nyPfl.ts`: New York Paid Family Leave — live-verified against
+  the Workers' Compensation Board's own 2026 press release and
+  paidfamilyleave.ny.gov's own eligibility page. WHAT THIS MODULE
+  DELIBERATELY DOES NOT DO: compute the payroll WITHHOLDING that funds
+  PFL — this project's own core tax engine already gets that exactly
+  right (`data/states/NY-2026.json`'s `statePaidLeaveEmployee` config,
+  0.432% up to a $411.91 annual cap, dispatched through
+  `src/taxes/state.ts`'s generic `statePaidLeaveEmployeeTax()`, the same
+  mechanism Minnesota's own Paid Leave program uses) — reimplementing it
+  here would risk the "two different, possibly divergent, calculations
+  of the same figure" failure mode `payroll/cobra.ts`'s own header
+  warns against. What this module actually adds: eligibility (full-time,
+  20+ hours/week, qualifies after 26 CONSECUTIVE weeks; part-time
+  qualifies after 175 days worked, which need NOT be consecutive and can
+  span more than one year) and the BENEFIT an eligible employee actually
+  receives while on leave — 67% of their own average weekly wage, capped
+  at 67% of the 2026 statewide average weekly wage ($1,228.53/week,
+  reproducing the WCB's own published figure exactly) — a wage-
+  replacement payment from the state's PFL carrier, not a payroll
+  withholding, and genuinely not modeled anywhere else in this project.
+  Wired into the admin UI as a calculator.
 - `payroll/complianceDashboard.ts`: one screen for every compliance check
   above — minimum wage, Form I-9, E-Verify, PRWORA new-hire reporting, and
   state registration — pure aggregation, the same "no new business logic,

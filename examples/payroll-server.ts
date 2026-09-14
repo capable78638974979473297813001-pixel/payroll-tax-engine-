@@ -102,6 +102,8 @@ import {
   ilSecureChoicePenaltyExposure,
   ilSecureChoiceCureDeadline,
   isWithinIlSecureChoiceCurePeriod,
+  isPflEligible,
+  nyPflWeeklyBenefit,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1913,6 +1915,24 @@ const server = createServer(async (req, res) => {
         penaltyExposure: ilSecureChoicePenaltyExposure(body.eligibleEmployeeCount, body.noncompliantCalendarYears),
         cureDeadline: ilSecureChoiceCureDeadline(body.noticeIssueDate),
         withinCurePeriod: isWithinIlSecureChoiceCurePeriod(body.noticeIssueDate, body.asOfDate),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // New York Paid Family Leave calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/ny-pfl/calculator') {
+      const body = await parseJsonBody<{
+        hoursPerWeek: number;
+        consecutiveWeeksEmployed: number;
+        totalDaysWorked: number;
+        averageWeeklyWageDollars: number;
+      }>(req);
+      sendJson(res, 200, {
+        eligible: isPflEligible(body.hoursPerWeek, body.consecutiveWeeksEmployed, body.totalDaysWorked),
+        weeklyBenefit: nyPflWeeklyBenefit(dollars(body.averageWeeklyWageDollars)),
       });
       return;
     }

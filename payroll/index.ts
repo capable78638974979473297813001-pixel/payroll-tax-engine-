@@ -297,6 +297,19 @@ export {
   ilSecureChoiceCureDeadline,
   isWithinIlSecureChoiceCurePeriod,
 } from './ilSecureChoice.ts';
+export {
+  NY_PFL_FULL_TIME_HOURS_PER_WEEK_THRESHOLD,
+  NY_PFL_FULL_TIME_ELIGIBILITY_WEEKS,
+  NY_PFL_PART_TIME_ELIGIBILITY_DAYS,
+  NY_PFL_STATEWIDE_AVERAGE_WEEKLY_WAGE_2026,
+  NY_PFL_WAGE_REPLACEMENT_RATE,
+  NY_PFL_MAX_WEEKLY_BENEFIT_2026,
+  NY_PFL_MAX_LEAVE_WEEKS,
+  isFullTimePflEligible,
+  isPartTimePflEligible,
+  isPflEligible,
+  nyPflWeeklyBenefit,
+} from './nyPfl.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';
