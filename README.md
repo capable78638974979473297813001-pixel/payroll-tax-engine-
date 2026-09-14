@@ -822,6 +822,24 @@ Beyond the pay-run engine itself, three more real HR pieces:
   replacement payment from the state's PFL carrier, not a payroll
   withholding, and genuinely not modeled anywhere else in this project.
   Wired into the admin UI as a calculator.
+- `payroll/njFli.ts`: New Jersey Family Leave Insurance — live-verified
+  against NJ DOL's own 2026 rate announcement and
+  myleavebenefits.nj.gov's own FAQ. Same scope boundary as
+  `payroll/nyPfl.ts` and for the same reason: this project's own core tax
+  engine already correctly computes the FLI/TDI payroll withholding
+  (`data/states/NJ-2026.json`'s own `statePaidLeaveEmployee` config,
+  sharing NJ's $171,100 TDI/FLI wage base), so this module adds only
+  eligibility (either 20+ "base weeks" each earning at least $310, OR
+  $15,500+ total base-year earnings regardless of weekly distribution —
+  two independent paths, not both required) and the wage-replacement
+  BENEFIT — 85% of average weekly wage, capped at $1,119/week for 2026
+  (`njFliWeeklyBenefit()` reproduces NJ DOL's own published figure
+  exactly). Also tracks NJ's own two SEPARATE duration caps — 12 weeks
+  for one continuous period of leave, or up to 56 days (8 weeks) for
+  intermittent leave, within a 12-month period — as two independent
+  countdowns (`njFliRemainingContinuousWeeks()`/
+  `njFliRemainingIntermittentDays()`), not a single pool split two ways.
+  Wired into the admin UI as a calculator.
 - `payroll/complianceDashboard.ts`: one screen for every compliance check
   above — minimum wage, Form I-9, E-Verify, PRWORA new-hire reporting, and
   state registration — pure aggregation, the same "no new business logic,

@@ -104,6 +104,10 @@ import {
   isWithinIlSecureChoiceCurePeriod,
   isPflEligible,
   nyPflWeeklyBenefit,
+  isNjFliEligible,
+  njFliWeeklyBenefit,
+  njFliRemainingContinuousWeeks,
+  njFliRemainingIntermittentDays,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -1933,6 +1937,28 @@ const server = createServer(async (req, res) => {
       sendJson(res, 200, {
         eligible: isPflEligible(body.hoursPerWeek, body.consecutiveWeeksEmployed, body.totalDaysWorked),
         weeklyBenefit: nyPflWeeklyBenefit(dollars(body.averageWeeklyWageDollars)),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // New Jersey Family Leave Insurance calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/nj-fli/calculator') {
+      const body = await parseJsonBody<{
+        baseWeeksWorked: number;
+        weeklyEarningsDollars: number;
+        baseYearEarningsDollars: number;
+        averageWeeklyWageDollars: number;
+        continuousWeeksAlreadyUsed: number;
+        intermittentDaysAlreadyUsed: number;
+      }>(req);
+      sendJson(res, 200, {
+        eligible: isNjFliEligible(body.baseWeeksWorked, dollars(body.weeklyEarningsDollars), dollars(body.baseYearEarningsDollars)),
+        weeklyBenefit: njFliWeeklyBenefit(dollars(body.averageWeeklyWageDollars)),
+        remainingContinuousWeeks: njFliRemainingContinuousWeeks(body.continuousWeeksAlreadyUsed),
+        remainingIntermittentDays: njFliRemainingIntermittentDays(body.intermittentDaysAlreadyUsed),
       });
       return;
     }

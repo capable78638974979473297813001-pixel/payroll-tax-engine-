@@ -310,6 +310,21 @@ export {
   isPflEligible,
   nyPflWeeklyBenefit,
 } from './nyPfl.ts';
+export {
+  NJ_FLI_MAX_WEEKLY_BENEFIT_2026,
+  NJ_FLI_WAGE_REPLACEMENT_RATE,
+  NJ_FLI_MAX_CONTINUOUS_LEAVE_WEEKS,
+  NJ_FLI_MAX_INTERMITTENT_LEAVE_DAYS,
+  NJ_FLI_MIN_BASE_WEEKS,
+  NJ_FLI_MIN_WEEKLY_EARNINGS_2026,
+  NJ_FLI_MIN_BASE_YEAR_EARNINGS_2026,
+  isNjFliEligibleByBaseWeeks,
+  isNjFliEligibleByAnnualEarnings,
+  isNjFliEligible,
+  njFliWeeklyBenefit,
+  njFliRemainingContinuousWeeks,
+  njFliRemainingIntermittentDays,
+} from './njFli.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

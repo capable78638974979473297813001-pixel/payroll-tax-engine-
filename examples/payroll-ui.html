@@ -482,6 +482,23 @@
   </section>
 
   <section>
+    <h2>New Jersey Family Leave Insurance</h2>
+    <p class="muted" style="margin-top:0">Eligible via 20+ base weeks each earning $310+, OR $15,500+ in total base-year earnings. The benefit is 85% of average weekly wage, capped at $1,119/week for 2026. Up to 12 weeks continuous, or up to 56 days (8 weeks) intermittent, within a 12-month period — separate caps, not additive. As with NY PFL, this project's core tax engine already computes the FLI payroll withholding correctly; this panel is the benefit side only.</p>
+    <div class="row">
+      <input id="njfli-base-weeks" type="number" placeholder="Base weeks worked" style="width:160px" />
+      <input id="njfli-weekly-earnings" type="number" placeholder="Weekly earnings ($)" style="width:180px" />
+      <input id="njfli-annual-earnings" type="number" placeholder="Base-year earnings ($)" style="width:200px" />
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="njfli-avg-wage" type="number" placeholder="Average weekly wage ($)" style="width:220px" />
+      <input id="njfli-cont-used" type="number" placeholder="Continuous weeks already used" style="width:230px" value="0" />
+      <input id="njfli-intermit-used" type="number" placeholder="Intermittent days already used" style="width:230px" value="0" />
+      <button class="secondary" id="njfli-calc-btn">Calculate</button>
+    </div>
+    <pre id="njfli-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -1531,6 +1548,29 @@ document.getElementById('nypfl-calc-btn').addEventListener('click', async () => 
     view.textContent =
       `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
       `Weekly benefit (67%, capped): ${fmtCents(result.weeklyBenefit)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('njfli-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('njfli-view');
+  const baseWeeksWorked = Number(document.getElementById('njfli-base-weeks').value) || 0;
+  const weeklyEarningsDollars = Number(document.getElementById('njfli-weekly-earnings').value) || 0;
+  const baseYearEarningsDollars = Number(document.getElementById('njfli-annual-earnings').value) || 0;
+  const averageWeeklyWageDollars = Number(document.getElementById('njfli-avg-wage').value) || 0;
+  const continuousWeeksAlreadyUsed = Number(document.getElementById('njfli-cont-used').value) || 0;
+  const intermittentDaysAlreadyUsed = Number(document.getElementById('njfli-intermit-used').value) || 0;
+  try {
+    const result = await api('/api/nj-fli/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ baseWeeksWorked, weeklyEarningsDollars, baseYearEarningsDollars, averageWeeklyWageDollars, continuousWeeksAlreadyUsed, intermittentDaysAlreadyUsed }),
+    });
+    view.textContent =
+      `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
+      `Weekly benefit (85%, capped): ${fmtCents(result.weeklyBenefit)}\n` +
+      `Remaining continuous weeks: ${result.remainingContinuousWeeks}\n` +
+      `Remaining intermittent days: ${result.remainingIntermittentDays}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
