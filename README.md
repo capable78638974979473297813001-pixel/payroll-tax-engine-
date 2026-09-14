@@ -402,6 +402,27 @@ Beyond the pay-run engine itself, three more real HR pieces:
   recorded here. Wired into the admin UI as "+ Add employee directly" on
   the Employees section, backed by a new `POST /api/companies/:id/employees`
   route, audit-logged the same as a pipeline hire.
+- `payroll/fairChanceAct.ts`: California's Fair Chance Act ("ban the
+  box," Gov. Code § 12952) — live-verified by reading CRD's own FAQ PDF
+  directly. Covers employers with 5+ employees; criminal history may
+  only be inquired about once a conditional offer has been made. If an
+  employer intends to rescind an offer over conviction history, the
+  applicant gets at least 5 BUSINESS days to respond to the preliminary
+  notice, extended by 5 MORE business days if they dispute the
+  conviction-history report within the original window. A mailed notice
+  without delivery confirmation is deemed received 5/10/20 CALENDAR days
+  later depending on whether the address is in California, elsewhere in
+  the US, or international (2 C.C.R. § 11017.01) — genuinely different
+  day-counting rules (business vs. calendar) within the same statute's
+  own timeline, each modeled with its own arithmetic rather than reusing
+  one for the other. Deliberately does NOT evaluate the individualized-
+  assessment factors themselves (the nature and gravity of the offense,
+  time elapsed, and the nature of the job) — a fact-specific judgment
+  about a real person's history and a real job's duties, the same kind
+  of scope boundary `payroll/warnAct.ts`'s own exception guidance draws.
+  California only — other jurisdictions' own ban-the-box ordinances
+  (including Los Angeles's own separate municipal ordinance) remain a
+  disclosed gap. Wired into the admin UI as a calculator.
 - `payroll/termination.ts`: final-paycheck timing and PTO/vacation payout
   at offboarding — genuinely different rules depending on WHY someone
   left, which federal law does not set a deadline for at all (FLSA has no

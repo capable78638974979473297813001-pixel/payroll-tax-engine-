@@ -123,6 +123,11 @@ import {
   generalNoticeDeadlineGivenPossibleElectionNotice,
   erisaNoticePenaltyExposure,
   exciseTaxExposure,
+  isFairChanceActCoveredEmployer,
+  isCriminalHistoryInquiryPermitted,
+  fairChanceResponseDeadline,
+  fairChanceExtendedResponseDeadline,
+  fairChanceDeemedReceivedDate,
   depositDeadlineFor,
   determineAleStatus,
   determineDepositorSchedule,
@@ -176,6 +181,7 @@ import type { HdhpCoverageTier } from '../payroll/hsaFsaLimits.ts';
 import type { NyWageBasisOfPay } from '../payroll/nyWageNotice.ts';
 import type { BackupWithholdingPaymentType } from '../payroll/backupWithholding.ts';
 import type { CaHourlyRateLine } from '../payroll/caWageStatement.ts';
+import type { FairChanceMailingAddressType } from '../payroll/fairChanceAct.ts';
 import type { FlsaExemptionCategory } from '../payroll/flsaExemption.ts';
 import type { I9Record } from '../payroll/i9.ts';
 import type { Candidate, CandidateStage, OfferDetails } from '../payroll/onboarding.ts';
@@ -2047,6 +2053,28 @@ const server = createServer(async (req, res) => {
         applicableDeadline: generalNoticeDeadlineGivenPossibleElectionNotice(body.firstCoverageDate, body.electionNoticeDeadlineIfApplicable),
         erisaPenaltyExposure: erisaNoticePenaltyExposure(body.daysLate, body.affectedBeneficiaryCount),
         exciseTaxExposure: exciseTaxExposure(body.daysLate, body.moreThanOneFamilyMemberAffected),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // California Fair Chance Act calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/fair-chance-act/calculator') {
+      const body = await parseJsonBody<{
+        employeeCount: number;
+        conditionalOfferMade: boolean;
+        preliminaryNoticeDate: string;
+        mailedDate: string;
+        addressType: FairChanceMailingAddressType;
+      }>(req);
+      sendJson(res, 200, {
+        coveredEmployer: isFairChanceActCoveredEmployer(body.employeeCount),
+        inquiryPermitted: isCriminalHistoryInquiryPermitted(body.conditionalOfferMade),
+        responseDeadline: fairChanceResponseDeadline(body.preliminaryNoticeDate),
+        extendedResponseDeadline: fairChanceExtendedResponseDeadline(body.preliminaryNoticeDate),
+        deemedReceivedDate: fairChanceDeemedReceivedDate(body.mailedDate, body.addressType),
       });
       return;
     }

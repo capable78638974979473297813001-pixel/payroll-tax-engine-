@@ -378,6 +378,22 @@ export {
   waPfmlTierThreshold,
   waPfmlWeeklyBenefit,
 } from './waPfml.ts';
+export {
+  FAIR_CHANCE_ACT_EMPLOYER_THRESHOLD,
+  FAIR_CHANCE_MIN_RESPONSE_BUSINESS_DAYS,
+  FAIR_CHANCE_DISPUTE_EXTENSION_BUSINESS_DAYS,
+  FAIR_CHANCE_DEEMED_RECEIVED_DAYS_CALIFORNIA,
+  FAIR_CHANCE_DEEMED_RECEIVED_DAYS_OTHER_US,
+  FAIR_CHANCE_DEEMED_RECEIVED_DAYS_INTERNATIONAL,
+  FAIR_CHANCE_COMPLAINT_DEADLINE_YEARS,
+  isFairChanceActCoveredEmployer,
+  isCriminalHistoryInquiryPermitted,
+  fairChanceResponseDeadline,
+  fairChanceExtendedResponseDeadline,
+  fairChanceDeemedReceivedDate,
+  fairChanceComplaintDeadline,
+} from './fairChanceAct.ts';
+export type { FairChanceMailingAddressType } from './fairChanceAct.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

@@ -554,6 +554,26 @@
   </section>
 
   <section>
+    <h2>California Fair Chance Act (ban the box)</h2>
+    <p class="muted" style="margin-top:0">Covers employers with 5+ employees. Criminal history may only be inquired about once a conditional offer has been made. If rescinding an offer over conviction history, an applicant gets at least 5 business days to respond, extended by 5 more if they dispute the report. A mailed notice without delivery confirmation is deemed received 5/10/20 calendar days later depending on the address. This project doesn't evaluate the individualized-assessment factors themselves (nature of offense, time elapsed, nature of job) — a fact-specific judgment.</p>
+    <div class="row">
+      <input id="fca-employee-count" type="number" placeholder="Employee count" style="width:150px" />
+      <label class="muted"><input type="checkbox" id="fca-conditional-offer" /> Conditional offer made</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <input id="fca-notice-date" type="date" placeholder="Preliminary notice date" />
+      <input id="fca-mailed-date" type="date" placeholder="Mailed date" />
+      <select id="fca-address-type">
+        <option value="california">California address</option>
+        <option value="other_us">Other US address</option>
+        <option value="international">International address</option>
+      </select>
+      <button class="secondary" id="fca-calc-btn">Calculate</button>
+    </div>
+    <pre id="fca-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -1708,6 +1728,32 @@ document.getElementById('cgn-calc-btn').addEventListener('click', async () => {
       `Applicable deadline (earlier of the two): ${result.applicableDeadline}\n` +
       `ERISA §502(c)(1) penalty exposure: ${fmtCents(result.erisaPenaltyExposure)}\n` +
       `IRS excise tax exposure: ${fmtCents(result.exciseTaxExposure)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('fca-notice-date').value = new Date().toISOString().slice(0, 10);
+document.getElementById('fca-mailed-date').value = new Date().toISOString().slice(0, 10);
+
+document.getElementById('fca-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('fca-view');
+  const employeeCount = Number(document.getElementById('fca-employee-count').value) || 0;
+  const conditionalOfferMade = document.getElementById('fca-conditional-offer').checked;
+  const preliminaryNoticeDate = document.getElementById('fca-notice-date').value;
+  const mailedDate = document.getElementById('fca-mailed-date').value;
+  const addressType = document.getElementById('fca-address-type').value;
+  try {
+    const result = await api('/api/fair-chance-act/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeCount, conditionalOfferMade, preliminaryNoticeDate, mailedDate, addressType }),
+    });
+    view.textContent =
+      `Covered employer (5+): ${result.coveredEmployer ? 'YES' : 'No'}\n` +
+      `Criminal history inquiry permitted: ${result.inquiryPermitted ? 'YES' : 'No'}\n` +
+      `Response deadline (5 business days): ${result.responseDeadline}\n` +
+      `Extended response deadline (if disputed): ${result.extendedResponseDeadline}\n` +
+      `Deemed-received date for mailed notice: ${result.deemedReceivedDate}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
