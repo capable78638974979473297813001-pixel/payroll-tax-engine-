@@ -114,6 +114,8 @@ import {
   cfraHoursEntitlement,
   cfraHoursRemaining,
   cfraDesignatedPersonsRemaining,
+  isWaPfmlEligible,
+  waPfmlWeeklyBenefit,
   compute1095CForEmployee,
   computeComplianceDashboard,
   continuationCoverageEndDate,
@@ -2007,6 +2009,19 @@ const server = createServer(async (req, res) => {
         totalEntitlementHours,
         remainingHours: cfraHoursRemaining(totalEntitlementHours, body.hoursUsedThisPeriod),
         remainingDesignatedPersons: cfraDesignatedPersonsRemaining(body.designatedPersonsUsedThisPeriod),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Washington PFML calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/wa-pfml/calculator') {
+      const body = await parseJsonBody<{ hoursWorkedInQualifyingPeriod: number; averageWeeklyWageDollars: number }>(req);
+      sendJson(res, 200, {
+        eligible: isWaPfmlEligible(body.hoursWorkedInQualifyingPeriod),
+        weeklyBenefit: waPfmlWeeklyBenefit(dollars(body.averageWeeklyWageDollars)),
       });
       return;
     }

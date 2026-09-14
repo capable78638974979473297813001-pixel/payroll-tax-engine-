@@ -355,6 +355,21 @@ export {
   cfraDesignatedPersonsRemaining,
 } from './cfra.ts';
 export type { CfraEligibilityInput, CfraEligibilityResult } from './cfra.ts';
+export {
+  WA_PFML_STATE_AVERAGE_WEEKLY_WAGE_2026,
+  WA_PFML_LOWER_TIER_REPLACEMENT_RATE,
+  WA_PFML_UPPER_TIER_REPLACEMENT_RATE,
+  WA_PFML_MAX_WEEKLY_BENEFIT_2026,
+  WA_PFML_MIN_WEEKLY_BENEFIT_2026,
+  WA_PFML_MIN_HOURS_WORKED,
+  WA_PFML_QUALIFYING_PERIOD_MONTHS,
+  WA_PFML_FAMILY_BONDING_MAX_WEEKS,
+  WA_PFML_MULTIPLE_QUALIFYING_EVENTS_MAX_WEEKS,
+  WA_PFML_PREGNANCY_COMPLICATIONS_MAX_WEEKS,
+  isWaPfmlEligible,
+  waPfmlTierThreshold,
+  waPfmlWeeklyBenefit,
+} from './waPfml.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

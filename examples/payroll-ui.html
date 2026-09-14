@@ -527,6 +527,17 @@
   </section>
 
   <section>
+    <h2>Washington PFML</h2>
+    <p class="muted" style="margin-top:0">Eligible with 820+ hours worked in a rolling 12-month qualifying period. A third distinct benefit formula in this project: 90% of average weekly wage up to half the 2026 state average weekly wage ($915), plus 50% above that, capped at $1,647/week — but with its own $100/week floor, except an employee earning under $100/week gets their full wage instead of the floor. This project's core tax engine already computes the PFML payroll withholding correctly; this panel is the benefit side only.</p>
+    <div class="row">
+      <input id="wapfml-hours" type="number" placeholder="Hours worked (qualifying period)" style="width:250px" />
+      <input id="wapfml-avg-wage" type="number" placeholder="Average weekly wage ($)" style="width:220px" />
+      <button class="secondary" id="wapfml-calc-btn">Calculate</button>
+    </div>
+    <pre id="wapfml-view"></pre>
+  </section>
+
+  <section>
     <h2>Form 1095-C</h2>
     <p class="muted" style="margin-top:0">This project has no month-by-month coverage-offer tracking — the terms below are treated as constant for every month the employee was employed in the chosen year. See payroll/form1095c.ts's own header for what that assumes away.</p>
     <div class="row">
@@ -1640,6 +1651,23 @@ document.getElementById('cfra-calc-btn').addEventListener('click', async () => {
       `\nTotal entitlement hours: ${result.totalEntitlementHours}\n` +
       `Remaining hours: ${result.remainingHours}\n` +
       `Remaining designated persons: ${result.remainingDesignatedPersons}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('wapfml-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('wapfml-view');
+  const hoursWorkedInQualifyingPeriod = Number(document.getElementById('wapfml-hours').value) || 0;
+  const averageWeeklyWageDollars = Number(document.getElementById('wapfml-avg-wage').value) || 0;
+  try {
+    const result = await api('/api/wa-pfml/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hoursWorkedInQualifyingPeriod, averageWeeklyWageDollars }),
+    });
+    view.textContent =
+      `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
+      `Weekly benefit (90%/50% tiered, floor/capped): ${fmtCents(result.weeklyBenefit)}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }

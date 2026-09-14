@@ -881,6 +881,28 @@ Beyond the pay-run engine itself, three more real HR pieces:
   first module's own benefit output, so the two are exposed as separate
   functions rather than one that hides the dependency). Wired into the
   admin UI as a calculator.
+- `payroll/waPfml.ts`: Washington Paid Family and Medical Leave — the
+  same withholding/benefit split as `payroll/nyPfl.ts`,
+  `payroll/njFli.ts`, and `payroll/maPfml.ts` (the core tax engine
+  already correctly computes the withholding, per
+  `data/states/WA-2026.json`'s own config, where employer and employee
+  split BOTH portions proportionally — genuinely different from
+  Massachusetts, which funds family leave entirely from the employee).
+  A THIRD distinct benefit formula among this project's state PFL
+  modules: like Massachusetts, Washington uses a two-tier calculation,
+  but at different percentages (90%/50%, not 80%/50%) — and Washington's
+  own statute (RCW 50A.15.020, quoted directly) adds something none of
+  the other three have: an explicit $100/week minimum benefit, with its
+  own carve-out that an employee earning under $100/week gets their full
+  wage instead of the floor (paying $100 to someone who earned $50 would
+  overpay them, not just meet a minimum). Eligible with 820+ hours worked
+  in a rolling 12-month qualifying period — no dollar-earnings test at
+  all, unlike NJ's or MA's own eligibility tests. Washington's own
+  duration rules are the most varied of any state module here (medical
+  leave is open-ended "as medically necessary," family bonding 12 weeks,
+  combined qualifying events up to 16, pregnancy/birth complications up
+  to 18) and are exposed as separate constants rather than one summary
+  figure. Wired into the admin UI as a calculator.
 - `payroll/complianceDashboard.ts`: one screen for every compliance check
   above — minimum wage, Form I-9, E-Verify, PRWORA new-hire reporting, and
   state registration — pure aggregation, the same "no new business logic,
