@@ -143,6 +143,8 @@ import {
   orPaidLeaveMaxWeeksAvailable,
   ctPaidLeaveWeeklyBenefit,
   isCtPaidLeaveEligible,
+  mePfmlWeeklyBenefit,
+  isMePfmlEligible,
   depositDeadlineFor,
   determineAleStatus,
   determineDepositorSchedule,
@@ -2066,6 +2068,19 @@ const server = createServer(async (req, res) => {
           body.isCurrentlyEmployed,
           body.weeksSinceSeparation,
         ),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // Maine PFML calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/me-pfml/calculator') {
+      const body = await parseJsonBody<{ averageWeeklyWageDollars: number; basePeriodEarningsDollars: number }>(req);
+      sendJson(res, 200, {
+        weeklyBenefit: mePfmlWeeklyBenefit(dollars(body.averageWeeklyWageDollars)),
+        eligible: isMePfmlEligible(dollars(body.basePeriodEarningsDollars)),
       });
       return;
     }

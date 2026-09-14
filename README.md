@@ -1050,6 +1050,24 @@ Beyond the pay-run engine itself, three more real HR pieces:
   weeks. Same withholding/benefit scope split as its five PFL siblings —
   `data/states/CT-2026.json`'s own config already computes CTPL's payroll
   withholding correctly. Wired into the admin UI as a calculator.
+- `payroll/mePfml.ts`: Maine Paid Family and Medical Leave — LIVE-VERIFIED
+  by reading MDOL's own April 2026 employer webinar deck directly, whose
+  three worked benefit examples are reproduced HERE to the exact dollar
+  in this module's own test file. A SEVENTH distinct benefit formula (90%
+  below 50% of the state average weekly wage, 66% above — a fourth
+  distinct percentage pairing among this project's seven state PFL
+  modules), and the ONLY sibling module that rounds DOWN to the whole
+  dollar at every step rather than to the nearest cent, matching Maine's
+  own published worksheet exactly (`mePfmlFloorToDollar()` makes this
+  explicit) — e.g. 66% of $497 is $328.02, but the state's own example
+  reports the tier as exactly $328. The maximum weekly benefit is the
+  full, un-floored state average weekly wage itself, not a percentage of
+  it the way `payroll/coFamli.ts` and `payroll/orPaidLeave.ts` define
+  their own caps. Eligibility is a single test — base-period earnings of
+  at least 6 times the SAWW. Same withholding/benefit scope split as its
+  six PFL siblings — `data/states/ME-2026.json`'s own config already
+  computes Maine PFML's payroll withholding correctly. Wired into the
+  admin UI as a calculator.
 - `payroll/complianceDashboard.ts`: one screen for every compliance check
   above — minimum wage, Form I-9, E-Verify, PRWORA new-hire reporting, and
   state registration — pure aggregation, the same "no new business logic,

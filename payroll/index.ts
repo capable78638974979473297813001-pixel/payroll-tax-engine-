@@ -469,6 +469,19 @@ export {
   ctMeetsRecentEmploymentTest,
   isCtPaidLeaveEligible,
 } from './ctPaidLeave.ts';
+export {
+  ME_PFML_STATE_AVERAGE_WEEKLY_WAGE_2026,
+  ME_PFML_LOWER_TIER_REPLACEMENT_RATE,
+  ME_PFML_UPPER_TIER_REPLACEMENT_RATE,
+  ME_PFML_MIN_BASE_PERIOD_EARNINGS_SAWW_MULTIPLE,
+  ME_PFML_MAX_WEEKS_PER_BENEFIT_YEAR,
+  mePfmlFloorToDollar,
+  mePfmlTierThreshold,
+  mePfmlMaxWeeklyBenefit,
+  mePfmlWeeklyBenefit,
+  mePfmlMinBasePeriodEarnings,
+  isMePfmlEligible,
+} from './mePfml.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

@@ -575,6 +575,17 @@
   </section>
 
   <section>
+    <h2>Maine PFML</h2>
+    <p class="muted" style="margin-top:0">The only sibling module that rounds DOWN to the whole dollar at every step (matching Maine's own published worksheet), not to the nearest cent: 90% replacement up to 50% of the 2026-2027 state average weekly wage ($624, floored), then 66% of the excess, capped at the full state average weekly wage ($1,249.12) — not a percentage of it. Eligible with base-period earnings of at least 6x the state average weekly wage ($7,494.72) — no other test. All covered reasons draw on the same combined 12-week annual allowance. This project's core tax engine already computes the payroll withholding correctly; this panel is the benefit side only.</p>
+    <div class="row">
+      <input id="mepfml-avg-wage" type="number" placeholder="Average weekly wage ($)" style="width:220px" />
+      <input id="mepfml-base-earnings" type="number" placeholder="Base-period earnings ($)" style="width:220px" />
+      <button class="secondary" id="mepfml-calc-btn">Calculate</button>
+    </div>
+    <pre id="mepfml-view"></pre>
+  </section>
+
+  <section>
     <h2>COBRA general notice</h2>
     <p class="muted" style="margin-top:0">Distinct from the election notice above: due within 90 days of first becoming covered under the plan, or sooner if an election notice is already required by then. Penalty exposure: up to $110/day per affected beneficiary (ERISA §502(c)(1), court-assessed, not inflation-adjusted), plus a separate IRS excise tax of $100/day (or $200/day if more than one family member is affected — not the single rate doubled).</p>
     <div class="row">
@@ -1841,6 +1852,23 @@ document.getElementById('ctpl-calc-btn').addEventListener('click', async () => {
     view.textContent =
       `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
       `Weekly benefit (95%/60% tiered, capped): ${fmtCents(result.weeklyBenefit)}`;
+  } catch (err) {
+    view.textContent = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('mepfml-calc-btn').addEventListener('click', async () => {
+  const view = document.getElementById('mepfml-view');
+  const averageWeeklyWageDollars = Number(document.getElementById('mepfml-avg-wage').value) || 0;
+  const basePeriodEarningsDollars = Number(document.getElementById('mepfml-base-earnings').value) || 0;
+  try {
+    const result = await api('/api/me-pfml/calculator', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ averageWeeklyWageDollars, basePeriodEarningsDollars }),
+    });
+    view.textContent =
+      `Eligible: ${result.eligible ? 'YES' : 'No'}\n` +
+      `Weekly benefit (90%/66% tiered, floored, capped): ${fmtCents(result.weeklyBenefit)}`;
   } catch (err) {
     view.textContent = 'Error: ' + err.message;
   }
