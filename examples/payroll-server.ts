@@ -130,6 +130,8 @@ import {
   fairChanceDeemedReceivedDate,
   isJobPostingPayScaleRequired,
   salaryHistoryBanPenaltyOwed,
+  isNyPayTransparencyRequired,
+  nyPayTransparencyPenaltyForViolationNumber,
   depositDeadlineFor,
   determineAleStatus,
   determineDepositorSchedule,
@@ -2095,6 +2097,19 @@ const server = createServer(async (req, res) => {
       sendJson(res, 200, {
         jobPostingPayScaleRequired: isJobPostingPayScaleRequired(body.employeeCount),
         penaltyOwed: salaryHistoryBanPenaltyOwed(body.isFirstViolation, body.allJobPostingsNowUpdated, dollars(body.consideredPenaltyDollars)),
+      });
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // New York pay transparency calculator
+    // ------------------------------------------------------------------
+
+    if (req.method === 'POST' && url.pathname === '/api/ny-pay-transparency/calculator') {
+      const body = await parseJsonBody<{ employeeCount: number; violationNumber: number }>(req);
+      sendJson(res, 200, {
+        required: isNyPayTransparencyRequired(body.employeeCount),
+        penalty: nyPayTransparencyPenaltyForViolationNumber(body.violationNumber),
       });
       return;
     }

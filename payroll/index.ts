@@ -403,6 +403,14 @@ export {
   clampSalaryHistoryBanPenalty,
   salaryHistoryBanPenaltyOwed,
 } from './salaryHistoryBan.ts';
+export {
+  NY_PAY_TRANSPARENCY_EMPLOYER_THRESHOLD,
+  NY_PAY_TRANSPARENCY_FIRST_VIOLATION_PENALTY,
+  NY_PAY_TRANSPARENCY_SECOND_VIOLATION_PENALTY,
+  NY_PAY_TRANSPARENCY_THIRD_OR_SUBSEQUENT_VIOLATION_PENALTY,
+  isNyPayTransparencyRequired,
+  nyPayTransparencyPenaltyForViolationNumber,
+} from './nyPayTransparency.ts';
 export { checkStateRegistrationCompliance } from './stateRegistration.ts';
 export type { StateRegistrationIssue, StateRegistrationIssueKind } from './stateRegistration.ts';
 export { buildOrgChart } from './orgChart.ts';

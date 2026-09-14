@@ -443,6 +443,25 @@ Beyond the pay-run engine itself, three more real HR pieces:
   counts as a compliant range — a fact-specific judgment, the same kind
   of boundary `payroll/warnAct.ts`'s own exception guidance draws.
   California only. Wired into the admin UI as a calculator.
+- `payroll/nyPayTransparency.ts`: New York's pay transparency law (Labor
+  Law § 194-b, effective September 17, 2023) — live-verified against NY
+  DOL's own pages, corroborated across multiple independent
+  employment-law sources for the exact tiered penalty figures. The
+  natural companion to `payroll/salaryHistoryBan.ts`, but deliberately
+  its own module rather than a shared abstraction, since the two
+  statutes differ in every particular that matters: NY's employer
+  threshold is 4 employees (not California's 15-for-postings-only), NY's
+  disclosure duty attaches unconditionally to every covered employer's
+  job/promotion/transfer postings performed at least in part in New
+  York, and NY's penalty is a flat per-violation TIER ($1,000 / $2,000 /
+  $3,000 for the first/second/third-or-later violation, never escalating
+  past the third) rather than California's $100-$10,000 discretionary
+  RANGE. Does not evaluate whether a posted range reflects a genuine
+  "good faith" estimate of expected pay (the 2026 amendments outlawed
+  placeholder ranges like "$1 to $1 million," but judging any SPECIFIC
+  range is a fact-specific determination, not a formula) — the same kind
+  of scope boundary `payroll/warnAct.ts`'s own exception guidance draws.
+  New York only. Wired into the admin UI as a calculator.
 - `payroll/termination.ts`: final-paycheck timing and PTO/vacation payout
   at offboarding — genuinely different rules depending on WHY someone
   left, which federal law does not set a deadline for at all (FLSA has no
