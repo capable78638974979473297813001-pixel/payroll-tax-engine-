@@ -1,9 +1,9 @@
 import { DatabaseSync } from 'node:sqlite';
-import { createReadStream, existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createInterface } from 'node:readline';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 
 /**
  * Turn the OpenAddresses bulk extracts into a local, queryable address
@@ -118,6 +118,32 @@ function openDb(append: boolean): DatabaseSync {
   return db;
 }
 
+/**
+ * Commit every this-many rows rather than one giant transaction spanning
+ * the whole file — a few OpenAddresses county files run past a million
+ * rows (Harris County, TX alone is 1.29M), and this keeps memory bounded
+ * and progress visible the same way build-nad-index.ts's own BATCH_SIZE
+ * does for its far larger single file.
+ */
+const BATCH_SIZE = 50_000;
+
+/**
+ * Stream one CSV entry's bytes out of the zip via a PIPED python process
+ * and read it line-by-line, rather than buffering the whole entry into one
+ * JS string via spawnSync + toString(). This is not an optimization — it
+ * fixes a real crash: several OpenAddresses county/state files exceed
+ * Node's ~512MB (0x1fffffe8 character) string limit on toString(),
+ * confirmed live: us/fl/statewide.csv (932MB), us/fl/statewide2.csv
+ * (678MB), us/fl/_loveland.csv (735MB), and us/ny/statewide.csv (511MB)
+ * all crashed the earlier spawnSync-based version outright with
+ * "Cannot create a string longer than 0x1fffffe8 characters" — which
+ * doesn't just skip that one file, it kills the ENTIRE build process, so
+ * every county queued after the first oversized file (in practice: most of
+ * Florida and New York, then everything alphabetically after) never got
+ * indexed at all. A streaming readline interface, the same approach
+ * build-nad-index.ts already uses successfully for a single 41GB file, has
+ * no such limit — peak memory is O(batch size), not O(file size).
+ */
 async function ingestCsv(
   db: DatabaseSync,
   zipPath: string,
@@ -125,37 +151,52 @@ async function ingestCsv(
   state: string,
   insert: ReturnType<DatabaseSync['prepare']>,
 ): Promise<number> {
-  const py = spawnSync('python', ['-c',
-    `import zipfile,sys\nz=zipfile.ZipFile(sys.argv[1])\nsys.stdout.buffer.write(z.read(sys.argv[2]))`,
-    zipPath, entry], { maxBuffer: 1024 * 1024 * 1024 });
-  if (py.status !== 0) return 0;
+  return new Promise((resolve, reject) => {
+    const py = spawn('python', ['-u', '-c', `
+import sys, zipfile
+z = zipfile.ZipFile(sys.argv[1])
+f = z.open(sys.argv[2])
+out = sys.stdout.buffer
+for line in f:
+    out.write(line)
+`, zipPath, entry], { stdio: ['ignore', 'pipe', 'inherit'] });
 
-  const text = py.stdout.toString('utf8');
-  let n = 0;
-  let first = true;
-  const source = entry.replace(/^us\//, '').replace(/\.csv$/, '');
+    const rl = createInterface({ input: py.stdout });
+    const source = entry.replace(/^us\//, '').replace(/\.csv$/, '');
+    let n = 0;
+    let first = true;
+    let inTxn = false;
+    let settled = false;
 
-  db.exec('BEGIN');
-  for (const line of text.split('\n')) {
-    if (first) { first = false; continue; }
-    if (!line) continue;
-    // OpenAddresses CSVs are simple: no embedded commas in these columns
-    // in practice, and a split is ~20x faster than a full CSV parser over
-    // 100M rows. A malformed row is skipped, not guessed at.
-    const f = line.split(',');
-    if (f.length < 6) continue;
-    const lon = Number(f[0]);
-    const lat = Number(f[1]);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon) || (lat === 0 && lon === 0)) continue;
-    const number = f[2]?.trim();
-    const street = f[3]?.trim();
-    if (!number && !street) continue;
-    insert.run(cellKey(lat, lon), lat, lon, number || null, street || null,
-      f[4]?.trim() || null, f[5]?.trim() || null, state.toUpperCase(), `OpenAddresses ${source}`);
-    n++;
-  }
-  db.exec('COMMIT');
-  return n;
+    rl.on('line', (line) => {
+      if (first) { first = false; return; }
+      if (!line) return;
+      // OpenAddresses CSVs are simple: no embedded commas in these columns
+      // in practice, and a split is ~20x faster than a full CSV parser over
+      // 100M rows. A malformed row is skipped, not guessed at.
+      const f = line.split(',');
+      if (f.length < 6) return;
+      const lon = Number(f[0]);
+      const lat = Number(f[1]);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon) || (lat === 0 && lon === 0)) return;
+      const number = f[2]?.trim();
+      const street = f[3]?.trim();
+      if (!number && !street) return;
+      if (!inTxn) { db.exec('BEGIN'); inTxn = true; }
+      insert.run(cellKey(lat, lon), lat, lon, number || null, street || null,
+        f[4]?.trim() || null, f[5]?.trim() || null, state.toUpperCase(), `OpenAddresses ${source}`);
+      n++;
+      if (n % BATCH_SIZE === 0) { db.exec('COMMIT'); inTxn = false; }
+    });
+
+    rl.on('close', () => {
+      if (inTxn) db.exec('COMMIT');
+      if (!settled) { settled = true; resolve(n); }
+    });
+    py.on('error', (err) => {
+      if (!settled) { settled = true; reject(err); }
+    });
+  });
 }
 
 const args = parseArgs();
@@ -192,7 +233,17 @@ for (const zip of zips) {
   for (const entry of entries) {
     const state = entry.split('/')[1];
     if (args.states && !args.states.has(state)) continue;
-    const n = await ingestCsv(db, zipPath, entry, state, insert);
+    // One bad entry (a genuinely corrupt zip member, or python itself
+    // failing to spawn) must not take down a build that is otherwise
+    // hours into 90M+ rows — reported and skipped, same "note it and move
+    // on" discipline this project uses for every other live-data source.
+    let n = 0;
+    try {
+      n = await ingestCsv(db, zipPath, entry, state, insert);
+    } catch (err) {
+      console.log(`\n  ${entry}: FAILED (${err instanceof Error ? err.message : String(err)}) — skipped`);
+      continue;
+    }
     if (n > 0) {
       grand += n;
       perState[state.toUpperCase()] = (perState[state.toUpperCase()] ?? 0) + n;
