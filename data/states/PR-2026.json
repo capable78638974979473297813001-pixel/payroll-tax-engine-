@@ -1,0 +1,108 @@
+{
+  "code": "PR",
+  "name": "Puerto Rico",
+  "year": 2026,
+  "method": "puerto_rico_percentage_method",
+  "$methodComment": "Puerto Rico's own Método de Porciento (Percentage Method), read directly from Hacienda's 'Retención en el Origen de la Contribución sobre Ingresos en el Caso de Salarios -- Manual para Patronos / Employer's Guide' -- this is the booklet's own current/effective version (its withholding tables page lists no later replacement; applicable to wages paid after December 31, 2016, and still the version served at hacienda.pr.gov today). Structurally simpler than this project's other percentage-method states (NM/OK): there is only ONE bracket schedule per payroll period -- filing status affects ONLY the Appendix-1 exemption amount, not a separate bracket table the way OK/NM key brackets by single-vs-married. Computation: (1) look up the withholding exemption from Appendix 1 by payroll period and the employee's elected personal-exemption category (individual/married-joint-full/married-joint-half-or-separate/none), plus $X per dependent (halved-rate column when the half/separate category applies -- Appendix 1's own instructions: 'each spouse will claim 50% of the exemption for dependents'), plus a per-veteran additional exemption, plus a deduction allowance ($ claimed deductions / $500, with any fraction over 50% rounding up to an extra allowance -- Hacienda's own stated rule); (2) subtract that exemption from period wages to get 'cantidad de los salarios' (wages subject to withholding); (3) look up the ONE bracket for that period/amount and compute rate x wages-subject MINUS the bracket's own 'menos' constant. ROUNDING, disclosed and load-bearing: this project's applyRate() rounds half up, but Hacienda's own worked Example 1 (monthly $2,200, exemption $665.50, wages subject $1,534.50, 7% bracket) computes 7% x $1,534.50 = $107.415 exactly and shows $107.41 -- i.e. TRUNCATED to the cent, not rounded half up (which would give $107.42, and a final answer of $54.92 rather than the document's own stated $54.91). Every other bracket-tier example in the booklet lands on an exact cent with no rounding ambiguity, so this is the one genuine tie-breaking data point; puertoRicoWithholding() uses roundDownToCent() for this specific step to reproduce Hacienda's own arithmetic exactly rather than applyRate()'s usual round-half-up, and this file's tests reproduce that example to the cent. NOT MODELLED, disclosed rather than guessed at: (a) Appendix 3's 'Método Alterno' for irregular/no-regular-payroll-period pay -- this engine assumes every paycheck has a payFrequency, so the alternate method's own precondition never applies here; (b) the three alternative Christmas-bonus withholding procedures (the booklet's own 5th section) -- a bonus paid through this engine is taxed via the same regular bracket procedure as any other supplemental wage, which matches only the booklet's own 'Situation 1' (bonus paid together with the same-period regular wage); (c) the booklet's own Situations 2-4 for supplemental wages paid on a different date, spanning multiple payroll periods, or fluctuating considerably -- again, this engine folds any supplemental cash straight into the period's base wages (no dedicated PR supplementalWages config is set), which is correct only for Situation 1; (d) the Act 135-2014 exemption on a young worker's (age 16-26) first $40,000 of wages -- the statute's own text says this was 'effective for taxable years beginning before January 1, 2020,' i.e. it has already expired and is correctly left unimplemented, not silently omitted; (e) the Military Spouses Residency Relief Act election (certificate.msrraExempt) IS modelled, since it is a simple boolean zero-out identical in shape to this project's existing Hawaii/nonresident-military-spouse pattern.",
+  "sources": [
+    {
+      "title": "Retención en el Origen de la Contribución sobre Ingresos en el Caso de Salarios -- Manual para Patronos / Employer's Guide (Departamento de Hacienda de Puerto Rico), applicable to wages paid after December 31, 2016",
+      "url": "https://www.hacienda.pr.gov/sites/default/files/tablas_retencion_2017_2.pdf",
+      "verifiedOn": "2026-09-16",
+      "verifiedBy": "PDF downloaded via WebFetch and read directly (WebFetch's own text extraction failed on the raw binary; the saved local PDF was read directly with the Read tool, which correctly extracted all 27 pages). Confirmed via hacienda.pr.gov's own 'Tablas de retención/Withholding Tables' listing page that this is the current/effective version with no later replacement on file. Appendix 1 (withholding exemption table, all 8 payroll periods x 6 columns), Appendix 2 (percentage-method bracket tables, all 8 payroll periods), and all of the booklet's own worked examples (A's $2,200 monthly / $54.91; X's $1,000 semimonthly + $1,500 bonus / $5.76; B's $550 weekly + $90 overtime / $6.30; A's $2,000+$2,200 commission / $238.43; C's $1,950 monthly average / $105.00) were transcribed verbatim into this file and reproduced to the cent by the engine -- see tests/engine.test.ts, describe('Puerto Rico')."
+    },
+    {
+      "title": "IRS Topic No. 903, U.S. Employment Tax in Puerto Rico -- Internal Revenue Service",
+      "url": "https://www.irs.gov/taxtopics/tc903",
+      "verifiedOn": "2026-09-16",
+      "verifiedBy": "Confirms the IRC Section 933 exclusion this file's own income tax withholding interacts with at the federal layer (implemented in src/taxes/federal.ts, not in this file): a bona-fide resident of Puerto Rico's PR-source wages are excluded from federal gross income, so federal income tax withholding is skipped, while social security, Medicare and FUTA continue to apply exactly as for any other U.S. employee -- this file does not itself encode that exemption; see federal.ts's own puertoRicoBonaFideResident handling."
+    }
+  ],
+  "exemptPretax": [],
+  "exemptComment": "No PR-specific pretax exemption list has been separately researched this pass -- defaults to the empty array (nothing carved out), matching this project's convention of an explicit disclosed default rather than silently reusing another jurisdiction's list.",
+  "puertoRicoWithholding": {
+    "exemption": {
+      "$comment": "Apéndice 1 / Appendix 1, dollars per payroll period. personalIndividual = 'Contribuyente Individual y reclama la totalidad de la exención personal'; personalMarriedJointFull = 'Casado que rinde planilla conjunta y reclama la totalidad'; personalMarriedJointHalfOrSeparate = 'Persona Casada que rinde planilla conjunta y reclama la mitad... o Persona Casada que vive con su cónyuge, se acoge al cómputo opcional' (also covers joint-custody, per the booklet's own column note); personalNone = $0 (footnote: 'the person who chooses claiming none of the personal exemption (\"None\"), shall be deducted $0.00'). dependentFull applies with personalIndividual/personalMarriedJointFull; dependentHalf ('Cómputo Opcional, Custodia Compartida o Casado que Rinde Separado') applies with personalMarriedJointHalfOrSeparate. deductionAllowanceUnit is the dollar value of ONE allowance (claimed deductions ÷ $500, per-period value shown here).",
+      "weekly": { "personalIndividual": 67.00, "personalMarriedJointFull": 135.00, "personalMarriedJointHalfOrSeparate": 67.00, "veteranAdditional": 29.00, "dependentFull": 48.00, "dependentHalf": 24.00, "deductionAllowanceUnit": 9.50 },
+      "biweekly": { "personalIndividual": 135.00, "personalMarriedJointFull": 270.00, "personalMarriedJointHalfOrSeparate": 135.00, "veteranAdditional": 57.50, "dependentFull": 96.00, "dependentHalf": 48.00, "deductionAllowanceUnit": 19.00 },
+      "semimonthly": { "personalIndividual": 146.00, "personalMarriedJointFull": 292.00, "personalMarriedJointHalfOrSeparate": 146.00, "veteranAdditional": 62.50, "dependentFull": 104.00, "dependentHalf": 52.00, "deductionAllowanceUnit": 21.00 },
+      "monthly": { "personalIndividual": 292.00, "personalMarriedJointFull": 583.00, "personalMarriedJointHalfOrSeparate": 292.00, "veteranAdditional": 125.00, "dependentFull": 208.00, "dependentHalf": 104.00, "deductionAllowanceUnit": 41.50 },
+      "quarterly": { "personalIndividual": 875.00, "personalMarriedJointFull": 1750.00, "personalMarriedJointHalfOrSeparate": 875.00, "veteranAdditional": 375.00, "dependentFull": 625.00, "dependentHalf": 312.50, "deductionAllowanceUnit": 125.00 },
+      "semiannual": { "personalIndividual": 1750.00, "personalMarriedJointFull": 3500.00, "personalMarriedJointHalfOrSeparate": 1750.00, "veteranAdditional": 750.00, "dependentFull": 1250.00, "dependentHalf": 625.00, "deductionAllowanceUnit": 250.00 },
+      "annual": { "personalIndividual": 3500.00, "personalMarriedJointFull": 7000.00, "personalMarriedJointHalfOrSeparate": 3500.00, "veteranAdditional": 1500.00, "dependentFull": 2500.00, "dependentHalf": 1250.00, "deductionAllowanceUnit": 500.00 },
+      "daily": { "personalIndividual": 14.00, "personalMarriedJointFull": 28.00, "personalMarriedJointHalfOrSeparate": 14.00, "veteranAdditional": 6.00, "dependentFull": 9.50, "dependentHalf": 4.75, "deductionAllowanceUnit": 2.00 }
+    },
+    "brackets": {
+      "$comment": "Apéndice 2 / Appendix 2. 'Cantidad de los salarios' (wages subject to withholding) is period wages LESS the exemption computed above. Tax = rate x wages-subject MINUS the bracket's own 'menos'/'minus' constant (Hacienda's own formula shape -- not the base-plus-excess shape this project's other percentage-method states use). from/to in dollars; to: null means no ceiling.",
+      "weekly": [
+        { "from": 0, "to": 173.10, "rate": 0, "subtract": 0 },
+        { "from": 173.10, "to": 480.80, "rate": 0.07, "subtract": 12.10 },
+        { "from": 480.80, "to": 798.10, "rate": 0.14, "subtract": 45.80 },
+        { "from": 798.10, "to": 1182.70, "rate": 0.25, "subtract": 133.60 },
+        { "from": 1182.70, "to": null, "rate": 0.33, "subtract": 228.20 }
+      ],
+      "biweekly": [
+        { "from": 0, "to": 346.20, "rate": 0, "subtract": 0 },
+        { "from": 346.20, "to": 961.50, "rate": 0.07, "subtract": 24.20 },
+        { "from": 961.50, "to": 1596.20, "rate": 0.14, "subtract": 91.50 },
+        { "from": 1596.20, "to": 2365.40, "rate": 0.25, "subtract": 267.10 },
+        { "from": 2365.40, "to": null, "rate": 0.33, "subtract": 456.30 }
+      ],
+      "semimonthly": [
+        { "from": 0, "to": 375.00, "rate": 0, "subtract": 0 },
+        { "from": 375.00, "to": 1041.70, "rate": 0.07, "subtract": 26.30 },
+        { "from": 1041.70, "to": 1729.20, "rate": 0.14, "subtract": 99.20 },
+        { "from": 1729.20, "to": 2562.50, "rate": 0.25, "subtract": 289.40 },
+        { "from": 2562.50, "to": null, "rate": 0.33, "subtract": 494.40 }
+      ],
+      "monthly": [
+        { "from": 0, "to": 750.00, "rate": 0, "subtract": 0 },
+        { "from": 750.00, "to": 2083.30, "rate": 0.07, "subtract": 52.50 },
+        { "from": 2083.30, "to": 3458.30, "rate": 0.14, "subtract": 198.30 },
+        { "from": 3458.30, "to": 5125.00, "rate": 0.25, "subtract": 578.70 },
+        { "from": 5125.00, "to": null, "rate": 0.33, "subtract": 988.70 }
+      ],
+      "quarterly": [
+        { "from": 0, "to": 2250.00, "rate": 0, "subtract": 0 },
+        { "from": 2250.00, "to": 6250.00, "rate": 0.07, "subtract": 157.50 },
+        { "from": 6250.00, "to": 10375.00, "rate": 0.14, "subtract": 595.00 },
+        { "from": 10375.00, "to": 15375.00, "rate": 0.25, "subtract": 1736.30 },
+        { "from": 15375.00, "to": null, "rate": 0.33, "subtract": 2966.30 }
+      ],
+      "semiannual": [
+        { "from": 0, "to": 4500.00, "rate": 0, "subtract": 0 },
+        { "from": 4500.00, "to": 12500.00, "rate": 0.07, "subtract": 315.00 },
+        { "from": 12500.00, "to": 20750.00, "rate": 0.14, "subtract": 1190.00 },
+        { "from": 20750.00, "to": 30750.00, "rate": 0.25, "subtract": 3472.50 },
+        { "from": 30750.00, "to": null, "rate": 0.33, "subtract": 5932.50 }
+      ],
+      "annual": [
+        { "from": 0, "to": 9000.00, "rate": 0, "subtract": 0 },
+        { "from": 9000.00, "to": 25000.00, "rate": 0.07, "subtract": 630.00 },
+        { "from": 25000.00, "to": 41500.00, "rate": 0.14, "subtract": 2380.00 },
+        { "from": 41500.00, "to": 61500.00, "rate": 0.25, "subtract": 6945.00 },
+        { "from": 61500.00, "to": null, "rate": 0.33, "subtract": 11865.00 }
+      ],
+      "daily": [
+        { "from": 0, "to": 36.00, "rate": 0, "subtract": 0 },
+        { "from": 36.00, "to": 100.00, "rate": 0.07, "subtract": 2.50 },
+        { "from": 100.00, "to": 166.00, "rate": 0.14, "subtract": 9.50 },
+        { "from": 166.00, "to": 246.00, "rate": 0.25, "subtract": 27.80 },
+        { "from": 246.00, "to": null, "rate": 0.33, "subtract": 47.50 }
+      ]
+    }
+  },
+  "suiEmployer": {
+    "$comment": "Employer-side SUI. wageBase ($7,000/yr) is confirmed via trabajo.pr.gov's own 'Servicio Contributivo' pages. newEmployerRate is deliberately null -- this engine has no confirmed 2026 new-employer default from a primary source (only secondary aggregators claim 2.8%, not independently verified against a Departamento del Trabajo y Recursos Humanos rate table the way e.g. Delaware's own Merit Rate Table was) -- so, exactly like Washington/Minnesota's schedule-assigned rates elsewhere in this project, NO line is produced unless the caller supplies this employer's own assigned rate via input.employer.stateUnemploymentRate.PR. This does NOT include PR's own separate mandatory 1% special contribution to the unemployment fund (confirmed via the same source) -- that is a genuinely different, non-experience-rated levy this engine does not yet compute; see knownGaps.",
+    "wageBase": 7000,
+    "newEmployerRate": null,
+    "experienceRange": null,
+    "employerSuppliedRateRequired": true
+  },
+  "knownGaps": [
+    "PR's mandatory 1% 'special contribution' to the unemployment fund (confirmed via trabajo.pr.gov's own 'Servicio Contributivo' page) is a separate, non-experience-rated levy on top of the ordinary SUI experience-rated contribution modelled by suiEmployer above -- not yet computed by this engine, which has no generic 'flat add-on contribution alongside an experience-rated one' shape. The employer's own EXPERIENCE-rated SUI rate itself also has no confirmed 2026 new-employer DEFAULT from a primary source (only secondary aggregators claim 2.8%) -- suiEmployer.newEmployerRate is left null rather than risk a wrong number, so a PR employer must supply its own rate via input.employer.stateUnemploymentRate.PR for any SUI line to appear at all.",
+    "SINOT (Seguro por Incapacidad No Ocupacional, non-occupational disability insurance): confirmed via trabajo.pr.gov/sinot.asp as mandatory for nearly every PR employer, 0.60% of wages up to $9,000/year, with the employee's own share capped at 0.30% (the employer may pay the whole 0.60% itself, or split it). This project has no existing generic tax-calc shape for an employer/employee-split program with an employer-elected split fraction outside the 'Paid Leave' family of functions, and reusing that family's PFML-labelled line IDs for a disability program would mislabel the tax on the paycheck -- left unimplemented and disclosed rather than mislabeled.",
+    "Christmas bonus special withholding procedures (booklet section 5: $0 if ≤$600, flat 7% if $600-$1,500, one of three alternative methods above $1,500) -- a PR bonus run through this engine today is taxed via the ordinary percentage-method bracket on whatever period wages include it, not any of these three dedicated procedures.",
+    "Appendix 3's 'Método Alterno' for pay with no regular payroll period, and booklet Situations 2-4 for supplemental wages paid on a different date or spanning multiple payroll periods -- not modelled; see $methodComment."
+  ]
+}

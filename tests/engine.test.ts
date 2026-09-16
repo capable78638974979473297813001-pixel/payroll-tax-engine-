@@ -10137,6 +10137,229 @@ describe('Oklahoma', () => {
   });
 });
 
+describe('Puerto Rico', () => {
+  const prState = (certificate: Record<string, unknown> = {}) => ({
+    workState: { code: 'PR', certificate },
+  });
+
+  test("reproduces Hacienda's own Example 1: monthly $2,200, individual, $4,500 in deductions -> $54.91", () => {
+    // 9 deduction allowances ($4,500 / $500) x $41.50 = $373.50; plus the
+    // $292.00 individual personal exemption = $665.50 total exemption.
+    // $2,200 - $665.50 = $1,534.50 subject; monthly 7% bracket: 7% x
+    // $1,534.50 = $107.415, TRUNCATED (not rounded) to $107.41 per the
+    // booklet's own arithmetic, less $52.50 = $54.91.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2200) }],
+        ...prState({ filingStatus: 'individual', deductions: 4500 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'PR_SIT'), 5491);
+  });
+
+  test("reproduces Hacienda's own overtime example: weekly $640 (\"B\"), individual, 3 dependents -> $17.93 before crediting tax already withheld", () => {
+    // Exemption: $67.00 personal + (3 x $48.00) dependents = $211.00.
+    // $640 - $211 = $429 subject; weekly 7% bracket: 7% x $429 = $30.03,
+    // less $12.10 = $17.93 -- the booklet's own "Total de la contribución"
+    // figure for this week's combined $640 (this engine computes one
+    // period's total withholding, not the incremental amount still owed
+    // after a prior partial withholding on the same period, which is what
+    // the booklet's own $6.30 final answer additionally subtracts).
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(640) }],
+        ...prState({ filingStatus: 'individual', dependents: 3 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'PR_SIT'), dollars(17.93));
+  });
+
+  test('reproduces Hacienda\'s own "C" example: monthly $2,450, married filing jointly (full exemption), 1 dependent -> $63.63', () => {
+    // Exemption: $583.00 married-joint-full personal + $208.00 (1
+    // dependent) = $791.00. $2,450 - $791 = $1,659 subject; monthly 7%
+    // bracket: 7% x $1,659 = $116.13, less $52.50 = $63.63.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2450) }],
+        ...prState({ filingStatus: 'married_joint_full', dependents: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'PR_SIT'), dollars(63.63));
+  });
+
+  test('married_joint_half_or_separate uses the HALVED dependent-exemption column, not the full one', () => {
+    // Same $2,450 monthly, 1 dependent as the "C" example, but this status
+    // uses the $104.00 halved dependent column and the $292.00 (not
+    // $583.00) personal exemption: 292 + 104 = 396 exemption. $2,450 - 396
+    // = $2,054 subject; monthly 7% bracket: 7% x 2,054 = $143.78, less
+    // $52.50 = $91.28.
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2450) }],
+        ...prState({ filingStatus: 'married_joint_half_or_separate', dependents: 1 }),
+      }),
+    );
+    assert.equal(amountOf(r, 'PR_SIT'), dollars(91.28));
+  });
+
+  test('filingStatus "none" claims $0 personal exemption, per Appendix 1\'s own footnote', () => {
+    const withNone = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2200) }],
+        ...prState({ filingStatus: 'none' }),
+      }),
+    );
+    const withIndividual = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2200) }],
+        ...prState({ filingStatus: 'individual' }),
+      }),
+    );
+    assert.ok(amountOf(withNone, 'PR_SIT') > amountOf(withIndividual, 'PR_SIT'));
+  });
+
+  test('a deduction fraction strictly over 50% rounds up to an extra allowance', () => {
+    // $4,750 / $500 = 9.5 exactly -> NOT in excess of 50%, stays at 9
+    // allowances (same $54.91 as Example 1's own 9-allowance case, since
+    // $4,500 and $4,750 both floor/round to 9).
+    const atExactlyHalf = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2200) }],
+        ...prState({ filingStatus: 'individual', deductions: 4750 }),
+      }),
+    );
+    assert.equal(amountOf(atExactlyHalf, 'PR_SIT'), dollars(54.91));
+
+    // $4,751 / $500 = 9.502 -> a fraction IN EXCESS of 50%, rounds up to
+    // 10 allowances: 10 x $41.50 = $415.00 deduction concession, $707.00
+    // total exemption, $1,493.00 subject; 7% x 1,493 = $104.51, less
+    // $52.50 = $52.01.
+    const overHalf = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2200) }],
+        ...prState({ filingStatus: 'individual', deductions: 4751 }),
+      }),
+    );
+    assert.equal(amountOf(overHalf, 'PR_SIT'), dollars(52.01));
+  });
+
+  test('a veteran additional exemption reduces withholding', () => {
+    const withoutVeteran = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2200) }],
+        ...prState({ filingStatus: 'individual' }),
+      }),
+    );
+    const withVeteran = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2200) }],
+        ...prState({ filingStatus: 'individual', veteran: true }),
+      }),
+    );
+    assert.ok(amountOf(withVeteran, 'PR_SIT') < amountOf(withoutVeteran, 'PR_SIT'));
+  });
+
+  test('MSRRA election (certificate.msrraExempt) zeroes PR withholding entirely', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2200) }],
+        ...prState({ msrraExempt: true }),
+      }),
+    );
+    assert.equal(amountOf(r, 'PR_SIT'), 0);
+  });
+
+  test('wages under the zero-bracket floor owe nothing', () => {
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-06-15',
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(100) }],
+        ...prState({ filingStatus: 'individual' }),
+      }),
+    );
+    assert.equal(amountOf(r, 'PR_SIT'), 0);
+  });
+
+  test('an unrecognized filingStatus throws rather than silently defaulting', () => {
+    assert.throws(
+      () => calculatePaycheck(input(prState({ filingStatus: 'head_of_household' }))),
+      /Unrecognized PR certificate\.filingStatus/,
+    );
+  });
+
+  describe('IRC § 933 interaction with federal withholding', () => {
+    test('a Puerto Rico work state zeroes US_FIT entirely, while FICA and FUTA are unaffected', () => {
+      const prResult = calculatePaycheck(
+        input({
+          checkDate: '2026-06-15',
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+          ...prState({ filingStatus: 'individual' }),
+        }),
+      );
+      const mainlandResult = calculatePaycheck(
+        input({
+          checkDate: '2026-06-15',
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(3000) }],
+          workState: { code: 'TX' },
+        }),
+      );
+
+      assert.equal(amountOf(prResult, 'US_FIT'), 0);
+      assert.match(
+        prResult.taxes.find((t) => t.id === 'US_FIT')!.detail,
+        /IRC § 933/,
+      );
+
+      // FICA and FUTA are computed exactly the same whether the work state
+      // is PR or a mainland state with no income tax withholding at all —
+      // § 933 excludes PR-source wages from federal INCOME tax only.
+      assert.equal(amountOf(prResult, 'US_SS_EE'), amountOf(mainlandResult, 'US_SS_EE'));
+      assert.equal(amountOf(prResult, 'US_MED_EE'), amountOf(mainlandResult, 'US_MED_EE'));
+      assert.equal(amountOf(prResult, 'US_FUTA'), amountOf(mainlandResult, 'US_FUTA'));
+    });
+
+    test('a supplemental (bonus) payment to a PR work state also has its US_FIT_SUPP zeroed', () => {
+      const r = calculatePaycheck(
+        input({
+          checkDate: '2026-06-15',
+          payFrequency: 'biweekly',
+          earnings: [
+            { code: 'REG', category: 'regular', amount: dollars(3000) },
+            { code: 'BONUS', category: 'supplemental', amount: dollars(1000) },
+          ],
+          ...prState({ filingStatus: 'individual' }),
+        }),
+      );
+      assert.equal(amountOf(r, 'US_FIT_SUPP'), 0);
+    });
+  });
+});
+
 describe('Wyoming', () => {
   test('no state wage income tax — WY_SIT is not produced', () => {
     const r = calculatePaycheck(
@@ -10493,7 +10716,7 @@ describe('state unemployment insurance, employer side (XX_SUI_ER)', () => {
     // qualifiedEmployer } shape (see resolveSUIWageBase() in state.ts) —
     // either way it must resolve to real numbers, not silently be missing.
     const states = readdirSync(join(import.meta.dirname, '..', 'data', 'states'));
-    assert.equal(states.length, 51);
+    assert.equal(states.length, 52);
     for (const file of states) {
       const parsed = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'data', 'states', file), 'utf8'));
       assert.ok(parsed.suiEmployer, `${file} has no suiEmployer block`);

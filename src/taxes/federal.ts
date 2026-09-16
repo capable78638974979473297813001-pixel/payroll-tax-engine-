@@ -748,24 +748,66 @@ function applyEmploymentCategory(
   });
 }
 
+/**
+ * IRC § 933 excludes a bona-fide Puerto Rico resident's Puerto-Rico-source
+ * wages from federal gross income entirely (IRS Topic No. 903, "U.S.
+ * Employment Tax in Puerto Rico," read directly) — so federal INCOME TAX
+ * withholding (US_FIT and US_FIT_SUPP) does not apply to those wages at
+ * all, while social security, Medicare and FUTA continue to apply exactly
+ * as for any other U.S. employee (Topic 903's own words: "Social security
+ * and Medicare taxes... apply to... wages for services performed in Puerto
+ * Rico... in the same manner as... the 50 states"). Every other line here
+ * — socialSecurity(), medicare(), futa() — is already state-agnostic and
+ * needs no change; only the two income-tax lines are zeroed.
+ *
+ * Gated off input.workState.code === 'PR', the same convention every other
+ * jurisdiction-specific rule in this engine uses (Indiana's reciprocity and
+ * day-count rules, Hawaii's nonresident-military-spouse exemption, etc. all
+ * derive from a caller-supplied state/certificate value rather than a
+ * separately-verified domicile test) — this assumes the caller has already
+ * confirmed bona-fide PR residency before routing an employee's wages
+ * through PR's own withholding (data/states/PR-2026.json's
+ * puertoRicoWithholding), which this engine cannot itself verify: the
+ * "bona fide resident" test in IRC § 937 turns on physical-presence,
+ * tax-home and closer-connection facts no paycheck-level input captures.
+ */
+function applyPuertoRicoExemption(input: PaycheckInput, lines: TaxLine[]): TaxLine[] {
+  if (input.workState?.code !== 'PR') return lines;
+  return lines.map((line) => {
+    if (line.id !== 'US_FIT' && line.id !== 'US_FIT_SUPP') return line;
+    return {
+      ...line,
+      taxableWages: 0,
+      amount: 0,
+      detail:
+        "$0 — IRC § 933 excludes a bona-fide Puerto Rico resident's Puerto-Rico-source wages from federal " +
+        'gross income entirely, so no federal income tax is withheld (IRS Topic No. 903). Social security, ' +
+        'Medicare and FUTA are unaffected and continue to apply.',
+    };
+  });
+}
+
 export function federalTaxes(
   input: PaycheckInput,
   ctx: ComputeContext,
 ): TaxLine[] {
   const rules = federalRuleset(input.checkDate);
   const supplemental = federalSupplementalTax(input, ctx, rules);
-  return applyEmploymentCategory(
+  return applyPuertoRicoExemption(
     input,
-    [
-    federalIncomeTax(input, ctx, rules),
-    ...(supplemental ? [supplemental] : []),
-    ...socialSecurity(input, ctx, rules),
-    ...medicare(input, ctx, rules),
-      ...futa(input, ctx, rules),
-      ...(input.employmentCategory === 'railroad'
-        ? [...railroadTier2(input, ctx, rules), ...railroadUnemployment(input, ctx, rules)]
-        : []),
-    ],
-    categoryCoverage(input, ctx, rules),
+    applyEmploymentCategory(
+      input,
+      [
+      federalIncomeTax(input, ctx, rules),
+      ...(supplemental ? [supplemental] : []),
+      ...socialSecurity(input, ctx, rules),
+      ...medicare(input, ctx, rules),
+        ...futa(input, ctx, rules),
+        ...(input.employmentCategory === 'railroad'
+          ? [...railroadTier2(input, ctx, rules), ...railroadUnemployment(input, ctx, rules)]
+          : []),
+      ],
+      categoryCoverage(input, ctx, rules),
+    ),
   );
 }

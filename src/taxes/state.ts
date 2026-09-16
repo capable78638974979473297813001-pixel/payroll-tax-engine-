@@ -1444,6 +1444,8 @@ function incomeTaxLinesByMethod(
       return [hawaiiWithholding(input, ctx, rules)];
     case 'oklahoma_percentage_method':
       return [oklahomaWithholding(input, ctx, rules)];
+    case 'puerto_rico_percentage_method':
+      return [puertoRicoWithholding(input, ctx, rules)];
     case 'north_dakota_dual_vintage':
       return [northDakotaWithholding(input, ctx, rules)];
     case 'no_income_tax':
@@ -9340,6 +9342,184 @@ function oklahomaWithholding(
       `= ${fmt(netWages)} net (${status === 'married' ? 'Married' : 'Single'}, ${period}), bracket ${fmt(dollars(bracket.from))}-` +
       `${bracket.to === null ? '∞' : fmt(dollars(bracket.to))}: ${fmt(dollars(bracket.base))} + ` +
       `${(bracket.rate * 100).toFixed(1)}% × ${fmt(excess)} = ${fmt(amount)}`,
+  };
+}
+
+interface PRExemptionRow {
+  personalIndividual: number;
+  personalMarriedJointFull: number;
+  personalMarriedJointHalfOrSeparate: number;
+  veteranAdditional: number;
+  dependentFull: number;
+  dependentHalf: number;
+  deductionAllowanceUnit: number;
+}
+
+interface PRBracket {
+  from: number;
+  to: number | null;
+  rate: number;
+  subtract: number;
+}
+
+interface PRConfig {
+  exemption: Record<string, PRExemptionRow>;
+  brackets: Record<string, PRBracket[]>;
+}
+
+function findPRBracket(brackets: PRBracket[], wagesSubject: number): PRBracket {
+  for (const b of brackets) {
+    const from = dollars(b.from);
+    const to = b.to === null ? Infinity : dollars(b.to);
+    if (wagesSubject >= from && wagesSubject < to) return b;
+  }
+  return brackets[brackets.length - 1];
+}
+
+/**
+ * Form 499 R-4.1's personal-exemption checkbox, resolved to Appendix 1's own
+ * four columns. 'married_joint_half_or_separate' deliberately covers three
+ * distinct scenarios the booklet's own Appendix 1 column note collapses into
+ * ONE rate: a joint filer claiming half the personal exemption, a married
+ * person living with spouse who elects the optional computation, and a
+ * married-filing-separately person -- all three share the identical
+ * personal-exemption AND halved-dependent-exemption figures in the source
+ * table, so one certificate value is enough. Unset defaults to 'individual'
+ * (the common case, mirroring resolveOKFilingStatus's own default
+ * convention); anything unrecognized throws rather than silently taxing at
+ * the wrong exemption.
+ */
+function resolvePRFilingStatus(
+  cert: Record<string, unknown>,
+): 'individual' | 'married_joint_full' | 'married_joint_half_or_separate' | 'none' {
+  const raw = cert.filingStatus;
+  if (raw === undefined || raw === null) return 'individual';
+  if (
+    raw === 'individual' ||
+    raw === 'married_joint_full' ||
+    raw === 'married_joint_half_or_separate' ||
+    raw === 'none'
+  ) {
+    return raw;
+  }
+  throw new Error(
+    `Unrecognized PR certificate.filingStatus ${JSON.stringify(raw)} — expected 'individual', ` +
+      `'married_joint_full', 'married_joint_half_or_separate', or 'none'.`,
+  );
+}
+
+/**
+ * "Concesión por deducciones": total claimed deductions ÷ $500, with any
+ * fraction STRICTLY in excess of 50% (not 50% itself) counted as one more
+ * whole allowance — Hacienda's own stated rule ("Any fraction in excess of
+ * 50% resulting from the aforementioned division shall be considered as an
+ * additional allowance").
+ */
+function computePRDeductionAllowances(deductionsDollars: number): number {
+  if (deductionsDollars <= 0) return 0;
+  const raw = deductionsDollars / 500;
+  const whole = Math.floor(raw);
+  const frac = raw - whole;
+  return frac > 0.5 ? whole + 1 : whole;
+}
+
+/**
+ * Puerto Rico's Método de Porciento (Percentage Method) — see
+ * data/states/PR-2026.json's own $methodComment for the full derivation,
+ * the rounding finding (Hacienda's own Example 1 truncates rather than
+ * rounds half up at a $107.415 tie), and the disclosed gaps (Appendix 3's
+ * alternate method, the Christmas-bonus procedures, supplemental-wage
+ * Situations 2-4, the expired age-16-26 exemption).
+ */
+function puertoRicoWithholding(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine {
+  const cfg = rules.puertoRicoWithholding as PRConfig;
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const periodWages = ctx.taxableWagesFor(exempt);
+
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+
+  // Military Spouses Residency Relief Act — the spouse of an active service
+  // member transferred to Puerto Rico may keep their original tax domicile,
+  // exempting PR-source wages from PR withholding entirely (the booklet's
+  // own "Cónyuge de un Miembro Activo de Servicio" section). Mirrors this
+  // project's existing Hawaii nonresident_military_spouse pattern.
+  if (resolveCertBoolean(cert, 'msrraExempt')) {
+    return {
+      id: `${rules.code}_SIT`,
+      name: `${rules.name} Income Tax`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: 0,
+      amount: 0,
+      detail:
+        '$0 — spouse of an active service member electing coverage under the Military Spouses Residency ' +
+        'Relief Act (certificate.msrraExempt); not subject to Puerto Rico withholding on these wages.',
+    };
+  }
+
+  const period = input.payFrequency;
+  const exemptionRow = cfg.exemption[period];
+  const bracketTable = cfg.brackets[period];
+  if (!exemptionRow || !bracketTable) {
+    throw new Error(
+      `Puerto Rico's own withholding booklet doesn't publish a "${period}" table — cannot compute ${rules.code}_SIT.`,
+    );
+  }
+
+  const status = resolvePRFilingStatus(cert);
+  const personalExemption =
+    status === 'individual'
+      ? exemptionRow.personalIndividual
+      : status === 'married_joint_full'
+        ? exemptionRow.personalMarriedJointFull
+        : status === 'married_joint_half_or_separate'
+          ? exemptionRow.personalMarriedJointHalfOrSeparate
+          : 0;
+
+  const veteranExemption = resolveCertBoolean(cert, 'veteran') ? exemptionRow.veteranAdditional : 0;
+
+  const dependents = Number(cert.dependents ?? 0);
+  const dependentUnit =
+    status === 'married_joint_half_or_separate' ? exemptionRow.dependentHalf : exemptionRow.dependentFull;
+  const dependentExemption = dependents * dependentUnit;
+
+  const deductionsClaimed = Number(cert.deductions ?? 0);
+  const deductionAllowances = computePRDeductionAllowances(deductionsClaimed);
+  const deductionExemption = deductionAllowances * exemptionRow.deductionAllowanceUnit;
+
+  const totalExemptionDollars = personalExemption + veteranExemption + dependentExemption + deductionExemption;
+  const totalExemption = dollars(totalExemptionDollars);
+
+  const wagesSubject = atLeastZero(periodWages - totalExemption);
+
+  const bracket = findPRBracket(bracketTable, wagesSubject);
+
+  // Hacienda's own formula: rate x wages-subject, MINUS the bracket's own
+  // "menos"/"minus" constant — not the base-plus-excess shape this
+  // project's other percentage-method states use. Uses roundDownToCent(),
+  // not applyRate()'s usual round-half-up, to reproduce the booklet's own
+  // Example 1 exactly (see PR-2026.json's $methodComment for the $107.415
+  // tie this resolves).
+  const amount = atLeastZero(roundDownToCent(wagesSubject * bracket.rate) - dollars(bracket.subtract));
+
+  return {
+    id: `${rules.code}_SIT`,
+    name: `${rules.name} Income Tax`,
+    payer: 'employee',
+    jurisdiction: 'state',
+    taxableWages: wagesSubject,
+    amount,
+    detail:
+      `${fmt(periodWages)} less ${fmt(totalExemption)} exemption (${status}` +
+      (veteranExemption ? ', veteran' : '') +
+      (dependents ? `, ${dependents} dependent(s)` : '') +
+      (deductionAllowances ? `, ${deductionAllowances} deduction allowance(s)` : '') +
+      `) = ${fmt(wagesSubject)} wages subject to withholding (${period}); ` +
+      `${(bracket.rate * 100).toFixed(0)}% × ${fmt(wagesSubject)} less ${fmt(dollars(bracket.subtract))} = ${fmt(amount)}`,
   };
 }
 
