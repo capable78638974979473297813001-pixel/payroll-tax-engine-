@@ -2,3 +2,5 @@ node_modules/
 *.log
 .env
 data/address-points/
+harvester/review/
+harvester/snapshots/
