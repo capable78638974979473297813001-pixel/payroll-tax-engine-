@@ -1,0 +1,17 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "RESEND_API_KEY",
+      "description": "Optional. Resend API key for emailing signup verification codes. Without it, codes print to the server console and signup still works. Get it from https://resend.com/api-keys.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "STRIPE_SECRET_KEY",
+      "description": "Optional. Stripe secret key to create real Checkout sessions for card/ACH payment setup. Without it, the payment step honestly reports no processor is connected. Get it from https://dashboard.stripe.com/apikeys.",
+      "requiredAtBoot": false
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "accounts": {},
+  "acceptances": [],
+  "paymentMethods": {},
+  "subscriptions": {},
+  "keys": {},
+  "usage": [],
+  "estimates": [
+    {
+      "email": "test@example.com",
+      "employees": 10,
+      "payFrequency": "biweekly",
+      "callsPerYear": 260,
+      "rooftop": false,
+      "estimatedPrice": 31.2,
+      "at": "2026-09-17T19:27:27.223Z"
+    }
+  ]
+}

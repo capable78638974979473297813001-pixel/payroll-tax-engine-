@@ -1,0 +1,31 @@
+# Base44 development environment for the Omnia payroll tax engine.
+#
+# Zero-dependency Node 22 TypeScript project. The web entry is
+# `node site/server.ts`, which serves the landing page, the docs/console,
+# and the JSON API. Storage is a local JSON file (site/.data/db.json) —
+# no database service is needed.
+#
+# RESEND_API_KEY (email verification) and STRIPE_SECRET_KEY (payments) are
+# OPTIONAL: without them the app still boots, signup works (codes print to
+# the console), and the payment step reports honestly that no processor is
+# connected. Provide them via the Base44 secrets dashboard to enable those
+# integrations.
+services:
+  web:
+    image: node:22-slim
+    working_dir: /app
+    # Bind-mount the cloned source so edits appear without a rebuild.
+    volumes:
+      - ./:/app
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      # Let Vite-style host allowlisting pick up the preview origin if ever
+      # needed; harmless for this plain http server which does not gate on
+      # Host/Origin.
+      - __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS
+      - BASE44_PUBLIC_HOST_SUFFIX
+    # Node's built-in file watcher restarts the server on source edits.
+    command: node --watch site/server.ts
+    restart: unless-stopped
