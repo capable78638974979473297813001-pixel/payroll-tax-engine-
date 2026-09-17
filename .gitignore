@@ -1,3 +1,9 @@
 node_modules/
 *.log
 .env
+
+# Harvester scratch output — snapshots and the review journal are written by
+# the harvest tests/demos (each test clears the dir for a clean slate) and by
+# local sweeps; transient runtime state, never committed.
+harvester/snapshots/
+harvester/review/
