@@ -1,0 +1,18 @@
+services:
+  web:
+    image: node:22
+    working_dir: /app
+    command: node --watch site/server.ts
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s

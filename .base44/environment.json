@@ -1,0 +1,17 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "RESEND_API_KEY",
+      "description": "Resend API key for sending verification emails during signup. Optional — without it the server logs the code to the console instead of emailing.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "STRIPE_SECRET_KEY",
+      "description": "Stripe secret key for collecting payment during signup. Optional — without it the payment step reports that no processor is connected.",
+      "requiredAtBoot": false
+    }
+  ]
+}
