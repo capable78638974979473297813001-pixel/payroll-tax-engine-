@@ -198,6 +198,71 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
 }
 
 // ---------------------------------------------------------------------
+// POST /api/start-session -- the landing-page lead form
+// ---------------------------------------------------------------------
+
+// The homepage lead form ("Get my price") promises zero friction: no
+// code step, straight into the console. This creates the lead and
+// issues the session token in one call. Email ownership is deliberately
+// not checked here -- an evaluation account carries no payment method
+// and no data until terms are accepted inside the console, so the trade
+// is zero friction now, verification-grade controls at the steps that
+// actually move money.
+
+async function handleStartSession(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  let body: { name?: string; email?: string; company?: string; phone?: string };
+  try {
+    body = await readJson(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message });
+    return;
+  }
+
+  const name = (body.name ?? '').trim();
+  const email = (body.email ?? '').trim().toLowerCase();
+  const company = (body.company ?? '').trim();
+  const phone = (body.phone ?? '').trim();
+
+  if (!name || !isValidEmail(email) || !company || !phone) {
+    sendJson(res, 400, { error: 'Name, a valid work email, business name and phone are all required.' });
+    return;
+  }
+
+  const token = randomBytes(24).toString('hex');
+  const now = Date.now();
+
+  const result = withDb((db) => {
+    const existing = db.accounts[email];
+    const record: AccountRecord = {
+      name,
+      email,
+      company,
+      phone,
+      code: null,
+      codeRequestedAt: existing?.codeRequestedAt ?? null,
+      codeExpiresAt: null,
+      emailVerifiedAt: existing?.emailVerifiedAt ?? new Date(now).toISOString(),
+      sessionToken: token,
+      sessionExpiresAt: new Date(now + SESSION_TTL_MS).toISOString(),
+      stage: existing?.emailVerifiedAt ? existing.stage : 'verified',
+      createdAt: existing?.createdAt ?? new Date(now).toISOString(),
+    };
+    db.accounts[email] = record;
+    const hasKey = Object.values(db.keys).some((k) => k.ownerEmail === email && k.isActive);
+    return { name: record.name, company: record.company, hasKey };
+  });
+
+  console.log(`[lead] ${email} (${result.company}) -- session issued from the homepage form`);
+  sendJson(res, 200, {
+    sessionToken: token,
+    email,
+    name: result.name,
+    company: result.company,
+    hasKey: result.hasKey,
+  });
+}
+
+// ---------------------------------------------------------------------
 // Step 2 -- POST /api/verify-email
 // ---------------------------------------------------------------------
 
@@ -823,6 +888,7 @@ createServer((req, res) => {
     }
 
     if (method === 'POST' && url === '/api/signup') return handleSignup(req, res);
+    if (method === 'POST' && url === '/api/start-session') return handleStartSession(req, res);
     if (method === 'POST' && url === '/api/verify-email') return handleVerifyEmail(req, res);
     if (method === 'GET' && url === '/api/terms') return handleTerms(req, res);
     if (method === 'POST' && url === '/api/accept-terms') return handleAcceptTerms(req, res);

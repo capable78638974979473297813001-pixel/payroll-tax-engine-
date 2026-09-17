@@ -1,5 +1,34 @@
 {
-  "accounts": {},
+  "accounts": {
+    "t@example.com": {
+      "name": "Test User",
+      "email": "t@example.com",
+      "company": "Acme",
+      "phone": "555",
+      "code": "331001",
+      "codeRequestedAt": "2026-09-17T23:07:51.329Z",
+      "codeExpiresAt": "2026-09-17T23:22:51.329Z",
+      "emailVerifiedAt": null,
+      "sessionToken": null,
+      "sessionExpiresAt": null,
+      "stage": "unverified",
+      "createdAt": "2026-09-17T23:07:51.329Z"
+    },
+    "jordan@acmepay.com": {
+      "name": "Jordan Casey",
+      "email": "jordan@acmepay.com",
+      "company": "Acme Payroll",
+      "phone": "(555) 123-4567",
+      "code": null,
+      "codeRequestedAt": null,
+      "codeExpiresAt": null,
+      "emailVerifiedAt": "2026-09-17T23:08:39.492Z",
+      "sessionToken": "6ae34d745d99906d0175d626776df30109c46550c3dd4174",
+      "sessionExpiresAt": "2026-09-18T23:08:39.492Z",
+      "stage": "verified",
+      "createdAt": "2026-09-17T23:08:39.492Z"
+    }
+  },
   "acceptances": [],
   "paymentMethods": {},
   "subscriptions": {},
