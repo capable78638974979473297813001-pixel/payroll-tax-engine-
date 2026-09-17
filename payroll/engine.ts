@@ -75,9 +75,26 @@ export function buildPaycheckInput(
   employee: Employee,
   checkDate: string,
   timeEntry?: TimeEntry,
+  /**
+   * Pre-built earnings for the period, used INSTEAD of deriving them from
+   * the employee's payType and this period's hours. The one seam a caller
+   * that assembles pay some other way needs — the trades layer (trades/)
+   * computes a plumber's period earnings across several public-works jobs
+   * at different prevailing-wage classifications and rates, work the flat
+   * hourlyRate × hours formula in baseEarnings() cannot express, then feeds
+   * the result straight in here so the tax engine, garnishments and direct
+   * deposit still run exactly once, in one place. When present, `timeEntry`
+   * is ignored for base pay; deductions still resolve against these
+   * earnings (a percent-of-gross 401(k) is a percentage of THIS cash), so
+   * the override must be the complete cash-and-imputed earnings for the
+   * period, not a delta on top of the payType formula.
+   */
+  earningsOverride?: readonly Earning[],
 ): PaycheckInput {
   const periodsPerYear = PERIODS_PER_YEAR[company.paySchedule.frequency];
-  const earnings = [...baseEarnings(employee, timeEntry, periodsPerYear), ...extraEarnings(timeEntry)];
+  const earnings = earningsOverride
+    ? [...earningsOverride]
+    : [...baseEarnings(employee, timeEntry, periodsPerYear), ...extraEarnings(timeEntry)];
 
   return {
     checkDate,
@@ -115,8 +132,10 @@ export function computeEmployeePaycheck(
   employee: Employee,
   checkDate: string,
   timeEntry?: TimeEntry,
+  /** See buildPaycheckInput's own `earningsOverride` — threaded through so the trades prevailing-wage layer gets the full garnishment + direct-deposit pipeline, not just the tax calc. */
+  earningsOverride?: readonly Earning[],
 ): EmployeePaycheckComputation {
-  const input = buildPaycheckInput(company, employee, checkDate, timeEntry);
+  const input = buildPaycheckInput(company, employee, checkDate, timeEntry, earningsOverride);
   const result = calculatePaycheck(input);
 
   const garnishment =
