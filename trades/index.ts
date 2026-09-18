@@ -71,6 +71,15 @@ export type {
 export { InvalidApprenticeRatioError, checkApprenticeRatio, totalApprenticeRatioExposure } from './apprenticeRatio.ts';
 export type { ApprenticeRatioDayFinding, ApprenticeshipProgram } from './apprenticeRatio.ts';
 
+export { distanceMeters, verifyClockIn } from './geofence.ts';
+export type { ClockEvent, ClockVerification, GeoPoint } from './geofence.ts';
+
+export { computeMissingHoursNudges, consoleNudgeSender, renderNudgeText, sendNudges } from './nudge.ts';
+export type { NudgeCandidate, NudgeSendResult, NudgeSender, NudgeWorker } from './nudge.ts';
+
+export { PER_EMPLOYEE_CENTS, monthlyBill } from './billing.ts';
+export type { Bill } from './billing.ts';
+
 export { DeterminationImportError, normalizeDetermination, slugifyClassification } from './importDetermination.ts';
 export type { DeterminationExport, DeterminationExportRow } from './importDetermination.ts';
 
@@ -116,8 +125,10 @@ export {
 export type { TradesEmployeeRun, TradesPayRunInput, TradesPayRunResult } from './payRun.ts';
 
 export {
+  addClockEvent,
   addWorkedHours,
   allWageDeterminations,
+  clockEventsForCompanyInRange,
   getJob,
   getWageDetermination,
   getWorkerProfile,

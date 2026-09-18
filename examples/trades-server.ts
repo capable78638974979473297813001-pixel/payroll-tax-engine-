@@ -2,25 +2,38 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { randomUUID } from 'node:crypto';
 
 import { dollars } from '../src/money.ts';
 import { freshYearToDate } from '../payroll/ytd.ts';
-import { employeesForCompany, saveCompany, saveEmployees } from '../payroll/store.ts';
+import { activeEmployeesFor } from '../payroll/run.ts';
+import { employeesForCompany, getCompany, saveCompany, saveEmployee, saveEmployees } from '../payroll/store.ts';
 import type { Company, Employee } from '../payroll/types.ts';
 import {
+  addClockEvent,
   addWorkedHours,
   approveRunById,
+  clockEventsForCompanyInRange,
+  computeMissingHoursNudges,
   draftWeeklyTradesRun,
+  getJob,
+  getWorkerProfile,
   jobsForCompany,
+  monthlyBill,
   saveJob,
   saveWageDetermination,
   saveWorkerProfile,
+  sendNudges,
+  verifyClockIn,
   weeklyCertifiedPayroll,
   weeklyComplianceReport,
   weeklyJobCosts,
   workedHoursForCompanyInRange,
   UnknownCompanyError,
+  type ClockEvent,
+  type GeoPoint,
   type Job,
+  type NudgeWorker,
   type TradeWorkerProfile,
   type WageDetermination,
   type WorkedHours,
@@ -28,14 +41,16 @@ import {
 } from '../trades/index.ts';
 
 /**
- * A thin JSON HTTP surface over the trades application service
- * (trades/service.ts) — the endpoints a self-serve UI for a plumbing or
- * electrical shop would call. It holds NO business logic: every route parses
- * a request, calls one service or store function, and serializes the result.
- * The prevailing-wage arithmetic, certified payroll, and job costing all live
- * below the service; this file is transport only.
+ * Crewtally — the server for the self-serve trades payroll app. A thin JSON
+ * HTTP surface over the trades application service (trades/service.ts) plus the
+ * crew-facing features (geofenced clock-in, hour-log nudges, seasonal roster,
+ * $5/employee billing), and it serves the single-page UI at /. It holds NO
+ * business logic: every route parses a request, calls one service or store
+ * function, and serializes the result. The prevailing-wage arithmetic,
+ * certified payroll, job costing, geofencing and nudges all live in trades/;
+ * this file is transport only.
  *
- *   npm run trades:server
+ *   npm run crewtally     (alias: npm run trades:server)
  *   curl -X POST localhost:4325/api/demo/seed         # sample shop + crew + job
  *   curl -X POST localhost:4325/api/companies/shop-1/runs/draft \
  *        -d '{"periodStart":"2026-01-04","periodEnd":"2026-01-10","checkDate":"2026-01-14"}'
@@ -128,21 +143,34 @@ function seedDemo(): { companyId: string; jobIds: string[]; employeeIds: string[
     prevailingWage: { determinationId: 'TX20260001', contractNumber: 'DBA-778', projectName: 'Travis County School' },
     workersCompClassCode: '5183',
     glCostCode: '01-100',
+    location: { lat: 30.2711, lng: -97.7437, radiusMeters: 200 }, // geofenced job site
   };
   const privateJob: Job = { id: 'J2', companyId: 'shop-1', name: 'Elm St service call', workState: 'TX', workersCompClassCode: '5183', glCostCode: '02-200' };
-
-  const profile: TradeWorkerProfile = {
-    employeeId: 'joe',
-    classificationRates: [{ classificationCode: 'PLUMBER', baseRateCents: dollars(40) }],
-    fringeCredits: [{ plan: 'Health & Welfare', ratePerHourCents: dollars(5) }],
-  };
 
   saveCompany(company);
   saveEmployees([baseEmployee('joe', 'Joe', 30), baseEmployee('amy', 'Amy', 22)]);
   saveWageDetermination(determination);
   saveJob(publicJob);
   saveJob(privateJob);
-  saveWorkerProfile(profile);
+  saveWorkerProfile({
+    employeeId: 'joe',
+    classificationRates: [{ classificationCode: 'PLUMBER', baseRateCents: dollars(40) }],
+    fringeCredits: [{ plan: 'Health & Welfare', ratePerHourCents: dollars(5) }],
+    employmentType: 'regular',
+    phone: '+15125550101',
+  });
+  saveWorkerProfile({
+    employeeId: 'amy',
+    classificationRates: [{ classificationCode: 'PLUMBER_APPRENTICE', baseRateCents: dollars(22) }],
+    fringeCredits: [],
+    employmentType: 'regular',
+    phone: '+15125550102',
+  });
+  // A seasonal helper — no hours logged yet, so the nudge and seasonal-roster
+  // features have something to show.
+  saveEmployee({ ...baseEmployee('sam', 'Sam', 18), lastName: 'Summers' });
+  saveWorkerProfile({ employeeId: 'sam', classificationRates: [], fringeCredits: [], employmentType: 'seasonal', seasonEndDate: '2026-03-31', phone: '+15125550103' });
+
   addWorkedHours([
     { employeeId: 'joe', jobId: 'J1', date: '2026-01-05', classificationCode: 'PLUMBER', hours: 10 },
     { employeeId: 'joe', jobId: 'J1', date: '2026-01-06', classificationCode: 'PLUMBER', hours: 10 },
@@ -153,7 +181,7 @@ function seedDemo(): { companyId: string; jobIds: string[]; employeeIds: string[
     { employeeId: 'amy', jobId: 'J1', date: '2026-01-06', classificationCode: 'PLUMBER_APPRENTICE', hours: 8 },
   ]);
 
-  return { companyId: 'shop-1', jobIds: ['J1', 'J2'], employeeIds: ['joe', 'amy'] };
+  return { companyId: 'shop-1', jobIds: ['J1', 'J2'], employeeIds: ['joe', 'amy', 'sam'] };
 }
 
 /** A run request built from a query string or a JSON body sharing the same field names. */
@@ -167,14 +195,31 @@ function runRequestFrom(companyId: string, source: Record<string, string | undef
   };
 }
 
-/** A run summary that's useful over the wire without dumping every resolved entry. */
+/** A run summary that's useful over the wire without dumping every resolved entry. Includes the per-worker split-rate / multi-role breakdown (hours and pay by classification), so the same person can show up as, say, plumber AND foreman in one week. */
 function summarizeRun(result: ReturnType<typeof draftWeeklyTradesRun>) {
+  const roleBreakdown = result.employees
+    .filter((e) => e.prevailingWage)
+    .map((e) => {
+      const byRole = new Map<string, { classification: string; hours: number; grossCents: number }>();
+      for (const week of e.prevailingWage!.weeks) {
+        for (const entry of week.entries) {
+          const r = byRole.get(entry.classificationCode) ?? { classification: entry.classificationCode, hours: 0, grossCents: 0 };
+          r.hours += entry.straightHours + entry.overtimeHours + entry.doubleTimeHours;
+          r.grossCents += entry.grossCashCents;
+          byRole.set(entry.classificationCode, r);
+        }
+      }
+      return { employeeId: e.employee.id, roles: [...byRole.values()].sort((a, b) => b.hours - a.hours) };
+    })
+    .filter((e) => e.roles.length > 0);
+
   return {
     runId: result.run.id,
     status: result.run.status,
     checkDate: result.run.checkDate,
     lines: result.run.lines.map((l) => ({ employeeId: l.employeeId, grossPay: l.grossPay, netPay: l.netPay })),
     adjustments: result.employees.flatMap((e) => e.prevailingWage?.adjustments ?? []),
+    roleBreakdown,
   };
 }
 
@@ -217,13 +262,52 @@ const server = createServer(async (req, res) => {
       return sendJson(res, 200, { jobs: jobsForCompany(decodeURIComponent(jobsMatch[1])) });
     }
 
+    // Add a worker — regular crew or a seasonal helper. Creates the payroll
+    // Employee and the trades profile (per-role rates, phone for nudges) in one
+    // call, so the shop can grow its crew from the UI, not just the demo seed.
+    if (method === 'POST' && path === '/api/employees') {
+      const b = await readJson<{
+        companyId?: string; firstName?: string; lastName?: string; hourlyRate?: number; workersCompClassCode?: string;
+        phone?: string; employmentType?: 'regular' | 'seasonal'; seasonEndDate?: string; workState?: string;
+      }>(req);
+      const companyId = (b.companyId ?? '').trim();
+      const firstName = (b.firstName ?? '').trim();
+      if (!companyId || !firstName || !(Number(b.hourlyRate) > 0)) {
+        return sendJson(res, 400, { error: 'companyId, firstName and a positive hourlyRate are required.' });
+      }
+      if (!getCompany(companyId)) return sendJson(res, 404, { error: `No company "${companyId}".` });
+      const id = `emp_${randomUUID().slice(0, 8)}`;
+      const employee: Employee = {
+        id, companyId, firstName, lastName: (b.lastName ?? '').trim() || 'Crew',
+        hireDate: new Date().toISOString().slice(0, 10),
+        terminationDate: b.employmentType === 'seasonal' ? b.seasonEndDate : undefined,
+        employmentCategory: 'standard',
+        payType: { kind: 'hourly', hourlyRate: dollars(Number(b.hourlyRate)) },
+        workersCompClassCode: b.workersCompClassCode || '5183',
+        residenceState: { code: b.workState || 'TX' },
+        federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+        deductionPlans: [], directDepositAccounts: [], garnishmentOrders: [],
+        ytd: freshYearToDate(), ytdYear: new Date().getUTCFullYear(),
+      };
+      saveEmployee(employee);
+      saveWorkerProfile({ employeeId: id, classificationRates: [], fringeCredits: [], employmentType: b.employmentType ?? 'regular', seasonEndDate: b.seasonEndDate, phone: b.phone });
+      return sendJson(res, 201, { ok: true, id });
+    }
+
     const employeesMatch = path.match(/^\/api\/companies\/([^/]+)\/employees$/);
     if (method === 'GET' && employeesMatch) {
-      const crew = employeesForCompany(decodeURIComponent(employeesMatch[1])).map((e) => ({
-        id: e.id,
-        name: `${e.firstName} ${e.lastName}`,
-        payType: e.payType.kind,
-      }));
+      const crew = employeesForCompany(decodeURIComponent(employeesMatch[1])).map((e) => {
+        const p = getWorkerProfile(e.id);
+        return {
+          id: e.id,
+          name: `${e.firstName} ${e.lastName}`,
+          payType: e.payType.kind,
+          hourlyRateCents: e.payType.kind === 'hourly' ? e.payType.hourlyRate : null,
+          employmentType: p?.employmentType ?? 'regular',
+          seasonEndDate: p?.seasonEndDate ?? null,
+          phone: p?.phone ?? null,
+        };
+      });
       return sendJson(res, 200, { employees: crew });
     }
 
@@ -231,6 +315,62 @@ const server = createServer(async (req, res) => {
     if (method === 'GET' && hoursMatch) {
       const entries = workedHoursForCompanyInRange(decodeURIComponent(hoursMatch[1]), params.start ?? '', params.end ?? '');
       return sendJson(res, 200, { entries });
+    }
+
+    // Geofenced clock-in / out: verify the device's coordinates against the
+    // job's fence, record the punch (flagged if off-site), and return the check.
+    if (method === 'POST' && path === '/api/clock') {
+      const b = await readJson<{ companyId?: string; employeeId?: string; jobId?: string; type?: 'in' | 'out'; lat?: number; lng?: number }>(req);
+      const job = b.jobId ? getJob(b.jobId) : null;
+      if (!job) return sendJson(res, 404, { error: `No job "${b.jobId}".` });
+      const coords: GeoPoint | null = Number.isFinite(b.lat) && Number.isFinite(b.lng) ? { lat: Number(b.lat), lng: Number(b.lng) } : null;
+      const check = verifyClockIn(job, coords);
+      const event: ClockEvent = {
+        id: `clk_${randomUUID().slice(0, 8)}`,
+        companyId: b.companyId ?? job.companyId,
+        employeeId: b.employeeId ?? '',
+        jobId: job.id,
+        type: b.type === 'out' ? 'out' : 'in',
+        at: new Date().toISOString(),
+        coords,
+        onSite: check.onSite,
+        distanceMeters: check.distanceMeters,
+        note: check.note,
+      };
+      addClockEvent(event);
+      return sendJson(res, 201, { event, verification: check });
+    }
+
+    const clockMatch = path.match(/^\/api\/companies\/([^/]+)\/clock$/);
+    if (method === 'GET' && clockMatch) {
+      const day = params.date ?? new Date().toISOString().slice(0, 10);
+      return sendJson(res, 200, { events: clockEventsForCompanyInRange(decodeURIComponent(clockMatch[1]), day, day) });
+    }
+
+    // The daily 5 PM nudge: who was on the active roster today and logged
+    // nothing, plus the reminder each would receive (staged, see nudge.ts).
+    const nudgeMatch = path.match(/^\/api\/companies\/([^/]+)\/nudges$/);
+    if (method === 'POST' && nudgeMatch) {
+      const companyId = decodeURIComponent(nudgeMatch[1]);
+      const date = params.date ?? new Date().toISOString().slice(0, 10);
+      const active = activeEmployeesFor(getCompany(companyId) ?? ({ id: companyId } as never), employeesForCompany(companyId), date);
+      const roster: NudgeWorker[] = active.map((e) => {
+        const p = getWorkerProfile(e.id);
+        return { employeeId: e.id, name: `${e.firstName} ${e.lastName}`, phone: p?.phone };
+      });
+      const logged = workedHoursForCompanyInRange(companyId, date, date).map((w) => w.employeeId);
+      const candidates = computeMissingHoursNudges(roster, logged, date);
+      const results = sendNudges(candidates);
+      return sendJson(res, 200, { date, nudged: results });
+    }
+
+    const billingMatch = path.match(/^\/api\/companies\/([^/]+)\/billing$/);
+    if (method === 'GET' && billingMatch) {
+      const companyId = decodeURIComponent(billingMatch[1]);
+      const asOf = params.asOf ?? new Date().toISOString().slice(0, 10);
+      const company = getCompany(companyId);
+      const active = company ? activeEmployeesFor(company, employeesForCompany(companyId), asOf) : [];
+      return sendJson(res, 200, { asOf, ...monthlyBill(active.length) });
     }
 
     // One call that runs the whole week: draft (persisted), compliance, certified
@@ -308,6 +448,7 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Trades payroll API: http://localhost:${PORT}`);
-  console.log(`Seed a demo shop:    curl -X POST http://localhost:${PORT}/api/demo/seed`);
+  console.log(`\n  Crewtally — time & pay for the trades`);
+  console.log(`  Open the app:  http://localhost:${PORT}`);
+  console.log(`  (Click "Load the sample plumbing shop" to see everything working.)\n`);
 });

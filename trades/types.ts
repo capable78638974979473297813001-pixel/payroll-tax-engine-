@@ -130,6 +130,18 @@ export interface TradeWorkerProfile {
    * pays them (they remain a real labor cost — see jobCosting.ts).
    */
   fringeCredits: FringeCredit[];
+  /**
+   * Regular crew vs. a seasonal helper (a summer laborer, a storm-season temp).
+   * Seasonal is purely a label for the roster and billing views — it changes no
+   * pay math; a seasonal helper's `seasonEndDate` and the payroll Employee's own
+   * terminationDate are what actually take them off active payroll. Defaults to
+   * regular when absent.
+   */
+  employmentType?: 'regular' | 'seasonal';
+  /** For a seasonal helper: the last day of their season (ISO yyyy-mm-dd), shown on the roster so a temp isn't left on the books past their season. */
+  seasonEndDate?: string;
+  /** Mobile number for hour-log nudges (see nudge.ts). E.164 or local; this layer does not validate it — the SMS carrier does. */
+  phone?: string;
 }
 
 /**
@@ -187,4 +199,12 @@ export interface Job {
   workersCompClassCode?: string;
   /** General-ledger cost code for this job, passed through to job-cost output for the caller's accounting export. */
   glCostCode?: string;
+  /**
+   * The job-site location and how close a worker must be to clock in there.
+   * Present turns on geofenced clock-ins for the job (see trades/geofence.ts):
+   * a punch outside the radius is recorded but flagged, so time from the wrong
+   * site is caught at the source instead of on the certified payroll. Absent
+   * means clock-ins are accepted anywhere (a shop with no field geofencing).
+   */
+  location?: { lat: number; lng: number; radiusMeters: number };
 }

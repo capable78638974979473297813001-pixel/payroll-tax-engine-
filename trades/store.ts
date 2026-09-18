@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { ClockEvent } from './geofence.ts';
 import type { Job, TradeWorkerProfile, WageDetermination, WorkedHours } from './types.ts';
 
 /**
@@ -39,10 +40,12 @@ interface TradesDB {
   workerProfiles: Record<string, TradeWorkerProfile>;
   /** Append-only log of reported hours; queried by employee, job, and date range. WorkedHours carries no id of its own (it is a fact about a day, not an entity), so this is a flat list, not a keyed map. */
   workedHours: WorkedHours[];
+  /** Append-only log of clock punches with their geofence verification (see geofence.ts). */
+  clockEvents: ClockEvent[];
 }
 
 function emptyDb(): TradesDB {
-  return { determinations: {}, jobs: {}, workerProfiles: {}, workedHours: [] };
+  return { determinations: {}, jobs: {}, workerProfiles: {}, workedHours: [], clockEvents: [] };
 }
 
 function ensureDataDir(): void {
@@ -62,6 +65,7 @@ function load(): TradesDB {
       jobs: parsed.jobs ?? base.jobs,
       workerProfiles: parsed.workerProfiles ?? base.workerProfiles,
       workedHours: parsed.workedHours ?? base.workedHours,
+      clockEvents: parsed.clockEvents ?? base.clockEvents,
     };
   } catch {
     return emptyDb();
@@ -164,4 +168,23 @@ export function workedHoursForCompanyInRange(companyId: string, start: string, e
     const companyJobIds = new Set(Object.values(db.jobs).filter((j) => j.companyId === companyId).map((j) => j.id));
     return db.workedHours.filter((w) => w.date >= start && w.date <= end && companyJobIds.has(w.jobId));
   });
+}
+
+// ----------------------------------------------------------------------------
+// Clock events
+// ----------------------------------------------------------------------------
+
+export function addClockEvent(event: ClockEvent): void {
+  withTradesDb((db) => {
+    db.clockEvents.push(event);
+  });
+}
+
+/** A company's clock punches whose calendar day (the ISO date prefix of `at`) falls in [startDate, endDate] inclusive — newest first. */
+export function clockEventsForCompanyInRange(companyId: string, startDate: string, endDate: string): ClockEvent[] {
+  return readTradesDb((db) =>
+    db.clockEvents
+      .filter((e) => e.companyId === companyId && e.at.slice(0, 10) >= startDate && e.at.slice(0, 10) <= endDate)
+      .sort((a, b) => b.at.localeCompare(a.at)),
+  );
 }
