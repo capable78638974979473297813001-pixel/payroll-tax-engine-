@@ -66,3 +66,22 @@ export type {
 
 export { runTradesPayPeriod } from './run.ts';
 export type { TradesPayPeriodInput, TradesPayPeriodResult } from './run.ts';
+
+export { certifiedPayrollForPeriod, draftTradesPayRun, jobCostsForPeriod } from './payRun.ts';
+export type { TradesEmployeeRun, TradesPayRunInput, TradesPayRunResult } from './payRun.ts';
+
+export {
+  addWorkedHours,
+  allWageDeterminations,
+  getJob,
+  getWageDetermination,
+  getWorkerProfile,
+  jobsForCompany,
+  readTradesDb,
+  saveJob,
+  saveWageDetermination,
+  saveWorkerProfile,
+  withTradesDb,
+  workedHoursForCompanyInRange,
+  workedHoursForEmployeeInRange,
+} from './store.ts';

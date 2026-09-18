@@ -1,4 +1,5 @@
 import { computeEmployeePaycheck, type EmployeePaycheckComputation } from '../payroll/engine.ts';
+import { overtimeRuleForState, type OvertimeRule } from '../payroll/timeAndAttendance.ts';
 import type { Company, Employee } from '../payroll/types.ts';
 import type { Earning } from '../src/types.ts';
 import {
@@ -37,6 +38,13 @@ export interface TradesPayPeriodInput {
   determinations: readonly WageDetermination[];
   /** The ISO weekday the employer's workweek starts on (0 = Sunday default). */
   weekStartsOn?: number;
+  /**
+   * The overtime rule to classify hours under. Defaults to the rule for the
+   * worker's work state (California's daily 8/12-hour and 7th-consecutive-day
+   * double time; the federal weekly-40 rule everywhere else), so a California
+   * crew gets daily overtime automatically. Pass one explicitly to override.
+   */
+  overtimeRule?: OvertimeRule;
 }
 
 export interface TradesPayPeriodResult {
@@ -54,6 +62,8 @@ export function runTradesPayPeriod(input: TradesPayPeriodInput): TradesPayPeriod
   const jobsById = new Map(input.jobs.map((j) => [j.id, j]));
   const determinationsById = indexDeterminations(input.determinations);
   const fallbackBaseRateCents = input.employee.payType.kind === 'hourly' ? input.employee.payType.hourlyRate : 0;
+  const workState = input.employee.workState?.code ?? input.company.homeState;
+  const overtimeRule = input.overtimeRule ?? overtimeRuleForState(workState);
 
   const workweeks = groupIntoWorkweeks(input.workedHours, input.weekStartsOn ?? 0);
   const weeks: PrevailingWageWeek[] = [...workweeks.keys()]
@@ -66,6 +76,7 @@ export function runTradesPayPeriod(input: TradesPayPeriodInput): TradesPayPeriod
         determinationsById,
         profile: input.profile,
         fallbackBaseRateCents,
+        overtimeRule,
       }),
     );
 

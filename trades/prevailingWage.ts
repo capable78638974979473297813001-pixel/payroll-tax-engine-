@@ -1,5 +1,6 @@
 import { roundHalfUp, type Cents } from '../src/money.ts';
 import type { Earning } from '../src/types.ts';
+import { FEDERAL_OVERTIME_RULE, type OvertimeRule } from '../payroll/timeAndAttendance.ts';
 import { resolveRate } from './wageDetermination.ts';
 import type { Job, TradeWorkerProfile, WageDetermination, WorkedHours } from './types.ts';
 
@@ -49,15 +50,20 @@ import type { Job, TradeWorkerProfile, WageDetermination, WorkedHours } from './
  * method, the more conservative and more common default, and the choice is
  * called out here rather than buried.
  *
- * SCOPE: this computes federal-style weekly (40-hour) overtime. State DAILY
- * overtime and double-time overlays (California's 8/12-hour-day and
- * seventh-consecutive-day rules) are a separate concern already modelled in
- * payroll/timeAndAttendance.ts; layering that on top of this weekly split is
- * a documented extension point, not silently assumed away.
+ * STATE DAILY OVERTIME. By default this applies the federal weekly-40 rule.
+ * Pass an `overtimeRule` (California's 8/12-hour-day and seventh-consecutive-
+ * day rule, from payroll/timeAndAttendance.ts, is the built-in one) and the
+ * split honours it: each day's hours are classified by the daily thresholds
+ * first, attributed back to that day's job/classification entries, and only
+ * the day's straight-time portion feeds the weekly-40 test — the same daily-
+ * then-weekly interaction payroll/timeAndAttendance.ts's classifyWeeklyHours
+ * implements, here carried down to the per-entry level so each job gets the
+ * right hours. Double-time hours are paid the basic rate plus a FULL-time
+ * premium (fringe still excluded), overtime hours the half-time premium.
  */
 
-const WEEKLY_OVERTIME_THRESHOLD_HOURS = 40;
 const OVERTIME_PREMIUM_MULTIPLIER = 0.5; // half-time premium; the base hour is already paid at the basic rate
+const DOUBLE_TIME_PREMIUM_MULTIPLIER = 1; // full-time premium on top of the base hour → 2x the regular rate
 
 /** One input WorkedHours entry after pricing — a single job/classification/day with its straight/overtime split and every rate and dollar figure it produced. The atomic row certified payroll (WH-347) and job costing both build on. */
 export interface ResolvedWorkedHours {
@@ -68,6 +74,8 @@ export interface ResolvedWorkedHours {
   isPrevailingWage: boolean;
   straightHours: number;
   overtimeHours: number;
+  /** Hours at double time — only ever non-zero under a daily rule that defines a double-time threshold (California's 12-hour day, the 7th consecutive day). Always 0 under the federal weekly rule. */
+  doubleTimeHours: number;
   /** The basic hourly rate actually used — max(worker's shop rate, prevailing basic rate) on a public job; the shop rate on a private one. */
   effectiveBaseRateCents: Cents;
   workerBaseRateCents: Cents;
@@ -84,10 +92,12 @@ export interface ResolvedWorkedHours {
   straightPayCents: Cents;
   overtimeBasePayCents: Cents;
   overtimePremiumCents: Cents;
+  doubleTimeBasePayCents: Cents;
+  doubleTimePremiumCents: Cents;
   cashFringeCents: Cents;
   /** Employer plan contributions for this row's hours — a burden cost, NOT paid to the worker (so not part of grossCashCents). */
   employerFringeCostCents: Cents;
-  /** Everything the worker is actually paid for this row: straight + overtime base + overtime premium + cash fringe. */
+  /** Everything the worker is actually paid for this row: straight + overtime (base + premium) + double time (base + premium) + cash fringe. */
   grossCashCents: Cents;
 }
 
@@ -124,9 +134,12 @@ export interface PrevailingWageWeek {
   totalHours: number;
   totalStraightHours: number;
   totalOvertimeHours: number;
+  totalDoubleTimeHours: number;
   /** Weighted-average basic rate across all hours — the FLSA regular rate the overtime premium is charged on. */
   regularRateCents: Cents;
   overtimePremiumPerHourCents: Cents;
+  /** Full-time premium per double-time hour (= the regular rate); 0 unless a daily rule produced double-time hours. */
+  doubleTimePremiumPerHourCents: Cents;
   /** Total cash the worker is owed for the week (sum of every entry's grossCash) — should reconcile to the engine's grossPay for the period once weeks are combined. */
   grossCashCents: Cents;
   /** Employer fringe-plan contributions for the week — a burden cost carried for job costing, never paid to the worker. */
@@ -146,6 +159,8 @@ export interface ResolvePrevailingWageArgs {
   profile?: TradeWorkerProfile;
   /** The worker's default hourly rate (their payroll Employee.payType hourlyRate), used for any classification the profile does not price. */
   fallbackBaseRateCents: Cents;
+  /** The overtime rule to classify hours under. Defaults to the federal weekly-40 rule; pass overtimeRuleForState(workState) (payroll/timeAndAttendance.ts) to apply a state's daily rule (California's 8/12-hour day and 7th-consecutive-day double time). */
+  overtimeRule?: OvertimeRule;
 }
 
 function workerBaseRateFor(args: ResolvePrevailingWageArgs, classificationCode: string): Cents {
@@ -158,26 +173,96 @@ function totalFringeCreditPerHour(profile: TradeWorkerProfile | undefined): Cent
   return profile.fringeCredits.reduce((sum, c) => sum + c.ratePerHourCents, 0);
 }
 
-/** The straight/overtime split for the whole week: how many of the worker's cumulative hours, in chronological order, fall past the 40-hour line. Returns, for each input entry (in the same order given), its straight and overtime portions — an entry that straddles the 40-hour boundary is split across both. */
-function splitStraightAndOvertime(
-  workedHours: readonly WorkedHours[],
-): { straightHours: number; overtimeHours: number }[] {
-  // Chronological order so the LAST hours of the week are the overtime ones —
-  // the standard convention (a stable sort keeps same-day entries in input
-  // order, so the caller controls tie-breaking within a day).
-  const order = workedHours
-    .map((w, i) => ({ i, date: w.date, hours: w.hours }))
-    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.i - b.i));
+interface EntryHourSplit {
+  straightHours: number;
+  overtimeHours: number;
+  doubleTimeHours: number;
+}
 
-  const split = workedHours.map(() => ({ straightHours: 0, overtimeHours: 0 }));
-  let cumulative = 0;
-  for (const { i, hours } of order) {
-    const straightRoom = Math.max(0, WEEKLY_OVERTIME_THRESHOLD_HOURS - cumulative);
-    const straight = Math.min(hours, straightRoom);
-    split[i] = { straightHours: straight, overtimeHours: hours - straight };
-    cumulative += hours;
+/** One day's TOTAL hours split by the daily thresholds alone (weekly-40 is layered on afterward). Mirrors payroll/timeAndAttendance.ts's own splitByDailyThresholds so the daily math stays identical; kept local because that helper is private there. */
+function dailySplit(hours: number, rule: OvertimeRule): EntryHourSplit {
+  if (rule.dailyOvertimeThresholdHours === undefined) {
+    return { straightHours: hours, overtimeHours: 0, doubleTimeHours: 0 };
   }
-  return split;
+  const straight = Math.min(hours, rule.dailyOvertimeThresholdHours);
+  const above = Math.max(0, hours - rule.dailyOvertimeThresholdHours);
+  const dtThreshold = rule.dailyDoubleTimeThresholdHours;
+  if (dtThreshold === undefined || hours <= dtThreshold) {
+    return { straightHours: straight, overtimeHours: above, doubleTimeHours: 0 };
+  }
+  return {
+    straightHours: straight,
+    overtimeHours: dtThreshold - rule.dailyOvertimeThresholdHours,
+    doubleTimeHours: hours - dtThreshold,
+  };
+}
+
+/**
+ * Split every entry into straight/overtime/double-time under `rule`,
+ * attributing each day's daily-classified pools back to that day's entries in
+ * order, then applying the weekly-40 test to the straight-time pool. The
+ * federal rule (no daily thresholds) collapses this to the plain chronological
+ * 40-hour split — every hour starts as straight, and the last hours over 40 in
+ * the week become overtime. Under California's rule the daily 8/12-hour split
+ * runs first, only each day's straight portion counts toward the weekly 40,
+ * and the 7th consecutive day is paid overtime/double-time throughout.
+ */
+function splitHoursByRule(workedHours: readonly WorkedHours[], rule: OvertimeRule): EntryHourSplit[] {
+  const out: EntryHourSplit[] = workedHours.map(() => ({ straightHours: 0, overtimeHours: 0, doubleTimeHours: 0 }));
+
+  const byDate = new Map<string, number[]>();
+  for (let i = 0; i < workedHours.length; i++) {
+    const list = byDate.get(workedHours[i].date);
+    if (list) list.push(i);
+    else byDate.set(workedHours[i].date, [i]);
+  }
+  const dates = [...byDate.keys()].sort();
+  const isSeventhConsecutiveDay = rule.seventhConsecutiveDayRule === true && dates.length === 7;
+
+  // Straight-hour chunks recorded in chronological order, so the weekly-40
+  // overflow can convert the LAST straight hours of the week into overtime.
+  const straightChunks: { idx: number; hours: number }[] = [];
+
+  dates.forEach((date, dayIndex) => {
+    const idxs = byDate.get(date)!;
+    const dayTotal = idxs.reduce((sum, i) => sum + workedHours[i].hours, 0);
+    const split =
+      isSeventhConsecutiveDay && dayIndex === dates.length - 1
+        ? // The 7th consecutive day: first 8 hours overtime, the rest double time.
+          { straightHours: 0, overtimeHours: Math.min(dayTotal, 8), doubleTimeHours: Math.max(0, dayTotal - 8) }
+        : dailySplit(dayTotal, rule);
+
+    let remStraight = split.straightHours;
+    let remOvertime = split.overtimeHours;
+    let remDouble = split.doubleTimeHours;
+    for (const i of idxs) {
+      let h = workedHours[i].hours;
+      const s = Math.min(h, remStraight);
+      remStraight -= s;
+      h -= s;
+      out[i].straightHours += s;
+      if (s > 0) straightChunks.push({ idx: i, hours: s });
+      const o = Math.min(h, remOvertime);
+      remOvertime -= o;
+      h -= o;
+      out[i].overtimeHours += o;
+      const d = Math.min(h, remDouble);
+      remDouble -= d;
+      out[i].doubleTimeHours += d;
+    }
+  });
+
+  // Weekly-40: the amount of straight time past 40 is reclassified up to
+  // overtime, taken from the last straight hours of the week.
+  let overflow = Math.max(0, out.reduce((sum, o) => sum + o.straightHours, 0) - rule.weeklyThresholdHours);
+  for (let k = straightChunks.length - 1; k >= 0 && overflow > 0; k--) {
+    const chunk = straightChunks[k];
+    const convert = Math.min(chunk.hours, overflow);
+    out[chunk.idx].straightHours -= convert;
+    out[chunk.idx].overtimeHours += convert;
+    overflow -= convert;
+  }
+  return out;
 }
 
 /**
@@ -189,11 +274,13 @@ function splitStraightAndOvertime(
  */
 export function resolvePrevailingWageWeek(args: ResolvePrevailingWageArgs): PrevailingWageWeek {
   const { workedHours, jobsById, determinationsById, profile, employeeId } = args;
+  const rule = args.overtimeRule ?? FEDERAL_OVERTIME_RULE;
 
-  const splits = splitStraightAndOvertime(workedHours);
+  const splits = splitHoursByRule(workedHours, rule);
   const totalHours = workedHours.reduce((sum, w) => sum + w.hours, 0);
   const totalStraightHours = splits.reduce((sum, s) => sum + s.straightHours, 0);
   const totalOvertimeHours = splits.reduce((sum, s) => sum + s.overtimeHours, 0);
+  const totalDoubleTimeHours = splits.reduce((sum, s) => sum + s.doubleTimeHours, 0);
 
   // First pass: resolve each entry's rates (independent of overtime), so the
   // weighted-average regular rate can be computed before pay is assigned.
@@ -248,17 +335,20 @@ export function resolvePrevailingWageWeek(args: ResolvePrevailingWageArgs): Prev
   const weightedBaseCentHours = resolved.reduce((sum, r) => sum + r.effectiveBase * r.w.hours, 0);
   const regularRateCents = totalHours > 0 ? roundHalfUp(weightedBaseCentHours / totalHours) : 0;
   const overtimePremiumPerHourCents = roundHalfUp(regularRateCents * OVERTIME_PREMIUM_MULTIPLIER);
+  const doubleTimePremiumPerHourCents = roundHalfUp(regularRateCents * DOUBLE_TIME_PREMIUM_MULTIPLIER);
 
-  // Second pass: assign pay now that the premium rate is known.
+  // Second pass: assign pay now that the premium rates are known.
   const entries: ResolvedWorkedHours[] = resolved.map((r) => {
-    const { straightHours, overtimeHours } = r.split;
-    const hours = straightHours + overtimeHours;
+    const { straightHours, overtimeHours, doubleTimeHours } = r.split;
+    const hours = straightHours + overtimeHours + doubleTimeHours;
     const straightPay = roundHalfUp(straightHours * r.effectiveBase);
     const overtimeBasePay = roundHalfUp(overtimeHours * r.effectiveBase);
     const overtimePremium = roundHalfUp(overtimeHours * overtimePremiumPerHourCents);
+    const doubleTimeBasePay = roundHalfUp(doubleTimeHours * r.effectiveBase);
+    const doubleTimePremium = roundHalfUp(doubleTimeHours * doubleTimePremiumPerHourCents);
     const cashFringe = roundHalfUp(hours * r.cashFringePerHour);
     const employerFringeCost = roundHalfUp(hours * r.employerFringeCostPerHour);
-    const grossCash = straightPay + overtimeBasePay + overtimePremium + cashFringe;
+    const grossCash = straightPay + overtimeBasePay + overtimePremium + doubleTimeBasePay + doubleTimePremium + cashFringe;
 
     return {
       employeeId,
@@ -268,6 +358,7 @@ export function resolvePrevailingWageWeek(args: ResolvePrevailingWageArgs): Prev
       isPrevailingWage: r.isPrevailingWage,
       straightHours,
       overtimeHours,
+      doubleTimeHours,
       effectiveBaseRateCents: r.effectiveBase,
       workerBaseRateCents: r.workerBase,
       prevailingBaseRateCents: r.prevailingBase,
@@ -278,6 +369,8 @@ export function resolvePrevailingWageWeek(args: ResolvePrevailingWageArgs): Prev
       straightPayCents: straightPay,
       overtimeBasePayCents: overtimeBasePay,
       overtimePremiumCents: overtimePremium,
+      doubleTimeBasePayCents: doubleTimeBasePay,
+      doubleTimePremiumCents: doubleTimePremium,
       cashFringeCents: cashFringe,
       employerFringeCostCents: employerFringeCost,
       grossCashCents: grossCash,
@@ -296,8 +389,10 @@ export function resolvePrevailingWageWeek(args: ResolvePrevailingWageArgs): Prev
     totalHours,
     totalStraightHours,
     totalOvertimeHours,
+    totalDoubleTimeHours,
     regularRateCents,
     overtimePremiumPerHourCents,
+    doubleTimePremiumPerHourCents,
     grossCashCents,
     employerFringeCostCents,
     earnings: weekEarnings(entries),
@@ -305,19 +400,22 @@ export function resolvePrevailingWageWeek(args: ResolvePrevailingWageArgs): Prev
   };
 }
 
-/** The tax-engine earnings for a resolved week: regular pay (straight + overtime base), the overtime premium, and cash fringe — all 'regular', since every dollar here is ordinary taxable wages. Zero components are omitted so a week with no overtime carries no OTP line. */
+/** The tax-engine earnings for a resolved week: regular pay (straight + overtime base + double-time base), the overtime and double-time premiums, and cash fringe — all 'regular', since every dollar here is ordinary taxable wages. Zero components are omitted, so a week with no overtime carries no OTP line and no double time carries no DTP line. */
 function weekEarnings(entries: readonly ResolvedWorkedHours[]): Earning[] {
   let regular = 0;
-  let premium = 0;
+  let overtimePremium = 0;
+  let doubleTimePremium = 0;
   let fringe = 0;
   for (const e of entries) {
-    regular += e.straightPayCents + e.overtimeBasePayCents;
-    premium += e.overtimePremiumCents;
+    regular += e.straightPayCents + e.overtimeBasePayCents + e.doubleTimeBasePayCents;
+    overtimePremium += e.overtimePremiumCents;
+    doubleTimePremium += e.doubleTimePremiumCents;
     fringe += e.cashFringeCents;
   }
   const earnings: Earning[] = [];
   if (regular !== 0) earnings.push({ code: 'REG', category: 'regular', amount: regular });
-  if (premium !== 0) earnings.push({ code: 'OTP', category: 'regular', amount: premium });
+  if (overtimePremium !== 0) earnings.push({ code: 'OTP', category: 'regular', amount: overtimePremium });
+  if (doubleTimePremium !== 0) earnings.push({ code: 'DTP', category: 'regular', amount: doubleTimePremium });
   if (fringe !== 0) earnings.push({ code: 'FRNG', category: 'regular', amount: fringe });
   return earnings;
 }
@@ -336,7 +434,7 @@ function weekAdjustments(entries: readonly ResolvedWorkedHours[]): PrevailingWag
   const adjustments: PrevailingWageAdjustment[] = [];
   for (const list of groups.values()) {
     const first = list[0];
-    const hours = list.reduce((sum, e) => sum + e.straightHours + e.overtimeHours, 0);
+    const hours = list.reduce((sum, e) => sum + e.straightHours + e.overtimeHours + e.doubleTimeHours, 0);
     const baseMakeUpPerHour = Math.max(0, first.prevailingBaseRateCents - first.workerBaseRateCents);
     const cashFringePerHour = first.cashFringePerHourCents;
     if (baseMakeUpPerHour === 0 && cashFringePerHour === 0) continue;
@@ -373,18 +471,21 @@ function weekAdjustments(entries: readonly ResolvedWorkedHours[]): PrevailingWag
  */
 export function combineWeeklyEarnings(weeks: readonly PrevailingWageWeek[]): Earning[] {
   let regular = 0;
-  let premium = 0;
+  let overtimePremium = 0;
+  let doubleTimePremium = 0;
   let fringe = 0;
   for (const week of weeks) {
     for (const e of week.earnings) {
       if (e.code === 'REG') regular += e.amount;
-      else if (e.code === 'OTP') premium += e.amount;
+      else if (e.code === 'OTP') overtimePremium += e.amount;
+      else if (e.code === 'DTP') doubleTimePremium += e.amount;
       else if (e.code === 'FRNG') fringe += e.amount;
     }
   }
   const earnings: Earning[] = [];
   if (regular !== 0) earnings.push({ code: 'REG', category: 'regular', amount: regular });
-  if (premium !== 0) earnings.push({ code: 'OTP', category: 'regular', amount: premium });
+  if (overtimePremium !== 0) earnings.push({ code: 'OTP', category: 'regular', amount: overtimePremium });
+  if (doubleTimePremium !== 0) earnings.push({ code: 'DTP', category: 'regular', amount: doubleTimePremium });
   if (fringe !== 0) earnings.push({ code: 'FRNG', category: 'regular', amount: fringe });
   return earnings;
 }

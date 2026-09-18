@@ -1,20 +1,38 @@
-import { test, describe } from 'node:test';
+import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 import { dollars } from '../src/money.ts';
 import { buildPaycheckInput } from '../payroll/engine.ts';
+import { approvePayRun } from '../payroll/run.ts';
+import { overtimeRuleForState } from '../payroll/timeAndAttendance.ts';
 import { freshYearToDate } from '../payroll/ytd.ts';
 import type { Company, Employee } from '../payroll/types.ts';
 
 import {
+  addWorkedHours,
   buildCertifiedPayroll,
+  certifiedPayrollForPeriod,
   combineWeeklyEarnings,
   computeJobCosts,
+  draftTradesPayRun,
   findRateOnDate,
+  getJob,
+  getWageDetermination,
+  getWorkerProfile,
   groupIntoWorkweeks,
+  jobCostsForPeriod,
+  jobsForCompany,
   resolvePrevailingWageWeek,
   resolveRate,
   runTradesPayPeriod,
+  saveJob,
+  saveWageDetermination,
+  saveWorkerProfile,
+  workedHoursForCompanyInRange,
+  workedHoursForEmployeeInRange,
   workweekStart,
   type EmployeeJobCostInput,
   type Job,
@@ -221,6 +239,78 @@ describe('prevailing-wage weekly resolution (trades/prevailingWage.ts)', () => {
 });
 
 // ============================================================================
+// California daily overtime / double time overlay
+// ============================================================================
+
+describe('California daily overtime overlay (trades/prevailingWage.ts)', () => {
+  // A California determination + public job, one 13-hour day: 8h straight, 4h
+  // OT (8→12), 1h double time (>12) under Cal. Labor Code § 510.
+  const caDetermination: WageDetermination = {
+    id: 'CA20260001',
+    authority: 'davis-bacon',
+    state: 'CA',
+    locality: 'Los Angeles County',
+    constructionType: 'building',
+    rates: [{ classificationCode: 'PLUMBER', baseHourlyRateCents: dollars(50), fringePerHourCents: 0, effectiveDate: '2026-01-01' }],
+  };
+  const caJob: Job = {
+    id: 'CAJ1',
+    companyId: 'shop-1',
+    name: 'LA County building',
+    workState: 'CA',
+    prevailingWage: { determinationId: 'CA20260001' },
+    workersCompClassCode: '5183',
+  };
+
+  function resolveCa() {
+    return resolvePrevailingWageWeek({
+      employeeId: 'joe',
+      workedHours: [{ employeeId: 'joe', jobId: 'CAJ1', date: '2026-01-05', classificationCode: 'PLUMBER', hours: 13 }],
+      jobsById: new Map([[caJob.id, caJob]]),
+      determinationsById: new Map([[caDetermination.id, caDetermination]]),
+      fallbackBaseRateCents: dollars(50),
+      overtimeRule: overtimeRuleForState('CA'),
+    });
+  }
+
+  test('splits a 13-hour day into 8 straight / 4 overtime / 1 double time', () => {
+    const week = resolveCa();
+    assert.equal(week.totalStraightHours, 8);
+    assert.equal(week.totalOvertimeHours, 4);
+    assert.equal(week.totalDoubleTimeHours, 1);
+  });
+
+  test('double time is paid the basic rate plus a full-time premium (2x), overtime the half-time premium', () => {
+    const week = resolveCa();
+    assert.equal(week.regularRateCents, dollars(50)); // single rate
+    assert.equal(week.overtimePremiumPerHourCents, dollars(25));
+    assert.equal(week.doubleTimePremiumPerHourCents, dollars(50));
+    const byCode = Object.fromEntries(week.earnings.map((e) => [e.code, e.amount]));
+    // REG: (8+4+1) base hours × $50 = $650
+    assert.equal(byCode['REG'], dollars(650));
+    // OTP: 4h × $25 = $100 ; DTP: 1h × $50 = $50
+    assert.equal(byCode['OTP'], dollars(100));
+    assert.equal(byCode['DTP'], dollars(50));
+    // total cash: 8×50 + 4×75 + 1×100 = 400 + 300 + 100 = $800
+    assert.equal(week.grossCashCents, dollars(800));
+  });
+
+  test('the federal weekly rule is unchanged — a 13-hour Monday is all straight until the week passes 40', () => {
+    const week = resolvePrevailingWageWeek({
+      employeeId: 'joe',
+      workedHours: [{ employeeId: 'joe', jobId: 'CAJ1', date: '2026-01-05', classificationCode: 'PLUMBER', hours: 13 }],
+      jobsById: new Map([[caJob.id, caJob]]),
+      determinationsById: new Map([[caDetermination.id, caDetermination]]),
+      fallbackBaseRateCents: dollars(50),
+      // no overtimeRule → federal weekly-40
+    });
+    assert.equal(week.totalStraightHours, 13);
+    assert.equal(week.totalOvertimeHours, 0);
+    assert.equal(week.totalDoubleTimeHours, 0);
+  });
+});
+
+// ============================================================================
 // Workweek bucketing
 // ============================================================================
 
@@ -419,5 +509,126 @@ describe('combining weeks into a pay period (trades/prevailingWage.ts)', () => {
     assert.equal(byCode['REG'], dollars(2240) * 2);
     assert.equal(byCode['OTP'], 18672 * 2);
     assert.equal(byCode['FRNG'], dollars(400) * 2);
+  });
+});
+
+// ============================================================================
+// Crew-wide pay run + period rollups (trades/payRun.ts)
+// ============================================================================
+
+function officeManager(): Employee {
+  return plumber({
+    id: 'pat',
+    firstName: 'Pat',
+    lastName: 'Ledger',
+    jobTitle: 'Office Manager',
+    payType: { kind: 'salary', annualSalary: dollars(78_000) },
+    workersCompClassCode: undefined,
+  });
+}
+
+describe('crew-wide trades pay run (trades/payRun.ts)', () => {
+  function draft(company = weeklyShop()) {
+    return draftTradesPayRun({
+      company,
+      employees: [plumber(), officeManager()],
+      profiles: [profile],
+      periodStart: '2026-01-04',
+      periodEnd: '2026-01-10',
+      checkDate: '2026-01-14',
+      workedHours: weekOfHours(),
+      jobs: [publicJob, privateJob],
+      determinations: [determination],
+    });
+  }
+
+  test('mixes a prevailing-wage field worker and a salaried office worker in one draft run', () => {
+    const result = draft();
+    assert.equal(result.run.status, 'draft');
+    assert.equal(result.run.lines.length, 2);
+
+    const joeLine = result.run.lines.find((l) => l.employeeId === 'joe')!;
+    const patLine = result.run.lines.find((l) => l.employeeId === 'pat')!;
+    assert.equal(joeLine.grossPay, dollars(2240) + 18672 + dollars(400)); // prevailing-wage gross
+    assert.equal(patLine.grossPay, Math.round(dollars(78_000) / 52)); // weekly salary slice
+
+    const joe = result.employees.find((e) => e.employee.id === 'joe')!;
+    const pat = result.employees.find((e) => e.employee.id === 'pat')!;
+    assert.notEqual(joe.prevailingWage, null);
+    assert.equal(pat.prevailingWage, null); // paid the ordinary way
+  });
+
+  test('the drafted run flows through the ordinary approve/YTD lifecycle unchanged', () => {
+    const result = draft();
+    const approved = approvePayRun(result.run, [plumber(), officeManager()]);
+    assert.equal(approved.run.status, 'approved');
+    assert.equal(approved.updatedEmployees.length, 2);
+    // Joe's Social Security YTD picked up his prevailing-wage gross.
+    const joe = approved.updatedEmployees.find((e) => e.id === 'joe')!;
+    assert.ok(joe.ytd.socialSecurity > 0);
+  });
+
+  test('job costs roll up across the run from the crew’s resolved hours', () => {
+    const result = draft();
+    const ratings = new Map<string, WorkersCompRating>([
+      ['5183', { classCode: '5183', ratePerHundredOfPayrollCents: dollars(3.5), experienceModificationFactor: 1 }],
+    ]);
+    const costs = jobCostsForPeriod(result, ratings);
+    const j1 = costs.find((c) => c.jobId === 'J1')!;
+    assert.equal(j1.grossCashCents, dollars(2400));
+    assert.equal(j1.workersCompPremiumCents, dollars(84));
+    // The salaried office line is overhead, not job labor — no phantom job for it.
+    assert.equal(costs.some((c) => c.jobId === undefined), false);
+  });
+
+  test('certified payroll for the period yields one WH-347 per public job for the week', () => {
+    const reports = certifiedPayrollForPeriod(draft(), 0);
+    assert.equal(reports.length, 1); // only the public job J1
+    assert.equal(reports[0].jobId, 'J1');
+    assert.equal(reports[0].weekEndingDate, '2026-01-10');
+    assert.equal(reports[0].rows[0].employeeId, 'joe');
+    assert.equal(reports[0].rows[0].grossThisProjectCents, dollars(2400));
+  });
+
+  test('certified payroll refuses a non-weekly frequency rather than misstating a week’s deductions', () => {
+    const biweekly: Company = { ...weeklyShop(), paySchedule: { frequency: 'biweekly', anchorPeriodStart: '2026-01-04', checkDateLagDays: 5 } };
+    assert.throws(() => certifiedPayrollForPeriod(draft(biweekly), 0), /weekly pay frequency/i);
+  });
+});
+
+// ============================================================================
+// File-backed store (trades/store.ts) — isolated in a temp dir
+// ============================================================================
+
+describe('trades store (trades/store.ts)', () => {
+  let dir: string;
+  before(() => {
+    dir = mkdtempSync(join(tmpdir(), 'trades-store-'));
+    process.env.TRADES_DB_DIR = dir;
+  });
+  after(() => {
+    delete process.env.TRADES_DB_DIR;
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test('round-trips jobs, determinations, and worker profiles', () => {
+    saveJob(publicJob);
+    saveWageDetermination(determination);
+    saveWorkerProfile(profile);
+    assert.deepEqual(getJob('J1'), publicJob);
+    assert.deepEqual(getWageDetermination('TX20260001'), determination);
+    assert.deepEqual(getWorkerProfile('joe'), profile);
+    assert.equal(jobsForCompany('shop-1').length, 1);
+    assert.equal(getJob('nope'), null);
+  });
+
+  test('queries worked hours by employee and by company within a date range', () => {
+    saveJob(publicJob);
+    saveJob(privateJob);
+    addWorkedHours(weekOfHours());
+    assert.equal(workedHoursForEmployeeInRange('joe', '2026-01-04', '2026-01-10').length, 5);
+    assert.equal(workedHoursForEmployeeInRange('joe', '2026-01-04', '2026-01-07').length, 3); // Mon–Wed only
+    assert.equal(workedHoursForCompanyInRange('shop-1', '2026-01-01', '2026-01-31').length, 5);
+    assert.equal(workedHoursForCompanyInRange('shop-1', '2026-02-01', '2026-02-28').length, 0);
   });
 });

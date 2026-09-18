@@ -34,6 +34,8 @@ export interface CertifiedPayrollDayHours {
   date: string;
   straightHours: number;
   overtimeHours: number;
+  /** Double-time hours (California and other daily-double-time states); 0 on a plain federal WH-347. */
+  doubleTimeHours: number;
 }
 
 export interface CertifiedPayrollDeductions {
@@ -53,6 +55,7 @@ export interface CertifiedPayrollRow {
   dayHours: CertifiedPayrollDayHours[];
   totalStraightHours: number;
   totalOvertimeHours: number;
+  totalDoubleTimeHours: number;
   /** The basic hourly rate paid (max of shop and prevailing) — the "rate of pay" the form lists. */
   baseHourlyRateCents: Cents;
   /** The hourly fringe listed alongside the base rate. */
@@ -174,20 +177,25 @@ export function buildCertifiedPayroll(
     for (const [classificationCode, list] of byClassification) {
       const byDate = new Map<string, CertifiedPayrollDayHours>();
       for (const e of list) {
-        const d = byDate.get(e.date) ?? { date: e.date, straightHours: 0, overtimeHours: 0 };
+        const d = byDate.get(e.date) ?? { date: e.date, straightHours: 0, overtimeHours: 0, doubleTimeHours: 0 };
         d.straightHours += e.straightHours;
         d.overtimeHours += e.overtimeHours;
+        d.doubleTimeHours += e.doubleTimeHours;
         byDate.set(e.date, d);
       }
       const dayHours = [...byDate.values()].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
       const totalStraightHours = list.reduce((s, e) => s + e.straightHours, 0);
       const totalOvertimeHours = list.reduce((s, e) => s + e.overtimeHours, 0);
+      const totalDoubleTimeHours = list.reduce((s, e) => s + e.doubleTimeHours, 0);
       const grossThisProject = list.reduce((s, e) => s + e.grossCashCents, 0);
       // Representative rate: the entry carrying the most hours (rates are
       // uniform within a classification-week except across an effective-date
       // change, where the majority rate is the fair one to print).
       const representative = list.reduce((best, e) =>
-        e.straightHours + e.overtimeHours > best.straightHours + best.overtimeHours ? e : best,
+        e.straightHours + e.overtimeHours + e.doubleTimeHours >
+        best.straightHours + best.overtimeHours + best.doubleTimeHours
+          ? e
+          : best,
       );
 
       if (list.some((e) => e.creditedFringePerHourCents > 0)) anyToPlans = true;
@@ -202,6 +210,7 @@ export function buildCertifiedPayroll(
         dayHours,
         totalStraightHours,
         totalOvertimeHours,
+        totalDoubleTimeHours,
         baseHourlyRateCents: representative.effectiveBaseRateCents,
         fringePerHourCents: representative.fringeObligationPerHourCents,
         grossThisProjectCents: grossThisProject,

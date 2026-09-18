@@ -7,3 +7,7 @@ node_modules/
 # local sweeps; transient runtime state, never committed.
 harvester/snapshots/
 harvester/review/
+
+# File-backed store output (payroll/.data, trades/.data) — the JSON stand-ins
+# for the database; per-run local state, never committed.
+.data/
