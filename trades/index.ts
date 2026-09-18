@@ -68,6 +68,9 @@ export type {
   FringePlanContribution,
 } from './fringeAnnualization.ts';
 
+export { InvalidApprenticeRatioError, checkApprenticeRatio, totalApprenticeRatioExposure } from './apprenticeRatio.ts';
+export type { ApprenticeRatioDayFinding, ApprenticeshipProgram } from './apprenticeRatio.ts';
+
 export { buildCertifiedPayroll, deductionsFromPaycheck } from './certifiedPayroll.ts';
 export type {
   CertifiedPayrollDayHours,

@@ -19,6 +19,7 @@ import {
   buildCaliforniaCertifiedPayroll,
   buildCertifiedPayroll,
   certifiedPayrollForPeriod,
+  checkApprenticeRatio,
   checkFringeAnnualization,
   draftWeeklyTradesRun,
   fringeCreditsFromContributions,
@@ -32,6 +33,7 @@ import {
   groupIntoWorkweeks,
   jobCostsForPeriod,
   InvalidAnnualHoursError,
+  InvalidApprenticeRatioError,
   jobsForCompany,
   loadTradesPayRunInput,
   recalculateTradesPayRun,
@@ -41,6 +43,7 @@ import {
   saveJob,
   saveWageDetermination,
   saveWorkerProfile,
+  totalApprenticeRatioExposure,
   UnknownCompanyError,
   voidPayRun,
   weeklyCertifiedPayroll,
@@ -48,6 +51,7 @@ import {
   workedHoursForCompanyInRange,
   workedHoursForEmployeeInRange,
   workweekStart,
+  type ApprenticeshipProgram,
   type EmployeeJobCostInput,
   type Job,
   type TradesRunRequest,
@@ -803,6 +807,76 @@ describe('fringe annualization (trades/fringeAnnualization.ts)', () => {
     const entry = week.entries[0];
     assert.equal(entry.creditedFringePerHourCents, dollars(2.5));
     assert.equal(entry.cashFringePerHourCents, dollars(12.5));
+  });
+});
+
+// ============================================================================
+// Davis-Bacon apprentice ratio compliance (trades/apprenticeRatio.ts)
+// ============================================================================
+
+describe('apprentice ratio compliance (trades/apprenticeRatio.ts)', () => {
+  const ratioDetermination: WageDetermination = {
+    id: 'TXRATIO',
+    authority: 'davis-bacon',
+    state: 'TX',
+    locality: 'Travis County',
+    constructionType: 'building',
+    rates: [
+      { classificationCode: 'PLUMBER', baseHourlyRateCents: dollars(50), fringePerHourCents: dollars(15), effectiveDate: '2026-01-01' },
+      { classificationCode: 'PLUMBER_APPRENTICE', baseHourlyRateCents: dollars(30), fringePerHourCents: dollars(9), effectiveDate: '2026-01-01' },
+    ],
+  };
+  const ratioJob: Job = { id: 'JR', companyId: 'shop-1', name: 'Ratio job', workState: 'TX', prevailingWage: { determinationId: 'TXRATIO' }, workersCompClassCode: '5183' };
+  const program: ApprenticeshipProgram = {
+    id: 'P1',
+    trade: 'Plumbing',
+    journeyworkerClassificationCode: 'PLUMBER',
+    apprenticeClassificationCodes: ['PLUMBER_APPRENTICE'],
+    ratio: { apprentices: 1, journeyworkers: 3 }, // one apprentice per three journeyworkers
+  };
+  const dets = new Map([[ratioDetermination.id, ratioDetermination]]);
+  const jobs = new Map([[ratioJob.id, ratioJob]]);
+  const JW_TOTAL = dollars(65); // $50 base + $15 fringe
+
+  function entriesFor(worked: WorkedHours[], employeeId: string) {
+    return resolvePrevailingWageWeek({ employeeId, workedHours: worked, jobsById: jobs, determinationsById: dets, fallbackBaseRateCents: dollars(20) }).entries;
+  }
+
+  test('apprentice hours within the ratio produce no finding', () => {
+    // 9h journeyworker allows 3h apprentice at 1:3; exactly 3h is within.
+    const jw = entriesFor([{ employeeId: 'jw', jobId: 'JR', date: '2026-01-05', classificationCode: 'PLUMBER', hours: 9 }], 'jw');
+    const appr = entriesFor([{ employeeId: 'a', jobId: 'JR', date: '2026-01-05', classificationCode: 'PLUMBER_APPRENTICE', hours: 3 }], 'a');
+    assert.equal(checkApprenticeRatio('JR', [...jw, ...appr], program, JW_TOTAL).length, 0);
+  });
+
+  test('apprentice hours over the ratio owe the journeyworker rate on the excess', () => {
+    const jw = entriesFor([{ employeeId: 'jw', jobId: 'JR', date: '2026-01-05', classificationCode: 'PLUMBER', hours: 8 }], 'jw');
+    const appr = entriesFor([{ employeeId: 'a', jobId: 'JR', date: '2026-01-05', classificationCode: 'PLUMBER_APPRENTICE', hours: 8 }], 'a');
+    const findings = checkApprenticeRatio('JR', [...jw, ...appr], program, JW_TOTAL);
+    assert.equal(findings.length, 1);
+    const f = findings[0];
+    assert.equal(f.journeyworkerHours, 8);
+    assert.equal(f.apprenticeHours, 8);
+    assert.ok(Math.abs(f.allowableApprenticeHours - 8 / 3) < 1e-9); // 2.67h allowed
+    assert.ok(Math.abs(f.overRatioApprenticeHours - 16 / 3) < 1e-9); // 5.33h over
+    // 16/3 h × ($65 − $39 apprentice total) = 16/3 × 2600¢ = 13866.67 → 13867
+    assert.equal(f.additionalWagesOwedCents, 13867);
+  });
+
+  test('with no journeyworker on site, every apprentice hour is over the ratio', () => {
+    const appr = entriesFor([{ employeeId: 'a', jobId: 'JR', date: '2026-01-05', classificationCode: 'PLUMBER_APPRENTICE', hours: 6 }], 'a');
+    const findings = checkApprenticeRatio('JR', appr, program, JW_TOTAL);
+    assert.equal(findings.length, 1);
+    assert.equal(findings[0].overRatioApprenticeHours, 6);
+    assert.equal(findings[0].additionalWagesOwedCents, dollars(156)); // 6h × ($65 − $39)
+    assert.equal(totalApprenticeRatioExposure(findings), dollars(156));
+  });
+
+  test('an invalid ratio denominator is a typed error', () => {
+    assert.throws(
+      () => checkApprenticeRatio('JR', [], { ...program, ratio: { apprentices: 1, journeyworkers: 0 } }, JW_TOTAL),
+      InvalidApprenticeRatioError,
+    );
   });
 });
 
