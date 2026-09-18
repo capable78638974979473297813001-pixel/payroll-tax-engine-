@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Crewtally</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Hanken+Grotesque:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* ---------------------------------------------------------------------------
+     Crewtally — hand-built, no component library. The feel we're after is a
+     warm work-order / field-notebook: cream paper with a faint blueprint grid,
+     a soft-serifed display face with personality (Fraunces) over a sturdy
+     humanist body (Hanken Grotesque), and chunky "printed sticker" buttons with
+     a hard offset shadow instead of the usual flat SaaS pill. Numbers are the
+     body face with tabular figures — no robotic monospace anywhere.
+  --------------------------------------------------------------------------- */
+  :root {
+    --paper:  #F4EEE1;      /* warm cream */
+    --paper2: #EFE7D6;
+    --card:   #FFFDF7;
+    --ink:    #211D17;      /* warm near-black */
+    --ink2:   #5b5346;
+    --ink3:   #8a8172;
+    --line:   #E2D9C4;
+    --line2:  #D6CBB0;
+    --clay:   #BE4A28;      /* primary — rust/clay */
+    --clay-d: #9c3a1e;
+    --pine:   #2F5B48;      /* good / compliant */
+    --pine-s: #E3EEE4;
+    --brick:  #A22E1D;      /* alert */
+    --brick-s:#F6E2DC;
+    --amber:  #A9761A;      /* warning */
+    --amber-s:#F7EBCF;
+    --sky:    #33556e;      /* info / blueprint */
+    --disp: "Fraunces", Georgia, "Times New Roman", serif;
+    --body: "Hanken Grotesque", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; color: var(--ink); font-family: var(--body); font-size: 16.5px; line-height: 1.5;
+    background-color: var(--paper);
+    /* faint blueprint grid */
+    background-image:
+      linear-gradient(rgba(51,85,110,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(51,85,110,.05) 1px, transparent 1px);
+    background-size: 26px 26px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .tnum { font-variant-numeric: tabular-nums; }
+  h1,h2,h3 { font-family: var(--disp); font-weight: 600; margin: 0; letter-spacing: -.01em; }
+
+  /* ---------- masthead ---------- */
+  header.top {
+    position: sticky; top: 0; z-index: 20; background: rgba(244,238,225,.92); backdrop-filter: blur(6px);
+    border-bottom: 2px solid var(--ink);
+  }
+  .top-in { max-width: 940px; margin: 0 auto; padding: 12px 18px; display: flex; align-items: center; gap: 14px; }
+  .brand { display: flex; align-items: center; gap: 11px; text-decoration: none; color: var(--ink); }
+  .mark { width: 38px; height: 38px; flex: none; }
+  .word { font-family: var(--disp); font-weight: 700; font-size: 25px; letter-spacing: -.02em; line-height: 1; }
+  .word b { color: var(--clay); font-weight: 700; }
+  .tag { font-size: 11.5px; color: var(--ink3); letter-spacing: .02em; margin-top: 1px; }
+  .bill-pill {
+    margin-left: auto; display: flex; align-items: center; gap: 8px; background: var(--card); border: 1.5px solid var(--ink);
+    border-radius: 999px; padding: 6px 14px; font-size: 13.5px; font-weight: 600; box-shadow: 2px 2px 0 var(--ink);
+  }
+  .bill-pill .amt { color: var(--clay); }
+
+  /* ---------- tabs ---------- */
+  nav.tabs { max-width: 940px; margin: 0 auto; padding: 14px 18px 0; display: flex; gap: 8px; }
+  .tab {
+    font-family: var(--disp); font-size: 16px; font-weight: 600; color: var(--ink2); cursor: pointer;
+    background: transparent; border: 2px solid transparent; border-bottom: none; border-radius: 10px 10px 0 0;
+    padding: 10px 18px; transition: color .12s, background .12s;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.on { color: var(--ink); background: var(--card); border-color: var(--ink); position: relative; top: 2px; }
+
+  main { max-width: 940px; margin: 0 auto; padding: 22px 18px 90px; }
+  .view { display: none; }
+  .view.on { display: block; animation: rise .25s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* ---------- cards ---------- */
+  .card { background: var(--card); border: 2px solid var(--ink); border-radius: 14px; padding: 22px; margin-bottom: 20px; box-shadow: 4px 5px 0 rgba(33,29,23,.09); }
+  .card h2 { font-size: 23px; margin-bottom: 3px; }
+  .card .lede { color: var(--ink2); font-size: 14.5px; margin: 0 0 16px; }
+  .eyebrow { font-family: var(--body); font-weight: 700; font-size: 11.5px; letter-spacing: .13em; text-transform: uppercase; color: var(--clay); margin-bottom: 6px; }
+
+  /* ---------- buttons: printed stickers ---------- */
+  button { font-family: var(--body); cursor: pointer; }
+  .btn {
+    font-weight: 700; font-size: 15.5px; color: #fff; background: var(--clay); border: 2px solid var(--ink);
+    border-radius: 11px; padding: 12px 20px; box-shadow: 3px 3px 0 var(--ink); transition: transform .07s, box-shadow .07s, background .12s;
+  }
+  .btn:hover { background: var(--clay-d); }
+  .btn:active { transform: translate(3px,3px); box-shadow: 0 0 0 var(--ink); }
+  .btn:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: 3px 3px 0 var(--ink); }
+  .btn.ghost { background: var(--card); color: var(--ink); }
+  .btn.ghost:hover { background: var(--paper2); }
+  .btn.pine { background: var(--pine); } .btn.pine:hover { filter: brightness(.93); }
+  .btn.big { width: 100%; font-size: 18px; padding: 16px; font-family: var(--disp); letter-spacing: .01em; }
+  .btn.sm { font-size: 13.5px; padding: 8px 14px; box-shadow: 2px 2px 0 var(--ink); }
+  .linkish { background: none; border: none; color: var(--sky); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; font-size: 13.5px; padding: 4px 0; }
+
+  /* ---------- forms ---------- */
+  label { display: block; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink3); margin-bottom: 5px; }
+  input, select {
+    font: inherit; width: 100%; padding: 11px 12px; color: var(--ink); background: var(--paper);
+    border: 2px solid var(--line2); border-radius: 10px;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--clay); background: #fff; box-shadow: 0 0 0 3px rgba(190,74,40,.13); }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+  .f { flex: 1 1 130px; min-width: 0; } .f.sm { flex: 0 1 96px; } .f.xs { flex: 0 1 78px; }
+
+  /* ---------- chips / badges ---------- */
+  .chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 3px 11px; border: 1.5px solid; }
+  .chip.reg { color: var(--sky); border-color: var(--sky); background: #eaf0f4; }
+  .chip.sea { color: var(--amber); border-color: var(--amber); background: var(--amber-s); }
+  .chip.on { color: var(--pine); border-color: var(--pine); background: var(--pine-s); }
+  .chip.off { color: var(--brick); border-color: var(--brick); background: var(--brick-s); }
+
+  /* ---------- tables (ruled ledger) ---------- */
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1.5px solid var(--line); }
+  th { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink3); font-weight: 700; }
+  td.r, th.r { text-align: right; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:nth-child(even) td { background: rgba(51,85,110,.028); }
+
+  /* ---------- roster ---------- */
+  .worker { display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1.5px solid var(--line); }
+  .worker:last-child { border-bottom: none; }
+  .avatar { width: 42px; height: 42px; border-radius: 12px; flex: none; display: grid; place-items: center; font-family: var(--disp); font-weight: 700; font-size: 18px; color: #fff; }
+  .worker .nm { font-weight: 700; font-size: 16.5px; }
+  .worker .meta { color: var(--ink3); font-size: 13px; }
+  .worker .spacer { margin-left: auto; }
+
+  /* ---------- banners / notes ---------- */
+  .banner { border: 2px solid var(--ink); border-radius: 12px; padding: 15px 18px; margin-bottom: 18px; display: flex; gap: 13px; align-items: center; box-shadow: 3px 3px 0 rgba(33,29,23,.1); }
+  .banner .ic { font-size: 26px; line-height: 1; }
+  .banner.good { background: var(--pine-s); }
+  .banner.bad  { background: var(--brick-s); }
+  .banner .h { font-family: var(--disp); font-weight: 700; font-size: 19px; }
+  .note { border-left: 4px solid var(--amber); background: var(--amber-s); border-radius: 0 8px 8px 0; padding: 10px 13px; font-size: 14px; margin: 8px 0; }
+  .note.info { border-color: var(--sky); background: #eaf0f4; }
+  .err { color: var(--brick); background: var(--brick-s); border: 1.5px solid var(--brick); border-radius: 9px; padding: 11px 13px; margin: 10px 0; font-weight: 600; }
+  .empty { color: var(--ink3); font-size: 14px; }
+  .hidden { display: none !important; }
+  .spin { width: 15px; height: 15px; border: 2.5px solid currentColor; border-top-color: transparent; border-radius: 50%; display: inline-block; vertical-align: -2px; animation: sp .7s linear infinite; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+
+  /* ---------- geofence viz ---------- */
+  .radar { width: 150px; height: 150px; flex: none; border-radius: 50%; position: relative; border: 2px solid var(--line2);
+    background: radial-gradient(circle, rgba(47,91,72,.10) 0 40%, transparent 41%), repeating-radial-gradient(circle, transparent 0 22px, rgba(51,85,110,.10) 22px 23px); }
+  .radar .site { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; background: var(--pine); border: 2px solid #fff; border-radius: 50%; transform: translate(-50%,-50%); box-shadow: 0 0 0 3px rgba(47,91,72,.25); }
+  .radar .you { position: absolute; width: 14px; height: 14px; border-radius: 50%; transform: translate(-50%,-50%); border: 2px solid #fff; }
+
+  details { border: 1.5px solid var(--line2); border-radius: 11px; margin-top: 12px; overflow: hidden; }
+  summary { cursor: pointer; padding: 13px 15px; font-family: var(--disp); font-weight: 600; list-style: none; background: var(--paper2); }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "+ "; color: var(--clay); font-weight: 700; }
+  details[open] summary::before { content: "– "; }
+  details .dbody { padding: 6px 15px 15px; }
+
+  .foot { text-align: center; color: var(--ink3); font-size: 13px; margin-top: 24px; }
+  .foot b { color: var(--ink2); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="#">
+      <svg class="mark" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="40" height="40" rx="11" fill="#211D17"/>
+        <rect x="2" y="2" width="40" height="40" rx="11" fill="none" stroke="#211D17"/>
+        <!-- level bubble / hard-hat feel: a checkmark tally in clay -->
+        <path d="M11 24.5l6.5 6.5L33 14" stroke="#BE4A28" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="33" cy="14" r="2.4" fill="#F4EEE1"/>
+      </svg>
+      <span>
+        <span class="word">Crew<b>tally</b></span>
+        <div class="tag">Time &amp; pay for the trades</div>
+      </span>
+    </a>
+    <div class="bill-pill" id="billPill" title="Your plan">
+      <span id="billCrew">—</span> crew · <span class="amt tnum" id="billAmt">—</span>/mo
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab on" data-view="crew">Crew</button>
+    <button class="tab" data-view="clock">Time Clock</button>
+    <button class="tab" data-view="pay">Payroll</button>
+  </nav>
+</header>
+
+<main>
+  <div id="topErr"></div>
+
+  <!-- ======================= CREW ======================= -->
+  <section class="view on" id="view-crew">
+    <div class="card" id="setupCard">
+      <p class="eyebrow">Get started</p>
+      <h2>Load a sample shop</h2>
+      <p class="lede">A crew, a geofenced public-works job, and a week of hours — already filled in so you can see everything working in one minute.</p>
+      <button class="btn" id="seedBtn">Load the sample plumbing shop</button>
+    </div>
+
+    <div class="card hidden" id="rosterCard">
+      <p class="eyebrow">Your crew</p>
+      <h2>Roster</h2>
+      <p class="lede">Regular crew and seasonal helpers. Seasonal folks roll off the books on their end date — and only active crew count toward billing.</p>
+      <div id="roster"></div>
+    </div>
+
+    <div class="card hidden" id="addCard">
+      <p class="eyebrow">Grow the crew</p>
+      <h2>Add a worker</h2>
+      <p class="lede">Hire a full-timer or bring on a seasonal helper for the busy months.</p>
+      <div class="row">
+        <div class="f"><label>First name</label><input id="wFirst" placeholder="Dana" /></div>
+        <div class="f"><label>Last name</label><input id="wLast" placeholder="Rivera" /></div>
+        <div class="f sm"><label>Rate $/hr</label><input id="wRate" type="number" min="0" step="0.5" value="28" /></div>
+        <div class="f"><label>Mobile (for nudges)</label><input id="wPhone" placeholder="(512) 555-0134" /></div>
+        <div class="f sm"><label>Type</label><select id="wType"><option value="regular">Regular</option><option value="seasonal">Seasonal</option></select></div>
+        <div class="f sm hidden" id="wEndWrap"><label>Season ends</label><input id="wEnd" type="date" value="2026-09-30" /></div>
+        <div><button class="btn sm" id="addWorkerBtn">Add</button></div>
+      </div>
+    </div>
+
+    <div class="card hidden" id="nudgeCard">
+      <p class="eyebrow">The 5 o'clock nudge</p>
+      <h2>Log-your-hours reminders</h2>
+      <p class="lede">Every day at 5 PM, anyone who was on the crew and hasn't logged hours gets a friendly text. Fewer Monday reconstructions, on-time certified payroll.</p>
+      <div class="row" style="align-items:center">
+        <div class="f sm"><label>For the day</label><input id="nudgeDate" type="date" value="2026-01-09" /></div>
+        <div><button class="btn ghost sm" id="nudgeBtn">Preview today's nudges</button></div>
+      </div>
+      <div id="nudgeOut"></div>
+    </div>
+  </section>
+
+  <!-- ======================= CLOCK ======================= -->
+  <section class="view" id="view-clock">
+    <div class="card">
+      <p class="eyebrow">On the job</p>
+      <h2>Geofenced clock-in</h2>
+      <p class="lede">Punch in from the phone. Crewtally checks you're actually at the site — a punch from the wrong place still counts, but it's flagged for the foreman.</p>
+      <div class="row" style="align-items:flex-end">
+        <div class="f"><label>Worker</label><select id="cWorker"></select></div>
+        <div class="f"><label>Job</label><select id="cJob"></select></div>
+      </div>
+      <div style="display:flex; gap:20px; align-items:center; margin-top:18px; flex-wrap:wrap">
+        <div class="radar" id="radar"><div class="site"></div></div>
+        <div style="flex:1; min-width:220px">
+          <div style="display:flex; gap:10px; flex-wrap:wrap">
+            <button class="btn pine" id="clockInBtn">Clock In</button>
+            <button class="btn ghost" id="clockOutBtn">Clock Out</button>
+          </div>
+          <button class="linkish" id="offSiteBtn">simulate an off-site punch (demo)</button>
+          <div id="clockMsg"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="eyebrow">Today</p>
+      <h2>Punches</h2>
+      <div id="punches"><p class="empty">No punches yet today.</p></div>
+    </div>
+  </section>
+
+  <!-- ======================= PAYROLL ======================= -->
+  <section class="view" id="view-pay">
+    <div class="card">
+      <p class="eyebrow">Step 1 · this week</p>
+      <h2>Hours</h2>
+      <p class="lede">Week of <b>Jan 4–10, 2026</b>, paid Jan 14. One line per person, job, and day — the same person can log different <b>roles</b> at different rates in the same week.</p>
+      <div class="row">
+        <div class="f"><label>Worker</label><select id="hWorker"></select></div>
+        <div class="f"><label>Job</label><select id="hJob"></select></div>
+        <div class="f"><label>Role</label><input id="hRole" list="roles" placeholder="PLUMBER" /><datalist id="roles"><option value="PLUMBER"></option><option value="PLUMBER_APPRENTICE"></option><option value="FOREMAN"></option><option value="SERVICE"></option></datalist></div>
+        <div class="f sm"><label>Day</label><input id="hDate" type="date" value="2026-01-05" min="2026-01-04" max="2026-01-10" /></div>
+        <div class="f xs"><label>Hours</label><input id="hHours" type="number" min="0" step="0.5" value="8" /></div>
+        <div><button class="btn ghost sm" id="addHoursBtn">Add</button></div>
+      </div>
+      <table style="margin-top:14px"><tbody id="hoursBody"></tbody></table>
+      <p class="empty" id="hoursEmpty">No hours yet.</p>
+      <div class="row" style="margin-top:16px; align-items:flex-end">
+        <div class="f sm"><label>Comp $/100</label><input id="wcRate" type="number" min="0" step="0.01" value="3.50" /></div>
+        <div class="empty" style="flex:1">Your workers' comp rate, so we can show what each job really costs. Optional.</div>
+      </div>
+    </div>
+
+    <button class="btn big" id="runBtn" disabled>Run this week's payroll</button>
+    <div id="payErr"></div>
+
+    <div id="results" class="hidden" style="margin-top:22px">
+      <div id="banner"></div>
+
+      <div class="card">
+        <p class="eyebrow">Paychecks</p><h2>Everyone's pay</h2>
+        <table><thead><tr><th>Worker</th><th class="r">Gross</th><th class="r">Take-home</th></tr></thead><tbody id="payBody"></tbody></table>
+        <div id="roleBreak"></div>
+      </div>
+
+      <div class="card hidden" id="fixCard">
+        <p class="eyebrow" style="color:var(--brick)">Action needed</p><h2>What to fix</h2>
+        <div id="fixBody"></div>
+      </div>
+
+      <div class="card">
+        <p class="eyebrow">Prevailing wage</p><h2>What the job required</h2>
+        <p class="lede">Extra pay already added to the cheques so the public job meets its wage determination. Money the crew was paid — not a problem.</p>
+        <div id="pwBody"></div>
+      </div>
+
+      <div class="card hidden" id="costCard">
+        <p class="eyebrow">Job costing</p><h2>What each job cost you</h2>
+        <table><thead><tr><th>Job</th><th class="r">Hrs</th><th class="r">Wages</th><th class="r">Loaded</th><th class="r">$/hr</th></tr></thead><tbody id="costBody"></tbody></table>
+      </div>
+
+      <div class="card">
+        <p class="eyebrow">Compliance</p><h2>Certified payroll (WH-347)</h2>
+        <p class="lede">Ready to file for each public job this week.</p>
+        <div id="cprBody"></div>
+      </div>
+
+      <button class="btn pine big" id="approveBtn">Approve &amp; finalize</button>
+      <div id="approveMsg"></div>
+    </div>
+  </section>
+
+  <p class="foot">Runs on your machine · penny-accurate integer math · built for plumbers, electricians &amp; HVAC on public work · <b>$5/employee/month</b></p>
+</main>
+
+<script>
+const COMPANY = "shop-1";
+const WEEK = { periodStart: "2026-01-04", periodEnd: "2026-01-10", checkDate: "2026-01-14" };
+let crew = [], jobs = [], jobById = {}, crewNames = {}, lastRunId = null;
+
+const $ = (id) => document.getElementById(id);
+const money = (c) => (c < 0 ? "-$" : "$") + (Math.abs(c) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const esc = (s) => String(s).replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
+const who = (id) => crewNames[id] || id;
+const AV = ["#BE4A28", "#2F5B48", "#33556e", "#A9761A", "#7a4b8a", "#4a6b2f"];
+const avatarColor = (s) => AV[[...String(s)].reduce((a, c) => a + c.charCodeAt(0), 0) % AV.length];
+
+async function api(method, path, body) {
+  const res = await fetch(path, { method, headers: body ? { "Content-Type": "application/json" } : undefined, body: body ? JSON.stringify(body) : undefined });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `${method} ${path} failed`);
+  return data;
+}
+const showErr = (where, msg) => { $(where).innerHTML = `<div class="err">${esc(msg)}</div>`; };
+
+// ---- tabs ----
+document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("on", x === t));
+  document.querySelectorAll(".view").forEach((v) => v.classList.toggle("on", v.id === "view-" + t.dataset.view));
+}));
+
+// ---- load ----
+async function loadAll() {
+  const [{ employees }, { jobs: jb }] = await Promise.all([
+    api("GET", `/api/companies/${COMPANY}/employees`),
+    api("GET", `/api/companies/${COMPANY}/jobs`),
+  ]);
+  crew = employees; jobs = jb;
+  jobById = Object.fromEntries(jobs.map((j) => [j.id, j]));
+  crewNames = Object.fromEntries(crew.map((e) => [e.id, e.name]));
+  if (!crew.length) { $("setupCard").classList.remove("hidden"); ["rosterCard","addCard","nudgeCard"].forEach(id=>$(id).classList.add("hidden")); return; }
+  $("setupCard").classList.add("hidden");
+  ["rosterCard","addCard","nudgeCard"].forEach(id=>$(id).classList.remove("hidden"));
+
+  renderRoster();
+  const opt = (arr, val, lab) => arr.map((x) => `<option value="${esc(x[val])}">${esc(x[lab])}</option>`).join("");
+  $("cWorker").innerHTML = opt(crew, "id", "name");
+  $("hWorker").innerHTML = opt(crew, "id", "name");
+  $("cJob").innerHTML = opt(jobs, "id", "name");
+  $("hJob").innerHTML = opt(jobs, "id", "name");
+  $("runBtn").disabled = false;
+  await Promise.all([loadHours(), loadBilling(), loadPunches()]);
+}
+
+function renderRoster() {
+  $("roster").innerHTML = crew.map((e) => {
+    const initials = e.name.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+    const rate = e.hourlyRateCents != null ? money(e.hourlyRateCents) + "/hr" : "salary";
+    const seasonal = e.employmentType === "seasonal";
+    return `<div class="worker">
+      <div class="avatar" style="background:${avatarColor(e.id)}">${esc(initials)}</div>
+      <div>
+        <div class="nm">${esc(e.name)}</div>
+        <div class="meta">${esc(rate)}${e.phone ? " · " + esc(e.phone) : ""}${seasonal && e.seasonEndDate ? " · season ends " + esc(e.seasonEndDate) : ""}</div>
+      </div>
+      <div class="spacer"></div>
+      <span class="chip ${seasonal ? "sea" : "reg"}">${seasonal ? "Seasonal" : "Regular"}</span>
+    </div>`;
+  }).join("");
+}
+
+async function loadBilling() {
+  try {
+    const b = await api("GET", `/api/companies/${COMPANY}/billing?asOf=${WEEK.checkDate}`);
+    $("billCrew").textContent = b.headcount;
+    $("billAmt").textContent = money(b.totalCents);
+  } catch {}
+}
+
+// ---- add worker ----
+$("wType").addEventListener("change", (e) => $("wEndWrap").classList.toggle("hidden", e.target.value !== "seasonal"));
+$("addWorkerBtn").addEventListener("click", async () => {
+  const body = {
+    companyId: COMPANY, firstName: $("wFirst").value.trim(), lastName: $("wLast").value.trim(),
+    hourlyRate: parseFloat($("wRate").value), phone: $("wPhone").value.trim(),
+    employmentType: $("wType").value, seasonEndDate: $("wType").value === "seasonal" ? $("wEnd").value : undefined,
+  };
+  if (!body.firstName || !(body.hourlyRate > 0)) return showErr("topErr", "A first name and an hourly rate are required.");
+  $("topErr").innerHTML = "";
+  try { await api("POST", "/api/employees", body); $("wFirst").value = $("wLast").value = $("wPhone").value = ""; await loadAll(); }
+  catch (e) { showErr("topErr", e.message); }
+});
+
+// ---- nudges ----
+$("nudgeBtn").addEventListener("click", async () => {
+  try {
+    const { nudged } = await api("POST", `/api/companies/${COMPANY}/nudges?date=${$("nudgeDate").value}`);
+    if (!nudged.length) { $("nudgeOut").innerHTML = `<div class="note info">Everyone's logged their hours. No nudges needed 🎉</div>`; return; }
+    $("nudgeOut").innerHTML = `<div class="note">${nudged.length} worker${nudged.length>1?"s":""} would get a text:</div>` +
+      nudged.map((n) => `<div style="padding:10px 0;border-bottom:1.5px solid var(--line)">
+        <b>${esc(who(n.employeeId))}</b> <span class="empty">${n.phone ? esc(n.phone) : "· no number on file"}</span>
+        <div style="margin-top:4px;color:var(--ink2)">“${esc(n.text)}”</div></div>`).join("") +
+      `<div class="note info" style="margin-top:10px">Texts send for real once an SMS carrier is connected — this preview shows exactly what goes out.</div>`;
+  } catch (e) { showErr("topErr", e.message); }
+});
+
+// ---- clock ----
+function paintRadar(check) {
+  const r = $("radar");
+  r.querySelector(".you")?.remove();
+  const dot = document.createElement("div");
+  dot.className = "you";
+  const onSite = check.onSite;
+  dot.style.background = onSite ? "var(--pine)" : "var(--brick)";
+  // place the "you" dot: near centre if on-site, out toward the edge if off
+  const frac = check.distanceMeters != null && check.radiusMeters ? Math.min(1.15, check.distanceMeters / (check.radiusMeters * 2)) : 0.15;
+  const ang = 0.9; const cx = 50 + Math.cos(ang) * frac * 46; const cy = 50 + Math.sin(ang) * frac * 46;
+  dot.style.left = cx + "%"; dot.style.top = cy + "%";
+  r.appendChild(dot);
+}
+async function punch(type, coords) {
+  $("clockMsg").innerHTML = `<div class="empty" style="margin-top:10px"><span class="spin"></span> Checking location…</div>`;
+  try {
+    const { verification } = await api("POST", "/api/clock", { companyId: COMPANY, employeeId: $("cWorker").value, jobId: $("cJob").value, type, lat: coords?.lat, lng: coords?.lng });
+    paintRadar(verification);
+    const cls = verification.onSite ? "on" : "off";
+    $("clockMsg").innerHTML = `<div style="margin-top:12px"><span class="chip ${cls}">${verification.onSite ? "✓ On site" : "⚠ Off site"}</span>
+      <div class="empty" style="margin-top:6px">${esc(verification.note)}</div></div>`;
+    await loadPunches();
+  } catch (e) { showErr("clockMsg", e.message); }
+}
+$("clockInBtn").addEventListener("click", () => {
+  if (navigator.geolocation) navigator.geolocation.getCurrentPosition(
+    (p) => punch("in", { lat: p.coords.latitude, lng: p.coords.longitude }),
+    () => punch("in", null), { timeout: 4000 });
+  else punch("in", null);
+});
+$("clockOutBtn").addEventListener("click", () => {
+  if (navigator.geolocation) navigator.geolocation.getCurrentPosition(
+    (p) => punch("out", { lat: p.coords.latitude, lng: p.coords.longitude }),
+    () => punch("out", null), { timeout: 4000 });
+  else punch("out", null);
+});
+$("offSiteBtn").addEventListener("click", () => {
+  const job = jobById[$("cJob").value];
+  const loc = job && job.location;
+  punch("in", loc ? { lat: loc.lat + 0.03, lng: loc.lng } : { lat: 0, lng: 0 });
+});
+async function loadPunches() {
+  try {
+    const { events } = await api("GET", `/api/companies/${COMPANY}/clock?date=2026-01-14`);
+    // also show today's real punches
+    const today = new Date().toISOString().slice(0, 10);
+    const { events: realToday } = await api("GET", `/api/companies/${COMPANY}/clock?date=${today}`);
+    const all = [...realToday, ...events];
+    $("punches").innerHTML = all.length ? `<table><tbody>${all.map((e) => `<tr>
+      <td><b>${esc(who(e.employeeId))}</b></td><td class="empty">${esc(jobById[e.jobId]?.name || e.jobId)}</td>
+      <td>${e.type === "in" ? "in" : "out"}</td>
+      <td class="empty">${esc(e.at.slice(11, 16))}</td>
+      <td class="r"><span class="chip ${e.onSite ? "on" : "off"}">${e.onSite ? "on site" : (e.distanceMeters != null ? e.distanceMeters + " m off" : "unverified")}</span></td>
+    </tr>`).join("")}</tbody></table>` : `<p class="empty">No punches yet today.</p>`;
+  } catch {}
+}
+
+// ---- hours ----
+async function loadHours() {
+  const { entries } = await api("GET", `/api/companies/${COMPANY}/hours?start=${WEEK.periodStart}&end=${WEEK.periodEnd}`);
+  $("hoursBody").innerHTML = entries.sort((a, b) => a.date.localeCompare(b.date)).map((e) =>
+    `<tr><td>${esc(who(e.employeeId))}</td><td class="empty">${esc(jobById[e.jobId]?.name || e.jobId)}</td><td>${esc(e.classificationCode)}</td><td class="empty">${esc(e.date)}</td><td class="r tnum">${e.hours}h</td></tr>`
+  ).join("");
+  $("hoursEmpty").classList.toggle("hidden", entries.length > 0);
+}
+$("addHoursBtn").addEventListener("click", async () => {
+  const entry = { employeeId: $("hWorker").value, jobId: $("hJob").value, classificationCode: ($("hRole").value || "").trim().toUpperCase(), date: $("hDate").value, hours: parseFloat($("hHours").value) };
+  if (!entry.employeeId || !entry.jobId || !entry.classificationCode || !entry.date || !(entry.hours > 0)) return showErr("payErr", "Fill in worker, job, role, day, and hours.");
+  $("payErr").innerHTML = "";
+  try { await api("POST", "/api/hours", { entries: [entry] }); await loadHours(); } catch (e) { showErr("payErr", e.message); }
+});
+
+// ---- run ----
+$("runBtn").addEventListener("click", async () => {
+  $("payErr").innerHTML = ""; const b = $("runBtn");
+  b.disabled = true; b.innerHTML = `<span class="spin"></span> Running…`;
+  try {
+    const wc = parseFloat($("wcRate").value);
+    const payload = { ...WEEK }; if (wc > 0) payload.wcRatePerHundred = wc;
+    const data = await api("POST", `/api/companies/${COMPANY}/run-week`, payload);
+    renderResults(data);
+    $("results").classList.remove("hidden");
+    $("results").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (e) { showErr("payErr", e.message); }
+  finally { b.disabled = false; b.textContent = "Run this week's payroll"; }
+});
+
+function renderResults(data) {
+  lastRunId = data.run.runId; $("approveMsg").innerHTML = "";
+  const exp = data.compliance.totalBackWageExposureCents, mw = data.compliance.minimumWageIssues.length;
+  if (exp > 0 || mw > 0) {
+    $("banner").className = "banner bad";
+    $("banner").innerHTML = `<span class="ic">⚠️</span><div><div class="h">${money(exp)} to fix</div><div>${mw ? mw + " pay-rate warning(s) too. " : ""}See “What to fix”.</div></div>`;
+  } else {
+    $("banner").className = "banner good";
+    $("banner").innerHTML = `<span class="ic">✅</span><div><div class="h">All clear</div><div>${data.run.lines.length} paycheck(s) ready to send.</div></div>`;
+  }
+
+  $("payBody").innerHTML = data.run.lines.map((l) => `<tr><td>${esc(who(l.employeeId))}</td><td class="r tnum">${money(l.grossPay)}</td><td class="r tnum">${money(l.netPay)}</td></tr>`).join("");
+
+  // split-rate / multi-role
+  const multi = (data.run.roleBreakdown || []).filter((e) => e.roles.length > 1);
+  $("roleBreak").innerHTML = multi.length ? `<div class="note info" style="margin-top:14px"><b>Split rate:</b> ` +
+    multi.map((e) => `${esc(who(e.employeeId))} worked ${e.roles.map((r) => `${r.roles ? "" : ""}${esc(r.classification.toLowerCase())} ${r.hours}h`).join(" + ")}`).join("; ") +
+    ` — each role paid at its own rate, blended for overtime.</div>` : "";
+
+  const fixes = [];
+  for (const f of data.compliance.apprenticeRatioFindings) fixes.push(`Apprentice ratio on ${esc(jobById[f.jobId]?.name || f.jobId)} (${esc(f.date)}): ${money(f.additionalWagesOwedCents)} owed — too many apprentice hours for the journeyworkers on site.`);
+  for (const f of data.compliance.fringeAnnualizationFindings) fixes.push(`Fringe over-credit for ${esc(who(f.employeeId))} on “${esc(f.plan)}”: ${money(f.dollarExposureCents)} — annualizes to less than claimed.`);
+  for (const m of data.compliance.minimumWageIssues) fixes.push(`${esc(who(m.employeeId))} is under ${esc(m.jurisdiction)} minimum wage by ${money(m.shortfallCents)}/hr — raise their rate.`);
+  $("fixCard").classList.toggle("hidden", !fixes.length);
+  $("fixBody").innerHTML = fixes.map((t) => `<div class="note">${t}</div>`).join("");
+
+  const adj = data.compliance.prevailingWageAdjustments;
+  $("pwBody").innerHTML = adj.length ? `<table><thead><tr><th>Worker</th><th>Role</th><th class="r">Hrs</th><th class="r">Extra paid</th></tr></thead><tbody>${adj.map((a) => `<tr><td>${esc(who(a.employeeId))}</td><td>${esc(a.classificationCode)}</td><td class="r tnum">${a.hours}h</td><td class="r tnum">${money(a.extraCostVsShopRateCents)}</td></tr>`).join("")}</tbody></table>` : `<p class="empty">No prevailing-wage make-up this week.</p>`;
+
+  if (data.jobCosts) {
+    $("costCard").classList.remove("hidden");
+    $("costBody").innerHTML = data.jobCosts.map((c) => `<tr><td>${esc(c.jobName)}</td><td class="r tnum">${c.hours}h</td><td class="r tnum">${money(c.grossCashCents)}</td><td class="r tnum">${money(c.totalBurdenedCostCents)}</td><td class="r tnum">${c.burdenedRatePerHourCents != null ? money(c.burdenedRatePerHourCents) : "—"}</td></tr>`).join("");
+  } else $("costCard").classList.add("hidden");
+
+  $("cprBody").innerHTML = data.certifiedPayroll.length ? data.certifiedPayroll.map(renderCpr).join("") : `<p class="empty">No public-works jobs this week, so no certified payroll is due.</p>`;
+}
+function renderCpr(r) {
+  const rows = r.rows.map((row) => {
+    const hrs = `${row.totalStraightHours}h` + (row.totalOvertimeHours ? ` +${row.totalOvertimeHours} OT` : "") + (row.totalDoubleTimeHours ? ` +${row.totalDoubleTimeHours} DT` : "");
+    return `<tr><td>${esc(who(row.employeeId))}</td><td>${esc(row.classificationCode)}</td><td class="tnum">${hrs}</td><td class="r tnum">${money(row.baseHourlyRateCents)}/hr</td><td class="r tnum">${money(row.grossThisProjectCents)}</td></tr>`;
+  }).join("");
+  return `<details><summary>${esc(r.projectName || r.jobId)} — week ending ${esc(r.weekEndingDate)}</summary><div class="dbody">
+    <table><thead><tr><th>Worker</th><th>Class</th><th>Hours</th><th class="r">Rate</th><th class="r">Gross (this job)</th></tr></thead><tbody>${rows}</tbody></table></div></details>`;
+}
+
+$("approveBtn").addEventListener("click", async () => {
+  if (!lastRunId) return; const b = $("approveBtn");
+  b.disabled = true; b.innerHTML = `<span class="spin"></span> Finalizing…`;
+  try {
+    const out = await api("POST", `/api/runs/${lastRunId}/approve`, {});
+    $("approveMsg").innerHTML = `<div class="banner good" style="margin-top:14px"><span class="ic">🎉</span><div><div class="h">Payroll finalized</div><div>${out.employeesUpdated} paycheck(s) committed; year-to-date totals updated.</div></div></div>`;
+  } catch (e) { showErr("approveMsg", e.message); }
+  finally { b.disabled = false; b.textContent = "Approve & finalize"; }
+});
+
+// ---- seed + boot ----
+$("seedBtn").addEventListener("click", async (ev) => {
+  ev.target.disabled = true; ev.target.innerHTML = `<span class="spin"></span> Loading…`;
+  try { await api("POST", "/api/demo/seed"); await loadAll(); }
+  catch (e) { showErr("topErr", e.message); ev.target.disabled = false; ev.target.textContent = "Load the sample plumbing shop"; }
+});
+loadAll().catch(() => {});
+</script>
+</body>
+</html>

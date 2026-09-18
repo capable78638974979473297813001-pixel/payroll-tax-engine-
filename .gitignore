@@ -1,3 +1,13 @@
 node_modules/
 *.log
 .env
+
+# Harvester scratch output — snapshots and the review journal are written by
+# the harvest tests/demos (each test clears the dir for a clean slate) and by
+# local sweeps; transient runtime state, never committed.
+harvester/snapshots/
+harvester/review/
+
+# File-backed store output (payroll/.data, trades/.data) — the JSON stand-ins
+# for the database; per-run local state, never committed.
+.data/

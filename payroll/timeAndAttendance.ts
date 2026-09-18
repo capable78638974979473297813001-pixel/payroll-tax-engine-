@@ -7,19 +7,30 @@ import type { Earning } from '../src/types.ts';
  * employee clocked in and out" and the flat regularHours/overtimeHours a
  * TimeEntry expects.
  *
- * SCOPE: this models the two overtime shapes that actually exist in US
- * law — a plain federal weekly-40-hour test (FLSA, every state that hasn't
- * enacted its own daily rule), and California's own daily 8/12-hour and
- * 7th-consecutive-day rules (Cal. Labor Code § 510) — because those are
- * the two this project could verify against a primary source. A handful of
- * other states (Alaska, Nevada, Colorado) have their OWN daily or
- * consecutive-day variants; those are NOT modelled here, the same
- * "disclosed, not force-fit" choice this project makes everywhere it
+ * SCOPE: this models the overtime shapes this project could verify against a
+ * primary source — the plain federal weekly-40-hour test (FLSA, every state
+ * with no daily rule of its own), California's daily 8/12-hour and
+ * 7th-consecutive-day rules (Cal. Labor Code § 510), Alaska's 8-hour day
+ * (AS 23.10.060), and Colorado's 12-hour day (COMPS Order). Each state rule
+ * is UNCONDITIONAL here, but two of them carry a real-world condition this
+ * stateless lookup cannot see, left to the caller:
+ *   - Alaska's daily rule EXEMPTS employers with fewer than four employees in
+ *     the week; a caller running a three-person shop should pass the federal
+ *     rule instead.
+ *   - Colorado's rule is actually "the greatest of 12 hours worked, 12
+ *     CONSECUTIVE hours, or 40/week" — the consecutive-hours span (which can
+ *     cross an unpaid break) needs punch times this hours-only model doesn't
+ *     carry, so only the 12-hours-worked and weekly tests are applied.
+ * NEVADA is deliberately left on the federal rule: its daily-8 rule reaches
+ * only employees earning under 1.5x the state minimum wage, which no
+ * prevailing-wage tradesworker does, so the weekly test is the correct one
+ * for this project's callers. Other states' variants remain unmodelled — the
+ * same "disclosed, not force-fit" choice this project makes everywhere it
  * hasn't done the legal research yet (see README.md's own Known gaps).
- * `overtimeRuleForState()` falls back to the federal rule for every state
- * it doesn't have an explicit rule for, which is the correct floor (no
- * state's overtime law is EVER less protective than FLSA) even where it
- * understates a state's own stricter daily rule.
+ * `overtimeRuleForState()` falls back to the federal rule for every state it
+ * doesn't have an explicit rule for, which is the correct floor (no state's
+ * overtime law is EVER less protective than FLSA) even where it understates a
+ * state's own stricter daily rule.
  */
 
 export interface TimePunch {
@@ -98,8 +109,22 @@ export const CALIFORNIA_OVERTIME_RULE: OvertimeRule = {
   seventhConsecutiveDayRule: true,
 };
 
+/** AS 23.10.060: overtime after 8 hours/day or 40 hours/week, at 1.5x, no double time. EXEMPTS employers with fewer than four employees in the week — a condition this stateless rule can't see (see the header). */
+export const ALASKA_OVERTIME_RULE: OvertimeRule = {
+  weeklyThresholdHours: 40,
+  dailyOvertimeThresholdHours: 8,
+};
+
+/** Colorado COMPS Order: overtime after 12 hours/day (or 40/week), at 1.5x, no double time. The order's third prong — 12 CONSECUTIVE hours — needs punch spans this hours-only model lacks, so only the 12-worked and weekly tests apply (see the header). */
+export const COLORADO_OVERTIME_RULE: OvertimeRule = {
+  weeklyThresholdHours: 40,
+  dailyOvertimeThresholdHours: 12,
+};
+
 const STATE_OVERTIME_RULES: Readonly<Record<string, OvertimeRule>> = {
   CA: CALIFORNIA_OVERTIME_RULE,
+  AK: ALASKA_OVERTIME_RULE,
+  CO: COLORADO_OVERTIME_RULE,
 };
 
 export function overtimeRuleForState(stateCode: string): OvertimeRule {
