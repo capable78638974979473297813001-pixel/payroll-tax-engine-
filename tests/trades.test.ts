@@ -13,6 +13,7 @@ import type { Company, Employee } from '../payroll/types.ts';
 
 import {
   addWorkedHours,
+  buildCaliforniaCertifiedPayroll,
   buildCertifiedPayroll,
   certifiedPayrollForPeriod,
   combineWeeklyEarnings,
@@ -25,12 +26,14 @@ import {
   groupIntoWorkweeks,
   jobCostsForPeriod,
   jobsForCompany,
+  recalculateTradesPayRun,
   resolvePrevailingWageWeek,
   resolveRate,
   runTradesPayPeriod,
   saveJob,
   saveWageDetermination,
   saveWorkerProfile,
+  voidPayRun,
   workedHoursForCompanyInRange,
   workedHoursForEmployeeInRange,
   workweekStart,
@@ -113,6 +116,29 @@ const privateJob: Job = {
   workState: 'TX',
   workersCompClassCode: '5183',
   glCostCode: '02-200',
+};
+
+// A California public-works determination + job, for the daily-OT overlay and
+// the DIR certified-payroll report.
+const caDetermination: WageDetermination = {
+  id: 'CA20260001',
+  authority: 'davis-bacon',
+  state: 'CA',
+  locality: 'Los Angeles County',
+  constructionType: 'building',
+  // Zero fringe here keeps the daily-OT/double-time math clean; the DIR
+  // report's fringe itemization is exercised via an explicit contributions
+  // input instead.
+  rates: [{ classificationCode: 'PLUMBER', baseHourlyRateCents: dollars(50), fringePerHourCents: 0, effectiveDate: '2026-01-01' }],
+};
+const caJob: Job = {
+  id: 'CAJ1',
+  companyId: 'shop-1',
+  name: 'LA County building',
+  workState: 'CA',
+  workLocality: 'Los Angeles County',
+  prevailingWage: { determinationId: 'CA20260001', projectName: 'LA County Facility' },
+  workersCompClassCode: '5183',
 };
 
 // Mon–Thu 10h/day plumbing on the public job (40h), then Fri 8h service on the
@@ -243,25 +269,8 @@ describe('prevailing-wage weekly resolution (trades/prevailingWage.ts)', () => {
 // ============================================================================
 
 describe('California daily overtime overlay (trades/prevailingWage.ts)', () => {
-  // A California determination + public job, one 13-hour day: 8h straight, 4h
-  // OT (8→12), 1h double time (>12) under Cal. Labor Code § 510.
-  const caDetermination: WageDetermination = {
-    id: 'CA20260001',
-    authority: 'davis-bacon',
-    state: 'CA',
-    locality: 'Los Angeles County',
-    constructionType: 'building',
-    rates: [{ classificationCode: 'PLUMBER', baseHourlyRateCents: dollars(50), fringePerHourCents: 0, effectiveDate: '2026-01-01' }],
-  };
-  const caJob: Job = {
-    id: 'CAJ1',
-    companyId: 'shop-1',
-    name: 'LA County building',
-    workState: 'CA',
-    prevailingWage: { determinationId: 'CA20260001' },
-    workersCompClassCode: '5183',
-  };
-
+  // One 13-hour day on the California public job: 8h straight, 4h OT (8→12),
+  // 1h double time (>12) under Cal. Labor Code § 510.
   function resolveCa() {
     return resolvePrevailingWageWeek({
       employeeId: 'joe',
@@ -630,5 +639,135 @@ describe('trades store (trades/store.ts)', () => {
     assert.equal(workedHoursForEmployeeInRange('joe', '2026-01-04', '2026-01-07').length, 3); // Mon–Wed only
     assert.equal(workedHoursForCompanyInRange('shop-1', '2026-01-01', '2026-01-31').length, 5);
     assert.equal(workedHoursForCompanyInRange('shop-1', '2026-02-01', '2026-02-28').length, 0);
+  });
+});
+
+// ============================================================================
+// Additional state daily-OT rules (Alaska, Colorado)
+// ============================================================================
+
+describe('Alaska and Colorado daily overtime (payroll/timeAndAttendance.ts via the overlay)', () => {
+  function oneDay(state: 'AK' | 'CO', hours: number) {
+    const job: Job = { id: `${state}J`, companyId: 'shop-1', name: `${state} job`, workState: state, workersCompClassCode: '5183' };
+    return resolvePrevailingWageWeek({
+      employeeId: 'joe',
+      workedHours: [{ employeeId: 'joe', jobId: job.id, date: '2026-01-05', classificationCode: 'PLUMBER', hours }],
+      jobsById: new Map([[job.id, job]]),
+      determinationsById: new Map(),
+      fallbackBaseRateCents: dollars(40),
+      overtimeRule: overtimeRuleForState(state),
+    });
+  }
+
+  test('Alaska: overtime after 8 hours a day, no double time', () => {
+    const week = oneDay('AK', 10);
+    assert.equal(week.totalStraightHours, 8);
+    assert.equal(week.totalOvertimeHours, 2);
+    assert.equal(week.totalDoubleTimeHours, 0);
+  });
+
+  test('Colorado: overtime after 12 hours a day, no double time', () => {
+    const week = oneDay('CO', 13);
+    assert.equal(week.totalStraightHours, 12);
+    assert.equal(week.totalOvertimeHours, 1);
+    assert.equal(week.totalDoubleTimeHours, 0);
+  });
+});
+
+// ============================================================================
+// Recalculate / void a draft trades run (trades/payRun.ts)
+// ============================================================================
+
+describe('recalculating and voiding a draft trades run (trades/payRun.ts)', () => {
+  function input(workedHours = weekOfHours()) {
+    return {
+      company: weeklyShop(),
+      employees: [plumber()],
+      profiles: [profile],
+      periodStart: '2026-01-04',
+      periodEnd: '2026-01-10',
+      checkDate: '2026-01-14',
+      workedHours,
+      jobs: [publicJob, privateJob],
+      determinations: [determination],
+    };
+  }
+
+  test('recalculating a draft keeps its id but updates the numbers from corrected hours', () => {
+    const first = draftTradesPayRun(input());
+    // Corrected timecard: only Mon–Wed on the public job, 30h, no overtime.
+    const corrected = recalculateTradesPayRun(
+      first.run,
+      input([
+        { employeeId: 'joe', jobId: 'J1', date: '2026-01-05', classificationCode: 'PLUMBER', hours: 10 },
+        { employeeId: 'joe', jobId: 'J1', date: '2026-01-06', classificationCode: 'PLUMBER', hours: 10 },
+        { employeeId: 'joe', jobId: 'J1', date: '2026-01-07', classificationCode: 'PLUMBER', hours: 10 },
+      ]),
+    );
+    assert.equal(corrected.run.id, first.run.id);
+    assert.equal(corrected.run.createdAt, first.run.createdAt);
+    const before = first.run.lines.find((l) => l.employeeId === 'joe')!.grossPay;
+    const after = corrected.run.lines.find((l) => l.employeeId === 'joe')!.grossPay;
+    assert.ok(after < before, 'fewer hours → lower gross');
+    // 30h plumbing: 30 × $50 + 30 × $10 cash fringe = $1500 + $300 = $1800, no OT.
+    assert.equal(after, dollars(1800));
+  });
+
+  test('voiding a draft flips its status; recalculating a non-draft run throws', () => {
+    const drafted = draftTradesPayRun(input());
+    assert.equal(voidPayRun(drafted.run).status, 'voided');
+    assert.throws(() => recalculateTradesPayRun(voidPayRun(drafted.run), input()), /Cannot recalculate a voided/i);
+  });
+});
+
+// ============================================================================
+// California DIR certified payroll (trades/californiaCertifiedPayroll.ts)
+// ============================================================================
+
+describe('California DIR certified payroll (trades/californiaCertifiedPayroll.ts)', () => {
+  function caRun() {
+    return runTradesPayPeriod({
+      company: weeklyShop(),
+      employee: plumber({ residenceState: { code: 'CA' }, workState: { code: 'CA' } }),
+      profile,
+      checkDate: '2026-01-14',
+      workedHours: [{ employeeId: 'joe', jobId: 'CAJ1', date: '2026-01-05', classificationCode: 'PLUMBER', hours: 13 }],
+      jobs: [caJob],
+      determinations: [caDetermination],
+    });
+  }
+
+  test('produces a DIR report with daily ST/OT/DT hours, itemized fringe, and DIR header fields', () => {
+    const run = caRun();
+    const report = buildCaliforniaCertifiedPayroll(
+      caJob,
+      '2026-01-04',
+      [
+        {
+          employeeId: 'joe',
+          entries: run.weeks.flatMap((w) => w.entries),
+          weeklyPaycheck: run.computation.result,
+          fringeContributions: [{ plan: 'Health & Welfare', ratePerHourCents: dollars(5) }],
+        },
+      ],
+      { contractorDirRegistrationNumber: '1000001234', dirProjectId: 'DIR-42', awardingBody: 'Los Angeles County' },
+    );
+
+    assert.equal(report.workState, 'CA');
+    assert.equal(report.weekEndingDate, '2026-01-10');
+    assert.equal(report.contractorDirRegistrationNumber, '1000001234');
+    assert.equal(report.dirProjectId, 'DIR-42');
+    assert.equal(report.rows.length, 1);
+
+    const row = report.rows[0];
+    assert.equal(row.totalStraightHours, 8);
+    assert.equal(row.totalOvertimeHours, 4);
+    assert.equal(row.totalDoubleTimeHours, 1); // the daily overlay carried through to the DIR form
+    assert.equal(row.baseHourlyRateCents, dollars(50));
+    assert.deepEqual(row.fringeContributions, [{ plan: 'Health & Welfare', ratePerHourCents: dollars(5) }]);
+    assert.equal(row.grossThisProjectCents, dollars(800)); // 8×50 + 4×75 + 1×100
+    // Deductions reconcile to the paycheck even with California state tax present.
+    assert.equal(row.deductions.totalCents, run.computation.result.grossPay - run.computation.result.netPay);
+    assert.ok(row.deductions.stateTaxCents > 0, 'California income tax withheld');
   });
 });

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { computeEmployeePaycheck, type EmployeePaycheckComputation } from '../payroll/engine.ts';
 import { checkMinimumWageComplianceForCompany } from '../payroll/compliance.ts';
-import { activeEmployeesFor } from '../payroll/run.ts';
+import { activeEmployeesFor, voidPayRun } from '../payroll/run.ts';
 import type { Company, Employee, PayRun, PayRunLine } from '../payroll/types.ts';
 import { buildCertifiedPayroll, type CertifiedPayrollEmployeeInput, type CertifiedPayrollReport } from './certifiedPayroll.ts';
 import { computeJobCosts, type EmployeeJobCostInput, type JobCost, type WorkersCompRating } from './jobCosting.ts';
@@ -128,6 +128,29 @@ export function draftTradesPayRun(input: TradesPayRunInput): TradesPayRunResult 
 
   return { run, employees: employeeRuns, company, jobs: input.jobs };
 }
+
+/**
+ * Recompute a DRAFT trades run in place from fresh input — a corrected
+ * timecard came in, a determination was updated — keeping the run's id and
+ * createdAt. Mirrors payroll/run.ts's recalculatePayRun and its guard: a run
+ * that is already approved or voided is what got signed off, and its numbers
+ * never change under it, so this throws rather than silently recompute one.
+ */
+export function recalculateTradesPayRun(run: PayRun, input: TradesPayRunInput): TradesPayRunResult {
+  if (run.status !== 'draft') {
+    throw new Error(`Cannot recalculate a ${run.status} trades pay run — only a draft run's numbers may change.`);
+  }
+  const fresh = draftTradesPayRun(input);
+  return { ...fresh, run: { ...fresh.run, id: run.id, createdAt: run.createdAt } };
+}
+
+/**
+ * Discard a draft trades run. Re-exported from payroll/run.ts unchanged — a
+ * trades run IS a PayRun, and voiding is a pure status flip that never touched
+ * YTD (nothing was committed until approval), so there is nothing trades-
+ * specific to add. Approving is likewise the ordinary approvePayRun().
+ */
+export { voidPayRun };
 
 /**
  * Burdened cost per job across the whole run, from the crew's resolved hours.

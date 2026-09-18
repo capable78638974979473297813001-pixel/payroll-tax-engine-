@@ -110,8 +110,8 @@ function isIncomeTax(id: string, name: string): boolean {
   return /FIT|SIT|_IT\b|income tax/i.test(id) || /income tax/i.test(name);
 }
 
-/** Break a week's paycheck into the WH-347 deduction buckets. `other` is the residual so the buckets always sum to the paycheck's real gross-to-net delta, even for a tax line this mapping doesn't recognize. */
-function deductionsFromPaycheck(paycheck: PaycheckResult): CertifiedPayrollDeductions {
+/** Break a week's paycheck into certified-payroll deduction buckets. `other` is the residual so the buckets always sum to the paycheck's real gross-to-net delta, even for a tax line this mapping doesn't recognize. Shared by the federal WH-347 and the California DIR report so both classify deductions identically. */
+export function deductionsFromPaycheck(paycheck: PaycheckResult): CertifiedPayrollDeductions {
   let fica = 0;
   let federalWithholding = 0;
   let stateTax = 0;

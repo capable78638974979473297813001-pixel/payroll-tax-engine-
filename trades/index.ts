@@ -54,7 +54,7 @@ export type {
 export { MissingWorkersCompRatingError, computeJobCosts } from './jobCosting.ts';
 export type { EmployeeJobCostInput, JobCost, WorkersCompRating } from './jobCosting.ts';
 
-export { buildCertifiedPayroll } from './certifiedPayroll.ts';
+export { buildCertifiedPayroll, deductionsFromPaycheck } from './certifiedPayroll.ts';
 export type {
   CertifiedPayrollDayHours,
   CertifiedPayrollDeductions,
@@ -64,10 +64,25 @@ export type {
   StatementOfCompliance,
 } from './certifiedPayroll.ts';
 
+export { buildCaliforniaCertifiedPayroll } from './californiaCertifiedPayroll.ts';
+export type {
+  CaliforniaCertifiedPayrollEmployeeInput,
+  CaliforniaCertifiedPayrollHeader,
+  CaliforniaCertifiedPayrollReport,
+  CaliforniaCertifiedPayrollRow,
+  CaliforniaFringeContribution,
+} from './californiaCertifiedPayroll.ts';
+
 export { runTradesPayPeriod } from './run.ts';
 export type { TradesPayPeriodInput, TradesPayPeriodResult } from './run.ts';
 
-export { certifiedPayrollForPeriod, draftTradesPayRun, jobCostsForPeriod } from './payRun.ts';
+export {
+  certifiedPayrollForPeriod,
+  draftTradesPayRun,
+  jobCostsForPeriod,
+  recalculateTradesPayRun,
+  voidPayRun,
+} from './payRun.ts';
 export type { TradesEmployeeRun, TradesPayRunInput, TradesPayRunResult } from './payRun.ts';
 
 export {
