@@ -230,8 +230,15 @@ const server = createServer(async (req, res) => {
   const params = Object.fromEntries(url.searchParams.entries());
 
   try {
-    if (method === 'GET' && (path === '/' || path === '/index.html' || path === '/app')) {
+    // Three front doors: the marketing site, the owner console, the crew app.
+    if (method === 'GET' && (path === '/' || path === '/index.html' || path === '/home')) {
+      return sendHtml(res, 'trades-landing.html');
+    }
+    if (method === 'GET' && (path === '/owner' || path === '/app' || path === '/admin')) {
       return sendHtml(res, 'trades-app.html');
+    }
+    if (method === 'GET' && (path === '/me' || path === '/crew' || path === '/worker')) {
+      return sendHtml(res, 'trades-employee.html');
     }
     if (method === 'POST' && path === '/api/demo/seed') {
       return sendJson(res, 200, seedDemo());
@@ -315,6 +322,44 @@ const server = createServer(async (req, res) => {
     if (method === 'GET' && hoursMatch) {
       const entries = workedHoursForCompanyInRange(decodeURIComponent(hoursMatch[1]), params.start ?? '', params.end ?? '');
       return sendJson(res, 200, { entries });
+    }
+
+    // One worker's own week — what the crew-facing app (/me) needs and nothing
+    // more: this employee's hours for the period (with a per-job breakdown),
+    // their rate, and a rough gross estimate. A worker never pulls the whole
+    // roster's data; this route is scoped to the one person.
+    const meMatch = path.match(/^\/api\/companies\/([^/]+)\/employees\/([^/]+)\/me$/);
+    if (method === 'GET' && meMatch) {
+      const companyId = decodeURIComponent(meMatch[1]);
+      const employeeId = decodeURIComponent(meMatch[2]);
+      const emp = employeesForCompany(companyId).find((e) => e.id === employeeId);
+      if (!emp) return sendJson(res, 404, { error: `No worker "${employeeId}".` });
+      const profile = getWorkerProfile(employeeId);
+      const start = params.start ?? '';
+      const end = params.end ?? '';
+      const entries = workedHoursForCompanyInRange(companyId, start, end).filter((e) => e.employeeId === employeeId);
+      const byJob = new Map<string, { jobId: string; name: string; hours: number }>();
+      let totalHours = 0;
+      for (const e of entries) {
+        totalHours += e.hours;
+        const row = byJob.get(e.jobId) ?? { jobId: e.jobId, name: getJob(e.jobId)?.name ?? e.jobId, hours: 0 };
+        row.hours += e.hours;
+        byJob.set(e.jobId, row);
+      }
+      const rateCents = emp.payType.kind === 'hourly' ? emp.payType.hourlyRate : null;
+      return sendJson(res, 200, {
+        employee: {
+          id: emp.id,
+          name: `${emp.firstName} ${emp.lastName}`,
+          firstName: emp.firstName,
+          hourlyRateCents: rateCents,
+          employmentType: profile?.employmentType ?? 'regular',
+          seasonEndDate: profile?.seasonEndDate ?? null,
+        },
+        week: { start, end, totalHours, jobs: [...byJob.values()].sort((a, b) => b.hours - a.hours) },
+        entries: entries.sort((a, b) => a.date.localeCompare(b.date)),
+        estimateGrossCents: rateCents != null ? Math.round(totalHours * rateCents) : null,
+      });
     }
 
     // Geofenced clock-in / out: verify the device's coordinates against the
@@ -449,6 +494,8 @@ const server = createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`\n  Crewtally — time & pay for the trades`);
-  console.log(`  Open the app:  http://localhost:${PORT}`);
-  console.log(`  (Click "Load the sample plumbing shop" to see everything working.)\n`);
+  console.log(`  Landing page:   http://localhost:${PORT}/`);
+  console.log(`  Owner console:  http://localhost:${PORT}/owner`);
+  console.log(`  Crew app:       http://localhost:${PORT}/me`);
+  console.log(`  (On the landing page, click "See the live demo" to load a sample shop.)\n`);
 });
