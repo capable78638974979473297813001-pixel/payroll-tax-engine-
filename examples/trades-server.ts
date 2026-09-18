@@ -13,6 +13,7 @@ import {
   saveWageDetermination,
   saveWorkerProfile,
   weeklyCertifiedPayroll,
+  weeklyComplianceReport,
   weeklyJobCosts,
   UnknownCompanyError,
   type Job,
@@ -227,6 +228,16 @@ const server = createServer(async (req, res) => {
       const ratings = new Map((body.wcRatings ?? []).map((r) => [r.classCode, r]));
       const costs = weeklyJobCosts(runRequestFrom(decodeURIComponent(costsMatch[1]), body), ratings);
       return sendJson(res, 200, { jobCosts: costs });
+    }
+
+    const complianceMatch = path.match(/^\/api\/companies\/([^/]+)\/compliance$/);
+    if (method === 'POST' && complianceMatch) {
+      const body = await readJson<Record<string, string> & { apprenticePrograms?: unknown[]; fringeAudits?: unknown[] }>(req);
+      const report = weeklyComplianceReport(runRequestFrom(decodeURIComponent(complianceMatch[1]), body), {
+        apprenticePrograms: body.apprenticePrograms as never,
+        fringeAudits: body.fringeAudits as never,
+      });
+      return sendJson(res, 200, report);
     }
 
     return sendJson(res, 404, { error: 'Not found' });

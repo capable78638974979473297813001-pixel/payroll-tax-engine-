@@ -18,11 +18,15 @@ import {
   approveRunById,
   buildCaliforniaCertifiedPayroll,
   buildCertifiedPayroll,
+  buildTradesComplianceReport,
   certifiedPayrollForPeriod,
   checkApprenticeRatio,
   checkFringeAnnualization,
+  DeterminationImportError,
   draftWeeklyTradesRun,
   fringeCreditsFromContributions,
+  normalizeDetermination,
+  slugifyClassification,
   combineWeeklyEarnings,
   computeJobCosts,
   draftTradesPayRun,
@@ -1007,5 +1011,124 @@ describe('California DIR certified payroll (trades/californiaCertifiedPayroll.ts
     // Deductions reconcile to the paycheck even with California state tax present.
     assert.equal(row.deductions.totalCents, run.computation.result.grossPay - run.computation.result.netPay);
     assert.ok(row.deductions.stateTaxCents > 0, 'California income tax withheld');
+  });
+});
+
+// ============================================================================
+// Determination import / normalization (trades/importDetermination.ts)
+// ============================================================================
+
+describe('determination import (trades/importDetermination.ts)', () => {
+  const goodExport = {
+    determinationId: 'TX20260099',
+    authority: 'davis-bacon' as const,
+    state: 'TX',
+    locality: 'Travis County',
+    constructionType: 'building' as const,
+    rows: [
+      { classification: 'Plumber', baseHourlyRate: 50, fringeRate: 15, effectiveDate: '2026-01-01' },
+      { classification: 'Plumber, Apprentice (1st period)', baseHourlyRate: 30, fringeRate: 9, effectiveDate: '2026-01-01' },
+    ],
+  };
+
+  test('normalizes dollars to cents and derives classification codes from titles', () => {
+    const det = normalizeDetermination(goodExport);
+    assert.equal(det.id, 'TX20260099');
+    assert.equal(det.rates[0].classificationCode, 'PLUMBER');
+    assert.equal(det.rates[0].baseHourlyRateCents, dollars(50));
+    assert.equal(det.rates[0].fringePerHourCents, dollars(15));
+    assert.equal(det.rates[1].classificationCode, 'PLUMBER_APPRENTICE_1ST_PERIOD');
+  });
+
+  test('an explicit classification code is preferred over the derived one', () => {
+    const det = normalizeDetermination({ ...goodExport, rows: [{ ...goodExport.rows[0], classificationCode: 'PLUMB_JW' }] });
+    assert.equal(det.rates[0].classificationCode, 'PLUMB_JW');
+  });
+
+  test('slugify collapses punctuation and spacing', () => {
+    assert.equal(slugifyClassification('Plumber, Apprentice (1st period)'), 'PLUMBER_APPRENTICE_1ST_PERIOD');
+  });
+
+  test('malformed input raises rather than importing a wrong rate', () => {
+    assert.throws(() => normalizeDetermination({ ...goodExport, state: 'Texas' }), DeterminationImportError);
+    assert.throws(() => normalizeDetermination({ ...goodExport, constructionType: 'skyscraper' }), DeterminationImportError);
+    assert.throws(() => normalizeDetermination({ ...goodExport, rows: [{ ...goodExport.rows[0], effectiveDate: '01/01/2026' }] }), DeterminationImportError);
+    assert.throws(() => normalizeDetermination({ ...goodExport, rows: [{ ...goodExport.rows[0], baseHourlyRate: -1 }] }), DeterminationImportError);
+    assert.throws(() => normalizeDetermination({ ...goodExport, rows: [] }), DeterminationImportError);
+  });
+
+  test('a normalized determination resolves rates by date like any other', () => {
+    const det = normalizeDetermination(goodExport);
+    assert.equal(findRateOnDate(det, 'PLUMBER', '2026-06-01')?.baseHourlyRateCents, dollars(50));
+  });
+});
+
+// ============================================================================
+// Consolidated compliance report (trades/compliance.ts)
+// ============================================================================
+
+describe('consolidated compliance report (trades/compliance.ts)', () => {
+  function baseRun() {
+    return draftTradesPayRun({
+      company: weeklyShop(),
+      employees: [plumber()],
+      profiles: [profile],
+      periodStart: '2026-01-04',
+      periodEnd: '2026-01-10',
+      checkDate: '2026-01-14',
+      workedHours: weekOfHours(),
+      jobs: [publicJob, privateJob],
+      determinations: [determination],
+    });
+  }
+
+  test('lists already-paid prevailing-wage adjustments but counts zero exposure without audits', () => {
+    const report = buildTradesComplianceReport({ run: baseRun() });
+    assert.ok(report.prevailingWageAdjustments.some((a) => a.employeeId === 'joe' && a.jobId === 'J1'));
+    assert.equal(report.totalBackWageExposureCents, 0);
+  });
+
+  test('a fringe over-claim becomes dollar exposure over the worker Davis-Bacon hours', () => {
+    // joe claims $5/hr (his profile); $6,240/yr over 2,080h annualizes to $3/hr → $2/hr over-claim.
+    const report = buildTradesComplianceReport({
+      run: baseRun(),
+      fringeAudits: [{ employeeId: 'joe', contributions: [{ plan: 'Health & Welfare', basis: { kind: 'annual', annualAmountCents: dollars(6240) } }], totalAnnualHoursWorked: 2080 }],
+    });
+    assert.equal(report.fringeAnnualizationFindings.length, 1);
+    const f = report.fringeAnnualizationFindings[0];
+    assert.equal(f.overClaimedPerHourCents, dollars(2));
+    assert.equal(f.davisBaconHours, 40); // joe's public plumbing hours (J2 Friday is private)
+    assert.equal(f.dollarExposureCents, dollars(80)); // $2/hr × 40h
+    assert.equal(report.totalBackWageExposureCents, dollars(80));
+  });
+
+  test('apprentice-ratio findings from a program roll into total exposure', () => {
+    const apprDet: WageDetermination = {
+      id: 'TXAPP', authority: 'davis-bacon', state: 'TX', locality: 'Travis County', constructionType: 'building',
+      rates: [
+        { classificationCode: 'PLUMBER', baseHourlyRateCents: dollars(50), fringePerHourCents: dollars(15), effectiveDate: '2026-01-01' },
+        { classificationCode: 'PLUMBER_APPRENTICE', baseHourlyRateCents: dollars(30), fringePerHourCents: dollars(9), effectiveDate: '2026-01-01' },
+      ],
+    };
+    const apprJob: Job = { id: 'JA', companyId: 'shop-1', name: 'Apprentice job', workState: 'TX', prevailingWage: { determinationId: 'TXAPP' }, workersCompClassCode: '5183' };
+    const prog: ApprenticeshipProgram = { id: 'P', trade: 'Plumbing', journeyworkerClassificationCode: 'PLUMBER', apprenticeClassificationCodes: ['PLUMBER_APPRENTICE'], ratio: { apprentices: 1, journeyworkers: 3 } };
+
+    const run = draftTradesPayRun({
+      company: weeklyShop(),
+      employees: [plumber({ id: 'jw' }), plumber({ id: 'appr', payType: { kind: 'hourly', hourlyRate: dollars(20) } })],
+      profiles: [],
+      periodStart: '2026-01-04', periodEnd: '2026-01-10', checkDate: '2026-01-14',
+      workedHours: [
+        { employeeId: 'jw', jobId: 'JA', date: '2026-01-05', classificationCode: 'PLUMBER', hours: 8 },
+        { employeeId: 'appr', jobId: 'JA', date: '2026-01-05', classificationCode: 'PLUMBER_APPRENTICE', hours: 8 },
+      ],
+      jobs: [apprJob],
+      determinations: [apprDet],
+    });
+
+    const report = buildTradesComplianceReport({ run, apprenticePrograms: [{ program: prog, journeyworkerRateCents: dollars(65) }] });
+    assert.equal(report.apprenticeRatioFindings.length, 1);
+    assert.equal(report.apprenticeRatioFindings[0].additionalWagesOwedCents, 13867);
+    assert.equal(report.totalBackWageExposureCents, 13867);
   });
 });

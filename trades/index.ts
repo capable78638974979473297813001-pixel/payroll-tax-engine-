@@ -71,6 +71,19 @@ export type {
 export { InvalidApprenticeRatioError, checkApprenticeRatio, totalApprenticeRatioExposure } from './apprenticeRatio.ts';
 export type { ApprenticeRatioDayFinding, ApprenticeshipProgram } from './apprenticeRatio.ts';
 
+export { DeterminationImportError, normalizeDetermination, slugifyClassification } from './importDetermination.ts';
+export type { DeterminationExport, DeterminationExportRow } from './importDetermination.ts';
+
+export { buildTradesComplianceReport } from './compliance.ts';
+export type {
+  EmployeeFringeAnnualizationFinding,
+  EmployeePrevailingWageAdjustment,
+  TradesComplianceFringeAudit,
+  TradesComplianceInput,
+  TradesComplianceProgramInput,
+  TradesComplianceReport,
+} from './compliance.ts';
+
 export { buildCertifiedPayroll, deductionsFromPaycheck } from './certifiedPayroll.ts';
 export type {
   CertifiedPayrollDayHours,
@@ -124,6 +137,7 @@ export {
   draftWeeklyTradesRun,
   loadTradesPayRunInput,
   weeklyCertifiedPayroll,
+  weeklyComplianceReport,
   weeklyJobCosts,
 } from './service.ts';
 export type { TradesRunRequest } from './service.ts';

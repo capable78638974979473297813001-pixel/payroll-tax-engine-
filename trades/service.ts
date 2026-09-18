@@ -1,6 +1,11 @@
 import { approvePayRun, type ApprovedPayRun } from '../payroll/run.ts';
 import { employeesForCompany, getCompany, getPayRun, saveEmployees, savePayRun } from '../payroll/store.ts';
 import type { CertifiedPayrollReport } from './certifiedPayroll.ts';
+import {
+  buildTradesComplianceReport,
+  type TradesComplianceInput,
+  type TradesComplianceReport,
+} from './compliance.ts';
 import type { JobCost, WorkersCompRating } from './jobCosting.ts';
 import {
   certifiedPayrollForPeriod,
@@ -122,4 +127,19 @@ export function weeklyCertifiedPayroll(req: TradesRunRequest): CertifiedPayrollR
 export function weeklyJobCosts(req: TradesRunRequest, wcRatingsByClassCode: ReadonlyMap<string, WorkersCompRating>): JobCost[] {
   const result = draftTradesPayRun(loadTradesPayRunInput(req));
   return jobCostsForPeriod(result, wcRatingsByClassCode);
+}
+
+/**
+ * The consolidated compliance report for a company's week — drafts the run,
+ * then runs every wage-compliance check. `audits` supplies the facts the run
+ * doesn't carry (registered apprenticeship programs, fringe-plan contributions
+ * and total annual hours); omit it and the report still returns the prevailing-
+ * wage and minimum-wage picture the run always has.
+ */
+export function weeklyComplianceReport(
+  req: TradesRunRequest,
+  audits: Pick<TradesComplianceInput, 'apprenticePrograms' | 'fringeAudits'> = {},
+): TradesComplianceReport {
+  const run = draftTradesPayRun(loadTradesPayRunInput(req));
+  return buildTradesComplianceReport({ run, ...audits });
 }
