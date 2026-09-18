@@ -82,7 +82,15 @@ export interface TradesComplianceReport {
   apprenticeRatioFindings: ApprenticeRatioDayFinding[];
   fringeAnnualizationFindings: EmployeeFringeAnnualizationFinding[];
   minimumWageIssues: PayRun['minimumWageIssues'];
-  /** Uncorrected underpayment only: apprentice-ratio make-up + fringe over-claim dollars + minimum-wage shortfalls. Prevailing-wage adjustments are excluded (already paid). */
+  /**
+   * Uncorrected underpayment, as period-dollar totals: apprentice-ratio make-up
+   * plus fringe over-claim. Prevailing-wage adjustments are excluded (already
+   * paid), and minimum-wage issues are excluded too — a minimum-wage finding is
+   * a per-HOUR rate gap (see MinimumWageComplianceIssue.shortfallCents), not a
+   * discrete dollar amount, and cannot be summed into a dollar total without
+   * the hours it was underpaid on; it is surfaced in minimumWageIssues to be
+   * resolved by raising the rate, and read there, not here.
+   */
   totalBackWageExposureCents: Cents;
 }
 
@@ -141,10 +149,12 @@ export function buildTradesComplianceReport(input: TradesComplianceInput): Trade
 
   const minimumWageIssues = run.run.minimumWageIssues;
 
+  // Only period-dollar underpayments are summed. Minimum-wage shortfalls are
+  // per-hour rate gaps, a different unit, so they stay in minimumWageIssues and
+  // out of this total (see totalBackWageExposureCents's own doc comment).
   const totalBackWageExposureCents =
     apprenticeRatioFindings.reduce((s, f) => s + f.additionalWagesOwedCents, 0) +
-    fringeAnnualizationFindings.reduce((s, f) => s + f.dollarExposureCents, 0) +
-    minimumWageIssues.reduce((s, m) => s + m.shortfallCents, 0);
+    fringeAnnualizationFindings.reduce((s, f) => s + f.dollarExposureCents, 0);
 
   return {
     companyId: run.run.companyId,

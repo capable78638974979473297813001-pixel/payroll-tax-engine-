@@ -65,6 +65,13 @@ export class DeterminationImportError extends Error {
 const CONSTRUCTION_TYPES: ReadonlySet<string> = new Set(['building', 'residential', 'highway', 'heavy']);
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+/** A real ISO calendar date — not just the right SHAPE. Catches "2026-13-45", which passes the regex but is not a date, at the import boundary rather than letting it corrupt effective-date resolution downstream (which compares dates as strings). */
+function isRealIsoDate(value: string): boolean {
+  if (!ISO_DATE.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+
 /** Derive a stable-ish classification code from a printed title: upper-case, non-alphanumeric runs to single underscores, trimmed. Documented as a fallback — an explicit classificationCode is preferred. */
 export function slugifyClassification(title: string): string {
   return title
@@ -106,8 +113,8 @@ export function normalizeDetermination(input: DeterminationExport): WageDetermin
     const n = i + 1;
     const title = (row.classification ?? '').trim();
     if (!title) throw new DeterminationImportError(`Row ${n}: classification title is required.`);
-    if (!ISO_DATE.test(row.effectiveDate ?? '')) {
-      throw new DeterminationImportError(`Row ${n} (${title}): effectiveDate must be ISO yyyy-mm-dd, got "${row.effectiveDate}".`);
+    if (!isRealIsoDate(row.effectiveDate ?? '')) {
+      throw new DeterminationImportError(`Row ${n} (${title}): effectiveDate must be a real ISO yyyy-mm-dd date, got "${row.effectiveDate}".`);
     }
     const code = row.classificationCode?.trim() || slugifyClassification(title);
     if (!code) throw new DeterminationImportError(`Row ${n} (${title}): could not derive a classification code — supply classificationCode.`);

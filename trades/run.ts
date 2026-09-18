@@ -61,7 +61,15 @@ export interface TradesPayPeriodResult {
 export function runTradesPayPeriod(input: TradesPayPeriodInput): TradesPayPeriodResult {
   const jobsById = new Map(input.jobs.map((j) => [j.id, j]));
   const determinationsById = indexDeterminations(input.determinations);
-  const fallbackBaseRateCents = input.employee.payType.kind === 'hourly' ? input.employee.payType.hourlyRate : 0;
+  // The base rate for a classification the worker profile doesn't price. For a
+  // salaried worker this is their hourly-equivalent (annual ÷ 2080 = 40h×52wk)
+  // rather than zero — so a salaried foreman who logs covered hours is priced
+  // at a real rate (and, on a public job, still bumped up to prevailing), never
+  // silently paid nothing.
+  const fallbackBaseRateCents =
+    input.employee.payType.kind === 'hourly'
+      ? input.employee.payType.hourlyRate
+      : Math.round(input.employee.payType.annualSalary / 2080);
   const workState = input.employee.workState?.code ?? input.company.homeState;
   const overtimeRule = input.overtimeRule ?? overtimeRuleForState(workState);
 

@@ -384,6 +384,22 @@ describe('a trades pay period through the payroll engine (trades/run.ts)', () =>
     assert.equal(result.adjustments.length, 1);
   });
 
+  test('a salaried worker who logs trades hours is priced at their hourly-equivalent, never $0', () => {
+    // $104,000 / 2,080 = $50/hr equivalent, used where no per-classification rate is set.
+    const foreman = plumber({ id: 'boss', payType: { kind: 'salary', annualSalary: dollars(104_000) } });
+    const run = runTradesPayPeriod({
+      company: weeklyShop(),
+      employee: foreman,
+      checkDate: '2026-01-14',
+      workedHours: [{ employeeId: 'boss', jobId: 'J2', date: '2026-01-05', classificationCode: 'SERVICE', hours: 8 }],
+      jobs: [privateJob],
+      determinations: [],
+    });
+    const entry = run.weeks[0].entries[0];
+    assert.equal(entry.effectiveBaseRateCents, dollars(50));
+    assert.equal(entry.grossCashCents, dollars(400)); // 8h × $50, no fringe on a private job
+  });
+
   test('the earnings override drives percent-of-gross deductions off the supplied earnings', () => {
     const employee = plumber({
       deductionPlans: [{ id: 'd1', code: '401K', category: 'deferral_401k', amount: { kind: 'percentOfGross', percent: 10 }, active: true }],
@@ -1053,6 +1069,8 @@ describe('determination import (trades/importDetermination.ts)', () => {
     assert.throws(() => normalizeDetermination({ ...goodExport, state: 'Texas' }), DeterminationImportError);
     assert.throws(() => normalizeDetermination({ ...goodExport, constructionType: 'skyscraper' }), DeterminationImportError);
     assert.throws(() => normalizeDetermination({ ...goodExport, rows: [{ ...goodExport.rows[0], effectiveDate: '01/01/2026' }] }), DeterminationImportError);
+    // Right shape, impossible date — rejected at the boundary, not left to corrupt date resolution downstream.
+    assert.throws(() => normalizeDetermination({ ...goodExport, rows: [{ ...goodExport.rows[0], effectiveDate: '2026-13-45' }] }), DeterminationImportError);
     assert.throws(() => normalizeDetermination({ ...goodExport, rows: [{ ...goodExport.rows[0], baseHourlyRate: -1 }] }), DeterminationImportError);
     assert.throws(() => normalizeDetermination({ ...goodExport, rows: [] }), DeterminationImportError);
   });
@@ -1130,5 +1148,22 @@ describe('consolidated compliance report (trades/compliance.ts)', () => {
     assert.equal(report.apprenticeRatioFindings.length, 1);
     assert.equal(report.apprenticeRatioFindings[0].additionalWagesOwedCents, 13867);
     assert.equal(report.totalBackWageExposureCents, 13867);
+  });
+
+  test('a minimum-wage rate gap is surfaced but never summed into the dollar exposure (different unit)', () => {
+    // shortfallCents is cents-per-HOUR, not a period total; summing it would be a units error.
+    const underpaid = plumber({ id: 'low', payType: { kind: 'hourly', hourlyRate: dollars(5) } }); // below the $7.25 federal floor
+    const run = draftTradesPayRun({
+      company: weeklyShop(),
+      employees: [underpaid],
+      profiles: [],
+      periodStart: '2026-01-04', periodEnd: '2026-01-10', checkDate: '2026-01-14',
+      workedHours: [],
+      jobs: [],
+      determinations: [],
+    });
+    const report = buildTradesComplianceReport({ run });
+    assert.ok(report.minimumWageIssues.length >= 1); // surfaced
+    assert.equal(report.totalBackWageExposureCents, 0); // but not summed
   });
 });
