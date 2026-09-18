@@ -1,8 +1,11 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { dollars } from '../src/money.ts';
 import { freshYearToDate } from '../payroll/ytd.ts';
-import { saveCompany, saveEmployees } from '../payroll/store.ts';
+import { employeesForCompany, saveCompany, saveEmployees } from '../payroll/store.ts';
 import type { Company, Employee } from '../payroll/types.ts';
 import {
   addWorkedHours,
@@ -15,6 +18,7 @@ import {
   weeklyCertifiedPayroll,
   weeklyComplianceReport,
   weeklyJobCosts,
+  workedHoursForCompanyInRange,
   UnknownCompanyError,
   type Job,
   type TradeWorkerProfile,
@@ -39,6 +43,13 @@ import {
  */
 
 const PORT = Number(process.env.PORT ?? 4325);
+const HERE = dirname(fileURLToPath(import.meta.url));
+
+function sendHtml(res: ServerResponse, file: string): void {
+  const html = readFileSync(join(HERE, file));
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': html.byteLength });
+  res.end(html);
+}
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
   const payload = JSON.stringify(body, null, 2);
@@ -174,6 +185,9 @@ const server = createServer(async (req, res) => {
   const params = Object.fromEntries(url.searchParams.entries());
 
   try {
+    if (method === 'GET' && (path === '/' || path === '/index.html' || path === '/app')) {
+      return sendHtml(res, 'trades-app.html');
+    }
     if (method === 'POST' && path === '/api/demo/seed') {
       return sendJson(res, 200, seedDemo());
     }
@@ -201,6 +215,52 @@ const server = createServer(async (req, res) => {
     const jobsMatch = path.match(/^\/api\/companies\/([^/]+)\/jobs$/);
     if (method === 'GET' && jobsMatch) {
       return sendJson(res, 200, { jobs: jobsForCompany(decodeURIComponent(jobsMatch[1])) });
+    }
+
+    const employeesMatch = path.match(/^\/api\/companies\/([^/]+)\/employees$/);
+    if (method === 'GET' && employeesMatch) {
+      const crew = employeesForCompany(decodeURIComponent(employeesMatch[1])).map((e) => ({
+        id: e.id,
+        name: `${e.firstName} ${e.lastName}`,
+        payType: e.payType.kind,
+      }));
+      return sendJson(res, 200, { employees: crew });
+    }
+
+    const hoursMatch = path.match(/^\/api\/companies\/([^/]+)\/hours$/);
+    if (method === 'GET' && hoursMatch) {
+      const entries = workedHoursForCompanyInRange(decodeURIComponent(hoursMatch[1]), params.start ?? '', params.end ?? '');
+      return sendJson(res, 200, { entries });
+    }
+
+    // One call that runs the whole week: draft (persisted), compliance, certified
+    // payroll, and — when a workers'-comp rate is supplied — job costs. This is
+    // what the UI's single "Run payroll" button hits.
+    const runWeekMatch = path.match(/^\/api\/companies\/([^/]+)\/run-week$/);
+    if (method === 'POST' && runWeekMatch) {
+      const companyId = decodeURIComponent(runWeekMatch[1]);
+      const body = await readJson<Record<string, string>>(req);
+      const req0 = runRequestFrom(companyId, body);
+      const draft = draftWeeklyTradesRun(req0);
+      const compliance = weeklyComplianceReport(req0);
+      const certifiedPayroll = weeklyCertifiedPayroll(req0);
+
+      let jobCosts: unknown = null;
+      const ratePerHundred = body.wcRatePerHundred !== undefined ? Number(body.wcRatePerHundred) : NaN;
+      if (Number.isFinite(ratePerHundred) && ratePerHundred > 0) {
+        const experienceMod = body.experienceMod !== undefined ? Number(body.experienceMod) : 1;
+        // Apply the shop's single comp rate to every class code its jobs use.
+        const classCodes = new Set(
+          jobsForCompany(companyId).map((j) => j.workersCompClassCode).filter((c): c is string => Boolean(c)),
+        );
+        for (const e of employeesForCompany(companyId)) if (e.workersCompClassCode) classCodes.add(e.workersCompClassCode);
+        const ratings = new Map<string, WorkersCompRating>(
+          [...classCodes].map((code) => [code, { classCode: code, ratePerHundredOfPayrollCents: dollars(ratePerHundred), experienceModificationFactor: experienceMod }]),
+        );
+        jobCosts = weeklyJobCosts(req0, ratings);
+      }
+
+      return sendJson(res, 200, { run: summarizeRun(draft), compliance, certifiedPayroll, jobCosts });
     }
 
     const draftMatch = path.match(/^\/api\/companies\/([^/]+)\/runs\/draft$/);

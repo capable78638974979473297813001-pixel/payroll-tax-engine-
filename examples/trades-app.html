@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trades Payroll</title>
+<style>
+  /* Deliberately plain and roomy: big targets, one column, plain words.
+     A shop owner should be able to run certified payroll without a manual. */
+  :root {
+    --bg: #f4f6f8; --card: #ffffff; --ink: #10151c; --muted: #5c6773; --line: #e3e7ec;
+    --teal: #0f7b6c; --teal-dark: #0b5c51; --teal-soft: #e6f3f0;
+    --green: #157347; --green-soft: #e5f2ea; --red: #b3341f; --red-soft: #fbeae6; --amber:#8a6d00; --amber-soft:#fdf3d8;
+    --radius: 12px;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 24px 18px 80px; }
+  h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -.02em; }
+  h2 { font-size: 18px; margin: 0 0 14px; letter-spacing: -.01em; }
+  .sub { color: var(--muted); margin: 0 0 26px; }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; margin-bottom: 18px; }
+  .step { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--teal); color: #fff; font-size: 13px; font-weight: 700; margin-right: 8px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+  .muted { color: var(--muted); }
+  .small { font-size: 13.5px; }
+
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 5px; }
+  input, select { font: inherit; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); width: 100%; }
+  input:focus, select:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
+  .field { flex: 1 1 130px; min-width: 0; }
+  .field.sm { flex: 0 1 100px; }
+
+  button { font: inherit; font-weight: 600; cursor: pointer; border-radius: 8px; border: 1px solid transparent; padding: 11px 16px; transition: background .12s, border-color .12s, opacity .12s; }
+  .btn { background: var(--teal); color: #fff; }
+  .btn:hover { background: var(--teal-dark); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-ghost { background: #fff; color: var(--ink); border-color: var(--line); }
+  .btn-ghost:hover { border-color: var(--ink); }
+  .btn-big { width: 100%; padding: 16px; font-size: 17px; }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-green:hover { filter: brightness(.95); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  td.r, th.r { text-align: right; }
+  tr:last-child td { border-bottom: none; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: var(--teal-soft); color: var(--teal-dark); border-radius: 999px; padding: 5px 12px; font-size: 13.5px; font-weight: 600; }
+  .chip.gray { background: #eef1f4; color: var(--muted); }
+
+  .banner { border-radius: 10px; padding: 16px 18px; margin-bottom: 18px; font-weight: 600; display: flex; gap: 12px; align-items: center; }
+  .banner.ok { background: var(--green-soft); color: var(--green); }
+  .banner.bad { background: var(--red-soft); color: var(--red); }
+  .banner .big { font-size: 22px; }
+
+  .note { background: var(--amber-soft); color: var(--amber); border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+  .err { background: var(--red-soft); color: var(--red); border-radius: 8px; padding: 12px 14px; margin: 10px 0; }
+  .hidden { display: none; }
+  .spin { display: inline-block; width: 16px; height: 16px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: s .7s linear infinite; vertical-align: -3px; }
+  @keyframes s { to { transform: rotate(360deg); } }
+
+  details { border: 1px solid var(--line); border-radius: 10px; margin-top: 12px; }
+  details > summary { cursor: pointer; padding: 12px 14px; font-weight: 600; list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary::before { content: "▸ "; color: var(--muted); }
+  details[open] > summary::before { content: "▾ "; }
+  details .body { padding: 4px 14px 14px; }
+  .foot { text-align: center; color: var(--muted); font-size: 13px; margin-top: 30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Trades Payroll</h1>
+  <p class="sub">Enter the week's hours, press one button, get paychecks and certified payroll. Built for plumbing, electrical, and HVAC shops on public jobs.</p>
+
+  <!-- STEP 1: shop -->
+  <div class="card">
+    <h2><span class="step">1</span>Your shop</h2>
+    <div id="shopEmpty">
+      <p class="muted small" style="margin-top:0">No shop loaded yet. Start with a sample plumbing shop — a crew, a public-works job, and a week of hours already filled in.</p>
+      <button class="btn" id="seedBtn">Load sample shop</button>
+    </div>
+    <div id="shopLoaded" class="hidden">
+      <p class="small muted" style="margin-top:0">Crew</p>
+      <div class="chips" id="crewChips"></div>
+      <p class="small muted" style="margin:14px 0 6px">Jobs</p>
+      <div class="chips" id="jobChips"></div>
+    </div>
+  </div>
+
+  <!-- STEP 2: hours -->
+  <div class="card" id="hoursCard">
+    <h2><span class="step">2</span>This week's hours</h2>
+    <p class="small muted" style="margin-top:-6px">Week of <b>Jan 4–10, 2026</b>, paid Jan 14. Add a line for each person, job, and day.</p>
+    <div class="row" id="hoursForm">
+      <div class="field"><label>Worker</label><select id="hWorker"></select></div>
+      <div class="field"><label>Job</label><select id="hJob"></select></div>
+      <div class="field"><label>Did what</label>
+        <input id="hClass" list="classList" placeholder="PLUMBER" />
+        <datalist id="classList">
+          <option value="PLUMBER"></option><option value="PLUMBER_APPRENTICE"></option><option value="SERVICE"></option>
+        </datalist>
+      </div>
+      <div class="field sm"><label>Day</label><input id="hDate" type="date" value="2026-01-05" min="2026-01-04" max="2026-01-10" /></div>
+      <div class="field sm"><label>Hours</label><input id="hHours" type="number" min="0" step="0.5" value="8" /></div>
+      <div><button class="btn-ghost" id="addHoursBtn">Add</button></div>
+    </div>
+    <table style="margin-top:14px"><tbody id="hoursBody"></tbody></table>
+    <p class="small muted" id="hoursEmptyNote">No hours yet.</p>
+    <div class="row" style="margin-top:16px; align-items:flex-end">
+      <div class="field sm"><label>Comp rate ($/100)</label><input id="wcRate" type="number" min="0" step="0.01" value="3.50" title="Your workers' comp rate per $100 of payroll — for job costs" /></div>
+      <div class="muted small" style="flex:1">Your workers' comp rate, so we can show what each job really costs. Optional.</div>
+    </div>
+  </div>
+
+  <!-- STEP 3: run -->
+  <button class="btn btn-big" id="runBtn" disabled>Run this week's payroll</button>
+  <div id="topErr"></div>
+
+  <!-- RESULTS -->
+  <div id="results" class="hidden" style="margin-top:22px">
+    <div id="banner"></div>
+
+    <div class="card">
+      <h2>Paychecks</h2>
+      <table><thead><tr><th>Worker</th><th class="r">Gross</th><th class="r">Take-home</th></tr></thead><tbody id="payBody"></tbody></table>
+    </div>
+
+    <div class="card" id="fixCard">
+      <h2>What you need to fix</h2>
+      <div id="fixBody"></div>
+    </div>
+
+    <div class="card">
+      <h2>Prevailing wage — what the job required</h2>
+      <p class="small muted" style="margin-top:-6px">Extra pay already added to the cheques so the public job meets its wage determination. This is money the crew was paid, not a problem.</p>
+      <div id="pwBody"></div>
+    </div>
+
+    <div class="card" id="costCard">
+      <h2>What each job cost you</h2>
+      <table><thead><tr><th>Job</th><th class="r">Hours</th><th class="r">Wages</th><th class="r">Fully loaded</th><th class="r">$/hr</th></tr></thead><tbody id="costBody"></tbody></table>
+    </div>
+
+    <div class="card">
+      <h2>Certified payroll (WH-347)</h2>
+      <p class="small muted" style="margin-top:-6px">Ready to file for each public job this week.</p>
+      <div id="cprBody"></div>
+    </div>
+
+    <button class="btn btn-green btn-big" id="approveBtn">Approve &amp; finalize this payroll</button>
+    <div id="approveMsg"></div>
+  </div>
+
+  <p class="foot">Runs entirely on your machine · figures in integer cents · no data leaves this server</p>
+</div>
+
+<script>
+const COMPANY = "shop-1";
+const WEEK = { periodStart: "2026-01-04", periodEnd: "2026-01-10", checkDate: "2026-01-14" };
+let lastRunId = null;
+let crewNames = {};
+const who = (id) => crewNames[id] || id;
+
+const $ = (id) => document.getElementById(id);
+const money = (c) => (c < 0 ? "-$" : "$") + (Math.abs(c) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const esc = (s) => String(s).replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
+
+async function api(method, path, body) {
+  const res = await fetch(path, { method, headers: body ? { "Content-Type": "application/json" } : undefined, body: body ? JSON.stringify(body) : undefined });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || (method + " " + path + " failed"));
+  return data;
+}
+function showErr(where, msg) { $(where).innerHTML = '<div class="err">' + esc(msg) + "</div>"; }
+
+// ---- Setup ----------------------------------------------------------------
+async function loadShop() {
+  const [{ employees }, { jobs }] = await Promise.all([
+    api("GET", `/api/companies/${COMPANY}/employees`),
+    api("GET", `/api/companies/${COMPANY}/jobs`),
+  ]);
+  if (!employees.length) { $("shopEmpty").classList.remove("hidden"); $("shopLoaded").classList.add("hidden"); return false; }
+  crewNames = Object.fromEntries(employees.map((e) => [e.id, e.name]));
+
+  $("crewChips").innerHTML = employees.map((e) => `<span class="chip">${esc(e.name)}${e.payType === "salary" ? " · salary" : ""}</span>`).join("");
+  $("jobChips").innerHTML = jobs.map((j) => `<span class="chip ${j.prevailingWage ? "" : "gray"}">${esc(j.name)}${j.prevailingWage ? " · public" : ""}</span>`).join("");
+  $("shopEmpty").classList.add("hidden");
+  $("shopLoaded").classList.remove("hidden");
+
+  $("hWorker").innerHTML = employees.map((e) => `<option value="${esc(e.id)}">${esc(e.name)}</option>`).join("");
+  $("hJob").innerHTML = jobs.map((j) => `<option value="${esc(j.id)}">${esc(j.name)}</option>`).join("");
+  $("runBtn").disabled = false;
+  await loadHours();
+  return true;
+}
+
+async function loadHours() {
+  const { entries } = await api("GET", `/api/companies/${COMPANY}/hours?start=${WEEK.periodStart}&end=${WEEK.periodEnd}`);
+  const workerName = {};
+  document.querySelectorAll("#hWorker option").forEach((o) => (workerName[o.value] = o.textContent));
+  $("hoursBody").innerHTML = entries
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map((e) => `<tr><td>${esc(workerName[e.employeeId] || e.employeeId)}</td><td class="muted small">${esc(e.jobId)}</td><td class="small">${esc(e.classificationCode)}</td><td class="muted small">${esc(e.date)}</td><td class="r num">${e.hours}h</td></tr>`)
+    .join("");
+  $("hoursEmptyNote").classList.toggle("hidden", entries.length > 0);
+}
+
+// ---- Run ------------------------------------------------------------------
+async function runWeek() {
+  $("topErr").innerHTML = "";
+  const btn = $("runBtn");
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Running…';
+  try {
+    const wcRate = parseFloat($("wcRate").value);
+    const payload = { ...WEEK };
+    if (Number.isFinite(wcRate) && wcRate > 0) payload.wcRatePerHundred = wcRate;
+    const data = await api("POST", `/api/companies/${COMPANY}/run-week`, payload);
+    render(data);
+    $("results").classList.remove("hidden");
+    $("results").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (e) {
+    showErr("topErr", e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "Run this week's payroll";
+  }
+}
+
+function render(data) {
+  lastRunId = data.run.runId;
+  $("approveMsg").innerHTML = "";
+
+  // Banner
+  const exposure = data.compliance.totalBackWageExposureCents;
+  const minWage = data.compliance.minimumWageIssues.length;
+  if (exposure > 0 || minWage > 0) {
+    $("banner").className = "banner bad";
+    $("banner").innerHTML = `<span class="big">⚠︎</span><div>${money(exposure)} in back wages to fix${minWage ? `, plus ${minWage} pay-rate warning${minWage > 1 ? "s" : ""}` : ""}. See “What you need to fix” below.</div>`;
+  } else {
+    $("banner").className = "banner ok";
+    $("banner").innerHTML = `<span class="big">✓</span><div>Everything checks out. ${data.run.lines.length} paycheck${data.run.lines.length > 1 ? "s" : ""} ready.</div>`;
+  }
+
+  // Paychecks
+  $("payBody").innerHTML = data.run.lines.map((l) =>
+    `<tr><td>${esc(who(l.employeeId))}</td><td class="r num">${money(l.grossPay)}</td><td class="r num">${money(l.netPay)}</td></tr>`
+  ).join("");
+
+  // Fixes
+  const fixes = [];
+  for (const f of data.compliance.apprenticeRatioFindings) fixes.push(`Apprentice ratio on job ${esc(f.jobId)} (${esc(f.date)}): ${money(f.additionalWagesOwedCents)} owed — too many apprentice hours for the journeyworkers on site.`);
+  for (const f of data.compliance.fringeAnnualizationFindings) fixes.push(`Fringe over-credit for ${esc(who(f.employeeId))} on “${esc(f.plan)}”: ${money(f.dollarExposureCents)} — the credit annualizes to less than claimed.`);
+  for (const m of data.compliance.minimumWageIssues) fixes.push(`${esc(who(m.employeeId))} is under ${esc(m.jurisdiction)} minimum wage by ${money(m.shortfallCents)}/hr — raise their rate.`);
+  if (fixes.length) {
+    $("fixCard").classList.remove("hidden");
+    $("fixBody").innerHTML = fixes.map((t) => `<div class="note" style="margin-bottom:8px">${t}</div>`).join("");
+  } else {
+    $("fixCard").classList.add("hidden");
+  }
+
+  // Prevailing wage
+  const adj = data.compliance.prevailingWageAdjustments;
+  $("pwBody").innerHTML = adj.length
+    ? `<table><thead><tr><th>Worker</th><th>Job</th><th>Class</th><th class="r">Hours</th><th class="r">Extra paid</th></tr></thead><tbody>${adj.map((a) => `<tr><td>${esc(who(a.employeeId))}</td><td class="muted small">${esc(a.jobId)}</td><td class="small">${esc(a.classificationCode)}</td><td class="r num">${a.hours}h</td><td class="r num">${money(a.extraCostVsShopRateCents)}</td></tr>`).join("")}</tbody></table>`
+    : '<p class="muted small">No prevailing-wage make-up this week.</p>';
+
+  // Job costs
+  if (data.jobCosts) {
+    $("costCard").classList.remove("hidden");
+    $("costBody").innerHTML = data.jobCosts.map((c) => `<tr><td>${esc(c.jobName)}</td><td class="r num">${c.hours}h</td><td class="r num">${money(c.grossCashCents)}</td><td class="r num">${money(c.totalBurdenedCostCents)}</td><td class="r num">${c.burdenedRatePerHourCents != null ? money(c.burdenedRatePerHourCents) : "—"}</td></tr>`).join("");
+  } else {
+    $("costCard").classList.add("hidden");
+  }
+
+  // Certified payroll
+  $("cprBody").innerHTML = data.certifiedPayroll.length
+    ? data.certifiedPayroll.map(renderCpr).join("")
+    : '<p class="muted small">No public-works jobs this week, so no certified payroll is due.</p>';
+}
+
+function renderCpr(r) {
+  const rows = r.rows.map((row) => {
+    const st = row.totalStraightHours, ot = row.totalOvertimeHours, dt = row.totalDoubleTimeHours;
+    const hrs = `${st}h` + (ot ? ` + ${ot} OT` : "") + (dt ? ` + ${dt} DT` : "");
+    return `<tr><td>${esc(who(row.employeeId))}</td><td class="small">${esc(row.classificationCode)}</td><td class="num small">${hrs}</td><td class="r num">${money(row.baseHourlyRateCents)}/hr</td><td class="r num">${money(row.grossThisProjectCents)}</td></tr>`;
+  }).join("");
+  return `<details><summary>${esc(r.projectName || r.jobId)} — week ending ${esc(r.weekEndingDate)}</summary><div class="body">
+    <table><thead><tr><th>Worker</th><th>Class</th><th>Hours</th><th class="r">Rate</th><th class="r">Gross (this job)</th></tr></thead><tbody>${rows}</tbody></table>
+  </div></details>`;
+}
+
+async function approve() {
+  if (!lastRunId) return;
+  const btn = $("approveBtn");
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Finalizing…';
+  try {
+    const out = await api("POST", `/api/runs/${lastRunId}/approve`, {});
+    $("approveMsg").innerHTML = `<div class="banner ok" style="margin-top:14px"><span class="big">✓</span><div>Payroll finalized — ${out.employeesUpdated} paycheck${out.employeesUpdated > 1 ? "s" : ""} committed. Year-to-date totals are updated.</div></div>`;
+  } catch (e) {
+    showErr("approveMsg", e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "Approve & finalize this payroll";
+  }
+}
+
+// ---- Wire up --------------------------------------------------------------
+$("seedBtn").addEventListener("click", async (ev) => {
+  ev.target.disabled = true; ev.target.innerHTML = '<span class="spin"></span> Loading…';
+  try { await api("POST", "/api/demo/seed"); await loadShop(); }
+  catch (e) { showErr("topErr", e.message); ev.target.disabled = false; ev.target.textContent = "Load sample shop"; }
+});
+
+$("addHoursBtn").addEventListener("click", async () => {
+  const entry = {
+    employeeId: $("hWorker").value, jobId: $("hJob").value,
+    classificationCode: ($("hClass").value || "").trim().toUpperCase(), date: $("hDate").value, hours: parseFloat($("hHours").value),
+  };
+  if (!entry.employeeId || !entry.jobId || !entry.classificationCode || !entry.date || !(entry.hours > 0)) {
+    showErr("topErr", "Fill in worker, job, what they did, day, and hours."); return;
+  }
+  $("topErr").innerHTML = "";
+  try { await api("POST", "/api/hours", { entries: [entry] }); await loadHours(); }
+  catch (e) { showErr("topErr", e.message); }
+});
+
+$("runBtn").addEventListener("click", runWeek);
+$("approveBtn").addEventListener("click", approve);
+
+// On load, show whatever is already there (survives a refresh).
+loadShop().catch(() => {});
+</script>
+</body>
+</html>
