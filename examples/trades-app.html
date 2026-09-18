@@ -65,6 +65,8 @@
   .tag { font-size: 11.5px; color: var(--ink3); letter-spacing: .02em; margin-top: 1px; }
   .crew-link { margin-left: auto; text-decoration: none; font-weight: 700; font-size: 14px; color: var(--sky); border-bottom: 2px solid transparent; }
   .crew-link:hover { border-bottom-color: var(--sky); }
+  .logout { font-family: var(--body); cursor: pointer; background: none; border: none; color: var(--ink3); font-weight: 700; font-size: 13.5px; padding: 6px 4px; }
+  .logout:hover { color: var(--brick); }
   .bill-pill {
     display: flex; align-items: center; gap: 8px; background: var(--card); border: 1.5px solid var(--ink);
     border-radius: 999px; padding: 6px 14px; font-size: 13.5px; font-weight: 600; box-shadow: 2px 2px 0 var(--ink);
@@ -214,6 +216,8 @@
     .word { font-size: 22px; }
     .tag { display: none; }
     .crew-link { display: none; }
+    .bill-pill { margin-left: auto; }
+    .logout { font-size: 12.5px; }
     .bill-pill { padding: 5px 11px; font-size: 12.5px; box-shadow: 1.5px 1.5px 0 var(--ink); }
 
     nav.tabs { display: none; }
@@ -262,6 +266,7 @@
     <div class="bill-pill" id="billPill" title="Your plan">
       <span id="billCrew">—</span> crew · <span class="amt tnum" id="billAmt">—</span>/mo
     </div>
+    <button class="logout" id="logoutBtn" title="Log out">Log out</button>
   </div>
   <nav class="tabs">
     <button class="tab on" data-view="today">Today</button>
@@ -335,6 +340,17 @@
         <div class="f sm hidden" id="wEndWrap"><label>Season ends</label><input id="wEnd" type="date" value="2026-09-30" /></div>
         <div><button class="btn sm" id="addWorkerBtn">Add</button></div>
       </div>
+      <details style="margin-top:12px">
+        <summary>Give them a crew-app login (optional)</summary>
+        <div class="dbody">
+          <p class="empty" style="margin:0 0 10px">Set an email and a temporary password and they can sign in to the crew app to clock in and see their hours.</p>
+          <div class="row">
+            <div class="f"><label>Login email</label><input id="wLoginEmail" type="email" placeholder="dana@yourshop.com" /></div>
+            <div class="f sm"><label>Temp password</label><input id="wLoginPass" type="text" placeholder="min 4 chars" /></div>
+          </div>
+        </div>
+      </details>
+      <div id="addWorkerMsg"></div>
     </div>
 
     <div class="card hidden" id="nudgeCard">
@@ -463,7 +479,7 @@
 </nav>
 
 <script>
-const COMPANY = "shop-1";
+let COMPANY = "shop-1";
 const WEEK = { periodStart: "2026-01-04", periodEnd: "2026-01-10", checkDate: "2026-01-14" };
 let crew = [], jobs = [], jobById = {}, crewNames = {}, lastRunId = null;
 
@@ -593,14 +609,19 @@ async function loadBilling() {
 $("wType").addEventListener("change", (e) => $("wEndWrap").classList.toggle("hidden", e.target.value !== "seasonal"));
 $("addWorkerBtn").addEventListener("click", async () => {
   const body = {
-    companyId: COMPANY, firstName: $("wFirst").value.trim(), lastName: $("wLast").value.trim(),
+    firstName: $("wFirst").value.trim(), lastName: $("wLast").value.trim(),
     hourlyRate: parseFloat($("wRate").value), phone: $("wPhone").value.trim(),
     employmentType: $("wType").value, seasonEndDate: $("wType").value === "seasonal" ? $("wEnd").value : undefined,
+    loginEmail: $("wLoginEmail").value.trim(), loginPassword: $("wLoginPass").value,
   };
   if (!body.firstName || !(body.hourlyRate > 0)) return showErr("topErr", "A first name and an hourly rate are required.");
-  $("topErr").innerHTML = "";
-  try { await api("POST", "/api/employees", body); $("wFirst").value = $("wLast").value = $("wPhone").value = ""; await loadAll(); }
-  catch (e) { showErr("topErr", e.message); }
+  $("topErr").innerHTML = ""; $("addWorkerMsg").innerHTML = "";
+  try {
+    const out = await api("POST", "/api/employees", body);
+    $("wFirst").value = $("wLast").value = $("wPhone").value = $("wLoginEmail").value = $("wLoginPass").value = "";
+    if (out.login) $("addWorkerMsg").innerHTML = `<div class="note info">Crew login created for <b>${esc(out.login)}</b> — they can sign in at <b>/me</b>.</div>`;
+    await loadAll();
+  } catch (e) { showErr("topErr", e.message); }
 });
 
 // ---- nudges ----
@@ -768,7 +789,25 @@ async function seed(ev) {
 }
 $("seedBtn").addEventListener("click", seed);
 $("seedBtn2").addEventListener("click", seed);
-loadAll().catch(() => {});
+
+// ---- logout ----
+$("logoutBtn").addEventListener("click", async () => {
+  try { await api("POST", "/api/auth/logout", {}); } catch {}
+  location.href = "/login";
+});
+
+// ---- auth gate + boot ----
+async function boot() {
+  let me;
+  try { me = await api("GET", "/api/auth/me"); }
+  catch { location.href = "/login"; return; }
+  if (me.account.role !== "owner") { location.href = "/me"; return; } // crew go to the crew app
+  COMPANY = me.account.companyId;
+  const tag = document.querySelector(".brand .tag");
+  if (tag && me.company) tag.textContent = me.company.name;
+  await loadAll();
+}
+boot().catch(() => {});
 </script>
 </body>
 </html>
