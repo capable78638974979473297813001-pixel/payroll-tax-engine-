@@ -1,0 +1,241 @@
+import { roundHalfUp, type Cents } from '../src/money.ts';
+import { workersCompPremium, workersCompSubjectWages } from '../payroll/workersComp.ts';
+import type { ResolvedWorkedHours } from './prevailingWage.ts';
+import type { Job } from './types.ts';
+
+/**
+ * Burdened labor cost per job — the number a trades contractor actually runs
+ * their business on. A plumber does not care what a paycheck cost in the
+ * aggregate; they care what the Elm Street job cost, because that is what
+ * they bid and what tells them whether the job made money. Fully-burdened
+ * labor is wages + the employer's own payroll taxes + workers'-comp premium +
+ * fringe-plan contributions, allocated down to the job.
+ *
+ * WHERE THE PIECES COME FROM — nothing is recomputed here that another layer
+ * already owns:
+ *  - Direct wages and cash fringe: summed straight from the resolved entries
+ *    (trades/prevailingWage.ts), which already priced them correctly.
+ *  - Employer payroll taxes: taken as the employee's total from the tax
+ *    engine's PaycheckResult and allocated across that employee's jobs
+ *    PRO-RATA by each job's share of their gross cash for the period. The
+ *    employer side of FICA/FUTA/SUI is a function of total wages, not of any
+ *    one job, so proportional allocation by wages is the standard and
+ *    defensible split; the rounding remainder lands on the largest job so the
+ *    per-job pieces sum EXACTLY back to the engine's employer-tax total.
+ *  - Workers' comp: computed here via payroll/workersComp.ts, per job, using
+ *    the job's own class code (trades WC codes attach to the KIND of work,
+ *    not the worker — see Job.workersCompClassCode) and the standard NCCI
+ *    rule that the overtime PREMIUM is excluded from subject payroll.
+ *  - Fringe-plan contributions: the employer's real per-hour plan cost from
+ *    the resolved entries — a burden the worker never sees on their cheque.
+ *
+ * Like payroll/workersComp.ts, the WC rate and experience mod are caller-
+ * supplied facts (an insurer/rating-bureau assignment), never guessed: a job
+ * whose class code has no rating supplied is an error, not a $0 premium.
+ */
+
+/** A caller-supplied workers'-comp rating for one class code — the same figures payroll/workersComp.ts consumes, keyed for lookup during a run. */
+export interface WorkersCompRating {
+  classCode: string;
+  /** Rate charged per $100 of subject payroll, in cents (payroll/workersComp.ts's own unit). */
+  ratePerHundredOfPayrollCents: Cents;
+  experienceModificationFactor: number;
+}
+
+/** One employee's contribution to job costs for the period: their resolved entries (all jobs, all weeks in the period) and the employer-tax total from their PaycheckResult. */
+export interface EmployeeJobCostInput {
+  employeeId: string;
+  entries: readonly ResolvedWorkedHours[];
+  /** PaycheckResult.employerTaxTotal for this employee's period paycheck — the pool allocated across their jobs by wage share. */
+  employerTaxTotalCents: Cents;
+  /** Employee.workersCompClassCode — the fallback class code for a job that does not override it. */
+  defaultWorkersCompClassCode?: string;
+  /** The employee's work state — drives whether the overtime premium is excluded from WC subject payroll (payroll/workersComp.ts). */
+  workState: string;
+}
+
+export interface JobCost {
+  jobId: string;
+  jobName: string;
+  glCostCode?: string;
+  hours: number;
+  /** Straight + overtime (base + premium) + double time (base + premium) — the cash wages paid for work on this job, excluding cash fringe. */
+  directWagesCents: Cents;
+  cashFringeCents: Cents;
+  /** directWages + cashFringe — total cash paid to workers on this job. */
+  grossCashCents: Cents;
+  /** Employer payroll taxes allocated to this job pro-rata by wage share. */
+  employerTaxesCents: Cents;
+  /** Employer fringe-plan contributions for this job's hours — a real cost not paid to the worker. */
+  employerFringePlanCents: Cents;
+  workersCompPremiumCents: Cents;
+  /** grossCash + employerTaxes + employerFringePlan + workersComp — fully-burdened labor cost of the job. */
+  totalBurdenedCostCents: Cents;
+  /** totalBurdenedCost ÷ hours — the burdened labor rate, for bidding the next job. Null when the job logged no hours. */
+  burdenedRatePerHourCents: Cents | null;
+}
+
+/** Thrown when a job's resolved class code has no rating supplied — the same "named it, so give me its rate" stop payroll/workersComp.ts implies, rather than silently pricing WC at zero. */
+export class MissingWorkersCompRatingError extends Error {
+  readonly classCode: string;
+  constructor(classCode: string) {
+    super(`No workers'-comp rating supplied for class code "${classCode}" — cannot compute its premium. Provide the rate and experience mod rather than pricing it at $0.`);
+    this.name = 'MissingWorkersCompRatingError';
+    this.classCode = classCode;
+  }
+}
+
+interface JobAccumulator {
+  jobId: string;
+  jobName: string;
+  glCostCode?: string;
+  hours: number;
+  directWages: Cents;
+  cashFringe: Cents;
+  employerFringePlan: Cents;
+  employerTaxes: Cents;
+  // WC is computed per (job, class code, state) so overtime-premium exclusion
+  // and the class rate apply to the right subject payroll — kept as running
+  // subject/premium inputs and finished at the end.
+  wcSubjectByKey: Map<string, { classCode: string; state: string; subject: Cents }>;
+}
+
+/**
+ * Compute burdened cost per job across every employee that worked in the
+ * period. Pure over its inputs. Employer taxes are allocated per employee
+ * (each employee's own tax total split across the jobs THEY worked), then
+ * accumulated per job — so two employees on the same job each contribute
+ * their own correctly-prorated share.
+ */
+export function computeJobCosts(
+  employees: readonly EmployeeJobCostInput[],
+  jobsById: ReadonlyMap<string, Job>,
+  wcRatingsByClassCode: ReadonlyMap<string, WorkersCompRating>,
+): JobCost[] {
+  const jobs = new Map<string, JobAccumulator>();
+
+  const ensureJob = (jobId: string): JobAccumulator => {
+    let acc = jobs.get(jobId);
+    if (!acc) {
+      const job = jobsById.get(jobId);
+      acc = {
+        jobId,
+        jobName: job?.name ?? jobId,
+        glCostCode: job?.glCostCode,
+        hours: 0,
+        directWages: 0,
+        cashFringe: 0,
+        employerFringePlan: 0,
+        employerTaxes: 0,
+        wcSubjectByKey: new Map(),
+      };
+      jobs.set(jobId, acc);
+    }
+    return acc;
+  };
+
+  for (const emp of employees) {
+    // Per-employee wage total and per-job wage subtotal, for pro-rata tax
+    // allocation.
+    const grossByJob = new Map<string, Cents>();
+    let empGross = 0;
+    for (const e of emp.entries) {
+      grossByJob.set(e.jobId, (grossByJob.get(e.jobId) ?? 0) + e.grossCashCents);
+      empGross += e.grossCashCents;
+    }
+
+    // Allocate this employee's employer taxes across their jobs by wage
+    // share, with the rounding remainder placed on the largest-wage job so
+    // the allocations sum exactly to the employer-tax total.
+    const taxByJob = allocateProRata(emp.employerTaxTotalCents, grossByJob, empGross);
+
+    for (const e of emp.entries) {
+      const acc = ensureJob(e.jobId);
+      acc.hours += e.straightHours + e.overtimeHours + e.doubleTimeHours;
+      acc.directWages +=
+        e.straightPayCents +
+        e.overtimeBasePayCents +
+        e.overtimePremiumCents +
+        e.doubleTimeBasePayCents +
+        e.doubleTimePremiumCents;
+      acc.cashFringe += e.cashFringeCents;
+      acc.employerFringePlan += e.employerFringeCostCents;
+
+      const job = jobsById.get(e.jobId);
+      const classCode = job?.workersCompClassCode ?? emp.defaultWorkersCompClassCode;
+      if (classCode) {
+        // Subject payroll excludes the overtime AND double-time PREMIUM
+        // portions (payroll/workersComp.ts) — the straight-time-equivalent
+        // base of every hour still counts. Pass this entry's full cash gross
+        // and the sum of its premium portions.
+        const entryPremium = e.overtimePremiumCents + e.doubleTimePremiumCents;
+        const entryCashGross =
+          e.straightPayCents +
+          e.overtimeBasePayCents +
+          e.overtimePremiumCents +
+          e.doubleTimeBasePayCents +
+          e.doubleTimePremiumCents +
+          e.cashFringeCents;
+        const subject = workersCompSubjectWages(entryCashGross, entryPremium, emp.workState);
+        const key = `${classCode} ${emp.workState}`;
+        const cur = acc.wcSubjectByKey.get(key);
+        if (cur) cur.subject += subject;
+        else acc.wcSubjectByKey.set(key, { classCode, state: emp.workState, subject });
+      }
+    }
+
+    for (const [jobId, tax] of taxByJob) ensureJob(jobId).employerTaxes += tax;
+  }
+
+  const result: JobCost[] = [];
+  for (const acc of jobs.values()) {
+    let workersCompPremiumCents = 0;
+    for (const { classCode, subject } of acc.wcSubjectByKey.values()) {
+      const rating = wcRatingsByClassCode.get(classCode);
+      if (!rating) throw new MissingWorkersCompRatingError(classCode);
+      workersCompPremiumCents += workersCompPremium(subject, rating.ratePerHundredOfPayrollCents, rating.experienceModificationFactor);
+    }
+
+    const grossCash = acc.directWages + acc.cashFringe;
+    const totalBurdened = grossCash + acc.employerTaxes + acc.employerFringePlan + workersCompPremiumCents;
+    result.push({
+      jobId: acc.jobId,
+      jobName: acc.jobName,
+      glCostCode: acc.glCostCode,
+      hours: acc.hours,
+      directWagesCents: acc.directWages,
+      cashFringeCents: acc.cashFringe,
+      grossCashCents: grossCash,
+      employerTaxesCents: acc.employerTaxes,
+      employerFringePlanCents: acc.employerFringePlan,
+      workersCompPremiumCents,
+      totalBurdenedCostCents: totalBurdened,
+      burdenedRatePerHourCents: acc.hours > 0 ? roundHalfUp(totalBurdened / acc.hours) : null,
+    });
+  }
+  return result;
+}
+
+/** Split `total` across the keys of `shares` in proportion to each share of `denominator`, placing the rounding remainder on the largest share so the parts sum exactly to `total`. */
+function allocateProRata(total: Cents, shares: ReadonlyMap<string, Cents>, denominator: Cents): Map<string, Cents> {
+  const out = new Map<string, Cents>();
+  if (denominator <= 0 || total === 0) {
+    for (const key of shares.keys()) out.set(key, 0);
+    return out;
+  }
+  let allocated = 0;
+  let largestKey: string | null = null;
+  let largestShare = -1;
+  for (const [key, share] of shares) {
+    const portion = roundHalfUp((total * share) / denominator);
+    out.set(key, portion);
+    allocated += portion;
+    if (share > largestShare) {
+      largestShare = share;
+      largestKey = key;
+    }
+  }
+  const remainder = total - allocated;
+  if (remainder !== 0 && largestKey !== null) out.set(largestKey, (out.get(largestKey) ?? 0) + remainder);
+  return out;
+}

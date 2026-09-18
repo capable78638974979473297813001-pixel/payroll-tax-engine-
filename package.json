@@ -1,0 +1,15 @@
+{
+  "name": "crewtally",
+  "version": "0.1.0",
+  "description": "Crewtally — time & pay for the trades. Prevailing-wage & certified payroll, geofenced clock-ins, split-rate roles, seasonal crew, and 5pm hour-log nudges, on a gross-to-net US payroll tax engine.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "start": "node examples/trades-server.ts",
+    "crewtally": "node examples/trades-server.ts",
+    "test": "node --test tests/trades.test.ts tests/trades-features.test.ts"
+  },
+  "license": "MIT"
+}
