@@ -1,0 +1,12 @@
+services:
+  web:
+    image: node:22
+    working_dir: /app
+    command: node --watch site/server.ts
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+    volumes:
+      - ./:/app
+    ports:
+      - "3000:3000"
