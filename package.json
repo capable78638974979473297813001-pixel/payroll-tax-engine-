@@ -34,7 +34,8 @@
     "address-index:build-nad": "node scripts/build-nad-index.ts",
     "address-index:stats": "node scripts/address-index-stats.ts",
     "ui:minimum-wage": "node examples/minimum-wage-server.ts",
-    "ui:payroll": "node examples/payroll-server.ts"
+    "ui:payroll": "node examples/payroll-server.ts",
+    "trades:server": "node examples/trades-server.ts"
   },
   "license": "MIT"
 }

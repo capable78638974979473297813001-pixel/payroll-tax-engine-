@@ -31,7 +31,10 @@ import type { Company, Employee, PayRun } from './types.ts';
  * implementation of the SHAPE of the data, not a production secret store.
  */
 
-const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), '.data');
+/** Resolved lazily on each call (not once at import) so a test or an isolated caller can point it elsewhere with PAYROLL_DB_DIR — the same override shape trades/store.ts and harvester/snapshot.ts use. */
+function dataDir(): string {
+  return process.env.PAYROLL_DB_DIR ?? join(dirname(fileURLToPath(import.meta.url)), '.data');
+}
 
 interface DB {
   companies: Record<string, Company>;
@@ -81,16 +84,20 @@ function emptyDb(): DB {
 }
 
 function ensureDataDir(): void {
-  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
+  const dir = dataDir();
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 }
 
-const FILE = join(DATA_DIR, 'payroll-db.json');
+function dbFile(): string {
+  return join(dataDir(), 'payroll-db.json');
+}
 
 function load(): DB {
   ensureDataDir();
-  if (!existsSync(FILE)) return emptyDb();
+  const file = dbFile();
+  if (!existsSync(file)) return emptyDb();
   try {
-    const parsed = JSON.parse(readFileSync(FILE, 'utf8')) as Partial<DB>;
+    const parsed = JSON.parse(readFileSync(file, 'utf8')) as Partial<DB>;
     const base = emptyDb();
     return {
       companies: parsed.companies ?? base.companies,
@@ -119,7 +126,7 @@ function load(): DB {
 
 function save(db: DB): void {
   ensureDataDir();
-  writeFileSync(FILE, JSON.stringify(db, null, 2), 'utf8');
+  writeFileSync(dbFile(), JSON.stringify(db, null, 2), 'utf8');
 }
 
 export function withPayrollDb<T>(fn: (db: DB) => T): T {

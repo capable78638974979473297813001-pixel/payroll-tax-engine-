@@ -100,3 +100,13 @@ export {
   workedHoursForCompanyInRange,
   workedHoursForEmployeeInRange,
 } from './store.ts';
+
+export {
+  UnknownCompanyError,
+  approveRunById,
+  draftWeeklyTradesRun,
+  loadTradesPayRunInput,
+  weeklyCertifiedPayroll,
+  weeklyJobCosts,
+} from './service.ts';
+export type { TradesRunRequest } from './service.ts';

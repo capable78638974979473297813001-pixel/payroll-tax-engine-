@@ -7,15 +7,18 @@ import { join } from 'node:path';
 import { dollars } from '../src/money.ts';
 import { buildPaycheckInput } from '../payroll/engine.ts';
 import { approvePayRun } from '../payroll/run.ts';
+import { getEmployee, getPayRun, saveCompany, saveEmployees } from '../payroll/store.ts';
 import { overtimeRuleForState } from '../payroll/timeAndAttendance.ts';
 import { freshYearToDate } from '../payroll/ytd.ts';
 import type { Company, Employee } from '../payroll/types.ts';
 
 import {
   addWorkedHours,
+  approveRunById,
   buildCaliforniaCertifiedPayroll,
   buildCertifiedPayroll,
   certifiedPayrollForPeriod,
+  draftWeeklyTradesRun,
   combineWeeklyEarnings,
   computeJobCosts,
   draftTradesPayRun,
@@ -26,6 +29,7 @@ import {
   groupIntoWorkweeks,
   jobCostsForPeriod,
   jobsForCompany,
+  loadTradesPayRunInput,
   recalculateTradesPayRun,
   resolvePrevailingWageWeek,
   resolveRate,
@@ -33,12 +37,16 @@ import {
   saveJob,
   saveWageDetermination,
   saveWorkerProfile,
+  UnknownCompanyError,
   voidPayRun,
+  weeklyCertifiedPayroll,
+  weeklyJobCosts,
   workedHoursForCompanyInRange,
   workedHoursForEmployeeInRange,
   workweekStart,
   type EmployeeJobCostInput,
   type Job,
+  type TradesRunRequest,
   type TradeWorkerProfile,
   type WageDetermination,
   type WorkersCompRating,
@@ -639,6 +647,79 @@ describe('trades store (trades/store.ts)', () => {
     assert.equal(workedHoursForEmployeeInRange('joe', '2026-01-04', '2026-01-07').length, 3); // Mon–Wed only
     assert.equal(workedHoursForCompanyInRange('shop-1', '2026-01-01', '2026-01-31').length, 5);
     assert.equal(workedHoursForCompanyInRange('shop-1', '2026-02-01', '2026-02-28').length, 0);
+  });
+});
+
+// ============================================================================
+// Application service — stores + engine end to end (trades/service.ts)
+// ============================================================================
+
+describe('trades application service (trades/service.ts)', () => {
+  let payrollDir: string;
+  let tradesDir: string;
+  const req: TradesRunRequest = { companyId: 'shop-1', periodStart: '2026-01-04', periodEnd: '2026-01-10', checkDate: '2026-01-14' };
+  const ratings = new Map<string, WorkersCompRating>([
+    ['5183', { classCode: '5183', ratePerHundredOfPayrollCents: dollars(3.5), experienceModificationFactor: 1 }],
+  ]);
+
+  before(() => {
+    payrollDir = mkdtempSync(join(tmpdir(), 'payroll-store-'));
+    tradesDir = mkdtempSync(join(tmpdir(), 'trades-svc-'));
+    process.env.PAYROLL_DB_DIR = payrollDir;
+    process.env.TRADES_DB_DIR = tradesDir;
+    // Seed the payroll store (company + crew) and the trades store (jobs,
+    // determination, profile, reported hours).
+    saveCompany(weeklyShop());
+    saveEmployees([plumber(), officeManager()]);
+    saveWageDetermination(determination);
+    saveJob(publicJob);
+    saveJob(privateJob);
+    saveWorkerProfile(profile);
+    addWorkedHours(weekOfHours());
+  });
+  after(() => {
+    delete process.env.PAYROLL_DB_DIR;
+    delete process.env.TRADES_DB_DIR;
+    rmSync(payrollDir, { recursive: true, force: true });
+    rmSync(tradesDir, { recursive: true, force: true });
+  });
+
+  test('loads only the determinations this company’s jobs reference', () => {
+    // An unrelated determination on file for nobody's job must not leak in.
+    saveWageDetermination({ ...determination, id: 'OTHER-CO-DET' });
+    const input = loadTradesPayRunInput(req);
+    assert.deepEqual(input.determinations.map((d) => d.id), ['TX20260001']);
+    assert.equal(input.employees.length, 2);
+    assert.equal(input.workedHours.length, 5);
+  });
+
+  test('drafts a week from the stores, persists it, and approves by id into YTD', () => {
+    const drafted = draftWeeklyTradesRun(req);
+    assert.equal(drafted.run.lines.length, 2);
+    // The draft was persisted and is retrievable for approval.
+    assert.notEqual(getPayRun(drafted.run.id), null);
+
+    const approved = approveRunById(drafted.run.id);
+    assert.equal(approved.run.status, 'approved');
+    // Joe's YTD was committed to the payroll store.
+    const joe = getEmployee('joe')!;
+    assert.ok(joe.ytd.socialSecurity > 0);
+    assert.equal(joe.ytdYear, 2026);
+  });
+
+  test('produces the weekly certified payroll and job costs for the company', () => {
+    const reports = weeklyCertifiedPayroll(req);
+    assert.equal(reports.length, 1);
+    assert.equal(reports[0].jobId, 'J1');
+
+    const costs = weeklyJobCosts(req, ratings);
+    const j1 = costs.find((c) => c.jobId === 'J1')!;
+    assert.equal(j1.grossCashCents, dollars(2400));
+    assert.equal(j1.workersCompPremiumCents, dollars(84));
+  });
+
+  test('an unknown company id is a typed error', () => {
+    assert.throws(() => loadTradesPayRunInput({ ...req, companyId: 'ghost' }), UnknownCompanyError);
   });
 });
 
