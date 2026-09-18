@@ -14,11 +14,14 @@ import type { Company, Employee } from '../payroll/types.ts';
 
 import {
   addWorkedHours,
+  annualizeFringeCredits,
   approveRunById,
   buildCaliforniaCertifiedPayroll,
   buildCertifiedPayroll,
   certifiedPayrollForPeriod,
+  checkFringeAnnualization,
   draftWeeklyTradesRun,
+  fringeCreditsFromContributions,
   combineWeeklyEarnings,
   computeJobCosts,
   draftTradesPayRun,
@@ -28,6 +31,7 @@ import {
   getWorkerProfile,
   groupIntoWorkweeks,
   jobCostsForPeriod,
+  InvalidAnnualHoursError,
   jobsForCompany,
   loadTradesPayRunInput,
   recalculateTradesPayRun,
@@ -720,6 +724,85 @@ describe('trades application service (trades/service.ts)', () => {
 
   test('an unknown company id is a typed error', () => {
     assert.throws(() => loadTradesPayRunInput({ ...req, companyId: 'ghost' }), UnknownCompanyError);
+  });
+});
+
+// ============================================================================
+// Davis-Bacon fringe annualization (trades/fringeAnnualization.ts)
+// ============================================================================
+
+describe('fringe annualization (trades/fringeAnnualization.ts)', () => {
+  test('annualizes an annual contribution over TOTAL hours, not just Davis-Bacon hours', () => {
+    // $5,200/yr over 2,080 total hours = $2.50/hr (not $5.00 over 1,040 DBA hours).
+    const [pension] = annualizeFringeCredits([{ plan: 'Pension', basis: { kind: 'annual', annualAmountCents: dollars(5200) } }], 2080);
+    assert.equal(pension.annualizedRatePerHourCents, dollars(2.5));
+    assert.equal(pension.annualContributionCents, dollars(5200));
+    assert.equal(pension.requiredAnnualization, true);
+  });
+
+  test('annualizes a monthly premium as 12 months over total hours', () => {
+    // $650/mo × 12 = $7,800/yr over 2,080 = $3.75/hr.
+    const [health] = annualizeFringeCredits([{ plan: 'Health', basis: { kind: 'monthly', monthlyAmountCents: dollars(650) } }], 2080);
+    assert.equal(health.annualizedRatePerHourCents, dollars(3.75));
+    assert.equal(health.annualContributionCents, dollars(7800));
+  });
+
+  test('rounds the creditable rate DOWN — over-crediting is the violation to avoid', () => {
+    // $5,000 / 2,080 = 240.38¢ → floored to 240¢.
+    const [p] = annualizeFringeCredits([{ plan: 'Pension', basis: { kind: 'annual', annualAmountCents: dollars(5000) } }], 2080);
+    assert.equal(p.annualizedRatePerHourCents, 240);
+  });
+
+  test('an hourly-basis plan is exempt from annualization and passes through', () => {
+    const [training] = annualizeFringeCredits([{ plan: 'Training', basis: { kind: 'hourly-all-hours', ratePerHourCents: dollars(1.5) } }], 2080);
+    assert.equal(training.annualizedRatePerHourCents, dollars(1.5));
+    assert.equal(training.requiredAnnualization, false);
+    assert.equal(training.annualContributionCents, null);
+  });
+
+  test('a plan that must be annualized over zero hours is a typed error', () => {
+    assert.throws(
+      () => annualizeFringeCredits([{ plan: 'Pension', basis: { kind: 'annual', annualAmountCents: dollars(5200) } }], 0),
+      InvalidAnnualHoursError,
+    );
+    // …but an hourly-basis plan needs no hours and does not throw.
+    assert.doesNotThrow(() => annualizeFringeCredits([{ plan: 'Training', basis: { kind: 'hourly-all-hours', ratePerHourCents: dollars(1) } }], 0));
+  });
+
+  test('flags an over-claimed credit as back-wage exposure', () => {
+    const findings = checkFringeAnnualization(
+      [{ plan: 'Pension', ratePerHourCents: dollars(5) }], // employer claimed $5/hr
+      [{ plan: 'Pension', basis: { kind: 'annual', annualAmountCents: dollars(5200) } }], // really $2.50/hr annualized
+      2080,
+    );
+    assert.equal(findings.length, 1);
+    assert.equal(findings[0].overClaimedPerHourCents, dollars(2.5));
+    // A claim at or below the annualized rate is compliant.
+    assert.equal(
+      checkFringeAnnualization([{ plan: 'Pension', ratePerHourCents: dollars(2.5) }], [{ plan: 'Pension', basis: { kind: 'annual', annualAmountCents: dollars(5200) } }], 2080).length,
+      0,
+    );
+  });
+
+  test('annualized credits plug into the resolver and raise the cash fringe owed', () => {
+    // Determination fringe is $15/hr; an annualized pension credit of $2.50/hr
+    // leaves $12.50/hr owed as cash, not the $10 a naive $5 credit would leave.
+    const annualizedProfile: TradeWorkerProfile = {
+      employeeId: 'joe',
+      classificationRates: [{ classificationCode: 'PLUMBER', baseRateCents: dollars(40) }],
+      fringeCredits: fringeCreditsFromContributions([{ plan: 'Pension', basis: { kind: 'annual', annualAmountCents: dollars(5200) } }], 2080),
+    };
+    const week = resolvePrevailingWageWeek({
+      employeeId: 'joe',
+      workedHours: [{ employeeId: 'joe', jobId: 'J1', date: '2026-01-05', classificationCode: 'PLUMBER', hours: 8 }],
+      jobsById: new Map([[publicJob.id, publicJob]]),
+      determinationsById: new Map([[determination.id, determination]]),
+      profile: annualizedProfile,
+      fallbackBaseRateCents: dollars(30),
+    });
+    const entry = week.entries[0];
+    assert.equal(entry.creditedFringePerHourCents, dollars(2.5));
+    assert.equal(entry.cashFringePerHourCents, dollars(12.5));
   });
 });
 

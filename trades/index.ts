@@ -54,6 +54,20 @@ export type {
 export { MissingWorkersCompRatingError, computeJobCosts } from './jobCosting.ts';
 export type { EmployeeJobCostInput, JobCost, WorkersCompRating } from './jobCosting.ts';
 
+export {
+  InvalidAnnualHoursError,
+  annualizeFringeCredits,
+  checkFringeAnnualization,
+  fringeCreditsFromContributions,
+  totalAnnualizedCreditPerHour,
+} from './fringeAnnualization.ts';
+export type {
+  AnnualizedFringeCredit,
+  FringeAnnualizationFinding,
+  FringeContributionBasis,
+  FringePlanContribution,
+} from './fringeAnnualization.ts';
+
 export { buildCertifiedPayroll, deductionsFromPaycheck } from './certifiedPayroll.ts';
 export type {
   CertifiedPayrollDayHours,
