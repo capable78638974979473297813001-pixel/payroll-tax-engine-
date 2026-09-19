@@ -21,6 +21,9 @@ export type { AchCredit, AchFileConfig, DepositAllocation } from './directDeposi
 
 export { buildPaymentBatch, submitPaymentBatch, unbankedSubmitter } from './paymentRun.ts';
 export type { PaymentBatch, PaymentSubmission, PaymentSubmitter, Payee } from './paymentRun.ts';
+
+export { ProviderNotConnectedError, checkProvider, resolveProvider, sandboxProvider, zealProvider } from './embeddedProvider.ts';
+export type { EmbeddedPayrollProvider, ProviderPayrollInput, ProviderPayrollItem, ProviderPayrollResult } from './embeddedProvider.ts';
 export {
   MICRO_DEPOSIT_MAX_ATTEMPTS,
   PRENOTE_WAITING_PERIOD_BUSINESS_DAYS,
