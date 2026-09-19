@@ -24,6 +24,8 @@ export interface UsageCall {
   at: string;
   stateCode: string | null;
   statusCode: number;
+  /** What this one call added to the balance due (0 for non-billable calls). */
+  chargedCents: number;
   error?: string;
 }
 
@@ -35,11 +37,17 @@ export interface ApiKey {
   /** A non-secret display prefix, e.g. "sk_live_ab12cd" — safe to show in a dashboard. */
   prefix: string;
   plan: string;
+  /** What each billable call costs this customer, in integer cents. */
+  pricePerCallCents: number;
   active: boolean;
   createdAt: string;
   lastUsedAt: string | null;
   /** Total calls ever metered against this key. */
   calls: number;
+  /** Outstanding, not-yet-billed charges in cents — what you'd charge them right now. */
+  balanceDueCents: number;
+  /** Everything ever billed to this key, in cents (survives settlement). */
+  lifetimeBilledCents: number;
   /** The most recent calls (bounded), newest first. */
   recent: UsageCall[];
 }
@@ -50,11 +58,25 @@ export interface PublicApiKey {
   name: string;
   prefix: string;
   plan: string;
+  pricePerCallCents: number;
   active: boolean;
   createdAt: string;
   lastUsedAt: string | null;
   calls: number;
+  balanceDueCents: number;
+  lifetimeBilledCents: number;
 }
+
+/**
+ * Per-call price by plan, in cents. This is "the amount we charge them" — the
+ * default when a key is minted without an explicit price. Change these, or
+ * pass an explicit price at mint time, to set your pricing.
+ */
+export const PLAN_PRICING_CENTS: Record<string, number> = {
+  free: 0,
+  standard: 1, // $0.01 / call
+  pro: 2, // $0.02 / call
+};
 
 const RECENT_LIMIT = 25;
 
@@ -107,10 +129,13 @@ function toPublic(k: ApiKey): PublicApiKey {
     name: k.name,
     prefix: k.prefix,
     plan: k.plan,
+    pricePerCallCents: k.pricePerCallCents,
     active: k.active,
     createdAt: k.createdAt,
     lastUsedAt: k.lastUsedAt,
     calls: k.calls,
+    balanceDueCents: k.balanceDueCents,
+    lifetimeBilledCents: k.lifetimeBilledCents,
   };
 }
 export function publicApiKey(k: ApiKey): PublicApiKey {
@@ -125,7 +150,12 @@ export function publicApiKey(k: ApiKey): PublicApiKey {
  * Mint a new key. Returns the plaintext ONCE (store it now — it is never
  * recoverable) alongside the stored record. Only the SHA-256 hash is persisted.
  */
-export function mintApiKey(name: string, plan = 'free'): { key: string; record: PublicApiKey } {
+export function mintApiKey(
+  name: string,
+  opts: { plan?: string; pricePerCallCents?: number } = {},
+): { key: string; record: PublicApiKey } {
+  const plan = opts.plan ?? 'standard';
+  const price = opts.pricePerCallCents ?? PLAN_PRICING_CENTS[plan] ?? PLAN_PRICING_CENTS.standard;
   const key = 'sk_live_' + randomBytes(24).toString('base64url');
   const record: ApiKey = {
     id: `key_${randomUUID().slice(0, 8)}`,
@@ -133,16 +163,29 @@ export function mintApiKey(name: string, plan = 'free'): { key: string; record: 
     keyHash: hashKey(key),
     prefix: key.slice(0, 14), // "sk_live_" + 6 chars — enough to identify, not to use
     plan,
+    pricePerCallCents: Math.max(0, Math.round(price)),
     active: true,
     createdAt: new Date().toISOString(),
     lastUsedAt: null,
     calls: 0,
+    balanceDueCents: 0,
+    lifetimeBilledCents: 0,
     recent: [],
   };
   withDb((db) => {
     db.keys[record.id] = record;
   });
   return { key, record: toPublic(record) };
+}
+
+/** Change what each billable call costs this customer (integer cents). */
+export function setPrice(id: string, pricePerCallCents: number): boolean {
+  return withDb((db) => {
+    const k = db.keys[id] ?? Object.values(db.keys).find((x) => x.prefix === id);
+    if (!k) return false;
+    k.pricePerCallCents = Math.max(0, Math.round(pricePerCallCents));
+    return true;
+  });
 }
 
 /** Resolve a presented plaintext key to its (active) record, or null. */
@@ -179,25 +222,81 @@ export function revokeApiKey(idOrPrefix: string): boolean {
 // Metering
 // ----------------------------------------------------------------------------
 
-/** Record one call against a key: bump the total, stamp last-used, keep a rolling recent window. */
-export function recordUsage(id: string, call: { stateCode?: string | null; statusCode: number; error?: string }): void {
-  withDb((db) => {
+/**
+ * Record one call against a key: bump the total, stamp last-used, and — when
+ * the call is billable — add this key's per-call price to its balance due.
+ * Returns what this call was charged (0 if not billable), so the caller can
+ * echo it back in the response. Billable defaults to true; pass false for a
+ * call you don't want to charge for (a bad request, say).
+ */
+export function recordUsage(
+  id: string,
+  call: { stateCode?: string | null; statusCode: number; error?: string; billable?: boolean },
+): number {
+  return withDb((db) => {
     const k = db.keys[id];
-    if (!k) return;
+    if (!k) return 0;
+    const billable = call.billable ?? true;
+    const chargedCents = billable ? k.pricePerCallCents : 0;
     k.calls += 1;
     k.lastUsedAt = new Date().toISOString();
+    k.balanceDueCents += chargedCents;
+    k.lifetimeBilledCents += chargedCents;
     k.recent.unshift({
       at: k.lastUsedAt,
       stateCode: call.stateCode ?? null,
       statusCode: call.statusCode,
+      chargedCents,
       ...(call.error ? { error: call.error } : {}),
     });
     if (k.recent.length > RECENT_LIMIT) k.recent.length = RECENT_LIMIT;
+    return chargedCents;
   });
 }
 
-export function usageForKey(id: string): { calls: number; lastUsedAt: string | null; recent: UsageCall[] } | null {
+export function usageForKey(id: string): {
+  calls: number;
+  lastUsedAt: string | null;
+  pricePerCallCents: number;
+  balanceDueCents: number;
+  lifetimeBilledCents: number;
+  recent: UsageCall[];
+} | null {
   const k = load().keys[id];
   if (!k) return null;
-  return { calls: k.calls, lastUsedAt: k.lastUsedAt, recent: k.recent };
+  return {
+    calls: k.calls,
+    lastUsedAt: k.lastUsedAt,
+    pricePerCallCents: k.pricePerCallCents,
+    balanceDueCents: k.balanceDueCents,
+    lifetimeBilledCents: k.lifetimeBilledCents,
+    recent: k.recent,
+  };
+}
+
+// ----------------------------------------------------------------------------
+// Billing / settlement
+// ----------------------------------------------------------------------------
+
+/**
+ * Settle a key's outstanding balance — i.e. "charge them the amount we have."
+ * This zeroes balanceDueCents and returns the amount that was owed, so the
+ * caller can hand that amount to a payment processor.
+ *
+ * NOTE — this moves NO real money by itself. Actually charging a card needs a
+ * payment processor (Stripe et al.): create a Customer + PaymentMethod at
+ * signup, then here call the processor with `amountCents` and only clear the
+ * balance once it confirms the charge succeeded. This function is that seam —
+ * it does the accounting (what the repo does for SMS/ACH too: never claim a
+ * charge happened when no processor is connected). Until a processor is wired,
+ * treat a returned amount as "invoice this", not "money collected".
+ */
+export function settleBalance(idOrPrefix: string): { ok: boolean; name?: string; chargedCents: number } {
+  return withDb((db) => {
+    const k = db.keys[idOrPrefix] ?? Object.values(db.keys).find((x) => x.prefix === idOrPrefix);
+    if (!k) return { ok: false, chargedCents: 0 };
+    const chargedCents = k.balanceDueCents;
+    k.balanceDueCents = 0;
+    return { ok: true, name: k.name, chargedCents };
+  });
 }

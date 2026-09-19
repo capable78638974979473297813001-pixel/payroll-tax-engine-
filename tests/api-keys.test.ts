@@ -10,6 +10,7 @@ import {
   publicApiKey,
   recordUsage,
   revokeApiKey,
+  settleBalance,
   usageForKey,
   verifyApiKey,
 } from '../api/keys.ts';
@@ -25,10 +26,12 @@ after(() => {
 
 describe('API keys + metering (api/keys.ts)', () => {
   test('a minted key is usable, prefixed, and stored only as a hash', () => {
-    const { key, record } = mintApiKey('Acme Payroll', 'pro');
+    const { key, record } = mintApiKey('Acme Payroll', { plan: 'pro' });
     assert.match(key, /^sk_live_[A-Za-z0-9_-]{20,}$/);
     assert.equal(record.plan, 'pro');
+    assert.equal(record.pricePerCallCents, 2); // pro plan default
     assert.equal(record.calls, 0);
+    assert.equal(record.balanceDueCents, 0);
     assert.ok(key.startsWith(record.prefix)); // prefix is a non-secret slice of the key
     // the plaintext must never be recoverable from what's stored
     const full = verifyApiKey(key);
@@ -72,6 +75,36 @@ describe('API keys + metering (api/keys.ts)', () => {
     for (let i = 0; i < 40; i++) recordUsage(id, { stateCode: 'OH', statusCode: 200 });
     assert.ok(usageForKey(id)!.recent.length <= 25);
     assert.equal(usageForKey(id)!.calls, 43);
+  });
+
+  test('each billable call charges the per-call price into the balance; failures do not', () => {
+    const { key } = mintApiKey('Bill Co', { pricePerCallCents: 5 }); // 5 cents/call
+    const id = verifyApiKey(key)!.id;
+    assert.equal(recordUsage(id, { statusCode: 200 }), 5); // returns what it charged
+    assert.equal(recordUsage(id, { statusCode: 200 }), 5);
+    assert.equal(recordUsage(id, { statusCode: 400, error: 'bad', billable: false }), 0); // not charged
+    const u = usageForKey(id)!;
+    assert.equal(u.pricePerCallCents, 5);
+    assert.equal(u.balanceDueCents, 10); // 2 billable × 5c
+    assert.equal(u.lifetimeBilledCents, 10);
+    assert.equal(u.recent.find((c) => c.statusCode === 400)!.chargedCents, 0);
+  });
+
+  test('settling charges the outstanding balance and resets it, keeping the lifetime total', () => {
+    const { key, record } = mintApiKey('Settle Co', { pricePerCallCents: 3 });
+    const id = verifyApiKey(key)!.id;
+    recordUsage(id, { statusCode: 200 });
+    recordUsage(id, { statusCode: 200 });
+    assert.equal(usageForKey(id)!.balanceDueCents, 6);
+    const out = settleBalance(record.prefix); // settle by prefix
+    assert.equal(out.ok, true);
+    assert.equal(out.chargedCents, 6);
+    assert.equal(usageForKey(id)!.balanceDueCents, 0); // reset
+    assert.equal(usageForKey(id)!.lifetimeBilledCents, 6); // survives settlement
+    // more calls accrue again from zero
+    recordUsage(id, { statusCode: 200 });
+    assert.equal(usageForKey(id)!.balanceDueCents, 3);
+    assert.equal(settleBalance('sk_live_nope').ok, false);
   });
 
   test('listing never leaks a hash', () => {

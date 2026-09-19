@@ -87,7 +87,8 @@ const server = createServer(async (req, res) => {
     try {
       input = await readJson<PaycheckInput>(req);
     } catch (err) {
-      recordUsage(key.id, { statusCode: 400, error: err instanceof Error ? err.message : 'bad request' });
+      // A malformed request isn't a billable call.
+      recordUsage(key.id, { statusCode: 400, error: err instanceof Error ? err.message : 'bad request', billable: false });
       return sendJson(res, 400, { error: err instanceof Error ? err.message : 'Bad request.' });
     }
     const stateCode = input?.workState?.code ?? null;
@@ -101,11 +102,14 @@ const server = createServer(async (req, res) => {
     }
     try {
       const result = calculatePaycheck(input);
-      recordUsage(key.id, { stateCode, statusCode: 200 });
-      return sendJson(res, 200, { ok: true, result });
+      const chargedCents = recordUsage(key.id, { stateCode, statusCode: 200 }); // billable success
+      const balanceDueCents = usageForKey(key.id)?.balanceDueCents ?? 0;
+      res.setHeader('X-Charge-Cents', String(chargedCents));
+      return sendJson(res, 200, { ok: true, result, billing: { chargedCents, balanceDueCents } });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Calculation failed.';
-      recordUsage(key.id, { stateCode, statusCode: 422, error: message });
+      // A calc that couldn't be produced isn't billed.
+      recordUsage(key.id, { stateCode, statusCode: 422, error: message, billable: false });
       return sendJson(res, 422, { error: message });
     }
   }
