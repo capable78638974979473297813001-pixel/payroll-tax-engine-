@@ -3,7 +3,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { calculatePaycheck } from '../src/calculate.ts';
 import type { PaycheckInput } from '../src/types.ts';
 import { mintApiKey, recordUsage, usageForKey, verifyApiKey, type ApiKey } from '../api/keys.ts';
-import { billingConfigured, completeCardSetup, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
+import { billingConfigured, completeCardSetup, handleStripeWebhook, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
 
 /**
  * The payroll-tax API — the engine (src/calculatePaycheck) behind an
@@ -49,7 +49,7 @@ function baseUrl(req: IncomingMessage): string {
   return `http://${req.headers.host ?? `localhost:${PORT}`}`;
 }
 
-function readJson<T>(req: IncomingMessage): Promise<T> {
+function readRaw(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     let data = '';
     req.on('data', (chunk) => {
@@ -59,16 +59,19 @@ function readJson<T>(req: IncomingMessage): Promise<T> {
         req.destroy();
       }
     });
-    req.on('end', () => {
-      if (!data) return resolve({} as T);
-      try {
-        resolve(JSON.parse(data) as T);
-      } catch {
-        reject(new Error('Request body must be valid JSON.'));
-      }
-    });
+    req.on('end', () => resolve(data));
     req.on('error', reject);
   });
+}
+
+async function readJson<T>(req: IncomingMessage): Promise<T> {
+  const raw = await readRaw(req);
+  if (!raw) return {} as T;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    throw new Error('Request body must be valid JSON.');
+  }
 }
 
 /** The bearer token from Authorization: Bearer <key>, or the x-api-key header. */
@@ -108,6 +111,15 @@ const server = createServer(async (req, res) => {
     return sendHtml(res, 200, 'Setup canceled', 'No card was saved. You can start again whenever you like.');
   }
 
+  // Stripe webhook — open, signature-verified. Suspends a key on a failed
+  // invoice and reactivates it once paid.
+  if (method === 'POST' && path === '/v1/billing/webhook') {
+    const raw = await readRaw(req);
+    const out = handleStripeWebhook(raw, String(req.headers['stripe-signature'] ?? ''));
+    if (!out.ok && out.reason === 'bad_signature') return sendJson(res, 400, { error: 'Invalid signature.' });
+    return sendJson(res, 200, { received: true, action: out.action });
+  }
+
   const key: ApiKey | null = verifyApiKey(presentedKey(req));
   if (!key) {
     return sendJson(res, 401, { error: 'Missing or invalid API key. Send it as "Authorization: Bearer sk_live_...".' });
@@ -138,10 +150,17 @@ const server = createServer(async (req, res) => {
       pricePerCallCents: key.pricePerCallCents,
       balanceDueCents: u?.balanceDueCents ?? 0,
       billingEnabled: billingConfigured(),
+      metered: meteringConfigured(),
+      suspended: key.suspended,
+      suspendedReason: key.suspendedReason,
     });
   }
 
   if (method === 'POST' && path === '/v1/calculate') {
+    // A key suspended for non-payment can still sign in (to fix its card) but can't make billable calls.
+    if (key.suspended) {
+      return sendJson(res, 402, { error: key.suspendedReason ?? 'This key is suspended for non-payment. Update your card to resume.', suspended: true });
+    }
     let input: PaycheckInput;
     try {
       input = await readJson<PaycheckInput>(req);

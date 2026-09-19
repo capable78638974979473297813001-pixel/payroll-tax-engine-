@@ -13,6 +13,8 @@
  * with Stripe's test cards before ever using a live key.
  */
 
+import { createHmac, timingSafeEqual } from 'node:crypto';
+
 const STRIPE_API = 'https://api.stripe.com';
 
 export class StripeError extends Error {
@@ -181,6 +183,28 @@ export function reportMeterEvent(input: {
     },
     input.identifier,
   );
+}
+
+/**
+ * Verify a Stripe webhook signature (the `Stripe-Signature` header) against the
+ * raw request body and the endpoint's signing secret (STRIPE_WEBHOOK_SECRET).
+ * Returns true only for a genuine, recent Stripe delivery — so a forged POST
+ * can't suspend or reactivate a customer. Implements Stripe's scheme directly
+ * (HMAC-SHA256 over "t.payload") so there's no dependency.
+ */
+export function verifyWebhookSignature(rawBody: string, signatureHeader: string, secret: string, toleranceSeconds = 300): boolean {
+  if (!signatureHeader || !secret) return false;
+  const parts = Object.fromEntries(signatureHeader.split(',').map((p) => p.split('=').map((s) => s.trim())));
+  const t = parts['t'];
+  const v1 = parts['v1'];
+  if (!t || !v1) return false;
+  // Reject stale timestamps (replay protection).
+  const age = Math.abs(Date.now() / 1000 - Number(t));
+  if (!Number.isFinite(age) || age > toleranceSeconds) return false;
+  const expected = createHmac('sha256', secret).update(`${t}.${rawBody}`).digest('hex');
+  const a = Buffer.from(expected);
+  const b = Buffer.from(v1);
+  return a.length === b.length && timingSafeEqual(a, b);
 }
 
 export interface StripePaymentIntent {

@@ -39,7 +39,11 @@ export interface ApiKey {
   plan: string;
   /** What each billable call costs this customer, in integer cents. */
   pricePerCallCents: number;
+  /** Manual on/off (revoke). A revoked key cannot authenticate at all. */
   active: boolean;
+  /** Auto-set when Stripe reports the monthly invoice went unpaid; the key can still sign in to fix its card but cannot make billable calls. */
+  suspended: boolean;
+  suspendedReason: string | null;
   createdAt: string;
   lastUsedAt: string | null;
   /** Total calls ever metered against this key. */
@@ -77,6 +81,8 @@ export interface PublicApiKey {
   cardOnFile: boolean;
   cardBrand: string | null;
   cardLast4: string | null;
+  suspended: boolean;
+  suspendedReason: string | null;
 }
 
 /**
@@ -151,6 +157,8 @@ function toPublic(k: ApiKey): PublicApiKey {
     cardOnFile: Boolean(k.stripePaymentMethodId),
     cardBrand: k.cardBrand,
     cardLast4: k.cardLast4,
+    suspended: k.suspended,
+    suspendedReason: k.suspendedReason,
   };
 }
 export function publicApiKey(k: ApiKey): PublicApiKey {
@@ -180,6 +188,8 @@ export function mintApiKey(
     plan,
     pricePerCallCents: Math.max(0, Math.round(price)),
     active: true,
+    suspended: false,
+    suspendedReason: null,
     createdAt: new Date().toISOString(),
     lastUsedAt: null,
     calls: 0,
@@ -222,6 +232,27 @@ export function setSubscription(id: string, subscriptionId: string): void {
   withDb((db) => {
     const k = db.keys[id];
     if (k) k.stripeSubscriptionId = subscriptionId;
+  });
+}
+
+/** Find the key belonging to a Stripe customer (for webhook handling). */
+export function keyByStripeCustomer(stripeCustomerId: string): ApiKey | null {
+  return Object.values(load().keys).find((k) => k.stripeCustomerId === stripeCustomerId) ?? null;
+}
+
+/**
+ * Suspend or un-suspend the key for a Stripe customer — driven by invoice
+ * webhooks. Suspension is separate from a manual revoke (active): a paid
+ * invoice lifts it, a manual revoke it does not touch. Returns the affected
+ * key's id, or null if no key matches that customer.
+ */
+export function setSuspendedByCustomer(stripeCustomerId: string, suspended: boolean, reason: string | null): string | null {
+  return withDb((db) => {
+    const k = Object.values(db.keys).find((x) => x.stripeCustomerId === stripeCustomerId);
+    if (!k) return null;
+    k.suspended = suspended;
+    k.suspendedReason = suspended ? reason : null;
+    return k.id;
   });
 }
 

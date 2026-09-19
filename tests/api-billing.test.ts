@@ -4,8 +4,9 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { createHmac } from 'node:crypto';
 import { mintApiKey, recordUsage, usageForKey, getApiKey, verifyApiKey, setStripeCustomer } from '../api/keys.ts';
-import { chargeOutstanding, completeCardSetup, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
+import { chargeOutstanding, completeCardSetup, handleStripeWebhook, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
 
 // A fake Stripe: route requests by method + path to canned responses.
 type Handler = (body: string) => { ok?: boolean; json: unknown };
@@ -130,6 +131,40 @@ describe('Stripe billing (api/billing.ts)', () => {
     const out = await reportCall(verifyApiKey(key)!.id);
     assert.equal(out.ok, false);
     assert.equal(out.reason, 'metering_not_configured');
+  });
+
+  test('webhook: a failed invoice suspends the key, a paid invoice reactivates it, a forged signature is rejected', () => {
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test';
+    try {
+      const { key } = mintApiKey('Webhook Co');
+      const id = verifyApiKey(key)!.id;
+      setStripeCustomer(id, 'cus_wh');
+      const sign = (body: string) => {
+        const t = Math.floor(Date.now() / 1000);
+        const v1 = createHmac('sha256', 'whsec_test').update(`${t}.${body}`).digest('hex');
+        return `t=${t},v1=${v1}`;
+      };
+
+      const failBody = JSON.stringify({ type: 'invoice.payment_failed', data: { object: { customer: 'cus_wh' } } });
+      let out = handleStripeWebhook(failBody, sign(failBody));
+      assert.equal(out.action, 'suspended');
+      assert.equal(out.keyId, id);
+      assert.equal(getApiKey(id)!.suspended, true);
+
+      const paidBody = JSON.stringify({ type: 'invoice.paid', data: { object: { customer: 'cus_wh' } } });
+      out = handleStripeWebhook(paidBody, sign(paidBody));
+      assert.equal(out.action, 'reactivated');
+      assert.equal(getApiKey(id)!.suspended, false);
+
+      // a forged signature changes nothing
+      handleStripeWebhook(failBody, sign(failBody)); // suspend again
+      const forged = handleStripeWebhook(paidBody, 't=' + Math.floor(Date.now() / 1000) + ',v1=deadbeef');
+      assert.equal(forged.ok, false);
+      assert.equal(forged.reason, 'bad_signature');
+      assert.equal(getApiKey(id)!.suspended, true); // still suspended — forgery ignored
+    } finally {
+      delete process.env.STRIPE_WEBHOOK_SECRET;
+    }
   });
 
   test('a declined charge leaves the balance intact (we never settle on failure)', async () => {

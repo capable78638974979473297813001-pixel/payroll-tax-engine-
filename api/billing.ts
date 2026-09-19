@@ -1,4 +1,4 @@
-import { getApiKey, setCardOnFile, setStripeCustomer, setSubscription, settleBalance } from './keys.ts';
+import { getApiKey, setCardOnFile, setStripeCustomer, setSubscription, setSuspendedByCustomer, settleBalance } from './keys.ts';
 import {
   chargeOffSession,
   createCustomer,
@@ -10,6 +10,7 @@ import {
   retrieveSubscription,
   stripeConfigured,
   StripeError,
+  verifyWebhookSignature,
 } from './stripe.ts';
 
 /** Metered per-call billing is on when Stripe is configured AND a metered price + meter event name are set. */
@@ -112,6 +113,38 @@ export async function completeCardSetup(sessionId: string): Promise<{ ok: boolea
   }
   setCardOnFile(apiKeyId, { paymentMethodId, brand, last4 });
   return { ok: true, brand, last4, metered: false };
+}
+
+/**
+ * Handle a Stripe webhook: verify the signature, then suspend a key when its
+ * invoice goes unpaid and lift the suspension when it's paid. Verifying against
+ * STRIPE_WEBHOOK_SECRET is what stops a forged POST from toggling any account.
+ */
+export function handleStripeWebhook(rawBody: string, signatureHeader: string): { ok: boolean; action: string; keyId?: string | null; reason?: string } {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret) return { ok: false, action: 'ignored', reason: 'no_webhook_secret' };
+  if (!verifyWebhookSignature(rawBody, signatureHeader, secret)) return { ok: false, action: 'rejected', reason: 'bad_signature' };
+
+  let event: { type?: string; data?: { object?: { customer?: string } } };
+  try {
+    event = JSON.parse(rawBody);
+  } catch {
+    return { ok: false, action: 'rejected', reason: 'bad_json' };
+  }
+  const customer = event.data?.object?.customer;
+  if (!customer) return { ok: true, action: 'ignored', reason: 'no_customer' };
+
+  switch (event.type) {
+    case 'invoice.payment_failed':
+      return { ok: true, action: 'suspended', keyId: setSuspendedByCustomer(customer, true, 'Your latest invoice could not be charged. Update your card to resume.') };
+    case 'customer.subscription.deleted':
+      return { ok: true, action: 'suspended', keyId: setSuspendedByCustomer(customer, true, 'Billing subscription canceled.') };
+    case 'invoice.paid':
+    case 'invoice.payment_succeeded':
+      return { ok: true, action: 'reactivated', keyId: setSuspendedByCustomer(customer, false, null) };
+    default:
+      return { ok: true, action: 'ignored', reason: event.type };
+  }
 }
 
 /**
