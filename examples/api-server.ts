@@ -1,4 +1,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { calculatePaycheck } from '../src/calculate.ts';
 import type { PaycheckInput } from '../src/types.ts';
@@ -28,6 +31,7 @@ import { billingConfigured, completeCardSetup, handleStripeWebhook, meteringConf
  */
 
 const PORT = Number(process.env.PORT ?? 4380);
+const HERE = dirname(fileURLToPath(import.meta.url));
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
   const payload = JSON.stringify(body, null, 2);
@@ -86,6 +90,14 @@ const server = createServer(async (req, res) => {
   const path = (req.url ?? '/').split('?')[0];
   const method = req.method ?? 'GET';
 
+  // The developer console — a self-serve UI for a key holder to see usage,
+  // cost, and their card, and to save one. Open (the key is entered in-page).
+  if (method === 'GET' && (path === '/' || path === '/dashboard' || path === '/console')) {
+    const html = readFileSync(join(HERE, 'api-dashboard.html'));
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': html.byteLength });
+    return res.end(html);
+  }
+
   // Health is open — everything else requires a key.
   if (method === 'GET' && path === '/v1/health') {
     const billing = meteringConfigured() ? 'metered' : billingConfigured() ? 'stripe-manual' : 'ledger-only';
@@ -99,10 +111,11 @@ const server = createServer(async (req, res) => {
     try {
       const out = await completeCardSetup(sessionId);
       if (out.ok) {
-        const card = out.brand && out.last4 ? `${out.brand} ending ${out.last4}` : 'your card';
-        return sendHtml(res, 200, 'Card saved ✓', `${card} is on file. You can close this tab — future API usage will be billed to it.`);
+        // Back to the console, which shows the saved card and a success note.
+        res.writeHead(302, { Location: '/?card=saved' });
+        return res.end();
       }
-      return sendHtml(res, 400, "Couldn't save the card", `Setup did not complete (${out.reason}). Please try again from the app.`);
+      return sendHtml(res, 400, "Couldn't save the card", `Setup did not complete (${out.reason}). Please try again from the console.`);
     } catch (err) {
       return sendHtml(res, 502, 'Card setup error', err instanceof Error ? err.message : 'Unexpected error talking to the payment processor.');
     }
@@ -208,6 +221,7 @@ if (mintFlag !== -1) {
 
 server.listen(PORT, () => {
   console.log(`\n  Payroll-tax API — the engine behind a metered, billed API key`);
+  console.log(`  Console:     http://localhost:${PORT}/            (paste a key to see usage, cost, card)`);
   console.log(`  Health:      http://localhost:${PORT}/v1/health`);
   console.log(`  Calculate:   POST http://localhost:${PORT}/v1/calculate   (Authorization: Bearer sk_live_...)`);
   console.log(`  Usage:       GET  http://localhost:${PORT}/v1/usage`);
