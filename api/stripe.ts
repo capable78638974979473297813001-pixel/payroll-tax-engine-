@@ -96,7 +96,9 @@ export interface StripeCheckoutSession {
   id: string;
   url: string | null;
   status?: string;
+  mode?: string;
   customer?: string;
+  subscription?: string | { id: string };
   setup_intent?: string | { id: string; payment_method?: string | null };
 }
 /** A hosted Checkout page in SETUP mode — the customer saves a card, no charge. */
@@ -118,7 +120,7 @@ export function createSetupCheckoutSession(input: {
 
 /** Retrieve a completed Checkout session, expanding the setup intent so we can read the saved card. */
 export function retrieveCheckoutSession(id: string): Promise<StripeCheckoutSession & { metadata?: Record<string, string> }> {
-  return stripeRequest('GET', `/v1/checkout/sessions/${encodeURIComponent(id)}?expand[0]=setup_intent`);
+  return stripeRequest('GET', `/v1/checkout/sessions/${encodeURIComponent(id)}?expand[0]=setup_intent&expand[1]=subscription`);
 }
 
 export interface StripePaymentMethod {
@@ -127,6 +129,58 @@ export interface StripePaymentMethod {
 }
 export function retrievePaymentMethod(id: string): Promise<StripePaymentMethod> {
   return stripeRequest('GET', `/v1/payment_methods/${encodeURIComponent(id)}`);
+}
+
+/** A hosted Checkout page in SUBSCRIPTION mode — saves a card AND starts metered usage billing. */
+export function createSubscriptionCheckoutSession(input: {
+  customerId: string;
+  apiKeyId: string;
+  priceId: string;
+  successUrl: string;
+  cancelUrl: string;
+}): Promise<StripeCheckoutSession> {
+  return stripeRequest<StripeCheckoutSession>('POST', '/v1/checkout/sessions', {
+    mode: 'subscription',
+    customer: input.customerId,
+    line_items: [{ price: input.priceId }], // metered price: no quantity, usage is reported per call
+    success_url: input.successUrl,
+    cancel_url: input.cancelUrl,
+    metadata: { apiKeyId: input.apiKeyId },
+    subscription_data: { metadata: { apiKeyId: input.apiKeyId } },
+  });
+}
+
+export interface StripeSubscription {
+  id: string;
+  status: string;
+  default_payment_method?: string | { id: string; card?: { brand?: string; last4?: string } };
+}
+export function retrieveSubscription(id: string): Promise<StripeSubscription> {
+  return stripeRequest('GET', `/v1/subscriptions/${encodeURIComponent(id)}?expand[0]=default_payment_method`);
+}
+
+/**
+ * Report one unit of usage to a Stripe billing meter — this is how a per-call
+ * charge is recorded. Stripe aggregates these and charges the customer's card
+ * on the subscription's monthly invoice (respecting the $0.50 minimum and
+ * one fee per invoice, not per call). `identifier` dedupes retries.
+ */
+export function reportMeterEvent(input: {
+  eventName: string;
+  customerId: string;
+  value?: number;
+  identifier?: string;
+}): Promise<{ identifier?: string }> {
+  return stripeRequest(
+    'POST',
+    '/v1/billing/meter_events',
+    {
+      event_name: input.eventName,
+      payload: { stripe_customer_id: input.customerId, value: String(input.value ?? 1) },
+      identifier: input.identifier,
+    },
+    input.identifier,
+  );
 }
 
 export interface StripePaymentIntent {

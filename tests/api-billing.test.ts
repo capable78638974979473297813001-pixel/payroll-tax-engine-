@@ -4,8 +4,8 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { mintApiKey, recordUsage, usageForKey, getApiKey, verifyApiKey } from '../api/keys.ts';
-import { chargeOutstanding, completeCardSetup, startCardSetup } from '../api/billing.ts';
+import { mintApiKey, recordUsage, usageForKey, getApiKey, verifyApiKey, setStripeCustomer } from '../api/keys.ts';
+import { chargeOutstanding, completeCardSetup, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
 
 // A fake Stripe: route requests by method + path to canned responses.
 type Handler = (body: string) => { ok?: boolean; json: unknown };
@@ -91,6 +91,45 @@ describe('Stripe billing (api/billing.ts)', () => {
     assert.equal(chargedAmount, 10); // exactly the balance was sent to Stripe
     assert.equal(usageForKey(id)!.balanceDueCents, 0); // settled
     assert.equal(usageForKey(id)!.lifetimeBilledCents, 10);
+  });
+
+  test('metered mode: every call reports one usage unit to Stripe', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_fake';
+    process.env.STRIPE_PRICE_ID = 'price_meter';
+    process.env.STRIPE_METER_EVENT = 'payroll_api_call';
+    try {
+      assert.equal(meteringConfigured(), true);
+      const { key } = mintApiKey('Metered Co'); // default $0.15/call
+      const id = verifyApiKey(key)!.id;
+      setStripeCustomer(id, 'cus_meter'); // pretend they subscribed
+
+      const events: Array<Record<string, string>> = [];
+      stub('POST', /\/v1\/billing\/meter_events$/, (body) => {
+        events.push(Object.fromEntries(new URLSearchParams(body)));
+        return { json: { identifier: 'evt_1' } };
+      });
+
+      assert.equal((await reportCall(id)).ok, true);
+      assert.equal((await reportCall(id)).ok, true);
+      assert.equal(events.length, 2);
+      assert.equal(events[0].event_name, 'payroll_api_call');
+      assert.equal(events[0]['payload[stripe_customer_id]'], 'cus_meter');
+      assert.equal(events[0]['payload[value]'], '1');
+    } finally {
+      delete process.env.STRIPE_PRICE_ID;
+      delete process.env.STRIPE_METER_EVENT;
+    }
+  });
+
+  test('metering is a safe no-op when it is not configured or there is no customer', async () => {
+    delete process.env.STRIPE_PRICE_ID;
+    delete process.env.STRIPE_METER_EVENT;
+    process.env.STRIPE_SECRET_KEY = 'sk_test_fake';
+    assert.equal(meteringConfigured(), false);
+    const { key } = mintApiKey('NoMeter Co');
+    const out = await reportCall(verifyApiKey(key)!.id);
+    assert.equal(out.ok, false);
+    assert.equal(out.reason, 'metering_not_configured');
   });
 
   test('a declined charge leaves the balance intact (we never settle on failure)', async () => {

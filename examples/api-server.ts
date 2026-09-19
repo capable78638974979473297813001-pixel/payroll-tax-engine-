@@ -3,7 +3,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { calculatePaycheck } from '../src/calculate.ts';
 import type { PaycheckInput } from '../src/types.ts';
 import { mintApiKey, recordUsage, usageForKey, verifyApiKey, type ApiKey } from '../api/keys.ts';
-import { billingConfigured, completeCardSetup, startCardSetup } from '../api/billing.ts';
+import { billingConfigured, completeCardSetup, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
 
 /**
  * The payroll-tax API — the engine (src/calculatePaycheck) behind an
@@ -85,7 +85,8 @@ const server = createServer(async (req, res) => {
 
   // Health is open — everything else requires a key.
   if (method === 'GET' && path === '/v1/health') {
-    return sendJson(res, 200, { ok: true, service: 'payroll-tax-api', billing: billingConfigured() ? 'stripe' : 'ledger-only', time: new Date().toISOString() });
+    const billing = meteringConfigured() ? 'metered' : billingConfigured() ? 'stripe-manual' : 'ledger-only';
+    return sendJson(res, 200, { ok: true, service: 'payroll-tax-api', billing, time: new Date().toISOString() });
   }
 
   // Stripe Checkout redirects the customer's BROWSER back here with no API key,
@@ -160,10 +161,13 @@ const server = createServer(async (req, res) => {
     }
     try {
       const result = calculatePaycheck(input);
-      const chargedCents = recordUsage(key.id, { stateCode, statusCode: 200 }); // billable success
+      const chargedCents = recordUsage(key.id, { stateCode, statusCode: 200 }); // billable success (local ledger)
+      // Report this call to Stripe's usage meter — the per-call charge. Fire and
+      // forget so a metering hiccup never delays or fails the customer's response.
+      void reportCall(key.id).catch(() => {});
       const balanceDueCents = usageForKey(key.id)?.balanceDueCents ?? 0;
       res.setHeader('X-Charge-Cents', String(chargedCents));
-      return sendJson(res, 200, { ok: true, result, billing: { chargedCents, balanceDueCents } });
+      return sendJson(res, 200, { ok: true, result, billing: { chargedCents, balanceDueCents, metered: meteringConfigured() } });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Calculation failed.';
       // A calc that couldn't be produced isn't billed.
@@ -189,6 +193,11 @@ server.listen(PORT, () => {
   console.log(`  Calculate:   POST http://localhost:${PORT}/v1/calculate   (Authorization: Bearer sk_live_...)`);
   console.log(`  Usage:       GET  http://localhost:${PORT}/v1/usage`);
   console.log(`  Save a card: POST http://localhost:${PORT}/v1/billing/setup  -> returns a Stripe Checkout URL`);
-  console.log(`  Bill a key:  npm run api:key -- --bill <prefix>`);
-  console.log(`  Billing:     ${billingConfigured() ? 'Stripe ENABLED (STRIPE_SECRET_KEY set)' : 'ledger-only (set STRIPE_SECRET_KEY to charge cards)'}\n`);
+  const billingMode = meteringConfigured()
+    ? 'METERED per-call (Stripe usage billing — every call reports $0.15 to Stripe, invoiced monthly)'
+    : billingConfigured()
+      ? 'Stripe manual (STRIPE_SECRET_KEY set; add STRIPE_PRICE_ID + STRIPE_METER_EVENT for per-call metering)'
+      : 'ledger-only (set STRIPE_SECRET_KEY + STRIPE_PRICE_ID + STRIPE_METER_EVENT to bill per call)';
+  console.log(`  Bill a key:  npm run api:key -- --bill <prefix>   (manual path; metered billing auto-invoices)`);
+  console.log(`  Billing:     ${billingMode}\n`);
 });

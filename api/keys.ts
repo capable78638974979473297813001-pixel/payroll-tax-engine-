@@ -50,8 +50,10 @@ export interface ApiKey {
   lifetimeBilledCents: number;
   /** Stripe Customer id, set once this key's owner saves a card. */
   stripeCustomerId: string | null;
-  /** The saved card to charge off-session. */
+  /** The saved card to charge off-session (used only for the manual/settle path). */
   stripePaymentMethodId: string | null;
+  /** Metered-billing subscription — set when the customer starts usage billing; each call reports one unit to it. */
+  stripeSubscriptionId: string | null;
   /** Non-secret card display, e.g. "visa •••• 4242". */
   cardBrand: string | null;
   cardLast4: string | null;
@@ -84,8 +86,8 @@ export interface PublicApiKey {
  */
 export const PLAN_PRICING_CENTS: Record<string, number> = {
   free: 0,
-  standard: 1, // $0.01 / call
-  pro: 2, // $0.02 / call
+  standard: 15, // $0.15 / call — the website price
+  pro: 15,
 };
 
 const RECENT_LIMIT = 25;
@@ -185,6 +187,7 @@ export function mintApiKey(
     lifetimeBilledCents: 0,
     stripeCustomerId: null,
     stripePaymentMethodId: null,
+    stripeSubscriptionId: null,
     cardBrand: null,
     cardLast4: null,
     recent: [],
@@ -211,6 +214,14 @@ export function setCardOnFile(id: string, card: { paymentMethodId: string; brand
     k.stripePaymentMethodId = card.paymentMethodId;
     k.cardBrand = card.brand ?? null;
     k.cardLast4 = card.last4 ?? null;
+  });
+}
+
+/** Attach the metered-billing subscription id for a key. */
+export function setSubscription(id: string, subscriptionId: string): void {
+  withDb((db) => {
+    const k = db.keys[id];
+    if (k) k.stripeSubscriptionId = subscriptionId;
   });
 }
 

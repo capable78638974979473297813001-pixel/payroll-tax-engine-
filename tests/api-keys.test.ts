@@ -29,7 +29,7 @@ describe('API keys + metering (api/keys.ts)', () => {
     const { key, record } = mintApiKey('Acme Payroll', { plan: 'pro' });
     assert.match(key, /^sk_live_[A-Za-z0-9_-]{20,}$/);
     assert.equal(record.plan, 'pro');
-    assert.equal(record.pricePerCallCents, 2); // pro plan default
+    assert.equal(record.pricePerCallCents, 15); // pro plan default ($0.15/call)
     assert.equal(record.calls, 0);
     assert.equal(record.balanceDueCents, 0);
     assert.ok(key.startsWith(record.prefix)); // prefix is a non-secret slice of the key
