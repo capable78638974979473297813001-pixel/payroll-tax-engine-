@@ -3,6 +3,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { calculatePaycheck } from '../src/calculate.ts';
 import type { PaycheckInput } from '../src/types.ts';
 import { mintApiKey, recordUsage, usageForKey, verifyApiKey, type ApiKey } from '../api/keys.ts';
+import { billingConfigured, completeCardSetup, startCardSetup } from '../api/billing.ts';
 
 /**
  * The payroll-tax API — the engine (src/calculatePaycheck) behind an
@@ -32,6 +33,20 @@ function sendJson(res: ServerResponse, status: number, body: unknown): void {
   const payload = JSON.stringify(body, null, 2);
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(payload) });
   res.end(payload);
+}
+
+function sendHtml(res: ServerResponse, status: number, title: string, message: string): void {
+  const body = `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${title}</title><body style="font-family:system-ui,sans-serif;max-width:34rem;margin:12vh auto;padding:0 1.2rem;color:#1c2530">
+<h1 style="font-size:1.5rem">${title}</h1><p style="font-size:1.05rem;color:#475569">${message}</p></body>`;
+  res.writeHead(status, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': Buffer.byteLength(body) });
+  res.end(body);
+}
+
+/** Where this API is publicly reachable — for building Checkout return URLs. */
+function baseUrl(req: IncomingMessage): string {
+  if (process.env.PUBLIC_BASE_URL) return process.env.PUBLIC_BASE_URL.replace(/\/$/, '');
+  return `http://${req.headers.host ?? `localhost:${PORT}`}`;
 }
 
 function readJson<T>(req: IncomingMessage): Promise<T> {
@@ -70,7 +85,26 @@ const server = createServer(async (req, res) => {
 
   // Health is open — everything else requires a key.
   if (method === 'GET' && path === '/v1/health') {
-    return sendJson(res, 200, { ok: true, service: 'payroll-tax-api', time: new Date().toISOString() });
+    return sendJson(res, 200, { ok: true, service: 'payroll-tax-api', billing: billingConfigured() ? 'stripe' : 'ledger-only', time: new Date().toISOString() });
+  }
+
+  // Stripe Checkout redirects the customer's BROWSER back here with no API key,
+  // so these two are open (correlation is via the session's server-trusted metadata).
+  if (method === 'GET' && path === '/v1/billing/return') {
+    const sessionId = new URL(req.url ?? '', baseUrl(req)).searchParams.get('session_id') ?? '';
+    try {
+      const out = await completeCardSetup(sessionId);
+      if (out.ok) {
+        const card = out.brand && out.last4 ? `${out.brand} ending ${out.last4}` : 'your card';
+        return sendHtml(res, 200, 'Card saved ✓', `${card} is on file. You can close this tab — future API usage will be billed to it.`);
+      }
+      return sendHtml(res, 400, "Couldn't save the card", `Setup did not complete (${out.reason}). Please try again from the app.`);
+    } catch (err) {
+      return sendHtml(res, 502, 'Card setup error', err instanceof Error ? err.message : 'Unexpected error talking to the payment processor.');
+    }
+  }
+  if (method === 'GET' && path === '/v1/billing/cancel') {
+    return sendHtml(res, 200, 'Setup canceled', 'No card was saved. You can start again whenever you like.');
   }
 
   const key: ApiKey | null = verifyApiKey(presentedKey(req));
@@ -80,6 +114,30 @@ const server = createServer(async (req, res) => {
 
   if (method === 'GET' && path === '/v1/usage') {
     return sendJson(res, 200, { key: { id: key.id, name: key.name, prefix: key.prefix, plan: key.plan }, usage: usageForKey(key.id) });
+  }
+
+  // Start saving a card: returns a hosted Stripe Checkout URL for this customer.
+  if (method === 'POST' && path === '/v1/billing/setup') {
+    if (!billingConfigured()) return sendJson(res, 503, { error: 'Billing is not configured on this server (no STRIPE_SECRET_KEY).' });
+    try {
+      const out = await startCardSetup(key.id, baseUrl(req));
+      if (out.ok) return sendJson(res, 200, { url: out.url });
+      return sendJson(res, 400, { error: `Could not start card setup (${out.reason}).` });
+    } catch (err) {
+      return sendJson(res, 502, { error: err instanceof Error ? err.message : 'Payment processor error.' });
+    }
+  }
+
+  // Whether this key has a card on file, plus what it owes.
+  if (method === 'GET' && path === '/v1/billing/status') {
+    const u = usageForKey(key.id);
+    return sendJson(res, 200, {
+      cardOnFile: Boolean(key.stripePaymentMethodId),
+      card: key.stripePaymentMethodId ? { brand: key.cardBrand, last4: key.cardLast4 } : null,
+      pricePerCallCents: key.pricePerCallCents,
+      balanceDueCents: u?.balanceDueCents ?? 0,
+      billingEnabled: billingConfigured(),
+    });
   }
 
   if (method === 'POST' && path === '/v1/calculate') {
@@ -126,9 +184,11 @@ if (mintFlag !== -1) {
 }
 
 server.listen(PORT, () => {
-  console.log(`\n  Payroll-tax API — the engine behind a metered API key`);
-  console.log(`  Health:     http://localhost:${PORT}/v1/health`);
-  console.log(`  Calculate:  POST http://localhost:${PORT}/v1/calculate  (Authorization: Bearer sk_live_...)`);
-  console.log(`  Usage:      GET  http://localhost:${PORT}/v1/usage`);
-  console.log(`  Mint a key: npm run api:key "Customer Name"\n`);
+  console.log(`\n  Payroll-tax API — the engine behind a metered, billed API key`);
+  console.log(`  Health:      http://localhost:${PORT}/v1/health`);
+  console.log(`  Calculate:   POST http://localhost:${PORT}/v1/calculate   (Authorization: Bearer sk_live_...)`);
+  console.log(`  Usage:       GET  http://localhost:${PORT}/v1/usage`);
+  console.log(`  Save a card: POST http://localhost:${PORT}/v1/billing/setup  -> returns a Stripe Checkout URL`);
+  console.log(`  Bill a key:  npm run api:key -- --bill <prefix>`);
+  console.log(`  Billing:     ${billingConfigured() ? 'Stripe ENABLED (STRIPE_SECRET_KEY set)' : 'ledger-only (set STRIPE_SECRET_KEY to charge cards)'}\n`);
 });

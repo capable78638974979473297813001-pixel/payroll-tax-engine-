@@ -1,4 +1,5 @@
-import { listApiKeys, mintApiKey, revokeApiKey, settleBalance, usageForKey } from '../api/keys.ts';
+import { getApiKey, listApiKeys, mintApiKey, revokeApiKey } from '../api/keys.ts';
+import { billingConfigured, chargeOutstanding } from '../api/billing.ts';
 
 /**
  * Manage API keys + billing for examples/api-server.ts — the self-hosted,
@@ -25,9 +26,10 @@ if (argv[0] === '--list') {
     console.log('No keys yet. Mint one:  npm run api:key "Customer Name"');
   } else {
     for (const k of keys) {
+      const card = k.cardOnFile ? `${k.cardBrand ?? 'card'}••${k.cardLast4 ?? '????'}` : 'no card';
       console.log(
         `${k.active ? '●' : '○'} ${k.prefix}…  ${k.name}  [${k.plan} · ${money(k.pricePerCallCents)}/call]  ` +
-          `calls=${k.calls}  due=${money(k.balanceDueCents)}  billed=${money(k.lifetimeBilledCents)}`,
+          `calls=${k.calls}  due=${money(k.balanceDueCents)}  billed=${money(k.lifetimeBilledCents)}  ${card}`,
       );
     }
   }
@@ -40,14 +42,25 @@ if (argv[0] === '--bill' || argv[0] === '--settle') {
     console.error('Usage: npm run api:key -- --bill <prefix-or-id>');
     process.exit(1);
   }
-  const before = usageForKey(target) ?? null; // may be null if target is a prefix; that's fine, settle resolves it
-  const out = settleBalance(target);
-  if (!out.ok) {
+  // Resolve prefix -> id (chargeOutstanding takes an id).
+  const k = getApiKey(target) ?? listApiKeys().find((x) => x.prefix === target || x.id === target);
+  if (!k) {
     console.log(`No key matching ${target}.`);
     process.exit(1);
   }
-  console.log(`Charged ${out.name}: ${money(out.chargedCents)} (balance settled to $0.00).`);
-  console.log('NOTE: this cleared the balance in the ledger. Wire a payment processor in api/keys.ts settleBalance() to actually collect it.');
+  const out = await chargeOutstanding(k.id);
+  if (out.ok && out.chargedCents > 0) {
+    console.log(`Charged ${k.name} ${money(out.chargedCents)} via Stripe (payment ${out.paymentIntentId}). Balance settled to $0.00.`);
+  } else if (out.ok) {
+    console.log(`Nothing due for ${k.name}.`);
+  } else if (out.reason === 'stripe_not_configured') {
+    console.log('STRIPE_SECRET_KEY is not set, so no card was charged. Set it in this server/shell env and try again.');
+  } else if (out.reason === 'no_card_on_file') {
+    console.log(`${k.name} has no card on file yet. Send them a Checkout link: POST /v1/billing/setup with their key.`);
+  } else {
+    console.log(`Charge failed for ${k.name} (${out.reason}${out.error ? ': ' + out.error : ''}). Balance left unchanged.`);
+  }
+  if (!billingConfigured()) console.log('(Billing runs in ledger-only mode until STRIPE_SECRET_KEY is set where this runs.)');
   process.exit(0);
 }
 

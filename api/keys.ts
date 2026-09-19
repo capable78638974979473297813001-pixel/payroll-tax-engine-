@@ -48,6 +48,13 @@ export interface ApiKey {
   balanceDueCents: number;
   /** Everything ever billed to this key, in cents (survives settlement). */
   lifetimeBilledCents: number;
+  /** Stripe Customer id, set once this key's owner saves a card. */
+  stripeCustomerId: string | null;
+  /** The saved card to charge off-session. */
+  stripePaymentMethodId: string | null;
+  /** Non-secret card display, e.g. "visa •••• 4242". */
+  cardBrand: string | null;
+  cardLast4: string | null;
   /** The most recent calls (bounded), newest first. */
   recent: UsageCall[];
 }
@@ -65,6 +72,9 @@ export interface PublicApiKey {
   calls: number;
   balanceDueCents: number;
   lifetimeBilledCents: number;
+  cardOnFile: boolean;
+  cardBrand: string | null;
+  cardLast4: string | null;
 }
 
 /**
@@ -136,6 +146,9 @@ function toPublic(k: ApiKey): PublicApiKey {
     calls: k.calls,
     balanceDueCents: k.balanceDueCents,
     lifetimeBilledCents: k.lifetimeBilledCents,
+    cardOnFile: Boolean(k.stripePaymentMethodId),
+    cardBrand: k.cardBrand,
+    cardLast4: k.cardLast4,
   };
 }
 export function publicApiKey(k: ApiKey): PublicApiKey {
@@ -170,12 +183,35 @@ export function mintApiKey(
     calls: 0,
     balanceDueCents: 0,
     lifetimeBilledCents: 0,
+    stripeCustomerId: null,
+    stripePaymentMethodId: null,
+    cardBrand: null,
+    cardLast4: null,
     recent: [],
   };
   withDb((db) => {
     db.keys[record.id] = record;
   });
   return { key, record: toPublic(record) };
+}
+
+/** Attach (or update) the Stripe Customer id for a key. */
+export function setStripeCustomer(id: string, stripeCustomerId: string): void {
+  withDb((db) => {
+    const k = db.keys[id];
+    if (k) k.stripeCustomerId = stripeCustomerId;
+  });
+}
+
+/** Record the saved card for a key after the customer completes Checkout. */
+export function setCardOnFile(id: string, card: { paymentMethodId: string; brand?: string | null; last4?: string | null }): void {
+  withDb((db) => {
+    const k = db.keys[id];
+    if (!k) return;
+    k.stripePaymentMethodId = card.paymentMethodId;
+    k.cardBrand = card.brand ?? null;
+    k.cardLast4 = card.last4 ?? null;
+  });
 }
 
 /** Change what each billable call costs this customer (integer cents). */
