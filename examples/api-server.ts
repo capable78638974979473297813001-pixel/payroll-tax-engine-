@@ -8,6 +8,15 @@ import type { PaycheckInput } from '../src/types.ts';
 import { mintApiKey, recordUsage, usageForKey, verifyApiKey, type ApiKey } from '../api/keys.ts';
 import { billingConfigured, completeCardSetup, handleStripeWebhook, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
 
+// Load a local .env (Stripe keys, PUBLIC_BASE_URL, etc.) if one exists — so
+// pasting values into .env is all it takes to configure billing. Harmless when
+// there's no .env; real host env vars still take precedence.
+try {
+  process.loadEnvFile();
+} catch {
+  /* no .env — that's fine */
+}
+
 /**
  * The payroll-tax API — the engine (src/calculatePaycheck) behind an
  * API-key gate that meters every call, with NOTHING external: keys and usage
