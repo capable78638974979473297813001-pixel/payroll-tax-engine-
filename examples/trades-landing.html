@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Crewtally — time &amp; pay for the trades</title>
+<meta name="description" content="Geofenced clock-ins, prevailing wage and certified payroll done for you, and job costing you can trust. Built for plumbers, electricians and HVAC crews on public work. $5 per employee per month." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Hanken+Grotesque:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* Crewtally landing — same field-notebook design language as the app:
+     warm cream paper + blueprint grid, Fraunces display over Hanken Grotesque,
+     printed-sticker buttons with a hard offset shadow. No component library. */
+  :root {
+    --paper:#F4EEE1; --paper2:#EFE7D6; --card:#FFFDF7;
+    --ink:#211D17; --ink2:#5b5346; --ink3:#8a8172;
+    --line:#E2D9C4; --line2:#D6CBB0;
+    --clay:#BE4A28; --clay-d:#9c3a1e;
+    --pine:#2F5B48; --pine-s:#E3EEE4;
+    --amber:#A9761A; --amber-s:#F7EBCF;
+    --sky:#33556e; --sky-s:#eaf0f4;
+    --disp:"Fraunces",Georgia,"Times New Roman",serif;
+    --body:"Hanken Grotesque",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  }
+  * { box-sizing:border-box; }
+  html { -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+  body {
+    margin:0; color:var(--ink); font-family:var(--body); font-size:17px; line-height:1.55;
+    background-color:var(--paper);
+    background-image:linear-gradient(rgba(51,85,110,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(51,85,110,.05) 1px,transparent 1px);
+    background-size:26px 26px; -webkit-font-smoothing:antialiased;
+  }
+  .tnum { font-variant-numeric:tabular-nums; }
+  h1,h2,h3 { font-family:var(--disp); font-weight:600; margin:0; letter-spacing:-.015em; line-height:1.08; }
+  a { color:inherit; }
+  .wrap { max-width:1060px; margin:0 auto; padding:0 20px; }
+
+  /* ---------- top bar ---------- */
+  header.top { position:sticky; top:0; z-index:30; background:rgba(244,238,225,.9); backdrop-filter:blur(8px); border-bottom:2px solid var(--ink); }
+  .top-in { max-width:1060px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; gap:14px; }
+  .brand { display:flex; align-items:center; gap:11px; text-decoration:none; color:var(--ink); }
+  .mark { width:38px; height:38px; flex:none; }
+  .word { font-family:var(--disp); font-weight:700; font-size:25px; letter-spacing:-.02em; line-height:1; }
+  .word b { color:var(--clay); }
+  .navlinks { margin-left:auto; display:flex; align-items:center; gap:26px; }
+  .navlinks a.lnk { text-decoration:none; font-weight:600; font-size:15px; color:var(--ink2); }
+  .navlinks a.lnk:hover { color:var(--ink); }
+
+  /* ---------- buttons ---------- */
+  .btn { font-family:var(--body); font-weight:700; font-size:16px; cursor:pointer; color:#fff; background:var(--clay); border:2px solid var(--ink); border-radius:11px; padding:12px 20px; box-shadow:3px 3px 0 var(--ink); transition:transform .07s, box-shadow .07s, background .12s; text-decoration:none; display:inline-flex; align-items:center; gap:9px; }
+  .btn:hover { background:var(--clay-d); }
+  .btn:active { transform:translate(3px,3px); box-shadow:0 0 0 var(--ink); }
+  .btn.ghost { background:var(--card); color:var(--ink); }
+  .btn.ghost:hover { background:var(--paper2); }
+  .btn.pine { background:var(--pine); } .btn.pine:hover { filter:brightness(.93); }
+  .btn.sm { font-size:14.5px; padding:9px 15px; box-shadow:2px 2px 0 var(--ink); }
+  .btn.big { font-size:18px; padding:15px 26px; font-family:var(--disp); }
+
+  .eyebrow { font-family:var(--body); font-weight:700; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--clay); }
+
+  /* ---------- hero ---------- */
+  .hero { padding:64px 0 28px; }
+  .hero-grid { display:grid; grid-template-columns:1.05fr .95fr; gap:46px; align-items:center; }
+  .hero h1 { font-size:60px; margin:14px 0 0; }
+  .hero h1 .u { color:var(--clay); font-style:italic; }
+  .hero .sub { font-size:20px; color:var(--ink2); margin:20px 0 0; max-width:34ch; }
+  .hero .cta { display:flex; flex-wrap:wrap; gap:13px; margin-top:30px; }
+  .hero .fine { margin-top:16px; font-size:14px; color:var(--ink3); }
+  .hero .fine b { color:var(--ink2); }
+
+  /* hero visual: a stacked "work ticket" + paycheck */
+  .stack { position:relative; }
+  .ticket { background:var(--card); border:2px solid var(--ink); border-radius:16px; box-shadow:6px 7px 0 rgba(33,29,23,.11); padding:20px; }
+  .ticket .thead { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .ticket .thead .jt { font-family:var(--disp); font-weight:700; font-size:18px; }
+  .radar { width:132px; height:132px; margin:2px auto 6px; border-radius:50%; position:relative; border:2px solid var(--line2);
+    background:radial-gradient(circle,rgba(47,91,72,.12) 0 40%,transparent 41%),repeating-radial-gradient(circle,transparent 0 20px,rgba(51,85,110,.10) 20px 21px); }
+  .radar .site { position:absolute; left:50%; top:50%; width:12px; height:12px; background:var(--pine); border:2px solid #fff; border-radius:50%; transform:translate(-50%,-50%); box-shadow:0 0 0 3px rgba(47,91,72,.25); }
+  .radar .you { position:absolute; left:41%; top:58%; width:13px; height:13px; background:var(--clay); border:2px solid #fff; border-radius:50%; transform:translate(-50%,-50%); }
+  .chip { display:inline-flex; align-items:center; gap:5px; font-size:12.5px; font-weight:700; border-radius:999px; padding:3px 11px; border:1.5px solid; }
+  .chip.on { color:var(--pine); border-color:var(--pine); background:var(--pine-s); }
+  .stub { background:var(--card); border:2px solid var(--ink); border-radius:16px; box-shadow:5px 6px 0 rgba(33,29,23,.11); padding:16px 18px; position:absolute; right:-14px; bottom:-30px; width:250px; }
+  .stub .r { display:flex; justify-content:space-between; padding:5px 0; font-size:14.5px; }
+  .stub .r.big { border-top:1.5px dashed var(--line2); margin-top:6px; padding-top:10px; font-weight:700; }
+  .stub .r.big .v { font-family:var(--disp); font-size:19px; color:var(--pine); }
+  .perf { height:2px; background:repeating-linear-gradient(90deg,var(--line2) 0 7px,transparent 7px 13px); margin:12px -18px; }
+
+  .trust { border-top:2px solid var(--ink); border-bottom:2px solid var(--ink); background:var(--paper2); margin-top:56px; }
+  .trust-in { max-width:1060px; margin:0 auto; padding:16px 20px; display:flex; flex-wrap:wrap; gap:10px 26px; align-items:center; justify-content:center; font-weight:600; color:var(--ink2); font-size:15px; text-align:center; }
+  .trust b { color:var(--clay); }
+
+  /* ---------- sections ---------- */
+  section.band { padding:66px 0; }
+  .sec-head { text-align:center; max-width:640px; margin:0 auto 40px; }
+  .sec-head h2 { font-size:40px; margin-top:8px; }
+  .sec-head p { font-size:18px; color:var(--ink2); margin:14px 0 0; }
+
+  .features { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .feat { background:var(--card); border:2px solid var(--ink); border-radius:14px; padding:22px; box-shadow:4px 5px 0 rgba(33,29,23,.09); }
+  .feat .ic { width:46px; height:46px; border-radius:12px; display:grid; place-items:center; border:2px solid var(--ink); margin-bottom:14px; }
+  .feat .ic svg { width:25px; height:25px; }
+  .feat h3 { font-size:20px; }
+  .feat p { color:var(--ink2); font-size:15px; margin:8px 0 0; }
+  .i-clay { background:#f7ded4; } .i-pine { background:var(--pine-s); } .i-amber { background:var(--amber-s); } .i-sky { background:var(--sky-s); }
+
+  /* two apps */
+  .apps { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  .appcard { background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:26px; box-shadow:5px 6px 0 rgba(33,29,23,.1); }
+  .appcard .tagrow { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .appcard h3 { font-size:26px; }
+  .appcard .who { font-size:14px; color:var(--ink3); font-weight:600; }
+  .appcard ul { list-style:none; padding:0; margin:16px 0 22px; }
+  .appcard li { padding:8px 0 8px 30px; position:relative; font-size:15.5px; border-bottom:1.5px solid var(--line); }
+  .appcard li:last-child { border-bottom:none; }
+  .appcard li::before { content:""; position:absolute; left:2px; top:13px; width:15px; height:9px; border-left:2.5px solid var(--pine); border-bottom:2.5px solid var(--pine); transform:rotate(-45deg); }
+
+  /* how it works */
+  .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; counter-reset:step; }
+  .step { position:relative; padding-top:8px; }
+  .step .n { font-family:var(--disp); font-weight:700; font-size:20px; width:44px; height:44px; border-radius:50%; background:var(--clay); color:#fff; border:2px solid var(--ink); display:grid; place-items:center; box-shadow:2px 2px 0 var(--ink); }
+  .step h3 { font-size:21px; margin:16px 0 0; }
+  .step p { color:var(--ink2); font-size:15.5px; margin:8px 0 0; }
+
+  /* pricing */
+  .price { max-width:460px; margin:0 auto; background:var(--card); border:2.5px solid var(--ink); border-radius:20px; padding:34px 30px; box-shadow:7px 8px 0 rgba(33,29,23,.12); text-align:center; }
+  .price .amt { font-family:var(--disp); font-weight:700; font-size:66px; line-height:1; color:var(--clay); }
+  .price .amt sup { font-size:30px; top:-.7em; }
+  .price .per { color:var(--ink2); font-size:17px; margin-top:6px; }
+  .price ul { list-style:none; padding:0; margin:24px 0; text-align:left; }
+  .price li { padding:9px 0 9px 30px; position:relative; font-size:15.5px; border-bottom:1.5px solid var(--line); }
+  .price li:last-child { border-bottom:none; }
+  .price li::before { content:""; position:absolute; left:2px; top:14px; width:15px; height:9px; border-left:2.5px solid var(--pine); border-bottom:2.5px solid var(--pine); transform:rotate(-45deg); }
+
+  /* faq */
+  .faq { max-width:760px; margin:0 auto; }
+  details.q { border:2px solid var(--ink); border-radius:12px; margin-bottom:12px; overflow:hidden; background:var(--card); box-shadow:3px 3px 0 rgba(33,29,23,.08); }
+  details.q summary { cursor:pointer; padding:17px 18px; font-family:var(--disp); font-weight:600; font-size:18px; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  details.q summary::-webkit-details-marker { display:none; }
+  details.q summary::after { content:"+"; color:var(--clay); font-weight:700; font-size:24px; line-height:1; }
+  details.q[open] summary::after { content:"\2013"; }
+  details.q .a { padding:0 18px 17px; color:var(--ink2); font-size:15.5px; }
+
+  /* closing cta */
+  .close { background:var(--ink); color:var(--paper); border-radius:22px; padding:52px 30px; text-align:center; }
+  .close h2 { font-size:40px; color:var(--paper); }
+  .close p { color:#d8cdb8; font-size:18px; margin:14px auto 26px; max-width:44ch; }
+  .close .btn.ghost { background:transparent; color:var(--paper); border-color:var(--paper); box-shadow:3px 3px 0 var(--clay); }
+  .close .btn.ghost:hover { background:rgba(255,255,255,.08); }
+
+  footer.foot { border-top:2px solid var(--ink); margin-top:60px; }
+  .foot-in { max-width:1060px; margin:0 auto; padding:26px 20px; display:flex; flex-wrap:wrap; gap:14px; align-items:center; color:var(--ink3); font-size:14px; }
+  .foot-in .brand .word { font-size:20px; }
+  .foot-in .sp { margin-left:auto; }
+
+  @media (max-width:860px) {
+    .hero-grid { grid-template-columns:1fr; gap:56px; }
+    .hero h1 { font-size:46px; }
+    .features, .apps, .steps { grid-template-columns:1fr; }
+    .navlinks a.lnk { display:none; }
+  }
+  @media (max-width:640px) {
+    body { font-size:16px; }
+    .hero { padding:40px 0 20px; }
+    .hero h1 { font-size:38px; }
+    .hero .sub { font-size:18px; }
+    .sec-head h2 { font-size:31px; }
+    section.band { padding:48px 0; }
+    .stub { position:static; width:auto; margin:20px 0 0; }
+    .close h2 { font-size:30px; }
+    .btn.big { font-size:17px; padding:14px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="/">
+      <svg class="mark" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="40" height="40" rx="11" fill="#211D17"/>
+        <path d="M11 24.5l6.5 6.5L33 14" stroke="#BE4A28" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="33" cy="14" r="2.4" fill="#F4EEE1"/>
+      </svg>
+      <span class="word">Crew<b>tally</b></span>
+    </a>
+    <nav class="navlinks">
+      <a class="lnk" href="#features">Features</a>
+      <a class="lnk" href="#apps">The apps</a>
+      <a class="lnk" href="#pricing">Pricing</a>
+      <a class="btn ghost sm" href="/login">Sign in</a>
+      <a class="btn sm" href="/signup">Start your shop</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============================ HERO ============================ -->
+<div class="wrap hero">
+  <div class="hero-grid">
+    <div>
+      <p class="eyebrow">Time &amp; pay for the trades</p>
+      <h1>Clock the crew.<br>Run <span class="u">prevailing‑wage</span> payroll. Done.</h1>
+      <p class="sub">Geofenced clock‑ins, certified payroll and job costing built for plumbers, electricians and HVAC crews on public work — not a generic time app with construction bolted on.</p>
+      <div class="cta">
+        <button class="btn big" id="demoBtn">See the live demo →</button>
+        <a class="btn ghost big" href="/signup">Start your shop</a>
+      </div>
+      <p class="fine">No card, no setup. <b>$5 / employee / month</b> · WH‑347 &amp; Davis‑Bacon done for you.</p>
+    </div>
+
+    <div class="stack">
+      <div class="ticket">
+        <div class="thead">
+          <span class="jt">Travis County School</span>
+          <span class="chip on">✓ On site</span>
+        </div>
+        <div class="radar"><div class="site"></div><div class="you"></div></div>
+        <div class="perf"></div>
+        <div style="display:flex; justify-content:space-between; font-size:14.5px; color:var(--ink2)">
+          <span><b style="color:var(--ink)">Joe Pipe</b> · Plumber</span>
+          <span class="tnum">Clocked in 7:02a</span>
+        </div>
+      </div>
+      <div class="stub">
+        <div style="font-family:var(--disp); font-weight:700; font-size:15px; margin-bottom:6px">Friday's cheque</div>
+        <div class="r"><span>Straight 32h + OT 8h</span><span class="tnum">$2,120.00</span></div>
+        <div class="r"><span>Prevailing‑wage make‑up</span><span class="tnum" style="color:var(--pine)">+$706.72</span></div>
+        <div class="r"><span>Taxes withheld</span><span class="tnum">−$678.01</span></div>
+        <div class="r big"><span>Take‑home</span><span class="v tnum">$2,148.71</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="trust">
+  <div class="trust-in">
+    <span>Built for <b>plumbers</b>, <b>electricians</b> &amp; <b>HVAC</b> on public work</span>
+    <span>·</span><span>Davis‑Bacon &amp; CA prevailing wage</span>
+    <span>·</span><span>Penny‑accurate integer math</span>
+    <span>·</span><span>Your data stays on your machine</span>
+  </div>
+</div>
+
+<!-- ========================== FEATURES ========================== -->
+<section class="band" id="features">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Everything the office was doing by hand</p>
+      <h2>The whole job, from punch to paycheck</h2>
+      <p>One tool that knows public work: it verifies where the crew clocked in, then pays them right — including the make‑up wages the wage determination requires.</p>
+    </div>
+    <div class="features">
+      <div class="feat">
+        <div class="ic i-pine"><svg viewBox="0 0 24 24" fill="none" stroke="#2F5B48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></div>
+        <h3>Geofenced clock‑in</h3>
+        <p>Punch in from the phone; Crewtally checks the crew is actually on site. A punch from the wrong place still counts — it's just flagged for the foreman.</p>
+      </div>
+      <div class="feat">
+        <div class="ic i-clay"><svg viewBox="0 0 24 24" fill="none" stroke="#BE4A28" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h6M9 9h2"/></svg></div>
+        <h3>Certified payroll, automatic</h3>
+        <p>Prevailing‑wage make‑up, weighted‑average overtime and fringe are computed for you, then a filing‑ready WH‑347 comes out the other side.</p>
+      </div>
+      <div class="feat">
+        <div class="ic i-sky"><svg viewBox="0 0 24 24" fill="none" stroke="#33556e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
+        <h3>Job costing you trust</h3>
+        <p>Wages plus the workers'‑comp burden, split by job and cost code — so you know what each public job really cost before you bid the next one.</p>
+      </div>
+      <div class="feat">
+        <div class="ic i-amber"><svg viewBox="0 0 24 24" fill="none" stroke="#A9761A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg></div>
+        <h3>The 5 o'clock nudge</h3>
+        <p>Anyone who was on the crew and hasn't logged hours gets a friendly text at 5 PM. Fewer Monday reconstructions, on‑time certified payroll.</p>
+      </div>
+      <div class="feat">
+        <div class="ic i-pine"><svg viewBox="0 0 24 24" fill="none" stroke="#2F5B48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 12h18M3 17h18"/><circle cx="8" cy="7" r="1.6" fill="#2F5B48"/><circle cx="15" cy="17" r="1.6" fill="#2F5B48"/></svg></div>
+        <h3>Split‑rate &amp; multi‑role</h3>
+        <p>The same person can run as plumber in the morning and foreman after lunch — each role at its own rate, blended correctly for overtime.</p>
+      </div>
+      <div class="feat">
+        <div class="ic i-clay"><svg viewBox="0 0 24 24" fill="none" stroke="#BE4A28" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 19a6.5 6.5 0 0 1 13 0"/><path d="M16 6a3 3 0 0 1 0 6"/><path d="M18 13a5 5 0 0 1 3.5 5"/></svg></div>
+        <h3>Seasonal crew &amp; simple billing</h3>
+        <p>Bring on helpers for the busy months; they roll off on their end date. You're billed $5 for each active worker — nothing for the ones who've left.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================== TWO APPS ========================== -->
+<section class="band" id="apps" style="background:var(--paper2); border-top:2px solid var(--ink); border-bottom:2px solid var(--ink)">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Two apps, one crew</p>
+      <h2>Simple for the field. Powerful for the office.</h2>
+      <p>The crew gets a phone app that does two things well. You get a console that runs the whole week.</p>
+    </div>
+    <div class="apps">
+      <div class="appcard">
+        <div class="tagrow"><span class="chip on">On the truck</span><span class="who">for the crew</span></div>
+        <h3>The crew app</h3>
+        <ul>
+          <li>One‑tap clock in and out, with the site checked by GPS</li>
+          <li>See this week's hours by day and by job</li>
+          <li>Know your rate and roughly what's coming Friday</li>
+          <li>A nudge if you forget to log a day — no phone calls</li>
+        </ul>
+        <a class="btn pine" href="/me">Open the crew app →</a>
+      </div>
+      <div class="appcard">
+        <div class="tagrow"><span class="chip on" style="color:var(--sky);border-color:var(--sky);background:var(--sky-s)">In the office</span><span class="who">for the owner / foreman</span></div>
+        <h3>The owner console</h3>
+        <ul>
+          <li>See who's on the clock and where, right now</li>
+          <li>Review the week's hours, then run payroll in one click</li>
+          <li>Prevailing wage, WH‑347 and job costs come out done</li>
+          <li>Grow the crew, add seasonal help, watch your bill</li>
+        </ul>
+        <a class="btn" href="/owner">Open the owner console →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= HOW IT WORKS ========================= -->
+<section class="band">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Up and running today</p>
+      <h2>Three steps to Friday</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="n">1</div>
+        <h3>Add your crew &amp; jobs</h3>
+        <p>Names, rates, and which jobs are public work. Pull the wage determination once; Crewtally remembers it.</p>
+      </div>
+      <div class="step">
+        <div class="n">2</div>
+        <h3>Crew clocks in on site</h3>
+        <p>Everyone punches from their phone. Hours land against the right job and role automatically, all week.</p>
+      </div>
+      <div class="step">
+        <div class="n">3</div>
+        <h3>Run payroll Friday</h3>
+        <p>One click. Take‑home, prevailing‑wage make‑up, job costs and a filing‑ready WH‑347 — checked and ready to approve.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== PRICING =========================== -->
+<section class="band" id="pricing" style="background:var(--paper2); border-top:2px solid var(--ink); border-bottom:2px solid var(--ink)">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Pricing</p>
+      <h2>One price. No games.</h2>
+      <p>You pay for the crew that's actually working. That's it.</p>
+    </div>
+    <div class="price">
+      <div class="amt"><sup>$</sup>5</div>
+      <div class="per">per active employee, per month</div>
+      <ul>
+        <li>Geofenced clock‑in for the whole crew</li>
+        <li>Prevailing wage &amp; certified payroll (WH‑347)</li>
+        <li>Weighted‑average overtime &amp; fringe, done right</li>
+        <li>Job costing with the workers'‑comp burden</li>
+        <li>The 5 o'clock nudge &amp; seasonal roster</li>
+        <li>Seasonal helpers stop billing the day they roll off</li>
+      </ul>
+      <button class="btn big" id="demoBtn2" style="width:100%; justify-content:center">See it on a sample shop →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= FAQ ============================= -->
+<section class="band">
+  <div class="wrap">
+    <div class="sec-head"><p class="eyebrow">Questions</p><h2>The stuff owners ask first</h2></div>
+    <div class="faq">
+      <details class="q" open><summary>Does it really handle prevailing wage and certified payroll?</summary><div class="a">Yes — that's the whole point. Crewtally computes the make‑up wage between your shop rate and the wage determination, blends overtime at the weighted‑average regular rate, annualizes fringe, and produces a filing‑ready WH‑347 for each public job. It's built for Davis‑Bacon and California prevailing wage, not bolted on.</div></details>
+      <details class="q"><summary>What if someone clocks in from the wrong place?</summary><div class="a">The punch still counts — we never lose someone's time. It's recorded with how far off site it was and flagged for the foreman to review. A job with no geofence, or a phone that won't share location, is simply accepted and marked unverified.</div></details>
+      <details class="q"><summary>Can one person be paid at two different rates in a week?</summary><div class="a">Yes. Log the hours under each role — say plumber and foreman — and each is paid at its own rate. When overtime hits, it's calculated on the blended, weighted‑average regular rate the way the law requires.</div></details>
+      <details class="q"><summary>How does billing work with seasonal help?</summary><div class="a">You're billed $5 for each active employee per month. Give a seasonal helper an end date and they roll off the roster automatically — and stop counting toward your bill — the day the season ends.</div></details>
+      <details class="q"><summary>Where does my data live?</summary><div class="a">This build runs on your own machine with penny‑accurate integer math — no cents lost to floating point, no crew list sitting on someone else's server. Texts send for real once you connect an SMS carrier; until then the nudge preview shows you exactly what would go out.</div></details>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== CLOSE =========================== -->
+<div class="wrap">
+  <div class="close">
+    <h2>See your week, run in a minute.</h2>
+    <p>Load a sample plumbing shop — a crew, a geofenced public job, and a week of hours — and watch it go from punches to paychecks.</p>
+    <div style="display:flex; gap:13px; justify-content:center; flex-wrap:wrap">
+      <button class="btn big" id="demoBtn3">See the live demo →</button>
+      <a class="btn ghost big" href="/me">Open the crew app</a>
+    </div>
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="foot-in">
+    <a class="brand" href="/"><span class="word">Crew<b>tally</b></span></a>
+    <span class="sp"></span>
+    <span>Time &amp; pay for the trades · $5/employee/month · built for public work</span>
+  </div>
+</footer>
+
+<script>
+  // "See the live demo" — seed the sample shop, then open the owner console.
+  async function demo(btn) {
+    const original = btn.textContent;
+    btn.disabled = true; btn.textContent = "Loading the sample shop…";
+    try {
+      await fetch("/api/demo/seed", { method: "POST" });
+      window.location.href = "/owner";
+    } catch (e) {
+      btn.disabled = false; btn.textContent = original;
+      alert("Couldn't reach the server. Is Crewtally running?");
+    }
+  }
+  ["demoBtn", "demoBtn2", "demoBtn3"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("click", () => demo(el));
+  });
+</script>
+</body>
+</html>

@@ -152,3 +152,20 @@ export {
   weeklyJobCosts,
 } from './service.ts';
 export type { TradesRunRequest } from './service.ts';
+
+export {
+  EmailTakenError,
+  accountForToken,
+  createAccount,
+  createSession,
+  deleteSession,
+  getAccount,
+  getAccountByEmail,
+  getAccountForEmployee,
+  getSession,
+  normalizeEmail,
+  publicAccount,
+  setPassword,
+  verifyCredentials,
+} from './accounts.ts';
+export type { Account, AccountRole, CreateAccountInput, PublicAccount, Session } from './accounts.ts';

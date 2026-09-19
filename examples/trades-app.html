@@ -63,8 +63,12 @@
   .word { font-family: var(--disp); font-weight: 700; font-size: 25px; letter-spacing: -.02em; line-height: 1; }
   .word b { color: var(--clay); font-weight: 700; }
   .tag { font-size: 11.5px; color: var(--ink3); letter-spacing: .02em; margin-top: 1px; }
+  .crew-link { margin-left: auto; text-decoration: none; font-weight: 700; font-size: 14px; color: var(--sky); border-bottom: 2px solid transparent; }
+  .crew-link:hover { border-bottom-color: var(--sky); }
+  .logout { font-family: var(--body); cursor: pointer; background: none; border: none; color: var(--ink3); font-weight: 700; font-size: 13.5px; padding: 6px 4px; }
+  .logout:hover { color: var(--brick); }
   .bill-pill {
-    margin-left: auto; display: flex; align-items: center; gap: 8px; background: var(--card); border: 1.5px solid var(--ink);
+    display: flex; align-items: center; gap: 8px; background: var(--card); border: 1.5px solid var(--ink);
     border-radius: 999px; padding: 6px 14px; font-size: 13.5px; font-weight: 600; box-shadow: 2px 2px 0 var(--ink);
   }
   .bill-pill .amt { color: var(--clay); }
@@ -168,13 +172,84 @@
 
   .foot { text-align: center; color: var(--ink3); font-size: 13px; margin-top: 24px; }
   .foot b { color: var(--ink2); }
+
+  /* ---------- dashboard stats ---------- */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+  .stat { background: var(--card); border: 2px solid var(--ink); border-radius: 14px; padding: 16px 17px; box-shadow: 4px 5px 0 rgba(33,29,23,.09); }
+  .stat .k { font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink3); }
+  .stat .v { font-family: var(--disp); font-weight: 700; font-size: 40px; line-height: 1.02; margin: 6px 0 2px; }
+  .stat .v.clay { color: var(--clay); } .stat .v.pine { color: var(--pine); }
+  .stat .s { font-size: 13px; color: var(--ink2); }
+  .alert-row { display: flex; align-items: center; gap: 11px; padding: 12px 0; border-bottom: 1.5px solid var(--line); }
+  .alert-row:last-child { border-bottom: none; }
+  .alert-row .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .alert-row .dot.ok { background: var(--pine); } .alert-row .dot.warn { background: var(--amber); } .alert-row .dot.bad { background: var(--brick); }
+  .alert-row .txt { flex: 1; font-size: 14.5px; }
+  .alert-row .txt b { font-weight: 700; }
+  @media (max-width: 640px) { .stats { grid-template-columns: 1fr 1fr; } .stat .v { font-size: 34px; } }
+
+  /* ---------- bottom tab bar (phones) ---------- */
+  nav.botnav { display: none; }
+  @media (max-width: 640px) {
+    nav.botnav {
+      display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+      background: var(--card); border-top: 2px solid var(--ink);
+      padding: 5px 6px calc(5px + env(safe-area-inset-bottom));
+      box-shadow: 0 -3px 12px rgba(33,29,23,.07);
+    }
+    nav.botnav .bn {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+      background: none; border: none; padding: 6px 2px; border-radius: 10px; min-height: 52px;
+      font-family: var(--body); font-size: 11px; font-weight: 700; letter-spacing: .02em; color: var(--ink3);
+      -webkit-tap-highlight-color: transparent;
+    }
+    nav.botnav .bn svg { width: 23px; height: 23px; stroke: currentColor; fill: none; }
+    nav.botnav .bn.on { color: var(--clay); }
+    nav.botnav .bn.on::after { content: ""; position: absolute; }
+  }
+
+  /* ---------- mobile layout ---------- */
+  @media (max-width: 640px) {
+    body { font-size: 16px; }
+    .top-in { padding: 9px 14px; gap: 10px; }
+    .mark { width: 33px; height: 33px; }
+    .word { font-size: 22px; }
+    .tag { display: none; }
+    .crew-link { display: none; }
+    .bill-pill { margin-left: auto; }
+    .logout { font-size: 12.5px; }
+    .bill-pill { padding: 5px 11px; font-size: 12.5px; box-shadow: 1.5px 1.5px 0 var(--ink); }
+
+    nav.tabs { display: none; }
+    main { padding: 16px 14px calc(80px + env(safe-area-inset-bottom)); }
+
+    .card { padding: 17px 15px; border-radius: 12px; margin-bottom: 15px; }
+    .card h2 { font-size: 21px; }
+    .banner { padding: 13px 15px; }
+
+    /* let fields breathe instead of cramming into 78px boxes */
+    .row { gap: 10px; }
+    .f, .f.sm, .f.xs { flex: 1 1 44%; }
+    .f { flex-basis: 100%; }
+    .row > div:last-child { flex: 1 1 100%; }
+    .row > div:last-child .btn { width: 100%; }
+    .btn.sm { font-size: 15px; padding: 12px 16px; }
+
+    /* tables scroll sideways rather than squishing the numbers */
+    .card table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+
+    /* clock: radar and controls stack full width */
+    .radar { width: 130px; height: 130px; margin: 0 auto; }
+    #clockInBtn, #clockOutBtn { flex: 1 1 44%; }
+    .linkish { font-size: 14.5px; padding: 9px 0; }
+  }
 </style>
 </head>
 <body>
 
 <header class="top">
   <div class="top-in">
-    <a class="brand" href="#">
+    <a class="brand" href="/">
       <svg class="mark" viewBox="0 0 44 44" fill="none" aria-hidden="true">
         <rect x="2" y="2" width="40" height="40" rx="11" fill="#211D17"/>
         <rect x="2" y="2" width="40" height="40" rx="11" fill="none" stroke="#211D17"/>
@@ -184,15 +259,18 @@
       </svg>
       <span>
         <span class="word">Crew<b>tally</b></span>
-        <div class="tag">Time &amp; pay for the trades</div>
+        <div class="tag">Owner console</div>
       </span>
     </a>
+    <a class="crew-link" href="/me" title="Open the crew app">Crew app ↗</a>
     <div class="bill-pill" id="billPill" title="Your plan">
       <span id="billCrew">—</span> crew · <span class="amt tnum" id="billAmt">—</span>/mo
     </div>
+    <button class="logout" id="logoutBtn" title="Log out">Log out</button>
   </div>
   <nav class="tabs">
-    <button class="tab on" data-view="crew">Crew</button>
+    <button class="tab on" data-view="today">Today</button>
+    <button class="tab" data-view="crew">Crew</button>
     <button class="tab" data-view="clock">Time Clock</button>
     <button class="tab" data-view="pay">Payroll</button>
   </nav>
@@ -201,8 +279,40 @@
 <main>
   <div id="topErr"></div>
 
+  <!-- ======================= TODAY ======================= -->
+  <section class="view on" id="view-today">
+    <div class="card" id="todaySetup">
+      <p class="eyebrow">Get started</p>
+      <h2>Load a sample shop</h2>
+      <p class="lede">A crew, a geofenced public-works job, and a week of hours — already filled in so you can see the whole console working in one minute.</p>
+      <button class="btn" id="seedBtn2">Load the sample plumbing shop</button>
+    </div>
+
+    <div id="todayBody" class="hidden">
+      <div class="stats">
+        <div class="stat"><div class="k">On the clock now</div><div class="v clay" id="stOnClock">0</div><div class="s" id="stOnClockSub">nobody punched in yet</div></div>
+        <div class="stat"><div class="k">Hours this week</div><div class="v" id="stHours">0</div><div class="s">logged across the crew</div></div>
+        <div class="stat"><div class="k">Active crew</div><div class="v pine" id="stCrew">0</div><div class="s" id="stBill">—/mo</div></div>
+      </div>
+
+      <div class="card">
+        <p class="eyebrow">Where things stand</p>
+        <h2>This week at a glance</h2>
+        <p class="lede">Week of <b>Jan 4–10, 2026</b>, paid Jan 14.</p>
+        <div id="todayAlerts"></div>
+        <button class="btn big pine" id="toPayBtn" style="margin-top:16px">Review &amp; run this week's payroll →</button>
+      </div>
+
+      <div class="card">
+        <p class="eyebrow">On site</p>
+        <h2>Who's on the clock</h2>
+        <div id="onClockList"><p class="empty">No one is punched in right now. Punches show up here the moment the crew clocks in.</p></div>
+      </div>
+    </div>
+  </section>
+
   <!-- ======================= CREW ======================= -->
-  <section class="view on" id="view-crew">
+  <section class="view" id="view-crew">
     <div class="card" id="setupCard">
       <p class="eyebrow">Get started</p>
       <h2>Load a sample shop</h2>
@@ -230,6 +340,17 @@
         <div class="f sm hidden" id="wEndWrap"><label>Season ends</label><input id="wEnd" type="date" value="2026-09-30" /></div>
         <div><button class="btn sm" id="addWorkerBtn">Add</button></div>
       </div>
+      <details style="margin-top:12px">
+        <summary>Give them a crew-app login (optional)</summary>
+        <div class="dbody">
+          <p class="empty" style="margin:0 0 10px">Set an email and a temporary password and they can sign in to the crew app to clock in and see their hours.</p>
+          <div class="row">
+            <div class="f"><label>Login email</label><input id="wLoginEmail" type="email" placeholder="dana@yourshop.com" /></div>
+            <div class="f sm"><label>Temp password</label><input id="wLoginPass" type="text" placeholder="min 4 chars" /></div>
+          </div>
+        </div>
+      </details>
+      <div id="addWorkerMsg"></div>
     </div>
 
     <div class="card hidden" id="nudgeCard">
@@ -338,8 +459,27 @@
   <p class="foot">Runs on your machine · penny-accurate integer math · built for plumbers, electricians &amp; HVAC on public work · <b>$5/employee/month</b></p>
 </main>
 
+<nav class="botnav" aria-label="Sections">
+  <button class="bn on" data-view="today">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v15H4z"/><path d="M4 9h16M8 3v4M16 3v4"/><path d="M8 13h3v3H8z"/></svg>
+    <span>Today</span>
+  </button>
+  <button class="bn" data-view="crew">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.2A5 5 0 0 1 20.5 19"/></svg>
+    <span>Crew</span>
+  </button>
+  <button class="bn" data-view="clock">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+    <span>Clock</span>
+  </button>
+  <button class="bn" data-view="pay">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M14 3v4h4"/><path d="M12 10.5c-1.4 0-2.2.7-2.2 1.6 0 2 4.4 1 4.4 3 0 .9-.8 1.6-2.2 1.6M12 10.5c1 0 1.7.3 2 .9M12 10.5V9m0 9.2v-1.5m0 1.5c-1 0-1.7-.3-2-.9"/></svg>
+    <span>Pay</span>
+  </button>
+</nav>
+
 <script>
-const COMPANY = "shop-1";
+let COMPANY = "shop-1";
 const WEEK = { periodStart: "2026-01-04", periodEnd: "2026-01-10", checkDate: "2026-01-14" };
 let crew = [], jobs = [], jobById = {}, crewNames = {}, lastRunId = null;
 
@@ -358,11 +498,13 @@ async function api(method, path, body) {
 }
 const showErr = (where, msg) => { $(where).innerHTML = `<div class="err">${esc(msg)}</div>`; };
 
-// ---- tabs ----
-document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
-  document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("on", x === t));
-  document.querySelectorAll(".view").forEach((v) => v.classList.toggle("on", v.id === "view-" + t.dataset.view));
-}));
+// ---- tabs (top bar + bottom bar stay in sync) ----
+function showView(view) {
+  document.querySelectorAll(".tab, .botnav .bn").forEach((x) => x.classList.toggle("on", x.dataset.view === view));
+  document.querySelectorAll(".view").forEach((v) => v.classList.toggle("on", v.id === "view-" + view));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+document.querySelectorAll(".tab, .botnav .bn").forEach((t) => t.addEventListener("click", () => showView(t.dataset.view)));
 
 // ---- load ----
 async function loadAll() {
@@ -373,9 +515,13 @@ async function loadAll() {
   crew = employees; jobs = jb;
   jobById = Object.fromEntries(jobs.map((j) => [j.id, j]));
   crewNames = Object.fromEntries(crew.map((e) => [e.id, e.name]));
-  if (!crew.length) { $("setupCard").classList.remove("hidden"); ["rosterCard","addCard","nudgeCard"].forEach(id=>$(id).classList.add("hidden")); return; }
-  $("setupCard").classList.add("hidden");
-  ["rosterCard","addCard","nudgeCard"].forEach(id=>$(id).classList.remove("hidden"));
+  if (!crew.length) {
+    ["todayBody","rosterCard","addCard","nudgeCard"].forEach(id=>$(id).classList.add("hidden"));
+    ["todaySetup","setupCard"].forEach(id=>$(id).classList.remove("hidden"));
+    return;
+  }
+  ["todaySetup","setupCard"].forEach(id=>$(id).classList.add("hidden"));
+  ["todayBody","rosterCard","addCard","nudgeCard"].forEach(id=>$(id).classList.remove("hidden"));
 
   renderRoster();
   const opt = (arr, val, lab) => arr.map((x) => `<option value="${esc(x[val])}">${esc(x[lab])}</option>`).join("");
@@ -384,8 +530,55 @@ async function loadAll() {
   $("cJob").innerHTML = opt(jobs, "id", "name");
   $("hJob").innerHTML = opt(jobs, "id", "name");
   $("runBtn").disabled = false;
-  await Promise.all([loadHours(), loadBilling(), loadPunches()]);
+  await Promise.all([loadHours(), loadBilling(), loadPunches(), loadToday()]);
 }
+
+// ---- today dashboard ----
+async function loadToday() {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const [{ entries }, billing, todayClock, demoClock] = await Promise.all([
+      api("GET", `/api/companies/${COMPANY}/hours?start=${WEEK.periodStart}&end=${WEEK.periodEnd}`),
+      api("GET", `/api/companies/${COMPANY}/billing?asOf=${WEEK.checkDate}`).catch(() => ({ headcount: crew.length, totalCents: crew.length * 500 })),
+      api("GET", `/api/companies/${COMPANY}/clock?date=${today}`).then((r) => r.events).catch(() => []),
+      api("GET", `/api/companies/${COMPANY}/clock?date=${WEEK.checkDate}`).then((r) => r.events).catch(() => []),
+    ]);
+
+    const totalHours = entries.reduce((s, e) => s + e.hours, 0);
+    $("stHours").textContent = totalHours.toLocaleString("en-US");
+    $("stCrew").textContent = billing.headcount;
+    $("stBill").textContent = money(billing.totalCents) + "/mo";
+
+    // who's on the clock now: last punch per worker across today + the demo day
+    const events = [...demoClock, ...todayClock];
+    const last = {};
+    for (const e of events.sort((a, b) => a.at.localeCompare(b.at))) last[e.employeeId] = e;
+    const onNow = Object.values(last).filter((e) => e.type === "in");
+    $("stOnClock").textContent = onNow.length;
+    $("stOnClockSub").textContent = onNow.length ? `${onNow.filter((e) => e.onSite).length} on site` : "nobody punched in yet";
+    $("onClockList").innerHTML = onNow.length ? onNow.map((e) => `<div class="worker">
+        <div class="avatar" style="background:${avatarColor(e.employeeId)}">${esc((who(e.employeeId).split(/\s+/).map((w)=>w[0]).slice(0,2).join("")||"?").toUpperCase())}</div>
+        <div><div class="nm">${esc(who(e.employeeId))}</div><div class="meta">${esc(jobById[e.jobId]?.name || e.jobId)} · in at ${esc(e.at.slice(11,16))}</div></div>
+        <div class="spacer"></div><span class="chip ${e.onSite ? "on" : "off"}">${e.onSite ? "✓ on site" : "⚠ off site"}</span>
+      </div>`).join("") : `<p class="empty">No one is punched in right now. Punches show up here the moment the crew clocks in.</p>`;
+
+    // alerts
+    const logged = new Set(entries.map((e) => e.employeeId));
+    const missing = crew.filter((c) => !logged.has(c.id));
+    const publicJobIds = new Set(entries.filter((e) => jobById[e.jobId]?.prevailingWage).map((e) => e.jobId));
+    const offToday = events.filter((e) => e.onSite === false).length;
+    const alerts = [];
+    alerts.push(publicJobIds.size
+      ? { c: "warn", h: `Certified payroll due`, t: `${publicJobIds.size} public job${publicJobIds.size > 1 ? "s" : ""} worked this week — a WH-347 is ready to file once you run payroll.` }
+      : { c: "ok", h: `No certified payroll due`, t: `No public-works hours logged this week.` });
+    alerts.push(missing.length
+      ? { c: "warn", h: `${missing.length} haven't logged hours`, t: `${missing.map((m) => m.name).join(", ")} — the 5 o'clock nudge will remind them.` }
+      : { c: "ok", h: `Everyone's logged hours`, t: `The whole active crew has time in for the week.` });
+    if (offToday) alerts.push({ c: "bad", h: `${offToday} off-site punch${offToday > 1 ? "es" : ""}`, t: `Clock-ins recorded away from the job site — worth a look on the Time Clock tab.` });
+    $("todayAlerts").innerHTML = alerts.map((a) => `<div class="alert-row"><span class="dot ${a.c}"></span><span class="txt"><b>${esc(a.h)}</b> — ${esc(a.t)}</span></div>`).join("");
+  } catch (e) { /* dashboard is best-effort */ }
+}
+$("toPayBtn").addEventListener("click", () => showView("pay"));
 
 function renderRoster() {
   $("roster").innerHTML = crew.map((e) => {
@@ -416,14 +609,19 @@ async function loadBilling() {
 $("wType").addEventListener("change", (e) => $("wEndWrap").classList.toggle("hidden", e.target.value !== "seasonal"));
 $("addWorkerBtn").addEventListener("click", async () => {
   const body = {
-    companyId: COMPANY, firstName: $("wFirst").value.trim(), lastName: $("wLast").value.trim(),
+    firstName: $("wFirst").value.trim(), lastName: $("wLast").value.trim(),
     hourlyRate: parseFloat($("wRate").value), phone: $("wPhone").value.trim(),
     employmentType: $("wType").value, seasonEndDate: $("wType").value === "seasonal" ? $("wEnd").value : undefined,
+    loginEmail: $("wLoginEmail").value.trim(), loginPassword: $("wLoginPass").value,
   };
   if (!body.firstName || !(body.hourlyRate > 0)) return showErr("topErr", "A first name and an hourly rate are required.");
-  $("topErr").innerHTML = "";
-  try { await api("POST", "/api/employees", body); $("wFirst").value = $("wLast").value = $("wPhone").value = ""; await loadAll(); }
-  catch (e) { showErr("topErr", e.message); }
+  $("topErr").innerHTML = ""; $("addWorkerMsg").innerHTML = "";
+  try {
+    const out = await api("POST", "/api/employees", body);
+    $("wFirst").value = $("wLast").value = $("wPhone").value = $("wLoginEmail").value = $("wLoginPass").value = "";
+    if (out.login) $("addWorkerMsg").innerHTML = `<div class="note info">Crew login created for <b>${esc(out.login)}</b> — they can sign in at <b>/me</b>.</div>`;
+    await loadAll();
+  } catch (e) { showErr("topErr", e.message); }
 });
 
 // ---- nudges ----
@@ -583,12 +781,33 @@ $("approveBtn").addEventListener("click", async () => {
 });
 
 // ---- seed + boot ----
-$("seedBtn").addEventListener("click", async (ev) => {
-  ev.target.disabled = true; ev.target.innerHTML = `<span class="spin"></span> Loading…`;
+async function seed(ev) {
+  const btn = ev.target;
+  btn.disabled = true; btn.innerHTML = `<span class="spin"></span> Loading…`;
   try { await api("POST", "/api/demo/seed"); await loadAll(); }
-  catch (e) { showErr("topErr", e.message); ev.target.disabled = false; ev.target.textContent = "Load the sample plumbing shop"; }
+  catch (e) { showErr("topErr", e.message); btn.disabled = false; btn.textContent = "Load the sample plumbing shop"; }
+}
+$("seedBtn").addEventListener("click", seed);
+$("seedBtn2").addEventListener("click", seed);
+
+// ---- logout ----
+$("logoutBtn").addEventListener("click", async () => {
+  try { await api("POST", "/api/auth/logout", {}); } catch {}
+  location.href = "/login";
 });
-loadAll().catch(() => {});
+
+// ---- auth gate + boot ----
+async function boot() {
+  let me;
+  try { me = await api("GET", "/api/auth/me"); }
+  catch { location.href = "/login"; return; }
+  if (me.account.role !== "owner") { location.href = "/me"; return; } // crew go to the crew app
+  COMPANY = me.account.companyId;
+  const tag = document.querySelector(".brand .tag");
+  if (tag && me.company) tag.textContent = me.company.name;
+  await loadAll();
+}
+boot().catch(() => {});
 </script>
 </body>
 </html>
