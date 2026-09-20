@@ -1,0 +1,1286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Omnia API Reference — payroll tax calculation</title>
+<meta name="description" content="The Omnia API reference: gross-to-net payroll tax calculation for all 50 states, DC, and the local jurisdictions underneath — one authenticated POST per paycheck." />
+<style>
+  :root {
+    --paper:      #FBFAF5;
+    --paper-2:    #F4F2EA;
+    --card:       #FFFFFF;
+    --ink:        #14140F;
+    --ink-2:      #3A392F;
+    --ink-3:      #6B695C;
+    --ink-4:      #93917F;
+    --rule:       #E4E1D4;
+    --rule-2:     #D5D2C4;
+    --stamp:      #B23A24;
+    --stamp-soft: #F7E7E2;
+    --verify:     #2F5D3A;
+    --verify-soft:#E4EDE3;
+    --code-bg:    #1E1D18;
+    --code-bg-2:  #2A2922;
+    --code-ink:   #E8E5D8;
+    --code-dim:   #9A9788;
+    --code-str:   #C6D68B;
+    --code-key:   #E0A986;
+    --code-num:   #86B8C6;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, Menlo, Consolas, monospace;
+    --nav-w: 256px;
+    --code-w: 480px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--stamp); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { font-family: var(--mono); font-size: 0.87em; }
+  h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.02em; scroll-margin-top: 88px; }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 40;
+    height: 60px; display: flex; align-items: center; gap: 20px;
+    padding: 0 24px; background: rgba(251,250,245,0.9);
+    backdrop-filter: saturate(140%) blur(8px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .brand { display: flex; align-items: baseline; gap: 9px; }
+  .brand .word { font-family: var(--mono); font-size: 19px; font-weight: 600; letter-spacing: -0.06em; color: var(--ink); }
+  .brand .tag {
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-4); border: 1px solid var(--rule-2); padding: 2px 5px; border-radius: 3px;
+  }
+  .topbar .sep { width: 1px; height: 22px; background: var(--rule-2); }
+  .topbar .crumb { font-size: 13.5px; color: var(--ink-3); }
+  .topbar .spacer { flex: 1; }
+  .topbar .tnav { display: flex; gap: 22px; }
+  .topbar .tnav a { font-size: 13.5px; color: var(--ink-2); }
+  .topbar .cta {
+    font-size: 13px; font-weight: 500; color: var(--paper); background: var(--ink);
+    padding: 7px 14px; border-radius: 6px;
+  }
+  .topbar .cta:hover { text-decoration: none; background: #000; }
+  .menu-btn {
+    display: none; border: 1px solid var(--rule-2); background: var(--card);
+    border-radius: 6px; padding: 6px 9px; cursor: pointer; font-size: 15px; line-height: 1;
+  }
+
+  /* ---------- layout ---------- */
+  .shell { display: flex; max-width: 1440px; margin: 0 auto; }
+
+  .sidebar {
+    width: var(--nav-w); flex: none;
+    position: sticky; top: 60px; align-self: flex-start;
+    height: calc(100vh - 60px); overflow-y: auto;
+    padding: 24px 12px 60px 24px;
+    border-right: 1px solid var(--rule);
+  }
+  .nav-group { margin-bottom: 22px; }
+  .nav-group > .label {
+    font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.13em;
+    text-transform: uppercase; color: var(--ink-4); padding: 0 10px; margin-bottom: 8px;
+  }
+  .nav-group a {
+    display: block; padding: 5px 10px; border-radius: 6px;
+    font-size: 13.5px; color: var(--ink-2); line-height: 1.4;
+    border-left: 2px solid transparent; margin-left: -2px;
+  }
+  .nav-group a:hover { background: var(--paper-2); text-decoration: none; }
+  .nav-group a.active { color: var(--stamp); background: var(--stamp-soft); font-weight: 500; }
+  .nav-group a .verb {
+    font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 0.05em;
+    color: var(--verify); margin-right: 6px; vertical-align: 1px;
+  }
+
+  .content { flex: 1; min-width: 0; padding: 40px 48px 120px; }
+  .content-inner { max-width: 720px; }
+
+  /* ---------- section blocks with right code rail ---------- */
+  .doc-section { padding-top: 24px; margin-bottom: 40px; border-top: 1px solid var(--rule); }
+  .doc-section:first-of-type { border-top: none; padding-top: 0; }
+  .row { display: flex; gap: 40px; align-items: flex-start; }
+  .row .prose { flex: 1; min-width: 0; max-width: 640px; }
+  .row .rail { width: var(--code-w); flex: none; position: sticky; top: 84px; }
+
+  h1.page-title { font-size: 32px; margin: 0 0 6px; letter-spacing: -0.03em; }
+  .page-sub { font-size: 16.5px; color: var(--ink-3); margin: 0 0 34px; max-width: 640px; }
+  h2 { font-size: 22px; margin: 0 0 12px; }
+  h3 { font-size: 16px; margin: 28px 0 10px; }
+  .prose p { color: var(--ink-2); margin: 0 0 14px; }
+  .prose ul { color: var(--ink-2); padding-left: 20px; margin: 0 0 14px; }
+  .prose li { margin: 4px 0; }
+
+  .endpoint-line {
+    display: inline-flex; align-items: center; gap: 10px; margin: 4px 0 18px;
+    font-family: var(--mono); font-size: 14px; background: var(--paper-2);
+    border: 1px solid var(--rule-2); border-radius: 7px; padding: 8px 12px;
+  }
+  .method {
+    font-weight: 700; font-size: 11px; letter-spacing: 0.06em; color: var(--paper);
+    background: var(--verify); padding: 3px 7px; border-radius: 4px;
+  }
+  .method.get { background: #2F4E5D; }
+  .path { color: var(--ink); }
+
+  code.inline {
+    background: var(--paper-2); border: 1px solid var(--rule); border-radius: 4px;
+    padding: 1px 5px; color: var(--stamp); white-space: nowrap;
+  }
+
+  /* ---------- callouts ---------- */
+  .note {
+    border: 1px solid var(--rule-2); border-left: 3px solid var(--ink-4);
+    background: var(--card); border-radius: 7px; padding: 12px 15px; margin: 0 0 18px;
+    font-size: 14px; color: var(--ink-2);
+  }
+  .note.warn { border-left-color: var(--stamp); background: var(--stamp-soft); }
+  .note.ok { border-left-color: var(--verify); background: var(--verify-soft); }
+  .note b { color: var(--ink); }
+
+  /* ---------- parameter tables ---------- */
+  .params { margin: 8px 0 20px; border-top: 1px solid var(--rule); }
+  .param { padding: 14px 2px; border-bottom: 1px solid var(--rule); }
+  .param-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .param-name { font-family: var(--mono); font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .param-type { font-family: var(--mono); font-size: 12px; color: var(--ink-4); }
+  .param-req {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--stamp); font-weight: 600;
+  }
+  .param-opt {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--ink-4); font-weight: 600;
+  }
+  .param-desc { margin-top: 5px; font-size: 13.5px; color: var(--ink-2); }
+  .param-desc code { background: var(--paper-2); padding: 1px 4px; border-radius: 3px; color: var(--stamp); }
+  .enum-list { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 5px; }
+  .enum-list span {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-2);
+    background: var(--paper-2); border: 1px solid var(--rule); border-radius: 4px; padding: 2px 7px;
+  }
+
+  /* ---------- code panel (right rail) ---------- */
+  .codepanel { border-radius: 10px; overflow: hidden; border: 1px solid var(--code-bg-2); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .codepanel + .codepanel { margin-top: 16px; }
+  .code-head {
+    display: flex; align-items: center; background: var(--code-bg-2); padding: 0 8px;
+    border-bottom: 1px solid #000;
+  }
+  .code-title {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--code-dim); padding: 9px 8px; flex: 1;
+  }
+  .code-tabs { display: flex; gap: 2px; }
+  .code-tabs button {
+    font-family: var(--mono); font-size: 12px; color: var(--code-dim);
+    background: transparent; border: none; padding: 8px 10px; cursor: pointer; border-radius: 5px;
+  }
+  .code-tabs button:hover { color: var(--code-ink); }
+  .code-tabs button.active { color: var(--code-ink); background: var(--code-bg); }
+  .copy-btn {
+    font-family: var(--mono); font-size: 11px; color: var(--code-dim); background: transparent;
+    border: 1px solid #3a382f; border-radius: 5px; padding: 5px 9px; cursor: pointer; margin-left: 4px;
+  }
+  .copy-btn:hover { color: var(--code-ink); border-color: #555;}
+  .copy-btn.done { color: var(--code-str); border-color: var(--code-str); }
+  .code-body { background: var(--code-bg); overflow-x: auto; }
+  .code-body pre { margin: 0; padding: 14px 16px; }
+  .code-body code {
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.65; color: var(--code-ink);
+    white-space: pre; display: block;
+  }
+  .code-pane { display: none; }
+  .code-pane.active { display: block; }
+  /* tiny token coloring */
+  .tok-str { color: var(--code-str); }
+  .tok-key { color: var(--code-key); }
+  .tok-num { color: var(--code-num); }
+  .tok-com { color: var(--code-dim); font-style: italic; }
+  .tok-punc { color: var(--code-dim); }
+
+  /* ---------- status pills ---------- */
+  .status-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 16px; }
+  .pill {
+    font-family: var(--mono); font-size: 12px; padding: 4px 9px; border-radius: 5px; font-weight: 500;
+    border: 1px solid var(--rule-2); color: var(--ink-2); background: var(--card);
+  }
+  .pill.ok { color: var(--verify); border-color: #bcd4c0; background: var(--verify-soft); }
+  .pill.bad { color: var(--stamp); border-color: #e6c2b9; background: var(--stamp-soft); }
+
+  table.grid { width: 100%; border-collapse: collapse; margin: 6px 0 20px; font-size: 13.5px; }
+  table.grid th {
+    text-align: left; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-4); font-weight: 600; padding: 8px 10px;
+    border-bottom: 1px solid var(--rule-2);
+  }
+  table.grid td { padding: 9px 10px; border-bottom: 1px solid var(--rule); color: var(--ink-2); vertical-align: top; }
+  table.grid td code, table.grid td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  table.grid td.n { text-align: right; color: var(--ink); }
+
+  .footer {
+    border-top: 1px solid var(--rule); margin-top: 40px; padding-top: 22px;
+    font-size: 13px; color: var(--ink-4); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+
+  .scrim { display: none; }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 1140px) {
+    .row { flex-direction: column; }
+    .row .rail { width: 100%; position: static; margin-top: 8px; }
+    .content { padding: 32px 32px 100px; }
+    :root { --code-w: 100%; }
+  }
+  @media (max-width: 820px) {
+    .menu-btn { display: inline-flex; }
+    .topbar .tnav { display: none; }
+    .sidebar {
+      position: fixed; top: 60px; left: 0; z-index: 45; background: var(--paper);
+      transform: translateX(-102%); transition: transform 0.2s ease; box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+      width: 280px;
+    }
+    body.nav-open .sidebar { transform: translateX(0); }
+    body.nav-open .scrim { display: block; position: fixed; inset: 60px 0 0; background: rgba(20,20,15,0.3); z-index: 44; }
+    .content { padding: 24px 18px 90px; }
+    h1.page-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+  <a class="brand" href="/">
+    <span class="word">Omnia</span>
+    <span class="tag">API</span>
+  </a>
+  <span class="sep"></span>
+  <span class="crumb">API reference</span>
+  <span class="spacer"></span>
+  <nav class="tnav">
+    <a href="/">Home</a>
+    <a href="/docs.html">Console</a>
+    <a href="#pricing">Pricing</a>
+  </nav>
+  <a class="cta" href="/docs.html">Get an API key</a>
+</header>
+
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="nav-group">
+      <div class="label">Getting started</div>
+      <a href="#overview">Overview</a>
+      <a href="#authentication">Authentication</a>
+      <a href="#requests">Making requests</a>
+      <a href="#money">Money &amp; rounding</a>
+      <a href="#errors">Errors</a>
+    </div>
+    <div class="nav-group">
+      <div class="label">Endpoints</div>
+      <a href="#calculate"><span class="verb">POST</span>Calculate paycheck</a>
+      <a href="#states"><span class="verb">GET</span>List states</a>
+      <a href="#usage"><span class="verb">GET</span>Get usage</a>
+    </div>
+    <div class="nav-group">
+      <div class="label">Objects</div>
+      <a href="#obj-input">PaycheckInput</a>
+      <a href="#obj-earning">Earning</a>
+      <a href="#obj-deduction">Deduction</a>
+      <a href="#obj-w4">FederalW4</a>
+      <a href="#obj-ytd">YearToDate</a>
+      <a href="#obj-state">StateWithholding</a>
+      <a href="#obj-result">PaycheckResult</a>
+      <a href="#obj-taxline">TaxLine</a>
+    </div>
+    <div class="nav-group">
+      <div class="label">Reference</div>
+      <a href="#pricing">Pricing</a>
+      <a href="#versioning">Versioning &amp; dates</a>
+    </div>
+  </aside>
+
+  <!-- ============ CONTENT ============ -->
+  <main class="content">
+    <div class="content-inner" style="max-width:none">
+
+      <!-- OVERVIEW -->
+      <section class="doc-section" id="overview">
+        <div class="row">
+          <div class="prose">
+            <h1 class="page-title">Omnia API reference</h1>
+            <p class="page-sub">Gross-to-net US payroll tax calculation for all 50 states, DC, and the municipal, county and school-district lines underneath them — one authenticated request per paycheck.</p>
+
+            <p>Omnia is payroll-tax <em>infrastructure</em>, not a payroll app. You send the facts of a single paycheck — earnings, deductions, the employee's W-4, year-to-date wages, and where the work happens — and Omnia returns every tax line that applies, for both the employee and the employer, computed against the ruleset in effect on the check date.</p>
+
+            <p>The API is deliberately small. There is one calculation endpoint you call on every pay run, plus two read-only helpers. There are no SDKs to install and no per-jurisdiction feature flags: every state, DC, and every local jurisdiction Omnia knows about is included for every key.</p>
+
+            <h3>Base URL</h3>
+            <p>All endpoints are served over HTTPS from your Omnia host. The hosted service is:</p>
+            <div class="endpoint-line"><span class="path">https://api.omnia.tax</span></div>
+            <p style="font-size:13.5px;color:var(--ink-3)">Self-hosted deployments run the same server on their own domain — swap the host and every path below is identical.</p>
+          </div>
+          <div class="rail">
+            <div class="codepanel" data-group="ov">
+              <div class="code-head">
+                <span class="code-title">Your first call</span>
+                <button class="copy-btn" data-copy>Copy</button>
+              </div>
+              <div class="code-body">
+                <div class="code-pane active"><pre><code><span class="tok-com"># One paycheck, federal + Ohio, biweekly</span>
+curl https://api.omnia.tax/api/paycheck \
+  -H <span class="tok-str">"Authorization: Bearer sk_test_…"</span> \
+  -H <span class="tok-str">"Content-Type: application/json"</span> \
+  -d <span class="tok-str">'{
+    "checkDate": "2026-06-15",
+    "payFrequency": "biweekly",
+    "earnings": [
+      { "code": "REG", "category": "regular",
+        "amount": 300000 }
+    ],
+    "deductions": [],
+    "federalW4": {
+      "filingStatus": "single",
+      "multipleJobs": false,
+      "dependentCredit": 0,
+      "otherIncome": 0,
+      "deductions": 0,
+      "extraWithholding": 0
+    },
+    "ytd": { "socialSecurity": 0,
+             "medicare": 0, "futa": 0 },
+    "workState": { "code": "OH" }
+  }'</span></code></pre></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AUTHENTICATION -->
+      <section class="doc-section" id="authentication">
+        <div class="row">
+          <div class="prose">
+            <h2>Authentication</h2>
+            <p>Every request to a calculation or account endpoint must carry an API key in the <code class="inline">Authorization</code> header as a bearer token:</p>
+            <div class="endpoint-line" style="display:block"><span class="path">Authorization: Bearer sk_test_a1b2c3…</span></div>
+
+            <p>Keys are issued from the <a href="/docs.html">Omnia console</a>. Sign in, then click <b>Issue my evaluation key</b> — the plaintext key is shown <b>once</b>, so copy it immediately. Omnia stores only a SHA-256 hash of the key; it can never be recovered or re-displayed, only replaced.</p>
+
+            <h3>Key lifecycle</h3>
+            <ul>
+              <li><b>One active key per account.</b> Reissuing generates a fresh key and immediately revokes the previous one.</li>
+              <li><b>Evaluation keys expire.</b> Keys minted during the free trial are time-boxed; the response tells you the exact <code class="inline">expiresAt</code>. An expired key returns <code class="inline">401</code>.</li>
+              <li><b>Keep it server-side.</b> A key can run any calculation on your account and is billable. Never ship it in a browser, mobile app, or public repository.</li>
+            </ul>
+
+            <div class="note warn"><b>Test vs. live.</b> Evaluation keys are prefixed <code class="inline">sk_test_</code>. Production keys are prefixed <code class="inline">sk_live_</code>. The two behave identically at the API; only billing and expiry differ.</div>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Issue a key</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code><span class="tok-com"># from the console, after signing in</span>
+POST /api/issue-key
+<span class="tok-punc">→</span> {
+  <span class="tok-key">"key"</span>: <span class="tok-str">"sk_test_a1b2c3d4e5…"</span>,
+  <span class="tok-key">"keyPrefix"</span>: <span class="tok-str">"sk_test_a1b2c3"</span>,
+  <span class="tok-key">"expiresAt"</span>: <span class="tok-str">"2026-10-04T12:00:00Z"</span>
+}</code></pre></div></div>
+            </div>
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Missing / bad key</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code><span class="tok-punc">HTTP</span> <span class="tok-num">401</span>
+{ <span class="tok-key">"error"</span>: <span class="tok-str">"Missing API key.
+  Send \"Authorization: Bearer &lt;key&gt;\"."</span> }</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MAKING REQUESTS -->
+      <section class="doc-section" id="requests">
+        <div class="row">
+          <div class="prose">
+            <h2>Making requests</h2>
+            <p>Requests and responses are JSON. Send <code class="inline">Content-Type: application/json</code> on any request with a body. The API is stateless: each call is a self-contained calculation, so you can fan out a whole pay run in parallel — one request per employee.</p>
+            <ul>
+              <li><b>Idempotent by construction.</b> The same input on the same <code class="inline">checkDate</code> always yields the same result — there is no server-side state that a call mutates (aside from usage metering).</li>
+              <li><b>No hidden defaults that move money.</b> Every eligibility fact the engine can't derive — SUI rate, nexus, reciprocity election — is an explicit input. Omit an optional block and the rules that depend on it simply don't fire.</li>
+            </ul>
+          </div>
+          <div class="rail">
+            <div class="codepanel" data-group="req">
+              <div class="code-head">
+                <span class="code-title">Request</span>
+                <div class="code-tabs">
+                  <button data-tab="curl" class="active">cURL</button>
+                  <button data-tab="py">Python</button>
+                  <button data-tab="ts">TypeScript</button>
+                </div>
+                <button class="copy-btn" data-copy>Copy</button>
+              </div>
+              <div class="code-body">
+                <div class="code-pane active" data-pane="curl"><pre><code>curl https://api.omnia.tax/api/paycheck \
+  -H <span class="tok-str">"Authorization: Bearer $OMNIA_KEY"</span> \
+  -H <span class="tok-str">"Content-Type: application/json"</span> \
+  -d @paycheck.json</code></pre></div>
+                <div class="code-pane" data-pane="py"><pre><code><span class="tok-key">import</span> os, requests
+
+r = requests.post(
+    <span class="tok-str">"https://api.omnia.tax/api/paycheck"</span>,
+    headers={<span class="tok-str">"Authorization"</span>: <span class="tok-str">f"Bearer {os.environ['OMNIA_KEY']}"</span>},
+    json={
+        <span class="tok-str">"checkDate"</span>: <span class="tok-str">"2026-06-15"</span>,
+        <span class="tok-str">"payFrequency"</span>: <span class="tok-str">"biweekly"</span>,
+        <span class="tok-str">"earnings"</span>: [{<span class="tok-str">"code"</span>: <span class="tok-str">"REG"</span>,
+                      <span class="tok-str">"category"</span>: <span class="tok-str">"regular"</span>,
+                      <span class="tok-str">"amount"</span>: <span class="tok-num">300000</span>}],
+        <span class="tok-str">"deductions"</span>: [],
+        <span class="tok-str">"federalW4"</span>: {<span class="tok-str">"filingStatus"</span>: <span class="tok-str">"single"</span>,
+                       <span class="tok-str">"multipleJobs"</span>: <span class="tok-key">False</span>,
+                       <span class="tok-str">"dependentCredit"</span>: <span class="tok-num">0</span>,
+                       <span class="tok-str">"otherIncome"</span>: <span class="tok-num">0</span>,
+                       <span class="tok-str">"deductions"</span>: <span class="tok-num">0</span>,
+                       <span class="tok-str">"extraWithholding"</span>: <span class="tok-num">0</span>},
+        <span class="tok-str">"ytd"</span>: {<span class="tok-str">"socialSecurity"</span>: <span class="tok-num">0</span>,
+                <span class="tok-str">"medicare"</span>: <span class="tok-num">0</span>, <span class="tok-str">"futa"</span>: <span class="tok-num">0</span>},
+        <span class="tok-str">"workState"</span>: {<span class="tok-str">"code"</span>: <span class="tok-str">"OH"</span>},
+    },
+)
+result = r.json()[<span class="tok-str">"result"</span>]
+<span class="tok-key">print</span>(result[<span class="tok-str">"netPay"</span>])  <span class="tok-com"># cents</span></code></pre></div>
+                <div class="code-pane" data-pane="ts"><pre><code><span class="tok-key">const</span> res = <span class="tok-key">await</span> fetch(
+  <span class="tok-str">"https://api.omnia.tax/api/paycheck"</span>,
+  {
+    method: <span class="tok-str">"POST"</span>,
+    headers: {
+      Authorization: <span class="tok-str">`Bearer ${process.env.OMNIA_KEY}`</span>,
+      <span class="tok-str">"Content-Type"</span>: <span class="tok-str">"application/json"</span>,
+    },
+    body: JSON.stringify({
+      checkDate: <span class="tok-str">"2026-06-15"</span>,
+      payFrequency: <span class="tok-str">"biweekly"</span>,
+      earnings: [{ code: <span class="tok-str">"REG"</span>, category: <span class="tok-str">"regular"</span>, amount: <span class="tok-num">300000</span> }],
+      deductions: [],
+      federalW4: {
+        filingStatus: <span class="tok-str">"single"</span>, multipleJobs: <span class="tok-key">false</span>,
+        dependentCredit: <span class="tok-num">0</span>, otherIncome: <span class="tok-num">0</span>,
+        deductions: <span class="tok-num">0</span>, extraWithholding: <span class="tok-num">0</span>,
+      },
+      ytd: { socialSecurity: <span class="tok-num">0</span>, medicare: <span class="tok-num">0</span>, futa: <span class="tok-num">0</span> },
+      workState: { code: <span class="tok-str">"OH"</span> },
+    }),
+  },
+);
+<span class="tok-key">const</span> { result } = <span class="tok-key">await</span> res.json();</code></pre></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MONEY -->
+      <section class="doc-section" id="money">
+        <div class="row">
+          <div class="prose">
+            <h2>Money &amp; rounding</h2>
+            <p><b>Every monetary value in the API is an integer number of cents.</b> There are no floating-point dollars anywhere in a request or response. <code class="inline">300000</code> means $3,000.00; a net pay of <code class="inline">246118</code> is $2,461.18.</p>
+            <p>This is deliberate: floating-point dollars silently lose pennies over a year of pay runs, and pennies are the whole game in payroll. Convert to and from dollars only at your display edge.</p>
+            <ul>
+              <li>Withholding is computed to the cent. Set <code class="inline">roundToWholeDollars: true</code> on the input to round federal withholding to whole dollars, as IRS Pub 15-T permits.</li>
+              <li>Percentages that <em>are</em> inputs (an SUI rate, for example) are given as decimals — <code class="inline">0.031</code> for 3.1%.</li>
+            </ul>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Cents ↔ dollars</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code><span class="tok-num">300000</span>  <span class="tok-com">// $3,000.00 gross</span>
+<span class="tok-num">24000</span>   <span class="tok-com">// $240.00  401(k)</span>
+<span class="tok-num">18600</span>   <span class="tok-com">// $186.00  Social Security</span>
+<span class="tok-num">-246118</span> <span class="tok-com">// never — amounts are unsigned</span>
+
+<span class="tok-com">// display edge only:</span>
+dollars = cents / <span class="tok-num">100</span></code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ERRORS -->
+      <section class="doc-section" id="errors">
+        <div class="row">
+          <div class="prose">
+            <h2>Errors</h2>
+            <p>Omnia uses conventional HTTP status codes. Any non-2xx response has a JSON body with a single human-readable <code class="inline">error</code> field. A <code class="inline">200</code> wraps the payload under <code class="inline">result</code>.</p>
+            <div class="status-row">
+              <span class="pill ok">200 OK</span>
+              <span class="pill bad">400 Bad request</span>
+              <span class="pill bad">401 Unauthorized</span>
+              <span class="pill bad">422 Unprocessable</span>
+            </div>
+            <table class="grid">
+              <thead><tr><th>Status</th><th>Meaning</th><th>When it happens</th></tr></thead>
+              <tbody>
+                <tr><td><code>200</code></td><td>Success</td><td>The calculation ran; the body is <code>{ "result": … }</code>.</td></tr>
+                <tr><td><code>400</code></td><td>Bad request</td><td>The body wasn't valid JSON, or a required field was malformed.</td></tr>
+                <tr><td><code>401</code></td><td>Unauthorized</td><td>Missing, invalid, inactive, or expired API key.</td></tr>
+                <tr><td><code>422</code></td><td>Unprocessable</td><td>Valid JSON, but the calculation couldn't run — e.g. an unknown state code or an inconsistent input.</td></tr>
+              </tbody>
+            </table>
+            <div class="note">A <code class="inline">422</code> is a calculation-level rejection, not a transport error. The <code class="inline">error</code> string names the specific reason (an unrecognized jurisdiction, a missing rate, a contradictory W-4) so you can surface it to the operator running payroll.</div>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">422 — calculation rejected</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code><span class="tok-punc">HTTP</span> <span class="tok-num">422</span>
+{ <span class="tok-key">"error"</span>: <span class="tok-str">"No ruleset for state 'ZZ'
+  on 2026-06-15."</span> }</code></pre></div></div>
+            </div>
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">400 — bad JSON</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code><span class="tok-punc">HTTP</span> <span class="tok-num">400</span>
+{ <span class="tok-key">"error"</span>: <span class="tok-str">"Unexpected end of JSON input"</span> }</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CALCULATE -->
+      <section class="doc-section" id="calculate">
+        <div class="row">
+          <div class="prose">
+            <h2>Calculate a paycheck</h2>
+            <div class="endpoint-line"><span class="method">POST</span><span class="path">/api/paycheck</span></div>
+            <p>The core of the API. Send the facts of one paycheck and receive every applicable tax line — federal, state, and local, employee-side and employer-side — plus the gross-to-net summary. Requires a bearer key.</p>
+
+            <h3>Request body — <a href="#obj-input">PaycheckInput</a></h3>
+            <div class="params">
+              <div class="param">
+                <div class="param-head"><span class="param-name">checkDate</span><span class="param-type">string</span><span class="param-req">required</span></div>
+                <div class="param-desc">The pay date, ISO <code>YYYY-MM-DD</code>. This — not "today" — selects the ruleset. A recalculation of a prior period must use that period's date so it reproduces that period's rules.</div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">payFrequency</span><span class="param-type">enum</span><span class="param-req">required</span></div>
+                <div class="param-desc">How often this employee is paid. Determines the annualization factor.</div>
+                <div class="enum-list"><span>weekly</span><span>biweekly</span><span>semimonthly</span><span>monthly</span><span>quarterly</span><span>semiannual</span><span>annual</span><span>daily</span></div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">earnings</span><span class="param-type">Earning[]</span><span class="param-req">required</span></div>
+                <div class="param-desc">One or more line items of pay. See <a href="#obj-earning">Earning</a>. At least one is required.</div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">deductions</span><span class="param-type">Deduction[]</span><span class="param-req">required</span></div>
+                <div class="param-desc">Pre-tax and post-tax deductions. See <a href="#obj-deduction">Deduction</a>. Send <code>[]</code> if there are none.</div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">federalW4</span><span class="param-type">FederalW4</span><span class="param-req">required</span></div>
+                <div class="param-desc">The employee's Form W-4 (2020 revision or later). See <a href="#obj-w4">FederalW4</a>.</div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">ytd</span><span class="param-type">YearToDate</span><span class="param-req">required</span></div>
+                <div class="param-desc">Year-to-date wages, needed for every wage-base-capped tax (Social Security, FUTA, SUI…). See <a href="#obj-ytd">YearToDate</a>.</div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">workState</span><span class="param-type">StateWithholding</span><span class="param-opt">optional</span></div>
+                <div class="param-desc">Where the work is performed — whose state income tax runs. Omit for a federal-only calculation. See <a href="#obj-state">StateWithholding</a>.</div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">residenceState</span><span class="param-type">StateWithholding</span><span class="param-opt">optional</span></div>
+                <div class="param-desc">Where the employee lives. Set it whenever it differs from <code>workState</code>; omitting it means every residence-based rule (reciprocity, nonresident allocation, resident credits) simply doesn't fire.</div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">residenceStateWithholding</span><span class="param-type">object</span><span class="param-opt">optional</span></div>
+                <div class="param-desc">Whether to withhold the residence state's tax when there's no reciprocity — <code>{ nexus?, voluntary? }</code>. Both are legal/business facts only you know. Ignored when reciprocity already governs the period.</div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">employer</span><span class="param-type">EmployerContext</span><span class="param-opt">optional</span></div>
+                <div class="param-desc">Employer-side facts the engine can't derive — most importantly your assigned SUI/SUTA rate per state, e.g. <code>{ "stateUnemploymentRate": { "OH": 0.031 } }</code>. Absent, the state's published new-employer rate is used and noted in the line's <code>detail</code>.</div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">employmentCategory</span><span class="param-type">enum</span><span class="param-opt">optional</span></div>
+                <div class="param-desc">Which employment-tax rules apply. Defaults to <code>standard</code>.</div>
+                <div class="enum-list"><span>standard</span><span>clergy</span><span>statutory_employee</span><span>household</span><span>agricultural</span><span>railroad</span><span>election_worker</span></div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">priorRegularPayment</span><span class="param-type">object</span><span class="param-opt">optional</span></div>
+                <div class="param-desc">For states that tax a stand-alone bonus by aggregating it with the last regular check — <code>{ taxableWages, stateIncomeTaxWithheld? }</code>. Omit (the normal case) and the bonus is taxed on its own.</div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">roundToWholeDollars</span><span class="param-type">boolean</span><span class="param-opt">optional</span></div>
+                <div class="param-desc">Round federal withholding to whole dollars, as IRS permits. Defaults to <code>false</code> (compute to the cent).</div>
+              </div>
+            </div>
+
+            <h3>Response</h3>
+            <p><code class="inline">200</code> with <code class="inline">{ "result": PaycheckResult }</code>. See <a href="#obj-result">PaycheckResult</a> for the full shape — a gross-to-net summary plus an itemized <code class="inline">taxes[]</code> array carrying one <a href="#obj-taxline">TaxLine</a> per jurisdiction and tax, each with a human-readable <code class="inline">detail</code> trace of how the number was reached.</p>
+          </div>
+
+          <div class="rail">
+            <div class="codepanel" data-group="calc">
+              <div class="code-head">
+                <span class="code-title">Request</span>
+                <div class="code-tabs">
+                  <button data-tab="curl" class="active">cURL</button>
+                  <button data-tab="py">Python</button>
+                  <button data-tab="ts">TS</button>
+                </div>
+                <button class="copy-btn" data-copy>Copy</button>
+              </div>
+              <div class="code-body">
+                <div class="code-pane active" data-pane="curl"><pre><code>curl https://api.omnia.tax/api/paycheck \
+  -H <span class="tok-str">"Authorization: Bearer $OMNIA_KEY"</span> \
+  -H <span class="tok-str">"Content-Type: application/json"</span> \
+  -d <span class="tok-str">'{
+    "checkDate": "2026-06-15",
+    "payFrequency": "biweekly",
+    "earnings": [
+      { "code": "REG", "category": "regular",
+        "amount": 300000 }
+    ],
+    "deductions": [
+      { "code": "401K", "category": "deferral_401k",
+        "amount": 24000 }
+    ],
+    "federalW4": {
+      "filingStatus": "single",
+      "multipleJobs": false,
+      "dependentCredit": 0,
+      "otherIncome": 0,
+      "deductions": 0,
+      "extraWithholding": 0
+    },
+    "ytd": { "socialSecurity": 0,
+             "medicare": 0, "futa": 0 },
+    "workState": { "code": "OH" },
+    "employer": {
+      "stateUnemploymentRate": { "OH": 0.031 }
+    }
+  }'</span></code></pre></div>
+                <div class="code-pane" data-pane="py"><pre><code>requests.post(
+  <span class="tok-str">"https://api.omnia.tax/api/paycheck"</span>,
+  headers={<span class="tok-str">"Authorization"</span>:
+           <span class="tok-str">f"Bearer {KEY}"</span>},
+  json={
+    <span class="tok-str">"checkDate"</span>: <span class="tok-str">"2026-06-15"</span>,
+    <span class="tok-str">"payFrequency"</span>: <span class="tok-str">"biweekly"</span>,
+    <span class="tok-str">"earnings"</span>: [{<span class="tok-str">"code"</span>: <span class="tok-str">"REG"</span>,
+       <span class="tok-str">"category"</span>: <span class="tok-str">"regular"</span>,
+       <span class="tok-str">"amount"</span>: <span class="tok-num">300000</span>}],
+    <span class="tok-str">"deductions"</span>: [{<span class="tok-str">"code"</span>: <span class="tok-str">"401K"</span>,
+       <span class="tok-str">"category"</span>: <span class="tok-str">"deferral_401k"</span>,
+       <span class="tok-str">"amount"</span>: <span class="tok-num">24000</span>}],
+    <span class="tok-str">"federalW4"</span>: {<span class="tok-str">"filingStatus"</span>: <span class="tok-str">"single"</span>,
+      <span class="tok-str">"multipleJobs"</span>: <span class="tok-key">False</span>,
+      <span class="tok-str">"dependentCredit"</span>: <span class="tok-num">0</span>,
+      <span class="tok-str">"otherIncome"</span>: <span class="tok-num">0</span>, <span class="tok-str">"deductions"</span>: <span class="tok-num">0</span>,
+      <span class="tok-str">"extraWithholding"</span>: <span class="tok-num">0</span>},
+    <span class="tok-str">"ytd"</span>: {<span class="tok-str">"socialSecurity"</span>: <span class="tok-num">0</span>,
+            <span class="tok-str">"medicare"</span>: <span class="tok-num">0</span>, <span class="tok-str">"futa"</span>: <span class="tok-num">0</span>},
+    <span class="tok-str">"workState"</span>: {<span class="tok-str">"code"</span>: <span class="tok-str">"OH"</span>},
+  },
+).json()[<span class="tok-str">"result"</span>]</code></pre></div>
+                <div class="code-pane" data-pane="ts"><pre><code><span class="tok-key">const</span> { result } = <span class="tok-key">await</span> (
+  <span class="tok-key">await</span> fetch(<span class="tok-str">"https://api.omnia.tax/api/paycheck"</span>, {
+    method: <span class="tok-str">"POST"</span>,
+    headers: {
+      Authorization: <span class="tok-str">`Bearer ${KEY}`</span>,
+      <span class="tok-str">"Content-Type"</span>: <span class="tok-str">"application/json"</span>,
+    },
+    body: JSON.stringify(paycheck),
+  })
+).json();
+
+console.log(result.netPay);   <span class="tok-com">// 246118 → $2,461.18</span>
+<span class="tok-key">for</span> (<span class="tok-key">const</span> t <span class="tok-key">of</span> result.taxes)
+  console.log(t.name, t.amount);</code></pre></div>
+              </div>
+            </div>
+
+            <div class="codepanel" data-group="calc-res">
+              <div class="code-head"><span class="code-title">Response — 200</span><button class="copy-btn" data-copy>Copy</button></div>
+              <div class="code-body"><div class="code-pane active"><pre><code>{
+  <span class="tok-key">"result"</span>: {
+    <span class="tok-key">"checkDate"</span>: <span class="tok-str">"2026-06-15"</span>,
+    <span class="tok-key">"grossPay"</span>: <span class="tok-num">300000</span>,
+    <span class="tok-key">"pretaxDeductions"</span>: <span class="tok-num">24000</span>,
+    <span class="tok-key">"posttaxDeductions"</span>: <span class="tok-num">0</span>,
+    <span class="tok-key">"taxes"</span>: [
+      { <span class="tok-key">"id"</span>: <span class="tok-str">"US_FIT"</span>,
+        <span class="tok-key">"name"</span>: <span class="tok-str">"Federal income tax"</span>,
+        <span class="tok-key">"payer"</span>: <span class="tok-str">"employee"</span>,
+        <span class="tok-key">"jurisdiction"</span>: <span class="tok-str">"federal"</span>,
+        <span class="tok-key">"taxableWages"</span>: <span class="tok-num">276000</span>,
+        <span class="tok-key">"amount"</span>: <span class="tok-num">29840</span>,
+        <span class="tok-key">"detail"</span>: <span class="tok-str">"Pub 15-T percentage…"</span> },
+      { <span class="tok-key">"id"</span>: <span class="tok-str">"US_SS_EE"</span>,
+        <span class="tok-key">"name"</span>: <span class="tok-str">"Social Security"</span>,
+        <span class="tok-key">"payer"</span>: <span class="tok-str">"employee"</span>,
+        <span class="tok-key">"jurisdiction"</span>: <span class="tok-str">"federal"</span>,
+        <span class="tok-key">"taxableWages"</span>: <span class="tok-num">300000</span>,
+        <span class="tok-key">"amount"</span>: <span class="tok-num">18600</span> },
+      { <span class="tok-key">"id"</span>: <span class="tok-str">"OH_SIT"</span>,
+        <span class="tok-key">"name"</span>: <span class="tok-str">"Ohio income tax"</span>,
+        <span class="tok-key">"payer"</span>: <span class="tok-str">"employee"</span>,
+        <span class="tok-key">"jurisdiction"</span>: <span class="tok-str">"state"</span>,
+        <span class="tok-key">"taxableWages"</span>: <span class="tok-num">276000</span>,
+        <span class="tok-key">"amount"</span>: <span class="tok-num">6042</span> }
+    ],
+    <span class="tok-key">"employeeTaxTotal"</span>: <span class="tok-num">58832</span>,
+    <span class="tok-key">"employerTaxTotal"</span>: <span class="tok-num">32610</span>,
+    <span class="tok-key">"netPay"</span>: <span class="tok-num">217168</span>
+  }
+}</code></pre></div></div>
+            </div>
+            <p style="font-size:12px;color:var(--ink-4);margin-top:8px">Figures above are illustrative; the live engine returns every applicable federal, state and local line.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- STATES -->
+      <section class="doc-section" id="states">
+        <div class="row">
+          <div class="prose">
+            <h2>List states</h2>
+            <div class="endpoint-line"><span class="method get">GET</span><span class="path">/api/states</span></div>
+            <p>Returns the states and DC this build can compute, driven directly from the rulesets present on the server — so the list can never claim a jurisdiction the engine can't actually calculate. Useful for populating a dropdown or validating a <code class="inline">workState.code</code> before you send a paycheck.</p>
+            <h3>Response</h3>
+            <div class="params">
+              <div class="param">
+                <div class="param-head"><span class="param-name">states</span><span class="param-type">Array&lt;{ code, name }&gt;</span></div>
+                <div class="param-desc">Sorted by name. <code>code</code> is the two-letter USPS abbreviation; <code>name</code> is the full state name.</div>
+              </div>
+            </div>
+          </div>
+          <div class="rail">
+            <div class="codepanel" data-group="st">
+              <div class="code-head"><span class="code-title">Request</span><button class="copy-btn" data-copy>Copy</button></div>
+              <div class="code-body"><div class="code-pane active"><pre><code>curl https://api.omnia.tax/api/states</code></pre></div></div>
+            </div>
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Response — 200</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code>{
+  <span class="tok-key">"states"</span>: [
+    { <span class="tok-key">"code"</span>: <span class="tok-str">"AL"</span>, <span class="tok-key">"name"</span>: <span class="tok-str">"Alabama"</span> },
+    { <span class="tok-key">"code"</span>: <span class="tok-str">"AK"</span>, <span class="tok-key">"name"</span>: <span class="tok-str">"Alaska"</span> },
+    { <span class="tok-key">"code"</span>: <span class="tok-str">"AZ"</span>, <span class="tok-key">"name"</span>: <span class="tok-str">"Arizona"</span> },
+    <span class="tok-com">// …</span>
+  ]
+}</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- USAGE -->
+      <section class="doc-section" id="usage">
+        <div class="row">
+          <div class="prose">
+            <h2>Get usage</h2>
+            <div class="endpoint-line"><span class="method get">GET</span><span class="path">/api/usage</span></div>
+            <p>Returns your key's call counts and a rolling window of recent requests. This endpoint is authenticated by your <b>console session</b> (a signed-in browser), not by a bearer key — it's what the console's dashboard reads. Programmatic metering for billing is handled server-side on every calculation.</p>
+            <h3>Response</h3>
+            <table class="grid">
+              <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>hasKey</code></td><td>boolean</td><td><code>false</code> if the account has no active key (the rest of the fields are then omitted).</td></tr>
+                <tr><td><code>keyPrefix</code> / <code>keyMasked</code></td><td>string</td><td>The non-secret prefix and a masked display form.</td></tr>
+                <tr><td><code>plan</code></td><td>string</td><td>e.g. <code>evaluation</code>.</td></tr>
+                <tr><td><code>issuedAt</code> / <code>expiresAt</code></td><td>string</td><td>ISO timestamps for the active key.</td></tr>
+                <tr><td><code>lastUsedAt</code></td><td>string \| null</td><td>When the key last made a call.</td></tr>
+                <tr><td><code>totalCalls</code></td><td>number</td><td>Lifetime calls on this key.</td></tr>
+                <tr><td><code>callsToday</code> / <code>callsThisMonth</code></td><td>number</td><td>Rolling 24-hour and 30-day counts.</td></tr>
+                <tr><td><code>recent</code></td><td>array</td><td>The 15 most recent calls (newest first): <code>at</code>, <code>statusCode</code>, <code>error</code>, <code>checkDate</code>.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Response — 200</span><button class="copy-btn" data-copy>Copy</button></div>
+              <div class="code-body"><div class="code-pane active"><pre><code>{
+  <span class="tok-key">"hasKey"</span>: <span class="tok-key">true</span>,
+  <span class="tok-key">"keyPrefix"</span>: <span class="tok-str">"sk_test_a1b2c3"</span>,
+  <span class="tok-key">"plan"</span>: <span class="tok-str">"evaluation"</span>,
+  <span class="tok-key">"issuedAt"</span>: <span class="tok-str">"2026-09-20T12:00:00Z"</span>,
+  <span class="tok-key">"expiresAt"</span>: <span class="tok-str">"2026-10-04T12:00:00Z"</span>,
+  <span class="tok-key">"lastUsedAt"</span>: <span class="tok-str">"2026-09-20T14:32:11Z"</span>,
+  <span class="tok-key">"totalCalls"</span>: <span class="tok-num">1284</span>,
+  <span class="tok-key">"callsToday"</span>: <span class="tok-num">96</span>,
+  <span class="tok-key">"callsThisMonth"</span>: <span class="tok-num">1284</span>,
+  <span class="tok-key">"recent"</span>: [
+    { <span class="tok-key">"at"</span>: <span class="tok-str">"2026-09-20T14:32:11Z"</span>,
+      <span class="tok-key">"statusCode"</span>: <span class="tok-num">200</span>,
+      <span class="tok-key">"error"</span>: <span class="tok-key">null</span>,
+      <span class="tok-key">"checkDate"</span>: <span class="tok-str">"2026-06-15"</span> }
+  ]
+}</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- OBJECT: PaycheckInput -->
+      <section class="doc-section" id="obj-input">
+        <div class="row">
+          <div class="prose">
+            <h2>The PaycheckInput object</h2>
+            <p>The complete request body for <a href="#calculate"><code>POST /api/paycheck</code></a>. See the endpoint above for the field-by-field table. In brief:</p>
+            <ul>
+              <li><b>Required:</b> <code>checkDate</code>, <code>payFrequency</code>, <code>earnings</code>, <code>deductions</code>, <code>federalW4</code>, <code>ytd</code>.</li>
+              <li><b>Optional:</b> <code>workState</code>, <code>residenceState</code>, <code>residenceStateWithholding</code>, <code>employer</code>, <code>employmentCategory</code>, <code>priorRegularPayment</code>, <code>roundToWholeDollars</code>.</li>
+            </ul>
+            <p>The guiding convention: <b>absent input changes nothing.</b> Leave out an optional block and the rules that read it don't fire — no silent defaults that would move a dollar you didn't ask to move.</p>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Type</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code><span class="tok-key">interface</span> PaycheckInput {
+  checkDate: <span class="tok-key">string</span>;   <span class="tok-com">// YYYY-MM-DD</span>
+  payFrequency: PayFrequency;
+  earnings: Earning[];
+  deductions: Deduction[];
+  federalW4: FederalW4;
+  ytd: YearToDate;
+  workState?: StateWithholding;
+  residenceState?: StateWithholding;
+  residenceStateWithholding?: {
+    nexus?: <span class="tok-key">boolean</span>;
+    voluntary?: <span class="tok-key">boolean</span>;
+  };
+  employer?: EmployerContext;
+  employmentCategory?: <span class="tok-key">string</span>;
+  priorRegularPayment?: {
+    taxableWages: <span class="tok-key">number</span>;
+    stateIncomeTaxWithheld?: <span class="tok-key">number</span>;
+  };
+  roundToWholeDollars?: <span class="tok-key">boolean</span>;
+}</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- OBJECT: Earning -->
+      <section class="doc-section" id="obj-earning">
+        <div class="row">
+          <div class="prose">
+            <h2>The Earning object</h2>
+            <div class="params">
+              <div class="param">
+                <div class="param-head"><span class="param-name">code</span><span class="param-type">string</span><span class="param-req">required</span></div>
+                <div class="param-desc">Your own label for the line, e.g. <code>REG</code>, <code>OT</code>, <code>BONUS</code>. Passed through untouched.</div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">category</span><span class="param-type">enum</span><span class="param-req">required</span></div>
+                <div class="param-desc">Drives how the line is taxed.</div>
+                <div class="enum-list"><span>regular</span><span>supplemental</span><span>imputed</span><span>reimbursement</span><span>housing_allowance</span></div>
+                <div class="param-desc" style="margin-top:8px"><code>supplemental</code> may use a flat supplemental rate; <code>imputed</code> is taxable but not paid in cash; <code>reimbursement</code> is cash but not taxable; <code>housing_allowance</code> is only excluded when <code>employmentCategory</code> is <code>clergy</code>.</div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">amount</span><span class="param-type">integer (cents)</span><span class="param-req">required</span></div>
+                <div class="param-desc">The amount of this line, in cents.</div>
+              </div>
+            </div>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Example</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code>[
+  { <span class="tok-key">"code"</span>: <span class="tok-str">"REG"</span>,
+    <span class="tok-key">"category"</span>: <span class="tok-str">"regular"</span>,
+    <span class="tok-key">"amount"</span>: <span class="tok-num">300000</span> },
+  { <span class="tok-key">"code"</span>: <span class="tok-str">"BONUS"</span>,
+    <span class="tok-key">"category"</span>: <span class="tok-str">"supplemental"</span>,
+    <span class="tok-key">"amount"</span>: <span class="tok-num">50000</span> }
+]</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- OBJECT: Deduction -->
+      <section class="doc-section" id="obj-deduction">
+        <div class="row">
+          <div class="prose">
+            <h2>The Deduction object</h2>
+            <div class="params">
+              <div class="param">
+                <div class="param-head"><span class="param-name">code</span><span class="param-type">string</span><span class="param-req">required</span></div>
+                <div class="param-desc">Your own label, e.g. <code>401K</code>, <code>MED</code>.</div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">category</span><span class="param-type">enum \| null</span><span class="param-req">required</span></div>
+                <div class="param-desc"><code>null</code> means post-tax (reduces net pay, changes no taxable base). Otherwise one of the pre-tax categories — and this table is the spine of the engine: the same deferred dollar is exempt from one tax and fully taxable under another.</div>
+                <div class="enum-list"><span>section125</span><span>hsa</span><span>fsa</span><span>dependent_care</span><span>deferral_401k</span><span>deferral_403b</span><span>deferral_457</span><span>deferral_simple</span><span>commuter</span><span>null</span></div>
+              </div>
+              <div class="param">
+                <div class="param-head"><span class="param-name">amount</span><span class="param-type">integer (cents)</span><span class="param-req">required</span></div>
+                <div class="param-desc">The amount withheld this period, in cents.</div>
+              </div>
+            </div>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Example</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code>[
+  { <span class="tok-key">"code"</span>: <span class="tok-str">"401K"</span>,
+    <span class="tok-key">"category"</span>: <span class="tok-str">"deferral_401k"</span>,
+    <span class="tok-key">"amount"</span>: <span class="tok-num">24000</span> },
+  { <span class="tok-key">"code"</span>: <span class="tok-str">"MED"</span>,
+    <span class="tok-key">"category"</span>: <span class="tok-str">"section125"</span>,
+    <span class="tok-key">"amount"</span>: <span class="tok-num">12500</span> },
+  { <span class="tok-key">"code"</span>: <span class="tok-str">"GARN"</span>,
+    <span class="tok-key">"category"</span>: <span class="tok-key">null</span>,
+    <span class="tok-key">"amount"</span>: <span class="tok-num">10000</span> }
+]</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- OBJECT: FederalW4 -->
+      <section class="doc-section" id="obj-w4">
+        <div class="row">
+          <div class="prose">
+            <h2>The FederalW4 object</h2>
+            <p>The employee's Form W-4 (2020 revision or later). All dollar fields are in cents.</p>
+            <div class="params">
+              <div class="param"><div class="param-head"><span class="param-name">filingStatus</span><span class="param-type">enum</span><span class="param-req">required</span></div>
+                <div class="enum-list"><span>single</span><span>married_joint</span><span>married_separate</span><span>head_of_household</span></div></div>
+              <div class="param"><div class="param-head"><span class="param-name">multipleJobs</span><span class="param-type">boolean</span><span class="param-req">required</span></div>
+                <div class="param-desc">Step 2 checkbox: two jobs / spouse works.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">dependentCredit</span><span class="param-type">integer (cents)</span><span class="param-req">required</span></div>
+                <div class="param-desc">Step 3: annual credit amount as entered.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">otherIncome</span><span class="param-type">integer (cents)</span><span class="param-req">required</span></div>
+                <div class="param-desc">Step 4(a): other annual income.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">deductions</span><span class="param-type">integer (cents)</span><span class="param-req">required</span></div>
+                <div class="param-desc">Step 4(b): annual deductions beyond the standard deduction.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">extraWithholding</span><span class="param-type">integer (cents)</span><span class="param-req">required</span></div>
+                <div class="param-desc">Step 4(c): additional withholding per pay period.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">exempt</span><span class="param-type">boolean</span><span class="param-opt">optional</span></div>
+                <div class="param-desc">Employee claimed exempt from federal withholding.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">nonresidentAlien</span><span class="param-type">boolean</span><span class="param-opt">optional</span></div>
+                <div class="param-desc">Triggers Pub 15-T's nonresident-alien adjustment (the India student/apprentice carve-out is the caller's responsibility).</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">voluntaryWithholdingAgreement</span><span class="param-type">boolean</span><span class="param-opt">optional</span></div>
+                <div class="param-desc">The one way a minister's pay carries federal withholding; ignored for other categories.</div></div>
+            </div>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Example</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code>{
+  <span class="tok-key">"filingStatus"</span>: <span class="tok-str">"married_joint"</span>,
+  <span class="tok-key">"multipleJobs"</span>: <span class="tok-key">true</span>,
+  <span class="tok-key">"dependentCredit"</span>: <span class="tok-num">400000</span>,
+  <span class="tok-key">"otherIncome"</span>: <span class="tok-num">0</span>,
+  <span class="tok-key">"deductions"</span>: <span class="tok-num">0</span>,
+  <span class="tok-key">"extraWithholding"</span>: <span class="tok-num">2500</span>
+}</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- OBJECT: YearToDate -->
+      <section class="doc-section" id="obj-ytd">
+        <div class="row">
+          <div class="prose">
+            <h2>The YearToDate object</h2>
+            <p>Year-to-date wages, in cents, needed for every wage-base-capped tax. Only the three required fields matter for most calculations; the rest exist for the corners of the code (railroad, WA Cares, state PFML caps, and so on).</p>
+            <div class="params">
+              <div class="param"><div class="param-head"><span class="param-name">socialSecurity</span><span class="param-type">integer (cents)</span><span class="param-req">required</span></div>
+                <div class="param-desc">YTD wages subject to Social Security (caps the SS line).</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">medicare</span><span class="param-type">integer (cents)</span><span class="param-req">required</span></div>
+                <div class="param-desc">YTD wages subject to Medicare; also drives Additional Medicare.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">futa</span><span class="param-type">integer (cents)</span><span class="param-req">required</span></div>
+                <div class="param-desc">YTD wages subject to FUTA.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">supplemental</span><span class="param-type">integer (cents)</span><span class="param-opt">optional</span></div>
+                <div class="param-desc">YTD supplemental wages — drives the mandatory 37% federal rate past $1,000,000.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">stateUnemployment</span><span class="param-type">Record&lt;string, cents&gt;</span><span class="param-opt">optional</span></div>
+                <div class="param-desc">YTD wages per SUI, keyed by state code.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">statePaidLeave</span> / <span class="param-name">stateDisabilityEmployee</span> / <span class="param-name">stateLongTermCare</span><span class="param-type">Record&lt;string, cents&gt;</span><span class="param-opt">optional</span></div>
+                <div class="param-desc">Per-state YTD toward PFML, SDI, and LTC wage bases respectively.</div></div>
+            </div>
+            <div class="note">For a brand-new hire mid-year — or a fresh calendar year — send zeros. The engine never assumes prior wages you didn't state.</div>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Minimal</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code>{ <span class="tok-key">"socialSecurity"</span>: <span class="tok-num">0</span>,
+  <span class="tok-key">"medicare"</span>: <span class="tok-num">0</span>,
+  <span class="tok-key">"futa"</span>: <span class="tok-num">0</span> }</code></pre></div></div>
+            </div>
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Mid-year</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code>{
+  <span class="tok-key">"socialSecurity"</span>: <span class="tok-num">7800000</span>,
+  <span class="tok-key">"medicare"</span>: <span class="tok-num">7800000</span>,
+  <span class="tok-key">"futa"</span>: <span class="tok-num">700000</span>,
+  <span class="tok-key">"stateUnemployment"</span>: { <span class="tok-key">"OH"</span>: <span class="tok-num">900000</span> }
+}</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- OBJECT: StateWithholding -->
+      <section class="doc-section" id="obj-state">
+        <div class="row">
+          <div class="prose">
+            <h2>The StateWithholding object</h2>
+            <div class="params">
+              <div class="param"><div class="param-head"><span class="param-name">code</span><span class="param-type">string</span><span class="param-req">required</span></div>
+                <div class="param-desc">Two-letter state code, e.g. <code>PA</code>. Validate against <a href="#states"><code>GET /api/states</code></a>.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">certificate</span><span class="param-type">object</span><span class="param-opt">optional</span></div>
+                <div class="param-desc">State-specific withholding-certificate fields (the state's equivalent of a W-4). The shape varies by state — e.g. allowances, additional withholding, exemption flags. Omit for the state's default treatment.</div></div>
+            </div>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Example</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code><span class="tok-com">// work + residence differ</span>
+{
+  <span class="tok-key">"workState"</span>: { <span class="tok-key">"code"</span>: <span class="tok-str">"NJ"</span> },
+  <span class="tok-key">"residenceState"</span>: { <span class="tok-key">"code"</span>: <span class="tok-str">"PA"</span> }
+}
+
+<span class="tok-com">// with a state certificate</span>
+{
+  <span class="tok-key">"code"</span>: <span class="tok-str">"GA"</span>,
+  <span class="tok-key">"certificate"</span>: {
+    <span class="tok-key">"filingStatus"</span>: <span class="tok-str">"married_joint"</span>,
+    <span class="tok-key">"allowances"</span>: <span class="tok-num">2</span>
+  }
+}</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- OBJECT: PaycheckResult -->
+      <section class="doc-section" id="obj-result">
+        <div class="row">
+          <div class="prose">
+            <h2>The PaycheckResult object</h2>
+            <p>Returned under <code class="inline">result</code> on a <code class="inline">200</code>. All amounts are in cents.</p>
+            <div class="params">
+              <div class="param"><div class="param-head"><span class="param-name">checkDate</span><span class="param-type">string</span></div><div class="param-desc">Echoes the input check date.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">grossPay</span><span class="param-type">integer (cents)</span></div><div class="param-desc">Cash earnings (excludes imputed income).</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">pretaxDeductions</span><span class="param-type">integer (cents)</span></div><div class="param-desc">Sum of all pre-tax deductions.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">posttaxDeductions</span><span class="param-type">integer (cents)</span></div><div class="param-desc">Sum of all post-tax deductions.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">taxes</span><span class="param-type">TaxLine[]</span></div><div class="param-desc">One line per jurisdiction and tax, employee- and employer-side. See <a href="#obj-taxline">TaxLine</a>.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">employeeTaxTotal</span><span class="param-type">integer (cents)</span></div><div class="param-desc">Sum of all employee-withheld taxes.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">employerTaxTotal</span><span class="param-type">integer (cents)</span></div><div class="param-desc">Sum of all employer-borne taxes (not withheld from the employee).</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">netPay</span><span class="param-type">integer (cents)</span></div><div class="param-desc">Take-home: gross − pre-tax deductions − employee taxes − post-tax deductions.</div></div>
+            </div>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Type</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code><span class="tok-key">interface</span> PaycheckResult {
+  checkDate: <span class="tok-key">string</span>;
+  grossPay: <span class="tok-key">number</span>;
+  pretaxDeductions: <span class="tok-key">number</span>;
+  posttaxDeductions: <span class="tok-key">number</span>;
+  taxes: TaxLine[];
+  employeeTaxTotal: <span class="tok-key">number</span>;
+  employerTaxTotal: <span class="tok-key">number</span>;
+  netPay: <span class="tok-key">number</span>;
+}</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- OBJECT: TaxLine -->
+      <section class="doc-section" id="obj-taxline">
+        <div class="row">
+          <div class="prose">
+            <h2>The TaxLine object</h2>
+            <div class="params">
+              <div class="param"><div class="param-head"><span class="param-name">id</span><span class="param-type">string</span></div><div class="param-desc">Stable identifier, e.g. <code>US_FIT</code>, <code>US_SS_EE</code>, <code>PA_SIT</code>.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">name</span><span class="param-type">string</span></div><div class="param-desc">Human-readable tax name.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">payer</span><span class="param-type">enum</span></div><div class="param-desc"><code>employee</code> (withheld) or <code>employer</code> (employer-borne).</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">jurisdiction</span><span class="param-type">enum</span></div><div class="param-desc"><code>federal</code>, <code>state</code>, or <code>local</code>.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">taxableWages</span><span class="param-type">integer (cents)</span></div><div class="param-desc">The base this tax was actually computed on, after its own exemptions.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">amount</span><span class="param-type">integer (cents)</span></div><div class="param-desc">The tax for this line.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">detail</span><span class="param-type">string</span><span class="param-opt">optional</span></div><div class="param-desc">A human-readable trace of how the number was reached — the rate, base, and rule applied. Show it in an audit view; it's how you prove the number.</div></div>
+            </div>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Example</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code>{
+  <span class="tok-key">"id"</span>: <span class="tok-str">"US_MEDICARE_EE"</span>,
+  <span class="tok-key">"name"</span>: <span class="tok-str">"Medicare"</span>,
+  <span class="tok-key">"payer"</span>: <span class="tok-str">"employee"</span>,
+  <span class="tok-key">"jurisdiction"</span>: <span class="tok-str">"federal"</span>,
+  <span class="tok-key">"taxableWages"</span>: <span class="tok-num">288000</span>,
+  <span class="tok-key">"amount"</span>: <span class="tok-num">4176</span>,
+  <span class="tok-key">"detail"</span>: <span class="tok-str">"1.45% of 2,880.00"</span>
+}</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRICING -->
+      <section class="doc-section" id="pricing">
+        <div class="row">
+          <div class="prose">
+            <h2>Pricing</h2>
+            <p>Usage-based, not per-employee-per-month. Every jurisdiction is included for everyone; you pay for the calculations you actually make. One <a href="#calculate"><code>POST /api/paycheck</code></a> is one billable call, and the graduated bands mean a bigger book pays <em>less</em> per call.</p>
+            <table class="grid">
+              <thead><tr><th>Calls / year</th><th class="n">Rate per call</th></tr></thead>
+              <tbody>
+                <tr><td>First 25,000</td><td class="n">$0.12</td></tr>
+                <tr><td>25,001 – 200,000</td><td class="n">$0.09</td></tr>
+                <tr><td>200,001 – 1,000,000</td><td class="n">$0.06</td></tr>
+                <tr><td>1,000,000+</td><td class="n">$0.04</td></tr>
+              </tbody>
+            </table>
+            <ul>
+              <li><b>Rooftop address resolution</b> (when a local tax turns on a precise address) is billed at <b>$0.30 per address</b>, once per address — not once per pay run.</li>
+              <li><b>Free trial:</b> a 14-day evaluation window before a card is needed. Evaluation keys (<code>sk_test_</code>) run the full engine.</li>
+              <li>Only <code>200</code> responses that ran a calculation are billable; auth failures and malformed requests are not.</li>
+            </ul>
+            <div class="note ok">Get a key and run live calls from the <a href="/docs.html">console</a>. It shows your real call counts and what they'd cost, computed from these exact figures — so what you're quoted and what you're billed can't drift.</div>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Estimate — public</span><button class="copy-btn" data-copy>Copy</button></div>
+              <div class="code-body"><div class="code-pane active"><pre><code>curl https://api.omnia.tax/api/estimate \
+  -H <span class="tok-str">"Content-Type: application/json"</span> \
+  -d <span class="tok-str">'{ "email": "you@co.com",
+       "employees": 8000,
+       "payFrequency": "biweekly" }'</span>
+
+<span class="tok-punc">→</span> {
+  <span class="tok-key">"callsPerYear"</span>: <span class="tok-num">208000</span>,
+  <span class="tok-key">"calculationCost"</span>: <span class="tok-num">18720</span>,
+  <span class="tok-key">"total"</span>: <span class="tok-num">18720</span>,
+  <span class="tok-key">"effectivePerCall"</span>: <span class="tok-num">0.09</span>
+}</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VERSIONING -->
+      <section class="doc-section" id="versioning">
+        <div class="row">
+          <div class="prose">
+            <h2>Versioning &amp; dates</h2>
+            <p>Omnia is <b>effective-dated</b>. The ruleset that runs is the one in force on your <code class="inline">checkDate</code> — never "today's" rules. This is the single most important thing to get right when you integrate:</p>
+            <ul>
+              <li><b>Recalculating a prior period</b> (a correction, a void-and-reissue) reproduces that period's numbers because you send that period's <code>checkDate</code>.</li>
+              <li><b>Running next year's first payroll</b> automatically picks up the new year's brackets, wage bases and local rates as soon as the check date crosses into the new year.</li>
+            </ul>
+            <p>New jurisdictions and rate changes ship as data, not as breaking API changes. The request and response shapes on this page are stable; a new local tax appears as an additional <a href="#obj-taxline">TaxLine</a> in the response, nothing more.</p>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Same input, two dates</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code><span class="tok-com">// 2025 brackets</span>
+{ <span class="tok-key">"checkDate"</span>: <span class="tok-str">"2025-12-19"</span>, … }
+
+<span class="tok-com">// 2026 brackets — automatically</span>
+{ <span class="tok-key">"checkDate"</span>: <span class="tok-str">"2026-01-02"</span>, … }</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="footer">
+        <span>Omnia — payroll tax infrastructure for all 50 states, DC, and the local lines underneath.</span>
+        <span><a href="/">Home</a> · <a href="/docs.html">Console</a></span>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  // ---- mobile nav ----
+  var body = document.body;
+  var menuBtn = document.getElementById('menuBtn');
+  var scrim = document.getElementById('scrim');
+  if (menuBtn) menuBtn.addEventListener('click', function () { body.classList.toggle('nav-open'); });
+  if (scrim) scrim.addEventListener('click', function () { body.classList.remove('nav-open'); });
+
+  // ---- language tabs (scoped per code panel) ----
+  document.querySelectorAll('.code-tabs').forEach(function (tabs) {
+    var panel = tabs.closest('.codepanel');
+    tabs.querySelectorAll('button').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var name = btn.getAttribute('data-tab');
+        tabs.querySelectorAll('button').forEach(function (b) { b.classList.toggle('active', b === btn); });
+        panel.querySelectorAll('.code-pane').forEach(function (p) {
+          p.classList.toggle('active', p.getAttribute('data-pane') === name);
+        });
+      });
+    });
+  });
+
+  // ---- copy buttons ----
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var panel = btn.closest('.codepanel');
+      var pane = panel.querySelector('.code-pane.active') || panel.querySelector('.code-pane');
+      var text = pane ? pane.innerText : '';
+      var done = function () {
+        var orig = btn.textContent;
+        btn.textContent = 'Copied'; btn.classList.add('done');
+        setTimeout(function () { btn.textContent = orig; btn.classList.remove('done'); }, 1400);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, done);
+      } else {
+        try {
+          var ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          document.execCommand('copy'); document.body.removeChild(ta); done();
+        } catch (e) {}
+      }
+    });
+  });
+
+  // ---- active section highlighting ----
+  var links = Array.prototype.slice.call(document.querySelectorAll('.sidebar a[href^="#"]'));
+  var byId = {};
+  links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.doc-section'));
+
+  function onScroll() {
+    var top = window.scrollY + 120;
+    var current = sections[0];
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i].offsetTop <= top) current = sections[i];
+    }
+    links.forEach(function (a) { a.classList.remove('active'); });
+    if (current && byId[current.id]) byId[current.id].classList.add('active');
+  }
+  var ticking = false;
+  window.addEventListener('scroll', function () {
+    if (!ticking) { window.requestAnimationFrame(function () { onScroll(); ticking = false; }); ticking = true; }
+  });
+  links.forEach(function (a) {
+    a.addEventListener('click', function () { body.classList.remove('nav-open'); });
+  });
+  onScroll();
+})();
+</script>
+</body>
+</html>

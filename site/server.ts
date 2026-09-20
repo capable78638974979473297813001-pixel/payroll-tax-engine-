@@ -821,6 +821,10 @@ createServer((req, res) => {
       sendHtml(res, join(HERE, 'docs.html'));
       return;
     }
+    if (method === 'GET' && (url === '/reference' || url === '/reference.html' || url === '/api-reference')) {
+      sendHtml(res, join(HERE, 'reference.html'));
+      return;
+    }
 
     if (method === 'POST' && url === '/api/signup') return handleSignup(req, res);
     if (method === 'POST' && url === '/api/verify-email') return handleVerifyEmail(req, res);
@@ -845,4 +849,5 @@ createServer((req, res) => {
 }).listen(PORT, () => {
   console.log(`Omnia landing page:  http://localhost:${PORT}`);
   console.log(`Omnia docs/console:  http://localhost:${PORT}/docs.html`);
+  console.log(`Omnia API reference: http://localhost:${PORT}/reference`);
 });
