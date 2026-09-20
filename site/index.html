@@ -1074,7 +1074,7 @@
     <div class="container split">
       <div class="rv">
         <p class="label" data-sec="&sect;07">For developers</p>
-        <h2>An address goes in. A defensible paystub comes out.</h2>
+        <h2>Facts go in. A defensible paystub comes out.</h2>
         <p class="lead" style="margin-top:18px">
           Every amount is in integer cents and every tax line reports the taxable base it was computed on, so
           a number you shipped last quarter can be explained line by line this quarter.
@@ -1088,32 +1088,36 @@
       </div>
       <div class="rv">
         <div class="code">
-          <div class="code-head">POST /v1/paycheck <span class="dots"><i></i><i></i><i></i></span></div>
-<pre><span class="c">// Authorization: Bearer sk_live_…</span>
+          <div class="code-head">POST /api/paycheck <span class="dots"><i></i><i></i><i></i></span></div>
+<pre><span class="c">// Authorization: Bearer sk_test_…</span>
 {
   <span class="k">"checkDate"</span>: <span class="s">"2026-06-15"</span>,
   <span class="k">"payFrequency"</span>: <span class="s">"biweekly"</span>,
-  <span class="k">"earnings"</span>:   [{ <span class="k">"category"</span>: <span class="s">"regular"</span>, <span class="k">"amount"</span>: <span class="v">300000</span> }],
-  <span class="k">"deductions"</span>: [{ <span class="k">"category"</span>: <span class="s">"deferral_401k"</span>, <span class="k">"amount"</span>: <span class="v">24000</span> }],
-  <span class="k">"federalW4"</span>: { <span class="k">"filingStatus"</span>: <span class="s">"single"</span> },
-  <span class="k">"address"</span>:   <span class="s">"90 W Broad St, Columbus OH"</span>
+  <span class="k">"earnings"</span>:   [{ <span class="k">"code"</span>: <span class="s">"REG"</span>,  <span class="k">"category"</span>: <span class="s">"regular"</span>,       <span class="k">"amount"</span>: <span class="v">300000</span> }],
+  <span class="k">"deductions"</span>: [{ <span class="k">"code"</span>: <span class="s">"401K"</span>, <span class="k">"category"</span>: <span class="s">"deferral_401k"</span>, <span class="k">"amount"</span>: <span class="v">24000</span> }],
+  <span class="k">"federalW4"</span>:  { <span class="k">"filingStatus"</span>: <span class="s">"single"</span>, <span class="k">"multipleJobs"</span>: <span class="v">false</span>,
+                 <span class="k">"dependentCredit"</span>: <span class="v">0</span>, <span class="k">"otherIncome"</span>: <span class="v">0</span>,
+                 <span class="k">"deductions"</span>: <span class="v">0</span>, <span class="k">"extraWithholding"</span>: <span class="v">0</span> },
+  <span class="k">"ytd"</span>:        { <span class="k">"socialSecurity"</span>: <span class="v">0</span>, <span class="k">"medicare"</span>: <span class="v">0</span>, <span class="k">"futa"</span>: <span class="v">0</span> },
+  <span class="k">"workState"</span>:  { <span class="k">"code"</span>: <span class="s">"OH"</span> }
 }
 
 <span class="c">// 200 OK</span>
-{
+{ <span class="k">"result"</span>: {
+  <span class="k">"grossPay"</span>: <span class="v">300000</span>, <span class="k">"pretaxDeductions"</span>: <span class="v">24000</span>,
   <span class="k">"taxes"</span>: [
-    { <span class="k">"id"</span>: <span class="s">"social_security"</span>,   <span class="k">"base"</span>: <span class="v">300000</span>, <span class="k">"amount"</span>: <span class="v">18600</span> },
-    { <span class="k">"id"</span>: <span class="s">"medicare"</span>,          <span class="k">"base"</span>: <span class="v">300000</span>, <span class="k">"amount"</span>:  <span class="v">4350</span> },
-    { <span class="k">"id"</span>: <span class="s">"federal_income"</span>,    <span class="k">"base"</span>: <span class="v">276000</span>, <span class="k">"amount"</span>: <span class="v">24713</span> },
-    { <span class="k">"id"</span>: <span class="s">"OH_income"</span>,         <span class="k">"base"</span>: <span class="v">276000</span>, <span class="k">"amount"</span>:  <span class="v">6118</span> },
-    { <span class="k">"id"</span>: <span class="s">"OH_local:columbus"</span>, <span class="k">"base"</span>: <span class="v">300000</span>, <span class="k">"amount"</span>:  <span class="hi">7500</span> }
+    { <span class="k">"id"</span>: <span class="s">"US_SS_EE"</span>,  <span class="k">"taxableWages"</span>: <span class="v">300000</span>, <span class="k">"amount"</span>: <span class="v">18600</span> },
+    { <span class="k">"id"</span>: <span class="s">"US_MED_EE"</span>, <span class="k">"taxableWages"</span>: <span class="v">300000</span>, <span class="k">"amount"</span>:  <span class="v">4350</span> },
+    { <span class="k">"id"</span>: <span class="s">"US_FIT"</span>,    <span class="k">"taxableWages"</span>: <span class="hi">276000</span>, <span class="k">"amount"</span>: <span class="v">26758</span> },
+    { <span class="k">"id"</span>: <span class="s">"OH_SIT"</span>,    <span class="k">"taxableWages"</span>: <span class="hi">276000</span>, <span class="k">"amount"</span>:  <span class="v">7035</span> }
   ],
-  <span class="k">"netPay"</span>: <span class="v">226119</span>
-}</pre>
+  <span class="k">"employeeTaxTotal"</span>: <span class="v">56743</span>,
+  <span class="k">"netPay"</span>: <span class="v">219257</span>
+} }</pre>
         </div>
         <p style="font-size:13.5px;color:#8FAAC4;margin-top:14px">
-          Figures illustrative. Note the two bases: the deferral reduced federal and Ohio wages and left FICA
-          and the Columbus municipal base untouched.
+          Real engine output. Note the two bases: the 401(k) deferral cut the federal and Ohio wage base to
+          <b>276000</b> and left Social Security and Medicare at the full <b>300000</b> &mdash; every amount in integer cents.
         </p>
       </div>
     </div>

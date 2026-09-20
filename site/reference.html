@@ -718,32 +718,44 @@ console.log(result.netPay);   <span class="tok-com">// 246118 → $2,461.18</spa
     <span class="tok-key">"posttaxDeductions"</span>: <span class="tok-num">0</span>,
     <span class="tok-key">"taxes"</span>: [
       { <span class="tok-key">"id"</span>: <span class="tok-str">"US_FIT"</span>,
-        <span class="tok-key">"name"</span>: <span class="tok-str">"Federal income tax"</span>,
+        <span class="tok-key">"name"</span>: <span class="tok-str">"Federal Income Tax"</span>,
         <span class="tok-key">"payer"</span>: <span class="tok-str">"employee"</span>,
         <span class="tok-key">"jurisdiction"</span>: <span class="tok-str">"federal"</span>,
         <span class="tok-key">"taxableWages"</span>: <span class="tok-num">276000</span>,
-        <span class="tok-key">"amount"</span>: <span class="tok-num">29840</span>,
-        <span class="tok-key">"detail"</span>: <span class="tok-str">"Pub 15-T percentage…"</span> },
+        <span class="tok-key">"amount"</span>: <span class="tok-num">26758</span> },
       { <span class="tok-key">"id"</span>: <span class="tok-str">"US_SS_EE"</span>,
         <span class="tok-key">"name"</span>: <span class="tok-str">"Social Security"</span>,
         <span class="tok-key">"payer"</span>: <span class="tok-str">"employee"</span>,
         <span class="tok-key">"jurisdiction"</span>: <span class="tok-str">"federal"</span>,
         <span class="tok-key">"taxableWages"</span>: <span class="tok-num">300000</span>,
         <span class="tok-key">"amount"</span>: <span class="tok-num">18600</span> },
+      { <span class="tok-key">"id"</span>: <span class="tok-str">"US_MED_EE"</span>,
+        <span class="tok-key">"name"</span>: <span class="tok-str">"Medicare"</span>,
+        <span class="tok-key">"payer"</span>: <span class="tok-str">"employee"</span>,
+        <span class="tok-key">"jurisdiction"</span>: <span class="tok-str">"federal"</span>,
+        <span class="tok-key">"taxableWages"</span>: <span class="tok-num">300000</span>,
+        <span class="tok-key">"amount"</span>: <span class="tok-num">4350</span> },
       { <span class="tok-key">"id"</span>: <span class="tok-str">"OH_SIT"</span>,
-        <span class="tok-key">"name"</span>: <span class="tok-str">"Ohio income tax"</span>,
+        <span class="tok-key">"name"</span>: <span class="tok-str">"Ohio Income Tax"</span>,
         <span class="tok-key">"payer"</span>: <span class="tok-str">"employee"</span>,
         <span class="tok-key">"jurisdiction"</span>: <span class="tok-str">"state"</span>,
         <span class="tok-key">"taxableWages"</span>: <span class="tok-num">276000</span>,
-        <span class="tok-key">"amount"</span>: <span class="tok-num">6042</span> }
+        <span class="tok-key">"amount"</span>: <span class="tok-num">7035</span> },
+      { <span class="tok-key">"id"</span>: <span class="tok-str">"OH_SUI_ER"</span>,
+        <span class="tok-key">"name"</span>: <span class="tok-str">"Ohio Unemployment Insurance (Employer)"</span>,
+        <span class="tok-key">"payer"</span>: <span class="tok-str">"employer"</span>,
+        <span class="tok-key">"jurisdiction"</span>: <span class="tok-str">"state"</span>,
+        <span class="tok-key">"taxableWages"</span>: <span class="tok-num">276000</span>,
+        <span class="tok-key">"amount"</span>: <span class="tok-num">8556</span> }
+      <span class="tok-com">// + US_SS_ER, US_MED_ER, US_FUTA</span>
     ],
-    <span class="tok-key">"employeeTaxTotal"</span>: <span class="tok-num">58832</span>,
-    <span class="tok-key">"employerTaxTotal"</span>: <span class="tok-num">32610</span>,
-    <span class="tok-key">"netPay"</span>: <span class="tok-num">217168</span>
+    <span class="tok-key">"employeeTaxTotal"</span>: <span class="tok-num">56743</span>,
+    <span class="tok-key">"employerTaxTotal"</span>: <span class="tok-num">33306</span>,
+    <span class="tok-key">"netPay"</span>: <span class="tok-num">219257</span>
   }
 }</code></pre></div></div>
             </div>
-            <p style="font-size:12px;color:var(--ink-4);margin-top:8px">Figures above are illustrative; the live engine returns every applicable federal, state and local line.</p>
+            <p style="font-size:12px;color:var(--ink-4);margin-top:8px">Real engine output for the request shown. The full <code>taxes[]</code> array also carries the employer-side lines (US_SS_ER, US_MED_ER, US_FUTA); each line's <code>detail</code> is omitted here for space.</p>
           </div>
         </div>
       </section>
@@ -1122,13 +1134,13 @@ console.log(result.netPay);   <span class="tok-com">// 246118 → $2,461.18</spa
             <div class="codepanel">
               <div class="code-head"><span class="code-title">Example</span></div>
               <div class="code-body"><div class="code-pane active"><pre><code>{
-  <span class="tok-key">"id"</span>: <span class="tok-str">"US_MEDICARE_EE"</span>,
+  <span class="tok-key">"id"</span>: <span class="tok-str">"US_MED_EE"</span>,
   <span class="tok-key">"name"</span>: <span class="tok-str">"Medicare"</span>,
   <span class="tok-key">"payer"</span>: <span class="tok-str">"employee"</span>,
   <span class="tok-key">"jurisdiction"</span>: <span class="tok-str">"federal"</span>,
-  <span class="tok-key">"taxableWages"</span>: <span class="tok-num">288000</span>,
-  <span class="tok-key">"amount"</span>: <span class="tok-num">4176</span>,
-  <span class="tok-key">"detail"</span>: <span class="tok-str">"1.45% of 2,880.00"</span>
+  <span class="tok-key">"taxableWages"</span>: <span class="tok-num">300000</span>,
+  <span class="tok-key">"amount"</span>: <span class="tok-num">4350</span>,
+  <span class="tok-key">"detail"</span>: <span class="tok-str">"$3000.00 @ 1.45%, no wage cap"</span>
 }</code></pre></div></div>
             </div>
           </div>
