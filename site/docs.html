@@ -1049,9 +1049,22 @@
     err.hidden = false;
   });
 
-  // Returning from the processor's hosted page.
+  // Returning from the processor's hosted Checkout page.
   if (qs.get('setup') === 'ok') {
-    api('/api/start-trial', { method: 'POST', headers: authHeaders() });
+    (async function () {
+      var sessionId = qs.get('session_id');
+      if (sessionId) {
+        // Metered subscription path: capture the Stripe customer +
+        // subscription ids and mark the account trialing.
+        var done = await api('/api/billing/return', {
+          method: 'POST', headers: authHeaders(), body: JSON.stringify({ sessionId: sessionId }),
+        });
+        if (done.ok) { setTimeout(boot, 600); return; }
+      }
+      // Fallback (card-on-file setup, or no session id): start the local trial.
+      await api('/api/start-trial', { method: 'POST', headers: authHeaders() });
+      setTimeout(boot, 600);
+    })();
   }
 
   // ---------------- key ----------------

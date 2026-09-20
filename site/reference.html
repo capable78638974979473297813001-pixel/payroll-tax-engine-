@@ -530,6 +530,7 @@ dollars = cents / <span class="tok-num">100</span></code></pre></div></div>
               <span class="pill ok">200 OK</span>
               <span class="pill bad">400 Bad request</span>
               <span class="pill bad">401 Unauthorized</span>
+              <span class="pill bad">402 Payment required</span>
               <span class="pill bad">422 Unprocessable</span>
               <span class="pill bad">429 Too many requests</span>
             </div>
@@ -539,6 +540,7 @@ dollars = cents / <span class="tok-num">100</span></code></pre></div></div>
                 <tr><td><code>200</code></td><td>—</td><td>The calculation ran; the body is <code>{ "result": … }</code>.</td></tr>
                 <tr><td><code>400</code></td><td><code>invalid_json</code></td><td>The body wasn't valid JSON.</td></tr>
                 <tr><td><code>401</code></td><td><code>missing_key</code> · <code>invalid_key</code> · <code>expired_key</code></td><td>No key, an unknown/inactive key, or an expired evaluation key.</td></tr>
+                <tr><td><code>402</code></td><td><code>account_suspended</code></td><td>A billing issue (failed invoice) paused the account. A paid invoice reactivates it.</td></tr>
                 <tr><td><code>422</code></td><td><code>invalid_input</code></td><td>Valid JSON, but a field failed validation — see the <code>details</code> array.</td></tr>
                 <tr><td><code>422</code></td><td><code>calculation_error</code></td><td>The input validated but the engine could not complete the calculation.</td></tr>
                 <tr><td><code>429</code></td><td><code>rate_limited</code></td><td>The per-key rate limit was exceeded. Respect the <code>Retry-After</code> header.</td></tr>

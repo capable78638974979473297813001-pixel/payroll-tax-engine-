@@ -16,6 +16,10 @@ import { isEmailConfigured, sendVerificationEmail } from './lib/mail.ts';
 import { validatePaycheckInput } from './lib/validate.ts';
 import { RateLimiter } from './lib/ratelimit.ts';
 import { keyLifeFor } from './lib/keylife.ts';
+import {
+  billingConfigured, meteringConfigured, reportCall,
+  createBillingCustomer, startMeteredCheckout, completeMeteredCheckout, interpretWebhook,
+} from './lib/billing.ts';
 
 // Loads <repo root>/.env (RESEND_API_KEY, STRIPE_SECRET_KEY -- see
 // .env.example) before any handler reads it. Absent .env is fine: signup
@@ -460,14 +464,47 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
     return;
   }
 
-  const origin = `http://localhost:${PORT}`;
+  const origin = (process.env.PUBLIC_BASE_URL ?? `http://localhost:${PORT}`).replace(/\/+$/, '');
+  const successUrl = `${origin}/docs.html?setup=ok&session_id={CHECKOUT_SESSION_ID}`;
+  const cancelUrl = `${origin}/docs.html?setup=cancelled`;
+
+  // Preferred path: a metered subscription to the graduated price, so every
+  // future call actually bills. Requires STRIPE_PRICE_ID (a usage-metered
+  // price). Falls back to card-on-file only when no price is configured.
+  if (billingConfigured()) {
+    try {
+      // Reuse the customer if this account already has one.
+      let customerId = sub.stripeCustomerId ?? null;
+      if (!customerId) {
+        customerId = await createBillingCustomer({ email: sub.billingEmail, name: sub.legalName });
+        withDb((db) => {
+          const s = db.subscriptions[session.email];
+          if (s) s.stripeCustomerId = customerId;
+        });
+      }
+      const out = await startMeteredCheckout({ customerId, email: session.email, successUrl, cancelUrl, trialDays: TRIAL_DAYS });
+      if (!out.ok || !out.url) {
+        sendJson(res, 502, { error: out.error ?? 'The processor rejected the subscription request.', reason: out.reason });
+        return;
+      }
+      sendJson(res, 200, { ok: true, checkoutUrl: out.url, paymentsConfigured: true, metered: true });
+      return;
+    } catch (err) {
+      sendJson(res, 502, { error: err instanceof Error ? err.message : 'Could not reach the processor.' });
+      return;
+    }
+  }
+
+  // Fallback: STRIPE_SECRET_KEY is set but no metered price — save a card
+  // on file (setup mode), same as before. Metering stays off until a price
+  // is configured.
   const form = new URLSearchParams();
   form.set('mode', 'setup');
   form.set('customer_email', sub.billingEmail);
   form.set('payment_method_types[0]', 'card');
   form.set('payment_method_types[1]', 'us_bank_account');
-  form.set('success_url', `${origin}/docs.html?setup=ok&session_id={CHECKOUT_SESSION_ID}`);
-  form.set('cancel_url', `${origin}/docs.html?setup=cancelled`);
+  form.set('success_url', successUrl);
+  form.set('cancel_url', cancelUrl);
   form.set('metadata[omnia_email]', session.email);
   form.set('metadata[terms_version]', TERMS_VERSION);
 
@@ -485,10 +522,118 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
       sendJson(res, 502, { error: payload.error?.message ?? 'The processor rejected the setup request.' });
       return;
     }
-    sendJson(res, 200, { ok: true, checkoutUrl: payload.url, paymentsConfigured: true });
+    sendJson(res, 200, { ok: true, checkoutUrl: payload.url, paymentsConfigured: true, metered: false });
   } catch (err) {
     sendJson(res, 502, { error: err instanceof Error ? err.message : 'Could not reach the processor.' });
   }
+}
+
+// ---------------------------------------------------------------------
+// POST /api/billing/return -- the console calls this with the Checkout
+// session_id from the ?setup=ok return, so we capture the Stripe customer
+// + subscription ids, mark the account trialing, and promote its key.
+// ---------------------------------------------------------------------
+
+async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const session = requireSession(req);
+  if (!session) {
+    sendJson(res, 401, { error: 'Sign in first.' });
+    return;
+  }
+  let body: { sessionId?: string };
+  try {
+    body = await readJson(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message });
+    return;
+  }
+  if (!body.sessionId) {
+    sendJson(res, 400, { error: 'A Checkout session_id is required.' });
+    return;
+  }
+
+  const done = await completeMeteredCheckout(body.sessionId);
+  if (!done.ok) {
+    sendJson(res, 502, { error: done.error ?? 'Could not confirm the subscription with the processor.', reason: done.reason });
+    return;
+  }
+
+  const now = Date.now();
+  const outcome = withDb((db) => {
+    const sub = db.subscriptions[session.email];
+    const acct = db.accounts[session.email];
+    if (!sub) return { ok: false as const };
+    if (done.customerId) sub.stripeCustomerId = done.customerId;
+    if (done.subscriptionId) sub.stripeSubscriptionId = done.subscriptionId;
+    sub.suspended = false;
+    sub.suspendedReason = null;
+    sub.status = 'trialing';
+    sub.trialStartsAt = sub.trialStartsAt ?? new Date(now).toISOString();
+    sub.trialEndsAt = sub.trialEndsAt ?? new Date(now + TRIAL_DAYS * 86_400_000).toISOString();
+    if (!sub.termEndsAt) {
+      sub.termEndsAt = new Date(new Date(now + TRIAL_DAYS * 86_400_000).setMonth(new Date(now).getMonth() + TERM_MONTHS)).toISOString();
+    }
+    if (acct) acct.stage = 'trialing';
+    // Promote the key to live for the committed term.
+    const life = keyLifeFor(sub, now);
+    for (const k of Object.values(db.keys)) {
+      if (k.ownerEmail === session.email && k.isActive) {
+        k.plan = life.plan;
+        k.expiresAt = life.expiresAt;
+      }
+    }
+    return { ok: true as const, subscription: sub };
+  });
+
+  if (!outcome.ok) {
+    sendJson(res, 409, { error: 'No subscription on file for this account.' });
+    return;
+  }
+  console.log(`[billing] ${session.email} subscribed -- customer ${done.customerId}, sub ${done.subscriptionId}`);
+  sendJson(res, 200, { ok: true, subscription: outcome.subscription, metered: meteringConfigured() });
+}
+
+// ---------------------------------------------------------------------
+// POST /api/billing/webhook -- Stripe delivery (open route; verified by
+// signature). Suspends a key on a failed invoice, reactivates on payment.
+// ---------------------------------------------------------------------
+
+async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  let rawBody: string;
+  try {
+    rawBody = await readBody(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message });
+    return;
+  }
+  const sig = req.headers['stripe-signature'];
+  const result = interpretWebhook(rawBody, Array.isArray(sig) ? sig[0] : sig);
+  if (!result.ok) {
+    // 400 for a bad/forged signature; nothing is changed.
+    sendJson(res, 400, { error: result.reason });
+    return;
+  }
+  if (result.action === 'ignore' || !result.customerId) {
+    sendJson(res, 200, { received: true });
+    return;
+  }
+
+  const applied = withDb((db) => {
+    const sub = Object.values(db.subscriptions).find((s) => s.stripeCustomerId === result.customerId);
+    if (!sub) return null;
+    if (result.action === 'suspend' || result.action === 'cancel') {
+      sub.suspended = true;
+      sub.suspendedReason = result.action === 'cancel' ? 'subscription_cancelled' : 'payment_failed';
+      if (result.action === 'cancel') sub.status = 'cancelled';
+    } else if (result.action === 'reactivate') {
+      sub.suspended = false;
+      sub.suspendedReason = null;
+    }
+    return sub.email;
+  });
+
+  console.log(`[billing webhook] ${result.action} customer=${result.customerId} account=${applied ?? 'unknown'}`);
+  sendJson(res, 200, { received: true, action: result.action, matched: Boolean(applied) });
 }
 
 // ---------------------------------------------------------------------
@@ -697,7 +842,12 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   }
 
   const keyHash = sha256Hex(key);
-  const keyRecord = readDb((db) => db.keys[keyHash]);
+  const auth = readDb((db) => {
+    const kr = db.keys[keyHash];
+    const sub = kr ? db.subscriptions[kr.ownerEmail] : undefined;
+    return { keyRecord: kr, customerId: sub?.stripeCustomerId ?? null, suspended: Boolean(sub?.suspended), suspendedReason: sub?.suspendedReason ?? null };
+  });
+  const keyRecord = auth.keyRecord;
 
   if (!keyRecord || !keyRecord.isActive) {
     sendJson(res, 401, { error: 'Invalid or inactive API key.', code: 'invalid_key', requestId }, baseHeaders);
@@ -705,6 +855,10 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   }
   if (Date.now() > new Date(keyRecord.expiresAt).getTime()) {
     sendJson(res, 401, { error: `This API key expired on ${keyRecord.expiresAt}.`, code: 'expired_key', requestId }, baseHeaders);
+    return;
+  }
+  if (auth.suspended) {
+    sendJson(res, 402, { error: 'This account is suspended for a billing issue. Update your payment method to resume.', code: 'account_suspended', reason: auth.suspendedReason, requestId }, baseHeaders);
     return;
   }
 
@@ -775,6 +929,18 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
 
   recordUsage(keyHash, status, usageError, validation.value.checkDate);
   sendJson(res, status, responseBody, rlHeaders);
+
+  // Meter the billable call to Stripe, best-effort and off the response
+  // path: a slow or down Stripe never delays or fails the calculation. The
+  // local usage log is the durable record and can reconcile. requestId
+  // dedupes any retry. No-op unless metering is configured with a customer.
+  if (status === 200 && meteringConfigured() && auth.customerId) {
+    void reportCall(auth.customerId, requestId).then((r) => {
+      if (!r.ok && r.reason === 'stripe_error') {
+        console.error(`[paycheck ${requestId}] meter report failed:`, r.error);
+      }
+    });
+  }
 }
 
 /** One place that appends a bounded usage event and updates the key's meter. */
@@ -918,11 +1084,15 @@ function handleBilling(req: IncomingMessage, res: ServerResponse): void {
       subscription: sub,
       paymentMethod: pm,
       termMonths: TERM_MONTHS,
-      // No payment processor is wired to this project: there is no Stripe
-      // account or STRIPE_SECRET_KEY anywhere in it. The signup below
-      // records everything a real activation needs; attaching a card is
-      // the one step that still needs a person.
-      paymentsConfigured: Boolean(process.env.STRIPE_SECRET_KEY),
+      // Real billing state. paymentsConfigured means a card/subscription
+      // Checkout can be created; metered means successful calls actually
+      // report usage to Stripe; suspended means a failed invoice has paused
+      // the key (a paid invoice reactivates it via webhook).
+      paymentsConfigured: billingConfigured() || Boolean(process.env.STRIPE_SECRET_KEY),
+      metered: meteringConfigured() && Boolean(sub?.stripeCustomerId),
+      subscribed: Boolean(sub?.stripeSubscriptionId),
+      suspended: Boolean(sub?.suspended),
+      suspendedReason: sub?.suspendedReason ?? null,
     });
   });
 }
@@ -954,6 +1124,8 @@ createServer((req, res) => {
     if (method === 'GET' && url === '/api/terms') return handleTerms(req, res);
     if (method === 'POST' && url === '/api/accept-terms') return handleAcceptTerms(req, res);
     if (method === 'POST' && url === '/api/payment-setup') return handlePaymentSetup(req, res);
+    if (method === 'POST' && url === '/api/billing/return') return handleBillingReturn(req, res);
+    if (method === 'POST' && (url === '/api/billing/webhook' || url === '/v1/billing/webhook')) return handleBillingWebhook(req, res);
     if (method === 'POST' && url === '/api/start-trial') return handleStartTrial(req, res);
     if (method === 'GET' && url === '/api/account') return handleAccount(req, res);
     if (method === 'POST' && url === '/api/issue-key') return handleIssueKey(req, res);

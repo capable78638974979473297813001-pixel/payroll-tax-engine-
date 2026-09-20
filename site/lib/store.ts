@@ -117,6 +117,20 @@ export interface SubscriptionRecord {
   termEndsAt: string | null;
   createdAt: string;
   activatedAt: string | null;
+
+  // ---- Stripe metered billing (set once the customer subscribes) ----
+  /** Stripe customer id; usage is metered against this. */
+  stripeCustomerId?: string | null;
+  /** Stripe subscription id for the metered graduated price. */
+  stripeSubscriptionId?: string | null;
+  /**
+   * Set true when Stripe reports a failed invoice (payment_failed /
+   * subscription deleted). A suspended account's key returns 402 until a
+   * paid invoice reactivates it. Kept here, driven only by verified Stripe
+   * webhooks — never by the caller.
+   */
+  suspended?: boolean;
+  suspendedReason?: string | null;
 }
 
 export interface KeyRecord {

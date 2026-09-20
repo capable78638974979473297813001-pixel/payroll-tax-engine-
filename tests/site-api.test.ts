@@ -1,7 +1,7 @@
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess } from 'node:child_process';
-import { createHash } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
@@ -17,6 +17,12 @@ import { fileURLToPath } from 'node:url';
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PLAINTEXT_KEY = 'sk_test_e2e_integration_key_abcdef';
 const KEY_HASH = createHash('sha256').update(PLAINTEXT_KEY).digest('hex');
+// A second key whose account carries a Stripe subscription, for the
+// suspend/reactivate (billing webhook) tests.
+const BILL_KEY = 'sk_test_e2e_billing_key_ghijkl';
+const BILL_HASH = createHash('sha256').update(BILL_KEY).digest('hex');
+const BILL_CUSTOMER = 'cus_e2e_billing';
+const WEBHOOK_SECRET = 'whsec_e2e_secret';
 const PORT = 4600 + Math.floor(Math.random() * 300);
 const BASE = `http://127.0.0.1:${PORT}`;
 const RATE_LIMIT = 5;
@@ -27,15 +33,27 @@ let child: ChildProcess;
 function seedDb(dataDir: string): void {
   mkdirSync(dataDir, { recursive: true });
   const future = new Date(Date.now() + 7 * 864e5).toISOString();
+  const mkKey = (hash: string, plain: string, email: string) => ({
+    keyHash: hash, keyPrefix: plain.slice(0, 14),
+    ownerEmail: email, ownerName: 'E2E', company: 'E2E Co',
+    plan: 'evaluation', createdAt: new Date().toISOString(), expiresAt: future,
+    isActive: true, lastUsedAt: null,
+  });
   const db = {
-    accounts: {}, acceptances: [], paymentMethods: {}, subscriptions: {},
-    keys: {
-      [KEY_HASH]: {
-        keyHash: KEY_HASH, keyPrefix: PLAINTEXT_KEY.slice(0, 14),
-        ownerEmail: 'e2e@example.com', ownerName: 'E2E', company: 'E2E Co',
-        plan: 'evaluation', createdAt: new Date().toISOString(), expiresAt: future,
-        isActive: true, lastUsedAt: null,
+    accounts: {}, acceptances: [], paymentMethods: {},
+    subscriptions: {
+      // The billing-key account is subscribed (customer on file), not suspended.
+      'bill@example.com': {
+        email: 'bill@example.com', legalName: 'Bill Co', billingContact: '', billingEmail: 'bill@example.com',
+        address: '', expectedEmployees: 10, payFrequency: 'biweekly', rooftop: false, estimatedAnnual: 0,
+        status: 'trialing', trialStartsAt: null, trialEndsAt: future, termMonths: 12, termEndsAt: future,
+        createdAt: new Date().toISOString(), activatedAt: null,
+        stripeCustomerId: BILL_CUSTOMER, stripeSubscriptionId: 'sub_e2e', suspended: false, suspendedReason: null,
       },
+    },
+    keys: {
+      [KEY_HASH]: mkKey(KEY_HASH, PLAINTEXT_KEY, 'e2e@example.com'),
+      [BILL_HASH]: mkKey(BILL_HASH, BILL_KEY, 'bill@example.com'),
     },
     usage: [], estimates: [],
   };
@@ -60,6 +78,24 @@ const post = (body: unknown, headers: Record<string, string> = {}) =>
     body: typeof body === 'string' ? body : JSON.stringify(body),
   });
 
+// Send a signed Stripe webhook to the site's endpoint.
+const sendWebhook = (type: string, customer: string, sign = true) => {
+  const body = JSON.stringify({ type, data: { object: { customer } } });
+  const t = Math.floor(Date.now() / 1000);
+  const v1 = createHmac('sha256', WEBHOOK_SECRET).update(`${t}.${body}`).digest('hex');
+  return fetch(`${BASE}/api/billing/webhook`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Stripe-Signature': sign ? `t=${t},v1=${v1}` : 't=1,v1=deadbeef' },
+    body,
+  });
+};
+const postWith = (key: string, body: unknown) =>
+  fetch(`${BASE}/api/paycheck`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
 const validBody = () => ({
   checkDate: '2026-06-15',
   payFrequency: 'biweekly',
@@ -75,7 +111,10 @@ before(async () => {
   seedDb(dir);
   child = spawn('node', ['site/server.ts'], {
     cwd: REPO,
-    env: { ...process.env, PORT: String(PORT), SITE_DB_DIR: dir, RATE_LIMIT_PER_MIN: String(RATE_LIMIT) },
+    env: {
+      ...process.env, PORT: String(PORT), SITE_DB_DIR: dir,
+      RATE_LIMIT_PER_MIN: String(RATE_LIMIT), STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET,
+    },
     stdio: 'ignore',
   });
   await waitForHealth();
@@ -150,6 +189,33 @@ describe('Omnia API (end to end)', () => {
     const j = await r.json();
     assert.ok(Array.isArray(j.states) && j.states.length > 0);
     assert.ok(j.states.every((s: { code: string; name: string }) => s.code && s.name));
+  });
+
+  test('a forged webhook signature is rejected and changes nothing', async () => {
+    const r = await sendWebhook('invoice.payment_failed', BILL_CUSTOMER, /* sign */ false);
+    assert.equal(r.status, 400);
+    // the billing key still works
+    const c = await postWith(BILL_KEY, validBody());
+    assert.equal(c.status, 200);
+    await c.arrayBuffer();
+  });
+
+  test('a signed payment_failed webhook suspends the account key (402), a paid webhook reactivates it', async () => {
+    // suspend
+    let w = await sendWebhook('invoice.payment_failed', BILL_CUSTOMER);
+    assert.equal(w.status, 200);
+    assert.equal((await w.json()).matched, true);
+
+    const suspended = await postWith(BILL_KEY, validBody());
+    assert.equal(suspended.status, 402);
+    assert.equal((await suspended.json()).code, 'account_suspended');
+
+    // reactivate
+    w = await sendWebhook('invoice.paid', BILL_CUSTOMER);
+    assert.equal(w.status, 200);
+    const back = await postWith(BILL_KEY, validBody());
+    assert.equal(back.status, 200);
+    await back.arrayBuffer();
   });
 
   test('the per-key rate limit eventually returns 429 with Retry-After', async () => {
