@@ -119,6 +119,17 @@ function sendHtml(res: ServerResponse, path: string): void {
   res.end(html);
 }
 
+function sendStatic(res: ServerResponse, path: string, contentType: string): void {
+  const buf = readFileSync(path);
+  res.writeHead(200, {
+    'Content-Type': contentType,
+    'Content-Length': buf.byteLength,
+    'Cache-Control': 'public, max-age=3600',
+    ...SECURITY_HEADERS,
+  });
+  res.end(buf);
+}
+
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     let data = '';
@@ -1117,6 +1128,24 @@ createServer((req, res) => {
     if (method === 'GET' && (url === '/reference' || url === '/reference.html' || url === '/api-reference')) {
       sendHtml(res, join(HERE, 'reference.html'));
       return;
+    }
+
+    // Legal pages (served, so customers can read them).
+    if (method === 'GET' && url === '/legal/legal.css') {
+      sendStatic(res, join(HERE, 'legal', 'legal.css'), 'text/css; charset=utf-8');
+      return;
+    }
+    {
+      const legal: Record<string, string> = {
+        '/terms': 'terms', '/terms.html': 'terms', '/legal/terms.html': 'terms',
+        '/privacy': 'privacy', '/privacy.html': 'privacy', '/legal/privacy.html': 'privacy',
+        '/acceptable-use': 'acceptable-use', '/legal/acceptable-use.html': 'acceptable-use',
+        '/disclaimer': 'disclaimer', '/legal/disclaimer.html': 'disclaimer',
+      };
+      if (method === 'GET' && legal[url]) {
+        sendHtml(res, join(HERE, 'legal', `${legal[url]}.html`));
+        return;
+      }
     }
 
     if (method === 'POST' && url === '/api/signup') return handleSignup(req, res);

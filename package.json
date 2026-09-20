@@ -40,5 +40,6 @@
     "trades:server": "node examples/trades-server.ts",
     "crewtally": "node examples/trades-server.ts"
   },
-  "license": "MIT"
+  "license": "UNLICENSED",
+  "private": true
 }
