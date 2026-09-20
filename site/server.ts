@@ -253,6 +253,67 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
 }
 
 // ---------------------------------------------------------------------
+// POST /api/start-session -- the hero's zero-friction lead form
+// (index.html). Creates the lead and issues a session token in one
+// step -- no email code -- so the moment it succeeds the browser goes
+// straight into docs.html already signed in. The staged flow beyond it
+// (terms, payment, trial) is unchanged.
+// ---------------------------------------------------------------------
+
+async function handleStartSession(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  let body: { name?: string; email?: string; company?: string; phone?: string };
+  try {
+    body = await readJson(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message });
+    return;
+  }
+
+  const name = (body.name ?? '').trim();
+  const email = (body.email ?? '').trim().toLowerCase();
+  const company = (body.company ?? '').trim();
+  const phone = (body.phone ?? '').trim();
+
+  if (!name || !isValidEmail(email) || !company || !phone) {
+    sendJson(res, 400, { error: 'Name, a valid work email, business name and phone are all required.' });
+    return;
+  }
+
+  const now = Date.now();
+  const token = randomBytes(24).toString('hex');
+
+  const hasKey = withDb((db) => {
+    const existing = db.accounts[email];
+    const record: AccountRecord = {
+      name,
+      email,
+      company,
+      phone,
+      code: null,
+      codeRequestedAt: null,
+      codeExpiresAt: null,
+      emailVerifiedAt: existing?.emailVerifiedAt ?? new Date(now).toISOString(),
+      sessionToken: token,
+      sessionExpiresAt: new Date(now + SESSION_TTL_MS).toISOString(),
+      stage: !existing || existing.stage === 'unverified' ? 'verified' : existing.stage,
+      createdAt: existing?.createdAt ?? new Date(now).toISOString(),
+    };
+    db.accounts[email] = record;
+    return Object.values(db.keys).some((k) => k.ownerEmail === email && k.isActive);
+  });
+
+  console.log(`[session started] ${name} <${email}> (${company})`);
+  sendJson(res, 200, {
+    ok: true,
+    sessionToken: token,
+    email,
+    name,
+    company,
+    hasKey,
+  });
+}
+
+// ---------------------------------------------------------------------
 // Step 3 -- GET /api/terms
 // ---------------------------------------------------------------------
 
@@ -824,6 +885,7 @@ createServer((req, res) => {
 
     if (method === 'POST' && url === '/api/signup') return handleSignup(req, res);
     if (method === 'POST' && url === '/api/verify-email') return handleVerifyEmail(req, res);
+    if (method === 'POST' && url === '/api/start-session') return handleStartSession(req, res);
     if (method === 'GET' && url === '/api/terms') return handleTerms(req, res);
     if (method === 'POST' && url === '/api/accept-terms') return handleAcceptTerms(req, res);
     if (method === 'POST' && url === '/api/payment-setup') return handlePaymentSetup(req, res);
