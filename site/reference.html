@@ -287,12 +287,14 @@
       <a href="#requests">Making requests</a>
       <a href="#money">Money &amp; rounding</a>
       <a href="#errors">Errors</a>
+      <a href="#ratelimits">Rate limits</a>
     </div>
     <div class="nav-group">
       <div class="label">Endpoints</div>
       <a href="#calculate"><span class="verb">POST</span>Calculate paycheck</a>
       <a href="#states"><span class="verb">GET</span>List states</a>
       <a href="#usage"><span class="verb">GET</span>Get usage</a>
+      <a href="#health"><span class="verb">GET</span>Health check</a>
     </div>
     <div class="nav-group">
       <div class="label">Objects</div>
@@ -523,35 +525,95 @@ dollars = cents / <span class="tok-num">100</span></code></pre></div></div>
         <div class="row">
           <div class="prose">
             <h2>Errors</h2>
-            <p>Omnia uses conventional HTTP status codes. Any non-2xx response has a JSON body with a single human-readable <code class="inline">error</code> field. A <code class="inline">200</code> wraps the payload under <code class="inline">result</code>.</p>
+            <p>Omnia uses conventional HTTP status codes. Every non-2xx response is a JSON <b>error envelope</b> with a stable machine-readable <code class="inline">code</code>, a human-readable <code class="inline">error</code>, and a <code class="inline">requestId</code> you can quote to support. A <code class="inline">200</code> wraps the payload under <code class="inline">result</code>.</p>
             <div class="status-row">
               <span class="pill ok">200 OK</span>
               <span class="pill bad">400 Bad request</span>
               <span class="pill bad">401 Unauthorized</span>
               <span class="pill bad">422 Unprocessable</span>
+              <span class="pill bad">429 Too many requests</span>
             </div>
             <table class="grid">
-              <thead><tr><th>Status</th><th>Meaning</th><th>When it happens</th></tr></thead>
+              <thead><tr><th>Status</th><th><code>code</code></th><th>When it happens</th></tr></thead>
               <tbody>
-                <tr><td><code>200</code></td><td>Success</td><td>The calculation ran; the body is <code>{ "result": … }</code>.</td></tr>
-                <tr><td><code>400</code></td><td>Bad request</td><td>The body wasn't valid JSON, or a required field was malformed.</td></tr>
-                <tr><td><code>401</code></td><td>Unauthorized</td><td>Missing, invalid, inactive, or expired API key.</td></tr>
-                <tr><td><code>422</code></td><td>Unprocessable</td><td>Valid JSON, but the calculation couldn't run — e.g. an unknown state code or an inconsistent input.</td></tr>
+                <tr><td><code>200</code></td><td>—</td><td>The calculation ran; the body is <code>{ "result": … }</code>.</td></tr>
+                <tr><td><code>400</code></td><td><code>invalid_json</code></td><td>The body wasn't valid JSON.</td></tr>
+                <tr><td><code>401</code></td><td><code>missing_key</code> · <code>invalid_key</code> · <code>expired_key</code></td><td>No key, an unknown/inactive key, or an expired evaluation key.</td></tr>
+                <tr><td><code>422</code></td><td><code>invalid_input</code></td><td>Valid JSON, but a field failed validation — see the <code>details</code> array.</td></tr>
+                <tr><td><code>422</code></td><td><code>calculation_error</code></td><td>The input validated but the engine could not complete the calculation.</td></tr>
+                <tr><td><code>429</code></td><td><code>rate_limited</code></td><td>The per-key rate limit was exceeded. Respect the <code>Retry-After</code> header.</td></tr>
               </tbody>
             </table>
-            <div class="note">A <code class="inline">422</code> is a calculation-level rejection, not a transport error. The <code class="inline">error</code> string names the specific reason (an unrecognized jurisdiction, a missing rate, a contradictory W-4) so you can surface it to the operator running payroll.</div>
+            <div class="note"><b>Validation errors are precise.</b> A <code class="inline">422 invalid_input</code> carries a <code class="inline">details</code> array — one entry per bad field, each with a dotted <code class="inline">path</code> and a <code class="inline">message</code> — so you can point the operator at exactly what to fix rather than at a generic failure.</div>
           </div>
           <div class="rail">
             <div class="codepanel">
-              <div class="code-head"><span class="code-title">422 — calculation rejected</span></div>
+              <div class="code-head"><span class="code-title">422 — invalid_input</span></div>
               <div class="code-body"><div class="code-pane active"><pre><code><span class="tok-punc">HTTP</span> <span class="tok-num">422</span>
-{ <span class="tok-key">"error"</span>: <span class="tok-str">"No ruleset for state 'ZZ'
-  on 2026-06-15."</span> }</code></pre></div></div>
+{
+  <span class="tok-key">"error"</span>: <span class="tok-str">"The request did not pass validation."</span>,
+  <span class="tok-key">"code"</span>: <span class="tok-str">"invalid_input"</span>,
+  <span class="tok-key">"requestId"</span>: <span class="tok-str">"req_9f3a…"</span>,
+  <span class="tok-key">"details"</span>: [
+    { <span class="tok-key">"path"</span>: <span class="tok-str">"earnings[0].amount"</span>,
+      <span class="tok-key">"message"</span>: <span class="tok-str">"must be integer cents, not
+        3000.5 — send whole cents…"</span> },
+    { <span class="tok-key">"path"</span>: <span class="tok-str">"workState.code"</span>,
+      <span class="tok-key">"message"</span>: <span class="tok-str">"\"ZZ\" is not a state this
+        API can compute. GET /api/states…"</span> }
+  ]
+}</code></pre></div></div>
             </div>
             <div class="codepanel">
-              <div class="code-head"><span class="code-title">400 — bad JSON</span></div>
-              <div class="code-body"><div class="code-pane active"><pre><code><span class="tok-punc">HTTP</span> <span class="tok-num">400</span>
-{ <span class="tok-key">"error"</span>: <span class="tok-str">"Unexpected end of JSON input"</span> }</code></pre></div></div>
+              <div class="code-head"><span class="code-title">429 — rate_limited</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code><span class="tok-punc">HTTP</span> <span class="tok-num">429</span>   <span class="tok-com">Retry-After: 42</span>
+{ <span class="tok-key">"error"</span>: <span class="tok-str">"Rate limit of 120 requests/minute
+    exceeded. Retry in 42s."</span>,
+  <span class="tok-key">"code"</span>: <span class="tok-str">"rate_limited"</span>,
+  <span class="tok-key">"requestId"</span>: <span class="tok-str">"req_1b2c…"</span> }</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RATE LIMITS -->
+      <section class="doc-section" id="ratelimits">
+        <div class="row">
+          <div class="prose">
+            <h2>Rate limits</h2>
+            <p>Each API key is rate-limited independently, on a fixed one-minute window. The default is <b>120 requests per minute per key</b>; self-hosted deployments set their own via the <code class="inline">RATE_LIMIT_PER_MIN</code> environment variable.</p>
+            <p>Every calculation response carries the current budget in standard headers, so you can pace a large pay run without guessing:</p>
+            <table class="grid">
+              <thead><tr><th>Header</th><th>Meaning</th></tr></thead>
+              <tbody>
+                <tr><td><code>RateLimit-Limit</code></td><td>Requests allowed in the window.</td></tr>
+                <tr><td><code>RateLimit-Remaining</code></td><td>Requests left in the current window.</td></tr>
+                <tr><td><code>RateLimit-Reset</code></td><td>Unix time (seconds) when the window resets.</td></tr>
+                <tr><td><code>Retry-After</code></td><td>On a <code>429</code> only: seconds to wait before retrying.</td></tr>
+              </tbody>
+            </table>
+            <p>Over the limit you get a <code class="inline">429</code> with <code class="inline">code: "rate_limited"</code>. Back off until <code class="inline">Retry-After</code> elapses; a fan-out pay run should cap its own concurrency rather than sprint into the limit.</p>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Response headers</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code><span class="tok-punc">HTTP</span> <span class="tok-num">200</span>
+RateLimit-Limit: <span class="tok-num">120</span>
+RateLimit-Remaining: <span class="tok-num">117</span>
+RateLimit-Reset: <span class="tok-num">1750000060</span>
+X-Request-Id: <span class="tok-str">req_9f3a1c…</span>
+X-Omnia-Version: <span class="tok-num">1.0.0</span></code></pre></div></div>
+            </div>
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Simple backoff — TS</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code><span class="tok-key">async function</span> withRetry(call) {
+  <span class="tok-key">for</span> (;;) {
+    <span class="tok-key">const</span> res = <span class="tok-key">await</span> call();
+    <span class="tok-key">if</span> (res.status !== <span class="tok-num">429</span>) <span class="tok-key">return</span> res;
+    <span class="tok-key">const</span> s = Number(res.headers.get(<span class="tok-str">"retry-after"</span>)) || <span class="tok-num">1</span>;
+    <span class="tok-key">await</span> <span class="tok-key">new</span> Promise((r) =&gt; setTimeout(r, s * <span class="tok-num">1000</span>));
+  }
+}</code></pre></div></div>
             </div>
           </div>
         </div>
@@ -836,6 +898,33 @@ console.log(result.netPay);   <span class="tok-com">// 246118 → $2,461.18</spa
       <span class="tok-key">"error"</span>: <span class="tok-key">null</span>,
       <span class="tok-key">"checkDate"</span>: <span class="tok-str">"2026-06-15"</span> }
   ]
+}</code></pre></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HEALTH -->
+      <section class="doc-section" id="health">
+        <div class="row">
+          <div class="prose">
+            <h2>Health check</h2>
+            <div class="endpoint-line"><span class="method get">GET</span><span class="path">/api/health</span></div>
+            <p>An unauthenticated liveness and readiness probe, safe to hit from a load balancer or uptime monitor. It reports the running API version and how many jurisdictions this build can compute — so a probe also catches a bad deploy that shipped without its tax data.</p>
+            <p>Returns <code class="inline">200</code> when healthy, or <code class="inline">503</code> with <code class="inline">status: "degraded"</code> if the ruleset data can't be read. Also reachable at <code class="inline">/healthz</code>.</p>
+          </div>
+          <div class="rail">
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Request</span><button class="copy-btn" data-copy>Copy</button></div>
+              <div class="code-body"><div class="code-pane active"><pre><code>curl https://api.omnia.tax/api/health</code></pre></div></div>
+            </div>
+            <div class="codepanel">
+              <div class="code-head"><span class="code-title">Response — 200</span></div>
+              <div class="code-body"><div class="code-pane active"><pre><code>{
+  <span class="tok-key">"status"</span>: <span class="tok-str">"ok"</span>,
+  <span class="tok-key">"version"</span>: <span class="tok-str">"1.0.0"</span>,
+  <span class="tok-key">"states"</span>: <span class="tok-num">51</span>,
+  <span class="tok-key">"time"</span>: <span class="tok-str">"2026-09-20T14:32:11Z"</span>
 }</code></pre></div></div>
             </div>
           </div>

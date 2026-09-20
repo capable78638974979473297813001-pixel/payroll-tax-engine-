@@ -5,15 +5,17 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 import { calculatePaycheck } from '../src/calculate.ts';
-import type { PaycheckInput } from '../src/types.ts';
 import {
-  withDb, readDb,
+  withDb, readDb, appendUsage,
   type AccountRecord, type KeyRecord, type PaymentMethodRecord,
   type SubscriptionRecord, type TermsAcceptance,
 } from './lib/store.ts';
 import { CALL_TIERS, ROOFTOP_RATE, TRIAL_DAYS, estimate as computePricing, costForCalls } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
 import { isEmailConfigured, sendVerificationEmail } from './lib/mail.ts';
+import { validatePaycheckInput } from './lib/validate.ts';
+import { RateLimiter } from './lib/ratelimit.ts';
+import { keyLifeFor } from './lib/keylife.ts';
 
 // Loads <repo root>/.env (RESEND_API_KEY, STRIPE_SECRET_KEY -- see
 // .env.example) before any handler reads it. Absent .env is fine: signup
@@ -52,21 +54,52 @@ try {
 const PORT = Number(process.env.PORT ?? 4323);
 const HERE = dirname(fileURLToPath(import.meta.url));
 
+/** Bumped when the request/response contract changes; stamped on every response. */
+const API_VERSION = '1.0.0';
+
 const SESSION_TTL_MS = 24 * 60 * 60_000;
-const KEY_TTL_MS = TRIAL_DAYS * 24 * 60 * 60_000;
 const CODE_TTL_MS = 15 * 60_000;
 const CODE_COOLDOWN_MS = 30_000;
+
+// Per-key rate limiter for the metered calculation endpoint.
+const paycheckLimiter = new RateLimiter();
+
+// The set of state codes this build can actually compute, read once from
+// data/states/. Used to reject an unknown workState at validation time
+// (a clean 422) rather than letting it surface as an engine throw.
+let VALID_STATE_CODES: Set<string> | null = null;
+function validStateCodes(): Set<string> {
+  if (VALID_STATE_CODES) return VALID_STATE_CODES;
+  const dir = join(HERE, '..', 'data', 'states');
+  const codes = readdirSync(dir)
+    .filter((f) => f.endsWith('-2026.json'))
+    .map((f) => f.slice(0, 2).toUpperCase());
+  VALID_STATE_CODES = new Set(codes);
+  return VALID_STATE_CODES;
+}
 
 // ---------------------------------------------------------------------
 // small helpers
 // ---------------------------------------------------------------------
 
-function sendJson(res: ServerResponse, status: number, body: unknown): void {
+// Applied to every response. Cheap, standard hardening: don't let the
+// content type be sniffed, don't leak the referrer, don't allow framing,
+// and stamp the API version so a caller can tell which build answered.
+const SECURITY_HEADERS: Record<string, string> = {
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'no-referrer',
+  'X-Frame-Options': 'SAMEORIGIN',
+  'X-Omnia-Version': API_VERSION,
+};
+
+function sendJson(res: ServerResponse, status: number, body: unknown, extraHeaders: Record<string, string> = {}): void {
   const payload = JSON.stringify(body);
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
     'Content-Length': Buffer.byteLength(payload),
     'Cache-Control': 'no-store',
+    ...SECURITY_HEADERS,
+    ...extraHeaders,
   });
   res.end(payload);
 }
@@ -77,6 +110,7 @@ function sendHtml(res: ServerResponse, path: string): void {
     'Content-Type': 'text/html; charset=utf-8',
     'Content-Length': html.byteLength,
     'Cache-Control': 'no-store',
+    ...SECURITY_HEADERS,
   });
   res.end(html);
 }
@@ -489,6 +523,16 @@ async function handleStartTrial(req: IncomingMessage, res: ServerResponse): Prom
       new Date(now + TRIAL_DAYS * 86_400_000).setMonth(new Date(now).getMonth() + TERM_MONTHS),
     ).toISOString();
     if (acct) acct.stage = 'trialing';
+
+    // Promote any key the customer already minted so it lives through the
+    // committed term instead of expiring at the end of the 14-day window.
+    const life = keyLifeFor(sub, now);
+    for (const k of Object.values(db.keys)) {
+      if (k.ownerEmail === session.email && k.isActive) {
+        k.plan = life.plan;
+        k.expiresAt = life.expiresAt;
+      }
+    }
     return { ok: true as const, subscription: sub, paymentAttached: hasPayment };
   });
 
@@ -558,34 +602,38 @@ async function handleIssueKey(req: IncomingMessage, res: ServerResponse): Promis
     return;
   }
 
-  const key = 'sk_test_' + randomBytes(24).toString('base64url');
+  const isLive = process.env.OMNIA_ISSUE_LIVE_KEYS === '1';
+  const key = (isLive ? 'sk_live_' : 'sk_test_') + randomBytes(24).toString('base64url');
   const keyHash = sha256Hex(key);
-  const keyPrefix = key.slice(0, 'sk_test_'.length + 6);
+  const keyPrefix = key.slice(0, (isLive ? 'sk_live_' : 'sk_test_').length + 6);
   const now = Date.now();
 
-  withDb((db) => {
+  const life = withDb((db) => {
     // Revoking any prior key for this email on reissue -- one live key per
-    // evaluation account, same as "generate a new one invalidates the old"
-    // that the docs page tells the user before they click the button.
+    // account, same as "generate a new one invalidates the old" that the
+    // docs page tells the user before they click the button.
     for (const existing of Object.values(db.keys)) {
       if (existing.ownerEmail === session.email) existing.isActive = false;
     }
+    const l = keyLifeFor(db.subscriptions[session.email], now);
     const record: KeyRecord = {
       keyHash,
       keyPrefix,
       ownerEmail: session.email,
       ownerName: session.name,
       company: session.company,
-      plan: 'evaluation',
+      plan: l.plan,
       createdAt: new Date(now).toISOString(),
-      expiresAt: new Date(now + KEY_TTL_MS).toISOString(),
+      expiresAt: l.expiresAt,
       isActive: true,
       lastUsedAt: null,
+      totalCalls: 0,
     };
     db.keys[keyHash] = record;
+    return l;
   });
 
-  sendJson(res, 200, { key, keyPrefix, expiresAt: new Date(now + KEY_TTL_MS).toISOString() });
+  sendJson(res, 200, { key, keyPrefix, plan: life.plan, expiresAt: life.expiresAt });
 }
 
 // ---------------------------------------------------------------------
@@ -624,7 +672,9 @@ function handleUsage(req: IncomingMessage, res: ServerResponse): void {
       issuedAt: keyRecord.createdAt,
       expiresAt: keyRecord.expiresAt,
       lastUsedAt: keyRecord.lastUsedAt,
-      totalCalls: events.length,
+      // Durable meter (survives usage-log trimming); falls back to the
+      // retained-window count for keys minted before the counter existed.
+      totalCalls: keyRecord.totalCalls ?? events.length,
       callsToday,
       callsThisMonth,
       recent,
@@ -637,9 +687,12 @@ function handleUsage(req: IncomingMessage, res: ServerResponse): void {
 // ---------------------------------------------------------------------
 
 async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const requestId = 'req_' + randomBytes(8).toString('hex');
+  const baseHeaders = { 'X-Request-Id': requestId };
+
   const key = bearerToken(req);
   if (!key) {
-    sendJson(res, 401, { error: 'Missing API key. Send "Authorization: Bearer <key>".' });
+    sendJson(res, 401, { error: 'Missing API key. Send "Authorization: Bearer <key>".', code: 'missing_key', requestId }, baseHeaders);
     return;
   }
 
@@ -647,47 +700,93 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   const keyRecord = readDb((db) => db.keys[keyHash]);
 
   if (!keyRecord || !keyRecord.isActive) {
-    sendJson(res, 401, { error: 'Invalid or inactive API key.' });
+    sendJson(res, 401, { error: 'Invalid or inactive API key.', code: 'invalid_key', requestId }, baseHeaders);
     return;
   }
   if (Date.now() > new Date(keyRecord.expiresAt).getTime()) {
-    sendJson(res, 401, { error: `This evaluation key expired on ${keyRecord.expiresAt}.` });
+    sendJson(res, 401, { error: `This API key expired on ${keyRecord.expiresAt}.`, code: 'expired_key', requestId }, baseHeaders);
     return;
   }
 
-  let input: PaycheckInput;
+  // --- rate limit (per key) --------------------------------------------
+  const rl = paycheckLimiter.hit(keyHash);
+  const rlHeaders = {
+    ...baseHeaders,
+    'RateLimit-Limit': String(rl.limit),
+    'RateLimit-Remaining': String(rl.remaining),
+    'RateLimit-Reset': String(rl.resetAt),
+  };
+  if (!rl.allowed) {
+    sendJson(
+      res,
+      429,
+      { error: `Rate limit of ${rl.limit} requests/minute exceeded. Retry in ${rl.retryAfterSec}s.`, code: 'rate_limited', requestId },
+      { ...rlHeaders, 'Retry-After': String(rl.retryAfterSec) },
+    );
+    return;
+  }
+
+  // --- parse ------------------------------------------------------------
+  let raw: unknown;
   try {
-    input = await readJson<PaycheckInput>(req);
+    raw = await readJson<unknown>(req);
   } catch (err) {
-    sendJson(res, 400, { error: (err as Error).message });
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId }, rlHeaders);
     return;
   }
 
+  // --- validate (structured, field-level) ------------------------------
+  const validation = validatePaycheckInput(raw, { validStateCodes: validStateCodes() });
+  if (!validation.ok) {
+    recordUsage(keyHash, 422, 'validation_failed', (raw as { checkDate?: string } | null)?.checkDate ?? null);
+    sendJson(
+      res,
+      422,
+      {
+        error: 'The request did not pass validation.',
+        code: 'invalid_input',
+        details: validation.errors,
+        requestId,
+      },
+      rlHeaders,
+    );
+    return;
+  }
+
+  // --- calculate --------------------------------------------------------
   let status = 200;
   let responseBody: unknown;
-  let errorText: string | null = null;
+  let usageError: string | null = null;
   try {
-    const result = calculatePaycheck(input);
-    responseBody = { result };
+    responseBody = { result: calculatePaycheck(validation.value) };
   } catch (err) {
+    // Validation covers the common bad-input cases, so a throw here is
+    // unexpected. Log the real reason for support (keyed by requestId);
+    // hand the caller a safe message, never an engine stack detail.
     status = 422;
-    errorText = err instanceof Error ? err.message : 'Unknown calculation error.';
-    responseBody = { error: errorText };
+    usageError = err instanceof Error ? err.message : 'calculation_error';
+    console.error(`[paycheck ${requestId}] calculation failed:`, usageError);
+    responseBody = {
+      error: 'The calculation could not be completed for the input provided.',
+      code: 'calculation_error',
+      requestId,
+    };
   }
 
-  withDb((db) => {
-    db.usage.push({
-      keyHash,
-      at: new Date().toISOString(),
-      statusCode: status,
-      error: errorText,
-      checkDate: (input as { checkDate?: string } | undefined)?.checkDate ?? null,
-    });
-    const stored = db.keys[keyHash];
-    if (stored) stored.lastUsedAt = new Date().toISOString();
-  });
+  recordUsage(keyHash, status, usageError, validation.value.checkDate);
+  sendJson(res, status, responseBody, rlHeaders);
+}
 
-  sendJson(res, status, responseBody);
+/** One place that appends a bounded usage event and updates the key's meter. */
+function recordUsage(keyHash: string, statusCode: number, error: string | null, checkDate: string | null): void {
+  withDb((db) => {
+    appendUsage(db, { keyHash, at: new Date().toISOString(), statusCode, error, checkDate });
+    const stored = db.keys[keyHash];
+    if (stored) {
+      stored.lastUsedAt = new Date().toISOString();
+      if (statusCode === 200) stored.totalCalls = (stored.totalCalls ?? 0) + 1;
+    }
+  });
 }
 
 // ---------------------------------------------------------------------
@@ -695,6 +794,30 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
 // rulesets actually present in data/states/, so the list can never
 // claim a state this build can't compute.
 // ---------------------------------------------------------------------
+
+// ---------------------------------------------------------------------
+// GET /api/health -- unauthenticated liveness/readiness probe. Cheap and
+// safe to hit from a load balancer. Reports the build's API version and
+// how many jurisdictions it can compute, so a probe also catches a bad
+// deploy with missing data.
+// ---------------------------------------------------------------------
+
+function handleHealth(res: ServerResponse): void {
+  let states = 0;
+  let ok = true;
+  try {
+    states = validStateCodes().size;
+    if (states === 0) ok = false;
+  } catch {
+    ok = false;
+  }
+  sendJson(res, ok ? 200 : 503, {
+    status: ok ? 'ok' : 'degraded',
+    version: API_VERSION,
+    states,
+    time: new Date().toISOString(),
+  });
+}
 
 function handleStates(res: ServerResponse): void {
   const dir = join(HERE, '..', 'data', 'states');
@@ -835,8 +958,9 @@ createServer((req, res) => {
     if (method === 'GET' && url === '/api/account') return handleAccount(req, res);
     if (method === 'POST' && url === '/api/issue-key') return handleIssueKey(req, res);
     if (method === 'GET' && url === '/api/usage') return handleUsage(req, res);
-    if (method === 'POST' && url === '/api/paycheck') return handlePaycheck(req, res);
-    if (method === 'GET' && url === '/api/states') return handleStates(res);
+    if (method === 'POST' && (url === '/api/paycheck' || url === '/v1/paycheck')) return handlePaycheck(req, res);
+    if (method === 'GET' && (url === '/api/health' || url === '/v1/health' || url === '/healthz')) return handleHealth(res);
+    if (method === 'GET' && (url === '/api/states' || url === '/v1/states')) return handleStates(res);
     if (method === 'POST' && url === '/api/estimate') return handleEstimate(req, res);
     if (method === 'GET' && url === '/api/billing') return handleBilling(req, res);
 
