@@ -1,0 +1,13 @@
+services:
+  web:
+    image: node:22-slim
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+    command: node --watch site/server.ts
+    restart: unless-stopped
