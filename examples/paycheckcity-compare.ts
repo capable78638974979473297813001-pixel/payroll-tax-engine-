@@ -88,18 +88,20 @@ const SCENARIOS: Scenario[] = [
     reference: noRef(),
   },
   {
-    id: 'oh-401k',
-    label: 'Ohio — single, biweekly, $240 pre-tax 401(k)',
-    recipe: 'Salary · OH · biweekly · gross $3,000.00 · Single · 401(k) $240.00 · no local city',
-    input: { checkDate: '2026-06-15', payFrequency: 'biweekly', earnings: reg(300000), deductions: [{ code: '401K', category: 'deferral_401k', amount: 24000 }], federalW4: w4(), ytd: ytd0(), workState: { code: 'OH' } },
-    reference: noRef(),
+    id: 'oh-plain',
+    label: 'Ohio — single, biweekly, no pre-tax',
+    recipe: 'Salary · OH · biweekly · gross $3,000.00 · Single · no local city',
+    input: { checkDate: '2026-06-15', payFrequency: 'biweekly', earnings: reg(300000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'OH' } },
+    // Read from paycheckcity.com on 2026-09-21 (verified via browser).
+    reference: { federalIncomeTax: 32038, socialSecurity: 18600, medicare: 4350, stateIncomeTax: 7577, stateOtherEE: 0, local: 0, netPay: 237435 },
   },
   {
     id: 'pa-flat',
     label: 'Pennsylvania — flat 3.07%, single, biweekly',
     recipe: 'Salary · PA · biweekly · gross $2,800.00 · Single · no local EIT',
     input: { checkDate: '2026-06-15', payFrequency: 'biweekly', earnings: reg(280000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'PA' } },
-    reference: noRef(),
+    // Read from paycheckcity.com on 2026-09-21 (verified via browser).
+    reference: { federalIncomeTax: 27638, socialSecurity: 17360, medicare: 4060, stateIncomeTax: 8596, stateOtherEE: 196, local: 0, netPay: 222150 },
   },
   {
     id: 'ca-sdi',
