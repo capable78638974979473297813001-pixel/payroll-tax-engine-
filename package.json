@@ -11,6 +11,7 @@
     "api": "node examples/api-server.ts",
     "compare:paycheckcity": "node examples/paycheckcity-compare.ts",
     "probe:local": "node examples/local-probe.ts",
+    "probe:engine": "node examples/engine-probe.ts",
     "api:key": "node scripts/mint-api-key.ts",
     "demo": "node examples/demo.ts",
     "demo:garnishment": "node examples/garnishment-demo.ts",
