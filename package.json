@@ -12,6 +12,7 @@
     "compare:paycheckcity": "node examples/paycheckcity-compare.ts",
     "probe:local": "node examples/local-probe.ts",
     "probe:engine": "node examples/engine-probe.ts",
+    "sweep:local": "node examples/local-sweep.ts",
     "api:key": "node scripts/mint-api-key.ts",
     "demo": "node examples/demo.ts",
     "demo:garnishment": "node examples/garnishment-demo.ts",
