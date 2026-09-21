@@ -31,6 +31,7 @@ import {
   type OHSchoolDistrictEntry,
   type PALocalEntry,
 } from '../src/registry.ts';
+import type { StateCertificate } from '../src/types.ts';
 import {
   namesEqual,
   schoolDistrictKeyFromCensusName,
@@ -501,8 +502,8 @@ export function resolveJurisdiction(
 export function toCertificateFields(
   resolved: ResolvedJurisdiction,
   role: 'work' | 'residence',
-): Record<string, unknown> {
-  const fields: Record<string, unknown> = {};
+): Partial<StateCertificate> {
+  const fields: Partial<StateCertificate> = {};
 
   if (resolved.miCity?.confidence === 'matched' && resolved.miCity.entry) {
     fields[role === 'work' ? 'workCity' : 'residenceCity'] = resolved.miCity.entry.name;

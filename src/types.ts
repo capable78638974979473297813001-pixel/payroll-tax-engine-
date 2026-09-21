@@ -208,11 +208,182 @@ export interface YearToDate {
   };
 }
 
+/**
+ * Every field any state or local tax in src/taxes/state.ts reads off
+ * workState.certificate / residenceState.certificate, gathered from that
+ * file's own certificate.* reads so a caller can discover what a
+ * jurisdiction needs from the type system instead of grepping state.ts.
+ *
+ * Several names here are reused across many states for the same KIND of
+ * fact (maritalStatus, filingStatus, withholdingCode, formVintage) but each
+ * state accepts its own, different set of values for it — e.g. NJ's
+ * filingStatus is 'single'|'mfs'|'mfj'|'hoh'|'qw' while MD's is
+ * 'single'|'mfjHoh'. Typed as `string` for those rather than one union that
+ * would wrongly suggest every state accepts every other state's values;
+ * stateIncomeTax() validates the actual per-state set at runtime and throws
+ * a clear "Unrecognized <STATE> certificate.<field>" error naming exactly
+ * what that state accepts. Fields confirmed to have one fixed, state-wide
+ * set of values (e.g. Alabama's exemption code, MA's M-4 codes) keep that
+ * literal union.
+ *
+ * The index signature is a forward-compatibility escape hatch, not an
+ * invitation to skip adding a field here: a genuinely new certificate
+ * field should be added above it, the same way a new StateRuleset field is
+ * added to that interface rather than left to the index signature there.
+ */
+export interface StateCertificate {
+  // --- geography (usually set by geocode/'s toCertificateFields(), not by
+  // hand) ---
+  /** Caller-resolved locality name for a caller-resolved-locality tax (Newark, Kansas City/St. Louis, Wilmington, Seattle, Denver/Glendale/Greenwood Village/Sheridan/Aurora, WV's service-fee cities, OR's transit districts). */
+  locality?: string;
+  /** County name — Indiana's mandatory county tax, Maryland's county piggyback tax, Kentucky's county-role occupational tax. */
+  county?: string;
+  /** Kentucky's WORK-address county role specifically (city-vs-county credit); never a residence concept. */
+  workCounty?: string;
+  /** City name — Michigan/Ohio/Alabama/Kentucky city-level local income tax, work role. */
+  workCity?: string;
+  /** City name — same registries as workCity, residence role (Michigan/Ohio/Alabama/Kentucky, plus NYC/Yonkers logic reads it for the "is the other address also this city" check). */
+  residenceCity?: string;
+  /** Pennsylvania's 6-digit work PSD code (required whenever PA local tax applies). */
+  workPSD?: string;
+  /** Pennsylvania's 6-digit residence PSD code; absent or '88000' means out-of-state/unknown residence. */
+  residencePSD?: string;
+  /** Ohio's 4-digit School District Income Tax code. */
+  schoolDistrictCode?: string;
+  /** Ohio's own JEDD/JEDZ zone id (not a name). */
+  workJEDDId?: string;
+
+  // --- NYC / Yonkers (New York) ---
+  nycResident?: boolean;
+  yonkersResident?: boolean;
+  yonkersNonresidentWorker?: boolean;
+  /** NYS-50-T-NYC Line 1 fallback when unset: this employee's NYC exemption count. */
+  nycExemptions?: number;
+  additionalWithholdingNYC?: Cents;
+  additionalWithholdingYonkers?: Cents;
+
+  // --- Oregon / Portland ---
+  metroDistrict?: boolean;
+  multnomahCounty?: boolean;
+
+  // --- caller-resolved-locality tax facts no address can supply ---
+  /** This month's cumulative pay so far in the locality — Denver-family OPT, Seattle JumpStart-adjacent monthly tests. */
+  localMonthlyCompensation?: Cents;
+  /** True when this month's local flat-rate/head tax was already withheld this cheque period, so it isn't withheld twice. */
+  localOPTWithheldThisMonth?: Cents;
+  /** Form TD269-style cross-employer coordination: true when a different employer already withheld this locality's employee OPT this month. */
+  localOPTEmployeeWithheldByOtherEmployer?: boolean;
+  /** This month's state tax already withheld so far — Denver-style monthly head-tax tests read this the same way. */
+  stateTaxWithheldThisMonth?: Cents;
+  /** West Virginia municipal service fee: proof it was already withheld elsewhere this period. */
+  wvLocalFeeAlreadyWithheld?: boolean;
+  /** Cumulative days worked in the locality/municipality this year — WV service-fee minimum-days gates, PA's day-count apportionment. */
+  daysWorkedInLocality?: number;
+  daysWorkedInMunicipality?: number;
+  /** Default true — most employees have exactly one work municipality; set false only for a genuinely split work location. */
+  workCityIsPrincipalWorkplace?: boolean;
+  /** Newark: this employee's wages are excluded from the employer's resident-apportionment calculation (the employer's own workforce-wide determination). */
+  newarkResidentApportionmentExcluded?: boolean;
+  /** Pennsylvania LST: proof another employer already withheld it this year, so this employer doesn't withhold it again past the annual cap. */
+  lstAlreadyWithheldElsewhere?: boolean;
+
+  // --- reciprocity / multi-state ---
+  /** Caller asserts this reciprocal-state employee is a genuine daily commuter, where a state's reciprocity is commuter-only. */
+  dailyCommuter?: boolean;
+  /** Caller asserts the further statutory conditions a paycheck alone can't evidence for a nonresident de minimis exemption. */
+  nonresidentDeMinimisEligible?: boolean;
+  /** Caller asserts this nonresident qualifies for a resident-state tax credit, where that eligibility gates the exemption. */
+  nonresidentCreditEligible?: boolean;
+  /** Cumulative days worked in the state this year — Indiana's 30-day rule and similar day-count thresholds. */
+  daysWorkedInStateThisYear?: number;
+  /** Direct nonresident flag some states' own forms use instead of a residence-state comparison (Maryland's county tax, Delaware's severance rules). */
+  nonresident?: boolean;
+
+  // --- exemption / withholding-adjustment mechanics generic across most states ---
+  /** Employee claimed exempt from this state's withholding on their certificate. */
+  exempt?: boolean;
+  /** Free-text reason the caller is asserting for `exempt` — carried through to the emitted TaxLine detail, not validated. */
+  exemptReason?: string;
+  /** Flat extra dollar amount withheld per period on top of the computed tax (this state's own Line 4(c)-equivalent). */
+  additionalWithholding?: Cents;
+  /** Caller-computed reduced withholding amount, already capped correctly by the caller; floored at $0 against the computed tax. */
+  reducedWithholding?: Cents;
+  /** Employee/payee is a nonresident alien — forces the single/no-allowances schedule some states' forms require regardless of actual marital status (mirrors federalW4.nonresidentAlien for state purposes). */
+  nonresidentAlien?: boolean;
+  /** An employer and employee's voluntary state withholding agreement where the category (e.g. clergy) otherwise has none. */
+  voluntaryWithholdingAgreement?: boolean;
+  /** Personal/dependency allowance count on this state's own W-4-equivalent (PA/MI/KY-family flatRate() states, Maine, North Carolina, and others using the same allowanceAmount × count shape). */
+  allowances?: number;
+  /** NY/NJ-style raw exemption count (distinct from `allowances` in the states that use this name instead). */
+  exemptions?: number;
+  /** Iowa/Pennsylvania-adjacent "caller supplies the already-computed number" allowance figure (Iowa's 2024+ IA W-4 Line 7 total dollar allowance amount). */
+  totalAllowanceAmount?: Cents;
+  /** Kansas-adjacent count of additional personal allowances distinct from the base `allowances` count. */
+  personalAllowances?: number;
+  /** Which revision of a state's own withholding form/method applies — currently only Iowa's 'pre_2024' (pre-2024 IA W-4); absent means the current form. */
+  formVintage?: string;
+  /** Iowa pre-2024 W-4's own flag: whether the spouse also has earned income, which changes the applicable bracket. */
+  spouseHasEarnedIncome?: boolean;
+  /** Dependent count some states' own forms ask for directly (e.g. Massachusetts Form M-4 Line 4). */
+  dependents?: number;
+  /** Maine-only: this pay period's wages (in cents) sourced from tribal land, excluded from Maine's taxable base directly. */
+  exemptWages?: Cents;
+
+  // --- state-specific enumerated fields (each state validates its OWN
+  // accepted set at runtime; see stateIncomeTax()'s own "Unrecognized
+  // <STATE> certificate.<field>" errors for the authoritative list) ---
+  /** Reused across many states for that state's own marital-status categories (e.g. WI/OR/ND 'single'|'married'; NY, MT, ID, IA, ME each with their own set). */
+  maritalStatus?: string;
+  /** Reused across many states for that state's own filing-status categories (e.g. NJ 'single'|'mfs'|'mfj'|'hoh'|'qw'; MD 'single'|'mfjHoh'; OK 'single'|'married'|'married_withhold_as_single'). */
+  filingStatus?: string;
+  /** Hawaii's own marital-status set — kept separate from `maritalStatus` because Hawaii doesn't allow the ordinary certificate.exempt-style exemption these other states share. */
+  hawaiiMaritalStatus?: string;
+  /** Connecticut Form CT-W4's own withholding code. */
+  withholdingCode?: string;
+  /** Kansas Form K-4's own allowance-rate election. */
+  allowanceRate?: 'single' | 'joint';
+  /** New Jersey NJ-W4's own Rate Table election — the only way NJ's alternate rate tables are ever selected. */
+  rateTableOverride?: 'A' | 'B' | 'C' | 'D' | 'E';
+  /** Massachusetts Form M-4 Line 1: 0 (no certificate on file), 1, or 2 (age 65+). */
+  personalExemptionCode?: 0 | 1 | 2;
+  /** Massachusetts Form M-4 Line 2: 0 (no spouse exemption), 4, or 5 (spouse age 65+). */
+  spouseExemptionCode?: 0 | 4 | 5;
+  /** Alabama Form A-4's own exemption code. */
+  alabamaExemptionCode?: '0' | 'S' | 'MS' | 'M' | 'H';
+  /** Arizona Form A-4's elected withholding percentage, as a decimal (e.g. 0.02 for 2.0%) — must be one of that year's cfg.availableRates. */
+  electedRate?: number;
+  /** Arizona Form A-4's own zero-withholding election, distinct from simply having no form on file. */
+  zeroElection?: boolean;
+
+  // --- multi-employer / payroll-history facts, disclosed as caller-only knowledge everywhere else in this engine ---
+  /** Denver-family Occupational Privilege Tax: whether this employee's $50,000 lifetime severance exemption cap already has amount used this year, in cents. */
+  severanceExemptYtd?: Cents;
+  /** Delaware severance exemption: caller's own on-file approval assertion. */
+  severanceApprovalOnFile?: boolean;
+  /** Washington Paid Leave exemption on file (unverified by this engine). */
+  paidLeaveExempt?: boolean;
+  /** Washington Paid Leave: this employer's own chosen rate override. */
+  paidLeaveEmployeeRateOverride?: number;
+  /** WA Cares Fund exemption on file (unverified by this engine) — a separate mechanism from paidLeaveExempt/exempt. */
+  wacaresExempt?: boolean;
+  /** Newark payroll tax: whether this employer is liable for the employee's paid-leave share, per the employer's own size determination. */
+  employerLiableForPaidLeaveShare?: boolean;
+
+  /**
+   * Forward-compatibility escape hatch for a certificate field not yet
+   * catalogued above (a new state, or a field this list missed) — see this
+   * interface's own doc comment. Reading through here bypasses the type
+   * checking every field above gives; prefer adding the field above it
+   * instead of relying on this for anything long-lived.
+   */
+  [key: string]: unknown;
+}
+
 export interface StateWithholding {
   /** Two-letter code, e.g. 'PA'. */
   code: string;
-  /** State-specific certificate fields; shape varies by state. */
-  certificate?: Record<string, unknown>;
+  /** State-specific certificate fields; shape varies by state — see StateCertificate for the full catalog this engine actually reads. */
+  certificate?: StateCertificate;
 }
 
 /**
