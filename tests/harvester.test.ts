@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { scanRepo, listJsonFiles } from '../harvester/collect.ts';
-import { probe } from '../harvester/probe.ts';
+import { probe, normalizeHtml } from '../harvester/probe.ts';
 import { classify, fold, type BaselineEntry } from '../harvester/baseline.ts';
 import type { Signal } from '../harvester/probe.ts';
 
@@ -140,6 +140,45 @@ test('probe: a 403 block is reported with its status, not a bare failure', async
   assert.equal(sig.ok, false);
   assert.equal(sig.status, 403);
   assert.equal(sig.error, 'HTTP 403');
+});
+
+test('normalizeHtml: two fetches that differ only in volatile tokens hash equal', () => {
+  const page = (rayId: string, viewState: string, ts: string) => `
+    <html><head>
+      <meta name="csrf-token" content="${rayId}xxxxxxxxxxxxxxxxxxxx">
+      <script nonce="${rayId}">window.__CF$cv$params={r:'${rayId}',t:'${ts}'};</script>
+      <style>.a{color:#${rayId.slice(0, 6)}}</style>
+    </head><body>
+      <form><input type="hidden" name="__VIEWSTATE" value="${viewState}"></form>
+      <h1>Wisconsin UI Tax Rates 2026</h1>
+      <p>The taxable wage base is $14,000. Rendered ${ts}.</p>
+      <!-- build ${rayId} -->
+    </body></html>`;
+  const a = normalizeHtml(page('a3f3f9b3fb482311', 'AAAA1111BBBB2222CCCC3333DDDD4444EEEE5555', '2026-09-22T20:14:00Z'));
+  const b = normalizeHtml(page('a3f3f9b4abdf2311', 'ZZZZ9999YYYY8888XXXX7777WWWW6666VVVV5555', '2026-09-22T20:21:47Z'));
+  assert.equal(a, b); // only the substantive text survives, and it's identical
+  assert.match(a, /Wisconsin UI Tax Rates 2026/);
+  assert.match(a, /taxable wage base is \$14,000/);
+});
+
+test('normalizeHtml: a real content change still shows up', () => {
+  const base = '<html><body><h1>Rate</h1><p>The rate is 4.25%.</p></body></html>';
+  const changed = '<html><body><h1>Rate</h1><p>The rate is 3.99%.</p></body></html>';
+  assert.notEqual(normalizeHtml(base), normalizeHtml(changed));
+});
+
+test('classify: first capture after being blocked is "new", not "changed"', () => {
+  // prev = we only ever saw a 403 (a status, no content); now we get real content.
+  const wasBlocked = { status: 403, firstSeen: 'x', lastSeen: 'x', lastChanged: 'x' };
+  const nowOk = { url: 'u', ok: true, status: 200, hash: 'abc' } as const;
+  assert.equal(classify(wasBlocked, nowOk), 'new');
+});
+
+test('classify: a steady ETag wins over a churning body hash', () => {
+  const prev = { etag: 'W/"v1"', hash: 'oldbytes', firstSeen: 'x', lastSeen: 'x', lastChanged: 'x' };
+  // Body hash differs (volatile HTML) but the server's ETag is unchanged.
+  const cur = { url: 'u', ok: true, status: 200, etag: 'W/"v1"', hash: 'newbytes' } as const;
+  assert.equal(classify(prev, cur), 'unchanged');
 });
 
 test('probe: retries then succeeds', async () => {

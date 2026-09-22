@@ -41,14 +41,25 @@ export function saveBaseline(path: string, sources: Baseline): void {
  * reached is 'unreachable' (a report note, never a change), so a flaky source
  * never masquerades as a real content change.
  */
+/** Did we ever capture real content for this source (a hash or a validator)? */
+const hasContent = (e: { hash?: string | null; etag?: string; lastModified?: string } | undefined): boolean =>
+  !!e && (e.hash != null || !!e.etag || !!e.lastModified);
+
 export function classify(prev: BaselineEntry | undefined, cur: Signal): Verdict {
   if (!cur.ok) return 'unreachable';
   if (!prev) return 'new';
-  // Prefer a strong content hash; fall back to validators, then status.
-  if (cur.hash != null && prev.hash != null) return cur.hash === prev.hash ? 'unchanged' : 'changed';
+  // First successful capture after the source was previously blocked/unreachable
+  // (we had a status but never real content) is NEW, not a content change.
+  if (!hasContent(prev) && hasContent(cur)) return 'new';
+  // Prefer the server's own stable validators over the body hash — a page can
+  // send a steady ETag/Last-Modified while its HTML bytes churn every request
+  // (ASP.NET __VIEWSTATE, CSRF tokens, timestamps). Only trust the hash when
+  // the server offers no validator.
   if (cur.etag && prev.etag) return cur.etag === prev.etag ? 'unchanged' : 'changed';
   if (cur.lastModified && prev.lastModified) return cur.lastModified === prev.lastModified ? 'unchanged' : 'changed';
-  if (cur.status && prev.status) return cur.status === prev.status ? 'unchanged' : 'changed';
+  if (cur.hash != null && prev.hash != null) return cur.hash === prev.hash ? 'unchanged' : 'changed';
+  // One side has only a validator and the other only a hash — not comparable;
+  // treat as unchanged rather than inventing a change.
   return 'unchanged';
 }
 
