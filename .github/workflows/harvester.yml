@@ -1,0 +1,60 @@
+name: Harvester
+
+# Scans the repo's data tree, probes every official source URL the data cites,
+# and flags sources that CHANGED since the last run (so a human can check
+# whether our numbers need updating). It is designed to always succeed:
+# unreachable sources and detected changes are findings in the report, never
+# job failures. Runs daily and on demand.
+on:
+  schedule:
+    - cron: '17 7 * * *' # 07:17 UTC daily
+  workflow_dispatch: {}
+
+# Needed only so the rolling baseline can be committed back. The commit step is
+# best-effort and never fails the job.
+permissions:
+  contents: write
+
+# Never let two harvester runs race on the baseline commit.
+concurrency:
+  group: harvester
+  cancel-in-progress: false
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22' # latest 22.x strips TypeScript types with no flag
+
+      - name: Run harvester
+        run: node harvester/audit.ts
+        # audit.ts exits 0 even when sources are unreachable or have changed,
+        # and writes the run summary to the GitHub Actions job summary.
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harvester-report
+          path: harvester/report.md
+          if-no-files-found: warn
+
+      - name: Commit updated baseline
+        if: always()
+        run: |
+          git config user.name "omnia-harvester[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- harvester/baseline.json; then
+            echo "Baseline unchanged — nothing to commit."
+          else
+            git add harvester/baseline.json
+            git commit -m "harvester: update source baseline [skip ci]"
+            git push || echo "Baseline push failed (branch protection?) — non-fatal; next run retries."
+          fi

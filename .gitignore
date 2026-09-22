@@ -2,11 +2,11 @@ node_modules/
 *.log
 .env
 
-# Harvester scratch output — snapshots and the review journal are written by
-# the harvest tests/demos (each test clears the dir for a clean slate) and by
-# local sweeps; transient runtime state, never committed.
-harvester/snapshots/
-harvester/review/
+# Harvester generated report — rewritten every run (job summary + CI artifact),
+# so it is transient and never committed. harvester/baseline.json IS committed
+# on purpose: it is the rolling source-freshness baseline the harvester diffs
+# against, and its git history is the record of when each source last changed.
+harvester/report.md
 
 # File-backed store output (payroll/.data, trades/.data) — the JSON stand-ins
 # for the database; per-run local state, never committed.
