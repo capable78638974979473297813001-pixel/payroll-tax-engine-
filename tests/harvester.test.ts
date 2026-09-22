@@ -174,11 +174,15 @@ test('classify: first capture after being blocked is "new", not "changed"', () =
   assert.equal(classify(wasBlocked, nowOk), 'new');
 });
 
-test('classify: a steady ETag wins over a churning body hash', () => {
-  const prev = { etag: 'W/"v1"', hash: 'oldbytes', firstSeen: 'x', lastSeen: 'x', lastChanged: 'x' };
-  // Body hash differs (volatile HTML) but the server's ETag is unchanged.
-  const cur = { url: 'u', ok: true, status: 200, etag: 'W/"v1"', hash: 'newbytes' } as const;
+test('classify: the normalized hash wins over a rotating ETag/Last-Modified', () => {
+  // Server sends a per-request (weak) ETag and Last-Modified, but the
+  // normalized visible-text hash is identical → this is NOT a change.
+  const prev = { etag: 'W/"r1"', lastModified: 'Mon, 01 Sep 2026 10:00:00 GMT', hash: 'samehash', firstSeen: 'x', lastSeen: 'x', lastChanged: 'x' };
+  const cur = { url: 'u', ok: true, status: 200, etag: 'W/"r2"', lastModified: 'Mon, 01 Sep 2026 10:05:11 GMT', hash: 'samehash' } as const;
   assert.equal(classify(prev, cur), 'unchanged');
+  // And a real content change (hash differs) still flags, rotating validator or not.
+  const changed = { url: 'u', ok: true, status: 200, etag: 'W/"r3"', hash: 'differenthash' } as const;
+  assert.equal(classify(prev, changed), 'changed');
 });
 
 test('probe: retries then succeeds', async () => {

@@ -51,13 +51,14 @@ export function classify(prev: BaselineEntry | undefined, cur: Signal): Verdict 
   // First successful capture after the source was previously blocked/unreachable
   // (we had a status but never real content) is NEW, not a content change.
   if (!hasContent(prev) && hasContent(cur)) return 'new';
-  // Prefer the server's own stable validators over the body hash — a page can
-  // send a steady ETag/Last-Modified while its HTML bytes churn every request
-  // (ASP.NET __VIEWSTATE, CSRF tokens, timestamps). Only trust the hash when
-  // the server offers no validator.
+  // The normalized visible-text hash is the source of truth. ETag and
+  // Last-Modified are consulted ONLY when a hash isn't available on both sides,
+  // because many servers (pa.gov, county sites, CDN fronts) send rotating or
+  // weak validators that change every request even when the page content is
+  // identical — trusting them over the hash flags dozens of false changes.
+  if (cur.hash != null && prev.hash != null) return cur.hash === prev.hash ? 'unchanged' : 'changed';
   if (cur.etag && prev.etag) return cur.etag === prev.etag ? 'unchanged' : 'changed';
   if (cur.lastModified && prev.lastModified) return cur.lastModified === prev.lastModified ? 'unchanged' : 'changed';
-  if (cur.hash != null && prev.hash != null) return cur.hash === prev.hash ? 'unchanged' : 'changed';
   // One side has only a validator and the other only a hash — not comparable;
   // treat as unchanged rather than inventing a change.
   return 'unchanged';
