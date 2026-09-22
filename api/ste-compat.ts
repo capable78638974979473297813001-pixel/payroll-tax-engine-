@@ -27,7 +27,11 @@
  *   1. `payCalc()` — an array in, array out, the same batch calling
  *      convention Symmetry's own PayCalcRequest/PayCalcResult uses, keyed
  *      by UniqueTaxId rather than this engine's own certificate field
- *      names.
+ *      names. A live (residence) id is translated onto the certificate
+ *      field the calculator actually reads — `workCity` on a live id
+ *      becomes `residenceCity`, a live PSD becomes `residencePSD` — because
+ *      every local tax in this engine reads those facts off the work
+ *      certificate, not off `residenceState`.
  *   2. The uniqueTaxId catalog itself (`listUniqueTaxIds`,
  *      `resolveUniqueTaxId`) — for a caller that wants to browse or resolve
  *      ids without going through a full payCalc call, the STE-equivalent of
@@ -55,6 +59,7 @@ import type {
   FederalW4,
   PayFrequency,
   StateCertificate,
+  TaxLine,
   YearToDate,
 } from '../src/types.ts';
 
@@ -270,6 +275,21 @@ export interface TaxJurisdictionParm {
   /** The uniqueTaxId (or, identically, locationCode) this override applies to. */
   uniqueTaxId?: string;
   locationCode?: string;
+  /**
+   * Exempt this jurisdiction. Honored for a state-level id, where it sets
+   * certificate.exempt on the work certificate (work id) or the residence
+   * certificate (live id). A local id has no single exempt switch this
+   * engine reads, so the flag is ignored there rather than applied to a
+   * different tax.
+   */
+  isExempt?: boolean;
+  /**
+   * Extra withholding for this jurisdiction, in decimal dollars (the same
+   * unit as grossPay). Honored for a state-level id: converted to cents and
+   * stored as certificate.additionalWithholding. Ignored for a local id,
+   * which has no additional-withholding field of its own.
+   */
+  additionalWH?: number;
   /** Certificate fields to merge in for whichever jurisdiction the id above resolves to — e.g. { allowances: 2 } for a state that reads certificate.allowances. */
   fields?: Partial<StateCertificate>;
 }
@@ -316,41 +336,159 @@ function centsToDecimalDollars(c: Cents): number {
   return Math.round(c) / 100;
 }
 
+const STATE_CODE_FIELDS = new Set(['workState.code', 'residenceState.code']);
+
 /**
- * Apply one resolved catalog entry to a certificate/workState.code
- * accumulator. Booleans and strings both just overwrite; a caller supplying
- * two conflicting ids for the same field (e.g. two different work cities)
- * gets whichever was applied last — the same "last one wins" rule ordinary
- * object spreading already uses everywhere else in this engine's inputs.
+ * A live city id is catalogued as `workCity` because that is the field a
+ * WORK location sets. The calculator reads the home city from
+ * `residenceCity` on the same work certificate. Same split for PSD codes.
+ * Every other live local fact (MD county, OH school district, NYC resident)
+ * is read under the catalog's own field name, still on the work certificate.
  */
-function applyEntry(
-  entry: UniqueTaxIdEntry,
-  acc: { stateCode?: string; certificate: Partial<StateCertificate> },
-): void {
-  if (entry.field === 'workState.code' || entry.field === 'residenceState.code') {
-    acc.stateCode = entry.value as string;
-    return;
-  }
-  (acc.certificate as Record<string, unknown>)[entry.field] = entry.value;
+const LIVE_FIELD_ON_WORK_CERT: Partial<Record<string, keyof StateCertificate>> = {
+  workCity: 'residenceCity',
+  workPSD: 'residencePSD',
+};
+
+interface AppliedTax {
+  entry: UniqueTaxIdEntry;
+  role: 'work' | 'residence';
 }
 
-function resolveIds(
-  ids: string[] | undefined,
-  checkDate: string,
+interface FoldedRequest {
+  workStateCode?: string;
+  residenceStateCode?: string;
+  workCertificate: Partial<StateCertificate>;
+  residenceCertificate: Partial<StateCertificate>;
+  applied: AppliedTax[];
+}
+
+function unknownId(rawId: string, checkDate: string): Error {
+  return new Error(
+    `Unrecognized uniqueTaxId/locationCode "${rawId}" for ${checkDate.slice(0, 4)} — see listUniqueTaxIds() for every id this engine currently issues. This is this engine's OWN catalog, not Symmetry's; an id copied from an actual STE integration will not resolve here.`,
+  );
+}
+
+/** Where a catalog value or a parm override lands. Local live facts land on the work certificate; a residence STATE's own certificate stays separate, because residence-state withholding reads it from there. */
+function destinationCertificate(
+  entry: UniqueTaxIdEntry,
   role: 'work' | 'residence',
-): { stateCode?: string; certificate: Partial<StateCertificate> } {
-  const acc: { stateCode?: string; certificate: Partial<StateCertificate> } = { certificate: {} };
-  for (const rawId of ids ?? []) {
-    const entry = resolveUniqueTaxId(rawId, checkDate);
-    if (!entry) {
-      throw new Error(
-        `Unrecognized uniqueTaxId/locationCode "${rawId}" for ${checkDate.slice(0, 4)} — see listUniqueTaxIds() for every id this engine currently issues. This is this engine's OWN catalog, not Symmetry's; an id copied from an actual STE integration will not resolve here.`,
-      );
-    }
-    if (entry.role !== 'either' && entry.role !== role) continue;
-    applyEntry(entry, acc);
+  fold: FoldedRequest,
+): Partial<StateCertificate> {
+  if (role === 'residence' && entry.type !== 'state') return fold.workCertificate;
+  return role === 'work' ? fold.workCertificate : fold.residenceCertificate;
+}
+
+function writeCatalogValue(
+  entry: UniqueTaxIdEntry,
+  role: 'work' | 'residence',
+  fold: FoldedRequest,
+): void {
+  if (STATE_CODE_FIELDS.has(entry.field)) {
+    if (role === 'work') fold.workStateCode = entry.value as string;
+    else fold.residenceStateCode = entry.value as string;
+    return;
   }
-  return acc;
+  const field =
+    role === 'residence'
+      ? (LIVE_FIELD_ON_WORK_CERT[entry.field] ?? (entry.field as keyof StateCertificate))
+      : (entry.field as keyof StateCertificate);
+  (destinationCertificate(entry, role, fold) as Record<string, unknown>)[field] = entry.value;
+}
+
+function foldRequest(req: PayCalcRequest): FoldedRequest {
+  const fold: FoldedRequest = {
+    workCertificate: {},
+    residenceCertificate: {},
+    applied: [],
+  };
+  const liveIds = new Set(req.liveUniqueTaxIds ?? []);
+
+  const absorb = (ids: string[] | undefined, role: 'work' | 'residence') => {
+    for (const rawId of ids ?? []) {
+      const entry = resolveUniqueTaxId(rawId, req.checkDate);
+      if (!entry) throw unknownId(rawId, req.checkDate);
+      if (entry.role !== 'either' && entry.role !== role) continue;
+      fold.applied.push({ entry, role });
+      writeCatalogValue(entry, role, fold);
+    }
+  };
+  absorb(req.workUniqueTaxIds, 'work');
+  absorb(req.liveUniqueTaxIds, 'residence');
+
+  for (const parm of req.taxJurisdictionParms ?? []) {
+    const id = parm.uniqueTaxId ?? parm.locationCode;
+    if (!id) continue;
+    const entry = resolveUniqueTaxId(id, req.checkDate);
+    if (!entry) continue;
+    const role: 'work' | 'residence' = liveIds.has(id) ? 'residence' : 'work';
+    const extra: Partial<StateCertificate> = { ...(parm.fields ?? {}) };
+    if (parm.isExempt === true && entry.type === 'state') extra.exempt = true;
+    if (parm.additionalWH != null && parm.additionalWH > 0 && entry.type === 'state') {
+      extra.additionalWithholding = dollars(parm.additionalWH);
+    }
+    Object.assign(destinationCertificate(entry, role, fold) as Record<string, unknown>, extra);
+  }
+
+  return fold;
+}
+
+/** One result line's id, or null when more than one applied jurisdiction could have produced it. A wrong id is worse than none. */
+function uniqueTaxIdForLine(line: TaxLine, fold: FoldedRequest): string | null {
+  if (line.jurisdiction === 'federal') return FEDERAL_UNIQUE_TAX_ID;
+
+  if (line.jurisdiction === 'state') {
+    const residenceLine = /_RESIDENCE$|_RECIPROCITY_SWAP$|_SIT_CREDIT$/.test(line.id);
+    const code = residenceLine ? fold.residenceStateCode : fold.workStateCode;
+    return fold.applied.find((a) => a.entry.type === 'state' && a.entry.state === code)?.entry.uniqueTaxId ?? null;
+  }
+
+  if (line.id === 'PA_LST') {
+    return fold.applied.find((a) => a.role === 'work' && a.entry.type === 'psd')?.entry.uniqueTaxId ?? null;
+  }
+
+  if (line.id === 'NY_YONKERS_SIT' || line.id === 'NY_YONKERS_SIT_SUPP') {
+    const field = line.name.includes('Nonresident') ? 'yonkersNonresidentWorker' : 'yonkersResident';
+    const hits = fold.applied.filter((a) => a.entry.field === field);
+    return hits.length === 1 ? hits[0].entry.uniqueTaxId : null;
+  }
+
+  if (line.id.endsWith('_OPT_EE') || line.id.endsWith('_OPT_ER')) {
+    const hits = fold.applied.filter((a) => {
+      const prefix = String(a.entry.value).toUpperCase().replace(/[^A-Z0-9]+/g, '_');
+      return line.id === `${prefix}_OPT_EE` || line.id === `${prefix}_OPT_ER`;
+    });
+    return hits.length === 1 ? hits[0].entry.uniqueTaxId : null;
+  }
+
+  if (line.id.endsWith('_COUNTY')) {
+    const state = line.id.slice(0, 2);
+    const hits = fold.applied.filter((a) => a.entry.type === 'county' && a.entry.state === state);
+    return hits.length === 1 ? hits[0].entry.uniqueTaxId : null;
+  }
+
+  const predicates: Record<string, (e: UniqueTaxIdEntry) => boolean> = {
+    OH_LOCAL: (e) => e.state === 'OH' && e.type === 'city',
+    OH_SDIT: (e) => e.type === 'school_district',
+    OH_JEDD: (e) => e.type === 'jedd',
+    PA_EIT: (e) => e.type === 'psd',
+    MI_LOCAL: (e) => e.state === 'MI' && e.type === 'city',
+    AL_LOCAL: (e) => e.state === 'AL' && e.type === 'city',
+    KY_LOCAL: (e) => e.state === 'KY' && e.type === 'city',
+    NY_NYC_SIT: (e) => e.field === 'nycResident',
+    NY_NYC_SIT_SUPP: (e) => e.field === 'nycResident',
+    NEWARK_PAYROLL_ER: (e) => e.name === 'Newark',
+    WILMINGTON_WAGE: (e) => e.name === 'Wilmington',
+    KC_EARN: (e) => e.value === 'Kansas City',
+    STL_EARN: (e) => e.value === 'St. Louis',
+    STL_PAYROLL_ER: (e) => e.value === 'St. Louis',
+    SEATTLE_PAYROLL_ER: (e) => e.state === 'WA' && e.name.startsWith('Seattle'),
+    WV_LOCAL_FEE: (e) => e.state === 'WV' && e.type === 'locality',
+  };
+  const pred = predicates[line.id];
+  if (!pred) return null;
+  const hits = fold.applied.filter((a) => pred(a.entry));
+  return hits.length === 1 ? hits[0].entry.uniqueTaxId : null;
 }
 
 /**
@@ -367,22 +505,9 @@ function resolveIds(
 export function payCalc(requests: PayCalcRequest[]): PayCalcResult[] {
   return requests.map((req) => {
     try {
-      const work = resolveIds(req.workUniqueTaxIds, req.checkDate, 'work');
-      const live = resolveIds(req.liveUniqueTaxIds, req.checkDate, 'residence');
+      const fold = foldRequest(req);
 
-      const certificate: Partial<StateCertificate> = { ...work.certificate };
-      const residenceCertificate: Partial<StateCertificate> = { ...live.certificate };
-
-      for (const parm of req.taxJurisdictionParms ?? []) {
-        const id = parm.uniqueTaxId ?? parm.locationCode;
-        if (!id || !parm.fields) continue;
-        const entry = resolveUniqueTaxId(id, req.checkDate);
-        if (!entry) continue;
-        const target = entry.role === 'residence' ? residenceCertificate : certificate;
-        Object.assign(target as Record<string, unknown>, parm.fields);
-      }
-
-      if (!work.stateCode) {
+      if (!fold.workStateCode) {
         throw new Error('workUniqueTaxIds must include exactly one state-level id (type "state") — no work state could be resolved.');
       }
 
@@ -395,28 +520,21 @@ export function payCalc(requests: PayCalcRequest[]): PayCalcResult[] {
           filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0,
         },
         ytd: req.ytd ?? { socialSecurity: 0, medicare: 0, futa: 0 },
-        workState: { code: work.stateCode, certificate },
-        residenceState: live.stateCode ? { code: live.stateCode, certificate: residenceCertificate } : undefined,
+        workState: { code: fold.workStateCode, certificate: fold.workCertificate },
+        residenceState: fold.residenceStateCode
+          ? { code: fold.residenceStateCode, certificate: fold.residenceCertificate }
+          : undefined,
       });
 
-      // Disclosed simplification: every result line is returned regardless
-      // (description/payer/amount are always correct — they come straight
-      // off calculatePaycheck()'s own TaxLine), but the uniqueTaxId on the
-      // line is only populated for FEDERAL and STATE-level lines. Local
-      // lines (a municipality, a school district, a JEDD, a caller-
-      // resolved locality) come back with uniqueTaxId: null rather than a
-      // guessed id, because src/taxes/state.ts's own TaxLine.id strings
-      // (e.g. 'MO_KC_EARN', 'OH_SDIT') aren't a single predictable pattern
-      // this module can safely reverse-match against the catalog without
-      // risking a WRONG id on a real dollar amount — the safer failure
-      // here is an honest null, not a confident guess.
+      // A local line is stamped with an id only when exactly one applied
+      // catalog entry could have produced it. Two cities on one combined
+      // OH_LOCAL / MI_LOCAL / PA_EIT line stay null: attaching either id
+      // would name the wrong jurisdiction for a blended dollar amount.
       const taxJurisdictionParms: PayCalcResultLine[] = result.taxes.map((line) => {
-        const catalogEntry = [...catalogFor(req.checkDate).entries].find(
-          (e) => e.state === work.stateCode && line.id.startsWith(`${work.stateCode}_`) && e.type === 'state',
-        );
+        const id = uniqueTaxIdForLine(line, fold);
         return {
-          uniqueTaxId: line.jurisdiction === 'federal' ? FEDERAL_UNIQUE_TAX_ID : catalogEntry?.uniqueTaxId ?? null,
-          locationCode: line.jurisdiction === 'federal' ? FEDERAL_UNIQUE_TAX_ID : catalogEntry?.uniqueTaxId ?? null,
+          uniqueTaxId: id,
+          locationCode: id,
           description: line.name,
           payer: line.payer,
           amount: centsToDecimalDollars(line.amount),
