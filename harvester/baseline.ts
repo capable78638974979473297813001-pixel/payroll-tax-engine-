@@ -15,11 +15,17 @@ export interface BaselineEntry {
   firstSeen: string;
   lastSeen: string;
   lastChanged: string;
+  /** Set once a source proves volatile (two immediate fetches disagree), so its
+   * per-request churn is remembered and never reported as a real change. */
+  volatile?: boolean;
 }
 
 export type Baseline = Record<string, BaselineEntry>;
 
-export type Verdict = 'new' | 'unchanged' | 'changed' | 'unreachable';
+// 'volatile' = the content differs from the baseline but two back-to-back
+// fetches in the same run also disagree, so the page churns every request
+// (view counter, timestamp, per-request token) and this is NOT a real change.
+export type Verdict = 'new' | 'unchanged' | 'changed' | 'unreachable' | 'volatile';
 
 export function loadBaseline(path: string): Baseline {
   try {
@@ -80,6 +86,25 @@ export function fold(prev: BaselineEntry | undefined, cur: Signal, now: string, 
     status: cur.status ?? prev?.status,
     firstSeen: prev?.firstSeen ?? now,
     lastSeen: now,
+    // Only a CONFIRMED change (or a first capture) advances lastChanged; a
+    // volatile source's per-request churn must not look like a real edit.
     lastChanged: verdict === 'changed' || verdict === 'new' ? now : (prev?.lastChanged ?? now),
+    // Once volatile, stay volatile so the fingerprint is treated as unreliable.
+    volatile: verdict === 'volatile' ? true : prev?.volatile,
   };
+}
+
+/**
+ * Second-fetch confirmation. When a source's content differs from the baseline,
+ * the harvester fetches it a SECOND time in the same run. If the two immediate
+ * fetches agree, the content is stably different — a REAL change. If they
+ * disagree, the page churns every request (view counter, timestamp, token) and
+ * the "change" is noise. When the confirming fetch is inconclusive (failed, or
+ * a body we couldn't hash), we err toward reporting so a genuine change is
+ * never hidden.
+ */
+export function confirmedChange(first: Signal, second: Signal): boolean {
+  if (!second.ok) return true; // inconclusive → keep as a real change
+  if (first.hash == null || second.hash == null) return true; // can't compare → keep
+  return first.hash === second.hash; // stable across both fetches → real change
 }

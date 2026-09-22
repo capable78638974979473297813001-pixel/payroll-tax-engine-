@@ -6,7 +6,7 @@ import { join } from 'node:path';
 
 import { scanRepo, listJsonFiles } from '../harvester/collect.ts';
 import { probe, normalizeHtml } from '../harvester/probe.ts';
-import { classify, fold, type BaselineEntry } from '../harvester/baseline.ts';
+import { classify, confirmedChange, fold, type BaselineEntry } from '../harvester/baseline.ts';
 import type { Signal } from '../harvester/probe.ts';
 
 // A throwaway data tree so the collector test never depends on real repo data.
@@ -183,6 +183,32 @@ test('classify: the normalized hash wins over a rotating ETag/Last-Modified', ()
   // And a real content change (hash differs) still flags, rotating validator or not.
   const changed = { url: 'u', ok: true, status: 200, etag: 'W/"r3"', hash: 'differenthash' } as const;
   assert.equal(classify(prev, changed), 'changed');
+});
+
+test('confirmedChange: two agreeing fetches = a real (stable) change', () => {
+  const first = { url: 'u', ok: true, status: 200, hash: 'newstable' } as const;
+  const second = { url: 'u', ok: true, status: 200, hash: 'newstable' } as const;
+  assert.equal(confirmedChange(first, second), true);
+});
+
+test('confirmedChange: two disagreeing fetches = volatile (noise), not a change', () => {
+  const first = { url: 'u', ok: true, status: 200, hash: 'churn-a' } as const;
+  const second = { url: 'u', ok: true, status: 200, hash: 'churn-b' } as const;
+  assert.equal(confirmedChange(first, second), false);
+});
+
+test('confirmedChange: an inconclusive confirm (unreachable / no hash) keeps the change', () => {
+  const first = { url: 'u', ok: true, status: 200, hash: 'x' } as const;
+  assert.equal(confirmedChange(first, { url: 'u', ok: false, error: 'timeout' }), true);
+  assert.equal(confirmedChange(first, { url: 'u', ok: true, status: 200, hash: null }), true);
+});
+
+test('fold: a volatile verdict does NOT advance lastChanged and marks the entry', () => {
+  const prev: BaselineEntry = { hash: 'a', firstSeen: 'd0', lastSeen: 'd0', lastChanged: 'd0' };
+  const cur = { url: 'u', ok: true, status: 200, hash: 'b' } as const;
+  const folded = fold(prev, cur, 'd9', 'volatile');
+  assert.equal(folded.lastChanged, 'd0'); // not bumped — churn isn't a real edit
+  assert.equal(folded.volatile, true);
 });
 
 test('probe: retries then succeeds', async () => {
