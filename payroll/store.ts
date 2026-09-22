@@ -31,7 +31,7 @@ import type { Company, Employee, PayRun } from './types.ts';
  * implementation of the SHAPE of the data, not a production secret store.
  */
 
-/** Resolved lazily on each call (not once at import) so a test or an isolated caller can point it elsewhere with PAYROLL_DB_DIR — the same override shape trades/store.ts and harvester/snapshot.ts use. */
+/** Resolved lazily on each call (not once at import) so a test or an isolated caller can point it elsewhere with PAYROLL_DB_DIR — the same override shape trades/store.ts uses. */
 function dataDir(): string {
   return process.env.PAYROLL_DB_DIR ?? join(dirname(fileURLToPath(import.meta.url)), '.data');
 }

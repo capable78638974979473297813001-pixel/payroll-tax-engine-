@@ -1,10 +1,9 @@
 /**
  * Live network calls to the Census Bureau's own free, public geocoding
  * services. Deliberately kept thin — everything that can be tested without
- * a live HTTP round-trip lives in resolve.ts/normalize.ts instead, the same
- * split harvester/harvest.ts uses (fetch is a parameter there; here, fetch
+ * a live HTTP round-trip lives in resolve.ts/normalize.ts instead; fetch
  * is confined to exactly these two functions and nothing else in this
- * project ever calls them at paycheck-calculation time).
+ * project ever calls them at paycheck-calculation time.
  *
  * Two SEPARATE Census services are needed, not one:
  *   1. geocoding.geo.census.gov/geocoder — address string -> lat/lon plus
