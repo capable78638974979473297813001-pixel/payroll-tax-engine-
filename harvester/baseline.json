@@ -1,5 +1,5 @@
 {
-  "$comment": "Rolling source-freshness baseline written by the harvester. Do not hand-edit. Reset to empty because the content-hashing algorithm changed (HTML is now normalized before hashing); the next CI run repopulates it and every source is recorded as a first-capture 'new', not a false 'changed'.",
+  "$comment": "Rolling source-freshness baseline written by the harvester. Do not hand-edit. Reset to empty because the HTML normalizer changed to visible-text extraction; the next CI run repopulates it (every source a first-capture 'new').",
   "updatedAt": "1970-01-01T00:00:00.000Z",
   "sources": {}
 }

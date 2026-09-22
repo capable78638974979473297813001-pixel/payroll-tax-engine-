@@ -35,24 +35,23 @@ const MAX_HASH_BYTES = 25 * 1024 * 1024;
  */
 export function normalizeHtml(text: string): string {
   return text
-    // Drop <script>/<style> bodies and HTML comments outright — they carry the
-    // worst churn (Cloudflare's per-request __CF$cv$params ray id, analytics
-    // tags, rocket-loader) and never hold the substantive page content we track.
+    // Drop <script>/<style> bodies and HTML comments — they carry the worst
+    // churn (Cloudflare's per-request __CF$cv$params ray id, analytics, rocket-
+    // loader) and never hold the content we track.
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
     .replace(/<!--[\s\S]*?-->/g, '')
-    // Whole hidden state/token inputs (name or id giving them away).
-    .replace(/<input\b[^>]*\b(?:name|id)\s*=\s*["'](?:__VIEWSTATE\w*|__EVENTVALIDATION|__REQUESTVERIFICATIONTOKEN|[^"']*(?:csrf|token|nonce)[^"']*)["'][^>]*>/gi, '')
-    // Inline script/style nonces and CSRF meta tags.
-    .replace(/\snonce\s*=\s*["'][^"']*["']/gi, '')
-    .replace(/<meta\b[^>]*\b(?:csrf|token|request-id|build-id)[^>]*>/gi, '')
-    // Cache-busting query params on asset links: ?v=..., ?_=..., &ver=...
-    .replace(/([?&])(?:v|ver|_|cb|cache|ts|t|build)=[^"'&\s]+/gi, '$1')
-    // ISO timestamps and clock times that many pages stamp on render.
+    // Strip ALL remaining tags and keep only the visible text. This is the key
+    // move: every per-request token lives in an ATTRIBUTE — ASP.NET __VIEWSTATE
+    // values, CSRF/nonce fields, Cloudflare email-protection hex
+    // (/cdn-cgi/l/email-protection#…, data-cfemail=…), cache-busting ?v=… on
+    // asset links, integrity hashes. Dropping tags removes them all at once,
+    // far more robustly than matching each token pattern. What survives is the
+    // human-readable text, which is exactly the freshness signal we want.
+    .replace(/<[^>]+>/g, ' ')
+    // Timestamps/clock times some pages print into the visible body on render.
     .replace(/\d{4}-\d{2}-\d{2}[T ][\d:.]+(?:Z|[+-]\d{2}:?\d{2})?/g, '')
     .replace(/\b\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?\b/g, '')
-    // Any remaining long opaque hex/base64 blob (view-state values, hashes, ids).
-    .replace(/[A-Za-z0-9+/=_-]{40,}/g, '')
     // Collapse whitespace so reflowed markup doesn't count as a change.
     .replace(/\s+/g, ' ')
     .trim();
