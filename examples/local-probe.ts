@@ -37,7 +37,7 @@ interface Probe {
 }
 
 const base = (workState: PaycheckInput['workState'], residenceState?: PaycheckInput['residenceState']): PaycheckInput => ({
-  checkDate: '2026-06-15',
+  checkDate: '2026-09-15',
   payFrequency: 'biweekly',
   earnings: [{ code: 'REG', category: 'regular', amount: GROSS }],
   deductions: [],

@@ -31,6 +31,16 @@ import type { PaycheckInput, PaycheckResult, TaxLine } from '../src/types.ts';
 const TOLERANCE_CENTS = Number(process.env.TOLERANCE_CENTS ?? 2);
 const AS_MARKDOWN = process.argv.includes('--md');
 
+/**
+ * Every scenario uses this one check date, and you MUST set the same date
+ * on PaycheckCity (its "Check Date" field, don't leave the default). Both
+ * engines are effective-dated: a mismatched date silently compares two
+ * different rule versions (e.g. Ohio changed its withholding table on
+ * 2026-08-01). Keep this on/after the latest 2026 table change so it lines
+ * up with PaycheckCity's own default of "today".
+ */
+const CHECK_DATE = '2026-09-15';
+
 type Cents = number;
 
 /** The employee-side figures PaycheckCity reports. All in integer cents. */
@@ -84,7 +94,7 @@ const SCENARIOS: Scenario[] = [
     id: 'tx-fed-fica',
     label: 'Texas — federal + FICA only (no state income tax)',
     recipe: 'Salary · TX · biweekly · gross $2,500.00 · Single · no dependents · no pre-tax',
-    input: { checkDate: '2026-06-15', payFrequency: 'biweekly', earnings: reg(250000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'TX' } },
+    input: { checkDate: CHECK_DATE, payFrequency: 'biweekly', earnings: reg(250000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'TX' } },
     reference: noRef(),
   },
   {
@@ -96,7 +106,7 @@ const SCENARIOS: Scenario[] = [
     // effective-dating, not a discrepancy, is why the two dates differ.
     label: 'Ohio — single, biweekly, no pre-tax (Aug 1, 2026 table)',
     recipe: 'Salary · OH · biweekly · gross $3,000.00 · Single · no local city · check date on/after Aug 1 2026',
-    input: { checkDate: '2026-09-15', payFrequency: 'biweekly', earnings: reg(300000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'OH' } },
+    input: { checkDate: CHECK_DATE, payFrequency: 'biweekly', earnings: reg(300000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'OH' } },
     // Read from paycheckcity.com on 2026-09-21 (verified via browser; default check date).
     reference: { federalIncomeTax: 32038, socialSecurity: 18600, medicare: 4350, stateIncomeTax: 7577, stateOtherEE: 0, local: 0, netPay: 237435 },
   },
@@ -104,7 +114,7 @@ const SCENARIOS: Scenario[] = [
     id: 'pa-flat',
     label: 'Pennsylvania — flat 3.07%, single, biweekly',
     recipe: 'Salary · PA · biweekly · gross $2,800.00 · Single · no local EIT',
-    input: { checkDate: '2026-06-15', payFrequency: 'biweekly', earnings: reg(280000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'PA' } },
+    input: { checkDate: CHECK_DATE, payFrequency: 'biweekly', earnings: reg(280000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'PA' } },
     // Read from paycheckcity.com on 2026-09-21 (verified via browser).
     reference: { federalIncomeTax: 27638, socialSecurity: 17360, medicare: 4060, stateIncomeTax: 8596, stateOtherEE: 196, local: 0, netPay: 222150 },
   },
@@ -112,49 +122,49 @@ const SCENARIOS: Scenario[] = [
     id: 'ca-sdi',
     label: 'California — single, biweekly (watch CA SDI as a separate line)',
     recipe: 'Salary · CA · biweekly · gross $3,500.00 · Single · no pre-tax',
-    input: { checkDate: '2026-06-15', payFrequency: 'biweekly', earnings: reg(350000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'CA' } },
+    input: { checkDate: CHECK_DATE, payFrequency: 'biweekly', earnings: reg(350000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'CA' } },
     reference: noRef(),
   },
   {
     id: 'ny-state',
     label: 'New York State (not NYC) — single, biweekly',
     recipe: 'Salary · NY · biweekly · gross $3,200.00 · Single · NOT a NYC resident',
-    input: { checkDate: '2026-06-15', payFrequency: 'biweekly', earnings: reg(320000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'NY' } },
+    input: { checkDate: CHECK_DATE, payFrequency: 'biweekly', earnings: reg(320000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'NY' } },
     reference: noRef(),
   },
   {
     id: 'nyc-resident',
     label: 'New York City resident — single, biweekly (local NYC tax)',
     recipe: 'Salary · NY · biweekly · gross $3,200.00 · Single · YES a NYC resident',
-    input: { checkDate: '2026-06-15', payFrequency: 'biweekly', earnings: reg(320000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'NY', certificate: { nycResident: true } }, residenceState: { code: 'NY', certificate: { nycResident: true } } },
+    input: { checkDate: CHECK_DATE, payFrequency: 'biweekly', earnings: reg(320000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'NY', certificate: { nycResident: true } }, residenceState: { code: 'NY', certificate: { nycResident: true } } },
     reference: noRef(),
   },
   {
     id: 'nj-fli-sdi',
     label: 'New Jersey — single, biweekly (FLI/SDI as separate lines)',
     recipe: 'Salary · NJ · biweekly · gross $2,900.00 · Single · no pre-tax',
-    input: { checkDate: '2026-06-15', payFrequency: 'biweekly', earnings: reg(290000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'NJ' } },
+    input: { checkDate: CHECK_DATE, payFrequency: 'biweekly', earnings: reg(290000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'NJ' } },
     reference: noRef(),
   },
   {
     id: 'or-state',
     label: 'Oregon — single, biweekly (statewide transit + Paid Leave lines)',
     recipe: 'Salary · OR · biweekly · gross $2,700.00 · Single · no local',
-    input: { checkDate: '2026-06-15', payFrequency: 'biweekly', earnings: reg(270000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'OR' } },
+    input: { checkDate: CHECK_DATE, payFrequency: 'biweekly', earnings: reg(270000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'OR' } },
     reference: noRef(),
   },
   {
     id: 'az-flat',
     label: 'Arizona — single, biweekly (flat rate)',
     recipe: 'Salary · AZ · biweekly · gross $2,400.00 · Single · AZ withholding 2.0% election',
-    input: { checkDate: '2026-06-15', payFrequency: 'biweekly', earnings: reg(240000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'AZ' } },
+    input: { checkDate: CHECK_DATE, payFrequency: 'biweekly', earnings: reg(240000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'AZ' } },
     reference: noRef(),
   },
   {
     id: 'oh-married-monthly',
     label: 'Ohio — married filing jointly, monthly, 2 dependents',
     recipe: 'Salary · OH · monthly · gross $6,000.00 · Married filing jointly · Step 3 dependents $4,000.00',
-    input: { checkDate: '2026-06-15', payFrequency: 'monthly', earnings: reg(600000), deductions: [], federalW4: w4({ filingStatus: 'married_joint', dependentCredit: 400000 }), ytd: ytd0(), workState: { code: 'OH' } },
+    input: { checkDate: CHECK_DATE, payFrequency: 'monthly', earnings: reg(600000), deductions: [], federalW4: w4({ filingStatus: 'married_joint', dependentCredit: 400000 }), ytd: ytd0(), workState: { code: 'OH' } },
     reference: noRef(),
   },
 ];
@@ -265,9 +275,9 @@ function main(): void {
   const lines: string[] = [];
 
   if (AS_MARKDOWN) {
-    lines.push('# Omnia vs. PaycheckCity — accuracy benchmark', '', `_Generated ${new Date().toISOString().slice(0, 10)}. ✓ exact · ≈ within ${TOLERANCE_CENTS}¢ · ✗ differs. All figures employee-side._`, '');
+    lines.push('# Omnia vs. PaycheckCity — accuracy benchmark', '', `_Generated ${new Date().toISOString().slice(0, 10)}. Check date ${CHECK_DATE} (set the same on PaycheckCity). ✓ exact · ≈ within ${TOLERANCE_CENTS}¢ · ✗ differs. All figures employee-side._`, '');
   } else {
-    lines.push('', '═'.repeat(70), '  OMNIA  vs  PAYCHECKCITY  (Symmetry) — accuracy benchmark', `  ✓ exact · ≈ within ${TOLERANCE_CENTS}¢ · ✗ differs · — no reference entered yet`, '═'.repeat(70));
+    lines.push('', '═'.repeat(70), '  OMNIA  vs  PAYCHECKCITY  (Symmetry) — accuracy benchmark', `  Set PaycheckCity's Check Date to ${CHECK_DATE} for every scenario.`, `  ✓ exact · ≈ within ${TOLERANCE_CENTS}¢ · ✗ differs · — no reference entered yet`, '═'.repeat(70));
   }
 
   for (const s of SCENARIOS) lines.push(...renderScenario(s, tally));

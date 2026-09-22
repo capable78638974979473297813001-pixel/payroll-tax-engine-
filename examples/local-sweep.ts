@@ -34,7 +34,7 @@ const GROSS = 1000000; // $10,000
 const money = (c: number) => '$' + (c / 100).toFixed(2);
 
 const baseInput = (over: Partial<PaycheckInput>): PaycheckInput => ({
-  checkDate: '2026-06-15',
+  checkDate: '2026-09-15',
   payFrequency: 'biweekly',
   earnings: [{ code: 'REG', category: 'regular', amount: GROSS }],
   deductions: [],
