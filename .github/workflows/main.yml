@@ -1,0 +1,186 @@
+#!/usr/bin/env python3
+"""
+Comprehensive State UI Rate Tracking Engine
+Tracks all 50 US States + DC official UI employer portals.
+Includes a structured architecture to easily append local payroll/income tax modules.
+"""
+
+import os
+import json
+import requests
+import hashlib
+from bs4 import BeautifulSoup
+
+# Comprehensive dictionary of official State UI Tax portals
+STATE_UI_SOURCES = {
+    "Alabama": "https://labor.alabama.gov/uc/employer-ui-tax-rates/",
+    "Alaska": "https://labor.alaska.gov/estax/",
+    "Arizona": "https://des.az.gov/services/employment/unemployment-individual/unemployment-insurance-tax",
+    "Arkansas": "https://dws.arkansas.gov/unemployment-insurance/employers/tax-rates/",
+    "California": "https://edd.ca.gov/en/payroll_taxes/rates_withholding_charts/",
+    "Colorado": "https://cdle.colorado.gov/unemployment/employer-premiums",
+    "Connecticut": "https://portal.ct.gov/dol/unemployment-benefits-and-services/employer-ui-tax-information",
+    "Delaware": "https://labor.delaware.gov/divisions/unemployment-insurance/employer-information/",
+    "District_of_Columbia": "https://does.dc.gov/page/unemployment-insurance-employer-tax-rates",
+    "Florida": "https://floridarevenue.com/taxes/taxesfees/Pages/reemployment.aspx",
+    "Georgia": "https://dol.georgia.gov/unemployment-taxes",
+    "Hawaii": "https://labor.hawaii.gov/ui/tax/",
+    "Idaho": "https://labor.idaho.gov/employers/unemployment-insurance-taxes/",
+    "Illinois": "https://ides.illinois.gov/employer-resources/rates.html",
+    "Indiana": "https://www.in.gov/dwd/employers/ui-tax/",
+    "Iowa": "https://workforce.iowa.gov/unemployment/employers/tax-rates",
+    "Kansas": "https://www.kansascommerce.gov/",
+    "Kentucky": "https://kcc.ky.gov/employer/Pages/Unemployment-Insurance-Taxes.aspx",
+    "Louisiana": "https://www.laworks.net/UnemploymentInsurance/UI_EmployerTax.aspx",
+    "Maine": "https://www.maine.gov/labor/unemployment/tax.shtml",
+    "Maryland": "https://www.dllr.state.md.us/employment/cltax.shtml",
+    "Massachusetts": "https://www.mass.gov/unemployment-insurance-tax-for-employers",
+    "Michigan": "https://www.michigan.gov/uia",
+    "Minnesota": "https://www.uimn.org/employers/tax-rates/",
+    "Mississippi": "https://mdes.ms.gov/employers/unemployment-tax/",
+    "Missouri": "https://labor.mo.gov/des/employers/tax-rates",
+    "Montana": "https://uid.dli.mt.gov/employer-information/",
+    "Nebraska": "https://dol.nebraska.gov/UIEmployer",
+    "Nevada": "https://detr.nv.gov/",
+    "New_Hampshire": "https://www.nhes.nh.gov/employers/",
+    "New_Jersey": "https://www.nj.gov/labor/ea/employer-services/",
+    "New_Mexico": "https://www.dws.state.nm.us/Employers/Unemployment-Insurance/UI-Tax",
+    "New_York": "https://dol.ny.gov/unemployment-insurance-tax-rates-and-charges",
+    "North_Carolina": "https://www.des.nc.gov/employers/unemployment-tax-rates",
+    "North_Dakota": "https://www.jobsnd.com/employers/unemployment-insurance-employers",
+    "Ohio": "https://jfs.ohio.gov/job-services-and-unemployment/unemployment-insurance/employers",
+    "Oklahoma": "https://oklahoma.gov/oesc/employers.html",
+    "Oregon": "https://unemployment.oregon.gov/employers",
+    "Pennsylvania": "https://www.uc.pa.gov/employers-uc-services-uc-tax/Pages/default.aspx",
+    "Rhode_Island": "https://dlt.ri.gov/ui/employers/",
+    "South_Carolina": "https://dew.sc.gov/employers/tax-rates",
+    "South_Dakota": "https://dlr.sd.gov/ui/employers/default.aspx",
+    "Tennessee": "https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/ut-rates.html",
+    "Texas": "https://www.twc.texas.gov/businesses/unemployment-benefits-tax",
+    "Utah": "https://jobs.utah.gov/ui/employer/",
+    "Vermont": "https://labor.vermont.gov/unemployment-insurance/employers",
+    "Virginia": "https://www.vec.virginia.gov/employers/unemployment-insurance-tax",
+    "Washington": "https://esd.wa.gov/employer-taxes",
+    "West_Virginia": "https://workforcewv.org/employers/unemployment-compensation-tax",
+    "Wisconsin": "https://dwd.wisconsin.gov/uitax/",
+    "Wyoming": "https://dws.wyo.gov/employers/unemployment-insurance/"
+}
+
+# NOTE ON LOCALS: UI (Unemployment Insurance) is calculated exclusively at the state level. 
+# Local municipalities do not levy separate UI. However, localities frequently adjust general 
+# Payroll, Local Income, or Earned Income Taxes (EIT). Below is the framework to track them.
+LOCAL_PAYROLL_SOURCES = {
+    "New_York_City_Tax_Rates": "https://www.tax.ny.gov/pdf/publications/withholding/ny_pub36_effective.pdf",
+    "San_Francisco_Payroll_Tax": "https://sftreasurer.org/business/taxes-fees/gross-receipts-tax-grt",
+    "Philadelphia_Wage_Tax": "https://www.phila.gov/services/payments-taxes-funds/business-taxes/wage-tax/"
+}
+
+# Combine sources for global execution loop
+ALL_SOURCES = {**STATE_UI_SOURCES, **LOCAL_PAYROLL_SOURCES}
+
+def fetch_and_hash(jurisdiction, url):
+    """
+    Fetches raw page source, handles base headers to circumvent generic blocks,
+    and returns a normalized SHA-256 fingerprint of the visible content structure.
+    """
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5"
+    }
+    try:
+        # 15 second timeout to handle sluggish government infrastructure
+        response = requests.get(url, timeout=15, headers=headers)
+        
+        if response.status_code != 200:
+            return f"HTTP_ERR_{response.status_code}"
+            
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Strip script, style, and navigation artifacts to focus entirely on layout text/tables
+        for element in soup(["script", "style", "nav", "footer", "header"]):
+            element.decompose()
+            
+        visible_text = soup.get_text(separator=' ', strip=True)
+        
+        # Create a unique SHA256 checksum of the text layout
+        hasher = hashlib.sha256()
+        hasher.update(visible_text.encode('utf-8'))
+        return hasher.hexdigest()
+        
+    except Exception as e:
+        return f"EXEC_ERR_{type(e).__name__}"
+
+def main():
+    data_file = "historical_rates.json"
+    
+    # Load previous structural baseline snapshot
+    if os.path.exists(data_file):
+        with open(data_file, "r") as f:
+            previous_snapshots = json.load(f)
+    else:
+        previous_snapshots = {}
+
+    current_snapshots = {}
+    clean_items = []
+    changed_items = []
+    error_items = []
+    
+    any_changes = False
+
+    print(f"Starting tracking run across {len(ALL_SOURCES)} tax endpoints...")
+
+    for jurisdiction, url in ALL_SOURCES.items():
+        current_fingerprint = fetch_and_hash(jurisdiction, url)
+        current_snapshots[jurisdiction] = current_fingerprint
+        
+        prev_fingerprint = previous_snapshots.get(jurisdiction)
+        
+        # Check classifications
+        if "ERR_" in current_fingerprint:
+            error_items.append(f"- **{jurisdiction}**: ⚠️ Network/Scrape Failure (`{current_fingerprint}`). [Inspect Portal]({url})")
+        elif prev_fingerprint is None:
+            changed_items.append(f"- **{jurisdiction}**: 🆕 Initialized and cached tracking footprint. [Source Portal]({url})")
+            any_changes = True
+        elif prev_fingerprint != current_fingerprint:
+            changed_items.append(f"- **{jurisdiction}**: 🚨 **POTENTIAL CHANGE DETECTED** - Source structure or figures updated. [Verify Changes Directly]({url})")
+            any_changes = True
+        else:
+            clean_items.append(f"- **{jurisdiction}**")
+
+    # Serialize states matrix for subsequent runs
+    with open(data_file, "w") as f:
+        json.dump(current_snapshots, f, indent=2)
+
+    # Compile clear structured Markdown Report
+    with open("report.md", "w") as f:
+        f.write("# 📑 Daily Tax Rate Automation Monitor Report\n\n")
+        
+        f.write("### 🚨 ATTENTION REQUIRED (Changes Detected)\n")
+        if changed_items:
+            f.write("\n".join(changed_items) + "\n")
+        else:
+            f.write("_No systemic changes found today._\n")
+            
+        f.write("\n### 🟢 CLEAN / UNCHANGED PORTALS\n")
+        if clean_items:
+            f.write("The following jurisdictions matched baseline metrics perfectly:\n" + "\n".join(clean_items) + "\n")
+        else:
+            f.write("_None._\n")
+            
+        f.write("\n### ⚠️ SYSTEM UTILITY ALERTS (Review Selectors)\n")
+        if error_items:
+            f.write("Portals blocked or down during worker route execution:\n" + "\n".join(error_items) + "\n")
+        else:
+            f.write("_All scrapers exited with 200 OK._\n")
+
+    # Signal variables back to GitHub runtime environment context
+    github_output = os.environ.get('GITHUB_OUTPUT')
+    if github_output:
+        with open(github_output, 'a') as fh:
+            print(f"changes={str(any_changes).lower()}", file=fh)
+            
+    print("Report compiled seamlessly as report.md")
+
+if __name__ == "__main__":
+    main()
