@@ -24,6 +24,28 @@ export interface Signal {
 /** Bodies larger than this are identified by headers only, not hashed. */
 const MAX_HASH_BYTES = 25 * 1024 * 1024;
 
+/**
+ * Present as a real Chrome browser. Many government / CDN-fronted sites
+ * (SSA, state revenue departments behind Akamai/Cloudflare) return 403/404/400
+ * to a plain scripting user-agent, so a bare fetch looks "blocked" even though
+ * the page is fine. Sending the full Chrome header set makes those sources
+ * respond normally — verified: tax.ohio.gov 404→200, dced.pa.gov 400→200. A
+ * site that still blocks by IP is reported as unreachable, never a failure.
+ */
+const BROWSER_HEADERS: Record<string, string> = {
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+  accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,application/pdf,image/avif,image/webp,image/apng,*/*;q=0.8',
+  'accept-language': 'en-US,en;q=0.9',
+  'upgrade-insecure-requests': '1',
+  'sec-fetch-dest': 'document',
+  'sec-fetch-mode': 'navigate',
+  'sec-fetch-site': 'none',
+  'sec-fetch-user': '?1',
+  'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
+  'sec-ch-ua-mobile': '?0',
+  'sec-ch-ua-platform': '"Windows"',
+};
+
 export interface ProbeOptions {
   timeoutMs?: number;
   retries?: number;
@@ -39,7 +61,7 @@ async function once(url: string, timeoutMs: number, fetchImpl: typeof fetch): Pr
     const res = await fetchImpl(url, {
       redirect: 'follow',
       signal: ctrl.signal,
-      headers: { 'user-agent': 'omnia-harvester/1.0 (+data-freshness check)' },
+      headers: BROWSER_HEADERS,
     });
     const etag = res.headers.get('etag') ?? undefined;
     const lastModified = res.headers.get('last-modified') ?? undefined;
@@ -55,7 +77,7 @@ async function once(url: string, timeoutMs: number, fetchImpl: typeof fetch): Pr
       // Drain nothing; rely on headers as the signal for oversized bodies.
       bytes = declared || undefined;
     }
-    return { url, ok: res.ok, status: res.status, etag, lastModified, hash, bytes, ms: Date.now() - started };
+    return { url, ok: res.ok, status: res.status, etag, lastModified, hash, bytes, error: res.ok ? undefined : `HTTP ${res.status}`, ms: Date.now() - started };
   } catch (e) {
     const err = e as Error;
     return { url, ok: false, error: (err?.name === 'AbortError' ? 'timeout' : err?.message ?? String(e)).slice(0, 140), ms: Date.now() - started };

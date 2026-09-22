@@ -123,6 +123,25 @@ test('probe: a 200 response is hashed into a stable signal', async () => {
   assert.equal(a.hash, b.hash); // deterministic
 });
 
+test('probe: presents a real Chrome user-agent so sources do not 403-block it', async () => {
+  let seen: Record<string, string> = {};
+  const capture: typeof fetch = (_url, init) => {
+    seen = (init?.headers ?? {}) as Record<string, string>;
+    return Promise.resolve(new Response('ok', { status: 200 }));
+  };
+  await probe('https://www.ssa.gov/oact/cola/cbb.html', { fetchImpl: capture, retries: 0 });
+  assert.match(seen['user-agent'] ?? '', /Chrome\/\d+/);
+  assert.equal(seen['sec-fetch-mode'], 'navigate');
+});
+
+test('probe: a 403 block is reported with its status, not a bare failure', async () => {
+  const blocked: typeof fetch = () => Promise.resolve(new Response('forbidden', { status: 403 }));
+  const sig = await probe('https://www.ssa.gov/x', { fetchImpl: blocked, retries: 1, timeoutMs: 200 });
+  assert.equal(sig.ok, false);
+  assert.equal(sig.status, 403);
+  assert.equal(sig.error, 'HTTP 403');
+});
+
 test('probe: retries then succeeds', async () => {
   let calls = 0;
   const flaky: typeof fetch = () => {
