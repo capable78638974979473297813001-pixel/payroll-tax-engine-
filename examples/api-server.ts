@@ -7,6 +7,8 @@ import { calculatePaycheck } from '../src/calculate.ts';
 import type { PaycheckInput } from '../src/types.ts';
 import { mintApiKey, recordUsage, usageForKey, verifyApiKey, type ApiKey } from '../api/keys.ts';
 import { billingConfigured, completeCardSetup, handleStripeWebhook, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
+import { runEmbeddedPayroll, type PlatformEmployeeInput } from '../payroll/platform.ts';
+import type { PayFrequency } from '../src/types.ts';
 import { listUniqueTaxIds, payCalc, resolveUniqueTaxId, type PayCalcRequest } from '../api/ste-compat.ts';
 
 // Load a local .env (Stripe keys, PUBLIC_BASE_URL, etc.) if one exists — so
@@ -231,6 +233,40 @@ const server = createServer(async (req, res) => {
     }
   }
 
+  // Run a WHOLE payroll (the embedded-payroll platform — "our own Zeal"):
+  // compute every employee gross-to-net with the engine, then hand it to the
+  // provider to pay + file. With the sandbox provider, settlement.moneyMoved is
+  // false — the response says exactly what really happened.
+  if (method === 'POST' && path === '/v1/payroll/run') {
+    if (key.suspended) return sendJson(res, 402, { error: key.suspendedReason ?? 'Suspended for non-payment.', suspended: true });
+    let body: { companyId?: string; checkDate?: string; payFrequency?: string; employees?: PlatformEmployeeInput[] };
+    try {
+      body = await readJson(req);
+    } catch (err) {
+      recordUsage(key.id, { statusCode: 400, error: 'bad request', billable: false });
+      return sendJson(res, 400, { error: err instanceof Error ? err.message : 'Bad request.' });
+    }
+    if (!body.employees?.length || !body.checkDate) {
+      recordUsage(key.id, { statusCode: 400, billable: false });
+      return sendJson(res, 400, { error: 'checkDate and a non-empty employees[] are required.' });
+    }
+    try {
+      const run = await runEmbeddedPayroll({
+        companyId: body.companyId ?? 'company',
+        checkDate: body.checkDate,
+        payFrequency: (body.payFrequency ?? 'biweekly') as PayFrequency,
+        employees: body.employees,
+      });
+      recordUsage(key.id, { statusCode: 200 }); // billable
+      void reportCall(key.id).catch(() => {});
+      return sendJson(res, 200, { ok: true, run });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Payroll run failed.';
+      recordUsage(key.id, { statusCode: 422, error: message, billable: false });
+      return sendJson(res, 422, { error: message });
+    }
+  }
+
   // Symmetry Tax Engine (STE) -shaped compatibility routes — see
   // api/ste-compat.ts's own doc comment for what this is and, importantly,
   // isn't: this engine's OWN uniqueTaxId/locationCode catalog in STE's
@@ -282,7 +318,7 @@ const server = createServer(async (req, res) => {
     return sendJson(res, 200, { payCalc: results });
   }
 
-  return sendJson(res, 404, { error: 'Not found. Try POST /v1/calculate, POST /v1/payCalc, GET /v1/uniqueTaxIds, GET /v1/usage, or GET /v1/health.' });
+  return sendJson(res, 404, { error: 'Not found. Try POST /v1/calculate, POST /v1/payroll/run, POST /v1/payCalc, GET /v1/uniqueTaxIds, GET /v1/usage, or GET /v1/health.' });
 });
 
 // A tiny convenience: `node examples/api-server.ts --mint "Name"` mints a key

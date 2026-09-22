@@ -18,6 +18,15 @@ export { accumulateYtd, freshYearToDate } from './ytd.ts';
 export type { YtdAccumulatorInput } from './ytd.ts';
 export { allocateNetPay, buildNachaFile, validateRoutingNumber } from './directDeposit.ts';
 export type { AchCredit, AchFileConfig, DepositAllocation } from './directDeposit.ts';
+
+export { buildPaymentBatch, submitPaymentBatch, unbankedSubmitter } from './paymentRun.ts';
+export type { PaymentBatch, PaymentSubmission, PaymentSubmitter, Payee } from './paymentRun.ts';
+
+export { ProviderNotConnectedError, checkProvider, resolveProvider, sandboxProvider, zealProvider } from './embeddedProvider.ts';
+export type { EmbeddedPayrollProvider, ProviderPayrollInput, ProviderPayrollItem, ProviderPayrollResult } from './embeddedProvider.ts';
+
+export { runEmbeddedPayroll } from './platform.ts';
+export type { PayrollRun, PlatformEmployeeInput, PlatformPaycheck, RunPayrollInput } from './platform.ts';
 export {
   MICRO_DEPOSIT_MAX_ATTEMPTS,
   PRENOTE_WAITING_PERIOD_BUSINESS_DAYS,

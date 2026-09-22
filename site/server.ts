@@ -5,15 +5,21 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 import { calculatePaycheck } from '../src/calculate.ts';
-import type { PaycheckInput } from '../src/types.ts';
 import {
-  withDb, readDb,
+  withDb, readDb, appendUsage,
   type AccountRecord, type KeyRecord, type PaymentMethodRecord,
   type SubscriptionRecord, type TermsAcceptance,
 } from './lib/store.ts';
 import { CALL_TIERS, ROOFTOP_RATE, TRIAL_DAYS, estimate as computePricing, costForCalls } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
 import { isEmailConfigured, sendVerificationEmail } from './lib/mail.ts';
+import { validatePaycheckInput } from './lib/validate.ts';
+import { RateLimiter } from './lib/ratelimit.ts';
+import { keyLifeFor } from './lib/keylife.ts';
+import {
+  billingConfigured, meteringConfigured, reportCall,
+  createBillingCustomer, startMeteredCheckout, completeMeteredCheckout, interpretWebhook,
+} from './lib/billing.ts';
 
 // Loads <repo root>/.env (RESEND_API_KEY, STRIPE_SECRET_KEY -- see
 // .env.example) before any handler reads it. Absent .env is fine: signup
@@ -52,21 +58,52 @@ try {
 const PORT = Number(process.env.PORT ?? 4323);
 const HERE = dirname(fileURLToPath(import.meta.url));
 
+/** Bumped when the request/response contract changes; stamped on every response. */
+const API_VERSION = '1.0.0';
+
 const SESSION_TTL_MS = 24 * 60 * 60_000;
-const KEY_TTL_MS = TRIAL_DAYS * 24 * 60 * 60_000;
 const CODE_TTL_MS = 15 * 60_000;
 const CODE_COOLDOWN_MS = 30_000;
+
+// Per-key rate limiter for the metered calculation endpoint.
+const paycheckLimiter = new RateLimiter();
+
+// The set of state codes this build can actually compute, read once from
+// data/states/. Used to reject an unknown workState at validation time
+// (a clean 422) rather than letting it surface as an engine throw.
+let VALID_STATE_CODES: Set<string> | null = null;
+function validStateCodes(): Set<string> {
+  if (VALID_STATE_CODES) return VALID_STATE_CODES;
+  const dir = join(HERE, '..', 'data', 'states');
+  const codes = readdirSync(dir)
+    .filter((f) => f.endsWith('-2026.json'))
+    .map((f) => f.slice(0, 2).toUpperCase());
+  VALID_STATE_CODES = new Set(codes);
+  return VALID_STATE_CODES;
+}
 
 // ---------------------------------------------------------------------
 // small helpers
 // ---------------------------------------------------------------------
 
-function sendJson(res: ServerResponse, status: number, body: unknown): void {
+// Applied to every response. Cheap, standard hardening: don't let the
+// content type be sniffed, don't leak the referrer, don't allow framing,
+// and stamp the API version so a caller can tell which build answered.
+const SECURITY_HEADERS: Record<string, string> = {
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'no-referrer',
+  'X-Frame-Options': 'SAMEORIGIN',
+  'X-Omnia-Version': API_VERSION,
+};
+
+function sendJson(res: ServerResponse, status: number, body: unknown, extraHeaders: Record<string, string> = {}): void {
   const payload = JSON.stringify(body);
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
     'Content-Length': Buffer.byteLength(payload),
     'Cache-Control': 'no-store',
+    ...SECURITY_HEADERS,
+    ...extraHeaders,
   });
   res.end(payload);
 }
@@ -77,8 +114,20 @@ function sendHtml(res: ServerResponse, path: string): void {
     'Content-Type': 'text/html; charset=utf-8',
     'Content-Length': html.byteLength,
     'Cache-Control': 'no-store',
+    ...SECURITY_HEADERS,
   });
   res.end(html);
+}
+
+function sendStatic(res: ServerResponse, path: string, contentType: string): void {
+  const buf = readFileSync(path);
+  res.writeHead(200, {
+    'Content-Type': contentType,
+    'Content-Length': buf.byteLength,
+    'Cache-Control': 'public, max-age=3600',
+    ...SECURITY_HEADERS,
+  });
+  res.end(buf);
 }
 
 function readBody(req: IncomingMessage): Promise<string> {
@@ -426,14 +475,47 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
     return;
   }
 
-  const origin = `http://localhost:${PORT}`;
+  const origin = (process.env.PUBLIC_BASE_URL ?? `http://localhost:${PORT}`).replace(/\/+$/, '');
+  const successUrl = `${origin}/docs.html?setup=ok&session_id={CHECKOUT_SESSION_ID}`;
+  const cancelUrl = `${origin}/docs.html?setup=cancelled`;
+
+  // Preferred path: a metered subscription to the graduated price, so every
+  // future call actually bills. Requires STRIPE_PRICE_ID (a usage-metered
+  // price). Falls back to card-on-file only when no price is configured.
+  if (billingConfigured()) {
+    try {
+      // Reuse the customer if this account already has one.
+      let customerId = sub.stripeCustomerId ?? null;
+      if (!customerId) {
+        customerId = await createBillingCustomer({ email: sub.billingEmail, name: sub.legalName });
+        withDb((db) => {
+          const s = db.subscriptions[session.email];
+          if (s) s.stripeCustomerId = customerId;
+        });
+      }
+      const out = await startMeteredCheckout({ customerId, email: session.email, successUrl, cancelUrl, trialDays: TRIAL_DAYS });
+      if (!out.ok || !out.url) {
+        sendJson(res, 502, { error: out.error ?? 'The processor rejected the subscription request.', reason: out.reason });
+        return;
+      }
+      sendJson(res, 200, { ok: true, checkoutUrl: out.url, paymentsConfigured: true, metered: true });
+      return;
+    } catch (err) {
+      sendJson(res, 502, { error: err instanceof Error ? err.message : 'Could not reach the processor.' });
+      return;
+    }
+  }
+
+  // Fallback: STRIPE_SECRET_KEY is set but no metered price — save a card
+  // on file (setup mode), same as before. Metering stays off until a price
+  // is configured.
   const form = new URLSearchParams();
   form.set('mode', 'setup');
   form.set('customer_email', sub.billingEmail);
   form.set('payment_method_types[0]', 'card');
   form.set('payment_method_types[1]', 'us_bank_account');
-  form.set('success_url', `${origin}/docs.html?setup=ok&session_id={CHECKOUT_SESSION_ID}`);
-  form.set('cancel_url', `${origin}/docs.html?setup=cancelled`);
+  form.set('success_url', successUrl);
+  form.set('cancel_url', cancelUrl);
   form.set('metadata[omnia_email]', session.email);
   form.set('metadata[terms_version]', TERMS_VERSION);
 
@@ -451,10 +533,118 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
       sendJson(res, 502, { error: payload.error?.message ?? 'The processor rejected the setup request.' });
       return;
     }
-    sendJson(res, 200, { ok: true, checkoutUrl: payload.url, paymentsConfigured: true });
+    sendJson(res, 200, { ok: true, checkoutUrl: payload.url, paymentsConfigured: true, metered: false });
   } catch (err) {
     sendJson(res, 502, { error: err instanceof Error ? err.message : 'Could not reach the processor.' });
   }
+}
+
+// ---------------------------------------------------------------------
+// POST /api/billing/return -- the console calls this with the Checkout
+// session_id from the ?setup=ok return, so we capture the Stripe customer
+// + subscription ids, mark the account trialing, and promote its key.
+// ---------------------------------------------------------------------
+
+async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const session = requireSession(req);
+  if (!session) {
+    sendJson(res, 401, { error: 'Sign in first.' });
+    return;
+  }
+  let body: { sessionId?: string };
+  try {
+    body = await readJson(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message });
+    return;
+  }
+  if (!body.sessionId) {
+    sendJson(res, 400, { error: 'A Checkout session_id is required.' });
+    return;
+  }
+
+  const done = await completeMeteredCheckout(body.sessionId);
+  if (!done.ok) {
+    sendJson(res, 502, { error: done.error ?? 'Could not confirm the subscription with the processor.', reason: done.reason });
+    return;
+  }
+
+  const now = Date.now();
+  const outcome = withDb((db) => {
+    const sub = db.subscriptions[session.email];
+    const acct = db.accounts[session.email];
+    if (!sub) return { ok: false as const };
+    if (done.customerId) sub.stripeCustomerId = done.customerId;
+    if (done.subscriptionId) sub.stripeSubscriptionId = done.subscriptionId;
+    sub.suspended = false;
+    sub.suspendedReason = null;
+    sub.status = 'trialing';
+    sub.trialStartsAt = sub.trialStartsAt ?? new Date(now).toISOString();
+    sub.trialEndsAt = sub.trialEndsAt ?? new Date(now + TRIAL_DAYS * 86_400_000).toISOString();
+    if (!sub.termEndsAt) {
+      sub.termEndsAt = new Date(new Date(now + TRIAL_DAYS * 86_400_000).setMonth(new Date(now).getMonth() + TERM_MONTHS)).toISOString();
+    }
+    if (acct) acct.stage = 'trialing';
+    // Promote the key to live for the committed term.
+    const life = keyLifeFor(sub, now);
+    for (const k of Object.values(db.keys)) {
+      if (k.ownerEmail === session.email && k.isActive) {
+        k.plan = life.plan;
+        k.expiresAt = life.expiresAt;
+      }
+    }
+    return { ok: true as const, subscription: sub };
+  });
+
+  if (!outcome.ok) {
+    sendJson(res, 409, { error: 'No subscription on file for this account.' });
+    return;
+  }
+  console.log(`[billing] ${session.email} subscribed -- customer ${done.customerId}, sub ${done.subscriptionId}`);
+  sendJson(res, 200, { ok: true, subscription: outcome.subscription, metered: meteringConfigured() });
+}
+
+// ---------------------------------------------------------------------
+// POST /api/billing/webhook -- Stripe delivery (open route; verified by
+// signature). Suspends a key on a failed invoice, reactivates on payment.
+// ---------------------------------------------------------------------
+
+async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  let rawBody: string;
+  try {
+    rawBody = await readBody(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message });
+    return;
+  }
+  const sig = req.headers['stripe-signature'];
+  const result = interpretWebhook(rawBody, Array.isArray(sig) ? sig[0] : sig);
+  if (!result.ok) {
+    // 400 for a bad/forged signature; nothing is changed.
+    sendJson(res, 400, { error: result.reason });
+    return;
+  }
+  if (result.action === 'ignore' || !result.customerId) {
+    sendJson(res, 200, { received: true });
+    return;
+  }
+
+  const applied = withDb((db) => {
+    const sub = Object.values(db.subscriptions).find((s) => s.stripeCustomerId === result.customerId);
+    if (!sub) return null;
+    if (result.action === 'suspend' || result.action === 'cancel') {
+      sub.suspended = true;
+      sub.suspendedReason = result.action === 'cancel' ? 'subscription_cancelled' : 'payment_failed';
+      if (result.action === 'cancel') sub.status = 'cancelled';
+    } else if (result.action === 'reactivate') {
+      sub.suspended = false;
+      sub.suspendedReason = null;
+    }
+    return sub.email;
+  });
+
+  console.log(`[billing webhook] ${result.action} customer=${result.customerId} account=${applied ?? 'unknown'}`);
+  sendJson(res, 200, { received: true, action: result.action, matched: Boolean(applied) });
 }
 
 // ---------------------------------------------------------------------
@@ -489,6 +679,16 @@ async function handleStartTrial(req: IncomingMessage, res: ServerResponse): Prom
       new Date(now + TRIAL_DAYS * 86_400_000).setMonth(new Date(now).getMonth() + TERM_MONTHS),
     ).toISOString();
     if (acct) acct.stage = 'trialing';
+
+    // Promote any key the customer already minted so it lives through the
+    // committed term instead of expiring at the end of the 14-day window.
+    const life = keyLifeFor(sub, now);
+    for (const k of Object.values(db.keys)) {
+      if (k.ownerEmail === session.email && k.isActive) {
+        k.plan = life.plan;
+        k.expiresAt = life.expiresAt;
+      }
+    }
     return { ok: true as const, subscription: sub, paymentAttached: hasPayment };
   });
 
@@ -558,34 +758,38 @@ async function handleIssueKey(req: IncomingMessage, res: ServerResponse): Promis
     return;
   }
 
-  const key = 'sk_test_' + randomBytes(24).toString('base64url');
+  const isLive = process.env.OMNIA_ISSUE_LIVE_KEYS === '1';
+  const key = (isLive ? 'sk_live_' : 'sk_test_') + randomBytes(24).toString('base64url');
   const keyHash = sha256Hex(key);
-  const keyPrefix = key.slice(0, 'sk_test_'.length + 6);
+  const keyPrefix = key.slice(0, (isLive ? 'sk_live_' : 'sk_test_').length + 6);
   const now = Date.now();
 
-  withDb((db) => {
+  const life = withDb((db) => {
     // Revoking any prior key for this email on reissue -- one live key per
-    // evaluation account, same as "generate a new one invalidates the old"
-    // that the docs page tells the user before they click the button.
+    // account, same as "generate a new one invalidates the old" that the
+    // docs page tells the user before they click the button.
     for (const existing of Object.values(db.keys)) {
       if (existing.ownerEmail === session.email) existing.isActive = false;
     }
+    const l = keyLifeFor(db.subscriptions[session.email], now);
     const record: KeyRecord = {
       keyHash,
       keyPrefix,
       ownerEmail: session.email,
       ownerName: session.name,
       company: session.company,
-      plan: 'evaluation',
+      plan: l.plan,
       createdAt: new Date(now).toISOString(),
-      expiresAt: new Date(now + KEY_TTL_MS).toISOString(),
+      expiresAt: l.expiresAt,
       isActive: true,
       lastUsedAt: null,
+      totalCalls: 0,
     };
     db.keys[keyHash] = record;
+    return l;
   });
 
-  sendJson(res, 200, { key, keyPrefix, expiresAt: new Date(now + KEY_TTL_MS).toISOString() });
+  sendJson(res, 200, { key, keyPrefix, plan: life.plan, expiresAt: life.expiresAt });
 }
 
 // ---------------------------------------------------------------------
@@ -624,7 +828,9 @@ function handleUsage(req: IncomingMessage, res: ServerResponse): void {
       issuedAt: keyRecord.createdAt,
       expiresAt: keyRecord.expiresAt,
       lastUsedAt: keyRecord.lastUsedAt,
-      totalCalls: events.length,
+      // Durable meter (survives usage-log trimming); falls back to the
+      // retained-window count for keys minted before the counter existed.
+      totalCalls: keyRecord.totalCalls ?? events.length,
       callsToday,
       callsThisMonth,
       recent,
@@ -637,57 +843,127 @@ function handleUsage(req: IncomingMessage, res: ServerResponse): void {
 // ---------------------------------------------------------------------
 
 async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const requestId = 'req_' + randomBytes(8).toString('hex');
+  const baseHeaders = { 'X-Request-Id': requestId };
+
   const key = bearerToken(req);
   if (!key) {
-    sendJson(res, 401, { error: 'Missing API key. Send "Authorization: Bearer <key>".' });
+    sendJson(res, 401, { error: 'Missing API key. Send "Authorization: Bearer <key>".', code: 'missing_key', requestId }, baseHeaders);
     return;
   }
 
   const keyHash = sha256Hex(key);
-  const keyRecord = readDb((db) => db.keys[keyHash]);
+  const auth = readDb((db) => {
+    const kr = db.keys[keyHash];
+    const sub = kr ? db.subscriptions[kr.ownerEmail] : undefined;
+    return { keyRecord: kr, customerId: sub?.stripeCustomerId ?? null, suspended: Boolean(sub?.suspended), suspendedReason: sub?.suspendedReason ?? null };
+  });
+  const keyRecord = auth.keyRecord;
 
   if (!keyRecord || !keyRecord.isActive) {
-    sendJson(res, 401, { error: 'Invalid or inactive API key.' });
+    sendJson(res, 401, { error: 'Invalid or inactive API key.', code: 'invalid_key', requestId }, baseHeaders);
     return;
   }
   if (Date.now() > new Date(keyRecord.expiresAt).getTime()) {
-    sendJson(res, 401, { error: `This evaluation key expired on ${keyRecord.expiresAt}.` });
+    sendJson(res, 401, { error: `This API key expired on ${keyRecord.expiresAt}.`, code: 'expired_key', requestId }, baseHeaders);
+    return;
+  }
+  if (auth.suspended) {
+    sendJson(res, 402, { error: 'This account is suspended for a billing issue. Update your payment method to resume.', code: 'account_suspended', reason: auth.suspendedReason, requestId }, baseHeaders);
     return;
   }
 
-  let input: PaycheckInput;
+  // --- rate limit (per key) --------------------------------------------
+  const rl = paycheckLimiter.hit(keyHash);
+  const rlHeaders = {
+    ...baseHeaders,
+    'RateLimit-Limit': String(rl.limit),
+    'RateLimit-Remaining': String(rl.remaining),
+    'RateLimit-Reset': String(rl.resetAt),
+  };
+  if (!rl.allowed) {
+    sendJson(
+      res,
+      429,
+      { error: `Rate limit of ${rl.limit} requests/minute exceeded. Retry in ${rl.retryAfterSec}s.`, code: 'rate_limited', requestId },
+      { ...rlHeaders, 'Retry-After': String(rl.retryAfterSec) },
+    );
+    return;
+  }
+
+  // --- parse ------------------------------------------------------------
+  let raw: unknown;
   try {
-    input = await readJson<PaycheckInput>(req);
+    raw = await readJson<unknown>(req);
   } catch (err) {
-    sendJson(res, 400, { error: (err as Error).message });
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId }, rlHeaders);
     return;
   }
 
+  // --- validate (structured, field-level) ------------------------------
+  const validation = validatePaycheckInput(raw, { validStateCodes: validStateCodes() });
+  if (!validation.ok) {
+    recordUsage(keyHash, 422, 'validation_failed', (raw as { checkDate?: string } | null)?.checkDate ?? null);
+    sendJson(
+      res,
+      422,
+      {
+        error: 'The request did not pass validation.',
+        code: 'invalid_input',
+        details: validation.errors,
+        requestId,
+      },
+      rlHeaders,
+    );
+    return;
+  }
+
+  // --- calculate --------------------------------------------------------
   let status = 200;
   let responseBody: unknown;
-  let errorText: string | null = null;
+  let usageError: string | null = null;
   try {
-    const result = calculatePaycheck(input);
-    responseBody = { result };
+    responseBody = { result: calculatePaycheck(validation.value) };
   } catch (err) {
+    // Validation covers the common bad-input cases, so a throw here is
+    // unexpected. Log the real reason for support (keyed by requestId);
+    // hand the caller a safe message, never an engine stack detail.
     status = 422;
-    errorText = err instanceof Error ? err.message : 'Unknown calculation error.';
-    responseBody = { error: errorText };
+    usageError = err instanceof Error ? err.message : 'calculation_error';
+    console.error(`[paycheck ${requestId}] calculation failed:`, usageError);
+    responseBody = {
+      error: 'The calculation could not be completed for the input provided.',
+      code: 'calculation_error',
+      requestId,
+    };
   }
 
-  withDb((db) => {
-    db.usage.push({
-      keyHash,
-      at: new Date().toISOString(),
-      statusCode: status,
-      error: errorText,
-      checkDate: (input as { checkDate?: string } | undefined)?.checkDate ?? null,
-    });
-    const stored = db.keys[keyHash];
-    if (stored) stored.lastUsedAt = new Date().toISOString();
-  });
+  recordUsage(keyHash, status, usageError, validation.value.checkDate);
+  sendJson(res, status, responseBody, rlHeaders);
 
-  sendJson(res, status, responseBody);
+  // Meter the billable call to Stripe, best-effort and off the response
+  // path: a slow or down Stripe never delays or fails the calculation. The
+  // local usage log is the durable record and can reconcile. requestId
+  // dedupes any retry. No-op unless metering is configured with a customer.
+  if (status === 200 && meteringConfigured() && auth.customerId) {
+    void reportCall(auth.customerId, requestId).then((r) => {
+      if (!r.ok && r.reason === 'stripe_error') {
+        console.error(`[paycheck ${requestId}] meter report failed:`, r.error);
+      }
+    });
+  }
+}
+
+/** One place that appends a bounded usage event and updates the key's meter. */
+function recordUsage(keyHash: string, statusCode: number, error: string | null, checkDate: string | null): void {
+  withDb((db) => {
+    appendUsage(db, { keyHash, at: new Date().toISOString(), statusCode, error, checkDate });
+    const stored = db.keys[keyHash];
+    if (stored) {
+      stored.lastUsedAt = new Date().toISOString();
+      if (statusCode === 200) stored.totalCalls = (stored.totalCalls ?? 0) + 1;
+    }
+  });
 }
 
 // ---------------------------------------------------------------------
@@ -695,6 +971,30 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
 // rulesets actually present in data/states/, so the list can never
 // claim a state this build can't compute.
 // ---------------------------------------------------------------------
+
+// ---------------------------------------------------------------------
+// GET /api/health -- unauthenticated liveness/readiness probe. Cheap and
+// safe to hit from a load balancer. Reports the build's API version and
+// how many jurisdictions it can compute, so a probe also catches a bad
+// deploy with missing data.
+// ---------------------------------------------------------------------
+
+function handleHealth(res: ServerResponse): void {
+  let states = 0;
+  let ok = true;
+  try {
+    states = validStateCodes().size;
+    if (states === 0) ok = false;
+  } catch {
+    ok = false;
+  }
+  sendJson(res, ok ? 200 : 503, {
+    status: ok ? 'ok' : 'degraded',
+    version: API_VERSION,
+    states,
+    time: new Date().toISOString(),
+  });
+}
 
 function handleStates(res: ServerResponse): void {
   const dir = join(HERE, '..', 'data', 'states');
@@ -795,11 +1095,15 @@ function handleBilling(req: IncomingMessage, res: ServerResponse): void {
       subscription: sub,
       paymentMethod: pm,
       termMonths: TERM_MONTHS,
-      // No payment processor is wired to this project: there is no Stripe
-      // account or STRIPE_SECRET_KEY anywhere in it. The signup below
-      // records everything a real activation needs; attaching a card is
-      // the one step that still needs a person.
-      paymentsConfigured: Boolean(process.env.STRIPE_SECRET_KEY),
+      // Real billing state. paymentsConfigured means a card/subscription
+      // Checkout can be created; metered means successful calls actually
+      // report usage to Stripe; suspended means a failed invoice has paused
+      // the key (a paid invoice reactivates it via webhook).
+      paymentsConfigured: billingConfigured() || Boolean(process.env.STRIPE_SECRET_KEY),
+      metered: meteringConfigured() && Boolean(sub?.stripeCustomerId),
+      subscribed: Boolean(sub?.stripeSubscriptionId),
+      suspended: Boolean(sub?.suspended),
+      suspendedReason: sub?.suspendedReason ?? null,
     });
   });
 }
@@ -821,18 +1125,43 @@ createServer((req, res) => {
       sendHtml(res, join(HERE, 'docs.html'));
       return;
     }
+    if (method === 'GET' && (url === '/reference' || url === '/reference.html' || url === '/api-reference')) {
+      sendHtml(res, join(HERE, 'reference.html'));
+      return;
+    }
+
+    // Legal pages (served, so customers can read them).
+    if (method === 'GET' && url === '/legal/legal.css') {
+      sendStatic(res, join(HERE, 'legal', 'legal.css'), 'text/css; charset=utf-8');
+      return;
+    }
+    {
+      const legal: Record<string, string> = {
+        '/terms': 'terms', '/terms.html': 'terms', '/legal/terms.html': 'terms',
+        '/privacy': 'privacy', '/privacy.html': 'privacy', '/legal/privacy.html': 'privacy',
+        '/acceptable-use': 'acceptable-use', '/legal/acceptable-use.html': 'acceptable-use',
+        '/disclaimer': 'disclaimer', '/legal/disclaimer.html': 'disclaimer',
+      };
+      if (method === 'GET' && legal[url]) {
+        sendHtml(res, join(HERE, 'legal', `${legal[url]}.html`));
+        return;
+      }
+    }
 
     if (method === 'POST' && url === '/api/signup') return handleSignup(req, res);
     if (method === 'POST' && url === '/api/verify-email') return handleVerifyEmail(req, res);
     if (method === 'GET' && url === '/api/terms') return handleTerms(req, res);
     if (method === 'POST' && url === '/api/accept-terms') return handleAcceptTerms(req, res);
     if (method === 'POST' && url === '/api/payment-setup') return handlePaymentSetup(req, res);
+    if (method === 'POST' && url === '/api/billing/return') return handleBillingReturn(req, res);
+    if (method === 'POST' && (url === '/api/billing/webhook' || url === '/v1/billing/webhook')) return handleBillingWebhook(req, res);
     if (method === 'POST' && url === '/api/start-trial') return handleStartTrial(req, res);
     if (method === 'GET' && url === '/api/account') return handleAccount(req, res);
     if (method === 'POST' && url === '/api/issue-key') return handleIssueKey(req, res);
     if (method === 'GET' && url === '/api/usage') return handleUsage(req, res);
-    if (method === 'POST' && url === '/api/paycheck') return handlePaycheck(req, res);
-    if (method === 'GET' && url === '/api/states') return handleStates(res);
+    if (method === 'POST' && (url === '/api/paycheck' || url === '/v1/paycheck')) return handlePaycheck(req, res);
+    if (method === 'GET' && (url === '/api/health' || url === '/v1/health' || url === '/healthz')) return handleHealth(res);
+    if (method === 'GET' && (url === '/api/states' || url === '/v1/states')) return handleStates(res);
     if (method === 'POST' && url === '/api/estimate') return handleEstimate(req, res);
     if (method === 'GET' && url === '/api/billing') return handleBilling(req, res);
 
@@ -845,4 +1174,5 @@ createServer((req, res) => {
 }).listen(PORT, () => {
   console.log(`Omnia landing page:  http://localhost:${PORT}`);
   console.log(`Omnia docs/console:  http://localhost:${PORT}/docs.html`);
+  console.log(`Omnia API reference: http://localhost:${PORT}/reference`);
 });

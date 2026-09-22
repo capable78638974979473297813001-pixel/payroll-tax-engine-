@@ -140,15 +140,23 @@ export function createSubscriptionCheckoutSession(input: {
   priceId: string;
   successUrl: string;
   cancelUrl: string;
+  /** Free-trial length; Stripe won't invoice until it elapses. */
+  trialDays?: number;
+  /** Extra subscription metadata, merged with apiKeyId. */
+  metadata?: Record<string, string>;
 }): Promise<StripeCheckoutSession> {
+  const subscriptionData: Record<string, unknown> = {
+    metadata: { apiKeyId: input.apiKeyId, ...input.metadata },
+  };
+  if (input.trialDays && input.trialDays > 0) subscriptionData.trial_period_days = input.trialDays;
   return stripeRequest<StripeCheckoutSession>('POST', '/v1/checkout/sessions', {
     mode: 'subscription',
     customer: input.customerId,
     line_items: [{ price: input.priceId }], // metered price: no quantity, usage is reported per call
     success_url: input.successUrl,
     cancel_url: input.cancelUrl,
-    metadata: { apiKeyId: input.apiKeyId },
-    subscription_data: { metadata: { apiKeyId: input.apiKeyId } },
+    metadata: { apiKeyId: input.apiKeyId, ...input.metadata },
+    subscription_data: subscriptionData,
   });
 }
 

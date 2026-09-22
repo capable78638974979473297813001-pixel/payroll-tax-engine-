@@ -24,7 +24,20 @@ import { fileURLToPath } from 'node:url';
  * plus a last four for display; see PaymentMethodRecord.
  */
 
-const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', '.data');
+// Overridable so a deployment can point the store at a durable, mounted
+// volume (and so tests get an isolated directory). Absent, it defaults to
+// site/.data, which is gitignored.
+const DATA_DIR = process.env.SITE_DB_DIR ?? join(dirname(fileURLToPath(import.meta.url)), '..', '.data');
+
+/**
+ * The usage log is append-only and would otherwise grow without bound —
+ * every billable call pushes one event. We keep the most recent
+ * MAX_USAGE_EVENTS so db.json stays a sane size; per-key lifetime totals
+ * are tracked separately on each KeyRecord (see totalCalls), so trimming
+ * the log never loses a key's billed count. Override for high-volume
+ * single-tenant deployments.
+ */
+export const MAX_USAGE_EVENTS = Number(process.env.MAX_USAGE_EVENTS ?? 50_000);
 
 export type SignupStage =
   | 'unverified'
@@ -104,6 +117,20 @@ export interface SubscriptionRecord {
   termEndsAt: string | null;
   createdAt: string;
   activatedAt: string | null;
+
+  // ---- Stripe metered billing (set once the customer subscribes) ----
+  /** Stripe customer id; usage is metered against this. */
+  stripeCustomerId?: string | null;
+  /** Stripe subscription id for the metered graduated price. */
+  stripeSubscriptionId?: string | null;
+  /**
+   * Set true when Stripe reports a failed invoice (payment_failed /
+   * subscription deleted). A suspended account's key returns 402 until a
+   * paid invoice reactivates it. Kept here, driven only by verified Stripe
+   * webhooks — never by the caller.
+   */
+  suspended?: boolean;
+  suspendedReason?: string | null;
 }
 
 export interface KeyRecord {
@@ -117,6 +144,12 @@ export interface KeyRecord {
   expiresAt: string;
   isActive: boolean;
   lastUsedAt: string | null;
+  /**
+   * Monotonic lifetime count of billable calls on this key. Kept on the
+   * key itself so it survives usage-log trimming (see MAX_USAGE_EVENTS)
+   * and so metering never has to scan the whole log to bill.
+   */
+  totalCalls?: number;
 }
 
 export interface UsageEvent {
@@ -199,4 +232,15 @@ export function withDb<T>(fn: (db: DB) => T): T {
 
 export function readDb<T>(fn: (db: DB) => T): T {
   return fn(load());
+}
+
+/**
+ * Append a usage event and keep the log bounded. Call this inside a
+ * withDb() block rather than pushing to db.usage directly, so the log
+ * can never grow past MAX_USAGE_EVENTS.
+ */
+export function appendUsage(db: DB, event: UsageEvent): void {
+  db.usage.push(event);
+  const overflow = db.usage.length - MAX_USAGE_EVENTS;
+  if (overflow > 0) db.usage.splice(0, overflow);
 }
