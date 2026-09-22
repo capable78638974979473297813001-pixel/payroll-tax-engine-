@@ -2,7 +2,7 @@ import { appendFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { scanRepo } from './collect.ts';
 import { probeAll, type Signal } from './probe.ts';
-import { classify, fold, loadBaseline, saveBaseline, type Baseline, type Verdict } from './baseline.ts';
+import { classify, confirmedChange, fold, loadBaseline, saveBaseline, type Baseline, type Verdict } from './baseline.ts';
 
 /**
  * The harvester entrypoint.
@@ -28,7 +28,7 @@ const BASELINE_PATH = process.env.HARVEST_BASELINE ?? join(ROOT, 'harvester', 'b
 const REPORT_PATH = process.env.HARVEST_REPORT ?? join(ROOT, 'harvester', 'report.md');
 const STALE_DAYS = Number(process.env.HARVEST_STALE_DAYS ?? 400);
 
-const ICON: Record<Verdict, string> = { new: '🆕', unchanged: '✅', changed: '⚠️', unreachable: '🔌' };
+const ICON: Record<Verdict, string> = { new: '🆕', unchanged: '✅', changed: '⚠️', unreachable: '🔌', volatile: '🌀' };
 const clip = (s: string | undefined, n = 90): string => (s && s.length > n ? s.slice(0, n - 1) + '…' : s ?? '');
 
 function daysSince(iso?: string): number | undefined {
@@ -43,13 +43,15 @@ function buildReport(rows: Row[], filesScanned: number, parseErrors: string[], s
   const n = (v: Verdict) => rows.filter((r) => r.verdict === v).length;
   const changed = rows.filter((r) => r.verdict === 'changed');
   const unreachable = rows.filter((r) => r.verdict === 'unreachable');
+  const volatile = rows.filter((r) => r.verdict === 'volatile');
   const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
   const L: string[] = [];
   L.push('# 🌾 Omnia data harvester', '', `_Run ${now} UTC · ${filesScanned} data files · ${rows.length} cited sources_`, '');
   L.push('| | count |', '|---|--:|',
-    `| ⚠️ changed | ${n('changed')} |`,
+    `| ⚠️ changed (confirmed) | ${n('changed')} |`,
     `| 🆕 new | ${n('new')} |`,
     `| ✅ unchanged | ${n('unchanged')} |`,
+    `| 🌀 volatile (per-request churn, ignored) | ${n('volatile')} |`,
     `| 🔌 unreachable | ${n('unreachable')} |`,
     `| 📄 JSON parse errors | ${parseErrors.length} |`,
     `| 🕰️ stale (>${STALE_DAYS}d) | ${stale.length} |`, '');
@@ -69,10 +71,15 @@ function buildReport(rows: Row[], filesScanned: number, parseErrors: string[], s
     for (const r of unreachable) L.push(`- ${clip(r.title) || r.url} — ${r.signal.error ?? 'unreachable'}`);
     L.push('', '</details>', '');
   }
+  if (volatile.length) {
+    L.push('<details><summary>🌀 Volatile — content changed but two back-to-back fetches disagreed, so it churns every request (view counters, timestamps, per-request tokens). Ignored, not a real change.</summary>', '');
+    for (const r of volatile) L.push(`- ${clip(r.title) || r.url} (${r.url})`);
+    L.push('', '</details>', '');
+  }
   if (stale.length) {
     L.push('<details><summary>🕰️ Data files whose freshness marker is older than ' + STALE_DAYS + ' days</summary>', '', ...stale.map((s) => `- ${s}`), '', '</details>', '');
   }
-  L.push('---', '_The harvester never fails on unreachable sources or detected changes; both are findings above. It only reports._');
+  L.push('---', '_A CHANGED source is one whose content differs from the baseline AND held steady across an immediate second fetch, so per-request churn never counts. The harvester never fails on unreachable sources or detected changes; both are findings above._');
   return L.join('\n');
 }
 
@@ -90,14 +97,30 @@ async function main(): Promise<void> {
 
   const baseline: Baseline = loadBaseline(BASELINE_PATH);
   const now = new Date().toISOString();
+
+  // First pass: classify every source against the baseline.
+  const verdicts: Verdict[] = scan.sources.map((src, i) => NO_NETWORK ? 'unreachable' : classify(baseline[src.url], signals[i]));
+
+  // Second-fetch confirmation: any source that looks CHANGED is fetched again
+  // right now. If the two fetches agree, the content is stably different — a
+  // real change. If they disagree, the page churns every request and the
+  // "change" is noise, reclassified 'volatile'. This is what makes the report
+  // quiet without ever hiding a genuine edit (a real edit produces a stable
+  // new hash, so it survives confirmation).
+  if (!NO_NETWORK) {
+    const candidates = verdicts.map((v, i) => (v === 'changed' ? i : -1)).filter((i) => i >= 0);
+    const confirms = await probeAll(candidates.map((i) => scan.sources[i].url), { concurrency: 10, timeoutMs: 15000, retries: 1 });
+    candidates.forEach((idx, k) => {
+      verdicts[idx] = confirmedChange(signals[idx], confirms[k]) ? 'changed' : 'volatile';
+    });
+  }
+
   const rows: Row[] = [];
   for (let i = 0; i < scan.sources.length; i++) {
     const src = scan.sources[i];
-    const sig = signals[i];
-    const verdict = NO_NETWORK ? 'unreachable' : classify(baseline[src.url], sig);
-    rows.push({ verdict, url: src.url, signal: sig, citedBy: src.citedBy, title: src.title });
+    rows.push({ verdict: verdicts[i], url: src.url, signal: signals[i], citedBy: src.citedBy, title: src.title });
     // Only evolve the baseline on a real network run, so --no-network never rewrites it.
-    if (!NO_NETWORK) baseline[src.url] = fold(baseline[src.url], sig, now, verdict);
+    if (!NO_NETWORK) baseline[src.url] = fold(baseline[src.url], signals[i], now, verdicts[i]);
   }
 
   const report = buildReport(rows, scan.files.length, parseErrors, stale);
@@ -108,7 +131,7 @@ async function main(): Promise<void> {
   if (!NO_NETWORK) saveBaseline(BASELINE_PATH, baseline);
 
   const count = (v: Verdict) => rows.filter((r) => r.verdict === v).length;
-  console.log(`\n🌾 Harvester: ${scan.files.length} files, ${rows.length} sources — ⚠️ ${count('changed')} changed · 🆕 ${count('new')} new · ✅ ${count('unchanged')} unchanged · 🔌 ${count('unreachable')} unreachable · 📄 ${parseErrors.length} parse errors · 🕰️ ${stale.length} stale`);
+  console.log(`\n🌾 Harvester: ${scan.files.length} files, ${rows.length} sources — ⚠️ ${count('changed')} changed · 🆕 ${count('new')} new · ✅ ${count('unchanged')} unchanged · 🌀 ${count('volatile')} volatile · 🔌 ${count('unreachable')} unreachable · 📄 ${parseErrors.length} parse errors · 🕰️ ${stale.length} stale`);
   console.log(`   report → ${REPORT_PATH}`);
 
   if (STRICT && count('changed') > 0) {
