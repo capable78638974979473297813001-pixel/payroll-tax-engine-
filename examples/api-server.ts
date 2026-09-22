@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { calculatePaycheck } from '../src/calculate.ts';
+import { grossUp, type GrossUpInput } from '../src/gross-up.ts';
 import type { PaycheckInput } from '../src/types.ts';
 import { mintApiKey, recordUsage, usageForKey, verifyApiKey, type ApiKey } from '../api/keys.ts';
 import { billingConfigured, completeCardSetup, handleStripeWebhook, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
@@ -318,7 +319,33 @@ const server = createServer(async (req, res) => {
     return sendJson(res, 200, { payCalc: results });
   }
 
-  return sendJson(res, 404, { error: 'Not found. Try POST /v1/calculate, POST /v1/payroll/run, POST /v1/payCalc, GET /v1/uniqueTaxIds, GET /v1/usage, or GET /v1/health.' });
+  // Net-to-gross. Same paycheck body as /v1/calculate, plus targetNetPay in
+  // cents. The solved regular earning is the one that produces that net
+  // under the taxes /v1/calculate would have withheld.
+  if (method === 'POST' && path === '/v1/gross-up') {
+    if (key.suspended) {
+      return sendJson(res, 402, { error: key.suspendedReason ?? 'This key is suspended for non-payment. Update your card to resume.', suspended: true });
+    }
+    let body: GrossUpInput;
+    try {
+      body = await readJson<GrossUpInput>(req);
+    } catch (err) {
+      recordUsage(key.id, { statusCode: 400, error: 'bad request', billable: false });
+      return sendJson(res, 400, { error: err instanceof Error ? err.message : 'Bad request.' });
+    }
+    try {
+      const solved = grossUp(body);
+      recordUsage(key.id, { stateCode: body.paycheck?.workState?.code ?? null, statusCode: 200 });
+      void reportCall(key.id).catch(() => {});
+      return sendJson(res, 200, { ok: true, variableEarningAmount: solved.variableEarningAmount, result: solved.result, iterations: solved.iterations });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Gross-up failed.';
+      recordUsage(key.id, { statusCode: 422, error: message, billable: false });
+      return sendJson(res, 422, { error: message });
+    }
+  }
+
+  return sendJson(res, 404, { error: 'Not found. Try POST /v1/calculate, POST /v1/gross-up, POST /v1/payroll/run, POST /v1/payCalc, GET /v1/uniqueTaxIds, GET /v1/usage, or GET /v1/health.' });
 });
 
 // A tiny convenience: `node examples/api-server.ts --mint "Name"` mints a key

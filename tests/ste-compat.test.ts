@@ -161,5 +161,144 @@ describe('STE-shaped compatibility layer (api/ste-compat.ts)', () => {
       ]);
       assert.match(results[0].error ?? '', /Unrecognized Frequency/);
     });
+
+    test('a single work city is stamped with that city id, not the state id', () => {
+      const entries = listUniqueTaxIds(CHECK_DATE);
+      const ohState = entries.find((e) => e.state === 'OH' && e.type === 'state')!;
+      const columbus = entries.find((e) => e.state === 'OH' && e.type === 'city' && e.name === 'Columbus')!;
+      const [result] = payCalc([
+        { checkDate: CHECK_DATE, frequency: 'biweekly', grossPay: 3000, workUniqueTaxIds: [ohState.uniqueTaxId, columbus.uniqueTaxId] },
+      ]);
+      const local = result.taxJurisdictionParms.find((l) => l.description === 'Ohio Municipal Income Tax');
+      assert.equal(local?.uniqueTaxId, columbus.uniqueTaxId);
+      const stateLine = result.taxJurisdictionParms.find((l) => l.description.includes('Ohio') && l.description.includes('Income Tax') && l.uniqueTaxId === ohState.uniqueTaxId);
+      assert.ok(stateLine);
+    });
+
+    test('a live city id is the residence city, and two cities leave the blended line unlabeled', () => {
+      const entries = listUniqueTaxIds(CHECK_DATE);
+      const ohState = entries.find((e) => e.state === 'OH' && e.type === 'state')!;
+      const columbus = entries.find((e) => e.state === 'OH' && e.type === 'city' && e.name === 'Columbus')!;
+      const cleveland = entries.find((e) => e.state === 'OH' && e.type === 'city' && e.name === 'Cleveland')!;
+      assert.ok(cleveland);
+
+      const [liveOnly] = payCalc([
+        { checkDate: CHECK_DATE, frequency: 'biweekly', grossPay: 3000, workUniqueTaxIds: [ohState.uniqueTaxId], liveUniqueTaxIds: [cleveland.uniqueTaxId] },
+      ]);
+      const direct = calculatePaycheck({
+        checkDate: CHECK_DATE,
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: 300_000 }],
+        deductions: [],
+        federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+        workState: { code: 'OH', certificate: { residenceCity: 'Cleveland' } },
+      });
+      assert.equal(liveOnly.netPay, direct.netPay / 100);
+      const liveLocal = liveOnly.taxJurisdictionParms.find((l) => l.description === 'Ohio Municipal Income Tax');
+      assert.equal(liveLocal?.uniqueTaxId, cleveland.uniqueTaxId);
+
+      const [both] = payCalc([
+        {
+          checkDate: CHECK_DATE,
+          frequency: 'biweekly',
+          grossPay: 3000,
+          workUniqueTaxIds: [ohState.uniqueTaxId, columbus.uniqueTaxId],
+          liveUniqueTaxIds: [cleveland.uniqueTaxId],
+        },
+      ]);
+      const blended = both.taxJurisdictionParms.find((l) => l.description === 'Ohio Municipal Income Tax');
+      assert.equal(blended?.uniqueTaxId, null);
+      assert.ok((blended?.amount ?? 0) > 0);
+    });
+
+    test('a live Pennsylvania PSD becomes residencePSD and the work PSD labels the LST line', () => {
+      const entries = listUniqueTaxIds(CHECK_DATE);
+      const paState = entries.find((e) => e.state === 'PA' && e.type === 'state')!;
+      const work = entries.find((e) => e.uniqueTaxId === '42-PSD-010201')!;
+      const home = entries.find((e) => e.uniqueTaxId === '42-PSD-530301')!;
+      assert.ok(work && home);
+
+      const [result] = payCalc([
+        {
+          checkDate: CHECK_DATE,
+          frequency: 'biweekly',
+          grossPay: 2800,
+          workUniqueTaxIds: [paState.uniqueTaxId, work.uniqueTaxId],
+          liveUniqueTaxIds: [home.uniqueTaxId],
+        },
+      ]);
+      const direct = calculatePaycheck({
+        checkDate: CHECK_DATE,
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: 280_000 }],
+        deductions: [],
+        federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+        workState: { code: 'PA', certificate: { workPSD: work.value as string, residencePSD: home.value as string } },
+      });
+      assert.equal(result.error, undefined);
+      assert.equal(result.netPay, direct.netPay / 100);
+      const lst = result.taxJurisdictionParms.find((l) => l.description === 'PA Local Services Tax');
+      assert.equal(lst?.uniqueTaxId, work.uniqueTaxId);
+      const eit = result.taxJurisdictionParms.find((l) => l.description === 'PA Local Earned Income Tax');
+      assert.equal(eit?.uniqueTaxId, null);
+    });
+
+    test('a live Maryland county id is what the combined state tax withholds', () => {
+      const entries = listUniqueTaxIds(CHECK_DATE);
+      const mdState = entries.find((e) => e.state === 'MD' && e.type === 'state')!;
+      const county = entries.find((e) => e.state === 'MD' && e.type === 'county')!;
+      const [result] = payCalc([
+        { checkDate: CHECK_DATE, frequency: 'biweekly', grossPay: 3000, workUniqueTaxIds: [mdState.uniqueTaxId], liveUniqueTaxIds: [county.uniqueTaxId] },
+      ]);
+      const direct = calculatePaycheck({
+        checkDate: CHECK_DATE,
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: 300_000 }],
+        deductions: [],
+        federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+        workState: { code: 'MD', certificate: { county: county.value as string } },
+      });
+      assert.equal(result.netPay, direct.netPay / 100);
+    });
+
+    test('isExempt and additionalWH on the state id change the state line', () => {
+      const entries = listUniqueTaxIds(CHECK_DATE);
+      const ohState = entries.find((e) => e.state === 'OH' && e.type === 'state')!;
+
+      const [exempt] = payCalc([
+        {
+          checkDate: CHECK_DATE,
+          frequency: 'biweekly',
+          grossPay: 3000,
+          workUniqueTaxIds: [ohState.uniqueTaxId],
+          taxJurisdictionParms: [{ uniqueTaxId: ohState.uniqueTaxId, isExempt: true }],
+        },
+      ]);
+      const stateLine = exempt.taxJurisdictionParms.find((l) => l.uniqueTaxId === ohState.uniqueTaxId && l.payer === 'employee' && /income tax/i.test(l.description));
+      assert.equal(stateLine?.amount, 0);
+
+      const [ohioExtra] = payCalc([
+        {
+          checkDate: CHECK_DATE,
+          frequency: 'biweekly',
+          grossPay: 3000,
+          workUniqueTaxIds: [ohState.uniqueTaxId],
+          taxJurisdictionParms: [{ uniqueTaxId: ohState.uniqueTaxId, additionalWH: 10 }],
+        },
+      ]);
+      const direct = calculatePaycheck({
+        checkDate: CHECK_DATE,
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: 300_000 }],
+        deductions: [],
+        federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+        workState: { code: 'OH', certificate: { additionalWithholding: 1000 } },
+      });
+      assert.equal(ohioExtra.netPay, direct.netPay / 100);
+    });
   });
 });
