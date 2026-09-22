@@ -1,0 +1,64 @@
+name: US tax change monitor
+
+on:
+  schedule:
+    - cron: '7 4 * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: us-tax-change-monitor
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  us-tax-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install PDF extraction tooling
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends poppler-utils
+
+      - name: Run broad U.S. state/local tax change scan
+        id: scan
+        run: |
+          node examples/us-tax-harvest.ts > us-tax-harvest.json
+          echo "changed=$(node -e \"const fs=require('fs');const d=JSON.parse(fs.readFileSync('us-tax-harvest.json','utf8'));process.stdout.write(String(d.changedCount || 0));\")" >> "$GITHUB_OUTPUT"
+          echo "unreadable=$(node -e \"const fs=require('fs');const d=JSON.parse(fs.readFileSync('us-tax-harvest.json','utf8'));process.stdout.write(String(d.unreadableCount || 0));\")" >> "$GITHUB_OUTPUT"
+
+      - name: Create/update US tax change issue
+        if: ${{ steps.scan.outputs.changed != '0' || steps.scan.outputs.unreadable != '0' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          EXISTING=$(gh issue list --state open --limit 20 --json number,title --jq '.[] | select(.title|test("US tax change monitor")) | .number' | head -n 1 || true)
+          BODY_FILE=$(mktemp)
+          {
+            echo "Automated scan of U.S. official state and local tax sources detected new or unreadable sources."
+            echo
+            echo '```json'
+            cat us-tax-harvest.json
+            echo '```'
+          } > "$BODY_FILE"
+
+          if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+            gh issue edit "$EXISTING" --body-file "$BODY_FILE" --title "US tax change monitor: ${{ steps.scan.outputs.changed }} change(s), ${{ steps.scan.outputs.unreadable }} unreadable source(s)"
+          else
+            gh issue create --title "US tax change monitor: ${{ steps.scan.outputs.changed }} change(s), ${{ steps.scan.outputs.unreadable }} unreadable source(s)" --body-file "$BODY_FILE"
+          fi
+
+      - name: Healthy report
+        if: ${{ steps.scan.outputs.changed == '0' && steps.scan.outputs.unreadable == '0' }}
+        run: |
+          echo "No new U.S. state/local tax changes detected."
+          cat us-tax-harvest.json
