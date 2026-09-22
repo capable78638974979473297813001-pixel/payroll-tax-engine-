@@ -25,6 +25,40 @@ export interface Signal {
 const MAX_HASH_BYTES = 25 * 1024 * 1024;
 
 /**
+ * Strip the volatile bits out of an HTML page before hashing so a page whose
+ * substantive content is unchanged doesn't churn a new hash on every fetch.
+ * Government pages are riddled with per-request tokens: ASP.NET __VIEWSTATE /
+ * __EVENTVALIDATION, CSRF tokens, script nonces, cache-busting query strings,
+ * and embedded timestamps. Left in, they made ~90 stable pages look "changed"
+ * every run. This is a freshness signal, not a security boundary, so an
+ * aggressive, purely-heuristic scrub is the right trade.
+ */
+export function normalizeHtml(text: string): string {
+  return text
+    // Drop <script>/<style> bodies and HTML comments outright — they carry the
+    // worst churn (Cloudflare's per-request __CF$cv$params ray id, analytics
+    // tags, rocket-loader) and never hold the substantive page content we track.
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    // Whole hidden state/token inputs (name or id giving them away).
+    .replace(/<input\b[^>]*\b(?:name|id)\s*=\s*["'](?:__VIEWSTATE\w*|__EVENTVALIDATION|__REQUESTVERIFICATIONTOKEN|[^"']*(?:csrf|token|nonce)[^"']*)["'][^>]*>/gi, '')
+    // Inline script/style nonces and CSRF meta tags.
+    .replace(/\snonce\s*=\s*["'][^"']*["']/gi, '')
+    .replace(/<meta\b[^>]*\b(?:csrf|token|request-id|build-id)[^>]*>/gi, '')
+    // Cache-busting query params on asset links: ?v=..., ?_=..., &ver=...
+    .replace(/([?&])(?:v|ver|_|cb|cache|ts|t|build)=[^"'&\s]+/gi, '$1')
+    // ISO timestamps and clock times that many pages stamp on render.
+    .replace(/\d{4}-\d{2}-\d{2}[T ][\d:.]+(?:Z|[+-]\d{2}:?\d{2})?/g, '')
+    .replace(/\b\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?\b/g, '')
+    // Any remaining long opaque hex/base64 blob (view-state values, hashes, ids).
+    .replace(/[A-Za-z0-9+/=_-]{40,}/g, '')
+    // Collapse whitespace so reflowed markup doesn't count as a change.
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
  * Present as a real Chrome browser. Many government / CDN-fronted sites
  * (SSA, state revenue departments behind Akamai/Cloudflare) return 403/404/400
  * to a plain scripting user-agent, so a bare fetch looks "blocked" even though
@@ -65,6 +99,7 @@ async function once(url: string, timeoutMs: number, fetchImpl: typeof fetch): Pr
     });
     const etag = res.headers.get('etag') ?? undefined;
     const lastModified = res.headers.get('last-modified') ?? undefined;
+    const contentType = res.headers.get('content-type') ?? undefined;
     const declared = Number(res.headers.get('content-length') ?? '0');
 
     let hash: string | null = null;
@@ -72,7 +107,14 @@ async function once(url: string, timeoutMs: number, fetchImpl: typeof fetch): Pr
     if (res.ok && (declared === 0 || declared <= MAX_HASH_BYTES)) {
       const buf = Buffer.from(await res.arrayBuffer());
       bytes = buf.byteLength;
-      if (bytes <= MAX_HASH_BYTES) hash = createHash('sha256').update(buf).digest('hex');
+      if (bytes <= MAX_HASH_BYTES) {
+        // Normalize HTML (strip per-request tokens) before hashing; hash other
+        // content types (PDF, JSON, CSV) byte-for-byte since they're stable.
+        const isHtml = /text\/html|application\/xhtml/i.test(contentType ?? '')
+          || (!contentType && /^\s*<(?:!doctype|html)/i.test(buf.subarray(0, 200).toString('utf8')));
+        const material = isHtml ? Buffer.from(normalizeHtml(buf.toString('utf8')), 'utf8') : buf;
+        hash = createHash('sha256').update(material).digest('hex');
+      }
     } else {
       // Drain nothing; rely on headers as the signal for oversized bodies.
       bytes = declared || undefined;
