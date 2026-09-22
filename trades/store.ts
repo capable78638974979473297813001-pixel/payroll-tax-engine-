@@ -22,8 +22,7 @@ import type { Job, TradeWorkerProfile, WageDetermination, WorkedHours } from './
 
 /**
  * Resolved lazily on each call (not once at import) so a test — or a caller
- * that wants an isolated store — can point it elsewhere with TRADES_DB_DIR,
- * the same override shape harvester/snapshot.ts uses for its snapshot root.
+ * that wants an isolated store — can point it elsewhere with TRADES_DB_DIR.
  */
 function dataDir(): string {
   return process.env.TRADES_DB_DIR ?? join(dirname(fileURLToPath(import.meta.url)), '.data');

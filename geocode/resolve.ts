@@ -2,13 +2,12 @@
  * Address -> jurisdiction resolution, pure half.
  *
  * This module never touches the network — it takes ALREADY-FETCHED Census
- * geography data (the same "fetch is a parameter, not a side effect"
- * separation harvester/harvest.ts uses for harvestSource()) and matches it
+ * geography data ("fetch is a parameter, not a side effect") and matches it
  * against this project's own name-keyed local tax registries. That split
  * is what makes this deterministically unit-testable with a captured JSON
  * fixture instead of a live HTTP call, and it's also what keeps a resolved
  * address from becoming a silent moving target: the resolution step runs
- * ONCE per employee address (like the harvester's review gate), not once
+ * ONCE per employee address, not once
  * per paycheck. calculatePaycheck() itself still never touches the network
  * — this module only ever produces the certificate fields it already
  * accepts (workCity, county, schoolDistrictCode, workPSD, ...), it doesn't

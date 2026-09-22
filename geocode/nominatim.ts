@@ -5,8 +5,8 @@
  * evidence; the whole point here is that Census and OSM are maintained by
  * different organizations from different underlying data, so they don't
  * share a blind spot. Disagreement doesn't mean either one is WRONG — it
- * means a human should look, the same review-gate ethos this project's
- * harvester and every FieldMatch in resolve.ts already use.
+ * means a human should look, the same review-gate ethos every FieldMatch
+ * in resolve.ts already uses.
  *
  * This does NOT itself close the rooftop-precision gap — OSM's address
  * data is crowd-sourced and interpolated in many of the same ways

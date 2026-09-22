@@ -69,6 +69,5 @@ it is disclosed in that entry's own `sources`, not silently papered over.
   several of these laws (full-time vs. part-time, common ownership/"single
   employer" aggregation across affiliated companies, temp and leased workers)
   and is disclosed per-entry rather than modelled.
-- **This is a snapshot, not a monitored feed.** Unlike `data/minimum-wage/`,
-  nothing here has a refresh cadence or harvester coverage; treat the `asOf`
-  date on the one file in this folder literally.
+- **This is a snapshot, not a monitored feed.** Nothing here has a refresh
+  cadence; treat the `asOf` date on the one file in this folder literally.
