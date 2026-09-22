@@ -46,6 +46,7 @@ import { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult 
 import { crossCheckSafe, milesBetween, searchStructuredAddressSafe, type NominatimResult } from './nominatim.ts';
 import { namesEqual, stripCountySuffix, stripPlaceTypeSuffix } from './normalize.ts';
 import { resolveJurisdiction, toCertificateFields, type ResolvedJurisdiction } from './resolve.ts';
+import type { StateCertificate } from '../src/types.ts';
 
 export type {
   CensusGeographies,
@@ -140,7 +141,7 @@ export interface AddressResolution {
   address: string;
   matched: boolean;
   resolved: ResolvedJurisdiction | null;
-  certificateFields: Record<string, unknown>;
+  certificateFields: Partial<StateCertificate>;
   matchQuality: MatchQuality | null;
   crossCheck: CrossCheckResult | null;
   /**
@@ -692,7 +693,7 @@ export interface EmployeeResolution {
   work: AddressResolution | null;
   residence: AddressResolution | null;
   /** The merged certificate object — everything from resolveAddress() for each role, PLUS the cross-address flags below. Feed this straight into PaycheckInput.workState.certificate. */
-  certificateFields: Record<string, unknown>;
+  certificateFields: Partial<StateCertificate>;
   /** Taxes this session confirmed CANNOT be resolved from Census/TIGERweb data at all (not a match failure — no boundary data exists for these). Surfaced so a caller doesn't mistake silence for "not applicable". */
   notResolvable: string[];
   /** Merged from both addresses' own AddressResolution.lowConfidenceReasons, each prefixed with which address it came from — empty when both addresses (that were supplied) resolved with full confidence. */
@@ -746,7 +747,7 @@ export async function resolveEmployee(
       : Promise.resolve(null),
   ]);
 
-  const fields: Record<string, unknown> = {
+  const fields: Partial<StateCertificate> = {
     ...(work?.certificateFields ?? {}),
     ...(residence?.certificateFields ?? {}),
   };

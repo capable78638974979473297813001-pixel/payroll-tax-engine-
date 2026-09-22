@@ -9,6 +9,7 @@ import { mintApiKey, recordUsage, usageForKey, verifyApiKey, type ApiKey } from 
 import { billingConfigured, completeCardSetup, handleStripeWebhook, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
 import { runEmbeddedPayroll, type PlatformEmployeeInput } from '../payroll/platform.ts';
 import type { PayFrequency } from '../src/types.ts';
+import { listUniqueTaxIds, payCalc, resolveUniqueTaxId, type PayCalcRequest } from '../api/ste-compat.ts';
 
 // Load a local .env (Stripe keys, PUBLIC_BASE_URL, etc.) if one exists — so
 // pasting values into .env is all it takes to configure billing. Harmless when
@@ -39,6 +40,19 @@ try {
  *       "workState":{"code":"OH","certificate":{"residenceCity":"Columbus","workCity":"Columbus"}}
  *     }'
  *   curl -s localhost:4380/v1/usage -H "Authorization: Bearer sk_live_..."
+ *
+ *   # Symmetry Tax Engine (STE) -shaped compatibility routes — this
+ *   # engine's own request/response shape is above; these exist for a
+ *   # caller already integrated against payCalc/UniqueTaxId/
+ *   # TaxJurisdictionParms. See api/ste-compat.ts's own doc comment for
+ *   # exactly what this is (a compatible SHAPE) and isn't (Symmetry's own
+ *   # data, which this project has no access to).
+ *   curl -s localhost:4380/v1/uniqueTaxIds -H "Authorization: Bearer sk_live_..."
+ *   curl -s localhost:4380/v1/payCalc -H "Authorization: Bearer sk_live_..." \
+ *     -H 'Content-Type: application/json' -d '{"payCalc":[{
+ *       "checkDate":"2026-08-15","frequency":"biweekly","grossPay":3000,
+ *       "workUniqueTaxIds":["39-000-0001"]
+ *     }]}'
  */
 
 const PORT = Number(process.env.PORT ?? 4380);
@@ -253,7 +267,58 @@ const server = createServer(async (req, res) => {
     }
   }
 
-  return sendJson(res, 404, { error: 'Not found. Try POST /v1/calculate, POST /v1/payroll/run, GET /v1/usage, or GET /v1/health.' });
+  // Symmetry Tax Engine (STE) -shaped compatibility routes — see
+  // api/ste-compat.ts's own doc comment for what this is and, importantly,
+  // isn't: this engine's OWN uniqueTaxId/locationCode catalog in STE's
+  // familiar request/response shape, not Symmetry's actual proprietary
+  // data. A caller who already speaks this engine's native PaycheckInput
+  // shape should keep using POST /v1/calculate directly; this exists for a
+  // caller migrating an integration that already speaks payCalc/
+  // UniqueTaxId/TaxJurisdictionParms.
+  if (method === 'GET' && path === '/v1/uniqueTaxIds') {
+    const checkDate = new URL(req.url ?? '', baseUrl(req)).searchParams.get('checkDate') ?? new Date().toISOString().slice(0, 10);
+    try {
+      return sendJson(res, 200, { checkDate, count: listUniqueTaxIds(checkDate).length, entries: listUniqueTaxIds(checkDate) });
+    } catch (err) {
+      return sendJson(res, 400, { error: err instanceof Error ? err.message : 'Bad request.' });
+    }
+  }
+
+  if (method === 'GET' && path.startsWith('/v1/uniqueTaxIds/')) {
+    const id = decodeURIComponent(path.slice('/v1/uniqueTaxIds/'.length));
+    const checkDate = new URL(req.url ?? '', baseUrl(req)).searchParams.get('checkDate') ?? new Date().toISOString().slice(0, 10);
+    const entry = resolveUniqueTaxId(id, checkDate);
+    if (!entry) return sendJson(res, 404, { error: `No such uniqueTaxId/locationCode "${id}" for ${checkDate}.` });
+    return sendJson(res, 200, entry);
+  }
+
+  if (method === 'POST' && path === '/v1/payCalc') {
+    if (key.suspended) {
+      return sendJson(res, 402, { error: key.suspendedReason ?? 'This key is suspended for non-payment. Update your card to resume.', suspended: true });
+    }
+    let requests: PayCalcRequest[];
+    try {
+      const body = await readJson<PayCalcRequest[] | { payCalc: PayCalcRequest[] }>(req);
+      requests = Array.isArray(body) ? body : body.payCalc;
+      if (!Array.isArray(requests)) throw new Error('Request body must be an array of PayCalcRequest, or { "payCalc": [...] }.');
+    } catch (err) {
+      recordUsage(key.id, { statusCode: 400, error: err instanceof Error ? err.message : 'bad request', billable: false });
+      return sendJson(res, 400, { error: err instanceof Error ? err.message : 'Bad request.' });
+    }
+    const results = payCalc(requests);
+    // Billed the same as /v1/calculate, once per request in the batch —
+    // this endpoint is a translation in front of the same engine call, not
+    // a cheaper one.
+    let chargedCents = 0;
+    for (const r of results) {
+      chargedCents += recordUsage(key.id, { statusCode: r.error ? 422 : 200, error: r.error, billable: !r.error });
+    }
+    if (results.some((r) => !r.error)) void reportCall(key.id).catch(() => {});
+    res.setHeader('X-Charge-Cents', String(chargedCents));
+    return sendJson(res, 200, { payCalc: results });
+  }
+
+  return sendJson(res, 404, { error: 'Not found. Try POST /v1/calculate, POST /v1/payroll/run, POST /v1/payCalc, GET /v1/uniqueTaxIds, GET /v1/usage, or GET /v1/health.' });
 });
 
 // A tiny convenience: `node examples/api-server.ts --mint "Name"` mints a key
