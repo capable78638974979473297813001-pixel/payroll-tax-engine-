@@ -89,10 +89,15 @@ const SCENARIOS: Scenario[] = [
   },
   {
     id: 'oh-plain',
-    label: 'Ohio — single, biweekly, no pre-tax',
-    recipe: 'Salary · OH · biweekly · gross $3,000.00 · Single · no local city',
-    input: { checkDate: '2026-06-15', payFrequency: 'biweekly', earnings: reg(300000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'OH' } },
-    // Read from paycheckcity.com on 2026-09-21 (verified via browser).
+    // Check date is ON/AFTER 2026-08-01 so it uses Ohio's current (Aug 1,
+    // 2026) withholding table — the same table PaycheckCity uses when its
+    // check date defaults to today. On a pre-Aug date Omnia correctly uses
+    // the prior table and Ohio state tax is $77.52 instead; the engine's
+    // effective-dating, not a discrepancy, is why the two dates differ.
+    label: 'Ohio — single, biweekly, no pre-tax (Aug 1, 2026 table)',
+    recipe: 'Salary · OH · biweekly · gross $3,000.00 · Single · no local city · check date on/after Aug 1 2026',
+    input: { checkDate: '2026-09-15', payFrequency: 'biweekly', earnings: reg(300000), deductions: [], federalW4: w4(), ytd: ytd0(), workState: { code: 'OH' } },
+    // Read from paycheckcity.com on 2026-09-21 (verified via browser; default check date).
     reference: { federalIncomeTax: 32038, socialSecurity: 18600, medicare: 4350, stateIncomeTax: 7577, stateOtherEE: 0, local: 0, netPay: 237435 },
   },
   {
