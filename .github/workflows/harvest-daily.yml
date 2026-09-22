@@ -1,41 +1,12 @@
 name: Harvest daily
 
-# What the 8am task runs, but on GitHub's infrastructure instead of one
-# person's laptop — see harvester/daily.ts's own doc comment for why every
-# source is checked every day regardless of its individual cadence.
-#
-# Hard requirement this workflow is built around: a real rate change must
-# NEVER be silently missed. The corollary — an occasional missed or noisy
-# RUN of the check itself is tolerable — is not: see the design notes
-# below for what that requirement rules out.
-#
-# 12:00 UTC is 8am Eastern Daylight Time / 7am Eastern Standard Time.
-# GitHub Actions cron does not know about daylight saving, so the actual
-# local time drifts by an hour twice a year. That drift is cosmetic — the
-# sweep still runs once a day either way — so it is left alone rather than
-# special-cased.
-#
-# Minute is :07, not :00 — found live, not theoretical: this workflow's
-# only real scheduled firing so far (2026-08-31) ran at 18:19 UTC, over
-# six hours late against this same '12:00' target, and the very next
-# day's firing never happened at all as of 1h17m past target (2026-09-01,
-# confirmed by checking the Actions API directly — zero schedule-triggered
-# runs that day). GitHub's own docs say exactly why: the schedule event
-# "can be delayed during periods of high load," and load peaks specifically
-# at the top of every hour, because that's the slot every other scheduled
-# workflow on the platform also requests by default. Every minute past
-# :00 draws a smaller crowd. This does not make GitHub's scheduler
-# reliable — it remains best-effort, full stop — but it is the one lever
-# available to reduce the delay, and the delay observed was not small.
+# GitHub cron is UTC. Run every day just after 04:00 UTC to reduce scheduler
+# contention at the top of the hour. Use workflow_dispatch for an immediate run.
 on:
   schedule:
-    - cron: '7 12 * * *'
+    - cron: '7 4 * * *'
   workflow_dispatch: {}
 
-# A second run must never start while one is still writing state — two
-# concurrent pushes to the state branch would race, and the harvester's
-# own file lock (harvester/journal.ts's acquireLock) only protects a
-# single checkout, not two separate Action runners.
 concurrency:
   group: harvest-daily
   cancel-in-progress: false
@@ -60,105 +31,50 @@ jobs:
         with:
           node-version: '24'
 
-      # Most of the registry is PDF sources, and harvester/fetch.ts shells
-      # out to pdftotext (poppler-utils) to read them. ubuntu-latest does
-      # NOT ship it, so without this step every PDF fetch fails with
-      # "pdftotext could not be found" — discovered from a real run
-      # (2026-08-31T18:20:58Z) that checked only 46 of 102 sources and
-      # failed the other 56, 95 of those on this exact error. A failed
-      # fetch is not "unchanged"; it is a source going dark, which is the
-      # one thing this workflow exists to never let happen silently.
-      - name: Install poppler-utils (pdftotext)
+      - name: Install PDF text extraction
         run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends poppler-utils
 
-      # gh issue create --label fails outright on a label that doesn't
-      # exist yet; these two are created once, idempotently, so the later
-      # issue-upsert steps never fail on a fresh repo.
       - name: Ensure tracking labels exist
         run: |
           gh label create "$FINDINGS_LABEL" --color FBCA04 \
             --description "Open harvester findings awaiting review" 2>/dev/null || true
           gh label create harvester-broken --color B60205 \
-            --description "The harvest-daily monitor itself failed" 2>/dev/null || true
+            --description "The harvest monitor itself failed" 2>/dev/null || true
         env:
           GH_TOKEN: ${{ github.token }}
 
-      # State (harvester/state/, harvester/snapshots/) is deliberately
-      # .gitignore'd in the main checkout — see .gitignore's own comment —
-      # because it used to mean "this machine's memory" and embedded
-      # absolute local paths. A GitHub Actions runner is a fresh machine
-      # every single run, so without an explicit, durable home for that
-      # state, EVERY run would look like day one: no prior snapshot to
-      # diff against, so a real rate change would be silently absorbed
-      # into a new "baseline" and never reported. That is the exact
-      # failure this workflow exists to rule out, so state is git-committed
-      # (not cached — GitHub Actions caches are explicitly best-effort and
-      # can be evicted, which would reproduce the same silent-miss failure)
-      # to its own orphan branch, kept out of the ordinary commit history
-      # main and other branches see.
-      - name: Restore harvester state from the state branch
+      # Snapshots and the journal must survive the ephemeral Actions runner.
+      # Keep them on a dedicated branch rather than in the application branch.
+      - name: Restore harvester state
         run: |
           set -e
+          mkdir -p harvester/state harvester/snapshots
           if git ls-remote --exit-code --heads origin "$STATE_BRANCH" >/dev/null 2>&1; then
             git clone --branch "$STATE_BRANCH" --single-branch --depth 1 \
-              "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" \
-              state-branch
-            mkdir -p harvester/state harvester/snapshots
+              "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" state-branch
             [ -d state-branch/harvester/state ] && cp -a state-branch/harvester/state/. harvester/state/ || true
             [ -d state-branch/harvester/snapshots ] && cp -a state-branch/harvester/snapshots/. harvester/snapshots/ || true
-            echo "Restored state from existing $STATE_BRANCH branch."
           else
-            echo "No $STATE_BRANCH branch yet — first-ever run, starting cold."
-            echo "(Safe: daily.ts treats a source's first capture as a baseline, not a finding.)"
-          fi
-
-      # No continue-on-error here, on purpose: a crash must fail this job
-      # loudly. A failed scheduled workflow run triggers GitHub's own
-      # email notification automatically — that is the backstop for "the
-      # run itself broke," separate from and in addition to the app's own
-      # journal, which is the backstop for "a page changed and we didn't
-      # notice."
-      - name: Run the sweep
-        id: harvest
-        run: npm run harvest:daily
-
-      # Runs even if the sweep step above failed, so whatever it managed
-      # to capture before crashing is not lost on top of the crash itself.
-      #
-      # Only *.meta.json is committed here — never the raw .raw capture
-      # bodies. Found out why the hard way on this workflow's first real
-      # run: Illinois's own withholding-guide page embeds a live-looking
-      # Mapbox secret token, which GitHub's push protection correctly
-      # refused to let land in this PUBLIC repo's history. That is not a
-      # false positive to route around — republishing a third party's
-      # embedded secret because it happened to be sitting on a page we
-      # fetched would be a real problem, not a CI inconvenience. And it
-      # is not needed anyway: hasChanged()/latestSnapshot() in
-      # harvester/snapshot.ts only ever read the .meta.json's stored
-      # sha256, never the raw bytes, so change detection is fully intact
-      # on metadata alone. The trade-off this accepts: `npm run
-      # harvest:diff -- <sourceId>`, which shows the actual byte-level
-      # diff, only works against whatever a machine has fetched locally
-      # — by design, not by omission, since printing full raw page
-      # bodies into this repo's PUBLIC Actions logs would carry the
-      # exact same leak risk. Run that command on your own machine, not
-      # in CI, when you want to see what actually changed.
-      - name: Commit state back to the state branch
-        if: always()
-        run: |
-          set -e
-          if [ ! -d state-branch ]; then
             mkdir -p state-branch
             git -C state-branch init -q
             git -C state-branch checkout -q --orphan "$STATE_BRANCH"
           fi
+
+      - name: Run the daily sweep
+        id: harvest
+        run: npm run harvest:daily
+
+      # Run even after a failed sweep so partial journal/state updates are not lost.
+      - name: Commit harvester state
+        if: always()
+        run: |
+          set -e
           mkdir -p state-branch/harvester/state state-branch/harvester/snapshots
           cp -a harvester/state/. state-branch/harvester/state/ 2>/dev/null || true
           if [ -d harvester/snapshots ]; then
-            ( cd harvester/snapshots && find . -name '*.meta.json' \
-                -exec cp --parents {} ../../state-branch/harvester/snapshots/ \; )
+            (cd harvester/snapshots && find . -name '*.meta.json' \
+              -exec cp --parents {} ../../state-branch/harvester/snapshots/ \;)
           fi
-
           cd state-branch
           git config user.name "harvester-bot"
           git config user.email "harvester-bot@users.noreply.github.com"
@@ -167,81 +83,48 @@ jobs:
             echo "No state changes to commit."
           else
             git commit -q -m "Harvest state: run ${{ github.run_id }} ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
-            git push -q "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" \
-              HEAD:"$STATE_BRANCH"
+            git push -q "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:"$STATE_BRANCH"
           fi
 
-      # A single, persistently-updated issue rather than a fresh issue
-      # every day — see the requirement that this must not "cry wolf."
-      # It opens when there is something unacknowledged, is edited in
-      # place while that stays true, and closes itself once every open
-      # finding has been dealt with via `npm run harvest:ack`.
-      #
-      # Trigger condition deliberately covers TWO different things, not just
-      # one: openFindings (a document's content actually differs) AND
-      # health.status != green (a source has gone stale/unreadable, or the
-      # run itself never finished). Before this fix the trigger was
-      # openFindings alone — so a source that started 403ing every day, or
-      # a PDF extractor silently broken (this actually happened: see the
-      # "Install poppler-utils" step above, added after a real run failed to
-      # read 56 of 102 sources and nothing here said a word about it) would
-      # sit at "0 open findings" forever. Zero findings from a monitor that
-      # cannot read the document is not health, it's the exact silent gap
-      # this whole project exists to close — a change could be sitting
-      # behind that dead fetch and nobody would ever be told to go look.
-      - name: Reflect open findings and health as a single tracking issue
+      - name: Reflect findings and health in one issue
         if: always()
         run: |
           set -e
-          # `|| true` on these two: harvest-daily.ts's status mode exits 1
-          # when health is 'red' ("not trustworthy") — a real state this
-          # step must still report on, not abort before reaching. set -e
-          # would otherwise kill the whole step on exactly the case it
-          # most needs to surface.
           HEALTH=$(node examples/harvest-daily.ts status --json) || true
-          echo "$HEALTH" > health.json
+          printf '%s' "$HEALTH" > health.json
           OPEN_COUNT=$(node -e "console.log(JSON.parse(require('fs').readFileSync('health.json','utf8')).openFindings.length)")
           HEALTH_STATUS=$(node -e "console.log(JSON.parse(require('fs').readFileSync('health.json','utf8')).status)")
           STATUS_TEXT=$(node examples/harvest-daily.ts status) || true
-
           EXISTING=$(gh issue list --label "$FINDINGS_LABEL" --state open --json number --jq '.[0].number' || true)
-
           if [ "$OPEN_COUNT" -gt 0 ] || [ "$HEALTH_STATUS" != "green" ]; then
             BODY_FILE=$(mktemp)
             {
-              echo "Automated — updated by the harvest-daily workflow, run ${{ github.run_id }}."
+              echo "Automated update from the 04:00 UTC harvest, run ${{ github.run_id }}."
               echo
               echo '```'
               echo "$STATUS_TEXT"
               echo '```'
             } > "$BODY_FILE"
-
             TITLE="Harvester: $OPEN_COUNT open finding(s)"
-            if [ "$HEALTH_STATUS" != "green" ]; then
-              TITLE="$TITLE — status $HEALTH_STATUS, sources unverified"
-            fi
-
+            [ "$HEALTH_STATUS" = "green" ] || TITLE="$TITLE — status $HEALTH_STATUS, sources unverified"
             if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
               gh issue edit "$EXISTING" --body-file "$BODY_FILE" --title "$TITLE"
             else
               gh issue create --title "$TITLE" --body-file "$BODY_FILE" --label "$FINDINGS_LABEL"
             fi
           elif [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
-            gh issue comment "$EXISTING" --body "All open findings acknowledged (or resolved), and every source verified fresh, as of run ${{ github.run_id }}. Closing."
+            gh issue comment "$EXISTING" --body "All findings acknowledged and sources are healthy as of run ${{ github.run_id }}. Closing."
             gh issue close "$EXISTING"
           fi
         env:
           GH_TOKEN: ${{ github.token }}
 
-      # Separate from the findings issue above: this one is ONLY for "the
-      # monitor itself is broken" (a crash, or every source unreadable),
-      # not for ordinary findings, so it never fires on a normal day.
-      - name: Flag a broken monitor separately from ordinary findings
+      - name: Flag a broken monitor
         if: failure()
         run: |
           set -e
           EXISTING=$(gh issue list --label harvester-broken --state open --json number --jq '.[0].number' || true)
-          BODY="The harvest-daily workflow run ${{ github.run_id }} failed — see: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          BODY="The daily harvest workflow run ${{ github.run_id }} failed: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
             gh issue comment "$EXISTING" --body "$BODY"
           else
