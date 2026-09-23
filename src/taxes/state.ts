@@ -305,6 +305,11 @@ export function stateIncomeTax(
   const excise = stateExciseEmployeeTax(input, ctx, rules);
   if (excise) lines.push(excise);
 
+  // Per-HOUR assessments (Oregon's Workers' Benefit Fund): the first levy in
+  // this engine measured in hours rather than wages, so it reads
+  // input.hoursWorked, falling back to the state's own flat-hours schedule.
+  lines.push(...stateHourlyAssessment(input, ctx, rules));
+
   // Missouri's Kansas City / St. Louis earnings taxes — the employee side,
   // gated on certificate.locality the same way Newark's employer tax is
   // gated, since which city (if any) applies is a caller-resolved fact
@@ -6370,6 +6375,76 @@ function stateExciseEmployeeTax(
     amount,
     detail: `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(3)}%, no wage cap`,
   };
+}
+
+interface StateHourlyAssessmentConfig {
+  idSuffix: string; // e.g. 'WBF'
+  name: string; // e.g. "Workers' Benefit Fund"
+  /** Dollars per hour, the TOTAL assessment (employee + employer). */
+  ratePerHour: number;
+  /** Fraction of the total the employer must retain from the employee. */
+  employeeShareFraction: number;
+  /**
+   * Hours assumed per period when the caller doesn't supply hoursWorked.
+   * A frequency missing here falls back to 2,080 hours a year ÷ periods.
+   */
+  flatRateHoursPerPeriod: Partial<Record<string, number>>;
+}
+
+/**
+ * A cents-per-hour assessment split between employee and employer, e.g.
+ * Oregon's Workers' Benefit Fund (ORS 656.506, OAR 436-070-0020): each pay
+ * period the employer retains half the rate times hours worked (rounded
+ * to the nearest cent, half a cent rounding up) and pays an equal amount
+ * itself. Hours come from input.hoursWorked; when actual hours aren't
+ * tracked, the rule's own flat-rate method applies (40 hours a week for
+ * weekly/biweekly pay, 173.33 hours a month for monthly/semimonthly),
+ * carried in the config so a caller with real hours always wins.
+ */
+function stateHourlyAssessment(input: PaycheckInput, ctx: ComputeContext, rules: StateRuleset): TaxLine[] {
+  const cfg = rules.stateHourlyAssessment as StateHourlyAssessmentConfig | undefined;
+  if (!cfg) return [];
+  if (input.employmentCategory && input.employmentCategory !== 'standard') return [];
+
+  let hours = input.hoursWorked;
+  let hoursNote = `${hours} hours worked`;
+  if (hours === undefined) {
+    const published = cfg.flatRateHoursPerPeriod[input.payFrequency];
+    // No published flat rate for this frequency: a 2,080-hour year spread
+    // over its periods, the "other reasonable method" the rule allows.
+    hours = published ?? Math.round((2080 / ctx.periodsPerYear) * 100) / 100;
+    hoursNote =
+      published !== undefined
+        ? `${hours} hours (flat-rate method, hoursWorked not supplied)`
+        : `${hours} hours (2,080-hour year ÷ ${ctx.periodsPerYear}, hoursWorked not supplied)`;
+  }
+  if (!(hours >= 0)) throw new Error(`input.hoursWorked must be a non-negative number, got ${input.hoursWorked}`);
+  if (hours === 0 || ctx.taxableWagesFor([]) <= 0) return [];
+
+  const employeeRate = cfg.ratePerHour * cfg.employeeShareFraction;
+  // Cents, rounded to the nearest whole cent, half a cent up.
+  const employeeAmount = roundHalfUp(hours * employeeRate * 100);
+  const detail = `${hoursNote} × $${employeeRate.toFixed(4)}/hr`;
+  return [
+    {
+      id: `${rules.code}_${cfg.idSuffix}_EE`,
+      name: `${rules.name} ${cfg.name} (Employee)`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: 0,
+      amount: employeeAmount,
+      detail,
+    },
+    {
+      id: `${rules.code}_${cfg.idSuffix}_ER`,
+      name: `${rules.name} ${cfg.name} (Employer)`,
+      payer: 'employer',
+      jurisdiction: 'state',
+      taxableWages: 0,
+      amount: employeeAmount,
+      detail: `matches the amount retained from the employee (${detail})`,
+    },
+  ];
 }
 
 interface MOLocalityConfig {

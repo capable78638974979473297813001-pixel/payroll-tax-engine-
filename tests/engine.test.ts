@@ -6866,6 +6866,33 @@ describe('Nebraska', () => {
 });
 
 describe('Oregon', () => {
+  describe("Workers' Benefit Fund (OAR 436-070-0020)", () => {
+    const or = (overrides: Partial<PaycheckInput>) =>
+      calculatePaycheck(input({ workState: { code: 'OR', certificate: {} }, ...overrides }));
+
+    test('flat-rate hours when hoursWorked is absent: biweekly 80 h x $0.009 = $0.72 employee, $0.72 employer (matches PaycheckCity)', () => {
+      const r = or({ payFrequency: 'biweekly' });
+      assert.equal(amountOf(r, 'OR_WBF_EE'), dollars(0.72));
+      assert.equal(amountOf(r, 'OR_WBF_ER'), dollars(0.72));
+    });
+
+    test('monthly 173.33 h -> $1.56; semimonthly 86.665 h -> $0.78 (half a cent rounds up)', () => {
+      assert.equal(amountOf(or({ payFrequency: 'monthly' }), 'OR_WBF_EE'), dollars(1.56));
+      assert.equal(amountOf(or({ payFrequency: 'semimonthly' }), 'OR_WBF_EE'), dollars(0.78));
+    });
+
+    test('actual hours win over the flat rate: 45.5 h x $0.009 = $0.4095 -> $0.41', () => {
+      const r = or({ payFrequency: 'weekly', hoursWorked: 45.5 });
+      assert.equal(amountOf(r, 'OR_WBF_EE'), dollars(0.41));
+    });
+
+    test('no line for zero hours, and none outside Oregon', () => {
+      assert.equal(or({ hoursWorked: 0 }).taxes.some((t) => t.id.startsWith('OR_WBF')), false);
+      const wa = calculatePaycheck(input({ workState: { code: 'WA', certificate: {} } }));
+      assert.equal(wa.taxes.some((t) => t.id.includes('WBF')), false);
+    });
+  });
+
   // Oregon is the first state in this project whose formula depends on the
   // employee's own COMPUTED FEDERAL WITHHOLDING, not just federally-defined
   // wage categories. These fixtures were verified two ways: (1) an
@@ -8218,9 +8245,10 @@ describe('West Virginia', () => {
     workState: { code: 'WV', certificate },
   });
 
-  test('weekly $800, 1 exemption, default Two Earner table: $23.74', () => {
+  test('weekly $800, 1 exemption, default Two Earner table: $24', () => {
     // Taxable = 800 - 38.46 = 761.54. Bracket [577-866, base 15.95, 4.22%]:
-    // 15.95 + 4.22%x(761.54-577=184.54) = 15.95 + 7.79 = $23.74.
+    // 15.95 + 4.22%x(761.54-577=184.54) = 15.95 + 7.79 = $23.74, rounded
+    // to the nearest whole dollar per IT-100.1-A = $24.
     const r = calculatePaycheck(
       input({
         payFrequency: 'weekly',
@@ -8228,15 +8256,16 @@ describe('West Virginia', () => {
         ...wvState({ exemptions: 1 }),
       }),
     );
-    assert.equal(amountOf(r, 'WV_SIT'), dollars(23.74));
+    assert.equal(amountOf(r, 'WV_SIT'), dollars(24));
   });
 
-  test('weekly $800, 1 exemption, One Earner/One Job elected (IT-104 Line 5): $21.04', () => {
+  test('weekly $800, 1 exemption, One Earner/One Job elected (IT-104 Line 5): $21', () => {
     // Same taxable $761.54, but the ONE-EARNER table's bracket [481-769,
     // base 12.17, 3.16%] applies instead: 12.17 + 3.16%x(761.54-481=280.54)
     // = 12.17 + 8.87 = $21.04 — less withheld than the default table, as
     // expected (opting in is only available to single filers/one-job
     // households, and produces LOWER withholding, per IT-104's own design).
+    // Rounded to the nearest whole dollar per IT-100.1-A = $21.
     const r = calculatePaycheck(
       input({
         payFrequency: 'weekly',
@@ -8244,12 +8273,13 @@ describe('West Virginia', () => {
         ...wvState({ exemptions: 1, oneEarnerElection: true }),
       }),
     );
-    assert.equal(amountOf(r, 'WV_SIT'), dollars(21.04));
+    assert.equal(amountOf(r, 'WV_SIT'), dollars(21));
   });
 
-  test('no certificate on file defaults to 0 exemptions and the (higher-withholding) Two Earner table: $25.36', () => {
+  test('no certificate on file defaults to 0 exemptions and the (higher-withholding) Two Earner table: $25', () => {
     // Taxable = 800 - 0 = 800. Bracket [577-866, base 15.95, 4.22%]:
-    // 15.95 + 4.22%x(800-577=223) = 15.95 + 9.41 = $25.36.
+    // 15.95 + 4.22%x(800-577=223) = 15.95 + 9.41 = $25.36 -> $25 (IT-100.1-A
+    // nearest-whole-dollar rule).
     const r = calculatePaycheck(
       input({
         payFrequency: 'weekly',
@@ -8257,7 +8287,7 @@ describe('West Virginia', () => {
         workState: { code: 'WV' },
       }),
     );
-    assert.equal(amountOf(r, 'WV_SIT'), dollars(25.36));
+    assert.equal(amountOf(r, 'WV_SIT'), dollars(25));
   });
 
   test('reciprocity: a Pennsylvania resident working in West Virginia owes $0 WV tax', () => {
@@ -8556,7 +8586,8 @@ describe('West Virginia', () => {
           workState: { code: 'WV', certificate: {} },
         }),
       );
-      assert.equal(amountOf(regular, 'WV_SIT'), dollars(68.59));
+      // $68.59 before IT-100.1-A's nearest-whole-dollar rounding.
+      assert.equal(amountOf(regular, 'WV_SIT'), dollars(69));
 
       const bonus = calculatePaycheck(
         input({

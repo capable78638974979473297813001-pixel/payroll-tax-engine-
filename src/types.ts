@@ -580,6 +580,12 @@ export interface PaycheckInput {
     /** State income tax actually withheld from it. */
     stateIncomeTaxWithheld?: Cents;
   };
+  /**
+   * Hours worked this pay period. Read only by per-hour levies (Oregon's
+   * Workers' Benefit Fund); when omitted those fall back to the state's own
+   * flat-rate hours for the pay frequency.
+   */
+  hoursWorked?: number;
   /** Where the work is performed — whose state income tax rules run. */
   workState?: StateWithholding;
   /**
