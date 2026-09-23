@@ -92,7 +92,10 @@
     "creditsAnnual": {
       "headOfHousehold": 120,
       "blind": 110
-    }
+    },
+    "ficaDeductionAnnualCap": 2000,
+    "noWithholdingBelowAnnualWithExemptions": 8000,
+    "$ficaComment": "Circular M's retirement deduction: the employee's own Social Security + Medicare (plus any Massachusetts retirement-system contribution) comes off wages before the exemption, until the year's total reaches $2,000. The USDA National Finance Center bulletin (NFC-26-1769797447, steps 5a-5e) spells out the running-total mechanics: prior-YTD FICA = YTD OASDI wages x FICA rate; the current period deducts its own FICA only up to what's left under $2,000. Confirmed against PaycheckCity: all ten Massachusetts comparison cases, previously $3.81-$83.61 over-withheld, match to the cent once the deduction applies. The same bulletin's step 4 note gives the $8,000 rule: an employee claiming one or more exemptions and earning less than $8,000 a year has nothing withheld. Massachusetts-system retirement contributions (public employees) are not tracked by this engine; only FICA counts toward the $2,000."
   },
   "statePaidLeaveEmployee": {
     "rate": 0.0046,

@@ -5379,8 +5379,13 @@ describe('Massachusetts', () => {
   // MA-2026.json's $extractionNote — so this project's usual "reproduce
   // the source's own worked example" discipline isn't available; this is
   // the fallback discipline instead).
+  // These tests exercise the exemption/surtax/credit mechanics, so they
+  // start from a YTD where the $2,000 FICA deduction is already used up
+  // ($30,000 x 7.65% = $2,295 > $2,000) and it stays out of the arithmetic.
+  // The deduction itself has its own tests at the end of this block.
   const maState = (certificate: Record<string, unknown> = {}) => ({
     workState: { code: 'MA', certificate },
+    ytd: { socialSecurity: dollars(30000), medicare: dollars(30000), futa: dollars(7000) },
   });
 
   test("no certificate filed: Form M-4's own instruction is withholding \"without exemptions\" — full $100.00, not the $95.77 a filed certificate would give", () => {
@@ -5571,6 +5576,50 @@ describe('Massachusetts', () => {
       }),
     );
     assert.equal(r.taxes.some((t) => t.jurisdiction === 'local'), false);
+  });
+
+  test("Circular M's FICA deduction: this cheque's Social Security + Medicare comes off wages first — matches PaycheckCity: monthly $4,750, no certificate -> $219.33", () => {
+    // FICA = 4,750 x 7.65% = $363.38, well under the $2,000 annual cap.
+    // (4,750 - 363.38) x 5% = $219.33. Before this deduction was wired the
+    // engine withheld $237.50 here, $18.17 more than PaycheckCity.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(4750) }],
+        workState: { code: 'MA', certificate: {} },
+      }),
+    );
+    assert.equal(amountOf(r, 'MA_SIT'), dollars(219.33));
+  });
+
+  test('the FICA deduction stops at $2,000 for the year: the cheque that crosses the cap deducts only what is left', () => {
+    // Prior YTD FICA = 25,000 x 6.2% + 25,000 x 1.45% = $1,912.50, leaving
+    // $87.50. This cheque's FICA ($153.00) is limited to that $87.50.
+    // (2,000 - 87.50) x 5% = $95.625 -> $95.63.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ytd: { socialSecurity: dollars(25000), medicare: dollars(25000), futa: dollars(7000) },
+        workState: { code: 'MA', certificate: {} },
+      }),
+    );
+    assert.equal(amountOf(r, 'MA_SIT'), dollars(95.63));
+  });
+
+  test('no withholding for an employee claiming an exemption with annual wages under $8,000; a no-certificate employee is still withheld on', () => {
+    const low = (certificate: Record<string, unknown>) =>
+      calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(150) }],
+          workState: { code: 'MA', certificate },
+        }),
+      );
+    // $150 x 52 = $7,800 < $8,000 with Line 4 = 1.
+    assert.equal(amountOf(low({ personalExemptionCode: 1 }), 'MA_SIT'), 0);
+    // No certificate: (150 - 11.48 FICA) x 5% = $6.926 -> $6.93.
+    assert.equal(amountOf(low({}), 'MA_SIT'), dollars(6.93));
   });
 });
 
@@ -8761,6 +8810,32 @@ describe('Arkansas', () => {
       }),
     );
     assert.equal(amountOf(r, 'AR_SIT'), dollars(0.9));
+  });
+
+  test('HB 1001 (2026) cut the top rate to 3.7%, retroactive to Jan 1 — matches PaycheckCity: biweekly $8,492.31 -> $307.62, monthly $7,133.33 -> $225.75', () => {
+    // Biweekly: 8,492.31 x 26 = 220,800.06, less $2,470 = $218,330.06 (over
+    // $100,001, so no midrange rounding) x 3.7% = $8,078.21, less $79.90 =
+    // $7,998.31 -> $7,998 / 26 = $307.62. Under the superseded 3.9% table
+    // this was $324.08.
+    const biweekly = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(8492.31) }],
+        workState: { code: 'AR' },
+      }),
+    );
+    assert.equal(amountOf(biweekly, 'AR_SIT'), dollars(307.62));
+    // Monthly: 7,133.33 x 12 = 85,599.96, less $2,470 = $83,129.96 ->
+    // midrange $83,150 x 3.7% = $3,076.55, less $367.16 = $2,709.39 ->
+    // $2,709 / 12 = $225.75.
+    const monthly = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(7133.33) }],
+        workState: { code: 'AR' },
+      }),
+    );
+    assert.equal(amountOf(monthly, 'AR_SIT'), dollars(225.75));
   });
 
   test('no reciprocity with any state', () => {

@@ -39,7 +39,7 @@ import {
   paLocalRuleset,
   stateRuleset,
 } from '../registry.ts';
-import { federalIncomeTax } from './federal.ts';
+import { federalIncomeTax, federalTaxes } from './federal.ts';
 import { cashEarnings, supplementalEarnings } from '../wages.ts';
 import { resolveCertBoolean } from '../validate.ts';
 import type {
@@ -5321,6 +5321,40 @@ interface FlatRateSurtaxCreditConfig {
     headOfHousehold: number; // dollars, annual — M-4 Box A
     blind: number; // dollars, annual — M-4 Box B
   };
+  /**
+   * Dollars, annual. The employee's own Social Security + Medicare (and
+   * railroad Tier I equivalents) come off wages before the exemption, until
+   * the year's cumulative deduction reaches this cap. Absent = no deduction.
+   */
+  ficaDeductionAnnualCap?: number;
+  /**
+   * Dollars, annual. An employee claiming at least one exemption whose
+   * annualized wages are below this owes no withholding at all.
+   */
+  noWithholdingBelowAnnualWithExemptions?: number;
+}
+
+/** Employee-side FICA line ids (and their railroad Tier I renames). */
+const FICA_EMPLOYEE_LINE_IDS = new Set(['US_SS_EE', 'US_MED_EE', 'US_RRTA_TIER1_EE', 'US_RRTA_MED_EE']);
+
+/**
+ * Massachusetts's retirement-contribution deduction for the current period:
+ * this cheque's employee Social Security + Medicare, limited so the
+ * year's running total never passes the annual cap. The prior total is
+ * rebuilt from the YTD FICA wage trackers times the employee rates, the
+ * same way the USDA National Finance Center's re-derivation of Circular M
+ * does it (steps 5a-5e).
+ */
+function massachusettsFicaDeduction(input: PaycheckInput, ctx: ComputeContext, annualCap: number): Cents {
+  const fed = federalRuleset(input.checkDate);
+  const current = federalTaxes(input, ctx)
+    .filter((t) => t.payer === 'employee' && FICA_EMPLOYEE_LINE_IDS.has(t.id))
+    .reduce((sum, t) => sum + t.amount, 0);
+  const priorYtd = roundHalfUp(
+    input.ytd.socialSecurity * fed.socialSecurity.employeeRate + input.ytd.medicare * fed.medicare.employeeRate,
+  );
+  const remaining = atLeastZero(dollars(annualCap) - priorYtd);
+  return Math.min(current, remaining);
 }
 
 /**
@@ -5423,7 +5457,30 @@ function flatRateSurtaxCredit(
       : dollars(cfg.exemptionTiers.perExemptionPoint) * line4Total + dollars(cfg.exemptionTiers.baseAddOn);
   const exemptionPerPeriod = annualExemption / periodsPerYear;
 
-  const netWages = atLeastZero(taxableWages - exemptionPerPeriod);
+  // Circular M: nothing is withheld from an employee who claims an
+  // exemption and whose annual wages come in under the filing threshold.
+  if (
+    cfg.noWithholdingBelowAnnualWithExemptions !== undefined &&
+    line4Total > 0 &&
+    taxableWages * periodsPerYear < dollars(cfg.noWithholdingBelowAnnualWithExemptions)
+  ) {
+    return {
+      id: `${rules.code}_SIT`,
+      name: `${rules.name} Income Tax`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: 0,
+      amount: 0,
+      detail:
+        `$0 — annualized wages ${fmt(roundHalfUp(taxableWages * periodsPerYear))} are under ` +
+        `${fmt(dollars(cfg.noWithholdingBelowAnnualWithExemptions))} with exemptions claimed`,
+    };
+  }
+
+  const ficaDeduction =
+    cfg.ficaDeductionAnnualCap !== undefined ? massachusettsFicaDeduction(input, ctx, cfg.ficaDeductionAnnualCap) : 0;
+
+  const netWages = atLeastZero(taxableWages - ficaDeduction - exemptionPerPeriod);
   const annualNetWages = netWages * periodsPerYear;
 
   const brackets: WIBracket[] = [
@@ -5455,7 +5512,9 @@ function flatRateSurtaxCredit(
     taxableWages: netWagesRounded,
     amount,
     detail:
-      `${fmt(taxableWages)} less ${fmt(roundHalfUp(exemptionPerPeriod))} exemption = ${fmt(netWagesRounded)} net ` +
+      `${fmt(taxableWages)}` +
+      (ficaDeduction ? ` less ${fmt(ficaDeduction)} FICA deduction` : '') +
+      ` less ${fmt(roundHalfUp(exemptionPerPeriod))} exemption = ${fmt(netWagesRounded)} net ` +
       `@ ${(bracket.rate * 100).toFixed(0)}%${bracket.rate > cfg.rate ? ' (surtax bracket)' : ''}` +
       (hohCredit || blindCredit
         ? `, less ${fmt(roundHalfUp(hohCredit + blindCredit))} credits (HOH/blind)`

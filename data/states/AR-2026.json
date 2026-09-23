@@ -6,7 +6,8 @@
   "sources": [
     {
       "title": "State of Arkansas Withholding Tax -- Formula Method, Tax Year 2026 (Effective 01/01/2026)",
-      "url": "https://www.dfa.arkansas.gov/wp-content/uploads/whformula_2026.pdf",
+      "url": "https://www.dfa.arkansas.gov/wp-content/uploads/Withholding-Tax-Formula.pdf",
+      "supersededUrl": "https://www.dfa.arkansas.gov/wp-content/uploads/whformula_2026.pdf",
       "verifiedOn": "2026-08-21",
       "verifiedBy": "PDF downloaded and read directly. WITHOUT the -layout flag for the bracket table specifically -- the -layout reconstruction badly interleaved the 4-column (From/To/Percentage/Minus Adjustment) table into what looked like a nonsensical mismatch; the plain reading-order extraction produced 4 clean column-blocks instead, which were then paired by POSITION. A genuine index-shift was found and resolved during that pairing: the 'Minus Adjustment' column has ONE FEWER entry than From/To/Percentage, because the first (0%) bracket has no adjustment at all (implicitly $0) -- adjustment[i] corresponds to bracket[i+1], not bracket[i]. Verified this mapping is correct (not an assumption) by reproducing the document's own full worked example to the cent: Gary, monthly, $2,127/period, 2 exemptions -> $23,054 net taxable -> $50-midrange-rounded to $23,050 -> bracket lookup (3.4%, adjustment $287.97) -> $783.70 gross, less adjustment = $495.73, ROUNDED to $496.00 (a genuine mid-formula whole-dollar rounding step, confirmed by the document's own text, not assumed) -> less $58.00 personal credit (2 x $29) = $438.00 annual net tax -> / 12 = $36.50/month, matching the document's own final answer exactly."
     },
@@ -76,203 +77,192 @@
       {
         "from": 26400,
         "to": 94701,
-        "rate": 0.039,
-        "adjustment": 419.96
+        "rate": 0.037,
+        "adjustment": 367.16
       },
       {
         "from": 94701,
         "to": 94801,
-        "rate": 0.039,
-        "adjustment": 399.3
+        "rate": 0.037,
+        "adjustment": 369.9
       },
       {
         "from": 94801,
         "to": 94901,
-        "rate": 0.039,
-        "adjustment": 389.3
+        "rate": 0.037,
+        "adjustment": 359.9
       },
       {
         "from": 94901,
         "to": 95001,
-        "rate": 0.039,
-        "adjustment": 379.3
+        "rate": 0.037,
+        "adjustment": 349.9
       },
       {
         "from": 95001,
         "to": 95101,
-        "rate": 0.039,
-        "adjustment": 369.3
+        "rate": 0.037,
+        "adjustment": 339.9
       },
       {
         "from": 95101,
         "to": 95201,
-        "rate": 0.039,
-        "adjustment": 359.3
+        "rate": 0.037,
+        "adjustment": 329.9
       },
       {
         "from": 95201,
         "to": 95301,
-        "rate": 0.039,
-        "adjustment": 349.3
+        "rate": 0.037,
+        "adjustment": 319.9
       },
       {
         "from": 95301,
         "to": 95401,
-        "rate": 0.039,
-        "adjustment": 339.3
+        "rate": 0.037,
+        "adjustment": 309.9
       },
       {
         "from": 95401,
         "to": 95501,
-        "rate": 0.039,
-        "adjustment": 329.3
+        "rate": 0.037,
+        "adjustment": 299.9
       },
       {
         "from": 95501,
         "to": 95601,
-        "rate": 0.039,
-        "adjustment": 319.3
+        "rate": 0.037,
+        "adjustment": 289.9
       },
       {
         "from": 95601,
         "to": 95701,
-        "rate": 0.039,
-        "adjustment": 309.3
+        "rate": 0.037,
+        "adjustment": 279.9
       },
       {
         "from": 95701,
         "to": 95801,
-        "rate": 0.039,
-        "adjustment": 299.3
+        "rate": 0.037,
+        "adjustment": 269.9
       },
       {
         "from": 95801,
         "to": 95901,
-        "rate": 0.039,
-        "adjustment": 289.3
+        "rate": 0.037,
+        "adjustment": 259.9
       },
       {
         "from": 95901,
         "to": 96001,
-        "rate": 0.039,
-        "adjustment": 279.3
+        "rate": 0.037,
+        "adjustment": 249.9
       },
       {
         "from": 96001,
         "to": 96101,
-        "rate": 0.039,
-        "adjustment": 269.3
+        "rate": 0.037,
+        "adjustment": 239.9
       },
       {
         "from": 96101,
         "to": 96201,
-        "rate": 0.039,
-        "adjustment": 259.3
+        "rate": 0.037,
+        "adjustment": 229.9
       },
       {
         "from": 96201,
         "to": 96301,
-        "rate": 0.039,
-        "adjustment": 249.3
+        "rate": 0.037,
+        "adjustment": 219.9
       },
       {
         "from": 96301,
         "to": 96401,
-        "rate": 0.039,
-        "adjustment": 239.3
+        "rate": 0.037,
+        "adjustment": 209.9
       },
       {
         "from": 96401,
         "to": 96501,
-        "rate": 0.039,
-        "adjustment": 229.3
+        "rate": 0.037,
+        "adjustment": 199.9
       },
       {
         "from": 96501,
         "to": 96601,
-        "rate": 0.039,
-        "adjustment": 219.3
+        "rate": 0.037,
+        "adjustment": 189.9
       },
       {
         "from": 96601,
         "to": 96701,
-        "rate": 0.039,
-        "adjustment": 209.3
+        "rate": 0.037,
+        "adjustment": 179.9
       },
       {
         "from": 96701,
         "to": 96801,
-        "rate": 0.039,
-        "adjustment": 199.3
+        "rate": 0.037,
+        "adjustment": 169.9
       },
       {
         "from": 96801,
         "to": 96901,
-        "rate": 0.039,
-        "adjustment": 189.3
+        "rate": 0.037,
+        "adjustment": 159.9
       },
       {
         "from": 96901,
         "to": 97001,
-        "rate": 0.039,
-        "adjustment": 179.3
+        "rate": 0.037,
+        "adjustment": 149.9
       },
       {
         "from": 97001,
         "to": 97101,
-        "rate": 0.039,
-        "adjustment": 169.3
+        "rate": 0.037,
+        "adjustment": 139.9
       },
       {
         "from": 97101,
         "to": 97201,
-        "rate": 0.039,
-        "adjustment": 159.3
+        "rate": 0.037,
+        "adjustment": 129.9
       },
       {
         "from": 97201,
         "to": 97301,
-        "rate": 0.039,
-        "adjustment": 149.3
+        "rate": 0.037,
+        "adjustment": 119.9
       },
       {
         "from": 97301,
         "to": 97401,
-        "rate": 0.039,
-        "adjustment": 139.3
+        "rate": 0.037,
+        "adjustment": 109.9
       },
       {
         "from": 97401,
         "to": 97501,
-        "rate": 0.039,
-        "adjustment": 129.3
+        "rate": 0.037,
+        "adjustment": 99.9
       },
       {
         "from": 97501,
         "to": 97601,
-        "rate": 0.039,
-        "adjustment": 119.3
+        "rate": 0.037,
+        "adjustment": 89.9
       },
       {
         "from": 97601,
-        "to": 97701,
-        "rate": 0.039,
-        "adjustment": 109.3
-      },
-      {
-        "from": 97701,
-        "to": 97801,
-        "rate": 0.039,
-        "adjustment": 99.3
-      },
-      {
-        "from": 97801,
         "to": null,
-        "rate": 0.039,
-        "adjustment": 89.3
+        "rate": 0.037,
+        "adjustment": 79.9
       }
     ],
-    "bracketStructureNote": "37 bands, not the usual 4-6 -- from $26,400 to $97,800, the marginal RATE stays flat at 3.9% but the adjustment constant steps DOWN by exactly $10.00 every $100 of income, a smoothing mechanism that makes the EFFECTIVE (not marginal) rate rise gradually toward the true flat-topped formula rather than jumping at a single cliff. Verified algebraically: the 31 $100-wide bands from $94,701 to $97,800 span adjustment $399.30 down to $89.30, a $310.00 total drop over 31 steps = exactly $10.00/step. Only above $97,800 does the formula become genuinely flat (3.9% x income - $89.30, forever)."
+    "bracketStructureNote": "REVISED 2026-09-23 for HB 1001 / SB 1 (2026 fiscal session), which cut the top individual rate from 3.9% to 3.7% retroactive to 2026-01-01; DFA reissued the Formula Method (same 'Effective 01/01/2026' header, now at dfa.arkansas.gov/wp-content/uploads/Withholding-Tax-Formula.pdf) with 3.7% brackets, and PaycheckCity's check-date-08/28/2026 results confirm the new table is live. 34 bands: from $26,400 to $94,700 the rate is 3.7% less $367.16; from $94,701 to $97,600 the rate stays 3.7% while the adjustment steps down $10.00 every $100 ($369.90 to $89.90, transcribed exactly as published, including the first fine band's adjustment sitting above the wide band's); $97,601 and over is 3.7% less $79.90. Lower four brackets, the $2,470 standard deduction and the $29 credit are unchanged from the original January release.",
+    "brackets2026JanuaryRelease": "Superseded 3.9% table (top: 3.9% less $89.30 at $97,801 and over) -- replaced, not kept, because the rate cut is retroactive to 2026-01-01 and DFA reissued the formula under the same effective date."
   },
   "exemptPretax": [
     "section125",
@@ -327,7 +317,7 @@
     "exemptPretax RESOLVED via direct Arkansas Code sec. 26-51-414(a)(1) citation (see exemptPretaxComment) -- explicit IRC-section adoption for retirement/deferral categories; Section 125 cafeteria-plan treatment specifically remains a residual, smaller gap.",
     "This state's 2026-specific new-employer rate breakdown rests on secondary sources. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
     "AR4EC's own low-income income thresholds come from a form revised 02/07/2025 -- worth re-checking against a 2026-specific AR4EC revision if one has since been issued.",
-    "Supplemental wages: the State of Arkansas Withholding Tax Formula Method document (Tax Year 2026) was fetched directly and read in full this pass -- it contains ZERO mentions of \"bonus\" or \"supplemental\" anywhere. Third-party payroll guides claim a separate 3.9% Arkansas flat supplemental rate -- checked directly and found this is simply Arkansas's own TOP MARGINAL BRACKET RATE (see this file's own brackets, 5,201+ Married/equivalent taxed at exactly 3.90%), not a distinct published supplemental-wage rate. A standalone bonus therefore runs through the same annualize-and-bracket formula as any other wages, which is what this engine already does by default -- the same conclusion already reached for South Carolina and Utah in this project."
+    "Supplemental wages: the State of Arkansas Withholding Tax Formula Method document (Tax Year 2026) was fetched directly and read in full this pass -- it contains ZERO mentions of \"bonus\" or \"supplemental\" anywhere. Third-party payroll guides claim a separate 3.9% Arkansas flat supplemental rate -- checked directly and found this is simply Arkansas's own TOP MARGINAL BRACKET RATE (see this file's own brackets, 5,201+ Married/equivalent taxed at exactly 3.90% under the January table, 3.70% since HB 1001), not a distinct published supplemental-wage rate. A standalone bonus therefore runs through the same annualize-and-bracket formula as any other wages, which is what this engine already does by default -- the same conclusion already reached for South Carolina and Utah in this project."
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
