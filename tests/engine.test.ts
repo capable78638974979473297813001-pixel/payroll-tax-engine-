@@ -4233,7 +4233,9 @@ describe('Idaho', () => {
   // Expected values hand-derived from EPB00744's own Table for Percentage
   // Computation Method (single weekly threshold $310, married $619; 5.3%
   // flat above it) before the code was run, same discipline as every other
-  // state in this project.
+  // state in this project. The Tax Commission's computing page then says
+  // to round the result to the nearest whole dollar, so each figure in a
+  // test name is the pre-rounding amount and the assertion the rounded one.
   const idState = (certificate: Record<string, unknown> = {}) => ({
     workState: { code: 'ID', certificate },
   });
@@ -4246,7 +4248,7 @@ describe('Idaho', () => {
         ...idState(),
       }),
     );
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(36.57));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(37));
   });
 
   test("married's threshold is exactly double single's: (1,000 − 619) × 5.3% = $20.19", () => {
@@ -4257,7 +4259,7 @@ describe('Idaho', () => {
         ...idState({ maritalStatus: 'married' }),
       }),
     );
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(20.19));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(20));
   });
 
   test('head of household folds into the single schedule — same $36.57 as plain single', () => {
@@ -4268,7 +4270,7 @@ describe('Idaho', () => {
         ...idState({ maritalStatus: 'hoh' }),
       }),
     );
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(36.57));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(37));
   });
 
   test('wages at or below the threshold owe $0, not a negative bracket', () => {
@@ -4301,7 +4303,7 @@ describe('Idaho', () => {
       }),
     );
     // (800 − 310) × 5.3% = $25.97, not $36.57.
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(25.97));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(26));
   });
 
   test('no reciprocity exemption exists — Idaho has none, confirmed structurally empty rather than omitted', () => {
@@ -4313,7 +4315,7 @@ describe('Idaho', () => {
         ...idState(),
       }),
     );
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(36.57));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(37));
   });
 
   test("Form ID W-4's Box C (married, but withhold at Single rate) uses the single schedule — same $36.57", () => {
@@ -4324,7 +4326,7 @@ describe('Idaho', () => {
         ...idState({ maritalStatus: 'married_withhold_as_single' }),
       }),
     );
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(36.57));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(37));
   });
 
   test("nonresident alien: forced to the single schedule plus Form ID W-4's own Pay Period table add-on", () => {
@@ -4339,7 +4341,7 @@ describe('Idaho', () => {
       }),
     );
     // (1,000 − 310) × 5.3% = $36.57, plus the weekly $15 NRA add-on = $51.57.
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(51.57));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(52));
   });
 
   test('nonresident alien on a pay frequency outside the Pay Period table falls back to $0 add-on, not an error', () => {
@@ -4352,7 +4354,7 @@ describe('Idaho', () => {
     );
     // (50,000 − 16,100) × 5.3% = $1,796.70, no annual row in the Pay Period
     // table so the add-on is $0, not a thrown error or a guessed figure.
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(1796.70));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(1797));
   });
 
   test('an unrecognized marital status throws rather than silently defaulting', () => {
@@ -9720,6 +9722,31 @@ describe('Texas', () => {
 });
 
 describe('New Mexico', () => {
+  describe("workers' compensation fee ($2.25 employee / $2.55 employer per quarter)", () => {
+    const nm = (overrides: Partial<PaycheckInput> = {}) =>
+      calculatePaycheck(input({ workState: { code: 'NM', certificate: {} }, ...overrides }));
+
+    test('prorated by default: semimonthly $2.25 x 4 / 24 = $0.375 -> $0.38, monthly $0.75 (matches PaycheckCity)', () => {
+      assert.equal(amountOf(nm({ payFrequency: 'semimonthly' }), 'NM_WC_FEE_EE'), dollars(0.38));
+      const monthly = nm({ payFrequency: 'monthly' });
+      assert.equal(amountOf(monthly, 'NM_WC_FEE_EE'), dollars(0.75));
+      assert.equal(amountOf(monthly, 'NM_WC_FEE_ER'), dollars(0.85));
+    });
+
+    test("'full' takes the whole quarterly share on this cheque; 'skip' takes nothing", () => {
+      const full = nm({ employer: { quarterlyHeadFeeCollection: { NM: 'full' } } });
+      assert.equal(amountOf(full, 'NM_WC_FEE_EE'), dollars(2.25));
+      assert.equal(amountOf(full, 'NM_WC_FEE_ER'), dollars(2.55));
+      const skip = nm({ employer: { quarterlyHeadFeeCollection: { NM: 'skip' } } });
+      assert.equal(skip.taxes.some((t) => t.id.startsWith('NM_WC_FEE')), false);
+    });
+
+    test('domestic and farm workers are exempt', () => {
+      assert.equal(nm({ employmentCategory: 'household' }).taxes.some((t) => t.id.startsWith('NM_WC_FEE')), false);
+      assert.equal(nm({ employmentCategory: 'agricultural' }).taxes.some((t) => t.id.startsWith('NM_WC_FEE')), false);
+    });
+  });
+
   const nmState = (certificate: Record<string, unknown> = {}) => ({
     workState: { code: 'NM', certificate },
   });

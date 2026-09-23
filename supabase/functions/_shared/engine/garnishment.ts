@@ -109,6 +109,35 @@ export interface GarnishmentOrder {
    */
   householdSize?: number;
   /**
+   * consumer_creditor only, and only meaningful in a state whose formula
+   * declares `flatWeeklyFloorSoleSupport` (currently just Alaska, AS
+   * 09.38.050(b)): has the debtor filed the court affidavit asserting that
+   * their earnings ALONE (not a spouse's or anyone else's) support their
+   * household? True raises the state's flat weekly exemption floor to the
+   * higher figure. Never assumed — same discipline as headOfFamily.
+   */
+  soleHouseholdSupport?: boolean;
+  /**
+   * consumer_creditor only, and only meaningful in a state whose formula
+   * declares `annualCapTiers` (currently just Iowa, Iowa Code 642.21): the
+   * debtor's own earnings reasonably expected for the calendar year — the
+   * fact Iowa's own garnishment questionnaire asks the debtor directly
+   * (642.5(1), question 4), used here to pick which annual dollar tier
+   * applies. Absent means this engine cannot select a tier, so the extra
+   * annual-cap layer simply doesn't apply (the ordinary per-paycheck
+   * federal test still does) — never guessed.
+   */
+  expectedAnnualEarnings?: Cents;
+  /**
+   * consumer_creditor only, alongside `expectedAnnualEarnings`: how much
+   * has ALREADY been withheld THIS calendar year for THIS SPECIFIC
+   * order/creditor under Iowa's own annual cap. Needed to know how much
+   * room remains under the tier ceiling this pay period. Absent is treated
+   * as $0 already withheld — the caller's own running total to maintain,
+   * the same convention as NM's certificate.stateTaxWithheldThisMonth.
+   */
+  garnishedThisYearForThisOrder?: Cents;
+  /**
    * Among orders that are NOT child_support, the lower number draws first
    * when they compete for room under the aggregate ceiling. child_support
    * orders always draw first regardless of this field. Ties keep array
@@ -194,6 +223,7 @@ function capFractionsResult(
   payFrequency: PayFrequency,
   cfg: GarnishmentFormula,
   dependents: number,
+  soleHouseholdSupport: boolean,
 ): CapResult {
   const fractions = cfg.capFractions!;
   const values = fractions.map((f) => applyRate(f.basis === 'gross' ? gross : disposable, f.fraction));
@@ -211,6 +241,17 @@ function capFractionsResult(
       cfg.minimumWageExcessFraction != null
         ? ` or ${(cfg.minimumWageExcessFraction * 100).toFixed(0)}% of the excess over ${cfg.minimumWageWeeklyMultiplier}x $${cfg.stateMinimumHourlyWage.toFixed(2)}/hr min wage (floor ${fmt(floor)})`
         : ` or disposable over ${cfg.minimumWageWeeklyMultiplier}x $${cfg.stateMinimumHourlyWage.toFixed(2)}/hr min wage (${fmt(floor)})`;
+  }
+
+  if (cfg.flatWeeklyFloor != null) {
+    const floorDollars =
+      soleHouseholdSupport && cfg.flatWeeklyFloorSoleSupport != null
+        ? cfg.flatWeeklyFloorSoleSupport
+        : cfg.flatWeeklyFloor;
+    const floor = weeklyDollarsToPeriod(floorDollars, payFrequency);
+    const byFloor = atLeastZero(disposable - floor);
+    cap = Math.min(cap, byFloor);
+    detail += ` or disposable over the state's own $${floorDollars.toFixed(2)}/week flat floor (${fmt(floor)})`;
   }
 
   if (cfg.perDependentWeeklyReduction != null && dependents > 0) {
@@ -307,6 +348,43 @@ function marginalMonthlyResult(
   };
 }
 
+/**
+ * Iowa's own ADDITIONAL layer (Iowa Code 642.21) — a cumulative CALENDAR-
+ * YEAR dollar cap per judgment creditor, checked AFTER whichever per-
+ * paycheck shape above already produced its own cap, never instead of it.
+ * Only applies when the caller supplies expectedAnnualEarnings (the tier
+ * selector); absent, this returns the base cap completely unchanged rather
+ * than guessing a tier.
+ */
+function applyAnnualCapTiers(
+  base: CapResult,
+  cfg: GarnishmentFormula,
+  expectedAnnualEarnings: Cents | undefined,
+  garnishedThisYearForThisOrder: Cents | undefined,
+): CapResult {
+  const tiers = cfg.annualCapTiers;
+  if (!tiers || expectedAnnualEarnings == null) return base;
+
+  const tier = tiers.find((t) => t.belowAnnualEarnings == null || expectedAnnualEarnings < dollars(t.belowAnnualEarnings));
+  if (!tier) return base;
+
+  const annualLimit =
+    tier.maxAnnualFractionOfEarnings != null
+      ? applyRate(expectedAnnualEarnings, tier.maxAnnualFractionOfEarnings)
+      : (tier.maxAnnualCents ?? 0);
+  const alreadyGarnished = garnishedThisYearForThisOrder ?? 0;
+  const remaining = atLeastZero(annualLimit - alreadyGarnished);
+  const cap = Math.min(base.cap, remaining);
+  const tierDescription =
+    tier.maxAnnualFractionOfEarnings != null
+      ? `${(tier.maxAnnualFractionOfEarnings * 100).toFixed(0)}% of expected annual earnings`
+      : fmt(annualLimit) + '/year';
+  return {
+    cap,
+    detail: `${base.detail}, further capped by this state's own annual per-creditor limit (${tierDescription}, less ${fmt(alreadyGarnished)} already garnished this year = ${fmt(remaining)} remaining)`,
+  };
+}
+
 function formulaCap(
   disposable: Cents,
   gross: Cents,
@@ -314,11 +392,18 @@ function formulaCap(
   payFrequency: PayFrequency,
   cfg: GarnishmentFormula,
   dependents: number,
+  soleHouseholdSupport: boolean,
+  expectedAnnualEarnings: Cents | undefined,
+  garnishedThisYearForThisOrder: Cents | undefined,
 ): CapResult {
-  if (cfg.tiers) return tierResult(disposable, workState, payFrequency, cfg);
-  if (cfg.grossWeeklyTiers) return grossWeeklyTierResult(disposable, gross, workState, payFrequency, cfg);
-  if (cfg.marginalMonthlyBrackets) return marginalMonthlyResult(disposable, workState, payFrequency, cfg);
-  return capFractionsResult(disposable, gross, workState, payFrequency, cfg, dependents);
+  const base = cfg.tiers
+    ? tierResult(disposable, workState, payFrequency, cfg)
+    : cfg.grossWeeklyTiers
+      ? grossWeeklyTierResult(disposable, gross, workState, payFrequency, cfg)
+      : cfg.marginalMonthlyBrackets
+        ? marginalMonthlyResult(disposable, workState, payFrequency, cfg)
+        : capFractionsResult(disposable, gross, workState, payFrequency, cfg, dependents, soleHouseholdSupport);
+  return applyAnnualCapTiers(base, cfg, expectedAnnualEarnings, garnishedThisYearForThisOrder);
 }
 
 /** The plain federal CCPA ordinary-garnishment default — pulled out so New Jersey's poverty-guideline shape can fall through to the exact same computation above its own 250% threshold. */
@@ -421,6 +506,9 @@ function ordinaryGarnishmentCap(
       payFrequency,
       override.headOfFamilyOrdinaryGarnishment,
       order.dependents ?? 0,
+      order.soleHouseholdSupport ?? false,
+      order.expectedAnnualEarnings,
+      order.garnishedThisYearForThisOrder,
     );
   }
 
@@ -445,7 +533,17 @@ function ordinaryGarnishmentCap(
   }
 
   if (override?.ordinaryGarnishment) {
-    return formulaCap(disposable, gross, workState, payFrequency, override.ordinaryGarnishment, order.dependents ?? 0);
+    return formulaCap(
+      disposable,
+      gross,
+      workState,
+      payFrequency,
+      override.ordinaryGarnishment,
+      order.dependents ?? 0,
+      order.soleHouseholdSupport ?? false,
+      order.expectedAnnualEarnings,
+      order.garnishedThisYearForThisOrder,
+    );
   }
 
   return federalOrdinaryGarnishmentCap(disposable, payFrequency, fed);

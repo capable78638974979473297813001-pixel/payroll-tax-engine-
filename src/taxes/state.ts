@@ -310,6 +310,9 @@ export function stateIncomeTax(
   // input.hoursWorked, falling back to the state's own flat-hours schedule.
   lines.push(...stateHourlyAssessment(input, ctx, rules));
 
+  // Flat per-head QUARTERLY fees (New Mexico's workers' compensation fee).
+  lines.push(...stateQuarterlyHeadFee(input, ctx, rules));
+
   // Missouri's Kansas City / St. Louis earnings taxes — the employee side,
   // gated on certificate.locality the same way Newark's employer tax is
   // gated, since which city (if any) applies is a caller-resolved fact
@@ -6443,6 +6446,68 @@ function stateHourlyAssessment(input: PaycheckInput, ctx: ComputeContext, rules:
       taxableWages: 0,
       amount: employeeAmount,
       detail: `matches the amount retained from the employee (${detail})`,
+    },
+  ];
+}
+
+interface StateQuarterlyHeadFeeConfig {
+  idSuffix: string; // e.g. 'WC_FEE'
+  name: string; // e.g. "Workers' Compensation Fee"
+  /** Dollars per covered employee per calendar quarter. */
+  employeeQuarterly: number;
+  employerQuarterly: number;
+  /** Employment categories the fee doesn't cover. */
+  exemptEmploymentCategories?: string[];
+}
+
+/**
+ * A flat dollar fee per covered employee per calendar quarter, split
+ * between employee and employer — New Mexico's workers' compensation fee
+ * (NMSA 52-5-19, $2.25 employee / $2.55 employer from 2026). The statute
+ * charges it per employee on the quarter's last working day, so how a
+ * payroll collects the employee share across that quarter's cheques is an
+ * employer choice: by default this spreads it evenly (quarterly share x 4
+ * / periods per year), and input.employer.quarterlyHeadFeeCollection
+ * switches a cheque to 'full' or 'skip'.
+ */
+function stateQuarterlyHeadFee(input: PaycheckInput, ctx: ComputeContext, rules: StateRuleset): TaxLine[] {
+  const cfg = rules.stateQuarterlyHeadFee as StateQuarterlyHeadFeeConfig | undefined;
+  if (!cfg) return [];
+  if (input.employmentCategory && (cfg.exemptEmploymentCategories ?? []).includes(input.employmentCategory)) return [];
+  if (ctx.taxableWagesFor([]) <= 0) return [];
+
+  const mode = input.employer?.quarterlyHeadFeeCollection?.[rules.code] ?? 'prorated';
+  if (mode !== 'prorated' && mode !== 'full' && mode !== 'skip') {
+    throw new Error(
+      `employer.quarterlyHeadFeeCollection.${rules.code} must be 'prorated', 'full' or 'skip', got ${JSON.stringify(mode)}`,
+    );
+  }
+  if (mode === 'skip') return [];
+
+  const share = (quarterly: number) =>
+    mode === 'full' ? dollars(quarterly) : roundHalfUp((dollars(quarterly) * 4) / ctx.periodsPerYear);
+  const how =
+    mode === 'full'
+      ? 'full quarterly share on this cheque'
+      : `quarterly share x 4 ÷ ${ctx.periodsPerYear} pay periods`;
+  return [
+    {
+      id: `${rules.code}_${cfg.idSuffix}_EE`,
+      name: `${rules.name} ${cfg.name} (Employee)`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: 0,
+      amount: share(cfg.employeeQuarterly),
+      detail: `$${cfg.employeeQuarterly.toFixed(2)}/quarter — ${how}`,
+    },
+    {
+      id: `${rules.code}_${cfg.idSuffix}_ER`,
+      name: `${rules.name} ${cfg.name} (Employer)`,
+      payer: 'employer',
+      jurisdiction: 'state',
+      taxableWages: 0,
+      amount: share(cfg.employerQuarterly),
+      detail: `$${cfg.employerQuarterly.toFixed(2)}/quarter — ${how}`,
     },
   ];
 }

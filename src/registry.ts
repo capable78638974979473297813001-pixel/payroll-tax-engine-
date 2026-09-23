@@ -141,6 +141,10 @@ export interface FederalRuleset {
     /** A SIMPLE plan's own separate, lower limit (IRC 408(p)/401(k) SIMPLE). */
     simple: number;
   };
+  /** Household / agricultural / election-worker coverage thresholds — shaped and read in taxes/federal.ts. */
+  employmentCategories?: unknown;
+  /** Railroad Tier II and RUIA parameters — shaped and read in taxes/federal.ts. */
+  railroadRetirement?: unknown;
 }
 
 export function federalRuleset(checkDate: string): FederalRuleset {

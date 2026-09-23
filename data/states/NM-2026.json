@@ -334,6 +334,14 @@
     "note": "FYI-104's own instruction: 'If the federal withholding is calculated using a flat percent, a flat 5.9% of the supplemental wage or fringe benefit amount should be withheld for state tax purposes' -- 5.9% is also the top marginal percentage-method rate. Dispatched generically via flatRateSupplementalFromConfig(), the same mechanism NY/other states already use -- zero new code needed. BUG FOUND AND FIXED (a later 'go to every state' pass): newMexicoWithholding() was NOT carving supplemental cash out of its own bracket base, so a bonus was taxed once via NM_SIT's regular bracket AND again via NM_SIT_SUPP's flat 5.9% -- a genuine double-taxation defect, caught by a direct calculatePaycheck() check, not by the existing test suite (the original supplemental test only asserted NM_SIT_SUPP, never NM_SIT, so it couldn't see the bug). Fixed to match computeNYSStyleTax()'s (NY) already-correct pattern: periodWages = fullBase minus supplementalCash."
   },
   "roundFinalToWholeDollar": false,
+  "stateQuarterlyHeadFee": {
+    "idSuffix": "WC_FEE",
+    "name": "Workers' Compensation Fee",
+    "employeeQuarterly": 2.25,
+    "employerQuarterly": 2.55,
+    "exemptEmploymentCategories": ["household", "agricultural"],
+    "$comment": "New Mexico Workers' Compensation Administration FAQ (workerscomp.nm.gov/faqs/, read directly 2026-09-23): 'a quarterly assessment fee of $4.80 for each covered employee working for their business on the last working day of each quarter ($2.25 is paid by the workers and $2.55 is paid by employers)', filed with Taxation and Revenue on the WC-1. Up from $4.30 ($2.00 / $2.30) under TRD's RPD-41108 instructions; the increase applies from the quarter beginning 2026-01-01. Domestic servants and farm and ranch laborers are exempt (RPD-41108), mapped to the household/agricultural employment categories; real estate salespersons and 10%+ owner-officers aren't representable here, so those employers pass employer.quarterlyHeadFeeCollection.NM = 'skip'. Collected evenly across the quarter's cheques by default, which is what PaycheckCity does ($0.38 semimonthly, $0.75 monthly, matching to the cent)."
+  },
   "roundingComment": "FYI-104's own worked example is cent-precision ($21.80) -- no whole-dollar rounding step anywhere in the document.",
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
   "exemptPretaxComment": "Confirmed via NMSA 7-2-2's own text: New Mexico 'base income' for individual taxpayers is federal adjusted gross income (IRC sec. 62) plus a short specific add-back list untouched by 401(k)/125/HSA/FSA elective deferrals. Same evidentiary tier as Virginia's/West Virginia's/Louisiana's FAGI-conformity citations elsewhere in this project -- one inferential step removed from the withholding wage base itself (FYI-104 doesn't independently define 'wages'), but a genuine direct statute read.",
