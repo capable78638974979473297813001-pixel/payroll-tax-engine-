@@ -11,3 +11,7 @@ harvester/report.md
 # File-backed store output (payroll/.data, trades/.data) — the JSON stand-ins
 # for the database; per-run local state, never committed.
 .data/
+
+# Python bytecode
+__pycache__/
+*.pyc

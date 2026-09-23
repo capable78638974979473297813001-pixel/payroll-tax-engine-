@@ -28,15 +28,19 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          node-version: '22' # latest 22.x strips TypeScript types with no flag
+          python-version: '3.11'
+
+      - name: Self-check (stdlib unittest, no network)
+        run: python -m unittest harvester/test_harvester.py
 
       - name: Run harvester
-        run: node harvester/audit.ts
-        # audit.ts exits 0 even when sources are unreachable or have changed,
-        # and writes the run summary to the GitHub Actions job summary.
+        run: python harvester/audit.py
+        # audit.py exits 0 even when sources are unreachable or have changed,
+        # and writes the run summary to the GitHub Actions job summary. Uses only
+        # the Python standard library — no pip install needed.
 
       - name: Upload report
         if: always()
