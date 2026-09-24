@@ -298,6 +298,43 @@ class WatcherTest(ServerTestCase):
             self.assertNotIn("S3CRET", path.read_text(), path)
         self.assertNotIn("S3CRET", watch.read_snapshot("t-0"))
 
+    def test_headline_box_changes_are_minor(self):
+        """A 'latest news' box rotating is recorded but isn't a real change;
+        the page's own text changing is."""
+        news = '<aside-free><ul class="news"><li><a href="/news/{a}">{a} picnic announced</a></li></ul>'
+        def body(headline, rate="3.7%"):
+            return page(rate=rate).replace("</main>", news.format(a=headline) + "</main>")
+        self.site.set_page("/wh", body("Spring"))
+        self.sources("/wh")
+        self.run_watch("2026-09-01")
+        self.site.set_page("/wh", body("Summer"))
+        summary = self.run_watch("2026-09-02")
+        self.assertEqual(summary["counts"], {"changed": 1})
+        self.assertEqual(summary["significant_changes"], 0)
+        self.assertIn("No changes", (watch.REPORT_DIR / "latest.md").read_text())
+        self.site.set_page("/wh", body("Summer", rate="3.5%"))
+        summary = self.run_watch("2026-09-03")
+        self.assertEqual(summary["significant_changes"], 1)
+
+    def test_keep_limits_a_busy_index_to_relevant_lines(self):
+        rows = '<tr><td><a href="/dft/{f}.pdf">{name}</a></td><td>{title}</td></tr>'
+        def body(*forms):
+            return ("<html><body><main><h1>Draft forms</h1><p>" + "Draft forms posted for review. " * 12 +
+                    "</p><table>" + "".join(rows.format(f=f, name=n, title=t) for f, n, t in forms) +
+                    "</table></main></body></html>")
+        w4 = ("fw4", "Form W-4", "Employee's Withholding Certificate")
+        self.site.set_page("/dft", body(w4, ("f1099da", "Form 1099-DA", "Digital Asset Proceeds")))
+        srcs = [{"id": "t-0", "jurisdiction": "XX", "title": "dft", "url": self.base + "/dft", "kind": "index",
+                 "keep": [r"\bW-4", r"\bfw4", r"Draft forms posted"]}]
+        watch.SOURCES_FILE.write_text(json.dumps({"sources": srcs}))
+        self.run_watch("2026-09-01")
+        self.site.set_page("/dft", body(w4, ("f1120s", "Form 1120-S", "S Corporation Return")))
+        self.assertEqual(self.run_watch("2026-09-02")["counts"], {"unchanged": 1})
+        self.site.set_page("/dft", body(w4, ("fw4p", "Form W-4P", "Withholding Certificate for Pensions")))
+        summary = self.run_watch("2026-09-03")
+        self.assertEqual(summary["significant_changes"], 1)
+        self.assertEqual(summary["changed"][0]["links_added"], [self.base + "/dft/fw4p.pdf"])
+
     def test_index_source_reports_new_pages(self):
         body = page(extra_link='<li><a href="/news/2026-rates">2026 rates</a></li>')
         self.site.set_page("/wh", body)

@@ -82,6 +82,7 @@ VOLATILE_LINE_PATTERNS = [
     r"^(this site uses cookies|we use cookies)\b.*",
     r"^page \d+( of \d+)?$",
     r"^-?\d+\.\d{6,}$",  # bare high-precision numbers: server render timings
+    r"^\d{1,2}/\d{1,2}/\d{2,4}$",  # a date on its own line: "today", "posted on"
     r"^(page )?(generated|rendered|loaded) in [\d.]+ ?(ms|s|seconds?)\.?$",
 ]
 VOLATILE_LINE_RE = re.compile("|".join(VOLATILE_LINE_PATTERNS), re.IGNORECASE)
@@ -221,9 +222,11 @@ def _canonical_url(url: str) -> str:
     return urllib.parse.urlunsplit((parts.scheme, parts.netloc.lower(), parts.path, urllib.parse.urlencode(query), ""))
 
 
-def normalise_text(text: str, ignore: list[str] | None = None) -> str:
-    """Reduce extracted text to stable, comparable lines."""
+def normalise_text(text: str, ignore: list[str] | None = None, keep: list[str] | None = None) -> str:
+    """Reduce extracted text to stable, comparable lines. `ignore` drops
+    matching lines; `keep`, when given, drops every line that doesn't match."""
     extra = [re.compile(p, re.IGNORECASE) for p in (ignore or [])]
+    keepers = [re.compile(p, re.IGNORECASE) for p in (keep or [])]
     out = []
     for raw in text.replace("\r", "\n").split("\n"):
         line = html.unescape(raw).replace("\u00a0", " ").replace("\u200b", "")
@@ -234,6 +237,8 @@ def normalise_text(text: str, ignore: list[str] | None = None) -> str:
         if not line:
             continue
         if VOLATILE_LINE_RE.match(line) or any(p.search(line) for p in extra):
+            continue
+        if keepers and not any(p.search(line) for p in keepers):
             continue
         line = INLINE_NOISE_RE.sub("", line).strip()
         if line:
@@ -347,7 +352,7 @@ def extract(source: dict, f: Fetched) -> Extracted:
     url = f.final_url or source["url"]
     is_pdf = "pdf" in ctype or f.body[:5] == b"%PDF-"
     if is_pdf:
-        return Extracted(normalise_text(extract_pdf(f.body), source.get("ignore")), [], "pdf")
+        return Extracted(normalise_text(extract_pdf(f.body), source.get("ignore"), source.get("keep")), [], "pdf")
     if "html" in ctype or "xml" in ctype or f.body.lstrip()[:1] == b"<":
         charset = None
         m = re.search(r"charset=([\w-]+)", ctype)
@@ -361,7 +366,7 @@ def extract(source: dict, f: Fetched) -> Extracted:
             if i >= 0:
                 j = text.find(end, i + len(start)) if end else -1
                 text = text[i:j + len(end)] if j >= 0 else text[i:]
-        return Extracted(normalise_text(text, source.get("ignore")), links, "html")
+        return Extracted(normalise_text(text, source.get("ignore"), source.get("keep")), links, "html")
     if "json" in ctype:
         try:
             data = json.loads(f.body)
@@ -370,10 +375,10 @@ def extract(source: dict, f: Fetched) -> Extracted:
             text = json.dumps(data, indent=1, sort_keys=True, ensure_ascii=False)
         except ValueError:
             text = f.body.decode("utf-8", errors="replace")
-        return Extracted(normalise_text(text, source.get("ignore")), [], "json")
+        return Extracted(normalise_text(text, source.get("ignore"), source.get("keep")), [], "json")
     if ctype.startswith("text/") or "csv" in ctype:
-        return Extracted(normalise_text(f.body.decode("utf-8", errors="replace"), source.get("ignore")), [], "text")
-    return Extracted(normalise_text(binary_strings(f.body), source.get("ignore")), [], "binary")
+        return Extracted(normalise_text(f.body.decode("utf-8", errors="replace"), source.get("ignore"), source.get("keep")), [], "text")
+    return Extracted(normalise_text(binary_strings(f.body), source.get("ignore"), source.get("keep")), [], "binary")
 
 
 def _drop_key(node, key: str) -> None:
@@ -467,6 +472,8 @@ class Result:
     final_url: str | None = None
     redirected: bool = False
     via_browser: bool = False
+    significant: bool = True
+    nav: list[str] | None = None
 
 
 ENV_PLACEHOLDER_RE = re.compile(r"\{env:([A-Z0-9_]+)\}")
@@ -508,13 +515,23 @@ def _signature(text_hash: str, links: dict[str, str]) -> str:
     return hashlib.sha256((text_hash + "\n" + "\n".join(sorted(links))).encode()).hexdigest()
 
 
-def _read(source: dict, f: Fetched) -> tuple[Extracted, dict[str, str]]:
+def _line_key(line: str) -> str:
+    return hashlib.sha1(line.encode()).hexdigest()[:10]
+
+
+def _read(source: dict, f: Fetched) -> tuple[Extracted, dict[str, str], set[str]]:
+    """Text, the links worth reporting, and the keys of every other link's
+    text (headline lists, menus): lines that change only there are minor."""
     page = f.final_url or source["url"]
     ex = extract(source, f)
     links = document_links(ex.links, page)
     if source.get("kind") == "index":
         links.update(page_links(ex.links, page))
-    return ex, links
+    keep = [re.compile(p, re.IGNORECASE) for p in source.get("keep", [])]
+    if keep:
+        links = {u: t for u, t in links.items() if any(p.search(u) or p.search(t) for p in keep)}
+    nav = {_line_key(normalise_text(t)) for u, t in ex.links if u not in links and t.strip()}
+    return ex, links, nav
 
 
 class BrowserFetcher:
@@ -627,12 +644,12 @@ def _check_source(source: dict, prev: dict | None, confirm_delay: float, fetcher
     if redirected and urllib.parse.urlsplit(final).path.strip("/") == "" and \
             urllib.parse.urlsplit(source["url"]).path.strip("/") != "":
         return Result(source, "gone", f"now redirects to the site's home page ({final})")
-    first, links_now = _read(source, f)
+    first, links_now, nav_now = _read(source, f)
     if first.kind == "html" and len(first.text.split()) < 15:
         return Result(source, "blocked", "page returned almost no text (a bot check, or built by JavaScript)")
     target = _redirect_key(final) if redirected else ""
 
-    base = Result(source, "unchanged", text=first.text, hash=first.hash, links=links_now,
+    base = Result(source, "unchanged", text=first.text, hash=first.hash, links=links_now, nav=sorted(nav_now),
                   final_url=f.final_url, redirected=redirected)
     if prev is None or not prev.get("hash"):
         base.status = "new"
@@ -653,7 +670,7 @@ def _check_source(source: dict, prev: dict | None, confirm_delay: float, fetcher
         base.status = "unstable"
         base.detail = f"content differed, but the confirming fetch failed ({f2.error}); snapshot kept"
         return base
-    second, links2 = _read(source, f2)
+    second, links2, _ = _read(source, f2)
     final2 = f2.final_url or source["url"]
     target2 = _redirect_key(final2) if _redirect_key(final2) != _redirect_key(source["url"]) else ""
     sig2 = _signature(second.hash + target2, links2)
@@ -687,6 +704,13 @@ def _check_source(source: dict, prev: dict | None, confirm_delay: float, fetcher
     if added or removed:
         parts.append(f"{len(added)} links added, {len(removed)} removed")
     base.detail = "; ".join(parts) or "content changed"
+    # Minor: nothing but link text changed (a "latest news" box, a menu).
+    # Document links, redirects, and any line of the page's own text count.
+    nav_known = nav_now | set(prev.get("nav", []))
+    content_lines = [l[1:] for l in base.diff if l[1:].strip() and _line_key(l[1:]) not in nav_known]
+    base.significant = bool(target != old_target or added or removed or content_lines or first.kind != "html")
+    if not base.significant:
+        base.detail += " (link lists / headlines only)"
     return base
 
 
@@ -766,6 +790,8 @@ def apply_results(results: list[Result], state: dict, today: str) -> None:
             entry["hash"] = r.hash
             entry["links"] = r.links or {}
             write_snapshot(sid, r.text or "")
+        if r.nav is not None and r.status in ("new", "changed", "unchanged"):
+            entry["nav"] = r.nav
         if r.status in ("new", "changed"):
             entry["last_changed"] = today
         if r.status in ("new", "changed"):
@@ -791,45 +817,57 @@ def build_report(results: list[Result], state: dict, today: str, started: float)
               and state.get(r.source["id"], {}).get("failures", 0) >= BROKEN_AFTER_FAILURES]
     order = lambda r: (r.source.get("jurisdiction", ""), r.source.get("title", ""))  # noqa: E731
 
-    n_changed = len(by_status["changed"])
+    real = [r for r in by_status["changed"] if r.significant]
+    minor = [r for r in by_status["changed"] if not r.significant]
+    n_changed = len(real)
     lines = [f"# Source watch - {today}", ""]
     headline = (f"**{n_changed} source{'s' if n_changed != 1 else ''} changed**" if n_changed
                 else "**No changes** in any official source.")
     lines += [headline, ""]
-    lines += ["| Changed | Unchanged | New | Unstable | Unreachable | Gone (404) | Blocks bots | Total |",
-              "|---:|---:|---:|---:|---:|---:|---:|---:|",
-              f"| {n_changed} | {len(by_status['unchanged'])} | {len(by_status['new'])} | "
+    lines += ["| Changed | Minor | Unchanged | New | Unstable | Unreachable | Gone (404) | Blocks bots | Total |",
+              "|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+              f"| {n_changed} | {len(minor)} | {len(by_status['unchanged'])} | {len(by_status['new'])} | "
               f"{len(by_status['unstable'])} | {len(by_status['unreachable'])} | {len(by_status['gone'])} | "
               f"{len(by_status['blocked'])} | {len(results)} |", ""]
     lines.append(f"_Run took {int(time.time() - started)} s. A change is only reported after a second fetch "
                  f"confirms it._")
     lines.append("")
 
-    if n_changed:
-        lines += ["## Changed", ""]
-        for r in sorted(by_status["changed"], key=order):
-            s = r.source
-            lines.append(f"### {s.get('jurisdiction', '?')} - {s.get('title') or s['url']}")
-            lines.append("")
-            lines.append(f"<{s['url']}>  ")
-            lines.append(f"{r.detail}")
-            if s.get("used_by"):
-                lines.append(f"  \nUsed by: {', '.join('`' + u + '`' for u in s['used_by'][:6])}")
-            lines.append("")
-            if r.figures_added or r.figures_removed:
-                lines.append(f"- Figures now present: {', '.join(r.figures_added[:20]) or 'none'}")
-                lines.append(f"- Figures no longer present: {', '.join(r.figures_removed[:20]) or 'none'}")
-            for u, t in r.docs_added[:15]:
-                lines.append(f"- New link: [{_md_escape(t) or u}]({u})")
-            for u, t in r.docs_removed[:15]:
-                lines.append(f"- Removed link: [{_md_escape(t) or u}]({u})")
-            if r.diff:
-                shown = [l if len(l) <= 240 else l[:237] + "..." for l in r.diff[:40]]
-                lines += ["", "<details><summary>What changed</summary>", "", "```diff", *shown]
-                if len(r.diff) > 40:
-                    lines.append(f"... {len(r.diff) - 40} more changed lines")
-                lines += ["```", "</details>"]
-            lines.append("")
+    def describe_change(r: Result):
+        s = r.source
+        lines.append(f"### {s.get('jurisdiction', '?')} - {s.get('title') or s['url']}")
+        lines.append("")
+        lines.append(f"<{s['url']}>  ")
+        lines.append(f"{r.detail}")
+        if s.get("used_by"):
+            lines.append(f"  \nUsed by: {', '.join('`' + u + '`' for u in s['used_by'][:6])}")
+        lines.append("")
+        if r.figures_added or r.figures_removed:
+            lines.append(f"- Figures now present: {', '.join(r.figures_added[:20]) or 'none'}")
+            lines.append(f"- Figures no longer present: {', '.join(r.figures_removed[:20]) or 'none'}")
+        for u, t in r.docs_added[:15]:
+            lines.append(f"- New link: [{_md_escape(t) or u}]({u})")
+        for u, t in r.docs_removed[:15]:
+            lines.append(f"- Removed link: [{_md_escape(t) or u}]({u})")
+        if r.diff:
+            shown = [l if len(l) <= 240 else l[:237] + "..." for l in r.diff[:40]]
+            lines.extend(["", "<details><summary>What changed</summary>", "", "```diff", *shown])
+            if len(r.diff) > 40:
+                lines.append(f"... {len(r.diff) - 40} more changed lines")
+            lines.extend(["```", "</details>"])
+        lines.append("")
+
+    if real:
+        lines.extend(["## Changed", ""])
+        for r in sorted(real, key=order):
+            describe_change(r)
+    if minor:
+        lines.extend([f"## Minor changes: link lists and headlines only ({len(minor)})", "",
+                      "Recorded, but only the text of links to other pages changed (news boxes, menus).", "",
+                      "<details><summary>Show</summary>", ""])
+        for r in sorted(minor, key=order):
+            describe_change(r)
+        lines.extend(["</details>", ""])
 
     def table(title: str, rows: list[Result], note: str = ""):
         if not rows:
@@ -885,7 +923,9 @@ def build_report(results: list[Result], state: dict, today: str, started: float)
         "changed": [{"id": r.source["id"], "jurisdiction": r.source.get("jurisdiction"), "title": r.source.get("title"),
                      "url": r.source["url"], "detail": r.detail, "figures_added": r.figures_added[:50],
                      "figures_removed": r.figures_removed[:50], "links_added": [u for u, _ in r.docs_added],
-                     "links_removed": [u for u, _ in r.docs_removed]} for r in sorted(by_status["changed"], key=order)],
+                     "links_removed": [u for u, _ in r.docs_removed], "significant": r.significant}
+                    for r in sorted(by_status["changed"], key=order)],
+        "significant_changes": len(real),
         "broken": [r.source["url"] for r in broken],
     }
     return "\n".join(lines) + "\n", summary

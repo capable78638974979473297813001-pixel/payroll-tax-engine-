@@ -83,7 +83,7 @@ jobs:
           python - <<'PY' >> "$GITHUB_OUTPUT"
           import json
           s = json.load(open("watcher/reports/latest.json"))
-          print(f"changed={s['counts'].get('changed', 0)}")
+          print(f"changed={s['significant_changes']}")
           PY
 
       - name: Commit report and snapshots

@@ -1,17 +1,18 @@
-name: Source watch trial (temporary)
+name: Source watch baseline (temporary)
 
-# Temporary: a full watch against the committed baseline on GitHub's runners,
-# twice back to back, without committing anything. Delete after use.
+# Temporary: rebuilds the watcher's baseline on GitHub's runners with the
+# final code, checks a second pass is quiet, and commits the baseline to this
+# branch. Delete after use.
 on:
   push:
     branches: ['claude/intelligent-tesla-q5vtjv']
     paths: ['watcher/**', '.github/workflows/source-watch-trial.yml']
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  trial:
+  baseline:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -23,7 +24,17 @@ jobs:
           pip install -r watcher/requirements.txt
           python -m playwright install --with-deps chromium
       - run: python -m unittest watcher/test_watch.py
-      - name: Full watch now, against yesterday's baseline
-        run: python watcher/watch.py
-      - name: Second pass (must show no changes)
-        run: python watcher/watch.py > /dev/null
+      - name: Fresh baseline
+        run: |
+          rm -rf watcher/state watcher/reports
+          python watcher/watch.py > /dev/null
+      - name: Second pass (should be quiet)
+        run: |
+          rm -f watcher/reports/*-*.md
+          python watcher/watch.py | head -40
+      - name: Commit baseline to this branch
+        run: |
+          git config user.name "source-watch[bot]"
+          git config user.email "source-watch[bot]@users.noreply.github.com"
+          git add watcher/
+          git commit -m "source watch: baseline taken on GitHub's runners [skip ci]" && git push origin HEAD:${GITHUB_REF_NAME}

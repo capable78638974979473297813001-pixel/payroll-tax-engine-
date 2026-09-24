@@ -18,9 +18,19 @@
   },
   {
    "jurisdiction": "US",
-   "title": "IRS draft tax forms (next year's W-4 and 15-T appear here first)",
+   "title": "IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)",
    "url": "https://www.irs.gov/draft-tax-forms",
-   "kind": "index"
+   "kind": "index",
+   "keep": [
+    "\\bW-4",
+    "15-T",
+    "Pub(lication)?\\.? ?15\\b",
+    "\\bp15",
+    "\\b94[014]\\b",
+    "\\bW-[23]\\b",
+    "\\bfw[234]",
+    "\\bf94[014]"
+   ]
   },
   {
    "jurisdiction": "US",
