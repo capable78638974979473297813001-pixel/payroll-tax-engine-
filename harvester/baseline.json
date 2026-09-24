@@ -1,26 +1,26 @@
 {
   "$comment": "Rolling source-freshness baseline written by the harvester. Do not hand-edit. 'hash' is the confirmed content; 'pending' is a candidate change awaiting a second consecutive sighting.",
-  "updatedAt": "2026-09-23T20:10:55.407648+00:00",
+  "updatedAt": "2026-09-24T12:46:38.217178+00:00",
   "sources": {
     "http://www.bcsalliance.com/debt1_northdakota.html": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b23d3902f5b9a33b6aef10c4750552a25c092e973aee82b60f6c40962f568b7e"
     },
     "https://ago.nebraska.gov/news/attorney-general-hilgers-sues-city-omaha-over-unconstitutional-minimum-wage-ordinance": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "78300f49cf0df7a0e09def8f7775aed440b292af714df80c4e6b3f4533a2c4cb"
     },
     "https://almonline.org/TaxRates.aspx": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d5d853f80b1bec0c1d88a8d72e6b852c288c2d9a88983efcadadbfad6da27e4a"
     },
     "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv": {
@@ -33,71 +33,71 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e59f352acd136c60c2fbc78441a05414b52de23cb839bc3c7fc569eb10c2e9c8"
     },
     "https://app.leg.wa.gov/RCW/default.aspx?cite=36.65.030": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "05c673eb8554f5c03a1be36c83c530fa95bc439c53f1227d4049a899dea42697"
     },
     "https://apps.dced.pa.gov/munstats-public/FindLocalTax.aspx": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "5fabaf56981ab3abd82ec72ff0b22be2a10c4d9d6298a275685cdb377046cced"
     },
     "https://apps.dced.pa.gov/munstats-public/ReportInformation2.aspx?report=EitWithCollector_Dyn_Excel&type=O": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "6a877a9f580d7d3df0f313bd282143348e088a112cb7bf164dd6fdb4b7266dc6"
     },
     "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2026": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "c0253de261fda85a3532ebffe62f71fc87d54e6290b48d26dc23e21f5975a720",
-      "pending": "ea5175126ba0206e46e199666c08ba635e4eea044983399887b215dc0d8816a3"
+      "pending": "9b72f7cf3a7a3a5f9954175e7414a5e3b41e33b07216eb33eb1d0755fe89bd5f"
     },
     "https://apps.legislature.ky.gov/law/Statutes/statute.aspx?id=54832": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "bda1acd1461ea61b509089e2f720c47ad7abdfde9e9b3c215d6befe35df3b386"
     },
     "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=18419": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "6aeca6e1696f1fa05021e6d38cd0e0f63bc285413f6119e4676a748b2a6b6873"
     },
     "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=48677": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1dd8ea33cbfc6efc34098cf6958cf345fb6c26c659ad867dd687c99265696b27"
     },
     "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=48683": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "3783b20564626de56a4e20e57f7fe48fe8ffe990089530a2ac9601b8bea81fe4"
     },
     "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=50960": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "70b2bee1a9f64748effdb42b149e41738265941c26a52bc324cbfe2900d68ef3"
     },
     "https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines": {
@@ -110,79 +110,79 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4a047b2c2c2fc5ebe1a991b82d62dd30ba83c1d59678979d13de90efe122764f"
     },
     "https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2026_A-4_f.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "80a6c71c702824d80d9505575257bb052574a5b1cef17dd3da486c7bfe6b4b54"
     },
     "https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2026_WECi.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "bbffd42f8ea364fc041ec0ae8c2d2d7a3d5eb1f9308d2aeb3a4b0983910d000a"
     },
     "https://ballotpedia.org/Nevada_Question_2,_Minimum_Wage_Amendment_(2022)": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 202,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9711627e61313734dcaca203b3ff11e9fb7c67624a93d5a287999913df0d87b8"
     },
     "https://bouldercolorado.gov/local-minimum-wage": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "5184218f0190c48846383e3496cac3a39deaff19f5e98b7990970a0835de29a6"
     },
     "https://bouldercounty.gov/departments/commissioners/local-minimum-wage/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0153e87613a2333b7d8ce2eb05c435d61908ad40e4c045ece5b1a5185fdbb579"
     },
     "https://cdle.colorado.gov/employers/unemployment-insurance-premiums/premium-rates": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "5c8e9d005740c90ddf60277655d1216981cbb94ac1e51dfa27c2cf403e684eb9"
     },
     "https://ci.sheridan.co.us/288/Occupational-Privilege-Tax": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "bd93922a43ce3a08316f10d9861ff3afa7f91c1e970fd9e32cba13afc86a9453"
     },
     "https://code.dccouncil.gov/us/dc/council/code/sections/47-1806.04": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "783163da3b993a133ebe59e79084d8f425a83ee32e3d3103b8128f5e9a0ecf87"
     },
     "https://code.dccouncil.gov/us/dc/council/laws/22-296": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "12cfb3715bc838d449b6371ae68a1067c5c942750b5a31b499c65edc2072a14d"
     },
     "https://code.wvlegislature.gov/38-5A-3/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1463188456e0915b053fedc9a26d917ff56c9d20d04074cb651e31e453bda06e",
-      "pending": "09db7c1b9941aa8052f847933727ed1a6339cb63ccfc1718f2a8399201f7cf1b"
+      "pending": "dfd8116e2f0839bd0f6b130ce67a63488fd4fcfec8b55ad977bc45a0b40d9ae8"
     },
     "https://codelibrary.amlegal.com/codes/elizabethtownky/latest/elizabethtown_ky/0-0-0-3203": {
       "status": 403,
@@ -218,119 +218,120 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1636e3729aae9316b6d8067c053bd8a1e3c044eaf4788505d734df27f27ed69e"
     },
     "https://codes.ohio.gov/ohio-revised-code/section-5747.06": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "bfa6c6ff4d0773bf7dbaf9e3e93100b97a83c75b63df33d6b583e05c78405cc7"
     },
     "https://codes.ohio.gov/ohio-revised-code/section-718.011": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "8a4faad38730ef399b593dba31634b720ad9681e3524be8ed33cdcd5a8a7bc02"
     },
     "https://codes.ohio.gov/ohio-revised-code/section-718.121": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "3c98f20f533c22a2c6d531d86ad41bcc28c8464767e437c7f7ed8a2c3340d29a"
     },
     "https://com.ohio.gov/about-us/media-center/news/ohio%20minimum%20wage%20set%20to%20increase%20in%202026": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "2daa9ca26f985c7be4d3fc01233af79acddae3c626c47f0eed6c764fbaf76719"
     },
     "https://comptroller.alabama.gov/wp-content/uploads/2018/01/Jefferson-County-Occupational-Tax.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "bd40bb47d65303c4c77b4df5b0b9da9a309c1f4e0374ad27ba49e2e6c504b412"
     },
     "https://content.govdelivery.com/accounts/ILCOOK/bulletins/3e27980": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f868141e1105a02cf083e63ea5033803e30c03a807150024d6743989f5cbb5dc"
     },
     "https://content.govdelivery.com/accounts/MDMONTGOMERY/bulletins/40be635": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "5f3526bc042bbf299843514cc2111e54662d2fb4e55914eb60301303b1d885a3"
     },
     "https://content.govdelivery.com/accounts/MNDEED/bulletins/3d3828d": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "6bbe1ab6079e937bc4758669cedf70620c451f8a8eb3c62c964b839a014ceab9"
     },
     "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_PercentageMethod_2025.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b726a7db435a59f5f9239059840b478d32ea8666b9e7813bb7b342b44099e2e1"
     },
     "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_PercentageMethod_2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e258bb3a32c8f41ce71b03fe1ae652a34a43347918c7fd37b640d8c149d447c2"
     },
     "https://dam.ldr.la.gov/taxforms/1300-1-26-F.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "eac8ccbef4ee2681719094ae5af22be403c2d0751cadf7a69b4825f2ff1a99ee"
     },
     "https://dam.ldr.la.gov/taxforms/1306-1-26.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "894da1932daa836b9817ccb1515ba81913838cb2957f7948368c4e67a2daab27"
     },
     "https://dcba.lacounty.gov/newsroom/new-worker-protections-for-july-1-2025/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "797d4b56f560462f142ea53ea65233a5fdcc28c37c59de869b05bed95c5165bb"
     },
     "https://dced.pa.gov/local-government/local-income-tax-information/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "b0ac2410a872f7196dec06cba0b9b64dd37b7c892997e1a30922a0eedae198ee"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "b0ac2410a872f7196dec06cba0b9b64dd37b7c892997e1a30922a0eedae198ee",
+      "pending": "1e8b8e6b022a1718f6afec7cf5dc720c518d491edc9f3da15d9465e12e98bdee"
     },
     "https://dced.pa.gov/local-government/local-income-tax-information/local-services-tax/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d9618359e5c8de671c26884505c3057287243851ceba6b3e76aad27067d4aea7"
     },
     "https://denver.prelive.opencities.com/files/assets/public/v/2/finance/documents/treasury/tax-guides/taxguidetopic61_occupationalprivilegetaxes.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "bf8633e49deaa79eddbfcc0e5f9d39bebb3dcaf921210bbac1c45612b2ec5ca2"
     },
     "https://des.az.gov/sites/default/files/dl/UIT-0603A_FY26.pdf": {
@@ -343,49 +344,49 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0f6a14031cd674f332cad8f00f3e7629971aa0c1a1db5ff9bc19adf98ca04bee"
     },
     "https://dew.sc.gov/news/2025-11/2026-tax-rate-cuts-press-release": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f2d63b30b4cb738e989a81ede73a04c93fa5cf1eeaf96bc7e0ba7e8ca80d4733"
     },
     "https://dli.mn.gov/news/minimum-wage-rate-adjusted-inflation-jan-1-2026": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "595ab3b4b7bbd74a2bfd4f6e916de001c954124f061adc6f4ef5b312d378e7ef"
     },
     "https://dlr.sd.gov/employment_laws/minimum_wage_faq.aspx": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f1fa5272e94bac327ce82ad5020fc4d0d714098369902ad94a02e32993cee94e"
     },
     "https://dlr.sd.gov/employment_laws/publications/min-wage-poster-2026-english.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9fafb5e6303e9faa0fe249ed78c2211eaba1d0c5c45c3bb8c8a9580ef1b71a1c"
     },
     "https://dlr.sd.gov/ra/businesses/default.aspx": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f8bbe006b9473c8123efd50836379d6b0cfc43679b06ed6dba0ca16c5a6f92ad"
     },
     "https://dlr.sd.gov/ra/businesses/faq.aspx": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e3f459c903cc30336f26709ef9169a3e16a7693833c645f71c56d5a4ed88b6c4"
     },
     "https://dlt.ri.gov/press-releases/2026-tax-rates-unemployment-insurance-and-temporary-disability-insurance": {
@@ -398,21 +399,21 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b67be11f5eb520ee775cd7ae38fd714cdb4cc00bbef9f3ee9e88829880c3d6f6"
     },
     "https://docs.legis.wisconsin.gov/document/statutes/71.03": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "83cbcc80aa65f70fd09e96af0c7b0edd21f960ceaddbb0f31b108323ab222d6b"
     },
     "https://docs.legis.wisconsin.gov/document/statutes/812.34": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b54463c3ada1867301fb351bc640984f373969a715dfea80351bed158080cfa6"
     },
     "https://does.dc.gov/service/office-wage-hour-compliance-0": {
@@ -425,374 +426,374 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d5eaec4a80478be3c36fdb03e5828108548c9dfbd31e8dfbe7522fcdbb70d8c3"
     },
     "https://does.dc.gov/sites/default/files/dc/sites/does/publication/attachments/2026%20Minimum%20Wage%20Poster.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9211de20494845b39ca1bb5c88ef9a0c21367c15e72160a774f4e181490fa3fb"
     },
     "https://dol.nebraska.gov/PressRelease/Details/338": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b2b51d2dace4284197a8f68574e6d42151b312c82e299b0cbf14eb1ea459c7fe"
     },
     "https://dol.nebraska.gov/webdocs/Resources/Items/2026%20UI%20guide%20to%20understanding.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0235d5945e4c517e7f46eb6381d9c80101dc74093d21b6fe232b88183573950c"
     },
     "https://dol.ny.gov/calculating-employers-ui-contribution-rate": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "df28ee4d8c8da3e31c028c7e3556bc057d99d798fc16f311a2813fabe27d0a05"
     },
     "https://dol.ny.gov/employer-contribution-rate-table": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "7f0d88efb6fdef7fb48fc5c44e3098ef1ff93fb8704552087978aed1762a1c37"
     },
     "https://dol.ny.gov/home-care-aide-minimum-wage-fact-sheet-p105": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "76beec7ff23208d2b97fc23d6a01391dae22fcd42fd21d74cb10e9875d960385"
     },
     "https://dol.ny.gov/minimum-wage-0": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "047be26d9fa73da38ced5164e2df671b4b0d8a1d08567d36963351118bd36f75"
     },
     "https://dol.ny.gov/register-unemployment-insurance-0": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "2629bb5361f404f8fd799f0f2d27963c437f16969d1fa561e7915f2f68bcd75b"
     },
     "https://dol.ny.gov/unemployment-insurance-rate-information": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "c340e4d3c3804f20ce100ad008a41e2e6158fc1cf7d747f9a07efacc9afc674a"
     },
     "https://dol.ny.gov/worker-adjustment-and-retraining-notification-warn": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4f675b4af58728bea72e0bf012148f44be133701527ff021ee0a4f44f295c95d"
     },
     "https://doli.virginia.gov/2025/07/29/virginia-minimum-wage-rate-increasing-effective-january-1-2026/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "84da2205350468bda021ac43ca81162c3961ca71e57150e60e2adf6b155ab090"
     },
     "https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-june-2026/download": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "bb8fc0ce2e3d6f208f5215eb0ed65e875bee1bb8105f313589856b78c9852cb0"
     },
     "https://dor.georgia.gov/document/form/tsdemployeeswithholdingallowancecertificateg-4pdf/download": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b4d72d1cb133db75c03ae327c0ffa6e3a0d78a36f00f08183f44f3a1176ca036"
     },
     "https://dor.georgia.gov/taxes/withholding-tax-employers": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "62e115147cb103f09ff6afae0cd83d07f7d265e6afbd432e6a025ff8474562a4"
     },
     "https://dor.mo.gov/forms/MO%20W-4.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "62e1bfb0629f2f4913531b96cb2e537d888b9147191dcf49ca2fcc0b539bace5"
     },
     "https://dor.mo.gov/forms/Withholding%20Formula_2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "943ce02894aefe7bdc2bf4cf08fe6428266607ee95a5f1816a1fbffa103b0777"
     },
     "https://dor.mo.gov/taxation/business/tax-types/withholding/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1e5f193961dba145667fe02f0d3257a9d5b3debb3399d63bb2d570fc7d710095"
     },
     "https://dor.sc.gov/sites/dor/files/forms/SCW4_2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "402d65b07bd11d5a9ea5357a50a54b6373b4dc32036833686da117684fc9d08a"
     },
     "https://dor.sc.gov/sites/dor/files/forms/WH105.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b4ac5e3837600a2e1d1b424b8f1aa78c411a2a420a2aa66bb9745f60a34667af"
     },
     "https://dor.sc.gov/sites/dor/files/forms/WH1603F_2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "588edf32e0876bc842d41dea20eebac59c2b12e5457562d052c0c28ac5e9ffff"
     },
     "https://dor.sc.gov/tax/withholding": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e7bf42e2e9eec052ecde245e8df75014a5865a1a191e26f289bcfecbbbd606b4"
     },
     "https://dwd.wisconsin.gov/dwd/forms/ui/pdf/uct-1-e-2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "fd513138d7a7578d1431942e9037af029d7ed78ba58204ffbc23065aae865e4d"
     },
     "https://dwd.wisconsin.gov/ui/employers/taxrates.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d6da373f71e364a1df058ef642f6dd70384c604b08d8ef45162edd390fe031e1"
     },
     "https://dws.arkansas.gov/workforce-services/unemployment/employer-ui-information/employer-ui-contributions/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "fc4770c0eac6268debaea89f3d3c58409187eaadc3f1c84aa655e8f86a156581"
     },
     "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-tax-rates/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4acfa9b5ca78c5ad89f76dff797d6970fa7f7ab804a7bc8550f52d54e1d2ad47"
     },
     "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-taxable-wage-base/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "99439c5382275151769c9d613d4c02306047c68d239aabee1873d2c4f6f7ca03"
     },
     "https://edd.ca.gov/en/payroll_taxes/rates_and_withholding/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "144b5d7692dc8d44ad48779d0015733061ea270190b0e75fc466b4e6a3b78b34"
     },
     "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/26methb.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "145b570a333f22ff0b4c230ef8ee04bd6f5dc89f8351eb134754b4820f6c7047"
     },
     "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de4.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "6d1e24c7081e4eab4d3380f197a87129b657f77bfb9be6a88784f536320e9e37"
     },
     "https://esd.wa.gov/about-us/news-release/2025/paid-family-medical-leave-premium-rate-increases-113-2026": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4264d81325ebefd2a46c93b2d7bbc68e78a3cb6d1cb82aadd393ad6483c8d7c4"
     },
     "https://famli.colorado.gov/employers": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "002d4056a6ec2b35760411fc0aa907444f8a4d93c8a53a7184a65ff383b36ef3"
     },
     "https://files.hawaii.gov/tax/news/pubs/25BkltA.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e819a8a48ed9f273014afe0046bc461152228953b545a9aad90e5f7378d3c051"
     },
     "https://files.tax.utah.gov/tax/forms/pubs/pub-14.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "a7662517232b93b21774666e703123d398916a0a1dd1f1791eccca10f4a8d56f"
     },
     "https://floridarevenue.com/taxes/taxesfees/Pages/rt_rate.aspx": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "7f0b1d6442f6da0d551bb59abadff52efc8c50778bbb2d7a0599262111b221e8"
     },
     "https://forms.in.gov/download.aspx?id=2419": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d977461f3eac7237ad995846795431d1f182daddbeec8ce9eb419c22ec6c1e05"
     },
     "https://frla.org/minimum-wage/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "bc23bca3e8d8507c877edb79fe56be6ca032d0e4333d15f128c8c7835ba3019a"
     },
     "https://gc.nh.gov/rsa/html/LII/512/512-21.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e20a0bd40035b55a40492241788d8437c3f2e8391bbfd2b6c76275db989cae8c"
     },
     "https://gov.georgia.gov/press-releases/2026-05-11/gov-kemp-signs-legislation-lowering-taxes-and-supporting-economic-growth": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e336d561b3be4018e86301bd45482838c6e95d41be24ca5fb86677e2c7628d63"
     },
     "https://governor.vermont.gov/vtfmli": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "a51d7ec01745185738a33dc6983d0b625f667efe8c622e200a0c36f022aa3c1b"
     },
     "https://help.nfc.usda.gov/bulletins/2022/1666037747.htm?taxmap=true": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "de2af7ef6cc7a7631e6f53e87244334b94a505e92d7c29d4f086e1b9561ebd97"
     },
     "https://help.nfc.usda.gov/bulletins/2022/1668460546.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "8b9a07fd26e4fc895dc02f5b022083733dc9f2ab5ea2026fd6d0a5b983d5654b"
     },
     "https://help.nfc.usda.gov/bulletins/2024/1709749757.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e32a7fd3d5e897cb0b1e78d31e78a1355a9b1a5b360b57571c9e297872bb64ed"
     },
     "https://help.nfc.usda.gov/bulletins/2025/1740487316.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "09ec9c4c9d5fa386a79445bff770b3959d66077903ec30f2d4c3a877cdad5bb0"
     },
     "https://help.nfc.usda.gov/bulletins/2025/1741189057.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4dd21415176156118273fad6cfd2f6ff5fb8ed1f92e35458f8ac7c07e3ba65f1"
     },
     "https://help.nfc.usda.gov/bulletins/2026/1768327516.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "c9980ea63e2267fe3fc5b97f542a4a9eb2347383a2a2c26fd97034f68441ab5b"
     },
     "https://help.nfc.usda.gov/bulletins/2026/1769797447.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "852e923131665e3786426081eb7d18af5ec90e1f348b6af435239d99f7358198"
     },
     "https://help.nfc.usda.gov/bulletins/2026/1771620053.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "8d03cfd5d3322b553a25aa2a5ac791b41da5073e9eba73a994d0094cb4b51e25"
     },
     "https://help.nfc.usda.gov/bulletins/2026/1784643404.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d9f8acf503915d22dd1e2d2bfc5a80afaee2a351768dcb47934b37b23daf2798"
     },
     "https://hrwatchdog.calchamber.com/2025/06/california-local-minimum-wage-increases-for-july-1-2025/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "353cf38ce32570dc403624ecc9d2907de002bb732b0be47c535e6621f942645c",
-      "pending": "637f853b75e400b0b89d0870783018707886acaef1a4e2bd9861e6fda480d031"
+      "pending": "198483f292dcdf734a1db6f40a342a42864892a4b2e66e8f85a6af9b94ab6043"
     },
     "https://hrwatchdog.calchamber.com/2025/12/california-local-minimum-wage-rates-increases-starting-january-1-2026/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "167c9f4ed730761fd5f01eb392831c02343f0d1bf61a0a738abc8a30bc5c4b53",
-      "pending": "1cd2f92826e88c2402bf8a50d997c6e7c8e327aa6493fb41bc007c1474be8f52"
+      "pending": "26d4842916da3fb1fbf2cd755fd195b9e57987e664947fdf966b6a8b51248a92"
     },
     "https://hrwatchdog.calchamber.com/2026/06/los-angeles-city-revises-wage-and-health-benefits-requirements-for-hotel-airport-workers/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "45b0a3c7818042aa212780af1b016622e67b555238869ec5cb009b8dbfb11b5c",
-      "pending": "5f66e2f6b380701db10641bdd99ad32aeda19157b7b200a2aebbf779c3fd2bf4"
+      "pending": "99880fd2a30cd7437d2fa6d6aecf3d8ab9dd6104e2a0b9eea47087beffcaaed4"
     },
     "https://ides.illinois.gov/content/dam/soi/en/web/ides/ides_forms_and_publications/EA-50_2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4b66ca453cfa1b7455929ef971ad25c17fbea454272c73c934e2228480bebd69"
     },
     "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026": {
@@ -805,126 +806,126 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "30bf38558727ff452c607c7bc556494373f9d8b1c48c36702ab509885241bfad"
     },
     "https://jfs.ohio.gov/unemployment-services/for-employers/file-unemployment-taxes/tax-resources/contribution-rates": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "afe6ca3ed99611614817ed3eb64ead244a26c5fcfc58012038423759b0d201d8"
     },
     "https://jobs.utah.gov/ui/employer/Public/Questions/TaxRates.aspx": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b3b7e26eca35cfb3013141e474765ca8014964e7e3020d4c14920a3fae7300c8"
     },
     "https://kewes.ky.gov/Contact/contacts.aspx?strid=2": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e5f154f94da50b4e7c2c4f80eb5d9b919b619ee7ff3d632466d363ace67459ed"
     },
     "https://kewes.ky.gov/Contact/contacts.aspx?strid=4": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e5f154f94da50b4e7c2c4f80eb5d9b919b619ee7ff3d632466d363ace67459ed"
     },
     "https://ksrevenue.gov/pdf/kw100.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "7e521f216548a12e5afc42faff6d3aa170327e9061582ce8e431ed86c67f8fdd"
     },
     "https://labor.alaska.gov/estax/2026-experience-rates.html": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "029980ca01da607c31ac07df7df5c5e900a2d592c23fc02a0786db3c2e02a3ab"
     },
     "https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "024eff51d92c0fb6ff93b898dc907308d1ed1dd8faf0012941d231929c9f7ae0"
     },
     "https://labor.delaware.gov/divisions/unemployment-insurance/employer-services/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b9ccc0d81b677c5c4a02b7260e59d57edf0da336b3340e4c12ab9655eb6b3822"
     },
     "https://labor.hawaii.gov/dcd/files/2025/12/2026-Maximum-Weekly-Wage-Base.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "91303976983f33164d0c3a823d6f577a1d42e4ce46ab2c38f40d7563b23814d2"
     },
     "https://labor.hawaii.gov/ui/tax-rate-schedule-and-weekly-benefit-amount/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "71a090b7ced0bcdbe6963a43708a66f117f098fba78c6c72b7ad950da9338992"
     },
     "https://labor.hawaii.gov/wsd/hawaii-family-leave/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "7cc73c31ae4e7588707a06dde19ce9bb903b27edf03820cfd20fb705d39e3fa3"
     },
     "https://labor.illinois.gov/laws-rules/fls/minimum-wage-law.html": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0b8d9d7d0a0754f45934da920e570f1efa25ac618fca5b13e82d6309146e5786"
     },
     "https://labor.mo.gov/des/employers/tax-rates": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "450b05ba71898fe7750c784b3de170ca29dd00c65885eeb9762c789175d25d65"
     },
     "https://labor.mo.gov/dls/minimum-wage": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "468f5a5fa2df5f6d3e52291f6255a0617311369a85273dff5df42289596999ed"
     },
     "https://labor.wv.gov/wage-hour/jobs-act/minimum-wage": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9e4cfb3fbbd7443b62eff66b65ef1762d71f17a9dbe23d8b2cbef6eaa6e43544"
     },
     "https://laborcenter.berkeley.edu/inventory-of-us-city-and-county-minimum-wage-ordinances/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d5de6501d2db8778a5d70036bab70f9f802712a52fbb84e24bc4360e377e20d0"
     },
     "https://laborfiles.delaware.gov/main/pfl/Employer_and_TPAs_Guide_to_DPL.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "5d3f315ba895b0d5c0d2c6ba51c10dc8c9f735b37579b1b5757bab515847214c"
     },
     "https://lascruces.gov/wp-content/uploads/2025/09/MinimumWageEng26.pdf": {
@@ -1099,100 +1100,103 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "6a3d958d888bf63e2bfd66a59cb6f1a54647016a1e8b863959e257e9f0db6664"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "6a3d958d888bf63e2bfd66a59cb6f1a54647016a1e8b863959e257e9f0db6664",
+      "pending": "e6e32657e226e3e316a45f00a3408ed5d576a0ff913a8c8e0ad8e0414c7ede69"
     },
     "https://legalclarity.org/what-is-the-personal-exemption-in-massachusetts/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "36f0406f0326a0d6aca59517a24e53becf711e5c885671d66d0345689c7df386"
     },
     "https://legis.delaware.gov/BillDetail?LegislationId=141813": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "8fd86603e925884aee42742a2a4b202ecc3c1c80e170eff1f85e527e4fa08335"
     },
     "https://legis.la.gov/Legis/Law.aspx?d=101760": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "fb65971a636ecb11d153ad99538824b49bb27310001e8cec46b800239e23d868"
     },
     "https://legislature.idaho.gov/statutesrules/idstat/title11/t11ch2/sect11-207/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "66d11422a43bdbd1688e6a2fffc2b1929d4e4d8eecdc860b256f8b7f3db6e2f6"
     },
     "https://legislature.maine.gov/statutes/14/title14sec3126-A.html": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "620fb495a43a26ac46ca37db7cd6ac78770992658bb9405f99262ab3605b1495"
     },
     "https://lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9457a7429f8ceb826bb16313958692f1930119f44636a5b0412194c18ae19922"
     },
     "https://louisvilleky.gov/sites/default/files/2024-12/w-1kjc_instructions_2025.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e4f1e4e29e84baf8e893350db5f4864f2553613254b57cca273e431b6045925a"
     },
     "https://malegislature.gov/Laws/Constitution": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "2072fbffe600226d777e661f9833b1bef947fb569967fc6fca1512d25423f1c0"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "2072fbffe600226d777e661f9833b1bef947fb569967fc6fca1512d25423f1c0",
+      "pending": "349e7c7192dc044e35ce3a249400cb8d07241827cc3c79608d2ca47248b79b21"
     },
     "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleIX/Chapter62B/Section2": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "da8abc2f60d2d35fa957460c138552c8af4daf984c097bb8359527b53f20b2dc"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "da8abc2f60d2d35fa957460c138552c8af4daf984c097bb8359527b53f20b2dc",
+      "pending": "77716bd82644c27bef2a1e03e3bcac50235089e81c4e3f6894fd26d35163088e"
     },
     "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter175M/Section6": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "3fbe74215176ae5fdf8191a8958524719e6719ae1c2ec623d4ad0c4a2ad780c4"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "3fbe74215176ae5fdf8191a8958524719e6719ae1c2ec623d4ad0c4a2ad780c4",
+      "pending": "458afc14a3092a28f47429f0e182ea090497a01810a3864a25cf50556ab15723"
     },
     "https://marylandtaxes.gov/business/income/withholding/index.php": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "81a249dc069462da666ae53b40282870aaa1f0e396b1f5657bb9c0fd79d0a55c"
     },
     "https://mdes.ms.gov/employer-faqs/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "80152c808777fcfc6074a934ea75249d8c30396b99f7a5e6c772936af003e255"
     },
     "https://michigan.gov/treasury/0,4679,7-121-44402_44415_44416-7351--,00.html": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
-      "lastChanged": "2026-09-23T20:09:30.411793+00:00",
+      "lastChanged": "2026-09-24T12:46:38.215978+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "c4aaf8bab38c4bb3b9a03ff3bb2603018cc81705165fa9709e792dc7bc461eb4",
-      "pending": "0b5d648d971aff552e7b1157d218e143c3377ee49c7f626aa0f7fdd63cf7b974"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "0b5d648d971aff552e7b1157d218e143c3377ee49c7f626aa0f7fdd63cf7b974"
     },
     "https://mtrevenue.gov/publications/": {
       "status": 403,
@@ -1210,93 +1214,95 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b1ec742b304d06e7a8fed3e77a630dff3d74815354c83de4e3ffc795394ae542"
     },
     "https://news.bloombergtax.com/daily-tax-report-state/georgia-dor-issues-revised-2026-employers-withholding-tax-guide": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "166b21368b7c76a1bac54beaeb74ca76e7b806b5c8930e6a6b20a943cdefea14"
     },
     "https://news.bloombergtax.com/payroll/kentucky-raises-unemployment-insurance-wage-base-for-2026": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b9c173d2f57fbf0e77284014954cef16ef712d121db385052e2e2867caa2a9de"
     },
     "https://news.bloombergtax.com/payroll/north-dakota-issues-2026-unemployment-insurance-rates": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "114a14acc884d5562f9263ad8e9293196cc459e73045812425eebd6a969fb51e"
     },
     "https://news.bloombergtax.com/payroll/west-hollywood-minimum-wage-rising-to-20-25-for-2026": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "bac5b7f51b669ad87e2a87d2a365df93835076411926141fdc1b83402233acd4"
     },
     "https://newyork.public.law/laws/n.y._civil_practice_law_%26_rules_section_5231": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "5eec250ce2c7897bf2cb9113136075a89cdb96087493a3d32fc9bf015f49ba24"
     },
     "https://nicholasville.org/tax-office/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "30ed01f14abce36be2fa1a9f0965f9062c4f25b04cac620d5711c974d52cb916"
     },
     "https://nj.gov/treasury/taxation/businesses/payroll/index.shtml": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e746a54c34cbe5fc0230f36d625997a24c6d3b3533692e2b2d0cac7995c88c0b"
     },
     "https://nj.gov/treasury/taxation/pdf/current/njw4.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "c16f212c32c80ea768c0a0a3de7d38d7e2b97a9375902c3772ad72869b81408c"
     },
     "https://ofm.wa.gov/wp-content/uploads/sites/default/files/public/legacy/policy/25.60.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "68e00f66a0a63c6ddf49120fc094b762b0c795e7d5e519f8de4f8efda95528fb"
     },
     "https://ogletree.com/insights-resources/blog-posts/2026-minimum-wage-increases-in-new-york-key-details-for-employers/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "1498a1c8a13a05d271acdd0f095a05847caaa6468c3368966e0bce00e9fa04ad"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "1498a1c8a13a05d271acdd0f095a05847caaa6468c3368966e0bce00e9fa04ad",
+      "pending": "2dc4eb511919a783b3144736929fc735f909d85d369410e09adeb8df1f0e39a8"
     },
     "https://ogletree.com/insights-resources/blog-posts/connecticut-minimum-wage-set-to-increase-to-16-94-on-january-1-2026/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "cb7ac8d452d29af909b4ec6dc36c6a144e17b9edd14675bc152d8c816c17afc4",
-      "pending": "974b506a817c291fec4f7518692dbd49c95e987d2b59828390d06c436ee66281"
+      "pending": "1770adeea0ef2c0a3de68072de94b84e451800d22aa134af96af68cbd44ab653"
     },
     "https://ogletree.com/insights-resources/blog-posts/new-hampshires-paid-family-and-medical-leave-plan-breaking-ground-in-the-granite-state/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "3b9d3037968aea8303d106d2598da4e1b16ec9623635e425ffc09cea7a428bf2"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "3b9d3037968aea8303d106d2598da4e1b16ec9623635e425ffc09cea7a428bf2",
+      "pending": "714c2caf3915c8565feb0073e6cf922a30be9dce5ee16c731d79f088760dd838"
     },
     "https://ohiocpa.com/for-the-public/news/2026/07/17/odt-updates-employer-withholding-rates-beginning-august-1": {
       "status": 403,
@@ -1308,49 +1314,49 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "59c3b9993b32d0c81c5a8210601f8596b6fd06c58e7f3e76aecff7b3ff2fdad3"
     },
     "https://oklahoma.gov/content/dam/ok/en/tax/documents/forms/businesses/general/OK-W-4.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d491ad5ba7ecedb2c9ab705fbe36e1d1421b55fbc9a4fbc4d24e0a66224b48c5"
     },
     "https://oklahoma.gov/tax/businesses/withholding.html": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "c15cb9d03f9d93f439c69adef7257d530ba5b03ce36fc183b5a8d7d76520bdae"
     },
     "https://onpay.com/insights/minimum-wage-by-state-summary/maryland/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "a56122787a7f4d5d49b9c4ef112640a2f84245220ce6e13f1ff3dd4a0be67a43"
     },
     "https://onpay.com/insights/minimum-wage-by-state-summary/new-mexico/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "dab5819fc2f8c6e686c56b1cbbc7da3604900d83f21bdeca8a7eb98b708650dd"
     },
     "https://onpay.com/payroll/calculator-tax-rates/south-dakota/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "aee6d90233839e1f3a7a041bb51bff44ef9f175a294e0b7bedb029979015cae7"
     },
     "https://oregon.public.law/statutes/ors_18.385": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f343d5503f2ead80916db9236c558c5a29095bff11b369641326c3d12cc4417a"
     },
     "https://otr.cfo.dc.gov/page/income-tax-withholding-instructions-and-tables": {
@@ -1363,7 +1369,7 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e9401c61008810a97d5e9ca0ea853e29b02bb8034eca09b98e4af165cd37c7a0"
     },
     "https://paidfamilyleave.ny.gov/private-employer-coverage-requirements": {
@@ -1376,35 +1382,35 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "25854f86c167c11cad3507c3dadc2abebf58c2b2a829b0228397d24ccf8ed0f6"
     },
     "https://paidleave.wa.gov/app/uploads/2021/12/Employer-Wage-Reporting-and-Premiums-Toolkit-v25.1-2026.06.26.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "07a342ed22e94c5b26a82f2690e9196165b05375f16c81984f2b078ff8f4210b"
     },
     "https://paidleave.wa.gov/estimate-your-paid-leave-payments/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b38c0a22469c8e248973c261cab0fb8ac164b81874b0ed4177f13abf2b98f5e5"
     },
     "https://payroll.org/news-resources/news/news-detail/2025/12/12/six-indiana-counties-state-have-tax-rate-changes-in-2026": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1806f9fc576f48f2e8454dd478240f29dee4a5087982ded78b088bdeb76adc72"
     },
     "https://payroll.org/news-resources/resources/resource-library/west-virginia-charleston-city-service-fee": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "285a63665840e4cc47b313103e94db5ec176e539d01cf69508afb523f6db9c03"
     },
     "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions": {
@@ -1417,238 +1423,238 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "ddd96fbe9e00b43cf105a204e0a3f918570c6e7431931c9bc097838a7b0651bc"
     },
     "https://portal.ct.gov/-/media/drs/forms/2025/wth/tpg-211_1225.pdf?rev=e16ef13773ec42d4bf0afd2e192e0176&hash=CCF9990D8EE0AA580A11BC6E97235650": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "a3df892d72740c5daa7633373b750ee9346ec2c78dea06dd6c22b1b4a63c4aec"
     },
     "https://portal.ct.gov/-/media/drs/forms/2026/wth/ct-w4_1225fillable.pdf?rev=9e9e0216cd394f579961e1d4cd5c7ab3&hash=4D496BCBD10659462D3799732B5A91F2": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d171e63015f887352d188a80d6e3c98d4075240e11bad54ba0e9aa7bf822c796"
     },
     "https://portal.ct.gov/-/media/drs/publications/pubsip/2026/ip-2026-1.pdf?rev=4482a3dca0a44b28ae39381a91fb0916&hash=57C34787EE2C1D4A7F989EE1F6B8F0F8": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1df6a8f3dbdc4403e5c3910eea2bee72904fb3535323b4fc68cb9726afe664a2"
     },
     "https://portal.ct.gov/drs": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "83c660cf2dbc2f0d7863afb8086119cd0adac4c9a1ab01693e70114ec4e1e9f2"
     },
     "https://public.courts.alaska.gov/web/forms/docs/civ-511.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "6bac6b94a35b3ee6aab40c8e1710cf179b33be52073fa6c1457dc40619ee55fc"
     },
     "https://realfile.tax.newmexico.gov/FYI-104.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "400f141e3cc28d352712cd0cb94f80d7c2dc1c40463fcdcf31561247b5889a82"
     },
     "https://remotelaws.com/paid-leave/tennessee/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "2a9fdae9b9d2595b773e84ac4cb7fbd2a714d45f37de0569252ba414142200cc"
     },
     "https://revenue.delaware.gov/employers-guide-withholding-regulations-employers-duties/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d59bc4dc7fc2078dab9d54c80c81d432e2e6576654d4a7f06fa1da19e46c9364"
     },
     "https://revenue.delaware.gov/employers-guide-withholding-tables/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0cc659b10a6a6de17144a32ade19cfac7bab3a331e2f487affd23a2663644e34"
     },
     "https://revenue.iowa.gov/media/4324/download?inline=": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "150af032ba92e625bc70d8f504f58e0011aa4e5c496b33db06fbf74ad79e86c2"
     },
     "https://revenue.iowa.gov/media/53/download?inline=": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "690911fa64266dffe9b21eac207220c18762dd4d02a4ca4807eb8ff02c8ca0e2"
     },
     "https://revenue.iowa.gov/taxes/tax-guidance/individual-income-tax/iowa-illinois-reciprocal-agreement": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9d2dc834dfe15a7373a0e843233e772fbc5c69865cdbc0334369e3e703cecfcd"
     },
     "https://revenue.iowa.gov/taxes/tax-guidance/withholding-tax/iowa-withholding-tax-information": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e7509bf8e05d994090049356498cf0e21284ae9b3d7e22fa74b2eb11f65dfd25"
     },
     "https://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "a4aedf3522a74612e9d1ffc90a06968b00b4b4b0d2eedc8a3db1c1e46a976c6e"
     },
     "https://revenue.ky.gov/DOR%20Training%20Materials/KY-TAM-18-03%20Credit%20for%20Income%20Tax%20Paid%20to%20Another%20State%20FINAL%20(UPDATED%20HYPERLINKS).pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f78ebf98380ff3fd80595e9bb6bbf7338ff3ba7aa2619c20688dec773240063b"
     },
     "https://revenue.ky.gov/Dor%20Training%20Materials/103%20KAR%2017.140.%20Individual%20income%20tax%20-%20reciprocity%20-%20nonresidents.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f35f7e74cb74e5f4435c6785977e210119ba03dfe84825579edad06e9c3b35f2"
     },
     "https://revenue.ky.gov/Forms/2026%20Withholding%20Formula.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "3876018d7019cf2b8ffae40554376ef2e6900809221517c26d8e71e025f5e439"
     },
     "https://revenue.ky.gov/Forms/42A804%20(K-4)%20(2026).pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "2978544f9ac7ff4176715b285daa5d1cd23b3bfe0a2694158497a26290f7f91b"
     },
     "https://revenue.louisiana.gov/tax-forms/businesses/r-1306-tf-01-01-2025/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "696cc16f9079a5593fc798d6e8a8b5cbec0e0f8ef8c1970cc607079a9787e4e3"
     },
     "https://revenue.nebraska.gov/businesses/nebraska-income-tax-withholding": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "071eb91ac8cc468e972d8cec3abb33c39cee6ad800b7b54c02b9cfd0c00c3b24"
     },
     "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026_percent.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "3688c1c21a859c941d3ece99dafe99021b9178156c1075eccfe9637d4eef7c49"
     },
     "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026cir_en_whole.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b6a3985ee03873aa1d16c1e9267c6de0acd8598a6e59db6b388dce649c1f3991"
     },
     "https://revenuefiles.delaware.gov/2021/DE-W4.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "aafc7e4ee2ef8a91c32dec79a56af12cfb461316d224fcf7d1a2e925e394f85e"
     },
     "https://revenuefiles.delaware.gov/docs/w4nr.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "975f7ae91727fc7c83b2a708b602a74e4a9407bd94701ec30b5384759a1a7854"
     },
     "https://revenuefiles.mt.gov/files/Forms/Montana_Employee_Withholding_Allowance_and_Exemption_Certificate_Form_MW-4.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "bad3f61899120b7fc068b1e7a8adc6693d29dd2548f9d5fad36c53682b6a13d6"
     },
     "https://revenuefiles.mt.gov/files/Forms/Montana_Employer_and_Information_Agent_Guide_with_Tax_Tables.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "be5e53a31b7175ed17fd2457ef40dff1224e4e9737ac18248f1434c6d4b578eb"
     },
     "https://revenuefiles.mt.gov/files/Forms/Publication-1/Publication-1-2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e3c8ead48b90065910744bb2ffdfc23709760892bfaa34ee4b468286cdde620d"
     },
     "https://rocklandmaine.gov/DocumentCenter/View/2670/2026-Minimum-Wage-Notice---Rockland": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4bffacf74c6739482bf4617593bd41da0802ef1868a3569dbcacb5411ed1a7a1"
     },
     "https://santafenm.gov/media/news_pdf/2025_Living_Wage_Ordinance.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "fd56309357fb37cc313c5053a0b99a944affa4d109238fe86f52042014200fc7"
     },
     "https://selfhelp.courts.ca.gov/guide-earnings-withholding-orders-employers": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "31dc9e958930bfae361b7453107bac35eab6228e357f9eb72ff27c41851b442a"
     },
     "https://statecodesfiles.justia.com/kentucky/2025/chapter-141/section-141-019/section-141-019.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0bd70307a8035555f5059ec7949d746bc30cc4e6be743baa3f9df6588afb556f"
     },
     "https://statutes.capitol.texas.gov/Docs/CN/htm/CN.8.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0e39115889ef365e9c37f4ebcb43c2545a09ccde9d1121104cc0d7df7baaab56"
     },
     "https://statutes.capitol.texas.gov/Docs/PR/htm/PR.42.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0e39115889ef365e9c37f4ebcb43c2545a09ccde9d1121104cc0d7df7baaab56"
     },
     "https://support.taxslayerpro.com/hc/en-us/articles/8472989690010": {
@@ -1661,133 +1667,133 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b6376eaa0f531162e81fb9ddb7782295f5f50f5ba8823e27361c02aac8a279b5"
     },
     "https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0f5d1e72ba39d0c443aa866c89364920878bb1b0a5b324ffa50054d33838ca76"
     },
     "https://tax.colorado.gov/withholding-tax-guide": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "18284cca56f5259d103a81444bf20f3f5fb024ca8e03f431cb7a92ed02531482"
     },
     "https://tax.hawaii.gov/geninfo/a2_b2_4empl_whhold/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "a3c5326f0642cac527b2a3a0e9a180572870540ca6a3706f36e4235a1e3771fe"
     },
     "https://tax.idaho.gov/document-mngr/pubs_EPB00744": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "c52b383684af433b12eb3b712fbb0de6b61326b5061562440b43464b332cb3d8"
     },
     "https://tax.idaho.gov/ictcat": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "6ac0c88b36746a8517d974eae5a5e55b03059bcdffc7f82d5e699ace318bc27d"
     },
     "https://tax.idaho.gov/pressrelease/withholding-tables-updated-for-2026/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "38630879cb765034eaa06f56c6d95c87c7668958f853d3c74a0dce36004d1b49"
     },
     "https://tax.idaho.gov/taxes/income-tax/withholding/computing/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "6ac0c88b36746a8517d974eae5a5e55b03059bcdffc7f82d5e699ace318bc27d"
     },
     "https://tax.idaho.gov/w4form": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d5737fbe17fddd72c9b386a15674899e7ea808a3f8136aaa548e3bd7aa218a96"
     },
     "https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/withholding/documents/2025/il-w-5-nr.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "c53b8e62e69a3816236ba790cfc5b639e90bf5e8e8a19a5ab19128d715f81e56"
     },
     "https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/withholding/documents/currentyear/il-w-4.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "435f12ee27ae5d15e85704f37a1a0700250634adedc2e3b497ed1aa83aa600ef"
     },
     "https://tax.illinois.gov/forms/withholding/currentyear/il-700-t-withholding-guide-tables.html": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "721d69876b3cea3dc012d38d3bfcad5cbd237a080522245196204e181de08f52"
     },
     "https://tax.illinois.gov/research/publications/pubs/who-is-required-to-withhold-illinois-income-tax/withholding-illinois-income-tax-for-my-employees.html": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "811c6b3df4e4800acce053e5be0ba9f5a5e3ab57c82a61207ea40327439910c0"
     },
     "https://tax.nv.gov/faqs/modified-business-tax-faqs/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "119df13d70c2b61149a84a412060005f5cac7f47eac44e908e675ecbd78d6565"
     },
     "https://tax.nv.gov/tax-types/modified-business-tax": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9f0a0a78019b0b4a4e64d18c38f3782dc676f72a293172bc2b0638094d4efb55"
     },
     "https://tax.ohio.gov/static/forms/employer_withholding/generic/wth-it4-combined-fi.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "928d27500754a001e74201b0af5083b64c459cb9eb28cc7ca48a8766263d5495"
     },
     "https://tax.ohio.gov/static/forms/employer_withholding/generic/wth_it4nr.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "916715bc730effff8002a2c14447fdc22f28df14a93445f27edc712696656d13"
     },
     "https://tax.ohio.gov/static/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "241f558af06c8309de16f5e64e882aa0dbc954de189acbec006de6d61a546ef2"
     },
     "https://tax.ri.gov/sites/g/files/xkgbur541/files/2025-12/2026%20Withholding%20Tax%20Booklet.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1e6883fa1a02cc03eaa0be3a62a8e8bf34b2a02ed5246fc8bcc7c54b0bab37c1"
     },
     "https://tax.ri.gov/tax-sections/withholding-tax": {
@@ -1800,70 +1806,70 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4d46c84fcfad577d4f6b3e6de9f8fd39a6dfb72254ea51816b33ba56efcc3eef"
     },
     "https://tax.vermont.gov/business/withholding": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1d826ef05ece81f4d00ee6e47674ead59125afdd6aa79187da0ae82d7dfe97c4"
     },
     "https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4656760209691fdd4404f2a10fa4edf57622e24dc7dbaa10ac113f2775f9687d"
     },
     "https://tax.vermont.gov/sites/tax/files/documents/W-4VT.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b08a01f8d8880660aa51dc160876ff4050f759ed89597fab55fde10d918eb942"
     },
     "https://tax.wv.gov/Business/Withholding/HelpAndGeneralInformation/Pages/WithholdingHelpAndGeneralInformation.aspx": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e3dc79ac2681b801f3a54e7065b24272a9d31cb2592654934498a1cc6cccf497"
     },
     "https://tax.wv.gov/Documents/Withholding/it100.2a.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "c103bacc00f5d3c6c02ce3831c76d328e3ada5ee8af3746a48100b9001ee68b2"
     },
     "https://tax.wv.gov/Documents/Withholding/it104.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d1db0a2bbfc289e126c92ea759bcc31cc0208f54a6b93a56b37c58af76ec4f08"
     },
     "https://thefinder.tax.ohio.gov/?tab=fileDownloads": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "7077f3b53deb12f8c99918d22eba09b3d15f83f69b229d13b5cbb2fd467375a8"
     },
     "https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FJEDTaxRates.csv": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "c8bb486ace2e7f0c16804d31f4ad40ed28bd7c104948507816928a4f02f89184"
     },
     "https://uid.dli.mt.gov/employers/schedule-of-contribution-rates": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "74382abc81f1b3424afc730ef09dc77a3cd4ee7d34814d87a58bb3aee2024eb3"
     },
     "https://ustax.tools/oklahoma-tax-brackets-2026/": {
@@ -1876,56 +1882,56 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "2b00d8fbbe9dc4a50526d082b50f0c5b8be79ea539d473a901106f50f2e8a46e"
     },
     "https://web.sos.ky.gov/occupationaltax/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "cebc2aaf5bd6f7e9599216c5ba6a03e7da67d3a1f42f9bc696c73151c9ac003e"
     },
     "https://webapps.dol.gov/elaws/elg/garnish.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0a6b87b81f1d943f6dba6d11496bfd723eb9b235d16f72aa463ce6980792acf4"
     },
     "https://wilmdebudget.org/wp-content/uploads/2024/03/fy25-tax-rates.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "56b2c1ad62751fbc160a5cfc67a7ed5adc9cf41d580e89854b07b7cd792e40be"
     },
     "https://workforce.iowa.gov/media/234/download": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "24922b26d77c223490cd955de69474c14a2a359290bb0649bd9e447cd4fd7603"
     },
     "https://workforcewv.org/businesses/unemployment-tax-information/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "39c86f3ed5df0b18ba78792d51c330ace2bde0f17b1f3bf07d94bd8a527134b2"
     },
     "https://www.akleg.gov/basis/statutes.asp#23.20": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "06924224e71f75434b9df59b282099f1596ec6ebc1cb634eb375e6403f8e0dcf"
     },
     "https://www.amundsendavislaw.com/labor-employment-law-update/il-minimum-wage-2025-update-july-1-2025-increases-to-chicago-and-cook-county-minimum-wages-january-1-2025-increase-to-the-irs-mileage-rate": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "2ea1073fd45390128d19aaab286d9d612cfa8fe4ec079112803905a2aca97968"
     },
     "https://www.auroragov.org/business_services/taxes__licensing/occupational_privilege_tax": {
@@ -1945,21 +1951,21 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9f5e785cf556e2e55565f27ddbff1fa64a9b9bbd3987785ba6572e68ee5e005a"
     },
     "https://www.californiaworkplacelawblog.com/2026/05/articles/wage-and-hour/los-angeles-amends-hotel-worker-minimum-wage-ordinance-in-advance-of-july-2026/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9ff787d63c80ad142333ccc3c54dbda03609b1671d2a4dee8f6d120be77bd610"
     },
     "https://www.canbyoregon.gov/sites/default/files/fileattachments/transit_tax/page/2041/transit_tax_guide_for_businesses.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "60a54b71f3ed99b633ea6c8b14696f54179567e95f054816c8b931f7e1b5ca67"
     },
     "https://www.capitol.hawaii.gov/hrscurrent/Vol13_Ch0601-0676/HRS0652/HRS_0652-0001.htm": {
@@ -1978,14 +1984,14 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "bdaafe148d4b248313016b5be58359e526abd74967d35d917c48b317dd1c2bc9"
     },
     "https://www.ci.sandy.or.us/sites/default/files/fileattachments/economic_development/page/4671/transit_tax_instructions.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "90c87abb1bfa4120eafb5a09c27ac53bcdd9600059888838f54d488415b1e684"
     },
     "https://www.congress.gov/bill/119th-congress/house-bill/1": {
@@ -1998,91 +2004,94 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "02f82c4b12b0572f8a3ce147c85c1e6692d4d9795913c8a0b344ffe27d311936"
     },
     "https://www.courtlistener.com/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "7987f220b86c4340764d46d4860d08136c6c2eb4e1146acfe7fafdaf764bb8b5"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "7987f220b86c4340764d46d4860d08136c6c2eb4e1146acfe7fafdaf764bb8b5",
+      "pending": "e8e58c2c277e4b5ed848f5547cfe1d0bc6011c81a15efa3d1ec59a8e8fe5842b"
     },
     "https://www.covingtonky.gov/government/departments/finance/business-licensing-occupational-license-fee": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b93ae913a7571a38c32ae9386117cd8999c62774eeeecb93a071ad12c5c2c95e"
     },
     "https://www.ctpaidleave.org/how-ct-paid-leave-works/contributions": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "ba3d36e2c97f8024d36b573551970c486ddde4e575cdf1da379e0d4db5007d24"
     },
     "https://www.cu.edu/blog/hcm-community/employees-working-aurora-will-see-tax-changes": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "7fdc80304d200450bda1fd8991ab6c4c83d163e3636d215333b4db30224b406a"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "7fdc80304d200450bda1fd8991ab6c4c83d163e3636d215333b4db30224b406a",
+      "pending": "21a7de4c07ce9018a1e99b348fc966988e641b1c8fce654fdd9ba8da685ca909"
     },
     "https://www.cu.edu/doc/2026-hi-state-w-4pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "deb109a6bf6394aaacb843864288e5b05104e5cbea52e332b0e5cff51ccc05e3"
     },
     "https://www.denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Department-of-Finance/News/2025/Denver-Local-Minimum-Wage-Adjusts-to-19.29-per-Hour-for-2026": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "d3925fd8edf92ca401a5f48c8e60569c98762a05906a98c5c61b72f05af9dfb0"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "d3925fd8edf92ca401a5f48c8e60569c98762a05906a98c5c61b72f05af9dfb0",
+      "pending": "fe9edbf5281e1425e9d1404d41dfbd6e42a34a1da7f798f8ed12518dbcf07980"
     },
     "https://www.denvergov.org/content/dam/denvergov/Portals/571/documents/TaxGuide/TaxGuideTopic61_OccupationalPrivilegeTaxes.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "045d0c870ecf03dcc7ce3e36dcc0d3604f5e0df5f7ea234c0c24a11e8e5da47f"
     },
     "https://www.des.nc.gov/employers/tax-rate-information": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d6ac226fc50e47eb3ff01670c3615d9a86a8cf2d650e8325326e03f984becdff"
     },
     "https://www.dfa.arkansas.gov/office/taxes/income-tax-administration/withholding-tax-branch/withholding-tax-forms-instructions/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "c143c97c7a1cbf3fcc95aed30234303231b5880694557bf2f808401c70ced013"
     },
     "https://www.dfa.arkansas.gov/wp-content/uploads/AR4EC2025_FI.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0f484cba251ddc73d3f2b2f28248bed31eeded99fa58216c164079e358008462"
     },
     "https://www.dfa.arkansas.gov/wp-content/uploads/whformula_2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "ae8e24bca0968fbfb9c00fd723cf11ed5706850c6ff793eb18cae4012a9271a6"
     },
     "https://www.dfa.arkansas.gov/wp-content/uploads/withholdTaxTablesLowIncome_2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e4711fc248e021eccbca6793929a4e0e4276c0f5f7a12687ba602fa214c7d307"
     },
     "https://www.dfs.ny.gov/consumers/health_insurance/cobra_and_premium_assistance": {
@@ -2095,91 +2104,96 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "94302693b9845fcfc2a09d27d63abe15bae4c6c822a63ff44617b467766694d4"
     },
     "https://www.dir.ca.gov/dlse/Health-Care-Worker-Minimum-Wage-FAQ.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e47f83c62a5b9c216c8988276891f651498c22c5a06b8cbbd36cebcd2572705e"
     },
     "https://www.dir.ca.gov/dlse/minimum_wage.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "6211c1f28666b1d1518473d9ea4c3a613ec91f96762e0568ad30ade21d8d6670"
     },
     "https://www.dli.mn.gov/business/employment-practices/minimum-wage-minnesota": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4509af014c521f9912aa2c64944bf0d63ab892a9d836efceef67630e495d53dd"
     },
     "https://www.dochub.com/fillable-form/160280-d-4-dc-withholding-allowances": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f1729f6fb8d71f6f56357103762c83a06e8a5cbe91ce435526120ba593dc4d1c"
     },
     "https://www.dol.gov/agencies/whd/compliance-assistance/handy-reference-guide-flsa": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "12eabd1a203ca86267b900a9ae0c2a84cea9446bd1ec222d96dde92ce804e8fb"
     },
     "https://www.dol.gov/agencies/whd/fact-sheets/17a-overtime": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "b457f135ed1c2b0b98b21497c28284beaf0ae5730478e4b34d937bb96cfce9fd"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "b457f135ed1c2b0b98b21497c28284beaf0ae5730478e4b34d937bb96cfce9fd",
+      "pending": "cdbf93785fb006ef9002ab430c417b055605fe6f933de2e68dbc165f13b91129"
     },
     "https://www.dol.gov/agencies/whd/fact-sheets/30-cppa": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "af54d91d16c64ff0f7cfb9db342f09cfa28dacd7f65e9a3278e2867edb855701"
     },
     "https://www.dol.gov/agencies/whd/flsa": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "d451a01709350369135af06b6ab5214cefe373f7bdb08d53df51d217751b2565"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "d451a01709350369135af06b6ab5214cefe373f7bdb08d53df51d217751b2565",
+      "pending": "98d784dbdd7a9a08f8cddfb19386aa5258d62741068b88072b6410a2946294d2"
     },
     "https://www.dol.gov/agencies/whd/fmla": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "77d5d1f63d6e234fa5325ec6819908e4b023f75788b5a8bb49df46ac36ee129f"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "77d5d1f63d6e234fa5325ec6819908e4b023f75788b5a8bb49df46ac36ee129f",
+      "pending": "37afc964e13ef228f5ced838672a58209447d1b3c0b7c7695f5d347dc6d1ea90"
     },
     "https://www.dol.gov/agencies/whd/government-contracts/eo14026": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "89e122a1aae0586ff6b6e5bf60ba2d8a6cf64cf2a29992ce5b9c4eace06ee1f3"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "89e122a1aae0586ff6b6e5bf60ba2d8a6cf64cf2a29992ce5b9c4eace06ee1f3",
+      "pending": "a33562f9ff4bd967de45db29c146f71f22a2b7fdec739942fad02f4dda31892e"
     },
     "https://www.dol.gov/agencies/whd/minimum-wage/state": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "c5b227ba80636c31fe4a8291c5c3879ca6cfb16571ca0366011cef993027fd6f"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "c5b227ba80636c31fe4a8291c5c3879ca6cfb16571ca0366011cef993027fd6f",
+      "pending": "06316828bf14d9283944593ddd92730f69864688577e0d4a77e02e817a70964b"
     },
     "https://www.dol.gov/agencies/whd/mw-consolidated": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b1286d97fb6c2479cabcb74fbbb48387636fd77ce03b19a36db250ce889e7f83"
     },
     "https://www.dol.gov/agencies/whd/overtime/rulemaking": {
@@ -2193,169 +2207,176 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "778b185c82f8db64a1535a196e5eadcbe081052724322c434900e823a49b2f52"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "778b185c82f8db64a1535a196e5eadcbe081052724322c434900e823a49b2f52",
+      "pending": "d4641fef60b4aa7c3ce6d1a3b73ac993aa704283e28167f575550aaf7d57ba8a"
     },
     "https://www.dol.gov/general/topic/health-plans/cobra": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "98a2d26e5a0352adaf42983b8eb9ba3e8f712fd0ac8f7fe411a128950e186a2b"
     },
     "https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/ASminwagePoster.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9fc30853a5ec29a8093c64b50efdf90eedd3aba791e6ffaf1870994546ce01db"
     },
     "https://www.dol.nh.gov/inspections/wage-and-hour/minimum-wage": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d6861a250e4611f9f6a1f6e9a57c2e8c38e3c194ec8a8f09d4e52391214e066b"
     },
     "https://www.dor.ms.gov/business/withholding-tax": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "ecfb0e96fb43e9a6fad79513509a10906da3a62274c2f482d4c80e22f2a4872f"
     },
     "https://www.dor.ms.gov/sites/default/files/tax-forms/business/89700251revised1.13.2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "5eabfe62a2d271ab21f72f741c95d1e0b49021b4ef286a644f4270b512a4d585"
     },
     "https://www.dws.state.nm.us/Unemployment/Unemployment-for-a-Business/Unemployment-Insurance-Tax-Information/How-UI-Tax-Rates-Are-Calculated": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "c5845be5c3959a42f68a35c75ff04dea7253abacfa4413417809de88077eac6b"
     },
     "https://www.ecfr.gov/current/title-29/subtitle-B/chapter-V/subchapter-A/part-553/subpart-B/section-553.106": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "a1d8f5d88805f4a1967f105c51c6b6f3d5a551be66fe0b0d57dee24c48d92fb7"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "a1d8f5d88805f4a1967f105c51c6b6f3d5a551be66fe0b0d57dee24c48d92fb7",
+      "pending": "3fc83dcb4b0639bbb8cfb5a1c33aad5c3c4787439dc719ac44ac96ef5ce4b5da"
     },
     "https://www.ecfr.gov/current/title-29/subtitle-B/chapter-V/subchapter-D/part-870": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "c0634d578c9fd0b8b537f28f78e9aaeadf391e34e464635860aad9b0156bc3f6"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "c0634d578c9fd0b8b537f28f78e9aaeadf391e34e464635860aad9b0156bc3f6",
+      "pending": "da7615d2a38030864bf062e6c5426dc5af9df54437243b97d2b8533fb821a9f6"
     },
     "https://www.ecfr.gov/current/title-34/subtitle-A/part-34": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "e1b84c0f0df24f2a51572633af5505b9e3df8c9ee3137eb1187280131a3f3d62"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "e1b84c0f0df24f2a51572633af5505b9e3df8c9ee3137eb1187280131a3f3d62",
+      "pending": "08168c7eeaa3d6bbd0e83a31ae49ba4919571e87222a4059284140fceb861afb"
     },
     "https://www.edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1513c603f5e400d9baf661f554132bc62103fe8331ad225af1efef05af94bd92"
     },
     "https://www.edgewaterco.gov/doing-business/minimum-wage": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1fd3ef82fb6098c7ea35457e270e0eafe9cc8235c896ae3126077a8519d72bd0"
     },
     "https://www.eeoc.gov/laws/guidance/section-2-threshold-issues": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f3b812dc319c46f50412d52801339030d85e7dec2f8e0e118f62944aa5766fca"
     },
     "https://www.federalregister.gov/documents/2026/02/09/2026-02466/minimum-wage-for-federal-contracts-covered-by-executive-order-13658-notice-of-rate-change-in-effect": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "93f2fedc9bfe72fb2a81fed0a41cf27015ee0ce461d9ba4cb6b66bf253a409c4"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "93f2fedc9bfe72fb2a81fed0a41cf27015ee0ce461d9ba4cb6b66bf253a409c4",
+      "pending": "f72d969973e5028cf1ee5a1d616b285be33e926b87390332d097c42f006ec328"
     },
     "https://www.fisherphillips.com/en/insights/insights/california-local-minimum-wage-increases-effective-july-1-2026": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "561faabc73aed3733e8152143bf80c034197f4b750cd605f97375c7757d8a463"
     },
     "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "d7eead38c5c4148e83bd3d5865c8951d554fde8d4b067708c1653b9b41bc0fb5"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "d7eead38c5c4148e83bd3d5865c8951d554fde8d4b067708c1653b9b41bc0fb5",
+      "pending": "1683072f05a16c1d415a4bcae44e99183f90c6efe3068772f7652e9de0728fe1"
     },
     "https://www.floridapolicy.org/posts/a-smart-investment-the-case-for-paid-family-leave-in-florida": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "991fcd023de1865517afcdcac6d3190f6d8a16520701f68055fd7971b79ba08c"
     },
     "https://www.flsenate.gov/Laws/Statutes/2010/222.11": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9cc67d334d2dc6b8d337f58f9b7a2f749c623ff0f35958c03106342c75775c74"
     },
     "https://www.flsenate.gov/Laws/Statutes/2025/218.077": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "07e715968c6e119036c6292b2433406c78cd948cd3e76914ea27b64af24dff80"
     },
     "https://www.georgetownky.gov/2167/Taxes-License-Fees": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "781a63fb7741d2785e9b443b657c135b201d1b6b16c40a1dda04857a6a4fd695"
     },
     "https://www.glendale.co.us/355/Occupational-Privilege-Tax": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e53014c1b6d25cd455b63cb6704adf015089205a51385a5dbf86012d38fd14b6"
     },
     "https://www.govdocs.com/colorados-new-minimum-wage-rates/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "baa2f8c2024594b279a1a6443013be1ad27d888735e553444243cc745a5743b0"
     },
     "https://www.governor.virginia.gov/newsroom/news-releases/2026/may-releases/name-1117602-en.html": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "13deff98331b6fbe0907a85066fe0fd2b1f9e0464d48880a90c87d95da3b8cdc"
     },
     "https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "d312177c3a492d771d79b6d5ce6dc74d0541f84391025ca32a3da741beec0da1"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "d312177c3a492d771d79b6d5ce6dc74d0541f84391025ca32a3da741beec0da1",
+      "pending": "1297ce05d84eb5985ffa43b1928eff84448ec3ef751bbb7c65f46b6859d022e0"
     },
     "https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax": {
       "status": 404,
@@ -2367,21 +2388,21 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4960ed13d78d000449bfd12385a52da48630ec29dfe56e4f02ec94cb8f7e6256"
     },
     "https://www.hendersonky.gov/174/Occupational-License-Tax": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "adcfd34531fba977d1f8daa882c8be0df41f393f825795e1478208365e0418ee"
     },
     "https://www.howardcountymd.gov/finance/minimum-wage": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "6b275786c980f00e6e645c37ffdd3d824a3bf9d87b5dcf592f9a02b29e245d0d"
     },
     "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803": {
@@ -2394,126 +2415,126 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "a4c6e71c43295bfe273d5831922565bcd49cb2f0b33208e59d922c4274a0b77d"
     },
     "https://www.in.gov/dor/tax-forms/withholding-tax-forms/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f20532d44ffe7a64f0b70ed2146a04cb3da9cc2d2016188b6fef583011c5b0ed"
     },
     "https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "94f66264af4ae69752812b6191416d70e81c3b8cff8cdf6b5fa3cc68f1d0167a"
     },
     "https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/new-employer-premium-rate/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "79afb27fe7b007aaaa6642c7f7626324367fe3f957e695157053a2fd93c8e29f"
     },
     "https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/state-premium-rate-computation/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9a7384b43f210a7ba28106fb08ed5ce6a7bb405bc514ad7b3a571882c1e90fe8"
     },
     "https://www.irs.gov/affordable-care-act/employers/determining-if-an-employer-is-an-applicable-large-employer": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "252e0fda466401f08f1a77cb907e060551d2ece31b6bee3f74348a5f84f2d32b"
     },
     "https://www.irs.gov/businesses/small-businesses-self-employed/members-of-the-clergy": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "cd324588e387d42f2978ec0f1ea5e76ed86811ab2f065d68b164607b86e470cf"
     },
     "https://www.irs.gov/pub/irs-pdf/fw4.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "92444d8856ce55d9e25dca8b6d1420634fc68b11e1ab1f760916ea29ddd312b2"
     },
     "https://www.irs.gov/pub/irs-pdf/p15.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b46c3622439d8521e3a0faca4cd5b5ece3451b526f65f06a5e38d5c9f804c88b"
     },
     "https://www.irs.gov/pub/irs-pdf/p15t.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "31b3e2428628e8d2e40f6266c2c8f1b9b0b6ccd24607895f9b3be3d9d306d3fb"
     },
     "https://www.irs.gov/pub/irs-pdf/p926.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "db57fe2911bc0baec40339cd898a2594e28d86eb033f13052786d12fee23e5e7"
     },
     "https://www.jsilvermanlaw.com/minimum-wage/glendale/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "5917daa5acb2bb24788b7e777a3cf81bd42bc9f0480661435f6d014260baf268"
     },
     "https://www.kaidenlaw.com/post/how-much-can-be-garnished-from-wages-georgia": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "a297b59c0f6ff3d4a3c0d06fd1b50659af5d3dcb467b6b43375b463a15beb3d5"
     },
     "https://www.ksrevenue.gov/kw100.html": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f5913c9a4eb1d70c796962c2469187adaf4c9f7e754004ab2c518b9dd0c6a060"
     },
     "https://www.ksrevenue.gov/pdf/20026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "03b344d350cdfe055f4cbde357d6d39eaf38de958e0008d0dded707a329ab481"
     },
     "https://www.ksrevenue.gov/pdf/kw100.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "7e521f216548a12e5afc42faff6d3aa170327e9061582ce8e431ed86c67f8fdd"
     },
     "https://www.ksrevisor.gov/statutes/chapters/ch60/060_023_0010.html": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "83aa1216a42207df425e20fb1406abe9e501c7d4bbe8cf296c6978790baff396"
     },
     "https://www.labor.idaho.gov/wp-content/uploads/2024/12/Tax-rate_Class-array_2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "dbaea7028c4b371d963eaf4fa490ad7fb95957d880a35ade811ed9cf405351fc"
     },
     "https://www.labor.maryland.gov/labor/wages/wagehrfacts.shtml": {
@@ -2526,28 +2547,28 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1dadc59a755c423597d099b91bc932efed86074728e66acd2a9bb7616ceaa8ee"
     },
     "https://www.laworks.net/Downloads/UI/WTS/2026RateTable.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d56899c4f7cf43899be1159c86b7596cd2e383552719fde64af1d7eb52c54fc9"
     },
     "https://www.laworks.net/unemploymentinsurance/ui_lainsurancetaxrates.asp": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0c4f1484c8cf1b8aed703a503644efe542ba91ac73cf5cfa54c86c4b4ecfd927"
     },
     "https://www.leadingageny.org/providers/home-and-community-based-services/lhcsa/home-care-minimum-wage-increases-january-1st-2026/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "88666a677b994f4daa82e6d72842c174a73b16f085c5bc7b21a4c4b77a99a830"
     },
     "https://www.legalconsumer.com/bankruptcy/bankruptcy-citation.php?CitationID=1078": {
@@ -2566,21 +2587,21 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0a7694b56e8ad55ba51f61d5ae1e6ab8f4553b7665667f0cad89e7c896487350"
     },
     "https://www.legis.iowa.gov/docs/publications/LGI/91/HF2631.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "134c55cfd8078cb6e1d6520c85f3948a3735b16c87a6a02db9aae3fbac4e9efe"
     },
     "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/42/00.081.027.000..HTM": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "df1a8f649bf49dcd532de1a4af8d9436e67e5f49422b76346b8cd66e3865d22d"
     },
     "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-206-30": {
@@ -2611,119 +2632,119 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d6360da7031d71597d2c146c87eacf7b088eb2846c3098c44714617523cb57d5"
     },
     "https://www.littler.com/news-analysis/asap/texas-governor-signs-preemption-bill-crown-act-and-other-legislation-law": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f3fb335fd961abbfb230a15ba8adb84dd41ccf4bc387a87ff858683ea21adee6"
     },
     "https://www.lni.wa.gov/news-events/article/25-27": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "a8cfab895085ed747651e4201c755a54324bc50c1862c415d0b305725798e6d4"
     },
     "https://www.lni.wa.gov/workers-rights/leave/paid-family-and-medical-leave": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9eabc09cc73d480966da31039e67edde5c52575b0b13fb5b0d37d9396af3bf47"
     },
     "https://www.loeb.com/en/insights/publications/2019/08/new-york-state-amends-workplace-discrimination-harassment-and-retaliation-laws": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "a8e373b2d5ce9d910220ef39d985e057411ee3f21d7ab1877e42a26c1eb12b71"
     },
     "https://www.longbeach.gov/globalassets/city-clerk/media-library/documents/public-notices/public-notices/measure-rw-bulletin-effective-july-1-2026": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "2c1c6e4782501ffbf7c886ff4a9aee36de531971d7705e747ce06ec7fa2bf69c"
     },
     "https://www.maine.gov/labor/news_events/article.shtml?id=13338762": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9ac62c2fca831a67b7fb4cf3a8cd360687493a77f0394e6ab1c16a54ec05ed93"
     },
     "https://www.maine.gov/paidleave/docs/2026/employers/faq/employerFAQenglish.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "10c6b972b5daae6ba82c0a9b6a5123ae3346d028c3f65fc841d0740df201b2b9"
     },
     "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_form_w-4me_fillable.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "3871ebc36d24fc602d5107c541a7a714fdc59fc0c90332a5c3dcfa8a546cef71"
     },
     "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_wh_tab_instr.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "8b481a6e8eb732d55212632fa58a1159d656e1289b844183d33f0d1b9a71afb3"
     },
     "https://www.malibucity.org/minimumwage": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "c2ebc8cc50ddbacbd8aea824bd648fa9a16b93517577e60b99544363f105ddeb"
     },
     "https://www.marylandcomptroller.gov/content/dam/mdcomp/md/state-payroll/memos/2026/2026-maryland-state-and-local-withholding-information.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4b8c4bc7dfece6737b4f9724274618dc7ec863b290f482b37c4a95035cc24534"
     },
     "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/forms/2026/mw507.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f3a0ac6ac464042b8bbd63ee0d61cbdf464bea5f05124f731e660630caec6140"
     },
     "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/instructions/withholding/2026/withholding-guide.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "ce61cef90c00bc41ad4f4a4913ea1f9f5be65db9c08b015d43c191d20883e0bf"
     },
     "https://www.mass.gov/info-details/learn-about-the-income-tax-paid-to-another-jurisdiction-credit": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "77a07e6dab4cafdb06721f0d57471abe088d76f8432251751e7605f54df4daff"
     },
     "https://www.mass.gov/info-details/massachusetts-4-surtax-on-taxable-income": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "7ef2801b05ed4a28512b3605f81b49281e682be0ebc3c67d823136d7396e25de"
     },
     "https://www.mass.gov/lists/massachusetts-dor-withholding-tax-forms": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "55bf866739b21f55a1385753b9f200c69509aaaf5e06610282405a1e3b96034e"
     },
     "https://www.masslegalhelp.org/employment-unemployment/getting-paid/minimum-wage": {
@@ -2736,86 +2757,86 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "06b8b7397547845aba80ea777a5e79223bd7bdb37bb7372d2ec3198e6ca7f09d"
     },
     "https://www.michigan.gov/-/media/Project/Websites/taxes/Forms/All-Years/MIW4.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "499e31202c2aa95366466fc926b86a33298bfbd82607aac5383d920c98aa6e48"
     },
     "https://www.michigan.gov/leo/bureaus-agencies/uia/assets/unemployment-tax-rate": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1caaba708b30d8bed74ca3d86f399a78842007791ed7382ce1cb35370a827784"
     },
     "https://www.michigan.gov/leo/bureaus-agencies/uia/employers/forms/accordion/taxable-wage-base": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "0dc75d8269a3beb405a99596782c54d2c63d5f41839c30a5076ea727aab1d176"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "0dc75d8269a3beb405a99596782c54d2c63d5f41839c30a5076ea727aab1d176",
+      "pending": "04ecf8a1bbcfb31ac03a9582cbdae3debb78958288b809d52df4c7bcb5f7db6f"
     },
     "https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "1364f72c4789a463e5b1bac875ce4c7bb8e53ddf67af79da09e822960242d91c"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "1364f72c4789a463e5b1bac875ce4c7bb8e53ddf67af79da09e822960242d91c",
+      "pending": "d9fc0cd275d5a1358d92878d0869a5d2d7fd96c0039f045c9cc4cb10924582d8"
     },
     "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/City-Withholding/TY2025/5469_ty2025.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "a24f2d251e19738072f4e3438aeb055ad7cd2b6a6d1d461cbb54f3d49959c6b3"
     },
     "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/SUW/TY2026/446_Withholding-Guide_2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "5cfe50e6842338649de7f97027f39659d830bb87e64e0c5834cf8e61b3a91b04"
     },
     "https://www.michigan.gov/taxes/business-taxes/payroll-service-providers/withholding-reciprocity-examples": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
-      "lastChanged": "2026-09-23T20:09:30.411793+00:00",
+      "lastChanged": "2026-09-24T12:46:38.215978+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "7b2d82d8e9233b1de89974f29324d3eda915bfed2c9e77a7e5ca1d4ebd8b9b48",
-      "pending": "158ae1d3584452ac8c215ce2e892f24376172caec928f585bf396e7c7b6695ef"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "158ae1d3584452ac8c215ce2e892f24376172caec928f585bf396e7c7b6695ef"
     },
     "https://www.michigan.gov/taxes/questions/iit/accordion/general/what-cities-impose-an-income-tax": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "594c11b5cd8ee3a08d6a2642174ce73822f994d99c9011d2b7fd05a36b7aaad9"
     },
     "https://www.michigan.gov/treasury/reference/taxpayer-notices/2026/04/15/425-income-tax-rate-for-individuals-and-fiduciaries-in-2026-tax-year": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "09c494d9c94b1942391cd320657c94488e5e1c7fbea04bb55b9ca001779b2f1d",
-      "pending": "7b3bd704e390ff904ec8426ef284fc09a589349d1e192681dd02e55c4697504a"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "09c494d9c94b1942391cd320657c94488e5e1c7fbea04bb55b9ca001779b2f1d"
     },
     "https://www.miltonma.gov/DocumentCenter/View/6586/Massachusetts-Withholding-Form--M-4": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "fdd582442dc28f5a96b591e8cc62a79e2c8f340d82f80d1f05e7025a3106e573"
     },
     "https://www.minneapolismn.gov/news/2025/december/minimum-wage/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "c7ace1fae4bd65cd7284940dff1d06940918a63b7933a611484dac15d8e04b04"
     },
     "https://www.monroecountylawyers.com/blog/2019/12/which-cities-in-michigan-assess-local-income-taxes-/": {
@@ -2828,126 +2849,128 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "76b9592f4f8970cbbcc49404d3a425eada5510797b67457b545b628e3e28a87d"
     },
     "https://www.montgomerycountymd.gov/office-human-rights/minimum-wage-increase": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "97e253d672df442b4e55b958301db770f9b14b200c1478244cc7f0243f06751a"
     },
     "https://www.nationallist.com/image/cache/Vermont_Debt_Collection_Law.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b7790c4b5bb3fa356667b5da82eb27ca6520f3521020c471d95c3ff38d484eb3"
     },
     "https://www.ncdor.gov/income-tax-withholding-tables-and-instructions-employers/open": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "56a00f942c48c51019c3b78d72da1f1cc04969890678c107fe9d0386c5d655be"
     },
     "https://www.ncdor.gov/taxes-forms/withholding-tax": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "eab6c8bbe1df5aec6c91c5914a471e66e6d788a9295b77aded748d85e7b1b1d3"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "eab6c8bbe1df5aec6c91c5914a471e66e6d788a9295b77aded748d85e7b1b1d3",
+      "pending": "2606ed10c7c4819ab098abafa14c8825c6e96f262aaf95f37f3c34610b834de8"
     },
     "https://www.ncdor.gov/withholding-tax-frequently-asked-questions": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "98e79ec1e8d7385933ba0668781dd268c5fbaf4611251722bd140dda28164010"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "98e79ec1e8d7385933ba0668781dd268c5fbaf4611251722bd140dda28164010",
+      "pending": "3c555cdf8eb555214da607b87e9deb2352cb926ff840924d55b15ceb547ba51d"
     },
     "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_1/GS_1-362.html": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f2a7b60366c714566d4e5c862ea4b3ed8ba42dc687a64d3be558ff6b928cf1dd"
     },
     "https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "ca9761686adb7c00297151cc57889758b7cfb98296fbd931f219ee64f44472b6"
     },
     "https://www.nj.gov/labor/assets/PDFs/Legal%20Notices/Other/Public%20Notice%20Minimum%20Wage%202026_FINAL.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "68ed52fc0d2c00197c3e05bd893b25eb2e673bdcd09aba9143ed4e845162980c"
     },
     "https://www.nj.gov/labor/ea/employer-services/rate-info/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0495337a1a0951cac1c6f103370b940016595ee341f1278bdeacbe1a828e4e80"
     },
     "https://www.nj.gov/labor/lwdhome/press/2025/20251001_Minimum_Wage.shtml": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "01fdd92fc2274ed1c665b047357bd5af1e6ec568f081cabe3afb97aa7c4286cc"
     },
     "https://www.nj.gov/labor/lwdhome/press/2025/20251229_newbenefitrates2026.shtml": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4abf04bb1a067c39ab7945afeb891979c811be16aa33c1e073deb362641b1376"
     },
     "https://www.nj.gov/labor/myleavebenefits/worker/fli/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "51634a24dba847f429f54fc6014acd66b30ba888575989204d38f296d4dfc685"
     },
     "https://www.nj.gov/labor/myleavebenefits/worker/tdi/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "ae68692ed639d348691bacec0216a206a50563025478cee42003d157759237a8"
     },
     "https://www.nj.gov/treasury/taxation/njit25.shtml": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "abc18d1cabdf45319913408a0a0a6431b2bf843e9818a0ce6726c36d5f866b87"
     },
     "https://www.nj.gov/treasury/taxation/pdf/current/nj165.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1c45285a93f3eb219c2943dc433e2134dbfe175b536dfa465eaf54c4cc07a4c5"
     },
     "https://www.nj.gov/treasury/taxation/pdf/current/njwt.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0fbd45b2c7e9f5d8858ed4008c1436739e7a3ba655a823516ca4be8041cf01e9"
     },
     "https://www.nj.gov/treasury/taxation/pdf/withholdingtables.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e7480d096b6126f49181c9f5e9b04a15b1542ca79e7480d01e4a3d6bb359f3f8"
     },
     "https://www.nolo.com/legal-encyclopedia/new-jersey-wage-garnishment-laws.html": {
@@ -2984,140 +3007,142 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "ec4327fe6153611ce6bf60f8e5914eb75c9b6132cf3122bbaaca0ed9dab478a7"
     },
     "https://www.oregon.gov/boli/workers/pages/minimum-wage.aspx": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "28924b6632fa4455ca11d48f827ab3f4f475bd0bc577e8b7b8f0373763631620"
     },
     "https://www.oregon.gov/dor/forms/FormsPubs/combined-payroll_211-155-2_2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "3a06a60b0bc4413162f674405fe79b6009704adce7f80c1d66415d9d5e7b65e8"
     },
     "https://www.oregon.gov/dor/forms/FormsPubs/withholding-tax-formulas_206-436_2026.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "5beea1190b4072da8fb027d211665a4899ffd43d4488ab9e910bde57261ed37d"
     },
     "https://www.oregon.gov/dor/forms/FormsPubs/withholding-transit-tax-non-resident_206-692.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e1b2ffdda1e7854949c3019a9378b45186b1c11ab72f4c0fea265b7827f4b941"
     },
     "https://www.oregon.gov/dor/forms/formspubs/transit-payroll-taxes_211-503.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "2d59c302a3dad4fcfa6e33e7af2139aca94f7c527444f6cb5c4f788bea3ebde9"
     },
     "https://www.oregon.gov/dor/programs/businesses/pages/statewide-transit-tax.aspx": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "442ca6082ecc0adc175d58621c41970202b76d322bf42b29078c2fc43811613f"
     },
     "https://www.oregon.gov/dor/programs/businesses/pages/withholding-and-payroll-tax.aspx": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4e46d6370f4a9f16b06b0c943c23ad066c6c61663faa27a0e561112702e5785b"
     },
     "https://www.oregon.gov/employ/businesses/pages/current-tax-rate.aspx": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9dc795f68f5bf31c966d4c04daf5162301f04fa9f108af8163be9314a8950def"
     },
     "https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/computation-of-rates": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "d59e57f69f387742a2152ddecf8095e33ef2ae5be2d1c28b1ee8f7980e07c199"
     },
     "https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/employee-withholding": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9585ea4f76ac27a7e1bede12e393541fb56644c23199e6c9cb7c1b39e3e1d836"
     },
     "https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/yearly-tax-highlights": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "5027cb82c15ba047160a9aacf23a085099f90b4a15527f0d26f6daa98804e55e"
     },
     "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4332de9ed85d9e82b982c97486a3ad058ba045376f5ee082915c289f819613bd"
     },
     "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748%20rev%2009-25.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "354c4f23b9e689843696218171f17a7b9c1dad61d06ec4af16a654e580daf463"
     },
     "https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforbusinesses/employerwithholding/documents/rev-415.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e64161ea109692f79d6642b5cbc7b56bf67483ad78b7ee369e57b14b5cd9c7e1"
     },
     "https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforbusinesses/employerwithholding/documents/rev-419.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "aa9e73dee6797dcd8ab3a471471f3626281bf3f376a5794a06d5aaffad0d5327"
     },
     "https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4332de9ed85d9e82b982c97486a3ad058ba045376f5ee082915c289f819613bd"
     },
     "https://www.patriotsoftware.com/blog/payroll/massachusetts-paid-family-leave/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
-      "hash": "3085a1b2236cf2376812e36c1ca5e1381f9b923c51bc47c611f94a3fa94f8d12"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "3085a1b2236cf2376812e36c1ca5e1381f9b923c51bc47c611f94a3fa94f8d12",
+      "pending": "cdc3a8b8b321050da52a5fcd9fbc4c19d6000ff02f09efcf7d205a69681519ee"
     },
     "https://www.patriotsoftware.com/blog/payroll/west-virginia-income-tax/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
-      "hash": "269b75bde3ba3590690ba10b46e657a3835b2b2556ed3920c8b80d36f2337ffb"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "269b75bde3ba3590690ba10b46e657a3835b2b2556ed3920c8b80d36f2337ffb",
+      "pending": "39feace1bdd1ab54987b4595f09e3eb7a64ae6ede631d394c791b15608ef4d55"
     },
     "https://www.portland.gov/revenue/withholding": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "94fc43be9d6570a93350f3cc6b83618a72368792f6023e760eb898b36f620477"
     },
     "https://www.portlandmaine.gov/1016/Minimum-Wage": {
@@ -3130,213 +3155,211 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "dee599af3b002b1f491400d9bf97cab6ab32b7f7791b5c2298fc9ce47322fb63"
     },
     "https://www.revenue.alabama.gov/individual-corporate/withholding-tax-2/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "487e30c13b7449b74c315c825f89f385f74ef349bfa05e6ad6ab0c2b95905e0f"
     },
     "https://www.revenue.alabama.gov/notice-overtime-exemption-ends-june-30-2025/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "786bffcde52dd869fb060d4e04cdbb274f186933ce613eaf577f9a03efd9b17b"
     },
     "https://www.revenue.alabama.gov/wp-content/uploads/2025/04/A4_0425.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e343e459a9b49ac94f0d798511a0ca7d652c2db02f249e95e973ed948b113327"
     },
     "https://www.revenue.alabama.gov/wp-content/uploads/2026/01/whbooklet_0126.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "11aa9a42eb1ba920918bcb7ed9356d6b2aad5b446079ac14c170b46c7313f628"
     },
     "https://www.revenue.state.mn.us/reciprocity": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "be75be5266385a48078ef17d0874a53331e5265f04079ac35ca4751ee3a4f81d",
-      "pending": "b916b4ef90a3295c7e10700435c3694eb0f7c234bf9aebc1bdf7f1e13a3c1183"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "be75be5266385a48078ef17d0874a53331e5265f04079ac35ca4751ee3a4f81d"
     },
     "https://www.revenue.state.mn.us/sites/default/files/2025-12/wh-inst-26.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "47c22acd256bcb85fe6fd49a8012835acc5e97b1ebaec99362e6a154e1795da9"
     },
     "https://www.revenue.state.mn.us/sites/default/files/2026-04/w-4mn.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "3fddec06a61284df4126e83697788f5e6e244a1c5a456e61d10b44dba86cd908"
     },
     "https://www.revenue.state.mn.us/withholding-tax": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
-      "hash": "2d3e44534a27aedaa02512e8298e635534f93b078c1fffc572c4bd32ae6206bb",
-      "pending": "157b88a139deef3e96412357aacf5785fde87387806bfecaf71a45793415b7df"
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
+      "hash": "2d3e44534a27aedaa02512e8298e635534f93b078c1fffc572c4bd32ae6206bb"
     },
     "https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "c400ce62d7a945f111d01f42e541415d27c3cae45eb30f3fbf25ac5220949fb7"
     },
     "https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "3718eb277722e8fb6af95442a750ce0fc609c5fa088dce2476e581e5d8fd7f5b"
     },
     "https://www.revenue.wi.gov/Pages/FAQS/pcs-with.aspx": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "7d3b751d051f5324b7b05a4c4ff21640ab90f7e6e56b896bea15941545803fe1"
     },
     "https://www.revisor.mn.gov/rules/8002.0200/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e787de6b5e6c77cd243e6b44a825c7417aded0617d9c2190a738702719a192aa"
     },
     "https://www.revisor.mn.gov/statutes/cite/268B.14": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1e04feab382ab3fb9de23c0b88d9d6b1d0fdd401b08fa7771ab0c0a7b7d119a6"
     },
     "https://www.revisor.mn.gov/statutes/cite/290.081": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "ffbf9416339cad7d80a0de4b56f7521eb616ae15553daeb97f83fa69e009b5c8"
     },
     "https://www.revisor.mn.gov/statutes/cite/477A.016": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "be7a0c013dc5f9b096ca965feaedfec002d34ae18bac8ad9586183da12b23fc3"
     },
     "https://www.revisor.mn.gov/statutes/cite/571.922": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "8ffb1e463897a709fcd80935b2ee95d7f1e9b512e60b8b8c9892749d64d492c0"
     },
     "https://www.rippling.com/blog/payroll-tax-in-kansas": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "a9b07acbab57da3e009dcdb5c25f4abf86681fff4ed877a7b44029ee330de3cf"
     },
     "https://www.rippling.com/blog/payroll-tax-in-new-hampshire": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "baf91ea67b81e4ea30830adc9e121fc6b22a7f86e6834b649613766b0b60ab41"
     },
     "https://www.rippling.com/blog/payroll-tax-in-washington-dc": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "043494dc02c107a287ead018ff1fca44430e89d9afbfe59747ff08930c861b44"
     },
     "https://www.ritaohio.com/municipalities": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "c7ef454b4fa71ee9246ec288a7a16257b00c93f1f14d30bf6c58a2b232c42dee"
     },
     "https://www.rivkinradler.com/publications/ny-amends-home-care-worker-minimum-wage/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1c79aaad092e69246c3112b23bdaaf394cb74d2b3fb73a78ba193c245af1bbc7",
-      "pending": "a55e45208864754a8e11ff9c6c1d174161214f93122f9d3487f9ddbff46bcaf6"
+      "pending": "712b5923aff486b95eb822d76220cc9a84dc8a7b12bf641ceb8da6303f6a0f53"
     },
     "https://www.rrb.gov/Newsroom/NewsReleases/RetirementUnemploymentInsuranceTaxes": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b98b60fe4352f31170dfa301dff5ecb0492b9942f94bf40df394ed561951280e"
     },
     "https://www.saginaw-mi.com/FAQ.aspx?QID=131": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "a7f6245b7718357047899e461c903950b230d6b0ddacfc494f59e927f6aed2c5"
     },
     "https://www.santafecountynm.gov/livingwage": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9a7957fdb0307dcad23f974504f3ffd8b3f9be0797a8cd69f87f025928652aac"
     },
     "https://www.santafecountynm.gov/news/detail/santa-fe-county-announces-living-wage-increase-effective-march-1-2025": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "5c62d951d515690c36e51f60b8facae39cab2978255f359a941dafb6ad5e30a4"
     },
     "https://www.santamonica.gov/minimum-wage": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "4960bb68a794f5c3d769cdf000ded2c399fa8cfa7b8578b12a7f988de153052c"
     },
     "https://www.scstatehouse.gov/code/t15c039.php": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "cecdcdf798604819b77ab734d39c58b774d24ab518d6e1152c50ba363879d641"
     },
     "https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/payroll-expense-tax": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "bf5c27a5a41a834891bcad3bfd567f9fdf662ae3161d12fffe9adc5faafb9a27"
     },
     "https://www.seattle.gov/laborstandards/ordinances/minimum-wage": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f6fee63ba3b254cd36bc1a7ac522a200d142c0a24718014364bdf062d43a53cc"
     },
     "https://www.seyfarth.com/news-insights/2026-wage-updates-for-new-york-employers.html": {
@@ -3349,49 +3372,49 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1210da2932f463906ce39b00a8096abdfa6684348fcbc21cbe1d5bababe46243"
     },
     "https://www.ssa.gov/slge/election_workers.htm": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "462e947d2beca2f0f34c5b35f0c6736db91719e9b51c7ea92140e339fea00f8c"
     },
     "https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e91787020e41e57ede3b4f2b1fb5e6fddd44d1c9d9ef6796c1a2145a0e68660b"
     },
     "https://www.tax-rates.org/kentucky/florence-income-tax": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e4dc594e03cedd1ae59a2bf0aeb4e0efc5873f5f1a09e38b1f34d4d292fdc771"
     },
     "https://www.tax.nd.gov/sites/www/files/documents/forms/business/ndwrfillable.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "38c22547c973f6236376fbc27d09ecc9aa017a15f0b2721e282360e691129ded"
     },
     "https://www.tax.nd.gov/sites/www/files/documents/forms/individual/2026-iit/2026-income-tax-withholding-rates-booklet.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b265477a04e5932a79efc5bbc1be6db812febbe018a4f8b7018b7a72553f0415"
     },
     "https://www.tax.newmexico.gov/forms-publications/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "be74ab4452ab7401e6e078bc4dc795810f5ba309f6356d13e0ca134794ec1dc9"
     },
     "https://www.tax.newmexico.gov/governments/wage-withholding-taxes/": {
@@ -3404,120 +3427,120 @@
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "04eb718666ba50f87183daf1581489354a23ac55b7f66997a8b10913a70dbea7"
     },
     "https://www.tax.ny.gov/pdf/current_forms/wt/nys45i.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "b2a54b19645cd93c05bf1b68d8249814d544ac67a5325861421bd2ac37f9d642"
     },
     "https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_nys.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "e1c2b3440572a10019efe8d8e4d727474c55afb37dd5d18a6a73b94463baf3e8"
     },
     "https://www.tax.virginia.gov/sites/default/files/taxforms/withholding/any/va-4-any.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "21cc7741c6da712f6439310370e7b2e76af0e66f8454bac96d6938e4c9d6daaa"
     },
     "https://www.tax.virginia.gov/sites/default/files/vatax-pdf/employer-withholding-instructions.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "52203efabfc3d5314be57279712c01066d0fadf3b98c0f66a63189aba55097c5"
     },
     "https://www.thestartuplawblog.com/seattle-payroll-expense-tax-guide/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "22f5a9cbc278cd5504ab22a496c5a98e126f3a22bda50ae0582382910cf6e6f0"
     },
     "https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax/ui-tax-rates.html": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "017280c7ae090f0e1f4dc648af5e1733ff18e598eb6ce1bd63bdb5a03d03c54f"
     },
     "https://www.tri-countybookkeeping.com/questions/virginia-new-employer-unemployment-tax": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "cde1c6a017298064552bc498d1a10e56aefd7c4cc2c82d14b6dae3208f0fd71a",
-      "pending": "9321817e96a41fd983aeadf2fd5fa1f4e5b54e1a400c297c9a3c1a42f013c352"
+      "pending": "b6f2dcc38d2d3e47e52576630578edf5c7f7504d5f25123fd9f5b1194238c11e"
     },
     "https://www.tucsonaz.gov/Departments/Business-Services-Department/Tucson-Minimum-Wage-Act": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "f903fa98ec53add834b788e04b8256d39645d4172054b5f7c65b6e1f1ff9696a"
     },
     "https://www.twc.texas.gov/programs/unemployment-tax/your-tax-rates": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 202,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9711627e61313734dcaca203b3ff11e9fb7c67624a93d5a287999913df0d87b8"
     },
     "https://www.twc.texas.gov/sites/default/files/ogc/mtg25/commission-meeting-material-111725-item9b-dp-2026-tax-rates-twc.pdf": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 202,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "9711627e61313734dcaca203b3ff11e9fb7c67624a93d5a287999913df0d87b8"
     },
     "https://www.uimn.org/employers/wages-taxes/tax-rates/index.jsp": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "424b0d0c2133671b5cbdf77e1399e991f153223cb1f0453cc99ca17b86855318"
     },
     "https://www.uimn.org/employers/wages-taxes/tax-rates/new-employer-rates.jsp": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "1558787d354a1adf232c25cccfedcc31a71e003dbe4bdac3aad5a6e599fe26eb"
     },
     "https://www.vec.virginia.gov/FAQs/employers/what-wage-base-each-employee-i-will-pay-taxes": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:09:30.411793+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "ac14b51a097adb9018ed0529d624b4785a1dc1bb5bd24f10fc30fd2bddb33a03"
     },
     "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "39d479cfe2f24902a3e1e0d5a7039e9ccfc5363775b69c5443c5f69b8ea38bfe"
     },
     "https://www.workforcehub.com/hr-laws-and-regulations/wyoming/wyoming-paid-family-leave-laws/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "38a3f00cf371475b22d30ae0e9924fe60de30bf4e9a7bcac0621c5b2c2dff5da"
     },
     "https://www2.labor.alabama.gov/": {
       "firstSeen": "2026-09-23T20:09:30.411793+00:00",
       "lastChanged": "2026-09-23T20:09:30.411793+00:00",
       "status": 200,
-      "lastSeen": "2026-09-23T20:10:55.406408+00:00",
+      "lastSeen": "2026-09-24T12:46:38.215978+00:00",
       "hash": "0b8de7a12ad20525e9849e08031277f51f888d22234e53ec3d1602ca8f082484"
     }
   }
