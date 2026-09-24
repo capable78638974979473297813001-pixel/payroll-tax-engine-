@@ -428,6 +428,17 @@ export interface EmployerContext {
    */
   supplementalFlatRateElection?: Record<string, boolean>;
   /**
+   * How a flat per-employee QUARTERLY fee (New Mexico's workers'
+   * compensation fee) is collected on this cheque, keyed by state code:
+   * 'prorated' (default) spreads the quarter's employee share evenly across
+   * the pay periods; 'full' takes the whole quarterly share on this cheque
+   * (an employer that collects once, e.g. on the last pay of the quarter);
+   * 'skip' takes nothing this cheque — for the other cheques under 'full',
+   * or an employer the fee doesn't cover (New Mexico: fewer than three
+   * employees and outside construction licensing).
+   */
+  quarterlyHeadFeeCollection?: Record<string, 'prorated' | 'full' | 'skip'>;
+  /**
    * Cash wages paid to ALL household employees in the current calendar
    * quarter — the FUTA test for domestic employment ($1,000 in any
    * quarter). An employer-wide figure, so only the employer has it.
@@ -580,6 +591,12 @@ export interface PaycheckInput {
     /** State income tax actually withheld from it. */
     stateIncomeTaxWithheld?: Cents;
   };
+  /**
+   * Hours worked this pay period. Read only by per-hour levies (Oregon's
+   * Workers' Benefit Fund); when omitted those fall back to the state's own
+   * flat-rate hours for the pay frequency.
+   */
+  hoursWorked?: number;
   /** Where the work is performed — whose state income tax rules run. */
   workState?: StateWithholding;
   /**

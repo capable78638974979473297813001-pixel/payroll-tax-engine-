@@ -121,6 +121,19 @@
     "name": "Statewide Transit Tax",
     "rate": 0.001
   },
+  "stateHourlyAssessment": {
+    "idSuffix": "WBF",
+    "name": "Workers' Benefit Fund",
+    "ratePerHour": 0.018,
+    "employeeShareFraction": 0.5,
+    "flatRateHoursPerPeriod": {
+      "weekly": 40,
+      "biweekly": 80,
+      "semimonthly": 86.665,
+      "monthly": 173.33
+    },
+    "$comment": "OAR 436-070-0010 (WCD Admin. Order 25-054, eff. 2026-01-01): 1.8 cents per hour for 2026, down from 2.0. OAR 436-070-0020(1): each pay period the employer 'must retain from the moneys earned by each employee an amount equal to one-half (1/2) the assessment rate ... multiplied by the number of hours or parts of an hour the employee worked', and 0020(3)(b) has the employer pay an equal amount. 0020(1)(a): if actual hours aren't tracked, the flat-rate method is '40 hours per week for employees paid weekly or biweekly, or 173.33 hours per month for employees paid monthly or semi-monthly' (so 86.665 per semimonthly period). 0020(1)(b): fractions of a cent round half up. Source read directly: wcd.oregon.gov/laws/Documents/New_rules/070 WBF - January 1, 2026/70-25054-rule-notice-and-rules.pdf. Daily/quarterly/semiannual/annual pay have no published flat rate; without input.hoursWorked the engine uses a 2,080-hour year divided by the periods, under 0020(1)(a)'s 'another reasonable method'. PaycheckCity withholds this too: its weekly/biweekly/monthly figures match to the cent; its semimonthly figure is one cent lower ($0.77 vs $0.78 from 86.665 hours), which the rule's own 173.33-per-month figure does not support."
+  },
   "statewideTransitTax": {
     "rate": 0.001,
     "payer": "employee",

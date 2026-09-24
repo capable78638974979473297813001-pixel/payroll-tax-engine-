@@ -4233,7 +4233,9 @@ describe('Idaho', () => {
   // Expected values hand-derived from EPB00744's own Table for Percentage
   // Computation Method (single weekly threshold $310, married $619; 5.3%
   // flat above it) before the code was run, same discipline as every other
-  // state in this project.
+  // state in this project. The Tax Commission's computing page then says
+  // to round the result to the nearest whole dollar, so each figure in a
+  // test name is the pre-rounding amount and the assertion the rounded one.
   const idState = (certificate: Record<string, unknown> = {}) => ({
     workState: { code: 'ID', certificate },
   });
@@ -4246,7 +4248,7 @@ describe('Idaho', () => {
         ...idState(),
       }),
     );
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(36.57));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(37));
   });
 
   test("married's threshold is exactly double single's: (1,000 − 619) × 5.3% = $20.19", () => {
@@ -4257,7 +4259,7 @@ describe('Idaho', () => {
         ...idState({ maritalStatus: 'married' }),
       }),
     );
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(20.19));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(20));
   });
 
   test('head of household folds into the single schedule — same $36.57 as plain single', () => {
@@ -4268,7 +4270,7 @@ describe('Idaho', () => {
         ...idState({ maritalStatus: 'hoh' }),
       }),
     );
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(36.57));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(37));
   });
 
   test('wages at or below the threshold owe $0, not a negative bracket', () => {
@@ -4301,7 +4303,7 @@ describe('Idaho', () => {
       }),
     );
     // (800 − 310) × 5.3% = $25.97, not $36.57.
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(25.97));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(26));
   });
 
   test('no reciprocity exemption exists — Idaho has none, confirmed structurally empty rather than omitted', () => {
@@ -4313,7 +4315,7 @@ describe('Idaho', () => {
         ...idState(),
       }),
     );
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(36.57));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(37));
   });
 
   test("Form ID W-4's Box C (married, but withhold at Single rate) uses the single schedule — same $36.57", () => {
@@ -4324,7 +4326,7 @@ describe('Idaho', () => {
         ...idState({ maritalStatus: 'married_withhold_as_single' }),
       }),
     );
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(36.57));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(37));
   });
 
   test("nonresident alien: forced to the single schedule plus Form ID W-4's own Pay Period table add-on", () => {
@@ -4339,7 +4341,7 @@ describe('Idaho', () => {
       }),
     );
     // (1,000 − 310) × 5.3% = $36.57, plus the weekly $15 NRA add-on = $51.57.
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(51.57));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(52));
   });
 
   test('nonresident alien on a pay frequency outside the Pay Period table falls back to $0 add-on, not an error', () => {
@@ -4352,7 +4354,7 @@ describe('Idaho', () => {
     );
     // (50,000 − 16,100) × 5.3% = $1,796.70, no annual row in the Pay Period
     // table so the add-on is $0, not a thrown error or a guessed figure.
-    assert.equal(amountOf(r, 'ID_SIT'), dollars(1796.70));
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(1797));
   });
 
   test('an unrecognized marital status throws rather than silently defaulting', () => {
@@ -5379,8 +5381,13 @@ describe('Massachusetts', () => {
   // MA-2026.json's $extractionNote — so this project's usual "reproduce
   // the source's own worked example" discipline isn't available; this is
   // the fallback discipline instead).
+  // These tests exercise the exemption/surtax/credit mechanics, so they
+  // start from a YTD where the $2,000 FICA deduction is already used up
+  // ($30,000 x 7.65% = $2,295 > $2,000) and it stays out of the arithmetic.
+  // The deduction itself has its own tests at the end of this block.
   const maState = (certificate: Record<string, unknown> = {}) => ({
     workState: { code: 'MA', certificate },
+    ytd: { socialSecurity: dollars(30000), medicare: dollars(30000), futa: dollars(7000) },
   });
 
   test("no certificate filed: Form M-4's own instruction is withholding \"without exemptions\" — full $100.00, not the $95.77 a filed certificate would give", () => {
@@ -5571,6 +5578,50 @@ describe('Massachusetts', () => {
       }),
     );
     assert.equal(r.taxes.some((t) => t.jurisdiction === 'local'), false);
+  });
+
+  test("Circular M's FICA deduction: this cheque's Social Security + Medicare comes off wages first — matches PaycheckCity: monthly $4,750, no certificate -> $219.33", () => {
+    // FICA = 4,750 x 7.65% = $363.38, well under the $2,000 annual cap.
+    // (4,750 - 363.38) x 5% = $219.33. Before this deduction was wired the
+    // engine withheld $237.50 here, $18.17 more than PaycheckCity.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(4750) }],
+        workState: { code: 'MA', certificate: {} },
+      }),
+    );
+    assert.equal(amountOf(r, 'MA_SIT'), dollars(219.33));
+  });
+
+  test('the FICA deduction stops at $2,000 for the year: the cheque that crosses the cap deducts only what is left', () => {
+    // Prior YTD FICA = 25,000 x 6.2% + 25,000 x 1.45% = $1,912.50, leaving
+    // $87.50. This cheque's FICA ($153.00) is limited to that $87.50.
+    // (2,000 - 87.50) x 5% = $95.625 -> $95.63.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+        ytd: { socialSecurity: dollars(25000), medicare: dollars(25000), futa: dollars(7000) },
+        workState: { code: 'MA', certificate: {} },
+      }),
+    );
+    assert.equal(amountOf(r, 'MA_SIT'), dollars(95.63));
+  });
+
+  test('no withholding for an employee claiming an exemption with annual wages under $8,000; a no-certificate employee is still withheld on', () => {
+    const low = (certificate: Record<string, unknown>) =>
+      calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(150) }],
+          workState: { code: 'MA', certificate },
+        }),
+      );
+    // $150 x 52 = $7,800 < $8,000 with Line 4 = 1.
+    assert.equal(amountOf(low({ personalExemptionCode: 1 }), 'MA_SIT'), 0);
+    // No certificate: (150 - 11.48 FICA) x 5% = $6.926 -> $6.93.
+    assert.equal(amountOf(low({}), 'MA_SIT'), dollars(6.93));
   });
 });
 
@@ -6817,6 +6868,33 @@ describe('Nebraska', () => {
 });
 
 describe('Oregon', () => {
+  describe("Workers' Benefit Fund (OAR 436-070-0020)", () => {
+    const or = (overrides: Partial<PaycheckInput>) =>
+      calculatePaycheck(input({ workState: { code: 'OR', certificate: {} }, ...overrides }));
+
+    test('flat-rate hours when hoursWorked is absent: biweekly 80 h x $0.009 = $0.72 employee, $0.72 employer (matches PaycheckCity)', () => {
+      const r = or({ payFrequency: 'biweekly' });
+      assert.equal(amountOf(r, 'OR_WBF_EE'), dollars(0.72));
+      assert.equal(amountOf(r, 'OR_WBF_ER'), dollars(0.72));
+    });
+
+    test('monthly 173.33 h -> $1.56; semimonthly 86.665 h -> $0.78 (half a cent rounds up)', () => {
+      assert.equal(amountOf(or({ payFrequency: 'monthly' }), 'OR_WBF_EE'), dollars(1.56));
+      assert.equal(amountOf(or({ payFrequency: 'semimonthly' }), 'OR_WBF_EE'), dollars(0.78));
+    });
+
+    test('actual hours win over the flat rate: 45.5 h x $0.009 = $0.4095 -> $0.41', () => {
+      const r = or({ payFrequency: 'weekly', hoursWorked: 45.5 });
+      assert.equal(amountOf(r, 'OR_WBF_EE'), dollars(0.41));
+    });
+
+    test('no line for zero hours, and none outside Oregon', () => {
+      assert.equal(or({ hoursWorked: 0 }).taxes.some((t) => t.id.startsWith('OR_WBF')), false);
+      const wa = calculatePaycheck(input({ workState: { code: 'WA', certificate: {} } }));
+      assert.equal(wa.taxes.some((t) => t.id.includes('WBF')), false);
+    });
+  });
+
   // Oregon is the first state in this project whose formula depends on the
   // employee's own COMPUTED FEDERAL WITHHOLDING, not just federally-defined
   // wage categories. These fixtures were verified two ways: (1) an
@@ -8169,9 +8247,10 @@ describe('West Virginia', () => {
     workState: { code: 'WV', certificate },
   });
 
-  test('weekly $800, 1 exemption, default Two Earner table: $23.74', () => {
+  test('weekly $800, 1 exemption, default Two Earner table: $24', () => {
     // Taxable = 800 - 38.46 = 761.54. Bracket [577-866, base 15.95, 4.22%]:
-    // 15.95 + 4.22%x(761.54-577=184.54) = 15.95 + 7.79 = $23.74.
+    // 15.95 + 4.22%x(761.54-577=184.54) = 15.95 + 7.79 = $23.74, rounded
+    // to the nearest whole dollar per IT-100.1-A = $24.
     const r = calculatePaycheck(
       input({
         payFrequency: 'weekly',
@@ -8179,15 +8258,16 @@ describe('West Virginia', () => {
         ...wvState({ exemptions: 1 }),
       }),
     );
-    assert.equal(amountOf(r, 'WV_SIT'), dollars(23.74));
+    assert.equal(amountOf(r, 'WV_SIT'), dollars(24));
   });
 
-  test('weekly $800, 1 exemption, One Earner/One Job elected (IT-104 Line 5): $21.04', () => {
+  test('weekly $800, 1 exemption, One Earner/One Job elected (IT-104 Line 5): $21', () => {
     // Same taxable $761.54, but the ONE-EARNER table's bracket [481-769,
     // base 12.17, 3.16%] applies instead: 12.17 + 3.16%x(761.54-481=280.54)
     // = 12.17 + 8.87 = $21.04 — less withheld than the default table, as
     // expected (opting in is only available to single filers/one-job
     // households, and produces LOWER withholding, per IT-104's own design).
+    // Rounded to the nearest whole dollar per IT-100.1-A = $21.
     const r = calculatePaycheck(
       input({
         payFrequency: 'weekly',
@@ -8195,12 +8275,13 @@ describe('West Virginia', () => {
         ...wvState({ exemptions: 1, oneEarnerElection: true }),
       }),
     );
-    assert.equal(amountOf(r, 'WV_SIT'), dollars(21.04));
+    assert.equal(amountOf(r, 'WV_SIT'), dollars(21));
   });
 
-  test('no certificate on file defaults to 0 exemptions and the (higher-withholding) Two Earner table: $25.36', () => {
+  test('no certificate on file defaults to 0 exemptions and the (higher-withholding) Two Earner table: $25', () => {
     // Taxable = 800 - 0 = 800. Bracket [577-866, base 15.95, 4.22%]:
-    // 15.95 + 4.22%x(800-577=223) = 15.95 + 9.41 = $25.36.
+    // 15.95 + 4.22%x(800-577=223) = 15.95 + 9.41 = $25.36 -> $25 (IT-100.1-A
+    // nearest-whole-dollar rule).
     const r = calculatePaycheck(
       input({
         payFrequency: 'weekly',
@@ -8208,7 +8289,7 @@ describe('West Virginia', () => {
         workState: { code: 'WV' },
       }),
     );
-    assert.equal(amountOf(r, 'WV_SIT'), dollars(25.36));
+    assert.equal(amountOf(r, 'WV_SIT'), dollars(25));
   });
 
   test('reciprocity: a Pennsylvania resident working in West Virginia owes $0 WV tax', () => {
@@ -8507,7 +8588,8 @@ describe('West Virginia', () => {
           workState: { code: 'WV', certificate: {} },
         }),
       );
-      assert.equal(amountOf(regular, 'WV_SIT'), dollars(68.59));
+      // $68.59 before IT-100.1-A's nearest-whole-dollar rounding.
+      assert.equal(amountOf(regular, 'WV_SIT'), dollars(69));
 
       const bonus = calculatePaycheck(
         input({
@@ -8761,6 +8843,32 @@ describe('Arkansas', () => {
       }),
     );
     assert.equal(amountOf(r, 'AR_SIT'), dollars(0.9));
+  });
+
+  test('HB 1001 (2026) cut the top rate to 3.7%, retroactive to Jan 1 — matches PaycheckCity: biweekly $8,492.31 -> $307.62, monthly $7,133.33 -> $225.75', () => {
+    // Biweekly: 8,492.31 x 26 = 220,800.06, less $2,470 = $218,330.06 (over
+    // $100,001, so no midrange rounding) x 3.7% = $8,078.21, less $79.90 =
+    // $7,998.31 -> $7,998 / 26 = $307.62. Under the superseded 3.9% table
+    // this was $324.08.
+    const biweekly = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(8492.31) }],
+        workState: { code: 'AR' },
+      }),
+    );
+    assert.equal(amountOf(biweekly, 'AR_SIT'), dollars(307.62));
+    // Monthly: 7,133.33 x 12 = 85,599.96, less $2,470 = $83,129.96 ->
+    // midrange $83,150 x 3.7% = $3,076.55, less $367.16 = $2,709.39 ->
+    // $2,709 / 12 = $225.75.
+    const monthly = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(7133.33) }],
+        workState: { code: 'AR' },
+      }),
+    );
+    assert.equal(amountOf(monthly, 'AR_SIT'), dollars(225.75));
   });
 
   test('no reciprocity with any state', () => {
@@ -9614,6 +9722,31 @@ describe('Texas', () => {
 });
 
 describe('New Mexico', () => {
+  describe("workers' compensation fee ($2.25 employee / $2.55 employer per quarter)", () => {
+    const nm = (overrides: Partial<PaycheckInput> = {}) =>
+      calculatePaycheck(input({ workState: { code: 'NM', certificate: {} }, ...overrides }));
+
+    test('prorated by default: semimonthly $2.25 x 4 / 24 = $0.375 -> $0.38, monthly $0.75 (matches PaycheckCity)', () => {
+      assert.equal(amountOf(nm({ payFrequency: 'semimonthly' }), 'NM_WC_FEE_EE'), dollars(0.38));
+      const monthly = nm({ payFrequency: 'monthly' });
+      assert.equal(amountOf(monthly, 'NM_WC_FEE_EE'), dollars(0.75));
+      assert.equal(amountOf(monthly, 'NM_WC_FEE_ER'), dollars(0.85));
+    });
+
+    test("'full' takes the whole quarterly share on this cheque; 'skip' takes nothing", () => {
+      const full = nm({ employer: { quarterlyHeadFeeCollection: { NM: 'full' } } });
+      assert.equal(amountOf(full, 'NM_WC_FEE_EE'), dollars(2.25));
+      assert.equal(amountOf(full, 'NM_WC_FEE_ER'), dollars(2.55));
+      const skip = nm({ employer: { quarterlyHeadFeeCollection: { NM: 'skip' } } });
+      assert.equal(skip.taxes.some((t) => t.id.startsWith('NM_WC_FEE')), false);
+    });
+
+    test('domestic and farm workers are exempt', () => {
+      assert.equal(nm({ employmentCategory: 'household' }).taxes.some((t) => t.id.startsWith('NM_WC_FEE')), false);
+      assert.equal(nm({ employmentCategory: 'agricultural' }).taxes.some((t) => t.id.startsWith('NM_WC_FEE')), false);
+    });
+  });
+
   const nmState = (certificate: Record<string, unknown> = {}) => ({
     workState: { code: 'NM', certificate },
   });

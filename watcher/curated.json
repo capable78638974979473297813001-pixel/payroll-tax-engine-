@@ -1,0 +1,589 @@
+{
+ "$comment": "Hand-picked official pages that announce changes: each agency's withholding / employer landing page (where a NEW formula, table or form shows up, often at a new address) plus the federal publications. kind 'index' also reports every added or removed same-site link, not just document links. build_sources.py merges these with every official URL the engine's data files cite.",
+ "sources": [
+  {
+   "jurisdiction": "US",
+   "title": "IRS Publication 15-T (Federal Income Tax Withholding Methods)",
+   "url": "https://www.irs.gov/pub/irs-pdf/p15t.pdf"
+  },
+  {
+   "jurisdiction": "US",
+   "title": "IRS Publication 15 (Circular E, Employer's Tax Guide)",
+   "url": "https://www.irs.gov/pub/irs-pdf/p15.pdf"
+  },
+  {
+   "jurisdiction": "US",
+   "title": "IRS Form W-4",
+   "url": "https://www.irs.gov/pub/irs-pdf/fw4.pdf"
+  },
+  {
+   "jurisdiction": "US",
+   "title": "IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)",
+   "url": "https://www.irs.gov/draft-tax-forms",
+   "kind": "index",
+   "keep": [
+    "\\bW-4",
+    "15-T",
+    "Pub(lication)?\\.? ?15\\b",
+    "\\bp15",
+    "\\b94[014]\\b",
+    "\\bW-[23]\\b",
+    "\\bfw[234]",
+    "\\bf94[014]"
+   ]
+  },
+  {
+   "jurisdiction": "US",
+   "title": "IRS Publication 15-T (web page)",
+   "url": "https://www.irs.gov/publications/p15t"
+  },
+  {
+   "jurisdiction": "US",
+   "title": "SSA contribution and benefit base (Social Security wage base)",
+   "url": "https://www.ssa.gov/oact/cola/cbb.html"
+  },
+  {
+   "jurisdiction": "US",
+   "title": "IRS retirement plan contribution limits (401(k)/403(b)/457)",
+   "url": "https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-topics-401k-and-profit-sharing-plan-contribution-limits"
+  },
+  {
+   "jurisdiction": "US",
+   "title": "DOL FUTA credit reduction states",
+   "url": "https://oui.doleta.gov/unemploy/futa_credit.asp"
+  },
+  {
+   "jurisdiction": "US",
+   "title": "DOL state minimum wage laws",
+   "url": "https://www.dol.gov/agencies/whd/minimum-wage/state"
+  },
+  {
+   "jurisdiction": "US",
+   "title": "DOL consolidated state minimum wage table",
+   "url": "https://www.dol.gov/agencies/whd/mw-consolidated"
+  },
+  {
+   "jurisdiction": "US",
+   "title": "IRS Publication 15-B (fringe benefits)",
+   "url": "https://www.irs.gov/pub/irs-pdf/p15b.pdf"
+  },
+  {
+   "jurisdiction": "US",
+   "title": "IRS Publication 15-A (supplemental guide)",
+   "url": "https://www.irs.gov/pub/irs-pdf/p15a.pdf"
+  },
+  {
+   "jurisdiction": "AL",
+   "title": "Alabama DOR withholding tax",
+   "url": "https://www.revenue.alabama.gov/individual-corporate/withholding-tax-2/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "AR",
+   "title": "Arkansas DFA withholding tax",
+   "url": "https://www.dfa.arkansas.gov/office/taxes/income-tax-administration/withholding-tax-branch/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "AR",
+   "title": "Arkansas withholding formula (current)",
+   "url": "https://www.dfa.arkansas.gov/wp-content/uploads/Withholding-Tax-Formula.pdf"
+  },
+  {
+   "jurisdiction": "AZ",
+   "title": "Arizona DOR withholding",
+   "url": "https://azdor.gov/business/withholding-tax",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "CA",
+   "title": "California EDD rates and withholding",
+   "url": "https://edd.ca.gov/en/payroll_taxes/rates_and_withholding/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "CA",
+   "title": "California DE 44 employer's guide",
+   "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf"
+  },
+  {
+   "jurisdiction": "CO",
+   "title": "Colorado wage withholding",
+   "url": "https://tax.colorado.gov/withholding-tax",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "CT",
+   "title": "Connecticut 2026 Informational Publications (Circular CT is IP 2026(1))",
+   "url": "https://portal.ct.gov/drs/publications/informational-publications/2026/2026-informational-publications",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "DC",
+   "title": "DC OTR withholding",
+   "url": "https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "DE",
+   "title": "Delaware withholding forms and guide",
+   "url": "https://revenue.delaware.gov/employers-guide-withholding-regulations-employers-duties/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "GA",
+   "title": "Georgia DOR withholding",
+   "url": "https://dor.georgia.gov/taxes/withholding-tax-employers",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "HI",
+   "title": "Hawaii DOTAX withholding",
+   "url": "https://tax.hawaii.gov/geninfo/a2_b2_4empl_whhold/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "IA",
+   "title": "Iowa withholding",
+   "url": "https://revenue.iowa.gov/taxes/tax-guidance/withholding-tax",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "ID",
+   "title": "Idaho computing withholding",
+   "url": "https://tax.idaho.gov/taxes/income-tax/withholding/computing/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "IL",
+   "title": "Illinois withholding income tax",
+   "url": "https://tax.illinois.gov/research/taxinformation/withholdingincometax.html",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "IN",
+   "title": "Indiana DOR withholding",
+   "url": "https://www.in.gov/dor/i-am-a/business-corp/withholding/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "IN",
+   "title": "Indiana Departmental Notice #1 (county rates)",
+   "url": "https://www.in.gov/dor/files/dn01.pdf"
+  },
+  {
+   "jurisdiction": "KS",
+   "title": "Kansas withholding tax guide KW-100",
+   "url": "https://www.ksrevenue.gov/pdf/kw100.pdf"
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "Kentucky withholding",
+   "url": "https://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "LA",
+   "title": "Louisiana withholding",
+   "url": "https://revenue.louisiana.gov/businesses/widely-used-tax-types/withholding/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "MA",
+   "title": "Massachusetts Circular M (2026, effective January 1)",
+   "url": "https://www.mass.gov/doc/massachusetts-circular-m-income-tax-withholding-tables-at-50-effective-january-1-2026/download"
+  },
+  {
+   "jurisdiction": "MD",
+   "title": "Maryland employer withholding",
+   "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/instructions/withholding/2026/withholding-guide.pdf"
+  },
+  {
+   "jurisdiction": "ME",
+   "title": "Maine withholding tables",
+   "url": "https://www.maine.gov/revenue/taxes/income-estate-tax/employer-withholding",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "MI",
+   "title": "Michigan withholding tax",
+   "url": "https://www.michigan.gov/taxes/business-taxes/withholding",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "MN",
+   "title": "Minnesota withholding tax",
+   "url": "https://www.revenue.state.mn.us/withholding-tax",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "MO",
+   "title": "Missouri withholding",
+   "url": "https://dor.mo.gov/taxation/business/tax-types/withholding/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "MS",
+   "title": "Mississippi withholding",
+   "url": "https://www.dor.ms.gov/business/withholding-tax",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "MT",
+   "title": "Montana withholding",
+   "url": "https://revenue.mt.gov/taxes/withholding-tax/wage-withholding-returns-and-payments",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "NC",
+   "title": "North Carolina withholding",
+   "url": "https://www.ncdor.gov/taxes-forms/withholding-tax",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "ND",
+   "title": "North Dakota withholding",
+   "url": "https://www.tax.nd.gov/income-tax-withholding",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "NE",
+   "title": "Nebraska withholding",
+   "url": "https://revenue.nebraska.gov/businesses/nebraska-income-tax-withholding",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "NJ",
+   "title": "New Jersey employer payroll tax",
+   "url": "https://www.nj.gov/treasury/taxation/businesses/payroll/index.shtml",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "NM",
+   "title": "New Mexico withholding (FYI-104)",
+   "url": "https://realfile.tax.newmexico.gov/FYI-104.pdf"
+  },
+  {
+   "jurisdiction": "NM",
+   "title": "New Mexico workers' compensation FAQ (fee amounts)",
+   "url": "https://www.workerscomp.nm.gov/faqs/"
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "New York withholding tax",
+   "url": "https://www.tax.ny.gov/bus/wt/wtidx.htm",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "New York NYS-50-T-NYS",
+   "url": "https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_nys.pdf"
+  },
+  {
+   "jurisdiction": "OH",
+   "title": "Ohio employer withholding",
+   "url": "https://tax.ohio.gov/business/employer-withholding",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "OK",
+   "title": "Oklahoma withholding OW-2",
+   "url": "https://oklahoma.gov/tax/businesses/withholding.html",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "OR",
+   "title": "Oregon payroll tax",
+   "url": "https://www.oregon.gov/dor/programs/businesses/pages/payroll-updates.aspx",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "OR",
+   "title": "Oregon Workers' Benefit Fund rule changes",
+   "url": "https://wcd.oregon.gov/laws/Pages/new-rules.aspx",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "PA",
+   "title": "Pennsylvania employer withholding",
+   "url": "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "RI",
+   "title": "Rhode Island withholding",
+   "url": "https://tax.ri.gov/tax-sections/withholding-tax",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "SC",
+   "title": "South Carolina withholding",
+   "url": "https://dor.sc.gov/withholding",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "UT",
+   "title": "Utah Publication 14 (withholding)",
+   "url": "https://files.tax.utah.gov/tax/forms/pubs/pub-14.pdf"
+  },
+  {
+   "jurisdiction": "VA",
+   "title": "Virginia withholding",
+   "url": "https://www.tax.virginia.gov/withholding-tax",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "VT",
+   "title": "Vermont withholding",
+   "url": "https://tax.vermont.gov/business/withholding",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "WI",
+   "title": "Wisconsin withholding",
+   "url": "https://www.revenue.wi.gov/Pages/Withholding/home.aspx",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "WV",
+   "title": "West Virginia withholding",
+   "url": "https://tax.wv.gov/Business/Withholding/Publications/Pages/WithholdingPublications.aspx",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "WA",
+   "title": "Washington Paid Leave premium rates",
+   "url": "https://paidleave.wa.gov/employers/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "WA",
+   "title": "Washington Cares Fund premiums",
+   "url": "https://wacaresfund.wa.gov/employers/"
+  },
+  {
+   "jurisdiction": "GA",
+   "title": "Georgia Employer's Tax Guide (current)",
+   "url": "https://dor.georgia.gov/employers-tax-guide",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "HI",
+   "title": "Hawaii employer payroll updates",
+   "url": "https://tax.hawaii.gov/payrollupdate/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "Kentucky 2026 withholding formula",
+   "url": "https://revenue.ky.gov/Forms/2026%20Withholding%20Formula.pdf"
+  },
+  {
+   "jurisdiction": "MD",
+   "title": "Maryland withholding tax facts",
+   "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/legal-publications/facts/withholding-tax-facts-2026.pdf"
+  },
+  {
+   "jurisdiction": "MT",
+   "title": "Montana withholding news",
+   "url": "https://revenue.mt.gov/news/recent-news/2026-withholding-updates"
+  },
+  {
+   "jurisdiction": "NJ",
+   "title": "New Jersey NJ-WT withholding instructions",
+   "url": "https://www.nj.gov/treasury/taxation/pdf/current/njwt.pdf"
+  },
+  {
+   "jurisdiction": "OR",
+   "title": "Oregon withholding and payroll tax",
+   "url": "https://www.oregon.gov/dor/programs/businesses/pages/withholding-and-payroll-tax.aspx",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "UT",
+   "title": "Utah Pub 14 page",
+   "url": "https://tax.utah.gov/forms-pubs/pub-14/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "WI",
+   "title": "Wisconsin W-166 withholding guide",
+   "url": "https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf"
+  },
+  {
+   "jurisdiction": "WV",
+   "title": "West Virginia withholding forms",
+   "url": "https://tax.wv.gov/business/withholding/pages/withholdingtaxforms.aspx",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "LA",
+   "title": "Louisiana withholding tax tables",
+   "url": "https://revenue.louisiana.gov/tax-professionals/general-resources/louisiana-withholding-tax-tables/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "CO",
+   "title": "Colorado withholding tax guide",
+   "url": "https://tax.colorado.gov/withholding-tax-guide",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "CT",
+   "title": "Connecticut DRS publications (new years' publication lists appear here)",
+   "url": "https://portal.ct.gov/drs/publications/publications-page",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "US",
+   "title": "eCFR 29 CFR 870 amendment history (garnishment limits) - official API",
+   "url": "https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?part=870",
+   "replaces": [
+    "https://www.ecfr.gov/current/title-29/subtitle-B/chapter-V/subchapter-D/part-870"
+   ]
+  },
+  {
+   "jurisdiction": "US",
+   "title": "eCFR 34 CFR 34 amendment history (administrative wage garnishment) - official API",
+   "url": "https://www.ecfr.gov/api/versioner/v1/versions/title-34.json?part=34",
+   "replaces": [
+    "https://www.ecfr.gov/current/title-34/subtitle-A/part-34"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "eCFR 29 CFR 553.106 amendment history - official API",
+   "url": "https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?section=553.106",
+   "replaces": [
+    "https://www.ecfr.gov/current/title-29/subtitle-B/chapter-V/subchapter-A/part-553/subpart-B/section-553.106"
+   ]
+  },
+  {
+   "jurisdiction": "US",
+   "title": "Federal Register: new Wage and Hour Division documents (minimum wage, overtime, garnishment) - official API",
+   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=wage-and-hour-division",
+   "replaces": [
+    "https://www.dol.gov/agencies/whd/overtime/rulemaking",
+    "https://www.federalregister.gov/documents/2026/02/09/2026-02466/minimum-wage-for-federal-contracts-covered-by-executive-order-13658-notice-of-rate-change-in-effect"
+   ]
+  },
+  {
+   "jurisdiction": "US",
+   "title": "Federal Register: new IRS withholding rules and proposed rules - official API",
+   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=internal-revenue-service&conditions%5Btype%5D%5B%5D=RULE&conditions%5Btype%5D%5B%5D=PRORULE&conditions%5Bterm%5D=withholding"
+  },
+  {
+   "jurisdiction": "US",
+   "title": "Federal Register: SSA yearly wage base notice (Cost-of-Living Increase and Other Determinations) - official API",
+   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=social-security-administration&conditions%5Bterm%5D=%22cost-of-living+increase+and+other+determinations%22",
+   "replaces": [
+    "https://www.ssa.gov/oact/cola/cbb.html"
+   ]
+  },
+  {
+   "jurisdiction": "MA",
+   "title": "Massachusetts DOR withholding tax forms (new Circular M editions are listed here)",
+   "url": "https://www.mass.gov/lists/dor-withholding-tax-forms",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "MT",
+   "title": "Montana Employer and Information Agent Guide (publication page)",
+   "url": "https://revenue.mt.gov/publications/montana-employer-and-information-agent-guide",
+   "kind": "index",
+   "replaces": [
+    "https://mtrevenue.gov/publications/"
+   ]
+  },
+  {
+   "jurisdiction": "CO",
+   "title": "Colorado Division of Labor Standards (local minimum wage notices, INFO #19)",
+   "url": "https://cdle.colorado.gov/dlss",
+   "kind": "index",
+   "replaces": [
+    "https://www.edgewaterco.gov/doing-business/minimum-wage"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "NY Workers' Compensation Board: Paid Family Leave 2026 announcement",
+   "url": "https://www.wcb.ny.gov/content/main/PressRe/paid-family-leave-2026.jsp",
+   "replaces": [
+    "https://paidfamilyleave.ny.gov/private-employer-coverage-requirements"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "NY Paid Family Leave payroll deduction notice 2026 (rate and cap)",
+   "url": "https://www.wcb.ny.gov/content/main/forms/PFLDocs/pfl-pay-deduction-notice-2026.pdf"
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "NY State Comptroller payroll bulletins (PFL, withholding changes)",
+   "url": "https://www.osc.ny.gov/state-agencies/payroll-bulletins",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "AR",
+   "title": "Arkansas UI Information Handbook 2026 (wage base, rates)",
+   "url": "https://dws.arkansas.gov/wp-content/uploads/UI-Handbook-2026-Final.pdf",
+   "replaces": [
+    "https://dws.arkansas.gov/workforce-services/unemployment/employer-ui-information/employer-ui-contributions/"
+   ]
+  },
+  {
+   "jurisdiction": "NH",
+   "title": "NH RSA 279:21 minimum hourly rate (statute)",
+   "url": "https://gc.nh.gov/rsa/html/XXIII/279/279-21.htm",
+   "replaces": [
+    "https://www.dol.nh.gov/inspections/wage-and-hour/minimum-wage"
+   ]
+  },
+  {
+   "jurisdiction": "US",
+   "title": "Federal Register: Railroad Retirement Board notices (RUIA/RRTA rates) - official API",
+   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=railroad-retirement-board",
+   "replaces": [
+    "https://www.rrb.gov/Newsroom/NewsReleases/RetirementUnemploymentInsuranceTaxes"
+   ]
+  },
+  {
+   "jurisdiction": "US",
+   "title": "P.L. 119-21 on govinfo.gov (official text)",
+   "url": "https://www.govinfo.gov/app/details/PLAW-119publ21",
+   "replaces": [
+    "https://www.congress.gov/bill/119th-congress/house-bill/1"
+   ]
+  },
+  {
+   "jurisdiction": "TX",
+   "title": "Texas Workforce Commission: your tax rates",
+   "url": "https://www.twc.texas.gov/programs/unemployment-tax/your-tax-rates",
+   "replaces": [
+    "https://www.twc.texas.gov/sites/default/files/ogc/mtg25/commission-meeting-material-111725-item9b-dp-2026-tax-rates-twc.pdf"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "NY Labor Law 651 via NY Senate Open Legislation API (free key: NYSENATE_API_KEY)",
+   "url": "https://legislation.nysenate.gov/api/3/laws/LAB/651?key={env:NYSENATE_API_KEY}",
+   "drop_json_keys": [
+    "responseTime"
+   ],
+   "replaces": [
+    "https://www.nysenate.gov/legislation/laws/LAB/651"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "NY Election Law 3-400 via NY Senate Open Legislation API (free key: NYSENATE_API_KEY)",
+   "url": "https://legislation.nysenate.gov/api/3/laws/ELN/3-400?key={env:NYSENATE_API_KEY}",
+   "drop_json_keys": [
+    "responseTime"
+   ],
+   "replaces": [
+    "https://www.nysenate.gov/legislation/laws/ELN/3-400"
+   ]
+  }
+ ]
+}

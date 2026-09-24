@@ -39,7 +39,7 @@ import {
   paLocalRuleset,
   stateRuleset,
 } from '../registry.ts';
-import { federalIncomeTax } from './federal.ts';
+import { federalIncomeTax, federalTaxes } from './federal.ts';
 import { cashEarnings, supplementalEarnings } from '../wages.ts';
 import { resolveCertBoolean } from '../validate.ts';
 import type {
@@ -304,6 +304,14 @@ export function stateIncomeTax(
   // state needs the same trivial shape (flat rate, no allowances, no cap).
   const excise = stateExciseEmployeeTax(input, ctx, rules);
   if (excise) lines.push(excise);
+
+  // Per-HOUR assessments (Oregon's Workers' Benefit Fund): the first levy in
+  // this engine measured in hours rather than wages, so it reads
+  // input.hoursWorked, falling back to the state's own flat-hours schedule.
+  lines.push(...stateHourlyAssessment(input, ctx, rules));
+
+  // Flat per-head QUARTERLY fees (New Mexico's workers' compensation fee).
+  lines.push(...stateQuarterlyHeadFee(input, ctx, rules));
 
   // Missouri's Kansas City / St. Louis earnings taxes — the employee side,
   // gated on certificate.locality the same way Newark's employer tax is
@@ -5321,6 +5329,40 @@ interface FlatRateSurtaxCreditConfig {
     headOfHousehold: number; // dollars, annual — M-4 Box A
     blind: number; // dollars, annual — M-4 Box B
   };
+  /**
+   * Dollars, annual. The employee's own Social Security + Medicare (and
+   * railroad Tier I equivalents) come off wages before the exemption, until
+   * the year's cumulative deduction reaches this cap. Absent = no deduction.
+   */
+  ficaDeductionAnnualCap?: number;
+  /**
+   * Dollars, annual. An employee claiming at least one exemption whose
+   * annualized wages are below this owes no withholding at all.
+   */
+  noWithholdingBelowAnnualWithExemptions?: number;
+}
+
+/** Employee-side FICA line ids (and their railroad Tier I renames). */
+const FICA_EMPLOYEE_LINE_IDS = new Set(['US_SS_EE', 'US_MED_EE', 'US_RRTA_TIER1_EE', 'US_RRTA_MED_EE']);
+
+/**
+ * Massachusetts's retirement-contribution deduction for the current period:
+ * this cheque's employee Social Security + Medicare, limited so the
+ * year's running total never passes the annual cap. The prior total is
+ * rebuilt from the YTD FICA wage trackers times the employee rates, the
+ * same way the USDA National Finance Center's re-derivation of Circular M
+ * does it (steps 5a-5e).
+ */
+function massachusettsFicaDeduction(input: PaycheckInput, ctx: ComputeContext, annualCap: number): Cents {
+  const fed = federalRuleset(input.checkDate);
+  const current = federalTaxes(input, ctx)
+    .filter((t) => t.payer === 'employee' && FICA_EMPLOYEE_LINE_IDS.has(t.id))
+    .reduce((sum, t) => sum + t.amount, 0);
+  const priorYtd = roundHalfUp(
+    input.ytd.socialSecurity * fed.socialSecurity.employeeRate + input.ytd.medicare * fed.medicare.employeeRate,
+  );
+  const remaining = atLeastZero(dollars(annualCap) - priorYtd);
+  return Math.min(current, remaining);
 }
 
 /**
@@ -5423,7 +5465,30 @@ function flatRateSurtaxCredit(
       : dollars(cfg.exemptionTiers.perExemptionPoint) * line4Total + dollars(cfg.exemptionTiers.baseAddOn);
   const exemptionPerPeriod = annualExemption / periodsPerYear;
 
-  const netWages = atLeastZero(taxableWages - exemptionPerPeriod);
+  // Circular M: nothing is withheld from an employee who claims an
+  // exemption and whose annual wages come in under the filing threshold.
+  if (
+    cfg.noWithholdingBelowAnnualWithExemptions !== undefined &&
+    line4Total > 0 &&
+    taxableWages * periodsPerYear < dollars(cfg.noWithholdingBelowAnnualWithExemptions)
+  ) {
+    return {
+      id: `${rules.code}_SIT`,
+      name: `${rules.name} Income Tax`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: 0,
+      amount: 0,
+      detail:
+        `$0 — annualized wages ${fmt(roundHalfUp(taxableWages * periodsPerYear))} are under ` +
+        `${fmt(dollars(cfg.noWithholdingBelowAnnualWithExemptions))} with exemptions claimed`,
+    };
+  }
+
+  const ficaDeduction =
+    cfg.ficaDeductionAnnualCap !== undefined ? massachusettsFicaDeduction(input, ctx, cfg.ficaDeductionAnnualCap) : 0;
+
+  const netWages = atLeastZero(taxableWages - ficaDeduction - exemptionPerPeriod);
   const annualNetWages = netWages * periodsPerYear;
 
   const brackets: WIBracket[] = [
@@ -5455,7 +5520,9 @@ function flatRateSurtaxCredit(
     taxableWages: netWagesRounded,
     amount,
     detail:
-      `${fmt(taxableWages)} less ${fmt(roundHalfUp(exemptionPerPeriod))} exemption = ${fmt(netWagesRounded)} net ` +
+      `${fmt(taxableWages)}` +
+      (ficaDeduction ? ` less ${fmt(ficaDeduction)} FICA deduction` : '') +
+      ` less ${fmt(roundHalfUp(exemptionPerPeriod))} exemption = ${fmt(netWagesRounded)} net ` +
       `@ ${(bracket.rate * 100).toFixed(0)}%${bracket.rate > cfg.rate ? ' (surtax bracket)' : ''}` +
       (hohCredit || blindCredit
         ? `, less ${fmt(roundHalfUp(hohCredit + blindCredit))} credits (HOH/blind)`
@@ -6311,6 +6378,138 @@ function stateExciseEmployeeTax(
     amount,
     detail: `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(3)}%, no wage cap`,
   };
+}
+
+interface StateHourlyAssessmentConfig {
+  idSuffix: string; // e.g. 'WBF'
+  name: string; // e.g. "Workers' Benefit Fund"
+  /** Dollars per hour, the TOTAL assessment (employee + employer). */
+  ratePerHour: number;
+  /** Fraction of the total the employer must retain from the employee. */
+  employeeShareFraction: number;
+  /**
+   * Hours assumed per period when the caller doesn't supply hoursWorked.
+   * A frequency missing here falls back to 2,080 hours a year ÷ periods.
+   */
+  flatRateHoursPerPeriod: Partial<Record<string, number>>;
+}
+
+/**
+ * A cents-per-hour assessment split between employee and employer, e.g.
+ * Oregon's Workers' Benefit Fund (ORS 656.506, OAR 436-070-0020): each pay
+ * period the employer retains half the rate times hours worked (rounded
+ * to the nearest cent, half a cent rounding up) and pays an equal amount
+ * itself. Hours come from input.hoursWorked; when actual hours aren't
+ * tracked, the rule's own flat-rate method applies (40 hours a week for
+ * weekly/biweekly pay, 173.33 hours a month for monthly/semimonthly),
+ * carried in the config so a caller with real hours always wins.
+ */
+function stateHourlyAssessment(input: PaycheckInput, ctx: ComputeContext, rules: StateRuleset): TaxLine[] {
+  const cfg = rules.stateHourlyAssessment as StateHourlyAssessmentConfig | undefined;
+  if (!cfg) return [];
+  if (input.employmentCategory && input.employmentCategory !== 'standard') return [];
+
+  let hours = input.hoursWorked;
+  let hoursNote = `${hours} hours worked`;
+  if (hours === undefined) {
+    const published = cfg.flatRateHoursPerPeriod[input.payFrequency];
+    // No published flat rate for this frequency: a 2,080-hour year spread
+    // over its periods, the "other reasonable method" the rule allows.
+    hours = published ?? Math.round((2080 / ctx.periodsPerYear) * 100) / 100;
+    hoursNote =
+      published !== undefined
+        ? `${hours} hours (flat-rate method, hoursWorked not supplied)`
+        : `${hours} hours (2,080-hour year ÷ ${ctx.periodsPerYear}, hoursWorked not supplied)`;
+  }
+  if (!(hours >= 0)) throw new Error(`input.hoursWorked must be a non-negative number, got ${input.hoursWorked}`);
+  if (hours === 0 || ctx.taxableWagesFor([]) <= 0) return [];
+
+  const employeeRate = cfg.ratePerHour * cfg.employeeShareFraction;
+  // Cents, rounded to the nearest whole cent, half a cent up.
+  const employeeAmount = roundHalfUp(hours * employeeRate * 100);
+  const detail = `${hoursNote} × $${employeeRate.toFixed(4)}/hr`;
+  return [
+    {
+      id: `${rules.code}_${cfg.idSuffix}_EE`,
+      name: `${rules.name} ${cfg.name} (Employee)`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: 0,
+      amount: employeeAmount,
+      detail,
+    },
+    {
+      id: `${rules.code}_${cfg.idSuffix}_ER`,
+      name: `${rules.name} ${cfg.name} (Employer)`,
+      payer: 'employer',
+      jurisdiction: 'state',
+      taxableWages: 0,
+      amount: employeeAmount,
+      detail: `matches the amount retained from the employee (${detail})`,
+    },
+  ];
+}
+
+interface StateQuarterlyHeadFeeConfig {
+  idSuffix: string; // e.g. 'WC_FEE'
+  name: string; // e.g. "Workers' Compensation Fee"
+  /** Dollars per covered employee per calendar quarter. */
+  employeeQuarterly: number;
+  employerQuarterly: number;
+  /** Employment categories the fee doesn't cover. */
+  exemptEmploymentCategories?: string[];
+}
+
+/**
+ * A flat dollar fee per covered employee per calendar quarter, split
+ * between employee and employer — New Mexico's workers' compensation fee
+ * (NMSA 52-5-19, $2.25 employee / $2.55 employer from 2026). The statute
+ * charges it per employee on the quarter's last working day, so how a
+ * payroll collects the employee share across that quarter's cheques is an
+ * employer choice: by default this spreads it evenly (quarterly share x 4
+ * / periods per year), and input.employer.quarterlyHeadFeeCollection
+ * switches a cheque to 'full' or 'skip'.
+ */
+function stateQuarterlyHeadFee(input: PaycheckInput, ctx: ComputeContext, rules: StateRuleset): TaxLine[] {
+  const cfg = rules.stateQuarterlyHeadFee as StateQuarterlyHeadFeeConfig | undefined;
+  if (!cfg) return [];
+  if (input.employmentCategory && (cfg.exemptEmploymentCategories ?? []).includes(input.employmentCategory)) return [];
+  if (ctx.taxableWagesFor([]) <= 0) return [];
+
+  const mode = input.employer?.quarterlyHeadFeeCollection?.[rules.code] ?? 'prorated';
+  if (mode !== 'prorated' && mode !== 'full' && mode !== 'skip') {
+    throw new Error(
+      `employer.quarterlyHeadFeeCollection.${rules.code} must be 'prorated', 'full' or 'skip', got ${JSON.stringify(mode)}`,
+    );
+  }
+  if (mode === 'skip') return [];
+
+  const share = (quarterly: number) =>
+    mode === 'full' ? dollars(quarterly) : roundHalfUp((dollars(quarterly) * 4) / ctx.periodsPerYear);
+  const how =
+    mode === 'full'
+      ? 'full quarterly share on this cheque'
+      : `quarterly share x 4 ÷ ${ctx.periodsPerYear} pay periods`;
+  return [
+    {
+      id: `${rules.code}_${cfg.idSuffix}_EE`,
+      name: `${rules.name} ${cfg.name} (Employee)`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: 0,
+      amount: share(cfg.employeeQuarterly),
+      detail: `$${cfg.employeeQuarterly.toFixed(2)}/quarter — ${how}`,
+    },
+    {
+      id: `${rules.code}_${cfg.idSuffix}_ER`,
+      name: `${rules.name} ${cfg.name} (Employer)`,
+      payer: 'employer',
+      jurisdiction: 'state',
+      taxableWages: 0,
+      amount: share(cfg.employerQuarterly),
+      detail: `$${cfg.employerQuarterly.toFixed(2)}/quarter — ${how}`,
+    },
+  ];
 }
 
 interface MOLocalityConfig {

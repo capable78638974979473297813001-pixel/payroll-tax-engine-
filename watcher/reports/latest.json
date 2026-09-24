@@ -1,0 +1,28 @@
+{
+ "date": "2026-09-24",
+ "counts": {
+  "unchanged": 392,
+  "unreachable": 10,
+  "blocked": 12,
+  "changed": 1,
+  "new": 1,
+  "gone": 3
+ },
+ "total": 419,
+ "changed": [
+  {
+   "id": "us-102cc000bf",
+   "jurisdiction": "US",
+   "title": "Va. Code Ann. \u00a7 34-29 \u2014 ordinary garnishment limited to the lesser of 25% of disposable earnings, or the amount by which disposable earnings exceed 40 times the greater of the federal or Virginia minimum hourly wage; nothing withheld if weekly disposable earnings are at or below that 40x floor",
+   "url": "https://law.lis.virginia.gov/vacode/title34/chapter4/section34-29/",
+   "detail": "8 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  }
+ ],
+ "significant_changes": 1,
+ "broken": []
+}

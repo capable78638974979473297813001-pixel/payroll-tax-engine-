@@ -443,6 +443,7 @@ export function futa(
 interface CoverageThresholds {
   household?: { annualCashWages: number; futaQuarterlyCashWages: number };
   agricultural?: { annualCashWagesPerWorker: number; annualWagesAllFarmworkers: number };
+  electionWorker?: { annualCashWages: number };
 }
 
 /**

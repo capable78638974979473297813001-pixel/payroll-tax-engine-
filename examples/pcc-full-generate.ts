@@ -97,7 +97,7 @@ function stateCertAndPccParms(
       return { certificate: { filingStatus: married ? 'mfj' : 'other' }, pccStateParms: { FILINGSTATUS: married ? 'M' : 'S' } };
     case 'DE':
       return {
-        certificate: { maritalStatus: married ? 'married' : 'single' },
+        certificate: { maritalStatus: married ? 'mfj' : 'single' },
         pccStateParms: { FILINGSTATUS: married ? 'M' : 'S' },
       };
     case 'GA':
@@ -145,7 +145,7 @@ function stateCertAndPccParms(
             ? 'married_spouse_does_not_work'
             : hoh
               ? 'head_of_household'
-              : 'single_or_married_spouse_works_or_mfs',
+              : 'single',
         },
         pccStateParms: { FILINGSTATUS: married ? 'M' : hoh ? 'H' : 'S' },
       };

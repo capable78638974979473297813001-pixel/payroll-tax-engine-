@@ -3319,8 +3319,8 @@
       "federal": 187250,
       "socialSecurity": 98942,
       "medicare": 23140,
-      "state": 95067,
-      "netPay": 1191434,
+      "state": 93279,
+      "netPay": 1193222,
       "otherEmployeeLines": []
     }
   },
@@ -3444,8 +3444,8 @@
       "federal": 3931,
       "socialSecurity": 10337,
       "medicare": 2418,
-      "state": 8637,
-      "netPay": 141408,
+      "state": 8224,
+      "netPay": 141821,
       "otherEmployeeLines": []
     }
   },
@@ -4690,7 +4690,7 @@
       "socialSecurity": 37105,
       "medicare": 8678,
       "state": 51382,
-      "netPay": 412193,
+      "netPay": 412121,
       "otherEmployeeLines": [
         {
           "name": "Oregon Paid Leave (Employee)",
@@ -4699,6 +4699,10 @@
         {
           "name": "Oregon Statewide Transit Tax",
           "amount": 598
+        },
+        {
+          "name": "Oregon Workers' Benefit Fund (Employee)",
+          "amount": 72
         }
       ]
     }
@@ -4724,7 +4728,7 @@
       "socialSecurity": 35340,
       "medicare": 8265,
       "state": 52497,
-      "netPay": 361737,
+      "netPay": 361701,
       "otherEmployeeLines": [
         {
           "name": "Oregon Paid Leave (Employee)",
@@ -4733,6 +4737,10 @@
         {
           "name": "Oregon Statewide Transit Tax",
           "amount": 570
+        },
+        {
+          "name": "Oregon Workers' Benefit Fund (Employee)",
+          "amount": 36
         }
       ]
     }
@@ -4758,7 +4766,7 @@
       "socialSecurity": 74245,
       "medicare": 17364,
       "state": 110031,
-      "netPay": 746959,
+      "netPay": 746881,
       "otherEmployeeLines": [
         {
           "name": "Oregon Paid Leave (Employee)",
@@ -4767,6 +4775,10 @@
         {
           "name": "Oregon Statewide Transit Tax",
           "amount": 1198
+        },
+        {
+          "name": "Oregon Workers' Benefit Fund (Employee)",
+          "amount": 78
         }
       ]
     }
@@ -4792,7 +4804,7 @@
       "socialSecurity": 17551,
       "medicare": 4105,
       "state": 21091,
-      "netPay": 217726,
+      "netPay": 217690,
       "otherEmployeeLines": [
         {
           "name": "Oregon Paid Leave (Employee)",
@@ -4801,6 +4813,10 @@
         {
           "name": "Oregon Statewide Transit Tax",
           "amount": 283
+        },
+        {
+          "name": "Oregon Workers' Benefit Fund (Employee)",
+          "amount": 36
         }
       ]
     }
@@ -4826,7 +4842,7 @@
       "socialSecurity": 62405,
       "medicare": 14595,
       "state": 91782,
-      "netPay": 643544,
+      "netPay": 643472,
       "otherEmployeeLines": [
         {
           "name": "Oregon Paid Leave (Employee)",
@@ -4835,6 +4851,10 @@
         {
           "name": "Oregon Statewide Transit Tax",
           "amount": 1007
+        },
+        {
+          "name": "Oregon Workers' Benefit Fund (Employee)",
+          "amount": 72
         }
       ]
     }
@@ -4860,7 +4880,7 @@
       "socialSecurity": 43710,
       "medicare": 10223,
       "state": 54330,
-      "netPay": 520010,
+      "netPay": 519938,
       "otherEmployeeLines": [
         {
           "name": "Oregon Paid Leave (Employee)",
@@ -4869,6 +4889,10 @@
         {
           "name": "Oregon Statewide Transit Tax",
           "amount": 705
+        },
+        {
+          "name": "Oregon Workers' Benefit Fund (Employee)",
+          "amount": 72
         }
       ]
     }
@@ -4894,7 +4918,7 @@
       "socialSecurity": 52318,
       "medicare": 12236,
       "state": 66479,
-      "netPay": 596875,
+      "netPay": 596803,
       "otherEmployeeLines": [
         {
           "name": "Oregon Paid Leave (Employee)",
@@ -4903,6 +4927,10 @@
         {
           "name": "Oregon Statewide Transit Tax",
           "amount": 844
+        },
+        {
+          "name": "Oregon Workers' Benefit Fund (Employee)",
+          "amount": 72
         }
       ]
     }
@@ -4928,7 +4956,7 @@
       "socialSecurity": 105503,
       "medicare": 24674,
       "state": 151423,
-      "netPay": 1174830,
+      "netPay": 1174674,
       "otherEmployeeLines": [
         {
           "name": "Oregon Paid Leave (Employee)",
@@ -4937,6 +4965,10 @@
         {
           "name": "Oregon Statewide Transit Tax",
           "amount": 1702
+        },
+        {
+          "name": "Oregon Workers' Benefit Fund (Employee)",
+          "amount": 156
         }
       ]
     }
@@ -4962,7 +4994,7 @@
       "socialSecurity": 28210,
       "medicare": 6598,
       "state": 33303,
-      "netPay": 363938,
+      "netPay": 363860,
       "otherEmployeeLines": [
         {
           "name": "Oregon Paid Leave (Employee)",
@@ -4971,6 +5003,10 @@
         {
           "name": "Oregon Statewide Transit Tax",
           "amount": 455
+        },
+        {
+          "name": "Oregon Workers' Benefit Fund (Employee)",
+          "amount": 78
         }
       ]
     }
@@ -4996,7 +5032,7 @@
       "socialSecurity": 9205,
       "medicare": 2153,
       "state": 9959,
-      "netPay": 116675,
+      "netPay": 116639,
       "otherEmployeeLines": [
         {
           "name": "Oregon Paid Leave (Employee)",
@@ -5005,6 +5041,10 @@
         {
           "name": "Oregon Statewide Transit Tax",
           "amount": 148
+        },
+        {
+          "name": "Oregon Workers' Benefit Fund (Employee)",
+          "amount": 36
         }
       ]
     }
@@ -5347,8 +5387,8 @@
       "federal": 0,
       "socialSecurity": 7678,
       "medicare": 1796,
-      "state": 3546,
-      "netPay": 110826,
+      "state": 3500,
+      "netPay": 110872,
       "otherEmployeeLines": []
     }
   },
@@ -5370,8 +5410,8 @@
       "federal": 12492,
       "socialSecurity": 20865,
       "medicare": 4880,
-      "state": 13112,
-      "netPay": 285189,
+      "state": 13100,
+      "netPay": 285201,
       "otherEmployeeLines": []
     }
   },
@@ -5393,8 +5433,8 @@
       "federal": 228884,
       "socialSecurity": 115372,
       "medicare": 26982,
-      "state": 80242,
-      "netPay": 1409353,
+      "state": 80200,
+      "netPay": 1409395,
       "otherEmployeeLines": []
     }
   },
@@ -5416,8 +5456,8 @@
       "federal": 117985,
       "socialSecurity": 54560,
       "medicare": 12760,
-      "state": 38003,
-      "netPay": 656692,
+      "state": 38000,
+      "netPay": 656695,
       "otherEmployeeLines": []
     }
   },
@@ -5439,8 +5479,8 @@
       "federal": 9446,
       "socialSecurity": 10099,
       "medicare": 2362,
-      "state": 6308,
-      "netPay": 134670,
+      "state": 6300,
+      "netPay": 134678,
       "otherEmployeeLines": []
     }
   },
@@ -5462,8 +5502,8 @@
       "federal": 80721,
       "socialSecurity": 28711,
       "medicare": 6715,
-      "state": 20057,
-      "netPay": 326873,
+      "state": 20100,
+      "netPay": 326830,
       "otherEmployeeLines": []
     }
   },
@@ -5485,8 +5525,8 @@
       "federal": 162246,
       "socialSecurity": 55800,
       "medicare": 13050,
-      "state": 38919,
-      "netPay": 629985,
+      "state": 38900,
+      "netPay": 630004,
       "otherEmployeeLines": []
     }
   },
@@ -5508,8 +5548,8 @@
       "federal": 214033,
       "socialSecurity": 67864,
       "medicare": 15871,
-      "state": 47639,
-      "netPay": 749176,
+      "state": 47600,
+      "netPay": 749215,
       "otherEmployeeLines": []
     }
   },
@@ -5531,8 +5571,8 @@
       "federal": 43233,
       "socialSecurity": 22553,
       "medicare": 5274,
-      "state": 14167,
-      "netPay": 278523,
+      "state": 14200,
+      "netPay": 278490,
       "otherEmployeeLines": []
     }
   },
@@ -5554,8 +5594,8 @@
       "federal": 38660,
       "socialSecurity": 20424,
       "medicare": 4777,
-      "state": 13935,
-      "netPay": 251627,
+      "state": 13900,
+      "netPay": 251662,
       "otherEmployeeLines": []
     }
   },
@@ -5879,8 +5919,8 @@
       "federal": 20667,
       "socialSecurity": 29450,
       "medicare": 6888,
-      "state": 23750,
-      "netPay": 392060,
+      "state": 21933,
+      "netPay": 393877,
       "otherEmployeeLines": [
         {
           "name": "Massachusetts Paid Leave (Employee)",
@@ -5909,8 +5949,8 @@
       "federal": 0,
       "socialSecurity": 8561,
       "medicare": 2002,
-      "state": 6904,
-      "netPay": 119975,
+      "state": 6376,
+      "netPay": 120503,
       "otherEmployeeLines": [
         {
           "name": "Massachusetts Paid Leave (Employee)",
@@ -5939,8 +5979,8 @@
       "federal": 1877,
       "socialSecurity": 6188,
       "medicare": 1447,
-      "state": 4760,
-      "netPay": 85077,
+      "state": 4378,
+      "netPay": 85459,
       "otherEmployeeLines": [
         {
           "name": "Massachusetts Paid Leave (Employee)",
@@ -5969,8 +6009,8 @@
       "federal": 222994,
       "socialSecurity": 67771,
       "medicare": 15850,
-      "state": 54192,
-      "netPay": 727242,
+      "state": 50011,
+      "netPay": 731423,
       "otherEmployeeLines": [
         {
           "name": "Massachusetts Paid Leave (Employee)",
@@ -5999,8 +6039,8 @@
       "federal": 219725,
       "socialSecurity": 89073,
       "medicare": 20832,
-      "state": 70833,
-      "netPay": 1029595,
+      "state": 65338,
+      "netPay": 1035090,
       "otherEmployeeLines": [
         {
           "name": "Massachusetts Paid Leave (Employee)",
@@ -6029,8 +6069,8 @@
       "federal": 242601,
       "socialSecurity": 71662,
       "medicare": 16760,
-      "state": 57792,
-      "netPay": 761701,
+      "state": 53371,
+      "netPay": 766122,
       "otherEmployeeLines": [
         {
           "name": "Massachusetts Paid Leave (Employee)",
@@ -6059,8 +6099,8 @@
       "federal": 8923,
       "socialSecurity": 8942,
       "medicare": 2091,
-      "state": 7212,
-      "netPay": 116400,
+      "state": 6660,
+      "netPay": 116952,
       "otherEmployeeLines": [
         {
           "name": "Massachusetts Paid Leave (Employee)",
@@ -6089,8 +6129,8 @@
       "federal": 373792,
       "socialSecurity": 135522,
       "medicare": 31695,
-      "state": 108292,
-      "netPay": 1526477,
+      "state": 99931,
+      "netPay": 1534838,
       "otherEmployeeLines": [
         {
           "name": "Massachusetts Paid Leave (Employee)",
@@ -6119,8 +6159,8 @@
       "federal": 290166,
       "socialSecurity": 127772,
       "medicare": 29882,
-      "state": 103042,
-      "netPay": 1500491,
+      "state": 95159,
+      "netPay": 1508374,
       "otherEmployeeLines": [
         {
           "name": "Massachusetts Paid Leave (Employee)",
@@ -6149,8 +6189,8 @@
       "federal": 24600,
       "socialSecurity": 26712,
       "medicare": 6247,
-      "state": 20542,
-      "netPay": 350750,
+      "state": 18894,
+      "netPay": 352398,
       "otherEmployeeLines": [
         {
           "name": "Massachusetts Paid Leave (Employee)",
@@ -7160,8 +7200,8 @@
       "federal": 118908,
       "socialSecurity": 52652,
       "medicare": 12314,
-      "state": 32408,
-      "netPay": 632949,
+      "state": 30762,
+      "netPay": 634595,
       "otherEmployeeLines": []
     }
   },
@@ -7183,8 +7223,8 @@
       "federal": 105054,
       "socialSecurity": 55252,
       "medicare": 12922,
-      "state": 34042,
-      "netPay": 683884,
+      "state": 32315,
+      "netPay": 685611,
       "otherEmployeeLines": []
     }
   },
@@ -7206,8 +7246,8 @@
       "federal": 33350,
       "socialSecurity": 44227,
       "medicare": 10343,
-      "state": 23525,
-      "netPay": 601888,
+      "state": 22575,
+      "netPay": 602838,
       "otherEmployeeLines": []
     }
   },
@@ -7444,8 +7484,8 @@
       "federal": 92761,
       "socialSecurity": 39132,
       "medicare": 9152,
-      "state": 30170,
-      "netPay": 459939,
+      "state": 30200,
+      "netPay": 459909,
       "otherEmployeeLines": []
     }
   },
@@ -7469,8 +7509,8 @@
       "federal": 30067,
       "socialSecurity": 46758,
       "medicare": 10935,
-      "state": 32858,
-      "netPay": 633549,
+      "state": 32900,
+      "netPay": 633507,
       "otherEmployeeLines": []
     }
   },
@@ -7494,8 +7534,8 @@
       "federal": 208151,
       "socialSecurity": 66078,
       "medicare": 15454,
-      "state": 53205,
-      "netPay": 722881,
+      "state": 53200,
+      "netPay": 722886,
       "otherEmployeeLines": []
     }
   },
@@ -8270,8 +8310,13 @@
       "socialSecurity": 77423,
       "medicare": 18107,
       "state": 54521,
-      "netPay": 892882,
-      "otherEmployeeLines": []
+      "netPay": 892844,
+      "otherEmployeeLines": [
+        {
+          "name": "New Mexico Workers' Compensation Fee (Employee)",
+          "amount": 38
+        }
+      ]
     }
   },
   {
@@ -8295,8 +8340,13 @@
       "socialSecurity": 24413,
       "medicare": 5709,
       "state": 13598,
-      "netPay": 315122,
-      "otherEmployeeLines": []
+      "netPay": 315084,
+      "otherEmployeeLines": [
+        {
+          "name": "New Mexico Workers' Compensation Fee (Employee)",
+          "amount": 38
+        }
+      ]
     }
   },
   {
@@ -8320,8 +8370,13 @@
       "socialSecurity": 89228,
       "medicare": 20868,
       "state": 62713,
-      "netPay": 1014841,
-      "otherEmployeeLines": []
+      "netPay": 1014766,
+      "otherEmployeeLines": [
+        {
+          "name": "New Mexico Workers' Compensation Fee (Employee)",
+          "amount": 75
+        }
+      ]
     }
   },
   {
