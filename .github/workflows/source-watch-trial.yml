@@ -1,0 +1,37 @@
+name: Source watch trial (temporary)
+
+# Temporary: runs the watcher's browser fallback against the sources that
+# currently fail, on a push to the working branch, without saving anything.
+# Delete once the fallback is verified.
+on:
+  push:
+    branches: ['claude/intelligent-tesla-q5vtjv']
+    paths: ['watcher/**', '.github/workflows/source-watch-trial.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  trial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          pip install -r watcher/requirements.txt
+          python -m playwright install --with-deps chromium
+      - run: python -m unittest watcher/test_watch.py
+      - name: Trial run on failing and new sources (dry run)
+        run: |
+          ids=$(python - <<'PY'
+          import json
+          st = json.load(open("watcher/state/state.json"))
+          src = json.load(open("watcher/sources.json"))["sources"]
+          print(",".join(s["id"] for s in src
+                         if st.get(s["id"], {}).get("failures", 0) > 0 or s.get("replaces") or s["id"] not in st))
+          PY
+          )
+          python watcher/watch.py --dry-run --only "$ids" --confirm-delay 5

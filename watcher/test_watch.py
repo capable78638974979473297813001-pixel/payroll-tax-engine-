@@ -67,6 +67,7 @@ class Site:
         self.counter = 0
         self.rotating: set[str] = set()
         self.flap_once: dict[str, bytes] = {}
+        self.browser_only: set[str] = set()
 
     def set_page(self, path: str, body: bytes | str, status: int = 200, ctype: str = "text/html; charset=utf-8"):
         self.pages[path] = (status, ctype, body.encode() if isinstance(body, str) else body)
@@ -80,6 +81,8 @@ def make_handler(site: Site):
         def do_GET(self):  # noqa: N802
             site.counter += 1
             status, ctype, body = site.pages.get(self.path, (404, "text/plain", b"not found"))
+            if self.path in site.browser_only and not self.headers.get("Sec-Fetch-Mode"):
+                status, ctype, body = 403, "text/html", b"Access denied"
             if self.path in site.flap_once:
                 body = site.flap_once.pop(self.path)
             if self.path in site.rotating:
@@ -100,7 +103,9 @@ def page(rate="3.7%", deduction="$2,470", token="abc", updated="September 1, 202
     return PAGE.format(rate=rate, deduction=deduction, token=token * 20, updated=updated, extra_link=extra_link)
 
 
-class WatcherTest(unittest.TestCase):
+class ServerTestCase(unittest.TestCase):
+    """Starts the fake site and points the watcher at a temp directory."""
+
     @classmethod
     def setUpClass(cls):
         cls.site = Site()
@@ -124,6 +129,7 @@ class WatcherTest(unittest.TestCase):
         self.site.pages.clear()
         self.site.rotating.clear()
         self.site.flap_once.clear()
+        self.site.browser_only.clear()
 
     def tearDown(self):
         (watch.SOURCES_FILE, watch.STATE_FILE, watch.SNAPSHOT_DIR, watch.REPORT_DIR, watch.RETRIES) = self._saved
@@ -134,11 +140,12 @@ class WatcherTest(unittest.TestCase):
                 for i, p in enumerate(paths)]
         watch.SOURCES_FILE.write_text(json.dumps({"sources": srcs}))
 
-    def run_watch(self, date: str) -> dict:
+    def run_watch(self, date: str, *extra: str) -> dict:
         with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
-            watch.main(["--confirm-delay", "0", "--date", date, "--workers", "4"])
+            watch.main(["--confirm-delay", "0", "--date", date, "--workers", "4", *extra])
         return json.loads((watch.REPORT_DIR / "latest.json").read_text())
 
+class WatcherTest(ServerTestCase):
     def test_first_run_takes_snapshots_then_nothing_changes(self):
         self.site.set_page("/wh", page())
         self.sources("/wh")
@@ -255,6 +262,23 @@ class WatcherTest(unittest.TestCase):
         self.assertIn("now redirects to", summary["changed"][0]["detail"])
         self.assertEqual(self.run_watch("2026-09-03")["counts"], {"unchanged": 1})
 
+    def test_json_api_compared_as_data(self):
+        """Official APIs (eCFR, Federal Register): key order and volatile
+        fields don't matter; a new amendment does."""
+        self.site.set_page("/api", json.dumps({"b": [{"date": "2016-12-01"}], "a": 1, "generated_at": "x"}),
+                           ctype="application/json")
+        self.sources("/api")
+        src = json.loads(watch.SOURCES_FILE.read_text())
+        src["sources"][0]["drop_json_keys"] = ["generated_at"]
+        watch.SOURCES_FILE.write_text(json.dumps(src))
+        self.run_watch("2026-09-01")
+        self.site.set_page("/api", json.dumps({"a": 1, "generated_at": "y", "b": [{"date": "2016-12-01"}]}),
+                           ctype="application/json")
+        self.assertEqual(self.run_watch("2026-09-02")["counts"], {"unchanged": 1})
+        self.site.set_page("/api", json.dumps({"a": 1, "b": [{"date": "2016-12-01"}, {"date": "2026-10-01"}]}),
+                           ctype="application/json")
+        self.assertEqual(self.run_watch("2026-09-03")["counts"], {"changed": 1})
+
     def test_index_source_reports_new_pages(self):
         body = page(extra_link='<li><a href="/news/2026-rates">2026 rates</a></li>')
         self.site.set_page("/wh", body)
@@ -263,6 +287,39 @@ class WatcherTest(unittest.TestCase):
         self.site.set_page("/wh", body.replace("</ul>", '<li><a href="/news/2027-rates">2027 rates</a></li></ul>'))
         summary = self.run_watch("2026-09-02")
         self.assertEqual(summary["changed"][0]["links_added"], [self.base + "/news/2027-rates"])
+
+
+@unittest.skipUnless(watch.browser_available(), "playwright not installed")
+class BrowserFallbackTest(ServerTestCase):
+    """Sites a plain request can't read, retried in headless Chromium."""
+
+    def test_javascript_only_page_is_read_by_the_browser(self):
+        self.site.set_page("/app", "<html><body><div id=r></div><script>document.getElementById('r').innerHTML = "
+                                   "'<main><p>' + 'The 2026 rate is 4.40 percent for all filers. '.repeat(5) + "
+                                   "'</p></main>';</script></body></html>")
+        self.sources("/app")
+        self.assertEqual(self.run_watch("2026-09-01", "--no-browser")["counts"], {"blocked": 1})
+        summary = self.run_watch("2026-09-02")
+        self.assertEqual(summary["counts"], {"new": 1})
+        self.assertIn("4.40 percent", watch.read_snapshot("t-0"))
+
+    def test_site_refusing_plain_requests(self):
+        self.site.set_page("/wh", page())
+        self.site.set_page("/f.pdf", make_pdf("Circular M rate 5 percent on wages after the exemption amount for "
+                                             "every employee claiming the personal exemption this year"),
+                           ctype="application/pdf")
+        self.site.browser_only.update({"/wh", "/f.pdf"})
+        self.sources("/wh", "/f.pdf")
+        self.assertEqual(self.run_watch("2026-09-01")["counts"], {"new": 2})
+        self.assertEqual(self.run_watch("2026-09-02")["counts"], {"unchanged": 2})
+        self.site.set_page("/wh", page(rate="3.5%"))
+        self.assertEqual(self.run_watch("2026-09-03")["counts"], {"changed": 1, "unchanged": 1})
+
+    def test_still_refused_stays_blocked(self):
+        self.site.set_page("/deny", "Access denied", status=403, ctype="text/html")
+        self.sources("/deny")
+        summary = self.run_watch("2026-09-01")
+        self.assertEqual(summary["counts"], {"blocked": 1})
 
 
 class ExtractionTest(unittest.TestCase):

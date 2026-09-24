@@ -58,7 +58,10 @@ jobs:
 
       - name: Install
         if: steps.gate.outputs.run == 'true'
-        run: pip install -r watcher/requirements.txt
+        run: |
+          pip install -r watcher/requirements.txt
+          # Headless Chromium for sites that refuse plain requests or need JavaScript.
+          python -m playwright install --with-deps chromium
 
       - name: Self-test (offline)
         if: steps.gate.outputs.run == 'true'

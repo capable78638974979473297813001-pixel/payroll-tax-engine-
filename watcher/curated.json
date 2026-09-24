@@ -423,6 +423,51 @@
    "title": "Connecticut DRS publications (new years' publication lists appear here)",
    "url": "https://portal.ct.gov/drs/publications/publications-page",
    "kind": "index"
+  },
+  {
+   "jurisdiction": "US",
+   "title": "eCFR 29 CFR 870 amendment history (garnishment limits) - official API",
+   "url": "https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?part=870",
+   "replaces": [
+    "https://www.ecfr.gov/current/title-29/subtitle-B/chapter-V/subchapter-D/part-870"
+   ]
+  },
+  {
+   "jurisdiction": "US",
+   "title": "eCFR 34 CFR 34 amendment history (administrative wage garnishment) - official API",
+   "url": "https://www.ecfr.gov/api/versioner/v1/versions/title-34.json?part=34",
+   "replaces": [
+    "https://www.ecfr.gov/current/title-34/subtitle-A/part-34"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "eCFR 29 CFR 553.106 amendment history - official API",
+   "url": "https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?section=553.106",
+   "replaces": [
+    "https://www.ecfr.gov/current/title-29/subtitle-B/chapter-V/subchapter-A/part-553/subpart-B/section-553.106"
+   ]
+  },
+  {
+   "jurisdiction": "US",
+   "title": "Federal Register: new Wage and Hour Division documents (minimum wage, overtime, garnishment) - official API",
+   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=wage-and-hour-division",
+   "replaces": [
+    "https://www.federalregister.gov/documents/2026/02/09/2026-02466/minimum-wage-for-federal-contracts-covered-by-executive-order-13658-notice-of-rate-change-in-effect"
+   ]
+  },
+  {
+   "jurisdiction": "US",
+   "title": "Federal Register: new IRS withholding rules and proposed rules - official API",
+   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=internal-revenue-service&conditions%5Btype%5D%5B%5D=RULE&conditions%5Btype%5D%5B%5D=PRORULE&conditions%5Bterm%5D=withholding"
+  },
+  {
+   "jurisdiction": "US",
+   "title": "Federal Register: SSA yearly wage base notice (Cost-of-Living Increase and Other Determinations) - official API",
+   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=social-security-administration&conditions%5Bterm%5D=%22cost-of-living+increase+and+other+determinations%22",
+   "replaces": [
+    "https://www.ssa.gov/oact/cola/cbb.html"
+   ]
   }
  ]
 }

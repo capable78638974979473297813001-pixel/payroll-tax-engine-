@@ -362,9 +362,30 @@ def extract(source: dict, f: Fetched) -> Extracted:
                 j = text.find(end, i + len(start)) if end else -1
                 text = text[i:j + len(end)] if j >= 0 else text[i:]
         return Extracted(normalise_text(text, source.get("ignore")), links, "html")
-    if ctype.startswith("text/") or "json" in ctype or "csv" in ctype:
+    if "json" in ctype:
+        try:
+            data = json.loads(f.body)
+            for key in source.get("drop_json_keys", []):
+                _drop_key(data, key)
+            text = json.dumps(data, indent=1, sort_keys=True, ensure_ascii=False)
+        except ValueError:
+            text = f.body.decode("utf-8", errors="replace")
+        return Extracted(normalise_text(text, source.get("ignore")), [], "json")
+    if ctype.startswith("text/") or "csv" in ctype:
         return Extracted(normalise_text(f.body.decode("utf-8", errors="replace"), source.get("ignore")), [], "text")
     return Extracted(normalise_text(binary_strings(f.body), source.get("ignore")), [], "binary")
+
+
+def _drop_key(node, key: str) -> None:
+    """Removes a volatile field (e.g. a per-request timestamp) wherever it
+    appears in a JSON document."""
+    if isinstance(node, dict):
+        node.pop(key, None)
+        for v in node.values():
+            _drop_key(v, key)
+    elif isinstance(node, list):
+        for v in node:
+            _drop_key(v, key)
 
 
 def binary_strings(body: bytes) -> str:
@@ -445,6 +466,7 @@ class Result:
     links: dict[str, str] | None = None
     final_url: str | None = None
     redirected: bool = False
+    via_browser: bool = False
 
 
 def _signature(text_hash: str, links: dict[str, str]) -> str:
@@ -460,6 +482,88 @@ def _read(source: dict, f: Fetched) -> tuple[Extracted, dict[str, str]]:
     return ex, links
 
 
+class BrowserFetcher:
+    """Loads pages in headless Chromium, for sites that turn away plain HTTP
+    requests or only build their content with JavaScript.
+
+    It behaves like one ordinary visit: it identifies itself with the same
+    user agent as the plain fetcher (which names this tool), visits each
+    site once per run, and doesn't try to defeat CAPTCHAs or hide that it's
+    automated. A site that still refuses is reported as blocking bots.
+    """
+
+    def __init__(self):
+        from playwright.sync_api import sync_playwright  # noqa: PLC0415
+
+        self._pw = sync_playwright().start()
+        self._browser = self._pw.chromium.launch()
+        self._context = self._browser.new_context(user_agent=USER_AGENT, locale="en-US",
+                                                  accept_downloads=False)
+        self._context.set_default_timeout(TIMEOUT_SECONDS * 1000)
+
+    def close(self) -> None:
+        try:
+            self._context.close()
+            self._browser.close()
+        finally:
+            self._pw.stop()
+
+    def __call__(self, url: str) -> Fetched:
+        page = self._context.new_page()
+        try:
+            try:
+                resp = page.goto(url, wait_until="domcontentloaded")
+            except Exception as e:  # noqa: BLE001
+                if "Download is starting" not in str(e):
+                    return Fetched(ok=False, error=f"browser: {type(e).__name__}: {str(e)[:150]}")
+                return self._fetch_file(page, url)
+            if resp is None:
+                return Fetched(ok=False, error="browser: no response")
+            try:
+                page.wait_for_load_state("networkidle", timeout=15_000)
+            except Exception:  # noqa: BLE001 - pages with long-polling never go idle
+                pass
+            ctype = resp.headers.get("content-type", "")
+            if resp.status >= 400:
+                return Fetched(ok=False, status=resp.status, error=f"HTTP {resp.status} (browser)")
+            if "html" not in ctype:
+                return Fetched(ok=True, status=resp.status, final_url=page.url, content_type=ctype, body=resp.body())
+            return Fetched(ok=True, status=resp.status, final_url=page.url, content_type="text/html; charset=utf-8",
+                          body=page.content().encode())
+        finally:
+            page.close()
+
+    def _fetch_file(self, page, url: str) -> Fetched:
+        """A PDF or other file: request it from the site's own origin, the way
+        a link click on that site would."""
+        origin = "{0.scheme}://{0.netloc}/".format(urllib.parse.urlsplit(url))
+        try:
+            page.goto(origin, wait_until="domcontentloaded")
+            result = page.evaluate(
+                """async (u) => {
+                    const r = await fetch(u, {credentials: 'include'});
+                    const b = new Uint8Array(await r.arrayBuffer());
+                    let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode(...b.subarray(i, i + 0x8000));
+                    return {status: r.status, type: r.headers.get('content-type') || '', url: r.url, data: btoa(s)};
+                }""", url)
+        except Exception as e:  # noqa: BLE001
+            return Fetched(ok=False, error=f"browser: {type(e).__name__}: {str(e)[:150]}")
+        import base64  # noqa: PLC0415
+
+        if result["status"] >= 400:
+            return Fetched(ok=False, status=result["status"], error=f"HTTP {result['status']} (browser)")
+        return Fetched(ok=True, status=result["status"], final_url=result["url"], content_type=result["type"],
+                       body=base64.b64decode(result["data"]))
+
+
+def browser_available() -> bool:
+    try:
+        import playwright.sync_api  # noqa: F401, PLC0415
+        return True
+    except ImportError:
+        return False
+
+
 BLOCK_PAGE_RE = re.compile(r"unblock|captcha|challenge|access[-_]?denied|/blocked|bot[-_]?check", re.IGNORECASE)
 
 
@@ -472,8 +576,9 @@ def _redirect_key(url: str) -> str:
     return f"{host}{path}{'?' + parts.query if parts.query else ''}"
 
 
-def check_source(source: dict, prev: dict | None, confirm_delay: float) -> Result:
-    f = fetch(source["url"])
+def check_source(source: dict, prev: dict | None, confirm_delay: float, fetcher=None) -> Result:
+    fetcher = fetcher or fetch
+    f = fetcher(source["url"])
     if not f.ok:
         if f.status in (404, 410):
             return Result(source, "gone", f.error or "not found")
@@ -508,7 +613,7 @@ def check_source(source: dict, prev: dict | None, confirm_delay: float) -> Resul
 
     # Something differs. Fetch again before believing it.
     time.sleep(confirm_delay)
-    f2 = fetch(source["url"])
+    f2 = fetcher(source["url"])
     if not f2.ok:
         base.status = "unstable"
         base.detail = f"content differed, but the confirming fetch failed ({f2.error}); snapshot kept"
@@ -578,6 +683,35 @@ def run(sources: list[dict], state: dict, confirm_delay: float, workers: int) ->
         for group_results in pool.map(work, by_host.values()):
             results.extend(group_results)
     return results
+
+
+def retry_in_browser(results: list[Result], state: dict, confirm_delay: float) -> list[Result]:
+    """Second chance for sources a plain request couldn't read: load them in
+    a real browser, one at a time."""
+    blocked = [r for r in results if r.status == "blocked"]
+    if not blocked:
+        return results
+    if not browser_available():
+        print("playwright not installed; blocked sites stay blocked", file=sys.stderr)
+        return results
+    print(f"Retrying {len(blocked)} blocked sources in headless Chromium...", file=sys.stderr)
+    retried: dict[str, Result] = {}
+    browser = BrowserFetcher()
+    try:
+        for r in blocked:
+            try:
+                again = check_source(r.source, state.get(r.source["id"]), confirm_delay, fetcher=browser)
+            except Exception as e:  # noqa: BLE001
+                again = Result(r.source, "blocked", f"{r.detail}; browser error: {type(e).__name__}")
+            if again.status == "blocked":
+                again.detail = f"{r.detail}; a real browser was refused too"
+            else:
+                again.detail = ("read with a headless browser" + (f"; {again.detail}" if again.detail else ""))
+                again.via_browser = True
+            retried[r.source["id"]] = again
+    finally:
+        browser.close()
+    return [retried.get(r.source["id"], r) for r in results]
 
 
 def apply_results(results: list[Result], state: dict, today: str) -> None:
@@ -728,6 +862,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--limit", type=int, help="check at most N sources")
     ap.add_argument("--confirm-delay", type=float, default=CONFIRM_DELAY_SECONDS)
     ap.add_argument("--workers", type=int, default=WORKERS)
+    ap.add_argument("--no-browser", action="store_true", help="don't retry blocked sites in headless Chromium")
     ap.add_argument("--date", help="report date (default: today, US Eastern)")
     ap.add_argument("--dry-run", action="store_true", help="don't write state, snapshots or reports")
     args = ap.parse_args(argv)
@@ -749,6 +884,8 @@ def main(argv: list[str] | None = None) -> int:
     state = load_json(STATE_FILE, {})
     print(f"Checking {len(sources)} sources...", file=sys.stderr)
     results = run(sources, state, args.confirm_delay, args.workers)
+    if not args.no_browser:
+        results = retry_in_browser(results, state, args.confirm_delay)
     if not args.dry_run:
         apply_results(results, state, today)
     report, summary = build_report(results, state, today, started)
