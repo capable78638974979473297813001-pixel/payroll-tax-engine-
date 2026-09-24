@@ -469,6 +469,41 @@ class Result:
     via_browser: bool = False
 
 
+ENV_PLACEHOLDER_RE = re.compile(r"\{env:([A-Z0-9_]+)\}")
+
+
+def check_source(source: dict, prev: dict | None, confirm_delay: float, fetcher=None) -> Result:
+    """Checks one source. A URL may carry {env:NAME} placeholders for API
+    keys: they're filled from the environment for the request only, and the
+    key never reaches the report, the state file or the snapshots."""
+    names = ENV_PLACEHOLDER_RE.findall(source["url"])
+    if not names:
+        return _check_source(source, prev, confirm_delay, fetcher)
+    missing = [n for n in names if not os.environ.get(n)]
+    if missing:
+        return Result(source, "blocked", f"needs a free API key: add repository secret {', '.join(missing)}")
+    secrets = [os.environ[n] for n in names]
+    resolved = ENV_PLACEHOLDER_RE.sub(lambda m: urllib.parse.quote(os.environ[m.group(1)], safe=""), source["url"])
+
+    def scrub(value):
+        if isinstance(value, str):
+            for secret in secrets:
+                value = value.replace(secret, "***").replace(urllib.parse.quote(secret, safe=""), "***")
+        return value
+
+    r = _check_source({**source, "url": resolved}, prev, confirm_delay, fetcher)
+    r.source = source
+    r.detail = scrub(r.detail)
+    r.final_url = source["url"] if r.final_url else None
+    r.redirected = False
+    if r.links:
+        r.links = {scrub(u): scrub(t) for u, t in r.links.items()}
+    r.docs_added = [(scrub(u), scrub(t)) for u, t in r.docs_added]
+    r.docs_removed = [(scrub(u), scrub(t)) for u, t in r.docs_removed]
+    r.text = scrub(r.text)
+    return r
+
+
 def _signature(text_hash: str, links: dict[str, str]) -> str:
     return hashlib.sha256((text_hash + "\n" + "\n".join(sorted(links))).encode()).hexdigest()
 
@@ -576,7 +611,7 @@ def _redirect_key(url: str) -> str:
     return f"{host}{path}{'?' + parts.query if parts.query else ''}"
 
 
-def check_source(source: dict, prev: dict | None, confirm_delay: float, fetcher=None) -> Result:
+def _check_source(source: dict, prev: dict | None, confirm_delay: float, fetcher=None) -> Result:
     fetcher = fetcher or fetch
     f = fetcher(source["url"])
     if not f.ok:

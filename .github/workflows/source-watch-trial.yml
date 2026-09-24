@@ -1,0 +1,29 @@
+name: Source watch trial (temporary)
+
+# Temporary: a full watch against the committed baseline on GitHub's runners,
+# twice back to back, without committing anything. Delete after use.
+on:
+  push:
+    branches: ['claude/intelligent-tesla-q5vtjv']
+    paths: ['watcher/**', '.github/workflows/source-watch-trial.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  trial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: |
+          pip install -r watcher/requirements.txt
+          python -m playwright install --with-deps chromium
+      - run: python -m unittest watcher/test_watch.py
+      - name: Full watch now, against yesterday's baseline
+        run: python watcher/watch.py
+      - name: Second pass (must show no changes)
+        run: python watcher/watch.py > /dev/null

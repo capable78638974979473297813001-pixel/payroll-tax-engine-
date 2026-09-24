@@ -74,6 +74,10 @@ jobs:
       - name: Watch
         if: steps.gate.outputs.run == 'true'
         id: watch
+        env:
+          # Free keys for official APIs; sources that need a missing key are
+          # listed in the report rather than failing the run.
+          NYSENATE_API_KEY: ${{ secrets.NYSENATE_API_KEY }}
         run: |
           python watcher/watch.py > /dev/null
           python - <<'PY' >> "$GITHUB_OUTPUT"

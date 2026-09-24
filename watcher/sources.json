@@ -229,6 +229,19 @@
    ]
   },
   {
+   "id": "us-7ab3e8058b",
+   "jurisdiction": "US",
+   "title": "Federal Register: Railroad Retirement Board notices (RUIA/RRTA rates) - official API",
+   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=railroad-retirement-board",
+   "origin": "curated",
+   "used_by": [
+    "data/federal/2026.json"
+   ],
+   "replaces": [
+    "https://www.rrb.gov/Newsroom/NewsReleases/RetirementUnemploymentInsuranceTaxes"
+   ]
+  },
+  {
    "id": "us-ed3b1bc80a",
    "jurisdiction": "US",
    "title": "Federal Register: SSA yearly wage base notice (Cost-of-Living Increase and Other Determinations) - official API",
@@ -258,6 +271,7 @@
     "data/minimum-wage/federal-2026.json"
    ],
    "replaces": [
+    "https://www.dol.gov/agencies/whd/overtime/rulemaking",
     "https://www.federalregister.gov/documents/2026/02/09/2026-02466/minimum-wage-for-federal-contracts-covered-by-executive-order-13658-notice-of-rate-change-in-effect"
    ]
   },
@@ -488,13 +502,16 @@
    ]
   },
   {
-   "id": "us-9a98f89dad",
+   "id": "us-6652b63bcb",
    "jurisdiction": "US",
-   "title": "One Big Beautiful Bill Act, P.L. 119-21 (2025)",
-   "url": "https://www.congress.gov/bill/119th-congress/house-bill/1",
-   "origin": "data",
+   "title": "P.L. 119-21 on govinfo.gov (official text)",
+   "url": "https://www.govinfo.gov/app/details/PLAW-119publ21",
+   "origin": "curated",
    "used_by": [
     "data/federal/2026.json"
+   ],
+   "replaces": [
+    "https://www.congress.gov/bill/119th-congress/house-bill/1"
    ]
   },
   {
@@ -535,16 +552,6 @@
    "origin": "data",
    "used_by": [
     "data/garnishment/state-overrides-2026.json"
-   ]
-  },
-  {
-   "id": "us-b1b94d3412",
-   "jurisdiction": "US",
-   "title": "State of Texas v. U.S. Department of Labor, No. 4:24-cv-499 (E.D. Tex. 2024-11-15)",
-   "url": "https://www.dol.gov/agencies/whd/overtime/rulemaking",
-   "origin": "data",
-   "used_by": [
-    "data/minimum-wage/federal-2026.json"
    ]
   },
   {
@@ -631,16 +638,6 @@
     "data/minimum-wage/territories/MP-2026.json",
     "data/minimum-wage/territories/PR-2026.json",
     "data/minimum-wage/territories/VI-2026.json"
-   ]
-  },
-  {
-   "id": "us-f0a47b1cf0",
-   "jurisdiction": "US",
-   "title": "US Railroad Retirement Board \u2014 Railroad Retirement and Unemployment Insurance Taxes in 2026, and the 2026 Railroad Experience Rating Proclamations",
-   "url": "https://www.rrb.gov/Newsroom/NewsReleases/RetirementUnemploymentInsuranceTaxes",
-   "origin": "data",
-   "used_by": [
-    "data/federal/2026.json"
    ]
   },
   {
@@ -808,16 +805,6 @@
    ]
   },
   {
-   "id": "ar-0772c90a5f",
-   "jurisdiction": "AR",
-   "title": "AR Division of Workforce Services -- Employer UI Contributions",
-   "url": "https://dws.arkansas.gov/workforce-services/unemployment/employer-ui-information/employer-ui-contributions/",
-   "origin": "data",
-   "used_by": [
-    "data/states/AR-2026.json"
-   ]
-  },
-  {
    "id": "ar-bf3a49f465",
    "jurisdiction": "AR",
    "title": "AR4EC -- Employee's Withholding Exemption Certificate (R 02/07/2025)",
@@ -843,6 +830,19 @@
    "origin": "data",
    "used_by": [
     "data/minimum-wage/states/AR-2026.json"
+   ]
+  },
+  {
+   "id": "ar-1cebef6d21",
+   "jurisdiction": "AR",
+   "title": "Arkansas UI Information Handbook 2026 (wage base, rates)",
+   "url": "https://dws.arkansas.gov/wp-content/uploads/UI-Handbook-2026-Final.pdf",
+   "origin": "curated",
+   "used_by": [
+    "data/states/AR-2026.json"
+   ],
+   "replaces": [
+    "https://dws.arkansas.gov/workforce-services/unemployment/employer-ui-information/employer-ui-contributions/"
    ]
   },
   {
@@ -1083,16 +1083,6 @@
    ]
   },
   {
-   "id": "co-5dadf5a792",
-   "jurisdiction": "CO",
-   "title": "City of Edgewater, Colorado -- Minimum Wage",
-   "url": "https://www.edgewaterco.gov/doing-business/minimum-wage",
-   "origin": "data",
-   "used_by": [
-    "data/minimum-wage/local/CO-local-2026.json"
-   ]
-  },
-  {
    "id": "co-fa310c6979",
    "jurisdiction": "CO",
    "title": "City of Glendale, CO \u2014 Occupational Privilege Tax (municipal code Chapter 3.21 and the city's own OPT page)",
@@ -1120,6 +1110,20 @@
    "origin": "data",
    "used_by": [
     "data/states/CO-2026.json"
+   ]
+  },
+  {
+   "id": "co-bf8aca859b",
+   "jurisdiction": "CO",
+   "title": "Colorado Division of Labor Standards (local minimum wage notices, INFO #19)",
+   "url": "https://cdle.colorado.gov/dlss",
+   "kind": "index",
+   "origin": "curated",
+   "used_by": [
+    "data/minimum-wage/local/CO-local-2026.json"
+   ],
+   "replaces": [
+    "https://www.edgewaterco.gov/doing-business/minimum-wage"
    ]
   },
   {
@@ -2569,13 +2573,17 @@
    ]
   },
   {
-   "id": "mt-52835da672",
+   "id": "mt-f98588262c",
    "jurisdiction": "MT",
-   "title": "Montana Department of Revenue \u2014 Publication 1, Montana Withholding Tax Guide (supplemental wage methods)",
-   "url": "https://mtrevenue.gov/publications/",
-   "origin": "data",
+   "title": "Montana Employer and Information Agent Guide (publication page)",
+   "url": "https://revenue.mt.gov/publications/montana-employer-and-information-agent-guide",
+   "kind": "index",
+   "origin": "curated",
    "used_by": [
     "data/states/MT-2026.json"
+   ],
+   "replaces": [
+    "https://mtrevenue.gov/publications/"
    ]
   },
   {
@@ -2738,13 +2746,16 @@
    "origin": "curated"
   },
   {
-   "id": "nh-1928063f1f",
+   "id": "nh-05aa788bb5",
    "jurisdiction": "NH",
-   "title": "New Hampshire Department of Labor -- Minimum Wage",
-   "url": "https://www.dol.nh.gov/inspections/wage-and-hour/minimum-wage",
-   "origin": "data",
+   "title": "NH RSA 279:21 minimum hourly rate (statute)",
+   "url": "https://gc.nh.gov/rsa/html/XXIII/279/279-21.htm",
+   "origin": "curated",
    "used_by": [
     "data/minimum-wage/states/NH-2026.json"
+   ],
+   "replaces": [
+    "https://www.dol.nh.gov/inspections/wage-and-hour/minimum-wage"
    ]
   },
   {
@@ -3073,26 +3084,6 @@
    ]
   },
   {
-   "id": "ny-a7ff0739d4",
-   "jurisdiction": "NY",
-   "title": "N.Y. Election Law 3-400 -- Election inspectors and poll clerks",
-   "url": "https://www.nysenate.gov/legislation/laws/ELN/3-400",
-   "origin": "data",
-   "used_by": [
-    "data/minimum-wage/states/NY-2026.json"
-   ]
-  },
-  {
-   "id": "ny-8dd98bdb7f",
-   "jurisdiction": "NY",
-   "title": "N.Y. Labor Law 651(5) -- Definitions (exclusions from 'employee')",
-   "url": "https://www.nysenate.gov/legislation/laws/LAB/651",
-   "origin": "data",
-   "used_by": [
-    "data/minimum-wage/states/NY-2026.json"
-   ]
-  },
-  {
    "id": "ny-75c50b7e24",
    "jurisdiction": "NY",
    "title": "NY Department of Financial Services -- COBRA and Premium Assistance",
@@ -3123,13 +3114,63 @@
    ]
   },
   {
-   "id": "ny-28f0ccb293",
+   "id": "ny-98bb301062",
    "jurisdiction": "NY",
-   "title": "NY Paid Family Leave -- Private Employer Coverage Requirements",
-   "url": "https://paidfamilyleave.ny.gov/private-employer-coverage-requirements",
-   "origin": "data",
+   "title": "NY Election Law 3-400 via NY Senate Open Legislation API (free key: NYSENATE_API_KEY)",
+   "url": "https://legislation.nysenate.gov/api/3/laws/ELN/3-400?key={env:NYSENATE_API_KEY}",
+   "origin": "curated",
+   "used_by": [
+    "data/minimum-wage/states/NY-2026.json"
+   ],
+   "drop_json_keys": [
+    "responseTime"
+   ],
+   "replaces": [
+    "https://www.nysenate.gov/legislation/laws/ELN/3-400"
+   ]
+  },
+  {
+   "id": "ny-56c42c3ba4",
+   "jurisdiction": "NY",
+   "title": "NY Labor Law 651 via NY Senate Open Legislation API (free key: NYSENATE_API_KEY)",
+   "url": "https://legislation.nysenate.gov/api/3/laws/LAB/651?key={env:NYSENATE_API_KEY}",
+   "origin": "curated",
+   "used_by": [
+    "data/minimum-wage/states/NY-2026.json"
+   ],
+   "drop_json_keys": [
+    "responseTime"
+   ],
+   "replaces": [
+    "https://www.nysenate.gov/legislation/laws/LAB/651"
+   ]
+  },
+  {
+   "id": "ny-8c25ef08ba",
+   "jurisdiction": "NY",
+   "title": "NY Paid Family Leave payroll deduction notice 2026 (rate and cap)",
+   "url": "https://www.wcb.ny.gov/content/main/forms/PFLDocs/pfl-pay-deduction-notice-2026.pdf",
+   "origin": "curated"
+  },
+  {
+   "id": "ny-a1e4ff92e7",
+   "jurisdiction": "NY",
+   "title": "NY State Comptroller payroll bulletins (PFL, withholding changes)",
+   "url": "https://www.osc.ny.gov/state-agencies/payroll-bulletins",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ny-7c8f6ff782",
+   "jurisdiction": "NY",
+   "title": "NY Workers' Compensation Board: Paid Family Leave 2026 announcement",
+   "url": "https://www.wcb.ny.gov/content/main/PressRe/paid-family-leave-2026.jsp",
+   "origin": "curated",
    "used_by": [
     "data/employer-thresholds/NY-2026.json"
+   ],
+   "replaces": [
+    "https://paidfamilyleave.ny.gov/private-employer-coverage-requirements"
    ]
   },
   {
@@ -3789,23 +3830,16 @@
    ]
   },
   {
-   "id": "tx-854104fd7b",
-   "jurisdiction": "TX",
-   "title": "Texas Workforce Commission -- Discussion Paper on Unemployment Insurance Tax Rates for 2026 (item 9b, Commission meeting 2025-11-17)",
-   "url": "https://www.twc.texas.gov/sites/default/files/ogc/mtg25/commission-meeting-material-111725-item9b-dp-2026-tax-rates-twc.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/states/TX-2026.json"
-   ]
-  },
-  {
    "id": "tx-bbdcaabbc3",
    "jurisdiction": "TX",
-   "title": "Texas Workforce Commission -- Your 2026 Tax Rates",
+   "title": "Texas Workforce Commission: your tax rates",
    "url": "https://www.twc.texas.gov/programs/unemployment-tax/your-tax-rates",
-   "origin": "data",
+   "origin": "curated",
    "used_by": [
     "data/states/TX-2026.json"
+   ],
+   "replaces": [
+    "https://www.twc.texas.gov/sites/default/files/ogc/mtg25/commission-meeting-material-111725-item9b-dp-2026-tax-rates-twc.pdf"
    ]
   },
   {

@@ -41,6 +41,24 @@ JavaScript. Two things handle those:
   solve CAPTCHAs or hide that it's automated. A site that refuses a real
   browser too stays listed under "Blocks bots" for a manual check.
 
+Where a blocked page has an official equivalent that allows automated
+checks, the equivalent replaces it: the statute instead of the agency's
+summary page (NH RSA 279:21), the agency's own PDF instead of its web page
+(Arkansas UI handbook), the Workers' Compensation Board and State
+Comptroller instead of paidfamilyleave.ny.gov, govinfo.gov instead of
+congress.gov, and so on (`"replaces"` in `curated.json`).
+
+### API keys
+
+Some official APIs need a free key. A source URL can carry
+`{env:NAME}`; the key is read from that environment variable at fetch time
+and is never written to reports, state or snapshots. Without it, the source
+is listed as needing a key. Current keys (add each as a repository secret):
+
+| Secret | Used for | Get one |
+|---|---|---|
+| `NYSENATE_API_KEY` | NY Labor Law and Election Law text | https://legislation.nysenate.gov (free sign-up) |
+
 ## How it decides something changed
 
 1. **Reduce to what a person reads.** For PDFs that's the text (so a

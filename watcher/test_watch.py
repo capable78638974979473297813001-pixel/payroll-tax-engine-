@@ -11,6 +11,7 @@ import contextlib
 import http.server
 import io
 import json
+import os
 import sys
 import tempfile
 import threading
@@ -278,6 +279,24 @@ class WatcherTest(ServerTestCase):
         self.site.set_page("/api", json.dumps({"a": 1, "b": [{"date": "2016-12-01"}, {"date": "2026-10-01"}]}),
                            ctype="application/json")
         self.assertEqual(self.run_watch("2026-09-03")["counts"], {"changed": 1})
+
+    def test_api_key_placeholder_is_used_but_never_saved(self):
+        self.site.set_page("/api?key=S3CRET-KEY", json.dumps({"law": "text of section 651"}), ctype="application/json")
+        srcs = [{"id": "t-0", "jurisdiction": "XX", "title": "api", "url": self.base + "/api?key={env:TEST_WATCH_KEY}"}]
+        watch.SOURCES_FILE.write_text(json.dumps({"sources": srcs}))
+        os.environ.pop("TEST_WATCH_KEY", None)
+        summary = self.run_watch("2026-09-01")
+        self.assertEqual(summary["counts"], {"blocked": 1})
+        self.assertIn("TEST_WATCH_KEY", (watch.REPORT_DIR / "latest.md").read_text())
+        os.environ["TEST_WATCH_KEY"] = "S3CRET-KEY"
+        try:
+            self.assertEqual(self.run_watch("2026-09-02")["counts"], {"new": 1})
+            self.assertEqual(self.run_watch("2026-09-03")["counts"], {"unchanged": 1})
+        finally:
+            del os.environ["TEST_WATCH_KEY"]
+        for path in [watch.STATE_FILE, *watch.REPORT_DIR.iterdir()]:
+            self.assertNotIn("S3CRET", path.read_text(), path)
+        self.assertNotIn("S3CRET", watch.read_snapshot("t-0"))
 
     def test_index_source_reports_new_pages(self):
         body = page(extra_link='<li><a href="/news/2026-rates">2026 rates</a></li>')
