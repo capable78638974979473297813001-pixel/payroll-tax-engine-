@@ -437,6 +437,7 @@
   "last_ok": "2026-09-24",
   "links": {},
   "nav": [],
+  "needs_browser": true,
   "url": "https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/ASminwagePoster.pdf"
  },
  "az-42fee4ee8e": {
@@ -541,6 +542,7 @@
    "da39a3ee5e",
    "daba4fa8c6"
   ],
+  "needs_browser": true,
   "url": "https://www.tucsonaz.gov/Departments/Business-Services-Department/Tucson-Minimum-Wage-Act"
  },
  "az-b66098e04c": {
@@ -569,14 +571,19 @@
   "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165"
  },
  "az-c562e891c7": {
-  "failures": 2,
+  "failures": 0,
+  "hash": "06643507b2f5d04ba2f6fbe5fe3262d8e354016da2f04f67cf50682aa4d1f333",
+  "last_changed": "2026-09-24",
   "last_checked": "2026-09-24",
-  "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+  "last_ok": "2026-09-24",
+  "links": {},
+  "nav": [],
+  "needs_browser": true,
   "url": "https://des.az.gov/sites/default/files/dl/UIT-0603A_FY26.pdf"
  },
  "ca-0f612469ad": {
   "failures": 0,
-  "hash": "a0d26bc9aec90a386175e790ebed53dc447b7abcb3abdb25afac081a31821320",
+  "hash": "7addf7c719b6142030d45c0a36e8b4a6c61f93f99a58a2f3c0c2aaacd7ea9ebd",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-24",
   "last_ok": "2026-09-24",
@@ -589,20 +596,8 @@
    "38a2113303",
    "3c5dae5e78",
    "3d59cf4b50",
-   "558865a16f",
-   "5721bbef40",
    "58370fe770",
-   "7927b144e1",
-   "9ad0ccff7c",
-   "b414b762a3",
-   "b8448df5a2",
-   "bcc228d5b2",
-   "c019778f6e",
-   "c032adc1ff",
-   "da39a3ee5e",
-   "e570be774d",
-   "e5deba0491",
-   "f08fecc069"
+   "bcc228d5b2"
   ],
   "url": "https://dcba.lacounty.gov/newsroom/new-worker-protections-for-july-1-2025/"
  },
@@ -740,10 +735,11 @@
   "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf"
  },
  "ca-8ca2cdf685": {
-  "failures": 0,
+  "failures": 1,
   "hash": "b70a843fc3866750aafaa20ab6fca1cd03461acb4dd833d225624944a8fe8a2a",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-24",
+  "last_error": "TimeoutError: The read operation timed out",
   "last_ok": "2026-09-24",
   "links": {},
   "nav": [],
@@ -2916,7 +2912,7 @@
  "in-7770ce5353": {
   "failures": 2,
   "last_checked": "2026-09-24",
-  "last_error": "URLError: <urlopen error [Errno 111] Connection refused>",
+  "last_error": "URLError: <urlopen error timed out>",
   "url": "https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/state-premium-rate-computation/"
  },
  "in-86066aa1c0": {
@@ -2930,9 +2926,16 @@
   "url": "https://www.in.gov/dor/files/dn01.pdf"
  },
  "in-8d2292d267": {
-  "failures": 2,
+  "failures": 1,
+  "hash": "e3428f497e880901599d3c6cd7d5b336a145c9612a0e1fcf875d52c0b75fe201",
+  "last_changed": "2026-09-24",
   "last_checked": "2026-09-24",
-  "last_error": "URLError: <urlopen error [Errno 111] Connection refused>",
+  "last_error": "URLError: <urlopen error timed out>",
+  "last_ok": "2026-09-24",
+  "links": {},
+  "nav": [
+   "6f720dc324"
+  ],
   "url": "https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/"
  },
  "in-cd957f8ce0": {
@@ -3881,6 +3884,7 @@
    "f585239777",
    "f8e8ac5ac2"
   ],
+  "needs_browser": true,
   "url": "https://www.mass.gov/info-details/massachusetts-4-surtax-on-taxable-income"
  },
  "ma-cdc80eeb37": {
@@ -3919,6 +3923,7 @@
    "9cc3d86f22",
    "ace09ae050"
   ],
+  "needs_browser": true,
   "redirects_to": "https://www.mass.gov/lists/withholding-tax-forms",
   "url": "https://www.mass.gov/lists/dor-withholding-tax-forms"
  },
@@ -3962,6 +3967,7 @@
   "last_ok": "2026-09-24",
   "links": {},
   "nav": [],
+  "needs_browser": true,
   "url": "https://www.mass.gov/doc/massachusetts-circular-m-income-tax-withholding-tables-at-50-effective-january-1-2026/download"
  },
  "md-43a4e93e35": {
@@ -4112,12 +4118,11 @@
  },
  "me-105c493e59": {
   "failures": 0,
-  "hash": "4f940f0ba2e749d45da22a1716c6cec763187af339015e0967e101914c426abd",
+  "hash": "5966fcabcc0c690fe2631383c45867ae7b6e0fe9a6527ed850c83ccc8fa29857",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-24",
   "last_ok": "2026-09-24",
   "links": {
-   "https://www.maine.gov/": "Home",
    "https://www.maine.gov/labor/index.shtml": "Maine Department of Labor's website",
    "https://www.maine.gov/revenue/faq/income-tax-withholding": "Withholding FAQs",
    "https://www.maine.gov/revenue/publications/rules": "Rule 803 - Withholding Tax Reports and Payments",
@@ -4129,11 +4134,7 @@
   },
   "nav": [
    "1225fe003e",
-   "1d58c1f5bc",
-   "31dedd913e",
-   "38e268b8f8",
-   "aad422d326",
-   "da39a3ee5e"
+   "1d58c1f5bc"
   ],
   "url": "https://www.maine.gov/revenue/taxes/income-estate-tax/employer-withholding"
  },
@@ -5057,62 +5058,9 @@
   "url": "https://www.michigan.gov/treasury/reference/taxpayer-notices/2026/04/15/425-income-tax-rate-for-individuals-and-fiduciaries-in-2026-tax-year"
  },
  "mn-2dafbfc1b6": {
-  "failures": 0,
-  "hash": "a13ebb0583566a5818e4143300e653ea0d6fd7c93ab655c70128db1c62a4e0b1",
-  "last_changed": "2026-09-24",
+  "failures": 2,
   "last_checked": "2026-09-24",
-  "last_ok": "2026-09-24",
-  "links": {},
-  "nav": [
-   "002545054b",
-   "01166e6d1c",
-   "01399bc023",
-   "05d7e7ea31",
-   "08dcf6c5f6",
-   "0ce41e530e",
-   "1de8a6803b",
-   "256b2c53d6",
-   "2690153f1d",
-   "2ce8eddbfa",
-   "31c22e3289",
-   "394658e59b",
-   "3c0434c713",
-   "42ec8466e6",
-   "4cc57cf839",
-   "4dc977b4fe",
-   "5198c45421",
-   "558f4e3f25",
-   "65e5266050",
-   "678765c67d",
-   "6c1926af4c",
-   "6d2023d989",
-   "6ff64b3f9f",
-   "70281a0552",
-   "727f00bebb",
-   "735c3f15ba",
-   "7f93d4f26a",
-   "84ac38462e",
-   "87df60de33",
-   "902894444e",
-   "94a019d48f",
-   "a20da7dc65",
-   "a51562f647",
-   "a57d6e12f0",
-   "ad0dce24a8",
-   "be789ab98b",
-   "c84895e893",
-   "c8767e3441",
-   "d613d88cb2",
-   "d88a994554",
-   "d8f8dd5d10",
-   "deef9b7e96",
-   "e861d3f3bb",
-   "ee08352d5e",
-   "f3dbad43df",
-   "f582aa3f67",
-   "fceef4c6b3",
-   "fcffa4b241"
-  ],
+  "last_error": "URLError: <urlopen error [SSL: BAD_SIGNATURE] bad signature (_ssl.c:1010)>",
   "url": "https://www.revisor.mn.gov/statutes/cite/290.081"
  },
  "mn-4b376a9ce0": {
@@ -5500,55 +5448,9 @@
   "url": "https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses"
  },
  "mn-bf10c5e515": {
-  "failures": 0,
-  "hash": "a9d89bf07d1bab819c18b5b0eebe7d5deeff13faa8a51fcf8bab1a6f8e40054f",
-  "last_changed": "2026-09-24",
+  "failures": 2,
   "last_checked": "2026-09-24",
-  "last_ok": "2026-09-24",
-  "links": {},
-  "nav": [
-   "01166e6d1c",
-   "01f089945a",
-   "0e8d3491b6",
-   "1afc950dfe",
-   "246d1e515f",
-   "256b2c53d6",
-   "2aaed62508",
-   "42ec8466e6",
-   "51665f0120",
-   "5a40314752",
-   "5da0c5b9d3",
-   "5e5b8bc79b",
-   "63c74e19f1",
-   "65e5266050",
-   "6a698336c2",
-   "73207346e7",
-   "7549e53156",
-   "7f93d4f26a",
-   "8457095429",
-   "87df60de33",
-   "94a019d48f",
-   "96e3003c55",
-   "999da76417",
-   "9abd395368",
-   "9ac4341d43",
-   "9b3e973a4f",
-   "a57d6e12f0",
-   "bb0ec68573",
-   "bd2143f5b4",
-   "be789ab98b",
-   "c8069effd8",
-   "c84895e893",
-   "d3d31ebcd6",
-   "d613d88cb2",
-   "d886a5f453",
-   "d88a994554",
-   "e3b9f560e1",
-   "eb2cb24488",
-   "ee08352d5e",
-   "f314a85c6a",
-   "fbe91e0dbd"
-  ],
+  "last_error": "URLError: <urlopen error [SSL: BAD_SIGNATURE] bad signature (_ssl.c:1010)>",
   "url": "https://www.revisor.mn.gov/statutes/cite/268B.14"
  },
  "mn-c8db387719": {
@@ -5558,69 +5460,15 @@
   "url": "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions"
  },
  "mn-ceb55e82d9": {
-  "failures": 0,
-  "hash": "9ea0fc8ba8f178b4b2314236d3e04a6d4d3c22209e5ac996e1c501cea7c46bf6",
-  "last_changed": "2026-09-24",
+  "failures": 2,
   "last_checked": "2026-09-24",
-  "last_ok": "2026-09-24",
-  "links": {},
-  "nav": [
-   "01166e6d1c",
-   "0810916285",
-   "256b2c53d6",
-   "42ec8466e6",
-   "65e5266050",
-   "7ce4bf730d",
-   "7f93d4f26a",
-   "87df60de33",
-   "8bd46fdd45",
-   "94a019d48f",
-   "be789ab98b",
-   "c84895e893",
-   "d613d88cb2",
-   "d88a994554",
-   "e018d9f1c2",
-   "e6a6232685",
-   "ee08352d5e"
-  ],
+  "last_error": "URLError: <urlopen error [SSL: BAD_SIGNATURE] bad signature (_ssl.c:1010)>",
   "url": "https://www.revisor.mn.gov/statutes/cite/477A.016"
  },
  "mn-f57b907ac0": {
-  "failures": 0,
-  "hash": "7c9ea9e30dce27c72b286cd078396795ca68f37e2d492e8eb4a5a786ac714327",
-  "last_changed": "2026-09-24",
+  "failures": 2,
   "last_checked": "2026-09-24",
-  "last_ok": "2026-09-24",
-  "links": {},
-  "nav": [
-   "01166e6d1c",
-   "0aa90e391a",
-   "1f603c5d8b",
-   "236a62ae8b",
-   "26413e84ad",
-   "28e08f2503",
-   "443db9240a",
-   "57b657638f",
-   "600d421420",
-   "6e2e090364",
-   "7d7ed24ad5",
-   "87df60de33",
-   "94a019d48f",
-   "9d46351f57",
-   "acc9826817",
-   "ae9d9ca6ec",
-   "af514d8be8",
-   "bb11a8e3f8",
-   "cc03becf3d",
-   "cc405349c2",
-   "ccd8515c39",
-   "d613d88cb2",
-   "e5163bb206",
-   "eb2cb24488",
-   "ebb45146c1",
-   "ee08352d5e",
-   "fcbf9ec1dc"
-  ],
+  "last_error": "URLError: <urlopen error [SSL: BAD_SIGNATURE] bad signature (_ssl.c:1010)>",
   "url": "https://www.revisor.mn.gov/rules/8002.0200/"
  },
  "mo-02e00fb2ac": {
@@ -7031,6 +6879,7 @@
    "eca17254ac",
    "fb5b0f8279"
   ],
+  "needs_browser": true,
   "url": "https://www.dol.gov/agencies/whd/fmla"
  },
  "ny-284a641e61": {
@@ -7629,6 +7478,7 @@
    "f30d589270",
    "f4572a5823"
   ],
+  "needs_browser": true,
   "url": "https://www.dol.gov/agencies/whd/compliance-assistance/handy-reference-guide-flsa"
  },
  "ny-75c50b7e24": {
@@ -7670,6 +7520,7 @@
    "c320b55287",
    "d6afc87d47"
   ],
+  "needs_browser": true,
   "url": "https://www.dol.gov/general/topic/health-plans/cobra"
  },
  "ny-7c8f6ff782": {
@@ -7987,6 +7838,7 @@
    "f634c771b2",
    "f9e946dec2"
   ],
+  "needs_browser": true,
   "url": "https://www.dol.gov/agencies/whd/flsa"
  },
  "ny-d4f2c6eeff": {
@@ -8331,6 +8183,7 @@
    "https://dam.assets.ohio.gov/image/upload/jfs.ohio.gov/ouio/uctax/2026RateDetails.pdf": "2026 Rate Details"
   },
   "nav": [],
+  "needs_browser": true,
   "url": "https://jfs.ohio.gov/unemployment-services/for-employers/file-unemployment-taxes/tax-resources/contribution-rates"
  },
  "oh-6b99ad75b9": {
@@ -10059,6 +9912,7 @@
    "f585239777",
    "ffcf888921"
   ],
+  "needs_browser": true,
   "url": "https://www.mass.gov/info-details/learn-about-the-income-tax-paid-to-another-jurisdiction-credit"
  },
  "ri-d9f64cd9b0": {
@@ -10147,7 +10001,7 @@
  },
  "sd-be0406fa60": {
   "failures": 0,
-  "hash": "9f6456ccd5d48c91f6cefe707c70ae78a926b68105e150d1ee8f7dd221424704",
+  "hash": "c5f87587bed4e7bd17634c796a3e21c396cc223931bcdbb136d1f916bfdf4efb",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-24",
   "last_ok": "2026-09-24",
@@ -10166,16 +10020,19 @@
    "25b00a6d96",
    "2827a9e775",
    "338caadc2f",
-   "3682eede6f",
    "3891099572",
    "3b9bb344fb",
    "3e5ea479ad",
    "3f11cc04b2",
+   "4948c06202",
+   "4a8e296444",
    "4bec957572",
+   "4c4a2e80cc",
    "60ac08ebcf",
    "63c9de6b1f",
    "654674fd82",
    "6bd0b76885",
+   "6be1307d99",
    "6cf2723409",
    "6ed28a1840",
    "71a0e54618",
@@ -10186,8 +10043,11 @@
    "9389b1335b",
    "953be3e9ae",
    "960b9833e4",
+   "9ad0ccff7c",
+   "9db108ba6b",
    "9e7c21f1c7",
    "a39887179b",
+   "b1385fdf0f",
    "b176e72641",
    "b488254097",
    "b637301a9a",
@@ -10202,7 +10062,8 @@
    "e45c95aa13",
    "e56c762e95",
    "e7386eb79e",
-   "f1491d08af",
+   "e935ba3b2b",
+   "ee3cb45f7e",
    "f172f7c297",
    "f4c0559529"
   ],
@@ -10210,7 +10071,7 @@
  },
  "sd-c9be726161": {
   "failures": 0,
-  "hash": "f6d878022cc59808a7bd4fd1988add8e25fcd8c8eca01ab9bb578277d4a25a8e",
+  "hash": "01f22e8c8c6868286019f7dd1a261733ef6741260872b996fcdbc228a3699f87",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-24",
   "last_ok": "2026-09-24",
@@ -10225,18 +10086,21 @@
    "1144bad8b0",
    "2146d13686",
    "280b4e5bd9",
-   "3682eede6f",
    "3d35e25c9e",
    "403f89801e",
    "469708fd28",
    "4764b57afe",
+   "4948c06202",
+   "4a8e296444",
    "4bec957572",
+   "4c4a2e80cc",
    "4d99c71529",
    "50ef0c0a83",
    "563f7c815f",
    "654674fd82",
    "6993e93f4b",
    "6da4c27ea4",
+   "6e28920829",
    "6f05f3585e",
    "735cd9b13f",
    "73a2a5bdc1",
@@ -10250,6 +10114,9 @@
    "90589df093",
    "91a12bca38",
    "91b89e5215",
+   "9306cc8a91",
+   "9ad0ccff7c",
+   "9db108ba6b",
    "9fef73d85d",
    "a3f0edda65",
    "a487d1b360",
@@ -10269,7 +10136,8 @@
    "da35e10877",
    "da39a3ee5e",
    "dba0f8a7d6",
-   "f1491d08af",
+   "e935ba3b2b",
+   "ee3cb45f7e",
    "f67f77966d",
    "fa56dba14e",
    "fcb789189a",
@@ -10280,7 +10148,7 @@
  },
  "sd-fd3b550c78": {
   "failures": 0,
-  "hash": "6bfec6b9cb4f748468c4dabf45eba933e6a70d16eb5b817fb505e97a73ff3301",
+  "hash": "fc055f53dff832d06a05ef54f4c7a464ca20104582f8ee1b575509d527c50318",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-24",
   "last_ok": "2026-09-24",
@@ -10291,31 +10159,44 @@
    "017bbd2bf7",
    "05cbfa8304",
    "0c9306a7e2",
+   "0eb141a047",
    "0f66c3cfbf",
    "1d351acfd5",
    "280b4e5bd9",
-   "3682eede6f",
+   "283e198972",
+   "2a627c1101",
+   "3993be7790",
    "3d35e25c9e",
    "4764b57afe",
+   "47b8c3461b",
+   "4948c06202",
    "49c88d0c4b",
+   "4a8e296444",
    "4bec957572",
+   "4c4a2e80cc",
    "50ef0c0a83",
    "563f7c815f",
    "654674fd82",
    "6741034b6c",
+   "6e28920829",
    "6f05f3585e",
    "746bfdeea7",
    "79b126b63b",
    "7e6d8ce1dd",
    "7f7d71f92c",
    "8060d9d634",
+   "82927015d1",
    "90589df093",
    "91a12bca38",
    "91b89e5215",
+   "9306cc8a91",
+   "9ad0ccff7c",
+   "9db108ba6b",
    "a487d1b360",
    "a6ab6564eb",
    "aaacffe875",
    "b176e72641",
+   "b32a1636fb",
    "bb02d36e9f",
    "c286a98ed4",
    "ce727d6da6",
@@ -10324,7 +10205,8 @@
    "da35e10877",
    "da39a3ee5e",
    "dba0f8a7d6",
-   "f1491d08af",
+   "e935ba3b2b",
+   "ee3cb45f7e",
    "fa56dba14e"
   ],
   "url": "https://dlr.sd.gov/ra/businesses/default.aspx"
@@ -10365,6 +10247,7 @@
    "9cfe26e8f1",
    "e8e08bd244"
   ],
+  "needs_browser": true,
   "url": "https://www.twc.texas.gov/programs/unemployment-tax/your-tax-rates"
  },
  "tx-c492882475": {
@@ -10418,6 +10301,7 @@
    "ed4da4f360",
    "f60ba15a7f"
   ],
+  "needs_browser": true,
   "url": "https://www.ssa.gov/slge/election_workers.htm"
  },
  "us-0b058600be": {
@@ -10432,29 +10316,18 @@
  },
  "us-102cc000bf": {
   "failures": 0,
-  "hash": "0c57e9dbc1c5095faef3ba92809cf358c46a91800c68b66f22dd4945e6d2fc31",
+  "hash": "83d275ba1d639c1ba722042b01188ee06fca7207b62e5ccbdf077941136a3d5e",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-24",
   "last_ok": "2026-09-24",
   "links": {},
   "nav": [
-   "16b713bf02",
    "1c05c88b14",
    "2bc4a9de21",
-   "54948af530",
-   "57422a509f",
-   "5770ac4408",
    "7edab1f00c",
    "8b05af0ef2",
-   "8ca23b53b7",
-   "9730d4326a",
-   "99a541ab26",
    "a609bb8ab0",
-   "b3e5bfe16a",
-   "b7a1039561",
    "befa2b1982",
-   "d0b6bebe49",
-   "d938599efd",
    "ee06a51c05",
    "f47aea8bdc",
    "fe5dbbcea5"
@@ -10627,6 +10500,7 @@
    "fd5c4817d9",
    "fe5dbbcea5"
   ],
+  "needs_browser": true,
   "url": "https://www.dol.gov/agencies/whd/state/minimum-wage/tipped"
  },
  "us-26b7d9348c": {
@@ -10658,6 +10532,7 @@
   "nav": [
    "b6929bf803"
   ],
+  "needs_browser": true,
   "url": "https://www.dol.gov/agencies/whd/fact-sheets/30-cppa"
  },
  "us-2c7b6854f3": {
@@ -10796,6 +10671,7 @@
    "873657cf00",
    "bc981983e7"
   ],
+  "needs_browser": true,
   "url": "https://www.capitol.hawaii.gov/hrscurrent/Vol13_Ch0601-0676/HRS0652/HRS_0652-0001.htm"
  },
  "us-432f46d844": {
@@ -11086,6 +10962,7 @@
    "bbfa773e5a",
    "ce62ce397a"
   ],
+  "needs_browser": true,
   "url": "https://www.dol.gov/agencies/whd/government-contracts/eo14026"
  },
  "us-6652b63bcb": {
@@ -11435,6 +11312,7 @@
    "f6091be377",
    "fb45609d80"
   ],
+  "needs_browser": true,
   "url": "https://www.dol.gov/agencies/whd/mw-consolidated"
  },
  "us-a861dc5f31": {
@@ -11468,6 +11346,7 @@
    "fa94f7d3f9",
    "fe22b074ed"
   ],
+  "needs_browser": true,
   "url": "https://www.dol.gov/agencies/whd/fact-sheets/17a-overtime"
  },
  "us-a964e468d1": {
@@ -11716,6 +11595,7 @@
    "e417701faa",
    "f6091be377"
   ],
+  "needs_browser": true,
   "url": "https://www.dol.gov/agencies/whd/minimum-wage/state"
  },
  "us-eb437d4ba6": {
@@ -11978,7 +11858,7 @@
  },
  "us-f10e455e50": {
   "failures": 0,
-  "hash": "a2d5bd665a968df9166315e91c83c71b2e45c4eeb214bdff1d044a3336b6d773",
+  "hash": "0b0e78e82c95e039627c55aa55c1c72312fcc22f719f9a6d39927d0b9b909a51",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-24",
   "last_ok": "2026-09-24",
@@ -11998,7 +11878,6 @@
    "https://www.irs.gov/draft-tax-forms?page=8": "9",
    "https://www.irs.gov/forms-pubs/using-irs-forms-instructions-publications-and-other-item-files": "Using IRS Forms, Instructions, Publications and Other Item Files",
    "https://www.irs.gov/help/find-help": "Find Help",
-   "https://www.irs.gov/pub/irs-dft/f1040s--dft.pdf": "Form 1040-SR",
    "https://www.irs.gov/pub/irs-dft/f1040sp--dft.pdf": "Form 1040 (sp)",
    "https://www.irs.gov/pub/irs-dft/f1040ss--dft.pdf": "Form 1040-SS",
    "https://www.irs.gov/pub/irs-dft/f1040x--dft.pdf": "Form 1040-X",
@@ -12012,6 +11891,7 @@
    "https://www.irs.gov/pub/irs-dft/f8915f--dft.pdf": "Form 8915-F",
    "https://www.irs.gov/pub/irs-dft/i1040sf--dft.pdf": "Instruction 1040 (Schedule F)",
    "https://www.irs.gov/pub/irs-dft/i1065sd--dft.pdf": "Instruction 1065 (Schedule D)",
+   "https://www.irs.gov/pub/irs-dft/i1120fh--dft.pdf": "Instruction 1120-F (Schedule H)",
    "https://www.irs.gov/pub/irs-dft/i1120ss3--dft.pdf": "Instruction 1120-S (Schedule M-3)",
    "https://www.irs.gov/pub/irs-dft/i1120ssk--dft.pdf": "Instruction 1120-S (Schedule K-1)",
    "https://www.irs.gov/pub/irs-dft/i3468--dft.pdf": "Instruction 3468",
@@ -12044,43 +11924,9 @@
   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=wage-and-hour-division"
  },
  "us-f98d1c5bd3": {
-  "failures": 0,
-  "hash": "62ccd16b48ca718965dcb42de475ff7f70ff928ae2c6f7343d486f75569b1aa6",
-  "last_changed": "2026-09-24",
+  "failures": 2,
   "last_checked": "2026-09-24",
-  "last_ok": "2026-09-24",
-  "links": {},
-  "nav": [
-   "01166e6d1c",
-   "0150aeb463",
-   "0a9d95c3ad",
-   "0c4bd32657",
-   "1e3edfbe64",
-   "24ca578f28",
-   "256b2c53d6",
-   "358c3fef46",
-   "3996d9f3d1",
-   "42ec8466e6",
-   "4d7c26b59f",
-   "6038851466",
-   "65e5266050",
-   "6aa592b321",
-   "7f93d4f26a",
-   "87df60de33",
-   "8d7eae8fee",
-   "94a019d48f",
-   "994f37961d",
-   "a385b42bc8",
-   "a3cd389e88",
-   "a57d6e12f0",
-   "a94b15f68a",
-   "be789ab98b",
-   "c84895e893",
-   "d613d88cb2",
-   "d88a994554",
-   "ee08352d5e",
-   "f163316c2d"
-  ],
+  "last_error": "URLError: <urlopen error [SSL: BAD_SIGNATURE] bad signature (_ssl.c:1010)>",
   "url": "https://www.revisor.mn.gov/statutes/cite/571.922"
  },
  "us-ff76a650a4": {
@@ -13247,6 +13093,7 @@
    "ea347775a3",
    "f4161aa3fb"
   ],
+  "needs_browser": true,
   "redirects_to": "https://dwd.wisconsin.gov/ui/employers/taxrates/",
   "url": "https://dwd.wisconsin.gov/ui/employers/taxrates.htm"
  },
