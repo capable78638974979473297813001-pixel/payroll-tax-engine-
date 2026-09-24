@@ -73,6 +73,14 @@ is listed as needing a key. Current keys (add each as a repository secret):
    come back is ignored. A page that comes back different every time is
    reported as *unstable* and its snapshot isn't touched.
 
+**Real vs. minor changes.** If the only lines that changed are the text of
+links to other pages (a "latest news" box, a menu), the change is recorded
+as *minor*: collapsed in the report, no issue opened. Anything else counts:
+the page's own text, a figure, a document link added or removed, or a new
+redirect target. Busy index pages can also be narrowed with `"keep"`
+(regexes; only matching lines and links are compared). The IRS draft-forms
+list uses it to watch payroll forms only.
+
 For each change the report shows the changed lines, the dollar amounts and
 percentages that appeared or disappeared (e.g. `3.9%` → `3.7%`), and any
 document links added or removed.
@@ -82,6 +90,7 @@ document links added or removed.
 | Status | Meaning |
 |---|---|
 | Changed | Confirmed new content. The snapshot moves forward. |
+| Minor | Only link lists or headlines changed. Recorded; no issue. |
 | Unchanged | Same as last time. |
 | New | First time seen; snapshot taken. |
 | Unstable | Differs on every request. Fix with an `ignore` pattern or a `contains` range in `curated.json`. |

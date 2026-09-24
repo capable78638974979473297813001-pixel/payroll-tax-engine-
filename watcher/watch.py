@@ -132,6 +132,9 @@ class _TextExtractor(html.parser.HTMLParser):
         self.main_parts: list[str] = []
         self.all_links: list[tuple[str, str]] = []
         self.main_links: list[tuple[str, str]] = []
+        self.article_depth = 0
+        self.article_parts: list[str] = []
+        self.article_links: list[tuple[str, str]] = []
         self._href: str | None = None
         self._href_text: list[str] = []
         self.saw_main = False
@@ -150,6 +153,8 @@ class _TextExtractor(html.parser.HTMLParser):
         if role in ("navigation", "banner", "contentinfo", "search"):
             is_chrome = True
         self.stack.append((tag, is_skip, is_chrome, is_main))
+        if tag == "article":
+            self.article_depth += 1
         if is_skip:
             self.skip_depth += 1
         if is_chrome:
@@ -169,7 +174,9 @@ class _TextExtractor(html.parser.HTMLParser):
         # Pop back to the matching open tag (tolerates sloppy HTML).
         for i in range(len(self.stack) - 1, -1, -1):
             if self.stack[i][0] == tag:
-                for _, is_skip, is_chrome, is_main in self.stack[i:]:
+                for t, is_skip, is_chrome, is_main in self.stack[i:]:
+                    if t == "article":
+                        self.article_depth -= 1
                     if is_skip:
                         self.skip_depth -= 1
                     if is_chrome:
@@ -188,6 +195,8 @@ class _TextExtractor(html.parser.HTMLParser):
                     self.all_links.append(link)
                 if self.main_depth:
                     self.main_links.append(link)
+                if self.article_depth:
+                    self.article_links.append(link)
             self._href = None
 
     def handle_data(self, data):
@@ -204,12 +213,19 @@ class _TextExtractor(html.parser.HTMLParser):
             self.all_parts.append(s)
         if self.main_depth:
             self.main_parts.append(s)
+        if self.article_depth:
+            self.article_parts.append(s)
 
     def result(self) -> tuple[str, list[tuple[str, str]]]:
         main_text = "".join(self.main_parts)
         # A <main> that holds almost nothing (a JS shell) is worse than the body.
         if self.saw_main and len(main_text.split()) >= 40:
             return main_text, self.main_links
+        # No usable <main>: a single <article> region is the next best
+        # marker of the page's own content (sidebars sit outside it).
+        article_text = "".join(self.article_parts)
+        if len(article_text.split()) >= 40:
+            return article_text, self.article_links
         return "".join(self.all_parts), self.all_links
 
 
