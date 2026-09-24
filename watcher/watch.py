@@ -57,6 +57,9 @@ USER_AGENT = (
 TIMEOUT_SECONDS = 20
 MAX_BYTES = 40 * 1024 * 1024
 RETRIES = 2
+# Sources that time out or hit a network glitch get one more try at the end,
+# all at once, with this longer limit, so slow sites don't hold up the run.
+SLOW_LANE_TIMEOUT_SECONDS = 60
 CONFIRM_DELAY_SECONDS = 20
 WORKERS = 24
 BROWSER_WORKERS = 4
@@ -321,7 +324,7 @@ class Fetched:
     error: str | None = None
 
 
-def fetch(url: str) -> Fetched:
+def fetch(url: str, timeout: float | None = None) -> Fetched:
     last = Fetched(ok=False, error="not attempted")
     for attempt in range(RETRIES):
         req = urllib.request.Request(url, headers={
@@ -330,7 +333,7 @@ def fetch(url: str) -> Fetched:
             "Accept-Language": "en-US,en;q=0.9",
         })
         try:
-            with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as resp:
+            with urllib.request.urlopen(req, timeout=timeout or TIMEOUT_SECONDS) as resp:
                 body = resp.read(MAX_BYTES + 1)
                 if len(body) > MAX_BYTES:
                     return Fetched(ok=False, status=resp.status, error=f"larger than {MAX_BYTES // 1024 // 1024} MB")
@@ -766,6 +769,29 @@ def run(sources: list[dict], state: dict, confirm_delay: float, workers: int) ->
     return results
 
 
+def retry_slow(results: list[Result], state: dict, confirm_delay: float, workers: int) -> list[Result]:
+    """One more try, with a longer time limit, for sources that timed out or
+    hit a transient network error in the main pass."""
+    slow = [r for r in results if r.status == "unreachable" and "certificate failed" not in r.detail
+            and not r.detail.startswith(("HTTP 5", "watcher error"))]
+    if not slow:
+        return results
+    print(f"Retrying {len(slow)} slow or glitchy sources with a longer time limit...", file=sys.stderr)
+
+    def slow_fetch(url: str) -> Fetched:
+        return fetch(url, timeout=SLOW_LANE_TIMEOUT_SECONDS)
+
+    def again(r: Result) -> Result:
+        try:
+            return check_source(r.source, state.get(r.source["id"]), confirm_delay, fetcher=slow_fetch)
+        except Exception:  # noqa: BLE001
+            return r
+
+    with cf.ThreadPoolExecutor(max_workers=workers) as pool:
+        retried = {r.source["id"]: x for r, x in zip(slow, pool.map(again, slow))}
+    return [retried.get(r.source["id"], r) for r in results]
+
+
 def retry_in_browser(results: list[Result], state: dict, confirm_delay: float) -> list[Result]:
     """Second chance for sources a plain request couldn't read: load them in
     real browsers, BROWSER_WORKERS at a time."""
@@ -996,6 +1022,7 @@ def main(argv: list[str] | None = None) -> int:
     state = load_json(STATE_FILE, {})
     print(f"Checking {len(sources)} sources...", file=sys.stderr)
     results = run(sources, state, args.confirm_delay, args.workers)
+    results = retry_slow(results, state, args.confirm_delay, args.workers)
     if not args.no_browser:
         results = retry_in_browser(results, state, args.confirm_delay)
     if not args.dry_run:

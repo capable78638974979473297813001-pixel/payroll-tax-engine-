@@ -104,7 +104,7 @@ document links added or removed.
 ```sh
 pip install -r watcher/requirements.txt
 python -m playwright install chromium   # for the browser fallback
-python watcher/watch.py                 # everything (about 5 minutes)
+python watcher/watch.py                 # everything (about 4 minutes)
 python watcher/watch.py --only AR,US    # some jurisdictions
 python watcher/watch.py --dry-run       # don't save anything
 python -m unittest watcher/test_watch.py
