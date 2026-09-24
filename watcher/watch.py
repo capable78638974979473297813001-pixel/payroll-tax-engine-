@@ -54,11 +54,12 @@ USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
     "Chrome/124.0 Safari/537.36 payroll-tax-source-watcher/1.0"
 )
-TIMEOUT_SECONDS = 45
+TIMEOUT_SECONDS = 20
 MAX_BYTES = 40 * 1024 * 1024
-RETRIES = 3
+RETRIES = 2
 CONFIRM_DELAY_SECONDS = 20
-WORKERS = 12
+WORKERS = 24
+BROWSER_WORKERS = 4
 # A source that has failed this many runs in a row is reported as broken
 # rather than as a one-off outage.
 BROKEN_AFTER_FAILURES = 3
@@ -588,7 +589,7 @@ class BrowserFetcher:
             if resp is None:
                 return Fetched(ok=False, error="browser: no response")
             try:
-                page.wait_for_load_state("networkidle", timeout=15_000)
+                page.wait_for_load_state("networkidle", timeout=4_000)
             except Exception:  # noqa: BLE001 - pages with long-polling never go idle
                 pass
             ctype = resp.headers.get("content-type", "")
@@ -746,8 +747,13 @@ def run(sources: list[dict], state: dict, confirm_delay: float, workers: int) ->
     def work(group: list[dict]) -> list[Result]:
         out = []
         for i, s in enumerate(group):
+            if state.get(s["id"], {}).get("needs_browser"):
+                # Plain requests to this site were refused last time and a
+                # real browser worked: go straight to the browser.
+                out.append(Result(s, "blocked", "read with a browser last time"))
+                continue
             if i:
-                time.sleep(1.0)
+                time.sleep(0.5)
             try:
                 out.append(check_source(s, state.get(s["id"]), confirm_delay))
             except Exception as e:  # noqa: BLE001 - one bad source must not sink the run
@@ -762,7 +768,7 @@ def run(sources: list[dict], state: dict, confirm_delay: float, workers: int) ->
 
 def retry_in_browser(results: list[Result], state: dict, confirm_delay: float) -> list[Result]:
     """Second chance for sources a plain request couldn't read: load them in
-    a real browser, one at a time."""
+    real browsers, BROWSER_WORKERS at a time."""
     blocked = [r for r in results if r.status == "blocked"]
     if not blocked:
         return results
@@ -770,22 +776,33 @@ def retry_in_browser(results: list[Result], state: dict, confirm_delay: float) -
         print("playwright not installed; blocked sites stay blocked", file=sys.stderr)
         return results
     print(f"Retrying {len(blocked)} blocked sources in headless Chromium...", file=sys.stderr)
+
+    def retry(r: Result, browser: BrowserFetcher) -> Result:
+        try:
+            again = check_source(r.source, state.get(r.source["id"]), confirm_delay, fetcher=browser)
+        except Exception as e:  # noqa: BLE001
+            again = Result(r.source, "blocked", f"{r.detail}; browser error: {type(e).__name__}")
+        if again.status == "blocked":
+            again.detail = f"{r.detail}; a real browser was refused too"
+        else:
+            again.detail = "read with a headless browser" + (f"; {again.detail}" if again.detail else "")
+            again.via_browser = True
+        return again
+
+    def worker(share: list[Result]) -> list[Result]:
+        # One Chromium per thread: Playwright's sync API isn't shareable
+        # across threads, and each browser is opened and closed right here.
+        browser = BrowserFetcher()
+        try:
+            return [retry(r, browser) for r in share]
+        finally:
+            browser.close()
+
+    shares = [blocked[i::BROWSER_WORKERS] for i in range(BROWSER_WORKERS)]
     retried: dict[str, Result] = {}
-    browser = BrowserFetcher()
-    try:
-        for r in blocked:
-            try:
-                again = check_source(r.source, state.get(r.source["id"]), confirm_delay, fetcher=browser)
-            except Exception as e:  # noqa: BLE001
-                again = Result(r.source, "blocked", f"{r.detail}; browser error: {type(e).__name__}")
-            if again.status == "blocked":
-                again.detail = f"{r.detail}; a real browser was refused too"
-            else:
-                again.detail = ("read with a headless browser" + (f"; {again.detail}" if again.detail else ""))
-                again.via_browser = True
-            retried[r.source["id"]] = again
-    finally:
-        browser.close()
+    with cf.ThreadPoolExecutor(max_workers=BROWSER_WORKERS) as pool:
+        for done in pool.map(worker, [sh for sh in shares if sh]):
+            retried.update({r.source["id"]: r for r in done})
     return [retried.get(r.source["id"], r) for r in results]
 
 
@@ -801,6 +818,10 @@ def apply_results(results: list[Result], state: dict, today: str) -> None:
             continue
         entry["failures"] = 0
         entry.pop("last_error", None)
+        if r.via_browser:
+            entry["needs_browser"] = True
+        else:
+            entry.pop("needs_browser", None)
         entry["last_ok"] = today
         if r.status in ("new", "changed"):
             entry["hash"] = r.hash
