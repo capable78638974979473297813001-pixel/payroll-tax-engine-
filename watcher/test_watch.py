@@ -367,6 +367,8 @@ class BrowserFallbackTest(ServerTestCase):
         self.site.browser_only.update({"/wh", "/f.pdf"})
         self.sources("/wh", "/f.pdf")
         self.assertEqual(self.run_watch("2026-09-01")["counts"], {"new": 2})
+        state = json.loads(watch.STATE_FILE.read_text())
+        self.assertTrue(state["t-0"]["needs_browser"] and state["t-1"]["needs_browser"])
         self.assertEqual(self.run_watch("2026-09-02")["counts"], {"unchanged": 2})
         self.site.set_page("/wh", page(rate="3.5%"))
         self.assertEqual(self.run_watch("2026-09-03")["counts"], {"changed": 1, "unchanged": 1})
