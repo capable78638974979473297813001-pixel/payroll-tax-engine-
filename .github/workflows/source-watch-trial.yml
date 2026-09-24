@@ -34,4 +34,7 @@ jobs:
                          if st.get(s["id"], {}).get("failures", 0) > 0 or s.get("replaces") or s["id"] not in st))
           PY
           )
-          python watcher/watch.py --dry-run --only "$ids" --confirm-delay 5
+          # Two real runs back to back (nothing is committed from this job): the
+          # second must report no changes, proving browser-read pages are stable.
+          python watcher/watch.py --only "$ids" --confirm-delay 5 > /dev/null
+          python watcher/watch.py --only "$ids" --confirm-delay 5

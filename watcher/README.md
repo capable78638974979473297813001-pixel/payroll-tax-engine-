@@ -25,6 +25,22 @@ Add sources to `curated.json` (or cite them in `data/`), then run
 `python watcher/build_sources.py`. The workflow re-runs that before each
 watch, so new citations in `data/` are picked up automatically.
 
+## Sites that turn away scripts
+
+Some official sites refuse plain HTTP requests (403) or only render with
+JavaScript. Two things handle those:
+
+- **Official APIs first.** Where an agency publishes a machine-readable
+  API it replaces the blocked page (`"replaces"` in `curated.json`):
+  eCFR's amendment history for the cited regulations, and Federal Register
+  feeds for new Wage and Hour Division documents, IRS withholding rules and
+  SSA's yearly wage-base notice (the ssa.gov wage-base page blocks scripts).
+- **A real browser second.** Anything still blocked is retried once in
+  headless Chromium (Playwright). It identifies itself with the same user
+  agent that names this tool, visits each site once a day, and doesn't
+  solve CAPTCHAs or hide that it's automated. A site that refuses a real
+  browser too stays listed under "Blocks bots" for a manual check.
+
 ## How it decides something changed
 
 1. **Reduce to what a person reads.** For PDFs that's the text (so a
@@ -60,6 +76,7 @@ document links added or removed.
 
 ```sh
 pip install -r watcher/requirements.txt
+python -m playwright install chromium   # for the browser fallback
 python watcher/watch.py                 # everything (about 5 minutes)
 python watcher/watch.py --only AR,US    # some jurisdictions
 python watcher/watch.py --dry-run       # don't save anything

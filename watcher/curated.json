@@ -180,8 +180,8 @@
   },
   {
    "jurisdiction": "MA",
-   "title": "Massachusetts Circular M",
-   "url": "https://www.mass.gov/info-details/circular-m-massachusetts-income-tax-withholding-tables"
+   "title": "Massachusetts Circular M (2026, effective January 1)",
+   "url": "https://www.mass.gov/doc/massachusetts-circular-m-income-tax-withholding-tables-at-50-effective-january-1-2026/download"
   },
   {
    "jurisdiction": "MD",
@@ -468,6 +468,12 @@
    "replaces": [
     "https://www.ssa.gov/oact/cola/cbb.html"
    ]
+  },
+  {
+   "jurisdiction": "MA",
+   "title": "Massachusetts DOR withholding tax forms (new Circular M editions are listed here)",
+   "url": "https://www.mass.gov/lists/dor-withholding-tax-forms",
+   "kind": "index"
   }
  ]
 }
