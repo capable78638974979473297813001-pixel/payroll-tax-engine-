@@ -5,6 +5,7 @@ import {
   reportMeterEvent,
   verifyWebhookSignature,
   stripeConfigured,
+  type StripePaymentMethod,
 } from '../../api/stripe.ts';
 
 /**
@@ -104,29 +105,56 @@ export async function startMeteredCheckout(input: {
   }
 }
 
+export interface SavedPaymentMethod {
+  id: string;
+  /** 'card' or 'us_bank_account'. */
+  kind: string;
+  brand: string | null;
+  last4: string | null;
+}
+
 export interface CompletedCheckout {
   ok: boolean;
   email?: string | null;
   customerId?: string | null;
   subscriptionId?: string | null;
+  /** The card or bank account the customer saved. Null if none was. */
+  paymentMethod?: SavedPaymentMethod | null;
   reason?: string;
   error?: string;
 }
 
+function describePaymentMethod(pm: StripePaymentMethod | string | null | undefined): SavedPaymentMethod | null {
+  if (!pm) return null;
+  if (typeof pm === 'string') return { id: pm, kind: 'card', brand: null, last4: null };
+  if (pm.type === 'us_bank_account' || pm.us_bank_account) {
+    return { id: pm.id, kind: 'us_bank_account', brand: pm.us_bank_account?.bank_name ?? null, last4: pm.us_bank_account?.last4 ?? null };
+  }
+  return { id: pm.id, kind: 'card', brand: pm.card?.brand ?? null, last4: pm.card?.last4 ?? null };
+}
+
 /**
- * Read back a completed Checkout session to capture the customer +
- * subscription ids, so subsequent calls can be metered against them.
+ * Read back a finished Checkout session (subscription or setup mode):
+ * the customer, the subscription, and the card or bank account saved on
+ * it. Refuses a session that isn't complete, so a key can't be unlocked
+ * by a checkout the customer abandoned.
  */
 export async function completeMeteredCheckout(sessionId: string): Promise<CompletedCheckout> {
   if (!stripeConfigured()) return { ok: false, reason: 'stripe_not_configured' };
   try {
     const s = await retrieveCheckoutSession(sessionId);
-    const subscriptionId = typeof s.subscription === 'string' ? s.subscription : s.subscription?.id ?? null;
+    if (s.status !== 'complete') return { ok: false, reason: 'checkout_not_complete' };
+    const sub = s.subscription;
+    const subscriptionId = typeof sub === 'string' ? sub : sub?.id ?? null;
+    const si = s.setup_intent;
+    const raw = (typeof sub === 'object' && sub ? sub.default_payment_method : null)
+      ?? (typeof si === 'object' && si ? si.payment_method : null);
     return {
       ok: true,
       email: s.metadata?.omnia_email ?? null,
       customerId: typeof s.customer === 'string' ? s.customer : null,
       subscriptionId,
+      paymentMethod: describePaymentMethod(raw),
     };
   } catch (err) {
     return { ok: false, reason: 'stripe_error', error: err instanceof Error ? err.message : String(err) };

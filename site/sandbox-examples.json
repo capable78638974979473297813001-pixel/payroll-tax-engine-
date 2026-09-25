@@ -1,0 +1,122 @@
+{
+  "$comment": "Example requests offered in the API console (site/sandbox.html). tests/site-sandbox.test.ts runs every one through validation and the engine, so none can quietly break.",
+  "examples": [
+    {
+      "id": "oh-columbus",
+      "title": "Columbus, Ohio salary",
+      "blurb": "Federal, Ohio and Columbus city tax, with a 401(k) deferral.",
+      "request": {
+        "checkDate": "2026-09-15",
+        "payFrequency": "biweekly",
+        "earnings": [{ "code": "REG", "category": "regular", "amount": 300000 }],
+        "deductions": [{ "code": "401K", "category": "deferral_401k", "amount": 24000 }],
+        "federalW4": { "filingStatus": "single", "multipleJobs": false, "dependentCredit": 0, "otherIncome": 0, "deductions": 0, "extraWithholding": 0 },
+        "ytd": { "socialSecurity": 0, "medicare": 0, "futa": 0 },
+        "workState": { "code": "OH", "certificate": { "residenceCity": "Columbus", "workCity": "Columbus" } }
+      }
+    },
+    {
+      "id": "ny-nyc",
+      "title": "New York City resident",
+      "blurb": "New York State, NYC resident tax, Paid Family Leave and disability.",
+      "request": {
+        "checkDate": "2026-09-15",
+        "payFrequency": "semimonthly",
+        "earnings": [{ "code": "REG", "category": "regular", "amount": 625000 }],
+        "deductions": [],
+        "federalW4": { "filingStatus": "married_joint", "multipleJobs": false, "dependentCredit": 400000, "otherIncome": 0, "deductions": 0, "extraWithholding": 0 },
+        "ytd": { "socialSecurity": 0, "medicare": 0, "futa": 0 },
+        "workState": { "code": "NY", "certificate": { "maritalStatus": "married", "nycResident": true } }
+      }
+    },
+    {
+      "id": "ca-sdi",
+      "title": "California with SDI",
+      "blurb": "California withholding plus State Disability Insurance.",
+      "request": {
+        "checkDate": "2026-09-15",
+        "payFrequency": "semimonthly",
+        "earnings": [{ "code": "REG", "category": "regular", "amount": 420000 }],
+        "deductions": [{ "code": "MED", "category": "section125", "amount": 18000 }],
+        "federalW4": { "filingStatus": "single", "multipleJobs": false, "dependentCredit": 0, "otherIncome": 0, "deductions": 0, "extraWithholding": 0 },
+        "ytd": { "socialSecurity": 0, "medicare": 0, "futa": 0 },
+        "workState": { "code": "CA", "certificate": { "filingStatus": "single_or_married_two_incomes" } }
+      }
+    },
+    {
+      "id": "pa-philadelphia",
+      "title": "Philadelphia wage tax",
+      "blurb": "Pennsylvania, Philadelphia resident wage tax and local services tax.",
+      "request": {
+        "checkDate": "2026-09-15",
+        "payFrequency": "weekly",
+        "earnings": [{ "code": "REG", "category": "regular", "amount": 140000 }],
+        "deductions": [],
+        "federalW4": { "filingStatus": "head_of_household", "multipleJobs": false, "dependentCredit": 200000, "otherIncome": 0, "deductions": 0, "extraWithholding": 0 },
+        "ytd": { "socialSecurity": 0, "medicare": 0, "futa": 0 },
+        "workState": { "code": "PA", "certificate": { "workPSD": "510101", "residencePSD": "510101" } }
+      }
+    },
+    {
+      "id": "or-hourly",
+      "title": "Oregon hourly worker",
+      "blurb": "Hours drive Oregon's Workers' Benefit Fund; statewide transit tax and Paid Leave.",
+      "request": {
+        "checkDate": "2026-09-15",
+        "payFrequency": "weekly",
+        "hoursWorked": 46.5,
+        "earnings": [
+          { "code": "REG", "category": "regular", "amount": 96000 },
+          { "code": "OT", "category": "regular", "amount": 23400 }
+        ],
+        "deductions": [],
+        "federalW4": { "filingStatus": "single", "multipleJobs": false, "dependentCredit": 0, "otherIncome": 0, "deductions": 0, "extraWithholding": 0 },
+        "ytd": { "socialSecurity": 0, "medicare": 0, "futa": 0 },
+        "workState": { "code": "OR", "certificate": { "maritalStatus": "single" } }
+      }
+    },
+    {
+      "id": "bonus",
+      "title": "Bonus on its own check",
+      "blurb": "A supplemental payment: flat 22% federal and the state's bonus rule.",
+      "request": {
+        "checkDate": "2026-09-15",
+        "payFrequency": "biweekly",
+        "earnings": [{ "code": "BONUS", "category": "supplemental", "amount": 1000000 }],
+        "deductions": [],
+        "federalW4": { "filingStatus": "single", "multipleJobs": false, "dependentCredit": 0, "otherIncome": 0, "deductions": 0, "extraWithholding": 0 },
+        "ytd": { "socialSecurity": 4500000, "medicare": 4500000, "futa": 700000 },
+        "workState": { "code": "GA", "certificate": { "georgiaMaritalStatus": "A" } }
+      }
+    },
+    {
+      "id": "tx-high-earner",
+      "title": "High earner past the wage base",
+      "blurb": "Texas (no income tax): Social Security stops at the wage base, Additional Medicare starts.",
+      "request": {
+        "checkDate": "2026-09-15",
+        "payFrequency": "monthly",
+        "earnings": [{ "code": "REG", "category": "regular", "amount": 3200000 }],
+        "deductions": [],
+        "federalW4": { "filingStatus": "single", "multipleJobs": false, "dependentCredit": 0, "otherIncome": 0, "deductions": 0, "extraWithholding": 0 },
+        "ytd": { "socialSecurity": 17600000, "medicare": 25600000, "futa": 700000 },
+        "workState": { "code": "TX" }
+      }
+    },
+    {
+      "id": "nj-pa-reciprocity",
+      "title": "Lives in NJ, works in PA",
+      "blurb": "Reciprocity: Pennsylvania income tax is waived for a New Jersey resident.",
+      "request": {
+        "checkDate": "2026-09-15",
+        "payFrequency": "biweekly",
+        "earnings": [{ "code": "REG", "category": "regular", "amount": 350000 }],
+        "deductions": [],
+        "federalW4": { "filingStatus": "single", "multipleJobs": false, "dependentCredit": 0, "otherIncome": 0, "deductions": 0, "extraWithholding": 0 },
+        "ytd": { "socialSecurity": 0, "medicare": 0, "futa": 0 },
+        "workState": { "code": "PA" },
+        "residenceState": { "code": "NJ", "certificate": { "filingStatus": "single" } }
+      }
+    }
+  ]
+}

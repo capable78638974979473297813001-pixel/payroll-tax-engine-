@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Omnia API Reference — payroll tax calculation</title>
 <meta name="description" content="The Omnia API reference: gross-to-net payroll tax calculation for all 50 states, DC, and the local jurisdictions underneath — one authenticated POST per paycheck." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
   :root {
     --paper:      #FBFAF5;
@@ -27,7 +29,7 @@
     --code-str:   #C6D68B;
     --code-key:   #E0A986;
     --code-num:   #86B8C6;
-    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --sans: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --mono: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, Menlo, Consolas, monospace;
     --nav-w: 256px;
     --code-w: 480px;
@@ -253,6 +255,12 @@
     .content { padding: 24px 18px 90px; }
     h1.page-title { font-size: 26px; }
   }
+
+  /* Status codes as plain coloured text, not pills. */
+  .pill, .tag { background: none !important; border: 0 !important; padding: 0 !important; border-radius: 0 !important; }
+  .note, .note.warn, .note.ok { background: none; }
+  .brand .word { font-family: var(--sans); letter-spacing: -0.02em; }
+  .brand .tag { display: none; }
 </style>
 </head>
 <body>
@@ -268,10 +276,11 @@
   <span class="spacer"></span>
   <nav class="tnav">
     <a href="/">Home</a>
-    <a href="/docs.html">Console</a>
+    <a href="/console">API console</a>
+    <a href="/docs.html">Account</a>
     <a href="#pricing">Pricing</a>
   </nav>
-  <a class="cta" href="/docs.html">Get an API key</a>
+  <a class="cta" href="/docs.html">Get started</a>
 </header>
 
 <div class="scrim" id="scrim"></div>
@@ -379,7 +388,7 @@ curl https://api.omnia.tax/api/paycheck \
             <p>Every request to a calculation or account endpoint must carry an API key in the <code class="inline">Authorization</code> header as a bearer token:</p>
             <div class="endpoint-line" style="display:block"><span class="path">Authorization: Bearer sk_test_a1b2c3…</span></div>
 
-            <p>Keys are issued from the <a href="/docs.html">Omnia console</a>. Sign in, then click <b>Issue my evaluation key</b> — the plaintext key is shown <b>once</b>, so copy it immediately. Omnia stores only a SHA-256 hash of the key; it can never be recovered or re-displayed, only replaced.</p>
+            <p>Keys are issued in your <a href="/docs.html">Omnia account</a> once a card or US bank account is on file (nothing is charged during the 14-day evaluation). Sign in, then click <b>Issue my evaluation key</b> — the plaintext key is shown <b>once</b>, so copy it immediately. Omnia stores only a SHA-256 hash of the key; it can never be recovered or re-displayed, only replaced. The <a href="/console">API console</a> runs requests with your key in the browser.</p>
 
             <h3>Key lifecycle</h3>
             <ul>

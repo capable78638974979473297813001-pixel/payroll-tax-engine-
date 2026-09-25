@@ -23,6 +23,9 @@ const BILL_KEY = 'sk_test_e2e_billing_key_ghijkl';
 const BILL_HASH = createHash('sha256').update(BILL_KEY).digest('hex');
 const BILL_CUSTOMER = 'cus_e2e_billing';
 const WEBHOOK_SECRET = 'whsec_e2e_secret';
+// A key whose account never saved a card or bank account.
+const NOPAY_KEY = 'sk_test_e2e_nopay_key_mnopqr';
+const NOPAY_HASH = createHash('sha256').update(NOPAY_KEY).digest('hex');
 const PORT = 4600 + Math.floor(Math.random() * 300);
 const BASE = `http://127.0.0.1:${PORT}`;
 const RATE_LIMIT = 5;
@@ -40,7 +43,11 @@ function seedDb(dataDir: string): void {
     isActive: true, lastUsedAt: null,
   });
   const db = {
-    accounts: {}, acceptances: [], paymentMethods: {},
+    accounts: {}, acceptances: [],
+    // Keys only work for accounts with a card or bank account on file.
+    paymentMethods: Object.fromEntries(['e2e@example.com', 'bill@example.com'].map((email) => [email, {
+      email, kind: 'card', processorRef: 'pm_e2e', last4: '4242', brand: 'visa', attachedAt: new Date().toISOString(),
+    }])),
     subscriptions: {
       // The billing-key account is subscribed (customer on file), not suspended.
       'bill@example.com': {
@@ -54,6 +61,7 @@ function seedDb(dataDir: string): void {
     keys: {
       [KEY_HASH]: mkKey(KEY_HASH, PLAINTEXT_KEY, 'e2e@example.com'),
       [BILL_HASH]: mkKey(BILL_HASH, BILL_KEY, 'bill@example.com'),
+      [NOPAY_HASH]: mkKey(NOPAY_HASH, NOPAY_KEY, 'nopay@example.com'),
     },
     usage: [], estimates: [],
   };
@@ -133,6 +141,12 @@ describe('Omnia API (end to end)', () => {
     const j = await r.json();
     assert.equal(j.status, 'ok');
     assert.ok(j.states > 0);
+  });
+
+  test('a key for an account with no card or bank account on file is 402', async () => {
+    const r = await postWith(NOPAY_KEY, validBody());
+    assert.equal(r.status, 402);
+    assert.equal((await r.json()).code, 'payment_method_required');
   });
 
   test('a missing key is 401 missing_key', async () => {
