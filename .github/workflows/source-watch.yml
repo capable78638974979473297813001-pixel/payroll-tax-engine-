@@ -4,14 +4,19 @@ name: Source watch
 # commits a report of what changed to watcher/reports/. Opens an issue when
 # something changed.
 #
-# GitHub cron runs in UTC and has no time zones, so there are two triggers:
-# 08:00 UTC is 4 AM during daylight time (EDT) and 09:00 UTC is 4 AM during
-# standard time (EST). The gate step runs the watch at whichever comes first
-# at or after 4 AM local time and skips the other.
+# GitHub cron runs in UTC and has no time zones: 08:00 UTC is 4 AM during
+# daylight time (EDT) and 09:00 UTC is 4 AM during standard time (EST). GitHub
+# also starts scheduled jobs late when it's busy (hours, sometimes) and can
+# drop one outright, so later triggers back those up. The gate step runs the
+# watch at the first trigger at or after 4 AM local time that finds no report
+# for today yet, and every later trigger that day skips.
 on:
   schedule:
     - cron: '0 8 * * *'
     - cron: '0 9 * * *'
+    - cron: '0 11 * * *'
+    - cron: '0 13 * * *'
+    - cron: '0 16 * * *'
   workflow_dispatch: {}
 
 permissions:
