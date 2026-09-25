@@ -480,9 +480,37 @@ export interface OHMunicipalityEntry {
   administeredBy: string;
 }
 
+/**
+ * The pre-tax categories that reduce an Ohio municipal (or JEDD/JEDZ)
+ * wage base. Held in the local data file, with its ORC 718.01(R) citation,
+ * because it differs from the Ohio state income tax list: municipal
+ * "qualifying wages" start from Medicare wages and add 401(k)/403(b)/457
+ * deferrals back, so a deferral that lowers state tax does not lower this.
+ */
+interface OHLocalTaxableWages {
+  exemptPretax: string[];
+}
+
 interface OHMunicipalityRegistryFile {
   year: number;
+  taxableWages?: OHLocalTaxableWages;
   municipalities: OHMunicipalityEntry[];
+}
+
+function requireOHLocalExemptPretax(file: { taxableWages?: OHLocalTaxableWages }, path: string): string[] {
+  const list = file.taxableWages?.exemptPretax;
+  if (!Array.isArray(list)) {
+    // No silent fallback to the state list: that is exactly the bug this
+    // field exists to prevent.
+    throw new Error(`${path} has no taxableWages.exemptPretax; the Ohio local wage base can't be determined.`);
+  }
+  return list;
+}
+
+/** Pre-tax categories that reduce the Ohio municipal income tax base (ORC 718.01(R)). */
+export function ohMunicipalExemptPretax(checkDate: string): string[] {
+  const path = join('local', `OH-municipalities-${yearOf(checkDate)}.json`);
+  return requireOHLocalExemptPretax(loadJson<OHMunicipalityRegistryFile>(path), path);
 }
 
 /** Whether an Ohio municipal income tax registry exists for this check date. */
@@ -566,7 +594,14 @@ export interface OHJEDDEntry {
 
 interface OHJEDDRegistryFile {
   year: number;
+  taxableWages?: OHLocalTaxableWages;
   zones: OHJEDDEntry[];
+}
+
+/** Pre-tax categories that reduce a JEDD/JEDZ income tax base (Chapter 718, via ORC 715.72 / 715.691). */
+export function ohJEDDExemptPretax(checkDate: string): string[] {
+  const path = join('local', `OH-jedd-jedz-${yearOf(checkDate)}.json`);
+  return requireOHLocalExemptPretax(loadJson<OHJEDDRegistryFile>(path), path);
 }
 
 /** Whether an Ohio JEDD/JEDZ rate registry exists for this check date. */

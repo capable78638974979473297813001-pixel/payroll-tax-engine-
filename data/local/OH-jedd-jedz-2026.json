@@ -9,6 +9,37 @@
     "downloadedBy": "Re-fetched directly via curl (through the site's own same-origin proxy route -- the direct api.thefinder.tax.ohio.gov URL now 401s, see harvester/sources.json's oh-jedd-rates note) during a full re-check of all 176 rows. Same feed as the municipal rate table. Found and fixed two real gaps against the 2026-08-11 version: Miami Township-Dayton JEDD (id 9080) was still carrying its pre-2026 rate (1.75%, expired 2025-12-31) instead of the 2.25% rate effective 2026-01-01; and three new JEDDs effective 2026-05-01 (Jersey-New Albany JEDD 1/2/3, ids 9158-9160, all 2%) were entirely missing.",
     "rateFormat": "Source CSV stores rate as a raw percentage number (e.g. 1.8 meaning 1.8%), NOT a fraction -- unlike the municipal CSV's .02500-style fraction. Converted here by dividing by 100 to a fraction (0.018) for consistency with OH-municipalities-2026.json; rateSourceRaw preserves the original value so the conversion is checkable, not just asserted."
   },
+  "taxableWages": {
+    "basis": "Same base as Ohio municipal income tax. A JEDD income tax 'is subject to Chapter 718. of the Revised Code' (ORC 715.72) and so is a JEDZ income tax (ORC 715.691), so ORC 718.01(R) 'qualifying wages' applies: Medicare wages less Section 125 amounts, with 401(k)/403(b)/457 employee deferrals added back.",
+    "exemptPretax": [
+      "section125",
+      "hsa",
+      "fsa",
+      "dependent_care",
+      "commuter"
+    ],
+    "exemptPretaxComment": "Mirrors the federal Medicare list (data/federal/2026.json medicare.exemptPretax): section125/hsa/fsa/dependent_care are cafeteria-plan amounts ORC 718.01(R)(1)(a) deducts, and qualified transportation fringes (commuter) are excluded from 3121(a) wages by 3121(a)(20) with no ORC add-back. deferral_401k/403b/457/simple are deliberately absent: 3121(a) already includes them and (R)(2)(c) adds back any 401(k)/403(b)/457 amount not included.",
+    "sources": [
+      {
+        "title": "Ohio Revised Code 718.01(R), definition of \"qualifying wages\"",
+        "url": "https://codes.ohio.gov/ohio-revised-code/section-718.01",
+        "verifiedOn": "2026-09-25",
+        "quote": "\"Qualifying wages\" means wages, as defined in section 3121(a) of the Internal Revenue Code, without regard to any wage limitations, adjusted as follows: (1) Deduct ... (a) Any amount included in wages if the amount constitutes compensation attributable to a plan or program described in section 125 ... (2) Add ... (c) Any amount not included in wages if the amount is an amount described in section 401(k), 403(b), or 457 of the Internal Revenue Code. Division (R)(2)(c) of this section applies only to employee contributions and employee deferrals."
+      },
+      {
+        "title": "Ohio Revised Code 715.72 (joint economic development districts)",
+        "url": "https://codes.ohio.gov/ohio-revised-code/section-715.72",
+        "verifiedOn": "2026-09-25",
+        "quote": "Except as provided in this section, the income tax levied within the district is subject to Chapter 718. of the Revised Code, except that no vote shall be required."
+      },
+      {
+        "title": "Ohio Revised Code 715.691 (joint economic development zones)",
+        "url": "https://codes.ohio.gov/ohio-revised-code/section-715.691",
+        "verifiedOn": "2026-09-25",
+        "quote": "The income tax may be levied in the zone based on income earned by persons working within the zone and on the net profits of businesses located in the zone. The income tax is subject to Chapter 718. of the Revised Code"
+      }
+    ]
+  },
   "confidence": "primary_source_confirmed -- same tier as the municipalities file, bulk-downloaded directly from Ohio's own database.",
   "zoneCount": 149,
   "zones": [

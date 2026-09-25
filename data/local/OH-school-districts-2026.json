@@ -8,6 +8,17 @@
     "verifiedOn": "2026-08-12",
     "verifiedBy": "PDF re-downloaded and re-parsed 2026-08-12 with pdfplumber (word-coordinate row clustering) to fix a 2-row table-merge bug found in the 2026-08-11 pdftotext-based parse; see parseConfidence. The official document itself states 'Total number of districts are 214' and 'Taxes based on earned income only; 68 districts' -- both now matched exactly."
   },
+  "taxableWages": {
+    "basis": "Ohio school district income tax is levied on Ohio modified adjusted gross income (ORC 5748.01(E)(1), 'traditional' base) or on wages to the extent included in it (5748.01(E)(2), 'earned income' base). Either way the wage figure is the Ohio state income tax base, so an elective 401(k)/403(b)/457 deferral (excluded from federal and Ohio AGI) DOES reduce it. The engine therefore uses the Ohio state exemptPretax list (data/states/OH-2026.json) for both base types; unlike the municipal and JEDD/JEDZ taxes it has no separate list.",
+    "sources": [
+      {
+        "title": "Ohio Revised Code 5748.01(E), definition of \"taxable income\" for school district income tax",
+        "url": "https://codes.ohio.gov/ohio-revised-code/section-5748.01",
+        "verifiedOn": "2026-09-25",
+        "quote": "\"Taxable income\" means one of the following, as specified in the resolution imposing the tax: (1) Modified adjusted gross income for the taxable year, as defined in section 5747.01 of the Revised Code, less the exemptions provided by section 5747.025 ... (2) Wages, salaries, tips, and other employee compensation to the extent included in modified adjusted gross income as defined in section 5747.01 of the Revised Code ..."
+      }
+    ]
+  },
   "officialTotals": {
     "districtsPerSource": 214,
     "earnedIncomeOnlyPerSource": 68

@@ -10,6 +10,25 @@
     "method": "Filtered to rows with EffEndDate=99991231 (currently open-ended / in force). Historical superseded rates (404 additional rows) were excluded, not deleted -- available by re-fetching the same URL and keeping earlier rows if effective-dated history is ever needed.",
     "rateFormat": "Rate is a fraction (e.g. 0.025 = 2.5%), matching the source CSV's own convention -- no conversion applied."
   },
+  "taxableWages": {
+    "basis": "Ohio municipal 'qualifying wages' (ORC 718.01(R)): Medicare wages under IRC 3121(a), less Section 125 cafeteria-plan amounts, with 401(k), 403(b) and 457 employee deferrals added back. This is NOT the Ohio state income tax base: an elective retirement deferral reduces Ohio state (and school district) taxable income but does not reduce the municipal base.",
+    "exemptPretax": [
+      "section125",
+      "hsa",
+      "fsa",
+      "dependent_care",
+      "commuter"
+    ],
+    "exemptPretaxComment": "Mirrors the federal Medicare list (data/federal/2026.json medicare.exemptPretax): section125/hsa/fsa/dependent_care are cafeteria-plan amounts ORC 718.01(R)(1)(a) deducts, and qualified transportation fringes (commuter) are excluded from 3121(a) wages by 3121(a)(20) with no ORC add-back. deferral_401k/403b/457/simple are deliberately absent: 3121(a) already includes them and (R)(2)(c) adds back any 401(k)/403(b)/457 amount not included.",
+    "sources": [
+      {
+        "title": "Ohio Revised Code 718.01(R), definition of \"qualifying wages\"",
+        "url": "https://codes.ohio.gov/ohio-revised-code/section-718.01",
+        "verifiedOn": "2026-09-25",
+        "quote": "\"Qualifying wages\" means wages, as defined in section 3121(a) of the Internal Revenue Code, without regard to any wage limitations, adjusted as follows: (1) Deduct ... (a) Any amount included in wages if the amount constitutes compensation attributable to a plan or program described in section 125 ... (2) Add ... (c) Any amount not included in wages if the amount is an amount described in section 401(k), 403(b), or 457 of the Internal Revenue Code. Division (R)(2)(c) of this section applies only to employee contributions and employee deferrals."
+      }
+    ]
+  },
   "residencyNote": "Ohio municipal income tax is primarily workplace-sourced: this single rate generally applies to income earned within the municipality regardless of the earner's residence (unlike Michigan's explicit resident/nonresident split). ohioLocalTax() (src/taxes/state.ts) implements the ORC 718.121 resident-credit-against-work-city at withholding time -- a resident working in a DIFFERENT taxing municipality gets that home municipality's tax reduced by the tax paid to the work municipality, capped at the home rate, verified end-to-end in tests/engine.test.ts.",
   "confidence": "primary_source_confirmed for every row -- downloaded directly from Ohio's own database, not cross-referenced from secondary sites. This is a STRONGER confidence tier than the per-city web-search approach used for 21 of Michigan's 24 cities, because it is bulk-sourced from the authority itself rather than corroborated across secondary summaries.",
   "municipalityCount": 679,
