@@ -1,10 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap');
 /* Shared styles for Omnia's legal pages. Matches the site palette. */
 :root {
   --paper: #FBFAF5; --paper-2: #F4F2EA; --card: #FFFFFF;
   --ink: #14140F; --ink-2: #3A392F; --ink-3: #6B695C; --ink-4: #93917F;
   --rule: #E4E1D4; --rule-2: #D5D2C4; --stamp: #B23A24; --stamp-soft: #F7E7E2;
   --verify: #2F5D3A; --verify-soft: #E4EDE3;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --sans: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
 }
 * { box-sizing: border-box; }

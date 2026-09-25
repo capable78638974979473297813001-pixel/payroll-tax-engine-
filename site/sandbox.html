@@ -198,9 +198,6 @@
   .copyrow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 10px; flex-wrap: wrap; }
   .toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
 
-  .welcome { margin: 14px 18px 0; background: var(--verify-soft); border: 1px solid #C6D8C4; border-radius: var(--radius); padding: 12px 14px; font-size: 13px; color: #24452C; display: flex; gap: 12px; align-items: flex-start; }
-  .welcome b { color: var(--verify); }
-  .welcome button { margin-left: auto; background: none; border: 0; cursor: pointer; color: var(--verify); font-size: 18px; line-height: 1; padding: 0 2px; }
 
   .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--paper); padding: 9px 14px; border-radius: 6px; font-size: 13px; opacity: 0; transition: .2s; pointer-events: none; z-index: 50; }
   .toast.on { opacity: 1; transform: translateX(-50%); }
@@ -236,6 +233,10 @@
     .mode { font-size: 10px; padding: 4px 6px; letter-spacing: .04em; }
     .top-in { gap: 8px; padding: 0 10px; }
   }
+
+  /* Plain text for mode and status, no pills. */
+  .mode, .mode.test, .mode.live { background: none; padding: 0; border-radius: 0; letter-spacing: .04em; }
+  .pill, .pill.ok, .pill.err { background: none; padding: 0; border-radius: 0; }
 </style>
 </head>
 <body>
@@ -301,13 +302,6 @@
     <div class="signin-bar" id="signinBar" hidden>
       <span>Sign in to send requests with your API key.</span>
       <a class="btn sm" href="/docs?signin=1">Sign in</a>
-    </div>
-    <div class="welcome" id="welcome" hidden>
-      <div>
-        <b>Welcome to the API console.</b> Every Send is a real call to the engine with your account's key.
-        Pick an example on the left or edit the request, then press <b>Send</b> (<span class="mono">Ctrl/⌘ + Enter</span>).
-      </div>
-      <button type="button" id="welcomeClose" aria-label="Dismiss">×</button>
     </div>
     <div class="reqline">
       <div class="url" id="urlBox"><span class="verb" id="urlVerb">POST</span><span class="host" id="urlHost"></span><span class="path" id="urlPath"></span></div>
@@ -455,7 +449,7 @@
     { id: 'me', verb: 'GET', path: '/v1/me', label: 'Your key' },
     { id: 'health', verb: 'GET', path: '/v1/health', label: 'Health', noAuth: true },
   ];
-  var LS = { account: 'omnia_key', own: 'omnia_console_key', hist: 'omnia_console_history', welcome: 'omnia_console_welcomed', lang: 'omnia_console_lang' };
+  var LS = { account: 'omnia_key', own: 'omnia_console_key', hist: 'omnia_console_history', lang: 'omnia_console_lang' };
   var isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
   var examples = [];
@@ -1022,9 +1016,6 @@
     store.set(LS.own, k); setKey(k); $('kmOwn').value = ''; toast('Using your key');
   };
 
-  // welcome
-  $('welcomeClose').onclick = function () { $('welcome').hidden = true; store.set(LS.welcome, true); };
-  if (!store.get(LS.welcome)) $('welcome').hidden = false;
   $('sendKbd').textContent = isMac ? '⌘↵' : 'Ctrl↵';
 
   // ------------------------------------------------------------------

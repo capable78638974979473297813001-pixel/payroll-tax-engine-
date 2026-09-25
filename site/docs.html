@@ -7,7 +7,7 @@
 <meta name="description" content="Sign in, get your Omnia Engine API key, run real calculations in the sandbox, and watch usage update live." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500&family=Inter:wght@400;450;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
   :root {
     color-scheme: light;
@@ -28,8 +28,8 @@
     --ink-2:      #4A505A;
     --ink-3:      #838A94;
     --line:       #E3E3DF;
-    --head: 'Newsreader', Georgia, 'Times New Roman', serif;
-    --body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --head: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --body: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
     --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, Menlo, monospace;
     --container: 1180px;
   }
@@ -327,6 +327,25 @@
 
   footer.site { padding: 26px 0 40px; text-align: center; font-size: 12.5px; color: var(--ink-3); }
   footer.site a { color: var(--ink-2); text-decoration: none; }
+
+  /* Plain, consistent UI: no pills, no dark header bars, no eyebrow labels,
+     one typeface. */
+  h1, h2, h3 { font-family: var(--head); font-weight: 600; letter-spacing: -0.015em; }
+  .eyebrow { display: none; }
+  .status-pill, .key-chip { background: none; border: 0; padding: 0; border-radius: 0; }
+  .warn { background: none; border: 0; padding: 0; color: #8A5B00; }
+  .card { border-radius: 8px; box-shadow: none; }
+  .steps { border: 0; gap: 22px; justify-content: flex-start; }
+  .steps li { flex: none; border: 0; padding: 0; background: none !important; font-family: var(--body); font-size: 14px; letter-spacing: 0; color: var(--ink-3) !important; }
+  .steps li .sn { display: none; }
+  .steps li.current { color: var(--ink) !important; font-weight: 600; }
+  .wiz-card { border: 1px solid var(--line); border-radius: 8px; }
+  .wiz-head { background: none; color: var(--ink); padding: 26px 24px 0; }
+  .wiz-head span { display: none; }
+  .wiz-head h2 { color: var(--ink); font-size: 22px; }
+  .wiz-body { padding: 14px 24px 24px; }
+  .wiz-body .lead { margin-bottom: 18px; }
+  .field label { font-family: var(--body); font-size: 13.5px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--ink-2); }
 </style>
 </head>
 <body>
@@ -514,7 +533,6 @@
 
           <div id="keyReveal" hidden>
             <div class="warn">
-              <span>&#9888;&#65039;</span>
               <span>Copy this now — it isn't shown again. It's also kept in this browser so the sandbox can use it; reissuing revokes it.</span>
             </div>
             <div class="key-box" id="keyRevealText">sk_test_…</div>
