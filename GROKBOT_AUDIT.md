@@ -257,3 +257,20 @@ Per-period tables were not all chained (many use a different shape). This is sma
 10. **PaycheckCity fixtures** in `examples/pcc-results/` were not re-run.
 11. **Test suite was not executed.** This was a static audit. A green `npm test` would not clear the path bugs above if no test constructs an Indiana resident working in Pennsylvania, a rail employee with a 401(k), an Oregon resident working in Washington, a Hackleburg geocode, or a Florida check dated 2026-09-30.
 12. **`payroll/` and `trades/`** were not reviewed, including any tax logic that might live only there.
+
+---
+
+## External tax-tables research (Researchy, 2026-09-25)
+
+Recorded as reported from a parallel official-source check. Not re-verified in this pass.
+
+**Headline:** Sampled federal rates and high-visibility state and local rates matched .gov sources. No HIGH numeric mismatches.
+
+**Medium follow-ups:**
+
+- The 2026 FUTA credit-reduction map is empty. Fill it after the determination, about 2026-11-10.
+- There is no `*-2025.json` tree in the repo.
+- Alabama local occupational taxes are sourced from the League, not the Department of Revenue.
+- Some SUI rates are secondary-sourced.
+- The Kentucky scrape includes rows marked `unreliable`.
+- There are no dedicated FIPS rate tables. Pennsylvania local tax is keyed by `psdCode`.
