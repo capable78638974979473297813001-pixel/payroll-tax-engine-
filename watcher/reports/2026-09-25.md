@@ -4,38 +4,106 @@
 
 | Changed | Minor | Unchanged | New | Unstable | Unreachable | Gone (404) | Blocks bots | Total |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1 | 0 | 387 | 6 | 0 | 8 | 3 | 14 | 419 |
+| 1 | 1 | 385 | 0 | 1 | 16 | 3 | 12 | 419 |
 
-_Run took 269 s. A change is only reported after a second fetch confirms it._
+_Run took 489 s. A change is only reported after a second fetch confirms it._
 
 ## Changed
 
 ### US - IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)
 
 <https://www.irs.gov/draft-tax-forms>  
-6 lines added, 6 removed; 2 links added, 2 removed
+read with a headless browser; 2 lines added, 103 removed; 0 links added, 39 removed
 
-- New link: [Form 1099-LPS](https://www.irs.gov/pub/irs-dft/f1099lps--dft.pdf)
-- New link: [Instruction 1040 (Schedule E)](https://www.irs.gov/pub/irs-dft/i1040se--dft.pdf)
-- Removed link: [Form 1040-X](https://www.irs.gov/pub/irs-dft/f1040x--dft.pdf)
-- Removed link: [Instruction 1040 (Schedule F)](https://www.irs.gov/pub/irs-dft/i1040sf--dft.pdf)
+- Figures now present: none
+- Figures no longer present: $10, 1.861
+- Removed link: [Title](https://www.irs.gov/draft-tax-forms?find=&items_per_page=25&order=draft_tax_forms_picklist_title&sort=asc)
+- Removed link: [Product Number](https://www.irs.gov/draft-tax-forms?find=&items_per_page=25&order=natural_sort_field&sort=asc)
+- Removed link: [Revision Date](https://www.irs.gov/draft-tax-forms?find=&items_per_page=25&order=picklist_revision_date_iso&sort=desc)
+- Removed link: [Posted Date](https://www.irs.gov/draft-tax-forms?find=&items_per_page=25&order=posted_date&sort=desc)
+- Removed link: [2](https://www.irs.gov/draft-tax-forms?page=1)
+- Removed link: [3](https://www.irs.gov/draft-tax-forms?page=2)
+- Removed link: [4](https://www.irs.gov/draft-tax-forms?page=3)
+- Removed link: [5](https://www.irs.gov/draft-tax-forms?page=4)
+- Removed link: [Last » Last page](https://www.irs.gov/draft-tax-forms?page=49)
+- Removed link: [6](https://www.irs.gov/draft-tax-forms?page=5)
+- Removed link: [7](https://www.irs.gov/draft-tax-forms?page=6)
+- Removed link: [8](https://www.irs.gov/draft-tax-forms?page=7)
+- Removed link: [9](https://www.irs.gov/draft-tax-forms?page=8)
+- Removed link: [Using IRS Forms, Instructions, Publications and Other Item Files](https://www.irs.gov/forms-pubs/using-irs-forms-instructions-publications-and-other-item-files)
+- Removed link: [Find Help](https://www.irs.gov/help/find-help)
 
 <details><summary>What changed</summary>
 
 ```diff
-+Form 1099-LPS
-+Long-Term Care Premiums Paid Statement
-+Dec 2026
-+Instruction 1040 (Schedule E)
-+Instructions for Schedule E (Form 1040), Supplemental Income and Loss
-+2026
--Instruction 1040 (Schedule F)
--Instructions for Schedule F (Form 1040), Profit or Loss From Farming
--2026
--Form 1040-X
--Amended U.S. Individual Income Tax Return
+-Draft versions of tax forms, instructions, and publications. Do not file draft forms and do not rely on information in draft instructions or publications.
+-If a PDF file won't open, try downloading the file to your device and opening it using Adobe Acrobat. View more information about Using IRS Forms, Instructions, Publications and Other Item Files.
+-Click on a column heading to sort the list by the contents of that column.
+-Enter a term in the Find box
+-Click the Search button
+-Showing 1 - 25 of 1238
+-Find Help
+-Find
+-Show per page
+-Product Number
+-Title
+-Revision Date
+-Posted Date
+-Form 1099-LPS
+-Long-Term Care Premiums Paid Statement
 -Dec 2026
+-Instruction 1040 (Schedule E)
+-Instructions for Schedule E (Form 1040), Supplemental Income and Loss
+-2026
+-Instruction 1120-F (Schedule H)
+-Instructions for Schedule H (Form 1120-F), Deductions Allocated To Effectively Connected Income Under Regulations Section 1.861-8
+-Dec 2026
+-Instruction 1120-S (Schedule M-3)
+-Instructions for Schedule M-3 (Form 1120S), Net Income (Loss) Reconciliation for S Corporations With Total Assets of $10 Million or More
+-Dec 2026
+-Instruction 4835
+-Instructions for Form 4835, Farm Rental Income and Expenses
+-2026
+-Form 1099-DA
+-Digital Asset Proceeds from Broker Transactions
+-2027
+-Form 1120-F
+-U.S. Income Tax Return of a Foreign Corporation
+-2026
+-Form 1099-R
+-Distributions From Pensions, Annuities, Retirement or Profit-Sharing Plans, IRAs, Insurance Contracts, etc.
+-2027
+-Instruction 8606
+-Instructions for Form 8606, Nondeductible IRAs
+-2026
+... 65 more changed lines
 ```
+</details>
+
+## Minor changes: link lists and headlines only (1)
+
+Recorded, but only the text of links to other pages changed (news boxes, menus).
+
+<details><summary>Show</summary>
+
+### MI - Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026
+
+<https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026>  
+1 lines added, 1 removed (link lists / headlines only)
+  
+Used by: `data/minimum-wage/states/MI-2026.json`
+
+- Figures now present: $1
+- Figures no longer present: none
+
+<details><summary>What changed</summary>
+
+```diff
++$1M investment helps 10 Michigan communities navigate industry transitions, prepare for future
+-UIA offices closed Monday for Labor Day, but you still can access online resources
+```
+</details>
+
 </details>
 
 ## Broken - failing for 3+ runs (11)
@@ -56,18 +124,26 @@ These URLs need replacing in `watcher/sources.json` (or the site blocks automate
 | US | [735 ILCS 5/12-803 — maximum wage deduction: lesser of 15% of GROSS weekly wages, or the am](https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803) | site's TLS certificate failed verification (unable to get local issuer certificate) |
 | US | [MCL 600.4012 and Michigan's own garnishment procedure — tracks the federal CCPA floor (25%](https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-600-4012) | site's TLS certificate failed verification (unable to get local issuer certificate) |
 
-## New (first snapshot taken) (6)
+## Unreachable this run (8)
 
 | Jurisdiction | Source | Detail |
 |---|---|---|
-| IN | [Indiana Unemployment for Employers: State Premium Rate Computation (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/state-premium-rate-computation/) | first snapshot (711 words, html) |
-| MN | [Minn. R. 8002.0200 (administrative rule implementing 290.081's reciprocity exclusion)](https://www.revisor.mn.gov/rules/8002.0200/) | first snapshot (1165 words, html) |
-| MN | [Minn. Stat. § 268B.14 (Premium rates)](https://www.revisor.mn.gov/statutes/cite/268B.14) | first snapshot (1433 words, html) |
-| MN | [Minn. Stat. § 290.081 (Income of nonresidents, reciprocity)](https://www.revisor.mn.gov/statutes/cite/290.081) | first snapshot (1003 words, html) |
-| MN | [Minn. Stat. § 477A.016](https://www.revisor.mn.gov/statutes/cite/477A.016) | first snapshot (98 words, html) |
-| US | [Minn. Stat. § 571.922 — non-support garnishment: fully exempt at or below 40x the applicab](https://www.revisor.mn.gov/statutes/cite/571.922) | first snapshot (683 words, html) |
+| TN | [TN Department of Labor and Workforce Development -- UI Tax Rates](https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax/ui-tax-rates.html) | URLError: <urlopen error [Errno 104] Connection reset by peer> |
+| US | [Wis. Stat. § 812.34 — 80% of disposable earnings exempt from garnishment (i.e. 20% reachab](https://docs.legis.wisconsin.gov/document/statutes/812.34) | URLError: <urlopen error timed out> |
+| WI | [DOR General Withholding Tax Questions (reciprocity, thresholds, WT-4)](https://www.revenue.wi.gov/Pages/FAQS/pcs-with.aspx) | URLError: <urlopen error timed out> |
+| WI | [DOR Tax Rates FAQ (annual Form 1 individual income tax brackets)](https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx) | URLError: <urlopen error timed out> |
+| WI | [Wis. Stat. § 71.03(13) — 'Wisconsin adjusted gross income' defined](https://docs.legis.wisconsin.gov/document/statutes/71.03) | URLError: <urlopen error timed out> |
+| WI | [Wisconsin Legislature -- Wis. Stat. 104.035 (minimum wage; opportunity employees)](https://docs.legis.wisconsin.gov/2017/statutes/statutes/104/035/9) | URLError: <urlopen error timed out> |
+| WI | [Wisconsin W-166 withholding guide](https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf) | URLError: <urlopen error timed out> |
+| WI | [Wisconsin withholding](https://www.revenue.wi.gov/Pages/Withholding/home.aspx) | URLError: <urlopen error timed out> |
 
-## Redirected (22)
+## Unstable (1)
+
+| Jurisdiction | Source | Detail |
+|---|---|---|
+| IN | [Indiana Departmental Notice #1 (county rates)](https://www.in.gov/dor/files/dn01.pdf) | content differed, but the confirming fetch failed (URLError: <urlopen error [Errno 111] Connection refused>); snapshot kept |
+
+## Redirected (21)
 
 These still work but redirect elsewhere; consider updating the URL in data/ or curated.json.
 
@@ -79,6 +155,7 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 | ID | [EPB00744 — Table for Percentage Computation Method of Withholding](https://tax.idaho.gov/document-mngr/pubs_EPB00744) | -> https://tax.idaho.gov/wp-content/uploads/pubs/EPB00744/EPB00744_07-23-2026.pdf |
 | ID | [Form ID W-4, Employee's Withholding Allowance Certificate (EFO00307, 04-28-2025 revision)](https://tax.idaho.gov/w4form) | -> https://tax.idaho.gov/wp-content/uploads/forms/EFO00307/EFO00307_04-28-2025.pdf |
 | ID | [Idaho Child Tax Credit Allowance Table (ICTCAT) page](https://tax.idaho.gov/ictcat) | -> https://tax.idaho.gov/taxes/income-tax/withholding/computing/#ictcat |
+| KY | [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs ](https://www.georgetownky.gov/2167/Taxes-License-Fees) | -> https://www.georgetownky.gov/2167/City-Property-Taxes |
 | MA | [Massachusetts DOR withholding tax forms (new Circular M editions are listed here)](https://www.mass.gov/lists/dor-withholding-tax-forms) | read with a headless browser |
 | MD | [Montgomery County, MD tipped-employee cash wage ($4.00/hr, Montgomery County Code Sec. 27-](https://www.montgomerycountymd.gov/humanrights/min-wage.html) | -> https://www.montgomerycountymd.gov/office-human-rights |
 | MI | [Revenue Administrative Bulletin 1988-27 — Section 125 cafeteria plan benefits excluded fro](https://michigan.gov/treasury/0,4679,7-121-44402_44415_44416-7351--,00.html) | -> https://www.michigan.gov/en/treasury/reference/rab/content/1988/revenue-administrative-bulletin-1988-27 |
@@ -91,12 +168,10 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 | OH | [Ohio Dept of Taxation - School District Income Tax rate list, Tax Year 2026](https://tax.ohio.gov/static/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf) | -> https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf |
 | OH | [Ohio Form IT 4NR — Employee's Statement of Residency in a Reciprocity State (Rev. 5/07), O](https://tax.ohio.gov/static/forms/employer_withholding/generic/wth_it4nr.pdf) | -> https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/employer_withholding/generic/wth_it4nr.pdf |
 | PA | [PA Department of Revenue -- Employer Withholding](https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html) | -> https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding |
-| US | [Wis. Stat. § 812.34 — 80% of disposable earnings exempt from garnishment (i.e. 20% reachab](https://docs.legis.wisconsin.gov/document/statutes/812.34) | -> https://docs.legis.wisconsin.gov/statutes/statutes/812/ii/34 |
 | WI | [2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)](https://dwd.wisconsin.gov/ui/employers/taxrates.htm) | read with a headless browser |
-| WI | [Wis. Stat. § 71.03(13) — 'Wisconsin adjusted gross income' defined](https://docs.legis.wisconsin.gov/document/statutes/71.03) | -> https://docs.legis.wisconsin.gov/statutes/statutes/71/i/03 |
 | WY | [Wyoming Dept of Workforce Services -- Unemployment Tax Rates](https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-tax-rates/) | -> https://dws.wyo.gov/dws-division/unemployment-insurance/employers/unemployment-tax-rates/ |
 
-## Sites that block automated checks (14)
+## Sites that block automated checks (12)
 
 These can't be watched by a script (bot protection or JavaScript-only pages). Check them by hand now and then, or find the same document at an address that allows it.
 
@@ -108,8 +183,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 | AZ | [UIT-0603A (FY26), Unemployment Insurance Tax Rate Chart](https://des.az.gov/sites/default/files/dl/UIT-0603A_FY26.pdf) | read with a browser last time; a real browser was refused too |
 | DC | [DC Department of Employment Services -- Office of Wage-Hour Compliance](https://does.dc.gov/service/office-wage-hour-compliance-0) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | DC | [DC OTR withholding](https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications) | HTTP 403: the site refuses automated requests; a real browser was refused too |
-| KY | [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs ](https://www.georgetownky.gov/2167/Taxes-License-Fees) | HTTP 403: the site refuses automated requests; a real browser was refused too |
-| NJ | [City of Newark Q1 2026 Payroll Tax Booklet](https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NM | [City of Las Cruces -- Official Notice, Minimum Wage Ordinance (2026)](https://lascruces.gov/wp-content/uploads/2025/09/MinimumWageEng26.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NV | [UI Information for Employers (Nevada DETR)](https://detr.nv.gov/Page/UI_Information_for_Employers) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NY | [NY Department of Financial Services -- COBRA and Premium Assistance](https://www.dfs.ny.gov/consumers/health_insurance/cobra_and_premium_assistance) | HTTP 403: the site refuses automated requests; a real browser was refused too |
@@ -121,7 +194,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 
 </details>
 
-## Unchanged (387)
+## Unchanged (385)
 
 <details><summary>Show all</summary>
 
@@ -218,15 +291,16 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - IN - [DOR: Withholding Tax Forms — WH-4 (State Form 48845), 'Employee's Withholding Exemption & County Sta](https://www.in.gov/dor/tax-forms/withholding-tax-forms/) (last changed: 2026-09-24)
 - IN - [Form WH-47 — Certificate of Residence (State Form 9686, R3/3-21)](https://forms.in.gov/download.aspx?id=2419) (last changed: 2026-09-24)
 - IN - [Indiana DOR withholding](https://www.in.gov/dor/i-am-a/business-corp/withholding/) (last changed: 2026-09-24)
-- IN - [Indiana Departmental Notice #1 (county rates)](https://www.in.gov/dor/files/dn01.pdf) (last changed: 2026-09-24)
 - IN - [Indiana Unemployment for Employers: New Employer Premium Rate (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/new-employer-premium-rate/) (last changed: 2026-09-24)
 - IN - [Indiana Unemployment for Employers: Rate Computation (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/) (last changed: 2026-09-24)
+- IN - [Indiana Unemployment for Employers: State Premium Rate Computation (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/state-premium-rate-computation/) (last changed: 2026-09-25)
 - KS - [Form 200, Local Intangibles Tax Return (Rev. 9-23-25)](https://www.ksrevenue.gov/pdf/20026.pdf) (last changed: 2026-09-24)
 - KS - [KW-100, Kansas Withholding Tax Guide (Rev. 10-24) -- SUPPLEMENTAL WAGES section, page 8](https://ksrevenue.gov/pdf/kw100.pdf) (last changed: 2026-09-24)
 - KS - [Kansas withholding tax guide KW-100](https://www.ksrevenue.gov/pdf/kw100.pdf) (last changed: 2026-09-24)
 - KY - [103 KAR 17:140 -- Individual income tax - reciprocity - nonresidents](https://revenue.ky.gov/Dor%20Training%20Materials/103%20KAR%2017.140.%20Individual%20income%20tax%20-%20reciprocity%20-%20nonresidents.pdf) (last changed: 2026-09-24)
 - KY - [42A804 (K-4)(12-2025) -- Kentucky's Withholding Certificate 2026](https://revenue.ky.gov/Forms/42A804%20(K-4)%20(2026).pdf) (last changed: 2026-09-24)
 - KY - [City of Covington, KY — Finance Department, business licensing and occupational license fee](https://www.covingtonky.gov/government/departments/finance/business-licensing-occupational-license-fee) (last changed: 2026-09-24)
+- KY - [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs gross rece](https://www.georgetownky.gov/2167/Taxes-License-Fees) (last changed: 2026-09-24)
 - KY - [City of Henderson, KY — Occupational License Tax](https://www.hendersonky.gov/174/Occupational-License-Tax) (last changed: 2026-09-24)
 - KY - [City of Lexington -- Occupational license fee: rates and current forms](https://www.lexingtonky.gov/working/business-licensing-taxes/occupational-license-fee-rates-current-forms) (last changed: 2026-09-24)
 - KY - [KRS 67.750 -- Definitions for KRS 67.750 to 67.790](https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=48677) (last changed: 2026-09-24)
@@ -270,7 +344,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - MI - [4.25% Income Tax Rate for Individuals and Fiduciaries in 2026 Tax Year (Treasury taxpayer notice, 20](https://www.michigan.gov/treasury/reference/taxpayer-notices/2026/04/15/425-income-tax-rate-for-individuals-and-fiduciaries-in-2026-tax-year) (last changed: 2026-09-24)
 - MI - [5469 (Rev. 05-24) — 2025 City of Detroit Income Tax Withholding Guide (Treasury administers Detroit ](https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/City-Withholding/TY2025/5469_ty2025.pdf) (last changed: 2026-09-24)
 - MI - [MI-W4 (Rev. 12-20) — Employee's Michigan Withholding Exemption Certificate](https://www.michigan.gov/-/media/Project/Websites/taxes/Forms/All-Years/MIW4.pdf) (last changed: 2026-09-24)
-- MI - [Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026](https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026) (last changed: 2026-09-24)
 - MI - [Michigan LEO/UIA — Taxable Wage Base FAQ](https://www.michigan.gov/leo/bureaus-agencies/uia/employers/forms/accordion/taxable-wage-base) (last changed: 2026-09-24)
 - MI - [Michigan LEO/UIA — Unemployment Tax Rate (statutory formula, Section 19 of the Michigan Employment S](https://www.michigan.gov/leo/bureaus-agencies/uia/assets/unemployment-tax-rate) (last changed: 2026-09-24)
 - MI - [Michigan Treasury — Withholding Reciprocity Examples (Analysis section: MCL 206.703(2), MCL 206.110,](https://www.michigan.gov/taxes/business-taxes/payroll-service-providers/withholding-reciprocity-examples) (last changed: 2026-09-24)
@@ -282,6 +355,10 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - MN - [2026 Minnesota Withholding Tax Instructions and Tables (wh-inst-26)](https://www.revenue.state.mn.us/sites/default/files/2025-12/wh-inst-26.pdf) (last changed: 2026-09-24)
 - MN - [City of Minneapolis -- Minimum wage increases to $16.37 for all employers](https://www.minneapolismn.gov/news/2025/december/minimum-wage/) (last changed: 2026-09-24)
 - MN - [City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)](https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses) (last changed: 2026-09-24)
+- MN - [Minn. R. 8002.0200 (administrative rule implementing 290.081's reciprocity exclusion)](https://www.revisor.mn.gov/rules/8002.0200/) (last changed: 2026-09-25)
+- MN - [Minn. Stat. § 268B.14 (Premium rates)](https://www.revisor.mn.gov/statutes/cite/268B.14) (last changed: 2026-09-25)
+- MN - [Minn. Stat. § 290.081 (Income of nonresidents, reciprocity)](https://www.revisor.mn.gov/statutes/cite/290.081) (last changed: 2026-09-25)
+- MN - [Minn. Stat. § 477A.016](https://www.revisor.mn.gov/statutes/cite/477A.016) (last changed: 2026-09-25)
 - MN - [Minnesota Department of Labor and Industry -- Minimum wage in Minnesota](https://www.dli.mn.gov/business/employment-practices/minimum-wage-minnesota) (last changed: 2026-09-24)
 - MN - [Minnesota Department of Revenue -- Reciprocity for Individuals, and wh-inst-26 p.4 ('Reciprocity for](https://www.revenue.state.mn.us/reciprocity) (last changed: 2026-09-24)
 - MN - [Minnesota withholding tax](https://www.revenue.state.mn.us/withholding-tax) (last changed: 2026-09-24)
@@ -316,6 +393,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - NE - [Nebraska Legislative Bill 258 (2026), approved by the Governor February 9, 2026](https://nebraskalegislature.gov/FloorDocs/109/PDF/Slip/LB258.pdf) (last changed: 2026-09-24)
 - NE - [Nebraska withholding](https://revenue.nebraska.gov/businesses/nebraska-income-tax-withholding) (last changed: 2026-09-24)
 - NH - [NH RSA 279:21 minimum hourly rate (statute)](https://gc.nh.gov/rsa/html/XXIII/279/279-21.htm) (last changed: 2026-09-24)
+- NJ - [City of Newark Q1 2026 Payroll Tax Booklet](https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF) (last changed: 2026-09-24)
 - NJ - [Form NJ-165 -- Employee's Certificate of Nonresidence in New Jersey](https://www.nj.gov/treasury/taxation/pdf/current/nj165.pdf) (last changed: 2026-09-24)
 - NJ - [Form NJ-W4, Employee's Withholding Allowance Certificate (1-21, last modified 2022-12-06)](https://nj.gov/treasury/taxation/pdf/current/njw4.pdf) (last changed: 2026-09-24)
 - NJ - [NJ Division of Employer Accounts — 2026 employee UI / Workforce Development / Supplemental Workforce](https://www.nj.gov/labor/ea/employer-services/rate-info/) (last changed: 2026-09-24)
@@ -413,7 +491,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - SD - [South Dakota DLR -- Reemployment Assistance for Businesses (rate notices)](https://dlr.sd.gov/ra/businesses/default.aspx) (last changed: 2026-09-24)
 - SD - [South Dakota Department of Labor and Regulation -- Minimum Wage FAQ](https://dlr.sd.gov/employment_laws/minimum_wage_faq.aspx) (last changed: 2026-09-24)
 - SD - [South Dakota Department of Labor and Regulation -- Reemployment Assistance Tax FAQ](https://dlr.sd.gov/ra/businesses/faq.aspx) (last changed: 2026-09-24)
-- TN - [TN Department of Labor and Workforce Development -- UI Tax Rates](https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax/ui-tax-rates.html) (last changed: 2026-09-24)
 - TX - [Tex. Const. Art. VIII, sec. 24 -- prohibition on a state income tax](https://statutes.capitol.texas.gov/Docs/CN/htm/CN.8.htm) (last changed: 2026-09-24)
 - TX - [Texas Workforce Commission: your tax rates](https://www.twc.texas.gov/programs/unemployment-tax/your-tax-rates) (last changed: 2026-09-24)
 - US - [https://apps.dced.pa.gov/munstats-public/FindLocalTax.aspx](https://apps.dced.pa.gov/munstats-public/FindLocalTax.aspx) (last changed: 2026-09-24)
@@ -454,6 +531,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - US - [K.S.A. § 60-2310 — wage garnishment: maximum part of earnings subject to garnishment is the lesser o](https://www.ksrevisor.gov/statutes/chapters/ch60/060_023_0010.html) (last changed: 2026-09-24)
 - US - [KRS 425.506 — a judgment creditor may reach only the lesser of 25% of disposable earnings, or the am](https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=18419) (last changed: 2026-09-24)
 - US - [Maine Department of Labor — 2026 minimum wage ($15.10/hr, effective 2026-01-01, cost-of-living index](https://www.maine.gov/labor/news_events/article.shtml?id=13338762) (last changed: 2026-09-24)
+- US - [Minn. Stat. § 571.922 — non-support garnishment: fully exempt at or below 40x the applicable minimum](https://www.revisor.mn.gov/statutes/cite/571.922) (last changed: 2026-09-25)
 - US - [Minnesota Department of Labor and Industry — 2026 statewide minimum wage ($11.41/hr, single rate for](https://dli.mn.gov/news/minimum-wage-rate-adjusted-inflation-jan-1-2026) (last changed: 2026-09-24)
 - US - [N.C. Gen. Stat. § 1-362 — wages/personal earnings exempt from attachment/garnishment for ordinary ju](https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_1/GS_1-362.html) (last changed: 2026-09-24)
 - US - [P.L. 119-21 on govinfo.gov (official text)](https://www.govinfo.gov/app/details/PLAW-119publ21) (last changed: 2026-09-24)
@@ -468,7 +546,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - US - [Virginia Department of Labor and Industry — 2026 minimum wage $12.77/hr effective 2026-01-01](https://doli.virginia.gov/2025/07/29/virginia-minimum-wage-rate-increasing-effective-january-1-2026/) (last changed: 2026-09-24)
 - US - [W. Va. Code § 38-5A-3 — ordinary (consumer credit sale/consumer loan judgment) garnishment limited t](https://code.wvlegislature.gov/38-5A-3/) (last changed: 2026-09-24)
 - US - [Washington State Department of Labor & Industries — 2026 minimum wage ($17.13/hr effective 2026-01-0](https://ofm.wa.gov/wp-content/uploads/sites/default/files/public/legacy/policy/25.60.pdf) (last changed: 2026-09-24)
-- US - [Wis. Stat. § 812.34 — 80% of disposable earnings exempt from garnishment (i.e. 20% reachable), furth](https://docs.legis.wisconsin.gov/document/statutes/812.34) (last changed: 2026-09-24)
 - US - [eCFR 29 CFR 870 amendment history (garnishment limits) - official API](https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?part=870) (last changed: 2026-09-24)
 - US - [eCFR 34 CFR 34 amendment history (administrative wage garnishment) - official API](https://www.ecfr.gov/api/versioner/v1/versions/title-34.json?part=34) (last changed: 2026-09-24)
 - UT - [Utah Pub 14 page](https://tax.utah.gov/forms-pubs/pub-14/) (last changed: 2026-09-24)
@@ -497,13 +574,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - WA - [Washington State Department of Labor & Industries -- Washington's minimum wage going up to $17.13 an](https://www.lni.wa.gov/news-events/article/25-27) (last changed: 2026-09-24)
 - WA - [Washington State's Paid Family and Medical Leave — Estimate your Paid Leave payments](https://paidleave.wa.gov/estimate-your-paid-leave-payments/) (last changed: 2026-09-24)
 - WI - [2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)](https://dwd.wisconsin.gov/ui/employers/taxrates.htm) (last changed: 2026-09-24)
-- WI - [DOR General Withholding Tax Questions (reciprocity, thresholds, WT-4)](https://www.revenue.wi.gov/Pages/FAQS/pcs-with.aspx) (last changed: 2026-09-24)
-- WI - [DOR Tax Rates FAQ (annual Form 1 individual income tax brackets)](https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx) (last changed: 2026-09-24)
 - WI - [UCT-1-E, 2026 Wisconsin Employer's Quarterly Contribution Report (SUTA initial rates)](https://dwd.wisconsin.gov/dwd/forms/ui/pdf/uct-1-e-2026.pdf) (last changed: 2026-09-24)
-- WI - [Wis. Stat. § 71.03(13) — 'Wisconsin adjusted gross income' defined](https://docs.legis.wisconsin.gov/document/statutes/71.03) (last changed: 2026-09-24)
-- WI - [Wisconsin Legislature -- Wis. Stat. 104.035 (minimum wage; opportunity employees)](https://docs.legis.wisconsin.gov/2017/statutes/statutes/104/035/9) (last changed: 2026-09-24)
-- WI - [Wisconsin W-166 withholding guide](https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf) (last changed: 2026-09-24)
-- WI - [Wisconsin withholding](https://www.revenue.wi.gov/Pages/Withholding/home.aspx) (last changed: 2026-09-24)
 - WV - [WV IT-100.2A -- Tables for Percentage Method of Withholding (March 2026 revision)](https://tax.wv.gov/Documents/Withholding/it100.2a.pdf) (last changed: 2026-09-24)
 - WV - [WV State Tax Division -- Withholding Help and General Information page, "Supplemental Wages" guidanc](https://tax.wv.gov/Business/Withholding/HelpAndGeneralInformation/Pages/WithholdingHelpAndGeneralInformation.aspx) (last changed: 2026-09-24)
 - WV - [WV/IT-104 -- Employee's Withholding Exemption Certificate (Rev. 03/2023) + WV/IT-104NR Certificate o](https://tax.wv.gov/Documents/Withholding/it104.pdf) (last changed: 2026-09-24)

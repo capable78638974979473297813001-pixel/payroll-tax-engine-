@@ -424,7 +424,7 @@
   "url": "https://www.dfa.arkansas.gov/wp-content/uploads/AR4EC2025_FI.pdf"
  },
  "ar-feaf1a0a4a": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/"
@@ -571,7 +571,7 @@
   "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165"
  },
  "az-c562e891c7": {
-  "failures": 1,
+  "failures": 2,
   "hash": "06643507b2f5d04ba2f6fbe5fe3262d8e354016da2f04f67cf50682aa4d1f333",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-25",
@@ -1619,7 +1619,7 @@
   "url": "https://code.dccouncil.gov/us/dc/council/code/sections/47-1806.04"
  },
  "dc-66209869a6": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications"
@@ -1651,7 +1651,7 @@
   "url": "https://help.nfc.usda.gov/bulletins/2022/1668460546.htm"
  },
  "dc-f341759fb9": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://does.dc.gov/service/office-wage-hour-compliance-0"
@@ -2557,7 +2557,7 @@
   "url": "https://tax.idaho.gov/taxes/income-tax/withholding/computing/"
  },
  "il-00c7f8095a": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "HTTP 500",
   "url": "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026"
@@ -3118,18 +3118,17 @@
   "url": "https://ksrevenue.gov/pdf/kw100.pdf"
  },
  "ky-0b7157b3a5": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "now redirects to the site's home page (https://ui.ky.gov/)",
   "url": "https://kewes.ky.gov/Contact/contacts.aspx?strid=2"
  },
  "ky-1411b13a1e": {
-  "failures": 1,
+  "failures": 0,
   "hash": "26dd39ede4457838b115ca363f8fce9995e35185d2ef8c41b55a14c8f9bce854",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-25",
-  "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
-  "last_ok": "2026-09-24",
+  "last_ok": "2026-09-25",
   "links": {},
   "nav": [
    "2240d974bf",
@@ -3541,7 +3540,7 @@
   "url": "https://revenue.ky.gov/Forms/2026%20Withholding%20Formula.pdf"
  },
  "ky-f4f36afe86": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "now redirects to the site's home page (https://ui.ky.gov/)",
   "url": "https://kewes.ky.gov/Contact/contacts.aspx?strid=4"
@@ -4155,7 +4154,7 @@
   "url": "https://rocklandmaine.gov/DocumentCenter/View/2670/2026-Minimum-Wage-Notice---Rockland"
  },
  "me-a062b9490e": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "site's TLS certificate failed verification (unable to get local issuer certificate)",
   "url": "https://www.portlandmaine.gov/1016/Minimum-Wage"
@@ -4206,7 +4205,7 @@
   "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_form_w-4me_fillable.pdf"
  },
  "mi-09c6c8cf81": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "site's TLS certificate failed verification (unable to get local issuer certificate)",
   "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-206-30"
@@ -4250,7 +4249,7 @@
   "url": "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/City-Withholding/TY2025/5469_ty2025.pdf"
  },
  "mi-67f33dcd9d": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "site's TLS certificate failed verification (unable to get local issuer certificate)",
   "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-141-631"
@@ -4274,7 +4273,7 @@
   "url": "https://www.michigan.gov/leo/bureaus-agencies/uia/employers/forms/accordion/taxable-wage-base"
  },
  "mi-711e9541f4": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "site's TLS certificate failed verification (unable to get local issuer certificate)",
   "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-206-703"
@@ -4924,8 +4923,8 @@
  },
  "mi-c62e8170b0": {
   "failures": 0,
-  "hash": "6816030647655eb07e1e655f0c2bc1c9aefa25ece24039f4b5ab29726e508c77",
-  "last_changed": "2026-09-24",
+  "hash": "099f4729a82b13e298cd2ebf7b18c02b39fac297a519783b606d8347f7020ab3",
+  "last_changed": "2026-09-25",
   "last_checked": "2026-09-25",
   "last_ok": "2026-09-25",
   "links": {},
@@ -4946,8 +4945,8 @@
    "ab9dcd4a02",
    "b4ee652233",
    "b898418b0d",
+   "d28f4cbb97",
    "d9f755c66f",
-   "df5c6d9179",
    "eae8df2576",
    "f6bf9c3593",
    "f893b3ac6b",
@@ -5559,7 +5558,7 @@
   "url": "https://www.revisor.mn.gov/statutes/cite/268B.14"
  },
  "mn-c8db387719": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "HTTP 405",
   "url": "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions"
@@ -6500,12 +6499,11 @@
   "url": "https://www.nj.gov/treasury/taxation/pdf/current/nj165.pdf"
  },
  "nj-92f4f549fb": {
-  "failures": 1,
+  "failures": 0,
   "hash": "93ec73d50c7536901cd4e64ae7bba5992d5d04f95642afcf81313dfc5b955ad0",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-25",
-  "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
-  "last_ok": "2026-09-24",
+  "last_ok": "2026-09-25",
   "links": {},
   "nav": [],
   "url": "https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF"
@@ -6805,13 +6803,13 @@
   "url": "https://realfile.tax.newmexico.gov/FYI-104.pdf"
  },
  "nm-fe3826da79": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://lascruces.gov/wp-content/uploads/2025/09/MinimumWageEng26.pdf"
  },
  "nv-016aa33031": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://detr.nv.gov/Page/UI_Information_for_Employers"
@@ -7102,7 +7100,7 @@
   "url": "https://www.tax.ny.gov/pdf/current_forms/wt/nys45i.pdf"
  },
  "ny-47dc9810d4": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://www.ny.gov/sites/default/files/atoms/files/PSL_FAQ_PaidSickLeaveFAQ.pdf"
@@ -7578,7 +7576,7 @@
   "url": "https://www.tax.ny.gov/bus/wt/wtidx.htm"
  },
  "ny-56c42c3ba4": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "needs a free API key: add repository secret NYSENATE_API_KEY; a real browser was refused too",
   "url": "https://legislation.nysenate.gov/api/3/laws/LAB/651?key={env:NYSENATE_API_KEY}"
@@ -7642,7 +7640,7 @@
   "url": "https://www.dol.gov/agencies/whd/compliance-assistance/handy-reference-guide-flsa"
  },
  "ny-75c50b7e24": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://www.dfs.ny.gov/consumers/health_insurance/cobra_and_premium_assistance"
@@ -7729,7 +7727,7 @@
   "url": "https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?section=553.106"
  },
  "ny-98bb301062": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "needs a free API key: add repository secret NYSENATE_API_KEY; a real browser was refused too",
   "url": "https://legislation.nysenate.gov/api/3/laws/ELN/3-400?key={env:NYSENATE_API_KEY}"
@@ -8404,7 +8402,7 @@
   "url": "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_PercentageMethod_2025.pdf"
  },
  "oh-980004cf44": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "HTTP 401: the site refuses automated requests; a real browser was refused too",
   "url": "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv"
@@ -8656,7 +8654,7 @@
   "url": "https://paidleave.oregon.gov/employers/contributions-calculator.html"
  },
  "or-7dba5cabbb": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "HTTP 404",
   "url": "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
@@ -10372,10 +10370,11 @@
   "url": "https://dlr.sd.gov/ra/businesses/default.aspx"
  },
  "tn-5ad0d69992": {
-  "failures": 0,
+  "failures": 1,
   "hash": "1771f66c499dfa2774ac404f72d3b74ba14b0449ec2979309b529b8aee82c35d",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-25",
+  "last_error": "URLError: <urlopen error [Errno 104] Connection reset by peer>",
   "last_ok": "2026-09-25",
   "links": {
    "https://www.tn.gov/content/dam/tn/workforce/documents/employers/Premium_Rate_Chart.pdf": "Download the Premium Rate Table"
@@ -11424,7 +11423,7 @@
   "url": "https://legislature.idaho.gov/statutesrules/idstat/title11/t11ch2/sect11-207/"
  },
  "us-908ea42275": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "site's TLS certificate failed verification (unable to get local issuer certificate)",
   "url": "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803"
@@ -11574,7 +11573,7 @@
   "url": "https://www.irs.gov/pub/irs-pdf/fw4.pdf"
  },
  "us-bf493adb61": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "site's TLS certificate failed verification (unable to get local issuer certificate)",
   "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-600-4012"
@@ -11759,10 +11758,11 @@
   "url": "https://www.dol.gov/agencies/whd/minimum-wage/state"
  },
  "us-eb437d4ba6": {
-  "failures": 0,
+  "failures": 1,
   "hash": "042731e9367ed5f7b8cc2e30656a451219df50c6593eea1aabfb66b3f01aedd1",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-25",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {
    "https://docs.legis.wisconsin.gov/document/statutes/812.pdf": ""
@@ -12018,57 +12018,60 @@
  },
  "us-f10e455e50": {
   "failures": 0,
-  "hash": "ef481a3cde4aa049c8f4cb009da2e985918eef1dba1094b705242bcf0f7b2304",
+  "hash": "9b99c34e68e2dde3deb69ba7df63252c9928e48a537d466236c4fb0a4bc9ac23",
   "last_changed": "2026-09-25",
   "last_checked": "2026-09-25",
   "last_ok": "2026-09-25",
   "links": {
-   "https://www.irs.gov/draft-tax-forms?find=&items_per_page=25&order=draft_tax_forms_picklist_title&sort=asc": "Title",
-   "https://www.irs.gov/draft-tax-forms?find=&items_per_page=25&order=natural_sort_field&sort=asc": "Product Number",
-   "https://www.irs.gov/draft-tax-forms?find=&items_per_page=25&order=picklist_revision_date_iso&sort=desc": "Revision Date",
-   "https://www.irs.gov/draft-tax-forms?find=&items_per_page=25&order=posted_date&sort=desc": "Posted Date",
-   "https://www.irs.gov/draft-tax-forms?page=1": "2",
-   "https://www.irs.gov/draft-tax-forms?page=2": "3",
-   "https://www.irs.gov/draft-tax-forms?page=3": "4",
-   "https://www.irs.gov/draft-tax-forms?page=4": "5",
-   "https://www.irs.gov/draft-tax-forms?page=49": "Last \u00bb Last page",
-   "https://www.irs.gov/draft-tax-forms?page=5": "6",
-   "https://www.irs.gov/draft-tax-forms?page=6": "7",
-   "https://www.irs.gov/draft-tax-forms?page=7": "8",
-   "https://www.irs.gov/draft-tax-forms?page=8": "9",
-   "https://www.irs.gov/forms-pubs/using-irs-forms-instructions-publications-and-other-item-files": "Using IRS Forms, Instructions, Publications and Other Item Files",
-   "https://www.irs.gov/help/find-help": "Find Help",
-   "https://www.irs.gov/pub/irs-dft/f1040sp--dft.pdf": "Form 1040 (sp)",
-   "https://www.irs.gov/pub/irs-dft/f1040ss--dft.pdf": "Form 1040-SS",
-   "https://www.irs.gov/pub/irs-dft/f1041si--dft.pdf": "Form 1041 (Schedule I)",
-   "https://www.irs.gov/pub/irs-dft/f1099da--dft.pdf": "Form 1099-DA",
-   "https://www.irs.gov/pub/irs-dft/f1099lps--dft.pdf": "Form 1099-LPS",
-   "https://www.irs.gov/pub/irs-dft/f1099r--dft.pdf": "Form 1099-R",
-   "https://www.irs.gov/pub/irs-dft/f1120f--dft.pdf": "Form 1120-F",
-   "https://www.irs.gov/pub/irs-dft/f2555--dft.pdf": "Form 2555",
-   "https://www.irs.gov/pub/irs-dft/f8582--dft.pdf": "Form 8582",
-   "https://www.irs.gov/pub/irs-dft/f8802--dft.pdf": "Form 8802",
-   "https://www.irs.gov/pub/irs-dft/f8915f--dft.pdf": "Form 8915-F",
-   "https://www.irs.gov/pub/irs-dft/i1040se--dft.pdf": "Instruction 1040 (Schedule E)",
-   "https://www.irs.gov/pub/irs-dft/i1065sd--dft.pdf": "Instruction 1065 (Schedule D)",
-   "https://www.irs.gov/pub/irs-dft/i1120fh--dft.pdf": "Instruction 1120-F (Schedule H)",
-   "https://www.irs.gov/pub/irs-dft/i1120ss3--dft.pdf": "Instruction 1120-S (Schedule M-3)",
-   "https://www.irs.gov/pub/irs-dft/i1120ssk--dft.pdf": "Instruction 1120-S (Schedule K-1)",
-   "https://www.irs.gov/pub/irs-dft/i3468--dft.pdf": "Instruction 3468",
-   "https://www.irs.gov/pub/irs-dft/i4835--dft.pdf": "Instruction 4835",
-   "https://www.irs.gov/pub/irs-dft/i7218--dft.pdf": "Instruction 7218",
-   "https://www.irs.gov/pub/irs-dft/i8606--dft.pdf": "Instruction 8606",
-   "https://www.irs.gov/pub/irs-dft/i8853--dft.pdf": "Instruction 8853",
-   "https://www.irs.gov/pub/irs-dft/i8874--dft.pdf": "Instruction 8874",
-   "https://www.irs.gov/pub/irs-dft/i8888--dft.pdf": "Instruction 8888",
-   "https://www.irs.gov/pub/irs-dft/i940--dft.pdf": "Instruction 940",
-   "https://www.irs.gov/pub/irs-dft/i990sj--dft.pdf": "Instruction 990 (Schedule J)"
+   "https://www.irs.gov/pub/irs-dft/i940--dft.pdf": "Instruction 940"
   },
-  "nav": [],
+  "nav": [
+   "03fbd72849",
+   "068f6b1a14",
+   "0ade7c2cf9",
+   "0df17d714e",
+   "12fd5c8888",
+   "1b64538924",
+   "225e7010f8",
+   "44b67c5d1b",
+   "47a34df037",
+   "48a55f9b57",
+   "4b14dd880e",
+   "4b1b56fb6e",
+   "6167ab33e4",
+   "62eff7672d",
+   "72e677cce0",
+   "768e0c1c69",
+   "77de68daec",
+   "886a9f5b3a",
+   "8e7487925b",
+   "902ba3cda1",
+   "9269fdcfdf",
+   "9522d45ed8",
+   "ac3478d69a",
+   "adb496fd6f",
+   "b474ce4f83",
+   "c11756758e",
+   "c1dfd96eea",
+   "ce03c7126f",
+   "ce70ce92ea",
+   "cf6c2a4a9a",
+   "d6d694df5d",
+   "da4b9237ba",
+   "dcb8d96fd9",
+   "dce2968902",
+   "de4cbd7a68",
+   "e6ec375643",
+   "e70771a814",
+   "e9bf63b884",
+   "f6deb90f30",
+   "fe5dbbcea5"
+  ],
+  "needs_browser": true,
   "url": "https://www.irs.gov/draft-tax-forms"
  },
  "us-f6de512498": {
-  "failures": 3,
+  "failures": 4,
   "last_checked": "2026-09-25",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines"
@@ -12790,10 +12793,11 @@
   "url": "https://wacaresfund.wa.gov/exemptions"
  },
  "wi-2ea1a73c00": {
-  "failures": 0,
+  "failures": 1,
   "hash": "bd1811b6bf784124b86fb53401a8ce31503e506eb7b8be1ee749cf60ee4fd041",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-25",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {
    "https://www.revenue.wi.gov/DOR%20Publications/1117composite.pdf": "Fact Sheet 1117 - Pass-Through Withholding and Composite Returns",
@@ -12865,10 +12869,11 @@
   "url": "https://www.revenue.wi.gov/Pages/Withholding/home.aspx"
  },
  "wi-44d4224e71": {
-  "failures": 0,
+  "failures": 1,
   "hash": "4834a80acc6a263351f712154f309eba45dadd81cce03264c4aea88e1e71742d",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-25",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {
    "https://www.revenue.wi.gov/DOR%20Publications/pb201.pdf": "Publication 201",
@@ -12912,10 +12917,11 @@
   "url": "https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx"
  },
  "wi-53244e93fe": {
-  "failures": 0,
+  "failures": 1,
   "hash": "36bab238ac72f6e6b4204129174d40752845a8a2a56ff4d9e36b811f4b62a240",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-25",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {
    "https://docs.legis.wisconsin.gov/document/statutes/71.pdf": ""
@@ -13292,10 +13298,11 @@
   "url": "https://dwd.wisconsin.gov/ui/employers/taxrates.htm"
  },
  "wi-b9ce22361c": {
-  "failures": 0,
+  "failures": 1,
   "hash": "4e5e671815c0a2ac755aacc67840fc146dd5c165925b17867eeb62656e90fc56",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-25",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {
    "https://docs.legis.wisconsin.gov/document/statutes/2017/104.pdf": ""
@@ -13509,20 +13516,22 @@
   "url": "https://docs.legis.wisconsin.gov/2017/statutes/statutes/104/035/9"
  },
  "wi-bf48d4174b": {
-  "failures": 0,
+  "failures": 1,
   "hash": "a6ca7f0e6c1ece53ce3de86fa3bcc87f09ee3eea822d8d986f3aad51a4f56b5d",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-25",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {},
   "nav": [],
   "url": "https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf"
  },
  "wi-d584da02ba": {
-  "failures": 0,
+  "failures": 1,
   "hash": "1e48136fb52cd8d8eb7cb57cf42e0c8b4293179f7e094fc09a5983b13ce522de",
   "last_changed": "2026-09-24",
   "last_checked": "2026-09-25",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {
    "http://www.irs.gov/pub/irs-pdf/p15.pdf": "Publication 15",
