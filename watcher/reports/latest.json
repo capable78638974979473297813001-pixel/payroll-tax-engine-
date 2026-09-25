@@ -1,30 +1,81 @@
 {
  "date": "2026-09-25",
  "counts": {
-  "unchanged": 387,
-  "unreachable": 8,
-  "blocked": 14,
-  "changed": 1,
-  "new": 6,
+  "unchanged": 385,
+  "unreachable": 16,
+  "blocked": 12,
+  "changed": 2,
+  "unstable": 1,
   "gone": 3
  },
  "total": 419,
  "changed": [
   {
+   "id": "mi-c62e8170b0",
+   "jurisdiction": "MI",
+   "title": "Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026",
+   "url": "https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026",
+   "detail": "1 lines added, 1 removed (link lists / headlines only)",
+   "figures_added": [
+    "$1"
+   ],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
    "id": "us-f10e455e50",
    "jurisdiction": "US",
    "title": "IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)",
    "url": "https://www.irs.gov/draft-tax-forms",
-   "detail": "6 lines added, 6 removed; 2 links added, 2 removed",
+   "detail": "read with a headless browser; 2 lines added, 103 removed; 0 links added, 39 removed",
    "figures_added": [],
-   "figures_removed": [],
-   "links_added": [
-    "https://www.irs.gov/pub/irs-dft/f1099lps--dft.pdf",
-    "https://www.irs.gov/pub/irs-dft/i1040se--dft.pdf"
+   "figures_removed": [
+    "$10",
+    "1.861"
    ],
+   "links_added": [],
    "links_removed": [
-    "https://www.irs.gov/pub/irs-dft/f1040x--dft.pdf",
-    "https://www.irs.gov/pub/irs-dft/i1040sf--dft.pdf"
+    "https://www.irs.gov/draft-tax-forms?find=&items_per_page=25&order=draft_tax_forms_picklist_title&sort=asc",
+    "https://www.irs.gov/draft-tax-forms?find=&items_per_page=25&order=natural_sort_field&sort=asc",
+    "https://www.irs.gov/draft-tax-forms?find=&items_per_page=25&order=picklist_revision_date_iso&sort=desc",
+    "https://www.irs.gov/draft-tax-forms?find=&items_per_page=25&order=posted_date&sort=desc",
+    "https://www.irs.gov/draft-tax-forms?page=1",
+    "https://www.irs.gov/draft-tax-forms?page=2",
+    "https://www.irs.gov/draft-tax-forms?page=3",
+    "https://www.irs.gov/draft-tax-forms?page=4",
+    "https://www.irs.gov/draft-tax-forms?page=49",
+    "https://www.irs.gov/draft-tax-forms?page=5",
+    "https://www.irs.gov/draft-tax-forms?page=6",
+    "https://www.irs.gov/draft-tax-forms?page=7",
+    "https://www.irs.gov/draft-tax-forms?page=8",
+    "https://www.irs.gov/forms-pubs/using-irs-forms-instructions-publications-and-other-item-files",
+    "https://www.irs.gov/help/find-help",
+    "https://www.irs.gov/pub/irs-dft/f1040sp--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/f1040ss--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/f1041si--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/f1099da--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/f1099lps--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/f1099r--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/f1120f--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/f2555--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/f8582--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/f8802--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/f8915f--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/i1040se--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/i1065sd--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/i1120fh--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/i1120ss3--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/i1120ssk--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/i3468--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/i4835--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/i7218--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/i8606--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/i8853--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/i8874--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/i8888--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/i990sj--dft.pdf"
    ],
    "significant": true
   }
