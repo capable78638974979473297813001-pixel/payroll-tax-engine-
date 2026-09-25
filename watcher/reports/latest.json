@@ -1,14 +1,46 @@
 {
- "date": "2026-09-24",
+ "date": "2026-09-25",
  "counts": {
-  "unchanged": 388,
-  "unreachable": 16,
-  "blocked": 11,
-  "new": 1,
+  "unchanged": 387,
+  "unreachable": 8,
+  "blocked": 14,
+  "changed": 1,
+  "new": 6,
   "gone": 3
  },
  "total": 419,
- "changed": [],
- "significant_changes": 0,
- "broken": []
+ "changed": [
+  {
+   "id": "us-f10e455e50",
+   "jurisdiction": "US",
+   "title": "IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)",
+   "url": "https://www.irs.gov/draft-tax-forms",
+   "detail": "6 lines added, 6 removed; 2 links added, 2 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.irs.gov/pub/irs-dft/f1099lps--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/i1040se--dft.pdf"
+   ],
+   "links_removed": [
+    "https://www.irs.gov/pub/irs-dft/f1040x--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/i1040sf--dft.pdf"
+   ],
+   "significant": true
+  }
+ ],
+ "significant_changes": 1,
+ "broken": [
+  "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
+  "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-600-4012",
+  "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-141-631",
+  "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-206-30",
+  "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-206-703",
+  "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
+  "https://kewes.ky.gov/Contact/contacts.aspx?strid=4",
+  "https://kewes.ky.gov/Contact/contacts.aspx?strid=2",
+  "https://www.portlandmaine.gov/1016/Minimum-Wage",
+  "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
+  "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
+ ]
 }
