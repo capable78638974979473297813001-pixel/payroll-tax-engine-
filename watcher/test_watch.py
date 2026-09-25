@@ -19,6 +19,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import build_sources  # noqa: E402
 import watch  # noqa: E402
 
 
@@ -378,6 +379,29 @@ class BrowserFallbackTest(ServerTestCase):
         self.sources("/deny")
         summary = self.run_watch("2026-09-01")
         self.assertEqual(summary["counts"], {"blocked": 1})
+
+
+class BuildSourcesTest(unittest.TestCase):
+    def test_every_optional_setting_survives_the_build(self):
+        """sources.json is generated; a curated setting the builder forgets to
+        copy silently stops working (this happened to 'keep')."""
+        options = {"kind": "index", "ignore": ["x"], "contains": "a...b", "drop_json_keys": ["t"],
+                   "replaces": ["https://old.example.gov/"], "keep": ["W-4"]}
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            (tmp / "data").mkdir()
+            (tmp / "curated.json").write_text(json.dumps({"sources": [
+                {"jurisdiction": "US", "title": "t", "url": "https://x.gov/", **options}]}))
+            saved = (build_sources.HERE, build_sources.DATA, build_sources.REPO)
+            build_sources.HERE, build_sources.DATA, build_sources.REPO = tmp, tmp / "data", tmp
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    build_sources.main()
+            finally:
+                build_sources.HERE, build_sources.DATA, build_sources.REPO = saved
+            built = json.loads((tmp / "sources.json").read_text())["sources"][0]
+        for key, value in options.items():
+            self.assertEqual(built.get(key), value, key)
 
 
 class ExtractionTest(unittest.TestCase):
