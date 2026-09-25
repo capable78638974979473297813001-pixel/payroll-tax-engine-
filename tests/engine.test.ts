@@ -12021,3 +12021,93 @@ describe('Voluntary / nexus-based residence-state withholding', () => {
     assert.equal(r.taxes.find((t) => t.id === 'OH_SIT_RESIDENCE'), undefined);
   });
 });
+
+// Which pre-tax deductions reduce each local wage base. Ohio municipal
+// "qualifying wages" (ORC 718.01(R)) start from Medicare wages and add
+// 401(k)/403(b)/457 employee deferrals back, but deduct Section 125
+// amounts. JEDD/JEDZ taxes are "subject to Chapter 718" (ORC 715.72,
+// 715.691) and share that base. Ohio school district tax is defined by
+// Ohio modified AGI (ORC 5748.01(E)), so a deferral DOES reduce it, for
+// traditional and earned-income districts alike. Pennsylvania taxes
+// deferrals as compensation, so they don't reduce PA EIT either. All
+// fixtures: $3,000.00 biweekly; rates are the real ones from data/local/.
+describe('local wage bases with pre-tax deductions', () => {
+  const k401: Deduction = { code: '401K', category: 'deferral_401k', amount: dollars(240) };
+  const cafeteria: Deduction = { code: 'MED', category: 'section125', amount: dollars(200) };
+  const line = (r: ReturnType<typeof calculatePaycheck>, id: string) => {
+    const t = r.taxes.find((x) => x.id === id);
+    assert.ok(t, `expected a tax line with id ${id}`);
+    return t;
+  };
+  const columbus = { code: 'OH', certificate: { residenceCity: 'Columbus', workCity: 'Columbus' } };
+
+  test('Ohio municipal: a 401(k) deferral does not reduce the base (Columbus 2.5% of $3,000 = $75.00)', () => {
+    const r = calculatePaycheck(input({ deductions: [k401], workState: columbus }));
+    assert.equal(line(r, 'OH_LOCAL').taxableWages, dollars(3000));
+    assert.equal(amountOf(r, 'OH_LOCAL'), dollars(75.0));
+    // The state tax on the same paycheck still excludes the deferral.
+    assert.equal(line(r, 'OH_SIT').taxableWages, dollars(2760));
+  });
+
+  test('Ohio municipal: 403(b) and 457 deferrals are added back too', () => {
+    for (const category of ['deferral_403b', 'deferral_457'] as const) {
+      const r = calculatePaycheck(
+        input({ deductions: [{ code: 'RET', category, amount: dollars(240) }], workState: columbus }),
+      );
+      assert.equal(line(r, 'OH_LOCAL').taxableWages, dollars(3000), category);
+    }
+  });
+
+  test('Ohio municipal: a Section 125 deduction does reduce the base ($2,800 x 2.5% = $70.00)', () => {
+    const r = calculatePaycheck(input({ deductions: [cafeteria], workState: columbus }));
+    assert.equal(line(r, 'OH_LOCAL').taxableWages, dollars(2800));
+    assert.equal(amountOf(r, 'OH_LOCAL'), dollars(70.0));
+  });
+
+  test('Ohio municipal: with both, only the Section 125 amount comes off', () => {
+    const r = calculatePaycheck(input({ deductions: [k401, cafeteria], workState: columbus }));
+    assert.equal(line(r, 'OH_LOCAL').taxableWages, dollars(2800));
+    assert.equal(amountOf(r, 'OH_LOCAL'), dollars(70.0));
+  });
+
+  test('Ohio municipal: the work/home credit uses the same base (Cincinnati 1.8% home, Columbus 2.5% work)', () => {
+    // Work tax 3,000 x 2.5% = 75.00; home tax 3,000 x 1.8% = 54.00, fully credited.
+    const r = calculatePaycheck(
+      input({
+        deductions: [k401],
+        workState: { code: 'OH', certificate: { residenceCity: 'Cincinnati', workCity: 'Columbus' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'OH_LOCAL'), dollars(75.0));
+  });
+
+  test('JEDD/JEDZ: same base as municipal tax (Bath-Akron-Fairlawn JEDD 2.5%)', () => {
+    const jedd = { code: 'OH', certificate: { workJEDDId: '9004' } };
+    const withDeferral = calculatePaycheck(input({ deductions: [k401], workState: jedd }));
+    assert.equal(line(withDeferral, 'OH_JEDD').taxableWages, dollars(3000));
+    assert.equal(amountOf(withDeferral, 'OH_JEDD'), dollars(75.0));
+    const withCafeteria = calculatePaycheck(input({ deductions: [cafeteria], workState: jedd }));
+    assert.equal(amountOf(withCafeteria, 'OH_JEDD'), dollars(70.0));
+  });
+
+  test('Ohio school district: a 401(k) deferral DOES reduce the base, for both base types (1.0% of $2,760 = $27.60)', () => {
+    // 6901 Columbus Grove LSD is a traditional-base district, 0502 Athens
+    // CSD an earned-income-base one; both are 1.0% and both use Ohio MAGI.
+    for (const sd of ['6901', '0502']) {
+      const r = calculatePaycheck(
+        input({ deductions: [k401], workState: { code: 'OH', certificate: { schoolDistrictCode: sd } } }),
+      );
+      assert.equal(line(r, 'OH_SDIT').taxableWages, dollars(2760), sd);
+      assert.equal(amountOf(r, 'OH_SDIT'), dollars(27.6), sd);
+    }
+  });
+
+  test('Pennsylvania EIT: a 401(k) deferral does not reduce the base, Section 125 does (PSD 700102, 3.0%)', () => {
+    const pgh = { code: 'PA', certificate: { workPSD: '700102', residencePSD: '700102' } };
+    const withDeferral = calculatePaycheck(input({ deductions: [k401], workState: pgh }));
+    assert.equal(line(withDeferral, 'PA_EIT').taxableWages, dollars(3000));
+    assert.equal(amountOf(withDeferral, 'PA_EIT'), dollars(90.0));
+    const withCafeteria = calculatePaycheck(input({ deductions: [cafeteria], workState: pgh }));
+    assert.equal(amountOf(withCafeteria, 'PA_EIT'), dollars(84.0)); // 2,800 x 3.0%
+  });
+});

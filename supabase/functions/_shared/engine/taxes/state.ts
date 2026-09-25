@@ -33,7 +33,9 @@ import {
   kyJurisdictionRuleset,
   miCityRuleset,
   hasOHJEDDRuleset,
+  ohJEDDExemptPretax,
   ohJEDDRuleset,
+  ohMunicipalExemptPretax,
   ohMunicipalityRuleset,
   ohSchoolDistrictRuleset,
   paLocalRuleset,
@@ -8192,7 +8194,10 @@ function ohioLocalTax(
 
   if (!residenceEntry && !workEntry) return null;
 
-  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  // Municipal "qualifying wages" (ORC 718.01(R)), not the state base: a
+  // 401(k)/403(b)/457 deferral does NOT reduce it. See the taxableWages
+  // block in data/local/OH-municipalities-<year>.json.
+  const exempt = ohMunicipalExemptPretax(input.checkDate) as PretaxCategory[];
   const periodWages = ctx.taxableWagesFor(exempt);
   const sameCity =
     residenceEntry !== undefined &&
@@ -8293,7 +8298,9 @@ function ohioJEDDTax(
   const entry = ohJEDDRuleset(jeddId, input.checkDate);
   if (!entry) return null;
 
-  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  // A JEDD/JEDZ tax is "subject to Chapter 718" (ORC 715.72, 715.691), so
+  // it uses municipal qualifying wages, not the state base.
+  const exempt = ohJEDDExemptPretax(input.checkDate) as PretaxCategory[];
   const periodWages = ctx.taxableWagesFor(exempt);
   const amount = applyRate(periodWages, entry.rate);
 
@@ -8324,7 +8331,12 @@ function ohioJEDDTax(
  * traditional/earned-income distinction governs what counts on the
  * district's year-end RETURN, not what an employer withholds from wages;
  * Ohio's own SD 100 withholding guidance applies the district rate to
- * wages paid either way. A code absent from or expired out of the 214-row
+ * wages paid either way. Using the STATE base (so a 401(k) deferral
+ * reduces it) is deliberate and differs from ohioLocalTax(): both SDIT
+ * bases are defined by Ohio modified AGI (ORC 5748.01(E)), which excludes
+ * elective deferrals, while municipal qualifying wages add them back. See
+ * the taxableWages block in data/local/OH-school-districts-<year>.json.
+ * A code absent from or expired out of the 214-row
  * list correctly produces no line, not a silent $0 assumption for an
  * unrecognised code — same closed-list convention as ohioLocalTax().
  */

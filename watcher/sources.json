@@ -3366,6 +3366,47 @@
    ]
   },
   {
+   "id": "oh-9ca5768c15",
+   "jurisdiction": "OH",
+   "title": "Ohio Revised Code 5748.01(E), definition of \"taxable income\" for school district income tax",
+   "url": "https://codes.ohio.gov/ohio-revised-code/section-5748.01",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-school-districts-2026.json"
+   ]
+  },
+  {
+   "id": "oh-11381dbcee",
+   "jurisdiction": "OH",
+   "title": "Ohio Revised Code 715.691 (joint economic development zones)",
+   "url": "https://codes.ohio.gov/ohio-revised-code/section-715.691",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-jedd-jedz-2026.json"
+   ]
+  },
+  {
+   "id": "oh-c6757be3d8",
+   "jurisdiction": "OH",
+   "title": "Ohio Revised Code 715.72 (joint economic development districts)",
+   "url": "https://codes.ohio.gov/ohio-revised-code/section-715.72",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-jedd-jedz-2026.json"
+   ]
+  },
+  {
+   "id": "oh-108bf265b1",
+   "jurisdiction": "OH",
+   "title": "Ohio Revised Code 718.01(R), definition of \"qualifying wages\"",
+   "url": "https://codes.ohio.gov/ohio-revised-code/section-718.01",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-jedd-jedz-2026.json",
+    "data/local/OH-municipalities-2026.json"
+   ]
+  },
+  {
    "id": "oh-6b99ad75b9",
    "jurisdiction": "OH",
    "title": "Ohio Revised Code Section 5747.06(A) -- Withholding exemptions, paragraphs (1) through (6)",
