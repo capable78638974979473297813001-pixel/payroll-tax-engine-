@@ -68,6 +68,18 @@ const CODE_COOLDOWN_MS = 30_000;
 // Per-key rate limiter for the metered calculation endpoint.
 const paycheckLimiter = new RateLimiter();
 
+// Public sandbox: anyone can mint a free test key without signing up, so
+// the limits live here. Issuance is capped per client address; each key is
+// short-lived, never billed and capped per day, so a sandbox key can't
+// quietly become a free production key.
+const SANDBOX_PLAN = 'sandbox';
+const SANDBOX_KEY_DAYS = Number(process.env.SANDBOX_KEY_DAYS ?? 7);
+const SANDBOX_DAILY_CALLS = Number(process.env.SANDBOX_DAILY_CALLS ?? 500);
+const sandboxIssueLimiter = new RateLimiter({
+  limit: Number(process.env.SANDBOX_KEYS_PER_HOUR ?? 20),
+  windowMs: 60 * 60_000,
+});
+
 // The set of state codes this build can actually compute, read once from
 // data/states/. Used to reject an unknown workState at validation time
 // (a clean 422) rather than letting it surface as an engine throw.
@@ -793,6 +805,127 @@ async function handleIssueKey(req: IncomingMessage, res: ServerResponse): Promis
 }
 
 // ---------------------------------------------------------------------
+// POST /v1/sandbox-keys -- a free sandbox key, no account needed. Real
+// engine, real endpoint, never billed; limited in lifetime, calls per day
+// and keys per client address. See the SANDBOX_* constants above.
+// ---------------------------------------------------------------------
+
+function clientAddress(req: IncomingMessage): string {
+  // Behind a proxy that sets it (the hosted deployment), the first
+  // X-Forwarded-For hop is the client. Only trusted when TRUST_PROXY=1, so
+  // a direct caller can't pick its own address to dodge the limit.
+  if (process.env.TRUST_PROXY === '1') {
+    const fwd = String(req.headers['x-forwarded-for'] ?? '').split(',')[0].trim();
+    if (fwd) return fwd;
+  }
+  return req.socket.remoteAddress ?? 'unknown';
+}
+
+function handleSandboxKey(req: IncomingMessage, res: ServerResponse): void {
+  const rl = sandboxIssueLimiter.hit('sandbox-issue:' + clientAddress(req));
+  if (!rl.allowed) {
+    sendJson(
+      res,
+      429,
+      { error: `Too many sandbox keys from this address. Try again in ${Math.ceil(rl.retryAfterSec / 60)} min, or create an account.`, code: 'rate_limited' },
+      { 'Retry-After': String(rl.retryAfterSec) },
+    );
+    return;
+  }
+
+  const key = 'sk_test_' + randomBytes(24).toString('base64url');
+  const keyHash = sha256Hex(key);
+  const keyPrefix = key.slice(0, 'sk_test_'.length + 6);
+  const now = Date.now();
+  const expiresAt = new Date(now + SANDBOX_KEY_DAYS * 24 * 60 * 60_000).toISOString();
+
+  withDb((db) => {
+    // Keep the store from growing without bound: drop sandbox keys that
+    // expired more than a day ago.
+    for (const [hash, k] of Object.entries(db.keys)) {
+      if (k.plan === SANDBOX_PLAN && now - new Date(k.expiresAt).getTime() > 24 * 60 * 60_000) delete db.keys[hash];
+    }
+    db.keys[keyHash] = {
+      keyHash,
+      keyPrefix,
+      ownerEmail: 'sandbox:' + keyPrefix,
+      ownerName: 'Sandbox',
+      company: '',
+      plan: SANDBOX_PLAN,
+      createdAt: new Date(now).toISOString(),
+      expiresAt,
+      isActive: true,
+      lastUsedAt: null,
+      totalCalls: 0,
+    };
+  });
+
+  sendJson(res, 201, {
+    key,
+    keyPrefix,
+    mode: 'sandbox',
+    expiresAt,
+    limits: { callsPerDay: SANDBOX_DAILY_CALLS, requestsPerMinute: paycheckLimiterLimit() },
+  });
+}
+
+function paycheckLimiterLimit(): number {
+  return Number(process.env.RATE_LIMIT_PER_MIN ?? 120);
+}
+
+function keyMode(k: { plan: string; keyPrefix: string }): 'sandbox' | 'test' | 'live' {
+  if (k.plan === SANDBOX_PLAN) return 'sandbox';
+  return k.keyPrefix.startsWith('sk_live_') ? 'live' : 'test';
+}
+
+function callsInLastDay(db: { usage: { keyHash: string; at: string; statusCode: number }[] }, keyHash: string): number {
+  const dayAgo = Date.now() - 24 * 60 * 60_000;
+  return db.usage.filter((u) => u.keyHash === keyHash && u.statusCode === 200 && new Date(u.at).getTime() >= dayAgo).length;
+}
+
+// ---------------------------------------------------------------------
+// GET /v1/me -- what the calling API key is: its mode, lifetime and
+// limits. Authenticated by the key itself, so it works for sandbox keys
+// (no account) and account keys alike.
+// ---------------------------------------------------------------------
+
+function handleMe(req: IncomingMessage, res: ServerResponse): void {
+  const key = bearerToken(req);
+  if (!key) {
+    sendJson(res, 401, { error: 'Missing API key. Send "Authorization: Bearer <key>".', code: 'missing_key' });
+    return;
+  }
+  const keyHash = sha256Hex(key);
+  const info = readDb((db) => {
+    const k = db.keys[keyHash];
+    if (!k) return null;
+    return { k, callsToday: callsInLastDay(db, keyHash) };
+  });
+  if (!info || !info.k.isActive) {
+    sendJson(res, 401, { error: 'Invalid or inactive API key.', code: 'invalid_key' });
+    return;
+  }
+  const { k, callsToday } = info;
+  const mode = keyMode(k);
+  sendJson(res, 200, {
+    keyPrefix: k.keyPrefix,
+    mode,
+    billable: mode !== 'sandbox',
+    plan: k.plan,
+    createdAt: k.createdAt,
+    expiresAt: k.expiresAt,
+    expired: Date.now() > new Date(k.expiresAt).getTime(),
+    lastUsedAt: k.lastUsedAt,
+    totalCalls: k.totalCalls ?? 0,
+    callsToday,
+    limits: {
+      requestsPerMinute: paycheckLimiterLimit(),
+      callsPerDay: mode === 'sandbox' ? SANDBOX_DAILY_CALLS : null,
+    },
+  });
+}
+
+// ---------------------------------------------------------------------
 // GET /api/usage
 // ---------------------------------------------------------------------
 
@@ -844,7 +977,7 @@ function handleUsage(req: IncomingMessage, res: ServerResponse): void {
 
 async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const requestId = 'req_' + randomBytes(8).toString('hex');
-  const baseHeaders = { 'X-Request-Id': requestId };
+  const baseHeaders: Record<string, string> = { 'X-Request-Id': requestId };
 
   const key = bearerToken(req);
   if (!key) {
@@ -867,6 +1000,20 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   if (Date.now() > new Date(keyRecord.expiresAt).getTime()) {
     sendJson(res, 401, { error: `This API key expired on ${keyRecord.expiresAt}.`, code: 'expired_key', requestId }, baseHeaders);
     return;
+  }
+  const mode = keyMode(keyRecord);
+  baseHeaders['Omnia-Mode'] = mode;
+  if (mode === 'sandbox') {
+    const used = readDb((db) => callsInLastDay(db, keyHash));
+    if (used >= SANDBOX_DAILY_CALLS) {
+      sendJson(
+        res,
+        429,
+        { error: `Sandbox keys are limited to ${SANDBOX_DAILY_CALLS} calculations a day. Create an account for production volume.`, code: 'sandbox_daily_limit', requestId },
+        baseHeaders,
+      );
+      return;
+    }
   }
   if (auth.suspended) {
     sendJson(res, 402, { error: 'This account is suspended for a billing issue. Update your payment method to resume.', code: 'account_suspended', reason: auth.suspendedReason, requestId }, baseHeaders);
@@ -945,7 +1092,7 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   // path: a slow or down Stripe never delays or fails the calculation. The
   // local usage log is the durable record and can reconcile. requestId
   // dedupes any retry. No-op unless metering is configured with a customer.
-  if (status === 200 && meteringConfigured() && auth.customerId) {
+  if (status === 200 && mode !== 'sandbox' && meteringConfigured() && auth.customerId) {
     void reportCall(auth.customerId, requestId).then((r) => {
       if (!r.ok && r.reason === 'stripe_error') {
         console.error(`[paycheck ${requestId}] meter report failed:`, r.error);
@@ -1125,6 +1272,14 @@ createServer((req, res) => {
       sendHtml(res, join(HERE, 'docs.html'));
       return;
     }
+    if (method === 'GET' && url === '/sandbox-examples.json') {
+      sendStatic(res, join(HERE, 'sandbox-examples.json'), 'application/json; charset=utf-8');
+      return;
+    }
+    if (method === 'GET' && (url === '/sandbox' || url === '/sandbox.html' || url === '/console')) {
+      sendHtml(res, join(HERE, 'sandbox.html'));
+      return;
+    }
     if (method === 'GET' && (url === '/reference' || url === '/reference.html' || url === '/api-reference')) {
       sendHtml(res, join(HERE, 'reference.html'));
       return;
@@ -1159,6 +1314,8 @@ createServer((req, res) => {
     if (method === 'GET' && url === '/api/account') return handleAccount(req, res);
     if (method === 'POST' && url === '/api/issue-key') return handleIssueKey(req, res);
     if (method === 'GET' && url === '/api/usage') return handleUsage(req, res);
+    if (method === 'POST' && (url === '/api/sandbox-key' || url === '/v1/sandbox-keys')) return handleSandboxKey(req, res);
+    if (method === 'GET' && (url === '/api/me' || url === '/v1/me')) return handleMe(req, res);
     if (method === 'POST' && (url === '/api/paycheck' || url === '/v1/paycheck')) return handlePaycheck(req, res);
     if (method === 'GET' && (url === '/api/health' || url === '/v1/health' || url === '/healthz')) return handleHealth(res);
     if (method === 'GET' && (url === '/api/states' || url === '/v1/states')) return handleStates(res);

@@ -199,6 +199,7 @@
   .hero h1 { margin-bottom: 20px; }
   .hero h1 mark { background: none; color: var(--stamp); }
   .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+  .hero-note { font-family: var(--mono); font-size: 12px; color: var(--ink-3, #6b6a60); margin: 10px 0 0; }
 
   /* facts: a ruled register, not badges */
   .facts { margin-top: 34px; border-top: 1px solid var(--ink); }
@@ -303,8 +304,8 @@
   .feature p { font-size: 14px; line-height: 1.6; color: var(--ink-2); }
 
   /* ---------- split ---------- */
-  .split { display: grid; grid-template-columns: repeat(2, 1fr); gap: 52px; align-items: start; }
-  @media (max-width: 1000px) { .split { grid-template-columns: 1fr; gap: 36px; } }
+  .split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 52px; align-items: start; }
+  @media (max-width: 1000px) { .split { grid-template-columns: minmax(0, 1fr); gap: 36px; } }
   .checklist { list-style: none; margin: 24px 0 0; padding: 0; border-top: 1px solid var(--ink); }
   .checklist li {
     position: relative; padding: 14px 12px 14px 34px; font-size: 14.5px; line-height: 1.6;
@@ -511,6 +512,7 @@
       <a href="#api">Developers</a>
       <a href="#why">Why Omnia</a>
       <a href="#pricing">Pricing</a>
+      <a href="/sandbox">API console</a>
       <a class="btn btn-sm" href="#lead">Get a demo</a>
     </nav>
   </div>
@@ -531,6 +533,12 @@
           same nationwide coverage the big engines sell, at a price a regional payroll company can sign
           without a procurement team.
         </p>
+
+        <div class="hero-actions" style="margin:22px 0 10px">
+          <a class="btn" href="/sandbox">Try the API now &mdash; no signup &rarr;</a>
+          <a class="btn btn-secondary" href="/reference">Read the API docs</a>
+        </div>
+        <p class="hero-note" style="margin-bottom:28px">The console hands you a free sandbox key on the spot: the real engine, never billed.</p>
 
         <div class="leadform rv in" id="lead">
           <div class="leadform-head">
@@ -579,9 +587,6 @@
           </div></div>
         </div>
 
-        <div class="hero-actions">
-          <a class="btn btn-ghost" href="/reference">Read the API docs</a>
-        </div>
         <div class="facts">
           <div class="fact"><span class="l">Jurisdictions live</span><span class="n">51</span></div>
           <div class="fact"><span class="l">Local tax registries</span><span class="n">8</span></div>
@@ -1084,7 +1089,10 @@
           <li><b>Effective-dated by check date.</b> A correction run in March for a December cheque uses December's rules, never today's.</li>
           <li><b>Keys you control.</b> Stored hashed, rotated on demand, rate-limited per key, with a sandbox that mirrors production data.</li>
         </ul>
-        <a class="btn btn-sm" href="/reference" style="margin-top:26px">Read the full API reference</a>
+        <div class="hero-actions" style="margin-top:26px">
+          <a class="btn btn-sm" href="/sandbox">Open the API console</a>
+          <a class="btn btn-sm btn-secondary" href="/reference">Read the full API reference</a>
+        </div>
       </div>
       <div class="rv">
         <div class="code">
