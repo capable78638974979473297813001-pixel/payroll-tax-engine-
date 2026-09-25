@@ -268,11 +268,11 @@
   <span class="spacer"></span>
   <nav class="tnav">
     <a href="/">Home</a>
-    <a href="/sandbox">Try it (sandbox)</a>
+    <a href="/console">API console</a>
     <a href="/docs.html">Account</a>
     <a href="#pricing">Pricing</a>
   </nav>
-  <a class="cta" href="/docs.html">Get an API key</a>
+  <a class="cta" href="/docs.html">Get started</a>
 </header>
 
 <div class="scrim" id="scrim"></div>
@@ -380,7 +380,7 @@ curl https://api.omnia.tax/api/paycheck \
             <p>Every request to a calculation or account endpoint must carry an API key in the <code class="inline">Authorization</code> header as a bearer token:</p>
             <div class="endpoint-line" style="display:block"><span class="path">Authorization: Bearer sk_test_a1b2c3…</span></div>
 
-            <p>Want to try a call right now? The <a href="/sandbox">API console</a> gives you a free sandbox key with no signup (real engine, never billed, 500 calls a day, 7 days). Production keys are issued from the <a href="/docs.html">Omnia console</a>. Sign in, then click <b>Issue my evaluation key</b> — the plaintext key is shown <b>once</b>, so copy it immediately. Omnia stores only a SHA-256 hash of the key; it can never be recovered or re-displayed, only replaced.</p>
+            <p>Keys are issued in your <a href="/docs.html">Omnia account</a> once a card or US bank account is on file (nothing is charged during the 14-day evaluation). Sign in, then click <b>Issue my evaluation key</b> — the plaintext key is shown <b>once</b>, so copy it immediately. Omnia stores only a SHA-256 hash of the key; it can never be recovered or re-displayed, only replaced. The <a href="/console">API console</a> runs requests with your key in the browser.</p>
 
             <h3>Key lifecycle</h3>
             <ul>

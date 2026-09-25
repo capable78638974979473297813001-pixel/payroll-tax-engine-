@@ -68,17 +68,13 @@ const CODE_COOLDOWN_MS = 30_000;
 // Per-key rate limiter for the metered calculation endpoint.
 const paycheckLimiter = new RateLimiter();
 
-// Public sandbox: anyone can mint a free test key without signing up, so
-// the limits live here. Issuance is capped per client address; each key is
-// short-lived, never billed and capped per day, so a sandbox key can't
-// quietly become a free production key.
-const SANDBOX_PLAN = 'sandbox';
-const SANDBOX_KEY_DAYS = Number(process.env.SANDBOX_KEY_DAYS ?? 7);
-const SANDBOX_DAILY_CALLS = Number(process.env.SANDBOX_DAILY_CALLS ?? 500);
-const sandboxIssueLimiter = new RateLimiter({
-  limit: Number(process.env.SANDBOX_KEYS_PER_HOUR ?? 20),
-  windowMs: 60 * 60_000,
-});
+// Sign-in codes: at most this many requests per address an hour, so the
+// sign-in form can't be used to spam someone's inbox.
+// Wrong-code attempts per email; past this the code is burned and the
+// customer asks for a new one, so a 6-digit code can't be guessed.
+const MAX_CODE_ATTEMPTS = 8;
+const codeAttempts = new RateLimiter({ limit: MAX_CODE_ATTEMPTS, windowMs: CODE_TTL_MS });
+const signinLimiter = new RateLimiter({ limit: Number(process.env.SIGNIN_PER_HOUR ?? 10), windowMs: 60 * 60_000 });
 
 // The set of state codes this build can actually compute, read once from
 // data/states/. Used to reject an unknown workState at validation time
@@ -259,6 +255,55 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
 }
 
 // ---------------------------------------------------------------------
+// POST /api/signin -- a returning customer asks for a sign-in code. The
+// code is checked by POST /api/verify-email, same as at signup. The reply
+// is the same whether or not the email has an account, so the form can't
+// be used to find out who is a customer.
+// ---------------------------------------------------------------------
+
+async function handleSignin(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  let body: { email?: string };
+  try {
+    body = await readJson(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message });
+    return;
+  }
+  const email = (body.email ?? '').trim().toLowerCase();
+  if (!isValidEmail(email)) {
+    sendJson(res, 400, { error: 'Enter the work email you signed up with.' });
+    return;
+  }
+  const rl = signinLimiter.hit('signin:' + clientAddress(req));
+  if (!rl.allowed) {
+    sendJson(res, 429, { error: 'Too many sign-in attempts. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(rl.retryAfterSec) });
+    return;
+  }
+
+  const now = Date.now();
+  const acct = withDb((db) => {
+    const a = db.accounts[email];
+    if (!a || !a.emailVerifiedAt) return null;
+    const cooling = a.codeRequestedAt && a.code && now - new Date(a.codeRequestedAt).getTime() < CODE_COOLDOWN_MS;
+    if (!cooling) {
+      a.code = String(randomInt(100000, 1000000));
+      a.codeRequestedAt = new Date(now).toISOString();
+      a.codeExpiresAt = new Date(now + CODE_TTL_MS).toISOString();
+    }
+    return { name: a.name, email: a.email, code: a.code!, codeExpiresAt: a.codeExpiresAt! };
+  });
+
+  if (acct) {
+    console.log(`[sign-in code] ${acct.email}: ${acct.code} (expires ${acct.codeExpiresAt})`);
+    if (isEmailConfigured()) {
+      const result = await sendVerificationEmail({ name: acct.name, email: acct.email, code: acct.code, expiresAt: acct.codeExpiresAt });
+      if (!result.sent) console.log(`[sign-in code] EMAIL FAILED (${result.reason})`);
+    }
+  }
+  sendJson(res, 200, { ok: true, emailConfigured: isEmailConfigured() });
+}
+
+// ---------------------------------------------------------------------
 // Step 2 -- POST /api/verify-email
 // ---------------------------------------------------------------------
 
@@ -285,7 +330,14 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
     if (Date.now() > new Date(acct.codeExpiresAt).getTime()) {
       return { ok: false as const, error: 'That code expired. Request a new one.' };
     }
-    if (acct.code !== code) return { ok: false as const, error: 'That code is incorrect.' };
+    if (acct.code !== code) {
+      if (!codeAttempts.hit('verify:' + email).allowed) {
+        acct.code = null;
+        acct.codeExpiresAt = null;
+        return { ok: false as const, error: 'Too many wrong codes. Request a new one.' };
+      }
+      return { ok: false as const, error: 'That code is incorrect.' };
+    }
 
     const token = randomBytes(24).toString('hex');
     acct.emailVerifiedAt = acct.emailVerifiedAt ?? new Date().toISOString();
@@ -532,7 +584,7 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
   form.set('metadata[terms_version]', TERMS_VERSION);
 
   try {
-    const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+    const stripeRes = await fetch(`${process.env.STRIPE_API_BASE ?? 'https://api.stripe.com'}/v1/checkout/sessions`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${secret}`,
@@ -577,7 +629,22 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
 
   const done = await completeMeteredCheckout(body.sessionId);
   if (!done.ok) {
+    if (done.reason === 'checkout_not_complete') {
+      sendJson(res, 402, { error: 'That checkout was not completed. Add a card or bank account to continue.', code: 'checkout_not_complete' });
+      return;
+    }
     sendJson(res, 502, { error: done.error ?? 'Could not confirm the subscription with the processor.', reason: done.reason });
+    return;
+  }
+  // The checkout must be this account's own, and must have saved a card
+  // or bank account; otherwise someone else's session id could unlock it.
+  if (!done.email || done.email.toLowerCase() !== session.email) {
+    sendJson(res, 403, { error: 'That checkout belongs to a different account.', code: 'checkout_mismatch' });
+    return;
+  }
+  const saved = done.paymentMethod;
+  if (!saved) {
+    sendJson(res, 402, { error: 'No card or bank account was saved in that checkout.', code: 'payment_method_required' });
     return;
   }
 
@@ -586,6 +653,14 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
     const sub = db.subscriptions[session.email];
     const acct = db.accounts[session.email];
     if (!sub) return { ok: false as const };
+    db.paymentMethods[session.email] = {
+      email: session.email,
+      kind: saved.kind,
+      processorRef: saved.id,
+      last4: saved.last4,
+      brand: saved.brand,
+      attachedAt: new Date(now).toISOString(),
+    };
     if (done.customerId) sub.stripeCustomerId = done.customerId;
     if (done.subscriptionId) sub.stripeSubscriptionId = done.subscriptionId;
     sub.suspended = false;
@@ -677,11 +752,11 @@ async function handleStartTrial(req: IncomingMessage, res: ServerResponse): Prom
   const outcome = withDb((db) => {
     const sub = db.subscriptions[session.email];
     const acct = db.accounts[session.email];
-    if (!sub) return { ok: false as const, error: 'Agree to the terms first.' };
+    if (!sub) return { ok: false as const, error: 'Agree to the terms first.', code: undefined };
 
-    const hasPayment = Boolean(db.paymentMethods[session.email]);
-    if (!hasPayment && process.env.STRIPE_SECRET_KEY) {
-      return { ok: false as const, error: 'Attach a payment method first.' };
+    const hasPayment = paymentOnFile(db, session.email);
+    if (!hasPayment) {
+      return { ok: false as const, error: 'Add a card or bank account first.', code: 'payment_method_required' };
     }
 
     sub.status = 'trialing';
@@ -705,7 +780,7 @@ async function handleStartTrial(req: IncomingMessage, res: ServerResponse): Prom
   });
 
   if (!outcome.ok) {
-    sendJson(res, 409, { error: outcome.error });
+    sendJson(res, outcome.code ? 402 : 409, { error: outcome.error, code: outcome.code });
     return;
   }
   console.log(`[trial started] ${session.email} -- ends ${outcome.subscription.trialEndsAt}`);
@@ -759,6 +834,14 @@ function requireSession(req: IncomingMessage): { email: string; name: string; co
   });
 }
 
+/**
+ * A key is only issued to, and only works for, an account with a card or
+ * bank account saved through the processor (recorded on checkout return).
+ */
+function paymentOnFile(db: { paymentMethods: Record<string, PaymentMethodRecord | undefined> }, email: string): boolean {
+  return Boolean(db.paymentMethods[email]?.processorRef);
+}
+
 // ---------------------------------------------------------------------
 // POST /api/issue-key
 // ---------------------------------------------------------------------
@@ -767,6 +850,11 @@ async function handleIssueKey(req: IncomingMessage, res: ServerResponse): Promis
   const session = requireSession(req);
   if (!session) {
     sendJson(res, 401, { error: 'Sign in first.' });
+    return;
+  }
+
+  if (!readDb((db) => paymentOnFile(db, session.email))) {
+    sendJson(res, 402, { error: 'Add a card or bank account before issuing an API key.', code: 'payment_method_required' });
     return;
   }
 
@@ -804,12 +892,7 @@ async function handleIssueKey(req: IncomingMessage, res: ServerResponse): Promis
   sendJson(res, 200, { key, keyPrefix, plan: life.plan, expiresAt: life.expiresAt });
 }
 
-// ---------------------------------------------------------------------
-// POST /v1/sandbox-keys -- a free sandbox key, no account needed. Real
-// engine, real endpoint, never billed; limited in lifetime, calls per day
-// and keys per client address. See the SANDBOX_* constants above.
-// ---------------------------------------------------------------------
-
+// Address of the caller, for per-address limits.
 function clientAddress(req: IncomingMessage): string {
   // Behind a proxy that sets it (the hosted deployment), the first
   // X-Forwarded-For hop is the client. Only trusted when TRUST_PROXY=1, so
@@ -821,60 +904,11 @@ function clientAddress(req: IncomingMessage): string {
   return req.socket.remoteAddress ?? 'unknown';
 }
 
-function handleSandboxKey(req: IncomingMessage, res: ServerResponse): void {
-  const rl = sandboxIssueLimiter.hit('sandbox-issue:' + clientAddress(req));
-  if (!rl.allowed) {
-    sendJson(
-      res,
-      429,
-      { error: `Too many sandbox keys from this address. Try again in ${Math.ceil(rl.retryAfterSec / 60)} min, or create an account.`, code: 'rate_limited' },
-      { 'Retry-After': String(rl.retryAfterSec) },
-    );
-    return;
-  }
-
-  const key = 'sk_test_' + randomBytes(24).toString('base64url');
-  const keyHash = sha256Hex(key);
-  const keyPrefix = key.slice(0, 'sk_test_'.length + 6);
-  const now = Date.now();
-  const expiresAt = new Date(now + SANDBOX_KEY_DAYS * 24 * 60 * 60_000).toISOString();
-
-  withDb((db) => {
-    // Keep the store from growing without bound: drop sandbox keys that
-    // expired more than a day ago.
-    for (const [hash, k] of Object.entries(db.keys)) {
-      if (k.plan === SANDBOX_PLAN && now - new Date(k.expiresAt).getTime() > 24 * 60 * 60_000) delete db.keys[hash];
-    }
-    db.keys[keyHash] = {
-      keyHash,
-      keyPrefix,
-      ownerEmail: 'sandbox:' + keyPrefix,
-      ownerName: 'Sandbox',
-      company: '',
-      plan: SANDBOX_PLAN,
-      createdAt: new Date(now).toISOString(),
-      expiresAt,
-      isActive: true,
-      lastUsedAt: null,
-      totalCalls: 0,
-    };
-  });
-
-  sendJson(res, 201, {
-    key,
-    keyPrefix,
-    mode: 'sandbox',
-    expiresAt,
-    limits: { callsPerDay: SANDBOX_DAILY_CALLS, requestsPerMinute: paycheckLimiterLimit() },
-  });
-}
-
 function paycheckLimiterLimit(): number {
   return Number(process.env.RATE_LIMIT_PER_MIN ?? 120);
 }
 
-function keyMode(k: { plan: string; keyPrefix: string }): 'sandbox' | 'test' | 'live' {
-  if (k.plan === SANDBOX_PLAN) return 'sandbox';
+function keyMode(k: { keyPrefix: string }): 'test' | 'live' {
   return k.keyPrefix.startsWith('sk_live_') ? 'live' : 'test';
 }
 
@@ -885,7 +919,7 @@ function callsInLastDay(db: { usage: { keyHash: string; at: string; statusCode: 
 
 // ---------------------------------------------------------------------
 // GET /v1/me -- what the calling API key is: its mode, lifetime and
-// limits. Authenticated by the key itself, so it works for sandbox keys
+// limits. Authenticated by the key itself
 // (no account) and account keys alike.
 // ---------------------------------------------------------------------
 
@@ -910,7 +944,6 @@ function handleMe(req: IncomingMessage, res: ServerResponse): void {
   sendJson(res, 200, {
     keyPrefix: k.keyPrefix,
     mode,
-    billable: mode !== 'sandbox',
     plan: k.plan,
     createdAt: k.createdAt,
     expiresAt: k.expiresAt,
@@ -918,10 +951,7 @@ function handleMe(req: IncomingMessage, res: ServerResponse): void {
     lastUsedAt: k.lastUsedAt,
     totalCalls: k.totalCalls ?? 0,
     callsToday,
-    limits: {
-      requestsPerMinute: paycheckLimiterLimit(),
-      callsPerDay: mode === 'sandbox' ? SANDBOX_DAILY_CALLS : null,
-    },
+    limits: { requestsPerMinute: paycheckLimiterLimit() },
   });
 }
 
@@ -989,7 +1019,13 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   const auth = readDb((db) => {
     const kr = db.keys[keyHash];
     const sub = kr ? db.subscriptions[kr.ownerEmail] : undefined;
-    return { keyRecord: kr, customerId: sub?.stripeCustomerId ?? null, suspended: Boolean(sub?.suspended), suspendedReason: sub?.suspendedReason ?? null };
+    return {
+      keyRecord: kr,
+      customerId: sub?.stripeCustomerId ?? null,
+      paymentOnFile: kr ? paymentOnFile(db, kr.ownerEmail) : false,
+      suspended: Boolean(sub?.suspended),
+      suspendedReason: sub?.suspendedReason ?? null,
+    };
   });
   const keyRecord = auth.keyRecord;
 
@@ -1003,17 +1039,9 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   }
   const mode = keyMode(keyRecord);
   baseHeaders['Omnia-Mode'] = mode;
-  if (mode === 'sandbox') {
-    const used = readDb((db) => callsInLastDay(db, keyHash));
-    if (used >= SANDBOX_DAILY_CALLS) {
-      sendJson(
-        res,
-        429,
-        { error: `Sandbox keys are limited to ${SANDBOX_DAILY_CALLS} calculations a day. Create an account for production volume.`, code: 'sandbox_daily_limit', requestId },
-        baseHeaders,
-      );
-      return;
-    }
+  if (!auth.paymentOnFile) {
+    sendJson(res, 402, { error: 'This account has no card or bank account on file. Add one in the console to use the API.', code: 'payment_method_required', requestId }, baseHeaders);
+    return;
   }
   if (auth.suspended) {
     sendJson(res, 402, { error: 'This account is suspended for a billing issue. Update your payment method to resume.', code: 'account_suspended', reason: auth.suspendedReason, requestId }, baseHeaders);
@@ -1092,7 +1120,7 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   // path: a slow or down Stripe never delays or fails the calculation. The
   // local usage log is the durable record and can reconcile. requestId
   // dedupes any retry. No-op unless metering is configured with a customer.
-  if (status === 200 && mode !== 'sandbox' && meteringConfigured() && auth.customerId) {
+  if (status === 200 && meteringConfigured() && auth.customerId) {
     void reportCall(auth.customerId, requestId).then((r) => {
       if (!r.ok && r.reason === 'stripe_error') {
         console.error(`[paycheck ${requestId}] meter report failed:`, r.error);
@@ -1276,7 +1304,7 @@ createServer((req, res) => {
       sendStatic(res, join(HERE, 'sandbox-examples.json'), 'application/json; charset=utf-8');
       return;
     }
-    if (method === 'GET' && (url === '/sandbox' || url === '/sandbox.html' || url === '/console')) {
+    if (method === 'GET' && (url === '/console' || url === '/sandbox' || url === '/sandbox.html')) {
       sendHtml(res, join(HERE, 'sandbox.html'));
       return;
     }
@@ -1305,6 +1333,7 @@ createServer((req, res) => {
 
     if (method === 'POST' && url === '/api/signup') return handleSignup(req, res);
     if (method === 'POST' && url === '/api/verify-email') return handleVerifyEmail(req, res);
+    if (method === 'POST' && url === '/api/signin') return handleSignin(req, res);
     if (method === 'GET' && url === '/api/terms') return handleTerms(req, res);
     if (method === 'POST' && url === '/api/accept-terms') return handleAcceptTerms(req, res);
     if (method === 'POST' && url === '/api/payment-setup') return handlePaymentSetup(req, res);
@@ -1314,7 +1343,6 @@ createServer((req, res) => {
     if (method === 'GET' && url === '/api/account') return handleAccount(req, res);
     if (method === 'POST' && url === '/api/issue-key') return handleIssueKey(req, res);
     if (method === 'GET' && url === '/api/usage') return handleUsage(req, res);
-    if (method === 'POST' && (url === '/api/sandbox-key' || url === '/v1/sandbox-keys')) return handleSandboxKey(req, res);
     if (method === 'GET' && (url === '/api/me' || url === '/v1/me')) return handleMe(req, res);
     if (method === 'POST' && (url === '/api/paycheck' || url === '/v1/paycheck')) return handlePaycheck(req, res);
     if (method === 'GET' && (url === '/api/health' || url === '/v1/health' || url === '/healthz')) return handleHealth(res);

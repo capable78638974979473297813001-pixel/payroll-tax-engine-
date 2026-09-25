@@ -100,7 +100,8 @@ export async function completeCardSetup(sessionId: string): Promise<{ ok: boolea
 
   // Setup mode (card-only fallback): pull the saved payment method from the setup intent.
   const si = session.setup_intent;
-  const paymentMethodId = typeof si === 'object' && si ? (typeof si.payment_method === 'string' ? si.payment_method : null) : null;
+  const rawPm = typeof si === 'object' && si ? si.payment_method : null;
+  const paymentMethodId = typeof rawPm === 'string' ? rawPm : rawPm?.id ?? null;
   if (!paymentMethodId) return { ok: false, reason: 'no_payment_method' };
   let brand: string | null = null;
   let last4: string | null = null;

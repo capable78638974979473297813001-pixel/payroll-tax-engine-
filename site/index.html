@@ -512,8 +512,9 @@
       <a href="#api">Developers</a>
       <a href="#why">Why Omnia</a>
       <a href="#pricing">Pricing</a>
-      <a href="/sandbox">API console</a>
-      <a class="btn btn-sm" href="#lead">Get a demo</a>
+      <a href="/reference">API docs</a>
+      <a href="/docs?signin=1">Sign in</a>
+      <a class="btn btn-sm" href="#lead">Get started</a>
     </nav>
   </div>
 </header>
@@ -534,11 +535,10 @@
           without a procurement team.
         </p>
 
-        <div class="hero-actions" style="margin:22px 0 10px">
-          <a class="btn" href="/sandbox">Try the API now &mdash; no signup &rarr;</a>
+        <div class="hero-actions" style="margin:22px 0 28px">
+          <a class="btn" href="mailto:hello@omnia.tax?subject=Omnia%20demo">Talk to sales</a>
           <a class="btn btn-secondary" href="/reference">Read the API docs</a>
         </div>
-        <p class="hero-note" style="margin-bottom:28px">The console hands you a free sandbox key on the spot: the real engine, never billed.</p>
 
         <div class="leadform rv in" id="lead">
           <div class="leadform-head">
@@ -547,8 +547,8 @@
           </div>
           <div class="leadform-body">
           <p class="lead">
-            Tell us who you are and where you work &mdash; you're straight into your console with a sandbox
-            key ready to go. We'll follow up separately with a price built around your volume.
+            Create your account and start a 14-day evaluation. We confirm your email, you review your terms,
+            and your API key is issued once a card or bank account is on file. Nothing is charged during the evaluation.
           </p>
           <form id="leadForm" class="leadform-form" novalidate>
             <div class="leadform-grid">
@@ -570,9 +570,9 @@
               </div>
             </div>
             <p class="leadform-error" id="leadError" hidden>Fill in all four fields with a valid work email before continuing.</p>
-            <button type="submit" class="btn leadform-submit">Get my price</button>
+            <button type="submit" class="btn leadform-submit">Create account</button>
           </form>
-          <p class="leadform-fine">No spam &mdash; this goes straight to pricing, not a drip campaign.</p>
+          <p class="leadform-fine">Already a customer? <a href="/docs?signin=1">Sign in</a>. No spam, no drip campaign.</p>
 
           </div>
           <div class="leadform-body"><div class="leadform-success" id="leadSuccess">
@@ -581,9 +581,9 @@
                 <circle cx="11" cy="11" r="10" fill="#EDF3F0" stroke="#2E6B55" stroke-width="1.4"/>
                 <path d="M6.6 11.2 9.4 14l6-6.8" stroke="#2E6B55" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              <span id="leadSuccessText">You're in. Taking you to your console&hellip;</span>
+              <span id="leadSuccessText">Check your email for a 6-digit code&hellip;</span>
             </div>
-            <a class="btn btn-sm" id="leadDocsLink" href="docs.html" style="margin-top:6px;align-self:flex-start">Open the console &rarr;</a>
+            <a class="btn btn-sm" id="leadDocsLink" href="/docs" style="margin-top:6px;align-self:flex-start">Enter your code &rarr;</a>
           </div></div>
         </div>
 
@@ -929,8 +929,8 @@
           <h3>Sandbox &amp; replay</h3>
           <p class="fine" style="display:none">Same engine, test data</p>
           <p>
-            A sandbox that mirrors production data and replays prior periods, so a number you shipped last
-            quarter can be reproduced and explained this quarter.
+            Test keys run the same engine and data as production, and every calculation is effective-dated by
+            check date, so a number you shipped last quarter can be reproduced and explained this quarter.
           </p>
           <a class="link-arrow" href="#demo">Try a calculation
             <svg width="13" height="10" viewBox="0 0 13 10" fill="none"><path d="M1 5h10M7.5 1.5 11 5l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1050,7 +1050,7 @@
               <tr>
                 <td class="row-label">Time to first calculation</td>
                 <td class="them">A sales cycle, a scoping call, then a scheduled implementation.</td>
-                <td class="ours"><b>A sandbox key the same afternoon</b>, with production data behind it.</td>
+                <td class="ours"><b>An API key the same afternoon</b>: sign up, add a card or bank account, and call the production engine.</td>
               </tr>
               <tr>
                 <td class="row-label">Trying before buying</td>
@@ -1087,10 +1087,10 @@
         <ul class="checklist" style="margin-top:26px">
           <li><b>Per-tax taxable bases.</b> The same $240 of 401(k) deferral reduces federal wages, does not reduce Social Security wages, and does not reduce Pennsylvania wages.</li>
           <li><b>Effective-dated by check date.</b> A correction run in March for a December cheque uses December's rules, never today's.</li>
-          <li><b>Keys you control.</b> Stored hashed, rotated on demand, rate-limited per key, with a sandbox that mirrors production data.</li>
+          <li><b>Keys you control.</b> Issued to verified accounts with a payment method on file, stored hashed, rotated on demand and rate-limited per key.</li>
         </ul>
         <div class="hero-actions" style="margin-top:26px">
-          <a class="btn btn-sm" href="/sandbox">Open the API console</a>
+          <a class="btn btn-sm" href="/console">Open the API console</a>
           <a class="btn btn-sm btn-secondary" href="/reference">Read the full API reference</a>
         </div>
       </div>
@@ -1253,20 +1253,13 @@
       burger.setAttribute('aria-expanded', String(open));
     });
 
-    // Inline lead form in the hero: name / work email / business / phone.
-    // Submits to this same server's own POST /api/start-session
-    // (site/server.ts), which really creates the lead and really issues a
-    // session token -- there's no code step, so the moment this succeeds
-    // the browser is redirected straight into docs.html already signed
-    // in. See site/server.ts's own doc comment for why there's no email
-    // ownership check here: it's a deliberate trade for zero friction,
-    // not an oversight.
-    var SESSION_KEY = 'omnia_session';
+    // Hero signup form: step 1 of the real signup (POST /api/signup sends
+    // an email code). The rest (code, terms, card or bank account) happens
+    // on /docs, which picks up where this left off.
     var leadCard = document.getElementById('lead');
     var leadForm = document.getElementById('leadForm');
     var leadError = document.getElementById('leadError');
     var leadSuccessText = document.getElementById('leadSuccessText');
-    var leadDocsLink = document.getElementById('leadDocsLink');
     var leadSubmitBtn = leadForm.querySelector('button[type="submit"]');
 
     leadForm.addEventListener('submit', function (e) {
@@ -1285,7 +1278,7 @@
       leadError.hidden = true;
       leadSubmitBtn.disabled = true;
 
-      fetch('/api/start-session', {
+      fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name, email: email, company: company, phone: phone })
@@ -1294,29 +1287,24 @@
         .then(function (res) {
           leadSubmitBtn.disabled = false;
           if (!res.ok) {
-            leadError.textContent = (res.body && res.body.error) || 'Something went wrong signing you in.';
+            leadError.textContent = (res.body && res.body.error) || 'Something went wrong creating your account.';
             leadError.hidden = false;
             return;
           }
           try {
-            localStorage.setItem(SESSION_KEY, JSON.stringify({
-              token: res.body.sessionToken, email: res.body.email,
-              name: res.body.name, company: res.body.company, hasKey: res.body.hasKey
+            sessionStorage.setItem('omnia_pending', JSON.stringify({
+              name: name, email: email, company: company, phone: phone, emailSent: Boolean(res.body.emailSent)
             }));
-          } catch (err) { /* storage blocked -- docs.html will just ask again */ }
-
-          var who = res.body.name ? res.body.name.split(' ')[0] : '';
-          leadSuccessText.textContent = who
-            ? 'Thanks, ' + who + ' \u2014 taking you to your console\u2026'
-            : 'You\u2019re in. Taking you to your console\u2026';
-          leadDocsLink.href = 'docs.html';
+          } catch (err) { /* storage blocked -- /docs will ask again */ }
+          leadSuccessText.textContent = res.body.emailSent
+            ? 'We sent a 6-digit code to ' + email + '. Taking you to enter it\u2026'
+            : 'Account started. Taking you to enter your code\u2026';
           leadCard.classList.add('is-done');
-
-          window.setTimeout(function () { window.location.href = 'docs.html'; }, 600);
+          window.setTimeout(function () { window.location.href = '/docs'; }, 700);
         })
         .catch(function () {
           leadSubmitBtn.disabled = false;
-          leadError.textContent = 'Could not reach the server. Run this page with "npm run site", not as a plain file.';
+          leadError.textContent = 'Could not reach the server. Check your connection and try again.';
           leadError.hidden = false;
         });
     });

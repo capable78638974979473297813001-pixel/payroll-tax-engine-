@@ -99,13 +99,41 @@ describe('site billing (site/lib/billing.ts)', () => {
   test('completeMeteredCheckout reads back the customer + subscription ids', async () => {
     process.env.STRIPE_SECRET_KEY = 'sk_test_x';
     stub('GET', /\/v1\/checkout\/sessions\/cs_1/, () => ({
-      json: { id: 'cs_1', customer: 'cus_9', subscription: 'sub_9', metadata: { omnia_email: 'a@b.co' } },
+      json: {
+        id: 'cs_1', status: 'complete', customer: 'cus_9', metadata: { omnia_email: 'a@b.co' },
+        subscription: { id: 'sub_9', default_payment_method: { id: 'pm_9', type: 'card', card: { brand: 'visa', last4: '4242' } } },
+      },
     }));
     const out = await completeMeteredCheckout('cs_1');
     assert.equal(out.ok, true);
     assert.equal(out.customerId, 'cus_9');
     assert.equal(out.subscriptionId, 'sub_9');
     assert.equal(out.email, 'a@b.co');
+    assert.deepEqual(out.paymentMethod, { id: 'pm_9', kind: 'card', brand: 'visa', last4: '4242' });
+  });
+
+  test('completeMeteredCheckout reads a bank account saved in setup mode', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_x';
+    stub('GET', /\/v1\/checkout\/sessions\/cs_3/, () => ({
+      json: {
+        id: 'cs_3', status: 'complete', customer: null, metadata: { omnia_email: 'a@b.co' },
+        setup_intent: { id: 'seti_3', payment_method: { id: 'pm_3', type: 'us_bank_account', us_bank_account: { bank_name: 'Chase', last4: '6789' } } },
+      },
+    }));
+    const out = await completeMeteredCheckout('cs_3');
+    assert.equal(out.ok, true);
+    assert.equal(out.subscriptionId, null);
+    assert.deepEqual(out.paymentMethod, { id: 'pm_3', kind: 'us_bank_account', brand: 'Chase', last4: '6789' });
+  });
+
+  test('completeMeteredCheckout refuses a checkout that was not completed', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_x';
+    stub('GET', /\/v1\/checkout\/sessions\/cs_4/, () => ({
+      json: { id: 'cs_4', status: 'open', customer: 'cus_4', metadata: { omnia_email: 'a@b.co' } },
+    }));
+    const out = await completeMeteredCheckout('cs_4');
+    assert.equal(out.ok, false);
+    assert.equal(out.reason, 'checkout_not_complete');
   });
 
   test('interpretWebhook verifies the signature and classifies the event', () => {

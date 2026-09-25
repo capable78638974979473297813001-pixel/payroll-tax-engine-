@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>API Console · Omnia</title>
-<meta name="description" content="Try the Omnia payroll tax API in your browser: a free sandbox key, the real engine, every state. No signup." />
+<meta name="description" content="The Omnia API console: build and send payroll tax requests with your account's API key and see every federal, state and local line." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -105,7 +105,7 @@
   .tab:hover { color: var(--ink); }
   .tabs .right { margin-left: auto; display: flex; align-items: center; gap: 8px; padding-bottom: 6px; }
   .panel { padding: 18px; }
-  .panel[hidden] { display: none; }
+  [hidden] { display: none !important; }
 
   /* form */
   fieldset { border: 0; padding: 0; margin: 0 0 20px; }
@@ -148,6 +148,13 @@
   .empty { padding: 48px 28px; text-align: center; color: var(--ink-3); }
   .empty h2 { color: var(--ink); font-size: 18px; margin: 0 0 6px; letter-spacing: -.01em; }
   .empty p { margin: 0 auto 16px; max-width: 380px; }
+  .signin-bar { display: none; margin: 14px 18px 0; padding: 10px 12px 10px 14px; border: 1px solid var(--rule); border-radius: var(--radius); background: #fff; font-size: 13px; align-items: center; gap: 12px; }
+  .signin-bar span { flex: 1; }
+  .signin-bar .btn { text-decoration: none; }
+  @media (max-width: 1180px) { .signin-bar { display: flex; } }
+  .gate-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .gate-actions .btn { text-decoration: none; }
+  .empty .gate-fine { font-size: 12.5px; margin-top: 16px; }
   .spinner { width: 16px; height: 16px; border: 2px solid var(--rule); border-top-color: var(--verify); border-radius: 50%; animation: spin .7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2s; } }
@@ -242,7 +249,7 @@
       </svg>
       Omnia <small>API console</small>
     </a>
-    <span class="mode" id="modeBadge" title="">Sandbox</span>
+    <span class="mode test" id="modeBadge" title="">Signed out</span>
     <div class="spacer"></div>
     <nav class="nav" aria-label="Site">
       <a class="hide-sm" href="/reference">API reference</a>
@@ -250,26 +257,26 @@
     </nav>
     <div class="keychip">
       <button type="button" id="keyBtn" aria-haspopup="true" aria-expanded="false">
-        <span class="dot wait" id="keyDot"></span><span class="klabel" id="keyLabel">Getting a key…</span>
+        <span class="dot bad" id="keyDot"></span><span class="klabel" id="keyLabel">No key</span>
       </button>
       <div class="menu" id="keyMenu" role="dialog" aria-label="API key">
-        <h4 id="kmTitle">Sandbox key</h4>
-        <p id="kmBlurb">Free and never billed. Real engine, real endpoint — use it from your own code too.</p>
+        <h4 id="kmTitle">API key</h4>
+        <p id="kmBlurb">Keys are issued in your account once a card or bank account is on file.</p>
         <div class="keyfull" id="kmKey">—</div>
         <dl class="meta" id="kmMeta"></dl>
         <div class="row">
           <button type="button" class="btn sm" id="kmCopy">Copy key</button>
-          <button type="button" class="btn ghost sm" id="kmNew">New sandbox key</button>
+          <button type="button" class="btn ghost sm" id="kmForget">Forget key</button>
         </div>
         <hr />
-        <label for="kmOwn" style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">Use your own key</label>
+        <label for="kmOwn" style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">Paste an API key</label>
         <input id="kmOwn" placeholder="sk_test_… or sk_live_…" autocomplete="off" spellcheck="false" />
         <div class="row"><button type="button" class="btn ghost sm" id="kmUse">Use this key</button></div>
         <hr />
-        <p style="margin:0">Ready for production volume? <a href="/docs">Create an account</a> for a key tied to your company.</p>
+        <p style="margin:0">Manage keys, usage and billing in <a href="/docs">your account</a>.</p>
       </div>
     </div>
-    <a class="btn sm" href="/docs"><span class="hide-xs">Get a production key</span><span class="show-xs">Get key</span></a>
+    <a class="btn sm" href="/docs" id="acctBtn"><span class="hide-xs">Your account</span><span class="show-xs">Account</span></a>
   </div>
 </header>
 
@@ -291,9 +298,13 @@
   </aside>
 
   <section class="pane req" aria-label="Request">
+    <div class="signin-bar" id="signinBar" hidden>
+      <span>Sign in to send requests with your API key.</span>
+      <a class="btn sm" href="/docs?signin=1">Sign in</a>
+    </div>
     <div class="welcome" id="welcome" hidden>
       <div>
-        <b>You're in the sandbox.</b> Every Send is a real call to the live engine with a free key — not billed, nothing to set up.
+        <b>Welcome to the API console.</b> Every Send is a real call to the engine with your account's key.
         Pick an example on the left or edit the request, then press <b>Send</b> (<span class="mono">Ctrl/⌘ + Enter</span>).
       </div>
       <button type="button" id="welcomeClose" aria-label="Dismiss">×</button>
@@ -411,10 +422,19 @@
       <div class="right"><button type="button" class="btn ghost sm" id="copyRes">Copy response</button></div>
     </div>
     <div class="panel" id="resView">
-      <div class="empty">
+      <div class="empty" id="emptyReady" hidden>
         <h2>Calculate a paycheck in one call</h2>
         <p>Facts go in — earnings, W-4, where the work happens. Every federal, state and local tax comes out, each with the math behind it.</p>
         <button type="button" class="btn send" id="emptySend">Send the example</button>
+      </div>
+      <div class="empty gate" id="emptyGate">
+        <h2>Sign in to send requests</h2>
+        <p>The console runs real calls with your account's API key. Keys are issued once your account has a card or bank account on file — nothing is charged during the 14-day evaluation.</p>
+        <div class="gate-actions">
+          <a class="btn send" href="/docs?signin=1">Sign in</a>
+          <a class="btn ghost" href="/docs">Create an account</a>
+        </div>
+        <p class="gate-fine">Already have a key? Paste it in the key menu at the top right.</p>
       </div>
     </div>
   </section>
@@ -435,7 +455,7 @@
     { id: 'me', verb: 'GET', path: '/v1/me', label: 'Your key' },
     { id: 'health', verb: 'GET', path: '/v1/health', label: 'Health', noAuth: true },
   ];
-  var LS = { sandbox: 'omnia_sandbox_key', account: 'omnia_key', own: 'omnia_console_key', hist: 'omnia_console_history', welcome: 'omnia_console_welcomed', lang: 'omnia_console_lang' };
+  var LS = { account: 'omnia_key', own: 'omnia_console_key', hist: 'omnia_console_history', welcome: 'omnia_console_welcomed', lang: 'omnia_console_lang' };
   var isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
   var examples = [];
@@ -482,22 +502,31 @@
   }
 
   // ------------------------------------------------------------------
-  // API key: account key > your own key > sandbox key (issued on demand)
+  // API key: a key pasted here > the key from your account page. There
+  // are no anonymous keys; without one, Send points to sign-in.
   // ------------------------------------------------------------------
   function setKey(k) {
     apiKey = k;
     var dot = $('keyDot'), label = $('keyLabel'), badge = $('modeBadge');
-    if (!k) { dot.className = 'dot bad'; label.textContent = 'No key'; badge.textContent = 'No key'; badge.className = 'mode test'; renderCode(); return; }
+    $('emptyGate').hidden = !!k;
+    $('signinBar').hidden = !!k;
+    $('emptyReady').hidden = !k;
+    if (!k) {
+      dot.className = 'dot bad'; label.textContent = 'No key';
+      badge.textContent = 'Signed out'; badge.className = 'mode test'; badge.title = 'Sign in to send requests.';
+      $('kmTitle').textContent = 'API key';
+      $('kmBlurb').textContent = 'Keys are issued in your account once a card or bank account is on file.';
+      $('kmKey').textContent = '—'; $('kmMeta').innerHTML = '';
+      renderCode(); return;
+    }
     dot.className = 'dot ok';
     label.textContent = k.key.slice(0, 14) + '…';
-    var names = { sandbox: 'Sandbox · not billed', test: 'Test key', live: 'Live · billed' };
-    badge.textContent = window.matchMedia('(max-width: 520px)').matches ? (k.mode === 'live' ? 'Live' : k.mode === 'sandbox' ? 'Sandbox' : 'Test') : (names[k.mode] || k.mode);
-    badge.className = 'mode ' + (k.mode === 'sandbox' ? '' : k.mode);
-    badge.title = k.mode === 'live' ? 'Calls with this key are billable.' : 'Calls with this key are not billed.';
-    $('kmTitle').textContent = k.mode === 'sandbox' ? 'Sandbox key' : (k.mode === 'live' ? 'Live key' : 'Test key');
-    $('kmBlurb').textContent = k.mode === 'sandbox'
-      ? 'Free and never billed. Real engine, real endpoint — use it from your own code too.'
-      : k.mode === 'live' ? 'Your production key. Calls made here count toward your bill.' : 'Your account\'s evaluation key.';
+    var live = k.mode === 'live';
+    badge.textContent = window.matchMedia('(max-width: 520px)').matches ? (live ? 'Live' : 'Test') : (live ? 'Live key' : 'Test key');
+    badge.className = 'mode ' + k.mode;
+    badge.title = 'Calls with this key count toward your account\'s usage.';
+    $('kmTitle').textContent = live ? 'Live key' : 'Test key';
+    $('kmBlurb').textContent = k.source === 'account' ? 'The key from your account page.' : 'A key you pasted into this browser.';
     $('kmKey').textContent = k.key;
     renderCode();
     refreshKeyMeta();
@@ -513,45 +542,27 @@
         return;
       }
       var m = r.json, rows = [
-        ['Mode', m.mode + (m.billable ? '' : ' (not billed)')],
+        ['Mode', m.mode],
         ['Expires', new Date(m.expiresAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })],
-        ['Calls today', m.callsToday + (m.limits.callsPerDay ? ' of ' + m.limits.callsPerDay : '')],
+        ['Calls today', String(m.callsToday)],
         ['Rate limit', m.limits.requestsPerMinute + ' / minute'],
       ];
       meta.innerHTML = rows.map(function (x) { return '<dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('');
     });
   }
 
-  function validStored(v) { return v && v.key && (!v.expiresAt || new Date(v.expiresAt).getTime() > Date.now() + 60000); }
-
-  function issueSandboxKey() {
-    $('keyDot').className = 'dot wait'; $('keyLabel').textContent = 'Getting a key…';
-    return fetch('/v1/sandbox-keys', { method: 'POST' }).then(function (res) {
-      return res.json().then(function (j) {
-        if (!res.ok) throw new Error(j.error || ('HTTP ' + res.status));
-        var k = { key: j.key, mode: 'sandbox', expiresAt: j.expiresAt, source: 'sandbox' };
-        store.set(LS.sandbox, k);
-        setKey(k);
-        return k;
-      });
-    }).catch(function (e) {
-      setKey(null);
-      showStatus('err', 'No key', e.message);
-      return null;
-    });
-  }
+  function modeOf(key) { return key.indexOf('sk_live_') === 0 ? 'live' : 'test'; }
 
   function loadKey() {
     var own = store.get(LS.own);
-    if (own && own.key) { setKey(own); return Promise.resolve(own); }
+    if (own && own.key) { setKey(own); return own; }
     var acct = store.get(LS.account);
     if (typeof acct === 'string' && acct.indexOf('sk_') === 0) {
-      var k = { key: acct, mode: acct.indexOf('sk_live_') === 0 ? 'live' : 'test', source: 'account' };
-      setKey(k); return Promise.resolve(k);
+      var k = { key: acct, mode: modeOf(acct), source: 'account' };
+      setKey(k); return k;
     }
-    var sb = store.get(LS.sandbox);
-    if (validStored(sb)) { setKey(sb); return Promise.resolve(sb); }
-    return issueSandboxKey();
+    setKey(null);
+    return null;
   }
 
   // ------------------------------------------------------------------
@@ -796,7 +807,12 @@
   function send() {
     if (sending) return;
     if (ep.body && !$('pJson').hidden && !fromJson()) { toast('Fix the JSON first'); return; }
-    if (!apiKey && !ep.noAuth) { loadKey().then(function (k) { if (k) send(); }); return; }
+    if (!apiKey && !ep.noAuth) {
+      showStatus('err', 'Sign in', 'Sign in to your account to send requests.');
+      $('resTabs').hidden = true;
+      $('emptyGate').hidden = false; $('emptyReady').hidden = true;
+      return;
+    }
     sending = true;
     $('sendBtn').disabled = true;
     $('status').innerHTML = '<span class="spinner" aria-hidden="true"></span><span class="stat">Calling ' + esc(ep.verb + ' ' + ep.path) + '…</span>';
@@ -858,11 +874,12 @@
       markFieldErrors(j.details);
     }
     var tips = {
-      missing_key: 'Open the key menu (top right) to get a sandbox key.',
-      invalid_key: 'This key was revoked or never existed. Get a new sandbox key from the key menu.',
-      expired_key: 'Sandbox keys last a week. Get a fresh one from the key menu.',
+      missing_key: 'Sign in to your account, or paste a key in the key menu (top right).',
+      invalid_key: 'This key was revoked or never existed. Issue a new one from your account page.',
+      expired_key: 'This key has expired. Issue a new one from your account page.',
+      payment_method_required: 'Add a card or bank account on your account page, then send again.',
+      account_suspended: 'Update the payment method on your account page to resume.',
       rate_limited: 'Wait a moment and send again.',
-      sandbox_daily_limit: 'Sandbox keys cover testing, not production volume. Create an account for a production key.',
       invalid_input: 'Fix the fields above, then send again. The JSON tab shows the exact body that was sent.',
     };
     if (j.code && tips[j.code]) out += '<p class="note">' + esc(tips[j.code]) + '</p>';
@@ -997,11 +1014,11 @@
     if (open) refreshKeyMeta();
   };
   $('kmCopy').onclick = function () { if (apiKey) copy(apiKey.key, 'Key copied'); };
-  $('kmNew').onclick = function () { store.del(LS.own); issueSandboxKey().then(function (k) { if (k) toast('New sandbox key ready'); }); };
+  $('kmForget').onclick = function () { store.del(LS.own); loadKey(); closeMenu(); toast('Key removed from this browser'); };
   $('kmUse').onclick = function () {
     var v = $('kmOwn').value.trim();
     if (!/^sk_(test|live)_[A-Za-z0-9_-]{8,}$/.test(v)) { toast('That doesn\'t look like an Omnia key'); return; }
-    var k = { key: v, mode: v.indexOf('sk_live_') === 0 ? 'live' : 'test', source: 'own' };
+    var k = { key: v, mode: modeOf(v), source: 'own' };
     store.set(LS.own, k); setKey(k); $('kmOwn').value = ''; toast('Using your key');
   };
 
@@ -1027,12 +1044,7 @@
     renderHistory();
     renderCode();
   });
-  // First visit: run the example straight away so the first thing people
-  // see is a real result. Only with a sandbox key, never an account's.
-  Promise.all([booted, loadKey()]).then(function (r) {
-    var k = r[1];
-    if (k && k.source === 'sandbox' && !(store.get(LS.hist) || []).length && !new URLSearchParams(location.search).get('endpoint')) send();
-  });
+  loadKey();
 })();
 </script>
 </body>

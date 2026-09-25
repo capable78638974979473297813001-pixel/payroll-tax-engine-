@@ -15,7 +15,8 @@
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
-const STRIPE_API = 'https://api.stripe.com';
+// Overridable only to point tests (or stripe-mock) at a local stub.
+const STRIPE_API = process.env.STRIPE_API_BASE ?? 'https://api.stripe.com';
 
 export class StripeError extends Error {
   status: number;
@@ -100,8 +101,8 @@ export interface StripeCheckoutSession {
   status?: string;
   mode?: string;
   customer?: string;
-  subscription?: string | { id: string };
-  setup_intent?: string | { id: string; payment_method?: string | null };
+  subscription?: string | { id: string; default_payment_method?: string | StripePaymentMethod | null };
+  setup_intent?: string | { id: string; payment_method?: string | StripePaymentMethod | null };
 }
 /** A hosted Checkout page in SETUP mode — the customer saves a card, no charge. */
 export function createSetupCheckoutSession(input: {
@@ -120,14 +121,16 @@ export function createSetupCheckoutSession(input: {
   });
 }
 
-/** Retrieve a completed Checkout session, expanding the setup intent so we can read the saved card. */
+/** Retrieve a completed Checkout session, expanding the saved payment method (setup or subscription mode). */
 export function retrieveCheckoutSession(id: string): Promise<StripeCheckoutSession & { metadata?: Record<string, string> }> {
-  return stripeRequest('GET', `/v1/checkout/sessions/${encodeURIComponent(id)}?expand[0]=setup_intent&expand[1]=subscription`);
+  return stripeRequest('GET', `/v1/checkout/sessions/${encodeURIComponent(id)}?expand[0]=setup_intent.payment_method&expand[1]=subscription.default_payment_method`);
 }
 
 export interface StripePaymentMethod {
   id: string;
+  type?: string;
   card?: { brand?: string; last4?: string };
+  us_bank_account?: { bank_name?: string; last4?: string };
 }
 export function retrievePaymentMethod(id: string): Promise<StripePaymentMethod> {
   return stripeRequest('GET', `/v1/payment_methods/${encodeURIComponent(id)}`);
@@ -153,6 +156,9 @@ export function createSubscriptionCheckoutSession(input: {
     mode: 'subscription',
     customer: input.customerId,
     line_items: [{ price: input.priceId }], // metered price: no quantity, usage is reported per call
+    // A card or bank account is required up front, trial or not.
+    payment_method_collection: 'always',
+    payment_method_types: ['card', 'us_bank_account'],
     success_url: input.successUrl,
     cancel_url: input.cancelUrl,
     metadata: { apiKeyId: input.apiKeyId, ...input.metadata },
