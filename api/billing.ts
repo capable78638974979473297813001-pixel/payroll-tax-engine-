@@ -154,17 +154,18 @@ export function handleStripeWebhook(rawBody: string, signatureHeader: string): {
  * key has a Stripe customer. Never throws; a metering hiccup must not fail the
  * customer's calculate call (the local ledger still counted it).
  */
-export async function reportCall(keyId: string): Promise<{ ok: boolean; reason?: string }> {
+export async function reportCall(keyId: string, units = 1): Promise<{ ok: boolean; reason?: string }> {
   if (!meteringConfigured()) return { ok: false, reason: 'metering_not_configured' };
   const key = getApiKey(keyId);
   if (!key?.stripeCustomerId) return { ok: false, reason: 'no_customer' };
+  const count = Math.max(1, Math.floor(units));
   try {
     await reportMeterEvent({
       eventName: process.env.STRIPE_METER_EVENT!,
       customerId: key.stripeCustomerId,
-      value: 1,
-      // Dedupe: at most one unit per key per second even if a retry double-fires.
-      identifier: `${key.id}-${Date.now()}`,
+      value: count,
+      // Dedupe: at most one event per key per millisecond even if a retry double-fires.
+      identifier: `${key.id}-${Date.now()}-${count}`,
     });
     return { ok: true };
   } catch (err) {

@@ -1,5 +1,7 @@
 # Tax calculation engine audit
 
+**Remediation (2026-09-26):** Findings 1–15, 16, 17, and 20 are fixed in code, with tests in `tests/audit-fixes.test.ts`. Finding 18's Pennsylvania LST comment was already the corrected text. Finding 19 (New York bracket bases) was left unchanged pending NYS-50-T. The open questions at the bottom of this file are still open. This document is the audit record; the code is no longer in the state it describes.
+
 **Audit date:** 2026-09-25  
 **Repository:** payroll tax engine (`calculatePaycheck` and supporting data)  
 **Auditor:** read-only code and data review (no application or data files were modified)

@@ -1,4 +1,28 @@
 import { toWholeDollars } from './money.ts';
+
+/**
+ * IRS whole-dollar rounding is for withheld income tax. FICA, FUTA, SUTA,
+ * disability, paid leave, transit excise, and flat head taxes stay in cents.
+ */
+function isWithheldIncomeTax(id: string): boolean {
+  if (id === 'US_FIT' || id === 'US_FIT_SUPP') return true;
+  if (id.includes('_SIT')) return true;
+  return (
+    id.endsWith('_COUNTY') ||
+    id === 'PA_EIT' ||
+    id === 'MI_LOCAL' ||
+    id === 'OH_LOCAL' ||
+    id === 'OH_JEDD' ||
+    id === 'OH_SDIT' ||
+    id === 'KY_LOCAL' ||
+    id === 'AL_LOCAL' ||
+    id === 'WILMINGTON_WAGE' ||
+    id === 'KC_EARN' ||
+    id === 'STL_EARN' ||
+    id === 'OR_METRO_SHS' ||
+    id === 'OR_MULTNOMAH_PFA'
+  );
+}
 import { PERIODS_PER_YEAR } from './types.ts';
 import type {
   ComputeContext,
@@ -57,7 +81,9 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
   ];
 
   if (input.roundToWholeDollars) {
-    taxes = taxes.map((t) => ({ ...t, amount: toWholeDollars(t.amount) }));
+    taxes = taxes.map((t) =>
+      isWithheldIncomeTax(t.id) ? { ...t, amount: toWholeDollars(t.amount) } : t,
+    );
   }
 
   const employeeTaxTotal = taxes

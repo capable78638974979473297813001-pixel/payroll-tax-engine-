@@ -92,7 +92,7 @@ export interface PublicApiKey {
  */
 export const PLAN_PRICING_CENTS: Record<string, number> = {
   free: 0,
-  standard: 15, // $0.15 / call — the website price
+  standard: 15, // $0.15 / call on the self-hosted ledger. The public site bills graduated bands in site/lib/pricing.ts.
   pro: 15,
 };
 

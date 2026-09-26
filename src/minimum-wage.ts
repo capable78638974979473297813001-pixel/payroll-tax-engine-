@@ -158,6 +158,46 @@ function historicalPredecessor(
   );
 }
 
+interface ScheduledWageChange {
+  hourlyCents?: number;
+  tippedCashWageCents?: number;
+  effectiveDate?: string;
+  effectiveTo?: string;
+}
+
+/**
+ * The next legislated step after the headline figure, once checkDate has
+ * reached it. Florida's September 30 step lives here rather than as a
+ * variant. A historical predecessor, when one covers checkDate, wins
+ * instead — that window is already a complete rate.
+ */
+function applicableScheduledChange(
+  source: { scheduledChanges?: unknown },
+  checkDate: string,
+): ScheduledWageChange | undefined {
+  const changes = source.scheduledChanges;
+  if (!Array.isArray(changes)) return undefined;
+  const applicable = (changes as ScheduledWageChange[])
+    .filter(
+      (c) =>
+        typeof c.effectiveDate === 'string' &&
+        checkDate >= c.effectiveDate &&
+        (!c.effectiveTo || checkDate <= c.effectiveTo),
+    )
+    .sort((a, b) => (b.effectiveDate ?? '').localeCompare(a.effectiveDate ?? ''));
+  return applicable[0];
+}
+
+function withScheduledStandard(
+  base: MinimumWageAmount,
+  source: { scheduledChanges?: unknown },
+  checkDate: string,
+): MinimumWageAmount {
+  const change = applicableScheduledChange(source, checkDate);
+  if (change?.hourlyCents == null) return base;
+  return { ...base, hourlyCents: change.hourlyCents, hourly: change.hourlyCents / 100 };
+}
+
 /**
  * Resolve a named region (MinimumWageQuery.region) against a jurisdiction's
  * variants, for either the standard rate or the tipped rate.
@@ -372,6 +412,15 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
       if (pred) {
         cents = toCents(pred);
         basis += ` (figure in effect through ${pred.effectiveTo ?? query.checkDate})`;
+      } else {
+        const scheduled = applicableScheduledChange(state, query.checkDate);
+        const scheduledCents = state.tipped.tipCreditAllowed
+          ? scheduled?.tippedCashWageCents
+          : scheduled?.hourlyCents;
+        if (scheduledCents != null) {
+          cents = scheduledCents;
+          basis += ` (scheduled change effective ${scheduled?.effectiveDate})`;
+        }
       }
     }
     considered.push({ level: 'state', jurisdiction: state.jurisdiction.name, cents, basis, caveat });
@@ -389,7 +438,8 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
       }
     }
     if (!regionLabel) {
-      base = historicalPredecessor(state.variants, 'standard', query.checkDate) ?? base;
+      const pred = historicalPredecessor(state.variants, 'standard', query.checkDate);
+      base = pred ?? withScheduledStandard(base, state, query.checkDate);
     }
     const tier = selectTier(base, state.variants, query);
     considered.push({
@@ -436,15 +486,27 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
     } else if (tipped) {
       if (found.tipped) {
         const pred = historicalPredecessor(found.variants, 'tipped', query.checkDate);
+        const scheduled = pred ? undefined : applicableScheduledChange(found, query.checkDate);
+        const scheduledCents = found.tipped.tipCreditAllowed
+          ? scheduled?.tippedCashWageCents
+          : scheduled?.hourlyCents;
         considered.push({
           level: 'local',
           jurisdiction: found.name,
-          cents: pred ? toCents(pred) : tippedCents(found.tipped),
+          cents: pred
+            ? toCents(pred)
+            : scheduledCents != null
+              ? scheduledCents
+              : tippedCents(found.tipped),
           basis:
             (found.tipped.tipCreditAllowed
               ? 'Local tipped cash wage'
               : 'Local ordinance allows no tip credit — the full local rate is owed in cash') +
-            (pred ? ` (figure in effect through ${pred.effectiveTo ?? query.checkDate})` : ''),
+            (pred
+              ? ` (figure in effect through ${pred.effectiveTo ?? query.checkDate})`
+              : scheduledCents != null
+                ? ` (scheduled change effective ${scheduled?.effectiveDate})`
+                : ''),
         });
       } else if (!state.tipped.tipCreditAllowed) {
         // The ordinance publishes no distinct tipped figure, but its STATE
@@ -456,7 +518,8 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
         // $17.13 instead of Seattle's own $21.30 full-cash floor). The
         // local standard rate — sized correctly via the same selectTier()
         // the non-tipped path uses — IS the tipped cash floor here.
-        const base = historicalPredecessor(found.variants, 'standard', query.checkDate) ?? found;
+        const pred = historicalPredecessor(found.variants, 'standard', query.checkDate);
+        const base = pred ?? withScheduledStandard(found, found, query.checkDate);
         const tier = selectTier(base, found.variants, query);
         considered.push({
           level: 'local',
@@ -485,7 +548,8 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
         });
       }
     } else {
-      const base = historicalPredecessor(found.variants, 'standard', query.checkDate) ?? found;
+      const pred = historicalPredecessor(found.variants, 'standard', query.checkDate);
+      const base = pred ?? withScheduledStandard(found, found, query.checkDate);
       const tier = selectTier(base, found.variants, query);
       considered.push({
         level: 'local',

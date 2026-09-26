@@ -767,6 +767,13 @@ export interface GarnishmentFormula {
   minimumWageWeeklyMultiplier?: number;
   stateMinimumHourlyWage?: number;
   /**
+   * When true, stateMinimumHourlyWage is replaced at calculation time by
+   * the minimum-wage ruleset for this state, check date, and optional
+   * GarnishmentInput.workRegion. The stored number remains the baseline
+   * the data file documents.
+   */
+  hourlyWageFromMinimumWageRuleset?: boolean;
+  /**
    * What fraction of the excess over the minimum-wage floor is actually
    * reachable — every state in this file except California takes the
    * FULL excess (the federal CCPA's own rule: disposable earnings minus the
