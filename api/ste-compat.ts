@@ -145,6 +145,9 @@ const NAMED_LOCALITIES: { state: string; name: string; field: keyof StateCertifi
   { state: 'OR', name: 'Canby Transit', field: 'locality', role: 'work', value: 'CanbyTransit' },
   { state: 'OR', name: 'Sandy Transit', field: 'locality', role: 'work', value: 'SandyTransit' },
   { state: 'OR', name: 'Wilsonville (SMART)', field: 'locality', role: 'work', value: 'SMART' },
+  { state: 'OR', name: 'South Clackamas Transportation District', field: 'locality', role: 'work', value: 'SCTD' },
+  { state: 'OR', name: 'Metro Supportive Housing Services', field: 'metroDistrict', role: 'either', value: true },
+  { state: 'OR', name: 'Multnomah County Preschool for All', field: 'multnomahCounty', role: 'either', value: true },
   { state: 'NY', name: 'New York City (resident)', field: 'nycResident', role: 'residence', value: true },
   { state: 'NY', name: 'Yonkers (resident)', field: 'yonkersResident', role: 'residence', value: true },
   { state: 'NY', name: 'Yonkers (nonresident worker)', field: 'yonkersNonresidentWorker', role: 'work', value: true },
@@ -326,12 +329,18 @@ function centsToDecimalDollars(c: Cents): number {
 function applyEntry(
   entry: UniqueTaxIdEntry,
   acc: { stateCode?: string; certificate: Partial<StateCertificate> },
+  role: 'work' | 'residence',
 ): void {
   if (entry.field === 'workState.code' || entry.field === 'residenceState.code') {
     acc.stateCode = entry.value as string;
     return;
   }
-  (acc.certificate as Record<string, unknown>)[entry.field] = entry.value;
+  // A PSD catalog entry is role 'either' and names workPSD, because that is
+  // the field a work location writes. The same id on the live (residence)
+  // profile is the employee's residence PSD — pennsylvaniaLocalTax reads
+  // that from the work certificate's residencePSD, not from workPSD.
+  const field = role === 'residence' && entry.field === 'workPSD' ? 'residencePSD' : entry.field;
+  (acc.certificate as Record<string, unknown>)[field] = entry.value;
 }
 
 function resolveIds(
@@ -348,7 +357,7 @@ function resolveIds(
       );
     }
     if (entry.role !== 'either' && entry.role !== role) continue;
-    applyEntry(entry, acc);
+    applyEntry(entry, acc, role);
   }
   return acc;
 }
@@ -372,6 +381,10 @@ export function payCalc(requests: PayCalcRequest[]): PayCalcResult[] {
 
       const certificate: Partial<StateCertificate> = { ...work.certificate };
       const residenceCertificate: Partial<StateCertificate> = { ...live.certificate };
+      // Local PA tax reads both PSD codes off the WORK certificate.
+      if (residenceCertificate.residencePSD && !certificate.residencePSD) {
+        certificate.residencePSD = residenceCertificate.residencePSD;
+      }
 
       for (const parm of req.taxJurisdictionParms ?? []) {
         const id = parm.uniqueTaxId ?? parm.locationCode;

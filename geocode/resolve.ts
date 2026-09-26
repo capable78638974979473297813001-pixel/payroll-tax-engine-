@@ -229,7 +229,13 @@ function matchALMunicipalityByName(
   const candidates: ALMunicipalityEntry[] = [];
   for (const place of places) {
     const stripped = stripPlaceTypeSuffix(place);
-    const hit = all.find((c) => namesEqual(c.name, stripped));
+    // Same alias check as alMunicipalityRuleset(): the source list spells
+    // Hackleburg "Hacklebug" and keeps the real name on aliases.
+    const hit = all.find(
+      (c) =>
+        namesEqual(c.name, stripped) ||
+        (c.aliases ?? []).some((alias) => namesEqual(alias, stripped)),
+    );
     if (hit && !candidates.includes(hit)) candidates.push(hit);
   }
   if (candidates.length === 1) return { confidence: 'matched', entry: candidates[0] };

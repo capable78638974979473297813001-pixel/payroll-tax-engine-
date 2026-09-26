@@ -108,8 +108,9 @@ export function overThreshold(current: Cents, ytd: Cents, threshold: Cents): Cen
   return Math.min(current, excess);
 }
 
-/** Round to whole dollars (IRS permits this for withholding). */
+/** Round to whole dollars (IRS permits this for withheld income tax). */
 export function toWholeDollars(cents: Cents): Cents {
+  assertFiniteMoney(cents, 'toWholeDollars');
   return Math.round(cents / 100) * 100;
 }
 
@@ -123,5 +124,6 @@ export function toWholeDollars(cents: Cents): Cents {
  * file already applies to roundHalfUp vs. toWholeDollars.
  */
 export function roundDownToCent(raw: number): Cents {
+  assertFiniteMoney(raw, 'roundDownToCent');
   return Math.floor(raw);
 }

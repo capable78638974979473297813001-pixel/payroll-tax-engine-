@@ -307,6 +307,22 @@ export function stateIncomeTax(
   const excise = stateExciseEmployeeTax(input, ctx, rules);
   if (excise) lines.push(excise);
 
+  // Oregon's Statewide Transit Tax reaches wages of Oregon residents
+  // wherever the work is performed (ORS 320.550). The block above only
+  // sees the WORK state's ruleset, so an Oregon resident working in
+  // another state would otherwise get no OR_STT line. Nonresidents
+  // working in Oregon are already covered when the work state is OR.
+  if (input.residenceState?.code === 'OR' && rules.code !== 'OR' && hasStateRuleset('OR', input.checkDate)) {
+    const orRules = stateRuleset('OR', input.checkDate);
+    const residentExcise = stateExciseEmployeeTax(input, ctx, orRules);
+    if (residentExcise) {
+      lines.push({
+        ...residentExcise,
+        detail: `${residentExcise.detail} — wages of an Oregon resident, wherever the work is performed (ORS 320.550)`,
+      });
+    }
+  }
+
   // Per-HOUR assessments (Oregon's Workers' Benefit Fund): the first levy in
   // this engine measured in hours rather than wages, so it reads
   // input.hoursWorked, falling back to the state's own flat-hours schedule.
@@ -404,15 +420,13 @@ export function stateIncomeTax(
   // documented assumption that the underlying certificate is on file.
   // Gated by rules.reciprocity.swapWithholdsResidenceState (opt-in,
   // data-only) so no other state's behavior changes.
-  const swapLine = reciprocitySwapWithholdingLine(input, ctx, rules, reciprocityReason);
-  if (swapLine) lines.push(swapLine);
+  lines.push(...reciprocitySwapWithholdingLine(input, ctx, rules, reciprocityReason));
 
   // Voluntary/nexus-based residence-state withholding — see its own doc
   // comment. Independent of, and gated off by, the reciprocity mechanisms
   // above (a caller-elected courtesy never overrides a statute-driven
   // exemption or swap for the same pay period).
-  const residenceLine = residenceStateWithholdingLine(input, ctx, rules, reciprocityReason);
-  if (residenceLine) lines.push(residenceLine);
+  lines.push(...residenceStateWithholdingLine(input, ctx, rules, reciprocityReason));
 
   return lines;
 }
@@ -429,43 +443,81 @@ export function stateIncomeTax(
  * state's own tax is already $0 here (that's what triggered this in the
  * first place), so there's nothing to net against.
  */
+/**
+ * Employee income-tax lines for a residence-state computation.
+ *
+ * incomeTaxLines() is the state method (and Indiana's county add-on).
+ * NYC and Yonkers are appended later in stateIncomeTax() and read
+ * workState.certificate, so a virtual input whose work state is the
+ * residence state is what makes them see the residence certificate.
+ */
+function residenceIncomeLines(
+  virtualInput: PaycheckInput,
+  ctx: ComputeContext,
+  residenceRules: StateRuleset,
+): TaxLine[] {
+  const lines = incomeTaxLines(virtualInput, ctx, residenceRules).filter((l) => l.payer === 'employee');
+  for (const extra of [
+    nycLocalTax(virtualInput, ctx, residenceRules),
+    nycSupplementalTax(virtualInput, ctx, residenceRules),
+    yonkersLocalTax(virtualInput, ctx, residenceRules),
+    yonkersSupplementalTax(virtualInput, ctx, residenceRules),
+  ]) {
+    if (extra && extra.payer === 'employee') lines.push(extra);
+  }
+  return lines;
+}
+
 function reciprocitySwapWithholdingLine(
   input: PaycheckInput,
   ctx: ComputeContext,
   rules: StateRuleset,
   reciprocityReason: string | null,
-): TaxLine | null {
-  if (!reciprocityReason) return null;
+): TaxLine[] {
+  if (!reciprocityReason) return [];
   if (!(rules.reciprocity as ReciprocityConfig | undefined)?.swapWithholdsResidenceState) {
-    return null;
+    return [];
   }
 
   const residence = input.residenceState;
-  if (!residence) return null;
-  if (!hasStateRuleset(residence.code, input.checkDate)) return null;
+  if (!residence) return [];
+  if (!hasStateRuleset(residence.code, input.checkDate)) return [];
 
   const residenceRules = stateRuleset(residence.code, input.checkDate);
   const virtualInput: PaycheckInput = {
     ...input,
     workState: { code: residence.code, certificate: residence.certificate },
   };
-  const residenceLines = incomeTaxLines(virtualInput, ctx, residenceRules);
+  const residenceLines = residenceIncomeLines(virtualInput, ctx, residenceRules);
   const residenceTax = residenceLines
     .filter((l) => l.id === `${residence.code}_SIT`)
     .reduce((sum, l) => sum + l.amount, 0);
 
-  return {
+  const sitLine: TaxLine = {
     id: `${residence.code}_SIT_RECIPROCITY_SWAP`,
     name: `${residenceRules.name} Income Tax (withheld by ${rules.code} employer under reciprocity)`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: residenceLines[0]?.taxableWages ?? 0,
+    taxableWages: residenceLines.find((l) => l.id === `${residence.code}_SIT`)?.taxableWages ?? residenceLines[0]?.taxableWages ?? 0,
     amount: residenceTax,
     detail:
       `${fmt(residenceTax)} ${residence.code} tax withheld by the ${rules.code} employer instead of ` +
       `${rules.code} tax, per ${rules.code}'s reciprocity swap mechanism — the employer has agreed not ` +
       `to withhold ${rules.code} tax, so ${residence.code}'s own withholding rules apply to these wages instead.`,
   };
+
+  // County and city lines (Indiana county, NYC, Yonkers) are part of the
+  // same residence withholding. They used to be dropped because only the
+  // `${code}_SIT` id was summed into the swap line.
+  const extras = residenceLines
+    .filter((l) => l.id !== `${residence.code}_SIT`)
+    .map((l) => ({
+      ...l,
+      detail:
+        `${l.detail} Withheld by the ${rules.code} employer under reciprocity, using the employee's ${residence.code} certificate.`,
+    }));
+
+  return [sitLine, ...extras];
 }
 
 /**
@@ -498,25 +550,25 @@ function residenceStateWithholdingLine(
   ctx: ComputeContext,
   work: StateRuleset,
   reciprocityReason: string | null,
-): TaxLine | null {
-  if (reciprocityReason) return null;
+): TaxLine[] {
+  if (reciprocityReason) return [];
 
   const residence = input.residenceState;
-  if (!residence || residence.code === work.code) return null;
+  if (!residence || residence.code === work.code) return [];
 
   const election = input.residenceStateWithholding;
   const nexus = election?.nexus === true;
   const voluntary = election?.voluntary === true;
-  if (!nexus && !voluntary) return null;
+  if (!nexus && !voluntary) return [];
 
-  if (!hasStateRuleset(residence.code, input.checkDate)) return null;
+  if (!hasStateRuleset(residence.code, input.checkDate)) return [];
   const residenceRules = stateRuleset(residence.code, input.checkDate);
 
   const virtualInput: PaycheckInput = {
     ...input,
     workState: { code: residence.code, certificate: residence.certificate },
   };
-  const residenceLines = incomeTaxLines(virtualInput, ctx, residenceRules);
+  const residenceLines = residenceIncomeLines(virtualInput, ctx, residenceRules);
   const residenceTax = residenceLines
     .filter((l) => l.id === `${residence.code}_SIT`)
     .reduce((sum, l) => sum + l.amount, 0);
@@ -526,18 +578,27 @@ function residenceStateWithholdingLine(
     : `the employer voluntarily agreed to withhold ${residence.code} tax as a courtesy to the employee, ` +
       `absent nexus (input.residenceStateWithholding.voluntary)`;
 
-  return {
+  const sitLine: TaxLine = {
     id: `${residence.code}_SIT_RESIDENCE`,
     name: `${residenceRules.name} Income Tax (residence state${nexus ? '' : ', voluntary'})`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: residenceLines[0]?.taxableWages ?? 0,
+    taxableWages: residenceLines.find((l) => l.id === `${residence.code}_SIT`)?.taxableWages ?? residenceLines[0]?.taxableWages ?? 0,
     amount: residenceTax,
     detail:
       `${fmt(residenceTax)} — ${basis}. Separate from any ${work.code} withholding above; whether this ` +
       `also earns the employee a credit on their ${work.code} return (or vice versa) is a filing-time ` +
       `question this engine does not resolve.`,
   };
+
+  const extras = residenceLines
+    .filter((l) => l.id !== `${residence.code}_SIT`)
+    .map((l) => ({
+      ...l,
+      detail: `${l.detail} Residence-state withholding (${basis}).`,
+    }));
+
+  return [sitLine, ...extras];
 }
 
 /**
@@ -581,10 +642,8 @@ function residentWorkingElsewhereCreditLine(
     ...input,
     workState: { code: residence.code, certificate: residence.certificate },
   };
-  const residenceLines = incomeTaxLines(virtualInput, ctx, residenceRules);
-  const residenceTax = residenceLines
-    .filter((l) => l.id === `${residence.code}_SIT`)
-    .reduce((sum, l) => sum + l.amount, 0);
+  const residenceLines = residenceIncomeLines(virtualInput, ctx, residenceRules);
+  const residenceTax = residenceLines.reduce((sum, l) => sum + l.amount, 0);
 
   const workTax = workStateLines
     .filter((l) => l.id === `${work.code}_SIT`)
@@ -1468,6 +1527,12 @@ function incomeTaxLinesByMethod(
 interface StateUnemploymentEmployeeConfig {
   rate: number;
   wageBase: number | null;
+  /**
+   * Pretax categories excluded from the employee unemployment wage.
+   * Absent means the FUTA-style list (cafeteria amounts out, elective
+   * deferrals in) — not the state's income-tax list.
+   */
+  exemptPretax?: string[];
 }
 
 /**
@@ -1506,6 +1571,31 @@ interface SUIEmployerConfig {
    * input.employer.stateUnemploymentRate supplied for this state.
    */
   industryNewEmployerRates?: Record<string, number>;
+  /**
+   * Pretax categories excluded from the employer unemployment wage.
+   * Absent means the FUTA-style list below, not rules.exemptPretax.
+   * Set this only where the state's own UI statute excludes a category
+   * the default keeps in (or the reverse).
+   */
+  exemptPretax?: string[];
+}
+
+/**
+ * Elective deferrals are in the FUTA wage base and, in the common case,
+ * in a state's unemployment wage base. Section 125 and the other cafeteria
+ * amounts are out. A state's income-tax exemptPretax is the wrong list:
+ * it drops 401(k) deferrals and understates SUTA.
+ */
+const UNEMPLOYMENT_EXEMPT_PRETAX: PretaxCategory[] = [
+  'section125',
+  'hsa',
+  'fsa',
+  'dependent_care',
+  'commuter',
+];
+
+function unemploymentExemptPretax(override: string[] | undefined): PretaxCategory[] {
+  return (override ?? UNEMPLOYMENT_EXEMPT_PRETAX) as PretaxCategory[];
 }
 
 /**
@@ -1529,14 +1619,13 @@ interface SUIEmployerConfig {
  * suiEmployer.employerSuppliedRateRequired marks those states so a caller
  * can tell the difference in advance.
  *
- * WAGE BASE, disclosed: this uses the same pretax-exemption list as the
- * state's income tax withholding (rules.exemptPretax), matching what
- * stateUnemploymentEmployeeTax() already does for Alaska/NJ/PA. State
- * unemployment wage definitions are not always identical to income tax
- * ones — Section 125 amounts are commonly excluded from both, but elective
- * deferrals like 401(k) are frequently INCLUDED in the unemployment base
- * while excluded from income tax. Each state file records that as the open
- * question it is rather than the code implying a verified answer.
+ * WAGE BASE: elective deferrals stay in the unemployment wage (the FUTA
+ * pattern, and the common state pattern). Section 125, HSA, FSA, dependent
+ * care, and commuter amounts stay out. suiEmployer.exemptPretax or
+ * stateUnemploymentEmployee.exemptPretax overrides that default where a
+ * state's own statute differs. The income-tax exemptPretax list is not
+ * reused — it excludes 401(k) deferrals that unemployment wages usually
+ * still include.
  *
  * TWO-TIER WAGE BASE BUG, found and fixed on a "go to every state" pass
  * (2026-09-06): Michigan's own data file documents a real $9,500 statutory
@@ -1578,7 +1667,7 @@ function stateUnemploymentEmployerTax(
   const rate = supplied ?? industryRate ?? cfg.newEmployerRate;
   if (rate === null || rate === undefined) return null;
 
-  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const exempt = unemploymentExemptPretax(cfg.exemptPretax);
   const currentWages = ctx.taxableWagesFor(exempt);
   const resolvedWageBase = resolveSUIWageBase(cfg.wageBase, rules.code, input.employer);
   const cap = resolvedWageBase === null ? null : dollars(resolvedWageBase);
@@ -1614,7 +1703,7 @@ function stateUnemploymentEmployeeTax(
   rules: StateRuleset,
 ): TaxLine {
   const cfg = rules.stateUnemploymentEmployee as StateUnemploymentEmployeeConfig;
-  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const exempt = unemploymentExemptPretax(cfg.exemptPretax);
   const currentWages = ctx.taxableWagesFor(exempt);
 
   const cap = cfg.wageBase === null ? null : dollars(cfg.wageBase);
@@ -6258,7 +6347,14 @@ function oregonWithholding(
   const periodWages = ctx.taxableWagesFor(exempt);
 
   if (!input.workState?.certificate) {
-    const amount = applyRate(periodWages, 0.08);
+    const phaseout = rules.bracketFederalSubtractionPhaseout as { noCertificateDefaultRate?: number } | undefined;
+    const noCertRate = phaseout?.noCertificateDefaultRate;
+    if (typeof noCertRate !== 'number') {
+      throw new Error(
+        `${rules.code} withholding with no certificate requires bracketFederalSubtractionPhaseout.noCertificateDefaultRate in the ruleset.`,
+      );
+    }
+    const amount = applyRate(periodWages, noCertRate);
     return {
       id: `${rules.code}_SIT`,
       name: `${rules.name} Income Tax`,
@@ -6266,7 +6362,7 @@ function oregonWithholding(
       jurisdiction: 'state',
       taxableWages: periodWages,
       amount,
-      detail: `${fmt(periodWages)} @ 8.00% (no Form OR-W-4 on file — HB 2119 default)`,
+      detail: `${fmt(periodWages)} @ ${(noCertRate * 100).toFixed(2)}% (no Form OR-W-4 on file — HB 2119 default)`,
     };
   }
 

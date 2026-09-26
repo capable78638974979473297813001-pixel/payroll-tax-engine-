@@ -50,6 +50,7 @@ import type {
   GarnishmentStateOverride,
 } from './registry.ts';
 import { garnishmentFederalRuleset, garnishmentStateOverride } from './registry.ts';
+import { minimumWage } from './minimum-wage.ts';
 
 export type GarnishmentOrderType =
   | 'consumer_creditor'
@@ -170,6 +171,13 @@ export interface GarnishmentInput {
   /** The already-computed paycheck this garnishment run is layered onto. */
   paycheck: PaycheckResult;
   orders: GarnishmentOrder[];
+  /**
+   * Named minimum-wage region from the state's own ruleset (`downstate`
+   * for New York City, Long Island, and Westchester). Used only where the
+   * garnishment override says its floor follows the published minimum wage.
+   * Omit it and the state's baseline figure applies.
+   */
+  workRegion?: string;
 }
 
 /**
@@ -487,6 +495,24 @@ function povertyGuidelineTierResult(
 }
 
 /** null return means no ordinary garnishment may be withheld at all — a flat state prohibition, or a qualifying full exemption the debtor hasn't waived. */
+/**
+ * Where the statute's floor is "the state's minimum wage" and that wage
+ * moves by date or region, read it from the minimum-wage ruleset instead
+ * of the static figure stored next to the garnishment formula. States
+ * that deliberately name the federal wage (West Virginia) leave the flag
+ * off and keep stateMinimumHourlyWage.
+ */
+function withResolvedMinimumWage(
+  cfg: GarnishmentFormula,
+  workState: string,
+  checkDate: string,
+  workRegion: string | undefined,
+): GarnishmentFormula {
+  if (!cfg.hourlyWageFromMinimumWageRuleset) return cfg;
+  const answer = minimumWage({ checkDate, state: workState, region: workRegion });
+  return { ...cfg, stateMinimumHourlyWage: answer.cents / 100 };
+}
+
 function ordinaryGarnishmentCap(
   disposable: Cents,
   gross: Cents,
@@ -495,6 +521,8 @@ function ordinaryGarnishmentCap(
   fed: GarnishmentFederalRuleset,
   override: GarnishmentStateOverride | undefined,
   order: GarnishmentOrder,
+  checkDate: string,
+  workRegion: string | undefined,
 ): CapResult | null {
   if (override?.ordinaryGarnishmentProhibited) return null;
 
@@ -504,7 +532,7 @@ function ordinaryGarnishmentCap(
       gross,
       workState,
       payFrequency,
-      override.headOfFamilyOrdinaryGarnishment,
+      withResolvedMinimumWage(override.headOfFamilyOrdinaryGarnishment, workState, checkDate, workRegion),
       order.dependents ?? 0,
       order.soleHouseholdSupport ?? false,
       order.expectedAnnualEarnings,
@@ -538,7 +566,7 @@ function ordinaryGarnishmentCap(
       gross,
       workState,
       payFrequency,
-      override.ordinaryGarnishment,
+      withResolvedMinimumWage(override.ordinaryGarnishment, workState, checkDate, workRegion),
       order.dependents ?? 0,
       order.soleHouseholdSupport ?? false,
       order.expectedAnnualEarnings,
@@ -599,6 +627,16 @@ export function calculateGarnishments(input: GarnishmentInput): GarnishmentResul
   let aggregateCeiling = applyRate(disposable, fed.ordinaryGarnishment.maxDisposableEarningsFraction);
 
   if (supportOrders.length > 0) {
+    for (const order of supportOrders) {
+      if (typeof order.supportingOtherFamily !== 'boolean') {
+        throw new Error(
+          `Child-support order "${order.id}" is missing supportingOtherFamily. ` +
+            `15 U.S.C. 1673(b) caps withholding at 50% of disposable earnings when the employee ` +
+            `is supporting another spouse or child, and 60% when they are not (5 points higher ` +
+            `if the order is 12 weeks in arrears). This engine will not assume either.`,
+        );
+      }
+    }
     const supportingOtherFamily = supportOrders.some((o) => o.supportingOtherFamily);
     const inArrears = supportOrders.some((o) => o.arrearsOver12Weeks);
     let fraction = supportingOtherFamily
@@ -634,7 +672,17 @@ export function calculateGarnishments(input: GarnishmentInput): GarnishmentResul
   for (const order of otherOrders) {
     const individualCap =
       order.type === 'consumer_creditor'
-        ? ordinaryGarnishmentCap(disposable, gross, workState, payFrequency, fed, override, order)
+        ? ordinaryGarnishmentCap(
+            disposable,
+            gross,
+            workState,
+            payFrequency,
+            fed,
+            override,
+            order,
+            checkDate,
+            input.workRegion,
+          )
         : studentLoanCap(disposable, payFrequency, fed);
 
     if (individualCap === null) {

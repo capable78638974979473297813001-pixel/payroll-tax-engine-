@@ -218,10 +218,12 @@ const server = createServer(async (req, res) => {
     }
     try {
       const result = calculatePaycheck(input);
-      const chargedCents = recordUsage(key.id, { stateCode, statusCode: 200 }); // billable success (local ledger)
-      // Report this call to Stripe's usage meter — the per-call charge. Fire and
-      // forget so a metering hiccup never delays or fails the customer's response.
-      void reportCall(key.id).catch(() => {});
+      // A key on Stripe metering is charged by the meter. The local ledger
+      // is the charge only when metering cannot bill this key. Doing both
+      // collects the same call twice.
+      const metered = meteringConfigured() && Boolean(key.stripeCustomerId);
+      const chargedCents = recordUsage(key.id, { stateCode, statusCode: 200, billable: !metered });
+      if (metered) void reportCall(key.id, 1).catch(() => {});
       const balanceDueCents = usageForKey(key.id)?.balanceDueCents ?? 0;
       res.setHeader('X-Charge-Cents', String(chargedCents));
       return sendJson(res, 200, { ok: true, result, billing: { chargedCents, balanceDueCents, metered: meteringConfigured() } });
@@ -257,8 +259,9 @@ const server = createServer(async (req, res) => {
         payFrequency: (body.payFrequency ?? 'biweekly') as PayFrequency,
         employees: body.employees,
       });
-      recordUsage(key.id, { statusCode: 200 }); // billable
-      void reportCall(key.id).catch(() => {});
+      const metered = meteringConfigured() && Boolean(key.stripeCustomerId);
+      recordUsage(key.id, { statusCode: 200, billable: !metered });
+      if (metered) void reportCall(key.id, 1).catch(() => {});
       return sendJson(res, 200, { ok: true, run });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Payroll run failed.';
@@ -309,11 +312,19 @@ const server = createServer(async (req, res) => {
     // Billed the same as /v1/calculate, once per request in the batch —
     // this endpoint is a translation in front of the same engine call, not
     // a cheaper one.
+    const metered = meteringConfigured() && Boolean(key.stripeCustomerId);
     let chargedCents = 0;
+    let successes = 0;
     for (const r of results) {
-      chargedCents += recordUsage(key.id, { statusCode: r.error ? 422 : 200, error: r.error, billable: !r.error });
+      const ok = !r.error;
+      if (ok) successes += 1;
+      chargedCents += recordUsage(key.id, {
+        statusCode: ok ? 200 : 422,
+        error: r.error,
+        billable: ok && !metered,
+      });
     }
-    if (results.some((r) => !r.error)) void reportCall(key.id).catch(() => {});
+    if (metered && successes > 0) void reportCall(key.id, successes).catch(() => {});
     res.setHeader('X-Charge-Cents', String(chargedCents));
     return sendJson(res, 200, { payCalc: results });
   }

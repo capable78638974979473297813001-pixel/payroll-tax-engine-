@@ -278,22 +278,29 @@ describe('ordinary garnishment — state overrides', () => {
     assert.equal(floorBinds.totalWithheld, dollars(37.50)); // $400-$362.50
   });
 
-  test("Washington DC: 25% of the excess over 40x DC's own $18.40 minimum wage (no separate fraction cap)", () => {
-    // D.C. Code 16-572 -- the reachable amount already IS "25% of the
-    // excess," not a separate lesser-of test against a flat 25%-of-
-    // disposable fraction, but this engine's capFractions+floor shape
-    // computes the same result either way since 25% of disposable can
-    // never be smaller than 25% of (disposable minus a positive floor).
-    // Floor = 40 x $18.40 = $736/week.
+  test("Washington DC: 25% of the excess over 40x DC's own minimum wage, dated", () => {
+    // D.C. Code 16-572. The floor is 40x the District minimum wage in
+    // effect on the check date: $17.95 through 2026-06-30, $18.40 from
+    // 2026-07-01. 25% of a large disposable amount is unchanged by the
+    // floor; the floor binds on a check that sits just above it.
     const r = run(paycheckOf(dollars(2000), 0), [
       order({ id: 'A', type: 'consumer_creditor' }),
     ], 'DC');
     assert.equal(r.totalWithheld, dollars(500)); // 25% of $2000
 
-    const floorBinds = run(paycheckOf(dollars(800), 0), [
+    const before = run(paycheckOf(dollars(800), 0), [
       order({ id: 'A', type: 'consumer_creditor' }),
     ], 'DC');
-    assert.equal(floorBinds.totalWithheld, dollars(64)); // $800-$736 excess
+    assert.equal(before.totalWithheld, dollars(82)); // $800 - 40x$17.95
+
+    const after = calculateGarnishments({
+      checkDate: '2026-07-15',
+      payFrequency: 'weekly',
+      workState: 'DC',
+      paycheck: paycheckOf(dollars(800), 0),
+      orders: [order({ id: 'A', type: 'consumer_creditor' })],
+    });
+    assert.equal(after.totalWithheld, dollars(64)); // $800 - 40x$18.40
   });
 
   test('Nebraska: matches the federal default in general, but drops to 15% (same 30x-federal floor) for a head-of-family debtor', () => {

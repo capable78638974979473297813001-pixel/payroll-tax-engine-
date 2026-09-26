@@ -199,8 +199,9 @@ export function federalSupplementalTax(
   const supplementalCash = Math.min(fullBase, rawSupplementalCash);
 
   // An exempt W-4 claims no federal income tax liability at all, supplemental
-  // included; nothing is withheld.
-  if (input.federalW4.exempt) {
+  // included; nothing is withheld. Same strict boolean read as
+  // federalIncomeTax() — a string "false" must throw, not withhold $0.
+  if (resolveCertBoolean(input.federalW4 as unknown as Record<string, unknown>, 'exempt')) {
     return {
       id: 'US_FIT_SUPP',
       name: 'Federal Income Tax (Supplemental)',
@@ -498,7 +499,9 @@ function categoryCoverage(
     const cfg = thresholds?.household;
     if (!cfg) return null;
     const ficaCovered = cashToDate >= dollars(cfg.annualCashWages);
-    const quarterly = input.employer?.householdQuarterlyCashWages ?? 0;
+    // Same convention as categoryCashWages: the caller stores quarter-to-date
+    // BEFORE this check. A cheque that itself crosses $1,000 is covered.
+    const quarterly = (input.employer?.householdQuarterlyCashWages ?? 0) + cashThisCheque;
     const futaCovered = quarterly >= dollars(cfg.futaQuarterlyCashWages);
     return {
       ficaCovered,
@@ -569,7 +572,10 @@ function railroadUnemployment(
   if (!cfg) return [];
 
   const rate = input.employer?.railroadUnemploymentRate ?? cfg.newEmployerRate;
-  const exempt = (rules.incomeTax.exemptPretax ?? []) as PretaxCategory[];
+  // RRTA compensation tracks FICA wages: elective deferrals stay in the
+  // base. The income-tax exempt list would drop 401(k)/403(b)/457/SIMPLE
+  // and understate both this contribution and the monthly cap.
+  const exempt = rules.socialSecurity.exemptPretax as PretaxCategory[];
   const compensation = ctx.taxableWagesFor(exempt);
   const cap = dollars(cfg.monthlyCompensationBase);
   const alreadyThisMonth = input.ytd.railroadMonthlyCompensation ?? 0;
@@ -602,7 +608,8 @@ function railroadTier2(
   const cfg = rules.railroadRetirement as RailroadRetirementConfig | undefined;
   if (!cfg) return [];
 
-  const exempt = (rules.incomeTax.exemptPretax ?? []) as PretaxCategory[];
+  // Same FICA wage base as RUIA and Tier I — deferrals are compensation.
+  const exempt = rules.socialSecurity.exemptPretax as PretaxCategory[];
   const compensation = ctx.taxableWagesFor(exempt);
   const cap = dollars(cfg.tier2.wageBase);
   const ytd = input.ytd.tier2Compensation ?? 0;
@@ -659,7 +666,7 @@ function applyEmploymentCategory(
           taxableWages: 0,
           amount: 0,
           detail:
-            '$0 — rail employment is outside FUTA: railroad employers pay unemployment contributions under the Railroad Unemployment Insurance Act instead, at an experience-rated rate this engine does not model.',
+            '$0 — rail employment is outside FUTA. Railroad employers pay unemployment contributions under the Railroad Unemployment Insurance Act instead; that amount is the US_RUIA_ER line on this paycheck.',
         };
       }
       return asRailroadTierOne(line);
@@ -709,7 +716,7 @@ function applyEmploymentCategory(
         detail: isFuta
           ? `$0 — ${
               category === 'household'
-                ? 'household employment: cash wages to all household employees have not reached $1,000 in a calendar quarter (input.employer.householdQuarterlyCashWages)'
+                ? 'household employment: cash wages to all household employees have not reached $1,000 in a calendar quarter. input.employer.householdQuarterlyCashWages is quarter-to-date before this check; this check’s cash wages are counted on top of it'
                 : category === 'election_worker'
                   ? 'election work is service for a state or local government, which is outside FUTA employment entirely'
                   : "farm work: the employer has not asserted the agricultural FUTA test (input.employer.agriculturalFutaLiable)"
