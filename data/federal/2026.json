@@ -7,7 +7,7 @@
       "id": "pub15t",
       "title": "IRS Publication 15-T (2026), Federal Income Tax Withholding Methods",
       "url": "https://www.irs.gov/pub/irs-pdf/p15t.pdf",
-      "verifiedOn": "2026-08-11"
+      "verifiedOn": "2026-09-26"
     },
     {
       "id": "ssa-cola",
@@ -19,8 +19,8 @@
       "id": "pub15",
       "title": "IRS Publication 15 (2026), Employer's Tax Guide",
       "url": "https://www.irs.gov/pub/irs-pdf/p15.pdf",
-      "verifiedOn": "2026-08-13",
-      "comment": "General employment-tax reference (depositing, reporting, special employment categories). Added for completeness of the source trail -- the categories it covers beyond ordinary W-2 wages (household/agricultural/railroad/statutory employees, ministers, tips, etc.) are out of scope for this engine; see knownGaps."
+      "verifiedOn": "2026-09-26",
+      "comment": "Re-read 2026-09-26 (Pub 15 for 2026, dated Dec 15, 2025) for socialSecurity/medicare/futa/supplemental/backup figures: \"The social security wage base limit is $184,500. The Medicare tax rate is 1.45% each for the employee and employer\"; \"The withholding rate on supplemental wages remains 22% (37% if supplemental wages paid to an employee during the calendar year exceed $1 million)\"; \"The backup withholding rate remains 24%\"; \"you must withhold a 0.9% Additional Medicare Tax from wages you pay to an employee in excess of $200,000 in a calendar year\"; \"For 2026, the FUTA tax rate is 6.0%. The tax applies to the first $7,000 ... If you're entitled to the maximum 5.4% credit, the FUTA tax rate after credit is 0.6%.\" General employment-tax reference (depositing, reporting, special employment categories). Added for completeness of the source trail -- the categories it covers beyond ordinary W-2 wages (household/agricultural/railroad/statutory employees, ministers, tips, etc.) are out of scope for this engine; see knownGaps."
     },
     {
       "id": "w4-instructions",
@@ -50,7 +50,13 @@
     "step1StandardAdjustment": {
       "comment": "Worksheet 1A line 1g. Subtracted from annualized wages. Zero when the Step 2 checkbox is marked. Note this is NOT the standard deduction on its own: it combines with the 0% bracket to equal it (e.g. 12900 + 19300 = 32200 MFJ for 2026).",
       "married_joint": 12900.0,
-      "other": 8600.0
+      "other": 8600.0,
+      "audit": {
+        "verifiedOn": "2026-09-26",
+        "source": "IRS Publication 15-T (2026), p. 10, Worksheet 1A line 1g",
+        "url": "https://www.irs.gov/pub/irs-pdf/p15t.pdf",
+        "quote": "1g If the box in Step 2 of Form W-4 is checked, enter -0-. If the box is not checked, enter $12,900 if the taxpayer is married filing jointly or $8,600 otherwise"
+      }
     },
     "supplementalRate": 0.22,
     "supplementalMandatoryRate": 0.37,
@@ -58,7 +64,7 @@
     "supplementalComment": "This is Pub 15's FLAT-RATE method for supplemental wages identified separately from regular wages. Pub 15 also allows an AGGREGATE method (add supplemental to regular wages paid at the same time, withhold on the total via the normal percentage method) -- that method is already reachable in this engine WITHOUT separate code: an earning simply isn't tagged category:'supplemental' (see types.ts EarningCategory), so it flows through federalIncomeTax()'s normal base instead of federalSupplementalTax()'s flat-rate path. The caller's tagging choice IS the method choice; there is no additional decision-tree data to store here.",
     "backupWithholdingRate": 0.24,
     "nonresidentAlienAdjustment": {
-      "comment": "Pub 15-T's 'Withholding Adjustment for Nonresident Alien Employees' procedure: add this per-period dollar amount to wages BEFORE annualizing (Step 1/2 of that procedure), then run the ordinary percentage-method worksheet on the inflated figure -- not a separate calculation path, just a bigger base. The amounts added are excluded from Box 1/income-tax-liability -- purely a withholding-calculation adjustment (Pub 15-T's own words: 'don't increase the income tax liability of the employee'). Two tables exist in Pub 15-T: Table 1 is for a nonresident alien whose Form W-4 predates 2020 (or who hasn't filed a 2020+ form); Table 2 is for a 2020-or-later Form W-4. This engine's FederalW4 type models ONLY the 2020+ shape (see its own doc comment) -- there is no legacy-W-4 representation anywhere in this project -- so TABLE 2 is the one that actually matches what this engine's inputs represent, and is what's recorded below. Reconstructed from the source PDF's own column-shifted table by chaining each period's multiple against the next (e.g. weekly 309.60 x 2 = 618.20 =~ biweekly's 619.20; monthly 1,341.70 x 3 = 4,025.10 =~ quarterly's 4,025.00) -- every value ties out to a period-count multiple of an adjacent one, the same internal-consistency check already used elsewhere in this project for column-shifted PDF tables.",
+      "comment": "Pub 15-T's 'Withholding Adjustment for Nonresident Alien Employees' procedure: add this per-period dollar amount to wages BEFORE annualizing (Step 1/2 of that procedure), then run the ordinary percentage-method worksheet on the inflated figure -- not a separate calculation path, just a bigger base. The amounts added are excluded from Box 1/income-tax-liability -- purely a withholding-calculation adjustment (Pub 15-T's own words: 'don't increase the income tax liability of the employee'). Two tables exist in Pub 15-T: Table 1 is for a nonresident alien whose Form W-4 predates 2020 (or who hasn't filed a 2020+ form); Table 2 is for a 2020-or-later Form W-4. This engine's FederalW4 type models ONLY the 2020+ shape (see its own doc comment) -- there is no legacy-W-4 representation anywhere in this project -- so TABLE 2 is the one that actually matches what this engine's inputs represent, and is what's recorded below. Reconstructed from the source PDF's own column-shifted table by chaining each period's multiple against the next (e.g. weekly 309.60 x 2 = 618.20 =~ biweekly's 619.20; monthly 1,341.70 x 3 = 4,025.10 =~ quarterly's 4,025.00) -- every value ties out to a period-count multiple of an adjacent one, the same internal-consistency check already used elsewhere in this project for column-shifted PDF tables. RE-VERIFIED 2026-09-26 against the printed table itself (IRS Publication 15-T (2026), p. 7, 'Table 2', https://www.irs.gov/pub/irs-pdf/p15t.pdf), all eight amounts exact: \"Weekly $309.60 / Biweekly 619.20 / Semimonthly 670.80 / Monthly 1,341.70 / Quarterly 4,025.00 / Semiannually 8,050.00 / Annually 16,100.00 / Daily or Miscellaneous (each day of the payroll period) 61.90\". The daily-vs-annual question (61.90 x 260 = 16,094 vs 16,100) is resolved by the source: Pub 15-T PRINTS both 61.90 and 16,100.00 as separate table entries, each rounded independently by the IRS, so neither is derived from the other and both are recorded exactly as printed. (Table 1, for pre-2020 Forms W-4, prints $226.90 weekly / 11,800.00 annually / 45.40 daily; not recorded here, as the engine has no pre-2020 W-4 shape.)",
       "weekly": 309.6,
       "biweekly": 619.2,
       "semimonthly": 670.8,
@@ -222,6 +228,13 @@
     },
     "multipleJobsSchedules": {
       "comment": "Used when the Form W-4 Step 2 checkbox is marked.",
+      "audit": {
+        "verifiedOn": "2026-09-26",
+        "source": "IRS Publication 15-T (2026), p. 12, '2026 Percentage Method Tables for Automated Payroll Systems' -- Form W-4, Step 2, Checkbox, Withholding Rate Schedules, Single or Married Filing Separately",
+        "url": "https://www.irs.gov/pub/irs-pdf/p15t.pdf",
+        "quote": "$60,900 $108,938 $8,983.00 24% $60,900 / $108,938 $136,163 $20,512.00 32% $108,938 / $136,163 $328,350 $29,224.00 35% $136,163",
+        "change": "single rows 5-7: from/to 108937.5 -> 108938.0 and 136162.5 -> 136163.0. The previous half-dollar values were a derivation (half of the MFJ standard-schedule breakpoints 217,875 / 272,325), not what the IRS table prints; columns A, B and E of the published table carry whole dollars, and Worksheet 1A line 2b/2e say to use 'the amount from column A of that row'. Column C (20,512.00 / 29,224.00) is unchanged. All other 45 bracket rows (both schedule sets, all three statuses) re-read on 2026-09-26 and match the printed table exactly."
+      },
       "married_joint": [
         {
           "from": 0.0,
@@ -299,18 +312,18 @@
         },
         {
           "from": 60900.0,
-          "to": 108937.5,
+          "to": 108938.0,
           "base": 8983.0,
           "rate": 0.24
         },
         {
-          "from": 108937.5,
-          "to": 136162.5,
+          "from": 108938.0,
+          "to": 136163.0,
           "base": 20512.0,
           "rate": 0.32
         },
         {
-          "from": 136162.5,
+          "from": 136163.0,
           "to": 328350.0,
           "base": 29224.0,
           "rate": 0.35
@@ -391,6 +404,10 @@
     "employerRate": 0.062,
     "wageBase": 184500.0,
     "comment": "2026 OASDI contribution and benefit base, up from 176100 in 2025.",
+    "audit": {
+      "verifiedOn": "2026-09-26",
+      "note": "The cited SSA page (https://www.ssa.gov/oact/cola/cbb.html) returned HTTP 403 Access Denied to a plain request on 2026-09-26 and was not retried around its bot protection. Rate and base instead re-verified from two other primary sources: IRS Publication 15 (2026), https://www.irs.gov/pub/irs-pdf/p15.pdf -- \"For 2026, the social security tax rate is 6.2% (amount withheld) each for the employer and employee (12.4% total). The social security wage base limit is $184,500.\" -- and US Railroad Retirement Board, Railroad Retirement and Unemployment Insurance Taxes in 2026, https://www.rrb.gov/Newsroom/NewsReleases/RetirementUnemploymentInsuranceTaxes -- \"The maximum amount of an employee's earnings subject to the 6.20 percent rate will increase from $176,100 in 2025 to $184,500 in 2026\"."
+    },
     "exemptPretax": [
       "section125",
       "hsa",
@@ -409,7 +426,13 @@
       "rate": 0.009,
       "threshold": 200000.0,
       "employeeOnly": true,
-      "comment": "Employer withholds on wages above 200000 paid to an individual regardless of filing status; the employee reconciles on Form 8959."
+      "comment": "Employer withholds on wages above 200000 paid to an individual regardless of filing status; the employee reconciles on Form 8959.",
+      "audit": {
+        "verifiedOn": "2026-09-26",
+        "source": "IRS Publication 15 (2026), section 9, Additional Medicare Tax withholding",
+        "url": "https://www.irs.gov/pub/irs-pdf/p15.pdf",
+        "quote": "In addition to withholding Medicare tax at 1.45%, you must withhold a 0.9% Additional Medicare Tax from wages you pay to an employee in excess of $200,000 in a calendar year. ... There is no employer share of Additional Medicare Tax."
+      }
     },
     "exemptPretax": [
       "section125",
@@ -434,7 +457,8 @@
         "source": {
           "title": "US Department of Labor, FUTA Credit Reductions; and the Federal Register notice of FUTA credit reductions applicable for 2025",
           "url": "https://oui.doleta.gov/unemploy/futa_credit.asp",
-          "verifiedOn": "2026-08-25"
+          "verifiedOn": "2026-09-26",
+          "quote": "DOL workbook 'Actual FUTA Credit Reductions 2010-2025' (https://oui.doleta.gov/unemploy/docs/reduced_credit_states_2010-2025.xlsx), CY 2025 column: California 1.2%, Virgin Islands 4.5%; no other state listed for 2025. DOL's 'Potential 2026 Credit Reductions' workbook (dated 2026-01-15) lists only California (potential total 5.3%) and the Virgin Islands (4.8%) -- potential, not final, so the 2026 map correctly stays empty until the post-November-10 determination."
         }
       }
     },
@@ -444,6 +468,21 @@
     "netRate": 0.006,
     "wageBase": 7000.0,
     "employerOnly": true,
+    "audit": {
+      "verifiedOn": "2026-09-26",
+      "sources": [
+        {
+          "title": "IRS Publication 15 (2026), section 14, Federal Unemployment (FUTA) Tax",
+          "url": "https://www.irs.gov/pub/irs-pdf/p15.pdf",
+          "quote": "For 2026, the FUTA tax rate is 6.0%. The tax applies to the first $7,000 you pay to each employee as wages during the year. ... If you're entitled to the maximum 5.4% credit, the FUTA tax rate after credit is 0.6%."
+        },
+        {
+          "title": "26 U.S.C. 3301 (rate) and 3306(b)(1) (wage base)",
+          "url": "https://www.law.cornell.edu/uscode/text/26/3301",
+          "quote": "equal to 6 percent of the total wages (as defined in section 3306(b)) ... [3306(b)(1)] that part of the remuneration which, after remuneration ... equal to $7,000 ... has been paid to an individual by an employer during any calendar year"
+        }
+      ]
+    },
     "comment": "Net rate assumes the full state credit. Credit-reduction states pay more, and that IS now modelled — see creditReduction below: futa() adds the state's additional rate when the map carries one, and says the determination is pending when it does not.",
     "exemptPretax": [
       "section125",
@@ -457,6 +496,12 @@
     "section402gAggregate": 24500.0,
     "deferral457": 24500.0,
     "simple": 17000.0,
+    "audit": {
+      "verifiedOn": "2026-09-26",
+      "source": "IRS Notice 2025-67, 2026 Limitations Adjusted as Provided in Section 415(d), etc.",
+      "url": "https://www.irs.gov/pub/irs-drop/n-25-67.pdf",
+      "quote": "The limitation under section 402(g)(1) on the exclusion for elective deferrals described in section 402(g)(3) ... is increased from $23,500 to $24,500. The limitation on deferrals under section 457(e)(15) ... is increased from $23,500 to $24,500. ... The limitation under section 408(p)(2)(E)(i)(III) that generally applies to salary reduction contributions under a SIMPLE retirement account ... is increased from $16,500 to $17,000."
+    },
     "$comment": "IRS Newsroom, '401(k) limit increases to $24,500 for 2026' (irs.gov/newsroom/401k-limit-increases-to-24500-for-2026-ira-limit-increases-to-7500), read directly: the 402(g) elective-deferral limit for 401(k)/403(b)/governmental-457(b) plans rises to $24,500 for 2026 (up from $23,500 for 2025), and the SIMPLE plan limit rises to $17,000. section402gAggregate is 401(k)+403(b) COMBINED (one shared IRC 402(g) limit — an employee contributing to both still only gets $24,500 total between them); deferral457 is a governmental/tax-exempt 457(b) plan's own SEPARATE limit (IRC 457(e)(15)) at the same dollar figure but NOT aggregated with 401(k)/403(b) — an employee with both a 401(k) and a 457(b) can legally defer up to BOTH limits in the same year, not a double-count error; simple is SIMPLE IRA/401(k) plans' own separate, lower limit (IRC 408(p)) under yet another section, also not aggregated with the other two. STANDARD limits only — catch-up contributions for age 50+ ($8,000 for 2026, bringing the total to $32,500) and the SECURE 2.0 age-60-63 enhanced catch-up ($11,250) are deliberately NOT modelled here: this engine has no age/birthdate input anywhere, and guessing catch-up eligibility would risk UNDER-capping (treating money as taxable that the law actually still exempts) — the wrong direction for a tax engine to guess in, so every employee is capped at the standard figure regardless of actual age. See capElectiveDeferrals() in src/wages.ts and this file's own knownGaps entry."
   },
   "knownGaps": [
@@ -479,6 +524,7 @@
           "title": "IRS Publication 15 (2026) and SSA, Election Workers — State and Local Government Employers",
           "url": "https://www.ssa.gov/slge/election_workers.htm",
           "verifiedOn": "2026-08-25",
+          "reverified": "2026-09-26: the SSA page returned HTTP 403 Access Denied (not retried around bot protection). The $2,500 figure re-verified instead in IRS Publication 15 (2026), https://www.irs.gov/pub/irs-pdf/p15.pdf: \"Social security and Medicare taxes apply to election workers who are paid $2,500 or more in cash or an equivalent form of compensation in 2026.\" The 'up from $2,300' prior-year figure in the quote below was NOT re-verified.",
           "quote": "Social security and Medicare taxes apply to election workers paid $2,500 or more in cash or its equivalent in 2026, up from $2,300. Below that figure the worker is outside social security and Medicare entirely. Election work is service for a state or political subdivision, which is excluded from FUTA employment, and the pay is not subject to federal income tax withholding — though it remains taxable income to the worker."
         }
       },
@@ -489,7 +535,8 @@
         "source": {
           "title": "IRS Publication 926 (2026), Household Employer's Tax Guide",
           "url": "https://www.irs.gov/pub/irs-pdf/p926.pdf",
-          "verifiedOn": "2026-08-25",
+          "verifiedOn": "2026-09-26",
+          "reverifiedQuote": "Pub 926 (2026): \"Social security and Medicare taxes apply to the wages of household workers you pay $3,000 or more in cash wages in 2026.\" Pub 15 (2026): \"You're subject to FUTA tax in 2026 if you paid total cash wages of $1,000 or more to household employees in any calendar quarter in 2025 or 2026.\"",
           "quote": "Social security and Medicare taxes apply to the wages of household workers paid $3,000 or more in cash wages in 2026 (up from $2,800 in 2025). FUTA applies if $1,000 or more in total cash wages is paid to all household employees during any single calendar quarter — a figure unchanged for 2026. Federal income tax withholding is not required from a household employee at all, though employer and employee may agree to it."
         }
       },
@@ -499,7 +546,8 @@
         "source": {
           "title": "IRS Publication 15 (Circular E) for use in 2026 — agricultural employers (Publication 51 was discontinued and folded into Publication 15)",
           "url": "https://www.irs.gov/pub/irs-pdf/p15.pdf",
-          "verifiedOn": "2026-08-25",
+          "verifiedOn": "2026-09-26",
+          "reverifiedQuote": "Pub 15 (2026), 'The $150 test or the $2,500 test for farmwork': \"You pay cash wages to an employee of $150 or more in a year for farmwork ... The total that you pay for farmwork (cash and noncash) to all your employees is $2,500 or more during the year.\" FUTA farmworkers test: \"You paid cash wages of $20,000 or more to farmworkers during any calendar quarter in 2025 or 2026, or ... You employed 10 or more farmworkers ... during any 20 or more different weeks\"",
           "quote": "The long-standing pair of statutory tests: cash wages of $150 or more paid to one farmworker in the year, OR total wages (cash and noncash) of $2,500 or more paid to all farmworkers. Either test on its own makes the wages subject to social security and Medicare, and income tax withholding follows the same coverage."
         }
       },
@@ -545,7 +593,7 @@
       "source": {
         "title": "US Railroad Retirement Board — Railroad Retirement and Unemployment Insurance Taxes in 2026, and the 2026 Railroad Experience Rating Proclamations",
         "url": "https://www.rrb.gov/Newsroom/NewsReleases/RetirementUnemploymentInsuranceTaxes",
-        "verifiedOn": "2026-08-25",
+        "verifiedOn": "2026-09-26",
         "quote": "In 2026 the minimum RUIA rate of 0.65 percent applies to 91 percent of covered employers, while 3 percent pay the maximum 12.0 percent. New employers pay 5.58 percent, the average rate paid by all employers in 2022-2024. The monthly compensation base for 2026 is $2,150, and no surcharge applies."
       },
       "note": "Contributions are capped MONTHLY, not annually — unlike every state unemployment tax in this project — so the caller keeps the running figure in ytd.railroadMonthlyCompensation and it resets each calendar month."
@@ -560,7 +608,8 @@
     "source": {
       "title": "US Railroad Retirement Board — Railroad Retirement and Unemployment Insurance Taxes in 2026",
       "url": "https://www.rrb.gov/Newsroom/NewsReleases/RetirementUnemploymentInsuranceTaxes",
-      "verifiedOn": "2026-08-25",
+      "verifiedOn": "2026-09-26",
+      "reverifiedQuote": "RRB news release (December 2025): \"The railroad retirement tier II tax rates in 2026 will remain at 4.9 percent for employees and 13.1 percent for employers. The maximum amount of earnings subject to railroad retirement tier II taxes in 2026 will increase from $130,800 to $137,100.\" \"Unemployment insurance contribution rates on railroad employers in 2026 will range from a minimum rate of 0.65 percent to a maximum of 12.0 percent on monthly compensation up to $2,150 ... New employers will pay an unemployment insurance contribution rate of 5.58 percent\"",
       "quote": "Tier II tax rates in 2026 remain at 4.9 percent for employees and 13.1 percent for employers; the maximum amount of earnings subject to tier II taxes increases from $130,800 to $137,100. The tier I payroll tax rate remains 7.65 percent, divided into 6.20 percent for retirement (on earnings up to $184,500 in 2026, up from $176,100) and 1.45 percent for Medicare hospital insurance with no maximum."
     },
     "notModelled": "WIRED: RUIA contributions are now computed — see the ruia block above (employer rate from input.employer.railroadUnemploymentRate, otherwise the published new-employer rate, capped at the monthly compensation base). STILL NOT MODELLED: the supplemental annuity work-hour tax, which is levied per work-hour rather than per dollar and has no wage base for this engine to work from."
