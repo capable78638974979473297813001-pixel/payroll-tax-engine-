@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { getApiKey, setCardOnFile, setStripeCustomer, setSubscription, setSuspendedByCustomer, settleBalance } from './keys.ts';
 import {
   chargeOffSession,
@@ -154,17 +155,23 @@ export function handleStripeWebhook(rawBody: string, signatureHeader: string): {
  * key has a Stripe customer. Never throws; a metering hiccup must not fail the
  * customer's calculate call (the local ledger still counted it).
  */
-export async function reportCall(keyId: string): Promise<{ ok: boolean; reason?: string }> {
+export async function reportCall(
+  keyId: string,
+  opts: { units?: number; identifier?: string } = {},
+): Promise<{ ok: boolean; reason?: string }> {
   if (!meteringConfigured()) return { ok: false, reason: 'metering_not_configured' };
   const key = getApiKey(keyId);
   if (!key?.stripeCustomerId) return { ok: false, reason: 'no_customer' };
+  const units = opts.units ?? 1;
+  if (units <= 0) return { ok: true };
   try {
     await reportMeterEvent({
       eventName: process.env.STRIPE_METER_EVENT!,
       customerId: key.stripeCustomerId,
-      value: 1,
-      // Dedupe: at most one unit per key per second even if a retry double-fires.
-      identifier: `${key.id}-${Date.now()}`,
+      value: units,
+      // One id per request, so Stripe drops a retried duplicate but never
+      // merges two genuine calls (a key+millisecond id could do both).
+      identifier: opts.identifier ?? `${key.id}-${randomUUID()}`,
     });
     return { ok: true };
   } catch (err) {
@@ -186,9 +193,19 @@ export interface ChargeResult {
  * when nothing is due (no-op) or when Stripe/card aren't set up (no charge, no
  * balance change).
  */
+/**
+ * Whether this key's calls are billed by Stripe's usage meter (a metered
+ * subscription). Such a key is never also charged through the ledger.
+ */
+export function isMeteredKey(key: { stripeSubscriptionId: string | null; stripeCustomerId: string | null }): boolean {
+  return meteringConfigured() && Boolean(key.stripeSubscriptionId && key.stripeCustomerId);
+}
+
 export async function chargeOutstanding(keyId: string): Promise<ChargeResult> {
   const key = getApiKey(keyId);
   if (!key) return { ok: false, chargedCents: 0, reason: 'no_such_key' };
+  // Defence in depth: a metered key's calls are on its Stripe invoice.
+  if (isMeteredKey(key)) return { ok: false, chargedCents: 0, reason: 'billed_by_meter' };
   const amount = key.balanceDueCents;
   if (amount <= 0) return { ok: true, chargedCents: 0, reason: 'nothing_due' };
   if (!stripeConfigured()) return { ok: false, chargedCents: 0, reason: 'stripe_not_configured' };

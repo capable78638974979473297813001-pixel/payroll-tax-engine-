@@ -111,6 +111,13 @@ export interface UniqueTaxIdEntry {
   /** Which certificate field this id sets, and on which role — see applyEntry() below. */
   field: keyof StateCertificate | 'workState.code' | 'residenceState.code';
   role: 'work' | 'residence' | 'either';
+  /**
+   * For an 'either' id used as the RESIDENCE (liveUniqueTaxIds): the field
+   * it sets instead of `field` — e.g. a Pennsylvania PSD is `workPSD` when
+   * worked in and `residencePSD` when lived in, the same split
+   * geocode/resolve.ts's toCertificateFields() makes.
+   */
+  residenceField?: keyof StateCertificate;
   value: string | boolean;
 }
 
@@ -123,7 +130,7 @@ function makeId(state: string, type: JurisdictionType, seq: number | string): st
 }
 
 /** Fixed catalog of caller-resolved-locality jurisdictions — these are ad hoc `certificate.locality`/flag matches in src/taxes/state.ts, not a name-keyed registry file this module can enumerate generically (see geocode/resolve.ts's own `flags` for the same list). */
-const NAMED_LOCALITIES: { state: string; name: string; field: keyof StateCertificate; role: 'work' | 'residence' | 'either'; value: string | boolean }[] = [
+const NAMED_LOCALITIES: { state: string; name: string; field: keyof StateCertificate; role: 'work' | 'residence' | 'either'; residenceField?: keyof StateCertificate; value: string | boolean }[] = [
   { state: 'NJ', name: 'Newark', field: 'locality', role: 'work', value: 'Newark' },
   { state: 'MO', name: 'Kansas City', field: 'locality', role: 'either', value: 'Kansas City' },
   { state: 'MO', name: 'St. Louis', field: 'locality', role: 'either', value: 'St. Louis' },
@@ -145,6 +152,10 @@ const NAMED_LOCALITIES: { state: string; name: string; field: keyof StateCertifi
   { state: 'OR', name: 'Canby Transit', field: 'locality', role: 'work', value: 'CanbyTransit' },
   { state: 'OR', name: 'Sandy Transit', field: 'locality', role: 'work', value: 'SandyTransit' },
   { state: 'OR', name: 'Wilsonville (SMART)', field: 'locality', role: 'work', value: 'SMART' },
+  // Appended (never inserted) so every existing Oregon id keeps its number.
+  { state: 'OR', name: 'South Clackamas Transit District', field: 'locality', role: 'work', value: 'SCTD' },
+  { state: 'OR', name: 'Metro (Supportive Housing Services tax)', field: 'metroDistrict', role: 'either', residenceField: 'metroDistrict', value: true },
+  { state: 'OR', name: 'Multnomah County (Preschool for All tax)', field: 'multnomahCounty', role: 'either', residenceField: 'multnomahCounty', value: true },
   { state: 'NY', name: 'New York City (resident)', field: 'nycResident', role: 'residence', value: true },
   { state: 'NY', name: 'Yonkers (resident)', field: 'yonkersResident', role: 'residence', value: true },
   { state: 'NY', name: 'Yonkers (nonresident worker)', field: 'yonkersNonresidentWorker', role: 'work', value: true },
@@ -171,9 +182,10 @@ function buildCatalog(checkDate: string): { entries: UniqueTaxIdEntry[]; byId: M
     field: UniqueTaxIdEntry['field'],
     role: UniqueTaxIdEntry['role'],
     value: string | boolean,
+    residenceField?: UniqueTaxIdEntry['residenceField'],
   ) => {
     const id = makeId(state, type, seq);
-    entries.push({ uniqueTaxId: id, locationCode: id, state, type, name, field, role, value });
+    entries.push({ uniqueTaxId: id, locationCode: id, state, type, name, field, role, value, ...(residenceField ? { residenceField } : {}) });
   };
 
   for (const state of Object.keys(STATE_FIPS)) {
@@ -194,10 +206,10 @@ function buildCatalog(checkDate: string): { entries: UniqueTaxIdEntry[]; byId: M
   }
 
   const miCities = [...allMICities(checkDate)].sort((a, b) => a.name.localeCompare(b.name));
-  miCities.forEach((c, i) => add('MI', 'city', i + 1, c.name, 'workCity', 'either', c.name));
+  miCities.forEach((c, i) => add('MI', 'city', i + 1, c.name, 'workCity', 'either', c.name, 'residenceCity'));
 
   const ohMunicipalities = [...allOHMunicipalities(checkDate)].sort((a, b) => a.name.localeCompare(b.name));
-  ohMunicipalities.forEach((m, i) => add('OH', 'city', i + 1, m.name, 'workCity', 'either', m.name));
+  ohMunicipalities.forEach((m, i) => add('OH', 'city', i + 1, m.name, 'workCity', 'either', m.name, 'residenceCity'));
 
   const ohSchoolDistricts = [...allOHSchoolDistricts(checkDate)].sort((a, b) => a.name.localeCompare(b.name));
   ohSchoolDistricts.forEach((d, i) => add('OH', 'school_district', i + 1, d.name, 'schoolDistrictCode', 'either', d.sdNumber));
@@ -209,7 +221,7 @@ function buildCatalog(checkDate: string): { entries: UniqueTaxIdEntry[]; byId: M
   alMunicipalities.forEach((m, i) => add('AL', 'city', i + 1, m.name, 'workCity', 'work', m.name));
 
   const kyJurisdictions = [...allKYJurisdictions(checkDate)].sort((a, b) => a.name.localeCompare(b.name));
-  kyJurisdictions.forEach((j, i) => add('KY', 'city', i + 1, j.name, 'workCity', 'either', j.name));
+  kyJurisdictions.forEach((j, i) => add('KY', 'city', i + 1, j.name, 'workCity', 'either', j.name, 'residenceCity'));
 
   // Pennsylvania already publishes its own stable 6-digit PSD code for
   // every one of its 2,627 EIT/LST jurisdictions — reused verbatim as the
@@ -218,12 +230,12 @@ function buildCatalog(checkDate: string): { entries: UniqueTaxIdEntry[]; byId: M
   // to provide, and PA's own withholding paperwork already refers to it by
   // that number.
   for (const j of allPALocalJurisdictions(checkDate)) {
-    add('PA', 'psd', j.psdCode, `${j.municipality}, ${j.county} (PSD ${j.psdCode})`, 'workPSD', 'either', j.psdCode);
+    add('PA', 'psd', j.psdCode, `${j.municipality}, ${j.county} (PSD ${j.psdCode})`, 'workPSD', 'either', j.psdCode, 'residencePSD');
   }
 
   for (const loc of NAMED_LOCALITIES) {
     const seq = entries.filter((e) => e.state === loc.state && e.type === 'locality').length + 1;
-    add(loc.state, 'locality', seq, loc.name, loc.field, loc.role, loc.value);
+    add(loc.state, 'locality', seq, loc.name, loc.field, loc.role, loc.value, loc.residenceField);
   }
 
   const byId = new Map(entries.map((e) => [e.uniqueTaxId, e]));
@@ -325,21 +337,37 @@ function centsToDecimalDollars(c: Cents): number {
  */
 function applyEntry(
   entry: UniqueTaxIdEntry,
-  acc: { stateCode?: string; certificate: Partial<StateCertificate> },
+  acc: ResolvedIds,
+  role: 'work' | 'residence',
 ): void {
   if (entry.field === 'workState.code' || entry.field === 'residenceState.code') {
     acc.stateCode = entry.value as string;
     return;
   }
+  if (role === 'residence' && entry.residenceField) {
+    // A residence-side LOCAL fact (residencePSD, residenceCity, ...). The
+    // local tax functions read these off the WORK state's certificate, so
+    // payCalc() also copies them there when both states are the same.
+    (acc.certificate as Record<string, unknown>)[entry.residenceField] = entry.value;
+    (acc.localResidenceFields as Record<string, unknown>)[entry.residenceField] = entry.value;
+    return;
+  }
   (acc.certificate as Record<string, unknown>)[entry.field] = entry.value;
+}
+
+interface ResolvedIds {
+  stateCode?: string;
+  certificate: Partial<StateCertificate>;
+  /** Residence-side local fields, for copying onto the work certificate. */
+  localResidenceFields: Partial<StateCertificate>;
 }
 
 function resolveIds(
   ids: string[] | undefined,
   checkDate: string,
   role: 'work' | 'residence',
-): { stateCode?: string; certificate: Partial<StateCertificate> } {
-  const acc: { stateCode?: string; certificate: Partial<StateCertificate> } = { certificate: {} };
+): ResolvedIds {
+  const acc: ResolvedIds = { certificate: {}, localResidenceFields: {} };
   for (const rawId of ids ?? []) {
     const entry = resolveUniqueTaxId(rawId, checkDate);
     if (!entry) {
@@ -348,7 +376,7 @@ function resolveIds(
       );
     }
     if (entry.role !== 'either' && entry.role !== role) continue;
-    applyEntry(entry, acc);
+    applyEntry(entry, acc, role);
   }
   return acc;
 }
@@ -370,7 +398,14 @@ export function payCalc(requests: PayCalcRequest[]): PayCalcResult[] {
       const work = resolveIds(req.workUniqueTaxIds, req.checkDate, 'work');
       const live = resolveIds(req.liveUniqueTaxIds, req.checkDate, 'residence');
 
-      const certificate: Partial<StateCertificate> = { ...work.certificate };
+      // Local taxes (PA EIT, MI/OH/KY cities, Oregon Metro/Multnomah) read
+      // the residence side from the work certificate, so a lived-in PSD or
+      // city in the same state goes there too.
+      const sameState = !live.stateCode || live.stateCode === work.stateCode;
+      const certificate: Partial<StateCertificate> = {
+        ...work.certificate,
+        ...(sameState ? live.localResidenceFields : {}),
+      };
       const residenceCertificate: Partial<StateCertificate> = { ...live.certificate };
 
       for (const parm of req.taxJurisdictionParms ?? []) {

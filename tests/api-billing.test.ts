@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { createHmac } from 'node:crypto';
-import { mintApiKey, recordUsage, usageForKey, getApiKey, verifyApiKey, setStripeCustomer } from '../api/keys.ts';
+import { mintApiKey, recordUsage, usageForKey, getApiKey, verifyApiKey, setStripeCustomer, setSubscription } from '../api/keys.ts';
 import { chargeOutstanding, completeCardSetup, handleStripeWebhook, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
 
 // A fake Stripe: route requests by method + path to canned responses.
@@ -100,7 +100,7 @@ describe('Stripe billing (api/billing.ts)', () => {
     process.env.STRIPE_METER_EVENT = 'payroll_api_call';
     try {
       assert.equal(meteringConfigured(), true);
-      const { key } = mintApiKey('Metered Co'); // default $0.15/call
+      const { key } = mintApiKey('Metered Co'); // default: published graduated rate
       const id = verifyApiKey(key)!.id;
       setStripeCustomer(id, 'cus_meter'); // pretend they subscribed
 
@@ -186,5 +186,31 @@ describe('Stripe billing (api/billing.ts)', () => {
     assert.equal(charge.reason, 'charge_failed');
     assert.match(charge.error!, /declined/);
     assert.equal(usageForKey(id)!.balanceDueCents, 7); // NOT settled
+  });
+
+  test('a key on a metered subscription is billed by the meter only: one unit per successful calculation', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_fake';
+    process.env.STRIPE_METER_EVENT = 'api_call';
+    process.env.STRIPE_PRICE_ID = 'price_metered';
+    try {
+      const { key } = mintApiKey('Meter Co', { pricePerCallCents: 5 });
+      const id = verifyApiKey(key)!.id;
+      setStripeCustomer(id, 'cus_m');
+      setSubscription(id, 'sub_m');
+      recordUsage(id, { statusCode: 200, meteredByStripe: true });
+      // Nothing for the ledger to charge, and it refuses to try.
+      assert.equal(usageForKey(id)!.balanceDueCents, 0);
+      assert.equal((await chargeOutstanding(id)).reason, 'billed_by_meter');
+
+      const sent: string[] = [];
+      stub('POST', /\/v1\/billing\/meter_events$/, (body) => { sent.push(body); return { json: { object: 'billing.meter_event' } }; });
+      const out = await reportCall(id, { units: 3 });
+      assert.equal(out.ok, true);
+      assert.equal(sent.length, 1);
+      assert.match(decodeURIComponent(sent[0]), /payload\[value\]=3/);
+    } finally {
+      delete process.env.STRIPE_METER_EVENT;
+      delete process.env.STRIPE_PRICE_ID;
+    }
   });
 });

@@ -50,6 +50,7 @@ import type {
   GarnishmentStateOverride,
 } from './registry.ts';
 import { garnishmentFederalRuleset, garnishmentStateOverride } from './registry.ts';
+import { minimumWage } from './minimum-wage.ts';
 
 export type GarnishmentOrderType =
   | 'consumer_creditor'
@@ -170,6 +171,13 @@ export interface GarnishmentInput {
   /** The already-computed paycheck this garnishment run is layered onto. */
   paycheck: PaycheckResult;
   orders: GarnishmentOrder[];
+  /**
+   * The work location's minimum-wage region where the state has several
+   * (New York: 'downstate' for NYC, Long Island and Westchester). Used only
+   * where a state's garnishment floor follows the current minimum wage.
+   * Omitted, the state's baseline (upstate) figure applies.
+   */
+  minimumWageRegion?: string;
 }
 
 /**
@@ -568,6 +576,23 @@ function studentLoanCap(
 }
 
 /**
+ * Replace a state's fixed garnishment-floor wage with the minimum wage in
+ * force on the check date (and in the employee's region), where the data
+ * says the statute follows the current minimum wage. A fixed figure is
+ * wrong for half the year in DC (a July 1 step) and for downstate New York
+ * (a higher regional rate) — see minimumWageFromRuleset in registry.ts.
+ */
+function withCurrentMinimumWage(
+  override: GarnishmentStateOverride | undefined,
+  input: GarnishmentInput,
+): GarnishmentStateOverride | undefined {
+  const cfg = override?.ordinaryGarnishment;
+  if (!override || !cfg?.minimumWageFromRuleset) return override;
+  const current = minimumWage({ checkDate: input.checkDate, state: input.workState, region: input.minimumWageRegion });
+  return { ...override, ordinaryGarnishment: { ...cfg, stateMinimumHourlyWage: current.hourly } };
+}
+
+/**
  * Compute what may lawfully be withheld from ONE paycheck across every
  * garnishment order in effect, applying the CCPA ceilings (federal, plus
  * any researched state override for ordinary garnishment) and the
@@ -583,7 +608,7 @@ export function calculateGarnishments(input: GarnishmentInput): GarnishmentResul
   const disposable = disposableEarnings(paycheck);
   const gross = paycheck.grossPay;
   const fed = garnishmentFederalRuleset(checkDate);
-  const override = garnishmentStateOverride(workState, checkDate);
+  const override = withCurrentMinimumWage(garnishmentStateOverride(workState, checkDate), input);
 
   const supportOrders = orders.filter((o) => o.type === 'child_support');
   const otherOrders = orders
@@ -599,7 +624,19 @@ export function calculateGarnishments(input: GarnishmentInput): GarnishmentResul
   let aggregateCeiling = applyRate(disposable, fed.ordinaryGarnishment.maxDisposableEarningsFraction);
 
   if (supportOrders.length > 0) {
-    const supportingOtherFamily = supportOrders.some((o) => o.supportingOtherFamily);
+    // The 50% vs 60% ceiling turns on this fact, so it must be stated on
+    // every support order. Treating "not said" as false picked the HIGHER
+    // ceiling (60%/65%), over-withholding from anyone who does support
+    // another family (15 U.S.C. 1673(b)(2)).
+    for (const o of supportOrders) {
+      if (typeof o.supportingOtherFamily !== 'boolean') {
+        throw new Error(
+          `Support order "${o.id}": supportingOtherFamily must be true or false. It decides whether the ` +
+            `CCPA ceiling is 50% or 60% of disposable earnings, and this engine will not assume it.`,
+        );
+      }
+    }
+    const supportingOtherFamily = supportOrders.some((o) => o.supportingOtherFamily === true);
     const inArrears = supportOrders.some((o) => o.arrearsOver12Weeks);
     let fraction = supportingOtherFamily
       ? fed.supportOrder.supportingOtherFamilyFraction

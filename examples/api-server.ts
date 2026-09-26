@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { calculatePaycheck } from '../src/calculate.ts';
 import type { PaycheckInput } from '../src/types.ts';
 import { mintApiKey, recordUsage, usageForKey, verifyApiKey, type ApiKey } from '../api/keys.ts';
-import { billingConfigured, completeCardSetup, handleStripeWebhook, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
+import { billingConfigured, completeCardSetup, handleStripeWebhook, isMeteredKey, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
 import { runEmbeddedPayroll, type PlatformEmployeeInput } from '../payroll/platform.ts';
 import type { PayFrequency } from '../src/types.ts';
 import { listUniqueTaxIds, payCalc, resolveUniqueTaxId, type PayCalcRequest } from '../api/ste-compat.ts';
@@ -218,10 +218,12 @@ const server = createServer(async (req, res) => {
     }
     try {
       const result = calculatePaycheck(input);
-      const chargedCents = recordUsage(key.id, { stateCode, statusCode: 200 }); // billable success (local ledger)
-      // Report this call to Stripe's usage meter — the per-call charge. Fire and
-      // forget so a metering hiccup never delays or fails the customer's response.
-      void reportCall(key.id).catch(() => {});
+      // ONE billing path per key: a metered subscription bills through
+      // Stripe's meter only; any other key through the local ledger only.
+      const metered = isMeteredKey(key);
+      const chargedCents = recordUsage(key.id, { stateCode, statusCode: 200, meteredByStripe: metered });
+      // Fire and forget so a metering hiccup never delays or fails the response.
+      if (metered) void reportCall(key.id).catch(() => {});
       const balanceDueCents = usageForKey(key.id)?.balanceDueCents ?? 0;
       res.setHeader('X-Charge-Cents', String(chargedCents));
       return sendJson(res, 200, { ok: true, result, billing: { chargedCents, balanceDueCents, metered: meteringConfigured() } });
@@ -257,8 +259,9 @@ const server = createServer(async (req, res) => {
         payFrequency: (body.payFrequency ?? 'biweekly') as PayFrequency,
         employees: body.employees,
       });
-      recordUsage(key.id, { statusCode: 200 }); // billable
-      void reportCall(key.id).catch(() => {});
+      const metered = isMeteredKey(key);
+      recordUsage(key.id, { statusCode: 200, meteredByStripe: metered }); // billable
+      if (metered) void reportCall(key.id).catch(() => {});
       return sendJson(res, 200, { ok: true, run });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Payroll run failed.';
@@ -309,11 +312,14 @@ const server = createServer(async (req, res) => {
     // Billed the same as /v1/calculate, once per request in the batch —
     // this endpoint is a translation in front of the same engine call, not
     // a cheaper one.
+    const metered = isMeteredKey(key);
     let chargedCents = 0;
     for (const r of results) {
-      chargedCents += recordUsage(key.id, { statusCode: r.error ? 422 : 200, error: r.error, billable: !r.error });
+      chargedCents += recordUsage(key.id, { statusCode: r.error ? 422 : 200, error: r.error, billable: !r.error, meteredByStripe: metered });
     }
-    if (results.some((r) => !r.error)) void reportCall(key.id).catch(() => {});
+    // One meter unit per successful calculation in the batch, not one per batch.
+    const successes = results.filter((r) => !r.error).length;
+    if (metered && successes > 0) void reportCall(key.id, { units: successes }).catch(() => {});
     res.setHeader('X-Charge-Cents', String(chargedCents));
     return sendJson(res, 200, { payCalc: results });
   }
@@ -337,7 +343,7 @@ server.listen(PORT, () => {
   console.log(`  Usage:       GET  http://localhost:${PORT}/v1/usage`);
   console.log(`  Save a card: POST http://localhost:${PORT}/v1/billing/setup  -> returns a Stripe Checkout URL`);
   const billingMode = meteringConfigured()
-    ? 'METERED per-call (Stripe usage billing — every call reports $0.15 to Stripe, invoiced monthly)'
+    ? 'METERED per-call (keys on a metered subscription report one unit per call to Stripe, billed at the published graduated rate and invoiced monthly; other keys use the ledger)'
     : billingConfigured()
       ? 'Stripe manual (STRIPE_SECRET_KEY set; add STRIPE_PRICE_ID + STRIPE_METER_EVENT for per-call metering)'
       : 'ledger-only (set STRIPE_SECRET_KEY + STRIPE_PRICE_ID + STRIPE_METER_EVENT to bill per call)';

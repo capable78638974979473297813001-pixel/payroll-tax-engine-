@@ -3,6 +3,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 
+import { CALL_TIERS } from '../site/lib/pricing.ts';
+
 /**
  * API keys + usage metering for the payroll-tax API (examples/api-server.ts) —
  * the self-contained, no-database replacement for what supabase/migrations'
@@ -37,8 +39,20 @@ export interface ApiKey {
   /** A non-secret display prefix, e.g. "sk_live_ab12cd" — safe to show in a dashboard. */
   prefix: string;
   plan: string;
-  /** What each billable call costs this customer, in integer cents. */
+  /**
+   * What each billable call costs this customer, in integer cents. For a
+   * `graduated` key this is the rate the NEXT call will be charged.
+   */
   pricePerCallCents: number;
+  /**
+   * Charge the published graduated rate (site/lib/pricing.ts: $0.12, then
+   * $0.09, $0.06 and $0.04 as the year's volume grows) instead of a flat
+   * pricePerCallCents. Set for plan keys minted without an explicit price.
+   */
+  graduated?: boolean;
+  /** Billable calls in `billableYear`, the volume the graduated rate is based on. */
+  billableCallsThisYear?: number;
+  billableYear?: number;
   /** Manual on/off (revoke). A revoked key cannot authenticate at all. */
   active: boolean;
   /** Auto-set when Stripe reports the monthly invoice went unpaid; the key can still sign in to fix its card but cannot make billable calls. */
@@ -86,15 +100,20 @@ export interface PublicApiKey {
 }
 
 /**
- * Per-call price by plan, in cents. This is "the amount we charge them" — the
- * default when a key is minted without an explicit price. Change these, or
- * pass an explicit price at mint time, to set your pricing.
+ * Flat per-call price by plan, in cents, for plans that are NOT on the
+ * published graduated rate. Paid plans minted without an explicit price
+ * use the graduated rate instead (see graduatedRateCents()), the same
+ * tiers the website publishes and Stripe's metered price bills.
  */
 export const PLAN_PRICING_CENTS: Record<string, number> = {
   free: 0,
-  standard: 15, // $0.15 / call — the website price
-  pro: 15,
 };
+
+/** The published per-call rate, in cents, for the (n+1)th billable call of the year. */
+export function graduatedRateCents(callsAlreadyThisYear: number): number {
+  const tier = CALL_TIERS.find((t) => callsAlreadyThisYear < t.upTo) ?? CALL_TIERS[CALL_TIERS.length - 1];
+  return Math.round(tier.rate * 100);
+}
 
 const RECENT_LIMIT = 25;
 
@@ -178,7 +197,8 @@ export function mintApiKey(
   opts: { plan?: string; pricePerCallCents?: number } = {},
 ): { key: string; record: PublicApiKey } {
   const plan = opts.plan ?? 'standard';
-  const price = opts.pricePerCallCents ?? PLAN_PRICING_CENTS[plan] ?? PLAN_PRICING_CENTS.standard;
+  const graduated = opts.pricePerCallCents === undefined && PLAN_PRICING_CENTS[plan] === undefined;
+  const price = opts.pricePerCallCents ?? PLAN_PRICING_CENTS[plan] ?? graduatedRateCents(0);
   const key = 'sk_live_' + randomBytes(24).toString('base64url');
   const record: ApiKey = {
     id: `key_${randomUUID().slice(0, 8)}`,
@@ -187,6 +207,7 @@ export function mintApiKey(
     prefix: key.slice(0, 14), // "sk_live_" + 6 chars — enough to identify, not to use
     plan,
     pricePerCallCents: Math.max(0, Math.round(price)),
+    ...(graduated ? { graduated: true, billableCallsThisYear: 0, billableYear: new Date().getUTCFullYear() } : {}),
     active: true,
     suspended: false,
     suspendedReason: null,
@@ -262,6 +283,7 @@ export function setPrice(id: string, pricePerCallCents: number): boolean {
     const k = db.keys[id] ?? Object.values(db.keys).find((x) => x.prefix === id);
     if (!k) return false;
     k.pricePerCallCents = Math.max(0, Math.round(pricePerCallCents));
+    k.graduated = false; // an explicit price is a flat price
     return true;
   });
 }
@@ -309,13 +331,35 @@ export function revokeApiKey(idOrPrefix: string): boolean {
  */
 export function recordUsage(
   id: string,
-  call: { stateCode?: string | null; statusCode: number; error?: string; billable?: boolean },
+  call: {
+    stateCode?: string | null;
+    statusCode: number;
+    error?: string;
+    billable?: boolean;
+    /**
+     * The call is billed by Stripe's usage meter (a metered subscription),
+     * so it is logged here but adds nothing to balanceDueCents. Without
+     * this, a metered key was charged twice: once on the invoice, once by
+     * chargeOutstanding() settling the ledger.
+     */
+    meteredByStripe?: boolean;
+  },
 ): number {
   return withDb((db) => {
     const k = db.keys[id];
     if (!k) return 0;
-    const billable = call.billable ?? true;
-    const chargedCents = billable ? k.pricePerCallCents : 0;
+    const billable = (call.billable ?? true) && !call.meteredByStripe;
+    let chargedCents = billable ? k.pricePerCallCents : 0;
+    if (billable && k.graduated) {
+      const year = new Date().getUTCFullYear();
+      if (k.billableYear !== year) {
+        k.billableYear = year;
+        k.billableCallsThisYear = 0;
+      }
+      chargedCents = graduatedRateCents(k.billableCallsThisYear ?? 0);
+      k.billableCallsThisYear = (k.billableCallsThisYear ?? 0) + 1;
+      k.pricePerCallCents = graduatedRateCents(k.billableCallsThisYear);
+    }
     k.calls += 1;
     k.lastUsedAt = new Date().toISOString();
     k.balanceDueCents += chargedCents;

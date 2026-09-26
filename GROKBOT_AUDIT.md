@@ -274,3 +274,34 @@ Recorded as reported from a parallel official-source check. Not re-verified in t
 - Some SUI rates are secondary-sourced.
 - The Kentucky scrape includes rows marked `unreliable`.
 - There are no dedicated FIPS rate tables. Pennsylvania local tax is keyed by `psdCode`.
+
+---
+
+## Fix status (2026-09-26)
+
+Every finding above was addressed in the follow-up pull request. Each fix has a test that fails on the pre-fix code.
+
+| # | Finding | Status |
+| --- | --- | --- |
+| 1 | Railroad Tier II / RUIA base | Fixed: FICA-style base. Confirmed against 26 U.S.C. 3231(e)(8)(A) and 45 U.S.C. 351(i) |
+| 2 | Residence withholding drops county/city lines | Fixed: swap and residence paths carry every residence income-tax line (Indiana county, NYC, Yonkers, supplemental) |
+| 3 | Oregon STT for residents working elsewhere | Fixed, per ORS 320.550(2)(a) |
+| 4 | Hackleburg alias | Fixed in the geocoder |
+| 5 | `payCalc` residence PSD | Fixed: residence ids set `residencePSD` / `residenceCity` |
+| 6 | Support order 60% default | Fixed: `supportingOtherFamily` is required |
+| 7 | Whole-dollar rounding on FICA | Fixed: income tax lines only |
+| 8 | Florida $15.00 on 2026-09-30 | Fixed: `scheduledChanges` now apply on their date, for every jurisdiction |
+| 9 | SUTA uses income-tax list | Fixed: FUTA wage definition by default. Minnesota overridden per Minn. Stat. 268.035 subd. 29(b). Oregon kept as before and marked unresolved |
+| 10 | Double billing | Fixed: one billing path per key; batch reports one unit per success; published graduated rate |
+| 11 | Household FUTA | Fixed: this check's cash counts toward the quarter |
+| 12 | Supplemental `exempt` truthiness | Fixed: strict boolean |
+| 13 | Missing Oregon catalog ids | Fixed: South Clackamas, Metro, Multnomah |
+| 14 | New York garnishment floor | Fixed: follows the minimum wage and region |
+| 15 | DC garnishment floor | Fixed: follows the minimum wage on the check date; note corrected |
+| 16 | RUIA narrative | Fixed |
+| 17 | Oregon 8% hardcoded | Fixed: read from data |
+| 18 | Stale narratives | Fixed |
+| 19 | New York annual bases | No change needed: they match NYS-50-T-NYS (1/26) exactly; verification recorded in the data file |
+| 20 | NaN in rounding helpers | Fixed |
+
+Related, found while fixing #9 and still open: Connecticut paid leave and Hawaii TDI use the income tax list, so a 401(k) deferral reduces their base. Their statutes could not be fetched (a TLS error and a bot block), so both are marked as open questions in their state files.

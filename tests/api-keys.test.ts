@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import {
+  graduatedRateCents,
   listApiKeys,
   mintApiKey,
   publicApiKey,
@@ -29,7 +30,7 @@ describe('API keys + metering (api/keys.ts)', () => {
     const { key, record } = mintApiKey('Acme Payroll', { plan: 'pro' });
     assert.match(key, /^sk_live_[A-Za-z0-9_-]{20,}$/);
     assert.equal(record.plan, 'pro');
-    assert.equal(record.pricePerCallCents, 15); // pro plan default ($0.15/call)
+    assert.equal(record.pricePerCallCents, 12); // pro plan default: the published first-tier rate ($0.12/call)
     assert.equal(record.calls, 0);
     assert.equal(record.balanceDueCents, 0);
     assert.ok(key.startsWith(record.prefix)); // prefix is a non-secret slice of the key
@@ -112,5 +113,24 @@ describe('API keys + metering (api/keys.ts)', () => {
     for (const k of listApiKeys()) {
       assert.equal(Object.prototype.hasOwnProperty.call(k, 'keyHash'), false);
     }
+  });
+
+  test('a default-priced key is charged the published graduated rate, falling with yearly volume', () => {
+    assert.equal(graduatedRateCents(0), 12);
+    assert.equal(graduatedRateCents(24_999), 12);
+    assert.equal(graduatedRateCents(25_000), 9); // the 25,001st call
+    assert.equal(graduatedRateCents(200_000), 6);
+    assert.equal(graduatedRateCents(1_000_000), 4);
+    const { record } = mintApiKey('Graduated Co');
+    assert.equal(recordUsage(record.id, { statusCode: 200 }), 12);
+    assert.equal(usageForKey(record.id)!.balanceDueCents, 12);
+  });
+
+  test('a call billed by Stripe\'s meter is logged but never added to the ledger balance', () => {
+    const { record } = mintApiKey('Metered Co', { pricePerCallCents: 5 });
+    assert.equal(recordUsage(record.id, { statusCode: 200, meteredByStripe: true }), 0);
+    const u = usageForKey(record.id)!;
+    assert.equal(u.calls, 1);
+    assert.equal(u.balanceDueCents, 0);
   });
 });
