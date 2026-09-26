@@ -3,8 +3,8 @@
   "failures": 0,
   "hash": "330a1e05b1e7452abe5cbd73018e0cf4d03addd6f280cbc11a081d165c6693f8",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "02e666060f",
@@ -71,8 +71,8 @@
   "failures": 0,
   "hash": "260a81883ad2d326094d03d51a3bf629a111b075a5b53023e06d332bd26d8f28",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://labor.alaska.gov/estax/documents/AK_RATE_2026_Experience_Rate_Table.pdf": "Download table as PDF"
   },
@@ -89,8 +89,8 @@
   "failures": 0,
   "hash": "1b2b8ae52c912290a662ac935e3c562378e379262a92e1209036e3468705d2b6",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.revenue.alabama.gov/wp-content/uploads/2025/04/A4_0425.pdf"
@@ -99,8 +99,8 @@
   "failures": 0,
   "hash": "048ba4b611a18fa7a9a1417798acf508882017a444a5d74ad1f554e17f40cecc",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www2.labor.alabama.gov/Newsletter/LMI Newsletter.pdf": "Alabama Labor Market Newsletter",
    "https://www2.labor.alabama.gov/WorkforceDev/RESEA_2026.pdf": "Open RESEA Report"
@@ -125,8 +125,8 @@
   "failures": 0,
   "hash": "f369c24954ece09b5b7e14c5ef4596afbe6e7aec537df4972e66a75b93adf0a0",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.revenue.alabama.gov/wp-content/uploads/2025/06/250529_NOTICE_IT_OvertimeExemptionSunset.pdf": "Download a pdf of this notice"
   },
@@ -148,8 +148,8 @@
   "failures": 0,
   "hash": "512c24e0acd28f99c05294582e3afd05e4dffa26c6cfabbb8e704e03a90d092a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.revenue.alabama.gov/wp-content/uploads/2026/01/whbooklet_0126.pdf"
@@ -158,8 +158,8 @@
   "failures": 0,
   "hash": "33ca066ff3c982ec22532e0b45b7d1102e563422b25a592ef7bd2b044b92db1e",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.revenue.alabama.gov/individual-corporate/alabama-accountability-act/": "Alabama Accountability Act",
    "https://www.revenue.alabama.gov/individual-corporate/alabama-business-modernized-electronic-filing-mef/": "Alabama Business Modernized Electronic Filing (MeF)",
@@ -196,10 +196,11 @@
   "url": "https://www.revenue.alabama.gov/individual-corporate/withholding-tax-2/"
  },
  "al-97dce36805": {
-  "failures": 0,
+  "failures": 1,
   "hash": "55dd6f64e054a95b9fcc9d3ec01de2c37a546fafe3875e127e7808a5e32e820b",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {},
   "nav": [
@@ -215,8 +216,8 @@
   "failures": 0,
   "hash": "0d36af89c4495220ab0ea4ecc9698c9165d131e54ef9eca411244f991cfea808",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://comptroller.alabama.gov/wp-content/uploads/2018/01/Jefferson-County-Occupational-Tax.pdf"
@@ -225,8 +226,8 @@
   "failures": 0,
   "hash": "d24e55207e85c78eb5139201139cc870851ce0e84720d65058292e64016df739",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://dws.arkansas.gov/wp-content/uploads/UI-Handbook-2026-Final.pdf"
@@ -235,8 +236,8 @@
   "failures": 0,
   "hash": "393f2b54b0d7030c2b7d00f26442e2128cbcab38096ba78a930334579ce9ea3b",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.dfa.arkansas.gov/cdn-cgi/l/email-protection": "Email: [email protected]",
    "https://www.dfa.arkansas.gov/divisions": "\u2190 View All DFA Offices",
@@ -397,8 +398,8 @@
   "failures": 0,
   "hash": "8490b8b5745f5cd2c31eccce63aceaeaffb2770e81591904982d067f7b2a28fb",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.dfa.arkansas.gov/wp-content/uploads/withholdTaxTablesLowIncome_2026.pdf"
@@ -407,8 +408,8 @@
   "failures": 0,
   "hash": "e94aebb6c48204a33eeb61918d211f2167a13c5349acc0aa84714d48afe20032",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.dfa.arkansas.gov/wp-content/uploads/Withholding-Tax-Formula.pdf"
@@ -417,15 +418,15 @@
   "failures": 0,
   "hash": "03eaed3cd0f2b441e5f073afc0bfc439626f2a9c0fef7a4deab9710ef5fd7c2e",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.dfa.arkansas.gov/wp-content/uploads/AR4EC2025_FI.pdf"
  },
  "ar-feaf1a0a4a": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/"
  },
@@ -433,8 +434,8 @@
   "failures": 0,
   "hash": "5a0813f876cffc411b0b7e0932c3774f19a648349d0ef6f9b4e548396b92897d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "needs_browser": true,
@@ -444,8 +445,8 @@
   "failures": 0,
   "hash": "6586ff8d2063f11a577b8a30354b149da81d730c9964e77b6d4317f37af03d13",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://azdor.gov/": "Home",
    "https://azdor.gov/business": "Business",
@@ -489,8 +490,8 @@
   "failures": 0,
   "hash": "04252cf0482ed80b1375a6ee71e2b9acb442dc084a39c9536dfc4cb3e3df2d06",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.oregon.gov/dor/forms/FormsPubs/withholding-transit-tax-non-resident_206-692.pdf"
@@ -499,8 +500,8 @@
   "failures": 0,
   "hash": "cad5c76056e83352e3e9897776ad61620dfbeb4110a14b736fb45eb1147a75c1",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2026_WECi.pdf"
@@ -509,8 +510,8 @@
   "failures": 0,
   "hash": "afb09946d483a90ed4211f03745d7a7e604967b2486bcdfcf9a0e642e1a448ad",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2026_A-4_f.pdf"
@@ -519,8 +520,8 @@
   "failures": 0,
   "hash": "17a6523a5707e2a235fb4a840b054ba25e71eee215e459934a909fabfebb41b2",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.tucsonaz.gov/files/sharedassets/public/v/1/bsd/documents/minimum-wage-materials/cot_minimum_wage_eng_2026.pdf": "Minimum Wage English 2026(PDF, 2MB)",
    "https://www.tucsonaz.gov/files/sharedassets/public/v/1/bsd/documents/minimum-wage-materials/cot_minimum_wage_span_2026.pdf": "Minimum Wage Spanish 2026(PDF, 3MB)"
@@ -547,13 +548,12 @@
  },
  "az-b66098e04c": {
   "failures": 0,
-  "hash": "f74c3d65b30f76d382f62fd0b37ba12f0ea11a29eca83ab386e9c813f26f103e",
-  "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "hash": "12021ae6c771bf56fc34742e8a304c361efe28d2b04226cce3faf1f1588f2646",
+  "last_changed": "2026-09-26",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
-   "08f4dbcb74",
    "1065e6e931",
    "10c4b0bc81",
    "3a35a2f2a5",
@@ -563,6 +563,7 @@
    "7535be1614",
    "c6073d2f8c",
    "c7fba6a824",
+   "cc00ad38fb",
    "da39a3ee5e",
    "e749a45fbc",
    "f0329cb068"
@@ -571,10 +572,10 @@
   "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165"
  },
  "az-c562e891c7": {
-  "failures": 2,
+  "failures": 3,
   "hash": "06643507b2f5d04ba2f6fbe5fe3262d8e354016da2f04f67cf50682aa4d1f333",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
   "last_error": "read with a browser last time; a real browser was refused too",
   "last_ok": "2026-09-24",
   "links": {},
@@ -586,8 +587,8 @@
   "failures": 0,
   "hash": "7addf7c719b6142030d45c0a36e8b4a6c61f93f99a58a2f3c0c2aaacd7ea9ebd",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0b403a6df0",
@@ -606,8 +607,8 @@
   "failures": 0,
   "hash": "76656f8a77a739a57141374f0b9c7b3a99ff0727dd2b26381f1f101ceae0c35a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_English2023.pdf": "FAQ (English)",
    "https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_Spanish2023.pdf": "FAQ (Spanish)",
@@ -653,8 +654,8 @@
   "failures": 0,
   "hash": "1c5d810cda653fda836d5da682b51035210c97fe2cde32bdaa0256dc9c37fa40",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de4.pdf"
@@ -663,8 +664,8 @@
   "failures": 0,
   "hash": "09a129a59ed6e9c4a71af51a6de238c8782dee31d30f62760fc98f5f19e92383",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://hcai.ca.gov/wp-content/uploads/2024/10/SB-525-Fact-Sheet-HCAI-Hospital-Lists-10_10_24.pdf": "list",
    "https://www.dhcs.ca.gov/provgovpart/Documents/Psychiatric-Health-Facility.pdf": "here",
@@ -729,8 +730,8 @@
   "failures": 0,
   "hash": "b8cbe543593fb1d0dadd01682f4804d09b003089d29901adee6c634e4957516d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf"
@@ -739,8 +740,8 @@
   "failures": 0,
   "hash": "b70a843fc3866750aafaa20ab6fca1cd03461acb4dd833d225624944a8fe8a2a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.longbeach.gov/globalassets/city-clerk/media-library/documents/public-notices/public-notices/measure-rw-bulletin-effective-july-1-2026"
@@ -749,8 +750,8 @@
   "failures": 0,
   "hash": "d26549db3dbd2101830492dd99ad17d7f4ee57036573920f7966123cce25e06d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.dir.ca.gov/IWC/IWCArticle05.pdf": "Wage Order 5",
    "https://www.dir.ca.gov/IWC/IWCArticle07.pdf": "Wage Order 7",
@@ -795,8 +796,8 @@
   "failures": 0,
   "hash": "b8cbe543593fb1d0dadd01682f4804d09b003089d29901adee6c634e4957516d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "redirects_to": "https://edd.ca.gov:443/siteassets/files/pdf_pub_ctr/de44.pdf",
@@ -806,8 +807,8 @@
   "failures": 0,
   "hash": "8a485ea22539bf925a77e91267588d2b268330592dccda584739e60e2c42a04d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://edd.ca.gov/en/Office_Locator/": "Employment Tax Office",
    "https://edd.ca.gov/en/about_edd/Get_Email_Notices/": "EDD email notices",
@@ -864,8 +865,8 @@
   "failures": 0,
   "hash": "d745daf01f0544f0849aca012a8e21ac6495ac7ac992601fb86be9a71ff34296",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/26methb.pdf"
@@ -874,8 +875,8 @@
   "failures": 0,
   "hash": "bb93cb4225fd583bbbb6ff3babdaa6457d49ef349249c50fda489ee80f034833",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://assets.bouldercounty.gov/wp-content/uploads/2017/08/bocc-advance-agenda.pdf": "Commissioners\u2019 Agenda",
    "https://assets.bouldercounty.gov/wp-content/uploads/2023/11/Wage-Theft-English-2022.pdf": "Boulder District Attorney\u2019s website",
@@ -1098,8 +1099,8 @@
   "failures": 0,
   "hash": "5d53af38f5ead5c1e03b065a09b1a01aa632d92a4c6871f3959fd9facec478c9",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf"
@@ -1108,8 +1109,8 @@
   "failures": 0,
   "hash": "9514452bc018b7b7133b19b58025c4cfdf3aeb1a1bfbae6bf68bbc28047b2a5c",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://bouldercolorado.gov/media/16918/download?inline=": "Poster about minimum wage in the City of Boulder",
    "https://bouldercolorado.gov/media/16919/download?inline=": "Poster in Spanish about minimum wage in the City of Boulder"
@@ -1126,8 +1127,8 @@
   "failures": 0,
   "hash": "a49fc0d9545f2e570875f6e1dc59a5bec7098a337c9da5573ff7b07f79d9e9e9",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://tax.colorado.gov/sites/tax/files/documents/DR_1098_Colorado_Withholding_Worksheet_for_Employees.pdf"
@@ -1136,8 +1137,8 @@
   "failures": 0,
   "hash": "7db53b68bf28192660b42cf7eaf41041a74f1951504d8355ec19b25ce4ce3436",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "08ea0b1e64",
@@ -1180,8 +1181,8 @@
   "failures": 0,
   "hash": "7303bba90554fc6d29df097f039ca028ab701730e62f1774aedc6a21e57a5515",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "068675af0c",
@@ -1202,8 +1203,8 @@
   "failures": 0,
   "hash": "ae8a06f8c6e153571adfaecf073f82370c2c0c140903c5e6962e7ec23f6f626c",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.denvergov.org/content/dam/denvergov/Portals/571/documents/TaxGuide/TaxGuideTopic61_OccupationalPrivilegeTaxes.pdf"
@@ -1212,8 +1213,8 @@
   "failures": 0,
   "hash": "de6afa8630150559bcff0a9b970ad1b299080606bb5607605e01b93d562e9b29",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://cdle.colorado.gov/sites/cdle/files/Copy%20of%20Formatted%202022%20CESA.pdf": "Colorado Employment Security Act (CESA) 8-76-102.5)"
   },
@@ -1246,8 +1247,8 @@
   "failures": 0,
   "hash": "1c9a77edd07e41e02a9abe2a029822944ebef8744ca9e229bf32868f4e52e926",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "03769262e3",
@@ -1280,8 +1281,8 @@
   "failures": 0,
   "hash": "54ce36f95bb4a8ac9b9987a1f317f6c7057ca38b48ee036780f5a00a958e6ad5",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://cdle.colorado.gov/": "Home",
    "https://cdle.colorado.gov/dlss/contact-us-dlss": "Contact DLSS",
@@ -1347,8 +1348,8 @@
   "failures": 0,
   "hash": "323b37454bce2beef3571ff77dcd602f511a8bbd334d451dafbcc8b96c8ca2ae",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://tax.colorado.gov/": "Tax.Colorado.gov",
    "https://tax.colorado.gov/CR0100": "Colorado Sales Tax and Withholding Account Application",
@@ -1398,8 +1399,8 @@
   "failures": 0,
   "hash": "410c82a3c34eaebf30f55e2d89952cd2d2740dda983ff2197652e3c2b943c28b",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://tax.colorado.gov/1099-NEC": "Important Information About the 1099-NEC",
    "https://tax.colorado.gov/amending-a-withholding-return": "How to Amend a Return",
@@ -1439,8 +1440,8 @@
   "failures": 0,
   "hash": "e43fe70f7ca458980feea3bdb5b7350b9e99ac83aeb2ead7e09eded9bfc83cd5",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0c727f1d35",
@@ -1474,8 +1475,8 @@
   "failures": 0,
   "hash": "00521e5144b330061061061b721765bd5dbef3df7a8b0e1b7e1b845910ddb279",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://portal.ct.gov/-/media/drs/forms/2026/wth/ct-w4_1225fillable.pdf?rev=9e9e0216cd394f579961e1d4cd5c7ab3&hash=4D496BCBD10659462D3799732B5A91F2"
@@ -1484,8 +1485,8 @@
   "failures": 0,
   "hash": "b5a735855a0940680530670145e3aa644659304806537caf28098df2dd73f765",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://portal.ct.gov/-/media/drs/forms/2025/wth/tpg-211_1225.pdf?rev=e16ef13773ec42d4bf0afd2e192e0176&hash=CCF9990D8EE0AA580A11BC6E97235650"
@@ -1494,8 +1495,8 @@
   "failures": 0,
   "hash": "e0ead8bb2ae6bc22596ece496a27d270c8bc8c61ec578442847e5fe768646d84",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://portal.ct.gov/": "CT.gov Home",
    "https://portal.ct.gov/-/media/drs/publications/pubsip/2026/ip-2026-1.pdf?hash=57C34787EE2C1D4A7F989EE1F6B8F0F8": "IP 2026(1) - Circular CT - Employer's Tax Guide to Withholding",
@@ -1532,8 +1533,8 @@
   "failures": 0,
   "hash": "0b3040e876931883200eaee91632edf42c6c4d4faba4649f4e3caddb054a5e13",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://portal.ct.gov/-/media/drs/publications/pubsip/2026/ip-2026-1.pdf?rev=4482a3dca0a44b28ae39381a91fb0916&hash=57C34787EE2C1D4A7F989EE1F6B8F0F8"
@@ -1542,8 +1543,8 @@
   "failures": 0,
   "hash": "00f28d411fec377300ad381950c8cc585b50b8df8f0a0e64f55818da3de3d0bf",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://portal.ct.gov/": "CT.gov Home",
    "https://portal.ct.gov/-/media/drs/publications/pubsip/2026/ip-2026-1.pdf?hash=57C34787EE2C1D4A7F989EE1F6B8F0F8": "IP 2026(1), Connecticut Employer\u2019s Tax Guide, Circular CT",
@@ -1568,8 +1569,8 @@
   "failures": 0,
   "hash": "2e1d089a9c96b30c93a1e74730e55aa2b8437078e48652f7af3cccaac645f69d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "02cacea692",
@@ -1619,8 +1620,8 @@
   "url": "https://code.dccouncil.gov/us/dc/council/code/sections/47-1806.04"
  },
  "dc-66209869a6": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications"
  },
@@ -1628,17 +1629,18 @@
   "failures": 0,
   "hash": "28d958e50fec88064a7b83958a776652a7cf0a8e14dff814a76df0da5ac7e017",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://does.dc.gov/sites/default/files/dc/sites/does/publication/attachments/2026%20Minimum%20Wage%20Increase%20Notice_0.pdf"
  },
  "dc-c0035095f2": {
-  "failures": 0,
+  "failures": 1,
   "hash": "eb16433a4035c1744be8885701640349c5a5a89ccf993df0b0c2f6c7203b1a91",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {},
   "nav": [
@@ -1651,8 +1653,8 @@
   "url": "https://help.nfc.usda.gov/bulletins/2022/1668460546.htm"
  },
  "dc-f341759fb9": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://does.dc.gov/service/office-wage-hour-compliance-0"
  },
@@ -1660,8 +1662,8 @@
   "failures": 0,
   "hash": "660442695fc1797148409c224f9b4ec8e6f6dd7232c27dc00d504412ca760803",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "http://revenue.delaware.gov/w-2-and-1099-form-faqs/": "W-2 and 1099 reporting FAQs",
    "https://revenue.delaware.gov/": "Home",
@@ -1799,8 +1801,8 @@
   "failures": 0,
   "hash": "8ead87ad874c67a94bfc3e4d42aa25f69c3017cc1d3c1b66b01a700175c7e814",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://laborfiles.delaware.gov/main/pfl/Employer_and_TPAs_Guide_to_DPL.pdf"
@@ -1809,8 +1811,8 @@
   "failures": 0,
   "hash": "04ed60ad21b1f1b913968b59c03c799ebd700e2470ef7782ba1846451beb81a7",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://revenuefiles.delaware.gov/2021/DE-W4.pdf"
@@ -1819,8 +1821,8 @@
   "failures": 0,
   "hash": "62431ff42b2c897522346da2e10756a612a27a35ac42ffcb78dc6c739fbf24ad",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0bfbc99b45",
@@ -1843,8 +1845,8 @@
   "failures": 0,
   "hash": "d657cb0a713df13f0abf6b53af72cbb2b42b3c412be288b070cfce6a0041fec2",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://revenuefiles.delaware.gov/docs/w4nr.pdf"
@@ -1853,8 +1855,8 @@
   "failures": 0,
   "hash": "35ceb10c4e1adccdbbc891844c25de5982a834b98e8c1a43c7665af88d24d613",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://laborfiles.delaware.gov/main/dui/handbook/UI%20Employer%20Handbook.pdf": "Employer Handbook"
   },
@@ -1868,8 +1870,8 @@
   "failures": 0,
   "hash": "cbbccc7b4dbcf5d83148daba0e80acc46bdc62b99b93278f28719b65cb467d0d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.flsenate.gov/PublishedContent/Laws/Statutes/Links/Florida_Statutes_Definitions_Index__2026_.pdf": "Florida Statutes Definitions Index (2026)",
    "https://www.flsenate.gov/PublishedContent/Laws/Statutes/Links/General_Laws_Conversion_Table.pdf": "General Laws Conversion Table (2026)",
@@ -1901,10 +1903,11 @@
   "url": "https://www.flsenate.gov/Laws/Statutes/2025/218.077"
  },
  "ga-24274cd146": {
-  "failures": 0,
+  "failures": 1,
   "hash": "94e9ff7f5c216293541fba01993e9ff0c83e737a76845007d77a058572c8410d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {},
   "nav": [
@@ -1920,34 +1923,35 @@
   "failures": 0,
   "hash": "78c2ec5f0c83d195dc4fd60d0eeeb91ce4c3e2400b13ea1bd69a7ea3b886c436",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://dor.georgia.gov/document/form/tsdemployeeswithholdingallowancecertificateg-4pdf/download"
  },
  "ga-6162a1afda": {
   "failures": 0,
-  "hash": "33abfffe0e783166d016976f4dcb00a31ac2c0fac84786c92dd3918b87a4be12",
-  "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "hash": "fde661a05a6d873eac25bcc869cdcf556b815f6ca41dda863612048129d2b9ad",
+  "last_changed": "2026-09-26",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
+  "redirects_to": "https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-september-2026/download",
   "url": "https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-june-2026/download"
  },
  "ga-944bb83df9": {
   "failures": 0,
-  "hash": "2d2aa4f21a73727cc92642ff89f4bac9cd1bbdb017e78599ef1a474aaa930e92",
-  "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "hash": "732ba7fbf6553d835a8df3a8738ca1df87da0d23d497cef7deb44c1d1f73f82d",
+  "last_changed": "2026-09-26",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://dor.georgia.gov/": "Home",
    "https://dor.georgia.gov/document/document-document/2025-employers-tax-guide-updated-june-2025/download": "2025 Employers Tax Guide (updated June 2025)",
    "https://dor.georgia.gov/document/document/2023-employers-tax-guidepdf/download": "2023 Employers Tax Guide",
    "https://dor.georgia.gov/document/document/2024-employers-tax-guide/download": "2024 Employers Tax Guide",
-   "https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-june-2026/download": "2026 Employers Tax Guide (updated June 2026)"
+   "https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-september-2026/download": "2026 Employers Tax Guide (updated September 2026)"
   },
   "nav": [],
   "url": "https://dor.georgia.gov/employers-tax-guide"
@@ -1956,8 +1960,8 @@
   "failures": 0,
   "hash": "281e9fde55ca83496bce4382199991c7e4fbdfe1ab4cc09bbe3da8c84179ad91",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "07198d3c5e",
@@ -1990,8 +1994,8 @@
   "failures": 0,
   "hash": "32d6c506928a6c6e0c4a939bd80c5a5f360178e8bd026826b77ad48df64182d9",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://dor.georgia.gov/": "Home",
    "https://dor.georgia.gov/documents/2014-employer-tax-guide": "Employer\u2019s Tax Guide",
@@ -2033,8 +2037,8 @@
   "failures": 0,
   "hash": "d6de47796cc9bc194882347aa668815f026ea83c2bf4827318807491a7ef82cd",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://files.hawaii.gov/tax/legal/har/har_235.pdf": "Hawaii Administrative Rules Title 18, Chapter -235, Sections -61-67",
    "https://files.hawaii.gov/tax/legal/hrs/hrs_235.pdf": "Hawaii Revised Statutes Chapter 235, Sections -61 through -69",
@@ -2056,8 +2060,8 @@
   "failures": 0,
   "hash": "d1297cc2a47039e486b36f054fa347a616ddf4cf89ddd568c664e97f4c1a4b33",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://files.hawaii.gov/tax/news/pubs/25BkltA.pdf": "2026 Booklet A",
    "https://tax.hawaii.gov/cdn-cgi/l/email-protection": "[email protected]",
@@ -2070,8 +2074,8 @@
   "failures": 0,
   "hash": "ed6637d8b7415d370ce7342cc90bf89a41d455d5df7fdef785c8506e1d8a94ed",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "21682e0776",
@@ -2088,8 +2092,8 @@
   "failures": 0,
   "hash": "bd38628896164f9b13d620c83cd2a8106e7d9d19d303f9b118312d00ccaa5707",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "70f8bb9a8a"
@@ -2100,8 +2104,8 @@
   "failures": 0,
   "hash": "4d3ae21fe8a781c11dec0575b0c6c316c8b877ba7f44b84e0ea912cb6a36def8",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://labor.hawaii.gov/dcd/files/2025/12/2026-Maximum-Weekly-Wage-Base.pdf"
@@ -2110,8 +2114,8 @@
   "failures": 0,
   "hash": "b9c196866fcc892fb374274c67bce2bd703a730cfa6e467fb4b7eb2c3178cb7c",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://files.hawaii.gov/tax/news/pubs/25BkltA.pdf"
@@ -2120,8 +2124,8 @@
   "failures": 0,
   "hash": "32042dd8a896a5bc177c783054251c8d0a1a04bd0574d6a65d221536f5049d38",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "00e418d492",
@@ -2200,8 +2204,8 @@
   "failures": 0,
   "hash": "bce31d6881a15b43cad6eaa91cb28df3aa6bd4bb81e1fc8747c6dbd64a63de59",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://revenue.iowa.gov/media/4324/download?inline="
@@ -2210,8 +2214,8 @@
   "failures": 0,
   "hash": "fd51e62b69b6a05bc18800d422d6f571306a00a7ad616703b0f001067b2cf4df",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://workforce.iowa.gov/media/234/download"
@@ -2220,8 +2224,8 @@
   "failures": 0,
   "hash": "d157f60ed80f2ce33562cd42f452a709d102f07dd34ebcd7d12fcefbe4b6dd1c",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://revenue.iowa.gov/i-need/file-w-2-or-1099": "File a W-2 or 1099",
    "https://revenue.iowa.gov/i-need/file-w-2-or-1099/electronic-reporting-w-2-1099s": "Electronic Reporting of Wage & Tax Statements and Information Returns",
@@ -2412,8 +2416,8 @@
   "failures": 0,
   "hash": "cbf585bcba5078c590cde5a541254847537f7b622c4a803a9c2c4f40f97440f8",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.legis.iowa.gov/docs/publications/LGI/91/HF2631.pdf"
@@ -2422,8 +2426,8 @@
   "failures": 0,
   "hash": "8ef43497f8e941f4a2370dd3d86ea6e3d66f7dcdcd3f37db0de2f783724e68df",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://revenue.iowa.gov/media/53/download?inline="
@@ -2432,8 +2436,8 @@
   "failures": 0,
   "hash": "08a7666080d25e0a9cc26bc075e31ed127cf40b6747cd0997b65419fe78ad857",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0eb127bc7f",
@@ -2471,8 +2475,8 @@
   "failures": 0,
   "hash": "889abb2ca38413761f37f050c2c8bf5bf9976fd5f418568ced7e16be5a03bbb7",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "redirects_to": "https://tax.idaho.gov/wp-content/uploads/forms/EFO00307/EFO00307_04-28-2025.pdf",
@@ -2482,8 +2486,8 @@
   "failures": 0,
   "hash": "f20b9a60ac060803dea5f04b2ca0494a7240f4db4e452c3a4066dc7502681d2c",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "redirects_to": "https://tax.idaho.gov/wp-content/uploads/pubs/EPB00744/EPB00744_07-23-2026.pdf",
@@ -2493,8 +2497,8 @@
   "failures": 0,
   "hash": "b5f4ac6bb02d88c21a0b05aebd0efe3d0a0f173011f3d4585ca33a6b0f85e83a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "2a166a7dc3",
@@ -2512,8 +2516,8 @@
   "failures": 0,
   "hash": "1fbcda4999797e5958b4edcca60106a1f7c1424c7bca59bff29d3a5326aa6cb8",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.labor.idaho.gov/wp-content/uploads/2024/12/Tax-rate_Class-array_2026.pdf"
@@ -2522,8 +2526,8 @@
   "failures": 0,
   "hash": "08a7666080d25e0a9cc26bc075e31ed127cf40b6747cd0997b65419fe78ad857",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://tax.idaho.gov/": "Home",
    "https://tax.idaho.gov/document-mngr/pubs_EPB00744": "Table for Percentage Computation Method of Withholding",
@@ -2557,8 +2561,8 @@
   "url": "https://tax.idaho.gov/taxes/income-tax/withholding/computing/"
  },
  "il-00c7f8095a": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "HTTP 500",
   "url": "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026"
  },
@@ -2566,8 +2570,8 @@
   "failures": 0,
   "hash": "9f2c04be68fc931f39fbad4b51813ff987a4204fcfedb148c4533d631ababbaf",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/withholding/documents/currentyear/il-700-t.pdf": "Printable PDF"
   },
@@ -2655,8 +2659,8 @@
   "failures": 0,
   "hash": "4f98dfe150810f66f60891c6cf471fd50d6402269b5b29a71e73453258947ea3",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://tax.illinois.gov/content/dam/soi/en/web/tax/research/publications/pubs/documents/pub-110.pdf": "Publication 110, W-2, W-2c, W-2G, and 1099 Filing and Storage Requirements for Employers and Payers"
   },
@@ -2754,8 +2758,8 @@
   "failures": 0,
   "hash": "472e08e67825287b4f0be8d99b75a85f7ce8b13dd2356956a89e68c41faaeedf",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://ides.illinois.gov/content/dam/soi/en/web/ides/ides_forms_and_publications/EA-50_2026.pdf"
@@ -2764,8 +2768,8 @@
   "failures": 0,
   "hash": "af81df8a7597bd17958e6447443fb9ade49f4e05932f9d4667c8ed56d0f93189",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://tax.illinois.gov/": "",
    "https://tax.illinois.gov/aboutidor.html": "About IDOR",
@@ -2868,8 +2872,8 @@
   "failures": 0,
   "hash": "a9a383f1dad68ffa825a654c645e37d6bb0337212749657ac34b5e4a2071a184",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/withholding/documents/2025/il-w-5-nr.pdf"
@@ -2878,8 +2882,8 @@
   "failures": 0,
   "hash": "7d70973512febff1eee10bf965d86b2c2cf7ea449a2641dac9d515420606b349",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/withholding/documents/currentyear/il-w-4.pdf"
@@ -2888,8 +2892,8 @@
   "failures": 0,
   "hash": "e47f1c5993d6e10ef8928919c5375336dfd35340979686c2afa6eb280b60c661",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "3f941e36a6",
@@ -2903,8 +2907,8 @@
   "failures": 0,
   "hash": "51deefcef93850da206d260eafa5f4f9016c7af871a6f12e4e59ebc8a9da1f77",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://forms.in.gov/download.aspx?id=2419"
@@ -2913,8 +2917,8 @@
   "failures": 0,
   "hash": "37ef5dca6dd46f6a6be75dc66799e1ca2b0b816c23a642eb1fb805ef1a3d992e",
   "last_changed": "2026-09-25",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "6f720dc324"
@@ -2925,8 +2929,8 @@
   "failures": 0,
   "hash": "172f1105b6eb09d18d87d03ef9c000e73bd291787f6c5b6e8c2e4348d7e45a51",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.in.gov/dor/files/dn01.pdf"
@@ -2935,8 +2939,8 @@
   "failures": 0,
   "hash": "e3428f497e880901599d3c6cd7d5b336a145c9612a0e1fcf875d52c0b75fe201",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "6f720dc324"
@@ -2947,8 +2951,8 @@
   "failures": 0,
   "hash": "8e1176d10a1846701d251fc515db0d6f3a9ea3167d0bdbcf373ab7cb327f4580",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.in.gov/dor/files/dn01.pdf": "Departmental Notice #1"
   },
@@ -3005,8 +3009,8 @@
   "failures": 0,
   "hash": "a9da7bbdf8f8f8de4e363671ebf64a1c062963578382c9c84379be2d361a76d6",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "http://www.in.gov/legislative/iac/": "Indiana Administrative Code",
    "http://www.in.gov/sos/": "Indiana Secretary of State",
@@ -3079,8 +3083,8 @@
   "failures": 0,
   "hash": "63d17b74629d436e085e7da37383e5268dd91cad6328d18b4d363bd380a6dee2",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "6f720dc324"
@@ -3091,8 +3095,8 @@
   "failures": 0,
   "hash": "66aca7ae0c77905fad5fc90f0ff1275833f029b6d1c9e260463444c45f60103d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.ksrevenue.gov/pdf/kw100.pdf"
@@ -3101,8 +3105,8 @@
   "failures": 0,
   "hash": "1029da851a91d8b0ae7a458d46c84b125d9d5bf81b03ed377005ae1392f4ada1",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.ksrevenue.gov/pdf/20026.pdf"
@@ -3111,15 +3115,15 @@
   "failures": 0,
   "hash": "66aca7ae0c77905fad5fc90f0ff1275833f029b6d1c9e260463444c45f60103d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://ksrevenue.gov/pdf/kw100.pdf"
  },
  "ky-0b7157b3a5": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "now redirects to the site's home page (https://ui.ky.gov/)",
   "url": "https://kewes.ky.gov/Contact/contacts.aspx?strid=2"
  },
@@ -3127,8 +3131,8 @@
   "failures": 0,
   "hash": "26dd39ede4457838b115ca363f8fce9995e35185d2ef8c41b55a14c8f9bce854",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "2240d974bf",
@@ -3155,8 +3159,8 @@
   "failures": 0,
   "hash": "a467681cb6d1bd91246b28e72c475ef753a25fbe5c5ba722a9b8487ae90b72ee",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://revenue.ky.gov/Dor%20Training%20Materials/103%20KAR%2017.140.%20Individual%20income%20tax%20-%20reciprocity%20-%20nonresidents.pdf"
@@ -3165,8 +3169,8 @@
   "failures": 0,
   "hash": "8c6a92ca5a2dffbe29cf6ac8481a6cbded5b56dbdb81e2fcf9ce493baf6e96f1",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.covingtonky.gov/Portals/covingtonky/2023%20ACFR-%20Final%20-%20City%20of%20Covington%204122024.pdf": "Annual Comprehensive Financial Report (ACFR) 2023",
    "https://www.covingtonky.gov/Portals/covingtonky/220128%20ACFR_%20year%20ended%206_30_21.pdf": "Annual Comprehensive Financial Report (ACFR) 2021",
@@ -3243,10 +3247,11 @@
   "url": "https://www.covingtonky.gov/government/departments/finance/business-licensing-occupational-license-fee"
  },
  "ky-26d8157a8d": {
-  "failures": 0,
+  "failures": 1,
   "hash": "5ac016ed60f512128f4b835770f4a0bfd8548c2a54405de445fcd62074b65e9c",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {},
   "nav": [
@@ -3262,8 +3267,8 @@
   "failures": 0,
   "hash": "67c944e19f96b931e0c575037b2d119dde5b17ab49435efa0e95e4a9863d4993",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=48683"
@@ -3272,8 +3277,8 @@
   "failures": 0,
   "hash": "92f303c946640d779ffd3e052337b96f1ed945832b31b93e11130960f83cf08d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "03693a8143",
@@ -3324,8 +3329,8 @@
   "failures": 0,
   "hash": "c864b45c727cda29051124edc21f6fbca56da70b6004267cca1d5f4e81e435ea",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://content.lexingtonky.gov/sites/default/files/2026-01/2025%20211-65_0.pdf": "Form 211-65 \u2013 2025 employee refund application, over age 65",
    "https://content.lexingtonky.gov/sites/default/files/2026-01/2025%20Form%20211-22_0.pdf": "Form 211-22 \u2013 2025 employee refund application",
@@ -3358,8 +3363,8 @@
   "failures": 0,
   "hash": "6f36ada91dc49b770d6d4379fa07ee47f5e4a462f8008b810b7fc7f1c1645898",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://apps.legislature.ky.gov/law/Statutes/statute.aspx?id=54832"
@@ -3368,8 +3373,8 @@
   "failures": 0,
   "hash": "27dcefe88a7a7a15c27e5bd1e4265fa64f0a9bb05ccff5244d2c5cf43b5aedfc",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "http://revenue.ky.gov/Forms/10A104.pdf": "Need to update or cancel a business account?",
    "https://revenue.ky.gov/Business/Documents/2020%20Withholding%20Calculator.xlsx": "2020 Employer Withholding Calculator.xlsx",
@@ -3415,8 +3420,8 @@
   "failures": 0,
   "hash": "de6dad24db29314eb46dcfe21d73265171c29eae3e43b231614f8c608c60b8e1",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://revenue.ky.gov/Forms/42A804%20(K-4)%20(2026).pdf"
@@ -3425,8 +3430,8 @@
   "failures": 0,
   "hash": "71d95e6f55748ae6aee77b0d01331f5e586b31373b469eb923bf8dc45ddafe2e",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=48677"
@@ -3435,8 +3440,8 @@
   "failures": 0,
   "hash": "01de35c65ad80892ee3f4d2a08b6d330849052e13d72c323ba7a22de229189f2",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://revenue.ky.gov/DOR%20Training%20Materials/KY-TAM-18-03%20Credit%20for%20Income%20Tax%20Paid%20to%20Another%20State%20FINAL%20(UPDATED%20HYPERLINKS).pdf"
@@ -3445,8 +3450,8 @@
   "failures": 0,
   "hash": "7d25fce3b144ec42ea06ce2a76bd10629a68783d73bf746c561ccb395d08918e",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=50960"
@@ -3455,8 +3460,8 @@
   "failures": 0,
   "hash": "77dcd332dcd97753f63db5b763b30c9eebd330bb59690f5570a555c9c886f26a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://louisvilleky.gov/sites/default/files/2024-12/w-1kjc_instructions_2025.pdf"
@@ -3465,8 +3470,8 @@
   "failures": 0,
   "hash": "a66393a56fb64b6931f8c8dccc1b91ce3f3bda96306c44161d2aafbeedb25b3d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://web.sos.ky.gov/Forms/OccupationalTax/Form OL-S Single District.pdf": "Form OL-S, Single Tax District, Occupational License Fee Return",
    "https://web.sos.ky.gov/Forms/OccupationalTax/OL-D Dual District.pdf": "Form OL-D, Dual Tax District, Occupational License Fee Return",
@@ -3533,15 +3538,15 @@
   "failures": 0,
   "hash": "cd7cefa2aaccf0709af3b568bdba3b2605913f1d66969b2229fe403ab39e6eed",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://revenue.ky.gov/Forms/2026%20Withholding%20Formula.pdf"
  },
  "ky-f4f36afe86": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "now redirects to the site's home page (https://ui.ky.gov/)",
   "url": "https://kewes.ky.gov/Contact/contacts.aspx?strid=4"
  },
@@ -3549,8 +3554,8 @@
   "failures": 0,
   "hash": "a50f801f4f10326a67a58712aa9d3e883bf066a36219ec7afcea16ffa57271c4",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://dam.ldr.la.gov/lawspolicies/1802EMR030.pdf": "Louisiana Withholding Tax Tables"
   },
@@ -3563,8 +3568,8 @@
   "failures": 0,
   "hash": "3d3b211f8929e407b4568ab5225e6a8d1088ed7116cb3516eb0c08f26723a0f4",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://dam.ldr.la.gov/taxforms/1306-1-26.pdf"
@@ -3573,17 +3578,18 @@
   "failures": 0,
   "hash": "834ad345d70542dc1cf3a84b186150ed55ae0c3861d7ca4b7ac035fba27c015e",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://revenue.louisiana.gov/businesses/widely-used-tax-types/withholding/"
  },
  "la-80f6b568f8": {
-  "failures": 0,
+  "failures": 1,
   "hash": "4baa96b9879d28fc26852d1635448a40ccbadfc04f57b951c58512e17972217b",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {},
   "nav": [
@@ -3600,8 +3606,8 @@
   "failures": 0,
   "hash": "d99e0038c68b1ecaa6935e44b7d0e2acfd3be7da0a8e13d48d86fdcd314d6857",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://legis.la.gov/Legis/Law.aspx?d=101760"
@@ -3610,8 +3616,8 @@
   "failures": 0,
   "hash": "aaeae45950f1a6414f99efeebd6475966d71e175edfbaae044f8d713112570a1",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://dam.ldr.la.gov/taxforms/1300-1-26-F.pdf"
@@ -3620,8 +3626,8 @@
   "failures": 0,
   "hash": "262a637531fc184df2c52103665bdb5c52b2610ebae260d1c79ce0afb8ff8933",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "00e48c1037",
@@ -3824,8 +3830,8 @@
   "failures": 0,
   "hash": "86b8e487ae329b0184ead00100ebb2b9dd9e4b02734425b37f697dd1b2ce9677",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "7699d81f68",
@@ -3840,8 +3846,8 @@
   "failures": 0,
   "hash": "6908b1f3587dbc9d9b100dd37d8e362c3589ffd70c5137c2b905ffe8a4aba912",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.miltonma.gov/DocumentCenter/View/6586/Massachusetts-Withholding-Form--M-4"
@@ -3850,8 +3856,8 @@
   "failures": 0,
   "hash": "4639b8a53a5ae3577ddde491ecadff03a92c462cd89216697a4dd478cff53d91",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.mass.gov/doc/2024-schedule-4-surtax/download": "Schedule 4% Surtax",
    "https://www.mass.gov/doc/massachusetts-circular-m-income-tax-withholding-tables-at-50-effective-january-1-2026/download": "Circular M"
@@ -3896,8 +3902,8 @@
   "failures": 0,
   "hash": "7597bb998440d979e3282c0fae5ca0b0eabf9a27e7fa5bb738bd1fb9e866cc99",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.mass.gov/doc/form-ai-1-business-taxpayer-change-of-address-andor-information/download": "Open PDF file, 28.64 KB, Form AI-1: Business Taxpayer Change of Address and/or Information",
    "https://www.mass.gov/doc/form-m-3-reconciliation-of-massachusetts-income-taxes-withheld-for-employers/download": "Open PDF file, 46.2 KB, Form M-3: Reconciliation of Massachusetts Income Taxes Withheld for Employers",
@@ -3936,8 +3942,8 @@
   "failures": 0,
   "hash": "de73c2064e5aa92076efd61f63a411f109812c75633d48ccf60f8b8849702414",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "55d230a6ad",
@@ -3949,10 +3955,11 @@
   "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter175M/Section6"
  },
  "ma-f3f46b347e": {
-  "failures": 0,
+  "failures": 1,
   "hash": "bcf9e1cd4c81b435bef8541357dce36fe9e9001d2a4dacbe067abd6e543422ed",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {},
   "nav": [
@@ -3968,8 +3975,8 @@
   "failures": 0,
   "hash": "d0f082dd2e4712e6ac791f3f24ef337adeb3fee7c45a3f5e5d59267725ab3d74",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "needs_browser": true,
@@ -3979,8 +3986,8 @@
   "failures": 0,
   "hash": "a67f4430ef25d7db8bddd62eb0073435436cba32034dee170a2dddd50e9ea6d3",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.dllr.state.md.us/labor/wages/minimumwagelawmont.pdf": "English",
    "https://www.dllr.state.md.us/labor/wages/minimumwagelawmontes.pdf": "Espa\u00f1ol"
@@ -3997,8 +4004,8 @@
   "failures": 0,
   "hash": "dc1f7c5ec14cf9ee7a14e71bdb63b1ef1dfe2ec9d1aa0204f45d5dda871131fd",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/instructions/withholding/2026/withholding-guide.pdf"
@@ -4007,8 +4014,8 @@
   "failures": 0,
   "hash": "acccf0f05a3a6b7aec3dd878d3938b2e939401fc5b8d674f0930121d82fc9a77",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/legal-publications/facts/withholding-tax-facts-2026.pdf"
@@ -4017,8 +4024,8 @@
   "failures": 0,
   "hash": "bf55030b91f9cf1857178b74f5d2cd1789f816dd603e1bf87f26a1ebe798698e",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "04f5880413",
@@ -4062,8 +4069,8 @@
   "failures": 0,
   "hash": "8fae98fa844cfb8547038676646af8a1c976679d90352cbd961ecc4a76cf7e7e",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/md/state-payroll/memos/2026/2026-maryland-state-and-local-withholding-information.pdf"
@@ -4072,8 +4079,8 @@
   "failures": 0,
   "hash": "6c475a76f5c862030f8abf4ff0801ae5042326cd6a0c10785ce0f814218de2f5",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.howardcountymd.gov/sites/default/files/2022-04/HC%20Wage%20Sheet%202022%20REV%20April%205%20%28DMT%20Edits%29.pdf": "local minimum wage increases"
   },
@@ -4096,8 +4103,8 @@
   "failures": 0,
   "hash": "285c4674916535d21d2f43f762b44414b4dd30cdbbd1ba4b9a9705bdf931353f",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://labor.maryland.gov/labor/wages/minimumwagelaw.pdf": "Maryland Minimum Wage and Overtime Law",
    "https://labor.maryland.gov/labor/wages/minimumwagelawes.pdf": "La Ley de Maryland Salario M\u00ednimo y Tiempo Extra",
@@ -4125,8 +4132,8 @@
   "failures": 0,
   "hash": "5966fcabcc0c690fe2631383c45867ae7b6e0fe9a6527ed850c83ccc8fa29857",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.maine.gov/labor/index.shtml": "Maine Department of Labor's website",
    "https://www.maine.gov/revenue/faq/income-tax-withholding": "Withholding FAQs",
@@ -4147,15 +4154,15 @@
   "failures": 0,
   "hash": "12f668b1acc3291e1bf09796be615822f80a904e235c6d161d5aec4ad09572cd",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://rocklandmaine.gov/DocumentCenter/View/2670/2026-Minimum-Wage-Notice---Rockland"
  },
  "me-a062b9490e": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "site's TLS certificate failed verification (unable to get local issuer certificate)",
   "url": "https://www.portlandmaine.gov/1016/Minimum-Wage"
  },
@@ -4163,17 +4170,18 @@
   "failures": 0,
   "hash": "618dc83210d25d652da6cb858129e9de8c51398101a4ab499930806d7d7df92f",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.maine.gov/paidleave/docs/2026/employers/faq/employerFAQenglish.pdf"
  },
  "me-b65c78d430": {
-  "failures": 0,
+  "failures": 1,
   "hash": "687e0293ef4ede581d6de48421b5ba8a92fb594fb59d62427d8a2c232ef84a39",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {},
   "nav": [
@@ -4188,8 +4196,8 @@
   "failures": 0,
   "hash": "9fc4d55105f7555049e01f0021e1e5a05f7e2d6f553dd7031cffe7dc6c97f3af",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_wh_tab_instr.pdf"
@@ -4198,24 +4206,63 @@
   "failures": 0,
   "hash": "ff9be76b528de3a3f0d514283759f9a790a6551e22a7cedadb8ea7af8d66b693",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_form_w-4me_fillable.pdf"
  },
  "mi-09c6c8cf81": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
-  "last_error": "site's TLS certificate failed verification (unable to get local issuer certificate)",
+  "failures": 0,
+  "hash": "3fc966bdd1a4ba3800128d55b265267c8559fab02330ec413d7c9e774cad0267",
+  "last_changed": "2026-09-26",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
+  "links": {},
+  "nav": [
+   "0126eb9050",
+   "0311c93778",
+   "0a79fe0328",
+   "0b1e10a096",
+   "119a7c55cc",
+   "267af5f4aa",
+   "3fad150eef",
+   "4dbcde28f7",
+   "5ef1f5d796",
+   "738667931f",
+   "75eca0aba0",
+   "765897f1b4",
+   "769e108835",
+   "76efd771ff",
+   "7b19f3c2ea",
+   "7ea6c9edd5",
+   "7efb291f8f",
+   "842340deea",
+   "842430164f",
+   "8b08f3781f",
+   "95f06defa5",
+   "9b998fb317",
+   "9cee6dfa4d",
+   "b87e237d80",
+   "bcc275bf27",
+   "bf76d55b28",
+   "c420d466e5",
+   "da45e58ff7",
+   "e36072ce8e",
+   "ec49e03bda",
+   "ef5851c49f",
+   "f5a9215702",
+   "f874a8ba86",
+   "ff83c2ea83"
+  ],
   "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-206-30"
  },
  "mi-0e4b206000": {
   "failures": 0,
   "hash": "f4cb5229770522e482cf68d95e5c7d7b614a2a49f764f6a20ec42ff9c0489738",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "070acaa3c9",
@@ -4232,8 +4279,8 @@
   "failures": 0,
   "hash": "fd2422014f8704f0866370c94b128ee82ee342cab19a5e0890bb06e69cc1797a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/SUW/TY2026/446_Withholding-Guide_2026.pdf"
@@ -4242,24 +4289,36 @@
   "failures": 0,
   "hash": "387b8760026e148612031f12374e6ade260eff656ef9d4f4590568be93941798",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/City-Withholding/TY2025/5469_ty2025.pdf"
  },
  "mi-67f33dcd9d": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
-  "last_error": "site's TLS certificate failed verification (unable to get local issuer certificate)",
+  "failures": 0,
+  "hash": "4035a1e47de23d778f468ff8853a0db67af87cd00faa4545644b90c85c2328a6",
+  "last_changed": "2026-09-26",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
+  "links": {},
+  "nav": [
+   "12b6327f2d",
+   "311683a71b",
+   "3a6f184755",
+   "842340deea",
+   "842430164f",
+   "8689eb612e",
+   "f5a9215702"
+  ],
   "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-141-631"
  },
  "mi-6fce915c3b": {
   "failures": 0,
   "hash": "a8c6616471b8220378eacc5db9c0a7c01b500746f063d7a4767db64a81756687",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "070acaa3c9",
@@ -4273,17 +4332,35 @@
   "url": "https://www.michigan.gov/leo/bureaus-agencies/uia/employers/forms/accordion/taxable-wage-base"
  },
  "mi-711e9541f4": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
-  "last_error": "site's TLS certificate failed verification (unable to get local issuer certificate)",
+  "failures": 0,
+  "hash": "6b6a5e37fc274b3f467148ae55ca660aa9ddb917c9e09245259b92e8e885741e",
+  "last_changed": "2026-09-26",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
+  "links": {},
+  "nav": [
+   "1b2e6b8ff7",
+   "2e1362f910",
+   "6c5e40a18d",
+   "842340deea",
+   "842430164f",
+   "8b08f3781f",
+   "9cee6dfa4d",
+   "a0e866e5b8",
+   "b00790ae58",
+   "e9553faaac",
+   "ec367aa378",
+   "f5a9215702",
+   "ff83c2ea83"
+  ],
   "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-206-703"
  },
  "mi-a5ea13ea77": {
   "failures": 0,
   "hash": "b927151e697b9a1546088fb966820190fc489dd9c2412694480d5f271c0a8686",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "003b86c94d",
@@ -4322,8 +4399,8 @@
   "failures": 0,
   "hash": "c7947cf40be898483b870a70e394dba19d1f2fb9f0b7f3d7c035d7f8367b836c",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.michigan.gov/-/media/Project/Websites/taxes/Forms/All-Years/MIW4.pdf"
@@ -4332,8 +4409,8 @@
   "failures": 0,
   "hash": "f56e96ebfcb95b9b24c263e8dccbd7d41303da9700bf6b16b89056b532ed4118",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0012856b77",
@@ -4925,8 +5002,8 @@
   "failures": 0,
   "hash": "099f4729a82b13e298cd2ebf7b18c02b39fac297a519783b606d8347f7020ab3",
   "last_changed": "2026-09-25",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "070acaa3c9",
@@ -4958,8 +5035,8 @@
   "failures": 0,
   "hash": "e48b8239182385413e9e6ed97fd5563180bbb7e09d30a5b27b9ade20288a1b61",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "070acaa3c9",
@@ -4978,8 +5055,8 @@
   "failures": 0,
   "hash": "c2706b606b6212bf0338f816ad6501192462553df26add840492fdf3d9828cdf",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "070acaa3c9",
@@ -4995,8 +5072,8 @@
   "failures": 0,
   "hash": "caff8325b78ad696f0292de34eb3d00855be3c59f1cb5cae84ec9aa549af1397",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.michigan.gov/leo/bureaus-agencies/uia": "Unemployment Insurance Agency",
    "https://www.michigan.gov/som/government/state-holidays": "State holiday",
@@ -5037,8 +5114,8 @@
   "failures": 0,
   "hash": "6d4bfeddbf28377cfc2f0e2783f7a2fb00831585972a92963d6eb47095b5cd2c",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0262222d38",
@@ -5066,8 +5143,8 @@
   "failures": 0,
   "hash": "a13ebb0583566a5818e4143300e653ea0d6fd7c93ab655c70128db1c62a4e0b1",
   "last_changed": "2026-09-25",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "002545054b",
@@ -5125,8 +5202,8 @@
   "failures": 0,
   "hash": "9c88ce2d19745fb7f127e8622ca18097cca70973bca406205ef5492050255785",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.revenue.state.mn.us/sites/default/files/2025-12/wh-inst-26.pdf"
@@ -5135,8 +5212,8 @@
   "failures": 0,
   "hash": "e1af1300c5a4d2b74befed5b3b117fad4b02939a485a3bc2a21855f0b30ae780",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.dli.mn.gov/sites/default/files/pdf/minimum_wage.pdf": "Minnesota's minimum wage laws",
    "https://www.dli.mn.gov/sites/default/files/pdf/minimum_wage_report_2025.pdf": "Minnesota minimum-wage report"
@@ -5198,8 +5275,8 @@
   "failures": 0,
   "hash": "3050aa1577c2b62b541ecd6c48eb511fbe9ddf532d003adc8a94b92ad33ef37f",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.revenue.state.mn.us/sites/default/files/2026-04/w-4mn.pdf"
@@ -5208,8 +5285,8 @@
   "failures": 0,
   "hash": "0518823a64ecac8e6afc93e0cfb3774d22fed3f357097ecd2af73ad763f61077",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.revenue.state.mn.us/sites/default/files/2025-12/mwr.pdf": "Form MWR, Minnesota Reciprocity Exemption /Affidavit of Residency"
   },
@@ -5394,8 +5471,8 @@
   "failures": 0,
   "hash": "f0d0c9097160543b1a6c609c5fb2ef3422413a8fbffcef4de1bef0f8beb249d0",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://minimumwage.minneapolismn.gov/uploads/9/6/3/1/96313024/2026_english_mpls_labor_standards_poster.pdf.pdf": "labor standards poster"
   },
@@ -5414,8 +5491,8 @@
   "failures": 0,
   "hash": "f139608d01bff492dda0aef7eda354dbdf6f546686a2bc667901529c903104de",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.irs.gov/pub/irs-pdf/p15.pdf": "see federal Circular E, IRS Publication 15",
    "https://www.revenue.state.mn.us/2025-federal-nonconformity-income-tax": "2025 Federal Nonconformity for Income Tax",
@@ -5484,13 +5561,12 @@
  },
  "mn-bb67f51ead": {
   "failures": 0,
-  "hash": "ff1a5b3fd684cc35a1dfbb3c07286f2e5e2c6ce689cb39133b424b67f37c6e66",
-  "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "hash": "f2d226d8e58ab2defb257f13c59c8892293f1aca0059acaee6a2b1a78d565ea6",
+  "last_changed": "2026-09-26",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
-   "043ed7ea3a",
    "52fedac782",
    "5be9039e8b",
    "62d5ec0c31",
@@ -5501,7 +5577,8 @@
    "af1b6a01c0",
    "d6c7f8ce76",
    "d915e2e4dc",
-   "ef0b0040c1"
+   "ef0b0040c1",
+   "fe7b45a97b"
   ],
   "url": "https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses"
  },
@@ -5509,8 +5586,8 @@
   "failures": 0,
   "hash": "a9d89bf07d1bab819c18b5b0eebe7d5deeff13faa8a51fcf8bab1a6f8e40054f",
   "last_changed": "2026-09-25",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "01166e6d1c",
@@ -5558,8 +5635,8 @@
   "url": "https://www.revisor.mn.gov/statutes/cite/268B.14"
  },
  "mn-c8db387719": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "HTTP 405",
   "url": "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions"
  },
@@ -5567,8 +5644,8 @@
   "failures": 0,
   "hash": "9ea0fc8ba8f178b4b2314236d3e04a6d4d3c22209e5ac996e1c501cea7c46bf6",
   "last_changed": "2026-09-25",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "01166e6d1c",
@@ -5595,8 +5672,8 @@
   "failures": 0,
   "hash": "7c9ea9e30dce27c72b286cd078396795ca68f37e2d492e8eb4a5a786ac714327",
   "last_changed": "2026-09-25",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "01166e6d1c",
@@ -5633,8 +5710,8 @@
   "failures": 0,
   "hash": "8b8da469b3100e44ba1723d0305b69b1fa2a3102ed359d042bbb079c8b0d1999",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "02bb719c98",
@@ -5656,8 +5733,8 @@
   "failures": 0,
   "hash": "e49a9bb19bbe63e04b6c536607e80e2f6f6d410cb820acaf90910be0b46be3a8",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://dor.mo.gov/forms/Withholding%20Formula_2026.pdf"
@@ -5666,8 +5743,8 @@
   "failures": 0,
   "hash": "8c859e08656e14b42529b8f0f13f8ea92839c1173bf1df444ab87f41c3e917b1",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "08516172fa",
@@ -5743,8 +5820,8 @@
   "failures": 0,
   "hash": "859f113068ddbacb7125ecd24c0ff54388491b4d19cdad4fe19aa2c990d10647",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://dor.mo.gov/faq/taxation/business/withholding.html": "General Information",
    "https://dor.mo.gov/forms/?formName=&category_id=23&year=99&sub=": "Withholding Tax Forms",
@@ -5785,8 +5862,8 @@
   "failures": 0,
   "hash": "1f7c812713c37e08afc63d1a22875b5f8c210e6fadd08165fe9973bc36201020",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://dor.mo.gov/forms/MO%20W-4.pdf"
@@ -5795,8 +5872,8 @@
   "failures": 0,
   "hash": "bd79a4a2c2c97f57d5fa514086bcc1853e0c758299c3de180e263b8c73e764ff",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.dor.ms.gov/business/business-tax-frequently-asked-questions": "Frequently Asked Questions\u200b",
    "https://www.dor.ms.gov/business/withholding-tax/bulk-filing-w2s-and-1099s": "More information",
@@ -5830,8 +5907,8 @@
   "failures": 0,
   "hash": "eb118c3a9f8efcccbbc1f9795d6f2a908e2f78f4bd5936bfa10fa2504f6f7c92",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://mdes.ms.gov/media/10385/UI_3B.pdf": "To download Form UI-3B, click here."
   },
@@ -5924,10 +6001,11 @@
   "url": "https://mdes.ms.gov/employer-faqs/"
  },
  "ms-bc2af1b7ff": {
-  "failures": 0,
+  "failures": 1,
   "hash": "d382dc4764e7ebf2309d9059fc64db2a1839fd1c383d9f66ca2e7b134b33c4e0",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {},
   "nav": [
@@ -5943,27 +6021,29 @@
   "failures": 0,
   "hash": "ffae841f830a124c38c288df618ea043d8c65e077b8c5702fdbe1b30c6882c34",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.dor.ms.gov/sites/default/files/tax-forms/business/89700251revised1.13.2026.pdf"
  },
  "mt-18605bd904": {
-  "failures": 0,
+  "failures": 1,
   "hash": "ff258ef09b3bafeb2e27d485eb2933df208434ed1d5d58e28e935b997ae4ec3a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {},
   "nav": [],
   "url": "https://revenuefiles.mt.gov/files/Forms/Montana_Employer_and_Information_Agent_Guide_with_Tax_Tables.pdf"
  },
  "mt-2599ef4f7b": {
-  "failures": 0,
+  "failures": 1,
   "hash": "331d0170cc99651b80f27329f09c56372537948ce6e76fdebb5da0761818c709",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {
    "https://revenue.mt.gov/": "Home",
@@ -5983,10 +6063,11 @@
   "url": "https://revenue.mt.gov/taxes/withholding-tax/wage-withholding-returns-and-payments"
  },
  "mt-2ae1b2691d": {
-  "failures": 0,
+  "failures": 1,
   "hash": "8472bbeff1aa8d1da37dd49711798321043d2b691d6a5ff0f9a4c7642f0039b6",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {},
   "nav": [
@@ -5999,40 +6080,44 @@
   "url": "https://revenue.mt.gov/news/recent-news/2026-withholding-updates"
  },
  "mt-871dbfd190": {
-  "failures": 0,
+  "failures": 1,
   "hash": "a1ca91e11237dcc786192b9781b9981b8b14722d617ca4c29362fe700c7c7a2c",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {},
   "nav": [],
   "url": "https://revenuefiles.mt.gov/files/Forms/Montana_Employee_Withholding_Allowance_and_Exemption_Certificate_Form_MW-4.pdf"
  },
  "mt-be96d1ec76": {
-  "failures": 0,
+  "failures": 1,
   "hash": "047e986bbdbaeaad3464227be63cc493dca7b3294524759d5df9f3a1c0c61d33",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {},
   "nav": [],
   "url": "https://revenuefiles.mt.gov/files/Forms/Publication-1/Publication-1-2026.pdf"
  },
  "mt-d3e1571950": {
-  "failures": 0,
+  "failures": 1,
   "hash": "38c3404e38ca60afeb622748510c8c34b5013df3d12b9af7c3aa6f5df06d9dbb",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {},
   "nav": [],
   "url": "https://uid.dli.mt.gov/employers/schedule-of-contribution-rates"
  },
  "mt-f98588262c": {
-  "failures": 0,
+  "failures": 1,
   "hash": "66fa347e28ede5f4cef4badfd8a12b4b7f3cb36a09e5886e7f4b55f15546bbd0",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {
    "https://revenue.mt.gov/": "Home",
@@ -6047,8 +6132,8 @@
   "failures": 0,
   "hash": "e0a333c74175078a18527ddad13c772a8382615bac6911dc66e1e98cc0e5dc3a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "08a4fb2062",
@@ -6078,8 +6163,8 @@
   "failures": 0,
   "hash": "914532b7ebcf4f9e6b25c5556a4cda727caa0445d50daa6292c6402f0dfe7877",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.ncdor.gov/income-tax-withholding-tables-and-instructions-employers/open"
@@ -6088,8 +6173,8 @@
   "failures": 0,
   "hash": "5837c76737c14494132e06edc36afeb80afb85075a9c1a77de30e6aa2d278730",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.ncdor.gov/": "Home",
    "https://www.ncdor.gov/contact-us/customer-education": "SVG Customer Education",
@@ -6119,8 +6204,8 @@
   "failures": 0,
   "hash": "2365e0178d49ddec0ed2430e894ff0d29cdd26af61f60fd166d00751aea74005",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.ncdor.gov/documents/2017-income-tax-withholding-tables-and-instructions-employers": "NC-30, North Carolina Income Tax Withholding Tables and Instructions for Employers",
    "https://www.ncdor.gov/documents/employees-withholding-allowance-certificate-nc-4": "Form NC-4",
@@ -6160,8 +6245,8 @@
   "failures": 0,
   "hash": "af76e7ee344848802b3be9381b04233ccaa7f7e75c9f6c932b6b8ca8ed68e393",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.tax.nd.gov/sites/www/files/documents/forms/individual/2026-iit/2026-income-tax-withholding-rates-booklet.pdf"
@@ -6170,8 +6255,8 @@
   "failures": 0,
   "hash": "391cb258b26f0f81d9895249924668d5bfa39f0351edd49b067b7e648a87de58",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://ndlegis.gov/cencode/t57c38.pdf": "N.D.C.C. 57-38-60",
    "https://www.irs.gov/pub/irs-pdf/p15.pdf": "IRS's Publication 15 (Circular E), Employer's Tax Guide",
@@ -6210,8 +6295,8 @@
   "failures": 0,
   "hash": "0ef170ae9f69de983ecaae6ef7bbb1afdd0b8b5b520594eca475a875bdc16f2e",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.tax.nd.gov/sites/www/files/documents/forms/business/ndwrfillable.pdf"
@@ -6220,8 +6305,8 @@
   "failures": 0,
   "hash": "540e6bd2bc70d1a13ea84ba7600fcc6321a42bfd2cc8cfbab5543743d9247215",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://nebraskalegislature.gov/FloorDocs/109/PDF/Slip/LB258.pdf"
@@ -6230,8 +6315,8 @@
   "failures": 0,
   "hash": "ba5f9dc60335773942579977f30c9f9bed05b92da20660d15abbc169f44eba25",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026cir_en_whole.pdf"
@@ -6240,8 +6325,8 @@
   "failures": 0,
   "hash": "ffbb25d5e774c95dfd1f43c13cfbfbbd4589f81fe2819c62947e11124b12ef0e",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://ago.nebraska.gov/sites/default/files/doc/2026.08.18%20-%20Complaint.pdf": "Download Court Filing",
    "https://ago.nebraska.gov/sites/default/files/doc/Court%20Filing_26.pdf": "Download Court Filing"
@@ -6253,8 +6338,8 @@
   "failures": 0,
   "hash": "60e3ceeaa5b525a1ffd98e82d20223f38a713ec132373683186367c26d37830b",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026_percent.pdf"
@@ -6263,8 +6348,8 @@
   "failures": 0,
   "hash": "f2d43c57a9c60f5911ccad7dfc85c230ffeebd09e671448b41859ce90c0b48e6",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "308ffb2e34",
@@ -6278,8 +6363,8 @@
   "failures": 0,
   "hash": "ed012c58ae5d8bbc5cfe7dc6a005c044faa3c8b4a6a65047483b72c11b0bc620",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://revenue.nebraska.gov/about/forms/income-tax-withholding-forms": "Forms",
    "https://revenue.nebraska.gov/about/frequently-asked-questions/income-tax-withholding-faqs": "Frequently Asked Questions",
@@ -6320,8 +6405,8 @@
   "failures": 0,
   "hash": "c9ef771248a6a3dd4d3dbf27f0a1e5f4fd783715473ec8b320f47d5eada07800",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://dol.nebraska.gov/webdocs/Resources/Items/2026%20UI%20guide%20to%20understanding.pdf"
@@ -6330,8 +6415,8 @@
   "failures": 0,
   "hash": "6557f419358c3264d9b7f6bc88d52cde886c6ffb60c5b5925694881469861910",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://gc.nh.gov/rsa/html/XXIII/279/279-21.htm"
@@ -6340,8 +6425,8 @@
   "failures": 0,
   "hash": "35e3c998cab365624f12b225faab5a988c490522c39b329b668b7e81080ad574",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://nj.gov/treasury/taxation/pdf/current/njw4.pdf"
@@ -6350,8 +6435,8 @@
   "failures": 0,
   "hash": "2ac20697e39fd6fc2cc822e576b46a5bdc33b6a5badc83df82f81f1111b3d468",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.nj.gov/labor/assets/PDFs/Legal%20Notices/Other/Public%20Notice%20Minimum%20Wage%202026_FINAL.pdf"
@@ -6360,8 +6445,8 @@
   "failures": 0,
   "hash": "54be638850e1726cc9fdb966da227e5f3b39fe4d177908726c7953b9ab8c8907",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0f0014e295",
@@ -6373,8 +6458,8 @@
   "failures": 0,
   "hash": "481a08826ccaac641c22b0f64a667069daab5ac55acd5f11590287a403afff38",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0e292b1f1d",
@@ -6387,8 +6472,8 @@
   "failures": 0,
   "hash": "484ebb70fb0659e91983c30daa5459901714fc99c9ed87e8773e7c8032aec540",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.nj.gov/labor/myleavebenefits/assets/pdfs/FL1_6-19v2.pdf": "paper application (FL-1)",
    "https://www.nj.gov/labor/myleavebenefits/assets/pdfs/FL1_7-20.pdf": "DOWNLOAD HERE >",
@@ -6448,8 +6533,8 @@
   "failures": 0,
   "hash": "2bef16dcfeb83eb67d7da5f55c876b52530ce036389d669b8b02f0554fe360cb",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.nj.gov/labor/ea/assets/PDFs/FY20262027 TABLE C.pdf": "Tax Table C",
    "https://www.nj.gov/labor/ea/assets/PDFs/UC-45.pdf": "UC-45, Voluntary Contribution Report",
@@ -6468,8 +6553,8 @@
   "failures": 0,
   "hash": "e26268f758f79e52159197beb471dffdf122d2156b4a4c1f6e0e27798c1aba0d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.nj.gov/treasury/news/2022/01252022.shtml": "Treasury Launches New Automated Payroll Service to Simplify Filings for Employers",
    "https://www.nj.gov/treasury/securechoiceprogram/employers.shtml": "New Jersey Secure Choice Savings Program",
@@ -6492,8 +6577,8 @@
   "failures": 0,
   "hash": "e4ba3669465e2ef0e6279d112926a75439f23c01f1e0ca7073d60e7775aa6ea8",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.nj.gov/treasury/taxation/pdf/current/nj165.pdf"
@@ -6502,8 +6587,8 @@
   "failures": 0,
   "hash": "93ec73d50c7536901cd4e64ae7bba5992d5d04f95642afcf81313dfc5b955ad0",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF"
@@ -6512,8 +6597,8 @@
   "failures": 0,
   "hash": "057a52a07119eda3c11e9be0af63314ec5941d699fa3f277822a4d06760f499c",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.nj.gov/labor/myleavebenefits/assets/pdfs/DS1_6-19.pdf": "DOWNLOAD NOW >",
    "https://www.nj.gov/labor/myleavebenefits/assets/pdfs/PR-117%20(3-26)%20Cash%20Benefits%20Health%20Conditions%20and%20Pregnancy.pdf": "DOWNLOAD NOW (ENGLISH) >",
@@ -6569,8 +6654,8 @@
   "failures": 0,
   "hash": "d07ebf499d75b96ebdff597fb32e9247806dad32159a066e4fa6fff708270c93",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.nj.gov/treasury/taxation/pdf/withholdingtables.pdf"
@@ -6579,8 +6664,8 @@
   "failures": 0,
   "hash": "42b2015fc4a5f0bea8dbf458de7fd4c018fb62417f4b0d502ee83d56342ea404",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.nj.gov/treasury/taxation/pdf/current/njwt.pdf"
@@ -6589,8 +6674,8 @@
   "failures": 0,
   "hash": "85f73a97857fd4e7f2429b9dc251393e74d3d0e155187f258f8696f7958bd0f6",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.santafecountynm.gov/documents/ordinances/Ordinance2014-1.pdf": "Ordinance 2014-1 (Living Wage Ordinance)",
    "https://www.santafecountynm.gov/documents/ordinances/Ordinance2014-5.pdf": "Ordinance 2014-5 (Amended Ordinance)",
@@ -6610,8 +6695,8 @@
   "failures": 0,
   "hash": "d3b18cc2a2ae51dd5fff74a3c538ec3fac80c98aa4638a418c51250b4c6797b7",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.dws.nm.gov/Portals/0/DM/Business/Client_Rate_File_Format.pdf": "Agent Client Rate File Format",
    "https://www.dws.nm.gov/Portals/0/DM/Business/Employer_Activation_Guide.pdf": "Employer Activation Guide",
@@ -6661,8 +6746,8 @@
   "failures": 0,
   "hash": "5f7e799fd46b639daf3978fd637c9fde7b19a52bbb38c0d8ed993e094a0f5efc",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://santafenm.gov/media/news_pdf/2025_Living_Wage_Ordinance.pdf"
@@ -6671,8 +6756,8 @@
   "failures": 0,
   "hash": "eccbb80b50660248cd5c697f8c7710a5532fba4d8629af12df89485af6281053",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.cabq.gov/legal/documents/2026-adjustment-in-annual-minimum-wage-english-spanish-updated-language-bmr-final.pdf": "2026 Adjustment in Annual Minimum Wage - English & Spanish",
    "https://www.cabq.gov/legal/documents/minimum-wage-ordinance-as-amended.pdf": "Minimum Wage Ordinance",
@@ -6707,10 +6792,11 @@
   "url": "https://www.cabq.gov/legal/albuquerque-minimum-wage-information"
  },
  "nm-aea5c9a404": {
-  "failures": 0,
+  "failures": 1,
   "hash": "a80a2f3645610c4bb64cefaac223a706f5dfd6ee46dfdb88e37ccd3e1575929a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {},
   "nav": [
@@ -6725,8 +6811,8 @@
   "failures": 0,
   "hash": "cf21af55533bb67946bdd5792998a2a170ba686747ef1a436020f0b7537e35a5",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.tax.newmexico.gov/wp-content/uploads/2021/04/disable-pop-up-blocker-on-android-1.pdf": "Disable Pop-Ups Blocker on Android",
    "https://www.tax.newmexico.gov/wp-content/uploads/2021/04/turn-off-pop-up-blocker-on-iphone-1.pdf": "Disable Pop-Ups Blocker on iPhone"
@@ -6745,8 +6831,8 @@
   "failures": 0,
   "hash": "c4a11e5b88a7c237c299781d8b5acfa2979d16c53d12b5689f1c7d19424674ae",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "1a28d3d144",
@@ -6778,8 +6864,8 @@
   "failures": 0,
   "hash": "f13f59847a0f008ace97a93ed1afde86dce146a6c76a56226d349c9d800d9828",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.santafecountynm.gov/documents/ordinances/Ordinance2014-1.pdf": "here"
   },
@@ -6796,29 +6882,30 @@
   "failures": 0,
   "hash": "06046340db412c2d4f39a32b5b14b4821f04fc331d07ba873d413b392d223035",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://realfile.tax.newmexico.gov/FYI-104.pdf"
  },
  "nm-fe3826da79": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://lascruces.gov/wp-content/uploads/2025/09/MinimumWageEng26.pdf"
  },
  "nv-016aa33031": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://detr.nv.gov/Page/UI_Information_for_Employers"
  },
  "nv-1783feb371": {
-  "failures": 0,
+  "failures": 1,
   "hash": "0b42f24adf5c75c6b557336ebee2a42d5946bf42ed1ac0d245c774e854f1aa13",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "page returned almost no text (a bot check, or built by JavaScript); a real browser was refused too",
   "last_ok": "2026-09-25",
   "links": {
    "https://tax.nv.gov/wp-content/uploads/2025/05/Modified-Business-Tax-Wage-Comparison-Resumes-January-1-2026.pdf": "Modified Business Tax Wage Comparison Resumes January 1, 2026!",
@@ -6857,10 +6944,11 @@
   "url": "https://tax.nv.gov/tax-types/modified-business-tax"
  },
  "nv-db9f9d62a7": {
-  "failures": 0,
+  "failures": 1,
   "hash": "8dd566740283dd9219cf125fe6620877472e95d4af4b5b80be79258c36c9bbe9",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "page returned almost no text (a bot check, or built by JavaScript); a real browser was refused too",
   "last_ok": "2026-09-25",
   "links": {
    "https://tax.nv.gov/wp-content/uploads/2025/05/Modified-Business-Tax-Wage-Comparison-Resumes-January-1-2026.pdf": "Modified Business Tax Wage Comparison Resumes January 1, 2026!"
@@ -6949,8 +7037,8 @@
   "failures": 0,
   "hash": "074eb11bcf869352d1496ca3f02251627658e7d8b99ff8cb759e8e809d8719e8",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "584f286055"
@@ -6961,8 +7049,8 @@
   "failures": 0,
   "hash": "13160f976c1518abaa4b7ae4b9f138355bc4921e54ad09d009e2c4221324a96e",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.dol.gov/sites/dolgov/files/WHD/fab/2023-1.pdf": "Telework under the FLSA and the FMLA",
    "https://www.dol.gov/sites/dolgov/files/WHD/fab/fab-2022-2.pdf": "Protecting Workers from Retaliation",
@@ -7044,8 +7132,8 @@
   "failures": 0,
   "hash": "e1b4ab6e6060cacbc5f8855d257341fd6040292dfdcc8c054ee593dec39d7c22",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "10baf2b216",
@@ -7067,8 +7155,8 @@
   "failures": 0,
   "hash": "dae69482c9d1533ae22f90e52a363f455003e5536e82db7bba7fbed6ab6ef9c8",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "1fc1500501",
@@ -7093,15 +7181,15 @@
   "failures": 0,
   "hash": "368f9ac5370eef66b702f929f1e80520861c487b568a93a1c2e9b17c738780ab",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.tax.ny.gov/pdf/current_forms/wt/nys45i.pdf"
  },
  "ny-47dc9810d4": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://www.ny.gov/sites/default/files/atoms/files/PSL_FAQ_PaidSickLeaveFAQ.pdf"
  },
@@ -7109,8 +7197,8 @@
   "failures": 0,
   "hash": "17af759db509a5547a2717a39bf996b5e782559006ee76ae40d1f9002e9b8cba",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.tax.ny.gov/pdf/current_forms/it/it2104_fill_in.pdf"
@@ -7119,8 +7207,8 @@
   "failures": 0,
   "hash": "1b379d98f7b5abe11cdce17ca65b9d55595b94a2b2cf7080eefe6b677f622d94",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "00a1c860f3",
@@ -7546,8 +7634,8 @@
   "failures": 0,
   "hash": "0d28e500c2b0741aac1eee8bec47294116f9785b9566632f27abc0ecf91f5b6a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.tax.ny.gov/bus/doingbus/hire.htm": "Hiring employees",
    "https://www.tax.ny.gov/bus/efile/elf_busn_mandate.htm": "Electronic filing",
@@ -7576,8 +7664,8 @@
   "url": "https://www.tax.ny.gov/bus/wt/wtidx.htm"
  },
  "ny-56c42c3ba4": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "needs a free API key: add repository secret NYSENATE_API_KEY; a real browser was refused too",
   "url": "https://legislation.nysenate.gov/api/3/laws/LAB/651?key={env:NYSENATE_API_KEY}"
  },
@@ -7585,8 +7673,8 @@
   "failures": 0,
   "hash": "777d594f146418152229c8ec092c45a8ff9a847ab233b75af1acce2001e3c63b",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/Digital_Reference_Guide_FLSA.pdf": "New: Interactive Handy Reference Guide to the Fair Labor Standards Act (PDF)",
    "https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/wh1282.pdf": "see the PDF version",
@@ -7640,8 +7728,8 @@
   "url": "https://www.dol.gov/agencies/whd/compliance-assistance/handy-reference-guide-flsa"
  },
  "ny-75c50b7e24": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://www.dfs.ny.gov/consumers/health_insurance/cobra_and_premium_assistance"
  },
@@ -7649,8 +7737,8 @@
   "failures": 0,
   "hash": "18dd2f5c1d4ba97f2f7b6458b43afb7e0602bf2f7fea40dbe0026570a9431ebd",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.dol.gov/sites/dolgov/files/EBSA/about-ebsa/our-activities/resource-center/faqs/cobra-continuation-health-coverage-consumer.pdf": "Frequently Asked Questions: COBRA Continuation Health Coverage",
    "https://www.dol.gov/sites/dolgov/files/EBSA/about-ebsa/our-activities/resource-center/faqs/hipaa-consumer.pdf": "HIPAA Portability of Health Coverage and Nondiscrimination Requirements Frequently Asked Questions",
@@ -7685,8 +7773,8 @@
   "failures": 0,
   "hash": "757efdcff9cee082b3c7a234e1639fdc5e94784e88db787a110d33971f81f9a2",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "10cd1a047a",
@@ -7700,8 +7788,8 @@
   "failures": 0,
   "hash": "8ee96fbb2d433bf54ac389063264097ece42fe34709547bfdc19c281324838f1",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_nys.pdf"
@@ -7710,8 +7798,8 @@
   "failures": 0,
   "hash": "8d24000c2dfafbef219c0ceff8f69c078746e673e7e0c56f7a42a7aebc3a4602",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.wcb.ny.gov/content/main/forms/PFLDocs/pfl-pay-deduction-notice-2026.pdf"
@@ -7720,15 +7808,15 @@
   "failures": 0,
   "hash": "0d4fa2a3d52758e2c0685cd4f1941cf4415a7d32fd183c435bbce500300c0e30",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?section=553.106"
  },
  "ny-98bb301062": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "needs a free API key: add repository secret NYSENATE_API_KEY; a real browser was refused too",
   "url": "https://legislation.nysenate.gov/api/3/laws/ELN/3-400?key={env:NYSENATE_API_KEY}"
  },
@@ -7736,8 +7824,8 @@
   "failures": 0,
   "hash": "4b3e0fb1cf385774c558381d34c3eb87eb3b543a806911dc725936f4b9ee74e4",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.osc.ny.gov/state-agencies/audits": "Audits",
    "https://www.osc.ny.gov/state-agencies/contracts": "Procurement and Contracting in New York",
@@ -7764,8 +7852,8 @@
   "failures": 0,
   "hash": "eeb807b3789a6467df1b5efa7557020007b5b852de6dd8357e4c085dfbfb4a06",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0423c9a894",
@@ -7880,8 +7968,8 @@
   "failures": 0,
   "hash": "0bf294eb7fa28790045323270d9698815cd56a86e10654695e1a2c878f88afc5",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "redirects_to": "https://dol.ny.gov/system/files/documents/2024/12/p105-home-health-aide-10-23-24.pdf",
@@ -7891,8 +7979,8 @@
   "failures": 0,
   "hash": "df95b8083c9d53543cd27d3c0f207b2adfb12b9f0554425099f507c25445d315",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "3a52ce7809",
@@ -7908,8 +7996,8 @@
   "failures": 0,
   "hash": "9cf4cd651d7d8a0bbe7d6f5dc2f52ccc560b853edcb285fe20efec6dc8935ab9",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "24426c362e",
@@ -7928,8 +8016,8 @@
   "failures": 0,
   "hash": "ca4b93eaaabaf5e7480fbaaa685a44b80fd820c9414c97a0d0325a1e4bec634a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/FLSAPosterPolish.pdf": "Polish Version (PDF)",
    "https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/FLSAPosterRuss.pdf": "Russian Version (PDF)",
@@ -8003,8 +8091,8 @@
   "failures": 0,
   "hash": "bb3fa30186e92376b1195d059d1277119aef098f6501b147f01c921bcd8fdfe5",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "http://www.treasury.gov/press-center/press-releases/Documents/Fact%20Sheet%20021014.pdf": "fact sheet PDF",
    "https://www.irs.gov/pub/irs-drop/n-13-45.PDF": "Notice 2013-45 PDF",
@@ -8036,12 +8124,99 @@
   ],
   "url": "https://www.irs.gov/affordable-care-act/employers/determining-if-an-employer-is-an-applicable-large-employer"
  },
+ "oh-108bf265b1": {
+  "failures": 0,
+  "hash": "e54e6710c7ca69e895e435ffb803831b57d4b65b4de36e19f5e8847354bb17f8",
+  "last_changed": "2026-09-26",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
+  "links": {
+   "https://codes.ohio.gov/assets/laws/revised-code/authenticated/7/718/718.01/9-30-2025/718.01-9-30-2025.pdf": "Download Authenticated PDF"
+  },
+  "nav": [
+   "006a983062",
+   "08cfdf545c",
+   "0ad867f250",
+   "0b2e5302d7",
+   "0d00fc5a97",
+   "27e1b493d0",
+   "2805f63f43",
+   "2ef86ceb2d",
+   "318339a824",
+   "353850d2f3",
+   "3cc67bcef6",
+   "3f452fc135",
+   "3fd82e5130",
+   "424b139c88",
+   "4637f4d10b",
+   "46ecc322c2",
+   "47607fa0f2",
+   "4e17b140f6",
+   "51affd3a55",
+   "5279c7096d",
+   "5a5fc30bfa",
+   "5a7356ea48",
+   "5cea254192",
+   "60216f32e9",
+   "679071ddc2",
+   "679d3c0d82",
+   "6b3c02c8f2",
+   "6bc0a9c533",
+   "6e736d5ec1",
+   "740c56031e",
+   "80dd70786f",
+   "89a27c9064",
+   "91c0f71ebe",
+   "953922e1e7",
+   "aa44b9e45a",
+   "ad4f431bef",
+   "b6cfab07ae",
+   "c327d1b3f0",
+   "d06b940ba2",
+   "d159eba8fb",
+   "d5511f21a0",
+   "d65f97ee40",
+   "d8435b93d8",
+   "dd17c1d9a6",
+   "ebebd870a3",
+   "ec00fa6685",
+   "ee04f7acab",
+   "f1aa119b9f",
+   "f93c396af6"
+  ],
+  "url": "https://codes.ohio.gov/ohio-revised-code/section-718.01"
+ },
+ "oh-11381dbcee": {
+  "failures": 0,
+  "hash": "4a5dfc312e51cf6dfa2963ab5439f8c967ce7e7e57c8b75856e05958217940f5",
+  "last_changed": "2026-09-26",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
+  "links": {
+   "https://codes.ohio.gov/assets/laws/revised-code/authenticated/7/715/715.691/10-3-2023/715.691-10-3-2023.pdf": "Download Authenticated PDF"
+  },
+  "nav": [
+   "1097d61c9d",
+   "13146dc0cc",
+   "3b3a97747f",
+   "5a5fc30bfa",
+   "5cea254192",
+   "5f29bb273a",
+   "67026bdb15",
+   "b7d50d26d5",
+   "cea6d5479e",
+   "d346b80b3d",
+   "d65f97ee40",
+   "e7fbd99075"
+  ],
+  "url": "https://codes.ohio.gov/ohio-revised-code/section-715.691"
+ },
  "oh-15911dbfb1": {
   "failures": 0,
   "hash": "8194b27cc2ba0239712894c596d0504c20bebb940bdeaa3c72005b31f336390a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "redirects_to": "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/employer_withholding/generic/wth-it4-combined-fi.pdf",
@@ -8051,8 +8226,8 @@
   "failures": 0,
   "hash": "8a0edf62c3e09ecd348cfe6ef7f71848abb0cae16047b1616d9e4b232e527883",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "00503c496f",
@@ -8103,8 +8278,8 @@
   "failures": 0,
   "hash": "4c76c180ae957efca276b8fcf3d7669e4e0f26a9d4b9dddefc803fe69ab198ca",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0032950894",
@@ -8187,8 +8362,8 @@
   "failures": 0,
   "hash": "695d6cd343997d3491157449e3845638d5d43d20511ad37c78294982df40ab30",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "redirects_to": "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf",
@@ -8198,8 +8373,8 @@
   "failures": 0,
   "hash": "aa90f3f37bbd1e11a051b0dd408bc81455d74823bf9e35a603749bbf9810e7b4",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/1099_common_errors_2021.pdf": "1099 Common Errors",
    "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/1099uploadsubmissionerrordescriptions2021.pdf": "1099 Submission Error Descriptions",
@@ -8332,8 +8507,8 @@
   "failures": 0,
   "hash": "03d0a61b107888c259dbeef416d3b1646c8e3bc11372300763323cf5b338b54b",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://dam.assets.ohio.gov/image/upload/jfs.ohio.gov/ouio/uctax/2023-RateDetails.pdf": "2023 Rate Details",
    "https://dam.assets.ohio.gov/image/upload/jfs.ohio.gov/ouio/uctax/2024RateDetails.pdf": "2024 Rate Details",
@@ -8348,8 +8523,8 @@
   "failures": 0,
   "hash": "a19873f9aee80dfb55503f277fbaac8f0452632169a581bc290ff76a2f538606",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://codes.ohio.gov/assets/laws/revised-code/authenticated/57/5747/5747.06/10-17-2019/5747.06-10-17-2019.pdf": "Download Authenticated PDF"
   },
@@ -8367,8 +8542,8 @@
   "failures": 0,
   "hash": "a20c828723872bc3fd666b752544c512be65bf7cbd05864391840851b6d126d8",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_PercentageMethod_2026.pdf"
@@ -8377,8 +8552,8 @@
   "failures": 0,
   "hash": "ab95290cd74f25b6b56e5c60a8d031c40750f64142ccc3206e8d505944a6ba06",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://codes.ohio.gov/assets/laws/revised-code/authenticated/7/718/718.121/3-23-2015/718.121-3-23-2015.pdf": "Download Authenticated PDF"
   },
@@ -8395,24 +8570,57 @@
   "failures": 0,
   "hash": "13e18aaaed98b7d8008bde5dd12fe3e7d6e2b223d8cb089842fb88622551a45f",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_PercentageMethod_2025.pdf"
  },
  "oh-980004cf44": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "HTTP 401: the site refuses automated requests; a real browser was refused too",
   "url": "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv"
+ },
+ "oh-9ca5768c15": {
+  "failures": 0,
+  "hash": "9a066d499fa41188d830652a5ed8205580b97cd453213d74858530ad4295b763",
+  "last_changed": "2026-09-26",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
+  "links": {
+   "https://codes.ohio.gov/assets/laws/revised-code/authenticated/57/5748/5748.01/1-1-2026/5748.01-1-1-2026.pdf": "Download Authenticated PDF"
+  },
+  "nav": [
+   "035fbdb727",
+   "0e1947f4f6",
+   "3f1a0e0e56",
+   "4d8037684f",
+   "4e17b140f6",
+   "5279c7096d",
+   "5a5fc30bfa",
+   "658b410a40",
+   "6b3346eb90",
+   "6bc0a9c533",
+   "708f240161",
+   "7a0d574a5a",
+   "8b3c7738b1",
+   "afa0132c14",
+   "d5a0ea80f7",
+   "d8d9bc1509",
+   "da132e876a",
+   "ef5f2330f2",
+   "f5fb2dec1f",
+   "f99ceae100"
+  ],
+  "url": "https://codes.ohio.gov/ohio-revised-code/section-5748.01"
  },
  "oh-a262e9dc43": {
   "failures": 0,
   "hash": "336d1479ff8adc4d014cb5fa445882f8fc0eef2518a32978ee3c65c6408258af",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "redirects_to": "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/employer_withholding/generic/wth_it4nr.pdf",
@@ -8422,8 +8630,8 @@
   "failures": 0,
   "hash": "7b81067c8b762a74328f745e51ecc97a86ea51512a835c1a125b93bd97e0d5eb",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://codes.ohio.gov/assets/laws/revised-code/authenticated/7/718/718.011/3-23-2015/718.011-3-23-2015.pdf": "Download Authenticated PDF"
   },
@@ -8442,18 +8650,48 @@
   "failures": 0,
   "hash": "53cf7b174b04da25e6cb645edf389e8c99da534fc30ce9f78e73bc9626573fd3",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FJEDTaxRates.csv"
+ },
+ "oh-c6757be3d8": {
+  "failures": 0,
+  "hash": "3eb0be4cc91945e2debdc239c0cee2d2e3d15ad1e3dcf6b6250beb684d8d01ee",
+  "last_changed": "2026-09-26",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
+  "links": {
+   "https://codes.ohio.gov/assets/laws/revised-code/authenticated/7/715/715.72/9-30-2021/715.72-9-30-2021.pdf": "Download Authenticated PDF"
+  },
+  "nav": [
+   "05ad6da131",
+   "19e88f2412",
+   "51affd3a55",
+   "560d633239",
+   "571c854b65",
+   "5a5fc30bfa",
+   "5a7356ea48",
+   "67026bdb15",
+   "6e67d2fcb9",
+   "78f150799c",
+   "87544b5bb1",
+   "8908d96084",
+   "89a27c9064",
+   "c6e94cf93f",
+   "d346b80b3d",
+   "d38c35e5f6",
+   "d65f97ee40"
+  ],
+  "url": "https://codes.ohio.gov/ohio-revised-code/section-715.72"
  },
  "ok-0baa065a73": {
   "failures": 0,
   "hash": "506b25aba10cfe6a3cdf7f995b60d0ced55b235f07b5ed34fba845cd734ecad6",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.oklahoma.gov/content/dam/ok/en/tax/documents/resources/publications/businesses/withholding-tables/WHTables-2026.pdf"
@@ -8462,8 +8700,8 @@
   "failures": 0,
   "hash": "81b5d1c4b2e8a2cf8a6950e1c881d4d5f47fe003f103f817e75901a4b4747519",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://oklahoma.gov/content/dam/ok/en/oesc/images/misc/Employer-Improtant-Numbers-2026.pdf"
@@ -8472,8 +8710,8 @@
   "failures": 0,
   "hash": "2e8943224a1da9c9b154c3048b258a336b60e4d608b16635f8c4e68324ddf63a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://oklahoma.gov/content/dam/ok/en/tax/documents/forms/businesses/general/OK-W-4.pdf"
@@ -8482,8 +8720,8 @@
   "failures": 0,
   "hash": "b90773e1be9af2927fb9cf1debe9419e0fa9ab33889d13b9311a59891729378d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://oklahoma.gov/content/dam/ok/en/tax/documents/forms/businesses/general/OW-21.pdf": "OW-21",
    "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/publications/businesses/brochures/CommonOklahomaWithholdingTaxAuditIssues.pdf": "HERE",
@@ -8513,8 +8751,8 @@
   "failures": 0,
   "hash": "724556ded46e1584a0af7939b21e468207b0f9f767035cf7f771ff3cfc8d63a1",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.canbyoregon.gov/sites/default/files/fileattachments/transit_tax/page/2041/transit_tax_guide_for_businesses.pdf"
@@ -8523,8 +8761,8 @@
   "failures": 0,
   "hash": "cadb4e7fd9e8445e9115b9413f9a38fba0519315809ed5ad74d00ad50814e36a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0a8c64e264",
@@ -8570,8 +8808,8 @@
   "failures": 0,
   "hash": "4ffb039eb6782c1488988ed7105cbe55f0b88aaf51880d865d10a4653feacf37",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.oregon.gov/dor/programs/businesses/Documents/stt-rol-import-template.xlsx": "spreadsheet"
   },
@@ -8593,8 +8831,8 @@
   "failures": 0,
   "hash": "7b6bf2a368d2a803000a1b2b58ce5f1c61c8544ee89b608dea4c8d79b54ca821",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.ci.sandy.or.us/sites/default/files/fileattachments/economic_development/page/4671/transit_tax_instructions.pdf"
@@ -8603,8 +8841,8 @@
   "failures": 0,
   "hash": "7391c754c1389f836d3ae7b2f9f856e9585479ad7f26332a5914d6ac3a2ad554",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "http://www.oregon.gov/EMPLOY/Businesses/Tax/Pages/Tax-Forms-and-Fliers.aspx": "Form OQ",
    "https://sos.oregon.gov/business/Documents/business-guides/employer-guide.pdf": "Oregon Employers Guide",
@@ -8643,8 +8881,8 @@
   "failures": 0,
   "hash": "ea339f861cc9d2317d583f30ee2db1a5678dd9092ce3703144d127a8c9886a69",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://d1o0i0v5q5lp8h.cloudfront.net/paidleave/live/assets/resources/taxability-fact-sheet-en.pdf": "Taxability Fact Sheet"
   },
@@ -8654,8 +8892,8 @@
   "url": "https://paidleave.oregon.gov/employers/contributions-calculator.html"
  },
  "or-7dba5cabbb": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "HTTP 404",
   "url": "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  },
@@ -8663,8 +8901,8 @@
   "failures": 0,
   "hash": "d53fd22d520e54d27c7c15a10b407554b45dd64de12bff6d24dbaecda91dc161",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.oregon.gov/dor/forms/FormsPubs/withholding-tax-formulas_206-436_2026.pdf"
@@ -8673,8 +8911,8 @@
   "failures": 0,
   "hash": "3c92c3430e580036493793b0c8f698a25873aba912bdf4f4d02907291373dd40",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.oregon.gov/dor/forms/formspubs/transit-payroll-taxes_211-503.pdf"
@@ -8683,8 +8921,8 @@
   "failures": 0,
   "hash": "af8ae8a64909595ddf9eeb65bf08f98f8193495a825a507d0b5c90281861269f",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.oregon.gov/dor/Pages/accessibility.aspx": "Request an ADA accommodation.",
    "https://www.oregon.gov/dor/Pages/map.aspx": "Regional Offices",
@@ -8700,8 +8938,8 @@
   "failures": 0,
   "hash": "aabef639e9e32eb6daad0e78724786bc0a08a7326a8c0217731e2ba8116ec336",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://wcd.oregon.gov/forms/Pages/index.aspx": "Forms and bulletins",
    "https://wcd.oregon.gov/laws/Documents/New_rules/009%2c%20010%2c%20015%20-%20April%201%2c%202025/10-25051-marked.pdf": "010",
@@ -8788,8 +9026,8 @@
   "failures": 0,
   "hash": "82962981cf362d9c7c98a53d379fb6b67df517def634397f2a095705f24db5e5",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.oregon.gov/dor/forms/FormsPubs/combined-payroll_211-155-2_2026.pdf"
@@ -8798,8 +9036,8 @@
   "failures": 0,
   "hash": "e3ef43e126c28a6cdfee02c27581cda61871c54671557c99df147cbe7b2b7c03",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.portland.gov/revenue/documents/ach-credit-specifications/download": "ACH Credit Specifications",
    "https://www.portland.gov/revenue/documents/annual-withholding-reconciliation-return-xml-file-guide/download": "Annual Withholding Reconciliation Return XML File Guide",
@@ -8839,8 +9077,8 @@
   "failures": 0,
   "hash": "b1b18448057dbbc718925252c5b0257d0633fd9e2234444eb65284edf4d7cc88",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.oregon.gov/employ/Businesses/Documents/Filing%20Due%20Date%20%26%20Misc%20Contact%20Info_UI%20PUB%20139_01.2026.pdf": "Employer\u2019s Filing Due Dates & Miscellaneous Contact Information UI Pub 139"
   },
@@ -8854,8 +9092,8 @@
   "failures": 0,
   "hash": "c6228a1665c7f95ddd2cb992a3ecac8f75c3a727cd2b848804718c2127041234",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "00459e6c7e",
@@ -9000,8 +9238,8 @@
   "failures": 0,
   "hash": "4c8c4545de10d130925539bc671cd19c86d31dfd016748430c1de387c9b73d59",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748%20rev%2009-25.pdf"
@@ -9010,8 +9248,8 @@
   "failures": 0,
   "hash": "97864ec5102d4072f658bdfcb9c35f4230f7a485809d1b936b1c0f04d61eea2e",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforbusinesses/employerwithholding/documents/rev-419.pdf"
@@ -9020,8 +9258,8 @@
   "failures": 0,
   "hash": "79d8adc49c8e160dced3fca8301d30af8a8038e14ffc3c69a265b34b77a305e2",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.pa.gov/agencies": "Agencies",
    "https://www.pa.gov/agencies/revenue": "Department of Revenue",
@@ -9293,8 +9531,8 @@
   "failures": 0,
   "hash": "6a659a6c20470acb67e1ca9fd332093428f8bf5b42e29da967ae5147e7d26c8b",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748%20rev%2008-18.pdf": "Form UC-748, Contribution Rates Effective January 1, 2019",
    "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748%20rev%2008-20.pdf": "Form UC-748, Contribution Rates Effective January 1, 2021",
@@ -9454,8 +9692,8 @@
   "failures": 0,
   "hash": "d65ca44a23aad7752472060971c77753542782d9051e564b9dfa7372abab8553",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforbusinesses/employerwithholding/documents/rev-415.pdf"
@@ -9464,8 +9702,8 @@
   "failures": 0,
   "hash": "977b9a8cc001179421ff917a46eca1526df62b25378e340579c377e2695f9ffa",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.nj.gov/treasury/taxation/pdf/current/nj165.pdf": "Form NJ-165",
    "https://www.nj.gov/treasury/taxation/pdf/signedstatement.pdf": "signed statement",
@@ -9483,8 +9721,8 @@
   "failures": 0,
   "hash": "ba2fde76e70b88dead7204dbca918cb218159dbfd90b766f9844e38ba1b126cf",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "00459e6c7e",
@@ -9626,8 +9864,8 @@
   "failures": 0,
   "hash": "79d8adc49c8e160dced3fca8301d30af8a8038e14ffc3c69a265b34b77a305e2",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/contactus/documents/address_directory.pdf": "Mailing Addresses [PDF]",
    "https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforbusinesses/employerwithholding/documents/rev-415.pdf": "Employer Withholding Information Guide (REV-415) [PDF]"
@@ -9901,8 +10139,8 @@
   "failures": 0,
   "hash": "b2c0fa635b321368306af59ecb61f9ab5e20067a6e91794b19b185872d08c200",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2026"
@@ -9911,8 +10149,8 @@
   "failures": 0,
   "hash": "c86dcc05e2897e6426ad05df83393bd967ae1a30704d856279770170dce7b2fb",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "059f964fef",
@@ -9943,8 +10181,8 @@
   "failures": 0,
   "hash": "dfc6a0d1d5d5ca4c91e570e07b9aae0f7c4cda312ae4f5465c19585655d250fa",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/forms/2026/mw507.pdf"
@@ -9953,8 +10191,8 @@
   "failures": 0,
   "hash": "229250df25999766662f39eae270ca111c37390b396075d53075ae5d445479f1",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://tax.ri.gov/forms/business-tax-forms/withholding-tax-forms": "Withholding forms page",
    "https://tax.ri.gov/resources/businesses/electronic-filing-mandate": "Electronic Filing Mandate page",
@@ -10027,8 +10265,8 @@
   "failures": 0,
   "hash": "4b75e075d1b12c2a3ee204a6ea7581edd404fd02b60786d06d2ca09f75f68092",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://dlt.ri.gov/press-releases/2026-tax-rates-unemployment-insurance-and-temporary-disability-insurance"
@@ -10037,8 +10275,8 @@
   "failures": 0,
   "hash": "79fa49c76d42247d1434c2393dde3b582deaa8b4c4a91350cef666acaa89baac",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0efc2e6be4",
@@ -10077,8 +10315,8 @@
   "failures": 0,
   "hash": "526a341621572f9f3213e439271539d78733033d720cf0338de9be56772d8ad9",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://tax.ri.gov/sites/g/files/xkgbur541/files/2025-12/2026%20Withholding%20Tax%20Booklet.pdf"
@@ -10087,8 +10325,8 @@
   "failures": 0,
   "hash": "89aff70934dac04c25d2056885fea376903fd239bd424c8c818e86ca87ed3140",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://dor.sc.gov/sites/dor/files/forms/WH1603F_2026.pdf"
@@ -10097,8 +10335,8 @@
   "failures": 0,
   "hash": "05652488b12d8a42127602da352e1dac6454d27c873ce986a8434e30f5253f8e",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0154c0dabe",
@@ -10110,8 +10348,8 @@
   "failures": 0,
   "hash": "5bd5f5052491c280c39372090aea0c61bba923df0a2cb27c78a1d0ef920f8749",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://dor.sc.gov/sites/dor/files/forms/WH105.pdf"
@@ -10120,8 +10358,8 @@
   "failures": 0,
   "hash": "0c6207295f3c7991cc2b796c9948eff9306e4180a69654bea5ed79e03c61944d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://dor.sc.gov/sites/dor/files/forms/SCW4_2026.pdf"
@@ -10130,8 +10368,8 @@
   "failures": 0,
   "hash": "72d38d69daff04fdc2973438c2ddea69b6577b8aebe42b6d2c9443bc959bab52",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://dor.sc.gov/businesses/file-pay-options-businesses": "online services for businesses \u200bpage",
    "https://dor.sc.gov/businesses/payroll-service-providers": "Info for payroll service providers",
@@ -10161,8 +10399,8 @@
   "failures": 0,
   "hash": "c5f87587bed4e7bd17634c796a3e21c396cc223931bcdbb136d1f916bfdf4efb",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.dol.gov/whd/regs/compliance/whdfs32.pdf": "Fact Sheet #32"
   },
@@ -10231,8 +10469,8 @@
   "failures": 0,
   "hash": "01f22e8c8c6868286019f7dd1a261733ef6741260872b996fcdbc228a3699f87",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://dlr.sd.gov/ra/businesses/documents/rahandbookforemployers.pdf": "Employer Handbook (Adobe PDF format)",
    "https://dlr.sd.gov/ra/forms/Employer_change_of_address.pdf": "Employer Change of Address Form"
@@ -10308,8 +10546,8 @@
   "failures": 0,
   "hash": "fc055f53dff832d06a05ef54f4c7a464ca20104582f8ee1b575509d527c50318",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://dlr.sd.gov/ra/businesses/documents/rahandbookforemployers.pdf": "Employer Handbook (Adobe PDF format)"
   },
@@ -10370,12 +10608,11 @@
   "url": "https://dlr.sd.gov/ra/businesses/default.aspx"
  },
  "tn-5ad0d69992": {
-  "failures": 1,
+  "failures": 0,
   "hash": "1771f66c499dfa2774ac404f72d3b74ba14b0449ec2979309b529b8aee82c35d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_error": "URLError: <urlopen error [Errno 104] Connection reset by peer>",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.tn.gov/content/dam/tn/workforce/documents/employers/Premium_Rate_Chart.pdf": "Download the Premium Rate Table"
   },
@@ -10393,8 +10630,8 @@
   "failures": 0,
   "hash": "921f571abd846d6ff2b54047205d210c3977b89779e60d0fa47df7056945e974",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "16cf352509",
@@ -10413,8 +10650,8 @@
   "failures": 0,
   "hash": "aafcc9fa6c2aeeaa2deb076ef4f448c18c5c68577336ce03472adfa14a3b55a0",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://statutes.capitol.texas.gov/Docs/CN/htm/CN.8.htm"
@@ -10423,8 +10660,8 @@
   "failures": 0,
   "hash": "c64c602de66ab427f81489e17d03df6ed5ba2ee4f5b7a386420cc6abc7797972",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "36cecc7f41"
@@ -10435,8 +10672,8 @@
   "failures": 0,
   "hash": "5703d9b0fc57b545b0e48eb3208568d58c2301b69fa551117e828d7cd8da24a3",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "http://www.irs.gov/pub/irs-irbs/irb00-06.pdf": "IRS Revenue Ruling 2000-6"
   },
@@ -10467,8 +10704,8 @@
   "failures": 0,
   "hash": "453db73cbe13af9dc0c9742a1dadc9cb64e397d08ea9b3a152180415e1a432fd",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.irs.gov/pub/irs-pdf/p15a.pdf"
@@ -10477,8 +10714,8 @@
   "failures": 0,
   "hash": "83d275ba1d639c1ba722042b01188ee06fca7207b62e5ccbdf077941136a3d5e",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "1c05c88b14",
@@ -10497,8 +10734,8 @@
   "failures": 0,
   "hash": "714831c539f5ba7bdbd66046dc47ba307ffe12f2e423f7f2f497205f167ff2e2",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=internal-revenue-service&conditions%5Btype%5D%5B%5D=RULE&conditions%5Btype%5D%5B%5D=PRORULE&conditions%5Bterm%5D=withholding"
@@ -10507,8 +10744,8 @@
   "failures": 0,
   "hash": "e40270851da98f18bc5860266aae84d75d770484ffa1d521754d7c6844bb3031",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://courts.ca.gov/sites/default/files/courts/default/2024-11/wg002.pdf": "form WG-002",
    "https://courts.ca.gov/sites/default/files/courts/default/2024-11/wg003.pdf": "form WG-003",
@@ -10546,8 +10783,8 @@
   "failures": 0,
   "hash": "7bb9bdf81e6fdf0e154083a52a99a2babd8a04e6b4e0e040e68fa5a7b0328bfb",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://labor.illinois.gov/content/dam/soi/en/web/idol/2025-updated-chicago-address-forms/Wage%20Complaint%20Form%202025%20English_11-7-25.pdf": "Printable Wage Claim Form",
    "https://labor.illinois.gov/content/dam/soi/en/web/idol/2025-updated-chicago-address-forms/Wage%20Complaint%20Form%20Espanol_11-7-25.pdf": "Spanish",
@@ -10627,8 +10864,8 @@
   "failures": 0,
   "hash": "aafcc9fa6c2aeeaa2deb076ef4f448c18c5c68577336ce03472adfa14a3b55a0",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://statutes.capitol.texas.gov/Docs/PR/htm/PR.42.htm"
@@ -10637,8 +10874,8 @@
   "failures": 0,
   "hash": "12201d4b4725a41c5b40a05f86a813a942e9b6a2afc12be0fcfb7725b476239e",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0ade7c2cf9",
@@ -10666,8 +10903,8 @@
   "failures": 0,
   "hash": "b2c9a909e27117ae7d195e285efad2ebede70221b27568bacb70fb80c3c2bbc5",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://codes.ohio.gov/assets/laws/revised-code/authenticated/27/2716/2716.02/9-30-2008/2716.02-9-30-2008.pdf": "Download Authenticated PDF"
   },
@@ -10685,8 +10922,8 @@
   "failures": 0,
   "hash": "c87d91481cf6afb6e317217a55997019f4a327467a8848cc71ad653aace7af7b",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "b6929bf803"
@@ -10698,8 +10935,8 @@
   "failures": 0,
   "hash": "b551229df2116f5f414b5c11dd80551f406637e24c1f836d55af78a309f10eff",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.irs.gov/pub/irs-pdf/p1828.pdf": "Publication 1828, Tax Guide for Churches and Religious Organizations PDF"
   },
@@ -10723,8 +10960,8 @@
   "failures": 0,
   "hash": "f0c40777eba206c2fb000d6d29561f1c03394c2f071926b3423742b414b7d53a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://legislature.maine.gov/statutes/14/title14sec3126-A.docx": "\u00a73126-A MS-Word",
    "https://legislature.maine.gov/statutes/14/title14sec3126-A.pdf": "\u00a73126-A PDF"
@@ -10762,8 +10999,8 @@
   "failures": 0,
   "hash": "e217e99801aa6192f627711dbb4a5cab915d2121a7cd0051eb12c3452eb881d1",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.flsenate.gov/PublishedContent/Laws/Statutes/Links/Florida_Statutes_Definitions_Index__2026_.pdf": "Florida Statutes Definitions Index (2026)",
    "https://www.flsenate.gov/PublishedContent/Laws/Statutes/Links/General_Laws_Conversion_Table.pdf": "General Laws Conversion Table (2026)",
@@ -10797,8 +11034,8 @@
   "failures": 0,
   "hash": "73a561dc3243a7848e932a5097c3ad6dab0e1b97dcaaab1589b57041354a49b1",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://public.courts.alaska.gov/web/forms/docs/civ-511.pdf"
@@ -10807,8 +11044,8 @@
   "failures": 0,
   "hash": "4257abacc9dea5af13d444068eb045903ef28f69f7220e0b7d930c82ab1932b3",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "35bb252b0f",
@@ -10822,8 +11059,8 @@
   "failures": 0,
   "hash": "ec84c99a69497853883d0f3603b77aa6947ad7fb1d8d8275149550484446c2de",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "50f94286ba",
@@ -10837,8 +11074,8 @@
   "failures": 0,
   "hash": "1bf3a0a3cf3f62e99107491381b829d637cf11c818052890021bacc85941d1bc",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.dir.ca.gov/dlse/Waiver-Application.pdf": "here",
    "https://www.dir.ca.gov/iwc/MW-2024-FF-SUPPLEMENT.pdf": "Supplement for Fast Food Restaurant Employees"
@@ -10884,8 +11121,8 @@
   "failures": 0,
   "hash": "e83209d1b277aec000b6a17c3eed5641484243dca67a1ff20e218d60e247da63",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "4fbee5edee",
@@ -10901,8 +11138,8 @@
   "failures": 0,
   "hash": "6f495d1b7d830f93a4b65f578da30a622b50569b5a475d902f6f6dbad9d53a28",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.irs.gov/pub/irs-pdf/p926.pdf"
@@ -10911,8 +11148,8 @@
   "failures": 0,
   "hash": "ccb86332d25651182a5f09f760aa4964ba41afb5c7fb30c4c4cc5de7c946835a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://code.wvlegislature.gov/signed_bills/1939\\1939-RS-SB5-ENR_signed.pdf": "1939 Regular Session Enrolled Senate Bill 5",
    "https://code.wvlegislature.gov/signed_bills/1961\\1961-RS-HB252-ENR_signed.pdf": "1961 Regular Session Enrolled House Bill 252",
@@ -10937,8 +11174,8 @@
   "failures": 0,
   "hash": "be8da0f16c096e95a9d930cfd56e733cef88e5fde7ee3bfac45b8b172d7845cc",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.irs.gov/pub/irs-irbs/irb99-04.pdf": "IRS.gov/pub/irs-irbs/irb99-04.pdf"
   },
@@ -11100,8 +11337,8 @@
   "failures": 0,
   "hash": "68b2ea85085ba1071b7b2d00ce80ec06e48a1b7303d459f47be80432aec27b2b",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.federalregister.gov/documents/2021/04/30/2021-09263/increasing-the-minimum-wage-for-federal-contractors": "86 FR 22835"
   },
@@ -11128,8 +11365,8 @@
   "failures": 0,
   "hash": "a9e785af4f881f7a0e90ebf3ff69338b375efda688161cc762d41263dd41225f",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.govinfo.gov/content/pkg/PLAW-119publ21.zip": "ZIP",
    "https://www.govinfo.gov/content/pkg/PLAW-119publ21/pdf/PLAW-119publ21.pdf": "PDF (945.9 KB)"
@@ -11152,8 +11389,8 @@
   "failures": 0,
   "hash": "c4e48830f019b6e873c1d7abaa6cb26d806c306b1fd1e8c9a0e7101df1264e6a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "03ebac34a2",
@@ -11176,10 +11413,11 @@
   "url": "https://dli.mn.gov/news/minimum-wage-rate-adjusted-inflation-jan-1-2026"
  },
  "us-6a3e772e2e": {
-  "failures": 0,
+  "failures": 1,
   "hash": "db14c42d88f7d55f4518e7d8e09c73f6df38d848ee936a5436fe47f7bbefdedc",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_error": "URLError: <urlopen error timed out>",
   "last_ok": "2026-09-25",
   "links": {
    "https://www.ksrevisor.gov/statutes/chapters/ch60/docs/LCC_Packet20260929/LCC Meeting Notice September 29, 2026.pdf": "Meeting Notice",
@@ -11223,8 +11461,8 @@
   "failures": 0,
   "hash": "a7dcfb46b95e75231254c1095df85e5a1675253e65b4e721e44eac9f869ae8b4",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://ofm.wa.gov/wp-content/uploads/sites/default/files/public/legacy/policy/25.60.pdf"
@@ -11233,8 +11471,8 @@
   "failures": 0,
   "hash": "52026fdb71a43c5e5012c8fcdef134c06498e913fbd9c1a116b2541b52e148b5",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/42/00.081.027.000..HTM"
@@ -11243,8 +11481,8 @@
   "failures": 0,
   "hash": "2af2b64dffff812087de2b0c038f3460bf141e1ca4a7f01262629141f1b5df1a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_1/GS_1-362.html"
@@ -11253,8 +11491,8 @@
   "failures": 0,
   "hash": "c18df1c3624b6dff18d8401f25235eec15871c2ceee02b0e0f2538aa587c01d3",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?part=870"
@@ -11263,8 +11501,8 @@
   "failures": 0,
   "hash": "58ba5b3c87dba6457d9546103612265606afb62b523d1d42e427e6bc49a51a2d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://doli.virginia.gov/wp-content/uploads/2025/07/Minimum-Wage-2026-Increase-Public-Letter.pdf": "here"
   },
@@ -11351,8 +11589,8 @@
   "failures": 0,
   "hash": "89dc639618def59a215c0e92f56207ebe5d5c8ef156d70556aff076fbe79e5dd",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=railroad-retirement-board"
@@ -11361,8 +11599,8 @@
   "failures": 0,
   "hash": "ba47ab3c331572be4265f0aaf8fe313bbde46529d8cfec7bebabc0b83cd1b6f6",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.legis.iowa.gov/docs/code/642.21.pdf"
@@ -11371,8 +11609,8 @@
   "failures": 0,
   "hash": "92477e4b50259a8181cf2216b0dc71e0b29004c79f285d2afa63115ec1641db0",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://legislature.idaho.gov/wp-content/uploads/senate/page_program.pdf": "Senate Page Program"
   },
@@ -11423,8 +11661,8 @@
   "url": "https://legislature.idaho.gov/statutesrules/idstat/title11/t11ch2/sect11-207/"
  },
  "us-908ea42275": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "site's TLS certificate failed verification (unable to get local issuer certificate)",
   "url": "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803"
  },
@@ -11432,8 +11670,8 @@
   "failures": 0,
   "hash": "d381f11f118779101b762e7f0f950f44745db144104c01483987195fc095dec5",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "07acafe1cb",
@@ -11447,8 +11685,8 @@
   "failures": 0,
   "hash": "8c5255045d5e18dbb997a607a8e465da899fb8eda44036b8e5c2d2d5c5f9f2b2",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.irs.gov/pub/irs-pdf/p15t.pdf"
@@ -11457,8 +11695,8 @@
   "failures": 0,
   "hash": "f356aa5db7358f4ec71aa7ed2f180606fd5c0a2a516fec6784e31b1dd78718fd",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "1b64538924",
@@ -11478,8 +11716,8 @@
   "failures": 0,
   "hash": "e2b618417d5c5de9e4470e98300afd933e3d2ef306df87188f81446b5011a788",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "02a4b6d39a",
@@ -11512,8 +11750,8 @@
   "failures": 0,
   "hash": "3d4d58bbf962eacd3907e64d9601bf866f898e5fc41961fc971756e89175b27f",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://dlr.sd.gov/employment_laws/publications/min-wage-poster-2026-english.pdf"
@@ -11522,8 +11760,8 @@
   "failures": 0,
   "hash": "976057663b3c8a4b44c9614d6ccac2cb95008e917eca930b5f24dbdfd4b7a2c6",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.irs.gov/pub/irs-pdf/p525.pdf": "Publication 525, Taxable and Nontaxable Income PDF"
   },
@@ -11546,8 +11784,8 @@
   "failures": 0,
   "hash": "03f3dec9b2e66d2551e4324be991fcd22aed500bec4d90f1c1012dc02bd172e5",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.azleg.gov/ars/33/01131.htm"
@@ -11556,8 +11794,8 @@
   "failures": 0,
   "hash": "5db222236f03b1610ccd2731e7d0db66a5bd32abfad4482cf4dba9f6f8b5715b",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.irs.gov/pub/irs-pdf/p15b.pdf"
@@ -11566,24 +11804,38 @@
   "failures": 0,
   "hash": "c7363e3164179a24e76f35d6433619c413c11ea26f0e07df1d361264f7d86f50",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.irs.gov/pub/irs-pdf/fw4.pdf"
  },
  "us-bf493adb61": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
-  "last_error": "site's TLS certificate failed verification (unable to get local issuer certificate)",
+  "failures": 0,
+  "hash": "53e07a6083e70b692144857bc42646195936fdc601763b36eeb06daeda671bc6",
+  "last_changed": "2026-09-26",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
+  "links": {},
+  "nav": [
+   "2d5513045c",
+   "5a7b4ffff0",
+   "842340deea",
+   "842430164f",
+   "b1cc98e7fa",
+   "b49e2776b2",
+   "b5b20bba3a",
+   "bbd65c5ca9",
+   "f5a9215702"
+  ],
   "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-600-4012"
  },
  "us-c7fb9fc76b": {
   "failures": 0,
   "hash": "541844ecbeebc2e002e746e65d591b73cfd0ca559086f9f7683bd273988666a6",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.irs.gov/pub/irs-pdf/p15.pdf"
@@ -11592,8 +11844,8 @@
   "failures": 0,
   "hash": "18ceb8c3433a3bc210655753db1a7c5cbb8357337d71ad2904c177deb7572e40",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://oui.doleta.gov/unemploy/docs/potential_credit_states_2026.xlsx": "Potential 2026 Credit Reductions",
    "https://oui.doleta.gov/unemploy/docs/reduced_credit_states_2010-2025.xlsx": "Historical FUTA Credit Reductions"
@@ -11644,8 +11896,8 @@
   "failures": 0,
   "hash": "51b57dd10eef52047ec36541ade5d8faa5719b30ad748570d51889180e092d57",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.ecfr.gov/api/versioner/v1/versions/title-34.json?part=34"
@@ -11654,8 +11906,8 @@
   "failures": 0,
   "hash": "79b23ab771dc456adf29692875081246ed8e389efe247bf79dd3c5e4e9f280fd",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0855684c14",
@@ -11700,8 +11952,8 @@
   "failures": 0,
   "hash": "8ae5ad81b2ad1a494bcd2a70ff8c6d452b266e766460e8582e2b0881905b7665",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.dol.gov/whd/regs/compliance/whdfs30.pdf": "Federal Wage Garnishment Law Fact Sheet",
    "https://www.dol.gov/whd/regs/statutes/garn01.pdf": "15 USC \u00a71671 et seq. (PDF)"
@@ -11733,8 +11985,8 @@
   "failures": 0,
   "hash": "8242d385e552405b2217a1ca82ec0f80a54316c3ddacfceec5cba6d088b49120",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://gc.nh.gov/rsa/html/LII/512/512-21.htm"
@@ -11743,8 +11995,8 @@
   "failures": 0,
   "hash": "1187ef10333fa88542b264ab1e4e3d6402b98a219b2f3e12b0f81163c61fd96c",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0bf9950463",
@@ -11758,12 +12010,11 @@
   "url": "https://www.dol.gov/agencies/whd/minimum-wage/state"
  },
  "us-eb437d4ba6": {
-  "failures": 1,
+  "failures": 0,
   "hash": "042731e9367ed5f7b8cc2e30656a451219df50c6593eea1aabfb66b3f01aedd1",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_error": "URLError: <urlopen error timed out>",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://docs.legis.wisconsin.gov/document/statutes/812.pdf": ""
   },
@@ -12000,8 +12251,8 @@
   "failures": 0,
   "hash": "4beef5d923fdd2af4ce5cd725454668643a3ef66781d9315c152aa1699de2186",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://does.dc.gov/sites/default/files/dc/sites/does/publication/attachments/2026%20Minimum%20Wage%20Poster.pdf"
@@ -12010,8 +12261,8 @@
   "failures": 0,
   "hash": "8aa275812767c25bf5eb7fbabd93fbc01df7f268eecaf0316f6ec089344bad0a",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=social-security-administration&conditions%5Bterm%5D=%22cost-of-living+increase+and+other+determinations%22"
@@ -12020,8 +12271,8 @@
   "failures": 0,
   "hash": "9b99c34e68e2dde3deb69ba7df63252c9928e48a537d466236c4fb0a4bc9ac23",
   "last_changed": "2026-09-25",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.irs.gov/pub/irs-dft/i940--dft.pdf": "Instruction 940"
   },
@@ -12032,15 +12283,15 @@
    "0df17d714e",
    "12fd5c8888",
    "1b64538924",
-   "225e7010f8",
+   "1f5053d7c7",
    "44b67c5d1b",
    "47a34df037",
    "48a55f9b57",
    "4b14dd880e",
    "4b1b56fb6e",
+   "614de35619",
    "6167ab33e4",
    "62eff7672d",
-   "72e677cce0",
    "768e0c1c69",
    "77de68daec",
    "886a9f5b3a",
@@ -12071,8 +12322,8 @@
   "url": "https://www.irs.gov/draft-tax-forms"
  },
  "us-f6de512498": {
-  "failures": 4,
-  "last_checked": "2026-09-25",
+  "failures": 5,
+  "last_checked": "2026-09-26",
   "last_error": "HTTP 403: the site refuses automated requests; a real browser was refused too",
   "url": "https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines"
  },
@@ -12080,8 +12331,8 @@
   "failures": 0,
   "hash": "670305a516ff6c0e4746e7e6d2974eec05205e302be745be8b4376fce6eada1d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=wage-and-hour-division"
@@ -12090,8 +12341,8 @@
   "failures": 0,
   "hash": "62ccd16b48ca718965dcb42de475ff7f70ff928ae2c6f7343d486f75569b1aa6",
   "last_changed": "2026-09-25",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "01166e6d1c",
@@ -12130,8 +12381,8 @@
   "failures": 0,
   "hash": "0aa617dc328e8e43edc9b9eb41d17adcff0fa3253d05401885a0eb7e188f1cfd",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=18419"
@@ -12140,8 +12391,8 @@
   "failures": 0,
   "hash": "e477b6ae3985a95f502f69ec799c5a8d8373b0eecce7d894b37d1d66868b2197",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0209205e5f",
@@ -12207,8 +12458,8 @@
   "failures": 0,
   "hash": "41eb18ce06c87d894d81aca5a21abd0a29fe4c14beccd1a100af943d51b435fc",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://files.tax.utah.gov/tax/forms/pubs/pub-14.pdf": "Pub 14 PDF download(opens in a new tab)",
    "https://tax.utah.gov/": "Home",
@@ -12255,8 +12506,8 @@
   "failures": 0,
   "hash": "2fdae0f57dea66b04e354c8f145194705434752dcfce69a0137d5fb4db985f21",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://files.tax.utah.gov/tax/forms/pubs/pub-14.pdf"
@@ -12265,8 +12516,8 @@
   "failures": 0,
   "hash": "9d7fdd1060ba91dd3f2fd4cceef40e5bf6f16a2fe1d0e4372ae87de0c15aac64",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.tax.virginia.gov/sites/default/files/taxforms/withholding/any/va-4-any.pdf"
@@ -12275,8 +12526,8 @@
   "failures": 0,
   "hash": "669a9d58272b6521aa2c23cdf7e23869d08eb223507783ff819480e5eac7dbc6",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://tax.virginia.gov/sites/default/files/inline-files/virginia-tax-electronic-payment-guide.pdf": "Electronic Payment Guide",
    "https://www.tax.virginia.gov/": "Home",
@@ -12340,8 +12591,8 @@
   "failures": 0,
   "hash": "aa2d674e08ec7979d9f9b5b1eee96650cd17d7534e30f2e8b520168d5bb460ff",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0049f8894e",
@@ -12361,8 +12612,8 @@
   "failures": 0,
   "hash": "08af9c85cf9a6dab899c441f55783879d684a65f9b999e7bb36516b35292a8ca",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.tax.virginia.gov/sites/default/files/vatax-pdf/employer-withholding-instructions.pdf"
@@ -12371,8 +12622,8 @@
   "failures": 0,
   "hash": "c6e7c42734222320d96777025faf1b0547cd26ce99211022315b8b93c1ef093f",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.vec.virginia.gov/FAQs/employers/what-wage-base-each-employee-i-will-pay-taxes"
@@ -12381,8 +12632,8 @@
   "failures": 0,
   "hash": "90bad07ed473ead719535316debed0bb62a257f6d4431ebf4aa907a28f8af672",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://tax.vermont.gov/sites/tax/files/documents/W-4VT.pdf"
@@ -12391,8 +12642,8 @@
   "failures": 0,
   "hash": "f909e7189fdd160d71e3df22e8c453e27f8f94a4d12d4e7c11befad0c9372a55",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2026.pdf"
@@ -12401,8 +12652,8 @@
   "failures": 0,
   "hash": "a8c273532ff27efa6c6cf3fa30c76bb6f66906fe3baf497943fdbdf589b6b7a9",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "00b9b5fce0",
@@ -12437,8 +12688,8 @@
   "failures": 0,
   "hash": "6f840f87279069a350f275dc5e27473f7a16ed102609b75a6678e407c4797b60",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "http://tax.vermont.gov/individuals/personal-income-tax/withholding": "correctly calculate their Vermont Income Tax Withholding",
    "http://tax.vermont.gov/individuals/personal-income-tax/withholding/faqs": "Read our frequently asked questions",
@@ -12524,8 +12775,8 @@
   "failures": 0,
   "hash": "c2598ea0117f0af609cc0f1ba3818bc7ee0bc8f444c9571ceb8fc6a8ec0b5882",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://lawfilesext.leg.wa.gov/biennium/2025-26/Pdf/Bills/Session Laws/Senate/6346-S.SL.pdf?cite=2026+c+238+s+1201": "2026 c 238 s 1201",
    "https://leg.wa.gov/CodeReviser/documents/sessionlaw/2024pam1.pdf?cite=2024+c+5+s+1": "2024 c 5 s 1"
@@ -12546,8 +12797,8 @@
   "failures": 0,
   "hash": "22b8d0dd9d03c911e3717befbe737bd73c2b274a06c458b3161a09cd6e2972d4",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://paidleave.wa.gov/app/uploads/2021/12/Employer-Wage-Reporting-and-Premiums-Toolkit-v25.1-2026.06.26.pdf": "Employer Reporting & Premiums Toolkit"
   },
@@ -12563,8 +12814,8 @@
   "failures": 0,
   "hash": "ccdb259cd6fb6995dbf3f3bad325ad1b78fe49a262a46604099ba0823ed718e7",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://leg.wa.gov/CodeReviser/documents/sessionlaw/1984c91.pdf?cite=1984+c+91+s+3": "1984 c 91 s 3"
   },
@@ -12584,8 +12835,8 @@
   "failures": 0,
   "hash": "bcdcf377ddb8aa06c174e1b91e8f8f2ea9a92fa739658981c24297e36e910b06",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/documents/Departments/CityFinance/Business%20Tax%20Rules/CF_322022_5-980.pdf": "Seattle Rule 5-980(2)(a)(ii)",
    "https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/documents/Departments/CityFinance/Seattle%20Taxes/Payroll%20Expense%20Tax/2025%20Payroll%20Expense%20Tax%20CPI%20updates/Payroll%20Expense%20Tax%20form%202025%20-%20v.9-2024.pdf": "2025 Payroll Expense Tax Form",
@@ -12626,8 +12877,8 @@
   "failures": 0,
   "hash": "d4b4150e043492276380344d09ee8814ff550da656ca62b9874794751faa5695",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://paidleave.wa.gov/app/uploads/2021/12/Employer-Wage-Reporting-and-Premiums-Toolkit-v25.1-2026.06.26.pdf"
@@ -12636,8 +12887,8 @@
   "failures": 0,
   "hash": "6f0c827b45bbea0858c074d9704e710821d95643313ce79a5fdf06fe377e13eb",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://paidleave.wa.gov/app/uploads/2021/12/Employer-Wage-Reporting-and-Premiums-Toolkit-v25.1-2026.06.26.pdf": "Employer Reporting and Premiums Toolkit",
    "https://paidleave.wa.gov/app/uploads/2024/02/Employers-Paid-Leave-Benefits-Toolkit-v4.1-2025.12.12.pdf": "Employer Benefits Toolkit",
@@ -12660,8 +12911,8 @@
   "failures": 0,
   "hash": "4685bbbb3b2a8949846cbb1dc53539e83995d91a8465c08a5c04430374e12f3d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.bls.gov/news.release/pdf/cpi.pdf": "Consumer Price Index for Urban Wage Earners and Clerical Workers (CPI-W)",
    "https://www.lni.wa.gov/forms-publications/F700-207-000.pdf": "implementation schedule"
@@ -12683,8 +12934,8 @@
   "failures": 0,
   "hash": "5c77e105260009e39e9300711e3223762d38870d30e165e2a0d8e518c232caf1",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "414c71301d",
@@ -12698,8 +12949,8 @@
   "failures": 0,
   "hash": "fc671e6ae92b1702a95024693abeb6cb666a580a4437498c119803102a4914ca",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "16082cff00",
@@ -12717,8 +12968,8 @@
   "failures": 0,
   "hash": "32f34b1863bc24c3ab159b129921207c838d7346a74a88e94cecee2960b07639",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "0dcd1ed7f4",
@@ -12739,8 +12990,8 @@
   "failures": 0,
   "hash": "cc0a25887c83797d7d6aeea1da8ca6cf52c5f1d4156e877dd0568e2feda2907f",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "01c87bfa4c",
@@ -12758,8 +13009,8 @@
   "failures": 0,
   "hash": "9d37df1baab7cd694463d5b2224c42ee0fa06e6fd3e48d5957e58e059d592991",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.seattle.gov/laborstandards/ordinances/documents/Departments/LaborStandards/2025_OLS_MW_MultiyearChart_FINAL_ADA.pdf": "Multi-Year Minimum Wage Chart",
    "https://www.seattle.gov/laborstandards/ordinances/documents/Departments/LaborStandards/2026_OLS_MW_FactSheet_Contrast_ADA.pdf": "2026 Minimum Wage Fact Sheet",
@@ -12778,8 +13029,8 @@
   "failures": 0,
   "hash": "93f48545d9ee1c72b508596c8cab1a3481ed940d16e6d16716b7016e4d48aeec",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://live-dshs-wacaresfund.pantheonsite.io/sites/default/files/2023-06/Steps%20after%20exemption.pdf": "exemption info sheet"
   },
@@ -12793,12 +13044,11 @@
   "url": "https://wacaresfund.wa.gov/exemptions"
  },
  "wi-2ea1a73c00": {
-  "failures": 1,
+  "failures": 0,
   "hash": "bd1811b6bf784124b86fb53401a8ce31503e506eb7b8be1ee749cf60ee4fd041",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_error": "URLError: <urlopen error timed out>",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.revenue.wi.gov/DOR%20Publications/1117composite.pdf": "Fact Sheet 1117 - Pass-Through Withholding and Composite Returns",
    "https://www.revenue.wi.gov/DOR%20Publications/pb117.pdf": "Publication 117 - Guide to WI Wage Statements and Information Returns",
@@ -12869,12 +13119,11 @@
   "url": "https://www.revenue.wi.gov/Pages/Withholding/home.aspx"
  },
  "wi-44d4224e71": {
-  "failures": 1,
+  "failures": 0,
   "hash": "4834a80acc6a263351f712154f309eba45dadd81cce03264c4aea88e1e71742d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_error": "URLError: <urlopen error timed out>",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://www.revenue.wi.gov/DOR%20Publications/pb201.pdf": "Publication 201",
    "https://www.revenue.wi.gov/TaxForms2025/2025-Form1NPR-Inst.pdf": "Form 1NPR instructions"
@@ -12917,12 +13166,11 @@
   "url": "https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx"
  },
  "wi-53244e93fe": {
-  "failures": 1,
+  "failures": 0,
   "hash": "36bab238ac72f6e6b4204129174d40752845a8a2a56ff4d9e36b811f4b62a240",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_error": "URLError: <urlopen error timed out>",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://docs.legis.wisconsin.gov/document/statutes/71.pdf": ""
   },
@@ -13249,8 +13497,8 @@
   "failures": 0,
   "hash": "c98111eb6af9bda48de8d25743ab64de145b103ae637d860a660f7c55d3d5d4b",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://dwd.wisconsin.gov/dwd/forms/ui/pdf/uct-1-e-2026.pdf"
@@ -13259,8 +13507,8 @@
   "failures": 0,
   "hash": "dcdeebcabcf14990496f6f9b61efe475d6ba04ddedf5e3059864222dc3d4ac89",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "004be89dd9",
@@ -13298,12 +13546,11 @@
   "url": "https://dwd.wisconsin.gov/ui/employers/taxrates.htm"
  },
  "wi-b9ce22361c": {
-  "failures": 1,
+  "failures": 0,
   "hash": "4e5e671815c0a2ac755aacc67840fc146dd5c165925b17867eeb62656e90fc56",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_error": "URLError: <urlopen error timed out>",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://docs.legis.wisconsin.gov/document/statutes/2017/104.pdf": ""
   },
@@ -13516,23 +13763,21 @@
   "url": "https://docs.legis.wisconsin.gov/2017/statutes/statutes/104/035/9"
  },
  "wi-bf48d4174b": {
-  "failures": 1,
+  "failures": 0,
   "hash": "a6ca7f0e6c1ece53ce3de86fa3bcc87f09ee3eea822d8d986f3aad51a4f56b5d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_error": "URLError: <urlopen error timed out>",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf"
  },
  "wi-d584da02ba": {
-  "failures": 1,
+  "failures": 0,
   "hash": "1e48136fb52cd8d8eb7cb57cf42e0c8b4293179f7e094fc09a5983b13ce522de",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_error": "URLError: <urlopen error timed out>",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "http://www.irs.gov/pub/irs-pdf/p15.pdf": "Publication 15",
    "https://www.irs.gov/pub/irs-pdf/f1099div.pdf": "1099-DIV",
@@ -13612,8 +13857,8 @@
   "failures": 0,
   "hash": "578735a5f453b1629593c79d2e341b27da90ed4a22b24c5f4cdb035510c00a5d",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://tax.wv.gov/Documents/Business/BusinessRegistrationInformationAndInstructions.pdf": "Business Registration Information and Instructions",
    "https://tax.wv.gov/Documents/Business/busapp.pdf": "Registration Forms",
@@ -13651,8 +13896,8 @@
   "failures": 0,
   "hash": "0850fb4f878f40ed894ec9694f1721361b59af383e1e5ea4c112bfc2249e9d75",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://labor.wv.gov/media/240/download?inline=": "Statute",
    "https://labor.wv.gov/media/57/download?inline=": "minimum wage and maximum hour (overtime) requirements"
@@ -13670,8 +13915,8 @@
   "failures": 0,
   "hash": "107402063fe4b61e075204708c0a3da9bc9715d2843ca3bc2f14c794c42ea856",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://tax.wv.gov/Documents/Withholding/it104.pdf"
@@ -13680,8 +13925,8 @@
   "failures": 0,
   "hash": "c8bfb67eb5675ae77038208109895da949b1f132579ac65a3b913f580f171fee",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://tax.wv.gov/": "",
    "https://tax.wv.gov/Business/Pages/Business.aspx": "Business",
@@ -13745,8 +13990,8 @@
   "failures": 0,
   "hash": "07005fec184e9444df64b96ad06c0b7c7de77edddbf7b544feaf51000d7d68f0",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {
    "https://tax.wv.gov/": "",
    "https://tax.wv.gov/Business/GuidanceAndPublications/Pages/BusinessGuidanceAndPublications.aspx": "Guidance Publications Main Page",
@@ -13779,8 +14024,8 @@
   "failures": 0,
   "hash": "a74b606d347f0894b5e79357436390c8b4f876a02bfc4edf684258858d9c4126",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [],
   "url": "https://tax.wv.gov/Documents/Withholding/it100.2a.pdf"
@@ -13789,8 +14034,8 @@
   "failures": 0,
   "hash": "650b7907751fbce62b54cb418ca6e5062836b3beb87f22a4cd0c67a70fdb4384",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "03688ba6aa",
@@ -13830,8 +14075,8 @@
   "failures": 0,
   "hash": "0ea93d6c9ea35137b3498054024f79b95a348e9a77d8d27bad42e2e2f17014f0",
   "last_changed": "2026-09-24",
-  "last_checked": "2026-09-25",
-  "last_ok": "2026-09-25",
+  "last_checked": "2026-09-26",
+  "last_ok": "2026-09-26",
   "links": {},
   "nav": [
    "03688ba6aa",
