@@ -162,4 +162,56 @@ describe('STE-shaped compatibility layer (api/ste-compat.ts)', () => {
       assert.match(results[0].error ?? '', /Unrecognized Frequency/);
     });
   });
+
+  // A lived-in PSD or city must land on the RESIDENCE field the tax code
+  // reads (residencePSD / residenceCity), not the work field.
+  describe('residence ids (liveUniqueTaxIds)', () => {
+    const idFor = (pred: (e: ReturnType<typeof listUniqueTaxIds>[number]) => boolean) =>
+      listUniqueTaxIds(CHECK_DATE).find(pred)!.uniqueTaxId;
+    const direct = (certificate: Record<string, unknown>) =>
+      calculatePaycheck({
+        checkDate: CHECK_DATE,
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: 300000 }],
+        deductions: [],
+        federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+        workState: { code: 'PA', certificate },
+        residenceState: { code: 'PA', certificate: {} },
+      });
+
+    test('Pennsylvania: living in PSD 700102 and working in 730105 matches a direct call with residencePSD', () => {
+      const pa = idFor((e) => e.state === 'PA' && e.type === 'state');
+      const [result] = payCalc([
+        {
+          checkDate: CHECK_DATE,
+          frequency: 'biweekly',
+          grossPay: 3000,
+          workUniqueTaxIds: [pa, '42-PSD-730105'],
+          liveUniqueTaxIds: [pa, '42-PSD-700102'],
+        },
+      ]);
+      assert.equal(result.error, undefined);
+      const expected = direct({ workPSD: '730105', residencePSD: '700102' }).taxes.find((t) => t.id === 'PA_EIT')!;
+      const eit = result.taxJurisdictionParms.find((l) => l.description === expected.name)!;
+      assert.equal(eit.amount, expected.amount / 100);
+      // Pittsburgh's 3.0% resident rate governs, not the work PSD's nonresident rate.
+      assert.equal(eit.amount, 90);
+    });
+
+    test('residence ids carry a residence field for PA PSDs and Michigan/Ohio/Kentucky cities', () => {
+      const entries = listUniqueTaxIds(CHECK_DATE);
+      assert.equal(entries.find((e) => e.uniqueTaxId === '42-PSD-700102')?.residenceField, 'residencePSD');
+      for (const st of ['MI', 'OH', 'KY']) {
+        assert.equal(entries.find((e) => e.state === st && e.type === 'city')?.residenceField, 'residenceCity', st);
+      }
+    });
+
+    test('Oregon Metro, Multnomah and South Clackamas have ids', () => {
+      const names = listUniqueTaxIds(CHECK_DATE).filter((e) => e.state === 'OR').map((e) => e.name);
+      for (const n of ['South Clackamas Transit District', 'Metro (Supportive Housing Services tax)', 'Multnomah County (Preschool for All tax)']) {
+        assert.ok(names.includes(n), n);
+      }
+    });
+  });
 });

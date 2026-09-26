@@ -1,5 +1,6 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
+import { calculatePaycheck } from '../src/calculate.ts';
 
 import {
   namesEqual,
@@ -369,6 +370,32 @@ describe('resolve.ts — real captured Census geographies', () => {
 
     const fields = toCertificateFields(resolved, 'work');
     assert.equal(fields.workCity, 'Birmingham');
+  });
+
+  test('Hackleburg, AL: matched through its alias, and the tax then applies', () => {
+    // The source list spells it "Hacklebug"; Census and every address say
+    // Hackleburg, which the file keeps as an alias (1%).
+    const geo: CensusGeographies = {
+      state: 'AL',
+      incorporatedPlaces: ['Hackleburg town'],
+      countySubdivisions: [],
+      counties: ['Marion County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.alMunicipality?.confidence, 'matched');
+    assert.equal(resolved.alMunicipality?.entry?.rate, 0.01);
+    const fields = toCertificateFields(resolved, 'work');
+    assert.ok(fields.workCity, 'workCity should be set');
+    const r = calculatePaycheck({
+      checkDate: CHECK_DATE,
+      payFrequency: 'biweekly',
+      earnings: [{ code: 'REG', category: 'regular', amount: 300000 }],
+      deductions: [],
+      federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+      ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+      workState: { code: 'AL', certificate: { ...fields } },
+    });
+    assert.equal(r.taxes.find((t) => t.id === 'AL_LOCAL')?.amount, 3000); // 1% of $3,000
   });
 
   test('a real AL city outside the 25-jurisdiction list: no_match, not a guess', () => {

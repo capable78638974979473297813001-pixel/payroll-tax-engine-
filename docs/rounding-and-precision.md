@@ -85,6 +85,13 @@ requests it (`roundToWholeDollars`), it is applied **after** all cent-level
 computation, independently to each already-computed tax line, as the final step
 (`calculate.ts`). It is never the default and never applied to FICA.
 
+Only withheld income tax rounds (`isIncomeTaxWithholding()` in `calculate.ts`):
+federal income tax, state income tax (every `_SIT` line), Indiana county tax, and
+local income taxes (Ohio municipal, JEDD and school district, Pennsylvania EIT,
+Michigan cities, Oregon Metro and Multnomah, Wilmington). Social Security,
+Medicare, railroad retirement, unemployment, disability, paid leave, flat local
+fees and every employer tax stay in cents.
+
 ---
 
 ## Wage-base caps and mid-payment splits

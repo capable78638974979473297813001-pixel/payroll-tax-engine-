@@ -102,6 +102,7 @@
       "possibleInconsistencyInSource": "RESOLVED 2026-09-02, definitively: re-fetched Oregon's own 2026 revision of this exact document (150-206-436, Rev. 12-31-25, at oregon.gov/dor/forms/FormsPubs/withholding-tax-formulas_206-436_2026.pdf) and extracted it directly with pypdfium2 after WebFetch's own summarizer twice failed to find any digits at all in it. $263 is confirmed correct: it appears 7 times across every bracket-formula 'WH = ...' line in both the under-$50k (page 6) and $50k-and-up (page 7) tables. $256 appears exactly ONCE, in Example 1's own itemized worksheet line 9 ('Less personal exemption credit ($256 x 0)') -- and comparing that same example against the PRIOR YEAR's document (150-206-436, Rev. 12-10-24, for 2025) shows $256 is verbatim that year's own figure, used consistently throughout the 2025 document the same way $263 is used throughout the 2026 one. Confirms this project's own working theory exactly: Example 1's other figures (standard deduction $2,910 not $2,835, BASE-band threshold $11,400 not $11,100) WERE updated for 2026, but line 9 alone was left at the prior year's number -- a genuine, verifiable clerical error in Oregon's own document, not a real ambiguity. $263 was already what this file modelled; this closes the disclosed uncertainty with a definitive primary citation rather than changing anything.",
       "appliedAfterBracket": true
     },
+    "noCertificateDefaultRate": 0.08,
     "noCertificateDefault": "8 percent flat rate (HB 2119, 2019) — a genuinely different no-certificate default shape from every bracket-table state in this project (most default to 'single, zero allowances' run through the normal table; Oregon instead skips the table entirely and applies a flat 8% until a certificate is filed). Also reused as the ALTERNATE flat-rate method for supplemental wages paid separately from regular wages."
   },
   "exemptPretax": [
@@ -117,6 +118,8 @@
   ],
   "exemptComment": "The formula document's own FAQ #6 states directly: wages does NOT include 'Non-taxable amounts such as pre-tax deductions for insurance, cafeteria or flex spending plans (section 125 plans), retirement plans (section 401k, etc.), health savings accounts, etc.' — an explicit, direct, by-name enumeration essentially matching Michigan's RAB-1988-27 and Arizona's A-4 as the strongest-sourced exemptPretax tier in this project; no inference chain needed.",
   "stateExciseEmployee": {
+    "appliesToResidentsWherePerformed": true,
+    "appliesToResidentsSource": {"title": "ORS 320.550(2), statewide transit tax", "url": "https://oregon.public.law/statutes/ors_320.550", "verifiedOn": "2026-09-26", "quote": "A tax is imposed at the rate of one-tenth of one percent of the wages of an employee who is: (a) A resident of this state, regardless of where services are performed. (b) Not a resident of this state, for services performed in this state."},
     "idSuffix": "STT",
     "name": "Statewide Transit Tax",
     "rate": 0.001
@@ -289,6 +292,8 @@
     "Nonresident allocation, statewide transit tax self-employment provisions, and OR-40N/OR-40P return-level mechanics are out of scope — payroll withholding only."
   ],
   "suiEmployer": {
+    "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
+    "exemptPretaxComment": "UNRESOLVED, kept at the prior behavior (Oregon's income tax list) instead of the FUTA default. Oregon unemployment wages are \"all remuneration for employment\" (ORS 657.105), but ORS 657.115(1)(a) excludes payments \"on account of ... Retirement\" and, unlike FUTA's 3306(r), has no add-back for employee elective deferrals. Cafeteria plans are excluded (OAR 471-031-0205). The Employment Department's UI PUB 205 does not address 401(k). Confirm with the Employment Department before changing this list. Sources: https://oregon.public.law/statutes/ors_657.105, https://oregon.public.law/statutes/ors_657.115 (verified 2026-09-26).",
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 56700,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",

@@ -200,7 +200,9 @@ export function federalSupplementalTax(
 
   // An exempt W-4 claims no federal income tax liability at all, supplemental
   // included; nothing is withheld.
-  if (input.federalW4.exempt) {
+  // Strict boolean, as federalIncomeTax() does: a string "false" must not
+  // read as exempt and withhold $0 on the bonus.
+  if (resolveCertBoolean(input.federalW4 as unknown as Record<string, unknown>, 'exempt')) {
     return {
       id: 'US_FIT_SUPP',
       name: 'Federal Income Tax (Supplemental)',
@@ -498,7 +500,10 @@ function categoryCoverage(
     const cfg = thresholds?.household;
     if (!cfg) return null;
     const ficaCovered = cashToDate >= dollars(cfg.annualCashWages);
-    const quarterly = input.employer?.householdQuarterlyCashWages ?? 0;
+    // Quarter-to-date BEFORE this check plus this check's cash, the same
+    // convention as the FICA test above; without adding this check, the
+    // paycheck that crosses $1,000 showed no FUTA.
+    const quarterly = (input.employer?.householdQuarterlyCashWages ?? 0) + cashThisCheque;
     const futaCovered = quarterly >= dollars(cfg.futaQuarterlyCashWages);
     return {
       ficaCovered,
@@ -569,7 +574,12 @@ function railroadUnemployment(
   if (!cfg) return [];
 
   const rate = input.employer?.railroadUnemploymentRate ?? cfg.newEmployerRate;
-  const exempt = (rules.incomeTax.exemptPretax ?? []) as PretaxCategory[];
+  // RUIA "compensation" is "any form of money remuneration ... paid for
+  // services rendered" (45 U.S.C. 351(i)), with no carve-out for elective
+  // deferrals, so a 401(k)/403(b) deferral stays in the base. Uses the same
+  // FICA-style list as Tier I and Tier II; excluding Section 125/HSA
+  // follows RRTA practice (26 U.S.C. 3231(e)(11)) rather than RUIA text.
+  const exempt = (rules.socialSecurity.exemptPretax ?? []) as PretaxCategory[];
   const compensation = ctx.taxableWagesFor(exempt);
   const cap = dollars(cfg.monthlyCompensationBase);
   const alreadyThisMonth = input.ytd.railroadMonthlyCompensation ?? 0;
@@ -602,7 +612,12 @@ function railroadTier2(
   const cfg = rules.railroadRetirement as RailroadRetirementConfig | undefined;
   if (!cfg) return [];
 
-  const exempt = (rules.incomeTax.exemptPretax ?? []) as PretaxCategory[];
+  // RRTA compensation keeps elective deferrals: "Nothing in any paragraph
+  // of this subsection ... shall exclude from the term 'compensation' any
+  // amount described in subparagraph (A) or (B) of section 3121(v)(1)"
+  // (26 U.S.C. 3231(e)(8)(A)). So Tier II uses the same base as Tier I
+  // (the Social Security list), never the income tax list.
+  const exempt = (rules.socialSecurity.exemptPretax ?? []) as PretaxCategory[];
   const compensation = ctx.taxableWagesFor(exempt);
   const cap = dollars(cfg.tier2.wageBase);
   const ytd = input.ytd.tier2Compensation ?? 0;
@@ -659,7 +674,7 @@ function applyEmploymentCategory(
           taxableWages: 0,
           amount: 0,
           detail:
-            '$0 — rail employment is outside FUTA: railroad employers pay unemployment contributions under the Railroad Unemployment Insurance Act instead, at an experience-rated rate this engine does not model.',
+            '$0 — rail employment is outside FUTA: the employer pays Railroad Unemployment Insurance Act contributions instead (see the US_RUIA_ER line).',
         };
       }
       return asRailroadTierOne(line);

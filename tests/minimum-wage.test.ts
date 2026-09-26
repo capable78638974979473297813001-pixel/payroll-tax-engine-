@@ -1101,3 +1101,51 @@ describe('the Supabase Edge Function data bundle stays in sync', () => {
     }
   });
 });
+
+// A ruleset's scheduledChanges must take effect on their date. Florida's
+// Amendment 2 moves $14.00 → $15.00 (tipped cash $10.98 → $11.98) on
+// 2026-09-30; before this was wired, every later check date kept $14.00.
+describe('scheduled minimum wage changes', () => {
+  test('Florida is $14.00 through 2026-09-29', () => {
+    assert.equal(minimumWage({ checkDate: '2026-09-29', state: 'FL' }).cents, 1400);
+    assert.equal(minimumWage({ checkDate: '2026-09-29', state: 'FL', tipped: true }).cents, 1098);
+  });
+
+  test('Florida is $15.00 (tipped $11.98) from 2026-09-30, and says why', () => {
+    for (const checkDate of ['2026-09-30', '2026-12-31']) {
+      const std = minimumWage({ checkDate, state: 'FL' });
+      assert.equal(std.cents, 1500, checkDate);
+      assert.match(std.considered.find((c) => c.level === 'state')!.basis, /scheduled change effective 2026-09-30/);
+      assert.equal(minimumWage({ checkDate, state: 'FL', tipped: true }).cents, 1198, checkDate);
+    }
+  });
+
+  test('every scheduled step dated in its own ruleset year carries a machine-readable figure', () => {
+    // A step with no figure would make minimumWage() throw from its date on.
+    // Only steps that fall inside the file's own year can be reached (a 2027
+    // date loads the 2027 file), so those must be complete now.
+    const dir = join(import.meta.dirname, '..', 'data', 'minimum-wage');
+    const files: string[] = [];
+    const walk = (d: string) => {
+      for (const e of readdirSync(d, { withFileTypes: true })) {
+        const p = join(d, e.name);
+        if (e.isDirectory()) walk(p);
+        else if (e.name.endsWith('.json')) files.push(p);
+      }
+    };
+    walk(dir);
+    for (const f of files) {
+      const data = JSON.parse(readFileSync(f, 'utf8'));
+      const year = String(data.year ?? '');
+      const holders = [data, ...(Array.isArray(data.jurisdictions) ? data.jurisdictions : [])];
+      for (const h of holders) {
+        for (const c of h.scheduledChanges ?? []) {
+          if (!String(c.effectiveDate).startsWith(year)) continue;
+          const readable = ['hourlyCents', 'hourly', 'tippedCashWageCents', 'tippedCashWage', 'tippedPercentOfMinimumWage']
+            .some((k) => typeof c[k] === 'number');
+          assert.ok(readable, `${relative(dir, f)} ${h.name ?? ''} ${c.effectiveDate} has no machine-readable figure`);
+        }
+      }
+    }
+  });
+});

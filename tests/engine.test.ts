@@ -2218,6 +2218,25 @@ describe('gross-to-net', () => {
     const r = calculatePaycheck(input({ roundToWholeDollars: true }));
     assert.equal(amountOf(r, 'US_FIT'), dollars(320));
   });
+
+  test('whole-dollar rounding touches income tax only, never FICA (rounding rule 7)', () => {
+    // $2,412.50 x 6.2% = $149.575 -> $149.58 Social Security; it used to become $150.00.
+    const r = calculatePaycheck(
+      input({
+        roundToWholeDollars: true,
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2412.5) }],
+        workState: { code: 'PA', certificate: { workPSD: '700102', residencePSD: '700102' } },
+      }),
+    );
+    assert.equal(amountOf(r, 'US_SS_EE'), dollars(149.58));
+    assert.equal(amountOf(r, 'US_MED_EE'), dollars(34.98)); // 1.45% = 34.98125
+    assert.equal(amountOf(r, 'US_SS_ER'), dollars(149.58));
+    assert.equal(amountOf(r, 'PA_UC_EE'), dollars(1.69)); // 0.07% = 1.68875
+    // Income taxes still round.
+    assert.equal(amountOf(r, 'PA_SIT') % 100, 0);
+    assert.equal(amountOf(r, 'PA_EIT') % 100, 0);
+    assert.equal(amountOf(r, 'US_FIT') % 100, 0);
+  });
 });
 
 describe('Minnesota', () => {
@@ -11375,6 +11394,18 @@ describe('household and agricultural coverage thresholds', () => {
     assert.equal(amountOf(withQuarter, 'US_FUTA'), dollars(3.6));
   });
 
+  test('the cheque that takes the quarter past $1,000 turns household FUTA on', () => {
+    // $500 earlier this quarter + this $600 cheque = $1,100 >= $1,000: 0.6% of $600 = $3.60.
+    const r = calculatePaycheck(
+      paid(600, {
+        employmentCategory: 'household',
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0, categoryCashWages: dollars(2900) },
+        employer: { householdQuarterlyCashWages: dollars(500) },
+      }),
+    );
+    assert.equal(amountOf(r, 'US_FUTA'), dollars(3.6));
+  });
+
   test('income tax is never withheld from a household employee unless both sides agree', () => {
     const withheld = {
       employmentCategory: 'household',
@@ -12109,5 +12140,176 @@ describe('local wage bases with pre-tax deductions', () => {
     assert.equal(amountOf(withDeferral, 'PA_EIT'), dollars(90.0));
     const withCafeteria = calculatePaycheck(input({ deductions: [cafeteria], workState: pgh }));
     assert.equal(amountOf(withCafeteria, 'PA_EIT'), dollars(84.0)); // 2,800 x 3.0%
+  });
+});
+
+// Railroad Tier II and RUIA compensation keep elective deferrals, like
+// Tier I and FICA: 26 U.S.C. 3231(e)(8)(A) and 45 U.S.C. 351(i). They used
+// to be computed on the income tax base, so a 401(k) deferral dropped out.
+describe('railroad compensation with pre-tax deductions', () => {
+  const railPay = (deductions: Deduction[]) =>
+    input({
+      earnings: [{ code: 'REG', category: 'regular', amount: dollars(1800) }],
+      deductions,
+      employmentCategory: 'railroad',
+    } as Partial<PaycheckInput>);
+  const k401: Deduction = { code: '401K', category: 'deferral_401k', amount: dollars(400) };
+  const cafeteria: Deduction = { code: 'MED', category: 'section125', amount: dollars(200) };
+  const base = (r: ReturnType<typeof calculatePaycheck>, id: string) => r.taxes.find((t) => t.id === id)!.taxableWages;
+
+  test('a 401(k) deferral does not reduce Tier II: 4.9% of $1,800 = $88.20', () => {
+    const r = calculatePaycheck(railPay([k401]));
+    assert.equal(base(r, 'US_RRTA_TIER2_EE'), dollars(1800));
+    assert.equal(amountOf(r, 'US_RRTA_TIER2_EE'), dollars(88.2));
+    assert.equal(amountOf(r, 'US_RRTA_TIER2_ER'), dollars(235.8)); // 13.1%
+    // Tier I and Tier II now agree on the base.
+    assert.equal(base(r, 'US_RRTA_TIER1_EE'), base(r, 'US_RRTA_TIER2_EE'));
+  });
+
+  test('a 401(k) deferral does not reduce RUIA: 5.58% of $1,800 = $100.44', () => {
+    const r = calculatePaycheck(railPay([k401]));
+    assert.equal(base(r, 'US_RUIA_ER'), dollars(1800));
+    assert.equal(amountOf(r, 'US_RUIA_ER'), dollars(100.44));
+  });
+
+  test('a Section 125 deduction reduces Tier II and RUIA, as it does Tier I', () => {
+    const r = calculatePaycheck(railPay([cafeteria]));
+    assert.equal(base(r, 'US_RRTA_TIER2_EE'), dollars(1600));
+    assert.equal(amountOf(r, 'US_RRTA_TIER2_EE'), dollars(78.4));
+    assert.equal(base(r, 'US_RUIA_ER'), dollars(1600));
+    assert.equal(base(r, 'US_RRTA_TIER1_EE'), dollars(1600));
+  });
+});
+
+// State unemployment wages follow FUTA's definition (26 U.S.C. 3306(b)),
+// not the state income tax list: a 401(k) deferral stays in the base, a
+// Section 125 deduction comes out. $3,000 biweekly, no YTD.
+describe('state unemployment wage base with pre-tax deductions', () => {
+  const k401: Deduction = { code: '401K', category: 'deferral_401k', amount: dollars(240) };
+  const cafeteria: Deduction = { code: 'MED', category: 'section125', amount: dollars(200) };
+  const base = (r: ReturnType<typeof calculatePaycheck>, id: string) => {
+    const t = r.taxes.find((x) => x.id === id);
+    assert.ok(t, `expected ${id}`);
+    return t.taxableWages;
+  };
+
+  test('employer SUI keeps a 401(k) deferral in the base while state income tax excludes it (Ohio)', () => {
+    const r = calculatePaycheck(input({ deductions: [k401], workState: { code: 'OH' } }));
+    assert.equal(base(r, 'OH_SUI_ER'), dollars(3000));
+    assert.equal(base(r, 'OH_SIT'), dollars(2760));
+    // Same base as FUTA on the same paycheck.
+    assert.equal(base(r, 'OH_SUI_ER'), base(r, 'US_FUTA'));
+  });
+
+  test('employer SUI excludes a Section 125 deduction (Ohio)', () => {
+    const r = calculatePaycheck(input({ deductions: [cafeteria], workState: { code: 'OH' } }));
+    assert.equal(base(r, 'OH_SUI_ER'), dollars(2800));
+  });
+
+  test('Pennsylvania employee UC is unchanged: deferral in, Section 125 out', () => {
+    const r = calculatePaycheck(input({ deductions: [k401, cafeteria], workState: { code: 'PA' } }));
+    assert.equal(base(r, 'PA_UC_EE'), dollars(2800));
+  });
+});
+
+// Minnesota defines unemployment (and paid leave) wages to include every
+// salary reduction, 401(k) and Section 125 alike (Minn. Stat. 268.035 subd.
+// 29(b); 268B.01), so neither reduces those bases even though both reduce
+// Minnesota income tax.
+describe('Minnesota unemployment and paid leave wages', () => {
+  test('neither a 401(k) deferral nor a Section 125 deduction reduces MN SUI or PFML', () => {
+    const r = calculatePaycheck(
+      input({
+        deductions: [
+          { code: '401K', category: 'deferral_401k', amount: dollars(240) },
+          { code: 'MED', category: 'section125', amount: dollars(200) },
+        ],
+        workState: { code: 'MN' },
+        employer: { stateUnemploymentRate: { MN: 0.01 } },
+      } as Partial<PaycheckInput>),
+    );
+    const base = (id: string) => r.taxes.find((t) => t.id === id)!.taxableWages;
+    assert.equal(base('MN_SUI_ER'), dollars(3000));
+    assert.equal(amountOf(r, 'MN_SUI_ER'), dollars(30.0));
+    assert.equal(base('MN_PFML_EE'), dollars(3000));
+    assert.equal(base('MN_SIT'), dollars(2560));
+  });
+});
+
+// When another state's employer withholds for the RESIDENCE state (a
+// reciprocity swap, or nexus/voluntary residence withholding), the whole of
+// that state's income tax comes along: Indiana's county tax, and NYC
+// resident tax, not only the base state line.
+describe('residence-state withholding carries county and city tax', () => {
+  test('Indiana resident working in Pennsylvania: swap includes the county tax (Marion 2.02%)', () => {
+    // Weekly $800, no exemptions: IN 800 x 2.95% = 23.60, Marion 800 x 2.02% = 16.16.
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'weekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+        workState: { code: 'PA', certificate: {} },
+        residenceState: { code: 'IN', certificate: { county: 'Marion' } },
+      } as Partial<PaycheckInput>),
+    );
+    assert.equal(amountOf(r, 'PA_SIT'), 0);
+    assert.equal(amountOf(r, 'IN_SIT_RECIPROCITY_SWAP'), dollars(23.6));
+    assert.equal(amountOf(r, 'IN_COUNTY_RECIPROCITY_SWAP'), dollars(16.16));
+  });
+
+  test('NYC resident working in New Jersey with residence withholding: NYC tax is withheld too', () => {
+    const cert = { maritalStatus: 'single', exemptions: 3, nycResident: true };
+    const pay = { payFrequency: 'weekly' as const, earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(400) }] };
+    const inNY = calculatePaycheck(input({ ...pay, workState: { code: 'NY', certificate: cert } }));
+    const r = calculatePaycheck(
+      input({
+        ...pay,
+        workState: { code: 'NJ', certificate: {} },
+        residenceState: { code: 'NY', certificate: cert },
+        residenceStateWithholding: { voluntary: true },
+      } as Partial<PaycheckInput>),
+    );
+    // NYS-50-T-NYC Example 1: $6.11 on these facts.
+    assert.equal(amountOf(inNY, 'NY_NYC_SIT'), dollars(6.11));
+    assert.equal(amountOf(r, 'NY_NYC_SIT_RESIDENCE'), dollars(6.11));
+    assert.equal(amountOf(r, 'NY_SIT_RESIDENCE'), amountOf(inNY, 'NY_SIT'));
+  });
+});
+
+// ORS 320.550(2): Oregon's statewide transit tax applies to "a resident of
+// this state, regardless of where services are performed."
+describe('Oregon statewide transit tax for residents working elsewhere', () => {
+  test('an Oregon resident working in Washington pays 0.1% ($3.00 on $3,000)', () => {
+    const r = calculatePaycheck(
+      input({ workState: { code: 'WA' }, residenceState: { code: 'OR', certificate: {} } } as Partial<PaycheckInput>),
+    );
+    assert.equal(amountOf(r, 'OR_STT'), dollars(3.0));
+  });
+
+  test('a Washington resident working in Washington pays none', () => {
+    const r = calculatePaycheck(input({ workState: { code: 'WA' }, residenceState: { code: 'WA' } } as Partial<PaycheckInput>));
+    assert.equal(r.taxes.some((t) => t.id === 'OR_STT'), false);
+  });
+
+  test('an Oregon resident working in Oregon pays it once, not twice', () => {
+    const r = calculatePaycheck(
+      input({ workState: { code: 'OR', certificate: {} }, residenceState: { code: 'OR', certificate: {} } } as Partial<PaycheckInput>),
+    );
+    assert.equal(r.taxes.filter((t) => t.id === 'OR_STT').length, 1);
+  });
+});
+
+describe('supplemental federal tax reads W-4 exempt strictly', () => {
+  test('a string "false" is rejected rather than treated as exempt', () => {
+    assert.throws(() =>
+      calculatePaycheck(
+        input({
+          earnings: [
+            { code: 'REG', category: 'regular', amount: dollars(3000) },
+            { code: 'BON', category: 'supplemental', amount: dollars(1000) },
+          ],
+          federalW4: { ...input().federalW4, exempt: 'false' as unknown as boolean },
+        }),
+      ),
+    );
   });
 });

@@ -278,13 +278,14 @@ describe('ordinary garnishment — state overrides', () => {
     assert.equal(floorBinds.totalWithheld, dollars(37.50)); // $400-$362.50
   });
 
-  test("Washington DC: 25% of the excess over 40x DC's own $18.40 minimum wage (no separate fraction cap)", () => {
+  test("Washington DC: 25% of the excess over 40x DC's own minimum wage on the check date (no separate fraction cap)", () => {
     // D.C. Code 16-572 -- the reachable amount already IS "25% of the
     // excess," not a separate lesser-of test against a flat 25%-of-
     // disposable fraction, but this engine's capFractions+floor shape
     // computes the same result either way since 25% of disposable can
     // never be smaller than 25% of (disposable minus a positive floor).
-    // Floor = 40 x $18.40 = $736/week.
+    // paycheckOf() is dated 2026-06-15, when DC's minimum wage was $17.95
+    // (it became $18.40 on 2026-07-01): floor = 40 x $17.95 = $718/week.
     const r = run(paycheckOf(dollars(2000), 0), [
       order({ id: 'A', type: 'consumer_creditor' }),
     ], 'DC');
@@ -293,7 +294,7 @@ describe('ordinary garnishment — state overrides', () => {
     const floorBinds = run(paycheckOf(dollars(800), 0), [
       order({ id: 'A', type: 'consumer_creditor' }),
     ], 'DC');
-    assert.equal(floorBinds.totalWithheld, dollars(64)); // $800-$736 excess
+    assert.equal(floorBinds.totalWithheld, dollars(82)); // $800-$718 excess
   });
 
   test('Nebraska: matches the federal default in general, but drops to 15% (same 30x-federal floor) for a head-of-family debtor', () => {
@@ -852,5 +853,61 @@ describe('more state overrides — cliff-on-dollar, marginal-bracket and head-of
       order({ id: 'A', type: 'consumer_creditor' }),
     ], 'TN');
     assert.equal(noDependents.totalWithheld, dollars(250));
+  });
+});
+
+describe('audit fixes (2026-09-26)', () => {
+  const withheld = (r: ReturnType<typeof calculateGarnishments>, id: string) => r.lines.find((l) => l.orderId === id)!.withheld;
+  const weekly = (gross: number, tax: number, checkDate: string) => ({ ...paycheckOf(dollars(gross), dollars(tax)), checkDate });
+
+  test('a support order without supportingOtherFamily is refused, not defaulted to the 60% ceiling', () => {
+    assert.throws(
+      () =>
+        calculateGarnishments({
+          checkDate: '2026-06-15', payFrequency: 'weekly', workState: 'TX', paycheck: weekly(1000, 100, '2026-06-15'),
+          orders: [{ id: 'CS', type: 'child_support', amountOrdered: Number.MAX_SAFE_INTEGER }],
+        }),
+      /supportingOtherFamily must be true or false/,
+    );
+    assert.throws(
+      () =>
+        calculateGarnishments({
+          checkDate: '2026-06-15', payFrequency: 'weekly', workState: 'TX', paycheck: weekly(1000, 100, '2026-06-15'),
+          orders: [{ id: 'CS', type: 'child_support', amountOrdered: Number.MAX_SAFE_INTEGER, supportingOtherFamily: 'false' as unknown as boolean }],
+        }),
+      /supportingOtherFamily must be true or false/,
+    );
+  });
+
+  test('supporting another family: 50% of $900 disposable = $450', () => {
+    const r = calculateGarnishments({
+      checkDate: '2026-06-15', payFrequency: 'weekly', workState: 'TX', paycheck: weekly(1000, 100, '2026-06-15'),
+      orders: [{ id: 'CS', type: 'child_support', amountOrdered: Number.MAX_SAFE_INTEGER, supportingOtherFamily: true }],
+    });
+    assert.equal(withheld(r, 'CS'), dollars(450));
+  });
+
+  test('DC floor follows the minimum wage on the check date: $17.95 before July 1, $18.40 after', () => {
+    // Weekly $800 disposable. Floor 40x: $718.00 in June, $736.00 in August.
+    const run = (checkDate: string) =>
+      calculateGarnishments({
+        checkDate, payFrequency: 'weekly', workState: 'DC', paycheck: weekly(850, 50, checkDate),
+        orders: [{ id: 'CC', type: 'consumer_creditor', amountOrdered: Number.MAX_SAFE_INTEGER }],
+      });
+    assert.equal(withheld(run('2026-06-15'), 'CC'), dollars(82));
+    assert.equal(withheld(run('2026-08-15'), 'CC'), dollars(64));
+  });
+
+  test('New York floor uses the downstate $17.00 minimum wage when the region is given', () => {
+    // Weekly $600 gross, $540 disposable. Cap = lesser of 10% gross ($60),
+    // 25% disposable ($135), and disposable over 30x minimum wage.
+    const run = (minimumWageRegion?: string) =>
+      calculateGarnishments({
+        checkDate: '2026-06-15', payFrequency: 'weekly', workState: 'NY', paycheck: weekly(600, 60, '2026-06-15'),
+        orders: [{ id: 'CC', type: 'consumer_creditor', amountOrdered: Number.MAX_SAFE_INTEGER }],
+        minimumWageRegion,
+      });
+    assert.equal(withheld(run(), 'CC'), dollars(60)); // upstate: 540 - 480
+    assert.equal(withheld(run('downstate'), 'CC'), dollars(30)); // downstate: 540 - 510
   });
 });

@@ -767,6 +767,14 @@ export interface GarnishmentFormula {
   minimumWageWeeklyMultiplier?: number;
   stateMinimumHourlyWage?: number;
   /**
+   * Take the floor's hourly figure from src/minimum-wage.ts for the check
+   * date (and region, where the state has regions) instead of the fixed
+   * stateMinimumHourlyWage above, which stays as the documented fallback.
+   * Set where the statute ties the floor to the CURRENT minimum wage and
+   * that wage moves mid-year or differs by region (New York, DC).
+   */
+  minimumWageFromRuleset?: boolean;
+  /**
    * What fraction of the excess over the minimum-wage floor is actually
    * reachable — every state in this file except California takes the
    * FULL excess (the federal CCPA's own rule: disposable earnings minus the

@@ -120,6 +120,7 @@
       "ordinaryGarnishment": {
         "minimumWageWeeklyMultiplier": 30,
         "stateMinimumHourlyWage": 16.00,
+        "minimumWageFromRuleset": true,
         "capFractions": [
           { "basis": "gross", "fraction": 0.10 },
           { "basis": "disposable", "fraction": 0.25 }
@@ -139,7 +140,7 @@
           "verifiedBy": "Cross-source confirmed via search synthesis of the announced regional rates, not independently fetched from NY DOL's own page this pass."
         }
       ],
-      "$note": "New York sets a REGIONAL minimum wage — $17.00/hr for NYC, Long Island and Westchester vs. $16.00/hr for the rest of the state — but this engine's workState is a bare 2-letter code with no county/region granularity to key off. stateMinimumHourlyWage here uses the LOWER, statewide-outside-downstate figure ($16.00) as a documented simplification: for an employee actually working in the $17.00 region, the true 30x floor is higher than this computes, meaning this engine could compute a small garnishment where the true NYC/LI/Westchester floor would still protect it entirely. This is a genuine, disclosed gap, not an assumed-safe direction — same disclosure discipline as this project's other geographic-granularity gaps (see docs/geocoding-coverage.md)."
+      "$note": "New York sets a REGIONAL minimum wage: $17.00/hr for NYC, Long Island and Westchester, $16.00/hr elsewhere (2026). Since 2026-09-26 the floor comes from src/minimum-wage.ts (minimumWageFromRuleset), using the caller's minimumWageRegion ('downstate' for the $17.00 region); stateMinimumHourlyWage ($16.00) is only the fallback shown in the file. Omitting the region still applies the lower upstate figure, which under-protects a downstate employee."
     },
     "MA": {
       "ordinaryGarnishment": {
@@ -550,9 +551,10 @@
       "ordinaryGarnishment": {
         "capFractions": [{ "basis": "disposable", "fraction": 0.25 }],
         "minimumWageWeeklyMultiplier": 40,
-        "stateMinimumHourlyWage": 18.40
+        "stateMinimumHourlyWage": 18.40,
+        "minimumWageFromRuleset": true
       },
-      "$note": "WIRED 2026-09-06. Unlike every 'greater of federal or state' floor in this file, D.C. Code 16-572 names the DISTRICT'S OWN minimum wage specifically — no federal comparison at all, and DC's own figure is already far above the federal $7.25 regardless. DC's minimum wage rose MID-YEAR on 2026-07-01 (from a lower H1 figure this file did not separately capture) — this entry uses only the current, post-increase $18.40 figure with no effective-dating mechanism, so a check date before 2026-07-01 would understate the true floor for that period; same class of disclosed simplification as this project's non-effective-dated figures elsewhere (distinct from Weirton's WV service fee or Ohio's HB96, which DO have effective-dating wired). Also note: this is a DISTRICT, not a state, but this engine's workState already treats DC as a 2-letter jurisdiction code like every other state-tax rule in this project, so no special-casing was needed to wire it in here."
+      "$note": "D.C. Code 16-572 names the DISTRICT'S OWN minimum wage (no federal comparison). DC's minimum wage steps every July 1: $17.95 through 2026-06-30, $18.40 from 2026-07-01. Since 2026-09-26 the floor comes from src/minimum-wage.ts for the check date (minimumWageFromRuleset), so a first-half-2026 check uses $17.95. Correction to the earlier note: applying the later, HIGHER $18.40 to a pre-July check OVERSTATED the floor, so it withheld LESS than the law allows (debtor over-protected, creditor short), not the other way round."
     },
     "NE": {
       "sources": [

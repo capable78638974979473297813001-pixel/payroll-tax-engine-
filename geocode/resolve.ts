@@ -229,7 +229,10 @@ function matchALMunicipalityByName(
   const candidates: ALMunicipalityEntry[] = [];
   for (const place of places) {
     const stripped = stripPlaceTypeSuffix(place);
-    const hit = all.find((c) => namesEqual(c.name, stripped));
+    // Aliases too, as alMunicipalityRuleset() does: the source list keeps
+    // its own spelling "Hacklebug" as the name, with the real town,
+    // "Hackleburg", only as an alias.
+    const hit = all.find((c) => namesEqual(c.name, stripped) || (c.aliases ?? []).some((a) => namesEqual(a, stripped)));
     if (hit && !candidates.includes(hit)) candidates.push(hit);
   }
   if (candidates.length === 1) return { confidence: 'matched', entry: candidates[0] };

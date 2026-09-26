@@ -3101,6 +3101,7 @@
     "note": "Connecticut has no income-tax reciprocity agreement with any other state (cross-source confirmed) -- deliberately empty, not omitted, per this project's \"checked, found none\" convention."
   },
   "statePaidLeaveEmployee": {
+    "exemptPretaxComment": "OPEN (2026-09-26): this uses Connecticut's income tax exemptPretax list, which lets a 401(k) deferral reduce the paid leave base. Paid leave programs in other states (MN, OR) define wages by their unemployment definition, which usually keeps deferrals in. Connecticut's statute (C.G.S. chapter 557) could not be fetched to confirm (TLS certificate error from cga.ct.gov). Verify before relying on this for employees who defer.",
     "$comment": "CT Paid Leave (launched 2022) -- dispatched via the SAME generic statePaidLeaveEmployeeTax() built for Minnesota, zero new code.",
     "rate": 0.005,
     "wageBase": "ssWageBase",

@@ -57,7 +57,7 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
   ];
 
   if (input.roundToWholeDollars) {
-    taxes = taxes.map((t) => ({ ...t, amount: toWholeDollars(t.amount) }));
+    taxes = taxes.map((t) => (isIncomeTaxWithholding(t) ? { ...t, amount: toWholeDollars(t.amount) } : t));
   }
 
   const employeeTaxTotal = taxes
@@ -82,4 +82,29 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
     // Employer taxes are a cost to the employer, never a reduction of net pay.
     netPay: gross - pretax - posttax - employeeTaxTotal,
   };
+}
+
+/**
+ * Local taxes that are income taxes on wages. Occupational license fees
+ * (AL_LOCAL, KY_LOCAL) and flat head taxes (PA_LST, WV_LOCAL_FEE) are not.
+ */
+const LOCAL_INCOME_TAX_IDS = new Set([
+  'OH_LOCAL', 'OH_JEDD', 'OH_SDIT', 'PA_EIT', 'MI_LOCAL', 'OR_METRO_SHS', 'OR_MULTNOMAH_PFA', 'WILMINGTON_WAGE',
+]);
+
+/**
+ * Whether a line is withheld income tax, the only kind the whole-dollar
+ * option may round (docs/rounding-and-precision.md rule 7). FICA, RRTA,
+ * unemployment, disability, paid leave and employer taxes stay in cents so
+ * Form 941 and the state wage reports tie to the cent.
+ */
+export function isIncomeTaxWithholding(line: TaxLine): boolean {
+  if (line.payer !== 'employee') return false;
+  return (
+    line.id === 'US_FIT' ||
+    line.id === 'US_FIT_SUPP' ||
+    /_SIT(_|$)/.test(line.id) ||
+    /^[A-Z]{2}_COUNTY(_|$)/.test(line.id) ||
+    LOCAL_INCOME_TAX_IDS.has(line.id)
+  );
 }

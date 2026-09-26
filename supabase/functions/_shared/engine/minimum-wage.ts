@@ -104,6 +104,81 @@ export interface MinimumWageAnswer {
   considered: MinimumWageCandidate[];
 }
 
+/**
+ * One legislated future step, as stored in a ruleset's `scheduledChanges`
+ * (e.g. Florida's Amendment 2 moving $14.00 → $15.00 on 2026-09-30). The
+ * figures are optional because some files record a step whose amount is
+ * not yet published (a CPI adjustment) or not a single number.
+ */
+interface ScheduledChange {
+  effectiveDate: string;
+  hourly?: number;
+  hourlyCents?: number;
+  tippedCashWage?: number;
+  tippedCashWageCents?: number;
+  /** Tipped cash wage as a share of the (new) standard rate — DC's form. */
+  tippedPercentOfMinimumWage?: number;
+  change?: string;
+  note?: string;
+}
+
+/**
+ * Apply the most recent `scheduledChanges` step on or before the check
+ * date to a jurisdiction's headline standard and tipped figures.
+ *
+ * A step that has arrived but carries no machine-readable figure (a
+ * free-text "+$0.40", or a CPI step whose amount isn't in the file) is an
+ * error, not a reason to keep paying the old rate: the old rate is known
+ * to be wrong from that date. Region and size-tier variants keep their own
+ * effective dating and are not touched here.
+ */
+function withScheduledChanges<T extends { standard?: MinimumWageAmount | null; tipped?: TippedMinimumWage; hourly?: number; hourlyCents?: number }>(
+  jurisdiction: T,
+  name: string,
+  checkDate: string,
+): { value: T; applied?: ScheduledChange } {
+  const steps = ((jurisdiction as Record<string, unknown>).scheduledChanges ?? []) as ScheduledChange[];
+  const due = steps
+    .filter((c) => typeof c.effectiveDate === 'string' && c.effectiveDate <= checkDate)
+    .sort((a, b) => (a.effectiveDate < b.effectiveDate ? -1 : 1))
+    .pop();
+  if (!due) return { value: jurisdiction };
+
+  const newStandardCents =
+    typeof due.hourlyCents === 'number' ? due.hourlyCents
+      : typeof due.hourly === 'number' ? Math.round(due.hourly * 100)
+        : undefined;
+  const hasTipped =
+    typeof due.tippedCashWageCents === 'number' || typeof due.tippedCashWage === 'number' ||
+    typeof due.tippedPercentOfMinimumWage === 'number';
+  if (newStandardCents === undefined && !hasTipped) {
+    throw new Error(
+      `${name}: a minimum wage change took effect on ${due.effectiveDate} but its ruleset gives no ` +
+        `machine-readable amount (${due.change ?? due.note ?? 'no figure recorded'}). Record the new rate ` +
+        `in data/minimum-wage/ rather than applying the superseded one.`,
+    );
+  }
+
+  // A state file carries `standard`; a local ordinance IS its own amount.
+  const isState = 'standard' in jurisdiction;
+  const oldStandard = isState ? jurisdiction.standard : (jurisdiction as unknown as MinimumWageAmount);
+  const standardCents = newStandardCents ?? oldStandard?.hourlyCents;
+  const next: T = { ...jurisdiction };
+  if (newStandardCents !== undefined && oldStandard) {
+    const updated = { ...oldStandard, hourly: newStandardCents / 100, hourlyCents: newStandardCents, effectiveFrom: due.effectiveDate };
+    if (isState) (next as { standard: MinimumWageAmount }).standard = updated;
+    else Object.assign(next, { hourly: updated.hourly, hourlyCents: updated.hourlyCents, effectiveFrom: due.effectiveDate });
+  }
+  if (jurisdiction.tipped && hasTipped) {
+    const cash =
+      typeof due.tippedCashWageCents === 'number' ? due.tippedCashWageCents
+        : typeof due.tippedCashWage === 'number' ? Math.round(due.tippedCashWage * 100)
+          : Math.round((standardCents ?? 0) * (due.tippedPercentOfMinimumWage as number));
+    next.tipped = { ...jurisdiction.tipped, cashWage: cash / 100, cashWageCents: cash };
+  }
+  return { value: next, applied: due };
+}
+
 /** Cents can carry a half-cent in exactly one place: South Dakota's $5.925 tipped wage. */
 function toCents(amount: { hourlyCents: number }): number {
   return amount.hourlyCents;
@@ -305,7 +380,14 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
     );
   }
 
-  const state = stateMinimumWageRuleset(query.state, query.checkDate);
+  const scheduledState = withScheduledChanges(
+    stateMinimumWageRuleset(query.state, query.checkDate),
+    query.state.toUpperCase(),
+    query.checkDate,
+  );
+  const state = scheduledState.value;
+  const stepNote = (applied?: ScheduledChange) =>
+    applied ? ` (scheduled change effective ${applied.effectiveDate})` : '';
   if (state.standard === null) {
     // American Samoa: the federal floor there is 18 industry rates, and no
     // single number is a correct answer. Refuse rather than pick one.
@@ -374,6 +456,7 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
         basis += ` (figure in effect through ${pred.effectiveTo ?? query.checkDate})`;
       }
     }
+    if (!regionMatched) basis += stepNote(scheduledState.applied);
     considered.push({ level: 'state', jurisdiction: state.jurisdiction.name, cents, basis, caveat });
   } else {
     let base = state.standard;
@@ -400,7 +483,7 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
         ? `State rate, ${regionLabel} region`
         : tier.narrowed
           ? `State rate, ${(tier.amount as MinimumWageAmount)?.label ?? 'tier'} (${query.employeeCount} employees)`
-          : 'State standard rate',
+          : 'State standard rate' + stepNote(scheduledState.applied),
       caveat:
         regionCaveat ??
         (!tier.narrowed && (state.variants ?? []).some((v) => v.appliesWhen)
@@ -412,7 +495,8 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
   let foundLocal: MinimumWageJurisdiction | undefined;
   if (query.locality) {
     const locals = localMinimumWageRuleset(query.state, query.checkDate);
-    const found = findLocality(locals, query.locality);
+    const rawFound = findLocality(locals, query.locality);
+    const found = rawFound ? withScheduledChanges(rawFound, rawFound.name, query.checkDate).value : undefined;
     foundLocal = found;
     if (!found) {
       considered.push({

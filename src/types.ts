@@ -440,8 +440,10 @@ export interface EmployerContext {
   quarterlyHeadFeeCollection?: Record<string, 'prorated' | 'full' | 'skip'>;
   /**
    * Cash wages paid to ALL household employees in the current calendar
-   * quarter — the FUTA test for domestic employment ($1,000 in any
-   * quarter). An employer-wide figure, so only the employer has it.
+   * quarter BEFORE this check — the FUTA test for domestic employment
+   * ($1,000 in a quarter). This check's own cash is added by the engine,
+   * the same convention as ytd.categoryCashWages. An employer-wide figure,
+   * so only the employer has it.
    */
   householdQuarterlyCashWages?: Cents;
   /**
