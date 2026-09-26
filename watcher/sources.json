@@ -1348,10 +1348,10 @@
    ]
   },
   {
-   "id": "ga-6162a1afda",
+   "id": "ga-84d4aaccbe",
    "jurisdiction": "GA",
-   "title": "Employer's Withholding Tax Guide 2026 (Revised June 2026, reflecting HB 463 signed 2026-05-11)",
-   "url": "https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-june-2026/download",
+   "title": "Employer's Withholding Tax Guide 2026 (Revised September 2026; withholding tables unchanged from the June 2026 HB 463 revision)",
+   "url": "https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-september-2026/download",
    "origin": "data",
    "used_by": [
     "data/states/GA-2026.json"

@@ -154,6 +154,33 @@ class WatcherTest(ServerTestCase):
         self.assertEqual(self.run_watch("2026-09-01")["counts"], {"new": 1})
         self.assertEqual(self.run_watch("2026-09-02")["counts"], {"unchanged": 1})
 
+    def test_related_news_churn_is_not_a_change(self):
+        def press(news: str) -> str:
+            return ("<html><body><main><h1>Minimum wage 2026</h1><p>" + "The minimum wage is $18.35 per hour. " * 12 +
+                    f"</p><p>###</p><h2>Related News</h2><p>{news}</p></main></body></html>")
+        self.site.set_page("/news", press("City hall roof replacement"))
+        self.sources("/news")
+        self.run_watch("2026-09-01")
+        self.site.set_page("/news", press("Council member resigns"))
+        self.assertEqual(self.run_watch("2026-09-02")["counts"], {"unchanged": 1})
+
+    def test_snapshot_from_older_rules_is_resaved_without_a_report(self):
+        page_html = ("<html><body><main><h1>Minimum wage 2026</h1><p>" + "The minimum wage is $16.37. " * 15 +
+                     "</p><h2>Related News</h2><p>ALDI now open</p></main></body></html>")
+        self.site.set_page("/news", page_html)
+        self.sources("/news")
+        real = watch.drop_related_block
+        watch.drop_related_block = lambda text: text  # the rules before this change
+        try:
+            self.run_watch("2026-09-01")
+        finally:
+            watch.drop_related_block = real
+        self.assertIn("ALDI", watch.read_snapshot("t-0"))
+        report = self.run_watch("2026-09-02")
+        self.assertEqual(report["counts"], {"unchanged": 1})
+        self.assertNotIn("ALDI", watch.read_snapshot("t-0"))
+        self.assertEqual(self.run_watch("2026-09-03")["counts"], {"unchanged": 1})
+
     def test_noise_is_ignored(self):
         """Script tokens, cache-busting ?ver= params, 'Last updated' stamps,
         nav and footer all change without the rules changing."""
@@ -405,6 +432,18 @@ class BuildSourcesTest(unittest.TestCase):
 
 
 class ExtractionTest(unittest.TestCase):
+    def test_related_news_block_is_dropped(self):
+        article = "City of Saint Paul Minimum Wage Increases July 1. " * 10
+        page = f"{article}\n###\nRelated News\nALDI grocery store now open\nRead More\n"
+        self.assertEqual(watch.drop_related_block(page), f"{article}\n###\n")
+        # A heading near the top (a menu) doesn't blank the page.
+        menu = "Related News\n" + article
+        self.assertEqual(watch.drop_related_block(menu), menu)
+        # "Related News in Homepage News" (Flagstaff's form) also counts.
+        cut = watch.drop_related_block(article + "\nRelated News in Homepage News\nAnthony Garcia Resigns\n")
+        self.assertNotIn("Related News", cut)
+        self.assertNotIn("Anthony Garcia", cut)
+
     def test_main_region_preferred_and_chrome_dropped(self):
         text, _ = watch.extract_html(page().encode(), "https://x.gov/wh", None)
         norm = watch.normalise_text(text)

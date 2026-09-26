@@ -367,6 +367,21 @@ class Extracted:
         return hashlib.sha256(self.text.encode()).hexdigest()
 
 
+# A "Related News" block under a press release lists whatever else the city
+# posted this week, so it changes daily while the article itself doesn't
+# (Flagstaff and Saint Paul, 2026-09-26). Everything from that heading on
+# is dropped. Only a whole-line heading counts, and only once some article
+# text precedes it, so a menu item near the top can't blank the page.
+RELATED_HEADING = re.compile(r"^[ \t]*Related (?:News|Stories|Articles|Posts|Press Releases)\b[^\n]{0,60}$", re.M | re.I)
+
+
+def drop_related_block(text: str) -> str:
+    for m in RELATED_HEADING.finditer(text):
+        if len(text[: m.start()].strip()) >= 300:
+            return text[: m.start()].rstrip() + "\n"
+    return text
+
+
 def extract(source: dict, f: Fetched) -> Extracted:
     ctype = f.content_type.lower()
     url = f.final_url or source["url"]
@@ -379,6 +394,7 @@ def extract(source: dict, f: Fetched) -> Extracted:
         if m:
             charset = m.group(1)
         text, links = extract_html(f.body, url, charset)
+        text = drop_related_block(text)
         if source.get("contains"):
             # Optional narrowing: keep only the region between two phrases.
             start, _, end = source["contains"].partition("...")
@@ -494,6 +510,9 @@ class Result:
     via_browser: bool = False
     significant: bool = True
     nav: list[str] | None = None
+    # Unchanged page whose saved snapshot predates a text-reduction rule;
+    # the snapshot is re-saved in the current form without a report.
+    rebaseline: bool = False
 
 
 ENV_PLACEHOLDER_RE = re.compile(r"\{env:([A-Z0-9_]+)\}")
@@ -683,6 +702,17 @@ def _check_source(source: dict, prev: dict | None, confirm_delay: float, fetcher
     if new_sig == old_sig:
         return base
 
+    # Same page, older text rules: the saved snapshot, reduced the way pages
+    # are reduced now (e.g. drop_related_block), equals today's text.
+    if target == old_target and links_now == old_links:
+        old_text = read_snapshot(source["id"])
+        if old_text is not None:
+            redone = normalise_text(drop_related_block(old_text), source.get("ignore"), source.get("keep"))
+            if hashlib.sha256(redone.encode()).hexdigest() == first.hash:
+                base.rebaseline = True
+                base.detail = "unchanged; snapshot re-saved under the current text rules"
+                return base
+
     # Something differs. Fetch again before believing it.
     time.sleep(confirm_delay)
     f2 = fetcher(source["url"])
@@ -849,7 +879,7 @@ def apply_results(results: list[Result], state: dict, today: str) -> None:
         else:
             entry.pop("needs_browser", None)
         entry["last_ok"] = today
-        if r.status in ("new", "changed"):
+        if r.status in ("new", "changed") or r.rebaseline:
             entry["hash"] = r.hash
             entry["links"] = r.links or {}
             write_snapshot(sid, r.text or "")
