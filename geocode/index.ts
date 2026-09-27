@@ -689,6 +689,48 @@ export async function resolveAddress(
   };
 }
 
+export interface LocalityResolution {
+  /** Set only when exactly one candidate fired — undefined on both zero and more-than-one. */
+  locality: string | undefined;
+  /** Set only when more than one candidate fired at once — see resolveLocalityCandidates()'s own doc comment. */
+  conflictMessage: string | null;
+}
+
+/**
+ * The single-slot arbitration behind certificate.locality — pulled out as
+ * its own pure function (rather than left inline in resolveEmployee())
+ * specifically so it can be unit-tested without a live Census call: the
+ * conflict case it exists to catch (two different caller-resolved-locality
+ * taxes both firing at once, e.g. a Kansas-City-work/Wilmington-residence
+ * employee, or a Kansas-City-work/City-of-St.-Louis-residence employee
+ * within Missouri itself) needs no network to construct — it only needs
+ * the already-collected candidate set resolveEmployee() builds from both
+ * addresses' flags and async boundary lookups.
+ *
+ * Zero candidates: no caller-resolved-locality tax applies — `locality` is
+ * undefined, no conflict. Exactly one: the ordinary case — `locality` is
+ * that candidate. More than one: a genuine conflict this function cannot
+ * arbitrate on its own (certificate.locality is one string; two states'
+ * worth of these taxes cannot both live on it) — `locality` stays
+ * undefined and `conflictMessage` names every candidate, so the caller
+ * builds separate work/residence certificates by hand instead of losing
+ * whichever candidate a silent pick would have dropped.
+ */
+export function resolveLocalityCandidates(candidates: ReadonlySet<string>): LocalityResolution {
+  if (candidates.size === 0) return { locality: undefined, conflictMessage: null };
+  if (candidates.size === 1) return { locality: [...candidates][0], conflictMessage: null };
+  return {
+    locality: undefined,
+    conflictMessage:
+      `certificate.locality could not be set: this employee's work and residence addresses independently ` +
+      `qualify for more than one caller-resolved-locality tax at once (${[...candidates].sort().join(', ')}), ` +
+      `but certificate.locality is a single field and can only hold one value. Each of these needs its own ` +
+      `certificate (build separate workState/residenceState certificates by hand from resolveAddress()'s own ` +
+      `per-role output, one per state, rather than this function's single merged certificateFields) — resolving ` +
+      `them onto one shared field here would silently drop whichever one lost.`,
+  };
+}
+
 export interface EmployeeResolution {
   work: AddressResolution | null;
   residence: AddressResolution | null;
@@ -763,30 +805,37 @@ export async function resolveEmployee(
     fields.yonkersNonresidentWorker = true;
   }
 
-  if (workFlags?.newark) {
-    fields.locality = 'Newark';
-  } else if (workFlags?.kansasCity || residenceFlags?.kansasCity) {
-    fields.locality = 'Kansas City';
-  } else if (workFlags?.stLouis || residenceFlags?.stLouis) {
-    fields.locality = 'St. Louis';
-  } else if (workFlags?.wilmington || residenceFlags?.wilmington) {
-    fields.locality = 'Wilmington';
-  }
-
-  if (workFlags?.multnomahCounty) fields.multnomahCounty = true;
-
+  // certificate.locality is ONE shared string (see its own doc comment in
+  // src/types.ts), but SEVERAL genuinely independent caller-resolved-
+  // locality taxes can each try to claim it: Newark (NJ), Kansas City/
+  // St. Louis (MO), Wilmington (DE), Seattle (WA), the Denver family (CO),
+  // WV's six service-fee cities, and Oregon's transit districts. Within
+  // one state these are mutually exclusive by construction (an address is
+  // never in two of a state's own cities at once), but ACROSS states they
+  // are not: an employee who works in Kansas City, MO and lives in
+  // Wilmington, DE genuinely owes both cities' taxes, on two DIFFERENT
+  // certificates (workState's and residenceState's) — and even within one
+  // state, working in Kansas City while residing in the City of St. Louis
+  // itself (not a suburb) genuinely owes both. Silently picking a winner
+  // by evaluation order would drop a real, owed local tax with no signal
+  // at all. So every candidate is collected here, and it is this
+  // function's own job to say when more than one is on the table rather
+  // than trusting whichever happened to run last — the same "explicit
+  // conflict over a confidently wrong number" discipline
+  // src/taxes/state.ts's own local-tax dispatch uses throughout.
+  const localityCandidates = new Set<string>();
+  if (workFlags?.newark) localityCandidates.add('Newark');
+  if (workFlags?.kansasCity || residenceFlags?.kansasCity) localityCandidates.add('Kansas City');
+  if (workFlags?.stLouis || residenceFlags?.stLouis) localityCandidates.add('St. Louis');
+  if (workFlags?.wilmington || residenceFlags?.wilmington) localityCandidates.add('Wilmington');
   // Seattle's JumpStart payroll expense tax. Employer-paid, and banded by
   // BOTH the employer's prior-year Seattle payroll and the employee's own
   // annual compensation — neither of which an address can supply. Setting
   // the locality is what makes seattlePayrollExpenseTax() reachable at
   // all; the two figures it still needs are reported in notResolvable
-  // below, the same way Denver's are.
-  if (workFlags?.seattle) fields.locality = 'Seattle';
-
-  if (work?.resolved?.wvServiceFeeCity) {
-    fields.locality = work.resolved.wvServiceFeeCity;
-  }
-
+  // below.
+  if (workFlags?.seattle) localityCandidates.add('Seattle');
+  if (work?.resolved?.wvServiceFeeCity) localityCandidates.add(work.resolved.wvServiceFeeCity);
   // Colorado's Occupational Privilege Tax: WORK address, duty-station
   // based like WV's service fee — same matched-name mechanism. Found
   // 2026-09-03: coloradoOccupationalPrivilegeTax() already computed all
@@ -795,9 +844,9 @@ export async function resolveEmployee(
   // used to set only Denver's boolean flag, leaving the other four
   // unreachable even though each is a plain Census incorporated place
   // needing no special boundary at all.
-  if (work?.resolved?.coOptCity) {
-    fields.locality = work.resolved.coOptCity;
-  }
+  if (work?.resolved?.coOptCity) localityCandidates.add(work.resolved.coOptCity);
+
+  if (workFlags?.multnomahCounty) fields.multnomahCounty = true;
 
   const notResolvable: string[] = [];
   const workState = work?.resolved?.state ?? residence?.resolved?.state;
@@ -828,7 +877,7 @@ export async function resolveEmployee(
     if (metroPoint) {
       const transit = await oregonTransitDistrictAtPoint(metroPoint.lat, metroPoint.lon);
       if (transit.attempted) {
-        if (transit.locality) fields.locality = transit.locality;
+        if (transit.locality) localityCandidates.add(transit.locality);
       } else {
         notResolvable.push(
           "Oregon's TriMet/LTD/SCTD transit payroll excises (certificate.locality) — ODOT's own jurisdictions service could not be reached this call, so this was NOT determined either way. Retry before treating its absence as 'outside every district'. (Canby/Sandy/Wilsonville below aren't affected by this — they're resolved separately.)",
@@ -837,7 +886,7 @@ export async function resolveEmployee(
 
       const canby = await isInsideCanbyTransitDistrict(metroPoint.lat, metroPoint.lon);
       if (canby.attempted) {
-        if (canby.inside) fields.locality = 'CanbyTransit';
+        if (canby.inside) localityCandidates.add('CanbyTransit');
       } else {
         notResolvable.push(
           "Canby's transit payroll excise (certificate.locality = 'CanbyTransit') — Oregon's own UGB boundary service could not be reached this call, so this was NOT determined either way. Retry before treating its absence as 'outside the district'.",
@@ -846,9 +895,14 @@ export async function resolveEmployee(
     }
     // Sandy and Wilsonville are simply their own city limits — no special
     // boundary lookup needed, just the ordinary Census place match
-    // already computed above as workFlags.sandy/wilsonville.
-    if (workFlags?.sandy) fields.locality = 'SandyTransit';
-    if (workFlags?.wilsonville) fields.locality = 'SMART';
+    // already computed above as workFlags.sandy/wilsonville. Disjoint from
+    // TriMet/LTD/SCTD/Canby above (see this block's own header comment),
+    // so adding both a transit-district hit and one of these to the same
+    // set never happens in practice — kept as a set anyway so a future
+    // boundary change that broke that disjointness would surface as a
+    // detected conflict below rather than a silent pick.
+    if (workFlags?.sandy) localityCandidates.add('SandyTransit');
+    if (workFlags?.wilsonville) localityCandidates.add('SMART');
   }
   if (workFlags?.seattle) {
     notResolvable.push(
@@ -862,6 +916,14 @@ export async function resolveEmployee(
       `${work.resolved.coOptCity}'s Occupational Privilege Tax needs certificate.localMonthlyCompensation (this month's cumulative pay so far in the district) and certificate.localOPTWithheldThisMonth — real payroll-history facts, not something any address can supply. certificate.locality was set to '${work.resolved.coOptCity}'; those two fields still need caller input.`,
     );
   }
+
+  // Resolve the collected candidates LAST, once every synchronous flag and
+  // every async boundary lookup above has had its say — see
+  // resolveLocalityCandidates()'s own doc comment for what each outcome
+  // means.
+  const settled = resolveLocalityCandidates(localityCandidates);
+  if (settled.locality) fields.locality = settled.locality;
+  if (settled.conflictMessage) notResolvable.push(settled.conflictMessage);
 
   const lowConfidenceReasons = [
     ...(work?.lowConfidenceReasons ?? []).map((r) => `Work address: ${r}`),
