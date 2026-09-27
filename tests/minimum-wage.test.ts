@@ -279,6 +279,30 @@ describe('state minimum wages', () => {
     assert.equal(stateMinimumWageRuleset('DC', D).tipped.cashWageCents, 1030);
   });
 
+  test('Florida’s final Amendment 2 step to $15.00 lands on 2026-09-30 and STAYS there — not a one-day blip', () => {
+    // Complements tests/audit-fixes.test.ts's own boundary check (the day
+    // before vs. the step day itself) with the day AFTER, through the
+    // public minimumWage() entry point rather than the raw ruleset, and
+    // pins the tip credit's own fixed-$3.02 arithmetic ($15.00 - $3.02 =
+    // $11.98) rather than just asserting the stepped figure in isolation.
+    const dayBefore = minimumWage({ checkDate: '2026-09-29', state: 'FL' });
+    const stepDay = minimumWage({ checkDate: '2026-09-30', state: 'FL' });
+    const dayAfter = minimumWage({ checkDate: '2026-10-01', state: 'FL' });
+    assert.equal(dayBefore.hourly, 14);
+    assert.equal(stepDay.hourly, 15);
+    assert.equal(dayAfter.hourly, 15, 'the step must persist, not revert the day after');
+
+    const tippedStepDay = minimumWage({ checkDate: '2026-09-30', state: 'FL', tipped: true });
+    const tippedDayAfter = minimumWage({ checkDate: '2026-10-01', state: 'FL', tipped: true });
+    assert.equal(tippedStepDay.hourly, 11.98);
+    assert.equal(tippedDayAfter.hourly, 11.98);
+    assert.equal(
+      Math.round((stepDay.hourly - tippedStepDay.hourly) * 100) / 100,
+      3.02,
+      'Florida’s tip credit is fixed at $3.02 by the constitution and must still be exactly $3.02 after the step, not $3.00 carried over from the old rate',
+    );
+  });
+
   test('South Dakota’s tipped wage is carried to the half cent its own DLR publishes', () => {
     // DOL's federal table rounds this to $5.93; South Dakota publishes
     // $5.925, exactly half of $11.85. Rounding down would underpay.
