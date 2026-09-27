@@ -436,7 +436,7 @@
       "withholdingSource": "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding",
       "status": "modelled",
       "localAggregator": "pa-dced-act32",
-      "note": "State flat 3.07% + employee-paid UC withholding (0.07%, uncapped -- PA is the first state in this project taxing the employee for UC, not just the employer) + reciprocity (IN/MD/NJ/OH/VA/WV) modelled in data/states/PA-2026.json. Act 32 local EIT + Local Services Tax documented structurally (localTax block) but not yet built as a data file/engine path -- DCED's downloadable PSD/rate spreadsheet identified as the bulk source, not yet imported."
+      "note": "State flat 3.07% + employee-paid UC withholding (0.07%, uncapped -- PA is the first state in this project taxing the employee for UC, not just the employer) + reciprocity (IN/MD/NJ/OH/VA/WV) modelled in data/states/PA-2026.json. Act 32 local EIT + Local Services Tax documented structurally (localTax block) and built as a data file/engine path. STALE, corrected (GROKBOT_AUDIT.md finding 18): this note previously said the DCED PSD/rate spreadsheet was 'not yet imported' -- it has been: data/local/PA-EIT-LST-2026.json holds all 2,627 PSD rows, read by pennsylvaniaLocalTax() in src/taxes/state.ts."
     },
     {
       "code": "RI",

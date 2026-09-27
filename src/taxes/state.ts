@@ -8501,10 +8501,6 @@ function ohioSchoolDistrictTax(
  * project's existing output shape, unchanged), just computed correctly
  * underneath it.
  *
- * a true year-to-date figure. Uses the municipal LIE threshold if
- * present, falling back to the school district's, matching how the
- * combined municipal+school total is what's actually being exempted.
- *
  * SECONDARY-EMPLOYER DEDUP, found and closed on the "go to every state,
  * fix real bugs" pass (2026-09-06) — PA-2026.json's own localTax.lst.
  * situsPriority text (sourced from PA DCED directly) says verbatim "a
