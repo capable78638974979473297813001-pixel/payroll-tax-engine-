@@ -149,6 +149,39 @@ describe('YTD accumulation across pay periods (payroll/ytd.ts)', () => {
     assert.equal(ytd.stateUnemployment?.NJ, taxable, 'the two lines must add ONE $30,000, not $60,000');
   });
 
+  test('Pennsylvania: an uncapped employee UC line and a capped employer SUI line sharing stateUnemployment do not corrupt each other', () => {
+    // PA_UC_EE has no wage base (0.07% of every dollar, uncapped); PA_SUI_ER
+    // is capped at $10,000/yr. Above that cap the two lines' taxableWages
+    // genuinely diverge — this is not the NJ/AK case above where both sides
+    // share one wage base and reporting either is fine. The tracker must
+    // still end up holding the EMPLOYER figure, since that is the only side
+    // whose OWN next-period computation reads ytd.stateUnemployment.PA back
+    // (stateUnemploymentEmployeeTax() ignores ytd whenever its own wageBase
+    // is null — see that function's own body in src/taxes/state.ts).
+    let ytd = freshYearToDate();
+    ytd.stateUnemployment = { PA: dollars(9_500) };
+    const forward = accumulateYtd(ytd, {
+      checkDate: '2026-06-15',
+      grossPay: dollars(5_000),
+      taxLines: [
+        { id: 'PA_UC_EE', taxableWages: dollars(5_000) }, // uncapped: all $5,000 is taxable
+        { id: 'PA_SUI_ER', taxableWages: dollars(500) }, // capped: only $500 remains before the $10,000 cap
+      ],
+    });
+    assert.equal(forward.stateUnemployment?.PA, dollars(10_000), 'must land on the EMPLOYER cap ($9,500 + $500), not the uncapped employee figure');
+
+    // Order in PaycheckResult.taxes must not change the outcome.
+    const reversed = accumulateYtd(ytd, {
+      checkDate: '2026-06-15',
+      grossPay: dollars(5_000),
+      taxLines: [
+        { id: 'PA_SUI_ER', taxableWages: dollars(500) },
+        { id: 'PA_UC_EE', taxableWages: dollars(5_000) },
+      ],
+    });
+    assert.equal(reversed.stateUnemployment?.PA, dollars(10_000), 'the resolved figure must not depend on tax-line order');
+  });
+
   test('a state with both a PFML employee and employer line shares one statePaidLeave tracker the same way', () => {
     let ytd = freshYearToDate();
     const taxable = dollars(20_000);

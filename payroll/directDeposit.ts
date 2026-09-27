@@ -141,10 +141,20 @@ export interface AchFileConfig {
    * this module's own header comment names for account-number custody.
    */
   originRoutingNumber: string;
-  /** Company/originator name, e.g. the legal payroll company name — truncated to NACHA's field widths, never rejected for being too long. */
+  /**
+   * The NAME of the bank at `originRoutingNumber` above — not the payroll
+   * company's own legal name (see `companyName` below for that). This fills
+   * the file header's Immediate DESTINATION Name field, the counterpart to
+   * `originRoutingNumber` filling Immediate Destination: together they say
+   * who this file is physically being submitted TO. A caller who passes
+   * their own company's name here instead of their bank's puts the wrong
+   * entity in that field of a real NACHA file — truncated to NACHA's field
+   * width, never rejected for being too long.
+   */
   originName: string;
   /** Immediate origin id NACHA expects in the file header — conventionally a space followed by a 9-digit id the originating bank assigns; if unknown, pass the company's own EIN digits and this function pads to 10 the same way. */
   immediateOriginId: string;
+  /** The payroll company/originator's own legal name — fills the file header's Immediate Origin Name field and the batch header's Company Name field, the actual entity the money is coming from (as opposed to `originName` above, which names the BANK it's being submitted through). */
   companyName: string;
   companyIdentification: string; // e.g. '1' + 9-digit EIN
   effectiveEntryDate: string; // ISO yyyy-mm-dd — the check date

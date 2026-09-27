@@ -48,6 +48,7 @@ import {
   jeddAtPoint,
   oregonTransitDistrictAtPoint,
 } from '../geocode/districts.ts';
+import { resolveLocalityCandidates } from '../geocode/index.ts';
 
 const CHECK_DATE = '2026-08-15';
 
@@ -549,6 +550,35 @@ describe('resolve.ts — real captured Census geographies', () => {
     };
     const resolved = resolveJurisdiction(geo, CHECK_DATE);
     assert.equal(resolved.flags.wilmington, false);
+  });
+});
+
+describe('resolveLocalityCandidates() — the single-slot certificate.locality arbitration (index.ts)', () => {
+  test('zero candidates: no locality, no conflict', () => {
+    const result = resolveLocalityCandidates(new Set());
+    assert.equal(result.locality, undefined);
+    assert.equal(result.conflictMessage, null);
+  });
+
+  test('exactly one candidate: that locality, no conflict — the ordinary same-state case', () => {
+    const result = resolveLocalityCandidates(new Set(['Kansas City']));
+    assert.equal(result.locality, 'Kansas City');
+    assert.equal(result.conflictMessage, null);
+  });
+
+  test('two DIFFERENT candidates (e.g. a Kansas-City-work / Wilmington-residence employee, or a Kansas-City-work / City-of-St.-Louis-residence employee within Missouri itself): no locality is guessed, and both names are named in the conflict message', () => {
+    const result = resolveLocalityCandidates(new Set(['Kansas City', 'Wilmington']));
+    assert.equal(result.locality, undefined, 'must not silently pick a winner');
+    assert.ok(result.conflictMessage, 'must surface the conflict rather than staying silent');
+    assert.match(result.conflictMessage!, /Kansas City/);
+    assert.match(result.conflictMessage!, /Wilmington/);
+    assert.match(result.conflictMessage!, /single field and can only hold one value/);
+  });
+
+  test('the same candidate reached twice (e.g. both the work AND residence flag independently point at Kansas City) collapses to one, not a conflict', () => {
+    const result = resolveLocalityCandidates(new Set(['Kansas City']));
+    assert.equal(result.locality, 'Kansas City');
+    assert.equal(result.conflictMessage, null);
   });
 });
 
