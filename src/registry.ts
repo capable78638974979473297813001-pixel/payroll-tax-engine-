@@ -592,10 +592,21 @@ export interface OHJEDDEntry {
   effectiveFrom: string;
 }
 
+/** A JEDD/JEDZ rate row with no polygon in Ohio's boundary layer — see the data file's boundaryGaps. */
+export interface OHJEDDBoundaryGap {
+  jeddId: string;
+  name: string;
+  /** Inferred from the zone's name; scopes a review warning only, never a tax. */
+  countyHints: string[];
+  placeHints: string[];
+  kind: string;
+}
+
 interface OHJEDDRegistryFile {
   year: number;
   taxableWages?: OHLocalTaxableWages;
   zones: OHJEDDEntry[];
+  boundaryGaps?: { zones: OHJEDDBoundaryGap[] };
 }
 
 /** Pre-tax categories that reduce a JEDD/JEDZ income tax base (Chapter 718, via ORC 715.72 / 715.691). */
@@ -620,6 +631,11 @@ export function hasOHJEDDRuleset(checkDate: string): boolean {
 export function ohJEDDRuleset(jeddId: string, checkDate: string): OHJEDDEntry | undefined {
   const file = loadJson<OHJEDDRegistryFile>(join('local', `OH-jedd-jedz-${yearOf(checkDate)}.json`));
   return file.zones.find((z) => z.jeddId === jeddId);
+}
+
+/** Rate rows whose zone can't be found by coordinate (no published polygon). */
+export function ohJEDDBoundaryGaps(checkDate: string): OHJEDDBoundaryGap[] {
+  return loadJson<OHJEDDRegistryFile>(join('local', `OH-jedd-jedz-${yearOf(checkDate)}.json`)).boundaryGaps?.zones ?? [];
 }
 
 /** Every Ohio JEDD/JEDZ on file. */

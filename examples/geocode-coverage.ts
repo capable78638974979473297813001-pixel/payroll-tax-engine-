@@ -1,3 +1,7 @@
+import { readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { geocodeAddress } from '../geocode/census.ts';
 import { resolveRooftop } from '../geocode/rooftop.ts';
 
@@ -21,6 +25,14 @@ import { resolveRooftop } from '../geocode/rooftop.ts';
  * Requires network access, takes a few minutes (the OSM fallback tier is
  * rate-limited to one request per second by Nominatim's usage policy),
  * and is deliberately NOT part of `npm test`.
+ *
+ *   npm run coverage:geocode              # print the measurement
+ *   npm run coverage:geocode -- --write   # also rewrite the measured
+ *                                         # sections of docs/geocoding-coverage.md
+ *
+ * --write replaces only the text between the doc's coverage:summary and
+ * coverage:table markers, stamped with today's date, so the published
+ * numbers are always one run of this script and never hand-edited.
  */
 
 const ADDRESSES: Record<string, string> = {
@@ -157,3 +169,62 @@ console.log(
     `  comment for why that sample answers "does this state's data reach the\n` +
     `  pipeline" and not "how accurate is this nationally".\x1b[0m\n`,
 );
+
+// ---------------------------------------------------------------------
+// --write: regenerate the measured sections of docs/geocoding-coverage.md
+// ---------------------------------------------------------------------
+
+const DOC_TIER: Record<string, string> = {
+  authoritative: 'rooftop',
+  'osm-corroborated': 'rooftop-osm',
+  'authoritative-neighbors': 'neighbor',
+  'parcel-centroid': 'parcel-centroid',
+  none: 'interpolated',
+};
+
+function replaceBetween(doc: string, name: string, body: string): string {
+  const begin = `<!-- coverage:${name}:begin -->`;
+  const end = `<!-- coverage:${name}:end -->`;
+  const i = doc.indexOf(begin);
+  const j = doc.indexOf(end);
+  if (i === -1 || j === -1 || j < i) throw new Error(`docs/geocoding-coverage.md is missing its ${begin} / ${end} markers.`);
+  return doc.slice(0, i + begin.length) + '\n' + body.trim() + '\n' + doc.slice(j);
+}
+
+if (process.argv.includes('--write')) {
+  const docPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'docs', 'geocoding-coverage.md');
+  const today = new Date().toISOString().slice(0, 10);
+  const n = entries.length;
+  const sorted = moved.slice().sort((a, b) => a - b);
+  const summary = [
+    `_Regenerated ${today} by \`npm run coverage:geocode -- --write\`._`,
+    '',
+    `**${better.length} of ${n} jurisdictions resolve to something better than Census's own interpolation**` +
+      (sorted.length ? `, correcting it by ${sorted[0]}m to ${sorted[sorted.length - 1]}m (median ${sorted[Math.floor(sorted.length / 2)]}m).` : '.'),
+    '',
+    '| Tier | Count |',
+    '| --- | --- |',
+    `| \`rooftop\` (authoritative) | ${counts.get('authoritative') ?? 0} / ${n} |`,
+    `| \`rooftop-osm\` (house-level, corroborated) | ${counts.get('osm-corroborated') ?? 0} / ${n} |`,
+    `| \`neighbor\` (block-level, authoritative) | ${counts.get('authoritative-neighbors') ?? 0} / ${n} |`,
+    `| \`parcel-centroid\` (county GIS, gated) | ${counts.get('parcel-centroid') ?? 0} / ${n} |`,
+    `| \`interpolated\` (no improvement available) | ${counts.get('none') ?? 0} / ${n} |`,
+    ...(failed ? [`| Census could not match the sample address | ${failed} / ${n} |`] : []),
+    ...(rows.some((r) => r.tier.startsWith('error')) ? [`| Lookup error during this run | ${rows.filter((r) => r.tier.startsWith('error')).length} / ${n} |`] : []),
+  ].join('\n');
+  const table = [
+    `_Regenerated ${today}._`,
+    '',
+    '| | Tier | Correction | Published by |',
+    '| --- | --- | --- | --- |',
+    ...rows
+      .slice()
+      .sort((a, b) => a.state.localeCompare(b.state))
+      .map((r) => `| ${r.state} | \`${DOC_TIER[r.tier] ?? r.tier}\` | ${r.meters === null ? '—' : `${r.meters}m`} | ${r.source ?? '—'} |`),
+  ].join('\n');
+  let doc = readFileSync(docPath, 'utf8');
+  doc = replaceBetween(doc, 'summary', summary);
+  doc = replaceBetween(doc, 'table', table);
+  writeFileSync(docPath, doc, 'utf8');
+  console.log(`  Wrote the measured sections of ${docPath}.\n`);
+}
