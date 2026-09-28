@@ -1,29 +1,65 @@
 {
- "date": "2026-09-27",
+ "date": "2026-09-28",
  "counts": {
-  "unchanged": 400,
-  "unreachable": 6,
+  "unchanged": 392,
+  "unreachable": 13,
   "blocked": 12,
-  "unstable": 1,
-  "gone": 3,
-  "changed": 1
+  "changed": 3,
+  "gone": 3
  },
  "total": 423,
  "changed": [
   {
-   "id": "sc-f29ced8fb2",
-   "jurisdiction": "SC",
-   "title": "South Carolina withholding",
-   "url": "https://dor.sc.gov/withholding",
+   "id": "az-b66098e04c",
+   "jurisdiction": "AZ",
+   "title": "City of Flagstaff -- City of Flagstaff announces minimum wage for 2026",
+   "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
    "detail": "2 lines added, 2 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
    "links_removed": [],
    "significant": true
+  },
+  {
+   "id": "in-86066aa1c0",
+   "jurisdiction": "IN",
+   "title": "Indiana Departmental Notice #1 (county rates)",
+   "url": "https://www.in.gov/dor/files/dn01.pdf",
+   "detail": "46 lines added, 54 removed",
+   "figures_added": [
+    "0.0171"
+   ],
+   "figures_removed": [
+    "0.017"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "wa-ea2845b8a3",
+   "jurisdiction": "WA",
+   "title": "City of Seattle Office of Labor Standards -- Minimum Wage Ordinance",
+   "url": "https://www.seattle.gov/laborstandards/ordinances/minimum-wage",
+   "detail": "3 lines added, 4 removed; 1 links added, 2 removed",
+   "figures_added": [
+    "$22.14"
+   ],
+   "figures_removed": [
+    "$20.76"
+   ],
+   "links_added": [
+    "https://www.seattle.gov/laborstandards/ordinances/documents/Departments/LaborStandards/QA_MW_26_0928v2_ADA.pdf"
+   ],
+   "links_removed": [
+    "https://www.seattle.gov/laborstandards/ordinances/documents/Departments/LaborStandards/2025_OLS_MW_MultiyearChart_FINAL_ADA.pdf",
+    "https://www.seattle.gov/laborstandards/ordinances/documents/Departments/LaborStandards/QA_MW_25_0930_ADA.pdf"
+   ],
+   "significant": true
   }
  ],
- "significant_changes": 1,
+ "significant_changes": 3,
  "broken": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
