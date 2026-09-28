@@ -14,7 +14,6 @@ import { CALL_TIERS, ROOFTOP_RATE, TRIAL_DAYS, estimate as computePricing, costF
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
 import { isEmailConfigured, sendVerificationEmail } from './lib/mail.ts';
 import { validatePaycheckInput } from './lib/validate.ts';
-import { RateLimiter } from './lib/ratelimit.ts';
 import { keyLifeFor } from './lib/keylife.ts';
 import {
   billingConfigured, meteringConfigured, enqueueMeterEvent, flushMeterQueue,
@@ -69,11 +68,10 @@ const QUOTE_TTL_MS = 60 * 60_000;
 /** Never-verified signups older than this are pruned, so junk signups can't pile up. */
 const UNVERIFIED_RETENTION_MS = 7 * 24 * 60 * 60_000;
 
-// Per-key rate limiter for the metered calculation endpoint. In process
-// memory on purpose: it is hit on every billable call, and a store write
-// per call would be the bottleneck. That makes it per instance -- run a
-// single instance, or front several with a shared limiter (GO-LIVE.md).
-const paycheckLimiter = new RateLimiter();
+// The per-key limit on POST /api/paycheck (paycheckLimiterLimit() a
+// minute) is kept in the store like every other limit here, so it holds
+// across restarts and across instances sharing the volume -- N instances
+// no longer allow N times the rate.
 
 // Wrong-code attempts per issued code; past this the code is burned and
 // the customer asks for a new one, so a 6-digit code can't be guessed.
@@ -1301,8 +1299,8 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
     return;
   }
 
-  // --- rate limit (per key) --------------------------------------------
-  const rl = paycheckLimiter.hit(keyHash);
+  // --- rate limit (per key, stored: shared by instances, kept across restarts)
+  const rl = withDb((db) => hitStoredLimit(db, 'paycheck:' + keyHash, paycheckLimiterLimit(), 60_000));
   const rlHeaders = {
     ...baseHeaders,
     'RateLimit-Limit': String(rl.limit),

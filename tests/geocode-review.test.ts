@@ -83,9 +83,17 @@ describe('ohioJeddDecision', () => {
     assert.match(d.reasons[0], /no rate on file/);
   });
 
+  test('the live polygons with no rate row (2026-09-28 diff) are flagged, never taxed at zero', () => {
+    for (const id of ['9022', '9069', '9098', '9123', '9142', '9143', '9155']) {
+      const d = ohioJeddDecision({ ...base, found: { attempted: true, jedd: { name: `ZONE ${id}`, jeddId: id, active: true } } });
+      assert.equal(d.workJEDDId, null, id);
+      assert.match(d.reasons[0], /no rate on file/, id);
+    }
+  });
+
   test('no polygon, but inside a hinted county/place of a boundary-gap zone: flagged for review', () => {
     const gaps = ohJEDDBoundaryGaps(CHECK_DATE);
-    assert.equal(gaps.length, 12);
+    assert.equal(gaps.length, 15);
     const d = ohioJeddDecision({
       ...base, counties: ['Cuyahoga County'], places: ['Cleveland city'],
       found: { attempted: true, jedd: null, candidates: [], ambiguous: false },

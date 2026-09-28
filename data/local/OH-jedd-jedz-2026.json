@@ -1089,7 +1089,7 @@
     }
   ],
   "boundaryGaps": {
-    "$comment": "Rate rows with NO polygon in Ohio's live boundary layer (the 2026-08-31 diff recorded in knownGaps). An address inside one of these cannot be detected by coordinate, so geocode/index.ts raises a manual-review warning -- never a tax -- for an Ohio WORK address that found no JEDD, sits in one of the hinted counties, and is either unincorporated or in one of the hinted places. The county/place hints are INFERRED FROM EACH ZONE'S NAME (not from a surveyed boundary) and exist only to scope that warning; they must never be used to apply a rate.",
+    "$comment": "Rate rows with NO polygon in Ohio's live boundary layer (re-diffed 2026-09-28 against all 141 live features; see knownGaps). An address inside one of these cannot be detected by coordinate, so geocode/index.ts raises a manual-review warning -- never a tax -- for an Ohio WORK address that found no JEDD, sits in one of the hinted counties, and is either unincorporated or in one of the hinted places. The county/place hints are INFERRED FROM EACH ZONE'S NAME (not from a surveyed boundary) and exist only to scope that warning; they must never be used to apply a rate.",
     "zones": [
       {
         "jeddId": "9156",
@@ -1227,6 +1227,42 @@
           "Girard"
         ],
         "kind": "jedz"
+      },
+      {
+        "jeddId": "9158",
+        "name": "Jersey-New Albany Jedd 1",
+        "countyHints": [
+          "Licking",
+          "Franklin"
+        ],
+        "placeHints": [
+          "New Albany"
+        ],
+        "kind": "jedd"
+      },
+      {
+        "jeddId": "9159",
+        "name": "Jersey-New Albany Jedd 2",
+        "countyHints": [
+          "Licking",
+          "Franklin"
+        ],
+        "placeHints": [
+          "New Albany"
+        ],
+        "kind": "jedd"
+      },
+      {
+        "jeddId": "9160",
+        "name": "Jersey-New Albany Jedd 3",
+        "countyHints": [
+          "Licking",
+          "Franklin"
+        ],
+        "placeHints": [
+          "New Albany"
+        ],
+        "kind": "jedd"
       }
     ]
   },
@@ -1235,6 +1271,7 @@
     "Zone boundaries are resolved live rather than shipped in this file: geocode/districts.ts queries Ohio's own statewide JEDD/JEDZ boundary layer (maps.ohio.gov/arcgis/rest/services/Tax/JEDDJEDZ) at the resolved coordinate and joins to this file on jeddId. So an address inside a zone IS resolvable now, but only while that service is reachable — a failed lookup reports itself as unknown rather than as 'no JEDD here'.",
     "CORRECTED 2026-08-31 (this note previously undercounted the mismatch): live-queried Ohio's own ArcGIS layer directly (maps.ohio.gov/arcgis/rest/services/Tax/JEDDJEDZ/MapServer/0/query, all 142 features, all active=Y) and diffed by jeddId against this file's rate rows (149 distinct jeddIds as of this writing; the note originally said 146). 12 rate rows have no matching boundary id, not 4: jeddId 9156 (Amherst Township-City Of Loriain JEDD), 9070 (Butler County Annex), 9071 (Emerald Park), 9072 (Gateway), 9082 (Hamilton Fairfield Township JEDD III), 9032 (Orange Chagrin Highlands JEDD), 9157 (Perry Township-Navarre JEDD), 9074 (Shaker Square), 9136 (Turtlecreek Monroe 2022 JEDD), 9102 (Village Of Highland Hills Muni Utility District), 9061 (Warrensville Heights JEDZ), 9062 (Youngstown Girard JEDZ). Fuzzy name matching turned up plausible-but-unconfirmed near misses for a few of these (e.g. our 'Hamilton Fairfield Township JEDD III' vs. the layer's 'HAMILTON FAIRFIELD TOWNSHIP JEDD II', different id 9019) — deliberately NOT auto-merged into the join, since guessing a jeddId correspondence from a fuzzy name match is exactly the kind of unverified guess this project's data is supposed to never contain. An address inside any of these 12 zones cannot be detected by coordinate; nothing here silently guesses which.",
     "2026-09-28: the gap runs both ways. 149 rate rows vs 142 live polygons, with 12 rate rows unmatched, means some polygons carry a jedd_id with NO rate row here. geocode/index.ts now reports that case as low-confidence ('JEDD found at this point but no rate on file') instead of setting workJEDDId and silently computing no tax; see boundaryGaps above for the rate-rows-without-polygons side. Re-run the diff when maps.ohio.gov is reachable to name those polygons.",
+    "RE-DIFFED 2026-09-28 against Ohio's live layer (maps.ohio.gov .../Tax/JEDDJEDZ/MapServer/0/query, where=1=1, fetched via a remote fetcher because this repo's CI/sandbox egress blocks maps.ohio.gov): 141 features, all active=Y. Rate rows with no polygon: 15 -- the 12 listed above PLUS Jersey-New Albany JEDD 1/2/3 (9158-9160, added to the rate table 2026-09-01, effective 2026-05-01, not yet drawn in the state layer). All 15 are in boundaryGaps. Polygons with no rate row: 7 -- 9022 LIBERTY TOWNSHIP-LIBERTY CENTER JEDD, 9069 SYLVANIA-TOLEDO JEDZ, 9098 GREEN TOWNSHIP-CITY OF CHEVIOT JEDD 3, 9123 Jefferson Township Whitehall JEDD, 9142/9143 APPLE CREEK EAST UNION TWP JEDD 1/2, 9155 WARREN - CHAMPION JEDD. An address inside one of these resolves to that zone id but has no rate here; geocode/index.ts reports it as low-confidence ('no rate on file') and sets no workJEDDId, rather than silently computing no tax. Their rates must come from The Finder's JEDD rate table before they can be computed.",
     "FOLLOW-UP SEARCH 2026-09-03, real finding but NOT a boundary fix: chased each of the 12 across ArcGIS Online's own global item-search API (arcgis.com/sharing/rest/search — a genuine catalog search, not a guessed county-server URL), Cuyahoga County's on-prem ArcGIS server folder listing (gis.cuyahogacounty.us — CCPC/CCGIS/CCDPW/etc. all empty of anything JEDD-related), and targeted web searches per zone. No usable boundary polygon surfaced for any of the 12. But three of them -- Emerald Park (9071), Gateway (9072), and Shaker Square (9074) -- turned out to share a real, specific explanation for their absence, not just bad luck: all three are CITY OF CLEVELAND 'revenue sharing areas,' a Cleveland-specific municipal economic-development mechanism (confirmed via Symmetry's own professional payroll-tax reference, which independently corroborates Ohio Finder's own naming and groups these three with a fourth, 'IX Center,' as Cleveland-administered, not township-JEDD-administered) -- categorically different from the ORC 715.70-72 JEDD/JEDZ contracts the state's own boundary layer tracks, which is the actual reason they were never going to be in that layer no matter how thoroughly it's searched. Their real boundary, if published anywhere, would be held by the City of Cleveland's own economic development office, not by Cuyahoga County or the state -- not chased further this pass. Also newly confirmed: Warrensville Heights (9061) and Highland Hills (9102, despite its rate-table name reading 'Muni Utility District') are NOT simple city-limits proxies -- both cities already appear as their own regular taxing municipalities in OH-municipalities-2026.json, so their JEDD/JEDZ entries here must be a narrower zone covering adjoining unincorporated land, the same JEDD structure as everywhere else -- confirming there's no shortcut through Census place-matching for either. Net effect: the 12-zone gap stands, now with a real explanation for a quarter of it rather than just an unexplained absence.",
     "The zone rate is applied to WORK-location wages only (see ohioJEDDTax()). A JEDD levies on income earned inside the district; there is no residence half, since the zones cover commercial development on township land rather than housing.",
     "OPEN QUESTION RESOLVED 2026-09-02 (the underlying legal shape is now known; the computed default is unchanged, for a reason explained below): does a resident of a taxing Ohio municipality who WORKS inside a JEDD/JEDZ get a credit against their home city's tax, the same way they would working in another municipality? Confirmed via WebSearch surfacing three INDEPENDENT Ohio municipalities' own codified ordinances (American Legal Publishing's amlegal.com code library; codes.ohio.gov itself remains client-side-rendered and unfetchable by a plain request, so this rests on the municipal code host rather than the state's own site): Urbana OH Sec. 171.083 'Credit For Person Working In JEDZ Or JEDD,' Mansfield OH Sec. 193.083, and Wauseon OH Sec. 191.083, all near-identically titled and worded (a shared model-ordinance pattern, not independent drafting) -- Urbana's own text (WebSearch snippet, not independently re-fetched in full: amlegal.com returned HTTP 403 to a direct WebFetch) grants a credit 'to any resident of the City who works in a joint economic development zone (JEDZ) or a joint economic development district (JEDD)... to the same extent that it grants a credit against its tax on income to its residents who are employed in another municipal corporation,' citing ORC 715.691/715.70/715.71/715.72 by number; Mansfield's own wording uses 'shall grant' rather than Urbana's 'may,' a real difference in whether the city's own adoption is itself framed as discretionary. This settles the structural question ORC 718.121's text alone couldn't: THIS IS A CITY-BY-CITY MUNICIPAL ORDINANCE CHOICE, not a statewide ORC mandate the way the regular inter-municipal credit is -- ORC 715.70-715.72 authorizes JEDDs but does not itself require this credit; each contracting municipality separately chooses (and evidently many do, via what looks like a shared model-ordinance template, though 'many' is not 'all 679'). Given that, the engine's CURRENT no-credit-applied default is the correct SAFE FLOOR under this project's own established convention (see OH-2026.json's interMunicipalCredit.practicalImplication: 'not confirmed... whether any of the 679 municipalities actually do grant more than the ORC 718.121 floor; treat the floor as the safe-default assumption') -- applying a credit unconditionally would risk UNDER-charging a resident of the unknown number of JEDD-hosting cities that have NOT adopted this optional ordinance, which is worse than the current, disclosed, occasionally-too-high default. NOT wired as an engine feature this pass: doing so correctly would need a per-municipality flag (which of the ~150 JEDD-adjacent cities actually adopted this ordinance), the same 'not individually verified per city' shape as the base credit's own unresolved practicalImplication, not a blanket switch."

@@ -116,14 +116,15 @@ value marks the console's session cookie `Secure`.
 
 Start it: `npm run site` (keep it running under a process manager / systemd).
 
-**Run one instance.** The store in `SITE_DB_DIR` is a JSON file: every write
-is atomic and taken under a lock file, so a second process on the same volume
-can't overwrite the first's changes — but each write rewrites the whole file,
-which caps throughput, and the per-key `RATE_LIMIT_PER_MIN` limiter is kept in
-process memory (so N instances allow N× the rate, and a restart resets it).
-Signup/sign-in limits and wrong-code counts are kept in the store and don't
-have this problem. Scaling past one instance means moving the store to a
-database and the paycheck limiter to a shared store (e.g. Redis).
+**Instances and the store.** The store in `SITE_DB_DIR` is a JSON file: every
+write is atomic and taken under a lock file, so several processes sharing the
+volume can't overwrite each other's changes. Every rate limit — per-key
+`RATE_LIMIT_PER_MIN` on `/api/paycheck`, signup and sign-in per address, and
+wrong-code counts — is kept in that store too, so limits survive restarts and
+N instances share one budget rather than allowing N× the rate. The cost is
+throughput: each write rewrites the whole file (a paycheck call makes two), so
+this is pilot scale. Past that, move the store to a database; the
+`withDb`/`readDb` seam in `site/lib/store.ts` is the only thing that changes.
 
 If the store file is ever corrupted (a disk fault, a manual edit), the server
 refuses to use it: account and API requests return 500, `GET /api/health`

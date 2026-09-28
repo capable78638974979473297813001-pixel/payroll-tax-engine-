@@ -320,8 +320,9 @@ export function appendUsage(db: DB, event: UsageEvent): void {
 /**
  * A fixed-window rate limit kept in the store instead of process memory,
  * so it survives restarts and is shared by every instance on the same
- * volume. Costs a store write per hit, so it is for the low-volume,
- * abuse-sensitive routes (signup, sign-in), not per-call metering.
+ * volume. Costs a store write per hit (for /api/paycheck that is one extra
+ * write alongside the one that records the call -- pilot-scale, like the
+ * rest of this store).
  */
 export function hitStoredLimit(
   db: DB,
@@ -329,7 +330,7 @@ export function hitStoredLimit(
   limit: number,
   windowMs: number,
   now: number = Date.now(),
-): { allowed: boolean; retryAfterSec: number } {
+): { allowed: boolean; retryAfterSec: number; limit: number; remaining: number; resetAt: number } {
   // Sweep elapsed windows so the map can't grow without bound.
   for (const [k, w] of Object.entries(db.rateLimits)) {
     if (now - w.start >= w.windowMs) delete db.rateLimits[k];
@@ -340,7 +341,8 @@ export function hitStoredLimit(
     db.rateLimits[key] = w;
   }
   const retryAfterSec = Math.max(1, Math.ceil((w.start + windowMs - now) / 1000));
-  if (w.count >= limit) return { allowed: false, retryAfterSec };
+  const resetAt = Math.ceil((w.start + windowMs) / 1000);
+  if (w.count >= limit) return { allowed: false, retryAfterSec, limit, remaining: 0, resetAt };
   w.count += 1;
-  return { allowed: true, retryAfterSec };
+  return { allowed: true, retryAfterSec, limit, remaining: Math.max(0, limit - w.count), resetAt };
 }
