@@ -188,3 +188,63 @@ describe('Stripe billing (api/billing.ts)', () => {
     assert.equal(usageForKey(id)!.balanceDueCents, 7); // NOT settled
   });
 });
+
+describe('Stripe metering durability and cancellation (api/billing.ts)', () => {
+  test('a failed meter report stays queued and is delivered on a later flush', async () => {
+    const { flushMeterQueue } = await import('../api/billing.ts');
+    const { pendingMeterEvents } = await import('../api/keys.ts');
+    process.env.STRIPE_SECRET_KEY = 'sk_test_fake';
+    process.env.STRIPE_PRICE_ID = 'price_meter';
+    process.env.STRIPE_METER_EVENT = 'payroll_api_call';
+    try {
+      const { key } = mintApiKey('Queue Co');
+      const id = verifyApiKey(key)!.id;
+      setStripeCustomer(id, 'cus_queue');
+      let fail = true;
+      const seen: Array<Record<string, string>> = [];
+      stub('POST', /\/v1\/billing\/meter_events$/, (body) => {
+        seen.push(Object.fromEntries(new URLSearchParams(body)));
+        return fail ? { ok: false, json: { error: { message: 'down' } } } : { json: {} };
+      });
+
+      // The call is recorded and its meter event queued in the same write.
+      recordUsage(id, { statusCode: 200, billable: false, meterUnits: 1 });
+      let r = await flushMeterQueue();
+      assert.equal(r.failed, 1);
+      const queued = pendingMeterEvents().filter((q) => q.keyId === id);
+      assert.equal(queued.length, 1);
+      assert.equal(queued[0].attempts, 1);
+
+      // Stripe recovers: a forced flush delivers with the same identifier.
+      fail = false;
+      r = await flushMeterQueue({ force: true });
+      assert.equal(r.delivered, 1);
+      assert.equal(pendingMeterEvents().filter((q) => q.keyId === id).length, 0);
+      assert.equal(seen[0].identifier, seen[1].identifier);
+      assert.equal(seen[0].timestamp, seen[1].timestamp);
+    } finally {
+      delete process.env.STRIPE_PRICE_ID;
+      delete process.env.STRIPE_METER_EVENT;
+    }
+  });
+
+  test('a cancelled subscription is not reactivated by a later paid invoice', () => {
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test';
+    try {
+      const { key } = mintApiKey('Cancel Co');
+      const id = verifyApiKey(key)!.id;
+      setStripeCustomer(id, 'cus_cancel');
+      const sign = (body: string) => {
+        const t = Math.floor(Date.now() / 1000);
+        return `t=${t},v1=${createHmac('sha256', 'whsec_test').update(`${t}.${body}`).digest('hex')}`;
+      };
+      const del = JSON.stringify({ type: 'customer.subscription.deleted', data: { object: { customer: 'cus_cancel' } } });
+      assert.equal(handleStripeWebhook(del, sign(del)).action, 'cancelled');
+      const paid = JSON.stringify({ type: 'invoice.paid', data: { object: { customer: 'cus_cancel' } } });
+      assert.equal(handleStripeWebhook(paid, sign(paid)).action, 'ignored_cancelled');
+      assert.equal(getApiKey(id)!.suspended, true);
+    } finally {
+      delete process.env.STRIPE_WEBHOOK_SECRET;
+    }
+  });
+});

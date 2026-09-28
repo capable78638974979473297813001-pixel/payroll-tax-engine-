@@ -469,6 +469,16 @@
     set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
     del: function (k) { try { localStorage.removeItem(k); } catch (e) {} },
   };
+  // API keys are secrets: kept for this tab only (sessionStorage), never in
+  // long-lived localStorage where any script on the origin could read them
+  // for as long as the browser keeps the profile.
+  var secrets = {
+    get: function (k) { try { return JSON.parse(sessionStorage.getItem(k) || 'null'); } catch (e) { return null; } },
+    set: function (k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+    del: function (k) { try { sessionStorage.removeItem(k); } catch (e) {} },
+  };
+  // Clear keys an older build left in localStorage.
+  store.del(LS.own); store.del(LS.account); store.del('omnia_session');
   lang = store.get(LS.lang) || 'curl';
 
   // ------------------------------------------------------------------
@@ -548,9 +558,9 @@
   function modeOf(key) { return key.indexOf('sk_live_') === 0 ? 'live' : 'test'; }
 
   function loadKey() {
-    var own = store.get(LS.own);
+    var own = secrets.get(LS.own);
     if (own && own.key) { setKey(own); return own; }
-    var acct = store.get(LS.account);
+    var acct = secrets.get(LS.account);
     if (typeof acct === 'string' && acct.indexOf('sk_') === 0) {
       var k = { key: acct, mode: modeOf(acct), source: 'account' };
       setKey(k); return k;
@@ -1008,12 +1018,12 @@
     if (open) refreshKeyMeta();
   };
   $('kmCopy').onclick = function () { if (apiKey) copy(apiKey.key, 'Key copied'); };
-  $('kmForget').onclick = function () { store.del(LS.own); loadKey(); closeMenu(); toast('Key removed from this browser'); };
+  $('kmForget').onclick = function () { secrets.del(LS.own); loadKey(); closeMenu(); toast('Key removed from this browser'); };
   $('kmUse').onclick = function () {
     var v = $('kmOwn').value.trim();
     if (!/^sk_(test|live)_[A-Za-z0-9_-]{8,}$/.test(v)) { toast('That doesn\'t look like an Omnia key'); return; }
     var k = { key: v, mode: modeOf(v), source: 'own' };
-    store.set(LS.own, k); setKey(k); $('kmOwn').value = ''; toast('Using your key');
+    secrets.set(LS.own, k); setKey(k); $('kmOwn').value = ''; toast('Using your key');
   };
 
   $('sendKbd').textContent = isMac ? '⌘↵' : 'Ctrl↵';

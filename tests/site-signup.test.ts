@@ -106,11 +106,21 @@ describe('signup: a key needs a card or bank account on file', () => {
   });
 
   test('terms are signed, and the trial still cannot start without a payment method', async () => {
+    const terms = await (await fetch(`${BASE}/api/terms?employees=200&payFrequency=biweekly&rooftop=false`, {
+      headers: { Authorization: `Bearer ${session}` },
+    })).json();
+    assert.match(terms.quoteId, /^tq_/);
     const t = await post('/api/accept-terms', {
       agreed: true, signedName: 'Jordan Casey', legalName: 'Acme Payroll LLC', billingEmail: EMAIL,
-      address: '120 Main St, Columbus OH 43215', expectedEmployees: 200, payFrequency: 'biweekly',
+      address: '120 Main St, Columbus OH 43215', quoteId: terms.quoteId,
+      expectedEmployees: 200, payFrequency: 'biweekly',
     }, session);
     assert.equal(t.status, 200);
+    // The stored evidence is the server's quote, bound by id and clause hash.
+    const acceptance = db().acceptances.at(-1);
+    assert.equal(acceptance.quoteId, terms.quoteId);
+    assert.match(acceptance.clausesSha256, /^[0-9a-f]{64}$/);
+    assert.equal(acceptance.disclosed.estimatedAnnual, terms.estimate.total);
     const s = await post('/api/start-trial', {}, session);
     assert.equal(s.status, 402);
     assert.equal((await post('/api/issue-key', {}, session)).status, 402);

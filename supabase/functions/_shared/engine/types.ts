@@ -238,6 +238,12 @@ export interface StateCertificate {
   locality?: string;
   /** County name — Indiana's mandatory county tax, Maryland's county piggyback tax, Kentucky's county-role occupational tax. */
   county?: string;
+  /**
+   * Arkansas AR4EC Line 5: the employee elected the low-income withholding
+   * tables. NOT modelled — the standard formula is used (which withholds
+   * at least as much) and the result carries a notice saying so.
+   */
+  lowIncomeElection?: boolean;
   /** Kentucky's WORK-address county role specifically (city-vs-county credit); never a residence concept. */
   workCounty?: string;
   /** City name — Michigan/Ohio/Alabama/Kentucky city-level local income tax, work role. */
@@ -654,6 +660,32 @@ export interface TaxLine {
   amount: Cents;
   /** Human-readable trace of how the number was reached. */
   detail?: string;
+  /**
+   * Set when this line rests on something weaker than a confirmed primary
+   * source, or on a certificate choice the engine doesn't model. Absent on
+   * the (normal) primary-source-confirmed line. Every marked line is also
+   * listed in PaycheckResult.notices.
+   */
+  dataQuality?: DataQuality;
+}
+
+export interface DataQuality {
+  /**
+   * secondary_source: rate from an aggregator/survey, not the levying
+   *   body's own ordinance or form.
+   * inferred: rate inferred from a pattern, not read from any source for
+   *   this jurisdiction.
+   * not_modelled: the employee's certificate asks for a method the engine
+   *   doesn't implement; the standard method was used instead.
+   */
+  tier: 'secondary_source' | 'inferred' | 'not_modelled';
+  note: string;
+}
+
+/** A PaycheckResult-level warning a payroll operator should read before paying. */
+export interface DataNotice extends DataQuality {
+  /** The TaxLine id this notice is about. */
+  taxId: string;
 }
 
 export interface PaycheckResult {
@@ -668,6 +700,13 @@ export interface PaycheckResult {
   employeeTaxTotal: Cents;
   employerTaxTotal: Cents;
   netPay: Cents;
+  /**
+   * Data-quality warnings for this paycheck (one per marked TaxLine).
+   * Present only when there is at least one: a calculation touching a
+   * lower-confidence rate or an unmodelled election still returns a
+   * number, but says so here rather than only in the data files.
+   */
+  notices?: DataNotice[];
 }
 
 /**

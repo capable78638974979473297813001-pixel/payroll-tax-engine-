@@ -46,6 +46,14 @@ export interface ValidateOptions {
    * message instead of surfacing as an engine throw.
    */
   validStateCodes?: Set<string>;
+  /**
+   * Tax years this build has rulesets for. When supplied, a checkDate in
+   * any other year is rejected up front with the supported years named,
+   * instead of reaching the engine and failing as a calculation error.
+   * Withholding is decided by the check date's year, so a correction or
+   * retroactive run for an earlier year needs that year's ruleset.
+   */
+  supportedYears?: number[];
 }
 
 function isObject(v: unknown): v is Record<string, unknown> {
@@ -83,6 +91,12 @@ export function validatePaycheckInput(raw: unknown, opts: ValidateOptions = {}):
     const d = new Date(body.checkDate + 'T00:00:00Z');
     if (Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== body.checkDate) {
       err('checkDate', `is not a real calendar date: "${body.checkDate}".`);
+    } else if (opts.supportedYears && !opts.supportedYears.includes(d.getUTCFullYear())) {
+      err(
+        'checkDate',
+        `falls in tax year ${d.getUTCFullYear()}, but this build only has rulesets for ${opts.supportedYears.join(', ')}. ` +
+          'Checks dated in other years (including corrections and retroactive pay for earlier years) cannot be calculated yet.',
+      );
     }
   }
 

@@ -1,10 +1,13 @@
-import { getApiKey, setCardOnFile, setStripeCustomer, setSubscription, setSuspendedByCustomer, settleBalance } from './keys.ts';
+import {
+  cancelByCustomer, enqueueMeterEvent, getApiKey, pendingMeterEvents, setCardOnFile, setStripeCustomer,
+  setSubscription, setSuspendedByCustomer, settleBalance, settleMeterEvent,
+} from './keys.ts';
+import { deliverMeterEvent, isDue } from './meter-queue.ts';
 import {
   chargeOffSession,
   createCustomer,
   createSetupCheckoutSession,
   createSubscriptionCheckoutSession,
-  reportMeterEvent,
   retrieveCheckoutSession,
   retrievePaymentMethod,
   retrieveSubscription,
@@ -139,38 +142,68 @@ export function handleStripeWebhook(rawBody: string, signatureHeader: string): {
     case 'invoice.payment_failed':
       return { ok: true, action: 'suspended', keyId: setSuspendedByCustomer(customer, true, 'Your latest invoice could not be charged. Update your card to resume.') };
     case 'customer.subscription.deleted':
-      return { ok: true, action: 'suspended', keyId: setSuspendedByCustomer(customer, true, 'Billing subscription canceled.') };
+      return { ok: true, action: 'cancelled', keyId: cancelByCustomer(customer, 'Billing subscription canceled.') };
     case 'invoice.paid':
-    case 'invoice.payment_succeeded':
-      return { ok: true, action: 'reactivated', keyId: setSuspendedByCustomer(customer, false, null) };
+    case 'invoice.payment_succeeded': {
+      // Settles a failed invoice. Does NOT revive a cancelled subscription.
+      const keyId = setSuspendedByCustomer(customer, false, null);
+      const k = keyId ? getApiKey(keyId) : null;
+      return { ok: true, action: k?.billingCancelledAt ? 'ignored_cancelled' : 'reactivated', keyId };
+    }
     default:
       return { ok: true, action: 'ignored', reason: event.type };
   }
 }
 
 /**
- * Report one API call to Stripe's usage meter — the per-call charge. Safe to
- * call on every request: it's a no-op unless metering is configured and the
- * key has a Stripe customer. Never throws; a metering hiccup must not fail the
- * customer's calculate call (the local ledger still counted it).
+ * Report API calls to Stripe's usage meter — the per-call charge. Queues
+ * the event durably (api/keys.ts meterQueue) and then delivers the queue,
+ * so a Stripe hiccup delays the charge instead of losing it. Never throws;
+ * a metering failure must not fail the customer's calculate call.
+ *
+ * The server prefers recordUsage(..., { meterUnits }) (queues in the same
+ * write as the call) followed by flushMeterQueue(); this is the one-step
+ * form for callers that meter separately.
  */
-export async function reportCall(keyId: string, units = 1): Promise<{ ok: boolean; reason?: string }> {
+export async function reportCall(keyId: string, units = 1): Promise<{ ok: boolean; reason?: string; queued?: boolean }> {
   if (!meteringConfigured()) return { ok: false, reason: 'metering_not_configured' };
-  const key = getApiKey(keyId);
-  if (!key?.stripeCustomerId) return { ok: false, reason: 'no_customer' };
-  const count = Math.max(1, Math.floor(units));
-  try {
-    await reportMeterEvent({
-      eventName: process.env.STRIPE_METER_EVENT!,
-      customerId: key.stripeCustomerId,
-      value: count,
-      // Dedupe: at most one event per key per millisecond even if a retry double-fires.
-      identifier: `${key.id}-${Date.now()}-${count}`,
-    });
-    return { ok: true };
-  } catch (err) {
-    return { ok: false, reason: err instanceof Error ? err.message : 'meter_failed' };
+  const item = enqueueMeterEvent(keyId, Math.max(1, Math.floor(units)));
+  if (!item) return { ok: false, reason: 'no_customer' };
+  const out = await flushMeterQueue({ only: item.identifier });
+  return out.delivered > 0 ? { ok: true } : { ok: false, reason: 'queued_for_retry', queued: true };
+}
+
+let flushing: Promise<{ delivered: number; failed: number; dead: number; pending: number }> | null = null;
+
+/**
+ * Deliver every queued meter event that is due (backoff applies to ones
+ * that failed before). Safe to call often and concurrently: overlapping
+ * calls share one run. Returns counts for logging and the operator script.
+ */
+export function flushMeterQueue(opts: { only?: string; force?: boolean } = {}): Promise<{ delivered: number; failed: number; dead: number; pending: number }> {
+  if (!meteringConfigured()) return Promise.resolve({ delivered: 0, failed: 0, dead: 0, pending: pendingMeterEvents().length });
+  if (flushing && !opts.only) return flushing;
+  const run = (async () => {
+    const eventName = process.env.STRIPE_METER_EVENT!;
+    let delivered = 0, failed = 0, dead = 0;
+    const now = Date.now();
+    for (const item of pendingMeterEvents()) {
+      if (opts.only && item.identifier !== opts.only) continue;
+      if (!opts.only && !opts.force && !isDue(item, now)) continue;
+      if (item.deadAt) continue;
+      const out = await deliverMeterEvent(item, eventName, now);
+      settleMeterEvent(item.identifier, out);
+      if (out.delivered) delivered += 1;
+      else if (out.dead) dead += 1;
+      else failed += 1;
+    }
+    return { delivered, failed, dead, pending: pendingMeterEvents().length };
+  })();
+  if (!opts.only) {
+    flushing = run;
+    void run.finally(() => { flushing = null; });
   }
+  return run;
 }
 
 export interface ChargeResult {

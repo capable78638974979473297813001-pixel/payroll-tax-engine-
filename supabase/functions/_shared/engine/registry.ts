@@ -328,6 +328,8 @@ export interface KYJurisdictionEntry {
   wageRateNonresidentDecimal: number | null;
   /** KRS 68.197(10)(c)'s SS-wage-base-cap variant — Walton and Florence are the two confirmed real-world users. When true, this jurisdiction's taxable base stops accruing once YTD wages reach the federal Social Security wage base, the same cap FICA itself uses. */
   capAtSSWageBase: boolean;
+  /** How the wage rate was established (the data file's wageRateStatus), e.g. 'inferred_small_city_single_rate_pattern'. Absent for the consolidated governments. */
+  wageRateStatus?: string;
 }
 
 interface KYOccupationalRegistryFile {
@@ -340,6 +342,7 @@ interface KYOccupationalRegistryFile {
         wageRateResidentDecimal?: number | null;
         wageRateNonresidentDecimal?: number | null;
         capAtSSWageBase?: boolean;
+        wageRateStatus?: string;
       }
     >;
     louisvilleMetro: { residentRate: number; nonresidentRate: number };
@@ -386,6 +389,7 @@ export function allKYJurisdictions(checkDate: string): KYJurisdictionEntry[] {
       wageRateResidentDecimal: hasSplit ? (raw.wageRateResidentDecimal as number) : null,
       wageRateNonresidentDecimal: hasSplit ? (raw.wageRateNonresidentDecimal as number) : null,
       capAtSSWageBase: raw.capAtSSWageBase ?? false,
+      ...(raw.wageRateStatus ? { wageRateStatus: raw.wageRateStatus } : {}),
     });
   }
 
@@ -592,10 +596,21 @@ export interface OHJEDDEntry {
   effectiveFrom: string;
 }
 
+/** A JEDD/JEDZ rate row with no polygon in Ohio's boundary layer — see the data file's boundaryGaps. */
+export interface OHJEDDBoundaryGap {
+  jeddId: string;
+  name: string;
+  /** Inferred from the zone's name; scopes a review warning only, never a tax. */
+  countyHints: string[];
+  placeHints: string[];
+  kind: string;
+}
+
 interface OHJEDDRegistryFile {
   year: number;
   taxableWages?: OHLocalTaxableWages;
   zones: OHJEDDEntry[];
+  boundaryGaps?: { zones: OHJEDDBoundaryGap[] };
 }
 
 /** Pre-tax categories that reduce a JEDD/JEDZ income tax base (Chapter 718, via ORC 715.72 / 715.691). */
@@ -620,6 +635,11 @@ export function hasOHJEDDRuleset(checkDate: string): boolean {
 export function ohJEDDRuleset(jeddId: string, checkDate: string): OHJEDDEntry | undefined {
   const file = loadJson<OHJEDDRegistryFile>(join('local', `OH-jedd-jedz-${yearOf(checkDate)}.json`));
   return file.zones.find((z) => z.jeddId === jeddId);
+}
+
+/** Rate rows whose zone can't be found by coordinate (no published polygon). */
+export function ohJEDDBoundaryGaps(checkDate: string): OHJEDDBoundaryGap[] {
+  return loadJson<OHJEDDRegistryFile>(join('local', `OH-jedd-jedz-${yearOf(checkDate)}.json`)).boundaryGaps?.zones ?? [];
 }
 
 /** Every Ohio JEDD/JEDZ on file. */

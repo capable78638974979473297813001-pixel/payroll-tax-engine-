@@ -243,6 +243,24 @@ class WatcherTest(ServerTestCase):
             summary = self.run_watch(day)
         self.assertEqual(summary["broken"], [self.base + "/missing"])
 
+    def test_report_states_coverage_and_never_read_sources(self):
+        self.site.set_page("/wh", page())
+        self.sources("/wh", "/missing")
+        summary = self.run_watch("2026-09-01")
+        # The run "succeeds", but the summary says one source was never read.
+        self.assertEqual(summary["verified"], 1)
+        self.assertEqual(summary["unverified"], 1)
+        self.assertEqual(summary["never_baselined"], [self.base + "/missing"])
+        report = (watch.REPORT_DIR / "latest.md").read_text()
+        self.assertIn("Coverage: 1 of 2 sources were read this run", report)
+        self.assertIn("Never read successfully", report)
+        # A source with a baseline that fails later is unverified, not never-read.
+        self.site.set_page("/wh", "oops", status=500, ctype="text/plain")
+        summary = self.run_watch("2026-09-02")
+        self.assertEqual(summary["unverified"], 2)
+        self.assertEqual(summary["never_baselined"], [self.base + "/missing"])
+        self.assertEqual(summary["max_consecutive_failures"], 2)
+
     def test_redirect_to_bot_check_or_home_page(self):
         self.site.set_page("/", page())
         self.site.set_page("/unblock?from=law", page())

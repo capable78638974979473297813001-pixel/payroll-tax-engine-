@@ -186,6 +186,8 @@ export function reportMeterEvent(input: {
   customerId: string;
   value?: number;
   identifier?: string;
+  /** When the usage happened (Unix seconds). A retried event keeps its original time. */
+  timestamp?: number;
 }): Promise<{ identifier?: string }> {
   return stripeRequest(
     'POST',
@@ -194,6 +196,7 @@ export function reportMeterEvent(input: {
       event_name: input.eventName,
       payload: { stripe_customer_id: input.customerId, value: String(input.value ?? 1) },
       identifier: input.identifier,
+      timestamp: input.timestamp,
     },
     input.identifier,
   );

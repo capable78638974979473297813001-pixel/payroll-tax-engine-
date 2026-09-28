@@ -26,6 +26,7 @@ function isWithheldIncomeTax(id: string): boolean {
 import { PERIODS_PER_YEAR } from './types.ts';
 import type {
   ComputeContext,
+  DataNotice,
   PaycheckInput,
   PaycheckResult,
   TaxLine,
@@ -107,5 +108,14 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
     employerTaxTotal,
     // Employer taxes are a cost to the employer, never a reduction of net pay.
     netPay: gross - pretax - posttax - employeeTaxTotal,
+    ...noticesFor(taxes),
   };
+}
+
+/** Every data-quality-marked line, lifted to the result so it can't be missed. */
+function noticesFor(taxes: TaxLine[]): { notices?: DataNotice[] } {
+  const notices = taxes
+    .filter((t) => t.dataQuality)
+    .map((t) => ({ taxId: t.id, ...t.dataQuality! }));
+  return notices.length ? { notices } : {};
 }

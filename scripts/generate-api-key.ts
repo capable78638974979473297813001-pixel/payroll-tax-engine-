@@ -7,18 +7,24 @@ import { randomBytes, createHash } from 'node:crypto';
  * hash, matching what supabase/functions/calculate-paycheck/index.ts
  * hashes an incoming request's key against before comparing.
  *
- *   node scripts/generate-api-key.ts "some-customer-name"
+ *   node scripts/generate-api-key.ts "some-customer-name"          # sk_test_ key
+ *   node scripts/generate-api-key.ts "some-customer-name" --live   # sk_live_ key
+ *
+ * Test by default (or live with EDGE_ISSUE_LIVE_KEYS=1), so a key minted
+ * while developing can't be mistaken for a production credential.
  */
-const name = process.argv[2];
+const args = process.argv.slice(2);
+const name = args.find((a) => !a.startsWith('--'));
 if (!name) {
-  console.error('Usage: node scripts/generate-api-key.ts "<name for this key>"');
+  console.error('Usage: node scripts/generate-api-key.ts "<name for this key>" [--live]');
   process.exit(1);
 }
+const live = args.includes('--live') || process.env.EDGE_ISSUE_LIVE_KEYS === '1';
 
-const key = 'sk_live_' + randomBytes(24).toString('base64url');
+const key = (live ? 'sk_live_' : 'sk_test_') + randomBytes(24).toString('base64url');
 const hash = createHash('sha256').update(key).digest('hex');
 
-console.log('PLAINTEXT KEY (save this now — it will not be shown again):');
+console.log(`PLAINTEXT ${live ? 'LIVE' : 'TEST'} KEY (save this now — it will not be shown again):`);
 console.log(key);
 console.log();
 console.log('Run this in the Supabase SQL editor:');

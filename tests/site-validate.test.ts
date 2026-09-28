@@ -110,3 +110,20 @@ describe('validatePaycheckInput', () => {
     assert.ok((r as { ok: false; errors: unknown[] }).errors.length >= 6);
   });
 });
+
+describe('validatePaycheckInput — tax years', () => {
+  test('a check date outside the supported years is a field-level 422 naming the supported years', () => {
+    const body = {
+      checkDate: '2025-12-31', payFrequency: 'biweekly',
+      earnings: [{ code: 'REG', category: 'regular', amount: 100000 }], deductions: [],
+      federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+      ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    };
+    const out = validatePaycheckInput(body, { supportedYears: [2026] });
+    assert.equal(out.ok, false);
+    const e = (out as { errors: { path: string; message: string }[] }).errors.find((x) => x.path === 'checkDate')!;
+    assert.match(e.message, /tax year 2025/);
+    assert.match(e.message, /2026/);
+    assert.equal(validatePaycheckInput({ ...body, checkDate: '2026-01-02' }, { supportedYears: [2026] }).ok, true);
+  });
+});

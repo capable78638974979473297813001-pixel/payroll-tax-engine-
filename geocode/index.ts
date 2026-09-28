@@ -39,8 +39,10 @@ import {
   isInsidePortlandMetro,
   jeddAtPoint,
   oregonTransitDistrictAtPoint,
+  type JeddCheck,
   type JeddDistrict,
 } from './districts.ts';
+import { ohJEDDBoundaryGaps, ohJEDDRuleset } from '../src/registry.ts';
 import { parseAddressParts, resolveRooftop, type AddressPointTier, type RooftopResult } from './rooftop.ts';
 import { checkNearestBuilding, LARGE_HOUSE_NUMBER_GAP, type BuildingCheckResult } from './buildings.ts';
 import { crossCheckSafe, milesBetween, searchStructuredAddressSafe, type NominatimResult } from './nominatim.ts';
@@ -188,12 +190,119 @@ export interface AddressResolution {
   geographies: { incorporatedPlaces: string[]; counties: string[] } | null;
   /** The authoritative-address-point lookup, whatever its outcome — including the distance between the two points, which is the size of the interpolation error this corrected. */
   rooftop: RooftopResult | null;
-  /** The Ohio JEDD/JEDZ containing this address, if any — a tax that exists on unincorporated land where no municipality does. Null everywhere outside Ohio, and wherever Ohio's boundary service couldn't be reached. */
+  /** The Ohio JEDD/JEDZ containing this address, if any — a tax that exists on unincorporated land where no municipality does. Null everywhere outside Ohio, and wherever Ohio's boundary service couldn't be reached (which is then a lowConfidenceReason, not a silent "no JEDD"). */
   jedd: JeddDistrict | null;
-  /** True when every field the address could plausibly need was 'matched' AND the geocode itself was high-confidence (narrow interpolation range, no fallback retry needed, no cross-check disagreement) — false means a human should look before this address goes live in certificate data. */
+  /**
+   * True when no field was ambiguous, every field whose registry covers the
+   * whole state (PA PSD, IN county, MD county) matched, every live boundary
+   * lookup this address needed answered, AND the geocode itself was
+   * high-confidence (narrow interpolation range, no fallback retry needed,
+   * no cross-check disagreement) — false means a human should look before
+   * this address goes live in certificate data. A 'no_match' on a
+   * closed-list registry (e.g. a Michigan city outside the taxing list) is
+   * usually the right answer and does not by itself clear this flag.
+   */
   fullyResolved: boolean;
   /** Plain-language reasons fullyResolved is false, if it is — empty when fullyResolved is true. */
   lowConfidenceReasons: string[];
+}
+
+/**
+ * Local-tax fields whose registry covers EVERY address in the state, so a
+ * 'no_match' there means the resolver failed, not that no tax applies:
+ * every Pennsylvania municipality/school-district pair has a PSD code and
+ * EIT, every Indiana county levies a county income tax, and every
+ * Maryland county (and Baltimore City) levies a local income tax. For
+ * closed-list registries (Michigan's cities, Ohio's taxing municipalities
+ * and school districts, Alabama's and Kentucky's cities) a no_match is
+ * usually the correct answer and is not flagged.
+ */
+const EXHAUSTIVE_LOCAL_FIELDS: Record<string, { field: keyof ResolvedJurisdiction; label: string }[]> = {
+  PA: [{ field: 'paJurisdiction', label: 'Pennsylvania local jurisdiction (PSD code for EIT/LST)' }],
+  IN: [{ field: 'county', label: 'Indiana county (county income tax)' }],
+  MD: [{ field: 'mdCounty', label: 'Maryland county (local income tax)' }],
+};
+
+/** Reasons an exhaustive local field failed to match. Exported for tests. */
+export function requiredFieldReasons(resolved: ResolvedJurisdiction): string[] {
+  const reasons: string[] = [];
+  for (const { field, label } of EXHAUSTIVE_LOCAL_FIELDS[resolved.state] ?? []) {
+    const m = resolved[field] as { confidence?: string } | null;
+    if (!m || m.confidence === 'no_match') {
+      reasons.push(
+        `No ${label} matched this address, but every address in ${resolved.state} has one — the local tax for this address would be omitted. Resolve it by hand before using this profile.`,
+      );
+    }
+  }
+  return reasons;
+}
+
+/**
+ * Turn Ohio's JEDD/JEDZ boundary lookup into what the certificate may use
+ * and what a reviewer must be told. Pure (the lookup is passed in), so the
+ * decision logic is testable without the network.
+ *
+ *   - Lookup failed: no zone can be ruled in or out -> review.
+ *   - Several active zones overlap the point: don't pick one -> review.
+ *   - A zone was found but has no rate row: the tax would silently be
+ *     zero -> review, and no workJEDDId is set.
+ *   - No zone found, but the address is where a zone WITHOUT a published
+ *     polygon may be (data file boundaryGaps) -> review.
+ */
+export function ohioJeddDecision(input: {
+  found: JeddCheck;
+  checkDate: string;
+  counties: string[];
+  places: string[];
+  /** Whether the address matched a taxing Ohio municipality. */
+  municipalityMatched: boolean;
+}): { jedd: JeddDistrict | null; workJEDDId: string | null; reasons: string[] } {
+  const { found, checkDate } = input;
+  if (!found.attempted) {
+    return {
+      jedd: null,
+      workJEDDId: null,
+      reasons: [
+        "Ohio's JEDD/JEDZ boundary service could not be reached, so this address was NOT checked for a joint economic development district tax. Retry before relying on this profile; an address inside a zone owes that zone's rate.",
+      ],
+    };
+  }
+  if (found.ambiguous) {
+    const names = (found.candidates ?? []).filter((c) => c.active).map((c) => `${c.name} (${c.jeddId})`).join(', ');
+    return {
+      jedd: null,
+      workJEDDId: null,
+      reasons: [`This point falls inside more than one active Ohio JEDD/JEDZ polygon (${names}). Which zone taxes it can't be decided automatically; none was applied. Confirm the zone by hand.`],
+    };
+  }
+  if (found.jedd?.active) {
+    if (!ohJEDDRuleset(found.jedd.jeddId, checkDate)) {
+      return {
+        jedd: found.jedd,
+        workJEDDId: null,
+        reasons: [`This address is inside ${found.jedd.name} (Ohio zone id ${found.jedd.jeddId}), but there is no rate on file for that zone id, so its tax can't be computed. Look up the zone's rate before using this profile.`],
+      };
+    }
+    return { jedd: found.jedd, workJEDDId: found.jedd.jeddId, reasons: [] };
+  }
+
+  // No zone by coordinate. Zones with no published polygon can't be ruled out.
+  const counties = input.counties.map((c) => stripCountySuffix(c).toLowerCase());
+  const places = input.places.map((p) => stripPlaceTypeSuffix(p).toLowerCase());
+  const possible = ohJEDDBoundaryGaps(checkDate).filter((g) => {
+    if (!g.countyHints.some((c) => counties.includes(c.toLowerCase()))) return false;
+    return !input.municipalityMatched || g.placeHints.some((p) => places.includes(p.toLowerCase()));
+  });
+  if (possible.length === 0) return { jedd: null, workJEDDId: null, reasons: [] };
+  return {
+    jedd: null,
+    workJEDDId: null,
+    reasons: [
+      `No JEDD/JEDZ polygon contains this address, but it is in an area where ${possible.length === 1 ? 'a zone' : 'zones'} with NO published boundary may apply: ` +
+        possible.map((g) => `${g.name} (${g.jeddId})`).join(', ') +
+        ". Ohio's boundary layer can't detect these; confirm with the zone's administrator whether this address is inside one.",
+    ],
+  };
 }
 
 function attemptedMatches(resolved: ResolvedJurisdiction) {
@@ -593,12 +702,18 @@ export async function resolveAddress(
   // a JEDD boundary follows parcel lines around a development, and a
   // curb-interpolated point can easily sit on the wrong side of one.
   let jedd: JeddDistrict | null = null;
+  const jeddReasons: string[] = [];
   if (resolved.state === 'OH' && role === 'work') {
-    const found = await jeddAtPoint(point.lat, point.lon);
-    if (found.attempted && found.jedd?.active) {
-      jedd = found.jedd;
-      certificateFields.workJEDDId = found.jedd.jeddId;
-    }
+    const decision = ohioJeddDecision({
+      found: await jeddAtPoint(point.lat, point.lon),
+      checkDate,
+      counties: geographies.counties,
+      places: geographies.incorporatedPlaces,
+      municipalityMatched: resolved.ohMunicipality?.confidence === 'matched',
+    });
+    jedd = decision.jedd;
+    if (decision.workJEDDId) certificateFields.workJEDDId = decision.workJEDDId;
+    jeddReasons.push(...decision.reasons);
   }
   // Cross-checked at the point actually used, not at the one Census
   // guessed: when a rooftop point replaced it, that is the coordinate
@@ -625,6 +740,9 @@ export async function resolveAddress(
   if (anyFieldAmbiguous) {
     lowConfidenceReasons.push('One or more jurisdiction fields matched more than one candidate — see the ambiguous FieldMatch(es) in `resolved` for the candidate list.');
   }
+  // A no_match is only a failure where the registry covers the whole state.
+  lowConfidenceReasons.push(...requiredFieldReasons(resolved));
+  lowConfidenceReasons.push(...jeddReasons);
   if (matchQuality.matchedViaFallback) {
     lowConfidenceReasons.push('Only matched after stripping an apartment/suite/unit designator — the interpolated position is for the base street address, not the specific unit.');
   }
@@ -740,6 +858,19 @@ export interface EmployeeResolution {
   notResolvable: string[];
   /** Merged from both addresses' own AddressResolution.lowConfidenceReasons, each prefixed with which address it came from — empty when both addresses (that were supplied) resolved with full confidence. */
   lowConfidenceReasons: string[];
+  /**
+   * Boundary services that could not be reached this call (a subset of
+   * notResolvable). Each is an UNKNOWN, not a "no tax here": the profile
+   * may be missing a local tax until the lookup is retried.
+   */
+  lookupFailures: string[];
+  /**
+   * True only when every supplied address matched and resolved with full
+   * confidence, no boundary lookup failed, and no locality conflict was
+   * left for a human. A caller should not put a profile into production
+   * payroll while this is false.
+   */
+  fullyResolved: boolean;
 }
 
 /**
@@ -849,6 +980,12 @@ export async function resolveEmployee(
   if (workFlags?.multnomahCounty) fields.multnomahCounty = true;
 
   const notResolvable: string[] = [];
+  const lookupFailures: string[] = [];
+  // A boundary service that didn't answer: unknown, reported both ways.
+  const unreachable = (message: string) => {
+    notResolvable.push(message);
+    lookupFailures.push(message);
+  };
   const workState = work?.resolved?.state ?? residence?.resolved?.state;
   if (workState === 'OR') {
     // Metro's district is not a Census geography — it covers the urban
@@ -863,7 +1000,7 @@ export async function resolveEmployee(
       if (metro.attempted) {
         if (metro.inside) fields.metroDistrict = true;
       } else {
-        notResolvable.push(
+        unreachable(
           "Portland Metro's Supportive Housing Services district (certificate.metroDistrict) — Metro's own boundary service could not be reached this call, so this was NOT determined either way. Retry before treating its absence as 'outside the district'.",
         );
       }
@@ -879,7 +1016,7 @@ export async function resolveEmployee(
       if (transit.attempted) {
         if (transit.locality) localityCandidates.add(transit.locality);
       } else {
-        notResolvable.push(
+        unreachable(
           "Oregon's TriMet/LTD/SCTD transit payroll excises (certificate.locality) — ODOT's own jurisdictions service could not be reached this call, so this was NOT determined either way. Retry before treating its absence as 'outside every district'. (Canby/Sandy/Wilsonville below aren't affected by this — they're resolved separately.)",
         );
       }
@@ -888,7 +1025,7 @@ export async function resolveEmployee(
       if (canby.attempted) {
         if (canby.inside) localityCandidates.add('CanbyTransit');
       } else {
-        notResolvable.push(
+        unreachable(
           "Canby's transit payroll excise (certificate.locality = 'CanbyTransit') — Oregon's own UGB boundary service could not be reached this call, so this was NOT determined either way. Retry before treating its absence as 'outside the district'.",
         );
       }
@@ -930,5 +1067,12 @@ export async function resolveEmployee(
     ...(residence?.lowConfidenceReasons ?? []).map((r) => `Residence address: ${r}`),
   ];
 
-  return { work, residence, certificateFields: fields, notResolvable, lowConfidenceReasons };
+  const supplied = [work, residence].filter((r): r is AddressResolution => r !== null);
+  const fullyResolved =
+    supplied.length > 0 &&
+    supplied.every((r) => r.matched && r.fullyResolved) &&
+    lookupFailures.length === 0 &&
+    !settled.conflictMessage;
+
+  return { work, residence, certificateFields: fields, notResolvable, lowConfidenceReasons, lookupFailures, fullyResolved };
 }

@@ -870,7 +870,9 @@
 
 <script>
 (function () {
-  var SESSION_KEY = 'omnia_session';
+  // The session itself is an HttpOnly cookie the server sets on
+  // verification: page script never sees the token. `session` below only
+  // holds display details from /api/account.
   var KEY_STORE = 'omnia_key';
 
   var signinView = document.getElementById('signinView');
@@ -882,12 +884,23 @@
   var plainKey = null;
   var qs = new URLSearchParams(location.search);
 
-  function getStored(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
-  function setStored(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-  function delStored(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  // The plaintext API key is a secret: this tab only (sessionStorage).
+  function getStored(k) { try { return JSON.parse(sessionStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+  function setStored(k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function delStored(k) { try { sessionStorage.removeItem(k); } catch (e) {} }
+  // Older builds kept the session token and key in localStorage; clear them.
+  try { localStorage.removeItem('omnia_session'); localStorage.removeItem(KEY_STORE); } catch (e) {}
+
+  // Anything from a user or the server that lands in innerHTML goes through this.
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function (ch) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+  }
 
   function authHeaders() {
-    return { 'Authorization': 'Bearer ' + session.token, 'Content-Type': 'application/json' };
+    // The session cookie rides along on same-origin requests by itself.
+    return { 'Content-Type': 'application/json' };
   }
 
   async function api(path, opts) {
@@ -1013,11 +1026,7 @@
       err.hidden = false;
       return;
     }
-    setStored(SESSION_KEY, {
-      token: res.body.sessionToken, email: res.body.email,
-      name: res.body.name, company: res.body.company
-    });
-    session = getStored(SESSION_KEY);
+    session = { email: res.body.email, name: res.body.name, company: res.body.company };
     try { sessionStorage.removeItem('omnia_pending'); } catch (x) { /* ignore */ }
     if (signinMode) { boot(); return; }
     document.getElementById('tLegal').value = res.body.company;
@@ -1056,7 +1065,7 @@
       '<div class="tf-row big"><span>Estimated annual usage</span><b>' + usdWhole(est.total) + '</b></div>';
 
     document.getElementById('termsDoc').innerHTML = res.body.clauses.map(function (c) {
-      return '<h4>' + c.heading + '</h4><p>' + c.body + '</p>';
+      return '<h4>' + esc(c.heading) + '</h4><p>' + esc(c.body) + '</p>';
     }).join('');
 
     document.getElementById('agreeText').textContent =
@@ -1075,8 +1084,15 @@
       err.hidden = false;
       return;
     }
+    if (!termsState || !termsState.quoteId) {
+      err.textContent = 'The terms have not loaded yet. Press Recalculate and try again.';
+      err.hidden = false;
+      return;
+    }
     var payload = {
       agreed: true,
+      // Binds the agreement to the exact terms the server showed above.
+      quoteId: termsState.quoteId,
       signedName: document.getElementById('tSign').value.trim(),
       legalName: document.getElementById('tLegal').value.trim(),
       billingEmail: document.getElementById('tBillingEmail').value.trim(),
@@ -1091,10 +1107,12 @@
     if (!res.ok) {
       err.textContent = (res.body && res.body.error) || 'Could not record your agreement.';
       err.hidden = false;
+      // A stale or changed quote: show the current terms before they try again.
+      if (res.body && /^quote_/.test(res.body.code || '')) loadTerms();
       return;
     }
     document.getElementById('signedNote').innerHTML =
-      'Signed by <b>' + payload.signedName + '</b> for <b>' + payload.legalName + '</b> on ' +
+      'Signed by <b>' + esc(payload.signedName) + '</b> for <b>' + esc(payload.legalName) + '</b> on ' +
       new Date(res.body.acceptedAt).toLocaleString() + ' — terms v' + res.body.termsVersion + '.';
     showStep(4);
   });
@@ -1136,8 +1154,8 @@
   }
   async function finishCheckout() {
     history.replaceState(null, '', location.pathname);
-    session = getStored(SESSION_KEY);
-    if (!session) { boot(); return; } // signed out meanwhile: sign in, then retry step 4
+    var me = await api('/api/account', { headers: authHeaders() });
+    if (!me.ok) { boot(); return; } // signed out meanwhile: sign in, then retry step 4
     var done = await api('/api/billing/return', {
       method: 'POST', headers: authHeaders(), body: JSON.stringify({ sessionId: qs.get('session_id') }),
     });
@@ -1175,7 +1193,7 @@
     ].forEach(function (r) {
       var d = document.createElement('div');
       d.className = 'kv';
-      d.innerHTML = '<span>' + r[0] + '</span><span>' + r[1] + '</span>';
+      d.innerHTML = '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>';
       meta.appendChild(d);
     });
   }
@@ -1274,9 +1292,9 @@
     if (employee.length) {
       row('<td colspan="3">Employee taxes</td>', 'group');
       employee.forEach(function (t) {
-        row('<td>' + t.name + '</td><td class="num">' + fromCents(t.taxableWages) + '</td><td class="num">' + fromCents(t.amount) + '</td>');
+        row('<td>' + esc(t.name) + '</td><td class="num">' + fromCents(t.taxableWages) + '</td><td class="num">' + fromCents(t.amount) + '</td>');
         if (t.detail && /NOT MODELLED/.test(t.detail)) {
-          row('<td colspan="3" class="note">' + t.detail + '</td>');
+          row('<td colspan="3" class="note">' + esc(t.detail) + '</td>');
         }
       });
       row('<td>Total withheld</td><td class="num"></td><td class="num">' + fromCents(result.employeeTaxTotal) + '</td>', 'sum');
@@ -1285,9 +1303,17 @@
     if (employer.length) {
       row('<td colspan="3">Employer cost (not withheld)</td>', 'group');
       employer.forEach(function (t) {
-        row('<td>' + t.name + '</td><td class="num">' + fromCents(t.taxableWages) + '</td><td class="num">' + fromCents(t.amount) + '</td>');
+        row('<td>' + esc(t.name) + '</td><td class="num">' + fromCents(t.taxableWages) + '</td><td class="num">' + fromCents(t.amount) + '</td>');
       });
       row('<td>Total employer tax</td><td class="num"></td><td class="num">' + fromCents(result.employerTaxTotal) + '</td>', 'sum');
+    }
+
+    // Lower-confidence rates or unmodelled elections: say so on the stub.
+    if (result.notices && result.notices.length) {
+      row('<td colspan="3">Check before paying</td>', 'group');
+      result.notices.forEach(function (n) {
+        row('<td colspan="3" class="note">' + esc(n.taxId) + ': ' + esc(n.note) + '</td>');
+      });
     }
   }
 
@@ -1363,9 +1389,9 @@
       var color = r.statusCode >= 200 && r.statusCode < 300 ? 'var(--good)' : 'var(--bad)';
       tr.innerHTML =
         '<td>' + new Date(r.at).toLocaleString() + '</td>' +
-        '<td style="font-family:var(--mono);color:' + color + '">' + r.statusCode + '</td>' +
-        '<td>' + (r.checkDate || '—') + '</td>' +
-        '<td style="color:var(--ink-3);font-size:12px">' + (r.error || '') + '</td>';
+        '<td style="font-family:var(--mono);color:' + color + '">' + esc(r.statusCode) + '</td>' +
+        '<td>' + esc(r.checkDate || '—') + '</td>' +
+        '<td style="color:var(--ink-3);font-size:12px">' + esc(r.error || '') + '</td>';
       body.appendChild(tr);
     });
   }
@@ -1490,8 +1516,17 @@
   }, { passive: true });
 
   // ---------------- boot ----------------
+  document.getElementById('signOutBtn').addEventListener('click', async function () {
+    await api('/api/signout', { method: 'POST', headers: authHeaders() });
+    delStored(KEY_STORE);
+    session = null; plainKey = null;
+    location.href = location.pathname;
+  });
+
   async function boot() {
-    session = getStored(SESSION_KEY);
+    // Signed in iff the HttpOnly session cookie is still good.
+    var acctRes = await api('/api/account', { headers: authHeaders() });
+    session = acctRes.ok ? { email: acctRes.body.email, name: acctRes.body.name, company: acctRes.body.company } : null;
     if (!session) {
       signinView.classList.add('on');
       consoleView.classList.remove('on');
@@ -1514,7 +1549,6 @@
     }
 
     // Signed in but not finished: drop them back at the step they owe.
-    var acctRes = await api('/api/account', { headers: authHeaders() });
     var noPayment = acctRes.ok && acctRes.body.subscription && !acctRes.body.paymentMethod;
     if (acctRes.ok && ((acctRes.body.stage !== 'trialing' && acctRes.body.stage !== 'active') || noPayment)) {
       signinView.classList.add('on');
@@ -1526,8 +1560,8 @@
         var a = acctRes.body.acceptance;
         if (a) {
           document.getElementById('signedNote').innerHTML =
-            'Signed by <b>' + a.signedName + '</b> on ' + new Date(a.acceptedAt).toLocaleString() +
-            ' — terms v' + a.termsVersion + '.';
+            'Signed by <b>' + esc(a.signedName) + '</b> on ' + esc(new Date(a.acceptedAt).toLocaleString()) +
+            ' — terms v' + esc(a.termsVersion) + '.';
         }
         showStep(4);
       } else {
@@ -1539,7 +1573,14 @@
       return;
     }
     var res = await api('/api/usage', { headers: authHeaders() });
-    if (!res.ok) { delStored(SESSION_KEY); delStored(KEY_STORE); session = null; boot(); return; }
+    if (!res.ok) {
+      // Session died between the two calls: back to sign-in (no re-boot loop).
+      delStored(KEY_STORE); session = null;
+      signinView.classList.add('on'); consoleView.classList.remove('on');
+      sectionNav.classList.remove('on'); acct.classList.remove('on');
+      showStep(0);
+      return;
+    }
 
     signinView.classList.remove('on');
     consoleView.classList.add('on');

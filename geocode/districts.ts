@@ -156,7 +156,16 @@ export interface JeddDistrict {
 export interface JeddCheck {
   /** false when Ohio's boundary service couldn't be reached — NOT a claim that the address is outside every JEDD. */
   attempted: boolean;
+  /**
+   * The one zone containing the point. Null when there is none — and also
+   * when several ACTIVE zones overlap here (see `ambiguous`), since which
+   * one taxes the address can't be decided from feature order.
+   */
   jedd: JeddDistrict | null;
+  /** Every distinct zone the layer returned for this point (present when attempted). */
+  candidates?: JeddDistrict[];
+  /** True when more than one distinct active zone contains the point. */
+  ambiguous?: boolean;
 }
 
 export interface DistrictCheck {
@@ -371,19 +380,29 @@ export async function jeddAtPoint(
     };
     if (body.error) return { attempted: false, jedd: null };
 
-    const hit = body.features?.[0]?.attributes;
-    if (!hit || hit.jedd_id === undefined || hit.jedd_id === null) return { attempted: true, jedd: null };
-    return {
-      attempted: true,
-      jedd: {
+    // Every feature, not just the first: if polygons overlap, the answer
+    // must not depend on the order the service happens to return them.
+    const candidates: JeddDistrict[] = [];
+    for (const feature of body.features ?? []) {
+      const hit = feature.attributes;
+      if (!hit || hit.jedd_id === undefined || hit.jedd_id === null) continue;
+      const jeddId = String(hit.jedd_id);
+      if (candidates.some((c) => c.jeddId === jeddId)) continue;
+      candidates.push({
         name: (hit.name ?? '').trim(),
-        jeddId: String(hit.jedd_id),
+        jeddId,
         // Ohio ships this as a "Y"/"N" flag; an inactive zone stays
         // reported rather than hidden, so a caller can see WHY no tax
         // applies instead of seeing nothing at all.
         active: (hit.active ?? '').toUpperCase() === 'Y',
-      },
-    };
+      });
+    }
+    if (candidates.length === 0) return { attempted: true, jedd: null, candidates, ambiguous: false };
+    const active = candidates.filter((c) => c.active);
+    if (active.length > 1) return { attempted: true, jedd: null, candidates, ambiguous: true };
+    // One active zone wins over inactive leftovers; with none active, the
+    // (single, or first inactive) zone is reported so the reason is visible.
+    return { attempted: true, jedd: active[0] ?? candidates[0], candidates, ambiguous: false };
   } catch {
     return { attempted: false, jedd: null };
   }

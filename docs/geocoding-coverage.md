@@ -44,16 +44,28 @@ available the whole time and is now what it resolves to.
 
 ## Measured result
 
+<!-- coverage:summary:begin -->
+> **Stale — do not rely on these figures until the script is re-run.**
+> They were hand-copied from a run around 2026-09-13 and no longer
+> reproduce: an independent re-run during the 2026-09-28 audit returned
+> **35** `rooftop` results (not 36) and **one** jurisdiction left on
+> Census-only `interpolated` (not 0), so "51 of 51" below overstates
+> current coverage. This environment could not reach Census, NAD or
+> Nominatim to regenerate them. Run `npm run coverage:geocode -- --write`
+> with network access; it rewrites this block and the per-jurisdiction
+> table from a fresh measurement and removes this notice.
+
 **51 of 51 jurisdictions resolve to something better than Census's own
-interpolation**, correcting it by 5m to 444m (median 90m).
+interpolation**, correcting it by 5m to 444m (median 90m). _(stale, see above)_
 
 | Tier | Count |
 | --- | --- |
-| `rooftop` (authoritative) | 36 / 51 |
+| `rooftop` (authoritative) | 36 / 51 _(audit re-run: 35)_ |
 | `rooftop-osm` (house-level, corroborated) | 12 / 51 |
 | `neighbor` (block-level, authoritative) | 2 / 51 |
 | `parcel-centroid` (county GIS, gated) | 1 / 51 |
-| `interpolated` (no improvement available) | 0 / 51 |
+| `interpolated` (no improvement available) | 0 / 51 _(audit re-run: 1)_ |
+<!-- coverage:summary:end -->
 
 ### A fifth tier: county tax-parcel centroids, and why it took two tries to get right
 
@@ -194,6 +206,9 @@ Census's own answer, which is where this project started.
 
 ### Per jurisdiction
 
+<!-- coverage:table:begin -->
+_Stale (≈2026-09-13); at least one row has since regressed to `interpolated` — regenerate with `npm run coverage:geocode -- --write`._
+
 | | Tier | Correction | Published by |
 | --- | --- | --- | --- |
 | AK | `rooftop` | 14m | State of Alaska |
@@ -247,6 +262,7 @@ Census's own answer, which is where this project started.
 | WI | `rooftop` | 32m | State of Wisconsin |
 | WV | `rooftop` | 152m | West Virginia GIS |
 | WY | `rooftop` | 51m | Laramie County Wyoming |
+<!-- coverage:table:end -->
 
 "Correction" is the distance between Census's interpolated point and the
 one actually used — i.e. how far off the old answer was for that address.
