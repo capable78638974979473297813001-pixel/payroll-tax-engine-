@@ -133,6 +133,36 @@ describe('STE-shaped compatibility layer (api/ste-compat.ts)', () => {
       assert.match(results[0].error ?? '', /no work state could be resolved/);
     });
 
+    test('conflicting state or local ids are rejected instead of last-one-wins', () => {
+      const entries = listUniqueTaxIds(CHECK_DATE);
+      const oh = entries.find((e) => e.state === 'OH' && e.type === 'state')!;
+      const pa = entries.find((e) => e.state === 'PA' && e.type === 'state')!;
+      const twoStates = payCalc([{ checkDate: CHECK_DATE, frequency: 'biweekly', grossPay: 3000, workUniqueTaxIds: [oh.uniqueTaxId, pa.uniqueTaxId] }]);
+      assert.match(twoStates[0].error ?? '', /two states|conflicting ids/);
+      assert.equal(twoStates[0].taxJurisdictionParms.length, 0);
+
+      // Two different locals that write the same certificate field.
+      const byField = new Map<string, typeof entries>();
+      for (const e of entries.filter((x) => x.state === 'OH' && x.type !== 'state' && x.role !== 'residence')) {
+        byField.set(String(e.field), [...(byField.get(String(e.field)) ?? []), e]);
+      }
+      const clash = [...byField.values()].find((list) => new Set(list.map((e) => String(e.value))).size > 1)!;
+      assert.ok(clash, 'expected two OH locals sharing a field');
+      const a = clash[0];
+      const b = clash.find((e) => String(e.value) !== String(a.value))!;
+      const twoCities = payCalc([{ checkDate: CHECK_DATE, frequency: 'biweekly', grossPay: 3000, workUniqueTaxIds: [oh.uniqueTaxId, a.uniqueTaxId, b.uniqueTaxId] }]);
+      assert.match(twoCities[0].error ?? '', /conflicting ids/);
+
+      // A local from another state can't ride along with this state.
+      const paLocal = entries.find((e) => e.state === 'PA' && e.type !== 'state' && e.role !== 'residence')!;
+      const mixed = payCalc([{ checkDate: CHECK_DATE, frequency: 'biweekly', grossPay: 3000, workUniqueTaxIds: [oh.uniqueTaxId, paLocal.uniqueTaxId] }]);
+      assert.match(mixed[0].error ?? '', /two states/);
+
+      // Repeating the very same id is harmless.
+      const dup = payCalc([{ checkDate: CHECK_DATE, frequency: 'biweekly', grossPay: 3000, workUniqueTaxIds: [oh.uniqueTaxId, oh.uniqueTaxId] }]);
+      assert.equal(dup[0].error, undefined);
+    });
+
     test('one bad request in a batch does not fail the others', () => {
       const entries = listUniqueTaxIds(CHECK_DATE);
       const ohState = entries.find((e) => e.state === 'OH' && e.type === 'state')!;

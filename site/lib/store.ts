@@ -1,6 +1,7 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { readJsonFile, withFileLock, writeJsonFileAtomic } from '../../api/json-store.ts';
 
 /**
  * The site's own file-backed store: accounts, the terms each one agreed
@@ -59,6 +60,9 @@ export interface AccountRecord {
   codeRequestedAt: string | null;
   emailVerifiedAt: string | null;
 
+  /** Wrong guesses against the current code; reset whenever a new code is issued. */
+  codeAttempts?: number;
+
   sessionToken: string | null;
   sessionExpiresAt: string | null;
 
@@ -75,6 +79,14 @@ export interface TermsAcceptance {
   acceptedAt: string;
   ip: string | null;
   userAgent: string | null;
+  /**
+   * The server-issued terms quote this acceptance is bound to (see
+   * TermsQuote). The disclosed figures below are copied from that quote,
+   * never from the client, so they are what the server actually showed.
+   */
+  quoteId?: string;
+  /** SHA-256 of the exact clause text shown with the quote. */
+  clausesSha256?: string;
   /** Exactly what was on screen when they agreed. */
   disclosed: {
     trialDays: number;
@@ -85,6 +97,61 @@ export interface TermsAcceptance {
     payFrequency: string;
     rooftop: boolean;
   };
+}
+
+/**
+ * What GET /api/terms showed a signed-in customer: the figures and the
+ * exact clause text, keyed by an unguessable id. POST /api/accept-terms
+ * must present that id, and the acceptance is recorded from this record
+ * rather than from anything the client re-sends.
+ */
+export interface TermsQuote {
+  id: string;
+  email: string;
+  termsVersion: string;
+  issuedAt: string;
+  expiresAt: string;
+  trialDays: number;
+  trialEndsAt: string;
+  termMonths: number;
+  estimatedAnnual: number;
+  expectedEmployees: number;
+  payFrequency: string;
+  rooftop: boolean;
+  clausesSha256: string;
+  /** Set once an acceptance consumed it; a quote can be accepted only once. */
+  acceptedAt?: string | null;
+}
+
+/**
+ * A Stripe meter event that still has to be delivered. Written in the same
+ * store transaction that records the billable call, removed only once
+ * Stripe accepts it, so a Stripe outage or a crash can't silently drop a
+ * billable call. `identifier` is Stripe's idempotency key for the event,
+ * so a retry after an ambiguous failure can't double-bill.
+ */
+export interface MeterQueueItem {
+  identifier: string;
+  customerId: string;
+  value: number;
+  /** When the call happened: reported as the event timestamp. */
+  at: string;
+  attempts: number;
+  lastAttemptAt: string | null;
+  lastError: string | null;
+  /**
+   * Set when Stripe can no longer accept the event (older than its
+   * backdating window). The item is kept for manual invoicing rather
+   * than deleted, so the usage is never lost.
+   */
+  deadAt?: string | null;
+}
+
+/** One fixed window of a persistent (store-backed) rate limit. */
+export interface RateWindow {
+  count: number;
+  start: number;
+  windowMs: number;
 }
 
 export interface PaymentMethodRecord {
@@ -170,7 +237,7 @@ export interface EstimateEvent {
   at: string;
 }
 
-interface DB {
+export interface DB {
   accounts: Record<string, AccountRecord>;
   acceptances: TermsAcceptance[];
   paymentMethods: Record<string, PaymentMethodRecord>;
@@ -178,6 +245,9 @@ interface DB {
   keys: Record<string, KeyRecord>;
   usage: UsageEvent[];
   estimates: EstimateEvent[];
+  termsQuotes: Record<string, TermsQuote>;
+  meterQueue: MeterQueueItem[];
+  rateLimits: Record<string, RateWindow>;
 }
 
 function emptyDb(): DB {
@@ -189,45 +259,47 @@ function emptyDb(): DB {
     keys: {},
     usage: [],
     estimates: [],
+    termsQuotes: {},
+    meterQueue: [],
+    rateLimits: {},
   };
-}
-
-function ensureDataDir(): void {
-  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
 }
 
 const FILE = join(DATA_DIR, 'db.json');
 
+// A file that exists but won't parse throws (see api/json-store.ts) rather
+// than loading as empty: an empty load followed by any write would erase
+// every account, key and billing record.
 function load(): DB {
-  ensureDataDir();
-  if (!existsSync(FILE)) return emptyDb();
-  try {
-    const parsed = JSON.parse(readFileSync(FILE, 'utf8')) as Partial<DB>;
-    const base = emptyDb();
-    return {
-      accounts: parsed.accounts ?? base.accounts,
-      acceptances: parsed.acceptances ?? base.acceptances,
-      paymentMethods: parsed.paymentMethods ?? base.paymentMethods,
-      subscriptions: parsed.subscriptions ?? base.subscriptions,
-      keys: parsed.keys ?? base.keys,
-      usage: parsed.usage ?? base.usage,
-      estimates: parsed.estimates ?? base.estimates,
-    };
-  } catch {
-    return emptyDb();
-  }
+  const parsed = readJsonFile<Partial<DB>>(FILE);
+  const base = emptyDb();
+  if (!parsed) return base;
+  return {
+    accounts: parsed.accounts ?? base.accounts,
+    acceptances: parsed.acceptances ?? base.acceptances,
+    paymentMethods: parsed.paymentMethods ?? base.paymentMethods,
+    subscriptions: parsed.subscriptions ?? base.subscriptions,
+    keys: parsed.keys ?? base.keys,
+    usage: parsed.usage ?? base.usage,
+    estimates: parsed.estimates ?? base.estimates,
+    termsQuotes: parsed.termsQuotes ?? base.termsQuotes,
+    meterQueue: parsed.meterQueue ?? base.meterQueue,
+    rateLimits: parsed.rateLimits ?? base.rateLimits,
+  };
 }
 
-function save(db: DB): void {
-  ensureDataDir();
-  writeFileSync(FILE, JSON.stringify(db, null, 2), 'utf8');
-}
-
+/**
+ * Read-modify-write under an exclusive lock, saved atomically. Safe
+ * against a crash mid-write and against another process sharing the
+ * volume. Keep fn synchronous: the lock is held for its whole run.
+ */
 export function withDb<T>(fn: (db: DB) => T): T {
-  const db = load();
-  const result = fn(db);
-  save(db);
-  return result;
+  return withFileLock(FILE, () => {
+    const db = load();
+    const result = fn(db);
+    writeJsonFileAtomic(FILE, db);
+    return result;
+  });
 }
 
 export function readDb<T>(fn: (db: DB) => T): T {
@@ -243,4 +315,32 @@ export function appendUsage(db: DB, event: UsageEvent): void {
   db.usage.push(event);
   const overflow = db.usage.length - MAX_USAGE_EVENTS;
   if (overflow > 0) db.usage.splice(0, overflow);
+}
+
+/**
+ * A fixed-window rate limit kept in the store instead of process memory,
+ * so it survives restarts and is shared by every instance on the same
+ * volume. Costs a store write per hit, so it is for the low-volume,
+ * abuse-sensitive routes (signup, sign-in), not per-call metering.
+ */
+export function hitStoredLimit(
+  db: DB,
+  key: string,
+  limit: number,
+  windowMs: number,
+  now: number = Date.now(),
+): { allowed: boolean; retryAfterSec: number } {
+  // Sweep elapsed windows so the map can't grow without bound.
+  for (const [k, w] of Object.entries(db.rateLimits)) {
+    if (now - w.start >= w.windowMs) delete db.rateLimits[k];
+  }
+  let w = db.rateLimits[key];
+  if (!w) {
+    w = { count: 0, start: now, windowMs };
+    db.rateLimits[key] = w;
+  }
+  const retryAfterSec = Math.max(1, Math.ceil((w.start + windowMs - now) / 1000));
+  if (w.count >= limit) return { allowed: false, retryAfterSec };
+  w.count += 1;
+  return { allowed: true, retryAfterSec };
 }

@@ -1,7 +1,8 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
+
+import { readJsonFile, withFileLock, writeJsonFileAtomic } from './json-store.ts';
 
 /**
  * API keys + usage metering for the payroll-tax API (examples/api-server.ts) —
@@ -34,8 +35,10 @@ export interface ApiKey {
   name: string;
   /** hex-encoded SHA-256 of the plaintext key — the plaintext is never stored. */
   keyHash: string;
-  /** A non-secret display prefix, e.g. "sk_live_ab12cd" — safe to show in a dashboard. */
+  /** A non-secret display prefix, e.g. "sk_test_ab12cd" — safe to show in a dashboard. */
   prefix: string;
+  /** 'test' keys carry sk_test_, 'live' keys sk_live_. Absent on keys minted before modes existed (those are live). */
+  mode?: KeyMode;
   plan: string;
   /** What each billable call costs this customer, in integer cents. */
   pricePerCallCents: number;
@@ -58,6 +61,12 @@ export interface ApiKey {
   stripePaymentMethodId: string | null;
   /** Metered-billing subscription — set when the customer starts usage billing; each call reports one unit to it. */
   stripeSubscriptionId: string | null;
+  /**
+   * Set when Stripe reports the subscription deleted. A cancelled key stays
+   * suspended: a later invoice.paid (e.g. the final invoice) settles a debt,
+   * it does not restart service. Cleared only by a new subscription.
+   */
+  billingCancelledAt?: string | null;
   /** Non-secret card display, e.g. "visa •••• 4242". */
   cardBrand: string | null;
   cardLast4: string | null;
@@ -65,11 +74,43 @@ export interface ApiKey {
   recent: UsageCall[];
 }
 
+export type KeyMode = 'test' | 'live';
+
+/**
+ * The mode a key is minted in when the caller doesn't say. Test unless the
+ * operator opts in with API_ISSUE_LIVE_KEYS=1, so a development box never
+ * hands out production-looking sk_live_ keys by accident. Same switch as
+ * the site's OMNIA_ISSUE_LIVE_KEYS.
+ */
+export function defaultKeyMode(): KeyMode {
+  return process.env.API_ISSUE_LIVE_KEYS === '1' ? 'live' : 'test';
+}
+
+/**
+ * A Stripe meter event still owed to Stripe. Queued in the same write that
+ * records the call and removed only once Stripe accepts it, so a Stripe
+ * outage or a crash can't silently drop billable usage (see
+ * api/billing.ts flushMeterQueue).
+ */
+export interface PendingMeterEvent {
+  identifier: string;
+  keyId: string;
+  customerId: string;
+  value: number;
+  at: string;
+  attempts: number;
+  lastAttemptAt: string | null;
+  lastError: string | null;
+  /** Set once Stripe's backdating window has passed; kept for manual invoicing. */
+  deadAt?: string | null;
+}
+
 /** What is safe to hand back / list — everything except the hash. */
 export interface PublicApiKey {
   id: string;
   name: string;
   prefix: string;
+  mode: KeyMode;
   plan: string;
   pricePerCallCents: number;
   active: boolean;
@@ -107,34 +148,26 @@ function dbFile(): string {
 
 interface KeysDB {
   keys: Record<string, ApiKey>;
+  meterQueue: PendingMeterEvent[];
 }
 function emptyDb(): KeysDB {
-  return { keys: {} };
+  return { keys: {}, meterQueue: [] };
 }
-function ensureDataDir(): void {
-  const dir = dataDir();
-  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-}
+// Missing file -> empty. Present but unparseable -> throws (never loads as
+// empty, which would let the next write erase every key and balance).
 function load(): KeysDB {
-  ensureDataDir();
-  const file = dbFile();
-  if (!existsSync(file)) return emptyDb();
-  try {
-    const parsed = JSON.parse(readFileSync(file, 'utf8')) as Partial<KeysDB>;
-    return { keys: parsed.keys ?? {} };
-  } catch {
-    return emptyDb();
-  }
+  const parsed = readJsonFile<Partial<KeysDB>>(dbFile());
+  return { keys: parsed?.keys ?? {}, meterQueue: parsed?.meterQueue ?? [] };
 }
-function save(db: KeysDB): void {
-  ensureDataDir();
-  writeFileSync(dbFile(), JSON.stringify(db, null, 2), 'utf8');
-}
+/** Locked read-modify-write, saved atomically (see api/json-store.ts). */
 function withDb<T>(fn: (db: KeysDB) => T): T {
-  const db = load();
-  const result = fn(db);
-  save(db);
-  return result;
+  const file = dbFile();
+  return withFileLock(file, () => {
+    const db = load();
+    const result = fn(db);
+    writeJsonFileAtomic(file, db);
+    return result;
+  });
 }
 
 function hashKey(plaintext: string): string {
@@ -146,6 +179,7 @@ function toPublic(k: ApiKey): PublicApiKey {
     id: k.id,
     name: k.name,
     prefix: k.prefix,
+    mode: k.mode ?? (k.prefix.startsWith('sk_test_') ? 'test' : 'live'),
     plan: k.plan,
     pricePerCallCents: k.pricePerCallCents,
     active: k.active,
@@ -175,16 +209,18 @@ export function publicApiKey(k: ApiKey): PublicApiKey {
  */
 export function mintApiKey(
   name: string,
-  opts: { plan?: string; pricePerCallCents?: number } = {},
+  opts: { plan?: string; pricePerCallCents?: number; mode?: KeyMode } = {},
 ): { key: string; record: PublicApiKey } {
   const plan = opts.plan ?? 'standard';
   const price = opts.pricePerCallCents ?? PLAN_PRICING_CENTS[plan] ?? PLAN_PRICING_CENTS.standard;
-  const key = 'sk_live_' + randomBytes(24).toString('base64url');
+  const mode = opts.mode ?? defaultKeyMode();
+  const key = `sk_${mode}_` + randomBytes(24).toString('base64url');
   const record: ApiKey = {
     id: `key_${randomUUID().slice(0, 8)}`,
     name: name.trim() || 'unnamed',
     keyHash: hashKey(key),
-    prefix: key.slice(0, 14), // "sk_live_" + 6 chars — enough to identify, not to use
+    prefix: key.slice(0, 14), // "sk_test_"/"sk_live_" + 6 chars — enough to identify, not to use
+    mode,
     plan,
     pricePerCallCents: Math.max(0, Math.round(price)),
     active: true,
@@ -227,11 +263,29 @@ export function setCardOnFile(id: string, card: { paymentMethodId: string; brand
   });
 }
 
-/** Attach the metered-billing subscription id for a key. */
+/** Attach the metered-billing subscription id for a key. A new subscription lifts a cancellation. */
 export function setSubscription(id: string, subscriptionId: string): void {
   withDb((db) => {
     const k = db.keys[id];
-    if (k) k.stripeSubscriptionId = subscriptionId;
+    if (!k) return;
+    if (k.billingCancelledAt && k.stripeSubscriptionId !== subscriptionId) {
+      k.billingCancelledAt = null;
+      k.suspended = false;
+      k.suspendedReason = null;
+    }
+    k.stripeSubscriptionId = subscriptionId;
+  });
+}
+
+/** Stripe deleted this customer's subscription: suspend for good (until a new subscription). */
+export function cancelByCustomer(stripeCustomerId: string, reason: string): string | null {
+  return withDb((db) => {
+    const k = Object.values(db.keys).find((x) => x.stripeCustomerId === stripeCustomerId);
+    if (!k) return null;
+    k.suspended = true;
+    k.suspendedReason = reason;
+    k.billingCancelledAt = new Date().toISOString();
+    return k.id;
   });
 }
 
@@ -250,6 +304,8 @@ export function setSuspendedByCustomer(stripeCustomerId: string, suspended: bool
   return withDb((db) => {
     const k = Object.values(db.keys).find((x) => x.stripeCustomerId === stripeCustomerId);
     if (!k) return null;
+    // A paid invoice never revives a cancelled subscription.
+    if (!suspended && k.billingCancelledAt) return k.id;
     k.suspended = suspended;
     k.suspendedReason = suspended ? reason : null;
     return k.id;
@@ -309,7 +365,7 @@ export function revokeApiKey(idOrPrefix: string): boolean {
  */
 export function recordUsage(
   id: string,
-  call: { stateCode?: string | null; statusCode: number; error?: string; billable?: boolean },
+  call: { stateCode?: string | null; statusCode: number; error?: string; billable?: boolean; meterUnits?: number },
 ): number {
   return withDb((db) => {
     const k = db.keys[id];
@@ -328,7 +384,72 @@ export function recordUsage(
       ...(call.error ? { error: call.error } : {}),
     });
     if (k.recent.length > RECENT_LIMIT) k.recent.length = RECENT_LIMIT;
+    // Metered keys: queue the Stripe meter event in this same write, so the
+    // call can't be recorded locally yet lost to Stripe.
+    const units = Math.floor(call.meterUnits ?? 0);
+    if (units > 0 && k.stripeCustomerId) {
+      db.meterQueue.push({
+        identifier: `${k.id}_${randomUUID()}`,
+        keyId: k.id,
+        customerId: k.stripeCustomerId,
+        value: units,
+        at: k.lastUsedAt,
+        attempts: 0,
+        lastAttemptAt: null,
+        lastError: null,
+      });
+    }
     return chargedCents;
+  });
+}
+
+// ----------------------------------------------------------------------------
+// Stripe meter queue
+// ----------------------------------------------------------------------------
+
+/** Every meter event not yet accepted by Stripe (dead ones included). */
+export function pendingMeterEvents(): PendingMeterEvent[] {
+  return load().meterQueue;
+}
+
+/** Queue meter units directly (used when a caller meters outside recordUsage). */
+export function enqueueMeterEvent(keyId: string, units: number): PendingMeterEvent | null {
+  return withDb((db) => {
+    const k = db.keys[keyId];
+    const value = Math.floor(units);
+    if (!k?.stripeCustomerId || value <= 0) return null;
+    const item: PendingMeterEvent = {
+      identifier: `${k.id}_${randomUUID()}`,
+      keyId: k.id,
+      customerId: k.stripeCustomerId,
+      value,
+      at: new Date().toISOString(),
+      attempts: 0,
+      lastAttemptAt: null,
+      lastError: null,
+    };
+    db.meterQueue.push(item);
+    return item;
+  });
+}
+
+/** Apply the outcome of one delivery attempt: delivered items leave the queue. */
+export function settleMeterEvent(
+  identifier: string,
+  outcome: { delivered: true } | { delivered: false; error: string; dead?: boolean },
+): void {
+  withDb((db) => {
+    const i = db.meterQueue.findIndex((q) => q.identifier === identifier);
+    if (i === -1) return;
+    if (outcome.delivered) {
+      db.meterQueue.splice(i, 1);
+      return;
+    }
+    const q = db.meterQueue[i];
+    q.attempts += 1;
+    q.lastAttemptAt = new Date().toISOString();
+    q.lastError = outcome.error;
+    if (outcome.dead) q.deadAt = q.lastAttemptAt;
   });
 }
 

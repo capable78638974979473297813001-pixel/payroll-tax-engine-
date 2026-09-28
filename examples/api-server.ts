@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { calculatePaycheck } from '../src/calculate.ts';
 import type { PaycheckInput } from '../src/types.ts';
 import { mintApiKey, recordUsage, usageForKey, verifyApiKey, type ApiKey } from '../api/keys.ts';
-import { billingConfigured, completeCardSetup, handleStripeWebhook, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
+import { billingConfigured, completeCardSetup, flushMeterQueue, handleStripeWebhook, meteringConfigured, startCardSetup } from '../api/billing.ts';
 import { runEmbeddedPayroll, type PlatformEmployeeInput } from '../payroll/platform.ts';
 import type { PayFrequency } from '../src/types.ts';
 import { listUniqueTaxIds, payCalc, resolveUniqueTaxId, type PayCalcRequest } from '../api/ste-compat.ts';
@@ -31,7 +31,7 @@ try {
  *   npm run api:key "Acme Payroll"    # mint a key (printed once)
  *
  *   curl -s localhost:4380/v1/health
- *   curl -s localhost:4380/v1/calculate -H "Authorization: Bearer sk_live_..." \
+ *   curl -s localhost:4380/v1/calculate -H "Authorization: Bearer sk_test_..." \
  *     -H 'Content-Type: application/json' -d '{
  *       "checkDate":"2026-08-15","payFrequency":"weekly",
  *       "earnings":[{"code":"REG","category":"regular","amount":100000}],
@@ -39,7 +39,7 @@ try {
  *       "ytd":{"socialSecurity":0,"medicare":0,"futa":0},
  *       "workState":{"code":"OH","certificate":{"residenceCity":"Columbus","workCity":"Columbus"}}
  *     }'
- *   curl -s localhost:4380/v1/usage -H "Authorization: Bearer sk_live_..."
+ *   curl -s localhost:4380/v1/usage -H "Authorization: Bearer sk_test_..."
  *
  *   # Symmetry Tax Engine (STE) -shaped compatibility routes — this
  *   # engine's own request/response shape is above; these exist for a
@@ -47,8 +47,8 @@ try {
  *   # TaxJurisdictionParms. See api/ste-compat.ts's own doc comment for
  *   # exactly what this is (a compatible SHAPE) and isn't (Symmetry's own
  *   # data, which this project has no access to).
- *   curl -s localhost:4380/v1/uniqueTaxIds -H "Authorization: Bearer sk_live_..."
- *   curl -s localhost:4380/v1/payCalc -H "Authorization: Bearer sk_live_..." \
+ *   curl -s localhost:4380/v1/uniqueTaxIds -H "Authorization: Bearer sk_test_..."
+ *   curl -s localhost:4380/v1/payCalc -H "Authorization: Bearer sk_test_..." \
  *     -H 'Content-Type: application/json' -d '{"payCalc":[{
  *       "checkDate":"2026-08-15","frequency":"biweekly","grossPay":3000,
  *       "workUniqueTaxIds":["39-000-0001"]
@@ -72,10 +72,24 @@ function sendHtml(res: ServerResponse, status: number, title: string, message: s
   res.end(body);
 }
 
-/** Where this API is publicly reachable — for building Checkout return URLs. */
-function baseUrl(req: IncomingMessage): string {
+/**
+ * Where this API is publicly reachable — for building Checkout return URLs.
+ * Never derived from the request's Host header: that is caller-controlled,
+ * and a forged Host would make Stripe send the customer back to an
+ * attacker's site. Without PUBLIC_BASE_URL it is plain localhost, which is
+ * only right for local development (startup warns when billing is on).
+ */
+function baseUrl(): string {
   if (process.env.PUBLIC_BASE_URL) return process.env.PUBLIC_BASE_URL.replace(/\/$/, '');
-  return `http://${req.headers.host ?? `localhost:${PORT}`}`;
+  return `http://localhost:${PORT}`;
+}
+
+/** Deliver queued Stripe meter events off the response path; failures stay queued for the next flush. */
+function flushMeterSoon(): void {
+  if (!meteringConfigured()) return;
+  void flushMeterQueue()
+    .then((r) => { if (r.failed || r.dead) console.error(`[meter] ${r.failed} failed, ${r.dead} past Stripe's window; ${r.pending} still queued`); })
+    .catch((err) => console.error('[meter] flush error:', err));
 }
 
 function readRaw(req: IncomingMessage): Promise<string> {
@@ -132,7 +146,7 @@ const server = createServer(async (req, res) => {
   // Stripe Checkout redirects the customer's BROWSER back here with no API key,
   // so these two are open (correlation is via the session's server-trusted metadata).
   if (method === 'GET' && path === '/v1/billing/return') {
-    const sessionId = new URL(req.url ?? '', baseUrl(req)).searchParams.get('session_id') ?? '';
+    const sessionId = new URL(req.url ?? '', 'http://localhost').searchParams.get('session_id') ?? '';
     try {
       const out = await completeCardSetup(sessionId);
       if (out.ok) {
@@ -160,7 +174,7 @@ const server = createServer(async (req, res) => {
 
   const key: ApiKey | null = verifyApiKey(presentedKey(req));
   if (!key) {
-    return sendJson(res, 401, { error: 'Missing or invalid API key. Send it as "Authorization: Bearer sk_live_...".' });
+    return sendJson(res, 401, { error: 'Missing or invalid API key. Send it as "Authorization: Bearer sk_test_...".' });
   }
 
   if (method === 'GET' && path === '/v1/usage') {
@@ -171,7 +185,7 @@ const server = createServer(async (req, res) => {
   if (method === 'POST' && path === '/v1/billing/setup') {
     if (!billingConfigured()) return sendJson(res, 503, { error: 'Billing is not configured on this server (no STRIPE_SECRET_KEY).' });
     try {
-      const out = await startCardSetup(key.id, baseUrl(req));
+      const out = await startCardSetup(key.id, baseUrl());
       if (out.ok) return sendJson(res, 200, { url: out.url });
       return sendJson(res, 400, { error: `Could not start card setup (${out.reason}).` });
     } catch (err) {
@@ -222,8 +236,9 @@ const server = createServer(async (req, res) => {
       // is the charge only when metering cannot bill this key. Doing both
       // collects the same call twice.
       const metered = meteringConfigured() && Boolean(key.stripeCustomerId);
-      const chargedCents = recordUsage(key.id, { stateCode, statusCode: 200, billable: !metered });
-      if (metered) void reportCall(key.id, 1).catch(() => {});
+      // Metered keys queue the Stripe event in the same write as the call.
+      const chargedCents = recordUsage(key.id, { stateCode, statusCode: 200, billable: !metered, meterUnits: metered ? 1 : 0 });
+      if (metered) flushMeterSoon();
       const balanceDueCents = usageForKey(key.id)?.balanceDueCents ?? 0;
       res.setHeader('X-Charge-Cents', String(chargedCents));
       return sendJson(res, 200, { ok: true, result, billing: { chargedCents, balanceDueCents, metered: meteringConfigured() } });
@@ -260,8 +275,8 @@ const server = createServer(async (req, res) => {
         employees: body.employees,
       });
       const metered = meteringConfigured() && Boolean(key.stripeCustomerId);
-      recordUsage(key.id, { statusCode: 200, billable: !metered });
-      if (metered) void reportCall(key.id, 1).catch(() => {});
+      recordUsage(key.id, { statusCode: 200, billable: !metered, meterUnits: metered ? 1 : 0 });
+      if (metered) flushMeterSoon();
       return sendJson(res, 200, { ok: true, run });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Payroll run failed.';
@@ -279,7 +294,7 @@ const server = createServer(async (req, res) => {
   // caller migrating an integration that already speaks payCalc/
   // UniqueTaxId/TaxJurisdictionParms.
   if (method === 'GET' && path === '/v1/uniqueTaxIds') {
-    const checkDate = new URL(req.url ?? '', baseUrl(req)).searchParams.get('checkDate') ?? new Date().toISOString().slice(0, 10);
+    const checkDate = new URL(req.url ?? '', 'http://localhost').searchParams.get('checkDate') ?? new Date().toISOString().slice(0, 10);
     try {
       return sendJson(res, 200, { checkDate, count: listUniqueTaxIds(checkDate).length, entries: listUniqueTaxIds(checkDate) });
     } catch (err) {
@@ -289,7 +304,7 @@ const server = createServer(async (req, res) => {
 
   if (method === 'GET' && path.startsWith('/v1/uniqueTaxIds/')) {
     const id = decodeURIComponent(path.slice('/v1/uniqueTaxIds/'.length));
-    const checkDate = new URL(req.url ?? '', baseUrl(req)).searchParams.get('checkDate') ?? new Date().toISOString().slice(0, 10);
+    const checkDate = new URL(req.url ?? '', 'http://localhost').searchParams.get('checkDate') ?? new Date().toISOString().slice(0, 10);
     const entry = resolveUniqueTaxId(id, checkDate);
     if (!entry) return sendJson(res, 404, { error: `No such uniqueTaxId/locationCode "${id}" for ${checkDate}.` });
     return sendJson(res, 200, entry);
@@ -322,9 +337,10 @@ const server = createServer(async (req, res) => {
         statusCode: ok ? 200 : 422,
         error: r.error,
         billable: ok && !metered,
+        meterUnits: ok && metered ? 1 : 0,
       });
     }
-    if (metered && successes > 0) void reportCall(key.id, successes).catch(() => {});
+    if (metered && successes > 0) flushMeterSoon();
     res.setHeader('X-Charge-Cents', String(chargedCents));
     return sendJson(res, 200, { payCalc: results });
   }
@@ -336,15 +352,21 @@ const server = createServer(async (req, res) => {
 // without a separate command, for a quick first-run.
 const mintFlag = process.argv.indexOf('--mint');
 if (mintFlag !== -1) {
-  const { key, record } = mintApiKey(process.argv[mintFlag + 1] ?? 'dev');
+  const { key, record } = mintApiKey(process.argv[mintFlag + 1] ?? 'dev'); // test mode unless API_ISSUE_LIVE_KEYS=1
   console.log(`Minted key for "${record.name}" (${record.prefix}…):\n  ${key}\n`);
+}
+
+// Retry any meter events a previous flush (or a previous process) left queued.
+if (meteringConfigured()) {
+  flushMeterSoon();
+  setInterval(flushMeterSoon, 60_000).unref();
 }
 
 server.listen(PORT, () => {
   console.log(`\n  Payroll-tax API — the engine behind a metered, billed API key`);
   console.log(`  Console:     http://localhost:${PORT}/            (paste a key to see usage, cost, card)`);
   console.log(`  Health:      http://localhost:${PORT}/v1/health`);
-  console.log(`  Calculate:   POST http://localhost:${PORT}/v1/calculate   (Authorization: Bearer sk_live_...)`);
+  console.log(`  Calculate:   POST http://localhost:${PORT}/v1/calculate   (Authorization: Bearer sk_test_...)`);
   console.log(`  Usage:       GET  http://localhost:${PORT}/v1/usage`);
   console.log(`  Save a card: POST http://localhost:${PORT}/v1/billing/setup  -> returns a Stripe Checkout URL`);
   const billingMode = meteringConfigured()
@@ -354,4 +376,7 @@ server.listen(PORT, () => {
       : 'ledger-only (set STRIPE_SECRET_KEY + STRIPE_PRICE_ID + STRIPE_METER_EVENT to bill per call)';
   console.log(`  Bill a key:  npm run api:key -- --bill <prefix>   (manual path; metered billing auto-invoices)`);
   console.log(`  Billing:     ${billingMode}\n`);
+  if (billingConfigured() && !process.env.PUBLIC_BASE_URL) {
+    console.warn('  WARNING: PUBLIC_BASE_URL is not set, so Stripe Checkout returns to http://localhost. Set it to this API\'s public https URL in production.\n');
+  }
 });

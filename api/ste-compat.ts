@@ -321,34 +321,64 @@ function centsToDecimalDollars(c: Cents): number {
 
 /**
  * Apply one resolved catalog entry to a certificate/workState.code
- * accumulator. Booleans and strings both just overwrite; a caller supplying
- * two conflicting ids for the same field (e.g. two different work cities)
- * gets whichever was applied last — the same "last one wins" rule ordinary
- * object spreading already uses everywhere else in this engine's inputs.
+ * accumulator. Each field may be set once: repeating the same id (or two
+ * ids with the same value) is harmless, but two different values for one
+ * field -- two states, two work cities, two PSDs -- is a malformed
+ * location, and silently letting the last one win would calculate tax for
+ * a place the caller didn't mean. That throws instead, naming both ids.
  */
 function applyEntry(
   entry: UniqueTaxIdEntry,
-  acc: { stateCode?: string; certificate: Partial<StateCertificate> },
+  acc: ResolvedProfile,
   role: 'work' | 'residence',
 ): void {
-  if (entry.field === 'workState.code' || entry.field === 'residenceState.code') {
-    acc.stateCode = entry.value as string;
-    return;
+  const profile = role === 'work' ? 'workUniqueTaxIds' : 'liveUniqueTaxIds';
+  // One location, one state: a local id from another state can't apply here.
+  if (acc.state && acc.state.value !== entry.state) {
+    throw new Error(
+      `${profile} mixes jurisdictions from two states: "${acc.state.id}" is ${acc.state.value} but "${entry.uniqueTaxId}" (${entry.name}) is ${entry.state}. ` +
+        'Each profile describes one location, so every id in it must be from the same state.',
+    );
   }
+  acc.state ??= { id: entry.uniqueTaxId, value: entry.state };
+
+  const isState = entry.field === 'workState.code' || entry.field === 'residenceState.code';
   // A PSD catalog entry is role 'either' and names workPSD, because that is
   // the field a work location writes. The same id on the live (residence)
   // profile is the employee's residence PSD — pennsylvaniaLocalTax reads
   // that from the work certificate's residencePSD, not from workPSD.
-  const field = role === 'residence' && entry.field === 'workPSD' ? 'residencePSD' : entry.field;
+  const field = isState ? 'state' : role === 'residence' && entry.field === 'workPSD' ? 'residencePSD' : entry.field;
+  const prior = acc.setBy.get(field);
+  if (prior && prior.value !== entry.value) {
+    throw new Error(
+      `${profile} has conflicting ids for ${isState ? 'the state' : `"${field}"`}: "${prior.id}" sets ${JSON.stringify(prior.value)} ` +
+        `and "${entry.uniqueTaxId}" sets ${JSON.stringify(entry.value)}. Send exactly one.`,
+    );
+  }
+  acc.setBy.set(field, { id: entry.uniqueTaxId, value: entry.value });
+
+  if (isState) {
+    acc.stateCode = entry.value as string;
+    return;
+  }
   (acc.certificate as Record<string, unknown>)[field] = entry.value;
+}
+
+interface ResolvedProfile {
+  stateCode?: string;
+  certificate: Partial<StateCertificate>;
+  /** The state every id in this profile belongs to, and the id that fixed it. */
+  state?: { id: string; value: string };
+  /** Which id set each field, to reject a second, different value. */
+  setBy: Map<string, { id: string; value: string | boolean }>;
 }
 
 function resolveIds(
   ids: string[] | undefined,
   checkDate: string,
   role: 'work' | 'residence',
-): { stateCode?: string; certificate: Partial<StateCertificate> } {
-  const acc: { stateCode?: string; certificate: Partial<StateCertificate> } = { certificate: {} };
+): ResolvedProfile {
+  const acc: ResolvedProfile = { certificate: {}, setBy: new Map() };
   for (const rawId of ids ?? []) {
     const entry = resolveUniqueTaxId(rawId, checkDate);
     if (!entry) {

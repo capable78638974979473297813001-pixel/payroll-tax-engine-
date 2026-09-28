@@ -34,13 +34,20 @@ describe('site billing (site/lib/billing.ts)', () => {
   test('configuration flags follow the environment', () => {
     delete process.env.STRIPE_SECRET_KEY;
     delete process.env.STRIPE_PRICE_ID;
+    delete process.env.STRIPE_METER_EVENT;
     assert.equal(billingConfigured(), false);
     assert.equal(meteringConfigured(), false);
     process.env.STRIPE_SECRET_KEY = 'sk_test_x';
-    assert.equal(meteringConfigured(), true);
+    // A secret key alone is not metering: no metered price to bill against.
+    assert.equal(meteringConfigured(), false);
     assert.equal(billingConfigured(), false); // still no price
     process.env.STRIPE_PRICE_ID = 'price_metered';
     assert.equal(billingConfigured(), true);
+    // A price without an explicit meter event name still isn't metering.
+    assert.equal(meteringConfigured(), false);
+    process.env.STRIPE_METER_EVENT = 'omnia_api_call';
+    assert.equal(meteringConfigured(), true);
+    delete process.env.STRIPE_METER_EVENT;
   });
 
   test('reportCall is a safe no-op without Stripe or a customer, and never throws', async () => {

@@ -1,14 +1,14 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import { createHash, randomBytes, randomInt } from 'node:crypto';
+import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 import { calculatePaycheck } from '../src/calculate.ts';
 import {
-  withDb, readDb, appendUsage,
+  withDb, readDb, appendUsage, hitStoredLimit,
   type AccountRecord, type KeyRecord, type PaymentMethodRecord,
-  type SubscriptionRecord, type TermsAcceptance,
+  type SubscriptionRecord, type TermsAcceptance, type TermsQuote,
 } from './lib/store.ts';
 import { CALL_TIERS, ROOFTOP_RATE, TRIAL_DAYS, estimate as computePricing, costForCalls } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
@@ -17,7 +17,7 @@ import { validatePaycheckInput } from './lib/validate.ts';
 import { RateLimiter } from './lib/ratelimit.ts';
 import { keyLifeFor } from './lib/keylife.ts';
 import {
-  billingConfigured, meteringConfigured, reportCall,
+  billingConfigured, meteringConfigured, enqueueMeterEvent, flushMeterQueue,
   createBillingCustomer, startMeteredCheckout, completeMeteredCheckout, interpretWebhook,
 } from './lib/billing.ts';
 
@@ -64,17 +64,41 @@ const API_VERSION = '1.0.0';
 const SESSION_TTL_MS = 24 * 60 * 60_000;
 const CODE_TTL_MS = 15 * 60_000;
 const CODE_COOLDOWN_MS = 30_000;
+/** A terms quote must be accepted within this long of being shown. */
+const QUOTE_TTL_MS = 60 * 60_000;
+/** Never-verified signups older than this are pruned, so junk signups can't pile up. */
+const UNVERIFIED_RETENTION_MS = 7 * 24 * 60 * 60_000;
 
-// Per-key rate limiter for the metered calculation endpoint.
+// Per-key rate limiter for the metered calculation endpoint. In process
+// memory on purpose: it is hit on every billable call, and a store write
+// per call would be the bottleneck. That makes it per instance -- run a
+// single instance, or front several with a shared limiter (GO-LIVE.md).
 const paycheckLimiter = new RateLimiter();
 
-// Sign-in codes: at most this many requests per address an hour, so the
-// sign-in form can't be used to spam someone's inbox.
-// Wrong-code attempts per email; past this the code is burned and the
-// customer asks for a new one, so a 6-digit code can't be guessed.
+// Wrong-code attempts per issued code; past this the code is burned and
+// the customer asks for a new one, so a 6-digit code can't be guessed.
+// Counted on the account record itself (not in memory), so a restart or a
+// second instance doesn't hand out fresh guesses.
 const MAX_CODE_ATTEMPTS = 8;
-const codeAttempts = new RateLimiter({ limit: MAX_CODE_ATTEMPTS, windowMs: CODE_TTL_MS });
-const signinLimiter = new RateLimiter({ limit: Number(process.env.SIGNIN_PER_HOUR ?? 10), windowMs: 60 * 60_000 });
+
+// Sign-in and signup codes: at most this many requests per client address
+// an hour, so neither form can be used to spam inboxes or grow the
+// account store without bound. Kept in the store, so the limit survives
+// restarts and is shared by every instance on the same volume.
+const HOUR_MS = 60 * 60_000;
+const signinPerHour = () => Number(process.env.SIGNIN_PER_HOUR ?? 10);
+const signupPerHour = () => Number(process.env.SIGNUP_PER_HOUR ?? 10);
+
+/**
+ * Print verification codes to the console only when no email provider is
+ * configured (local development). With email on, a code in the logs is a
+ * working sign-in credential for anyone who can read them.
+ */
+function logCodesToConsole(): boolean {
+  return !isEmailConfigured();
+}
+
+const SESSION_COOKIE = 'omnia_session';
 
 // The set of state codes this build can actually compute, read once from
 // data/states/. Used to reject an unknown workState at validation time
@@ -203,9 +227,19 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
     sendJson(res, 400, { error: 'Name, a valid work email, business name and phone are all required.' });
     return;
   }
+  if (name.length > 200 || email.length > 254 || company.length > 200 || phone.length > 40) {
+    sendJson(res, 400, { error: 'One of those fields is too long.' });
+    return;
+  }
 
   const now = Date.now();
   const account = withDb((db) => {
+    // Per client address, across all emails: the per-email cooldown below
+    // doesn't stop a flood of unique addresses.
+    const rl = hitStoredLimit(db, 'signup:' + clientAddress(req), signupPerHour(), HOUR_MS, now);
+    if (!rl.allowed) return { limited: true as const, retryAfterSec: rl.retryAfterSec };
+    pruneUnverified(db, now);
+
     const existing = db.accounts[email];
     const cooling =
       existing?.codeRequestedAt && now - new Date(existing.codeRequestedAt).getTime() < CODE_COOLDOWN_MS;
@@ -219,39 +253,62 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
       code,
       codeRequestedAt: cooling ? existing!.codeRequestedAt : new Date(now).toISOString(),
       codeExpiresAt: cooling ? existing!.codeExpiresAt : new Date(now + CODE_TTL_MS).toISOString(),
+      codeAttempts: cooling ? existing!.codeAttempts ?? 0 : 0,
       emailVerifiedAt: existing?.emailVerifiedAt ?? null,
       sessionToken: existing?.sessionToken ?? null,
       sessionExpiresAt: existing?.sessionExpiresAt ?? null,
       stage: existing?.emailVerifiedAt ? existing.stage : 'unverified',
       createdAt: existing?.createdAt ?? new Date(now).toISOString(),
     };
+    // An existing account keeps its profile: an unauthenticated signup
+    // for a known email may only issue a new code, never rewrite it.
+    if (existing?.emailVerifiedAt) {
+      record.name = existing.name;
+      record.company = existing.company;
+      record.phone = existing.phone;
+    }
     db.accounts[email] = record;
     return record;
   });
 
-  console.log('');
-  console.log('+- Omnia verification code ------------------------');
-  console.log(`|  ${name} <${email}> (${company})`);
-  console.log(`|  CODE: ${account.code}`);
-  console.log(`|  expires ${account.codeExpiresAt}`);
+  if ('limited' in account) {
+    sendJson(res, 429, { error: 'Too many signup attempts from this network. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(account.retryAfterSec) });
+    return;
+  }
 
   let emailSent = false;
-  if (isEmailConfigured()) {
+  if (logCodesToConsole()) {
+    // Local development only: no email provider, so the code has to be
+    // readable somewhere. Never taken when RESEND_API_KEY is set.
+    console.log('');
+    console.log('+- Omnia verification code (dev: no email provider) -');
+    console.log(`|  ${email}`);
+    console.log(`|  CODE: ${account.code}`);
+    console.log(`|  expires ${account.codeExpiresAt}`);
+    console.log('+--------------------------------------------------');
+    console.log('');
+  } else {
     const result = await sendVerificationEmail({
-      name,
+      name: account.name,
       email,
       code: account.code!,
       expiresAt: account.codeExpiresAt!,
     });
     emailSent = result.sent;
-    console.log(result.sent ? `|  emailed via Resend` : `|  EMAIL FAILED (${result.reason})`);
-  } else {
-    console.log('|  no RESEND_API_KEY -- code is console-only');
+    // Never the code, and no personal details: just that delivery failed.
+    if (!result.sent) console.error(`[signup] verification email failed: ${result.reason}`);
   }
-  console.log('+--------------------------------------------------');
-  console.log('');
 
   sendJson(res, 200, { ok: true, emailSent, alreadyVerified: Boolean(account.emailVerifiedAt) });
+}
+
+/** Drop never-verified signups past retention (and their dangling state). */
+function pruneUnverified(db: { accounts: Record<string, AccountRecord> }, now: number): void {
+  for (const [email, a] of Object.entries(db.accounts)) {
+    if (a.emailVerifiedAt) continue;
+    const last = new Date(a.codeRequestedAt ?? a.createdAt).getTime();
+    if (now - last > UNVERIFIED_RETENTION_MS) delete db.accounts[email];
+  }
 }
 
 // ---------------------------------------------------------------------
@@ -274,30 +331,33 @@ async function handleSignin(req: IncomingMessage, res: ServerResponse): Promise<
     sendJson(res, 400, { error: 'Enter the work email you signed up with.' });
     return;
   }
-  const rl = signinLimiter.hit('signin:' + clientAddress(req));
-  if (!rl.allowed) {
-    sendJson(res, 429, { error: 'Too many sign-in attempts. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(rl.retryAfterSec) });
-    return;
-  }
-
   const now = Date.now();
-  const acct = withDb((db) => {
+  const outcome = withDb((db) => {
+    const rl = hitStoredLimit(db, 'signin:' + clientAddress(req), signinPerHour(), HOUR_MS, now);
+    if (!rl.allowed) return { limited: true as const, retryAfterSec: rl.retryAfterSec };
     const a = db.accounts[email];
-    if (!a || !a.emailVerifiedAt) return null;
+    if (!a || !a.emailVerifiedAt) return { acct: null };
     const cooling = a.codeRequestedAt && a.code && now - new Date(a.codeRequestedAt).getTime() < CODE_COOLDOWN_MS;
     if (!cooling) {
       a.code = String(randomInt(100000, 1000000));
       a.codeRequestedAt = new Date(now).toISOString();
       a.codeExpiresAt = new Date(now + CODE_TTL_MS).toISOString();
+      a.codeAttempts = 0;
     }
-    return { name: a.name, email: a.email, code: a.code!, codeExpiresAt: a.codeExpiresAt! };
+    return { acct: { name: a.name, email: a.email, code: a.code!, codeExpiresAt: a.codeExpiresAt! } };
   });
+  if ('limited' in outcome) {
+    sendJson(res, 429, { error: 'Too many sign-in attempts. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(outcome.retryAfterSec) });
+    return;
+  }
 
+  const acct = outcome.acct;
   if (acct) {
-    console.log(`[sign-in code] ${acct.email}: ${acct.code} (expires ${acct.codeExpiresAt})`);
-    if (isEmailConfigured()) {
+    if (logCodesToConsole()) {
+      console.log(`[sign-in code, dev: no email provider] ${acct.email}: ${acct.code} (expires ${acct.codeExpiresAt})`);
+    } else {
       const result = await sendVerificationEmail({ name: acct.name, email: acct.email, code: acct.code, expiresAt: acct.codeExpiresAt });
-      if (!result.sent) console.log(`[sign-in code] EMAIL FAILED (${result.reason})`);
+      if (!result.sent) console.error(`[sign-in] verification email failed: ${result.reason}`);
     }
   }
   sendJson(res, 200, { ok: true, emailConfigured: isEmailConfigured() });
@@ -323,26 +383,35 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
     return;
   }
 
+  // One answer for every failure -- unknown email, no code, expired code,
+  // wrong code -- so this endpoint can't be used to learn who has signed
+  // up (POST /api/signin makes the same promise). Wrong guesses are
+  // counted per address whether or not it exists, and a burned code is
+  // reported the same way for all of them.
+  const INVALID = 'That code is incorrect or has expired. Request a new one if needed.';
+  const TOO_MANY = 'Too many wrong codes. Request a new one.';
   const outcome = withDb((db) => {
     const acct = db.accounts[email];
-    if (!acct) return { ok: false as const, error: 'No signup found for that email.' };
-    if (!acct.code || !acct.codeExpiresAt) return { ok: false as const, error: 'Request a new code.' };
-    if (Date.now() > new Date(acct.codeExpiresAt).getTime()) {
-      return { ok: false as const, error: 'That code expired. Request a new one.' };
-    }
-    if (acct.code !== code) {
-      if (!codeAttempts.hit('verify:' + email).allowed) {
+    const now = Date.now();
+    const live = Boolean(acct?.code && acct.codeExpiresAt && now <= new Date(acct.codeExpiresAt).getTime());
+    if (!acct || !live || !safeEqual(acct.code!, code)) {
+      // Unknown addresses get a stored counter too, so "burned" looks
+      // the same for them as for real accounts.
+      const burned = acct
+        ? (acct.codeAttempts = (acct.codeAttempts ?? 0) + 1) > MAX_CODE_ATTEMPTS
+        : !hitStoredLimit(db, 'verify:' + email, MAX_CODE_ATTEMPTS, CODE_TTL_MS, now).allowed;
+      if (burned && acct) {
         acct.code = null;
         acct.codeExpiresAt = null;
-        return { ok: false as const, error: 'Too many wrong codes. Request a new one.' };
       }
-      return { ok: false as const, error: 'That code is incorrect.' };
+      return { ok: false as const, error: burned ? TOO_MANY : INVALID };
     }
 
     const token = randomBytes(24).toString('hex');
     acct.emailVerifiedAt = acct.emailVerifiedAt ?? new Date().toISOString();
     acct.code = null;
     acct.codeExpiresAt = null;
+    acct.codeAttempts = 0;
     acct.sessionToken = token;
     acct.sessionExpiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
     if (acct.stage === 'unverified') acct.stage = 'verified';
@@ -361,8 +430,56 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
     sendJson(res, 401, { error: outcome.error });
     return;
   }
-  console.log(`[verified] ${outcome.email}`);
-  sendJson(res, 200, outcome);
+  // The browser console authenticates with an HttpOnly cookie, so the
+  // session token is never readable by page script (an XSS can't lift
+  // it). The token is also in the body for non-browser API clients, which
+  // send it as a Bearer header; the console no longer stores it.
+  sendJson(res, 200, outcome, { 'Set-Cookie': sessionCookie(outcome.sessionToken, SESSION_TTL_MS) });
+}
+
+function safeEqual(a: string, b: string): boolean {
+  const x = Buffer.from(a);
+  const y = Buffer.from(b);
+  return x.length === y.length && timingSafeEqual(x, y);
+}
+
+function cookieSecure(): boolean {
+  return (process.env.PUBLIC_BASE_URL ?? '').startsWith('https://') || process.env.COOKIE_SECURE === '1';
+}
+
+function sessionCookie(token: string, ttlMs: number): string {
+  // SameSite=Lax: sent on same-site requests and top-level navigations
+  // (the Stripe Checkout return), never on cross-site POSTs.
+  return `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${Math.floor(ttlMs / 1000)}` +
+    (cookieSecure() ? '; Secure' : '');
+}
+
+function cookieToken(req: IncomingMessage): string | null {
+  const header = req.headers.cookie;
+  if (!header) return null;
+  for (const part of header.split(';')) {
+    const [k, ...v] = part.trim().split('=');
+    if (k === SESSION_COOKIE) return v.join('=') || null;
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------
+// POST /api/signout -- ends the session server-side and clears the cookie.
+// ---------------------------------------------------------------------
+
+function handleSignout(req: IncomingMessage, res: ServerResponse): void {
+  const token = sessionTokenFrom(req);
+  if (token) {
+    withDb((db) => {
+      const acct = Object.values(db.accounts).find((a) => a.sessionToken === token);
+      if (acct) {
+        acct.sessionToken = null;
+        acct.sessionExpiresAt = null;
+      }
+    });
+  }
+  sendJson(res, 200, { ok: true }, { 'Set-Cookie': sessionCookie('', 0) });
 }
 
 // ---------------------------------------------------------------------
@@ -381,19 +498,51 @@ function handleTerms(req: IncomingMessage, res: ServerResponse): void {
   const rooftop = url.searchParams.get('rooftop') === 'true';
 
   const breakdown = computePricing({ employees, payFrequency, rooftop });
-  const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 86_400_000).toISOString();
+  const now = Date.now();
+  const trialEndsAt = new Date(now + TRIAL_DAYS * 86_400_000).toISOString();
+  const clauses = termsClauses({
+    trialEndsAt,
+    estimatedAnnual: breakdown.total,
+    expectedEmployees: employees,
+  });
+
+  // Record exactly what is about to be shown, under an unguessable id.
+  // Acceptance must present this id and is recorded from this record, so
+  // the stored evidence is what the server displayed -- not whatever the
+  // client re-sends later.
+  const quote: TermsQuote = {
+    id: 'tq_' + randomBytes(16).toString('hex'),
+    email: session.email,
+    termsVersion: TERMS_VERSION,
+    issuedAt: new Date(now).toISOString(),
+    expiresAt: new Date(now + QUOTE_TTL_MS).toISOString(),
+    trialDays: TRIAL_DAYS,
+    trialEndsAt,
+    termMonths: TERM_MONTHS,
+    estimatedAnnual: breakdown.total,
+    expectedEmployees: employees,
+    payFrequency,
+    rooftop,
+    clausesSha256: sha256Hex(JSON.stringify(clauses)),
+    acceptedAt: null,
+  };
+  withDb((db) => {
+    // Unaccepted quotes past expiry are noise; accepted ones stay as evidence.
+    for (const [id, q] of Object.entries(db.termsQuotes)) {
+      if (!q.acceptedAt && now > new Date(q.expiresAt).getTime()) delete db.termsQuotes[id];
+    }
+    db.termsQuotes[quote.id] = quote;
+  });
 
   sendJson(res, 200, {
+    quoteId: quote.id,
+    quoteExpiresAt: quote.expiresAt,
     termsVersion: TERMS_VERSION,
     trialDays: TRIAL_DAYS,
     termMonths: TERM_MONTHS,
     trialEndsAt,
     estimate: breakdown,
-    clauses: termsClauses({
-      trialEndsAt,
-      estimatedAnnual: breakdown.total,
-      expectedEmployees: employees,
-    }),
+    clauses,
   });
 }
 
@@ -410,7 +559,7 @@ async function handleAcceptTerms(req: IncomingMessage, res: ServerResponse): Pro
 
   let body: {
     signedName?: string; agreed?: unknown; legalName?: string; billingEmail?: string; address?: string;
-    expectedEmployees?: unknown; payFrequency?: string; rooftop?: unknown;
+    quoteId?: string; expectedEmployees?: unknown; payFrequency?: string; rooftop?: unknown;
   };
   try {
     body = await readJson(req);
@@ -423,41 +572,74 @@ async function handleAcceptTerms(req: IncomingMessage, res: ServerResponse): Pro
   const legalName = (body.legalName ?? '').trim();
   const billingEmail = (body.billingEmail ?? '').trim().toLowerCase();
   const address = (body.address ?? '').trim();
-  const expectedEmployees = Math.max(0, Math.trunc(Number(body.expectedEmployees) || 0));
-  const payFrequency = (body.payFrequency ?? 'biweekly').trim();
-  const rooftop = body.rooftop === true;
+  const quoteId = String(body.quoteId ?? '');
 
   if (body.agreed !== true) {
     sendJson(res, 400, { error: 'You have to tick the authorization box to continue.' });
     return;
   }
-  if (!signedName || !legalName || !isValidEmail(billingEmail) || !address || expectedEmployees <= 0) {
+  if (!signedName || !legalName || !isValidEmail(billingEmail) || !address) {
     sendJson(res, 400, {
-      error: 'Signature, legal business name, billing email, address and employee count are all required.',
+      error: 'Signature, legal business name, billing email and address are all required.',
     });
     return;
   }
+  if (!quoteId) {
+    sendJson(res, 400, { error: 'Load the terms before agreeing to them.', code: 'quote_required' });
+    return;
+  }
 
-  const breakdown = computePricing({ employees: expectedEmployees, payFrequency, rooftop });
   const now = Date.now();
-  const trialEndsAt = new Date(now + TRIAL_DAYS * 86_400_000).toISOString();
 
   const result = withDb((db) => {
     const acct = db.accounts[session.email];
 
+    // The agreement binds to the terms the server showed this account.
+    const quote = db.termsQuotes[quoteId];
+    if (!quote || quote.email !== session.email) {
+      return { ok: false as const, status: 409, code: 'quote_invalid', error: 'Those terms are not valid for this account. Reload them and agree again.' };
+    }
+    if (quote.acceptedAt) {
+      return { ok: false as const, status: 409, code: 'quote_used', error: 'Those terms were already agreed to. Reload them to agree again.' };
+    }
+    if (now > new Date(quote.expiresAt).getTime() || quote.termsVersion !== TERMS_VERSION) {
+      return { ok: false as const, status: 409, code: 'quote_expired', error: 'Those terms have expired. Reload them and agree again.' };
+    }
+    // A client that re-sends the figures must re-send the ones it was shown.
+    const mismatch =
+      (body.expectedEmployees !== undefined && Math.trunc(Number(body.expectedEmployees) || 0) !== quote.expectedEmployees) ||
+      (body.payFrequency !== undefined && String(body.payFrequency).trim() !== quote.payFrequency) ||
+      (body.rooftop !== undefined && (body.rooftop === true) !== quote.rooftop);
+    if (mismatch) {
+      return { ok: false as const, status: 409, code: 'quote_mismatch', error: 'The figures changed since the terms were shown. Reload them and agree again.' };
+    }
+    if (quote.expectedEmployees <= 0) {
+      return { ok: false as const, status: 400, code: 'employees_required', error: 'Enter your employee count and reload the terms before agreeing.' };
+    }
+    // Re-signing must not replace a subscription that already started (it
+    // would drop the Stripe ids and hand out a second free trial).
+    const prior = db.subscriptions[session.email];
+    if (prior?.trialStartsAt || prior?.status === 'cancelled') {
+      return { ok: false as const, status: 409, code: 'already_subscribed', error: 'This account already has a subscription. Contact support to change its terms.' };
+    }
+    quote.acceptedAt = new Date(now).toISOString();
+    const { expectedEmployees, payFrequency, rooftop, trialEndsAt } = quote;
+
     // Append-only: an acceptance is evidence, never edited in place.
     const acceptance: TermsAcceptance = {
       email: session.email,
-      termsVersion: TERMS_VERSION,
+      termsVersion: quote.termsVersion,
       signedName,
       acceptedAt: new Date(now).toISOString(),
-      ip: (req.socket.remoteAddress ?? null),
+      ip: clientAddress(req),
       userAgent: (req.headers['user-agent'] as string) ?? null,
+      quoteId: quote.id,
+      clausesSha256: quote.clausesSha256,
       disclosed: {
-        trialDays: TRIAL_DAYS,
+        trialDays: quote.trialDays,
         trialEndsAt,
-        termMonths: TERM_MONTHS,
-        estimatedAnnual: breakdown.total,
+        termMonths: quote.termMonths,
+        estimatedAnnual: quote.estimatedAnnual,
         expectedEmployees,
         payFrequency,
         rooftop,
@@ -474,25 +656,27 @@ async function handleAcceptTerms(req: IncomingMessage, res: ServerResponse): Pro
       expectedEmployees,
       payFrequency,
       rooftop,
-      estimatedAnnual: breakdown.total,
+      estimatedAnnual: quote.estimatedAnnual,
       status: 'payment_pending',
       trialStartsAt: null,
       trialEndsAt,
       termMonths: TERM_MONTHS,
       termEndsAt: null,
-      createdAt: db.subscriptions[session.email]?.createdAt ?? new Date(now).toISOString(),
+      createdAt: prior?.createdAt ?? new Date(now).toISOString(),
       activatedAt: null,
+      stripeCustomerId: prior?.stripeCustomerId ?? null,
     };
     db.subscriptions[session.email] = sub;
     if (acct) acct.stage = 'payment_pending';
 
-    return { acceptance, subscription: sub };
+    return { ok: true as const, acceptance, subscription: sub };
   });
 
-  console.log(
-    `[terms accepted] ${signedName} for ${legalName} -- v${TERMS_VERSION}, ` +
-      `est $${Math.round(breakdown.total).toLocaleString()}/yr, trial ends ${trialEndsAt}`,
-  );
+  if (!result.ok) {
+    sendJson(res, result.status, { error: result.error, code: result.code });
+    return;
+  }
+  console.log(`[terms accepted] v${result.acceptance.termsVersion} quote ${result.acceptance.quoteId}`);
 
   sendJson(res, 200, {
     ok: true,
@@ -653,6 +837,8 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
     const sub = db.subscriptions[session.email];
     const acct = db.accounts[session.email];
     if (!sub) return { ok: false as const };
+    const resubscribed = Boolean(done.subscriptionId && done.subscriptionId !== sub.stripeSubscriptionId);
+    if (sub.status === 'cancelled' && !resubscribed) return { ok: false as const, cancelled: true };
     db.paymentMethods[session.email] = {
       email: session.email,
       kind: saved.kind,
@@ -665,13 +851,14 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
     if (done.subscriptionId) sub.stripeSubscriptionId = done.subscriptionId;
     sub.suspended = false;
     sub.suspendedReason = null;
-    sub.status = 'trialing';
+    // A returning (re-subscribed) customer is active, not on a second trial.
+    sub.status = sub.trialStartsAt && resubscribed && sub.status === 'cancelled' ? 'active' : 'trialing';
     sub.trialStartsAt = sub.trialStartsAt ?? new Date(now).toISOString();
     sub.trialEndsAt = sub.trialEndsAt ?? new Date(now + TRIAL_DAYS * 86_400_000).toISOString();
     if (!sub.termEndsAt) {
       sub.termEndsAt = new Date(new Date(now + TRIAL_DAYS * 86_400_000).setMonth(new Date(now).getMonth() + TERM_MONTHS)).toISOString();
     }
-    if (acct) acct.stage = 'trialing';
+    if (acct) acct.stage = sub.status;
     // Promote the key to live for the committed term.
     const life = keyLifeFor(sub, now);
     for (const k of Object.values(db.keys)) {
@@ -684,7 +871,9 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
   });
 
   if (!outcome.ok) {
-    sendJson(res, 409, { error: 'No subscription on file for this account.' });
+    sendJson(res, 409, 'cancelled' in outcome
+      ? { error: 'This subscription was cancelled. Start a new subscription to resume.', code: 'subscription_cancelled' }
+      : { error: 'No subscription on file for this account.' });
     return;
   }
   console.log(`[billing] ${session.email} subscribed -- customer ${done.customerId}, sub ${done.subscriptionId}`);
@@ -719,13 +908,25 @@ async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse): 
   const applied = withDb((db) => {
     const sub = Object.values(db.subscriptions).find((s) => s.stripeCustomerId === result.customerId);
     if (!sub) return null;
-    if (result.action === 'suspend' || result.action === 'cancel') {
+    if (result.action === 'cancel') {
       sub.suspended = true;
-      sub.suspendedReason = result.action === 'cancel' ? 'subscription_cancelled' : 'payment_failed';
-      if (result.action === 'cancel') sub.status = 'cancelled';
+      sub.suspendedReason = 'subscription_cancelled';
+      sub.status = 'cancelled';
+      const acct = db.accounts[sub.email];
+      if (acct) acct.stage = 'cancelled';
+    } else if (result.action === 'suspend') {
+      // A failed invoice on an already-cancelled subscription keeps the
+      // cancellation as the reason.
+      sub.suspended = true;
+      if (sub.status !== 'cancelled') sub.suspendedReason = 'payment_failed';
     } else if (result.action === 'reactivate') {
-      sub.suspended = false;
-      sub.suspendedReason = null;
+      // A paid invoice settles a payment failure. It never revives a
+      // cancelled subscription (Stripe sends invoice.paid for the final
+      // invoice after cancellation, too).
+      if (sub.status !== 'cancelled' && sub.suspendedReason !== 'subscription_cancelled') {
+        sub.suspended = false;
+        sub.suspendedReason = null;
+      }
     }
     return sub.email;
   });
@@ -757,6 +958,15 @@ async function handleStartTrial(req: IncomingMessage, res: ServerResponse): Prom
     const hasPayment = paymentOnFile(db, session.email);
     if (!hasPayment) {
       return { ok: false as const, error: 'Add a card or bank account first.', code: 'payment_method_required' };
+    }
+    if (sub.status === 'cancelled') {
+      return { ok: false as const, error: 'This subscription was cancelled. Contact support to restart it.', code: undefined };
+    }
+    // One trial per subscription: once started, calling this again reports
+    // the existing trial instead of moving its dates (which would extend
+    // the free window and the key's committed term).
+    if (sub.trialStartsAt) {
+      return { ok: true as const, subscription: sub, paymentAttached: hasPayment };
     }
 
     sub.status = 'trialing';
@@ -822,12 +1032,17 @@ function handleAccount(req: IncomingMessage, res: ServerResponse): void {
 // session lookup shared by the /api/* console routes below
 // ---------------------------------------------------------------------
 
+/** The console's session token: the HttpOnly cookie, or a Bearer header from a non-browser client. */
+function sessionTokenFrom(req: IncomingMessage): string | null {
+  return cookieToken(req) ?? bearerToken(req);
+}
+
 function requireSession(req: IncomingMessage): { email: string; name: string; company: string } | null {
-  const token = bearerToken(req);
+  const token = sessionTokenFrom(req);
   if (!token) return null;
   return readDb((db) => {
     const acct = Object.values(db.accounts).find((a) => a.sessionToken === token);
-    if (!acct || !acct.sessionExpiresAt) return null;
+    if (!acct || !acct.sessionExpiresAt || !acct.sessionToken || !safeEqual(acct.sessionToken, token)) return null;
     if (Date.now() > new Date(acct.sessionExpiresAt).getTime()) return null;
     if (!acct.emailVerifiedAt) return null; // unverified email gets no session powers
     return { email: acct.email, name: acct.name, company: acct.company };
@@ -1022,7 +1237,11 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
     return {
       keyRecord: kr,
       customerId: sub?.stripeCustomerId ?? null,
+      // Meter only a customer on a metered subscription: an event for a
+      // customer with none is accepted by Stripe and never invoiced.
+      meteredSubscription: Boolean(sub?.stripeCustomerId && sub?.stripeSubscriptionId),
       paymentOnFile: kr ? paymentOnFile(db, kr.ownerEmail) : false,
+      cancelled: sub?.status === 'cancelled',
       suspended: Boolean(sub?.suspended),
       suspendedReason: sub?.suspendedReason ?? null,
     };
@@ -1041,6 +1260,10 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   baseHeaders['Omnia-Mode'] = mode;
   if (!auth.paymentOnFile) {
     sendJson(res, 402, { error: 'This account has no card or bank account on file. Add one in the console to use the API.', code: 'payment_method_required', requestId }, baseHeaders);
+    return;
+  }
+  if (auth.cancelled) {
+    sendJson(res, 402, { error: 'This account\'s subscription was cancelled. Start a new subscription in the console to resume.', code: 'subscription_cancelled', requestId }, baseHeaders);
     return;
   }
   if (auth.suspended) {
@@ -1113,32 +1336,46 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
     };
   }
 
-  recordUsage(keyHash, status, usageError, validation.value.checkDate);
+  // A billable call on a metered subscription queues its Stripe meter
+  // event in the same store write that records the call, so the two are
+  // saved together; delivery happens off the response path and a failure
+  // stays queued for retry (flushMeterQueue) rather than being lost.
+  // requestId is Stripe's idempotency identifier for the event.
+  const meter = status === 200 && meteringConfigured() && auth.meteredSubscription && auth.customerId
+    ? { customerId: auth.customerId, identifier: requestId }
+    : null;
+  recordUsage(keyHash, status, usageError, validation.value.checkDate, meter);
   sendJson(res, status, responseBody, rlHeaders);
-
-  // Meter the billable call to Stripe, best-effort and off the response
-  // path: a slow or down Stripe never delays or fails the calculation. The
-  // local usage log is the durable record and can reconcile. requestId
-  // dedupes any retry. No-op unless metering is configured with a customer.
-  if (status === 200 && meteringConfigured() && auth.customerId) {
-    void reportCall(auth.customerId, requestId).then((r) => {
-      if (!r.ok && r.reason === 'stripe_error') {
-        console.error(`[paycheck ${requestId}] meter report failed:`, r.error);
-      }
-    });
-  }
+  if (meter) flushMeterSoon();
 }
 
 /** One place that appends a bounded usage event and updates the key's meter. */
-function recordUsage(keyHash: string, statusCode: number, error: string | null, checkDate: string | null): void {
+function recordUsage(
+  keyHash: string,
+  statusCode: number,
+  error: string | null,
+  checkDate: string | null,
+  meter: { customerId: string; identifier: string } | null = null,
+): void {
   withDb((db) => {
-    appendUsage(db, { keyHash, at: new Date().toISOString(), statusCode, error, checkDate });
+    const at = new Date().toISOString();
+    appendUsage(db, { keyHash, at, statusCode, error, checkDate });
     const stored = db.keys[keyHash];
     if (stored) {
-      stored.lastUsedAt = new Date().toISOString();
+      stored.lastUsedAt = at;
       if (statusCode === 200) stored.totalCalls = (stored.totalCalls ?? 0) + 1;
     }
+    if (meter) enqueueMeterEvent(db, { ...meter, at });
   });
+}
+
+/** Deliver queued meter events now, off the response path. Failures stay queued. */
+function flushMeterSoon(): void {
+  void flushMeterQueue()
+    .then((r) => {
+      if (r.failed || r.dead) console.error(`[meter] ${r.failed} failed, ${r.dead} past Stripe's window; ${r.pending} still queued`);
+    })
+    .catch((err) => console.error('[meter] flush error:', err instanceof Error ? err.message : err));
 }
 
 // ---------------------------------------------------------------------
@@ -1275,7 +1512,7 @@ function handleBilling(req: IncomingMessage, res: ServerResponse): void {
       // report usage to Stripe; suspended means a failed invoice has paused
       // the key (a paid invoice reactivates it via webhook).
       paymentsConfigured: billingConfigured() || Boolean(process.env.STRIPE_SECRET_KEY),
-      metered: meteringConfigured() && Boolean(sub?.stripeCustomerId),
+      metered: meteringConfigured() && Boolean(sub?.stripeCustomerId && sub?.stripeSubscriptionId),
       subscribed: Boolean(sub?.stripeSubscriptionId),
       suspended: Boolean(sub?.suspended),
       suspendedReason: sub?.suspendedReason ?? null,
@@ -1334,6 +1571,7 @@ createServer((req, res) => {
     if (method === 'POST' && url === '/api/signup') return handleSignup(req, res);
     if (method === 'POST' && url === '/api/verify-email') return handleVerifyEmail(req, res);
     if (method === 'POST' && url === '/api/signin') return handleSignin(req, res);
+    if (method === 'POST' && url === '/api/signout') return handleSignout(req, res);
     if (method === 'GET' && url === '/api/terms') return handleTerms(req, res);
     if (method === 'POST' && url === '/api/accept-terms') return handleAcceptTerms(req, res);
     if (method === 'POST' && url === '/api/payment-setup') return handlePaymentSetup(req, res);
@@ -1357,6 +1595,13 @@ createServer((req, res) => {
     sendJson(res, 500, { error: 'Internal server error.' });
   });
 }).listen(PORT, () => {
+  if (meteringConfigured()) {
+    // Retry anything a previous run left queued, then keep retrying.
+    flushMeterSoon();
+    setInterval(flushMeterSoon, 60_000).unref();
+  } else if (process.env.STRIPE_SECRET_KEY) {
+    console.warn('Stripe is connected but metering is OFF: set STRIPE_PRICE_ID (a usage-metered price) and STRIPE_METER_EVENT to bill per call. Onboarding will only save a card.');
+  }
   console.log(`Omnia landing page:  http://localhost:${PORT}`);
   console.log(`Omnia docs/console:  http://localhost:${PORT}/docs.html`);
   console.log(`Omnia API reference: http://localhost:${PORT}/reference`);

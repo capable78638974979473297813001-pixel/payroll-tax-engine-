@@ -27,7 +27,13 @@ after(() => {
 describe('API keys + metering (api/keys.ts)', () => {
   test('a minted key is usable, prefixed, and stored only as a hash', () => {
     const { key, record } = mintApiKey('Acme Payroll', { plan: 'pro' });
-    assert.match(key, /^sk_live_[A-Za-z0-9_-]{20,}$/);
+    // Test mode unless live is asked for, so dev boxes never mint sk_live_ keys.
+    assert.match(key, /^sk_test_[A-Za-z0-9_-]{20,}$/);
+    assert.equal(record.mode, 'test');
+    const live = mintApiKey('Acme Live', { mode: 'live' });
+    assert.match(live.key, /^sk_live_[A-Za-z0-9_-]{20,}$/);
+    assert.equal(live.record.mode, 'live');
+    assert.ok(verifyApiKey(live.key));
     assert.equal(record.plan, 'pro');
     assert.equal(record.pricePerCallCents, 15); // pro plan default ($0.15/call)
     assert.equal(record.calls, 0);

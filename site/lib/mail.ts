@@ -14,7 +14,8 @@
  * was delivered when it wasn't.
  */
 
-const RESEND_ENDPOINT = 'https://api.resend.com/emails';
+// Overridable only to point tests at a local stand-in.
+const RESEND_ENDPOINT = `${process.env.RESEND_API_BASE ?? 'https://api.resend.com'}/emails`;
 
 /**
  * Resend's shared sandbox sender. Works with zero setup, but Resend only
