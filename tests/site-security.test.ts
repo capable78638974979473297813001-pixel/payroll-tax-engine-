@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { createServer, type Server } from 'node:http';
 import { createHmac } from 'node:crypto';
-import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -175,6 +175,13 @@ describe('account security', () => {
     assert.equal((await replay.json()).code, 'quote_used');
   });
 
+  test('terms quotes are bounded per account however often the terms reload', async () => {
+    for (let i = 0; i < 30; i++) await fetch(`${BASE}/api/terms?employees=${i + 1}`, { headers: bearer(session) });
+    const open = Object.values(db().termsQuotes as Record<string, { email: string; acceptedAt: string | null }>)
+      .filter((q) => q.email === EMAIL && !q.acceptedAt);
+    assert.equal(open.length, 20);
+  });
+
   test('the trial starts once; calling start-trial again does not move its dates', async () => {
     const r = await post('/api/billing/return', { sessionId: 'cs_ok' }, bearer(session));
     assert.equal(r.status, 200);
@@ -249,14 +256,43 @@ describe('account security', () => {
     assert.equal((await fetch(`${BASE}/api/account`, { headers: bearer(session) })).status, 401);
   });
 
+  test('a corrupt store is reported by health and never overwritten', async () => {
+    const file = join(dir, 'db.json');
+    const good = readFileSync(file, 'utf8');
+    writeFileSync(file, good.slice(0, 100), 'utf8'); // a truncated write
+    const h = await fetch(`${BASE}/api/health`);
+    assert.equal(h.status, 503);
+    assert.equal((await h.json()).store, 'unreadable');
+    assert.equal((await post('/api/signin', { email: EMAIL })).status, 500);
+    assert.equal(readFileSync(file, 'utf8'), good.slice(0, 100));
+    writeFileSync(file, good, 'utf8');
+    assert.equal((await fetch(`${BASE}/api/health`)).status, 200);
+  });
+
+  test('wrong guesses are capped per address per hour, across fresh codes', async () => {
+    const victim = 'victim@secure.test';
+    await post('/api/signup', { name: 'Vic', email: victim, company: 'V', phone: '1' });
+    // Burn 24 guesses (3 codes' worth); the per-code burn alone would allow more.
+    for (let i = 0; i < 24; i++) await post('/api/verify-email', { email: victim, code: '000000' });
+    // As if a fresh code had just been issued: even that right code is refused.
+    const state = db();
+    Object.assign(state.accounts[victim], {
+      code: '424242', codeAttempts: 0, codeExpiresAt: new Date(Date.now() + 600_000).toISOString(),
+    });
+    writeFileSync(join(dir, 'db.json'), JSON.stringify(state), 'utf8');
+    const r = await post('/api/verify-email', { email: victim, code: '424242' });
+    assert.equal(r.status, 401);
+    assert.match((await r.json()).error, /Too many wrong codes/);
+  });
+
   test('signup is rate limited per client address across different emails', async () => {
-    // One signup already happened above; the limit is 4 an hour.
+    // Two signups already happened above; the limit is 4 an hour.
     const statuses: number[] = [];
     for (let i = 0; i < 4; i++) {
       const r = await post('/api/signup', { name: 'Flood', email: `flood${i}@spam.test`, company: 'Spam', phone: '1' });
       statuses.push(r.status);
     }
-    assert.deepEqual(statuses, [200, 200, 200, 429]);
-    assert.equal(db().accounts['flood3@spam.test'], undefined);
+    assert.deepEqual(statuses, [200, 200, 429, 429]);
+    assert.equal(db().accounts['flood2@spam.test'], undefined);
   });
 });

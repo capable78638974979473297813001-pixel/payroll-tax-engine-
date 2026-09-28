@@ -89,16 +89,46 @@ PORT=4323
 
 STRIPE_SECRET_KEY=sk_test_…            # test first, then sk_live_…
 STRIPE_PRICE_ID=price_…                # the graduated metered price
-STRIPE_METER_EVENT=omnia_api_call
+STRIPE_METER_EVENT=omnia_api_call       # required: must match the meter exactly
 STRIPE_WEBHOOK_SECRET=whsec_…
+RESEND_API_KEY=…                       # required in production (see below)
 
 # optional
-RESEND_API_KEY=…                       # email verification codes
 RATE_LIMIT_PER_MIN=120
+SIGNUP_PER_HOUR=10                      # signup code requests per client address
+SIGNIN_PER_HOUR=10                      # sign-in code requests per client address
+TRUST_PROXY=1                           # behind a reverse proxy: client IP from X-Forwarded-For
 OMNIA_ISSUE_LIVE_KEYS=1                 # mint sk_live_ keys instead of sk_test_
 ```
 
+**Metering needs all three of** `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` and
+`STRIPE_METER_EVENT`. With only the secret key, onboarding saves a card and no
+usage is billed; the server logs a warning at startup saying so.
+
+**Set `RESEND_API_KEY` in production.** Without it the server is in local
+development mode and prints each 6-digit verification code to its console —
+a working sign-in credential for anyone who can read the logs. With it set,
+codes are only emailed and never logged.
+
+**`PUBLIC_BASE_URL` must be the real `https://` URL.** Checkout return links
+are built from it (never from the request's `Host` header), and an `https`
+value marks the console's session cookie `Secure`.
+
 Start it: `npm run site` (keep it running under a process manager / systemd).
+
+**Run one instance.** The store in `SITE_DB_DIR` is a JSON file: every write
+is atomic and taken under a lock file, so a second process on the same volume
+can't overwrite the first's changes — but each write rewrites the whole file,
+which caps throughput, and the per-key `RATE_LIMIT_PER_MIN` limiter is kept in
+process memory (so N instances allow N× the rate, and a restart resets it).
+Signup/sign-in limits and wrong-code counts are kept in the store and don't
+have this problem. Scaling past one instance means moving the store to a
+database and the paycheck limiter to a shared store (e.g. Redis).
+
+If the store file is ever corrupted (a disk fault, a manual edit), the server
+refuses to use it: account and API requests return 500, `GET /api/health`
+returns `503` with `"store":"unreadable"`, and the file is left untouched —
+restore it from backup. It never silently starts over empty.
 
 Health check for your load balancer or uptime monitor: `GET /api/health`
 (returns `200` with the API version and jurisdiction count).
@@ -115,7 +145,8 @@ Health check for your load balancer or uptime monitor: `GET /api/health`
 4. On return, the console finalizes via `/api/billing/return`; the account
    shows *trialing* and a live key.
 5. Make a few `POST /api/paycheck` calls with the key. In Stripe → Billing →
-   Meters, confirm meter events are arriving for the customer.
+   Meters, confirm meter events are arriving for the customer, and that
+   `node scripts/meter-queue.ts` shows `0 pending`.
 6. Simulate a failed payment (Stripe → send a test `invoice.payment_failed`
    webhook, or use a card that fails on renewal). Confirm the key then returns
    `402 account_suspended`, and that a test `invoice.paid` reactivates it.
@@ -132,17 +163,34 @@ add a **live** webhook endpoint, and repeat step 1–5 with a real card.
 - [ ] Back up `SITE_DB_DIR` on a schedule.
 - [ ] Put the app behind HTTPS and a process manager that restarts it.
 - [ ] Decide `OMNIA_ISSUE_LIVE_KEYS` (on for production `sk_live_` keys).
+- [ ] Alert on `[meter]` errors in the server log, and check
+      `node scripts/meter-queue.ts` for `dead` items at least monthly.
 - [ ] Test the suspend/reactivate webhook path in live mode once.
 
 ---
 
 ## Notes on the billing design
 
-- **Metering is best-effort and off the response path.** A slow or down Stripe
-  never delays or fails a calculation; the local usage log is the durable record
-  and can reconcile. The request id dedupes any retry.
+- **Metering is durable and off the response path.** Each billable call writes
+  its Stripe meter event to a queue in the store, in the same write that
+  records the call, and the server delivers the queue in the background. A slow
+  or down Stripe never delays or fails a calculation, and a failed delivery
+  stays queued and is retried (backoff from 1 minute up to hourly, and on every
+  restart). The request id is Stripe's idempotency identifier, so a retry after
+  an ambiguous failure can't double-bill, and the event keeps the call's
+  original timestamp.
+- **Reconciliation.** `node scripts/meter-queue.ts` lists what is still owed to
+  Stripe for both the site and the self-hosted API; `--flush` delivers it now.
+  Stripe only accepts events up to 35 days old: anything older is marked
+  *dead* (never deleted) and listed by `--dead` for manual invoicing.
 - **No per-call card charges.** Usage is aggregated by Stripe and invoiced
   monthly, so you don't hit Stripe's per-charge minimum and fees.
 - **Suspension is webhook-driven only.** A failed invoice suspends the key
   (`402`); a paid invoice reactivates it. Nothing suspends an account except a
   verified Stripe event.
+- **Cancellation is final.** `customer.subscription.deleted` cancels the
+  account (`402 subscription_cancelled`). A later `invoice.paid` — Stripe sends
+  one for the final invoice — does not revive it; only a new subscription
+  through the console does.
+- **One trial per subscription.** Once the trial has started, repeating
+  `/api/start-trial` or re-signing the terms can't move its dates.

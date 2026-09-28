@@ -328,6 +328,8 @@ export interface KYJurisdictionEntry {
   wageRateNonresidentDecimal: number | null;
   /** KRS 68.197(10)(c)'s SS-wage-base-cap variant — Walton and Florence are the two confirmed real-world users. When true, this jurisdiction's taxable base stops accruing once YTD wages reach the federal Social Security wage base, the same cap FICA itself uses. */
   capAtSSWageBase: boolean;
+  /** How the wage rate was established (the data file's wageRateStatus), e.g. 'inferred_small_city_single_rate_pattern'. Absent for the consolidated governments. */
+  wageRateStatus?: string;
 }
 
 interface KYOccupationalRegistryFile {
@@ -340,6 +342,7 @@ interface KYOccupationalRegistryFile {
         wageRateResidentDecimal?: number | null;
         wageRateNonresidentDecimal?: number | null;
         capAtSSWageBase?: boolean;
+        wageRateStatus?: string;
       }
     >;
     louisvilleMetro: { residentRate: number; nonresidentRate: number };
@@ -386,6 +389,7 @@ export function allKYJurisdictions(checkDate: string): KYJurisdictionEntry[] {
       wageRateResidentDecimal: hasSplit ? (raw.wageRateResidentDecimal as number) : null,
       wageRateNonresidentDecimal: hasSplit ? (raw.wageRateNonresidentDecimal as number) : null,
       capAtSSWageBase: raw.capAtSSWageBase ?? false,
+      ...(raw.wageRateStatus ? { wageRateStatus: raw.wageRateStatus } : {}),
     });
   }
 

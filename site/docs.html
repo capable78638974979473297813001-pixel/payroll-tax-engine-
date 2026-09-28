@@ -1307,6 +1307,14 @@
       });
       row('<td>Total employer tax</td><td class="num"></td><td class="num">' + fromCents(result.employerTaxTotal) + '</td>', 'sum');
     }
+
+    // Lower-confidence rates or unmodelled elections: say so on the stub.
+    if (result.notices && result.notices.length) {
+      row('<td colspan="3">Check before paying</td>', 'group');
+      result.notices.forEach(function (n) {
+        row('<td colspan="3" class="note">' + esc(n.taxId) + ': ' + esc(n.note) + '</td>');
+      });
+    }
   }
 
   function renderError(status, bodyText) {

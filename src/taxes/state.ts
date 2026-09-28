@@ -46,6 +46,7 @@ import { cashEarnings, supplementalEarnings } from '../wages.ts';
 import { resolveCertBoolean } from '../validate.ts';
 import type {
   ComputeContext,
+  DataQuality,
   EmployerContext,
   PaycheckInput,
   PretaxCategory,
@@ -5183,6 +5184,12 @@ function alabamaLocalTax(
     taxableWages: periodWages,
     amount,
     detail: `${fmt(periodWages)} @ ${(entry.rate * 100).toFixed(2)}% on wages earned in ${entry.name} (certificate.workCity)`,
+    // Alabama publishes no state database of these; the rate is the
+    // League of Municipalities' survey figure, not the city's ordinance.
+    dataQuality: {
+      tier: 'secondary_source',
+      note: `${entry.name}'s ${(entry.rate * 100).toFixed(2)}% comes from the Alabama League of Municipalities' rate survey, not ${entry.name}'s own ordinance; the League itself says to verify rates with the city.`,
+    },
   };
 }
 
@@ -5335,6 +5342,7 @@ function kentuckyLocalTax(
         `less a ${fmt(credit)} KRS 68.197(6)-(7) credit for the city fee already paid ` +
         `(assumes the 30,000-300,000-population county credit tier applies to ${countyEntry.name} — not ` +
         `individually verified)`,
+      ...kyDataQuality([cityEntry, countyEntry]),
     };
   }
 
@@ -5353,7 +5361,35 @@ function kentuckyLocalTax(
     detail: entry.capAtSSWageBase
       ? `${fmt(taxableWages)} of ${fmt(periodWages)} (SS-wage-base-capped, KRS 68.197(10)(c)) @ ${r.note} to ${entry.name}`
       : `${fmt(periodWages)} @ ${r.note} to ${entry.name}, full gross wages (KRS 67.750(2) adds back pretax deferrals)`,
+    ...kyDataQuality([entry]),
   };
+}
+
+/**
+ * Mark a Kentucky line whose rate was inferred from a pattern, or parsed
+ * from an aggregator without a jurisdiction-level confirmation (the data
+ * file's wageRateStatus). Inferred outranks parsed when both apply.
+ */
+function kyDataQuality(entries: KYJurisdictionEntry[]): { dataQuality?: DataQuality } {
+  const inferred = entries.filter((e) => e.wageRateStatus?.startsWith('inferred'));
+  if (inferred.length) {
+    return {
+      dataQuality: {
+        tier: 'inferred',
+        note: `The wage rate for ${inferred.map((e) => e.name).join(' and ')} is inferred from the single-rate pattern small Kentucky cities use, not read from the jurisdiction's own ordinance or form. Confirm it before relying on this withholding.`,
+      },
+    };
+  }
+  const parsed = entries.filter((e) => e.wageRateStatus?.startsWith('parsed_'));
+  if (parsed.length) {
+    return {
+      dataQuality: {
+        tier: 'secondary_source',
+        note: `The wage rate for ${parsed.map((e) => e.name).join(' and ')} was parsed from a statewide aggregator's table and has not been confirmed against the jurisdiction's own source.`,
+      },
+    };
+  }
+  return {};
 }
 
 interface WilmingtonWageTaxConfig {
@@ -8832,6 +8868,19 @@ function arkansasWithholding(
       `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction, ${midrangeNote} ` +
       `@ ${(bracket.rate * 100).toFixed(2)}% less ${fmt(adjustment)} adjustment = ${fmt(annualGrossTax)} gross tax, ` +
       `less ${fmt(credit)} (${exemptions} × $${cfg.personalCreditPerExemption} credit) = ${fmt(annualNetTax)}/yr ÷ ${multiplier}`,
+    // AR4EC Line 5 (the low-income tables) is disclosed in AR-2026.json
+    // but not built. Computing the standard formula anyway withholds at
+    // least as much, which is the safe side -- but the caller must know.
+    ...(resolveCertBoolean(cert, 'lowIncomeElection')
+      ? {
+          dataQuality: {
+            tier: 'not_modelled' as const,
+            note:
+              "This employee elected Arkansas's low-income withholding tables (AR4EC Line 5), which this engine does not implement. " +
+              'The standard Formula Method was used instead, which withholds the same or more. Use the AR4EC low-income tables by hand if the employee qualifies.',
+          },
+        }
+      : {}),
   };
 }
 

@@ -550,7 +550,7 @@ dollars = cents / <span class="tok-num">100</span></code></pre></div></div>
                 <tr><td><code>400</code></td><td><code>invalid_json</code></td><td>The body wasn't valid JSON.</td></tr>
                 <tr><td><code>401</code></td><td><code>missing_key</code> · <code>invalid_key</code> · <code>expired_key</code></td><td>No key, an unknown/inactive key, or an expired evaluation key.</td></tr>
                 <tr><td><code>402</code></td><td><code>account_suspended</code></td><td>A billing issue (failed invoice) paused the account. A paid invoice reactivates it.</td></tr>
-                <tr><td><code>422</code></td><td><code>invalid_input</code></td><td>Valid JSON, but a field failed validation — see the <code>details</code> array.</td></tr>
+                <tr><td><code>422</code></td><td><code>invalid_input</code></td><td>Valid JSON, but a field failed validation — see the <code>details</code> array. Includes a <code>checkDate</code> outside the tax years this build has rulesets for (<code>GET /api/health</code> lists them as <code>taxYears</code>).</td></tr>
                 <tr><td><code>422</code></td><td><code>calculation_error</code></td><td>The input validated but the engine could not complete the calculation.</td></tr>
                 <tr><td><code>429</code></td><td><code>rate_limited</code></td><td>The per-key rate limit was exceeded. Respect the <code>Retry-After</code> header.</td></tr>
               </tbody>
@@ -1195,6 +1195,7 @@ console.log(result.netPay);   <span class="tok-com">// 246118 → $2,461.18</spa
               <div class="param"><div class="param-head"><span class="param-name">employeeTaxTotal</span><span class="param-type">integer (cents)</span></div><div class="param-desc">Sum of all employee-withheld taxes.</div></div>
               <div class="param"><div class="param-head"><span class="param-name">employerTaxTotal</span><span class="param-type">integer (cents)</span></div><div class="param-desc">Sum of all employer-borne taxes (not withheld from the employee).</div></div>
               <div class="param"><div class="param-head"><span class="param-name">netPay</span><span class="param-type">integer (cents)</span></div><div class="param-desc">Take-home: gross − pre-tax deductions − employee taxes − post-tax deductions.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">notices</span><span class="param-type">DataNotice[] · optional</span></div><div class="param-desc">Present only when a line rests on something weaker than a confirmed primary source (<code class="inline">secondary_source</code>, <code class="inline">inferred</code>) or the certificate asked for a method the engine doesn’t model (<code class="inline">not_modelled</code>). Each has the <code class="inline">taxId</code> it applies to, its <code class="inline">tier</code>, and a plain-language <code class="inline">note</code>. The amounts are still returned; read these before paying.</div></div>
             </div>
           </div>
           <div class="rail">
@@ -1209,6 +1210,7 @@ console.log(result.netPay);   <span class="tok-com">// 246118 → $2,461.18</spa
   employeeTaxTotal: <span class="tok-key">number</span>;
   employerTaxTotal: <span class="tok-key">number</span>;
   netPay: <span class="tok-key">number</span>;
+  notices?: { taxId: <span class="tok-key">string</span>; tier: <span class="tok-str">'secondary_source'</span> | <span class="tok-str">'inferred'</span> | <span class="tok-str">'not_modelled'</span>; note: <span class="tok-key">string</span> }[];
 }</code></pre></div></div>
             </div>
           </div>

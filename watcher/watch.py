@@ -868,6 +868,15 @@ def apply_results(results: list[Result], state: dict, today: str) -> None:
 # Report
 # --------------------------------------------------------------------------
 
+UNVERIFIED_STATUSES = ("unreachable", "gone", "blocked")
+
+
+def never_baselined(results: list[Result], state: dict) -> list[Result]:
+    """Sources not read this run that have no stored snapshot from any earlier run either."""
+    return [r for r in results
+            if r.status in UNVERIFIED_STATUSES and not state.get(r.source["id"], {}).get("hash")]
+
+
 def _md_escape(s: str) -> str:
     return s.replace("|", "\\|").replace("\n", " ")
 
@@ -894,6 +903,20 @@ def build_report(results: list[Result], state: dict, today: str, started: float)
               f"{len(by_status['blocked'])} | {len(results)} |", ""]
     lines.append(f"_Run took {int(time.time() - started)} s. A change is only reported after a second fetch "
                  f"confirms it._")
+    lines.append("")
+
+    # A green run is not a full check: say how much of the source list was
+    # actually read, and which sources have never been read at all (no
+    # baseline snapshot, so a change there cannot be noticed).
+    unverified = [r for r in results if r.status in UNVERIFIED_STATUSES]
+    never = never_baselined(results, state)
+    verified = len(results) - len(unverified)
+    if unverified:
+        lines.append(f"**Coverage: {verified} of {len(results)} sources were read this run; {len(unverified)} could "
+                     f"not be checked**" + (f", and {len(never)} of those have never been read successfully, so "
+                                             f"nothing about them is being watched." if never else "."))
+    else:
+        lines.append(f"**Coverage: all {len(results)} sources were read this run.**")
     lines.append("")
 
     def describe_change(r: Result):
@@ -945,6 +968,8 @@ def build_report(results: list[Result], state: dict, today: str, started: float)
                          f"| {_md_escape(r.detail)[:160]} |")
         lines.append("")
 
+    table("Never read successfully - no baseline, so changes here go unnoticed", never,
+          "Each of these has failed on every run so far. Replace the URL, or check the document by hand.")
     table("Broken - failing for 3+ runs", broken,
           "These URLs need replacing in `watcher/sources.json` (or the site blocks automated fetches).")
     table("Gone (404)", [r for r in by_status["gone"] if r not in broken],
@@ -990,6 +1015,10 @@ def build_report(results: list[Result], state: dict, today: str, started: float)
                     for r in sorted(by_status["changed"], key=order)],
         "significant_changes": len(real),
         "broken": [r.source["url"] for r in broken],
+        "verified": verified,
+        "unverified": len(unverified),
+        "never_baselined": [r.source["url"] for r in never],
+        "max_consecutive_failures": max((state.get(r.source["id"], {}).get("failures", 0) for r in unverified), default=0),
     }
     return "\n".join(lines) + "\n", summary
 

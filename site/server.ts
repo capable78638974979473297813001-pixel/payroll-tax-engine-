@@ -80,6 +80,12 @@ const paycheckLimiter = new RateLimiter();
 // Counted on the account record itself (not in memory), so a restart or a
 // second instance doesn't hand out fresh guesses.
 const MAX_CODE_ATTEMPTS = 8;
+// Across codes: requesting a fresh code resets the per-code count above,
+// so wrong guesses per address are also capped per hour. Once spent, even
+// the right code is refused until the hour passes.
+const MAX_CODE_GUESSES_PER_HOUR = MAX_CODE_ATTEMPTS * 3;
+/** Unaccepted terms quotes kept per account; older ones are dropped. */
+const MAX_OPEN_QUOTES = 20;
 
 // Sign-in and signup codes: at most this many requests per client address
 // an hour, so neither form can be used to spam inboxes or grow the
@@ -108,10 +114,23 @@ function validStateCodes(): Set<string> {
   if (VALID_STATE_CODES) return VALID_STATE_CODES;
   const dir = join(HERE, '..', 'data', 'states');
   const codes = readdirSync(dir)
-    .filter((f) => f.endsWith('-2026.json'))
+    .filter((f) => /^[A-Z]{2}-\d{4}\.json$/.test(f))
     .map((f) => f.slice(0, 2).toUpperCase());
   VALID_STATE_CODES = new Set(codes);
   return VALID_STATE_CODES;
+}
+
+// Tax years with a federal ruleset on disk -- the years a check date may
+// fall in. Read once; a year without one is a clean 422, not an engine throw.
+let SUPPORTED_YEARS: number[] | null = null;
+function supportedYears(): number[] {
+  if (SUPPORTED_YEARS) return SUPPORTED_YEARS;
+  SUPPORTED_YEARS = readdirSync(join(HERE, '..', 'data', 'federal'))
+    .map((f) => /^(\d{4})\.json$/.exec(f)?.[1])
+    .filter((y): y is string => Boolean(y))
+    .map(Number)
+    .sort((a, b) => a - b);
+  return SUPPORTED_YEARS;
 }
 
 // ---------------------------------------------------------------------
@@ -393,13 +412,19 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
   const outcome = withDb((db) => {
     const acct = db.accounts[email];
     const now = Date.now();
+    const hourKey = 'verify-hour:' + email;
+    const spent = db.rateLimits[hourKey];
+    if (spent && now - spent.start < spent.windowMs && spent.count >= MAX_CODE_GUESSES_PER_HOUR) {
+      return { ok: false as const, error: TOO_MANY };
+    }
     const live = Boolean(acct?.code && acct.codeExpiresAt && now <= new Date(acct.codeExpiresAt).getTime());
     if (!acct || !live || !safeEqual(acct.code!, code)) {
+      const hourly = hitStoredLimit(db, hourKey, MAX_CODE_GUESSES_PER_HOUR, HOUR_MS, now);
       // Unknown addresses get a stored counter too, so "burned" looks
       // the same for them as for real accounts.
-      const burned = acct
+      const burned = !hourly.allowed || (acct
         ? (acct.codeAttempts = (acct.codeAttempts ?? 0) + 1) > MAX_CODE_ATTEMPTS
-        : !hitStoredLimit(db, 'verify:' + email, MAX_CODE_ATTEMPTS, CODE_TTL_MS, now).allowed;
+        : !hitStoredLimit(db, 'verify:' + email, MAX_CODE_ATTEMPTS, CODE_TTL_MS, now).allowed);
       if (burned && acct) {
         acct.code = null;
         acct.codeExpiresAt = null;
@@ -531,6 +556,11 @@ function handleTerms(req: IncomingMessage, res: ServerResponse): void {
     for (const [id, q] of Object.entries(db.termsQuotes)) {
       if (!q.acceptedAt && now > new Date(q.expiresAt).getTime()) delete db.termsQuotes[id];
     }
+    // Bounded per account, however often the page recalculates.
+    const open = Object.values(db.termsQuotes)
+      .filter((q) => q.email === session.email && !q.acceptedAt)
+      .sort((a, b) => a.issuedAt.localeCompare(b.issuedAt));
+    for (const q of open.slice(0, Math.max(0, open.length - (MAX_OPEN_QUOTES - 1)))) delete db.termsQuotes[q.id];
     db.termsQuotes[quote.id] = quote;
   });
 
@@ -1299,7 +1329,7 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   }
 
   // --- validate (structured, field-level) ------------------------------
-  const validation = validatePaycheckInput(raw, { validStateCodes: validStateCodes() });
+  const validation = validatePaycheckInput(raw, { validStateCodes: validStateCodes(), supportedYears: supportedYears() });
   if (!validation.ok) {
     recordUsage(keyHash, 422, 'validation_failed', (raw as { checkDate?: string } | null)?.checkDate ?? null);
     sendJson(
@@ -1400,18 +1430,30 @@ function handleHealth(res: ServerResponse): void {
   } catch {
     ok = false;
   }
+  // A store that exists but won't parse is refused (never overwritten), so
+  // every account request fails until it's restored: report that here.
+  let store: 'ok' | 'unreadable' = 'ok';
+  try {
+    readDb(() => true);
+  } catch {
+    store = 'unreadable';
+    ok = false;
+  }
   sendJson(res, ok ? 200 : 503, {
     status: ok ? 'ok' : 'degraded',
     version: API_VERSION,
     states,
+    store,
+    taxYears: supportedYears(),
     time: new Date().toISOString(),
   });
 }
 
 function handleStates(res: ServerResponse): void {
   const dir = join(HERE, '..', 'data', 'states');
+  const latest = supportedYears().at(-1);
   const states = readdirSync(dir)
-    .filter((f) => f.endsWith('-2026.json'))
+    .filter((f) => f.endsWith(`-${latest}.json`))
     .map((f) => {
       const raw = JSON.parse(readFileSync(join(dir, f), 'utf8')) as { code: string; name: string };
       return { code: raw.code, name: raw.name };

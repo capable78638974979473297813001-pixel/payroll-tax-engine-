@@ -89,7 +89,19 @@ jobs:
           import json
           s = json.load(open("watcher/reports/latest.json"))
           print(f"changed={s['significant_changes']}")
+          print(f"unverified={s.get('unverified', 0)}")
+          print(f"never={len(s.get('never_baselined', []))}")
+          print(f"broken={len(s.get('broken', []))}")
+          print(f"total={s['total']}")
           PY
+
+      # A successful run is not a full check. Surface how many sources were
+      # NOT read, as annotations on the run, so green never reads as "every
+      # source verified".
+      - name: Flag sources that were not checked
+        if: steps.gate.outputs.run == 'true' && steps.watch.outputs.unverified != '0'
+        run: |
+          echo "::warning title=Sources not checked::${{ steps.watch.outputs.unverified }} of ${{ steps.watch.outputs.total }} sources could not be read this run (${{ steps.watch.outputs.broken }} broken for 3+ runs, ${{ steps.watch.outputs.never }} never read). See watcher/reports/latest.md."
 
       - name: Commit report and snapshots
         if: steps.gate.outputs.run == 'true'
@@ -107,6 +119,33 @@ jobs:
             sleep $((i * 5))
           done
           echo "::warning::Could not push the watch report."
+
+      # One standing issue, not one a day: opened while sources have never
+      # been read or are broken, left alone while it is already open.
+      - name: Track sources that are not being watched
+        if: steps.gate.outputs.run == 'true' && (steps.watch.outputs.never != '0' || steps.watch.outputs.broken != '0')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="Source watch: official sources that are not being checked"
+          if [ -n "$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[0].number')" ]; then
+            echo "Tracking issue already open."
+            exit 0
+          fi
+          body=$(python - <<'PY'
+          import json
+          s = json.load(open("watcher/reports/latest.json"))
+          lines = [f"As of {s['date']}, {s.get('unverified', 0)} of {s['total']} sources could not be read. "
+                   "The daily run still succeeds, so this issue is the standing reminder.", ""]
+          if s.get("never_baselined"):
+              lines += ["**Never read successfully** (no baseline, so changes go unnoticed):", ""]
+              lines += [f"- {u}" for u in s["never_baselined"][:80]] + [""]
+          if s.get("broken"):
+              lines += ["**Broken for 3+ runs:**", ""] + [f"- {u}" for u in s["broken"][:80]]
+          print("\n".join(lines))
+          PY
+          )
+          gh issue create --title "$title" --body "$body" || echo "::warning::Could not open the tracking issue."
 
       - name: Open an issue for changes
         if: steps.gate.outputs.run == 'true' && steps.watch.outputs.changed != '0'
