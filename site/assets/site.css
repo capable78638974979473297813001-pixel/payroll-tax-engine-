@@ -23,8 +23,8 @@ a { color: inherit; }
 .mono { font-family: var(--font-mono); }
 
 .logo { display: inline-flex; align-items: center; line-height: 0; text-decoration: none; }
-.logo img { display: block; height: 25px; width: auto; } /* mark ≈ 22px */
-.logo.logo-sm img { height: 23px; } /* mark ≈ 20px */
+.logo img { display: block; height: 50px; width: auto; } /* viewBox 96px, bars 42px → mark ≈ 22px */
+.logo.logo-sm img { height: 46px; } /* mark ≈ 20px */
 
 /* ---------- buttons ---------- */
 .btn {
