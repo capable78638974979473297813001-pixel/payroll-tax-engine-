@@ -27,7 +27,7 @@ const amount = (r: ReturnType<typeof calculatePaycheck>, id: string) => r.taxes.
 describe('tax year 2025', () => {
   test('covers federal and the states with a 2025 file', () => {
     const covered = statesWithRuleset('2025-06-13');
-    for (const st of ['AK', 'FL', 'NH', 'NV', 'SD', 'TN', 'TX', 'WA', 'WY', 'AZ', 'CO', 'GA', 'IA', 'ID', 'IL', 'IN', 'KY', 'LA', 'MA', 'MI', 'MS', 'NC', 'UT']) assert.ok(covered.includes(st), st);
+    for (const st of ['AK', 'FL', 'NH', 'NV', 'SD', 'TN', 'TX', 'WA', 'WY', 'AZ', 'CO', 'GA', 'IA', 'ID', 'IL', 'IN', 'KY', 'LA', 'MA', 'MI', 'MS', 'NC', 'PA', 'UT']) assert.ok(covered.includes(st), st);
   });
 
   test("Illinois 2025: IL-700-T's own example ($800 weekly, 2 + 2 allowances) withholds $32.27", () => {
@@ -86,6 +86,29 @@ describe('tax year 2025', () => {
 
   test('Mississippi 2025 taxes above $10,000 at 4.4%, 2026 at 4.0%', () => {
     assert.ok(amount(st('2025-06-13', 'MS'), 'MS_SIT')! > amount(st('2026-06-12', 'MS'), 'MS_SIT')!);
+  });
+
+  describe('Pennsylvania local rates by check date', () => {
+    const eit = (checkDate: string, psd: string) =>
+      amount(st(checkDate, 'PA', { workPSD: psd, residencePSD: psd }), 'PA_EIT');
+    test('Philadelphia: 3.75% until 30 June 2025, 3.74% to 30 June 2026, then 3.735%', () => {
+      assert.equal(eit('2025-06-13', '510101'), 11250);
+      assert.equal(eit('2025-08-15', '510101'), 11220);
+      assert.equal(eit('2026-03-13', '510101'), 11220);
+      assert.equal(eit('2026-08-14', '510101'), 11205);
+    });
+    test("Springfield Twp (Delaware) has no municipal EIT until its new 1% starts on 1 July 2026", () => {
+      assert.equal(eit('2026-03-13', '231202'), 0);
+      assert.equal(eit('2026-08-14', '231202'), 3000);
+    });
+    test('South Canaan Twp: 0.5% from 1 April 2025', () => {
+      assert.equal(eit('2025-03-14', '640205'), 0);
+      assert.equal(eit('2025-06-13', '640205'), 1500);
+    });
+    test('Kingston Twp: 1.05% + 0.5% school in 2025, 1.34% + 0.5% in 2026', () => {
+      assert.equal(eit('2025-06-13', '400204'), 4650);
+      assert.equal(eit('2026-06-12', '400204'), 5520);
+    });
   });
 
   test('Michigan 2025: 4.25% after $5,800 per exemption', () => {

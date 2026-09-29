@@ -757,13 +757,18 @@ describe('Pennsylvania', () => {
   // because Philadelphia collects its own Wage Tax directly, outside the
   // Act 32/DCED system, on its own July 1 fiscal-year boundary. Corrected
   // against phila.gov directly to FY2027's 3.735% resident rate.
-  test("Philadelphia's Wage Tax reflects the current FY2027 rate (3.735%), not the expired FY2026 one (3.74%)", () => {
-    const r = calculatePaycheck(
-      input({
-        workState: { code: 'PA', certificate: { workPSD: '510101', residencePSD: '510101' } },
-      }),
-    );
-    assert.equal(amountOf(r, 'PA_EIT'), dollars(112.05)); // 3,000 × 3.735%
+  // The rate resets every 1 July, so it is dated: FY2026's 3.74% until
+  // 2026-06-30, FY2027's 3.735% from 2026-07-01.
+  test("Philadelphia's Wage Tax uses the fiscal year of the check date (3.74% before 1 July 2026, 3.735% after)", () => {
+    const phl = (checkDate: string) =>
+      calculatePaycheck(
+        input({
+          checkDate,
+          workState: { code: 'PA', certificate: { workPSD: '510101', residencePSD: '510101' } },
+        }),
+      );
+    assert.equal(amountOf(phl('2026-06-12'), 'PA_EIT'), dollars(112.2)); // 3,000 × 3.74%
+    assert.equal(amountOf(phl('2026-07-10'), 'PA_EIT'), dollars(112.05)); // 3,000 × 3.735%
   });
 
   // EIT low-income exemption (BUG FIXED 2026-09-02): PSD 100401 (Adams

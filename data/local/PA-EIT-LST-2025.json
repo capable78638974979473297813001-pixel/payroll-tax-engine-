@@ -1,13 +1,13 @@
 {
   "$comment": "Pennsylvania Act 32 local Earned Income Tax (EIT) and Local Services Tax (LST) -- ALL 2,627 PSD-code jurisdictions (municipality x school-district combinations), downloaded directly from PA DCED's own Municipal Statistics system (the authoritative state-run register every local tax collector and payroll processor uses), not hand-researched or transcribed. This is PA's equivalent of Ohio's Finder bulk CSV / Kentucky's SOS occupational-tax database -- primary-source bulk coverage, not a sampled anchor set. `totalResidentEIT` is the source's own pre-summed figure (municipal resident EIT + school district EIT, correctly handling the rare PIT-instead-of-EIT school districts) and IS the number to use for the resident side of the withhold-at-higher-of-resident-or-worksite-nonresident-rate rule documented in data/states/PA-2026.json's localTax.eit.withholdingRule. `nonresidentEIT` is the municipal-only nonresident rate for someone working (not living) in that PSD.",
-  "year": 2026,
-  "asOf": "2026-08-21",
+  "year": 2025,
+  "asOf": "2026-09-29",
   "source": {
-    "title": "PA DCED Municipal Statistics -- EIT/PIT/LST Tax Register with Collector (statewide, official)",
-    "url": "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2026",
+    "title": "PA DCED Municipal Statistics -- EIT/PIT/LST Tax Register with Collector (statewide, official) -- 2025 edition",
+    "url": "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2025",
     "portalUrl": "https://apps.dced.pa.gov/munstats-public/ReportInformation2.aspx?report=EitWithCollector_Dyn_Excel&type=O",
-    "downloadedOn": "2026-08-21",
-    "downloadedBy": "Fetched directly via curl (the report page's own 'Click here to download the State-wide report' link resolves to this exact URL via a WebForm_DoPostBackWithOptions call, read from the page's own rendered HTML rather than guessed) -- this is the SAME live Excel export PA's own Municipal Statistics site generates for a human clicking the download link, not a secondary aggregator. Parsed with Python xlrd (legacy BIFF .xls format, confirmed via `file`).",
+    "downloadedOn": "2026-09-29",
+    "downloadedBy": "Built from the 2026 register (exact values) plus every change between the two years. Changes were found three ways: the 2025 and 2026 registers' effective dates (read from the 2025 XLS, whose text cells survive the fetch), the 2025 XLS numeric cells (lossy: a candidate set per cell, used to confirm or reject each 2026 value), and payroll-vendor change lists (NEOGOV 2025-12-23 and 2026-05-07, Dayforce 2025-11/12/16/19). Each changed row carries yearNotes with its source.",
     "rateFormat": "Source stores rates as whole percentage numbers (e.g. 0.5 = 0.5%); converted to decimal fractions here (0.005) to match every other state/local file's convention in this project."
   },
   "crossCheck": "The $52/yr municipal+school LST combined cap and $12,000 LST low-income-exemption threshold already documented in data/states/PA-2026.json's localTax.lst block (sourced separately from PA DCED's LST policy page) appear verbatim and consistently across this bulk register's own muniLST+sdLST totals and LIE columns -- independent confirmation between the policy-text source and the actual per-jurisdiction data.",
@@ -19,16 +19,9 @@
     "$comment": "The source register has a 'School District PIT (percent)' column for school districts that levy a Personal Income Tax (broader base than EIT) instead of the standard Earned Income Tax -- structurally real (Act 511 permits it) but EVERY one of the 2,627 rows in this 2026 snapshot has PIT = 0%, i.e. no PA school district is currently exercising this option. Kept in the per-jurisdiction schema (as an omitted-when-zero field) rather than dropped, since this is a snapshot fact for 2026, not a structural impossibility -- a future year's re-pull could find a nonzero row."
   },
   "knownGaps": [
-    "FIXED 2026-09-29: four rows changed on 2026-07-01 but were applied from January. Philadelphia (3.74%/3.43% until 2026-06-30, then 3.735%/3.425%), and three new municipal EITs (Springfield Twp, Collingdale Boro, Liberty Twp) that start 2026-07-01. Each now carries rateChanges. McKeesport Area SD's EIT is also dated 07/01/2026 in the register, but no rate change was published and the 0.5% value is unchanged, so no change is recorded.",
-    "FIXED 2026-09-04 (local-tax re-verification pass, all states with a local/city tax checked against their own official source): Philadelphia's row (PSD 510101) was stale. PA DCED's own bulk register is the authoritative source for every OTHER Act 32 jurisdiction, but Philadelphia's Wage Tax is collected directly by the City outside the Act 32/DCED system entirely and resets every July 1 (the City's fiscal year boundary) -- this register's 2026-08-21 snapshot still carried FY2026's 3.74%/3.43% (resident/nonresident) figures, effective 07/01/2025, a full fiscal year stale. Confirmed directly against the City of Philadelphia's own Wage Tax page (phila.gov) that FY2027's rate -- 3.735%/3.425%, effective 07/01/2026 -- has been in force since before this pass's check date, and corrected this row accordingly (see its own $note). GENERALIZES: any other city that collects its own EIT-equivalent tax directly rather than through Act 32 (if one exists) would have the same blind spot in this file and should be checked against its own city source, not assumed current just because this register's overall asOf date is recent -- DCED's own snapshot date says nothing about a self-collecting city's independent fiscal-year reset.",
-    "Local Services Tax (LST) situs-PRIORITY ordering (principal place of employment > residence-and-employment > closest-to-residence, for choosing WHICH of several simultaneous PA work locations owes it) is not applied here -- this file is rate DATA per jurisdiction, not the multi-worksite situs LOGIC. pennsylvaniaLST() (src/taxes/state.ts) does handle the 'already paid, don't double-charge' half via certificate.lstAlreadyWithheldElsewhere, but assumes a single workPSD per paycheck rather than resolving priority among several -- see data/states/PA-2026.json's own localTax.knownGap for the full picture.",
-    "Out-of-state residents' PSD code (88000, 0% resident rate per PA DCED convention) is not included as a row in this bulk export -- it is a convention documented in data/states/PA-2026.json's localTax.eit.psdCodes note, not a jurisdiction PA DCED's own register lists.",
-    "Collector contact details (address/phone/fax/email/website) were captured by the source but deliberately excluded from this file to keep it a rate dataset rather than a directory -- only collector NAME is retained (eitCollector / municipalLSTCollector / schoolDistrictLSTCollector when they differ), consistent with this project's 'who do you remit to' convention from Ohio's administeredBy field. The full contact block is available by re-fetching the source URL above if ever needed.",
-    "This is a single point-in-time snapshot (2026-08-21). Municipalities and school districts can change EIT/LST rates only on calendar-year or fiscal-year boundaries per Act 32's own notice rules (not checked further here); a stale re-use of this file in a future year should be re-verified against the same source URL, not assumed current.",
-    "BUG FIXED 2026-09-02: 49 jurisdictions carry municipalEitLIE/schoolDistrictEitLIE (Act 511/319 low-income exemption thresholds for EIT, the same mechanism this file's LST block already models) -- the data existed in this file but pennsylvaniaLocalTax() never read it, so every employee in one of those 49 places was over-withheld regardless of income. Fixed by decomposing each side's rate into its municipal/school components and testing each against its OWN threshold before recombining (NOT a single combined-rate test, since 48 of the 49 jurisdictions carry only one of the two thresholds -- naively gating the whole combined rate off either one alone would have over-exempted the portion with no ordinance). See pennsylvaniaLocalTax()'s own doc comment in src/taxes/state.ts and tests/engine.test.ts's 3 new EIT-low-income-exemption tests.",
-    "NOTED 2026-09-02: 8 PSD codes appear TWICE in this file's jurisdictions array (e.g. 480202 Bethlehem City, once under Lehigh County and once under Northampton County -- a real municipality PA DCED itself registers as spanning two counties). paLocalRuleset() (src/registry.ts, a plain .find()) resolves to whichever row happens to come first, arbitrarily. Checked all 8 pairs: every one has IDENTICAL rates/LST/LIE figures between its two rows (only the county field and minor collector-name capitalization differ), so this currently changes NO computed dollar amount -- not fixed, since there's nothing to fix without a data-shape change (PSD code alone isn't a unique key in PA DCED's own register for these 8 border municipalities), but flagged because a future data refresh that desyncs the two rows for any of these 8 would silently start returning whichever one sorts first, not a deliberate choice.",
-    "BUG FIXED 2026-09-02 (same pass as the EIT low-income-exemption fix above, found auditing it): the LST low-income exemption had the SAME asymmetric-threshold shape as EIT did. Old logic: `lst.lowIncomeExemption?.municipal || lst.lowIncomeExemption?.schoolDistrict` picked whichever was truthy and exempted the WHOLE combined lst.total if annual wages were below it. Wrong in two directions, found by direct data inspection: 73 jurisdictions (e.g. PSD 650701, Adamsburg Boro: municipal LIE $12,000, school LIE $3,200) have both thresholds set but DIFFERENT, and the old code always used the municipal figure, over-exempting anyone earning between the two thresholds; 33 more (e.g. PSD 180105, Beech Creek Boro: municipal $5 LST with LIE $0/never-exempt, school $5 LST with LIE $12,000) have the municipal portion deliberately non-exempt while the school portion is, and `||` reads a $0 threshold as falsy in JS and falls through to the school's $12,000, incorrectly waiving the whole combined LST including the never-exempt municipal portion. Fixed by testing each of lst.municipal/lst.schoolDistrict against ITS OWN threshold independently and summing whichever portions survive -- confirmed lst.municipal + lst.schoolDistrict === lst.total holds across all 2,627 jurisdictions first, so this still emits ONE combined PA_LST line (unchanged output shape), just computed correctly underneath. See pennsylvaniaLST()'s own doc comment and tests/engine.test.ts's 2 new asymmetric-threshold LST tests, both hand-picked from real PSDs.",
-    "SECONDARY-EMPLOYER LST DEDUP wired 2026-09-06: PA DCED's own situsPriority rule ('a secondary employer need not withhold if shown proof of LST already withheld by the principal employer') is now modelled via certificate.lstAlreadyWithheldElsewhere -- caller-supplied, opt-in, absent = charge, so existing callers are unaffected. Only fires for two employers in the SAME PSD; two different PA localities genuinely both owe LST and that is not double-counting."
+    "2025 edition. Rates are the 2026 register's except where a 2025-2026 change was found (see each row's yearNotes). A rate that changed without a new effective date, without a vendor notice, and between two values that decode to the same damaged cell would be missed; every EIT cell whose 2026 value is inconsistent with the 2025 cell has been resolved.",
+    "McGuffey, Elizabeth Forward and Hamburg Area school districts' EITs carry a 07/01/2025 date in both registers, but no rate change was published and 0.5% is consistent with the 2025 cells, so 0.5% is used all year.",
+    "Three municipalities that merged on 2026-01-01 (Callimont Boro into Larimer Twp, South New Castle Boro into Shenango Twp, Sandy Twp into DuBois City) are not in either register export, so 2025 checks for them resolve to the successor's row."
   ],
   "jurisdictions": [
     {
@@ -3662,16 +3655,19 @@
       "totalResidentEIT": 0.017,
       "schoolDistrictEITEffective": "07/01/2016",
       "lst": {
-        "municipal": 52.0,
+        "municipal": 0.0,
         "schoolDistrict": 0.0,
-        "total": 52.0,
+        "total": 0.0,
         "municipalEffective": "01/01/2026",
         "lowIncomeExemption": {
-          "municipal": 12000.0,
+          "municipal": 0.0,
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Capital Tax Collection Bureau"
+      "eitCollector": "Capital Tax Collection Bureau",
+      "yearNotes": {
+        "2025": "Blain Boro municipal LST was $0 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "631001",
@@ -4619,9 +4615,9 @@
       "schoolDistrictEIT": 0.005,
       "totalResidentEIT": 0.01,
       "lst": {
-        "municipal": 47.0,
+        "municipal": 30.0,
         "schoolDistrict": 5.0,
-        "total": 52.0,
+        "total": 35.0,
         "municipalEffective": "01/01/2026",
         "schoolDistrictEffective": "01/01/2009",
         "lowIncomeExemption": {
@@ -4629,7 +4625,10 @@
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Berkheimer Tax Administrator"
+      "eitCollector": "Berkheimer Tax Administrator",
+      "yearNotes": {
+        "2025": "Briar Creek Twp municipal LST was $30 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "461901",
@@ -5962,13 +5961,21 @@
       "schoolDistrictId": "648903",
       "schoolDistrict": "WESTERN WAYNE S D",
       "tcd": "WAYNE TAX COLLECTION DISTRICT",
-      "residentEIT": 0.01,
-      "nonresidentEIT": 0.01,
+      "residentEIT": 0.0,
+      "nonresidentEIT": 0.0,
       "schoolDistrictEIT": 0.0,
-      "totalResidentEIT": 0.01,
+      "totalResidentEIT": 0.0,
       "residentEITEffective": "01/01/2026",
       "nonresidentEITEffective": "01/01/2026",
-      "eitCollector": "Berkheimer Tax Administrator"
+      "eitCollector": "Berkheimer Tax Administrator",
+      "lst": {
+        "municipal": 10.0,
+        "schoolDistrict": 0.0,
+        "total": 10.0
+      },
+      "yearNotes": {
+        "2025": "Canaan Twp had no EIT in 2025 (0% -> 1% on 2026-01-01); municipal LST $10 -> $0. Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025"
+      }
     },
     {
       "psdCode": "610202",
@@ -6403,16 +6410,36 @@
       "totalResidentEIT": 0.01,
       "schoolDistrictEITEffective": "07/01/2009",
       "lst": {
-        "municipal": 0.0,
+        "municipal": 10.0,
         "schoolDistrict": 5.0,
-        "total": 5.0,
+        "total": 15.0,
         "schoolDistrictEffective": "07/01/2009",
         "lowIncomeExemption": {
           "municipal": 0.0,
           "schoolDistrict": 12000.0
         }
       },
-      "eitCollector": "Berkheimer Tax Administrator"
+      "eitCollector": "Berkheimer Tax Administrator",
+      "rateChanges": [
+        {
+          "on": "2025-07-01",
+          "set": {
+            "lst": {
+              "municipal": 0.0,
+              "schoolDistrict": 5.0,
+              "total": 5.0,
+              "schoolDistrictEffective": "07/01/2009",
+              "lowIncomeExemption": {
+                "municipal": 0.0,
+                "schoolDistrict": 12000.0
+              }
+            }
+          }
+        }
+      ],
+      "yearNotes": {
+        "2025": "Cassandra Boro combined LST $15 -> $5 effective 2025-07-01 (DCED Official Register via Dayforce Notice 2025-11). Source: https://help.dayforce.com/r/documents/Tax-and-Garnishment-Tables-Notice-2025-11/US-Taxes-Local"
+      }
     },
     {
       "psdCode": "560502",
@@ -7529,16 +7556,19 @@
       "residentEITEffective": "01/01/2012",
       "nonresidentEITEffective": "01/01/2012",
       "lst": {
-        "municipal": 52.0,
+        "municipal": 10.0,
         "schoolDistrict": 0.0,
-        "total": 52.0,
+        "total": 10.0,
         "municipalEffective": "01/01/2026",
         "lowIncomeExemption": {
-          "municipal": 12000.0,
+          "municipal": 0.0,
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Keystone Collections Group"
+      "eitCollector": "Keystone Collections Group",
+      "yearNotes": {
+        "2025": "Chester Twp municipal LST was $10 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "450201",
@@ -8006,9 +8036,9 @@
       "schoolDistrictEIT": 0.005,
       "totalResidentEIT": 0.01,
       "lst": {
-        "municipal": 47.0,
+        "municipal": 0.0,
         "schoolDistrict": 5.0,
-        "total": 52.0,
+        "total": 5.0,
         "municipalEffective": "01/01/2025",
         "schoolDistrictEffective": "07/01/2008",
         "lowIncomeExemption": {
@@ -8016,7 +8046,28 @@
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Berkheimer Tax Administrator"
+      "eitCollector": "Berkheimer Tax Administrator",
+      "rateChanges": [
+        {
+          "on": "2025-07-01",
+          "set": {
+            "lst": {
+              "municipal": 47.0,
+              "schoolDistrict": 5.0,
+              "total": 52.0,
+              "municipalEffective": "01/01/2025",
+              "schoolDistrictEffective": "07/01/2008",
+              "lowIncomeExemption": {
+                "municipal": 12000.0,
+                "schoolDistrict": 0.0
+              }
+            }
+          }
+        }
+      ],
+      "yearNotes": {
+        "2025": "Clearfield Twp combined LST $5 -> $52 effective 2025-07-01 (DCED Official Register via Dayforce Notice 2025-11). Source: https://help.dayforce.com/r/documents/Tax-and-Garnishment-Tables-Notice-2025-11/US-Taxes-Local"
+      }
     },
     {
       "psdCode": "110204",
@@ -8771,18 +8822,9 @@
       "residentEITEffective": "07/01/2026",
       "nonresidentEITEffective": "07/01/2026",
       "eitCollector": "Keystone Collections Group",
-      "rateChanges": [
-        {
-          "on": "2026-07-01",
-          "set": {
-            "residentEIT": 0.01,
-            "nonresidentEIT": 0.01,
-            "totalResidentEIT": 0.01
-          }
-        }
-      ],
       "yearNotes": {
-        "rateChanges": "Collingdale Boro: the 2026 register dates its 1% municipal EIT 07/01/2026, and the 2025 register cell is exactly 0. Source: DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+        "rateChanges": "Collingdale Boro: the 2026 register dates its 1% municipal EIT 07/01/2026, and the 2025 register cell is exactly 0. Source: DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded",
+        "2025": "No municipal EIT in 2025 (it starts 2026-07-01)."
       }
     },
     {
@@ -10386,9 +10428,9 @@
       "schoolDistrictEIT": 0.005,
       "totalResidentEIT": 0.01,
       "lst": {
-        "municipal": 52.0,
+        "municipal": 20.0,
         "schoolDistrict": 0.0,
-        "total": 52.0,
+        "total": 20.0,
         "municipalEffective": "01/01/2026",
         "lowIncomeExemption": {
           "municipal": 12000.0,
@@ -10396,7 +10438,10 @@
         }
       },
       "eitCollector": "Berkheimer Tax Administrator",
-      "municipalLSTCollector": "HAB-LST   (Berkheimer Tax Innovations)"
+      "municipalLSTCollector": "HAB-LST   (Berkheimer Tax Innovations)",
+      "yearNotes": {
+        "2025": "Cussewago Twp municipal LST was $20 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "110402",
@@ -11325,16 +11370,19 @@
       "totalResidentEIT": 0.016,
       "schoolDistrictEITEffective": "07/01/2016",
       "lst": {
-        "municipal": 52.0,
+        "municipal": 0.0,
         "schoolDistrict": 0.0,
-        "total": 52.0,
+        "total": 0.0,
         "municipalEffective": "01/01/2026",
         "lowIncomeExemption": {
-          "municipal": 12000.0,
+          "municipal": 0.0,
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Cumberland County Tax Bureau"
+      "eitCollector": "Cumberland County Tax Bureau",
+      "yearNotes": {
+        "2025": "Dickinson Twp municipal LST was $0 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "350501",
@@ -14353,16 +14401,19 @@
       "totalResidentEIT": 0.01,
       "schoolDistrictEITEffective": "07/01/2025",
       "lst": {
-        "municipal": 47.0,
+        "municipal": 5.0,
         "schoolDistrict": 5.0,
-        "total": 52.0,
+        "total": 10.0,
         "municipalEffective": "01/01/2026",
         "lowIncomeExemption": {
-          "municipal": 12000.0,
+          "municipal": 0.0,
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Keystone Collections Group"
+      "eitCollector": "Keystone Collections Group",
+      "yearNotes": {
+        "2025": "Elizabeth Twp municipal LST was $5 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "361701",
@@ -15091,17 +15142,20 @@
       "totalResidentEIT": 0.01,
       "schoolDistrictEITEffective": "07/01/2009",
       "lst": {
-        "municipal": 25.0,
+        "municipal": 5.0,
         "schoolDistrict": 5.0,
-        "total": 30.0,
+        "total": 10.0,
         "municipalEffective": "01/01/2026",
         "schoolDistrictEffective": "07/01/2009",
         "lowIncomeExemption": {
-          "municipal": 12000.0,
+          "municipal": 0.0,
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Berkheimer Tax Administrator"
+      "eitCollector": "Berkheimer Tax Administrator",
+      "yearNotes": {
+        "2025": "Exeter Twp municipal LST was $5 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "401006",
@@ -18258,9 +18312,9 @@
       "schoolDistrictEIT": 0.005,
       "totalResidentEIT": 0.01,
       "lst": {
-        "municipal": 52.0,
+        "municipal": 20.0,
         "schoolDistrict": 0.0,
-        "total": 52.0,
+        "total": 20.0,
         "municipalEffective": "01/01/2025",
         "lowIncomeExemption": {
           "municipal": 12000.0,
@@ -18268,7 +18322,27 @@
         }
       },
       "eitCollector": "Keystone Collections Group",
-      "municipalLSTCollector": "Dauphin County Treasurer"
+      "municipalLSTCollector": "Dauphin County Treasurer",
+      "rateChanges": [
+        {
+          "on": "2025-07-01",
+          "set": {
+            "lst": {
+              "municipal": 52.0,
+              "schoolDistrict": 0.0,
+              "total": 52.0,
+              "municipalEffective": "01/01/2025",
+              "lowIncomeExemption": {
+                "municipal": 12000.0,
+                "schoolDistrict": 0.0
+              }
+            }
+          }
+        }
+      ],
+      "yearNotes": {
+        "2025": "Gratz Boro combined LST $20 -> $52 effective 2025-07-01 (DCED Official Register via Dayforce Notice 2025-11). Source: https://help.dayforce.com/r/documents/Tax-and-Garnishment-Tables-Notice-2025-11/US-Taxes-Local"
+      }
     },
     {
       "psdCode": "300505",
@@ -23621,10 +23695,10 @@
       "schoolDistrictId": "401603",
       "schoolDistrict": "DALLAS S D",
       "tcd": "LUZERNE TAX COLLECTION DISTRICT",
-      "residentEIT": 0.0134,
+      "residentEIT": 0.0105,
       "nonresidentEIT": 0.01,
       "schoolDistrictEIT": 0.005,
-      "totalResidentEIT": 0.0184,
+      "totalResidentEIT": 0.0155,
       "residentEITEffective": "01/01/2026",
       "lst": {
         "municipal": 42.0,
@@ -23637,7 +23711,10 @@
         }
       },
       "eitCollector": "Berkheimer Tax Administrator",
-      "schoolDistrictLSTCollector": "Berkheimer-Bangor"
+      "schoolDistrictLSTCollector": "Berkheimer-Bangor",
+      "yearNotes": {
+        "2025": "Kingston Twp resident EIT 1.05% -> 1.34% on 2026-01-01. Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025"
+      }
     },
     {
       "psdCode": "030102",
@@ -24180,16 +24257,19 @@
       "residentEITEffective": "01/01/2025",
       "nonresidentEITEffective": "01/01/2012",
       "lst": {
-        "municipal": 47.0,
+        "municipal": 52.0,
         "schoolDistrict": 0.0,
-        "total": 47.0,
+        "total": 52.0,
         "municipalEffective": "01/01/2026",
         "lowIncomeExemption": {
           "municipal": 12000.0,
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Lancaster County Tax Collection Bureau"
+      "eitCollector": "Lancaster County Tax Collection Bureau",
+      "yearNotes": {
+        "2025": "Lancaster City municipal LST was $52 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "361001",
@@ -24303,13 +24383,16 @@
       "schoolDistrictId": "586503",
       "schoolDistrict": "SUSQUEHANNA COMM S D",
       "tcd": "SUSQUEHANNA TAX COLLECTION DISTRICT",
-      "residentEIT": 0.01,
-      "nonresidentEIT": 0.01,
+      "residentEIT": 0.0,
+      "nonresidentEIT": 0.0,
       "schoolDistrictEIT": 0.0,
-      "totalResidentEIT": 0.01,
+      "totalResidentEIT": 0.0,
       "residentEITEffective": "01/01/2026",
       "nonresidentEITEffective": "01/01/2026",
-      "eitCollector": "Berkheimer Tax Administrator"
+      "eitCollector": "Berkheimer Tax Administrator",
+      "yearNotes": {
+        "2025": "Lanesboro Boro: the 2025 register cells are exactly 0; 1% from 2026-01-01. Source: DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "090802",
@@ -24346,10 +24429,10 @@
       "schoolDistrictId": "097502",
       "schoolDistrict": "NESHAMINY S D",
       "tcd": "BUCKS TAX COLLECTION DISTRICT",
-      "residentEIT": 0.005,
-      "nonresidentEIT": 0.005,
+      "residentEIT": 0.0,
+      "nonresidentEIT": 0.0,
       "schoolDistrictEIT": 0.0,
-      "totalResidentEIT": 0.005,
+      "totalResidentEIT": 0.0,
       "residentEITEffective": "01/01/2026",
       "nonresidentEITEffective": "01/01/2026",
       "lst": {
@@ -24358,7 +24441,10 @@
         "total": 10.0
       },
       "eitCollector": "Keystone Collections Group",
-      "schoolDistrictLSTCollector": "Berkheimer Tax Administrator"
+      "schoolDistrictLSTCollector": "Berkheimer Tax Administrator",
+      "yearNotes": {
+        "2025": "Langhorne Manor had no EIT in 2025 (0% -> 0.5% on 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025"
+      }
     },
     {
       "psdCode": "461104",
@@ -25274,12 +25360,15 @@
       "schoolDistrict": "WILLIAMSPORT AREA S D",
       "tcd": "LYCOMING TAX COLLECTION DISTRICT",
       "residentEIT": 0.005,
-      "nonresidentEIT": 0.005,
+      "nonresidentEIT": 0.0,
       "schoolDistrictEIT": 0.015,
       "totalResidentEIT": 0.02,
       "nonresidentEITEffective": "01/01/2009",
       "schoolDistrictEITEffective": "07/01/2016",
-      "eitCollector": "Keystone Collections Group"
+      "eitCollector": "Keystone Collections Group",
+      "yearNotes": {
+        "2025": "Lewis Twp nonresident EIT: the 2025 register cell is exactly 0. Source: DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "210907",
@@ -25475,18 +25564,9 @@
       "residentEITEffective": "07/01/2026",
       "nonresidentEITEffective": "07/01/2026",
       "eitCollector": "Berkheimer Tax Administrator",
-      "rateChanges": [
-        {
-          "on": "2026-07-01",
-          "set": {
-            "residentEIT": 0.01,
-            "nonresidentEIT": 0.01,
-            "totalResidentEIT": 0.01
-          }
-        }
-      ],
       "yearNotes": {
-        "rateChanges": "Liberty Twp: the 2026 register dates its 1% municipal EIT 07/01/2026, and the 2025 register cell is exactly 0. Source: DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+        "rateChanges": "Liberty Twp: the 2026 register dates its 1% municipal EIT 07/01/2026, and the 2025 register cell is exactly 0. Source: DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded",
+        "2025": "No municipal EIT in 2025 (it starts 2026-07-01)."
       }
     },
     {
@@ -28077,13 +28157,16 @@
       "totalResidentEIT": 0.01,
       "nonresidentEITEffective": "01/01/1964",
       "lst": {
-        "municipal": 10.0,
+        "municipal": 5.0,
         "schoolDistrict": 5.0,
-        "total": 15.0,
+        "total": 10.0,
         "municipalEffective": "01/01/2026",
         "schoolDistrictEffective": "01/01/2020"
       },
-      "eitCollector": "Keystone Collections Group"
+      "eitCollector": "Keystone Collections Group",
+      "yearNotes": {
+        "2025": "Marianna Boro municipal LST was $5 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "360402",
@@ -28200,16 +28283,19 @@
       "totalResidentEIT": 0.01,
       "nonresidentEITEffective": "01/01/1988",
       "lst": {
-        "municipal": 42.0,
+        "municipal": 0.0,
         "schoolDistrict": 10.0,
-        "total": 52.0,
+        "total": 10.0,
         "municipalEffective": "01/01/2026",
         "lowIncomeExemption": {
-          "municipal": 12000.0,
+          "municipal": 0.0,
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Berkheimer Tax Administrator"
+      "eitCollector": "Berkheimer Tax Administrator",
+      "yearNotes": {
+        "2025": "Marion Twp municipal LST was $0 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "041102",
@@ -29694,17 +29780,20 @@
       "nonresidentEITEffective": "01/01/2012",
       "schoolDistrictEITEffective": "07/01/2019",
       "lst": {
-        "municipal": 52.0,
+        "municipal": 0.0,
         "schoolDistrict": 0.0,
-        "total": 52.0,
+        "total": 0.0,
         "municipalEffective": "01/01/2026",
         "lowIncomeExemption": {
-          "municipal": 12000.0,
+          "municipal": 0.0,
           "schoolDistrict": 0.0
         }
       },
       "eitCollector": "Centre Tax Agency",
-      "municipalLSTCollector": "State College Borough"
+      "municipalLSTCollector": "State College Borough",
+      "yearNotes": {
+        "2025": "Miles Twp municipal LST was $0 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "140106",
@@ -31938,10 +32027,10 @@
       "schoolDistrictId": "464502",
       "schoolDistrict": "LOWER MERION S D",
       "tcd": "MONTGOMERY TAX COLLECTION DISTRICT",
-      "residentEIT": 0.01,
-      "nonresidentEIT": 0.01,
+      "residentEIT": 0.0075,
+      "nonresidentEIT": 0.0075,
       "schoolDistrictEIT": 0.0,
-      "totalResidentEIT": 0.01,
+      "totalResidentEIT": 0.0075,
       "residentEITEffective": "01/01/2026",
       "nonresidentEITEffective": "01/01/2026",
       "municipalEitLIE": 12000.0,
@@ -31951,7 +32040,10 @@
         "total": 5.0,
         "schoolDistrictEffective": "07/01/2008"
       },
-      "eitCollector": "Berkheimer Tax Administrator"
+      "eitCollector": "Berkheimer Tax Administrator",
+      "yearNotes": {
+        "2025": "Narberth 0.75% -> 1% (resident and nonresident) on 2026-01-01. Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025"
+      }
     },
     {
       "psdCode": "480403",
@@ -32386,7 +32478,7 @@
       "schoolDistrict": "NEW CASTLE AREA S D",
       "tcd": "LAWRENCE TAX COLLECTION DISTRICT",
       "residentEIT": 0.01575,
-      "nonresidentEIT": 0.01271,
+      "nonresidentEIT": 0.01332,
       "schoolDistrictEIT": 0.005,
       "totalResidentEIT": 0.02075,
       "residentEITEffective": "01/01/2026",
@@ -32401,7 +32493,18 @@
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Berkheimer Tax Administrator"
+      "eitCollector": "Berkheimer Tax Administrator",
+      "rateChanges": [
+        {
+          "on": "2025-07-01",
+          "set": {
+            "nonresidentEIT": 0.01148
+          }
+        }
+      ],
+      "yearNotes": {
+        "2025": "New Castle City nonresident EIT 1.332% until 2025-06-30, 1.148% from 2025-07-01 (1.271% from 2026-01-01); the 2025 register cell matches 1.148%. Source: https://help.dayforce.com/r/documents/Tax-and-Garnishment-Tables-Notice-2025-11/US-Taxes-Local"
+      }
     },
     {
       "psdCode": "540704",
@@ -32601,16 +32704,19 @@
       "residentEITEffective": "01/01/2016",
       "nonresidentEITEffective": "01/01/2007",
       "lst": {
-        "municipal": 47.0,
+        "municipal": 5.0,
         "schoolDistrict": 5.0,
-        "total": 52.0,
+        "total": 10.0,
         "municipalEffective": "01/01/2026",
         "lowIncomeExemption": {
-          "municipal": 12000.0,
+          "municipal": 0.0,
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Berks Earned Income Tax Bureau"
+      "eitCollector": "Berks Earned Income Tax Bureau",
+      "yearNotes": {
+        "2025": "New Hanover Twp municipal LST was $5 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "360505",
@@ -36936,26 +37042,27 @@
       "schoolDistrictId": "515001",
       "schoolDistrict": "PHILADELPHIA CITY S D",
       "tcd": "PHILADELPHIA CITY *",
-      "residentEIT": 0.0374,
-      "nonresidentEIT": 0.0343,
+      "residentEIT": 0.0375,
+      "nonresidentEIT": 0.0344,
       "schoolDistrictEIT": 0.0,
-      "totalResidentEIT": 0.0374,
+      "totalResidentEIT": 0.0375,
       "residentEITEffective": "07/01/2026",
       "nonresidentEITEffective": "07/01/2026",
       "eitCollector": "CITY OF PHILADELPHIA",
       "$note": "RESOLVED (2026-09-04 local-tax re-verification pass): Philadelphia's Wage Tax is set annually, effective July 1 (the city's fiscal year start), separate from the Act 32 EIT collector system this file otherwise reflects. The prior figures on file (3.74%/3.43%, effective 07/01/2025) were FY2026's rate and expired 2026-06-30; confirmed directly against the City of Philadelphia's own Wage Tax page (phila.gov) that FY2027's rate -- 3.735% resident / 3.425% nonresident, effective 07/01/2026 -- has been in effect since before this pass's check date. Continues Philadelphia's multi-year pattern of small annual cuts already noted elsewhere in this project's history.",
       "rateChanges": [
         {
-          "on": "2026-07-01",
+          "on": "2025-07-01",
           "set": {
-            "residentEIT": 0.03735,
-            "nonresidentEIT": 0.03425,
-            "totalResidentEIT": 0.03735
+            "residentEIT": 0.0374,
+            "nonresidentEIT": 0.0343,
+            "totalResidentEIT": 0.0374
           }
         }
       ],
       "yearNotes": {
-        "rateChanges": "Philadelphia wage tax: 3.74% / 3.43% from 2025-07-01 (FY26), 3.735% / 3.425% from 2026-07-01 (FY27). Source: https://www.phila.gov/services/payments-assistance-taxes/taxes/business-taxes/business-taxes-by-type/wage-tax-employers/"
+        "rateChanges": "Philadelphia wage tax: 3.74% / 3.43% from 2025-07-01 (FY26), 3.735% / 3.425% from 2026-07-01 (FY27). Source: https://www.phila.gov/services/payments-assistance-taxes/taxes/business-taxes/business-taxes-by-type/wage-tax-employers/",
+        "2025": "Philadelphia wage tax 3.75%/3.44% (FY25) until 2025-06-30, 3.74%/3.43% from 2025-07-01. Source: https://www.phila.gov/services/payments-assistance-taxes/taxes/business-taxes/business-taxes-by-type/wage-tax-employers/"
       }
     },
     {
@@ -37303,17 +37410,20 @@
       "nonresidentEITEffective": "01/01/2012",
       "schoolDistrictEITEffective": "07/01/2008",
       "lst": {
-        "municipal": 52.0,
+        "municipal": 10.0,
         "schoolDistrict": 0.0,
-        "total": 52.0,
+        "total": 10.0,
         "municipalEffective": "01/01/2026",
         "lowIncomeExemption": {
-          "municipal": 12000.0,
+          "municipal": 0.0,
           "schoolDistrict": 0.0
         }
       },
       "eitCollector": "Berkheimer Tax Administrator",
-      "municipalLSTCollector": "DOROTHY GAGEN"
+      "municipalLSTCollector": "DOROTHY GAGEN",
+      "yearNotes": {
+        "2025": "Pine Twp municipal LST was $10 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "430403",
@@ -37571,10 +37681,10 @@
       "schoolDistrictId": "406602",
       "schoolDistrict": "PITTSTON AREA S D",
       "tcd": "LUZERNE TAX COLLECTION DISTRICT",
-      "residentEIT": 0.022,
+      "residentEIT": 0.017,
       "nonresidentEIT": 0.01,
       "schoolDistrictEIT": 0.005,
-      "totalResidentEIT": 0.027,
+      "totalResidentEIT": 0.022,
       "residentEITEffective": "01/01/2026",
       "nonresidentEITEffective": "01/01/2020",
       "lst": {
@@ -37588,7 +37698,10 @@
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Berkheimer Tax Administrator"
+      "eitCollector": "Berkheimer Tax Administrator",
+      "yearNotes": {
+        "2025": "Pittston City resident EIT: the 2025 register cell decodes uniquely to 1.7% (2.2% from 2026-01-01). Source: DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "400807",
@@ -43566,10 +43679,10 @@
       "schoolDistrictId": "648903",
       "schoolDistrict": "WESTERN WAYNE S D",
       "tcd": "WAYNE TAX COLLECTION DISTRICT",
-      "residentEIT": 0.005,
-      "nonresidentEIT": 0.005,
+      "residentEIT": 0.0,
+      "nonresidentEIT": 0.0,
       "schoolDistrictEIT": 0.0,
-      "totalResidentEIT": 0.005,
+      "totalResidentEIT": 0.0,
       "residentEITEffective": "04/01/2025",
       "nonresidentEITEffective": "04/01/2025",
       "lst": {
@@ -43579,7 +43692,20 @@
         "municipalEffective": "01/01/2008"
       },
       "eitCollector": "Berkheimer Tax Administrator",
-      "municipalLSTCollector": "Paula J Herzog"
+      "municipalLSTCollector": "Paula J Herzog",
+      "rateChanges": [
+        {
+          "on": "2025-04-01",
+          "set": {
+            "residentEIT": 0.005,
+            "nonresidentEIT": 0.005,
+            "totalResidentEIT": 0.005
+          }
+        }
+      ],
+      "yearNotes": {
+        "2025": "South Canaan Twp EIT 0% -> 0.5% effective 2025-04-01 (register date 04/01/2025). Source: https://success.neogov.com/payroll-product-updates-115/july-24-2025-payroll-release-notes-16207"
+      }
     },
     {
       "psdCode": "190407",
@@ -44027,9 +44153,9 @@
       "totalResidentEIT": 0.0165,
       "schoolDistrictEITEffective": "07/01/2016",
       "lst": {
-        "municipal": 47.0,
+        "municipal": 30.0,
         "schoolDistrict": 5.0,
-        "total": 52.0,
+        "total": 35.0,
         "municipalEffective": "01/01/2026",
         "schoolDistrictEffective": "01/01/2013",
         "lowIncomeExemption": {
@@ -44037,7 +44163,10 @@
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Cumberland County Tax Bureau"
+      "eitCollector": "Cumberland County Tax Bureau",
+      "yearNotes": {
+        "2025": "South Newton Twp municipal LST was $30 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "731401",
@@ -44248,10 +44377,10 @@
       "schoolDistrictId": "395103",
       "schoolDistrict": "PARKLAND S D",
       "tcd": "LEHIGH TAX COLLECTION DISTRICT",
-      "residentEIT": 0.006,
+      "residentEIT": 0.005,
       "nonresidentEIT": 0.005,
       "schoolDistrictEIT": 0.005,
-      "totalResidentEIT": 0.011,
+      "totalResidentEIT": 0.01,
       "nonresidentEITEffective": "01/12/2012",
       "lst": {
         "municipal": 47.0,
@@ -44264,7 +44393,10 @@
           "schoolDistrict": 12000.0
         }
       },
-      "eitCollector": "Berkheimer Tax Administrator"
+      "eitCollector": "Berkheimer Tax Administrator",
+      "yearNotes": {
+        "2025": "South Whitehall Twp resident EIT 0.5% -> 0.6% on 2026-01-01. Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025"
+      }
     },
     {
       "psdCode": "410703",
@@ -45010,18 +45142,9 @@
       },
       "eitCollector": "Keystone Collections Group",
       "municipalLSTCollector": "Anne Marie Pellegrino",
-      "rateChanges": [
-        {
-          "on": "2026-07-01",
-          "set": {
-            "residentEIT": 0.01,
-            "nonresidentEIT": 0.01,
-            "totalResidentEIT": 0.01
-          }
-        }
-      ],
       "yearNotes": {
-        "rateChanges": "Springfield Twp adopted a new 1% EIT on 2026-04-14, effective 2026-07-01; none before. Source: https://www.springfielddelco.org/wp-content/uploads/2026/04/EIT-FAQ-.pdf"
+        "rateChanges": "Springfield Twp adopted a new 1% EIT on 2026-04-14, effective 2026-07-01; none before. Source: https://www.springfielddelco.org/wp-content/uploads/2026/04/EIT-FAQ-.pdf",
+        "2025": "No municipal EIT in 2025 (it starts 2026-07-01)."
       }
     },
     {
@@ -48866,10 +48989,10 @@
       "schoolDistrictId": "239452",
       "schoolDistrict": "UPPER DARBY S D",
       "tcd": "DELAWARE TAX COLLECTION DISTRICT",
-      "residentEIT": 0.01,
-      "nonresidentEIT": 0.01,
+      "residentEIT": 0.0,
+      "nonresidentEIT": 0.0,
       "schoolDistrictEIT": 0.0,
-      "totalResidentEIT": 0.01,
+      "totalResidentEIT": 0.0,
       "residentEITEffective": "01/01/2026",
       "nonresidentEITEffective": "01/01/2026",
       "municipalEitLIE": 12000.0,
@@ -48884,7 +49007,10 @@
         }
       },
       "eitCollector": "Keystone Collections Group",
-      "municipalLSTCollector": "ECollect"
+      "municipalLSTCollector": "ECollect",
+      "yearNotes": {
+        "2025": "Upper Darby Twp had no EIT in 2025; its 1% payroll tax starts 2026-01-01 (upperdarby.org/579). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025"
+      }
     },
     {
       "psdCode": "461801",
@@ -48952,10 +49078,10 @@
       "schoolDistrictId": "060753",
       "schoolDistrict": "BOYERTOWN AREA S D",
       "tcd": "BERKS TAX COLLECTION DISTRICT",
-      "residentEIT": 0.0054,
+      "residentEIT": 0.005,
       "nonresidentEIT": 0.01,
       "schoolDistrictEIT": 0.005,
-      "totalResidentEIT": 0.0104,
+      "totalResidentEIT": 0.01,
       "lst": {
         "municipal": 47.0,
         "schoolDistrict": 5.0,
@@ -48966,7 +49092,10 @@
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Berks Earned Income Tax Bureau"
+      "eitCollector": "Berks Earned Income Tax Bureau",
+      "yearNotes": {
+        "2025": "Upper Frederick Twp resident EIT 0.5% -> 0.54% on 2026-01-01. Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025"
+      }
     },
     {
       "psdCode": "461108",
@@ -49538,17 +49667,20 @@
       "totalResidentEIT": 0.01,
       "nonresidentEITEffective": "01/01/2001",
       "lst": {
-        "municipal": 42.0,
+        "municipal": 0.0,
         "schoolDistrict": 10.0,
-        "total": 52.0,
+        "total": 10.0,
         "municipalEffective": "01/01/2026",
         "schoolDistrictEffective": "01/01/2008",
         "lowIncomeExemption": {
-          "municipal": 12000.0,
+          "municipal": 0.0,
           "schoolDistrict": 500.0
         }
       },
-      "eitCollector": "Keystone Collections Group"
+      "eitCollector": "Keystone Collections Group",
+      "yearNotes": {
+        "2025": "Upper Uwchlan Twp municipal LST was $0 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "111202",
@@ -49861,11 +49993,23 @@
       "schoolDistrictId": "204703",
       "schoolDistrict": "PENNCREST S D",
       "tcd": "CRAWFORD TAX COLLECTION DISTRICT",
-      "residentEIT": 0.005,
+      "residentEIT": 0.01,
       "nonresidentEIT": 0.01,
       "schoolDistrictEIT": 0.005,
-      "totalResidentEIT": 0.01,
-      "eitCollector": "Berkheimer Tax Administrator"
+      "totalResidentEIT": 0.015,
+      "eitCollector": "Berkheimer Tax Administrator",
+      "rateChanges": [
+        {
+          "on": "2025-07-01",
+          "set": {
+            "residentEIT": 0.0055,
+            "totalResidentEIT": 0.0105
+          }
+        }
+      ],
+      "yearNotes": {
+        "2025": "Venango Twp (Crawford) resident EIT 1.00% -> 0.55% effective 2025-07-01. Source: https://help.dayforce.com/r/documents/Tax-and-Garnishment-Tables-Notice-2025-11/US-Taxes-Local"
+      }
     },
     {
       "psdCode": "251304",
@@ -50088,16 +50232,19 @@
       "schoolDistrictEIT": 0.005,
       "totalResidentEIT": 0.01,
       "lst": {
-        "municipal": 52.0,
+        "municipal": 0.0,
         "schoolDistrict": 0.0,
-        "total": 52.0,
+        "total": 0.0,
         "municipalEffective": "01/01/2026",
         "lowIncomeExemption": {
-          "municipal": 12000.0,
+          "municipal": 0.0,
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Capital Tax Collection Bureau"
+      "eitCollector": "Capital Tax Collection Bureau",
+      "yearNotes": {
+        "2025": "Walker Twp municipal LST was $0 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "541004",
@@ -50387,16 +50534,19 @@
       "nonresidentEITEffective": "03/20/2006",
       "schoolDistrictEITEffective": "07/01/2016",
       "lst": {
-        "municipal": 52.0,
+        "municipal": 0.0,
         "schoolDistrict": 0.0,
-        "total": 52.0,
+        "total": 0.0,
         "municipalEffective": "01/01/2026",
         "lowIncomeExemption": {
-          "municipal": 12000.0,
+          "municipal": 0.0,
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "York Adams Tax Bureau"
+      "eitCollector": "York Adams Tax Bureau",
+      "yearNotes": {
+        "2025": "Warrington Twp municipal LST was $0 in 2025 (changed 2026-01-01). Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025 ; DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "400404",
@@ -51151,9 +51301,9 @@
       "totalResidentEIT": 0.01,
       "schoolDistrictEITEffective": "07/01/1969",
       "lst": {
-        "municipal": 47.0,
+        "municipal": 15.0,
         "schoolDistrict": 5.0,
-        "total": 52.0,
+        "total": 20.0,
         "municipalEffective": "01/01/2024",
         "schoolDistrictEffective": "01/01/2024",
         "lowIncomeExemption": {
@@ -51162,7 +51312,28 @@
         }
       },
       "eitCollector": "Berkheimer Tax Administrator",
-      "schoolDistrictLSTCollector": "Berkheimer-Erie"
+      "schoolDistrictLSTCollector": "Berkheimer-Erie",
+      "rateChanges": [
+        {
+          "on": "2025-07-01",
+          "set": {
+            "lst": {
+              "municipal": 47.0,
+              "schoolDistrict": 5.0,
+              "total": 52.0,
+              "municipalEffective": "01/01/2024",
+              "schoolDistrictEffective": "01/01/2024",
+              "lowIncomeExemption": {
+                "municipal": 12000.0,
+                "schoolDistrict": 5000.0
+              }
+            }
+          }
+        }
+      ],
+      "yearNotes": {
+        "2025": "Wattsburg Boro combined LST $20 -> $52 effective 2025-07-01 (DCED Official Register via Dayforce Notice 2025-11). Source: https://help.dayforce.com/r/documents/Tax-and-Garnishment-Tables-Notice-2025-11/US-Taxes-Local"
+      }
     },
     {
       "psdCode": "350101",
@@ -52459,9 +52630,9 @@
       "totalResidentEIT": 0.01,
       "schoolDistrictEITEffective": "07/01/2023",
       "lst": {
-        "municipal": 47.0,
+        "municipal": 5.0,
         "schoolDistrict": 5.0,
-        "total": 52.0,
+        "total": 10.0,
         "municipalEffective": "01/01/2025",
         "lowIncomeExemption": {
           "municipal": 12000.0,
@@ -52470,7 +52641,27 @@
       },
       "eitCollector": "Berkheimer Tax Administrator",
       "municipalLSTCollector": "H. Kevin Smith",
-      "schoolDistrictLSTCollector": "Kevin Smith"
+      "schoolDistrictLSTCollector": "Kevin Smith",
+      "rateChanges": [
+        {
+          "on": "2025-07-01",
+          "set": {
+            "lst": {
+              "municipal": 47.0,
+              "schoolDistrict": 5.0,
+              "total": 52.0,
+              "municipalEffective": "01/01/2025",
+              "lowIncomeExemption": {
+                "municipal": 12000.0,
+                "schoolDistrict": 0.0
+              }
+            }
+          }
+        }
+      ],
+      "yearNotes": {
+        "2025": "West Leechburg Boro combined LST $10 -> $52 effective 2025-07-01 (DCED Official Register via Dayforce Notice 2025-11). Source: https://help.dayforce.com/r/documents/Tax-and-Garnishment-Tables-Notice-2025-11/US-Taxes-Local"
+      }
     },
     {
       "psdCode": "100610",
@@ -53859,10 +54050,10 @@
       "schoolDistrictId": "408852",
       "schoolDistrict": "WILKES-BARRE AREA S D",
       "tcd": "LUZERNE TAX COLLECTION DISTRICT",
-      "residentEIT": 0.01,
+      "residentEIT": 0.0075,
       "nonresidentEIT": 0.01,
       "schoolDistrictEIT": 0.005,
-      "totalResidentEIT": 0.015,
+      "totalResidentEIT": 0.0125,
       "residentEITEffective": "01/01/2026",
       "lst": {
         "municipal": 47.0,
@@ -53874,7 +54065,10 @@
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Berkheimer Tax Administrator"
+      "eitCollector": "Berkheimer Tax Administrator",
+      "yearNotes": {
+        "2025": "Wilkes-Barre Twp resident EIT 0.75% -> 1% on 2026-01-01. Source: https://success.neogov.com/payroll-product-updates-115/may-7-2026-payroll-supplemental-release-notes-20901"
+      }
     },
     {
       "psdCode": "721012",
@@ -53949,10 +54143,10 @@
       "schoolDistrictId": "488603",
       "schoolDistrict": "WILSON AREA S D",
       "tcd": "NORTHAMPTON TAX COLLECTION DISTRICT",
-      "residentEIT": 0.0075,
+      "residentEIT": 0.005,
       "nonresidentEIT": 0.01,
       "schoolDistrictEIT": 0.005,
-      "totalResidentEIT": 0.0125,
+      "totalResidentEIT": 0.01,
       "residentEITEffective": "01/01/2015",
       "lst": {
         "municipal": 47.0,
@@ -53965,7 +54159,10 @@
           "schoolDistrict": 0.0
         }
       },
-      "eitCollector": "Keystone Collections Group"
+      "eitCollector": "Keystone Collections Group",
+      "yearNotes": {
+        "2025": "Williams Twp resident EIT 0.5% -> 0.75% on 2026-01-01. Source: https://success.neogov.com/payroll-product-updates-115/december-23-2025-payroll-supplemental-release-notes-17025"
+      }
     },
     {
       "psdCode": "070702",

@@ -340,7 +340,31 @@ export interface PALocalEntry {
 
 interface PALocalRegistryFile {
   year: number;
-  jurisdictions: PALocalEntry[];
+  jurisdictions: (PALocalEntry & { rateChanges?: PARateChange[] })[];
+}
+
+/**
+ * A change part-way through the register's year: from `on` (a check date,
+ * inclusive) the listed fields take these values. Philadelphia resets its
+ * wage tax every 1 July; school districts change on 1 July too.
+ */
+interface PARateChange {
+  on: string;
+  set: Partial<Pick<PALocalEntry, 'residentEIT' | 'nonresidentEIT' | 'schoolDistrictEIT' | 'totalResidentEIT' | 'lst'>>;
+}
+
+function paEntryOn(
+  raw: PALocalEntry & { rateChanges?: PARateChange[] },
+  checkDate: string,
+): PALocalEntry {
+  const due = (raw.rateChanges ?? []).filter((c) => c.on <= checkDate).sort((a, b) => a.on.localeCompare(b.on));
+  if (due.length === 0) return raw;
+  const out: PALocalEntry & { rateChanges?: PARateChange[] } = { ...raw };
+  for (const c of due) Object.assign(out, c.set);
+  if (due.some((c) => c.set.totalResidentEIT === undefined && (c.set.residentEIT !== undefined || c.set.schoolDistrictEIT !== undefined))) {
+    out.totalResidentEIT = Math.round((out.residentEIT + out.schoolDistrictEIT) * 1e6) / 1e6;
+  }
+  return out;
 }
 
 /** Whether a PA Act 32 local (EIT/LST) registry exists for this check date. */
@@ -360,7 +384,8 @@ export function paLocalRuleset(
   const file = loadJson<PALocalRegistryFile>(
     join('local', `PA-EIT-LST-${yearOf(checkDate)}.json`),
   );
-  return file.jurisdictions.find((j) => j.psdCode === psdCode);
+  const raw = file.jurisdictions.find((j) => j.psdCode === psdCode);
+  return raw && paEntryOn(raw, checkDate);
 }
 
 /** Every PA Act 32 jurisdiction — for geocode/'s county+municipality search. */
@@ -368,7 +393,9 @@ export function allPALocalJurisdictions(checkDate: string): PALocalEntry[] {
   const file = loadJson<PALocalRegistryFile>(
     join('local', `PA-EIT-LST-${yearOf(checkDate)}.json`),
   );
-  return file.jurisdictions;
+  return file.jurisdictions.some((j) => j.rateChanges)
+    ? file.jurisdictions.map((j) => paEntryOn(j, checkDate))
+    : file.jurisdictions;
 }
 
 export interface MICityEntry {
