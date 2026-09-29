@@ -348,7 +348,7 @@
     if (sending) return;
     if (ep.body && !$('pJson').hidden && !fromJson()) return;
     if (!apiKey) { Omnia.toast('Paste a key or finish signup. There is no anonymous key.', 'error'); return; }
-    sending = true; $('sendBtn').disabled = true;
+    sending = true; Omnia.setLoading($('sendBtn'), true);
     var headers = { Authorization: 'Bearer ' + apiKey.key };
     var body = ep.body ? JSON.stringify(request) : undefined;
     if (body) headers['Content-Type'] = 'application/json';
@@ -363,7 +363,7 @@
       lastRes = r; illustrative = false; renderResponse(r); addHistory(r);
     }).catch(function (e) {
       Omnia.toast(e.message || 'Network error', 'error');
-    }).then(function () { sending = false; $('sendBtn').disabled = false; });
+    }).then(function () { sending = false; Omnia.setLoading($('sendBtn'), false); });
   }
 
   function renderResponse(r) {

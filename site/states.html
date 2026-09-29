@@ -27,25 +27,31 @@
       <figure><figcaption>ERROR</figcaption><div class="field error" style="width:240px"><label class="field-label">Work email</label><input value="you@company" /><p class="field-error">Enter a valid work email.</p></div></figure>
       <figure><figcaption>DISABLED</figcaption><div class="field" style="width:220px"><label class="field-label">Work email</label><input value="you@company.com" disabled /></div></figure>
     </div>
+    <p class="field-hint">Focus is a 2px cobalt border on all sides and a cobalt caret (<code>caret-color</code>). The caret is the browser’s, so it is not a drawn 2×32 bar. “Enter a valid work email.” is the message the signup form shows before it calls the server. If the server rejects the address it returns its own <code>error</code> string on the field.</p>
   </section>
 
   <section class="states-sec">
     <h2>02 · Buttons</h2>
     <div class="state-row">
       <figure><figcaption>PRIMARY DEFAULT</figcaption><button class="btn btn-md btn-primary">Create account <span class="btn-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button></figure>
-      <figure><figcaption>HOVER</figcaption><button class="btn btn-md btn-primary hover-demo">Create account →</button></figure>
-      <figure><figcaption>PRESSED</figcaption><button class="btn btn-md btn-primary pressed-demo">Create account →</button></figure>
-      <figure><figcaption>LOADING</figcaption><button class="btn btn-md btn-primary is-loading" aria-busy="true">Create account <span class="btn-icon"></span></button></figure>
-      <figure><figcaption>DISABLED</figcaption><button class="btn btn-md btn-primary" disabled>Create account →</button></figure>
+      <figure><figcaption>HOVER</figcaption><button class="btn btn-md btn-primary hover-demo" type="button">Create account <span class="btn-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button></figure>
+      <figure><figcaption>PRESSED</figcaption><button class="btn btn-md btn-primary pressed-demo" type="button">Create account <span class="btn-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button></figure>
+      <figure><figcaption>FOCUS</figcaption><button class="btn btn-md btn-primary focus-demo" type="button">Create account <span class="btn-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button></figure>
+      <figure><figcaption>LOADING</figcaption><button class="btn btn-md btn-primary is-loading" type="button" disabled aria-busy="true">Create account <span class="btn-icon"></span></button></figure>
+      <figure><figcaption>DISABLED</figcaption><button class="btn btn-md btn-primary" type="button" disabled>Create account <span class="btn-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button></figure>
     </div>
     <div class="state-row">
-      <figure><figcaption>SECONDARY</figcaption><button class="btn btn-md btn-secondary">Start building</button></figure>
-      <figure><figcaption>SECONDARY HOVER</figcaption><button class="btn btn-md btn-secondary" style="background:var(--color-panel)">Start building</button></figure>
-      <figure><figcaption>SECONDARY PRESSED</figcaption><button class="btn btn-md btn-secondary" style="background:var(--color-ink);color:#fff;box-shadow:none">Start building</button></figure>
-      <figure><figcaption>TEXT</figcaption><button class="btn btn-text">See pricing</button></figure>
-      <figure><figcaption>TEXT DISABLED</figcaption><button class="btn btn-text" disabled>See pricing</button></figure>
+      <figure><figcaption>SECONDARY</figcaption><button class="btn btn-md btn-secondary" type="button">Start building</button></figure>
+      <figure><figcaption>SECONDARY HOVER</figcaption><button class="btn btn-md btn-secondary" type="button" style="background:var(--color-panel)">Start building</button></figure>
+      <figure><figcaption>SECONDARY PRESSED</figcaption><button class="btn btn-md btn-secondary" type="button" style="background:var(--color-ink);color:#fff;box-shadow:none">Start building</button></figure>
+      <figure><figcaption>SECONDARY DISABLED</figcaption><button class="btn btn-md btn-secondary" type="button" disabled>Start building</button></figure>
+      <figure><figcaption>TEXT</figcaption><button class="btn btn-text" type="button">See pricing</button></figure>
+      <figure><figcaption>TEXT HOVER</figcaption><button class="btn btn-text text-hover-demo" type="button">See pricing</button></figure>
+      <figure><figcaption>TEXT PRESSED</figcaption><button class="btn btn-text text-pressed-demo" type="button">See pricing</button></figure>
+      <figure><figcaption>TEXT FOCUS</figcaption><button class="btn btn-text focus-demo" type="button">See pricing</button></figure>
+      <figure><figcaption>TEXT DISABLED</figcaption><button class="btn btn-text" type="button" disabled>See pricing</button></figure>
     </div>
-    <p class="field-hint">Hover: primary turns black; secondary fills panel; text underline thickens to 4px. Pressed: primary black with a 2px cobalt inset; secondary inverts to black. Loading: label stays, a spinner replaces the arrow, the button is not clickable.</p>
+    <p class="field-hint">Hover: primary turns black; secondary fills panel; text underline thickens to 4px. Pressed: primary black with a 2px cobalt inset; secondary inverts to black; text fills panel. Focus: 2px cobalt outline, 2px offset, the same ring as <code>:focus-visible</code> (the frame left button focus open). Loading: the label stays, a 12px spinner replaces the arrow, and the button is disabled so it cannot be clicked — the fill stays cobalt, not the hairline disabled fill. Disabled: hairline fill and placeholder text. Secondary disabled keeps a hairline border. Text disabled uses a placeholder label and underline.</p>
   </section>
 
   <section class="states-sec">
@@ -59,11 +65,11 @@
     <div class="state-row">
       <figure><figcaption>ERROR</figcaption>
         <div class="codes error"><input class="code" value="4" /><input class="code" value="8" /><input class="code" value="1" /><span class="gap"><i></i></span><input class="code" value="9" /><input class="code" value="0" /><input class="code" value="3" /></div>
-        <p class="field-error">That code is incorrect.</p>
+        <p class="field-error">That code is incorrect or has expired. Request a new one if needed.</p>
         <button class="btn btn-text" type="button">Resend code</button>
       </figure>
     </div>
-    <p class="field-hint">The frame’s “2 tries left” is not returned by the API. A wrong code responds with “That code is incorrect.” After 8 wrong attempts the code is burned: “Too many wrong codes. Request a new one.”</p>
+    <p class="field-hint">The frame’s “That code didn’t match. 2 tries left.” is not returned by the API. A wrong, expired, or unknown code all respond with “That code is incorrect or has expired. Request a new one if needed.” After 8 wrong attempts the code is burned, and the hourly cap uses the same sentence: “Too many wrong codes. Request a new one.”</p>
   </section>
 
   <section class="states-sec">
@@ -85,10 +91,10 @@
   <section class="states-sec">
     <h2>05 · Alert / toast</h2>
     <div class="state-row" style="flex-direction:column;align-items:stretch;max-width:640px">
-      <div class="alert alert-success"><span class="alert-icon"></span><span>Key copied to clipboard.</span></div>
-      <div class="alert alert-error"><span class="alert-icon"></span><span>We couldn’t send the code. Try again in a minute.</span></div>
+      <div class="alert alert-success" role="status"><span class="alert-icon"></span><span>Key copied to clipboard.</span></div>
+      <div class="alert alert-error" role="alert"><span class="alert-icon"></span><span>Could not send the code. Try again in a minute.</span></div>
     </div>
-    <p class="field-hint">Inline: full width of its container, 24px above the element it refers to. Toast: the same component, fixed 24px from the bottom-right. “Key copied to clipboard.” is the copy used after a successful clipboard write. The resend failure toast uses the server’s error string when one is returned.</p>
+    <p class="field-hint">Inline: full width of its container, 24px above the element it refers to. Toast: the same component, fixed 24px from the bottom-right, dismissed after 4 seconds. Success uses <code>role="status"</code>; errors use <code>role="alert"</code>. “Key copied to clipboard.” is the copy after a successful clipboard write. “Could not send the code. Try again in a minute.” is the client fallback when resend fails and the server sends no <code>error</code> string. A server <code>error</code> replaces it. The frame’s “We couldn’t send the code…” is not used.</p>
   </section>
 
   <section class="states-sec">
