@@ -27,7 +27,7 @@ const amount = (r: ReturnType<typeof calculatePaycheck>, id: string) => r.taxes.
 describe('tax year 2025', () => {
   test('covers federal and the states with a 2025 file', () => {
     const covered = statesWithRuleset('2025-06-13');
-    for (const st of ['AK', 'FL', 'NH', 'NV', 'SD', 'TN', 'TX', 'WA', 'WY', 'AZ', 'CO', 'GA', 'IA', 'ID', 'IL', 'IN', 'KY', 'LA', 'MA', 'MI', 'MS', 'NC', 'PA', 'UT']) assert.ok(covered.includes(st), st);
+    for (const st of ['AK', 'AZ', 'CA', 'CO', 'FL', 'GA', 'IA', 'ID', 'IL', 'IN', 'KY', 'LA', 'MA', 'MI', 'MO', 'MS', 'NC', 'ND', 'NH', 'NV', 'OK', 'PA', 'SD', 'TN', 'TX', 'UT', 'WA', 'WY']) assert.ok(covered.includes(st), st);
   });
 
   test("Illinois 2025: IL-700-T's own example ($800 weekly, 2 + 2 allowances) withholds $32.27", () => {
@@ -109,6 +109,25 @@ describe('tax year 2025', () => {
       assert.equal(eit('2025-06-13', '400204'), 4650);
       assert.equal(eit('2026-06-12', '400204'), 5520);
     });
+  });
+
+  test("California 2025 reproduces EDD Method B's own examples C, D and B", () => {
+    assert.equal(amount(st('2025-06-13', 'CA', { filingStatus: 'married_one_income', regularAllowances: 5 }, 'monthly', 510000), 'CA_SIT'), 389);
+    assert.equal(amount(st('2025-06-13', 'CA', { filingStatus: 'hoh', regularAllowances: 3 }, 'weekly', 95000), 'CA_SIT'), 220);
+    assert.equal(amount(st('2025-06-13', 'CA', { filingStatus: 'married_one_income', regularAllowances: 2, estimatedDeductionAllowances: 1 }, 'biweekly', 160000), 'CA_SIT'), 328);
+    assert.equal(amount(st('2025-06-13', 'CA', { filingStatus: 'hoh', regularAllowances: 3 }, 'weekly', 95000), 'CA_DBL_EE'), 1140); // SDI 1.2%
+  });
+
+  test("Missouri 2025: the formula's own example ($35,000 a year, married spouse works) is $64 a month", () => {
+    assert.equal(amount(st('2025-06-13', 'MO', { filingStatus: 'married_spouse_works' }, 'monthly', 291667), 'MO_SIT'), 6400);
+  });
+
+  test("Oklahoma 2025: OW-2's own example ($1,825 semi-monthly, married, 2 allowances) is $42", () => {
+    assert.equal(amount(st('2025-06-13', 'OK', { filingStatus: 'married', allowances: 2 }, 'semimonthly', 182500), 'OK_SIT'), 4200);
+  });
+
+  test("North Dakota 2025: the booklet's own example ($1,800 weekly, single, 2 pre-2020 allowances) is $10", () => {
+    assert.equal(amount(st('2025-06-13', 'ND', { formVintage: 'pre_2020', maritalStatus: 'single', allowances: 2 }, 'weekly', 180000), 'ND_SIT'), 1000);
   });
 
   test('Michigan 2025: 4.25% after $5,800 per exemption', () => {
