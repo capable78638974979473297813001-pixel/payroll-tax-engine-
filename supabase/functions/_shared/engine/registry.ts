@@ -3,6 +3,7 @@ import { join } from 'node:path';
 
 const DATA_ROOT = join(import.meta.dirname, '..', 'data');
 
+const datedCache = new Map<string, StateRuleset>();
 const cache = new Map<string, unknown>();
 
 /**
@@ -27,6 +28,7 @@ let dataReader: DataReader = (relPath) => {
 export function setDataReader(reader: DataReader): void {
   dataReader = reader;
   cache.clear();
+  datedCache.clear();
 }
 
 /**
@@ -160,10 +162,48 @@ export interface StateRuleset {
   [key: string]: unknown;
 }
 
+/**
+ * A mid-year change inside one year's file: from `from` (a check date,
+ * inclusive) each dotted path in `set` takes the new value. Used where a
+ * state reissued its tables part-way through a year (Idaho's May 2025 rate
+ * cut, Utah's June 2025 tables) and the method has no dated switch of its own.
+ */
+interface EffectiveDatedChange {
+  from: string;
+  set: Record<string, unknown>;
+  note?: string;
+}
+
+function applyEffectiveDated(base: StateRuleset, checkDate: string): StateRuleset {
+  const changes = (base.effectiveDated as EffectiveDatedChange[] | undefined) ?? [];
+  const due = changes.filter((c) => c.from <= checkDate).sort((a, b) => a.from.localeCompare(b.from));
+  if (due.length === 0) return base;
+  const key = `${base.code}-${base.year}@${due.at(-1)!.from}`;
+  const hit = datedCache.get(key);
+  if (hit) return hit;
+  const out = structuredClone(base) as Record<string, unknown>;
+  for (const change of due) {
+    for (const [path, value] of Object.entries(change.set)) {
+      const parts = path.split('.');
+      let node = out as Record<string, unknown>;
+      for (const part of parts.slice(0, -1)) {
+        if (typeof node[part] !== 'object' || node[part] === null) {
+          throw new Error(`effectiveDated path ${path} does not exist in ${base.code}-${base.year}.json`);
+        }
+        node = node[part] as Record<string, unknown>;
+      }
+      node[parts.at(-1)!] = structuredClone(value);
+    }
+  }
+  datedCache.set(key, out as StateRuleset);
+  return out as StateRuleset;
+}
+
 export function stateRuleset(code: string, checkDate: string): StateRuleset {
-  return loadJson<StateRuleset>(
+  const base = loadJson<StateRuleset>(
     join('states', `${code.toUpperCase()}-${yearOf(checkDate)}.json`),
   );
+  return base.effectiveDated ? applyEffectiveDated(base, checkDate) : base;
 }
 
 export function hasStateRuleset(code: string, checkDate: string): boolean {

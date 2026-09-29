@@ -4236,8 +4236,32 @@ describe('Idaho', () => {
   // state in this project. The Tax Commission's computing page then says
   // to round the result to the nearest whole dollar, so each figure in a
   // test name is the pre-rounding amount and the assertion the rounded one.
+  // These pin the 07-23-2026 table, in force for checks from 2026-07-31.
   const idState = (certificate: Record<string, unknown> = {}) => ({
+    checkDate: '2026-08-14',
     workState: { code: 'ID', certificate },
+  });
+
+  test('before 2026-07-31 the 04-28-2025 table still applies, with its $148.77 biweekly child tax credit allowance', () => {
+    // Idaho's own example: $1,212 biweekly single, 4 allowances: 1,212 - 595.08 = 616.92; (616.92 - 577) x 5.3% = $2.12 -> $2
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-03-13',
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1212) }],
+        workState: { code: 'ID', certificate: { allowances: 4 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(2));
+    // after the reissue the allowance is gone: (1,212 - 619) x 5.3% = $31.43 -> $31
+    const after = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1212) }],
+        ...idState({ allowances: 4 }),
+      }),
+    );
+    assert.equal(amountOf(after, 'ID_SIT'), dollars(31));
   });
 
   test('weekly $1,000 single: (1,000 − 310) × 5.3% = $36.57', () => {

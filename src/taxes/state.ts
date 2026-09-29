@@ -3933,6 +3933,12 @@ function stateDisabilityEmployeeTax(
 interface BracketTwoStatusConfig {
   brackets: Record<'single' | 'married', Record<string, WIBracket[]>>; // second key is PayFrequency
   nonresidentAlienAdjustment?: Record<string, number>; // dollars, keyed by PayFrequency
+  /**
+   * Idaho Child Tax Credit Allowance Table: dollars per Form ID W-4 allowance,
+   * keyed by PayFrequency, subtracted from wages before the table lookup.
+   * Absent once the credit sunset (2026); present in the 2025 file.
+   */
+  childTaxCreditAllowance?: Record<string, number>;
 }
 
 /**
@@ -4042,8 +4048,15 @@ function bracketTwoStatusPerPeriod(
         `schedule — cannot compute ${rules.code}_SIT.`,
     );
   }
-  const bracket = findWIBracket(brackets, taxableWages);
-  const excess = taxableWages - dollars(bracket.from);
+  const allowances = cfg.childTaxCreditAllowance ? Math.max(0, Number(cert.allowances ?? 0)) : 0;
+  const perAllowance = cfg.childTaxCreditAllowance?.[input.payFrequency];
+  if (allowances > 0 && perAllowance === undefined) {
+    throw new Error(`Idaho's allowance table has no "${input.payFrequency}" amount — cannot compute ${rules.code}_SIT.`);
+  }
+  const allowanceCents = allowances > 0 ? Math.round(dollars(perAllowance!) * allowances) : 0;
+  const wagesForTable = atLeastZero(taxableWages - allowanceCents);
+  const bracket = findWIBracket(brackets, wagesForTable);
+  const excess = wagesForTable - dollars(bracket.from);
   const nraAdjustment = isNRA
     ? dollars(cfg.nonresidentAlienAdjustment?.[input.payFrequency] ?? 0)
     : 0;
@@ -4057,9 +4070,10 @@ function bracketTwoStatusPerPeriod(
     taxableWages,
     amount,
     detail:
+      (allowanceCents ? `${fmt(taxableWages)} less ${allowances} child tax credit allowance(s) (${fmt(allowanceCents)}) = ` : '') +
       (bracket.rate === 0
-        ? `${fmt(taxableWages)} below the ${maritalStatus} ${fmt(dollars(bracket.to ?? 0))} threshold — $0`
-        : `${fmt(taxableWages)} less ${fmt(dollars(bracket.from))} ${maritalStatus} threshold ` +
+        ? `${fmt(wagesForTable)} below the ${maritalStatus} ${fmt(dollars(bracket.to ?? 0))} threshold — $0`
+        : `${fmt(wagesForTable)} less ${fmt(dollars(bracket.from))} ${maritalStatus} threshold ` +
           `@ ${(bracket.rate * 100).toFixed(2)}%`) +
       (nraAdjustment
         ? `; plus ${fmt(nraAdjustment)}/period nonresident alien adjustment (Form ID W-4's own Pay Period table)`
