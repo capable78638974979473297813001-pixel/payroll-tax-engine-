@@ -24,7 +24,8 @@ a:hover { text-decoration: underline; }
   background: rgba(251,250,245,0.92); backdrop-filter: saturate(140%) blur(8px);
   border-bottom: 1px solid var(--rule);
 }
-.brand { display: flex; align-items: baseline; gap: 9px; text-decoration: none; }
+.brand { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+.brand img { height: 22px; width: auto; display: block; }
 .brand .word { font-family: var(--mono); font-size: 18px; font-weight: 600; letter-spacing: -0.06em; color: var(--ink); }
 .brand .tag { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-4); border: 1px solid var(--rule-2); padding: 2px 5px; border-radius: 3px; }
 .topbar .spacer { flex: 1; }

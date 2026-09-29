@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Create account — Omnia.tax</title>
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/tokens.css" />
+<link rel="stylesheet" href="/assets/site.css" />
+<!--OMNIA_CONFIG-->
+</head>
+<body>
+<div class="onboard">
+  <aside class="step-panel">
+    <div class="step-panel-top">
+      <a class="logo" href="/" aria-label="Omnia.tax"><img src="/logo/logo-on-blue.svg" alt="" /></a>
+      <span class="label-mono" style="color:var(--color-on-cobalt-muted);font-weight:400">Onboarding</span>
+    </div>
+    <div class="step-num-row">
+      <div class="step-num">01</div>
+      <div class="step-of"><div class="eyebrow">Step</div><div class="of">OF 05</div></div>
+    </div>
+    <div class="step-rule"></div>
+    <div class="panel-head"><span>WHAT YOU GET</span><span>PRICE SHEET</span></div>
+    <div class="panel-rule"></div>
+    <div style="font-size:112px;font-weight:700;letter-spacing:-5px;line-height:0.9" data-rate>$0.12</div>
+    <div style="font-size:20px;font-weight:700;margin-bottom:16px">per paycheck</div>
+    <div class="panel-rows">
+      <div><span>Contract</span><b>None</b></div>
+      <div><span>Minimums</span><b>None</b></div>
+      <div><span>Setup fee</span><b>None</b></div>
+      <div><span>Free trial</span><b>First <span data-trial>14</span> days</b></div>
+    </div>
+    <div class="step-rule"></div>
+    <div class="due">
+      <div class="label-mono">Due today</div>
+      <p>Nothing is charged during the trial.</p>
+      <div class="zero">$0.00</div>
+    </div>
+  </aside>
+  <main class="form-col">
+    <div class="form-top"><span class="label-mono">Step 01 of 05</span></div>
+    <ol class="progress" aria-label="Progress">
+      <li class="current"><div class="bar"></div><div class="lbl"><span class="n">01</span> Account</div></li>
+      <li><div class="bar"></div><div class="lbl"><span class="n">02</span> Verify</div></li>
+      <li><div class="bar"></div><div class="lbl"><span class="n">03</span> Business</div></li>
+      <li><div class="bar"></div><div class="lbl"><span class="n">04</span> Payment</div></li>
+      <li><div class="bar"></div><div class="lbl"><span class="n">05</span> API key</div></li>
+    </ol>
+    <h1>Create your account.</h1>
+    <p class="lead">Five short steps to your API key. The first <span data-trial>14</span> days are free.</p>
+    <form class="form-stack" id="form" novalidate>
+      <div class="field" id="emailField">
+        <label class="field-label" for="email">Work email</label>
+        <input id="email" name="email" type="email" autocomplete="email" placeholder="you@company.com" required />
+        <p class="field-error" id="emailError" hidden></p>
+      </div>
+      <div class="field" id="pwField">
+        <label class="field-label" for="password">Password</label>
+        <div class="field-box">
+          <input id="password" type="password" value="" placeholder="Password" disabled />
+          <button type="button" class="field-slot" disabled>Show</button>
+        </div>
+        <p class="pw-rule" id="pwRule"><span class="box" aria-hidden="true"></span><svg class="check" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6l3 3 5-6" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>12+ characters</span></p>
+        <p class="field-hint">Accounts use a 6-digit email code. There is no password to set.</p>
+      </div>
+      <div class="field" id="nameField">
+        <label class="field-label" for="name">Your name</label>
+        <input id="name" name="name" autocomplete="name" required />
+        <p class="field-error" id="nameError" hidden></p>
+      </div>
+      <div class="field" id="companyField">
+        <label class="field-label" for="company">Business name</label>
+        <input id="company" name="company" autocomplete="organization" required />
+        <p class="field-error" id="companyError" hidden></p>
+      </div>
+      <div class="field" id="phoneField">
+        <label class="field-label" for="phone">Phone</label>
+        <input id="phone" name="phone" type="tel" autocomplete="tel" required />
+        <p class="field-error" id="phoneError" hidden></p>
+      </div>
+      <p class="field-error" id="formError" hidden></p>
+      <button class="btn btn-lg btn-primary btn-block" id="submit" type="submit" disabled>Create account <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
+    </form>
+    <p class="form-foot">Already have an account? <a class="btn btn-text" href="/signin">Sign in</a></p>
+    <p class="fine">By continuing you agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
+  </main>
+</div>
+<script src="/assets/pricing.js"></script>
+<script src="/assets/session.js"></script>
+<script>
+(function () {
+  var email = document.getElementById('email');
+  var name = document.getElementById('name');
+  var company = document.getElementById('company');
+  var phone = document.getElementById('phone');
+  var submit = document.getElementById('submit');
+  var params = new URLSearchParams(location.search);
+  if (params.get('email')) email.value = params.get('email');
+  var pending = Omnia.pending();
+  if (pending) {
+    if (!email.value && pending.email) email.value = pending.email;
+    if (pending.name) name.value = pending.name;
+    if (pending.company) company.value = pending.company;
+    if (pending.phone) phone.value = pending.phone;
+  }
+  function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+  function refresh() {
+    submit.disabled = !(validEmail(email.value.trim()) && name.value.trim() && company.value.trim() && phone.value.trim());
+  }
+  [email, name, company, phone].forEach(function (el) { el.addEventListener('input', refresh); });
+  refresh();
+  document.getElementById('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    document.getElementById('emailError').hidden = true;
+    document.getElementById('formError').hidden = true;
+    email.closest('.field').classList.remove('error');
+    if (!validEmail(email.value.trim())) {
+      email.closest('.field').classList.add('error');
+      var err = document.getElementById('emailError');
+      err.textContent = 'Enter a valid work email.';
+      err.hidden = false;
+      return;
+    }
+    var payload = {
+      name: name.value.trim(),
+      email: email.value.trim(),
+      company: company.value.trim(),
+      phone: phone.value.trim()
+    };
+    Omnia.setLoading(submit, true);
+    Omnia.api('/api/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      .then(function (res) {
+        Omnia.setLoading(submit, false);
+        if (!res.ok) {
+          var msg = (res.body && res.body.error) || 'Could not start signup.';
+          var box = document.getElementById('formError');
+          if (/email/i.test(msg)) {
+            email.closest('.field').classList.add('error');
+            document.getElementById('emailError').textContent = msg;
+            document.getElementById('emailError').hidden = false;
+          } else {
+            box.textContent = msg;
+            box.hidden = false;
+          }
+          return;
+        }
+        Omnia.setPending(Object.assign({}, payload, { emailSent: !!(res.body && res.body.emailSent), sentAt: Date.now() }));
+        location.href = '/signup/verify';
+      })
+      .catch(function () {
+        Omnia.setLoading(submit, false);
+        var box = document.getElementById('formError');
+        box.textContent = 'Could not reach the server. Try again.';
+        box.hidden = false;
+      });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>States — Omnia.tax</title>
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/tokens.css" />
+<link rel="stylesheet" href="/assets/site.css" />
+<!--OMNIA_CONFIG-->
+</head>
+<body>
+<header class="nav">
+  <a class="logo" href="/" aria-label="Omnia.tax"><img src="/logo/logo.svg" alt="" /></a>
+  <span class="mono" style="margin-left:24px;font-size:12px;letter-spacing:1px;color:var(--color-gray)">B08 · COMPONENT STATES</span>
+</header>
+<main class="wrap" style="padding-bottom:80px">
+  <h1 style="font-size:64px;letter-spacing:-3px;margin:40px 0 8px">States</h1>
+  <p style="color:var(--color-gray);max-width:640px">Every interactive component in each of its states, drawn with the same tokens as the product pages. This board is internal. It has no product route in the onboarding click path.</p>
+
+  <section class="states-sec">
+    <h2>01 · Text input</h2>
+    <div class="state-row">
+      <figure><figcaption>DEFAULT</figcaption><div class="field" style="width:220px"><label class="field-label">Work email</label><input placeholder="you@company.com" /></div></figure>
+      <figure><figcaption>FOCUS</figcaption><div class="field" style="width:220px"><label class="field-label">Work email</label><input class="demo-focus" value="" placeholder="" /></div></figure>
+      <figure><figcaption>FILLED</figcaption><div class="field" style="width:220px"><label class="field-label">Work email</label><input value="you@company.com" /></div></figure>
+      <figure><figcaption>ERROR</figcaption><div class="field error" style="width:240px"><label class="field-label">Work email</label><input value="you@company" /><p class="field-error">Enter a valid work email.</p></div></figure>
+      <figure><figcaption>DISABLED</figcaption><div class="field" style="width:220px"><label class="field-label">Work email</label><input value="you@company.com" disabled /></div></figure>
+    </div>
+  </section>
+
+  <section class="states-sec">
+    <h2>02 · Buttons</h2>
+    <div class="state-row">
+      <figure><figcaption>PRIMARY DEFAULT</figcaption><button class="btn btn-md btn-primary">Create account <span class="btn-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button></figure>
+      <figure><figcaption>HOVER</figcaption><button class="btn btn-md btn-primary hover-demo">Create account →</button></figure>
+      <figure><figcaption>PRESSED</figcaption><button class="btn btn-md btn-primary pressed-demo">Create account →</button></figure>
+      <figure><figcaption>LOADING</figcaption><button class="btn btn-md btn-primary is-loading" aria-busy="true">Create account <span class="btn-icon"></span></button></figure>
+      <figure><figcaption>DISABLED</figcaption><button class="btn btn-md btn-primary" disabled>Create account →</button></figure>
+    </div>
+    <div class="state-row">
+      <figure><figcaption>SECONDARY</figcaption><button class="btn btn-md btn-secondary">Start building</button></figure>
+      <figure><figcaption>SECONDARY HOVER</figcaption><button class="btn btn-md btn-secondary" style="background:var(--color-panel)">Start building</button></figure>
+      <figure><figcaption>SECONDARY PRESSED</figcaption><button class="btn btn-md btn-secondary" style="background:var(--color-ink);color:#fff;box-shadow:none">Start building</button></figure>
+      <figure><figcaption>TEXT</figcaption><button class="btn btn-text">See pricing</button></figure>
+      <figure><figcaption>TEXT DISABLED</figcaption><button class="btn btn-text" disabled>See pricing</button></figure>
+    </div>
+    <p class="field-hint">Hover: primary turns black; secondary fills panel; text underline thickens to 4px. Pressed: primary black with a 2px cobalt inset; secondary inverts to black. Loading: label stays, a spinner replaces the arrow, the button is not clickable.</p>
+  </section>
+
+  <section class="states-sec">
+    <h2>03 · Verify code</h2>
+    <div class="state-row">
+      <figure><figcaption>EMPTY</figcaption><div class="codes"><input class="code" /><input class="code" /><input class="code" /><span class="gap"><i></i></span><input class="code" /><input class="code" /><input class="code" /></div></figure>
+    </div>
+    <div class="state-row">
+      <figure><figcaption>TYPING</figcaption><div class="codes"><input class="code filled" value="4" /><input class="code filled" value="8" /><input class="code filled" value="1" /><span class="gap"><i></i></span><input class="code demo-focus" /><input class="code" /><input class="code" /></div></figure>
+    </div>
+    <div class="state-row">
+      <figure><figcaption>ERROR</figcaption>
+        <div class="codes error"><input class="code" value="4" /><input class="code" value="8" /><input class="code" value="1" /><span class="gap"><i></i></span><input class="code" value="9" /><input class="code" value="0" /><input class="code" value="3" /></div>
+        <p class="field-error">That code is incorrect.</p>
+        <button class="btn btn-text" type="button">Resend code</button>
+      </figure>
+    </div>
+    <p class="field-hint">The frame’s “2 tries left” is not returned by the API. A wrong code responds with “That code is incorrect.” After 8 wrong attempts the code is burned: “Too many wrong codes. Request a new one.”</p>
+  </section>
+
+  <section class="states-sec">
+    <h2>04 · Password rule · stepper · card</h2>
+    <div class="state-row">
+      <figure><figcaption>PASSWORD RULE UNMET</figcaption><p class="pw-rule"><span class="box"></span><span>12+ characters</span></p></figure>
+      <figure><figcaption>MET</figcaption><p class="pw-rule met"><svg class="check" viewBox="0 0 12 12"><path d="M2 6l3 3 5-6" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>12+ characters</span></p></figure>
+      <figure><figcaption>STEPPER AT MINIMUM</figcaption>
+        <div class="stepper"><button type="button" disabled>−</button><input value="1" readonly /><button type="button">+</button></div>
+        <p class="field-hint">− is disabled at 1. No maximum is defined by the API.</p>
+      </figure>
+      <figure><figcaption>CARD FIELD · STRIPE COPY</figcaption>
+        <div class="field error" style="width:280px"><label class="field-label">Card number</label><input value="4242 4242 4242" /><p class="field-error">Your card number is incomplete.</p></div>
+        <p class="field-hint">Shown by Stripe inside Checkout, not by this page. The server never receives the card number.</p>
+      </figure>
+    </div>
+  </section>
+
+  <section class="states-sec">
+    <h2>05 · Alert / toast</h2>
+    <div class="state-row" style="flex-direction:column;align-items:stretch;max-width:640px">
+      <div class="alert alert-success"><span class="alert-icon"></span><span>Key copied to clipboard.</span></div>
+      <div class="alert alert-error"><span class="alert-icon"></span><span>We couldn’t send the code. Try again in a minute.</span></div>
+    </div>
+    <p class="field-hint">Inline: full width of its container, 24px above the element it refers to. Toast: the same component, fixed 24px from the bottom-right. “Key copied to clipboard.” is the copy used after a successful clipboard write. The resend failure toast uses the server’s error string when one is returned.</p>
+  </section>
+
+  <section class="states-sec">
+    <h2>06 · Sandbox response, error state</h2>
+    <div style="max-width:560px;border:1px solid var(--color-hairline);padding:16px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="status-chip err">422</span>
+        <span class="mono">POST /v1/paycheck</span>
+        <span class="tag tag-solid" style="margin-left:auto;background:var(--color-error);color:#fff">Illustrative</span>
+      </div>
+      <pre class="json-err" style="font-family:var(--font-mono);font-size:13px;line-height:22px">{
+  "error": "The request did not pass validation.",
+  "code": "invalid_input",
+  "requestId": "req_…",
+  "details": [
+    { "path": "checkDate", "message": "is required and must be an ISO date, \"YYYY-MM-DD\"." },
+    { "path": "workState.code", "message": "must be a two-letter state code, e.g. \"OH\"." }
+  ]
+}</pre>
+      <p class="label-mono">Details · 2 fields</p>
+      <ul class="details-list">
+        <li><i></i><code>checkDate</code><span>is required and must be an ISO date, "YYYY-MM-DD".</span></li>
+        <li><i></i><code>workState.code</code><span>must be a two-letter state code, e.g. "OH".</span></li>
+      </ul>
+      <p class="field-hint">Item shape is <code>{ path, message }</code>, from site/lib/validate.ts. The frame’s <code>field</code> key is not what the API sends. Headers on a 422 that got past the limiter include X-Request-Id, Omnia-Mode, and RateLimit-*. 401 responses have X-Request-Id and no Omnia-Mode.</p>
+    </div>
+  </section>
+</main>
+<script src="/assets/pricing.js"></script>
+</body>
+</html>

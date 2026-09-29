@@ -1,8 +1,8 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 
 import { calculatePaycheck } from '../src/calculate.ts';
 import {
@@ -10,7 +10,7 @@ import {
   type AccountRecord, type KeyRecord, type PaymentMethodRecord,
   type SubscriptionRecord, type TermsAcceptance, type TermsQuote,
 } from './lib/store.ts';
-import { CALL_TIERS, ROOFTOP_RATE, TRIAL_DAYS, estimate as computePricing, costForCalls } from './lib/pricing.ts';
+import { CALL_TIERS, ROOFTOP_RATE, TRIAL_DAYS, PERIODS_PER_YEAR, estimate as computePricing, costForCalls } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
 import { isEmailConfigured, sendVerificationEmail } from './lib/mail.ts';
 import { validatePaycheckInput } from './lib/validate.ts';
@@ -166,6 +166,45 @@ function sendHtml(res: ServerResponse, path: string): void {
     ...SECURITY_HEADERS,
   });
   res.end(html);
+}
+
+/** Figures the pages display, read from pricing.ts so the HTML cannot drift. */
+function clientConfig() {
+  return {
+    trialDays: TRIAL_DAYS,
+    termMonths: TERM_MONTHS,
+    tiers: CALL_TIERS.map((t) => ({ upTo: Number.isFinite(t.upTo) ? t.upTo : null, rate: t.rate })),
+    rooftopRate: ROOFTOP_RATE,
+    periodsPerYear: PERIODS_PER_YEAR,
+    codeTtlSec: CODE_TTL_MS / 1000,
+    codeCooldownSec: CODE_COOLDOWN_MS / 1000,
+    maxCodeAttempts: MAX_CODE_ATTEMPTS,
+    rateLimitPerMin: paycheckLimiterLimit(),
+  };
+}
+
+function sendPage(res: ServerResponse, path: string): void {
+  const html = readFileSync(path, 'utf8').replace(
+    '<!--OMNIA_CONFIG-->',
+    `<script>window.OMNIA=${JSON.stringify(clientConfig())};</script>`,
+  );
+  const buf = Buffer.from(html);
+  res.writeHead(200, {
+    'Content-Type': 'text/html; charset=utf-8',
+    'Content-Length': buf.byteLength,
+    'Cache-Control': 'no-store',
+    ...SECURITY_HEADERS,
+  });
+  res.end(buf);
+}
+
+function contentTypeFor(file: string): string {
+  if (file.endsWith('.css')) return 'text/css; charset=utf-8';
+  if (file.endsWith('.js')) return 'text/javascript; charset=utf-8';
+  if (file.endsWith('.svg')) return 'image/svg+xml';
+  if (file.endsWith('.png')) return 'image/png';
+  if (file.endsWith('.json')) return 'application/json; charset=utf-8';
+  return 'application/octet-stream';
 }
 
 function sendStatic(res: ServerResponse, path: string, contentType: string): void {
@@ -752,8 +791,8 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
   }
 
   const origin = (process.env.PUBLIC_BASE_URL ?? `http://localhost:${PORT}`).replace(/\/+$/, '');
-  const successUrl = `${origin}/docs.html?setup=ok&session_id={CHECKOUT_SESSION_ID}`;
-  const cancelUrl = `${origin}/docs.html?setup=cancelled`;
+  const successUrl = `${origin}/signup/payment?setup=ok&session_id={CHECKOUT_SESSION_ID}`;
+  const cancelUrl = `${origin}/signup/payment?setup=cancelled`;
 
   // Preferred path: a metered subscription to the graduated price, so every
   // future call actually bills. Requires STRIPE_PRICE_ID (a usage-metered
@@ -1569,20 +1608,38 @@ createServer((req, res) => {
   const method = req.method ?? 'GET';
 
   (async () => {
-    if (method === 'GET' && (url === '/' || url === '/index.html')) {
-      sendHtml(res, join(HERE, 'index.html'));
+    const pages: Record<string, string> = {
+      '/': 'index.html',
+      '/index.html': 'index.html',
+      '/signup': 'signup.html',
+      '/signup/verify': 'signup-verify.html',
+      '/signup/business': 'signup-business.html',
+      '/signup/payment': 'signup-payment.html',
+      '/signup/key': 'signup-key.html',
+      '/signin': 'signin.html',
+      '/docs': 'docs.html',
+      '/docs.html': 'docs.html',
+      '/sandbox': 'sandbox.html',
+      '/sandbox.html': 'sandbox.html',
+      '/console': 'sandbox.html',
+      '/_states': 'states.html',
+    };
+    if (method === 'GET' && pages[url]) {
+      sendPage(res, join(HERE, pages[url]));
       return;
     }
-    if (method === 'GET' && (url === '/docs' || url === '/docs.html')) {
-      sendHtml(res, join(HERE, 'docs.html'));
-      return;
+    if (method === 'GET' && (url === '/favicon.ico' || url === '/favicon.svg' || url.startsWith('/logo/') || url.startsWith('/assets/') || url === '/tokens.css')) {
+      const rel = url === '/favicon.ico' || url === '/favicon.svg' ? 'logo/favicon.svg' : url.replace(/^\/+/, '');
+      if (!rel.includes('..')) {
+        const file = resolve(HERE, rel);
+        if ((file === HERE || file.startsWith(HERE + '/')) && existsSync(file)) {
+          sendStatic(res, file, contentTypeFor(file));
+          return;
+        }
+      }
     }
     if (method === 'GET' && url === '/sandbox-examples.json') {
       sendStatic(res, join(HERE, 'sandbox-examples.json'), 'application/json; charset=utf-8');
-      return;
-    }
-    if (method === 'GET' && (url === '/console' || url === '/sandbox' || url === '/sandbox.html')) {
-      sendHtml(res, join(HERE, 'sandbox.html'));
       return;
     }
     if (method === 'GET' && (url === '/reference' || url === '/reference.html' || url === '/api-reference')) {
@@ -1642,7 +1699,8 @@ createServer((req, res) => {
   } else if (process.env.STRIPE_SECRET_KEY) {
     console.warn('Stripe is connected but metering is OFF: set STRIPE_PRICE_ID (a usage-metered price) and STRIPE_METER_EVENT to bill per call. Onboarding will only save a card.');
   }
-  console.log(`Omnia landing page:  http://localhost:${PORT}`);
-  console.log(`Omnia docs/console:  http://localhost:${PORT}/docs.html`);
+  console.log(`Omnia.tax:           http://localhost:${PORT}`);
+  console.log(`Omnia.tax docs:      http://localhost:${PORT}/docs`);
+  console.log(`Omnia.tax console:   http://localhost:${PORT}/sandbox`);
   console.log(`Omnia API reference: http://localhost:${PORT}/reference`);
 });

@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>About your business — Omnia.tax</title>
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/tokens.css" />
+<link rel="stylesheet" href="/assets/site.css" />
+<!--OMNIA_CONFIG-->
+</head>
+<body>
+<div class="onboard">
+  <aside class="step-panel">
+    <div class="step-panel-top">
+      <a class="logo" href="/" aria-label="Omnia.tax"><img src="/logo/logo-on-blue.svg" alt="" /></a>
+      <span class="label-mono" style="color:var(--color-on-cobalt-muted);font-weight:400">Onboarding</span>
+    </div>
+    <div class="step-num-row">
+      <div class="step-num">03</div>
+      <div class="step-of"><div class="eyebrow">Step</div><div class="of">OF 05</div></div>
+    </div>
+    <div class="step-rule"></div>
+    <div class="panel-head">
+      <span>Live estimate</span>
+      <span class="tag tag-solid">Assumes biweekly</span>
+    </div>
+    <div class="panel-rule"></div>
+    <div style="font-weight:700;font-size:18px">Estimated monthly cost</div>
+    <div class="est-val"><span class="approx">≈</span> <span id="est">$0.00</span><span class="mo">/month</span></div>
+    <div class="panel-rule"></div>
+    <div class="mono" id="formula" style="font-weight:700;font-size:18px"></div>
+    <div class="micro" id="formulaCap" style="color:var(--color-on-cobalt-muted)">EMPLOYEES × PAYCHECKS A YEAR × PRICE ÷ MONTHS</div>
+    <div class="assume"><i class="i" aria-hidden="true">i</i><span>We don’t know how often you pay. This estimate assumes biweekly pay (26 paychecks a year).</span></div>
+    <p class="note-muted">It counts one calculation per paycheck. Bonus runs and recalculations add calls. Failed calls aren’t billed.</p>
+  </aside>
+  <main class="form-col">
+    <div class="form-top"><span class="label-mono">Step 03 of 05</span><span class="who" id="who"></span></div>
+    <ol class="progress">
+      <li class="done"><div class="bar"></div><div class="lbl"><span class="chk"></span> Account</div></li>
+      <li class="done"><div class="bar"></div><div class="lbl"><span class="chk"></span> Verify</div></li>
+      <li class="current"><div class="bar"></div><div class="lbl"><span class="n">03</span> Business</div></li>
+      <li><div class="bar"></div><div class="lbl"><span class="n">04</span> Payment</div></li>
+      <li><div class="bar"></div><div class="lbl"><span class="n">05</span> API key</div></li>
+    </ol>
+    <h1>About your business.</h1>
+    <p class="lead">Two questions, so we can estimate your monthly cost. You’re only billed for calls you make.</p>
+    <form class="form-stack" id="form">
+      <div class="field">
+        <label class="field-label" for="company">Business name</label>
+        <input id="company" required />
+      </div>
+      <div>
+        <label class="field-label" for="employees">Employees you pay</label>
+        <div style="display:flex;align-items:center">
+          <div class="stepper">
+            <button type="button" id="minus" aria-label="Fewer employees">−</button>
+            <input id="employees" inputmode="numeric" value="20" />
+            <button type="button" id="plus" aria-label="More employees">+</button>
+          </div>
+          <span class="stepper-hint">Everyone who gets a paycheck from you.</span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label" for="address">Business address</label>
+        <input id="address" autocomplete="street-address" required />
+        <p class="field-hint">Required to record the terms before a payment method is added.</p>
+      </div>
+      <div class="field">
+        <label class="field-label" for="sign">Signature</label>
+        <input id="sign" autocomplete="name" required />
+        <p class="field-hint">Type your name. This is the signature stored with the terms.</p>
+      </div>
+      <div class="terms-doc" id="termsDoc">Loading the terms…</div>
+      <label class="checkline"><input type="checkbox" id="agree" /> <span id="agreeText">I agree to the terms above.</span></label>
+      <p class="field-error" id="formError" hidden></p>
+      <button class="btn btn-lg btn-primary btn-block" id="submit" type="submit" style="margin-top:8px">Continue to payment <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
+    </form>
+  </main>
+</div>
+<script src="/assets/pricing.js"></script>
+<script src="/assets/session.js"></script>
+<script>
+(function () {
+  var session = Omnia.session() || {};
+  Omnia.api('/api/account', { headers: Omnia.authHeaders() }).then(function (res) {
+    if (!res.ok) { Omnia.setSession(null); location.href = '/signup'; return; }
+    session = { email: res.body.email, name: res.body.name, company: res.body.company };
+    Omnia.setSession(session);
+    document.getElementById('who').textContent = session.email;
+    if (!document.getElementById('company').value) document.getElementById('company').value = session.company || '';
+    if (!document.getElementById('sign').value) document.getElementById('sign').value = session.name || '';
+  });
+  document.getElementById('who').textContent = session.email || '';
+  document.getElementById('company').value = session.company || '';
+  document.getElementById('sign').value = session.name || '';
+
+  var employees = document.getElementById('employees');
+  var minus = document.getElementById('minus');
+  function n() { return Math.max(1, Math.round(Number(employees.value) || 1)); }
+  function render() {
+    var v = n();
+    employees.value = String(v);
+    minus.disabled = v <= 1;
+    var est = OmniaPricing.estimate(v, 'biweekly');
+    document.getElementById('est').textContent = OmniaPricing.formatMoney(est.monthly);
+    var rate = OmniaPricing.formatRate(est.rate);
+    if (est.inFirstTier) {
+      document.getElementById('formula').textContent = est.employees + ' × ' + est.periodsPerYear + ' × ' + rate + ' ÷ 12';
+      document.getElementById('formulaCap').textContent = 'EMPLOYEES × PAYCHECKS A YEAR × PRICE ÷ MONTHS';
+    } else {
+      document.getElementById('formula').textContent = OmniaPricing.formatMoney(est.annual) + ' / yr ÷ 12';
+      document.getElementById('formulaCap').textContent = 'GRADUATED RATE CARD IN PRICING.TS · NOT A SINGLE FLAT RATE';
+    }
+  }
+  minus.addEventListener('click', function () { employees.value = String(n() - 1); render(); loadTerms(); });
+  document.getElementById('plus').addEventListener('click', function () { employees.value = String(n() + 1); render(); loadTerms(); });
+  employees.addEventListener('change', function () { render(); loadTerms(); });
+  render();
+
+  function loadTerms() {
+    var q = '/api/terms?employees=' + n() + '&payFrequency=biweekly&rooftop=false';
+    document.getElementById('submit').disabled = true;
+    Omnia.api(q, { headers: Omnia.authHeaders() }).then(function (res) {
+      if (!res.ok) {
+        document.getElementById('termsDoc').textContent = (res.body && res.body.error) || 'Could not load the terms.';
+        return;
+      }
+      document.getElementById('submit').disabled = false;
+      window.__terms = res.body;
+      window.__quoteId = res.body.quoteId || '';
+      document.getElementById('termsDoc').innerHTML = (res.body.clauses || []).map(function (c) {
+        return '<h4>' + escapeHtml(c.heading) + '</h4><p>' + escapeHtml(c.body) + '</p>';
+      }).join('');
+      var ends = res.body.trialEndsAt ? new Date(res.body.trialEndsAt).toLocaleDateString() : '';
+      document.getElementById('agreeText').textContent =
+        'I authorize Omnia.tax to charge my payment method for metered usage once the ' +
+        res.body.trialDays + '-day trial ends on ' + ends + ', and I accept the ' +
+        res.body.termMonths + '-month term described above.';
+    });
+  }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+  loadTerms();
+
+  document.getElementById('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var err = document.getElementById('formError');
+    err.hidden = true;
+    if (!document.getElementById('agree').checked) {
+      err.textContent = 'You have to tick the authorization box to continue.';
+      err.hidden = false;
+      return;
+    }
+    var payload = {
+      agreed: true,
+      quoteId: window.__quoteId,
+      signedName: document.getElementById('sign').value.trim(),
+      legalName: document.getElementById('company').value.trim(),
+      billingEmail: session.email,
+      address: document.getElementById('address').value.trim(),
+      expectedEmployees: n(),
+      payFrequency: 'biweekly',
+      rooftop: false
+    };
+    var btn = document.getElementById('submit');
+    Omnia.setLoading(btn, true);
+    Omnia.api('/api/accept-terms', { method: 'POST', headers: Omnia.authHeaders(), body: JSON.stringify(payload) })
+      .then(function (res) {
+        Omnia.setLoading(btn, false);
+        if (!res.ok) {
+          err.textContent = (res.body && res.body.error) || 'Could not record your agreement.';
+          err.hidden = false;
+          return;
+        }
+        try { sessionStorage.setItem('omnia_employees', String(payload.expectedEmployees)); } catch (x) {}
+        location.href = '/signup/payment';
+      });
+  });
+})();
+</script>
+</body>
+</html>

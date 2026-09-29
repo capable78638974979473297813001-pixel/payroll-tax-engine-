@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Omnia API Reference — payroll tax calculation</title>
+<title>API reference — Omnia.tax</title>
 <meta name="description" content="The Omnia API reference: gross-to-net payroll tax calculation for all 50 states, DC, and the local jurisdictions underneath — one authenticated POST per paycheck." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -267,8 +267,8 @@
 
 <header class="topbar">
   <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
-  <a class="brand" href="/">
-    <span class="word">Omnia</span>
+  <a class="brand" href="/" aria-label="Omnia.tax">
+    <img src="/logo/logo.svg" alt="" style="height:22px;width:auto" />
     <span class="tag">API</span>
   </a>
   <span class="sep"></span>
@@ -331,7 +331,7 @@
       <section class="doc-section" id="overview">
         <div class="row">
           <div class="prose">
-            <h1 class="page-title">Omnia API reference</h1>
+            <h1 class="page-title">Omnia.tax API reference</h1>
             <p class="page-sub">Gross-to-net US payroll tax calculation for all 50 states, DC, and the municipal, county and school-district lines underneath them — one authenticated request per paycheck.</p>
 
             <p>Omnia is payroll-tax <em>infrastructure</em>, not a payroll app. You send the facts of a single paycheck — earnings, deductions, the employee's W-4, year-to-date wages, and where the work happens — and Omnia returns every tax line that applies, for both the employee and the employer, computed against the ruleset in effect on the check date.</p>
@@ -388,7 +388,7 @@ curl https://api.omnia.tax/api/paycheck \
             <p>Every request to a calculation or account endpoint must carry an API key in the <code class="inline">Authorization</code> header as a bearer token:</p>
             <div class="endpoint-line" style="display:block"><span class="path">Authorization: Bearer sk_test_a1b2c3…</span></div>
 
-            <p>Keys are issued in your <a href="/docs.html">Omnia account</a> once a card or US bank account is on file (nothing is charged during the 14-day evaluation). Sign in, then click <b>Issue my evaluation key</b> — the plaintext key is shown <b>once</b>, so copy it immediately. Omnia stores only a SHA-256 hash of the key; it can never be recovered or re-displayed, only replaced. The <a href="/console">API console</a> runs requests with your key in the browser.</p>
+            <p>Keys are issued at the end of <a href="/signup">signup</a> once a card or US bank account is on file (nothing is charged during the 14-day evaluation). The plaintext key is shown <b>once</b>, so copy it immediately. Omnia.tax stores only a SHA-256 hash of the key; it can never be recovered or re-displayed, only replaced. The <a href="/sandbox">API console</a> runs requests with your key in the browser.</p>
 
             <h3>Key lifecycle</h3>
             <ul>
