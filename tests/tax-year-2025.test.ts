@@ -27,7 +27,7 @@ const amount = (r: ReturnType<typeof calculatePaycheck>, id: string) => r.taxes.
 describe('tax year 2025', () => {
   test('covers federal and the states with a 2025 file', () => {
     const covered = statesWithRuleset('2025-06-13');
-    for (const st of ['AK', 'AZ', 'CA', 'CO', 'FL', 'GA', 'IA', 'ID', 'IL', 'IN', 'KY', 'LA', 'MA', 'MI', 'MO', 'MS', 'NC', 'ND', 'NH', 'NV', 'OK', 'PA', 'SD', 'TN', 'TX', 'UT', 'WA', 'WY']) assert.ok(covered.includes(st), st);
+    for (const st of ['AK', 'AZ', 'CA', 'CO', 'FL', 'GA', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'ME', 'MI', 'MN', 'MO', 'MS', 'NC', 'ND', 'NE', 'NH', 'NV', 'OK', 'PA', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'WA', 'WY']) assert.ok(covered.includes(st), st);
   });
 
   test("Illinois 2025: IL-700-T's own example ($800 weekly, 2 + 2 allowances) withholds $32.27", () => {
@@ -128,6 +128,33 @@ describe('tax year 2025', () => {
 
   test("North Dakota 2025: the booklet's own example ($1,800 weekly, single, 2 pre-2020 allowances) is $10", () => {
     assert.equal(amount(st('2025-06-13', 'ND', { formVintage: 'pre_2020', maritalStatus: 'single', allowances: 2 }, 'weekly', 180000), 'ND_SIT'), 1000);
+  });
+
+  test("South Carolina 2025: WH-1603F's own example ($750 weekly, 3 allowances) is $11.44", () => {
+    assert.equal(amount(st('2025-06-13', 'SC', { allowances: 3 }, 'weekly', 75000), 'SC_SIT'), 1144);
+  });
+
+  test('Nebraska 2025: $2,360 allowance and the 5.37% top bracket ($1,800 weekly, married, 2 allowances: $70.36)', () => {
+    // 1,800 - 2 x 45.38 = 1,709.24; 61.22 + 5.37% x (1,709.24 - 1,539)
+    assert.equal(amount(st('2025-06-13', 'NE', { maritalStatus: 'married', allowances: 2 }, 'weekly', 180000), 'NE_SIT'), 7036);
+  });
+
+  test("Vermont 2025: GB-1210's own example ($1,800 weekly, married, 2 allowances) is $46.07", () => {
+    assert.equal(amount(st('2025-06-13', 'VT', { maritalStatus: 'married', allowances: 2 }, 'weekly', 180000), 'VT_SIT'), 4607);
+  });
+
+  test("Kansas 2025: KW-100's own example ($2,000 semi-monthly, joint, one dependent) is $41.44", () => {
+    assert.equal(amount(st('2025-06-13', 'KS', { allowanceRate: 'joint', personalAllowances: 2, dependents: 1 }, 'semimonthly', 200000), 'KS_SIT'), 4144);
+  });
+
+  test("Maine 2025: the tables' own Example 2 ($1,000 weekly, single, 2 allowances) is $33", () => {
+    assert.equal(amount(st('2025-06-13', 'ME', { maritalStatus: 'single', allowances: 2 }, 'weekly', 100000), 'ME_SIT'), 3300);
+  });
+
+  test('Minnesota 2025: $5,200 allowance, and no Paid Leave premium before 2026', () => {
+    const r = st('2025-06-13', 'MN', { maritalStatus: 'single', allowances: 1 });
+    assert.equal(amount(r, 'MN_SIT'), 16034); // (78,000 - 5,200): 1,742.50 + 6.8% x (72,800 - 37,120) = 4,168.74 / 26
+    assert.equal(amount(r, 'MN_PFML_EE'), undefined);
   });
 
   test('Michigan 2025: 4.25% after $5,800 per exemption', () => {
