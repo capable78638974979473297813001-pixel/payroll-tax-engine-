@@ -1,14 +1,26 @@
 {
- "date": "2026-09-28",
+ "date": "2026-09-29",
  "counts": {
-  "unchanged": 392,
-  "unreachable": 13,
-  "blocked": 12,
-  "changed": 3,
+  "unchanged": 385,
+  "unreachable": 16,
+  "blocked": 15,
+  "changed": 4,
   "gone": 3
  },
  "total": 423,
  "changed": [
+  {
+   "id": "al-9366421409",
+   "jurisdiction": "AL",
+   "title": "Alabama DOR withholding tax",
+   "url": "https://www.revenue.alabama.gov/individual-corporate/withholding-tax-2/",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
   {
    "id": "az-b66098e04c",
    "jurisdiction": "AZ",
@@ -22,39 +34,30 @@
    "significant": true
   },
   {
-   "id": "in-86066aa1c0",
-   "jurisdiction": "IN",
-   "title": "Indiana Departmental Notice #1 (county rates)",
-   "url": "https://www.in.gov/dor/files/dn01.pdf",
-   "detail": "46 lines added, 54 removed",
-   "figures_added": [
-    "0.0171"
-   ],
-   "figures_removed": [
-    "0.017"
-   ],
+   "id": "ky-4de2e96fcb",
+   "jurisdiction": "KY",
+   "title": "City of Henderson, KY \u2014 Occupational License Tax",
+   "url": "https://www.hendersonky.gov/174/Occupational-License-Tax",
+   "detail": "1 lines added, 0 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
    "links_added": [],
    "links_removed": [],
-   "significant": true
+   "significant": false
   },
   {
-   "id": "wa-ea2845b8a3",
-   "jurisdiction": "WA",
-   "title": "City of Seattle Office of Labor Standards -- Minimum Wage Ordinance",
-   "url": "https://www.seattle.gov/laborstandards/ordinances/minimum-wage",
-   "detail": "3 lines added, 4 removed; 1 links added, 2 removed",
-   "figures_added": [
-    "$22.14"
-   ],
-   "figures_removed": [
-    "$20.76"
-   ],
+   "id": "nj-5b6e2ab262",
+   "jurisdiction": "NJ",
+   "title": "New Jersey employer payroll tax",
+   "url": "https://www.nj.gov/treasury/taxation/businesses/payroll/index.shtml",
+   "detail": "1 links added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
    "links_added": [
-    "https://www.seattle.gov/laborstandards/ordinances/documents/Departments/LaborStandards/QA_MW_26_0928v2_ADA.pdf"
+    "https://www.nj.gov/treasury/taxation/forms/index.shtml?taxType=Employer+Payroll+Tax"
    ],
    "links_removed": [
-    "https://www.seattle.gov/laborstandards/ordinances/documents/Departments/LaborStandards/2025_OLS_MW_MultiyearChart_FINAL_ADA.pdf",
-    "https://www.seattle.gov/laborstandards/ordinances/documents/Departments/LaborStandards/QA_MW_25_0930_ADA.pdf"
+    "https://www.nj.gov/treasury/taxation/prntempl.shtml"
    ],
    "significant": true
   }
@@ -68,5 +71,28 @@
   "https://www.portlandmaine.gov/1016/Minimum-Wage",
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
- ]
+ ],
+ "verified": 389,
+ "unverified": 34,
+ "never_baselined": [
+  "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
+  "https://does.dc.gov/service/office-wage-hour-compliance-0",
+  "https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines",
+  "https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/",
+  "https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications",
+  "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
+  "https://kewes.ky.gov/Contact/contacts.aspx?strid=4",
+  "https://kewes.ky.gov/Contact/contacts.aspx?strid=2",
+  "https://www.portlandmaine.gov/1016/Minimum-Wage",
+  "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
+  "https://lascruces.gov/wp-content/uploads/2025/09/MinimumWageEng26.pdf",
+  "https://detr.nv.gov/Page/UI_Information_for_Employers",
+  "https://www.dfs.ny.gov/consumers/health_insurance/cobra_and_premium_assistance",
+  "https://legislation.nysenate.gov/api/3/laws/ELN/3-400?key={env:NYSENATE_API_KEY}",
+  "https://legislation.nysenate.gov/api/3/laws/LAB/651?key={env:NYSENATE_API_KEY}",
+  "https://www.ny.gov/sites/default/files/atoms/files/PSL_FAQ_PaidSickLeaveFAQ.pdf",
+  "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
+  "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
+ ],
+ "max_consecutive_failures": 8
 }
