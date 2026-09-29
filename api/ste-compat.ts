@@ -33,8 +33,17 @@
  *      ids without going through a full payCalc call, the STE-equivalent of
  *      a GeoCode/jurisdiction lookup.
  */
+import { readFileSync } from 'node:fs';
 import { calculatePaycheck } from '../src/calculate.ts';
 import {
+  hasMICityRuleset,
+  hasOHMunicipalityRuleset,
+  hasOHSchoolDistrictRuleset,
+  hasOHJEDDRuleset,
+  hasALMunicipalityRuleset,
+  hasKYOccupationalRuleset,
+  hasPALocalRuleset,
+  allALCounties,
   allALMunicipalities,
   allCounties,
   allKYJurisdictions,
@@ -114,6 +123,22 @@ export interface UniqueTaxIdEntry {
   value: string | boolean;
 }
 
+/** state|type -> keys in sequence order (see api/ste-id-pins.json). */
+const STE_ID_PINS: Record<string, string[]> = (
+  JSON.parse(readFileSync(new URL('./ste-id-pins.json', import.meta.url), 'utf8')) as { groups: Record<string, string[]> }
+).groups;
+
+/** Every (state|type, key) the catalog emitted that has no pin — for the test that keeps the pin file complete. */
+export function unpinnedUniqueTaxIds(checkDate: string): string[] {
+  return catalogFor(checkDate)
+    .entries.filter((e) => e.type !== 'psd' && e.type !== 'state')
+    .filter((e) => {
+      const key = e.type === 'locality' ? e.name : String(e.value);
+      return !(STE_ID_PINS[`${e.state}|${e.type}`] ?? []).includes(key);
+    })
+    .map((e) => `${e.state}|${e.type}|${e.type === 'locality' ? e.name : String(e.value)}`);
+}
+
 let catalogCache: { checkDate: string; entries: UniqueTaxIdEntry[]; byId: Map<string, UniqueTaxIdEntry> } | null = null;
 
 function makeId(state: string, type: JurisdictionType, seq: number | string): string {
@@ -158,13 +183,30 @@ const NAMED_LOCALITIES: { state: string; name: string; field: keyof StateCertifi
  * checkDate resolves to a different year than what's cached — the same
  * per-year-file convention as every ruleset this reads.
  *
- * Sequence numbers within each (state, type) group are assigned over
- * entries SORTED BY NAME, not by the order the underlying data file happens
- * to list them in — a data file can be re-sorted or re-scraped without
- * silently reassigning every id that comes after the change.
+ * Sequence numbers within each (state, type) group come from
+ * api/ste-id-pins.json, frozen from the catalog as launched. A jurisdiction
+ * added since then gets the next number after its group's last pinned one
+ * (in name order among the new ones), so adding a town -- Beaverton sorts
+ * before Bessemer -- never renumbers an id a caller has stored. Before the
+ * pins, numbers were positions in the name-sorted list, and one new name
+ * shifted every id after it onto a different jurisdiction.
  */
 function buildCatalog(checkDate: string): { entries: UniqueTaxIdEntry[]; byId: Map<string, UniqueTaxIdEntry> } {
   const entries: UniqueTaxIdEntry[] = [];
+
+  // Unpinned jurisdictions (a fallback -- tests/ste-compat.test.ts fails
+  // until they are appended to the pin file) number on from the group's
+  // last pinned sequence.
+  const appended = new Map<string, number>();
+  const seqFor = (state: string, type: Exclude<JurisdictionType, 'psd' | 'state'>, key: string): number => {
+    const group = `${state}|${type}`;
+    const pinned = STE_ID_PINS[group] ?? [];
+    const at = pinned.indexOf(key);
+    if (at >= 0) return at + 1;
+    const n = (appended.get(group) ?? 0) + 1;
+    appended.set(group, n);
+    return pinned.length + n;
+  };
 
   const add = (
     state: string,
@@ -186,33 +228,38 @@ function buildCatalog(checkDate: string): { entries: UniqueTaxIdEntry[]; byId: M
 
     if (hasCountyRuleset(state, checkDate)) {
       const counties = [...allCounties(state, checkDate)].sort((a, b) => a.name.localeCompare(b.name));
-      counties.forEach((c, i) => add(state, 'county', i + 1, c.name, 'county', 'work', c.name));
+      counties.forEach((c) => add(state, 'county', seqFor(state, 'county', c.name), c.name, 'county', 'work', c.name));
     }
 
-    if (state === 'MD') {
+    if (state === 'MD' && hasStateRuleset('MD', checkDate)) {
       const rules = stateRuleset('MD', checkDate) as unknown as { countyRates?: Record<string, unknown> };
       const keys = Object.keys(rules.countyRates ?? {}).filter((k) => !k.startsWith('$')).sort();
-      keys.forEach((key, i) => add('MD', 'county', i + 1, key, 'county', 'residence', key));
+      keys.forEach((key) => add('MD', 'county', seqFor('MD', 'county', key), key, 'county', 'residence', key));
     }
   }
 
-  const miCities = [...allMICities(checkDate)].sort((a, b) => a.name.localeCompare(b.name));
-  miCities.forEach((c, i) => add('MI', 'city', i + 1, c.name, 'workCity', 'either', c.name));
+  // Each registry is per year; a year may lack some (2025 has none of these).
+  const miCities = [...(hasMICityRuleset(checkDate) ? allMICities(checkDate) : [])].sort((a, b) => a.name.localeCompare(b.name));
+  miCities.forEach((c) => add('MI', 'city', seqFor('MI', 'city', c.name), c.name, 'workCity', 'either', c.name));
 
-  const ohMunicipalities = [...allOHMunicipalities(checkDate)].sort((a, b) => a.name.localeCompare(b.name));
-  ohMunicipalities.forEach((m, i) => add('OH', 'city', i + 1, m.name, 'workCity', 'either', m.name));
+  const ohMunicipalities = [...(hasOHMunicipalityRuleset(checkDate) ? allOHMunicipalities(checkDate) : [])].sort((a, b) => a.name.localeCompare(b.name));
+  ohMunicipalities.forEach((m) => add('OH', 'city', seqFor('OH', 'city', m.name), m.name, 'workCity', 'either', m.name));
 
-  const ohSchoolDistricts = [...allOHSchoolDistricts(checkDate)].sort((a, b) => a.name.localeCompare(b.name));
-  ohSchoolDistricts.forEach((d, i) => add('OH', 'school_district', i + 1, d.name, 'schoolDistrictCode', 'either', d.sdNumber));
+  const ohSchoolDistricts = [...(hasOHSchoolDistrictRuleset(checkDate) ? allOHSchoolDistricts(checkDate) : [])].sort((a, b) => a.name.localeCompare(b.name));
+  ohSchoolDistricts.forEach((d) => add('OH', 'school_district', seqFor('OH', 'school_district', d.sdNumber), d.name, 'schoolDistrictCode', 'either', d.sdNumber));
 
-  const ohJEDDs = [...allOHJEDDs(checkDate)].sort((a, b) => a.name.localeCompare(b.name));
-  ohJEDDs.forEach((z, i) => add('OH', 'jedd', i + 1, z.name, 'workJEDDId', 'work', z.jeddId));
+  const ohJEDDs = [...(hasOHJEDDRuleset(checkDate) ? allOHJEDDs(checkDate) : [])].sort((a, b) => a.name.localeCompare(b.name));
+  ohJEDDs.forEach((z) => add('OH', 'jedd', seqFor('OH', 'jedd', z.jeddId), z.name, 'workJEDDId', 'work', z.jeddId));
 
-  const alMunicipalities = [...allALMunicipalities(checkDate)].sort((a, b) => a.name.localeCompare(b.name));
-  alMunicipalities.forEach((m, i) => add('AL', 'city', i + 1, m.name, 'workCity', 'work', m.name));
+  const hasAL = hasALMunicipalityRuleset(checkDate);
+  const alMunicipalities = [...(hasAL ? allALMunicipalities(checkDate) : [])].sort((a, b) => a.name.localeCompare(b.name));
+  alMunicipalities.forEach((m) => add('AL', 'city', seqFor('AL', 'city', m.name), m.name, 'workCity', 'work', m.name));
+  for (const c of [...(hasAL ? allALCounties(checkDate) : [])].sort((a, b) => a.name.localeCompare(b.name))) {
+    add('AL', 'county', seqFor('AL', 'county', c.name), `${c.name} County`, 'workCounty', 'work', c.name);
+  }
 
-  const kyJurisdictions = [...allKYJurisdictions(checkDate)].sort((a, b) => a.name.localeCompare(b.name));
-  kyJurisdictions.forEach((j, i) => add('KY', 'city', i + 1, j.name, 'workCity', 'either', j.name));
+  const kyJurisdictions = [...(hasKYOccupationalRuleset(checkDate) ? allKYJurisdictions(checkDate) : [])].sort((a, b) => a.name.localeCompare(b.name));
+  kyJurisdictions.forEach((j) => add('KY', 'city', seqFor('KY', 'city', j.name), j.name, 'workCity', 'either', j.name));
 
   // Pennsylvania already publishes its own stable 6-digit PSD code for
   // every one of its 2,627 EIT/LST jurisdictions — reused verbatim as the
@@ -220,13 +267,12 @@ function buildCatalog(checkDate: string): { entries: UniqueTaxIdEntry[]; byId: M
   // already exactly the kind of stable location code this catalog exists
   // to provide, and PA's own withholding paperwork already refers to it by
   // that number.
-  for (const j of allPALocalJurisdictions(checkDate)) {
+  for (const j of hasPALocalRuleset(checkDate) ? allPALocalJurisdictions(checkDate) : []) {
     add('PA', 'psd', j.psdCode, `${j.municipality}, ${j.county} (PSD ${j.psdCode})`, 'workPSD', 'either', j.psdCode);
   }
 
   for (const loc of NAMED_LOCALITIES) {
-    const seq = entries.filter((e) => e.state === loc.state && e.type === 'locality').length + 1;
-    add(loc.state, 'locality', seq, loc.name, loc.field, loc.role, loc.value);
+    add(loc.state, 'locality', seqFor(loc.state, 'locality', loc.name), loc.name, loc.field, loc.role, loc.value);
   }
 
   const byId = new Map(entries.map((e) => [e.uniqueTaxId, e]));

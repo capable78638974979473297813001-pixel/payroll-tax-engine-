@@ -27,12 +27,28 @@ describe('data-quality notices on the paycheck result', () => {
     assert.equal(r.notices, undefined);
   });
 
-  test('an Alabama municipal occupational tax line is marked as survey-sourced', () => {
-    const r = calculatePaycheck(base('AL', { workCity: 'Birmingham', exemptions: 'S', dependents: 0 }));
+  test('an Alabama city with only the League survey behind its rate is marked survey-sourced', () => {
+    const r = calculatePaycheck(base('AL', { workCity: 'Gadsden', exemptions: 'S', dependents: 0 }));
     const line = r.taxes.find((t) => t.id === 'AL_LOCAL')!;
     assert.ok(line, 'expected an AL_LOCAL line');
     assert.equal(line.dataQuality?.tier, 'secondary_source');
     assert.deepEqual(r.notices?.map((n) => n.taxId), ['AL_LOCAL']);
+  });
+
+  test("an Alabama city confirmed from its own form carries no notice (Birmingham's return: 1%)", () => {
+    const r = calculatePaycheck(base('AL', { workCity: 'Birmingham', exemptions: 'S', dependents: 0 }));
+    const line = r.taxes.find((t) => t.id === 'AL_LOCAL')!;
+    assert.equal(line.amount, 2500);
+    assert.equal(line.dataQuality, undefined);
+    assert.equal(r.notices, undefined);
+  });
+
+  test("Tuskegee uses its own form's 3% and says the League's 2% disagrees", () => {
+    const r = calculatePaycheck(base('AL', { workCity: 'Tuskegee', exemptions: 'S', dependents: 0 }));
+    const line = r.taxes.find((t) => t.id === 'AL_LOCAL')!;
+    assert.equal(line.amount, 7500);
+    assert.equal(line.dataQuality?.tier, 'conflicting_sources');
+    assert.match(line.dataQuality!.note, /2%/);
   });
 
   test('a Kentucky line with an inferred rate is marked inferred', () => {
@@ -44,17 +60,31 @@ describe('data-quality notices on the paycheck result', () => {
     assert.match(r.notices![0].note, new RegExp(inferred.name));
   });
 
-  test('an Arkansas low-income election is reported as not modelled, not silently ignored', () => {
-    const plain = calculatePaycheck(base('AR', { exemptions: 1 }));
-    assert.equal(plain.notices, undefined);
-    const elected = calculatePaycheck(base('AR', { exemptions: 1, lowIncomeElection: true }));
-    const n = elected.notices!.find((x) => x.taxId === 'AR_SIT')!;
+  test('an Arkansas low-income election outside DFA\'s tables is flagged, not silently computed', () => {
+    // Daily pay has no low-income table: the Formula Method applies, with a notice.
+    const daily = calculatePaycheck({ ...base('AR', { exemptions: 1, lowIncomeElection: true, filingStatus: 'single', dependents: 0 }), payFrequency: 'daily', earnings: [{ code: 'REG', category: 'regular', amount: 5000 }] });
+    const n = daily.notices!.find((x) => x.taxId === 'AR_SIT')!;
     assert.equal(n.tier, 'not_modelled');
-    assert.match(n.note, /AR4EC Line 5/);
-    // Same (standard-formula) amount either way — the notice is the difference.
-    assert.equal(
-      elected.taxes.find((t) => t.id === 'AR_SIT')!.amount,
-      plain.taxes.find((t) => t.id === 'AR_SIT')!.amount,
-    );
+    assert.match(n.note, /no daily table/);
+  });
+});
+
+describe('New Hampshire UI new-employer rate', () => {
+  const nh = (checkDate: string, employer?: PaycheckInput['employer']) =>
+    calculatePaycheck({ ...base('NH'), checkDate, ...(employer ? { employer } : {}) });
+  test('confirmed through Q2 2026: no notice', () => {
+    const r = nh('2026-06-15');
+    assert.equal(r.taxes.find((t) => t.id === 'NH_SUI_ER')?.amount, 4250); // $2,500 x 1.7%
+    assert.equal(r.notices, undefined);
+  });
+  test('after 2026-06-30 the rate is still used but flagged until NHES publishes Q3', () => {
+    const r = nh('2026-08-14');
+    assert.equal(r.taxes.find((t) => t.id === 'NH_SUI_ER')?.amount, 4250);
+    assert.equal(r.notices?.[0].taxId, 'NH_SUI_ER');
+    assert.equal(r.notices?.[0].tier, 'inferred');
+  });
+  test("an employer's own assigned rate needs no notice", () => {
+    const r = nh('2026-08-14', { stateUnemploymentRate: { NH: 0.012 } } as PaycheckInput['employer']);
+    assert.equal(r.notices, undefined);
   });
 });

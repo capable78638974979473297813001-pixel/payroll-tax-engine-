@@ -10483,7 +10483,7 @@ describe('effective dating', () => {
   test('the ruleset is chosen by check date, not by the clock', () => {
     assert.throws(
       () => calculatePaycheck(input({ checkDate: '2019-06-15' })),
-      /No ruleset at data[\\/]federal[\\/]2019\.json/,
+      /no 2019 rules for federal tax/,
     );
   });
 
@@ -10626,7 +10626,8 @@ describe('state unemployment insurance, employer side (XX_SUI_ER)', () => {
     // qualifiedEmployer } shape (see resolveSUIWageBase() in state.ts) —
     // either way it must resolve to real numbers, not silently be missing.
     const states = readdirSync(join(import.meta.dirname, '..', 'data', 'states'));
-    assert.equal(states.length, 51);
+    // 51 for the current year; earlier years (2025) cover only some states.
+    assert.equal(states.filter((f) => f.endsWith('-2026.json')).length, 51);
     for (const file of states) {
       const parsed = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'data', 'states', file), 'utf8'));
       assert.ok(parsed.suiEmployer, `${file} has no suiEmployer block`);
@@ -11555,8 +11556,10 @@ describe('Kentucky county occupational tax coverage', () => {
   });
 
   test('a city and its county still stack, with the KRS 68.197 credit', () => {
+    // Edmonton 1.5% (its own payroll form; was 1% until 2026-09-28) fully
+    // credits Metcalfe County's 1%, so only the city's amount is owed.
     const r = calculatePaycheck(ky({ workCity: 'Edmonton', workCounty: 'Metcalfe County' }));
-    assert.equal(amountOf(r, 'KY_LOCAL'), dollars(30.0));
+    assert.equal(amountOf(r, 'KY_LOCAL'), dollars(45.0));
     assert.match(r.taxes.find((t) => t.id === 'KY_LOCAL')?.detail ?? '', /Edmonton/);
   });
 });

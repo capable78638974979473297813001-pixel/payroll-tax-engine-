@@ -83,11 +83,11 @@ describe('ohioJeddDecision', () => {
     assert.match(d.reasons[0], /no rate on file/);
   });
 
-  test('the live polygons with no rate row (2026-09-28 diff) are flagged, never taxed at zero', () => {
+  test('every live polygon from the 2026-09-28 diff now resolves to a rate row', () => {
     for (const id of ['9022', '9069', '9098', '9123', '9142', '9143', '9155']) {
       const d = ohioJeddDecision({ ...base, found: { attempted: true, jedd: { name: `ZONE ${id}`, jeddId: id, active: true } } });
-      assert.equal(d.workJEDDId, null, id);
-      assert.match(d.reasons[0], /no rate on file/, id);
+      assert.equal(d.workJEDDId, id, id);
+      assert.deepEqual(d.reasons, [], id);
     }
   });
 

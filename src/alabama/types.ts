@@ -261,11 +261,17 @@ export interface AlabamaPaycheckInput {
   residency?: AlabamaResidency;
   /**
    * The Alabama municipality where the work was performed. Alabama's
-   * occupational tax is work-location-based; 25 municipalities levy one and
-   * every other city in the state does not. An unrecognised name produces
+   * occupational tax is work-location-based; 29 municipalities are known to
+   * levy one and most other cities do not. An unrecognised name produces
    * no local line and a warning — never a silent $0.
    */
   workCity?: string;
+  /**
+   * The county where the work was performed. Only Macon County levies a
+   * county-level occupational fee (1%, Ala. Code 45-44-244.31), and only
+   * outside Tuskegee, Notasulga and Shorter; any other county is ignored.
+   */
+  workCounty?: string;
   /**
    * Which body of employment-tax rules applies. Alabama excludes
    * 'household', 'agricultural' and 'clergy' from its own withholding
@@ -330,6 +336,8 @@ export interface AlabamaPaycheckOutput {
     stateIncomeTax: Amount;
     /** Present only when the work city levies an occupational tax. */
     localOccupationalTax?: { city: string; rate: number; amount: Amount };
+    /** Present only when the work is in Macon County outside its three taxing towns. */
+    countyOccupationalTax?: { county: string; rate: number; amount: Amount };
     unemploymentEmployer?: Amount;
     a4: { exemptionCode: A4ExemptionCode; dependents: number; bracketSchedule: 'M' | 'non-M' };
     /** Plain-language account of every Alabama rule that touched this cheque. */

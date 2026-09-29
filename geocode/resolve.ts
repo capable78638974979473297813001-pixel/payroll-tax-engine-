@@ -14,6 +14,7 @@
  * change how paychecks are computed.
  */
 import {
+  allALCounties,
   allALMunicipalities,
   allCounties,
   allKYJurisdictions,
@@ -22,6 +23,7 @@ import {
   allOHSchoolDistricts,
   allPALocalJurisdictions,
   stateRuleset,
+  type ALCountyEntry,
   type ALMunicipalityEntry,
   type CountyEntry,
   type KYJurisdictionEntry,
@@ -220,7 +222,7 @@ function matchMDCounty(
   return { confidence: 'no_match', entry: null };
 }
 
-/** Alabama's 25-city municipal occupational tax — same list-lookup shape as Michigan's/Ohio's cities. */
+/** Alabama's municipal occupational tax list — same list-lookup shape as Michigan's/Ohio's cities. */
 function matchALMunicipalityByName(
   places: string[],
   checkDate: string,
@@ -321,6 +323,8 @@ export interface ResolvedJurisdiction {
   paJurisdiction: FieldMatch<PALocalEntry> | null;
   mdCounty: FieldMatch<string> | null;
   alMunicipality: FieldMatch<ALMunicipalityEntry> | null;
+  /** Alabama's county-level occupational fee (Macon County only), work role. */
+  alCounty: FieldMatch<ALCountyEntry> | null;
   /** City-role match only — see index.ts's resolveEmployee() for how this combines with kyCounty for the KRS 68.197 credit. */
   kyCity: FieldMatch<KYJurisdictionEntry> | null;
   /** County-role match only. */
@@ -407,6 +411,7 @@ export function resolveJurisdiction(
     paJurisdiction: null,
     mdCounty: null,
     alMunicipality: null,
+    alCounty: null,
     kyCity: null,
     kyCounty: null,
     wvServiceFeeCity: null,
@@ -465,6 +470,8 @@ export function resolveJurisdiction(
   }
   if (state === 'AL') {
     result.alMunicipality = matchALMunicipalityByName(geo.incorporatedPlaces, checkDate);
+    const alCounty = allALCounties(checkDate).find((c) => countiesInclude(geo.counties, c.name));
+    result.alCounty = alCounty ? { confidence: 'matched', entry: alCounty } : { confidence: 'no_match', entry: null };
   }
   if (state === 'KY') {
     result.kyCity = matchKYCityByName(geo.incorporatedPlaces, checkDate);
@@ -533,6 +540,10 @@ export function toCertificateFields(
   }
   if (resolved.kyCity?.confidence === 'matched' && resolved.kyCity.entry) {
     fields[role === 'work' ? 'workCity' : 'residenceCity'] = resolved.kyCity.entry.name;
+  }
+  // Alabama's Macon County fee is work-location-based too.
+  if (role === 'work' && resolved.alCounty?.confidence === 'matched' && resolved.alCounty.entry) {
+    fields.workCounty = resolved.alCounty.entry.name;
   }
   // workCounty is only ever meaningful for the WORK address — Kentucky's
   // credit mechanism (kentuckyLocalTax()) has no residence-county concept.

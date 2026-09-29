@@ -11,6 +11,7 @@ import {
 } from '../money.ts';
 import type { Cents } from '../money.ts';
 import type {
+  ALCountyEntry,
   ALMunicipalityEntry,
   KYJurisdictionEntry,
   MICityEntry,
@@ -20,6 +21,7 @@ import type {
 } from '../registry.ts';
 import {
   alMunicipalityRuleset,
+  alCountyRuleset,
   countyRuleset,
   federalRuleset,
   hasALMunicipalityRuleset,
@@ -285,8 +287,7 @@ export function stateIncomeTax(
   // Alabama's municipal Occupational Tax — see alabamaLocalTax()'s own
   // doc comment for the ALM-survey confidence tier and the confirmed-dead
   // Jefferson County occupational tax this data file corrects.
-  const alLocal = alabamaLocalTax(input, ctx, rules);
-  if (alLocal) lines.push(alLocal);
+  lines.push(...alabamaLocalTax(input, ctx, rules));
 
   // Kentucky's city/county occupational tax — see kentuckyLocalTax()'s
   // own doc comment for the KRS 68.197 city-credited-against-county
@@ -1562,6 +1563,13 @@ interface SUIEmployerConfig {
   // EmployerContext.stateUnemploymentQualifiedForReducedWageBase.
   wageBase: number | { default: number; qualifiedEmployer: number } | null;
   newEmployerRate: number | null;
+  /**
+   * Last day the published new-employer rate is confirmed for, where the
+   * state resets it during the year (New Hampshire's quarterly Fund
+   * Balance Reduction). After it, the rate on file is still used but the
+   * line carries a notice until the next period's figure is published.
+   */
+  newEmployerRateConfirmedThrough?: string;
   experienceRange: { min: number; max: number } | null;
   employerSuppliedRateRequired?: boolean;
   /**
@@ -1695,6 +1703,18 @@ function stateUnemploymentEmployerTax(
       (cap === null
         ? ', no wage cap'
         : `, capped at ${fmt(cap)}/yr (${fmt(ytd)} YTD already counted)`),
+    ...(supplied === undefined && industryRate === undefined &&
+    cfg.newEmployerRateConfirmedThrough && input.checkDate > cfg.newEmployerRateConfirmedThrough
+      ? {
+          dataQuality: {
+            tier: 'inferred' as const,
+            note:
+              `${rules.name}'s published new-employer rate is confirmed only through ${cfg.newEmployerRateConfirmedThrough}; ` +
+              `the state has not yet published the rate for this check date, so the last confirmed ${(rate * 100).toFixed(2)}% was used. ` +
+              'Supply the employer\'s own assigned rate (input.employer.stateUnemploymentRate) to avoid this.',
+          },
+        }
+      : {}),
   };
 }
 
@@ -5143,54 +5163,99 @@ function westVirginiaMunicipalServiceFee(
  * apply — disclosed as "not certain either way" in the data file's own
  * knownGaps rather than assumed to definitely not exist.
  *
- * Sourced from the Alabama League of Municipalities' own tax-rate survey
- * — the closest thing to a centralized aggregator this state has (no
- * state-government database exists the way Ohio's Finder or Kentucky's
- * SOS site are) — one confidence tier below primary-source, matching this
- * project's existing tier for Kentucky's KACo-sourced county entries. A
- * city not on the 25-jurisdiction list correctly produces no line at all,
- * not a silent $0 assumption — most Alabama municipalities have no
- * occupational tax at all, so this is the expected, common outcome.
+ * Rates are held per entry with where they were read (confirmation.tier):
+ * the city's own ordinance/form, the collecting agent's current return,
+ * or statute (primary_source, no notice); the Alabama League of
+ * Municipalities' survey only (league_survey_only, a secondary_source
+ * notice); or a city form that disagrees with the survey
+ * (conflicting_sources, a notice saying so). A city not on the list
+ * correctly produces no line at all -- most Alabama municipalities levy
+ * none.
+ *
+ * Also computes Macon County's county-level 1% fee (Ala. Code
+ * 45-44-244.31) from certificate.workCounty. It applies only outside the
+ * towns that already taxed on 2019-06-10 (excludedMunicipalities in the
+ * data file), so a Tuskegee worker pays Tuskegee's tax and not the
+ * county's, while an unincorporated-Macon or Franklin worker pays the
+ * county's.
  */
 function alabamaLocalTax(
   input: PaycheckInput,
   ctx: ComputeContext,
   rules: StateRuleset,
-): TaxLine | null {
+): TaxLine[] {
   // Gate on the actual work state, not just the presence of certificate.workCity —
   // that field name is shared with Kentucky/Michigan/Ohio's own local-tax
   // certificates, so without this check a Michigan employee whose work city
   // happens to share a name with an Alabama municipality (e.g. Birmingham)
   // would incorrectly get charged Alabama's occupational tax too.
-  if (input.workState?.code !== 'AL') return null;
-  if (!hasALMunicipalityRuleset(input.checkDate)) return null;
+  if (input.workState?.code !== 'AL') return [];
+  if (!hasALMunicipalityRuleset(input.checkDate)) return [];
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const workCityName = typeof cert.workCity === 'string' ? cert.workCity : undefined;
-  if (!workCityName) return null;
+  const workCountyName = typeof cert.workCounty === 'string' ? cert.workCounty : undefined;
+  if (!workCityName && !workCountyName) return [];
 
-  const entry: ALMunicipalityEntry | undefined = alMunicipalityRuleset(workCityName, input.checkDate);
-  if (!entry) return null;
+  const entry: ALMunicipalityEntry | undefined = workCityName
+    ? alMunicipalityRuleset(workCityName, input.checkDate)
+    : undefined;
+  const county: ALCountyEntry | undefined = workCountyName
+    ? alCountyRuleset(workCountyName, input.checkDate)
+    : undefined;
+  if (!entry && !county) return [];
 
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const periodWages = ctx.taxableWagesFor(exempt);
-  const amount = applyRate(periodWages, entry.rate);
+  const pct = (rate: number) => `${(rate * 100).toFixed(2)}%`;
+  const lines: TaxLine[] = [];
 
-  return {
-    id: 'AL_LOCAL',
-    name: `${entry.name} Occupational Tax`,
-    payer: 'employee',
-    jurisdiction: 'local',
-    taxableWages: periodWages,
-    amount,
-    detail: `${fmt(periodWages)} @ ${(entry.rate * 100).toFixed(2)}% on wages earned in ${entry.name} (certificate.workCity)`,
-    // Alabama publishes no state database of these; the rate is the
-    // League of Municipalities' survey figure, not the city's ordinance.
-    dataQuality: {
-      tier: 'secondary_source',
-      note: `${entry.name}'s ${(entry.rate * 100).toFixed(2)}% comes from the Alabama League of Municipalities' rate survey, not ${entry.name}'s own ordinance; the League itself says to verify rates with the city.`,
-    },
-  };
+  if (entry) {
+    const tier = entry.confirmation?.tier ?? 'league_survey_only';
+    const line: TaxLine = {
+      id: 'AL_LOCAL',
+      name: `${entry.name} Occupational Tax`,
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: periodWages,
+      amount: applyRate(periodWages, entry.rate),
+      detail: `${fmt(periodWages)} @ ${pct(entry.rate)} on wages earned in ${entry.name} (certificate.workCity)`,
+    };
+    if (tier === 'league_survey_only') {
+      line.dataQuality = {
+        tier: 'secondary_source',
+        note: `${entry.name}'s ${pct(entry.rate)} comes from the Alabama League of Municipalities' rate survey, not ${entry.name}'s own ordinance; the League itself says to verify rates with the city.`,
+      };
+    } else if (tier === 'conflicting_sources') {
+      line.dataQuality = {
+        tier: 'conflicting_sources',
+        note: entry.confirmation?.conflict ?? `${entry.name}'s published sources disagree on the rate; ${pct(entry.rate)} (the city's own figure) was used.`,
+      };
+    }
+    lines.push(line);
+  }
+
+  if (county) {
+    const excludedBy = entry
+      ? county.excludedMunicipalities.find((m) => m.name.toLowerCase() === entry.name.toLowerCase())
+      : undefined;
+    if (!excludedBy) {
+      lines.push({
+        id: 'AL_COUNTY',
+        name: `${county.name} County Occupational Tax`,
+        payer: 'employee',
+        jurisdiction: 'local',
+        taxableWages: periodWages,
+        amount: applyRate(periodWages, county.rate),
+        detail:
+          `${fmt(periodWages)} @ ${pct(county.rate)} on wages earned in ${county.name} County outside the towns that ` +
+          `already taxed on 2019-06-10 (${county.statute}; certificate.workCounty)` +
+          (entry ? `, in addition to ${entry.name}'s own tax` : ''),
+      });
+    }
+  }
+
+  return lines;
 }
 
 /**
@@ -8429,21 +8494,49 @@ function ohioJEDDTax(
 
   const entry = ohJEDDRuleset(jeddId, input.checkDate);
   if (!entry) return null;
+  // Not yet levying, or dissolved/terminated: no tax, even though Ohio's
+  // boundary layer may still draw the district.
+  if (input.checkDate < entry.effectiveFrom) return null;
+  if (entry.terminatedOn && input.checkDate >= entry.terminatedOn) return null;
 
   // A JEDD/JEDZ tax is "subject to Chapter 718" (ORC 715.72, 715.691), so
   // it uses municipal qualifying wages, not the state base.
   const exempt = ohJEDDExemptPretax(input.checkDate) as PretaxCategory[];
   const periodWages = ctx.taxableWagesFor(exempt);
-  const amount = applyRate(periodWages, entry.rate);
 
+  // Some districts (Cheviot/Green Township's) tax only the first N dollars
+  // an employee earns there each year. YTD district wages come in under
+  // ytd.localIncomeTax['OH_JEDD_<id>'], the same tracker Kentucky's
+  // SS-wage-base-capped cities use.
+  const capKey = `OH_JEDD_${jeddId}`;
+  const capApplies = entry.annualWageCap !== undefined && entry.annualWageCapYear === ctx.year;
+  const taxableWages = capApplies
+    ? underCap(periodWages, input.ytd.localIncomeTax?.[capKey] ?? 0, dollars(entry.annualWageCap!))
+    : periodWages;
+  const amount = applyRate(taxableWages, entry.rate);
+
+  const staleCap = entry.annualWageCap !== undefined && entry.annualWageCapYear !== ctx.year;
+  const rateEnded = entry.rateEndsOn !== undefined && input.checkDate > entry.rateEndsOn;
   return {
     id: 'OH_JEDD',
     name: 'Ohio JEDD/JEDZ Income Tax',
     payer: 'employee',
     jurisdiction: 'local',
-    taxableWages: periodWages,
+    taxableWages,
     amount,
-    detail: `${fmt(amount)} to ${entry.name} @ ${(entry.rate * 100).toFixed(2)}% on wages earned inside the district (certificate.workJEDDId = "${jeddId}", Ohio's own zone id) — unincorporated township land, so no municipal tax applies at this address`,
+    detail:
+      `${fmt(amount)} to ${entry.name} @ ${(entry.rate * 100).toFixed(2)}% on wages earned inside the district (certificate.workJEDDId = "${jeddId}", Ohio's own zone id) — unincorporated township land, so no municipal tax applies at this address` +
+      (capApplies ? `; capped at $${entry.annualWageCap!.toLocaleString('en-US')} of district wages for ${ctx.year} (${fmt(taxableWages)} of ${fmt(periodWages)} taxed this period; YTD from ytd.localIncomeTax['${capKey}'])` : ''),
+    ...(staleCap || rateEnded
+      ? {
+          dataQuality: {
+            tier: 'inferred' as const,
+            note: staleCap
+              ? `${entry.name} caps taxable wages each year, but the cap on file is for ${entry.annualWageCapYear}, not ${ctx.year}; the full wage was taxed. Confirm the ${ctx.year} cap with the district.`
+              : `${entry.name}'s ${(entry.rate * 100).toFixed(2)}% rate was scheduled to end on ${entry.rateEndsOn}; the rate that follows is not on file. Confirm it with the district.`,
+          },
+        }
+      : {}),
   };
 }
 
@@ -8856,6 +8949,41 @@ function arkansasWithholding(
   const annualNetTax = atLeastZero(annualGrossTax - credit);
 
   const amount = roundHalfUp(annualNetTax / multiplier);
+  const formulaDetail =
+    `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction, ${midrangeNote} ` +
+    `@ ${(bracket.rate * 100).toFixed(2)}% less ${fmt(adjustment)} adjustment = ${fmt(annualGrossTax)} gross tax, ` +
+    `less ${fmt(credit)} (${exemptions} × $${cfg.personalCreditPerExemption} credit) = ${fmt(annualNetTax)}/yr ÷ ${multiplier}`;
+
+  // AR4EC Line 5: the employee elected DFA's Low Income Tax Tables.
+  if (resolveCertBoolean(cert, 'lowIncomeElection')) {
+    const lookup = arkansasLowIncomeLookup(rules, cert, input.payFrequency, periodWages);
+    if (lookup.kind === 'table') {
+      return {
+        id: `${rules.code}_SIT`,
+        name: `${rules.name} Income Tax`,
+        payer: 'employee',
+        jurisdiction: 'state',
+        taxableWages: periodWages,
+        amount: lookup.amount,
+        detail: lookup.detail,
+      };
+    }
+    // Outside the tables: the Formula Method applies. Above the top band is
+    // the ordinary case (the election only covers a narrow income range);
+    // daily pay or 7+ dependents are gaps in DFA's tables and get a notice.
+    return {
+      id: `${rules.code}_SIT`,
+      name: `${rules.name} Income Tax`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: periodWages,
+      amount,
+      detail: `${lookup.detail} Formula Method: ${formulaDetail}`,
+      ...(lookup.kind === 'not_covered'
+        ? { dataQuality: { tier: 'not_modelled' as const, note: lookup.detail + ' The Formula Method was used, which withholds the same or more.' } }
+        : {}),
+    };
+  }
 
   return {
     id: `${rules.code}_SIT`,
@@ -8864,23 +8992,86 @@ function arkansasWithholding(
     jurisdiction: 'state',
     taxableWages: periodWages,
     amount,
+    detail: formulaDetail,
+  };
+}
+
+interface ARLowIncomeBucket {
+  dependentColumns: number[];
+  /** Rows of [fromDollars, toDollars, ...amount per dependent column]. */
+  byFrequency: Partial<Record<string, number[][]>>;
+}
+
+type ARLowIncomeLookup =
+  | { kind: 'table'; amount: Cents; detail: string }
+  | { kind: 'above_range'; detail: string }
+  | { kind: 'not_covered'; detail: string };
+
+const AR_LOW_INCOME_STATUS: Record<string, 'single' | 'mfj' | 'hoh'> = {
+  single: 'single',
+  mfj: 'mfj',
+  married_joint: 'mfj',
+  hoh: 'hoh',
+  head_of_household: 'hoh',
+  qualifying_widow: 'hoh',
+};
+
+/**
+ * DFA's 2026 Low Income Tax Tables (AR-2026.json lowIncomeElection.tables):
+ * wage-bracket tables by filing status, dependent count and pay frequency.
+ * Married and head-of-household have separate "1 or no" and "2 or more"
+ * dependent tables; single has one table for 0-6 dependents.
+ */
+function arkansasLowIncomeLookup(
+  rules: StateRuleset,
+  cert: Record<string, unknown>,
+  payFrequency: string,
+  periodWages: Cents,
+): ARLowIncomeLookup {
+  const tables = (rules.lowIncomeElection as { tables?: { buckets: Record<string, ARLowIncomeBucket> } } | undefined)?.tables;
+  if (!tables) return { kind: 'not_covered', detail: 'No Arkansas Low Income Tax Tables are on file for this year.' };
+
+  const rawStatus = cert.filingStatus;
+  const status = typeof rawStatus === 'string' ? AR_LOW_INCOME_STATUS[rawStatus] : undefined;
+  if (!status) {
+    throw new Error(
+      `Arkansas certificate.lowIncomeElection needs certificate.filingStatus of 'single', 'mfj' or 'hoh' (AR4EC Line 5's own categories); got ${JSON.stringify(rawStatus)}.`,
+    );
+  }
+  const dependents = cert.dependents;
+  if (typeof dependents !== 'number' || !Number.isInteger(dependents) || dependents < 0) {
+    throw new Error(
+      `Arkansas certificate.lowIncomeElection needs certificate.dependents as a whole number (the dependents counted on AR4EC); got ${JSON.stringify(dependents)}.`,
+    );
+  }
+
+  const bucketKey = status === 'single' ? 'single' : `${status}_${dependents <= 1 ? '1orNone' : '2orMore'}`;
+  const bucket = tables.buckets[bucketKey];
+  const column = bucket?.dependentColumns.indexOf(dependents) ?? -1;
+  if (!bucket || column === -1) {
+    return { kind: 'not_covered', detail: `Arkansas's Low Income Tax Tables have no column for ${dependents} dependents (${status}).` };
+  }
+  const rows = bucket.byFrequency[payFrequency];
+  if (!rows) {
+    return { kind: 'not_covered', detail: `Arkansas's Low Income Tax Tables have no ${payFrequency} table.` };
+  }
+
+  const wagesDollars = periodWages / 100;
+  const top = rows[rows.length - 1];
+  if (wagesDollars > top[1]) {
+    return {
+      kind: 'above_range',
+      detail: `Low-income election on file, but ${fmt(periodWages)} is above the ${payFrequency} low-income table's top band ($${top[1].toFixed(2)}), so the election doesn't apply this period.`,
+    };
+  }
+  const row = rows.find((r) => wagesDollars >= r[0] && wagesDollars <= r[1]) ?? rows[rows.length - 1];
+  const amount = dollars(row[2 + column]);
+  return {
+    kind: 'table',
+    amount,
     detail:
-      `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction, ${midrangeNote} ` +
-      `@ ${(bracket.rate * 100).toFixed(2)}% less ${fmt(adjustment)} adjustment = ${fmt(annualGrossTax)} gross tax, ` +
-      `less ${fmt(credit)} (${exemptions} × $${cfg.personalCreditPerExemption} credit) = ${fmt(annualNetTax)}/yr ÷ ${multiplier}`,
-    // AR4EC Line 5 (the low-income tables) is disclosed in AR-2026.json
-    // but not built. Computing the standard formula anyway withholds at
-    // least as much, which is the safe side -- but the caller must know.
-    ...(resolveCertBoolean(cert, 'lowIncomeElection')
-      ? {
-          dataQuality: {
-            tier: 'not_modelled' as const,
-            note:
-              "This employee elected Arkansas's low-income withholding tables (AR4EC Line 5), which this engine does not implement. " +
-              'The standard Formula Method was used instead, which withholds the same or more. Use the AR4EC low-income tables by hand if the employee qualifies.',
-          },
-        }
-      : {}),
+      `AR4EC low-income election: DFA 2026 Low Income Tax Table (${status}, ${dependents} dependent${dependents === 1 ? '' : 's'}, ${payFrequency}), ` +
+      `wages $${row[0].toFixed(2)}–$${row[1].toFixed(2)} → ${fmt(amount)}`,
   };
 }
 

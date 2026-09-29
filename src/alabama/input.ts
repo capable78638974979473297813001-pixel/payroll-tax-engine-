@@ -1,6 +1,6 @@
 import { dollars } from '../money.ts';
 import type { Cents } from '../money.ts';
-import { alMunicipalityRuleset, hasStateRuleset, stateRuleset } from '../registry.ts';
+import { alCountyRuleset, alMunicipalityRuleset, hasStateRuleset, stateRuleset } from '../registry.ts';
 import { PERIODS_PER_YEAR } from '../types.ts';
 import type {
   Deduction,
@@ -85,6 +85,7 @@ export interface AlabamaBuildResult {
   a4: { exemptionCode: A4ExemptionCode; dependents: number };
   /** The work city as matched against the occupational-tax list, if it matched. */
   matchedCity?: { name: string; rate: number };
+  matchedCounty?: { name: string; rate: number };
 }
 
 function requireMoney(
@@ -317,9 +318,9 @@ export function buildAlabamaEngineInput(input: AlabamaPaycheckInput): AlabamaBui
       warnings.push(
         `No occupational tax is on file for "${input.workCity}", so no local line was computed. Most ` +
           `Alabama municipalities levy none at all, so this is usually correct — but the list this engine ` +
-          `holds is the Alabama League of Municipalities' own 25-city survey, not a state register, and a ` +
-          `city that adopted a tax without responding to that survey would look identical to a city with ` +
-          `no tax. Verify with the municipality if the answer matters.`,
+          `holds is built from the Alabama League of Municipalities' survey plus the collecting agents' own ` +
+          `returns, not a state register (Alabama has none), and a city that adopted a tax without appearing ` +
+          `in either would look identical to a city with no tax. Verify with the municipality if the answer matters.`,
       );
     }
   }
@@ -334,6 +335,14 @@ export function buildAlabamaEngineInput(input: AlabamaPaycheckInput): AlabamaBui
     if (a4.exemptReason) certificate.exemptReason = a4.exemptReason;
   }
   if (matchedCity) certificate.workCity = matchedCity.name;
+  let matchedCounty: { name: string; rate: number } | undefined;
+  if (input.workCounty) {
+    const county = alCountyRuleset(input.workCounty, input.checkDate);
+    if (county) {
+      matchedCounty = { name: county.name, rate: county.rate };
+      certificate.workCounty = county.name;
+    }
+  }
   if (isNonresident && days !== undefined) certificate.daysWorkedInStateThisYear = days;
   if (isNonresident && fraction !== undefined && fraction < 1) {
     certificate.nonresidentAllocationFraction = fraction;
@@ -404,7 +413,7 @@ export function buildAlabamaEngineInput(input: AlabamaPaycheckInput): AlabamaBui
 
   warnings.push(...advisoryWarnings(input, { isNonresident, days, severanceCents, rules }));
 
-  return { engineInput, warnings, a4: { exemptionCode, dependents }, matchedCity };
+  return { engineInput, warnings, a4: { exemptionCode, dependents }, matchedCity, matchedCounty };
 }
 
 /**

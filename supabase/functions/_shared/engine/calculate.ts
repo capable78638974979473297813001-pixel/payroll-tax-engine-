@@ -31,7 +31,7 @@ import type {
   PaycheckResult,
   TaxLine,
 } from './types.ts';
-import { federalRuleset, yearOf } from './registry.ts';
+import { assertTaxYearCovered, federalRuleset, yearOf } from './registry.ts';
 import { federalTaxes } from './taxes/federal.ts';
 import { stateIncomeTax } from './taxes/state.ts';
 import {
@@ -54,6 +54,9 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
   if (!periodsPerYear) {
     throw new Error(`Unknown pay frequency: ${input.payFrequency}`);
   }
+  // 2025 is covered for federal tax and only some states; a paycheck
+  // touching any other state that year is refused, not computed federal-only.
+  assertTaxYearCovered(input.checkDate, [input.workState?.code, input.residenceState?.code]);
 
   // Cap 401(k)/403(b)/457/SIMPLE deductions at their IRC annual elective-
   // deferral limits before ANY tax reads the deduction list — see

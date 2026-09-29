@@ -185,7 +185,9 @@ export interface YearToDate {
    * 'OR_METRO', 'OR_MULTNOMAH' for Portland's Metro Supportive Housing
    * Services and Multnomah County Preschool For All taxes) rather than by
    * state code, since a single state can have multiple independent local
-   * triggers active at once.
+   * triggers active at once. Also YTD district wages for local taxes with an
+   * annual wage CAP: Kentucky's SS-wage-base-capped cities ('KY_LOCAL_<name>')
+   * and Ohio's capped JEDDs ('OH_JEDD_<jeddId>').
    */
   localIncomeTax?: Record<string, Cents>;
   /**
@@ -239,12 +241,14 @@ export interface StateCertificate {
   /** County name — Indiana's mandatory county tax, Maryland's county piggyback tax, Kentucky's county-role occupational tax. */
   county?: string;
   /**
-   * Arkansas AR4EC Line 5: the employee elected the low-income withholding
-   * tables. NOT modelled — the standard formula is used (which withholds
-   * at least as much) and the result carries a notice saying so.
+   * Arkansas AR4EC Line 5: the employee elected DFA's Low Income Tax Tables.
+   * Requires certificate.filingStatus ('single' | 'mfj' | 'hoh') and
+   * certificate.dependents. Above the tables' top band the Formula Method
+   * applies; daily pay and 7+ dependents (not in DFA's tables) also use the
+   * Formula Method, with a notice.
    */
   lowIncomeElection?: boolean;
-  /** Kentucky's WORK-address county role specifically (city-vs-county credit); never a residence concept. */
+  /** WORK-address county: Kentucky's county-role occupational tax (city-vs-county credit) and Alabama's Macon County occupational fee. Never a residence concept. */
   workCounty?: string;
   /** City name — Michigan/Ohio/Alabama/Kentucky city-level local income tax, work role. */
   workCity?: string;
@@ -677,8 +681,10 @@ export interface DataQuality {
    *   this jurisdiction.
    * not_modelled: the employee's certificate asks for a method the engine
    *   doesn't implement; the standard method was used instead.
+   * conflicting_sources: the levying body's own form and another
+   *   published source disagree; the note says which figure was used.
    */
-  tier: 'secondary_source' | 'inferred' | 'not_modelled';
+  tier: 'secondary_source' | 'inferred' | 'not_modelled' | 'conflicting_sources';
   note: string;
 }
 
