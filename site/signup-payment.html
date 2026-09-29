@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Add a payment method — Omnia.tax</title>
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/tokens.css" />
+<link rel="stylesheet" href="/assets/site.css" />
+<!--OMNIA_CONFIG-->
+</head>
+<body>
+<div class="onboard">
+  <aside class="step-panel">
+    <div class="step-panel-top">
+      <a class="logo" href="/" aria-label="Omnia.tax"><img src="/logo/logo-on-blue.svg" alt="" /></a>
+      <span class="label-mono" style="color:var(--color-on-cobalt-muted);font-weight:400">Onboarding</span>
+    </div>
+    <div class="step-num-row">
+      <div class="step-num">04</div>
+      <div class="step-of"><div class="eyebrow">Step</div><div class="of">OF 05</div></div>
+    </div>
+    <div class="step-rule"></div>
+    <div class="panel-head"><span>Summary</span><span>Trial · <span data-trial>14</span> days</span></div>
+    <div class="panel-rule"></div>
+    <div class="panel-rows">
+      <div><span>Plan</span><b>Pay per paycheck</b></div>
+      <div><span>Rate</span><b data-rate>$0.12</b></div>
+      <div><span>Estimated</span><b id="est">≈ $0.00/mo</b></div>
+    </div>
+    <p id="estNote" style="color:var(--color-on-cobalt-muted);font-size:13px;margin:8px 0 0"></p>
+    <div class="step-rule"></div>
+    <div class="due">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <span style="font-size:24px;font-weight:700">Due today</span>
+        <span class="zero" style="font-size:64px">$0.00</span>
+      </div>
+      <p>First charge after your <span data-trial>14</span>-day trial</p>
+      <div class="label-mono" id="trialEnd">—</div>
+    </div>
+    <button class="btn btn-lg btn-white btn-block" id="start" type="button" style="margin-top:32px">Start <span data-trial>14</span>-day trial <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
+    <p class="field-error" id="payError" hidden style="background:#fff;padding:8px"></p>
+  </aside>
+  <main class="form-col">
+    <div class="form-top"><span class="label-mono">Step 04 of 05</span><span class="who" id="who"></span></div>
+    <ol class="progress">
+      <li class="done"><div class="bar"></div><div class="lbl"><span class="chk"></span> Account</div></li>
+      <li class="done"><div class="bar"></div><div class="lbl"><span class="chk"></span> Verify</div></li>
+      <li class="done"><div class="bar"></div><div class="lbl"><span class="chk"></span> Business</div></li>
+      <li class="current"><div class="bar"></div><div class="lbl"><span class="n">04</span> Payment</div></li>
+      <li><div class="bar"></div><div class="lbl"><span class="n">05</span> API key</div></li>
+    </ol>
+    <h1>Add a payment method.</h1>
+    <div class="banner-ink" style="margin-top:32px;max-width:560px">You won’t be charged for the first <span data-trial>14</span> days.</div>
+    <div id="payBox" style="max-width:560px;margin-top:24px;border:1px solid var(--color-hairline);padding:24px">
+      <p style="margin:0 0 8px;font-weight:700">Card and bank details are collected by Stripe Checkout.</p>
+      <p style="margin:0;color:var(--color-gray);font-size:14px">This server creates a Checkout session and sends you to Stripe. It does not render a Payment Element, and it never receives your full card number. With no <span class="mono">STRIPE_SECRET_KEY</span>, the button below explains that no processor is connected and the account stays at payment pending.</p>
+    </div>
+    <p style="max-width:560px;margin-top:32px;color:var(--color-gray);font-size:13px;display:flex;gap:8px;align-items:flex-start">
+      <svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><rect x="1" y="7" width="12" height="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4 7V4a3 3 0 0 1 6 0v3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+      Payments are processed securely by Stripe. We never see your full card number.
+    </p>
+    <div id="fallback" class="alert alert-error" hidden style="max-width:560px;margin-top:24px"></div>
+  </main>
+</div>
+<script src="/assets/pricing.js"></script>
+<script src="/assets/session.js"></script>
+<script>
+(function () {
+  var session = Omnia.session() || {};
+  document.getElementById('who').textContent = session.email || '';
+  var qs = new URLSearchParams(location.search);
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
+  }
+
+  Omnia.api('/api/account', { headers: Omnia.authHeaders() }).then(function (res) {
+    if (res.status === 401) { location.href = '/signin'; return; }
+    var sub = res.body && res.body.subscription;
+    var employees = (sub && sub.expectedEmployees) || Number(sessionStorage.getItem('omnia_employees')) || 1;
+    var est = OmniaPricing.estimate(employees, (sub && sub.payFrequency) || 'biweekly');
+    document.getElementById('est').textContent = '≈ ' + OmniaPricing.formatMoney(est.monthly) + '/mo';
+    document.getElementById('estNote').textContent = 'for ' + employees + ' employees (' + (est.payFrequency || 'biweekly') + ')';
+    if (sub && sub.trialEndsAt) document.getElementById('trialEnd').textContent = fmtDate(sub.trialEndsAt);
+  });
+
+  function showErr(text) {
+    var el = document.getElementById('payError');
+    el.textContent = text;
+    el.hidden = false;
+  }
+
+  if (qs.get('setup') === 'cancelled') showErr('Checkout was cancelled. You can try again.');
+  if (qs.get('setup') === 'ok' && qs.get('session_id')) {
+    history.replaceState(null, '', location.pathname);
+    var btn = document.getElementById('start');
+    Omnia.setLoading(btn, true);
+    Omnia.api('/api/billing/return', {
+      method: 'POST', headers: Omnia.authHeaders(),
+      body: JSON.stringify({ sessionId: qs.get('session_id') })
+    }).then(function (done) {
+      if (!done.ok) {
+        Omnia.setLoading(btn, false);
+        showErr((done.body && done.body.error) || 'We couldn’t confirm your payment method. Try again.');
+        return;
+      }
+      return Omnia.api('/api/issue-key', { method: 'POST', headers: Omnia.authHeaders(), body: '{}' });
+    }).then(function (keyRes) {
+      if (!keyRes) return;
+      Omnia.setLoading(btn, false);
+      if (!keyRes.ok) { showErr((keyRes.body && keyRes.body.error) || 'Could not issue a key.'); return; }
+      Omnia.setApiKey({ key: keyRes.body.key, prefix: keyRes.body.keyPrefix, plan: keyRes.body.plan, expiresAt: keyRes.body.expiresAt });
+      location.href = '/signup/key';
+    });
+  }
+
+  document.getElementById('start').addEventListener('click', function () {
+    var btn = document.getElementById('start');
+    document.getElementById('payError').hidden = true;
+    document.getElementById('fallback').hidden = true;
+    Omnia.setLoading(btn, true);
+    Omnia.api('/api/payment-setup', { method: 'POST', headers: Omnia.authHeaders(), body: '{}' })
+      .then(function (res) {
+        Omnia.setLoading(btn, false);
+        if (res.ok && res.body && res.body.checkoutUrl) {
+          location.href = res.body.checkoutUrl;
+          return;
+        }
+        if (res.status === 501) {
+          var fb = document.getElementById('fallback');
+          fb.className = 'alert alert-error';
+          fb.innerHTML = '<span class="alert-icon"></span><span>No payment processor is connected yet. Your account and signed terms are saved. Set STRIPE_SECRET_KEY and this step opens Stripe Checkout. Until then the account stays at payment pending and no trial clock starts.</span>';
+          fb.hidden = false;
+          return;
+        }
+        showErr((res.body && res.body.error) || 'Could not start payment setup.');
+      });
+  });
+})();
+</script>
+</body>
+</html>

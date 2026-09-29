@@ -3,1604 +3,295 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Omnia Engine — Docs &amp; Console</title>
-<meta name="description" content="Sign in, get your Omnia Engine API key, run real calculations in the sandbox, and watch usage update live." />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<style>
-  :root {
-    color-scheme: light;
-    --navy:       #14161A;
-    --navy-2:     #1D2026;
-    --navy-3:     #2A2E36;
-    --mist:       #FAFAF8;
-    --mist-2:     #F3F3F0;
-    --sky:        #2E6B55;
-    --sky-soft:   #EDF3F0;
-    --amber:      #1C4D3C;
-    --amber-2:    #143B2D;
-    --amber-soft: #EDF3F0;
-    --good:       #2E6B55;
-    --good-soft:  #EDF3F0;
-    --bad:        #A33A2C;
-    --bad-soft:   #FAEEEC;
-    --ink-2:      #4A505A;
-    --ink-3:      #838A94;
-    --line:       #E3E3DF;
-    --head: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-    --body: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-    --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, Menlo, monospace;
-    --container: 1180px;
-  }
-
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--mist-2); color: var(--navy);
-    font-family: var(--body); font-size: 15.5px; line-height: 1.55;
-    -webkit-font-smoothing: antialiased;
-  }
-  img, svg { max-width: 100%; }
-  a { color: inherit; }
-  h1, h2, h3, h4 { font-family: var(--head); margin: 0; font-weight: 500; letter-spacing: -.02em; line-height: 1.18; }
-  p { margin: 0; }
-
-  .container { width: 100%; max-width: var(--container); margin: 0 auto; padding: 0 28px; }
-  @media (max-width: 720px) { .container { padding: 0 16px; } }
-
-  .eyebrow {
-    font-family: var(--mono); font-size: 10.5px; font-weight: 500; letter-spacing: .16em;
-    text-transform: uppercase; color: var(--ink-3); margin: 0 0 10px;
-    display: block;
-  }
-  h1 { font-size: clamp(26px, 3.4vw, 34px); }
-  h2 { font-size: 21px; }
-  h3 { font-size: 15px; font-weight: 600; font-family: var(--body); letter-spacing: 0; }
-  .lead { font-size: 14.5px; line-height: 1.6; color: var(--ink-2); }
-  .hint { font-size: 12.5px; color: var(--ink-3); }
-
-  /* ---------- header ---------- */
-  header.site { background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 40; }
-  .head-inner { display: flex; align-items: center; gap: 16px; height: 62px; }
-  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-  .logo-word { font-family: var(--head); font-size: 18px; font-weight: 700; letter-spacing: -.03em; }
-  .logo-word span { color: var(--ink-3); font-weight: 400; }
-  .head-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
-  .head-right a { font-size: 13px; font-weight: 500; color: var(--ink-2); text-decoration: none; }
-  .head-right a:hover { color: var(--navy); }
-  .acct { display: none; align-items: center; gap: 10px; font-size: 13px; }
-  .acct.on { display: flex; }
-  .acct .who { text-align: right; line-height: 1.3; }
-  .acct .who b { font-weight: 600; }
-  .acct .who span { display: block; font-size: 11.5px; color: var(--ink-3); }
-  .acct button {
-    background: transparent; border: 1px solid var(--line); color: var(--ink-2); border-radius: 999px;
-    padding: 6px 13px; font-size: 12px; cursor: pointer; font-family: var(--body); font-weight: 500;
-  }
-  .acct button:hover { border-color: var(--navy); color: var(--navy); }
-
-  /* ---------- section nav ---------- */
-  .section-nav { background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 62px; z-index: 30; display: none; }
-  .section-nav.on { display: block; }
-  .section-nav .container { display: flex; gap: 4px; overflow-x: auto; }
-  .section-nav a {
-    padding: 13px 14px; font-size: 13.5px; font-weight: 500; color: var(--ink-2); text-decoration: none;
-    border-bottom: 2px solid transparent; white-space: nowrap;
-  }
-  .section-nav a:hover { color: var(--navy); }
-  .section-nav a.active { color: var(--navy); border-bottom-color: var(--sky); }
-
-  /* ---------- layout ---------- */
-  .page { padding: 34px 0 60px; }
-  .block { margin-bottom: 34px; scroll-margin-top: 120px; }
-  .block-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
-  .block-head .lead { max-width: 620px; margin-top: 6px; }
-
-  .card {
-    background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 22px 22px;
-    box-shadow: 0 18px 36px -34px rgba(10,37,64,.4);
-  }
-  .card + .card { margin-top: 16px; }
-  .split-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
-  @media (max-width: 900px) { .split-2 { grid-template-columns: 1fr; } }
-
-  /* ---------- buttons ---------- */
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    font-family: var(--body); font-size: 14px; font-weight: 500; letter-spacing: -.005em;
-    text-decoration: none; cursor: pointer; white-space: nowrap;
-    padding: 11px 18px; border-radius: 8px;
-    background: var(--amber); color: #fff; border: 1px solid var(--amber);
-    transition: transform .14s ease, box-shadow .14s ease, background .18s ease;
-  }
-  .btn:hover { background: var(--amber-2); border-color: var(--amber-2); }
-  
-  .btn:disabled { opacity: .5; cursor: not-allowed; }
-  .btn-outline { background: transparent; color: var(--navy); border-color: var(--line); }
-  .btn-outline:hover { background: var(--mist-2); color: var(--navy); border-color: var(--ink-3); }
-  .btn-sm { padding: 8px 14px; font-size: 13px; }
-  .btn-block { width: 100%; }
-
-  /* ---------- fields ---------- */
-  .field { display: flex; flex-direction: column; gap: 5px; }
-  .field label {
-    font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: .12em;
-    text-transform: uppercase; color: var(--ink-3);
-  }
-  .field input, .field select {
-    font-family: var(--body); font-size: 14.5px; color: var(--navy); padding: 10px 12px;
-    border: 1px solid var(--line); border-radius: 9px; background: var(--mist-2); width: 100%;
-    transition: border-color .15s ease, background .15s ease;
-  }
-  .field input:focus, .field select:focus { outline: none; border-color: var(--navy); background: #fff; }
-  .money { position: relative; }
-  .money span.cur { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--ink-3); font-size: 14px; }
-  .money input { padding-left: 24px; }
-  .grid-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .grid-fields.one { grid-template-columns: 1fr; }
-  @media (max-width: 520px) { .grid-fields { grid-template-columns: 1fr; } }
-  fieldset { border: none; border-top: 1px solid var(--line); margin: 0 0 16px; padding: 14px 0 0; }
-  fieldset:first-of-type { border-top: none; padding-top: 0; }
-  legend {
-    font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
-    color: var(--navy); font-weight: 500; padding: 0; margin-bottom: 10px;
-  }
-
-  .msg { font-size: 13px; border-radius: 8px; padding: 9px 12px; margin: 10px 0 0; }
-  .msg.err { color: var(--bad); background: var(--bad-soft); border: 1px solid #F3C7C1; }
-  .msg.ok { color: var(--good); background: var(--good-soft); border: 1px solid #B9E4C9; }
-  .msg[hidden] { display: none; }
-  [hidden] { display: none !important; }
-  .switch { margin: 18px 0 0; font-size: 13.5px; color: var(--ink-2, #555); }
-  .switch .linkish { margin: 0; }
-
-  /* ---------- sign in ---------- */
-  #signinView { display: none; padding: 50px 0 70px; }
-  #signinView.on { display: block; }
-  .signin-wrap { max-width: 470px; margin: 0 auto; }
-  #consoleView { display: none; }
-  #consoleView.on { display: block; }
-
-  /* ---------- key ---------- */
-  .key-box {
-    font-family: var(--mono); font-size: 13.5px; word-break: break-all; background: var(--navy);
-    color: #C9F7DD; border-radius: 10px; padding: 13px 15px; margin: 10px 0;
-  }
-  .key-masked {
-    font-family: var(--mono); font-size: 13.5px; color: var(--ink-2); background: var(--mist-2);
-    border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px; margin: 10px 0;
-  }
-  .warn {
-    display: flex; gap: 9px; font-size: 12.5px; color: #8A5B00; background: var(--amber-soft);
-    border: 1px solid #F0D8A0; border-radius: 8px; padding: 9px 11px; margin-bottom: 10px;
-  }
-  .kv { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding: 7px 0; border-top: 1px solid var(--line); }
-  .kv:first-child { border-top: none; }
-  .kv span:first-child { color: var(--ink-3); }
-  .kv span:last-child { font-weight: 500; font-family: var(--mono); font-size: 12.5px; }
-
-  /* ---------- sandbox ---------- */
-  .sandbox { display: grid; grid-template-columns: minmax(0,360px) minmax(0,1fr); gap: 16px; align-items: start; }
-  @media (max-width: 940px) { .sandbox { grid-template-columns: 1fr; } }
-  .run-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
-  .key-chip {
-    font-family: var(--mono); font-size: 11px; color: var(--ink-3); background: var(--mist-2);
-    border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px;
-  }
-
-  .result-empty { text-align: center; color: var(--ink-3); font-size: 13.5px; padding: 46px 20px; }
-  .stub-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
-  .stub-head .net { font-family: var(--head); font-size: 26px; font-weight: 600; }
-  .stub-head .net small { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); font-weight: 400; margin-bottom: 2px; }
-  table.stub { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-  table.stub th {
-    text-align: left; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase;
-    color: var(--ink-3); font-weight: 500; padding: 10px 6px 6px; border-bottom: 1px solid var(--line);
-  }
-  table.stub th.num, table.stub td.num { text-align: right; font-family: var(--mono); }
-  table.stub td { padding: 7px 6px; border-bottom: 1px solid var(--line); }
-  table.stub tr:last-child td { border-bottom: none; }
-  table.stub tr.group td {
-    font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase;
-    color: var(--ink-3); padding-top: 14px; border-bottom: none;
-  }
-  table.stub tr.sum td { font-weight: 600; border-top: 1px solid var(--navy); border-bottom: none; }
-  table.stub td.note { color: var(--ink-3); font-size: 11.5px; padding-top: 0; border-bottom: none; }
-
-  details.raw { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
-  details.raw summary { cursor: pointer; font-size: 12.5px; color: var(--ink-2); font-weight: 500; }
-  details.raw summary:hover { color: var(--navy); }
-  .raw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
-  @media (max-width: 820px) { .raw-grid { grid-template-columns: 1fr; } }
-  pre.code {
-    margin: 0; padding: 13px 14px; background: var(--navy-2); color: #D5E4F0; border-radius: 10px;
-    font-family: var(--mono); font-size: 11.5px; line-height: 1.65; overflow-x: auto; max-height: 300px; overflow-y: auto;
-  }
-  .code-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
-  .status-pill {
-    display: inline-block; font-family: var(--mono); font-size: 11px; padding: 3px 9px; border-radius: 999px;
-    background: var(--good-soft); color: var(--good); border: 1px solid #B9E4C9;
-  }
-  .status-pill.bad { background: var(--bad-soft); color: var(--bad); border-color: #F3C7C1; }
-
-  /* ---------- usage ---------- */
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
-  @media (max-width: 760px) { .stats { grid-template-columns: 1fr 1fr; } }
-  .stat { background: var(--mist-2); border: 1px solid var(--line); border-radius: 12px; padding: 13px 14px; }
-  .stat .n { font-family: var(--head); font-size: 23px; font-weight: 600; line-height: 1.1; }
-  .stat .l { font-size: 11.5px; color: var(--ink-3); margin-top: 3px; }
-  table.log { width: 100%; border-collapse: collapse; font-size: 13px; }
-  table.log th {
-    text-align: left; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase;
-    color: var(--ink-3); font-weight: 500; padding: 8px 6px; border-bottom: 1px solid var(--line);
-  }
-  table.log td { padding: 8px 6px; border-bottom: 1px solid var(--line); }
-  table.log tr:last-child td { border-bottom: none; }
-  .empty { text-align: center; color: var(--ink-3); font-size: 13px; padding: 24px 6px; }
-
-  /* ---------- billing ---------- */
-  .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
-  @media (max-width: 780px) { .plans { grid-template-columns: 1fr; } }
-  .plan { border: 1px solid var(--line); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 9px; }
-  .plan h4 { font-family: var(--head); font-size: 15.5px; font-weight: 600; }
-  .plan p { font-size: 12.5px; color: var(--ink-2); flex: 1; }
-  .note-dashed {
-    margin-top: 14px; font-size: 12.5px; color: var(--ink-3); background: var(--mist-2);
-    border: 1px dashed var(--line); border-radius: 10px; padding: 11px 13px;
-  }
-
-  /* ---------- reference ---------- */
-  .ref { background: var(--navy); color: #fff; border-radius: 18px; padding: 28px 26px; }
-  .ref .eyebrow { color: var(--sky); }
-  .ref h2 { color: #fff; }
-  .ref .lead { color: #B9CFE2; }
-  .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
-  @media (max-width: 860px) { .ref-grid { grid-template-columns: 1fr; } }
-  .ref pre { margin: 0; padding: 15px; background: var(--navy-2); border: 1px solid rgba(255,255,255,.13); border-radius: 12px; overflow-x: auto; font-family: var(--mono); font-size: 11.5px; line-height: 1.7; color: #D5E4F0; }
-  .ref .k { color: #7ED0F5; } .ref .s { color: #FFD98A; } .ref .v { color: #9FE6BE; } .ref .c { color: #6E8CA8; }
-  .errs { list-style: none; margin: 16px 0 0; padding: 0; }
-  .errs li { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid rgba(255,255,255,.13); font-size: 13px; color: #C8DCEF; }
-  .errs li:first-child { border-top: none; }
-  .errs code { font-family: var(--mono); font-size: 12px; color: var(--sky); flex: none; }
-
-  .trial-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
-  .trial-days { font-family: var(--head); font-size: 34px; font-weight: 600; line-height: 1; }
-  .trial-days small { font-family: var(--body); font-size: 13px; font-weight: 500; color: var(--ink-3); }
-  .meter { border-top: 1px solid var(--line); margin-bottom: 14px; }
-  .rates { border-top: 1px solid var(--line); padding-top: 10px; }
-  .rate-line { display: flex; justify-content: space-between; gap: 12px; font-size: 12.5px; color: var(--ink-2); padding: 5px 0; }
-  .rate-line b { font-family: var(--mono); color: var(--navy); }
-  .rate-line.current { color: var(--navy); font-weight: 600; }
-  .rate-line.current::after { content: "current"; font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--amber-2); margin-left: 8px; }
-  .quote-line {
-    background: var(--mist); border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px;
-    font-size: 13px; color: var(--ink-2); margin-bottom: 12px;
-  }
-  .quote-line b { font-family: var(--head); font-size: 17px; color: var(--navy); }
-
-  /* ---------- signup wizard ---------- */
-  .wiz { max-width: 620px; padding-top: 40px; padding-bottom: 70px; }
-  .steps { list-style: none; display: flex; margin: 0 0 20px; padding: 0; border: 1px solid var(--navy); }
-  .steps li {
-    flex: 1; font-family: var(--mono); font-size: 11px; letter-spacing: .04em; color: var(--ink-3);
-    padding: 10px 8px; text-align: center; border-right: 1px solid var(--line); white-space: nowrap;
-  }
-  .steps li:last-child { border-right: none; }
-  .steps li .sn { color: var(--ink-3); }
-  .steps li.done { background: var(--mist); color: var(--navy); }
-  .steps li.done .sn { color: var(--good); }
-  .steps li.current { background: var(--navy); color: #fff; }
-  .steps li.current .sn { color: #E9A08B; }
-  @media (max-width: 620px) { .steps li { font-size: 9.5px; padding: 8px 4px; } }
-
-  .wiz-card { border: 1px solid var(--navy); background: #fff; }
-  .wiz-head {
-    display: flex; align-items: baseline; gap: 12px; padding: 12px 18px;
-    background: var(--navy); color: #fff;
-  }
-  .wiz-head span { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: #E9A08B; }
-  .wiz-head h2 { font-size: 17px; color: #fff; }
-  .wiz-body { padding: 22px 18px 20px; }
-  .code-field input { font-family: var(--mono); font-size: 24px; letter-spacing: .45em; text-align: center; }
-  .linkish {
-    background: none; border: none; padding: 0; margin-top: 14px; cursor: pointer;
-    font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); text-decoration: underline; text-underline-offset: 3px;
-  }
-  .linkish:hover { color: var(--navy); }
-
-  .terms-figures { border: 1px solid var(--line); margin-bottom: 16px; }
-  .tf-row { display: flex; justify-content: space-between; gap: 12px; padding: 11px 14px; font-size: 14px; border-bottom: 1px solid var(--line); }
-  .tf-row:nth-child(even) { background: var(--mist); }
-  .tf-row:last-child { border-bottom: none; }
-  .tf-row b { font-family: var(--mono); font-variant-numeric: tabular-nums; }
-  .tf-row.big b { font-size: 19px; color: var(--bad); }
-
-  .terms-doc { border: 1px solid var(--line); max-height: 260px; overflow-y: auto; padding: 16px 16px 6px; margin-bottom: 18px; background: var(--mist-2); }
-  .terms-doc h4 { font-family: var(--body); font-size: 13.5px; font-weight: 600; margin: 0 0 5px; }
-  .terms-doc p { font-size: 13px; line-height: 1.6; color: var(--ink-2); margin: 0 0 14px; }
-
-  .agree { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; line-height: 1.55; color: var(--navy); }
-  .agree input { margin-top: 3px; width: 16px; height: 16px; flex: none; accent-color: var(--navy); }
-  .signed-note { border-left: 2px solid var(--good); padding-left: 12px; font-size: 13px; color: var(--ink-2); }
-  .pay-note { margin-top: 14px; border: 1px dashed var(--line); padding: 12px 14px; font-size: 12.5px; color: var(--ink-3); line-height: 1.6; background: var(--mist-2); }
-  .pay-note b { color: var(--navy); }
-
-  footer.site { padding: 26px 0 40px; text-align: center; font-size: 12.5px; color: var(--ink-3); }
-  footer.site a { color: var(--ink-2); text-decoration: none; }
-
-  /* Plain, consistent UI: no pills, no dark header bars, no eyebrow labels,
-     one typeface. */
-  h1, h2, h3 { font-family: var(--head); font-weight: 600; letter-spacing: -0.015em; }
-  .eyebrow { display: none; }
-  .status-pill, .key-chip { background: none; border: 0; padding: 0; border-radius: 0; }
-  .warn { background: none; border: 0; padding: 0; color: #8A5B00; }
-  .card { border-radius: 8px; box-shadow: none; }
-  .steps { border: 0; gap: 22px; justify-content: flex-start; }
-  .steps li { flex: none; border: 0; padding: 0; background: none !important; font-family: var(--body); font-size: 14px; letter-spacing: 0; color: var(--ink-3) !important; }
-  .steps li .sn { display: none; }
-  .steps li.current { color: var(--ink) !important; font-weight: 600; }
-  .wiz-card { border: 1px solid var(--line); border-radius: 8px; }
-  .wiz-head { background: none; color: var(--ink); padding: 26px 24px 0; }
-  .wiz-head span { display: none; }
-  .wiz-head h2 { color: var(--ink); font-size: 22px; }
-  .wiz-body { padding: 14px 24px 24px; }
-  .wiz-body .lead { margin-bottom: 18px; }
-  .field label { font-family: var(--body); font-size: 13.5px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--ink-2); }
-</style>
+<title>Docs — Omnia.tax</title>
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/tokens.css" />
+<link rel="stylesheet" href="/assets/site.css" />
+<!--OMNIA_CONFIG-->
 </head>
 <body>
-
-<header class="site">
-  <div class="container head-inner">
-    <a class="logo" href="index.html">
-      <svg width="28" height="28" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <circle cx="20" cy="20" r="15.4" stroke="#14161A" stroke-width="3.4"/>
-        <path d="M12.4 22.6 20 15.2l7.6 7.4" stroke="#2E6B55" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="20" cy="25.4" r="2.5" fill="#9A5B2C"/>
-      </svg>
-      <span class="logo-word">Omnia <span>Console</span></span>
+<header class="topbar">
+  <a class="logo logo-sm" href="/" aria-label="Omnia.tax"><img src="/logo/logo.svg" alt="" /></a>
+  <span class="docs-word">DOCS</span>
+  <label class="search">
+    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 9.5L13 13" stroke="currentColor" stroke-width="1.5"/></svg>
+    <input type="search" placeholder="Search the docs" disabled aria-disabled="true" title="Search isn’t available. There is no search endpoint." />
+    <kbd>/</kbd>
+  </label>
+  <div class="top-right">
+    <span style="font-weight:700;font-size:14px" id="modeLabel">Test mode</span>
+    <span class="switch" id="modeSwitch" aria-hidden="true"><i></i></span>
+    <span class="tag tag-outline" id="trialTag">Trial</span>
+    <button type="button" class="btn btn-text" id="signOut" hidden style="font-size:14px">Sign out</button>
+    <a href="/signin" id="acctLink" style="display:flex;align-items:center;gap:8px;text-decoration:none">
+      <span class="avatar" id="avatar">?</span>
+      <span id="acctName">Sign in</span>
     </a>
-    <div class="head-right">
-      <a href="/console">API console</a>
-      <a href="/reference">API reference</a>
-      <a href="/terms">Terms</a>
-      <a href="/privacy">Privacy</a>
-      <a href="index.html">&larr; omnia.tax</a>
-      <div class="acct" id="acct">
-        <div class="who"><b id="acctName">—</b><span id="acctCompany">—</span></div>
-        <button type="button" id="signOutBtn">Sign out</button>
-      </div>
-    </div>
   </div>
 </header>
-
-<nav class="section-nav" id="sectionNav">
-  <div class="container">
-    <a href="#key">Your key</a>
-    <a href="#sandbox">Sandbox</a>
-    <a href="#usage">Usage</a>
+<div class="docs-layout">
+  <nav class="docs-nav" aria-label="Docs">
+    <div class="g">Guides</div>
+    <a href="#getting-started">Getting started</a>
+    <a href="#authentication">Authentication</a>
+    <div class="g">API reference</div>
+    <a href="#post"><span class="post-tag">POST</span> /v1/paycheck</a>
+    <a href="#tax-lines">Tax lines</a>
+    <a href="#errors">Errors</a>
+    <a href="#response-headers">Response headers</a>
+    <div class="g">Account</div>
     <a href="#billing">Billing</a>
-    <a href="#reference">Reference</a>
-  </div>
-</nav>
-
-<main>
-  <!-- ================= SIGN IN ================= -->
-  <div id="signinView">
-    <div class="container wiz">
-
-      <ol class="steps" id="steps">
-        <li data-step="1"><span class="sn">01</span> Account</li>
-        <li data-step="2"><span class="sn">02</span> Verify email</li>
-        <li data-step="3"><span class="sn">03</span> Terms</li>
-        <li data-step="4"><span class="sn">04</span> Payment</li>
-      </ol>
-
-      <!-- SIGN IN (returning customers) -->
-      <section class="wiz-card" data-panel="0" hidden>
-        <div class="wiz-head"><span>Welcome back</span><h2>Sign in</h2></div>
-        <div class="wiz-body">
-          <p class="lead">Enter the work email on your account. We'll send a 6-digit sign-in code.</p>
-          <form id="signinForm" novalidate>
-            <div class="field" style="margin-bottom:16px"><label for="siEmail">Work email</label><input id="siEmail" type="email" autocomplete="email" placeholder="jordan@yourcompany.com" required /></div>
-            <button type="submit" class="btn btn-block">Send sign-in code</button>
-            <p class="msg err" id="siError" hidden></p>
-          </form>
-          <p class="switch">New to Omnia? <button type="button" class="linkish" id="toSignup">Create an account</button></p>
-        </div>
-      </section>
-
-      <!-- STEP 1 -->
-      <section class="wiz-card" data-panel="1">
-        <div class="wiz-head"><span>Step 01</span><h2>Create your account</h2></div>
-        <div class="wiz-body">
-          <p class="lead">Four steps: your details, a code to confirm your email, your terms, then a card or US bank account. Your API key is issued once a payment method is on file. Nothing is charged during the 14-day evaluation.</p>
-          <form id="signupForm" novalidate>
-            <div class="grid-fields" style="margin-bottom:12px">
-              <div class="field"><label for="suName">Full name</label><input id="suName" type="text" autocomplete="name" placeholder="Jordan Casey" required /></div>
-              <div class="field"><label for="suEmail">Work email</label><input id="suEmail" type="email" autocomplete="email" placeholder="jordan@yourcompany.com" required /></div>
-            </div>
-            <div class="grid-fields" style="margin-bottom:16px">
-              <div class="field"><label for="suCompany">Business name</label><input id="suCompany" type="text" autocomplete="organization" placeholder="Acme Payroll Services" required /></div>
-              <div class="field"><label for="suPhone">Phone</label><input id="suPhone" type="tel" autocomplete="tel" placeholder="(555) 123-4567" required /></div>
-            </div>
-            <button type="submit" class="btn btn-block">Send verification code</button>
-            <p class="msg err" id="suError" hidden></p>
-          </form>
-          <p class="switch">Already have an account? <button type="button" class="linkish" id="toSignin">Sign in</button></p>
-        </div>
-      </section>
-
-      <!-- STEP 2 -->
-      <section class="wiz-card" data-panel="2" hidden>
-        <div class="wiz-head"><span>Step 02</span><h2>Verify your email</h2></div>
-        <div class="wiz-body">
-          <p class="lead" id="verifySent">We sent a 6-digit code. It expires in 15 minutes.</p>
-          <form id="verifyForm" novalidate>
-            <div class="field code-field" style="margin-bottom:14px">
-              <label for="vCode">Verification code</label>
-              <input id="vCode" type="text" inputmode="numeric" maxlength="6" placeholder="000000" required />
-            </div>
-            <button type="submit" class="btn btn-block">Verify and continue</button>
-            <p class="msg err" id="vError" hidden></p>
-            <p class="msg ok" id="vResent" hidden>New code sent.</p>
-          </form>
-          <button type="button" class="linkish" id="resendBtn">Send a new code</button>
-        </div>
-      </section>
-
-      <!-- STEP 3 -->
-      <section class="wiz-card" data-panel="3" hidden>
-        <div class="wiz-head"><span>Step 03</span><h2>Your terms</h2></div>
-        <div class="wiz-body">
-          <p class="lead">Tell us your volume so the figures below are yours, not an example. Read them before you authorize anything.</p>
-
-          <div class="grid-fields" style="margin:18px 0 6px">
-            <div class="field"><label for="tEmployees">Employees you pay</label><input id="tEmployees" type="number" min="1" step="1" value="8000" /></div>
-            <div class="field"><label for="tFrequency">Pay frequency</label>
-              <select id="tFrequency">
-                <option value="weekly">Weekly</option>
-                <option value="biweekly" selected>Biweekly</option>
-                <option value="semimonthly">Semi-monthly</option>
-                <option value="monthly">Monthly</option>
-              </select>
-            </div>
-          </div>
-          <div class="grid-fields" style="margin-bottom:18px">
-            <div class="field"><label for="tRooftop">Rooftop resolution</label>
-              <select id="tRooftop"><option value="no" selected>Not needed</option><option value="yes">Include it</option></select>
-            </div>
-            <div class="field"><label>&nbsp;</label><button type="button" class="btn btn-secondary btn-block" id="recalcBtn">Recalculate</button></div>
-          </div>
-
-          <div class="terms-figures" id="termsFigures"></div>
-          <div class="terms-doc" id="termsDoc"></div>
-
-          <form id="termsForm" novalidate>
-            <div class="grid-fields" style="margin-bottom:12px">
-              <div class="field"><label for="tLegal">Legal business name</label><input id="tLegal" type="text" placeholder="Acme Payroll Services, LLC" required /></div>
-              <div class="field"><label for="tBillingEmail">Billing email</label><input id="tBillingEmail" type="email" placeholder="ap@acmepayroll.com" required /></div>
-            </div>
-            <div class="field" style="margin-bottom:14px"><label for="tAddress">Billing address</label><input id="tAddress" type="text" placeholder="120 Main St, Columbus OH 43215" required /></div>
-
-            <label class="agree">
-              <input type="checkbox" id="tAgree" />
-              <span id="agreeText">I authorize Omnia to charge my payment method for metered usage after the free trial ends, and I accept the terms above.</span>
-            </label>
-
-            <div class="field" style="margin:14px 0"><label for="tSign">Type your full name to sign</label><input id="tSign" type="text" placeholder="Jordan Casey" required /></div>
-
-            <button type="submit" class="btn btn-block">Agree and continue to payment</button>
-            <p class="msg err" id="tError" hidden></p>
-          </form>
-        </div>
-      </section>
-
-      <!-- STEP 4 -->
-      <section class="wiz-card" data-panel="4" hidden>
-        <div class="wiz-head"><span>Step 04</span><h2>Payment method</h2></div>
-        <div class="wiz-body">
-          <p class="lead">Card or US bank account, entered on our payment processor's secure page — it never touches our servers. Nothing is charged today; your API key is issued as soon as it's saved.</p>
-          <div class="signed-note" id="signedNote"></div>
-          <button type="button" class="btn btn-block" id="payBtn" style="margin-top:16px">Add card or bank account</button>
-          <p class="msg err" id="payError" hidden></p>
-          <div class="pay-note" id="payFallback" hidden></div>
-        </div>
-      </section>
-
+    <a href="/sandbox">Sandbox</a>
+    <div class="keycard">
+      <div class="label-mono" style="color:var(--color-gray)">Your test key</div>
+      <div class="k" id="navKey">No key in this session</div>
+      <div style="color:var(--color-gray);font-size:13px" id="navKeyNote">The full key is shown once, on the key screen.</div>
     </div>
-  </div>
+  </nav>
+  <main class="docs-main">
+    <p class="crumb">GUIDES / GETTING STARTED</p>
+    <h1 id="getting-started">Getting started</h1>
+    <p class="lead">Calculate every tax line on a paycheck with one request. You’re in test mode, and the first <span data-trial>14</span> days are free.</p>
+    <div style="height:3px;background:var(--color-ink);margin:24px 0"></div>
+    <div class="step-list">
+      <article><div class="n">01</div><div><h3>Get your key</h3><p>Your test key starts with sk_test_ and was shown once at sign-up. You can create a new one from your account at any time.</p></div></article>
+      <article><div class="n">02</div><div><h3>Make your first call</h3><p>POST a paycheck to /v1/paycheck. The example on the right works as-is with your test key.</p></div></article>
+      <article><div class="n">03</div><div><h3>Read the tax lines</h3><p>Each entry in result.taxes[] names the tax, who pays it, its jurisdiction, the taxable wages and the amount, with a detail explaining the math.</p></div></article>
+    </div>
 
-  <div id="consoleView">
-    <div class="container page">
+    <div class="sec-rule"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Authentication</p>
+    <h2 id="authentication">Authentication</h2>
+    <p>Send your secret key as a Bearer token in the Authorization header of every request. Keep keys on your server, never in a browser or mobile app.</p>
+    <div class="auth-line">Authorization: Bearer sk_test_...</div>
+    <div class="kv"><code>sk_test_</code><span>Test key. Same API, same results. For building and your trial.</span></div>
+    <div class="kv"><code>sk_live_</code><span>Live key. Metered and billed at <span data-rate>$0.12</span> per paycheck on the first band of the rate card.</span></div>
+    <p id="tierNote" style="color:var(--color-gray);font-size:14px"></p>
 
-      <!-- ---------- YOUR KEY ---------- -->
-      <section class="block" id="key">
-        <div class="block-head">
-          <div>
-            <p class="eyebrow">Step 1</p>
-            <h2>Your API key</h2>
-            <p class="lead">An evaluation key, good for 14 days. The sandbox below uses it for every call.</p>
-          </div>
-        </div>
+    <div class="sec-rule"></div>
+    <p class="label-mono" style="color:var(--color-gray)">API reference</p>
+    <div class="path-row" id="post">
+      <span class="tag tag-cobalt" style="height:32px;padding:0 12px;font-size:13px">POST</span>
+      <span class="path">/v1/paycheck</span>
+    </div>
+    <p>Calculate one paycheck and get back every tax line that applies.</p>
+    <div class="money-banner">All money in integer cents. <span>100000 = $1,000.00</span></div>
+    <table class="fields">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr class="group"><td colspan="3" style="color:var(--color-cobalt)">CORE FIELDS</td></tr>
+        <tr><td><code>checkDate</code></td><td class="ty">string</td><td class="desc">Pay date, YYYY-MM-DD. Selects the rules in effect on that date.</td></tr>
+        <tr><td><code>payFrequency</code></td><td class="ty">enum</td><td class="desc"><code>weekly, biweekly, semimonthly, monthly, quarterly, semiannual, annual, daily</code>. How often this employee is paid.</td></tr>
+        <tr><td><code>earnings[]</code></td><td class="ty">array</td><td class="desc"><code>{ code, category, amount }</code>. One entry per earning on the check.</td></tr>
+        <tr><td><code>deductions[]</code></td><td class="ty">array</td><td class="desc"><code>{ code, category, amount }</code>. Pre-tax and post-tax deductions.</td></tr>
+        <tr><td><code>federalW4</code></td><td class="ty">object</td><td class="desc"><code>{ filingStatus, multipleJobs, dependentCredit, otherIncome, deductions, extraWithholding }</code>. The employee’s federal Form W-4.</td></tr>
+        <tr><td><code>ytd</code></td><td class="ty">object</td><td class="desc"><code>{ socialSecurity, medicare, futa }</code>. Year-to-date wages before this check.</td></tr>
+        <tr><td><code>workState</code></td><td class="ty">object</td><td class="desc"><code>{ code, certificate }</code>. Where the work happens, plus that state’s certificate (e.g. workCity). Omit for federal only.</td></tr>
+        <tr class="group"><td colspan="3" style="color:var(--color-gray)">OPTIONAL</td></tr>
+        <tr><td><code>residenceState</code></td><td class="ty">object</td><td class="desc"><code>{ code, certificate }</code>. Where the employee lives, when it differs from workState.</td></tr>
+        <tr><td><code>employer</code></td><td class="ty">object</td><td class="desc">Employer facts some rules need, such as a state unemployment rate.</td></tr>
+        <tr><td><code>employmentCategory</code></td><td class="ty">enum</td><td class="desc">Which employment-tax rules apply. Defaults to standard.</td></tr>
+        <tr><td><code>hoursWorked</code></td><td class="ty">number</td><td class="desc">Hours in this pay period, for minimum-wage checks.</td></tr>
+        <tr><td><code>roundToWholeDollars</code></td><td class="ty">boolean</td><td class="desc">Round federal withholding to whole dollars. Defaults to false.</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:24px;font-weight:700">Success shape</p>
+    <pre class="shape">{ result: { checkDate, grossPay, pretaxDeductions, posttaxDeductions, employeeTaxTotal, employerTaxTotal, netPay, taxes: [ { id, name, payer, jurisdiction, taxableWages, amount, detail } ] } }</pre>
 
-        <div class="card">
-          <div id="keyNone">
-            <p class="lead" style="margin-bottom:14px">No key yet — issue one to unlock the sandbox.</p>
-            <button type="button" id="issueKeyBtn" class="btn">Issue my evaluation key</button>
-            <p class="msg err" id="keyError" hidden></p>
-          </div>
+    <div class="sec-rule" id="tax-lines"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Tax lines</p>
+    <h2>Tax lines</h2>
+    <p>Each object in <code>result.taxes</code> is one line. A jurisdiction this build does not compute comes back as a line whose <code>detail</code> starts with <code>NOT MODELLED</code> and whose <code>amount</code> is 0, with the detail telling you not to treat that as zero tax. That is separate from <code>calculation_error</code>, which is an engine failure after the input validated.</p>
+    <div class="field-rows">
+      <div><code>id</code><span>Stable id for the line.</span></div>
+      <div><code>name</code><span>Human-readable tax name.</span></div>
+      <div><code>payer</code><span><code>employee</code> or <code>employer</code>.</span></div>
+      <div><code>jurisdiction</code><span><code>federal</code>, <code>state</code>, or <code>local</code>.</span></div>
+      <div><code>taxableWages</code><span>Integer cents.</span></div>
+      <div><code>amount</code><span>Integer cents withheld or owed.</span></div>
+      <div><code>detail</code><span>The math, or a NOT MODELLED explanation.</span></div>
+    </div>
 
-          <div id="keyReveal" hidden>
-            <div class="warn">
-              <span>Copy this now — it isn't shown again. It's also kept in this browser so the sandbox can use it; reissuing revokes it.</span>
-            </div>
-            <div class="key-box" id="keyRevealText">sk_test_…</div>
-            <button type="button" id="copyKeyBtn" class="btn btn-outline btn-sm">Copy key</button>
-          </div>
+    <div class="sec-rule" id="errors"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Errors</p>
+    <h2>Errors</h2>
+    <p>Every error returns the same three fields with a matching HTTP status. A missing rule is never returned as a silent zero.</p>
+    <div class="field-rows">
+      <div><code>error</code><span>A human-readable message.</span></div>
+      <div><code>code</code><span>A stable, machine-readable code from the table below.</span></div>
+      <div><code>requestId</code><span>Identifies the request. Include it when you contact us.</span></div>
+      <div><code>details</code><span>invalid_input only. An array of <code>{ path, message }</code>. <code>path</code> is a dotted path such as <code>earnings[0].amount</code>.</span></div>
+    </div>
+    <table class="errors">
+      <thead><tr><th>HTTP</th><th>Code</th><th>When</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tag-outline tag-error">400</span></td><td><code>invalid_json</code></td><td class="when">The request body isn’t valid JSON. The message is “Request body must be valid JSON.”</td></tr>
+        <tr><td colspan="3"><div class="status-split"></div></td></tr>
+        <tr><td><span class="tag tag-outline tag-error">401</span></td><td><code>missing_key</code></td><td class="when">No API key was sent in the Authorization header.</td></tr>
+        <tr><td><span class="tag tag-outline tag-error">401</span></td><td><code>invalid_key</code></td><td class="when">The key isn’t recognized, or it is inactive.</td></tr>
+        <tr><td><span class="tag tag-outline tag-error">401</span></td><td><code>expired_key</code></td><td class="when">The key has expired. The message includes the expiry timestamp. Create a new one from your account.</td></tr>
+        <tr><td colspan="3"><div class="status-split"></div></td></tr>
+        <tr><td><span class="tag tag-outline tag-error">402</span></td><td><code>payment_method_required</code></td><td class="when">A card or bank account must be on file, even during the <span data-trial>14</span>-day trial.</td></tr>
+        <tr><td><span class="tag tag-outline tag-error">402</span></td><td><code>account_suspended</code></td><td class="when">The account is suspended for a billing issue, so calls are refused.</td></tr>
+        <tr><td colspan="3"><div class="status-split"></div></td></tr>
+        <tr><td><span class="tag tag-outline tag-error">422</span></td><td><code>invalid_input</code></td><td class="when">The request did not pass validation. <code>details</code> lists each field error as <code>{ path, message }</code>.</td></tr>
+        <tr><td><span class="tag tag-outline tag-error">422</span></td><td><code>calculation_error</code></td><td class="when">The input was valid, but the paycheck couldn’t be calculated. This is not the “not modelled” line — that is a normal tax line with a NOT MODELLED detail.</td></tr>
+        <tr><td colspan="3"><div class="status-split"></div></td></tr>
+        <tr><td><span class="tag tag-outline tag-error">429</span></td><td><code>rate_limited</code></td><td class="when">Too many requests from this key in the current minute. The default limit is <span id="rpm">120</span> requests per minute, per key. Retry after the number of seconds in the Retry-After header.</td></tr>
+      </tbody>
+    </table>
 
-          <div id="keyActive" hidden>
-            <div class="key-masked" id="keyMaskedText">sk_test_…</div>
-            <div id="keyMeta"></div>
-            <button type="button" id="reissueKeyBtn" class="btn btn-outline btn-sm" style="margin-top:12px">Reissue (revokes current)</button>
-          </div>
-        </div>
-      </section>
+    <div class="sec-rule" id="response-headers"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Response headers</p>
+    <h2>Response headers</h2>
+    <p>Every response carries a request ID. Rate limits are per key, per minute.</p>
+    <table class="headers">
+      <thead><tr><th>Header</th><th>Sent on</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>X-Request-Id</code></td><td>Every response</td><td class="mean">Identifies the request. Include it when you contact us.</td></tr>
+        <tr><td><code>Omnia-Mode</code></td><td>Once the key is checked (not on 401s)</td><td class="mean"><code>test</code> or <code>live</code>: the mode of the key that made the call.</td></tr>
+        <tr><td><code>RateLimit-Limit</code></td><td>Once past the rate limiter, including 429 and later errors</td><td class="mean">Requests this key may make per minute.</td></tr>
+        <tr><td><code>RateLimit-Remaining</code></td><td>Once past the rate limiter, including 429 and later errors</td><td class="mean">Requests left in the current minute.</td></tr>
+        <tr><td><code>RateLimit-Reset</code></td><td>Once past the rate limiter, including 429 and later errors</td><td class="mean">Unix epoch seconds when the current window resets.</td></tr>
+        <tr><td><code>Retry-After</code></td><td>429 rate_limited</td><td class="mean">Seconds to wait before retrying.</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:32px"><span class="label-mono" style="color:var(--color-gray)">Next</span> <a class="btn btn-text" href="#tax-lines" style="margin-left:12px;font-size:18px">Tax lines</a></p>
 
-      <!-- ---------- SANDBOX ---------- -->
-      <section class="block" id="sandbox">
-        <div class="block-head">
-          <div>
-            <p class="eyebrow">Step 2</p>
-            <h2>API sandbox</h2>
-            <p class="lead">
-              A real, key-authenticated call to <code style="font-family:var(--mono);font-size:12.5px">POST /api/paycheck</code>
-              on every run — the same endpoint your code will call. Nothing here is canned.
-            </p>
-          </div>
-        </div>
-
-        <div class="sandbox">
-          <!-- inputs -->
-          <div class="card">
-            <form id="calcForm" novalidate>
-              <fieldset>
-                <legend>Period</legend>
-                <div class="grid-fields">
-                  <div class="field">
-                    <label for="cState">Work state</label>
-                    <select id="cState"><option value="">Federal only</option></select>
-                  </div>
-                  <div class="field">
-                    <label for="cFrequency">Pay frequency</label>
-                    <select id="cFrequency">
-                      <option value="weekly">Weekly</option>
-                      <option value="biweekly" selected>Biweekly</option>
-                      <option value="semimonthly">Semi-monthly</option>
-                      <option value="monthly">Monthly</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="grid-fields" style="margin-top:12px">
-                  <div class="field">
-                    <label for="cCheckDate">Check date</label>
-                    <input id="cCheckDate" type="date" value="2026-06-15" />
-                  </div>
-                  <div class="field">
-                    <label for="cGross">Gross pay</label>
-                    <div class="money"><span class="cur">$</span><input id="cGross" type="number" min="0" step="0.01" value="3000.00" /></div>
-                  </div>
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend>Federal W-4</legend>
-                <div class="grid-fields one">
-                  <div class="field">
-                    <label for="cFiling">Filing status</label>
-                    <select id="cFiling">
-                      <option value="single" selected>Single or married filing separately</option>
-                      <option value="married_joint">Married filing jointly</option>
-                      <option value="head_of_household">Head of household</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="grid-fields" style="margin-top:12px">
-                  <div class="field">
-                    <label for="cDependents">Dependents amount</label>
-                    <div class="money"><span class="cur">$</span><input id="cDependents" type="number" min="0" step="0.01" value="0" /></div>
-                  </div>
-                  <div class="field">
-                    <label for="cExtra">Extra withholding</label>
-                    <div class="money"><span class="cur">$</span><input id="cExtra" type="number" min="0" step="0.01" value="0" /></div>
-                  </div>
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend>Pre-tax deductions</legend>
-                <div class="grid-fields">
-                  <div class="field">
-                    <label for="c401k">401(k) deferral</label>
-                    <div class="money"><span class="cur">$</span><input id="c401k" type="number" min="0" step="0.01" value="240.00" /></div>
-                  </div>
-                  <div class="field">
-                    <label for="cSec125">Section 125 medical</label>
-                    <div class="money"><span class="cur">$</span><input id="cSec125" type="number" min="0" step="0.01" value="0" /></div>
-                  </div>
-                </div>
-              </fieldset>
-
-              <div class="run-bar">
-                <button type="submit" class="btn" id="runBtn">Run calculation</button>
-                <span class="key-chip" id="keyChip">no key yet</span>
-              </div>
-              <p class="msg err" id="calcError" hidden></p>
-            </form>
-          </div>
-
-          <!-- results -->
-          <div class="card">
-            <div id="resultEmpty" class="result-empty">
-              Issue a key, then run a calculation — the paystub lands here.
-            </div>
-
-            <div id="resultBody" hidden>
-              <div class="stub-head">
-                <div>
-                  <span class="status-pill" id="resStatus">HTTP 200</span>
-                  <div class="hint" id="resMeta" style="margin-top:6px">—</div>
-                </div>
-                <div class="net" style="text-align:right">
-                  <small>Net pay</small>
-                  <span id="resNet">$0.00</span>
-                </div>
-              </div>
-
-              <table class="stub">
-                <thead>
-                  <tr><th>Line</th><th class="num">Taxable base</th><th class="num">Amount</th></tr>
-                </thead>
-                <tbody id="stubBody"></tbody>
-              </table>
-
-              <details class="raw">
-                <summary>View raw request &amp; response</summary>
-                <div class="raw-grid">
-                  <div>
-                    <div class="code-label">Request</div>
-                    <pre class="code" id="rawReq"></pre>
-                  </div>
-                  <div>
-                    <div class="code-label">Response</div>
-                    <pre class="code" id="rawRes"></pre>
-                  </div>
-                </div>
-              </details>
-            </div>
-
-            <div id="resultError" hidden>
-              <span class="status-pill bad" id="errStatus">HTTP 422</span>
-              <p class="lead" style="margin-top:10px" id="errText">—</p>
-              <details class="raw" open>
-                <summary>View raw response</summary>
-                <div style="margin-top:12px"><pre class="code" id="errRaw"></pre></div>
-              </details>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ---------- USAGE ---------- -->
-      <section class="block" id="usage">
-        <div class="block-head">
-          <div>
-            <p class="eyebrow">Step 3</p>
-            <h2>Usage</h2>
-            <p class="lead">Every row here is a call your key actually made — the sandbox writes to the same log your production traffic would.</p>
-          </div>
-          <button type="button" id="refreshUsageBtn" class="btn btn-outline btn-sm">Refresh</button>
-        </div>
-
-        <div class="card">
-          <div class="stats">
-            <div class="stat"><div class="n" id="statToday">0</div><div class="l">calls today</div></div>
-            <div class="stat"><div class="n" id="statMonth">0</div><div class="l">calls this month</div></div>
-            <div class="stat"><div class="n" id="statTotal">0</div><div class="l">total calls</div></div>
-            <div class="stat"><div class="n" id="statLast" style="font-size:14px;padding-top:5px">never</div><div class="l">last used</div></div>
-          </div>
-          <p class="empty" id="logEmpty">No calls yet — run one in the sandbox.</p>
-          <table class="log" id="logTable" hidden>
-            <thead><tr><th>When</th><th>Status</th><th>Check date</th><th>Error</th></tr></thead>
-            <tbody id="logBody"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- ---------- BILLING ---------- -->
-      <section class="block" id="billing">
-        <div class="block-head">
-          <div>
-            <p class="eyebrow">Step 4</p>
-            <h2>Billing</h2>
-            <p class="lead">Usage-based: you pay per calculation, every jurisdiction included. Nothing is charged during the trial.</p>
-          </div>
-        </div>
-
-        <div class="split-2">
-          <div class="card">
-            <div class="trial-head">
-              <div>
-                <div class="trial-days"><span id="trialDays">14</span> <small>days left</small></div>
-                <div class="hint" id="trialUntil">of your 14-day free trial</div>
-              </div>
-              <span class="status-pill" id="subStatus">Trialing</span>
-            </div>
-
-            <div class="meter">
-              <div class="kv"><span>Calls so far</span><span id="billCalls">0</span></div>
-              <div class="kv"><span>What that would cost</span><span id="billCost">$0.00</span></div>
-              <div class="kv"><span>Charged so far</span><span>$0.00 — trial</span></div>
-            </div>
-
-            <div class="rates" id="rateList"></div>
-            <p class="hint" style="margin-top:10px">Rooftop address resolution billed separately at <b id="roofRate">$0.30</b> per address, once per address rather than per pay run.</p>
-          </div>
-
-          <div class="card">
-            <p class="eyebrow">Activate</p>
-            <h3 style="font-family:var(--head);font-size:18px;font-weight:600;margin-bottom:4px">Set up your account</h3>
-            <p class="lead" style="margin-bottom:14px">Everything we need to bill you when the trial ends. No card is charged today.</p>
-
-            <form id="subForm" novalidate>
-              <div class="grid-fields" style="margin-bottom:12px">
-                <div class="field">
-                  <label for="sbLegal">Legal business name</label>
-                  <input id="sbLegal" type="text" placeholder="Acme Payroll Services, LLC" required />
-                </div>
-                <div class="field">
-                  <label for="sbContact">Billing contact</label>
-                  <input id="sbContact" type="text" placeholder="Jordan Casey" required />
-                </div>
-              </div>
-              <div class="grid-fields" style="margin-bottom:12px">
-                <div class="field">
-                  <label for="sbEmail">Billing email</label>
-                  <input id="sbEmail" type="email" placeholder="ap@acmepayroll.com" required />
-                </div>
-                <div class="field">
-                  <label for="sbEmployees">Employees you pay</label>
-                  <input id="sbEmployees" type="number" min="1" step="1" value="8000" required />
-                </div>
-              </div>
-              <div class="field" style="margin-bottom:12px">
-                <label for="sbAddress">Billing address</label>
-                <input id="sbAddress" type="text" placeholder="120 Main St, Columbus OH 43215" required />
-              </div>
-              <div class="grid-fields" style="margin-bottom:14px">
-                <div class="field">
-                  <label for="sbFrequency">Pay frequency</label>
-                  <select id="sbFrequency">
-                    <option value="weekly">Weekly</option>
-                    <option value="biweekly" selected>Biweekly</option>
-                    <option value="semimonthly">Semi-monthly</option>
-                    <option value="monthly">Monthly</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label for="sbRooftop">Rooftop resolution</label>
-                  <select id="sbRooftop">
-                    <option value="no" selected>Not needed</option>
-                    <option value="yes">Yes, include it</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="quote-line" id="sbQuote" hidden></div>
-              <button type="submit" class="btn btn-block" id="sbSubmit">Activate my account</button>
-              <p class="msg err" id="sbError" hidden></p>
-              <p class="msg ok" id="sbOk" hidden></p>
-            </form>
-
-            <div class="note-dashed" id="payNote">
-              Card capture isn't connected yet — there's no payment processor on this project. Activating
-              records your billing details and flags the account for setup; a person finishes it.
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ---------- REFERENCE ---------- -->
-      <section class="block" id="reference">
-        <div class="ref">
-          <p class="eyebrow">Reference</p>
-          <h2>POST /api/paycheck</h2>
-          <p class="lead" style="margin-top:8px;max-width:620px">
-            One endpoint. Amounts in integer cents, every tax line reporting the taxable base it was computed
-            on. The sandbox above sends exactly this.
-          </p>
-          <div class="ref-grid">
-            <div>
-              <div class="code-label" style="color:#7A93A8">Request</div>
-<pre><span class="c">// Authorization: Bearer sk_test_…</span>
-{
-  <span class="k">"checkDate"</span>: <span class="s">"2026-06-15"</span>,
-  <span class="k">"payFrequency"</span>: <span class="s">"biweekly"</span>,
-  <span class="k">"earnings"</span>: [
-    { <span class="k">"code"</span>: <span class="s">"REG"</span>, <span class="k">"category"</span>: <span class="s">"regular"</span>, <span class="k">"amount"</span>: <span class="v">300000</span> }
-  ],
-  <span class="k">"deductions"</span>: [
-    { <span class="k">"code"</span>: <span class="s">"401K"</span>, <span class="k">"category"</span>: <span class="s">"deferral_401k"</span>, <span class="k">"amount"</span>: <span class="v">24000</span> }
-  ],
-  <span class="k">"federalW4"</span>: { <span class="k">"filingStatus"</span>: <span class="s">"single"</span> },
-  <span class="k">"ytd"</span>: { <span class="k">"socialSecurity"</span>: <span class="v">0</span>, <span class="k">"medicare"</span>: <span class="v">0</span>, <span class="k">"futa"</span>: <span class="v">0</span> },
-  <span class="k">"workState"</span>: { <span class="k">"code"</span>: <span class="s">"PA"</span> }
-}</pre>
-            </div>
-            <div>
-              <div class="code-label" style="color:#7A93A8">Response · 200</div>
-<pre>{
-  <span class="k">"result"</span>: {
-    <span class="k">"grossPay"</span>: <span class="v">300000</span>,
-    <span class="k">"taxes"</span>: [
-      { <span class="k">"id"</span>: <span class="s">"US_FIT"</span>, <span class="k">"taxableWages"</span>: <span class="v">276000</span>,
-        <span class="k">"amount"</span>: <span class="v">26758</span> },
-      <span class="c">// … FICA, FUTA, state and local lines</span>
-    ],
-    <span class="k">"employeeTaxTotal"</span>: <span class="v">59128</span>,
-    <span class="k">"netPay"</span>: <span class="v">216872</span>
+    <div class="sec-rule" id="billing"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Account</p>
+    <h2>Billing</h2>
+    <div id="billingBody"><p>Sign in to see this account’s trial and usage. <a href="/signin">Sign in</a></p></div>
+  </main>
+  <aside class="docs-code">
+    <div style="display:flex;justify-content:space-between"><span class="label-mono">Example request</span><span class="mono" style="font-size:12px">POST /v1/paycheck</span></div>
+    <div class="tabs" role="tablist" style="margin-top:16px">
+      <button type="button" data-lang="curl" aria-selected="true">cURL</button>
+      <button type="button" data-lang="js">JavaScript</button>
+      <button type="button" data-lang="py">Python</button>
+      <button type="button" id="copyEx" style="margin-left:auto;border:0;font-weight:700;color:var(--color-ink)">Copy</button>
+    </div>
+    <pre class="doc-code" id="exCode"></pre>
+    <a class="btn btn-lg btn-primary btn-block" id="trySandbox" href="/sandbox?example=oh-columbus">Try it in the sandbox <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
+    <p style="color:var(--color-gray);font-size:13px;margin-top:16px">Opens the console with this request filled in.</p>
+    <div style="margin-top:32px;display:flex;justify-content:space-between;align-items:center">
+      <span class="label-mono">Response shape</span>
+      <span class="tag tag-outline">Field names only</span>
+    </div>
+    <pre class="shape">{
+  result: {
+    checkDate, grossPay,
+    pretaxDeductions, posttaxDeductions,
+    employeeTaxTotal, employerTaxTotal,
+    netPay,
+    taxes: [{ id, name, payer, jurisdiction, taxableWages, amount, detail }]
   }
 }</pre>
-            </div>
-          </div>
-          <ul class="errs">
-            <li><code>401</code> Missing, invalid, inactive or expired key.</li>
-            <li><code>400</code> Body isn't valid JSON.</li>
-            <li><code>422</code> Body parsed, but the calculation rejected it — the message names the field and why.</li>
-          </ul>
-        </div>
-      </section>
-    </div>
-  </div>
-</main>
-
-<footer class="site">
-  <p>Omnia Engine &middot; <a href="index.html">omnia.tax</a> &middot; <a href="mailto:hello@omnia.tax">hello@omnia.tax</a></p>
-</footer>
-
+    <div style="margin-top:24px;display:flex;justify-content:space-between"><span class="label-mono">Error shape</span><span class="tag tag-outline">Field names only</span></div>
+    <pre class="shape">{ error, code, requestId }
+// 422 invalid_input also sends:
+details: [ { path, message } ]</pre>
+  </aside>
+</div>
+<script src="/assets/pricing.js"></script>
+<script src="/assets/session.js"></script>
 <script>
 (function () {
-  // The session itself is an HttpOnly cookie the server sets on
-  // verification: page script never sees the token. `session` below only
-  // holds display details from /api/account.
-  var KEY_STORE = 'omnia_key';
-
-  var signinView = document.getElementById('signinView');
-  var consoleView = document.getElementById('consoleView');
-  var sectionNav = document.getElementById('sectionNav');
-  var acct = document.getElementById('acct');
-
-  var session = null;
-  var plainKey = null;
-  var qs = new URLSearchParams(location.search);
-
-  // The plaintext API key is a secret: this tab only (sessionStorage).
-  function getStored(k) { try { return JSON.parse(sessionStorage.getItem(k) || 'null'); } catch (e) { return null; } }
-  function setStored(k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-  function delStored(k) { try { sessionStorage.removeItem(k); } catch (e) {} }
-  // Older builds kept the session token and key in localStorage; clear them.
-  try { localStorage.removeItem('omnia_session'); localStorage.removeItem(KEY_STORE); } catch (e) {}
-
-  // Anything from a user or the server that lands in innerHTML goes through this.
-  function esc(v) {
-    return String(v == null ? '' : v).replace(/[&<>"']/g, function (ch) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
-    });
-  }
-
-  function authHeaders() {
-    // The session cookie rides along on same-origin requests by itself.
-    return { 'Content-Type': 'application/json' };
-  }
-
-  async function api(path, opts) {
-    var res = await fetch(path, opts || {});
-    var body = null;
-    try { body = await res.json(); } catch (e) {}
-    return { ok: res.ok, status: res.status, body: body };
-  }
-
-  // Amounts out of the engine are integer cents.
-  function fromCents(cents) {
-    var n = (cents || 0) / 100;
-    return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-  function toCents(v) { return Math.round((parseFloat(v) || 0) * 100); }
-
-  // ---------------- signup wizard ----------------
-  // Order matters and is enforced server-side too: account -> verified
-  // email -> terms agreed (with a stored signature) -> payment method ->
-  // trial. Nothing collects a payment method before the terms are on
-  // screen and ticked.
-  var pending = { email: '', name: '', company: '' };
-  var termsState = null;
-
-  function showStep(n) {
-    document.getElementById('steps').hidden = n === 0;
-    for (var i = 0; i <= 4; i++) {
-      var panel = document.querySelector('[data-panel="' + i + '"]');
-      if (panel) panel.hidden = i !== n;
-      var chip = document.querySelector('.steps li[data-step="' + i + '"]');
-      if (chip) {
-        chip.classList.toggle('current', i === n);
-        chip.classList.toggle('done', i < n);
-      }
-    }
-  }
-
-  // Estimates are plain dollars, not cents.
-  function usdWhole(n) { return '$' + Math.round(n || 0).toLocaleString('en-US'); }
-
-  // --- sign in (returning customers) ------------------------------------
-  // Same email-code check as signup; the server answers the same way
-  // whether or not the email has an account.
-  var signinMode = false;
-  document.getElementById('toSignin').addEventListener('click', function () { showStep(0); document.getElementById('siEmail').focus(); });
-  document.getElementById('toSignup').addEventListener('click', function () { signinMode = false; showStep(1); });
-  document.getElementById('signinForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
-    var err = document.getElementById('siError');
-    err.hidden = true;
-    var email = document.getElementById('siEmail').value.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      err.textContent = 'Enter the work email on your account.';
-      err.hidden = false;
-      return;
-    }
-    var res = await api('/api/signin', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email })
-    });
-    if (!res.ok) {
-      err.textContent = (res.body && res.body.error) || 'Could not send a sign-in code.';
-      err.hidden = false;
-      return;
-    }
-    signinMode = true;
-    pending = { email: email, name: '', company: '' };
-    document.getElementById('verifySent').textContent = res.body.emailConfigured
-      ? 'If ' + email + ' has an Omnia account, a 6-digit sign-in code is on its way. It expires in 15 minutes.'
-      : 'If ' + email + ' has an account, its sign-in code is printed in the server terminal (no email provider is connected yet).';
-    showStep(2);
-    document.getElementById('vCode').focus();
-  });
-
-  // --- step 1: account -------------------------------------------------
-  document.getElementById('signupForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
-    var err = document.getElementById('suError');
-    err.hidden = true;
-    var payload = {
-      name: document.getElementById('suName').value.trim(),
-      email: document.getElementById('suEmail').value.trim(),
-      company: document.getElementById('suCompany').value.trim(),
-      phone: document.getElementById('suPhone').value.trim()
-    };
-    if (!payload.name || !payload.email || !payload.company || !payload.phone) {
-      err.textContent = 'All four fields are required.';
-      err.hidden = false;
-      return;
-    }
-    var res = await api('/api/signup', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-    });
-    if (!res.ok) {
-      err.textContent = (res.body && res.body.error) || 'Could not start signup.';
-      err.hidden = false;
-      return;
-    }
-    pending = payload;
-    document.getElementById('verifySent').textContent = res.body.emailSent
-      ? 'We sent a 6-digit code to ' + payload.email + '. It expires in 15 minutes.'
-      : 'Code generated for ' + payload.email + '. No email provider is connected yet, so it is printed in the server terminal.';
-    showStep(2);
-    document.getElementById('vCode').focus();
-  });
-
-  // --- step 2: verify email -------------------------------------------
-  document.getElementById('verifyForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
-    var err = document.getElementById('vError');
-    err.hidden = true;
-    var code = document.getElementById('vCode').value.trim();
-    if (code.length !== 6) {
-      err.textContent = 'Enter the 6-digit code.';
-      err.hidden = false;
-      return;
-    }
-    var res = await api('/api/verify-email', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: pending.email, code: code })
-    });
-    if (!res.ok) {
-      err.textContent = (res.body && res.body.error) || 'Could not verify that code.';
-      err.hidden = false;
-      return;
-    }
-    session = { email: res.body.email, name: res.body.name, company: res.body.company };
-    try { sessionStorage.removeItem('omnia_pending'); } catch (x) { /* ignore */ }
-    if (signinMode) { boot(); return; }
-    document.getElementById('tLegal').value = res.body.company;
-    document.getElementById('tBillingEmail').value = res.body.email;
-    document.getElementById('tSign').placeholder = res.body.name;
-    showStep(3);
-    loadTerms();
-  });
-
-  document.getElementById('resendBtn').addEventListener('click', async function () {
-    var ok = document.getElementById('vResent');
-    await api(signinMode ? '/api/signin' : '/api/signup', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(signinMode ? { email: pending.email } : pending)
-    });
-    ok.hidden = false;
-    setTimeout(function () { ok.hidden = true; }, 3000);
-  });
-
-  // --- step 3: terms ---------------------------------------------------
-  async function loadTerms() {
-    var employees = parseInt(document.getElementById('tEmployees').value, 10) || 0;
-    var freq = document.getElementById('tFrequency').value;
-    var rooftop = document.getElementById('tRooftop').value === 'yes';
-    var res = await api('/api/terms?employees=' + employees + '&payFrequency=' + freq + '&rooftop=' + rooftop, {
-      headers: authHeaders()
-    });
-    if (!res.ok) return;
-    termsState = res.body;
-
-    var est = res.body.estimate;
-    document.getElementById('termsFigures').innerHTML =
-      '<div class="tf-row"><span>Calculations a year</span><b>' + est.callsPerYear.toLocaleString() + '</b></div>' +
-      '<div class="tf-row"><span>Free trial</span><b>' + res.body.trialDays + ' days</b></div>' +
-      '<div class="tf-row"><span>Then a committed term of</span><b>' + res.body.termMonths + ' months</b></div>' +
-      '<div class="tf-row big"><span>Estimated annual usage</span><b>' + usdWhole(est.total) + '</b></div>';
-
-    document.getElementById('termsDoc').innerHTML = res.body.clauses.map(function (c) {
-      return '<h4>' + esc(c.heading) + '</h4><p>' + esc(c.body) + '</p>';
-    }).join('');
-
-    document.getElementById('agreeText').textContent =
-      'I authorize Omnia to charge my payment method for metered usage once the ' + res.body.trialDays +
-      '-day trial ends on ' + new Date(res.body.trialEndsAt).toLocaleDateString() +
-      ', and I accept the ' + res.body.termMonths + '-month term described above.';
-  }
-  document.getElementById('recalcBtn').addEventListener('click', loadTerms);
-
-  document.getElementById('termsForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
-    var err = document.getElementById('tError');
-    err.hidden = true;
-    if (!document.getElementById('tAgree').checked) {
-      err.textContent = 'Tick the authorization box to continue.';
-      err.hidden = false;
-      return;
-    }
-    if (!termsState || !termsState.quoteId) {
-      err.textContent = 'The terms have not loaded yet. Press Recalculate and try again.';
-      err.hidden = false;
-      return;
-    }
-    var payload = {
-      agreed: true,
-      // Binds the agreement to the exact terms the server showed above.
-      quoteId: termsState.quoteId,
-      signedName: document.getElementById('tSign').value.trim(),
-      legalName: document.getElementById('tLegal').value.trim(),
-      billingEmail: document.getElementById('tBillingEmail').value.trim(),
-      address: document.getElementById('tAddress').value.trim(),
-      expectedEmployees: parseInt(document.getElementById('tEmployees').value, 10) || 0,
-      payFrequency: document.getElementById('tFrequency').value,
-      rooftop: document.getElementById('tRooftop').value === 'yes'
-    };
-    var res = await api('/api/accept-terms', {
-      method: 'POST', headers: authHeaders(), body: JSON.stringify(payload)
-    });
-    if (!res.ok) {
-      err.textContent = (res.body && res.body.error) || 'Could not record your agreement.';
-      err.hidden = false;
-      // A stale or changed quote: show the current terms before they try again.
-      if (res.body && /^quote_/.test(res.body.code || '')) loadTerms();
-      return;
-    }
-    document.getElementById('signedNote').innerHTML =
-      'Signed by <b>' + esc(payload.signedName) + '</b> for <b>' + esc(payload.legalName) + '</b> on ' +
-      new Date(res.body.acceptedAt).toLocaleString() + ' — terms v' + res.body.termsVersion + '.';
-    showStep(4);
-  });
-
-  // --- step 4: payment method -----------------------------------------
-  document.getElementById('payBtn').addEventListener('click', async function () {
-    var err = document.getElementById('payError');
-    var fallback = document.getElementById('payFallback');
-    err.hidden = true; fallback.hidden = true;
-
-    var res = await api('/api/payment-setup', { method: 'POST', headers: authHeaders() });
-
-    if (res.ok && res.body.checkoutUrl) {
-      window.location.href = res.body.checkoutUrl;
-      return;
-    }
-    if (res.status === 501) {
-      // No processor connected: the account waits here. A key needs a
-      // saved card or bank account, so there is no way around this step.
-      fallback.innerHTML =
-        '<b>Payments aren\'t switched on for this site yet.</b><br>Your account and signed terms are saved at this step. ' +
-        'Email <a href="mailto:hello@omnia.tax">hello@omnia.tax</a> and we\'ll finish your setup.';
-      fallback.hidden = false;
-      return;
-    }
-    err.textContent = (res.body && res.body.error) || 'Could not start payment setup.';
-    err.hidden = false;
-  });
-
-  // Returning from the processor's hosted Checkout page.
-  // The server confirms the checkout finished, belongs to this account
-  // and saved a card or bank account before it starts the trial.
-  var returning = qs.get('setup') === 'ok' && qs.get('session_id');
-  function payError(text) {
-    showStep(4);
-    var err = document.getElementById('payError');
-    err.textContent = text;
-    err.hidden = false;
-  }
-  async function finishCheckout() {
-    history.replaceState(null, '', location.pathname);
-    var me = await api('/api/account', { headers: authHeaders() });
-    if (!me.ok) { boot(); return; } // signed out meanwhile: sign in, then retry step 4
-    var done = await api('/api/billing/return', {
-      method: 'POST', headers: authHeaders(), body: JSON.stringify({ sessionId: qs.get('session_id') }),
-    });
-    if (done.ok) { boot(); return; }
-    await boot();
-    payError((done.body && done.body.error) || 'We couldn\'t confirm your payment method. Try again.');
-  }
-
-  // ---------------- key ----------------
-  var keyNone = document.getElementById('keyNone');
-  var keyReveal = document.getElementById('keyReveal');
-  var keyActive = document.getElementById('keyActive');
-
-  function setKeyChip() {
-    var chip = document.getElementById('keyChip');
-    chip.textContent = plainKey ? 'using ' + plainKey.slice(0, 14) + '••••' : 'no key yet';
-  }
-
-  function showRevealed(key) {
-    keyNone.hidden = true; keyActive.hidden = true; keyReveal.hidden = false;
-    document.getElementById('keyRevealText').textContent = key;
-    plainKey = key;
-    setStored(KEY_STORE, key);
-    setKeyChip();
-  }
-
-  function showActive(usage) {
-    keyNone.hidden = true; keyReveal.hidden = true; keyActive.hidden = false;
-    document.getElementById('keyMaskedText').textContent = usage.keyMasked || usage.keyPrefix + '••••';
-    var meta = document.getElementById('keyMeta');
-    meta.innerHTML = '';
-    [['Plan', usage.plan || 'evaluation'],
-     ['Issued', usage.issuedAt ? new Date(usage.issuedAt).toLocaleDateString() : '—'],
-     ['Expires', usage.expiresAt ? new Date(usage.expiresAt).toLocaleDateString() : '—']
-    ].forEach(function (r) {
-      var d = document.createElement('div');
-      d.className = 'kv';
-      d.innerHTML = '<span>' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>';
-      meta.appendChild(d);
-    });
-  }
-
-  async function issueKey() {
-    var res = await api('/api/issue-key', { method: 'POST', headers: authHeaders() });
-    var kerr = document.getElementById('keyError');
-    kerr.hidden = true;
-    if (!res.ok) {
-      kerr.textContent = (res.body && res.body.error) || 'Could not issue a key.';
-      kerr.hidden = false;
-      return;
-    }
-    showRevealed(res.body.key);
-    refreshUsage();
-    refreshBilling();
-  }
-  document.getElementById('issueKeyBtn').addEventListener('click', issueKey);
-  document.getElementById('reissueKeyBtn').addEventListener('click', function () {
-    if (confirm('Issuing a new key revokes the current one. Continue?')) issueKey();
-  });
-  document.getElementById('copyKeyBtn').addEventListener('click', function () {
-    navigator.clipboard && navigator.clipboard.writeText(document.getElementById('keyRevealText').textContent);
-    var b = document.getElementById('copyKeyBtn');
-    var t = b.textContent; b.textContent = 'Copied';
-    setTimeout(function () { b.textContent = t; }, 1400);
-  });
-
-  // ---------------- sandbox ----------------
-  async function loadStates() {
-    var res = await api('/api/states');
-    if (!res.ok || !res.body || !res.body.states) return;
-    var sel = document.getElementById('cState');
-    res.body.states.forEach(function (st) {
-      var o = document.createElement('option');
-      o.value = st.code; o.textContent = st.name;
-      sel.appendChild(o);
-    });
-    sel.value = 'PA';
-  }
-
-  function buildRequest() {
-    var body = {
-      checkDate: document.getElementById('cCheckDate').value,
-      payFrequency: document.getElementById('cFrequency').value,
-      earnings: [{ code: 'REG', category: 'regular', amount: toCents(document.getElementById('cGross').value) }],
-      deductions: [],
-      federalW4: {
-        filingStatus: document.getElementById('cFiling').value,
-        multipleJobs: false,
-        dependentCredit: toCents(document.getElementById('cDependents').value),
-        otherIncome: 0,
-        deductions: 0,
-        extraWithholding: toCents(document.getElementById('cExtra').value)
-      },
-      ytd: { socialSecurity: 0, medicare: 0, futa: 0 }
-    };
-    var k = toCents(document.getElementById('c401k').value);
-    if (k > 0) body.deductions.push({ code: '401K', category: 'deferral_401k', amount: k });
-    var s125 = toCents(document.getElementById('cSec125').value);
-    if (s125 > 0) body.deductions.push({ code: 'MEDICAL', category: 'section125', amount: s125 });
-    var st = document.getElementById('cState').value;
-    if (st) body.workState = { code: st };
-    return body;
-  }
-
-  function renderStub(reqBody, result, status) {
-    document.getElementById('resultEmpty').hidden = true;
-    document.getElementById('resultError').hidden = true;
-    document.getElementById('resultBody').hidden = false;
-
-    document.getElementById('resStatus').textContent = 'HTTP ' + status;
-    document.getElementById('resStatus').className = 'status-pill';
-    document.getElementById('resMeta').textContent =
-      result.checkDate + ' · ' + reqBody.payFrequency + ' · gross ' + fromCents(result.grossPay);
-    document.getElementById('resNet').textContent = fromCents(result.netPay);
-
-    var body = document.getElementById('stubBody');
-    body.innerHTML = '';
-
-    function row(cells, cls) {
-      var tr = document.createElement('tr');
-      if (cls) tr.className = cls;
-      tr.innerHTML = cells;
-      body.appendChild(tr);
-    }
-
-    row('<td>Gross pay</td><td class="num">—</td><td class="num">' + fromCents(result.grossPay) + '</td>');
-    if (result.pretaxDeductions) {
-      row('<td>Pre-tax deductions</td><td class="num">—</td><td class="num">-' + fromCents(result.pretaxDeductions) + '</td>');
-    }
-
-    var employee = (result.taxes || []).filter(function (t) { return t.payer === 'employee'; });
-    var employer = (result.taxes || []).filter(function (t) { return t.payer === 'employer'; });
-
-    if (employee.length) {
-      row('<td colspan="3">Employee taxes</td>', 'group');
-      employee.forEach(function (t) {
-        row('<td>' + esc(t.name) + '</td><td class="num">' + fromCents(t.taxableWages) + '</td><td class="num">' + fromCents(t.amount) + '</td>');
-        if (t.detail && /NOT MODELLED/.test(t.detail)) {
-          row('<td colspan="3" class="note">' + esc(t.detail) + '</td>');
-        }
-      });
-      row('<td>Total withheld</td><td class="num"></td><td class="num">' + fromCents(result.employeeTaxTotal) + '</td>', 'sum');
-    }
-
-    if (employer.length) {
-      row('<td colspan="3">Employer cost (not withheld)</td>', 'group');
-      employer.forEach(function (t) {
-        row('<td>' + esc(t.name) + '</td><td class="num">' + fromCents(t.taxableWages) + '</td><td class="num">' + fromCents(t.amount) + '</td>');
-      });
-      row('<td>Total employer tax</td><td class="num"></td><td class="num">' + fromCents(result.employerTaxTotal) + '</td>', 'sum');
-    }
-
-    // Lower-confidence rates or unmodelled elections: say so on the stub.
-    if (result.notices && result.notices.length) {
-      row('<td colspan="3">Check before paying</td>', 'group');
-      result.notices.forEach(function (n) {
-        row('<td colspan="3" class="note">' + esc(n.taxId) + ': ' + esc(n.note) + '</td>');
-      });
-    }
-  }
-
-  function renderError(status, bodyText) {
-    document.getElementById('resultEmpty').hidden = true;
-    document.getElementById('resultBody').hidden = true;
-    document.getElementById('resultError').hidden = false;
-    document.getElementById('errStatus').textContent = 'HTTP ' + status;
-    var parsed;
-    try { parsed = JSON.parse(bodyText); } catch (e) { parsed = null; }
-    document.getElementById('errText').textContent =
-      (parsed && parsed.error) ? parsed.error : 'The request failed.';
-    document.getElementById('errRaw').textContent = parsed ? JSON.stringify(parsed, null, 2) : bodyText;
-  }
-
-  document.getElementById('calcForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
-    var err = document.getElementById('calcError');
-    err.hidden = true;
-    if (!plainKey) {
-      err.textContent = 'Issue a key first — the sandbox sends a real authenticated request.';
-      err.hidden = false;
-      return;
-    }
-
-    var runBtn = document.getElementById('runBtn');
-    runBtn.disabled = true;
-    var reqBody = buildRequest();
-
-    document.getElementById('rawReq').textContent =
-      'POST /api/paycheck\nAuthorization: Bearer ' + plainKey.slice(0, 14) + '…\n\n' +
-      JSON.stringify(reqBody, null, 2);
-
-    var res = await fetch('/api/paycheck', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + plainKey, 'Content-Type': 'application/json' },
-      body: JSON.stringify(reqBody)
-    });
-    var text = await res.text();
-    runBtn.disabled = false;
-
-    document.getElementById('rawRes').textContent = (function () {
-      try { return JSON.stringify(JSON.parse(text), null, 2); } catch (e) { return text; }
-    })();
-
-    if (res.ok) {
-      var parsed = JSON.parse(text);
-      renderStub(reqBody, parsed.result, res.status);
+  var sample = {
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly',
+    earnings: [{ code: 'REG', category: 'regular', amount: 100000 }],
+    deductions: [],
+    federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    workState: { code: 'OH', certificate: { workCity: 'Columbus' } }
+  };
+  var lang = 'curl';
+  var url = location.origin + '/v1/paycheck';
+  function render() {
+    var body = JSON.stringify(sample, null, 2);
+    var text = '';
+    if (lang === 'curl') {
+      text = 'curl -X POST ' + url + ' \\\n  -H "Authorization: Bearer sk_test_..." \\\n  -H "Content-Type: application/json" \\\n  -d \'' + body + '\'';
+    } else if (lang === 'js') {
+      text = 'const res = await fetch("' + url + '", {\n  method: "POST",\n  headers: {\n    Authorization: "Bearer sk_test_...",\n    "Content-Type": "application/json",\n  },\n  body: JSON.stringify(' + body + '),\n});\nconst data = await res.json();';
     } else {
-      renderError(res.status, text);
+      text = 'import os, requests\n\nres = requests.post(\n    "' + url + '",\n    headers={"Authorization": f"Bearer {os.environ[\'OMNIA_API_KEY\']}"},\n    json=' + body + ',\n)\nprint(res.status_code, res.json())';
     }
-    refreshUsage();
-    refreshBilling();
+    document.getElementById('exCode').textContent = text;
+  }
+  document.querySelectorAll('.docs-code .tabs button[data-lang]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      lang = b.dataset.lang;
+      document.querySelectorAll('.docs-code .tabs button[data-lang]').forEach(function (x) { x.setAttribute('aria-selected', x === b); });
+      render();
+    });
   });
-
-  // ---------------- usage ----------------
-  function renderUsage(d) {
-    document.getElementById('statToday').textContent = d.callsToday || 0;
-    document.getElementById('statMonth').textContent = d.callsThisMonth || 0;
-    document.getElementById('statTotal').textContent = d.totalCalls || 0;
-    document.getElementById('statLast').textContent =
-      d.lastUsedAt ? new Date(d.lastUsedAt).toLocaleTimeString() : 'never';
-
-    var rows = d.recent || [];
-    var empty = document.getElementById('logEmpty');
-    var table = document.getElementById('logTable');
-    var body = document.getElementById('logBody');
-    if (!rows.length) { empty.hidden = false; table.hidden = true; return; }
-    empty.hidden = true; table.hidden = false;
-    body.innerHTML = '';
-    rows.forEach(function (r) {
-      var tr = document.createElement('tr');
-      var color = r.statusCode >= 200 && r.statusCode < 300 ? 'var(--good)' : 'var(--bad)';
-      tr.innerHTML =
-        '<td>' + new Date(r.at).toLocaleString() + '</td>' +
-        '<td style="font-family:var(--mono);color:' + color + '">' + esc(r.statusCode) + '</td>' +
-        '<td>' + esc(r.checkDate || '—') + '</td>' +
-        '<td style="color:var(--ink-3);font-size:12px">' + esc(r.error || '') + '</td>';
-      body.appendChild(tr);
-    });
-  }
-
-  async function refreshUsage() {
-    if (!session) return;
-    var res = await api('/api/usage', { headers: authHeaders() });
-    if (!res.ok) return;
-    if (res.body.hasKey && keyReveal.hidden) showActive(res.body);
-    renderUsage(res.body);
-  }
-  document.getElementById('refreshUsageBtn').addEventListener('click', refreshUsage);
-
-  // ---------------- billing ----------------
-  function usdExact(n) {
-    return '$' + (n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  function renderBilling(b) {
-    document.getElementById('trialDays').textContent = b.daysLeft != null ? b.daysLeft : '—';
-    document.getElementById('trialUntil').textContent = b.trialEndsAt
-      ? 'of your ' + b.trialDays + '-day free trial — ends ' + new Date(b.trialEndsAt).toLocaleDateString()
-      : 'issue a key to start your trial';
-
-    var pill = document.getElementById('subStatus');
-    var label = { trialing: 'Trialing', pending_payment: 'Pending setup', active: 'Active', no_key: 'No key yet' };
-    pill.textContent = label[b.status] || b.status;
-    pill.className = 'status-pill' + (b.status === 'pending_payment' ? ' bad' : '');
-
-    document.getElementById('billCalls').textContent = (b.callsSoFar || 0).toLocaleString();
-    document.getElementById('billCost').textContent = usdExact(b.costSoFar);
-    document.getElementById('roofRate').textContent = '$' + b.rooftopRate.toFixed(2);
-
-    var list = document.getElementById('rateList');
-    list.innerHTML = '';
-    var prev = 0;
-    (b.tiers || []).forEach(function (t) {
-      var upper = t.upTo;
-      var label = upper
-        ? (prev === 0 ? 'First ' + upper.toLocaleString() : (prev + 1).toLocaleString() + ' – ' + upper.toLocaleString())
-        : 'Above ' + prev.toLocaleString();
-      var isCurrent = b.callsSoFar >= prev && (upper === null || b.callsSoFar < upper);
-      var row = document.createElement('div');
-      row.className = 'rate-line' + (isCurrent ? ' current' : '');
-      row.innerHTML = '<span>' + label + ' calls/yr</span><b>$' + t.rate.toFixed(2) + '</b>';
-      list.appendChild(row);
-      prev = upper || prev;
-    });
-
-    if (!b.paymentsConfigured) {
-      document.getElementById('payNote').hidden = false;
-    }
-    if (b.subscription) {
-      var f = b.subscription;
-      document.getElementById('sbLegal').value = f.legalName;
-      document.getElementById('sbContact').value = f.billingContact;
-      document.getElementById('sbEmail').value = f.billingEmail;
-      document.getElementById('sbAddress').value = f.address;
-      document.getElementById('sbEmployees').value = f.expectedEmployees;
-      document.getElementById('sbFrequency').value = f.payFrequency;
-      document.getElementById('sbRooftop').value = f.rooftop ? 'yes' : 'no';
-      var ok = document.getElementById('sbOk');
-      ok.textContent = 'Submitted ' + new Date(f.requestedAt).toLocaleDateString() +
-        ' — estimated $' + Math.round(f.estimatedAnnual).toLocaleString() + '/yr. We\u2019ll be in touch to finish setup.';
-      ok.hidden = false;
-      document.getElementById('sbSubmit').textContent = 'Update my details';
-    }
-  }
-
-  async function refreshBilling() {
-    if (!session) return;
-    var res = await api('/api/billing', { headers: authHeaders() });
-    if (res.ok) renderBilling(res.body);
-  }
-
-  document.getElementById('subForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
-    var err = document.getElementById('sbError');
-    var ok = document.getElementById('sbOk');
-    err.hidden = true; ok.hidden = true;
-
-    var payload = {
-      legalName: document.getElementById('sbLegal').value.trim(),
-      billingContact: document.getElementById('sbContact').value.trim(),
-      billingEmail: document.getElementById('sbEmail').value.trim(),
-      address: document.getElementById('sbAddress').value.trim(),
-      expectedEmployees: parseInt(document.getElementById('sbEmployees').value, 10) || 0,
-      payFrequency: document.getElementById('sbFrequency').value,
-      rooftop: document.getElementById('sbRooftop').value === 'yes'
-    };
-
-    var res = await api('/api/subscribe', {
-      method: 'POST', headers: authHeaders(), body: JSON.stringify(payload)
-    });
-    if (!res.ok) {
-      err.textContent = (res.body && res.body.error) || 'Could not activate.';
-      err.hidden = false;
-      return;
-    }
-    var est = res.body.estimate;
-    var q = document.getElementById('sbQuote');
-    q.innerHTML = 'At ' + est.callsPerYear.toLocaleString() + ' calls a year that\u2019s <b>$' +
-      Math.round(est.total).toLocaleString() + '</b> / year — about $' + est.effectivePerCall.toFixed(3) + ' a call.';
-    q.hidden = false;
-    ok.textContent = res.body.paymentsConfigured
-      ? 'Details saved — continue to payment.'
-      : 'Details saved. Card capture isn\u2019t connected yet, so a person finishes setup from here.';
-    ok.hidden = false;
-    refreshBilling();
+  document.getElementById('copyEx').addEventListener('click', function () {
+    var t = document.getElementById('exCode').textContent;
+    if (navigator.clipboard) navigator.clipboard.writeText(t);
   });
+  render();
 
-  // ---------------- section nav highlight ----------------
-  var navLinks = [].slice.call(document.querySelectorAll('.section-nav a'));
-  window.addEventListener('scroll', function () {
-    var pos = window.scrollY + 160;
-    var current = null;
-    navLinks.forEach(function (a) {
-      var el = document.querySelector(a.getAttribute('href'));
-      if (el && el.offsetTop <= pos) current = a;
-    });
-    navLinks.forEach(function (a) { a.classList.toggle('active', a === current); });
-  }, { passive: true });
+  var cfg = window.OMNIA || {};
+  document.getElementById('rpm').textContent = String(cfg.rateLimitPerMin || 120);
+  if (cfg.tiers && cfg.tiers.length) {
+    document.getElementById('tierNote').textContent = 'Rate card from pricing.ts, per call: ' + cfg.tiers.map(function (t) {
+      var cap = t.upTo == null ? 'and above' : ('up to ' + Number(t.upTo).toLocaleString() + ' calls/year');
+      return OmniaPricing.formatRate(t.rate) + ' ' + cap;
+    }).join(' · ') + '. Rooftop address resolution is ' + OmniaPricing.formatMoney(cfg.rooftopRate) + ' each, billed separately.';
+  }
 
-  // ---------------- boot ----------------
-  document.getElementById('signOutBtn').addEventListener('click', async function () {
-    await api('/api/signout', { method: 'POST', headers: authHeaders() });
-    delStored(KEY_STORE);
-    session = null; plainKey = null;
-    location.href = location.pathname;
+  var key = Omnia.apiKey();
+  if (key && key.key) {
+    document.getElementById('navKey').textContent = Omnia.maskKey(key.key);
+    var live = key.key.indexOf('sk_live_') === 0;
+    document.getElementById('modeLabel').textContent = live ? 'Live mode' : 'Test mode';
+    if (live) document.getElementById('modeSwitch').classList.add('off');
+  }
+  document.getElementById('signOut').addEventListener('click', function () {
+    Omnia.signOut().then(function () { location.href = '/'; });
   });
-
-  async function boot() {
-    // Signed in iff the HttpOnly session cookie is still good.
-    var acctRes = await api('/api/account', { headers: authHeaders() });
-    session = acctRes.ok ? { email: acctRes.body.email, name: acctRes.body.name, company: acctRes.body.company } : null;
-    if (!session) {
-      signinView.classList.add('on');
-      consoleView.classList.remove('on');
-      sectionNav.classList.remove('on');
-      acct.classList.remove('on');
-      // Signup started on the home page: go straight to the code.
-      var handoff = null;
-      try { handoff = JSON.parse(sessionStorage.getItem('omnia_pending') || 'null'); } catch (x) { /* ignore */ }
-      if (handoff && handoff.email) {
-        pending = handoff;
-        document.getElementById('verifySent').textContent = handoff.emailSent
-          ? 'We sent a 6-digit code to ' + handoff.email + '. It expires in 15 minutes.'
-          : 'Code generated for ' + handoff.email + '. No email provider is connected yet, so it is printed in the server terminal.';
-        showStep(2);
-        return;
+  Omnia.api('/api/account', { headers: Omnia.authHeaders() }).then(function (acct) {
+    if (!acct.ok) return;
+    var session = { email: acct.body.email, name: acct.body.name, company: acct.body.company };
+    Omnia.setSession(session);
+    var name = session.company || session.name || session.email;
+    document.getElementById('acctName').textContent = name;
+    document.getElementById('avatar').textContent = (name || '?').slice(0, 1).toUpperCase();
+    document.getElementById('acctLink').href = '#billing';
+    document.getElementById('signOut').hidden = false;
+    Omnia.api('/api/billing', { headers: Omnia.authHeaders() }).then(function (res) {
+      if (!res.ok) return;
+      var b = res.body;
+      var until = b.trialEndsAt ? new Date(b.trialEndsAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      if (b.trialDays) document.getElementById('trialTag').textContent = 'Trial · ' + (b.daysLeft != null ? (b.trialDays - b.daysLeft + 1) : 1) + ' of ' + b.trialDays;
+      document.getElementById('navKeyNote').textContent = until ? ('No charges until ' + until) : 'No key yet';
+      var pm = b.paymentMethod;
+      document.getElementById('billingBody').innerHTML =
+        '<div class="kv"><span>Status</span><b>' + (b.status || '—') + '</b></div>' +
+        '<div class="kv"><span>Trial days</span><b>' + b.trialDays + '</b></div>' +
+        '<div class="kv"><span>Days left</span><b>' + (b.daysLeft == null ? '—' : b.daysLeft) + '</b></div>' +
+        '<div class="kv"><span>Trial ends</span><b>' + (until || '—') + '</b></div>' +
+        '<div class="kv"><span>Calls so far</span><b>' + b.callsSoFar + '</b></div>' +
+        '<div class="kv"><span>Cost so far</span><b>' + OmniaPricing.formatMoney(b.costSoFar || 0) + '</b></div>' +
+        '<div class="kv"><span>Payment method</span><b>' + (pm ? ((pm.brand || pm.kind) + (pm.last4 ? ' ····' + pm.last4 : '')) : 'None on file') + '</b></div>' +
+        '<div class="kv"><span>Processor</span><b>' + (b.paymentsConfigured ? 'Connected' : 'Not connected') + '</b></div>';
+    });
+    Omnia.api('/api/usage', { headers: Omnia.authHeaders() }).then(function (res) {
+      if (res.ok && res.body && res.body.hasKey) {
+        document.getElementById('navKey').textContent = res.body.keyMasked || res.body.keyPrefix;
       }
-      if (qs.get('signin') === '1') { showStep(0); return; }
-      showStep(1);
-      return;
-    }
-
-    // Signed in but not finished: drop them back at the step they owe.
-    var noPayment = acctRes.ok && acctRes.body.subscription && !acctRes.body.paymentMethod;
-    if (acctRes.ok && ((acctRes.body.stage !== 'trialing' && acctRes.body.stage !== 'active') || noPayment)) {
-      signinView.classList.add('on');
-      consoleView.classList.remove('on');
-      sectionNav.classList.remove('on');
-      acct.classList.remove('on');
-      pending = { email: acctRes.body.email, name: acctRes.body.name, company: acctRes.body.company };
-      if (acctRes.body.stage === 'payment_pending' || noPayment) {
-        var a = acctRes.body.acceptance;
-        if (a) {
-          document.getElementById('signedNote').innerHTML =
-            'Signed by <b>' + esc(a.signedName) + '</b> on ' + esc(new Date(a.acceptedAt).toLocaleString()) +
-            ' — terms v' + esc(a.termsVersion) + '.';
-        }
-        showStep(4);
-      } else {
-        document.getElementById('tLegal').value = acctRes.body.company || '';
-        document.getElementById('tBillingEmail').value = acctRes.body.email || '';
-        showStep(3);
-        loadTerms();
-      }
-      return;
-    }
-    var res = await api('/api/usage', { headers: authHeaders() });
-    if (!res.ok) {
-      // Session died between the two calls: back to sign-in (no re-boot loop).
-      delStored(KEY_STORE); session = null;
-      signinView.classList.add('on'); consoleView.classList.remove('on');
-      sectionNav.classList.remove('on'); acct.classList.remove('on');
-      showStep(0);
-      return;
-    }
-
-    signinView.classList.remove('on');
-    consoleView.classList.add('on');
-    sectionNav.classList.add('on');
-    acct.classList.add('on');
-    document.getElementById('acctName').textContent = session.name;
-    document.getElementById('acctCompany').textContent = session.company;
-
-    plainKey = getStored(KEY_STORE);
-    setKeyChip();
-    if (res.body.hasKey) showActive(res.body);
-    renderUsage(res.body);
-    loadStates();
-    refreshBilling();
-  }
-
-  if (returning) finishCheckout();
-  else boot().then(function () {
-    if (qs.get('setup') === 'cancelled') payError('Checkout was cancelled, so no payment method was saved. Add one to get your API key.');
+    });
   });
+
+  var links = document.querySelectorAll('.docs-nav a[href^="#"]');
+  function mark() {
+    var id = location.hash || '#getting-started';
+    links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === id); });
+  }
+  window.addEventListener('hashchange', mark);
+  mark();
 })();
 </script>
 </body>

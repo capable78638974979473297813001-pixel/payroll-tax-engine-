@@ -139,13 +139,14 @@ Health check for your load balancer or uptime monitor: `GET /api/health`
 ## 4. Verify end-to-end (test mode)
 
 1. `GET /api/health` → `200`, `"status":"ok"`.
-2. Sign up in the console (`/docs.html`), verify email, accept terms.
-3. Click **Add card or bank account** → you should land on a Stripe **Checkout**
-   for a **subscription** with a 14-day trial. Pay with a Stripe
+2. Sign up at `/signup`, verify the email code, and accept terms on `/signup/business`.
+3. On `/signup/payment`, start the trial. You should land on a Stripe **Checkout**
+   for a **subscription** with a 14-day trial (or a setup-mode Checkout if no
+   metered price is configured). Pay with a Stripe
    [test card](https://stripe.com/docs/testing) (`4242 4242 4242 4242`).
-4. On return, the console finalizes via `/api/billing/return`; the account
-   shows *trialing* and a live key.
-5. Make a few `POST /api/paycheck` calls with the key. In Stripe → Billing →
+4. On return to `/signup/payment`, the page finalizes via `/api/billing/return`,
+   issues the key, and opens `/signup/key`. The account shows *trialing*.
+5. Make a few `POST /v1/paycheck` calls from `/sandbox` with the key. In Stripe → Billing →
    Meters, confirm meter events are arriving for the customer, and that
    `node scripts/meter-queue.ts` shows `0 pending`.
 6. Simulate a failed payment (Stripe → send a test `invoice.payment_failed`

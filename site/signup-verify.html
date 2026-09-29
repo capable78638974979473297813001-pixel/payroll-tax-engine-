@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Check your email — Omnia.tax</title>
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/tokens.css" />
+<link rel="stylesheet" href="/assets/site.css" />
+<!--OMNIA_CONFIG-->
+</head>
+<body>
+<div class="onboard">
+  <aside class="step-panel">
+    <div class="step-panel-top">
+      <a class="logo" href="/" aria-label="Omnia.tax"><img src="/logo/logo-on-blue.svg" alt="" /></a>
+      <span class="label-mono" style="color:var(--color-on-cobalt-muted);font-weight:400">Onboarding</span>
+    </div>
+    <div class="step-num-row">
+      <div class="step-num">02</div>
+      <div class="step-of"><div class="eyebrow">Step</div><div class="of">OF 05</div></div>
+    </div>
+    <div class="step-rule"></div>
+    <div class="sheet">
+      <div class="micro">Sample message</div>
+      <div class="sheet-row"><span>From</span><b>Omnia.tax</b></div>
+      <div class="sheet-row"><span>To</span><b id="sheetTo">you@company.com</b></div>
+      <div class="sheet-row"><span>Subject</span><b>Your verification code</b></div>
+      <p style="margin:16px 0 0">Use this code to verify your email:</p>
+      <div class="code-sample" aria-hidden="true">••••••</div>
+      <p style="font-size:13px;color:var(--color-gray);margin:0">The code expires in <span id="ttlMin">15</span> minutes. If you didn’t ask for it, you can ignore this email. The digits above are a sample, not your code.</p>
+    </div>
+  </aside>
+  <main class="form-col">
+    <div class="form-top"><span class="label-mono">Step 02 of 05</span><span class="who" id="who"></span></div>
+    <ol class="progress">
+      <li class="done"><div class="bar"></div><div class="lbl"><span class="chk" aria-hidden="true"></span> Account</div></li>
+      <li class="current"><div class="bar"></div><div class="lbl"><span class="n">02</span> Verify</div></li>
+      <li><div class="bar"></div><div class="lbl"><span class="n">03</span> Business</div></li>
+      <li><div class="bar"></div><div class="lbl"><span class="n">04</span> Payment</div></li>
+      <li><div class="bar"></div><div class="lbl"><span class="n">05</span> API key</div></li>
+    </ol>
+    <h1>Check your email.</h1>
+    <p class="lead" id="lead1"></p>
+    <p class="lead" style="margin-top:0">Enter it below to confirm this address.</p>
+    <form id="form" class="form-stack">
+      <div>
+        <label class="field-label" for="c0">Verification code</label>
+        <div class="codes" id="codes">
+          <input class="code" id="c0" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1" />
+          <input class="code" id="c1" inputmode="numeric" maxlength="1" aria-label="Digit 2" />
+          <input class="code" id="c2" inputmode="numeric" maxlength="1" aria-label="Digit 3" />
+          <span class="gap" aria-hidden="true"><i></i></span>
+          <input class="code" id="c3" inputmode="numeric" maxlength="1" aria-label="Digit 4" />
+          <input class="code" id="c4" inputmode="numeric" maxlength="1" aria-label="Digit 5" />
+          <input class="code" id="c5" inputmode="numeric" maxlength="1" aria-label="Digit 6" />
+        </div>
+        <p class="field-error" id="codeError" hidden></p>
+      </div>
+      <button class="btn btn-lg btn-primary btn-block" id="submit" type="submit">Verify <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
+    </form>
+    <div class="resend-row" id="resendRow">
+      <button type="button" class="btn btn-text" id="resend" disabled>Resend code</button>
+      <span id="resendIn">in <span class="countdown" id="count">0:30</span></span>
+    </div>
+    <p class="form-foot">Wrong email? <a class="btn btn-text" id="change" href="/signup">Change it</a></p>
+  </main>
+</div>
+<script src="/assets/pricing.js"></script>
+<script src="/assets/session.js"></script>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var signin = params.get('mode') === 'signin';
+  var pending = Omnia.pending() || {};
+  var email = pending.email || params.get('email') || '';
+  if (!email) { location.href = signin ? '/signin' : '/signup'; return; }
+  document.getElementById('who').textContent = email;
+  document.getElementById('sheetTo').textContent = email;
+  document.getElementById('change').href = '/signup?email=' + encodeURIComponent(email);
+  var ttl = (window.OMNIA && window.OMNIA.codeTtlSec) || 900;
+  document.getElementById('ttlMin').textContent = String(Math.round(ttl / 60));
+  var lead = document.getElementById('lead1');
+  if (signin) {
+    lead.innerHTML = pending.emailConfigured
+      ? 'If <b style="color:var(--color-ink)">' + escapeHtml(email) + '</b> has an Omnia.tax account, we sent a 6-digit code.'
+      : 'If <b style="color:var(--color-ink)">' + escapeHtml(email) + '</b> has an account, its sign-in code is printed in the server terminal (no email provider is connected yet).';
+  } else if (pending.emailSent) {
+    lead.innerHTML = 'We sent a 6-digit code to <b style="color:var(--color-ink)">' + escapeHtml(email) + '</b>.';
+  } else {
+    lead.innerHTML = 'No email provider is connected, so the 6-digit code for <b style="color:var(--color-ink)">' + escapeHtml(email) + '</b> is printed in the server terminal.';
+  }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+
+  var inputs = Array.prototype.slice.call(document.querySelectorAll('.code'));
+  function value() { return inputs.map(function (i) { return i.value; }).join(''); }
+  function paint() {
+    inputs.forEach(function (i) { i.classList.toggle('filled', !!i.value); });
+  }
+  inputs.forEach(function (input, idx) {
+    input.addEventListener('input', function () {
+      input.value = input.value.replace(/\D/g, '').slice(-1);
+      paint();
+      if (input.value && inputs[idx + 1]) inputs[idx + 1].focus();
+    });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Backspace' && !input.value && inputs[idx - 1]) {
+        inputs[idx - 1].focus();
+        inputs[idx - 1].value = '';
+        paint();
+      }
+    });
+    input.addEventListener('paste', function (e) {
+      var text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+      if (!text) return;
+      e.preventDefault();
+      text.split('').forEach(function (ch, i) { if (inputs[i]) inputs[i].value = ch; });
+      paint();
+      (inputs[Math.min(text.length, 5)] || inputs[5]).focus();
+    });
+  });
+
+  var cooldown = (window.OMNIA && window.OMNIA.codeCooldownSec) || 30;
+  var remain = cooldown;
+  if (pending.sentAt) remain = Math.max(0, cooldown - Math.floor((Date.now() - pending.sentAt) / 1000));
+  var resend = document.getElementById('resend');
+  var count = document.getElementById('count');
+  var resendIn = document.getElementById('resendIn');
+  function tick() {
+    if (remain <= 0) {
+      resend.disabled = false;
+      resendIn.hidden = true;
+      return;
+    }
+    resend.disabled = true;
+    resendIn.hidden = false;
+    var m = Math.floor(remain / 60);
+    var s = remain % 60;
+    count.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+    remain -= 1;
+    setTimeout(tick, 1000);
+  }
+  tick();
+
+  function showError(msg) {
+    document.getElementById('codes').classList.add('error');
+    var el = document.getElementById('codeError');
+    el.textContent = msg;
+    el.hidden = false;
+  }
+
+  document.getElementById('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    document.getElementById('codes').classList.remove('error');
+    document.getElementById('codeError').hidden = true;
+    var code = value();
+    if (code.length !== 6) { showError('Enter the 6-digit code.'); return; }
+    var btn = document.getElementById('submit');
+    Omnia.setLoading(btn, true);
+    Omnia.api('/api/verify-email', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, code: code })
+    }).then(function (res) {
+      Omnia.setLoading(btn, false);
+      if (!res.ok) {
+        showError((res.body && res.body.error) || 'Could not verify that code.');
+        return;
+      }
+      Omnia.setSession({
+        token: res.body.sessionToken,
+        email: res.body.email,
+        name: res.body.name,
+        company: res.body.company
+      });
+      location.href = signin ? '/docs' : '/signup/business';
+    }).catch(function () {
+      Omnia.setLoading(btn, false);
+      Omnia.toast('Could not reach the server. Try again.', 'error');
+    });
+  });
+
+  resend.addEventListener('click', function () {
+    var path = signin ? '/api/signin' : '/api/signup';
+    var body = signin ? { email: email } : { name: pending.name, email: email, company: pending.company, phone: pending.phone };
+    resend.disabled = true;
+    Omnia.api(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (res) {
+        if (!res.ok) {
+          Omnia.toast((res.body && res.body.error) || 'Could not send the code. Try again in a minute.', 'error');
+          resend.disabled = false;
+          return;
+        }
+        pending.sentAt = Date.now();
+        if (!signin) pending.emailSent = !!(res.body && res.body.emailSent);
+        Omnia.setPending(pending);
+        remain = cooldown;
+        tick();
+        Omnia.toast('A new code is on its way.');
+      });
+  });
+})();
+</script>
+</body>
+</html>

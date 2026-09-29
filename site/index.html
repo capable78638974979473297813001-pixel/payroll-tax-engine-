@@ -3,453 +3,305 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Omnia · Payroll tax API</title>
-<meta name="description" content="Omnia calculates federal, state and local payroll withholding in one API call, for all 50 states and DC, with the taxable wages and source behind every line." />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<style>
-  /* Type scale: 48 / 30 / 17 / 16 / 14. Two weights: 400 and 600.
-     Mono only for code and money. One accent colour, used for links. */
-  :root {
-    color-scheme: light;
-    --bg: #FBFAF5;
-    --ink: #14140F;
-    --ink-2: #4A4A42;
-    --ink-3: #75756A;
-    --rule: #E4E1D6;
-    --accent: #2F5D3A;
-    --sans: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-    --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, Menlo, monospace;
-  }
-  * { box-sizing: border-box; }
-  [hidden] { display: none !important; }
-  html { scroll-behavior: smooth; scroll-padding-top: 72px; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
-  a { color: inherit; }
-  p { margin: 0; }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
-  @media (max-width: 600px) { .wrap { padding: 0 16px; } }
-
-  h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.02em; }
-  h1 { font-size: clamp(34px, 5vw, 48px); line-height: 1.1; }
-  h2 { font-size: clamp(24px, 3vw, 30px); line-height: 1.2; }
-  h3 { font-size: 17px; line-height: 1.4; letter-spacing: -0.01em; }
-  .lead { font-size: 17px; color: var(--ink-2); max-width: 600px; }
-  .small { font-size: 14px; color: var(--ink-3); }
-  .num { font-family: var(--mono); font-size: 14px; }
-  .link { color: var(--accent); font-weight: 600; text-decoration: none; }
-  .link:hover { text-decoration: underline; }
-
-  .btn { display: inline-flex; align-items: center; height: 42px; padding: 0 18px; border-radius: 6px; border: 0;
-    background: var(--ink); color: #fff; font: 600 15px var(--sans); text-decoration: none; cursor: pointer; white-space: nowrap; }
-  .btn:hover { background: #33332B; }
-  .btn.sm { height: 36px; padding: 0 14px; font-size: 14px; }
-
-  /* header */
-  .head { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--rule); }
-  .head-in { display: flex; align-items: center; gap: 32px; height: 64px; }
-  .logo { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 18px; letter-spacing: -0.02em; text-decoration: none; }
-  .nav { display: flex; gap: 26px; }
-  .nav a, .signin { font-size: 15px; color: var(--ink-2); text-decoration: none; }
-  .nav a:hover, .signin:hover { color: var(--ink); }
-  .head-right { margin-left: auto; display: flex; align-items: center; gap: 20px; }
-  .burger { display: none; margin-left: auto; background: none; border: 0; padding: 8px; cursor: pointer; }
-  .burger span { display: block; width: 18px; height: 1.5px; background: var(--ink); margin: 4px 0; }
-  @media (max-width: 820px) {
-    .burger { display: block; }
-    .nav, .head-right { display: none; }
-    .head.open .head-in { flex-wrap: wrap; height: auto; padding: 14px 0 18px; }
-    .head.open .nav { display: flex; order: 3; width: 100%; flex-direction: column; gap: 14px; margin-top: 6px; }
-    .head.open .head-right { display: flex; order: 4; width: 100%; margin: 10px 0 0; }
-  }
-
-  section { padding: 96px 0; }
-  @media (max-width: 700px) { section { padding: 64px 0; } }
-  .sec-head { max-width: 620px; margin-bottom: 40px; }
-  .sec-head .lead { margin-top: 12px; }
-
-  /* hero */
-  .hero { padding: 80px 0 72px; }
-  .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr); gap: 72px; align-items: start; }
-  @media (max-width: 940px) { .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 48px; } }
-  .hero .lead { margin: 20px 0 32px; }
-  .hero-actions { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
-  .hero .small { margin-top: 20px; max-width: 460px; }
-
-  /* example paystub: a plain ruled table, no box */
-  .stub { width: 100%; border-collapse: collapse; font-size: 15px; }
-  .stub caption { text-align: left; font-size: 14px; color: var(--ink-3); padding-bottom: 12px; }
-  .stub td { padding: 9px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
-  .stub td:last-child { text-align: right; font-family: var(--mono); font-size: 14px; white-space: nowrap; }
-  .stub td span { display: block; font-size: 13px; color: var(--ink-3); }
-  .stub tr.net td { border-bottom: 0; padding-top: 14px; font-weight: 600; }
-  .stub tr.net td:last-child { font-size: 16px; }
-
-  .facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-top: 80px; }
-  .fact b { display: block; font-size: 17px; font-weight: 600; }
-  .fact span { font-size: 14px; color: var(--ink-3); }
-  @media (max-width: 760px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-
-  .cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 64px; }
-  @media (max-width: 760px) { .cols { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
-  .cols h3 { margin-bottom: 6px; }
-  .cols p, .cols li { color: var(--ink-2); }
-  .cols ul { margin: 10px 0 0; padding-left: 18px; }
-  .cols li { margin: 5px 0; }
-
-  /* coverage: plain text grid, local states in the accent colour */
-  .states { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); row-gap: 10px; font: 14px var(--mono); color: var(--ink-3); }
-  .states .l { color: var(--accent); font-weight: 500; }
-  @media (max-width: 860px) { .states { grid-template-columns: repeat(9, minmax(0, 1fr)); } }
-  @media (max-width: 480px) { .states { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
-  .states-note { height: 56px; }
-
-  /* developers */
-  .dev { display: grid; grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr); gap: 64px; align-items: start; }
-  @media (max-width: 940px) { .dev { grid-template-columns: minmax(0, 1fr); gap: 36px; } }
-  .dev .lead { margin: 12px 0 20px; }
-  .dev-links { display: flex; gap: 24px; }
-  pre { margin: 0; padding: 20px; overflow-x: auto; background: #16160F; color: #D8D6CB; border-radius: 8px; font: 12.5px/1.7 var(--mono); }
-  pre .c { color: #85836F; } pre .k { color: #A9C6A2; } pre .s { color: #E3C08D; } pre .hi { color: #F0A58F; }
-
-  /* pricing */
-  .pricing { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; }
-  @media (max-width: 860px) { .pricing { grid-template-columns: minmax(0, 1fr); gap: 48px; } }
-  .rates { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 12px; }
-  .rates td { padding: 10px 0; border-bottom: 1px solid var(--rule); }
-  .rates td:last-child { text-align: right; font-family: var(--mono); font-size: 14px; }
-  .terms { margin: 20px 0 0; padding-left: 18px; color: var(--ink-2); font-size: 15px; }
-  .terms li { margin: 5px 0; }
-  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-  label { display: block; font-size: 14px; color: var(--ink-2); margin-bottom: 6px; }
-  input, select { width: 100%; height: 42px; padding: 0 12px; border: 1px solid #D6D3C6; border-radius: 6px; background: #fff; font: 15px var(--sans); color: var(--ink); }
-  input:focus, select:focus { outline: 2px solid #A8C2A5; outline-offset: 0; border-color: var(--accent); }
-  .est { margin-top: 24px; }
-  .est-total { display: flex; align-items: baseline; justify-content: space-between; margin-top: 4px; }
-  .est-total b { font: 500 28px var(--mono); letter-spacing: -0.02em; }
-  .send { display: flex; gap: 8px; margin-top: 24px; }
-  .send input { height: 36px; font-size: 14px; }
-  .msg { font-size: 14px; margin-top: 10px; }
-  .msg.err { color: #B23A24; }
-  .msg.ok { color: var(--accent); }
-
-  footer { border-top: 1px solid var(--rule); padding: 40px 0; font-size: 14px; color: var(--ink-3); }
-  .foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px 32px; }
-  .foot nav { display: flex; flex-wrap: wrap; gap: 8px 22px; }
-  .foot a { color: var(--ink-3); text-decoration: none; }
-  .foot a:hover { color: var(--ink); }
-  .foot p { margin-top: 16px; flex-basis: 100%; }
-</style>
+<title>Omnia.tax — Payroll tax calculation API</title>
+<meta name="description" content="One API call returns every tax line on a paycheck — federal, state, and local. Pay per paycheck, with no contract, no minimums, and no sales call." />
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/tokens.css" />
+<link rel="stylesheet" href="/assets/site.css" />
+<!--OMNIA_CONFIG-->
 </head>
-<body>
-
-<header class="head" id="head">
-  <div class="wrap head-in">
-    <a class="logo" href="/" aria-label="Omnia home">
-      <svg width="26" height="26" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <circle cx="20" cy="20" r="15.4" stroke="#14161A" stroke-width="3.4"/>
-        <path d="M12.4 22.6 20 15.2l7.6 7.4" stroke="#2E6B55" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="20" cy="25.4" r="2.5" fill="#9A5B2C"/>
-      </svg>
-      Omnia
-    </a>
-    <nav class="nav" aria-label="Main">
-      <a href="#product">Product</a>
-      <a href="#coverage">Coverage</a>
-      <a href="#pricing">Pricing</a>
-      <a href="/reference">Docs</a>
-    </nav>
-    <div class="head-right">
-      <a class="signin" href="/docs?signin=1">Sign in</a>
-      <a class="btn sm" href="/docs">Get started</a>
-    </div>
-    <button class="burger" id="burger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+<body class="page-landing">
+<header class="nav">
+  <a class="logo" href="/" aria-label="Omnia.tax"><img src="/logo/logo.svg" alt="" /></a>
+  <nav class="nav-links" aria-label="Primary">
+    <a href="#product">Product</a>
+    <a href="#coverage">Coverage</a>
+    <a href="#pricing">Pricing</a>
+    <a href="/docs">Docs</a>
+  </nav>
+  <div class="nav-right">
+    <a class="signin" href="/signin">Sign in</a>
+    <a class="btn btn-md btn-secondary" href="/docs">Start building</a>
+    <a class="btn btn-md btn-primary" href="/signup">Get a demo <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
   </div>
 </header>
 
-<main>
-  <section class="hero">
-    <div class="wrap">
-      <div class="hero-grid">
-        <div>
-          <h1>Payroll tax calculation for every state and local jurisdiction.</h1>
-          <p class="lead">
-            One API call returns federal, state and local withholding for a paycheck, with the taxable wages
-            behind each line and the official source of every rate.
-          </p>
-          <div class="hero-actions">
-            <a class="btn" href="/docs">Get started</a>
-            <a class="link" href="mailto:hello@omnia.tax?subject=Omnia%20demo">Talk to sales</a>
-          </div>
-          <p class="small">14 days free. An API key needs a card or bank account on file; nothing is charged during the evaluation.</p>
-        </div>
-
-        <table class="stub">
-          <caption>Biweekly paycheck in Ohio, calculated by the API</caption>
-          <tr><td>Gross pay</td><td>$3,000.00</td></tr>
-          <tr><td>401(k) deferral</td><td>−$240.00</td></tr>
-          <tr><td>Federal income tax<span>on $2,760.00</span></td><td>−$267.58</td></tr>
-          <tr><td>Social Security<span>on $3,000.00</span></td><td>−$186.00</td></tr>
-          <tr><td>Medicare<span>on $3,000.00</span></td><td>−$43.50</td></tr>
-          <tr><td>Ohio income tax<span>on $2,760.00</span></td><td>−$70.35</td></tr>
-          <tr class="net"><td>Net pay</td><td>$2,192.57</td></tr>
-        </table>
-      </div>
-
-      <div class="facts">
-        <div class="fact"><b>50 states and DC</b><span>State withholding everywhere</span></div>
-        <div class="fact"><b>6 states</b><span>With city, county and school district taxes</span></div>
-        <div class="fact"><b>Checked daily</b><span>Against official rate sources</span></div>
-        <div class="fact"><b>From $0.04</b><span>Per calculation at volume</span></div>
-      </div>
+<section class="hero" id="product">
+  <div class="hero-guides" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="wrap hero-inner">
+    <div class="hero-eyebrow">
+      <span class="sq" aria-hidden="true"></span>
+      <span class="eyebrow">Payroll tax calculation API</span>
+      <span class="mono" style="margin-left:auto;color:var(--color-gray);font-size:12px">POST /v1/paycheck</span>
     </div>
-  </section>
-
-  <section id="product">
-    <div class="wrap">
-      <div class="sec-head">
-        <h2>What the API does</h2>
-        <p class="lead">Send the facts of a paycheck: earnings, deductions, the W-4, and where the employee works and lives. Every tax comes back calculated.</p>
+    <h1>Accurate payroll tax, priced for growing payroll teams.</h1>
+    <div class="hero-row">
+      <p class="hero-lead">One API call returns every tax line on a paycheck — federal, state, and local. Pay per paycheck, with no contract, no minimums, and no sales call.</p>
+      <div class="hero-actions">
+        <a class="btn btn-lg btn-primary" href="/signup">Get a demo <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
+        <a class="btn btn-lg btn-secondary" href="/docs">Start building</a>
+        <a class="btn btn-text" href="#pricing">See pricing</a>
       </div>
-      <div class="cols">
-        <div>
-          <h3>Gross to net in one call</h3>
-          <p>Federal income tax by the Publication 15-T method, Social Security, Medicare, FUTA, state withholding and local taxes, in integer cents.</p>
-        </div>
-        <div>
-          <h3>Taxable wages for each tax</h3>
-          <p>Pre-tax deductions reduce each tax's wage base by that tax's own rules. A 401(k) deferral lowers federal income tax wages but not Social Security or Medicare wages.</p>
-        </div>
-        <div>
-          <h3>Rules chosen by check date</h3>
-          <p>Each calculation uses the rates in force on the check date, so a correction for a past period uses that period's rules.</p>
-        </div>
-        <div>
-          <h3>Sourced rates, checked daily</h3>
-          <p>Every rate records the official document it came from and when it was verified, and those sources are checked each morning. A missing rule returns an error, never a silent zero.</p>
-        </div>
-      </div>
+      <div class="hero-rule"></div>
+      <p class="hero-price"><b data-rate>$0.12</b> per paycheck · billed only for calls you make</p>
     </div>
-  </section>
-
-  <section id="coverage">
-    <div class="wrap">
-      <div class="sec-head">
-        <h2>Coverage</h2>
-        <p class="lead">State withholding in all 50 states and DC. Local taxes in the six states shown in green.</p>
-      </div>
-      <div class="states" aria-label="Jurisdictions covered">
-        <span class="l">AL</span><span>AK</span><span>AZ</span><span>AR</span><span>CA</span><span>CO</span><span>CT</span><span>DC</span><span>DE</span><span>FL</span><span>GA</span><span>HI</span><span>ID</span>
-        <span>IL</span><span class="l">IN</span><span>IA</span><span>KS</span><span class="l">KY</span><span>LA</span><span>ME</span><span>MD</span><span>MA</span><span class="l">MI</span><span>MN</span><span>MS</span><span>MO</span>
-        <span>MT</span><span>NE</span><span>NV</span><span>NH</span><span>NJ</span><span>NM</span><span>NY</span><span>NC</span><span>ND</span><span class="l">OH</span><span>OK</span><span>OR</span><span class="l">PA</span>
-        <span>RI</span><span>SC</span><span>SD</span><span>TN</span><span>TX</span><span>UT</span><span>VT</span><span>VA</span><span>WA</span><span>WV</span><span>WI</span><span>WY</span>
-      </div>
-      <div class="states-note"></div>
-      <div class="cols">
-        <div>
-          <h3>Federal and state</h3>
-          <ul>
-            <li>Federal income tax, all Publication 15-T schedules</li>
-            <li>Social Security, Medicare and Additional Medicare</li>
-            <li>FUTA</li>
-            <li>State withholding, including reciprocity and non-resident rules</li>
-          </ul>
-        </div>
-        <div>
-          <h3>Local</h3>
-          <ul>
-            <li>Ohio city, JEDD and school district income taxes</li>
-            <li>Pennsylvania Earned Income Tax and Local Services Tax</li>
-            <li>Kentucky county and city occupational taxes</li>
-            <li>Michigan city income taxes</li>
-            <li>Alabama city occupational taxes and Indiana county income taxes</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="developers">
-    <div class="wrap dev">
-      <div>
-        <h2>One JSON endpoint</h2>
-        <p class="lead">Post a paycheck with your API key. The response lists every tax with its taxable wages and amount.</p>
-        <div class="dev-links">
-          <a class="link" href="/reference">API reference</a>
-          <a class="link" href="/console">API console</a>
-        </div>
-      </div>
-<pre><span class="c">POST /v1/paycheck
-Authorization: Bearer sk_test_…</span>
-
-{
-  <span class="k">"checkDate"</span>: <span class="s">"2026-06-15"</span>,
-  <span class="k">"payFrequency"</span>: <span class="s">"biweekly"</span>,
-  <span class="k">"earnings"</span>:   [{ <span class="k">"code"</span>: <span class="s">"REG"</span>,  <span class="k">"category"</span>: <span class="s">"regular"</span>,       <span class="k">"amount"</span>: 300000 }],
-  <span class="k">"deductions"</span>: [{ <span class="k">"code"</span>: <span class="s">"401K"</span>, <span class="k">"category"</span>: <span class="s">"deferral_401k"</span>, <span class="k">"amount"</span>: 24000 }],
-  <span class="k">"federalW4"</span>:  { <span class="k">"filingStatus"</span>: <span class="s">"single"</span>, <span class="k">"multipleJobs"</span>: false,
-                 <span class="k">"dependentCredit"</span>: 0, <span class="k">"otherIncome"</span>: 0,
-                 <span class="k">"deductions"</span>: 0, <span class="k">"extraWithholding"</span>: 0 },
-  <span class="k">"ytd"</span>:        { <span class="k">"socialSecurity"</span>: 0, <span class="k">"medicare"</span>: 0, <span class="k">"futa"</span>: 0 },
-  <span class="k">"workState"</span>:  { <span class="k">"code"</span>: <span class="s">"OH"</span> }
-}
-
-<span class="c">200 OK</span>
-
-{ <span class="k">"result"</span>: {
-  <span class="k">"grossPay"</span>: 300000, <span class="k">"pretaxDeductions"</span>: 24000,
-  <span class="k">"taxes"</span>: [
-    { <span class="k">"id"</span>: <span class="s">"US_FIT"</span>,    <span class="k">"taxableWages"</span>: <span class="hi">276000</span>, <span class="k">"amount"</span>: 26758 },
-    { <span class="k">"id"</span>: <span class="s">"US_SS_EE"</span>,  <span class="k">"taxableWages"</span>: 300000, <span class="k">"amount"</span>: 18600 },
-    { <span class="k">"id"</span>: <span class="s">"US_MED_EE"</span>, <span class="k">"taxableWages"</span>: 300000, <span class="k">"amount"</span>:  4350 },
-    { <span class="k">"id"</span>: <span class="s">"OH_SIT"</span>,    <span class="k">"taxableWages"</span>: <span class="hi">276000</span>, <span class="k">"amount"</span>:  7035 }
-  ],
-  <span class="k">"employeeTaxTotal"</span>: 56743,
-  <span class="k">"netPay"</span>: 219257
-} }</pre>
-    </div>
-  </section>
-
-  <section id="pricing">
-    <div class="wrap pricing">
-      <div>
-        <h2>Pricing</h2>
-        <p class="lead" style="margin-top:12px">Per calculation, with every jurisdiction included. The rate drops as yearly volume grows.</p>
-        <table class="rates">
-          <tr><td>First 25,000 a year</td><td>$0.12</td></tr>
-          <tr><td>25,001 to 200,000</td><td>$0.09</td></tr>
-          <tr><td>200,001 to 1,000,000</td><td>$0.06</td></tr>
-          <tr><td>Above 1,000,000</td><td>$0.04</td></tr>
-        </table>
-        <ul class="terms">
-          <li>First 14 days free</li>
-          <li>Then a 12-month term, billed monthly for usage</li>
-          <li>Card or US bank account required for an API key</li>
-        </ul>
-      </div>
-
-      <div id="estimator">
-        <h3>Estimate your yearly cost</h3>
-        <div class="fields">
-          <div>
-            <label for="estEmployees">Employees paid</label>
-            <input type="number" id="estEmployees" min="1" step="1" value="8000" />
-          </div>
-          <div>
-            <label for="estFrequency">Pay frequency</label>
-            <select id="estFrequency">
-              <option value="weekly">Weekly</option>
-              <option value="biweekly" selected>Biweekly</option>
-              <option value="semimonthly">Semi-monthly</option>
-              <option value="monthly">Monthly</option>
-            </select>
-          </div>
-        </div>
-        <div class="est">
-          <p class="small" id="estCallsNote"></p>
-          <div class="est-total"><span>Estimated per year</span><b id="estTotal">$0</b></div>
-          <p class="small" id="estEffective"></p>
-        </div>
-        <div class="send">
-          <input type="email" id="estEmail" placeholder="Work email" aria-label="Work email" />
-          <button type="button" class="btn sm" id="estSendBtn">Email estimate</button>
-        </div>
-        <p class="msg" id="estMsg" hidden></p>
-      </div>
-    </div>
-  </section>
-</main>
-
-<footer>
-  <div class="wrap foot">
-    <nav aria-label="Footer">
-      <a href="/reference">API reference</a>
-      <a href="/console">API console</a>
-      <a href="mailto:hello@omnia.tax">Contact</a>
-      <a href="/terms">Terms</a>
-      <a href="/privacy">Privacy</a>
-      <a href="/acceptable-use">Acceptable use</a>
-      <a href="/disclaimer">Disclaimer</a>
-    </nav>
-    <span>© 2026 Omnia</span>
-    <p>Omnia calculates withholding. It is not tax advice; filing and deposits remain the employer's responsibility.</p>
   </div>
+</section>
+
+<section class="band-cobalt fig" aria-label="Figure 1">
+  <div class="wrap">
+    <div class="fig-head">
+      <span class="eyebrow">Fig. 1</span>
+      <span class="eyebrow">One paycheck, one call, every tax line</span>
+      <span class="grow"><span class="tag tag-solid">Example · amounts omitted</span></span>
+    </div>
+    <div class="bracket" style="margin-top:28px">
+      <div class="ticks" aria-hidden="true"></div>
+      <span class="cap">GROSS PAY</span><span class="val">—</span>
+    </div>
+    <div class="cols" style="margin-top:20px">
+      <div class="bracket" style="grid-column:1 / span 6">
+        <div class="ticks" aria-hidden="true"></div>
+        <span class="cap">EMPLOYEE TAXES</span><span class="val">—</span>
+      </div>
+      <div class="bracket" style="grid-column:7 / span 6">
+        <div class="ticks" aria-hidden="true"></div>
+        <span class="cap">NET PAY</span><span class="val">—</span>
+      </div>
+    </div>
+    <div class="tile-row">
+      <div class="cell"><div class="tax-tile"><span class="idx">01</span><span class="dash">—</span></div><div class="tax-name">Federal income tax</div><div class="tax-level">FEDERAL</div></div>
+      <div class="cell"><div class="tax-tile"><span class="idx">02</span><span class="dash">—</span></div><div class="tax-name">Social Security</div><div class="tax-level">FEDERAL</div></div>
+      <div class="cell"><div class="tax-tile"><span class="idx">03</span><span class="dash">—</span></div><div class="tax-name">Medicare</div><div class="tax-level">FEDERAL</div></div>
+      <div class="cell"><div class="tax-tile"><span class="idx">04</span><span class="dash">—</span></div><div class="tax-name">State income tax (OH)</div><div class="tax-level">STATE</div></div>
+      <div class="cell"><div class="tax-tile"><span class="idx">05</span><span class="dash">—</span></div><div class="tax-name">City tax (Columbus)</div><div class="tax-level">CITY</div></div>
+      <div class="cell"><div class="tax-tile"><span class="idx">06</span><span class="dash">—</span></div><div class="tax-name">School district tax</div><div class="tax-level">SCHOOL DIST.</div></div>
+      <div class="net-col">
+        <div class="net-tile"><span class="idx">07</span><span class="name">Net pay</span><span class="dash">—</span></div>
+        <div class="net-caption"><p>What lands in the employee’s account.</p><div class="micro">RESULT.NETPAY</div></div>
+      </div>
+    </div>
+    <p class="fig-note">Schematic, not to scale. Each tax line carries id, name, payer, jurisdiction, taxableWages, amount, and detail. Employer-paid taxes come back in the same response.</p>
+  </div>
+</section>
+
+<section class="section" id="pricing">
+  <div class="wrap">
+    <div class="shead">
+      <div class="rule"></div>
+      <div class="sidx">01</div>
+      <div class="slabel eyebrow">Price</div>
+      <div class="sright">ONE LINE ITEM</div>
+      <h2 class="statement">No quote request. No pricing call.<span class="muted">Here it is.</span></h2>
+    </div>
+    <div class="figure-price" data-rate>$0.12</div>
+    <p class="per">per paycheck <span>— one calculation, one charge.</span></p>
+    <div class="terms-grid">
+      <div class="term"><div class="k"><b>01</b>Contract</div><p class="v">None</p></div>
+      <div class="term"><div class="k"><b>02</b>Minimums</div><p class="v">None</p></div>
+      <div class="term"><div class="k"><b>03</b>Setup fee</div><p class="v">None</p></div>
+      <div class="term"><div class="k"><b>04</b>Per-state or per-jurisdiction tiers</div><p class="v">None</p></div>
+      <div class="term"><div class="k"><b>05</b>Sales call</div><p class="v">Not needed</p></div>
+      <div class="term"><div class="k"><b>06</b>Billed for</div><p class="v">Only calls you make</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="coverage">
+  <div class="wrap">
+    <div class="shead">
+      <div class="rule"></div>
+      <div class="sidx">02</div>
+      <div class="slabel eyebrow">Coverage</div>
+      <div class="sright">FEDERAL · STATE · LOCAL</div>
+      <h2 class="statement" style="max-width:980px">Federal, state, and local — down to the city, county, school district, and transit district.</h2>
+    </div>
+    <div class="cols" style="margin-top:40px;align-items:start">
+      <div style="grid-column:1 / span 4">
+        <div class="cov-figure"><span class="n">50</span><span class="dc">+DC</span></div>
+        <p class="cov-cap">All 50 states and the District of Columbia, plus federal.</p>
+      </div>
+      <div style="grid-column:6 / span 7">
+        <div class="local-head"><span class="label-mono">Local taxes</span><span class="mono" style="color:var(--color-gray);font-size:12px">NAMED, NOT COUNTED</span></div>
+        <div class="local-grid">
+          <div><div class="code">OH</div><div class="name">Ohio</div></div>
+          <div><div class="code">PA</div><div class="name">Pennsylvania</div></div>
+          <div><div class="code">MI</div><div class="name">Michigan</div></div>
+          <div><div class="code">IN</div><div class="name">Indiana</div></div>
+          <div><div class="code">KY</div><div class="name">Kentucky</div></div>
+          <div><div class="code">AL</div><div class="name">Alabama</div></div>
+          <div><div class="code">NY</div><div class="name">New York City</div></div>
+          <div><div class="code">NY</div><div class="name">Yonkers</div></div>
+          <div><div class="code">OR</div><div class="name">Oregon transit &amp;&nbsp;Metro</div></div>
+        </div>
+        <p class="footnote"><b>Not on this list?</b> You get an explicit error or a “not modelled” line. See 03.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band-ink guess">
+  <div class="wrap">
+    <div class="shead dark">
+      <div class="rule"></div>
+      <div class="sidx">03</div>
+      <div class="slabel eyebrow" style="color:#fff">No guessing</div>
+      <div class="sright">EXPLICIT, ALWAYS</div>
+    </div>
+    <div class="cols" style="margin-top:32px">
+      <div style="grid-column:1 / span 7">
+        <h2><span style="display:block">Never a</span><span style="display:block">silent <span class="zero">$0</span>.</span></h2>
+        <p class="guess-body">If a rule or code is missing, the API returns an explicit error or a “not modelled” line. It never fills the gap with a quiet zero, so a missing tax can’t hide inside a clean-looking paycheck.</p>
+      </div>
+      <div style="grid-column:8 / span 5">
+        <div class="excerpt">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span class="label-mono">A · A not-modelled line</span>
+            <span class="tag tag-outline" style="color:#fff">Illustrative</span>
+          </div>
+          <pre>{
+  <span class="s">"name"</span>: <span class="s">"IN County Income Tax"</span>,
+  <span class="s">"amount"</span>: 0,
+  <span class="s">"detail"</span>: <span class="s">"NOT MODELLED — no county specified. Do not treat as zero-tax."</span>
+}</pre>
+        </div>
+        <div class="excerpt">
+          <span class="label-mono">B · Or an explicit error</span>
+          <pre>{ <span class="s">"error"</span>, <span class="s">"code"</span>, <span class="s">"requestId"</span> }</pre>
+          <p style="color:var(--color-on-ink-muted);font-size:13px">Every error has the same shape. <a href="/docs#errors" style="color:#fff">See the Errors table in the docs.</a></p>
+        </div>
+        <div class="never"><b>NEVER THIS</b><s>"amount": 0</s></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="developers">
+  <div class="wrap">
+    <div class="shead">
+      <div class="rule"></div>
+      <div class="sidx">04</div>
+      <div class="slabel eyebrow">Developers</div>
+      <div class="sright">POST /V1/PAYCHECK</div>
+      <h2 class="statement">Your first paycheck in one request.</h2>
+    </div>
+    <p class="lead" style="margin:16px 0 32px;color:var(--color-gray);font-size:18px;max-width:640px">Send the paycheck as JSON. Get back every tax line in the same response.</p>
+    <div class="cols">
+      <div class="facts" style="grid-column:1 / span 3">
+        <div class="fact"><span class="k">ENDPOINT</span><span class="v">POST /v1/paycheck</span></div>
+        <div class="fact"><span class="k">AUTH</span><span class="v">Bearer secret key</span></div>
+        <div class="fact"><span class="k">BODY</span><span class="v">application/json</span></div>
+        <div class="fact"><span class="k">AMOUNTS</span><span class="v">Integer cents</span></div>
+      </div>
+      <div class="codepanel" style="grid-column:4 / span 6">
+        <div class="hd"><span>REQUEST</span><span style="color:var(--color-on-ink-muted)">cURL</span></div>
+        <pre id="landingCurl"><span class="c-cmd">curl</span> <span class="c-pun">-X POST</span> <span class="c-str" id="landingHost">https://api.example</span>/v1/paycheck \
+  <span class="c-pun">-H</span> <span class="c-str">"Authorization: Bearer sk_live_..."</span> \
+  <span class="c-pun">-H</span> <span class="c-str">"Content-Type: application/json"</span> \
+  <span class="c-pun">-d</span> <span class="c-str">'{
+  "checkDate": "2026-08-15",
+  "payFrequency": "biweekly",
+  "earnings": [{ "code": "REG", "amount": </span><span class="u-amt c-num">100000</span><span class="c-str"> }]
+}'</span></pre>
+      </div>
+      <div class="respanel" style="grid-column:10 / span 3">
+        <div class="hd"><span>RESPONSE</span><span>200</span></div>
+        <div class="label-mono" style="padding:12px 16px 0;color:var(--color-gray)">Field names</div>
+        <div class="tree">result
+  <span class="muted">›</span> checkDate
+  <span class="muted">›</span> grossPay
+  <span class="muted">›</span> pretaxDeductions
+  <span class="muted">›</span> posttaxDeductions
+  <span class="muted">›</span> employeeTaxTotal
+  <span class="muted">›</span> employerTaxTotal
+  <span class="muted">›</span> netPay
+  <span class="muted">›</span> taxes[]
+      <span class="muted">›</span> id · name · payer
+      <span class="muted">›</span> jurisdiction
+      <span class="muted">›</span> taxableWages
+      <span class="muted">›</span> amount · detail</div>
+      </div>
+    </div>
+    <div class="cents-call">
+      <span class="sq" aria-hidden="true"></span>
+      <div><p>Amounts in integer cents.</p><div class="mono">100000 = $1,000.00</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="shead">
+      <div class="rule"></div>
+      <div class="sidx">05</div>
+      <div class="slabel eyebrow">The fine print</div>
+      <div class="sright">INCLUDED IN THE PRICE</div>
+      <h2 class="statement">The fine print is short,<span class="muted">and it’s all in your favor.</span></h2>
+    </div>
+    <div style="margin-top:48px">
+      <div class="fp-row"><div class="num">01</div><h3>One call, every tax line</h3><p>Federal, state, and local lines come back together in a single response. No stitching calls together.</p></div>
+      <div class="fp-row"><div class="num">02</div><h3>Integer cents</h3><p>Every amount is a whole number of cents. No floating-point rounding, ever.</p></div>
+      <div class="fp-row"><div class="num">03</div><h3>Effective-dated rates</h3><p>A check dated before a rate change uses the rate that was in effect on that date.</p></div>
+      <div class="fp-row"><div class="num">04</div><h3>Garnishments &amp; minimum wage</h3><p>Wage garnishments and minimum-wage checks are included in the same calculation.</p></div>
+      <div class="fp-row"><div class="num">05</div><h3>No third-party dependencies</h3><p>The calculation runs with no third-party dependencies.</p></div>
+      <div class="fp-end"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="shead">
+      <div class="rule"></div>
+      <div class="sidx">06</div>
+      <div class="slabel eyebrow">Questions</div>
+    </div>
+    <div class="cols" style="margin-top:32px">
+      <div style="grid-column:1 / span 3">
+        <h2 class="statement" style="grid-column:auto;margin:0 0 24px">Plain answers.</h2>
+        <p style="color:var(--color-gray)">Everything else is in the docs.</p>
+        <a class="btn btn-text" href="/docs">Read the docs</a>
+      </div>
+      <div class="faq" style="grid-column:4 / span 9">
+        <div class="faq-item"><div class="qrow"><span class="qn">Q1</span><div><h3>How much does it cost?</h3><p><span data-rate>$0.12</span> per paycheck calculated. No contract, no minimums, no setup fee, and no per-state or per-jurisdiction tiers.</p></div></div></div>
+        <div class="faq-item"><div class="qrow"><span class="qn">Q2</span><div><h3>What does it cover?</h3><p>Federal, all 50 states and DC, and local taxes down to the city, county, school district, and transit district, including Ohio, Pennsylvania, Michigan, Indiana, Kentucky, Alabama, New York City, Yonkers, and Oregon transit and Metro.</p></div></div></div>
+        <div class="faq-item"><div class="qrow"><span class="qn">Q3</span><div><h3>What if a jurisdiction isn’t covered?</h3><p>You get an explicit error or a “not modelled” line in the response. Never a silent $0.</p></div></div></div>
+        <div class="faq-item"><div class="qrow"><span class="qn">Q4</span><div><h3>Do I need to talk to sales?</h3><p>No. Read the docs and start building.</p></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band-cobalt cta">
+  <div class="cta-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="wrap cols" style="align-items:end">
+    <h2 style="grid-column:1 / span 8">Run your first paycheck today.</h2>
+    <div class="cta-side" style="grid-column:9 / span 4">
+      <div class="eyebrow">Per paycheck</div>
+      <div class="big" data-rate>$0.12</div>
+      <p>No contract. No minimums. No sales call.</p>
+      <div class="cta-actions">
+        <a class="btn btn-lg btn-white" href="/signup">Get a demo <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
+        <a class="btn btn-lg btn-outline-white" href="/docs">Start building</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <a class="logo logo-sm" href="/" aria-label="Omnia.tax"><img src="/logo/logo.svg" alt="" /></a>
+  <span class="tagline">Payroll tax calculation API</span>
+  <nav aria-label="Footer">
+    <a href="mailto:hello@omnia.tax">Contact</a>
+    <a href="#coverage">Coverage</a>
+    <a href="#pricing">Pricing</a>
+    <a href="/docs">Docs</a>
+  </nav>
 </footer>
-
+<script src="/assets/pricing.js"></script>
 <script>
-  (function () {
-    var head = document.getElementById('head');
-    var burger = document.getElementById('burger');
-    burger.addEventListener('click', function () {
-      burger.setAttribute('aria-expanded', String(head.classList.toggle('open')));
-    });
-    head.querySelectorAll('.nav a').forEach(function (a) {
-      a.addEventListener('click', function () { head.classList.remove('open'); burger.setAttribute('aria-expanded', 'false'); });
-    });
-  })();
-
-  // Price estimator. A client-side preview; POST /api/estimate recomputes it
-  // from site/lib/pricing.ts. Keep TIERS in sync with that file.
-  (function () {
-    var TIERS = [
-      { upTo: 25000, rate: 0.12 },
-      { upTo: 200000, rate: 0.09 },
-      { upTo: 1000000, rate: 0.06 },
-      { upTo: Infinity, rate: 0.04 }
-    ];
-    var PERIODS = { weekly: 52, biweekly: 26, semimonthly: 24, monthly: 12 };
-    var employeesInput = document.getElementById('estEmployees');
-    var frequencySel = document.getElementById('estFrequency');
-
-    function costForCalls(calls) {
-      var remaining = Math.max(0, calls), prev = 0, total = 0;
-      for (var i = 0; i < TIERS.length; i++) {
-        var band = Math.min(remaining, TIERS[i].upTo - prev);
-        if (band > 0) { total += band * TIERS[i].rate; remaining -= band; }
-        prev = TIERS[i].upTo;
-        if (remaining <= 0) break;
-      }
-      return total;
-    }
-    function money(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
-    function compute() {
-      var employees = Math.max(0, parseInt(employeesInput.value, 10) || 0);
-      var periods = PERIODS[frequencySel.value] || 26;
-      var calls = employees * periods;
-      return { employees: employees, periods: periods, calls: calls, total: costForCalls(calls) };
-    }
-    function render() {
-      var r = compute();
-      document.getElementById('estCallsNote').textContent =
-        r.employees.toLocaleString() + ' employees × ' + r.periods + ' pay periods = ' + r.calls.toLocaleString() + ' calculations';
-      document.getElementById('estTotal').textContent = money(r.total);
-      document.getElementById('estEffective').textContent = r.calls ? 'About $' + (r.total / r.calls).toFixed(3) + ' per calculation' : '';
-    }
-    employeesInput.addEventListener('input', render);
-    frequencySel.addEventListener('change', render);
-
-    document.getElementById('estSendBtn').addEventListener('click', function () {
-      var msgEl = document.getElementById('estMsg');
-      var email = document.getElementById('estEmail').value.trim();
-      function show(text, kind) { msgEl.textContent = text; msgEl.className = 'msg ' + kind; msgEl.hidden = false; }
-      msgEl.hidden = true;
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { show('Enter a valid work email.', 'err'); return; }
-      var r = compute();
-      fetch('/api/estimate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, employees: r.employees, payFrequency: frequencySel.value, rooftop: false })
-      })
-        .then(function (res) { return res.json().then(function (b) { return { ok: res.ok, body: b }; }); })
-        .then(function (res) {
-          if (!res.ok) { show((res.body && res.body.error) || 'Could not send that estimate.', 'err'); return; }
-          show('Sent to ' + email + ': ' + money(res.body.total) + ' a year for ' + res.body.callsPerYear.toLocaleString() + ' calculations.', 'ok');
-        })
-        .catch(function () { show('Could not reach the server. Try again.', 'err'); });
-    });
-    render();
-  })();
+  var host = document.getElementById('landingHost');
+  if (host) host.textContent = location.origin;
 </script>
 </body>
 </html>

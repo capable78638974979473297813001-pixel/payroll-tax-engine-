@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Your API key — Omnia.tax</title>
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/tokens.css" />
+<link rel="stylesheet" href="/assets/site.css" />
+<!--OMNIA_CONFIG-->
+</head>
+<body>
+<iframe class="key-back" src="/docs" title="Docs, dimmed" tabindex="-1" aria-hidden="true"></iframe>
+<div class="key-dim"></div>
+<div class="key-modal" role="dialog" aria-modal="true" aria-labelledby="keyTitle" id="dialog">
+  <header>
+    <div style="display:flex;align-items:center">
+      <span class="key-check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="#1F3BFF" stroke-width="2"/></svg></span>
+      <span class="eyebrow">Key created</span>
+    </div>
+    <span class="mono" style="font-size:11px;color:var(--color-on-cobalt-muted)">STEP 05 OF 05</span>
+  </header>
+  <div class="body">
+    <h1 id="keyTitle">Your API key is ready.</h1>
+    <p style="color:var(--color-gray);margin:0 0 16px">Use it to call the API from your server. It’s a test key, so build freely.</p>
+    <div class="label-mono" style="color:var(--color-gray)">Secret key · <span id="modeLabel">Test mode</span></div>
+    <div class="key-line">
+      <div class="val"><span id="keyText"></span><button type="button" class="reveal" id="reveal">Reveal</button></div>
+      <button type="button" class="btn btn-ink" id="copy" style="width:120px;height:56px">Copy</button>
+    </div>
+    <div class="warn-ink" style="margin-top:24px">
+      <span class="bang" aria-hidden="true"></span>
+      <span style="max-width:360px">This is the only time we’ll show the full key. Store it somewhere safe.</span>
+    </div>
+    <div class="trial-badge"><i></i><span id="trialBadge">Trial</span></div>
+    <div style="height:1px;background:var(--color-hairline);margin:24px 0"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px">
+      <span style="color:var(--color-gray);font-size:14px">Manage keys any time in your account.</span>
+      <a class="btn btn-lg btn-primary" id="docs" href="/docs">Go to the docs <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
+    </div>
+    <p id="missing" hidden style="color:var(--color-error)">This key was already shown. Issue a new one from your account to see a full key again.</p>
+  </div>
+</div>
+<script src="/assets/pricing.js"></script>
+<script src="/assets/session.js"></script>
+<script>
+(function () {
+  var stored = Omnia.apiKey();
+  var full = stored && stored.key;
+  var revealed = false;
+  var keyText = document.getElementById('keyText');
+  if (!full) {
+    document.getElementById('missing').hidden = false;
+    keyText.textContent = 'sk_test_…';
+    document.getElementById('reveal').disabled = true;
+    document.getElementById('copy').disabled = true;
+  } else {
+    var live = full.indexOf('sk_live_') === 0;
+    document.getElementById('modeLabel').textContent = live ? 'Live mode' : 'Test mode';
+    function paint() { keyText.textContent = revealed ? full : Omnia.maskKey(full); }
+    paint();
+    document.getElementById('reveal').addEventListener('click', function () {
+      revealed = !revealed;
+      this.textContent = revealed ? 'Hide' : 'Reveal';
+      paint();
+    });
+    document.getElementById('copy').addEventListener('click', function () {
+      var done = function () { Omnia.toast('Key copied to clipboard.'); };
+      if (navigator.clipboard) navigator.clipboard.writeText(full).then(done, done);
+      else done();
+    });
+  }
+  Omnia.api('/api/billing', { headers: Omnia.authHeaders() }).then(function (res) {
+    if (!res.ok || !res.body) return;
+    var b = res.body;
+    var days = b.trialDays || (window.OMNIA && window.OMNIA.trialDays) || 14;
+    var day = 1;
+    if (b.daysLeft != null) day = Math.max(1, days - b.daysLeft + (b.daysLeft === days ? 0 : 0));
+    if (b.daysLeft != null) day = Math.min(days, Math.max(1, days - b.daysLeft));
+    var until = b.trialEndsAt ? new Date(b.trialEndsAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+    document.getElementById('trialBadge').textContent = 'Trial · Day ' + day + ' of ' + days + (until ? ' · no charges until ' + until : '');
+  });
+  var dialog = document.getElementById('dialog');
+  var focusables = function () {
+    return Array.prototype.slice.call(dialog.querySelectorAll('a,button,input')).filter(function (el) { return !el.disabled; });
+  };
+  dialog.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { e.preventDefault(); return; }
+    if (e.key !== 'Tab') return;
+    var list = focusables();
+    if (!list.length) return;
+    var first = list[0], last = list[list.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+  document.getElementById('docs').focus();
+})();
+</script>
+</body>
+</html>
