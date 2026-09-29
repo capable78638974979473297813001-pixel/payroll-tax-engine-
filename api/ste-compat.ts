@@ -36,6 +36,7 @@
 import { readFileSync } from 'node:fs';
 import { calculatePaycheck } from '../src/calculate.ts';
 import {
+  kyLouisvilleMetro,
   hasMICityRuleset,
   hasOHMunicipalityRuleset,
   hasOHSchoolDistrictRuleset,
@@ -260,6 +261,14 @@ function buildCatalog(checkDate: string): { entries: UniqueTaxIdEntry[]; byId: M
 
   const kyJurisdictions = [...(hasKYOccupationalRuleset(checkDate) ? allKYJurisdictions(checkDate) : [])].sort((a, b) => a.name.localeCompare(b.name));
   kyJurisdictions.forEach((j) => add('KY', 'city', seqFor('KY', 'city', j.name), j.name, 'workCity', 'either', j.name));
+  // Every city inside Louisville/Jefferson County Metro owes Metro's tax
+  // even when it levies none of its own, so each gets an id too.
+  if (hasKYOccupationalRuleset(checkDate)) {
+    const listed = new Set(kyJurisdictions.map((j) => j.name.toLowerCase()));
+    for (const c of [...kyLouisvilleMetro(checkDate).cities].sort((a, b) => a.localeCompare(b))) {
+      if (!listed.has(c.toLowerCase())) add('KY', 'city', seqFor('KY', 'city', c), c, 'workCity', 'either', c);
+    }
+  }
 
   // Pennsylvania already publishes its own stable 6-digit PSD code for
   // every one of its 2,627 EIT/LST jurisdictions — reused verbatim as the

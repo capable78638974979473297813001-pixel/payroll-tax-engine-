@@ -72,19 +72,20 @@ describe('data-quality notices on the paycheck result', () => {
 describe('New Hampshire UI new-employer rate', () => {
   const nh = (checkDate: string, employer?: PaycheckInput['employer']) =>
     calculatePaycheck({ ...base('NH'), checkDate, ...(employer ? { employer } : {}) });
-  test('confirmed through Q2 2026: no notice', () => {
-    const r = nh('2026-06-15');
+  test('confirmed through Q3 2026 (NHES WebTax notice): no notice', () => {
+    assert.equal(nh('2026-06-15').notices, undefined);
+    const r = nh('2026-09-25');
     assert.equal(r.taxes.find((t) => t.id === 'NH_SUI_ER')?.amount, 4250); // $2,500 x 1.7%
     assert.equal(r.notices, undefined);
   });
-  test('after 2026-06-30 the rate is still used but flagged until NHES publishes Q3', () => {
-    const r = nh('2026-08-14');
+  test('after 2026-09-30 the rate is still used but flagged until NHES publishes Q4', () => {
+    const r = nh('2026-10-09');
     assert.equal(r.taxes.find((t) => t.id === 'NH_SUI_ER')?.amount, 4250);
     assert.equal(r.notices?.[0].taxId, 'NH_SUI_ER');
     assert.equal(r.notices?.[0].tier, 'inferred');
   });
   test("an employer's own assigned rate needs no notice", () => {
-    const r = nh('2026-08-14', { stateUnemploymentRate: { NH: 0.012 } } as PaycheckInput['employer']);
+    const r = nh('2026-10-09', { stateUnemploymentRate: { NH: 0.012 } } as PaycheckInput['employer']);
     assert.equal(r.notices, undefined);
   });
 });

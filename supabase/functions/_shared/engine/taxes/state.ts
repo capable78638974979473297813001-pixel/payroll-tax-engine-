@@ -33,6 +33,7 @@ import {
   hasPALocalRuleset,
   hasStateRuleset,
   kyJurisdictionRuleset,
+  kyLouisvilleMetro,
   miCityRuleset,
   hasOHJEDDRuleset,
   ohJEDDExemptPretax,
@@ -5346,10 +5347,57 @@ function kentuckyLocalTax(
   const countyEntry = workCountyName
     ? kyJurisdictionRuleset(workCountyName, input.checkDate)
     : undefined;
-  if (!cityEntry && !countyEntry) return null;
 
   const periodWages = ctx.taxableWagesFor([]);
   const residenceCityName = typeof cert.residenceCity === 'string' ? cert.residenceCity : undefined;
+
+  // Louisville/Jefferson County Metro: work anywhere in the county owes
+  // Metro's tax, and a city inside it (Jeffersontown, Lyndon, ...) adds its
+  // own on top with no credit -- KRS 68.197's credit is only for counties
+  // of 30,000-300,000 people. Residents of anywhere in the county pay
+  // Metro's resident rate.
+  const metro = kyLouisvilleMetro(input.checkDate);
+  const same = (a: string | undefined, b: string) => a !== undefined && a.trim().toLowerCase() === b.toLowerCase();
+  const isJefferson = (county: unknown) =>
+    typeof county === 'string' && /^jefferson( county)?$/i.test(county.trim());
+  const metroCity = metro.cities.find((c) => same(workCityName, c));
+  if (same(workCityName, 'Louisville') || metroCity || isJefferson(workCountyName)) {
+    const resident =
+      same(residenceCityName, 'Louisville') ||
+      metro.cities.some((c) => same(residenceCityName, c)) ||
+      isJefferson(cert.residenceCounty);
+    const metroRate = resident ? metro.residentRate : metro.nonresidentRate;
+    const metroTax = applyRate(periodWages, metroRate);
+    const ownCity = metroCity && cityEntry && cityEntry.wageRateDecimal !== null ? cityEntry : undefined;
+    const cityWages = ownCity
+      ? ownCity.capAtSSWageBase
+        ? underCap(
+            periodWages,
+            input.ytd.localIncomeTax?.[`KY_LOCAL_${ownCity.name}`] ?? 0,
+            dollars(federalRuleset(input.checkDate).socialSecurity.wageBase),
+          )
+        : periodWages
+      : 0;
+    const cityTax = ownCity ? applyRate(cityWages, ownCity.wageRateDecimal!) : 0;
+    return {
+      id: 'KY_LOCAL',
+      name: 'Kentucky Local Occupational Tax',
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: periodWages,
+      amount: metroTax + cityTax,
+      detail:
+        `${fmt(metroTax)} to Louisville/Jefferson County Metro @ ${resident ? 'resident' : 'nonresident'} ${(metroRate * 100).toFixed(2)}%` +
+        (ownCity
+          ? ` + ${fmt(cityTax)} to ${ownCity.name} @ ${(ownCity.wageRateDecimal! * 100).toFixed(2)}% (a Jefferson County city's own tax stacks on Metro's; no KRS 68.197 credit)`
+          : metroCity
+            ? ` (${metroCity} levies no wage tax of its own on file)`
+            : ''),
+      ...(ownCity ? kyDataQuality([ownCity]) : {}),
+    };
+  }
+
+  if (!cityEntry && !countyEntry) return null;
 
   const rateFor = (entry: KYJurisdictionEntry): { rate: number; note: string } => {
     if (entry.wageRateDecimal !== null) {
@@ -5959,7 +6007,7 @@ function ohioWithholding(
     detail:
       `${fmt(taxableWages)} less ${fmt(exemptionAmount)} exemptions (${exemptions} × $${table.exemptionPerPeriod}) ` +
       `= ${fmt(netWages)} net @ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.floor))}, base ${fmt(dollars(bracket.base))}` +
-      (usePriorTable ? ` (pre-2026-08-01 table)` : ''),
+      (usePriorTable ? ` (pre-${dating!.thresholdDate} table)` : ''),
   };
 }
 
@@ -7457,7 +7505,7 @@ function utahWithholding(
       `${fmt(periodWages)} @ ${(table.rate * 100).toFixed(2)}% = ${fmt(line2)} gross tax; base allowance ` +
       `${fmt(line3)} less ${fmt(line5)} phase-out (${(table.phaseOutRate * 100).toFixed(1)}% of ${fmt(line4)} over ` +
       `$${phaseOutThresholdDollars}) = ${fmt(line6)} net allowance (${status}); withholding = ${fmt(line2)} - ${fmt(line6)} ` +
-      `(${table === cfg.fromJune2026 ? 'post' : 'pre'}-2026-06-01 table)`,
+      `(${table === cfg.fromJune2026 ? 'post' : 'pre'}-${cfg.effectiveDateOfNewTable} table)`,
   };
 }
 
@@ -9378,7 +9426,7 @@ function georgiaWithholding(
       `(${higherDeduction ? 'MFJ, one spouse working' : 'Single/HoH/MFS/MFJ-both-working'}) ` +
       `less ${fmt(dependentAllowance)} (${dependents} dependents) = ${fmt(taxableIncome)} taxable ` +
       `@ ${(table.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear} ` +
-      `(${table === cfg.fromMay11_2026 ? 'post' : 'pre'}-2026-05-11 table)`,
+      `(${table === cfg.fromMay11_2026 ? 'post' : 'pre'}-${cfg.effectiveDateOfNewTable} table)`,
   };
 }
 

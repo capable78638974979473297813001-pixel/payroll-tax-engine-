@@ -10,13 +10,14 @@ rules, so each year has its own files: `data/federal/<year>.json`,
 | Year | Federal | States | Local registries |
 |---|---|---|---|
 | 2026 | yes | all 50 + DC | all (PA, OH, MI, KY, AL, IN, ...) |
-| 2025 | yes | AK, FL, NH, NV, SD, TN, TX, WA, WY | none needed for these nine; Seattle's payroll expense tax is in WA-2025.json |
+| 2025 | yes | AK, AZ, FL, GA, IL, MI, NH, NV, SD, TN, TX, WA, WY | MI cities (MI-cities-2025.json); Seattle's payroll expense tax is in WA-2025.json |
 
-The nine 2025 states are the ones with no tax on wages, so a 2025 file only
-needs their unemployment, paid-leave, WA Cares and Seattle figures. Those
-were taken from the U.S. Department of Labor's *Significant Provisions of
+The nine no-wage-tax states' 2025 files only need their unemployment,
+paid-leave, WA Cares and Seattle figures. Those were taken from the U.S. Department of Labor's *Significant Provisions of
 State UI Laws, January 2025* and each agency's own 2025 notices; each file
-lists its sources.
+lists its sources. AZ, GA, IL and MI come from each revenue department's
+2025 withholding booklet (GA's rate drops from 5.39% to 5.19% for checks
+from 1 July 2025, per its June 2025 Employer's Tax Guide).
 
 The 2025 federal file comes from IRS Publication 15-T (2025), SSA's $176,100
 wage base, IRS Notice 2024-80 (deferral limits) and RRB Program Letter

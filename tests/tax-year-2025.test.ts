@@ -25,8 +25,28 @@ const pay = (checkDate: string, state: string, residence?: string): PaycheckInpu
 const amount = (r: ReturnType<typeof calculatePaycheck>, id: string) => r.taxes.find((t) => t.id === id)?.amount;
 
 describe('tax year 2025', () => {
-  test('covers federal and exactly the nine no-wage-tax states', () => {
-    assert.deepEqual(statesWithRuleset('2025-06-13').sort(), ['AK', 'FL', 'NH', 'NV', 'SD', 'TN', 'TX', 'WA', 'WY']);
+  test('covers federal and the states with a 2025 file', () => {
+    const covered = statesWithRuleset('2025-06-13');
+    for (const st of ['AK', 'FL', 'NH', 'NV', 'SD', 'TN', 'TX', 'WA', 'WY', 'AZ', 'GA', 'IL', 'MI']) assert.ok(covered.includes(st), st);
+  });
+
+  test("Illinois 2025: IL-700-T's own example ($800 weekly, 2 + 2 allowances) withholds $32.27", () => {
+    const r = calculatePaycheck({ ...pay('2025-06-13', 'IL'), payFrequency: 'weekly', earnings: [{ code: 'REG', category: 'regular', amount: 80000 }],
+      workState: { code: 'IL', certificate: { basicAllowances: 2, additionalAllowances: 2 } } as PaycheckInput['workState'] });
+    assert.equal(amount(r, 'IL_SIT'), 3227);
+  });
+
+  test('Georgia 2025 switches from 5.39% to 5.19% for checks from 1 July 2025', () => {
+    const ga = (checkDate: string) => amount(calculatePaycheck({ ...pay(checkDate, 'GA'), payFrequency: 'semimonthly', earnings: [{ code: 'REG', category: 'regular', amount: 147083 }],
+      workState: { code: 'GA', certificate: { filingStatus: 'C', dependents: 1 } } as PaycheckInput['workState'] }), 'GA_SIT');
+    assert.equal(ga('2025-06-13'), 4334);
+    assert.equal(ga('2025-08-15'), 4174);
+  });
+
+  test('Michigan 2025: 4.25% after $5,800 per exemption', () => {
+    // 3,000 - 5,800/26 = 2,776.92 x 4.25%
+    const r = calculatePaycheck({ ...pay('2025-06-13', 'MI'), workState: { code: 'MI', certificate: { allowances: 1 } } as PaycheckInput['workState'] });
+    assert.equal(amount(r, 'MI_SIT'), 11802);
   });
 
   test('federal income tax uses the 2025 tables ($3,000 biweekly single: $337.46)', () => {

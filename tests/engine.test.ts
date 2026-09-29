@@ -1906,7 +1906,7 @@ describe('Kentucky', () => {
       assert.equal(amountOf(r, 'KY_LOCAL'), dollars(15.0));
     });
 
-    test('West Buechel: real wage rate (1.5%) confirmed via a city audit document, separate from its scraped Gross Receipts figure', () => {
+    test('West Buechel: its own 1.5% (city audit document) stacks on Metro\'s 1.45% nonresident rate', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
@@ -1914,7 +1914,7 @@ describe('Kentucky', () => {
           workState: { code: 'KY', certificate: { workCity: 'West Buechel' } },
         }),
       );
-      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(15.0));
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(29.5));
     });
 
     test('Lynnview: no separate ordinance found, so it inherits the countywide Louisville Metro rate -- same pattern as Lyndon/Middletown', () => {

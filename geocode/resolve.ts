@@ -545,10 +545,11 @@ export function toCertificateFields(
   if (role === 'work' && resolved.alCounty?.confidence === 'matched' && resolved.alCounty.entry) {
     fields.workCounty = resolved.alCounty.entry.name;
   }
-  // workCounty is only ever meaningful for the WORK address — Kentucky's
-  // credit mechanism (kentuckyLocalTax()) has no residence-county concept.
-  if (role === 'work' && resolved.kyCounty?.confidence === 'matched' && resolved.kyCounty.entry) {
-    fields.workCounty = resolved.kyCounty.entry.name;
+  // Kentucky's work county drives the KRS 68.197 credit; the residence
+  // county matters only for Louisville Metro, whose resident rate applies
+  // to anyone living in Jefferson County.
+  if (resolved.kyCounty?.confidence === 'matched' && resolved.kyCounty.entry) {
+    fields[role === 'work' ? 'workCounty' : 'residenceCounty'] = resolved.kyCounty.entry.name;
   }
 
   return fields;

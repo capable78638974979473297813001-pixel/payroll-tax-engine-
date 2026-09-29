@@ -401,7 +401,7 @@ interface KYOccupationalRegistryFile {
         rateChanges?: { on: string; wageRateDecimal: number }[];
       }
     >;
-    louisvilleMetro: { residentRate: number; nonresidentRate: number };
+    louisvilleMetro: { residentRate: number; nonresidentRate: number; citiesWithinMetro?: string[] };
     lexingtonFayette: { residentRate: number; nonresidentRate: number };
   };
 }
@@ -474,6 +474,20 @@ export function allKYJurisdictions(checkDate: string): KYJurisdictionEntry[] {
   });
 
   return entries;
+}
+
+/**
+ * Louisville/Jefferson County Metro: its resident/nonresident rates and the
+ * 83 cities inside it. Metro's tax applies to work anywhere in the county;
+ * a city's own tax is owed on top, with no credit (KRS 68.197's credit is
+ * for 30,000-300,000-population counties only).
+ */
+export function kyLouisvilleMetro(checkDate: string): { residentRate: number; nonresidentRate: number; cities: string[] } {
+  const file = loadJson<KYOccupationalRegistryFile>(
+    join('local', `KY-occupational-${yearOf(checkDate)}.json`),
+  );
+  const m = file.jurisdictions.louisvilleMetro;
+  return { residentRate: m.residentRate, nonresidentRate: m.nonresidentRate, cities: m.citiesWithinMetro ?? [] };
 }
 
 /** Look up one Kentucky jurisdiction by name (case-insensitive) among the confirmed-rate set — see allKYJurisdictions()'s own doc comment for what "confirmed" means here. */

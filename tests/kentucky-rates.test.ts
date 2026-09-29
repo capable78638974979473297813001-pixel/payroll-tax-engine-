@@ -73,3 +73,37 @@ describe('Kentucky cities the SOS scrape lacked', () => {
     assert.equal(r.notices?.[0].tier, 'secondary_source');
   });
 });
+
+describe('Louisville/Jefferson County Metro and the cities inside it', () => {
+  // $2,000 biweekly: Metro 1.45% nonresident = 2900, 2.2% resident = 4400.
+  test('Jeffersontown: its 1% stacks on Metro 1.45% (no KRS 68.197 credit in Jefferson County)', () => {
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCity: 'Jeffersontown' })))?.amount, 2000 + 2900);
+  });
+
+  test('the same with workCounty set, as the geocoder sends it', () => {
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCity: 'Jeffersontown', workCounty: 'Jefferson County' })))?.amount, 4900);
+  });
+
+  test("Lyndon's own 0.75% (not Metro's rates copied)", () => {
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCity: 'Lyndon' })))?.amount, 1500 + 2900);
+  });
+
+  test("Middletown's own 1% since 2024, and St. Matthews' 0.75%", () => {
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCity: 'Middletown' })))?.amount, 2000 + 2900);
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCity: 'St. Matthews' })))?.amount, 1500 + 2900);
+  });
+
+  test('a Jefferson County resident pays the resident rate wherever in the county they live', () => {
+    const r = calculatePaycheck(ky('2026-06-15', { workCity: 'Louisville', residenceCity: 'Lyndon' }));
+    assert.equal(local(r)?.amount, 4400);
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCity: 'Louisville', residenceCounty: 'Jefferson' })))?.amount, 4400);
+  });
+
+  test('a Jefferson County city with no tax of its own: Metro only', () => {
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCity: 'Lynnview' })))?.amount, 2900);
+  });
+
+  test('Augusta corrected to its code\'s 1.30%', () => {
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCity: 'Augusta' })))?.amount, 2600);
+  });
+});

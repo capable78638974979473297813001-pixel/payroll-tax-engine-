@@ -35,6 +35,12 @@
       "url": "https://www.rippling.com/blog/payroll-tax-in-new-hampshire",
       "verifiedOn": "2026-08-16",
       "verifiedBy": "Cross-source confirmed (search-engine synthesis of this and other secondary sources, not independently fetched and read in full this session): New Hampshire does not permit municipalities to levy a local income tax, and unemployment insurance is funded entirely by employer payroll tax with no employee contribution — context-only, not engine-consumed, same convention as every other state's employer-only UI in this project. 2026 new-employer rate 1.7%, wage base $14,000 (recorded for completeness, not independently primary-verified)."
+    },
+    {
+      "title": "NHES WebTax -- Trust Fund Reductions notice (available thru 2026-Q3)",
+      "url": "https://www2.nhes.nh.gov/webtax/indexSecPg.jsp",
+      "verifiedOn": "2026-09-29",
+      "quote": "Trust Fund Reductions Available thru 2026-Q3 ... 1.0% reduction to tax rate of positive rated employers in good standing (Schedule I) effective with the tax due for wages paid each quarter thru Q3-2026."
     }
   ],
   "reciprocity": {
@@ -43,20 +49,20 @@
   },
   "knownGaps": [
     "RESOLVED 2026-09-28: revenue.nh.gov and nhes.nh.gov were reached through a remote fetcher (this sandbox is still blocked), and both the I&D repeal and the UI new-employer rate/wage base are now primary-sourced (see sources[0] and [1]).",
-    "OPEN, but not an access problem: NHES has not yet published the 2026-Q3/Q4 Fund Balance Reduction (its chart ends at 2026-Q2 as of 2026-09-28). Checks after 2026-06-30 carry an 'inferred' notice on NH_SUI_ER until it does. Re-check https://www.nhes.nh.gov/employers/employer-claims-taxes/tax-rate-chart."
+    "The 2026-Q4 Fund Balance Reduction (check dates from 2026-10-01) is decided by NHES from the Q3 trust-fund balance and was not yet published on 2026-09-29. Until it is, those check dates use 1.7% with an 'inferred' notice; update newEmployerRateConfirmedThrough when NHES posts Q4."
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 14000,
     "wageBaseSource": "NHES Employer Claims & Taxes (fetched 2026-09-28): 'the first $14,000 in annual wages paid to each employee'.",
     "newEmployerRate": 0.017,
-    "newEmployerRateSource": "PRIMARY 2026-09-28 (NHES, see sources): new-employer rate = 2.7% minus the quarter's Fund Balance Reduction; FBR 1.00% for 2026-Q1 and Q2 -> 1.7%. NHES's own chart has no 2026-Q3 or Q4 entry yet (checked 2026-09-28), so the rate is confirmed through 2026-06-30 only; checks dated after that use 1.7% with an 'inferred' notice (newEmployerRateConfirmedThrough) until NHES publishes. Earlier history of this field: nhes.nh.gov returned 403 to every direct attempt from this repo's sandbox (2026-09-05/06).",
+    "newEmployerRateSource": "PRIMARY 2026-09-28 (NHES, see sources): new-employer rate = 2.7% minus the quarter's Fund Balance Reduction; FBR 1.00% for 2026-Q1 and Q2 -> 1.7%. NHES's own chart has no 2026-Q3 or Q4 entry yet (checked 2026-09-28), so the rate is confirmed through 2026-06-30 only; checks dated after that use 1.7% with an 'inferred' notice (newEmployerRateConfirmedThrough) until NHES publishes. Earlier history of this field: nhes.nh.gov returned 403 to every direct attempt from this repo's sandbox (2026-09-05/06). EXTENDED 2026-09-29: NHES's WebTax notice (www2.nhes.nh.gov/webtax, shown to filers behind the filing agreement; text as indexed from that page): 'Trust Fund Reductions Available thru 2026-Q3 -- Pursuant to RSA 282-A:82 the Trust Fund maintained a balance of at least $350 million for an entire quarter resulting in a 1.0% reduction to tax rate of positive rated employers in good standing (Schedule I) effective with the tax due for wages paid each quarter thru Q3-2026.' So 1.7% is confirmed through 2026-09-30. Q4 (from 2026-10-01) is set by NHES from the Q3 fund balance and had not been published as of 2026-09-29.",
     "experienceRange": {
       "min": 0.001,
       "max": 0.075
     },
     "employerSuppliedRateRequired": false,
     "confidence": "primary_source_confirmed through 2026-06-30 (NHES); later quarters await NHES's own publication",
-    "newEmployerRateConfirmedThrough": "2026-06-30"
+    "newEmployerRateConfirmedThrough": "2026-09-30"
   }
 }
