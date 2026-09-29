@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
 import { calculatePaycheck } from '../src/calculate.ts';
+import { UnsupportedTaxYearError } from '../src/registry.ts';
 import {
   withDb, readDb, appendUsage, hitStoredLimit,
   type AccountRecord, type KeyRecord, type PaymentMethodRecord,
@@ -1366,7 +1367,11 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   }
 
   // --- validate (structured, field-level) ------------------------------
-  const validation = validatePaycheckInput(raw, { validStateCodes: validStateCodes(), supportedYears: supportedYears() });
+  const validation = validatePaycheckInput(raw, {
+    validStateCodes: validStateCodes(),
+    supportedYears: supportedYears(),
+    stateHasYear: (code, year) => stateYears(code).includes(year),
+  });
   if (!validation.ok) {
     recordUsage(keyHash, 422, 'validation_failed', (raw as { checkDate?: string } | null)?.checkDate ?? null);
     sendJson(
@@ -1396,11 +1401,14 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
     status = 422;
     usageError = err instanceof Error ? err.message : 'calculation_error';
     console.error(`[paycheck ${requestId}] calculation failed:`, usageError);
-    responseBody = {
-      error: 'The calculation could not be completed for the input provided.',
-      code: 'calculation_error',
-      requestId,
-    };
+    responseBody =
+      err instanceof UnsupportedTaxYearError
+        ? { error: err.message, code: 'unsupported_tax_year', requestId }
+        : {
+            error: 'The calculation could not be completed for the input provided.',
+            code: 'calculation_error',
+            requestId,
+          };
   }
 
   // A billable call on a metered subscription queues its Stripe meter
@@ -1486,17 +1494,32 @@ function handleHealth(res: ServerResponse): void {
   });
 }
 
-function handleStates(res: ServerResponse): void {
+// Tax years each state has a ruleset for (2025 covers only some states).
+let STATE_YEARS: Map<string, number[]> | null = null;
+function stateYears(code: string): number[] {
+  if (!STATE_YEARS) {
+    STATE_YEARS = new Map();
+    for (const f of readdirSync(join(HERE, '..', 'data', 'states'))) {
+      const m = /^([A-Z]{2})-(\d{4})\.json$/.exec(f);
+      if (!m) continue;
+      STATE_YEARS.set(m[1], [...(STATE_YEARS.get(m[1]) ?? []), Number(m[2])].sort((a, b) => a - b));
+    }
+  }
+  return STATE_YEARS.get(code.toUpperCase()) ?? [];
+}
+
+function handleStates(res: ServerResponse, rawUrl: string): void {
   const dir = join(HERE, '..', 'data', 'states');
-  const latest = supportedYears().at(-1);
+  const asked = Number(new URL(rawUrl, 'http://x').searchParams.get('year'));
+  const year = supportedYears().includes(asked) ? asked : supportedYears().at(-1);
   const states = readdirSync(dir)
-    .filter((f) => f.endsWith(`-${latest}.json`))
+    .filter((f) => f.endsWith(`-${year}.json`))
     .map((f) => {
       const raw = JSON.parse(readFileSync(join(dir, f), 'utf8')) as { code: string; name: string };
       return { code: raw.code, name: raw.name };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
-  sendJson(res, 200, { states });
+  sendJson(res, 200, { year, states });
 }
 
 // ---------------------------------------------------------------------
@@ -1681,7 +1704,7 @@ createServer((req, res) => {
     if (method === 'GET' && (url === '/api/me' || url === '/v1/me')) return handleMe(req, res);
     if (method === 'POST' && (url === '/api/paycheck' || url === '/v1/paycheck')) return handlePaycheck(req, res);
     if (method === 'GET' && (url === '/api/health' || url === '/v1/health' || url === '/healthz')) return handleHealth(res);
-    if (method === 'GET' && (url === '/api/states' || url === '/v1/states')) return handleStates(res);
+    if (method === 'GET' && (url === '/api/states' || url === '/v1/states')) return handleStates(res, req.url ?? url);
     if (method === 'POST' && url === '/api/estimate') return handleEstimate(req, res);
     if (method === 'GET' && url === '/api/billing') return handleBilling(req, res);
 

@@ -1195,7 +1195,7 @@ console.log(result.netPay);   <span class="tok-com">// 246118 → $2,461.18</spa
               <div class="param"><div class="param-head"><span class="param-name">employeeTaxTotal</span><span class="param-type">integer (cents)</span></div><div class="param-desc">Sum of all employee-withheld taxes.</div></div>
               <div class="param"><div class="param-head"><span class="param-name">employerTaxTotal</span><span class="param-type">integer (cents)</span></div><div class="param-desc">Sum of all employer-borne taxes (not withheld from the employee).</div></div>
               <div class="param"><div class="param-head"><span class="param-name">netPay</span><span class="param-type">integer (cents)</span></div><div class="param-desc">Take-home: gross − pre-tax deductions − employee taxes − post-tax deductions.</div></div>
-              <div class="param"><div class="param-head"><span class="param-name">notices</span><span class="param-type">DataNotice[] · optional</span></div><div class="param-desc">Present only when a line rests on something weaker than a confirmed primary source (<code class="inline">secondary_source</code>, <code class="inline">inferred</code>) or the certificate asked for a method the engine doesn’t model (<code class="inline">not_modelled</code>). Each has the <code class="inline">taxId</code> it applies to, its <code class="inline">tier</code>, and a plain-language <code class="inline">note</code>. The amounts are still returned; read these before paying.</div></div>
+              <div class="param"><div class="param-head"><span class="param-name">notices</span><span class="param-type">DataNotice[] · optional</span></div><div class="param-desc">Present only when a line rests on something weaker than a confirmed primary source (<code class="inline">secondary_source</code>, <code class="inline">inferred</code>) the certificate asked for a method the engine doesn’t model (<code class="inline">not_modelled</code>), or the levying body’s own form disagrees with another published source (<code class="inline">conflicting_sources</code>). Each has the <code class="inline">taxId</code> it applies to, its <code class="inline">tier</code>, and a plain-language <code class="inline">note</code>. The amounts are still returned; read these before paying.</div></div>
             </div>
           </div>
           <div class="rail">
@@ -1210,7 +1210,7 @@ console.log(result.netPay);   <span class="tok-com">// 246118 → $2,461.18</spa
   employeeTaxTotal: <span class="tok-key">number</span>;
   employerTaxTotal: <span class="tok-key">number</span>;
   netPay: <span class="tok-key">number</span>;
-  notices?: { taxId: <span class="tok-key">string</span>; tier: <span class="tok-str">'secondary_source'</span> | <span class="tok-str">'inferred'</span> | <span class="tok-str">'not_modelled'</span>; note: <span class="tok-key">string</span> }[];
+  notices?: { taxId: <span class="tok-key">string</span>; tier: <span class="tok-str">'secondary_source'</span> | <span class="tok-str">'inferred'</span> | <span class="tok-str">'not_modelled'</span> | <span class="tok-str">'conflicting_sources'</span>; note: <span class="tok-key">string</span> }[];
 }</code></pre></div></div>
             </div>
           </div>

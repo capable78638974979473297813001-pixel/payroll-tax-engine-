@@ -170,6 +170,60 @@ export function hasStateRuleset(code: string, checkDate: string): boolean {
   return dataFileExists(join('states', `${code.toUpperCase()}-${yearOf(checkDate)}.json`));
 }
 
+export function hasFederalRuleset(checkDate: string): boolean {
+  return dataFileExists(join('federal', `${yearOf(checkDate)}.json`));
+}
+
+/** The 50 states plus DC -- the codes a state ruleset can exist for. */
+export const STATE_CODES = [
+  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS',
+  'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC',
+  'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
+] as const;
+
+/** The states with a ruleset for this check date's tax year. */
+export function statesWithRuleset(checkDate: string): string[] {
+  return STATE_CODES.filter((c) => hasStateRuleset(c, checkDate));
+}
+
+/**
+ * Thrown when a check date falls in a tax year this build only partly
+ * covers: the federal rules or a work/residence state's rules for that year
+ * are missing. Computing anyway would return federal-only withholding that
+ * looks complete, so the engine refuses instead.
+ */
+export class UnsupportedTaxYearError extends Error {
+  readonly year: number;
+  readonly missing: string[];
+  constructor(year: number, missing: string[], coveredStates: string[]) {
+    super(
+      `Tax year ${year} is not fully available for this paycheck: no ${year} rules for ${missing.join(' or ')}. ` +
+        (coveredStates.length
+          ? `${year} is available for federal tax and ${coveredStates.join(', ')} only.`
+          : `There are no ${year} rules in this build.`),
+    );
+    this.name = 'UnsupportedTaxYearError';
+    this.year = year;
+    this.missing = missing;
+  }
+}
+
+/**
+ * Throws UnsupportedTaxYearError unless the federal rules and every state
+ * this paycheck touches have a ruleset for the check date's year. A state
+ * code that has no ruleset in ANY year is left to the engine's own
+ * "NOT MODELLED" line; this guards only against a real state missing a year.
+ */
+export function assertTaxYearCovered(checkDate: string, stateCodes: (string | undefined)[]): void {
+  const year = yearOf(checkDate);
+  const missing: string[] = [];
+  if (!hasFederalRuleset(checkDate)) missing.push('federal tax');
+  for (const code of new Set(stateCodes.filter((c): c is string => Boolean(c)).map((c) => c.toUpperCase()))) {
+    if ((STATE_CODES as readonly string[]).includes(code) && !hasStateRuleset(code, checkDate)) missing.push(code);
+  }
+  if (missing.length) throw new UnsupportedTaxYearError(year, missing, statesWithRuleset(checkDate));
+}
+
 export interface CountyEntry {
   name: string;
   countyCode: string;
@@ -343,6 +397,8 @@ interface KYOccupationalRegistryFile {
         wageRateNonresidentDecimal?: number | null;
         capAtSSWageBase?: boolean;
         wageRateStatus?: string;
+        /** Mid-year rate changes: from `on` (a check date, inclusive) the flat rate is `wageRateDecimal`. A rate of 0 means no wage tax yet. */
+        rateChanges?: { on: string; wageRateDecimal: number }[];
       }
     >;
     louisvilleMetro: { residentRate: number; nonresidentRate: number };
@@ -376,7 +432,16 @@ export function allKYJurisdictions(checkDate: string): KYJurisdictionEntry[] {
   const entries: KYJurisdictionEntry[] = [];
 
   for (const raw of Object.values(file.jurisdictions.scraped)) {
-    const hasFlat = raw.wageRateDecimal !== null && raw.wageRateDecimal !== undefined;
+    // The flat rate in force on this check date: the latest change on or
+    // before it, else the base rate (Elsmere 1.25% -> 1.75% and Grant
+    // County 2.5% -> 2.0% on 2026-07-01; Falmouth's tax starts that day).
+    const change = (raw.rateChanges ?? [])
+      .filter((c) => c.on <= checkDate)
+      .sort((a, b) => a.on.localeCompare(b.on))
+      .at(-1);
+    const flatRate = change ? change.wageRateDecimal : raw.wageRateDecimal;
+    if (flatRate === 0) continue;
+    const hasFlat = flatRate !== null && flatRate !== undefined;
     const hasSplit =
       raw.wageRateResidentDecimal !== null &&
       raw.wageRateResidentDecimal !== undefined &&
@@ -385,7 +450,7 @@ export function allKYJurisdictions(checkDate: string): KYJurisdictionEntry[] {
     if (!hasFlat && !hasSplit) continue;
     entries.push({
       name: raw.name,
-      wageRateDecimal: hasFlat ? (raw.wageRateDecimal as number) : null,
+      wageRateDecimal: hasFlat ? (flatRate as number) : null,
       wageRateResidentDecimal: hasSplit ? (raw.wageRateResidentDecimal as number) : null,
       wageRateNonresidentDecimal: hasSplit ? (raw.wageRateNonresidentDecimal as number) : null,
       capAtSSWageBase: raw.capAtSSWageBase ?? false,
@@ -433,11 +498,36 @@ export interface ALMunicipalityEntry {
    * it still gets the 1% instead of a silent no-tax result.
    */
   aliases?: string[];
+  /**
+   * Where the rate was read. primary_source: the levying body's own
+   * ordinance/form/page, the collecting agent's current return, or statute.
+   * league_survey_only: only the Alabama League of Municipalities' survey.
+   * conflicting_sources: the city's own form and the survey disagree; the
+   * city's figure is used and `conflict` says how.
+   */
+  confirmation?: {
+    tier: 'primary_source' | 'league_survey_only' | 'conflicting_sources';
+    conflict?: string;
+  };
+}
+
+/**
+ * A county-level Alabama occupational fee (today only Macon County, Ala.
+ * Code 45-44-244.31). It applies only outside the towns that already had
+ * their own occupational tax on the statute's cutoff date, listed here as
+ * excludedMunicipalities.
+ */
+export interface ALCountyEntry {
+  name: string;
+  rate: number;
+  statute: string;
+  excludedMunicipalities: { name: string; basis: string }[];
 }
 
 interface ALMunicipalityRegistryFile {
   year: number;
   municipalities: ALMunicipalityEntry[];
+  counties?: ALCountyEntry[];
 }
 
 /** Whether an Alabama municipal occupational tax registry exists for this check date. */
@@ -466,6 +556,26 @@ export function alMunicipalityRuleset(
       m.name.toLowerCase() === wanted ||
       (m.aliases ?? []).some((alias) => alias.toLowerCase() === wanted),
   );
+}
+
+/**
+ * Look up an Alabama county-level occupational fee by county name
+ * (case-insensitive; a trailing " County" is ignored).
+ */
+export function alCountyRuleset(name: string, checkDate: string): ALCountyEntry | undefined {
+  const file = loadJson<ALMunicipalityRegistryFile>(
+    join('local', `AL-municipalities-${yearOf(checkDate)}.json`),
+  );
+  const wanted = name.trim().toLowerCase().replace(/\s+county$/, '');
+  return (file.counties ?? []).find((c) => c.name.toLowerCase() === wanted);
+}
+
+/** Every Alabama county with a county-level occupational fee — for geocode/. */
+export function allALCounties(checkDate: string): ALCountyEntry[] {
+  const file = loadJson<ALMunicipalityRegistryFile>(
+    join('local', `AL-municipalities-${yearOf(checkDate)}.json`),
+  );
+  return file.counties ?? [];
 }
 
 /** Every Alabama taxing municipality — for geocode/'s fuzzy name matching. */
@@ -594,6 +704,14 @@ export interface OHJEDDEntry {
   jeddId: string;
   rate: number;
   effectiveFrom: string;
+  /** The district was dissolved or its contract ended: no tax on checks dated on/after this. */
+  terminatedOn?: string;
+  /** Scheduled end of the current rate (e.g. a step-down period). */
+  rateEndsOn?: string;
+  /** Tax applies only to the first N dollars (not cents) of district wages each year. */
+  annualWageCap?: number;
+  /** The year annualWageCap is for (these caps are CPI-adjusted annually). */
+  annualWageCapYear?: number;
 }
 
 /** A JEDD/JEDZ rate row with no polygon in Ohio's boundary layer — see the data file's boundaryGaps. */

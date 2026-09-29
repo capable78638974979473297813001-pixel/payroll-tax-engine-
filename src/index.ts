@@ -6,6 +6,10 @@ export {
   federalRuleset,
   stateRuleset,
   hasStateRuleset,
+  hasFederalRuleset,
+  statesWithRuleset,
+  assertTaxYearCovered,
+  UnsupportedTaxYearError,
   RulesetNotFoundError,
 } from './registry.ts';
 export { minimumWage, localMinimumWages } from './minimum-wage.ts';

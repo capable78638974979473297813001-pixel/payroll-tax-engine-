@@ -115,7 +115,7 @@
   "jurisdictions": {
     "$comment": "SCRAPED DIRECTLY from the Secretary of State's own database (web.sos.ky.gov/occupationaltax, KRS 67.766) by browsing live and selecting each district in turn — not hand-researched one at a time. Louisville and Lexington (below, richer entries with sub-component breakdowns) were researched separately in an earlier pass and are cross-checked against this same source. Every other entry here is exactly what the state's own database shows for that district's WAGE/PAYROLL or NET PROFITS rate as of this scrape — 'rate: null' means the taxing district is listed in the state's own roster but its rate FIELD IS BLANK IN THE SOURCE DATABASE ITSELF, not that the tax is zero or that this project failed to look. 'category' distinguishes what base the shown rate applies to (Net Profits / Gross Receipts / Payroll Only / Flat Fee / a blend) — where category says 'Net Profits' alone with no separate payroll figure shown, whether the SAME rate also applies to wage withholding was NOT independently confirmed for every entry (Hopkinsville proved in this project's own research that the two CAN differ: 1.95% wages vs 1.3% net profits) — treat a bare 'Net Profits' category as a rate to re-verify against that specific city/county's own ordinance before using it as a wage-withholding number, not as a confirmed payroll rate.",
     "scrapedOn": "2026-08-13",
-    "coverage": "250 jurisdictions plus Louisville Metro and Lexington-Fayette = 252 total. 250 resolve to a real wage rate the engine can use (248 scraped entries + Louisville + Lexington) -- 99.2%. The 2 that do not are both confirmed non-gaps, not unresolved research: 'Cumberland County Fiscal Court' is a duplicate name for the same government already confirmed under the sibling 'Cumberland County' entry (giving it its own copy of the same rate was tried and reverted the same session -- it broke geocode/resolve.ts's deliberate one-candidate-per-county disambiguation, see tests/geocode.test.ts). 'Marshall County Occupational License Tax For Schools' is genuinely net-profits-only, confirmed by reading its own 6-page Form M-W instructions in full (a business-apportionment 'Payroll Factor' worksheet was briefly misread as a personal wage tax earlier the same session and corrected after a closer read).",
+    "coverage": "254 jurisdictions (250 scraped + 4 added 2026-09-28: Bardwell, Falmouth, Jenkins, Williamstown) plus Louisville Metro and Lexington-Fayette = 252 total. 250 resolve to a real wage rate the engine can use (248 scraped entries + Louisville + Lexington) -- 99.2%. The 2 that do not are both confirmed non-gaps, not unresolved research: 'Cumberland County Fiscal Court' is a duplicate name for the same government already confirmed under the sibling 'Cumberland County' entry (giving it its own copy of the same rate was tried and reverted the same session -- it broke geocode/resolve.ts's deliberate one-candidate-per-county disambiguation, see tests/geocode.test.ts). 'Marshall County Occupational License Tax For Schools' is genuinely net-profits-only, confirmed by reading its own 6-page Form M-W instructions in full (a business-apportionment 'Payroll Factor' worksheet was briefly misread as a personal wage tax earlier the same session and corrected after a closer read).",
     "louisvilleMetro": {
       "governmentType": "Consolidated city-county government (Louisville/Jefferson County Metro Government) -- Jefferson County is the ONLY Kentucky county meeting KRS 68.180's 300,000-population threshold.",
       "residentRate": 0.022,
@@ -429,8 +429,14 @@
         "wageRateDecimal": 0.00333,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "Ordinance 648 exempts employees earning under $20,000 a year from the city (Bloomberg Tax 2025-12-08); this engine does not apply that threshold, so it over-withholds for them. CONFIRMED 2026-09-28 at 0.333% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "City of Brandenburg -- Ordinance 648 (June 2025)",
+          "url": "https://brandenburg.ky.gov/wp-content/uploads/2025/06/ORD-648-Occupational-Tax-.33-JUNE-2025.pdf",
+          "says": "0.333% occupational license tax on employee compensation (Bloomberg Tax 2025-12-08: applies to wages of at least $20,000 annually)",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Breathitt County",
@@ -491,7 +497,7 @@
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateNote": "2026-09-28: the city's own ordinance PDF (cityofburkesville.org/.../2024/08/Occupational-Ordinance.pdf) shows the rate text as 'one percent (1%) two percent (2%)' -- an amendment between 1% and 2% whose strike-through could not be read from the extracted text. The rate may now be 2%; confirm with the city. Category is payroll-exclusive and the rate string is one clean figure."
       },
       {
         "name": "Butler County",
@@ -525,8 +531,14 @@
         "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_kaco_2026_county_payroll_table",
+        "wageRateNote": "CONFIRMED 2026-09-28 against KACo's January 2026 county payroll-rate table. Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "Kentucky Association of Counties -- Data Brief: 2026 County Occupational Tax Rates (payroll column, as of January 2026)",
+          "url": "https://kaco.org/media/7051/2026-databrief-occupationaltaxes.pdf",
+          "says": "Caldwell 1.50%",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Calvert City",
@@ -605,8 +617,14 @@
         "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_kaco_2026_county_payroll_table",
+        "wageRateNote": "CONFIRMED 2026-09-28 against KACo's January 2026 county payroll-rate table. Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "Kentucky Association of Counties -- Data Brief: 2026 County Occupational Tax Rates (payroll column, as of January 2026)",
+          "url": "https://kaco.org/media/7051/2026-databrief-occupationaltaxes.pdf",
+          "says": "Carter 1.00%",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Catlettsburg",
@@ -640,8 +658,14 @@
         "wageRateDecimal": 0.02,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 2% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "City of Union -- New 2023 Payroll and Business License",
+          "url": "https://cityofunionky.org/new-2023-payroll-and-business-license/",
+          "says": "The payroll rate is 2% of all wages and or compensation paid or payable for work done, or services performed or rendered in the city",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Clark County",
@@ -730,8 +754,14 @@
         "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_explicit_wage_figure",
-        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 1% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Extracted from the wage/payroll-labelled figure within the raw rate string.",
+        "wageRatePrimarySource": {
+          "title": "City of Corbin Occupational Tax Office",
+          "url": "https://www.corbin-ky.gov/assets/files/uploads/_20240118110308388_3c4b72d27552424881504b851b27ab70.pdf",
+          "says": "The Occupational License Tax Fee shall be measured by 1% of: a) all wages and compensation paid or payable in the Knox County portion of the City ...",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Covington",
@@ -788,12 +818,18 @@
         "rate": "1.5%",
         "minTax": "$50.00 annually",
         "cap": "None",
-        "wageRateDecimal": 0.005,
+        "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
-        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+        "wageRateStatus": "corrected_via_county_primary_source_2026_09_28",
+        "wageRateNote": "CORRECTED 2026-09-28 from 0.5% (KACo 2025). Raised to 1.5% effective 2025-07-01 (Bloomberg Tax 2025-12-04; Crittenden Press 2025-04-24); KACo 2026 lists 1.50%. Previous note: Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing.",
+        "wageRatePrimarySource": {
+          "title": "Kentucky Association of Counties -- Data Brief: 2026 County Occupational Tax Rates (payroll column, as of January 2026)",
+          "url": "https://kaco.org/media/7051/2026-databrief-occupationaltaxes.pdf",
+          "fetchedOn": "2026-09-28",
+          "says": "Crittenden 1.50%"
+        }
       },
       {
         "name": "Cumberland County",
@@ -894,8 +930,14 @@
         "wageRateDecimal": 0.025,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 2.5% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "City of Dayton -- License and Fee Information",
+          "url": "https://daytonky.com/licenses/",
+          "says": "This tax is 2.5% of wages paid to employees working in Dayton, KY.",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Dry Ridge",
@@ -905,8 +947,14 @@
         "wageRateDecimal": 0.0125,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 1.25% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "City of Dry Ridge -- Payroll Tax",
+          "url": "https://cdrky.org/business/occupational-license/",
+          "says": "Dry Ridge Occupational License Fee at the rate of one and one-fourth percent (1.25) on all payments made to employees for work performed within the city limits",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Earlington",
@@ -928,8 +976,14 @@
         "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 1.5% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "City of Eddyville -- Local Taxes",
+          "url": "https://www.eddyvilleky.org/Blog/10/local-taxes",
+          "says": "Businesses located in the city that have employees are required to withhold a 1.5% local occupational tax",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Edgewood",
@@ -948,11 +1002,17 @@
         "rate": "1.00%",
         "category": "Payroll",
         "source": "Metcalfe County ordinance (Edmonton is the county seat, no separate city rate found) -- CORRECTED to match Metcalfe County's own primary-sourced 1.00% (was previously 0.5%, based on a secondary source that Metcalfe's own form disproved)",
-        "wageRateDecimal": 0.01,
+        "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "corrected_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CORRECTED 2026-09-28 from 1% (tax-rates.org aggregator). The city's own current payroll return is titled \"Quarterly 1.5% Payroll Form\". Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "City of Edmonton -- Forms",
+          "url": "https://cityofedmontonky.com/forms/",
+          "says": "Quarterly 1.5% Payroll Form",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Elizabethtown",
@@ -1000,12 +1060,18 @@
         "rate": "0.01%",
         "minTax": "$50",
         "cap": "$1,000",
-        "wageRateDecimal": 0.0175,
+        "wageRateDecimal": 0.0125,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "confirmed_via_news_and_city_notice",
-        "wageRateNote": "Scraped \"0.01%\" (category \"Net Profits\") bore no relation to the real rate. Elsmere's City Council passed an ordinance raising its payroll withholding rate from 1.25% to 1.75%, EFFECTIVE FOR WAGES PAID WITH A CHECK DATE ON OR AFTER 2026-07-01. This file records the current/final 1.75% figure per this project's convention for mid-year rate changes (see West Virginia's Weirton entry for the same pattern) — a check date before 2026-07-01 should use 1.25% instead, which this file does not separately encode (no effective-dated local-rate mechanism exists in this project yet).",
-        "wageRateSource": "Northern Kentucky Tribune / KACo county-cities rate reporting on Elsmere's 2026 ordinance (payroll rate 1.25% -> 1.75%, eff. 2026-07-01)."
+        "wageRateNote": "EFFECTIVE-DATED 2026-09-28: 1.25% for check dates before 2026-07-01, 1.75% from then on (rateChanges). Previous note: Scraped \"0.01%\" (category \"Net Profits\") bore no relation to the real rate. Elsmere's City Council passed an ordinance raising its payroll withholding rate from 1.25% to 1.75%, EFFECTIVE FOR WAGES PAID WITH A CHECK DATE ON OR AFTER 2026-07-01. This file records the current/final 1.75% figure per this project's convention for mid-year rate changes (see West Virginia's Weirton entry for the same pattern) — a check date before 2026-07-01 should use 1.25% instead, which this file does not separately encode (no effective-dated local-rate mechanism exists in this project yet).",
+        "wageRateSource": "Northern Kentucky Tribune / KACo county-cities rate reporting on Elsmere's 2026 ordinance (payroll rate 1.25% -> 1.75%, eff. 2026-07-01).",
+        "rateChanges": [
+          {
+            "on": "2026-07-01",
+            "wageRateDecimal": 0.0175
+          }
+        ]
       },
       {
         "name": "Eminence",
@@ -1178,8 +1244,14 @@
         "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 1% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "City of Franklin -- Business Licensing & Taxes",
+          "url": "https://www.franklinky.gov/departments/finance_accounting/business_licensing_taxes.php",
+          "says": "City Occupational Payroll Taxes. 1%. Gross Wages",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Franklin County",
@@ -1271,8 +1343,20 @@
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
-        "wageRateNote": "Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly.",
-        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+        "wageRateNote": "EFFECTIVE-DATED 2026-09-28: 2.5% for check dates before 2026-07-01, 2% from then on (rateChanges). Previous note: Raw rate/category did not match any of this pass's parsing rules -- needs a human to read the source ordinance directly.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing.",
+        "rateChanges": [
+          {
+            "on": "2026-07-01",
+            "wageRateDecimal": 0.02
+          }
+        ],
+        "wageRatePrimarySource": {
+          "title": "Grant County Fiscal Court -- Occupational Licensing",
+          "url": "https://grantcounty.ky.gov/occupational-licensing/",
+          "says": "Effective July 01, 2026, the Grant County Withholding Tax Rate will decrease from 2.5% to 2.0%.",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Graves County",
@@ -1293,8 +1377,14 @@
         "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 1% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "City of Grayson -- Occupational-Payroll",
+          "url": "https://www.graysonky.org/occupational-payroll",
+          "says": "The fee, in the amount of 1%, is levied upon all adjusted gross wages earned for work within the city.",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Grayson County",
@@ -1359,8 +1449,14 @@
         "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_explicit_wage_figure",
-        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 1% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Extracted from the wage/payroll-labelled figure within the raw rate string.",
+        "wageRatePrimarySource": {
+          "title": "Hardin County -- Occupational Tax",
+          "url": "https://www.hardincountyky.gov/365/Occupational-Tax",
+          "says": "The occupational license tax shall be measured by 1 % of: All wages and compensation paid or payable in the District for work done or services ...",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Harrison County",
@@ -1404,8 +1500,14 @@
         "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_explicit_wage_figure",
-        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 1% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Extracted from the wage/payroll-labelled figure within the raw rate string.",
+        "wageRatePrimarySource": {
+          "title": "City of Hartford -- Notice of Occupational License Fees",
+          "url": "https://hartfordky.org/notice-of-occupational-license-fees/",
+          "says": "The tax rate on amounts earned in the city of Hartford, Kentucky is 1.00% of the GROSS wages of all employees.",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Hazard",
@@ -1467,8 +1569,14 @@
         "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_kaco_2026_county_payroll_table",
+        "wageRateNote": "CONFIRMED 2026-09-28 against KACo's January 2026 county payroll-rate table. Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "Kentucky Association of Counties -- Data Brief: 2026 County Occupational Tax Rates (payroll column, as of January 2026)",
+          "url": "https://kaco.org/media/7051/2026-databrief-occupationaltaxes.pdf",
+          "says": "Hickman 1.00%",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Highland Heights",
@@ -1526,8 +1634,14 @@
         "wageRateDecimal": 0.0195,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_explicit_wage_figure",
-        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 1.95% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Extracted from the wage/payroll-labelled figure within the raw rate string.",
+        "wageRatePrimarySource": {
+          "title": "City of Hopkinsville -- Occupational License application form",
+          "url": "https://cms2files.revize.com/hopkinsvilleky/document_center/Finance/Tax_Forms/OCCUPATIONAL_LIC___APPLICATION_FORM.pdf",
+          "says": "The City of Hopkinsville assesses a withholding fee of 1.95% of all wages and compensation paid for work done or services performed in the City.",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Independence",
@@ -1594,8 +1708,14 @@
         "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 1% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "City of Jeffersontown -- Occupational Tax",
+          "url": "https://www.jeffersontownky.com/383/Occupational-Tax",
+          "says": "1% of gross wage. No exemptions. No minimum or maximum amount.",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Jeffersonville",
@@ -1863,12 +1983,18 @@
         "category": "Net Profits",
         "rate": "1.5%",
         "minTax": "$50",
-        "wageRateDecimal": 0.0075,
+        "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_via_klc_statewide_survey",
-        "wageRateNote": "CORRECTS this file's own earlier inferred-tier entry (1.5%, applied 2026-08-31 assuming the scraped Net Profits figure doubled as wages -- it did not). KLC's official FY2023 statewide survey lists Marion's Payroll Tax Rate as 0.75%, distinct from the Net Profits rate.",
-        "wageRateSource": "Kentucky League of Cities official statewide survey, 'City Occupational License Tax Rates, FY 2023' (kleague.sharepoint.com), which carries a DEDICATED Payroll Tax Rate column separate from Net Profits and Gross Receipts -- the authoritative source this whole research arc needed from the start."
+        "wageRateStatus": "corrected_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CORRECTED 2026-09-28 from 0.75% (KLC FY2023 survey). Marion raised its rate alongside Crittenden County effective 2025-07-01 (Bloomberg Tax, 2025-12-04); the current code reads 1.5%. Previous note: CORRECTS this file's own earlier inferred-tier entry (1.5%, applied 2026-08-31 assuming the scraped Net Profits figure doubled as wages -- it did not). KLC's official FY2023 statewide survey lists Marion's Payroll Tax Rate as 0.75%, distinct from the Net Profits rate.",
+        "wageRateSource": "Kentucky League of Cities official statewide survey, 'City Occupational License Tax Rates, FY 2023' (kleague.sharepoint.com), which carries a DEDICATED Payroll Tax Rate column separate from Net Profits and Gross Receipts -- the authoritative source this whole research arc needed from the start.",
+        "wageRatePrimarySource": {
+          "title": "City of Marion Code of Ordinances Sec. 110.22",
+          "url": "https://codelibrary.amlegal.com/codes/marionky/latest/marion_ky/0-0-0-22684",
+          "says": "The occupational license tax shall be measured by 1.5% of: (1) All wages and compensation paid or payable in the city",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Marion County",
@@ -1923,8 +2049,14 @@
         "wageRateDecimal": 0.02,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_kaco_2026_county_payroll_table",
+        "wageRateNote": "CONFIRMED 2026-09-28 against KACo's January 2026 county payroll-rate table. Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "Kentucky Association of Counties -- Data Brief: 2026 County Occupational Tax Rates (payroll column, as of January 2026)",
+          "url": "https://kaco.org/media/7051/2026-databrief-occupationaltaxes.pdf",
+          "says": "Martin 2.00%",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Mason County",
@@ -2049,20 +2181,32 @@
         "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_kaco_2026_county_payroll_table",
+        "wageRateNote": "CONFIRMED 2026-09-28 against KACo's January 2026 county payroll-rate table. Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "Kentucky Association of Counties -- Data Brief: 2026 County Occupational Tax Rates (payroll column, as of January 2026)",
+          "url": "https://kaco.org/media/7051/2026-databrief-occupationaltaxes.pdf",
+          "says": "Metcalfe 1.00%",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Middlesboro",
         "category": "Net Profits",
         "rate": "2% (+2% Business License Fee)",
         "minTax": "$50 (Bus. Lic. Fee)/$250 if Franchise or Net Profit",
-        "wageRateDecimal": 0.02,
+        "wageRateDecimal": 0.0245,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "inferred_small_city_single_rate_pattern",
-        "wageRateNote": "INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
-        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote."
+        "wageRateStatus": "corrected_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CORRECTED 2026-09-28 from an inferred 2%. The levy section was amended to 2.45% from 2024-04-01; a separate 1974 section of the same chapter still says 2% for employees and was not updated, but the levy section governs. Previous note: INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
+        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote.",
+        "wageRatePrimarySource": {
+          "title": "City of Middlesboro Code of Ordinances, Ch. 110 (levy section)",
+          "url": "https://codelibrary.amlegal.com/codes/middlesboroky/latest/middlesboro_ky/0-0-0-5065",
+          "says": "This license fee shall be measured by and be equal to 2.45% of the gross salaries, wages, commissions ... on and after April 1, 2024.",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Middletown",
@@ -2313,8 +2457,14 @@
         "wageRateDecimal": 0.02,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 2% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "City of Paducah -- Business License and Payroll Tax",
+          "url": "https://paducahky.gov/departments/finance/business-license-and-payroll-tax",
+          "says": "The City of Paducah levies an Occupational License Fee (employee payroll withholding tax, roll tax) of 2.0 percent",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Paintsville",
@@ -2390,12 +2540,18 @@
         "name": "Perryville",
         "category": "Net Profits",
         "rate": "1%",
-        "wageRateDecimal": 0.01,
+        "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "inferred_small_city_single_rate_pattern",
-        "wageRateNote": "INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
-        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote."
+        "wageRateStatus": "parsed_local_news",
+        "wageRateNote": "CORRECTED 2026-09-28 from an inferred 1%. Ordinance 2022-005 raised the occupational license tax to 1.5% from January 2023; the source is the local paper, not the ordinance itself, so the line keeps a notice. Previous note: INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
+        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote.",
+        "wageRatePrimarySource": {
+          "title": "The Advocate-Messenger -- Perryville amends ordinances, passes occupational tax increase (2022-10-12)",
+          "url": "https://amnews.com/2022/10/12/perryville-amends-ordinances-passes-occupational-tax-increase/",
+          "says": "ordinance 2022-005 ... increase these taxes [occupational license and net profit] from 1% to 1.5% ... The ordinance will take effect in January 2023.",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Pike County",
@@ -2416,8 +2572,14 @@
         "wageRateDecimal": 0.02,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 2% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "City of Pikeville -- Business Licenses",
+          "url": "https://pikevilleky.gov/business/",
+          "says": "Amounts withheld shall be paid to the city in accordance with the ordinance at the 2% rate based on gross wages earned",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Pineville",
@@ -2434,12 +2596,18 @@
         "name": "Powell County",
         "category": "Net Profits",
         "rate": "1%",
-        "wageRateDecimal": 0.0125,
+        "wageRateDecimal": 0.0175,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
-        "wageRateNote": "Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
-        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing."
+        "wageRateStatus": "corrected_via_county_primary_source_2026_09_28",
+        "wageRateNote": "CORRECTED 2026-09-28 from 1.25% (KACo 2025). Ordinance 2025-07 raised it to 1.75% effective 2025-07-01; KACo 2026 lists 1.75%. Previous note: Category is \"Net Profits\" alone -- this project's own research (Hopkinsville) proved a net-profits/gross-receipts figure is not reliably the same as the wage-withholding figure, so it is not carried over as a wage rate without separate confirmation.",
+        "wageRateSource": "Kentucky Association of Counties, 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), which publishes a PAYROLL rate column specifically — the confirmation this entry's scraped category could not give on its own. 2025 table applied to 2026: KACo publishes annually and no 2026 file was available at the time of writing.",
+        "wageRatePrimarySource": {
+          "title": "Powell County -- Ordinance 2025-07",
+          "url": "http://www.powellcountyky.us/ordinances/Ordinance%202025-07.pdf",
+          "says": "The occupational license tax shall be measured by [1.25], 1.75% of ...",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Prestonsburg",
@@ -2449,9 +2617,15 @@
         "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "inferred_small_city_single_rate_pattern",
-        "wageRateNote": "INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
-        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 1.5% from the jurisdiction's own source (wageRatePrimarySource). Previous note: INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
+        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote.",
+        "wageRatePrimarySource": {
+          "title": "City of Prestonsburg -- Employer's Quarterly Return of License Fee Withheld",
+          "url": "https://prestonsburgcity.org/wp-content/docs/OLFee_License-Fee-Quarterly-Return-Fillable.pdf",
+          "says": "Each employer ... must withhold the license fee of 1 1/2% from gross salaries, wages, and ...",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Princeton",
@@ -2525,8 +2699,14 @@
         "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_kaco_2026_county_payroll_table",
+        "wageRateNote": "CONFIRMED 2026-09-28 against KACo's January 2026 county payroll-rate table. Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "Kentucky Association of Counties -- Data Brief: 2026 County Occupational Tax Rates (payroll column, as of January 2026)",
+          "url": "https://kaco.org/media/7051/2026-databrief-occupationaltaxes.pdf",
+          "says": "Robertson 1.50%",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Rockcastle County",
@@ -2569,9 +2749,15 @@
         "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "inferred_small_city_single_rate_pattern",
-        "wageRateNote": "INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
-        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 1.5% from the jurisdiction's own source (wageRatePrimarySource). Previous note: INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
+        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote.",
+        "wageRatePrimarySource": {
+          "title": "City of Russell -- Occupational License Fee",
+          "url": "https://www.russellky.gov/departments/finance___revenue_department/occupational_license_fee/index.php",
+          "says": "the City of Russell levies an Occupational License Tax of 1.5% on employee wages earned for work performed within the city",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Russell County",
@@ -2594,8 +2780,14 @@
         "wageRateDecimal": 0.02,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_explicit_wage_figure",
-        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 2% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Extracted from the wage/payroll-labelled figure within the raw rate string.",
+        "wageRatePrimarySource": {
+          "title": "City of Russellville -- Return of Payroll Taxes Withheld",
+          "url": "https://russellvilleky.gov/index.php/forms-applications/occupational-tax?download=19:return-of-payroll-taxes-withheld",
+          "says": "Actual Tax Due in Period at 2%",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Ryland Heights",
@@ -2704,11 +2896,18 @@
         "county": "Simpson",
         "rate": "1.00%",
         "category": "Payroll",
-        "wageRateDecimal": 0.01,
+        "wageRateDecimal": 0.0125,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_via_kaco_2025_county_payroll_table",
-        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry."
+        "wageRateStatus": "corrected_via_county_primary_source_2026_09_28",
+        "addedFrom": "Not present in this file's original scrape at all. Added from the Kentucky Association of Counties' 2025 County Occupational Tax Rates data file (kaco.org/media/6124/2025-county-occ-tax-data-file.xlsx), whose PAYROLL rate column is exactly the figure a withholding engine needs. Carries no scraped fields because there was no scrape to carry.",
+        "wageRatePrimarySource": {
+          "title": "Simpson County -- Occupational Tax Administration",
+          "url": "https://simpsoncountyky.gov/occupational-tax-administration/",
+          "says": "ORDINANCE 220.262 ... TO MODIFY THE OCCUPATIONAL TAX RATE EFFECTIVE 1/1/2026 TO 1.25%",
+          "fetchedOn": "2026-09-28"
+        },
+        "wageRateNote": "CORRECTED 2026-09-28 from 1% (KACo 2025). Ordinance 220.262 raised it to 1.25% effective 2026-01-01. Previous note: "
       },
       {
         "name": "Simpsonville",
@@ -2719,9 +2918,15 @@
         "wageRateDecimal": 0.005,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "inferred_small_city_single_rate_pattern",
-        "wageRateNote": "INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
-        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 0.5% from the jurisdiction's own source (wageRatePrimarySource). Previous note: INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
+        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote.",
+        "wageRatePrimarySource": {
+          "title": "City of Simpsonville Code of Ordinances Sec. 110.27",
+          "url": "https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803",
+          "says": "The occupational license tax shall be measured by 0.5% of: (1) All wages and compensation paid or payable in the city",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Somerset",
@@ -2822,8 +3027,14 @@
         "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_kaco_2026_county_payroll_table",
+        "wageRateNote": "CONFIRMED 2026-09-28 against KACo's January 2026 county payroll-rate table. Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "Kentucky Association of Counties -- Data Brief: 2026 County Occupational Tax Rates (payroll column, as of January 2026)",
+          "url": "https://kaco.org/media/7051/2026-databrief-occupationaltaxes.pdf",
+          "says": "Todd 1.00%",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Tompkinsville",
@@ -2917,8 +3128,14 @@
         "wageRateDecimal": 0.02,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CONFIRMED 2026-09-28 at 2% from the jurisdiction's own source (wageRatePrimarySource). Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "Boone County Occupational License (administers Walton's tax)",
+          "url": "https://www.boonecountyky.org/services/occupational_licensing/index.php",
+          "says": "The City of Walton has approved a new 2% occupational payroll tax on wages earned for work performed inside Walton city limits.",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Warren County",
@@ -2996,7 +3213,7 @@
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "inferred_small_city_single_rate_pattern",
-        "wageRateNote": "INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
+        "wageRateNote": "2026-09-28: the city's own ordinance (westliberty.ky.gov/Ordinances/Occupational-License-Fee-Ordiance.pdf) is indexed with the phrase 'measured by one half a percent (1/2) of the compensation earned in different locations by the employee', which may mean the wage rate is 0.5%, not 1%. The PDF was unreachable, so the rate was not changed; confirm with the city. INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
         "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote."
       },
       {
@@ -3049,11 +3266,17 @@
         "name": "Winchester",
         "category": "Payroll Only",
         "rate": "2%",
-        "wageRateDecimal": 0.02,
+        "wageRateDecimal": 0.0215,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_payroll_category_single_figure",
-        "wageRateNote": "Category is payroll-exclusive and the rate string is one clean figure."
+        "wageRateStatus": "corrected_via_city_primary_source_2026_09_28",
+        "wageRateNote": "CORRECTED 2026-09-28 from 2% (the KY SOS scrape predates the 2024-10-01 increase). Every 2026 check date is after it. Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
+        "wageRatePrimarySource": {
+          "title": "City of Winchester -- Occupational License Fees (Payroll Tax)",
+          "url": "https://www.winchesterky.com/DepartmentsSubPage/30/occupational-license-fees-payroll-tax",
+          "says": "The City of Winchester has a 2.15% occupational license fee (effective October 1, 2024) on gross wages earned in the city.",
+          "fetchedOn": "2026-09-28"
+        }
       },
       {
         "name": "Wolfe County",
@@ -3100,6 +3323,87 @@
         "wageRateStatus": "confirmed_no_wage_tax",
         "wageRateNote": "Confirmed via Campbell County's own CC-3 occupational tax form: Woodlawn's occupational levy is a flat 0 BUSINESS license fee only — no percentage-of-wages column exists for Woodlawn on the county's own rate schedule. This is a genuine absence of a wage-withholding tax, not an unconfirmed gap.",
         "wageRateSource": "Campbell County CC-3 Occupational Tax & Business License Fee form (campbellcountyky.gov/egov/documents/1573237357_32461.pdf), rate schedule table: Woodlawn listed as \"FEE ... \u0000 FLAT FEE\"."
+      },
+      {
+        "name": "Williamstown",
+        "county": "Grant",
+        "wageRateDecimal": 0.01,
+        "wageRateStatus": "parsed_news_and_payroll_vendor",
+        "wageRateNote": "ADDED 2026-09-28: missing from the KY SOS scrape. Williamstown cut its payroll rate from 1.5% to 1% effective 2026-01-01. The city page (wtownky.org/business/occupational_tax.php) links the details as a download that could not be read, so this rests on the local paper and a payroll vendor.",
+        "wageRateSource": [
+          {
+            "title": "News of Grant County -- Williamstown looking to reduce occupational tax in 2026 (2025-07-19)",
+            "url": "https://www.pmg-ky3.com/grantco/news/williamstown-looking-to-reduce-occupational-tax-in-2026/article_9eea90e2-72c7-572e-8e9f-13bc8043ce1e.html",
+            "says": "The ordinance lowers the rate to one percent and would go into effect Jan. 1, 2026."
+          },
+          {
+            "title": "NEOGOV payroll release notes, 2025-12-10",
+            "url": "https://success.neogov.com/payroll-product-updates-115/december-11-2025-payroll-release-notes-16969",
+            "says": "Effective January 1, 2026, the Williamstown - OLF rate decreased from 1.5% to 1%."
+          }
+        ],
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null
+      },
+      {
+        "name": "Jenkins",
+        "county": "Letcher",
+        "wageRateDecimal": 0.02,
+        "wageRateStatus": "parsed_news_and_payroll_vendor",
+        "wageRateNote": "ADDED 2026-09-28: missing from the KY SOS scrape. Raised from 1.5% to 2% effective 2026-01-01. The city posted an 'Occupational Payroll Tax Amendment - Effective 01/01/2026' notice (cityofjenkins.org) whose body did not render, so the rate rests on a payroll vendor's notice.",
+        "wageRateSource": [
+          {
+            "title": "NEOGOV payroll release notes, 2025-12-10",
+            "url": "https://success.neogov.com/payroll-product-updates-115/december-11-2025-payroll-release-notes-16969",
+            "says": "Effective January 1, 2026, the Jenkins - OLF rate increased from 1.5% to 2%."
+          }
+        ],
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null
+      },
+      {
+        "name": "Bardwell",
+        "county": "Carlisle",
+        "wageRateDecimal": 0.01,
+        "wageRateStatus": "parsed_news_and_payroll_vendor",
+        "wageRateNote": "ADDED 2026-09-28: missing from the KY SOS scrape. Raised from 0.5% to 1% effective 2025-07-01, with a $1,000 annual maximum per employee that this engine does NOT apply (it would over-withhold above $100,000 of Bardwell wages).",
+        "wageRateSource": [
+          {
+            "title": "Bloomberg Tax -- Kentucky Localities Update Occupational Taxes (2025-12-04)",
+            "url": "https://news.bloombergtax.com/payroll/kentucky-localities-update-occupational-taxes",
+            "says": "The occupational tax rate in Bardwell rose to 1% from 0.5% effective July 1, 2025 ... The maximum tax amount per employee is $1,000"
+          },
+          {
+            "title": "NEOGOV payroll release notes, 2025-12-10",
+            "url": "https://success.neogov.com/payroll-product-updates-115/december-11-2025-payroll-release-notes-16969",
+            "says": "Effective July 1, 2025, the Bardwell - OLF rate increased from 0.5% to 1%."
+          }
+        ],
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null
+      },
+      {
+        "name": "Falmouth",
+        "county": "Pendleton",
+        "wageRateDecimal": 0.0,
+        "rateChanges": [
+          {
+            "on": "2026-07-01",
+            "wageRateDecimal": 0.015
+          }
+        ],
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_28",
+        "wageRateNote": "ADDED 2026-09-28: a new tax, created by Ordinance 2026:1 (adopted 2026-05-07), 1.5% of compensation for work performed in the city on or after 2026-07-01. No wage tax before that date.",
+        "wageRateSource": [
+          {
+            "title": "City of Falmouth -- Occupational and Payroll Tax",
+            "url": "https://cityoffalmouth.com/occupational-and-payroll-tax/",
+            "says": "A one and one-half percent (1.5%) payroll tax will also be imposed on compensation earned for work performed within the city limits ... effective July 1, 2026",
+            "fetchedOn": "2026-09-28"
+          }
+        ],
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null
       }
     ],
     "normalizationPass": {
@@ -3132,6 +3436,7 @@
     }
   },
   "knownGaps": [
+    "STILL UNCONFIRMED after the 2026-09-28 pass (31 jurisdictions; each carries an inferred or secondary_source notice on every paycheck): Adairville, Augusta, Bardwell, Benton, Brooksville, Burkesville, Camargo, Carlisle, Cumberland County Public School District, Fordsville, Gamaliel, Hickman, Irvington, Jackson, Jeffersonville, Jenkins, Lebanon Junction, Lyndon, Lynnview, Mayfield, McKee, Middletown, Millersburg, Nortonville, Perryville, Raceland, Salem, Vanceburg, Vine Grove, West Liberty, Williamstown. No page, form or code stating the wage rate was reachable for these; Burkesville's and West Liberty's own ordinances suggest different rates (see their notes). The SOS scrape is also not exhaustive -- this pass found four taxing cities it lacked (Falmouth, Williamstown, Jenkins, Bardwell) -- so a missing city can still mean a missing tax.",
     "FOUND AND FIXED 2026-09-04, same re-verification pass as the Somerset fix below: Lexington-Fayette's old flat `rate: 0.0225` was INCOMPLETE for RESIDENTS specifically -- it captured only LFUCG's own occupational tax, missing Fayette County Public Schools' genuinely separate 0.5% resident-only occupational tax (its own withholding requirement, own collection office). Reshaped jurisdictions.lexingtonFayette from a flat rate to a residentRate (2.75% = 2.25% LFUCG + 0.5% FCPS) / nonresidentRate (2.25%, LFUCG only) split -- see that entry's own schoolBoardComponent note for the full citation. Required a matching change in allKYJurisdictions() (src/registry.ts) to read the new field names, but NO change to kentuckyLocalTax()'s own logic, since it already handles resident/nonresident-split jurisdictions generically.",
     "FIXED 2026-09-04 (local-tax re-verification pass, all states with a local/city tax checked against their own official source): Somerset's entry was stale. This file previously carried Somerset's PRE-increase 0.6% rate (from 2013's Ordinance 13-02) with a note that a reported two-phase increase toward 1.2% had NOT been confirmed as actually enacted. It was: City Council approved the ordinance (confirmed via the City of Somerset's own official news page, corroborated by independent local news), phasing the rate up 0.3 points on 2025-07-01 (to 0.9%) and another 0.3 points on 2026-01-01 (to the current 1.2%) -- both effective dates already past as of this pass. Corrected to 1.2% (see the entry's own wageRateNote). Also checked and found ALREADY CORRECT this same pass: Ashland's 2.375% (eff. 1/1/2026), Walton's new 2% tax (eff. 1/1/2026), and Elsmere's 1.75% (eff. for check dates on/after 7/1/2026) -- all three were already on file with accurate figures and sourcing before this pass; only Somerset needed a fix.",
     "140 of 230 authoritative taxing districts attempted, 101 with a rate value scraped from the source database -- 90 districts remain entirely unattempted, and the 39 attempted-but-blank districts have no rate in the state's own database either (their ordinance PDF would need a separate fetch to close). SUPERSEDED: county coverage is now complete — all 62 county entries carry a confirmed payroll rate, cross-checked against KACo's own 2025 payroll-rate column with zero disagreements against the 20 an earlier pass had already confirmed. What remains unconfirmed is CITY entries, where the scraped category alone cannot distinguish a payroll rate from a net-profits or gross-receipts one.",
@@ -3149,5 +3454,6 @@
     "2026-08-31, third pass (grind-30 request): pushed 197 to 208. Real new source found: KACo's own 2025 Data Brief PDF (kaco.org/media/6120/2025-databrief-occupationaltaxes-3.pdf, distinct from the earlier-cited xlsx file) resolved 4 county fiscal courts at once (Daviess, Gallatin, Nelson, Rockcastle) and, in the same pass, RESOLVED a previously-disclosed live conflict: Daviess County Fiscal Court's scraped 0.35% (Net Profits) is a genuinely separate figure from its real 1.00% payroll rate. Also found and fixed a duplicate-entity case: the bare 'Woodford' scraped entry (no such city exists in Kentucky) is the same jurisdiction as the already-confirmed 'Woodford County' entry, so it now carries the same 1.5% rather than sitting as a spurious gap -- the same pattern already documented for Boone/Cumberland. Deliberately did NOT apply this shortcut to Clinton, Hickman, Marion, and Russell, which remain unconfirmed: unlike Woodford, these are real, distinct Kentucky cities in DIFFERENT counties that merely share a name with an unrelated confirmed county (city Marion sits in Crittenden County; 'Marion County' is a different place entirely, seat Lebanon) -- applying the shortcut there would have assigned a wrong county's rate to a real city. Also resolved a genuine Cumberland County duplicate the other direction: 'Cumberland County Fiscal Court' (scraped 1.75% Net Profits) is now understood to be a real, separate net-profits-only tax, NOT a missing wage rate -- the payroll figure (1.25%) already lives correctly under the sibling 'Cumberland County' entry, so Fiscal Court's wageRateDecimal is correctly left null with an explanatory note rather than forced. Diminishing returns clearly hit for the smallest remaining towns (Adairville, Gamaliel, Millersburg, Park City, population under ~1,000 each) -- repeated targeted searches returned only generic Kentucky-occupational-tax boilerplate with no town-specific rate, suggesting these genuinely have no rate published anywhere online rather than being findable with more searching.",
     "2026-08-31, fourth pass (explicit \"find a way, do not stop\" instruction): pushed 208 to 233 by going straight to the primary source -- drove the KY Secretary of State's own KRS 67.766 occupational-tax lookup database live via browser automation (it is an ASP.NET postback form WebFetch cannot drive) for every remaining city, confirming the SOS database IS this file's original scrape source (no new numbers hiding there) but surfacing each city's real website/contact info. Chased those down: most small-city sites have no occupational-tax page at all, and one (cityofcavecity.com) turned out to be a squatted/expired domain now serving an Indonesian gambling site -- not used. The SOS-hosted per-district PDF forms are scanned images with no text layer (confirmed via pdftotext returning zero output), so OCR was not possible with available tools. Faced with a real choice under direct pressure to close every remaining entry: drew a principled line rather than force wrong numbers. Applied a new, explicitly lowest-confidence tier (inferred_small_city_single_rate_pattern) to 25 entries whose only figure is a bare 'Net Profits'-or-Payroll-inclusive category at a normal wage-tax magnitude, reasoning from this file's OWN confirmed history that this specific pattern usually does turn out to be the wage rate too (Elizabethtown, Henderson, Georgetown, several counties, Russellville, all independently confirmed this same shape). Deliberately did NOT extend that same inference to 17 entries whose only figure is a 'Gross Receipts' category, at any magnitude -- this file's own corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show that figure is a structurally different business-revenue tax, never the wage rate, so guessing it in would make the engine actively wrong rather than merely incomplete. The remaining 19 (17 Gross-Receipts-only + 2 already-explained non-gaps) would need a phone call to each town clerk to close for real -- the one remaining avenue this session cannot perform itself.",
     "2026-08-31, fifth and final pass of this research arc (\"just try to find them\" / \"they are literally required to be somewhere\"): went from 246 to 250 confirmed. Checked the KY SOS database live for the 4 remaining holdouts (Lewisburg, Muldraugh, Park City, Tompkinsville) and got their contact/website info, which led to Cave City's own official withholding form -- catching a REAL ERROR in this file's own earlier work: the 2026-08-31 inferred-tier pass had guessed Cave City at 1% (assuming Net Profits doubled as wages); the city's own form says 2%, a genuinely different, higher rate. That prompted checking the Kentucky League of Cities' own website, which linked to their official statewide FY2023 occupational tax survey (kleague.sharepoint.com) -- a comprehensive table with 400+ Kentucky cities, each carrying a DEDICATED Payroll Tax Rate column distinct from Net Profits and Gross Receipts. Cross-checked essentially every entry this whole research arc had touched against it: the overwhelming majority matched exactly, validating the individual-source work, but it also caught five more real errors in this file's own inferred-tier guesses -- Marion (1.5% guessed, 0.75% real), Cadiz (1.5% from a weaker source, 1.9% real), Earlington (1.5% guessed, 1.25% real), Greensburg (1% guessed, 1.5% real), Hillview (1.8% guessed, 1.1% real), Shively (1.5% from tax-rates.org, 2.25% real). Several apparent \"conflicts\" against the FY2023 table turned out NOT to be errors once checked against a more recent source -- Campbellsville, Elsmere, Harrodsburg, Highland Heights, and Shepherdsville all have real, separately-dated rate increases AFTER FY2023 that this file had already correctly sourced; the FY2023 table's lower figure is the historical rate, not a correction. Lesson worth keeping: even a single authoritative-seeming source (the KY SOS database itself, an individual tax-rates.org page, or this file's own inferred-tier pattern-matching) can be wrong, and cross-checking against a genuinely independent comprehensive source is what actually catches it -- this is the second time in this same research arc a supposedly-confirmed entry (Cave City, then five more) turned out wrong on closer inspection, not just the unconfirmed ones."
-  ]
+  ],
+  "reverification2026_09_28": "Item-22 pass. (1) Every county entry checked against KACo's 2026 data brief (payroll rates as of January 2026, kaco.org/media/7051/2026-databrief-occupationaltaxes.pdf): all match except three stale ones, now corrected -- Crittenden County 0.5%->1.5% and Powell County 1.25%->1.75% (both from 2025-07-01), Simpson County 1%->1.25% (2026-01-01). (2) Two mid-2026 changes are now effective-dated via rateChanges instead of one rate for the whole year: Grant County 2.5%->2.0% and Elsmere 1.25%->1.75%, both on 2026-07-01. (3) Of the 18 inferred and 39 parsed wage rates, these were read from the jurisdiction's own page, form or code: Paducah, Hopkinsville, Pikeville, Jeffersontown, Dayton, Russell, Walton, Corbin, Prestonsburg, Russellville, Simpsonville, City of Union, Dry Ridge, Brandenburg, Hardin County Industrial Tax District, Eddyville, Franklin, Grayson, Hartford; and these were WRONG and corrected: Winchester 2%->2.15% (since 2024-10-01), Middlesboro 2%->2.45% (since 2024-04-01), Marion 0.75%->1.5% (since 2025-07-01), Edmonton 1%->1.5%, Perryville 1%->1.5% (since 2023, local-paper source, keeps a notice). The county entries Caldwell, Carter, Hickman, Martin, Metcalfe, Robertson and Todd match KACo 2026 and are upgraded. (4) Added four jurisdictions the SOS scrape never had: Falmouth (1.5% from 2026-07-01, city page), Williamstown (1%), Jenkins (2%) and Bardwell (1%) -- the last three on news/payroll-vendor evidence, so they carry a notice. Still inferred or aggregator-parsed, and still flagged on every paycheck: see knownGaps."
 }

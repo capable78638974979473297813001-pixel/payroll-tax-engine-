@@ -314,6 +314,7 @@ function attemptedMatches(resolved: ResolvedJurisdiction) {
     resolved.paJurisdiction,
     resolved.mdCounty,
     resolved.alMunicipality,
+    resolved.alCounty,
     resolved.kyCity,
     resolved.kyCounty,
   ].filter((m) => m !== null);

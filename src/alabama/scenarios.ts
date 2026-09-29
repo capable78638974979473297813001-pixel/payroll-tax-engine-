@@ -70,7 +70,7 @@ export const ALABAMA_SCENARIOS: AlabamaScenario[] = [
     id: 'city-not-taxing',
     title: 'Same salary, working in Montgomery',
     covers:
-      'A work city that is a real Alabama city but NOT among the 25 known to levy an occupational ' +
+      'A work city that is a real Alabama city but NOT among those known to levy an occupational ' +
       'tax — correctly produces no local line at all, not a silent $0 assumption.',
     input: {
       checkDate: '2026-04-15',

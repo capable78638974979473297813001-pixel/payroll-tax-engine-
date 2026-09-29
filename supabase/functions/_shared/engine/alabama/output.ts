@@ -58,6 +58,7 @@ export function buildAlabamaOutput(
   const sit = result.taxes.filter((t) => t.id.startsWith('AL_SIT'));
   const sitTotal = sit.reduce((sum, t) => sum + t.amount, 0);
   const local = result.taxes.find((t) => t.id === 'AL_LOCAL');
+  const county = result.taxes.find((t) => t.id === 'AL_COUNTY');
   const sui = result.taxes.find((t) => t.id === 'AL_SUI_ER');
 
   const alabamaBase = result.taxes.find((t) => t.id === 'AL_SIT')?.taxableWages ?? 0;
@@ -91,6 +92,15 @@ export function buildAlabamaOutput(
               city: built.matchedCity.name,
               rate: built.matchedCity.rate,
               amount: amount(local.amount),
+            },
+          }
+        : {}),
+      ...(county && built.matchedCounty
+        ? {
+            countyOccupationalTax: {
+              county: built.matchedCounty.name,
+              rate: built.matchedCounty.rate,
+              amount: amount(county.amount),
             },
           }
         : {}),
@@ -151,8 +161,21 @@ function explain(
     );
   } else if (input.workCity && !built.matchedCity) {
     out.push(
-      `Work city "${input.workCity}" is not among the 25 Alabama municipalities known to levy an ` +
+      `Work city "${input.workCity}" is not among the Alabama municipalities known to levy an ` +
         `occupational tax, so no local line was produced. Most Alabama cities levy none.`,
+    );
+  }
+  const countyLine = result.taxes.find((t) => t.id === 'AL_COUNTY');
+  if (countyLine) {
+    out.push(
+      `${countyLine.name}: ${countyLine.detail}. Persons over 65 who are not gainfully employed and domestic ` +
+        `servants in private homes are exempt, and an employee's Sec. 40-12-40 professional license fee is ` +
+        `credited against it on their own return; neither is applied here.`,
+    );
+  } else if (built.matchedCounty && local) {
+    out.push(
+      `${built.matchedCounty.name} County's occupational fee does not apply: ${local.name.replace(/ Occupational Tax$/, '')} ` +
+        `already taxed work there on 2019-06-10, the statute's cutoff.`,
     );
   }
 

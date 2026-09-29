@@ -7,6 +7,7 @@ import {
   listUniqueTaxIds,
   payCalc,
   resolveUniqueTaxId,
+  unpinnedUniqueTaxIds,
 } from '../api/ste-compat.ts';
 
 const CHECK_DATE = '2026-08-15';
@@ -42,6 +43,27 @@ describe('STE-shaped compatibility layer (api/ste-compat.ts)', () => {
       const first = entries[0];
       assert.deepEqual(resolveUniqueTaxId(first.uniqueTaxId, CHECK_DATE), first);
       assert.equal(resolveUniqueTaxId('99-999-9999', CHECK_DATE), undefined);
+    });
+  });
+
+  describe('uniqueTaxId stability (api/ste-id-pins.json)', () => {
+    test('every catalog entry is pinned -- append new jurisdictions to the pin file', () => {
+      assert.deepEqual(unpinnedUniqueTaxIds(CHECK_DATE), []);
+    });
+
+    test('a town added after launch does not renumber the ones after it', () => {
+      // Beaverton (added 2026-09-28) sorts between Bear Creek and Bessemer;
+      // Bessemer keeps the id it launched with.
+      assert.equal(resolveUniqueTaxId('01-200-0004', CHECK_DATE)?.name, 'Bessemer');
+      assert.equal(resolveUniqueTaxId('01-200-0026', CHECK_DATE)?.name, 'Beaverton');
+      assert.equal(resolveUniqueTaxId('01-100-0001', CHECK_DATE)?.value, 'Macon');
+    });
+
+    test('non-PSD ids are unique', () => {
+      // (A PA borough split across two counties is listed once per county
+      // under its one PSD code; both entries set the same workPSD.)
+      const ids = listUniqueTaxIds(CHECK_DATE).filter((e) => e.type !== 'psd').map((e) => e.uniqueTaxId);
+      assert.equal(new Set(ids).size, ids.length);
     });
   });
 

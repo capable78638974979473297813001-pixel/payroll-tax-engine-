@@ -54,6 +54,12 @@ export interface ValidateOptions {
    * retroactive run for an earlier year needs that year's ruleset.
    */
   supportedYears?: number[];
+  /**
+   * Whether a state has a ruleset for a tax year. A year can be covered for
+   * federal tax and only some states (2025 is), so a supported year is
+   * still rejected for a work or residence state without that year's rules.
+   */
+  stateHasYear?: (code: string, year: number) => boolean;
 }
 
 function isObject(v: unknown): v is Record<string, unknown> {
@@ -175,6 +181,17 @@ export function validatePaycheckInput(raw: unknown, opts: ValidateOptions = {}):
     }
     if (opts.validStateCodes && !opts.validStateCodes.has(v.code.toUpperCase())) {
       err(`${path}.code`, `"${v.code}" is not a state this API can compute. GET /api/states for the list.`);
+    } else if (opts.stateHasYear && typeof body.checkDate === 'string' && /^\d{4}-/.test(body.checkDate)) {
+      const year = Number(body.checkDate.slice(0, 4));
+      if (!opts.supportedYears || opts.supportedYears.includes(year)) {
+        if (!opts.stateHasYear(v.code.toUpperCase(), year)) {
+          err(
+            `${path}.code`,
+            `has no ${year} rules in this build, so a ${year} check can't be calculated for ${v.code.toUpperCase()}. ` +
+              `GET /api/states?year=${year} for the states that have them.`,
+          );
+        }
+      }
     }
     if (v.certificate !== undefined && !isObject(v.certificate)) {
       err(`${path}.certificate`, 'must be an object when present.');
