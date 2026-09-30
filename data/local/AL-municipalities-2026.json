@@ -156,6 +156,13 @@
           {
             "title": "Alabama League of Municipalities survey",
             "url": "https://almonline.org/TaxRates.aspx"
+          },
+          {
+            "title": "Gadsden-Etowah Industrial Development Authority -- Taxes and Fees",
+            "url": "https://gadsdenida.org/taxes-and-fees/",
+            "fetchedOn": "2026-09-30",
+            "says": "Gadsden and some other municipalities have an occupational license fee of 2%, withheld from employee salaries and remitted by the employer.",
+            "note": "Corroborates the survey but is not the city's own document; the city's Form G-3 (Ordinance No. 1777, as amended) prints no rate, so the tier stays league_survey_only."
           }
         ]
       }
@@ -164,8 +171,14 @@
       "name": "Glencoe",
       "rate": 0.02,
       "confirmation": {
-        "tier": "league_survey_only",
+        "tier": "primary_source",
         "sources": [
+          {
+            "title": "City of Glencoe -- Form G-1, Employer's Monthly/Quarterly Return of Occupational Tax Withheld (Ordinance #2010-002)",
+            "url": "https://cityofglencoe.org/wp-content/uploads/2021/09/Glencoe-Occupational-Tax-Form.pdf",
+            "fetchedOn": "2026-09-30",
+            "says": "Each employer of one or more persons must withhold an occupational tax at the rate of 2% from gross salaries, wages and commissions paid for work or services performed within the City of Glencoe."
+          },
           {
             "title": "Alabama League of Municipalities survey",
             "url": "https://almonline.org/TaxRates.aspx"
@@ -551,7 +564,7 @@
   },
   "notCapturedYet": "Nothing known. Macon County's 1% county fee, deliberately left out before for lack of a source, is now in counties[] on the strength of its statute and Neumo's 01/2026 return, which lists it as a live jurisdiction.",
   "knownGaps": [
-    "RESOLVED 2026-09-28 for 20 of 29 municipalities and Macon County (see confirmation on each entry). Still survey-only: Bear Creek, Brilliant, Gadsden, Glencoe, Goodwater, Haleyville, Lynn, Red Bay -- each carries a secondary_source notice on every paycheck.",
+    "RESOLVED 2026-09-28 for 20 of 29 municipalities and Macon County (see confirmation on each entry). Glencoe confirmed 2026-09-30 from its own Form G-1 (2%). Still survey-only: Bear Creek, Brilliant, Gadsden, Goodwater, Haleyville, Lynn, Red Bay (Gadsden's 2% is corroborated by the Gadsden-Etowah IDA but not by a city document; Haleyville's 2026 return is a .docx no available fetcher could read; Goodwater's published fee schedule covers business licenses only) -- each carries a secondary_source notice on every paycheck.",
     "No taxable-base detail (exemptions, minimum earnings thresholds, residency treatment) was independently confirmed per city beyond Birmingham's general 'gross pay, residents and nonresidents alike' convention -- assumed uniform across all 25 cities, not individually verified.",
     "No inter-jurisdiction credit mechanism (the OH ORC-718.121 equivalent, for an employee who lives in one taxing AL city and works in another) was found or confirmed to exist for Alabama -- unlike Ohio, no evidence was found that Alabama cities tax based on RESIDENCE at all, only work location, so this may be a non-issue rather than an unmodelled gap; not certain either way. CHECKED AGAIN (this pass) and the answer sharpened rather than repeated: Birmingham's own occupational tax code DOES contain an inter-municipal provision, but it is a refund procedure for tax ERRONEOUSLY paid to another municipality — the paying city refunds it and Birmingham holds off assessing until the refund arrives. That is a correction mechanism for a misdirected payment, not an Ohio-style credit for an employee who legitimately owes two cities. So the absence stands, and it is now an absence that was looked for in the right place.",
     "This list may not be exhaustive -- the 2026-09-28 pass found 4 towns and 1 county the League survey never listed (Beaverton, Irondale, Notasulga, Tarrant, Macon County). Alabama has no state register of occupational taxes, so another unlisted town is possible.",
