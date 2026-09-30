@@ -28,6 +28,12 @@
       "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/instructions/withholding/2026/withholding-guide.pdf",
       "verifiedOn": "2026-08-26",
       "verifiedBy": "Same guide already on file for this state, re-downloaded and re-extracted with pdftotext -layout (page 8-9 of the printed guide) for the 'find and fix anything missing across all 50 states' pass. Quoted verbatim: \"For lump sum distribution of annual bonus, the withholding amount should be calculated at the highest State tax rate (6.50%), and the highest local tax rate for the county of residence.\" Then independently cross-checked against all ten of the guide's own combined per-county 'Lump Sum Distribution of Annual Bonus' percentage-method tables (one per distinct local rate present in this project's own countyRates data): every single one is EXACTLY 6.50% plus that county's own top local rate (2.25%->8.75%, 2.40%->8.90%, 2.65%->9.15%, 2.75%->9.25%, 2.85%->9.35%, 3.00%->9.50%, 3.05%->9.55%, 3.10%->9.60%, 3.20%->9.70%, 3.30%->9.80%), confirming the formula rather than assuming it from the one-sentence description alone. This project had NO record of this rule before this pass -- a standalone Maryland bonus cheque was previously run through the ordinary annual-bracket formula with no flat lump-sum option at all, on a state whose 24 counties/city all levy a real local income tax on top of the state's own graduated rate."
+    },
+    {
+      "title": "Comptroller of Maryland -- Withholding Tax Facts, January 2026 - December 2026 (Revised 12/25)",
+      "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/legal-publications/facts/withholding-tax-facts-2026.pdf",
+      "verifiedOn": "2026-09-29",
+      "quote": "Note: These tax rates are used for computing tax on individual tax return. Maryland law does not permit the use of a rate of less than 4.75% to be used for withholding tax purposes."
     }
   ],
   "bracketStatePlusLocal": {
@@ -35,128 +41,91 @@
       "mfjHoh": [
         {
           "from": 0,
-          "to": 1000,
-          "base": 0,
-          "rate": 0.02
-        },
-        {
-          "from": 1000,
-          "to": 2000,
-          "base": 20,
-          "rate": 0.03
-        },
-        {
-          "from": 2000,
-          "to": 3000,
-          "base": 50,
-          "rate": 0.04
-        },
-        {
-          "from": 3000,
           "to": 150000,
-          "base": 90,
+          "base": 0.0,
           "rate": 0.0475
         },
         {
           "from": 150000,
           "to": 175000,
-          "base": 7072.5,
+          "base": 7125.0,
           "rate": 0.05
         },
         {
           "from": 175000,
           "to": 225000,
-          "base": 8322.5,
+          "base": 8375.0,
           "rate": 0.0525
         },
         {
           "from": 225000,
           "to": 300000,
-          "base": 10947.5,
+          "base": 11000.0,
           "rate": 0.055
         },
         {
           "from": 300000,
           "to": 600000,
-          "base": 15072.5,
+          "base": 15125.0,
           "rate": 0.0575
         },
         {
           "from": 600000,
           "to": 1200000,
-          "base": 32322.5,
+          "base": 32375.0,
           "rate": 0.0625
         },
         {
           "from": 1200000,
           "to": null,
-          "base": 69822.5,
+          "base": 69875.0,
           "rate": 0.065
         }
       ],
       "single": [
         {
           "from": 0,
-          "to": 1000,
-          "base": 0,
-          "rate": 0.02
-        },
-        {
-          "from": 1000,
-          "to": 2000,
-          "base": 20,
-          "rate": 0.03
-        },
-        {
-          "from": 2000,
-          "to": 3000,
-          "base": 50,
-          "rate": 0.04
-        },
-        {
-          "from": 3000,
           "to": 100000,
-          "base": 90,
+          "base": 0.0,
           "rate": 0.0475
         },
         {
           "from": 100000,
           "to": 125000,
-          "base": 4697.5,
+          "base": 4750.0,
           "rate": 0.05
         },
         {
           "from": 125000,
           "to": 150000,
-          "base": 5947.5,
+          "base": 6000.0,
           "rate": 0.0525
         },
         {
           "from": 150000,
           "to": 250000,
-          "base": 7260,
+          "base": 7312.5,
           "rate": 0.055
         },
         {
           "from": 250000,
           "to": 500000,
-          "base": 12760,
+          "base": 12812.5,
           "rate": 0.0575
         },
         {
           "from": 500000,
           "to": 1000000,
-          "base": 27135,
+          "base": 27187.5,
           "rate": 0.0625
         },
         {
           "from": 1000000,
           "to": null,
-          "base": 58385,
+          "base": 58437.5,
           "rate": 0.065
         }
-      ],
-      "$comment": "Base values computed and internally verified by this project (chained from each bracket's own from/rate) since the source publishes rates and thresholds but not pre-computed cumulative bases the way DE/CT/CA's own tables do -- e.g. single: 90 + (100000-3000)x0.0475 = 90+4607.5=4697.5, matching the next tier's own base exactly; chain verified consistent end to end for both schedules before trusting it."
+      ]
     },
     "standardDeductionAnnual": 3400,
     "standardDeductionPerPeriod": {
@@ -186,7 +155,8 @@
       "note": "'Employees that do not submit a withholding certificate are defaulted to the highest rate of local tax, which for the year 2026 will be 3.30%' -- the ONE state in this project so far whose no-certificate default explicitly uses the MOST punitive rate available (every other state's no-cert default is 'single, zero allowances' on the ORDINARY schedule, not a specially elevated one)."
     },
     "nonresidentSpecialRate": 0.0225,
-    "nonresidentComment": "'For employees who are not residents of Maryland, use the Nonresident rate, which includes no local tax; but does include the Special 2.25% Nonresident rate' -- structurally the SAME shape as this file's own resident calculation (state bracket + a flat rate applied to the same taxable income), just substituting a UNIVERSAL 2.25% figure for the resident's own county-specific rate. Gated on certificate.nonresident, distinct from the (separate) reciprocity mechanism below, which zeroes MD tax ENTIRELY for residents of DC/PA/VA/WV rather than applying this reduced rate."
+    "nonresidentComment": "'For employees who are not residents of Maryland, use the Nonresident rate, which includes no local tax; but does include the Special 2.25% Nonresident rate' -- structurally the SAME shape as this file's own resident calculation (state bracket + a flat rate applied to the same taxable income), just substituting a UNIVERSAL 2.25% figure for the resident's own county-specific rate. Gated on certificate.nonresident, distinct from the (separate) reciprocity mechanism below, which zeroes MD tax ENTIRELY for residents of DC/PA/VA/WV rather than applying this reduced rate.",
+    "stateBracketsWithholdingNote": "Withholding starts at 4.75%: the Comptroller's Withholding Tax Facts (2025 and 2026 editions) print the return schedule's 2% / 3% / 4% bands and then say 'Maryland law does not permit the use of a rate of less than 4.75% to be used for withholding tax purposes.' Corrected 2026-09-29 from the return schedule, which under-withheld about $52 a year."
   },
   "countyRates": {
     "$comment": "24 jurisdictions. 22 are FLAT (a single percentage of the same taxable income the state bracket uses); Anne Arundel and Frederick are TIERED (their own internal income brackets, independent of and narrower than the state's own bracket thresholds) -- a genuinely different local-tax shape from every other state's local tax in this project.",

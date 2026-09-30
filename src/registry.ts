@@ -3,6 +3,7 @@ import { join } from 'node:path';
 
 const DATA_ROOT = join(import.meta.dirname, '..', 'data');
 
+const datedCache = new Map<string, StateRuleset>();
 const cache = new Map<string, unknown>();
 
 /**
@@ -27,6 +28,7 @@ let dataReader: DataReader = (relPath) => {
 export function setDataReader(reader: DataReader): void {
   dataReader = reader;
   cache.clear();
+  datedCache.clear();
 }
 
 /**
@@ -160,10 +162,48 @@ export interface StateRuleset {
   [key: string]: unknown;
 }
 
+/**
+ * A mid-year change inside one year's file: from `from` (a check date,
+ * inclusive) each dotted path in `set` takes the new value. Used where a
+ * state reissued its tables part-way through a year (Idaho's May 2025 rate
+ * cut, Utah's June 2025 tables) and the method has no dated switch of its own.
+ */
+interface EffectiveDatedChange {
+  from: string;
+  set: Record<string, unknown>;
+  note?: string;
+}
+
+function applyEffectiveDated(base: StateRuleset, checkDate: string): StateRuleset {
+  const changes = (base.effectiveDated as EffectiveDatedChange[] | undefined) ?? [];
+  const due = changes.filter((c) => c.from <= checkDate).sort((a, b) => a.from.localeCompare(b.from));
+  if (due.length === 0) return base;
+  const key = `${base.code}-${base.year}@${due.at(-1)!.from}`;
+  const hit = datedCache.get(key);
+  if (hit) return hit;
+  const out = structuredClone(base) as Record<string, unknown>;
+  for (const change of due) {
+    for (const [path, value] of Object.entries(change.set)) {
+      const parts = path.split('.');
+      let node = out as Record<string, unknown>;
+      for (const part of parts.slice(0, -1)) {
+        if (typeof node[part] !== 'object' || node[part] === null) {
+          throw new Error(`effectiveDated path ${path} does not exist in ${base.code}-${base.year}.json`);
+        }
+        node = node[part] as Record<string, unknown>;
+      }
+      node[parts.at(-1)!] = structuredClone(value);
+    }
+  }
+  datedCache.set(key, out as StateRuleset);
+  return out as StateRuleset;
+}
+
 export function stateRuleset(code: string, checkDate: string): StateRuleset {
-  return loadJson<StateRuleset>(
+  const base = loadJson<StateRuleset>(
     join('states', `${code.toUpperCase()}-${yearOf(checkDate)}.json`),
   );
+  return base.effectiveDated ? applyEffectiveDated(base, checkDate) : base;
 }
 
 export function hasStateRuleset(code: string, checkDate: string): boolean {
@@ -300,7 +340,31 @@ export interface PALocalEntry {
 
 interface PALocalRegistryFile {
   year: number;
-  jurisdictions: PALocalEntry[];
+  jurisdictions: (PALocalEntry & { rateChanges?: PARateChange[] })[];
+}
+
+/**
+ * A change part-way through the register's year: from `on` (a check date,
+ * inclusive) the listed fields take these values. Philadelphia resets its
+ * wage tax every 1 July; school districts change on 1 July too.
+ */
+interface PARateChange {
+  on: string;
+  set: Partial<Pick<PALocalEntry, 'residentEIT' | 'nonresidentEIT' | 'schoolDistrictEIT' | 'totalResidentEIT' | 'lst'>>;
+}
+
+function paEntryOn(
+  raw: PALocalEntry & { rateChanges?: PARateChange[] },
+  checkDate: string,
+): PALocalEntry {
+  const due = (raw.rateChanges ?? []).filter((c) => c.on <= checkDate).sort((a, b) => a.on.localeCompare(b.on));
+  if (due.length === 0) return raw;
+  const out: PALocalEntry & { rateChanges?: PARateChange[] } = { ...raw };
+  for (const c of due) Object.assign(out, c.set);
+  if (due.some((c) => c.set.totalResidentEIT === undefined && (c.set.residentEIT !== undefined || c.set.schoolDistrictEIT !== undefined))) {
+    out.totalResidentEIT = Math.round((out.residentEIT + out.schoolDistrictEIT) * 1e6) / 1e6;
+  }
+  return out;
 }
 
 /** Whether a PA Act 32 local (EIT/LST) registry exists for this check date. */
@@ -320,7 +384,8 @@ export function paLocalRuleset(
   const file = loadJson<PALocalRegistryFile>(
     join('local', `PA-EIT-LST-${yearOf(checkDate)}.json`),
   );
-  return file.jurisdictions.find((j) => j.psdCode === psdCode);
+  const raw = file.jurisdictions.find((j) => j.psdCode === psdCode);
+  return raw && paEntryOn(raw, checkDate);
 }
 
 /** Every PA Act 32 jurisdiction — for geocode/'s county+municipality search. */
@@ -328,7 +393,9 @@ export function allPALocalJurisdictions(checkDate: string): PALocalEntry[] {
   const file = loadJson<PALocalRegistryFile>(
     join('local', `PA-EIT-LST-${yearOf(checkDate)}.json`),
   );
-  return file.jurisdictions;
+  return file.jurisdictions.some((j) => j.rateChanges)
+    ? file.jurisdictions.map((j) => paEntryOn(j, checkDate))
+    : file.jurisdictions;
 }
 
 export interface MICityEntry {
@@ -401,7 +468,7 @@ interface KYOccupationalRegistryFile {
         rateChanges?: { on: string; wageRateDecimal: number }[];
       }
     >;
-    louisvilleMetro: { residentRate: number; nonresidentRate: number };
+    louisvilleMetro: { residentRate: number; nonresidentRate: number; citiesWithinMetro?: string[] };
     lexingtonFayette: { residentRate: number; nonresidentRate: number };
   };
 }
@@ -476,6 +543,20 @@ export function allKYJurisdictions(checkDate: string): KYJurisdictionEntry[] {
   return entries;
 }
 
+/**
+ * Louisville/Jefferson County Metro: its resident/nonresident rates and the
+ * 83 cities inside it. Metro's tax applies to work anywhere in the county;
+ * a city's own tax is owed on top, with no credit (KRS 68.197's credit is
+ * for 30,000-300,000-population counties only).
+ */
+export function kyLouisvilleMetro(checkDate: string): { residentRate: number; nonresidentRate: number; cities: string[] } {
+  const file = loadJson<KYOccupationalRegistryFile>(
+    join('local', `KY-occupational-${yearOf(checkDate)}.json`),
+  );
+  const m = file.jurisdictions.louisvilleMetro;
+  return { residentRate: m.residentRate, nonresidentRate: m.nonresidentRate, cities: m.citiesWithinMetro ?? [] };
+}
+
 /** Look up one Kentucky jurisdiction by name (case-insensitive) among the confirmed-rate set — see allKYJurisdictions()'s own doc comment for what "confirmed" means here. */
 export function kyJurisdictionRuleset(
   name: string,
@@ -509,6 +590,11 @@ export interface ALMunicipalityEntry {
     tier: 'primary_source' | 'league_survey_only' | 'conflicting_sources';
     conflict?: string;
   };
+  /**
+   * Dated rates, oldest first: the latest entry whose `from` is on or
+   * before the check date sets `rate` (Opelika's 1.5% ran to 2025-03-31).
+   */
+  rateHistory?: { from: string; rate: number }[];
 }
 
 /**
@@ -551,11 +637,13 @@ export function alMunicipalityRuleset(
     join('local', `AL-municipalities-${yearOf(checkDate)}.json`),
   );
   const wanted = name.trim().toLowerCase();
-  return file.municipalities.find(
+  const entry = file.municipalities.find(
     (m) =>
       m.name.toLowerCase() === wanted ||
       (m.aliases ?? []).some((alias) => alias.toLowerCase() === wanted),
   );
+  const dated = entry?.rateHistory?.filter((h) => h.from <= checkDate).at(-1);
+  return entry && dated && dated.rate !== entry.rate ? { ...entry, rate: dated.rate } : entry;
 }
 
 /**
@@ -592,6 +680,12 @@ export interface OHMunicipalityEntry {
   rate: number;
   effectiveFrom: string;
   administeredBy: string;
+  /**
+   * Dated rates within the file's year, oldest first: the latest entry whose
+   * `from` is on or before the check date sets `rate` (a 0 rate means the
+   * town was not taxing yet, or had repealed).
+   */
+  rateHistory?: { from: string; rate: number }[];
 }
 
 /**
@@ -650,7 +744,9 @@ export function ohMunicipalityRuleset(
   const file = loadJson<OHMunicipalityRegistryFile>(
     join('local', `OH-municipalities-${yearOf(checkDate)}.json`),
   );
-  return file.municipalities.find((m) => m.name.toLowerCase() === name.toLowerCase());
+  const entry = file.municipalities.find((m) => m.name.toLowerCase() === name.toLowerCase());
+  const dated = entry?.rateHistory?.filter((h) => h.from <= checkDate).at(-1);
+  return entry && dated && dated.rate !== entry.rate ? { ...entry, rate: dated.rate } : entry;
 }
 
 /** Every Ohio taxing municipality — for geocode/'s fuzzy name matching. */
@@ -666,7 +762,9 @@ export interface OHSchoolDistrictEntry {
   sdNumber: string;
   irn: string;
   name: string;
-  rate2026: number;
+  /** The file year's rate; the 2026 file names it rate2026. */
+  rate?: number;
+  rate2026?: number;
   earnedIncomeOnlyBase: boolean;
   firstYearEffective: number;
 }
@@ -712,6 +810,8 @@ export interface OHJEDDEntry {
   annualWageCap?: number;
   /** The year annualWageCap is for (these caps are CPI-adjusted annually). */
   annualWageCapYear?: number;
+  /** Dated rates within the file's year, oldest first; the latest `from` on or before the check date sets `rate`. */
+  rateHistory?: { from: string; rate: number }[];
 }
 
 /** A JEDD/JEDZ rate row with no polygon in Ohio's boundary layer — see the data file's boundaryGaps. */
@@ -752,7 +852,9 @@ export function hasOHJEDDRuleset(checkDate: string): boolean {
  */
 export function ohJEDDRuleset(jeddId: string, checkDate: string): OHJEDDEntry | undefined {
   const file = loadJson<OHJEDDRegistryFile>(join('local', `OH-jedd-jedz-${yearOf(checkDate)}.json`));
-  return file.zones.find((z) => z.jeddId === jeddId);
+  const zone = file.zones.find((z) => z.jeddId === jeddId);
+  const dated = zone?.rateHistory?.filter((h) => h.from <= checkDate).at(-1);
+  return zone && dated && dated.rate !== zone.rate ? { ...zone, rate: dated.rate } : zone;
 }
 
 /** Rate rows whose zone can't be found by coordinate (no published polygon). */

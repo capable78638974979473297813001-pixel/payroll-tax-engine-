@@ -33,6 +33,7 @@ import {
   hasPALocalRuleset,
   hasStateRuleset,
   kyJurisdictionRuleset,
+  kyLouisvilleMetro,
   miCityRuleset,
   hasOHJEDDRuleset,
   ohJEDDExemptPretax,
@@ -2832,6 +2833,8 @@ type MTSchedule = 'single_mfs_bothWorking' | 'mfj_qss' | 'hoh';
 
 interface BracketPerPeriodGrossConfig {
   brackets: Record<MTSchedule, Record<string, WIBracket[]>>; // second key is PayFrequency
+  /** Round the per-period amount UP to the next dollar (the 2025 guide) rather than to the nearest dollar (2026). */
+  roundUp?: boolean;
 }
 
 /**
@@ -2960,7 +2963,10 @@ function bracketPerPeriodGross(
   // this against the guide's own examples before trusting it: an earlier
   // draft that stopped at cent-level rounding produced $33.09 here, which
   // does not match the source at all.
-  const amount = toWholeDollars(dollars(bracket.base) + applyRate(excess, bracket.rate));
+  // The 2025 guide's own examples round UP ($35.25 -> $36, $130.16 -> $131),
+  // the 2026 guide's round to the nearest dollar; each year's file says which.
+  const raw = dollars(bracket.base) + applyRate(excess, bracket.rate);
+  const amount = cfg.roundUp ? Math.ceil(raw / 100) * 100 : toWholeDollars(raw);
 
   const detail =
     `${fmt(grossWages)} gross (${schedule}, ${input.payFrequency}) @ ${(bracket.rate * 100).toFixed(2)}% ` +
@@ -3932,6 +3938,12 @@ function stateDisabilityEmployeeTax(
 interface BracketTwoStatusConfig {
   brackets: Record<'single' | 'married', Record<string, WIBracket[]>>; // second key is PayFrequency
   nonresidentAlienAdjustment?: Record<string, number>; // dollars, keyed by PayFrequency
+  /**
+   * Idaho Child Tax Credit Allowance Table: dollars per Form ID W-4 allowance,
+   * keyed by PayFrequency, subtracted from wages before the table lookup.
+   * Absent once the credit sunset (2026); present in the 2025 file.
+   */
+  childTaxCreditAllowance?: Record<string, number>;
 }
 
 /**
@@ -4041,8 +4053,15 @@ function bracketTwoStatusPerPeriod(
         `schedule — cannot compute ${rules.code}_SIT.`,
     );
   }
-  const bracket = findWIBracket(brackets, taxableWages);
-  const excess = taxableWages - dollars(bracket.from);
+  const allowances = cfg.childTaxCreditAllowance ? Math.max(0, Number(cert.allowances ?? 0)) : 0;
+  const perAllowance = cfg.childTaxCreditAllowance?.[input.payFrequency];
+  if (allowances > 0 && perAllowance === undefined) {
+    throw new Error(`Idaho's allowance table has no "${input.payFrequency}" amount — cannot compute ${rules.code}_SIT.`);
+  }
+  const allowanceCents = allowances > 0 ? Math.round(dollars(perAllowance!) * allowances) : 0;
+  const wagesForTable = atLeastZero(taxableWages - allowanceCents);
+  const bracket = findWIBracket(brackets, wagesForTable);
+  const excess = wagesForTable - dollars(bracket.from);
   const nraAdjustment = isNRA
     ? dollars(cfg.nonresidentAlienAdjustment?.[input.payFrequency] ?? 0)
     : 0;
@@ -4056,9 +4075,10 @@ function bracketTwoStatusPerPeriod(
     taxableWages,
     amount,
     detail:
+      (allowanceCents ? `${fmt(taxableWages)} less ${allowances} child tax credit allowance(s) (${fmt(allowanceCents)}) = ` : '') +
       (bracket.rate === 0
-        ? `${fmt(taxableWages)} below the ${maritalStatus} ${fmt(dollars(bracket.to ?? 0))} threshold — $0`
-        : `${fmt(taxableWages)} less ${fmt(dollars(bracket.from))} ${maritalStatus} threshold ` +
+        ? `${fmt(wagesForTable)} below the ${maritalStatus} ${fmt(dollars(bracket.to ?? 0))} threshold — $0`
+        : `${fmt(wagesForTable)} less ${fmt(dollars(bracket.from))} ${maritalStatus} threshold ` +
           `@ ${(bracket.rate * 100).toFixed(2)}%`) +
       (nraAdjustment
         ? `; plus ${fmt(nraAdjustment)}/period nonresident alien adjustment (Form ID W-4's own Pay Period table)`
@@ -5346,10 +5366,57 @@ function kentuckyLocalTax(
   const countyEntry = workCountyName
     ? kyJurisdictionRuleset(workCountyName, input.checkDate)
     : undefined;
-  if (!cityEntry && !countyEntry) return null;
 
   const periodWages = ctx.taxableWagesFor([]);
   const residenceCityName = typeof cert.residenceCity === 'string' ? cert.residenceCity : undefined;
+
+  // Louisville/Jefferson County Metro: work anywhere in the county owes
+  // Metro's tax, and a city inside it (Jeffersontown, Lyndon, ...) adds its
+  // own on top with no credit -- KRS 68.197's credit is only for counties
+  // of 30,000-300,000 people. Residents of anywhere in the county pay
+  // Metro's resident rate.
+  const metro = kyLouisvilleMetro(input.checkDate);
+  const same = (a: string | undefined, b: string) => a !== undefined && a.trim().toLowerCase() === b.toLowerCase();
+  const isJefferson = (county: unknown) =>
+    typeof county === 'string' && /^jefferson( county)?$/i.test(county.trim());
+  const metroCity = metro.cities.find((c) => same(workCityName, c));
+  if (same(workCityName, 'Louisville') || metroCity || isJefferson(workCountyName)) {
+    const resident =
+      same(residenceCityName, 'Louisville') ||
+      metro.cities.some((c) => same(residenceCityName, c)) ||
+      isJefferson(cert.residenceCounty);
+    const metroRate = resident ? metro.residentRate : metro.nonresidentRate;
+    const metroTax = applyRate(periodWages, metroRate);
+    const ownCity = metroCity && cityEntry && cityEntry.wageRateDecimal !== null ? cityEntry : undefined;
+    const cityWages = ownCity
+      ? ownCity.capAtSSWageBase
+        ? underCap(
+            periodWages,
+            input.ytd.localIncomeTax?.[`KY_LOCAL_${ownCity.name}`] ?? 0,
+            dollars(federalRuleset(input.checkDate).socialSecurity.wageBase),
+          )
+        : periodWages
+      : 0;
+    const cityTax = ownCity ? applyRate(cityWages, ownCity.wageRateDecimal!) : 0;
+    return {
+      id: 'KY_LOCAL',
+      name: 'Kentucky Local Occupational Tax',
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: periodWages,
+      amount: metroTax + cityTax,
+      detail:
+        `${fmt(metroTax)} to Louisville/Jefferson County Metro @ ${resident ? 'resident' : 'nonresident'} ${(metroRate * 100).toFixed(2)}%` +
+        (ownCity
+          ? ` + ${fmt(cityTax)} to ${ownCity.name} @ ${(ownCity.wageRateDecimal! * 100).toFixed(2)}% (a Jefferson County city's own tax stacks on Metro's; no KRS 68.197 credit)`
+          : metroCity
+            ? ` (${metroCity} levies no wage tax of its own on file)`
+            : ''),
+      ...(ownCity ? kyDataQuality([ownCity]) : {}),
+    };
+  }
+
+  if (!cityEntry && !countyEntry) return null;
 
   const rateFor = (entry: KYJurisdictionEntry): { rate: number; note: string } => {
     if (entry.wageRateDecimal !== null) {
@@ -5922,7 +5989,7 @@ function ohioWithholding(
   // own thresholdDate (ISO yyyy-mm-dd sorts correctly as a string).
   const dating = rules.midYearEffectiveDating as { thresholdDate: string } | undefined;
   const usePriorTable = dating && input.checkDate < dating.thresholdDate;
-  const tables = (usePriorTable ? rules.priorTable2026 : rules.periodTables) as Record<
+  const tables = (usePriorTable ? (rules.priorTable ?? rules.priorTable2026) : rules.periodTables) as Record<
     string,
     OhioPeriodTable
   >;
@@ -5959,7 +6026,7 @@ function ohioWithholding(
     detail:
       `${fmt(taxableWages)} less ${fmt(exemptionAmount)} exemptions (${exemptions} × $${table.exemptionPerPeriod}) ` +
       `= ${fmt(netWages)} net @ ${(bracket.rate * 100).toFixed(2)}% over ${fmt(dollars(bracket.floor))}, base ${fmt(dollars(bracket.base))}` +
-      (usePriorTable ? ` (pre-2026-08-01 table)` : ''),
+      (usePriorTable ? ` (pre-${dating!.thresholdDate} table)` : ''),
   };
 }
 
@@ -7457,7 +7524,7 @@ function utahWithholding(
       `${fmt(periodWages)} @ ${(table.rate * 100).toFixed(2)}% = ${fmt(line2)} gross tax; base allowance ` +
       `${fmt(line3)} less ${fmt(line5)} phase-out (${(table.phaseOutRate * 100).toFixed(1)}% of ${fmt(line4)} over ` +
       `$${phaseOutThresholdDollars}) = ${fmt(line6)} net allowance (${status}); withholding = ${fmt(line2)} - ${fmt(line6)} ` +
-      `(${table === cfg.fromJune2026 ? 'post' : 'pre'}-2026-06-01 table)`,
+      `(${table === cfg.fromJune2026 ? 'post' : 'pre'}-${cfg.effectiveDateOfNewTable} table)`,
   };
 }
 
@@ -7470,6 +7537,8 @@ interface MDConfig {
   stateBrackets: { mfjHoh: WIBracket[]; single: WIBracket[] };
   standardDeductionAnnual: number;
   standardDeductionPerPeriod: Partial<Record<string, number>>;
+  /** Maryland's formula before its 2025 revision: 15% of annual wages, within a floor and a cap (dollars). Absent means the flat standardDeductionAnnual. */
+  standardDeductionPercent?: { rate: number; min: number; max: number } | null;
   exemptionAmountAnnual: number;
   exemptionAmountPerPeriod: Partial<Record<string, number>>;
   noCertificateDefault: { filingStatus: string; exemptions: number; localRate: number };
@@ -7640,7 +7709,10 @@ function marylandWithholding(
     : (cfg.noCertificateDefault.filingStatus as 'single' | 'mfjHoh');
   const exemptions = hasCertificate ? Number(cert.exemptions ?? 0) : cfg.noCertificateDefault.exemptions;
 
-  const standardDeduction = dollars(cfg.standardDeductionAnnual);
+  const pct = cfg.standardDeductionPercent;
+  const standardDeduction = pct
+    ? Math.min(dollars(pct.max), Math.max(dollars(pct.min), roundHalfUp(annualWages * pct.rate)))
+    : dollars(cfg.standardDeductionAnnual);
   const exemptionAmount = dollars(cfg.exemptionAmountAnnual) * exemptions;
   const taxableIncome = atLeastZero(annualWages - standardDeduction - exemptionAmount);
 
@@ -8582,7 +8654,8 @@ function ohioSchoolDistrictTax(
 
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const periodWages = ctx.taxableWagesFor(exempt);
-  const amount = applyRate(periodWages, entry.rate2026);
+  const sdRate = entry.rate ?? entry.rate2026 ?? 0;
+  const amount = applyRate(periodWages, sdRate);
 
   return {
     id: 'OH_SDIT',
@@ -8591,7 +8664,7 @@ function ohioSchoolDistrictTax(
     jurisdiction: 'local',
     taxableWages: periodWages,
     amount,
-    detail: `${fmt(amount)} to ${entry.name} (SD ${entry.sdNumber}) @ ${(entry.rate2026 * 100).toFixed(2)}% on wages (${entry.earnedIncomeOnlyBase ? 'earned-income-only' : 'traditional MAGI'} base, same wage figure withheld either way)`,
+    detail: `${fmt(amount)} to ${entry.name} (SD ${entry.sdNumber}) @ ${(sdRate * 100).toFixed(2)}% on wages (${entry.earnedIncomeOnlyBase ? 'earned-income-only' : 'traditional MAGI'} base, same wage figure withheld either way)`,
   };
 }
 
@@ -8956,6 +9029,36 @@ function arkansasWithholding(
 
   // AR4EC Line 5: the employee elected DFA's Low Income Tax Tables.
   if (resolveCertBoolean(cert, 'lowIncomeElection')) {
+    // Years whose low-income relief is published as a credit formula
+    // (2025: standard tax less a phase-out credit by filing status).
+    const creditFormula = (rules.lowIncomeElection as { creditFormula?: Record<string, ARLowIncomeCredit> } | undefined)
+      ?.creditFormula;
+    if (creditFormula) {
+      const { status, dependents, bucketKey } = arLowIncomeBucket(cert);
+      const f = creditFormula[bucketKey];
+      if (!f) throw new Error(`Arkansas lowIncomeElection.creditFormula has no "${bucketKey}" entry.`);
+      const floor = dollars(f.floor);
+      const lowIncomeCredit =
+        annualWages < floor
+          ? annualGrossTax
+          : Math.min(
+              annualGrossTax,
+              atLeastZero(roundHalfUp((1 - (annualWages - floor) / (dollars(f.ceiling) - floor)) * dollars(f.maxCredit))),
+            );
+      const netTax = atLeastZero(annualGrossTax - lowIncomeCredit - credit);
+      return {
+        id: `${rules.code}_SIT`,
+        name: `${rules.name} Income Tax`,
+        payer: 'employee',
+        jurisdiction: 'state',
+        taxableWages: periodWages,
+        amount: roundHalfUp(netTax / multiplier),
+        detail:
+          `${formulaDetail}; AR4EC low-income election (${status}, ${dependents} dependent${dependents === 1 ? '' : 's'}): ` +
+          `credit (1 − (${fmt(annualWages)} − $${f.floor}) ÷ ($${f.ceiling} − $${f.floor})) × $${f.maxCredit} = ${fmt(lowIncomeCredit)}, ` +
+          `annual net ${fmt(netTax)} ÷ ${multiplier}`,
+      };
+    }
     const lookup = arkansasLowIncomeLookup(rules, cert, input.payFrequency, periodWages);
     if (lookup.kind === 'table') {
       return {
@@ -9002,6 +9105,12 @@ interface ARLowIncomeBucket {
   byFrequency: Partial<Record<string, number[][]>>;
 }
 
+interface ARLowIncomeCredit {
+  floor: number;
+  ceiling: number;
+  maxCredit: number;
+}
+
 type ARLowIncomeLookup =
   | { kind: 'table'; amount: Cents; detail: string }
   | { kind: 'above_range'; detail: string }
@@ -9015,6 +9124,26 @@ const AR_LOW_INCOME_STATUS: Record<string, 'single' | 'mfj' | 'hoh'> = {
   head_of_household: 'hoh',
   qualifying_widow: 'hoh',
 };
+
+/** AR4EC Line 5 bucket: filing status plus the "1 or none" / "2 or more" dependent split. */
+function arLowIncomeBucket(cert: Record<string, unknown>): { status: 'single' | 'mfj' | 'hoh'; dependents: number; bucketKey: string } {
+  const rawStatus = cert.filingStatus;
+  const status = typeof rawStatus === 'string' ? AR_LOW_INCOME_STATUS[rawStatus] : undefined;
+  if (!status) {
+    throw new Error(
+      `Arkansas certificate.lowIncomeElection needs certificate.filingStatus of 'single', 'mfj' or 'hoh' (AR4EC Line 5's own categories); got ${JSON.stringify(rawStatus)}.`,
+    );
+  }
+  const dependents = cert.dependents;
+  if (typeof dependents !== 'number' || !Number.isInteger(dependents) || dependents < 0) {
+    throw new Error(
+      `Arkansas certificate.lowIncomeElection needs certificate.dependents as a whole number (the dependents counted on AR4EC); got ${JSON.stringify(dependents)}.`,
+    );
+  }
+
+  const bucketKey = status === 'single' ? 'single' : `${status}_${dependents <= 1 ? '1orNone' : '2orMore'}`;
+  return { status, dependents, bucketKey };
+}
 
 /**
  * DFA's 2026 Low Income Tax Tables (AR-2026.json lowIncomeElection.tables):
@@ -9031,21 +9160,7 @@ function arkansasLowIncomeLookup(
   const tables = (rules.lowIncomeElection as { tables?: { buckets: Record<string, ARLowIncomeBucket> } } | undefined)?.tables;
   if (!tables) return { kind: 'not_covered', detail: 'No Arkansas Low Income Tax Tables are on file for this year.' };
 
-  const rawStatus = cert.filingStatus;
-  const status = typeof rawStatus === 'string' ? AR_LOW_INCOME_STATUS[rawStatus] : undefined;
-  if (!status) {
-    throw new Error(
-      `Arkansas certificate.lowIncomeElection needs certificate.filingStatus of 'single', 'mfj' or 'hoh' (AR4EC Line 5's own categories); got ${JSON.stringify(rawStatus)}.`,
-    );
-  }
-  const dependents = cert.dependents;
-  if (typeof dependents !== 'number' || !Number.isInteger(dependents) || dependents < 0) {
-    throw new Error(
-      `Arkansas certificate.lowIncomeElection needs certificate.dependents as a whole number (the dependents counted on AR4EC); got ${JSON.stringify(dependents)}.`,
-    );
-  }
-
-  const bucketKey = status === 'single' ? 'single' : `${status}_${dependents <= 1 ? '1orNone' : '2orMore'}`;
+  const { status, dependents, bucketKey } = arLowIncomeBucket(cert);
   const bucket = tables.buckets[bucketKey];
   const column = bucket?.dependentColumns.indexOf(dependents) ?? -1;
   if (!bucket || column === -1) {
@@ -9242,6 +9357,23 @@ function alabamaDependentPerUnit(
  * project's own Oregon method (bracketFederalSubtractionPhaseout) already
  * established, just without Oregon's cap.
  */
+/**
+ * Act 2023-421 (extended by Act 2024-437) excluded overtime pay — hours
+ * over 40 in a week — from Alabama income tax for pay dates through
+ * 2025-06-30. Reads earnings flagged `overtime` when the year's ruleset
+ * carries an active overtimeExemption covering the check date.
+ */
+function alabamaExemptOvertime(input: PaycheckInput, rules: StateRuleset): { exempt: Cents; note: string } {
+  const rule = rules.overtimeExemption as { status?: string; through?: string } | undefined;
+  if (rule?.status !== 'active' || !rule.through || input.checkDate > rule.through) return { exempt: 0, note: '' };
+  const exempt = input.earnings
+    .filter((e) => e.overtime && (e.category === 'regular' || e.category === 'supplemental'))
+    .reduce((sum, e) => sum + e.amount, 0);
+  return exempt > 0
+    ? { exempt, note: `; ${fmt(exempt)} overtime excluded (Act 2023-421, through ${rule.through})` }
+    : { exempt: 0, note: '' };
+}
+
 function alabamaWithholding(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -9256,7 +9388,8 @@ function alabamaWithholding(
   // formula sees, not a credit against the tax it produces.
   const grossPeriodWages = ctx.taxableWagesFor(exempt);
   const severance = alabamaExemptSeverance(cert, rules, grossPeriodWages);
-  const periodWages = atLeastZero(grossPeriodWages - severance.exempt);
+  const overtime = alabamaExemptOvertime(input, rules);
+  const periodWages = atLeastZero(grossPeriodWages - severance.exempt - overtime.exempt);
   const annualGI = periodWages * ctx.periodsPerYear;
 
   // No Form A-4 on file is not a gap this engine has to guess at: the
@@ -9297,7 +9430,8 @@ function alabamaWithholding(
       `${fmt(federalWithheldAnnual)} annual federal withholding, ${fmt(personalExemption)} personal exemption (${code}), ` +
       `${fmt(dependentTotal)} (${dependents} dependents) = ${fmt(taxableAmount)} taxable @ ` +
       `${(bracket.rate * 100).toFixed(2)}% (${isMarried ? 'M' : 'non-M'} schedule) = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}` +
-      severance.note,
+      severance.note +
+      overtime.note,
   };
 }
 
@@ -9378,7 +9512,7 @@ function georgiaWithholding(
       `(${higherDeduction ? 'MFJ, one spouse working' : 'Single/HoH/MFS/MFJ-both-working'}) ` +
       `less ${fmt(dependentAllowance)} (${dependents} dependents) = ${fmt(taxableIncome)} taxable ` +
       `@ ${(table.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear} ` +
-      `(${table === cfg.fromMay11_2026 ? 'post' : 'pre'}-2026-05-11 table)`,
+      `(${table === cfg.fromMay11_2026 ? 'post' : 'pre'}-${cfg.effectiveDateOfNewTable} table)`,
   };
 }
 

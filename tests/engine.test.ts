@@ -757,13 +757,18 @@ describe('Pennsylvania', () => {
   // because Philadelphia collects its own Wage Tax directly, outside the
   // Act 32/DCED system, on its own July 1 fiscal-year boundary. Corrected
   // against phila.gov directly to FY2027's 3.735% resident rate.
-  test("Philadelphia's Wage Tax reflects the current FY2027 rate (3.735%), not the expired FY2026 one (3.74%)", () => {
-    const r = calculatePaycheck(
-      input({
-        workState: { code: 'PA', certificate: { workPSD: '510101', residencePSD: '510101' } },
-      }),
-    );
-    assert.equal(amountOf(r, 'PA_EIT'), dollars(112.05)); // 3,000 × 3.735%
+  // The rate resets every 1 July, so it is dated: FY2026's 3.74% until
+  // 2026-06-30, FY2027's 3.735% from 2026-07-01.
+  test("Philadelphia's Wage Tax uses the fiscal year of the check date (3.74% before 1 July 2026, 3.735% after)", () => {
+    const phl = (checkDate: string) =>
+      calculatePaycheck(
+        input({
+          checkDate,
+          workState: { code: 'PA', certificate: { workPSD: '510101', residencePSD: '510101' } },
+        }),
+      );
+    assert.equal(amountOf(phl('2026-06-12'), 'PA_EIT'), dollars(112.2)); // 3,000 × 3.74%
+    assert.equal(amountOf(phl('2026-07-10'), 'PA_EIT'), dollars(112.05)); // 3,000 × 3.735%
   });
 
   // EIT low-income exemption (BUG FIXED 2026-09-02): PSD 100401 (Adams
@@ -1906,7 +1911,7 @@ describe('Kentucky', () => {
       assert.equal(amountOf(r, 'KY_LOCAL'), dollars(15.0));
     });
 
-    test('West Buechel: real wage rate (1.5%) confirmed via a city audit document, separate from its scraped Gross Receipts figure', () => {
+    test('West Buechel: its own 1.5% (city audit document) stacks on Metro\'s 1.45% nonresident rate', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
@@ -1914,7 +1919,7 @@ describe('Kentucky', () => {
           workState: { code: 'KY', certificate: { workCity: 'West Buechel' } },
         }),
       );
-      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(15.0));
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(29.5));
     });
 
     test('Lynnview: no separate ordinance found, so it inherits the countywide Louisville Metro rate -- same pattern as Lyndon/Middletown', () => {
@@ -4236,8 +4241,32 @@ describe('Idaho', () => {
   // state in this project. The Tax Commission's computing page then says
   // to round the result to the nearest whole dollar, so each figure in a
   // test name is the pre-rounding amount and the assertion the rounded one.
+  // These pin the 07-23-2026 table, in force for checks from 2026-07-31.
   const idState = (certificate: Record<string, unknown> = {}) => ({
+    checkDate: '2026-08-14',
     workState: { code: 'ID', certificate },
+  });
+
+  test('before 2026-07-31 the 04-28-2025 table still applies, with its $148.77 biweekly child tax credit allowance', () => {
+    // Idaho's own example: $1,212 biweekly single, 4 allowances: 1,212 - 595.08 = 616.92; (616.92 - 577) x 5.3% = $2.12 -> $2
+    const r = calculatePaycheck(
+      input({
+        checkDate: '2026-03-13',
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1212) }],
+        workState: { code: 'ID', certificate: { allowances: 4 } },
+      }),
+    );
+    assert.equal(amountOf(r, 'ID_SIT'), dollars(2));
+    // after the reissue the allowance is gone: (1,212 - 619) x 5.3% = $31.43 -> $31
+    const after = calculatePaycheck(
+      input({
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(1212) }],
+        ...idState({ allowances: 4 }),
+      }),
+    );
+    assert.equal(amountOf(after, 'ID_SIT'), dollars(31));
   });
 
   test('weekly $1,000 single: (1,000 − 310) × 5.3% = $36.57', () => {
@@ -7822,6 +7851,10 @@ describe('Maryland', () => {
   // local" table reproduces its stated combined rates (7.00/7.25/7.50/
   // 7.75/8.00/8.50/8.75%) exactly, 7-for-7, before any of this was
   // written into a test.
+  // Withholding starts at 4.75% on the first dollar ('Maryland law does
+  // not permit the use of a rate of less than 4.75% to be used for
+  // withholding tax purposes' -- Withholding Tax Facts 2026), so each state
+  // figure below is $52.50 above the return schedule's $90 + 4.75% form.
   const mdState = (certificate: Record<string, unknown> = {}) => ({
     workState: { code: 'MD', certificate },
   });
@@ -7838,7 +7871,7 @@ describe('Maryland', () => {
         ...mdState({ filingStatus: 'single', exemptions: 0, county: 'Worcester' }),
       }),
     );
-    assert.equal(amountOf(r, 'MD_SIT'), dollars(5309.5));
+    assert.equal(amountOf(r, 'MD_SIT'), dollars(5362));
   });
 
   test('Anne Arundel County (TIERED local rate), MFJ/HOH, 2 exemptions, annual $120,000', () => {
@@ -7854,7 +7887,7 @@ describe('Maryland', () => {
         ...mdState({ filingStatus: 'mfjHoh', exemptions: 2, county: 'AnneArundel' }),
       }),
     );
-    assert.equal(amountOf(r, 'MD_SIT'), dollars(8241.88));
+    assert.equal(amountOf(r, 'MD_SIT'), dollars(8294.38));
   });
 
   test('Frederick County (TIERED local rate), single, 1 exemption, annual $60,000', () => {
@@ -7869,7 +7902,7 @@ describe('Maryland', () => {
         ...mdState({ filingStatus: 'single', exemptions: 1, county: 'Frederick' }),
       }),
     );
-    assert.equal(amountOf(r, 'MD_SIT'), dollars(3834.64));
+    assert.equal(amountOf(r, 'MD_SIT'), dollars(3887.14));
   });
 
   test('no certificate at all defaults to the maximum 3.30% local rate', () => {
@@ -7883,7 +7916,7 @@ describe('Maryland', () => {
         workState: { code: 'MD' },
       }),
     );
-    assert.equal(amountOf(r, 'MD_SIT'), dollars(6113.8));
+    assert.equal(amountOf(r, 'MD_SIT'), dollars(6166.3));
   });
 
   test('nonresident uses the flat 2.25% Special Nonresident Rate, not a county lookup', () => {
@@ -7898,7 +7931,7 @@ describe('Maryland', () => {
     // own flat rate) -- confirms the nonresident PATH itself is exercised
     // and produces the correct combined amount, not that the two are
     // indistinguishable in general.
-    assert.equal(amountOf(r, 'MD_SIT'), dollars(5309.5));
+    assert.equal(amountOf(r, 'MD_SIT'), dollars(5362));
   });
 
   test('certificate.nonresident as the STRING "false" throws instead of silently switching to the nonresident rate', () => {

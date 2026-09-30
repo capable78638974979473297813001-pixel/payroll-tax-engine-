@@ -19,6 +19,7 @@
     "$comment": "The source register has a 'School District PIT (percent)' column for school districts that levy a Personal Income Tax (broader base than EIT) instead of the standard Earned Income Tax -- structurally real (Act 511 permits it) but EVERY one of the 2,627 rows in this 2026 snapshot has PIT = 0%, i.e. no PA school district is currently exercising this option. Kept in the per-jurisdiction schema (as an omitted-when-zero field) rather than dropped, since this is a snapshot fact for 2026, not a structural impossibility -- a future year's re-pull could find a nonzero row."
   },
   "knownGaps": [
+    "FIXED 2026-09-29: four rows changed on 2026-07-01 but were applied from January. Philadelphia (3.74%/3.43% until 2026-06-30, then 3.735%/3.425%), and three new municipal EITs (Springfield Twp, Collingdale Boro, Liberty Twp) that start 2026-07-01. Each now carries rateChanges. McKeesport Area SD's EIT is also dated 07/01/2026 in the register, but no rate change was published and the 0.5% value is unchanged, so no change is recorded.",
     "FIXED 2026-09-04 (local-tax re-verification pass, all states with a local/city tax checked against their own official source): Philadelphia's row (PSD 510101) was stale. PA DCED's own bulk register is the authoritative source for every OTHER Act 32 jurisdiction, but Philadelphia's Wage Tax is collected directly by the City outside the Act 32/DCED system entirely and resets every July 1 (the City's fiscal year boundary) -- this register's 2026-08-21 snapshot still carried FY2026's 3.74%/3.43% (resident/nonresident) figures, effective 07/01/2025, a full fiscal year stale. Confirmed directly against the City of Philadelphia's own Wage Tax page (phila.gov) that FY2027's rate -- 3.735%/3.425%, effective 07/01/2026 -- has been in force since before this pass's check date, and corrected this row accordingly (see its own $note). GENERALIZES: any other city that collects its own EIT-equivalent tax directly rather than through Act 32 (if one exists) would have the same blind spot in this file and should be checked against its own city source, not assumed current just because this register's overall asOf date is recent -- DCED's own snapshot date says nothing about a self-collecting city's independent fiscal-year reset.",
     "Local Services Tax (LST) situs-PRIORITY ordering (principal place of employment > residence-and-employment > closest-to-residence, for choosing WHICH of several simultaneous PA work locations owes it) is not applied here -- this file is rate DATA per jurisdiction, not the multi-worksite situs LOGIC. pennsylvaniaLST() (src/taxes/state.ts) does handle the 'already paid, don't double-charge' half via certificate.lstAlreadyWithheldElsewhere, but assumes a single workPSD per paycheck rather than resolving priority among several -- see data/states/PA-2026.json's own localTax.knownGap for the full picture.",
     "Out-of-state residents' PSD code (88000, 0% resident rate per PA DCED convention) is not included as a row in this bulk export -- it is a convention documented in data/states/PA-2026.json's localTax.eit.psdCodes note, not a jurisdiction PA DCED's own register lists.",
@@ -8763,13 +8764,26 @@
       "schoolDistrictId": "238402",
       "schoolDistrict": "SOUTHEAST DELCO S D",
       "tcd": "DELAWARE TAX COLLECTION DISTRICT",
-      "residentEIT": 0.01,
-      "nonresidentEIT": 0.01,
+      "residentEIT": 0.0,
+      "nonresidentEIT": 0.0,
       "schoolDistrictEIT": 0.0,
-      "totalResidentEIT": 0.01,
+      "totalResidentEIT": 0.0,
       "residentEITEffective": "07/01/2026",
       "nonresidentEITEffective": "07/01/2026",
-      "eitCollector": "Keystone Collections Group"
+      "eitCollector": "Keystone Collections Group",
+      "rateChanges": [
+        {
+          "on": "2026-07-01",
+          "set": {
+            "residentEIT": 0.01,
+            "nonresidentEIT": 0.01,
+            "totalResidentEIT": 0.01
+          }
+        }
+      ],
+      "yearNotes": {
+        "rateChanges": "Collingdale Boro: the 2026 register dates its 1% municipal EIT 07/01/2026, and the 2025 register cell is exactly 0. Source: DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "360201",
@@ -25454,13 +25468,26 @@
       "schoolDistrictId": "584503",
       "schoolDistrict": "MONTROSE AREA S D",
       "tcd": "SUSQUEHANNA TAX COLLECTION DISTRICT",
-      "residentEIT": 0.01,
-      "nonresidentEIT": 0.01,
+      "residentEIT": 0.0,
+      "nonresidentEIT": 0.0,
       "schoolDistrictEIT": 0.0,
-      "totalResidentEIT": 0.01,
+      "totalResidentEIT": 0.0,
       "residentEITEffective": "07/01/2026",
       "nonresidentEITEffective": "07/01/2026",
-      "eitCollector": "Berkheimer Tax Administrator"
+      "eitCollector": "Berkheimer Tax Administrator",
+      "rateChanges": [
+        {
+          "on": "2026-07-01",
+          "set": {
+            "residentEIT": 0.01,
+            "nonresidentEIT": 0.01,
+            "totalResidentEIT": 0.01
+          }
+        }
+      ],
+      "yearNotes": {
+        "rateChanges": "Liberty Twp: the 2026 register dates its 1% municipal EIT 07/01/2026, and the 2025 register cell is exactly 0. Source: DCED Official Register for 2025 (apps.dced.pa.gov ... EitWithCollector_Dyn_Excel&paramList=O;2025), cell decoded"
+      }
     },
     {
       "psdCode": "420402",
@@ -36909,14 +36936,27 @@
       "schoolDistrictId": "515001",
       "schoolDistrict": "PHILADELPHIA CITY S D",
       "tcd": "PHILADELPHIA CITY *",
-      "residentEIT": 0.03735,
-      "nonresidentEIT": 0.03425,
+      "residentEIT": 0.0374,
+      "nonresidentEIT": 0.0343,
       "schoolDistrictEIT": 0.0,
-      "totalResidentEIT": 0.03735,
+      "totalResidentEIT": 0.0374,
       "residentEITEffective": "07/01/2026",
       "nonresidentEITEffective": "07/01/2026",
       "eitCollector": "CITY OF PHILADELPHIA",
-      "$note": "RESOLVED (2026-09-04 local-tax re-verification pass): Philadelphia's Wage Tax is set annually, effective July 1 (the city's fiscal year start), separate from the Act 32 EIT collector system this file otherwise reflects. The prior figures on file (3.74%/3.43%, effective 07/01/2025) were FY2026's rate and expired 2026-06-30; confirmed directly against the City of Philadelphia's own Wage Tax page (phila.gov) that FY2027's rate -- 3.735% resident / 3.425% nonresident, effective 07/01/2026 -- has been in effect since before this pass's check date. Continues Philadelphia's multi-year pattern of small annual cuts already noted elsewhere in this project's history."
+      "$note": "RESOLVED (2026-09-04 local-tax re-verification pass): Philadelphia's Wage Tax is set annually, effective July 1 (the city's fiscal year start), separate from the Act 32 EIT collector system this file otherwise reflects. The prior figures on file (3.74%/3.43%, effective 07/01/2025) were FY2026's rate and expired 2026-06-30; confirmed directly against the City of Philadelphia's own Wage Tax page (phila.gov) that FY2027's rate -- 3.735% resident / 3.425% nonresident, effective 07/01/2026 -- has been in effect since before this pass's check date. Continues Philadelphia's multi-year pattern of small annual cuts already noted elsewhere in this project's history.",
+      "rateChanges": [
+        {
+          "on": "2026-07-01",
+          "set": {
+            "residentEIT": 0.03735,
+            "nonresidentEIT": 0.03425,
+            "totalResidentEIT": 0.03735
+          }
+        }
+      ],
+      "yearNotes": {
+        "rateChanges": "Philadelphia wage tax: 3.74% / 3.43% from 2025-07-01 (FY26), 3.735% / 3.425% from 2026-07-01 (FY27). Source: https://www.phila.gov/services/payments-assistance-taxes/taxes/business-taxes/business-taxes-by-type/wage-tax-employers/"
+      }
     },
     {
       "psdCode": "170701",
@@ -44952,10 +44992,10 @@
       "schoolDistrictId": "238502",
       "schoolDistrict": "SPRINGFIELD S D",
       "tcd": "DELAWARE TAX COLLECTION DISTRICT",
-      "residentEIT": 0.01,
-      "nonresidentEIT": 0.01,
+      "residentEIT": 0.0,
+      "nonresidentEIT": 0.0,
       "schoolDistrictEIT": 0.0,
-      "totalResidentEIT": 0.01,
+      "totalResidentEIT": 0.0,
       "residentEITEffective": "07/01/2026",
       "nonresidentEITEffective": "07/01/2026",
       "lst": {
@@ -44969,7 +45009,20 @@
         }
       },
       "eitCollector": "Keystone Collections Group",
-      "municipalLSTCollector": "Anne Marie Pellegrino"
+      "municipalLSTCollector": "Anne Marie Pellegrino",
+      "rateChanges": [
+        {
+          "on": "2026-07-01",
+          "set": {
+            "residentEIT": 0.01,
+            "nonresidentEIT": 0.01,
+            "totalResidentEIT": 0.01
+          }
+        }
+      ],
+      "yearNotes": {
+        "rateChanges": "Springfield Twp adopted a new 1% EIT on 2026-04-14, effective 2026-07-01; none before. Source: https://www.springfielddelco.org/wp-content/uploads/2026/04/EIT-FAQ-.pdf"
+      }
     },
     {
       "psdCode": "461601",

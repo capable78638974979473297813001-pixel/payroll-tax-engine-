@@ -129,7 +129,95 @@
       "nonresidentRate": 0.0145,
       "nonresidentRateNote": "Per the search-summary source, the 0.75% school-board component does NOT apply to nonresidents -- nonresident rate = 1.25% Metro + 0.2% TARC only, which is 1.45%, matching the quoted figure.",
       "confidence": "secondary-sourced (WebSearch summary of Louisville's own W-1KJC instructions and Metro Code Sec 110.02) -- two direct WebFetch attempts against louisvilleky.gov both returned HTTP 403. The 1.25% component's exact match against KRS 68.180's statutory cap is the strongest corroboration available without a direct fetch.",
-      "nfcCrossCheck": "USDA NFC's bulletin independently reports Louisville at 1.45% -- matches this entry's own nonresidentRate exactly. (NFC's single published figure per city is presumably the nonresident/default rate; the residentRate's extra 0.75% school-board component remains secondary-sourced only, unchanged by this cross-check.)"
+      "nfcCrossCheck": "USDA NFC's bulletin independently reports Louisville at 1.45% -- matches this entry's own nonresidentRate exactly. (NFC's single published figure per city is presumably the nonresident/default rate; the residentRate's extra 0.75% school-board component remains secondary-sourced only, unchanged by this cross-check.)",
+      "citiesWithinMetro": [
+        "Anchorage",
+        "Audubon Park",
+        "Bancroft",
+        "Barbourmeade",
+        "Beechwood Village",
+        "Bellemeade",
+        "Bellewood",
+        "Blue Ridge Manor",
+        "Briarwood",
+        "Broeck Pointe",
+        "Brownsboro Farm",
+        "Brownsboro Village",
+        "Cambridge",
+        "Coldstream",
+        "Creekside",
+        "Crossgate",
+        "Douglass Hills",
+        "Druid Hills",
+        "Fincastle",
+        "Forest Hills",
+        "Glenview",
+        "Glenview Hills",
+        "Glenview Manor",
+        "Goose Creek",
+        "Graymoor-Devondale",
+        "Green Spring",
+        "Heritage Creek",
+        "Hickory Hill",
+        "Hills and Dales",
+        "Hollow Creek",
+        "Hollyvilla",
+        "Houston Acres",
+        "Hurstbourne",
+        "Hurstbourne Acres",
+        "Indian Hills",
+        "Jeffersontown",
+        "Kingsley",
+        "Langdon Place",
+        "Lincolnshire",
+        "Lyndon",
+        "Lynnview",
+        "Manor Creek",
+        "Maryhill Estates",
+        "Meadowbrook Farm",
+        "Meadow Vale",
+        "Meadowview Estates",
+        "Middletown",
+        "Mockingbird Valley",
+        "Moorland",
+        "Murray Hill",
+        "Norbourne Estates",
+        "Northfield",
+        "Norwood",
+        "Old Brownsboro Place",
+        "Parkway Village",
+        "Plantation",
+        "Poplar Hills",
+        "Prospect",
+        "Richlawn",
+        "Riverwood",
+        "Rolling Fields",
+        "Rolling Hills",
+        "St. Matthews",
+        "St. Regis Park",
+        "Seneca Gardens",
+        "Shively",
+        "Spring Mill",
+        "Spring Valley",
+        "Strathmoor Manor",
+        "Strathmoor Village",
+        "Sycamore",
+        "Ten Broeck",
+        "Thornhill",
+        "Watterson Park",
+        "Wellington",
+        "West Buechel",
+        "Westwood",
+        "Whipps Millgate",
+        "Wildwood",
+        "Windy Hills",
+        "Woodland Hills",
+        "Woodlawn Park",
+        "Worthington Hills"
+      ],
+      "citiesWithinMetroSource": "The 83 incorporated cities inside Louisville/Jefferson County Metro (Wikipedia, 'Neighborhoods in Louisville, Kentucky' -- Incorporated places, fetched 2026-09-29). Work anywhere in Jefferson County, including inside these cities, owes the Metro occupational tax.",
+      "cityTaxesStack": "CORRECTED 2026-09-29. A Jefferson County city's own occupational tax is owed IN ADDITION to Metro's, with no credit: KRS 68.197's city-against-county credit is for counties of 30,000-300,000 people, and Jefferson County is over 300,000. Lyndon's own FAQ (lyndonky.munirevs.com/faq, fetched 2026-09-29): 'An employee earning a wage within the City of Lyndon is subject to the Lyndon occupational tax AND the Louisville Metro occupational tax.' Until this fix the engine applied a Jefferson County city's rate INSTEAD of Metro's (Jeffersontown 1% alone), or -- given workCounty 'Jefferson County' too -- credited the two against each other (1.25% total); the right answer for a nonresident is 1% + 1.45% = 2.45%.",
+      "residentMeans": "Metro's resident rate (with the 0.75% school-board share) is for residents of Jefferson County -- anywhere in the county, including its 83 cities -- not only of 'Louisville' itself."
     },
     "lexingtonFayette": {
       "governmentType": "Consolidated city-county government (Lexington-Fayette Urban County Government) -- exercises CITY (Section 181/KRS 92.281) taxing authority, not county fiscal-court authority, which is consistent with its LFUCG-only rate exceeding both KRS 68.180 and 68.197's county caps.",
@@ -227,12 +315,18 @@
         "rate": "1.25%",
         "minTax": "$50 Net profits",
         "cap": "$900 for both",
-        "wageRateDecimal": 0.0125,
+        "wageRateDecimal": 0.013,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "inferred_small_city_single_rate_pattern",
-        "wageRateNote": "INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
-        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote."
+        "wageRateStatus": "corrected_via_city_primary_source_2026_09_29",
+        "wageRateNote": "CORRECTED 2026-09-29 from an inferred 1.25% (the SOS figure) to the 1.30% in the city's own code. Previous note: INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
+        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote.",
+        "wageRatePrimarySource": {
+          "title": "City of Augusta Code of Ordinances Sec. 110.02",
+          "url": "https://codelibrary.amlegal.com/codes/augusta/latest/augusta_ky/0-0-0-8998",
+          "says": "The occupational license tax shall be measured as follows: (1) One and thirty one hundredths percent (1.30%) of all wages and compensation paid or payable in ...",
+          "fetchedOn": "2026-09-29"
+        }
       },
       {
         "name": "Ballard County",
@@ -1554,12 +1648,18 @@
         "category": "Net Profits",
         "rate": "1.5%",
         "minTax": "$50 (Application Fee)",
-        "wageRateDecimal": 0.015,
+        "wageRateDecimal": 0.0175,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "inferred_small_city_single_rate_pattern",
-        "wageRateNote": "INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
-        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote."
+        "wageRateStatus": "corrected_via_city_primary_source_2026_09_30",
+        "wageRateNote": "CORRECTED 2026-09-30 from an inferred 1.5% to 1.75%. Hickman's code conflicts with itself: Sec. 14-13 levies 1.5% of wages (minimum $50, tax capped at $1,500 a year), but Sec. 14-15 tells employers to withhold 1.75% of gross wages. Withholding follows Sec. 14-15. The $1,500 annual cap is not modelled. Confirm with the city clerk before relying on either figure.",
+        "wageRateSource": "The city's own code of ordinances (see wageRatePrimarySource).",
+        "wageRatePrimarySource": {
+          "title": "City of Hickman Code of Ordinances Secs. 14-13 and 14-15 (Ord. No. 08-07)",
+          "url": "https://library.municode.com/ky/hickman/codes/code_of_ordinances?nodeId=COOR_CH14LIBURE_ARTIIOCLITA",
+          "says": "Sec. 14-13: fifty dollars ($50.00) or the greater of one and one-half (1.5) percent ... not to exceed one thousand five hundred dollars ($1,500.00) ... Sec. 14-15: Every employer ... shall deduct and withhold ... at the rate of one and three-quarters (1.75) percent of gross wages of the employee.",
+          "fetchedOn": "2026-09-30"
+        }
       },
       {
         "name": "Hickman County",
@@ -1926,11 +2026,17 @@
         "rate": "2.2% resident / 1.45% nonresident",
         "category": "Payroll (inherits Louisville Metro/Jefferson County rate)",
         "source": "No separate Lyndon city ordinance found -- Lyndon is a small Jefferson County city; applying the countywide Louisville Metro rate absent contrary evidence, flagged as inferred not directly confirmed",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": 0.022,
-        "wageRateNonresidentDecimal": 0.0145,
-        "wageRateStatus": "parsed_resident_nonresident_split",
-        "wageRateNote": "Resident/nonresident split rate, same shape as Michigan's city taxes elsewhere in this project. Matches jurisdictions.louisvilleMetro's own residentRate/nonresidentRate exactly -- category confirms this jurisdiction inherits Louisville Metro/Jefferson County's rate."
+        "wageRateDecimal": 0.0075,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_29",
+        "wageRateNote": "CORRECTED 2026-09-29: Lyndon levies its OWN 0.75% (cut from 1% effective 2025-01-01), owed on top of Metro's tax. This entry used to copy Metro's 2.2%/1.45% as if Lyndon had no tax of its own. Previous note: Resident/nonresident split rate, same shape as Michigan's city taxes elsewhere in this project. Matches jurisdictions.louisvilleMetro's own residentRate/nonresidentRate exactly -- category confirms this jurisdiction inherits Louisville Metro/Jefferson County's rate.",
+        "wageRatePrimarySource": {
+          "title": "City of Lyndon occupational tax FAQ (GovOS / munirevs)",
+          "url": "https://lyndonky.munirevs.com/faq/",
+          "says": "Lyndon's Occupational Tax is a .75% wage withholding tax on an employee's gross wage ... subject to the Lyndon occupational tax AND the Louisville Metro occupational tax.",
+          "fetchedOn": "2026-09-29"
+        }
       },
       {
         "name": "Lynnview",
@@ -1938,10 +2044,10 @@
         "rate": "Sliding Scale",
         "minTax": "$250.00",
         "wageRateDecimal": null,
-        "wageRateResidentDecimal": 0.022,
-        "wageRateNonresidentDecimal": 0.0145,
-        "wageRateStatus": "parsed_resident_nonresident_split",
-        "wageRateNote": "Same pattern already applied to Lyndon and Middletown elsewhere in this file: Lynnview is a small Jefferson County suburb with no separate city wage-withholding ordinance found -- the scraped 'Gross Receipts Sliding Scale' figure is Lynnview's own small business-license fee (a different tax), not a wage rate. Anyone working in Lynnview is subject to the countywide Louisville Metro / Jefferson County occupational tax instead.",
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "no_city_wage_tax_found_metro_only",
+        "wageRateNote": "CHANGED 2026-09-29: this entry copied Metro's rates. Metro's tax now applies to every Jefferson County work location (louisvilleMetro.citiesWithinMetro), so Lynnview workers still get it; Lynnview itself has no wage-tax ordinance that could be found, so no city tax is added. Previous note: Same pattern already applied to Lyndon and Middletown elsewhere in this file: Lynnview is a small Jefferson County suburb with no separate city wage-withholding ordinance found -- the scraped 'Gross Receipts Sliding Scale' figure is Lynnview's own small business-license fee (a different tax), not a wage rate. Anyone working in Lynnview is subject to the countywide Louisville Metro / Jefferson County occupational tax instead.",
         "wageRateSource": "Same source as this file's own Lyndon/Middletown entries: Louisville Metro Revenue Commission occupational tax applies countywide (louisvilleky.gov), matches jurisdictions.louisvilleMetro's own residentRate/nonresidentRate exactly."
       },
       {
@@ -2077,8 +2183,15 @@
         "wageRateDecimal": 0.019,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_explicit_wage_figure",
-        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_30",
+        "wageRateNote": "CONFIRMED 2026-09-30: the city's own code sets 1.9% of gross salary (Sec. 9-42 as amended by Ord. 11-17, 2017); employers withhold it under Sec. 9-44.",
+        "wageRatePrimarySource": {
+          "title": "City of Mayfield Code of Ordinances Sec. 9-42, Earnings and net profits tax payment required",
+          "url": "https://library.municode.com/ky/mayfield/codes/code_of_ordinances?nodeId=COOR_CH9OCLITARE_ARTIIOCLITA_S9-42EANEPRTAPARE",
+          "says": "The earnings tax shall be measured by 1.9 percent of the gross salary from each employer. The 1.9 percent payroll tax shall be computed for all wages and compensation paid or payable in the city",
+          "fetchedOn": "2026-09-30"
+        },
+        "wageRateSource": "The city's own code of ordinances (see wageRatePrimarySource)."
       },
       {
         "name": "Maysville",
@@ -2121,9 +2234,15 @@
         "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "inferred_small_city_single_rate_pattern",
-        "wageRateNote": "INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
-        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_29",
+        "wageRateNote": "CONFIRMED 2026-09-30: the city's own code sets 1% on wages.",
+        "wageRateSource": "The city's own code of ordinances (see wageRatePrimarySource).",
+        "wageRatePrimarySource": {
+          "title": "City of McKee Code of Ordinances § 110.02 LICENSE REQUIRED; FEES",
+          "url": "https://codelibrary.amlegal.com/codes/mckeeky/latest/mckee_ky/0-0-0-2883",
+          "says": "The license fee shall be measured by 1% of all salaries, wages, commissions, and other compensations earned by every person in the city for work done, or services performed or rendered, in the city.",
+          "fetchedOn": "2026-09-29"
+        }
       },
       {
         "name": "McLean County",
@@ -2213,11 +2332,17 @@
         "rate": "2.2% resident / 1.45% nonresident",
         "category": "Payroll (inherits Louisville Metro/Jefferson County rate)",
         "source": "No separate Middletown city ordinance found -- applying the countywide Louisville Metro rate absent contrary evidence, flagged as inferred not directly confirmed",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": 0.022,
-        "wageRateNonresidentDecimal": 0.0145,
-        "wageRateStatus": "parsed_resident_nonresident_split",
-        "wageRateNote": "Resident/nonresident split rate, same shape as Michigan's city taxes elsewhere in this project. Matches jurisdictions.louisvilleMetro's own residentRate/nonresidentRate exactly -- category confirms this jurisdiction inherits Louisville Metro/Jefferson County's rate."
+        "wageRateDecimal": 0.01,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_29",
+        "wageRateNote": "CORRECTED 2026-09-29: Middletown created its OWN 1% tax from 2024-01-01, owed on top of Metro's. Ord. 05-14-2026-B amended chapter 114 in May 2026; it is not yet in the codified text and its PDF was unreachable, so any rate change it made is not reflected. Previous note: Resident/nonresident split rate, same shape as Michigan's city taxes elsewhere in this project. Matches jurisdictions.louisvilleMetro's own residentRate/nonresidentRate exactly -- category confirms this jurisdiction inherits Louisville Metro/Jefferson County's rate.",
+        "wageRatePrimarySource": {
+          "title": "City of Middletown Code of Ordinances Sec. 114.23 (Ord. 07-13-2023-B, 10-12-2023-B)",
+          "url": "https://codelibrary.amlegal.com/codes/middletownky/latest/middletown_ky/0-0-0-10846",
+          "says": "Beginning January 1, 2024 ... The occupational license fee shall be measured by and be equal to 1% of the gross annual salaries, wages, or other compensations",
+          "fetchedOn": "2026-09-29"
+        }
       },
       {
         "name": "Midway",
@@ -2387,12 +2512,18 @@
         "name": "Nortonville",
         "category": "Net Profits",
         "rate": "1%",
-        "wageRateDecimal": 0.01,
+        "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "inferred_small_city_single_rate_pattern",
-        "wageRateNote": "INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
-        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote."
+        "wageRateStatus": "corrected_via_city_primary_source_2026_09_29",
+        "wageRateNote": "CORRECTED 2026-09-30 from an inferred 1% (the SOS figure) to the 1.5% in the city's own code. The code's adoption date for 1.5% was not read; it is applied to 2025 and 2026 alike.",
+        "wageRateSource": "The city's own code of ordinances (see wageRatePrimarySource).",
+        "wageRatePrimarySource": {
+          "title": "City of Nortonville Code of Ordinances § 110.03 OCCUPATIONAL LICENSE FEE PAYMENT REQUIRED",
+          "url": "https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279",
+          "says": "The occupational license fee shall be measured by 1.5% of: (1) All wages and compensation paid or payable in the city for work done or services performed or rendered in the city by every resident and nonresident who is an employee",
+          "fetchedOn": "2026-09-29"
+        }
       },
       {
         "name": "Oak Grove",
@@ -3404,6 +3535,23 @@
         ],
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null
+      },
+      {
+        "name": "St. Matthews",
+        "county": "Jefferson",
+        "category": "Payroll",
+        "rate": "0.75%",
+        "wageRateDecimal": 0.0075,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_29",
+        "wageRateNote": "ADDED 2026-09-29: missing from the SOS scrape. Owed on top of Metro's tax.",
+        "wageRatePrimarySource": {
+          "title": "City of St. Matthews -- Occupational Tax",
+          "url": "https://www.stmatthewsky.gov/occupational-tax/",
+          "says": "all persons working within the City of St. Matthews are required to pay an occupational tax fee of .75% (3/4 of 1%) on gross wages and commissions earned in St. Matthews",
+          "fetchedOn": "2026-09-29"
+        }
       }
     ],
     "normalizationPass": {
@@ -3436,7 +3584,7 @@
     }
   },
   "knownGaps": [
-    "STILL UNCONFIRMED after the 2026-09-28 pass (31 jurisdictions; each carries an inferred or secondary_source notice on every paycheck): Adairville, Augusta, Bardwell, Benton, Brooksville, Burkesville, Camargo, Carlisle, Cumberland County Public School District, Fordsville, Gamaliel, Hickman, Irvington, Jackson, Jeffersonville, Jenkins, Lebanon Junction, Lyndon, Lynnview, Mayfield, McKee, Middletown, Millersburg, Nortonville, Perryville, Raceland, Salem, Vanceburg, Vine Grove, West Liberty, Williamstown. No page, form or code stating the wage rate was reachable for these; Burkesville's and West Liberty's own ordinances suggest different rates (see their notes). The SOS scrape is also not exhaustive -- this pass found four taxing cities it lacked (Falmouth, Williamstown, Jenkins, Bardwell) -- so a missing city can still mean a missing tax.",
+    "STILL UNCONFIRMED after the 2026-09-28 pass (27 jurisdictions; each carries an inferred or secondary_source notice on every paycheck): Adairville, Augusta, Bardwell, Benton, Brooksville, Burkesville, Camargo, Carlisle, Cumberland County Public School District, Fordsville, Gamaliel, Irvington, Jackson, Jeffersonville, Jenkins, Lebanon Junction, Lyndon, Lynnview, Middletown, Millersburg, Perryville, Raceland, Salem, Vanceburg, Vine Grove, West Liberty, Williamstown. No page, form or code stating the wage rate was reachable for these; Burkesville's and West Liberty's own ordinances suggest different rates (see their notes). The SOS scrape is also not exhaustive -- this pass found four taxing cities it lacked (Falmouth, Williamstown, Jenkins, Bardwell) -- so a missing city can still mean a missing tax.",
     "FOUND AND FIXED 2026-09-04, same re-verification pass as the Somerset fix below: Lexington-Fayette's old flat `rate: 0.0225` was INCOMPLETE for RESIDENTS specifically -- it captured only LFUCG's own occupational tax, missing Fayette County Public Schools' genuinely separate 0.5% resident-only occupational tax (its own withholding requirement, own collection office). Reshaped jurisdictions.lexingtonFayette from a flat rate to a residentRate (2.75% = 2.25% LFUCG + 0.5% FCPS) / nonresidentRate (2.25%, LFUCG only) split -- see that entry's own schoolBoardComponent note for the full citation. Required a matching change in allKYJurisdictions() (src/registry.ts) to read the new field names, but NO change to kentuckyLocalTax()'s own logic, since it already handles resident/nonresident-split jurisdictions generically.",
     "FIXED 2026-09-04 (local-tax re-verification pass, all states with a local/city tax checked against their own official source): Somerset's entry was stale. This file previously carried Somerset's PRE-increase 0.6% rate (from 2013's Ordinance 13-02) with a note that a reported two-phase increase toward 1.2% had NOT been confirmed as actually enacted. It was: City Council approved the ordinance (confirmed via the City of Somerset's own official news page, corroborated by independent local news), phasing the rate up 0.3 points on 2025-07-01 (to 0.9%) and another 0.3 points on 2026-01-01 (to the current 1.2%) -- both effective dates already past as of this pass. Corrected to 1.2% (see the entry's own wageRateNote). Also checked and found ALREADY CORRECT this same pass: Ashland's 2.375% (eff. 1/1/2026), Walton's new 2% tax (eff. 1/1/2026), and Elsmere's 1.75% (eff. for check dates on/after 7/1/2026) -- all three were already on file with accurate figures and sourcing before this pass; only Somerset needed a fix.",
     "140 of 230 authoritative taxing districts attempted, 101 with a rate value scraped from the source database -- 90 districts remain entirely unattempted, and the 39 attempted-but-blank districts have no rate in the state's own database either (their ordinance PDF would need a separate fetch to close). SUPERSEDED: county coverage is now complete — all 62 county entries carry a confirmed payroll rate, cross-checked against KACo's own 2025 payroll-rate column with zero disagreements against the 20 an earlier pass had already confirmed. What remains unconfirmed is CITY entries, where the scraped category alone cannot distinguish a payroll rate from a net-profits or gross-receipts one.",

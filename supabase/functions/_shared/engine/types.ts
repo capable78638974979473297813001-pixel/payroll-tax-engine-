@@ -66,6 +66,12 @@ export interface Earning {
   code: string;
   category: EarningCategory;
   amount: Cents;
+  /**
+   * Pay for hours worked over 40 in a week. Only a state rule that
+   * excludes overtime reads it (Alabama, 2024-01-01 through 2025-06-30);
+   * everywhere else overtime is ordinary wages of its category.
+   */
+  overtime?: boolean;
 }
 
 export interface Deduction {
@@ -252,6 +258,8 @@ export interface StateCertificate {
   workCounty?: string;
   /** City name — Michigan/Ohio/Alabama/Kentucky city-level local income tax, work role. */
   workCity?: string;
+  /** Residence county (Kentucky: a Jefferson County resident pays Louisville Metro's resident rate wherever in the county they live). */
+  residenceCounty?: string;
   /** City name — same registries as workCity, residence role (Michigan/Ohio/Alabama/Kentucky, plus NYC/Yonkers logic reads it for the "is the other address also this city" check). */
   residenceCity?: string;
   /** Pennsylvania's 6-digit work PSD code (required whenever PA local tax applies). */
