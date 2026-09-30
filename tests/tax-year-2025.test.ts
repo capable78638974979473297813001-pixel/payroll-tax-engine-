@@ -2,7 +2,8 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { calculatePaycheck } from '../src/calculate.ts';
-import { UnsupportedTaxYearError, statesWithRuleset } from '../src/registry.ts';
+import { readFileSync } from 'node:fs';
+import { UnsupportedTaxYearError, setDataReader, statesWithRuleset } from '../src/registry.ts';
 import { validatePaycheckInput } from '../site/lib/validate.ts';
 import type { PaycheckInput } from '../src/types.ts';
 
@@ -27,7 +28,7 @@ const amount = (r: ReturnType<typeof calculatePaycheck>, id: string) => r.taxes.
 describe('tax year 2025', () => {
   test('covers federal and the states with a 2025 file', () => {
     const covered = statesWithRuleset('2025-06-13');
-    for (const st of ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NM', 'NV', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY']) assert.ok(covered.includes(st), st);
+    for (const st of ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY']) assert.ok(covered.includes(st), st);
   });
 
   test("Illinois 2025: IL-700-T's own example ($800 weekly, 2 + 2 allowances) withholds $32.27", () => {
@@ -251,6 +252,22 @@ describe('tax year 2025', () => {
     assert.equal(amount(st('2025-06-13', 'DE'), 'DE_SIT'), amount(st('2026-06-12', 'DE'), 'DE_SIT'));
   });
 
+  test('New Jersey 2025 worker contributions: TDI 0.23%, FLI 0.33%, UI/WF 0.425%', () => {
+    const r = st('2025-03-14', 'NJ');
+    assert.equal(amount(r, 'NJ_DBL_EE'), 690);
+    assert.equal(amount(r, 'NJ_PFML_EE'), 990);
+    assert.equal(amount(r, 'NJ_UC_EE'), 1275);
+  });
+
+  test('New York 2025 uses NYS-50-T-NYS (1/22): all four single worked examples', () => {
+    assert.equal(amount(st('2025-03-14', 'NY', { maritalStatus: 'single', exemptions: 3 }, 'weekly', 40000), 'NY_SIT'), 820);
+    assert.equal(amount(st('2025-03-14', 'NY', { maritalStatus: 'single', exemptions: 1 }, 'semimonthly', 500000), 'NY_SIT'), 27573);
+    assert.equal(amount(st('2025-03-14', 'NY', { maritalStatus: 'single', exemptions: 3 }, 'monthly', 5000000), 'NY_SIT'), 357613);
+    assert.equal(amount(st('2025-03-14', 'NY', { maritalStatus: 'single', exemptions: 2 }, 'daily', 75000), 'NY_SIT'), 4658);
+    // Paid Family Leave 0.388% in 2025
+    assert.equal(amount(st('2025-03-14', 'NY', { maritalStatus: 'single', exemptions: 3 }, 'weekly', 40000), 'NY_PFML_EE'), 155);
+  });
+
   test('Michigan 2025: 4.25% after $5,800 per exemption', () => {
     // 3,000 - 5,800/26 = 2,776.92 x 4.25%
     const r = calculatePaycheck({ ...pay('2025-06-13', 'MI'), workState: { code: 'MI', certificate: { allowances: 1 } } as PaycheckInput['workState'] });
@@ -279,12 +296,37 @@ describe('tax year 2025', () => {
     assert.equal(amount(r, 'AK_SUI_ER'), 4500);
   });
 
+  // Every state now has 2025 rules, so these hide one file behind the data reader.
+  const withoutDataFile = (hidden: string, fn: () => void) => {
+    const real = (rel: string) => {
+      try {
+        return readFileSync(new URL(`../data/${rel}`, import.meta.url), 'utf8');
+      } catch {
+        return undefined;
+      }
+    };
+    setDataReader((rel) => (rel === hidden ? undefined : real(rel)));
+    try {
+      fn();
+    } finally {
+      setDataReader(real);
+    }
+  };
+
   test('a 2025 check in a state without 2025 rules is refused, not computed federal-only', () => {
-    assert.throws(() => calculatePaycheck(pay('2025-06-13', 'OH')), (e: unknown) => e instanceof UnsupportedTaxYearError && /OH/.test(e.message));
+    withoutDataFile('states/OH-2025.json', () =>
+      assert.throws(() => calculatePaycheck(pay('2025-06-13', 'OH')), (e: unknown) => e instanceof UnsupportedTaxYearError && /OH/.test(e.message)),
+    );
   });
 
   test('a 2025 check where only the residence state lacks 2025 rules is refused too', () => {
-    assert.throws(() => calculatePaycheck(pay('2025-06-13', 'WA', 'NY')), UnsupportedTaxYearError);
+    withoutDataFile('states/NY-2025.json', () =>
+      assert.throws(() => calculatePaycheck(pay('2025-06-13', 'WA', 'NY')), UnsupportedTaxYearError),
+    );
+  });
+
+  test('a 2024 check is refused: no 2024 rules at all', () => {
+    assert.throws(() => calculatePaycheck(pay('2024-06-14', 'TX')), UnsupportedTaxYearError);
   });
 
   test('the API validator names the state and year', () => {
