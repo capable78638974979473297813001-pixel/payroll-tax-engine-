@@ -2242,7 +2242,7 @@
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "confirmed_via_city_primary_source_2026_09_29",
-        "wageRateNote": "CONFIRMED 2026-09-29: the city's own code sets 1% on wages.",
+        "wageRateNote": "CONFIRMED 2026-09-30: the city's own code sets 1% on wages.",
         "wageRateSource": "The city's own code of ordinances (see wageRatePrimarySource).",
         "wageRatePrimarySource": {
           "title": "City of McKee Code of Ordinances § 110.02 LICENSE REQUIRED; FEES",
@@ -2523,7 +2523,7 @@
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
         "wageRateStatus": "corrected_via_city_primary_source_2026_09_29",
-        "wageRateNote": "CORRECTED 2026-09-29 from an inferred 1% (the SOS figure) to the 1.5% in the city's own code. The code's adoption date for 1.5% was not read; it is applied to 2025 and 2026 alike.",
+        "wageRateNote": "CORRECTED 2026-09-30 from an inferred 1% (the SOS figure) to the 1.5% in the city's own code. The code's adoption date for 1.5% was not read; it is applied to 2025 and 2026 alike.",
         "wageRateSource": "The city's own code of ordinances (see wageRatePrimarySource).",
         "wageRatePrimarySource": {
           "title": "City of Nortonville Code of Ordinances § 110.03 OCCUPATIONAL LICENSE FEE PAYMENT REQUIRED",

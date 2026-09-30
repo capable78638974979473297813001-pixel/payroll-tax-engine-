@@ -430,11 +430,11 @@
         "fetchedOn": "2026-09-28"
       },
       "capNote": "Cheviot: NO CAP for 2026.",
-      "$correctionNote": "CORRECTED 2026-09-29: effectiveFrom was 2025-01-01. City of Cheviot: 'Coopers Hawk JEDD ... tax rate is 2%. Effective date January 1, 2026.'",
+      "$correctionNote": "CORRECTED 2026-09-30: effectiveFrom was 2025-01-01. City of Cheviot: 'Coopers Hawk JEDD ... tax rate is 2%. Effective date January 1, 2026.'",
       "source": {
         "title": "City of Cheviot Tax Department -- Contracts with Green Township",
         "url": "https://cheviot.org/departments/tax/",
-        "fetchedOn": "2026-09-29"
+        "fetchedOn": "2026-09-30"
       }
     },
     {
@@ -1074,11 +1074,11 @@
       "rate": 0.01,
       "rateSourceRaw": "1",
       "effectiveFrom": "2025-06-01",
-      "$correctionNote": "CORRECTED 2026-09-29: effectiveFrom was 2025-01-01. RITA's Tax Rates Table (2025, New Municipalities and Tax Rate Changes): 'Union Twp Village of Batavia JEDD 9 -- New Tax as of 06/01/2025'.",
+      "$correctionNote": "CORRECTED 2026-09-30: effectiveFrom was 2025-01-01. RITA's Tax Rates Table (2025, New Municipalities and Tax Rate Changes): 'Union Twp Village of Batavia JEDD 9 -- New Tax as of 06/01/2025'.",
       "source": {
         "title": "RITA -- Tax Rates Table, 2025 new municipalities and tax rate changes",
         "url": "https://www.ritaohio.com/TaxRatesTable",
-        "fetchedOn": "2026-09-29"
+        "fetchedOn": "2026-09-30"
       }
     },
     {
@@ -1136,11 +1136,11 @@
       "rate": 0.01,
       "rateSourceRaw": "1",
       "effectiveFrom": "2025-04-01",
-      "$correctionNote": "CORRECTED 2026-09-29: effectiveFrom was 2025-01-01. RITA's Milford JEDD VIII page: 04/01/2025 current 1.000%; 01/01/2020-03/31/2025 0.000%.",
+      "$correctionNote": "CORRECTED 2026-09-30: effectiveFrom was 2025-01-01. RITA's Milford JEDD VIII page: 04/01/2025 current 1.000%; 01/01/2020-03/31/2025 0.000%.",
       "source": {
         "title": "RITA member page -- Milford JEDD VIII",
         "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=869",
-        "fetchedOn": "2026-09-29"
+        "fetchedOn": "2026-09-30"
       }
     },
     {

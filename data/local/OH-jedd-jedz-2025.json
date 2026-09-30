@@ -1,7 +1,7 @@
 {
   "$comment": "JEDDs (Joint Economic Development Districts) and JEDZs (Zones) -- contractual arrangements letting a municipality tax income earned in adjoining UNINCORPORATED township land, without annexation. This is the exact mechanism flagged last session as breaking Michigan-style 'closed list, default zero' certainty for rural Ohio -- now enumerated by name and rate instead of left as an abstract caveat.",
   "year": 2025,
-  "asOf": "2026-09-29",
+  "asOf": "2026-09-30",
   "source": {
     "title": "Ohio JEDD/JEDZ Income Tax Rate Database Table (The Finder, bulk CSV download)",
     "url": "https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FJEDTaxRates.csv",
@@ -434,7 +434,7 @@
       "source": {
         "title": "City of Cheviot Tax Department -- Contracts with Green Township",
         "url": "https://cheviot.org/departments/tax/",
-        "fetchedOn": "2026-09-29"
+        "fetchedOn": "2026-09-30"
       }
     },
     {
@@ -648,7 +648,7 @@
         "title": "NEOGOV November 2025 Payroll Notes",
         "url": "https://success.neogov.com/payroll-product-updates-115/november-2025-payroll-notes-16826",
         "says": "Effective January 1, 2026, the Jefferson Township-Washington Court House JEDD Tax rate decreased from 1.95% to 1.75%.",
-        "fetchedOn": "2026-09-29"
+        "fetchedOn": "2026-09-30"
       }
     },
     {
@@ -788,7 +788,7 @@
         "title": "City of Dayton -- Joint Economic Development District",
         "url": "https://www.daytonohio.gov/261/Joint-Economic-Development-District",
         "says": "Effective January 1, 2026, the Miami Township JEDD income tax rate will change to two and one-quarter percent (2.25%) ... The tax rate will increase from 1.75% to 2.25%.",
-        "fetchedOn": "2026-09-29"
+        "fetchedOn": "2026-09-30"
       }
     },
     {
@@ -1090,11 +1090,11 @@
       "rate": 0.01,
       "rateSourceRaw": "1",
       "effectiveFrom": "2025-06-01",
-      "$correctionNote": "CORRECTED 2026-09-29: effectiveFrom was 2025-01-01. RITA's Tax Rates Table (2025, New Municipalities and Tax Rate Changes): 'Union Twp Village of Batavia JEDD 9 -- New Tax as of 06/01/2025'.",
+      "$correctionNote": "CORRECTED 2026-09-30: effectiveFrom was 2025-01-01. RITA's Tax Rates Table (2025, New Municipalities and Tax Rate Changes): 'Union Twp Village of Batavia JEDD 9 -- New Tax as of 06/01/2025'.",
       "source": {
         "title": "RITA -- Tax Rates Table, 2025 new municipalities and tax rate changes",
         "url": "https://www.ritaohio.com/TaxRatesTable",
-        "fetchedOn": "2026-09-29"
+        "fetchedOn": "2026-09-30"
       }
     },
     {
@@ -1155,7 +1155,7 @@
       "source": {
         "title": "RITA member page -- Milford JEDD VIII",
         "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=869",
-        "fetchedOn": "2026-09-29"
+        "fetchedOn": "2026-09-30"
       }
     },
     {

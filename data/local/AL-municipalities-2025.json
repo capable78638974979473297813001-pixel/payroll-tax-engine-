@@ -1,7 +1,7 @@
 {
   "$comment": "Alabama's municipal Occupational Tax (Code of Ala. Sec. 11-51-90, home-rule municipal license/privilege taxing power) -- a flat percentage of GROSS WAGES earned working within the municipality, applied to residents and nonresidents alike (work-location-based, no separate resident/nonresident rate the way Michigan's cities have). Unlike Ohio/Pennsylvania, Alabama has NO state-run bulk database of local rates -- the closest thing to an authoritative aggregator is the Alabama League of Municipalities' own member survey.",
   "year": 2025,
-  "asOf": "2026-09-29",
+  "asOf": "2026-09-30",
   "source": {
     "title": "Alabama League of Municipalities -- Municipal Tax Rates, 'Municipal Occupational Taxes' section",
     "url": "https://almonline.org/TaxRates.aspx",

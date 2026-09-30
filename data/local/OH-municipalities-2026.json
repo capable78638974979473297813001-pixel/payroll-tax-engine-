@@ -1534,15 +1534,15 @@
         {
           "title": "RITA member page -- Germantown (rate history)",
           "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=353",
-          "fetchedOn": "2026-09-29"
+          "fetchedOn": "2026-09-30"
         },
         {
           "title": "CCA Division of Taxation -- Tax Rates (2026 and 2025 tables)",
           "url": "https://www.ccaohio.gov/tax-rates",
-          "fetchedOn": "2026-09-29"
+          "fetchedOn": "2026-09-30"
         }
       ],
-      "$addedNote": "ADDED 2026-09-29: a taxing city missing from the Finder extract. RITA: 1.5% since at least 2020-01-01 (RITA from 2026-01-01; CCA collected it in 2025 at 1.5%). Ohio municode not captured."
+      "$addedNote": "ADDED 2026-09-30: a taxing city missing from the Finder extract. RITA: 1.5% since at least 2020-01-01 (RITA from 2026-01-01; CCA collected it in 2025 at 1.5%). Ohio municode not captured."
     },
     {
       "name": "Gettysburg",
@@ -1921,7 +1921,7 @@
       "rate": 0.005,
       "effectiveFrom": "2025-01-01",
       "administeredBy": "self_or_other",
-      "$correctionNote": "CORRECTED 2026-09-29: was 0.45%. Indian Hill's emergency ordinance of 2025-12-15 raised the rate to 0.5% for tax year 2025 and prospectively for 2026 (https://indianhill.gov/departments/tax/)."
+      "$correctionNote": "CORRECTED 2026-09-30: was 0.45%. Indian Hill's emergency ordinance of 2025-12-15 raised the rate to 0.5% for tax year 2025 and prospectively for 2026 (https://indianhill.gov/departments/tax/)."
     },
     {
       "name": "Ironton",
@@ -3088,10 +3088,10 @@
         {
           "title": "RITA member page -- North Hampton (rate history)",
           "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=695",
-          "fetchedOn": "2026-09-29"
+          "fetchedOn": "2026-09-30"
         }
       ],
-      "$addedNote": "ADDED 2026-09-29: new 1% tax from 2025-07-01, missing from the Finder extract. Ohio municode not captured."
+      "$addedNote": "ADDED 2026-09-30: new 1% tax from 2025-07-01, missing from the Finder extract. Ohio municode not captured."
     },
     {
       "name": "North Kingsville",
@@ -4074,10 +4074,10 @@
         {
           "title": "RITA member page -- Stockport (rate history)",
           "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=719",
-          "fetchedOn": "2026-09-29"
+          "fetchedOn": "2026-09-30"
         }
       ],
-      "$addedNote": "ADDED 2026-09-29: 1% since 2023-07-01, missing from the Finder extract. Ohio municode not captured."
+      "$addedNote": "ADDED 2026-09-30: 1% since 2023-07-01, missing from the Finder extract. Ohio municode not captured."
     },
     {
       "name": "Stone Creek",
@@ -4470,7 +4470,7 @@
       "rate": 0.0175,
       "effectiveFrom": "2026-01-01",
       "administeredBy": "self_or_other",
-      "$correctionNote": "CORRECTED 2026-09-29: was 1.95% (the Finder extract's open row). The City of Washington (Court House) Tax Department: 'Income Tax Rate Change effective January 1, 2026. Current Rate - 1.95%. New Rate - 1.75%.' (https://www.cityofwch.com/183/Tax-Department)"
+      "$correctionNote": "CORRECTED 2026-09-30: was 1.95% (the Finder extract's open row). The City of Washington (Court House) Tax Department: 'Income Tax Rate Change effective January 1, 2026. Current Rate - 1.95%. New Rate - 1.75%.' (https://www.cityofwch.com/183/Tax-Department)"
     },
     {
       "name": "Washingtonville",
@@ -4850,7 +4850,7 @@
     "JEDD/JEDZ zones are a SEPARATE dataset -- see data/local/OH-jedd-jedz-2026.json -- because they are legally distinct (contractual zones, not municipalities) and use a different ID scheme in Ohio's own data.",
     "This is a snapshot as of the fetch date; Ohio's own CSV is the living source of truth and should be re-fetched periodically (harvester territory, Phase 9) rather than this file treated as permanently current.",
     "CHECKED 2026-09-02: Grandview's (municode 31262) effectiveFrom of \"9999-12-31\" looks like a transcription bug (Ohio's own EffEndDate=99991231 'still in force' sentinel leaking into the wrong field) but ISN'T one -- re-checked directly against a fresh pull of the same Finder CSV this file is built from: Grandview's own row is genuinely EffStartDate=99991231, EffEndDate=99991231, rate=0% in Ohio's own source data, a degenerate placeholder row Ohio itself publishes, faithfully transcribed here. No dollar impact (0% rate) and effectiveFrom isn't read by any lookup/gating logic in this project, so left as-is rather than 'fixed' into a number Ohio's own data doesn't actually give.",
-    "2026-09-29 cross-check against RITA's member list and CCA's rate table found three taxing towns absent from the Finder extract (Germantown, North Hampton, Stockport -- added) and two stale open rows (Washington 1.95% -> 1.75% from 2026-01-01; Indian Hill 0.45% -> 0.5%). Towns administered by neither agency were not cross-checked the same way."
+    "2026-09-30 cross-check against RITA's member list and CCA's rate table found three taxing towns absent from the Finder extract (Germantown, North Hampton, Stockport -- added) and two stale open rows (Washington 1.95% -> 1.75% from 2026-01-01; Indian Hill 0.45% -> 0.5%). Towns administered by neither agency were not cross-checked the same way."
   ],
   "administeringAgencies": {
     "$comment": "NEW this session: WHO an employer actually remits municipal withholding to. Ohio municipalities do not uniformly collect their own tax the way Michigan's 24 cities do -- many contract with a regional third-party agency. This is a real operational fact a payroll company needs (where to send the money and file the return), separate from the rate itself.",

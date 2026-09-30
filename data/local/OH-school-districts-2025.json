@@ -1,11 +1,11 @@
 {
   "$comment": "All Ohio School District Income Tax (SDIT) districts and their Tax Year 2026 rates. Parsed directly from Ohio Dept of Taxation's own official SDIT_LIST.pdf (5 pages, dated 2025-12-30) via a Python script written and self-validated this session -- NOT hand-transcribed and NOT AI-recalled figures.",
   "year": 2025,
-  "asOf": "2026-09-29",
+  "asOf": "2026-09-30",
   "source": {
     "title": "Ohio Department of Taxation -- School Districts With an Income Tax for 2025 (Updated School Districts Effective January 1, 2025, Rev. 3/26)",
     "url": "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2024-2025%20NYP%20Updates/School_Districts_2025.pdf",
-    "verifiedOn": "2026-09-29",
+    "verifiedOn": "2026-09-30",
     "quote": "Rate Changes (2) 4202 Danville LSD 1.75% ... 5903 Mount Gilead EVSD 0.75% ... Expired School District (2) 0501 Alexander LSD 0.00% 1402 Clinton-Massie LSD 0.00%"
   },
   "taxableWages": {
