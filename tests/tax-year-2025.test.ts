@@ -27,7 +27,7 @@ const amount = (r: ReturnType<typeof calculatePaycheck>, id: string) => r.taxes.
 describe('tax year 2025', () => {
   test('covers federal and the states with a 2025 file', () => {
     const covered = statesWithRuleset('2025-06-13');
-    for (const st of ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NM', 'NV', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'WA', 'WI', 'WV', 'WY']) assert.ok(covered.includes(st), st);
+    for (const st of ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NM', 'NV', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY']) assert.ok(covered.includes(st), st);
   });
 
   test("Illinois 2025: IL-700-T's own example ($800 weekly, 2 + 2 allowances) withholds $32.27", () => {
@@ -237,6 +237,18 @@ describe('tax year 2025', () => {
     assert.equal(amount(al('2025-08-15', true), 'AL_SIT'), amount(al('2025-08-15', false), 'AL_SIT'));
     assert.equal(amount(al('2025-03-14', true), 'AL_LOCAL'), 3450); // 2,300 x 1.5%
     assert.equal(amount(al('2025-08-15', true), 'AL_LOCAL'), 2300); // 1% from 2025-04-01
+  });
+
+  test('Virginia 2025 guide example ($2,649 semimonthly, 5 exemptions = $109.50); $8,500 deduction until July 1', () => {
+    assert.equal(amount(st('2025-08-15', 'VA', { personalExemptions: 5 }, 'semimonthly', 264900), 'VA_SIT'), 10950);
+    // (63,576 - 8,500 - 4,650 - 17,000) x 5.75% + 720 = 2,642.38, whole dollars as in the example, / 24
+    assert.equal(amount(st('2025-03-14', 'VA', { personalExemptions: 5 }, 'semimonthly', 264900), 'VA_SIT'), 11008);
+  });
+
+  test('District of Columbia and Delaware 2025 match their unchanged 2026 formulas', () => {
+    assert.equal(amount(st('2025-06-13', 'DC'), 'DC_SIT'), amount(st('2026-06-12', 'DC'), 'DC_SIT'));
+    assert.equal(amount(st('2025-06-13', 'DC'), 'DC_PFML_ER'), 2250); // 0.75% since July 2024
+    assert.equal(amount(st('2025-06-13', 'DE'), 'DE_SIT'), amount(st('2026-06-12', 'DE'), 'DE_SIT'));
   });
 
   test('Michigan 2025: 4.25% after $5,800 per exemption', () => {
