@@ -116,6 +116,7 @@
    "url": "https://oui.doleta.gov/unemploy/futa_credit.asp",
    "origin": "curated",
    "used_by": [
+    "data/federal/2025.json",
     "data/federal/2026.json"
    ]
   },
@@ -248,6 +249,7 @@
    "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=social-security-administration&conditions%5Bterm%5D=%22cost-of-living+increase+and+other+determinations%22",
    "origin": "curated",
    "used_by": [
+    "data/federal/2025.json",
     "data/federal/2026.json"
    ],
    "replaces": [
@@ -316,6 +318,36 @@
    ]
   },
   {
+   "id": "us-818f1567da",
+   "jurisdiction": "US",
+   "title": "IRS Instructions for Schedule H (2025)",
+   "url": "https://www.irs.gov/instructions/i1040sh",
+   "origin": "data",
+   "used_by": [
+    "data/federal/2025.json"
+   ]
+  },
+  {
+   "id": "us-fdbd208bc6",
+   "jurisdiction": "US",
+   "title": "IRS Notice 2024-80, 2025 Amounts Relating to Retirement Plans and IRAs",
+   "url": "https://www.irs.gov/pub/irs-drop/n-24-80.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/federal/2025.json"
+   ]
+  },
+  {
+   "id": "us-7cdc87d60b",
+   "jurisdiction": "US",
+   "title": "IRS Publication 15 (2025), Employer's Tax Guide",
+   "url": "https://www.irs.gov/pub/irs-prior/p15--2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/federal/2025.json"
+   ]
+  },
+  {
    "id": "us-07b3700320",
    "jurisdiction": "US",
    "title": "IRS Publication 15 (2026) and SSA, Election Workers \u2014 State and Local Government Employers",
@@ -350,6 +382,16 @@
    "origin": "curated"
   },
   {
+   "id": "us-c7c1aed87a",
+   "jurisdiction": "US",
+   "title": "IRS Publication 15-T (2025), Federal Income Tax Withholding Methods (prior-year copy)",
+   "url": "https://www.irs.gov/pub/irs-prior/p15t--2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/federal/2025.json"
+   ]
+  },
+  {
    "id": "us-9a846f38c1",
    "jurisdiction": "US",
    "title": "IRS Publication 15-T (Federal Income Tax Withholding Methods)",
@@ -365,6 +407,16 @@
    "title": "IRS Publication 15-T (web page)",
    "url": "https://www.irs.gov/publications/p15t",
    "origin": "curated"
+  },
+  {
+   "id": "us-99801772f1",
+   "jurisdiction": "US",
+   "title": "IRS Publication 51 (2025), Agricultural Employer's Tax Guide -- the statutory $150 per worker / $2,500 all-farmworker tests, unchanged year to year",
+   "url": "https://www.irs.gov/pub/irs-prior/p51--2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/federal/2025.json"
+   ]
   },
   {
    "id": "us-570ae1a15f",
@@ -408,6 +460,7 @@
    "url": "https://www.irs.gov/businesses/small-businesses-self-employed/members-of-the-clergy",
    "origin": "data",
    "used_by": [
+    "data/federal/2025.json",
     "data/federal/2026.json"
    ]
   },
@@ -535,6 +588,16 @@
    ]
   },
   {
+   "id": "us-8d731c3946",
+   "jurisdiction": "US",
+   "title": "RRB Program Letter 2025-01 (monthly base) and RRB FY2026 Justification of Budget Estimates (rates)",
+   "url": "https://www.rrb.gov/sites/default/files/2025-07/JBE2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/federal/2025.json"
+   ]
+  },
+  {
    "id": "us-ead0ecf606",
    "jurisdiction": "US",
    "title": "RSA 512:21 \u2014 New Hampshire's trustee process: wages earned by the defendant AFTER service of the writ upon the trustee are exempt outright; wages already earned but not yet paid AT THE MOMENT of service are exempt except for an action founded upon a debt on a judgment, in which case up to 50 times the federal minimum hourly wage per week is exempt",
@@ -651,6 +714,16 @@
    ]
   },
   {
+   "id": "us-d4b95327e4",
+   "jurisdiction": "US",
+   "title": "US Railroad Retirement Board, Program Letter 2025-01",
+   "url": "https://www.rrb.gov/Employers/Publications/ProgramAndCircularLetters/PL25-01",
+   "origin": "data",
+   "used_by": [
+    "data/federal/2025.json"
+   ]
+  },
+  {
    "id": "us-102cc000bf",
    "jurisdiction": "US",
    "title": "Va. Code Ann. \u00a7 34-29 \u2014 ordinary garnishment limited to the lesser of 25% of disposable earnings, or the amount by which disposable earnings exceed 40 times the greater of the federal or Virginia minimum hourly wage; nothing withheld if weekly disposable earnings are at or below that 40x floor",
@@ -727,6 +800,16 @@
    ]
   },
   {
+   "id": "ak-5912804a09",
+   "jurisdiction": "AK",
+   "title": "Alaska DOLWD -- Employment Security Tax FAQ (wage base and rates by year)",
+   "url": "https://www.labor.alaska.gov/estax/faq/w1.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/AK-2025.json"
+   ]
+  },
+  {
    "id": "ak-afe59bae77",
    "jurisdiction": "AK",
    "title": "Alaska Dept of Labor and Workforce Development, Employment Security Tax -- 2026 Unemployment Insurance Tax Rates",
@@ -744,6 +827,66 @@
    "origin": "data",
    "used_by": [
     "data/states/AK-2026.json"
+   ]
+  },
+  {
+   "id": "ak-e754c3da72",
+   "jurisdiction": "AK",
+   "title": "U.S. Department of Labor, ETA -- Significant Provisions of State Unemployment Insurance Laws, Effective January 2025",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/AK-2025.json",
+    "data/states/AL-2025.json",
+    "data/states/AR-2025.json",
+    "data/states/AZ-2025.json",
+    "data/states/CA-2025.json",
+    "data/states/CO-2025.json",
+    "data/states/CT-2025.json",
+    "data/states/DC-2025.json",
+    "data/states/DE-2025.json",
+    "data/states/FL-2025.json",
+    "data/states/GA-2025.json",
+    "data/states/HI-2025.json",
+    "data/states/IA-2025.json",
+    "data/states/ID-2025.json",
+    "data/states/IL-2025.json",
+    "data/states/IN-2025.json",
+    "data/states/KS-2025.json",
+    "data/states/KY-2025.json",
+    "data/states/LA-2025.json",
+    "data/states/MA-2025.json",
+    "data/states/MD-2025.json",
+    "data/states/ME-2025.json",
+    "data/states/MI-2025.json",
+    "data/states/MN-2025.json",
+    "data/states/MO-2025.json",
+    "data/states/MS-2025.json",
+    "data/states/MT-2025.json",
+    "data/states/NC-2025.json",
+    "data/states/ND-2025.json",
+    "data/states/NE-2025.json",
+    "data/states/NH-2025.json",
+    "data/states/NJ-2025.json",
+    "data/states/NM-2025.json",
+    "data/states/NV-2025.json",
+    "data/states/NY-2025.json",
+    "data/states/OH-2025.json",
+    "data/states/OK-2025.json",
+    "data/states/OR-2025.json",
+    "data/states/PA-2025.json",
+    "data/states/RI-2025.json",
+    "data/states/SC-2025.json",
+    "data/states/SD-2025.json",
+    "data/states/TN-2025.json",
+    "data/states/TX-2025.json",
+    "data/states/UT-2025.json",
+    "data/states/VA-2025.json",
+    "data/states/VT-2025.json",
+    "data/states/WA-2025.json",
+    "data/states/WI-2025.json",
+    "data/states/WV-2025.json",
+    "data/states/WY-2025.json"
    ]
   },
   {
@@ -771,6 +914,7 @@
    "url": "https://www.revenue.alabama.gov/notice-overtime-exemption-ends-june-30-2025/",
    "origin": "data",
    "used_by": [
+    "data/states/AL-2025.json",
     "data/states/AL-2026.json"
    ]
   },
@@ -781,6 +925,84 @@
    "url": "https://comptroller.alabama.gov/wp-content/uploads/2018/01/Jefferson-County-Occupational-Tax.pdf",
    "origin": "data",
    "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json"
+   ]
+  },
+  {
+   "id": "al-07af137cf6",
+   "jurisdiction": "AL",
+   "title": "City of Auburn -- Occupational License Fee",
+   "url": "https://www.auburnal.gov/revenue/tax-information/occupational-license-fee/",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json"
+   ]
+  },
+  {
+   "id": "al-ca037207c7",
+   "jurisdiction": "AL",
+   "title": "City of Irondale -- Occupational License Fee",
+   "url": "https://cityofirondaleal.gov/occupational-license-fee/",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json"
+   ]
+  },
+  {
+   "id": "al-3cef691abe",
+   "jurisdiction": "AL",
+   "title": "City of Leeds -- Occupational Tax",
+   "url": "https://www.leedsalabama.gov/471/Occupational-Tax",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json"
+   ]
+  },
+  {
+   "id": "al-dcd77af5c8",
+   "jurisdiction": "AL",
+   "title": "City of Opelika -- announcement of the occupational tax cut",
+   "url": "https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json"
+   ]
+  },
+  {
+   "id": "al-06b18ca67e",
+   "jurisdiction": "AL",
+   "title": "City of Tarrant -- occupational license fee ordinance (Municode)",
+   "url": "https://mcclibraryfunctions.azurewebsites.us/api/ordinanceDownload/10178/1047327/pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json"
+   ]
+  },
+  {
+   "id": "al-135026d367",
+   "jurisdiction": "AL",
+   "title": "City of Tuskegee -- Occupational Tax Reporting form",
+   "url": "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json"
+   ]
+  },
+  {
+   "id": "al-d7fe3d8fb6",
+   "jurisdiction": "AL",
+   "title": "City of Tuskegee -- business information brochure",
+   "url": "https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
     "data/local/AL-municipalities-2026.json"
    ]
   },
@@ -797,10 +1019,11 @@
   {
    "id": "al-97dce36805",
    "jurisdiction": "AL",
-   "title": "USDA National Finance Center -- Alabama State Income Tax Withholding bulletin (TAXES 22-24)",
+   "title": "USDA National Finance Center -- Alabama State Income Tax Withholding (NFC-22-1666037747, still the current NFC Alabama formula in 2026)",
    "url": "https://help.nfc.usda.gov/bulletins/2022/1666037747.htm?taxmap=true",
    "origin": "data",
    "used_by": [
+    "data/states/AL-2025.json",
     "data/states/AL-2026.json"
    ]
   },
@@ -866,6 +1089,16 @@
    ]
   },
   {
+   "id": "ar-09b9a66c18",
+   "jurisdiction": "AR",
+   "title": "State of Arkansas Withholding Tax -- Low Income Tax Tables, Effective 01/01/2026",
+   "url": "https://www.dfa.arkansas.gov/wp-content/uploads/Withholding-Tax-Tables-for-Low-Income.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/AR-2026.json"
+   ]
+  },
+  {
    "id": "ar-67edb14828",
    "jurisdiction": "AR",
    "title": "State of Arkansas Withholding Tax -- Low Income Tax Tables, Tax Year 2026 (Effective 01/01/2026)",
@@ -873,6 +1106,26 @@
    "origin": "data",
    "used_by": [
     "data/states/AR-2026.json"
+   ]
+  },
+  {
+   "id": "ar-5d10918c60",
+   "jurisdiction": "AR",
+   "title": "State of Arkansas Withholding Tax -- Regular Income Tax Tables, Effective 01/01/2025",
+   "url": "https://www.dfa.arkansas.gov/wp-content/uploads/withholdTaxTablesRegularIncome_1.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/AR-2025.json"
+   ]
+  },
+  {
+   "id": "ar-6497713879",
+   "jurisdiction": "AR",
+   "title": "USDA National Finance Center -- Arkansas State Income Tax Withholding (NFC-25-1736280741, 2025 formula)",
+   "url": "https://help.nfc.usda.gov/bulletins/2025/1736280741.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/AR-2025.json"
    ]
   },
   {
@@ -893,6 +1146,7 @@
    "origin": "data",
    "used_by": [
     "data/states/AZ-2026.json",
+    "data/states/OR-2025.json",
     "data/states/OR-2026.json"
    ]
   },
@@ -909,11 +1163,22 @@
   {
    "id": "az-82d71cbef9",
    "jurisdiction": "AZ",
-   "title": "2026 Form WEC, Employee Withholding Exemption Certificate (Instructions)",
+   "title": "2026 Form WEC Instructions, 'Nonresidents' section",
    "url": "https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2026_WECi.pdf",
    "origin": "data",
    "used_by": [
+    "data/states/AZ-2025.json",
     "data/states/AZ-2026.json"
+   ]
+  },
+  {
+   "id": "az-ddbdf11123",
+   "jurisdiction": "AZ",
+   "title": "Arizona DOR -- Withholding Calculations",
+   "url": "https://azdor.gov/individuals/withholding-calculations",
+   "origin": "data",
+   "used_by": [
+    "data/states/AZ-2025.json"
    ]
   },
   {
@@ -923,6 +1188,16 @@
    "url": "https://azdor.gov/business/withholding-tax",
    "kind": "index",
    "origin": "curated"
+  },
+  {
+   "id": "az-e91daa9fa4",
+   "jurisdiction": "AZ",
+   "title": "Arizona Form A-4 (2025)",
+   "url": "https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2025_A-4_f.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/AZ-2025.json"
+   ]
   },
   {
    "id": "az-b66098e04c",
@@ -989,6 +1264,7 @@
    "kind": "index",
    "origin": "curated",
    "used_by": [
+    "data/states/CA-2025.json",
     "data/states/CA-2026.json"
    ]
   },
@@ -1030,6 +1306,16 @@
    "origin": "data",
    "used_by": [
     "data/minimum-wage/sectoral/CA-sectoral-2026.json"
+   ]
+  },
+  {
+   "id": "ca-55a9a37716",
+   "jurisdiction": "CA",
+   "title": "EDD -- California Withholding Schedules for 2025, Method B (Exact Calculation Method)",
+   "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/25methb.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/CA-2025.json"
    ]
   },
   {
@@ -1079,6 +1365,7 @@
    "url": "https://www.denvergov.org/content/dam/denvergov/Portals/571/documents/TaxGuide/TaxGuideTopic61_OccupationalPrivilegeTaxes.pdf",
    "origin": "data",
    "used_by": [
+    "data/states/CO-2025.json",
     "data/states/CO-2026.json"
    ]
   },
@@ -1099,6 +1386,7 @@
    "url": "https://www.glendale.co.us/355/Occupational-Privilege-Tax",
    "origin": "data",
    "used_by": [
+    "data/states/CO-2025.json",
     "data/states/CO-2026.json"
    ]
   },
@@ -1109,7 +1397,18 @@
    "url": "https://ci.sheridan.co.us/288/Occupational-Privilege-Tax",
    "origin": "data",
    "used_by": [
+    "data/states/CO-2025.json",
     "data/states/CO-2026.json"
+   ]
+  },
+  {
+   "id": "co-783844535e",
+   "jurisdiction": "CO",
+   "title": "Colorado DOR -- DR 1098 Colorado Withholding Worksheet for Employers",
+   "url": "https://tax.colorado.gov/DR1098",
+   "origin": "data",
+   "used_by": [
+    "data/states/CO-2025.json"
    ]
   },
   {
@@ -1134,6 +1433,17 @@
    ],
    "replaces": [
     "https://www.edgewaterco.gov/doing-business/minimum-wage"
+   ]
+  },
+  {
+   "id": "co-22bb192b52",
+   "jurisdiction": "CO",
+   "title": "Colorado FAMLI -- premium rate (0.9% for 2023-2025; 0.88% from 2026)",
+   "url": "https://famli.colorado.gov/employers",
+   "origin": "data",
+   "used_by": [
+    "data/states/CO-2025.json",
+    "data/states/CO-2026.json"
    ]
   },
   {
@@ -1173,13 +1483,13 @@
    ]
   },
   {
-   "id": "co-22bb192b52",
+   "id": "co-4e47f3aee1",
    "jurisdiction": "CO",
-   "title": "Family and Medical Leave Insurance (FAMLI) \u2014 Employers page",
-   "url": "https://famli.colorado.gov/employers",
+   "title": "USDA National Finance Center -- Colorado State Income Tax Withholding (NFC-26-1772551649, 2026-03-04)",
+   "url": "https://help.nfc.usda.gov/bulletins/2026/1772551649.htm",
    "origin": "data",
    "used_by": [
-    "data/states/CO-2026.json"
+    "data/states/CO-2025.json"
    ]
   },
   {
@@ -1189,6 +1499,16 @@
    "url": "https://portal.ct.gov/drs/publications/informational-publications/2026/2026-informational-publications",
    "kind": "index",
    "origin": "curated"
+  },
+  {
+   "id": "ct-75b91b6b44",
+   "jurisdiction": "CT",
+   "title": "Connecticut DRS -- IP 2025(1) Circular CT Employer's Tax Guide (issued 2024-12-17), including TPG-211 2025 Withholding Calculation Rules (Rev. 12/24)",
+   "url": "https://portal.ct.gov/-/media/drs/publications/pubsip/2025/ip-2025-1.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/CT-2025.json"
+   ]
   },
   {
    "id": "ct-8add94a686",
@@ -1249,6 +1569,16 @@
    ]
   },
   {
+   "id": "dc-8f124e7558",
+   "jurisdiction": "DC",
+   "title": "DC Department of Employment Services, Office of Paid Family Leave -- Employer Information",
+   "url": "https://dcpaidfamilyleave.dc.gov/employer-information/",
+   "origin": "data",
+   "used_by": [
+    "data/states/DC-2025.json"
+   ]
+  },
+  {
    "id": "dc-b3198251fc",
    "jurisdiction": "DC",
    "title": "DC Department of Employment Services, Office of Wage and Hour -- District of Columbia Minimum Wage Increase (public notice)",
@@ -1269,10 +1599,11 @@
   {
    "id": "dc-c0035095f2",
    "jurisdiction": "DC",
-   "title": "NFC-22-1668460546, District of Columbia Income Tax Withholding (USDA National Finance Center bulletin, effective Pay Period 22, 2022)",
+   "title": "USDA National Finance Center -- District of Columbia Income Tax Withholding (NFC-22-1668460546, still NFC's current DC formula in 2026)",
    "url": "https://help.nfc.usda.gov/bulletins/2022/1668460546.htm",
    "origin": "data",
    "used_by": [
+    "data/states/DC-2025.json",
     "data/states/DC-2026.json"
    ]
   },
@@ -1284,6 +1615,16 @@
    "origin": "data",
    "used_by": [
     "data/states/DE-2026.json"
+   ]
+  },
+  {
+   "id": "de-1a96746d6a",
+   "jurisdiction": "DE",
+   "title": "Delaware Division of Revenue -- Employer's Guide (Withholding Tables)",
+   "url": "https://revenue.delaware.gov/employers-guide-withholding-tables/",
+   "origin": "data",
+   "used_by": [
+    "data/states/DE-2025.json"
    ]
   },
   {
@@ -1314,6 +1655,7 @@
    "url": "https://laborfiles.delaware.gov/main/pfl/Employer_and_TPAs_Guide_to_DPL.pdf",
    "origin": "data",
    "used_by": [
+    "data/states/DE-2025.json",
     "data/states/DE-2026.json"
    ]
   },
@@ -1368,6 +1710,16 @@
    ]
   },
   {
+   "id": "ga-c086c88bb4",
+   "jurisdiction": "GA",
+   "title": "Georgia DOR -- 2025 Employer's Tax Guide (updated June 2025)",
+   "url": "https://dor.georgia.gov/document/document-document/2025-employers-tax-guide-updated-june-2025/download",
+   "origin": "data",
+   "used_by": [
+    "data/states/GA-2025.json"
+   ]
+  },
+  {
    "id": "ga-e097c014c1",
    "jurisdiction": "GA",
    "title": "Georgia DOR withholding",
@@ -1404,13 +1756,13 @@
    ]
   },
   {
-   "id": "hi-dea958dcf2",
+   "id": "hi-93e02d06aa",
    "jurisdiction": "HI",
-   "title": "Booklet A, Employer's Tax Guide, Appendix -- Hawaii Income Tax Withholding Rates, Methods, and Tax Tables (effective as of 2025-12-05 for withholding 2026-01-01 and thereafter)",
-   "url": "https://files.hawaii.gov/tax/news/pubs/25BkltA.pdf",
+   "title": "Hawaii DLIR Disability Compensation Division -- 2025 Maximum Weekly Wage Base and Maximum Weekly Benefit Amount (2024-12-02)",
+   "url": "https://labor.hawaii.gov/dcd/files/2023/05/2025-Max-Weekly-Wage-Base-Rev-2025.03.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/HI-2026.json"
+    "data/states/HI-2025.json"
    ]
   },
   {
@@ -1420,6 +1772,17 @@
    "url": "https://tax.hawaii.gov/geninfo/a2_b2_4empl_whhold/",
    "kind": "index",
    "origin": "curated"
+  },
+  {
+   "id": "hi-dea958dcf2",
+   "jurisdiction": "HI",
+   "title": "Hawaii Department of Taxation -- Booklet A, Employer's Tax Guide (Rev. 2025)",
+   "url": "https://files.hawaii.gov/tax/news/pubs/25BkltA.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/HI-2025.json",
+    "data/states/HI-2026.json"
+   ]
   },
   {
    "id": "hi-96e863a26e",
@@ -1487,6 +1850,16 @@
    "origin": "data",
    "used_by": [
     "data/states/IA-2026.json"
+   ]
+  },
+  {
+   "id": "ia-12c77846db",
+   "jurisdiction": "IA",
+   "title": "Iowa DOR -- Iowa Withholding Formula For Wages Paid Beginning January 1, 2025",
+   "url": "https://revenue.iowa.gov/media/61/download?inline",
+   "origin": "data",
+   "used_by": [
+    "data/states/IA-2025.json"
    ]
   },
   {
@@ -1558,6 +1931,16 @@
    ]
   },
   {
+   "id": "id-805e07d8a0",
+   "jurisdiction": "ID",
+   "title": "Idaho State Tax Commission -- Withholding tables updated for 2025 (press release, 2025-05-01)",
+   "url": "https://tax.idaho.gov/pressrelease/withholding-tables-updated-for-2025/",
+   "origin": "data",
+   "used_by": [
+    "data/states/ID-2025.json"
+   ]
+  },
+  {
    "id": "id-e981541009",
    "jurisdiction": "ID",
    "title": "Idaho computing withholding",
@@ -1611,10 +1994,11 @@
   {
    "id": "il-cc04bd200f",
    "jurisdiction": "IL",
-   "title": "Form IL-W-4 \u2014 Employee's and other Payee's Illinois Withholding Allowance Certificate and Instructions (R-07/23)",
+   "title": "Form IL-W-4 (R-07/23) and its Illinois Withholding Allowance Worksheet",
    "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/withholding/documents/currentyear/il-w-4.pdf",
    "origin": "data",
    "used_by": [
+    "data/states/IL-2025.json",
     "data/states/IL-2026.json"
    ]
   },
@@ -1626,6 +2010,16 @@
    "origin": "data",
    "used_by": [
     "data/states/IL-2026.json"
+   ]
+  },
+  {
+   "id": "il-569cb0bca0",
+   "jurisdiction": "IL",
+   "title": "Illinois DOR -- 2025 Booklet IL-700-T, Illinois Withholding Tax Tables",
+   "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/withholding/documents/2025/il-700-t.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/IL-2025.json"
    ]
   },
   {
@@ -1657,22 +2051,13 @@
    ]
   },
   {
-   "id": "in-cd957f8ce0",
-   "jurisdiction": "IN",
-   "title": "DOR: Withholding Tax Forms \u2014 WH-4 (State Form 48845), 'Employee's Withholding Exemption & County Status Certificate'",
-   "url": "https://www.in.gov/dor/tax-forms/withholding-tax-forms/",
-   "origin": "data",
-   "used_by": [
-    "data/states/IN-2026.json"
-   ]
-  },
-  {
    "id": "in-64c1a3537b",
    "jurisdiction": "IN",
-   "title": "Form WH-47 \u2014 Certificate of Residence (State Form 9686, R3/3-21)",
+   "title": "Form WH-47 \u2014 Certificate of Residence",
    "url": "https://forms.in.gov/download.aspx?id=2419",
    "origin": "data",
    "used_by": [
+    "data/states/IN-2025.json",
     "data/states/IN-2026.json",
     "data/states/PA-2026.json"
    ]
@@ -1727,6 +2112,17 @@
    ]
   },
   {
+   "id": "in-cd957f8ce0",
+   "jurisdiction": "IN",
+   "title": "WH-4, State Form 48845",
+   "url": "https://www.in.gov/dor/tax-forms/withholding-tax-forms/",
+   "origin": "data",
+   "used_by": [
+    "data/states/IN-2025.json",
+    "data/states/IN-2026.json"
+   ]
+  },
+  {
    "id": "ks-68647e40a7",
    "jurisdiction": "KS",
    "title": "Form 200, Local Intangibles Tax Return (Rev. 9-23-25)",
@@ -1763,17 +2159,41 @@
    "url": "https://revenue.ky.gov/Dor%20Training%20Materials/103%20KAR%2017.140.%20Individual%20income%20tax%20-%20reciprocity%20-%20nonresidents.pdf",
    "origin": "data",
    "used_by": [
+    "data/states/KY-2025.json",
     "data/states/KY-2026.json"
    ]
   },
   {
    "id": "ky-9650576b30",
    "jurisdiction": "KY",
-   "title": "42A804 (K-4)(12-2025) -- Kentucky's Withholding Certificate 2026",
+   "title": "42A804 (K-4)(12-2025)",
    "url": "https://revenue.ky.gov/Forms/42A804%20(K-4)%20(2026).pdf",
    "origin": "data",
    "used_by": [
+    "data/states/KY-2025.json",
     "data/states/KY-2026.json"
+   ]
+  },
+  {
+   "id": "ky-37570664b9",
+   "jurisdiction": "KY",
+   "title": "City of Brandenburg -- Ordinance 648 (June 2025)",
+   "url": "https://brandenburg.ky.gov/wp-content/uploads/2025/06/ORD-648-Occupational-Tax-.33-JUNE-2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json"
+   ]
+  },
+  {
+   "id": "ky-baa092b9f6",
+   "jurisdiction": "KY",
+   "title": "City of Corbin Occupational Tax Office",
+   "url": "https://www.corbin-ky.gov/assets/files/uploads/_20240118110308388_3c4b72d27552424881504b851b27ab70.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json"
    ]
   },
   {
@@ -1783,6 +2203,18 @@
    "url": "https://www.covingtonky.gov/government/departments/finance/business-licensing-occupational-license-fee",
    "origin": "data",
    "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json"
+   ]
+  },
+  {
+   "id": "ky-c1343deb18",
+   "jurisdiction": "KY",
+   "title": "City of Franklin -- Business Licensing & Taxes",
+   "url": "https://www.franklinky.gov/departments/finance_accounting/business_licensing_taxes.php",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
     "data/local/KY-occupational-2026.json"
    ]
   },
@@ -1793,6 +2225,7 @@
    "url": "https://www.georgetownky.gov/2167/Taxes-License-Fees",
    "origin": "data",
    "used_by": [
+    "data/local/KY-occupational-2025.json",
     "data/local/KY-occupational-2026.json"
    ]
   },
@@ -1803,6 +2236,7 @@
    "url": "https://www.hendersonky.gov/174/Occupational-License-Tax",
    "origin": "data",
    "used_by": [
+    "data/local/KY-occupational-2025.json",
     "data/local/KY-occupational-2026.json"
    ]
   },
@@ -1813,6 +2247,84 @@
    "url": "https://www.lexingtonky.gov/working/business-licensing-taxes/occupational-license-fee-rates-current-forms",
    "origin": "data",
    "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json"
+   ]
+  },
+  {
+   "id": "ky-cb14dfaed5",
+   "jurisdiction": "KY",
+   "title": "City of Paducah -- Business License and Payroll Tax",
+   "url": "https://paducahky.gov/departments/finance/business-license-and-payroll-tax",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json"
+   ]
+  },
+  {
+   "id": "ky-998b97afaa",
+   "jurisdiction": "KY",
+   "title": "City of Pikeville -- Business Licenses",
+   "url": "https://pikevilleky.gov/business/",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json"
+   ]
+  },
+  {
+   "id": "ky-8029ccbcee",
+   "jurisdiction": "KY",
+   "title": "City of Russell -- Occupational License Fee",
+   "url": "https://www.russellky.gov/departments/finance___revenue_department/occupational_license_fee/index.php",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json"
+   ]
+  },
+  {
+   "id": "ky-69ce150600",
+   "jurisdiction": "KY",
+   "title": "City of Russellville -- Return of Payroll Taxes Withheld",
+   "url": "https://russellvilleky.gov/index.php/forms-applications/occupational-tax?download=19:return-of-payroll-taxes-withheld",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json"
+   ]
+  },
+  {
+   "id": "ky-a2771355e3",
+   "jurisdiction": "KY",
+   "title": "City of St. Matthews -- Occupational Tax",
+   "url": "https://www.stmatthewsky.gov/occupational-tax/",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json"
+   ]
+  },
+  {
+   "id": "ky-cd3c1f45a4",
+   "jurisdiction": "KY",
+   "title": "Grant County Fiscal Court -- Occupational Licensing",
+   "url": "https://grantcounty.ky.gov/occupational-licensing/",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json"
+   ]
+  },
+  {
+   "id": "ky-ea2a51e963",
+   "jurisdiction": "KY",
+   "title": "Hardin County -- Occupational Tax",
+   "url": "https://www.hardincountyky.gov/365/Occupational-Tax",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
     "data/local/KY-occupational-2026.json"
    ]
   },
@@ -1823,6 +2335,7 @@
    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=48677",
    "origin": "data",
    "used_by": [
+    "data/local/KY-occupational-2025.json",
     "data/local/KY-occupational-2026.json"
    ]
   },
@@ -1833,6 +2346,7 @@
    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=50960",
    "origin": "data",
    "used_by": [
+    "data/local/KY-occupational-2025.json",
     "data/local/KY-occupational-2026.json"
    ]
   },
@@ -1843,6 +2357,7 @@
    "url": "https://apps.legislature.ky.gov/law/Statutes/statute.aspx?id=54832",
    "origin": "data",
    "used_by": [
+    "data/local/KY-occupational-2025.json",
     "data/local/KY-occupational-2026.json"
    ]
   },
@@ -1853,7 +2368,19 @@
    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=48683",
    "origin": "data",
    "used_by": [
+    "data/local/KY-occupational-2025.json",
     "data/local/KY-occupational-2026.json"
+   ]
+  },
+  {
+   "id": "ky-ab0a0a1513",
+   "jurisdiction": "KY",
+   "title": "KY-TAM-18-03 -- Credit for Income Tax Paid to Another State",
+   "url": "https://revenue.ky.gov/DOR%20Training%20Materials/KY-TAM-18-03%20Credit%20for%20Income%20Tax%20Paid%20to%20Another%20State%20FINAL%20(UPDATED%20HYPERLINKS).pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/KY-2025.json",
+    "data/states/KY-2026.json"
    ]
   },
   {
@@ -1864,6 +2391,36 @@
    "origin": "curated",
    "used_by": [
     "data/states/KY-2026.json"
+   ]
+  },
+  {
+   "id": "ky-b732a96cb7",
+   "jurisdiction": "KY",
+   "title": "Kentucky DOR -- 2025 Form K-4",
+   "url": "https://revenue.ky.gov/Documents/42A804%20(K-4)%20(2025).pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/KY-2025.json"
+   ]
+  },
+  {
+   "id": "ky-49d5fcad5c",
+   "jurisdiction": "KY",
+   "title": "Kentucky DOR -- 2025 Kentucky Withholding Tax Formula",
+   "url": "https://revenue.ky.gov/Forms/Withholding%20Computer%20Formula.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/KY-2025.json"
+   ]
+  },
+  {
+   "id": "ky-2c297275de",
+   "jurisdiction": "KY",
+   "title": "Kentucky DOR -- Kentucky DOR Announces 2025 Standard Deduction",
+   "url": "https://revenue.ky.gov/News/pages/kentucky-dor-announces-2025-standard-deduction.aspx",
+   "origin": "data",
+   "used_by": [
+    "data/states/KY-2025.json"
    ]
   },
   {
@@ -1893,17 +2450,8 @@
    "url": "https://web.sos.ky.gov/occupationaltax/",
    "origin": "data",
    "used_by": [
+    "data/local/KY-occupational-2025.json",
     "data/local/KY-occupational-2026.json"
-   ]
-  },
-  {
-   "id": "ky-ab0a0a1513",
-   "jurisdiction": "KY",
-   "title": "Kentucky Technical Advice Memorandum KY-TAM-18-03 -- Credit for Income Tax Paid to Another State",
-   "url": "https://revenue.ky.gov/DOR%20Training%20Materials/KY-TAM-18-03%20Credit%20for%20Income%20Tax%20Paid%20to%20Another%20State%20FINAL%20(UPDATED%20HYPERLINKS).pdf",
-   "origin": "data",
-   "used_by": [
-    "data/states/KY-2026.json"
    ]
   },
   {
@@ -1921,6 +2469,29 @@
    "url": "https://louisvilleky.gov/sites/default/files/2024-12/w-1kjc_instructions_2025.pdf",
    "origin": "data",
    "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json"
+   ]
+  },
+  {
+   "id": "ky-347ed57f44",
+   "jurisdiction": "KY",
+   "title": "Powell County -- Ordinance 2025-07",
+   "url": "http://www.powellcountyky.us/ordinances/Ordinance%202025-07.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json"
+   ]
+  },
+  {
+   "id": "ky-d66bb087e3",
+   "jurisdiction": "KY",
+   "title": "Simpson County -- Occupational Tax Administration",
+   "url": "https://simpsoncountyky.gov/occupational-tax-administration/",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
     "data/local/KY-occupational-2026.json"
    ]
   },
@@ -1931,7 +2502,18 @@
    "url": "https://help.nfc.usda.gov/bulletins/2024/1709749757.htm",
    "origin": "data",
    "used_by": [
+    "data/local/KY-occupational-2025.json",
     "data/local/KY-occupational-2026.json"
+   ]
+  },
+  {
+   "id": "la-27745012e5",
+   "jurisdiction": "LA",
+   "title": "Louisiana DOR -- R-1306 (1/25) Louisiana Withholding Tables and Formulas, effective on or after January 1, 2025",
+   "url": "https://dam.ldr.la.gov/taxforms/1306-1-25.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/LA-2025.json"
    ]
   },
   {
@@ -2003,10 +2585,11 @@
   {
    "id": "ma-949aae902f",
    "jurisdiction": "MA",
-   "title": "Massachusetts 4% Surtax on Taxable Income \u2014 cross-source (multiple tax-guide sources agreeing)",
+   "title": "Mass. DOR -- Massachusetts 4% Surtax on Taxable Income",
    "url": "https://www.mass.gov/info-details/massachusetts-4-surtax-on-taxable-income",
    "origin": "data",
    "used_by": [
+    "data/states/MA-2025.json",
     "data/states/MA-2026.json"
    ]
   },
@@ -2076,6 +2659,16 @@
    ]
   },
   {
+   "id": "md-c500bb90f3",
+   "jurisdiction": "MD",
+   "title": "Comptroller of Maryland -- Withholding Tax Facts, January 2025 - December 2025 (Revised 07/25)",
+   "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/legal-publications/facts/Withholding-Tax-Facts-2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/MD-2025.json"
+   ]
+  },
+  {
    "id": "md-d8888f97db",
    "jurisdiction": "MD",
    "title": "Howard County, MD -- Minimum Wage schedule (Finance Department)",
@@ -2110,7 +2703,10 @@
    "jurisdiction": "MD",
    "title": "Maryland withholding tax facts",
    "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/legal-publications/facts/withholding-tax-facts-2026.pdf",
-   "origin": "curated"
+   "origin": "curated",
+   "used_by": [
+    "data/states/MD-2026.json"
+   ]
   },
   {
    "id": "md-43a4e93e35",
@@ -2130,6 +2726,16 @@
    "origin": "data",
    "used_by": [
     "data/minimum-wage/local/MD-local-2026.json"
+   ]
+  },
+  {
+   "id": "md-745492832a",
+   "jurisdiction": "MD",
+   "title": "USDA National Finance Center -- Maryland State and Counties Income Tax Withholding (NFC-25-1743080634, 2025 formula before the revision)",
+   "url": "https://help.nfc.usda.gov/bulletins/2025/1743080634.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/MD-2025.json"
    ]
   },
   {
@@ -2170,6 +2776,16 @@
    "origin": "data",
    "used_by": [
     "data/states/ME-2026.json"
+   ]
+  },
+  {
+   "id": "me-7969f2a1bd",
+   "jurisdiction": "ME",
+   "title": "Maine Revenue Services -- 2025 Withholding Tables for Individual Income Tax (revised October 2024)",
+   "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_wh_tab_instr.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/ME-2025.json"
    ]
   },
   {
@@ -2227,6 +2843,7 @@
    "url": "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/City-Withholding/TY2025/5469_ty2025.pdf",
    "origin": "data",
    "used_by": [
+    "data/local/MI-cities-2025.json",
     "data/local/MI-cities-2026.json"
    ]
   },
@@ -2237,6 +2854,7 @@
    "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-141-631",
    "origin": "data",
    "used_by": [
+    "data/local/MI-cities-2025.json",
     "data/local/MI-cities-2026.json"
    ]
   },
@@ -2267,6 +2885,7 @@
    "url": "https://www.michigan.gov/-/media/Project/Websites/taxes/Forms/All-Years/MIW4.pdf",
    "origin": "data",
    "used_by": [
+    "data/states/MI-2025.json",
     "data/states/MI-2026.json"
    ]
   },
@@ -2301,12 +2920,33 @@
    ]
   },
   {
+   "id": "mi-38e464f417",
+   "jurisdiction": "MI",
+   "title": "Michigan Treasury -- 446 Michigan Income Tax Withholding Guide (2025)",
+   "url": "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/SUW/TY2025/446_Withholding-Guide_2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/MI-2025.json"
+   ]
+  },
+  {
+   "id": "mi-a46d183c4e",
+   "jurisdiction": "MI",
+   "title": "Michigan Treasury -- Withholding Tax Information by Calendar Year",
+   "url": "https://www.michigan.gov/taxes/business-taxes/withholding/calendar-year-tax-information",
+   "origin": "data",
+   "used_by": [
+    "data/states/MI-2025.json"
+   ]
+  },
+  {
    "id": "mi-ca78297f10",
    "jurisdiction": "MI",
    "title": "Michigan Treasury \u2014 Withholding Reciprocity Examples (Analysis section: MCL 206.703(2), MCL 206.110, MCL 206.256, RAB 2017-13)",
    "url": "https://www.michigan.gov/taxes/business-taxes/payroll-service-providers/withholding-reciprocity-examples",
    "origin": "data",
    "used_by": [
+    "data/states/MI-2025.json",
     "data/states/MI-2026.json"
    ]
   },
@@ -2325,6 +2965,7 @@
    "url": "https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/",
    "origin": "data",
    "used_by": [
+    "data/local/MI-cities-2025.json",
     "data/local/MI-cities-2026.json"
    ]
   },
@@ -2345,16 +2986,18 @@
    "url": "https://www.michigan.gov/taxes/questions/iit/accordion/general/what-cities-impose-an-income-tax",
    "origin": "data",
    "used_by": [
+    "data/local/MI-cities-2025.json",
     "data/local/MI-cities-2026.json"
    ]
   },
   {
    "id": "mn-5e6a2ed0fc",
    "jurisdiction": "MN",
-   "title": "2026 Form W-4MN, Minnesota Employee Withholding Certificate",
+   "title": "2026 Form W-4MN, Section 2 -- Exemption From Minnesota Withholding",
    "url": "https://www.revenue.state.mn.us/sites/default/files/2026-04/w-4mn.pdf",
    "origin": "data",
    "used_by": [
+    "data/states/MN-2025.json",
     "data/states/MN-2026.json"
    ]
   },
@@ -2395,6 +3038,7 @@
    "url": "https://www.revisor.mn.gov/rules/8002.0200/",
    "origin": "data",
    "used_by": [
+    "data/states/MN-2025.json",
     "data/states/MN-2026.json"
    ]
   },
@@ -2415,6 +3059,7 @@
    "url": "https://www.revisor.mn.gov/statutes/cite/290.081",
    "origin": "data",
    "used_by": [
+    "data/states/MN-2025.json",
     "data/states/MN-2026.json"
    ]
   },
@@ -2425,7 +3070,18 @@
    "url": "https://www.revisor.mn.gov/statutes/cite/477A.016",
    "origin": "data",
    "used_by": [
+    "data/states/MN-2025.json",
     "data/states/MN-2026.json"
+   ]
+  },
+  {
+   "id": "mn-16a2679c7d",
+   "jurisdiction": "MN",
+   "title": "Minnesota DEED -- Paid Leave: premiums begin January 1, 2026",
+   "url": "https://mn.gov/deed/paidleave/employers/",
+   "origin": "data",
+   "used_by": [
+    "data/states/MN-2025.json"
    ]
   },
   {
@@ -2445,6 +3101,7 @@
    "url": "https://www.revenue.state.mn.us/reciprocity",
    "origin": "data",
    "used_by": [
+    "data/states/MN-2025.json",
     "data/states/MN-2026.json"
    ]
   },
@@ -2467,6 +3124,16 @@
    "origin": "curated"
   },
   {
+   "id": "mn-a4a9d011be",
+   "jurisdiction": "MN",
+   "title": "USDA National Finance Center -- Minnesota State Income Tax Withholding (NFC-25-1743707530, 2025 formula)",
+   "url": "https://help.nfc.usda.gov/bulletins/2025/1743707530.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/MN-2025.json"
+   ]
+  },
+  {
    "id": "mo-5666f995b6",
    "jurisdiction": "MO",
    "title": "2026 Missouri Withholding Tax Formula",
@@ -2484,6 +3151,16 @@
    "origin": "data",
    "used_by": [
     "data/states/MO-2026.json"
+   ]
+  },
+  {
+   "id": "mo-c4e0e7fb7d",
+   "jurisdiction": "MO",
+   "title": "Missouri DOR -- 2025 Missouri Withholding Tax Formula",
+   "url": "https://dor.mo.gov/forms/Withholding%20Formula_2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/MO-2025.json"
    ]
   },
   {
@@ -2543,6 +3220,16 @@
    ]
   },
   {
+   "id": "ms-90e917f2e5",
+   "jurisdiction": "MS",
+   "title": "USDA National Finance Center -- Mississippi State Income Tax Withholding (NFC-25-1745343478, effective pay period 06, 2025)",
+   "url": "https://help.nfc.usda.gov/bulletins/2025/1745343478.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/MS-2025.json"
+   ]
+  },
+  {
    "id": "ms-bc2af1b7ff",
    "jurisdiction": "MS",
    "title": "USDA National Finance Center -- Mississippi State Income Tax Withholding bulletin (NFC-26-1768327516)",
@@ -2590,6 +3277,7 @@
    "kind": "index",
    "origin": "curated",
    "used_by": [
+    "data/states/MT-2025.json",
     "data/states/MT-2026.json"
    ],
    "replaces": [
@@ -2660,6 +3348,16 @@
    "origin": "curated"
   },
   {
+   "id": "nc-c0dcd0fd7e",
+   "jurisdiction": "NC",
+   "title": "USDA National Finance Center -- North Carolina Income Tax Withholding (2025)",
+   "url": "https://help.nfc.usda.gov/bulletins/2025/1740006150.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/NC-2025.json"
+   ]
+  },
+  {
    "id": "nd-67b029ac73",
    "jurisdiction": "ND",
    "title": "2026 Income Tax Withholding Rates and Instructions (North Dakota Office of State Tax Commissioner)",
@@ -2677,6 +3375,16 @@
    "origin": "data",
    "used_by": [
     "data/states/ND-2026.json"
+   ]
+  },
+  {
+   "id": "nd-6c3b61d236",
+   "jurisdiction": "ND",
+   "title": "North Dakota Office of State Tax Commissioner -- Income Tax Withholding Rates and Instructions, 2025 Calendar Year",
+   "url": "https://www.tax.nd.gov/sites/www/files/documents/misc-discuss-folder/Final_2025%20Income%20Tax%20Withholding%20Rates%20%20Instructions.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/ND-2025.json"
    ]
   },
   {
@@ -2718,6 +3426,16 @@
    ]
   },
   {
+   "id": "ne-f3a0bd30b6",
+   "jurisdiction": "NE",
+   "title": "Nebraska DOR -- Nebraska Income Tax Withholding Percentage Method Tables (For Wages Paid on or After January 1, 2025)",
+   "url": "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2024/2025_percent.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/NE-2025.json"
+   ]
+  },
+  {
    "id": "ne-7fa665e1ae",
    "jurisdiction": "NE",
    "title": "Nebraska Department of Labor -- Nebraska's Minimum Wage Increases to $15 Effective January 1, 2026",
@@ -2756,6 +3474,26 @@
    "origin": "curated"
   },
   {
+   "id": "ne-174f834a71",
+   "jurisdiction": "NE",
+   "title": "USDA National Finance Center -- Nebraska State Income Tax Withholding (2025)",
+   "url": "https://help.nfc.usda.gov/bulletins/2025/1740158785.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/NE-2025.json"
+   ]
+  },
+  {
+   "id": "nh-da46edff17",
+   "jurisdiction": "NH",
+   "title": "NH Department of Revenue Administration -- Interest & Dividends Tax",
+   "url": "https://www.revenue.nh.gov/taxes-glance/interest-dividends-tax",
+   "origin": "data",
+   "used_by": [
+    "data/states/NH-2026.json"
+   ]
+  },
+  {
    "id": "nh-05aa788bb5",
    "jurisdiction": "NH",
    "title": "NH RSA 279:21 minimum hourly rate (statute)",
@@ -2766,6 +3504,27 @@
    ],
    "replaces": [
     "https://www.dol.nh.gov/inspections/wage-and-hour/minimum-wage"
+   ]
+  },
+  {
+   "id": "nh-f5dca03759",
+   "jurisdiction": "NH",
+   "title": "NHES -- Tax Rate Chart (Fund Balance Reductions and Surcharges by quarter)",
+   "url": "https://www.nhes.nh.gov/employers/employer-claims-taxes/tax-rate-chart",
+   "origin": "data",
+   "used_by": [
+    "data/states/NH-2025.json",
+    "data/states/NH-2026.json"
+   ]
+  },
+  {
+   "id": "nh-ac9ef03a4c",
+   "jurisdiction": "NH",
+   "title": "NHES WebTax -- Trust Fund Reductions notice (available thru 2026-Q3)",
+   "url": "https://www2.nhes.nh.gov/webtax/indexSecPg.jsp",
+   "origin": "data",
+   "used_by": [
+    "data/states/NH-2026.json"
    ]
   },
   {
@@ -2785,6 +3544,7 @@
    "url": "https://www.nj.gov/treasury/taxation/pdf/current/nj165.pdf",
    "origin": "data",
    "used_by": [
+    "data/states/NJ-2025.json",
     "data/states/NJ-2026.json"
    ]
   },
@@ -2801,10 +3561,11 @@
   {
    "id": "nj-580303cbb9",
    "jurisdiction": "NJ",
-   "title": "NJ Division of Employer Accounts \u2014 2026 employee UI / Workforce Development / Supplemental Workforce Fund rates",
+   "title": "NJ Division of Employer Accounts -- Rate information, contributions, and due dates",
    "url": "https://www.nj.gov/labor/ea/employer-services/rate-info/",
    "origin": "data",
    "used_by": [
+    "data/states/NJ-2025.json",
     "data/states/NJ-2026.json"
    ]
   },
@@ -2875,6 +3636,7 @@
    "url": "https://www.nj.gov/treasury/taxation/pdf/withholdingtables.pdf",
    "origin": "data",
    "used_by": [
+    "data/states/NJ-2025.json",
     "data/states/NJ-2026.json"
    ]
   },
@@ -2917,12 +3679,23 @@
    ]
   },
   {
+   "id": "nm-43a879eee4",
+   "jurisdiction": "NM",
+   "title": "New Mexico TRD -- Important return changes for 2026 (WKC fee notice)",
+   "url": "https://www.tax.newmexico.gov/individuals/wp-content/uploads/sites/5/2026/01/WKC-Fee-Payment-Other-Update-.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/NM-2025.json"
+   ]
+  },
+  {
    "id": "nm-b8b9c21d3e",
    "jurisdiction": "NM",
    "title": "New Mexico Taxation and Revenue Department \u2014 FYI-104, New Mexico Withholding Tax",
    "url": "https://www.tax.newmexico.gov/forms-publications/",
    "origin": "data",
    "used_by": [
+    "data/states/NM-2025.json",
     "data/states/NM-2026.json"
    ]
   },
@@ -3194,6 +3967,16 @@
    ]
   },
   {
+   "id": "ny-e7a67fb09a",
+   "jurisdiction": "NY",
+   "title": "NYS Paid Family Leave -- 2025 contribution rate 0.388%, maximum annual contribution $354.53",
+   "url": "https://paidfamilyleave.ny.gov/2025",
+   "origin": "data",
+   "used_by": [
+    "data/states/NY-2025.json"
+   ]
+  },
+  {
    "id": "ny-878dc0d1f8",
    "jurisdiction": "NY",
    "title": "New York NYS-50-T-NYS",
@@ -3281,7 +4064,40 @@
    "url": "https://www.ccaohio.gov/member-municipalities",
    "origin": "data",
    "used_by": [
+    "data/local/OH-municipalities-2025.json",
     "data/local/OH-municipalities-2026.json"
+   ]
+  },
+  {
+   "id": "oh-da4e60cebe",
+   "jurisdiction": "OH",
+   "title": "CCA Division of Taxation -- Tax Rates (2026 and 2025 tables)",
+   "url": "https://www.ccaohio.gov/tax-rates",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json",
+    "data/local/OH-municipalities-2026.json"
+   ]
+  },
+  {
+   "id": "oh-ccc56a7423",
+   "jurisdiction": "OH",
+   "title": "City of Dayton -- Joint Economic Development District",
+   "url": "https://www.daytonohio.gov/261/Joint-Economic-Development-District",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-jedd-jedz-2025.json"
+   ]
+  },
+  {
+   "id": "oh-38da18fb14",
+   "jurisdiction": "OH",
+   "title": "City of Toledo 2022 ACFR (filed with the Ohio Auditor of State), note on tax-sharing agreements: 'City of Toledo-City of Sylvania ... In July 2008 ... an income tax that shall be imposed based on the City of Sylvania's Municipal Code at a rate of 1.5%'",
+   "url": "https://ohioauditor.gov/AuditSearch/Reports/2023/City_of_Toledo_2022_Lucas_FINAL.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-jedd-jedz-2025.json",
+    "data/local/OH-jedd-jedz-2026.json"
    ]
   },
   {
@@ -3291,6 +4107,7 @@
    "url": "https://tax.ohio.gov/static/forms/employer_withholding/generic/wth-it4-combined-fi.pdf",
    "origin": "data",
    "used_by": [
+    "data/states/OH-2025.json",
     "data/states/OH-2026.json"
    ]
   },
@@ -3299,16 +4116,6 @@
    "jurisdiction": "OH",
    "title": "Employer Withholding Taxes - Percentage Method (Effective August 1, 2026)",
    "url": "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_PercentageMethod_2026.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/states/OH-2026.json"
-   ]
-  },
-  {
-   "id": "oh-9717f2e022",
-   "jurisdiction": "OH",
-   "title": "Employer Withholding Taxes - Percentage Method (Effective October 1, 2025)",
-   "url": "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_PercentageMethod_2025.pdf",
    "origin": "data",
    "used_by": [
     "data/states/OH-2026.json"
@@ -3325,6 +4132,27 @@
    ]
   },
   {
+   "id": "oh-9717f2e022",
+   "jurisdiction": "OH",
+   "title": "Ohio Department of Taxation -- Employer Withholding Taxes, Percentage Method (Effective October 1, 2025)",
+   "url": "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_PercentageMethod_2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/OH-2025.json",
+    "data/states/OH-2026.json"
+   ]
+  },
+  {
+   "id": "oh-1c7be58e1c",
+   "jurisdiction": "OH",
+   "title": "Ohio Department of Taxation -- School Districts With an Income Tax for 2025 (Updated School Districts Effective January 1, 2025, Rev. 3/26)",
+   "url": "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2024-2025%20NYP%20Updates/School_Districts_2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-school-districts-2025.json"
+   ]
+  },
+  {
    "id": "oh-504c7aae71",
    "jurisdiction": "OH",
    "title": "Ohio Dept of Taxation - School District Income Tax rate list, Tax Year 2026",
@@ -3332,6 +4160,7 @@
    "origin": "data",
    "used_by": [
     "data/local/OH-school-districts-2026.json",
+    "data/states/OH-2025.json",
     "data/states/OH-2026.json"
    ]
   },
@@ -3342,6 +4171,7 @@
    "url": "https://tax.ohio.gov/static/forms/employer_withholding/generic/wth_it4nr.pdf",
    "origin": "data",
    "used_by": [
+    "data/states/OH-2025.json",
     "data/states/OH-2026.json"
    ]
   },
@@ -3352,6 +4182,7 @@
    "url": "https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FJEDTaxRates.csv",
    "origin": "data",
    "used_by": [
+    "data/local/OH-jedd-jedz-2025.json",
     "data/local/OH-jedd-jedz-2026.json"
    ]
   },
@@ -3362,6 +4193,7 @@
    "url": "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
    "origin": "data",
    "used_by": [
+    "data/local/OH-municipalities-2025.json",
     "data/local/OH-municipalities-2026.json"
    ]
   },
@@ -3372,6 +4204,7 @@
    "url": "https://codes.ohio.gov/ohio-revised-code/section-5748.01",
    "origin": "data",
    "used_by": [
+    "data/local/OH-school-districts-2025.json",
     "data/local/OH-school-districts-2026.json"
    ]
   },
@@ -3382,6 +4215,7 @@
    "url": "https://codes.ohio.gov/ohio-revised-code/section-715.691",
    "origin": "data",
    "used_by": [
+    "data/local/OH-jedd-jedz-2025.json",
     "data/local/OH-jedd-jedz-2026.json"
    ]
   },
@@ -3392,6 +4226,7 @@
    "url": "https://codes.ohio.gov/ohio-revised-code/section-715.72",
    "origin": "data",
    "used_by": [
+    "data/local/OH-jedd-jedz-2025.json",
     "data/local/OH-jedd-jedz-2026.json"
    ]
   },
@@ -3402,7 +4237,9 @@
    "url": "https://codes.ohio.gov/ohio-revised-code/section-718.01",
    "origin": "data",
    "used_by": [
+    "data/local/OH-jedd-jedz-2025.json",
     "data/local/OH-jedd-jedz-2026.json",
+    "data/local/OH-municipalities-2025.json",
     "data/local/OH-municipalities-2026.json"
    ]
   },
@@ -3423,6 +4260,7 @@
    "url": "https://codes.ohio.gov/ohio-revised-code/section-718.011",
    "origin": "data",
    "used_by": [
+    "data/states/OH-2025.json",
     "data/states/OH-2026.json"
    ]
   },
@@ -3433,6 +4271,7 @@
    "url": "https://codes.ohio.gov/ohio-revised-code/section-718.121",
    "origin": "data",
    "used_by": [
+    "data/states/OH-2025.json",
     "data/states/OH-2026.json"
    ]
   },
@@ -3455,6 +4294,26 @@
    "origin": "curated"
   },
   {
+   "id": "oh-740fc07d10",
+   "jurisdiction": "OH",
+   "title": "Village of Georgetown -- Income Tax",
+   "url": "https://georgetownohio.gov/income-tax/",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json"
+   ]
+  },
+  {
+   "id": "oh-4cfcb1a2a0",
+   "jurisdiction": "OH",
+   "title": "Village of Indian Hill -- Tax",
+   "url": "https://indianhill.gov/departments/tax/",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json"
+   ]
+  },
+  {
    "id": "ok-95b3b0461f",
    "jurisdiction": "OK",
    "title": "Form OK-W-4 (Rev. 3-2021) -- Employee's State Withholding Allowance Certificate",
@@ -3472,6 +4331,16 @@
    "origin": "data",
    "used_by": [
     "data/states/OK-2026.json"
+   ]
+  },
+  {
+   "id": "ok-bacea3a094",
+   "jurisdiction": "OK",
+   "title": "Oklahoma Tax Commission -- 2025 Oklahoma Income Tax Withholding Tables (Packet OW-2, revised 11-2024), effective January 1, 2025",
+   "url": "https://www.oklahoma.gov/content/dam/ok/en/tax/documents/resources/publications/businesses/withholding-tables/WHTables-2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/OK-2025.json"
    ]
   },
   {
@@ -3519,6 +4388,7 @@
    "url": "https://www.oregon.gov/dor/forms/FormsPubs/combined-payroll_211-155-2_2026.pdf",
    "origin": "data",
    "used_by": [
+    "data/states/OR-2025.json",
     "data/states/OR-2026.json"
    ]
   },
@@ -3529,6 +4399,7 @@
    "url": "https://www.canbyoregon.gov/sites/default/files/fileattachments/transit_tax/page/2041/transit_tax_guide_for_businesses.pdf",
    "origin": "data",
    "used_by": [
+    "data/states/OR-2025.json",
     "data/states/OR-2026.json"
    ]
   },
@@ -3539,6 +4410,7 @@
    "url": "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information",
    "origin": "data",
    "used_by": [
+    "data/states/OR-2025.json",
     "data/states/OR-2026.json"
    ]
   },
@@ -3553,13 +4425,13 @@
    ]
   },
   {
-   "id": "or-cc1c29b684",
+   "id": "or-afcf8168de",
    "jurisdiction": "OR",
-   "title": "Metro Supportive Housing Services (SHS) Personal Income Tax and Multnomah County Preschool for All (PFA) Personal Income Tax \u2014 withholding requirement",
-   "url": "https://www.portland.gov/revenue/withholding",
+   "title": "Oregon DOR -- Withholding Tax Formulas, 150-206-436 (Rev. 12-10-24) for 2025",
+   "url": "https://www.oregon.gov/dor/forms/FormsPubs/withholding-tax-formulas_206-436_2025.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/OR-2026.json"
+    "data/states/OR-2025.json"
    ]
   },
   {
@@ -3617,12 +4489,24 @@
    ]
   },
   {
+   "id": "or-cc1c29b684",
+   "jurisdiction": "OR",
+   "title": "Personal Income Tax Withholding Information for Employers/Payroll Providers",
+   "url": "https://www.portland.gov/revenue/withholding",
+   "origin": "data",
+   "used_by": [
+    "data/states/OR-2025.json",
+    "data/states/OR-2026.json"
+   ]
+  },
+  {
    "id": "or-41d95f1cf1",
    "jurisdiction": "OR",
    "title": "Sandy Area Metro (SAM) Payroll and Self-Employment Tax Instructions",
    "url": "https://www.ci.sandy.or.us/sites/default/files/fileattachments/economic_development/page/4671/transit_tax_instructions.pdf",
    "origin": "data",
    "used_by": [
+    "data/states/OR-2025.json",
     "data/states/OR-2026.json"
    ]
   },
@@ -3643,6 +4527,7 @@
    "url": "https://www.nj.gov/treasury/taxation/njit25.shtml",
    "origin": "data",
    "used_by": [
+    "data/states/PA-2025.json",
     "data/states/PA-2026.json"
    ]
   },
@@ -3653,6 +4538,7 @@
    "url": "https://dced.pa.gov/local-government/local-income-tax-information/local-services-tax/",
    "origin": "data",
    "used_by": [
+    "data/states/PA-2025.json",
     "data/states/PA-2026.json"
    ]
   },
@@ -3667,13 +4553,13 @@
    ]
   },
   {
-   "id": "pa-27988b75f9",
+   "id": "pa-86b8e60d34",
    "jurisdiction": "PA",
-   "title": "PA Department of Labor & Industry -- Employee Withholding (UC)",
-   "url": "https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/employee-withholding",
+   "title": "PA DCED Municipal Statistics -- EIT/PIT/LST Tax Register with Collector (statewide, official) -- 2025 edition",
+   "url": "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2025",
    "origin": "data",
    "used_by": [
-    "data/states/PA-2026.json"
+    "data/local/PA-EIT-LST-2025.json"
    ]
   },
   {
@@ -3683,6 +4569,17 @@
    "url": "https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/computation-of-rates",
    "origin": "data",
    "used_by": [
+    "data/states/PA-2026.json"
+   ]
+  },
+  {
+   "id": "pa-27988b75f9",
+   "jurisdiction": "PA",
+   "title": "PA Department of Labor & Industry -- UC employee withholding (0.07% since 2018)",
+   "url": "https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/employee-withholding",
+   "origin": "data",
+   "used_by": [
+    "data/states/PA-2025.json",
     "data/states/PA-2026.json"
    ]
   },
@@ -3699,11 +4596,22 @@
   {
    "id": "pa-da0fba1e41",
    "jurisdiction": "PA",
-   "title": "PA Department of Revenue -- Employer Withholding",
+   "title": "PA Department of Revenue -- Employer Withholding (reciprocal agreements)",
    "url": "https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html",
    "origin": "data",
    "used_by": [
+    "data/states/PA-2025.json",
     "data/states/PA-2026.json"
+   ]
+  },
+  {
+   "id": "pa-19b2687c65",
+   "jurisdiction": "PA",
+   "title": "PA Department of Revenue -- Personal Income Tax (3.07%)",
+   "url": "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/personal-income-tax",
+   "origin": "data",
+   "used_by": [
+    "data/states/PA-2025.json"
    ]
   },
   {
@@ -3731,6 +4639,7 @@
    "url": "https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforbusinesses/employerwithholding/documents/rev-419.pdf",
    "origin": "data",
    "used_by": [
+    "data/states/PA-2025.json",
     "data/states/PA-2026.json"
    ]
   },
@@ -3755,6 +4664,16 @@
    ]
   },
   {
+   "id": "ri-862019197a",
+   "jurisdiction": "RI",
+   "title": "RI DLT -- 2025 Tax Rates for Unemployment Insurance and Temporary Disability Insurance (2024-12-20)",
+   "url": "https://dlt.ri.gov/press-releases/2025-tax-rates-unemployment-insurance-and-temporary-disability-insurance",
+   "origin": "data",
+   "used_by": [
+    "data/states/RI-2025.json"
+   ]
+  },
+  {
    "id": "ri-ca03346bf0",
    "jurisdiction": "RI",
    "title": "RI Department of Labor & Training: 2026 TDI/TCI and UI Tax Rates",
@@ -3772,6 +4691,16 @@
    "origin": "data",
    "used_by": [
     "data/states/RI-2026.json"
+   ]
+  },
+  {
+   "id": "ri-e46370a788",
+   "jurisdiction": "RI",
+   "title": "Rhode Island Division of Taxation -- 2025 Rhode Island Withholding Tax Booklet",
+   "url": "https://tax.ri.gov/sites/g/files/xkgbur541/files/2024-12/2025%20Withholding%20Tax%20Booklet_0.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/RI-2025.json"
    ]
   },
   {
@@ -3800,6 +4729,16 @@
    "origin": "data",
    "used_by": [
     "data/states/SC-2026.json"
+   ]
+  },
+  {
+   "id": "sc-ae1c44cead",
+   "jurisdiction": "SC",
+   "title": "South Carolina DOR -- WH-1603F Formula for Computing South Carolina 2025 Withholding Tax (Rev. 11/12/24)",
+   "url": "https://dor.sc.gov/sites/dor/files/forms/WH1603F_2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/SC-2025.json"
    ]
   },
   {
@@ -3912,6 +4851,26 @@
    ]
   },
   {
+   "id": "ut-25ee4790dc",
+   "jurisdiction": "UT",
+   "title": "Utah State Tax Commission -- Publication 14 Rev. 4/24, Withholding Tax Guide",
+   "url": "https://files.tax.utah.gov/tax/forms/2024/pub-14.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/UT-2025.json"
+   ]
+  },
+  {
+   "id": "ut-f0f098aed0",
+   "jurisdiction": "UT",
+   "title": "Utah State Tax Commission -- Publication 14 Rev. 4/25, Withholding Tax Guide",
+   "url": "https://files.tax.utah.gov/tax/forms/2025/pub-14.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/UT-2025.json"
+   ]
+  },
+  {
    "id": "ut-21cd8adeaa",
    "jurisdiction": "UT",
    "title": "Utah State Tax Commission UI wage base / tax rate page",
@@ -3932,22 +4891,23 @@
    ]
   },
   {
-   "id": "va-b3a051ecad",
-   "jurisdiction": "VA",
-   "title": "Income Tax Withholding Guide for Employers (Rev. 05/25, 'Effective for wages paid after July 1, 2025')",
-   "url": "https://www.tax.virginia.gov/sites/default/files/vatax-pdf/employer-withholding-instructions.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/states/VA-2026.json"
-   ]
-  },
-  {
    "id": "va-544db114da",
    "jurisdiction": "VA",
    "title": "Virginia Paid Family and Medical Leave Insurance Program -- Governor's own press release",
    "url": "https://www.governor.virginia.gov/newsroom/news-releases/2026/may-releases/name-1117602-en.html",
    "origin": "data",
    "used_by": [
+    "data/states/VA-2026.json"
+   ]
+  },
+  {
+   "id": "va-b3a051ecad",
+   "jurisdiction": "VA",
+   "title": "Virginia Tax -- Income Tax Withholding Guide for Employers (Rev. 05/25)",
+   "url": "https://www.tax.virginia.gov/sites/default/files/vatax-pdf/employer-withholding-instructions.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/VA-2025.json",
     "data/states/VA-2026.json"
    ]
   },
@@ -4000,6 +4960,16 @@
    ]
   },
   {
+   "id": "vt-8c4e916431",
+   "jurisdiction": "VT",
+   "title": "Vermont Department of Taxes -- GB-1210, 2025 Income Tax Withholding Instructions, Tables, and Charts",
+   "url": "https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/VT-2025.json"
+   ]
+  },
+  {
    "id": "vt-a359b6d000",
    "jurisdiction": "VT",
    "title": "Vermont withholding",
@@ -4020,10 +4990,11 @@
   {
    "id": "wa-78ec5c3b87",
    "jurisdiction": "WA",
-   "title": "City of Seattle, City Finance \u2014 Payroll expense tax",
+   "title": "City of Seattle, City Finance -- Payroll expense tax (2025 thresholds and rates)",
    "url": "https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/payroll-expense-tax",
    "origin": "data",
    "used_by": [
+    "data/states/WA-2025.json",
     "data/states/WA-2026.json"
    ]
   },
@@ -4078,6 +5049,16 @@
    ]
   },
   {
+   "id": "wa-bcdb420119",
+   "jurisdiction": "WA",
+   "title": "WA Cares Fund premium, RCW 50B.04.080 -- 0.58% of wages since 2023-07-01, unchanged through 2026",
+   "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=50B.04.080",
+   "origin": "data",
+   "used_by": [
+    "data/states/WA-2025.json"
+   ]
+  },
+  {
    "id": "wa-f385d68879",
    "jurisdiction": "WA",
    "title": "WA Cares Fund \u2014 Exemptions",
@@ -4093,6 +5074,16 @@
    "title": "Washington Cares Fund premiums",
    "url": "https://wacaresfund.wa.gov/employers/",
    "origin": "curated"
+  },
+  {
+   "id": "wa-c1c62014e4",
+   "jurisdiction": "WA",
+   "title": "Washington ESD -- Paid Family & Medical Leave premiums to increase in 2025 (2024-10-23)",
+   "url": "https://esd.wa.gov/about-us/news-release/2024/paid-family-medical-leave-premiums-increase-2025",
+   "origin": "data",
+   "used_by": [
+    "data/states/WA-2025.json"
+   ]
   },
   {
    "id": "wa-b023203d3c",
@@ -4199,6 +5190,7 @@
    "url": "https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf",
    "origin": "curated",
    "used_by": [
+    "data/states/WI-2025.json",
     "data/states/WI-2026.json"
    ]
   },
@@ -4248,6 +5240,16 @@
    "origin": "data",
    "used_by": [
     "data/minimum-wage/states/WV-2026.json"
+   ]
+  },
+  {
+   "id": "wv-536e67a641",
+   "jurisdiction": "WV",
+   "title": "West Virginia Tax Division -- 2026 Income Tax Rate Cut",
+   "url": "https://tax.wv.gov/Individuals/Pages/PersonalIncomeTaxReductionBill.aspx",
+   "origin": "data",
+   "used_by": [
+    "data/states/WV-2026.json"
    ]
   },
   {

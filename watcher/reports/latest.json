@@ -1,26 +1,15 @@
 {
- "date": "2026-09-29",
+ "date": "2026-09-30",
  "counts": {
-  "unchanged": 385,
-  "unreachable": 16,
-  "blocked": 15,
-  "changed": 4,
-  "gone": 3
+  "unchanged": 383,
+  "new": 70,
+  "unreachable": 21,
+  "changed": 10,
+  "blocked": 20,
+  "gone": 4
  },
- "total": 423,
+ "total": 508,
  "changed": [
-  {
-   "id": "al-9366421409",
-   "jurisdiction": "AL",
-   "title": "Alabama DOR withholding tax",
-   "url": "https://www.revenue.alabama.gov/individual-corporate/withholding-tax-2/",
-   "detail": "1 lines added, 1 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
   {
    "id": "az-b66098e04c",
    "jurisdiction": "AZ",
@@ -34,11 +23,109 @@
    "significant": true
   },
   {
-   "id": "ky-4de2e96fcb",
-   "jurisdiction": "KY",
-   "title": "City of Henderson, KY \u2014 Occupational License Tax",
-   "url": "https://www.hendersonky.gov/174/Occupational-License-Tax",
-   "detail": "1 lines added, 0 removed (link lists / headlines only)",
+   "id": "dc-09b0713e93",
+   "jurisdiction": "DC",
+   "title": "D.C. Home Rule Act of 1973 nonresident-taxation prohibition",
+   "url": "https://code.dccouncil.gov/us/dc/council/code/sections/47-1806.04",
+   "detail": "4 lines added, 6 removed",
+   "figures_added": [
+    "85%"
+   ],
+   "figures_removed": [
+    "24.25%"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "in-f3e8cf456b",
+   "jurisdiction": "IN",
+   "title": "Indiana DOR withholding",
+   "url": "https://www.in.gov/dor/i-am-a/business-corp/withholding/",
+   "detail": "3 lines added, 0 removed; 2 links added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.in.gov/dor/files/IRIS-2026-Tax-Year-Guide.pdf",
+    "https://www.in.gov/dor/files/IRIS-Business-Rules.pdf"
+   ],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ma-cdc80eeb37",
+   "jurisdiction": "MA",
+   "title": "Massachusetts DOR withholding tax forms (new Circular M editions are listed here)",
+   "url": "https://www.mass.gov/lists/dor-withholding-tax-forms",
+   "detail": "read with a headless browser; 12 lines added, 24 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "nv-1783feb371",
+   "jurisdiction": "NV",
+   "title": "Modified Business Tax (MBT) program page",
+   "url": "https://tax.nv.gov/tax-types/modified-business-tax",
+   "detail": "1 lines added, 0 removed; 1 links added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://tax.nv.gov/wp-content/uploads/2026/09/TPAs-Power-Point.pdf"
+   ],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "us-7ab3e8058b",
+   "jurisdiction": "US",
+   "title": "Federal Register: Railroad Retirement Board notices (RUIA/RRTA rates) - official API",
+   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=railroad-retirement-board",
+   "detail": "10 lines added, 10 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "us-6a3e772e2e",
+   "jurisdiction": "US",
+   "title": "K.S.A. \u00a7 60-2310 \u2014 wage garnishment: maximum part of earnings subject to garnishment is the lesser of 25% of aggregate disposable earnings, or the amount by which disposable earnings exceed 30 times the federal minimum hourly wage",
+   "url": "https://www.ksrevisor.gov/statutes/chapters/ch60/060_023_0010.html",
+   "detail": "4 lines added, 0 removed; 4 links added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.ksrevisor.gov/docs/LCC_Packet20260929/Item 1 PROPOSED MINUTES August 17 and September 3, 2026.pdf",
+    "https://www.ksrevisor.gov/docs/LCC_Packet20260929/Item 3 USD 489 RAC Closing of Building Resolution 09-2026.pdf",
+    "https://www.ksrevisor.gov/docs/LCC_Packet20260929/Item 4 Proposed Recommended Legislative Holidays for 2027.pdf",
+    "https://www.ksrevisor.gov/docs/LCC_Packet20260929/LCC Agenda September 29, 2026.pdf"
+   ],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "vt-a359b6d000",
+   "jurisdiction": "VT",
+   "title": "Vermont withholding",
+   "url": "https://tax.vermont.gov/business/withholding",
+   "detail": "2 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "wi-909b5f1dab",
+   "jurisdiction": "WI",
+   "title": "2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)",
+   "url": "https://dwd.wisconsin.gov/ui/employers/taxrates.htm",
+   "detail": "read with a headless browser; 1 lines added, 1 removed (link lists / headlines only)",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -46,25 +133,63 @@
    "significant": false
   },
   {
-   "id": "nj-5b6e2ab262",
-   "jurisdiction": "NJ",
-   "title": "New Jersey employer payroll tax",
-   "url": "https://www.nj.gov/treasury/taxation/businesses/payroll/index.shtml",
-   "detail": "1 links added, 1 removed",
+   "id": "wv-b7ac5b21f3",
+   "jurisdiction": "WV",
+   "title": "West Virginia withholding forms",
+   "url": "https://tax.wv.gov/business/withholding/pages/withholdingtaxforms.aspx",
+   "detail": "0 lines added, 67 removed; 0 links added, 32 removed",
    "figures_added": [],
    "figures_removed": [],
-   "links_added": [
-    "https://www.nj.gov/treasury/taxation/forms/index.shtml?taxType=Employer+Payroll+Tax"
-   ],
+   "links_added": [],
    "links_removed": [
-    "https://www.nj.gov/treasury/taxation/prntempl.shtml"
+    "https://tax.wv.gov/Documents/PIT/it104.1.pdf",
+    "https://tax.wv.gov/Documents/TSD/tsd381.pdf",
+    "https://tax.wv.gov/Documents/TSD/tsd389.pdf",
+    "https://tax.wv.gov/Documents/TSD/tsd432.pdf",
+    "https://tax.wv.gov/Documents/TaxForms/945.pdf",
+    "https://tax.wv.gov/Documents/TaxForms/945v.pdf",
+    "https://tax.wv.gov/Documents/TaxForms/it101v.pdf",
+    "https://tax.wv.gov/Documents/TaxForms/it102-1.pdf",
+    "https://tax.wv.gov/Documents/Withholding/2022/it105.1.pdf",
+    "https://tax.wv.gov/Documents/Withholding/2022/it105.pdf",
+    "https://tax.wv.gov/Documents/Withholding/2023/it105.1.2023.pdf",
+    "https://tax.wv.gov/Documents/Withholding/2023/it105.2023.pdf",
+    "https://tax.wv.gov/Documents/Withholding/2024/it103.2024.pdf",
+    "https://tax.wv.gov/Documents/Withholding/2024/it105.1.2024.pdf",
+    "https://tax.wv.gov/Documents/Withholding/2024/it105.2024.pdf",
+    "https://tax.wv.gov/Documents/Withholding/2025/it103.2025.pdf",
+    "https://tax.wv.gov/Documents/Withholding/2025/it105.1.2025.pdf",
+    "https://tax.wv.gov/Documents/Withholding/2025/it105.2025.pdf",
+    "https://tax.wv.gov/Documents/Withholding/2025/wv1096.2025.pdf",
+    "https://tax.wv.gov/Documents/Withholding/it100.2a.pdf",
+    "https://tax.wv.gov/Documents/Withholding/it100.2b.pdf",
+    "https://tax.wv.gov/Documents/Withholding/it101a.pdf",
+    "https://tax.wv.gov/Documents/Withholding/it101q.Bulk-Filing.Questions-And-Answers.pdf",
+    "https://tax.wv.gov/Documents/Withholding/it101q.Bulk-Submission.Instructions.pdf",
+    "https://tax.wv.gov/Documents/Withholding/it101q.pdf",
+    "https://tax.wv.gov/Documents/Withholding/it104.pdf",
+    "https://tax.wv.gov/Documents/Withholding/nrae.pdf",
+    "https://tax.wv.gov/Documents/Withholding/nrer.instructions.pdf",
+    "https://tax.wv.gov/Documents/Withholding/nrer.pdf",
+    "https://tax.wv.gov/Documents/Withholding/nrsr.pdf",
+    "https://tax.wv.gov/Documents/Withholding/rc.pdf",
+    "https://tax.wv.gov/Individuals/Pages/PersonalIncomeTaxReductionBill.aspx"
    ],
    "significant": true
   }
  ],
- "significant_changes": 3,
+ "significant_changes": 9,
  "broken": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
+  "https://help.nfc.usda.gov/bulletins/2022/1666037747.htm?taxmap=true",
+  "https://help.nfc.usda.gov/bulletins/2022/1668460546.htm",
+  "https://help.nfc.usda.gov/bulletins/2026/1784643404.htm",
+  "https://help.nfc.usda.gov/bulletins/2024/1709749757.htm",
+  "https://help.nfc.usda.gov/bulletins/2025/1740487316.htm",
+  "https://help.nfc.usda.gov/bulletins/2026/1769797447.htm",
+  "https://help.nfc.usda.gov/bulletins/2026/1771620053.htm",
+  "https://help.nfc.usda.gov/bulletins/2026/1768327516.htm",
+  "https://help.nfc.usda.gov/bulletins/2025/1741189057.htm",
   "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
   "https://kewes.ky.gov/Contact/contacts.aspx?strid=4",
   "https://kewes.ky.gov/Contact/contacts.aspx?strid=2",
@@ -72,27 +197,42 @@
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "verified": 389,
- "unverified": 34,
+ "verified": 463,
+ "unverified": 45,
  "never_baselined": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://does.dc.gov/service/office-wage-hour-compliance-0",
   "https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines",
+  "https://www.irs.gov/pub/irs-prior/p51--2025.pdf",
+  "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
+  "https://help.nfc.usda.gov/bulletins/2025/1736280741.htm",
+  "https://help.nfc.usda.gov/bulletins/2026/1772551649.htm",
+  "https://help.nfc.usda.gov/bulletins/2025/1743080634.htm",
+  "https://help.nfc.usda.gov/bulletins/2025/1743707530.htm",
+  "https://help.nfc.usda.gov/bulletins/2025/1745343478.htm",
+  "https://help.nfc.usda.gov/bulletins/2025/1740006150.htm",
+  "https://help.nfc.usda.gov/bulletins/2025/1740158785.htm",
   "https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/",
   "https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications",
   "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
+  "https://pikevilleky.gov/business/",
   "https://kewes.ky.gov/Contact/contacts.aspx?strid=4",
   "https://kewes.ky.gov/Contact/contacts.aspx?strid=2",
   "https://www.portlandmaine.gov/1016/Minimum-Wage",
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
+  "https://www.revenue.nh.gov/taxes-glance/interest-dividends-tax",
+  "https://www.nhes.nh.gov/employers/employer-claims-taxes/tax-rate-chart",
+  "https://www2.nhes.nh.gov/webtax/indexSecPg.jsp",
   "https://lascruces.gov/wp-content/uploads/2025/09/MinimumWageEng26.pdf",
   "https://detr.nv.gov/Page/UI_Information_for_Employers",
   "https://www.dfs.ny.gov/consumers/health_insurance/cobra_and_premium_assistance",
   "https://legislation.nysenate.gov/api/3/laws/ELN/3-400?key={env:NYSENATE_API_KEY}",
   "https://legislation.nysenate.gov/api/3/laws/LAB/651?key={env:NYSENATE_API_KEY}",
   "https://www.ny.gov/sites/default/files/atoms/files/PSL_FAQ_PaidSickLeaveFAQ.pdf",
+  "https://paidfamilyleave.ny.gov/2025",
   "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
+  "https://georgetownohio.gov/income-tax/",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 8
+ "max_consecutive_failures": 9
 }
