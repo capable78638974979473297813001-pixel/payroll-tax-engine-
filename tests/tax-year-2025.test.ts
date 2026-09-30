@@ -27,7 +27,7 @@ const amount = (r: ReturnType<typeof calculatePaycheck>, id: string) => r.taxes.
 describe('tax year 2025', () => {
   test('covers federal and the states with a 2025 file', () => {
     const covered = statesWithRuleset('2025-06-13');
-    for (const st of ['AK', 'AZ', 'CA', 'CO', 'CT', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NM', 'NV', 'OK', 'OR', 'PA', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'WA', 'WI', 'WV', 'WY']) assert.ok(covered.includes(st), st);
+    for (const st of ['AK', 'AR', 'AZ', 'CA', 'CO', 'CT', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NM', 'NV', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'WA', 'WI', 'WV', 'WY']) assert.ok(covered.includes(st), st);
   });
 
   test("Illinois 2025: IL-700-T's own example ($800 weekly, 2 + 2 allowances) withholds $32.27", () => {
@@ -200,6 +200,26 @@ describe('tax year 2025', () => {
     const md = (d: string) => amount(st(d, 'MD', { filingStatus: 'single', exemptions: 1, county: 'Montgomery' }), 'MD_SIT');
     assert.equal(md('2025-03-14'), 22015); // (78,000 - 2,800 - 3,200) x (4.75% + 3.2%) / 26
     assert.equal(md('2025-08-15'), 21847); // (78,000 - 3,350 - 3,200) x 7.95% / 26
+  });
+
+  test('Rhode Island 2025 booklet example: $2,195 weekly, one exemption = $87.98; TDI 1.3%', () => {
+    const r = st('2025-03-14', 'RI', { exemptions: 1 }, 'weekly', 219500);
+    assert.equal(amount(r, 'RI_SIT'), 8798);
+    assert.equal(amount(r, 'RI_DBL_EE'), 2854);
+  });
+
+  test('Arkansas 2025: $2,410 standard deduction, 3.9% top rate and the 200-wide midrange band', () => {
+    // 25,524 - 2,410 = 23,114 -> 23,150 x 3.4% - 281.37 = 505.73 -> 506 - 2 x 29 = 448 / 12
+    assert.equal(amount(st('2025-03-14', 'AR', { exemptions: 2 }, 'monthly', 212700), 'AR_SIT'), 3733);
+    // 96,864 - 2,410 = 94,454 -> 94,450 x 3.9% - 197.40 (the $94,301-$94,501 band) = 3,486 / 12
+    assert.equal(amount(st('2025-03-14', 'AR', { exemptions: 0 }, 'monthly', 807200), 'AR_SIT'), 29050);
+  });
+
+  test('Arkansas 2025 low-income election uses the credit formula', () => {
+    // 176 gross less (1 - (15,600 - 14,266) / 2,734) x 109.20 = 55.92 credit, less 29 = 91.08 / 12
+    const cert = { exemptions: 1, lowIncomeElection: true, filingStatus: 'single', dependents: 0 };
+    assert.equal(amount(st('2025-03-14', 'AR', cert, 'monthly', 130000), 'AR_SIT'), 759);
+    assert.equal(amount(st('2025-03-14', 'AR', cert, 'monthly', 110000), 'AR_SIT'), 0);
   });
 
   test('Michigan 2025: 4.25% after $5,800 per exemption', () => {

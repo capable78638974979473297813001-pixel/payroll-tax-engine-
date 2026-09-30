@@ -9028,6 +9028,36 @@ function arkansasWithholding(
 
   // AR4EC Line 5: the employee elected DFA's Low Income Tax Tables.
   if (resolveCertBoolean(cert, 'lowIncomeElection')) {
+    // Years whose low-income relief is published as a credit formula
+    // (2025: standard tax less a phase-out credit by filing status).
+    const creditFormula = (rules.lowIncomeElection as { creditFormula?: Record<string, ARLowIncomeCredit> } | undefined)
+      ?.creditFormula;
+    if (creditFormula) {
+      const { status, dependents, bucketKey } = arLowIncomeBucket(cert);
+      const f = creditFormula[bucketKey];
+      if (!f) throw new Error(`Arkansas lowIncomeElection.creditFormula has no "${bucketKey}" entry.`);
+      const floor = dollars(f.floor);
+      const lowIncomeCredit =
+        annualWages < floor
+          ? annualGrossTax
+          : Math.min(
+              annualGrossTax,
+              atLeastZero(roundHalfUp((1 - (annualWages - floor) / (dollars(f.ceiling) - floor)) * dollars(f.maxCredit))),
+            );
+      const netTax = atLeastZero(annualGrossTax - lowIncomeCredit - credit);
+      return {
+        id: `${rules.code}_SIT`,
+        name: `${rules.name} Income Tax`,
+        payer: 'employee',
+        jurisdiction: 'state',
+        taxableWages: periodWages,
+        amount: roundHalfUp(netTax / multiplier),
+        detail:
+          `${formulaDetail}; AR4EC low-income election (${status}, ${dependents} dependent${dependents === 1 ? '' : 's'}): ` +
+          `credit (1 − (${fmt(annualWages)} − $${f.floor}) ÷ ($${f.ceiling} − $${f.floor})) × $${f.maxCredit} = ${fmt(lowIncomeCredit)}, ` +
+          `annual net ${fmt(netTax)} ÷ ${multiplier}`,
+      };
+    }
     const lookup = arkansasLowIncomeLookup(rules, cert, input.payFrequency, periodWages);
     if (lookup.kind === 'table') {
       return {
@@ -9074,6 +9104,12 @@ interface ARLowIncomeBucket {
   byFrequency: Partial<Record<string, number[][]>>;
 }
 
+interface ARLowIncomeCredit {
+  floor: number;
+  ceiling: number;
+  maxCredit: number;
+}
+
 type ARLowIncomeLookup =
   | { kind: 'table'; amount: Cents; detail: string }
   | { kind: 'above_range'; detail: string }
@@ -9087,6 +9123,26 @@ const AR_LOW_INCOME_STATUS: Record<string, 'single' | 'mfj' | 'hoh'> = {
   head_of_household: 'hoh',
   qualifying_widow: 'hoh',
 };
+
+/** AR4EC Line 5 bucket: filing status plus the "1 or none" / "2 or more" dependent split. */
+function arLowIncomeBucket(cert: Record<string, unknown>): { status: 'single' | 'mfj' | 'hoh'; dependents: number; bucketKey: string } {
+  const rawStatus = cert.filingStatus;
+  const status = typeof rawStatus === 'string' ? AR_LOW_INCOME_STATUS[rawStatus] : undefined;
+  if (!status) {
+    throw new Error(
+      `Arkansas certificate.lowIncomeElection needs certificate.filingStatus of 'single', 'mfj' or 'hoh' (AR4EC Line 5's own categories); got ${JSON.stringify(rawStatus)}.`,
+    );
+  }
+  const dependents = cert.dependents;
+  if (typeof dependents !== 'number' || !Number.isInteger(dependents) || dependents < 0) {
+    throw new Error(
+      `Arkansas certificate.lowIncomeElection needs certificate.dependents as a whole number (the dependents counted on AR4EC); got ${JSON.stringify(dependents)}.`,
+    );
+  }
+
+  const bucketKey = status === 'single' ? 'single' : `${status}_${dependents <= 1 ? '1orNone' : '2orMore'}`;
+  return { status, dependents, bucketKey };
+}
 
 /**
  * DFA's 2026 Low Income Tax Tables (AR-2026.json lowIncomeElection.tables):
@@ -9103,21 +9159,7 @@ function arkansasLowIncomeLookup(
   const tables = (rules.lowIncomeElection as { tables?: { buckets: Record<string, ARLowIncomeBucket> } } | undefined)?.tables;
   if (!tables) return { kind: 'not_covered', detail: 'No Arkansas Low Income Tax Tables are on file for this year.' };
 
-  const rawStatus = cert.filingStatus;
-  const status = typeof rawStatus === 'string' ? AR_LOW_INCOME_STATUS[rawStatus] : undefined;
-  if (!status) {
-    throw new Error(
-      `Arkansas certificate.lowIncomeElection needs certificate.filingStatus of 'single', 'mfj' or 'hoh' (AR4EC Line 5's own categories); got ${JSON.stringify(rawStatus)}.`,
-    );
-  }
-  const dependents = cert.dependents;
-  if (typeof dependents !== 'number' || !Number.isInteger(dependents) || dependents < 0) {
-    throw new Error(
-      `Arkansas certificate.lowIncomeElection needs certificate.dependents as a whole number (the dependents counted on AR4EC); got ${JSON.stringify(dependents)}.`,
-    );
-  }
-
-  const bucketKey = status === 'single' ? 'single' : `${status}_${dependents <= 1 ? '1orNone' : '2orMore'}`;
+  const { status, dependents, bucketKey } = arLowIncomeBucket(cert);
   const bucket = tables.buckets[bucketKey];
   const column = bucket?.dependentColumns.indexOf(dependents) ?? -1;
   if (!bucket || column === -1) {
