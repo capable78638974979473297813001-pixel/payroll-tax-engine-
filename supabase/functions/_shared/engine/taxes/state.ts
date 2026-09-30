@@ -5388,15 +5388,7 @@ function kentuckyLocalTax(
     const metroRate = resident ? metro.residentRate : metro.nonresidentRate;
     const metroTax = applyRate(periodWages, metroRate);
     const ownCity = metroCity && cityEntry && cityEntry.wageRateDecimal !== null ? cityEntry : undefined;
-    const cityWages = ownCity
-      ? ownCity.capAtSSWageBase
-        ? underCap(
-            periodWages,
-            input.ytd.localIncomeTax?.[`KY_LOCAL_${ownCity.name}`] ?? 0,
-            dollars(federalRuleset(input.checkDate).socialSecurity.wageBase),
-          )
-        : periodWages
-      : 0;
+    const cityWages = ownCity ? kyCappedWages(ownCity, periodWages, input) : 0;
     const cityTax = ownCity ? applyRate(cityWages, ownCity.wageRateDecimal!) : 0;
     return {
       id: 'KY_LOCAL',
@@ -5430,25 +5422,14 @@ function kentuckyLocalTax(
     return { rate, note: `${isResident ? 'resident' : 'nonresident'} ${(rate * 100).toFixed(2)}%` };
   };
 
-  /**
-   * KRS 68.197(10)(c)'s SS-wage-base-cap variant — Walton and Florence are
-   * the two confirmed real-world users (see KY-occupational-2026.json's
-   * own capAtSSWageBase field on each). Tracked per JURISDICTION NAME, not
-   * one shared KY_LOCAL key, since the city and county halves of a credit
-   * pair are legally separate levies that could each have their own cap —
-   * none currently does on the county side, but the tracking key doesn't
-   * assume that stays true. Reuses the SAME federal SS wage base FICA
-   * itself is capped at (federalRuleset(), not a hardcoded KY-side copy),
-   * so this never drifts out of sync the way this project's own data
-   * caught a stale-transcription cap figure ($84,500 instead of the real
-   * $184,500) in an earlier pass.
-   */
-  const taxableFor = (entry: KYJurisdictionEntry): number => {
-    if (!entry.capAtSSWageBase) return periodWages;
-    const ssWageBase = dollars(federalRuleset(input.checkDate).socialSecurity.wageBase);
-    const ytd = input.ytd.localIncomeTax?.[`KY_LOCAL_${entry.name}`] ?? 0;
-    return underCap(periodWages, ytd, ssWageBase);
-  };
+  // Annual caps: see kyCappedWages().
+  const taxableFor = (entry: KYJurisdictionEntry): number => kyCappedWages(entry, periodWages, input);
+  const capNote = (entry: KYJurisdictionEntry, taxable: number): string =>
+    entry.capAtSSWageBase
+      ? ` (${fmt(taxable)} of ${fmt(periodWages)}, SS-wage-base-capped)`
+      : entry.annualWageCap !== undefined
+        ? ` (${fmt(taxable)} of ${fmt(periodWages)}; ${entry.name} taxes at most $${entry.annualWageCap.toLocaleString('en-US')} of wages a year, YTD from ytd.localIncomeTax['KY_LOCAL_${entry.name}'])`
+        : '';
 
   if (cityEntry && countyEntry) {
     const cityRate = rateFor(cityEntry);
@@ -5469,8 +5450,8 @@ function kentuckyLocalTax(
       taxableWages: periodWages,
       amount,
       detail:
-        `${fmt(cityTax)} to ${cityEntry.name} @ ${cityRate.note}${cityEntry.capAtSSWageBase ? ` (${fmt(cityTaxableWages)} of ${fmt(periodWages)}, SS-wage-base-capped)` : ''}; ` +
-        `${fmt(netCountyTax)} to ${countyEntry.name} @ ${countyRate.note}${countyEntry.capAtSSWageBase ? ` (${fmt(countyTaxableWages)} of ${fmt(periodWages)}, SS-wage-base-capped)` : ''}, ` +
+        `${fmt(cityTax)} to ${cityEntry.name} @ ${cityRate.note}${capNote(cityEntry, cityTaxableWages)}; ` +
+        `${fmt(netCountyTax)} to ${countyEntry.name} @ ${countyRate.note}${capNote(countyEntry, countyTaxableWages)}, ` +
         `less a ${fmt(credit)} KRS 68.197(6)-(7) credit for the city fee already paid ` +
         `(assumes the 30,000-300,000-population county credit tier applies to ${countyEntry.name} — not ` +
         `individually verified)`,
@@ -5492,9 +5473,31 @@ function kentuckyLocalTax(
     amount,
     detail: entry.capAtSSWageBase
       ? `${fmt(taxableWages)} of ${fmt(periodWages)} (SS-wage-base-capped, KRS 68.197(10)(c)) @ ${r.note} to ${entry.name}`
-      : `${fmt(periodWages)} @ ${r.note} to ${entry.name}, full gross wages (KRS 67.750(2) adds back pretax deferrals)`,
+      : entry.annualWageCap !== undefined
+        ? `${fmt(taxableWages)} of ${fmt(periodWages)} @ ${r.note} to ${entry.name}; ${entry.name} taxes at most $${entry.annualWageCap.toLocaleString('en-US')} of wages a year (YTD from ytd.localIncomeTax['KY_LOCAL_${entry.name}'])`
+        : `${fmt(periodWages)} @ ${r.note} to ${entry.name}, full gross wages (KRS 67.750(2) adds back pretax deferrals)`,
     ...kyDataQuality([entry]),
   };
+}
+
+/**
+ * A Kentucky jurisdiction's taxable wages this period after its annual
+ * cap, if it has one: KRS 68.197(10)(c)'s Social Security wage base
+ * (Walton, Florence), or a dollar cap its own ordinance sets (Bardwell).
+ * Tracked per jurisdiction name, since the city and county halves of a
+ * credit pair are separate levies that could each have their own cap.
+ * The SS base is read from federalRuleset(), not a Kentucky-side copy,
+ * so it can't drift (this project's data once carried $84,500 for the
+ * real $184,500).
+ */
+function kyCappedWages(entry: KYJurisdictionEntry, periodWages: number, input: PaycheckInput): number {
+  const cap = entry.capAtSSWageBase
+    ? dollars(federalRuleset(input.checkDate).socialSecurity.wageBase)
+    : entry.annualWageCap !== undefined
+      ? dollars(entry.annualWageCap)
+      : null;
+  if (cap === null) return periodWages;
+  return underCap(periodWages, input.ytd.localIncomeTax?.[`KY_LOCAL_${entry.name}`] ?? 0, cap);
 }
 
 /**

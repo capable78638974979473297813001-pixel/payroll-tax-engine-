@@ -43,10 +43,34 @@ describe('Kentucky corrections', () => {
     assert.equal(r.notices, undefined);
   });
 
-  test('a rate still unconfirmed keeps its notice (Vanceburg, inferred)', () => {
-    const r = calculatePaycheck(ky('2026-06-15', { workCity: 'Vanceburg' }));
+  test('a rate still unconfirmed keeps its notice (Adairville, inferred)', () => {
+    const r = calculatePaycheck(ky('2026-06-15', { workCity: 'Adairville' }));
     assert.equal(r.notices?.[0].tier, 'inferred');
   });
+});
+
+describe('the 2026-09-30 pass', () => {
+  test("Benton 0.6% per its own quarterly return, not 0.5%", () => {
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCity: 'Benton' })))?.amount, 1200);
+    assert.equal(local(calculatePaycheck(ky('2025-06-13', { workCity: 'Benton' })))?.amount, 1200);
+  });
+
+  test("Burkesville 2% per its own license application, not 1%", () => {
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCity: 'Burkesville' })))?.amount, 4000);
+  });
+
+  for (const [city, cents] of [
+    ['Vanceburg', 2000],
+    ['West Liberty', 2000],
+    ['Jackson', 3000],
+    ['Perryville', 3000],
+  ] as const) {
+    test(`${city}: confirmed from its own form or code, so no notice`, () => {
+      const r = calculatePaycheck(ky('2026-06-15', { workCity: city }));
+      assert.equal(local(r)?.amount, cents);
+      assert.equal(r.notices, undefined);
+    });
+  }
 });
 
 describe('Kentucky rates that change on 2026-07-01', () => {
@@ -67,10 +91,10 @@ describe('Kentucky rates that change on 2026-07-01', () => {
 });
 
 describe('Kentucky cities the SOS scrape lacked', () => {
-  test('Williamstown 1%, with a notice (news and payroll-vendor sources)', () => {
+  test('Williamstown 1%, confirmed by two independent sources, so no notice', () => {
     const r = calculatePaycheck(ky('2026-06-15', { workCity: 'Williamstown' }));
     assert.equal(local(r)?.amount, 2000);
-    assert.equal(r.notices?.[0].tier, 'secondary_source');
+    assert.equal(r.notices, undefined);
   });
 });
 
