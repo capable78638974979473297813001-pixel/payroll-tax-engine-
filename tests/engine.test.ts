@@ -2172,6 +2172,38 @@ describe('Kentucky', () => {
         assert.equal(amountOf(r, 'KY_LOCAL'), dollars(10.0));
       });
     });
+
+    // Bardwell's ordinance caps the tax at $1,000 per employee a year; at
+    // its 1% rate that is the first $100,000 of wages.
+    describe('a city-set dollar cap (Bardwell, $1,000 of tax at 1%)', () => {
+      const bardwell = (ytdWages: number, checkDate = '2026-06-15') =>
+        calculatePaycheck(
+          input({
+            checkDate,
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            workState: { code: 'KY', certificate: { workCity: 'Bardwell' } },
+            ytd: { socialSecurity: 0, medicare: 0, futa: 0, localIncomeTax: { KY_LOCAL_Bardwell: dollars(ytdWages) } },
+          }),
+        );
+
+      test('under the cap: full 1%', () => {
+        assert.equal(amountOf(bardwell(50_000), 'KY_LOCAL'), dollars(10.0));
+      });
+
+      test('crossing the cap: only the wages up to $100,000 are taxed', () => {
+        // $99,600 YTD leaves $400 of room: 400 x 1% = $4.00.
+        assert.equal(amountOf(bardwell(99_600), 'KY_LOCAL'), dollars(4.0));
+      });
+
+      test('past the cap: $0', () => {
+        assert.equal(amountOf(bardwell(100_000), 'KY_LOCAL'), 0);
+      });
+
+      test('2025 is not capped: the rate changed mid-year, so no single wage cap equals the tax cap', () => {
+        assert.equal(amountOf(bardwell(150_000, '2025-12-05'), 'KY_LOCAL'), dollars(10.0));
+      });
+    });
   });
 });
 
