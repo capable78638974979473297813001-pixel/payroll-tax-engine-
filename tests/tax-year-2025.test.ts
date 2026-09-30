@@ -27,7 +27,7 @@ const amount = (r: ReturnType<typeof calculatePaycheck>, id: string) => r.taxes.
 describe('tax year 2025', () => {
   test('covers federal and the states with a 2025 file', () => {
     const covered = statesWithRuleset('2025-06-13');
-    for (const st of ['AK', 'AZ', 'CA', 'CO', 'FL', 'GA', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'ME', 'MI', 'MN', 'MO', 'MS', 'NC', 'ND', 'NE', 'NH', 'NV', 'OK', 'PA', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'WA', 'WY']) assert.ok(covered.includes(st), st);
+    for (const st of ['AK', 'AZ', 'CA', 'CO', 'FL', 'GA', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NM', 'NV', 'OK', 'OR', 'PA', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'WA', 'WI', 'WV', 'WY']) assert.ok(covered.includes(st), st);
   });
 
   test("Illinois 2025: IL-700-T's own example ($800 weekly, 2 + 2 allowances) withholds $32.27", () => {
@@ -157,6 +157,37 @@ describe('tax year 2025', () => {
     assert.equal(amount(r, 'MN_PFML_EE'), undefined);
   });
 
+  test("Montana 2025 rounds UP, as the 2025 guide's own examples do ($130.16 -> $131, $35.25 -> $36, married $86.21 -> $87)", () => {
+    assert.equal(amount(st('2025-06-13', 'MT', {}, 'biweekly', 295000), 'MT_SIT'), 13100);
+    assert.equal(amount(st('2025-06-13', 'MT', {}, 'semimonthly', 137500), 'MT_SIT'), 3600);
+    assert.equal(amount(st('2025-06-13', 'MT', { filingStatus: 'mfj' }, 'biweekly', 295000), 'MT_SIT'), 8700);
+    assert.equal(amount(st('2026-06-12', 'MT', {}, 'semimonthly', 137500), 'MT_SIT'), 3300); // 2026 still rounds to nearest
+  });
+
+  test("New Mexico 2025: FYI-104's 2025 table, and the workers' comp fee rising on 1 July 2025", () => {
+    const early = st('2025-03-14', 'NM', { filingStatus: 'married_joint' }, 'weekly', 100000);
+    assert.equal(amount(early, 'NM_SIT'), 2270); // 12.77 + 4.3% x (1,000 - 769)
+    assert.equal(amount(st('2025-03-14', 'NM', { filingStatus: 'married_joint' }, 'monthly', 400000), 'NM_WC_FEE_EE'), 67); // $2.00 / 3
+    assert.equal(amount(st('2025-09-12', 'NM', { filingStatus: 'married_joint' }, 'monthly', 400000), 'NM_WC_FEE_EE'), 75); // $2.25 / 3
+  });
+
+  test('Oregon 2025: $2,835 standard deduction, $8,500 federal cap, $917 + 8.75% band, WBF 1.0 cent an hour each side', () => {
+    const r = st('2025-06-13', 'OR', { filingStatus: 'single', allowances: 0 }, 'biweekly', 100000);
+    // 26,000 - 1,100.06 federal - 2,835 = 22,064.94; 917 + 8.75% x (22,064.94 - 11,100) = 1,876.43 / 26
+    assert.equal(amount(r, 'OR_SIT'), 7217);
+    assert.equal(amount(r, 'OR_WBF_EE'), 80);
+  });
+
+  test('West Virginia: October 2024 tables through 2025 and until SB 392 took effect on 12 June 2026', () => {
+    assert.equal(amount(st('2025-06-13', 'WV', { exemptions: 1 }, 'biweekly', 300000), 'WV_SIT'), 11700);
+    assert.equal(amount(st('2026-03-13', 'WV', { exemptions: 1 }, 'biweekly', 300000), 'WV_SIT'), 11700);
+    assert.equal(amount(st('2026-07-10', 'WV', { exemptions: 1 }, 'biweekly', 300000), 'WV_SIT'), 11100);
+  });
+
+  test('Wisconsin 2025 uses the same W-166 tables as 2026', () => {
+    assert.equal(amount(st('2025-06-13', 'WI', { maritalStatus: 'single', exemptions: 1 }), 'WI_SIT'), amount(st('2026-06-12', 'WI', { maritalStatus: 'single', exemptions: 1 }), 'WI_SIT'));
+  });
+
   test('Michigan 2025: 4.25% after $5,800 per exemption', () => {
     // 3,000 - 5,800/26 = 2,776.92 x 4.25%
     const r = calculatePaycheck({ ...pay('2025-06-13', 'MI'), workState: { code: 'MI', certificate: { allowances: 1 } } as PaycheckInput['workState'] });
@@ -190,7 +221,7 @@ describe('tax year 2025', () => {
   });
 
   test('a 2025 check where only the residence state lacks 2025 rules is refused too', () => {
-    assert.throws(() => calculatePaycheck(pay('2025-06-13', 'WA', 'OR')), UnsupportedTaxYearError);
+    assert.throws(() => calculatePaycheck(pay('2025-06-13', 'WA', 'NY')), UnsupportedTaxYearError);
   });
 
   test('the API validator names the state and year', () => {

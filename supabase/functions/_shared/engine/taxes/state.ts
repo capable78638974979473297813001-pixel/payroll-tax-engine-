@@ -2833,6 +2833,8 @@ type MTSchedule = 'single_mfs_bothWorking' | 'mfj_qss' | 'hoh';
 
 interface BracketPerPeriodGrossConfig {
   brackets: Record<MTSchedule, Record<string, WIBracket[]>>; // second key is PayFrequency
+  /** Round the per-period amount UP to the next dollar (the 2025 guide) rather than to the nearest dollar (2026). */
+  roundUp?: boolean;
 }
 
 /**
@@ -2961,7 +2963,10 @@ function bracketPerPeriodGross(
   // this against the guide's own examples before trusting it: an earlier
   // draft that stopped at cent-level rounding produced $33.09 here, which
   // does not match the source at all.
-  const amount = toWholeDollars(dollars(bracket.base) + applyRate(excess, bracket.rate));
+  // The 2025 guide's own examples round UP ($35.25 -> $36, $130.16 -> $131),
+  // the 2026 guide's round to the nearest dollar; each year's file says which.
+  const raw = dollars(bracket.base) + applyRate(excess, bracket.rate);
+  const amount = cfg.roundUp ? Math.ceil(raw / 100) * 100 : toWholeDollars(raw);
 
   const detail =
     `${fmt(grossWages)} gross (${schedule}, ${input.payFrequency}) @ ${(bracket.rate * 100).toFixed(2)}% ` +
