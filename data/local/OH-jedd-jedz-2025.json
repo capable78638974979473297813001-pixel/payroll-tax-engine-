@@ -1089,7 +1089,13 @@
       "jeddId": "9150",
       "rate": 0.01,
       "rateSourceRaw": "1",
-      "effectiveFrom": "2025-01-01"
+      "effectiveFrom": "2025-06-01",
+      "$correctionNote": "CORRECTED 2026-09-29: effectiveFrom was 2025-01-01. RITA's Tax Rates Table (2025, New Municipalities and Tax Rate Changes): 'Union Twp Village of Batavia JEDD 9 -- New Tax as of 06/01/2025'.",
+      "source": {
+        "title": "RITA -- Tax Rates Table, 2025 new municipalities and tax rate changes",
+        "url": "https://www.ritaohio.com/TaxRatesTable",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Union Township-Milford Jedd 1",
@@ -1455,5 +1461,5 @@
     "2025 earnings caps for the Cheviot/Green Township JEDDs other than Mercy West III are not published; their 2026 caps are kept and flagged as stale."
   ],
   "wageCapComment": "annualWageCap: some JEDDs (the City of Cheviot / Green Township ones) tax only the first N dollars an employee earns in the district each year, CPI-adjusted annually. The engine stops the tax once year-to-date district wages (ytd.localIncomeTax['OH_JEDD_<jeddId>']) reach the cap. annualWageCapYear says which year the figure is for. terminatedOn: the district was dissolved or its contract ended; no tax on checks dated on or after it. rateEndsOn: the scheduled end of the current rate.",
-  "$yearNote": "2025 registry: the 2026 JEDD/JEDZ list read for 2025. Zones starting in 2026 (Coopers Hawk, Jersey-New Albany 1-3, Warren-Champion) carry their 2026 effectiveFrom, so 2025 checks owe nothing there. Zones starting during 2025 (Milford 8 on 04-01, Kimberly Clark 08-25, Sycamore-Montgomery 11-01) apply from those dates. 2025 rates restored for Jefferson Twp-Washington C.H. (1.95%) and Miami Twp-Dayton (1.75%). Mercy West JEDD III uses its published 2025 cap ($106,189)."
+  "$yearNote": "2025 registry: the 2026 JEDD/JEDZ list read for 2025. Zones starting in 2026 (Coopers Hawk, Jersey-New Albany 1-3, Warren-Champion) carry their 2026 effectiveFrom, so 2025 checks owe nothing there. Zones starting during 2025 (Milford 8 on 04-01, Union Twp-Batavia 9 on 06-01, Kimberly Clark 08-25, Sycamore-Montgomery 11-01) apply from those dates. 2025 rates restored for Jefferson Twp-Washington C.H. (1.95%) and Miami Twp-Dayton (1.75%). Mercy West JEDD III uses its published 2025 cap ($106,189)."
 }

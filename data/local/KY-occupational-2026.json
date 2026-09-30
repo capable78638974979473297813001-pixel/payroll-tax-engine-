@@ -2221,9 +2221,15 @@
         "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "inferred_small_city_single_rate_pattern",
-        "wageRateNote": "INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
-        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_29",
+        "wageRateNote": "CONFIRMED 2026-09-29: the city's own code sets 1% on wages.",
+        "wageRateSource": "The city's own code of ordinances (see wageRatePrimarySource).",
+        "wageRatePrimarySource": {
+          "title": "City of McKee Code of Ordinances § 110.02 LICENSE REQUIRED; FEES",
+          "url": "https://codelibrary.amlegal.com/codes/mckeeky/latest/mckee_ky/0-0-0-2883",
+          "says": "The license fee shall be measured by 1% of all salaries, wages, commissions, and other compensations earned by every person in the city for work done, or services performed or rendered, in the city.",
+          "fetchedOn": "2026-09-29"
+        }
       },
       {
         "name": "McLean County",
@@ -2493,12 +2499,18 @@
         "name": "Nortonville",
         "category": "Net Profits",
         "rate": "1%",
-        "wageRateDecimal": 0.01,
+        "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "inferred_small_city_single_rate_pattern",
-        "wageRateNote": "INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
-        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote."
+        "wageRateStatus": "corrected_via_city_primary_source_2026_09_29",
+        "wageRateNote": "CORRECTED 2026-09-29 from an inferred 1% (the SOS figure) to the 1.5% in the city's own code. The code's adoption date for 1.5% was not read; it is applied to 2025 and 2026 alike.",
+        "wageRateSource": "The city's own code of ordinances (see wageRatePrimarySource).",
+        "wageRatePrimarySource": {
+          "title": "City of Nortonville Code of Ordinances § 110.03 OCCUPATIONAL LICENSE FEE PAYMENT REQUIRED",
+          "url": "https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279",
+          "says": "The occupational license fee shall be measured by 1.5% of: (1) All wages and compensation paid or payable in the city for work done or services performed or rendered in the city by every resident and nonresident who is an employee",
+          "fetchedOn": "2026-09-29"
+        }
       },
       {
         "name": "Oak Grove",
@@ -3559,7 +3571,7 @@
     }
   },
   "knownGaps": [
-    "STILL UNCONFIRMED after the 2026-09-28 pass (31 jurisdictions; each carries an inferred or secondary_source notice on every paycheck): Adairville, Augusta, Bardwell, Benton, Brooksville, Burkesville, Camargo, Carlisle, Cumberland County Public School District, Fordsville, Gamaliel, Hickman, Irvington, Jackson, Jeffersonville, Jenkins, Lebanon Junction, Lyndon, Lynnview, Mayfield, McKee, Middletown, Millersburg, Nortonville, Perryville, Raceland, Salem, Vanceburg, Vine Grove, West Liberty, Williamstown. No page, form or code stating the wage rate was reachable for these; Burkesville's and West Liberty's own ordinances suggest different rates (see their notes). The SOS scrape is also not exhaustive -- this pass found four taxing cities it lacked (Falmouth, Williamstown, Jenkins, Bardwell) -- so a missing city can still mean a missing tax.",
+    "STILL UNCONFIRMED after the 2026-09-28 pass (29 jurisdictions; each carries an inferred or secondary_source notice on every paycheck): Adairville, Augusta, Bardwell, Benton, Brooksville, Burkesville, Camargo, Carlisle, Cumberland County Public School District, Fordsville, Gamaliel, Hickman, Irvington, Jackson, Jeffersonville, Jenkins, Lebanon Junction, Lyndon, Lynnview, Mayfield, Middletown, Millersburg, Perryville, Raceland, Salem, Vanceburg, Vine Grove, West Liberty, Williamstown. No page, form or code stating the wage rate was reachable for these; Burkesville's and West Liberty's own ordinances suggest different rates (see their notes). The SOS scrape is also not exhaustive -- this pass found four taxing cities it lacked (Falmouth, Williamstown, Jenkins, Bardwell) -- so a missing city can still mean a missing tax.",
     "FOUND AND FIXED 2026-09-04, same re-verification pass as the Somerset fix below: Lexington-Fayette's old flat `rate: 0.0225` was INCOMPLETE for RESIDENTS specifically -- it captured only LFUCG's own occupational tax, missing Fayette County Public Schools' genuinely separate 0.5% resident-only occupational tax (its own withholding requirement, own collection office). Reshaped jurisdictions.lexingtonFayette from a flat rate to a residentRate (2.75% = 2.25% LFUCG + 0.5% FCPS) / nonresidentRate (2.25%, LFUCG only) split -- see that entry's own schoolBoardComponent note for the full citation. Required a matching change in allKYJurisdictions() (src/registry.ts) to read the new field names, but NO change to kentuckyLocalTax()'s own logic, since it already handles resident/nonresident-split jurisdictions generically.",
     "FIXED 2026-09-04 (local-tax re-verification pass, all states with a local/city tax checked against their own official source): Somerset's entry was stale. This file previously carried Somerset's PRE-increase 0.6% rate (from 2013's Ordinance 13-02) with a note that a reported two-phase increase toward 1.2% had NOT been confirmed as actually enacted. It was: City Council approved the ordinance (confirmed via the City of Somerset's own official news page, corroborated by independent local news), phasing the rate up 0.3 points on 2025-07-01 (to 0.9%) and another 0.3 points on 2026-01-01 (to the current 1.2%) -- both effective dates already past as of this pass. Corrected to 1.2% (see the entry's own wageRateNote). Also checked and found ALREADY CORRECT this same pass: Ashland's 2.375% (eff. 1/1/2026), Walton's new 2% tax (eff. 1/1/2026), and Elsmere's 1.75% (eff. for check dates on/after 7/1/2026) -- all three were already on file with accurate figures and sourcing before this pass; only Somerset needed a fix.",
     "140 of 230 authoritative taxing districts attempted, 101 with a rate value scraped from the source database -- 90 districts remain entirely unattempted, and the 39 attempted-but-blank districts have no rate in the state's own database either (their ordinance PDF would need a separate fetch to close). SUPERSEDED: county coverage is now complete — all 62 county entries carry a confirmed payroll rate, cross-checked against KACo's own 2025 payroll-rate column with zero disagreements against the 20 an earlier pass had already confirmed. What remains unconfirmed is CITY entries, where the scraped category alone cannot distinguish a payroll rate from a net-profits or gross-receipts one.",

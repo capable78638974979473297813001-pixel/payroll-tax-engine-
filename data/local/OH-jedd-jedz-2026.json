@@ -1073,7 +1073,13 @@
       "jeddId": "9150",
       "rate": 0.01,
       "rateSourceRaw": "1",
-      "effectiveFrom": "2025-01-01"
+      "effectiveFrom": "2025-06-01",
+      "$correctionNote": "CORRECTED 2026-09-29: effectiveFrom was 2025-01-01. RITA's Tax Rates Table (2025, New Municipalities and Tax Rate Changes): 'Union Twp Village of Batavia JEDD 9 -- New Tax as of 06/01/2025'.",
+      "source": {
+        "title": "RITA -- Tax Rates Table, 2025 new municipalities and tax rate changes",
+        "url": "https://www.ritaohio.com/TaxRatesTable",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Union Township-Milford Jedd 1",
