@@ -1648,12 +1648,18 @@
         "category": "Net Profits",
         "rate": "1.5%",
         "minTax": "$50 (Application Fee)",
-        "wageRateDecimal": 0.015,
+        "wageRateDecimal": 0.0175,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "inferred_small_city_single_rate_pattern",
-        "wageRateNote": "INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
-        "wageRateSource": "No new primary source found for this specific city. Rate taken from the original KY SOS KRS-67.766-database scrape (this file's own jurisdictions.scraped.); the inference is that this bare figure also covers wages, per the pattern described in wageRateNote."
+        "wageRateStatus": "corrected_via_city_primary_source_2026_09_30",
+        "wageRateNote": "CORRECTED 2026-09-30 from an inferred 1.5% to 1.75%. Hickman's code conflicts with itself: Sec. 14-13 levies 1.5% of wages (minimum $50, tax capped at $1,500 a year), but Sec. 14-15 tells employers to withhold 1.75% of gross wages. Withholding follows Sec. 14-15. The $1,500 annual cap is not modelled. Confirm with the city clerk before relying on either figure.",
+        "wageRateSource": "The city's own code of ordinances (see wageRatePrimarySource).",
+        "wageRatePrimarySource": {
+          "title": "City of Hickman Code of Ordinances Secs. 14-13 and 14-15 (Ord. No. 08-07)",
+          "url": "https://library.municode.com/ky/hickman/codes/code_of_ordinances?nodeId=COOR_CH14LIBURE_ARTIIOCLITA",
+          "says": "Sec. 14-13: fifty dollars ($50.00) or the greater of one and one-half (1.5) percent ... not to exceed one thousand five hundred dollars ($1,500.00) ... Sec. 14-15: Every employer ... shall deduct and withhold ... at the rate of one and three-quarters (1.75) percent of gross wages of the employee.",
+          "fetchedOn": "2026-09-30"
+        }
       },
       {
         "name": "Hickman County",
@@ -2177,8 +2183,15 @@
         "wageRateDecimal": 0.019,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_explicit_wage_figure",
-        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_09_30",
+        "wageRateNote": "CONFIRMED 2026-09-30: the city's own code sets 1.9% of gross salary (Sec. 9-42 as amended by Ord. 11-17, 2017); employers withhold it under Sec. 9-44.",
+        "wageRatePrimarySource": {
+          "title": "City of Mayfield Code of Ordinances Sec. 9-42, Earnings and net profits tax payment required",
+          "url": "https://library.municode.com/ky/mayfield/codes/code_of_ordinances?nodeId=COOR_CH9OCLITARE_ARTIIOCLITA_S9-42EANEPRTAPARE",
+          "says": "The earnings tax shall be measured by 1.9 percent of the gross salary from each employer. The 1.9 percent payroll tax shall be computed for all wages and compensation paid or payable in the city",
+          "fetchedOn": "2026-09-30"
+        },
+        "wageRateSource": "The city's own code of ordinances (see wageRatePrimarySource)."
       },
       {
         "name": "Maysville",
@@ -3571,7 +3584,7 @@
     }
   },
   "knownGaps": [
-    "STILL UNCONFIRMED after the 2026-09-28 pass (29 jurisdictions; each carries an inferred or secondary_source notice on every paycheck): Adairville, Augusta, Bardwell, Benton, Brooksville, Burkesville, Camargo, Carlisle, Cumberland County Public School District, Fordsville, Gamaliel, Hickman, Irvington, Jackson, Jeffersonville, Jenkins, Lebanon Junction, Lyndon, Lynnview, Mayfield, Middletown, Millersburg, Perryville, Raceland, Salem, Vanceburg, Vine Grove, West Liberty, Williamstown. No page, form or code stating the wage rate was reachable for these; Burkesville's and West Liberty's own ordinances suggest different rates (see their notes). The SOS scrape is also not exhaustive -- this pass found four taxing cities it lacked (Falmouth, Williamstown, Jenkins, Bardwell) -- so a missing city can still mean a missing tax.",
+    "STILL UNCONFIRMED after the 2026-09-28 pass (27 jurisdictions; each carries an inferred or secondary_source notice on every paycheck): Adairville, Augusta, Bardwell, Benton, Brooksville, Burkesville, Camargo, Carlisle, Cumberland County Public School District, Fordsville, Gamaliel, Irvington, Jackson, Jeffersonville, Jenkins, Lebanon Junction, Lyndon, Lynnview, Middletown, Millersburg, Perryville, Raceland, Salem, Vanceburg, Vine Grove, West Liberty, Williamstown. No page, form or code stating the wage rate was reachable for these; Burkesville's and West Liberty's own ordinances suggest different rates (see their notes). The SOS scrape is also not exhaustive -- this pass found four taxing cities it lacked (Falmouth, Williamstown, Jenkins, Bardwell) -- so a missing city can still mean a missing tax.",
     "FOUND AND FIXED 2026-09-04, same re-verification pass as the Somerset fix below: Lexington-Fayette's old flat `rate: 0.0225` was INCOMPLETE for RESIDENTS specifically -- it captured only LFUCG's own occupational tax, missing Fayette County Public Schools' genuinely separate 0.5% resident-only occupational tax (its own withholding requirement, own collection office). Reshaped jurisdictions.lexingtonFayette from a flat rate to a residentRate (2.75% = 2.25% LFUCG + 0.5% FCPS) / nonresidentRate (2.25%, LFUCG only) split -- see that entry's own schoolBoardComponent note for the full citation. Required a matching change in allKYJurisdictions() (src/registry.ts) to read the new field names, but NO change to kentuckyLocalTax()'s own logic, since it already handles resident/nonresident-split jurisdictions generically.",
     "FIXED 2026-09-04 (local-tax re-verification pass, all states with a local/city tax checked against their own official source): Somerset's entry was stale. This file previously carried Somerset's PRE-increase 0.6% rate (from 2013's Ordinance 13-02) with a note that a reported two-phase increase toward 1.2% had NOT been confirmed as actually enacted. It was: City Council approved the ordinance (confirmed via the City of Somerset's own official news page, corroborated by independent local news), phasing the rate up 0.3 points on 2025-07-01 (to 0.9%) and another 0.3 points on 2026-01-01 (to the current 1.2%) -- both effective dates already past as of this pass. Corrected to 1.2% (see the entry's own wageRateNote). Also checked and found ALREADY CORRECT this same pass: Ashland's 2.375% (eff. 1/1/2026), Walton's new 2% tax (eff. 1/1/2026), and Elsmere's 1.75% (eff. for check dates on/after 7/1/2026) -- all three were already on file with accurate figures and sourcing before this pass; only Somerset needed a fix.",
     "140 of 230 authoritative taxing districts attempted, 101 with a rate value scraped from the source database -- 90 districts remain entirely unattempted, and the 39 attempted-but-blank districts have no rate in the state's own database either (their ordinance PDF would need a separate fetch to close). SUPERSEDED: county coverage is now complete — all 62 county entries carry a confirmed payroll rate, cross-checked against KACo's own 2025 payroll-rate column with zero disagreements against the 20 an earlier pass had already confirmed. What remains unconfirmed is CITY entries, where the scraped category alone cannot distinguish a payroll rate from a net-profits or gross-receipts one.",

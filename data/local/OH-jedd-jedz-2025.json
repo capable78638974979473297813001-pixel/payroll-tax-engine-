@@ -1446,7 +1446,8 @@
         ],
         "kind": "jedd"
       }
-    ]
+    ],
+    "recheck2026_09_30": "Re-queried Ohio's live layer (maps.ohio.gov Tax/JEDDJEDZ/MapServer/0, where=1=1) on 2026-09-30: 141 features, none of them any of these 15 ids. Also searched for other published boundaries: Jersey Township's JEDD-2 resolution is a scanned PDF with no text layer, RITA's pages for the Jersey-New Albany JEDDs publish no map, and Cleveland's revenue-sharing areas (Emerald Park, Gateway, Shaker Square) have no public boundary. These zones still cannot be found by coordinate. The tax itself is computed whenever the employer supplies certificate.workJEDDId; the geocoder's manual-review warning covers an address that may fall inside one."
   },
   "ruralCoverageImplication": "A resident of unincorporated Ohio township land should be checked against BOTH this file and OH-municipalities-2026.json before concluding /usr/bin/bash local tax -- the municipalities file alone is not sufficient, which is the correction to last session's abstract JEDD/JEDZ caveat.",
   "knownGaps": [
