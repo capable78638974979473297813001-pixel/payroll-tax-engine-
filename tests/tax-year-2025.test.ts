@@ -28,7 +28,7 @@ const amount = (r: ReturnType<typeof calculatePaycheck>, id: string) => r.taxes.
 describe('tax year 2025', () => {
   test('covers federal and the states with a 2025 file', () => {
     const covered = statesWithRuleset('2025-06-13');
-    for (const st of ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY']) assert.ok(covered.includes(st), st);
+    for (const st of ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY']) assert.ok(covered.includes(st), st);
   });
 
   test("Illinois 2025: IL-700-T's own example ($800 weekly, 2 + 2 allowances) withholds $32.27", () => {
@@ -266,6 +266,25 @@ describe('tax year 2025', () => {
     assert.equal(amount(st('2025-03-14', 'NY', { maritalStatus: 'single', exemptions: 2 }, 'daily', 75000), 'NY_SIT'), 4658);
     // Paid Family Leave 0.388% in 2025
     assert.equal(amount(st('2025-03-14', 'NY', { maritalStatus: 'single', exemptions: 3 }, 'weekly', 40000), 'NY_PFML_EE'), 155);
+  });
+
+  test('Ohio 2025: July 2024 tables until October 1, 2025, then the October 2025 tables', () => {
+    // 1,000 - 12.50 = 987.50; 5.78 + (987.50 - 384.62) x 2.990% = 23.81
+    assert.equal(amount(st('2025-06-13', 'OH', { exemptions: 1 }, 'weekly', 100000), 'OH_SIT'), 2381);
+    // 8.89 + (987.50 - 500.96) x 2.990% = 23.44
+    assert.equal(amount(st('2025-10-03', 'OH', { exemptions: 1 }, 'weekly', 100000), 'OH_SIT'), 2344);
+  });
+
+  test('Ohio 2025 local: dated municipal rates, 2025 school districts and JEDDs', () => {
+    const oh = (d: string, certificate: Record<string, unknown>) => st(d, 'OH', certificate, 'weekly', 100000);
+    assert.equal(amount(oh('2025-06-13', { workCity: 'Circleville' }), 'OH_LOCAL'), 2000); // 2.0% in 2025, 2.5% from 2026
+    assert.equal(amount(oh('2025-06-13', { workCity: 'Oak Hill' }), 'OH_LOCAL'), 500); // 0.5% until July 1
+    assert.equal(amount(oh('2025-07-11', { workCity: 'Oak Hill' }), 'OH_LOCAL'), 1000);
+    assert.equal(amount(oh('2025-06-13', { workCity: 'Paulding' }), 'OH_LOCAL'), 1100);
+    assert.equal(amount(oh('2025-08-15', { workCity: 'North Hampton' }), 'OH_LOCAL'), 1000); // new July 2025
+    assert.equal(amount(oh('2025-06-13', { schoolDistrictCode: '8701' }), 'OH_SDIT'), 500); // Bowling Green CSD 0.5% (1.25% in 2026)
+    assert.equal(amount(oh('2025-06-13', { workJEDDId: '9080' }), 'OH_JEDD'), 1750); // Miami Twp-Dayton 1.75% (2.25% in 2026)
+    assert.equal(st('2025-03-14', 'OH', { workJEDDId: '9147' }, 'weekly', 100000).taxes.find((t) => t.id === 'OH_JEDD'), undefined); // Milford 8 starts 2025-04-01
   });
 
   test('Michigan 2025: 4.25% after $5,800 per exemption', () => {

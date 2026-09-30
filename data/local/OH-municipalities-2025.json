@@ -1,7 +1,7 @@
 {
   "$comment": "ALL 679 currently-active Ohio municipal income tax jurisdictions (this $comment previously said 678, off by one from municipalityCount and the array's own length below -- corrected 2026-09-02), sourced directly from the Ohio Dept of Taxation's own official Finder database (bulk CSV, not hand-searched/transcribed). This replaces the earlier 3-anchor-city approach in this file with real, primary-sourced comprehensive coverage -- genuinely comparable in depth to what a competitor like Symmetry would maintain for Ohio.",
-  "year": 2026,
-  "asOf": "2026-08-11",
+  "year": 2025,
+  "asOf": "2026-09-29",
   "source": {
     "title": "Ohio Municipal Income Tax Rates (The Finder, bulk CSV download)",
     "url": "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
@@ -232,9 +232,14 @@
     {
       "name": "Avon",
       "municode": "03352",
-      "rate": 0.0195,
-      "effectiveFrom": "2026-01-01",
-      "administeredBy": "RITA"
+      "rate": 0.0175,
+      "effectiveFrom": "2025-01-01",
+      "administeredBy": "RITA",
+      "source2025": {
+        "title": "RITA member page -- Avon (rate history)",
+        "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=020",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Avon Lake",
@@ -477,9 +482,14 @@
     {
       "name": "Bowling Green",
       "municode": "07972",
-      "rate": 0.0215,
-      "effectiveFrom": "2026-01-01",
-      "administeredBy": "self_or_other"
+      "rate": 0.02,
+      "effectiveFrom": "2025-01-01",
+      "administeredBy": "self_or_other",
+      "source2025": {
+        "title": "Dayforce Tax and Garnishment Tables Notice 2025-19 / NEOGOV release notes (January 1, 2026 Ohio local changes)",
+        "url": "https://help.dayforce.com/r/documents/Tax-and-Garnishment-Tables-Notice-2025-19/US-Taxes-Local",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Bradford",
@@ -820,9 +830,14 @@
     {
       "name": "Chillicothe",
       "municode": "14184",
-      "rate": 0.018,
-      "effectiveFrom": "2026-01-01",
-      "administeredBy": "self_or_other"
+      "rate": 0.02,
+      "effectiveFrom": "2025-01-01",
+      "administeredBy": "self_or_other",
+      "source2025": {
+        "title": "Dayforce Tax and Garnishment Tables Notice 2025-19 / NEOGOV release notes (January 1, 2026 Ohio local changes)",
+        "url": "https://help.dayforce.com/r/documents/Tax-and-Garnishment-Tables-Notice-2025-19/US-Taxes-Local",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Cincinnati",
@@ -834,9 +849,14 @@
     {
       "name": "Circleville",
       "municode": "15070",
-      "rate": 0.025,
-      "effectiveFrom": "2026-01-01",
-      "administeredBy": "RITA"
+      "rate": 0.02,
+      "effectiveFrom": "2025-01-01",
+      "administeredBy": "RITA",
+      "source2025": {
+        "title": "RITA member page -- Circleville (rate history)",
+        "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=190",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Clarksville",
@@ -855,9 +875,14 @@
     {
       "name": "Clayton",
       "municode": "15644",
-      "rate": 0.025,
-      "effectiveFrom": "2026-01-01",
-      "administeredBy": "CCA"
+      "rate": 0.015,
+      "effectiveFrom": "2025-01-01",
+      "administeredBy": "CCA",
+      "source2025": {
+        "title": "CCA Division of Taxation -- Tax Rates (2026 and 2025 tables)",
+        "url": "https://www.ccaohio.gov/tax-rates",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Cleveland",
@@ -904,9 +929,24 @@
     {
       "name": "College Corner",
       "municode": "16700",
-      "rate": 0,
+      "rate": 0.0,
       "effectiveFrom": "2025-09-13",
-      "administeredBy": "RITA"
+      "administeredBy": "RITA",
+      "rateHistory": [
+        {
+          "from": "2025-01-01",
+          "rate": 0.01
+        },
+        {
+          "from": "2025-09-13",
+          "rate": 0.0
+        }
+      ],
+      "source2025": {
+        "title": "Village of College Corner income tax ordinance (1%) and repeal resolution",
+        "url": "https://villageofcollegecorner.org/wp-content/uploads/2025/04/Rita-Repeal.pdf",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Columbiana",
@@ -1065,9 +1105,14 @@
     {
       "name": "De Graff",
       "municode": "21378",
-      "rate": 0.0175,
-      "effectiveFrom": "2026-01-01",
-      "administeredBy": "self_or_other"
+      "rate": 0.01,
+      "effectiveFrom": "2025-01-01",
+      "administeredBy": "self_or_other",
+      "source2025": {
+        "title": "RITA member page -- DeGraff (rate history)",
+        "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=249",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Deer Park",
@@ -1387,9 +1432,14 @@
     {
       "name": "Fort Recovery",
       "municode": "27902",
-      "rate": 0.015,
-      "effectiveFrom": "2026-01-01",
-      "administeredBy": "self_or_other"
+      "rate": 0.01,
+      "effectiveFrom": "2025-01-01",
+      "administeredBy": "self_or_other",
+      "source2025": {
+        "title": "Dayforce Tax and Garnishment Tables Notice 2025-19 / NEOGOV release notes (January 1, 2026 Ohio local changes)",
+        "url": "https://help.dayforce.com/r/documents/Tax-and-Garnishment-Tables-Notice-2025-19/US-Taxes-Local",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Fostoria",
@@ -1464,9 +1514,15 @@
     {
       "name": "Gallipolis",
       "municode": "29204",
-      "rate": 0.015,
-      "effectiveFrom": "2026-01-01",
-      "administeredBy": "self_or_other"
+      "rate": 0.01,
+      "effectiveFrom": "2025-01-01",
+      "administeredBy": "self_or_other",
+      "source2025": {
+        "title": "City of Gallipolis Tax Department",
+        "url": "https://cityofgallipolis.com/tax-department-2/",
+        "says": "As a result of the November 2025 Election, the City of Gallipolis Income Tax will increase a half of a percent to 1.5% as of January 1, 2026.",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Gambier",
@@ -1522,7 +1578,14 @@
       "municode": "29778",
       "rate": 0.01,
       "effectiveFrom": "2026-01-01",
-      "administeredBy": "self_or_other"
+      "administeredBy": "self_or_other",
+      "source2025": {
+        "title": "Village of Georgetown -- Income Tax",
+        "url": "https://georgetownohio.gov/income-tax/",
+        "says": "The tax rate is 1% of earned income and net profits.",
+        "fetchedOn": "2026-09-29"
+      },
+      "$yearNote": "1% in 2025 and 2026; the Finder's 2026-01-01 row is taken as a non-rate change (credit terms), since the village still publishes 1%."
     },
     {
       "name": "Germantown",
@@ -1731,7 +1794,22 @@
       "municode": "33194",
       "rate": 0.01,
       "effectiveFrom": "2025-02-01",
-      "administeredBy": "RITA"
+      "administeredBy": "RITA",
+      "rateHistory": [
+        {
+          "from": "2025-01-01",
+          "rate": 0.0
+        },
+        {
+          "from": "2025-02-01",
+          "rate": 0.01
+        }
+      ],
+      "source2025": {
+        "title": "RITA member page -- Hanging Rock (rate history)",
+        "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=616",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Hanover",
@@ -1919,9 +1997,25 @@
       "name": "Indian Hill",
       "municode": "76582",
       "rate": 0.005,
-      "effectiveFrom": "2025-01-01",
+      "effectiveFrom": "2025-12-15",
       "administeredBy": "self_or_other",
-      "$correctionNote": "CORRECTED 2026-09-29: was 0.45%. Indian Hill's emergency ordinance of 2025-12-15 raised the rate to 0.5% for tax year 2025 and prospectively for 2026 (https://indianhill.gov/departments/tax/)."
+      "rateHistory": [
+        {
+          "from": "2025-01-01",
+          "rate": 0.0045
+        },
+        {
+          "from": "2025-12-15",
+          "rate": 0.005
+        }
+      ],
+      "source2025": {
+        "title": "Village of Indian Hill -- Tax",
+        "url": "https://indianhill.gov/departments/tax/",
+        "says": "At the December 15, 2025 Council meeting ... increasing the Indian Hill income tax rate from 0.45% to 0.5% for the tax year 2025",
+        "fetchedOn": "2026-09-29"
+      },
+      "$yearNote": "Withholding at 0.45% through 2025-12-14; the 2025-12-15 ordinance set 0.5% for all of tax year 2025, so the annual return settles the difference."
     },
     {
       "name": "Ironton",
@@ -2192,9 +2286,14 @@
     {
       "name": "Lockbourne",
       "municode": "44310",
-      "rate": 0.025,
-      "effectiveFrom": "2026-01-01",
-      "administeredBy": "RITA"
+      "rate": 0.01,
+      "effectiveFrom": "2025-01-01",
+      "administeredBy": "RITA",
+      "source2025": {
+        "title": "RITA member page -- Lockbourne (rate history)",
+        "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=427",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Lockington",
@@ -2656,7 +2755,22 @@
       "municode": "50540",
       "rate": 0.01,
       "effectiveFrom": "2025-07-01",
-      "administeredBy": "RITA"
+      "administeredBy": "RITA",
+      "rateHistory": [
+        {
+          "from": "2025-01-01",
+          "rate": 0.0
+        },
+        {
+          "from": "2025-07-01",
+          "rate": 0.01
+        }
+      ],
+      "source2025": {
+        "title": "RITA member page -- Millville (rate history)",
+        "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=691",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Mineral City",
@@ -2724,9 +2838,14 @@
     {
       "name": "Montpelier",
       "municode": "51772",
-      "rate": 0.018,
-      "effectiveFrom": "2026-01-01",
-      "administeredBy": "CCA"
+      "rate": 0.016,
+      "effectiveFrom": "2025-01-01",
+      "administeredBy": "CCA",
+      "source2025": {
+        "title": "CCA Division of Taxation -- Tax Rates (2026 and 2025 tables)",
+        "url": "https://www.ccaohio.gov/tax-rates",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Moraine",
@@ -3067,9 +3186,14 @@
     {
       "name": "North Canton",
       "municode": "56294",
-      "rate": 0.02,
-      "effectiveFrom": "2026-01-01",
-      "administeredBy": "RITA"
+      "rate": 0.015,
+      "effectiveFrom": "2025-01-01",
+      "administeredBy": "RITA",
+      "source2025": {
+        "title": "RITA member page -- North Canton (rate history)",
+        "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=546",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "North College Hill",
@@ -3091,7 +3215,17 @@
           "fetchedOn": "2026-09-29"
         }
       ],
-      "$addedNote": "ADDED 2026-09-29: new 1% tax from 2025-07-01, missing from the Finder extract. Ohio municode not captured."
+      "$addedNote": "ADDED 2026-09-29: new 1% tax from 2025-07-01, missing from the Finder extract. Ohio municode not captured.",
+      "rateHistory": [
+        {
+          "from": "2025-01-01",
+          "rate": 0.0
+        },
+        {
+          "from": "2025-07-01",
+          "rate": 0.01
+        }
+      ]
     },
     {
       "name": "North Kingsville",
@@ -3203,7 +3337,22 @@
       "municode": "57596",
       "rate": 0.01,
       "effectiveFrom": "2025-07-01",
-      "administeredBy": "RITA"
+      "administeredBy": "RITA",
+      "rateHistory": [
+        {
+          "from": "2025-01-01",
+          "rate": 0.005
+        },
+        {
+          "from": "2025-07-01",
+          "rate": 0.01
+        }
+      ],
+      "source2025": {
+        "title": "RITA member page -- Oak Hill (rate history)",
+        "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=624",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Oakwood (Cuyahoga)",
@@ -3395,7 +3544,22 @@
       "municode": "61252",
       "rate": 0.01,
       "effectiveFrom": "2025-07-01",
-      "administeredBy": "CCA"
+      "administeredBy": "CCA",
+      "rateHistory": [
+        {
+          "from": "2025-01-01",
+          "rate": 0.011
+        },
+        {
+          "from": "2025-07-01",
+          "rate": 0.01
+        }
+      ],
+      "source2025": {
+        "title": "CCA Division of Taxation -- Tax Rates (2026 and 2025 tables)",
+        "url": "https://www.ccaohio.gov/tax-rates",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Payne",
@@ -3631,9 +3795,14 @@
     {
       "name": "Rio Grande",
       "municode": "67258",
-      "rate": 0.02,
-      "effectiveFrom": "2026-01-01",
-      "administeredBy": "RITA"
+      "rate": 0.015,
+      "effectiveFrom": "2025-01-01",
+      "administeredBy": "RITA",
+      "source2025": {
+        "title": "RITA member page -- Rio Grande (rate history)",
+        "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=588",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Ripley",
@@ -3878,9 +4047,14 @@
     {
       "name": "Sidney",
       "municode": "72424",
-      "rate": 0.0175,
-      "effectiveFrom": "2026-01-01",
-      "administeredBy": "self_or_other"
+      "rate": 0.015,
+      "effectiveFrom": "2025-01-01",
+      "administeredBy": "self_or_other",
+      "source2025": {
+        "title": "Dayforce Tax and Garnishment Tables Notice 2025-19 / NEOGOV release notes (January 1, 2026 Ohio local changes)",
+        "url": "https://help.dayforce.com/r/documents/Tax-and-Garnishment-Tables-Notice-2025-19/US-Taxes-Local",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Silver Lake",
@@ -4336,7 +4510,23 @@
       "municode": "79044",
       "rate": 0.0175,
       "effectiveFrom": "2025-12-17",
-      "administeredBy": "self_or_other"
+      "administeredBy": "self_or_other",
+      "rateHistory": [
+        {
+          "from": "2025-01-01",
+          "rate": 0.01
+        },
+        {
+          "from": "2025-12-17",
+          "rate": 0.0175
+        }
+      ],
+      "source2025": {
+        "title": "City of Upper Sandusky public notice, 2025-11-17",
+        "url": "https://www.facebook.com/cityofuppersandusky/photos/public-noticecity-of-upper-sanduskyincome-tax-rate-change-november-17-2025follow/1282718397233582/",
+        "says": "income tax rate will increase from 1% to 1.75% beginning December 17, 2025",
+        "fetchedOn": "2026-09-29"
+      }
     },
     {
       "name": "Urbana",
@@ -4849,8 +5039,7 @@
     "ohioLocalTax() implements the ORC 718.121 resident-city-vs-work-city credit at withholding time — the home municipality's tax is reduced by the tax paid to the work municipality, capped at the home rate. Verified: working in Columbus while living in Cleveland produces one $75.00 line rather than two.",
     "JEDD/JEDZ zones are a SEPARATE dataset -- see data/local/OH-jedd-jedz-2026.json -- because they are legally distinct (contractual zones, not municipalities) and use a different ID scheme in Ohio's own data.",
     "This is a snapshot as of the fetch date; Ohio's own CSV is the living source of truth and should be re-fetched periodically (harvester territory, Phase 9) rather than this file treated as permanently current.",
-    "CHECKED 2026-09-02: Grandview's (municode 31262) effectiveFrom of \"9999-12-31\" looks like a transcription bug (Ohio's own EffEndDate=99991231 'still in force' sentinel leaking into the wrong field) but ISN'T one -- re-checked directly against a fresh pull of the same Finder CSV this file is built from: Grandview's own row is genuinely EffStartDate=99991231, EffEndDate=99991231, rate=0% in Ohio's own source data, a degenerate placeholder row Ohio itself publishes, faithfully transcribed here. No dollar impact (0% rate) and effectiveFrom isn't read by any lookup/gating logic in this project, so left as-is rather than 'fixed' into a number Ohio's own data doesn't actually give.",
-    "2026-09-29 cross-check against RITA's member list and CCA's rate table found three taxing towns absent from the Finder extract (Germantown, North Hampton, Stockport -- added) and two stale open rows (Washington 1.95% -> 1.75% from 2026-01-01; Indian Hill 0.45% -> 0.5%). Towns administered by neither agency were not cross-checked the same way."
+    "CHECKED 2026-09-02: Grandview's (municode 31262) effectiveFrom of \"9999-12-31\" looks like a transcription bug (Ohio's own EffEndDate=99991231 'still in force' sentinel leaking into the wrong field) but ISN'T one -- re-checked directly against a fresh pull of the same Finder CSV this file is built from: Grandview's own row is genuinely EffStartDate=99991231, EffEndDate=99991231, rate=0% in Ohio's own source data, a degenerate placeholder row Ohio itself publishes, faithfully transcribed here. No dollar impact (0% rate) and effectiveFrom isn't read by any lookup/gating logic in this project, so left as-is rather than 'fixed' into a number Ohio's own data doesn't actually give."
   ],
   "administeringAgencies": {
     "$comment": "NEW this session: WHO an employer actually remits municipal withholding to. Ohio municipalities do not uniformly collect their own tax the way Michigan's 24 cities do -- many contract with a regional third-party agency. This is a real operational fact a payroll company needs (where to send the money and file the return), separate from the rate itself.",
@@ -4879,5 +5068,6 @@
     "selfOrOtherNote": "'self_or_other' means NOT found on the RITA or CCA member list -- the municipality either self-administers (like Columbus, Cincinnati) or uses a different, smaller third-party agency not checked this session. This is a residual/default label, not a confirmed 'self-administers' claim for every name in it.",
     "knownDataGap": "5 RITA/CCA member municipalities were NOT found anywhere in this file's 679-municipality list after name normalization: [\"DeGraff\",\"Germantown\",\"North Hampton\",\"Stockport\",\"Valleyview (Franklin)\"]. RE-CHECKED 2026-09-02 against a fresh pull of the same Finder CSV this file is built from (thefinder.tax.ohio.gov's own municipal rate download, 685 unique municipality codes as of this pull vs. this file's 679): DeGraff, North Hampton, and Stockport are CONFIRMED still genuinely absent from Finder itself, not just from this file's parse -- Ohio's own database has no rate row for any of the three under that name. Germantown and Valleyview, however, ARE present in the fresh CSV -- the original 'genuinely absent' claim for those two was imprecise. The real, different problem: Germantown's most recent row is $.015 effective 2019-01-01 but EXPIRES 2025-12-31 (MuniCode 29932), and Valleyview's is $.01 effective 2012-01-01 but EXPIRES 2017-12-31 (MuniCode 79282) -- both with no successor row as of this pull, meaning either the levy genuinely lapsed (some Ohio villages tax via a renewable, time-limited voter levy) or Finder simply hasn't posted a renewal yet. Deliberately NOT added with either the expired rate or a guessed continuation -- adding a rate that may no longer be legally in effect would be a worse error than the current $0/no-line outcome, and this project's own standing rule is to disclose an ambiguity rather than guess through it. Whether Germantown's/Valleyview's levies are still active needs a source Finder's CSV itself doesn't resolve (each village's own current ordinance or the county auditor), not a re-parse of this same pipeline. This means the municipality COUNT (679) is a genuine undercount by 3 confirmed-real, currently-unlisted municipalities (DeGraff/North Hampton/Stockport) plus 2 more (Germantown/Valleyview) whose CURRENT rate is unconfirmed rather than confirmed-zero.",
     "oakwoodAmbiguity": "RITA and/or CCA's lists include 'Oakwood' without a county qualifier, and this file has 3 same-named municipalities (Cuyahoga, Montgomery, Paulding counties) -- left as administeredBy='unknown_ambiguous_name' on all 3 rather than guessing."
-  }
+  },
+  "$yearNote": "2025 registry: the 2026 Finder-derived list with each 2025 rate restored from the collecting agency's own dated history (RITA member pages, CCA's 2025 rate table) or the city's notice. Towns whose rate changed on 2026-01-01 carry their 2025 rate; towns that changed during 2025 carry rateHistory, read by check date. Adds Germantown, North Hampton and Stockport, which the Finder extract lacked. For a restored rate with no in-year change, effectiveFrom is 2025-01-01 (in force on that date), not the rate's original start."
 }

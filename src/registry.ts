@@ -680,6 +680,12 @@ export interface OHMunicipalityEntry {
   rate: number;
   effectiveFrom: string;
   administeredBy: string;
+  /**
+   * Dated rates within the file's year, oldest first: the latest entry whose
+   * `from` is on or before the check date sets `rate` (a 0 rate means the
+   * town was not taxing yet, or had repealed).
+   */
+  rateHistory?: { from: string; rate: number }[];
 }
 
 /**
@@ -738,7 +744,9 @@ export function ohMunicipalityRuleset(
   const file = loadJson<OHMunicipalityRegistryFile>(
     join('local', `OH-municipalities-${yearOf(checkDate)}.json`),
   );
-  return file.municipalities.find((m) => m.name.toLowerCase() === name.toLowerCase());
+  const entry = file.municipalities.find((m) => m.name.toLowerCase() === name.toLowerCase());
+  const dated = entry?.rateHistory?.filter((h) => h.from <= checkDate).at(-1);
+  return entry && dated && dated.rate !== entry.rate ? { ...entry, rate: dated.rate } : entry;
 }
 
 /** Every Ohio taxing municipality — for geocode/'s fuzzy name matching. */
@@ -754,7 +762,9 @@ export interface OHSchoolDistrictEntry {
   sdNumber: string;
   irn: string;
   name: string;
-  rate2026: number;
+  /** The file year's rate; the 2026 file names it rate2026. */
+  rate?: number;
+  rate2026?: number;
   earnedIncomeOnlyBase: boolean;
   firstYearEffective: number;
 }
@@ -800,6 +810,8 @@ export interface OHJEDDEntry {
   annualWageCap?: number;
   /** The year annualWageCap is for (these caps are CPI-adjusted annually). */
   annualWageCapYear?: number;
+  /** Dated rates within the file's year, oldest first; the latest `from` on or before the check date sets `rate`. */
+  rateHistory?: { from: string; rate: number }[];
 }
 
 /** A JEDD/JEDZ rate row with no polygon in Ohio's boundary layer — see the data file's boundaryGaps. */
@@ -840,7 +852,9 @@ export function hasOHJEDDRuleset(checkDate: string): boolean {
  */
 export function ohJEDDRuleset(jeddId: string, checkDate: string): OHJEDDEntry | undefined {
   const file = loadJson<OHJEDDRegistryFile>(join('local', `OH-jedd-jedz-${yearOf(checkDate)}.json`));
-  return file.zones.find((z) => z.jeddId === jeddId);
+  const zone = file.zones.find((z) => z.jeddId === jeddId);
+  const dated = zone?.rateHistory?.filter((h) => h.from <= checkDate).at(-1);
+  return zone && dated && dated.rate !== zone.rate ? { ...zone, rate: dated.rate } : zone;
 }
 
 /** Rate rows whose zone can't be found by coordinate (no published polygon). */

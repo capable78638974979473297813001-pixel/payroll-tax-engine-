@@ -5989,7 +5989,7 @@ function ohioWithholding(
   // own thresholdDate (ISO yyyy-mm-dd sorts correctly as a string).
   const dating = rules.midYearEffectiveDating as { thresholdDate: string } | undefined;
   const usePriorTable = dating && input.checkDate < dating.thresholdDate;
-  const tables = (usePriorTable ? rules.priorTable2026 : rules.periodTables) as Record<
+  const tables = (usePriorTable ? (rules.priorTable ?? rules.priorTable2026) : rules.periodTables) as Record<
     string,
     OhioPeriodTable
   >;
@@ -8654,7 +8654,8 @@ function ohioSchoolDistrictTax(
 
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const periodWages = ctx.taxableWagesFor(exempt);
-  const amount = applyRate(periodWages, entry.rate2026);
+  const sdRate = entry.rate ?? entry.rate2026 ?? 0;
+  const amount = applyRate(periodWages, sdRate);
 
   return {
     id: 'OH_SDIT',
@@ -8663,7 +8664,7 @@ function ohioSchoolDistrictTax(
     jurisdiction: 'local',
     taxableWages: periodWages,
     amount,
-    detail: `${fmt(amount)} to ${entry.name} (SD ${entry.sdNumber}) @ ${(entry.rate2026 * 100).toFixed(2)}% on wages (${entry.earnedIncomeOnlyBase ? 'earned-income-only' : 'traditional MAGI'} base, same wage figure withheld either way)`,
+    detail: `${fmt(amount)} to ${entry.name} (SD ${entry.sdNumber}) @ ${(sdRate * 100).toFixed(2)}% on wages (${entry.earnedIncomeOnlyBase ? 'earned-income-only' : 'traditional MAGI'} base, same wage figure withheld either way)`,
   };
 }
 
