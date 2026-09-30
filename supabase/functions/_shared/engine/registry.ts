@@ -590,6 +590,11 @@ export interface ALMunicipalityEntry {
     tier: 'primary_source' | 'league_survey_only' | 'conflicting_sources';
     conflict?: string;
   };
+  /**
+   * Dated rates, oldest first: the latest entry whose `from` is on or
+   * before the check date sets `rate` (Opelika's 1.5% ran to 2025-03-31).
+   */
+  rateHistory?: { from: string; rate: number }[];
 }
 
 /**
@@ -632,11 +637,13 @@ export function alMunicipalityRuleset(
     join('local', `AL-municipalities-${yearOf(checkDate)}.json`),
   );
   const wanted = name.trim().toLowerCase();
-  return file.municipalities.find(
+  const entry = file.municipalities.find(
     (m) =>
       m.name.toLowerCase() === wanted ||
       (m.aliases ?? []).some((alias) => alias.toLowerCase() === wanted),
   );
+  const dated = entry?.rateHistory?.filter((h) => h.from <= checkDate).at(-1);
+  return entry && dated && dated.rate !== entry.rate ? { ...entry, rate: dated.rate } : entry;
 }
 
 /**

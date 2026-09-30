@@ -9356,6 +9356,23 @@ function alabamaDependentPerUnit(
  * project's own Oregon method (bracketFederalSubtractionPhaseout) already
  * established, just without Oregon's cap.
  */
+/**
+ * Act 2023-421 (extended by Act 2024-437) excluded overtime pay — hours
+ * over 40 in a week — from Alabama income tax for pay dates through
+ * 2025-06-30. Reads earnings flagged `overtime` when the year's ruleset
+ * carries an active overtimeExemption covering the check date.
+ */
+function alabamaExemptOvertime(input: PaycheckInput, rules: StateRuleset): { exempt: Cents; note: string } {
+  const rule = rules.overtimeExemption as { status?: string; through?: string } | undefined;
+  if (rule?.status !== 'active' || !rule.through || input.checkDate > rule.through) return { exempt: 0, note: '' };
+  const exempt = input.earnings
+    .filter((e) => e.overtime && (e.category === 'regular' || e.category === 'supplemental'))
+    .reduce((sum, e) => sum + e.amount, 0);
+  return exempt > 0
+    ? { exempt, note: `; ${fmt(exempt)} overtime excluded (Act 2023-421, through ${rule.through})` }
+    : { exempt: 0, note: '' };
+}
+
 function alabamaWithholding(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -9370,7 +9387,8 @@ function alabamaWithholding(
   // formula sees, not a credit against the tax it produces.
   const grossPeriodWages = ctx.taxableWagesFor(exempt);
   const severance = alabamaExemptSeverance(cert, rules, grossPeriodWages);
-  const periodWages = atLeastZero(grossPeriodWages - severance.exempt);
+  const overtime = alabamaExemptOvertime(input, rules);
+  const periodWages = atLeastZero(grossPeriodWages - severance.exempt - overtime.exempt);
   const annualGI = periodWages * ctx.periodsPerYear;
 
   // No Form A-4 on file is not a gap this engine has to guess at: the
@@ -9411,7 +9429,8 @@ function alabamaWithholding(
       `${fmt(federalWithheldAnnual)} annual federal withholding, ${fmt(personalExemption)} personal exemption (${code}), ` +
       `${fmt(dependentTotal)} (${dependents} dependents) = ${fmt(taxableAmount)} taxable @ ` +
       `${(bracket.rate * 100).toFixed(2)}% (${isMarried ? 'M' : 'non-M'} schedule) = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}` +
-      severance.note,
+      severance.note +
+      overtime.note,
   };
 }
 

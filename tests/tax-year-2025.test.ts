@@ -27,7 +27,7 @@ const amount = (r: ReturnType<typeof calculatePaycheck>, id: string) => r.taxes.
 describe('tax year 2025', () => {
   test('covers federal and the states with a 2025 file', () => {
     const covered = statesWithRuleset('2025-06-13');
-    for (const st of ['AK', 'AR', 'AZ', 'CA', 'CO', 'CT', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NM', 'NV', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'WA', 'WI', 'WV', 'WY']) assert.ok(covered.includes(st), st);
+    for (const st of ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NM', 'NV', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'WA', 'WI', 'WV', 'WY']) assert.ok(covered.includes(st), st);
   });
 
   test("Illinois 2025: IL-700-T's own example ($800 weekly, 2 + 2 allowances) withholds $32.27", () => {
@@ -220,6 +220,23 @@ describe('tax year 2025', () => {
     const cert = { exemptions: 1, lowIncomeElection: true, filingStatus: 'single', dependents: 0 };
     assert.equal(amount(st('2025-03-14', 'AR', cert, 'monthly', 130000), 'AR_SIT'), 759);
     assert.equal(amount(st('2025-03-14', 'AR', cert, 'monthly', 110000), 'AR_SIT'), 0);
+  });
+
+  test('Alabama 2025: overtime is excluded through June 30, 2025, and Opelika is 1.5% until April', () => {
+    const al = (d: string, ot: boolean) =>
+      calculatePaycheck({
+        ...pay(d, 'AL'),
+        earnings: [
+          { code: 'REG', category: 'regular', amount: 200000 },
+          { code: 'OT', category: 'regular', amount: 30000, overtime: ot },
+        ],
+        workState: { code: 'AL', certificate: { alabamaExemptionCode: 'S', workCity: 'Opelika' } } as PaycheckInput['workState'],
+      });
+    // $300 overtime x 5% = $15.00 less Alabama tax while the exclusion runs
+    assert.equal(amount(al('2025-03-14', false), 'AL_SIT') - amount(al('2025-03-14', true), 'AL_SIT'), 1500);
+    assert.equal(amount(al('2025-08-15', true), 'AL_SIT'), amount(al('2025-08-15', false), 'AL_SIT'));
+    assert.equal(amount(al('2025-03-14', true), 'AL_LOCAL'), 3450); // 2,300 x 1.5%
+    assert.equal(amount(al('2025-08-15', true), 'AL_LOCAL'), 2300); // 1% from 2025-04-01
   });
 
   test('Michigan 2025: 4.25% after $5,800 per exemption', () => {

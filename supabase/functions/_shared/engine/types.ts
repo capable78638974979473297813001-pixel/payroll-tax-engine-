@@ -66,6 +66,12 @@ export interface Earning {
   code: string;
   category: EarningCategory;
   amount: Cents;
+  /**
+   * Pay for hours worked over 40 in a week. Only a state rule that
+   * excludes overtime reads it (Alabama, 2024-01-01 through 2025-06-30);
+   * everywhere else overtime is ordinary wages of its category.
+   */
+  overtime?: boolean;
 }
 
 export interface Deduction {
