@@ -7851,6 +7851,10 @@ describe('Maryland', () => {
   // local" table reproduces its stated combined rates (7.00/7.25/7.50/
   // 7.75/8.00/8.50/8.75%) exactly, 7-for-7, before any of this was
   // written into a test.
+  // Withholding starts at 4.75% on the first dollar ('Maryland law does
+  // not permit the use of a rate of less than 4.75% to be used for
+  // withholding tax purposes' -- Withholding Tax Facts 2026), so each state
+  // figure below is $52.50 above the return schedule's $90 + 4.75% form.
   const mdState = (certificate: Record<string, unknown> = {}) => ({
     workState: { code: 'MD', certificate },
   });
@@ -7867,7 +7871,7 @@ describe('Maryland', () => {
         ...mdState({ filingStatus: 'single', exemptions: 0, county: 'Worcester' }),
       }),
     );
-    assert.equal(amountOf(r, 'MD_SIT'), dollars(5309.5));
+    assert.equal(amountOf(r, 'MD_SIT'), dollars(5362));
   });
 
   test('Anne Arundel County (TIERED local rate), MFJ/HOH, 2 exemptions, annual $120,000', () => {
@@ -7883,7 +7887,7 @@ describe('Maryland', () => {
         ...mdState({ filingStatus: 'mfjHoh', exemptions: 2, county: 'AnneArundel' }),
       }),
     );
-    assert.equal(amountOf(r, 'MD_SIT'), dollars(8241.88));
+    assert.equal(amountOf(r, 'MD_SIT'), dollars(8294.38));
   });
 
   test('Frederick County (TIERED local rate), single, 1 exemption, annual $60,000', () => {
@@ -7898,7 +7902,7 @@ describe('Maryland', () => {
         ...mdState({ filingStatus: 'single', exemptions: 1, county: 'Frederick' }),
       }),
     );
-    assert.equal(amountOf(r, 'MD_SIT'), dollars(3834.64));
+    assert.equal(amountOf(r, 'MD_SIT'), dollars(3887.14));
   });
 
   test('no certificate at all defaults to the maximum 3.30% local rate', () => {
@@ -7912,7 +7916,7 @@ describe('Maryland', () => {
         workState: { code: 'MD' },
       }),
     );
-    assert.equal(amountOf(r, 'MD_SIT'), dollars(6113.8));
+    assert.equal(amountOf(r, 'MD_SIT'), dollars(6166.3));
   });
 
   test('nonresident uses the flat 2.25% Special Nonresident Rate, not a county lookup', () => {
@@ -7927,7 +7931,7 @@ describe('Maryland', () => {
     // own flat rate) -- confirms the nonresident PATH itself is exercised
     // and produces the correct combined amount, not that the two are
     // indistinguishable in general.
-    assert.equal(amountOf(r, 'MD_SIT'), dollars(5309.5));
+    assert.equal(amountOf(r, 'MD_SIT'), dollars(5362));
   });
 
   test('certificate.nonresident as the STRING "false" throws instead of silently switching to the nonresident rate', () => {

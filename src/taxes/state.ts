@@ -7537,6 +7537,8 @@ interface MDConfig {
   stateBrackets: { mfjHoh: WIBracket[]; single: WIBracket[] };
   standardDeductionAnnual: number;
   standardDeductionPerPeriod: Partial<Record<string, number>>;
+  /** Maryland's formula before its 2025 revision: 15% of annual wages, within a floor and a cap (dollars). Absent means the flat standardDeductionAnnual. */
+  standardDeductionPercent?: { rate: number; min: number; max: number } | null;
   exemptionAmountAnnual: number;
   exemptionAmountPerPeriod: Partial<Record<string, number>>;
   noCertificateDefault: { filingStatus: string; exemptions: number; localRate: number };
@@ -7707,7 +7709,10 @@ function marylandWithholding(
     : (cfg.noCertificateDefault.filingStatus as 'single' | 'mfjHoh');
   const exemptions = hasCertificate ? Number(cert.exemptions ?? 0) : cfg.noCertificateDefault.exemptions;
 
-  const standardDeduction = dollars(cfg.standardDeductionAnnual);
+  const pct = cfg.standardDeductionPercent;
+  const standardDeduction = pct
+    ? Math.min(dollars(pct.max), Math.max(dollars(pct.min), roundHalfUp(annualWages * pct.rate)))
+    : dollars(cfg.standardDeductionAnnual);
   const exemptionAmount = dollars(cfg.exemptionAmountAnnual) * exemptions;
   const taxableIncome = atLeastZero(annualWages - standardDeduction - exemptionAmount);
 

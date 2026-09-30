@@ -27,7 +27,7 @@ const amount = (r: ReturnType<typeof calculatePaycheck>, id: string) => r.taxes.
 describe('tax year 2025', () => {
   test('covers federal and the states with a 2025 file', () => {
     const covered = statesWithRuleset('2025-06-13');
-    for (const st of ['AK', 'AZ', 'CA', 'CO', 'FL', 'GA', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NM', 'NV', 'OK', 'OR', 'PA', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'WA', 'WI', 'WV', 'WY']) assert.ok(covered.includes(st), st);
+    for (const st of ['AK', 'AZ', 'CA', 'CO', 'CT', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NM', 'NV', 'OK', 'OR', 'PA', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'WA', 'WI', 'WV', 'WY']) assert.ok(covered.includes(st), st);
   });
 
   test("Illinois 2025: IL-700-T's own example ($800 weekly, 2 + 2 allowances) withholds $32.27", () => {
@@ -186,6 +186,20 @@ describe('tax year 2025', () => {
 
   test('Wisconsin 2025 uses the same W-166 tables as 2026', () => {
     assert.equal(amount(st('2025-06-13', 'WI', { maritalStatus: 'single', exemptions: 1 }), 'WI_SIT'), amount(st('2026-06-12', 'WI', { maritalStatus: 'single', exemptions: 1 }), 'WI_SIT'));
+  });
+
+  test('Connecticut 2025 uses the same statutory tables as 2026', () => {
+    assert.equal(amount(st('2025-06-13', 'CT', { withholdingCode: 'A' }), 'CT_SIT'), amount(st('2026-06-12', 'CT', { withholdingCode: 'A' }), 'CT_SIT'));
+  });
+
+  test('Hawaii 2025 TDI employee share is capped at $7.21 a week', () => {
+    assert.equal(amount(st('2025-06-13', 'HI', {}, 'weekly', 200000), 'HI_DBL_EE'), 721);
+  });
+
+  test('Maryland 2025: 15% standard deduction ($2,800 cap) until July, then the flat $3,350', () => {
+    const md = (d: string) => amount(st(d, 'MD', { filingStatus: 'single', exemptions: 1, county: 'Montgomery' }), 'MD_SIT');
+    assert.equal(md('2025-03-14'), 22015); // (78,000 - 2,800 - 3,200) x (4.75% + 3.2%) / 26
+    assert.equal(md('2025-08-15'), 21847); // (78,000 - 3,350 - 3,200) x 7.95% / 26
   });
 
   test('Michigan 2025: 4.25% after $5,800 per exemption', () => {
