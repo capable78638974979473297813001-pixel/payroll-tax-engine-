@@ -188,6 +188,49 @@ export function stripSecondaryUnit(address: string): string | null {
   return cleaned === normalizeAddress(address) ? null : cleaned;
 }
 
+const DIRECTIONALS: Record<string, string> = {
+  N: 'N', S: 'S', E: 'E', W: 'W', NE: 'NE', NW: 'NW', SE: 'SE', SW: 'SW',
+  NORTH: 'N', SOUTH: 'S', EAST: 'E', WEST: 'W',
+  NORTHEAST: 'NE', NORTHWEST: 'NW', SOUTHEAST: 'SE', SOUTHWEST: 'SW',
+};
+
+/** House number and street directionals of a one-line address, as far as they can be read from it. */
+function addressParts(address: string): { number: string | null; directionals: string } {
+  const [street = ''] = address.toUpperCase().split(',');
+  const tokens = street.replace(/[.#]/g, ' ').trim().split(/\s+/).filter(Boolean);
+  const number = tokens[0] && /^\d/.test(tokens[0]) ? tokens.shift()! : null;
+  const dirs: string[] = [];
+  // A directional only counts when a street name remains beside it: in
+  // "100 North St", NORTH is the name.
+  if (tokens.length > 2 && DIRECTIONALS[tokens[0]]) dirs.push(DIRECTIONALS[tokens[0]]);
+  if (tokens.length > 2 && DIRECTIONALS[tokens[tokens.length - 1]]) dirs.push(`(suffix) ${DIRECTIONALS[tokens[tokens.length - 1]]}`);
+  return { number, directionals: dirs.join(' ') };
+}
+
+/**
+ * Where Census's matched address names a different address from the one
+ * submitted: another house number, or a street direction changed, dropped
+ * or supplied. On the 2026-09-30 coverage run Census matched "100 N
+ * Capitol Ave, Lansing" as 100 S Capitol, "1 E Edenton St, Raleigh" as
+ * 1 W Edenton, and "1007 E Grand Ave, Des Moines" as 1007 Grand Ave two
+ * kilometres west. Spelling, abbreviation and ZIP differences are not
+ * reported: Census routinely replaces a government building's own ZIP
+ * (36130, 05633, 50319) with the street's delivery ZIP. Empty when either
+ * address can't be read.
+ */
+export function matchedAddressDifferences(submitted: string, matched: string): string[] {
+  if (!matched) return [];
+  const a = addressParts(stripSecondaryUnit(submitted) ?? submitted);
+  const b = addressParts(matched);
+  if (!a.number || !b.number) return [];
+  const out: string[] = [];
+  if (a.number !== b.number) out.push(`house number ${a.number} → ${b.number}`);
+  if (a.directionals !== b.directionals) {
+    out.push(`street direction ${a.directionals || 'none'} → ${b.directionals || 'none'}`);
+  }
+  return out;
+}
+
 export interface FetchOptions {
   retries?: number;
   timeoutMs?: number;

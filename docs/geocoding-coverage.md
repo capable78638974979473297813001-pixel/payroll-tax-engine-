@@ -45,26 +45,17 @@ available the whole time and is now what it resolves to.
 ## Measured result
 
 <!-- coverage:summary:begin -->
-> **Stale — do not rely on these figures until the script is re-run.**
-> They were hand-copied from a run around 2026-09-13 and no longer
-> reproduce: an independent re-run during the 2026-09-28 audit returned
-> **35** `rooftop` results (not 36) and **one** jurisdiction left on
-> Census-only `interpolated` (not 0), so "51 of 51" below overstates
-> current coverage. This environment could not reach Census, NAD or
-> Nominatim to regenerate them. Run `npm run coverage:geocode -- --write`
-> with network access; it rewrites this block and the per-jurisdiction
-> table from a fresh measurement and removes this notice.
+_Regenerated 2026-09-30 by `npm run coverage:geocode -- --write`._
 
-**51 of 51 jurisdictions resolve to something better than Census's own
-interpolation**, correcting it by 5m to 444m (median 90m). _(stale, see above)_
+**50 of 51 jurisdictions resolve to something better than Census's own interpolation**, correcting it by 5m to 269m (median 88m).
 
 | Tier | Count |
 | --- | --- |
-| `rooftop` (authoritative) | 36 / 51 _(audit re-run: 35)_ |
-| `rooftop-osm` (house-level, corroborated) | 12 / 51 |
+| `rooftop` (authoritative) | 34 / 51 |
+| `rooftop-osm` (house-level, corroborated) | 13 / 51 |
 | `neighbor` (block-level, authoritative) | 2 / 51 |
 | `parcel-centroid` (county GIS, gated) | 1 / 51 |
-| `interpolated` (no improvement available) | 0 / 51 _(audit re-run: 1)_ |
+| `interpolated` (no improvement available) | 1 / 51 |
 <!-- coverage:summary:end -->
 
 ### A fifth tier: county tax-parcel centroids, and why it took two tries to get right
@@ -190,6 +181,45 @@ jurisdiction run: every other state's tier and correction distance came
 back byte-for-byte identical to the run before this change; only North
 Dakota moved, from `interpolated` to `rooftop` at 444m.
 
+### 2026-09-30 re-run: Iowa, and Census matching the wrong street
+
+This environment's network policy blocks the Census, NAD and Nominatim
+hosts, so the 2026-09-30 run fetched each request through an outside
+page-fetch service, saved the responses, and replayed them through the
+unmodified script. The responses are the services' own; only the route
+they travelled differs from a normal run.
+
+Iowa fell from `rooftop` (111m on earlier runs) to `interpolated`, and
+the reason is on Census's side. Census now matches the sample address,
+`1007 E Grand Ave, Des Moines, IA 50319`, as `1007 GRAND AVE, DES MOINES,
+IA, 50309`: the plain Grand Avenue downtown, about 2.3km (1.4 miles) west
+of the Capitol. Every better tier searches around Census's point, so none
+of them finds the Capitol. OpenStreetMap has the Capitol, but 2.3km from
+Census's point, so `rooftop-osm` correctly refuses to call that
+corroboration. The row reads `interpolated`, but the point is for a
+different address, not a rough position for the right one.
+
+The same run found Census matching two other capitol addresses to the
+opposite side of the street grid: `100 N Capitol Ave, Lansing` as 100 S
+Capitol Ave and `1 E Edenton St, Raleigh` as 1 W Edenton St. Those two
+still resolve correctly, because the rooftop tiers look up the address as
+submitted rather than Census's version of it and found the right points.
+
+`resolveAddress()` already flagged the Iowa case for review, because
+Nominatim placed the address 1.4 miles from Census's point. That check
+needs Nominatim to answer, so it now has a direct one as well: when
+Census's point is the one used (`interpolated`) and Census's matched
+address has a different house number or street direction from the one
+submitted, the address is not `fullyResolved`
+(`matchedAddressDifferences()` in `geocode/census.ts`). ZIP differences
+are ignored: Census replaced the government building's own ZIP with the
+street's on five of the 51 samples.
+
+North Dakota moved from `rooftop` at 444m (the wide-radius match
+described above) to `rooftop-osm` at 8m: OpenStreetMap now has a
+house-level point for the Capitol that agrees with Census, and that tier
+is tried before the wide search.
+
 ### These numbers still move, and that is not a bug
 
 Two of the four tiers depend on services outside this repo — the National
@@ -207,40 +237,40 @@ Census's own answer, which is where this project started.
 ### Per jurisdiction
 
 <!-- coverage:table:begin -->
-_Stale (≈2026-09-13); at least one row has since regressed to `interpolated` — regenerate with `npm run coverage:geocode -- --write`._
+_Regenerated 2026-09-30._
 
 | | Tier | Correction | Published by |
 | --- | --- | --- | --- |
 | AK | `rooftop` | 14m | State of Alaska |
 | AL | `rooftop` | 124m | Alabama 911 Board |
-| AR | `rooftop` | 105m | Arkansas Geographic Information Office |
+| AR | `rooftop` | 106m | Arkansas Geographic Information Office |
 | AZ | `rooftop` | 146m | State of Arizona |
 | CA | `rooftop` | 112m | Sacramento County CA |
 | CO | `rooftop` | 90m | Colorado OIT GIS |
-| CT | `neighbor` | 148m | Connecticut (neighbouring points) |
-| DC | `rooftop` | 111m | OCTO Data Team, District of Columbia |
+| CT | `neighbor` | 148m | — |
+| DC | `rooftop` | 111m | OCTO DATA TEAM District of Columbia |
 | DE | `rooftop` | 66m | Kent County Delaware |
 | FL | `rooftop-osm` | 63m | — |
-| GA | `rooftop` | 86m | City of Atlanta |
+| GA | `rooftop` | 86m | ATLANTA.GA.US |
 | HI | `rooftop-osm` | 52m | — |
-| IA | `rooftop` | 111m | State of Iowa |
+| IA | `interpolated` | — | — |
 | ID | `rooftop-osm` | 53m | — |
 | IL | `rooftop` | 125m | State of Illinois |
 | IN | `rooftop` | 174m | Indiana Geographic Information Council |
 | KS | `rooftop` | 147m | State of Kansas |
 | KY | `rooftop-osm` | 9m | — |
-| LA | `rooftop` | 121m | City of Baton Rouge / East Baton Rouge Parish |
-| MA | `neighbor` | 27m | Massachusetts (neighbouring points) |
+| LA | `rooftop` | 121m | City of Baton Rouge-Parish of East Baton Rouge Government |
+| MA | `neighbor` | 27m | — |
 | MD | `rooftop` | 43m | Maryland Department of Information Technology |
-| ME | `rooftop` | 84m | Maine NG911 |
+| ME | `rooftop` | 85m | ngesi.maine.gov Maine |
 | MI | `rooftop-osm` | 122m | — |
-| MN | `rooftop` | 55m | Minnesota Geospatial Information Office |
+| MN | `rooftop` | 47m | Geospatial Information Office Minnesota |
 | MO | `rooftop` | 111m | Missouri GIS Advisory Council |
 | MS | `rooftop-osm` | 8m | — |
 | MT | `rooftop` | 112m | Montana State Library |
 | NC | `rooftop` | 82m | State of North Carolina |
-| ND | `rooftop` | 444m | State of North Dakota |
-| NE | `rooftop` | 50m | State of Nebraska |
+| ND | `rooftop-osm` | 8m | — |
+| NE | `rooftop` | 51m | State of Nebraska |
 | NH | `rooftop-osm` | 28m | — |
 | NJ | `rooftop` | 88m | State of New Jersey |
 | NM | `rooftop` | 145m | University of New Mexico EDAC |
@@ -249,19 +279,19 @@ _Stale (≈2026-09-13); at least one row has since regressed to `interpolated` �
 | OH | `rooftop` | 82m | State of Ohio |
 | OK | `rooftop-osm` | 167m | — |
 | OR | `rooftop` | 67m | Oregon Department of Administrative Services |
-| PA | `parcel-centroid` | 68m | Dauphin County, PA |
+| PA | `parcel-centroid` | 67m | Dauphin County, PA |
 | RI | `rooftop` | 269m | State of Rhode Island |
 | SC | `rooftop-osm` | 107m | — |
-| SD | `rooftop-osm` | 104m | — |
-| TN | `rooftop` | 90m | Tennessee STS GIS Services |
+| SD | `rooftop-osm` | 105m | — |
+| TN | `rooftop` | 91m | TN STS GIS Services |
 | TX | `rooftop-osm` | 5m | — |
-| UT | `rooftop` | 187m | Utah Geospatial Resource Center |
+| UT | `rooftop` | 186m | Utah Geospatial Resource Center |
 | VA | `rooftop` | 170m | Virginia Geographic Information Network |
-| VT | `rooftop` | 138m | Vermont Enhanced 911 Board |
-| WA | `rooftop` | 39m | State of Washington |
-| WI | `rooftop` | 32m | State of Wisconsin |
+| VT | `rooftop` | 139m | Vermont Enhanced 911 Board |
+| WA | `rooftop` | 40m | State of Washington |
+| WI | `rooftop` | 31m | State of Wisconsin |
 | WV | `rooftop` | 152m | West Virginia GIS |
-| WY | `rooftop` | 51m | Laramie County Wyoming |
+| WY | `rooftop` | 50m | Laramie County Wyoming |
 <!-- coverage:table:end -->
 
 "Correction" is the distance between Census's interpolated point and the

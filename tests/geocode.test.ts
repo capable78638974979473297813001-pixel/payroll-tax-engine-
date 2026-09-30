@@ -20,6 +20,7 @@ import {
 import {
   fetchSchoolDistrictAtPointSafe,
   geocodeAddress,
+  matchedAddressDifferences,
   normalizeAddress,
   stripSecondaryUnit,
 } from '../geocode/census.ts';
@@ -618,6 +619,46 @@ describe('census.ts — match quality, retries, and the secondary-unit fallback 
 
     test('stripSecondaryUnit returns null when there is nothing to strip', () => {
       assert.equal(stripSecondaryUnit('123 Main St, Columbus, OH 43215'), null);
+    });
+  });
+
+  describe('matchedAddressDifferences (pure; matched addresses from the 2026-09-30 coverage run)', () => {
+    test('a dropped or reversed street direction is reported', () => {
+      assert.deepEqual(
+        matchedAddressDifferences('1007 E Grand Ave, Des Moines, IA 50319', '1007 GRAND AVE, DES MOINES, IA, 50309'),
+        ['street direction E → none'],
+      );
+      assert.deepEqual(
+        matchedAddressDifferences('100 N Capitol Ave, Lansing, MI 48933', '100 S CAPITOL AVE, LANSING, MI, 48933'),
+        ['street direction N → S'],
+      );
+      assert.deepEqual(
+        matchedAddressDifferences('350 State St, Salt Lake City, UT 84103', '350 N STATE ST, SALT LAKE CITY, UT, 84103'),
+        ['street direction none → N'],
+      );
+    });
+
+    test('a different house number is reported', () => {
+      assert.deepEqual(
+        matchedAddressDifferences('125 Main St, Columbus, OH 43215', '123 MAIN ST, COLUMBUS, OH, 43215'),
+        ['house number 125 → 123'],
+      );
+    });
+
+    test('ZIP, spelling and abbreviation differences are not', () => {
+      // Census swaps a government building's own ZIP for the street's.
+      assert.deepEqual(matchedAddressDifferences('600 Dexter Ave, Montgomery, AL 36130', '600 DEXTER AVE, MONTGOMERY, AL, 36104'), []);
+      assert.deepEqual(matchedAddressDifferences('900 Court St NE, Salem, OR 97301', '900 COURT ST NE, SALEM, OR, 97301'), []);
+      assert.deepEqual(matchedAddressDifferences('1100 West Main Street, Frankfort, KY 40601', '1100 W MAIN ST, FRANKFORT, KY, 40601'), []);
+      assert.deepEqual(matchedAddressDifferences('100 North St, Columbus, OH 43215', '100 NORTH ST, COLUMBUS, OH, 43215'), []);
+    });
+
+    test('a unit designator is not read as a street direction', () => {
+      assert.deepEqual(matchedAddressDifferences('123 Main St Apt E, Columbus, OH 43215', '123 MAIN ST, COLUMBUS, OH, 43215'), []);
+    });
+
+    test('nothing is reported when there is no matched address to compare', () => {
+      assert.deepEqual(matchedAddressDifferences('123 Main St, Columbus, OH 43215', ''), []);
     });
   });
 

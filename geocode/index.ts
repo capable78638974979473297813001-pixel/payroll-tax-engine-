@@ -31,6 +31,7 @@ import {
   fetchGeographiesAtPointSafe,
   fetchSchoolDistrictAtPointSafe,
   geocodeAddress,
+  matchedAddressDifferences,
   tigerwebServiceForDate,
   type MatchQuality,
 } from './census.ts';
@@ -60,6 +61,7 @@ export { resolveJurisdiction, toCertificateFields } from './resolve.ts';
 export {
   fetchSchoolDistrictAtPoint,
   geocodeAddress,
+  matchedAddressDifferences,
   normalizeAddress,
   type FetchOptions,
   type MatchQuality,
@@ -744,6 +746,16 @@ export async function resolveAddress(
   // A no_match is only a failure where the registry covers the whole state.
   lowConfidenceReasons.push(...requiredFieldReasons(resolved));
   lowConfidenceReasons.push(...jeddReasons);
+  // Only while Census's point is the one used: every better tier looks up
+  // the address as submitted, so its point is for the right address even
+  // when Census matched another one.
+  const differences =
+    precision === 'interpolated' ? matchedAddressDifferences(address, matchQuality.matchedAddress ?? '') : [];
+  if (differences.length > 0) {
+    lowConfidenceReasons.push(
+      `Census matched "${matchQuality.matchedAddress}", which differs from the address given (${differences.join('; ')}) — it may have placed a different address. Confirm the address before trusting these jurisdictions.`,
+    );
+  }
   if (matchQuality.matchedViaFallback) {
     lowConfidenceReasons.push('Only matched after stripping an apartment/suite/unit designator — the interpolated position is for the base street address, not the specific unit.');
   }
