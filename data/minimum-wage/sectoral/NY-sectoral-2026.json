@@ -49,6 +49,7 @@
   "knownGaps": [
     "Whether a given worker meets Public Health Law 3614-f's own 'home care aide' definition (as opposed to the ordinary Labor Law 652 minimum wage applying instead) is a legal/statutory determination this file does not model.",
     "Wage parity requirements for Medicaid-funded home care (Public Health Law 3614-c), which layer a benefits component on top of the cash wage in NYC, Nassau, Suffolk and Westchester, are a separate and larger obligation not carried here -- this file carries only the Public Health Law 3614-f minimum cash wage.",
+    "NY DOL's minimum wage page (read directly 2026-10-01) says the home care aide minimum wage rises on 2027-01-01 to $20.00 per hour in NYC, Long Island and Westchester and $19.00 in the rest of the state (from $19.65 / $18.65), capped at $3.00 above the standard wage. Not applied here: this is a 2026 file and the engine has no 2027 tax year yet.",
     "The FARE (Fair Pay for Home Care) grant program that some agencies rely on to fund this wage is a funding mechanism, not a different wage floor, and is not modelled.",
     "This file was not read against the NYSDOL fact sheet's own primary text this session (see that source's own verifiedBy note) -- only against two independent secondary summaries of it. Re-verify directly when the primary page is reachable."
   ]
