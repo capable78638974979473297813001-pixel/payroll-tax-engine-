@@ -62,7 +62,8 @@ describe('minimum wage data integrity', () => {
     assert.ok(files.length >= 60, `expected the full database, found ${files.length} files`);
     for (const f of files) {
       const parsed = JSON.parse(readFileSync(f, 'utf8')) as Record<string, unknown>;
-      assert.equal(parsed.year, 2026, `${f} is not a 2026 ruleset`);
+      const yearInName = Number(f.match(/(\d{4})\.json$/)?.[1]);
+      assert.equal(parsed.year, yearInName, `${f} year does not match its filename`);
       const hasOwnSources = Array.isArray(parsed.sources) && parsed.sources.length > 0;
       const hasPerEntrySources =
         Array.isArray(parsed.jurisdictions) &&
@@ -165,8 +166,8 @@ describe('minimum wage data integrity', () => {
   });
 
   test('all 50 states, DC and 5 territories are present', () => {
-    const states = readdirSync(join(DATA_ROOT, 'states')).filter((f) => f.endsWith('.json'));
-    assert.equal(states.length, 51, 'expected 50 states + DC');
+    const states = readdirSync(join(DATA_ROOT, 'states')).filter((f) => f.endsWith('-2026.json'));
+    assert.equal(states.length, 51, 'expected 50 states + DC for 2026');
     const territories = readdirSync(join(DATA_ROOT, 'territories')).filter((f) =>
       f.endsWith('.json'),
     );
@@ -179,7 +180,7 @@ describe('minimum wage data integrity', () => {
   test('no state ruleset falls below the federal floor without saying why', () => {
     const federal = federalMinimumWageRuleset(D).standard.hourlyCents;
     const states = readdirSync(join(DATA_ROOT, 'states'))
-      .filter((f) => f.endsWith('.json'))
+      .filter((f) => f.endsWith('-2026.json'))
       .map((f) => f.slice(0, 2));
     for (const code of states) {
       const s = stateMinimumWageRuleset(code, D);
