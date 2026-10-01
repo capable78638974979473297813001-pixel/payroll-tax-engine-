@@ -483,6 +483,19 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
         basis: `Ordinance not applied — ${found.status}`,
         caveat: found.note as string | undefined,
       });
+    } else if (
+      found.effectiveFrom &&
+      query.checkDate < found.effectiveFrom &&
+      !(found.variants ?? []).some((v) => v.effectiveTo)
+    ) {
+      // An ordinance with a start date and no recorded earlier figure
+      // contributes nothing before it: not "no ordinance", but not yet one.
+      considered.push({
+        level: 'local',
+        jurisdiction: found.name,
+        basis: `Ordinance not yet in effect — takes effect ${found.effectiveFrom}`,
+        caveat: found.note as string | undefined,
+      });
     } else if (tipped) {
       if (found.tipped) {
         const pred = historicalPredecessor(found.variants, 'tipped', query.checkDate);

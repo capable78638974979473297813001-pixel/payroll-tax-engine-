@@ -1,7 +1,7 @@
 {
   "$comment": "All 92 Indiana counties, each levying a mandatory local income tax (LIT) -- unlike Michigan (24-city closed list) or Ohio (municipality-by-municipality), EVERY Indiana address falls inside exactly one of these 92 rates. There is no zero-rate default case. Rates transcribed directly from the Indiana Department of Revenue's own semi-annual Departmental Notice #1, not a secondary aggregator.",
   "year": 2026,
-  "asOf": "2026-08-12",
+  "asOf": "2026-10-01",
   "effectiveFrom": "2026-01-01",
   "source": {
     "title": "Departmental Notice #1 -- How to Compute Withholding for State and County Income Tax (R46 / 01-26)",
@@ -26,12 +26,36 @@
     "stateRateForThisPeriod": 0.03,
     "stateRateComment": "Confirmed by the SAME PayrollOrg article ('the state withholding tax rate decreases to 2.95% from 3%') and independently corroborated by SmartAsset's Indiana tax explainer ('Now, in 2025, it's a flat 3.00%'). Indiana's state rate changes only at calendar-year boundaries (3.15% in 2023, 3.05% in 2024, 3.00% in 2025, 2.95% in 2026, one rate per full year) -- unlike the COUNTY layer, which can move at both Jan 1 and Oct 1. So the Oct-1-2025-to-Dec-31-2025 period uses R45's county rates together with the SAME 3.00% state rate that applied all year, not a separate state-rate table.",
     "changedCounties": [
-      { "name": "Carroll", "countyCode": "08", "priorRate": 0.022733 },
-      { "name": "Grant", "countyCode": "27", "priorRate": 0.0255 },
-      { "name": "Greene", "countyCode": "28", "priorRate": 0.0215 },
-      { "name": "Howard", "countyCode": "34", "priorRate": 0.0195 },
-      { "name": "Shelby", "countyCode": "73", "priorRate": 0.016 },
-      { "name": "Union", "countyCode": "81", "priorRate": 0.02 }
+      {
+        "name": "Carroll",
+        "countyCode": "08",
+        "priorRate": 0.022733
+      },
+      {
+        "name": "Grant",
+        "countyCode": "27",
+        "priorRate": 0.0255
+      },
+      {
+        "name": "Greene",
+        "countyCode": "28",
+        "priorRate": 0.0215
+      },
+      {
+        "name": "Howard",
+        "countyCode": "34",
+        "priorRate": 0.0195
+      },
+      {
+        "name": "Shelby",
+        "countyCode": "73",
+        "priorRate": 0.016
+      },
+      {
+        "name": "Union",
+        "countyCode": "81",
+        "priorRate": 0.02
+      }
     ],
     "allOtherCounties": "The remaining 86 counties are UNCHANGED between R45 (Oct 2025) and R46 (Jan 2026) -- use the same rate values as the main `counties` array above for any of them.",
     "knownGap": "RE-CHECKED 2026-09-02: confirmed this priorTable is currently UNREACHABLE, not just unwired -- a genuinely different situation from Ohio's Aug-1 HB96 mid-year table (which IS reachable, since its threshold falls inside 2026 and got a real dispatch mechanism this same pass). Indiana's threshold (2026-01-01) is a YEAR boundary, not a mid-year one: any checkDate needing this priorTable has year 2025, and this project's registry.ts loads every ruleset (federal, state, and this county file) by yearOf(checkDate) with only 2026 data published anywhere in the project -- confirmed by direct test: a 2025 checkDate throws 'No ruleset at data/federal/2025.json' before calculatePaycheck() ever reaches Indiana's own county lookup, for ANY state, not just Indiana. Building a date-based dispatch inside countyAddOnLine() for this specific data would be dead code, untestable because no valid input can reach it. The correct fix, if this ever becomes reachable (i.e. once a 2025 federal/state dataset exists in this project), is a year-boundary one at the registry level, not a mid-year switch inside Indiana's own function -- and even then, no fix is needed for any 2026 checkDate: registry.ts's own year-only lookup already and correctly loads this file's current (Jan-2026 R46) counties array for every one of them, which is the right table for the whole of 2026's reachable range."
@@ -74,7 +98,13 @@
       "name": "Boone",
       "countyCode": "06",
       "rate": 0.017,
-      "changedSinceOct2025": false
+      "changedSinceOct2025": false,
+      "rateChanges": [
+        {
+          "on": "2026-10-01",
+          "rate": 0.0171
+        }
+      ]
     },
     {
       "name": "Brown",
@@ -597,6 +627,23 @@
     "CLOSED 2026-08-12: state.ts's flatRateMultiExemption() now resolves workState.certificate.county against this file and stacks a county add-on onto the state rate -- see data/states/IN-2026.json and tests/engine.test.ts, describe('Indiana'). What's genuinely still open is the county-STATUS determination itself (residence vs. work fallback) -- the engine takes the county name as an already-resolved input.",
     "CLOSED 2026-08-12: the Oct 1, 2025 (R45) table is now captured -- see priorTable above (reconstructed from the 6-county diff plus PayrollOrg, not a direct PDF pull; disclosed as such). The mechanism gap remains: no date-based dispatch chooses between priorTable and the main table by check date.",
     "The out-of-state-resident work-county fallback and the Jan-1 determination date are documented but not modelled -- current PaycheckInput/types.ts has no concept of a determination-date snapshot distinct from the check date.",
-    "County code values (01-92) are Indiana's own two-digit county codes as printed in Departmental Notice #1, included for cross-referencing against other Indiana state forms; not independently verified against, e.g., FIPS county codes, which differ."
-  ]
+    "County code values (01-92) are Indiana's own two-digit county codes as printed in Departmental Notice #1, included for cross-referencing against other Indiana state forms; not independently verified against, e.g., FIPS county codes, which differ.",
+    "2026-10-01: R47 / 10-26 read and diffed against all 92 rows; only Boone changed (see octoberUpdate). The notice keys the rate to periods BEGINNING on or after 2026-10-01 while this engine selects by check date."
+  ],
+  "octoberUpdate": {
+    "$comment": "Departmental Notice #1 R47 / 10-26, effective for withholding for periods beginning on or after 2026-10-01. READ DIRECTLY from the Indiana DOR's own PDF (https://www.in.gov/dor/files/dn01.pdf) on 2026-10-01 and all 92 rows diffed against the table above: exactly one county changed, Boone (06), 0.017 -> 0.0171, the only row the notice marks with an asterisk. Carried as a dated rateChanges entry on that county, so check dates before 2026-10-01 keep 0.017.",
+    "notice": "R47 / 10-26",
+    "effectiveFrom": "2026-10-01",
+    "changed": [
+      {
+        "county": "Boone",
+        "countyCode": "06",
+        "from": 0.017,
+        "to": 0.0171
+      }
+    ],
+    "verifiedOn": "2026-10-01",
+    "secondarySource": "PayrollOrg PayState Update, 2026-09-30: 'The tax rate in Boone County increases to 0.0171 from 0.017, effective October 1, 2026.'",
+    "periodNote": "The notice keys the new rate to pay PERIODS BEGINNING on or after 2026-10-01; this engine selects by check date, so a check dated on or after 2026-10-01 for a period that began in September is the one case where the two differ. The next notice, for changes effective 2027-01-01, is due in December."
+  }
 }
