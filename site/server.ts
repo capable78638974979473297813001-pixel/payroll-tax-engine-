@@ -1711,7 +1711,9 @@ createServer((req, res) => {
       return;
     }
     if (method === 'GET' && (url === '/reference' || url === '/reference.html' || url === '/api-reference')) {
-      sendHtml(res, join(HERE, 'reference.html'));
+      // The old standalone reference page is gone; its URLs land on the docs.
+      res.writeHead(301, { Location: '/docs', ...SECURITY_HEADERS });
+      res.end();
       return;
     }
 
@@ -1778,5 +1780,4 @@ createServer((req, res) => {
   console.log(`Omnia.tax:           http://localhost:${PORT}`);
   console.log(`Omnia.tax docs:      http://localhost:${PORT}/docs`);
   console.log(`Omnia.tax console:   http://localhost:${PORT}/sandbox`);
-  console.log(`Omnia API reference: http://localhost:${PORT}/reference`);
 });
