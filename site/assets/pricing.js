@@ -5,7 +5,7 @@
   var cfg = w.OMNIA || {
     trialDays: 14,
     termMonths: 12,
-    tiers: [{ upTo: 25000, rate: 0.12 }, { upTo: 200000, rate: 0.09 }, { upTo: 1000000, rate: 0.06 }, { upTo: null, rate: 0.04 }],
+    tiers: [{ upTo: null, rate: 0.09 }],
     rooftopRate: 0.3,
     periodsPerYear: { weekly: 52, biweekly: 26, semimonthly: 24, monthly: 12 },
     codeTtlSec: 900,
@@ -37,7 +37,7 @@
 
   /**
    * Biweekly monthly estimate, in dollars, from estimate() in pricing.ts
-   * (annual graduated cost ÷ 12). Not the flat 325/12 cents formula.
+   * (annual cost ÷ 12). Not the flat 325/12 cents formula.
    */
   function estimate(employees, payFrequency) {
     var freq = payFrequency || 'biweekly';
@@ -60,7 +60,7 @@
     };
   }
 
-  /** $0.12, $0.125, $0.04 — however many decimals the tier actually uses. */
+  /** $0.09, $0.125 — however many decimals the tier actually uses. */
   function formatRate(rate) {
     var n = Number(rate);
     if (!Number.isFinite(n)) return '';

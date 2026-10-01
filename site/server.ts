@@ -833,7 +833,7 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
   const successUrl = `${origin}/signup/payment?setup=ok&session_id={CHECKOUT_SESSION_ID}`;
   const cancelUrl = `${origin}/signup/payment?setup=cancelled`;
 
-  // Preferred path: a metered subscription to the graduated price, so every
+  // Preferred path: a metered subscription to the flat per-call price, so every
   // future call actually bills. Requires STRIPE_PRICE_ID (a usage-metered
   // price). Falls back to card-on-file only when no price is configured.
   if (billingConfigured()) {

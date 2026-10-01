@@ -2,16 +2,12 @@
  * Omnia's pricing model, in one place.
  *
  * Usage-based, not tiered plans: every jurisdiction is included for
- * everyone, and you pay for the calculations you actually make. The
- * graduated bands below mean a bigger book pays less per call, not more
- * in total per client -- the thing the "per-employee-per-month" model
- * this project keeps criticising gets backwards.
- *
- * Calibrated so the archetype this site is written for -- roughly 400
- * clients averaging 20 employees, paid biweekly, ~208,000 calls a year --
- * lands near $19-20k/year. Change a band and that moves; the estimator on
- * index.html and the console's billing panel both read these numbers, so
- * they can't drift apart.
+ * everyone, and you pay a flat $0.09 for each calculation you actually
+ * make, at any volume. The list below stays a list of bands so a volume
+ * discount can be added back without touching the estimator or the pages;
+ * today it has one band with no upper bound. The estimator on index.html
+ * and the console's billing panel both read these numbers, so they can't
+ * drift apart.
  *
  * NOTE: index.html's estimator script carries a copy of these constants
  * for its live client-side preview (there is no bundler in this project).
@@ -27,10 +23,7 @@ export interface CallTier {
 }
 
 export const CALL_TIERS: CallTier[] = [
-  { upTo: 25_000, rate: 0.12 },
-  { upTo: 200_000, rate: 0.09 },
-  { upTo: 1_000_000, rate: 0.06 },
-  { upTo: Infinity, rate: 0.04 },
+  { upTo: Infinity, rate: 0.09 },
 ];
 
 /** Rooftop address resolution, billed once per address -- not per pay run. */
