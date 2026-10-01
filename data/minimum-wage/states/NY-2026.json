@@ -12,7 +12,7 @@
     "hourlyCents": 1600,
     "effectiveFrom": "2026-01-01",
     "coverage": "Remainder of New York State -- everywhere OUTSIDE New York City, Nassau, Suffolk and Westchester. Recorded as the standard because it is the lower of the two and applies to the larger land area; the downstate rate is in variants and must be used for those four jurisdictions.",
-    "note": "N.Y. Lab. Law 652 as amended in 2023: $16.00 upstate / $17.00 downstate for 2026, then CPI indexing from 2027."
+    "note": "N.Y. Lab. Law 652 as amended in 2023: $16.00 upstate / $17.00 downstate for 2026. NY DOL's page (read 2026-10-01) says the CPI increase scheduled for 2027 will NOT happen: the law's 'off-ramp' condition was met, so the rates stay $16.00 / $17.00 on 2027-01-01. The Governor has proposed changing the off-ramp, which is not law."
   },
   "tipped": {
     "tipCreditAllowed": true,
@@ -244,7 +244,8 @@
   "indexation": {
     "indexed": true,
     "basis": "CPI-W (Northeast region), beginning 2027",
-    "adjustmentDate": "01-01"
+    "adjustmentDate": "01-01",
+    "note": "The 2027 adjustment is switched off by the law's off-ramp: NY DOL (read 2026-10-01) states the 2027 rates are unchanged at $17.00 (NYC, Long Island, Westchester) and $16.00 (rest of state)."
   },
   "scheduledChanges": [],
   "sources": [
@@ -253,6 +254,12 @@
       "url": "https://dol.ny.gov/minimum-wage-0",
       "verifiedOn": "2026-09-08",
       "verifiedBy": "Fetched and read directly this session. Source of all six New York figures: $17.00 downstate / $16.00 remainder, food service worker cash wages of $11.35 / $10.70 (tip credits $5.65 / $5.30), and service employee cash wages of $14.15 / $13.30 (tip credits $2.85 / $2.70)."
+    },
+    {
+      "title": "New York State Department of Labor -- Minimum Wage (2027 update: rates unchanged, home care aide increase)",
+      "url": "https://dol.ny.gov/minimum-wage-0",
+      "verifiedOn": "2026-10-01",
+      "verifiedBy": "Read directly by the daily source watch on 2026-10-01 (the page's headings changed from 'as of 01/01/2026' to 'as of 01/01/2027'). It states that on 2027-01-01 the minimum wage stays $17.00 per hour in New York City, Long Island and Westchester County and $16.00 in the rest of the state, because an off-ramp condition was met, and that home care aides rise to $20.00 / $19.00 (capped at $3.00 above the standard wage). Informational only: no 2027 file exists because the engine has no 2027 tax year."
     },
     {
       "id": "dol-state-mw",
