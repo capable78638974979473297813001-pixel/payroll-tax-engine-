@@ -26,8 +26,8 @@ export const CALL_TIERS: CallTier[] = [
   { upTo: Infinity, rate: 0.09 },
 ];
 
-/** Rooftop address resolution, billed once per address -- not per pay run. */
-export const ROOFTOP_RATE = 0.3;
+/** Rooftop address resolution, billed once per address -- not per pay run. Same 9 cents as a calculation. */
+export const ROOFTOP_RATE = 0.09;
 
 /** Free evaluation window, in days, before a card is needed. */
 export const TRIAL_DAYS = 14;

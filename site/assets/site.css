@@ -885,3 +885,14 @@ table.fields td.desc, table.errors td.when, table.headers td.mean { color: var(-
   .progress .lbl { font-size: 0; gap: 0; }
   .progress .lbl .n { font-size: 11px; }
 }
+@media (max-width: 640px) {
+  .docs-main { padding: 24px 16px 56px; }
+  .docs-main h1 { font-size: 40px; letter-spacing: -1.6px; }
+  .docs-main h2 { font-size: 30px; letter-spacing: -1px; overflow-wrap: anywhere; }
+  .step-list article { grid-template-columns: 56px 1fr; }
+  .step-list .n { font-size: 32px; }
+  .kv { grid-template-columns: 1fr; }
+  .path-row .path { font-size: 20px; overflow-wrap: anywhere; }
+  table.fields, table.errors, table.headers { display: block; overflow-x: auto; }
+  .shape, .auth-line { overflow-x: auto; white-space: pre; }
+}

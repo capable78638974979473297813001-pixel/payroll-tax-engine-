@@ -1,5 +1,8 @@
 # Omnia.tax, design B: developer handoff
 
+> **Pricing note (2026-10-01):** the product price is a flat **$0.09 per call**. The PNG/SVG frames in `screens/` were exported at $0.125 and still show that figure; the copy in `SPEC.md` has been updated, the images have not.
+
+
 This is design B (Swiss, cobalt + ink), which the client picked, refined as v2. The job is to implement it as working code in the existing repo, **with no new features**.
 
 ## What's here
@@ -29,7 +32,7 @@ Generator source (for reference, not needed to build): `/workspace/figma/b_gen_f
 - Responsive/mobile layouts aren't designed. The frames are 1440 desktop.
 
 ## Data rules (quick reference)
-- Estimate = employees × 26 × $0.125 ÷ 12, rounded to cents (`Math.round(n * 325 / 12)` cents). It updates live and is labelled "ASSUMES BIWEEKLY". Stepper min is 1.
+- Estimate = employees × 26 × $0.09 ÷ 12, rounded to cents (`Math.round(n * 234 / 12)` cents). It updates live and is labelled "ASSUMES BIWEEKLY". Stepper min is 1.
 - "Due today $0.00". Trial end = signup date + 14 days. "Trial · Day N of 14".
 - The API key is **shown once** (B05). Everywhere else shows the masked `sk_test_…xxxx`.
 - Money in the API is integer cents. The sandbox form takes dollars and converts them.

@@ -126,6 +126,13 @@ describe('account security', () => {
     const home = await (await fetch(BASE + '/')).text();
     assert.match(home, /\/tokens\.css/); // the design B home page is the main site
     assert.doesNotMatch(home, /IBM Plex Mono/);
+
+    // The old reference's API content now lives in the docs.
+    const docs = await (await fetch(BASE + '/docs')).text();
+    for (const id of ['making-requests', 'money', 'rate-limits', 'versioning', 'states', 'me', 'health',
+      'earning', 'deduction', 'federal-w4', 'ytd', 'state-withholding', 'result', 'pricing']) {
+      assert.match(docs, new RegExp(`id="${id}"`), `docs section #${id}`);
+    }
   });
 
   test('with email on, the code is emailed and never written to the logs', async () => {

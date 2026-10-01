@@ -34,12 +34,27 @@
     <div class="g">Guides</div>
     <a href="#getting-started">Getting started</a>
     <a href="#authentication">Authentication</a>
+    <a href="#making-requests">Making requests</a>
+    <a href="#money">Money &amp; rounding</a>
+    <a href="#rate-limits">Rate limits</a>
+    <a href="#versioning">Versioning &amp; dates</a>
     <div class="g">API reference</div>
     <a href="#post"><span class="post-tag">POST</span> /v1/paycheck</a>
+    <a href="#states"><span class="post-tag">GET</span> /v1/states</a>
+    <a href="#me"><span class="post-tag">GET</span> /v1/me</a>
+    <a href="#health"><span class="post-tag">GET</span> /v1/health</a>
     <a href="#tax-lines">Tax lines</a>
     <a href="#errors">Errors</a>
     <a href="#response-headers">Response headers</a>
+    <div class="g">Objects</div>
+    <a href="#earning">Earning</a>
+    <a href="#deduction">Deduction</a>
+    <a href="#federal-w4">FederalW4</a>
+    <a href="#ytd">YearToDate</a>
+    <a href="#state-withholding">StateWithholding</a>
+    <a href="#result">PaycheckResult</a>
     <div class="g">Account</div>
+    <a href="#pricing">Pricing</a>
     <a href="#billing">Billing</a>
     <a href="/sandbox">Sandbox</a>
     <div class="keycard">
@@ -67,6 +82,53 @@
     <div class="kv"><code>sk_test_</code><span>Test key. Same API, same results. For building and your trial.</span></div>
     <div class="kv"><code>sk_live_</code><span>Live key. Metered and billed at <span data-rate>$0.09</span> per paycheck.</span></div>
     <p id="tierNote" style="color:var(--color-gray);font-size:14px"></p>
+    <p style="font-weight:700;margin-top:32px">Key lifecycle</p>
+    <div class="kv"><code>Issued once</code><span>A key is issued at the end of signup, once a card or bank account is on file. Nothing is charged during the <span data-trial>14</span>-day trial. The full key is shown once. Omnia.tax stores only a SHA-256 hash, so a lost key can be replaced but never recovered.</span></div>
+    <div class="kv"><code>One per account</code><span>Issuing a new key revokes the previous one immediately.</span></div>
+    <div class="kv"><code>Trial keys expire</code><span>A trial key is time-boxed and <code>GET /v1/me</code> returns its exact <code>expiresAt</code>. An expired key returns <code>401 expired_key</code>.</span></div>
+    <div class="kv"><code>Server-side only</code><span>A key can run any calculation on your account and every successful call is billable. Never ship it in a browser, a mobile app or a public repository.</span></div>
+
+    <div class="sec-rule" id="making-requests"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Guides</p>
+    <h2>Making requests</h2>
+    <p>Requests and responses are JSON. Send <code>Content-Type: application/json</code> on any request with a body. Every endpoint below is served from <code data-origin>this host</code>; a self-hosted deployment answers the same paths on its own domain.</p>
+    <div class="kv"><code>Stateless</code><span>Each call is one self-contained calculation, so you can run a whole pay run in parallel, one request per employee.</span></div>
+    <div class="kv"><code>Repeatable</code><span>The same input on the same <code>checkDate</code> always returns the same result. The only thing a call changes is usage metering.</span></div>
+    <div class="kv"><code>No hidden defaults</code><span>Facts the engine cannot derive, such as your unemployment rate, nexus or a reciprocity election, are explicit inputs. Leave an optional block out and the rules that read it do not fire.</span></div>
+    <p>The same routes also answer under <code>/api/</code> (for example <code>/api/paycheck</code>) with identical behavior.</p>
+
+    <div class="sec-rule" id="money"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Guides</p>
+    <h2>Money &amp; rounding</h2>
+    <p>Every monetary value in a request or response is an integer number of cents. <code>300000</code> is $3,000.00 and a net pay of <code>219432</code> is $2,194.32. There are no floating-point dollars anywhere. Convert at your display edge only.</p>
+    <div class="kv"><code>To the cent</code><span>Withholding is computed to the cent. Set <code>roundToWholeDollars: true</code> to round federal withholding to whole dollars, as IRS Publication 15-T permits.</span></div>
+    <div class="kv"><code>Rates</code><span>A percentage that is an input, such as a state unemployment rate, is a decimal: <code>0.031</code> is 3.1%.</span></div>
+    <div class="kv"><code>Unsigned</code><span>Amounts are never negative.</span></div>
+
+    <div class="sec-rule" id="rate-limits"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Guides</p>
+    <h2>Rate limits</h2>
+    <p>Each key is limited independently on a fixed one-minute window. The default is <span class="rpm-copy">120</span> requests per minute per key. A self-hosted deployment sets its own with <code>RATE_LIMIT_PER_MIN</code>. The headers in <a href="#response-headers">Response headers</a> carry your current budget, so you can pace a pay run without guessing.</p>
+    <p>Over the limit you get <code>429 rate_limited</code>. Wait for the <code>Retry-After</code> seconds and cap your own concurrency rather than running into the limit.</p>
+    <pre class="shape">async function withRetry(call) {
+  for (;;) {
+    const res = await call();
+    if (res.status !== 429) return res;
+    const seconds = Number(res.headers.get("retry-after")) || 1;
+    await new Promise((r) =&gt; setTimeout(r, seconds * 1000));
+  }
+}</pre>
+
+    <div class="sec-rule" id="versioning"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Guides</p>
+    <h2>Versioning &amp; dates</h2>
+    <p>Rules are effective-dated. The ruleset that runs is the one in force on your <code>checkDate</code>, never today’s. This is the most important thing to get right when you integrate.</p>
+    <div class="kv"><code>Corrections</code><span>Recalculating a prior period reproduces that period’s numbers because you send that period’s <code>checkDate</code>.</span></div>
+    <div class="kv"><code>New year</code><span>The first payroll dated in a new year picks up that year’s brackets, wage bases and local rates automatically.</span></div>
+    <div class="kv"><code>Data, not breaking changes</code><span>New jurisdictions and rate changes ship as data. The request and response shapes on this page are stable. A new local tax is one more line in <code>taxes</code>, nothing more.</span></div>
+    <div class="kv"><code>Tax years</code><span>A <code>checkDate</code> outside the years this build covers returns <code>422 invalid_input</code>. <code>GET /v1/health</code> lists the covered years as <code>taxYears</code>.</span></div>
+    <pre class="shape">{ "checkDate": "2025-12-19", ... }   // 2025 rules
+{ "checkDate": "2026-01-02", ... }   // 2026 rules, automatically</pre>
 
     <div class="sec-rule"></div>
     <p class="label-mono" style="color:var(--color-gray)">API reference</p>
@@ -82,21 +144,98 @@
         <tr class="group"><td colspan="3" style="color:var(--color-cobalt)">CORE FIELDS</td></tr>
         <tr><td><code>checkDate</code></td><td class="ty">string</td><td class="desc">Pay date, YYYY-MM-DD. Selects the rules in effect on that date.</td></tr>
         <tr><td><code>payFrequency</code></td><td class="ty">enum</td><td class="desc"><code>weekly, biweekly, semimonthly, monthly, quarterly, semiannual, annual, daily</code>. How often this employee is paid.</td></tr>
-        <tr><td><code>earnings[]</code></td><td class="ty">array</td><td class="desc"><code>{ code, category, amount }</code>. One entry per earning on the check.</td></tr>
-        <tr><td><code>deductions[]</code></td><td class="ty">array</td><td class="desc"><code>{ code, category, amount }</code>. Pre-tax and post-tax deductions.</td></tr>
-        <tr><td><code>federalW4</code></td><td class="ty">object</td><td class="desc"><code>{ filingStatus, multipleJobs, dependentCredit, otherIncome, deductions, extraWithholding }</code>. The employee’s federal Form W-4.</td></tr>
-        <tr><td><code>ytd</code></td><td class="ty">object</td><td class="desc"><code>{ socialSecurity, medicare, futa }</code>. Year-to-date wages before this check.</td></tr>
-        <tr><td><code>workState</code></td><td class="ty">object</td><td class="desc"><code>{ code, certificate }</code>. Where the work happens, plus that state’s certificate (e.g. workCity). Omit for federal only.</td></tr>
+        <tr><td><code>earnings[]</code></td><td class="ty">array</td><td class="desc"><a href="#earning">Earning</a>: <code>{ code, category, amount }</code>. One entry per earning on the check. At least one is required.</td></tr>
+        <tr><td><code>deductions[]</code></td><td class="ty">array</td><td class="desc"><a href="#deduction">Deduction</a>: <code>{ code, category, amount }</code>. Pre-tax and post-tax deductions. Send <code>[]</code> if there are none.</td></tr>
+        <tr><td><code>federalW4</code></td><td class="ty">object</td><td class="desc"><a href="#federal-w4">FederalW4</a>: <code>{ filingStatus, multipleJobs, dependentCredit, otherIncome, deductions, extraWithholding }</code>. The employee’s federal Form W-4 (2020 or later).</td></tr>
+        <tr><td><code>ytd</code></td><td class="ty">object</td><td class="desc"><a href="#ytd">YearToDate</a>: <code>{ socialSecurity, medicare, futa }</code>. Year-to-date wages before this check.</td></tr>
+        <tr><td><code>workState</code></td><td class="ty">object</td><td class="desc"><a href="#state-withholding">StateWithholding</a>: <code>{ code, certificate }</code>. Where the work happens, plus that state’s certificate (e.g. workCity). Omit for federal only.</td></tr>
         <tr class="group"><td colspan="3" style="color:var(--color-gray)">OPTIONAL</td></tr>
-        <tr><td><code>residenceState</code></td><td class="ty">object</td><td class="desc"><code>{ code, certificate }</code>. Where the employee lives, when it differs from workState.</td></tr>
-        <tr><td><code>employer</code></td><td class="ty">object</td><td class="desc">Employer facts some rules need, such as a state unemployment rate.</td></tr>
-        <tr><td><code>employmentCategory</code></td><td class="ty">enum</td><td class="desc">Which employment-tax rules apply. Defaults to standard.</td></tr>
+        <tr><td><code>residenceState</code></td><td class="ty">object</td><td class="desc"><code>{ code, certificate }</code>. Where the employee lives, when it differs from workState. Leave it out and every residence-based rule (reciprocity, nonresident allocation, resident credits) does not fire.</td></tr>
+        <tr><td><code>residenceStateWithholding</code></td><td class="ty">object</td><td class="desc"><code>{ nexus?, voluntary? }</code>. Whether to withhold the residence state’s tax when there is no reciprocity. Both are business facts only you know. Ignored when reciprocity already governs the period.</td></tr>
+        <tr><td><code>employer</code></td><td class="ty">object</td><td class="desc">Employer facts the engine cannot derive, most importantly your assigned unemployment rate per state, for example <code>{ "stateUnemploymentRate": { "OH": 0.031 } }</code>. Absent, the state’s published new-employer rate is used and noted in that line’s <code>detail</code>.</td></tr>
+        <tr><td><code>employmentCategory</code></td><td class="ty">enum</td><td class="desc"><code>standard, clergy, statutory_employee, household, agricultural, railroad, election_worker</code>. Which employment-tax rules apply. Defaults to <code>standard</code>.</td></tr>
+        <tr><td><code>priorRegularPayment</code></td><td class="ty">object</td><td class="desc"><code>{ taxableWages, stateIncomeTaxWithheld? }</code>. For states that tax a stand-alone bonus by aggregating it with the last regular check. Omit it and the bonus is taxed on its own.</td></tr>
         <tr><td><code>hoursWorked</code></td><td class="ty">number</td><td class="desc">Hours in this pay period, for minimum-wage checks.</td></tr>
         <tr><td><code>roundToWholeDollars</code></td><td class="ty">boolean</td><td class="desc">Round federal withholding to whole dollars. Defaults to false.</td></tr>
       </tbody>
     </table>
     <p style="margin-top:24px;font-weight:700">Success shape</p>
     <pre class="shape">{ result: { checkDate, grossPay, pretaxDeductions, posttaxDeductions, employeeTaxTotal, employerTaxTotal, netPay, taxes: [ { id, name, payer, jurisdiction, taxableWages, amount, detail } ] } }</pre>
+
+    <p style="margin-top:24px;font-weight:700">Example response</p>
+    <p style="color:var(--color-gray);font-size:14px">Real engine output for a $3,000.00 biweekly check dated 2026-08-15 with a $240.00 401(k) deferral, an Ohio work state and an assigned Ohio unemployment rate of 3.1%. Each line also carries a <code>detail</code>, left out here for length.</p>
+    <pre class="shape">{
+  "result": {
+    "checkDate": "2026-08-15",
+    "grossPay": 300000,
+    "pretaxDeductions": 24000,
+    "posttaxDeductions": 0,
+    "taxes": [
+      { "id": "US_FIT",    "name": "Federal Income Tax", "payer": "employee", "jurisdiction": "federal", "taxableWages": 276000, "amount": 26758 },
+      { "id": "US_SS_EE",  "name": "Social Security",    "payer": "employee", "jurisdiction": "federal", "taxableWages": 300000, "amount": 18600 },
+      { "id": "US_MED_EE", "name": "Medicare",           "payer": "employee", "jurisdiction": "federal", "taxableWages": 300000, "amount": 4350 },
+      { "id": "OH_SIT",    "name": "Ohio Income Tax",    "payer": "employee", "jurisdiction": "state",   "taxableWages": 276000, "amount": 6860 }
+      // employer lines: US_SS_ER, US_MED_ER, US_FUTA, OH_SUI_ER
+    ],
+    "employeeTaxTotal": 56568,
+    "employerTaxTotal": 34050,
+    "netPay": 219432
+  }
+}</pre>
+
+    <div class="sec-rule" id="states"></div>
+    <p class="label-mono" style="color:var(--color-gray)">API reference</p>
+    <div class="path-row">
+      <span class="tag tag-cobalt" style="height:32px;padding:0 12px;font-size:13px">GET</span>
+      <span class="path">/v1/states</span>
+    </div>
+    <p>The states and DC this build can compute, read from the rulesets on the server, so the list never claims a jurisdiction the engine cannot calculate. Use it to fill a dropdown or to check a <code>workState.code</code> before you send a paycheck. No key needed.</p>
+    <div class="field-rows">
+      <div><code>year</code><span>The tax year listed. Pass <code>?year=2025</code> to ask for another covered year. An unknown year falls back to the latest.</span></div>
+      <div><code>states</code><span>Array of <code>{ code, name }</code>, sorted by name. <code>code</code> is the two-letter USPS code.</span></div>
+    </div>
+    <pre class="shape">curl <span data-origin>https://your-host</span>/v1/states
+
+{ "year": 2026, "states": [ { "code": "AL", "name": "Alabama" }, { "code": "AK", "name": "Alaska" }, ... ] }</pre>
+
+    <div class="sec-rule" id="me"></div>
+    <p class="label-mono" style="color:var(--color-gray)">API reference</p>
+    <div class="path-row">
+      <span class="tag tag-cobalt" style="height:32px;padding:0 12px;font-size:13px">GET</span>
+      <span class="path">/v1/me</span>
+    </div>
+    <p>What the calling key is: its mode, plan, expiry and call counts. Send the key as a Bearer token. Use it to check a key before a pay run or to show its expiry in your own admin screen. It does not count as a billable call.</p>
+    <table class="fields">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>keyPrefix</code></td><td class="ty">string</td><td class="desc">The non-secret start of the key.</td></tr>
+        <tr><td><code>mode</code></td><td class="ty">enum</td><td class="desc"><code>test</code> or <code>live</code>.</td></tr>
+        <tr><td><code>plan</code></td><td class="ty">string</td><td class="desc">For example <code>evaluation</code>, <code>trial</code> or <code>active</code>.</td></tr>
+        <tr><td><code>createdAt</code> / <code>expiresAt</code></td><td class="ty">string</td><td class="desc">ISO timestamps for this key.</td></tr>
+        <tr><td><code>expired</code></td><td class="ty">boolean</td><td class="desc">Whether <code>expiresAt</code> has passed.</td></tr>
+        <tr><td><code>lastUsedAt</code></td><td class="ty">string | null</td><td class="desc">When the key last made a call.</td></tr>
+        <tr><td><code>totalCalls</code></td><td class="ty">number</td><td class="desc">Lifetime calls on this key.</td></tr>
+        <tr><td><code>callsToday</code></td><td class="ty">number</td><td class="desc">Successful calls in the last 24 hours.</td></tr>
+        <tr><td><code>limits</code></td><td class="ty">object</td><td class="desc"><code>{ requestsPerMinute }</code>.</td></tr>
+      </tbody>
+    </table>
+    <pre class="shape">curl <span data-origin>https://your-host</span>/v1/me -H "Authorization: Bearer sk_test_..."
+
+{ "keyPrefix": "sk_test_a1b2c3", "mode": "test", "plan": "trial",
+  "createdAt": "2026-10-01T12:00:00.000Z", "expiresAt": "2026-10-15T12:00:00.000Z", "expired": false,
+  "lastUsedAt": null, "totalCalls": 0, "callsToday": 0, "limits": { "requestsPerMinute": 120 } }</pre>
+
+    <div class="sec-rule" id="health"></div>
+    <p class="label-mono" style="color:var(--color-gray)">API reference</p>
+    <div class="path-row">
+      <span class="tag tag-cobalt" style="height:32px;padding:0 12px;font-size:13px">GET</span>
+      <span class="path">/v1/health</span>
+    </div>
+    <p>An unauthenticated liveness and readiness probe for a load balancer or uptime monitor. It reports the API version and how many states this build can compute, so a probe also catches a deploy that shipped without its tax data. Returns <code>200</code>, or <code>503</code> with <code>status: "degraded"</code> if the rule data or the account store cannot be read. Also answers at <code>/healthz</code>.</p>
+    <pre class="shape">curl <span data-origin>https://your-host</span>/v1/health
+
+{ "status": "ok", "version": "1.0.0", "states": 51, "store": "ok",
+  "taxYears": [2025, 2026], "time": "2026-10-01T12:00:00.000Z" }</pre>
 
     <div class="sec-rule" id="tax-lines"></div>
     <p class="label-mono" style="color:var(--color-gray)">Tax lines</p>
@@ -157,6 +296,123 @@
       </tbody>
     </table>
     <p style="margin-top:32px"><span class="label-mono" style="color:var(--color-gray)">Next</span> <a class="btn btn-text" href="#tax-lines" style="margin-left:12px;font-size:18px">Tax lines</a></p>
+
+    <div class="sec-rule" id="earning"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Objects</p>
+    <h2>Earning</h2>
+    <p>One line of pay. Amounts are integer cents.</p>
+    <table class="fields">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>code</code></td><td class="ty">string</td><td class="desc">Your own label, for example <code>REG</code>, <code>OT</code> or <code>BONUS</code>. Passed through untouched.</td></tr>
+        <tr><td><code>category</code></td><td class="ty">enum</td><td class="desc">Drives how the line is taxed: <code>regular, supplemental, imputed, reimbursement, housing_allowance</code>. <code>supplemental</code> may use a flat supplemental rate. <code>imputed</code> is taxable but not paid in cash. <code>reimbursement</code> is paid in cash but not taxable. <code>housing_allowance</code> is only excluded when <code>employmentCategory</code> is <code>clergy</code>.</td></tr>
+        <tr><td><code>amount</code></td><td class="ty">integer</td><td class="desc">The amount of this line, in cents.</td></tr>
+      </tbody>
+    </table>
+    <pre class="shape">[ { "code": "REG",   "category": "regular",      "amount": 300000 },
+  { "code": "BONUS", "category": "supplemental", "amount": 50000 } ]</pre>
+
+    <div class="sec-rule" id="deduction"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Objects</p>
+    <h2>Deduction</h2>
+    <p>One deduction from pay. The category decides which taxes it reduces: the same deferred dollar can be exempt from one tax and fully taxable under another.</p>
+    <table class="fields">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>code</code></td><td class="ty">string</td><td class="desc">Your own label, for example <code>401K</code> or <code>MED</code>.</td></tr>
+        <tr><td><code>category</code></td><td class="ty">enum | null</td><td class="desc"><code>null</code> means post-tax: it reduces net pay and changes no taxable base. Otherwise one of <code>section125, hsa, fsa, dependent_care, deferral_401k, deferral_403b, deferral_457, deferral_simple, commuter</code>.</td></tr>
+        <tr><td><code>amount</code></td><td class="ty">integer</td><td class="desc">The amount withheld this period, in cents.</td></tr>
+      </tbody>
+    </table>
+    <pre class="shape">[ { "code": "401K", "category": "deferral_401k", "amount": 24000 },
+  { "code": "MED",  "category": "section125",    "amount": 12500 },
+  { "code": "GARN", "category": null,            "amount": 10000 } ]</pre>
+
+    <div class="sec-rule" id="federal-w4"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Objects</p>
+    <h2>FederalW4</h2>
+    <p>The employee’s Form W-4 (2020 revision or later). Dollar fields are in cents.</p>
+    <table class="fields">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>filingStatus</code></td><td class="ty">enum</td><td class="desc"><code>single, married_joint, married_separate, head_of_household</code>.</td></tr>
+        <tr><td><code>multipleJobs</code></td><td class="ty">boolean</td><td class="desc">Step 2 checkbox: two jobs, or a spouse who works.</td></tr>
+        <tr><td><code>dependentCredit</code></td><td class="ty">integer</td><td class="desc">Step 3: the annual credit amount as entered.</td></tr>
+        <tr><td><code>otherIncome</code></td><td class="ty">integer</td><td class="desc">Step 4(a): other annual income.</td></tr>
+        <tr><td><code>deductions</code></td><td class="ty">integer</td><td class="desc">Step 4(b): annual deductions beyond the standard deduction.</td></tr>
+        <tr><td><code>extraWithholding</code></td><td class="ty">integer</td><td class="desc">Step 4(c): extra withholding per pay period.</td></tr>
+        <tr><td><code>exempt</code></td><td class="ty">boolean</td><td class="desc">Optional. The employee claimed exempt from federal withholding.</td></tr>
+        <tr><td><code>nonresidentAlien</code></td><td class="ty">boolean</td><td class="desc">Optional. Applies the Publication 15-T nonresident-alien adjustment.</td></tr>
+        <tr><td><code>voluntaryWithholdingAgreement</code></td><td class="ty">boolean</td><td class="desc">Optional. The one way a minister’s pay carries federal withholding. Ignored for other categories.</td></tr>
+      </tbody>
+    </table>
+    <pre class="shape">{ "filingStatus": "married_joint", "multipleJobs": true, "dependentCredit": 400000,
+  "otherIncome": 0, "deductions": 0, "extraWithholding": 2500 }</pre>
+
+    <div class="sec-rule" id="ytd"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Objects</p>
+    <h2>YearToDate</h2>
+    <p>Year-to-date wages in cents, needed for every wage-capped tax. For a new hire or the first check of a year, send zeros. The engine never assumes prior wages you did not state.</p>
+    <table class="fields">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>socialSecurity</code></td><td class="ty">integer</td><td class="desc">YTD wages subject to Social Security. Caps that line.</td></tr>
+        <tr><td><code>medicare</code></td><td class="ty">integer</td><td class="desc">YTD wages subject to Medicare. Also drives Additional Medicare.</td></tr>
+        <tr><td><code>futa</code></td><td class="ty">integer</td><td class="desc">YTD wages subject to FUTA.</td></tr>
+        <tr><td><code>supplemental</code></td><td class="ty">integer</td><td class="desc">Optional. YTD supplemental wages. Drives the mandatory 37% federal rate past $1,000,000.</td></tr>
+        <tr><td><code>stateUnemployment</code></td><td class="ty">map</td><td class="desc">Optional. YTD wages per state unemployment tax, keyed by state code.</td></tr>
+        <tr><td><code>statePaidLeave</code>, <code>stateDisabilityEmployee</code>, <code>stateLongTermCare</code></td><td class="ty">map</td><td class="desc">Optional. Per-state YTD toward paid-leave, disability and long-term-care wage bases.</td></tr>
+      </tbody>
+    </table>
+    <pre class="shape">{ "socialSecurity": 7800000, "medicare": 7800000, "futa": 700000, "stateUnemployment": { "OH": 900000 } }</pre>
+
+    <div class="sec-rule" id="state-withholding"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Objects</p>
+    <h2>StateWithholding</h2>
+    <p>Used for <code>workState</code> and <code>residenceState</code>.</p>
+    <table class="fields">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>code</code></td><td class="ty">string</td><td class="desc">Two-letter state code, for example <code>PA</code>. Check it against <a href="#states">GET /v1/states</a>.</td></tr>
+        <tr><td><code>certificate</code></td><td class="ty">object</td><td class="desc">Optional. The state’s own withholding-certificate fields (its equivalent of a W-4), such as allowances, exemptions or <code>workCity</code>. The shape varies by state. Omit it for the state’s default treatment.</td></tr>
+      </tbody>
+    </table>
+    <pre class="shape">{ "workState": { "code": "NJ" }, "residenceState": { "code": "PA" } }
+
+{ "code": "GA", "certificate": { "filingStatus": "married_joint", "allowances": 2 } }</pre>
+
+    <div class="sec-rule" id="result"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Objects</p>
+    <h2>PaycheckResult</h2>
+    <p>Returned under <code>result</code> on a <code>200</code>. Amounts are integer cents.</p>
+    <table class="fields">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>checkDate</code></td><td class="ty">string</td><td class="desc">Echoes the input check date.</td></tr>
+        <tr><td><code>grossPay</code></td><td class="ty">integer</td><td class="desc">Cash earnings. Excludes imputed income.</td></tr>
+        <tr><td><code>pretaxDeductions</code></td><td class="ty">integer</td><td class="desc">Sum of all pre-tax deductions.</td></tr>
+        <tr><td><code>posttaxDeductions</code></td><td class="ty">integer</td><td class="desc">Sum of all post-tax deductions.</td></tr>
+        <tr><td><code>taxes</code></td><td class="ty">array</td><td class="desc">One <a href="#tax-lines">tax line</a> per jurisdiction and tax, employee and employer side.</td></tr>
+        <tr><td><code>employeeTaxTotal</code></td><td class="ty">integer</td><td class="desc">Sum of all taxes withheld from the employee.</td></tr>
+        <tr><td><code>employerTaxTotal</code></td><td class="ty">integer</td><td class="desc">Sum of all employer-borne taxes. Not withheld from the employee.</td></tr>
+        <tr><td><code>netPay</code></td><td class="ty">integer</td><td class="desc">Take-home: gross, less pre-tax deductions, less employee taxes, less post-tax deductions.</td></tr>
+        <tr><td><code>notices</code></td><td class="ty">array</td><td class="desc">Optional. Present only when a line rests on something weaker than a confirmed primary source, or the engine does not model something the input asked for. Each is <code>{ taxId, tier, note }</code> with <code>tier</code> one of <code>secondary_source, inferred, not_modelled, conflicting_sources</code>. The amounts are still returned. Read the notice before you pay.</td></tr>
+      </tbody>
+    </table>
+    <pre class="shape">{ "taxId": "NH_SUI_ER", "tier": "inferred",
+  "note": "New Hampshire's published new-employer rate is confirmed only through 2026-09-30; the state has not yet published the rate for this check date, so the last confirmed 1.70% was used. ..." }   // one entry of notices[]</pre>
+
+    <div class="sec-rule" id="pricing"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Account</p>
+    <h2>Pricing</h2>
+    <p>Usage-based, never per employee per month. Every jurisdiction is included for everyone and you pay for the calculations you make: a flat <b data-rate>$0.09</b> per call at any volume.</p>
+    <div class="kv"><code>One call</code><span>One <code>POST /v1/paycheck</code> that returns <code>200</code> is one billable call. Authentication failures, validation errors and rate-limited requests are not billed.</span></div>
+    <div class="kv"><code>Rooftop lookups</code><span>When a local tax turns on a precise address, the address resolution is <b data-rooftop>$0.09</b> per address, once per address and not once per pay run.</span></div>
+    <div class="kv"><code>Free trial</code><span>The first <span data-trial>14</span> days are free and unmetered. Trial keys (<code>sk_test_</code>) run the full engine.</span></div>
+    <p>To size a bill before you sign up, the public estimator takes a head count and a pay frequency. No key needed.</p>
+    <pre class="shape">curl <span data-origin>https://your-host</span>/api/estimate \
+  -H "Content-Type: application/json" \
+  -d '{ "email": "you@company.com", "employees": 8000, "payFrequency": "biweekly" }'</pre>
 
     <div class="sec-rule" id="billing"></div>
     <p class="label-mono" style="color:var(--color-gray)">Account</p>
@@ -236,11 +492,17 @@ details: [ { path, message } ]</pre>
   var cfg = window.OMNIA || {};
   document.getElementById('rpm').textContent = String(cfg.rateLimitPerMin || 120);
   if (cfg.tiers && cfg.tiers.length) {
-    document.getElementById('tierNote').textContent = 'Rate card from pricing.ts, per call: ' + cfg.tiers.map(function (t) {
-      var cap = t.upTo == null ? 'and above' : ('up to ' + Number(t.upTo).toLocaleString() + ' calls/year');
-      return OmniaPricing.formatRate(t.rate) + ' ' + cap;
-    }).join(' · ') + '. Rooftop address resolution is ' + OmniaPricing.formatMoney(cfg.rooftopRate) + ' each, billed separately.';
+    var rooftop = ' Rooftop address resolution is ' + OmniaPricing.formatRate(cfg.rooftopRate) + ' each, billed separately.';
+    document.getElementById('tierNote').textContent = cfg.tiers.length === 1
+      ? 'Every call is ' + OmniaPricing.formatRate(cfg.tiers[0].rate) + ', at any volume.' + rooftop
+      : 'Rate card, per call: ' + cfg.tiers.map(function (t) {
+          var cap = t.upTo == null ? 'and above' : ('up to ' + Number(t.upTo).toLocaleString() + ' calls/year');
+          return OmniaPricing.formatRate(t.rate) + ' ' + cap;
+        }).join(' · ') + '.' + rooftop;
+    document.querySelectorAll('[data-rooftop]').forEach(function (el) { el.textContent = OmniaPricing.formatRate(cfg.rooftopRate); });
   }
+  document.querySelectorAll('[data-origin]').forEach(function (el) { el.textContent = location.origin; });
+  document.querySelectorAll('.rpm-copy').forEach(function (el) { el.textContent = String(cfg.rateLimitPerMin || 120); });
 
   var key = Omnia.apiKey();
   if (key && key.key) {

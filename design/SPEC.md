@@ -8,8 +8,8 @@ Every px value below comes from the generator. Where the design doesn't decide s
 - Tokens are written `--text-heading-lg` (a type style, i.e. its size/lh/weight/ls set), `--color-cobalt`, `--space-3`, and so on.
 - Copy is verbatim in "quotes". `’` and `—` are real typographic characters, so keep them.
 - Data labels: **[EXAMPLE]** = placeholder/sample data that must come from real state or be marked as illustrative. **[REAL]** = a real product value.
-  - [REAL]: $0.125 per paycheck; 14-day free trial; "Due today $0.00"; POST /v1/paycheck; the `{ result: {...} }` success shape and the `{ error, code, requestId }` error shape; the error codes and response headers in B06; the "biweekly = 26 paychecks a year" assumption.
-  - [EXAMPLE]: every amount in the sandbox paystub (the design labels them EXAMPLE DATA); `you@company.com`; "Acme Manufacturing Co." / "Acme Manufacturing"; `481 902`; `sk_test_…4f2a` and every other key string; `api.<your-domain>` / `https://api.<your-domain>`; "Oct 12, 2026" (= Sep 28, 2026 + 14); "20 employees" / "$5.42"; "0:42"; the request bodies (2026-08-15, OH / Columbus, 100000, and so on); every B08 error message except "Your card number is incomplete." and "That code didn’t match. 2 tries left.".
+  - [REAL]: $0.09 per paycheck; 14-day free trial; "Due today $0.00"; POST /v1/paycheck; the `{ result: {...} }` success shape and the `{ error, code, requestId }` error shape; the error codes and response headers in B06; the "biweekly = 26 paychecks a year" assumption.
+  - [EXAMPLE]: every amount in the sandbox paystub (the design labels them EXAMPLE DATA); `you@company.com`; "Acme Manufacturing Co." / "Acme Manufacturing"; `481 902`; `sk_test_…4f2a` and every other key string; `api.<your-domain>` / `https://api.<your-domain>`; "Oct 12, 2026" (= Sep 28, 2026 + 14); "20 employees" / "$3.90"; "0:42"; the request bodies (2026-08-15, OH / Columbus, 100000, and so on); every B08 error message except "Your card number is incomplete." and "That code didn’t match. 2 tries left.".
 - No text relies on manual line breaks. Multi-line text is a block with a **max-width**, which is given per element. Where a break has to land in a particular place, the max-width was chosen to produce it, or a non-breaking space is used (noted).
 - Text blocks use the tokens' line-heights. The SVG positions are baselines, so rebuild the vertical rhythm from the gaps listed here, not from the SVG `y` values.
 
@@ -21,7 +21,7 @@ Every px value below comes from the generator. Where the design doesn't decide s
 `4 · 8 · 16 · 24 · 32 · 40 · 48 · 56 · 64 · 72 · 80 · 96 · 120` (`--space-0-5` … `--space-15`). 4 is the only half step. It's used for icon/label nudges, the gap between alert rows, and the console's label-to-field gap.
 
 ### Type scale
-Sizes: `10 11 12 13 14 16 18 20 24 28 32 40 48 64 96 112 136`, plus three display figures: `250` (step numeral), `300` ("50"), and `380` ("$0.125"). Every v1 size was snapped to this list (for example 15→16, 17/19→18, 22→24, 26→28, 44/52→48, 60/72→64, 104→96, 116→112, 132→136). The full style table is in `tokens.css`. Mono labels are UPPERCASE with tracking.
+Sizes: `10 11 12 13 14 16 18 20 24 28 32 40 48 64 96 112 136`, plus three display figures: `250` (step numeral), `300` ("50"), and `380` ("$0.09"). Every v1 size was snapped to this list (for example 15→16, 17/19→18, 22→24, 26→28, 44/52→48, 60/72→64, 104→96, 116→112, 132→136). The full style table is in `tokens.css`. Mono labels are UPPERCASE with tracking.
 
 ### Colour use
 - Cobalt `#1F3BFF`: primary actions, the single accent, full-bleed bands (hero Fig. 1, CTA, and the onboarding step panel).
@@ -91,7 +91,7 @@ All components are sharp-cornered and use tokens only. "Line box 16" means a 13p
 - H1 `--text-display-lg` (112/0.94/700/−5px): "Accurate payroll tax, priced for growing payroll teams." Max-width 10 cols (1089px), which gives 3 lines. x = col 1 − 6px (optical).
 - Subcopy `--text-lead` grey, max-width 5 cols (533): "One API call returns every tax line on a paycheck — federal, state, and local. Pay per paycheck, with no contract, no minimums, and no sales call."
 - Actions at col 7, aligned with the subcopy's first line: Button lg primary "Get a demo" + arrow → **/signup**; 8 gap; Button lg secondary "Start building" (target **OPEN**); 24 gap; text link "See pricing" (→ #pricing, suggested).
-- Below the actions, 36 down: a 2px ink rule over cols 7–12. 28 below that, mono 13: "$0.125" (700 cobalt) + " per paycheck · billed only for calls you make".
+- Below the actions, 36 down: a 2px ink rule over cols 7–12. 28 below that, mono 13: "$0.09" (700 cobalt) + " per paycheck · billed only for calls you make".
 
 **Fig. 1: paycheck split** (full-bleed cobalt band, 492h)
 - Header row at 52: mono eyebrow white "FIG. 1" (col 1) and "ONE PAYCHECK, ONE CALL, EVERY TAX LINE" (col 2). Right: solid white tag, cobalt text, "EXAMPLE · AMOUNTS OMITTED".
@@ -105,7 +105,7 @@ All components are sharp-cornered and use tokens only. "Line box 16" means a 13p
 
 **01 Price** (SectionIndex "01" · "PRICE" · right "ONE LINE ITEM")
 - Statement: "No quote request. No pricing call." then, on the next line in grey, "Here it is." (one `<h2>` with a muted `<span>` set to `display:block`).
-- Figure "$0.125" at 380/700 cobalt, ls −18, x = margin − 18 (optical).
+- Figure "$0.09" at 380/700 cobalt, ls −18, x = margin − 18 (optical).
 - Below: "per paycheck" (24/700 ink) + "  —  one calculation, one charge." (grey), ls −0.5.
 - Terms: 3×2 grid, each item span 4, 3px ink top rule. Index mono 11 cobalt "01"… + label 14 grey (36 after the index); value `--text-heading-md` (40/700, ls −1.5). Rows are 132 apart. Items: Contract / None · Minimums / None · Setup fee / None · Per-state or per-jurisdiction tiers / None · Sales call / Not needed · Billed for / Only calls you make.
 
@@ -142,14 +142,14 @@ All components are sharp-cornered and use tokens only. "Line box 16" means a 13p
 - Statement "Plain answers."
 - Left, cols 1–3: "Everything else is in the docs." 16 grey + text link "Read the docs" → /docs.
 - FAQ over cols 4–12: 3px ink top rule; "Q1"… mono 13 cobalt; question 28/700 ls −0.6 at col 5; answer 18 grey lh 1.5, max-width 7 cols; 40 below each answer, then a hairline. (A static list; the design doesn't show an accordion.)
-  - "How much does it cost?": "$0.125 per paycheck calculated. No contract, no minimums, no setup fee, and no per-state or per-jurisdiction tiers."
+  - "How much does it cost?": "$0.09 per paycheck calculated. No contract, no minimums, no setup fee, and no per-state or per-jurisdiction tiers."
   - "What does it cover?": "Federal, all 50 states and DC, and local taxes down to the city, county, school district, and transit district, including Ohio, Pennsylvania, Michigan, Indiana, Kentucky, Alabama, New York City, Yonkers, and Oregon transit and Metro."
   - "What if a jurisdiction isn’t covered?": "You get an explicit error or a “not modelled” line in the response. Never a silent $0."
   - "Do I need to talk to sales?": "No. Read the docs and start building."
 
 **CTA** (full-bleed cobalt, 440h; 40-tall `#576CFF` column ticks along the top)
 - Headline `--text-display-lg` white, lh 0.92, max-width 8 cols: "Run your first paycheck today."
-- Right, col 9: a 3px white rule, mono label "PER PAYCHECK", "$0.125" 96/700 white ls −4, "No contract. No minimums. No sales call." 16 `#C7CEFF`, then Button lg white "Get a demo" + arrow (→ /signup) + Button lg outline-white "Start building".
+- Right, col 9: a 3px white rule, mono label "PER PAYCHECK", "$0.09" 96/700 white ls −4, "No contract. No minimums. No sales call." 16 `#C7CEFF`, then Button lg white "Get a demo" + arrow (→ /signup) + Button lg outline-white "Start building".
 
 **Footer** (120h, white): Logo s = 20; mono 12 grey "Payroll tax calculation API" at col 4; right-aligned links "Contact" "Coverage" "Pricing" "Docs", 16, 32 apart.
 
@@ -178,7 +178,7 @@ All components are sharp-cornered and use tokens only. "Line box 16" means a 13p
 - Button lg primary full-width "Create account" + arrow → **/signup/verify** (sends the verification code). Disabled until the email and password are valid (state per B08). Loading while the request runs.
 - "Already have an account?" 16 grey + 8 + text link "Sign in" (→ sign-in route, **OPEN**). 32 above it.
 - A hairline 24 below that, then 24 later the fine print 13 grey: "By continuing you agree to the Terms and Privacy Policy." "Terms" and "Privacy Policy" are links with a 1px grey underline.
-- Step panel "WHAT YOU GET" / "PRICE SHEET": "$0.125" 112/700 white ls −5; "per paycheck" 20/700; rows Contract None · Minimums None · Setup fee None · Free trial "First 14 days"; a 3px white rule; "DUE TODAY" mono label; "Nothing is charged during the trial." 14 `#C7CEFF`; "$0.00" 64/700 white, right-aligned [REAL].
+- Step panel "WHAT YOU GET" / "PRICE SHEET": "$0.09" 112/700 white ls −5; "per paycheck" 20/700; rows Contract None · Minimums None · Setup fee None · Free trial "First 14 days"; a 3px white rule; "DUE TODAY" mono label; "Nothing is charged during the trial." 14 `#C7CEFF`; "$0.00" 64/700 white, right-aligned [REAL].
 - Errors: invalid email → Input error state. Use the existing endpoint's error messages (the B08 message "Enter a valid work email." is a placeholder).
 
 ## B02 Verify email (`/signup/verify`)
@@ -201,8 +201,8 @@ All components are sharp-cornered and use tokens only. "Line box 16" means a 13p
   - Panel head "LIVE ESTIMATE" + solid white tag with cobalt text "ASSUMES BIWEEKLY".
   - "Estimated monthly cost" 18/700 white.
   - "≈" 64/400 + value 96/700 white ls −5 + "/month" 24/700 `#C7CEFF`.
-  - 1px `#576CFF` rule, then the derivation mono 18/700 white "{n} × 26 × $0.125 ÷ 12" + mono 10 `#C7CEFF` "EMPLOYEES × PAYCHECKS A YEAR × PRICE ÷ MONTHS".
-  - **Formula:** `estimate = employees × 26 × $0.125 ÷ 12`, rounded to cents. Integer-safe: `cents = Math.round(employees * 325 / 12)`. Example: 20 → $5.42.
+  - 1px `#576CFF` rule, then the derivation mono 18/700 white "{n} × 26 × $0.09 ÷ 12" + mono 10 `#C7CEFF` "EMPLOYEES × PAYCHECKS A YEAR × PRICE ÷ MONTHS".
+  - **Formula:** `estimate = employees × 26 × $0.09 ÷ 12`, rounded to cents. Integer-safe: `cents = Math.round(employees * 234 / 12)`. Example: 20 → $3.90.
   - Assumption note: white box, 8px ink left bar, 24×24 cobalt "i" square, text 18/700 ink, lh 24, max-width 320 (gives one clause per line): "We don’t know how often you pay. This estimate assumes biweekly pay (26 paychecks a year)."
   - Secondary note 14 `#C7CEFF`, lh 1.5, max-width 469: "It counts one calculation per paycheck. Bonus runs and recalculations add calls. Failed calls aren’t billed."
 
@@ -212,7 +212,7 @@ All components are sharp-cornered and use tokens only. "Line box 16" means a 13p
 - TrialBanner (ink, 48h, 8px cobalt left bar, 24 padding): "You won’t be charged for the first 14 days." 18/700 white.
 - **Stripe Payment Element** (card + PayPal), 24 below the banner, full form width (560). Stripe renders it. We only provide the container and the Appearance variables (below). The frame shows what it should look like: tabs Card (selected: ink fill, white, card icon) | PayPal (white, hairline border, grey), 48h each, then card number / expiry + CVC / country + ZIP. Labels are 13 grey; fields are 48h white with a 1px hairline and radius 0; field pitch 80 with 16 between the two columns. Placeholders "1234 1234 1234 1234", "MM / YY", "CVC", "United States", "12345" are Stripe's own. v2 removed the separate "OR / Continue with PayPal" button because the Element's PayPal tab already covers it.
 - Secure note, 32 below the Element: lock icon + "Payments are processed securely by Stripe. We never see your full card number." 13 grey.
-- Summary panel: head "SUMMARY" / "TRIAL · 14 DAYS"; rows Plan "Pay per paycheck" · Rate "$0.125"; "Estimated" "≈ $5.42/mo" (from B03's formula and count) with "for 20 employees (biweekly)" 13 `#C7CEFF` under it [EXAMPLE count]; a 3px white rule; "Due today" 24/700 white + "$0.00" 64/700 right [REAL]; "First charge after your 14-day trial" 13 `#C7CEFF`; date mono 11/700 white "OCT 12, 2026" = **signup date + 14 days** [EXAMPLE date], formatted `MMM D, YYYY` uppercase.
+- Summary panel: head "SUMMARY" / "TRIAL · 14 DAYS"; rows Plan "Pay per paycheck" · Rate "$0.09"; "Estimated" "≈ $3.90/mo" (from B03's formula and count) with "for 20 employees (biweekly)" 13 `#C7CEFF` under it [EXAMPLE count]; a 3px white rule; "Due today" 24/700 white + "$0.00" 64/700 right [REAL]; "First charge after your 14-day trial" 13 `#C7CEFF`; date mono 11/700 white "OCT 12, 2026" = **signup date + 14 days** [EXAMPLE date], formatted `MMM D, YYYY` uppercase.
 - Button lg **white** full panel width (469) "Start 14-day trial" + arrow, at y 704 in the panel. It confirms the Payment Element (`stripe.confirmSetup` or whatever the existing backend flow uses) and on success → **/signup/key**. Loading state while confirming. Card errors appear inside the Element (e.g. "Your card number is incomplete.", Stripe's copy), as in B08.
 
 ### Suggested Stripe Appearance (mapped to tokens)
@@ -281,7 +281,7 @@ The padding and gridRowSpacing values are derived from the 48px field and 80px p
     1. "Get your key": "Your test key starts with sk_test_ and was shown once at sign-up. You can create a new one from your account at any time."
     2. "Make your first call": "POST a paycheck to /v1/paycheck. The example on the right works as-is with your test key."
     3. "Read the tax lines": "Each entry in result.taxes[] names the tax, who pays it, its jurisdiction, the taxable wages and the amount, with a detail explaining the math."
-  - **Authentication**: "Send your secret key as a Bearer token in the Authorization header of every request. Keep keys on your server, never in a browser or mobile app." Code line (48h panel, 6px cobalt bar) "Authorization: Bearer sk_test_...". Rows (48 each, hairline): `sk_test_` "Test key. Same API, same results. For building and your trial." · `sk_live_` "Live key. Metered and billed at $0.125 per paycheck."
+  - **Authentication**: "Send your secret key as a Bearer token in the Authorization header of every request. Keep keys on your server, never in a browser or mobile app." Code line (48h panel, 6px cobalt bar) "Authorization: Bearer sk_test_...". Rows (48 each, hairline): `sk_test_` "Test key. Same API, same results. For building and your trial." · `sk_live_` "Live key. Metered and billed at $0.09 per paycheck."
   - **POST /v1/paycheck**: label "API REFERENCE"; solid cobalt "POST" tag 64×32 + mono 28/700 "/v1/paycheck"; "Calculate one paycheck and get back every tax line that applies." Ink banner 52h: "All money in integer cents." (white 700) + "   100000 = $1,000.00" (mono `#9A9CA5`). Field table: FIELD (x+0) / TYPE (x+182) / DESCRIPTION (x+262). Group bands CORE FIELDS / OPTIONAL. Rows, verbatim from the generator:
     - CORE: checkDate · string · "Pay date, YYYY-MM-DD. Selects the rules in effect on that date." | payFrequency · enum · `weekly, biweekly, semimonthly, monthly, quarterly, semiannual, annual, daily` · "How often this employee is paid." | earnings[] · array · `{ code, category, amount }` · "One entry per earning on the check." | deductions[] · array · `{ code, category, amount }` · "Pre-tax and post-tax deductions." | federalW4 · object · `{ filingStatus, multipleJobs, dependentCredit, otherIncome, deductions, extraWithholding }` · "The employee’s federal Form W-4." | ytd · object · `{ socialSecurity, medicare, futa }` · "Year-to-date wages before this check." | workState · object · `{ code, certificate }` · "Where the work happens, plus that state’s certificate (e.g. workCity). Omit for federal only."
     - OPTIONAL: residenceState · object · `{ code, certificate }` · "Where the employee lives, when it differs from workState." | employer · object · "Employer facts some rules need, such as a state unemployment rate." | employmentCategory · enum · "Which employment-tax rules apply. Defaults to standard." | hoursWorked · number · "Hours in this pay period, for minimum-wage checks." | roundToWholeDollars · boolean · "Round federal withholding to whole dollars. Defaults to false."

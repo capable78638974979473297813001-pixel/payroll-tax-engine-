@@ -370,7 +370,7 @@ server.listen(PORT, () => {
   console.log(`  Usage:       GET  http://localhost:${PORT}/v1/usage`);
   console.log(`  Save a card: POST http://localhost:${PORT}/v1/billing/setup  -> returns a Stripe Checkout URL`);
   const billingMode = meteringConfigured()
-    ? 'METERED per-call (Stripe usage billing — every call reports $0.15 to Stripe, invoiced monthly)'
+    ? 'METERED per-call (Stripe usage billing — every call reports $0.09 to Stripe, invoiced monthly)'
     : billingConfigured()
       ? 'Stripe manual (STRIPE_SECRET_KEY set; add STRIPE_PRICE_ID + STRIPE_METER_EVENT for per-call metering)'
       : 'ledger-only (set STRIPE_SECRET_KEY + STRIPE_PRICE_ID + STRIPE_METER_EVENT to bill per call)';

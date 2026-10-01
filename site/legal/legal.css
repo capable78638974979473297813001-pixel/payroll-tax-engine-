@@ -1,12 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap');
-/* Shared styles for Omnia's legal pages. Matches the site palette. */
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap');
+/* Shared styles for Omnia's legal pages. Same tokens as /tokens.css (design B). */
 :root {
-  --paper: #FBFAF5; --paper-2: #F4F2EA; --card: #FFFFFF;
-  --ink: #14140F; --ink-2: #3A392F; --ink-3: #6B695C; --ink-4: #93917F;
-  --rule: #E4E1D4; --rule-2: #D5D2C4; --stamp: #B23A24; --stamp-soft: #F7E7E2;
-  --verify: #2F5D3A; --verify-soft: #E4EDE3;
-  --sans: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --mono: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --paper: #FFFFFF; --paper-2: #F3F4F7; --card: #FFFFFF;
+  --ink: #0A0A0A; --ink-2: #26272B; --ink-3: #6E7079; --ink-4: #6E7079;
+  --rule: #E1E3E8; --rule-2: #E1E3E8; --stamp: #1F3BFF; --stamp-soft: #EEF0FF;
+  --verify: #1F3BFF; --verify-soft: #EEF0FF;
+  --sans: "Inter Tight", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -21,13 +21,13 @@ a:hover { text-decoration: underline; }
 .topbar {
   position: sticky; top: 0; z-index: 20; height: 58px;
   display: flex; align-items: center; gap: 16px; padding: 0 24px;
-  background: rgba(251,250,245,0.92); backdrop-filter: saturate(140%) blur(8px);
-  border-bottom: 1px solid var(--rule);
+  background: rgba(255,255,255,0.94); backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid var(--ink);
 }
 .brand { display: flex; align-items: center; gap: 9px; text-decoration: none; }
 .brand img { height: 44px; width: auto; display: block; }
 .brand .word { font-family: var(--mono); font-size: 18px; font-weight: 600; letter-spacing: -0.06em; color: var(--ink); }
-.brand .tag { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-4); border: 1px solid var(--rule-2); padding: 2px 5px; border-radius: 3px; }
+.brand .tag { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-4); border: 1px solid var(--rule-2); padding: 2px 5px; border-radius: 0; }
 .topbar .spacer { flex: 1; }
 .topbar nav a { font-size: 13.5px; color: var(--ink-2); text-decoration: none; margin-left: 18px; }
 .topbar nav a:hover { color: var(--stamp); }
@@ -42,11 +42,11 @@ h1 { font-size: 32px; letter-spacing: -0.02em; color: var(--ink); margin: 0 0 10
 .notice {
   margin: 22px 0; padding: 14px 16px; border: 1px solid var(--rule-2);
   border-left: 3px solid var(--stamp); background: var(--stamp-soft);
-  border-radius: 7px; font-size: 14px;
+  border-radius: 0; font-size: 14px;
 }
 .notice.plain { border-left-color: var(--ink-4); background: var(--card); }
 
-.toc { margin: 26px 0 10px; padding: 16px 18px; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 8px; }
+.toc { margin: 26px 0 10px; padding: 16px 18px; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 0; }
 .toc h2 { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-4); margin: 0 0 10px; }
 .toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 32px; font-size: 14px; }
 .toc li { margin: 3px 0; break-inside: avoid; }
