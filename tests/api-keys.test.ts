@@ -35,7 +35,7 @@ describe('API keys + metering (api/keys.ts)', () => {
     assert.equal(live.record.mode, 'live');
     assert.ok(verifyApiKey(live.key));
     assert.equal(record.plan, 'pro');
-    assert.equal(record.pricePerCallCents, 15); // pro plan default ($0.15/call)
+    assert.equal(record.pricePerCallCents, 9); // pro plan default ($0.09/call)
     assert.equal(record.calls, 0);
     assert.equal(record.balanceDueCents, 0);
     assert.ok(key.startsWith(record.prefix)); // prefix is a non-secret slice of the key

@@ -188,7 +188,7 @@ export interface SubscriptionRecord {
   // ---- Stripe metered billing (set once the customer subscribes) ----
   /** Stripe customer id; usage is metered against this. */
   stripeCustomerId?: string | null;
-  /** Stripe subscription id for the metered graduated price. */
+  /** Stripe subscription id for the metered per-call price. */
   stripeSubscriptionId?: string | null;
   /**
    * Set true when Stripe reports a failed invoice (payment_failed /

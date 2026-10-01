@@ -269,6 +269,19 @@ export interface CountyEntry {
   countyCode: string;
   rate: number;
   changedSinceOct2025?: boolean;
+  /**
+   * Changes part-way through the file's year: from `on` (a check date,
+   * inclusive) the county's rate is `rate`. Indiana's Departmental Notice
+   * is reissued each 1 Jan and 1 Oct. The latest change on or before the
+   * check date wins.
+   */
+  rateChanges?: { on: string; rate: number }[];
+}
+
+function countyEntryOn(raw: CountyEntry, checkDate: string): CountyEntry {
+  const due = (raw.rateChanges ?? []).filter((c) => c.on <= checkDate).sort((a, b) => a.on.localeCompare(b.on));
+  const last = due[due.length - 1];
+  return last ? { ...raw, rate: last.rate } : raw;
 }
 
 interface CountyRegistryFile {
@@ -300,9 +313,10 @@ export function countyRuleset(
   const file = loadJson<CountyRegistryFile>(
     join('local', `${stateCode.toUpperCase()}-counties-${yearOf(checkDate)}.json`),
   );
-  return file.counties.find(
+  const found = file.counties.find(
     (c) => c.name.toLowerCase() === countyName.toLowerCase(),
   );
+  return found && countyEntryOn(found, checkDate);
 }
 
 /**
@@ -314,7 +328,7 @@ export function allCounties(stateCode: string, checkDate: string): CountyEntry[]
   const file = loadJson<CountyRegistryFile>(
     join('local', `${stateCode.toUpperCase()}-counties-${yearOf(checkDate)}.json`),
   );
-  return file.counties;
+  return file.counties.map((c) => countyEntryOn(c, checkDate));
 }
 
 export interface PALocalEntry {

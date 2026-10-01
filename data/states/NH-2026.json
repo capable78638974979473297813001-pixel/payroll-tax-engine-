@@ -49,7 +49,8 @@
   },
   "knownGaps": [
     "RESOLVED 2026-09-28: revenue.nh.gov and nhes.nh.gov were reached through a remote fetcher (this sandbox is still blocked), and both the I&D repeal and the UI new-employer rate/wage base are now primary-sourced (see sources[0] and [1]).",
-    "The 2026-Q4 Fund Balance Reduction (check dates from 2026-10-01) is decided by NHES from the Q3 trust-fund balance and was not yet published on 2026-09-29. Until it is, those check dates use 1.7% with an 'inferred' notice; update newEmployerRateConfirmedThrough when NHES posts Q4."
+    "The 2026-Q4 Fund Balance Reduction (check dates from 2026-10-01) is decided by NHES from the Q3 trust-fund balance and was not yet published on 2026-09-29. Until it is, those check dates use 1.7% with an 'inferred' notice; update newEmployerRateConfirmedThrough when NHES posts Q4.",
+    "RE-CHECKED 2026-10-01: NHES's Tax Rate Chart (https://www.nhes.nh.gov/employers/employer-claims-taxes/tax-rate-chart, fetched live) still ends at 2026-Q2 (Fund Balance Reduction 1.00%, inverse rate surcharge 0.50%); neither 2026-Q3 nor 2026-Q4 has been posted. Check dates from 2026-07-01 therefore still use 1.7% with the 'inferred' notice. Update newEmployerRateConfirmedThrough when NHES posts."
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",

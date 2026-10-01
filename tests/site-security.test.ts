@@ -117,6 +117,24 @@ describe('account security', () => {
   let session = '';
   let cookie = '';
 
+  test('the old standalone reference page is gone: its URLs redirect to the docs', async () => {
+    for (const path of ['/reference', '/reference.html', '/api-reference']) {
+      const r = await fetch(BASE + path, { redirect: 'manual' });
+      assert.equal(r.status, 301, path);
+      assert.equal(r.headers.get('location'), '/docs');
+    }
+    const home = await (await fetch(BASE + '/')).text();
+    assert.match(home, /\/tokens\.css/); // the design B home page is the main site
+    assert.doesNotMatch(home, /IBM Plex Mono/);
+
+    // The old reference's API content now lives in the docs.
+    const docs = await (await fetch(BASE + '/docs')).text();
+    for (const id of ['making-requests', 'money', 'rate-limits', 'versioning', 'states', 'me', 'health',
+      'earning', 'deduction', 'federal-w4', 'ytd', 'state-withholding', 'result', 'pricing']) {
+      assert.match(docs, new RegExp(`id="${id}"`), `docs section #${id}`);
+    }
+  });
+
   test('with email on, the code is emailed and never written to the logs', async () => {
     const r = await post('/api/signup', { name: 'Casey Rivers', email: EMAIL, company: 'Secure Payroll', phone: '555-000-1111' });
     assert.equal(r.status, 200);

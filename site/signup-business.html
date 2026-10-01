@@ -110,7 +110,7 @@
       document.getElementById('formulaCap').textContent = 'EMPLOYEES × PAYCHECKS A YEAR × PRICE ÷ MONTHS';
     } else {
       document.getElementById('formula').textContent = OmniaPricing.formatMoney(est.annual) + ' / yr ÷ 12';
-      document.getElementById('formulaCap').textContent = 'GRADUATED RATE CARD IN PRICING.TS · NOT A SINGLE FLAT RATE';
+      document.getElementById('formulaCap').textContent = 'ANNUAL COST ÷ 12';
     }
   }
   minus.addEventListener('click', function () { employees.value = String(n() - 1); render(); loadTerms(); });

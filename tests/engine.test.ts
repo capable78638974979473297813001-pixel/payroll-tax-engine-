@@ -1110,6 +1110,27 @@ describe('Indiana', () => {
     workState: { code: 'IN', certificate },
   });
 
+  test('Boone County steps from 1.70% to 1.71% on 2026-10-01 (R47 / 10-26); no other county moves', () => {
+    // Departmental Notice #1 R47 / 10-26 marks Boone (06) 0.0171* and no other
+    // county. $1,000 weekly, one exemption: taxable = 1,000 - 19.23 = 980.77.
+    // County: 980.77 x 1.70% = 16.67 before; 980.77 x 1.71% = 16.77 from Oct 1.
+    const county = (checkDate: string, name: string) =>
+      amountOf(
+        calculatePaycheck(
+          input({
+            checkDate,
+            payFrequency: 'weekly',
+            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+            ...inState({ county: name, personalExemptions: 1 }),
+          }),
+        ),
+        'IN_COUNTY',
+      );
+    assert.equal(county('2026-09-30', 'Boone'), dollars(16.67));
+    assert.equal(county('2026-10-01', 'Boone'), dollars(16.77));
+    assert.equal(county('2026-10-01', 'Hendricks'), county('2026-09-30', 'Hendricks'));
+  });
+
   test("reproduces Departmental Notice #1's own worked example to the cent", () => {
     // Weekly $800; 5 personal + 3 dependent + 1 first-time-dependent + 2
     // adopted-child exemptions. Each tier's per-period constant, rounded

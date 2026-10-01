@@ -44,24 +44,12 @@ Do this in **Test mode** first, verify, then repeat in **Live mode**.
    - Aggregation: **Sum** of `value`.
    - Copy the event name; it becomes `STRIPE_METER_EVENT`.
 
-2. **Create the metered price with graduated tiers.**
+2. **Create the metered price at a flat $0.09 per unit.**
    Products → *Create product* (e.g. "Omnia API — metered calls") → add a
-   **usage-based price** tied to the meter above, **Graduated** tiers matching
-   `site/lib/pricing.ts`:
-
-   | Up to (calls / mo or billing period) | Per-call |
-   |---|---|
-   | first 25,000 | $0.12 |
-   | 25,001 – 200,000 | $0.09 |
-   | 200,001 – 1,000,000 | $0.06 |
-   | 1,000,000+ | $0.04 |
+   **usage-based price** tied to the meter above: **Per unit**, **$0.09**
+   (no tiers), matching `site/lib/pricing.ts`.
 
    Billing period: monthly. Copy the **Price ID** (`price_…`) → `STRIPE_PRICE_ID`.
-
-   > Note: the site's tiers are annual in the copy; if you bill monthly, either
-   > set the tier bounds to monthly-equivalent volumes or keep them as-is and
-   > treat them as per-invoice bands. Decide this with the same numbers the
-   > pricing page shows so quotes and invoices agree.
 
 3. **Get your secret key.**
    Developers → API keys → **Secret key**. Start with the **test** key
@@ -88,7 +76,7 @@ PUBLIC_BASE_URL=https://omnia.tax
 PORT=4323
 
 STRIPE_SECRET_KEY=sk_test_…            # test first, then sk_live_…
-STRIPE_PRICE_ID=price_…                # the graduated metered price
+STRIPE_PRICE_ID=price_…                # the flat $0.09 metered price
 STRIPE_METER_EVENT=omnia_api_call       # required: must match the meter exactly
 STRIPE_WEBHOOK_SECRET=whsec_…
 RESEND_API_KEY=…                       # required in production (see below)
@@ -109,6 +97,17 @@ usage is billed; the server logs a warning at startup saying so.
 development mode and prints each 6-digit verification code to its console —
 a working sign-in credential for anyone who can read the logs. With it set,
 codes are only emailed and never logged.
+
+**Optional: run the Python email verifier.** `npm run verifier` starts
+`verifier/email_verifier.py` (Python 3.10+, standard library only) on
+`127.0.0.1:4390`. Set `VERIFIER_SECRET` and `VERIFIER_PEPPER` (each at least
+32 random characters) for both processes, `VERIFIER_URL=http://127.0.0.1:4390`
+on the site, and `RESEND_API_KEY` or the `SMTP_*` variables on the verifier.
+With that on, codes are minted, mailed and checked by the verifier, stored only
+as HMAC hashes, expire in 10 minutes, work once, and burn after 5 wrong tries.
+The site's store never holds a code. Keep the verifier on loopback (or a private
+network with TLS); it refuses every request without the shared secret.
+`npm run verifier:test` runs its tests.
 
 **`PUBLIC_BASE_URL` must be the real `https://` URL.** Checkout return links
 are built from it (never from the request's `Host` header), and an `https`
@@ -161,7 +160,7 @@ add a **live** webhook endpoint, and repeat step 1–5 with a real card.
 ## 5. Before you take real customers
 
 - [ ] Fill in the legal placeholders — see `docs/LEGAL.md`.
-- [ ] Confirm the pricing-page tiers match the Stripe price exactly.
+- [ ] Confirm the Stripe price is exactly $0.09 per unit, matching `site/lib/pricing.ts`.
 - [ ] Back up `SITE_DB_DIR` on a schedule.
 - [ ] Put the app behind HTTPS and a process manager that restarts it.
 - [ ] Decide `OMNIA_ISSUE_LIVE_KEYS` (on for production `sk_live_` keys).

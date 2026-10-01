@@ -23,7 +23,7 @@ const RESEND_ENDPOINT = `${process.env.RESEND_API_BASE ?? 'https://api.resend.co
  * up with -- fine for testing on yourself, not for real signups. Verify a
  * domain and set RESEND_FROM to lift that.
  */
-const DEFAULT_FROM = 'Omnia <onboarding@resend.dev>';
+const DEFAULT_FROM = 'Omnia.tax <onboarding@resend.dev>';
 
 export interface SendResult {
   sent: boolean;
@@ -48,17 +48,17 @@ export async function sendVerificationEmail(args: {
   const minutes = Math.max(1, Math.round((new Date(args.expiresAt).getTime() - Date.now()) / 60_000));
 
   const html = `
-    <div style="font-family:'Public Sans',Helvetica,Arial,sans-serif;max-width:440px;margin:0 auto;padding:32px 8px;color:#14140F">
-      <p style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7C7C70;margin:0 0 18px">Omnia &middot; Payroll Tax</p>
-      <h1 style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:500;margin:0 0 12px;letter-spacing:-.02em">Confirm your email, ${escapeHtml(firstName)}</h1>
-      <p style="font-size:15px;line-height:1.6;color:#4B4B42;margin:0 0 22px">
-        Enter this code in the Omnia console to verify your address and continue setting up your account.
+    <div style="font-family:'Inter Tight',Helvetica,Arial,sans-serif;max-width:440px;margin:0 auto;padding:32px 8px;color:#0A0A0A">
+      <p style="font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#1F3BFF;margin:0 0 18px">Omnia.tax</p>
+      <h1 style="font-size:24px;font-weight:700;margin:0 0 12px;letter-spacing:-.02em">Confirm your email, ${escapeHtml(firstName)}</h1>
+      <p style="font-size:15px;line-height:1.6;color:#6E7079;margin:0 0 22px">
+        Enter this code in the Omnia.tax console to verify your address and continue setting up your account.
         It expires in ${minutes} minute${minutes === 1 ? '' : 's'}.
       </p>
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:30px;letter-spacing:.34em;background:#14140F;color:#FBFAF5;text-align:center;padding:18px 8px;margin-bottom:22px">
+      <div style="font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:30px;font-weight:700;letter-spacing:.34em;background:#0A0A0A;color:#FFFFFF;text-align:center;padding:18px 8px;margin-bottom:22px">
         ${escapeHtml(args.code)}
       </div>
-      <p style="font-size:12.5px;color:#7C7C70;margin:0;border-top:1px dashed #D5D2C4;padding-top:12px">
+      <p style="font-size:12.5px;color:#6E7079;margin:0;border-top:1px solid #E1E3E8;padding-top:12px">
         Didn't start a signup? Ignore this &mdash; nothing happens without this code, and no payment method is
         collected until you review the terms.
       </p>

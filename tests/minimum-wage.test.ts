@@ -794,14 +794,27 @@ describe('local minimum wages', () => {
     assert.equal(co.edgewater!.tipped!.cashWageCents, 1350);
   });
 
-  test('Nebraska’s two ordinances are carried as NOT in effect', () => {
-    for (const j of localMinimumWages('NE', D)) {
-      assert.ok(j.status, `${j.id} must carry a status`);
-    }
-    const answer = minimumWage({ checkDate: D, state: 'NE', locality: 'lincoln' });
-    assert.equal(answer.cents, 1500); // Nebraska's state rate, not the blocked ordinance
-    assert.equal(answer.bindingLevel, 'state');
-    assert.match(answer.considered.find((c) => c.level === 'local')!.basis, /not applied/);
+  test('Nebraska: Lincoln is blocked; Omaha starts 2026-10-01 at the state rate', () => {
+    const ne = Object.fromEntries(localMinimumWages('NE', D).map((j) => [j.id, j]));
+    assert.ok(ne.lincoln!.status, 'Lincoln must carry a status');
+    assert.equal(ne.omaha!.status, undefined);
+    assert.equal(ne.omaha!.effectiveFrom, '2026-10-01');
+    const lincoln = minimumWage({ checkDate: D, state: 'NE', locality: 'lincoln' });
+    assert.equal(lincoln.cents, 1500); // Nebraska's state rate, not the blocked ordinance
+    assert.equal(lincoln.bindingLevel, 'state');
+    assert.match(lincoln.considered.find((c) => c.level === 'local')!.basis, /not applied/);
+
+    // Before 2026-10-01 Omaha's ordinance is not yet a candidate at all.
+    const before = minimumWage({ checkDate: '2026-09-30', state: 'NE', locality: 'omaha' });
+    assert.equal(before.bindingLevel, 'state');
+    assert.match(before.considered.find((c) => c.level === 'local')!.basis, /not yet in effect/);
+
+    // From 2026-10-01 it is a live $15.00, equal to the state's.
+    const after = minimumWage({ checkDate: '2026-10-01', state: 'NE', locality: 'omaha' });
+    assert.equal(after.cents, 1500);
+    const local = after.considered.find((c) => c.level === 'local')!;
+    assert.equal(local.cents, 1500);
+    assert.equal(local.basis, 'Local standard rate');
   });
 
   test('a misspelled locality is reported, never silently treated as "no ordinance"', () => {

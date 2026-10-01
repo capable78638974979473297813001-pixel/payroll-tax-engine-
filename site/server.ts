@@ -16,6 +16,7 @@ import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
 import { isEmailConfigured, sendVerificationEmail } from './lib/mail.ts';
 import { validatePaycheckInput } from './lib/validate.ts';
 import { keyLifeFor } from './lib/keylife.ts';
+import { verifierConfigured, issueCode, checkCode } from './lib/verifier.ts';
 import {
   billingConfigured, meteringConfigured, enqueueMeterEvent, flushMeterQueue,
   createBillingCustomer, startMeteredCheckout, completeMeteredCheckout, interpretWebhook,
@@ -144,7 +145,21 @@ const SECURITY_HEADERS: Record<string, string> = {
   'Referrer-Policy': 'no-referrer',
   'X-Frame-Options': 'SAMEORIGIN',
   'X-Omnia-Version': API_VERSION,
+  ...((process.env.PUBLIC_BASE_URL ?? '').startsWith('https://') ? { 'Strict-Transport-Security': 'max-age=31536000' } : {}),
 };
+
+/** True when the browser's Origin (if any) is this site. */
+function sameOrigin(req: IncomingMessage): boolean {
+  const origin = req.headers.origin;
+  if (!origin) return true;
+  try {
+    const o = new URL(origin).host;
+    const own = process.env.PUBLIC_BASE_URL ? new URL(process.env.PUBLIC_BASE_URL).host : null;
+    return o === req.headers.host || o === own;
+  } catch {
+    return false;
+  }
+}
 
 function sendJson(res: ServerResponse, status: number, body: unknown, extraHeaders: Record<string, string> = {}): void {
   const payload = JSON.stringify(body);
@@ -300,7 +315,8 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
     const existing = db.accounts[email];
     const cooling =
       existing?.codeRequestedAt && now - new Date(existing.codeRequestedAt).getTime() < CODE_COOLDOWN_MS;
-    const code = cooling && existing.code ? existing.code : String(randomInt(100000, 1000000));
+    const remote = verifierConfigured();
+    const code = remote ? null : cooling && existing.code ? existing.code : String(randomInt(100000, 1000000));
 
     const record: AccountRecord = {
       name,
@@ -309,8 +325,8 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
       phone,
       code,
       codeRequestedAt: cooling ? existing!.codeRequestedAt : new Date(now).toISOString(),
-      codeExpiresAt: cooling ? existing!.codeExpiresAt : new Date(now + CODE_TTL_MS).toISOString(),
-      codeAttempts: cooling ? existing!.codeAttempts ?? 0 : 0,
+      codeExpiresAt: remote ? null : cooling ? existing!.codeExpiresAt : new Date(now + CODE_TTL_MS).toISOString(),
+      codeAttempts: remote ? 0 : cooling ? existing!.codeAttempts ?? 0 : 0,
       emailVerifiedAt: existing?.emailVerifiedAt ?? null,
       sessionToken: existing?.sessionToken ?? null,
       sessionExpiresAt: existing?.sessionExpiresAt ?? null,
@@ -334,7 +350,16 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
   }
 
   let emailSent = false;
-  if (logCodesToConsole()) {
+  if (verifierConfigured()) {
+    // The Python verifier owns the code: it mints, mails and later checks it.
+    const issued = await issueCode(email, account.name);
+    if (issued.status === 429) {
+      sendJson(res, 429, { error: 'Too many codes requested for this address. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(issued.retryAfterSec ?? 3600) });
+      return;
+    }
+    emailSent = issued.sent;
+    if (!issued.ok) console.error('[signup] verifier could not issue a code');
+  } else if (logCodesToConsole()) {
     // Local development only: no email provider, so the code has to be
     // readable somewhere. Never taken when RESEND_API_KEY is set.
     console.log('');
@@ -395,13 +420,15 @@ async function handleSignin(req: IncomingMessage, res: ServerResponse): Promise<
     const a = db.accounts[email];
     if (!a || !a.emailVerifiedAt) return { acct: null };
     const cooling = a.codeRequestedAt && a.code && now - new Date(a.codeRequestedAt).getTime() < CODE_COOLDOWN_MS;
-    if (!cooling) {
+    if (verifierConfigured()) {
+      a.codeRequestedAt = new Date(now).toISOString();
+    } else if (!cooling) {
       a.code = String(randomInt(100000, 1000000));
       a.codeRequestedAt = new Date(now).toISOString();
       a.codeExpiresAt = new Date(now + CODE_TTL_MS).toISOString();
       a.codeAttempts = 0;
     }
-    return { acct: { name: a.name, email: a.email, code: a.code!, codeExpiresAt: a.codeExpiresAt! } };
+    return { acct: { name: a.name, email: a.email, code: a.code ?? '', codeExpiresAt: a.codeExpiresAt ?? '' } };
   });
   if ('limited' in outcome) {
     sendJson(res, 429, { error: 'Too many sign-in attempts. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(outcome.retryAfterSec) });
@@ -409,7 +436,10 @@ async function handleSignin(req: IncomingMessage, res: ServerResponse): Promise<
   }
 
   const acct = outcome.acct;
-  if (acct) {
+  if (acct && verifierConfigured()) {
+    const issued = await issueCode(acct.email, acct.name);
+    if (!issued.ok) console.error('[sign-in] verifier could not issue a code');
+  } else if (acct) {
     if (logCodesToConsole()) {
       console.log(`[sign-in code, dev: no email provider] ${acct.email}: ${acct.code} (expires ${acct.codeExpiresAt})`);
     } else {
@@ -417,7 +447,7 @@ async function handleSignin(req: IncomingMessage, res: ServerResponse): Promise<
       if (!result.sent) console.error(`[sign-in] verification email failed: ${result.reason}`);
     }
   }
-  sendJson(res, 200, { ok: true, emailConfigured: isEmailConfigured() });
+  sendJson(res, 200, { ok: true, emailConfigured: isEmailConfigured() || verifierConfigured() });
 }
 
 // ---------------------------------------------------------------------
@@ -447,16 +477,23 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
   // reported the same way for all of them.
   const INVALID = 'That code is incorrect or has expired. Request a new one if needed.';
   const TOO_MANY = 'Too many wrong codes. Request a new one.';
+  // With the Python verifier configured it owns the code, its expiry, its
+  // attempt limits and its throttling; the site only acts on its answer.
+  const remote = verifierConfigured();
+  const remoteOk = remote ? await checkCode(email, code) : false;
   const outcome = withDb((db) => {
     const acct = db.accounts[email];
     const now = Date.now();
+    if (remote) {
+      if (!acct || !remoteOk) return { ok: false as const, error: INVALID };
+    }
     const hourKey = 'verify-hour:' + email;
     const spent = db.rateLimits[hourKey];
-    if (spent && now - spent.start < spent.windowMs && spent.count >= MAX_CODE_GUESSES_PER_HOUR) {
+    if (!remote && spent && now - spent.start < spent.windowMs && spent.count >= MAX_CODE_GUESSES_PER_HOUR) {
       return { ok: false as const, error: TOO_MANY };
     }
     const live = Boolean(acct?.code && acct.codeExpiresAt && now <= new Date(acct.codeExpiresAt).getTime());
-    if (!acct || !live || !safeEqual(acct.code!, code)) {
+    if (!remote && (!acct || !live || !safeEqual(acct.code!, code))) {
       const hourly = hitStoredLimit(db, hourKey, MAX_CODE_GUESSES_PER_HOUR, HOUR_MS, now);
       // Unknown addresses get a stored counter too, so "burned" looks
       // the same for them as for real accounts.
@@ -470,6 +507,7 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
       return { ok: false as const, error: burned ? TOO_MANY : INVALID };
     }
 
+    if (!acct) return { ok: false as const, error: INVALID };
     const token = randomBytes(24).toString('hex');
     acct.emailVerifiedAt = acct.emailVerifiedAt ?? new Date().toISOString();
     acct.code = null;
@@ -795,7 +833,7 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
   const successUrl = `${origin}/signup/payment?setup=ok&session_id={CHECKOUT_SESSION_ID}`;
   const cancelUrl = `${origin}/signup/payment?setup=cancelled`;
 
-  // Preferred path: a metered subscription to the graduated price, so every
+  // Preferred path: a metered subscription to the flat per-call price, so every
   // future call actually bills. Requires STRIPE_PRICE_ID (a usage-metered
   // price). Falls back to card-on-file only when no price is configured.
   if (billingConfigured()) {
@@ -1138,6 +1176,13 @@ async function handleIssueKey(req: IncomingMessage, res: ServerResponse): Promis
 
   if (!readDb((db) => paymentOnFile(db, session.email))) {
     sendJson(res, 402, { error: 'Add a card or bank account before issuing an API key.', code: 'payment_method_required' });
+    return;
+  }
+
+  // A stolen session can't churn keys: a handful of issues an hour per account.
+  const issueLimit = withDb((db) => hitStoredLimit(db, 'issue-key:' + session.email, 5, HOUR_MS));
+  if (!issueLimit.allowed) {
+    sendJson(res, 429, { error: 'Too many keys issued. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(issueLimit.retryAfterSec) });
     return;
   }
 
@@ -1666,7 +1711,9 @@ createServer((req, res) => {
       return;
     }
     if (method === 'GET' && (url === '/reference' || url === '/reference.html' || url === '/api-reference')) {
-      sendHtml(res, join(HERE, 'reference.html'));
+      // The old standalone reference page is gone; its URLs land on the docs.
+      res.writeHead(301, { Location: '/docs', ...SECURITY_HEADERS });
+      res.end();
       return;
     }
 
@@ -1686,6 +1733,14 @@ createServer((req, res) => {
         sendHtml(res, join(HERE, 'legal', `${legal[url]}.html`));
         return;
       }
+    }
+
+    // Cookie-authenticated console routes refuse cross-site browser POSTs
+    // (belt and braces on top of SameSite=Lax). Bearer-key clients and the
+    // Stripe webhook send no Origin header, so they pass untouched.
+    if (method === 'POST' && url.startsWith('/api/') && url !== '/api/billing/webhook' && url !== '/api/paycheck' && !sameOrigin(req)) {
+      sendJson(res, 403, { error: 'Cross-origin request refused.', code: 'bad_origin' });
+      return;
     }
 
     if (method === 'POST' && url === '/api/signup') return handleSignup(req, res);
@@ -1725,5 +1780,4 @@ createServer((req, res) => {
   console.log(`Omnia.tax:           http://localhost:${PORT}`);
   console.log(`Omnia.tax docs:      http://localhost:${PORT}/docs`);
   console.log(`Omnia.tax console:   http://localhost:${PORT}/sandbox`);
-  console.log(`Omnia API reference: http://localhost:${PORT}/reference`);
 });
