@@ -110,6 +110,17 @@ development mode and prints each 6-digit verification code to its console —
 a working sign-in credential for anyone who can read the logs. With it set,
 codes are only emailed and never logged.
 
+**Optional: run the Python email verifier.** `npm run verifier` starts
+`verifier/email_verifier.py` (Python 3.10+, standard library only) on
+`127.0.0.1:4390`. Set `VERIFIER_SECRET` and `VERIFIER_PEPPER` (each at least
+32 random characters) for both processes, `VERIFIER_URL=http://127.0.0.1:4390`
+on the site, and `RESEND_API_KEY` or the `SMTP_*` variables on the verifier.
+With that on, codes are minted, mailed and checked by the verifier, stored only
+as HMAC hashes, expire in 10 minutes, work once, and burn after 5 wrong tries.
+The site's store never holds a code. Keep the verifier on loopback (or a private
+network with TLS); it refuses every request without the shared secret.
+`npm run verifier:test` runs its tests.
+
 **`PUBLIC_BASE_URL` must be the real `https://` URL.** Checkout return links
 are built from it (never from the request's `Host` header), and an `https`
 value marks the console's session cookie `Secure`.
