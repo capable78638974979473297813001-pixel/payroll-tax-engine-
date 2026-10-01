@@ -2,7 +2,7 @@
  * Omnia's pricing model, in one place.
  *
  * Usage-based, not tiered plans: every jurisdiction is included for
- * everyone, and you pay a flat $0.09 for each calculation you actually
+ * everyone, and you pay a flat $0.90 for each calculation you actually
  * make, at any volume. The list below stays a list of bands so a volume
  * discount can be added back without touching the estimator or the pages;
  * today it has one band with no upper bound. The estimator on index.html
@@ -23,7 +23,7 @@ export interface CallTier {
 }
 
 export const CALL_TIERS: CallTier[] = [
-  { upTo: Infinity, rate: 0.09 },
+  { upTo: Infinity, rate: 0.9 },
 ];
 
 /** Rooftop address resolution, billed once per address -- not per pay run. */

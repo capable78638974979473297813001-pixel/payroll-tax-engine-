@@ -15,7 +15,7 @@ import { readDb, withDb, type DB, type MeterQueueItem } from './store.ts';
  * Stripe client in api/stripe.ts.
  *
  * The model: each account is a Stripe customer subscribed to a single
- * usage-metered price at a flat $0.09 per unit, mirroring
+ * usage-metered price at a flat $0.90 per unit, mirroring
  * site/lib/pricing.ts. Every successful POST /api/paycheck
  * reports one meter event; Stripe aggregates them and invoices monthly.
  * There is no per-call card charge — that would drown in Stripe's per-
