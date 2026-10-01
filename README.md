@@ -44,7 +44,7 @@ Money is integer cents. `dollars(3.07)` is 307.
 | `supabase/functions/` | Edge-function copy of `src/`. Regenerate it with `npm run edge:build` after changing `src/` |
 | `docs/` | Rounding, geocoding coverage, payments, and the go-live runbook |
 
-Two billing paths exist on purpose. The public site charges the flat $0.90 per call in `site/lib/pricing.ts` through a Stripe meter. The self-hosted API in `examples/api-server.ts` charges the key's own `pricePerCallCents` on a local ledger, and switches to the Stripe meter (one unit per successful calculation) when that key has a Stripe customer and metering is configured. It does not do both.
+Two billing paths exist on purpose. The public site charges the flat $0.09 per call in `site/lib/pricing.ts` through a Stripe meter. The self-hosted API in `examples/api-server.ts` charges the key's own `pricePerCallCents` on a local ledger, and switches to the Stripe meter (one unit per successful calculation) when that key has a Stripe customer and metering is configured. It does not do both.
 
 ## Requirements
 

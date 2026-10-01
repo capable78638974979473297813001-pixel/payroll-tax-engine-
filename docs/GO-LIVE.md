@@ -44,9 +44,9 @@ Do this in **Test mode** first, verify, then repeat in **Live mode**.
    - Aggregation: **Sum** of `value`.
    - Copy the event name; it becomes `STRIPE_METER_EVENT`.
 
-2. **Create the metered price at a flat $0.90 per unit.**
+2. **Create the metered price at a flat $0.09 per unit.**
    Products → *Create product* (e.g. "Omnia API — metered calls") → add a
-   **usage-based price** tied to the meter above: **Per unit**, **$0.90**
+   **usage-based price** tied to the meter above: **Per unit**, **$0.09**
    (no tiers), matching `site/lib/pricing.ts`.
 
    Billing period: monthly. Copy the **Price ID** (`price_…`) → `STRIPE_PRICE_ID`.
@@ -76,7 +76,7 @@ PUBLIC_BASE_URL=https://omnia.tax
 PORT=4323
 
 STRIPE_SECRET_KEY=sk_test_…            # test first, then sk_live_…
-STRIPE_PRICE_ID=price_…                # the flat $0.90 metered price
+STRIPE_PRICE_ID=price_…                # the flat $0.09 metered price
 STRIPE_METER_EVENT=omnia_api_call       # required: must match the meter exactly
 STRIPE_WEBHOOK_SECRET=whsec_…
 RESEND_API_KEY=…                       # required in production (see below)
@@ -160,7 +160,7 @@ add a **live** webhook endpoint, and repeat step 1–5 with a real card.
 ## 5. Before you take real customers
 
 - [ ] Fill in the legal placeholders — see `docs/LEGAL.md`.
-- [ ] Confirm the Stripe price is exactly $0.90 per unit, matching `site/lib/pricing.ts`.
+- [ ] Confirm the Stripe price is exactly $0.09 per unit, matching `site/lib/pricing.ts`.
 - [ ] Back up `SITE_DB_DIR` on a schedule.
 - [ ] Put the app behind HTTPS and a process manager that restarts it.
 - [ ] Decide `OMNIA_ISSUE_LIVE_KEYS` (on for production `sk_live_` keys).

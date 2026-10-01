@@ -5,7 +5,7 @@
   var cfg = w.OMNIA || {
     trialDays: 14,
     termMonths: 12,
-    tiers: [{ upTo: null, rate: 0.9 }],
+    tiers: [{ upTo: null, rate: 0.09 }],
     rooftopRate: 0.3,
     periodsPerYear: { weekly: 52, biweekly: 26, semimonthly: 24, monthly: 12 },
     codeTtlSec: 900,
@@ -60,7 +60,7 @@
     };
   }
 
-  /** $0.90, $0.125 — however many decimals the tier actually uses. */
+  /** $0.09, $0.125 — however many decimals the tier actually uses. */
   function formatRate(rate) {
     var n = Number(rate);
     if (!Number.isFinite(n)) return '';
