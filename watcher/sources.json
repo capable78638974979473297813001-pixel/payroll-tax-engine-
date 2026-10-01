@@ -2263,6 +2263,17 @@
    ]
   },
   {
+   "id": "ky-b6a5b3ec4c",
+   "jurisdiction": "KY",
+   "title": "City of Perryville -- Employer's Quarterly Return of License Fee Withheld (2023)",
+   "url": "https://www.perryvilleky.gov/wp-content/uploads/2022/12/Employers-Qtrly-Return-of-License-Fee-WH-2023.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json"
+   ]
+  },
+  {
    "id": "ky-998b97afaa",
    "jurisdiction": "KY",
    "title": "City of Pikeville -- Business Licenses",
@@ -2300,6 +2311,17 @@
    "jurisdiction": "KY",
    "title": "City of St. Matthews -- Occupational Tax",
    "url": "https://www.stmatthewsky.gov/occupational-tax/",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json"
+   ]
+  },
+  {
+   "id": "ky-8d03c801b6",
+   "jurisdiction": "KY",
+   "title": "City of West Liberty -- Occupational Tax Ordinance Amendment",
+   "url": "https://westliberty.ky.gov/Ordinances/Occupational-Tax-Ordinance-Amendment.pdf",
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
