@@ -1,11 +1,14 @@
+import contextlib
+import io
 import json
+import os
 import sqlite3
 import tempfile
 import threading
 import unittest
 import urllib.error
 import urllib.request
-from http.server import ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 import email_verifier as ev
@@ -114,6 +117,42 @@ class VerifierTest(unittest.TestCase):
     def test_email_html_escapes_name(self) -> None:
         _, _, body = ev._message_parts('<script>x</script> Bob', "123456", 10)
         self.assertNotIn("<script>", body)
+
+
+class ResendFailureTest(unittest.TestCase):
+    """When Resend refuses, the log says why, and never contains the code."""
+
+    def test_refusal_reason_is_logged_without_the_code(self) -> None:
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self) -> None:  # noqa: N802
+                self.rfile.read(int(self.headers.get("Content-Length", "0")))
+                body = json.dumps({"statusCode": 403, "message": "The omniatax.io domain is not verified."}).encode()
+                self.send_response(403)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, *_a: object) -> None:
+                pass
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        try:
+            os.environ["RESEND_API_BASE"] = f"http://127.0.0.1:{server.server_port}"
+            v = ev.Verifier(":memory:", PEPPER, ev.resend_sender("re_x", "Omnia.tax <verify@omniatax.io>"))
+            log = io.StringIO()
+            with contextlib.redirect_stderr(log):
+                result = v.issue("a@b.com", "Ada")
+            self.assertFalse(result["sent"])
+            text = log.getvalue()
+            self.assertIn("403", text)
+            self.assertIn("domain is not verified", text)
+            row = v._db.execute("SELECT code_hash FROM codes").fetchone()
+            self.assertTrue(row)  # a code was minted, but is not in the log
+            self.assertNotRegex(text, r"\b\d{6}\b")
+        finally:
+            os.environ.pop("RESEND_API_BASE", None)
+            server.shutdown()
 
 
 class HttpTest(unittest.TestCase):

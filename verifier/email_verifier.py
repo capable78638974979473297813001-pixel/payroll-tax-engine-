@@ -181,7 +181,8 @@ class Verifier:
             self._send(email, name, code, CODE_TTL_SECONDS // 60)
             sent = True
         except Exception as exc:  # delivery failure must not leak the code
-            print(f"[verifier] mail delivery failed: {type(exc).__name__}", file=sys.stderr)
+            reason = str(exc).replace("\n", " ")[:300] or type(exc).__name__
+            print(f"[verifier] mail delivery failed: {type(exc).__name__}: {reason}", file=sys.stderr)
             sent = False
         return {"ok": True, "sent": sent, "cooldown": False}
 
@@ -256,9 +257,17 @@ def resend_sender(api_key: str, sender: str) -> Callable[[str, str, str, int], N
             headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
             method="POST",
         )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            if resp.status >= 300:
-                raise RuntimeError(f"Resend responded {resp.status}")
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                if resp.status >= 300:
+                    raise RuntimeError(f"Resend responded {resp.status}")
+        except urllib.error.HTTPError as err:
+            # Resend says why in the body ("domain is not verified", "API key is
+            # invalid", ...). It never contains the code, so it is safe to log.
+            detail = err.read(400).decode("utf-8", "replace").replace("\n", " ")
+            raise RuntimeError(f"Resend answered {err.code}: {detail}") from None
+        except urllib.error.URLError as err:
+            raise RuntimeError(f"could not reach Resend: {err.reason}") from None
 
     return send
 
