@@ -98,7 +98,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 PUBLIC_BASE_URL=https://omniatax.io
 ```
 
-Then run `npm run check:stripe` with the same values. Fix anything it marks
+Then run the check with the same values. On Render, open your service's **Shell** tab and run `node scripts/check-stripe.ts`: the shell already has your environment variables, so there is nothing to paste. Locally, `npm run check:stripe`. Fix anything it marks
 `FAIL` before going further. Anything marked `warn` is optional.
 
 ## 7. Walk through it once in test mode
