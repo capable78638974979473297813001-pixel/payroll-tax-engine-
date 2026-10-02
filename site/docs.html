@@ -15,12 +15,12 @@
   <span class="docs-word">DOCS</span>
   <label class="search">
     <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 9.5L13 13" stroke="currentColor" stroke-width="1.5"/></svg>
-    <input type="search" placeholder="Search the docs" disabled aria-disabled="true" title="Search isn’t available. There is no search endpoint." />
+    <input type="search" id="docSearch" placeholder="Search the docs" autocomplete="off" aria-label="Search the docs" aria-controls="searchResults" />
     <kbd>/</kbd>
+    <div class="search-results" id="searchResults" role="listbox" hidden></div>
   </label>
   <div class="top-right">
     <span style="font-weight:700;font-size:14px" id="modeLabel">Test mode</span>
-    <span class="switch" id="modeSwitch" aria-hidden="true"><i></i></span>
     <span class="tag tag-outline" id="trialTag">Trial</span>
     <button type="button" class="btn btn-text" id="signOut" hidden style="font-size:14px">Sign out</button>
     <a href="/signin" id="acctLink" style="display:flex;align-items:center;gap:8px;text-decoration:none">
@@ -504,12 +504,75 @@ details: [ { path, message } ]</pre>
   document.querySelectorAll('[data-origin]').forEach(function (el) { el.textContent = location.origin; });
   document.querySelectorAll('.rpm-copy').forEach(function (el) { el.textContent = String(cfg.rateLimitPerMin || 120); });
 
+  // ---- search: every section of this page, matched in the browser ------
+  (function () {
+    var main = document.querySelector('.docs-main');
+    var input = document.getElementById('docSearch');
+    var box = document.getElementById('searchResults');
+    var index = [];
+    var cur = null;
+    Array.prototype.forEach.call(main.children, function (n) {
+      if (n.classList.contains('sec-rule') || n.tagName === 'H1') {
+        cur = { id: n.id, title: '', text: '' };
+        index.push(cur);
+      }
+      if (!cur) return;
+      var h = n.matches('h1,h2') ? n : n.querySelector('h1,h2');
+      if (h && !cur.title) cur.title = h.textContent.trim();
+      if (n.classList.contains('path-row') && !cur.title) cur.title = n.textContent.replace(/\s+/g, ' ').trim();
+      cur.text += ' ' + n.textContent.replace(/\s+/g, ' ');
+    });
+    index = index.filter(function (e) { return e.id && e.title; });
+
+    function find(q) {
+      var words = q.toLowerCase().split(/\s+/).filter(Boolean);
+      if (!words.length) return [];
+      return index.map(function (e) {
+        var t = e.title.toLowerCase(), x = e.text.toLowerCase(), score = 0;
+        for (var i = 0; i < words.length; i++) {
+          var inTitle = t.indexOf(words[i]) >= 0;
+          var at = x.indexOf(words[i]);
+          if (!inTitle && at < 0) return null; // every word must appear
+          score += (inTitle ? 10 : 0) + (at >= 0 ? 1 : 0);
+        }
+        var at0 = x.indexOf(words[0]);
+        var snip = at0 >= 0 ? e.text.slice(Math.max(0, at0 - 40), at0 + 90).trim() : '';
+        return { e: e, score: score, snip: snip };
+      }).filter(Boolean).sort(function (a, b) { return b.score - a.score; }).slice(0, 8);
+    }
+    function show(list, q) {
+      box.textContent = '';
+      if (!q.trim()) { box.hidden = true; return; }
+      if (!list.length) {
+        var none = document.createElement('div'); none.className = 'sr-none'; none.textContent = 'Nothing matches “' + q + '”.'; box.appendChild(none);
+      }
+      list.forEach(function (r) {
+        var a = document.createElement('a');
+        a.href = '#' + r.e.id; a.setAttribute('role', 'option');
+        var t = document.createElement('b'); t.textContent = r.e.title;
+        var s = document.createElement('span'); s.textContent = r.snip;
+        a.appendChild(t); a.appendChild(s);
+        a.addEventListener('click', function () { box.hidden = true; input.value = ''; });
+        box.appendChild(a);
+      });
+      box.hidden = false;
+    }
+    input.addEventListener('input', function () { show(find(input.value), input.value); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { input.value = ''; box.hidden = true; input.blur(); }
+      if (e.key === 'Enter') { var first = box.querySelector('a'); if (first) { e.preventDefault(); first.click(); location.hash = first.getAttribute('href'); } }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === '/' && document.activeElement && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); input.focus(); }
+    });
+    document.addEventListener('click', function (e) { if (!e.target.closest('.search')) box.hidden = true; });
+  })();
+
   var key = Omnia.apiKey();
   if (key && key.key) {
     document.getElementById('navKey').textContent = Omnia.maskKey(key.key);
     var live = key.key.indexOf('sk_live_') === 0;
     document.getElementById('modeLabel').textContent = live ? 'Live mode' : 'Test mode';
-    if (live) document.getElementById('modeSwitch').classList.add('off');
   }
   document.getElementById('signOut').addEventListener('click', function () {
     Omnia.signOut().then(function () { location.href = '/'; });

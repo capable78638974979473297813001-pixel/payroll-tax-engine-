@@ -63,7 +63,18 @@
       <button type="button" class="btn btn-text" id="resend" disabled>Resend code</button>
       <span id="resendIn">in <span class="countdown" id="count">0:30</span></span>
     </div>
-    <p class="form-foot">Wrong email? <a class="btn btn-text" id="change" href="/signup">Change it</a></p>
+    <p class="form-foot" id="changeRow">Wrong email? <a class="btn btn-text" id="change" href="/signup">Change it</a></p>
+    <form id="npForm" class="form-stack" hidden novalidate>
+      <div class="field" id="npField">
+        <label class="field-label" for="np">New password</label>
+        <div class="field-box">
+          <input id="np" type="password" autocomplete="new-password" maxlength="200" placeholder="At least 12 characters" />
+          <button type="button" class="field-slot" id="npToggle" aria-controls="np" aria-pressed="false">Show</button>
+        </div>
+        <p class="field-error" id="npError" hidden></p>
+      </div>
+      <button class="btn btn-lg btn-primary btn-block" id="npSubmit" type="submit">Save password</button>
+    </form>
   </main>
 </div>
 <script src="/assets/pricing.js"></script>
@@ -84,11 +95,11 @@
   if (signin) {
     lead.innerHTML = pending.emailConfigured
       ? 'If <b style="color:var(--color-ink)">' + escapeHtml(email) + '</b> has an Omnia.tax account, we sent a 6-digit code.'
-      : 'If <b style="color:var(--color-ink)">' + escapeHtml(email) + '</b> has an account, its sign-in code is printed in the server terminal (no email provider is connected yet).';
+      : 'If <b style="color:var(--color-ink)">' + escapeHtml(email) + '</b> has an account, its sign-in code is in the server log (no email provider is connected yet).';
   } else if (pending.emailSent) {
     lead.innerHTML = 'We sent a 6-digit code to <b style="color:var(--color-ink)">' + escapeHtml(email) + '</b>.';
   } else {
-    lead.innerHTML = 'No email provider is connected, so the 6-digit code for <b style="color:var(--color-ink)">' + escapeHtml(email) + '</b> is printed in the server terminal.';
+    lead.innerHTML = 'We couldn’t send the email to <b style="color:var(--color-ink)">' + escapeHtml(email) + '</b> just now. Use “Resend code” in a moment. On a development server the code is in the server log.';
   }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
 
@@ -172,11 +183,46 @@
         name: res.body.name,
         company: res.body.company
       });
-      location.href = signin ? '/docs' : '/signup/business';
+      if (signin && params.get('reset') === '1') { showReset(); return; }
+      location.href = signin ? '/docs#billing' : '/signup/business';
     }).catch(function () {
       Omnia.setLoading(btn, false);
       Omnia.toast('Could not reach the server. Try again.', 'error');
     });
+  });
+
+  // After a "forgot password" code is confirmed the session is fresh from an
+  // emailed code, which is what lets the server accept a new password without
+  // the old one.
+  function showReset() {
+    ['form', 'resendRow', 'changeRow'].forEach(function (id) { document.getElementById(id).hidden = true; });
+    document.querySelector('h1').textContent = 'Choose a new password.';
+    lead.textContent = 'You’re signed in. Pick a password you’ll use from now on.';
+    document.querySelectorAll('.lead').forEach(function (l, i) { if (i) l.hidden = true; });
+    document.getElementById('npForm').hidden = false;
+    document.getElementById('np').focus();
+  }
+  document.getElementById('npToggle').addEventListener('click', function () {
+    var np = document.getElementById('np');
+    var show = np.type === 'password';
+    np.type = show ? 'text' : 'password';
+    this.textContent = show ? 'Hide' : 'Show';
+    this.setAttribute('aria-pressed', String(show));
+  });
+  document.getElementById('npForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var err = document.getElementById('npError');
+    err.hidden = true;
+    var btn = document.getElementById('npSubmit');
+    Omnia.setLoading(btn, true);
+    Omnia.api('/api/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: document.getElementById('np').value }) })
+      .then(function (res) {
+        Omnia.setLoading(btn, false);
+        if (!res.ok) { err.textContent = (res.body && res.body.error) || 'Could not save that password.'; err.hidden = false; return; }
+        Omnia.toast('Password saved.');
+        setTimeout(function () { location.href = '/docs#billing'; }, 600);
+      })
+      .catch(function () { Omnia.setLoading(btn, false); err.textContent = 'Could not reach the server. Try again.'; err.hidden = false; });
   });
 
   resend.addEventListener('click', function () {

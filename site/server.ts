@@ -17,6 +17,7 @@ import { isEmailConfigured, sendVerificationEmail } from './lib/mail.ts';
 import { validatePaycheckInput } from './lib/validate.ts';
 import { keyLifeFor } from './lib/keylife.ts';
 import { verifierConfigured, issueCode, checkCode } from './lib/verifier.ts';
+import { hashPassword, verifyPassword, passwordProblem, MAX_PASSWORD } from './lib/password.ts';
 import {
   billingConfigured, meteringConfigured, enqueueMeterEvent, flushMeterQueue,
   createBillingCustomer, startMeteredCheckout, completeMeteredCheckout, interpretWebhook,
@@ -282,7 +283,7 @@ function maskKey(prefix: string): string {
 // ---------------------------------------------------------------------
 
 async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  let body: { name?: string; email?: string; company?: string; phone?: string };
+  let body: { name?: string; email?: string; company?: string; phone?: string; password?: string };
   try {
     body = await readJson(req);
   } catch (err) {
@@ -304,12 +305,30 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
     return;
   }
 
+  // Checked before any work is done on the password: hashing costs CPU, so an
+  // address that is over its limit must not be able to make us do it.
   const now = Date.now();
+  // Per client address, across all emails: the per-email cooldown below
+  // doesn't stop a flood of unique addresses.
+  const gate = withDb((db) => hitStoredLimit(db, 'signup:' + clientAddress(req), signupPerHour(), HOUR_MS, now));
+  if (!gate.allowed) {
+    sendJson(res, 429, { error: 'Too many signup attempts from this network. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(gate.retryAfterSec) });
+    return;
+  }
+
+  // A password is optional at the API (accounts can sign in by emailed code
+  // alone) but the web form always sends one.
+  let passwordHash: string | null = null;
+  if (body.password !== undefined) {
+    const problem = passwordProblem(body.password, email);
+    if (problem) {
+      sendJson(res, 400, { error: problem, field: 'password' });
+      return;
+    }
+    passwordHash = await hashPassword(body.password);
+  }
+
   const account = withDb((db) => {
-    // Per client address, across all emails: the per-email cooldown below
-    // doesn't stop a flood of unique addresses.
-    const rl = hitStoredLimit(db, 'signup:' + clientAddress(req), signupPerHour(), HOUR_MS, now);
-    if (!rl.allowed) return { limited: true as const, retryAfterSec: rl.retryAfterSec };
     pruneUnverified(db, now);
 
     const existing = db.accounts[email];
@@ -330,6 +349,15 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
       emailVerifiedAt: existing?.emailVerifiedAt ?? null,
       sessionToken: existing?.sessionToken ?? null,
       sessionExpiresAt: existing?.sessionExpiresAt ?? null,
+      sessionIssuedAt: existing?.sessionIssuedAt ?? null,
+      sessionMethod: existing?.sessionMethod ?? null,
+      // A signup can set the password of an account that was never verified,
+      // but never replace the password of one that was: that would let anyone
+      // who knows an email address take its account over.
+      passwordHash: existing?.emailVerifiedAt ? existing.passwordHash ?? null : passwordHash ?? existing?.passwordHash ?? null,
+      passwordSetAt: existing?.emailVerifiedAt
+        ? existing.passwordSetAt ?? null
+        : passwordHash ? new Date(now).toISOString() : existing?.passwordSetAt ?? null,
       stage: existing?.emailVerifiedAt ? existing.stage : 'unverified',
       createdAt: existing?.createdAt ?? new Date(now).toISOString(),
     };
@@ -343,11 +371,6 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
     db.accounts[email] = record;
     return record;
   });
-
-  if ('limited' in account) {
-    sendJson(res, 429, { error: 'Too many signup attempts from this network. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(account.retryAfterSec) });
-    return;
-  }
 
   let emailSent = false;
   if (verifierConfigured()) {
@@ -508,13 +531,11 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
     }
 
     if (!acct) return { ok: false as const, error: INVALID };
-    const token = randomBytes(24).toString('hex');
     acct.emailVerifiedAt = acct.emailVerifiedAt ?? new Date().toISOString();
     acct.code = null;
     acct.codeExpiresAt = null;
     acct.codeAttempts = 0;
-    acct.sessionToken = token;
-    acct.sessionExpiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
+    const token = startSession(acct, 'code');
     if (acct.stage === 'unverified') acct.stage = 'verified';
 
     return {
@@ -524,6 +545,7 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
       email: acct.email,
       company: acct.company,
       stage: acct.stage,
+      hasPassword: Boolean(acct.passwordHash),
     };
   });
 
@@ -536,6 +558,146 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
   // it). The token is also in the body for non-browser API clients, which
   // send it as a Bearer header; the console no longer stores it.
   sendJson(res, 200, outcome, { 'Set-Cookie': sessionCookie(outcome.sessionToken, SESSION_TTL_MS) });
+}
+
+/** Begin a fresh session on an account (mutates it; call inside withDb). Returns the token. */
+function startSession(acct: AccountRecord, method: 'code' | 'password'): string {
+  const token = randomBytes(24).toString('hex');
+  const now = Date.now();
+  acct.sessionToken = token;
+  acct.sessionExpiresAt = new Date(now + SESSION_TTL_MS).toISOString();
+  acct.sessionIssuedAt = new Date(now).toISOString();
+  acct.sessionMethod = method;
+  return token;
+}
+
+// Wrong passwords per address per hour before further password attempts are
+// refused (the emailed code still works), and password attempts per client
+// address per hour regardless of the address tried.
+const MAX_LOGIN_FAILURES = 10;
+const MAX_LOGIN_ATTEMPTS_PER_IP = 60;
+/** A session this fresh from an emailed code may set a new password without the old one. */
+const RESET_WINDOW_MS = 15 * 60_000;
+
+// ---------------------------------------------------------------------
+// POST /api/signin-password -- email + password. Same session as the
+// emailed-code route. One answer for every failure, and the password is
+// always checked against something, so neither the reply nor its timing
+// says whether an address has an account.
+// ---------------------------------------------------------------------
+
+async function handleSigninPassword(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  let body: { email?: string; password?: string };
+  try {
+    body = await readJson(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message });
+    return;
+  }
+  const email = (body.email ?? '').trim().toLowerCase();
+  const password = typeof body.password === 'string' ? body.password : '';
+  if (!isValidEmail(email) || !password) {
+    sendJson(res, 400, { error: 'Enter your email and password.' });
+    return;
+  }
+  const INVALID = 'That email and password don’t match. You can also sign in with an emailed code.';
+  if (password.length > MAX_PASSWORD) {
+    sendJson(res, 401, { error: INVALID });
+    return;
+  }
+
+  const now = Date.now();
+  const failKey = 'login-fail:' + email;
+  const gate = withDb((db) => {
+    const ip = hitStoredLimit(db, 'login-ip:' + clientAddress(req), MAX_LOGIN_ATTEMPTS_PER_IP, HOUR_MS, now);
+    if (!ip.allowed) return { blocked: true as const, retryAfterSec: ip.retryAfterSec };
+    const f = db.rateLimits[failKey];
+    if (f && now - f.start < f.windowMs && f.count >= MAX_LOGIN_FAILURES) {
+      return { blocked: true as const, retryAfterSec: Math.ceil((f.start + f.windowMs - now) / 1000) };
+    }
+    const a = db.accounts[email];
+    return { blocked: false as const, hash: a?.emailVerifiedAt ? a.passwordHash ?? null : null };
+  });
+  if (gate.blocked) {
+    sendJson(res, 429, { error: 'Too many sign-in attempts. Try again later, or sign in with an emailed code.', code: 'rate_limited' }, { 'Retry-After': String(gate.retryAfterSec) });
+    return;
+  }
+
+  const good = await verifyPassword(password, gate.hash);
+  if (!good) {
+    withDb((db) => { hitStoredLimit(db, failKey, MAX_LOGIN_FAILURES, HOUR_MS, now); });
+    sendJson(res, 401, { error: INVALID });
+    return;
+  }
+
+  const outcome = withDb((db) => {
+    const acct = db.accounts[email];
+    if (!acct || !acct.emailVerifiedAt) return null;
+    const token = startSession(acct, 'password');
+    return { ok: true as const, sessionToken: token, name: acct.name, email: acct.email, company: acct.company, stage: acct.stage, hasPassword: true };
+  });
+  if (!outcome) {
+    sendJson(res, 401, { error: INVALID });
+    return;
+  }
+  sendJson(res, 200, outcome, { 'Set-Cookie': sessionCookie(outcome.sessionToken, SESSION_TTL_MS) });
+}
+
+// ---------------------------------------------------------------------
+// POST /api/password -- set or change the password of the signed-in
+// account. Allowed when the account has no password yet, when the session
+// came from an emailed code in the last 15 minutes (the "forgot password"
+// path), or when the current password is supplied.
+// ---------------------------------------------------------------------
+
+async function handlePassword(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const session = requireSession(req);
+  if (!session) {
+    sendJson(res, 401, { error: 'Sign in first.' });
+    return;
+  }
+  let body: { password?: string; currentPassword?: string };
+  try {
+    body = await readJson(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message });
+    return;
+  }
+  const problem = passwordProblem(body.password, session.email);
+  if (problem) {
+    sendJson(res, 400, { error: problem, field: 'password' });
+    return;
+  }
+
+  const now = Date.now();
+  const info = withDb((db) => {
+    const rl = hitStoredLimit(db, 'pw-change:' + session.email, 10, HOUR_MS, now);
+    if (!rl.allowed) return { limited: true as const, retryAfterSec: rl.retryAfterSec };
+    const a = db.accounts[session.email];
+    const recentCode =
+      a?.sessionMethod === 'code' && a.sessionIssuedAt && now - new Date(a.sessionIssuedAt).getTime() < RESET_WINDOW_MS;
+    return { limited: false as const, hash: a?.passwordHash ?? null, recentCode: Boolean(recentCode) };
+  });
+  if (info.limited) {
+    sendJson(res, 429, { error: 'Too many password changes. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(info.retryAfterSec) });
+    return;
+  }
+  if (info.hash && !info.recentCode) {
+    const given = typeof body.currentPassword === 'string' ? body.currentPassword : '';
+    if (!given || given.length > MAX_PASSWORD || !(await verifyPassword(given, info.hash))) {
+      sendJson(res, 403, { error: 'Enter your current password, or sign in with an emailed code first.', code: 'reauth_required' });
+      return;
+    }
+  }
+
+  const newHash = await hashPassword(body.password as string);
+  withDb((db) => {
+    const a = db.accounts[session.email];
+    if (!a) return;
+    a.passwordHash = newHash;
+    a.passwordSetAt = new Date().toISOString();
+  });
+  sendJson(res, 200, { ok: true });
 }
 
 function safeEqual(a: string, b: string): boolean {
@@ -1124,6 +1286,7 @@ function handleAccount(req: IncomingMessage, res: ServerResponse): void {
       company: acct?.company,
       stage: acct?.stage ?? 'unverified',
       emailVerifiedAt: acct?.emailVerifiedAt ?? null,
+      hasPassword: Boolean(acct?.passwordHash),
       subscription: sub,
       paymentMethod: pm,
       acceptance,
@@ -1218,6 +1381,71 @@ async function handleIssueKey(req: IncomingMessage, res: ServerResponse): Promis
   });
 
   sendJson(res, 200, { key, keyPrefix, plan: life.plan, expiresAt: life.expiresAt });
+}
+
+// ---------------------------------------------------------------------
+// POST /api/demo/paycheck -- the live calculator on the home page. No key:
+// it runs the real engine on a small, fixed shape of input and returns both
+// the full request it built and the real result. Not billed, not recorded
+// against any account, and limited per client address.
+// ---------------------------------------------------------------------
+
+const DEMO_PER_HOUR = 120;
+const DEMO_MAX_GROSS_CENTS = 50_000_000; // $500,000 a paycheck
+const DEMO_FREQUENCIES = ['weekly', 'biweekly', 'semimonthly', 'monthly'];
+const DEMO_FILING = ['single', 'married_joint', 'married_separate', 'head_of_household'];
+
+async function handleDemoPaycheck(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const rl = withDb((db) => hitStoredLimit(db, 'demo:' + clientAddress(req), DEMO_PER_HOUR, HOUR_MS));
+  if (!rl.allowed) {
+    sendJson(res, 429, { error: 'The live calculator is rate limited. Try again in a little while, or sign up for a key.', code: 'rate_limited' }, { 'Retry-After': String(rl.retryAfterSec) });
+    return;
+  }
+  let body: Record<string, unknown>;
+  try {
+    body = await readJson<Record<string, unknown>>(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json' });
+    return;
+  }
+  const state = typeof body.state === 'string' ? body.state.toUpperCase() : '';
+  const payFrequency = typeof body.payFrequency === 'string' ? body.payFrequency : 'biweekly';
+  const filingStatus = typeof body.filingStatus === 'string' ? body.filingStatus : 'single';
+  const gross = body.grossCents;
+  const pretax = body.pretaxCents === undefined ? 0 : body.pretaxCents;
+  const bad = (error: string) => sendJson(res, 422, { error, code: 'invalid_input' });
+  if (!validStateCodes().has(state)) return bad('Choose a state from the list.');
+  if (!DEMO_FREQUENCIES.includes(payFrequency)) return bad('Choose weekly, biweekly, semimonthly or monthly.');
+  if (!DEMO_FILING.includes(filingStatus)) return bad('Choose a filing status from the list.');
+  if (!Number.isInteger(gross) || (gross as number) < 1 || (gross as number) > DEMO_MAX_GROSS_CENTS) return bad('Enter a paycheck amount between $0.01 and $500,000.');
+  if (!Number.isInteger(pretax) || (pretax as number) < 0 || (pretax as number) > (gross as number)) return bad('The 401(k) deferral must be between $0 and the paycheck amount.');
+
+  // Today's rules when we have them; otherwise the latest year we do have.
+  const have = supportedYears().filter((y) => stateYears(state).includes(y));
+  const today = new Date().toISOString().slice(0, 10);
+  const checkDate = have.includes(Number(today.slice(0, 4))) ? today : `${have.at(-1) ?? supportedYears().at(-1)}-06-15`;
+
+  const input = {
+    checkDate,
+    payFrequency,
+    earnings: [{ code: 'REG', category: 'regular', amount: gross }],
+    deductions: (pretax as number) > 0 ? [{ code: '401K', category: 'deferral_401k', amount: pretax }] : [],
+    federalW4: { filingStatus, multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    workState: { code: state },
+  };
+  const validation = validatePaycheckInput(input, {
+    validStateCodes: validStateCodes(),
+    supportedYears: supportedYears(),
+    stateHasYear: (code, year) => stateYears(code).includes(year),
+  });
+  if (!validation.ok) return bad(validation.errors[0]?.message ?? 'That input could not be used.');
+  try {
+    sendJson(res, 200, { demo: true, request: input, result: calculatePaycheck(validation.value) });
+  } catch (err) {
+    console.error('[demo paycheck] calculation failed:', err instanceof Error ? err.message : err);
+    sendJson(res, 422, { error: 'That calculation could not be completed.', code: 'calculation_error' });
+  }
 }
 
 // Address of the caller, for per-address limits.
@@ -1746,6 +1974,9 @@ createServer((req, res) => {
     if (method === 'POST' && url === '/api/signup') return handleSignup(req, res);
     if (method === 'POST' && url === '/api/verify-email') return handleVerifyEmail(req, res);
     if (method === 'POST' && url === '/api/signin') return handleSignin(req, res);
+    if (method === 'POST' && url === '/api/signin-password') return handleSigninPassword(req, res);
+    if (method === 'POST' && url === '/api/password') return handlePassword(req, res);
+    if (method === 'POST' && url === '/api/demo/paycheck') return handleDemoPaycheck(req, res);
     if (method === 'POST' && url === '/api/signout') return handleSignout(req, res);
     if (method === 'GET' && url === '/api/terms') return handleTerms(req, res);
     if (method === 'POST' && url === '/api/accept-terms') return handleAcceptTerms(req, res);

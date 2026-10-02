@@ -18,48 +18,117 @@
     </div>
     <div class="step-num-row"><div class="step-num" style="font-size:96px;letter-spacing:-4px">Sign in</div></div>
     <div class="step-rule"></div>
-    <p>We’ll email a 6-digit code if this address has an account. The reply is the same either way.</p>
+    <p>Sign in with your password, or have a 6-digit code emailed to you. Either way you land on the same account.</p>
   </aside>
   <main class="form-col">
-    <h1>Sign in.</h1>
-    <p class="lead">Use the work email on your account. There is no password.</p>
-    <form class="form-stack" id="form">
+    <h1 id="title">Sign in.</h1>
+    <p class="lead" id="lead">Use the work email and password on your account.</p>
+    <form class="form-stack" id="pwForm" novalidate>
       <div class="field" id="emailField">
         <label class="field-label" for="email">Work email</label>
-        <input id="email" type="email" autocomplete="email" placeholder="you@company.com" required />
-        <p class="field-error" id="err" hidden></p>
+        <input id="email" name="email" type="email" autocomplete="username" placeholder="you@company.com" required />
       </div>
-      <button class="btn btn-lg btn-primary btn-block" id="submit" type="submit">Email me a code <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
+      <div class="field" id="pwField">
+        <label class="field-label" for="password">Password</label>
+        <div class="field-box">
+          <input id="password" name="password" type="password" autocomplete="current-password" maxlength="200" />
+          <button type="button" class="field-slot" id="pwToggle" aria-controls="password" aria-pressed="false">Show</button>
+        </div>
+      </div>
+      <p class="field-error" id="err" hidden></p>
+      <button class="btn btn-lg btn-primary btn-block" id="submit" type="submit">Sign in <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
     </form>
+    <form class="form-stack" id="codeForm" novalidate hidden>
+      <div class="field" id="codeEmailField">
+        <label class="field-label" for="codeEmail">Work email</label>
+        <input id="codeEmail" type="email" autocomplete="email" placeholder="you@company.com" required />
+      </div>
+      <p class="field-error" id="codeErr" hidden></p>
+      <button class="btn btn-lg btn-primary btn-block" id="codeSubmit" type="submit">Email me a code <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
+    </form>
+    <p class="form-foot" id="altRow">
+      <button type="button" class="btn btn-text" id="useCode">Email me a code instead</button>
+      <button type="button" class="btn btn-text" id="forgot" style="margin-left:16px">Forgot your password?</button>
+    </p>
+    <p class="form-foot" id="backRow" hidden><button type="button" class="btn btn-text" id="usePassword">Use my password instead</button></p>
     <p class="form-foot">New here? <a class="btn btn-text" href="/signup">Create account</a></p>
   </main>
 </div>
 <script src="/assets/session.js"></script>
 <script>
-document.getElementById('form').addEventListener('submit', function (e) {
-  e.preventDefault();
-  var email = document.getElementById('email').value.trim();
-  var err = document.getElementById('err');
-  err.hidden = true;
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    err.textContent = 'Enter the work email you signed up with.';
-    err.hidden = false;
-    return;
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var validEmail = function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); };
+  var params = new URLSearchParams(location.search);
+  var reset = false;
+  if (params.get('email')) { $('email').value = params.get('email'); $('codeEmail').value = params.get('email'); }
+
+  function mode(code, isReset) {
+    reset = !!isReset;
+    $('pwForm').hidden = code;
+    $('codeForm').hidden = !code;
+    $('altRow').hidden = code;
+    $('backRow').hidden = !code;
+    $('title').textContent = isReset ? 'Reset your password.' : code ? 'Get a sign-in code.' : 'Sign in.';
+    $('lead').textContent = isReset
+      ? 'We’ll email a 6-digit code to the address on your account. Enter it, then choose a new password.'
+      : code ? 'We’ll email a 6-digit code if this address has an account. The reply is the same either way.'
+             : 'Use the work email and password on your account.';
+    if (code) { $('codeEmail').value = $('codeEmail').value || $('email').value; $('codeEmail').focus(); }
   }
-  var btn = document.getElementById('submit');
-  Omnia.setLoading(btn, true);
-  Omnia.api('/api/signin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email }) })
-    .then(function (res) {
-      Omnia.setLoading(btn, false);
-      if (!res.ok) {
-        err.textContent = (res.body && res.body.error) || 'Could not send a sign-in code.';
-        err.hidden = false;
-        return;
-      }
-      Omnia.setPending({ email: email, emailConfigured: !!(res.body && res.body.emailConfigured), sentAt: Date.now() });
-      location.href = '/signup/verify?mode=signin';
-    });
-});
+  $('useCode').addEventListener('click', function () { mode(true, false); });
+  $('forgot').addEventListener('click', function () { mode(true, true); });
+  $('usePassword').addEventListener('click', function () { mode(false, false); });
+  $('pwToggle').addEventListener('click', function () {
+    var show = $('password').type === 'password';
+    $('password').type = show ? 'text' : 'password';
+    this.textContent = show ? 'Hide' : 'Show';
+    this.setAttribute('aria-pressed', String(show));
+  });
+
+  function fail(box, msg) { box.textContent = msg; box.hidden = false; }
+
+  // Email + password
+  $('pwForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var err = $('err'); err.hidden = true;
+    var email = $('email').value.trim();
+    var password = $('password').value;
+    if (!validEmail(email)) { fail(err, 'Enter the work email you signed up with.'); return; }
+    if (!password) { fail(err, 'Enter your password, or use an emailed code.'); return; }
+    var btn = $('submit');
+    Omnia.setLoading(btn, true);
+    Omnia.api('/api/signin-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: password }) })
+      .then(function (res) {
+        Omnia.setLoading(btn, false);
+        if (!res.ok) { fail(err, (res.body && res.body.error) || 'Could not sign you in.'); return; }
+        Omnia.setSession({ email: res.body.email, name: res.body.name, company: res.body.company });
+        location.href = '/docs#billing';
+      })
+      .catch(function () { Omnia.setLoading(btn, false); fail(err, 'Could not reach the server. Try again.'); });
+  });
+
+  // Emailed code (sign in, or the first half of a password reset)
+  $('codeForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var err = $('codeErr'); err.hidden = true;
+    var email = $('codeEmail').value.trim();
+    if (!validEmail(email)) { fail(err, 'Enter the work email you signed up with.'); return; }
+    var btn = $('codeSubmit');
+    Omnia.setLoading(btn, true);
+    Omnia.api('/api/signin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email }) })
+      .then(function (res) {
+        Omnia.setLoading(btn, false);
+        if (!res.ok) { fail(err, (res.body && res.body.error) || 'Could not send a sign-in code.'); return; }
+        Omnia.setPending({ email: email, emailConfigured: !!(res.body && res.body.emailConfigured), sentAt: Date.now() });
+        location.href = '/signup/verify?mode=signin' + (reset ? '&reset=1' : '');
+      })
+      .catch(function () { Omnia.setLoading(btn, false); fail(err, 'Could not reach the server. Try again.'); });
+  });
+
+  if (params.get('mode') === 'code') mode(true, false);
+  if (params.get('reset') === '1') mode(true, true);
+})();
 </script>
 </body>
 </html>

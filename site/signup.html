@@ -58,11 +58,12 @@
       <div class="field" id="pwField">
         <label class="field-label" for="password">Password</label>
         <div class="field-box">
-          <input id="password" type="password" value="" placeholder="Password" disabled />
-          <button type="button" class="field-slot" disabled>Show</button>
+          <input id="password" name="password" type="password" autocomplete="new-password" placeholder="At least 12 characters" maxlength="200" required />
+          <button type="button" class="field-slot" id="pwToggle" aria-controls="password" aria-pressed="false">Show</button>
         </div>
         <p class="pw-rule" id="pwRule"><span class="box" aria-hidden="true"></span><svg class="check" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6l3 3 5-6" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>12+ characters</span></p>
-        <p class="field-hint">Accounts use a 6-digit email code. There is no password to set.</p>
+        <p class="field-error" id="pwError" hidden></p>
+        <p class="field-hint">Next we email a 6-digit code to confirm this address. You can sign in later with this password or a fresh code.</p>
       </div>
       <div class="field" id="nameField">
         <label class="field-label" for="name">Your name</label>
@@ -94,6 +95,7 @@
   var name = document.getElementById('name');
   var company = document.getElementById('company');
   var phone = document.getElementById('phone');
+  var password = document.getElementById('password');
   var submit = document.getElementById('submit');
   var params = new URLSearchParams(location.search);
   if (params.get('email')) email.value = params.get('email');
@@ -106,13 +108,23 @@
   }
   function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
   function refresh() {
-    submit.disabled = !(validEmail(email.value.trim()) && name.value.trim() && company.value.trim() && phone.value.trim());
+    var long = password.value.length >= 12;
+    document.getElementById('pwRule').classList.toggle('met', long);
+    submit.disabled = !(validEmail(email.value.trim()) && long && name.value.trim() && company.value.trim() && phone.value.trim());
   }
-  [email, name, company, phone].forEach(function (el) { el.addEventListener('input', refresh); });
+  [email, password, name, company, phone].forEach(function (el) { el.addEventListener('input', refresh); });
+  document.getElementById('pwToggle').addEventListener('click', function () {
+    var show = password.type === 'password';
+    password.type = show ? 'text' : 'password';
+    this.textContent = show ? 'Hide' : 'Show';
+    this.setAttribute('aria-pressed', String(show));
+  });
   refresh();
   document.getElementById('form').addEventListener('submit', function (e) {
     e.preventDefault();
     document.getElementById('emailError').hidden = true;
+    document.getElementById('pwError').hidden = true;
+    document.getElementById('pwField').classList.remove('error');
     document.getElementById('formError').hidden = true;
     email.closest('.field').classList.remove('error');
     if (!validEmail(email.value.trim())) {
@@ -129,13 +141,18 @@
       phone: phone.value.trim()
     };
     Omnia.setLoading(submit, true);
-    Omnia.api('/api/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+    // The password goes to the server once and is never kept in the page's storage.
+    Omnia.api('/api/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ password: password.value }, payload)) })
       .then(function (res) {
         Omnia.setLoading(submit, false);
         if (!res.ok) {
           var msg = (res.body && res.body.error) || 'Could not start signup.';
           var box = document.getElementById('formError');
-          if (/email/i.test(msg)) {
+          if (res.body && res.body.field === 'password') {
+            document.getElementById('pwField').classList.add('error');
+            document.getElementById('pwError').textContent = msg;
+            document.getElementById('pwError').hidden = false;
+          } else if (/email/i.test(msg)) {
             email.closest('.field').classList.add('error');
             document.getElementById('emailError').textContent = msg;
             document.getElementById('emailError').hidden = false;

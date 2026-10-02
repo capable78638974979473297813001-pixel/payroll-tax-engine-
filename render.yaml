@@ -35,11 +35,9 @@ services:
         sync: false
       - key: RESEND_FROM
         value: "Omnia.tax <verify@omniatax.io>"
-      # Python verifier (optional). Set both to turn it on; 32+ random chars each.
-      - key: VERIFIER_SECRET
-        sync: false
-      - key: VERIFIER_PEPPER
-        sync: false
+      # The Python email verifier starts by itself once RESEND_API_KEY (or SMTP_HOST)
+      # is set, and keeps its own secrets on the disk. Set VERIFIER_SECRET and
+      # VERIFIER_PEPPER (32+ chars each) only if you want to choose them.
       # Cards only until ACH Direct Debit is enabled in Stripe. Remove for card + bank.
       # - key: STRIPE_PAYMENT_METHOD_TYPES
       #   value: card
