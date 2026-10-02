@@ -182,6 +182,19 @@ describe('accounts you can log back into', { skip: !havePython }, () => {
     assert.equal((await post('/api/verify-email', { email: EMAIL, code: lastCode() })).status, 200);
   });
 
+  test('the calculator accepts looked-up address facts and rejects a bad lookup', async () => {
+    const base = { state: 'OH', grossCents: 300000, payFrequency: 'biweekly', filingStatus: 'single' };
+    const ok = await post('/api/demo/paycheck', { ...base, certificate: { ohMunicipality: 'Columbus', bogus: { nested: 1 }, 'bad key!': 'x' }, residenceState: 'KY' });
+    assert.equal(ok.status, 200);
+    const b = await ok.json();
+    assert.equal(b.request.workState.certificate.ohMunicipality, 'Columbus');
+    assert.equal(b.request.workState.certificate.bogus, undefined, 'nested values never reach the engine');
+    assert.equal(b.request.residenceState.code, 'KY');
+    assert.equal((await post('/api/demo/paycheck', { ...base, residenceState: 'ZZ' })).status, 422);
+    assert.equal((await post('/api/demo/resolve-address', {})).status, 422);
+    assert.equal((await post('/api/demo/resolve-address', { workAddress: 'x'.repeat(300) })).status, 422);
+  });
+
   test('the home page calculator runs the real engine without a key', async () => {
     const r = await post('/api/demo/paycheck', { state: 'OH', grossCents: 300000, payFrequency: 'biweekly', filingStatus: 'single', pretaxCents: 24000 });
     assert.equal(r.status, 200);

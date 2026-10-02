@@ -54,11 +54,25 @@
     <div class="cc-head">
       <p class="eyebrow">Try it &middot; no signup</p>
       <h2 id="calcTitle">Run a real paycheck.</h2>
-      <p class="cc-sub">Pick a state and change the numbers. This is the same engine your API key calls, and every line below is real output.</p>
+      <p class="cc-sub">Type a work address or pick a state, then change the numbers. This is the same engine your API key calls, and every line below is real output.</p>
     </div>
     <div class="cc-card">
       <form class="cc-in" id="calc" autocomplete="off" novalidate>
         <h3>The paycheck</h3>
+        <div class="cc-f cc-addr">
+          <label for="cAddr"><span>Work address</span></label>
+          <div class="cc-addr-row">
+            <input id="cAddr" type="text" inputmode="text" autocomplete="street-address" maxlength="200" placeholder="233 S Wacker Dr, Chicago, IL 60606" aria-describedby="cAddrHelp" />
+            <button class="btn btn-md btn-ink" type="button" id="cLookup">Look up</button>
+          </div>
+          <p class="cc-help" id="cAddrHelp">Street, city and state. We find the state and any city, county or school-district tax at that spot.</p>
+          <details class="cc-home" id="cHomeBox">
+            <summary>Lives somewhere else? Add a home address</summary>
+            <input id="cHome" type="text" autocomplete="off" maxlength="200" placeholder="1 Main St, Yonkers, NY 10701" aria-label="Home address" />
+          </details>
+          <div class="cc-examples" id="cExamples" aria-label="Example addresses"></div>
+          <div class="cc-geo" id="cGeo" role="status" hidden></div>
+        </div>
         <label class="cc-f" for="cState"><span>State</span>
           <select id="cState"><option value="OH">Ohio</option></select></label>
         <label class="cc-f" for="cFreq"><span>How often paid</span>
