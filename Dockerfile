@@ -10,6 +10,7 @@ WORKDIR /app
 COPY package.json ./
 COPY src ./src
 COPY api ./api
+COPY geocode ./geocode
 COPY data ./data
 COPY site ./site
 COPY verifier/email_verifier.py ./verifier/email_verifier.py

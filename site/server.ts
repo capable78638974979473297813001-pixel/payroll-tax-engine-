@@ -6,6 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 
 import { calculatePaycheck } from '../src/calculate.ts';
 import { UnsupportedTaxYearError } from '../src/registry.ts';
+import { resolveEmployee } from '../geocode/index.ts';
 import {
   withDb, readDb, appendUsage, hitStoredLimit,
   type AccountRecord, type KeyRecord, type PaymentMethodRecord,
@@ -1433,6 +1434,9 @@ async function handleDemoPaycheck(req: IncomingMessage, res: ServerResponse): Pr
   const gross = body.grossCents;
   const pretax = body.pretaxCents === undefined ? 0 : body.pretaxCents;
   const bad = (error: string) => sendJson(res, 422, { error, code: 'invalid_input' });
+  const certificate = demoCertificate(body.certificate);
+  const residenceState = typeof body.residenceState === 'string' ? body.residenceState.toUpperCase() : '';
+  if (residenceState && !validStateCodes().has(residenceState)) return bad('The home state is not one this build can compute.');
   if (!validStateCodes().has(state)) return bad('Choose a state from the list.');
   if (!DEMO_FREQUENCIES.includes(payFrequency)) return bad('Choose weekly, biweekly, semimonthly or monthly.');
   if (!DEMO_FILING.includes(filingStatus)) return bad('Choose a filing status from the list.');
@@ -1451,7 +1455,8 @@ async function handleDemoPaycheck(req: IncomingMessage, res: ServerResponse): Pr
     deductions: (pretax as number) > 0 ? [{ code: '401K', category: 'deferral_401k', amount: pretax }] : [],
     federalW4: { filingStatus, multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
     ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
-    workState: { code: state },
+    workState: certificate ? { code: state, certificate } : { code: state },
+    ...(residenceState && residenceState !== state ? { residenceState: { code: residenceState } } : {}),
   };
   const validation = validatePaycheckInput(input, {
     validStateCodes: validStateCodes(),
@@ -1464,6 +1469,83 @@ async function handleDemoPaycheck(req: IncomingMessage, res: ServerResponse): Pr
   } catch (err) {
     console.error('[demo paycheck] calculation failed:', err instanceof Error ? err.message : err);
     sendJson(res, 422, { error: 'That calculation could not be completed.', code: 'calculation_error' });
+  }
+}
+
+// The certificate the address lookup produced, handed back by the page.
+// Only flat scalar facts are kept, so the page can't smuggle structure into
+// the engine; the engine and validator still judge the values.
+function demoCertificate(raw: unknown): Record<string, string | number | boolean> | undefined {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  const out: Record<string, string | number | boolean> = {};
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>).slice(0, 60)) {
+    if (!/^[A-Za-z][A-Za-z0-9]{0,40}$/.test(k)) continue;
+    if (typeof v === 'boolean' || (typeof v === 'number' && Number.isFinite(v))) out[k] = v;
+    else if (typeof v === 'string' && v.length <= 120) out[k] = v;
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
+// ---------------------------------------------------------------------
+// POST /api/demo/resolve-address -- the calculator's address lookup. Turns a
+// work address (and optionally a home address) into the state, the local
+// jurisdictions and the certificate facts the engine reads, using the same
+// resolver the API's customers use. Public, so it is rate limited much
+// harder than the calculation itself: each lookup calls outside geocoders.
+// ---------------------------------------------------------------------
+
+const DEMO_LOOKUPS_PER_HOUR = 30;
+
+async function handleDemoResolveAddress(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const rl = withDb((db) => hitStoredLimit(db, 'demo-geo:' + clientAddress(req), DEMO_LOOKUPS_PER_HOUR, HOUR_MS));
+  if (!rl.allowed) {
+    sendJson(res, 429, { error: 'Too many address lookups from this connection. Try again in a little while, or sign up for a key.', code: 'rate_limited' }, { 'Retry-After': String(rl.retryAfterSec) });
+    return;
+  }
+  let body: Record<string, unknown>;
+  try {
+    body = await readJson<Record<string, unknown>>(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json' });
+    return;
+  }
+  const clean = (v: unknown) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : '');
+  const work = clean(body.workAddress);
+  const home = clean(body.residenceAddress);
+  if (!work && !home) {
+    sendJson(res, 422, { error: 'Enter a work address, like 233 S Wacker Dr, Chicago, IL 60606.', code: 'invalid_input' });
+    return;
+  }
+  if (work.length > 200 || home.length > 200) {
+    sendJson(res, 422, { error: 'That address is too long.', code: 'invalid_input' });
+    return;
+  }
+  const checkDate = new Date().toISOString().slice(0, 10);
+  try {
+    const r = await resolveEmployee({ work: work || undefined, residence: home || undefined }, checkDate);
+    const side = (a: typeof r.work) => a && {
+      matched: a.matched,
+      matchedAddress: a.matchQuality?.matchedAddress ?? null,
+      state: a.resolved?.state ?? null,
+      place: a.geographies?.incorporatedPlaces[0] ?? null,
+      county: a.geographies?.counties[0] ?? null,
+      precision: a.matched ? a.precision : null,
+    };
+    const state = (r.work?.matched ? r.work.resolved?.state : null) ?? (r.residence?.matched ? r.residence.resolved?.state : null) ?? null;
+    const homeState = r.residence?.matched ? r.residence.resolved?.state ?? null : null;
+    sendJson(res, 200, {
+      state,
+      residenceState: homeState && homeState !== state ? homeState : null,
+      certificate: demoCertificate(r.certificateFields) ?? null,
+      work: side(r.work),
+      residence: side(r.residence),
+      notResolvable: r.notResolvable,
+      warnings: r.lowConfidenceReasons,
+      fullyResolved: r.fullyResolved,
+    });
+  } catch (err) {
+    console.error('[demo resolve-address] failed:', err instanceof Error ? err.message : err);
+    sendJson(res, 502, { error: 'The address lookup is unavailable right now. Pick the state by hand instead.', code: 'geocode_unavailable' });
   }
 }
 
@@ -1996,6 +2078,7 @@ createServer((req, res) => {
     if (method === 'POST' && url === '/api/signin-password') return handleSigninPassword(req, res);
     if (method === 'POST' && url === '/api/password') return handlePassword(req, res);
     if (method === 'POST' && url === '/api/demo/paycheck') return handleDemoPaycheck(req, res);
+    if (method === 'POST' && url === '/api/demo/resolve-address') return handleDemoResolveAddress(req, res);
     if (method === 'POST' && url === '/api/signout') return handleSignout(req, res);
     if (method === 'GET' && url === '/api/terms') return handleTerms(req, res);
     if (method === 'POST' && url === '/api/accept-terms') return handleAcceptTerms(req, res);

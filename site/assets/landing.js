@@ -10,6 +10,23 @@
     NY: 'New York City and Yonkers', OH: 'Ohio municipalities and school districts', OR: 'Oregon transit and Metro', PA: 'Pennsylvania local taxes' };
 
   var last = { request: null, result: null };
+  // What the address lookup found: { certificate, residenceState, state }.
+  // Cleared the moment the person picks a state by hand or edits the address.
+  var geo = null;
+  var EXAMPLES = [
+    ['Chicago, IL', '233 S Wacker Dr, Chicago, IL 60606'],
+    ['Columbus, OH', '77 S High St, Columbus, OH 43215'],
+    ['Philadelphia, PA', '1500 Market St, Philadelphia, PA 19102'],
+    ['New York, NY', '350 5th Ave, New York, NY 10118'],
+    ['Detroit, MI', '2 Woodward Ave, Detroit, MI 48226']
+  ];
+  var PRECISION = {
+    rooftop: 'Exact point, published by the local address authority',
+    'rooftop-osm': 'House-level point (OpenStreetMap, cross-checked)',
+    neighbor: 'Between two published address points on the street',
+    'parcel-centroid': 'Center of the county tax parcel',
+    interpolated: 'Estimated along the street segment'
+  };
   var seq = 0;
   var timer = null;
 
@@ -62,6 +79,7 @@
   }
   function choose(code) {
     $('cState').value = code;
+    clearGeo();
     markChip();
     run();
     var c = $('calculator');
@@ -86,10 +104,15 @@
     if (pretax > gross) { setErr('The 401(k) deferral can’t be more than the paycheck.'); return; }
     setErr('');
     var mine = ++seq;
-    api('/api/demo/paycheck', {
+    var req = {
       state: $('cState').value, payFrequency: $('cFreq').value, filingStatus: $('cFiling').value,
       grossCents: gross, pretaxCents: pretax,
-    }).then(function (r) {
+    };
+    if (geo && geo.state === req.state) {
+      if (geo.certificate) req.certificate = geo.certificate;
+      if (geo.residenceState) req.residenceState = geo.residenceState;
+    }
+    api('/api/demo/paycheck', req).then(function (r) {
       if (mine !== seq) return; // a newer request is already on its way
       if (!r.ok) { setErr((r.body && r.body.error) || 'The calculator could not be reached. Try again.'); return; }
       last = { request: r.body.request, result: r.body.result };
@@ -146,6 +169,65 @@
     markChip();
   }
 
+  // ---------- address lookup -----------------------------------------------
+  function showGeo(node, warn) {
+    var g = $('cGeo');
+    g.textContent = '';
+    g.className = 'cc-geo' + (warn ? ' warn' : '');
+    if (!node) { g.hidden = true; return; }
+    g.appendChild(node);
+    g.hidden = false;
+  }
+  function geoMsg(title, lines, mono) {
+    var d = el('div');
+    d.appendChild(el('b', null, title));
+    if (lines && lines.length) {
+      var ul = el('ul');
+      lines.forEach(function (l) { ul.appendChild(el('li', null, l)); });
+      d.appendChild(ul);
+    }
+    if (mono) d.appendChild(el('span', 'mono', mono));
+    return d;
+  }
+  function place(a) {
+    return [a.place && a.place.replace(/ (city|town|village|borough|CDP)$/i, ''), a.county && a.county.replace(/ County$/i, '') + ' County', a.state].filter(Boolean).join(', ');
+  }
+  function lookup() {
+    var work = $('cAddr').value.trim(), home = $('cHome').value.trim();
+    if (!work && !home) { showGeo(geoMsg('Enter a street address first.', null, 'For example 233 S Wacker Dr, Chicago, IL 60606'), true); $('cAddr').focus(); return; }
+    var btn = $('cLookup');
+    btn.disabled = true; btn.textContent = 'Looking up…';
+    showGeo(geoMsg('Finding that address…'));
+    api('/api/demo/resolve-address', { workAddress: work, residenceAddress: home }).then(function (r) {
+      btn.disabled = false; btn.textContent = 'Look up';
+      if (!r.ok) { geo = null; showGeo(geoMsg((r.body && r.body.error) || 'The address lookup could not be reached. Pick the state by hand instead.'), true); return; }
+      var b = r.body;
+      if (!b.state) {
+        geo = null;
+        showGeo(geoMsg('We couldn’t match that address.', ['Check the street number and spelling, and include the city and state.']), true);
+        return;
+      }
+      geo = { state: b.state, certificate: b.certificate, residenceState: b.residenceState };
+      $('cState').value = b.state;
+      markChip();
+      var a = b.work && b.work.matched ? b.work : null;
+      var lines = [];
+      if (a) lines.push('Works in ' + place(a));
+      else if (b.work) lines.push('Work address not matched, so the home address is used for the state.');
+      if (b.residence && b.residence.matched) lines.push('Lives in ' + place(b.residence) + (b.residenceState ? ' (a different state: reciprocity and home-state rules apply)' : ''));
+      else if (b.residence) lines.push('Home address not matched, so it was ignored.');
+      (b.warnings || []).slice(0, 2).forEach(function (w) { lines.push(w); });
+      var m = a || b.residence;
+      showGeo(geoMsg('Matched: ' + (m.matchedAddress || m.state), lines, m.precision ? (PRECISION[m.precision] || m.precision) : ''), !b.fullyResolved && (b.warnings || []).length > 0);
+      doRun();
+    }).catch(function () {
+      btn.disabled = false; btn.textContent = 'Look up';
+      geo = null;
+      showGeo(geoMsg('The address lookup could not be reached. Pick the state by hand instead.'), true);
+    });
+  }
+  function clearGeo() { geo = null; showGeo(null); }
+
   // ---------- real code sample ---------------------------------------------
   function curl() {
     return 'curl -X POST ' + location.origin + '/v1/paycheck \\\n' +
@@ -192,7 +274,17 @@
   }
 
   // ---------- go ------------------------------------------------------------
-  ['cState', 'cFreq', 'cFiling'].forEach(function (id) { $(id).addEventListener('change', function () { markChip(); run(); }); });
+  ['cState', 'cFreq', 'cFiling'].forEach(function (id) { $(id).addEventListener('change', function () { if (id === 'cState') clearGeo(); markChip(); run(); }); });
+  $('cLookup').addEventListener('click', lookup);
+  ['cAddr', 'cHome'].forEach(function (id) {
+    $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); lookup(); } });
+    $(id).addEventListener('input', function () { if (geo) { geo = null; $('cGeo').hidden = true; } });
+  });
+  EXAMPLES.forEach(function (x) {
+    var b = el('button', null, x[0]); b.type = 'button';
+    b.addEventListener('click', function () { $('cAddr').value = x[1]; lookup(); });
+    $('cExamples').appendChild(b);
+  });
   ['cGross', 'cPretax'].forEach(function (id) { $(id).addEventListener('input', run); });
   $('calc').addEventListener('submit', function (e) { e.preventDefault(); doRun(); });
   $('cCopy').addEventListener('click', function () { if (last.request) copy($('cCopy'), curl()); });
