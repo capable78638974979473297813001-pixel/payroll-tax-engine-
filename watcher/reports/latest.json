@@ -1,22 +1,47 @@
 {
- "date": "2026-10-01",
+ "date": "2026-10-02",
  "counts": {
-  "unchanged": 456,
-  "unreachable": 6,
-  "blocked": 18,
+  "unchanged": 463,
+  "unreachable": 5,
+  "blocked": 22,
   "gone": 4,
-  "changed": 11,
-  "new": 13,
-  "unstable": 2
+  "changed": 15,
+  "unstable": 1
  },
  "total": 510,
  "changed": [
+  {
+   "id": "al-dcd77af5c8",
+   "jurisdiction": "AL",
+   "title": "City of Opelika -- announcement of the occupational tax cut",
+   "url": "https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092",
+   "detail": "2 lines added, 2 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "ar-40b5273020",
+   "jurisdiction": "AR",
+   "title": "Arkansas DFA withholding tax",
+   "url": "https://www.dfa.arkansas.gov/office/taxes/income-tax-administration/withholding-tax-branch/",
+   "detail": "0 lines added, 2 removed; 0 links added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [
+    "https://www.dfa.arkansas.gov/office/taxes/excise-tax-administration/miscellaneous-tax/electronic-games-of-skill/"
+   ],
+   "significant": true
+  },
   {
    "id": "az-b66098e04c",
    "jurisdiction": "AZ",
    "title": "City of Flagstaff -- City of Flagstaff announces minimum wage for 2026",
    "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
-   "detail": "4 lines added, 4 removed",
+   "detail": "2 lines added, 2 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -28,133 +53,190 @@
    "jurisdiction": "CO",
    "title": "Colorado Division of Labor Standards (local minimum wage notices, INFO #19)",
    "url": "https://cdle.colorado.gov/dlss",
+   "detail": "4 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "md-de02db8bce",
+   "jurisdiction": "MD",
+   "title": "Maryland Division of Labor and Industry -- Maryland Minimum Wage and Overtime Law (Employment Standards Service)",
+   "url": "https://www.labor.maryland.gov/labor/wages/wagehrfacts.shtml",
+   "detail": "11 lines added, 9 removed; 1 links added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://labor.maryland.gov/labor/wages/minimumwagelawpgco.pdf"
+   ],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "mi-c62e8170b0",
+   "jurisdiction": "MI",
+   "title": "Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026",
+   "url": "https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026",
+   "detail": "1 lines added, 1 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [
+    "$21"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "mi-b2211f9083",
+   "jurisdiction": "MI",
+   "title": "Other Michigan Cities with Income Tax (City of Grand Rapids consolidated rate/exemption table)",
+   "url": "https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/",
+   "detail": "2 lines added, 1 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "nc-0f5b81d0f3",
+   "jurisdiction": "NC",
+   "title": "NC Division of Employment Security -- Tax Rate Information",
+   "url": "https://www.des.nc.gov/employers/tax-rate-information",
+   "detail": "0 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "nc-e720098358",
+   "jurisdiction": "NC",
+   "title": "NCDOR -- Withholding Tax Frequently Asked Questions",
+   "url": "https://www.ncdor.gov/withholding-tax-frequently-asked-questions",
+   "detail": "0 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "pa-d4ff9b144e",
+   "jurisdiction": "PA",
+   "title": "PA Department of Labor & Industry -- UC Computation of Rates",
+   "url": "https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/computation-of-rates",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "pa-8ec9b7d696",
+   "jurisdiction": "PA",
+   "title": "PA Department of Labor & Industry -- Yearly Tax Highlights (UC)",
+   "url": "https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/yearly-tax-highlights",
+   "detail": "17 lines added, 33 removed; 0 links added, 6 removed",
+   "figures_added": [
+    "0.00%",
+    "0.07",
+    "0.60",
+    "0.60",
+    "0.60",
+    "0.60",
+    "0.60",
+    "0.60"
+   ],
+   "figures_removed": [
+    "$1,000",
+    "$10,000",
+    "0.06",
+    "0.06",
+    "0.50",
+    "0.50",
+    "0.50",
+    "0.50",
+    "0.50",
+    "0.50",
+    "0.50",
+    "0.50",
+    "0.50",
+    "0.50",
+    "0.50",
+    "0.50",
+    "2.15"
+   ],
+   "links_added": [],
+   "links_removed": [
+    "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748%20rev%2008-18.pdf",
+    "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748%20rev%209-17.pdf",
+    "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-749%20rev%2008-18.pdf",
+    "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-749%20rev%209-17.pdf",
+    "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-820%20rev%2008-18.pdf",
+    "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-820%20rev%209-17.pdf"
+   ],
+   "significant": true
+  },
+  {
+   "id": "pa-da0fba1e41",
+   "jurisdiction": "PA",
+   "title": "PA Department of Revenue -- Employer Withholding (reciprocal agreements)",
+   "url": "https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html",
+   "detail": "1 lines added, 0 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "pa-19b2687c65",
+   "jurisdiction": "PA",
+   "title": "PA Department of Revenue -- Personal Income Tax (3.07%)",
+   "url": "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/personal-income-tax",
+   "detail": "1 lines added, 0 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "pa-8251b0b3ee",
+   "jurisdiction": "PA",
+   "title": "Pennsylvania employer withholding",
+   "url": "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding",
    "detail": "1 lines added, 0 removed; 1 links added, 0 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [
-    "https://cdle.colorado.gov/labor-law-stats/labor-laws-by-topic/direct-care/direct-care-required-training"
+    "https://www.pa.gov/agencies/revenue/newsroom/revenue-department-releases-september-2026-collections"
    ],
    "links_removed": [],
    "significant": true
   },
   {
-   "id": "dc-8f124e7558",
-   "jurisdiction": "DC",
-   "title": "DC Department of Employment Services, Office of Paid Family Leave -- Employer Information",
-   "url": "https://dcpaidfamilyleave.dc.gov/employer-information/",
-   "detail": "1 lines added, 1 removed",
+   "id": "va-3e26b60555",
+   "jurisdiction": "VA",
+   "title": "Virginia withholding",
+   "url": "https://www.tax.virginia.gov/withholding-tax",
+   "detail": "1 lines added, 0 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
    "links_removed": [],
    "significant": true
-  },
-  {
-   "id": "md-9dcde44192",
-   "jurisdiction": "MD",
-   "title": "Montgomery County, MD tipped-employee cash wage ($4.00/hr, Montgomery County Code Sec. 27-69)",
-   "url": "https://www.montgomerycountymd.gov/humanrights/min-wage.html",
-   "detail": "4 lines added, 4 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "ny-a7fb2e2987",
-   "jurisdiction": "NY",
-   "title": "New York State Department of Labor -- Minimum Wage (rates effective 01/01/2026)",
-   "url": "https://dol.ny.gov/minimum-wage-0",
-   "detail": "16 lines added, 6 removed",
-   "figures_added": [
-    "$16.00",
-    "$17.00",
-    "$19.00",
-    "$20.00",
-    "$3.00"
-   ],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "sd-fd3b550c78",
-   "jurisdiction": "SD",
-   "title": "South Dakota DLR -- Reemployment Assistance for Businesses (rate notices)",
-   "url": "https://dlr.sd.gov/ra/businesses/default.aspx",
-   "detail": "2 lines added, 0 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "us-eb437d4ba6",
-   "jurisdiction": "US",
-   "title": "Wis. Stat. \u00a7 812.34 \u2014 80% of disposable earnings exempt from garnishment (i.e. 20% reachable), further limited by the amount by which disposable earnings exceed 30x the FEDERAL minimum hourly wage",
-   "url": "https://docs.legis.wisconsin.gov/document/statutes/812.34",
-   "detail": "1 lines added, 1 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "vt-a359b6d000",
-   "jurisdiction": "VT",
-   "title": "Vermont withholding",
-   "url": "https://tax.vermont.gov/business/withholding",
-   "detail": "0 lines added, 2 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "wi-53244e93fe",
-   "jurisdiction": "WI",
-   "title": "Wis. Stat. \u00a7 71.03(13) \u2014 'Wisconsin adjusted gross income' defined",
-   "url": "https://docs.legis.wisconsin.gov/document/statutes/71.03",
-   "detail": "1 lines added, 1 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "wy-a9db532de7",
-   "jurisdiction": "WY",
-   "title": "Wyoming Constitution -- no personal income tax; Wyoming Dept of Workforce Services -- Unemployment Taxable Wage Base",
-   "url": "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-taxable-wage-base/",
-   "detail": "3 lines added, 3 removed (link lists / headlines only)",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": false
-  },
-  {
-   "id": "wy-31b5e3fff5",
-   "jurisdiction": "WY",
-   "title": "Wyoming Dept of Workforce Services -- Unemployment Tax Rates",
-   "url": "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-tax-rates/",
-   "detail": "3 lines added, 3 removed (link lists / headlines only)",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": false
   }
  ],
- "significant_changes": 9,
+ "significant_changes": 10,
  "broken": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
+  "https://www.irs.gov/pub/irs-prior/p51--2025.pdf",
   "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
   "https://kewes.ky.gov/Contact/contacts.aspx?strid=4",
   "https://kewes.ky.gov/Contact/contacts.aspx?strid=2",
@@ -162,8 +244,8 @@
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "verified": 482,
- "unverified": 28,
+ "verified": 479,
+ "unverified": 31,
  "never_baselined": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://does.dc.gov/service/office-wage-hour-compliance-0",
@@ -188,5 +270,5 @@
   "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 10
+ "max_consecutive_failures": 11
 }
