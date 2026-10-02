@@ -28,7 +28,7 @@ let dir: string;
 let site: ChildProcess;
 let verifier: ChildProcess;
 let resend: Server;
-const mail: { to: string[]; subject: string; html: string; text: string; from: string; auth: string }[] = [];
+const mail: { to: string[]; subject: string; html: string; text: string; from: string; auth: string; ua: string }[] = [];
 
 const post = (path: string, body: unknown, headers: Record<string, string> = {}) =>
   fetch(BASE + path, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body) });
@@ -55,7 +55,7 @@ describe('accounts you can log back into', { skip: !havePython }, () => {
       req.on('data', (d) => { body += d; });
       req.on('end', () => {
         const j = JSON.parse(body);
-        mail.push({ ...j, auth: String(req.headers.authorization) });
+        mail.push({ ...j, auth: String(req.headers.authorization), ua: String(req.headers['user-agent']) });
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ id: 'em_1' }));
       });
@@ -97,6 +97,7 @@ describe('accounts you can log back into', { skip: !havePython }, () => {
     const m = mail[0]!;
     assert.deepEqual(m.to, [EMAIL]);
     assert.equal(m.auth, 'Bearer re_test_key');
+    assert.equal(m.ua, 'omniatax-verifier/1.0', 'Resend rejects the default Python-urllib User-Agent');
     assert.equal(m.from, 'Omnia.tax <verify@omniatax.io>');
     assert.match(m.subject, /^\d{6} is your Omnia verification code$/);
     assert.ok(m.html.includes(lastCode()) && m.text.includes(lastCode()));
