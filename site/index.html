@@ -14,15 +14,15 @@
 <header class="nav">
   <a class="logo" href="/" aria-label="Omnia.tax"><img src="/logo/logo.svg" alt="" /></a>
   <nav class="nav-links" aria-label="Primary">
-    <a href="#product">Product</a>
+    <a href="#calculator">Try it</a>
     <a href="#coverage">Coverage</a>
     <a href="#pricing">Pricing</a>
     <a href="/docs">Docs</a>
   </nav>
   <div class="nav-right">
-    <a class="signin" href="/signin">Sign in</a>
+    <a class="signin" id="navSignin" href="/signin">Sign in</a>
     <a class="btn btn-md btn-secondary" href="/docs">Start building</a>
-    <a class="btn btn-md btn-primary" href="/signup">Start free trial <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
+    <a class="btn btn-md btn-primary" id="navPrimary" href="/signup">Start free trial <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
   </div>
 </header>
 
@@ -48,40 +48,38 @@
   </div>
 </section>
 
-<section class="band-cobalt fig" aria-label="Figure 1">
+<section class="band-cobalt fig" id="calculator" aria-label="Live calculator">
   <div class="wrap">
     <div class="fig-head">
-      <span class="eyebrow">Fig. 1</span>
+      <span class="eyebrow">Try it</span>
       <span class="eyebrow">One paycheck, one call, every tax line</span>
-      <span class="grow"><span class="tag tag-solid">Example · amounts omitted</span></span>
+      <span class="grow"><span class="tag tag-solid">Real engine · no signup</span></span>
     </div>
-    <div class="bracket" style="margin-top:28px">
-      <div class="ticks" aria-hidden="true"></div>
-      <span class="cap">GROSS PAY</span><span class="val">—</span>
+    <form class="calc" id="calc" autocomplete="off" novalidate>
+      <label class="calc-f"><span class="micro">State</span><select id="cState" aria-label="State"><option value="OH">Ohio</option></select></label>
+      <label class="calc-f"><span class="micro">Paid</span>
+        <select id="cFreq"><option value="weekly">Weekly</option><option value="biweekly" selected>Biweekly</option><option value="semimonthly">Semimonthly</option><option value="monthly">Monthly</option></select></label>
+      <label class="calc-f"><span class="micro">Gross pay per check</span><span class="calc-money"><i>$</i><input id="cGross" inputmode="decimal" value="3,000.00" aria-label="Gross pay per check in dollars" /></span></label>
+      <label class="calc-f"><span class="micro">Federal W-4 status</span>
+        <select id="cFiling"><option value="single" selected>Single</option><option value="married_joint">Married filing jointly</option><option value="married_separate">Married filing separately</option><option value="head_of_household">Head of household</option></select></label>
+      <label class="calc-f"><span class="micro">401(k) deferral</span><span class="calc-money"><i>$</i><input id="cPretax" inputmode="decimal" value="240.00" aria-label="401(k) deferral in dollars" /></span></label>
+    </form>
+    <p class="calc-err" id="cErr" role="alert" hidden></p>
+    <div class="calc-sums" aria-live="polite">
+      <div class="bracket"><div class="ticks" aria-hidden="true"></div><span class="cap">GROSS PAY</span><span class="val" id="sGross">&mdash;</span></div>
+      <div class="bracket"><div class="ticks" aria-hidden="true"></div><span class="cap">EMPLOYEE TAXES</span><span class="val" id="sEmployee">&mdash;</span></div>
+      <div class="bracket"><div class="ticks" aria-hidden="true"></div><span class="cap">NET PAY</span><span class="val" id="sNet">&mdash;</span></div>
     </div>
-    <div class="cols" style="margin-top:20px">
-      <div class="bracket" style="grid-column:1 / span 6">
-        <div class="ticks" aria-hidden="true"></div>
-        <span class="cap">EMPLOYEE TAXES</span><span class="val">—</span>
-      </div>
-      <div class="bracket" style="grid-column:7 / span 6">
-        <div class="ticks" aria-hidden="true"></div>
-        <span class="cap">NET PAY</span><span class="val">—</span>
-      </div>
+    <p class="calc-h micro">Withheld from the employee &middot; click any line to see how it was calculated</p>
+    <div class="tile-row live" id="tilesEmployee"></div>
+    <p class="calc-h micro" id="employerHead" hidden>Paid by the employer, on top of gross pay</p>
+    <div class="tile-row live" id="tilesEmployer"></div>
+    <div class="calc-detail" id="cDetail" hidden aria-live="polite"></div>
+    <div class="calc-actions">
+      <a class="btn btn-lg btn-white" href="/signup">Run this on your own payroll <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
+      <button class="btn btn-lg btn-outline-white" type="button" id="cCopy">Copy as cURL</button>
     </div>
-    <div class="tile-row">
-      <div class="cell"><div class="tax-tile"><span class="idx">01</span><span class="dash">—</span></div><div class="tax-name">Federal income tax</div><div class="tax-level">FEDERAL</div></div>
-      <div class="cell"><div class="tax-tile"><span class="idx">02</span><span class="dash">—</span></div><div class="tax-name">Social Security</div><div class="tax-level">FEDERAL</div></div>
-      <div class="cell"><div class="tax-tile"><span class="idx">03</span><span class="dash">—</span></div><div class="tax-name">Medicare</div><div class="tax-level">FEDERAL</div></div>
-      <div class="cell"><div class="tax-tile"><span class="idx">04</span><span class="dash">—</span></div><div class="tax-name">State income tax (OH)</div><div class="tax-level">STATE</div></div>
-      <div class="cell"><div class="tax-tile"><span class="idx">05</span><span class="dash">—</span></div><div class="tax-name">City tax (Columbus)</div><div class="tax-level">CITY</div></div>
-      <div class="cell"><div class="tax-tile"><span class="idx">06</span><span class="dash">—</span></div><div class="tax-name">School district tax</div><div class="tax-level">SCHOOL DIST.</div></div>
-      <div class="net-col">
-        <div class="net-tile"><span class="idx">07</span><span class="name">Net pay</span><span class="dash">—</span></div>
-        <div class="net-caption"><p>What lands in the employee’s account.</p><div class="micro">RESULT.NETPAY</div></div>
-      </div>
-    </div>
-    <p class="fig-note">Schematic, not to scale. Each tax line carries id, name, payer, jurisdiction, taxableWages, amount, and detail. Employer-paid taxes come back in the same response.</p>
+    <p class="fig-note" id="cNote">Loading the engine&hellip;</p>
   </div>
 </section>
 
@@ -122,19 +120,9 @@
         <p class="cov-cap">All 50 states and the District of Columbia, plus federal.</p>
       </div>
       <div style="grid-column:6 / span 7">
-        <div class="local-head"><span class="label-mono">Local taxes</span><span class="mono" style="color:var(--color-gray);font-size:12px">NAMED, NOT COUNTED</span></div>
-        <div class="local-grid">
-          <div><div class="code">OH</div><div class="name">Ohio</div></div>
-          <div><div class="code">PA</div><div class="name">Pennsylvania</div></div>
-          <div><div class="code">MI</div><div class="name">Michigan</div></div>
-          <div><div class="code">IN</div><div class="name">Indiana</div></div>
-          <div><div class="code">KY</div><div class="name">Kentucky</div></div>
-          <div><div class="code">AL</div><div class="name">Alabama</div></div>
-          <div><div class="code">NY</div><div class="name">New York City</div></div>
-          <div><div class="code">NY</div><div class="name">Yonkers</div></div>
-          <div><div class="code">OR</div><div class="name">Oregon transit &amp;&nbsp;Metro</div></div>
-        </div>
-        <p class="footnote"><b>Not on this list?</b> You get an explicit error or a “not modelled” line. See 03.</p>
+        <div class="local-head"><span class="label-mono">Pick a state to run it</span><span class="mono" style="color:var(--color-gray);font-size:12px"><i class="dotkey" aria-hidden="true"></i> ALSO LOCAL TAXES</span></div>
+        <div class="state-grid" id="stateGrid" role="group" aria-label="States covered"><span class="mono" style="color:var(--color-gray);font-size:13px">Loading states&hellip;</span></div>
+        <p class="footnote"><b>Local taxes</b> are modelled for Alabama, Indiana, Kentucky, Michigan, Ohio, Pennsylvania, New York City and Yonkers, and Oregon transit. <b>Anywhere else</b> you get an explicit “not modelled” line. See 03.</p>
       </div>
     </div>
   </div>
@@ -157,13 +145,9 @@
         <div class="excerpt">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <span class="label-mono">A · A not-modelled line</span>
-            <span class="tag tag-outline" style="color:#fff">Illustrative</span>
+            <span class="tag tag-outline" style="color:#fff">Live from the engine</span>
           </div>
-          <pre>{
-  <span class="s">"name"</span>: <span class="s">"IN County Income Tax"</span>,
-  <span class="s">"amount"</span>: 0,
-  <span class="s">"detail"</span>: <span class="s">"NOT MODELLED — no county specified. Do not treat as zero-tax."</span>
-}</pre>
+          <pre id="nmExcerpt">Loading&hellip;</pre>
         </div>
         <div class="excerpt">
           <span class="label-mono">B · Or an explicit error</span>
@@ -193,33 +177,15 @@
         <div class="fact"><span class="k">BODY</span><span class="v">application/json</span></div>
         <div class="fact"><span class="k">AMOUNTS</span><span class="v">Integer cents</span></div>
       </div>
-      <div class="codepanel" style="grid-column:4 / span 6">
+      <div class="codepanel" style="grid-column:4 / span 5">
         <div class="hd"><span>REQUEST</span><span style="color:var(--color-on-ink-muted)">cURL</span></div>
-        <pre id="landingCurl"><span class="c-cmd">curl</span> <span class="c-pun">-X POST</span> <span class="c-str" id="landingHost">https://api.example</span>/v1/paycheck \
-  <span class="c-pun">-H</span> <span class="c-str">"Authorization: Bearer sk_live_..."</span> \
-  <span class="c-pun">-H</span> <span class="c-str">"Content-Type: application/json"</span> \
-  <span class="c-pun">-d</span> <span class="c-str">'{
-  "checkDate": "2026-08-15",
-  "payFrequency": "biweekly",
-  "earnings": [{ "code": "REG", "amount": </span><span class="u-amt c-num">100000</span><span class="c-str"> }]
-}'</span></pre>
+        <pre id="landingCurl">Loading&hellip;</pre>
+        <div style="padding:0 16px 16px"><button class="btn btn-sm btn-ink" type="button" id="curlCopy">Copy</button> <a class="btn btn-sm btn-secondary" href="#calculator" style="margin-left:8px">Change the inputs</a></div>
       </div>
-      <div class="respanel" style="grid-column:10 / span 3">
+      <div class="respanel" style="grid-column:9 / span 4">
         <div class="hd"><span>RESPONSE</span><span>200</span></div>
-        <div class="label-mono" style="padding:12px 16px 0;color:var(--color-gray)">Field names</div>
-        <div class="tree">result
-  <span class="muted">›</span> checkDate
-  <span class="muted">›</span> grossPay
-  <span class="muted">›</span> pretaxDeductions
-  <span class="muted">›</span> posttaxDeductions
-  <span class="muted">›</span> employeeTaxTotal
-  <span class="muted">›</span> employerTaxTotal
-  <span class="muted">›</span> netPay
-  <span class="muted">›</span> taxes[]
-      <span class="muted">›</span> id · name · payer
-      <span class="muted">›</span> jurisdiction
-      <span class="muted">›</span> taxableWages
-      <span class="muted">›</span> amount · detail</div>
+        <div class="label-mono" style="padding:12px 16px 0;color:var(--color-gray)">Real response &middot; amounts in cents</div>
+        <pre class="tree live-resp" id="landingResp">Loading&hellip;</pre>
       </div>
     </div>
     <div class="cents-call">
@@ -293,15 +259,16 @@
   <span class="tagline">Payroll tax calculation API</span>
   <nav aria-label="Footer">
     <a href="mailto:hello@omniatax.io">Contact</a>
+    <a href="#calculator">Try it</a>
     <a href="#coverage">Coverage</a>
     <a href="#pricing">Pricing</a>
     <a href="/docs">Docs</a>
+    <a href="/terms">Terms</a>
+    <a href="/privacy">Privacy</a>
   </nav>
 </footer>
 <script src="/assets/pricing.js"></script>
-<script>
-  var host = document.getElementById('landingHost');
-  if (host) host.textContent = location.origin;
-</script>
+<script src="/assets/session.js"></script>
+<script src="/assets/landing.js"></script>
 </body>
 </html>

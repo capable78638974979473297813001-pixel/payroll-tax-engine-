@@ -65,6 +65,13 @@ export interface AccountRecord {
 
   sessionToken: string | null;
   sessionExpiresAt: string | null;
+  /** When the current session began, and how: an emailed 'code' or the 'password'. */
+  sessionIssuedAt?: string | null;
+  sessionMethod?: 'code' | 'password' | null;
+
+  /** scrypt hash (see lib/password.ts). Absent for accounts that sign in by emailed code only. */
+  passwordHash?: string | null;
+  passwordSetAt?: string | null;
 
   stage: SignupStage;
   createdAt: string;

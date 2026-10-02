@@ -44,15 +44,17 @@ touches the codebase.
 ## 0c. Deploy on Render
 
 The repo ships a `Dockerfile`, `deploy/start.sh` and `render.yaml`. The container
-runs the site and, when `VERIFIER_SECRET` is set, the Python email verifier next
-to it (restarted if it exits).
+runs the site and the Python email verifier next to it (restarted if it exits).
+The verifier sends every sign-up and sign-in code. It starts by itself as soon as
+`RESEND_API_KEY` (or `SMTP_HOST`) is set, and generates its own two secrets on first
+boot, kept in `/var/data/verifier-secrets.env`. Without a mail provider the site
+prints codes in the Render log instead, which is fine for a first test only.
 
 1. Push to GitHub, then in Render choose **New → Blueprint** and pick this repo
    and branch. It creates one web service (**Starter** plan; a persistent disk
    needs a paid plan) with a 1 GB disk mounted at `/var/data`.
 2. Fill in the secrets the Blueprint marks `sync: false`: `STRIPE_SECRET_KEY`,
-   `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, and
-   optionally `VERIFIER_SECRET` and `VERIFIER_PEPPER`. Leave
+   `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` and `RESEND_API_KEY`. Leave
    `OMNIA_ISSUE_LIVE_KEYS` unset until test mode has passed.
 3. Add the domain: the Blueprint lists `omniatax.io` and `www.omniatax.io`.
    Render shows the DNS records to create; add them in GoDaddy DNS (section 0b).
@@ -124,7 +126,8 @@ development mode and prints each 6-digit verification code to its console —
 a working sign-in credential for anyone who can read the logs. With it set,
 codes are only emailed and never logged.
 
-**Optional: run the Python email verifier.** `npm run verifier` starts
+**The Python email verifier.** On Render it runs automatically (section 0c). To run it
+yourself, `npm run verifier` starts
 `verifier/email_verifier.py` (Python 3.10+, standard library only) on
 `127.0.0.1:4390`. Set `VERIFIER_SECRET` and `VERIFIER_PEPPER` (each at least
 32 random characters) for both processes, `VERIFIER_URL=http://127.0.0.1:4390`
@@ -224,3 +227,23 @@ add a **live** webhook endpoint, and repeat step 1–5 with a real card.
   through the console does.
 - **One trial per subscription.** Once the trial has started, repeating
   `/api/start-trial` or re-signing the terms can't move its dates.
+
+---
+
+## Accounts and sign-in (how it works)
+
+- **Sign up** collects name, work email, business, phone and a password (12+
+  characters). The password is stored only as a salted scrypt hash. A 6-digit code
+  is emailed through the Python verifier; entering it proves the address and signs
+  the customer in.
+- **Sign in** with email and password, or have a fresh code emailed. **Forgot
+  password** is the code route: confirm the code, then choose a new password.
+- **Limits:** ten wrong passwords for one address in an hour locks password sign-in
+  for that address (the emailed code still works); 60 password attempts per network
+  address per hour; codes expire in 10 minutes, work once and burn after 5 wrong tries.
+- **A second signup for a verified address can never replace its password.**
+- Accounts created before passwords existed have none; they sign in with a code and
+  can set a password from the "forgot password" route.
+- **Home-page calculator:** `POST /api/demo/paycheck` runs the real engine with no
+  key, for a fixed small input shape, 120 calls per network address per hour. It is
+  never billed and never touches an account.

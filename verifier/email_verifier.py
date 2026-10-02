@@ -33,6 +33,7 @@ Configuration (environment)
                     Rotating it invalidates outstanding codes (they last minutes).
   VERIFIER_DB       sqlite path (default verifier/.data/verifier.sqlite3)
   VERIFIER_HOST / VERIFIER_PORT   default 127.0.0.1 / 4390
+  VERIFIER_COOLDOWN_SECONDS       minimum gap between codes to one address (default 30)
   Mail transport, first one configured wins:
     RESEND_API_KEY [RESEND_FROM]
     SMTP_HOST [SMTP_PORT=587] [SMTP_USER SMTP_PASS] SMTP_FROM
@@ -94,12 +95,14 @@ class Verifier:
         pepper: str,
         send: Callable[[str, str, str, int], None],
         clock: Callable[[], float] = time.time,
+        cooldown_seconds: float = COOLDOWN_SECONDS,
     ) -> None:
         if len(pepper) < MIN_SECRET_LEN:
             raise ConfigError(f"VERIFIER_PEPPER must be at least {MIN_SECRET_LEN} characters.")
         self._pepper = pepper.encode()
         self._send = send
         self._now = clock
+        self._cooldown = cooldown_seconds
         if db_path != ":memory:":
             Path(db_path).parent.mkdir(parents=True, exist_ok=True)
         self._db = sqlite3.connect(db_path, check_same_thread=False, isolation_level=None)
@@ -156,7 +159,7 @@ class Verifier:
         self.prune()
 
         row = self._db.execute("SELECT issued_at FROM codes WHERE email=?", (email,)).fetchone()
-        if row and now - row[0] < COOLDOWN_SECONDS:
+        if row and now - row[0] < self._cooldown:
             # Already sent moments ago. Same shape as success: no signal either way.
             return {"ok": True, "sent": False, "cooldown": True}
         if self._count("issue", email, now - HOUR) >= MAX_ISSUES_PER_HOUR:
@@ -393,7 +396,8 @@ def build_from_env() -> tuple[Verifier, str]:
     secret = require_env("VERIFIER_SECRET")
     pepper = require_env("VERIFIER_PEPPER")
     db = os.environ.get("VERIFIER_DB", str(Path(__file__).parent / ".data" / "verifier.sqlite3"))
-    return Verifier(db, pepper, sender_from_env()), secret
+    cooldown = float(os.environ.get("VERIFIER_COOLDOWN_SECONDS", COOLDOWN_SECONDS))
+    return Verifier(db, pepper, sender_from_env(), cooldown_seconds=cooldown), secret
 
 
 def load_dotenv() -> None:
