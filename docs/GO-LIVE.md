@@ -41,6 +41,33 @@ touches the codebase.
 
 ---
 
+## 0c. Deploy on Render
+
+The repo ships a `Dockerfile`, `deploy/start.sh` and `render.yaml`. The container
+runs the site and, when `VERIFIER_SECRET` is set, the Python email verifier next
+to it (restarted if it exits).
+
+1. Push to GitHub, then in Render choose **New → Blueprint** and pick this repo
+   and branch. It creates one web service (**Starter** plan; a persistent disk
+   needs a paid plan) with a 1 GB disk mounted at `/var/data`.
+2. Fill in the secrets the Blueprint marks `sync: false`: `STRIPE_SECRET_KEY`,
+   `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, and
+   optionally `VERIFIER_SECRET` and `VERIFIER_PEPPER`. Leave
+   `OMNIA_ISSUE_LIVE_KEYS` unset until test mode has passed.
+3. Add the domain: the Blueprint lists `omniatax.io` and `www.omniatax.io`.
+   Render shows the DNS records to create; add them in GoDaddy DNS (section 0b).
+   Render issues the HTTPS certificate once the records resolve.
+4. Keep **one instance** (`numInstances: 1`). The account store is a file on the
+   disk. Turn on disk snapshots in the Render dashboard, and also keep your own
+   off-box copy of `/var/data` on a schedule.
+5. Check `https://omniatax.io/healthz`, then run section 4.
+
+Data lives in `/var/data/site` (accounts, keys as hashes, usage) and
+`/var/data/verifier.sqlite3`. A redeploy replaces the container but keeps the
+disk. Deploys cause a brief restart; there is no zero-downtime swap with a disk.
+
+---
+
 ## 1. Persistent storage
 
 The account/key/usage store is a JSON file. Point it at a durable, backed-up

@@ -1,0 +1,45 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# One web service, one persistent disk. Keep numInstances at 1: the account
+# store is a file on that disk.
+services:
+  - type: web
+    name: omnia
+    runtime: docker
+    plan: starter
+    region: oregon
+    numInstances: 1
+    healthCheckPath: /healthz
+    autoDeploy: true
+    domains:
+      - omniatax.io
+      - www.omniatax.io
+    disk:
+      name: omnia-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: PUBLIC_BASE_URL
+        value: https://omniatax.io
+      - key: TRUST_PROXY
+        value: "1"
+      # Secrets: set these in the Render dashboard (sync: false keeps them out of git).
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PRICE_ID
+        sync: false
+      - key: STRIPE_METER_EVENT
+        value: omnia_api_call
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM
+        value: "Omnia.tax <verify@omniatax.io>"
+      # Python verifier (optional). Set both to turn it on; 32+ random chars each.
+      - key: VERIFIER_SECRET
+        sync: false
+      - key: VERIFIER_PEPPER
+        sync: false
+      # Leave unset while testing (sk_test_ keys). Set to 1 for sk_live_ keys.
+      # - key: OMNIA_ISSUE_LIVE_KEYS
+      #   value: "1"
