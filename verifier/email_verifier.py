@@ -54,6 +54,7 @@ import ssl
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from email.message import EmailMessage
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -308,11 +309,25 @@ def dev_sender(email: str, name: str, code: str, minutes: int) -> None:
     print(f"[verifier dev] {email}: {code} (expires in {minutes} min)", file=sys.stderr)
 
 
+def default_from() -> str:
+    """The From address when RESEND_FROM is not set.
+
+    Resend delivers mail from its shared test address only to the account
+    owner's own inbox, so when the site has a real public address
+    (PUBLIC_BASE_URL=https://omniatax.io) send from verify@ that domain instead.
+    The domain still has to be verified in Resend.
+    """
+    host = (urllib.parse.urlparse(os.environ.get("PUBLIC_BASE_URL", "")).hostname or "").lower()
+    if host.startswith("www."):
+        host = host[4:]
+    if "." in host and host not in ("localhost", "127.0.0.1"):
+        return f"Omnia.tax <verify@{host}>"
+    return "Omnia.tax <onboarding@resend.dev>"
+
+
 def sender_from_env() -> Callable[[str, str, str, int], None]:
     if os.environ.get("RESEND_API_KEY"):
-        return resend_sender(
-            os.environ["RESEND_API_KEY"], os.environ.get("RESEND_FROM", "Omnia <onboarding@resend.dev>")
-        )
+        return resend_sender(os.environ["RESEND_API_KEY"], os.environ.get("RESEND_FROM") or default_from())
     if os.environ.get("SMTP_HOST"):
         sender = os.environ.get("SMTP_FROM")
         if not sender:
