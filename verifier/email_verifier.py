@@ -254,7 +254,14 @@ def resend_sender(api_key: str, sender: str) -> Callable[[str, str, str, int], N
         req = urllib.request.Request(
             f"{base}/emails",
             data=json.dumps({"from": sender, "to": [email], "subject": subject, "text": text, "html": body}).encode(),
-            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+                # Resend sits behind a firewall that rejects Python's default
+                # "Python-urllib" signature with a 403, so identify ourselves.
+                "User-Agent": "omniatax-verifier/1.0",
+                "Accept": "application/json",
+            },
             method="POST",
         )
         try:
