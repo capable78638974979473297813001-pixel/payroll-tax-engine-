@@ -13,10 +13,31 @@ touches the codebase.
 ## 0. Prerequisites
 
 - A host that runs Node ≥ 22.6 and stays up (a VM, container, or PaaS).
-- A domain pointed at it over HTTPS (e.g. `https://omnia.tax`).
+- A domain pointed at it over HTTPS (e.g. `https://omniatax.io`).
 - A Stripe account.
 - A transactional-email provider (Resend) if you want signup codes emailed
   instead of printed to the server log.
+
+---
+
+## 0b. Domain (omniatax.io on GoDaddy)
+
+1. **Point the site at your host.** In GoDaddy → your domain → DNS, add the
+   record your host asks for (usually an `A` record for `@` and a `CNAME` for
+   `www`). Make sure the host issues an HTTPS certificate for `omniatax.io`.
+2. **Set the public URL** on the server: `PUBLIC_BASE_URL=https://omniatax.io`
+   and `TRUST_PROXY=1` if a proxy sits in front. Stripe return links and the
+   session cookie's `Secure` flag come from this.
+3. **Send mail from the domain.** In Resend, add `omniatax.io` and copy the DNS
+   records it shows (SPF and DKIM `TXT`/`CNAME` records) into GoDaddy DNS, wait
+   for Resend to mark the domain verified, then set
+   `RESEND_FROM="Omnia.tax <verify@omniatax.io>"`. Until then Resend only
+   delivers to its own account owner. If you run the Python verifier with SMTP
+   instead, set `SMTP_FROM` the same way and add your mail provider's SPF record.
+4. **Create the inboxes the site and legal pages mention:**
+   `hello@`, `legal@`, `privacy@` and `security@omniatax.io`. Forwarding every
+   one to a single mailbox is enough to start.
+5. **Stripe webhook URL** is `https://omniatax.io/api/billing/webhook`.
 
 ---
 
@@ -72,7 +93,7 @@ Set these where the site runs (see `.env.example` for the full list):
 
 ```
 SITE_DB_DIR=/var/lib/omnia
-PUBLIC_BASE_URL=https://omnia.tax
+PUBLIC_BASE_URL=https://omniatax.io
 PORT=4323
 
 STRIPE_SECRET_KEY=sk_test_…            # test first, then sk_live_…
