@@ -17,6 +17,7 @@ import { isEmailConfigured, sendVerificationEmail } from './lib/mail.ts';
 import { validatePaycheckInput } from './lib/validate.ts';
 import { keyLifeFor } from './lib/keylife.ts';
 import { verifierConfigured, issueCode, checkCode } from './lib/verifier.ts';
+import { checkoutPaymentMethodTypes } from '../api/stripe.ts';
 import { hashPassword, verifyPassword, passwordProblem, MAX_PASSWORD } from './lib/password.ts';
 import {
   billingConfigured, meteringConfigured, enqueueMeterEvent, flushMeterQueue,
@@ -988,6 +989,7 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
   if (!secret) {
     // Honest 501 rather than a fake success. The UI renders this as
     // "processor not connected" and leaves the account payment_pending.
+    console.error('[payment] STRIPE_SECRET_KEY is not set on this server, so no one can add a payment method. Add it in the environment settings (see docs/STRIPE-SETUP.md).');
     sendJson(res, 501, {
       error: 'No payment processor is connected yet.',
       detail:
@@ -1018,12 +1020,14 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
       }
       const out = await startMeteredCheckout({ customerId, email: session.email, successUrl, cancelUrl, trialDays: TRIAL_DAYS });
       if (!out.ok || !out.url) {
+        console.error(`[payment] could not start Stripe Checkout (${out.reason ?? 'unknown'}): ${out.error ?? ''}`);
         sendJson(res, 502, { error: out.error ?? 'The processor rejected the subscription request.', reason: out.reason });
         return;
       }
       sendJson(res, 200, { ok: true, checkoutUrl: out.url, paymentsConfigured: true, metered: true });
       return;
     } catch (err) {
+      console.error('[payment] Stripe request failed:', err instanceof Error ? err.message : err);
       sendJson(res, 502, { error: err instanceof Error ? err.message : 'Could not reach the processor.' });
       return;
     }
@@ -1032,27 +1036,35 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
   // Fallback: STRIPE_SECRET_KEY is set but no metered price — save a card
   // on file (setup mode), same as before. Metering stays off until a price
   // is configured.
-  const form = new URLSearchParams();
-  form.set('mode', 'setup');
-  form.set('customer_email', sub.billingEmail);
-  form.set('payment_method_types[0]', 'card');
-  form.set('payment_method_types[1]', 'us_bank_account');
-  form.set('success_url', successUrl);
-  form.set('cancel_url', cancelUrl);
-  form.set('metadata[omnia_email]', session.email);
-  form.set('metadata[terms_version]', TERMS_VERSION);
+  const setupForm = (types: string[]) => {
+    const form = new URLSearchParams();
+    form.set('mode', 'setup');
+    form.set('customer_email', sub.billingEmail);
+    types.forEach((t, i) => form.set(`payment_method_types[${i}]`, t));
+    form.set('success_url', successUrl);
+    form.set('cancel_url', cancelUrl);
+    form.set('metadata[omnia_email]', session.email);
+    form.set('metadata[terms_version]', TERMS_VERSION);
+    return form.toString();
+  };
+  const postSetup = async (types: string[]) => {
+    const r = await fetch(`${process.env.STRIPE_API_BASE ?? 'https://api.stripe.com'}/v1/checkout/sessions`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: setupForm(types),
+    });
+    return { ok: r.ok, payload: (await r.json()) as { url?: string; error?: { message?: string } } };
+  };
 
   try {
-    const stripeRes = await fetch(`${process.env.STRIPE_API_BASE ?? 'https://api.stripe.com'}/v1/checkout/sessions`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${secret}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: form.toString(),
-    });
-    const payload = (await stripeRes.json()) as { url?: string; error?: { message?: string } };
-    if (!stripeRes.ok || !payload.url) {
+    let { ok, payload } = await postSetup(checkoutPaymentMethodTypes());
+    if ((!ok || !payload.url) && checkoutPaymentMethodTypes().includes('us_bank_account')
+        && /payment method type|us_bank_account|activated|not enabled/i.test(payload.error?.message ?? '')) {
+      console.warn('[payment] Stripe refused bank-account setup; retrying with card only. Enable ACH Direct Debit in Stripe to offer bank accounts.');
+      ({ ok, payload } = await postSetup(['card']));
+    }
+    if (!ok || !payload.url) {
+      console.error('[payment] Stripe refused the setup checkout:', payload.error?.message ?? 'no reason given');
       sendJson(res, 502, { error: payload.error?.message ?? 'The processor rejected the setup request.' });
       return;
     }

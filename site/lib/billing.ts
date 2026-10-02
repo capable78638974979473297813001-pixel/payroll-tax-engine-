@@ -1,6 +1,7 @@
 import {
   createCustomer,
   createSubscriptionCheckoutSession,
+  checkoutPaymentMethodTypes,
   retrieveCheckoutSession,
   reportMeterEvent,
   verifyWebhookSignature,
@@ -182,15 +183,32 @@ export async function startMeteredCheckout(input: {
   if (!stripeConfigured()) return { ok: false, reason: 'stripe_not_configured' };
   if (!priceId) return { ok: false, reason: 'no_price_configured' };
   try {
-    const session = await createSubscriptionCheckoutSession({
-      customerId: input.customerId,
-      apiKeyId: input.email,
-      priceId,
-      successUrl: input.successUrl,
-      cancelUrl: input.cancelUrl,
-      trialDays: input.trialDays,
-      metadata: { omnia_email: input.email },
-    });
+    const make = (paymentMethodTypes?: string[]) =>
+      createSubscriptionCheckoutSession({
+        customerId: input.customerId,
+        apiKeyId: input.email,
+        priceId,
+        successUrl: input.successUrl,
+        cancelUrl: input.cancelUrl,
+        trialDays: input.trialDays,
+        metadata: { omnia_email: input.email },
+        paymentMethodTypes,
+      });
+    let session;
+    try {
+      session = await make();
+    } catch (err) {
+      // A new Stripe account has not enabled ACH Direct Debit yet, and Stripe
+      // refuses the whole checkout when we offer it. Offer cards only instead of
+      // leaving the customer stuck, and say so in the log.
+      const message = err instanceof Error ? err.message : '';
+      if (checkoutPaymentMethodTypes().includes('us_bank_account') && /payment method type|us_bank_account|activated|not enabled/i.test(message)) {
+        console.warn(`[billing] Stripe refused bank-account checkout (${message.slice(0, 200)}). Retrying with card only. Enable ACH Direct Debit in Stripe, Settings, Payment methods, to offer bank accounts.`);
+        session = await make(['card']);
+      } else {
+        throw err;
+      }
+    }
     if (!session.url) return { ok: false, reason: 'no_url' };
     return { ok: true, url: session.url };
   } catch (err) {
