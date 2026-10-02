@@ -13,8 +13,8 @@ import { fileURLToPath } from 'node:url';
  */
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
-const SITE_PORT = 5300 + Math.floor(Math.random() * 300);
-const VER_PORT = 5700 + Math.floor(Math.random() * 300);
+const SITE_PORT = 7000 + Math.floor(Math.random() * 300);
+const VER_PORT = 7400 + Math.floor(Math.random() * 300);
 const BASE = `http://127.0.0.1:${SITE_PORT}`;
 const SECRET = 's'.repeat(40);
 const EMAIL = 'ada@verifier.test';

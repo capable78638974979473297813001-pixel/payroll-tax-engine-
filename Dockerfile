@@ -13,6 +13,7 @@ COPY api ./api
 COPY data ./data
 COPY site ./site
 COPY verifier/email_verifier.py ./verifier/email_verifier.py
+COPY scripts/check-stripe.ts scripts/meter-queue.ts ./scripts/
 COPY deploy/start.sh ./deploy/start.sh
 RUN chmod +x deploy/start.sh
 

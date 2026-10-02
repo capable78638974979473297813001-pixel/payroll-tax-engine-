@@ -12,7 +12,6 @@
   var last = { request: null, result: null };
   var seq = 0;
   var timer = null;
-  var openLine = null;
 
   function cents(text) {
     var n = Number(String(text).replace(/[$,\s]/g, ''));
@@ -104,32 +103,28 @@
   }
   function notModelled(t) { return /^NOT MODELLED/i.test(t.detail || ''); }
 
-  function tile(t, i) {
-    var b = el('button', 'tax-tile' + (notModelled(t) ? ' nm' : ''));
+  // One tax line: a row that opens in place to show how it was calculated.
+  function row(t) {
+    var item = el('div', 'cc-item');
+    var b = el('button', 'tax-row' + (notModelled(t) ? ' nm' : ''));
     b.type = 'button';
     b.setAttribute('aria-expanded', 'false');
-    b.dataset.id = t.id;
-    b.appendChild(el('span', 'idx', String(i + 1).padStart(2, '0')));
-    b.appendChild(el('span', 'amt', notModelled(t) ? 'Not modelled' : money(t.amount)));
-    var wrap = el('div', 'cell');
-    wrap.appendChild(b);
-    wrap.appendChild(el('div', 'tax-name', t.name));
-    wrap.appendChild(el('div', 'tax-level', level(t)));
-    b.addEventListener('click', function () { toggle(t, b); });
-    return wrap;
-  }
-  function toggle(t, b) {
-    var box = $('cDetail');
-    var same = openLine === t.id;
-    document.querySelectorAll('.tax-tile[aria-expanded="true"]').forEach(function (x) { x.setAttribute('aria-expanded', 'false'); });
-    if (same) { openLine = null; box.hidden = true; return; }
-    openLine = t.id;
-    b.setAttribute('aria-expanded', 'true');
-    box.textContent = '';
-    box.appendChild(el('div', 'micro', t.name + ' · ' + t.payer + ' · ' + t.jurisdiction + ' · id ' + t.id));
-    box.appendChild(el('p', null, t.detail || 'No further detail for this line.'));
-    box.appendChild(el('div', 'mono', 'taxableWages ' + t.taxableWages + '   amount ' + t.amount + '   (cents)'));
-    box.hidden = false;
+    b.appendChild(el('span', 'tax-name2', t.name));
+    b.appendChild(el('span', 'tax-tag', level(t)));
+    b.appendChild(el('span', 'tax-amt', notModelled(t) ? 'Not modelled' : money(t.amount)));
+    b.appendChild(el('span', 'tax-chev'));
+    var d = el('div', 'tax-detail');
+    d.hidden = true;
+    d.appendChild(el('p', null, t.detail || 'No further detail for this line.'));
+    d.appendChild(el('div', 'mono', 'id ' + t.id + '  ·  ' + t.payer + '  ·  taxableWages ' + t.taxableWages + '  ·  amount ' + t.amount + '  (cents)'));
+    b.addEventListener('click', function () {
+      var open = b.getAttribute('aria-expanded') === 'true';
+      b.setAttribute('aria-expanded', String(!open));
+      d.hidden = open;
+    });
+    item.appendChild(b);
+    item.appendChild(d);
+    return item;
   }
 
   function render() {
@@ -137,17 +132,16 @@
     $('sGross').textContent = money(r.grossPay);
     $('sEmployee').textContent = money(r.employeeTaxTotal);
     $('sNet').textContent = money(r.netPay);
+    $('sPct').textContent = r.grossPay ? Math.round((r.netPay / r.grossPay) * 100) + '% of gross' : '';
+    $('sCost').textContent = money(r.grossPay + r.employerTaxTotal);
     var ee = $('tilesEmployee'), er = $('tilesEmployer');
     ee.textContent = ''; er.textContent = '';
-    openLine = null; $('cDetail').hidden = true;
-    var n = 0;
-    r.taxes.filter(function (t) { return t.payer === 'employee'; }).forEach(function (t) { ee.appendChild(tile(t, n++)); });
+    r.taxes.filter(function (t) { return t.payer === 'employee'; }).forEach(function (t) { ee.appendChild(row(t)); });
     var employer = r.taxes.filter(function (t) { return t.payer === 'employer'; });
-    employer.forEach(function (t) { er.appendChild(tile(t, n++)); });
+    employer.forEach(function (t) { er.appendChild(row(t)); });
     $('employerHead').hidden = !employer.length;
-    var lines = r.taxes.length;
     $('cNote').textContent = 'Real output for ' + (stateNames[$('cState').value] || $('cState').value) + ', check date ' + last.request.checkDate +
-      ': ' + lines + ' tax lines from one call. Employer-paid lines do not reduce net pay. The same call is what your key runs.';
+      ': ' + r.taxes.length + ' tax lines from one call. Employer-paid lines do not reduce net pay. Your API key runs this same call.';
     renderCode();
     markChip();
   }
