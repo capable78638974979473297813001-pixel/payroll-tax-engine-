@@ -42,6 +42,9 @@ if [ -n "${RESEND_API_KEY:-}" ] || [ -n "${SMTP_HOST:-}" ]; then
     done
   ) &
   echo "[start] email verifier on, sending through ${RESEND_API_KEY:+Resend}${SMTP_HOST:+SMTP}" >&2
+  if [ -n "${RESEND_API_KEY:-}" ] && [ -z "${RESEND_FROM:-}" ] && [ -z "${PUBLIC_BASE_URL:-}" ]; then
+    echo "[start] WARNING: neither RESEND_FROM nor PUBLIC_BASE_URL is set, so mail goes out from Resend's test address and only reaches your own Resend inbox. Set PUBLIC_BASE_URL=https://yourdomain or RESEND_FROM." >&2
+  fi
 else
   echo "[start] NO MAIL PROVIDER: set RESEND_API_KEY (or SMTP_HOST). Until then sign-up and sign-in codes are printed in this log instead of emailed." >&2
 fi

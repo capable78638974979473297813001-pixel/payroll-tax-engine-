@@ -160,6 +160,8 @@ export function createSubscriptionCheckoutSession(input: {
   trialDays?: number;
   /** Extra subscription metadata, merged with apiKeyId. */
   metadata?: Record<string, string>;
+  /** Overrides checkoutPaymentMethodTypes(), e.g. ['card'] when ACH is not enabled. */
+  paymentMethodTypes?: string[];
 }): Promise<StripeCheckoutSession> {
   const subscriptionData: Record<string, unknown> = {
     metadata: { apiKeyId: input.apiKeyId, ...input.metadata },
@@ -171,7 +173,7 @@ export function createSubscriptionCheckoutSession(input: {
     line_items: [{ price: input.priceId }], // metered price: no quantity, usage is reported per call
     // A card or bank account is required up front, trial or not.
     payment_method_collection: 'always',
-    payment_method_types: checkoutPaymentMethodTypes(),
+    payment_method_types: input.paymentMethodTypes ?? checkoutPaymentMethodTypes(),
     success_url: input.successUrl,
     cancel_url: input.cancelUrl,
     metadata: { apiKeyId: input.apiKeyId, ...input.metadata },

@@ -23,7 +23,17 @@ const RESEND_ENDPOINT = `${process.env.RESEND_API_BASE ?? 'https://api.resend.co
  * up with -- fine for testing on yourself, not for real signups. Verify a
  * domain and set RESEND_FROM to lift that.
  */
-const DEFAULT_FROM = 'Omnia.tax <onboarding@resend.dev>';
+function defaultFrom(): string {
+  // Resend delivers its test address only to the account owner. With a real
+  // public address configured, send from verify@ that domain instead.
+  try {
+    const host = new URL(process.env.PUBLIC_BASE_URL ?? '').hostname.replace(/^www\./, '');
+    if (host.includes('.') && host !== 'localhost' && host !== '127.0.0.1') return `Omnia.tax <verify@${host}>`;
+  } catch {
+    /* no PUBLIC_BASE_URL */
+  }
+  return 'Omnia.tax <onboarding@resend.dev>';
+}
 
 export interface SendResult {
   sent: boolean;
@@ -43,7 +53,7 @@ export async function sendVerificationEmail(args: {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return { sent: false, reason: 'RESEND_API_KEY is not set.' };
 
-  const from = process.env.RESEND_FROM || DEFAULT_FROM;
+  const from = process.env.RESEND_FROM || defaultFrom();
   const firstName = args.name.split(' ')[0] || args.name;
   const minutes = Math.max(1, Math.round((new Date(args.expiresAt).getTime() - Date.now()) / 60_000));
 

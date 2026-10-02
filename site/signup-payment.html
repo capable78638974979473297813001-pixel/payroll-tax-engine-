@@ -53,13 +53,20 @@
     </ol>
     <h1>Add a payment method.</h1>
     <div class="banner-ink" style="margin-top:32px;max-width:560px">You won’t be charged for the first <span data-trial>14</span> days.</div>
-    <div id="payBox" style="max-width:560px;margin-top:24px;border:1px solid var(--color-hairline);padding:24px">
-      <p style="margin:0 0 8px;font-weight:700">Card and bank details are collected by Stripe Checkout.</p>
-      <p style="margin:0;color:var(--color-gray);font-size:14px">This server creates a Checkout session and sends you to Stripe. It does not render a Payment Element, and it never receives your full card number. With no <span class="mono">STRIPE_SECRET_KEY</span>, the button below explains that no processor is connected and the account stays at payment pending.</p>
+    <div id="payBox" style="max-width:560px;margin-top:24px;border:3px solid var(--color-ink);padding:28px">
+      <p style="margin:0 0 8px;font-weight:700;font-size:20px;letter-spacing:-.4px">Add a card or bank account.</p>
+      <p style="margin:0 0 20px;font-size:16px;line-height:1.5;color:#26272B">You&rsquo;ll enter it on Stripe&rsquo;s secure page, then come straight back here to get your API key. Your card or bank number goes to Stripe, not to us.</p>
+      <ul style="margin:0 0 24px;padding-left:20px;font-size:16px;line-height:1.7;color:#0A0A0A">
+        <li>Nothing is charged for the first <span data-trial>14</span> days.</li>
+        <li>After the trial you pay <b data-rate>$0.09</b> for each paycheck you calculate, billed monthly.</li>
+        <li>The terms you just signed apply.</li>
+      </ul>
+      <button class="btn btn-lg btn-primary btn-block" id="start2" type="button">Continue to Stripe <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
+      <p class="field-error" id="payError2" hidden style="margin-top:16px"></p>
     </div>
     <p style="max-width:560px;margin-top:32px;color:var(--color-gray);font-size:13px;display:flex;gap:8px;align-items:flex-start">
       <svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><rect x="1" y="7" width="12" height="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4 7V4a3 3 0 0 1 6 0v3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-      Payments are processed securely by Stripe. We never see your full card number.
+      Payments are processed by Stripe. We never see or store your full card or bank number.
     </p>
     <div id="fallback" class="alert alert-error" hidden style="max-width:560px;margin-top:24px"></div>
   </main>
@@ -88,9 +95,11 @@
   });
 
   function showErr(text) {
-    var el = document.getElementById('payError');
-    el.textContent = text;
-    el.hidden = false;
+    ['payError', 'payError2'].forEach(function (id) {
+      var el = document.getElementById(id);
+      el.textContent = text;
+      el.hidden = false;
+    });
   }
 
   if (qs.get('setup') === 'cancelled') showErr('Checkout was cancelled. You can try again.');
@@ -117,27 +126,34 @@
     });
   }
 
-  document.getElementById('start').addEventListener('click', function () {
-    var btn = document.getElementById('start');
-    document.getElementById('payError').hidden = true;
+  function startCheckout(btn) {
+    ['payError', 'payError2'].forEach(function (id) { document.getElementById(id).hidden = true; });
     document.getElementById('fallback').hidden = true;
     Omnia.setLoading(btn, true);
     Omnia.api('/api/payment-setup', { method: 'POST', headers: Omnia.authHeaders(), body: '{}' })
       .then(function (res) {
-        Omnia.setLoading(btn, false);
         if (res.ok && res.body && res.body.checkoutUrl) {
-          location.href = res.body.checkoutUrl;
+          location.href = res.body.checkoutUrl; // leaves the page; keep the button busy
           return;
         }
+        Omnia.setLoading(btn, false);
         if (res.status === 501) {
           var fb = document.getElementById('fallback');
           fb.className = 'alert alert-error';
-          fb.innerHTML = '<span class="alert-icon"></span><span>No payment processor is connected yet. Your account and signed terms are saved. Set STRIPE_SECRET_KEY and this step opens Stripe Checkout. Until then the account stays at payment pending and no trial clock starts.</span>';
+          fb.textContent = 'Online payment isn’t switched on yet. Your account and signed terms are saved. Email hello@omniatax.io and we’ll finish setting you up.';
           fb.hidden = false;
           return;
         }
-        showErr((res.body && res.body.error) || 'Could not start payment setup.');
+        if (res.status === 401) { location.href = '/signin'; return; }
+        showErr((res.body && res.body.error) || 'We couldn’t open the payment page. Try again in a moment.');
+      })
+      .catch(function () {
+        Omnia.setLoading(btn, false);
+        showErr('We couldn’t reach the server. Check your connection and try again.');
       });
+  }
+  ['start', 'start2'].forEach(function (id) {
+    document.getElementById(id).addEventListener('click', function () { startCheckout(this); });
   });
 })();
 </script>

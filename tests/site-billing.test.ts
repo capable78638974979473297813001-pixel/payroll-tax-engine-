@@ -95,6 +95,40 @@ describe('site billing (site/lib/billing.ts)', () => {
     assert.equal(params.get('subscription_data[trial_period_days]'), '14');
   });
 
+  test('a new Stripe account without ACH enabled still gets a working checkout (cards only)', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_x';
+    process.env.STRIPE_PRICE_ID = 'price_metered';
+    delete process.env.STRIPE_PAYMENT_METHOD_TYPES;
+    const bodies: string[] = [];
+    stub('POST', /\/v1\/checkout\/sessions$/, (b) => {
+      bodies.push(b);
+      return bodies.length === 1
+        ? { ok: false, json: { error: { message: 'The payment method type provided: us_bank_account is invalid. Please ensure the provided type is activated in your dashboard.' } } }
+        : { json: { id: 'cs_2', url: 'https://checkout.test/cs_2' } };
+    });
+    const out = await startMeteredCheckout({ customerId: 'cus_1', email: 'a@b.co', successUrl: 'https://x/ok', cancelUrl: 'https://x/no', trialDays: 14 });
+    assert.equal(out.ok, true);
+    assert.match(out.url!, /cs_2/);
+    assert.equal(bodies.length, 2);
+    const first = new URLSearchParams(bodies[0]);
+    assert.equal(first.get('payment_method_types[1]'), 'us_bank_account');
+    const second = new URLSearchParams(bodies[1]);
+    assert.equal(second.get('payment_method_types[0]'), 'card');
+    assert.equal(second.get('payment_method_types[1]'), null, 'second try is cards only');
+  });
+
+  test('other Stripe refusals are not retried, and the reason reaches the caller', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_x';
+    process.env.STRIPE_PRICE_ID = 'price_metered';
+    let calls = 0;
+    stub('POST', /\/v1\/checkout\/sessions$/, () => { calls++; return { ok: false, json: { error: { message: 'No such price: price_metered' } } }; });
+    const out = await startMeteredCheckout({ customerId: 'cus_1', email: 'a@b.co', successUrl: 'x', cancelUrl: 'y', trialDays: 14 });
+    assert.equal(out.ok, false);
+    assert.equal(out.reason, 'stripe_error');
+    assert.match(out.error!, /No such price/);
+    assert.equal(calls, 1);
+  });
+
   test('startMeteredCheckout refuses without a configured price', async () => {
     process.env.STRIPE_SECRET_KEY = 'sk_test_x';
     delete process.env.STRIPE_PRICE_ID;

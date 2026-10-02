@@ -119,6 +119,30 @@ class VerifierTest(unittest.TestCase):
         self.assertNotIn("<script>", body)
 
 
+class DefaultFromTest(unittest.TestCase):
+    def check(self, base: str | None) -> str:
+        saved = os.environ.get("PUBLIC_BASE_URL")
+        try:
+            if base is None:
+                os.environ.pop("PUBLIC_BASE_URL", None)
+            else:
+                os.environ["PUBLIC_BASE_URL"] = base
+            return ev.default_from()
+        finally:
+            if saved is None:
+                os.environ.pop("PUBLIC_BASE_URL", None)
+            else:
+                os.environ["PUBLIC_BASE_URL"] = saved
+
+    def test_uses_the_public_domain(self) -> None:
+        self.assertEqual(self.check("https://omniatax.io"), "Omnia.tax <verify@omniatax.io>")
+        self.assertEqual(self.check("https://www.omniatax.io/"), "Omnia.tax <verify@omniatax.io>")
+
+    def test_falls_back_to_the_resend_test_address_locally(self) -> None:
+        self.assertEqual(self.check(None), "Omnia.tax <onboarding@resend.dev>")
+        self.assertEqual(self.check("http://localhost:4323"), "Omnia.tax <onboarding@resend.dev>")
+
+
 class ResendFailureTest(unittest.TestCase):
     """When Resend refuses, the log says why, and never contains the code."""
 
