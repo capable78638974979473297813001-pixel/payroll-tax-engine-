@@ -31,7 +31,7 @@ every one:
 - `[STATE]` — the state whose law governs (usually where your entity is formed).
 - `[COUNTY, STATE]` — the venue for disputes.
 - `[COMPANY ADDRESS]` — your business address.
-- `[SECURITY EMAIL]` / `legal@` / `privacy@` / `security@omnia.tax` — set up these inboxes or repoint them.
+- `[SECURITY EMAIL]` / `legal@` / `privacy@` / `security@omniatax.io` — set up these inboxes or repoint them.
 - `[ARBITRATION BODY]` — only if you keep the optional arbitration clause (Terms §13). **Discuss the arbitration / class-action waiver with counsel before enabling it** — it's powerful but regulated, and unenforceable if done wrong.
 
 ## Ownership ("this is mine only")

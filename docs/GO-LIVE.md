@@ -13,10 +13,58 @@ touches the codebase.
 ## 0. Prerequisites
 
 - A host that runs Node ≥ 22.6 and stays up (a VM, container, or PaaS).
-- A domain pointed at it over HTTPS (e.g. `https://omnia.tax`).
+- A domain pointed at it over HTTPS (e.g. `https://omniatax.io`).
 - A Stripe account.
 - A transactional-email provider (Resend) if you want signup codes emailed
   instead of printed to the server log.
+
+---
+
+## 0b. Domain (omniatax.io on GoDaddy)
+
+1. **Point the site at your host.** In GoDaddy → your domain → DNS, add the
+   record your host asks for (usually an `A` record for `@` and a `CNAME` for
+   `www`). Make sure the host issues an HTTPS certificate for `omniatax.io`.
+2. **Set the public URL** on the server: `PUBLIC_BASE_URL=https://omniatax.io`
+   and `TRUST_PROXY=1` if a proxy sits in front. Stripe return links and the
+   session cookie's `Secure` flag come from this.
+3. **Send mail from the domain.** In Resend, add `omniatax.io` and copy the DNS
+   records it shows (SPF and DKIM `TXT`/`CNAME` records) into GoDaddy DNS, wait
+   for Resend to mark the domain verified, then set
+   `RESEND_FROM="Omnia.tax <verify@omniatax.io>"`. Until then Resend only
+   delivers to its own account owner. If you run the Python verifier with SMTP
+   instead, set `SMTP_FROM` the same way and add your mail provider's SPF record.
+4. **Create the inboxes the site and legal pages mention:**
+   `hello@`, `legal@`, `privacy@` and `security@omniatax.io`. Forwarding every
+   one to a single mailbox is enough to start.
+5. **Stripe webhook URL** is `https://omniatax.io/api/billing/webhook`.
+
+---
+
+## 0c. Deploy on Render
+
+The repo ships a `Dockerfile`, `deploy/start.sh` and `render.yaml`. The container
+runs the site and, when `VERIFIER_SECRET` is set, the Python email verifier next
+to it (restarted if it exits).
+
+1. Push to GitHub, then in Render choose **New → Blueprint** and pick this repo
+   and branch. It creates one web service (**Starter** plan; a persistent disk
+   needs a paid plan) with a 1 GB disk mounted at `/var/data`.
+2. Fill in the secrets the Blueprint marks `sync: false`: `STRIPE_SECRET_KEY`,
+   `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, and
+   optionally `VERIFIER_SECRET` and `VERIFIER_PEPPER`. Leave
+   `OMNIA_ISSUE_LIVE_KEYS` unset until test mode has passed.
+3. Add the domain: the Blueprint lists `omniatax.io` and `www.omniatax.io`.
+   Render shows the DNS records to create; add them in GoDaddy DNS (section 0b).
+   Render issues the HTTPS certificate once the records resolve.
+4. Keep **one instance** (`numInstances: 1`). The account store is a file on the
+   disk. Turn on disk snapshots in the Render dashboard, and also keep your own
+   off-box copy of `/var/data` on a schedule.
+5. Check `https://omniatax.io/healthz`, then run section 4.
+
+Data lives in `/var/data/site` (accounts, keys as hashes, usage) and
+`/var/data/verifier.sqlite3`. A redeploy replaces the container but keeps the
+disk. Deploys cause a brief restart; there is no zero-downtime swap with a disk.
 
 ---
 
@@ -34,35 +82,12 @@ usage. Losing it means losing customer keys and billing history.
 
 ---
 
-## 2. Stripe — one-time dashboard setup
+## 2. Stripe: one-time dashboard setup
 
-Do this in **Test mode** first, verify, then repeat in **Live mode**.
-
-1. **Create the billing meter.**
-   Billing → Meters → *Create meter*.
-   - Event name: `omnia_api_call`
-   - Aggregation: **Sum** of `value`.
-   - Copy the event name; it becomes `STRIPE_METER_EVENT`.
-
-2. **Create the metered price at a flat $0.09 per unit.**
-   Products → *Create product* (e.g. "Omnia API — metered calls") → add a
-   **usage-based price** tied to the meter above: **Per unit**, **$0.09**
-   (no tiers), matching `site/lib/pricing.ts`.
-
-   Billing period: monthly. Copy the **Price ID** (`price_…`) → `STRIPE_PRICE_ID`.
-
-3. **Get your secret key.**
-   Developers → API keys → **Secret key**. Start with the **test** key
-   (`sk_test_…`), or a restricted key scoped to Customers, Checkout,
-   Subscriptions, and Billing Meters. → `STRIPE_SECRET_KEY`.
-
-4. **Add the webhook endpoint.**
-   Developers → Webhooks → *Add endpoint*:
-   - URL: `https://<your-domain>/api/billing/webhook`
-   - Events: `invoice.payment_failed`, `invoice.paid`,
-     `customer.subscription.deleted` (optionally `invoice.payment_succeeded`,
-     `customer.subscription.paused`, `customer.subscription.resumed`).
-   - Copy the **Signing secret** (`whsec_…`) → `STRIPE_WEBHOOK_SECRET`.
+Follow **`docs/STRIPE-SETUP.md`**. It has the exact meter, price, payment-method
+and webhook settings, and `npm run check:stripe` verifies them against your
+Stripe account before you launch. Do it in test mode first, then repeat in live
+mode.
 
 ---
 
@@ -72,7 +97,7 @@ Set these where the site runs (see `.env.example` for the full list):
 
 ```
 SITE_DB_DIR=/var/lib/omnia
-PUBLIC_BASE_URL=https://omnia.tax
+PUBLIC_BASE_URL=https://omniatax.io
 PORT=4323
 
 STRIPE_SECRET_KEY=sk_test_…            # test first, then sk_live_…
@@ -87,6 +112,7 @@ SIGNUP_PER_HOUR=10                      # signup code requests per client addres
 SIGNIN_PER_HOUR=10                      # sign-in code requests per client address
 TRUST_PROXY=1                           # behind a reverse proxy: client IP from X-Forwarded-For
 OMNIA_ISSUE_LIVE_KEYS=1                 # mint sk_live_ keys instead of sk_test_
+STRIPE_PAYMENT_METHOD_TYPES=card        # cards only, until ACH Direct Debit is enabled in Stripe
 ```
 
 **Metering needs all three of** `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` and
@@ -136,6 +162,9 @@ Health check for your load balancer or uptime monitor: `GET /api/health`
 ---
 
 ## 4. Verify end-to-end (test mode)
+
+First run `npm run check:stripe` with the same environment; it names anything
+misconfigured in Stripe. Then:
 
 1. `GET /api/health` → `200`, `"status":"ok"`.
 2. Sign up at `/signup`, verify the email code, and accept terms on `/signup/business`.
