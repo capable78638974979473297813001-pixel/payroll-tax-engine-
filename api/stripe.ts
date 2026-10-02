@@ -136,6 +136,19 @@ export function retrievePaymentMethod(id: string): Promise<StripePaymentMethod> 
   return stripeRequest('GET', `/v1/payment_methods/${encodeURIComponent(id)}`);
 }
 
+/**
+ * Payment methods offered at subscription Checkout. Default is card plus US
+ * bank account (ACH). A fresh Stripe account must have ACH Direct Debit
+ * enabled before it can be offered, or Checkout creation fails; until then set
+ * STRIPE_PAYMENT_METHOD_TYPES=card. Unknown names are ignored.
+ */
+export function checkoutPaymentMethodTypes(): string[] {
+  const raw = process.env.STRIPE_PAYMENT_METHOD_TYPES;
+  if (!raw) return ['card', 'us_bank_account'];
+  const wanted = raw.split(',').map((x) => x.trim()).filter((x) => x === 'card' || x === 'us_bank_account');
+  return wanted.length ? [...new Set(wanted)] : ['card', 'us_bank_account'];
+}
+
 /** A hosted Checkout page in SUBSCRIPTION mode — saves a card AND starts metered usage billing. */
 export function createSubscriptionCheckoutSession(input: {
   customerId: string;
@@ -158,7 +171,7 @@ export function createSubscriptionCheckoutSession(input: {
     line_items: [{ price: input.priceId }], // metered price: no quantity, usage is reported per call
     // A card or bank account is required up front, trial or not.
     payment_method_collection: 'always',
-    payment_method_types: ['card', 'us_bank_account'],
+    payment_method_types: checkoutPaymentMethodTypes(),
     success_url: input.successUrl,
     cancel_url: input.cancelUrl,
     metadata: { apiKeyId: input.apiKeyId, ...input.metadata },

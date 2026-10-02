@@ -40,6 +40,9 @@ services:
         sync: false
       - key: VERIFIER_PEPPER
         sync: false
+      # Cards only until ACH Direct Debit is enabled in Stripe. Remove for card + bank.
+      # - key: STRIPE_PAYMENT_METHOD_TYPES
+      #   value: card
       # Leave unset while testing (sk_test_ keys). Set to 1 for sk_live_ keys.
       # - key: OMNIA_ISSUE_LIVE_KEYS
       #   value: "1"

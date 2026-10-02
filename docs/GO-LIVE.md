@@ -82,35 +82,12 @@ usage. Losing it means losing customer keys and billing history.
 
 ---
 
-## 2. Stripe — one-time dashboard setup
+## 2. Stripe: one-time dashboard setup
 
-Do this in **Test mode** first, verify, then repeat in **Live mode**.
-
-1. **Create the billing meter.**
-   Billing → Meters → *Create meter*.
-   - Event name: `omnia_api_call`
-   - Aggregation: **Sum** of `value`.
-   - Copy the event name; it becomes `STRIPE_METER_EVENT`.
-
-2. **Create the metered price at a flat $0.09 per unit.**
-   Products → *Create product* (e.g. "Omnia API — metered calls") → add a
-   **usage-based price** tied to the meter above: **Per unit**, **$0.09**
-   (no tiers), matching `site/lib/pricing.ts`.
-
-   Billing period: monthly. Copy the **Price ID** (`price_…`) → `STRIPE_PRICE_ID`.
-
-3. **Get your secret key.**
-   Developers → API keys → **Secret key**. Start with the **test** key
-   (`sk_test_…`), or a restricted key scoped to Customers, Checkout,
-   Subscriptions, and Billing Meters. → `STRIPE_SECRET_KEY`.
-
-4. **Add the webhook endpoint.**
-   Developers → Webhooks → *Add endpoint*:
-   - URL: `https://<your-domain>/api/billing/webhook`
-   - Events: `invoice.payment_failed`, `invoice.paid`,
-     `customer.subscription.deleted` (optionally `invoice.payment_succeeded`,
-     `customer.subscription.paused`, `customer.subscription.resumed`).
-   - Copy the **Signing secret** (`whsec_…`) → `STRIPE_WEBHOOK_SECRET`.
+Follow **`docs/STRIPE-SETUP.md`**. It has the exact meter, price, payment-method
+and webhook settings, and `npm run check:stripe` verifies them against your
+Stripe account before you launch. Do it in test mode first, then repeat in live
+mode.
 
 ---
 
@@ -135,6 +112,7 @@ SIGNUP_PER_HOUR=10                      # signup code requests per client addres
 SIGNIN_PER_HOUR=10                      # sign-in code requests per client address
 TRUST_PROXY=1                           # behind a reverse proxy: client IP from X-Forwarded-For
 OMNIA_ISSUE_LIVE_KEYS=1                 # mint sk_live_ keys instead of sk_test_
+STRIPE_PAYMENT_METHOD_TYPES=card        # cards only, until ACH Direct Debit is enabled in Stripe
 ```
 
 **Metering needs all three of** `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` and
@@ -184,6 +162,9 @@ Health check for your load balancer or uptime monitor: `GET /api/health`
 ---
 
 ## 4. Verify end-to-end (test mode)
+
+First run `npm run check:stripe` with the same environment; it names anything
+misconfigured in Stripe. Then:
 
 1. `GET /api/health` → `200`, `"status":"ok"`.
 2. Sign up at `/signup`, verify the email code, and accept terms on `/signup/business`.
