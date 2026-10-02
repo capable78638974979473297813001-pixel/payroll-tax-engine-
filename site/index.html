@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
 <title>Omnia.tax — Payroll tax calculation API</title>
 <meta name="description" content="One API call returns every tax line on a paycheck — federal, state, and local. Pay per paycheck, with no contract, no minimums, and no sales call." />
 <link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
@@ -48,38 +49,47 @@
   </div>
 </section>
 
-<section class="band-cobalt fig" id="calculator" aria-label="Live calculator">
+<section class="band-cobalt fig" id="calculator" aria-labelledby="calcTitle">
   <div class="wrap">
-    <div class="fig-head">
-      <span class="eyebrow">Try it</span>
-      <span class="eyebrow">One paycheck, one call, every tax line</span>
-      <span class="grow"><span class="tag tag-solid">Real engine · no signup</span></span>
+    <div class="cc-head">
+      <p class="eyebrow">Try it &middot; no signup</p>
+      <h2 id="calcTitle">Run a real paycheck.</h2>
+      <p class="cc-sub">Pick a state and change the numbers. This is the same engine your API key calls, and every line below is real output.</p>
     </div>
-    <form class="calc" id="calc" autocomplete="off" novalidate>
-      <label class="calc-f"><span class="micro">State</span><select id="cState" aria-label="State"><option value="OH">Ohio</option></select></label>
-      <label class="calc-f"><span class="micro">Paid</span>
-        <select id="cFreq"><option value="weekly">Weekly</option><option value="biweekly" selected>Biweekly</option><option value="semimonthly">Semimonthly</option><option value="monthly">Monthly</option></select></label>
-      <label class="calc-f"><span class="micro">Gross pay per check</span><span class="calc-money"><i>$</i><input id="cGross" inputmode="decimal" value="3,000.00" aria-label="Gross pay per check in dollars" /></span></label>
-      <label class="calc-f"><span class="micro">Federal W-4 status</span>
-        <select id="cFiling"><option value="single" selected>Single</option><option value="married_joint">Married filing jointly</option><option value="married_separate">Married filing separately</option><option value="head_of_household">Head of household</option></select></label>
-      <label class="calc-f"><span class="micro">401(k) deferral</span><span class="calc-money"><i>$</i><input id="cPretax" inputmode="decimal" value="240.00" aria-label="401(k) deferral in dollars" /></span></label>
-    </form>
-    <p class="calc-err" id="cErr" role="alert" hidden></p>
-    <div class="calc-sums" aria-live="polite">
-      <div class="bracket"><div class="ticks" aria-hidden="true"></div><span class="cap">GROSS PAY</span><span class="val" id="sGross">&mdash;</span></div>
-      <div class="bracket"><div class="ticks" aria-hidden="true"></div><span class="cap">EMPLOYEE TAXES</span><span class="val" id="sEmployee">&mdash;</span></div>
-      <div class="bracket"><div class="ticks" aria-hidden="true"></div><span class="cap">NET PAY</span><span class="val" id="sNet">&mdash;</span></div>
+    <div class="cc-card">
+      <form class="cc-in" id="calc" autocomplete="off" novalidate>
+        <h3>The paycheck</h3>
+        <label class="cc-f" for="cState"><span>State</span>
+          <select id="cState"><option value="OH">Ohio</option></select></label>
+        <label class="cc-f" for="cFreq"><span>How often paid</span>
+          <select id="cFreq"><option value="weekly">Weekly</option><option value="biweekly" selected>Every two weeks</option><option value="semimonthly">Twice a month</option><option value="monthly">Monthly</option></select></label>
+        <label class="cc-f" for="cGross"><span>Gross pay for this check</span>
+          <span class="cc-money"><i>$</i><input id="cGross" inputmode="decimal" value="3,000.00" /></span></label>
+        <label class="cc-f" for="cFiling"><span>Federal W-4 filing status</span>
+          <select id="cFiling"><option value="single" selected>Single</option><option value="married_joint">Married filing jointly</option><option value="married_separate">Married filing separately</option><option value="head_of_household">Head of household</option></select></label>
+        <label class="cc-f" for="cPretax"><span>401(k) deferral this check</span>
+          <span class="cc-money"><i>$</i><input id="cPretax" inputmode="decimal" value="240.00" /></span></label>
+        <p class="cc-err" id="cErr" role="alert" hidden></p>
+      </form>
+      <div class="cc-out" aria-live="polite">
+        <div class="cc-stats">
+          <div class="cc-stat"><span class="cc-k">Gross pay</span><span class="cc-v" id="sGross">&mdash;</span></div>
+          <div class="cc-stat"><span class="cc-k">Employee taxes</span><span class="cc-v" id="sEmployee">&mdash;</span></div>
+          <div class="cc-stat cc-net"><span class="cc-k">Net pay</span><span class="cc-v" id="sNet">&mdash;</span><span class="cc-sub2" id="sPct"></span></div>
+          <div class="cc-stat"><span class="cc-k">Cost to employer</span><span class="cc-v" id="sCost">&mdash;</span></div>
+        </div>
+        <h3 class="cc-h">Taken out of the employee&rsquo;s pay</h3>
+        <p class="cc-hint">Click any line to see how it was calculated.</p>
+        <div class="cc-list" id="tilesEmployee"></div>
+        <h3 class="cc-h" id="employerHead" hidden>Paid by the employer, on top of gross pay</h3>
+        <div class="cc-list" id="tilesEmployer"></div>
+        <div class="cc-actions">
+          <a class="btn btn-lg btn-primary" href="/signup">Run this on your own payroll <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
+          <button class="btn btn-lg btn-secondary" type="button" id="cCopy">Copy as cURL</button>
+        </div>
+        <p class="cc-note" id="cNote">Loading the engine&hellip;</p>
+      </div>
     </div>
-    <p class="calc-h micro">Withheld from the employee &middot; click any line to see how it was calculated</p>
-    <div class="tile-row live" id="tilesEmployee"></div>
-    <p class="calc-h micro" id="employerHead" hidden>Paid by the employer, on top of gross pay</p>
-    <div class="tile-row live" id="tilesEmployer"></div>
-    <div class="calc-detail" id="cDetail" hidden aria-live="polite"></div>
-    <div class="calc-actions">
-      <a class="btn btn-lg btn-white" href="/signup">Run this on your own payroll <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
-      <button class="btn btn-lg btn-outline-white" type="button" id="cCopy">Copy as cURL</button>
-    </div>
-    <p class="fig-note" id="cNote">Loading the engine&hellip;</p>
   </div>
 </section>
 

@@ -224,14 +224,21 @@ function contentTypeFor(file: string): string {
   return 'application/octet-stream';
 }
 
-function sendStatic(res: ServerResponse, path: string, contentType: string): void {
+/**
+ * Static files are always revalidated (no-cache) and carry an ETag, so a
+ * deploy shows up on the next page load instead of after an hour of stale
+ * CSS, while an unchanged file still costs only a 304.
+ */
+function sendStatic(res: ServerResponse, path: string, contentType: string, req?: IncomingMessage): void {
   const buf = readFileSync(path);
-  res.writeHead(200, {
-    'Content-Type': contentType,
-    'Content-Length': buf.byteLength,
-    'Cache-Control': 'public, max-age=3600',
-    ...SECURITY_HEADERS,
-  });
+  const etag = '"' + createHash('sha1').update(buf).digest('base64url') + '"';
+  const headers = { 'Cache-Control': 'no-cache', ETag: etag, ...SECURITY_HEADERS };
+  if (req && req.headers['if-none-match'] === etag) {
+    res.writeHead(304, headers);
+    res.end();
+    return;
+  }
+  res.writeHead(200, { 'Content-Type': contentType, 'Content-Length': buf.byteLength, ...headers });
   res.end(buf);
 }
 
@@ -1929,13 +1936,13 @@ createServer((req, res) => {
       if (!rel.includes('..')) {
         const file = resolve(HERE, rel);
         if ((file === HERE || file.startsWith(HERE + '/')) && existsSync(file)) {
-          sendStatic(res, file, contentTypeFor(file));
+          sendStatic(res, file, contentTypeFor(file), req);
           return;
         }
       }
     }
     if (method === 'GET' && url === '/sandbox-examples.json') {
-      sendStatic(res, join(HERE, 'sandbox-examples.json'), 'application/json; charset=utf-8');
+      sendStatic(res, join(HERE, 'sandbox-examples.json'), 'application/json; charset=utf-8', req);
       return;
     }
     if (method === 'GET' && (url === '/reference' || url === '/reference.html' || url === '/api-reference')) {
@@ -1947,7 +1954,7 @@ createServer((req, res) => {
 
     // Legal pages (served, so customers can read them).
     if (method === 'GET' && url === '/legal/legal.css') {
-      sendStatic(res, join(HERE, 'legal', 'legal.css'), 'text/css; charset=utf-8');
+      sendStatic(res, join(HERE, 'legal', 'legal.css'), 'text/css; charset=utf-8', req);
       return;
     }
     {

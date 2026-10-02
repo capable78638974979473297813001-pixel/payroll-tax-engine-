@@ -127,6 +127,18 @@ describe('account security', () => {
     assert.match(home, /\/tokens\.css/); // the design B home page is the main site
     assert.doesNotMatch(home, /IBM Plex Mono/);
 
+    // The live calculator is a light card with its own black text, and the
+    // page opts out of forced dark rendering so it can't wash out.
+    assert.match(home, /name="color-scheme" content="light"/);
+    for (const id of ['calc', 'cState', 'cGross', 'sNet', 'tilesEmployee', 'stateGrid']) assert.match(home, new RegExp(`id="${id}"`), `home #${id}`);
+
+    // Static files revalidate, so a deploy is never hidden behind a stale cache.
+    const css = await fetch(BASE + '/assets/site.css');
+    assert.equal(css.headers.get('cache-control'), 'no-cache');
+    const etag = css.headers.get('etag')!;
+    assert.ok(etag);
+    assert.equal((await fetch(BASE + '/assets/site.css', { headers: { 'If-None-Match': etag } })).status, 304);
+
     // The old reference's API content now lives in the docs.
     const docs = await (await fetch(BASE + '/docs')).text();
     for (const id of ['making-requests', 'money', 'rate-limits', 'versioning', 'states', 'me', 'health',
