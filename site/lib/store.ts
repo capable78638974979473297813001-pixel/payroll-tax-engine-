@@ -244,8 +244,19 @@ export interface EstimateEvent {
   at: string;
 }
 
+/** One calculator setup an account saved from the home page. */
+export interface SavedScenario {
+  id: string;
+  name: string;
+  createdAt: string;
+  /** State, pay, filing and so on, exactly as the calculator sends them. */
+  inputs: Record<string, unknown>;
+}
+
 export interface DB {
   accounts: Record<string, AccountRecord>;
+  /** Saved calculator scenarios, by account email. */
+  scenarios: Record<string, SavedScenario[]>;
   acceptances: TermsAcceptance[];
   paymentMethods: Record<string, PaymentMethodRecord>;
   subscriptions: Record<string, SubscriptionRecord>;
@@ -260,6 +271,7 @@ export interface DB {
 function emptyDb(): DB {
   return {
     accounts: {},
+    scenarios: {},
     acceptances: [],
     paymentMethods: {},
     subscriptions: {},
@@ -283,6 +295,7 @@ function load(): DB {
   if (!parsed) return base;
   return {
     accounts: parsed.accounts ?? base.accounts,
+    scenarios: parsed.scenarios ?? base.scenarios,
     acceptances: parsed.acceptances ?? base.acceptances,
     paymentMethods: parsed.paymentMethods ?? base.paymentMethods,
     subscriptions: parsed.subscriptions ?? base.subscriptions,

@@ -10,7 +10,7 @@ import { resolveEmployee } from '../geocode/index.ts';
 import {
   withDb, readDb, appendUsage, hitStoredLimit,
   type AccountRecord, type KeyRecord, type PaymentMethodRecord,
-  type SubscriptionRecord, type TermsAcceptance, type TermsQuote,
+  type SavedScenario, type SubscriptionRecord, type TermsAcceptance, type TermsQuote,
 } from './lib/store.ts';
 import { CALL_TIERS, ROOFTOP_RATE, TRIAL_DAYS, PERIODS_PER_YEAR, estimate as computePricing, costForCalls } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
@@ -1551,6 +1551,103 @@ async function handleDemoResolveAddress(req: IncomingMessage, res: ServerRespons
   }
 }
 
+// ---------------------------------------------------------------------
+// Saved calculator scenarios -- /api/scenarios (list), /api/scenarios/save,
+// /api/scenarios/delete. Signed-in accounts only; each account sees only its
+// own. A scenario is the calculator's inputs, not a result: loading one
+// reruns the real engine, so a saved scenario never goes stale.
+// ---------------------------------------------------------------------
+
+const MAX_SCENARIOS = 25;
+
+/** The calculator inputs worth keeping, each checked; anything else is dropped. */
+function scenarioInputs(raw: unknown): Record<string, unknown> | string {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return 'Send the calculator inputs as an object.';
+  const b = raw as Record<string, unknown>;
+  const state = typeof b.state === 'string' ? b.state.toUpperCase() : '';
+  if (!validStateCodes().has(state)) return 'Choose a state from the list.';
+  const payFrequency = typeof b.payFrequency === 'string' ? b.payFrequency : '';
+  if (!DEMO_FREQUENCIES.includes(payFrequency)) return 'Choose weekly, biweekly, semimonthly or monthly.';
+  const filingStatus = typeof b.filingStatus === 'string' ? b.filingStatus : '';
+  if (!DEMO_FILING.includes(filingStatus)) return 'Choose a filing status from the list.';
+  const gross = b.grossCents;
+  const pretax = b.pretaxCents === undefined ? 0 : b.pretaxCents;
+  if (!Number.isInteger(gross) || (gross as number) < 1 || (gross as number) > DEMO_MAX_GROSS_CENTS) return 'Enter a paycheck amount between $0.01 and $500,000.';
+  if (!Number.isInteger(pretax) || (pretax as number) < 0 || (pretax as number) > (gross as number)) return 'The 401(k) deferral must be between $0 and the paycheck amount.';
+  const out: Record<string, unknown> = { state, payFrequency, filingStatus, grossCents: gross, pretaxCents: pretax };
+  const text = (v: unknown) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, 200) : '');
+  if (text(b.workAddress)) out.workAddress = text(b.workAddress);
+  if (text(b.residenceAddress)) out.residenceAddress = text(b.residenceAddress);
+  const certificate = demoCertificate(b.certificate);
+  if (certificate) out.certificate = certificate;
+  const residenceState = typeof b.residenceState === 'string' ? b.residenceState.toUpperCase() : '';
+  if (residenceState) {
+    if (!validStateCodes().has(residenceState)) return 'The home state is not one this build can compute.';
+    out.residenceState = residenceState;
+  }
+  return out;
+}
+
+function handleScenarioList(req: IncomingMessage, res: ServerResponse): void {
+  const session = requireSession(req);
+  if (!session) { sendJson(res, 401, { error: 'Sign in to see saved scenarios.', code: 'not_signed_in' }); return; }
+  sendJson(res, 200, { scenarios: readDb((db) => db.scenarios[session.email] ?? []), max: MAX_SCENARIOS });
+}
+
+async function handleScenarioSave(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const session = requireSession(req);
+  if (!session) { sendJson(res, 401, { error: 'Sign in to save a scenario.', code: 'not_signed_in' }); return; }
+  let body: Record<string, unknown>;
+  try {
+    body = await readJson<Record<string, unknown>>(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json' });
+    return;
+  }
+  const name = typeof body.name === 'string' ? body.name.replace(/\s+/g, ' ').trim() : '';
+  if (!name || name.length > 60) { sendJson(res, 422, { error: 'Give the scenario a name of up to 60 characters.', code: 'invalid_input' }); return; }
+  const inputs = scenarioInputs(body.inputs);
+  if (typeof inputs === 'string') { sendJson(res, 422, { error: inputs, code: 'invalid_input' }); return; }
+
+  const saved = withDb((db): SavedScenario | 'full' => {
+    const list = (db.scenarios[session.email] ??= []);
+    // Saving under an existing name replaces it, so "update" needs no id.
+    const same = list.findIndex((s) => s.name.toLowerCase() === name.toLowerCase());
+    const entry: SavedScenario = { id: 'sc_' + randomBytes(6).toString('hex'), name, createdAt: new Date().toISOString(), inputs };
+    if (same >= 0) { list[same] = entry; return entry; }
+    if (list.length >= MAX_SCENARIOS) return 'full';
+    list.push(entry);
+    return entry;
+  });
+  if (saved === 'full') {
+    sendJson(res, 409, { error: `You can keep ${MAX_SCENARIOS} scenarios. Delete one to save another.`, code: 'scenario_limit' });
+    return;
+  }
+  sendJson(res, 200, { scenario: saved });
+}
+
+async function handleScenarioDelete(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const session = requireSession(req);
+  if (!session) { sendJson(res, 401, { error: 'Sign in first.', code: 'not_signed_in' }); return; }
+  let body: Record<string, unknown>;
+  try {
+    body = await readJson<Record<string, unknown>>(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json' });
+    return;
+  }
+  const id = typeof body.id === 'string' ? body.id : '';
+  const removed = withDb((db) => {
+    const list = db.scenarios[session.email] ?? [];
+    const i = list.findIndex((s) => s.id === id);
+    if (i < 0) return false;
+    list.splice(i, 1);
+    return true;
+  });
+  if (!removed) { sendJson(res, 404, { error: 'That scenario was not found.', code: 'not_found' }); return; }
+  sendJson(res, 200, { deleted: id });
+}
+
 // Address of the caller, for per-address limits.
 function clientAddress(req: IncomingMessage): string {
   // Behind a proxy that sets it (the hosted deployment), the first
@@ -2183,6 +2280,9 @@ createServer((req, res) => {
     if (method === 'POST' && url === '/api/password') return handlePassword(req, res);
     if (method === 'POST' && url === '/api/demo/paycheck') return handleDemoPaycheck(req, res);
     if (method === 'POST' && url === '/api/demo/resolve-address') return handleDemoResolveAddress(req, res);
+    if (method === 'GET' && url === '/api/scenarios') return handleScenarioList(req, res);
+    if (method === 'POST' && url === '/api/scenarios/save') return handleScenarioSave(req, res);
+    if (method === 'POST' && url === '/api/scenarios/delete') return handleScenarioDelete(req, res);
     if (method === 'POST' && url === '/api/signout') return handleSignout(req, res);
     if (method === 'GET' && url === '/api/terms') return handleTerms(req, res);
     if (method === 'POST' && url === '/api/accept-terms') return handleAcceptTerms(req, res);

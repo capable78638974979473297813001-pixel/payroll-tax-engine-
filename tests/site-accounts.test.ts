@@ -134,6 +134,41 @@ describe('accounts you can log back into', { skip: !havePython }, () => {
     assert.deepEqual(await wrong.json(), await unknown.json());
   });
 
+  test('saved calculator scenarios belong to the signed-in account', async () => {
+    const inputs = { state: 'IN', payFrequency: 'biweekly', filingStatus: 'single', grossCents: 300000, pretaxCents: 24000,
+      workAddress: '200 E Washington St, Indianapolis, IN 46204', certificate: { county: 'Marion', nested: { x: 1 } } };
+    // signed out: nothing to see or change
+    assert.equal((await fetch(`${BASE}/api/scenarios`)).status, 401);
+    assert.equal((await post('/api/scenarios/save', { name: 'x', inputs })).status, 401);
+
+    const h = { Cookie: cookieOf(await post('/api/signin-password', { email: EMAIL, password: PW })) };
+    const list = () => fetch(`${BASE}/api/scenarios`, { headers: h }).then((r) => r.json());
+    assert.deepEqual((await list()).scenarios, []);
+
+    const saved = await post('/api/scenarios/save', { name: '  Indy   hire ', inputs }, h);
+    assert.equal(saved.status, 200);
+    const sc = (await saved.json()).scenario;
+    assert.equal(sc.name, 'Indy hire');
+    assert.equal(sc.inputs.certificate.county, 'Marion');
+    assert.equal(sc.inputs.certificate.nested, undefined, 'only flat facts are kept');
+    assert.equal((await list()).scenarios.length, 1);
+
+    // same name replaces rather than duplicates
+    await post('/api/scenarios/save', { name: 'indy HIRE', inputs: { ...inputs, grossCents: 400000 } }, h);
+    const after = (await list()).scenarios;
+    assert.equal(after.length, 1);
+    assert.equal(after[0].inputs.grossCents, 400000);
+
+    // bad input is refused with a reason
+    assert.equal((await post('/api/scenarios/save', { name: '', inputs }, h)).status, 422);
+    assert.equal((await post('/api/scenarios/save', { name: 'a', inputs: { ...inputs, state: 'ZZ' } }, h)).status, 422);
+    assert.equal((await post('/api/scenarios/save', { name: 'a', inputs: { ...inputs, pretaxCents: 999999999 } }, h)).status, 422);
+
+    assert.equal((await post('/api/scenarios/delete', { id: 'sc_nope' }, h)).status, 404);
+    assert.equal((await post('/api/scenarios/delete', { id: after[0].id }, h)).status, 200);
+    assert.deepEqual((await list()).scenarios, []);
+  });
+
   test('signing up again can not replace a verified account\'s password', async () => {
     const r = await post('/api/signup', { name: 'Mallory', email: EMAIL, company: 'Evil', phone: '1', password: 'mallory takes over now' });
     assert.equal(r.status, 200);

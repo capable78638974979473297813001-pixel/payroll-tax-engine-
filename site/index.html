@@ -84,6 +84,18 @@
         <label class="cc-f" for="cPretax"><span>401(k) deferral this check</span>
           <span class="cc-money"><i>$</i><input id="cPretax" inputmode="decimal" value="240.00" /></span></label>
         <p class="cc-err" id="cErr" role="alert" hidden></p>
+        <div class="cc-saved" id="cSaved">
+          <h3>Saved scenarios</h3>
+          <p class="cc-help" id="cSavedOut">Sign in to keep scenarios on your account and reopen them any time. <a href="/signin">Sign in</a> or <a href="/signup">start a free trial</a>.</p>
+          <div id="cSavedIn" hidden>
+            <div class="cc-addr-row">
+              <input id="cSaveName" type="text" maxlength="60" placeholder="Name this scenario, e.g. Chicago hire" aria-label="Scenario name" />
+              <button class="btn btn-md btn-ink" type="button" id="cSave">Save</button>
+            </div>
+            <p class="cc-help" id="cSaveMsg" role="status"></p>
+            <ul class="cc-saved-list" id="cSavedList"></ul>
+          </div>
+        </div>
       </form>
       <div class="cc-out" aria-live="polite">
         <div class="cc-stats">
