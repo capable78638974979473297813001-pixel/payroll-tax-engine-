@@ -31,7 +31,7 @@ import type {
   PaycheckResult,
   TaxLine,
 } from './types.ts';
-import { assertTaxYearCovered, federalRuleset, yearOf } from './registry.ts';
+import { assertTaxYearCovered, CannotComputeError, federalRuleset, yearOf } from './registry.ts';
 import { federalTaxes } from './taxes/federal.ts';
 import { stateIncomeTax } from './taxes/state.ts';
 import {
@@ -79,10 +79,17 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
     }),
   };
 
-  let taxes: TaxLine[] = [
-    ...federalTaxes(input, ctx),
-    ...stateIncomeTax(input, ctx),
-  ];
+  let taxes: TaxLine[];
+  try {
+    taxes = [...federalTaxes(input, ctx), ...stateIncomeTax(input, ctx)];
+  } catch (err) {
+    // Rules throw "... cannot compute X" when the agency publishes no method
+    // for this input. Give those a type so callers can show the reason.
+    if (err instanceof Error && !(err instanceof CannotComputeError) && /cannot compute/i.test(err.message)) {
+      throw new CannotComputeError(err.message);
+    }
+    throw err;
+  }
 
   if (input.roundToWholeDollars) {
     taxes = taxes.map((t) =>
@@ -101,6 +108,16 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
   const pretax = pretaxTotal(effectiveDeductions);
   const posttax = posttaxTotal(effectiveDeductions);
 
+  const netPay = gross - pretax - posttax - employeeTaxTotal;
+  const warnings: string[] = [];
+  if (netPay < 0) {
+    warnings.push(
+      `Taxes and deductions are $${(-netPay / 100).toFixed(2)} more than this paycheck. ` +
+        `Net pay is negative; nothing was dropped or reduced automatically. ` +
+        `Reduce a deduction or withholding election, or pay the difference another way.`,
+    );
+  }
+
   return {
     checkDate: input.checkDate,
     grossPay: gross,
@@ -110,8 +127,9 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
     employeeTaxTotal,
     employerTaxTotal,
     // Employer taxes are a cost to the employer, never a reduction of net pay.
-    netPay: gross - pretax - posttax - employeeTaxTotal,
+    netPay,
     ...noticesFor(taxes),
+    ...(warnings.length ? { warnings } : {}),
   };
 }
 

@@ -127,3 +127,20 @@ describe('validatePaycheckInput — tax years', () => {
     assert.equal(validatePaycheckInput({ ...body, checkDate: '2026-01-02' }, { supportedYears: [2026] }).ok, true);
   });
 });
+
+describe('deductions that cannot fit in the pay', () => {
+  const opts = { validStateCodes: new Set(['OH']), supportedYears: [2026], stateHasYear: () => true };
+  test('pre-tax deductions larger than the cash pay are rejected', () => {
+    const r = validatePaycheckInput({ ...good(), deductions: [{ code: '401K', category: 'deferral_401k', amount: 400000 }] }, opts);
+    assert.equal(r.ok, false);
+    if (!r.ok) assert.match(r.errors[0]!.message, /more than the cash pay/);
+  });
+  test('imputed income does not count as cash pay', () => {
+    const r = validatePaycheckInput({ ...good(), earnings: [{ code: 'I', category: 'imputed', amount: 400000 }], deductions: [{ code: '401K', category: 'deferral_401k', amount: 24000 }] }, opts);
+    assert.equal(r.ok, false);
+  });
+  test('post-tax deductions are left to the engine warning', () => {
+    const r = validatePaycheckInput({ ...good(), deductions: [{ code: 'P', category: null, amount: 900000 }] }, opts);
+    assert.equal(r.ok, true);
+  });
+});

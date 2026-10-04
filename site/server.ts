@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
 import { calculatePaycheck } from '../src/calculate.ts';
-import { UnsupportedTaxYearError } from '../src/registry.ts';
+import { CannotComputeError, UnsupportedTaxYearError } from '../src/registry.ts';
 import { resolveEmployee } from '../geocode/index.ts';
 import {
   withDb, readDb, appendUsage, hitStoredLimit,
@@ -1468,7 +1468,9 @@ async function handleDemoPaycheck(req: IncomingMessage, res: ServerResponse): Pr
     sendJson(res, 200, { demo: true, request: input, result: calculatePaycheck(validation.value) });
   } catch (err) {
     console.error('[demo paycheck] calculation failed:', err instanceof Error ? err.message : err);
-    sendJson(res, 422, { error: 'That calculation could not be completed.', code: 'calculation_error' });
+    sendJson(res, 422, err instanceof CannotComputeError
+      ? { error: err.message, code: 'cannot_compute' }
+      : { error: 'That calculation could not be completed.', code: 'calculation_error' });
   }
 }
 
@@ -1778,6 +1780,8 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
     responseBody =
       err instanceof UnsupportedTaxYearError
         ? { error: err.message, code: 'unsupported_tax_year', requestId }
+        : err instanceof CannotComputeError
+        ? { error: err.message, code: 'cannot_compute', requestId }
         : {
             error: 'The calculation could not be completed for the input provided.',
             code: 'calculation_error',

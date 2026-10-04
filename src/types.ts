@@ -721,6 +721,13 @@ export interface PaycheckResult {
    * number, but says so here rather than only in the data files.
    */
   notices?: DataNotice[];
+  /**
+   * Plain-language problems with the paycheck as a whole, present only when
+   * there is one. Today: taxes and deductions add up to more than the pay,
+   * so net pay is negative and something has to give (the employer decides
+   * what; the engine does not silently drop a withholding).
+   */
+  warnings?: string[];
 }
 
 /**

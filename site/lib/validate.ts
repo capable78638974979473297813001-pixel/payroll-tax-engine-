@@ -143,6 +143,16 @@ export function validatePaycheckInput(raw: unknown, opts: ValidateOptions = {}):
     });
   }
 
+  // Pre-tax deductions come out before tax, so they can't exceed the cash
+  // pay they come out of. That is a mistake in the request, not a paycheck.
+  if (errors.length === 0 && Array.isArray(body.earnings) && Array.isArray(body.deductions)) {
+    const sum = (xs: unknown[], pick: (x: Record<string, unknown>) => boolean) =>
+      xs.reduce<number>((t, x) => (isObject(x) && pick(x) && typeof x.amount === 'number' ? t + x.amount : t), 0);
+    const cash = sum(body.earnings, (e) => e.category !== 'imputed');
+    const pretax = sum(body.deductions, (d) => d.category !== null);
+    if (pretax > cash) err('deductions', `pre-tax deductions (${pretax} cents) are more than the cash pay (${cash} cents).`);
+  }
+
   // ---- federalW4 -------------------------------------------------------
   if (!isObject(body.federalW4)) {
     err('federalW4', 'is required and must be a Form W-4 object.');

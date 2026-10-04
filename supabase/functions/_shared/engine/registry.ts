@@ -227,6 +227,19 @@ export function statesWithRuleset(checkDate: string): string[] {
 }
 
 /**
+ * Thrown when a tax rule refuses to compute because the agency publishes no
+ * method for this input (for example a pay frequency its tables skip). The
+ * message names the agency source and is written for the caller to read;
+ * the engine refuses rather than guess a number.
+ */
+export class CannotComputeError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'CannotComputeError';
+  }
+}
+
+/**
  * Thrown when a check date falls in a tax year this build only partly
  * covers: the federal rules or a work/residence state's rules for that year
  * are missing. Computing anyway would return federal-only withholding that
