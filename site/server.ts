@@ -1664,14 +1664,30 @@ function handleUsage(req: IncomingMessage, res: ServerResponse): void {
 // POST /api/paycheck -- the real product, key-authenticated
 // ---------------------------------------------------------------------
 
-async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promise<void> {
+/** What a successful key check hands to the endpoint that asked for it. */
+interface KeyContext {
+  requestId: string;
+  keyHash: string;
+  rlHeaders: Record<string, string>;
+  customerId: string | null;
+  meteredSubscription: boolean;
+}
+
+/**
+ * The checks every key-authenticated endpoint shares: a key that exists,
+ * is active and unexpired, an account in good standing with a payment
+ * method, then the per-key rate limit. Sends the error and returns null
+ * when any fails. `limiter` names the rate-limit bucket so endpoints
+ * with different costs don't spend each other's allowance.
+ */
+function authenticateKey(req: IncomingMessage, res: ServerResponse, limiter: string): KeyContext | null {
   const requestId = 'req_' + randomBytes(8).toString('hex');
   const baseHeaders: Record<string, string> = { 'X-Request-Id': requestId };
 
   const key = bearerToken(req);
   if (!key) {
     sendJson(res, 401, { error: 'Missing API key. Send "Authorization: Bearer <key>".', code: 'missing_key', requestId }, baseHeaders);
-    return;
+    return null;
   }
 
   const keyHash = sha256Hex(key);
@@ -1694,29 +1710,29 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
 
   if (!keyRecord || !keyRecord.isActive) {
     sendJson(res, 401, { error: 'Invalid or inactive API key.', code: 'invalid_key', requestId }, baseHeaders);
-    return;
+    return null;
   }
   if (Date.now() > new Date(keyRecord.expiresAt).getTime()) {
     sendJson(res, 401, { error: `This API key expired on ${keyRecord.expiresAt}.`, code: 'expired_key', requestId }, baseHeaders);
-    return;
+    return null;
   }
   const mode = keyMode(keyRecord);
   baseHeaders['Omnia-Mode'] = mode;
   if (!auth.paymentOnFile) {
     sendJson(res, 402, { error: 'This account has no card or bank account on file. Add one in the console to use the API.', code: 'payment_method_required', requestId }, baseHeaders);
-    return;
+    return null;
   }
   if (auth.cancelled) {
     sendJson(res, 402, { error: 'This account\'s subscription was cancelled. Start a new subscription in the console to resume.', code: 'subscription_cancelled', requestId }, baseHeaders);
-    return;
+    return null;
   }
   if (auth.suspended) {
     sendJson(res, 402, { error: 'This account is suspended for a billing issue. Update your payment method to resume.', code: 'account_suspended', reason: auth.suspendedReason, requestId }, baseHeaders);
-    return;
+    return null;
   }
 
   // --- rate limit (per key, stored: shared by instances, kept across restarts)
-  const rl = withDb((db) => hitStoredLimit(db, 'paycheck:' + keyHash, paycheckLimiterLimit(), 60_000));
+  const rl = withDb((db) => hitStoredLimit(db, limiter + ':' + keyHash, paycheckLimiterLimit(), 60_000));
   const rlHeaders = {
     ...baseHeaders,
     'RateLimit-Limit': String(rl.limit),
@@ -1730,8 +1746,16 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
       { error: `Rate limit of ${rl.limit} requests/minute exceeded. Retry in ${rl.retryAfterSec}s.`, code: 'rate_limited', requestId },
       { ...rlHeaders, 'Retry-After': String(rl.retryAfterSec) },
     );
-    return;
+    return null;
   }
+  return { requestId, keyHash, rlHeaders, customerId: auth.customerId, meteredSubscription: auth.meteredSubscription };
+}
+
+async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const ctx = authenticateKey(req, res, 'paycheck');
+  if (!ctx) return;
+  const { requestId, keyHash, rlHeaders } = ctx;
+  const auth = ctx;
 
   // --- parse ------------------------------------------------------------
   let raw: unknown;
@@ -1800,6 +1824,82 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   recordUsage(keyHash, status, usageError, validation.value.checkDate, meter);
   sendJson(res, status, responseBody, rlHeaders);
   if (meter) flushMeterSoon();
+}
+
+// ---------------------------------------------------------------------
+// POST /v1/address -- key-authenticated address resolution. Turns a work
+// address (and optionally a home address) into the state, the local
+// jurisdictions and the certificate facts a paycheck needs, so the caller
+// resolves an employee once and reuses the result on every pay run:
+//   workState: { code: <state>, certificate: <certificate> }
+// Billed as one unit when at least one address matched; an address that
+// can't be matched costs nothing.
+// ---------------------------------------------------------------------
+
+async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const ctx = authenticateKey(req, res, 'address');
+  if (!ctx) return;
+  const { requestId, keyHash, rlHeaders } = ctx;
+
+  let body: Record<string, unknown>;
+  try {
+    body = await readJson<Record<string, unknown>>(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId }, rlHeaders);
+    return;
+  }
+  const clean = (v: unknown) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : '');
+  const work = clean(body.workAddress);
+  const home = clean(body.residenceAddress);
+  const checkDate = typeof body.checkDate === 'string' ? body.checkDate : new Date().toISOString().slice(0, 10);
+  const problem =
+    !work && !home ? 'Send workAddress, residenceAddress, or both, as one-line street addresses.'
+    : work.length > 200 || home.length > 200 ? 'An address can be at most 200 characters.'
+    : body.checkDate !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(checkDate) ? 'checkDate must be ISO yyyy-mm-dd.'
+    : null;
+  if (problem) {
+    recordUsage(keyHash, 422, 'validation_failed', null);
+    sendJson(res, 422, { error: problem, code: 'invalid_input', requestId }, rlHeaders);
+    return;
+  }
+
+  try {
+    const r = await resolveEmployee({ work: work || undefined, residence: home || undefined }, checkDate);
+    const side = (a: typeof r.work) => a && {
+      matched: a.matched,
+      matchedAddress: a.matchQuality?.matchedAddress ?? null,
+      state: a.resolved?.state ?? null,
+      place: a.geographies?.incorporatedPlaces[0] ?? null,
+      county: a.geographies?.counties[0] ?? null,
+      precision: a.matched ? a.precision : null,
+      coordinates: a.coordinates,
+    };
+    const matched = Boolean(r.work?.matched || r.residence?.matched);
+    const state = (r.work?.matched ? r.work.resolved?.state : null) ?? (r.residence?.matched ? r.residence.resolved?.state : null) ?? null;
+    const homeState = r.residence?.matched ? r.residence.resolved?.state ?? null : null;
+    const meter = matched && meteringConfigured() && ctx.meteredSubscription && ctx.customerId
+      ? { customerId: ctx.customerId, identifier: requestId }
+      : null;
+    recordUsage(keyHash, 200, null, null, meter);
+    sendJson(res, 200, {
+      matched,
+      state,
+      residenceState: homeState && homeState !== state ? homeState : null,
+      certificate: r.certificateFields,
+      work: side(r.work),
+      residence: side(r.residence),
+      notResolvable: r.notResolvable,
+      lookupFailures: r.lookupFailures,
+      warnings: r.lowConfidenceReasons,
+      fullyResolved: r.fullyResolved,
+      requestId,
+    }, rlHeaders);
+    if (meter) flushMeterSoon();
+  } catch (err) {
+    console.error(`[address ${requestId}] lookup failed:`, err instanceof Error ? err.message : err);
+    recordUsage(keyHash, 502, 'geocode_unavailable', null);
+    sendJson(res, 502, { error: 'The address lookup is unavailable right now. Retry shortly; nothing was billed.', code: 'geocode_unavailable', requestId }, rlHeaders);
+  }
 }
 
 /** One place that appends a bounded usage event and updates the key's meter. */
@@ -2071,7 +2171,7 @@ createServer((req, res) => {
     // Cookie-authenticated console routes refuse cross-site browser POSTs
     // (belt and braces on top of SameSite=Lax). Bearer-key clients and the
     // Stripe webhook send no Origin header, so they pass untouched.
-    if (method === 'POST' && url.startsWith('/api/') && url !== '/api/billing/webhook' && url !== '/api/paycheck' && !sameOrigin(req)) {
+    if (method === 'POST' && url.startsWith('/api/') && url !== '/api/billing/webhook' && url !== '/api/paycheck' && url !== '/api/address' && !sameOrigin(req)) {
       sendJson(res, 403, { error: 'Cross-origin request refused.', code: 'bad_origin' });
       return;
     }
@@ -2097,6 +2197,7 @@ createServer((req, res) => {
     if (method === 'POST' && (url === '/api/paycheck' || url === '/v1/paycheck')) return handlePaycheck(req, res);
     if (method === 'GET' && (url === '/api/health' || url === '/v1/health' || url === '/healthz')) return handleHealth(res);
     if (method === 'GET' && (url === '/api/states' || url === '/v1/states')) return handleStates(res, req.url ?? url);
+    if (method === 'POST' && (url === '/api/address' || url === '/v1/address')) return handleAddress(req, res);
     if (method === 'POST' && url === '/api/estimate') return handleEstimate(req, res);
     if (method === 'GET' && url === '/api/billing') return handleBilling(req, res);
 

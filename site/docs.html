@@ -226,6 +226,38 @@
   "createdAt": "2026-10-01T12:00:00.000Z", "expiresAt": "2026-10-15T12:00:00.000Z", "expired": false,
   "lastUsedAt": null, "totalCalls": 0, "callsToday": 0, "limits": { "requestsPerMinute": 120 } }</pre>
 
+    <div class="sec-rule" id="address"></div>
+    <p class="label-mono" style="color:var(--color-gray)">API reference</p>
+    <div class="path-row">
+      <span class="tag tag-cobalt" style="height:32px;padding:0 12px;font-size:13px">POST</span>
+      <span class="path">/v1/address</span>
+    </div>
+    <p>Turns an employee&rsquo;s work address (and, optionally, home address) into the state, the local jurisdictions and the facts a paycheck needs: Indiana&rsquo;s county, Pennsylvania&rsquo;s PSD code, Ohio&rsquo;s municipality and school district, and so on. Resolve an employee once, store the result, and pass it on every pay run:</p>
+    <pre class="shape">"workState": { "code": response.state, "certificate": response.certificate },
+"residenceState": { "code": response.residenceState }   // only when it differs</pre>
+    <p>Billed at the <a href="#pricing">address rate</a>, once per lookup where at least one address matched. A lookup that matches nothing, or that fails on our side, is not billed. Send a Bearer key. A local tax that needs an address and has none comes back as a &ldquo;not modelled&rdquo; line, never a silent zero.</p>
+    <div class="field-rows">
+      <div><code>workAddress</code><span>One-line street address with city and state, up to 200 characters. Send this, <code>residenceAddress</code>, or both.</span></div>
+      <div><code>residenceAddress</code><span>Home address. Needed when a tax compares the two, such as Yonkers or reciprocity.</span></div>
+      <div><code>checkDate</code><span>Optional ISO date the rules are resolved for. Defaults to today.</span></div>
+    </div>
+    <table class="fields">
+      <thead><tr><th>Response field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>matched</code></td><td class="ty">boolean</td><td class="desc">At least one address was found. If false, nothing was billed.</td></tr>
+        <tr><td><code>state</code> / <code>residenceState</code></td><td class="ty">string | null</td><td class="desc">Two-letter codes. <code>residenceState</code> is set only when the home state differs.</td></tr>
+        <tr><td><code>certificate</code></td><td class="ty">object</td><td class="desc">Pass as <code>workState.certificate</code>.</td></tr>
+        <tr><td><code>work</code> / <code>residence</code></td><td class="ty">object | null</td><td class="desc">What was matched: <code>matchedAddress</code>, <code>place</code>, <code>county</code>, <code>precision</code>, <code>coordinates</code>.</td></tr>
+        <tr><td><code>fullyResolved</code></td><td class="ty">boolean</td><td class="desc">False when anything was ambiguous or a boundary lookup failed. Read <code>warnings</code> and <code>notResolvable</code> before relying on the result.</td></tr>
+      </tbody>
+    </table>
+    <pre class="shape">curl -X POST <span data-origin>https://your-host</span>/v1/address -H "Authorization: Bearer sk_test_..." \
+  -d '{ "workAddress": "414 Grant St, Pittsburgh, PA 15219" }'
+
+{ "matched": true, "state": "PA", "residenceState": null, "certificate": { "workPSD": "700102" },
+  "work": { "matchedAddress": "414 GRANT ST, PITTSBURGH, PA, 15219", "precision": "rooftop", ... },
+  "fullyResolved": true, "warnings": [], "notResolvable": [] }</pre>
+
     <div class="sec-rule" id="health"></div>
     <p class="label-mono" style="color:var(--color-gray)">API reference</p>
     <div class="path-row">
@@ -276,6 +308,7 @@
         <tr><td colspan="3"><div class="status-split"></div></td></tr>
         <tr><td><span class="tag tag-outline tag-error">422</span></td><td><code>invalid_input</code></td><td class="when">The request did not pass validation. <code>details</code> lists each field error as <code>{ path, message }</code>.</td></tr>
         <tr><td><span class="tag tag-outline tag-error">422</span></td><td><code>calculation_error</code></td><td class="when">The input was valid, but the paycheck couldn’t be calculated. This is not the “not modelled” line — that is a normal tax line with a NOT MODELLED detail.</td></tr>
+        <tr><td><span class="tag tag-outline tag-error">422</span></td><td><code>cannot_compute</code></td><td class="when">The agency publishes no method for this input, for example a pay frequency its tables skip. The message names the reason. The engine refuses rather than guess.</td></tr>
         <tr><td colspan="3"><div class="status-split"></div></td></tr>
         <tr><td><span class="tag tag-outline tag-error">429</span></td><td><code>rate_limited</code></td><td class="when">Too many requests from this key in the current minute. The default limit is <span id="rpm">120</span> requests per minute, per key. Retry after the number of seconds in the Retry-After header.</td></tr>
       </tbody>
@@ -397,6 +430,7 @@
         <tr><td><code>employeeTaxTotal</code></td><td class="ty">integer</td><td class="desc">Sum of all taxes withheld from the employee.</td></tr>
         <tr><td><code>employerTaxTotal</code></td><td class="ty">integer</td><td class="desc">Sum of all employer-borne taxes. Not withheld from the employee.</td></tr>
         <tr><td><code>netPay</code></td><td class="ty">integer</td><td class="desc">Take-home: gross, less pre-tax deductions, less employee taxes, less post-tax deductions.</td></tr>
+        <tr><td><code>warnings</code></td><td class="ty">array</td><td class="desc">Optional. Plain-language problems with the paycheck as a whole. Today: taxes and deductions add up to more than the pay, so <code>netPay</code> is negative. Nothing is dropped or reduced automatically.</td></tr>
         <tr><td><code>notices</code></td><td class="ty">array</td><td class="desc">Optional. Present only when a line rests on something weaker than a confirmed primary source, or the engine does not model something the input asked for. Each is <code>{ taxId, tier, note }</code> with <code>tier</code> one of <code>secondary_source, inferred, not_modelled, conflicting_sources</code>. The amounts are still returned. Read the notice before you pay.</td></tr>
       </tbody>
     </table>
