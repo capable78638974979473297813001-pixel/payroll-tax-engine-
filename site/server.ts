@@ -5,12 +5,12 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
 import { calculatePaycheck } from '../src/calculate.ts';
-import { UnsupportedTaxYearError } from '../src/registry.ts';
+import { CannotComputeError, UnsupportedTaxYearError } from '../src/registry.ts';
 import { resolveEmployee } from '../geocode/index.ts';
 import {
   withDb, readDb, appendUsage, hitStoredLimit,
   type AccountRecord, type KeyRecord, type PaymentMethodRecord,
-  type SubscriptionRecord, type TermsAcceptance, type TermsQuote,
+  type SavedScenario, type SubscriptionRecord, type TermsAcceptance, type TermsQuote,
 } from './lib/store.ts';
 import { CALL_TIERS, ROOFTOP_RATE, TRIAL_DAYS, PERIODS_PER_YEAR, estimate as computePricing, costForCalls } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
@@ -1468,7 +1468,9 @@ async function handleDemoPaycheck(req: IncomingMessage, res: ServerResponse): Pr
     sendJson(res, 200, { demo: true, request: input, result: calculatePaycheck(validation.value) });
   } catch (err) {
     console.error('[demo paycheck] calculation failed:', err instanceof Error ? err.message : err);
-    sendJson(res, 422, { error: 'That calculation could not be completed.', code: 'calculation_error' });
+    sendJson(res, 422, err instanceof CannotComputeError
+      ? { error: err.message, code: 'cannot_compute' }
+      : { error: 'That calculation could not be completed.', code: 'calculation_error' });
   }
 }
 
@@ -1547,6 +1549,103 @@ async function handleDemoResolveAddress(req: IncomingMessage, res: ServerRespons
     console.error('[demo resolve-address] failed:', err instanceof Error ? err.message : err);
     sendJson(res, 502, { error: 'The address lookup is unavailable right now. Pick the state by hand instead.', code: 'geocode_unavailable' });
   }
+}
+
+// ---------------------------------------------------------------------
+// Saved calculator scenarios -- /api/scenarios (list), /api/scenarios/save,
+// /api/scenarios/delete. Signed-in accounts only; each account sees only its
+// own. A scenario is the calculator's inputs, not a result: loading one
+// reruns the real engine, so a saved scenario never goes stale.
+// ---------------------------------------------------------------------
+
+const MAX_SCENARIOS = 25;
+
+/** The calculator inputs worth keeping, each checked; anything else is dropped. */
+function scenarioInputs(raw: unknown): Record<string, unknown> | string {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return 'Send the calculator inputs as an object.';
+  const b = raw as Record<string, unknown>;
+  const state = typeof b.state === 'string' ? b.state.toUpperCase() : '';
+  if (!validStateCodes().has(state)) return 'Choose a state from the list.';
+  const payFrequency = typeof b.payFrequency === 'string' ? b.payFrequency : '';
+  if (!DEMO_FREQUENCIES.includes(payFrequency)) return 'Choose weekly, biweekly, semimonthly or monthly.';
+  const filingStatus = typeof b.filingStatus === 'string' ? b.filingStatus : '';
+  if (!DEMO_FILING.includes(filingStatus)) return 'Choose a filing status from the list.';
+  const gross = b.grossCents;
+  const pretax = b.pretaxCents === undefined ? 0 : b.pretaxCents;
+  if (!Number.isInteger(gross) || (gross as number) < 1 || (gross as number) > DEMO_MAX_GROSS_CENTS) return 'Enter a paycheck amount between $0.01 and $500,000.';
+  if (!Number.isInteger(pretax) || (pretax as number) < 0 || (pretax as number) > (gross as number)) return 'The 401(k) deferral must be between $0 and the paycheck amount.';
+  const out: Record<string, unknown> = { state, payFrequency, filingStatus, grossCents: gross, pretaxCents: pretax };
+  const text = (v: unknown) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, 200) : '');
+  if (text(b.workAddress)) out.workAddress = text(b.workAddress);
+  if (text(b.residenceAddress)) out.residenceAddress = text(b.residenceAddress);
+  const certificate = demoCertificate(b.certificate);
+  if (certificate) out.certificate = certificate;
+  const residenceState = typeof b.residenceState === 'string' ? b.residenceState.toUpperCase() : '';
+  if (residenceState) {
+    if (!validStateCodes().has(residenceState)) return 'The home state is not one this build can compute.';
+    out.residenceState = residenceState;
+  }
+  return out;
+}
+
+function handleScenarioList(req: IncomingMessage, res: ServerResponse): void {
+  const session = requireSession(req);
+  if (!session) { sendJson(res, 401, { error: 'Sign in to see saved scenarios.', code: 'not_signed_in' }); return; }
+  sendJson(res, 200, { scenarios: readDb((db) => db.scenarios[session.email] ?? []), max: MAX_SCENARIOS });
+}
+
+async function handleScenarioSave(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const session = requireSession(req);
+  if (!session) { sendJson(res, 401, { error: 'Sign in to save a scenario.', code: 'not_signed_in' }); return; }
+  let body: Record<string, unknown>;
+  try {
+    body = await readJson<Record<string, unknown>>(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json' });
+    return;
+  }
+  const name = typeof body.name === 'string' ? body.name.replace(/\s+/g, ' ').trim() : '';
+  if (!name || name.length > 60) { sendJson(res, 422, { error: 'Give the scenario a name of up to 60 characters.', code: 'invalid_input' }); return; }
+  const inputs = scenarioInputs(body.inputs);
+  if (typeof inputs === 'string') { sendJson(res, 422, { error: inputs, code: 'invalid_input' }); return; }
+
+  const saved = withDb((db): SavedScenario | 'full' => {
+    const list = (db.scenarios[session.email] ??= []);
+    // Saving under an existing name replaces it, so "update" needs no id.
+    const same = list.findIndex((s) => s.name.toLowerCase() === name.toLowerCase());
+    const entry: SavedScenario = { id: 'sc_' + randomBytes(6).toString('hex'), name, createdAt: new Date().toISOString(), inputs };
+    if (same >= 0) { list[same] = entry; return entry; }
+    if (list.length >= MAX_SCENARIOS) return 'full';
+    list.push(entry);
+    return entry;
+  });
+  if (saved === 'full') {
+    sendJson(res, 409, { error: `You can keep ${MAX_SCENARIOS} scenarios. Delete one to save another.`, code: 'scenario_limit' });
+    return;
+  }
+  sendJson(res, 200, { scenario: saved });
+}
+
+async function handleScenarioDelete(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const session = requireSession(req);
+  if (!session) { sendJson(res, 401, { error: 'Sign in first.', code: 'not_signed_in' }); return; }
+  let body: Record<string, unknown>;
+  try {
+    body = await readJson<Record<string, unknown>>(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json' });
+    return;
+  }
+  const id = typeof body.id === 'string' ? body.id : '';
+  const removed = withDb((db) => {
+    const list = db.scenarios[session.email] ?? [];
+    const i = list.findIndex((s) => s.id === id);
+    if (i < 0) return false;
+    list.splice(i, 1);
+    return true;
+  });
+  if (!removed) { sendJson(res, 404, { error: 'That scenario was not found.', code: 'not_found' }); return; }
+  sendJson(res, 200, { deleted: id });
 }
 
 // Address of the caller, for per-address limits.
@@ -1662,14 +1761,30 @@ function handleUsage(req: IncomingMessage, res: ServerResponse): void {
 // POST /api/paycheck -- the real product, key-authenticated
 // ---------------------------------------------------------------------
 
-async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promise<void> {
+/** What a successful key check hands to the endpoint that asked for it. */
+interface KeyContext {
+  requestId: string;
+  keyHash: string;
+  rlHeaders: Record<string, string>;
+  customerId: string | null;
+  meteredSubscription: boolean;
+}
+
+/**
+ * The checks every key-authenticated endpoint shares: a key that exists,
+ * is active and unexpired, an account in good standing with a payment
+ * method, then the per-key rate limit. Sends the error and returns null
+ * when any fails. `limiter` names the rate-limit bucket so endpoints
+ * with different costs don't spend each other's allowance.
+ */
+function authenticateKey(req: IncomingMessage, res: ServerResponse, limiter: string): KeyContext | null {
   const requestId = 'req_' + randomBytes(8).toString('hex');
   const baseHeaders: Record<string, string> = { 'X-Request-Id': requestId };
 
   const key = bearerToken(req);
   if (!key) {
     sendJson(res, 401, { error: 'Missing API key. Send "Authorization: Bearer <key>".', code: 'missing_key', requestId }, baseHeaders);
-    return;
+    return null;
   }
 
   const keyHash = sha256Hex(key);
@@ -1692,29 +1807,29 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
 
   if (!keyRecord || !keyRecord.isActive) {
     sendJson(res, 401, { error: 'Invalid or inactive API key.', code: 'invalid_key', requestId }, baseHeaders);
-    return;
+    return null;
   }
   if (Date.now() > new Date(keyRecord.expiresAt).getTime()) {
     sendJson(res, 401, { error: `This API key expired on ${keyRecord.expiresAt}.`, code: 'expired_key', requestId }, baseHeaders);
-    return;
+    return null;
   }
   const mode = keyMode(keyRecord);
   baseHeaders['Omnia-Mode'] = mode;
   if (!auth.paymentOnFile) {
     sendJson(res, 402, { error: 'This account has no card or bank account on file. Add one in the console to use the API.', code: 'payment_method_required', requestId }, baseHeaders);
-    return;
+    return null;
   }
   if (auth.cancelled) {
     sendJson(res, 402, { error: 'This account\'s subscription was cancelled. Start a new subscription in the console to resume.', code: 'subscription_cancelled', requestId }, baseHeaders);
-    return;
+    return null;
   }
   if (auth.suspended) {
     sendJson(res, 402, { error: 'This account is suspended for a billing issue. Update your payment method to resume.', code: 'account_suspended', reason: auth.suspendedReason, requestId }, baseHeaders);
-    return;
+    return null;
   }
 
   // --- rate limit (per key, stored: shared by instances, kept across restarts)
-  const rl = withDb((db) => hitStoredLimit(db, 'paycheck:' + keyHash, paycheckLimiterLimit(), 60_000));
+  const rl = withDb((db) => hitStoredLimit(db, limiter + ':' + keyHash, paycheckLimiterLimit(), 60_000));
   const rlHeaders = {
     ...baseHeaders,
     'RateLimit-Limit': String(rl.limit),
@@ -1728,8 +1843,16 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
       { error: `Rate limit of ${rl.limit} requests/minute exceeded. Retry in ${rl.retryAfterSec}s.`, code: 'rate_limited', requestId },
       { ...rlHeaders, 'Retry-After': String(rl.retryAfterSec) },
     );
-    return;
+    return null;
   }
+  return { requestId, keyHash, rlHeaders, customerId: auth.customerId, meteredSubscription: auth.meteredSubscription };
+}
+
+async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const ctx = authenticateKey(req, res, 'paycheck');
+  if (!ctx) return;
+  const { requestId, keyHash, rlHeaders } = ctx;
+  const auth = ctx;
 
   // --- parse ------------------------------------------------------------
   let raw: unknown;
@@ -1778,6 +1901,8 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
     responseBody =
       err instanceof UnsupportedTaxYearError
         ? { error: err.message, code: 'unsupported_tax_year', requestId }
+        : err instanceof CannotComputeError
+        ? { error: err.message, code: 'cannot_compute', requestId }
         : {
             error: 'The calculation could not be completed for the input provided.',
             code: 'calculation_error',
@@ -1796,6 +1921,82 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   recordUsage(keyHash, status, usageError, validation.value.checkDate, meter);
   sendJson(res, status, responseBody, rlHeaders);
   if (meter) flushMeterSoon();
+}
+
+// ---------------------------------------------------------------------
+// POST /v1/address -- key-authenticated address resolution. Turns a work
+// address (and optionally a home address) into the state, the local
+// jurisdictions and the certificate facts a paycheck needs, so the caller
+// resolves an employee once and reuses the result on every pay run:
+//   workState: { code: <state>, certificate: <certificate> }
+// Billed as one unit when at least one address matched; an address that
+// can't be matched costs nothing.
+// ---------------------------------------------------------------------
+
+async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const ctx = authenticateKey(req, res, 'address');
+  if (!ctx) return;
+  const { requestId, keyHash, rlHeaders } = ctx;
+
+  let body: Record<string, unknown>;
+  try {
+    body = await readJson<Record<string, unknown>>(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId }, rlHeaders);
+    return;
+  }
+  const clean = (v: unknown) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : '');
+  const work = clean(body.workAddress);
+  const home = clean(body.residenceAddress);
+  const checkDate = typeof body.checkDate === 'string' ? body.checkDate : new Date().toISOString().slice(0, 10);
+  const problem =
+    !work && !home ? 'Send workAddress, residenceAddress, or both, as one-line street addresses.'
+    : work.length > 200 || home.length > 200 ? 'An address can be at most 200 characters.'
+    : body.checkDate !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(checkDate) ? 'checkDate must be ISO yyyy-mm-dd.'
+    : null;
+  if (problem) {
+    recordUsage(keyHash, 422, 'validation_failed', null);
+    sendJson(res, 422, { error: problem, code: 'invalid_input', requestId }, rlHeaders);
+    return;
+  }
+
+  try {
+    const r = await resolveEmployee({ work: work || undefined, residence: home || undefined }, checkDate);
+    const side = (a: typeof r.work) => a && {
+      matched: a.matched,
+      matchedAddress: a.matchQuality?.matchedAddress ?? null,
+      state: a.resolved?.state ?? null,
+      place: a.geographies?.incorporatedPlaces[0] ?? null,
+      county: a.geographies?.counties[0] ?? null,
+      precision: a.matched ? a.precision : null,
+      coordinates: a.coordinates,
+    };
+    const matched = Boolean(r.work?.matched || r.residence?.matched);
+    const state = (r.work?.matched ? r.work.resolved?.state : null) ?? (r.residence?.matched ? r.residence.resolved?.state : null) ?? null;
+    const homeState = r.residence?.matched ? r.residence.resolved?.state ?? null : null;
+    const meter = matched && meteringConfigured() && ctx.meteredSubscription && ctx.customerId
+      ? { customerId: ctx.customerId, identifier: requestId }
+      : null;
+    recordUsage(keyHash, 200, null, null, meter);
+    sendJson(res, 200, {
+      matched,
+      state,
+      residenceState: homeState && homeState !== state ? homeState : null,
+      certificate: r.certificateFields,
+      work: side(r.work),
+      residence: side(r.residence),
+      notResolvable: r.notResolvable,
+      lookupFailures: r.lookupFailures,
+      warnings: r.lowConfidenceReasons,
+      fullyResolved: r.fullyResolved,
+      requestId,
+    }, rlHeaders);
+    if (meter) flushMeterSoon();
+  } catch (err) {
+    console.error(`[address ${requestId}] lookup failed:`, err instanceof Error ? err.message : err);
+    recordUsage(keyHash, 502, 'geocode_unavailable', null);
+    sendJson(res, 502, { error: 'The address lookup is unavailable right now. Retry shortly; nothing was billed.', code: 'geocode_unavailable', requestId }, rlHeaders);
+  }
 }
 
 /** One place that appends a bounded usage event and updates the key's meter. */
@@ -2067,7 +2268,7 @@ createServer((req, res) => {
     // Cookie-authenticated console routes refuse cross-site browser POSTs
     // (belt and braces on top of SameSite=Lax). Bearer-key clients and the
     // Stripe webhook send no Origin header, so they pass untouched.
-    if (method === 'POST' && url.startsWith('/api/') && url !== '/api/billing/webhook' && url !== '/api/paycheck' && !sameOrigin(req)) {
+    if (method === 'POST' && url.startsWith('/api/') && url !== '/api/billing/webhook' && url !== '/api/paycheck' && url !== '/api/address' && !sameOrigin(req)) {
       sendJson(res, 403, { error: 'Cross-origin request refused.', code: 'bad_origin' });
       return;
     }
@@ -2079,6 +2280,9 @@ createServer((req, res) => {
     if (method === 'POST' && url === '/api/password') return handlePassword(req, res);
     if (method === 'POST' && url === '/api/demo/paycheck') return handleDemoPaycheck(req, res);
     if (method === 'POST' && url === '/api/demo/resolve-address') return handleDemoResolveAddress(req, res);
+    if (method === 'GET' && url === '/api/scenarios') return handleScenarioList(req, res);
+    if (method === 'POST' && url === '/api/scenarios/save') return handleScenarioSave(req, res);
+    if (method === 'POST' && url === '/api/scenarios/delete') return handleScenarioDelete(req, res);
     if (method === 'POST' && url === '/api/signout') return handleSignout(req, res);
     if (method === 'GET' && url === '/api/terms') return handleTerms(req, res);
     if (method === 'POST' && url === '/api/accept-terms') return handleAcceptTerms(req, res);
@@ -2093,6 +2297,7 @@ createServer((req, res) => {
     if (method === 'POST' && (url === '/api/paycheck' || url === '/v1/paycheck')) return handlePaycheck(req, res);
     if (method === 'GET' && (url === '/api/health' || url === '/v1/health' || url === '/healthz')) return handleHealth(res);
     if (method === 'GET' && (url === '/api/states' || url === '/v1/states')) return handleStates(res, req.url ?? url);
+    if (method === 'POST' && (url === '/api/address' || url === '/v1/address')) return handleAddress(req, res);
     if (method === 'POST' && url === '/api/estimate') return handleEstimate(req, res);
     if (method === 'GET' && url === '/api/billing') return handleBilling(req, res);
 

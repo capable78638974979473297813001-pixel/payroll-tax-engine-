@@ -197,6 +197,22 @@ describe('Omnia API (end to end)', () => {
     assert.ok(j.result.taxes.length > 0);
   });
 
+  test('POST /v1/address needs a key and validates before any lookup', async () => {
+    const addr = (body: unknown, key: string | null = PLAINTEXT_KEY) =>
+      fetch(`${BASE}/v1/address`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(key ? { Authorization: `Bearer ${key}` } : {}) },
+        body: JSON.stringify(body),
+      });
+    assert.equal((await addr({ workAddress: '1 Main St, Indianapolis, IN' }, null)).status, 401);
+    assert.equal((await addr({ workAddress: '1 Main St, Indianapolis, IN' }, 'sk_test_nope')).status, 401);
+    const empty = await addr({});
+    assert.equal(empty.status, 422);
+    assert.equal((await empty.json()).code, 'invalid_input');
+    assert.equal((await addr({ workAddress: 'x'.repeat(201) })).status, 422);
+    assert.equal((await addr({ workAddress: '1 Main St', checkDate: 'June 1' })).status, 422);
+  });
+
   test('GET /api/states returns the computable jurisdictions', async () => {
     const r = await fetch(`${BASE}/api/states`);
     assert.equal(r.status, 200);

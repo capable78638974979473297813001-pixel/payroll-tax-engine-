@@ -262,6 +262,80 @@
     });
   }
 
+  // ---------- saved scenarios ----------------------------------------------
+  // A scenario is the calculator's inputs. Loading one reruns the engine, so
+  // it never shows an out-of-date result. Needs a signed-in account.
+  var signedIn = false;
+  function currentInputs() {
+    var inputs = {
+      state: $('cState').value, payFrequency: $('cFreq').value, filingStatus: $('cFiling').value,
+      grossCents: cents($('cGross').value), pretaxCents: cents($('cPretax').value || '0'),
+    };
+    var w = $('cAddr').value.trim(), h = $('cHome').value.trim();
+    if (w) inputs.workAddress = w;
+    if (h) inputs.residenceAddress = h;
+    if (geo && geo.state === inputs.state) {
+      if (geo.certificate) inputs.certificate = geo.certificate;
+      if (geo.residenceState) inputs.residenceState = geo.residenceState;
+    }
+    return inputs;
+  }
+  function saveMsg(t, bad) { var m = $('cSaveMsg'); m.textContent = t || ''; m.style.color = bad ? 'var(--color-error)' : ''; }
+  function describe(i) {
+    return (stateNames[i.state] || i.state) + ' · ' + money(i.grossCents) + ' ' + ({ weekly: 'weekly', biweekly: 'every two weeks', semimonthly: 'twice a month', monthly: 'monthly' }[i.payFrequency] || '');
+  }
+  function renderSaved(list) {
+    var ul = $('cSavedList');
+    ul.textContent = '';
+    list.forEach(function (s) {
+      var li = el('li');
+      var b = el('button', 'load', s.name); b.type = 'button';
+      b.appendChild(el('small', null, describe(s.inputs)));
+      b.addEventListener('click', function () { loadScenario(s); });
+      var d = el('button', 'del', '×'); d.type = 'button';
+      d.setAttribute('aria-label', 'Delete ' + s.name);
+      d.addEventListener('click', function () {
+        api('/api/scenarios/delete', { id: s.id }).then(function (r) {
+          if (r.ok) { saveMsg('Deleted “' + s.name + '”.'); loadSaved(); } else saveMsg((r.body && r.body.error) || 'Could not delete.', true);
+        });
+      });
+      li.appendChild(b); li.appendChild(d); ul.appendChild(li);
+    });
+  }
+  function loadSaved() {
+    return api('/api/scenarios').then(function (r) {
+      signedIn = r.ok;
+      $('cSavedOut').hidden = r.ok;
+      $('cSavedIn').hidden = !r.ok;
+      if (r.ok) renderSaved(r.body.scenarios || []);
+    });
+  }
+  function loadScenario(s) {
+    var i = s.inputs;
+    $('cState').value = i.state; $('cFreq').value = i.payFrequency; $('cFiling').value = i.filingStatus;
+    $('cGross').value = (i.grossCents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    $('cPretax').value = ((i.pretaxCents || 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    $('cAddr').value = i.workAddress || ''; $('cHome').value = i.residenceAddress || '';
+    if (i.residenceAddress) $('cHomeBox').open = true;
+    geo = (i.certificate || i.residenceState) ? { state: i.state, certificate: i.certificate, residenceState: i.residenceState } : null;
+    showGeo(geo ? geoMsg('Using the address facts saved with “' + s.name + '”.', null, 'Look up again to refresh them.') : null);
+    $('cSaveName').value = s.name;
+    saveMsg('');
+    markChip();
+    doRun();
+  }
+  function saveScenario() {
+    var name = $('cSaveName').value.trim();
+    var inputs = currentInputs();
+    if (!name) { saveMsg('Give it a name first.', true); $('cSaveName').focus(); return; }
+    if (isNaN(inputs.grossCents) || inputs.grossCents < 1 || isNaN(inputs.pretaxCents)) { saveMsg('Fix the paycheck amounts first.', true); return; }
+    api('/api/scenarios/save', { name: name, inputs: inputs }).then(function (r) {
+      if (r.ok) { saveMsg('Saved “' + r.body.scenario.name + '”.'); loadSaved(); }
+      else if (r.status === 401) { signedIn = false; loadSaved(); }
+      else saveMsg((r.body && r.body.error) || 'Could not save.', true);
+    });
+  }
+
   // ---------- sign-in aware nav --------------------------------------------
   function navState() {
     api('/api/account').then(function (r) {
@@ -290,7 +364,9 @@
   $('cCopy').addEventListener('click', function () { if (last.request) copy($('cCopy'), curl()); });
   if ($('curlCopy')) $('curlCopy').addEventListener('click', function () { if (last.request) copy($('curlCopy'), curl()); });
 
-  loadStates().then(doRun, doRun);
+  $('cSave').addEventListener('click', saveScenario);
+  $('cSaveName').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); saveScenario(); } });
+  loadStates().then(doRun, doRun).then(loadSaved);
   loadExcerpt();
   navState();
 })();
