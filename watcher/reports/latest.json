@@ -1,60 +1,28 @@
 {
- "date": "2026-10-03",
+ "date": "2026-10-04",
  "counts": {
-  "unchanged": 479,
-  "unreachable": 4,
-  "blocked": 20,
+  "unchanged": 476,
+  "unreachable": 8,
+  "blocked": 21,
   "gone": 4,
-  "changed": 3
+  "changed": 1
  },
  "total": 510,
  "changed": [
   {
-   "id": "al-9366421409",
-   "jurisdiction": "AL",
-   "title": "Alabama DOR withholding tax",
-   "url": "https://www.revenue.alabama.gov/individual-corporate/withholding-tax-2/",
-   "detail": "2 lines added, 2 removed; 2 links added, 2 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [
-    "https://www.revenue.alabama.gov/individual-corporate/alabama-taxpayer-identity-theft-and-tax-fraud/",
-    "https://www.revenue.alabama.gov/individual-corporate/software-vendor-information/"
-   ],
-   "links_removed": [
-    "https://www.revenue.alabama.gov/individual-corporate/alabama-individual-modernized-electronic-filing-mef/",
-    "https://www.revenue.alabama.gov/individual-corporate/electronic-filing-requirements-and-information-for-tax-practitioners/"
-   ],
-   "significant": true
-  },
-  {
-   "id": "az-b66098e04c",
-   "jurisdiction": "AZ",
-   "title": "City of Flagstaff -- City of Flagstaff announces minimum wage for 2026",
-   "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
-   "detail": "4 lines added, 4 removed",
+   "id": "oh-740fc07d10",
+   "jurisdiction": "OH",
+   "title": "Village of Georgetown -- Income Tax",
+   "url": "https://georgetownohio.gov/income-tax/",
+   "detail": "read with a headless browser; 0 lines added, 2 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
    "links_removed": [],
    "significant": true
-  },
-  {
-   "id": "mi-c62e8170b0",
-   "jurisdiction": "MI",
-   "title": "Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026",
-   "url": "https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026",
-   "detail": "1 lines added, 1 removed (link lists / headlines only)",
-   "figures_added": [
-    "$4"
-   ],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": false
   }
  ],
- "significant_changes": 2,
+ "significant_changes": 1,
  "broken": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://www.irs.gov/pub/irs-prior/p51--2025.pdf",
@@ -65,8 +33,8 @@
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "verified": 482,
- "unverified": 28,
+ "verified": 477,
+ "unverified": 33,
  "never_baselined": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://does.dc.gov/service/office-wage-hour-compliance-0",
@@ -91,5 +59,5 @@
   "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 12
+ "max_consecutive_failures": 13
 }
