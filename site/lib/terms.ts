@@ -45,8 +45,8 @@ export function termsClauses(args: {
     {
       heading: 'What you are agreeing to pay',
       body:
-        `Omnia is billed on usage: every calculation your key makes is metered against the published ` +
-        `rate card, plus $0.09 for each rooftop address resolution. Nothing is a flat fee and nothing ` +
+        `Omnia is billed on usage: every call your key makes is metered against the published ` +
+        `rate card, with rooftop geocoding included at the same rate. Nothing is a flat fee and nothing ` +
         `is per-seat. On the volume you entered (${args.expectedEmployees.toLocaleString()} employees) ` +
         `that comes to about ${annual} a year — an estimate from your own numbers, not a cap or a quote.`,
     },

@@ -12,7 +12,7 @@ import {
   type AccountRecord, type KeyRecord, type PaymentMethodRecord,
   type SavedScenario, type SubscriptionRecord, type TermsAcceptance, type TermsQuote,
 } from './lib/store.ts';
-import { CALL_TIERS, ROOFTOP_RATE, TRIAL_DAYS, PERIODS_PER_YEAR, estimate as computePricing, costForCalls } from './lib/pricing.ts';
+import { CALL_TIERS, TRIAL_DAYS, PERIODS_PER_YEAR, estimate as computePricing, costForCalls } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
 import { isEmailConfigured, sendVerificationEmail } from './lib/mail.ts';
 import { validatePaycheckInput } from './lib/validate.ts';
@@ -193,7 +193,6 @@ function clientConfig() {
     trialDays: TRIAL_DAYS,
     termMonths: TERM_MONTHS,
     tiers: CALL_TIERS.map((t) => ({ upTo: Number.isFinite(t.upTo) ? t.upTo : null, rate: t.rate })),
-    rooftopRate: ROOFTOP_RATE,
     periodsPerYear: PERIODS_PER_YEAR,
     codeTtlSec: CODE_TTL_MS / 1000,
     codeCooldownSec: CODE_COOLDOWN_MS / 1000,
@@ -2180,8 +2179,7 @@ function handleBilling(req: IncomingMessage, res: ServerResponse): void {
       callsSoFar: calls,
       costSoFar: Math.round(costForCalls(calls) * 100) / 100,
       tiers: CALL_TIERS.map((t) => ({ upTo: t.upTo === Infinity ? null : t.upTo, rate: t.rate })),
-      rooftopRate: ROOFTOP_RATE,
-      subscription: sub,
+        subscription: sub,
       paymentMethod: pm,
       termMonths: TERM_MONTHS,
       // Real billing state. paymentsConfigured means a card/subscription

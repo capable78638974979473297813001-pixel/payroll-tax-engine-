@@ -6,7 +6,6 @@
     trialDays: 14,
     termMonths: 12,
     tiers: [{ upTo: null, rate: 0.09 }],
-    rooftopRate: 0.09,
     periodsPerYear: { weekly: 52, biweekly: 26, semimonthly: 24, monthly: 12 },
     codeTtlSec: 900,
     codeCooldownSec: 30,

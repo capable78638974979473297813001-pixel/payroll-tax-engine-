@@ -2,8 +2,8 @@
  * Omnia's pricing model, in one place.
  *
  * Usage-based, not tiered plans: every jurisdiction is included for
- * everyone, and you pay a flat $0.09 for each calculation you actually
- * make, at any volume. The list below stays a list of bands so a volume
+ * everyone, and you pay a flat $0.09 for each call you actually make,
+ * at any volume, geocoding included. The list below stays a list of bands so a volume
  * discount can be added back without touching the estimator or the pages;
  * today it has one band with no upper bound. The estimator on index.html
  * and the console's billing panel both read these numbers, so they can't
@@ -25,9 +25,6 @@ export interface CallTier {
 export const CALL_TIERS: CallTier[] = [
   { upTo: Infinity, rate: 0.09 },
 ];
-
-/** Rooftop address resolution, billed once per address -- not per pay run. Same 9 cents as a calculation. */
-export const ROOFTOP_RATE = 0.09;
 
 /** Free evaluation window, in days, before a card is needed. */
 export const TRIAL_DAYS = 14;
@@ -88,9 +85,10 @@ export function estimate(input: EstimateInput): EstimateBreakdown {
   const employees = Math.max(0, Math.round(input.employees));
   const callsPerYear = employees * periodsPerYear;
   const calculationCost = costForCalls(callsPerYear);
-  // One resolution per employee address, not one per pay run -- see the
-  // pricing copy on index.html, which makes the same promise.
-  const rooftopCost = input.rooftop ? employees * ROOFTOP_RATE : 0;
+  // Rooftop geocoding is not a separate charge: any call is the same rate,
+  // whether or not it resolves an address. `rooftop` is still accepted so
+  // existing callers keep working, and rooftopCost stays in the shape at 0.
+  const rooftopCost = 0;
   const total = calculationCost + rooftopCost;
   return {
     employees,
