@@ -256,10 +256,14 @@ function capFractionsResult(
       soleHouseholdSupport && cfg.flatWeeklyFloorSoleSupport != null
         ? cfg.flatWeeklyFloorSoleSupport
         : cfg.flatWeeklyFloor;
-    const floor = weeklyDollarsToPeriod(floorDollars, payFrequency);
+    const published = cfg.flatPeriodFloor?.[payFrequency as keyof NonNullable<GarnishmentFormula['flatPeriodFloor']>];
+    const floor = published != null ? dollars(published) : weeklyDollarsToPeriod(floorDollars, payFrequency);
     const byFloor = atLeastZero(disposable - floor);
     cap = Math.min(cap, byFloor);
-    detail += ` or disposable over the state's own $${floorDollars.toFixed(2)}/week flat floor (${fmt(floor)})`;
+    detail +=
+      published != null
+        ? ` or disposable over the state's own ${payFrequency} flat floor (${fmt(floor)})`
+        : ` or disposable over the state's own $${floorDollars.toFixed(2)}/week flat floor (${fmt(floor)})`;
   }
 
   if (cfg.perDependentWeeklyReduction != null && dependents > 0) {
@@ -513,6 +517,26 @@ function withResolvedMinimumWage(
   return { ...cfg, stateMinimumHourlyWage: answer.cents / 100 };
 }
 
+/**
+ * Resolve a dated flat-floor schedule (Oregon) to the step in force on the
+ * check date, so formulaCap sees an ordinary flatWeeklyFloor. A check dated
+ * before the first step keeps the static figure beside the schedule.
+ */
+function withResolvedFlatFloor(cfg: GarnishmentFormula, checkDate: string): GarnishmentFormula {
+  if (!cfg.flatFloorSchedule) return cfg;
+  let step;
+  for (const s of cfg.flatFloorSchedule) {
+    if (s.effectiveFrom <= checkDate && (!step || s.effectiveFrom > step.effectiveFrom)) step = s;
+  }
+  if (!step) return cfg;
+  const { weekly, biweekly, semimonthly, monthly } = step;
+  const flatPeriodFloor: NonNullable<GarnishmentFormula['flatPeriodFloor']> = {};
+  if (biweekly != null) flatPeriodFloor.biweekly = biweekly;
+  if (semimonthly != null) flatPeriodFloor.semimonthly = semimonthly;
+  if (monthly != null) flatPeriodFloor.monthly = monthly;
+  return { ...cfg, flatWeeklyFloor: weekly, flatPeriodFloor };
+}
+
 function ordinaryGarnishmentCap(
   disposable: Cents,
   gross: Cents,
@@ -566,7 +590,10 @@ function ordinaryGarnishmentCap(
       gross,
       workState,
       payFrequency,
-      withResolvedMinimumWage(override.ordinaryGarnishment, workState, checkDate, workRegion),
+      withResolvedFlatFloor(
+        withResolvedMinimumWage(override.ordinaryGarnishment, workState, checkDate, workRegion),
+        checkDate,
+      ),
       order.dependents ?? 0,
       order.soleHouseholdSupport ?? false,
       order.expectedAnnualEarnings,

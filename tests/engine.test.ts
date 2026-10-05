@@ -692,7 +692,7 @@ describe('Pennsylvania', () => {
   test("reciprocity SWAP (REV-419): a New Jersey resident working in PA gets $0 PA tax AND a real NJ tax line instead", () => {
     // Biweekly $3,000, no certificate on either side — the SAME default
     // fixture NJ's own 'Rate A, 0 exemptions' test already proved computes
-    // to $120.74 when NJ is the WORK state. Here PA is the work state and
+    // to $121.05 when NJ is the WORK state. Here PA is the work state and
     // NJ is only the RESIDENCE state, so this proves the swap mechanism
     // reproduces that exact figure via the virtual-input path, not a
     // coincidence — reciprocitySwapWithholdingLine() runs incomeTaxLines()
@@ -704,7 +704,7 @@ describe('Pennsylvania', () => {
       }),
     );
     assert.equal(amountOf(r, 'PA_SIT'), 0);
-    assert.equal(amountOf(r, 'NJ_SIT_RECIPROCITY_SWAP'), dollars(120.74));
+    assert.equal(amountOf(r, 'NJ_SIT_RECIPROCITY_SWAP'), dollars(121.05));
   });
 
   test('reciprocity SWAP does not over-apply: a New York resident working in PA owes full PA tax and gets no swap line at all', () => {
@@ -4015,10 +4015,11 @@ describe('New Jersey', () => {
   });
 
   test('biweekly $3,000 (the shared default paycheck), Rate A, 0 exemptions', () => {
-    // $3,000 falls in Rate A biweekly's $2,885-$19,231 bracket: base
-    // $112.69 + 7.0% of ($3,000-$2,885=$115) = $112.69 + $8.05 = $120.74.
+    // $3,000 falls in Rate A biweekly's $2,885-$19,231 bracket: the state's
+    // printed base is $113.00 (not the $112.69 you get by dividing the annual
+    // figure by 26), so $113.00 + 7.0% of ($3,000-$2,885=$115) = $113.00 + $8.05 = $121.05.
     const r = calculatePaycheck(input({ workState: { code: 'NJ' } }));
-    assert.equal(amountOf(r, 'NJ_SIT'), dollars(120.74));
+    assert.equal(amountOf(r, 'NJ_SIT'), dollars(121.05));
   });
 
   test('reciprocity: a Pennsylvania resident working in NJ owes $0 NJ income tax, AND gets a PA swap line instead (NJ-165)', () => {
@@ -10680,6 +10681,22 @@ describe('state unemployment insurance, employer side (XX_SUI_ER)', () => {
       construction.taxes.find((t) => t.id === 'KS_SUI_ER')?.detail ?? '',
       /"construction" industry classification/,
     );
+  });
+
+  test("South Dakota: a new employer pays 1.20% RA tax + 0.55% investment fee = 1.75%; a construction employer 6.55%", () => {
+    // $3,000 biweekly, under the $15,000 wage base. DLR's table: RA tax is
+    // 1.20% (non-construction) or 6.00% (construction), plus a 0.55%
+    // investment fee; the administrative fee column reads "Not Applicable".
+    const general = calculatePaycheck(suiInput({ workState: { code: 'SD', certificate: {} } }));
+    assert.equal(amountOf(general, 'SD_SUI_ER'), dollars(52.5)); // 1.75% * $3,000
+
+    const construction = calculatePaycheck(
+      suiInput({
+        workState: { code: 'SD', certificate: {} },
+        employer: { suiIndustry: { SD: 'construction' } },
+      }),
+    );
+    assert.equal(amountOf(construction, 'SD_SUI_ER'), dollars(196.5)); // 6.55% * $3,000
   });
 
   test("Kansas: an explicit employer-supplied rate still overrides the industry rate", () => {

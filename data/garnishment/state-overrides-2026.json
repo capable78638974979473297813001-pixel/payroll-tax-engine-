@@ -803,17 +803,23 @@
     "OR": {
       "sources": [
         {
-          "title": "ORS 18.385 — 75% of disposable earnings exempt from execution, or a flat per-period dollar minimum, whichever protects more: $254/week (scaled for other pay periods)",
-          "url": "https://oregon.public.law/statutes/ors_18.385",
-          "verifiedOn": "2026-09-11",
-          "verifiedBy": "Fetched via a rendering of the statute's own text (oregon.public.law, a direct statute-hosting site, not a law-firm summary). Quoted: '75 percent of the disposable earnings of an individual are exempt from execution,' with a flat-dollar floor 'to the extent that payment under a garnishment would result in net disposable earnings... of less than' $254 (weekly), $509 (biweekly), $545 (semimonthly), or $1,090 (monthly). The biweekly/semimonthly/monthly figures don't scale as a pure multiple of $254 the way this engine's generic weekly-to-period prorating would compute them (e.g. monthly would come out near $1,101, not $1,090) — same independently-rounded-per-period phenomenon already disclosed for Wisconsin's and New Mexico's own tables elsewhere in this project. Only the $254/week base figure is wired here; a caller on a non-weekly frequency gets this engine's own generic pro-rata scaling, not Oregon's own independently-published rounding for that specific period."
+          "title": "ORS 18.385(2) — 75% of disposable earnings exempt from execution, or a flat per-period dollar minimum, whichever protects more; the dollar minimums step up by wages-payable date: weekly $254 (before 2025-01-01), $305, $338 (from 2025-07-01), $400 (from 2026-07-01), then 30x the Oregon minimum wage from 2027-07-01",
+          "url": "https://www.oregonlegislature.gov/bills_laws/ors/ors018.html",
+          "verifiedOn": "2026-10-05",
+          "verifiedBy": "Fetched the Oregon Legislature's own ORS chapter 18 page and read subsection (2) directly. CORRECTS the earlier entry (verified 2026-09-11 against oregon.public.law, an out-of-date copy of the statute), which carried the pre-2025 $254/week flat floor. Current text, wages payable on or after: 2025-01-01: $305 weekly / $611 two-week / $655 half-month / $1,309 month; 2025-07-01: $338 / $675 / $737 / $1,458; 2026-07-01: $400 / $832 / $912 / $1,792; 2027-07-01: minimum wage x 30 / 60 / 65 / 130. Before 2025-01-01: $254 / $509 / $545 / $1,090. The per-period figures are the statute's own and are not multiples of the weekly one, so they are carried per frequency and used as printed. A frequency the statute does not name (quarterly, daily and so on) scales the weekly figure."
         }
       ],
       "ordinaryGarnishment": {
         "capFractions": [{ "basis": "disposable", "fraction": 0.25 }],
-        "flatWeeklyFloor": 254
+        "flatWeeklyFloor": 400,
+        "flatFloorSchedule": [
+          { "effectiveFrom": "1900-01-01", "weekly": 254, "biweekly": 509, "semimonthly": 545, "monthly": 1090 },
+          { "effectiveFrom": "2025-01-01", "weekly": 305, "biweekly": 611, "semimonthly": 655, "monthly": 1309 },
+          { "effectiveFrom": "2025-07-01", "weekly": 338, "biweekly": 675, "semimonthly": 737, "monthly": 1458 },
+          { "effectiveFrom": "2026-07-01", "weekly": 400, "biweekly": 832, "semimonthly": 912, "monthly": 1792 }
+        ]
       },
-      "$note": "WIRED 2026-09-11. Same flat-dollar-floor shape Alaska uses (GarnishmentFormula.flatWeeklyFloor) — Oregon's own $254/week statutory figure substitutes for the federal 30x-minimum-wage floor ($217.50/week at the current federal minimum wage), a real but modest departure. No sole-support-style higher figure exists in Oregon's statute the way Alaska's does."
+      "$note": "WIRED 2026-09-11, CORRECTED 2026-10-05. Same flat-dollar-floor shape Alaska uses (GarnishmentFormula.flatWeeklyFloor), but Oregon's figure is a dated schedule: the engine takes the step in force on the check date from flatFloorSchedule. $254 was only right for wages payable before 2025-01-01. 2027-07-01 onward (30x the Oregon minimum wage) is not modelled and would need the 2027 file."
     },
     "TN": {
       "sources": [
