@@ -115,7 +115,7 @@
   "jurisdictions": {
     "$comment": "SCRAPED DIRECTLY from the Secretary of State's own database (web.sos.ky.gov/occupationaltax, KRS 67.766) by browsing live and selecting each district in turn — not hand-researched one at a time. Louisville and Lexington (below, richer entries with sub-component breakdowns) were researched separately in an earlier pass and are cross-checked against this same source. Every other entry here is exactly what the state's own database shows for that district's WAGE/PAYROLL or NET PROFITS rate as of this scrape — 'rate: null' means the taxing district is listed in the state's own roster but its rate FIELD IS BLANK IN THE SOURCE DATABASE ITSELF, not that the tax is zero or that this project failed to look. 'category' distinguishes what base the shown rate applies to (Net Profits / Gross Receipts / Payroll Only / Flat Fee / a blend) — where category says 'Net Profits' alone with no separate payroll figure shown, whether the SAME rate also applies to wage withholding was NOT independently confirmed for every entry (Hopkinsville proved in this project's own research that the two CAN differ: 1.95% wages vs 1.3% net profits) — treat a bare 'Net Profits' category as a rate to re-verify against that specific city/county's own ordinance before using it as a wage-withholding number, not as a confirmed payroll rate.",
     "scrapedOn": "2026-08-13",
-    "coverage": "254 jurisdictions (250 scraped + 4 added 2026-09-28: Bardwell, Falmouth, Jenkins, Williamstown) plus Louisville Metro and Lexington-Fayette = 252 total. 250 resolve to a real wage rate the engine can use (248 scraped entries + Louisville + Lexington) -- 99.2%. The 2 that do not are both confirmed non-gaps, not unresolved research: 'Cumberland County Fiscal Court' is a duplicate name for the same government already confirmed under the sibling 'Cumberland County' entry (giving it its own copy of the same rate was tried and reverted the same session -- it broke geocode/resolve.ts's deliberate one-candidate-per-county disambiguation, see tests/geocode.test.ts). 'Marshall County Occupational License Tax For Schools' is genuinely net-profits-only, confirmed by reading its own 6-page Form M-W instructions in full (a business-apportionment 'Payroll Factor' worksheet was briefly misread as a personal wage tax earlier the same session and corrected after a closer read).",
+    "coverage": "254 jurisdictions (250 scraped + 4 added 2026-09-28: Bardwell, Falmouth, Jenkins, Williamstown) plus Louisville Metro and Lexington-Fayette = 252 total. 251 resolve to a real wage rate the engine can use (249 scraped entries + Louisville + Lexington) -- 99.6%. The 1 that does not is a confirmed non-gap, not unresolved research: 'Cumberland County Fiscal Court' is a duplicate name for the same government already confirmed under the sibling 'Cumberland County' entry (giving it its own copy of the same rate was tried and reverted the same session -- it broke geocode/resolve.ts's deliberate one-candidate-per-county disambiguation, see tests/geocode.test.ts). CORRECTED 2026-10-05: 'Marshall County Occupational License Tax For Schools' was previously listed here as net-profits-only (it was judged from the net-profit instruction booklet alone), but the board's own Occupational Tax Office page also levies 0.5% on the wages of Marshall County RESIDENTS working in the county, so it now resolves as a resident-only wage rate (see its wageRateNote).",
     "louisvilleMetro": {
       "governmentType": "Consolidated city-county government (Louisville/Jefferson County Metro Government) -- Jefferson County is the ONLY Kentucky county meeting KRS 68.180's 300,000-population threshold.",
       "residentRate": 0.022,
@@ -1732,12 +1732,12 @@
         "name": "Hillview",
         "category": "Net Profits",
         "rate": "1.8%",
-        "wageRateDecimal": 0.011,
+        "wageRateDecimal": 0.018,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_via_klc_statewide_survey",
-        "wageRateNote": "CORRECTS this file's own earlier figure (1.80% (inferred tier)), which turned out wrong -- KLC's official FY2023 statewide survey (a dedicated Payroll Tax Rate column, cross-checked against dozens of other entries in this same file this same session, all matching) gives the real rate.",
-        "wageRateSource": "Kentucky League of Cities official statewide survey, 'City Occupational License Tax Rates, FY 2023' (kleague.sharepoint.com), Payroll Tax Rate column."
+        "wageRateStatus": "confirmed_via_city_code",
+        "wageRateNote": "CORRECTED 2026-10-05 from 1.1% to 1.8%. The 1.1% came from KLC's FY2023 statewide survey, but the city's own codified ordinance s. 110.22 says 1.8% (last amended 2016, so no later change in the code), which outranks a survey column. The scraped 'Net Profits 1.8%' figure is the same percentage.",
+        "wageRateSource": "Hillview, KY Code of Ordinances s. 110.22 (American Legal Publishing; Ord. 2007-04, last amended by Ord. 2016-11 passed 2016-05-02): \"The occupational license tax shall be measured by one and eight-tenths percent (1.8%) of\" wages and compensation for work done in the city by every resident and nonresident employee. https://codelibrary.amlegal.com/codes/hillview/latest/hillview_ky/0-0-0-12896"
       },
       {
         "name": "Hodgenville",
@@ -2059,12 +2059,12 @@
         "name": "Ludlow",
         "category": "Gross Receipts",
         "rate": "0.00075%",
-        "wageRateDecimal": 0.015,
+        "wageRateDecimal": 0.02,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_via_multiple_sources",
-        "wageRateNote": "Scraped \"Gross Receipts 0.00075%\" was not the wage tax. Ludlow levies a 1.5% occupational/local income tax on both residents and nonresidents working in the city, stackable with Kenton County's own rate.",
-        "wageRateSource": "WebSearch aggregation of Ludlow city tax pages and Kenton County rate documentation (kentoncountyky.gov): 1.5% payroll rate."
+        "wageRateStatus": "confirmed_via_county_rate_sheet",
+        "wageRateNote": "CORRECTED 2026-10-05 from 1.5% to 2.0%. Kenton County's '2026 Rates' sheet lists Ludlow at .02 employee withholding on gross wages (employer/business fee .00132, license fee $50), stackable with Kenton County's own withholding rate. The earlier 1.5% came from a web-search aggregation of older Kenton documents.",
+        "wageRateSource": "Kenton County Fiscal Court, '2026 Rates -- Employee Withholding, Employer or Business Fee, License Fee' (kentoncountyky.gov/DocumentCenter/View/4143/2026-Kenton-County-and-Cities-Rates): Ludlow .02 Gross .00132 $50."
       },
       {
         "name": "Lyndon",
@@ -2175,11 +2175,12 @@
         "category": "Net Profits",
         "rate": "0.5%",
         "wageRateDecimal": null,
-        "wageRateResidentDecimal": null,
-        "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_net_profits_only_no_wage_tax",
-        "wageRateNote": "REVERTED a same-session false-positive confirmation (0.5%, claimed as a residence-triggered WAGE tax). Read the district's full 6-page Form M-W instruction document directly this time, not just a WebSearch summary and an out-of-context grep fragment: it is titled 'NET PROFIT INSTRUCTIONS' throughout, its own table of contents has no wage-withholding section at all, and every line item is business apportionment (federal Schedule C/E/F, Form 1120/1065/1120S) -- filed by SOLE PROPRIETORS, PARTNERSHIPS, and CORPORATIONS, never individual W-2 employees. The 'Payroll Factor' (Worksheet 1) is a business apportionment INPUT for multi-jurisdiction net-profit allocation, not a personal wage tax; 'no occupational license tax shall be collected from any individual who is not a resident' refers to individual sole-proprietor FILERS, not employees. Confirmed net-profits-only, correctly no wage rate to record -- the same conclusion this file reached before this same session's over-eager re-read.",
-        "wageRateSource": "Marshall County Occupational License Tax For Schools, Net Profit Instructions (zillionforms.com/2012/I628420888.PDF), read in full via pdftotext this time -- all 6 pages, not a fragment."
+        "wageRateResidentDecimal": 0.005,
+        "wageRateNonresidentDecimal": 0,
+        "residentCounty": "Marshall County",
+        "wageRateStatus": "confirmed_via_district_official_page",
+        "wageRateNote": "CORRECTED 2026-10-05: this entry carried no wage rate (the engine withheld $0) after an earlier pass read only the district's NET PROFIT instruction booklet (Form M-W) and concluded the tax was net-profits-only. The board's own Occupational Tax Office page says it levies 0.5% on 'salaries, wages, commissions, and other compensation of individuals who are Marshall County residents for activities performed or rendered in Marshall County' and, separately, on net profits (KRS 160.605). It is a RESIDENT-only wage tax, so it is modelled as a resident rate of 0.5% with a nonresident rate of 0, gated on certificate.residenceCounty = Marshall County (residentCounty). Employers file the board's Form MOLT-1 at least quarterly and reconcile annually on MOLT-1A with a W-2 listing. The employee's work location must be in Marshall County; this tax is separate from, and in addition to, the county's own 1% and any city rate (the engine's one-jurisdiction school lookup does not stack layers; see knownGaps).",
+        "wageRateSource": "Marshall County Schools Occupational Tax Office page (https://www.marshall.kyschools.us/page/occupational-tax-office), board of education levy under KRS 160.605; Form MOLT-1A annual reconciliation (https://resources.finalsite.net/images/v1654625949/marshallkyschoolsus/e6w9kzfeoeaiol4c2g8o/2021annualreconciliationformfill-in.pdf)."
       },
       {
         "name": "Martin County",
@@ -3081,24 +3082,24 @@
       {
         "name": "Shepherdsville",
         "rate": "2%",
-        "wageRateDecimal": 0.015,
+        "wageRateDecimal": 0.02,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_via_local_news_correction",
-        "wageRateNote": "CORRECTS the scraped 2% figure: local news (\"Occupational tax rolled back to 1.5% in Shepherdsville\") confirms the current rate is 1.5%, a rollback from a formerly higher rate -- the scraped figure predates this change.",
-        "wageRateSource": "Pioneer News (pmg-ky1.com): \"Occupational tax rolled back to 1.5% in Shepherdsville.\""
+        "wageRateStatus": "confirmed_via_city_code_form_and_portal",
+        "wageRateNote": "RESOLVED 2026-10-05: 2.0%, not 1.5%. The 1.5% came from a mid-2022 Pioneer News story about the council rolling a scheduled 2% increase back to 1.5% 'at least temporarily' (https://www.pmg-ky1.com/pioneer_news/news/occupational-tax-rolled-back-to-1-5-in-shepherdsville/article_10b88134-448e-56e4-91a2-e7ec03e9f029.html). Every current city source says 2%: the codified s. 111.03, the city's employer withholding and reconciliation forms, and the live employer portal. A 2022 news item does not outweigh the city's own current forms.",
+        "wageRateSource": "Shepherdsville, KY Code of Ordinances s. 111.03(A) (American Legal Publishing; last amended Ord. 022-052 passed 2022-05-23): \"measured by 2% of all wages and compensation paid or payable in the city ... by every resident and non-resident who is an employee\". Also the city's own Employer's Return of License Fee Withheld (\"Tax Due this period at 2%\", https://shepherdsvilleky.gov/wp-content/uploads/2023/09/Withholding-Form-New-1.pdf) and its live GovOS employer portal FAQ, in use since 2025-09-15: \"A 2% Occupational Tax on Gross Payroll must be withheld and remitted quarterly\" (https://shepherdsvilleky.munirevs.com/faq/)."
       },
       {
         "name": "Shively",
         "category": "Net Profits",
         "rate": "1.5%",
         "minTax": "$100",
-        "wageRateDecimal": 0.0225,
+        "wageRateDecimal": 0.02,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_via_klc_statewide_survey",
-        "wageRateNote": "CORRECTS this file's own earlier figure (1.50% (tax-rates.org)), which turned out wrong -- KLC's official FY2023 statewide survey (a dedicated Payroll Tax Rate column, cross-checked against dozens of other entries in this same file this same session, all matching) gives the real rate.",
-        "wageRateSource": "Kentucky League of Cities official statewide survey, 'City Occupational License Tax Rates, FY 2023' (kleague.sharepoint.com), Payroll Tax Rate column."
+        "wageRateStatus": "confirmed_via_city_code",
+        "wageRateNote": "CORRECTED 2026-10-05 from 2.25% to 2.0%. 2.25% is the city's NET PROFITS rate (s. 112.03(A)(2)); the wage rate in (A)(1) is 2%. KLC's FY2023 survey and the scraped 1.5% were both wrong for wages. The $100 minimum applies to net profits only.",
+        "wageRateSource": "Shively, KY Code of Ordinances s. 112.03(A)(1) (American Legal Publishing, amended by Ord. 5-2021 passed 2021-04-05): \"Two percent (2%) of all wages and compensation paid or payable in the city for work done or services performed or rendered in the city by every resident and nonresident who is an employee\"; (A)(2) is the separate 2.25% net-profit rate. https://codelibrary.amlegal.com/codes/shively/latest/shively_ky/0-0-0-3712"
       },
       {
         "name": "Simpson County",
@@ -3199,12 +3200,12 @@
         "name": "Stanford",
         "category": "Net Profits",
         "rate": "0.65%",
-        "wageRateDecimal": 0.0065,
+        "wageRateDecimal": 0.0115,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "cross_source_confirmed",
-        "wageRateNote": "Matches the scraped 0.65% figure exactly (secondary aggregator: Stanford flat city rate on earned income).",
-        "wageRateSource": "tax-rates.org (Stanford, KY) cross-referenced via WebSearch aggregation."
+        "wageRateStatus": "confirmed_via_city_form",
+        "wageRateNote": "CORRECTED 2026-10-05 from 0.65% to 1.15%. 0.65% was the net-profits figure. The city's Employers Payroll Tax Return (Form 541) says 'All organizations are required to submit 1.15% from gross wages paid employees for service within the City of Stanford', remitted quarterly with line 4 'STANFORD PAYROLL TAX DUE (1.15% OF LINE 3)'.",
+        "wageRateSource": "City of Stanford, KY, Form 541 Employers Payroll Tax Return (https://stanford.ky.gov/Forms/541payrolltaxreturntemplate.pdf, linked from https://stanford.ky.gov/Pages/Forms.aspx)."
       },
       {
         "name": "Taylor County",

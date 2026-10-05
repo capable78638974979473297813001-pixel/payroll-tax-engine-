@@ -1835,18 +1835,12 @@ describe('Kentucky', () => {
       // Cadiz, Warsaw, Clarkson, Muldraugh) turned out to have a real,
       // confirmable wage rate once research went far enough -- the KY
       // League of Cities' own statewide survey resolved 249 of 250
-      // scraped entries. The one exception, Marshall County Occupational
-      // License Tax For Schools, briefly got a false-positive 0.5% wage
-      // rate applied this same session (a WebSearch summary and an
-      // out-of-context grep fragment both misread its "Payroll Factor"
-      // business-apportionment worksheet as a personal wage tax) --
-      // reading its full 6-page Form M-W instructions directly showed it
-      // is genuinely net-profits-only, filed by sole proprietors and
-      // corporations, with no wage-withholding section anywhere in the
-      // document. See that entry's own wageRateNote and the dedicated
-      // test just below. Switched THIS test to a name that will never
-      // resolve, by construction, so it stops needing to be re-pinned
-      // every time research gets more thorough.
+      // scraped entries. Marshall County Occupational License Tax For
+      // Schools was the last holdout and turned out to be a real
+      // resident-only wage tax too (see the dedicated tests just below).
+      // Switched THIS test to a name that will never resolve, by
+      // construction, so it stops needing to be re-pinned every time
+      // research gets more thorough.
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
@@ -1857,24 +1851,42 @@ describe('Kentucky', () => {
       assert.equal(r.taxes.some((t) => t.id === 'KY_LOCAL'), false);
     });
 
-    test('Marshall County Occupational License Tax For Schools: genuinely net-profits-only, confirmed by reading its full Form M-W instructions -- no KY_LOCAL wage line, not a guess', () => {
+    test('Marshall County Occupational License Tax For Schools: 0.5% of wages for Marshall County residents working in the county', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
           earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
           workState: {
             code: 'KY',
-            certificate: { workCounty: 'Marshall County Occupational License Tax For Schools' },
+            certificate: {
+              workCounty: 'Marshall County Occupational License Tax For Schools',
+              residenceCounty: 'Marshall County',
+            },
           },
         }),
       );
-      assert.equal(r.taxes.some((t) => t.id === 'KY_LOCAL'), false);
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(5.0));
     });
 
-    test('Hillview: real rate is 1.1%, correcting this file\'s own earlier inferred-tier guess of 1.8%', () => {
-      // The inferred-tier guess (assuming the scraped Net Profits figure
-      // doubled as wages) was wrong here -- KLC's official FY2023
-      // statewide survey gives the real Payroll Tax Rate as 1.1%.
+    test('Marshall County Schools tax: a nonresident of Marshall County owes nothing', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
+          workState: {
+            code: 'KY',
+            certificate: {
+              workCounty: 'Marshall County Occupational License Tax For Schools',
+              residenceCounty: 'Calloway County',
+            },
+          },
+        }),
+      );
+      assert.equal(amountOf(r, 'KY_LOCAL'), 0);
+    });
+
+    test('Hillview: 1.8% per the city\'s own ordinance s. 110.22, correcting the KLC survey\'s 1.1%', () => {
+      // The city's codified ordinance (amended 2016) says 1.8% of wages.
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
@@ -1882,7 +1894,7 @@ describe('Kentucky', () => {
           workState: { code: 'KY', certificate: { workCity: 'Hillview' } },
         }),
       );
-      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(11.0));
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(18.0));
     });
 
     test('Hardin County Industrial Tax District: newly confirmed at 1% ("gross payroll" figure the parser initially missed)', () => {

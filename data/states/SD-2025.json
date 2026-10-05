@@ -19,8 +19,10 @@
   "suiEmployer": {
     "wageBase": 15000,
     "wageBaseSource": "DOL Significant Provisions, January 2025 (Wages Subject to Tax)",
-    "newEmployerRate": 0.012,
-    "newEmployerRateSource": "DOL Significant Provisions, January 2025 (New Employer Rate, base rate) -- the 1.2% reemployment-assistance rate; the file's 2026 notes on SD's separate investment and administrative fees apply to 2025 too and are not modelled.",
+    "newEmployerRate": 0.0175,
+    "newEmployerRateSource": "CORRECTED 2026-10-05 from 0.012 (the RA-tax component alone) to the all-in 1.75% a regular new employer pays in year 1: 1.20% reemployment-assistance rate (SDCL 61-5-24: 'one and two tenths percent the first year') plus the 0.55% investment fee that applies to every employer not yet eligible for experience rating 'on and after January 1, 2007' (SDCL 61-5-29). Both are statutory and unchanged since before 2025. Years 2 and 3 are 1.55%; the engine has no employer-age input, so it applies the year-1 rate. DOL Significant Provisions (January 2025) lists only the 1.2% base rate.",
+    "industryNewEmployerRates": { "construction": 0.0655 },
+    "industryNewEmployerRatesSource": "SDCL 61-5-24: construction services employers are assigned 'six percent the first year' (3% after, with a positive balance) plus the same 0.55% investment fee = 6.55% in year 1. Selected by input.employer.suiIndustry['SD'] === 'construction'.",
     "experienceRange": {
       "min": 0.0,
       "max": 0.088

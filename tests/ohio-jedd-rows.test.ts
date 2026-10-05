@@ -25,16 +25,29 @@ const paycheck = (jeddId: string, checkDate = '2026-06-12', ytdDistrictWages?: n
 const jedd = (input: PaycheckInput) => calculatePaycheck(input).taxes.find((t) => t.id === 'OH_JEDD');
 
 describe('Ohio JEDD rows sourced 2026-09-28', () => {
-  test('new rates: Warren-Champion 2.5%, Sylvania-Toledo 1.5%, Apple Creek-East Union 1%', () => {
+  test('new rates: Warren-Champion 2.5%, Apple Creek-East Union 1%', () => {
     assert.equal(jedd(paycheck('9155'))?.amount, 10000);
-    assert.equal(jedd(paycheck('9069'))?.amount, 6000);
     assert.equal(jedd(paycheck('9142'))?.amount, 4000);
     assert.equal(jedd(paycheck('9143'))?.amount, 4000);
   });
 
   test('a terminated or dissolved district levies nothing', () => {
     assert.equal(jedd(paycheck('9123')), undefined); // Jefferson Twp-Whitehall, ended 2024-11-19
-    assert.equal(jedd(paycheck('9022')), undefined); // Liberty Center, dissolved
+    assert.equal(jedd(paycheck('9022')), undefined); // Liberty Center, dissolved 2021-06-01
+  });
+
+  test('Sylvania-Toledo JEDZ: 1.5% through 2017, nothing from 2018-01-01 (Ohio rate table)', () => {
+    assert.equal(jedd(paycheck('9069', '2026-06-12')), undefined);
+    assert.equal(jedd(paycheck('9069', '2025-06-13')), undefined);
+  });
+
+  test('Liberty Center JEDD: dissolved 2021-06-01, so nothing from then on', () => {
+    assert.equal(jedd(paycheck('9022', '2025-06-13')), undefined);
+    assert.equal(jedd(paycheck('9022', '2026-01-09')), undefined);
+  });
+
+  test('Rossford-Toledo JEDZ (9068) is on file and ended in 2017', () => {
+    assert.equal(jedd(paycheck('9068', '2026-06-12')), undefined);
   });
 
   test('a district that starts mid-year levies nothing before its start date', () => {

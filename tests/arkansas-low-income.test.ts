@@ -39,6 +39,16 @@ describe('Arkansas low-income withholding tables (AR4EC Line 5)', () => {
     assert.equal(ar(paycheck('semimonthly', 1000, elect('hoh', 1, 3))).amount, 1375);
   });
 
+  test("matches DFA's current PDF (modified 2026-05-29), not the superseded 2025-12-10 one", () => {
+    // Weekly single, 0 dependents, wages 281.61-282.69: 0.55 in the current
+    // Withholding-Tax-Tables-for-Low-Income.pdf (22 pages); the December 2025
+    // file (withholdTaxTablesLowIncome_2026.pdf, 28 pages) printed 0.56 here
+    // and differed from the current one in hundreds of cells.
+    assert.equal(ar(paycheck('weekly', 282, elect('single', 0))).amount, 55);
+    assert.equal(ar(paycheck('weekly', 284, elect('single', 0))).amount, 63);
+    assert.equal(ar(paycheck('weekly', 284, elect('single', 1))).amount, 7);
+  });
+
   test('a wage in the zero band withholds nothing', () => {
     assert.equal(ar(paycheck('weekly', 250, elect('single', 0))).amount, 0);
   });

@@ -480,6 +480,8 @@ export interface KYJurisdictionEntry {
   annualWageCap?: number;
   /** How the wage rate was established (the data file's wageRateStatus), e.g. 'inferred_small_city_single_rate_pattern'. Absent for the consolidated governments. */
   wageRateStatus?: string;
+  /** A resident-only levy (a school board's wage tax): the resident rate applies only when certificate.residenceCounty is this county, otherwise the nonresident rate. Entries without it use residenceCity matching the entry's own name. */
+  residentCounty?: string;
 }
 
 interface KYOccupationalRegistryFile {
@@ -494,6 +496,7 @@ interface KYOccupationalRegistryFile {
         capAtSSWageBase?: boolean;
         annualWageCap?: number;
         wageRateStatus?: string;
+        residentCounty?: string;
         /** Mid-year rate changes: from `on` (a check date, inclusive) the flat rate is `wageRateDecimal`. A rate of 0 means no wage tax yet. */
         rateChanges?: { on: string; wageRateDecimal: number }[];
       }
@@ -553,6 +556,7 @@ export function allKYJurisdictions(checkDate: string): KYJurisdictionEntry[] {
       capAtSSWageBase: raw.capAtSSWageBase ?? false,
       ...(raw.annualWageCap !== undefined ? { annualWageCap: raw.annualWageCap } : {}),
       ...(raw.wageRateStatus ? { wageRateStatus: raw.wageRateStatus } : {}),
+      ...(raw.residentCounty ? { residentCounty: raw.residentCounty } : {}),
     });
   }
 
