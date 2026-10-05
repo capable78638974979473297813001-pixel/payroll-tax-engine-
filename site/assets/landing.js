@@ -21,10 +21,10 @@
     ['Detroit, MI', '2 Woodward Ave, Detroit, MI 48226']
   ];
   var PRECISION = {
-    rooftop: 'Exact point, published by the local address authority',
-    'rooftop-osm': 'House-level point (OpenStreetMap, cross-checked)',
-    neighbor: 'Between two published address points on the street',
-    'parcel-centroid': 'Center of the county tax parcel',
+    rooftop: 'Rooftop-level point for this exact address',
+    'rooftop-osm': 'Rooftop-level point, cross-checked across sources',
+    neighbor: 'Between two known address points on the street',
+    'parcel-centroid': 'Center of the property parcel',
     interpolated: 'Estimated along the street segment'
   };
   var seq = 0;

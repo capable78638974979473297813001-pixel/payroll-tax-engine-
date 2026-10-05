@@ -442,7 +442,7 @@
     <h2>Pricing</h2>
     <p>Usage-based, never per employee per month. Every jurisdiction is included for everyone and you pay for the calculations you make: a flat <b data-rate>$0.09</b> per call at any volume.</p>
     <div class="kv"><code>One call</code><span>One <code>POST /v1/paycheck</code> that returns <code>200</code> is one billable call. Authentication failures, validation errors and rate-limited requests are not billed.</span></div>
-    <div class="kv"><code>Rooftop lookups</code><span>When a local tax turns on a precise address, the address resolution is <b data-rooftop>$0.09</b> per address, once per address and not once per pay run.</span></div>
+    <div class="kv"><code>Rooftop geocoding</code><span>Included. A call is <b data-rate>$0.09</b> whether or not it geocodes an address.</span></div>
     <div class="kv"><code>Free trial</code><span>The first <span data-trial>14</span> days are free and unmetered. Trial keys (<code>sk_test_</code>) run the full engine.</span></div>
     <p>To size a bill before you sign up, the public estimator takes a head count and a pay frequency. No key needed.</p>
     <pre class="shape">curl <span data-origin>https://your-host</span>/api/estimate \
@@ -527,14 +527,13 @@ details: [ { path, message } ]</pre>
   var cfg = window.OMNIA || {};
   document.getElementById('rpm').textContent = String(cfg.rateLimitPerMin || 120);
   if (cfg.tiers && cfg.tiers.length) {
-    var rooftop = ' Rooftop address resolution is ' + OmniaPricing.formatRate(cfg.rooftopRate) + ' each, billed separately.';
+    var rooftop = ' Rooftop geocoding is included in that price.';
     document.getElementById('tierNote').textContent = cfg.tiers.length === 1
       ? 'Every call is ' + OmniaPricing.formatRate(cfg.tiers[0].rate) + ', at any volume.' + rooftop
       : 'Rate card, per call: ' + cfg.tiers.map(function (t) {
           var cap = t.upTo == null ? 'and above' : ('up to ' + Number(t.upTo).toLocaleString() + ' calls/year');
           return OmniaPricing.formatRate(t.rate) + ' ' + cap;
         }).join(' · ') + '.' + rooftop;
-    document.querySelectorAll('[data-rooftop]').forEach(function (el) { el.textContent = OmniaPricing.formatRate(cfg.rooftopRate); });
   }
   document.querySelectorAll('[data-origin]').forEach(function (el) { el.textContent = location.origin; });
   document.querySelectorAll('.rpm-copy').forEach(function (el) { el.textContent = String(cfg.rateLimitPerMin || 120); });
