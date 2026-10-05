@@ -1014,6 +1014,15 @@ export interface GarnishmentPovertyGuidelineTier {
   flatWeeklyExemption?: number;
 }
 
+/** One dated step of a state's flat exemption floor, in dollars. See GarnishmentFormula.flatFloorSchedule. */
+export interface FlatFloorStep {
+  effectiveFrom: string; // ISO yyyy-mm-dd; wages payable on or after
+  weekly: number;
+  biweekly?: number;
+  semimonthly?: number;
+  monthly?: number;
+}
+
 /**
  * One state's (or one head-of-family variant's) full garnishment formula.
  * Every field is optional because a formula can be built from any ONE of
@@ -1094,6 +1103,21 @@ export interface GarnishmentFormula {
    * household. Only meaningful alongside `flatWeeklyFloor`.
    */
   flatWeeklyFloorSoleSupport?: number;
+  /**
+   * Dated version of `flatWeeklyFloor` for a state that legislates a
+   * stepped schedule (Oregon, ORS 18.385(2)). The entry with the latest
+   * `effectiveFrom` on or before the check date applies and replaces
+   * `flatWeeklyFloor`. A state that prints its own per-period figures
+   * (Oregon's differ from a plain multiple of the weekly one) lists them;
+   * a frequency left out falls back to scaling the weekly figure.
+   */
+  flatFloorSchedule?: FlatFloorStep[];
+  /**
+   * Set by the engine from the resolved `flatFloorSchedule` step, never in
+   * the data file: the state's own printed per-period floors, in dollars,
+   * used instead of scaling `flatWeeklyFloor`.
+   */
+  flatPeriodFloor?: { biweekly?: number; semimonthly?: number; monthly?: number };
   /**
    * Iowa's own ADDITIONAL layer (Iowa Code 642.21): a cumulative CALENDAR-
    * YEAR dollar cap per judgment creditor, on top of whichever per-paycheck

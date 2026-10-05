@@ -9,7 +9,7 @@
       "title": "South Dakota Department of Labor and Regulation -- Reemployment Assistance Tax FAQ",
       "url": "https://dlr.sd.gov/ra/businesses/faq.aspx",
       "verifiedOn": "2026-08-20",
-      "verifiedBy": "Fetched and read directly (raw HTML, not just the summarized fetch). Quoted verbatim: 'For calendar year 2026 and each year thereafter, an administrative fee of eight-hundredths percent (.08%) or .0008 must be paid by the employer. For calendar year 2025 and 2024, if the employer's reserve ratio is less than two and one-quarter percent, an administrative fee of two hundredths percent (.02%) or .0002 shall be paid.' This resolved a real apparent conflict on first read: the page ALSO shows a 0.55% 'Administrative Fee' column in the NEW-EMPLOYER rate table. These are two DIFFERENT fees, not a contradiction -- the 0.55% is a component of the flat new-employer rate (years 1-3 only); the 0.08% (up from 0.02%, effective calendar year 2026) is a SEPARATE fee under SDCL 61-5-24 that applies only to employers who have graduated to experience rating, i.e. NOT new employers. Confirmed by the page's own structure: the 0.08% clause appears directly under its own 'Administrative Fee' subheading, distinct from and below the new-employer rate table."
+      "verifiedBy": "Fetched and read directly (raw HTML, not just the summarized fetch). Quoted verbatim: 'For calendar year 2026 and each year thereafter, an administrative fee of eight-hundredths percent (.08%) or .0008 must be paid by the employer. For calendar year 2025 and 2024, if the employer's reserve ratio is less than two and one-quarter percent, an administrative fee of two hundredths percent (.02%) or .0002 shall be paid.' This resolved a real apparent conflict on first read: the page ALSO shows a 0.55% 'Administrative Fee' column in the NEW-EMPLOYER rate table. These are two DIFFERENT fees, not a contradiction -- the 0.55% is a component of the flat new-employer rate (years 1-3 only); the 0.08% (up from 0.02%, effective calendar year 2026) is a SEPARATE fee under SDCL 61-5-24 that applies only to employers who have graduated to experience rating, i.e. NOT new employers. Confirmed by the page's own structure: the 0.08% clause appears directly under its own 'Administrative Fee' subheading, distinct from and below the new-employer rate table. CORRECTION 2026-10-05: the 0.55% in the new-employer table is the INVESTMENT FEE column, not an administrative fee; that table's Administrative Fee column reads 'Not Applicable' (see unemploymentInsurance.newEmployerRates.correction). The 0.08% experience-rated administrative fee above is unaffected."
     },
     {
       "title": "South Dakota DLR -- Reemployment Assistance for Businesses (rate notices)",
@@ -29,8 +29,9 @@
     "administeredBy": "South Dakota Department of Labor and Regulation (DLR), Reemployment Assistance Tax Unit",
     "wageBase": 15000.0,
     "newEmployerRates": {
-      "year1": { "raTax": 0.012, "investmentFee": 0.06, "administrativeFee": 0.0055, "total": 0.0775 },
-      "years2and3": { "raTax": 0.01, "investmentFee": 0.03, "administrativeFee": 0.0055, "total": 0.0455 },
+      "year1": { "raTax": 0.012, "raTaxConstruction": 0.06, "investmentFee": 0.0055, "administrativeFee": 0, "total": 0.0175, "totalConstruction": 0.0655 },
+      "years2and3": { "raTax": 0.01, "raTaxConstruction": 0.03, "investmentFee": 0.0055, "administrativeFee": 0, "total": 0.0155, "totalConstruction": 0.0355 },
+      "correction": "CORRECTED 2026-10-05 against the DLR FAQ's own table markup (dlr.sd.gov/ra/businesses/faq.aspx, New Employer Tax Rates): 'RA Tax' is a two-column group (Non-Construction 1.20% / 1.00%, Construction 6.00% / 3.00%), then Investment Fee 0.55%, then Administrative Fee 'Not Applicable'. This file previously read the Construction RA-tax column as the investment fee and the investment fee as the administrative fee, giving totals of 7.75% and 4.55%. A regular new employer pays 1.75% in year 1 and 1.55% in years 2 and 3; a new construction employer pays 6.55% and 3.55%.",
       "comment": "Investment fee 'applies to those with a positive account balance' per the source's own footnote -- a hold-harmless clause also caps an employer's investment-fee rate at their 1987 fee rate if their account had a positive balance at the end of the last two years, an unusual legacy provision unique to South Dakota's statute among every state built in this project so far."
     },
     "experienceRatedAdministrativeFee": {
@@ -43,10 +44,11 @@
       "$comment": "Reserve-ratio-based Schedule A/B contribution rate table (SDCL 61-5), 'Beginning 2018' vintage, transcribed from the FAQ page's own table -- comprehensive but not directly usable by this engine, same class of gap as Wisconsin's 26-row Schedule D table: applying it requires an employer's account reserve ratio, which nothing in types.ts carries.",
       "sampleRows": [
         { "reserveRatio": "2.25% and Over", "scheduleA": 0.0, "scheduleB": 0.0 },
-        { "reserveRatio": "1.00% and Less than 1.25%", "scheduleA": 0.0055, "scheduleB": 0.0045 },
-        { "reserveRatio": "0.75% and Less than 1.00%", "scheduleA": 0.007, "scheduleB": 0.006 },
-        { "reserveRatio": "0.50% and Less than 0.75%", "scheduleA": 0.0095, "scheduleB": null }
+        { "reserveRatio": "1.00% and Less than 1.25%", "scheduleA": 0.0035, "scheduleB": 0.0025 },
+        { "reserveRatio": "0.75% and Less than 1.00%", "scheduleA": 0.0055, "scheduleB": 0.0045 },
+        { "reserveRatio": "0.50% and Less than 0.75%", "scheduleA": 0.007, "scheduleB": 0.006 }
       ],
+      "correction": "CORRECTED 2026-10-05: the three banded rows were shifted down one row against the DLR table (the page's first rows are malformed HTML, which misaligned the earlier transcription). 1.00% to under 1.25% is 0.35% / 0.25%, 0.75% to under 1.00% is 0.55% / 0.45%, 0.50% to under 0.75% is 0.70% / 0.60%.",
       "note": "NOT a full transcription -- only a representative sample of the reserve-ratio bands was captured (the source table has many more rows spanning both positive and negative reserve ratios, plus a separate 2011-vintage Investment Fee table keyed by its own reserve-ratio bands). Flagged honestly as partial rather than padded out with unread rows; South Dakota has no state income tax, so this table is lower-priority than an income-tax bracket table would be, and was intentionally not pursued to full completeness in this pass."
     },
     "knownGap": "Experience-rated schedule is only partially transcribed (see note above), and even fully transcribed would need a reserve-ratio input this engine's types.ts doesn't carry -- same structural gap as every other state's experience-rated SUTA in this project."
@@ -70,8 +72,10 @@
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 15000,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
-    "newEmployerRate": 0.012,
-    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "newEmployerRate": 0.0175,
+    "newEmployerRateSource": "CORRECTED 2026-10-05 from 0.012 (the RA-tax component alone) to the all-in 1.75% a regular new employer pays in year 1: 1.20% RA tax + 0.55% investment fee, per the DLR FAQ's New Employer Tax Rates table (dlr.sd.gov/ra/businesses/faq.aspx). Years 2 and 3 are 1.55%; the engine has no employer-age input, so it applies the year-1 rate, as Kansas does.",
+    "industryNewEmployerRates": { "construction": 0.0655 },
+    "industryNewEmployerRatesSource": "Same DLR table: year-1 construction employers pay 6.00% RA tax + 0.55% investment fee = 6.55% (years 2 and 3: 3.55%). Selected by input.employer.suiIndustry['SD'] === 'construction'.",
     "experienceRange": {
       "min": 0,
       "max": 0.095

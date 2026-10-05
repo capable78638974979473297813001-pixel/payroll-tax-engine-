@@ -1768,12 +1768,10 @@
       "sizeOfFundIndexColumn2026": "0.5% but less than 1.0%",
       "generalAccountBalance": "Less than $0 (still in deficit as of the source page's own snapshot)."
     },
-    "subsidiaryRateSchedule2026": {
-      "$comment": "RESOLVED: previously this file only had the bookend lowest/new-employer/highest TOTAL rates, not the full intermediate schedule. Fetched dol.ny.gov/employer-contribution-rate-table as raw HTML and parsed the actual <table> elements directly (not an AI summary -- same lesson as the rate-info page above) to get all three published tables in full: 'Employer's Negative Account Percentage' (35 rate-class rows), 'Employer's Positive Account Percentage' (27 rate-class rows), and a 'Benefit Equalization Factor' table (5 account-percentage bands x 11 average-payroll ranges), each cross-tabulated against 12 possible 'Size of Fund Index' columns. Only ONE column applies for any given year -- 2026's is confirmed as '0.5% but less than 1.0%' from the rate-info page above -- so only that column is extracted below; the other 11 columns exist in the same source table for other years/fund conditions and were not transcribed (a genuine, disclosed scope limit, not an oversight).",
-      "whatThisIs": "These are SUBSIDIARY rate tables specifically -- per DOL's own 'Calculating an Employer's UI Contribution Rate' page, an employer's total normal-plus-subsidiary rate structure means this schedule is only PART of the full calculation, not the whole thing by itself.",
-      "unreconciledGap": "HONEST, DISCLOSED LIMIT: this subsidiary schedule's own numbers do not obviously reconcile with the earlier bookend TOTAL figures (lowest 1.7%, highest 9.5%) by simple addition of the stated 3.4% new-employer normal rate -- e.g. the negative table's own maximum (8.5% at the 21%-or-more/0.5-1.0%-index cell) plus 3.4% would exceed 9.5% (the stated highest TOTAL), and the normal-rate page's own text says an employer's normal rate itself 'can vary' by the employer's own experience, meaning 3.4% may only be the NEW-EMPLOYER figure, not a flat rate every experienced employer shares. A separate table defining EXPERIENCED employers' own normal-rate-by-experience was referenced by the source pages but not located this session. Recorded honestly as an unresolved cross-source reconciliation rather than force-fitting an invented formula -- the underlying DATA (every cell below) is primary-sourced and correct on its own terms; it's the FULL end-to-end formula connecting normal + subsidiary + Benefit Equalization Factor into one final total rate that isn't completely pinned down.",
-      "negativeAccountSubsidiaryRate": {
-        "note": "Deficit (negative-account) employers. Rate class -> subsidiary rate %, for the 0.5%-1.0% Size of Fund Index column only.",
+    "normalRateSchedule2026": {
+      "$comment": "RENAMED 2026-10-05. This block was filed as 'subsidiaryRateSchedule2026' but holds the NORMAL contribution-rate tables (dol.ny.gov/employer-contribution-rate-table: 'Employer's Negative Account Percentage' and 'Employer's Positive Account Percentage', each cross-tabulated against Size of Fund Index). Only the 0.5% but less than 1.0% index column, which DOL's rate-information page gives for 2026, is transcribed. Values are percent.",
+      "negativeAccountNormalRate": {
+        "note": "Deficit (negative-account) employers. Rate class -> normal contribution rate %, for the 0.5%-1.0% Size of Fund Index column only.",
         "21.0% or more": 8.5,
         "20.5% to 21.0%": 8.4,
         "20.0% to 20.5%": 8.3,
@@ -1810,8 +1808,8 @@
         "1.0% to 2.0%": 5.0,
         "less than 1.0%": 4.8
       },
-      "positiveAccountSubsidiaryRate": {
-        "note": "Employers with a positive reserve. Rate class -> subsidiary rate %, for the 0.5%-1.0% Size of Fund Index column only. Lower account percentage = HIGHER subsidiary rate, the inverse relationship from the negative table.",
+      "positiveAccountNormalRate": {
+        "note": "Employers with a positive reserve. Rate class -> normal contribution rate %, for the 0.5%-1.0% Size of Fund Index column only. Lower account percentage = HIGHER subsidiary rate, the inverse relationship from the negative table.",
         "less than 1.0%": 3.7,
         "1.0% to 2.0%": 3.6,
         "2.0% to 3.0%": 3.5,
@@ -1839,8 +1837,96 @@
         "10.0% to 10.25%": 1.3,
         "10.25% to 10.5%": 1.2,
         "10.5% or more": 1.1
+      }
+    },
+    "subsidiaryRateSchedule2026": {
+      "$comment": "ADDED 2026-10-05 from dol.ny.gov/subsidiary-rate-table (raw HTML, table cells parsed directly). The previous version of this block was actually the normal-rate tables (now normalRateSchedule2026) and the subsidiary table was never transcribed. Subsidiary contribution rate, in percent, by the employer's account percentage (rows) and the General Account balance in millions of dollars (columns). It runs from 0.000% to 0.925%.",
+      "generalAccountBalanceColumns": [
+        "Less than $0",
+        "$0 or more but less than $75",
+        "$75 or more but less than $150",
+        "$150 or more but less than $225",
+        "$225 or more but less than $300",
+        "$300 or more but less than $375",
+        "$375 or more but less than $450",
+        "$450 or more but less than $525",
+        "$525 or more but less than $600",
+        "$600 or more but less than $650",
+        "$650 or more"
+      ],
+      "ratePercentByAccountPercentage": {
+        "Less than 0.0% (negative)": [
+          0.925,
+          0.825,
+          0.725,
+          0.625,
+          0.525,
+          0.425,
+          0.325,
+          0.225,
+          0.125,
+          0.025,
+          0.0
+        ],
+        "0.0% or more but less than 5.5%": [
+          0.625,
+          0.625,
+          0.625,
+          0.525,
+          0.425,
+          0.325,
+          0.225,
+          0.125,
+          0.025,
+          0.0,
+          0.0
+        ],
+        "5.5% or more but less than 7.5%": [
+          0.625,
+          0.625,
+          0.525,
+          0.425,
+          0.325,
+          0.225,
+          0.125,
+          0.025,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "7.5% or more but less than 9.0%": [
+          0.625,
+          0.525,
+          0.425,
+          0.325,
+          0.225,
+          0.125,
+          0.025,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "9.0% or more": [
+          0.525,
+          0.425,
+          0.325,
+          0.225,
+          0.125,
+          0.025,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
       },
-      "benefitEqualizationFactorNote": "A THIRD table exists (5 account-percentage bands x 11 average-quarterly-payroll-dollar ranges, values from 0.000% to 0.925%) that adjusts rates for newer employers specifically -- per DOL's own description, applies 'from the fifth quarter through the twenty-first quarter of liability, if the account is positive,' to give new employers 'an equal opportunity with established employers to earn rate reductions.' Fetched and parsed in full but NOT transcribed cell-by-cell here (narrower applicability -- only affects a specific employer-tenure window -- and this file's core UI figures are already far more complete than before this pass); its existence and mechanism are disclosed rather than silently omitted, and the raw data is available from the same dol.ny.gov/employer-contribution-rate-table source if ever needed."
+      "applicableColumn2026": "Less than $0",
+      "applicableColumn2026Note": "This file's rates2026.generalAccountBalance records the General Account as still in deficit, so the first column applies: 0.925% for a negative account, 0.625% for the 0.0%-to-5.5% band (which is also what a brand-new employer is assigned) down to 0.525% at 9.0% or more.",
+      "source": "https://dol.ny.gov/subsidiary-rate-table",
+      "verifiedOn": "2026-10-05",
+      "howItCombines": "DOL's 'Calculating an Employer's UI Contribution Rate' page: contribution rate = normal rate (UI Trust Fund size, normalRateSchedule2026) + subsidiary rate (General Account balance, this table); plus the flat 0.075% Re-employment Services Fund. Checks against rates2026: the highest total, 8.5 + 0.925 + 0.075 = 9.5%; the lowest, 1.1 + 0.525 + 0.075 = 1.7%; a new employer, 3.4 + 0.625 (+ 0.075) = 4.025% UI (4.1% total).",
+      "benefitEqualizationFactorNote": "The Benefit Equalization Factor is a calculation that gives newer employers a graduated reduction from the fifth through the twenty-first quarter of liability if the account is positive, per DOL's calculation page. It is not a separate table. The earlier note here described the 5 x 11 subsidiary table as a BEF table; that was wrong."
     },
     "trustFundContext": "DOL's own page: the NYS fiscal year 2026 Budget 'committed to pay off the state's Unemployment Insurance (UI) loan and achieve solvency in the federal UI Trust Fund,' saving employers 'an average of $100 per employee in 2026 and $250 per employee in 2027.' The same legislation that raised the wage base to $17,600 also lowered 2026 contribution rates from what they'd otherwise have been -- both changes are part of one solvency package, not independent policy choices.",
     "sources": [
@@ -1866,10 +1952,16 @@
         "title": "DOL -- Employer Contribution Rate Table",
         "url": "https://dol.ny.gov/employer-contribution-rate-table",
         "verifiedOn": "2026-08-16",
-        "verifiedBy": "Raw HTML fetched via curl; the actual <table> elements were parsed directly (row/cell structure preserved) rather than flattened to plain text, since this table's meaning depends entirely on which row/column intersection applies -- flattening would have lost that. Source for subsidiaryRateSchedule2026 above."
+        "verifiedBy": "Raw HTML fetched via curl; the actual <table> elements were parsed directly (row/cell structure preserved) rather than flattened to plain text, since this table's meaning depends entirely on which row/column intersection applies -- flattening would have lost that. Source for normalRateSchedule2026 above."
+      },
+      {
+        "title": "DOL -- Subsidiary Contribution Rate Table",
+        "url": "https://dol.ny.gov/subsidiary-rate-table",
+        "verifiedOn": "2026-10-05",
+        "verifiedBy": "Raw HTML fetched via curl; the <table> cells were parsed directly."
       }
     ],
-    "knownGap": "Wage base and all 2026 rate figures are now primary-confirmed, including reconciling a genuine conflict between two sources both claiming to quote the same NYS-45 instructions, AND the full subsidiary rate schedule (both Negative and Positive Account Percentage tables, 62 rate-class rows total for the active 2026 Size-of-Fund-Index column) is now transcribed -- see subsidiaryRateSchedule2026. One honest gap remains: how the normal rate, subsidiary rate, and Benefit Equalization Factor combine into one final total rate for an EXPERIENCED (non-new) employer wasn't fully reconciled against the earlier bookend total figures -- see subsidiaryRateSchedule2026.unreconciledGap. Even fully complete, none of this is consumable by the engine -- no per-employer experience-rating (account percentage, Size of Fund Index) or new-vs-established-employer classification input exists anywhere in this project, the same structural gap as every other state's employer SUTA/UI here."
+    "knownGap": "Wage base and all 2026 rate figures are now primary-confirmed, including reconciling a genuine conflict between two sources both claiming to quote the same NYS-45 instructions, AND the normal-rate tables (62 rate-class rows for the active 2026 Size-of-Fund-Index column, normalRateSchedule2026) AND the subsidiary table (subsidiaryRateSchedule2026, corrected 2026-10-05) are transcribed, and normal + subsidiary + 0.075% RSF reproduces the lowest, highest and new-employer totals. Even fully complete, none of this is consumable by the engine -- no per-employer experience-rating (account percentage, Size of Fund Index) or new-vs-established-employer classification input exists anywhere in this project, the same structural gap as every other state's employer SUTA/UI here."
   },
   "mctmt": {
     "$comment": "Metropolitan Commuter Transportation Mobility Tax -- RESOLVED from a flagged-but-unbuilt gap to fully primary-sourced. Fetched directly from tax.ny.gov/bus/mctmt/emp.htm (raw HTML, stripped by hand -- same method as the UI page, for the same reason: this project's default WebFetch summarization has demonstrated real extraction-consistency problems this session). Page dated 'Updated: July 2, 2026.'",

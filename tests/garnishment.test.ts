@@ -830,20 +830,54 @@ describe('more state overrides — cliff-on-dollar, marginal-bracket and head-of
     assert.equal(topTier.totalWithheld, dollars(250));
   });
 
-  test('Oregon: lesser of 25% of disposable and disposable over its own flat $254/week floor', () => {
-    // $1000 disposable: 25% = $250; floor excess = $1000-$254 = $746
+  test('Oregon: lesser of 25% of disposable and disposable over its own dated flat weekly floor (ORS 18.385(2))', () => {
+    // run() uses a 2026-06-15 check date, so the $338 step (wages payable
+    // 2025-07-01 through 2026-06-30) applies.
+    // $1000 disposable: 25% = $250; floor excess = $1000-$338 = $662
     // (25% is smaller — the ordinary, higher-income case).
     const higherIncome = run(paycheckOf(dollars(1000), 0), [
       order({ id: 'A', type: 'consumer_creditor' }),
     ], 'OR');
     assert.equal(higherIncome.totalWithheld, dollars(250));
 
-    // $300 disposable: 25% = $75; floor excess = $300-$254 = $46
+    // $400 disposable: 25% = $100; floor excess = $400-$338 = $62
     // (the flat floor is smaller — the low-income case it exists to protect).
-    const lowerIncome = run(paycheckOf(dollars(300), 0), [
+    const lowerIncome = run(paycheckOf(dollars(400), 0), [
       order({ id: 'A', type: 'consumer_creditor' }),
     ], 'OR');
-    assert.equal(lowerIncome.totalWithheld, dollars(46));
+    assert.equal(lowerIncome.totalWithheld, dollars(62));
+
+    // At or under the floor nothing may be withheld.
+    const underFloor = run(paycheckOf(dollars(338), 0), [
+      order({ id: 'A', type: 'consumer_creditor' }),
+    ], 'OR');
+    assert.equal(underFloor.totalWithheld, 0);
+  });
+
+  test('Oregon: the weekly floor steps with the check date, and other pay periods use the statute\'s own printed figures', () => {
+    const withheld = (checkDate: string, disposable: number, frequency: PayFrequency) =>
+      calculateGarnishments({
+        checkDate,
+        payFrequency: frequency,
+        workState: 'OR',
+        paycheck: paycheckOf(dollars(disposable), 0),
+        orders: [order({ id: 'A', type: 'consumer_creditor' })],
+      }).totalWithheld;
+
+    // Weekly, $340 disposable: 25% = $85, so the floor excess governs
+    // whenever it is smaller. Only 2026 check dates are reachable: the
+    // garnishment data files are one per calendar year.
+    assert.equal(withheld('2026-01-01', 340, 'weekly'), dollars(2)); // $338 floor
+    assert.equal(withheld('2026-06-30', 340, 'weekly'), dollars(2));
+    assert.equal(withheld('2026-07-01', 340, 'weekly'), 0); // $400 floor
+    assert.equal(withheld('2026-07-01', 420, 'weekly'), dollars(20));
+    assert.equal(withheld('2026-06-30', 420, 'weekly'), dollars(82)); // 25% = $105; excess over $338 is $82
+
+    // Printed per-period figures, wages payable on or after 2026-07-01:
+    // biweekly $832, semimonthly $912, monthly $1,792 — not 2x/2.17x/4.33x $400.
+    assert.equal(withheld('2026-07-01', 900, 'biweekly'), dollars(68));
+    assert.equal(withheld('2026-07-01', 1000, 'semimonthly'), dollars(88));
+    assert.equal(withheld('2026-07-01', 1900, 'monthly'), dollars(108));
   });
 
   test('Tennessee: the plain federal 25%/30x test, reduced $2.50/week per qualifying dependent child', () => {
