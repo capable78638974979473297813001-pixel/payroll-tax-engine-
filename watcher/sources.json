@@ -1329,6 +1329,28 @@
    ]
   },
   {
+   "id": "ca-008fd9678a",
+   "jurisdiction": "CA",
+   "title": "Information Sheet: Taxability of Employee Benefits (DE 231EB) Rev. 12 (6-17)",
+   "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de231eb.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/CA-2025.json",
+    "data/states/CA-2026.json"
+   ]
+  },
+  {
+   "id": "ca-35fd3e19bb",
+   "jurisdiction": "CA",
+   "title": "Information Sheet: Types of Payments (DE 231TP) Rev. 1 (6-16)",
+   "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de231tp.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/CA-2025.json",
+    "data/states/CA-2026.json"
+   ]
+  },
+  {
    "id": "ca-0f612469ad",
    "jurisdiction": "CA",
    "title": "Unincorporated Los Angeles County minimum wage, July 1, 2025 step ($17.81)",

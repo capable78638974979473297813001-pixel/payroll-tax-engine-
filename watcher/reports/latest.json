@@ -1,28 +1,15 @@
 {
- "date": "2026-10-04",
+ "date": "2026-10-05",
  "counts": {
-  "unchanged": 476,
-  "unreachable": 8,
-  "blocked": 21,
+  "unchanged": 477,
+  "unreachable": 6,
+  "blocked": 23,
   "gone": 4,
-  "changed": 1
+  "new": 2
  },
- "total": 510,
- "changed": [
-  {
-   "id": "oh-740fc07d10",
-   "jurisdiction": "OH",
-   "title": "Village of Georgetown -- Income Tax",
-   "url": "https://georgetownohio.gov/income-tax/",
-   "detail": "read with a headless browser; 0 lines added, 2 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  }
- ],
- "significant_changes": 1,
+ "total": 512,
+ "changed": [],
+ "significant_changes": 0,
  "broken": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://www.irs.gov/pub/irs-prior/p51--2025.pdf",
@@ -33,7 +20,7 @@
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "verified": 477,
+ "verified": 479,
  "unverified": 33,
  "never_baselined": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
@@ -59,5 +46,5 @@
   "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 13
+ "max_consecutive_failures": 14
 }
