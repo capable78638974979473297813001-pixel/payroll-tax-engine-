@@ -41,7 +41,7 @@
     ]
   },
   "confidence": "primary_source_confirmed -- same tier as the municipalities file, bulk-downloaded directly from Ohio's own database.",
-  "zoneCount": 156,
+  "zoneCount": 157,
   "zones": [
     {
       "name": "Amherst Township-City Of Loriain Jedd",
@@ -726,14 +726,14 @@
       "jeddId": "9022",
       "rate": 0.01,
       "rateSourceRaw": "1",
-      "effectiveFrom": "2016-01-01",
-      "terminatedOn": "2023-01-01",
+      "effectiveFrom": "2013-01-01",
+      "terminatedOn": "2021-06-01",
       "source": {
-        "title": "RITA Annual Financial Report 2025 (as of 2026-06-12), member collections table: 'Liberty Center JEDD D' where (D) = 'Municipality dissolved and no longer considered a member of the Regional Council of Governments'",
-        "url": "https://cdn.ritaohio.com/Media/703216/Regional%20Income%20Tax%20Agency%20Annual%20Financial%20%20Report%202025%20as%20of%2006.12.2026.pdf",
-        "fetchedOn": "2026-09-28"
+        "title": "Ohio Auditor of State, Liberty Township (Henry County) regular audit 2021-2022: 'The JEDD was dissolved June 1, 2021 by the Township and the Village.'",
+        "url": "https://ohioauditor.gov/Auditsearch/Reports/2023/Liberty_Township_22_21_Henry_FINAL.pdf",
+        "fetchedOn": "2026-10-05"
       },
-      "note": "DISSOLVED. RITA's 2022 report shows a 1.00% rate; its 2025 report codes the JEDD 'D' (dissolved) with collections falling to $17. The exact dissolution date is not published; terminatedOn is set to 2023-01-01 because collections effectively ended by then and a payroll vendor recorded the 1% rate as eliminated in April 2023. effectiveFrom is not the real start date (unknown) and is irrelevant after termination. Ohio's boundary layer still carries the polygon."
+      "note": "DISSOLVED 2021-06-01 (terminatedOn). CORRECTED 2026-10-05 from 2023-01-01, which was inferred from RITA's collections table and a payroll vendor's April 2023 note; the Auditor's report gives the actual date. Ohio's Finder rate table (JEDTaxRates.csv) shows the rate row ending 2021-10-03, which lags the dissolution. effectiveFrom is the Finder's EffStartDate (2013-01-01); collections began 2011-01-01 per the audit. Neither affects any 2025-2026 paycheck. Ohio's boundary layer still carries the polygon."
     },
     {
       "name": "Lytle Five Points Jedd",
@@ -1049,12 +1049,27 @@
       "rate": 0.015,
       "rateSourceRaw": "1.5",
       "effectiveFrom": "2008-07-01",
+      "terminatedOn": "2018-01-01",
       "source": {
-        "title": "City of Toledo 2022 ACFR (filed with the Ohio Auditor of State), note on tax-sharing agreements: 'City of Toledo-City of Sylvania ... In July 2008 ... an income tax that shall be imposed based on the City of Sylvania's Municipal Code at a rate of 1.5%'",
-        "url": "https://ohioauditor.gov/AuditSearch/Reports/2023/City_of_Toledo_2022_Lucas_FINAL.pdf",
-        "fetchedOn": "2026-09-28"
+        "title": "Ohio Department of Taxation, The Finder JEDD/JEDZ rate table (JEDTaxRates.csv): row 9069 SYLVANIA-TOLEDO JEDZ, EffStartDate 2008-07-01, EffEndDate 2017-12-31, rate 1.5; no later row",
+        "url": "https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FJEDTaxRates.csv",
+        "fetchedOn": "2026-10-05"
       },
-      "note": "effectiveFrom is the contract month (July 2008); the audit gives no day."
+      "note": "ENDED: Ohio's rate table has no row in force after 2017-12-31, so the engine levies nothing on checks dated 2018-01-01 or later (terminatedOn). CORRECTED 2026-10-05: this row previously had no end date and charged 1.5% indefinitely, sourced from the Toledo 2022 ACFR's description of the July 2008 agreement (https://ohioauditor.gov/AuditSearch/Reports/2023/City_of_Toledo_2022_Lucas_FINAL.pdf), which describes the contract rather than a rate still being collected. effectiveFrom is the contract month (July 2008)."
+    },
+    {
+      "name": "Rossford-Toledo Jedz",
+      "jeddId": "9068",
+      "rate": 0.0225,
+      "rateSourceRaw": "2.25",
+      "effectiveFrom": "1992-02-01",
+      "terminatedOn": "2017-12-31",
+      "source": {
+        "title": "Ohio Department of Taxation, The Finder JEDD/JEDZ rate table (JEDTaxRates.csv): row 9068 ROSSFORD-TOLEDO JEDZ, EffStartDate 1992-02-01, EffEndDate 2017-12-30, rate 2.25",
+        "url": "https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FJEDTaxRates.csv",
+        "fetchedOn": "2026-10-05"
+      },
+      "note": "ENDED 2017-12-30 per Ohio's rate table; added 2026-10-05 because the table lists it and this file did not. No tax on checks dated on or after 2017-12-31. No polygon in Ohio's boundary layer."
     },
     {
       "name": "Troy Township-Toledo Jedd",

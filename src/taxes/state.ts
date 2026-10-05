@@ -5417,9 +5417,19 @@ function kentuckyLocalTax(
         note: `flat ${(entry.wageRateDecimal * 100).toFixed(2)}%`,
       };
     }
-    const isResident = residenceCityName?.toLowerCase() === entry.name.toLowerCase();
+    const residenceCountyName = typeof cert.residenceCounty === 'string' ? cert.residenceCounty : undefined;
+    const bareCounty = (c: string) => c.trim().toLowerCase().replace(/ county$/, '');
+    const isResident = entry.residentCounty
+      ? residenceCountyName !== undefined && bareCounty(residenceCountyName) === bareCounty(entry.residentCounty)
+      : residenceCityName?.toLowerCase() === entry.name.toLowerCase();
     const rate = isResident ? entry.wageRateResidentDecimal! : entry.wageRateNonresidentDecimal!;
-    return { rate, note: `${isResident ? 'resident' : 'nonresident'} ${(rate * 100).toFixed(2)}%` };
+    return {
+      rate,
+      note:
+        entry.residentCounty && !isResident
+          ? `nonresident ${(rate * 100).toFixed(2)}% (taxes only residents of ${entry.residentCounty}; set certificate.residenceCounty)`
+          : `${isResident ? 'resident' : 'nonresident'} ${(rate * 100).toFixed(2)}%`,
+    };
   };
 
   // Annual caps: see kyCappedWages().

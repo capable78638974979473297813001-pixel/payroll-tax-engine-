@@ -73,6 +73,31 @@ describe('the 2026-09-30 pass', () => {
   }
 });
 
+describe('the 2026-10-05 verification report', () => {
+  for (const [where, cents, why] of [
+    [{ workCity: 'Shively' }, 6900, '2% of wages (s. 112.03(A)(1)) stacked on Louisville Metro 1.45%; 2.25% is net profits'],
+    [{ workCity: 'Hillview' }, 3600, '1.8% (s. 110.22)'],
+    [{ workCity: 'Ludlow' }, 4000, '2.0% (Kenton County 2026 rates)'],
+    [{ workCity: 'Stanford' }, 2300, '1.15% (city Form 541)'],
+    [{ workCity: 'Shepherdsville' }, 4000, '2% (code s. 111.03, city form and portal)'],
+  ] as const) {
+    test(`${Object.values(where)[0]}: ${why}`, () => {
+      const r = calculatePaycheck(ky('2026-06-15', where));
+      assert.equal(local(r)?.amount, cents);
+      assert.equal(r.notices, undefined);
+    });
+  }
+
+  test('Marshall County Schools: 0.5% for a Marshall County resident, nothing for anyone else', () => {
+    const school = 'Marshall County Occupational License Tax For Schools';
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCounty: school, residenceCounty: 'Marshall County' })))?.amount, 1000);
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCounty: school, residenceCounty: 'marshall' })))?.amount, 1000);
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCounty: school, residenceCounty: 'Graves County' })))?.amount, 0);
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCounty: school })))?.amount, 0);
+    assert.equal(local(calculatePaycheck(ky('2025-06-13', { workCounty: school, residenceCounty: 'Marshall County' })))?.amount, 1000);
+  });
+});
+
 describe('Kentucky rates that change on 2026-07-01', () => {
   test('Grant County: 2.5% through June, 2.0% from July', () => {
     assert.equal(local(calculatePaycheck(ky('2026-06-30', { workCounty: 'Grant County' })))?.amount, 5000);
