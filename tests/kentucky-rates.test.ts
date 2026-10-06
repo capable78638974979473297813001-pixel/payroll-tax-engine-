@@ -88,13 +88,12 @@ describe('the 2026-10-05 verification report', () => {
     });
   }
 
-  test('Marshall County Schools: 0.5% for a Marshall County resident, nothing for anyone else', () => {
+  test('Marshall County Schools: 0.5% for a district resident working in the county, nothing for anyone else, in 2025 and 2026', () => {
     const school = 'Marshall County Occupational License Tax For Schools';
-    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCounty: school, residenceCounty: 'Marshall County' })))?.amount, 1000);
-    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCounty: school, residenceCounty: 'marshall' })))?.amount, 1000);
-    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCounty: school, residenceCounty: 'Graves County' })))?.amount, 0);
-    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCounty: school })))?.amount, 0);
-    assert.equal(local(calculatePaycheck(ky('2025-06-13', { workCounty: school, residenceCounty: 'Marshall County' })))?.amount, 1000);
+    const both = { workSchoolDistrict: school, residenceSchoolDistrict: school };
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', both)))?.amount, 1000);
+    assert.equal(local(calculatePaycheck(ky('2025-06-13', both)))?.amount, 1000);
+    assert.equal(local(calculatePaycheck(ky('2026-06-15', { workSchoolDistrict: school, residenceSchoolDistrict: 'Boone County School Board' })))?.amount ?? 0, 0);
   });
 });
 

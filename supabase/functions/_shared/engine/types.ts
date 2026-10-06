@@ -260,6 +260,10 @@ export interface StateCertificate {
   workCity?: string;
   /** Residence county (Kentucky: a Jefferson County resident pays Louisville Metro's resident rate wherever in the county they live). */
   residenceCounty?: string;
+  /** Kentucky: the school-district occupational tax (data/local/KY-occupational-<year>.json schoolDistrictTax) whose district contains the WORK address, by entry name. geocode/ sets it; the tax needs residenceSchoolDistrict too. 'none' means the address WAS resolved and is in no taxing school district. */
+  workSchoolDistrict?: string;
+  /** Kentucky: the school-district occupational tax whose district contains the employee's RESIDENCE, by entry name. The tax is owed only by residents of the district. 'none' means the address WAS resolved and is in no taxing school district (as opposed to absent: not looked up). */
+  residenceSchoolDistrict?: string;
   /** City name — same registries as workCity, residence role (Michigan/Ohio/Alabama/Kentucky, plus NYC/Yonkers logic reads it for the "is the other address also this city" check). */
   residenceCity?: string;
   /** Pennsylvania's 6-digit work PSD code (required whenever PA local tax applies). */
@@ -421,6 +425,15 @@ export interface EmployerContext {
    * schedule-assigned), no line is produced rather than a guessed one.
    */
   stateUnemploymentRate?: Record<string, number>;
+  /**
+   * A separate assessment some states levy on EXPERIENCE-RATED employers on
+   * top of their unemployment rate, keyed by state code — Massachusetts's
+   * COVID-19 Recovery Assessment (0.178% to 2.716% in 2026, assigned on the
+   * rate notice alongside the UI rate; new employers pay none). Produces its
+   * own employer line. Absent for an employer that supplied
+   * stateUnemploymentRate, the engine says the assessment was not applied.
+   */
+  stateUnemploymentAssessmentRate?: Record<string, number>;
   /**
    * A handful of states publish a TWO-TIER SUI/SUTA taxable wage base — a
    * higher statutory default, and a reduced base for employers who qualify

@@ -260,6 +260,15 @@ export function validatePaycheckInput(raw: unknown, opts: ValidateOptions = {}):
           }
         }
       }
+      const assessment = body.employer.stateUnemploymentAssessmentRate;
+      if (assessment !== undefined) {
+        if (!isObject(assessment)) err('employer.stateUnemploymentAssessmentRate', 'must be an object keyed by state code, e.g. { "MA": 0.01 }.');
+        else for (const [code, r] of Object.entries(assessment)) {
+          if (typeof r !== 'number' || !Number.isFinite(r) || r < 0) {
+            err(`employer.stateUnemploymentAssessmentRate.${code}`, 'must be a non-negative decimal rate, e.g. 0.01 for 1%.');
+          }
+        }
+      }
     }
   }
 

@@ -112,9 +112,10 @@
     "industryNewEmployerRates": { "construction": 0.0655 },
     "industryNewEmployerRatesSource": "Same DLR table: year-1 construction employers pay 6.00% RA tax + 0.55% investment fee = 6.55% (years 2 and 3: 3.55%). Selected by input.employer.suiIndustry['SD'] === 'construction'.",
     "experienceRange": {
-      "min": 0,
-      "max": 0.095
+      "min": 0.0008,
+      "max": 0.1
     },
+    "experienceRangeSource": "RESTATED 2026-10-06 as ALL-IN (contribution + administrative fee + investment fee), the same basis as newEmployerRate above. Informational: the engine does not read it. Floor 0.08%: the 2026 contribution schedule bottoms out at 0.00% (SDCL 61-5-25.7, reserve ratio 2.25% and over) and the investment fee is 0.00% at a 1.6% reserve ratio, but every experience-rated employer pays the 0.08% administrative fee for 2026 and later (SDCL 61-5-28.1; DLR FAQ: 'an administrative fee of eight-hundredths percent (.08%) ... must be paid by the employer'). Ceiling 10.00%: the top 2026 contribution rate is 9.39% (Schedule A, reserve ratio below -7.00%) + 0.08% fee + 0.53% investment fee (reserve ratio below 1.00%, SDCL 61-5-29). Without the investment fee the ceiling is 9.47%; 9.53% would be the superseded 2024-2025 table's 9.45% plus the 0.08% fee.",
     "employerSuppliedRateRequired": false,
     "confidence": "cross_source_confirmed"
   }

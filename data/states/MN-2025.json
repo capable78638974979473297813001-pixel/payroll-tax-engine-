@@ -179,7 +179,9 @@
       "note": "A compliance/attestation mechanism, not a tax rate of its own -- recorded for completeness of the withholding-adjacent forms landscape, not because it has a number to compute."
     },
     "backupWithholding": {
-      "rate": 0.24,
+      "rate": 0.0985,
+      "verifiedOn": "2026-10-06",
+      "verifiedBy": "Minnesota Department of Revenue, Backup Withholding page (https://www.revenue.state.mn.us/backup-withholding): 'You must withhold tax equal to 9.85% of the personal service payments to that worker', and the 2026 Withholding Tax Instructions (wh-inst-26). The earlier 0.24 was the FEDERAL rate left in this field while the note below already said the figure had been corrected to 9.85%.",
       "base": "Payments for personal services performed by a non-employee (independent contractor) who fails to provide a correct SSN/TIN.",
       "quote": "wh-inst-26, quoted verbatim: 'Minnesota follows the federal provisions for backup withholding on payments for personal services... If the person performing services for you does not provide a Social Security or tax ID number, or if the number is incorrect, you must withhold tax equal to 9.85% (.0985) of the payments.'",
       "note": "CORRECTED while transcribing: the quoted rate is Minnesota's OWN 9.85% (its top marginal income-tax rate), not the FEDERAL backup withholding rate (24%, already on file in data/federal/2026.json's incomeTax.backupWithholdingRate) -- despite the sentence opening with 'Minnesota follows the federal provisions,' which describes the MECHANISM (withhold when TIN is missing/incorrect), not the rate. The rate field above is corrected to 0.0985 to match the actual quoted figure, not the federal one a careless read of the opening clause might substitute."

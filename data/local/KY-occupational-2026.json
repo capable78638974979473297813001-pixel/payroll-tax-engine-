@@ -471,6 +471,7 @@
         "wageRateDecimal": 0.005,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
+        "schoolDistrictTax": {"censusName":"Boone County School District","county":"Boone County","workScope":"district","whoPays":"Employees who BOTH live in and work in the Boone County School District (an employee living in the independent Walton-Verona district is not taxed). Source: Boone County Fiscal Court 2026 tax-rate sheet, 'Boone County Board of Education Tax is 1/2 of 1% (.005)', on gross compensation with no pretax deductions allowed."},
         "wageRateStatus": "confirmed_via_county_rate_sheet",
         "wageRateNote": "Confirmed: a 0.5% Boone County Board of Education tax, applied to eligible employees who live and work in the Boone County school district -- matches the scraped figure exactly.",
         "wageRateSource": "Boone County Fiscal Court official occupational licensing page (boonecountyky.org/departments/occupational_licensing/), cross-referenced via WebSearch aggregation."
@@ -984,6 +985,7 @@
         "wageRateDecimal": 0.005,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
+        "schoolDistrictTax": {"censusName":"Cumberland County School District","county":"Cumberland County","workScope":"district","whoPays":"Every resident who is an employee, on wages paid in the school district (district ordinance, effective 2008-01-01)."},
         "wageRateStatus": "confirmed_via_district_primary_source_2026_09_30",
         "wageRateNote": "CONFIRMED 2026-09-30 by the district's own ordinance (effective 2008-01-01): 0.5% of wages, with a $500 maximum per employee, applied by withholding only on the first $100,000 of compensation (now annualWageCap). The ordinance words the wage tax as applying to \"every resident who is an employee\"; this engine does not check residence for this entry. Previous note: Category is payroll-exclusive and the rate string is one clean figure.",
         "annualWageCap": 100000,
@@ -1258,6 +1260,7 @@
         "wageRateDecimal": 0.005,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
+        "schoolDistrictTax": {"censusName":"Fayette County School District","county":"Fayette County","workScope":"county","blendedInto":"Lexington","whoPays":"Fayette County residents working in Fayette County (Fayette County Public Schools Tax Collection Office)."},
         "wageRateStatus": "confirmed_via_district_official_page",
         "wageRateNote": "Confirmed: Fayette County Public Schools levies 0.5% on wages/compensation of Fayette County residents working in Fayette County -- matches the scraped figure exactly. A proposed 0.25% increase was paused by the board, so 0.5% remains current.",
         "wageRateSource": "Fayette County Public Schools Tax Collection Office official page (fcps.net/community/tax-collection-office) and CivicLex coverage of the paused 2025 increase proposal."
@@ -2174,12 +2177,12 @@
         "name": "Marshall County Occupational License Tax For Schools",
         "category": "Net Profits",
         "rate": "0.5%",
-        "wageRateDecimal": null,
-        "wageRateResidentDecimal": 0.005,
-        "wageRateNonresidentDecimal": 0,
-        "residentCounty": "Marshall County",
+        "wageRateDecimal": 0.005,
+        "wageRateResidentDecimal": null,
+        "wageRateNonresidentDecimal": null,
+        "schoolDistrictTax": {"censusName":"Marshall County School District","county":"Marshall County","workScope":"county","whoPays":"Marshall County residents for activities performed in Marshall County (Marshall County Schools Occupational Tax Office; KRS 160.605)."},
         "wageRateStatus": "confirmed_via_district_official_page",
-        "wageRateNote": "CORRECTED 2026-10-05: this entry carried no wage rate (the engine withheld $0) after an earlier pass read only the district's NET PROFIT instruction booklet (Form M-W) and concluded the tax was net-profits-only. The board's own Occupational Tax Office page says it levies 0.5% on 'salaries, wages, commissions, and other compensation of individuals who are Marshall County residents for activities performed or rendered in Marshall County' and, separately, on net profits (KRS 160.605). It is a RESIDENT-only wage tax, so it is modelled as a resident rate of 0.5% with a nonresident rate of 0, gated on certificate.residenceCounty = Marshall County (residentCounty). Employers file the board's Form MOLT-1 at least quarterly and reconcile annually on MOLT-1A with a W-2 listing. The employee's work location must be in Marshall County; this tax is separate from, and in addition to, the county's own 1% and any city rate (the engine's one-jurisdiction school lookup does not stack layers; see knownGaps).",
+        "wageRateNote": "CORRECTED 2026-10-05: this entry carried no wage rate (the engine withheld $0) after an earlier pass read only the district's NET PROFIT instruction booklet (Form M-W) and concluded the tax was net-profits-only. The board's own Occupational Tax Office page says it levies 0.5% on 'salaries, wages, commissions, and other compensation of individuals who are Marshall County residents for activities performed or rendered in Marshall County' and, separately, on net profits (KRS 160.605). Employers file the board's Form MOLT-1 at least quarterly and reconcile annually on MOLT-1A with a W-2 listing. Like the other school-district entries it is applied as a stacked school layer (certificate.workSchoolDistrict / residenceSchoolDistrict), only for a resident of the district working in Marshall County; it is separate from, and in addition to, the county's own 1% and any city rate.",
         "wageRateSource": "Marshall County Schools Occupational Tax Office page (https://www.marshall.kyschools.us/page/occupational-tax-office), board of education levy under KRS 160.605; Form MOLT-1A annual reconciliation (https://resources.finalsite.net/images/v1654625949/marshallkyschoolsus/e6w9kzfeoeaiol4c2g8o/2021annualreconciliationformfill-in.pdf)."
       },
       {
@@ -3038,6 +3041,7 @@
         "wageRateDecimal": 0.005,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
+        "schoolDistrictTax": {"censusName":"Scott County School District","county":"Scott County","workScope":"county","whoPays":"Scott County residents working in Scott County (Scott County Schools Tax Collection page)."},
         "wageRateStatus": "confirmed_via_district_official_page",
         "wageRateNote": "Confirmed: the Scott County Board of Education levies 0.5% on wages of Scott County residents working in Scott County -- matches the scraped figure exactly.",
         "wageRateSource": "Scott County Schools Tax Collection page (scott.kyschools.us/departments/business-finance/tax-collection)."
@@ -3390,6 +3394,7 @@
         "wageRateDecimal": 0.005,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
+        "schoolDistrictTax": {"censusName":"Warren County School District","county":"Warren County","workScope":"county","whoPays":"Residents of the Warren County School District who earn wages anywhere in Warren County, including Bowling Green: 'If a resident employee earns wages in any part of Warren County or Bowling Green, then his or her gross wages are taxable' (Warren County Public Schools Occupational Tax Office). Residents of the independent Bowling Green district are not in this district."},
         "wageRateStatus": "confirmed_via_district_official_page",
         "wageRateNote": "Confirmed: the Warren County Schools Occupational Tax Rate is 0.5%, withheld on gross wages, quarterly -- matches the scraped figure exactly. Distinct from and stacks with Bowling Green city (1.85%) and Warren County government (1.00%), both already confirmed elsewhere in this file.",
         "wageRateSource": "Warren County Public Schools Occupational Tax Office official page (warrencountyschools.org/tax-office)."

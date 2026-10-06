@@ -33,6 +33,7 @@ import {
   hasPALocalRuleset,
   hasStateRuleset,
   kyJurisdictionRuleset,
+  kySchoolDistricts,
   kyLouisvilleMetro,
   miCityRuleset,
   hasOHJEDDRuleset,
@@ -208,6 +209,8 @@ export function stateIncomeTax(
   // withheld from the employee for it. See stateUnemploymentEmployerTax().
   const suiEmployer = stateUnemploymentEmployerTax(input, ctx, rules);
   if (suiEmployer) lines.push(suiEmployer);
+  const suiAssessment = stateUnemploymentAssessmentTax(input, ctx, rules);
+  if (suiAssessment) lines.push(suiAssessment);
 
   const paidLeave = statePaidLeaveEmployeeTax(input, ctx, rules);
   if (paidLeave) lines.push(paidLeave);
@@ -1558,6 +1561,27 @@ interface StateUnemploymentEmployeeConfig {
  * fixed.
  */
 interface SUIEmployerConfig {
+  /**
+   * Attached to the SUI line only when the state's plain new-employer rate was
+   * the one used (no employer rate and no industry rate supplied): for a
+   * published figure that is a floor (New Mexico's "greater of the industry
+   * average or 1%") or whose add-ons rest on secondary sources (Virginia).
+   */
+  newEmployerRateNotice?: DataQuality;
+  /**
+   * A fee the state bills outside the paycheck (West Virginia's annual
+   * unemployment automation and administration fee, from 2026-07-01): the
+   * text is attached to the SUI line as a not_modelled notice rather than
+   * guessed into an amount.
+   */
+  automationFeeNotice?: string;
+  /**
+   * A second employer assessment owed only by experience-rated employers,
+   * on the same wage base as the unemployment tax (Massachusetts's COVID-19
+   * Recovery Assessment). The rate is assigned per employer, so it arrives as
+   * input.employer.stateUnemploymentAssessmentRate; min/max are the published range.
+   */
+  experienceRatedAssessment?: { name: string; min: number; max: number; note: string };
   // Either a single published wage base, or a two-tier { default,
   // qualifiedEmployer } shape for states (Michigan confirmed) that offer a
   // reduced base to employers current on their filings — see
@@ -1713,6 +1737,68 @@ function stateUnemploymentEmployerTax(
               `${rules.name}'s published new-employer rate is confirmed only through ${cfg.newEmployerRateConfirmedThrough}; ` +
               `the state has not yet published the rate for this check date, so the last confirmed ${(rate * 100).toFixed(2)}% was used. ` +
               'Supply the employer\'s own assigned rate (input.employer.stateUnemploymentRate) to avoid this.',
+          },
+        }
+      : cfg.newEmployerRateNotice && supplied === undefined && industryRate === undefined
+        ? { dataQuality: cfg.newEmployerRateNotice }
+        : cfg.experienceRatedAssessment &&
+          supplied !== undefined &&
+          input.employer?.stateUnemploymentAssessmentRate?.[rules.code] === undefined
+        ? {
+            dataQuality: {
+              tier: 'not_modelled' as const,
+              note:
+                `${cfg.experienceRatedAssessment.name}: ${cfg.experienceRatedAssessment.note} ` +
+                `This employer supplied its own experience rate but no assessment rate (published range ${(cfg.experienceRatedAssessment.min * 100).toFixed(3)}% to ${(cfg.experienceRatedAssessment.max * 100).toFixed(3)}%), so it was not applied. ` +
+                'Supply the rate from the rate notice as input.employer.stateUnemploymentAssessmentRate.',
+            },
+          }
+        : cfg.automationFeeNotice
+          ? { dataQuality: { tier: 'not_modelled' as const, note: cfg.automationFeeNotice } }
+          : {}),
+  };
+}
+
+/**
+ * The experience-rated-only assessment some states add to the unemployment
+ * tax (Massachusetts's COVID-19 Recovery Assessment). Same wage base and
+ * pretax treatment as the unemployment line it rides with. Produced only
+ * when the employer supplies its assigned assessment rate: a new employer pays
+ * none, and an experience-rated one's rate is on its own notice, so a missing
+ * rate is flagged on the unemployment line, never guessed here.
+ */
+function stateUnemploymentAssessmentTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cfg = rules.suiEmployer as SUIEmployerConfig | undefined;
+  const a = cfg?.experienceRatedAssessment;
+  if (!cfg || !a) return null;
+  const rate = input.employer?.stateUnemploymentAssessmentRate?.[rules.code];
+  if (rate === undefined) return null;
+
+  const currentWages = ctx.taxableWagesFor(unemploymentExemptPretax(cfg.exemptPretax));
+  const resolvedWageBase = resolveSUIWageBase(cfg.wageBase, rules.code, input.employer);
+  const cap = resolvedWageBase === null ? null : dollars(resolvedWageBase);
+  const ytd = input.ytd.stateUnemployment?.[rules.code] ?? 0;
+  const taxableWages = cap === null ? currentWages : underCap(currentWages, ytd, cap);
+  const outside = rate < a.min || rate > a.max;
+  return {
+    id: `${rules.code}_SUI_ASSESSMENT_ER`,
+    name: `${rules.name} ${a.name} (Employer)`,
+    payer: 'employer',
+    jurisdiction: 'state',
+    taxableWages,
+    amount: applyRate(taxableWages, rate),
+    detail:
+      `${fmt(taxableWages)} @ ${(rate * 100).toFixed(3)}% — this employer's own assigned assessment rate` +
+      (cap === null ? ', no wage cap' : `, same ${fmt(cap)}/yr wage base as the unemployment tax (${fmt(ytd)} YTD already counted)`),
+    ...(outside
+      ? {
+          dataQuality: {
+            tier: 'conflicting_sources' as const,
+            note: `The supplied ${a.name} rate ${(rate * 100).toFixed(3)}% is outside the state's published ${(a.min * 100).toFixed(3)}%–${(a.max * 100).toFixed(3)}% range; check it against the rate notice.`,
           },
         }
       : {}),
@@ -5356,15 +5442,115 @@ function kentuckyLocalTax(
 ): TaxLine | null {
   if (rules.code !== 'KY') return null;
   if (!hasKYOccupationalRuleset(input.checkDate)) return null;
+  const cityCounty = kentuckyCityCountyTax(input, ctx);
+  const school = kentuckySchoolDistrictTax(input, ctx);
+  if (!school) return cityCounty;
+  if (!cityCounty) return school;
+  // One KY_LOCAL line: a school board's tax stacks on the city and county
+  // (no KRS 68.197 credit, which is for the county/city pair only).
+  return {
+    ...cityCounty,
+    amount: cityCounty.amount + school.amount,
+    detail: `${cityCounty.detail}; plus ${school.detail}`,
+    ...(cityCounty.dataQuality ?? school.dataQuality
+      ? { dataQuality: (cityCounty.dataQuality ?? school.dataQuality)! }
+      : {}),
+  };
+}
+
+/**
+ * A Kentucky school board's occupational tax (KRS 160.593 et seq.): 0.5% of
+ * the wages of a RESIDENT of the district who works in scope, owed on top of
+ * any city and county tax. Driven by certificate.residenceSchoolDistrict and
+ * the work location (workSchoolDistrict, or workCounty for the districts
+ * that tax work anywhere in the county), both of which geocode/ resolves from
+ * the two addresses.
+ *
+ * Residence is required: without residenceSchoolDistrict the tax can't be
+ * told from nothing, so a work address inside a taxing district produces a
+ * $0 line that says so, instead of silently omitting a tax some residents owe.
+ */
+function kentuckySchoolDistrictTax(input: PaycheckInput, ctx: ComputeContext): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const str = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : undefined);
+  const workDistrict = str(cert.workSchoolDistrict);
+  const workCounty = str(cert.workCounty);
+  const residenceDistrict = str(cert.residenceSchoolDistrict);
+  if (!workDistrict && !workCounty && !residenceDistrict) return null;
+  if (residenceDistrict?.toLowerCase() === 'none') return null; // resolved: lives in no taxing school district
+
+  const same = (a: string | undefined, b: string) => a !== undefined && a.toLowerCase() === b.toLowerCase();
+  const bareCounty = (c: string | undefined) => c?.toLowerCase().replace(/\s+county$/, '');
+  const districts = kySchoolDistricts(input.checkDate);
+
+  const inScope = (e: KYJurisdictionEntry): boolean => {
+    const st = e.schoolDistrictTax!;
+    return st.workScope === 'district'
+      ? same(workDistrict, e.name)
+      : same(workDistrict, e.name) || bareCounty(workCounty) === bareCounty(st.county);
+  };
+
+  const resident = districts.find((e) => same(residenceDistrict, e.name));
+  if (resident) {
+    if (!inScope(resident)) return null; // lives in the district, works outside its scope: not taxed
+    const blended = resident.schoolDistrictTax!.blendedInto;
+    // Already inside the consolidated government's resident rate (Lexington-Fayette's 2.75%).
+    if (blended && same(str(cert.workCity), blended) && same(str(cert.residenceCity), blended)) return null;
+    const wages = kyCappedWages(resident, ctx.taxableWagesFor([]), input);
+    const rate = resident.wageRateDecimal!;
+    return {
+      id: 'KY_LOCAL',
+      name: 'Kentucky Local Occupational Tax',
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: ctx.taxableWagesFor([]),
+      amount: applyRate(wages, rate),
+      detail:
+        `${fmt(wages)} @ ${(rate * 100).toFixed(2)}% to ${resident.name} (school-district tax: a resident of the district working in ${resident.schoolDistrictTax!.county})` +
+        (resident.annualWageCap !== undefined
+          ? `; ${resident.name} taxes at most $${resident.annualWageCap.toLocaleString('en-US')} of wages a year (YTD from ytd.localIncomeTax['KY_LOCAL_${resident.name}'])`
+          : ''),
+      ...kyDataQuality([resident]),
+    };
+  }
+
+  // No (taxing) residence district on the certificate. If the work address is in a
+  // taxing district and residence was simply not given, say so.
+  if (residenceDistrict === undefined) {
+    const workHit = districts.find((e) => inScope(e));
+    if (workHit) {
+      return {
+        id: 'KY_LOCAL',
+        name: 'Kentucky Local Occupational Tax',
+        payer: 'employee',
+        jurisdiction: 'local',
+        taxableWages: ctx.taxableWagesFor([]),
+        amount: 0,
+        detail: `${workHit.name} levies ${((workHit.wageRateDecimal ?? 0) * 100).toFixed(2)}% on residents of its district who work in ${workHit.schoolDistrictTax!.county}; no residence school district was supplied, so none was withheld`,
+        dataQuality: {
+          tier: 'not_modelled',
+          note: `The work location is in ${workHit.schoolDistrictTax!.county}, where ${workHit.name} taxes residents of the district at ${((workHit.wageRateDecimal ?? 0) * 100).toFixed(2)}% of wages. Without certificate.residenceSchoolDistrict the engine cannot tell whether this employee lives in the district, so nothing was withheld for it. Resolve the home address (geocode/) or set the field.`,
+        },
+      };
+    }
+  }
+  return null;
+}
+
+function kentuckyCityCountyTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+): TaxLine | null {
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const workCityName = typeof cert.workCity === 'string' ? cert.workCity : undefined;
   const workCountyName = typeof cert.workCounty === 'string' ? cert.workCounty : undefined;
   if (!workCityName && !workCountyName) return null;
 
-  const cityEntry = workCityName ? kyJurisdictionRuleset(workCityName, input.checkDate) : undefined;
+  const notSchool = (e: KYJurisdictionEntry | undefined) => (e && !e.schoolDistrictTax ? e : undefined);
+  const cityEntry = workCityName ? notSchool(kyJurisdictionRuleset(workCityName, input.checkDate)) : undefined;
   const countyEntry = workCountyName
-    ? kyJurisdictionRuleset(workCountyName, input.checkDate)
+    ? notSchool(kyJurisdictionRuleset(workCountyName, input.checkDate))
     : undefined;
 
   const periodWages = ctx.taxableWagesFor([]);
@@ -5417,19 +5603,9 @@ function kentuckyLocalTax(
         note: `flat ${(entry.wageRateDecimal * 100).toFixed(2)}%`,
       };
     }
-    const residenceCountyName = typeof cert.residenceCounty === 'string' ? cert.residenceCounty : undefined;
-    const bareCounty = (c: string) => c.trim().toLowerCase().replace(/ county$/, '');
-    const isResident = entry.residentCounty
-      ? residenceCountyName !== undefined && bareCounty(residenceCountyName) === bareCounty(entry.residentCounty)
-      : residenceCityName?.toLowerCase() === entry.name.toLowerCase();
+    const isResident = residenceCityName?.toLowerCase() === entry.name.toLowerCase();
     const rate = isResident ? entry.wageRateResidentDecimal! : entry.wageRateNonresidentDecimal!;
-    return {
-      rate,
-      note:
-        entry.residentCounty && !isResident
-          ? `nonresident ${(rate * 100).toFixed(2)}% (taxes only residents of ${entry.residentCounty}; set certificate.residenceCounty)`
-          : `${isResident ? 'resident' : 'nonresident'} ${(rate * 100).toFixed(2)}%`,
-    };
+    return { rate, note: `${isResident ? 'resident' : 'nonresident'} ${(rate * 100).toFixed(2)}%` };
   };
 
   // Annual caps: see kyCappedWages().

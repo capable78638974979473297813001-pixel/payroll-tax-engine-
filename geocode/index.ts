@@ -319,6 +319,7 @@ function attemptedMatches(resolved: ResolvedJurisdiction) {
     resolved.alCounty,
     resolved.kyCity,
     resolved.kyCounty,
+    resolved.kySchoolDistrict,
   ].filter((m) => m !== null);
 }
 
@@ -568,7 +569,7 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
   // Only needed on the interpolated path, and only when the identify call
   // above didn't already run: the rooftop lookup returns the school
   // district from the SAME identify call, so this would be a duplicate.
-  if (precision === 'interpolated' && !historicalVintage && geographies.state === 'OH') {
+  if (precision === 'interpolated' && !historicalVintage && (geographies.state === 'OH' || geographies.state === 'KY')) {
     const sd = await fetchSchoolDistrictAtPointSafe(point.lon, point.lat, undefined, {}, checkDate);
     if (sd.ok) {
       schoolDistrictName = sd.district ?? undefined;
@@ -772,7 +773,7 @@ export async function resolveAddress(
     lowConfidenceReasons.push(`Census interpolated this address within a wide address range (${matchQuality.addressRangeWidth} addresses on this block face) — less positionally precise than a narrow range, worth a second look if this address is near a jurisdiction boundary.`);
   }
   if (schoolDistrictLookupFailed) {
-    lowConfidenceReasons.push('The Ohio school-district lookup (a separate Census service from the main geocoder) failed after retries — municipality/county resolution above is unaffected, but schoolDistrictCode was not attempted this call. Retry resolveAddress() to try again.');
+    lowConfidenceReasons.push('The school-district lookup (a separate Census service from the main geocoder) failed after retries — municipality/county resolution above is unaffected, but the Ohio schoolDistrictCode / Kentucky school-board tax district was not resolved this call. Retry resolveAddress() to try again.');
   }
   if (crossCheck.placeDisagreement) {
     lowConfidenceReasons.push(`OpenStreetMap's independent geocoder resolved this address to a different place/county than Census did (Nominatim: ${crossCheck.nominatim?.place ?? '?'}, ${crossCheck.nominatim?.county ?? '?'}) — two independently-maintained datasets disagree, worth a second look before trusting either one.`);
