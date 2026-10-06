@@ -426,6 +426,50 @@ describe('resolve.ts — real captured Census geographies', () => {
     assert.equal(resolved.kyCounty?.entry?.wageRateDecimal, 0.0125);
   });
 
+  test('a KY address in a taxing school district resolves it; certificate fields follow the role', () => {
+    const geo: CensusGeographies = {
+      state: 'KY',
+      incorporatedPlaces: ['Benton city'],
+      countySubdivisions: [],
+      counties: ['Marshall County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE, 'Marshall County School District');
+    assert.equal(resolved.kySchoolDistrict?.confidence, 'matched');
+    assert.equal(resolved.kySchoolDistrict?.entry?.name, 'Marshall County Occupational License Tax For Schools');
+    assert.equal(toCertificateFields(resolved, 'work').workSchoolDistrict, 'Marshall County Occupational License Tax For Schools');
+    assert.equal(toCertificateFields(resolved, 'residence').residenceSchoolDistrict, 'Marshall County Occupational License Tax For Schools');
+    assert.equal(toCertificateFields(resolved, 'residence').workSchoolDistrict, undefined);
+  });
+
+  for (const [census, entry] of [
+    ['Boone County School District', 'Boone County School Board'],
+    ['Cumberland County School District', 'Cumberland County Public School District'],
+    ['Fayette County School District', 'Fayette County Public School District'],
+    ['Scott County School District', 'Scott County Public School District'],
+    ['Warren County School District', 'Warren County Public Schools'],
+  ] as const) {
+    test(`Census "${census}" resolves to ${entry}`, () => {
+      const geo: CensusGeographies = { state: 'KY', incorporatedPlaces: [], countySubdivisions: [], counties: [] };
+      assert.equal(resolveJurisdiction(geo, CHECK_DATE, census).kySchoolDistrict?.entry?.name, entry);
+    });
+  }
+
+  test('KY independent districts and non-taxing districts match no school tax (the normal case, not a failure)', () => {
+    const geo: CensusGeographies = { state: 'KY', incorporatedPlaces: ['Bowling Green city'], countySubdivisions: [], counties: ['Warren County'] };
+    for (const name of ['Bowling Green Independent School District', 'Jefferson County School District', 'Erlanger-Elsmere Independent School District']) {
+      const r = resolveJurisdiction(geo, CHECK_DATE, name);
+      assert.equal(r.kySchoolDistrict?.confidence, 'no_match', name);
+      // resolved-and-outside is marked 'none', never left looking like "not looked up"
+      assert.equal(toCertificateFields(r, 'work').workSchoolDistrict, 'none', name);
+      assert.equal(toCertificateFields(r, 'residence').residenceSchoolDistrict, 'none', name);
+    }
+  });
+
+  test('KY without a school-district lookup leaves the school field unresolved, not no_match', () => {
+    const geo: CensusGeographies = { state: 'KY', incorporatedPlaces: [], countySubdivisions: [], counties: ['Warren County'] };
+    assert.equal(resolveJurisdiction(geo, CHECK_DATE).kySchoolDistrict, null);
+  });
+
   test('KY workCounty is only populated on a work-role call, never residence', () => {
     const geo: CensusGeographies = {
       state: 'KY',

@@ -1851,38 +1851,97 @@ describe('Kentucky', () => {
       assert.equal(r.taxes.some((t) => t.id === 'KY_LOCAL'), false);
     });
 
-    test('Marshall County Occupational License Tax For Schools: 0.5% of wages for Marshall County residents working in the county', () => {
-      const r = calculatePaycheck(
+    const MARSHALL = 'Marshall County Occupational License Tax For Schools';
+    const schoolPay = (certificate: Record<string, unknown>) =>
+      calculatePaycheck(
         input({
           payFrequency: 'weekly',
           earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
-          workState: {
-            code: 'KY',
-            certificate: {
-              workCounty: 'Marshall County Occupational License Tax For Schools',
-              residenceCounty: 'Marshall County',
-            },
-          },
+          workState: { code: 'KY', certificate } as never,
         }),
       );
+
+    test('Marshall County Schools: 0.5% of wages for a district resident working in Marshall County', () => {
+      const r = schoolPay({ workSchoolDistrict: MARSHALL, residenceSchoolDistrict: MARSHALL });
       assert.equal(amountOf(r, 'KY_LOCAL'), dollars(5.0));
     });
 
-    test('Marshall County Schools tax: a nonresident of Marshall County owes nothing', () => {
+    test('Marshall County Schools: a resident working in Marshall County counts by work county too', () => {
+      const r = schoolPay({ workCounty: 'Marshall County', residenceSchoolDistrict: MARSHALL });
+      // county government 1% + school board 0.5%, no credit between them
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(15.0));
+    });
+
+    test('Marshall County Schools: a nonresident of the district owes nothing', () => {
+      const r = schoolPay({ workSchoolDistrict: MARSHALL, residenceSchoolDistrict: 'Warren County Public Schools' });
+      assert.equal(r.taxes.some((x) => x.id === 'KY_LOCAL' && x.amount > 0), false);
+    });
+
+    test('Marshall County Schools: a resident who works outside the county owes nothing', () => {
+      const r = schoolPay({ workCounty: 'Warren County', residenceSchoolDistrict: MARSHALL });
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(10.0)); // Warren County's own 1% only, no school tax
+      assert.doesNotMatch(r.taxes.find((x) => x.id === 'KY_LOCAL')!.detail!, /school/i);
+    });
+
+    test('a school-district name used as workCity/workCounty is no longer a city or county lookup', () => {
+      const r = schoolPay({ workCounty: MARSHALL });
+      assert.equal(r.taxes.some((x) => x.id === 'KY_LOCAL'), false);
+    });
+
+    test('work address inside a taxing school district with no residence supplied: a $0 line with a notice, not silence', () => {
+      const r = schoolPay({ workSchoolDistrict: 'Fayette County Public School District' });
+      const line = r.taxes.find((x) => x.id === 'KY_LOCAL')!;
+      assert.equal(line.amount, 0);
+      assert.equal(line.dataQuality?.tier, 'not_modelled');
+      assert.match(line.dataQuality!.note, /residenceSchoolDistrict/);
+    });
+
+    test("a residence resolved as being in no taxing school district ('none') owes no school tax and raises no notice", () => {
+      const r = schoolPay({ workCounty: 'Warren County', residenceSchoolDistrict: 'none' });
+      assert.equal(r.notices?.some((n) => n.tier === 'not_modelled') ?? false, false);
+      assert.doesNotMatch(r.taxes.find((x) => x.id === 'KY_LOCAL')!.detail!, /school/i);
+    });
+
+    test('Boone County School Board needs the employee to work IN the district, not just the county', () => {
+      const BOONE = 'Boone County School Board';
+      assert.equal(amountOf(schoolPay({ workSchoolDistrict: BOONE, residenceSchoolDistrict: BOONE }), 'KY_LOCAL'), dollars(5.0));
+      // works in Boone County but outside the district (Walton-Verona): not taxed by the board
+      const r = schoolPay({ residenceSchoolDistrict: BOONE, workCounty: 'Boone County' });
+      assert.equal(r.taxes.some((x) => x.id === 'KY_LOCAL' && x.name.includes('School') ), false);
+    });
+
+    test('Warren County Public Schools taxes a district resident earning wages anywhere in Warren County (Bowling Green included)', () => {
+      const WARREN = 'Warren County Public Schools';
+      const r = schoolPay({ residenceSchoolDistrict: WARREN, workCity: 'Bowling Green', workCounty: 'Warren County' });
+      const line = r.taxes.find((x) => x.id === 'KY_LOCAL')!;
+      assert.match(line.detail!, /Warren County Public Schools/);
+      // Bowling Green 1.85% + Warren County 1.00% (credited against the city) + schools 0.5%
+      assert.ok(line.amount >= dollars(5.0));
+    });
+
+    test('Fayette: a Lexington resident working in Lexington pays the blended 2.75% once, not 3.25%', () => {
+      const FAYETTE = 'Fayette County Public School District';
+      const r = schoolPay({ workCity: 'Lexington', residenceCity: 'Lexington', workSchoolDistrict: FAYETTE, residenceSchoolDistrict: FAYETTE });
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(27.5));
+    });
+
+    test('Fayette: with only the school district known (no residence city) the layer supplies the 0.5% the blended rate would have', () => {
+      const FAYETTE = 'Fayette County Public School District';
+      const r = schoolPay({ workCity: 'Lexington', workSchoolDistrict: FAYETTE, residenceSchoolDistrict: FAYETTE });
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(27.5)); // 2.25% nonresident-form Lexington + 0.5% school
+    });
+
+    test('Cumberland school tax stops at its $100,000 wage cap', () => {
+      const CUMBERLAND = 'Cumberland County Public School District';
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
-          earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
-          workState: {
-            code: 'KY',
-            certificate: {
-              workCounty: 'Marshall County Occupational License Tax For Schools',
-              residenceCounty: 'Calloway County',
-            },
-          },
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(2000) }],
+          ytd: { socialSecurity: 0, medicare: 0, futa: 0, localIncomeTax: { [`KY_LOCAL_${CUMBERLAND}`]: dollars(99_000) } },
+          workState: { code: 'KY', certificate: { workSchoolDistrict: CUMBERLAND, residenceSchoolDistrict: CUMBERLAND } } as never,
         }),
       );
-      assert.equal(amountOf(r, 'KY_LOCAL'), 0);
+      assert.equal(amountOf(r, 'KY_LOCAL'), dollars(5.0)); // only $1,000 of the $2,000 is under the cap
     });
 
     test('Hillview: 1.8% per the city\'s own ordinance s. 110.22, correcting the KLC survey\'s 1.1%', () => {

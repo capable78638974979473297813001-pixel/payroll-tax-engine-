@@ -113,8 +113,9 @@
     "industryNewEmployerRatesSource": "Same DLR table: year-1 construction employers pay 6.00% RA tax + 0.55% investment fee = 6.55% (years 2 and 3: 3.55%). Selected by input.employer.suiIndustry['SD'] === 'construction'.",
     "experienceRange": {
       "min": 0,
-      "max": 0.095
+      "max": 0.0947
     },
+    "experienceRangeSource": "CORRECTED 2026-10-06 from 0.095. Informational (the engine does not read it): the largest 2026 contribution rate in SDCL 61-5-25.7 (Schedule A, reserve ratio below -7.00%) is 9.39%, plus the 0.08% experience-rated administrative fee for 2026 and later (SDCL 61-5-28.1) = 9.47%. The investment fee (0.00% to 0.53% by reserve ratio, SDCL 61-5-29) is separate and not included. 9.53% would be the superseded 2024-2025 table's 9.45% maximum plus the 0.08% fee.",
     "employerSuppliedRateRequired": false,
     "confidence": "cross_source_confirmed"
   }

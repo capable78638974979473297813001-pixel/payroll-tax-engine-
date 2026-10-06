@@ -283,12 +283,12 @@
   "lowIncomeElection": {
     "$comment": "BUILT 2026-09-28. AR4EC Line 5 lets a qualifying employee elect the Low Income Tax Tables instead of the Formula Method. The tables below are transcribed programmatically from DFA's own 2026 PDF (22 pages, 916 wage-band rows) and machine-checked: every band is contiguous to the cent with the next, no amount ever decreases down a column, every row has the expected column count, and all four pay frequencies of a filing status have the same number of bands. Engine: arkansasWithholding() uses these when certificate.lowIncomeElection is true, keyed by certificate.filingStatus ('single' | 'mfj' | 'hoh') and certificate.dependents. Wages above a table's last band are outside the low-income range, so the Formula Method applies (as AR4EC says); daily pay and more than 6 dependents are not in the tables and fall back to the Formula Method with a notice.",
     "incomeThresholds2026": {
-      "single": "$14,265 to $17,000",
-      "marriedFilingJointly_1orFewerDependents": "$24,057 to $28,300",
-      "marriedFilingJointly_2orMoreDependents": "$28,953 to $35,100",
-      "headOfHousehold_1orFewerDependents": "$20,282 to $24,600",
-      "headOfHousehold_2orMoreDependents": "$24,176 to $28,200",
-      "source": "AR4EC (R 02/07/2025) instructions page, read directly -- note the form's own revision date predates 2026, so these dollar figures should be re-checked against a 2026-specific AR4EC revision if one has since been issued."
+      "single": "$14,644 to $17,500",
+      "marriedFilingJointly_1orFewerDependents": "$24,696 to $29,000",
+      "marriedFilingJointly_2orMoreDependents": "$29,723 to $36,100",
+      "headOfHousehold_1orFewerDependents": "$20,821 to $25,300",
+      "headOfHousehold_2orMoreDependents": "$24,819 to $29,000",
+      "source": "CORRECTED 2026-10-06 from the 2025 form's figures ($14,265 to $17,000 and so on). Read from DFA's AR4EC (R 12/04/2025), the 2026 Employee's Withholding Exemption Certificate (https://www.dfa.arkansas.gov/wp-content/uploads/AR4EC2026.pdf, linked from DFA's Withholding Tax Forms & Instructions page): 'You qualify for the low-income tax rates if your total income from all sources is: (a) Single $14,644 to $17,500 ...'. Descriptive text only; the engine's low-income tables (below) are unaffected and already match DFA's 2026 table PDF. The upper limits agree with the tables' top bands (e.g. $17,500 / 52 = $336.54, the last weekly single row)."
     },
     "tables": {
       "source": {
@@ -1297,24 +1297,24 @@
     "administeredBy": "AR Division of Workforce Services (DWS)",
     "wageBase": 7000.0,
     "wageBaseConfidence": "cross_source_confirmed -- stable at $7,000 (the FUTA statutory minimum) across every source checked, including DWS's own page, with zero dissent for many years running.",
-    "newEmployerRate": 0.022,
-    "newEmployerRateNote": "2.0% base + 0.200% stabilization tax = 2.2% total for 2026, per secondary sources -- DWS's own fetched page returned 2025-dated figures (2.0% + 0.1% administrative assessment) rather than confirming the 2026 breakdown directly. Flagged as one tier below a direct 2026-dated primary quote.",
+    "newEmployerRate": 0.02,
+    "newEmployerRateNote": "CORRECTED 2026-10-06 from 2.2% to 2.0%. DWS's own 2026 Tax Rates list (dws.arkansas.gov/workforce-services/unemployment/employer-ui-information/): 'New employer tax rate - 2.0%', 'Experienced employer tax rate range - .200%-5.100% (Deficit includes 3 levels - 6.100%, 8.100%, 10.100%)', 'Stabilization rate - .200%'. The 0.200% stabilization rate is INSIDE these figures, not added to them: the experienced range's own minimum is .200%, which is the stabilization rate alone for an employer with no experience rate. The earlier 2.2% added the stabilization rate on top, from a secondary source.",
     "experiencedEmployerRateRange": [0.002, 0.101],
     "knownGap": "This state's new-employer rate is cross-source only for the 2026-specific figure; wage base and experience range are stable/well-corroborated. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax."
   },
   "knownGaps": [
     "RESOLVED 2026-09-28: the low-income election (AR4EC Line 5) is now built from DFA's 2026 Low Income Tax Tables (lowIncomeElection.tables). Remaining edges, each reported as a notice rather than guessed: daily pay (no daily table) and more than 6 dependents (no column) use the Formula Method.",
     "exemptPretax RESOLVED via direct Arkansas Code sec. 26-51-414(a)(1) citation (see exemptPretaxComment) -- explicit IRC-section adoption for retirement/deferral categories; Section 125 cafeteria-plan treatment specifically remains a residual, smaller gap.",
-    "This state's 2026-specific new-employer rate breakdown rests on secondary sources. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
-    "AR4EC's own low-income income thresholds come from a form revised 02/07/2025 -- worth re-checking against a 2026-specific AR4EC revision if one has since been issued.",
+    "RESOLVED 2026-10-06: the 2026 new-employer rate is 2.0% on DWS's own page (stabilization included), no longer a secondary-source figure. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
+    "RESOLVED 2026-10-06: AR4EC's low-income income thresholds now come from the 2026 form (AR4EC R 12/04/2025), not the 02/07/2025 one.",
     "Supplemental wages: the State of Arkansas Withholding Tax Formula Method document (Tax Year 2026) was fetched directly and read in full this pass -- it contains ZERO mentions of \"bonus\" or \"supplemental\" anywhere. Third-party payroll guides claim a separate 3.9% Arkansas flat supplemental rate -- checked directly and found this is simply Arkansas's own TOP MARGINAL BRACKET RATE (see this file's own brackets, 5,201+ Married/equivalent taxed at exactly 3.90% under the January table, 3.70% since HB 1001), not a distinct published supplemental-wage rate. A standalone bonus therefore runs through the same annualize-and-bracket formula as any other wages, which is what this engine already does by default -- the same conclusion already reached for South Carolina and Utah in this project."
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 7000,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
-    "newEmployerRate": 0.022,
-    "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
+    "newEmployerRate": 0.02,
+    "newEmployerRateSource": "CORRECTED 2026-10-06 from 0.022: DWS's own 2026 rates page lists the new-employer rate as 2.0%, stabilization rate included. See unemploymentInsurance.newEmployerRateNote.",
     "experienceRange": {
       "min": 0.002,
       "max": 0.101

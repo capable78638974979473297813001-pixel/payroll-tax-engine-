@@ -480,8 +480,32 @@ export interface KYJurisdictionEntry {
   annualWageCap?: number;
   /** How the wage rate was established (the data file's wageRateStatus), e.g. 'inferred_small_city_single_rate_pattern'. Absent for the consolidated governments. */
   wageRateStatus?: string;
-  /** A resident-only levy (a school board's wage tax): the resident rate applies only when certificate.residenceCounty is this county, otherwise the nonresident rate. Entries without it use residenceCity matching the entry's own name. */
-  residentCounty?: string;
+  /**
+   * Present on a school board's occupational tax (Boone, Cumberland, Fayette,
+   * Marshall, Scott, Warren). Such an entry is NOT a city or county: it is a
+   * stacked layer owed by a RESIDENT of the district who works in scope, so
+   * it is applied from certificate.residenceSchoolDistrict plus the work
+   * location, never looked up as workCity/workCounty.
+   */
+  schoolDistrictTax?: KYSchoolDistrictTax;
+}
+
+export interface KYSchoolDistrictTax {
+  /** The name Census TIGERweb gives the district ("Boone County School District"), for address resolution. */
+  censusName: string;
+  /** The county whose work location counts when workScope is 'county'. */
+  county: string;
+  /** 'district': the employee must work inside the district. 'county': working anywhere in the county counts (Warren: a resident earning wages anywhere in Warren County, Bowling Green included). */
+  workScope: 'district' | 'county';
+  /** Plain-language statement of who owes it, from the district's own page. */
+  whoPays: string;
+  /**
+   * Set when a consolidated government's RESIDENT rate already includes this
+   * school tax (Lexington-Fayette's 2.75% = 2.25% + Fayette County Public Schools'
+   * 0.5%). For a resident of that city working in it the school layer is skipped,
+   * or it would be counted twice.
+   */
+  blendedInto?: string;
 }
 
 interface KYOccupationalRegistryFile {
@@ -496,7 +520,7 @@ interface KYOccupationalRegistryFile {
         capAtSSWageBase?: boolean;
         annualWageCap?: number;
         wageRateStatus?: string;
-        residentCounty?: string;
+        schoolDistrictTax?: KYSchoolDistrictTax;
         /** Mid-year rate changes: from `on` (a check date, inclusive) the flat rate is `wageRateDecimal`. A rate of 0 means no wage tax yet. */
         rateChanges?: { on: string; wageRateDecimal: number }[];
       }
@@ -556,7 +580,7 @@ export function allKYJurisdictions(checkDate: string): KYJurisdictionEntry[] {
       capAtSSWageBase: raw.capAtSSWageBase ?? false,
       ...(raw.annualWageCap !== undefined ? { annualWageCap: raw.annualWageCap } : {}),
       ...(raw.wageRateStatus ? { wageRateStatus: raw.wageRateStatus } : {}),
-      ...(raw.residentCounty ? { residentCounty: raw.residentCounty } : {}),
+      ...(raw.schoolDistrictTax ? { schoolDistrictTax: raw.schoolDistrictTax } : {}),
     });
   }
 
@@ -590,6 +614,11 @@ export function kyLouisvilleMetro(checkDate: string): { residentRate: number; no
   );
   const m = file.jurisdictions.louisvilleMetro;
   return { residentRate: m.residentRate, nonresidentRate: m.nonresidentRate, cities: m.citiesWithinMetro ?? [] };
+}
+
+/** The Kentucky school-district occupational taxes (entries carrying schoolDistrictTax). */
+export function kySchoolDistricts(checkDate: string): KYJurisdictionEntry[] {
+  return allKYJurisdictions(checkDate).filter((e) => e.schoolDistrictTax !== undefined);
 }
 
 /** Look up one Kentucky jurisdiction by name (case-insensitive) among the confirmed-rate set — see allKYJurisdictions()'s own doc comment for what "confirmed" means here. */

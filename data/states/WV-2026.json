@@ -1169,6 +1169,16 @@
           ]
         }
       }
+    },
+    {
+      "from": "2026-07-01",
+      "note": "SB 1053 (CS for CS for SB 1053, 2026 Regular Session), effective 2026-07-01: WV Code 21A-5-5(d) reduces the otherwise applicable contribution rate of every employer by seven percent (not below zero), so the 2.7% new-employer rate becomes 2.7% x 0.93 = 2.511%. WV Code 21A-9-10 adds an annual unemployment automation and administration fee on the same date (see automationFeeNotice).",
+      "set": {
+        "suiEmployer.newEmployerRate": 0.02511,
+        "suiEmployer.newEmployerRateSource": "WV Code 21A-5-5(d) as enacted by SB 1053, effective 2026-07-01: 'the otherwise applicable unemployment contribution rate for each employer ... shall be reduced by seven percent, except that such contribution rate shall not be less than zero' (code.wvlegislature.gov/21A-5-5). 2.7% x 0.93 = 2.511%. Checks dated before 2026-07-01 keep 2.7%.",
+        "suiEmployer.experienceRange": { "min": 0.01395, "max": 0.07905 },
+        "suiEmployer.automationFeeNotice": "West Virginia's temporary unemployment automation and administration fee (WV Code 21A-9-10, effective 2026-07-01) is billed to the employer once a year, not per paycheck: the statute sets it at 7% of the employer's total taxable wages for the twelve months ending the preceding June 30, lets the Commissioner reduce the percentage so total collections stay under $18 million a year, exempts employers whose contribution rate is zero, and ends once $60 million is collected or on 2031-07-01. The base and the percentage actually billed are set by the Commissioner and the invoice arrives by March 31, so no per-paycheck amount is computed here; budget for the invoice separately. If the employer's own assigned rate is supplied, confirm whether the state's notice already reflects the 7% reduction."
+      }
     }
   ]
 }

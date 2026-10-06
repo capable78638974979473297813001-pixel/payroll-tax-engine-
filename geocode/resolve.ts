@@ -18,6 +18,7 @@ import {
   allALMunicipalities,
   allCounties,
   allKYJurisdictions,
+  kySchoolDistricts,
   allMICities,
   allOHMunicipalities,
   allOHSchoolDistricts,
@@ -296,6 +297,23 @@ function matchKYCountyByName(
   return { confidence: 'no_match', entry: null };
 }
 
+/**
+ * Kentucky's school-board occupational taxes, matched on the district name
+ * TIGERweb returns ("Boone County School District"). Exact name match on the
+ * data file's censusName: an independent district (Bowling Green, Erlanger-Elsmere,
+ * Walton-Verona) is a different jurisdiction from the county district around it
+ * and correctly matches nothing.
+ */
+function matchKYSchoolDistrictByName(
+  censusDistrictName: string,
+  checkDate: string,
+): FieldMatch<KYJurisdictionEntry> {
+  const hits = kySchoolDistricts(checkDate).filter((e) => namesEqual(e.schoolDistrictTax!.censusName, censusDistrictName));
+  if (hits.length === 1) return { confidence: 'matched', entry: hits[0] };
+  if (hits.length > 1) return { confidence: 'ambiguous', entry: null, candidates: hits };
+  return { confidence: 'no_match', entry: null };
+}
+
 /** Whether a specific named place appears (after stripping Census's place-type suffix) among a list of Incorporated Places. */
 function placesInclude(places: string[], name: string): boolean {
   return places.some((p) => namesEqual(stripPlaceTypeSuffix(p), name));
@@ -329,6 +347,14 @@ export interface ResolvedJurisdiction {
   kyCity: FieldMatch<KYJurisdictionEntry> | null;
   /** County-role match only. */
   kyCounty: FieldMatch<KYJurisdictionEntry> | null;
+  /**
+   * The school-board occupational tax (Boone, Cumberland, Fayette, Marshall,
+   * Scott, Warren) whose district contains the address, from the Census
+   * school-district layer. no_match for every other Kentucky district (most
+   * of the state, and the independent districts inside a taxing county), which
+   * is the normal outcome, not a failure. null when the district lookup was not made.
+   */
+  kySchoolDistrict: FieldMatch<KYJurisdictionEntry> | null;
   /** Whichever of Charleston/Huntington/Morgantown/Parkersburg/Wheeling/Weirton matched, if any — the matched NAME itself is the certificate.locality value westVirginiaMunicipalServiceFee() reads. */
   wvServiceFeeCity: string | null;
   /**
@@ -414,6 +440,7 @@ export function resolveJurisdiction(
     alCounty: null,
     kyCity: null,
     kyCounty: null,
+    kySchoolDistrict: null,
     wvServiceFeeCity: null,
     coOptCity: null,
     flags: {
@@ -476,6 +503,9 @@ export function resolveJurisdiction(
   if (state === 'KY') {
     result.kyCity = matchKYCityByName(geo.incorporatedPlaces, checkDate);
     result.kyCounty = matchKYCountyByName(geo.counties, checkDate);
+    if (ohSchoolDistrictName) {
+      result.kySchoolDistrict = matchKYSchoolDistrictByName(ohSchoolDistrictName, checkDate);
+    }
   }
   if (state === 'WV') {
     result.wvServiceFeeCity = matchAnyPlace(geo.incorporatedPlaces, [
@@ -550,6 +580,15 @@ export function toCertificateFields(
   // to anyone living in Jefferson County.
   if (resolved.kyCounty?.confidence === 'matched' && resolved.kyCounty.entry) {
     fields[role === 'work' ? 'workCounty' : 'residenceCounty'] = resolved.kyCounty.entry.name;
+  }
+  // A school board's tax is owed by RESIDENTS of the district; the engine reads
+  // both addresses' districts (see kentuckySchoolDistrictTax() in taxes/state.ts).
+  if (resolved.kySchoolDistrict?.confidence === 'matched' && resolved.kySchoolDistrict.entry) {
+    fields[role === 'work' ? 'workSchoolDistrict' : 'residenceSchoolDistrict'] = resolved.kySchoolDistrict.entry.name;
+  } else if (resolved.kySchoolDistrict?.confidence === 'no_match') {
+    // Looked up and in no taxing district (an independent district, or one with no school tax):
+    // say so, so the engine can tell "not in a taxing district" from "never resolved".
+    fields[role === 'work' ? 'workSchoolDistrict' : 'residenceSchoolDistrict'] = 'none';
   }
 
   return fields;
