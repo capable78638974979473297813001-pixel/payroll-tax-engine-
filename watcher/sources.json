@@ -565,6 +565,16 @@
    ]
   },
   {
+   "id": "us-cd2a16cb2a",
+   "jurisdiction": "US",
+   "title": "ORS 18.385(2) \u2014 75% of disposable earnings exempt from execution, or a flat per-period dollar minimum, whichever protects more; the dollar minimums step up by wages-payable date: weekly $254 (before 2025-01-01), $305, $338 (from 2025-07-01), $400 (from 2026-07-01), then 30x the Oregon minimum wage from 2027-07-01",
+   "url": "https://www.oregonlegislature.gov/bills_laws/ors/ors018.html",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json"
+   ]
+  },
+  {
    "id": "us-6652b63bcb",
    "jurisdiction": "US",
    "title": "P.L. 119-21 on govinfo.gov (official text)",
@@ -3861,6 +3871,16 @@
    ]
   },
   {
+   "id": "ny-f92e9989a1",
+   "jurisdiction": "NY",
+   "title": "DOL -- Subsidiary Contribution Rate Table",
+   "url": "https://dol.ny.gov/subsidiary-rate-table",
+   "origin": "data",
+   "used_by": [
+    "data/states/NY-2026.json"
+   ]
+  },
+  {
    "id": "ny-3a561f3380",
    "jurisdiction": "NY",
    "title": "DOL -- Unemployment Insurance Rate Information",
@@ -4134,17 +4154,6 @@
    ]
   },
   {
-   "id": "oh-38da18fb14",
-   "jurisdiction": "OH",
-   "title": "City of Toledo 2022 ACFR (filed with the Ohio Auditor of State), note on tax-sharing agreements: 'City of Toledo-City of Sylvania ... In July 2008 ... an income tax that shall be imposed based on the City of Sylvania's Municipal Code at a rate of 1.5%'",
-   "url": "https://ohioauditor.gov/AuditSearch/Reports/2023/City_of_Toledo_2022_Lucas_FINAL.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/local/OH-jedd-jedz-2025.json",
-    "data/local/OH-jedd-jedz-2026.json"
-   ]
-  },
-  {
    "id": "oh-15911dbfb1",
    "jurisdiction": "OH",
    "title": "Combined Form IT 4 \u2014 Employee's Withholding Exemption Certificate (post-2020-12-07 combined version)",
@@ -4163,6 +4172,17 @@
    "origin": "data",
    "used_by": [
     "data/states/OH-2026.json"
+   ]
+  },
+  {
+   "id": "oh-d3a87cd417",
+   "jurisdiction": "OH",
+   "title": "Ohio Auditor of State, Liberty Township (Henry County) regular audit 2021-2022: 'The JEDD was dissolved June 1, 2021 by the Township and the Village.'",
+   "url": "https://ohioauditor.gov/Auditsearch/Reports/2023/Liberty_Township_22_21_Henry_FINAL.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-jedd-jedz-2025.json",
+    "data/local/OH-jedd-jedz-2026.json"
    ]
   },
   {

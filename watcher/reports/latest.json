@@ -1,15 +1,80 @@
 {
- "date": "2026-10-05",
+ "date": "2026-10-06",
  "counts": {
-  "unchanged": 477,
-  "unreachable": 6,
-  "blocked": 23,
+  "unchanged": 476,
+  "unreachable": 4,
+  "blocked": 22,
   "gone": 4,
-  "new": 2
+  "new": 3,
+  "changed": 5
  },
- "total": 512,
- "changed": [],
- "significant_changes": 0,
+ "total": 514,
+ "changed": [
+  {
+   "id": "al-dcd77af5c8",
+   "jurisdiction": "AL",
+   "title": "City of Opelika -- announcement of the occupational tax cut",
+   "url": "https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092",
+   "detail": "2 lines added, 2 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "az-b66098e04c",
+   "jurisdiction": "AZ",
+   "title": "City of Flagstaff -- City of Flagstaff announces minimum wage for 2026",
+   "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
+   "detail": "2 lines added, 2 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "de-1a96746d6a",
+   "jurisdiction": "DE",
+   "title": "Delaware Division of Revenue -- Employer's Guide (Withholding Tables)",
+   "url": "https://revenue.delaware.gov/employers-guide-withholding-tables/",
+   "detail": "0 lines added, 2 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "de-196392c3ba",
+   "jurisdiction": "DE",
+   "title": "Delaware withholding forms and guide",
+   "url": "https://revenue.delaware.gov/employers-guide-withholding-regulations-employers-duties/",
+   "detail": "0 lines added, 2 removed; 0 links added, 2 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [
+    "https://revenue.delaware.gov/calendar/",
+    "https://revenue.delaware.gov/collections/assistance-questions/"
+   ],
+   "significant": true
+  },
+  {
+   "id": "mi-c62e8170b0",
+   "jurisdiction": "MI",
+   "title": "Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026",
+   "url": "https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026",
+   "detail": "1 lines added, 1 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  }
+ ],
+ "significant_changes": 2,
  "broken": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://www.irs.gov/pub/irs-prior/p51--2025.pdf",
@@ -20,8 +85,8 @@
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "verified": 479,
- "unverified": 33,
+ "verified": 484,
+ "unverified": 30,
  "never_baselined": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://does.dc.gov/service/office-wage-hour-compliance-0",
@@ -46,5 +111,5 @@
   "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 14
+ "max_consecutive_failures": 15
 }
