@@ -175,3 +175,62 @@ describe('New Mexico new employers: the greater of the industry average or 1%', 
     });
   }
 });
+
+describe('employer assessments next to the unemployment tax (2026 data)', () => {
+  const tech = 'HI_UI_TECH_ER';
+  const et = 'HI_ET_ER';
+
+  test('Hawaii new employer: 2.40% + 0.01% technology + 0.01% employment and training', () => {
+    const r = calculatePaycheck(pay('HI', '2026-06-15'));
+    assert.equal(line(r, 'HI_SUI_ER')?.amount, 2400);
+    assert.equal(line(r, tech)?.amount, 10);
+    assert.equal(line(r, et)?.amount, 10);
+    assert.equal(r.employerTaxTotal - (r.taxes.filter((t) => t.payer === 'employer' && !t.id.startsWith('HI_')).reduce((s, t) => s + t.amount, 0)), 2420);
+  });
+
+  test("Hawaii: an employer at the 0% minimum owes the technology assessment but not E&T", () => {
+    const r = calculatePaycheck(pay('HI', '2026-06-15', { stateUnemploymentRate: { HI: 0 } }));
+    assert.equal(line(r, 'HI_SUI_ER')?.amount, 0);
+    assert.equal(line(r, tech)?.amount, 10);
+    assert.equal(line(r, et), undefined);
+  });
+
+  test("Hawaii: an employer at the schedule maximum (5.6%) owes the technology assessment but not E&T", () => {
+    const r = calculatePaycheck(pay('HI', '2026-06-15', { stateUnemploymentRate: { HI: 0.056 } }));
+    assert.equal(line(r, 'HI_SUI_ER')?.amount, 5600);
+    assert.equal(line(r, tech)?.amount, 10);
+    assert.equal(line(r, et), undefined);
+  });
+
+  test('Hawaii: an employer in between owes both', () => {
+    const r = calculatePaycheck(pay('HI', '2026-06-15', { stateUnemploymentRate: { HI: 0.012 } }));
+    assert.equal(line(r, tech)?.amount, 10);
+    assert.equal(line(r, et)?.amount, 10);
+  });
+
+  test('Hawaii: the assessments stop at the $64,500 wage base', () => {
+    const r = calculatePaycheck(pay('HI', '2026-06-15', undefined, 64_500_00));
+    assert.equal(line(r, tech)?.amount, 0);
+    assert.equal(line(r, et)?.amount, 0);
+  });
+
+  test('New Jersey new employer: UI + WF/SWF 2.8% plus disability insurance 0.5%', () => {
+    const r = calculatePaycheck(pay('NJ', '2026-06-15'));
+    assert.equal(line(r, 'NJ_SUI_ER')?.amount, 2800);
+    assert.equal(line(r, 'NJ_DI_ER')?.amount, 500);
+    assert.equal(r.notices, undefined);
+  });
+
+  test("New Jersey: with the employer's own unemployment rate the disability rate isn't assumed, and the line says so", () => {
+    const r = calculatePaycheck(pay('NJ', '2026-06-15', { stateUnemploymentRate: { NJ: 0.015 } }));
+    assert.equal(line(r, 'NJ_SUI_ER')?.amount, 1500);
+    assert.equal(line(r, 'NJ_DI_ER'), undefined);
+    assert.equal(r.notices?.[0].tier, 'not_modelled');
+    assert.match(r.notices![0].note, /Disability Insurance/);
+  });
+
+  test('a state without assessments is unchanged (South Carolina: one employer line)', () => {
+    const r = calculatePaycheck(pay('SC', '2026-06-15'));
+    assert.deepEqual(r.taxes.filter((t) => t.id.startsWith('SC_') && t.payer === 'employer').map((t) => t.id), ['SC_SUI_ER']);
+  });
+});

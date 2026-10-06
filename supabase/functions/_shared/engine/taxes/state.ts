@@ -211,6 +211,7 @@ export function stateIncomeTax(
   if (suiEmployer) lines.push(suiEmployer);
   const suiAssessment = stateUnemploymentAssessmentTax(input, ctx, rules);
   if (suiAssessment) lines.push(suiAssessment);
+  lines.push(...stateEmployerAssessments(input, ctx, rules));
 
   const paidLeave = statePaidLeaveEmployeeTax(input, ctx, rules);
   if (paidLeave) lines.push(paidLeave);
@@ -1560,7 +1561,27 @@ interface StateUnemploymentEmployeeConfig {
  * claimed ("capped at X/yr") versus what amount actually computed, now
  * fixed.
  */
+/**
+ * A fixed employer assessment a state levies next to its unemployment
+ * contribution, on the same wages and wage base (Hawaii's 0.01% technology and
+ * employment-and-training assessments, New Jersey's employer disability
+ * insurance). Each produces its own employer line, `<STATE>_<id>_ER`.
+ */
+interface EmployerAssessmentConfig {
+  id: string;
+  name: string;
+  rate: number;
+  /** Not owed when the employer's unemployment rate is exactly one of these (Hawaii's E&T assessment skips an employer at the 0% minimum or the schedule maximum). */
+  exceptWhenRateIn?: number[];
+  /** Applies only with the state's plain new-employer rate: an employer that supplies its own assigned rate has its own assessment rate too (New Jersey's disability insurance), which is flagged instead of guessed. */
+  onlyWithNewEmployerRate?: boolean;
+  /** The notice shown on the unemployment line when onlyWithNewEmployerRate and the employer supplied its own rate. */
+  suppliedRateNote?: string;
+}
+
 interface SUIEmployerConfig {
+  /** See EmployerAssessmentConfig. */
+  employerAssessments?: EmployerAssessmentConfig[];
   /**
    * Attached to the SUI line only when the state's plain new-employer rate was
    * the one used (no employer rate and no industry rate supplied): for a
@@ -1753,10 +1774,60 @@ function stateUnemploymentEmployerTax(
                 'Supply the rate from the rate notice as input.employer.stateUnemploymentAssessmentRate.',
             },
           }
-        : cfg.automationFeeNotice
-          ? { dataQuality: { tier: 'not_modelled' as const, note: cfg.automationFeeNotice } }
-          : {}),
+        : supplied !== undefined && cfg.employerAssessments?.some((a) => a.onlyWithNewEmployerRate && a.suppliedRateNote)
+          ? {
+              dataQuality: {
+                tier: 'not_modelled' as const,
+                note: cfg.employerAssessments.find((a) => a.onlyWithNewEmployerRate && a.suppliedRateNote)!.suppliedRateNote!,
+              },
+            }
+          : cfg.automationFeeNotice
+            ? { dataQuality: { tier: 'not_modelled' as const, note: cfg.automationFeeNotice } }
+            : {}),
   };
+}
+
+/**
+ * The state's fixed employer assessments (see EmployerAssessmentConfig),
+ * one line each, on the same taxable wages and wage base as the unemployment
+ * contribution they ride with.
+ */
+function stateEmployerAssessments(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine[] {
+  const cfg = rules.suiEmployer as SUIEmployerConfig | undefined;
+  if (!cfg?.employerAssessments?.length) return [];
+  const supplied = input.employer?.stateUnemploymentRate?.[rules.code];
+  const industry = input.employer?.suiIndustry?.[rules.code];
+  const industryRate = industry === undefined ? undefined : cfg.industryNewEmployerRates?.[industry];
+  const rate = supplied ?? industryRate ?? cfg.newEmployerRate;
+  if (rate === null || rate === undefined) return [];
+
+  const currentWages = ctx.taxableWagesFor(unemploymentExemptPretax(cfg.exemptPretax));
+  const resolvedWageBase = resolveSUIWageBase(cfg.wageBase, rules.code, input.employer);
+  const cap = resolvedWageBase === null ? null : dollars(resolvedWageBase);
+  const ytd = input.ytd.stateUnemployment?.[rules.code] ?? 0;
+  const taxableWages = cap === null ? currentWages : underCap(currentWages, ytd, cap);
+
+  const lines: TaxLine[] = [];
+  for (const a of cfg.employerAssessments) {
+    if (a.onlyWithNewEmployerRate && supplied !== undefined) continue;
+    if (a.exceptWhenRateIn?.some((r) => Math.abs(r - rate) < 1e-9)) continue;
+    lines.push({
+      id: `${rules.code}_${a.id}_ER`,
+      name: `${rules.name} ${a.name} (Employer)`,
+      payer: 'employer',
+      jurisdiction: 'state',
+      taxableWages,
+      amount: applyRate(taxableWages, a.rate),
+      detail:
+        `${fmt(taxableWages)} @ ${(a.rate * 100).toFixed(3)}%` +
+        (cap === null ? ', no wage cap' : `, same ${fmt(cap)}/yr wage base as the unemployment tax (${fmt(ytd)} YTD already counted)`),
+    });
+  }
+  return lines;
 }
 
 /**
