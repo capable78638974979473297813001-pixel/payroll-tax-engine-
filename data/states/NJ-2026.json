@@ -1979,8 +1979,8 @@
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 44800,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
-    "newEmployerRate": 0.026825,
-    "newEmployerRateSource": "Primary: NJ Dept. of Labor's own rate-info page (https://www.nj.gov/labor/ea/employer-services/rate-info/), 2026 New Employer table: UI rate 0.026825 (2.6825%), fiscal year July 1, 2026-June 30, 2027. Replaces a stale OnPay-sourced 2.8% figure.",
+    "newEmployerRate": 0.028,
+    "newEmployerRateSource": "CORRECTED 2026-10-06 from 0.026825 (UI only) to the 2.8% CURRENT RATE. NJ DOL's Table C for July 1, 2026 - June 30, 2027 (https://www.nj.gov/labor/ea/assets/PDFs/FY20262027%20TABLE%20C.pdf) lists NEW EMPLOYER RATE 2.8% in its CURRENT RATE column, which is UI 2.6825% (the UI column) plus the 0.1175% WFD/SWF; the rate-info page (https://www.nj.gov/labor/ea/employer-services/rate-info/) shows the same split (UI 0.026825, W.F./S.W.F. 0.001175). The experience range below already uses the Current Rate column (0.5% to 5.8%). The earlier note called 2.8% a stale OnPay figure; it is the state's own total. NOT included: the employer's Disability Insurance (0.5% for a new employer on the same page), which is a separate employer tax this engine does not model; employee-side UI/WF/SWF is on its own line (stateUnemploymentEmployee). The same 2.6825% UI rate applied July 2025 - June 2026.",
     "experienceRange": {
       "min": 0.005,
       "max": 0.058

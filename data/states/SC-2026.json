@@ -95,8 +95,8 @@
     "administeredBy": "SC Department of Employment and Workforce (DEW)",
     "wageBase": 14000.0,
     "wageBaseConfidence": "cross_source_confirmed only -- dew.sc.gov's own 2026 press release (fetched directly) covers rate figures but does not itself state the wage base; multiple independent secondary sources (Netchex, southcarolinapayrollguide.com) agree on $14,000 with no dissent, one tier below the rate figures below.",
-    "newEmployerRate": 0.01,
-    "newEmployerRateNote": "PRIMARY-CONFIRMED at 1.0% via direct dew.sc.gov quote -- see sources above for the conflicting uncited 0.55% secondary figure that was checked and rejected.",
+    "newEmployerRate": 0.0106,
+    "newEmployerRateNote": "CORRECTED 2026-10-06 from 1.0% to the TOTAL EFFECTIVE RATE 1.06%. DEW's 2026 Unemployment Insurance Tax Rates table (dew.sc.gov/employers/tax-rate-information) lists class 30 (New Employers) as Base Rate 1.000% + Solvency Surcharge 0.000% + Contingency Assessment 0.060% = Total Effective Rate 1.060% ($148.40 maximum cost per employee on the $14,000 base). The 1.0% was the base rate alone; every class in the table, and this file's experience range, already use the total effective rate. The statute sets the new-employer base at the class 12 rate or 1%, whichever is higher (class 12 is 0.150%). See sources above for the conflicting uncited 0.55% secondary figure that was checked and rejected.",
     "experiencedEmployerRateRange": [
       0.0006,
       0.0546
@@ -116,8 +116,8 @@
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 14000,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
-    "newEmployerRate": 0.01,
-    "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
+    "newEmployerRate": 0.0106,
+    "newEmployerRateSource": "CORRECTED 2026-10-06 from 0.01 to the all-in 1.06% (1.000% base + 0.060% contingency assessment), DEW's 'Total Effective Rate' for class 30 New Employers. See unemploymentInsurance.newEmployerRateNote.",
     "experienceRange": {
       "min": 0.0006,
       "max": 0.0546

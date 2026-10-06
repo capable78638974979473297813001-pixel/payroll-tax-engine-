@@ -389,7 +389,18 @@
     "wageBaseNote": "This file previously carried $31700; the 2026 table publishes $34800. The 2026 figure is used, and the discrepancy is recorded here rather than dropped.",
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
     "newEmployerRate": 0.01,
-    "newEmployerRateSource": "New Mexico's 2026 UI release — wage base $34,800 (up from $33,200). This CORRECTS the $31,700 figure previously carried in this file, which was a prior year's base.",
+    "newEmployerRateSource": "CLARIFIED 2026-10-06: 0.01 is the FLOOR, not a flat rate. DWS (dws.nm.gov, How UI Tax Rates Are Calculated): 'New contributing employers will have a rate that is the greater of their industry average Unemployment Insurance Contribution rate or 1%', fixed by the establishment's NAICS sector until the employer has two years as an experience-rated employer. DWS's 2026 New Employer Industry Rates are 1.00% for 14 of the 20 sectors and 1.08% to 1.28% for the other 6 (industryNewEmployerRates below), so 1% is right only where the industry average is at or below it. Wage base $34,800 (up from $33,200) per New Mexico's 2026 UI release, which CORRECTS the $31,700 figure previously carried in this file.",
+    "newEmployerRateNotice": {
+      "tier": "not_modelled",
+      "note": "New Mexico assigns a new employer the greater of its industry's average rate or 1%. No industry was supplied (input.employer.suiIndustry['NM'] as the 2-digit NAICS sector, e.g. '23' or 'construction'), so the 1% floor was used; an employer in construction (1.21%), agriculture (1.19%), administrative and waste services (1.19%), transportation (1.15%), information (1.08%) or public administration (1.28%) pays more."
+    },
+    "industryNewEmployerRates": {
+      "11": 0.0119, "21": 0.01, "22": 0.01, "23": 0.0121, "construction": 0.0121,
+      "31-33": 0.01, "42": 0.01, "44-45": 0.01, "48-49": 0.0115, "51": 0.0108,
+      "52": 0.01, "53": 0.01, "54": 0.01, "55": 0.01, "56": 0.0119,
+      "61": 0.01, "62": 0.01, "71": 0.01, "72": 0.01, "81": 0.01, "92": 0.0128
+    },
+    "industryNewEmployerRatesSource": "DWS 2026 New Employer Industry Rates table (dws.nm.gov, How UI Tax Rates Are Calculated, read in a browser 2026-10-06), keyed by NAICS sector: 11 Agriculture 1.19, 21 Mining 1.00, 22 Utilities 1.00, 23 Construction 1.21, 31-33 Manufacturing 1.00, 42 Wholesale 1.00, 44-45 Retail 1.00, 48-49 Transportation 1.15, 51 Information 1.08, 52 Finance 1.00, 53 Real Estate 1.00, 54 Professional 1.00, 55 Management 1.00, 56 Admin and Waste 1.19, 61 Education 1.00, 62 Health Care 1.00, 71 Arts 1.00, 72 Accommodation and Food 1.00, 81 Other Services 1.00, 92 Public Administration 1.28 (government entities only). 'construction' is an alias for 23.",
     "experienceRange": {
       "min": 0.0033,
       "max": 0.064

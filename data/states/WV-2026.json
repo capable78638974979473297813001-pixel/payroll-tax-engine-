@@ -488,9 +488,10 @@
       0.085
     ],
     "outOfStateConstructionRate": {
-      "rate": 0.085,
+      "rate": 0.075,
       "surtax": 0.01,
-      "note": "1% surtax on top of the 8.5% base for out-of-state construction employers, per secondary sourcing."
+      "total": 0.085,
+      "note": "CORRECTED 2026-10-06: 8.5% is the TOTAL, not the base. WV Code 21A-5-5(c): a foreign corporation or business entity engaged in the construction trades pays 'seven and five-tenths percent' of wages until it has been an employer for 36 consecutive months; 21A-5-10(b) adds a one percent surtax for the same employers ('in addition to any other tax provided for in this section') = 8.5%. The earlier wording ('1% surtax on top of the 8.5% base') implied 9.5%. From 2026-07-01 21A-5-5(d) reduces 'the otherwise applicable' contribution rate of every employer by 7%; whether the surtax is inside that reduction is not stated, so no post-July figure is given here. Not read by the engine."
     },
     "confidence": "cross_source_confirmed only -- workforcewv.org's own page gates the actual rate table behind an authenticated employer system, not a public static page; a direct fetch attempt confirmed this rather than assuming it. Wage base and new-employer rate are consistent across every secondary source checked with zero dissent."
   },

@@ -1562,6 +1562,13 @@ interface StateUnemploymentEmployeeConfig {
  */
 interface SUIEmployerConfig {
   /**
+   * Attached to the SUI line only when the state's plain new-employer rate was
+   * the one used (no employer rate and no industry rate supplied): for a
+   * published figure that is a floor (New Mexico's "greater of the industry
+   * average or 1%") or whose add-ons rest on secondary sources (Virginia).
+   */
+  newEmployerRateNotice?: DataQuality;
+  /**
    * A fee the state bills outside the paycheck (West Virginia's annual
    * unemployment automation and administration fee, from 2026-07-01): the
    * text is attached to the SUI line as a not_modelled notice rather than
@@ -1732,7 +1739,9 @@ function stateUnemploymentEmployerTax(
               'Supply the employer\'s own assigned rate (input.employer.stateUnemploymentRate) to avoid this.',
           },
         }
-      : cfg.experienceRatedAssessment &&
+      : cfg.newEmployerRateNotice && supplied === undefined && industryRate === undefined
+        ? { dataQuality: cfg.newEmployerRateNotice }
+        : cfg.experienceRatedAssessment &&
           supplied !== undefined &&
           input.employer?.stateUnemploymentAssessmentRate?.[rules.code] === undefined
         ? {

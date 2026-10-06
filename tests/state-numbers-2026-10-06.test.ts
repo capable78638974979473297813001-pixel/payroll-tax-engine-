@@ -106,7 +106,72 @@ describe('data corrections that no engine path reads yet', () => {
     assert.equal(json('MN-2025.json').otherMinnesotaWithholdingTypes.backupWithholding.rate, 0.0985);
   });
 
-  test('South Dakota 2026 experience maximum: 9.39% schedule top + 0.08% fee = 9.47%', () => {
-    assert.equal(json('SD-2026.json').suiEmployer.experienceRange.max, 0.0947);
+  test('South Dakota 2026 experience range is all-in: 0.08% admin fee floor, 9.39% + 0.08% + 0.53% = 10.00% ceiling', () => {
+    const r = json('SD-2026.json').suiEmployer.experienceRange;
+    assert.equal(r.min, 0.0008);
+    assert.equal(r.max, 0.1);
   });
+
+  test("Hawaii's experience minimum is Schedule C's 0.0%, not the 2.4% new-employer rate", () => {
+    const s = json('HI-2026.json').suiEmployer;
+    assert.equal(s.experienceRange.min, 0);
+    assert.equal(s.newEmployerRate, 0.024);
+  });
+
+  test('West Virginia out-of-state construction: 7.5% base + 1% surtax = 8.5% total', () => {
+    const c = json('WV-2026.json').unemploymentInsurance.outOfStateConstructionRate;
+    assert.equal(c.rate, 0.075);
+    assert.equal(c.surtax, 0.01);
+    assert.equal(c.total, 0.085);
+    assert.match(c.note, /8.5% is the TOTAL/);
+  });
+});
+
+describe('new-employer rates that are all-in, not the base alone (2026-10-06)', () => {
+  test('South Carolina: class 30 total effective rate 1.06% (1.000% + 0.060% contingency)', () => {
+    assert.equal(line(calculatePaycheck(pay('SC', '2026-06-15')), 'SC_SUI_ER')?.amount, 1060);
+  });
+
+  test('New Jersey: Table C current rate 2.8% (UI 2.6825% + WFD/SWF 0.1175%)', () => {
+    assert.equal(line(calculatePaycheck(pay('NJ', '2026-06-15')), 'NJ_SUI_ER')?.amount, 2800);
+    assert.equal(line(calculatePaycheck(pay('NJ', '2026-10-05')), 'NJ_SUI_ER')?.amount, 2800);
+  });
+
+  test('Virginia: 2.5% base + 0.2% fund building + 0.03% pool cost = 2.73%, with a secondary-source notice', () => {
+    const r = calculatePaycheck(pay('VA', '2026-06-15'));
+    assert.equal(line(r, 'VA_SUI_ER')?.amount, 2730);
+    assert.equal(r.notices?.[0].tier, 'secondary_source');
+    assert.match(r.notices![0].note, /fund building/);
+  });
+
+  test("Virginia: an employer's own rate-notice total is used as given, with no notice", () => {
+    const r = calculatePaycheck(pay('VA', '2026-06-15', { stateUnemploymentRate: { VA: 0.031 } }));
+    assert.equal(line(r, 'VA_SUI_ER')?.amount, 3100);
+    assert.equal(r.notices, undefined);
+  });
+});
+
+describe('New Mexico new employers: the greater of the industry average or 1%', () => {
+  test('no industry given: the 1% floor, with a notice that the industry rate can be higher', () => {
+    const r = calculatePaycheck(pay('NM', '2026-06-15'));
+    assert.equal(line(r, 'NM_SUI_ER')?.amount, 1000);
+    assert.equal(r.notices?.[0].tier, 'not_modelled');
+    assert.match(r.notices![0].note, /greater of its industry/);
+  });
+
+  for (const [sector, cents] of [
+    ['23', 1210], // construction
+    ['construction', 1210],
+    ['11', 1190], // agriculture
+    ['48-49', 1150],
+    ['51', 1080],
+    ['92', 1280], // public administration
+    ['54', 1000], // professional services: the average is 1.00%
+  ] as const) {
+    test(`NAICS sector ${sector}: ${cents} cents, no notice`, () => {
+      const r = calculatePaycheck(pay('NM', '2026-06-15', { suiIndustry: { NM: sector } }));
+      assert.equal(line(r, 'NM_SUI_ER')?.amount, cents);
+      assert.equal(r.notices, undefined);
+    });
+  }
 });

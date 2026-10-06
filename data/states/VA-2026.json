@@ -103,8 +103,12 @@
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 8000,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
-    "newEmployerRate": 0.025,
-    "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
+    "newEmployerRate": 0.0273,
+    "newEmployerRateSource": "CHANGED 2026-10-06 from the 2.5% base alone to the all-in 2.73%. VEC (vec.virginia.gov, How are tax rates assigned?): 'New Virginia employers receive the initial base tax rate of 2.5% (plus add-ons)'; the base is Va. Code 60.2-526(B). The add-ons are statutory: a 0.2% fund building charge added to rates unless the trust fund balance factor exceeds 50% (60.2-533(C)) and an annual pool cost charge (60.2-532). The 2026 amounts, 0.20% and 0.03%, are from secondary summaries; VEC prints them on each December rate notice and could not be read on its own pages, hence the notice on the line. Secondary summaries also report a separate 0.05% administrative fee since 2025 (Appropriation Act Item 359) offset by a 0.05% reduction in the affected tax rates, i.e. net zero; it is not added here and was not confirmed on a VEC page.",
+    "newEmployerRateNotice": {
+      "tier": "secondary_source",
+      "note": "Virginia's published new-employer rate is 2.5% 'plus add-ons'. The 2.73% used adds the 0.2% fund building charge (Va. Code 60.2-533(C)) and a 0.03% pool cost charge (60.2-532), whose 2026 amounts come from secondary summaries rather than VEC's own pages. Supply the employer's rate-notice total as input.employer.stateUnemploymentRate to avoid relying on them."
+    },
     "experienceRange": {
       "min": 0.001,
       "max": 0.062
