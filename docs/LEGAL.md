@@ -26,7 +26,7 @@ they are your evidence that a customer agreed.
 Search the `site/legal/` files (and `LICENSE`) for square-bracket tokens and replace
 every one:
 
-- `[LEGAL ENTITY NAME]` — your registered company, e.g. "Omnia Payroll Technologies, LLC". **Form an entity (LLC/corp) — do not run this personally.** It is the single biggest thing separating your personal assets from a lawsuit.
+- `[LEGAL ENTITY NAME]` — **done**: the entity is **OMNIA TAX LLC** (filled in `LICENSE`, `site/legal/*`, the landing footer and `package.json`). Keep the name identical to the formation documents.
 - `[EFFECTIVE DATE]` — the date you publish.
 - `[STATE]` — the state whose law governs (usually where your entity is formed).
 - `[COUNTY, STATE]` — the venue for disputes.
@@ -40,7 +40,7 @@ every one:
   is `"license": "UNLICENSED"`, `"private": true`. Nobody may copy, use, host, or resell
   the code without your written permission.
 - The Terms assert Omnia's ownership of the software, data, rulesets, brand, and site.
-- Every legal page and footer carries `© 2026 [LEGAL ENTITY NAME]. All rights reserved.`
+- Every legal page and footer carries `© 2026 OMNIA TAX LLC. All rights reserved.`
 
 > If any part of this repo was ever published under MIT, understand that copies made
 > under that earlier license stay under it — the relicense is only prospective. If that

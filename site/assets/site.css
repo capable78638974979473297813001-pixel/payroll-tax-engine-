@@ -461,9 +461,9 @@ a { color: inherit; }
 .cta-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .footer {
-  height: 120px; display: flex; align-items: center; gap: 32px; padding: 0 64px;
+  min-height: 120px; display: flex; align-items: center; gap: 32px; padding: 0 64px;
 }
-.footer .tagline { font-family: var(--font-mono); font-size: 12px; color: var(--color-gray); }
+.footer .tagline { line-height: 1.6; font-family: var(--font-mono); font-size: 12px; color: var(--color-gray); }
 .footer nav { margin-left: auto; display: flex; gap: 32px; }
 .footer nav a { font-size: 16px; text-decoration: none; }
 .footer nav a:hover { text-decoration: underline; }
