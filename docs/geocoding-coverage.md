@@ -127,11 +127,42 @@ and "300 Monroe Ave NW" (Grand Rapids) sit on parcels of 6,000-12,000 sqm,
 far over the 2,000 sqm limit, so they return nothing from this tier and fall
 to the OSM tier as before.
 
-Not added: Allegheny County, PA (Pittsburgh). Its parcel layer carries no
-site address, but the county publishes an official address-point service
-(`gisdata.alleghenycounty.us/arcgis/rest/services/Addressing/Addressing_AddressPoints`)
-with split house-number and street fields. That is point data, not a polygon,
-so it needs its own tier rather than a `parcel-centroid` label.
+### 2026-10-07: government address-point services (`geocode/county-points.ts`)
+
+Parcel centroids are a fallback. Where a government publishes its own
+address POINTS, that is the same kind of evidence NAD holds, so those points
+are merged with NAD's before the exact-match and neighbour tiers run and come
+back as `authoritative`, with the publishing government in the point's
+`source`. Every source below was queried live and tested against real
+addresses before it was registered.
+
+| Source | Covers | Result |
+| --- | --- | --- |
+| Allegheny County GIS, Address Points | Pittsburgh and the county | 10 of 10 sampled City of Pittsburgh addresses resolved `authoritative`, 18-207m from Census's point; directional streets ("N Negley Ave", "S 9th St") match |
+| City of Miami GIS, All City Addresses | City of Miami | Four grid addresses resolved `authoritative` (the layer writes "NE 2 AV", which is rewritten to "NE 2nd AV" so it compares) |
+| Madison County, MS 911 (via MARIS) | Madison, Ridgeland, Canton area | `authoritative` on the tested address |
+| Rankin County, MS 911 (via MARIS) | Brandon, Flowood area | `authoritative` on the tested address |
+| WV GIS Technical Center, Site Address Points | West Virginia statewide, queried through its locator | Point-address candidates only, score 97+, house number and core street name must agree |
+
+What was looked at and NOT added, and why:
+
+- **Clark County, NV (Las Vegas).** The county's address layer holds 26,812
+  rows (IDs run to 65,498), and a box around Las Vegas City Hall and one
+  around the Strip returned nothing. It looks like a feed of newly assigned
+  addresses, not the full address set, so it was dropped rather than
+  registered as if it covered the county. Status codes 2 and 6 are also
+  undocumented.
+- **Detroit's `AddressPoints` layer.** About 1,000 rows, mostly businesses,
+  not a full address set. Detroit stays covered by the parcel source above.
+- **Hinds County / Jackson, MS.** MARIS publishes county point-address layers
+  for 25 counties and Hinds is not one of them.
+- **Honolulu, Boise (Ada County), Manchester NH.** No public address-point
+  service was found. Manchester publishes a Public Works "service address
+  points" layer, but it is a utility record rather than the addressing
+  authority's, so it was not used. Ada County's combined address layer is
+  said to be on Boise's open-data hub; no queryable endpoint was confirmed.
+- **Grand Rapids / Kent County, MI.** Covered by the parcel source; the
+  county's own geocoder was not added.
 
 ### A second real bug: "Capital" vs "Capitol"
 

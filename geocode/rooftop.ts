@@ -55,6 +55,7 @@ import { streetKey, streetKeyCapitolNormalized, streetKeyWithoutDirectionals, st
 import type { FetchOptions } from './census.ts';
 import { searchStructuredAddressSafe } from './nominatim.ts';
 import { resolveParcelCentroid, type ParcelCentroidResult } from './parcel.ts';
+import { fetchCountyAddressPoints } from './county-points.ts';
 import { localAddressPointsNear } from './local-address-index.ts';
 
 /**
@@ -694,7 +695,11 @@ export async function resolveRooftop(
   //
   // Absent index = empty array = behaviour identical to before it existed.
   const local = readLocal(interpolated.lat, interpolated.lon, radiusMeters);
-  const points = dedupePoints([...(fetched.ok ? fetched.points : []), ...local]);
+  // County/city address-point services NAD never received (county-points.ts).
+  // Merged the same way, so the exact-match and neighbour tiers below see
+  // whichever government actually published this address.
+  const county = await fetchCountyAddressPoints(oneLineAddress, interpolated.lat, interpolated.lon, radiusMeters, fetchImpl, retryOptions);
+  const points = dedupePoints([...(fetched.ok ? fetched.points : []), ...local, ...county]);
 
   // Tier 1 — a point published for this exact address.
   const match = matchAddressPoint(oneLineAddress, points);
@@ -795,7 +800,15 @@ export async function resolveRooftop(
       fetchImpl,
       retryOptions,
     );
-    const widePoints = dedupePoints([...(wider.ok ? wider.points : []), ...widerLocal]);
+    const widerCounty = await fetchCountyAddressPoints(
+      oneLineAddress,
+      interpolated.lat,
+      interpolated.lon,
+      WIDE_SEARCH_RADIUS_METERS,
+      fetchImpl,
+      retryOptions,
+    );
+    const widePoints = dedupePoints([...(wider.ok ? wider.points : []), ...widerLocal, ...widerCounty]);
     if (widePoints.length > 0) {
       const wideMatch = matchAddressPoint(oneLineAddress, widePoints);
       if (wideMatch) {
