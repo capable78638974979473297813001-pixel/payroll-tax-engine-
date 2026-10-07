@@ -39,25 +39,85 @@ import type { AddressPoint } from './rooftop.ts';
  */
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const DB_PATH = process.env.ADDRESS_INDEX_PATH
-  ?? join(HERE, '..', 'data', 'address-points', 'address-points.db');
 
-/** Must match scripts/build-address-index.ts — a mismatch silently returns nothing. */
+/** Read on every open, not once at load, so a test (or a deploy that moves the disk) can repoint it. */
+function dbPath(): string {
+  return process.env.ADDRESS_INDEX_PATH ?? join(HERE, '..', 'data', 'address-points', 'address-points.db');
+}
+
+/** Must match scripts/address-index-lib.ts — a mismatch silently returns nothing. */
 const CELL = 0.01;
+const MICRO = 1_000_000;
+
+/**
+ * How long a missing index is trusted before the file is looked for again.
+ * The index can appear while the server is already running (the deploy
+ * downloads or builds it in the background, then renames it into place), and
+ * the process must pick it up without a restart. A present index is opened
+ * once and kept.
+ */
+function recheckMs(): number {
+  const v = Number(process.env.ADDRESS_INDEX_RECHECK_MS);
+  return Number.isFinite(v) && v >= 0 ? v : 30_000;
+}
 
 let db: DatabaseSync | null = null;
-let tried = false;
+let openedPath: string | null = null;
+let lastLookAt = 0;
+/** 1 = text cell, REAL coordinates, text source (the original layout and build-nad-index.ts). 2 = see scripts/address-index-lib.ts. Read once per open. */
+let format = 1;
+let sourceNames: Map<number, string> | null = null;
+
+function detectFormat(h: DatabaseSync): number {
+  try {
+    const row = h.prepare("SELECT value FROM meta WHERE key = 'format'").get() as { value: string } | undefined;
+    return row ? Number(row.value) : 1;
+  } catch {
+    return 1; // no meta table: a format-1 file
+  }
+}
 
 function handle(): DatabaseSync | null {
-  if (tried) return db;
-  tried = true;
-  if (!existsSync(DB_PATH)) return null;
+  const path = dbPath();
+  if (db && openedPath === path) return db;
+  const now = Date.now();
+  if (now - lastLookAt < recheckMs() && lastLookAt !== 0 && openedPath === path) return null;
+  lastLookAt = now;
+  openedPath = path;
+  db = null;
+  if (!existsSync(path)) return null;
   try {
-    db = new DatabaseSync(DB_PATH, { readOnly: true });
+    db = new DatabaseSync(path, { readOnly: true });
+    format = detectFormat(db);
+    sourceNames = null;
   } catch {
     db = null;
   }
   return db;
+}
+
+/** Format 2 stores a small id; the names live in `sources` (a few thousand rows), loaded once per open. */
+function sourceNameOf(h: DatabaseSync, id: number | string): string {
+  if (typeof id === 'string') return id;
+  if (!sourceNames) {
+    sourceNames = new Map();
+    for (const r of h.prepare('SELECT id, name FROM sources').all() as { id: number; name: string }[]) sourceNames.set(r.id, r.name);
+  }
+  return sourceNames.get(id) ?? 'local address index';
+}
+
+/** Forget any open handle and the recheck timer. For tests, and for a process told the index was just replaced. */
+export function resetLocalAddressIndexCache(): void {
+  try {
+    db?.close();
+  } catch {
+    /* already closed */
+  }
+  db = null;
+  openedPath = null;
+  lastLookAt = 0;
+  format = 1;
+  sourceNames = null;
 }
 
 /** Whether a local index is available at all — for a caller that wants to report which tiers are live. */
@@ -106,11 +166,14 @@ export function localAddressPointsNear(
 
   const latCells = spanOf(lat - dLat, lat + dLat);
   const lonCells = spanOf(lon - dLon, lon + dLon);
-  const cells: string[] = [];
-  for (const la of latCells) for (const lo of lonCells) cells.push(`${la}:${lo}`);
+  const cells: (string | number)[] = [];
+  for (const la of latCells) {
+    for (const lo of lonCells) cells.push(format === 2 ? (la + 9000) * 100_000 + (lo + 18_000) : `${la}:${lo}`);
+  }
   if (cells.length === 0) return [];
 
   const placeholders = cells.map(() => '?').join(',');
+  const scale = format === 2 ? MICRO : 1;
   const rows = h
     .prepare(
       `SELECT lat, lon, number, street, unit, city, state, source
@@ -118,9 +181,9 @@ export function localAddressPointsNear(
         WHERE cell IN (${placeholders})
           AND lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?`,
     )
-    .all(...cells, lat - dLat, lat + dLat, lon - dLon, lon + dLon) as {
+    .all(...cells, (lat - dLat) * scale, (lat + dLat) * scale, (lon - dLon) * scale, (lon + dLon) * scale) as {
       lat: number; lon: number; number: string | null; street: string | null;
-      unit: string | null; city: string | null; state: string; source: string;
+      unit: string | null; city: string | null; state: string; source: number | string;
     }[];
 
   return rows.map((r) => ({
@@ -136,12 +199,12 @@ export function localAddressPointsNear(
     // A live NAD query still carries the real value via toAddressPoint().
     placement: null,
     // Full provenance ("OpenAddresses tx/harris", "NAD Cook County GIS") is
-    // written into the source column AT INGEST by each build script, not
-    // prefixed here — this table now holds rows from more than one
-    // builder, so a single hardcoded prefix would mislabel the other's.
-    source: r.source,
-    lat: r.lat,
-    lon: r.lon,
+    // written at ingest by each build script (format 2: as an id into
+    // `sources`), not prefixed here: this table can hold rows from more than
+    // one builder, so a single hardcoded prefix would mislabel the other's.
+    source: sourceNameOf(h, r.source),
+    lat: r.lat / scale,
+    lon: r.lon / scale,
   }));
 }
 

@@ -16,7 +16,9 @@ services:
     disk:
       name: omnia-data
       mountPath: /var/data
-      sizeGB: 1
+      # The address index (~14 GB) lives here too, plus room to build it. A Render
+      # disk can be grown but never shrunk.
+      sizeGB: 25
     envVars:
       - key: PUBLIC_BASE_URL
         value: https://omniatax.io
@@ -26,6 +28,17 @@ services:
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_PRICE_ID
+        sync: false
+      # The large address index behind keyed geocoding. With neither line below
+      # set the site still works, on the live address services only. Preferred:
+      # ADDRESS_INDEX_URL (a prebuilt address-points.db or .db.gz, minutes to fetch).
+      # Otherwise AUTOBUILD builds it here from OpenAddresses, which takes hours
+      # on this instance size, at the lowest CPU priority.
+      - key: ADDRESS_INDEX_AUTOBUILD
+        value: "1"
+      - key: ADDRESS_INDEX_URL
+        sync: false
+      - key: ADDRESS_INDEX_SHA256
         sync: false
       - key: STRIPE_METER_EVENT
         value: omnia_api_call

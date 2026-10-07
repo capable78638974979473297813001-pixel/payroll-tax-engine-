@@ -14,13 +14,14 @@ COPY geocode ./geocode
 COPY data ./data
 COPY site ./site
 COPY verifier/email_verifier.py ./verifier/email_verifier.py
-COPY scripts/check-stripe.ts scripts/meter-queue.ts ./scripts/
+COPY scripts/check-stripe.ts scripts/meter-queue.ts scripts/build-address-index.ts scripts/ensure-address-index.ts scripts/address-index-lib.ts scripts/address-index-stats.ts ./scripts/
 COPY deploy/start.sh ./deploy/start.sh
 RUN chmod +x deploy/start.sh
 
 ENV NODE_ENV=production \
     SITE_DB_DIR=/var/data/site \
-    VERIFIER_DB=/var/data/verifier.sqlite3
+    VERIFIER_DB=/var/data/verifier.sqlite3 \
+    ADDRESS_INDEX_PATH=/var/data/address-index/address-points.db
 
 # The host mounts a persistent disk at /var/data. PORT is set by the host.
 EXPOSE 10000
