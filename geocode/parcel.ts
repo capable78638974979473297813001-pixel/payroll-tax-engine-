@@ -69,6 +69,8 @@ export interface ParcelSource {
   streetNameField?: string;
   /** Field name carrying ONE combined "123 MAIN ST" string, when the schema doesn't split it. Mutually exclusive with houseNumberField/streetNameField. */
   siteAddressField?: string;
+  /** Optional [minLat, minLon, maxLat, maxLon] box the service covers. A point outside it is never sent to this service — it can only return nothing, and several counties can share one state. */
+  bounds?: [number, number, number, number];
   source: string;
 }
 
@@ -86,6 +88,31 @@ export const PARCEL_SOURCES: ParcelSource[] = [
     houseNumberField: 'house_numb',
     streetNameField: 'street_nam',
     source: 'Dauphin County IT/GIS (data-dauphinco.opendata.arcgis.com)',
+  },
+  // Detroit's own Assessor parcel file. Verified live 2026-10-07: "2 WOODWARD
+  // AVE" and "500 GRISWOLD" (the street type is often dropped, which the
+  // type-suffix fallback in classifyParcelAddress already bridges) each came
+  // back as one small parcel a few metres from Census's point. Detroit is one
+  // of the cities the National Address Database has no points for.
+  {
+    state: 'MI',
+    jurisdictionLabel: 'City of Detroit, MI',
+    queryUrl: 'https://services2.arcgis.com/qvkbeam7Wirps6zC/ArcGIS/rest/services/parcel_file_current/FeatureServer/0/query',
+    siteAddressField: 'address',
+    bounds: [42.25, -83.3, 42.46, -82.9],
+    source: 'City of Detroit Office of the Assessor, Parcels (Current) (detroitdata.org)',
+  },
+  // Kent County's parcel layer with condos. Verified live 2026-10-07: "300
+  // MONROE AVE NW" (Grand Rapids) returned two condo-unit parcels at the same
+  // address, a few metres apart; the smallest is used. Field values are
+  // space-padded, which the combined-address parser trims.
+  {
+    state: 'MI',
+    jurisdictionLabel: 'Kent County, MI',
+    queryUrl: 'https://gis.kentcountymi.gov/agisprod/rest/services/ParcelsWithCondos/FeatureServer/0/query',
+    siteAddressField: 'PROPERTYADDRESS',
+    bounds: [42.7, -85.85, 43.3, -85.1],
+    source: 'Kent County GIS, Parcels With Condos (gis.kentcountymi.gov)',
   },
 ];
 
@@ -256,9 +283,29 @@ function classifyParcelAddress(
   targetHouseNumber: string,
   targetStreet: string,
 ): 'exact' | 'unattributed' | 'other' {
-  if (!source.houseNumberField || !source.streetNameField) return 'other';
-  const rawNumber = String(attributes[source.houseNumberField] ?? '').trim();
-  const rawStreet = String(attributes[source.streetNameField] ?? '').trim();
+  let rawNumber: string;
+  let rawStreet: string;
+  if (source.houseNumberField && source.streetNameField) {
+    rawNumber = String(attributes[source.houseNumberField] ?? '').trim();
+    rawStreet = String(attributes[source.streetNameField] ?? '').trim();
+  } else if (source.siteAddressField) {
+    // One combined "123 MAIN ST" string (Detroit, Kent County). A value that
+    // doesn't start with a number is treated like a blank house number only
+    // when it is empty; text like "STATE CAPITOL" is a real, different label.
+    const combined = String(attributes[source.siteAddressField] ?? '').replace(/\s+/g, ' ').trim();
+    const m = /^(\d+[A-Za-z]?)\s+(.+)$/.exec(combined);
+    if (m) {
+      rawNumber = m[1];
+      rawStreet = m[2];
+    } else if (combined === '' || combined === '0') {
+      rawNumber = '';
+      rawStreet = '';
+    } else {
+      return 'other';
+    }
+  } else {
+    return 'other';
+  }
 
   if (rawNumber === '' || rawNumber === '0') return 'unattributed';
   if (rawNumber !== targetHouseNumber.trim()) return 'other';
@@ -312,7 +359,13 @@ export async function resolveParcelCentroid(
 ): Promise<ParcelCentroidResult | null> {
   const parts = parseAddressParts(oneLineAddress);
   if (!parts.state || !parts.houseNumber || !parts.street) return null;
-  const candidates = PARCEL_SOURCES.filter((s) => s.state === parts.state!.toUpperCase());
+  const inBounds = (src: ParcelSource): boolean =>
+    !src.bounds ||
+    (interpolated.lat >= src.bounds[0] &&
+      interpolated.lat <= src.bounds[2] &&
+      interpolated.lon >= src.bounds[1] &&
+      interpolated.lon <= src.bounds[3]);
+  const candidates = PARCEL_SOURCES.filter((s) => s.state === parts.state!.toUpperCase() && inBounds(s));
   if (candidates.length === 0) return null;
 
   for (const source of candidates) {

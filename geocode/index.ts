@@ -365,6 +365,29 @@ function describePoint(rooftop: RooftopResult): string {
   }
 }
 
+/**
+ * Who published the coordinate a resolution used: the government (or data
+ * collection) behind an authoritative point, "OpenStreetMap" for the house-level
+ * fallback, the county for a parcel centroid. Null when Census's own interpolated
+ * point was used, since nothing better than it was found. Exposed so a keyed
+ * caller can see which source produced a coordinate, not just how precise it is.
+ */
+export function pointSourceOf(rooftop: RooftopResult | null): string | null {
+  if (!rooftop?.found || rooftop.ambiguous) return null;
+  switch (rooftop.tier) {
+    case 'authoritative':
+      return rooftop.match?.chosen.source ?? 'local address authority';
+    case 'authoritative-neighbors':
+      return rooftop.neighbors?.below.source ?? null;
+    case 'osm-corroborated':
+      return 'OpenStreetMap';
+    case 'parcel-centroid':
+      return rooftop.parcel?.source.source ?? null;
+    default:
+      return null;
+  }
+}
+
 /** Human-readable list of every geography that came out DIFFERENT at the authoritative point than at the interpolated one. Empty is the normal, reassuring case; non-empty means the corrected coordinate changed the tax answer. */
 function geographyDifferences(
   interpolated: { incorporatedPlaces: string[]; counties: string[]; countySubdivisions: string[]; state: string },
@@ -431,7 +454,26 @@ async function coordinateFromFallbackGeocoders(
   return null;
 }
 
-async function geocodeAndResolve(address: string, checkDate: string): Promise<{
+/**
+ * Per-call switches for resolveAddress()/resolveEmployee().
+ *
+ * `useLocalIndex` controls the large on-disk address index (OpenAddresses +
+ * NAD bulk, built by scripts/build-address-index.ts). It is a keyed-API
+ * feature: the public website's demo lookup passes `false`, so it only ever
+ * sees the live services, and requests authenticated with an API key leave
+ * it at its default of `true`. Defaults to true so library callers keep the
+ * behaviour they had.
+ */
+export interface GeocodeOptions {
+  useLocalIndex?: boolean;
+}
+
+/** The local-index reader to hand resolveRooftop(): an empty reader when the index is switched off, undefined (= use the real index if one exists) otherwise. Exported for tests. */
+export function localIndexReaderFor(options?: GeocodeOptions): (() => never[]) | undefined {
+  return options?.useLocalIndex === false ? () => [] : undefined;
+}
+
+async function geocodeAndResolve(address: string, checkDate: string, options?: GeocodeOptions): Promise<{
   resolved: ResolvedJurisdiction;
   matched: true;
   matchQuality: MatchQuality;
@@ -524,7 +566,7 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
   }
 
   const interpolated = { lat: geocoded.coordinates.y, lon: geocoded.coordinates.x };
-  const rooftop = await resolveRooftop(address, interpolated);
+  const rooftop = await resolveRooftop(address, interpolated, undefined, {}, undefined, localIndexReaderFor(options));
 
   let geographies = geocoded.geographies;
   let point = interpolated;
@@ -665,6 +707,7 @@ export async function resolveAddress(
   address: string,
   role: 'work' | 'residence',
   checkDate: string,
+  options?: GeocodeOptions,
 ): Promise<AddressResolution> {
   const {
     resolved,
@@ -678,7 +721,7 @@ export async function resolveAddress(
     rooftop,
     rooftopJurisdictionChanges,
     coordinateSource,
-  } = await geocodeAndResolve(address, checkDate);
+  } = await geocodeAndResolve(address, checkDate, options);
   if (!matched) {
     return {
       address,
@@ -788,7 +831,7 @@ export async function resolveAddress(
   }
   if (rooftop?.ambiguous) {
     lowConfidenceReasons.push(
-      `The National Address Database has several points for this house number and street that are too far apart to be one building (${rooftop.match!.spreadMeters.toFixed(0)}m apart) — most likely the same address exists twice inside the search area. Census's interpolated position was kept rather than picking one of them.`,
+      `The authoritative address-point data (National Address Database or a county/city source) has several points for this house number and street that are too far apart to be one building (${rooftop.match!.spreadMeters.toFixed(0)}m apart) — most likely the same address exists twice inside the search area. Census's interpolated position was kept rather than picking one of them.`,
     );
   }
   if (crossCheck.building.houseNumberGap !== null && crossCheck.building.houseNumberGap > LARGE_HOUSE_NUMBER_GAP) {
@@ -926,11 +969,12 @@ export interface EmployeeResolution {
 export async function resolveEmployee(
   addresses: { work?: string; residence?: string },
   checkDate: string,
+  options?: GeocodeOptions,
 ): Promise<EmployeeResolution> {
   const [work, residence] = await Promise.all([
-    addresses.work ? resolveAddress(addresses.work, 'work', checkDate) : Promise.resolve(null),
+    addresses.work ? resolveAddress(addresses.work, 'work', checkDate, options) : Promise.resolve(null),
     addresses.residence
-      ? resolveAddress(addresses.residence, 'residence', checkDate)
+      ? resolveAddress(addresses.residence, 'residence', checkDate, options)
       : Promise.resolve(null),
   ]);
 

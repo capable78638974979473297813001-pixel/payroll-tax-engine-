@@ -64,6 +64,15 @@ if (!existsSync(ZIP_PATH)) {
 
 mkdirSync(dirname(DB_PATH), { recursive: true });
 const db = new DatabaseSync(DB_PATH);
+{
+  // This builder writes the original (format 1) layout. A format-2 index, which
+  // is what scripts/build-address-index.ts now produces, must not be appended to.
+  const meta = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='meta'").get();
+  if (meta) {
+    console.error(`${DB_PATH} is a format-2 index; build-nad-index.ts only writes format 1. Point it at a different file or remove this one.`);
+    process.exit(1);
+  }
+}
 db.exec('PRAGMA journal_mode = WAL');
 db.exec('PRAGMA synchronous = OFF');
 db.exec('PRAGMA cache_size = -200000');

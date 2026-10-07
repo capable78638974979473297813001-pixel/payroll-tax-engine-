@@ -45,14 +45,14 @@ available the whole time and is now what it resolves to.
 ## Measured result
 
 <!-- coverage:summary:begin -->
-_Regenerated 2026-09-30 by `npm run coverage:geocode -- --write`._
+_Regenerated 2026-10-07 by `npm run coverage:geocode -- --write`._
 
-**50 of 51 jurisdictions resolve to something better than Census's own interpolation**, correcting it by 5m to 269m (median 88m).
+**50 of 51 jurisdictions resolve to something better than Census's own interpolation**, correcting it by 8m to 444m (median 90m).
 
 | Tier | Count |
 | --- | --- |
-| `rooftop` (authoritative) | 34 / 51 |
-| `rooftop-osm` (house-level, corroborated) | 13 / 51 |
+| `rooftop` (authoritative) | 36 / 51 |
+| `rooftop-osm` (house-level, corroborated) | 11 / 51 |
 | `neighbor` (block-level, authoritative) | 2 / 51 |
 | `parcel-centroid` (county GIS, gated) | 1 / 51 |
 | `interpolated` (no improvement available) | 1 / 51 |
@@ -98,6 +98,155 @@ the numerically closer of the two to Census's own point — never merely
 by existing, so a state with no registered parcel source (every state but
 Pennsylvania, as of this pass — there is no national registry of these,
 only individually-verified counties) behaves exactly as before.
+
+### 2026-10-07: county parcel sources for Detroit and Kent County, MI
+
+The parcel registry (`PARCEL_SOURCES` in `geocode/parcel.ts`) had one entry,
+Dauphin County, PA. Two more were added, each queried live before being
+registered:
+
+| Source | Covers | Address field | Notes |
+| --- | --- | --- | --- |
+| City of Detroit Assessor, Parcels (Current) | Detroit | one combined `address` string | Street type is often dropped ("500 GRISWOLD"); the existing type-suffix fallback bridges it |
+| Kent County GIS, Parcels With Condos | Grand Rapids and the rest of Kent County | one combined, space-padded `PROPERTYADDRESS` | Condo units share an address; the smallest parcel is used |
+
+Both services carry one combined site-address string rather than split
+house-number and street fields, so `classifyParcelAddress` now parses
+`"123 MAIN ST"` into number and street itself (it previously returned
+`other` for every combined-address source, so such a source could never have
+worked). Sources can also carry a `bounds` box so a point outside the
+service's area is never sent to it.
+
+Measured the same day, 12 ordinary residential addresses each: every Detroit
+address resolved to a 287-625 sqm parcel, 42-62m from Census's interpolated
+point; 9 of 12 Kent County addresses resolved (785-1,751 sqm, 20-106m from
+Census) and 3 did not (parcel address text did not match, so the tier refused).
+
+The gate still does its job on civic addresses: "2 Woodward Ave" (Detroit)
+and "300 Monroe Ave NW" (Grand Rapids) sit on parcels of 6,000-12,000 sqm,
+far over the 2,000 sqm limit, so they return nothing from this tier and fall
+to the OSM tier as before.
+
+### 2026-10-07: government address-point services (`geocode/county-points.ts`)
+
+Parcel centroids are a fallback. Where a government publishes its own
+address POINTS, that is the same kind of evidence NAD holds, so those points
+are merged with NAD's before the exact-match and neighbour tiers run and come
+back as `authoritative`, with the publishing government in the point's
+`source`. Every source below was queried live and tested against real
+addresses before it was registered.
+
+| Source | Kind | Covers | Result |
+| --- | --- | --- | --- |
+| Allegheny County GIS, Address Points | layer | Pittsburgh and the county | 10 of 10 sampled City of Pittsburgh addresses resolved `authoritative`, 18-207m from Census's point; directional streets ("N Negley Ave", "S 9th St") match |
+| Ada County Address Exchange (via City of Boise GIS) | layer | Boise, Meridian, Kuna, county | City Hall and the Capitol area resolved `authoritative` / `authoritative-neighbors`; 275,171 points |
+| Hennepin County GIS, Address Points | layer | Minneapolis and the county | 350 S 5th St and 200 S 6th St resolved `authoritative`. The county writes "5th Street South"; the target's "S 5th St" spelling is applied only when the same words differ by a moved directional |
+| Orange County, FL GIS, Address Points | layer | Orlando and the county | Both tested addresses `authoritative`; 714,909 points, active only |
+| Los Angeles County eGIS, CAMS Address Points | layer | LA County, about 2.7M points | Four of four tested addresses `authoritative`. Coverage inside a city depends on what that city contributed |
+| City of Miami GIS, All City Addresses | layer | City of Miami | Four grid addresses resolved `authoritative` (the layer writes "NE 2 AV", rewritten to "NE 2nd AV") |
+| Madison and Rankin counties MS, 911 via MARIS | layer | Ridgeland, Canton, Brandon, Flowood | `authoritative` on the tested addresses |
+| San Francisco Enterprise Addressing System (DataSF) | socrata | San Francisco | Four of five tested addresses `authoritative` |
+| NYC Planning, Address Points | socrata | All five boroughs | Three of three Manhattan addresses `authoritative`/`authoritative-neighbors`; Queens hyphenated numbers are skipped |
+| City of Chicago, Address Points locator | geocoder | Chicago | `authoritative` on the tested address; point addresses only, score 90+ |
+| WV GIS Technical Center, Site Address Points | geocoder | West Virginia | Point-address candidates only, score 97+ |
+
+What was looked at and NOT added, and why:
+
+- **Clark County, NV (Las Vegas).** The county's address layer holds 26,812
+  rows (IDs run to 65,498), and a box around Las Vegas City Hall and one
+  around the Strip returned nothing. It looks like a feed of newly assigned
+  addresses, not the full address set, so it was dropped rather than
+  registered as if it covered the county. Status codes 2 and 6 are also
+  undocumented.
+- **Detroit's `AddressPoints` layer.** About 1,000 rows, mostly businesses,
+  not a full address set. Detroit stays covered by the parcel source above.
+- **Lexington, KY.** The E911 layer exists
+  (`services1.arcgis.com/Mg7DLdfYcSWIaDnu`, 191,027 points) but NAD already
+  resolved Lexington addresses `authoritative`, so it was not registered.
+- **Philadelphia.** The city's AIS address-points service no longer lists a
+  layer; the OPA property layer is a parcel record, not address points.
+- **St. Louis (city).** Only a parcel/street geocoder is published, no points.
+- **Milwaukee.** The county address-point service is "not started"; the
+  hosted replacement was not located.
+- **Jacksonville.** The composite locator returned no candidates for four real
+  addresses.
+- **Cook County's own locators** return street interpolations ("StreetAddress"),
+  not points, and were not used.
+- **Lansing and Flint, MI; Honolulu.** No public address-point service found.
+- **Hinds County / Jackson, MS.** MARIS publishes county point-address layers
+  for 25 counties and Hinds is not one of them.
+- **Manchester NH.** The only layer found is a Public Works "service address
+  points" utility record, not the addressing authority's, so it was not used.
+  (Boise's combined Ada County layer, previously unconfirmed, was located on the
+  City of Boise's ArcGIS organization and is registered above.)
+- **Grand Rapids / Kent County, MI.** Covered by the parcel source; the
+  county's own geocoder was not added.
+
+### The large local index, measured (2026-10-07)
+
+Built end to end with the same job the server runs at boot
+(`scripts/ensure-address-index.ts` with `ADDRESS_INDEX_AUTOBUILD=1`):
+
+| | |
+| --- | --- |
+| Points | 206,014,795 from OpenAddresses' four US regional extracts (northeast, south, midwest, west) |
+| Coverage | All 50 states and DC. Thinnest: NH 42,811 (only five towns, Manchester is not one), DC 147,867, AK 234,319 |
+| File size | 13.8 GB in index format 2 (about 58 bytes a point). The first layout came to about 97 bytes a point, roughly 21 GB, which would not have fit the 25 GB disk, so it was replaced |
+| Build time | About 24 minutes on a fast 252 GB workstation at the lowest CPU priority; expect several hours on a Starter instance |
+| Peak disk | About 17 GB used during the build (the file, SQLite's sort scratch, and the largest zip, 2.7 GB). `render.yaml` provisions 30 GB |
+
+The same 51-jurisdiction run with the index on (`ADDRESS_INDEX_PATH` set, as for
+the keyed API) against the run without it:
+
+| Tier | Without the index | With the index |
+| --- | --- | --- |
+| `rooftop` (authoritative) | 36 / 51 | 42 / 51 |
+| `rooftop-osm` (house-level, corroborated) | 11 / 51 | 6 / 51 |
+| `neighbor` (block-level, authoritative) | 2 / 51 | 2 / 51 |
+| `parcel-centroid` | 1 / 51 | 0 / 51 |
+| `interpolated` | 1 / 51 | 1 / 51 |
+
+Pennsylvania's Capitol address moved from `parcel-centroid` (Dauphin County, 67m
+from Census's point) to `neighbor` (120m): the index has points for the same
+street, and a neighbour bracket is tried before a parcel centroid by design. Still
+on `rooftop-osm` with the index: KY, MI, MS, NH, SC, TX (their sample civic
+addresses are not in OpenAddresses either). Iowa is still `interpolated`: Census
+matches the sample address to a different street.
+
+Run through the real server (`site/server.ts` booted with that index and a
+seeded API key), the same address sent to `/v1/address` (keyed) and
+`/api/demo/resolve-address` (public) gave:
+
+| Address | Keyed API | Public demo |
+| --- | --- | --- |
+| 2 Woodward Ave, Detroit | `rooftop` | `rooftop-osm` |
+| 124 W Michigan Ave, Lansing | `rooftop` | `rooftop-osm` |
+| 495 S Main St, Las Vegas | `rooftop` | `rooftop-osm` |
+| 415 S Beretania St, Honolulu | `rooftop` | `rooftop-osm` |
+| 219 S President St, Jackson MS | `rooftop` | `rooftop-osm` |
+| 300 Monroe Ave NW, Grand Rapids | `rooftop` | `rooftop-osm` |
+| 1 City Hall Plz, Manchester NH | `interpolated` | `interpolated` |
+
+Manchester is the known gap: OpenAddresses carries only five NH towns and no
+public Manchester address-point service was found.
+
+The keyed `/v1/address` response also carries `pointSource`, the publisher of
+the coordinate that was used.
+
+### Where the large local index is used
+
+The on-disk address index (`scripts/build-address-index.ts`, read by
+`geocode/local-address-index.ts`) is a keyed-API feature, not a website one.
+`resolveAddress()` and `resolveEmployee()` take `{ useLocalIndex }`
+(default `true`):
+
+- `POST /v1/address` authenticates the API key first, then resolves with the
+  index allowed.
+- The public calculator's `POST /api/demo/resolve-address` resolves with
+  `useLocalIndex: false`, so it only ever sees the live services.
+
+`tests/local-index-gating.test.ts` pins both, and checks that no other
+handler in `site/server.ts` resolves addresses.
 
 ### A second real bug: "Capital" vs "Capitol"
 
@@ -237,7 +386,7 @@ Census's own answer, which is where this project started.
 ### Per jurisdiction
 
 <!-- coverage:table:begin -->
-_Regenerated 2026-09-30._
+_Regenerated 2026-10-07._
 
 | | Tier | Correction | Published by |
 | --- | --- | --- | --- |
@@ -254,7 +403,7 @@ _Regenerated 2026-09-30._
 | GA | `rooftop` | 86m | ATLANTA.GA.US |
 | HI | `rooftop-osm` | 52m | — |
 | IA | `interpolated` | — | — |
-| ID | `rooftop-osm` | 53m | — |
+| ID | `rooftop` | 44m | Ada County Address Exchange via City of Boise GIS (services1.arcgis.com) |
 | IL | `rooftop` | 125m | State of Illinois |
 | IN | `rooftop` | 174m | Indiana Geographic Information Council |
 | KS | `rooftop` | 147m | State of Kansas |
@@ -269,7 +418,7 @@ _Regenerated 2026-09-30._
 | MS | `rooftop-osm` | 8m | — |
 | MT | `rooftop` | 112m | Montana State Library |
 | NC | `rooftop` | 82m | State of North Carolina |
-| ND | `rooftop-osm` | 8m | — |
+| ND | `rooftop` | 444m | State of North Dakota |
 | NE | `rooftop` | 51m | State of Nebraska |
 | NH | `rooftop-osm` | 28m | — |
 | NJ | `rooftop` | 88m | State of New Jersey |
@@ -284,13 +433,13 @@ _Regenerated 2026-09-30._
 | SC | `rooftop-osm` | 107m | — |
 | SD | `rooftop-osm` | 105m | — |
 | TN | `rooftop` | 91m | TN STS GIS Services |
-| TX | `rooftop-osm` | 5m | — |
+| TX | `rooftop-osm` | 8m | — |
 | UT | `rooftop` | 186m | Utah Geospatial Resource Center |
 | VA | `rooftop` | 170m | Virginia Geographic Information Network |
 | VT | `rooftop` | 139m | Vermont Enhanced 911 Board |
 | WA | `rooftop` | 40m | State of Washington |
 | WI | `rooftop` | 31m | State of Wisconsin |
-| WV | `rooftop` | 152m | West Virginia GIS |
+| WV | `rooftop` | 193m | West Virginia GIS |
 | WY | `rooftop` | 50m | Laramie County Wyoming |
 <!-- coverage:table:end -->
 

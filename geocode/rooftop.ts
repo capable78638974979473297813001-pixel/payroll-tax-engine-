@@ -55,6 +55,7 @@ import { streetKey, streetKeyCapitolNormalized, streetKeyWithoutDirectionals, st
 import type { FetchOptions } from './census.ts';
 import { searchStructuredAddressSafe } from './nominatim.ts';
 import { resolveParcelCentroid, type ParcelCentroidResult } from './parcel.ts';
+import { fetchCountyAddressPoints } from './county-points.ts';
 import { localAddressPointsNear } from './local-address-index.ts';
 
 /**
@@ -673,13 +674,13 @@ export async function resolveRooftop(
     ambiguous: false,
   };
 
-  const fetched = await fetchAddressPointsNear(
-    interpolated.lat,
-    interpolated.lon,
-    radiusMeters,
-    fetchImpl,
-    retryOptions,
-  );
+  // NAD and the county/city address-point services (county-points.ts) are
+  // independent hosts, so they are asked at the same time rather than one
+  // after the other.
+  const [fetched, county] = await Promise.all([
+    fetchAddressPointsNear(interpolated.lat, interpolated.lon, radiusMeters, fetchImpl, retryOptions),
+    fetchCountyAddressPoints(oneLineAddress, interpolated.lat, interpolated.lon, radiusMeters, fetchImpl, retryOptions),
+  ]);
 
   // The LOCAL index is merged with NAD's own LIVE answer rather than
   // replacing it, because the local index (even with NAD's own bulk file
@@ -694,7 +695,9 @@ export async function resolveRooftop(
   //
   // Absent index = empty array = behaviour identical to before it existed.
   const local = readLocal(interpolated.lat, interpolated.lon, radiusMeters);
-  const points = dedupePoints([...(fetched.ok ? fetched.points : []), ...local]);
+  // `county` (fetched above) is merged the same way, so the exact-match and
+  // neighbour tiers below see whichever government actually published this address.
+  const points = dedupePoints([...(fetched.ok ? fetched.points : []), ...local, ...county]);
 
   // Tier 1 — a point published for this exact address.
   const match = matchAddressPoint(oneLineAddress, points);
@@ -788,14 +791,11 @@ export async function resolveRooftop(
   // widened one.
   if (radiusMeters === SEARCH_RADIUS_METERS) {
     const widerLocal = readLocal(interpolated.lat, interpolated.lon, WIDE_SEARCH_RADIUS_METERS);
-    const wider = await fetchAddressPointsNear(
-      interpolated.lat,
-      interpolated.lon,
-      WIDE_SEARCH_RADIUS_METERS,
-      fetchImpl,
-      retryOptions,
-    );
-    const widePoints = dedupePoints([...(wider.ok ? wider.points : []), ...widerLocal]);
+    const [wider, widerCounty] = await Promise.all([
+      fetchAddressPointsNear(interpolated.lat, interpolated.lon, WIDE_SEARCH_RADIUS_METERS, fetchImpl, retryOptions),
+      fetchCountyAddressPoints(oneLineAddress, interpolated.lat, interpolated.lon, WIDE_SEARCH_RADIUS_METERS, fetchImpl, retryOptions),
+    ]);
+    const widePoints = dedupePoints([...(wider.ok ? wider.points : []), ...widerLocal, ...widerCounty]);
     if (widePoints.length > 0) {
       const wideMatch = matchAddressPoint(oneLineAddress, widePoints);
       if (wideMatch) {

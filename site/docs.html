@@ -247,7 +247,7 @@
         <tr><td><code>matched</code></td><td class="ty">boolean</td><td class="desc">At least one address was found. If false, nothing was billed.</td></tr>
         <tr><td><code>state</code> / <code>residenceState</code></td><td class="ty">string | null</td><td class="desc">Two-letter codes. <code>residenceState</code> is set only when the home state differs.</td></tr>
         <tr><td><code>certificate</code></td><td class="ty">object</td><td class="desc">Pass as <code>workState.certificate</code>.</td></tr>
-        <tr><td><code>work</code> / <code>residence</code></td><td class="ty">object | null</td><td class="desc">What was matched: <code>matchedAddress</code>, <code>place</code>, <code>county</code>, <code>precision</code>, <code>coordinates</code>.</td></tr>
+        <tr><td><code>work</code> / <code>residence</code></td><td class="ty">object | null</td><td class="desc">What was matched: <code>matchedAddress</code>, <code>place</code>, <code>county</code>, <code>pointSource</code> (who published the coordinate used), <code>precision</code>, <code>coordinates</code>.</td></tr>
         <tr><td><code>fullyResolved</code></td><td class="ty">boolean</td><td class="desc">False when anything was ambiguous or a boundary lookup failed. Read <code>warnings</code> and <code>notResolvable</code> before relying on the result.</td></tr>
       </tbody>
     </table>
@@ -255,7 +255,7 @@
   -d '{ "workAddress": "414 Grant St, Pittsburgh, PA 15219" }'
 
 { "matched": true, "state": "PA", "residenceState": null, "certificate": { "workPSD": "700102" },
-  "work": { "matchedAddress": "414 GRANT ST, PITTSBURGH, PA, 15219", "precision": "rooftop", ... },
+  "work": { "matchedAddress": "414 GRANT ST, PITTSBURGH, PA, 15219", "precision": "rooftop", "pointSource": "Allegheny County GIS, Address Points (gisdata.alleghenycounty.us)", ... },
   "fullyResolved": true, "warnings": [], "notResolvable": [] }</pre>
 
     <div class="sec-rule" id="health"></div>

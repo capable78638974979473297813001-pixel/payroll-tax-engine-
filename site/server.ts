@@ -6,7 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 
 import { calculatePaycheck } from '../src/calculate.ts';
 import { CannotComputeError, UnsupportedTaxYearError } from '../src/registry.ts';
-import { resolveEmployee } from '../geocode/index.ts';
+import { pointSourceOf, resolveEmployee } from '../geocode/index.ts';
 import {
   withDb, readDb, appendUsage, hitStoredLimit,
   type AccountRecord, type KeyRecord, type PaymentMethodRecord,
@@ -221,6 +221,7 @@ function contentTypeFor(file: string): string {
   if (file.endsWith('.js')) return 'text/javascript; charset=utf-8';
   if (file.endsWith('.svg')) return 'image/svg+xml';
   if (file.endsWith('.png')) return 'image/png';
+  if (file.endsWith('.jpg') || file.endsWith('.jpeg')) return 'image/jpeg';
   if (file.endsWith('.json')) return 'application/json; charset=utf-8';
   return 'application/octet-stream';
 }
@@ -1523,7 +1524,9 @@ async function handleDemoResolveAddress(req: IncomingMessage, res: ServerRespons
   }
   const checkDate = new Date().toISOString().slice(0, 10);
   try {
-    const r = await resolveEmployee({ work: work || undefined, residence: home || undefined }, checkDate);
+    // The public lookup never reads the large local address index; that is a
+    // keyed-API feature (see handleAddress, which leaves useLocalIndex on).
+    const r = await resolveEmployee({ work: work || undefined, residence: home || undefined }, checkDate, { useLocalIndex: false });
     const side = (a: typeof r.work) => a && {
       matched: a.matched,
       matchedAddress: a.matchQuality?.matchedAddress ?? null,
@@ -1960,7 +1963,8 @@ async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise
   }
 
   try {
-    const r = await resolveEmployee({ work: work || undefined, residence: home || undefined }, checkDate);
+    // Key-authenticated, so the large local address index is allowed here.
+    const r = await resolveEmployee({ work: work || undefined, residence: home || undefined }, checkDate, { useLocalIndex: true });
     const side = (a: typeof r.work) => a && {
       matched: a.matched,
       matchedAddress: a.matchQuality?.matchedAddress ?? null,
@@ -1968,6 +1972,7 @@ async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise
       place: a.geographies?.incorporatedPlaces[0] ?? null,
       county: a.geographies?.counties[0] ?? null,
       precision: a.matched ? a.precision : null,
+      pointSource: a.matched && a.precision !== 'interpolated' ? pointSourceOf(a.rooftop) : null,
       coordinates: a.coordinates,
     };
     const matched = Boolean(r.work?.matched || r.residence?.matched);

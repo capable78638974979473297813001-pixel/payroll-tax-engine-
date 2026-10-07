@@ -49,4 +49,16 @@ else
   echo "[start] NO MAIL PROVIDER: set RESEND_API_KEY (or SMTP_HOST). Until then sign-up and sign-in codes are printed in this log instead of emailed." >&2
 fi
 
+# The large local address index (keyed-API geocoding). Fetched or built in the
+# background at the lowest CPU priority so the site is up immediately; the
+# running server opens the index as soon as the finished file appears. Does
+# nothing unless ADDRESS_INDEX_PATH is set, and never stops the site starting.
+if [ -n "${ADDRESS_INDEX_PATH:-}" ]; then
+  mkdir -p "$(dirname "$ADDRESS_INDEX_PATH")"
+  (
+    nice -n 19 node scripts/ensure-address-index.ts >> "$(dirname "$ADDRESS_INDEX_PATH")/index-build.log" 2>&1 || true
+  ) &
+  echo "[start] address index: $ADDRESS_INDEX_PATH (progress in $(dirname "$ADDRESS_INDEX_PATH")/index-build.log)" >&2
+fi
+
 exec node site/server.ts

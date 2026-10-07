@@ -1,215 +1,285 @@
 import { DatabaseSync } from 'node:sqlite';
-import { createReadStream, existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
+import { createWriteStream, existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createInterface } from 'node:readline';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+
+import { INDEX_FORMAT, OPENADDRESSES_REGIONS, openAddressesRegionUrl, parseOpenAddressesLine, toMicro } from './address-index-lib.ts';
 
 /**
  * Turn the OpenAddresses bulk extracts into a local, queryable address
- * index — the thing that makes rooftop precision possible in the states
+ * index: the thing that makes rooftop precision possible in the states
  * the National Address Database never received.
  *
  * WHY THIS EXISTS, measured rather than assumed. NAD is aggregated from
- * states that volunteer, and a 5km-box probe over each city (this
- * session) found ZERO NAD points in Detroit, Grand Rapids, Pittsburgh,
- * Honolulu, Las Vegas, Manchester, Charleston, Boise, Jackson and Miami.
- * Philadelphia and Hartford are dense. So contribution is county-by-
- * county even within one state, and no amount of retrying the NAD service
- * fixes a county that never sent its data.
- *
- * OpenAddresses aggregates the SAME kind of authoritative local address
- * files, but directly from the counties, so it carries what NAD is
- * missing: Allegheny County alone (Pittsburgh, zero NAD points) has
- * 623,653 points here, including 600 GRANT ST.
+ * states that volunteer, and a 5km-box probe over each city found ZERO
+ * NAD points in Detroit, Grand Rapids, Pittsburgh, Honolulu, Las Vegas,
+ * Manchester, Charleston, Boise, Jackson and Miami. So contribution is
+ * county-by-county even within one state, and no amount of retrying the NAD
+ * service fixes a county that never sent its data. OpenAddresses collects
+ * the same kind of authoritative local files directly from the counties.
  *
  * SHAPE OF THE DATA: each regional zip holds us/<state>/<county>.csv with
- * a fixed header — LON,LAT,NUMBER,STREET,UNIT,CITY,DISTRICT,REGION,
+ * a fixed header: LON,LAT,NUMBER,STREET,UNIT,CITY,DISTRICT,REGION,
  * POSTCODE,ID,HASH.
  *
- * SHAPE OF THE INDEX: one SQLite file, keyed by a rounded coordinate
- * CELL, not by address text. The database's only job is to narrow ~100M
- * points to the ~200 in a neighbourhood; deciding which of those 200 IS
- * the address is rooftop.ts's matchAddressPoint(), which already has the
- * directional/street-type/unit guards and should stay the single place
- * that judgement lives.
+ * SHAPE OF THE INDEX: one SQLite file keyed by a rounded coordinate CELL, not
+ * by address text. Its only job is to narrow ~200M points to the ~200 in a
+ * neighbourhood; deciding which of those IS the address stays in rooftop.ts's
+ * matchAddressPoint(). This is index FORMAT 2 (see address-index-lib.ts): integer
+ * cell, integer micro-degree coordinates, source as an id into `sources`, and a
+ * `meta` table that says so. The reader still opens format 1 files.
  *
- * node:sqlite is a Node 22+ BUILT-IN, so this adds no npm dependency —
- * this project has none and should keep it that way.
+ * BUILT SAFELY FOR A LIVE SERVER. The build writes `<db>.building` and
+ * renames it into place only when it finishes, so a half-built index is never
+ * opened and a running server picks the finished one up without a restart.
+ * Rows stream from each zip entry line by line, so memory stays flat no
+ * matter how large a county is.
  *
- *   node scripts/build-address-index.ts [--states MI,PA,HI] [--all]
+ * node:sqlite is a Node 22+ built-in, so this adds no npm dependency. Python
+ * is used only as a zip reader (Node has no built-in zip).
+ *
+ *   node scripts/build-address-index.ts [--states MI,PA,HI] [--download] [--keep] [--append]
+ *
+ *   --download   fetch each regional zip from data.openaddresses.io, ingest it,
+ *                then delete it (--keep leaves the zips in place)
+ *
+ * ADDRESS_INDEX_PATH sets the output file (default data/address-points/address-points.db).
+ * ADDRESS_INDEX_RAW_DIR sets where the zips are read from / downloaded to.
  */
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const RAW_DIR = join(HERE, '..', 'data', 'address-points', 'raw');
-const DB_PATH = join(HERE, '..', 'data', 'address-points', 'address-points.db');
+const DB_PATH = process.env.ADDRESS_INDEX_PATH ?? join(HERE, '..', 'data', 'address-points', 'address-points.db');
+const RAW_DIR =
+  process.env.ADDRESS_INDEX_RAW_DIR ??
+  (process.env.ADDRESS_INDEX_PATH ? join(dirname(DB_PATH), 'raw') : join(HERE, '..', 'data', 'address-points', 'raw'));
 
-/**
- * Cell size in degrees. 0.01 deg is ~1.1km of latitude — comfortably
- * larger than rooftop.ts's own 300m search radius, so a query needs at
- * most the 3x3 block of cells around a point, and small enough that a
- * dense downtown cell stays a few thousand rows rather than a million.
- */
-const CELL = 0.01;
+const BATCH_ROWS = 50_000;
 
-export function cellKey(lat: number, lon: number): string {
-  return `${Math.floor(lat / CELL)}:${Math.floor(lon / CELL)}`;
+interface Args {
+  states: Set<string> | null;
+  append: boolean;
+  download: boolean;
+  keep: boolean;
 }
-
-interface Args { states: Set<string> | null; append: boolean; }
 
 function parseArgs(): Args {
   const argv = process.argv.slice(2);
-  const all = argv.includes('--all');
-  const append = argv.includes('--append');
   const i = argv.indexOf('--states');
-  if (!all && i !== -1 && argv[i + 1]) {
-    return { states: new Set(argv[i + 1].split(',').map((s) => s.trim().toLowerCase())), append };
-  }
-  return { states: null, append };
+  return {
+    states: i !== -1 && argv[i + 1] ? new Set(argv[i + 1].split(',').map((s) => s.trim().toLowerCase())) : null,
+    append: argv.includes('--append'),
+    download: argv.includes('--download'),
+    keep: argv.includes('--keep'),
+  };
 }
 
-/**
- * Stream one CSV out of a zip WITHOUT unpacking the whole archive.
- * Python is used purely as a zip reader here: Node has no built-in zip,
- * and adding an npm dependency for it would break this project's own
- * zero-dependency rule. Everything downstream is Node.
- */
+/** python3 on a Linux container, python on a machine that only has that. */
+function pythonBinary(): string {
+  for (const candidate of ['python3', 'python']) {
+    if (spawnSync(candidate, ['--version']).status === 0) return candidate;
+  }
+  throw new Error('Python is needed to read the zip extracts, and neither python3 nor python is on PATH.');
+}
+const PYTHON = pythonBinary();
+
 function listZipEntries(zipPath: string): string[] | null {
-  const out = spawnSync('python', ['-c',
-    `import zipfile,sys\nfor n in zipfile.ZipFile(sys.argv[1]).namelist():\n  print(n)`,
-    zipPath], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
-  // A still-downloading archive has no readable central directory yet.
-  // That is a "come back later", not a failure worth aborting the whole
-  // build over — the other regions are independent of it.
+  const out = spawnSync(
+    PYTHON,
+    ['-c', 'import zipfile,sys\nfor n in zipfile.ZipFile(sys.argv[1]).namelist():\n  print(n)', zipPath],
+    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
+  );
+  // A still-downloading archive has no readable central directory yet: a
+  // "come back later", not a reason to abort the other regions.
   if (out.status !== 0) return null;
   return out.stdout.split('\n').map((s) => s.trim()).filter(Boolean);
 }
 
-function openDb(append: boolean): DatabaseSync {
-  mkdirSync(dirname(DB_PATH), { recursive: true });
-  const db = new DatabaseSync(DB_PATH);
-  // Bulk-load settings. This file is a derived artifact rebuilt from the
-  // extracts on demand, so full durability buys nothing -- but journal_mode
-  // OFF does NOT: an interrupted build then leaves a database that cannot
-  // even be OPENED read-only, because SQLite needs write access to roll the
-  // partial transaction back. Hit exactly that. WAL keeps the build fast,
-  // stays recoverable, and lets a reader in while a build is running.
+function openDb(path: string, fresh: boolean): DatabaseSync {
+  mkdirSync(dirname(path), { recursive: true });
+  const db = new DatabaseSync(path);
+  // Bulk-load settings. This file is a derived artifact rebuilt on demand, so
+  // full durability buys nothing, but journal_mode OFF does not work: an
+  // interrupted build would leave a database that cannot even be opened.
   db.exec('PRAGMA journal_mode = WAL');
   db.exec('PRAGMA synchronous = OFF');
   db.exec('PRAGMA cache_size = -200000');
-  // Rebuild from scratch by default. Appending silently doubles the table
-  // on a re-run -- caught exactly that way on the first test -- so
-  // --append is opt-in, for topping up states a previous run missed.
-  if (!append) db.exec('DROP TABLE IF EXISTS points');
+  if (fresh) {
+    db.exec('DROP TABLE IF EXISTS points');
+    db.exec('DROP TABLE IF EXISTS sources');
+    db.exec('DROP TABLE IF EXISTS meta');
+  }
+  const existing = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='meta'").get();
+  if (!fresh && !existing && db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='points'").get()) {
+    throw new Error(`${path} is an older format-1 index; rebuild it instead of appending (drop --append).`);
+  }
   db.exec(`
+    CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS sources (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE);
     CREATE TABLE IF NOT EXISTS points (
-      cell   TEXT NOT NULL,
-      lat    REAL NOT NULL,
-      lon    REAL NOT NULL,
+      cell   INTEGER NOT NULL,
+      lat    INTEGER NOT NULL,
+      lon    INTEGER NOT NULL,
       number TEXT,
       street TEXT,
       unit   TEXT,
       city   TEXT,
       state  TEXT NOT NULL,
-      source TEXT NOT NULL
-    )
+      source INTEGER NOT NULL
+    );
   `);
+  db.prepare("INSERT OR REPLACE INTO meta (key, value) VALUES ('format', ?)").run(String(INDEX_FORMAT));
   return db;
 }
 
-async function ingestCsv(
+/** source name -> id, creating the row the first time a county file is seen. */
+function sourceIdFor(db: DatabaseSync, cache: Map<string, number>, name: string): number {
+  const hit = cache.get(name);
+  if (hit !== undefined) return hit;
+  db.prepare('INSERT OR IGNORE INTO sources (name) VALUES (?)').run(name);
+  const row = db.prepare('SELECT id FROM sources WHERE name = ?').get(name) as { id: number };
+  cache.set(name, row.id);
+  return row.id;
+}
+
+/** Stream one CSV out of a zip, line by line, without unpacking the archive or holding it in memory. */
+async function ingestEntry(
   db: DatabaseSync,
+  sourceCache: Map<string, number>,
   zipPath: string,
   entry: string,
   state: string,
   insert: ReturnType<DatabaseSync['prepare']>,
 ): Promise<number> {
-  const py = spawnSync('python', ['-c',
-    `import zipfile,sys\nz=zipfile.ZipFile(sys.argv[1])\nsys.stdout.buffer.write(z.read(sys.argv[2]))`,
-    zipPath, entry], { maxBuffer: 1024 * 1024 * 1024 });
-  if (py.status !== 0) return 0;
-
-  const text = py.stdout.toString('utf8');
+  const child = spawn(
+    PYTHON,
+    ['-c', 'import zipfile,sys,shutil\nz=zipfile.ZipFile(sys.argv[1])\nshutil.copyfileobj(z.open(sys.argv[2]), sys.stdout.buffer)', zipPath, entry],
+    { stdio: ['ignore', 'pipe', 'ignore'] },
+  );
+  const lines = createInterface({ input: child.stdout, crlfDelay: Infinity });
+  const sourceId = sourceIdFor(db, sourceCache, `OpenAddresses ${entry.replace(/^us\//, '').replace(/\.csv$/, '')}`);
+  const stateCode = state.toUpperCase();
   let n = 0;
   let first = true;
-  const source = entry.replace(/^us\//, '').replace(/\.csv$/, '');
-
-  db.exec('BEGIN');
-  for (const line of text.split('\n')) {
-    if (first) { first = false; continue; }
-    if (!line) continue;
-    // OpenAddresses CSVs are simple: no embedded commas in these columns
-    // in practice, and a split is ~20x faster than a full CSV parser over
-    // 100M rows. A malformed row is skipped, not guessed at.
-    const f = line.split(',');
-    if (f.length < 6) continue;
-    const lon = Number(f[0]);
-    const lat = Number(f[1]);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon) || (lat === 0 && lon === 0)) continue;
-    const number = f[2]?.trim();
-    const street = f[3]?.trim();
-    if (!number && !street) continue;
-    insert.run(cellKey(lat, lon), lat, lon, number || null, street || null,
-      f[4]?.trim() || null, f[5]?.trim() || null, state.toUpperCase(), `OpenAddresses ${source}`);
+  let inTx = false;
+  for await (const line of lines) {
+    if (first) {
+      first = false;
+      continue;
+    }
+    const row = parseOpenAddressesLine(line);
+    if (!row) continue;
+    if (!inTx) {
+      db.exec('BEGIN');
+      inTx = true;
+    }
+    insert.run(row.cell, toMicro(row.lat), toMicro(row.lon), row.number, row.street, row.unit, row.city, stateCode, sourceId);
     n++;
+    if (n % BATCH_ROWS === 0) {
+      db.exec('COMMIT');
+      inTx = false;
+    }
   }
-  db.exec('COMMIT');
+  if (inTx) db.exec('COMMIT');
   return n;
 }
 
-const args = parseArgs();
-if (!existsSync(RAW_DIR)) {
-  console.error(`No extracts at ${RAW_DIR}. Download them first:\n` +
-    `  curl -L -o data/address-points/raw/us_northeast.zip https://data.openaddresses.io/openaddr-collected-us_northeast.zip`);
-  process.exit(1);
+async function downloadRegion(region: string): Promise<string> {
+  mkdirSync(RAW_DIR, { recursive: true });
+  const dest = join(RAW_DIR, `us_${region}.zip`);
+  const partial = `${dest}.part`;
+  const res = await fetch(openAddressesRegionUrl(region));
+  if (!res.ok || !res.body) throw new Error(`download of ${region} failed: HTTP ${res.status}`);
+  await pipeline(Readable.fromWeb(res.body as never), createWriteStream(partial));
+  renameSync(partial, dest);
+  return dest;
 }
 
-const zips = readdirSync(RAW_DIR).filter((f) => f.endsWith('.zip'));
-if (zips.length === 0) { console.error(`No .zip files in ${RAW_DIR}`); process.exit(1); }
+async function main(): Promise<void> {
+  const args = parseArgs();
+  const outPath = args.append ? DB_PATH : `${DB_PATH}.building`;
+  if (!args.append) for (const f of [outPath, `${outPath}-wal`, `${outPath}-shm`]) rmSync(f, { force: true });
 
-const db = openDb(args.append);
-const insert = db.prepare(
-  'INSERT INTO points (cell,lat,lon,number,street,unit,city,state,source) VALUES (?,?,?,?,?,?,?,?,?)',
-);
-
-let grand = 0;
-const perState: Record<string, number> = {};
-
-for (const zip of zips) {
-  const zipPath = join(RAW_DIR, zip);
-  const sizeMb = Math.round(statSync(zipPath).size / 1024 / 1024);
-  console.log(`\n=== ${zip} (${sizeMb} MB)`);
-  const listed = listZipEntries(zipPath);
-  if (listed === null) {
-    console.log('  still downloading or unreadable — skipped');
-    continue;
-  }
-  const entries = listed.filter(
-    (e) => e.startsWith('us/') && e.endsWith('.csv') && !e.startsWith('summary/'),
-  );
-
-  for (const entry of entries) {
-    const state = entry.split('/')[1];
-    if (args.states && !args.states.has(state)) continue;
-    const n = await ingestCsv(db, zipPath, entry, state, insert);
-    if (n > 0) {
-      grand += n;
-      perState[state.toUpperCase()] = (perState[state.toUpperCase()] ?? 0) + n;
-      process.stdout.write(`\r  ${entry.padEnd(46)} ${n.toLocaleString().padStart(10)}  (total ${grand.toLocaleString()})   `);
+  let zips: string[] = [];
+  if (!args.download) {
+    if (!existsSync(RAW_DIR)) {
+      console.error(
+        `No extracts at ${RAW_DIR}. Re-run with --download, or fetch them yourself:\n` +
+          `  curl -L -o ${RAW_DIR}/us_northeast.zip ${openAddressesRegionUrl('northeast')}`,
+      );
+      process.exit(1);
+    }
+    zips = readdirSync(RAW_DIR).filter((f) => f.endsWith('.zip')).map((f) => join(RAW_DIR, f));
+    if (zips.length === 0) {
+      console.error(`No .zip files in ${RAW_DIR}`);
+      process.exit(1);
     }
   }
-  console.log();
+
+  const db = openDb(outPath, !args.append);
+  const insert = db.prepare(
+    'INSERT INTO points (cell,lat,lon,number,street,unit,city,state,source) VALUES (?,?,?,?,?,?,?,?,?)',
+  );
+  const sourceCache = new Map<string, number>();
+  let grand = 0;
+  const perState: Record<string, number> = {};
+
+  const sources: { label: string; resolve: () => Promise<string>; disposable: boolean }[] = args.download
+    ? OPENADDRESSES_REGIONS.map((r) => ({ label: r, resolve: () => downloadRegion(r), disposable: !args.keep }))
+    : zips.map((z) => ({ label: z, resolve: async () => z, disposable: false }));
+
+  for (const src of sources) {
+    let zipPath: string;
+    try {
+      console.log(`\n=== ${src.label}${args.download ? ' (downloading)' : ''}`);
+      zipPath = await src.resolve();
+    } catch (err) {
+      console.error(`  ${(err as Error).message}; skipped`);
+      continue;
+    }
+    console.log(`  ${Math.round(statSync(zipPath).size / 1024 / 1024)} MB`);
+    const listed = listZipEntries(zipPath);
+    if (listed === null) {
+      console.log('  unreadable; skipped');
+      continue;
+    }
+    for (const entry of listed.filter((e) => e.startsWith('us/') && e.endsWith('.csv') && !e.startsWith('summary/'))) {
+      const state = entry.split('/')[1];
+      if (args.states && !args.states.has(state)) continue;
+      const n = await ingestEntry(db, sourceCache, zipPath, entry, state, insert);
+      if (n > 0) {
+        grand += n;
+        perState[state.toUpperCase()] = (perState[state.toUpperCase()] ?? 0) + n;
+        process.stdout.write(`\r  ${entry.padEnd(46)} ${n.toLocaleString().padStart(10)}  (total ${grand.toLocaleString()})   `);
+      }
+    }
+    console.log();
+    if (src.disposable) rmSync(zipPath, { force: true });
+  }
+
+  console.log('\nindexing…');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_points_cell ON points(cell)');
+  db.exec('PRAGMA optimize');
+  db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+  db.close();
+
+  if (grand === 0 && !args.append) {
+    rmSync(outPath, { force: true });
+    console.error('no points were ingested; nothing was written');
+    process.exit(1);
+  }
+  if (!args.append) {
+    for (const f of [`${outPath}-wal`, `${outPath}-shm`]) rmSync(f, { force: true });
+    renameSync(outPath, DB_PATH);
+  }
+
+  console.log('\n--- points per state ---');
+  for (const [st, n] of Object.entries(perState).sort((a, b) => b[1] - a[1])) console.log(`  ${st}  ${n.toLocaleString()}`);
+  console.log(`\ntotal: ${grand.toLocaleString()} points -> ${DB_PATH}`);
+  console.log(`db size: ${Math.round(statSync(DB_PATH).size / 1024 / 1024)} MB`);
 }
 
-console.log('\nindexing…');
-db.exec('CREATE INDEX IF NOT EXISTS idx_points_cell ON points(cell)');
-db.exec('PRAGMA optimize');
-db.close();
-
-console.log('\n--- points per state ---');
-for (const [st, n] of Object.entries(perState).sort((a, b) => b[1] - a[1])) {
-  console.log(`  ${st}  ${n.toLocaleString()}`);
-}
-console.log(`\ntotal: ${grand.toLocaleString()} points -> ${DB_PATH}`);
-console.log(`db size: ${Math.round(statSync(DB_PATH).size / 1024 / 1024)} MB`);
+await main();

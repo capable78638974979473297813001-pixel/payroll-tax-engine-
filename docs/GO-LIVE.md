@@ -70,6 +70,36 @@ disk. Deploys cause a brief restart; there is no zero-downtime swap with a disk.
 
 ---
 
+## 0d. The large address index (keyed API geocoding)
+
+`POST /v1/address` (API key required) uses the full geocoding stack: the live
+National Address Database, the county and city address-point services, parcel
+centroids, OpenStreetMap, and a 206-million-point local index built from
+OpenAddresses. The public website lookup deliberately skips the local index.
+Without the index, a keyed request still works, on the live services only: it
+resolves, for example, Detroit or Las Vegas addresses to `rooftop-osm` instead of
+`rooftop`.
+
+The index is one 13.8 GB SQLite file on the persistent disk
+(`/var/data/address-index/address-points.db`, set by `ADDRESS_INDEX_PATH` in the
+Dockerfile). `deploy/start.sh` fetches or builds it in the background at boot, at
+the lowest CPU priority, and the running server opens it as soon as the finished
+file is renamed into place; no restart is needed. Two ways to get it there:
+
+1. **Download a prebuilt file (recommended, minutes).** Build it once on any
+   machine with ~20 GB free (`ADDRESS_INDEX_PATH=./address-points.db node scripts/build-address-index.ts --download`),
+   host the file, and set `ADDRESS_INDEX_URL` (and `ADDRESS_INDEX_SHA256`) in Render.
+   `.db.gz` is expanded as it downloads.
+2. **Build on the server (the Blueprint's default, `ADDRESS_INDEX_AUTOBUILD=1`).**
+   It downloads each regional zip, ingests it, and deletes it. Expect several
+   hours on the Starter plan. Remove the variable to turn it off.
+
+Progress is in `/var/data/address-index/index-build.log` (Render shell). The disk
+is 30 GB; a Render disk can be grown but never shrunk. Keep `/var/data/address-index`
+out of your off-box backups: it is rebuildable and 13.8 GB.
+
+---
+
 ## 1. Persistent storage
 
 The account/key/usage store is a JSON file. Point it at a durable, backed-up
