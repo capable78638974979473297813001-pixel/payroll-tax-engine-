@@ -32,7 +32,7 @@ every one:
 - `[COUNTY, STATE]` — **done**: Oakland County, Michigan.
 - `[COMPANY ADDRESS]` — **done**: 595 N Old Woodward Ave, Birmingham, Michigan (add suite/ZIP if the formation documents list them).
 - `[SECURITY EMAIL]` / `[LEGAL EMAIL]` — **done**: scottholdan@gmail.com. Still to set up or repoint: `legal@` / `privacy@` / `security@omniatax.io` — set up these inboxes or repoint them.
-- `[ARBITRATION BODY]` — only if you keep the optional arbitration clause (Terms §13). **Discuss the arbitration / class-action waiver with counsel before enabling it** — it's powerful but regulated, and unenforceable if done wrong.
+- `[ARBITRATION BODY]` — **removed**: the optional arbitration clause was dropped, so disputes go to the Oakland County, Michigan courts. Add it back only on counsel's advice.
 
 ## Ownership ("this is mine only")
 
