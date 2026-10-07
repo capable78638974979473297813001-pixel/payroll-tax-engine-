@@ -27,11 +27,11 @@ Search the `site/legal/` files (and `LICENSE`) for square-bracket tokens and rep
 every one:
 
 - `[LEGAL ENTITY NAME]` — **done**: the entity is **OMNIA TAX LLC** (filled in `LICENSE`, `site/legal/*`, the landing footer and `package.json`). Keep the name identical to the formation documents.
-- `[EFFECTIVE DATE]` — the date you publish.
-- `[STATE]` — the state whose law governs (usually where your entity is formed).
-- `[COUNTY, STATE]` — the venue for disputes.
-- `[COMPANY ADDRESS]` — your business address.
-- `[SECURITY EMAIL]` / `legal@` / `privacy@` / `security@omniatax.io` — set up these inboxes or repoint them.
+- `[EFFECTIVE DATE]` — **done**: October 6, 2026.
+- `[STATE]` — **done**: Michigan.
+- `[COUNTY, STATE]` — **done**: Oakland County, Michigan.
+- `[COMPANY ADDRESS]` — **done**: 595 N Old Woodward Ave, Birmingham, Michigan (add suite/ZIP if the formation documents list them).
+- `[SECURITY EMAIL]` / `[LEGAL EMAIL]` — **done**: scottholdan@gmail.com. Still to set up or repoint: `legal@` / `privacy@` / `security@omniatax.io` — set up these inboxes or repoint them.
 - `[ARBITRATION BODY]` — only if you keep the optional arbitration clause (Terms §13). **Discuss the arbitration / class-action waiver with counsel before enabling it** — it's powerful but regulated, and unenforceable if done wrong.
 
 ## Ownership ("this is mine only")
