@@ -195,6 +195,24 @@ Built end to end with the same job the server runs at boot
 | Build time | About 24 minutes on a fast 252 GB workstation at the lowest CPU priority; expect several hours on a Starter instance |
 | Peak disk | About 17 GB used during the build (the file, SQLite's sort scratch, and the largest zip, 2.7 GB). `render.yaml` provisions 30 GB |
 
+The same 51-jurisdiction run with the index on (`ADDRESS_INDEX_PATH` set, as for
+the keyed API) against the run without it:
+
+| Tier | Without the index | With the index |
+| --- | --- | --- |
+| `rooftop` (authoritative) | 36 / 51 | 42 / 51 |
+| `rooftop-osm` (house-level, corroborated) | 11 / 51 | 6 / 51 |
+| `neighbor` (block-level, authoritative) | 2 / 51 | 2 / 51 |
+| `parcel-centroid` | 1 / 51 | 0 / 51 |
+| `interpolated` | 1 / 51 | 1 / 51 |
+
+Pennsylvania's Capitol address moved from `parcel-centroid` (Dauphin County, 67m
+from Census's point) to `neighbor` (120m): the index has points for the same
+street, and a neighbour bracket is tried before a parcel centroid by design. Still
+on `rooftop-osm` with the index: KY, MI, MS, NH, SC, TX (their sample civic
+addresses are not in OpenAddresses either). Iowa is still `interpolated`: Census
+matches the sample address to a different street.
+
 Run through the real server (`site/server.ts` booted with that index and a
 seeded API key), the same address sent to `/v1/address` (keyed) and
 `/api/demo/resolve-address` (public) gave:
