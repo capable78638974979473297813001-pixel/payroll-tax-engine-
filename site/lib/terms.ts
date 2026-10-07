@@ -21,7 +21,7 @@ import { TRIAL_DAYS } from './pricing.ts';
  * exposure.
  */
 
-export const TERMS_VERSION = '2026-09-03.1';
+export const TERMS_VERSION = '2026-10-06.1';
 export const TERM_MONTHS = 12;
 
 export interface TermsClause {

@@ -34,9 +34,9 @@ touches the codebase.
    `RESEND_FROM="Omnia.tax <verify@omniatax.io>"`. Until then Resend only
    delivers to its own account owner. If you run the Python verifier with SMTP
    instead, set `SMTP_FROM` the same way and add your mail provider's SPF record.
-4. **Create the inboxes the site and legal pages mention:**
-   `hello@`, `legal@`, `privacy@` and `security@omniatax.io`. Forwarding every
-   one to a single mailbox is enough to start.
+4. **Contact address:** the site and legal pages all use
+   `scottholdan@gmail.com`, so no extra inboxes are needed. Keep
+   `verify@omniatax.io` as the sending address only (step 3).
 5. **Stripe webhook URL** is `https://omniatax.io/api/billing/webhook`.
 
 ---

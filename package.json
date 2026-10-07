@@ -44,6 +44,7 @@
     "meter:queue": "node scripts/meter-queue.ts",
     "check:stripe": "node scripts/check-stripe.ts"
   },
+  "author": "OMNIA TAX LLC",
   "license": "UNLICENSED",
   "private": true
 }
