@@ -17,6 +17,9 @@
  *   - 'layer': an address-point layer queried by bounding box, one record per
  *     address, fields mapped below. Every source here was queried live and
  *     checked against real addresses before it was registered.
+ *   - 'socrata': the same kind of address-point table, published on a city's
+ *     Socrata open-data portal and queried by distance from the point (San
+ *     Francisco's Enterprise Addressing System).
  *   - 'geocoder': a government GeocodeServer built on its site-address
  *     points (West Virginia's statewide SAMS-II locator). Used only for an
  *     exact point-address match, never for an interpolated street match.
@@ -34,7 +37,7 @@
 import type { FetchOptions } from './census.ts';
 import type { AddressPoint } from './rooftop.ts';
 import { parseAddressParts } from './rooftop.ts';
-import { streetKeyWithoutDirectionals, STREET_TYPES } from './buildings.ts';
+import { streetKey, streetKeyWithoutDirectionals, STREET_TYPES } from './buildings.ts';
 
 interface SourceBase {
   /** Short stable id, used in tests and logs. */
@@ -74,7 +77,27 @@ export interface GeocoderPointSource extends SourceBase {
   minScore: number;
 }
 
-export type AddressPointSourceConfig = LayerPointSource | GeocoderPointSource;
+export interface SocrataPointSource extends SourceBase {
+  kind: 'socrata';
+  /** Resource endpoint, e.g. https://data.sfgov.org/resource/ramy-di5m.json */
+  resourceUrl: string;
+  /** The point-type column used for the distance filter. */
+  locationField: string;
+  numberField: string;
+  skipIfSetFields?: string[];
+  streetFields: string[];
+  /** See LayerPointSource.ordinalizeNumericField. */
+  ordinalizeNumericField?: string;
+  unitField?: string;
+  zipField?: string;
+  /** Plain latitude/longitude columns... */
+  latField?: string;
+  lonField?: string;
+  /** ...or one GeoJSON point column ({"type":"Point","coordinates":[lon,lat]}). */
+  geoJsonField?: string;
+}
+
+export type AddressPointSourceConfig = LayerPointSource | GeocoderPointSource | SocrataPointSource;
 
 export const ADDRESS_POINT_SOURCES: AddressPointSourceConfig[] = [
   {
@@ -137,6 +160,120 @@ export const ADDRESS_POINT_SOURCES: AddressPointSourceConfig[] = [
     cityField: 'COMMUNITY',
     zipField: 'ZIPCODE',
     source: 'Rankin County, MS 911 via MARIS, Point Addresses 2023 (gis.mississippi.edu)',
+  },
+  // Ada County, ID address exchange (Boise, Meridian, Kuna, county), hosted by
+  // the City of Boise: 275,171 points. Boise is one of the cities NAD has none for.
+  {
+    kind: 'layer',
+    id: 'ada-id',
+    state: 'ID',
+    bounds: [43.2, -116.7, 43.9, -115.8],
+    queryUrl: 'https://services1.arcgis.com/WHM6qC35aMtyAAlN/ArcGIS/rest/services/Ada_County_Addresses/FeatureServer/0/query',
+    numberField: 'AddNum',
+    skipIfSetFields: ['AddPfx', 'AddSfx'],
+    streetFields: ['StPreMod', 'StPreDir', 'StPrefix', 'StName', 'StSuffix', 'StPostDir', 'StPostMod'],
+    unitField: 'PrUnitID',
+    cityField: 'CommName',
+    zipField: 'Zip4',
+    source: 'Ada County Address Exchange via City of Boise GIS (services1.arcgis.com)',
+  },
+  // Hennepin County, MN (Minneapolis and 44 other cities): 493,787 points,
+  // street types and directions written out in full ("Avenue", "South").
+  {
+    kind: 'layer',
+    id: 'hennepin-mn',
+    state: 'MN',
+    bounds: [44.75, -93.8, 45.3, -93.15],
+    queryUrl: 'https://gis.hennepin.us/arcgis/rest/services/HennepinData/LAND_PROPERTY/MapServer/0/query',
+    numberField: 'ANUMBER',
+    skipIfSetFields: ['ANUMBERSUF'],
+    streetFields: ['ST_PRE_MOD', 'ST_PRE_DIR', 'ST_PRE_TYP', 'ST_NAME', 'ST_POS_TYP', 'ST_POS_DIR', 'ST_POS_MOD'],
+    unitField: 'SUB_AD_ID',
+    cityField: 'MUNI_NAME',
+    zipField: 'ZIP',
+    source: 'Hennepin County GIS, Address Points (gis.hennepin.us)',
+  },
+  // San Francisco's Enterprise Addressing System, the City's master address
+  // list (every address and unit), published on DataSF.
+  {
+    kind: 'socrata',
+    id: 'sf-ca',
+    state: 'CA',
+    bounds: [37.6, -123.05, 37.95, -122.3],
+    resourceUrl: 'https://data.sfgov.org/resource/ramy-di5m.json',
+    locationField: 'point',
+    numberField: 'address_number',
+    skipIfSetFields: ['address_number_suffix'],
+    streetFields: ['street_name', 'street_type'],
+    unitField: 'unit_number',
+    zipField: 'zip_code',
+    latField: 'latitude',
+    lonField: 'longitude',
+    source: 'City and County of San Francisco, Enterprise Addressing System (data.sfgov.org)',
+  },
+  // NYC Planning's address points (all five boroughs). Queens hyphenated house
+  // numbers ("12-34") are skipped, not guessed at. Street names for the numbered
+  // grid are bare numbers ("42" + "ST"), rewritten to ordinals like Miami's.
+  {
+    kind: 'socrata',
+    id: 'nyc-ny',
+    state: 'NY',
+    bounds: [40.47, -74.27, 40.93, -73.68],
+    resourceUrl: 'https://data.cityofnewyork.us/resource/uf93-f8nk.json',
+    locationField: 'the_geom',
+    numberField: 'house_number',
+    skipIfSetFields: ['house_number_suffix'],
+    streetFields: ['pre_modifier', 'pre_directional', 'street_name', 'post_type', 'post_directional', 'post_modifier'],
+    ordinalizeNumericField: 'street_name',
+    zipField: 'zipcode',
+    geoJsonField: 'the_geom',
+    source: 'NYC Department of City Planning, Address Points (data.cityofnewyork.us)',
+  },
+  // Orange County, FL (Orlando and the county): 714,909 points, active only.
+  {
+    kind: 'layer',
+    id: 'orange-fl',
+    state: 'FL',
+    bounds: [28.34, -81.66, 28.79, -81.05],
+    queryUrl: 'https://ocgis4.ocfl.net/arcgis/rest/services/AGOL_Open_Data/MapServer/0/query',
+    numberField: 'ADDRESS_NUMBER',
+    skipIfSetFields: ['ADDRESS_NUMBER_SUFFIX'],
+    streetFields: ['PRE_MODIFIER', 'PRE_DIRECTION', 'PRE_TYPE', 'BASENAME', 'POST_TYPE', 'POST_DIRECTION', 'POST_MODIFIER'],
+    unitField: 'UNIT',
+    cityField: 'MUNICIPAL_JURISDICTION',
+    zipField: 'ZIPCODE',
+    where: "ADDRESS_STATUS = 'Active'",
+    source: 'Orange County, FL GIS, Address Points (ocgis4.ocfl.net)',
+  },
+  // Los Angeles County's Countywide Address Management System (CAMS): about 2.7
+  // million primary addresses contributed by the county and its cities. Where a
+  // city did not map every address the Assessor's primary address is the only
+  // one shown, so a missing number here is not evidence of anything.
+  {
+    kind: 'layer',
+    id: 'lacounty-ca',
+    state: 'CA',
+    bounds: [33.65, -118.95, 34.85, -117.6],
+    queryUrl: 'https://services.arcgis.com/RmCCgQtiZLDCtblq/ArcGIS/rest/services/eGIS_Addressing_ADDRESS_POINTSv2/FeatureServer/0/query',
+    numberField: 'Number',
+    skipIfSetFields: ['NumPrefix', 'NumSuffix'],
+    streetFields: ['PreMod', 'PreDir', 'PreType', 'StreetName', 'PostType', 'PostDir', 'PostMod'],
+    unitField: 'UnitName',
+    cityField: 'PostComm1',
+    zipField: 'ZipCode',
+    source: 'Los Angeles County eGIS, CAMS Address Points (services.arcgis.com)',
+  },
+  // City of Chicago's address-point locator (point addresses only; Chicago
+  // publishes no queryable address-point table). Spelling differs from the
+  // postal form ("LASALLE" for "La Salle"), so the score floor is 90, not 97.
+  {
+    kind: 'geocoder',
+    id: 'chicago-il',
+    state: 'IL',
+    bounds: [41.64, -87.95, 42.03, -87.5],
+    findUrl: 'https://gisapps.chicago.gov/arcgis/rest/services/AddressPoints/GeocodeServer/findAddressCandidates',
+    minScore: 90,
+    source: 'City of Chicago, Address Points locator (gisapps.chicago.gov)',
   },
   // West Virginia's statewide Site Address Points (SAMS-II, WVU GIS Technical
   // Center) are only published through this locator. Point addresses only.
@@ -212,6 +349,27 @@ export function layerFeatureToPoint(src: LayerPointSource, f: RawLayerFeature): 
   };
 }
 
+const DIRECTION_WORDS = new Set(['north', 'south', 'east', 'west', 'northeast', 'northwest', 'southeast', 'southwest']);
+
+/**
+ * Hennepin County writes Minneapolis's downtown streets "5th Street South"
+ * while Census and the USPS write "S 5th St": the same street, with the
+ * directional moved. The matcher compares directional position literally, so
+ * when a point's street and the target's are the same words in a different
+ * order, and the only word that moved is a directional, the point is given the
+ * target's own spelling. Anything else (different words, a different
+ * directional) is left exactly as published.
+ */
+export function reconcileDirectionalPosition(pointStreet: string, targetStreet: string): string {
+  const a = streetKey(pointStreet).split(' ');
+  const b = streetKey(targetStreet).split(' ');
+  if (a.join(' ') === b.join(' ') || a.length !== b.length || a.length < 2) return pointStreet;
+  if ([...a].sort().join(' ') !== [...b].sort().join(' ')) return pointStreet;
+  const movedLeadToTail = DIRECTION_WORDS.has(a[0]) && DIRECTION_WORDS.has(b[b.length - 1]) && a.slice(1).join(' ') === b.slice(0, -1).join(' ');
+  const movedTailToLead = DIRECTION_WORDS.has(a[a.length - 1]) && DIRECTION_WORDS.has(b[0]) && a.slice(0, -1).join(' ') === b.slice(1).join(' ');
+  return movedLeadToTail || movedTailToLead ? targetStreet : pointStreet;
+}
+
 async function queryLayer(
   src: LayerPointSource,
   lat: number,
@@ -247,6 +405,58 @@ async function queryLayer(
   if (body.error) throw new Error(JSON.stringify(body.error));
   const points = (body.features ?? []).map((f) => layerFeatureToPoint(src, f)).filter((p): p is AddressPoint => p !== null);
   return { points, exceeded: body.exceededTransferLimit === true };
+}
+
+export function socrataRowToPoint(src: SocrataPointSource, row: Record<string, unknown>): AddressPoint | null {
+  for (const field of src.skipIfSetFields ?? []) if (str(row[field]) !== '') return null;
+  const houseNumber = str(row[src.numberField]);
+  if (!/^\d+$/.test(houseNumber) || houseNumber === '0') return null;
+  const street = src.streetFields
+    .map((field) => (field === src.ordinalizeNumericField ? ordinal(str(row[field])) : str(row[field])))
+    .filter((p) => p !== '')
+    .join(' ');
+  let lat = NaN;
+  let lon = NaN;
+  if (src.geoJsonField) {
+    const coords = (row[src.geoJsonField] as { coordinates?: unknown[] } | undefined)?.coordinates;
+    if (Array.isArray(coords)) {
+      lon = Number(coords[0]);
+      lat = Number(coords[1]);
+    }
+  } else if (src.latField && src.lonField) {
+    lat = Number(str(row[src.latField]));
+    lon = Number(str(row[src.lonField]));
+  }
+  if (street === '' || !Number.isFinite(lat) || !Number.isFinite(lon) || lat === 0 || lon === 0) return null;
+  return {
+    houseNumber,
+    street,
+    unit: src.unitField ? str(row[src.unitField]) || null : null,
+    city: null,
+    zip: src.zipField ? str(row[src.zipField]).slice(0, 5) || null : null,
+    placement: null,
+    source: src.source,
+    lat,
+    lon,
+  };
+}
+
+/** Rows near a point from a Socrata table. 5,000 rows is far more than any one city block holds. */
+async function querySocrata(src: SocrataPointSource, lat: number, lon: number, radiusMeters: number, fetchImpl: typeof fetch, timeoutMs: number): Promise<AddressPoint[]> {
+  const select = [
+    src.numberField,
+    ...(src.skipIfSetFields ?? []),
+    ...src.streetFields,
+    ...[src.unitField, src.zipField, src.latField, src.lonField, src.geoJsonField].filter((f): f is string => !!f),
+  ].join(',');
+  const params = new URLSearchParams({
+    $select: select,
+    $where: `within_circle(${src.locationField}, ${lat}, ${lon}, ${radiusMeters})`,
+    $limit: '5000',
+  });
+  const body = await getJson(`${src.resourceUrl}?${params.toString()}`, fetchImpl, timeoutMs);
+  if (!Array.isArray(body)) throw new Error('unexpected Socrata response');
+  return (body as Record<string, unknown>[]).map((row) => socrataRowToPoint(src, row)).filter((p): p is AddressPoint => p !== null);
 }
 
 /** Street name stripped of directionals and a trailing street-type word, so "KANAWHA BLVD E" and "Kanawha Blvd" compare. */
@@ -336,11 +546,13 @@ export async function fetchCountyAddressPoints(
     sources.map(async (src): Promise<AddressPoint[]> => {
       try {
         if (src.kind === 'geocoder') return await queryGeocoder(src, oneLineAddress, fetchImpl, timeoutMs);
+        if (src.kind === 'socrata') return await querySocrata(src, lat, lon, radiusMeters, fetchImpl, timeoutMs);
         let r = await queryLayer(src, lat, lon, radiusMeters, fetchImpl, timeoutMs);
         if (r.exceeded && radiusMeters > DENSE_RETRY_METERS) {
           r = await queryLayer(src, lat, lon, DENSE_RETRY_METERS, fetchImpl, timeoutMs);
         }
-        return r.points;
+        const target = parts.street;
+        return target ? r.points.map((p) => (p.street ? { ...p, street: reconcileDirectionalPosition(p.street, target) } : p)) : r.points;
       } catch {
         return NO_POINTS;
       }

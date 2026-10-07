@@ -6,7 +6,10 @@ import {
   fetchCountyAddressPoints,
   layerFeatureToPoint,
   ordinal,
+  reconcileDirectionalPosition,
+  socrataRowToPoint,
   type LayerPointSource,
+  type SocrataPointSource,
 } from '../geocode/county-points.ts';
 import { resolveRooftop } from '../geocode/rooftop.ts';
 
@@ -98,6 +101,98 @@ describe('layerFeatureToPoint()', () => {
   });
 });
 
+const socrata = (id: string): SocrataPointSource => {
+  const s = ADDRESS_POINT_SOURCES.find((x) => x.id === id);
+  assert.ok(s && s.kind === 'socrata', `${id} is a registered Socrata source`);
+  return s as SocrataPointSource;
+};
+
+describe('socrataRowToPoint()', () => {
+  test('San Francisco: plain latitude/longitude columns, street name + type', () => {
+    const p = socrataRowToPoint(socrata('sf-ca'), {
+      address_number: '401',
+      street_name: 'VAN NESS',
+      street_type: 'AVE',
+      zip_code: '94102',
+      latitude: '37.77946222286584',
+      longitude: '-122.42051342151602',
+    });
+    assert.ok(p);
+    assert.equal(p!.houseNumber, '401');
+    assert.equal(p!.street, 'VAN NESS AVE');
+    assert.equal(p!.lat, 37.77946222286584);
+    assert.equal(p!.lon, -122.42051342151602);
+  });
+
+  test('NYC: coordinates come from the GeoJSON point (lon first), the grid number becomes an ordinal', () => {
+    const p = socrataRowToPoint(socrata('nyc-ny'), {
+      house_number: '100',
+      pre_directional: 'W',
+      street_name: '42',
+      post_type: 'ST',
+      zipcode: '10036',
+      the_geom: { type: 'Point', coordinates: [-73.9856, 40.7566] },
+    });
+    assert.ok(p);
+    assert.equal(p!.street, 'W 42nd ST');
+    assert.equal(p!.lat, 40.7566);
+    assert.equal(p!.lon, -73.9856);
+  });
+
+  test('NYC: a hyphenated Queens number ("12-34") and a suffixed number are skipped, not guessed at', () => {
+    const base = { street_name: 'MAIN', post_type: 'ST', the_geom: { type: 'Point', coordinates: [-73.8, 40.7] } };
+    assert.equal(socrataRowToPoint(socrata('nyc-ny'), { ...base, house_number: '12-34' }), null);
+    assert.equal(socrataRowToPoint(socrata('nyc-ny'), { ...base, house_number: '12', house_number_suffix: 'A' }), null);
+  });
+
+  test('a row with no usable coordinates is skipped', () => {
+    assert.equal(socrataRowToPoint(socrata('sf-ca'), { address_number: '1', street_name: 'X', street_type: 'ST' }), null);
+    assert.equal(
+      socrataRowToPoint(socrata('sf-ca'), { address_number: '1', street_name: 'X', street_type: 'ST', latitude: '0', longitude: '0' }),
+      null,
+    );
+  });
+});
+
+describe('reconcileDirectionalPosition()', () => {
+  test('Hennepin\'s "5th Street South" takes the target\'s "S 5th St" spelling', () => {
+    assert.equal(reconcileDirectionalPosition('5th Street South', 'S 5th St'), 'S 5th St');
+    assert.equal(reconcileDirectionalPosition('Grant Street West', 'W Grant St'), 'W Grant St');
+  });
+  test('the other way round works too', () => {
+    assert.equal(reconcileDirectionalPosition('South 5th Street', '5th St S'), '5th St S');
+  });
+  test('a DIFFERENT directional is never reconciled: "5th Street North" is not "S 5th St"', () => {
+    assert.equal(reconcileDirectionalPosition('5th Street North', 'S 5th St'), '5th Street North');
+  });
+  test('different street words are left alone', () => {
+    assert.equal(reconcileDirectionalPosition('6th Street South', 'S 5th St'), '6th Street South');
+    assert.equal(reconcileDirectionalPosition('Main Street', 'Main St'), 'Main Street');
+  });
+});
+
+describe('the registry', () => {
+  test('every source has a state, bounds that are a valid box, and a provenance string', () => {
+    for (const s of ADDRESS_POINT_SOURCES) {
+      assert.match(s.state, /^[A-Z]{2}$/, s.id);
+      assert.ok(s.bounds[0] < s.bounds[2] && s.bounds[1] < s.bounds[3], `${s.id} bounds`);
+      assert.ok(s.source.length > 10, `${s.id} source`);
+    }
+  });
+  test('ids are unique', () => {
+    const ids = ADDRESS_POINT_SOURCES.map((s) => s.id);
+    assert.equal(new Set(ids).size, ids.length);
+  });
+  test('no layer source requests an owner, tax or value column', () => {
+    for (const s of ADDRESS_POINT_SOURCES) {
+      if (s.kind !== 'layer') continue;
+      for (const f of [s.numberField, ...s.streetFields, s.unitField, s.cityField, s.zipField, ...(s.skipIfSetFields ?? [])]) {
+        assert.doesNotMatch(f ?? '', /owner|tax|value|val$/i, `${s.id}: ${f}`);
+      }
+    }
+  });
+});
+
 describe('fetchCountyAddressPoints()', () => {
   test('a point outside every source\'s bounds sends no request at all', async () => {
     let calls = 0;
@@ -184,6 +279,21 @@ describe('fetchCountyAddressPoints()', () => {
     });
     test('a different house number is refused', async () => {
       assert.deepEqual(await ask([candidate({ AddNum: '1902' })]), []);
+    });
+    test('Chicago: a point address scoring 95 is accepted by the 90-point floor, with the locator\'s "LASALLE" spelling matching "LaSalle"', async () => {
+      const out = await fetchCountyAddressPoints(
+        '121 N LaSalle St, Chicago, IL 60602',
+        41.8838,
+        -87.6321,
+        300,
+        respond({
+          candidates: [
+            { location: { x: -87.632071, y: 41.883784 }, score: 95.05, attributes: { Addr_type: 'PointAddress', AddNum: '121', StPreDir: 'N', StName: 'LASALLE', StType: 'ST', Postal: '60601' } },
+          ],
+        }),
+      );
+      assert.equal(out.length, 1);
+      assert.match(out[0].source ?? '', /Chicago/);
     });
     test('a different street is refused', async () => {
       assert.deepEqual(await ask([candidate({ StPreDir: '', StName: 'WASHINGTON ST' })]), []);

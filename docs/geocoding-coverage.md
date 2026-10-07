@@ -136,13 +136,19 @@ back as `authoritative`, with the publishing government in the point's
 `source`. Every source below was queried live and tested against real
 addresses before it was registered.
 
-| Source | Covers | Result |
-| --- | --- | --- |
-| Allegheny County GIS, Address Points | Pittsburgh and the county | 10 of 10 sampled City of Pittsburgh addresses resolved `authoritative`, 18-207m from Census's point; directional streets ("N Negley Ave", "S 9th St") match |
-| City of Miami GIS, All City Addresses | City of Miami | Four grid addresses resolved `authoritative` (the layer writes "NE 2 AV", which is rewritten to "NE 2nd AV" so it compares) |
-| Madison County, MS 911 (via MARIS) | Madison, Ridgeland, Canton area | `authoritative` on the tested address |
-| Rankin County, MS 911 (via MARIS) | Brandon, Flowood area | `authoritative` on the tested address |
-| WV GIS Technical Center, Site Address Points | West Virginia statewide, queried through its locator | Point-address candidates only, score 97+, house number and core street name must agree |
+| Source | Kind | Covers | Result |
+| --- | --- | --- | --- |
+| Allegheny County GIS, Address Points | layer | Pittsburgh and the county | 10 of 10 sampled City of Pittsburgh addresses resolved `authoritative`, 18-207m from Census's point; directional streets ("N Negley Ave", "S 9th St") match |
+| Ada County Address Exchange (via City of Boise GIS) | layer | Boise, Meridian, Kuna, county | City Hall and the Capitol area resolved `authoritative` / `authoritative-neighbors`; 275,171 points |
+| Hennepin County GIS, Address Points | layer | Minneapolis and the county | 350 S 5th St and 200 S 6th St resolved `authoritative`. The county writes "5th Street South"; the target's "S 5th St" spelling is applied only when the same words differ by a moved directional |
+| Orange County, FL GIS, Address Points | layer | Orlando and the county | Both tested addresses `authoritative`; 714,909 points, active only |
+| Los Angeles County eGIS, CAMS Address Points | layer | LA County, about 2.7M points | Four of four tested addresses `authoritative`. Coverage inside a city depends on what that city contributed |
+| City of Miami GIS, All City Addresses | layer | City of Miami | Four grid addresses resolved `authoritative` (the layer writes "NE 2 AV", rewritten to "NE 2nd AV") |
+| Madison and Rankin counties MS, 911 via MARIS | layer | Ridgeland, Canton, Brandon, Flowood | `authoritative` on the tested addresses |
+| San Francisco Enterprise Addressing System (DataSF) | socrata | San Francisco | Four of five tested addresses `authoritative` |
+| NYC Planning, Address Points | socrata | All five boroughs | Three of three Manhattan addresses `authoritative`/`authoritative-neighbors`; Queens hyphenated numbers are skipped |
+| City of Chicago, Address Points locator | geocoder | Chicago | `authoritative` on the tested address; point addresses only, score 90+ |
+| WV GIS Technical Center, Site Address Points | geocoder | West Virginia | Point-address candidates only, score 97+ |
 
 What was looked at and NOT added, and why:
 
@@ -154,13 +160,25 @@ What was looked at and NOT added, and why:
   undocumented.
 - **Detroit's `AddressPoints` layer.** About 1,000 rows, mostly businesses,
   not a full address set. Detroit stays covered by the parcel source above.
+- **Lexington, KY.** The E911 layer exists
+  (`services1.arcgis.com/Mg7DLdfYcSWIaDnu`, 191,027 points) but NAD already
+  resolved Lexington addresses `authoritative`, so it was not registered.
+- **Philadelphia.** The city's AIS address-points service no longer lists a
+  layer; the OPA property layer is a parcel record, not address points.
+- **St. Louis (city).** Only a parcel/street geocoder is published, no points.
+- **Milwaukee.** The county address-point service is "not started"; the
+  hosted replacement was not located.
+- **Jacksonville.** The composite locator returned no candidates for four real
+  addresses.
+- **Cook County's own locators** return street interpolations ("StreetAddress"),
+  not points, and were not used.
+- **Lansing and Flint, MI; Honolulu.** No public address-point service found.
 - **Hinds County / Jackson, MS.** MARIS publishes county point-address layers
   for 25 counties and Hinds is not one of them.
-- **Honolulu, Boise (Ada County), Manchester NH.** No public address-point
-  service was found. Manchester publishes a Public Works "service address
-  points" layer, but it is a utility record rather than the addressing
-  authority's, so it was not used. Ada County's combined address layer is
-  said to be on Boise's open-data hub; no queryable endpoint was confirmed.
+- **Manchester NH.** The only layer found is a Public Works "service address
+  points" utility record, not the addressing authority's, so it was not used.
+  (Boise's combined Ada County layer, previously unconfirmed, was located on the
+  City of Boise's ArcGIS organization and is registered above.)
 - **Grand Rapids / Kent County, MI.** Covered by the parcel source; the
   county's own geocoder was not added.
 
