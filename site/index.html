@@ -37,7 +37,7 @@
     </div>
     <h1>Accurate payroll tax, priced for growing payroll teams.</h1>
     <div class="hero-row">
-      <p class="hero-lead">One API call returns every tax line on a paycheck — federal, state, and local. Rooftop-level geocoding and address lookup find the exact local jurisdictions for any work address. Pay per paycheck, with no contract, no minimums, and no sales call.</p>
+      <p class="hero-lead">One API call returns every tax line on a paycheck — federal, state, and local. Rooftop-level geocoding and address lookup find the exact local jurisdictions for any work address, and wage-garnishment limits and minimum-wage checks come in the same call. Pay per paycheck, with no contract, no minimums, and no sales call.</p>
       <div class="hero-actions">
         <a class="btn btn-lg btn-primary" href="/signup">Start free trial <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
         <a class="btn btn-lg btn-secondary" href="/docs">Start building</a>
@@ -244,7 +244,7 @@
       <div class="fp-row"><div class="num">01</div><h3>One call, every tax line</h3><p>Federal, state, and local lines come back together in a single response. No stitching calls together.</p></div>
       <div class="fp-row"><div class="num">02</div><h3>Integer cents</h3><p>Every amount is a whole number of cents. No floating-point rounding, ever.</p></div>
       <div class="fp-row"><div class="num">03</div><h3>Effective-dated rates</h3><p>A check dated before a rate change uses the rate that was in effect on that date.</p></div>
-      <div class="fp-row"><div class="num">04</div><h3>Garnishments &amp; minimum wage</h3><p>Wage garnishments and minimum-wage checks are included in the same calculation.</p></div>
+      <div class="fp-row"><div class="num">04</div><h3>Garnishments &amp; minimum wage</h3><p>Both are answered in the same paycheck call, at no extra cost. Send a garnishment order and get back what the law lets you withhold: the federal Consumer Credit Protection Act limit for consumer debt, child support and federal student loans, with state rules applied. Send an hourly rate and get back whether it clears the binding federal, state or local minimum wage, across all 50 states, DC and 69 city and county ordinances.</p></div>
       <div class="fp-row"><div class="num">05</div><h3>Rooftop geocoding &amp; address lookup</h3><p>Local taxes follow the exact address, not the ZIP code. Rooftop-level geocoding places a work or home address from a blend of address sources, at no extra cost, and every response reports the <code>precision</code> it achieved.</p></div>
       <div class="fp-row"><div class="num">06</div><h3>No third-party dependencies</h3><p>The calculation runs with no third-party dependencies.</p></div>
       <div class="fp-end"></div>
@@ -267,7 +267,7 @@
       </div>
       <div class="faq" style="grid-column:4 / span 9">
         <div class="faq-item"><div class="qrow"><span class="qn">Q1</span><div><h3>How much does it cost?</h3><p><span data-rate>$0.09</span> per paycheck calculated. No contract, no minimums, no setup fee, and no per-state or per-jurisdiction tiers.</p></div></div></div>
-        <div class="faq-item"><div class="qrow"><span class="qn">Q2</span><div><h3>What does it cover?</h3><p>Federal, all 50 states and DC, and local taxes down to the city, county, school district, and transit district, including Ohio, Pennsylvania, Michigan, Indiana, Kentucky, Alabama, New York City, Yonkers, and Oregon transit and Metro.</p></div></div></div>
+        <div class="faq-item"><div class="qrow"><span class="qn">Q2</span><div><h3>What does it cover?</h3><p>Federal, all 50 states and DC, and local taxes down to the city, county, school district, and transit district, including Ohio, Pennsylvania, Michigan, Indiana, Kentucky, Alabama, New York City, Yonkers, and Oregon transit and Metro. Wage-garnishment limits and minimum-wage checks (federal, state and local) are included in the same call.</p></div></div></div>
         <div class="faq-item"><div class="qrow"><span class="qn">Q3</span><div><h3>What if a jurisdiction isn’t covered?</h3><p>You get an explicit error or a “not modelled” line in the response. Never a silent $0.</p></div></div></div>
         <div class="faq-item"><div class="qrow"><span class="qn">Q4</span><div><h3>How precise is the address lookup?</h3><p>Rooftop-level wherever our blend of address sources has a point for the address. Otherwise it falls back to block-level or street-range placement. Every response reports the <code>precision</code> it used, so you always know. It&rsquo;s included in the same <span data-rate>$0.09</span> per call. <a href="/docs">See the docs.</a></p></div></div></div>
         <div class="faq-item"><div class="qrow"><span class="qn">Q5</span><div><h3>Do I need to talk to sales?</h3><p>No. Read the docs and start building.</p></div></div></div>

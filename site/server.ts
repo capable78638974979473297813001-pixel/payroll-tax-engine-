@@ -16,6 +16,7 @@ import { CALL_TIERS, TRIAL_DAYS, PERIODS_PER_YEAR, estimate as computePricing, c
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
 import { isEmailConfigured, sendVerificationEmail } from './lib/mail.ts';
 import { validatePaycheckInput } from './lib/validate.ts';
+import { ExtrasRefusal, runPaycheckExtras, validatePaycheckExtras } from './lib/extras.ts';
 import { keyLifeFor } from './lib/keylife.ts';
 import { verifierConfigured, issueCode, checkCode } from './lib/verifier.ts';
 import { checkoutPaymentMethodTypes } from '../api/stripe.ts';
@@ -1887,12 +1888,34 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
     return;
   }
 
+  // --- optional extras: garnishments[] and minimumWageCheck -------------
+  // Answered in this same call and billed as this same call.
+  const extrasCheck = validatePaycheckExtras(raw as Record<string, unknown>, validation.value.workState?.code);
+  if (!extrasCheck.ok) {
+    recordUsage(keyHash, 422, 'validation_failed', validation.value.checkDate);
+    sendJson(
+      res,
+      422,
+      { error: 'The request did not pass validation.', code: 'invalid_input', details: extrasCheck.errors, requestId },
+      rlHeaders,
+    );
+    return;
+  }
+
   // --- calculate --------------------------------------------------------
   let status = 200;
   let responseBody: unknown;
   let usageError: string | null = null;
   try {
-    responseBody = { result: calculatePaycheck(validation.value) };
+    const result = calculatePaycheck(validation.value);
+    const extras = runPaycheckExtras(validation.value, result, extrasCheck.value);
+    responseBody = {
+      result: {
+        ...result,
+        ...(extras.garnishment ? { garnishment: extras.garnishment } : {}),
+        ...(extras.minimumWage ? { minimumWage: extras.minimumWage } : {}),
+      },
+    };
   } catch (err) {
     // Validation covers the common bad-input cases, so a throw here is
     // unexpected. Log the real reason for support (keyed by requestId);
@@ -1901,7 +1924,9 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
     usageError = err instanceof Error ? err.message : 'calculation_error';
     console.error(`[paycheck ${requestId}] calculation failed:`, usageError);
     responseBody =
-      err instanceof UnsupportedTaxYearError
+      err instanceof ExtrasRefusal
+        ? { error: err.message, code: 'invalid_input', details: [{ path: err.path, message: err.message }], requestId }
+        : err instanceof UnsupportedTaxYearError
         ? { error: err.message, code: 'unsupported_tax_year', requestId }
         : err instanceof CannotComputeError
         ? { error: err.message, code: 'cannot_compute', requestId }

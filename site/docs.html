@@ -41,6 +41,7 @@
     <a href="#versioning">Versioning &amp; dates</a>
     <div class="g">API reference</div>
     <a href="#post"><span class="post-tag">POST</span> /v1/paycheck</a>
+    <a href="#garnishments-minimum-wage">Garnishments &amp; minimum wage</a>
     <a href="#states"><span class="post-tag">GET</span> /v1/states</a>
     <a href="#me"><span class="post-tag">GET</span> /v1/me</a>
     <a href="#health"><span class="post-tag">GET</span> /v1/health</a>
@@ -156,7 +157,9 @@
         <tr><td><code>employer</code></td><td class="ty">object</td><td class="desc">Employer facts the engine cannot derive, most importantly your assigned unemployment rate per state, for example <code>{ "stateUnemploymentRate": { "OH": 0.031 } }</code>. Absent, the state’s published new-employer rate is used and noted in that line’s <code>detail</code>. Experience-rated employers in a state with a separate assessment (Massachusetts’s COVID-19 Recovery Assessment) also pass it as <code>stateUnemploymentAssessmentRate</code>, for example <code>{ "MA": 0.01 }</code>.</td></tr>
         <tr><td><code>employmentCategory</code></td><td class="ty">enum</td><td class="desc"><code>standard, clergy, statutory_employee, household, agricultural, railroad, election_worker</code>. Which employment-tax rules apply. Defaults to <code>standard</code>.</td></tr>
         <tr><td><code>priorRegularPayment</code></td><td class="ty">object</td><td class="desc"><code>{ taxableWages, stateIncomeTaxWithheld? }</code>. For states that tax a stand-alone bonus by aggregating it with the last regular check. Omit it and the bonus is taxed on its own.</td></tr>
-        <tr><td><code>hoursWorked</code></td><td class="ty">number</td><td class="desc">Hours in this pay period, for minimum-wage checks.</td></tr>
+        <tr><td><code>hoursWorked</code></td><td class="ty">number</td><td class="desc">Hours in this pay period. Read only by per-hour levies such as Oregon’s Workers’ Benefit Fund; when omitted they fall back to the state’s own flat hours for the pay frequency.</td></tr>
+        <tr><td><code>garnishments[]</code></td><td class="ty">array</td><td class="desc">Wage garnishment orders to run against this check: <code>{ id, type, amountOrdered, ... }</code>. Returned as <code>result.garnishment</code>. <a href="#garnishments-minimum-wage">Details</a>.</td></tr>
+        <tr><td><code>minimumWageCheck</code></td><td class="ty">object</td><td class="desc"><code>{ hourlyRate, locality?, employeeCount?, tipped?, region?, occupation? }</code>. Compares the employee’s hourly rate with the binding federal, state and local minimum wage. Returned as <code>result.minimumWage</code>. <a href="#garnishments-minimum-wage">Details</a>.</td></tr>
         <tr><td><code>roundToWholeDollars</code></td><td class="ty">boolean</td><td class="desc">Round federal withholding to whole dollars. Defaults to false.</td></tr>
       </tbody>
     </table>
@@ -183,6 +186,53 @@
     "netPay": 219432
   }
 }</pre>
+
+    <div class="sec-rule" id="garnishments-minimum-wage"></div>
+    <p class="label-mono" style="color:var(--color-gray)">Included in the same call</p>
+    <h2>Garnishments &amp; minimum wage</h2>
+    <p>Send either, or both, on a <code>POST /v1/paycheck</code> request. They are answered in the same call and billed as that one call. Leave them out and the response is unchanged.</p>
+
+    <p style="margin-top:24px;font-weight:700">Garnishments</p>
+    <p>Each order is limited by the Consumer Credit Protection Act ceiling for its type, measured against disposable earnings (gross pay less the employee’s taxes, not pre-tax deductions), with a state’s own limit applied to ordinary consumer debt where it sets one. A support order draws first. Every other order draws from the room left under the same ceiling, never more than the order itself demands. Every line carries a plain-language <code>detail</code> saying which limit applied.</p>
+    <table class="fields">
+      <thead><tr><th>Order field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>id</code></td><td class="ty">string</td><td class="desc">Your identifier for the order, echoed on its result line. Unique within the request.</td></tr>
+        <tr><td><code>type</code></td><td class="ty">enum</td><td class="desc"><code>consumer_creditor, child_support, federal_student_loan_default</code>.</td></tr>
+        <tr><td><code>amountOrdered</code></td><td class="ty">integer cents</td><td class="desc">What the order demands this pay period. The result is the lesser of this and the legal limit.</td></tr>
+        <tr><td><code>supportingOtherFamily</code></td><td class="ty">boolean</td><td class="desc">Required for <code>child_support</code>. Whether the employee supports another spouse or child. It decides a 50% or 60% ceiling and is never assumed.</td></tr>
+        <tr><td><code>arrearsOver12Weeks</code></td><td class="ty">boolean</td><td class="desc"><code>child_support</code> only. Adds five points to the ceiling.</td></tr>
+        <tr><td><code>priority</code></td><td class="ty">integer</td><td class="desc">Among orders that are not child support, the lower number draws first.</td></tr>
+        <tr><td><code>headOfFamily, wageExemptionWaivedInWriting, dependents, householdSize, soleHouseholdSupport, expectedAnnualEarnings, garnishedThisYearForThisOrder</code></td><td class="ty">various</td><td class="desc">Facts that only some states’ rules read (Florida, North Dakota, New Jersey, Alaska, Iowa). Where a state needs one and you leave it out, the federal default applies.</td></tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:24px;font-weight:700">Minimum wage</p>
+    <p>The binding rate is the highest of the federal, state and local minimum wage covering the work. <code>locality</code> names a city or county ordinance (for example <code>"seattle"</code>); the engine will not guess a locality from a state code. A locality it does not recognise comes back in <code>caveats</code> instead of being treated as “no ordinance”.</p>
+
+    <pre class="shape">curl -X POST <span data-origin>https://your-host</span>/v1/paycheck -H "Authorization: Bearer sk_test_..." \
+  -d '{ "checkDate": "2026-06-15", "payFrequency": "biweekly", "workState": { "code": "OH" },
+        "earnings": [ { "code": "REG", "category": "regular", "amount": 300000 } ], "deductions": [],
+        "federalW4": { ... }, "ytd": { ... },
+        "garnishments": [
+          { "id": "cc-1", "type": "consumer_creditor", "amountOrdered": 1000000 },
+          { "id": "cs-1", "type": "child_support", "amountOrdered": 50000, "supportingOtherFamily": true } ],
+        "minimumWageCheck": { "hourlyRate": 1500 } }'
+
+{ "result": { "netPay": 237260, "taxes": [ ... ],
+    "garnishment": {
+      "disposableEarnings": 237260, "aggregateCeiling": 118630,
+      "lines": [
+        { "orderId": "cs-1", "type": "child_support", "withheld": 50000,
+          "detail": "50% CCPA support-order ceiling (supporting another spouse/child) on $2372.60 disposable" },
+        { "orderId": "cc-1", "type": "consumer_creditor", "withheld": 59315,
+          "detail": "federal CCPA ordinary-garnishment cap: lesser of 25% of $2372.60 disposable and ..." } ],
+      "totalWithheld": 109315, "netPayAfterGarnishment": 127945 },
+    "minimumWage": {
+      "hourlyRate": 1500, "requiredHourlyRate": 1100, "compliant": true, "shortfallPerHour": 0,
+      "bindingLevel": "state", "bindingJurisdiction": "Ohio", "tipCreditAllowed": false,
+      "caveats": [], "considered": [ { "level": "federal", "cents": 725, ... }, { "level": "state", "cents": 1100, ... } ] } } }</pre>
+    <p style="color:var(--color-gray);font-size:14px">A request with a missing or malformed order is a field-level <code>422</code> (for example <code>garnishments[0].supportingOtherFamily</code>) and is not billed. Both extras need <code>workState.code</code>.</p>
 
     <div class="sec-rule" id="states"></div>
     <p class="label-mono" style="color:var(--color-gray)">API reference</p>
