@@ -182,6 +182,21 @@ What was looked at and NOT added, and why:
 - **Grand Rapids / Kent County, MI.** Covered by the parcel source; the
   county's own geocoder was not added.
 
+### Where the large local index is used
+
+The on-disk address index (`scripts/build-address-index.ts`, read by
+`geocode/local-address-index.ts`) is a keyed-API feature, not a website one.
+`resolveAddress()` and `resolveEmployee()` take `{ useLocalIndex }`
+(default `true`):
+
+- `POST /v1/address` authenticates the API key first, then resolves with the
+  index allowed.
+- The public calculator's `POST /api/demo/resolve-address` resolves with
+  `useLocalIndex: false`, so it only ever sees the live services.
+
+`tests/local-index-gating.test.ts` pins both, and checks that no other
+handler in `site/server.ts` resolves addresses.
+
 ### A second real bug: "Capital" vs "Capitol"
 
 Found chasing why Kentucky's sample address (700 Capitol Ave, Frankfort)

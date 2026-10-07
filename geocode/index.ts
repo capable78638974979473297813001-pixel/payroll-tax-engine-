@@ -431,7 +431,26 @@ async function coordinateFromFallbackGeocoders(
   return null;
 }
 
-async function geocodeAndResolve(address: string, checkDate: string): Promise<{
+/**
+ * Per-call switches for resolveAddress()/resolveEmployee().
+ *
+ * `useLocalIndex` controls the large on-disk address index (OpenAddresses +
+ * NAD bulk, built by scripts/build-address-index.ts). It is a keyed-API
+ * feature: the public website's demo lookup passes `false`, so it only ever
+ * sees the live services, and requests authenticated with an API key leave
+ * it at its default of `true`. Defaults to true so library callers keep the
+ * behaviour they had.
+ */
+export interface GeocodeOptions {
+  useLocalIndex?: boolean;
+}
+
+/** The local-index reader to hand resolveRooftop(): an empty reader when the index is switched off, undefined (= use the real index if one exists) otherwise. Exported for tests. */
+export function localIndexReaderFor(options?: GeocodeOptions): (() => never[]) | undefined {
+  return options?.useLocalIndex === false ? () => [] : undefined;
+}
+
+async function geocodeAndResolve(address: string, checkDate: string, options?: GeocodeOptions): Promise<{
   resolved: ResolvedJurisdiction;
   matched: true;
   matchQuality: MatchQuality;
@@ -524,7 +543,7 @@ async function geocodeAndResolve(address: string, checkDate: string): Promise<{
   }
 
   const interpolated = { lat: geocoded.coordinates.y, lon: geocoded.coordinates.x };
-  const rooftop = await resolveRooftop(address, interpolated);
+  const rooftop = await resolveRooftop(address, interpolated, undefined, {}, undefined, localIndexReaderFor(options));
 
   let geographies = geocoded.geographies;
   let point = interpolated;
@@ -665,6 +684,7 @@ export async function resolveAddress(
   address: string,
   role: 'work' | 'residence',
   checkDate: string,
+  options?: GeocodeOptions,
 ): Promise<AddressResolution> {
   const {
     resolved,
@@ -678,7 +698,7 @@ export async function resolveAddress(
     rooftop,
     rooftopJurisdictionChanges,
     coordinateSource,
-  } = await geocodeAndResolve(address, checkDate);
+  } = await geocodeAndResolve(address, checkDate, options);
   if (!matched) {
     return {
       address,
@@ -926,11 +946,12 @@ export interface EmployeeResolution {
 export async function resolveEmployee(
   addresses: { work?: string; residence?: string },
   checkDate: string,
+  options?: GeocodeOptions,
 ): Promise<EmployeeResolution> {
   const [work, residence] = await Promise.all([
-    addresses.work ? resolveAddress(addresses.work, 'work', checkDate) : Promise.resolve(null),
+    addresses.work ? resolveAddress(addresses.work, 'work', checkDate, options) : Promise.resolve(null),
     addresses.residence
-      ? resolveAddress(addresses.residence, 'residence', checkDate)
+      ? resolveAddress(addresses.residence, 'residence', checkDate, options)
       : Promise.resolve(null),
   ]);
 

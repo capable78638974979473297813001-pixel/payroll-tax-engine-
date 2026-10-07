@@ -1524,7 +1524,9 @@ async function handleDemoResolveAddress(req: IncomingMessage, res: ServerRespons
   }
   const checkDate = new Date().toISOString().slice(0, 10);
   try {
-    const r = await resolveEmployee({ work: work || undefined, residence: home || undefined }, checkDate);
+    // The public lookup never reads the large local address index; that is a
+    // keyed-API feature (see handleAddress, which leaves useLocalIndex on).
+    const r = await resolveEmployee({ work: work || undefined, residence: home || undefined }, checkDate, { useLocalIndex: false });
     const side = (a: typeof r.work) => a && {
       matched: a.matched,
       matchedAddress: a.matchQuality?.matchedAddress ?? null,
@@ -1961,7 +1963,8 @@ async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise
   }
 
   try {
-    const r = await resolveEmployee({ work: work || undefined, residence: home || undefined }, checkDate);
+    // Key-authenticated, so the large local address index is allowed here.
+    const r = await resolveEmployee({ work: work || undefined, residence: home || undefined }, checkDate, { useLocalIndex: true });
     const side = (a: typeof r.work) => a && {
       matched: a.matched,
       matchedAddress: a.matchQuality?.matchedAddress ?? null,
