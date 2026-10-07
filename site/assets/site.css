@@ -287,6 +287,22 @@ a { color: inherit; }
 }
 .hero-price b { color: var(--color-cobalt); font-weight: 700; }
 
+.photo-band { padding: 72px 0 80px; }
+.photo-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: center; }
+.photo-fig { grid-column: 1 / span 5; margin: 0; }
+.photo-fig img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; background: var(--color-panel); }
+.photo-fig figcaption { margin-top: 8px; font-family: var(--font-mono); font-size: 11px; color: var(--color-gray); }
+.photo-fig figcaption a { color: inherit; }
+.photo-copy { grid-column: 7 / span 6; }
+.photo-copy .statement { margin: 0 0 24px; }
+.photo-lead { margin: 0 0 32px; max-width: 480px; color: var(--color-gray); font-size: 18px; line-height: 28px; }
+@media (max-width: 900px) {
+  .photo-band { padding: 48px 0; }
+  .photo-fig, .photo-copy { grid-column: 1 / -1; }
+  .photo-fig { max-width: 420px; }
+  .photo-copy { margin-top: 32px; }
+}
+
 .band-cobalt { background: var(--color-cobalt); color: #fff; }
 .band-ink { background: var(--color-ink); color: #fff; }
 .fig { padding: 52px 0 40px; min-height: 492px; }
