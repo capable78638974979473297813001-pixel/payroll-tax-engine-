@@ -1883,6 +1883,79 @@ describe('rooftop.ts — authoritative address points (real captured National Ad
         assert.ok(result!.metersFromInterpolated > 5, 'should have picked the farther EXACT match, not the closer unattributed one');
       });
 
+      describe('sources that carry ONE combined site-address string (Detroit, Kent County MI)', () => {
+        const DETROIT = { lat: 42.3535, lon: -83.2065 }; // inside the Detroit box, around 20521 Meyers
+        const GRAND_RAPIDS = { lat: 42.9846, lon: -85.6905 };
+        const combinedFeature = (field: string, value: string, at: { lat: number; lon: number }, sideMeters: number) => ({
+          attributes: { [field]: value },
+          geometry: { rings: [squareRing(at.lat, at.lon, sideMeters)] },
+        });
+        const respondWith = (features: unknown[]) =>
+          (async () => new Response(JSON.stringify({ features }), { status: 200 })) as unknown as typeof fetch;
+
+        test('Detroit: "20521 MEYERS" (street type dropped) matches "20521 Meyers Rd" and returns the small parcel', async () => {
+          const result = await resolveParcelCentroid(
+            '20521 Meyers Rd, Detroit, MI 48235',
+            DETROIT,
+            respondWith([combinedFeature('address', '20521 MEYERS', DETROIT, 17)]),
+            { baseBackoffMs: 0 },
+          );
+          assert.ok(result);
+          assert.equal(result!.source.jurisdictionLabel, 'City of Detroit, MI');
+          assert.ok(result!.areaSquareMeters < 400);
+        });
+
+        test('Kent County: space-padded "300 MONROE AVE NW      " matches, and the smaller of two condo parcels wins', async () => {
+          const result = await resolveParcelCentroid(
+            '300 Monroe Ave NW, Grand Rapids, MI 49503',
+            GRAND_RAPIDS,
+            respondWith([
+              combinedFeature('PROPERTYADDRESS', '300 MONROE AVE NW              ', GRAND_RAPIDS, 60),
+              combinedFeature('PROPERTYADDRESS', '300 MONROE AVE NW              ', GRAND_RAPIDS, 20),
+            ]),
+            { baseBackoffMs: 0 },
+          );
+          assert.ok(result);
+          assert.equal(result!.source.jurisdictionLabel, 'Kent County, MI');
+          assert.ok(result!.areaSquareMeters < 500, 'the 20m x 20m parcel, not the 60m x 60m one');
+        });
+
+        test('a combined-address parcel with a DIFFERENT house number is never used', async () => {
+          const result = await resolveParcelCentroid(
+            '20521 Meyers Rd, Detroit, MI 48235',
+            DETROIT,
+            respondWith([combinedFeature('address', '20523 MEYERS', DETROIT, 17)]),
+            { baseBackoffMs: 0 },
+          );
+          assert.equal(result, null);
+        });
+
+        test('a combined-address parcel over the area gate is refused (a civic campus like 2 Woodward Ave)', async () => {
+          const result = await resolveParcelCentroid(
+            '2 Woodward Ave, Detroit, MI 48226',
+            { lat: 42.3295, lon: -83.0438 },
+            respondWith([combinedFeature('address', '2 WOODWARD AVE', { lat: 42.3295, lon: -83.0438 }, 110)]),
+            { baseBackoffMs: 0 },
+          );
+          assert.equal(result, null);
+        });
+
+        test('a point outside a source\'s bounds is never sent to it (Lansing is in Michigan but in neither county)', async () => {
+          let calls = 0;
+          const result = await resolveParcelCentroid(
+            '124 W Michigan Ave, Lansing, MI 48933',
+            { lat: 42.7335, lon: -84.5535 },
+            (async () => {
+              calls++;
+              return new Response(JSON.stringify({ features: [] }), { status: 200 });
+            }) as unknown as typeof fetch,
+            { baseBackoffMs: 0 },
+          );
+          assert.equal(result, null);
+          assert.equal(calls, 0);
+        });
+      });
+
       test('resolveParcelCentroid: a directional/street-type mismatch ("3RD" vs "N 3rd St") still counts as exact', async () => {
         const bareStreetName = parcelFeature({
           houseNumber: '501',

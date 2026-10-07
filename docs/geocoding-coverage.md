@@ -99,6 +99,40 @@ by existing, so a state with no registered parcel source (every state but
 Pennsylvania, as of this pass — there is no national registry of these,
 only individually-verified counties) behaves exactly as before.
 
+### 2026-10-07: county parcel sources for Detroit and Kent County, MI
+
+The parcel registry (`PARCEL_SOURCES` in `geocode/parcel.ts`) had one entry,
+Dauphin County, PA. Two more were added, each queried live before being
+registered:
+
+| Source | Covers | Address field | Notes |
+| --- | --- | --- | --- |
+| City of Detroit Assessor, Parcels (Current) | Detroit | one combined `address` string | Street type is often dropped ("500 GRISWOLD"); the existing type-suffix fallback bridges it |
+| Kent County GIS, Parcels With Condos | Grand Rapids and the rest of Kent County | one combined, space-padded `PROPERTYADDRESS` | Condo units share an address; the smallest parcel is used |
+
+Both services carry one combined site-address string rather than split
+house-number and street fields, so `classifyParcelAddress` now parses
+`"123 MAIN ST"` into number and street itself (it previously returned
+`other` for every combined-address source, so such a source could never have
+worked). Sources can also carry a `bounds` box so a point outside the
+service's area is never sent to it.
+
+Measured the same day, 12 ordinary residential addresses each: every Detroit
+address resolved to a 287-625 sqm parcel, 42-62m from Census's interpolated
+point; 9 of 12 Kent County addresses resolved (785-1,751 sqm, 20-106m from
+Census) and 3 did not (parcel address text did not match, so the tier refused).
+
+The gate still does its job on civic addresses: "2 Woodward Ave" (Detroit)
+and "300 Monroe Ave NW" (Grand Rapids) sit on parcels of 6,000-12,000 sqm,
+far over the 2,000 sqm limit, so they return nothing from this tier and fall
+to the OSM tier as before.
+
+Not added: Allegheny County, PA (Pittsburgh). Its parcel layer carries no
+site address, but the county publishes an official address-point service
+(`gisdata.alleghenycounty.us/arcgis/rest/services/Addressing/Addressing_AddressPoints`)
+with split house-number and street fields. That is point data, not a polygon,
+so it needs its own tier rather than a `parcel-centroid` label.
+
 ### A second real bug: "Capital" vs "Capitol"
 
 Found chasing why Kentucky's sample address (700 Capitol Ave, Frankfort)
