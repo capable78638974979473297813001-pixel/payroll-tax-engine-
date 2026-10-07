@@ -182,6 +182,39 @@ What was looked at and NOT added, and why:
 - **Grand Rapids / Kent County, MI.** Covered by the parcel source; the
   county's own geocoder was not added.
 
+### The large local index, measured (2026-10-07)
+
+Built end to end with the same job the server runs at boot
+(`scripts/ensure-address-index.ts` with `ADDRESS_INDEX_AUTOBUILD=1`):
+
+| | |
+| --- | --- |
+| Points | 206,014,795 from OpenAddresses' four US regional extracts (northeast, south, midwest, west) |
+| Coverage | All 50 states and DC. Thinnest: NH 42,811 (only five towns, Manchester is not one), DC 147,867, AK 234,319 |
+| File size | 13.8 GB in index format 2 (about 58 bytes a point). The first layout came to about 97 bytes a point, roughly 21 GB, which would not have fit the 25 GB disk, so it was replaced |
+| Build time | About 24 minutes on a fast 252 GB workstation at the lowest CPU priority; expect several hours on a Starter instance |
+| Peak disk | About 17 GB used during the build (the file, SQLite's sort scratch, and the largest zip, 2.7 GB). `render.yaml` provisions 30 GB |
+
+Run through the real server (`site/server.ts` booted with that index and a
+seeded API key), the same address sent to `/v1/address` (keyed) and
+`/api/demo/resolve-address` (public) gave:
+
+| Address | Keyed API | Public demo |
+| --- | --- | --- |
+| 2 Woodward Ave, Detroit | `rooftop` | `rooftop-osm` |
+| 124 W Michigan Ave, Lansing | `rooftop` | `rooftop-osm` |
+| 495 S Main St, Las Vegas | `rooftop` | `rooftop-osm` |
+| 415 S Beretania St, Honolulu | `rooftop` | `rooftop-osm` |
+| 219 S President St, Jackson MS | `rooftop` | `rooftop-osm` |
+| 300 Monroe Ave NW, Grand Rapids | `rooftop` | `rooftop-osm` |
+| 1 City Hall Plz, Manchester NH | `interpolated` | `interpolated` |
+
+Manchester is the known gap: OpenAddresses carries only five NH towns and no
+public Manchester address-point service was found.
+
+The keyed `/v1/address` response also carries `pointSource`, the publisher of
+the coordinate that was used.
+
 ### Where the large local index is used
 
 The on-disk address index (`scripts/build-address-index.ts`, read by

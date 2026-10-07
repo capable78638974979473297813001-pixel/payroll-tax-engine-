@@ -365,6 +365,29 @@ function describePoint(rooftop: RooftopResult): string {
   }
 }
 
+/**
+ * Who published the coordinate a resolution used: the government (or data
+ * collection) behind an authoritative point, "OpenStreetMap" for the house-level
+ * fallback, the county for a parcel centroid. Null when Census's own interpolated
+ * point was used, since nothing better than it was found. Exposed so a keyed
+ * caller can see which source produced a coordinate, not just how precise it is.
+ */
+export function pointSourceOf(rooftop: RooftopResult | null): string | null {
+  if (!rooftop?.found || rooftop.ambiguous) return null;
+  switch (rooftop.tier) {
+    case 'authoritative':
+      return rooftop.match?.chosen.source ?? 'local address authority';
+    case 'authoritative-neighbors':
+      return rooftop.neighbors?.below.source ?? null;
+    case 'osm-corroborated':
+      return 'OpenStreetMap';
+    case 'parcel-centroid':
+      return rooftop.parcel?.source.source ?? null;
+    default:
+      return null;
+  }
+}
+
 /** Human-readable list of every geography that came out DIFFERENT at the authoritative point than at the interpolated one. Empty is the normal, reassuring case; non-empty means the corrected coordinate changed the tax answer. */
 function geographyDifferences(
   interpolated: { incorporatedPlaces: string[]; counties: string[]; countySubdivisions: string[]; state: string },

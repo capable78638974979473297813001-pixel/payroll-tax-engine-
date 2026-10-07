@@ -6,7 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 
 import { calculatePaycheck } from '../src/calculate.ts';
 import { CannotComputeError, UnsupportedTaxYearError } from '../src/registry.ts';
-import { resolveEmployee } from '../geocode/index.ts';
+import { pointSourceOf, resolveEmployee } from '../geocode/index.ts';
 import {
   withDb, readDb, appendUsage, hitStoredLimit,
   type AccountRecord, type KeyRecord, type PaymentMethodRecord,
@@ -1972,6 +1972,7 @@ async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise
       place: a.geographies?.incorporatedPlaces[0] ?? null,
       county: a.geographies?.counties[0] ?? null,
       precision: a.matched ? a.precision : null,
+      pointSource: a.matched && a.precision !== 'interpolated' ? pointSourceOf(a.rooftop) : null,
       coordinates: a.coordinates,
     };
     const matched = Boolean(r.work?.matched || r.residence?.matched);

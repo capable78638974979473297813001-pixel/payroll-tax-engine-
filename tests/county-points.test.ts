@@ -1,5 +1,8 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import {
   ADDRESS_POINT_SOURCES,
@@ -12,6 +15,7 @@ import {
   type SocrataPointSource,
 } from '../geocode/county-points.ts';
 import { resolveRooftop } from '../geocode/rooftop.ts';
+import { pointSourceOf } from '../geocode/index.ts';
 
 const source = (id: string): LayerPointSource => {
   const s = ADDRESS_POINT_SOURCES.find((x) => x.id === id);
@@ -347,5 +351,39 @@ describe('resolveRooftop() with a county source', () => {
       () => [],
     );
     assert.notEqual(r.tier, 'authoritative');
+  });
+});
+
+describe('pointSourceOf()', () => {
+  const FAST = { baseBackoffMs: 0, minIntervalMs: 0 };
+  const empty = (async () => new Response(JSON.stringify({ features: [] }), { status: 200 })) as unknown as typeof fetch;
+
+  test('names the publishing government for an authoritative point, wherever it came from', async () => {
+    const r = await resolveRooftop(
+      '600 Grant St, Pittsburgh, PA 15219',
+      { lat: 40.4385, lon: -79.9959 },
+      empty,
+      FAST,
+      undefined,
+      () => [
+        { houseNumber: '600', street: 'Grant St', unit: null, city: null, zip: null, placement: null, source: 'OpenAddresses pa/allegheny', lat: 40.4388, lon: -79.9964 },
+      ],
+    );
+    assert.equal(pointSourceOf(r), 'OpenAddresses pa/allegheny');
+  });
+
+  test('is null when nothing better than the interpolated point was found, or the match was ambiguous', async () => {
+    const none = await resolveRooftop('1 Nowhere Rd, Nowhere, ZZ 00000', { lat: 1, lon: 1 }, empty, FAST, undefined, () => []);
+    assert.equal(pointSourceOf(none), null);
+    assert.equal(pointSourceOf(null), null);
+    assert.equal(pointSourceOf({ ...none, found: true, ambiguous: true, tier: 'authoritative' }), null);
+  });
+
+  test('the keyed /v1/address response carries pointSource and the public demo response does not', () => {
+    const server = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'site', 'server.ts'), 'utf8');
+    const keyed = server.slice(server.indexOf('async function handleAddress('));
+    const demo = server.slice(server.indexOf('async function handleDemoResolveAddress('), server.indexOf('async function handleAddress('));
+    assert.match(keyed, /pointSource:/);
+    assert.doesNotMatch(demo, /pointSource/);
   });
 });

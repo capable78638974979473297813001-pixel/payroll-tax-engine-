@@ -16,9 +16,10 @@ services:
     disk:
       name: omnia-data
       mountPath: /var/data
-      # The address index (~14 GB) lives here too, plus room to build it. A Render
-      # disk can be grown but never shrunk.
-      sizeGB: 25
+      # The address index lives here too: measured at 13.8 GB for 206M points,
+      # plus the largest regional zip (2.7 GB) while it builds. A Render disk can
+      # be grown but never shrunk.
+      sizeGB: 30
     envVars:
       - key: PUBLIC_BASE_URL
         value: https://omniatax.io
