@@ -45,14 +45,14 @@ available the whole time and is now what it resolves to.
 ## Measured result
 
 <!-- coverage:summary:begin -->
-_Regenerated 2026-09-30 by `npm run coverage:geocode -- --write`._
+_Regenerated 2026-10-07 by `npm run coverage:geocode -- --write`._
 
-**50 of 51 jurisdictions resolve to something better than Census's own interpolation**, correcting it by 5m to 269m (median 88m).
+**50 of 51 jurisdictions resolve to something better than Census's own interpolation**, correcting it by 8m to 444m (median 90m).
 
 | Tier | Count |
 | --- | --- |
-| `rooftop` (authoritative) | 34 / 51 |
-| `rooftop-osm` (house-level, corroborated) | 13 / 51 |
+| `rooftop` (authoritative) | 36 / 51 |
+| `rooftop-osm` (house-level, corroborated) | 11 / 51 |
 | `neighbor` (block-level, authoritative) | 2 / 51 |
 | `parcel-centroid` (county GIS, gated) | 1 / 51 |
 | `interpolated` (no improvement available) | 1 / 51 |
@@ -320,7 +320,7 @@ Census's own answer, which is where this project started.
 ### Per jurisdiction
 
 <!-- coverage:table:begin -->
-_Regenerated 2026-09-30._
+_Regenerated 2026-10-07._
 
 | | Tier | Correction | Published by |
 | --- | --- | --- | --- |
@@ -337,7 +337,7 @@ _Regenerated 2026-09-30._
 | GA | `rooftop` | 86m | ATLANTA.GA.US |
 | HI | `rooftop-osm` | 52m | — |
 | IA | `interpolated` | — | — |
-| ID | `rooftop-osm` | 53m | — |
+| ID | `rooftop` | 44m | Ada County Address Exchange via City of Boise GIS (services1.arcgis.com) |
 | IL | `rooftop` | 125m | State of Illinois |
 | IN | `rooftop` | 174m | Indiana Geographic Information Council |
 | KS | `rooftop` | 147m | State of Kansas |
@@ -352,7 +352,7 @@ _Regenerated 2026-09-30._
 | MS | `rooftop-osm` | 8m | — |
 | MT | `rooftop` | 112m | Montana State Library |
 | NC | `rooftop` | 82m | State of North Carolina |
-| ND | `rooftop-osm` | 8m | — |
+| ND | `rooftop` | 444m | State of North Dakota |
 | NE | `rooftop` | 51m | State of Nebraska |
 | NH | `rooftop-osm` | 28m | — |
 | NJ | `rooftop` | 88m | State of New Jersey |
@@ -367,13 +367,13 @@ _Regenerated 2026-09-30._
 | SC | `rooftop-osm` | 107m | — |
 | SD | `rooftop-osm` | 105m | — |
 | TN | `rooftop` | 91m | TN STS GIS Services |
-| TX | `rooftop-osm` | 5m | — |
+| TX | `rooftop-osm` | 8m | — |
 | UT | `rooftop` | 186m | Utah Geospatial Resource Center |
 | VA | `rooftop` | 170m | Virginia Geographic Information Network |
 | VT | `rooftop` | 139m | Vermont Enhanced 911 Board |
 | WA | `rooftop` | 40m | State of Washington |
 | WI | `rooftop` | 31m | State of Wisconsin |
-| WV | `rooftop` | 152m | West Virginia GIS |
+| WV | `rooftop` | 193m | West Virginia GIS |
 | WY | `rooftop` | 50m | Laramie County Wyoming |
 <!-- coverage:table:end -->
 

@@ -788,7 +788,7 @@ export async function resolveAddress(
   }
   if (rooftop?.ambiguous) {
     lowConfidenceReasons.push(
-      `The National Address Database has several points for this house number and street that are too far apart to be one building (${rooftop.match!.spreadMeters.toFixed(0)}m apart) — most likely the same address exists twice inside the search area. Census's interpolated position was kept rather than picking one of them.`,
+      `The authoritative address-point data (National Address Database or a county/city source) has several points for this house number and street that are too far apart to be one building (${rooftop.match!.spreadMeters.toFixed(0)}m apart) — most likely the same address exists twice inside the search area. Census's interpolated position was kept rather than picking one of them.`,
     );
   }
   if (crossCheck.building.houseNumberGap !== null && crossCheck.building.houseNumberGap > LARGE_HOUSE_NUMBER_GAP) {
