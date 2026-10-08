@@ -1,20 +1,56 @@
 {
- "date": "2026-10-07",
+ "date": "2026-10-08",
  "counts": {
-  "unchanged": 474,
-  "unreachable": 5,
-  "blocked": 22,
-  "changed": 9,
+  "unchanged": 475,
+  "unreachable": 4,
+  "blocked": 25,
+  "changed": 6,
   "gone": 4
  },
  "total": 514,
  "changed": [
   {
-   "id": "al-dcd77af5c8",
-   "jurisdiction": "AL",
-   "title": "City of Opelika -- announcement of the occupational tax cut",
-   "url": "https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092",
-   "detail": "2 lines added, 2 removed (link lists / headlines only)",
+   "id": "az-b66098e04c",
+   "jurisdiction": "AZ",
+   "title": "City of Flagstaff -- City of Flagstaff announces minimum wage for 2026",
+   "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
+   "detail": "4 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "co-002adac414",
+   "jurisdiction": "CO",
+   "title": "Boulder County -- Local Minimum Wage",
+   "url": "https://bouldercounty.gov/departments/commissioners/local-minimum-wage/",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "md-d8888f97db",
+   "jurisdiction": "MD",
+   "title": "Howard County, MD -- Minimum Wage schedule (Finance Department)",
+   "url": "https://www.howardcountymd.gov/finance/minimum-wage",
+   "detail": "0 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "mi-b2211f9083",
+   "jurisdiction": "MI",
+   "title": "Other Michigan Cities with Income Tax (City of Grand Rapids consolidated rate/exemption table)",
+   "url": "https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/",
+   "detail": "1 lines added, 1 removed (link lists / headlines only)",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -22,82 +58,17 @@
    "significant": false
   },
   {
-   "id": "az-b66098e04c",
-   "jurisdiction": "AZ",
-   "title": "City of Flagstaff -- City of Flagstaff announces minimum wage for 2026",
-   "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
-   "detail": "2 lines added, 6 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "ma-cdc80eeb37",
-   "jurisdiction": "MA",
-   "title": "Massachusetts DOR withholding tax forms (new Circular M editions are listed here)",
-   "url": "https://www.mass.gov/lists/dor-withholding-tax-forms",
-   "detail": "read with a headless browser; 1 links added, 1 removed",
+   "id": "or-a1d9b0c474",
+   "jurisdiction": "OR",
+   "title": "Oregon Workers' Benefit Fund rule changes",
+   "url": "https://wcd.oregon.gov/laws/Pages/new-rules.aspx",
+   "detail": "3 lines added, 0 removed; 2 links added, 0 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [
-    "https://www.mass.gov/info-details/translation-services"
+    "https://wcd.oregon.gov/laws/Documents/New_rules/070%20WBF%20January%201%2c%202027/070-26072-marked-2026-10-06.pdf",
+    "https://wcd.oregon.gov/laws/Documents/New_rules/070%20WBF%20January%201%2c%202027/70-WCD_5-2026TrackedChanges.pdf"
    ],
-   "links_removed": [
-    "https://www.mass.gov/info-details/how-to-translate-a-website-webpage-or-document-into-your-language"
-   ],
-   "significant": true
-  },
-  {
-   "id": "nh-ac9ef03a4c",
-   "jurisdiction": "NH",
-   "title": "NHES WebTax -- Trust Fund Reductions notice (available thru 2026-Q3)",
-   "url": "https://www2.nhes.nh.gov/webtax/indexSecPg.jsp",
-   "detail": "1 lines added, 1 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "oh-5eceaa717d",
-   "jurisdiction": "OH",
-   "title": "Ohio employer withholding",
-   "url": "https://tax.ohio.gov/business/employer-withholding",
-   "detail": "1 lines added, 1 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "pa-8ec9b7d696",
-   "jurisdiction": "PA",
-   "title": "PA Department of Labor & Industry -- Yearly Tax Highlights (UC)",
-   "url": "https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/yearly-tax-highlights",
-   "detail": "3 links added, 0 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [
-    "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748%20rev%2010-26.pdf",
-    "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-749%20rev%2010-26.pdf",
-    "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-820%20rev%2010-26.pdf"
-   ],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "sd-fd3b550c78",
-   "jurisdiction": "SD",
-   "title": "South Dakota DLR -- Reemployment Assistance for Businesses (rate notices)",
-   "url": "https://dlr.sd.gov/ra/businesses/default.aspx",
-   "detail": "0 lines added, 2 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
    "links_removed": [],
    "significant": true
   },
@@ -112,72 +83,9 @@
    "links_added": [],
    "links_removed": [],
    "significant": true
-  },
-  {
-   "id": "va-b3a051ecad",
-   "jurisdiction": "VA",
-   "title": "Virginia Tax -- Income Tax Withholding Guide for Employers (Rev. 05/25)",
-   "url": "https://www.tax.virginia.gov/sites/default/files/vatax-pdf/employer-withholding-instructions.pdf",
-   "detail": "82 lines added, 704 removed",
-   "figures_added": [],
-   "figures_removed": [
-    "$0",
-    "$0",
-    "$0",
-    "$0",
-    "$0",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00",
-    "0.00"
-   ],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
   }
  ],
- "significant_changes": 8,
+ "significant_changes": 5,
  "broken": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://www.irs.gov/pub/irs-prior/p51--2025.pdf",
@@ -188,8 +96,8 @@
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "verified": 483,
- "unverified": 31,
+ "verified": 481,
+ "unverified": 33,
  "never_baselined": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://does.dc.gov/service/office-wage-hour-compliance-0",
@@ -214,5 +122,5 @@
   "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 16
+ "max_consecutive_failures": 17
 }
