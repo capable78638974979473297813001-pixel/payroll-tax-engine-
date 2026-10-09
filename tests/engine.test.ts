@@ -12001,8 +12001,12 @@ describe('Seattle payroll expense tax (JumpStart)', () => {
   const hasLine = (r: ReturnType<typeof calculatePaycheck>) =>
     r.taxes.some((t) => t.id === 'SEATTLE_PAYROLL_ER');
 
-  test('computes nothing without the employer payroll figure — it cannot be inferred from a paycheck', () => {
-    assert.equal(hasLine(calculatePaycheck(seattle(10000, 0, null))), false);
+  test('computes nothing without the employer payroll figure — and says so instead of staying silent', () => {
+    const r = calculatePaycheck(seattle(10000, 0, null));
+    const line = r.taxes.find((t) => t.id === 'SEATTLE_PAYROLL_ER');
+    assert.equal(line?.amount, 0);
+    assert.equal(line?.dataQuality?.tier, 'not_modelled');
+    assert.match(line!.dataQuality!.note, /seattlePriorYearPayrollExpense/);
   });
 
   test('an employer under the payroll threshold owes nothing', () => {

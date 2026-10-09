@@ -244,6 +244,8 @@ export interface StateCertificate {
   // hand) ---
   /** Caller-resolved locality name for a caller-resolved-locality tax (Newark, Kansas City/St. Louis, Wilmington, Seattle, Denver/Glendale/Greenwood Village/Sheridan/Aurora, WV's service-fee cities, OR's transit districts). */
   locality?: string;
+  /** Every caller-resolved locality when there is more than one (works in Kansas City, lives in the City of St. Louis). The engine reads this together with locality; geocode/'s resolveEmployee() sets it. */
+  localities?: string[];
   /** County name — Indiana's mandatory county tax, Maryland's county piggyback tax, Kentucky's county-role occupational tax. */
   county?: string;
   /**

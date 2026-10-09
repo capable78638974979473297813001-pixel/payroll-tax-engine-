@@ -54,6 +54,8 @@ export interface FieldMatch<T> {
   entry: T | null;
   /** All candidates found when confidence is 'ambiguous' — surfaced for a human to pick, never guessed at. */
   candidates?: T[];
+  /** A 'matched' result that a second fact did not confirm (Pennsylvania: the one PSD for this county and municipality names a different school district than the one at the point). The field is still set; the warning goes to lowConfidenceReasons. */
+  warning?: string;
 }
 
 /**
@@ -141,7 +143,29 @@ function matchPAJurisdiction(
     const muniOk = municipalityForms.some((m) => namesEqual(m, entry.municipality));
     if (countyOk && muniOk && !candidates.includes(entry)) candidates.push(entry);
   }
-  if (candidates.length === 1) return { confidence: 'matched', entry: candidates[0] };
+  if (candidates.length === 1) {
+    const only = candidates[0];
+    // One PSD for this county and municipality means the registry knows only
+    // one school district there. When the district at the point is known and
+    // is a different one, the registry is missing a PSD or the point is off:
+    // keep the match, but say so instead of stamping it silently.
+    if (
+      censusSchoolDistrictName &&
+      !schoolDistrictKeysMatch(
+        schoolDistrictKeyFromCensusName(censusSchoolDistrictName),
+        schoolDistrictKeyFromDataFileName(only.schoolDistrict),
+      )
+    ) {
+      return {
+        confidence: 'matched',
+        entry: only,
+        warning:
+          `PSD ${only.psdCode} (${only.municipality}, ${only.schoolDistrict}) is the only PSD on file for this county and municipality, ` +
+          `but Census places this address in ${censusSchoolDistrictName}. Confirm the PSD before relying on it.`,
+      };
+    }
+    return { confidence: 'matched', entry: only };
+  }
 
   // A PSD code is keyed on (municipality x SCHOOL DISTRICT), so a
   // municipality split across districts has several of them and county +
@@ -553,7 +577,10 @@ export function toCertificateFields(
   if (resolved.ohMunicipality?.confidence === 'matched' && resolved.ohMunicipality.entry) {
     fields[role === 'work' ? 'workCity' : 'residenceCity'] = resolved.ohMunicipality.entry.name;
   }
-  if (resolved.ohSchoolDistrict?.confidence === 'matched' && resolved.ohSchoolDistrict.entry) {
+  // Ohio's school district income tax is owed by RESIDENTS of the district
+  // (ORC 5748), so only the residence address may set it. Taking it from the
+  // work address taxes the employee at the district they work in.
+  if (role === 'residence' && resolved.ohSchoolDistrict?.confidence === 'matched' && resolved.ohSchoolDistrict.entry) {
     fields.schoolDistrictCode = resolved.ohSchoolDistrict.entry.sdNumber;
   }
   if (resolved.county?.confidence === 'matched' && resolved.county.entry) {

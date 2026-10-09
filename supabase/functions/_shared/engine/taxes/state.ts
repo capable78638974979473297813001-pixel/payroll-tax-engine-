@@ -343,8 +343,7 @@ export function stateIncomeTax(
   // gated, since which city (if any) applies is a caller-resolved fact
   // (residence OR work location, either one triggers it) this engine
   // cannot derive from the state code alone.
-  const moLocal = missouriLocalEarningsTax(input, ctx, rules);
-  if (moLocal) lines.push(moLocal);
+  lines.push(...missouriLocalEarningsTax(input, ctx, rules));
 
   // St. Louis's Payroll Expense Tax — a SEPARATE employer-only levy layered
   // on top of the employee earnings tax above, unique to St. Louis (Kansas
@@ -1721,6 +1720,13 @@ function stateUnemploymentEmployerTax(
   const industryRate = industry === undefined ? undefined : cfg.industryNewEmployerRates?.[industry];
   const rate = supplied ?? industryRate ?? cfg.newEmployerRate;
   if (rate === null || rate === undefined) return null;
+  // experienceRange is the state's published range. A supplied rate well
+  // outside it is most often a percent typed as a decimal (3.1 for 3.1%) or
+  // another state's rate; it is used as given, but flagged.
+  const range = cfg.experienceRange;
+  const suppliedOutOfRange =
+    supplied !== undefined &&
+    (supplied > 0.25 || (range != null && (supplied > range.max + 0.02 || supplied < Math.max(0, range.min - 0.02))));
 
   const exempt = unemploymentExemptPretax(cfg.exemptPretax);
   const currentWages = ctx.taxableWagesFor(exempt);
@@ -1736,6 +1742,25 @@ function stateUnemploymentEmployerTax(
       : industryRate !== undefined
         ? `the state's published new-employer rate for its "${industry}" industry classification (see input.employer.suiIndustry)`
         : "the state's published new-employer rate (no employer rate supplied — see input.employer.stateUnemploymentRate)";
+
+  if (suppliedOutOfRange) {
+    return {
+      id: `${rules.code}_SUI_ER`,
+      name: `${rules.name} Unemployment Insurance (Employer)`,
+      payer: 'employer',
+      jurisdiction: 'state',
+      taxableWages,
+      amount,
+      detail: `${fmt(taxableWages)} @ ${(rate * 100).toFixed(3)}% — this employer's own assigned rate`,
+      dataQuality: {
+        tier: 'conflicting_sources',
+        note:
+          `The supplied ${rules.code} unemployment rate ${supplied} (${(supplied! * 100).toFixed(3)}%) is outside ${rules.name}'s published range` +
+          (range ? ` (${(range.min * 100).toFixed(2)}% to ${(range.max * 100).toFixed(2)}%)` : '') +
+          '. It was used as given. Rates are decimals (0.031 for 3.1%); check it against the rate notice.',
+      },
+    };
+  }
 
   return {
     id: `${rules.code}_SUI_ER`,
@@ -4872,13 +4897,38 @@ interface NewarkPayrollTaxConfig {
  * Newark paycheck with one. See tests/engine.test.ts's Newark describe
  * block for the before/after figures.
  */
+/**
+ * Every caller-resolved locality on the certificate: certificate.locality
+ * plus certificate.localities. One employee can genuinely owe more than one
+ * locality tax at once (works in Kansas City, lives in the City of St.
+ * Louis), and a single string can only hold one, so geocode/'s
+ * resolveEmployee() sets localities to all of them.
+ */
+function certLocalities(cert: Record<string, unknown>): string[] {
+  const out: string[] = [];
+  if (typeof cert.locality === 'string' && cert.locality) out.push(cert.locality);
+  if (Array.isArray(cert.localities)) {
+    for (const l of cert.localities) if (typeof l === 'string' && l && !out.includes(l)) out.push(l);
+  }
+  return out;
+}
+
+function hasLocality(cert: Record<string, unknown>, name: string): boolean {
+  return certLocalities(cert).includes(name);
+}
+
+/** The first of the certificate's localities that this tax knows (a WV fee city, a CO OPT city, an OR transit district). */
+function pickLocality(cert: Record<string, unknown>, known: (l: string) => boolean): string | undefined {
+  return certLocalities(cert).find(known);
+}
+
 function newarkPayrollTaxEmployer(
   input: PaycheckInput,
   ctx: ComputeContext,
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.locality !== 'Newark') return null;
+  if (!hasLocality(cert, 'Newark')) return null;
 
   const cfg = rules.newarkPayrollTax as NewarkPayrollTaxConfig | undefined;
   if (!cfg) return null;
@@ -4993,14 +5043,30 @@ function seattlePayrollExpenseTax(
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.locality !== 'Seattle') return null;
+  if (!hasLocality(cert, 'Seattle')) return null;
 
   const cfg = (rules.localIncomeTax as { seattlePayrollExpenseTax?: SeattlePayrollTaxConfig } | undefined)
     ?.seattlePayrollExpenseTax;
   if (!cfg) return null;
 
   const priorYearPayroll = input.employer?.seattlePriorYearPayrollExpense;
-  if (priorYearPayroll === undefined) return null;
+  if (priorYearPayroll === undefined) {
+    // Which band applies (and whether the employer owes at all) depends on
+    // its prior-year Seattle payroll. Say so instead of producing nothing.
+    return {
+      id: 'SEATTLE_PAYROLL_ER',
+      name: 'Seattle Payroll Expense Tax (Employer)',
+      payer: 'employer',
+      jurisdiction: 'local',
+      taxableWages: 0,
+      amount: 0,
+      detail: 'Not computed: input.employer.seattlePriorYearPayrollExpense was not supplied.',
+      dataQuality: {
+        tier: 'not_modelled',
+        note: "Seattle's JumpStart payroll expense tax depends on the employer's prior-year Seattle payroll expense (input.employer.seattlePriorYearPayrollExpense) and this employee's Seattle compensation so far this year (input.ytd.seattleCompensation). The first was not supplied, so nothing was computed.",
+      },
+    };
+  }
   if (priorYearPayroll < dollars(cfg.employerPayrollThreshold)) return null;
 
   const tier =
@@ -5050,8 +5116,7 @@ function coloradoOccupationalPrivilegeTax(
   rules: StateRuleset,
 ): TaxLine[] {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  const locality = typeof cert.locality === 'string' ? cert.locality : null;
-  if (!locality) return [];
+  if (certLocalities(cert).length === 0) return [];
 
   const local = rules.localIncomeTax as
     | { denver?: OPTJurisdictionConfig; occupationalPrivilegeTax?: Record<string, OPTJurisdictionConfig> }
@@ -5065,8 +5130,9 @@ function coloradoOccupationalPrivilegeTax(
     ...(local.denver ? { Denver: local.denver } : {}),
     ...(local.occupationalPrivilegeTax ?? {}),
   };
+  const locality = pickLocality(cert, (l) => jurisdictions[l] !== undefined);
+  if (!locality) return [];
   const cfg = jurisdictions[locality];
-  if (!cfg) return [];
 
   const prefix = optLineIdPrefix(locality);
   const employeeLine = (amount: Cents, detail: string): TaxLine => ({
@@ -5128,6 +5194,20 @@ function coloradoOccupationalPrivilegeTax(
 
   const monthlyComp = Number(cert.localMonthlyCompensation ?? cert.denverMonthlyCompensation ?? 0);
   const threshold = cfg.monthlyEarningsThreshold;
+  if (
+    threshold !== null &&
+    threshold !== undefined &&
+    cert.localMonthlyCompensation === undefined &&
+    cert.denverMonthlyCompensation === undefined
+  ) {
+    const note =
+      `${locality}'s Occupational Privilege Tax applies once this month's ${locality}-sourced pay reaches $${threshold}, and is charged once a month. ` +
+      'certificate.localMonthlyCompensation (this month so far, including this check) and certificate.localOPTWithheldThisMonth were not supplied, so nothing was computed.';
+    return [
+      { ...employeeLine(0, `Not computed: certificate.localMonthlyCompensation was not supplied.`), dataQuality: { tier: 'not_modelled' as const, note } },
+      employerLine(0, `Not computed: certificate.localMonthlyCompensation was not supplied.`),
+    ];
+  }
   if (threshold !== null && threshold !== undefined) {
     const cap = dollars(threshold);
     const met = cfg.thresholdComparison === 'above' ? monthlyComp > cap : monthlyComp >= cap;
@@ -5280,13 +5360,11 @@ function westVirginiaMunicipalServiceFee(
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  const locality = typeof cert.locality === 'string' ? cert.locality : undefined;
-  if (!locality) return null;
-
   const cities = (rules.localIncomeTax as { serviceFeeCities?: Record<string, WVServiceFeeCityConfig> } | undefined)
     ?.serviceFeeCities;
-  const city = cities?.[locality];
-  if (!city) return null;
+  const locality = pickLocality(cert, (l) => cities?.[l] !== undefined);
+  if (!locality) return null;
+  const city = cities![locality];
 
   if (city.nonResidentOnly) {
     const residenceCityName = typeof cert.residenceCity === 'string' ? cert.residenceCity : undefined;
@@ -5712,7 +5790,7 @@ function kentuckyCityCountyTax(
         `less a ${fmt(credit)} KRS 68.197(6)-(7) credit for the city fee already paid ` +
         `(assumes the 30,000-300,000-population county credit tier applies to ${countyEntry.name} — not ` +
         `individually verified)`,
-      ...kyDataQuality([cityEntry, countyEntry]),
+      ...kyLineQuality([cityEntry, countyEntry], input, ctx, periodWages, countyEntry),
     };
   }
 
@@ -5733,7 +5811,7 @@ function kentuckyCityCountyTax(
       : entry.annualWageCap !== undefined
         ? `${fmt(taxableWages)} of ${fmt(periodWages)} @ ${r.note} to ${entry.name}; ${entry.name} taxes at most $${entry.annualWageCap.toLocaleString('en-US')} of wages a year (YTD from ytd.localIncomeTax['KY_LOCAL_${entry.name}'])`
         : `${fmt(periodWages)} @ ${r.note} to ${entry.name}, full gross wages (KRS 67.750(2) adds back pretax deferrals)`,
-    ...kyDataQuality([entry]),
+    ...kyLineQuality([entry], input, ctx, periodWages),
   };
 }
 
@@ -5762,6 +5840,48 @@ function kyCappedWages(entry: KYJurisdictionEntry, periodWages: number, input: P
  * from an aggregator without a jurisdiction-level confirmation (the data
  * file's wageRateStatus). Inferred outranks parsed when both apply.
  */
+/**
+ * The notice for a Kentucky city/county line, in priority order: an
+ * unconfirmed rate; then an annual cap the employee is on course to pass
+ * with no year-to-date wages supplied; then the KRS 68.197 city-against-
+ * county credit, which is only mandated for counties of 30,000-300,000 people
+ * (and not for a voter-approved legacy levy, or one adopted under KRS
+ * 67.083), and is applied without that being checked per county.
+ */
+function kyLineQuality(
+  entries: KYJurisdictionEntry[],
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  periodWages: Cents,
+  creditCounty?: KYJurisdictionEntry,
+): { dataQuality?: DataQuality } {
+  const base = kyDataQuality(entries);
+  if (base.dataQuality) return base;
+  const annual = periodWages * ctx.periodsPerYear;
+  const ss = dollars(federalRuleset(input.checkDate).socialSecurity.wageBase);
+  const capped = entries.find((e) => {
+    const cap = e.capAtSSWageBase ? ss : e.annualWageCap !== undefined ? dollars(e.annualWageCap) : null;
+    return cap !== null && annual > cap && input.ytd.localIncomeTax?.[`KY_LOCAL_${e.name}`] === undefined;
+  });
+  if (capped) {
+    return {
+      dataQuality: {
+        tier: 'inferred',
+        note: `${capped.name} taxes wages only up to an annual cap, and this employee's pay is on course to pass it, but no year-to-date wages were supplied (ytd.localIncomeTax['KY_LOCAL_${capped.name}']), so this check was treated as the first of the year. Supply it, or the tax will keep being withheld past the cap.`,
+      },
+    };
+  }
+  if (creditCounty) {
+    return {
+      dataQuality: {
+        tier: 'inferred',
+        note: `The city fee was credited against ${creditCounty.name}'s fee under KRS 68.197(6)-(7). That credit is mandatory only for counties of 30,000 to 300,000 people that levy under KRS 68.197 (not a voter-approved legacy levy, and not one adopted under KRS 67.083); it was not confirmed for ${creditCounty.name}${(creditCounty.wageRateDecimal ?? 0) > 0.01 ? `, and its ${((creditCounty.wageRateDecimal ?? 0) * 100).toFixed(2)}% rate is above KRS 68.197's 1% cap, which suggests it levies under another authority` : ''}. If no credit applies, the county fee is owed in full on top of the city's.`,
+      },
+    };
+  }
+  return {};
+}
+
 function kyDataQuality(entries: KYJurisdictionEntry[]): { dataQuality?: DataQuality } {
   const inferred = entries.filter((e) => e.wageRateStatus?.startsWith('inferred'));
   if (inferred.length) {
@@ -5812,7 +5932,7 @@ function wilmingtonWageTax(
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.locality !== 'Wilmington') return null;
+  if (!hasLocality(cert, 'Wilmington')) return null;
 
   const cfg = (rules.localIncomeTax as { rate?: number } | undefined)?.rate;
   if (cfg === undefined) return null;
@@ -7055,11 +7175,21 @@ function missouriLocalEarningsTax(
   input: PaycheckInput,
   ctx: ComputeContext,
   rules: StateRuleset,
-): TaxLine | null {
+): TaxLine[] {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  const locality = cert.locality;
-  if (locality !== 'Kansas City' && locality !== 'St. Louis') return null;
+  // Both cities tax residents on all earnings and nonresidents on earnings
+  // made in the city, so working in one and living in the other owes both.
+  return (['Kansas City', 'St. Louis'] as const)
+    .filter((l) => hasLocality(cert, l))
+    .map((l) => missouriCityEarningsTax(l, ctx, rules))
+    .filter((t): t is TaxLine => t !== null);
+}
 
+function missouriCityEarningsTax(
+  locality: 'Kansas City' | 'St. Louis',
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
   const cfg = rules.localIncomeTax as MOLocalityConfig | undefined;
   if (!cfg) return null;
   const rate = locality === 'Kansas City' ? cfg.kansasCity?.rate : cfg.stLouis?.earningsTaxRate;
@@ -7096,7 +7226,7 @@ function stLouisPayrollExpenseTaxEmployer(
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (cert.locality !== 'St. Louis') return null;
+  if (!hasLocality(cert, 'St. Louis')) return null;
 
   const cfg = rules.localIncomeTax as MOLocalityConfig | undefined;
   const rate = cfg?.stLouis?.payrollExpenseTax?.rate;
@@ -7166,7 +7296,7 @@ function oregonTransitDistrictTaxEmployer(
   rules: StateRuleset,
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  const district = typeof cert.locality === 'string' ? cert.locality : undefined;
+  const district = pickLocality(cert, (l) => OR_TRANSIT_DISTRICTS[l] !== undefined);
   const meta = district ? OR_TRANSIT_DISTRICTS[district] : undefined;
   if (!meta) return null;
 
@@ -7236,6 +7366,18 @@ function portlandAreaLocalTax(
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const currentWages = ctx.taxableWagesFor(exempt);
   const lines: TaxLine[] = [];
+  // These start only once YEAR-TO-DATE wages pass the trigger. With no YTD
+  // supplied every check looks like the first of the year, so an employee
+  // who will pass it is never withheld from: say so.
+  const ytdMissing = (key: string, trigger: number): { dataQuality?: DataQuality } =>
+    input.ytd.localIncomeTax?.[key] === undefined && currentWages * ctx.periodsPerYear > dollars(trigger)
+      ? {
+          dataQuality: {
+            tier: 'not_modelled',
+            note: `This tax starts once year-to-date wages pass $${trigger.toLocaleString('en-US')}, and this employee's pay is on course to pass it, but no year-to-date wages were supplied (ytd.localIncomeTax['${key}']), so this check was treated as the first of the year. Supply it, or nothing will be withheld.`,
+          },
+        }
+      : {};
 
   if (resolveCertBoolean(cert, 'metroDistrict')) {
     const ytd = input.ytd.localIncomeTax?.['OR_METRO'] ?? 0;
@@ -7252,6 +7394,7 @@ function portlandAreaLocalTax(
       detail:
         `${fmt(currentWages)} wages (${fmt(ytd)} YTD already counted), ${fmt(taxableExcess)} above the ` +
         `$${cfg.metroSHS.threshold.toLocaleString()} withholding trigger @ ${(cfg.metroSHS.rate * 100).toFixed(1)}%`,
+      ...ytdMissing('OR_METRO', cfg.metroSHS.threshold),
     });
   }
 
@@ -7273,6 +7416,7 @@ function portlandAreaLocalTax(
         `${fmt(currentWages)} wages (${fmt(ytd)} YTD), ${fmt(above1)} above $${cfg.multnomahPFA.tier1Threshold.toLocaleString()} ` +
         `@ ${(cfg.multnomahPFA.tier1Rate * 100).toFixed(1)}%, plus ${fmt(above2)} above ` +
         `$${cfg.multnomahPFA.tier2Threshold.toLocaleString()} @ an ADDITIONAL ${(cfg.multnomahPFA.tier2Rate * 100).toFixed(1)}%`,
+      ...ytdMissing('OR_MULTNOMAH', cfg.multnomahPFA.tier1Threshold),
     });
   }
 
@@ -7983,6 +8127,7 @@ function marylandWithholding(
 
   let localTax: number;
   let localNote: string;
+  let localDefaulted = false;
   const nonresident = resolveCertNonresident(cert);
   if (nonresident) {
     localTax = applyRate(taxableIncome, cfg.nonresidentSpecialRate);
@@ -7994,6 +8139,7 @@ function marylandWithholding(
     if (!hasCertificate || !county) {
       localTax = applyRate(taxableIncome, cfg.noCertificateDefault.localRate);
       localNote = `no certificate/unrecognized county — max local rate ${(cfg.noCertificateDefault.localRate * 100).toFixed(2)}%`;
+      localDefaulted = hasCertificate;
     } else if (county.flat !== undefined) {
       localTax = applyRate(taxableIncome, county.flat);
       localNote = `${countyName} @ ${(county.flat * 100).toFixed(2)}% flat`;
@@ -8022,6 +8168,14 @@ function marylandWithholding(
       `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} std. deduction less ${fmt(exemptionAmount)} ` +
       `exemptions (${exemptions}) = ${fmt(taxableIncome)} taxable; state ${fmt(stateTax)} + local ${fmt(localTax)} ` +
       `(${localNote}) = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
+    ...(localDefaulted
+      ? {
+          dataQuality: {
+            tier: 'not_modelled' as const,
+            note: `The certificate names no recognized Maryland county (certificate.county = ${JSON.stringify(cert.county ?? null)}), so the maximum local rate was withheld. A Maryland resident pays their county of residence's rate; a nonresident pays the special nonresident rate (certificate.nonresident = true).`,
+          },
+        }
+      : {}),
   };
 }
 
@@ -8509,6 +8663,26 @@ function pennsylvaniaLocalTax(
     jurisdiction: 'local',
     taxableWages,
     amount: eitAmount,
+    // A missing residencePSD is not a claim that the employee lives out of
+    // state: a PA resident's own resident rate may be higher than the work
+    // place's nonresident rate, and that is the rate that must be withheld.
+    ...(residencePSD === undefined
+      ? {
+          dataQuality: {
+            tier: 'not_modelled' as const,
+            note:
+              `No certificate.residencePSD was supplied, so only the work location's ${(nonresidentRate * 100).toFixed(2)}% nonresident rate was applied. ` +
+              "Pennsylvania withholds the higher of the employee's resident rate and the work location's nonresident rate; set residencePSD to the PSD of the home address, or to '880000' for a home outside Pennsylvania.",
+          },
+        }
+      : residenceEntry === undefined && residencePSD !== '88000' && residencePSD !== '880000'
+        ? {
+            dataQuality: {
+              tier: 'not_modelled' as const,
+              note: `certificate.residencePSD "${residencePSD}" is not in the PSD registry, so no resident rate was applied. Check the code (a work PSD in the residence field gives the wrong rate).`,
+            },
+          }
+        : {}),
     detail:
       `${fmt(taxableWages)} @ ${(rate * 100).toFixed(2)}% (the ${higherSide} rate is higher) — resident ` +
       `${(residentRate * 100).toFixed(2)}% (PSD ${residencePSD ?? '88000/out-of-state'}) vs. work-location ` +
@@ -8520,8 +8694,27 @@ function pennsylvaniaLocalTax(
   };
 
   const lines: TaxLine[] = [eitLine];
-  const lstLine = pennsylvaniaLST(input, ctx, rules, workEntry);
-  if (lstLine) lines.push(lstLine);
+
+  // LST is owed to ONE place a year: the employee's principal office or place
+  // of employment (Act 32 / DCED LST situs rules). Someone working in several
+  // PA municipalities in the period may have a principal worksite other than
+  // this paycheck's workPSD; certificate.lstPSD names it.
+  const lstPSD = typeof cert.lstPSD === 'string' && cert.lstPSD ? cert.lstPSD : undefined;
+  const lstEntry = lstPSD ? paLocalRuleset(lstPSD, input.checkDate) : workEntry;
+  if (lstPSD && !lstEntry) {
+    lines.push({
+      id: 'PA_LST',
+      name: 'PA Local Services Tax',
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: 0,
+      amount: 0,
+      detail: `NOT MODELLED — certificate.lstPSD "${lstPSD}" (the principal worksite for the Local Services Tax) is not in the PSD registry; no LST was computed. Do not treat as zero-tax.`,
+    });
+  } else if (lstEntry) {
+    const lstLine = pennsylvaniaLST(input, ctx, rules, lstEntry);
+    if (lstLine) lines.push(lstLine);
+  }
 
   return lines;
 }
@@ -8841,13 +9034,19 @@ function ohioJEDDTax(
   // ytd.localIncomeTax['OH_JEDD_<id>'], the same tracker Kentucky's
   // SS-wage-base-capped cities use.
   const capKey = `OH_JEDD_${jeddId}`;
-  const capApplies = entry.annualWageCap !== undefined && entry.annualWageCapYear === ctx.year;
+  // A cap on file for another year (CPI-adjusted each year) is still applied:
+  // dropping it would tax every dollar above it, which is further from right.
+  const capApplies = entry.annualWageCap !== undefined;
   const taxableWages = capApplies
     ? underCap(periodWages, input.ytd.localIncomeTax?.[capKey] ?? 0, dollars(entry.annualWageCap!))
     : periodWages;
   const amount = applyRate(taxableWages, entry.rate);
 
   const staleCap = entry.annualWageCap !== undefined && entry.annualWageCapYear !== ctx.year;
+  const capYtdMissing =
+    capApplies &&
+    input.ytd.localIncomeTax?.[capKey] === undefined &&
+    periodWages * ctx.periodsPerYear > dollars(entry.annualWageCap!);
   const rateEnded = entry.rateEndsOn !== undefined && input.checkDate > entry.rateEndsOn;
   return {
     id: 'OH_JEDD',
@@ -8858,13 +9057,15 @@ function ohioJEDDTax(
     amount,
     detail:
       `${fmt(amount)} to ${entry.name} @ ${(entry.rate * 100).toFixed(2)}% on wages earned inside the district (certificate.workJEDDId = "${jeddId}", Ohio's own zone id) — unincorporated township land, so no municipal tax applies at this address` +
-      (capApplies ? `; capped at $${entry.annualWageCap!.toLocaleString('en-US')} of district wages for ${ctx.year} (${fmt(taxableWages)} of ${fmt(periodWages)} taxed this period; YTD from ytd.localIncomeTax['${capKey}'])` : ''),
-    ...(staleCap || rateEnded
+      (capApplies ? `; capped at $${entry.annualWageCap!.toLocaleString('en-US')} of district wages (the ${entry.annualWageCapYear ?? ctx.year} cap; ${fmt(taxableWages)} of ${fmt(periodWages)} taxed this period; YTD from ytd.localIncomeTax['${capKey}'])` : ''),
+    ...(staleCap || rateEnded || capYtdMissing
       ? {
           dataQuality: {
             tier: 'inferred' as const,
-            note: staleCap
-              ? `${entry.name} caps taxable wages each year, but the cap on file is for ${entry.annualWageCapYear}, not ${ctx.year}; the full wage was taxed. Confirm the ${ctx.year} cap with the district.`
+            note: capYtdMissing && !staleCap && !rateEnded
+              ? `${entry.name} taxes only the first $${entry.annualWageCap!.toLocaleString('en-US')} of district wages a year, and this employee's pay is on course to pass it, but no year-to-date district wages were supplied (ytd.localIncomeTax['${capKey}']), so this check was treated as the first of the year. Supply it, or the tax will keep being withheld past the cap.`
+              : staleCap
+              ? `${entry.name} caps taxable wages each year, but the cap on file ($${entry.annualWageCap!.toLocaleString('en-US')}) is for ${entry.annualWageCapYear}, not ${ctx.year}; that cap was applied. Confirm the ${ctx.year} cap with the district.`
               : `${entry.name}'s ${(entry.rate * 100).toFixed(2)}% rate was scheduled to end on ${entry.rateEndsOn}; the rate that follows is not on file. Confirm it with the district.`,
           },
         }
