@@ -1051,6 +1051,8 @@ export interface GarnishmentPovertyGuidelineTier {
 export interface FlatFloorStep {
   effectiveFrom: string; // ISO yyyy-mm-dd; wages payable on or after
   weekly: number;
+  /** A period of one week or less: Oregon's statute gives such a period the full weekly figure, so a daily-paid worker's floor is NOT the weekly figure divided down. */
+  daily?: number;
   biweekly?: number;
   semimonthly?: number;
   monthly?: number;
@@ -1150,7 +1152,7 @@ export interface GarnishmentFormula {
    * the data file: the state's own printed per-period floors, in dollars,
    * used instead of scaling `flatWeeklyFloor`.
    */
-  flatPeriodFloor?: { biweekly?: number; semimonthly?: number; monthly?: number };
+  flatPeriodFloor?: { daily?: number; biweekly?: number; semimonthly?: number; monthly?: number };
   /**
    * Iowa's own ADDITIONAL layer (Iowa Code 642.21): a cumulative CALENDAR-
    * YEAR dollar cap per judgment creditor, on top of whichever per-paycheck

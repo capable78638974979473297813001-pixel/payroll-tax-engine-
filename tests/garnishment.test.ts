@@ -878,6 +878,13 @@ describe('more state overrides — cliff-on-dollar, marginal-bracket and head-of
     assert.equal(withheld('2026-07-01', 900, 'biweekly'), dollars(68));
     assert.equal(withheld('2026-07-01', 1000, 'semimonthly'), dollars(88));
     assert.equal(withheld('2026-07-01', 1900, 'monthly'), dollars(108));
+
+    // A daily pay period is "a period of one week or less" and takes the full
+    // weekly floor (ORS 18.385(2)(a)), not a fifth of it.
+    assert.equal(withheld('2026-07-01', 100, 'daily'), 0); // under the $400 floor: nothing may be withheld
+    assert.equal(withheld('2026-07-01', 400, 'daily'), 0);
+    assert.equal(withheld('2026-07-01', 420, 'daily'), dollars(20)); // excess over $400; 25% would be $105
+    assert.equal(withheld('2026-06-30', 340, 'daily'), dollars(2)); // the $338 step before 2026-07-01
   });
 
   test('Tennessee: the plain federal 25%/30x test, reduced $2.50/week per qualifying dependent child', () => {

@@ -806,20 +806,20 @@
           "title": "ORS 18.385(2) — 75% of disposable earnings exempt from execution, or a flat per-period dollar minimum, whichever protects more; the dollar minimums step up by wages-payable date: weekly $254 (before 2025-01-01), $305, $338 (from 2025-07-01), $400 (from 2026-07-01), then 30x the Oregon minimum wage from 2027-07-01",
           "url": "https://www.oregonlegislature.gov/bills_laws/ors/ors018.html",
           "verifiedOn": "2026-10-05",
-          "verifiedBy": "Fetched the Oregon Legislature's own ORS chapter 18 page and read subsection (2) directly. CORRECTS the earlier entry (verified 2026-09-11 against oregon.public.law, an out-of-date copy of the statute), which carried the pre-2025 $254/week flat floor. Current text, wages payable on or after: 2025-01-01: $305 weekly / $611 two-week / $655 half-month / $1,309 month; 2025-07-01: $338 / $675 / $737 / $1,458; 2026-07-01: $400 / $832 / $912 / $1,792; 2027-07-01: minimum wage x 30 / 60 / 65 / 130. Before 2025-01-01: $254 / $509 / $545 / $1,090. The per-period figures are the statute's own and are not multiples of the weekly one, so they are carried per frequency and used as printed. A frequency the statute does not name (quarterly, daily and so on) scales the weekly figure."
+          "verifiedBy": "Fetched the Oregon Legislature's own ORS chapter 18 page and read subsection (2) directly. CORRECTS the earlier entry (verified 2026-09-11 against oregon.public.law, an out-of-date copy of the statute), which carried the pre-2025 $254/week flat floor. Current text, wages payable on or after: 2025-01-01: $305 weekly / $611 two-week / $655 half-month / $1,309 month; 2025-07-01: $338 / $675 / $737 / $1,458; 2026-07-01: $400 / $832 / $912 / $1,792; 2027-07-01: minimum wage x 30 / 60 / 65 / 130. Before 2025-01-01: $254 / $509 / $545 / $1,090. The per-period figures are the statute's own and are not multiples of the weekly one, so they are carried per frequency and used as printed. ORS 18.385(2)(a) gives 'any period of one week or less' the full weekly figure, so a daily pay period takes it unscaled (CORRECTED 2026-10-08; it was divided to one fifth, an $80 daily floor from 2026-07-01, so a daily-paid worker with $100 of disposable pay could be garnished $20 where the statute allows nothing). A longer period the statute does not name (quarterly and so on) scales the weekly figure."
         }
       ],
       "ordinaryGarnishment": {
         "capFractions": [{ "basis": "disposable", "fraction": 0.25 }],
         "flatWeeklyFloor": 400,
         "flatFloorSchedule": [
-          { "effectiveFrom": "1900-01-01", "weekly": 254, "biweekly": 509, "semimonthly": 545, "monthly": 1090 },
-          { "effectiveFrom": "2025-01-01", "weekly": 305, "biweekly": 611, "semimonthly": 655, "monthly": 1309 },
-          { "effectiveFrom": "2025-07-01", "weekly": 338, "biweekly": 675, "semimonthly": 737, "monthly": 1458 },
-          { "effectiveFrom": "2026-07-01", "weekly": 400, "biweekly": 832, "semimonthly": 912, "monthly": 1792 }
+          { "effectiveFrom": "1900-01-01", "weekly": 254, "daily": 254, "biweekly": 509, "semimonthly": 545, "monthly": 1090 },
+          { "effectiveFrom": "2025-01-01", "weekly": 305, "daily": 305, "biweekly": 611, "semimonthly": 655, "monthly": 1309 },
+          { "effectiveFrom": "2025-07-01", "weekly": 338, "daily": 338, "biweekly": 675, "semimonthly": 737, "monthly": 1458 },
+          { "effectiveFrom": "2026-07-01", "weekly": 400, "daily": 400, "biweekly": 832, "semimonthly": 912, "monthly": 1792 }
         ]
       },
-      "$note": "WIRED 2026-09-11, CORRECTED 2026-10-05. Same flat-dollar-floor shape Alaska uses (GarnishmentFormula.flatWeeklyFloor), but Oregon's figure is a dated schedule: the engine takes the step in force on the check date from flatFloorSchedule. $254 was only right for wages payable before 2025-01-01. 2027-07-01 onward (30x the Oregon minimum wage) is not modelled and would need the 2027 file."
+      "$note": "WIRED 2026-09-11, CORRECTED 2026-10-05. Same flat-dollar-floor shape Alaska uses (GarnishmentFormula.flatWeeklyFloor), but Oregon's figure is a dated schedule: the engine takes the step in force on the check date from flatFloorSchedule, with the weekly figure applied whole to a daily period (ORS 18.385(2)(a), 'any period of one week or less'). $254 was only right for wages payable before 2025-01-01. 2027-07-01 onward (30x the Oregon minimum wage) is not modelled and would need the 2027 file."
     },
     "TN": {
       "sources": [
