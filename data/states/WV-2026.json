@@ -769,6 +769,8 @@
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
     "newEmployerRate": 0.027,
     "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
+    "industryNewEmployerRates": { "out_of_state_construction": 0.085 },
+    "industryNewEmployerRatesSource": "ADDED 2026-10-08: a foreign corporation or business entity in the construction trades pays 7.5% (WV Code 21A-5-5(c)) plus a 1% surtax (21A-5-10(b)) = 8.5% until it has been an employer for 36 months; see unemploymentInsurance.outOfStateConstructionRate. Nothing read that block, so such an employer got the ordinary 2.7%. Selected by input.employer.suiIndustry['WV'] === 'out_of_state_construction'. From 2026-07-01 see effectiveDated.",
     "experienceRange": {
       "min": 0.015,
       "max": 0.085
@@ -1178,6 +1180,8 @@
         "suiEmployer.newEmployerRate": 0.02511,
         "suiEmployer.newEmployerRateSource": "WV Code 21A-5-5(d) as enacted by SB 1053, effective 2026-07-01: 'the otherwise applicable unemployment contribution rate for each employer ... shall be reduced by seven percent, except that such contribution rate shall not be less than zero' (code.wvlegislature.gov/21A-5-5). 2.7% x 0.93 = 2.511%. Checks dated before 2026-07-01 keep 2.7%.",
         "suiEmployer.experienceRange": { "min": 0.01395, "max": 0.07905 },
+        "suiEmployer.industryNewEmployerRates": { "out_of_state_construction": 0.07975 },
+        "suiEmployer.industryNewEmployerRatesSource": "From 2026-07-01 WV Code 21A-5-5(d) reduces the otherwise applicable contribution rate by 7%: 7.5% x 0.93 = 6.975%, plus the 1% surtax of 21A-5-10(b), which that section levies 'in addition to any other tax' and is not itself reduced here = 7.975%. Whether the 7% reduction also reaches the surtax is not stated in the statute.",
         "suiEmployer.automationFeeNotice": "West Virginia's temporary unemployment automation and administration fee (WV Code 21A-9-10, effective 2026-07-01) is billed to the employer once a year, not per paycheck: the statute sets it at 7% of the employer's total taxable wages for the twelve months ending the preceding June 30, lets the Commissioner reduce the percentage so total collections stay under $18 million a year, exempts employers whose contribution rate is zero, and ends once $60 million is collected or on 2031-07-01. The base and the percentage actually billed are set by the Commissioner and the invoice arrives by March 31, so no per-paycheck amount is computed here; budget for the invoice separately. If the employer's own assigned rate is supplied, confirm whether the state's notice already reflects the 7% reduction."
       }
     }

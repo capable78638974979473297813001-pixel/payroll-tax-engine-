@@ -144,7 +144,9 @@ describe('resolve.ts — real captured Census geographies', () => {
 
     const fields = toCertificateFields(resolved, 'work');
     assert.equal(fields.workCity, 'Bluffton');
-    assert.equal(fields.schoolDistrictCode, '0203');
+    // Ohio SDIT is owed by RESIDENTS of the district: the work address never sets it.
+    assert.equal(fields.schoolDistrictCode, undefined);
+    assert.equal(toCertificateFields(resolved, 'residence').schoolDistrictCode, '0203');
   });
 
   test('Columbus, OH: resolves to a real municipal match, and a school district NAME that correctly finds no SDIT levy', () => {

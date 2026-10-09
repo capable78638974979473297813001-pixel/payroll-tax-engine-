@@ -420,6 +420,8 @@
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
     "newEmployerRate": 0.0285,
     "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
+    "industryNewEmployerRates": { "construction": 0.0585 },
+    "industryNewEmployerRatesSource": "ADDED 2026-10-08: ODJFS Contribution Rates table (jfs.ohio.gov/unemployment-services/for-employers/file-unemployment-taxes/tax-resources/contribution-rates, read in a browser): 2026 'New Employer Rate 2.85% *except construction', 'NER*Construction Industry 5.85%'. The 5.85% was in unemploymentInsurance.rates.newEmployerConstructionRate but nothing read it, so a construction employer got 2.85%. Selected by input.employer.suiIndustry['OH'] === 'construction'.",
     "experienceRange": {
       "min": 0.004,
       "max": 0.101
