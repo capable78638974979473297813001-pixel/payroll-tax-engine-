@@ -1,10 +1,10 @@
 {
- "date": "2026-10-08",
+ "date": "2026-10-09",
  "counts": {
-  "unchanged": 475,
-  "unreachable": 4,
-  "blocked": 25,
+  "unchanged": 476,
   "changed": 6,
+  "unreachable": 5,
+  "blocked": 23,
   "gone": 4
  },
  "total": 514,
@@ -14,7 +14,7 @@
    "jurisdiction": "AZ",
    "title": "City of Flagstaff -- City of Flagstaff announces minimum wage for 2026",
    "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
-   "detail": "4 lines added, 0 removed",
+   "detail": "2 lines added, 2 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -22,11 +22,11 @@
    "significant": true
   },
   {
-   "id": "co-002adac414",
+   "id": "co-0afe64d6b9",
    "jurisdiction": "CO",
-   "title": "Boulder County -- Local Minimum Wage",
-   "url": "https://bouldercounty.gov/departments/commissioners/local-minimum-wage/",
-   "detail": "1 lines added, 0 removed",
+   "title": "Colorado Wage Withholding Tax Guide, January 2026",
+   "url": "https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf",
+   "detail": "now redirects to https://tax.colorado.gov/sites/default/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -34,11 +34,11 @@
    "significant": true
   },
   {
-   "id": "md-d8888f97db",
-   "jurisdiction": "MD",
-   "title": "Howard County, MD -- Minimum Wage schedule (Finance Department)",
-   "url": "https://www.howardcountymd.gov/finance/minimum-wage",
-   "detail": "0 lines added, 1 removed",
+   "id": "co-1d9b7b596b",
+   "jurisdiction": "CO",
+   "title": "DR 1098 (10/21/25), 2026 Colorado Withholding Worksheet for Employers",
+   "url": "https://tax.colorado.gov/sites/tax/files/documents/DR_1098_Colorado_Withholding_Worksheet_for_Employees.pdf",
+   "detail": "now redirects to https://tax.colorado.gov/sites/default/files/documents/DR_1098_Colorado_Withholding_Worksheet_for_Employees.pdf",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -46,38 +46,35 @@
    "significant": true
   },
   {
-   "id": "mi-b2211f9083",
-   "jurisdiction": "MI",
-   "title": "Other Michigan Cities with Income Tax (City of Grand Rapids consolidated rate/exemption table)",
-   "url": "https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/",
-   "detail": "1 lines added, 1 removed (link lists / headlines only)",
+   "id": "mn-bb67f51ead",
+   "jurisdiction": "MN",
+   "title": "City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)",
+   "url": "https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses",
+   "detail": "11 lines added, 11 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
    "links_removed": [],
-   "significant": false
+   "significant": true
   },
   {
-   "id": "or-a1d9b0c474",
-   "jurisdiction": "OR",
-   "title": "Oregon Workers' Benefit Fund rule changes",
-   "url": "https://wcd.oregon.gov/laws/Pages/new-rules.aspx",
-   "detail": "3 lines added, 0 removed; 2 links added, 0 removed",
+   "id": "nh-ac9ef03a4c",
+   "jurisdiction": "NH",
+   "title": "NHES WebTax -- Trust Fund Reductions notice (available thru 2026-Q3)",
+   "url": "https://www2.nhes.nh.gov/webtax/indexSecPg.jsp",
+   "detail": "1 lines added, 1 removed",
    "figures_added": [],
    "figures_removed": [],
-   "links_added": [
-    "https://wcd.oregon.gov/laws/Documents/New_rules/070%20WBF%20January%201%2c%202027/070-26072-marked-2026-10-06.pdf",
-    "https://wcd.oregon.gov/laws/Documents/New_rules/070%20WBF%20January%201%2c%202027/70-WCD_5-2026TrackedChanges.pdf"
-   ],
+   "links_added": [],
    "links_removed": [],
    "significant": true
   },
   {
-   "id": "us-f8fc661e48",
+   "id": "us-3a363f8d6d",
    "jurisdiction": "US",
-   "title": "Federal Register: new Wage and Hour Division documents (minimum wage, overtime, garnishment) - official API",
-   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=wage-and-hour-division",
-   "detail": "10 lines added, 10 removed",
+   "title": "14 M.R.S. \u00a7 3126 \u2014 ordinary garnishment limited to the lesser of 25% of disposable earnings or the amount by which disposable earnings exceed 40x the greater of the federal minimum wage or Maine's own minimum wage (26 M.R.S. \u00a7 664)",
+   "url": "https://legislature.maine.gov/statutes/14/title14sec3126-A.html",
+   "detail": "1 lines added, 1 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -85,7 +82,7 @@
    "significant": true
   }
  ],
- "significant_changes": 5,
+ "significant_changes": 6,
  "broken": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://www.irs.gov/pub/irs-prior/p51--2025.pdf",
@@ -96,8 +93,8 @@
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "verified": 481,
- "unverified": 33,
+ "verified": 482,
+ "unverified": 32,
  "never_baselined": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://does.dc.gov/service/office-wage-hour-compliance-0",
@@ -122,5 +119,5 @@
   "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 17
+ "max_consecutive_failures": 18
 }

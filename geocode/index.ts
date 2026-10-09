@@ -288,6 +288,26 @@ export function ohioJeddDecision(input: {
     return { jedd: found.jedd, workJEDDId: found.jedd.jeddId, reasons: [] };
   }
 
+  // Ohio's layer marks this polygon inactive, but the rate table still has the
+  // zone in force (no termination on file): one of the two is wrong, and
+  // silently trusting the map would drop a tax that may still be owed.
+  const inactiveInForce = (found.candidates ?? (found.jedd ? [found.jedd] : [])).filter((c) => {
+    if (c.active) return false;
+    const entry = ohJEDDRuleset(c.jeddId, checkDate);
+    return !!entry && entry.effectiveFrom <= checkDate && (!entry.terminatedOn || checkDate < entry.terminatedOn);
+  });
+  if (inactiveInForce.length > 0) {
+    return {
+      jedd: null,
+      workJEDDId: null,
+      reasons: [
+        `Ohio's boundary layer marks ${inactiveInForce.map((c) => `${c.name} (${c.jeddId})`).join(', ')} as inactive at this address, ` +
+          `but the zone's rate is still in force in this project's rate table (no termination date on file). No JEDD tax was applied. ` +
+          `Confirm with the zone's administrator whether it still taxes this address.`,
+      ],
+    };
+  }
+
   // No zone by coordinate. Zones with no published polygon can't be ruled out.
   const counties = input.counties.map((c) => stripCountySuffix(c).toLowerCase());
   const places = input.places.map((p) => stripPlaceTypeSuffix(p).toLowerCase());
@@ -611,7 +631,11 @@ async function geocodeAndResolve(address: string, checkDate: string, options?: G
   // Only needed on the interpolated path, and only when the identify call
   // above didn't already run: the rooftop lookup returns the school
   // district from the SAME identify call, so this would be a duplicate.
-  if (precision === 'interpolated' && !historicalVintage && (geographies.state === 'OH' || geographies.state === 'KY')) {
+  if (
+    precision === 'interpolated' &&
+    !historicalVintage &&
+    (geographies.state === 'OH' || geographies.state === 'KY' || geographies.state === 'PA')
+  ) {
     const sd = await fetchSchoolDistrictAtPointSafe(point.lon, point.lat, undefined, {}, checkDate);
     if (sd.ok) {
       schoolDistrictName = sd.district ?? undefined;
@@ -783,6 +807,7 @@ export async function resolveAddress(
       "Census had no address range for this address, and OpenStreetMap had no house-level point either — the position used is OSM's free-text result, which can be a street or town centroid rather than the building. Good enough to place the address in a city or county; NOT good enough to trust near a jurisdiction line.",
     );
   }
+  for (const m of attemptedMatches(resolved)) if (m!.warning) lowConfidenceReasons.push(m!.warning);
   const anyFieldAmbiguous = attemptedMatches(resolved).some((m) => m!.confidence === 'ambiguous');
   if (anyFieldAmbiguous) {
     lowConfidenceReasons.push('One or more jurisdiction fields matched more than one candidate — see the ambiguous FieldMatch(es) in `resolved` for the candidate list.');
@@ -865,9 +890,11 @@ export async function resolveAddress(
 }
 
 export interface LocalityResolution {
-  /** Set only when exactly one candidate fired — undefined on both zero and more-than-one. */
+  /** The (first) locality for this certificate; undefined on zero candidates or a real clash. */
   locality: string | undefined;
-  /** Set only when more than one candidate fired at once — see resolveLocalityCandidates()'s own doc comment. */
+  /** Every locality for this certificate when more than one is owed at once (Kansas City and St. Louis). */
+  localities?: string[];
+  /** Set when candidates clash (two WV fee cities), or when one belongs to another state's certificate. */
   conflictMessage: string | null;
 }
 
@@ -891,9 +918,57 @@ export interface LocalityResolution {
  * builds separate work/residence certificates by hand instead of losing
  * whichever candidate a silent pick would have dropped.
  */
-export function resolveLocalityCandidates(candidates: ReadonlySet<string>): LocalityResolution {
+/** Which state each caller-resolved locality tax belongs to, and which of them exclude each other (an address is in at most one WV fee city, one CO OPT city, one OR transit district). */
+const LOCALITY_STATE: Record<string, { state: string; group?: string }> = {
+  Newark: { state: 'NJ' },
+  'Kansas City': { state: 'MO' },
+  'St. Louis': { state: 'MO' },
+  Wilmington: { state: 'DE' },
+  Seattle: { state: 'WA' },
+  Charleston: { state: 'WV', group: 'WV fee city' },
+  Huntington: { state: 'WV', group: 'WV fee city' },
+  Morgantown: { state: 'WV', group: 'WV fee city' },
+  Parkersburg: { state: 'WV', group: 'WV fee city' },
+  Wheeling: { state: 'WV', group: 'WV fee city' },
+  Weirton: { state: 'WV', group: 'WV fee city' },
+  Denver: { state: 'CO', group: 'CO OPT city' },
+  Glendale: { state: 'CO', group: 'CO OPT city' },
+  'Greenwood Village': { state: 'CO', group: 'CO OPT city' },
+  Sheridan: { state: 'CO', group: 'CO OPT city' },
+  Aurora: { state: 'CO', group: 'CO OPT city' },
+  TriMet: { state: 'OR', group: 'OR transit district' },
+  LTD: { state: 'OR', group: 'OR transit district' },
+  SCTD: { state: 'OR', group: 'OR transit district' },
+  CanbyTransit: { state: 'OR', group: 'OR transit district' },
+  SandyTransit: { state: 'OR', group: 'OR transit district' },
+  SMART: { state: 'OR', group: 'OR transit district' },
+};
+
+export function resolveLocalityCandidates(candidates: ReadonlySet<string>, workState?: string): LocalityResolution {
   if (candidates.size === 0) return { locality: undefined, conflictMessage: null };
   if (candidates.size === 1) return { locality: [...candidates][0], conflictMessage: null };
+  const all = [...candidates].sort();
+  // Two of a mutually exclusive kind can't both be right: hold both back.
+  const groups = new Map<string, string[]>();
+  for (const c of all) {
+    const g = LOCALITY_STATE[c]?.group;
+    if (g) groups.set(g, [...(groups.get(g) ?? []), c]);
+  }
+  const clash = [...groups.entries()].find(([, members]) => members.length > 1);
+  // A locality of another state can't go on this state's certificate.
+  const states = new Set(all.map((c) => LOCALITY_STATE[c]?.state ?? '?'));
+  const sameState = workState ? all.filter((c) => (LOCALITY_STATE[c]?.state ?? workState) === workState) : states.size === 1 ? all : [];
+  const otherState = all.filter((c) => !sameState.includes(c));
+  if (!clash && sameState.length > 0) {
+    return {
+      locality: sameState[0],
+      localities: sameState.length > 1 ? sameState : undefined,
+      conflictMessage: otherState.length
+        ? `${otherState.join(', ')} ${otherState.length === 1 ? 'is' : 'are'} owed under another state than the work state (${workState ?? 'unknown'}), so ${otherState.length === 1 ? 'it was' : 'they were'} not put on this certificate. ` +
+          `Put ${otherState.length === 1 ? 'it' : 'them'} on that state's own certificate (residenceState) by hand from resolveAddress()'s per-role output.`
+        : null,
+    };
+  }
   return {
     locality: undefined,
     conflictMessage:
@@ -902,7 +977,8 @@ export function resolveLocalityCandidates(candidates: ReadonlySet<string>): Loca
       `but certificate.locality is a single field and can only hold one value. Each of these needs its own ` +
       `certificate (build separate workState/residenceState certificates by hand from resolveAddress()'s own ` +
       `per-role output, one per state, rather than this function's single merged certificateFields) — resolving ` +
-      `them onto one shared field here would silently drop whichever one lost.`,
+      `them onto one shared field here would silently drop whichever one lost.` +
+      (clash ? ` (${clash[1].join(' and ')} are both ${clash[0]}s, and an address is in only one.)` : ''),
   };
 }
 
@@ -982,6 +1058,17 @@ export async function resolveEmployee(
     ...(work?.certificateFields ?? {}),
     ...(residence?.certificateFields ?? {}),
   };
+  // certificate.county is shared by Indiana and Maryland, where the county of
+  // RESIDENCE governs for a resident. A residence in another state must not
+  // overwrite the work state's county (work in Maryland, live in Indiana).
+  const workStateCode = work?.resolved?.state;
+  const residenceStateCode = residence?.resolved?.state;
+  if (workStateCode && residenceStateCode && workStateCode !== residenceStateCode) {
+    if (work?.certificateFields.county !== undefined) fields.county = work.certificateFields.county;
+    else delete fields.county;
+    // Ohio's school district tax is for Ohio residents; a non-Ohio residence sets none.
+    if (residenceStateCode !== 'OH') delete fields.schoolDistrictCode;
+  }
 
   const workFlags = work?.resolved?.flags;
   const residenceFlags = residence?.resolved?.flags;
@@ -1116,8 +1203,9 @@ export async function resolveEmployee(
   // every async boundary lookup above has had its say — see
   // resolveLocalityCandidates()'s own doc comment for what each outcome
   // means.
-  const settled = resolveLocalityCandidates(localityCandidates);
+  const settled = resolveLocalityCandidates(localityCandidates, workState);
   if (settled.locality) fields.locality = settled.locality;
+  if (settled.localities) fields.localities = settled.localities;
   if (settled.conflictMessage) notResolvable.push(settled.conflictMessage);
 
   const lowConfidenceReasons = [
@@ -1125,8 +1213,20 @@ export async function resolveEmployee(
     ...(residence?.lowConfidenceReasons ?? []).map((r) => `Residence address: ${r}`),
   ];
 
+  if (!addresses.residence) {
+    notResolvable.push(
+      'No residence address was given, so residence-based local taxes were not checked: NYC and Yonkers resident tax, Kansas City / St. Louis / Wilmington resident earnings tax, Ohio school district income tax, Kentucky school-board tax, Pennsylvania resident EIT (residencePSD), Maryland and Indiana county of residence. Resolve both addresses before using this profile.',
+    );
+  }
+  if (!addresses.work) {
+    notResolvable.push(
+      'No work address was given, so work-location taxes were not checked: city and county occupational and income taxes, Pennsylvania work PSD and LST, Ohio JEDD, Newark, Seattle, Colorado OPT, West Virginia service fees, Oregon transit and Metro taxes. Resolve both addresses before using this profile.',
+    );
+  }
   const supplied = [work, residence].filter((r): r is AddressResolution => r !== null);
   const fullyResolved =
+    !!addresses.residence &&
+    !!addresses.work &&
     supplied.length > 0 &&
     supplied.every((r) => r.matched && r.fullyResolved) &&
     lookupFailures.length === 0 &&

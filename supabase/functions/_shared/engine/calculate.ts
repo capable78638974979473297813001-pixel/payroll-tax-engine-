@@ -34,6 +34,7 @@ import type {
 import { assertTaxYearCovered, CannotComputeError, federalRuleset, yearOf } from './registry.ts';
 import { federalTaxes } from './taxes/federal.ts';
 import { stateIncomeTax } from './taxes/state.ts';
+import { inputContractWarnings } from './contracts.ts';
 import {
   capElectiveDeferrals,
   cashEarnings,
@@ -109,7 +110,7 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
   const posttax = posttaxTotal(effectiveDeductions);
 
   const netPay = gross - pretax - posttax - employeeTaxTotal;
-  const warnings: string[] = [];
+  const warnings: string[] = inputContractWarnings(input);
   if (netPay < 0) {
     warnings.push(
       `Taxes and deductions are $${(-netPay / 100).toFixed(2)} more than this paycheck. ` +
