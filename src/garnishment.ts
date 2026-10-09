@@ -529,8 +529,9 @@ function withResolvedFlatFloor(cfg: GarnishmentFormula, checkDate: string): Garn
     if (s.effectiveFrom <= checkDate && (!step || s.effectiveFrom > step.effectiveFrom)) step = s;
   }
   if (!step) return cfg;
-  const { weekly, biweekly, semimonthly, monthly } = step;
+  const { weekly, daily, biweekly, semimonthly, monthly } = step;
   const flatPeriodFloor: NonNullable<GarnishmentFormula['flatPeriodFloor']> = {};
+  if (daily != null) flatPeriodFloor.daily = daily;
   if (biweekly != null) flatPeriodFloor.biweekly = biweekly;
   if (semimonthly != null) flatPeriodFloor.semimonthly = semimonthly;
   if (monthly != null) flatPeriodFloor.monthly = monthly;
