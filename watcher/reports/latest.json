@@ -1,11 +1,11 @@
 {
- "date": "2026-10-09",
+ "date": "2026-10-10",
  "counts": {
   "unchanged": 476,
-  "changed": 6,
-  "unreachable": 5,
-  "blocked": 23,
-  "gone": 4
+  "unreachable": 4,
+  "blocked": 26,
+  "gone": 4,
+  "changed": 4
  },
  "total": 514,
  "changed": [
@@ -14,7 +14,7 @@
    "jurisdiction": "AZ",
    "title": "City of Flagstaff -- City of Flagstaff announces minimum wage for 2026",
    "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
-   "detail": "2 lines added, 2 removed",
+   "detail": "4 lines added, 4 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -22,11 +22,11 @@
    "significant": true
   },
   {
-   "id": "co-0afe64d6b9",
-   "jurisdiction": "CO",
-   "title": "Colorado Wage Withholding Tax Guide, January 2026",
-   "url": "https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf",
-   "detail": "now redirects to https://tax.colorado.gov/sites/default/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf",
+   "id": "ga-e097c014c1",
+   "jurisdiction": "GA",
+   "title": "Georgia DOR withholding",
+   "url": "https://dor.georgia.gov/taxes/withholding-tax-employers",
+   "detail": "2 lines added, 0 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -34,11 +34,11 @@
    "significant": true
   },
   {
-   "id": "co-1d9b7b596b",
-   "jurisdiction": "CO",
-   "title": "DR 1098 (10/21/25), 2026 Colorado Withholding Worksheet for Employers",
-   "url": "https://tax.colorado.gov/sites/tax/files/documents/DR_1098_Colorado_Withholding_Worksheet_for_Employees.pdf",
-   "detail": "now redirects to https://tax.colorado.gov/sites/default/files/documents/DR_1098_Colorado_Withholding_Worksheet_for_Employees.pdf",
+   "id": "ga-944bb83df9",
+   "jurisdiction": "GA",
+   "title": "Georgia Employer's Tax Guide (current)",
+   "url": "https://dor.georgia.gov/employers-tax-guide",
+   "detail": "2 lines added, 0 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -46,35 +46,11 @@
    "significant": true
   },
   {
-   "id": "mn-bb67f51ead",
-   "jurisdiction": "MN",
-   "title": "City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)",
-   "url": "https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses",
-   "detail": "11 lines added, 11 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "nh-ac9ef03a4c",
-   "jurisdiction": "NH",
-   "title": "NHES WebTax -- Trust Fund Reductions notice (available thru 2026-Q3)",
-   "url": "https://www2.nhes.nh.gov/webtax/indexSecPg.jsp",
-   "detail": "1 lines added, 1 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "us-3a363f8d6d",
-   "jurisdiction": "US",
-   "title": "14 M.R.S. \u00a7 3126 \u2014 ordinary garnishment limited to the lesser of 25% of disposable earnings or the amount by which disposable earnings exceed 40x the greater of the federal minimum wage or Maine's own minimum wage (26 M.R.S. \u00a7 664)",
-   "url": "https://legislature.maine.gov/statutes/14/title14sec3126-A.html",
-   "detail": "1 lines added, 1 removed",
+   "id": "ny-0bd46f2a22",
+   "jurisdiction": "NY",
+   "title": "DOL -- Employer Contribution Rate Table",
+   "url": "https://dol.ny.gov/employer-contribution-rate-table",
+   "detail": "now redirects to https://dol.ny.gov/bizserve/ui/prg/rate/ratetables",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -82,7 +58,7 @@
    "significant": true
   }
  ],
- "significant_changes": 6,
+ "significant_changes": 4,
  "broken": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://www.irs.gov/pub/irs-prior/p51--2025.pdf",
@@ -93,8 +69,8 @@
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "verified": 482,
- "unverified": 32,
+ "verified": 480,
+ "unverified": 34,
  "never_baselined": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://does.dc.gov/service/office-wage-hour-compliance-0",
@@ -119,5 +95,5 @@
   "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 18
+ "max_consecutive_failures": 19
 }
