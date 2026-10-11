@@ -1,64 +1,14 @@
 {
- "date": "2026-10-10",
+ "date": "2026-10-11",
  "counts": {
-  "unchanged": 476,
-  "unreachable": 4,
-  "blocked": 26,
-  "gone": 4,
-  "changed": 4
+  "unchanged": 481,
+  "unreachable": 7,
+  "blocked": 24,
+  "gone": 2
  },
  "total": 514,
- "changed": [
-  {
-   "id": "az-b66098e04c",
-   "jurisdiction": "AZ",
-   "title": "City of Flagstaff -- City of Flagstaff announces minimum wage for 2026",
-   "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
-   "detail": "4 lines added, 4 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "ga-e097c014c1",
-   "jurisdiction": "GA",
-   "title": "Georgia DOR withholding",
-   "url": "https://dor.georgia.gov/taxes/withholding-tax-employers",
-   "detail": "2 lines added, 0 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "ga-944bb83df9",
-   "jurisdiction": "GA",
-   "title": "Georgia Employer's Tax Guide (current)",
-   "url": "https://dor.georgia.gov/employers-tax-guide",
-   "detail": "2 lines added, 0 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "ny-0bd46f2a22",
-   "jurisdiction": "NY",
-   "title": "DOL -- Employer Contribution Rate Table",
-   "url": "https://dol.ny.gov/employer-contribution-rate-table",
-   "detail": "now redirects to https://dol.ny.gov/bizserve/ui/prg/rate/ratetables",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  }
- ],
- "significant_changes": 4,
+ "changed": [],
+ "significant_changes": 0,
  "broken": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://www.irs.gov/pub/irs-prior/p51--2025.pdf",
@@ -69,8 +19,8 @@
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "verified": 480,
- "unverified": 34,
+ "verified": 481,
+ "unverified": 33,
  "never_baselined": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://does.dc.gov/service/office-wage-hour-compliance-0",
@@ -95,5 +45,5 @@
   "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 19
+ "max_consecutive_failures": 20
 }

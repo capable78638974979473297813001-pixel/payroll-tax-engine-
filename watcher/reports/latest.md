@@ -1,74 +1,14 @@
-# Source watch - 2026-10-10
+# Source watch - 2026-10-11
 
-**4 sources changed**
+**No changes** in any official source.
 
 | Changed | Minor | Unchanged | New | Unstable | Unreachable | Gone (404) | Blocks bots | Total |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 4 | 0 | 476 | 0 | 0 | 4 | 4 | 26 | 514 |
+| 0 | 0 | 481 | 0 | 0 | 7 | 2 | 24 | 514 |
 
-_Run took 251 s. A change is only reported after a second fetch confirms it._
+_Run took 444 s. A change is only reported after a second fetch confirms it._
 
-**Coverage: 480 of 514 sources were read this run; 34 could not be checked**, and 22 of those have never been read successfully, so nothing about them is being watched.
-
-## Changed
-
-### AZ - City of Flagstaff -- City of Flagstaff announces minimum wage for 2026
-
-<https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165>  
-4 lines added, 4 removed
-  
-Used by: `data/minimum-wage/local/AZ-local-2026.json`
-
-
-<details><summary>What changed</summary>
-
-```diff
-+Flagstaff Adopts 2024 Building and Fire Codes, Advancing Public Health, Resilience, and Safety
-+Homepage News
-+City Manager Joanne Keene Recognized as 2026 Women Achiever of Arizona
-+Homepage News
--Community Feedback on Potential Drones as First Responders Program
--Homepage News
--City Honors Gene Munger with Memorial Plaque Dedication
--Homepage News
-```
-</details>
-
-### GA - Georgia DOR withholding
-
-<https://dor.georgia.gov/taxes/withholding-tax-employers>  
-2 lines added, 0 removed
-
-
-<details><summary>What changed</summary>
-
-```diff
-+Columbus Day Holiday - Office Closed Monday, October 12
-+October 12 is a state holiday. We will reopen on Tuesday.
-```
-</details>
-
-### GA - Georgia Employer's Tax Guide (current)
-
-<https://dor.georgia.gov/employers-tax-guide>  
-2 lines added, 0 removed
-
-
-<details><summary>What changed</summary>
-
-```diff
-+Columbus Day Holiday - Office Closed Monday, October 12
-+October 12 is a state holiday. We will reopen on Tuesday.
-```
-</details>
-
-### NY - DOL -- Employer Contribution Rate Table
-
-<https://dol.ny.gov/employer-contribution-rate-table>  
-now redirects to https://dol.ny.gov/bizserve/ui/prg/rate/ratetables
-  
-Used by: `data/states/NY-2026.json`
-
+**Coverage: 481 of 514 sources were read this run; 33 could not be checked**, and 22 of those have never been read successfully, so nothing about them is being watched.
 
 ## Never read successfully - no baseline, so changes here go unnoticed (22)
 
@@ -82,8 +22,8 @@ Each of these has failed on every run so far. Replace the URL, or check the docu
 | DC | [DC OTR withholding](https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | IL | [Illinois State Income Tax Exemptions - 2026 (Illinois Office of Comptroller, Payroll Bulle](https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026) | HTTP 500 |
 | KY | [City of Pikeville -- Business Licenses](https://pikevilleky.gov/business/) | HTTP 403: the site refuses automated requests; a real browser was refused too |
-| KY | [Kentucky Office of Unemployment Insurance -- Tax Rate Schedules](https://kewes.ky.gov/Contact/contacts.aspx?strid=4) | now redirects to the site's home page (https://ui.ky.gov/) |
-| KY | [Kentucky Office of Unemployment Insurance -- Taxable Wage Base and Surcharge Information](https://kewes.ky.gov/Contact/contacts.aspx?strid=2) | now redirects to the site's home page (https://ui.ky.gov/) |
+| KY | [Kentucky Office of Unemployment Insurance -- Tax Rate Schedules](https://kewes.ky.gov/Contact/contacts.aspx?strid=4) | site's TLS certificate failed verification (certificate has expired) |
+| KY | [Kentucky Office of Unemployment Insurance -- Taxable Wage Base and Surcharge Information](https://kewes.ky.gov/Contact/contacts.aspx?strid=2) | site's TLS certificate failed verification (certificate has expired) |
 | ME | [City of Portland, Maine minimum wage -- November 2025 voter-approved schedule](https://www.portlandmaine.gov/1016/Minimum-Wage) | site's TLS certificate failed verification (unable to get local issuer certificate) |
 | MN | [Minnesota Paid Leave -- Premium rate and contributions](https://pl.mn.gov/resources/calculators/premium-rate-and-contributions) | HTTP 405 |
 | NM | [City of Las Cruces -- Official Notice, Minimum Wage Ordinance (2026)](https://lascruces.gov/wp-content/uploads/2025/09/MinimumWageEng26.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
@@ -106,22 +46,28 @@ These URLs need replacing in `watcher/sources.json` (or the site blocks automate
 | Jurisdiction | Source | Detail |
 |---|---|---|
 | IL | [Illinois State Income Tax Exemptions - 2026 (Illinois Office of Comptroller, Payroll Bulle](https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026) | HTTP 500 |
-| KY | [Kentucky Office of Unemployment Insurance -- Tax Rate Schedules](https://kewes.ky.gov/Contact/contacts.aspx?strid=4) | now redirects to the site's home page (https://ui.ky.gov/) |
-| KY | [Kentucky Office of Unemployment Insurance -- Taxable Wage Base and Surcharge Information](https://kewes.ky.gov/Contact/contacts.aspx?strid=2) | now redirects to the site's home page (https://ui.ky.gov/) |
+| KY | [Kentucky Office of Unemployment Insurance -- Tax Rate Schedules](https://kewes.ky.gov/Contact/contacts.aspx?strid=4) | site's TLS certificate failed verification (certificate has expired) |
+| KY | [Kentucky Office of Unemployment Insurance -- Taxable Wage Base and Surcharge Information](https://kewes.ky.gov/Contact/contacts.aspx?strid=2) | site's TLS certificate failed verification (certificate has expired) |
 | ME | [City of Portland, Maine minimum wage -- November 2025 voter-approved schedule](https://www.portlandmaine.gov/1016/Minimum-Wage) | site's TLS certificate failed verification (unable to get local issuer certificate) |
 | MN | [Minnesota Paid Leave -- Premium rate and contributions](https://pl.mn.gov/resources/calculators/premium-rate-and-contributions) | HTTP 405 |
 | OR | [City of Wilsonville Transit Payroll Tax Information](https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information) | HTTP 404 |
 | US | [735 ILCS 5/12-803 — maximum wage deduction: lesser of 15% of GROSS weekly wages, or the am](https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803) | site's TLS certificate failed verification (unable to get local issuer certificate) |
 | US | [IRS Publication 51 (2025), Agricultural Employer's Tax Guide -- the statutory $150 per wor](https://www.irs.gov/pub/irs-prior/p51--2025.pdf) | HTTP 404 |
 
-## Redirected (27)
+## Unreachable this run (1)
+
+| Jurisdiction | Source | Detail |
+|---|---|---|
+| KY | [Grant County Fiscal Court -- Occupational Licensing](https://grantcounty.ky.gov/occupational-licensing/) | URLError: <urlopen error timed out> |
+
+## Redirected (28)
 
 These still work but redirect elsewhere; consider updating the URL in data/ or curated.json.
 
 | Jurisdiction | Source | Detail |
 |---|---|---|
 | AL | [City of Opelika -- announcement of the occupational tax cut](https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092) | -> https://www.opelika-al.gov/m/newsflash/home/detail/1092 |
-| AZ | [City of Flagstaff -- City of Flagstaff announces minimum wage for 2026](https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165) | 4 lines added, 4 removed |
+| AZ | [City of Flagstaff -- City of Flagstaff announces minimum wage for 2026](https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165) | -> https://www.flagstaff.az.gov/m/newsflash/Archive/Item/2165?arcId=3969 |
 | CA | [California Employer's Guide (DE 44), Rev. 52 (4-26) -- "How to Withhold PIT on Supplementa](https://www.edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf) | -> https://edd.ca.gov:443/siteassets/files/pdf_pub_ctr/de44.pdf |
 | CO | [Colorado Department of Labor & Employment — UI Premium Rates](https://cdle.colorado.gov/employers/unemployment-insurance-premiums/premium-rates) | -> https://cdle.colorado.gov/ui/employers/requirements/premiums/premium-rates |
 | CO | [Colorado Wage Withholding Tax Guide, January 2026](https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf) | -> https://tax.colorado.gov/sites/default/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf |
@@ -130,13 +76,14 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 | ID | [EPB00744 — Table for Percentage Computation Method of Withholding](https://tax.idaho.gov/document-mngr/pubs_EPB00744) | -> https://tax.idaho.gov/wp-content/uploads/pubs/EPB00744/EPB00744_07-23-2026.pdf |
 | ID | [Form ID W-4, Employee's Withholding Allowance Certificate (EFO00307, 04-28-2025 revision)](https://tax.idaho.gov/w4form) | -> https://tax.idaho.gov/wp-content/uploads/forms/EFO00307/EFO00307_04-28-2025.pdf |
 | ID | [Idaho Child Tax Credit Allowance Table (ICTCAT) page](https://tax.idaho.gov/ictcat) | -> https://tax.idaho.gov/taxes/income-tax/withholding/computing/#ictcat |
+| KY | [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs ](https://www.georgetownky.gov/2167/Taxes-License-Fees) | read with a headless browser |
 | MA | [Massachusetts DOR withholding tax forms (new Circular M editions are listed here)](https://www.mass.gov/lists/dor-withholding-tax-forms) | read with a headless browser |
 | MD | [Montgomery County, MD tipped-employee cash wage ($4.00/hr, Montgomery County Code Sec. 27-](https://www.montgomerycountymd.gov/humanrights/min-wage.html) | -> https://www.montgomerycountymd.gov/office-human-rights |
 | MI | [Revenue Administrative Bulletin 1988-27 — Section 125 cafeteria plan benefits excluded fro](https://michigan.gov/treasury/0,4679,7-121-44402_44415_44416-7351--,00.html) | -> https://www.michigan.gov/en/treasury/reference/rab/content/1988/revenue-administrative-bulletin-1988-27 |
 | MN | [Minnesota Department of Labor and Industry -- Minimum wage in Minnesota](https://www.dli.mn.gov/business/employment-practices/minimum-wage-minnesota) | -> https://www.dli.mn.gov/minwage |
 | NC | [NCDOR -- Withholding Tax Frequently Asked Questions](https://www.ncdor.gov/withholding-tax-frequently-asked-questions) | -> https://www.ncdor.gov/taxes-forms/withholding-tax/withholding-tax-frequently-asked-questions |
 | NM | [Texas Workforce Commission cross-reference for New Mexico UI figures -- New Mexico DWS 'Ho](https://www.dws.state.nm.us/Unemployment/Unemployment-for-a-Business/Unemployment-Insurance-Tax-Information/How-UI-Tax-Rates-Are-Calculated) | -> https://www.dws.nm.gov/Unemployment/Unemployment-for-a-Business/Unemployment-Insurance-Tax-Information/How-UI-Tax-Rates-Are-Calculated |
-| NY | [DOL -- Employer Contribution Rate Table](https://dol.ny.gov/employer-contribution-rate-table) | now redirects to https://dol.ny.gov/bizserve/ui/prg/rate/ratetables |
+| NY | [DOL -- Employer Contribution Rate Table](https://dol.ny.gov/employer-contribution-rate-table) | -> https://dol.ny.gov/bizserve/ui/prg/rate/ratetables |
 | NY | [New York State Department of Labor -- Home Care Aide Minimum Wage Fact Sheet (P105)](https://dol.ny.gov/home-care-aide-minimum-wage-fact-sheet-p105) | -> https://dol.ny.gov/system/files/documents/2024/12/p105-home-health-aide-10-23-24.pdf |
 | NY | [New York State Department of Labor -- Minimum Wage (rates effective 01/01/2026)](https://dol.ny.gov/minimum-wage-0) | -> https://dol.ny.gov/minimum-wage |
 | OH | [Combined Form IT 4 — Employee's Withholding Exemption Certificate (post-2020-12-07 combine](https://tax.ohio.gov/static/forms/employer_withholding/generic/wth-it4-combined-fi.pdf) | -> https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/employer_withholding/generic/wth-it4-combined-fi.pdf |
@@ -148,7 +95,7 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 | WI | [Wis. Stat. § 71.03(13) — 'Wisconsin adjusted gross income' defined](https://docs.legis.wisconsin.gov/document/statutes/71.03) | -> https://docs.legis.wisconsin.gov/statutes/statutes/71/i/03 |
 | WY | [Wyoming Dept of Workforce Services -- Unemployment Tax Rates](https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-tax-rates/) | -> https://dws.wyo.gov/dws-division/unemployment-insurance/employers/unemployment-tax-rates/ |
 
-## Sites that block automated checks (26)
+## Sites that block automated checks (24)
 
 These can't be watched by a script (bot protection or JavaScript-only pages). Check them by hand now and then, or find the same document at an address that allows it.
 
@@ -165,7 +112,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 | DC | [DC Department of Employment Services -- Office of Wage-Hour Compliance](https://does.dc.gov/service/office-wage-hour-compliance-0) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | DC | [DC OTR withholding](https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | KY | [City of Franklin -- Business Licensing & Taxes](https://www.franklinky.gov/departments/finance_accounting/business_licensing_taxes.php) | HTTP 403: the site refuses automated requests; a real browser was refused too |
-| KY | [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs ](https://www.georgetownky.gov/2167/Taxes-License-Fees) | read with a browser last time; a real browser was refused too |
 | KY | [City of Pikeville -- Business Licenses](https://pikevilleky.gov/business/) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NH | [NH Department of Revenue Administration -- Interest & Dividends Tax](https://www.revenue.nh.gov/taxes-glance/interest-dividends-tax) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NH | [NHES -- Tax Rate Chart (Fund Balance Reductions and Surcharges by quarter)](https://www.nhes.nh.gov/employers/employer-claims-taxes/tax-rate-chart) | HTTP 403: the site refuses automated requests; a real browser was refused too |
@@ -179,13 +125,12 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 | NY | [NY.gov -- New York State Paid Sick Leave FAQ](https://www.ny.gov/sites/default/files/atoms/files/PSL_FAQ_PaidSickLeaveFAQ.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NY | [NYS Paid Family Leave -- 2025 contribution rate 0.388%, maximum annual contribution $354.5](https://paidfamilyleave.ny.gov/2025) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | OH | [Ohio Municipal Income Tax Rates (The Finder, bulk CSV download)](https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv) | HTTP 401: the site refuses automated requests; a real browser was refused too |
-| OH | [Village of Georgetown -- Income Tax](https://georgetownohio.gov/income-tax/) | read with a browser last time; a real browser was refused too |
 | US | [HHS/ASPE 2026 Poverty Guidelines for the 48 Contiguous States and DC — household of 1: $15](https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | US | [IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)](https://www.irs.gov/draft-tax-forms) | read with a browser last time; a real browser was refused too |
 
 </details>
 
-## Unchanged (476)
+## Unchanged (481)
 
 <details><summary>Show all</summary>
 
@@ -221,6 +166,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - AZ - [Arizona DOR -- Withholding Calculations](https://azdor.gov/individuals/withholding-calculations) (last changed: 2026-09-30)
 - AZ - [Arizona DOR withholding](https://azdor.gov/business/withholding-tax) (last changed: 2026-09-24)
 - AZ - [Arizona Form A-4 (2025)](https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2025_A-4_f.pdf) (last changed: 2026-09-30)
+- AZ - [City of Flagstaff -- City of Flagstaff announces minimum wage for 2026](https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165) (last changed: 2026-10-10)
 - AZ - [City of Tucson -- Tucson Minimum Wage Act (Proposition 206, November 2021)](https://www.tucsonaz.gov/Departments/Business-Services-Department/Tucson-Minimum-Wage-Act) (last changed: 2026-09-24)
 - CA - [California DE 44 employer's guide](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf) (last changed: 2026-09-24)
 - CA - [California Department of Industrial Relations -- Fast Food Minimum Wage Frequently Asked Questions](https://www.dir.ca.gov/dlse/Fast-Food-Minimum-Wage-FAQ.htm) (last changed: 2026-09-24)
@@ -268,6 +214,8 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - GA - [Employer's Withholding Tax Guide 2026 (Revised June 2026, reflecting HB 463 signed 2026-05-11)](https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-june-2026/download) (last changed: 2026-09-26)
 - GA - [Form G-4 (Rev. 06/03/26) -- State of Georgia Employee's Withholding Allowance Certificate](https://dor.georgia.gov/document/form/tsdemployeeswithholdingallowancecertificateg-4pdf/download) (last changed: 2026-09-24)
 - GA - [Georgia DOR -- 2025 Employer's Tax Guide (updated June 2025)](https://dor.georgia.gov/document/document-document/2025-employers-tax-guide-updated-june-2025/download) (last changed: 2026-09-30)
+- GA - [Georgia DOR withholding](https://dor.georgia.gov/taxes/withholding-tax-employers) (last changed: 2026-10-10)
+- GA - [Georgia Employer's Tax Guide (current)](https://dor.georgia.gov/employers-tax-guide) (last changed: 2026-10-10)
 - GA - [Governor Brian Kemp -- press release, HB 463 signed 2026-05-11](https://gov.georgia.gov/press-releases/2026-05-11/gov-kemp-signs-legislation-lowering-taxes-and-supporting-economic-growth) (last changed: 2026-09-24)
 - GA - [USDA National Finance Center -- Georgia State Income Tax Withholding bulletin (2026)](https://help.nfc.usda.gov/bulletins/2026/1784643404.htm) (last changed: 2026-09-24)
 - HI - [Hawaii DLIR Disability Compensation Division -- 2025 Maximum Weekly Wage Base and Maximum Weekly Ben](https://labor.hawaii.gov/dcd/files/2023/05/2025-Max-Weekly-Wage-Base-Rev-2025.03.pdf) (last changed: 2026-09-30)
@@ -314,6 +262,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - KY - [City of Brandenburg -- Ordinance 648 (June 2025)](https://brandenburg.ky.gov/wp-content/uploads/2025/06/ORD-648-Occupational-Tax-.33-JUNE-2025.pdf) (last changed: 2026-09-30)
 - KY - [City of Corbin Occupational Tax Office](https://www.corbin-ky.gov/assets/files/uploads/_20240118110308388_3c4b72d27552424881504b851b27ab70.pdf) (last changed: 2026-09-30)
 - KY - [City of Covington, KY — Finance Department, business licensing and occupational license fee](https://www.covingtonky.gov/government/departments/finance/business-licensing-occupational-license-fee) (last changed: 2026-09-24)
+- KY - [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs gross rece](https://www.georgetownky.gov/2167/Taxes-License-Fees) (last changed: 2026-09-24)
 - KY - [City of Henderson, KY — Occupational License Tax](https://www.hendersonky.gov/174/Occupational-License-Tax) (last changed: 2026-09-29)
 - KY - [City of Lexington -- Occupational license fee: rates and current forms](https://www.lexingtonky.gov/working/business-licensing-taxes/occupational-license-fee-rates-current-forms) (last changed: 2026-09-24)
 - KY - [City of Paducah -- Business License and Payroll Tax](https://paducahky.gov/departments/finance/business-license-and-payroll-tax) (last changed: 2026-09-30)
@@ -322,7 +271,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - KY - [City of Russellville -- Return of Payroll Taxes Withheld](https://russellvilleky.gov/index.php/forms-applications/occupational-tax?download=19:return-of-payroll-taxes-withheld) (last changed: 2026-09-30)
 - KY - [City of St. Matthews -- Occupational Tax](https://www.stmatthewsky.gov/occupational-tax/) (last changed: 2026-09-30)
 - KY - [City of West Liberty -- Occupational Tax Ordinance Amendment](https://westliberty.ky.gov/Ordinances/Occupational-Tax-Ordinance-Amendment.pdf) (last changed: 2026-10-01)
-- KY - [Grant County Fiscal Court -- Occupational Licensing](https://grantcounty.ky.gov/occupational-licensing/) (last changed: 2026-09-30)
 - KY - [Hardin County -- Occupational Tax](https://www.hardincountyky.gov/365/Occupational-Tax) (last changed: 2026-09-30)
 - KY - [KRS 67.750 -- Definitions for KRS 67.750 to 67.790](https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=48677) (last changed: 2026-09-24)
 - KY - [KRS 68.180 -- Occupational license tax in counties containing 300,000 population](https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=50960) (last changed: 2026-09-24)
@@ -462,6 +410,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - NV - [Modified Business Tax (MBT) program page](https://tax.nv.gov/tax-types/modified-business-tax) (last changed: 2026-09-30)
 - NY - [29 U.S.C. 2611(4)(A)(i)-(ii)](https://www.dol.gov/agencies/whd/fmla) (last changed: 2026-09-24)
 - NY - [DOL -- Calculating an Employer's UI Contribution Rate](https://dol.ny.gov/calculating-employers-ui-contribution-rate) (last changed: 2026-09-24)
+- NY - [DOL -- Employer Contribution Rate Table](https://dol.ny.gov/employer-contribution-rate-table) (last changed: 2026-10-10)
 - NY - [DOL -- Subsidiary Contribution Rate Table](https://dol.ny.gov/subsidiary-rate-table) (last changed: 2026-10-06)
 - NY - [DOL -- Unemployment Insurance Rate Information](https://dol.ny.gov/unemployment-insurance-rate-information) (last changed: 2026-09-24)
 - NY - [EEOC -- Section 2, Threshold Issues](https://www.eeoc.gov/laws/guidance/section-2-threshold-issues) (last changed: 2026-09-24)
@@ -502,6 +451,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - OH - [Ohio Revised Code Section 718.121 — Second municipality imposing tax after time period allowed for r](https://codes.ohio.gov/ohio-revised-code/section-718.121) (last changed: 2026-09-24)
 - OH - [Ohio Unemployment Contribution Rates for Calendar Year 2023-2026](https://jfs.ohio.gov/unemployment-services/for-employers/file-unemployment-taxes/tax-resources/contribution-rates) (last changed: 2026-09-24)
 - OH - [Ohio employer withholding](https://tax.ohio.gov/business/employer-withholding) (last changed: 2026-10-07)
+- OH - [Village of Georgetown -- Income Tax](https://georgetownohio.gov/income-tax/) (last changed: 2026-10-04)
 - OH - [Village of Indian Hill -- Tax](https://indianhill.gov/departments/tax/) (last changed: 2026-09-30)
 - OK - [Form OK-W-4 (Rev. 3-2021) -- Employee's State Withholding Allowance Certificate](https://oklahoma.gov/content/dam/ok/en/tax/documents/forms/businesses/general/OK-W-4.pdf) (last changed: 2026-09-24)
 - OK - [Oklahoma Employment Security Commission -- Important Numbers for Employers 2026](https://oklahoma.gov/content/dam/ok/en/oesc/images/misc/Employer-Improtant-Numbers-2026.pdf) (last changed: 2026-09-24)
