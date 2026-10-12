@@ -1,14 +1,82 @@
 {
- "date": "2026-10-11",
+ "date": "2026-10-12",
  "counts": {
-  "unchanged": 481,
-  "unreachable": 7,
-  "blocked": 24,
-  "gone": 2
+  "unchanged": 477,
+  "unreachable": 8,
+  "blocked": 22,
+  "gone": 2,
+  "unstable": 1,
+  "changed": 4
  },
  "total": 514,
- "changed": [],
- "significant_changes": 0,
+ "changed": [
+  {
+   "id": "ia-81aa5600bf",
+   "jurisdiction": "IA",
+   "title": "Iowa withholding",
+   "url": "https://revenue.iowa.gov/taxes/tax-guidance/withholding-tax",
+   "detail": "1 lines added, 1 removed; 3 links added, 3 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://revenue.iowa.gov/taxes/file-w-2-or-1099",
+    "https://revenue.iowa.gov/taxes/file-w-2-or-1099/electronic-reporting-w-2-1099s",
+    "https://revenue.iowa.gov/taxes/file-w-2-or-1099/w-2-1099-software-vendor-list"
+   ],
+   "links_removed": [
+    "https://revenue.iowa.gov/i-need/file-w-2-or-1099",
+    "https://revenue.iowa.gov/i-need/file-w-2-or-1099/electronic-reporting-w-2-1099s",
+    "https://revenue.iowa.gov/i-need/file-w-2-or-1099/w-2-1099-software-vendor-list"
+   ],
+   "significant": true
+  },
+  {
+   "id": "mi-b2211f9083",
+   "jurisdiction": "MI",
+   "title": "Other Michigan Cities with Income Tax (City of Grand Rapids consolidated rate/exemption table)",
+   "url": "https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/",
+   "detail": "1 lines added, 0 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "mn-bb67f51ead",
+   "jurisdiction": "MN",
+   "title": "City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)",
+   "url": "https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses",
+   "detail": "8 lines added, 7 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "wi-909b5f1dab",
+   "jurisdiction": "WI",
+   "title": "2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)",
+   "url": "https://dwd.wisconsin.gov/ui/employers/taxrates.htm",
+   "detail": "read with a headless browser; 8 lines added, 8 removed",
+   "figures_added": [
+    "0.50%",
+    "0.70%",
+    "2.00%",
+    "2.00%",
+    "2.50%",
+    "2.50%",
+    "2.70%",
+    "2.70%"
+   ],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  }
+ ],
+ "significant_changes": 3,
  "broken": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://www.irs.gov/pub/irs-prior/p51--2025.pdf",
@@ -19,8 +87,8 @@
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "verified": 481,
- "unverified": 33,
+ "verified": 482,
+ "unverified": 32,
  "never_baselined": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://does.dc.gov/service/office-wage-hour-compliance-0",
@@ -45,5 +113,5 @@
   "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 20
+ "max_consecutive_failures": 21
 }
