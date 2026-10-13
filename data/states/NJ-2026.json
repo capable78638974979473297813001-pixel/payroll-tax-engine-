@@ -1936,8 +1936,8 @@
       }
     }
   },
-  "exemptPretax": [],
-  "exemptPretaxResolved": "RESOLVED: New Jersey Gross Income Tax is well-established as NOT conforming to federal pretax treatment for 401(k)/cafeteria-125-style deferrals -- NJ taxes those contributions as earned, the same \"taxes deferrals when earned\" rule this project already documents for Pennsylvania (see README). An empty exemptPretax array (full gross wages as the base) is therefore correct, not a placeholder.",
+  "exemptPretax": ["deferral_401k", "commuter"],
+  "exemptPretaxResolved": "RESOLVED 2026-10-13 (corrects an earlier note that said NJ taxes 401(k) and cafeteria deferrals alike): NJ-WT (September 2025, https://www.nj.gov/treasury/taxation/pdf/current/njwt.pdf, read directly) lists '401(k) contributions up to the federal limit' and 'Commuter Transportation Benefits - up to a certain limit' under Compensation Not Subject to Withholding, and lists 'Employee contributions to retirement plans other than a 401(k) in the year they are made', '401(k) contributions that exceed the federal limit' and 'Amounts an employee takes out of cafeteria plans' as subject to withholding. TB-39(R) (https://nj.gov/treasury/taxation/pdf/pubs/tb/tb39r.pdf) agrees: 401(k) follows the federal treatment (N.J.S.A. 54A:6-21) and salary-reduction cafeteria benefits (premium conversion, FSA) are taxable. So exemptPretax is [deferral_401k, commuter]; 403(b), 457, SIMPLE, section 125, HSA, FSA and dependent care stay in the base. Over-limit 401(k) is already moved to post-tax by capElectiveDeferrals(), so it stays taxable as NJ-WT requires.",
   "reciprocity": {
     "reciprocalStates": [
       "PA"
