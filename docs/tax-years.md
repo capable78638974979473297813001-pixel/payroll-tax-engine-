@@ -9,6 +9,7 @@ rules, so each year has its own files: `data/federal/<year>.json`,
 
 | Year | Federal | States | Local registries |
 |---|---|---|---|
+| 2027 | yes, provisional | all 50 + DC, provisional | the same set, provisional |
 | 2026 | yes | all 50 + DC | AL, IN, KY, MI, OH (municipal, school district, JEDD), PA |
 | 2025 | yes | all 50 + DC | the same set, each with its own 2025 file |
 
@@ -30,6 +31,23 @@ wage base, IRS Notice 2024-80 (deferral limits) and RRB Program Letter
 2025-01. The 2025 tables were not revised after OBBBA passed in July 2025,
 and the IRS told employers to keep using them, so they are what a 2025
 cheque should have withheld.
+
+## 2027 is provisional
+
+The 2027 files were started on 2026-10-13, before the IRS, SSA and most
+states publish 2027 figures. Each is the 2026 file carried forward (2026's
+mid-year `effectiveDated` overlays folded into the base) with a top-level
+`provisional` block, and only the figures listed in that block's
+`updatedFor2027` are 2027 values. So far: Indiana's 2.9% state rate
+(IC 6-3-2-1), Boone County IN at 1.71%, and Nevada's $45,400 UI wage base.
+Minimum-wage files are not part of this.
+
+Every paycheck that reads a provisional file gets a `warnings` entry naming
+it (`provisionalYearWarnings()` in `src/registry.ts`). Replace a file's
+carried-forward figures with the year's own source, record `verifiedOn`, then
+delete its `provisional` block. Still to come: IRS Rev. Proc. and Pub 15-T,
+SSA wage base (announced 2026-10-14), state withholding tables and UI wage
+bases (Nov-Jan), Indiana's county notice (December).
 
 ## Changes during a year
 

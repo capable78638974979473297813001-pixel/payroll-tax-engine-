@@ -277,6 +277,30 @@ export function assertTaxYearCovered(checkDate: string, stateCodes: (string | un
   if (missing.length) throw new UnsupportedTaxYearError(year, missing, statesWithRuleset(checkDate));
 }
 
+/**
+ * Data files marked `provisional` are carry-forwards that have not been
+ * re-verified against the year's own source (a new year's files are started
+ * from the last year's before the agencies publish). A paycheck that reads
+ * one gets a warning naming it, so a stale figure is never silent.
+ */
+export function provisionalYearWarnings(checkDate: string, stateCodes: (string | undefined)[]): string[] {
+  const year = yearOf(checkDate);
+  const out: string[] = [];
+  const note = (label: string, file: { provisional?: { status?: string } } | undefined) => {
+    if (file?.provisional) {
+      out.push(
+        `${label} ${year} rules are provisional (${file.provisional.status ?? 'unverified'}): ` +
+          `figures not listed in its provisional block are the prior year's and have not been checked against ${year} sources.`,
+      );
+    }
+  };
+  if (hasFederalRuleset(checkDate)) note('Federal', federalRuleset(checkDate) as { provisional?: { status?: string } });
+  for (const code of new Set(stateCodes.filter((c): c is string => Boolean(c)).map((c) => c.toUpperCase()))) {
+    if (hasStateRuleset(code, checkDate)) note(code, stateRuleset(code, checkDate) as { provisional?: { status?: string } });
+  }
+  return out;
+}
+
 export interface CountyEntry {
   name: string;
   countyCode: string;
