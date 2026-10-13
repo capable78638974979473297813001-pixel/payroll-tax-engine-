@@ -1,41 +1,20 @@
 {
- "date": "2026-10-12",
+ "date": "2026-10-13",
  "counts": {
-  "unchanged": 477,
+  "unchanged": 470,
   "unreachable": 8,
-  "blocked": 22,
+  "blocked": 23,
   "gone": 2,
-  "unstable": 1,
-  "changed": 4
+  "changed": 11
  },
  "total": 514,
  "changed": [
   {
-   "id": "ia-81aa5600bf",
-   "jurisdiction": "IA",
-   "title": "Iowa withholding",
-   "url": "https://revenue.iowa.gov/taxes/tax-guidance/withholding-tax",
-   "detail": "1 lines added, 1 removed; 3 links added, 3 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [
-    "https://revenue.iowa.gov/taxes/file-w-2-or-1099",
-    "https://revenue.iowa.gov/taxes/file-w-2-or-1099/electronic-reporting-w-2-1099s",
-    "https://revenue.iowa.gov/taxes/file-w-2-or-1099/w-2-1099-software-vendor-list"
-   ],
-   "links_removed": [
-    "https://revenue.iowa.gov/i-need/file-w-2-or-1099",
-    "https://revenue.iowa.gov/i-need/file-w-2-or-1099/electronic-reporting-w-2-1099s",
-    "https://revenue.iowa.gov/i-need/file-w-2-or-1099/w-2-1099-software-vendor-list"
-   ],
-   "significant": true
-  },
-  {
-   "id": "mi-b2211f9083",
-   "jurisdiction": "MI",
-   "title": "Other Michigan Cities with Income Tax (City of Grand Rapids consolidated rate/exemption table)",
-   "url": "https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/",
-   "detail": "1 lines added, 0 removed (link lists / headlines only)",
+   "id": "al-dcd77af5c8",
+   "jurisdiction": "AL",
+   "title": "City of Opelika -- announcement of the occupational tax cut",
+   "url": "https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092",
+   "detail": "2 lines added, 2 removed (link lists / headlines only)",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -43,11 +22,23 @@
    "significant": false
   },
   {
-   "id": "mn-bb67f51ead",
-   "jurisdiction": "MN",
-   "title": "City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)",
-   "url": "https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses",
-   "detail": "8 lines added, 7 removed",
+   "id": "az-b66098e04c",
+   "jurisdiction": "AZ",
+   "title": "City of Flagstaff -- City of Flagstaff announces minimum wage for 2026",
+   "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
+   "detail": "3 lines added, 3 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "ga-e097c014c1",
+   "jurisdiction": "GA",
+   "title": "Georgia DOR withholding",
+   "url": "https://dor.georgia.gov/taxes/withholding-tax-employers",
+   "detail": "0 lines added, 2 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -55,28 +46,146 @@
    "significant": true
   },
   {
-   "id": "wi-909b5f1dab",
-   "jurisdiction": "WI",
-   "title": "2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)",
-   "url": "https://dwd.wisconsin.gov/ui/employers/taxrates.htm",
-   "detail": "read with a headless browser; 8 lines added, 8 removed",
-   "figures_added": [
-    "0.50%",
-    "0.70%",
-    "2.00%",
-    "2.00%",
-    "2.50%",
-    "2.50%",
-    "2.70%",
-    "2.70%"
-   ],
+   "id": "ga-944bb83df9",
+   "jurisdiction": "GA",
+   "title": "Georgia Employer's Tax Guide (current)",
+   "url": "https://dor.georgia.gov/employers-tax-guide",
+   "detail": "0 lines added, 2 removed",
+   "figures_added": [],
    "figures_removed": [],
    "links_added": [],
    "links_removed": [],
    "significant": true
+  },
+  {
+   "id": "in-f3e8cf456b",
+   "jurisdiction": "IN",
+   "title": "Indiana DOR withholding",
+   "url": "https://www.in.gov/dor/i-am-a/business-corp/withholding/",
+   "detail": "7 lines added, 9 removed; 17 links added, 17 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.in.gov/dA/06b8f7f762/guide-1220-w-2g-1099.pdf?language_id=1",
+    "https://www.in.gov/dA/0a9a6c9175/guide-withholding-sftp.pdf?language_id=1",
+    "https://www.in.gov/dA/5bba4274a2/guide-withholding-intime.pdf?language_id=1",
+    "https://www.in.gov/dA/734e099191/business-rules-wh3-xml.pdf?language_id=1",
+    "https://www.in.gov/dA/7ad2e03d76/business-rules-efw2-flat-file.pdf?language_id=1",
+    "https://www.in.gov/dA/8abea3ed05/dor-efile-methods-bulk.pdf?language_id=1",
+    "https://www.in.gov/dA/90b32bce8e/IDORWTH2016V1.0.zip?language_id=1",
+    "https://www.in.gov/dA/92797e5a5f/dn01.pdf?language_id=1",
+    "https://www.in.gov/dA/982ff2641c/guide-efw2-w2-wh3.pdf?language_id=1",
+    "https://www.in.gov/dA/a3107df03b/intime-business-guide.pdf?language_id=1",
+    "https://www.in.gov/dA/bbb0b69ed4/2016WTH_change_log.pdf?language_id=1",
+    "https://www.in.gov/dA/be2052e7c3/business-rules-1220-flat-file.pdf?language_id=1",
+    "https://www.in.gov/dA/ca58e65593/ib28.pdf?language_id=1",
+    "https://www.in.gov/dA/d2a2c3ce66/business-rules-wh1-xml.pdf?language_id=1",
+    "https://www.in.gov/dA/efe5e47b07/guide-bulk-file.pdf?language_id=1",
+    "https://www.in.gov/dA/f205e0a637/ib52.pdf?language_id=1",
+    "https://www.in.gov/dor/index"
+   ],
+   "links_removed": [
+    "https://www.in.gov/dor",
+    "https://www.in.gov/dor/files/2016WTH_change_log.pdf",
+    "https://www.in.gov/dor/files/IDORWTH2016V1.0.zip",
+    "https://www.in.gov/dor/files/business-rules-1220-flat-file.pdf",
+    "https://www.in.gov/dor/files/business-rules-efw2-flat-file.pdf",
+    "https://www.in.gov/dor/files/business-rules-wh1-xml.pdf",
+    "https://www.in.gov/dor/files/business-rules-wh3-xml.pdf",
+    "https://www.in.gov/dor/files/dn01.pdf",
+    "https://www.in.gov/dor/files/dor-efile-methods-bulk.pdf",
+    "https://www.in.gov/dor/files/guide-1220-w-2g-1099.pdf",
+    "https://www.in.gov/dor/files/guide-bulk-file.pdf",
+    "https://www.in.gov/dor/files/guide-efw2-w2-wh3.pdf",
+    "https://www.in.gov/dor/files/guide-withholding-intime.pdf",
+    "https://www.in.gov/dor/files/guide-withholding-sftp.pdf",
+    "https://www.in.gov/dor/files/ib28.pdf",
+    "https://www.in.gov/dor/files/ib52.pdf",
+    "https://www.in.gov/dor/files/intime-business-guide.pdf"
+   ],
+   "significant": true
+  },
+  {
+   "id": "in-86066aa1c0",
+   "jurisdiction": "IN",
+   "title": "Indiana Departmental Notice #1 (county rates)",
+   "url": "https://www.in.gov/dor/files/dn01.pdf",
+   "detail": "54 lines added, 46 removed",
+   "figures_added": [
+    "0.017"
+   ],
+   "figures_removed": [
+    "0.0171"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "mi-c62e8170b0",
+   "jurisdiction": "MI",
+   "title": "Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026",
+   "url": "https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026",
+   "detail": "1 lines added, 1 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "oh-3c99c8482e",
+   "jurisdiction": "OH",
+   "title": null,
+   "url": "https://www.ccaohio.gov/member-municipalities",
+   "detail": "0 lines added, 1 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "pa-da0fba1e41",
+   "jurisdiction": "PA",
+   "title": "PA Department of Revenue -- Employer Withholding (reciprocal agreements)",
+   "url": "https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html",
+   "detail": "2 lines added, 0 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "pa-19b2687c65",
+   "jurisdiction": "PA",
+   "title": "PA Department of Revenue -- Personal Income Tax (3.07%)",
+   "url": "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/personal-income-tax",
+   "detail": "2 lines added, 0 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "pa-8251b0b3ee",
+   "jurisdiction": "PA",
+   "title": "Pennsylvania employer withholding",
+   "url": "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding",
+   "detail": "2 lines added, 0 removed; 2 links added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.pa.gov/agencies/revenue/get-assistance/requesting-a-closing-agreement",
+    "https://www.pa.gov/agencies/revenue/tax-resolution-options"
+   ],
+   "links_removed": [],
+   "significant": true
   }
  ],
- "significant_changes": 3,
+ "significant_changes": 5,
  "broken": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://www.irs.gov/pub/irs-prior/p51--2025.pdf",
@@ -87,8 +196,8 @@
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "verified": 482,
- "unverified": 32,
+ "verified": 481,
+ "unverified": 33,
  "never_baselined": [
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://does.dc.gov/service/office-wage-hour-compliance-0",
@@ -113,5 +222,5 @@
   "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 21
+ "max_consecutive_failures": 22
 }

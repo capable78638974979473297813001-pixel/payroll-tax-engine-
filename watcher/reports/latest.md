@@ -1,116 +1,280 @@
-# Source watch - 2026-10-12
+# Source watch - 2026-10-13
 
-**3 sources changed**
+**5 sources changed**
 
 | Changed | Minor | Unchanged | New | Unstable | Unreachable | Gone (404) | Blocks bots | Total |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 3 | 1 | 477 | 0 | 1 | 8 | 2 | 22 | 514 |
+| 5 | 6 | 470 | 0 | 0 | 8 | 2 | 23 | 514 |
 
-_Run took 418 s. A change is only reported after a second fetch confirms it._
+_Run took 410 s. A change is only reported after a second fetch confirms it._
 
-**Coverage: 482 of 514 sources were read this run; 32 could not be checked**, and 22 of those have never been read successfully, so nothing about them is being watched.
+**Coverage: 481 of 514 sources were read this run; 33 could not be checked**, and 22 of those have never been read successfully, so nothing about them is being watched.
 
 ## Changed
 
-### IA - Iowa withholding
+### GA - Georgia DOR withholding
 
-<https://revenue.iowa.gov/taxes/tax-guidance/withholding-tax>  
-1 lines added, 1 removed; 3 links added, 3 removed
+<https://dor.georgia.gov/taxes/withholding-tax-employers>  
+0 lines added, 2 removed
 
-- New link: [File a W-2 or 1099](https://revenue.iowa.gov/taxes/file-w-2-or-1099)
-- New link: [Electronic Reporting of Wage & Tax Statements and Information Returns](https://revenue.iowa.gov/taxes/file-w-2-or-1099/electronic-reporting-w-2-1099s)
-- New link: [W-2 & 1099 Software Vendor List](https://revenue.iowa.gov/taxes/file-w-2-or-1099/w-2-1099-software-vendor-list)
-- Removed link: [File a W-2 or 1099](https://revenue.iowa.gov/i-need/file-w-2-or-1099)
-- Removed link: [Electronic Reporting of Wage & Tax Statements and Information Returns](https://revenue.iowa.gov/i-need/file-w-2-or-1099/electronic-reporting-w-2-1099s)
-- Removed link: [W-2 & 1099 Software Vendor List](https://revenue.iowa.gov/i-need/file-w-2-or-1099/w-2-1099-software-vendor-list)
 
 <details><summary>What changed</summary>
 
 ```diff
-+Iowa Property Tax Overview
--Iowa Property Tax Overview
+-Columbus Day Holiday - Office Closed Monday, October 12
+-October 12 is a state holiday. We will reopen on Tuesday.
 ```
 </details>
 
-### MN - City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)
+### GA - Georgia Employer's Tax Guide (current)
 
-<https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses>  
-8 lines added, 7 removed
+<https://dor.georgia.gov/employers-tax-guide>  
+0 lines added, 2 removed
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Columbus Day Holiday - Office Closed Monday, October 12
+-October 12 is a state holiday. We will reopen on Tuesday.
+```
+</details>
+
+### IN - Indiana DOR withholding
+
+<https://www.in.gov/dor/i-am-a/business-corp/withholding/>  
+7 lines added, 9 removed; 17 links added, 17 removed
+
+- New link: [1220 Specifications/Deviations for Indiana (includes W-2Gs and 1099)](https://www.in.gov/dA/06b8f7f762/guide-1220-w-2g-1099.pdf?language_id=1)
+- New link: [Guide to Filing Withholding via SFTP Bulk Upload](https://www.in.gov/dA/0a9a6c9175/guide-withholding-sftp.pdf?language_id=1)
+- New link: [INTIME Guide to Withholding Taxes](https://www.in.gov/dA/5bba4274a2/guide-withholding-intime.pdf?language_id=1)
+- New link: [WH-3 XML Business Rules](https://www.in.gov/dA/734e099191/business-rules-wh3-xml.pdf?language_id=1)
+- New link: [EFW2 Flat File Business Rules](https://www.in.gov/dA/7ad2e03d76/business-rules-efw2-flat-file.pdf?language_id=1)
+- New link: [electronic methods and options for filing Withholding](https://www.in.gov/dA/8abea3ed05/dor-efile-methods-bulk.pdf?language_id=1)
+- New link: [Withholding Schema: IDORWTH2016V1.0](https://www.in.gov/dA/90b32bce8e/IDORWTH2016V1.0.zip?language_id=1)
+- New link: [Departmental Notice #1](https://www.in.gov/dA/92797e5a5f/dn01.pdf?language_id=1)
+- New link: [EFW2 Specifications/Deviations for Indiana (includes W-2 and WH-3)](https://www.in.gov/dA/982ff2641c/guide-efw2-w2-wh3.pdf?language_id=1)
+- New link: [INTIME for Business Customers](https://www.in.gov/dA/a3107df03b/intime-business-guide.pdf?language_id=1)
+- New link: [Change Log](https://www.in.gov/dA/bbb0b69ed4/2016WTH_change_log.pdf?language_id=1)
+- New link: [1220 Flat File Business Rules](https://www.in.gov/dA/be2052e7c3/business-rules-1220-flat-file.pdf?language_id=1)
+- New link: [Income Tax to Residents With Out-of-State Income (Reciprocal Agreement States)](https://www.in.gov/dA/ca58e65593/ib28.pdf?language_id=1)
+- New link: [WH-1 XML Business Rules](https://www.in.gov/dA/d2a2c3ce66/business-rules-wh1-xml.pdf?language_id=1)
+- New link: [SFTP Bulk Upload Guide](https://www.in.gov/dA/efe5e47b07/guide-bulk-file.pdf?language_id=1)
+- Removed link: [DOR](https://www.in.gov/dor)
+- Removed link: [Change Log](https://www.in.gov/dor/files/2016WTH_change_log.pdf)
+- Removed link: [Withholding Schema: IDORWTH2016V1.0](https://www.in.gov/dor/files/IDORWTH2016V1.0.zip)
+- Removed link: [1220 Flat File Business Rules](https://www.in.gov/dor/files/business-rules-1220-flat-file.pdf)
+- Removed link: [EFW2 Flat File Business Rules](https://www.in.gov/dor/files/business-rules-efw2-flat-file.pdf)
+- Removed link: [WH-1 XML Business Rules](https://www.in.gov/dor/files/business-rules-wh1-xml.pdf)
+- Removed link: [WH-3 XML Business Rules](https://www.in.gov/dor/files/business-rules-wh3-xml.pdf)
+- Removed link: [Departmental Notice #1](https://www.in.gov/dor/files/dn01.pdf)
+- Removed link: [electronic methods and options for filing Withholding](https://www.in.gov/dor/files/dor-efile-methods-bulk.pdf)
+- Removed link: [1220 Specifications/Deviations for Indiana (includes W-2Gs and 1099)](https://www.in.gov/dor/files/guide-1220-w-2g-1099.pdf)
+- Removed link: [SFTP Bulk Upload Guide](https://www.in.gov/dor/files/guide-bulk-file.pdf)
+- Removed link: [EFW2 Specifications/Deviations for Indiana (includes W-2 and WH-3)](https://www.in.gov/dor/files/guide-efw2-w2-wh3.pdf)
+- Removed link: [INTIME Guide to Withholding Taxes](https://www.in.gov/dor/files/guide-withholding-intime.pdf)
+- Removed link: [Guide to Filing Withholding via SFTP Bulk Upload](https://www.in.gov/dor/files/guide-withholding-sftp.pdf)
+- Removed link: [Income Tax to Residents With Out-of-State Income (Reciprocal Agreement States)](https://www.in.gov/dor/files/ib28.pdf)
+
+<details><summary>What changed</summary>
+
+```diff
+-Current: Withholding Income
++Withholding Income
+-INTIME: If a file size is under 10 MB, manually enter or upload via INTIME.
+-SFTP: If a file size exceeds 10 MB, register for and use SFTP bulk filing.
+-Claim a gambling loss on my Indiana return.
+-Have more time to file my taxes and I think I will owe the Department.
+-State Employee Resources
++State Employee
++Resources
+-IN.gov News & Events
++IN.gov News &
++Events
+-Report Accessibility Issues
+-Screen Reader - Speak
++Report
++Accessibility Issues
+```
+</details>
+
+### IN - Indiana Departmental Notice #1 (county rates)
+
+<https://www.in.gov/dor/files/dn01.pdf>  
+54 lines added, 46 removed
   
-Used by: `data/minimum-wage/local/MN-local-2026.json`
+Used by: `data/local/IN-counties-2026.json`, `data/states/IN-2026.json`
 
-
-<details><summary>What changed</summary>
-
-```diff
-+ADVISORY: City of Saint Paul and Community Partners to Celebrate Wabasha Park Improvements
-+Parks & Recreation
-+Common Cent sales tax funds support downtown park enhancements, including a new artfully designed shelter, improved lighting, restored Skygate sculpture and welcoming gathering spaces.
-+Read More
-+City of Saint Paul and Community Partners to Celebrate Wabasha Park Improvements
-+Parks & Recreation
-+Common Cent sales tax funds support downtown park enhancements, including a new artfully designed shelter, improved lighting, restored Skygate sculpture and welcoming gathering spaces.
-+Read More
--ALDI grocery store now open in downtown Saint Paul
--The new grocery store provides convenient access for people who live, work, and spend time downtown.
--Read More
--City of Saint Paul and community partners to celebrate a ribbon cutting for new multi-use turf field at Baker Park
--Parks & Recreation
--The City of Saint Paul and community partners will celebrate the grand opening of the new Baker Park multi-use turf field on Friday, Sept. 25 at 4 p.m. with a ribbon cutting and remarks from community leaders.
--Read More
-```
-</details>
-
-### WI - 2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)
-
-<https://dwd.wisconsin.gov/ui/employers/taxrates.htm>  
-read with a headless browser; 8 lines added, 8 removed
-  
-Used by: `data/states/WI-2026.json`
-
-- Figures now present: 0.50%, 0.70%, 2.00%, 2.00%, 2.50%, 2.50%, 2.70%, 2.70%
-- Figures no longer present: none
+- Figures now present: 0.017
+- Figures no longer present: 0.0171
 
 <details><summary>What changed</summary>
 
 ```diff
--TBD
--TBD
--TBD
--TBD
--TBD
--TBD
-+2.00%
-+0.50%
-+2.50%
-+2.00%
-+0.70%
-+2.70%
--TBD
-+2.50%
--TBD
-+2.70%
+-1
+-Effective Oct. 1, 2026
+-(R47 / 10-26)
+-Important Note: The rates in this notice are effective for withholding purposes for periods beginning on or after Oct. 1, 2026.
++Effective Jan. 1, 2026
++(R46 / 01-26)
++Important Note: The rates in this notice are effective for withholding purposes for periods beginning on or after Jan. 1, 2026.
+-rate has changed since Departmental Notice #1 was published on Jan. 1, 2026.
++rate has changed since Departmental Notice #1 was published on Oct. 1, 2025.
+-Indiana Department of Revenue • Departmental Notice #1
+-2
++1
++- -
++- -
++- -
++Indiana Department of Revenue • Departmental Notice #1
+-Table A Daily Weekly Bi-Weekly Semi-Monthly Monthly
++Table A Daily Weekly Bi Weekly Semi Monthly Monthly
+-Table B Daily Weekly Bi-Weekly Semi-Monthly Monthly
++Table B Daily Weekly Bi Weekly Semi Monthly Monthly
+-Table C Daily Weekly Bi-Weekly Semi-Monthly Monthly
++Table C Daily Weekly Bi Weekly Semi Monthly Monthly
+-Indiana Department of Revenue • Departmental Notice #1
+-3
++2
++Indiana Department of Revenue • Departmental Notice #1
++Example: An employee is paid a weekly salary of $800; he/she claims five personal
++exemptions and is subject to county tax at the rate of 0.01. He/she claims three additional
++dependent exemptions, one first-time additional dependent exemption, and two adopted
++child dependent exemptions. The taxable income of $473.08 is the amount on which state
++and county tax should be calculated.
++Equation Math
++Deduction Constant from Table A $96.15
++Deduction Constant from Table B (additional dependent) +86.54
++Deduction Constant from Table B (first-time additional dependent) +28.85
++Deduction Constant from Table C (adopted dependent) +115.38
++Total Deduction Constant $326.92
++Gross Income $800.00
++Total Deduction Constant -326.92
++Taxable Income $473.08
+... 60 more changed lines
 ```
 </details>
 
-## Minor changes: link lists and headlines only (1)
+### PA - Pennsylvania employer withholding
+
+<https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding>  
+2 lines added, 0 removed; 2 links added, 0 removed
+
+- New link: [Closing Agreements](https://www.pa.gov/agencies/revenue/get-assistance/requesting-a-closing-agreement)
+- New link: [Tax Resolution Options](https://www.pa.gov/agencies/revenue/tax-resolution-options)
+
+<details><summary>What changed</summary>
+
+```diff
++Closing Agreements
++Tax Resolution Options
+```
+</details>
+
+## Minor changes: link lists and headlines only (6)
 
 Recorded, but only the text of links to other pages changed (news boxes, menus).
 
 <details><summary>Show</summary>
 
-### MI - Other Michigan Cities with Income Tax (City of Grand Rapids consolidated rate/exemption table)
+### AL - City of Opelika -- announcement of the occupational tax cut
 
-<https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/>  
-1 lines added, 0 removed (link lists / headlines only)
+<https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092>  
+2 lines added, 2 removed (link lists / headlines only)
   
-Used by: `data/local/MI-cities-2025.json`, `data/local/MI-cities-2026.json`
+Used by: `data/local/AL-municipalities-2025.json`, `data/local/AL-municipalities-2026.json`
 
 
 <details><summary>What changed</summary>
 
 ```diff
-+Christkindl Markt
++REVENUE DEPARTMENT NOTICE
++Home
+-UPCOMING SIDEWALK CLOSURE
+-Home
+```
+</details>
+
+### AZ - City of Flagstaff -- City of Flagstaff announces minimum wage for 2026
+
+<https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165>  
+3 lines added, 3 removed (link lists / headlines only)
+  
+Used by: `data/minimum-wage/local/AZ-local-2026.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-City Offices Closed on Indigenous Peoples Day
++City of Flagstaff in talks with air carrier partners for additional air service
+-City Hosts Indigenous Peoples Day Celebration Event on Oct. 12
++Community Feedback on Potential Drones as First Responders Program
+-City of Flagstaff in talks with air carrier partners for additional air service
++City Honors Gene Munger with Memorial Plaque Dedication
+```
+</details>
+
+### MI - Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026
+
+<https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026>  
+1 lines added, 1 removed (link lists / headlines only)
+  
+Used by: `data/minimum-wage/states/MI-2026.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
++Michigan is a national leader in connecting workers to careers, businesses to talent
+-Michigan Iron Workers gain new pathway to college credit through apprenticeships
+```
+</details>
+
+### OH - https://www.ccaohio.gov/member-municipalities
+
+<https://www.ccaohio.gov/member-municipalities>  
+0 lines added, 1 removed (link lists / headlines only)
+  
+Used by: `data/local/OH-municipalities-2025.json`, `data/local/OH-municipalities-2026.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Amherst
+```
+</details>
+
+### PA - PA Department of Revenue -- Employer Withholding (reciprocal agreements)
+
+<https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html>  
+2 lines added, 0 removed (link lists / headlines only)
+  
+Used by: `data/states/PA-2025.json`, `data/states/PA-2026.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
++Closing Agreements
++Tax Resolution Options
+```
+</details>
+
+### PA - PA Department of Revenue -- Personal Income Tax (3.07%)
+
+<https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/personal-income-tax>  
+2 lines added, 0 removed (link lists / headlines only)
+  
+Used by: `data/states/PA-2025.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
++Closing Agreements
++Tax Resolution Options
 ```
 </details>
 
@@ -164,14 +328,8 @@ These URLs need replacing in `watcher/sources.json` (or the site blocks automate
 
 | Jurisdiction | Source | Detail |
 |---|---|---|
-| TN | [TN Department of Labor and Workforce Development -- UI Tax Rates](https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax/ui-tax-rates.html) | URLError: <urlopen error [Errno 104] Connection reset by peer> |
-| US | [42 Pa. Cons. Stat. § 8127 — wages/salaries/commissions exempt from attachment, execution o](https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/42/00.081.027.000..HTM) | URLError: <urlopen error timed out> |
-
-## Unstable (1)
-
-| Jurisdiction | Source | Detail |
-|---|---|---|
-| CO | [Colorado withholding tax guide](https://tax.colorado.gov/withholding-tax-guide) | read with a headless browser; content differed, but the confirming fetch failed (HTTP 403 (browser)); snapshot kept |
+| IN | [WH-4, State Form 48845](https://www.in.gov/dor/tax-forms/withholding-tax-forms/) | URLError: <urlopen error [Errno 111] Connection refused> |
+| KY | [Grant County Fiscal Court -- Occupational Licensing](https://grantcounty.ky.gov/occupational-licensing/) | URLError: <urlopen error timed out> |
 
 ## Redirected (28)
 
@@ -179,8 +337,8 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 
 | Jurisdiction | Source | Detail |
 |---|---|---|
-| AL | [City of Opelika -- announcement of the occupational tax cut](https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092) | -> https://www.opelika-al.gov/m/newsflash/home/detail/1092 |
-| AZ | [City of Flagstaff -- City of Flagstaff announces minimum wage for 2026](https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165) | -> https://www.flagstaff.az.gov/m/newsflash/Archive/Item/2165?arcId=3969 |
+| AL | [City of Opelika -- announcement of the occupational tax cut](https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092) | 2 lines added, 2 removed (link lists / headlines only) |
+| AZ | [City of Flagstaff -- City of Flagstaff announces minimum wage for 2026](https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165) | 3 lines added, 3 removed (link lists / headlines only) |
 | CA | [California Employer's Guide (DE 44), Rev. 52 (4-26) -- "How to Withhold PIT on Supplementa](https://www.edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf) | -> https://edd.ca.gov:443/siteassets/files/pdf_pub_ctr/de44.pdf |
 | CO | [Colorado Department of Labor & Employment — UI Premium Rates](https://cdle.colorado.gov/employers/unemployment-insurance-premiums/premium-rates) | -> https://cdle.colorado.gov/ui/employers/requirements/premiums/premium-rates |
 | CO | [Colorado Wage Withholding Tax Guide, January 2026](https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf) | -> https://tax.colorado.gov/sites/default/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf |
@@ -202,13 +360,13 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 | OH | [Combined Form IT 4 — Employee's Withholding Exemption Certificate (post-2020-12-07 combine](https://tax.ohio.gov/static/forms/employer_withholding/generic/wth-it4-combined-fi.pdf) | -> https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/employer_withholding/generic/wth-it4-combined-fi.pdf |
 | OH | [Ohio Dept of Taxation - School District Income Tax rate list, Tax Year 2026](https://tax.ohio.gov/static/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf) | -> https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf |
 | OH | [Ohio Form IT 4NR — Employee's Statement of Residency in a Reciprocity State (Rev. 5/07), O](https://tax.ohio.gov/static/forms/employer_withholding/generic/wth_it4nr.pdf) | -> https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/employer_withholding/generic/wth_it4nr.pdf |
-| PA | [PA Department of Revenue -- Employer Withholding (reciprocal agreements)](https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html) | -> https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding |
+| PA | [PA Department of Revenue -- Employer Withholding (reciprocal agreements)](https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html) | 2 lines added, 0 removed (link lists / headlines only) |
 | US | [Wis. Stat. § 812.34 — 80% of disposable earnings exempt from garnishment (i.e. 20% reachab](https://docs.legis.wisconsin.gov/document/statutes/812.34) | -> https://docs.legis.wisconsin.gov/statutes/statutes/812/ii/34 |
-| WI | [2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)](https://dwd.wisconsin.gov/ui/employers/taxrates.htm) | read with a headless browser; 8 lines added, 8 removed |
+| WI | [2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)](https://dwd.wisconsin.gov/ui/employers/taxrates.htm) | read with a headless browser |
 | WI | [Wis. Stat. § 71.03(13) — 'Wisconsin adjusted gross income' defined](https://docs.legis.wisconsin.gov/document/statutes/71.03) | -> https://docs.legis.wisconsin.gov/statutes/statutes/71/i/03 |
 | WY | [Wyoming Dept of Workforce Services -- Unemployment Tax Rates](https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-tax-rates/) | -> https://dws.wyo.gov/dws-division/unemployment-insurance/employers/unemployment-tax-rates/ |
 
-## Sites that block automated checks (22)
+## Sites that block automated checks (23)
 
 These can't be watched by a script (bot protection or JavaScript-only pages). Check them by hand now and then, or find the same document at an address that allows it.
 
@@ -221,6 +379,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 | AZ | [UIT-0603A (FY26), Unemployment Insurance Tax Rate Chart](https://des.az.gov/sites/default/files/dl/UIT-0603A_FY26.pdf) | read with a browser last time; a real browser was refused too |
 | CO | [Colorado DOR -- DR 1098 Colorado Withholding Worksheet for Employers](https://tax.colorado.gov/DR1098) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | CO | [Colorado wage withholding](https://tax.colorado.gov/withholding-tax) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| CO | [Colorado withholding tax guide](https://tax.colorado.gov/withholding-tax-guide) | read with a browser last time; a real browser was refused too |
 | DC | [DC Department of Employment Services -- Office of Wage-Hour Compliance](https://does.dc.gov/service/office-wage-hour-compliance-0) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | DC | [DC OTR withholding](https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | KY | [City of Pikeville -- Business Licenses](https://pikevilleky.gov/business/) | HTTP 403: the site refuses automated requests; a real browser was refused too |
@@ -241,7 +400,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 
 </details>
 
-## Unchanged (477)
+## Unchanged (470)
 
 <details><summary>Show all</summary>
 
@@ -256,7 +415,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - AL - [City of Auburn -- Occupational License Fee](https://www.auburnal.gov/revenue/tax-information/occupational-license-fee/) (last changed: 2026-09-30)
 - AL - [City of Irondale -- Occupational License Fee](https://cityofirondaleal.gov/occupational-license-fee/) (last changed: 2026-09-30)
 - AL - [City of Leeds -- Occupational Tax](https://www.leedsalabama.gov/471/Occupational-Tax) (last changed: 2026-09-30)
-- AL - [City of Opelika -- announcement of the occupational tax cut](https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092) (last changed: 2026-10-07)
 - AL - [City of Tarrant -- occupational license fee ordinance (Municode)](https://mcclibraryfunctions.azurewebsites.us/api/ordinanceDownload/10178/1047327/pdf) (last changed: 2026-09-30)
 - AL - [City of Tuskegee -- business information brochure](https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf) (last changed: 2026-09-30)
 - AL - [Form A4 (Rev. 4/2025) -- Employee's Withholding Tax Exemption Certificate](https://www.revenue.alabama.gov/wp-content/uploads/2025/04/A4_0425.pdf) (last changed: 2026-09-24)
@@ -277,7 +435,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - AZ - [Arizona DOR -- Withholding Calculations](https://azdor.gov/individuals/withholding-calculations) (last changed: 2026-09-30)
 - AZ - [Arizona DOR withholding](https://azdor.gov/business/withholding-tax) (last changed: 2026-09-24)
 - AZ - [Arizona Form A-4 (2025)](https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2025_A-4_f.pdf) (last changed: 2026-09-30)
-- AZ - [City of Flagstaff -- City of Flagstaff announces minimum wage for 2026](https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165) (last changed: 2026-10-10)
 - AZ - [City of Tucson -- Tucson Minimum Wage Act (Proposition 206, November 2021)](https://www.tucsonaz.gov/Departments/Business-Services-Department/Tucson-Minimum-Wage-Act) (last changed: 2026-09-24)
 - CA - [California DE 44 employer's guide](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf) (last changed: 2026-09-24)
 - CA - [California Department of Industrial Relations -- Fast Food Minimum Wage Frequently Asked Questions](https://www.dir.ca.gov/dlse/Fast-Food-Minimum-Wage-FAQ.htm) (last changed: 2026-09-24)
@@ -325,8 +482,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - GA - [Employer's Withholding Tax Guide 2026 (Revised June 2026, reflecting HB 463 signed 2026-05-11)](https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-june-2026/download) (last changed: 2026-09-26)
 - GA - [Form G-4 (Rev. 06/03/26) -- State of Georgia Employee's Withholding Allowance Certificate](https://dor.georgia.gov/document/form/tsdemployeeswithholdingallowancecertificateg-4pdf/download) (last changed: 2026-09-24)
 - GA - [Georgia DOR -- 2025 Employer's Tax Guide (updated June 2025)](https://dor.georgia.gov/document/document-document/2025-employers-tax-guide-updated-june-2025/download) (last changed: 2026-09-30)
-- GA - [Georgia DOR withholding](https://dor.georgia.gov/taxes/withholding-tax-employers) (last changed: 2026-10-10)
-- GA - [Georgia Employer's Tax Guide (current)](https://dor.georgia.gov/employers-tax-guide) (last changed: 2026-10-10)
 - GA - [Governor Brian Kemp -- press release, HB 463 signed 2026-05-11](https://gov.georgia.gov/press-releases/2026-05-11/gov-kemp-signs-legislation-lowering-taxes-and-supporting-economic-growth) (last changed: 2026-09-24)
 - GA - [USDA National Finance Center -- Georgia State Income Tax Withholding bulletin (2026)](https://help.nfc.usda.gov/bulletins/2026/1784643404.htm) (last changed: 2026-09-24)
 - HI - [Hawaii DLIR Disability Compensation Division -- 2025 Maximum Weekly Wage Base and Maximum Weekly Ben](https://labor.hawaii.gov/dcd/files/2023/05/2025-Max-Weekly-Wage-Base-Rev-2025.03.pdf) (last changed: 2026-09-30)
@@ -342,6 +497,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - IA - [Iowa DOR -- Iowa Withholding Formula For Wages Paid Beginning January 1, 2025](https://revenue.iowa.gov/media/61/download?inline) (last changed: 2026-09-30)
 - IA - [Iowa Individual Income Tax Withholding Formula, Effective January 1, 2026](https://revenue.iowa.gov/media/53/download?inline=) (last changed: 2026-09-24)
 - IA - [Iowa Workforce Development / Iowa Division of Labor -- Your Rights Under the Iowa Minimum Wage Law a](https://workforce.iowa.gov/media/234/download) (last changed: 2026-09-24)
+- IA - [Iowa withholding](https://revenue.iowa.gov/taxes/tax-guidance/withholding-tax) (last changed: 2026-10-12)
 - ID - [EPB00744 — Table for Percentage Computation Method of Withholding](https://tax.idaho.gov/document-mngr/pubs_EPB00744) (last changed: 2026-09-24)
 - ID - [Form ID W-4, Employee's Withholding Allowance Certificate (EFO00307, 04-28-2025 revision)](https://tax.idaho.gov/w4form) (last changed: 2026-09-24)
 - ID - [Idaho Child Tax Credit Allowance Table (ICTCAT) page](https://tax.idaho.gov/ictcat) (last changed: 2026-09-24)
@@ -358,12 +514,9 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - IL - [Illinois withholding income tax](https://tax.illinois.gov/research/taxinformation/withholdingincometax.html) (last changed: 2026-09-24)
 - IL - [Pub-130, Withholding Illinois Income Tax for My Employees](https://tax.illinois.gov/research/publications/pubs/who-is-required-to-withhold-illinois-income-tax/withholding-illinois-income-tax-for-my-employees.html) (last changed: 2026-09-24)
 - IN - [Form WH-47 — Certificate of Residence](https://forms.in.gov/download.aspx?id=2419) (last changed: 2026-09-24)
-- IN - [Indiana DOR withholding](https://www.in.gov/dor/i-am-a/business-corp/withholding/) (last changed: 2026-09-30)
-- IN - [Indiana Departmental Notice #1 (county rates)](https://www.in.gov/dor/files/dn01.pdf) (last changed: 2026-09-28)
 - IN - [Indiana Unemployment for Employers: New Employer Premium Rate (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/new-employer-premium-rate/) (last changed: 2026-09-24)
 - IN - [Indiana Unemployment for Employers: Rate Computation (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/) (last changed: 2026-09-24)
 - IN - [Indiana Unemployment for Employers: State Premium Rate Computation (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/state-premium-rate-computation/) (last changed: 2026-09-25)
-- IN - [WH-4, State Form 48845](https://www.in.gov/dor/tax-forms/withholding-tax-forms/) (last changed: 2026-09-24)
 - KS - [Form 200, Local Intangibles Tax Return (Rev. 9-23-25)](https://www.ksrevenue.gov/pdf/20026.pdf) (last changed: 2026-09-24)
 - KS - [KW-100, Kansas Withholding Tax Guide (Rev. 10-24) -- SUPPLEMENTAL WAGES section, page 8](https://ksrevenue.gov/pdf/kw100.pdf) (last changed: 2026-09-24)
 - KS - [Kansas withholding tax guide KW-100](https://www.ksrevenue.gov/pdf/kw100.pdf) (last changed: 2026-09-24)
@@ -382,7 +535,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - KY - [City of Russellville -- Return of Payroll Taxes Withheld](https://russellvilleky.gov/index.php/forms-applications/occupational-tax?download=19:return-of-payroll-taxes-withheld) (last changed: 2026-09-30)
 - KY - [City of St. Matthews -- Occupational Tax](https://www.stmatthewsky.gov/occupational-tax/) (last changed: 2026-09-30)
 - KY - [City of West Liberty -- Occupational Tax Ordinance Amendment](https://westliberty.ky.gov/Ordinances/Occupational-Tax-Ordinance-Amendment.pdf) (last changed: 2026-10-01)
-- KY - [Grant County Fiscal Court -- Occupational Licensing](https://grantcounty.ky.gov/occupational-licensing/) (last changed: 2026-09-30)
 - KY - [Hardin County -- Occupational Tax](https://www.hardincountyky.gov/365/Occupational-Tax) (last changed: 2026-09-30)
 - KY - [KRS 67.750 -- Definitions for KRS 67.750 to 67.790](https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=48677) (last changed: 2026-09-24)
 - KY - [KRS 68.180 -- Occupational license tax in counties containing 300,000 population](https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=50960) (last changed: 2026-09-24)
@@ -437,18 +589,19 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - MI - [MCL 206.30 — retirement/pension income deductions (subsection (1)(f) etc.), the basis for MI taxable](https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-206-30) (last changed: 2026-09-26)
 - MI - [MCL 206.703(2) — Every employer required under the Internal Revenue Code to withhold on an individua](https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-206-703) (last changed: 2026-09-26)
 - MI - [MI-W4 (Rev. 12-20) — Employee's Michigan Withholding Exemption Certificate](https://www.michigan.gov/-/media/Project/Websites/taxes/Forms/All-Years/MIW4.pdf) (last changed: 2026-09-24)
-- MI - [Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026](https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026) (last changed: 2026-10-06)
 - MI - [Michigan LEO/UIA — Taxable Wage Base FAQ](https://www.michigan.gov/leo/bureaus-agencies/uia/employers/forms/accordion/taxable-wage-base) (last changed: 2026-09-24)
 - MI - [Michigan LEO/UIA — Unemployment Tax Rate (statutory formula, Section 19 of the Michigan Employment S](https://www.michigan.gov/leo/bureaus-agencies/uia/assets/unemployment-tax-rate) (last changed: 2026-09-24)
 - MI - [Michigan Treasury -- 446 Michigan Income Tax Withholding Guide (2025)](https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/SUW/TY2025/446_Withholding-Guide_2025.pdf) (last changed: 2026-09-30)
 - MI - [Michigan Treasury -- Withholding Tax Information by Calendar Year](https://www.michigan.gov/taxes/business-taxes/withholding/calendar-year-tax-information) (last changed: 2026-09-30)
 - MI - [Michigan Treasury — Withholding Reciprocity Examples (Analysis section: MCL 206.703(2), MCL 206.110,](https://www.michigan.gov/taxes/business-taxes/payroll-service-providers/withholding-reciprocity-examples) (last changed: 2026-09-24)
 - MI - [Michigan withholding tax](https://www.michigan.gov/taxes/business-taxes/withholding) (last changed: 2026-09-24)
+- MI - [Other Michigan Cities with Income Tax (City of Grand Rapids consolidated rate/exemption table)](https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/) (last changed: 2026-10-12)
 - MI - [Revenue Administrative Bulletin 1988-27 — Section 125 cafeteria plan benefits excluded from AGI are ](https://michigan.gov/treasury/0,4679,7-121-44402_44415_44416-7351--,00.html) (last changed: 2026-09-24)
 - MI - [Which cities impose an income tax? (Michigan Dept of Treasury — authoritative list of all 24 cities)](https://www.michigan.gov/taxes/questions/iit/accordion/general/what-cities-impose-an-income-tax) (last changed: 2026-09-24)
 - MN - [2026 Form W-4MN, Section 2 -- Exemption From Minnesota Withholding](https://www.revenue.state.mn.us/sites/default/files/2026-04/w-4mn.pdf) (last changed: 2026-09-24)
 - MN - [2026 Minnesota Withholding Tax Instructions and Tables (wh-inst-26)](https://www.revenue.state.mn.us/sites/default/files/2025-12/wh-inst-26.pdf) (last changed: 2026-09-24)
 - MN - [City of Minneapolis -- Minimum wage increases to $16.37 for all employers](https://www.minneapolismn.gov/news/2025/december/minimum-wage/) (last changed: 2026-09-24)
+- MN - [City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)](https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses) (last changed: 2026-10-12)
 - MN - [Minn. R. 8002.0200 (administrative rule implementing 290.081's reciprocity exclusion)](https://www.revisor.mn.gov/rules/8002.0200/) (last changed: 2026-09-25)
 - MN - [Minn. Stat. § 268B.14 (Premium rates)](https://www.revisor.mn.gov/statutes/cite/268B.14) (last changed: 2026-09-25)
 - MN - [Minn. Stat. § 290.081 (Income of nonresidents, reciprocity)](https://www.revisor.mn.gov/statutes/cite/290.081) (last changed: 2026-09-25)
@@ -540,7 +693,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - NY - [U.S. DOL Wage and Hour Opinion Letter (1986-05-07) on county-appointed poll workers](https://www.dol.gov/agencies/whd/compliance-assistance/handy-reference-guide-flsa) (last changed: 2026-09-24)
 - NY - [data/minimum-wage/federal-2026.json (this engine's own federal minimum wage file)](https://www.dol.gov/agencies/whd/flsa) (last changed: 2026-09-24)
 - NY - [eCFR 29 CFR 553.106 amendment history - official API](https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?section=553.106) (last changed: 2026-09-24)
-- OH - [https://www.ccaohio.gov/member-municipalities](https://www.ccaohio.gov/member-municipalities) (last changed: 2026-09-24)
 - OH - [CCA Division of Taxation -- Tax Rates (2026 and 2025 tables)](https://www.ccaohio.gov/tax-rates) (last changed: 2026-09-30)
 - OH - [City of Dayton -- Joint Economic Development District](https://www.daytonohio.gov/261/Joint-Economic-Development-District) (last changed: 2026-09-30)
 - OH - [Combined Form IT 4 — Employee's Withholding Exemption Certificate (post-2020-12-07 combined version)](https://tax.ohio.gov/static/forms/employer_withholding/generic/wth-it4-combined-fi.pdf) (last changed: 2026-09-24)
@@ -590,9 +742,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - PA - [PA Department of Labor & Industry -- UC Computation of Rates](https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/computation-of-rates) (last changed: 2026-10-02)
 - PA - [PA Department of Labor & Industry -- UC employee withholding (0.07% since 2018)](https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/employee-withholding) (last changed: 2026-09-24)
 - PA - [PA Department of Labor & Industry -- Yearly Tax Highlights (UC)](https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/yearly-tax-highlights) (last changed: 2026-10-07)
-- PA - [PA Department of Revenue -- Employer Withholding (reciprocal agreements)](https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html) (last changed: 2026-10-02)
-- PA - [PA Department of Revenue -- Personal Income Tax (3.07%)](https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/personal-income-tax) (last changed: 2026-10-02)
-- PA - [Pennsylvania employer withholding](https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding) (last changed: 2026-10-02)
 - PA - [REV-415 (SU) 01-23 -- Employer Withholding Information Guide](https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforbusinesses/employerwithholding/documents/rev-415.pdf) (last changed: 2026-09-24)
 - PA - [REV-419 (EX) 09-20, instructions REV-419 IN (EX) 03-24 -- Employee's Nonwithholding Application Cert](https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforbusinesses/employerwithholding/documents/rev-419.pdf) (last changed: 2026-09-24)
 - PA - [UC-748 (REV 09-25) -- Contribution Rates Effective January 1, 2026](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748%20rev%2009-25.pdf) (last changed: 2026-09-24)
@@ -611,11 +760,13 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - SD - [South Dakota DLR -- Reemployment Assistance for Businesses (rate notices)](https://dlr.sd.gov/ra/businesses/default.aspx) (last changed: 2026-10-07)
 - SD - [South Dakota Department of Labor and Regulation -- Minimum Wage FAQ](https://dlr.sd.gov/employment_laws/minimum_wage_faq.aspx) (last changed: 2026-09-24)
 - SD - [South Dakota Department of Labor and Regulation -- Reemployment Assistance Tax FAQ](https://dlr.sd.gov/ra/businesses/faq.aspx) (last changed: 2026-09-24)
+- TN - [TN Department of Labor and Workforce Development -- UI Tax Rates](https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax/ui-tax-rates.html) (last changed: 2026-09-24)
 - TX - [Tex. Const. Art. VIII, sec. 24 -- prohibition on a state income tax](https://statutes.capitol.texas.gov/Docs/CN/htm/CN.8.htm) (last changed: 2026-09-24)
 - TX - [Texas Workforce Commission: your tax rates](https://www.twc.texas.gov/programs/unemployment-tax/your-tax-rates) (last changed: 2026-09-24)
 - US - [https://apps.dced.pa.gov/munstats-public/FindLocalTax.aspx](https://apps.dced.pa.gov/munstats-public/FindLocalTax.aspx) (last changed: 2026-09-24)
 - US - [https://thefinder.tax.ohio.gov/?tab=fileDownloads](https://thefinder.tax.ohio.gov/?tab=fileDownloads) (last changed: 2026-09-24)
 - US - [14 M.R.S. § 3126 — ordinary garnishment limited to the lesser of 25% of disposable earnings or the a](https://legislature.maine.gov/statutes/14/title14sec3126-A.html) (last changed: 2026-10-09)
+- US - [42 Pa. Cons. Stat. § 8127 — wages/salaries/commissions exempt from attachment, execution or other pr](https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/42/00.081.027.000..HTM) (last changed: 2026-09-24)
 - US - [A.R.S. § 33-1131(B) — maximum part of disposable earnings subject to garnishment: the lesser of 10% ](https://www.azleg.gov/ars/33/01131.htm) (last changed: 2026-09-24)
 - US - [AS 09.38.030(a) and 8 AAC 95.030 — regular earnings exemption: the greater of $473/week or 75% of we](https://public.courts.alaska.gov/web/forms/docs/civ-511.pdf) (last changed: 2026-09-24)
 - US - [Cal. Civ. Proc. Code § 706.050 — ordinary garnishment limited to the lesser of 20% of disposable ear](https://selfhelp.courts.ca.gov/guide-earnings-withholding-orders-employers) (last changed: 2026-09-24)
@@ -706,6 +857,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - WA - [Washington State Department of Labor & Industries -- Local Minimum Wage Rates](https://lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates) (last changed: 2026-09-24)
 - WA - [Washington State Department of Labor & Industries -- Washington's minimum wage going up to $17.13 an](https://www.lni.wa.gov/news-events/article/25-27) (last changed: 2026-09-24)
 - WA - [Washington State's Paid Family and Medical Leave — Estimate your Paid Leave payments](https://paidleave.wa.gov/estimate-your-paid-leave-payments/) (last changed: 2026-09-24)
+- WI - [2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)](https://dwd.wisconsin.gov/ui/employers/taxrates.htm) (last changed: 2026-10-12)
 - WI - [DOR General Withholding Tax Questions (reciprocity, thresholds, WT-4)](https://www.revenue.wi.gov/Pages/FAQS/pcs-with.aspx) (last changed: 2026-09-24)
 - WI - [DOR Tax Rates FAQ (annual Form 1 individual income tax brackets)](https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx) (last changed: 2026-09-24)
 - WI - [UCT-1-E, 2026 Wisconsin Employer's Quarterly Contribution Report (SUTA initial rates)](https://dwd.wisconsin.gov/dwd/forms/ui/pdf/uct-1-e-2026.pdf) (last changed: 2026-09-24)
