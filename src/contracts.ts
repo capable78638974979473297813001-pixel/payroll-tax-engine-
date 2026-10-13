@@ -55,5 +55,19 @@ export function inputContractWarnings(input: PaycheckInput): string[] {
     );
   }
 
+  // Residence-side local facts on the work certificate for someone who lives in
+  // another state: a resident-only tax would apply to a nonresident. Ohio's and
+  // Michigan's are ignored by the engine; the rest it cannot tell apart.
+  if (input.residenceState && input.workState && input.residenceState.code !== input.workState.code) {
+    const RESIDENT_ONLY = ['residenceCity', 'residenceCounty', 'residenceSchoolDistrict', 'schoolDistrictCode', 'nycResident', 'yonkersResident'] as const;
+    const present = RESIDENT_ONLY.filter((k) => work[k] !== undefined && work[k] !== false);
+    if (present.length > 0) {
+      warnings.push(
+        `workState.certificate has ${present.join(', ')}, which describe a resident of ${input.workState.code}, but residenceState is ${input.residenceState.code}. ` +
+          'Ohio school district and resident city taxes and Michigan resident city taxes were not applied for this reason; check the others.',
+      );
+    }
+  }
+
   return warnings;
 }

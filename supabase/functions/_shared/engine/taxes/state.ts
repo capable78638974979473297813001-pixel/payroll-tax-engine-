@@ -1133,6 +1133,32 @@ function resolveCertNonresident(cert: Record<string, unknown>): boolean {
 }
 
 /**
+ * Whether the employee is a NONRESIDENT of the work state, for the two states
+ * whose method itself changes on it (Maryland's Special Nonresident Rate,
+ * DC's blanket exemption). input.residenceState is the source of truth: a
+ * residence in a different state IS nonresidence, so the caller no longer has
+ * to also set certificate.nonresident (a second flag nothing forced them to
+ * keep in step). The certificate flag still counts on its own, for callers
+ * that have no residenceState.
+ */
+function isNonresidentOfWorkState(input: PaycheckInput, cert: Record<string, unknown>): boolean {
+  const residence = input.residenceState?.code;
+  if (residence && input.workState && residence !== input.workState.code) return true;
+  return resolveCertNonresident(cert);
+}
+
+/**
+ * True when the employee is known to live in a state other than the work
+ * state. Residence-only local taxes (Ohio's school district tax, a resident
+ * city rate) cannot apply to them, whatever residence fields are on the
+ * certificate.
+ */
+function residesOutsideWorkState(input: PaycheckInput): boolean {
+  const residence = input.residenceState?.code;
+  return residence !== undefined && input.workState !== undefined && residence !== input.workState.code;
+}
+
+/**
  * Employee-claimed exemption from state withholding (Minnesota's W-4MN
  * Section 2 is the first concrete, enumerable example in this project, but
  * read generically off certificate.exempt so any future state's own
@@ -8026,7 +8052,7 @@ function mdSupplementalCarveOut(
   }
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (resolveCertNonresident(cert)) return null;
+  if (isNonresidentOfWorkState(input, cert)) return null;
 
   const countyRate = mdCountyTopRate(cert.county as string | undefined, rules);
   if (countyRate === undefined) return null;
@@ -8128,7 +8154,7 @@ function marylandWithholding(
   let localTax: number;
   let localNote: string;
   let localDefaulted = false;
-  const nonresident = resolveCertNonresident(cert);
+  const nonresident = isNonresidentOfWorkState(input, cert);
   if (nonresident) {
     localTax = applyRate(taxableIncome, cfg.nonresidentSpecialRate);
     localNote = `nonresident, Special ${(cfg.nonresidentSpecialRate * 100).toFixed(2)}% rate`;
@@ -8272,7 +8298,7 @@ function dcWithholding(
   const periodWages = ctx.taxableWagesFor(exempt);
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (resolveCertNonresident(cert)) {
+  if (isNonresidentOfWorkState(input, cert)) {
     return {
       id: `${rules.code}_SIT`,
       name: `${rules.name} Income Tax`,
@@ -8763,7 +8789,9 @@ function michiganLocalTax(
   if (!hasMICityRuleset(input.checkDate)) return null;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  const residenceCityName = typeof cert.residenceCity === 'string' ? cert.residenceCity : undefined;
+  // A resident rate is for Michigan city residents; a residence in another state leaves only the work city.
+  const residenceCityName =
+    typeof cert.residenceCity === 'string' && !residesOutsideWorkState(input) ? cert.residenceCity : undefined;
   const workCityName = typeof cert.workCity === 'string' ? cert.workCity : undefined;
   if (!residenceCityName && !workCityName) return null;
 
@@ -8905,7 +8933,9 @@ function ohioLocalTax(
   if (!hasOHMunicipalityRuleset(input.checkDate)) return null;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  const residenceCityName = typeof cert.residenceCity === 'string' ? cert.residenceCity : undefined;
+  // A resident rate is for Ohio residents; a residence in another state leaves only the work city.
+  const residenceCityName =
+    typeof cert.residenceCity === 'string' && !residesOutsideWorkState(input) ? cert.residenceCity : undefined;
   const workCityName = typeof cert.workCity === 'string' ? cert.workCity : undefined;
   if (!residenceCityName && !workCityName) return null;
 
@@ -9105,6 +9135,9 @@ function ohioSchoolDistrictTax(
 ): TaxLine | null {
   if (rules.code !== 'OH') return null;
   if (!hasOHSchoolDistrictRuleset(input.checkDate)) return null;
+
+  // SDIT is owed by residents of the district only (ORC 5748).
+  if (residesOutsideWorkState(input)) return null;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const sdNumber = typeof cert.schoolDistrictCode === 'string' ? cert.schoolDistrictCode : undefined;

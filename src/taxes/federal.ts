@@ -103,6 +103,16 @@ export function federalIncomeTax(
     return line(0, 'Employee claimed exempt on Form W-4');
   }
 
+  // A nonresident alien cannot file jointly or as head of household, so Pub 15-T
+  // / Notice 1392 have them check Single or Married Filing Separately in Step
+  // 1(c) whatever their marital status. Run a married_joint or head_of_household
+  // NRA on the Single schedule: the MFJ schedule and its larger Step 1 adjustment
+  // would otherwise undo the add-back above.
+  const filingStatus: FilingStatus =
+    nraAdjustment !== 0 && (w4.filingStatus === 'married_joint' || w4.filingStatus === 'head_of_household')
+      ? 'single'
+      : w4.filingStatus;
+
   // Step 1 — annualise and adjust.
   const annualWages = (taxableWages + nraAdjustment) * periods; // 1c
   const withOther = annualWages + w4.otherIncome; // 1e
@@ -112,7 +122,7 @@ export function federalIncomeTax(
   const standardAdj = w4.multipleJobs
     ? 0
     : dollars(
-        w4.filingStatus === 'married_joint'
+        filingStatus === 'married_joint'
           ? cfg.step1StandardAdjustment.married_joint
           : cfg.step1StandardAdjustment.other,
       );
@@ -124,7 +134,7 @@ export function federalIncomeTax(
   const schedules = w4.multipleJobs
     ? cfg.multipleJobsSchedules
     : cfg.standardSchedules;
-  const schedule = schedules[scheduleKey(w4.filingStatus)];
+  const schedule = schedules[scheduleKey(filingStatus)];
   if (!schedule) {
     throw new Error(
       `No 2026 federal schedule for filing status "${w4.filingStatus}"`,
@@ -146,7 +156,9 @@ export function federalIncomeTax(
 
   const detail =
     (nraAdjustment
-      ? `NRA adjustment +${fmt(nraAdjustment)}/period (Pub 15-T Table 2, not reported as wages); `
+      ? `NRA adjustment +${fmt(nraAdjustment)}/period (Pub 15-T Table 2, not reported as wages)` +
+        (filingStatus !== w4.filingStatus ? `; ${w4.filingStatus} treated as single (a nonresident alien cannot file jointly or as head of household)` : '') +
+        '; '
       : '') +
     `annualised ${fmt(annualWages)} → adjusted ${fmt(adjustedAnnual)}; ` +
     `bracket ${(bracket.rate * 100).toFixed(0)}% over ${fmt(dollars(bracket.from))}; ` +
