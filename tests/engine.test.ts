@@ -4227,12 +4227,12 @@ describe('New Jersey', () => {
     assert.equal(r.netPay, noLocality.netPay);
   });
 
-  test("Newark's payroll tax excludes federal pretax deferrals from its base, not NJ's own (empty) exempt list", () => {
+  test("Newark's payroll tax excludes federal pretax deferrals from its base (its own list, not NJ's income-tax exempt list)", () => {
     // $1,000 regular with a $200 401(k) deferral. NJ's OWN state income
-    // tax is famously non-conforming (rules.exemptPretax === []) and
-    // would tax the full $1,000 — but Newark's ordinance tracks FEDERAL
-    // withholding wages, which exclude a 401(k) deferral. Taxable base
-    // should be $800, not $1,000: 1% x $800 = $8.00, not $10.00.
+    // tax exempts only 401(k) and commuter benefits (NJ-WT), while
+    // Newark's ordinance tracks FEDERAL withholding wages, which exclude
+    // every pre-tax category. Taxable base should be $800, not $1,000:
+    // 1% x $800 = $8.00, not $10.00.
     const r = calculatePaycheck(
       input({
         payFrequency: 'weekly',
