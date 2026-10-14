@@ -31,10 +31,11 @@ function L<T = Record<string, unknown>>(f: string): T[] {
   return (arrays[0] as T[]) ?? [];
 }
 const GROSS = 1000000; // $10,000
+const CHECK_DATE = '2026-09-15';
 const money = (c: number) => '$' + (c / 100).toFixed(2);
 
 const baseInput = (over: Partial<PaycheckInput>): PaycheckInput => ({
-  checkDate: '2026-09-15',
+  checkDate: CHECK_DATE,
   payFrequency: 'biweekly',
   earnings: [{ code: 'REG', category: 'regular', amount: GROSS }],
   deductions: [],
@@ -67,7 +68,13 @@ const FILES: FileCfg[] = [
   },
   {
     name: 'PA Act 32 EIT (PSD)',
-    rows: () => (L('PA-EIT-LST-2026.json') as Array<Record<string, number | string>>).map((j) => {
+    rows: () => (L('PA-EIT-LST-2026.json') as Array<Record<string, number | string>>).map((row) => {
+      // Dated rateChanges (a new EIT, Philadelphia's July 1 reset) apply to the
+      // sweep's check date exactly as the engine applies them, so the expected
+      // rate is the one in force on that date, not the file's base row.
+      const j: Record<string, unknown> = { ...row };
+      const dated = (row.rateChanges ?? []) as unknown as Array<{ on: string; set: Record<string, unknown> }>;
+      for (const c of dated.filter((c) => c.on <= CHECK_DATE).sort((a, b) => a.on.localeCompare(b.on))) Object.assign(j, c.set);
       const totalRes = Number(j.totalResidentEIT ?? (Number(j.residentEIT) + Number(j.schoolDistrictEIT ?? 0)));
       const nonres = Number(j.nonresidentEIT ?? 0);
       return {
