@@ -8272,7 +8272,13 @@ function dcWithholding(
   const periodWages = ctx.taxableWagesFor(exempt);
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
-  if (resolveCertNonresident(cert)) {
+  // A worker whose residenceState is another state is a nonresident by
+  // definition, so DC is $0 whether or not the caller also set
+  // certificate.nonresident. Without this, a Maryland resident working in DC
+  // was withheld DC tax on the strength of an omitted flag.
+  const livesElsewhere =
+    typeof input.residenceState?.code === 'string' && input.residenceState.code.toUpperCase() !== 'DC';
+  if (resolveCertNonresident(cert) || livesElsewhere) {
     return {
       id: `${rules.code}_SIT`,
       name: `${rules.name} Income Tax`,
@@ -8280,7 +8286,8 @@ function dcWithholding(
       jurisdiction: 'state',
       taxableWages: 0,
       amount: 0,
-      detail: `$0 — DC does not tax nonresident wages (Home Rule Act of 1973, federal statutory prohibition, not a bilateral reciprocity agreement)`,
+      detail: `$0 — DC does not tax nonresident wages (Home Rule Act of 1973, federal statutory prohibition, not a bilateral reciprocity agreement)` +
+        (livesElsewhere && !resolveCertNonresident(cert) ? `; nonresident inferred from residenceState ${input.residenceState!.code}` : ''),
     };
   }
 
