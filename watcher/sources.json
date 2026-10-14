@@ -26,7 +26,8 @@
    "url": "https://legislature.maine.gov/statutes/14/title14sec3126-A.html",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -36,7 +37,8 @@
    "url": "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/42/00.081.027.000..HTM",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -46,7 +48,8 @@
    "url": "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -56,7 +59,8 @@
    "url": "https://www.azleg.gov/ars/33/01131.htm",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -66,7 +70,8 @@
    "url": "https://public.courts.alaska.gov/web/forms/docs/civ-511.pdf",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -76,7 +81,8 @@
    "url": "https://selfhelp.courts.ca.gov/guide-earnings-withholding-orders-employers",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -86,7 +92,8 @@
    "url": "https://www.dir.ca.gov/dlse/minimum_wage.htm",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -96,7 +103,8 @@
    "url": "https://code.dccouncil.gov/us/dc/council/laws/22-296",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -106,7 +114,8 @@
    "url": "https://does.dc.gov/sites/default/files/dc/sites/does/publication/attachments/2026%20Minimum%20Wage%20Poster.pdf",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -117,7 +126,8 @@
    "origin": "curated",
    "used_by": [
     "data/federal/2025.json",
-    "data/federal/2026.json"
+    "data/federal/2026.json",
+    "data/federal/2027.json"
    ]
   },
   {
@@ -127,7 +137,8 @@
    "url": "https://www.dol.gov/agencies/whd/fact-sheets/30-cppa",
    "origin": "data",
    "used_by": [
-    "data/garnishment/federal-2026.json"
+    "data/garnishment/federal-2026.json",
+    "data/garnishment/federal-2027.json"
    ]
   },
   {
@@ -150,7 +161,8 @@
    "url": "https://webapps.dol.gov/elaws/elg/garnish.htm",
    "origin": "data",
    "used_by": [
-    "data/garnishment/federal-2026.json"
+    "data/garnishment/federal-2026.json",
+    "data/garnishment/federal-2027.json"
    ]
   },
   {
@@ -236,7 +248,8 @@
    "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=railroad-retirement-board",
    "origin": "curated",
    "used_by": [
-    "data/federal/2026.json"
+    "data/federal/2026.json",
+    "data/federal/2027.json"
    ],
    "replaces": [
     "https://www.rrb.gov/Newsroom/NewsReleases/RetirementUnemploymentInsuranceTaxes"
@@ -250,7 +263,8 @@
    "origin": "curated",
    "used_by": [
     "data/federal/2025.json",
-    "data/federal/2026.json"
+    "data/federal/2026.json",
+    "data/federal/2027.json"
    ],
    "replaces": [
     "https://www.ssa.gov/oact/cola/cbb.html"
@@ -284,7 +298,8 @@
    "url": "https://www.flsenate.gov/Laws/Statutes/2010/222.11",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -294,7 +309,8 @@
    "url": "https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -304,7 +320,8 @@
    "url": "https://www.capitol.hawaii.gov/hrscurrent/Vol13_Ch0601-0676/HRS0652/HRS_0652-0001.htm",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -314,7 +331,8 @@
    "url": "https://www.irs.gov/pub/irs-pdf/fw4.pdf",
    "origin": "curated",
    "used_by": [
-    "data/federal/2026.json"
+    "data/federal/2026.json",
+    "data/federal/2027.json"
    ]
   },
   {
@@ -354,7 +372,8 @@
    "url": "https://www.ssa.gov/slge/election_workers.htm",
    "origin": "data",
    "used_by": [
-    "data/federal/2026.json"
+    "data/federal/2026.json",
+    "data/federal/2027.json"
    ]
   },
   {
@@ -364,7 +383,8 @@
    "url": "https://www.irs.gov/pub/irs-pdf/p15.pdf",
    "origin": "curated",
    "used_by": [
-    "data/federal/2026.json"
+    "data/federal/2026.json",
+    "data/federal/2027.json"
    ]
   },
   {
@@ -398,7 +418,8 @@
    "url": "https://www.irs.gov/pub/irs-pdf/p15t.pdf",
    "origin": "curated",
    "used_by": [
-    "data/federal/2026.json"
+    "data/federal/2026.json",
+    "data/federal/2027.json"
    ]
   },
   {
@@ -425,7 +446,8 @@
    "url": "https://www.irs.gov/pub/irs-pdf/p926.pdf",
    "origin": "data",
    "used_by": [
-    "data/federal/2026.json"
+    "data/federal/2026.json",
+    "data/federal/2027.json"
    ]
   },
   {
@@ -461,7 +483,8 @@
    "origin": "data",
    "used_by": [
     "data/federal/2025.json",
-    "data/federal/2026.json"
+    "data/federal/2026.json",
+    "data/federal/2027.json"
    ]
   },
   {
@@ -471,7 +494,8 @@
    "url": "https://legislature.idaho.gov/statutesrules/idstat/title11/t11ch2/sect11-207/",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -481,7 +505,8 @@
    "url": "https://labor.illinois.gov/laws-rules/fls/minimum-wage-law.html",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -491,7 +516,8 @@
    "url": "https://www.legis.iowa.gov/docs/code/642.21.pdf",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -501,7 +527,8 @@
    "url": "https://www.ksrevisor.gov/statutes/chapters/ch60/060_023_0010.html",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -511,7 +538,8 @@
    "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=18419",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -521,7 +549,8 @@
    "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-600-4012",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -531,7 +560,8 @@
    "url": "https://www.maine.gov/labor/news_events/article.shtml?id=13338762",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -541,7 +571,8 @@
    "url": "https://www.revisor.mn.gov/statutes/cite/571.922",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -551,7 +582,8 @@
    "url": "https://dli.mn.gov/news/minimum-wage-rate-adjusted-inflation-jan-1-2026",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -561,7 +593,8 @@
    "url": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_1/GS_1-362.html",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -571,7 +604,8 @@
    "url": "https://www.oregonlegislature.gov/bills_laws/ors/ors018.html",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -581,7 +615,8 @@
    "url": "https://www.govinfo.gov/app/details/PLAW-119publ21",
    "origin": "curated",
    "used_by": [
-    "data/federal/2026.json"
+    "data/federal/2026.json",
+    "data/federal/2027.json"
    ],
    "replaces": [
     "https://www.congress.gov/bill/119th-congress/house-bill/1"
@@ -594,7 +629,8 @@
    "url": "https://codes.ohio.gov/ohio-revised-code/section-2716.02",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -614,7 +650,8 @@
    "url": "https://gc.nh.gov/rsa/html/LII/512/512-21.htm",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -624,7 +661,8 @@
    "url": "https://www.scstatehouse.gov/code/t15c039.php",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -634,7 +672,8 @@
    "url": "https://dlr.sd.gov/employment_laws/publications/min-wage-poster-2026-english.pdf",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -644,7 +683,8 @@
    "url": "https://statutes.capitol.texas.gov/Docs/PR/htm/PR.42.htm",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -740,7 +780,8 @@
    "url": "https://law.lis.virginia.gov/vacode/title34/chapter4/section34-29/",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -750,7 +791,8 @@
    "url": "https://doli.virginia.gov/2025/07/29/virginia-minimum-wage-rate-increasing-effective-january-1-2026/",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -760,7 +802,8 @@
    "url": "https://code.wvlegislature.gov/38-5A-3/",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -770,7 +813,8 @@
    "url": "https://ofm.wa.gov/wp-content/uploads/sites/default/files/public/legacy/policy/25.60.pdf",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -780,7 +824,8 @@
    "url": "https://docs.legis.wisconsin.gov/document/statutes/812.34",
    "origin": "data",
    "used_by": [
-    "data/garnishment/state-overrides-2026.json"
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
    ]
   },
   {
@@ -790,7 +835,8 @@
    "url": "https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?part=870",
    "origin": "curated",
    "used_by": [
-    "data/garnishment/federal-2026.json"
+    "data/garnishment/federal-2026.json",
+    "data/garnishment/federal-2027.json"
    ],
    "replaces": [
     "https://www.ecfr.gov/current/title-29/subtitle-B/chapter-V/subchapter-D/part-870"
@@ -803,7 +849,8 @@
    "url": "https://www.ecfr.gov/api/versioner/v1/versions/title-34.json?part=34",
    "origin": "curated",
    "used_by": [
-    "data/garnishment/federal-2026.json"
+    "data/garnishment/federal-2026.json",
+    "data/garnishment/federal-2027.json"
    ],
    "replaces": [
     "https://www.ecfr.gov/current/title-34/subtitle-A/part-34"
@@ -826,7 +873,8 @@
    "url": "https://labor.alaska.gov/estax/2026-experience-rates.html",
    "origin": "data",
    "used_by": [
-    "data/states/AK-2026.json"
+    "data/states/AK-2026.json",
+    "data/states/AK-2027.json"
    ]
   },
   {
@@ -836,7 +884,8 @@
    "url": "https://www.akleg.gov/basis/statutes.asp#23.20",
    "origin": "data",
    "used_by": [
-    "data/states/AK-2026.json"
+    "data/states/AK-2026.json",
+    "data/states/AK-2027.json"
    ]
   },
   {
@@ -914,7 +963,8 @@
    "url": "https://www2.labor.alabama.gov/",
    "origin": "data",
    "used_by": [
-    "data/states/AL-2026.json"
+    "data/states/AL-2026.json",
+    "data/states/AL-2027.json"
    ]
   },
   {
@@ -925,7 +975,8 @@
    "origin": "data",
    "used_by": [
     "data/states/AL-2025.json",
-    "data/states/AL-2026.json"
+    "data/states/AL-2026.json",
+    "data/states/AL-2027.json"
    ]
   },
   {
@@ -936,7 +987,8 @@
    "origin": "data",
    "used_by": [
     "data/local/AL-municipalities-2025.json",
-    "data/local/AL-municipalities-2026.json"
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
    ]
   },
   {
@@ -947,7 +999,8 @@
    "origin": "data",
    "used_by": [
     "data/local/AL-municipalities-2025.json",
-    "data/local/AL-municipalities-2026.json"
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
    ]
   },
   {
@@ -958,7 +1011,8 @@
    "origin": "data",
    "used_by": [
     "data/local/AL-municipalities-2025.json",
-    "data/local/AL-municipalities-2026.json"
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
    ]
   },
   {
@@ -969,7 +1023,8 @@
    "origin": "data",
    "used_by": [
     "data/local/AL-municipalities-2025.json",
-    "data/local/AL-municipalities-2026.json"
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
    ]
   },
   {
@@ -980,7 +1035,8 @@
    "origin": "data",
    "used_by": [
     "data/local/AL-municipalities-2025.json",
-    "data/local/AL-municipalities-2026.json"
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
    ]
   },
   {
@@ -991,7 +1047,8 @@
    "origin": "data",
    "used_by": [
     "data/local/AL-municipalities-2025.json",
-    "data/local/AL-municipalities-2026.json"
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
    ]
   },
   {
@@ -1002,7 +1059,8 @@
    "origin": "data",
    "used_by": [
     "data/local/AL-municipalities-2025.json",
-    "data/local/AL-municipalities-2026.json"
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
    ]
   },
   {
@@ -1013,7 +1071,8 @@
    "origin": "data",
    "used_by": [
     "data/local/AL-municipalities-2025.json",
-    "data/local/AL-municipalities-2026.json"
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
    ]
   },
   {
@@ -1023,7 +1082,8 @@
    "url": "https://www.revenue.alabama.gov/wp-content/uploads/2025/04/A4_0425.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/AL-2026.json"
+    "data/states/AL-2026.json",
+    "data/states/AL-2027.json"
    ]
   },
   {
@@ -1034,7 +1094,8 @@
    "origin": "data",
    "used_by": [
     "data/states/AL-2025.json",
-    "data/states/AL-2026.json"
+    "data/states/AL-2026.json",
+    "data/states/AL-2027.json"
    ]
   },
   {
@@ -1044,7 +1105,8 @@
    "url": "https://www.revenue.alabama.gov/wp-content/uploads/2026/01/whbooklet_0126.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/AL-2026.json"
+    "data/states/AL-2026.json",
+    "data/states/AL-2027.json"
    ]
   },
   {
@@ -1054,7 +1116,8 @@
    "url": "https://www.dfa.arkansas.gov/wp-content/uploads/AR4EC2025_FI.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/AR-2026.json"
+    "data/states/AR-2026.json",
+    "data/states/AR-2027.json"
    ]
   },
   {
@@ -1082,7 +1145,8 @@
    "url": "https://dws.arkansas.gov/wp-content/uploads/UI-Handbook-2026-Final.pdf",
    "origin": "curated",
    "used_by": [
-    "data/states/AR-2026.json"
+    "data/states/AR-2026.json",
+    "data/states/AR-2027.json"
    ],
    "replaces": [
     "https://dws.arkansas.gov/workforce-services/unemployment/employer-ui-information/employer-ui-contributions/"
@@ -1095,7 +1159,8 @@
    "url": "https://www.dfa.arkansas.gov/wp-content/uploads/Withholding-Tax-Formula.pdf",
    "origin": "curated",
    "used_by": [
-    "data/states/AR-2026.json"
+    "data/states/AR-2026.json",
+    "data/states/AR-2027.json"
    ]
   },
   {
@@ -1105,7 +1170,8 @@
    "url": "https://www.dfa.arkansas.gov/wp-content/uploads/Withholding-Tax-Tables-for-Low-Income.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/AR-2026.json"
+    "data/states/AR-2026.json",
+    "data/states/AR-2027.json"
    ]
   },
   {
@@ -1115,7 +1181,8 @@
    "url": "https://www.dfa.arkansas.gov/wp-content/uploads/withholdTaxTablesLowIncome_2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/AR-2026.json"
+    "data/states/AR-2026.json",
+    "data/states/AR-2027.json"
    ]
   },
   {
@@ -1156,8 +1223,10 @@
    "origin": "data",
    "used_by": [
     "data/states/AZ-2026.json",
+    "data/states/AZ-2027.json",
     "data/states/OR-2025.json",
-    "data/states/OR-2026.json"
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
    ]
   },
   {
@@ -1167,7 +1236,8 @@
    "url": "https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2026_A-4_f.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/AZ-2026.json"
+    "data/states/AZ-2026.json",
+    "data/states/AZ-2027.json"
    ]
   },
   {
@@ -1178,7 +1248,8 @@
    "origin": "data",
    "used_by": [
     "data/states/AZ-2025.json",
-    "data/states/AZ-2026.json"
+    "data/states/AZ-2026.json",
+    "data/states/AZ-2027.json"
    ]
   },
   {
@@ -1236,7 +1307,8 @@
    "url": "https://des.az.gov/sites/default/files/dl/UIT-0603A_FY26.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/AZ-2026.json"
+    "data/states/AZ-2026.json",
+    "data/states/AZ-2027.json"
    ]
   },
   {
@@ -1275,7 +1347,8 @@
    "origin": "curated",
    "used_by": [
     "data/states/CA-2025.json",
-    "data/states/CA-2026.json"
+    "data/states/CA-2026.json",
+    "data/states/CA-2027.json"
    ]
   },
   {
@@ -1285,7 +1358,8 @@
    "url": "https://www.edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/CA-2026.json"
+    "data/states/CA-2026.json",
+    "data/states/CA-2027.json"
    ]
   },
   {
@@ -1295,7 +1369,8 @@
    "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/26methb.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/CA-2026.json"
+    "data/states/CA-2026.json",
+    "data/states/CA-2027.json"
    ]
   },
   {
@@ -1335,7 +1410,8 @@
    "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de4.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/CA-2026.json"
+    "data/states/CA-2026.json",
+    "data/states/CA-2027.json"
    ]
   },
   {
@@ -1346,7 +1422,8 @@
    "origin": "data",
    "used_by": [
     "data/states/CA-2025.json",
-    "data/states/CA-2026.json"
+    "data/states/CA-2026.json",
+    "data/states/CA-2027.json"
    ]
   },
   {
@@ -1357,7 +1434,8 @@
    "origin": "data",
    "used_by": [
     "data/states/CA-2025.json",
-    "data/states/CA-2026.json"
+    "data/states/CA-2026.json",
+    "data/states/CA-2027.json"
    ]
   },
   {
@@ -1398,7 +1476,8 @@
    "origin": "data",
    "used_by": [
     "data/states/CO-2025.json",
-    "data/states/CO-2026.json"
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
    ]
   },
   {
@@ -1419,7 +1498,8 @@
    "origin": "data",
    "used_by": [
     "data/states/CO-2025.json",
-    "data/states/CO-2026.json"
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
    ]
   },
   {
@@ -1430,7 +1510,8 @@
    "origin": "data",
    "used_by": [
     "data/states/CO-2025.json",
-    "data/states/CO-2026.json"
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
    ]
   },
   {
@@ -1450,7 +1531,8 @@
    "url": "https://cdle.colorado.gov/employers/unemployment-insurance-premiums/premium-rates",
    "origin": "data",
    "used_by": [
-    "data/states/CO-2026.json"
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
    ]
   },
   {
@@ -1475,7 +1557,8 @@
    "origin": "data",
    "used_by": [
     "data/states/CO-2025.json",
-    "data/states/CO-2026.json"
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
    ]
   },
   {
@@ -1485,7 +1568,8 @@
    "url": "https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/CO-2026.json"
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
    ]
   },
   {
@@ -1511,7 +1595,8 @@
    "url": "https://tax.colorado.gov/sites/tax/files/documents/DR_1098_Colorado_Withholding_Worksheet_for_Employees.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/CO-2026.json"
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
    ]
   },
   {
@@ -1557,7 +1642,8 @@
    "url": "https://portal.ct.gov/-/media/drs/forms/2026/wth/ct-w4_1225fillable.pdf?rev=9e9e0216cd394f579961e1d4cd5c7ab3&hash=4D496BCBD10659462D3799732B5A91F2",
    "origin": "data",
    "used_by": [
-    "data/states/CT-2026.json"
+    "data/states/CT-2026.json",
+    "data/states/CT-2027.json"
    ]
   },
   {
@@ -1567,7 +1653,8 @@
    "url": "https://portal.ct.gov/-/media/drs/publications/pubsip/2026/ip-2026-1.pdf?rev=4482a3dca0a44b28ae39381a91fb0916&hash=57C34787EE2C1D4A7F989EE1F6B8F0F8",
    "origin": "data",
    "used_by": [
-    "data/states/CT-2026.json"
+    "data/states/CT-2026.json",
+    "data/states/CT-2027.json"
    ]
   },
   {
@@ -1577,7 +1664,8 @@
    "url": "https://portal.ct.gov/-/media/drs/forms/2025/wth/tpg-211_1225.pdf?rev=e16ef13773ec42d4bf0afd2e192e0176&hash=CCF9990D8EE0AA580A11BC6E97235650",
    "origin": "data",
    "used_by": [
-    "data/states/CT-2026.json"
+    "data/states/CT-2026.json",
+    "data/states/CT-2027.json"
    ]
   },
   {
@@ -1587,7 +1675,8 @@
    "url": "https://code.dccouncil.gov/us/dc/council/code/sections/47-1806.04",
    "origin": "data",
    "used_by": [
-    "data/states/DC-2026.json"
+    "data/states/DC-2026.json",
+    "data/states/DC-2027.json"
    ]
   },
   {
@@ -1636,7 +1725,8 @@
    "origin": "data",
    "used_by": [
     "data/states/DC-2025.json",
-    "data/states/DC-2026.json"
+    "data/states/DC-2026.json",
+    "data/states/DC-2027.json"
    ]
   },
   {
@@ -1646,7 +1736,8 @@
    "url": "https://labor.delaware.gov/divisions/unemployment-insurance/employer-services/",
    "origin": "data",
    "used_by": [
-    "data/states/DE-2026.json"
+    "data/states/DE-2026.json",
+    "data/states/DE-2027.json"
    ]
   },
   {
@@ -1666,7 +1757,8 @@
    "url": "https://legis.delaware.gov/BillDetail?LegislationId=141813",
    "origin": "data",
    "used_by": [
-    "data/states/DE-2026.json"
+    "data/states/DE-2026.json",
+    "data/states/DE-2027.json"
    ]
   },
   {
@@ -1677,7 +1769,8 @@
    "kind": "index",
    "origin": "curated",
    "used_by": [
-    "data/states/DE-2026.json"
+    "data/states/DE-2026.json",
+    "data/states/DE-2027.json"
    ]
   },
   {
@@ -1688,7 +1781,8 @@
    "origin": "data",
    "used_by": [
     "data/states/DE-2025.json",
-    "data/states/DE-2026.json"
+    "data/states/DE-2026.json",
+    "data/states/DE-2027.json"
    ]
   },
   {
@@ -1698,7 +1792,8 @@
    "url": "https://revenuefiles.delaware.gov/2021/DE-W4.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/DE-2026.json"
+    "data/states/DE-2026.json",
+    "data/states/DE-2027.json"
    ]
   },
   {
@@ -1708,7 +1803,8 @@
    "url": "https://revenuefiles.delaware.gov/docs/w4nr.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/DE-2026.json"
+    "data/states/DE-2026.json",
+    "data/states/DE-2027.json"
    ]
   },
   {
@@ -1718,7 +1814,8 @@
    "url": "https://www.flsenate.gov/Laws/Statutes/2025/218.077",
    "origin": "data",
    "used_by": [
-    "data/states/FL-2026.json"
+    "data/states/FL-2026.json",
+    "data/states/FL-2027.json"
    ]
   },
   {
@@ -1728,7 +1825,8 @@
    "url": "https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-june-2026/download",
    "origin": "data",
    "used_by": [
-    "data/states/GA-2026.json"
+    "data/states/GA-2026.json",
+    "data/states/GA-2027.json"
    ]
   },
   {
@@ -1738,7 +1836,8 @@
    "url": "https://dor.georgia.gov/document/form/tsdemployeeswithholdingallowancecertificateg-4pdf/download",
    "origin": "data",
    "used_by": [
-    "data/states/GA-2026.json"
+    "data/states/GA-2026.json",
+    "data/states/GA-2027.json"
    ]
   },
   {
@@ -1774,7 +1873,8 @@
    "url": "https://gov.georgia.gov/press-releases/2026-05-11/gov-kemp-signs-legislation-lowering-taxes-and-supporting-economic-growth",
    "origin": "data",
    "used_by": [
-    "data/states/GA-2026.json"
+    "data/states/GA-2026.json",
+    "data/states/GA-2027.json"
    ]
   },
   {
@@ -1784,7 +1884,8 @@
    "url": "https://help.nfc.usda.gov/bulletins/2026/1784643404.htm",
    "origin": "data",
    "used_by": [
-    "data/states/GA-2026.json"
+    "data/states/GA-2026.json",
+    "data/states/GA-2027.json"
    ]
   },
   {
@@ -1813,7 +1914,8 @@
    "origin": "data",
    "used_by": [
     "data/states/HI-2025.json",
-    "data/states/HI-2026.json"
+    "data/states/HI-2026.json",
+    "data/states/HI-2027.json"
    ]
   },
   {
@@ -1823,7 +1925,8 @@
    "url": "https://labor.hawaii.gov/ui/tax-rate-schedule-and-weekly-benefit-amount/",
    "origin": "data",
    "used_by": [
-    "data/states/HI-2026.json"
+    "data/states/HI-2026.json",
+    "data/states/HI-2027.json"
    ]
   },
   {
@@ -1833,7 +1936,8 @@
    "url": "https://labor.hawaii.gov/dcd/files/2025/12/2026-Maximum-Weekly-Wage-Base.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/HI-2026.json"
+    "data/states/HI-2026.json",
+    "data/states/HI-2027.json"
    ]
   },
   {
@@ -1843,7 +1947,8 @@
    "url": "https://labor.hawaii.gov/wsd/hawaii-family-leave/",
    "origin": "data",
    "used_by": [
-    "data/states/HI-2026.json"
+    "data/states/HI-2026.json",
+    "data/states/HI-2027.json"
    ]
   },
   {
@@ -1861,7 +1966,8 @@
    "url": "https://revenue.iowa.gov/media/4324/download?inline=",
    "origin": "data",
    "used_by": [
-    "data/states/IA-2026.json"
+    "data/states/IA-2026.json",
+    "data/states/IA-2027.json"
    ]
   },
   {
@@ -1871,7 +1977,8 @@
    "url": "https://www.legis.iowa.gov/docs/publications/LGI/91/HF2631.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/IA-2026.json"
+    "data/states/IA-2026.json",
+    "data/states/IA-2027.json"
    ]
   },
   {
@@ -1881,7 +1988,8 @@
    "url": "https://revenue.iowa.gov/taxes/tax-guidance/individual-income-tax/iowa-illinois-reciprocal-agreement",
    "origin": "data",
    "used_by": [
-    "data/states/IA-2026.json"
+    "data/states/IA-2026.json",
+    "data/states/IA-2027.json"
    ]
   },
   {
@@ -1901,7 +2009,8 @@
    "url": "https://revenue.iowa.gov/media/53/download?inline=",
    "origin": "data",
    "used_by": [
-    "data/states/IA-2026.json"
+    "data/states/IA-2026.json",
+    "data/states/IA-2027.json"
    ]
   },
   {
@@ -1929,7 +2038,8 @@
    "url": "https://tax.idaho.gov/document-mngr/pubs_EPB00744",
    "origin": "data",
    "used_by": [
-    "data/states/ID-2026.json"
+    "data/states/ID-2026.json",
+    "data/states/ID-2027.json"
    ]
   },
   {
@@ -1939,7 +2049,8 @@
    "url": "https://tax.idaho.gov/w4form",
    "origin": "data",
    "used_by": [
-    "data/states/ID-2026.json"
+    "data/states/ID-2026.json",
+    "data/states/ID-2027.json"
    ]
   },
   {
@@ -1949,7 +2060,8 @@
    "url": "https://tax.idaho.gov/ictcat",
    "origin": "data",
    "used_by": [
-    "data/states/ID-2026.json"
+    "data/states/ID-2026.json",
+    "data/states/ID-2027.json"
    ]
   },
   {
@@ -1959,7 +2071,8 @@
    "url": "https://www.labor.idaho.gov/wp-content/uploads/2024/12/Tax-rate_Class-array_2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/ID-2026.json"
+    "data/states/ID-2026.json",
+    "data/states/ID-2027.json"
    ]
   },
   {
@@ -1980,7 +2093,8 @@
    "kind": "index",
    "origin": "curated",
    "used_by": [
-    "data/states/ID-2026.json"
+    "data/states/ID-2026.json",
+    "data/states/ID-2027.json"
    ]
   },
   {
@@ -1990,7 +2104,8 @@
    "url": "https://tax.idaho.gov/pressrelease/withholding-tables-updated-for-2026/",
    "origin": "data",
    "used_by": [
-    "data/states/ID-2026.json"
+    "data/states/ID-2026.json",
+    "data/states/ID-2027.json"
    ]
   },
   {
@@ -2000,7 +2115,8 @@
    "url": "https://tax.illinois.gov/forms/withholding/currentyear/il-700-t-withholding-guide-tables.html",
    "origin": "data",
    "used_by": [
-    "data/states/IL-2026.json"
+    "data/states/IL-2026.json",
+    "data/states/IL-2027.json"
    ]
   },
   {
@@ -2010,7 +2126,8 @@
    "url": "https://ides.illinois.gov/content/dam/soi/en/web/ides/ides_forms_and_publications/EA-50_2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/IL-2026.json"
+    "data/states/IL-2026.json",
+    "data/states/IL-2027.json"
    ]
   },
   {
@@ -2031,7 +2148,8 @@
    "origin": "data",
    "used_by": [
     "data/states/IL-2025.json",
-    "data/states/IL-2026.json"
+    "data/states/IL-2026.json",
+    "data/states/IL-2027.json"
    ]
   },
   {
@@ -2041,7 +2159,8 @@
    "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/withholding/documents/2025/il-w-5-nr.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/IL-2026.json"
+    "data/states/IL-2026.json",
+    "data/states/IL-2027.json"
    ]
   },
   {
@@ -2061,7 +2180,8 @@
    "url": "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
    "origin": "data",
    "used_by": [
-    "data/states/IL-2026.json"
+    "data/states/IL-2026.json",
+    "data/states/IL-2027.json"
    ]
   },
   {
@@ -2079,7 +2199,8 @@
    "url": "https://tax.illinois.gov/research/publications/pubs/who-is-required-to-withhold-illinois-income-tax/withholding-illinois-income-tax-for-my-employees.html",
    "origin": "data",
    "used_by": [
-    "data/states/IL-2026.json"
+    "data/states/IL-2026.json",
+    "data/states/IL-2027.json"
    ]
   },
   {
@@ -2091,7 +2212,9 @@
    "used_by": [
     "data/states/IN-2025.json",
     "data/states/IN-2026.json",
-    "data/states/PA-2026.json"
+    "data/states/IN-2027.json",
+    "data/states/PA-2026.json",
+    "data/states/PA-2027.json"
    ]
   },
   {
@@ -2110,7 +2233,9 @@
    "origin": "curated",
    "used_by": [
     "data/local/IN-counties-2026.json",
-    "data/states/IN-2026.json"
+    "data/local/IN-counties-2027.json",
+    "data/states/IN-2026.json",
+    "data/states/IN-2027.json"
    ]
   },
   {
@@ -2120,7 +2245,8 @@
    "url": "https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/new-employer-premium-rate/",
    "origin": "data",
    "used_by": [
-    "data/states/IN-2026.json"
+    "data/states/IN-2026.json",
+    "data/states/IN-2027.json"
    ]
   },
   {
@@ -2130,7 +2256,8 @@
    "url": "https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/",
    "origin": "data",
    "used_by": [
-    "data/states/IN-2026.json"
+    "data/states/IN-2026.json",
+    "data/states/IN-2027.json"
    ]
   },
   {
@@ -2140,7 +2267,8 @@
    "url": "https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/state-premium-rate-computation/",
    "origin": "data",
    "used_by": [
-    "data/states/IN-2026.json"
+    "data/states/IN-2026.json",
+    "data/states/IN-2027.json"
    ]
   },
   {
@@ -2151,7 +2279,8 @@
    "origin": "data",
    "used_by": [
     "data/states/IN-2025.json",
-    "data/states/IN-2026.json"
+    "data/states/IN-2026.json",
+    "data/states/IN-2027.json"
    ]
   },
   {
@@ -2161,7 +2290,8 @@
    "url": "https://www.ksrevenue.gov/pdf/20026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/KS-2026.json"
+    "data/states/KS-2026.json",
+    "data/states/KS-2027.json"
    ]
   },
   {
@@ -2171,7 +2301,8 @@
    "url": "https://ksrevenue.gov/pdf/kw100.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/KS-2026.json"
+    "data/states/KS-2026.json",
+    "data/states/KS-2027.json"
    ]
   },
   {
@@ -2181,7 +2312,8 @@
    "url": "https://www.ksrevenue.gov/pdf/kw100.pdf",
    "origin": "curated",
    "used_by": [
-    "data/states/KS-2026.json"
+    "data/states/KS-2026.json",
+    "data/states/KS-2027.json"
    ]
   },
   {
@@ -2192,7 +2324,8 @@
    "origin": "data",
    "used_by": [
     "data/states/KY-2025.json",
-    "data/states/KY-2026.json"
+    "data/states/KY-2026.json",
+    "data/states/KY-2027.json"
    ]
   },
   {
@@ -2203,7 +2336,8 @@
    "origin": "data",
    "used_by": [
     "data/states/KY-2025.json",
-    "data/states/KY-2026.json"
+    "data/states/KY-2026.json",
+    "data/states/KY-2027.json"
    ]
   },
   {
@@ -2214,7 +2348,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2225,7 +2360,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2236,7 +2372,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2247,7 +2384,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2258,7 +2396,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2269,7 +2408,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2280,7 +2420,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2291,7 +2432,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2302,7 +2444,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2313,7 +2456,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2324,7 +2468,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2335,7 +2480,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2346,7 +2492,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2357,7 +2504,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2368,7 +2516,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2379,7 +2528,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2390,7 +2540,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2401,7 +2552,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2412,7 +2564,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2423,7 +2576,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2434,7 +2588,8 @@
    "origin": "data",
    "used_by": [
     "data/states/KY-2025.json",
-    "data/states/KY-2026.json"
+    "data/states/KY-2026.json",
+    "data/states/KY-2027.json"
    ]
   },
   {
@@ -2444,7 +2599,8 @@
    "url": "https://revenue.ky.gov/Forms/2026%20Withholding%20Formula.pdf",
    "origin": "curated",
    "used_by": [
-    "data/states/KY-2026.json"
+    "data/states/KY-2026.json",
+    "data/states/KY-2027.json"
    ]
   },
   {
@@ -2484,7 +2640,8 @@
    "url": "https://kewes.ky.gov/Contact/contacts.aspx?strid=4",
    "origin": "data",
    "used_by": [
-    "data/states/KY-2026.json"
+    "data/states/KY-2026.json",
+    "data/states/KY-2027.json"
    ]
   },
   {
@@ -2494,7 +2651,8 @@
    "url": "https://kewes.ky.gov/Contact/contacts.aspx?strid=2",
    "origin": "data",
    "used_by": [
-    "data/states/KY-2026.json"
+    "data/states/KY-2026.json",
+    "data/states/KY-2027.json"
    ]
   },
   {
@@ -2505,7 +2663,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2524,7 +2683,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2535,7 +2695,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2546,7 +2707,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2557,7 +2719,8 @@
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json"
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -2577,7 +2740,8 @@
    "url": "https://legis.la.gov/Legis/Law.aspx?d=101760",
    "origin": "data",
    "used_by": [
-    "data/states/LA-2026.json"
+    "data/states/LA-2026.json",
+    "data/states/LA-2027.json"
    ]
   },
   {
@@ -2603,7 +2767,8 @@
    "url": "https://dam.ldr.la.gov/taxforms/1300-1-26-F.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/LA-2026.json"
+    "data/states/LA-2026.json",
+    "data/states/LA-2027.json"
    ]
   },
   {
@@ -2613,7 +2778,8 @@
    "url": "https://dam.ldr.la.gov/taxforms/1306-1-26.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/LA-2026.json"
+    "data/states/LA-2026.json",
+    "data/states/LA-2027.json"
    ]
   },
   {
@@ -2623,7 +2789,8 @@
    "url": "https://help.nfc.usda.gov/bulletins/2025/1740487316.htm",
    "origin": "data",
    "used_by": [
-    "data/states/LA-2026.json"
+    "data/states/LA-2026.json",
+    "data/states/LA-2027.json"
    ]
   },
   {
@@ -2633,7 +2800,8 @@
    "url": "https://www.miltonma.gov/DocumentCenter/View/6586/Massachusetts-Withholding-Form--M-4",
    "origin": "data",
    "used_by": [
-    "data/states/MA-2026.json"
+    "data/states/MA-2026.json",
+    "data/states/MA-2027.json"
    ]
   },
   {
@@ -2644,7 +2812,8 @@
    "origin": "data",
    "used_by": [
     "data/states/MA-2025.json",
-    "data/states/MA-2026.json"
+    "data/states/MA-2026.json",
+    "data/states/MA-2027.json"
    ]
   },
   {
@@ -2661,7 +2830,8 @@
    "url": "https://malegislature.gov/Laws/Constitution",
    "origin": "data",
    "used_by": [
-    "data/states/MA-2026.json"
+    "data/states/MA-2026.json",
+    "data/states/MA-2027.json"
    ]
   },
   {
@@ -2679,7 +2849,8 @@
    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter175M/Section6",
    "origin": "data",
    "used_by": [
-    "data/states/MA-2026.json"
+    "data/states/MA-2026.json",
+    "data/states/MA-2027.json"
    ]
   },
   {
@@ -2689,7 +2860,8 @@
    "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleIX/Chapter62B/Section2",
    "origin": "data",
    "used_by": [
-    "data/states/MA-2026.json"
+    "data/states/MA-2026.json",
+    "data/states/MA-2027.json"
    ]
   },
   {
@@ -2699,7 +2871,8 @@
    "url": "https://help.nfc.usda.gov/bulletins/2026/1769797447.htm",
    "origin": "data",
    "used_by": [
-    "data/states/MA-2026.json"
+    "data/states/MA-2026.json",
+    "data/states/MA-2027.json"
    ]
   },
   {
@@ -2709,7 +2882,8 @@
    "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/md/state-payroll/memos/2026/2026-maryland-state-and-local-withholding-information.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/MD-2026.json"
+    "data/states/MD-2026.json",
+    "data/states/MD-2027.json"
    ]
   },
   {
@@ -2749,7 +2923,8 @@
    "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/instructions/withholding/2026/withholding-guide.pdf",
    "origin": "curated",
    "used_by": [
-    "data/states/MD-2026.json"
+    "data/states/MD-2026.json",
+    "data/states/MD-2027.json"
    ]
   },
   {
@@ -2759,7 +2934,8 @@
    "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/legal-publications/facts/withholding-tax-facts-2026.pdf",
    "origin": "curated",
    "used_by": [
-    "data/states/MD-2026.json"
+    "data/states/MD-2026.json",
+    "data/states/MD-2027.json"
    ]
   },
   {
@@ -2819,7 +2995,8 @@
    "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_form_w-4me_fillable.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/ME-2026.json"
+    "data/states/ME-2026.json",
+    "data/states/ME-2027.json"
    ]
   },
   {
@@ -2829,7 +3006,8 @@
    "url": "https://www.maine.gov/paidleave/docs/2026/employers/faq/employerFAQenglish.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/ME-2026.json"
+    "data/states/ME-2026.json",
+    "data/states/ME-2027.json"
    ]
   },
   {
@@ -2849,7 +3027,8 @@
    "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_wh_tab_instr.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/ME-2026.json"
+    "data/states/ME-2026.json",
+    "data/states/ME-2027.json"
    ]
   },
   {
@@ -2867,7 +3046,8 @@
    "url": "https://help.nfc.usda.gov/bulletins/2026/1771620053.htm",
    "origin": "data",
    "used_by": [
-    "data/states/ME-2026.json"
+    "data/states/ME-2026.json",
+    "data/states/ME-2027.json"
    ]
   },
   {
@@ -2877,7 +3057,8 @@
    "url": "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/SUW/TY2026/446_Withholding-Guide_2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/MI-2026.json"
+    "data/states/MI-2026.json",
+    "data/states/MI-2027.json"
    ]
   },
   {
@@ -2887,7 +3068,8 @@
    "url": "https://www.michigan.gov/treasury/reference/taxpayer-notices/2026/04/15/425-income-tax-rate-for-individuals-and-fiduciaries-in-2026-tax-year",
    "origin": "data",
    "used_by": [
-    "data/states/MI-2026.json"
+    "data/states/MI-2026.json",
+    "data/states/MI-2027.json"
    ]
   },
   {
@@ -2898,7 +3080,8 @@
    "origin": "data",
    "used_by": [
     "data/local/MI-cities-2025.json",
-    "data/local/MI-cities-2026.json"
+    "data/local/MI-cities-2026.json",
+    "data/local/MI-cities-2027.json"
    ]
   },
   {
@@ -2909,7 +3092,8 @@
    "origin": "data",
    "used_by": [
     "data/local/MI-cities-2025.json",
-    "data/local/MI-cities-2026.json"
+    "data/local/MI-cities-2026.json",
+    "data/local/MI-cities-2027.json"
    ]
   },
   {
@@ -2919,7 +3103,8 @@
    "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-206-30",
    "origin": "data",
    "used_by": [
-    "data/states/MI-2026.json"
+    "data/states/MI-2026.json",
+    "data/states/MI-2027.json"
    ]
   },
   {
@@ -2929,7 +3114,8 @@
    "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-206-703",
    "origin": "data",
    "used_by": [
-    "data/states/MI-2026.json"
+    "data/states/MI-2026.json",
+    "data/states/MI-2027.json"
    ]
   },
   {
@@ -2940,7 +3126,8 @@
    "origin": "data",
    "used_by": [
     "data/states/MI-2025.json",
-    "data/states/MI-2026.json"
+    "data/states/MI-2026.json",
+    "data/states/MI-2027.json"
    ]
   },
   {
@@ -2960,7 +3147,8 @@
    "url": "https://www.michigan.gov/leo/bureaus-agencies/uia/employers/forms/accordion/taxable-wage-base",
    "origin": "data",
    "used_by": [
-    "data/states/MI-2026.json"
+    "data/states/MI-2026.json",
+    "data/states/MI-2027.json"
    ]
   },
   {
@@ -2970,7 +3158,8 @@
    "url": "https://www.michigan.gov/leo/bureaus-agencies/uia/assets/unemployment-tax-rate",
    "origin": "data",
    "used_by": [
-    "data/states/MI-2026.json"
+    "data/states/MI-2026.json",
+    "data/states/MI-2027.json"
    ]
   },
   {
@@ -3001,7 +3190,8 @@
    "origin": "data",
    "used_by": [
     "data/states/MI-2025.json",
-    "data/states/MI-2026.json"
+    "data/states/MI-2026.json",
+    "data/states/MI-2027.json"
    ]
   },
   {
@@ -3020,7 +3210,8 @@
    "origin": "data",
    "used_by": [
     "data/local/MI-cities-2025.json",
-    "data/local/MI-cities-2026.json"
+    "data/local/MI-cities-2026.json",
+    "data/local/MI-cities-2027.json"
    ]
   },
   {
@@ -3030,7 +3221,8 @@
    "url": "https://michigan.gov/treasury/0,4679,7-121-44402_44415_44416-7351--,00.html",
    "origin": "data",
    "used_by": [
-    "data/states/MI-2026.json"
+    "data/states/MI-2026.json",
+    "data/states/MI-2027.json"
    ]
   },
   {
@@ -3041,7 +3233,8 @@
    "origin": "data",
    "used_by": [
     "data/local/MI-cities-2025.json",
-    "data/local/MI-cities-2026.json"
+    "data/local/MI-cities-2026.json",
+    "data/local/MI-cities-2027.json"
    ]
   },
   {
@@ -3052,7 +3245,8 @@
    "origin": "data",
    "used_by": [
     "data/states/MN-2025.json",
-    "data/states/MN-2026.json"
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
    ]
   },
   {
@@ -3062,7 +3256,8 @@
    "url": "https://www.revenue.state.mn.us/sites/default/files/2025-12/wh-inst-26.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/MN-2026.json"
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
    ]
   },
   {
@@ -3093,7 +3288,8 @@
    "origin": "data",
    "used_by": [
     "data/states/MN-2025.json",
-    "data/states/MN-2026.json"
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
    ]
   },
   {
@@ -3103,7 +3299,8 @@
    "url": "https://www.revisor.mn.gov/statutes/cite/268B.14",
    "origin": "data",
    "used_by": [
-    "data/states/MN-2026.json"
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
    ]
   },
   {
@@ -3114,7 +3311,8 @@
    "origin": "data",
    "used_by": [
     "data/states/MN-2025.json",
-    "data/states/MN-2026.json"
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
    ]
   },
   {
@@ -3125,7 +3323,8 @@
    "origin": "data",
    "used_by": [
     "data/states/MN-2025.json",
-    "data/states/MN-2026.json"
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
    ]
   },
   {
@@ -3156,7 +3355,8 @@
    "origin": "data",
    "used_by": [
     "data/states/MN-2025.json",
-    "data/states/MN-2026.json"
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
    ]
   },
   {
@@ -3166,7 +3366,8 @@
    "url": "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
    "origin": "data",
    "used_by": [
-    "data/states/MN-2026.json"
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
    ]
   },
   {
@@ -3194,7 +3395,8 @@
    "url": "https://dor.mo.gov/forms/Withholding%20Formula_2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/MO-2026.json"
+    "data/states/MO-2026.json",
+    "data/states/MO-2027.json"
    ]
   },
   {
@@ -3204,7 +3406,8 @@
    "url": "https://dor.mo.gov/forms/MO%20W-4.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/MO-2026.json"
+    "data/states/MO-2026.json",
+    "data/states/MO-2027.json"
    ]
   },
   {
@@ -3234,7 +3437,8 @@
    "url": "https://labor.mo.gov/des/employers/tax-rates",
    "origin": "data",
    "used_by": [
-    "data/states/MO-2026.json"
+    "data/states/MO-2026.json",
+    "data/states/MO-2027.json"
    ]
   },
   {
@@ -3252,7 +3456,8 @@
    "url": "https://mdes.ms.gov/employer-faqs/",
    "origin": "data",
    "used_by": [
-    "data/states/MS-2026.json"
+    "data/states/MS-2026.json",
+    "data/states/MS-2027.json"
    ]
   },
   {
@@ -3270,7 +3475,8 @@
    "url": "https://www.dor.ms.gov/sites/default/files/tax-forms/business/89700251revised1.13.2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/MS-2026.json"
+    "data/states/MS-2026.json",
+    "data/states/MS-2027.json"
    ]
   },
   {
@@ -3290,7 +3496,8 @@
    "url": "https://help.nfc.usda.gov/bulletins/2026/1768327516.htm",
    "origin": "data",
    "used_by": [
-    "data/states/MS-2026.json"
+    "data/states/MS-2026.json",
+    "data/states/MS-2027.json"
    ]
   },
   {
@@ -3300,7 +3507,8 @@
    "url": "https://revenuefiles.mt.gov/files/Forms/Montana_Employee_Withholding_Allowance_and_Exemption_Certificate_Form_MW-4.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/MT-2026.json"
+    "data/states/MT-2026.json",
+    "data/states/MT-2027.json"
    ]
   },
   {
@@ -3310,7 +3518,8 @@
    "url": "https://revenuefiles.mt.gov/files/Forms/Publication-1/Publication-1-2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/MT-2026.json"
+    "data/states/MT-2026.json",
+    "data/states/MT-2027.json"
    ]
   },
   {
@@ -3320,7 +3529,8 @@
    "url": "https://uid.dli.mt.gov/employers/schedule-of-contribution-rates",
    "origin": "data",
    "used_by": [
-    "data/states/MT-2026.json"
+    "data/states/MT-2026.json",
+    "data/states/MT-2027.json"
    ]
   },
   {
@@ -3332,7 +3542,8 @@
    "origin": "curated",
    "used_by": [
     "data/states/MT-2025.json",
-    "data/states/MT-2026.json"
+    "data/states/MT-2026.json",
+    "data/states/MT-2027.json"
    ],
    "replaces": [
     "https://mtrevenue.gov/publications/"
@@ -3345,7 +3556,8 @@
    "url": "https://revenuefiles.mt.gov/files/Forms/Montana_Employer_and_Information_Agent_Guide_with_Tax_Tables.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/MT-2026.json"
+    "data/states/MT-2026.json",
+    "data/states/MT-2027.json"
    ]
   },
   {
@@ -3370,7 +3582,8 @@
    "url": "https://www.des.nc.gov/employers/tax-rate-information",
    "origin": "data",
    "used_by": [
-    "data/states/NC-2026.json"
+    "data/states/NC-2026.json",
+    "data/states/NC-2027.json"
    ]
   },
   {
@@ -3380,7 +3593,8 @@
    "url": "https://www.ncdor.gov/income-tax-withholding-tables-and-instructions-employers/open",
    "origin": "data",
    "used_by": [
-    "data/states/NC-2026.json"
+    "data/states/NC-2026.json",
+    "data/states/NC-2027.json"
    ]
   },
   {
@@ -3390,7 +3604,8 @@
    "url": "https://www.ncdor.gov/withholding-tax-frequently-asked-questions",
    "origin": "data",
    "used_by": [
-    "data/states/NC-2026.json"
+    "data/states/NC-2026.json",
+    "data/states/NC-2027.json"
    ]
   },
   {
@@ -3418,7 +3633,8 @@
    "url": "https://www.tax.nd.gov/sites/www/files/documents/forms/individual/2026-iit/2026-income-tax-withholding-rates-booklet.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/ND-2026.json"
+    "data/states/ND-2026.json",
+    "data/states/ND-2027.json"
    ]
   },
   {
@@ -3428,7 +3644,8 @@
    "url": "https://www.tax.nd.gov/sites/www/files/documents/forms/business/ndwrfillable.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/ND-2026.json"
+    "data/states/ND-2026.json",
+    "data/states/ND-2027.json"
    ]
   },
   {
@@ -3456,7 +3673,8 @@
    "url": "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026cir_en_whole.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/NE-2026.json"
+    "data/states/NE-2026.json",
+    "data/states/NE-2027.json"
    ]
   },
   {
@@ -3466,7 +3684,8 @@
    "url": "https://dol.nebraska.gov/webdocs/Resources/Items/2026%20UI%20guide%20to%20understanding.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/NE-2026.json"
+    "data/states/NE-2026.json",
+    "data/states/NE-2027.json"
    ]
   },
   {
@@ -3506,7 +3725,8 @@
    "url": "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026_percent.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/NE-2026.json"
+    "data/states/NE-2026.json",
+    "data/states/NE-2027.json"
    ]
   },
   {
@@ -3544,7 +3764,8 @@
    "url": "https://www.revenue.nh.gov/taxes-glance/interest-dividends-tax",
    "origin": "data",
    "used_by": [
-    "data/states/NH-2026.json"
+    "data/states/NH-2026.json",
+    "data/states/NH-2027.json"
    ]
   },
   {
@@ -3568,7 +3789,8 @@
    "origin": "data",
    "used_by": [
     "data/states/NH-2025.json",
-    "data/states/NH-2026.json"
+    "data/states/NH-2026.json",
+    "data/states/NH-2027.json"
    ]
   },
   {
@@ -3578,7 +3800,8 @@
    "url": "https://www2.nhes.nh.gov/webtax/indexSecPg.jsp",
    "origin": "data",
    "used_by": [
-    "data/states/NH-2026.json"
+    "data/states/NH-2026.json",
+    "data/states/NH-2027.json"
    ]
   },
   {
@@ -3588,7 +3811,8 @@
    "url": "https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF",
    "origin": "data",
    "used_by": [
-    "data/states/NJ-2026.json"
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
    ]
   },
   {
@@ -3599,7 +3823,8 @@
    "origin": "data",
    "used_by": [
     "data/states/NJ-2025.json",
-    "data/states/NJ-2026.json"
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
    ]
   },
   {
@@ -3609,7 +3834,8 @@
    "url": "https://nj.gov/treasury/taxation/pdf/current/njw4.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/NJ-2026.json"
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
    ]
   },
   {
@@ -3620,7 +3846,8 @@
    "origin": "data",
    "used_by": [
     "data/states/NJ-2025.json",
-    "data/states/NJ-2026.json"
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
    ]
   },
   {
@@ -3630,7 +3857,8 @@
    "url": "https://www.nj.gov/labor/myleavebenefits/worker/fli/",
    "origin": "data",
    "used_by": [
-    "data/states/NJ-2026.json"
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
    ]
   },
   {
@@ -3640,7 +3868,8 @@
    "url": "https://www.nj.gov/labor/myleavebenefits/worker/tdi/",
    "origin": "data",
    "used_by": [
-    "data/states/NJ-2026.json"
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
    ]
   },
   {
@@ -3650,7 +3879,8 @@
    "url": "https://www.nj.gov/labor/lwdhome/press/2025/20251229_newbenefitrates2026.shtml",
    "origin": "data",
    "used_by": [
-    "data/states/NJ-2026.json"
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
    ]
   },
   {
@@ -3670,7 +3900,8 @@
    "url": "https://www.nj.gov/treasury/taxation/pdf/current/njwt.pdf",
    "origin": "curated",
    "used_by": [
-    "data/states/NJ-2026.json"
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
    ]
   },
   {
@@ -3691,7 +3922,8 @@
    "origin": "data",
    "used_by": [
     "data/states/NJ-2025.json",
-    "data/states/NJ-2026.json"
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
    ]
   },
   {
@@ -3750,7 +3982,8 @@
    "origin": "data",
    "used_by": [
     "data/states/NM-2025.json",
-    "data/states/NM-2026.json"
+    "data/states/NM-2026.json",
+    "data/states/NM-2027.json"
    ]
   },
   {
@@ -3760,7 +3993,8 @@
    "url": "https://realfile.tax.newmexico.gov/FYI-104.pdf",
    "origin": "curated",
    "used_by": [
-    "data/states/NM-2026.json"
+    "data/states/NM-2026.json",
+    "data/states/NM-2027.json"
    ]
   },
   {
@@ -3797,7 +4031,8 @@
    "url": "https://www.dws.state.nm.us/Unemployment/Unemployment-for-a-Business/Unemployment-Insurance-Tax-Information/How-UI-Tax-Rates-Are-Calculated",
    "origin": "data",
    "used_by": [
-    "data/states/NM-2026.json"
+    "data/states/NM-2026.json",
+    "data/states/NM-2027.json"
    ]
   },
   {
@@ -3807,7 +4042,8 @@
    "url": "https://help.nfc.usda.gov/bulletins/2025/1741189057.htm",
    "origin": "data",
    "used_by": [
-    "data/states/NM-2026.json"
+    "data/states/NM-2026.json",
+    "data/states/NM-2027.json"
    ]
   },
   {
@@ -3817,7 +4053,8 @@
    "url": "https://tax.nv.gov/faqs/modified-business-tax-faqs/",
    "origin": "data",
    "used_by": [
-    "data/states/NV-2026.json"
+    "data/states/NV-2026.json",
+    "data/states/NV-2027.json"
    ]
   },
   {
@@ -3827,7 +4064,8 @@
    "url": "https://tax.nv.gov/tax-types/modified-business-tax",
    "origin": "data",
    "used_by": [
-    "data/states/NV-2026.json"
+    "data/states/NV-2026.json",
+    "data/states/NV-2027.json"
    ]
   },
   {
@@ -3837,7 +4075,8 @@
    "url": "https://detr.nv.gov/Page/UI_Information_for_Employers",
    "origin": "data",
    "used_by": [
-    "data/states/NV-2026.json"
+    "data/states/NV-2026.json",
+    "data/states/NV-2027.json"
    ]
   },
   {
@@ -3847,7 +4086,8 @@
    "url": "https://www.dol.gov/agencies/whd/fmla",
    "origin": "data",
    "used_by": [
-    "data/employer-thresholds/NY-2026.json"
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
    ]
   },
   {
@@ -3857,7 +4097,8 @@
    "url": "https://dol.ny.gov/calculating-employers-ui-contribution-rate",
    "origin": "data",
    "used_by": [
-    "data/states/NY-2026.json"
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
    ]
   },
   {
@@ -3867,7 +4108,8 @@
    "url": "https://dol.ny.gov/employer-contribution-rate-table",
    "origin": "data",
    "used_by": [
-    "data/states/NY-2026.json"
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
    ]
   },
   {
@@ -3877,7 +4119,8 @@
    "url": "https://dol.ny.gov/subsidiary-rate-table",
    "origin": "data",
    "used_by": [
-    "data/states/NY-2026.json"
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
    ]
   },
   {
@@ -3887,7 +4130,8 @@
    "url": "https://dol.ny.gov/unemployment-insurance-rate-information",
    "origin": "data",
    "used_by": [
-    "data/states/NY-2026.json"
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
    ]
   },
   {
@@ -3897,7 +4141,8 @@
    "url": "https://www.eeoc.gov/laws/guidance/section-2-threshold-issues",
    "origin": "data",
    "used_by": [
-    "data/employer-thresholds/NY-2026.json"
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
    ]
   },
   {
@@ -3907,7 +4152,8 @@
    "url": "https://www.irs.gov/affordable-care-act/employers/determining-if-an-employer-is-an-applicable-large-employer",
    "origin": "data",
    "used_by": [
-    "data/employer-thresholds/NY-2026.json"
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
    ]
   },
   {
@@ -3917,7 +4163,8 @@
    "url": "https://www.tax.ny.gov/pdf/current_forms/it/it2104_fill_in.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/NY-2026.json"
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
    ]
   },
   {
@@ -3927,7 +4174,8 @@
    "url": "https://www.tax.ny.gov/pdf/current_forms/wt/nys45i.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/NY-2026.json"
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
    ]
   },
   {
@@ -3937,7 +4185,8 @@
    "url": "https://www.dfs.ny.gov/consumers/health_insurance/cobra_and_premium_assistance",
    "origin": "data",
    "used_by": [
-    "data/employer-thresholds/NY-2026.json"
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
    ]
   },
   {
@@ -3947,7 +4196,8 @@
    "url": "https://dol.ny.gov/register-unemployment-insurance-0",
    "origin": "data",
    "used_by": [
-    "data/employer-thresholds/NY-2026.json"
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
    ]
   },
   {
@@ -3957,7 +4207,8 @@
    "url": "https://dol.ny.gov/worker-adjustment-and-retraining-notification-warn",
    "origin": "data",
    "used_by": [
-    "data/employer-thresholds/NY-2026.json"
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
    ]
   },
   {
@@ -4014,7 +4265,8 @@
    "url": "https://www.wcb.ny.gov/content/main/PressRe/paid-family-leave-2026.jsp",
    "origin": "curated",
    "used_by": [
-    "data/employer-thresholds/NY-2026.json"
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
    ],
    "replaces": [
     "https://paidfamilyleave.ny.gov/private-employer-coverage-requirements"
@@ -4027,7 +4279,8 @@
    "url": "https://www.ny.gov/sites/default/files/atoms/files/PSL_FAQ_PaidSickLeaveFAQ.pdf",
    "origin": "data",
    "used_by": [
-    "data/employer-thresholds/NY-2026.json"
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
    ]
   },
   {
@@ -4047,7 +4300,8 @@
    "url": "https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_nys.pdf",
    "origin": "curated",
    "used_by": [
-    "data/states/NY-2026.json"
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
    ]
   },
   {
@@ -4085,7 +4339,8 @@
    "url": "https://www.dol.gov/general/topic/health-plans/cobra",
    "origin": "data",
    "used_by": [
-    "data/employer-thresholds/NY-2026.json"
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
    ]
   },
   {
@@ -4106,6 +4361,7 @@
    "origin": "data",
    "used_by": [
     "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json",
     "data/minimum-wage/federal-2026.json"
    ]
   },
@@ -4129,7 +4385,8 @@
    "origin": "data",
    "used_by": [
     "data/local/OH-municipalities-2025.json",
-    "data/local/OH-municipalities-2026.json"
+    "data/local/OH-municipalities-2026.json",
+    "data/local/OH-municipalities-2027.json"
    ]
   },
   {
@@ -4140,7 +4397,8 @@
    "origin": "data",
    "used_by": [
     "data/local/OH-municipalities-2025.json",
-    "data/local/OH-municipalities-2026.json"
+    "data/local/OH-municipalities-2026.json",
+    "data/local/OH-municipalities-2027.json"
    ]
   },
   {
@@ -4161,7 +4419,8 @@
    "origin": "data",
    "used_by": [
     "data/states/OH-2025.json",
-    "data/states/OH-2026.json"
+    "data/states/OH-2026.json",
+    "data/states/OH-2027.json"
    ]
   },
   {
@@ -4171,7 +4430,8 @@
    "url": "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_PercentageMethod_2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/OH-2026.json"
+    "data/states/OH-2026.json",
+    "data/states/OH-2027.json"
    ]
   },
   {
@@ -4182,7 +4442,8 @@
    "origin": "data",
    "used_by": [
     "data/local/OH-jedd-jedz-2025.json",
-    "data/local/OH-jedd-jedz-2026.json"
+    "data/local/OH-jedd-jedz-2026.json",
+    "data/local/OH-jedd-jedz-2027.json"
    ]
   },
   {
@@ -4203,7 +4464,8 @@
    "origin": "data",
    "used_by": [
     "data/states/OH-2025.json",
-    "data/states/OH-2026.json"
+    "data/states/OH-2026.json",
+    "data/states/OH-2027.json"
    ]
   },
   {
@@ -4224,8 +4486,10 @@
    "origin": "data",
    "used_by": [
     "data/local/OH-school-districts-2026.json",
+    "data/local/OH-school-districts-2027.json",
     "data/states/OH-2025.json",
-    "data/states/OH-2026.json"
+    "data/states/OH-2026.json",
+    "data/states/OH-2027.json"
    ]
   },
   {
@@ -4236,7 +4500,8 @@
    "origin": "data",
    "used_by": [
     "data/states/OH-2025.json",
-    "data/states/OH-2026.json"
+    "data/states/OH-2026.json",
+    "data/states/OH-2027.json"
    ]
   },
   {
@@ -4247,7 +4512,8 @@
    "origin": "data",
    "used_by": [
     "data/local/OH-jedd-jedz-2025.json",
-    "data/local/OH-jedd-jedz-2026.json"
+    "data/local/OH-jedd-jedz-2026.json",
+    "data/local/OH-jedd-jedz-2027.json"
    ]
   },
   {
@@ -4258,7 +4524,8 @@
    "origin": "data",
    "used_by": [
     "data/local/OH-municipalities-2025.json",
-    "data/local/OH-municipalities-2026.json"
+    "data/local/OH-municipalities-2026.json",
+    "data/local/OH-municipalities-2027.json"
    ]
   },
   {
@@ -4269,7 +4536,8 @@
    "origin": "data",
    "used_by": [
     "data/local/OH-school-districts-2025.json",
-    "data/local/OH-school-districts-2026.json"
+    "data/local/OH-school-districts-2026.json",
+    "data/local/OH-school-districts-2027.json"
    ]
   },
   {
@@ -4280,7 +4548,8 @@
    "origin": "data",
    "used_by": [
     "data/local/OH-jedd-jedz-2025.json",
-    "data/local/OH-jedd-jedz-2026.json"
+    "data/local/OH-jedd-jedz-2026.json",
+    "data/local/OH-jedd-jedz-2027.json"
    ]
   },
   {
@@ -4291,7 +4560,8 @@
    "origin": "data",
    "used_by": [
     "data/local/OH-jedd-jedz-2025.json",
-    "data/local/OH-jedd-jedz-2026.json"
+    "data/local/OH-jedd-jedz-2026.json",
+    "data/local/OH-jedd-jedz-2027.json"
    ]
   },
   {
@@ -4303,8 +4573,10 @@
    "used_by": [
     "data/local/OH-jedd-jedz-2025.json",
     "data/local/OH-jedd-jedz-2026.json",
+    "data/local/OH-jedd-jedz-2027.json",
     "data/local/OH-municipalities-2025.json",
-    "data/local/OH-municipalities-2026.json"
+    "data/local/OH-municipalities-2026.json",
+    "data/local/OH-municipalities-2027.json"
    ]
   },
   {
@@ -4314,7 +4586,8 @@
    "url": "https://codes.ohio.gov/ohio-revised-code/section-5747.06",
    "origin": "data",
    "used_by": [
-    "data/states/OH-2026.json"
+    "data/states/OH-2026.json",
+    "data/states/OH-2027.json"
    ]
   },
   {
@@ -4325,7 +4598,8 @@
    "origin": "data",
    "used_by": [
     "data/states/OH-2025.json",
-    "data/states/OH-2026.json"
+    "data/states/OH-2026.json",
+    "data/states/OH-2027.json"
    ]
   },
   {
@@ -4336,7 +4610,8 @@
    "origin": "data",
    "used_by": [
     "data/states/OH-2025.json",
-    "data/states/OH-2026.json"
+    "data/states/OH-2026.json",
+    "data/states/OH-2027.json"
    ]
   },
   {
@@ -4346,7 +4621,8 @@
    "url": "https://jfs.ohio.gov/unemployment-services/for-employers/file-unemployment-taxes/tax-resources/contribution-rates",
    "origin": "data",
    "used_by": [
-    "data/states/OH-2026.json"
+    "data/states/OH-2026.json",
+    "data/states/OH-2027.json"
    ]
   },
   {
@@ -4384,7 +4660,8 @@
    "url": "https://oklahoma.gov/content/dam/ok/en/tax/documents/forms/businesses/general/OK-W-4.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/OK-2026.json"
+    "data/states/OK-2026.json",
+    "data/states/OK-2027.json"
    ]
   },
   {
@@ -4394,7 +4671,8 @@
    "url": "https://oklahoma.gov/content/dam/ok/en/oesc/images/misc/Employer-Improtant-Numbers-2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/OK-2026.json"
+    "data/states/OK-2026.json",
+    "data/states/OK-2027.json"
    ]
   },
   {
@@ -4422,7 +4700,8 @@
    "url": "https://www.oklahoma.gov/content/dam/ok/en/tax/documents/resources/publications/businesses/withholding-tables/WHTables-2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/OK-2026.json"
+    "data/states/OK-2026.json",
+    "data/states/OK-2027.json"
    ]
   },
   {
@@ -4432,7 +4711,8 @@
    "url": "https://www.oregon.gov/dor/forms/FormsPubs/withholding-tax-formulas_206-436_2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/OR-2026.json"
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
    ]
   },
   {
@@ -4442,7 +4722,8 @@
    "url": "https://www.oregon.gov/dor/forms/formspubs/transit-payroll-taxes_211-503.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/OR-2026.json"
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
    ]
   },
   {
@@ -4453,7 +4734,8 @@
    "origin": "data",
    "used_by": [
     "data/states/OR-2025.json",
-    "data/states/OR-2026.json"
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
    ]
   },
   {
@@ -4464,7 +4746,8 @@
    "origin": "data",
    "used_by": [
     "data/states/OR-2025.json",
-    "data/states/OR-2026.json"
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
    ]
   },
   {
@@ -4475,7 +4758,8 @@
    "origin": "data",
    "used_by": [
     "data/states/OR-2025.json",
-    "data/states/OR-2026.json"
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
    ]
   },
   {
@@ -4485,7 +4769,8 @@
    "url": "https://www.oregon.gov/employ/businesses/pages/current-tax-rate.aspx",
    "origin": "data",
    "used_by": [
-    "data/states/OR-2026.json"
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
    ]
   },
   {
@@ -4505,7 +4790,8 @@
    "url": "https://www.oregon.gov/dor/programs/businesses/pages/statewide-transit-tax.aspx",
    "origin": "data",
    "used_by": [
-    "data/states/OR-2026.json"
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
    ]
   },
   {
@@ -4549,7 +4835,8 @@
    "url": "https://paidleave.oregon.gov/employers/contributions-calculator.html",
    "origin": "data",
    "used_by": [
-    "data/states/OR-2026.json"
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
    ]
   },
   {
@@ -4560,7 +4847,8 @@
    "origin": "data",
    "used_by": [
     "data/states/OR-2025.json",
-    "data/states/OR-2026.json"
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
    ]
   },
   {
@@ -4571,7 +4859,8 @@
    "origin": "data",
    "used_by": [
     "data/states/OR-2025.json",
-    "data/states/OR-2026.json"
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
    ]
   },
   {
@@ -4581,7 +4870,8 @@
    "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/forms/2026/mw507.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/PA-2026.json"
+    "data/states/PA-2026.json",
+    "data/states/PA-2027.json"
    ]
   },
   {
@@ -4592,7 +4882,8 @@
    "origin": "data",
    "used_by": [
     "data/states/PA-2025.json",
-    "data/states/PA-2026.json"
+    "data/states/PA-2026.json",
+    "data/states/PA-2027.json"
    ]
   },
   {
@@ -4603,7 +4894,8 @@
    "origin": "data",
    "used_by": [
     "data/states/PA-2025.json",
-    "data/states/PA-2026.json"
+    "data/states/PA-2026.json",
+    "data/states/PA-2027.json"
    ]
   },
   {
@@ -4613,7 +4905,8 @@
    "url": "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2026",
    "origin": "data",
    "used_by": [
-    "data/local/PA-EIT-LST-2026.json"
+    "data/local/PA-EIT-LST-2026.json",
+    "data/local/PA-EIT-LST-2027.json"
    ]
   },
   {
@@ -4633,7 +4926,8 @@
    "url": "https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/computation-of-rates",
    "origin": "data",
    "used_by": [
-    "data/states/PA-2026.json"
+    "data/states/PA-2026.json",
+    "data/states/PA-2027.json"
    ]
   },
   {
@@ -4644,7 +4938,8 @@
    "origin": "data",
    "used_by": [
     "data/states/PA-2025.json",
-    "data/states/PA-2026.json"
+    "data/states/PA-2026.json",
+    "data/states/PA-2027.json"
    ]
   },
   {
@@ -4654,7 +4949,8 @@
    "url": "https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/yearly-tax-highlights",
    "origin": "data",
    "used_by": [
-    "data/states/PA-2026.json"
+    "data/states/PA-2026.json",
+    "data/states/PA-2027.json"
    ]
   },
   {
@@ -4665,7 +4961,8 @@
    "origin": "data",
    "used_by": [
     "data/states/PA-2025.json",
-    "data/states/PA-2026.json"
+    "data/states/PA-2026.json",
+    "data/states/PA-2027.json"
    ]
   },
   {
@@ -4693,7 +4990,8 @@
    "url": "https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforbusinesses/employerwithholding/documents/rev-415.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/PA-2026.json"
+    "data/states/PA-2026.json",
+    "data/states/PA-2027.json"
    ]
   },
   {
@@ -4704,7 +5002,8 @@
    "origin": "data",
    "used_by": [
     "data/states/PA-2025.json",
-    "data/states/PA-2026.json"
+    "data/states/PA-2026.json",
+    "data/states/PA-2027.json"
    ]
   },
   {
@@ -4714,7 +5013,8 @@
    "url": "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748%20rev%2009-25.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/PA-2026.json"
+    "data/states/PA-2026.json",
+    "data/states/PA-2027.json"
    ]
   },
   {
@@ -4724,7 +5024,8 @@
    "url": "https://tax.ri.gov/sites/g/files/xkgbur541/files/2025-12/2026%20Withholding%20Tax%20Booklet.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/RI-2026.json"
+    "data/states/RI-2026.json",
+    "data/states/RI-2027.json"
    ]
   },
   {
@@ -4744,7 +5045,8 @@
    "url": "https://dlt.ri.gov/press-releases/2026-tax-rates-unemployment-insurance-and-temporary-disability-insurance",
    "origin": "data",
    "used_by": [
-    "data/states/RI-2026.json"
+    "data/states/RI-2026.json",
+    "data/states/RI-2027.json"
    ]
   },
   {
@@ -4754,7 +5056,8 @@
    "url": "https://www.mass.gov/info-details/learn-about-the-income-tax-paid-to-another-jurisdiction-credit",
    "origin": "data",
    "used_by": [
-    "data/states/RI-2026.json"
+    "data/states/RI-2026.json",
+    "data/states/RI-2027.json"
    ]
   },
   {
@@ -4782,7 +5085,8 @@
    "url": "https://dew.sc.gov/news/2025-11/2026-tax-rate-cuts-press-release",
    "origin": "data",
    "used_by": [
-    "data/states/SC-2026.json"
+    "data/states/SC-2026.json",
+    "data/states/SC-2027.json"
    ]
   },
   {
@@ -4792,7 +5096,8 @@
    "url": "https://dor.sc.gov/sites/dor/files/forms/SCW4_2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/SC-2026.json"
+    "data/states/SC-2026.json",
+    "data/states/SC-2027.json"
    ]
   },
   {
@@ -4820,7 +5125,8 @@
    "url": "https://dor.sc.gov/sites/dor/files/forms/WH105.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/SC-2026.json"
+    "data/states/SC-2026.json",
+    "data/states/SC-2027.json"
    ]
   },
   {
@@ -4830,7 +5136,8 @@
    "url": "https://dor.sc.gov/sites/dor/files/forms/WH1603F_2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/SC-2026.json"
+    "data/states/SC-2026.json",
+    "data/states/SC-2027.json"
    ]
   },
   {
@@ -4840,7 +5147,8 @@
    "url": "https://dlr.sd.gov/ra/businesses/default.aspx",
    "origin": "data",
    "used_by": [
-    "data/states/SD-2026.json"
+    "data/states/SD-2026.json",
+    "data/states/SD-2027.json"
    ]
   },
   {
@@ -4860,7 +5168,8 @@
    "url": "https://dlr.sd.gov/ra/businesses/faq.aspx",
    "origin": "data",
    "used_by": [
-    "data/states/SD-2026.json"
+    "data/states/SD-2026.json",
+    "data/states/SD-2027.json"
    ]
   },
   {
@@ -4870,7 +5179,8 @@
    "url": "https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax/ui-tax-rates.html",
    "origin": "data",
    "used_by": [
-    "data/states/TN-2026.json"
+    "data/states/TN-2026.json",
+    "data/states/TN-2027.json"
    ]
   },
   {
@@ -4880,7 +5190,8 @@
    "url": "https://statutes.capitol.texas.gov/Docs/CN/htm/CN.8.htm",
    "origin": "data",
    "used_by": [
-    "data/states/TX-2026.json"
+    "data/states/TX-2026.json",
+    "data/states/TX-2027.json"
    ]
   },
   {
@@ -4890,7 +5201,8 @@
    "url": "https://www.twc.texas.gov/programs/unemployment-tax/your-tax-rates",
    "origin": "curated",
    "used_by": [
-    "data/states/TX-2026.json"
+    "data/states/TX-2026.json",
+    "data/states/TX-2027.json"
    ],
    "replaces": [
     "https://www.twc.texas.gov/sites/default/files/ogc/mtg25/commission-meeting-material-111725-item9b-dp-2026-tax-rates-twc.pdf"
@@ -4911,7 +5223,8 @@
    "url": "https://files.tax.utah.gov/tax/forms/pubs/pub-14.pdf",
    "origin": "curated",
    "used_by": [
-    "data/states/UT-2026.json"
+    "data/states/UT-2026.json",
+    "data/states/UT-2027.json"
    ]
   },
   {
@@ -4941,7 +5254,8 @@
    "url": "https://jobs.utah.gov/ui/employer/Public/Questions/TaxRates.aspx",
    "origin": "data",
    "used_by": [
-    "data/states/UT-2026.json"
+    "data/states/UT-2026.json",
+    "data/states/UT-2027.json"
    ]
   },
   {
@@ -4951,7 +5265,8 @@
    "url": "https://www.tax.virginia.gov/sites/default/files/taxforms/withholding/any/va-4-any.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/VA-2026.json"
+    "data/states/VA-2026.json",
+    "data/states/VA-2027.json"
    ]
   },
   {
@@ -4961,7 +5276,8 @@
    "url": "https://www.governor.virginia.gov/newsroom/news-releases/2026/may-releases/name-1117602-en.html",
    "origin": "data",
    "used_by": [
-    "data/states/VA-2026.json"
+    "data/states/VA-2026.json",
+    "data/states/VA-2027.json"
    ]
   },
   {
@@ -4972,7 +5288,8 @@
    "origin": "data",
    "used_by": [
     "data/states/VA-2025.json",
-    "data/states/VA-2026.json"
+    "data/states/VA-2026.json",
+    "data/states/VA-2027.json"
    ]
   },
   {
@@ -4982,7 +5299,8 @@
    "url": "https://www.vec.virginia.gov/FAQs/employers/what-wage-base-each-employee-i-will-pay-taxes",
    "origin": "data",
    "used_by": [
-    "data/states/VA-2026.json"
+    "data/states/VA-2026.json",
+    "data/states/VA-2027.json"
    ]
   },
   {
@@ -5000,7 +5318,8 @@
    "url": "https://tax.vermont.gov/sites/tax/files/documents/W-4VT.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/VT-2026.json"
+    "data/states/VT-2026.json",
+    "data/states/VT-2027.json"
    ]
   },
   {
@@ -5010,7 +5329,8 @@
    "url": "https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/VT-2026.json"
+    "data/states/VT-2026.json",
+    "data/states/VT-2027.json"
    ]
   },
   {
@@ -5020,7 +5340,8 @@
    "url": "https://governor.vermont.gov/vtfmli",
    "origin": "data",
    "used_by": [
-    "data/states/VT-2026.json"
+    "data/states/VT-2026.json",
+    "data/states/VT-2027.json"
    ]
   },
   {
@@ -5059,7 +5380,8 @@
    "origin": "data",
    "used_by": [
     "data/states/WA-2025.json",
-    "data/states/WA-2026.json"
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
    ]
   },
   {
@@ -5069,7 +5391,8 @@
    "url": "https://esd.wa.gov/about-us/news-release/2025/paid-family-medical-leave-premium-rate-increases-113-2026",
    "origin": "data",
    "used_by": [
-    "data/states/WA-2026.json"
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
    ]
   },
   {
@@ -5079,7 +5402,8 @@
    "url": "https://paidleave.wa.gov/app/uploads/2021/12/Employer-Wage-Reporting-and-Premiums-Toolkit-v25.1-2026.06.26.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/WA-2026.json"
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
    ]
   },
   {
@@ -5089,7 +5413,8 @@
    "url": "https://www.lni.wa.gov/workers-rights/leave/paid-family-and-medical-leave",
    "origin": "data",
    "used_by": [
-    "data/states/WA-2026.json"
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
    ]
   },
   {
@@ -5099,7 +5424,8 @@
    "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=1.90.100",
    "origin": "data",
    "used_by": [
-    "data/states/WA-2026.json"
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
    ]
   },
   {
@@ -5109,7 +5435,8 @@
    "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=36.65.030",
    "origin": "data",
    "used_by": [
-    "data/states/WA-2026.json"
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
    ]
   },
   {
@@ -5129,7 +5456,8 @@
    "url": "https://wacaresfund.wa.gov/exemptions",
    "origin": "data",
    "used_by": [
-    "data/states/WA-2026.json"
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
    ]
   },
   {
@@ -5184,7 +5512,8 @@
    "url": "https://paidleave.wa.gov/estimate-your-paid-leave-payments/",
    "origin": "data",
    "used_by": [
-    "data/states/WA-2026.json"
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
    ]
   },
   {
@@ -5194,7 +5523,8 @@
    "url": "https://dwd.wisconsin.gov/ui/employers/taxrates.htm",
    "origin": "data",
    "used_by": [
-    "data/states/WI-2026.json"
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
    ]
   },
   {
@@ -5204,7 +5534,8 @@
    "url": "https://www.revenue.wi.gov/Pages/FAQS/pcs-with.aspx",
    "origin": "data",
    "used_by": [
-    "data/states/WI-2026.json"
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
    ]
   },
   {
@@ -5214,7 +5545,8 @@
    "url": "https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx",
    "origin": "data",
    "used_by": [
-    "data/states/WI-2026.json"
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
    ]
   },
   {
@@ -5224,7 +5556,8 @@
    "url": "https://dwd.wisconsin.gov/dwd/forms/ui/pdf/uct-1-e-2026.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/WI-2026.json"
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
    ]
   },
   {
@@ -5234,7 +5567,8 @@
    "url": "https://docs.legis.wisconsin.gov/document/statutes/71.03",
    "origin": "data",
    "used_by": [
-    "data/states/WI-2026.json"
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
    ]
   },
   {
@@ -5255,7 +5589,8 @@
    "origin": "curated",
    "used_by": [
     "data/states/WI-2025.json",
-    "data/states/WI-2026.json"
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
    ]
   },
   {
@@ -5273,7 +5608,8 @@
    "url": "https://tax.wv.gov/Documents/Withholding/it100.2a.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/WV-2026.json"
+    "data/states/WV-2026.json",
+    "data/states/WV-2027.json"
    ]
   },
   {
@@ -5283,7 +5619,8 @@
    "url": "https://tax.wv.gov/Business/Withholding/HelpAndGeneralInformation/Pages/WithholdingHelpAndGeneralInformation.aspx",
    "origin": "data",
    "used_by": [
-    "data/states/WV-2026.json"
+    "data/states/WV-2026.json",
+    "data/states/WV-2027.json"
    ]
   },
   {
@@ -5293,7 +5630,8 @@
    "url": "https://tax.wv.gov/Documents/Withholding/it104.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/WV-2026.json"
+    "data/states/WV-2026.json",
+    "data/states/WV-2027.json"
    ]
   },
   {
@@ -5313,7 +5651,8 @@
    "url": "https://tax.wv.gov/Individuals/Pages/PersonalIncomeTaxReductionBill.aspx",
    "origin": "data",
    "used_by": [
-    "data/states/WV-2026.json"
+    "data/states/WV-2026.json",
+    "data/states/WV-2027.json"
    ]
   },
   {
@@ -5339,7 +5678,8 @@
    "url": "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-taxable-wage-base/",
    "origin": "data",
    "used_by": [
-    "data/states/WY-2026.json"
+    "data/states/WY-2026.json",
+    "data/states/WY-2027.json"
    ]
   },
   {
@@ -5349,7 +5689,8 @@
    "url": "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-tax-rates/",
    "origin": "data",
    "used_by": [
-    "data/states/WY-2026.json"
+    "data/states/WY-2026.json",
+    "data/states/WY-2027.json"
    ]
   }
  ]
