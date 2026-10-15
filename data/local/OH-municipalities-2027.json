@@ -4794,6 +4794,26 @@
       "administeredBy": "RITA"
     },
     {
+      "name": "Woodville",
+      "municode": "",
+      "rate": 0.01,
+      "effectiveFrom": "2026-07-01",
+      "administeredBy": "self_or_other",
+      "source": [
+        {
+          "title": "Village of Woodville -- Tax Information (ordinance passed 2026-02-09, effective July 1, 2026)",
+          "url": "https://www.villageofwoodville.com/tax-information",
+          "fetchedOn": "2026-10-15"
+        },
+        {
+          "title": "Bloomberg Tax -- 3 Ohio Localities Update Municipal Income Tax Laws (1% rate; no credit for tax paid to other cities)",
+          "url": "https://news.bloombergtax.com/payroll/3-ohio-localities-update-municipal-income-tax-laws",
+          "fetchedOn": "2026-10-15"
+        }
+      ],
+      "$addedNote": "ADDED 2026-10-15: 1% tax in force for all of 2027 (effective 2026-07-01; ordinance passed 2026-02-09), missing from the Ohio Finder rate CSV. Ohio municode not captured. Village publishes its own withholding forms. No rateHistory: the rate applies for the whole file year, same as other mid-prior-year starts. Bloomberg Tax (2026-10-07) says residents get no credit for tax paid to other cities; this file has no per-municipality credit field, so that exception is not represented."
+    },
+    {
       "name": "Wooster",
       "municode": "86548",
       "rate": 0.015,
