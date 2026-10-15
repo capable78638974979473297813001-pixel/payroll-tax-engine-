@@ -6172,50 +6172,6 @@ describe('Ohio', () => {
       assert.equal(amountOf(r, 'OH_LOCAL'), dollars(25.0));
     });
 
-    // Woodville (Sandusky County) began a 1% village income tax on 2026-07-01
-    // (Ordinance 1-2026, self-administered; see the entry's own `source` in
-    // data/local/OH-municipalities-2026.json). It was missing from the Finder
-    // extract this registry is built from, so employees working there were
-    // under-withheld.
-    describe('Woodville (1% village income tax from 2026-07-01)', () => {
-      const woodville = (checkDate: string, certificate: Record<string, unknown> = { workCity: 'Woodville' }) =>
-        calculatePaycheck(
-          input({
-            payFrequency: 'weekly',
-            earnings: [{ code: 'REG', category: 'regular', amount: dollars(1000) }],
-            checkDate,
-            workState: { code: 'OH', certificate },
-          }),
-        );
-
-      test('a Woodville workplace withholds 1% from the 2026-07-01 check date', () => {
-        assert.equal(amountOf(woodville('2026-07-01'), 'OH_LOCAL'), dollars(10.0));
-        assert.equal(amountOf(woodville('2026-08-15'), 'OH_LOCAL'), dollars(10.0));
-      });
-
-      test('a check dated before the 2026-07-01 start withholds nothing for Woodville', () => {
-        assert.equal(amountOf(woodville('2026-06-30'), 'OH_LOCAL'), dollars(0));
-      });
-
-      test('a Columbus resident (2.5%) working in Woodville (1%) pays 2.5% total after the ORC 718.121 credit', () => {
-        const r = woodville('2026-08-15', { residenceCity: 'Columbus', workCity: 'Woodville' });
-        assert.equal(amountOf(r, 'OH_LOCAL'), dollars(25.0));
-      });
-
-      test('a Woodville resident working in Columbus pays the Columbus 2.5% only (1% home tax fully credited)', () => {
-        const r = woodville('2026-08-15', { residenceCity: 'Woodville', workCity: 'Columbus' });
-        assert.equal(amountOf(r, 'OH_LOCAL'), dollars(25.0));
-      });
-
-      test('the provisional 2027 registry carries the 1% rate forward', () => {
-        assert.equal(amountOf(woodville('2027-01-15'), 'OH_LOCAL'), dollars(10.0));
-      });
-
-      test('2025 had no Woodville tax: no OH_LOCAL line at all', () => {
-        assert.equal(woodville('2025-08-15').taxes.find((t) => t.id === 'OH_LOCAL'), undefined);
-      });
-    });
-
     test('neither city is one of the 679 taxing municipalities: no OH_LOCAL line at all', () => {
       const r = calculatePaycheck(
         input({

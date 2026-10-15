@@ -4793,6 +4793,24 @@
       "rate": 0.01,
       "effectiveFrom": "2026-07-01",
       "administeredBy": "self_or_other",
+      "source": [
+        {
+          "title": "Village of Woodville -- Tax Information (ordinance passed 2026-02-09, effective July 1, 2026)",
+          "url": "https://www.villageofwoodville.com/tax-information",
+          "fetchedOn": "2026-10-15"
+        },
+        {
+          "title": "Village of Woodville -- Important Tax Notification (1% local municipal income tax from July 1, 2026, Ordinance 1-2026; signed by Tax Administrator Barb Rizzo)",
+          "url": "https://www.villageofwoodville.com/_files/ugd/ef2ef5_5f60f5fa78e64495b52690728f655b41.pdf",
+          "fetchedOn": "2026-10-15"
+        },
+        {
+          "title": "Bloomberg Tax -- 3 Ohio Localities Update Municipal Income Tax Laws (1% rate; no credit for tax paid to other cities)",
+          "url": "https://news.bloombergtax.com/payroll/3-ohio-localities-update-municipal-income-tax-laws",
+          "fetchedOn": "2026-10-15"
+        }
+      ],
+      "$addedNote": "ADDED 2026-10-15: new 1% tax effective 2026-07-01 (ordinance passed 2026-02-09), missing from the Ohio Finder rate CSV. Ohio municode not captured. Village publishes its own withholding forms. rateHistory is the mid-year start used elsewhere (0 until 2026-07-01, then 1%): effectiveFrom is not read for municipalities. Bloomberg Tax (2026-10-07) says residents get no credit for tax paid to other cities; this file has no per-municipality credit field, so that exception is not represented. Administered by the Village of Woodville Taxation Department (not RITA/CCA): employers remit monthly or quarterly to the village (ORC 718.03). The village's Important Tax Notification cites Ordinance 1-2026 passed February 23, 2026, while its Tax Information page says 2026-02-09; both agree on the 1% rate and the 2026-07-01 start, the only fields the engine reads.",
       "rateHistory": [
         {
           "from": "2026-01-01",
@@ -4802,20 +4820,7 @@
           "from": "2026-07-01",
           "rate": 0.01
         }
-      ],
-      "source": [
-        {
-          "title": "Village of Woodville -- Important Tax Notification (1% local municipal income tax from July 1, 2026, Ordinance 1-2026; signed by Tax Administrator Barb Rizzo)",
-          "url": "https://www.villageofwoodville.com/_files/ugd/ef2ef5_5f60f5fa78e64495b52690728f655b41.pdf",
-          "fetchedOn": "2026-10-15"
-        },
-        {
-          "title": "Village of Woodville -- Tax Information page (ordinance passed 02.09.2026, effective July 1st, 2026) and income tax return form (\"TOTAL TAX DUE, 1% of LINE 3\")",
-          "url": "https://www.villageofwoodville.com/tax-information",
-          "fetchedOn": "2026-10-15"
-        }
-      ],
-      "$addedNote": "ADDED 2026-10-15: new 1% village income tax effective 2026-07-01, missing from the Finder extract. Self-administered by the Village of Woodville Taxation Department (Sandusky County), not RITA/CCA -- employers remit monthly or quarterly to the village (ORC 718.03). Ohio municode not captured. The village's notice cites Ordinance 1-2026 passed February 23, 2026; its Tax Information page says the ordinance was passed 02.09.2026. The two dates differ, but both agree on the 1% rate and the 2026-07-01 effective date, which are the only fields the engine reads."
+      ]
     },
     {
       "name": "Wooster",
