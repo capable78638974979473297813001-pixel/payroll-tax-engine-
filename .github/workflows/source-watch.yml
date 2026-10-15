@@ -92,6 +92,7 @@ jobs:
           print(f"unverified={s.get('unverified', 0)}")
           print(f"never={len(s.get('never_baselined', []))}")
           print(f"broken={len(s.get('broken', []))}")
+          print(f"attention={len(s.get('attention', []))}")
           print(f"total={s['total']}")
           PY
 
@@ -146,6 +147,35 @@ jobs:
           PY
           )
           gh issue create --title "$title" --body "$body" || echo "::warning::Could not open the tracking issue."
+
+      # One standing issue that always shows what needs a person today: an
+      # official rate file that can't be read, or engine data that disagrees
+      # with one. Opened when something needs attention, rewritten on each run
+      # while it still does, and left for a person to close once it is fixed.
+      - name: Track items that need attention
+        if: steps.gate.outputs.run == 'true' && steps.watch.outputs.attention != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="Source watch: needs attention (official file unreadable or data disagrees)"
+          body=$(python - <<'PY'
+          import json
+          s = json.load(open("watcher/reports/latest.json"))
+          lines = [f"As of {s['date']}, {len(s['attention'])} item(s) need a person. A run with no changes is not an "
+                   "all-clear while this issue lists anything. Rewritten on each run; close it once fixed.", ""]
+          for a in s["attention"]:
+              name = f"[{a['title']}]({a['url']})" if a.get("url") else a["title"]
+              lines.append(f"- **{name}**: {a['detail']}")
+          lines += ["", "Full report: watcher/reports/latest.md"]
+          print("\n".join(lines))
+          PY
+          )
+          number=$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[0].number')
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body "$body" || echo "::warning::Could not update the attention issue."
+          else
+            gh issue create --title "$title" --body "$body" || echo "::warning::Could not open the attention issue."
+          fi
 
       - name: Open an issue for changes
         if: steps.gate.outputs.run == 'true' && steps.watch.outputs.changed != '0'

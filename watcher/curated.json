@@ -584,6 +584,52 @@
    "replaces": [
     "https://www.nysenate.gov/legislation/laws/ELN/3-400"
    ]
+  },
+  {
+   "jurisdiction": "OH",
+   "title": "Ohio Municipal Income Tax Rates (The Finder, bulk CSV: read through the Finder's own download link)",
+   "url": "https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FMuni%2FOHMuniRateTable.csv",
+   "replaces": [
+    "https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv"
+   ],
+   "critical": true,
+   "reconcile": "oh_municipal",
+   "directory": "https://thefinder.tax.ohio.gov/api/file-downloads?type=municipality"
+  },
+  {
+   "jurisdiction": "OH",
+   "title": "Ohio JEDD/JEDZ Income Tax Rate Database Table (The Finder, bulk CSV)",
+   "url": "https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FJEDTaxRates.csv",
+   "critical": true,
+   "reconcile": "oh_jedd"
+  },
+  {
+   "jurisdiction": "OH",
+   "title": "The Finder: directory of every Ohio municipality (a new entry here is a new jurisdiction)",
+   "url": "https://thefinder.tax.ohio.gov/api/file-downloads?type=municipality"
+  },
+  {
+   "jurisdiction": "OH",
+   "title": "The Finder: directory of every Ohio school district",
+   "url": "https://thefinder.tax.ohio.gov/api/file-downloads?type=schoolDistrict"
+  },
+  {
+   "jurisdiction": "OH",
+   "title": "Ohio Department of Taxation: municipal income tax (state page for municipalities and employers)",
+   "url": "https://tax.ohio.gov/business/municipalities",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "OH",
+   "title": "Ohio Department of Taxation: information releases",
+   "url": "https://tax.ohio.gov/wps/portal/gov/tax/help-center/communications/information-releases",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "OH",
+   "title": "Village of Woodville: income tax page (withholding notice, forms, ordinance)",
+   "url": "https://www.villageofwoodville.com/tax-information",
+   "kind": "index"
   }
  ]
 }
