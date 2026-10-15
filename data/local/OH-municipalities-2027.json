@@ -4811,6 +4811,11 @@
           "fetchedOn": "2026-10-15"
         },
         {
+          "title": "Village of Woodville -- Ordinance No. 1-2026, passed 02-09-2026: levies the village income tax, 'beginning July 1, 2026' (Section 2)",
+          "url": "https://www.villageofwoodville.com/_files/ugd/ef2ef5_fc1ed5429f25479b939fd57201b684f7.pdf",
+          "fetchedOn": "2026-10-15"
+        },
+        {
           "title": "Bloomberg Tax -- 3 Ohio Localities Update Municipal Income Tax Laws (1% rate; no credit for tax paid to other cities)",
           "url": "https://news.bloombergtax.com/payroll/3-ohio-localities-update-municipal-income-tax-laws",
           "fetchedOn": "2026-10-15"
@@ -4821,7 +4826,7 @@
           "fetchedOn": "2026-10-15"
         }
       ],
-      "$addedNote": "ADDED 2026-10-15: 1% tax in force for all of 2027 (effective 2026-07-01; ordinance passed 2026-02-09), missing from the Ohio Finder rate CSV. Municode 86492 is from the Finder's own municipality directory, which lists Woodville although its rate file (OHMuniRateTable.csv) has no Woodville rows yet as of 2026-10-15. Village publishes its own withholding forms. No rateHistory: the rate applies for the whole file year, same as other mid-prior-year starts. Bloomberg Tax (2026-10-07) says residents get no credit for tax paid to other cities; this file has no per-municipality credit field, so that exception is not represented. Administered by the Village of Woodville Taxation Department (not RITA/CCA): employers remit monthly or quarterly to the village (ORC 718.03). The village's Important Tax Notification cites Ordinance 1-2026 passed February 23, 2026, while its Tax Information page says 2026-02-09; both agree on the 1% rate and the 2026-07-01 start, the only fields the engine reads."
+      "$addedNote": "ADDED 2026-10-15: 1% tax in force for all of 2027 (effective 2026-07-01; ordinance passed 2026-02-09), missing from the Ohio Finder rate CSV. Municode 86492 is from the Finder's own municipality directory, which lists Woodville although its rate file (OHMuniRateTable.csv) has no Woodville rows yet as of 2026-10-15. Village publishes its own withholding forms. No rateHistory: the rate applies for the whole file year, same as other mid-prior-year starts. Bloomberg Tax (2026-10-07) says residents get no credit for tax paid to other cities; this file has no per-municipality credit field, so that exception is not represented. Administered by the Village of Woodville Taxation Department (not RITA/CCA): employers remit monthly or quarterly to the village (ORC 718.03). The ordinance itself (No. 1-2026) is stamped passed 02-09-2026 and imposes the tax beginning July 1, 2026; the village's Important Tax Notification says it was passed February 23, which is the notice's own slip."
     },
     {
       "name": "Wooster",
