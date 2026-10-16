@@ -2017,7 +2017,11 @@
    "jurisdiction": "OH",
    "title": "The Finder: directory of every Ohio municipality (a new entry here is a new jurisdiction)",
    "url": "https://thefinder.tax.ohio.gov/api/file-downloads?type=municipality",
-   "origin": "curated"
+   "origin": "curated",
+   "used_by": [
+    "data/local/OH-municipalities-2026.json",
+    "data/local/OH-municipalities-2027.json"
+   ]
   },
   {
    "id": "oh-aa448ef54d",
