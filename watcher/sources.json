@@ -298,13 +298,17 @@
    "origin": "curated"
   },
   {
-   "id": "us-99801772f1",
+   "id": "us-c7a477781b",
    "jurisdiction": "US",
-   "title": "IRS Publication 51 (2025), Agricultural Employer's Tax Guide -- the statutory $150 per worker / $2,500 all-farmworker tests, unchanged year to year",
-   "url": "https://www.irs.gov/pub/irs-prior/p51--2025.pdf",
-   "origin": "data",
+   "title": "IRS Publication 51 (Circular A), Agricultural Employer's Tax Guide: current edition page",
+   "url": "https://www.irs.gov/forms-pubs/about-publication-51",
+   "kind": "index",
+   "origin": "curated",
    "used_by": [
     "data/federal/2025.json"
+   ],
+   "replaces": [
+    "https://www.irs.gov/pub/irs-prior/p51--2025.pdf"
    ]
   },
   {
@@ -502,6 +506,22 @@
    "origin": "curated"
   },
   {
+   "id": "al-3517d9fb4e",
+   "jurisdiction": "AL",
+   "title": "Alabama DOR: local tax (rates and codes for cities and counties)",
+   "url": "https://www.revenue.alabama.gov/local-tax/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "al-494cac99a9",
+   "jurisdiction": "AL",
+   "title": "Alabama DOR: news",
+   "url": "https://www.revenue.alabama.gov/news",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
    "id": "al-63367f237d",
    "jurisdiction": "AL",
    "title": "Alabama Department of Labor -- 2026 UI wage base and rate figures (cross-source)",
@@ -674,6 +694,14 @@
    "origin": "curated"
   },
   {
+   "id": "ar-ae6960acd2",
+   "jurisdiction": "AR",
+   "title": "Arkansas DFA: news",
+   "url": "https://www.dfa.arkansas.gov/news/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
    "id": "ar-feaf1a0a4a",
    "jurisdiction": "AR",
    "title": "Arkansas Department of Labor and Licensing -- Minimum Wage and Overtime",
@@ -791,6 +819,14 @@
    "origin": "curated"
   },
   {
+   "id": "ga-0af971f8e2",
+   "jurisdiction": "GA",
+   "title": "Georgia DOR: press releases",
+   "url": "https://dor.georgia.gov/press-releases",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
    "id": "ga-944bb83df9",
    "jurisdiction": "GA",
    "title": "Georgia Employer's Tax Guide (current)",
@@ -886,6 +922,15 @@
    ]
   },
   {
+   "id": "id-41c38a0241",
+   "jurisdiction": "ID",
+   "title": "Idaho State Tax Commission: press releases",
+   "url": "https://tax.idaho.gov/pressrelease",
+   "kind": "index",
+   "origin": "curated",
+   "follow_limit": 10
+  },
+  {
    "id": "id-e981541009",
    "jurisdiction": "ID",
    "title": "Idaho computing withholding",
@@ -927,6 +972,22 @@
    "jurisdiction": "IN",
    "title": "Indiana DOR withholding",
    "url": "https://www.in.gov/dor/i-am-a/business-corp/withholding/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "in-e42a1b3562",
+   "jurisdiction": "IN",
+   "title": "Indiana DOR: departmental notices",
+   "url": "https://www.in.gov/dor/legal-resources/tax-library/departmental-notices/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "in-10c6cb8790",
+   "jurisdiction": "IN",
+   "title": "Indiana DOR: news and publications",
+   "url": "https://www.in.gov/dor/about/news-publications/",
    "kind": "index",
    "origin": "curated"
   },
@@ -1317,25 +1378,26 @@
    ]
   },
   {
-   "id": "ky-f4f36afe86",
+   "id": "ky-2e0beff97a",
    "jurisdiction": "KY",
-   "title": "Kentucky Office of Unemployment Insurance -- Tax Rate Schedules",
-   "url": "https://kewes.ky.gov/Contact/contacts.aspx?strid=4",
-   "origin": "data",
-   "used_by": [
-    "data/states/KY-2026.json",
-    "data/states/KY-2027.json"
-   ]
+   "title": "Kentucky DOR: news",
+   "url": "https://revenue.ky.gov/News/Pages/default.aspx",
+   "kind": "index",
+   "origin": "curated"
   },
   {
-   "id": "ky-0b7157b3a5",
+   "id": "ky-d82e90e17d",
    "jurisdiction": "KY",
-   "title": "Kentucky Office of Unemployment Insurance -- Taxable Wage Base and Surcharge Information",
-   "url": "https://kewes.ky.gov/Contact/contacts.aspx?strid=2",
-   "origin": "data",
+   "title": "Kentucky OUI Employer Guide to Unemployment Insurance 2026 (rate schedules, taxable wage base): ui.ky.gov",
+   "url": "https://ui.ky.gov/Documents/KY-OUI_Employer%20Guide_2026.pdf",
+   "origin": "curated",
    "used_by": [
     "data/states/KY-2026.json",
     "data/states/KY-2027.json"
+   ],
+   "replaces": [
+    "https://kewes.ky.gov/Contact/contacts.aspx?strid=4",
+    "https://kewes.ky.gov/Contact/contacts.aspx?strid=2"
    ]
   },
   {
@@ -1349,6 +1411,14 @@
     "data/local/KY-occupational-2026.json",
     "data/local/KY-occupational-2027.json"
    ]
+  },
+  {
+   "id": "ky-0bec2793f5",
+   "jurisdiction": "KY",
+   "title": "Kentucky Unemployment Insurance self-service site (employer notices)",
+   "url": "https://ui.ky.gov/Redesign/home.aspx",
+   "kind": "index",
+   "origin": "curated"
   },
   {
    "id": "ky-829edc7fb7",
@@ -1562,6 +1632,22 @@
    ]
   },
   {
+   "id": "mi-e2e29c90f4",
+   "jurisdiction": "MI",
+   "title": "Michigan Treasury: taxes home (notices and withholding news)",
+   "url": "https://www.michigan.gov/taxes",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "mi-e39e35a8ce",
+   "jurisdiction": "MI",
+   "title": "Michigan Treasury: taxpayer notices",
+   "url": "https://www.michigan.gov/treasury/reference/taxpayer-notices",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
    "id": "mi-f5fa14dee6",
    "jurisdiction": "MI",
    "title": "Michigan withholding tax",
@@ -1614,6 +1700,14 @@
     "data/local/OH-municipalities-2026.json",
     "data/local/OH-municipalities-2027.json"
    ]
+  },
+  {
+   "id": "oh-8d6ac93833",
+   "jurisdiction": "OH",
+   "title": "CCA (Central Collection Agency): municipal income tax calendar and notices",
+   "url": "https://www.ccaohio.gov/due-dates/municipal-income-tax-calendar",
+   "kind": "index",
+   "origin": "curated"
   },
   {
    "id": "oh-da4e60cebe",
@@ -1703,6 +1797,14 @@
    "used_by": [
     "data/local/OH-school-districts-2025.json"
    ]
+  },
+  {
+   "id": "oh-947c46cfd7",
+   "jurisdiction": "OH",
+   "title": "Ohio Department of Taxation: all news",
+   "url": "https://tax.ohio.gov/wps/portal/gov/tax/home/news-and-events/all-news/",
+   "kind": "index",
+   "origin": "curated"
   },
   {
    "id": "oh-2c9dde1423",
@@ -1895,6 +1997,22 @@
    ]
   },
   {
+   "id": "oh-557c86e52b",
+   "jurisdiction": "OH",
+   "title": "RITA (Regional Income Tax Agency): news and updates (municipal rate and law changes)",
+   "url": "https://www.ritaohio.com/Resources/News",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "oh-2fd5ea2a78",
+   "jurisdiction": "OH",
+   "title": "RITA: tax professionals news",
+   "url": "https://www.ritaohio.com/TaxProfessionals/News",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
    "id": "oh-5d5aa5d040",
    "jurisdiction": "OH",
    "title": "The Finder: directory of every Ohio municipality (a new entry here is a new jurisdiction)",
@@ -2060,6 +2178,14 @@
    ]
   },
   {
+   "id": "pa-a6cda778f7",
+   "jurisdiction": "PA",
+   "title": "Pennsylvania Department of Revenue: newsroom",
+   "url": "https://www.pa.gov/agencies/revenue/newsroom",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
    "id": "pa-8251b0b3ee",
    "jurisdiction": "PA",
    "title": "Pennsylvania employer withholding",
@@ -2152,6 +2278,23 @@
    ]
   },
   {
+   "id": "ut-2acba615ef",
+   "jurisdiction": "UT",
+   "title": "Utah State Tax Commission: news releases",
+   "url": "https://tax.utah.gov/news/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ut-8658b330c6",
+   "jurisdiction": "UT",
+   "title": "Utah State Tax Commission: tax bulletins",
+   "url": "https://tax.utah.gov/tax-bulletins/",
+   "kind": "index",
+   "origin": "curated",
+   "follow_limit": 10
+  },
+  {
    "id": "wv-5a62d719fd",
    "jurisdiction": "WV",
    "title": "W. Va. Code \u00a7 38-5A-3 \u2014 ordinary (consumer credit sale/consumer loan judgment) garnishment limited to the lesser of 20% of disposable earnings, or the amount by which disposable earnings exceed 50 times the FEDERAL minimum hourly wage specifically (not a 'greater of state or federal' test)",
@@ -2204,6 +2347,14 @@
    "used_by": [
     "data/minimum-wage/states/WV-2026.json"
    ]
+  },
+  {
+   "id": "wv-b41d566a30",
+   "jurisdiction": "WV",
+   "title": "West Virginia State Tax Department: home page (news and notices)",
+   "url": "https://tax.wv.gov/",
+   "kind": "index",
+   "origin": "curated"
   },
   {
    "id": "wv-536e67a641",

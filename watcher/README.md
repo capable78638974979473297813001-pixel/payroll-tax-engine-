@@ -11,7 +11,7 @@ workflow also opens a GitHub issue with the report.
 
 ## What it watches
 
-`sources.json`, about 420 sources in 53 jurisdictions, built from two places:
+`sources.json`, about 210 sources in 12 jurisdictions (see "Scope" below), built from two places:
 
 - **`curated.json`**: each state agency's withholding / employer page, plus
   the federal publications (Pub 15, 15-T, W-4, IRS draft forms, contribution
@@ -24,6 +24,34 @@ workflow also opens a GitHub issue with the report.
 Add sources to `curated.json` (or cite them in `data/`), then run
 `python watcher/build_sources.py`. The workflow re-runs that before each
 watch, so new citations in `data/` are picked up automatically.
+
+Beyond the agencies' rule pages, the curated list includes **where changes are
+announced first**, as index pages so a new item shows up as a new link: each
+covered state's tax-agency news, bulletin or notice page, Ohio's regional tax
+agencies (RITA, CCA), and the Finder's directories of jurisdictions.
+
+## Scope
+
+The watcher is for catching **unscheduled** changes. A jurisdiction whose rates
+and tables only move on January 1, or on a July 1 step, is handled when the
+data is refreshed for that date and doesn't need a daily watch. `scope.json`
+lists the jurisdictions that are left out, with a reason for each, and
+`build_sources.py` drops their sources (curated or cited in `data/`).
+
+- **Kept (12):** federal; **AR, GA, ID, OH, UT, WV**, which have documented
+  unscheduled mid-year changes in this repo's data (AR's retroactive 2026 cut
+  and reissued formula, GA's HB 463, ID's reissued tables, OH's HB 96, UT's
+  HB 106, WV's SB 392); and **AL, IN, KY, MI, PA**, which have local-tax
+  registries whose rates change on any date.
+- **Left out (41):** states with no tax on wages, the July-1-only states (MD,
+  VA, NJ, NM) and the January-1-only states.
+- This is a judgment from what the repo's 2025-2027 data records, **not a legal
+  finding** that other states can't change mid-year. A state with no change
+  recorded here can still legislate one. To bring a jurisdiction back, delete
+  its line from `excluded` in `scope.json` and re-run `build_sources.py`; the
+  data files and `curated.json` are never touched.
+- A state-code key in a data file (`"TX": {...}`) attributes the cites beneath
+  it to that state, so e.g. a state's garnishment statute follows its scope.
 
 ## Reading what pages link to
 

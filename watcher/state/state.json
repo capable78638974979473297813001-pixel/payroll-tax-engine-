@@ -1003,12 +1003,6 @@
   ],
   "url": "https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/new-employer-premium-rate/"
  },
- "ky-0b7157b3a5": {
-  "failures": 24,
-  "last_checked": "2026-10-15",
-  "last_error": "site's TLS certificate failed verification (certificate has expired)",
-  "url": "https://kewes.ky.gov/Contact/contacts.aspx?strid=2"
- },
  "ky-1411b13a1e": {
   "failures": 2,
   "hash": "26dd39ede4457838b115ca363f8fce9995e35185d2ef8c41b55a14c8f9bce854",
@@ -1710,12 +1704,6 @@
   "links": {},
   "nav": [],
   "url": "https://revenue.ky.gov/Forms/2026%20Withholding%20Formula.pdf"
- },
- "ky-f4f36afe86": {
-  "failures": 24,
-  "last_checked": "2026-10-15",
-  "last_error": "site's TLS certificate failed verification (certificate has expired)",
-  "url": "https://kewes.ky.gov/Contact/contacts.aspx?strid=4"
  },
  "mi-09c6c8cf81": {
   "failures": 0,
@@ -5331,12 +5319,6 @@
   "links": {},
   "nav": [],
   "url": "https://www.rrb.gov/sites/default/files/2025-07/JBE2026.pdf"
- },
- "us-99801772f1": {
-  "failures": 16,
-  "last_checked": "2026-10-15",
-  "last_error": "HTTP 404",
-  "url": "https://www.irs.gov/pub/irs-prior/p51--2025.pdf"
  },
  "us-9a846f38c1": {
   "failures": 0,
