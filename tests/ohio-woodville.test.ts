@@ -64,6 +64,11 @@ describe('Woodville, Ohio municipal income tax', () => {
     assert.equal(local('2026-12-18')?.amount, dollars(40));
   });
 
+  test('has no Woodville line in tax year 2025, before the tax existed', () => {
+    assert.equal(ohMunicipalityRuleset('Woodville', '2025-08-15'), undefined);
+    assert.equal(local('2025-08-15'), undefined);
+  });
+
   test('is present at 1% for tax year 2027', () => {
     assert.equal(ohMunicipalityRuleset('Woodville', '2027-01-15')?.rate, 0.01);
     const line = local('2027-01-15');
