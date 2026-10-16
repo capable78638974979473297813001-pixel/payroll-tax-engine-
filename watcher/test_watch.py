@@ -424,6 +424,74 @@ class BuildSourcesTest(unittest.TestCase):
             self.assertEqual(built.get(key), value, key)
 
 
+class ScopeTest(unittest.TestCase):
+    """watcher/scope.json: the watcher is for unscheduled changes, so jurisdictions that only move on fixed
+    dates are left out of sources.json (reversibly: data/ and curated.json are untouched)."""
+
+    def build(self, *, curated, data, scope):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            (tmp / "data" / "states").mkdir(parents=True)
+            (tmp / "data" / "garnishment").mkdir(parents=True)
+            (tmp / "curated.json").write_text(json.dumps({"sources": curated}))
+            for rel, body in data.items():
+                (tmp / "data" / rel).write_text(json.dumps(body))
+            if scope is not None:
+                (tmp / "scope.json").write_text(json.dumps(scope))
+            saved = (build_sources.HERE, build_sources.DATA, build_sources.REPO, build_sources.SCOPE_FILE)
+            build_sources.HERE, build_sources.DATA, build_sources.REPO = tmp, tmp / "data", tmp
+            build_sources.SCOPE_FILE = tmp / "scope.json"
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    build_sources.main()
+            finally:
+                build_sources.HERE, build_sources.DATA, build_sources.REPO, build_sources.SCOPE_FILE = saved
+            return json.loads((tmp / "sources.json").read_text())["sources"]
+
+    DATA = {
+        "states/OH-2026.json": {"sources": [{"title": "Ohio withholding", "url": "https://tax.ohio.gov/w.pdf"}]},
+        "states/MD-2026.json": {"sources": [{"title": "Maryland withholding", "url": "https://www.marylandtaxes.gov/w.pdf"}]},
+    }
+    CURATED = [{"jurisdiction": "MD", "title": "MD curated", "url": "https://www.marylandtaxes.gov/index"},
+               {"jurisdiction": "OH", "title": "OH curated", "url": "https://tax.ohio.gov/index"},
+               {"jurisdiction": "US", "title": "IRS", "url": "https://www.irs.gov/p15t"}]
+
+    def test_excluded_jurisdictions_lose_curated_and_cited_sources(self):
+        built = self.build(curated=self.CURATED, data=self.DATA,
+                           scope={"excluded": {"MD": "only a July 1 step"}})
+        self.assertEqual(sorted(s["url"] for s in built),
+                         ["https://tax.ohio.gov/index", "https://tax.ohio.gov/w.pdf", "https://www.irs.gov/p15t"])
+
+    def test_no_scope_file_means_everything_is_in_scope(self):
+        built = self.build(curated=self.CURATED, data=self.DATA, scope=None)
+        self.assertEqual(len(built), 5)
+
+    def test_a_jurisdiction_cannot_be_both_kept_and_excluded(self):
+        with self.assertRaises(SystemExit):
+            self.build(curated=self.CURATED, data=self.DATA, scope={"keep": {"MD": "x"}, "excluded": {"MD": "y"}})
+
+    def test_cites_nested_under_a_state_code_belong_to_that_state(self):
+        """Garnishment overrides sit in one file for every state; each state's statutes must follow the state."""
+        data = {"garnishment/state-overrides-2026.json": {"states": {
+            "TX": {"sources": [{"title": "Tex. Prop. Code", "url": "https://statutes.capitol.texas.gov/x"}]},
+            "OH": {"sources": [{"title": "R.C. 2716.02", "url": "https://codes.ohio.gov/x"}]}}}}
+        built = {s["url"]: s["jurisdiction"] for s in self.build(curated=[], data=data, scope=None)}
+        self.assertEqual(built, {"https://statutes.capitol.texas.gov/x": "TX", "https://codes.ohio.gov/x": "OH"})
+        kept = self.build(curated=[], data=data, scope={"excluded": {"TX": "no income tax"}})
+        self.assertEqual([s["jurisdiction"] for s in kept], ["OH"])
+
+    def test_the_real_scope_file_is_consistent(self):
+        scope = json.loads((Path(__file__).resolve().parent / "scope.json").read_text())
+        self.assertFalse(set(scope["keep"]) & set(scope["excluded"]))
+        self.assertIn("US", scope["keep"])
+        for st in ("OH", "GA", "UT", "WV", "ID", "AR"):  # documented unscheduled mid-year changes
+            self.assertIn(st, scope["keep"], st)
+        for st in ("AL", "IN", "KY", "MI", "PA"):  # local-tax registries
+            self.assertIn(st, scope["keep"], st)
+        for reason in {**scope["keep"], **scope["excluded"]}.values():
+            self.assertGreater(len(reason), 20)
+
+
 class ExtractionTest(unittest.TestCase):
     def test_main_region_preferred_and_chrome_dropped(self):
         text, _ = watch.extract_html(page().encode(), "https://x.gov/wh", None)
