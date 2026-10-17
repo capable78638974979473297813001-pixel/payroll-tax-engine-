@@ -214,6 +214,11 @@ export interface YearToDate {
     deferral457?: Cents;
     simple?: Cents;
   };
+  /**
+   * YTD dependent-care deductions already taken at THIS employer this
+   * calendar year, checked by capDependentCare() against the IRC 129 limit.
+   */
+  dependentCare?: Cents;
 }
 
 /**

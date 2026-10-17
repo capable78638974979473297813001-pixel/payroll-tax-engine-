@@ -453,6 +453,8 @@
       "commuter"
     ]
   },
+  "dependentCareLimit": 7500.0,
+  "dependentCareLimit$comment": "IRC 129(a)(2)(A) as amended by Pub. L. 119-21 (One Big Beautiful Bill Act) sec. 70404: $7,500 ($3,750 married filing separately) beginning 2026. Confirmed against the EY and Proskauer summaries of the 2026 inflation adjustments.",
   "electiveDeferralLimits": {
     "section402gAggregate": 24500.0,
     "deferral457": 24500.0,

@@ -155,4 +155,21 @@ describe('rounding and caps', () => {
     // Medicare is 1.45% of the full 3000.
     assert.equal(line(input, 'US_MED_EE'), dollars(43.5));
   });
+
+  test('dependent care over the IRC 129 limit ($7,500 in 2026) becomes taxable', () => {
+    // $7,300 already taken; of a $400 deduction only $200 fits. Taxable PA wages 3000 - 200 = 2800 x 3.07% = 85.96.
+    const over = pa(3000, [ded('dependent_care', 400)], {
+      ytd: { socialSecurity: 0, medicare: 0, futa: 0, dependentCare: dollars(7300) },
+    });
+    assert.equal(line(over, 'PA_SIT'), dollars(85.96));
+    assert.equal(line(over, 'US_MED_EE'), dollars(40.6)); // 2800 x 1.45%
+    // Within the limit nothing changes: 3000 - 400 = 2600 x 3.07% = 79.82.
+    assert.equal(line(pa(3000, [ded('dependent_care', 400)]), 'PA_SIT'), dollars(79.82));
+    // In 2025 the limit was $5,000: $4,900 taken, $400 deduction, $100 fits -> 2900 base x 3.07% = 89.03.
+    const y2025 = pa(3000, [ded('dependent_care', 400)], {
+      checkDate: '2025-06-13',
+      ytd: { socialSecurity: 0, medicare: 0, futa: 0, dependentCare: dollars(4900) },
+    });
+    assert.equal(line(y2025, 'PA_SIT'), dollars(89.03));
+  });
 });

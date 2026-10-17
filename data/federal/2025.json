@@ -445,6 +445,8 @@
       "commuter"
     ]
   },
+  "dependentCareLimit": 5000.0,
+  "dependentCareLimit$comment": "IRC 129(a)(2)(A): $5,000 ($2,500 married filing separately) through 2025.",
   "electiveDeferralLimits": {
     "section402gAggregate": 23500.0,
     "deferral457": 23500.0,

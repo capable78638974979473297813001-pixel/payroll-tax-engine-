@@ -143,6 +143,13 @@ export interface FederalRuleset {
     /** A SIMPLE plan's own separate, lower limit (IRC 408(p)/401(k) SIMPLE). */
     simple: number;
   };
+  /**
+   * IRC 129 annual exclusion for employer-provided dependent care assistance
+   * (including a dependent care FSA), in dollars, for a single filer or a
+   * joint return. See capDependentCare() in wages.ts. Optional so a year's file
+   * that predates it applies no cap.
+   */
+  dependentCareLimit?: number;
   /** Household / agricultural / election-worker coverage thresholds — shaped and read in taxes/federal.ts. */
   employmentCategories?: unknown;
   /** Railroad Tier II and RUIA parameters — shaped and read in taxes/federal.ts. */

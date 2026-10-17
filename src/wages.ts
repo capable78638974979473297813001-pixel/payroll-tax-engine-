@@ -161,3 +161,45 @@ export function capElectiveDeferrals(
 
   return result;
 }
+
+/**
+ * Caps this period's dependent-care deductions at the IRC 129 annual
+ * exclusion, given what this employer has already taken this calendar year.
+ * Dependent care assistance above the limit is taxable wages, so the excess
+ * is reclassified from pretax to post-tax (net pay is unchanged), the same
+ * way capElectiveDeferrals() treats an over-limit deferral; the post-tax
+ * remainder is suffixed `_OVER_LIMIT`.
+ *
+ * Standard limit only: the married-filing-separately limit is half, but this
+ * engine has no way to know that status (the W-4 box is not the same thing),
+ * so guessing it would risk over-taxing. Also not modelled: the employee's
+ * other employers earlier in the year, or a spouse's plan (the limit is per
+ * household).
+ */
+export function capDependentCare(
+  deductions: readonly Deduction[],
+  ytdDependentCare: Cents | undefined,
+  limitDollars: number | undefined,
+): Deduction[] {
+  if (limitDollars === undefined) return deductions.slice();
+  const total = deductions
+    .filter((d) => d.category === 'dependent_care')
+    .reduce((sum, d) => sum + d.amount, 0);
+  if (total === 0) return deductions.slice();
+
+  const room = atLeastZero(dollars(limitDollars) - (ytdDependentCare ?? 0));
+  if (total <= room) return deductions.slice();
+
+  let remainingRoom = room;
+  return deductions.flatMap((d) => {
+    if (d.category !== 'dependent_care') return [d];
+    const pretaxPart = Math.min(d.amount, remainingRoom);
+    remainingRoom -= pretaxPart;
+    const overLimitPart = d.amount - pretaxPart;
+    if (overLimitPart === 0) return [d];
+    const lines: Deduction[] = [];
+    if (pretaxPart > 0) lines.push({ ...d, amount: pretaxPart });
+    lines.push({ code: `${d.code}_OVER_LIMIT`, category: null, amount: overLimitPart });
+    return lines;
+  });
+}
