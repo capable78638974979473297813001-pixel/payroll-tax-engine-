@@ -459,6 +459,8 @@
       "commuter"
     ]
   },
+  "dependentCareLimit": 7500.0,
+  "dependentCareLimit$comment": "IRC 129(a)(2)(A) as amended by Pub. L. 119-21 sec. 70404: $7,500 from 2026, indexed for inflation for years after 2026; the 2027 adjusted figure is not yet published, so the statutory $7,500 is used.",
   "electiveDeferralLimits": {
     "section402gAggregate": 24500.0,
     "deferral457": 24500.0,

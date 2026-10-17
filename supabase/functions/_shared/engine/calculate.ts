@@ -36,6 +36,7 @@ import { federalTaxes } from './taxes/federal.ts';
 import { stateIncomeTax } from './taxes/state.ts';
 import { inputContractWarnings } from './contracts.ts';
 import {
+  capDependentCare,
   capElectiveDeferrals,
   cashEarnings,
   makeTaxableWagesFn,
@@ -64,10 +65,11 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
   // capElectiveDeferrals()'s own doc comment in wages.ts. Net pay is
   // unaffected (the same total dollar amount still leaves the paycheck);
   // this only changes which taxes see an over-limit amount as taxable.
-  const effectiveDeductions = capElectiveDeferrals(
-    input.deductions,
-    input.ytd.electiveDeferrals,
-    federalRuleset(input.checkDate).electiveDeferralLimits,
+  const federal = federalRuleset(input.checkDate);
+  const effectiveDeductions = capDependentCare(
+    capElectiveDeferrals(input.deductions, input.ytd.electiveDeferrals, federal.electiveDeferralLimits),
+    input.ytd.dependentCare,
+    federal.dependentCareLimit,
   );
 
   const ctx: ComputeContext = {

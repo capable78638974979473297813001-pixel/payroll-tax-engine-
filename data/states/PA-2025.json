@@ -24,16 +24,16 @@
   "flatRate": {
     "rate": 0.0307,
     "allowanceAmount": 0.0,
+    "annualize": false,
     "comment": "Pennsylvania has no personal exemptions, no standard deduction and no withholding allowances. Withholding is a straight percentage of PA-taxable compensation. Confirmed unchanged for 2026 from PA's own current employer-withholding page."
   },
   "exemptPretax": [
     "section125",
     "hsa",
     "fsa",
-    "dependent_care",
-    "commuter"
+    "dependent_care"
   ],
-  "exemptComment": "Deliberately omits deferral_401k / 403b / 457 / SIMPLE. Pennsylvania taxes elective retirement deferrals as compensation when earned, unlike federal income tax -- confirmed this session via a dedicated search (not just carried over from the prior version of this file): 'contributions to a 401(K) or contributions to other types of retirement plans are considered part of the employee's taxable compensation under Pennsylvania law, unlike federal income tax law', and nonqualified deferred-comp salary reductions are 'taxable at the time of deduction'. An engine with a single shared 'taxable wages' figure gets Pennsylvania wrong on every cheque where an employee defers. This SAME list is reused for stateUnemploymentEmployee below -- confirmed this session that PA UC's employee-withholding base is also gross/total wages with no 401(k) carve-out (Form UC-2 instructions), so the two PA taxes share one taxable-wages definition, unlike MI/IN where state income tax and local tax disagree on pretax treatment.",
+  "exemptComment": "PA-taxable compensation for the income tax, the local earned income tax and the Local Services Tax. EXCLUDED (this list): section125 (health/accident/disability/death salary reductions under a qualified IRC 125 plan: 72 P.S. 7301(d)(vi); 61 Pa. Code 101.6(i); PA PIT Guide, Gross Compensation), hsa (routed through the cafeteria plan: PA letter ruling PIT-06-005), fsa (health FSA: 61 Pa. Code 101.6(h)), and dependent_care (Act 34 of 2023, in effect 2023-12-14: employer dependent care assistance under an IRC 129 program, including pre-tax dependent care FSA contributions, is not PA compensation and employers stopped withholding on it from tax year 2024; source: PA Revenue, Employer Withholding > Dependent Care Assistance -- the older PIT Guide sentence that dependent care is 'not excludable' predates Act 34). INCLUDED, so deliberately absent: deferral_401k / 403b / 457 / SIMPLE (REV-415 and 61 Pa. Code 101.6(c)(8)(ii)(B): elective deferrals are taxable compensation when earned, unlike federal income tax) and commuter (REV-415 (SU) 01-23: qualified transportation fringe benefits are non-taxable only 'so long as the employee does not reduce his/her salary in order to receive the benefit', so a pre-tax commuter deduction is PA-taxable even though it is federally excluded; corrected 2026-10-17, it was listed as exempt without a PA source). The employee unemployment contribution (stateUnemploymentEmployee) does NOT use this list: src/taxes/state.ts gives it the shared FUTA-style unemployment base (section125, hsa, fsa, dependent_care, commuter out; elective deferrals in). Whether PA's UC law excludes those cafeteria amounts from the 0.07% base is NOT settled by a primary source: 43 P.S. 753(x) excludes employer plan payments for retirement, sickness/accident disability, medical expenses and death, and includes anything FUTA taxes, but does not name dependent care or commuter, and L&I says only 'total gross wages'. The difference is 0.07% of the deduction (cents).",
   "stateUnemploymentEmployee": {
     "rate": 0.0007,
     "wageBase": null,

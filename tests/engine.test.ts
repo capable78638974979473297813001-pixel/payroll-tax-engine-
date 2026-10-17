@@ -780,7 +780,8 @@ describe('Pennsylvania', () => {
     const r = calculatePaycheck(
       input({
         earnings: [{ code: 'REG', category: 'regular', amount: dollars(150) }],
-        workState: { code: 'PA', certificate: { workPSD: '100401' } }, // out-of-state resident
+        // out-of-state resident who has FILED the exemption certificate (a low-income exemption is the employee's to claim)
+        workState: { code: 'PA', certificate: { workPSD: '100401', eitExemptionCertificate: true } },
       }),
     );
     // $150 x 26 = $3,900/yr, below the $5,000 municipal threshold.
@@ -791,7 +792,7 @@ describe('Pennsylvania', () => {
     const r = calculatePaycheck(
       input({
         earnings: [{ code: 'REG', category: 'regular', amount: dollars(150) }],
-        workState: { code: 'PA', certificate: { workPSD: '100401', residencePSD: '100401' } },
+        workState: { code: 'PA', certificate: { workPSD: '100401', residencePSD: '100401', eitExemptionCertificate: true } },
       }),
     );
     // Same $3,900/yr, below the $5,000 MUNICIPAL threshold only —
@@ -824,7 +825,7 @@ describe('Pennsylvania', () => {
     const r = calculatePaycheck(
       input({
         earnings: [{ code: 'REG', category: 'regular', amount: dollars(400) }],
-        workState: { code: 'PA', certificate: { workPSD: '700102', residencePSD: '700102' } },
+        workState: { code: 'PA', certificate: { workPSD: '700102', residencePSD: '700102', lstExemptionCertificate: true } },
       }),
     );
     assert.equal(amountOf(r, 'PA_LST'), 0);
@@ -847,7 +848,7 @@ describe('Pennsylvania', () => {
       input({
         payFrequency: 'weekly',
         earnings: [{ code: 'REG', category: 'regular', amount: dollars(200) }],
-        workState: { code: 'PA', certificate: { workPSD: '650701', residencePSD: '650701' } },
+        workState: { code: 'PA', certificate: { workPSD: '650701', residencePSD: '650701', lstExemptionCertificate: true } },
       }),
     );
     assert.equal(amountOf(r, 'PA_LST'), dollars(0.09));
@@ -869,7 +870,7 @@ describe('Pennsylvania', () => {
       input({
         payFrequency: 'weekly',
         earnings: [{ code: 'REG', category: 'regular', amount: dollars(150) }],
-        workState: { code: 'PA', certificate: { workPSD: '180105', residencePSD: '180105' } },
+        workState: { code: 'PA', certificate: { workPSD: '180105', residencePSD: '180105', lstExemptionCertificate: true } },
       }),
     );
     assert.equal(amountOf(r, 'PA_LST'), dollars(0.09));
@@ -10038,7 +10039,10 @@ describe('New Mexico', () => {
     // 5.9% — this test now asserts BOTH lines, not just the supplemental
     // one, so that regression can't go silent again. NM_SIT must see only
     // the $700 regular wage (bracket [645,799): 15.80 + 4.3% × 55 =
-    // $18.16), not $1,700.
+    // $18.165 exactly, which half-up rounds to $18.17), not $1,700.
+    // (This once asserted $18.16: that was a floating-point artifact —
+    // 1816.5 computed as 1816.4999999999998 — not a rounding rule. See
+    // roundHalfUp() in src/money.ts.)
     const r = calculatePaycheck(
       input({
         checkDate: '2026-06-15',
@@ -10050,7 +10054,7 @@ describe('New Mexico', () => {
         ...nmState({ filingStatus: 'single' }),
       }),
     );
-    assert.equal(amountOf(r, 'NM_SIT'), dollars(18.16));
+    assert.equal(amountOf(r, 'NM_SIT'), dollars(18.17));
     assert.equal(amountOf(r, 'NM_SIT_SUPP'), dollars(59.0));
   });
 
