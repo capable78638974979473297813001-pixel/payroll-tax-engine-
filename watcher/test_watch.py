@@ -20,6 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_sources  # noqa: E402
+import reconcile  # noqa: E402
 import watch  # noqa: E402
 
 
@@ -404,7 +405,8 @@ class BuildSourcesTest(unittest.TestCase):
         """sources.json is generated; a curated setting the builder forgets to
         copy silently stops working (this happened to 'keep')."""
         options = {"kind": "index", "ignore": ["x"], "contains": "a...b", "drop_json_keys": ["t"],
-                   "replaces": ["https://old.example.gov/"], "keep": ["W-4"]}
+                   "replaces": ["https://old.example.gov/"], "keep": ["W-4"], "follow": True, "follow_limit": 3,
+                   "critical": True, "reconcile": "oh_municipal", "directory": "https://x.gov/directory"}
         with tempfile.TemporaryDirectory() as tmp:
             tmp = Path(tmp)
             (tmp / "data").mkdir()
@@ -420,6 +422,74 @@ class BuildSourcesTest(unittest.TestCase):
             built = json.loads((tmp / "sources.json").read_text())["sources"][0]
         for key, value in options.items():
             self.assertEqual(built.get(key), value, key)
+
+
+class ScopeTest(unittest.TestCase):
+    """watcher/scope.json: the watcher is for unscheduled changes, so jurisdictions that only move on fixed
+    dates are left out of sources.json (reversibly: data/ and curated.json are untouched)."""
+
+    def build(self, *, curated, data, scope):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            (tmp / "data" / "states").mkdir(parents=True)
+            (tmp / "data" / "garnishment").mkdir(parents=True)
+            (tmp / "curated.json").write_text(json.dumps({"sources": curated}))
+            for rel, body in data.items():
+                (tmp / "data" / rel).write_text(json.dumps(body))
+            if scope is not None:
+                (tmp / "scope.json").write_text(json.dumps(scope))
+            saved = (build_sources.HERE, build_sources.DATA, build_sources.REPO, build_sources.SCOPE_FILE)
+            build_sources.HERE, build_sources.DATA, build_sources.REPO = tmp, tmp / "data", tmp
+            build_sources.SCOPE_FILE = tmp / "scope.json"
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    build_sources.main()
+            finally:
+                build_sources.HERE, build_sources.DATA, build_sources.REPO, build_sources.SCOPE_FILE = saved
+            return json.loads((tmp / "sources.json").read_text())["sources"]
+
+    DATA = {
+        "states/OH-2026.json": {"sources": [{"title": "Ohio withholding", "url": "https://tax.ohio.gov/w.pdf"}]},
+        "states/MD-2026.json": {"sources": [{"title": "Maryland withholding", "url": "https://www.marylandtaxes.gov/w.pdf"}]},
+    }
+    CURATED = [{"jurisdiction": "MD", "title": "MD curated", "url": "https://www.marylandtaxes.gov/index"},
+               {"jurisdiction": "OH", "title": "OH curated", "url": "https://tax.ohio.gov/index"},
+               {"jurisdiction": "US", "title": "IRS", "url": "https://www.irs.gov/p15t"}]
+
+    def test_excluded_jurisdictions_lose_curated_and_cited_sources(self):
+        built = self.build(curated=self.CURATED, data=self.DATA,
+                           scope={"excluded": {"MD": "only a July 1 step"}})
+        self.assertEqual(sorted(s["url"] for s in built),
+                         ["https://tax.ohio.gov/index", "https://tax.ohio.gov/w.pdf", "https://www.irs.gov/p15t"])
+
+    def test_no_scope_file_means_everything_is_in_scope(self):
+        built = self.build(curated=self.CURATED, data=self.DATA, scope=None)
+        self.assertEqual(len(built), 5)
+
+    def test_a_jurisdiction_cannot_be_both_kept_and_excluded(self):
+        with self.assertRaises(SystemExit):
+            self.build(curated=self.CURATED, data=self.DATA, scope={"keep": {"MD": "x"}, "excluded": {"MD": "y"}})
+
+    def test_cites_nested_under_a_state_code_belong_to_that_state(self):
+        """Garnishment overrides sit in one file for every state; each state's statutes must follow the state."""
+        data = {"garnishment/state-overrides-2026.json": {"states": {
+            "TX": {"sources": [{"title": "Tex. Prop. Code", "url": "https://statutes.capitol.texas.gov/x"}]},
+            "OH": {"sources": [{"title": "R.C. 2716.02", "url": "https://codes.ohio.gov/x"}]}}}}
+        built = {s["url"]: s["jurisdiction"] for s in self.build(curated=[], data=data, scope=None)}
+        self.assertEqual(built, {"https://statutes.capitol.texas.gov/x": "TX", "https://codes.ohio.gov/x": "OH"})
+        kept = self.build(curated=[], data=data, scope={"excluded": {"TX": "no income tax"}})
+        self.assertEqual([s["jurisdiction"] for s in kept], ["OH"])
+
+    def test_the_real_scope_file_is_consistent(self):
+        scope = json.loads((Path(__file__).resolve().parent / "scope.json").read_text())
+        self.assertFalse(set(scope["keep"]) & set(scope["excluded"]))
+        self.assertIn("US", scope["keep"])
+        for st in ("OH", "GA", "UT", "WV", "ID", "AR"):  # documented unscheduled mid-year changes
+            self.assertIn(st, scope["keep"], st)
+        for st in ("AL", "IN", "KY", "MI", "PA"):  # local-tax registries
+            self.assertIn(st, scope["keep"], st)
+        for reason in {**scope["keep"], **scope["excluded"]}.values():
+            self.assertGreater(len(reason), 20)
 
 
 class ExtractionTest(unittest.TestCase):
@@ -446,6 +516,349 @@ class ExtractionTest(unittest.TestCase):
     def test_key_figures(self):
         figs = watch.key_figures("Rate 3.7% over $26,400; base 184,500 and 0.0046")
         self.assertEqual(set(figs), {"3.7%", "$26,400", "184,500", "0.0046"})
+
+
+WORDS = ("The employer must withhold the tax shown in this schedule from every payment of wages made to an employee "
+         "who works within the municipality and remit it to the tax administrator on or before the due date")
+
+
+def pdf(rate: str) -> bytes:
+    return make_pdf(f"{WORDS} at the rate of {rate}%")
+
+
+def index_page(*links: str) -> str:
+    items = "".join(f'<li><a href="{u}">{label}</a></li>' for u, label in links)
+    return (f"<html><body><main><h1>Village income tax</h1><p>{WORDS}. Forms and notices are listed below for "
+            f"employers and residents.</p><ul>{items}</ul></main></body></html>")
+
+
+class FollowTest(ServerTestCase):
+    """The watcher reads the documents an index page links to, not only the
+    page: a rate sheet can change behind a landing page that never does."""
+
+    def kids(self, summary):
+        return [c for c in summary["changed"] if "~" in c["id"]]
+
+    def test_linked_document_is_read_and_a_change_to_it_is_reported(self):
+        self.site.set_page("/tax", index_page(("/files/notice.pdf", "Withholding notice")))
+        self.site.set_page("/files/notice.pdf", pdf("1.0"), ctype="application/pdf")
+        self.sources("/tax", kind="index")
+        first = self.run_watch("2026-10-01")
+        self.assertEqual(first["counts"], {"new": 2})  # the page and its one document
+        self.assertEqual(first["followed_documents"], 1)
+        self.assertEqual(self.run_watch("2026-10-02")["counts"], {"unchanged": 2})
+
+        # The landing page does not change at all; only the PDF behind it.
+        self.site.set_page("/files/notice.pdf", pdf("2.0"), ctype="application/pdf")
+        summary = self.run_watch("2026-10-03")
+        self.assertEqual(summary["counts"], {"changed": 1, "unchanged": 1})
+        kid = self.kids(summary)[0]
+        self.assertIn("Withholding notice", kid["title"])
+        self.assertEqual((kid["figures_removed"], kid["figures_added"]), (["1.0%"], ["2.0%"]))
+        self.assertEqual(summary["significant_changes"], 1)
+
+    def test_a_scanned_pdf_with_no_text_is_still_watched(self):
+        """Many village notices are scans. With no text layer the file itself is compared."""
+        scan = make_pdf("")
+        self.site.set_page("/tax", index_page(("/files/scan.pdf", "Scanned notice")))
+        self.site.set_page("/files/scan.pdf", scan, ctype="application/pdf")
+        self.sources("/tax", kind="index")
+        self.run_watch("2026-10-01")
+        self.site.set_page("/files/scan.pdf", make_pdf("") + b"\n% a different scan\n", ctype="application/pdf")
+        self.assertEqual(self.run_watch("2026-10-02")["counts"], {"changed": 1, "unchanged": 1})
+
+    def test_a_scan_stored_under_the_old_blind_marker_is_rebaselined_not_reported_as_changed(self):
+        """Before the fix, every scanned PDF was stored as one constant string, so none could ever
+        show a change. On the first run after the fix they are re-baselined quietly."""
+        import hashlib  # noqa: PLC0415
+
+        self.site.set_page("/scan.pdf", make_pdf(""), ctype="application/pdf")
+        self.sources("/scan.pdf")
+        self.run_watch("2026-10-01")
+        legacy = watch.LEGACY_MARKERS[0]
+        state = json.loads(watch.STATE_FILE.read_text())
+        state["t-0"]["hash"] = hashlib.sha256(legacy.encode()).hexdigest()
+        watch.STATE_FILE.write_text(json.dumps(state))
+        watch.write_snapshot("t-0", legacy)
+        summary = self.run_watch("2026-10-02")
+        self.assertEqual(summary["counts"], {"new": 1})
+        self.assertEqual(summary["significant_changes"], 0)
+        self.assertEqual(self.run_watch("2026-10-03")["counts"], {"unchanged": 1})
+        self.site.set_page("/scan.pdf", make_pdf("") + b"\n% re-scanned\n", ctype="application/pdf")
+        self.assertEqual(self.run_watch("2026-10-04")["counts"], {"changed": 1})
+
+    def test_removed_link_drops_the_document_from_state(self):
+        self.site.set_page("/tax", index_page(("/files/a.pdf", "A"), ("/files/b.pdf", "B")))
+        for n in "ab":
+            self.site.set_page(f"/files/{n}.pdf", pdf(n), ctype="application/pdf")
+        self.sources("/tax", kind="index")
+        self.run_watch("2026-10-01")
+        before = json.loads(watch.STATE_FILE.read_text())
+        self.assertEqual(sum("~" in k for k in before), 2)
+        self.site.set_page("/tax", index_page(("/files/a.pdf", "A")))
+        self.run_watch("2026-10-02")
+        after = json.loads(watch.STATE_FILE.read_text())
+        self.assertEqual(sum("~" in k for k in after), 1)
+        self.assertEqual(len(list(watch.SNAPSHOT_DIR.glob("*~*"))), 1)
+
+    def test_only_documents_on_the_pages_own_site_or_other_government_sites(self):
+        self.site.set_page("/tax", index_page(("/files/a.pdf", "Ours"),
+                                              ("https://example.com/vendor.pdf", "A vendor's brochure"),
+                                              ("https://tax.ohio.gov/forms/it4.pdf", "State form")))
+        self.site.set_page("/files/a.pdf", pdf("1"), ctype="application/pdf")
+        self.sources("/tax", kind="index")
+        children = watch.follow_children(
+            [watch.Result(json.loads(watch.SOURCES_FILE.read_text())["sources"][0], "new",
+                          links=watch.document_links(
+                              watch.extract_html(index_page(("/files/a.pdf", "Ours"),
+                                                            ("https://example.com/vendor.pdf", "V"),
+                                                            ("https://tax.ohio.gov/forms/it4.pdf", "S")).encode(),
+                                                 self.base + "/tax", None)[1], self.base + "/tax"),
+                          final_url=self.base + "/tax")], {})
+        urls = sorted(c["url"] for c in children)
+        self.assertIn("https://tax.ohio.gov/forms/it4.pdf", urls)
+        self.assertNotIn("https://example.com/vendor.pdf", urls)
+
+    def test_a_page_is_read_at_most_follow_limit_documents_and_says_so(self):
+        links = [(f"/files/d{i}.pdf", f"Doc {i}") for i in range(5)]
+        self.site.set_page("/tax", index_page(*links))
+        for u, _ in links:
+            self.site.set_page(u, pdf(u[-5]), ctype="application/pdf")
+        srcs = [{"id": "t-0", "jurisdiction": "XX", "title": "tax", "url": self.base + "/tax", "kind": "index",
+                 "follow_limit": 2}]
+        watch.SOURCES_FILE.write_text(json.dumps({"sources": srcs}))
+        summary = self.run_watch("2026-10-01")
+        self.assertEqual(summary["followed_documents"], 2)
+        self.assertEqual(json.loads(watch.STATE_FILE.read_text())["t-0"]["follow_skipped"], 3)
+
+    def test_follow_false_opts_an_index_out(self):
+        self.site.set_page("/tax", index_page(("/files/a.pdf", "A")))
+        self.site.set_page("/files/a.pdf", pdf("1"), ctype="application/pdf")
+        srcs = [{"id": "t-0", "jurisdiction": "XX", "title": "tax", "url": self.base + "/tax", "kind": "index",
+                 "follow": False}]
+        watch.SOURCES_FILE.write_text(json.dumps({"sources": srcs}))
+        self.assertEqual(self.run_watch("2026-10-01")["counts"], {"new": 1})
+
+    def test_plain_pages_are_not_followed_unless_asked(self):
+        self.site.set_page("/tax", index_page(("/files/a.pdf", "A")))
+        self.site.set_page("/files/a.pdf", pdf("1"), ctype="application/pdf")
+        self.sources("/tax")  # not an index
+        self.assertEqual(self.run_watch("2026-10-01")["counts"], {"new": 1})
+        srcs = json.loads(watch.SOURCES_FILE.read_text())["sources"]
+        srcs[0]["follow"] = True
+        watch.SOURCES_FILE.write_text(json.dumps({"sources": srcs}))
+        self.assertEqual(self.run_watch("2026-10-02")["counts"], {"new": 1, "unchanged": 1})
+
+    def test_a_dead_link_is_counted_not_escalated(self):
+        self.site.set_page("/tax", index_page(("/files/a.pdf", "A"), ("/files/missing.pdf", "Missing")))
+        self.site.set_page("/files/a.pdf", pdf("1"), ctype="application/pdf")
+        self.sources("/tax", kind="index")
+        summary = self.run_watch("2026-10-01")
+        self.assertEqual(summary["counts"], {"new": 2})
+        self.assertEqual(summary["followed_documents_unread"], 1)
+        self.assertEqual(summary["broken"], [])
+        self.assertEqual(summary["attention"], [])
+        self.assertIn("could not be read", (watch.REPORT_DIR / "latest.md").read_text())
+
+    def test_running_one_jurisdiction_does_not_forget_another_ones_documents(self):
+        self.site.set_page("/a", index_page(("/files/a.pdf", "A")))
+        self.site.set_page("/b", index_page(("/files/b.pdf", "B")))
+        for n in "ab":
+            self.site.set_page(f"/files/{n}.pdf", pdf(n), ctype="application/pdf")
+        srcs = [{"id": "a-0", "jurisdiction": "AA", "title": "a", "url": self.base + "/a", "kind": "index"},
+                {"id": "b-0", "jurisdiction": "BB", "title": "b", "url": self.base + "/b", "kind": "index"}]
+        watch.SOURCES_FILE.write_text(json.dumps({"sources": srcs}))
+        self.run_watch("2026-10-01")
+        self.assertEqual(sum("~" in k for k in json.loads(watch.STATE_FILE.read_text())), 2)
+        self.run_watch("2026-10-02", "--only", "AA")
+        state = json.loads(watch.STATE_FILE.read_text())
+        self.assertEqual(sorted(k.split("~")[0] for k in state if "~" in k), ["a-0", "b-0"])
+
+
+class AttentionTest(ServerTestCase):
+    """A green run must not read as 'everything is watched' while an official
+    bulk file the data is built from has never been readable."""
+
+    def critical(self, path: str, **extra):
+        srcs = [{"id": "c-0", "jurisdiction": "OH", "title": "Official rate file", "url": self.base + path,
+                 "critical": True, **extra}]
+        watch.SOURCES_FILE.write_text(json.dumps({"sources": srcs}))
+
+    def test_a_critical_source_that_was_never_readable_is_raised_on_the_first_run(self):
+        self.site.set_page("/rates", "denied", status=401)
+        self.critical("/rates")
+        summary = self.run_watch("2026-10-01", "--no-browser")
+        self.assertEqual([a["kind"] for a in summary["attention"]], ["critical_unreadable"])
+        report = (watch.REPORT_DIR / "latest.md").read_text()
+        self.assertIn("## Needs attention (1)", report)
+        self.assertIn("not an all-clear", report)
+
+    def test_a_critical_source_that_fails_after_working_is_raised_after_three_runs(self):
+        self.site.set_page("/rates", page())
+        self.critical("/rates")
+        self.run_watch("2026-10-01", "--no-browser")
+        self.site.set_page("/rates", "denied", status=401)
+        counts = [len(self.run_watch(f"2026-10-0{d}", "--no-browser")["attention"]) for d in (2, 3, 4)]
+        self.assertEqual(counts, [0, 0, 1])
+
+    def test_an_ordinary_source_failing_is_not_attention(self):
+        self.site.set_page("/p", "denied", status=401)
+        self.sources("/p")
+        self.assertEqual(self.run_watch("2026-10-01", "--no-browser")["attention"], [])
+
+    def test_reconcile_findings_flow_into_the_report_and_summary(self):
+        findings = [
+            {"kind": "missing_from_engine", "severity": "action", "source_id": "x", "jurisdiction": "OH",
+             "code": "86492", "name": "Woodville", "detail": "in force in the official file but not in the data"},
+            {"kind": "rate_differs", "severity": "info", "source_id": "x", "jurisdiction": "OH", "code": "81214",
+             "name": "Washington", "detail": "acknowledged"},
+        ]
+        self.site.set_page("/p", page())
+        self.sources("/p")
+        saved = watch.reconcile.run
+        watch.reconcile.run = lambda *a, **k: findings
+        try:
+            summary = self.run_watch("2026-10-01")
+        finally:
+            watch.reconcile.run = saved
+        self.assertEqual([a["name"] if "name" in a else a["title"] for a in summary["attention"]], ["OH Woodville"])
+        self.assertEqual(len(summary["reconcile"]), 2)
+        report = (watch.REPORT_DIR / "latest.md").read_text()
+        self.assertIn("## Needs attention (1)", report)
+        self.assertIn("for information (1)", report)
+
+
+class IncompleteChainTest(unittest.TestCase):
+    def test_only_a_missing_intermediate_certificate_gets_the_browser_retry(self):
+        src = {"id": "t", "url": "https://x.gov/"}
+        missing = watch.Result(src, "unreachable", "site's TLS certificate failed verification (unable to get local issuer certificate)")
+        expired = watch.Result(src, "unreachable", "site's TLS certificate failed verification (certificate has expired)")
+        self.assertTrue(watch.incomplete_chain(missing))
+        self.assertFalse(watch.incomplete_chain(expired))  # verification is never turned off
+        self.assertFalse(watch.incomplete_chain(watch.Result(src, "blocked", "HTTP 403")))
+
+
+def finder_csv(extra_rows: list[str], filler: int = 520) -> str:
+    """OHMuniRateTable.csv: no header; start,end,code,NAME,rate (a fraction)."""
+    rows = [f"20040101,99991231,{10000 + i:05d},TOWN{i},.01000" for i in range(filler)]
+    return "\n".join(rows + extra_rows) + "\n"
+
+
+class ReconcileTest(unittest.TestCase):
+    SRC = {"id": "oh-muni", "jurisdiction": "OH", "title": "Muni rates"}
+    TODAY = "2026-10-15"
+
+    def repo(self, extra_entries: list[dict], year: int = 2026, filler: int = 520) -> Path:
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        d = Path(tmp.name) / "data" / "local"
+        d.mkdir(parents=True)
+        base = [{"name": f"Town{i}", "municode": f"{10000 + i:05d}", "rate": 0.01, "effectiveFrom": "2004-01-01"}
+                for i in range(filler)]
+        (d / f"OH-municipalities-{year}.json").write_text(json.dumps({"year": year, "municipalities": base + extra_entries}))
+        return Path(tmp.name)
+
+    def run_it(self, csv_text, repo, directory=None, today=None):
+        return reconcile.reconcile_oh_municipal(csv_text, self.SRC, today or self.TODAY, repo, directory)
+
+    def kinds(self, findings, severity=None):
+        return sorted((f["kind"], f["name"]) for f in findings if severity in (None, f["severity"]))
+
+    def test_matching_data_has_no_findings(self):
+        self.assertEqual(self.run_it(finder_csv([]), self.repo([])), [])
+
+    def test_a_taxing_municipality_missing_from_the_engine_needs_action(self):
+        csv_text = finder_csv(["20260701,99991231,99001,NEWVILLE,.01000"])
+        out = self.run_it(csv_text, self.repo([]))
+        self.assertEqual(self.kinds(out, "action"), [("missing_from_engine", "Newville")])
+        self.assertIn("1.000%", out[0]["detail"])
+
+    def test_a_rate_the_engine_gets_wrong_needs_action(self):
+        csv_text = finder_csv(["20260101,99991231,99002,TAXTOWN,.02000"])
+        repo = self.repo([{"name": "Taxtown", "municode": "99002", "rate": 0.015, "effectiveFrom": "2026-01-01"}])
+        out = self.run_it(csv_text, repo)
+        self.assertEqual(self.kinds(out, "action"), [("rate_differs", "Taxtown")])
+
+    def test_a_variance_the_data_file_already_explains_is_only_information(self):
+        csv_text = finder_csv(["20260101,99991231,99002,TAXTOWN,.02000"])
+        repo = self.repo([{"name": "Taxtown", "municode": "99002", "rate": 0.015, "effectiveFrom": "2026-01-01",
+                           "$correctionNote": "the city's own notice says 1.5%"}])
+        out = self.run_it(csv_text, repo)
+        self.assertEqual(self.kinds(out, "action"), [])
+        self.assertEqual(self.kinds(out, "info"), [("rate_differs", "Taxtown")])
+
+    def test_rate_history_is_applied_as_of_the_check_date(self):
+        csv_text = finder_csv(["20260701,99991231,99003,LATETOWN,.01000"])
+        entry = {"name": "Latetown", "municode": "99003", "rate": 0.01, "effectiveFrom": "2026-07-01",
+                 "rateHistory": [{"from": "2026-01-01", "rate": 0.0}, {"from": "2026-07-01", "rate": 0.01}]}
+        self.assertEqual(self.run_it(csv_text, self.repo([entry])), [])
+        # Before July the official file has no row in force, and the engine's 0% is consistent.
+        self.assertEqual(self.kinds(self.run_it(csv_text, self.repo([entry]), today="2026-03-01"), "action"), [])
+
+    def test_a_row_added_by_hand_that_the_official_file_lacks_is_information(self):
+        entry = {"name": "Handville", "municode": "", "rate": 0.01, "effectiveFrom": "2026-07-01",
+                 "$addedNote": "ADDED: the village's own notice"}
+        out = self.run_it(finder_csv([]), self.repo([entry]), directory={"handville": "86492"})
+        self.assertEqual(self.kinds(out, "action"), [])
+        self.assertEqual(self.kinds(out, "info"), [("backfill_municode", "Handville"), ("not_in_official_file", "Handville")])
+        self.assertEqual({f["code"] for f in out}, {"86492"})
+
+    def test_an_engine_row_with_no_note_that_the_official_file_dropped_needs_action(self):
+        entry = {"name": "Stale", "municode": "99004", "rate": 0.01, "effectiveFrom": "2004-01-01"}
+        out = self.run_it(finder_csv([]), self.repo([entry]))
+        self.assertEqual(self.kinds(out, "action"), [("not_in_official_file", "Stale")])
+
+    def test_a_blank_municode_is_matched_by_name_and_offered_for_backfill(self):
+        csv_text = finder_csv(["20260101,99991231,99005,ANNEXED,.01000"])
+        entry = {"name": "Annexed", "municode": "", "rate": 0.01, "effectiveFrom": "2026-01-01"}
+        out = self.run_it(csv_text, self.repo([entry]))
+        self.assertEqual(self.kinds(out), [("backfill_municode", "Annexed")])
+
+    def test_a_scheduled_rate_change_the_engine_lacks_needs_action_before_it_takes_effect(self):
+        csv_text = finder_csv(["20260101,20261231,99006,GROWTH,.01500", "20270101,99991231,99006,GROWTH,.02000"])
+        e26 = {"name": "Growth", "municode": "99006", "rate": 0.015, "effectiveFrom": "2026-01-01"}
+        e27 = {"name": "Growth", "municode": "99006", "rate": 0.015, "effectiveFrom": "2026-01-01"}
+        repo = self.repo([e26])
+        d = repo / "data" / "local"
+        (d / "OH-municipalities-2027.json").write_text(json.dumps({"year": 2027, "municipalities": [e27]}))
+        out = self.run_it(csv_text, repo)
+        self.assertEqual(self.kinds(out, "action"), [("scheduled_change_missing", "Growth")])
+        self.assertIn("2027-01-01", out[0]["detail"])
+
+    def test_a_truncated_download_is_reported_not_trusted(self):
+        out = self.run_it("20040101,99991231,00142,ABERDEEN,.01000\n", self.repo([]))
+        self.assertEqual([f["kind"] for f in out], ["unreadable"])  # not 520 false 'missing' rows
+
+    def test_directory_names_that_repeat_are_dropped(self):
+        text = json.dumps({"entities": [{"code": "03585", "name": "BAINBRIDGE"}, {"code": "03604", "name": "BAINBRIDGE"},
+                                        {"code": "86492", "name": "WOODVILLE"}]})
+        self.assertEqual(reconcile.parse_finder_directory(text), {"woodville": "86492"})
+
+    def test_jedd_rates_are_percent_in_the_official_file(self):
+        rows = ["EffStartDate,EffEndDate,JEDD_ID,Name,Rate"] + [f"20030101,29991231,{9000 + i},ZONE {i},1.5" for i in range(60)]
+        rows.append("20030101,29991231,9500,ZONE X,2")
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        d = Path(tmp.name) / "data" / "local"
+        d.mkdir(parents=True)
+        zones = [{"name": f"Zone {i}", "jeddId": str(9000 + i), "rate": 0.015} for i in range(60)]
+        zones.append({"name": "Zone X", "jeddId": "9500", "rate": 0.02})
+        (d / "OH-jedd-jedz-2026.json").write_text(json.dumps({"zones": zones}))
+        self.assertEqual(reconcile.reconcile_oh_jedd("\n".join(rows), self.SRC, self.TODAY, Path(tmp.name)), [])
+        zones[-1]["rate"] = 0.025
+        (d / "OH-jedd-jedz-2026.json").write_text(json.dumps({"zones": zones}))
+        out = reconcile.reconcile_oh_jedd("\n".join(rows), self.SRC, self.TODAY, Path(tmp.name))
+        self.assertEqual(self.kinds(out, "action"), [("rate_differs", "Zone X")])
+
+    def test_a_file_that_cannot_be_read_is_a_finding_not_a_silent_skip(self):
+        class Bad:
+            ok = False
+            body = b""
+            error = "HTTP 401"
+        out = reconcile.run([{**self.SRC, "reconcile": "oh_municipal", "url": "https://x/"}], lambda u: Bad(), self.TODAY)
+        self.assertEqual([(f["kind"], f["severity"]) for f in out], [("unreadable", "action")])
+        out = reconcile.run([{**self.SRC, "reconcile": "nope", "url": "https://x/"}], lambda u: Bad(), self.TODAY)
+        self.assertEqual([f["kind"] for f in out], ["unknown_reconciler"])
 
 
 if __name__ == "__main__":

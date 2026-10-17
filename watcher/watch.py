@@ -16,6 +16,17 @@ can't bury the real changes.
     python watcher/watch.py --only AR,US     # some jurisdictions
     python watcher/watch.py --limit 20       # quick smoke run
 
+Beyond single pages it also:
+
+- reads the documents an index page links to (PDFs, spreadsheets), not just the
+  page's own text, so a rate sheet that changes behind an unchanged landing page
+  is still noticed ("follow", below);
+- compares the engine's local-tax data with Ohio's official bulk rate files row
+  by row (reconcile.py), which catches a jurisdiction the engine lacks;
+- puts anything that needs a person's attention at the top of the report: a
+  critical source that has gone unreadable, or data that disagrees with an
+  official file.
+
 Always exits 0 unless the tool itself crashes: changes and dead links are
 findings in the report, not failures.
 """
@@ -45,6 +56,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import reconcile  # noqa: E402  (sits beside this file)
+
 SOURCES_FILE = HERE / "sources.json"
 STATE_FILE = HERE / "state" / "state.json"
 SNAPSHOT_DIR = HERE / "state" / "snapshots"
@@ -68,6 +82,14 @@ BROWSER_WORKERS = 4
 BROKEN_AFTER_FAILURES = 3
 
 DOC_EXTENSIONS = (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".txt", ".zip")
+
+# Reading what an index page links to, not just the page. Each linked document
+# becomes its own watched source (id "<parent>~<hash of url>"), read like any
+# other: PDF text, spreadsheet strings, confirmed before a change is reported.
+# One level deep only, and capped, so a busy page can't turn into a crawl.
+FOLLOW_EXTENSIONS = tuple(e for e in DOC_EXTENSIONS if e != ".zip")
+FOLLOW_LIMIT_PER_PAGE = 25
+FOLLOW_LIMIT_TOTAL = 500
 
 # Lines that change without the substance changing. Matched against each
 # normalised line; a matching line is dropped before hashing.
@@ -280,6 +302,20 @@ def extract_html(body: bytes, url: str, charset: str | None) -> tuple[str, list[
     return parser.result()
 
 
+# What a file with no readable text (a scanned PDF) is reduced to: a fingerprint
+# of the file. normalise_text() later strips any run of 24+ hex characters as
+# noise (nonces, session tokens), which used to erase a plain hex digest and
+# left every scanned document looking identical forever. Chunking the digest
+# keeps it. The two LEGACY markers are what such documents were stored as
+# before that was fixed; they are re-baselined quietly, not reported as changes.
+LEGACY_MARKERS = ("[binary PDF, no extractable text] sha256=", "[binary] sha256=")
+
+
+def fingerprint_text(label: str, data: bytes) -> str:
+    digest = hashlib.sha256(data).hexdigest()
+    return f"[{label}] sha256=" + " ".join(digest[i:i + 16] for i in range(0, len(digest), 16))
+
+
 def extract_pdf(body: bytes) -> str:
     """PDF text via pypdf. Falls back to the raw bytes minus PDF metadata
     (creation/modification dates, document IDs) when text can't be read."""
@@ -303,7 +339,7 @@ def extract_pdf(body: bytes) -> str:
     stripped = re.sub(rb"/ID\s*\[[^\]]*\]", b"", stripped)
     stripped = re.sub(rb"<xmp:(Create|Modify|Metadata)Date>[^<]*<", b"<", stripped)
     stripped = re.sub(rb"<xmpMM:(Document|Instance)ID>[^<]*<", b"<", stripped)
-    return "[binary PDF, no extractable text] sha256=" + hashlib.sha256(stripped).hexdigest()
+    return fingerprint_text("binary PDF, no extractable text", stripped)
 
 
 def key_figures(text: str) -> Counter:
@@ -420,7 +456,7 @@ def binary_strings(body: bytes) -> str:
     ascii_runs = re.findall(rb"[\x20-\x7e]{6,}", body)
     utf16_runs = re.findall(rb"(?:[\x20-\x7e]\x00){6,}", body)
     parts = [r.decode("ascii") for r in ascii_runs] + [r.decode("utf-16-le") for r in utf16_runs]
-    return "\n".join(parts) if parts else "[binary] sha256=" + hashlib.sha256(body).hexdigest()
+    return "\n".join(parts) if parts else fingerprint_text("binary", body)
 
 
 def document_links(links: list[tuple[str, str]], page_url: str) -> dict[str, str]:
@@ -675,6 +711,11 @@ def _check_source(source: dict, prev: dict | None, confirm_delay: float, fetcher
         base.status = "new"
         base.detail = f"first snapshot ({len(first.text.split())} words, {first.kind})"
         return base
+    if (read_snapshot(source["id"]) or "").strip() in LEGACY_MARKERS and first.text.strip() not in LEGACY_MARKERS:
+        base.status = "new"
+        base.detail = ("re-baselined: a document with no readable text (a scan) is now compared by its content; "
+                       "before, every such document looked identical")
+        return base
 
     old_links: dict[str, str] = prev.get("links", {})
     old_target = _redirect_key(prev["redirects_to"]) if prev.get("redirects_to") else ""
@@ -792,10 +833,19 @@ def retry_slow(results: list[Result], state: dict, confirm_delay: float, workers
     return [retried.get(r.source["id"], r) for r in results]
 
 
+def incomplete_chain(r: Result) -> bool:
+    """A site whose server forgot to send its intermediate certificate. Python
+    can't build the chain, but a browser fetches the missing piece itself (as
+    it would for any visitor), so these get the browser retry too. An EXPIRED
+    or otherwise invalid certificate is not this case and stays a failure:
+    verification is never turned off."""
+    return r.status == "unreachable" and "unable to get local issuer certificate" in r.detail
+
+
 def retry_in_browser(results: list[Result], state: dict, confirm_delay: float) -> list[Result]:
     """Second chance for sources a plain request couldn't read: load them in
     real browsers, BROWSER_WORKERS at a time."""
-    blocked = [r for r in results if r.status == "blocked"]
+    blocked = [r for r in results if r.status == "blocked" or incomplete_chain(r)]
     if not blocked:
         return results
     if not browser_available():
@@ -808,6 +858,8 @@ def retry_in_browser(results: list[Result], state: dict, confirm_delay: float) -
             again = check_source(r.source, state.get(r.source["id"]), confirm_delay, fetcher=browser)
         except Exception as e:  # noqa: BLE001
             again = Result(r.source, "blocked", f"{r.detail}; browser error: {type(e).__name__}")
+        if again.status == "unreachable" and incomplete_chain(r):
+            return r  # the browser couldn't verify the site either; keep the original, clearer message
         if again.status == "blocked":
             again.detail = f"{r.detail}; a real browser was refused too"
         else:
@@ -830,6 +882,56 @@ def retry_in_browser(results: list[Result], state: dict, confirm_delay: float) -
         for done in pool.map(worker, [sh for sh in shares if sh]):
             retried.update({r.source["id"]: r for r in done})
     return [retried.get(r.source["id"], r) for r in results]
+
+
+def _host(url: str) -> str:
+    return urllib.parse.urlsplit(url).netloc.lower().split(":")[0]
+
+
+def _official_host(host: str) -> bool:
+    return bool(re.search(r"\.(gov|us|mil)$", host))
+
+
+def follow_children(results: list[Result], state: dict) -> list[dict]:
+    """Sources for the documents that index pages link to.
+
+    A page is followed when it is an index (`"kind": "index"`) or says
+    `"follow": true`; `"follow": false` opts out, and `"follow_limit"` raises
+    or lowers the per-page cap. Only documents are followed (PDF, Word, Excel,
+    CSV, text), and only on the page's own site or another .gov/.us/.mil site.
+    A document that already has a source of its own isn't read twice.
+    """
+    own_urls = {r.source["url"] for r in results}
+    children: dict[str, dict] = {}
+    for r in sorted(results, key=lambda r: r.source["id"]):
+        s = r.source
+        if s.get("origin") == "follow" or s.get("follow") is False:
+            continue
+        if not (s.get("follow") or s.get("kind") == "index"):
+            continue
+        links = r.links if r.links is not None else state.get(s["id"], {}).get("links", {})
+        host = _host(r.final_url or s["url"])
+        picked = []
+        for url, text in sorted(links.items()):
+            path = urllib.parse.urlsplit(url).path.lower()
+            if not (path.endswith(FOLLOW_EXTENSIONS) or path.endswith("/download")):
+                continue
+            if url in own_urls or not (_host(url) == host or _official_host(_host(url))):
+                continue
+            picked.append((url, text))
+        for url, text in picked[: s.get("follow_limit", FOLLOW_LIMIT_PER_PAGE)]:
+            cid = f"{s['id']}~{hashlib.sha1(url.encode()).hexdigest()[:8]}"
+            label = (text or Path(urllib.parse.urlsplit(url).path).name or url).strip()
+            children.setdefault(cid, {
+                "id": cid, "jurisdiction": s.get("jurisdiction", ""), "origin": "follow", "parent": s["id"], "url": url,
+                "title": f"{label[:70]} (linked from {(s.get('title') or s['url'])[:50]})",
+                "used_by": s.get("used_by", []),
+            })
+        if len(picked) > s.get("follow_limit", FOLLOW_LIMIT_PER_PAGE):
+            state.setdefault(s["id"], {})["follow_skipped"] = len(picked) - s.get("follow_limit", FOLLOW_LIMIT_PER_PAGE)
+        else:
+            state.get(s["id"], {}).pop("follow_skipped", None)
+    return list(children.values())[:FOLLOW_LIMIT_TOTAL]
 
 
 def apply_results(results: list[Result], state: dict, today: str) -> None:
@@ -881,7 +983,38 @@ def _md_escape(s: str) -> str:
     return s.replace("|", "\\|").replace("\n", " ")
 
 
-def build_report(results: list[Result], state: dict, today: str, started: float) -> tuple[str, dict]:
+def attention_items(results: list[Result], state: dict, findings: list[dict]) -> list[dict]:
+    """What a person should look at today, apart from ordinary changes.
+
+    - A critical source (an official bulk rate file the engine's data is built
+      from) that can't be read: the daily run stays green while nothing about
+      that file is being watched, which is how a missing city tax went unseen.
+      Raised as soon as it has never been read, or after BROKEN_AFTER_FAILURES
+      failed runs in a row.
+    - Any reconciliation finding with severity "action": the engine disagrees
+      with an official file.
+    """
+    items = []
+    for r in results:
+        s = r.source
+        if not s.get("critical") or r.status not in UNVERIFIED_STATUSES:
+            continue
+        entry = state.get(s["id"], {})
+        runs = entry.get("failures", 0)
+        if runs >= BROKEN_AFTER_FAILURES or not entry.get("hash"):
+            items.append({"kind": "critical_unreadable", "title": s.get("title") or s["url"], "url": s["url"],
+                          "detail": f"unreadable for {runs} run{'s' if runs != 1 else ''}: {r.detail}"})
+    for f in findings:
+        if f["severity"] == "action":
+            items.append({"kind": f["kind"], "title": f"{f['jurisdiction']} {f['name']}".strip(), "url": "",
+                          "detail": f["detail"]})
+    return items
+
+
+def build_report(results: list[Result], state: dict, today: str, started: float,
+                 findings: list[dict] | None = None, unread_children: int = 0) -> tuple[str, dict]:
+    findings = findings or []
+    attention = attention_items(results, state, findings)
     by_status: dict[str, list[Result]] = defaultdict(list)
     for r in results:
         by_status[r.status].append(r)
@@ -896,6 +1029,9 @@ def build_report(results: list[Result], state: dict, today: str, started: float)
     headline = (f"**{n_changed} source{'s' if n_changed != 1 else ''} changed**" if n_changed
                 else "**No changes** in any official source.")
     lines += [headline, ""]
+    if attention:
+        lines += [f"**{len(attention)} item{'s' if len(attention) != 1 else ''} need attention: see \"Needs attention\" "
+                  f"below.** A run with no changes is not an all-clear while this list is not empty.", ""]
     lines += ["| Changed | Minor | Unchanged | New | Unstable | Unreachable | Gone (404) | Blocks bots | Total |",
               "|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
               f"| {n_changed} | {len(minor)} | {len(by_status['unchanged'])} | {len(by_status['new'])} | "
@@ -917,6 +1053,12 @@ def build_report(results: list[Result], state: dict, today: str, started: float)
                                              f"nothing about them is being watched." if never else "."))
     else:
         lines.append(f"**Coverage: all {len(results)} sources were read this run.**")
+    followed = sum(1 for r in results if r.source.get("origin") == "follow")
+    if followed or unread_children:
+        many = unread_children != 1
+        lines.append(f"{followed} of those are documents linked from index pages."
+                     + (f" {unread_children} other linked document{'s' if many else ''} could not be read (a dead link, "
+                        f"or a file the site won't serve) and {'are' if many else 'is'} not counted above." if unread_children else ""))
     lines.append("")
 
     def describe_change(r: Result):
@@ -942,6 +1084,23 @@ def build_report(results: list[Result], state: dict, today: str, started: float)
                 lines.append(f"... {len(r.diff) - 40} more changed lines")
             lines.extend(["```", "</details>"])
         lines.append("")
+
+    if attention:
+        lines.extend([f"## Needs attention ({len(attention)})", "",
+                      "| What | Detail |", "|---|---|"])
+        for a in attention:
+            what = f"[{_md_escape(a['title'])[:90]}]({a['url']})" if a["url"] else _md_escape(a["title"])[:90]
+            lines.append(f"| {what} | {_md_escape(a['detail'])[:220]} |")
+        lines.append("")
+    infos = [f for f in findings if f["severity"] == "info"]
+    if infos:
+        lines.extend([f"## Data checks against official files: for information ({len(infos)})", "",
+                      "No change needed, but worth knowing: a variance the data file already explains, a row added by "
+                      "hand that the official file hasn't caught up to, or a municode that can now be filled in.", "",
+                      "<details><summary>Show</summary>", "", "| Jurisdiction | Name | Code | Detail |", "|---|---|---|---|"])
+        for f in infos:
+            lines.append(f"| {f['jurisdiction']} | {_md_escape(f['name'])} | {f['code']} | {_md_escape(f['detail'])[:200]} |")
+        lines.extend(["", "</details>", ""])
 
     if real:
         lines.extend(["## Changed", ""])
@@ -1015,6 +1174,10 @@ def build_report(results: list[Result], state: dict, today: str, started: float)
                     for r in sorted(by_status["changed"], key=order)],
         "significant_changes": len(real),
         "broken": [r.source["url"] for r in broken],
+        "attention": attention,
+        "reconcile": findings,
+        "followed_documents": sum(1 for r in results if r.source.get("origin") == "follow"),
+        "followed_documents_unread": unread_children,
         "verified": verified,
         "unverified": len(unverified),
         "never_baselined": [r.source["url"] for r in never],
@@ -1054,14 +1217,42 @@ def main(argv: list[str] | None = None) -> int:
     results = retry_slow(results, state, args.confirm_delay, args.workers)
     if not args.no_browser:
         results = retry_in_browser(results, state, args.confirm_delay)
+
+    # Second pass: the documents the index pages link to.
+    children = follow_children(results, state)
+    unread_children = 0
+    if children:
+        print(f"Reading {len(children)} documents linked from index pages...", file=sys.stderr)
+        kids = run(children, state, args.confirm_delay, args.workers)
+        kids = retry_slow(kids, state, args.confirm_delay, args.workers)
+        if not args.no_browser:
+            kids = retry_in_browser(kids, state, args.confirm_delay)
+        # A linked document that can't be read (a dead link on someone else's
+        # page, a file behind a login) is counted, not escalated: it isn't one
+        # of the sources we chose, and its page's own link list still shows it.
+        unread_children = sum(1 for k in kids if k.status in UNVERIFIED_STATUSES)
+        results = results + [k for k in kids if k.status not in UNVERIFIED_STATUSES]
+
+    # Third: compare the engine's data with the official bulk files.
+    findings = reconcile.run(sources, fetch, today)
+
     if not args.dry_run:
         apply_results(results, state, today)
-    report, summary = build_report(results, state, today, started)
+    report, summary = build_report(results, state, today, started, findings, unread_children)
 
     if not args.dry_run:
         STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
         known = {s["id"] for s in json.loads(SOURCES_FILE.read_text())["sources"]}
-        for sid in [k for k in state if k not in known]:
+        selected = {s["id"] for s in sources}
+        found = {c["id"] for c in children}
+
+        def stale(sid: str) -> bool:
+            if "~" in sid:  # a followed document: gone when its page no longer links to it
+                parent = sid.split("~")[0]
+                return parent not in known or (parent in selected and sid not in found)
+            return sid not in known
+
+        for sid in [k for k in state if stale(k)]:
             del state[sid]
             snapshot_path(sid).unlink(missing_ok=True)
         STATE_FILE.write_text(json.dumps(state, indent=1, sort_keys=True) + "\n")
