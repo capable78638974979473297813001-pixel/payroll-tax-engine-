@@ -4493,6 +4493,17 @@
    ]
   },
   {
+   "id": "oh-5d5aa5d040",
+   "jurisdiction": "OH",
+   "title": "Ohio Dept of Taxation, The Finder -- municipality directory (file-downloads?type=municipality): WOODVILLE, code 86492 (listed, with no rate rows yet as of 2026-10-15)",
+   "url": "https://thefinder.tax.ohio.gov/api/file-downloads?type=municipality",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2026.json",
+    "data/local/OH-municipalities-2027.json"
+   ]
+  },
+  {
    "id": "oh-a262e9dc43",
    "jurisdiction": "OH",
    "title": "Ohio Form IT 4NR \u2014 Employee's Statement of Residency in a Reciprocity State (Rev. 5/07), Ohio Department of Taxation",

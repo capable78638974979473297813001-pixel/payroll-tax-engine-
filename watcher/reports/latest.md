@@ -1,84 +1,141 @@
-# Source watch - 2026-10-16
+# Source watch - 2026-10-17
 
-**7 sources changed**
+**8 sources changed**
 
 | Changed | Minor | Unchanged | New | Unstable | Unreachable | Gone (404) | Blocks bots | Total |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 7 | 3 | 463 | 0 | 2 | 9 | 4 | 26 | 514 |
+| 8 | 3 | 464 | 1 | 1 | 6 | 4 | 28 | 515 |
 
-_Run took 438 s. A change is only reported after a second fetch confirms it._
+_Run took 382 s. A change is only reported after a second fetch confirms it._
 
-**Coverage: 475 of 514 sources were read this run; 39 could not be checked**, and 22 of those have never been read successfully, so nothing about them is being watched.
+**Coverage: 477 of 515 sources were read this run; 38 could not be checked**, and 22 of those have never been read successfully, so nothing about them is being watched.
 
 ## Changed
 
-### AL - Alabama Department of Revenue -- NOTICE: Overtime Exemption Ends June 30, 2025
+### AL - Alabama Department of Labor -- 2026 UI wage base and rate figures (cross-source)
 
-<https://www.revenue.alabama.gov/notice-overtime-exemption-ends-june-30-2025/>  
-3 lines added, 2 removed
+<https://www2.labor.alabama.gov/>  
+10 lines added, 10 removed
   
-Used by: `data/states/AL-2025.json`, `data/states/AL-2026.json`, `data/states/AL-2027.json`
+Used by: `data/states/AL-2026.json`, `data/states/AL-2027.json`
+
+- Figures now present: 10,200, 2,080, 2,218,800, 2,279,937, 2,362,012, 24,300, 3.1%, 3.2%, 3.5%, 5.0%, 5.8%, 6,800, 6.4%, 6.5%, 65,692, 7,300, 78.4%, 80,550, 82,075
+- Figures no longer present: 11,100, 16,143, 2,216,200, 2,282,055, 2,362,622, 2.7%, 2.8%, 22,100, 30,420, 5,100, 5.1%, 6,000, 6.1%, 6.8%, 66,290, 7.3%, 79,322, 80,567
+
+<details><summary>What changed</summary>
+
+```diff
+-September 18, 2026 - August Unemployment Statistics
+-September 18, 2026 - Alabama Labor Market Newsletter
+-September 18, 2026 - Current Employment Statistics updated
+-September 18, 2026 - Online Jobs Data for August
++October 16, 2026 - September Unemployment Statistics
++October 16, 2026 - Alabama Labor Market Newsletter
++October 16, 2026 - Current Employment Statistics updated
++October 16, 2026 - Online Jobs Data for September
+-Alabama's prime-age labor force participation rate held steady in August at 79.5%. Prime-age workers are those aged 25-54 years.
+-Over the year, wage and salary employment increased by 22,100 to 2,216,200, with gains in the leisure and hospitality sector (+11,100), the professional and business services sector (+6,000), and the private education and health service...
+-Alabama's preliminary, seasonally adjusted unemployment rate is 3.4%, unchanged from July 2026's rate, and above August 2025's rate of 2.8%. The rate represents 80,567 unemployed persons, compared to 79,322 in July and 66,290 in August ...
+-The number of people counted as employed decreased by 30,420 over the year to 2,282,055. The civilian labor force also decreased to 2,362,622, with 16,143 fewer people joining over the year.
+-Counties with the lowest unemployment rates are: Shelby and Chambers Counties at 2.8%, Morgan, Marshall, Limestone, and Blount Counties at 2.9%, and Madison and Elmore Counties at 3.0%. Counties with the highest unemployment rates are: ...
+-Major cities with the lowest unemployment rates are: Vestavia Hills at 2.6%, Trussville, Pelham, Madison, Homewood, and Alabaster at 2.7%, and Fairhope at 2.8%. Major cities with the highest unemployment rates are: Prichard at 7.3%, Sel...
++Alabama's prime-age labor force participation rate increased to 79.5%, up from 78.4% a year ago. Prime-age workers are those aged 25-54 years.
++Over the year, wage and salary employment increased by 24,300 to 2,218,800, with gains in the leisure and hospitality sector (+10,200), the private education and health services sector (+7,300), and the professional and business service...
++Alabama's preliminary, seasonally adjusted unemployment rate is 3.5%, up slightly from August 2026's rate of 3.4%, and above September 2025's rate of 2.8%. The rate represents 82,075 unemployed persons, compared to 80,550 in August and ...
++The number of people counted as employed decreased by 2,080 over the month to 2,279,937. The civilian labor force also decreased to 2,362,012, with 555 fewer people joining over the month.
++Counties with the lowest unemployment rates are: Shelby, Limestone, and Chambers Counties at 3.0%, Morgan and Elmore Counties at 3.1%, and Madison and Blount Counties at 3.2%. Counties with the highest unemployment rates are: Perry Coun...
++Major cities with the lowest unemployment rates are: Pelham at 2.6%, Vestavia Hills at 2.8%, and Trussville and Alabaster at 2.9%. Major cities with the highest unemployment rates are: Prichard at 7.0%, Selma at 5.8%, and Tuscaloosa at ...
+```
+</details>
+
+### AZ - City of Flagstaff -- City of Flagstaff announces minimum wage for 2026
+
+<https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165>  
+2 lines added, 2 removed
+  
+Used by: `data/minimum-wage/local/AZ-local-2026.json`
 
 
 <details><summary>What changed</summary>
 
 ```diff
-+ALDOR Announces Additional Relief for Taxpayers Affected by Hurricane Isaias
-+October 15, 2026
-+Press Release
--NOTICE Alabama Income Tax Withholding Guidance for Nonresident Employees
--August 25, 2026
++Council Selects Moses Milazzo to Fill Vacant Council Seat
++Homepage News
+-City of Flagstaff in talks with air carrier partners for additional air service
+-Homepage News
 ```
 </details>
 
 ### CO - Boulder County -- Local Minimum Wage
 
 <https://bouldercounty.gov/departments/commissioners/local-minimum-wage/>  
-0 lines added, 1 removed
+23 lines added, 23 removed
   
 Used by: `data/minimum-wage/local/CO-local-2026.json`
 
+- Figures now present: $17.43, 14.41, 14.93, 15.47, 16.02, 16.82, 17.43, 17.95, 18.49, 19.04, 3.6%
+- Figures no longer present: $16.82, 14.30, 14.82, 15.36, 15.91, 17.32, 17.84, 18.38, 18.93, 3%
 
 <details><summary>What changed</summary>
 
 ```diff
--Stage 1 Fire Restrictions in Effect for Western Boulder County.
+-Starting on Jan. 1, 2026, the local minimum wage in unincorporated Boulder County is $16.82/hour.
++The local minimum wage in unincorporated Boulder County is 16.82/hour in 2026. Starting on Jan. 1, 2027, the local minimum wage in unincorporated Boulder County is $17.43/hour.
+-Why does Boulder County have a higher minimum wage than the State of Colorado?
+-According to state statute, counties and incorporated towns and cities may establish a local minimum wage. The Boulder County Commissioners raised the minimum wage in the unincorporated parts of the county above the state's minimum wage...
+-Why did Boulder County's Local Minimum Wage schedule change?
+-On. Nov. 20, 2025, the Boulder County Commissioners voted to change future increases to Boulder County's local minimum wage starting Jan.1, 2026. The commissioners made the change in response to concerns from members of the farming and ...
+-What happens when an employee works in Boulder County, but the employer isn't based here?
+-The local minimum wage applies to individuals performing, or expected to perform, four or more hours of work for an employer in any given week within unincorporated Boulder County. This requirement does not apply to time spent in Boulde...
+-What happens when an employee works in unincorporated Boulder County, but the employer isn't based there?
+-The local minimum wage applies to individuals performing, or expected to perform, four or more hours of work for an employer in any given week within unincorporated Boulder County. This requirement does not apply to time spent in Boulde...
+-Why is the minimum wage only being raised in unincorporated Boulder County?
+-According to state statute, the Boulder County Commissioners only have the authority to establish a local minimum wage in unincorporated Boulder County. The commissioners are committed to working with municipal governments within Boulde...
+-The Cities of Boulder, Lafayette, Longmont, Louisville and the Town of Erie collectively explored a potential increase to the local minimum wage in their respective communities. In 2024, the City of Boulder approved a local minimum wage.
+-Does the local minimum wage apply to businesses with fewer than 10 employees?
+-Yes, the local minimum wage applies to all businesses regardless of the number of employees.
+-17.32*
++17.43
++(+3.6%)
++17.95*
+-17.84*
++18.49*
+-18.38*
+-(+3%)
+-18.93*
++19.04*
+-14.30*
+-14.82*
+-15.36*
+-15.91*
++14.41
++14.93*
++15.47*
++16.02*
++Why does Boulder County have a higher minimum wage than the State of Colorado?
++According to state statute, counties and incorporated towns and cities may establish a local minimum wage. The Boulder County Commissioners raised the minimum wage in the unincorporated parts of the county above the state's minimum wage...
++Why did Boulder County's Local Minimum Wage schedule change?
++On. Nov. 20, 2025, the Boulder County Commissioners voted to change future increases to Boulder County's local minimum wage starting Jan.1, 2026. The commissioners made the change in response to concerns from members of the farming and ...
++What happens when an employee works in Boulder County, but the employer isn't based here?
++The local minimum wage applies to individuals performing, or expected to perform, four or more hours of work for an employer in any given week within unincorporated Boulder County. This requirement does not apply to time spent in Boulde...
++What happens when an employee works in unincorporated Boulder County, but the employer isn't based there?
+... 6 more changed lines
 ```
 </details>
 
-### IA - Iowa withholding
+### CO - Colorado Department of Labor & Employment — UI Premium Rates
 
-<https://revenue.iowa.gov/taxes/tax-guidance/withholding-tax>  
-1 lines added, 0 removed; 1 links added, 0 removed
-
-- New link: [Dyed Diesel Use](https://revenue.iowa.gov/taxes/tax-guidance/sales-use-excise-tax/dyed-diesel-use)
-
-<details><summary>What changed</summary>
-
-```diff
-+Dyed Diesel Use
-```
-</details>
-
-### MN - City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)
-
-<https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses>  
-4 lines added, 4 removed
+<https://cdle.colorado.gov/employers/unemployment-insurance-premiums/premium-rates>  
+1 lines added, 1 removed
   
-Used by: `data/minimum-wage/local/MN-local-2026.json`
+Used by: `data/states/CO-2026.json`, `data/states/CO-2027.json`
 
 
 <details><summary>What changed</summary>
 
 ```diff
-+Saint Paul Begins Annual Residential Fall Sweep on October 19
-+Public Works
-+Saint Paul Public Works will sweep more than 530 miles of residential streets starting October 19
-+Read More
--The City of Saint Paul and Community Partners to Celebrate New Mural in Victoria Park
--Parks & Recreation
--The dedication of the mural highlights youth artists, community collaboration, creative use of urban spaces, art in Saint Paul, and cultural storytelling.
--Read More
+-The Division of Unemployment Insurance (UI) determines employer premium rates annually based on a number of factors, such as the amount of premiums paid by the employer and any unemployment benefit payments made by the Division to forme...
++The Division of Unemployment Insurance (UI) determines employer premium rates annually based on a number of factors, such as the amount of premiums paid by the employer and any unemployment benefit payments made by the Division to forme...
 ```
 </details>
 
@@ -93,8 +150,8 @@ Used by: `data/states/NH-2026.json`, `data/states/NH-2027.json`
 <details><summary>What changed</summary>
 
 ```diff
--Page Opened: Fri Oct 09  2026
-+Page Opened: Fri Oct 16  2026
+-Page Opened: Fri Oct 16  2026
++Page Opened: Sat Oct 17  2026
 ```
 </details>
 
@@ -103,48 +160,58 @@ Used by: `data/states/NH-2026.json`, `data/states/NH-2027.json`
 <https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding>  
 1 lines added, 0 removed; 1 links added, 0 removed
 
-- Figures now present: $1,000
+- Figures now present: $23.9
 - Figures no longer present: none
-- New link: [Shapiro Administration Encourages Eligible Older Pennsylvanians, People with Disabilities to Apply for Up to $1,000 Rebates on Property Taxes or Rent by December 31 Deadline](https://www.pa.gov/agencies/revenue/newsroom/shapiro-administration-encourages-eligible-older-pennsylvanians,-people-with-disabilities-to-apply-for-up-to--1,000-rebates-on-property-taxes-or-rent-by-december-31-deadline)
+- New link: [Shapiro Administration Reinvests $23.9 Million Through CRIZ Program to Help Revitalize Cities and Spur Economic Development Across Pennsylvania](https://www.pa.gov/agencies/revenue/newsroom/shapiro-administration-reinvests--23-9-million-through-criz-program-to-help-revitalize-cities-and-spur-economic-development-across-pennsylvania)
 
 <details><summary>What changed</summary>
 
 ```diff
-+Shapiro Administration Encourages Eligible Older Pennsylvanians, People with Disabilities to Apply for Up to $1,000 Rebates on Property Taxes or Rent by December 31 Deadline
++Shapiro Administration Reinvests $23.9 Million Through CRIZ Program to Help Revitalize Cities and Spur Economic Development Across Pennsylvania
 ```
 </details>
 
-### US - Federal Register: new Wage and Hour Division documents (minimum wage, overtime, garnishment) - official API
+### WA - ESD — Paid Family and Medical Leave premium rate increases to 1.13% in 2026
 
-<https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=wage-and-hour-division>  
-10 lines added, 10 removed
+<https://esd.wa.gov/about-us/news-release/2025/paid-family-medical-leave-premium-rate-increases-113-2026>  
+3 lines added, 3 removed
   
-Used by: `data/minimum-wage/federal-2026.json`
+Used by: `data/states/WA-2026.json`, `data/states/WA-2027.json`
 
+- Figures now present: 1.2%
+- Figures no longer present: none
 
 <details><summary>What changed</summary>
 
 ```diff
--"count": 432,
-+"count": 433,
--"next_page_url": "https://www.federalregister.gov/api/v1/documents?conditions%5Bagencies%5D%5B%5D=wage-and-hour-division&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effect...
-+"next_page_url": "https://www.federalregister.gov/api/v1/documents?conditions%5Bagencies%5D%5B%5D=wage-and-hour-division&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effect...
-+{
-+"document_number": "2026-21169",
-+"effective_on": null,
-+"html_url": "https://www.federalregister.",
-+"publication_date": "2026-10-16",
-+"title": "Agency Information Collection Activities; Comment Request; Information Collections: High-Wage Components of the Labor Value Content Requirements Under the USMCA",
-+"type": "Notice"
-+},
--},
--{
--"document_number": "2025-12315",
--"effective_on": null,
--"html_url": "https://www.federalregister.",
--"publication_date": "2025-07-02",
--"title": "Recission of Final Rule: Improving Protections for Workers in Temporary Agricultural Employment in the United States",
--"type": "Proposed Rule"
++Paid Family & Medical Leave premium rate increases to 1.2% in 2027
++Benefit programs
++Employers
+-Employment Security outlines state Paid Family & Medical Leave program during Senate hearing
+-Benefit programs
+-ESD
+```
+</details>
+
+### WA - Washington ESD -- Paid Family & Medical Leave premiums to increase in 2025 (2024-10-23)
+
+<https://esd.wa.gov/about-us/news-release/2024/paid-family-medical-leave-premiums-increase-2025>  
+3 lines added, 3 removed
+  
+Used by: `data/states/WA-2025.json`
+
+- Figures now present: 1.2%
+- Figures no longer present: none
+
+<details><summary>What changed</summary>
+
+```diff
++Paid Family & Medical Leave premium rate increases to 1.2% in 2027
++Benefit programs
++Employers
+-Employment Security outlines state Paid Family & Medical Leave program during Senate hearing
+-Benefit programs
+-ESD
 ```
 </details>
 
@@ -154,21 +221,17 @@ Recorded, but only the text of links to other pages changed (news boxes, menus).
 
 <details><summary>Show</summary>
 
-### AL - City of Opelika -- announcement of the occupational tax cut
+### IN - Indiana DOR withholding
 
-<https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092>  
-2 lines added, 2 removed (link lists / headlines only)
-  
-Used by: `data/local/AL-municipalities-2025.json`, `data/local/AL-municipalities-2026.json`, `data/local/AL-municipalities-2027.json`
+<https://www.in.gov/dor/i-am-a/business-corp/withholding/>  
+1 lines added, 1 removed (link lists / headlines only)
 
 
 <details><summary>What changed</summary>
 
 ```diff
-+RENTAL TAX ORDINANCE PROPOSAL FACT SHEET
-+Home
--CITY OF OPELIKA VISITS CAR TECH
--Home
+-State Information Live Chat
++State Information Center Live Chat
 ```
 </details>
 
@@ -179,13 +242,13 @@ Used by: `data/local/AL-municipalities-2025.json`, `data/local/AL-municipalities
   
 Used by: `data/states/PA-2025.json`, `data/states/PA-2026.json`, `data/states/PA-2027.json`
 
-- Figures now present: $1,000
+- Figures now present: $23.9
 - Figures no longer present: none
 
 <details><summary>What changed</summary>
 
 ```diff
-+Shapiro Administration Encourages Eligible Older Pennsylvanians, People with Disabilities to Apply for Up to $1,000 Rebates on Property Taxes or Rent by December 31 Deadline
++Shapiro Administration Reinvests $23.9 Million Through CRIZ Program to Help Revitalize Cities and Spur Economic Development Across Pennsylvania
 ```
 </details>
 
@@ -196,13 +259,13 @@ Used by: `data/states/PA-2025.json`, `data/states/PA-2026.json`, `data/states/PA
   
 Used by: `data/states/PA-2025.json`
 
-- Figures now present: $1,000
+- Figures now present: $23.9
 - Figures no longer present: none
 
 <details><summary>What changed</summary>
 
 ```diff
-+Shapiro Administration Encourages Eligible Older Pennsylvanians, People with Disabilities to Apply for Up to $1,000 Rebates on Property Taxes or Rent by December 31 Deadline
++Shapiro Administration Reinvests $23.9 Million Through CRIZ Program to Help Revitalize Cities and Spur Economic Development Across Pennsylvania
 ```
 </details>
 
@@ -217,7 +280,7 @@ Each of these has failed on every run so far. Replace the URL, or check the docu
 | AL | [City of Tuskegee -- Occupational Tax Reporting form](https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form) | HTTP 404 |
 | AR | [Arkansas Department of Labor and Licensing -- Minimum Wage and Overtime](https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | DC | [DC Department of Employment Services -- Office of Wage-Hour Compliance](https://does.dc.gov/service/office-wage-hour-compliance-0) | HTTP 403: the site refuses automated requests; a real browser was refused too |
-| DC | [DC OTR withholding](https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications) | read with a headless browser; browser: TimeoutError: Page.goto: Timeout 20000ms exceeded. Call log:   - navigating to "https://otr.cfo.dc.gov/page/withholding-t |
+| DC | [DC OTR withholding](https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | IL | [Illinois State Income Tax Exemptions - 2026 (Illinois Office of Comptroller, Payroll Bulle](https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026) | HTTP 500 |
 | KY | [City of Pikeville -- Business Licenses](https://pikevilleky.gov/business/) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | KY | [Kentucky Office of Unemployment Insurance -- Tax Rate Schedules](https://kewes.ky.gov/Contact/contacts.aspx?strid=4) | site's TLS certificate failed verification (certificate has expired) |
@@ -244,7 +307,7 @@ These URLs need replacing in `watcher/sources.json` (or the site blocks automate
 | Jurisdiction | Source | Detail |
 |---|---|---|
 | AL | [City of Tuskegee -- Occupational Tax Reporting form](https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form) | HTTP 404 |
-| DC | [DC OTR withholding](https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications) | read with a headless browser; browser: TimeoutError: Page.goto: Timeout 20000ms exceeded. Call log:   - navigating to "https://otr.cfo.dc.gov/page/withholding-t |
+| AL | [City of Tuskegee -- business information brochure](https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf) | HTTP 404 |
 | IL | [Illinois State Income Tax Exemptions - 2026 (Illinois Office of Comptroller, Payroll Bulle](https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026) | HTTP 500 |
 | KY | [Kentucky Office of Unemployment Insurance -- Tax Rate Schedules](https://kewes.ky.gov/Contact/contacts.aspx?strid=4) | site's TLS certificate failed verification (certificate has expired) |
 | KY | [Kentucky Office of Unemployment Insurance -- Taxable Wage Base and Surcharge Information](https://kewes.ky.gov/Contact/contacts.aspx?strid=2) | site's TLS certificate failed verification (certificate has expired) |
@@ -254,45 +317,34 @@ These URLs need replacing in `watcher/sources.json` (or the site blocks automate
 | US | [735 ILCS 5/12-803 — maximum wage deduction: lesser of 15% of GROSS weekly wages, or the am](https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803) | site's TLS certificate failed verification (unable to get local issuer certificate) |
 | US | [IRS Publication 51 (2025), Agricultural Employer's Tax Guide -- the statutory $150 per wor](https://www.irs.gov/pub/irs-prior/p51--2025.pdf) | HTTP 404 |
 
-## Gone (404) (1)
-
-A 404 on an official document often means a new version was published at a new address.
+## Unstable (1)
 
 | Jurisdiction | Source | Detail |
 |---|---|---|
-| AL | [City of Tuskegee -- business information brochure](https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf) | HTTP 404 |
+| IN | [WH-4, State Form 48845](https://www.in.gov/dor/tax-forms/withholding-tax-forms/) | content differed, but the confirming fetch failed (URLError: <urlopen error timed out>); snapshot kept |
 
-## Unreachable this run (2)
-
-| Jurisdiction | Source | Detail |
-|---|---|---|
-| IN | [Indiana Departmental Notice #1 (county rates)](https://www.in.gov/dor/files/dn01.pdf) | URLError: <urlopen error [Errno 111] Connection refused> |
-| IN | [Indiana Unemployment for Employers: New Employer Premium Rate (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/new-employer-premium-rate/) | URLError: <urlopen error [Errno 111] Connection refused> |
-
-## Unstable (2)
+## New (first snapshot taken) (1)
 
 | Jurisdiction | Source | Detail |
 |---|---|---|
-| IN | [Indiana DOR withholding](https://www.in.gov/dor/i-am-a/business-corp/withholding/) | content differed, but the confirming fetch failed (URLError: <urlopen error [Errno 111] Connection refused>); snapshot kept |
-| IN | [WH-4, State Form 48845](https://www.in.gov/dor/tax-forms/withholding-tax-forms/) | content differed, but the confirming fetch failed (URLError: <urlopen error [Errno 111] Connection refused>); snapshot kept |
+| OH | [Ohio Dept of Taxation, The Finder -- municipality directory (file-downloads?type=municipal](https://thefinder.tax.ohio.gov/api/file-downloads?type=municipality) | first snapshot (6711 words, json) |
 
-## Redirected (28)
+## Redirected (27)
 
 These still work but redirect elsewhere; consider updating the URL in data/ or curated.json.
 
 | Jurisdiction | Source | Detail |
 |---|---|---|
-| AL | [City of Opelika -- announcement of the occupational tax cut](https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092) | 2 lines added, 2 removed (link lists / headlines only) |
-| AZ | [City of Flagstaff -- City of Flagstaff announces minimum wage for 2026](https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165) | -> https://www.flagstaff.az.gov/m/newsflash/Archive/Item/2165?arcId=3969 |
+| AL | [City of Opelika -- announcement of the occupational tax cut](https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092) | -> https://www.opelika-al.gov/m/newsflash/home/detail/1092 |
+| AZ | [City of Flagstaff -- City of Flagstaff announces minimum wage for 2026](https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165) | 2 lines added, 2 removed |
 | CA | [California Employer's Guide (DE 44), Rev. 52 (4-26) -- "How to Withhold PIT on Supplementa](https://www.edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf) | -> https://edd.ca.gov:443/siteassets/files/pdf_pub_ctr/de44.pdf |
-| CO | [Colorado Department of Labor & Employment — UI Premium Rates](https://cdle.colorado.gov/employers/unemployment-insurance-premiums/premium-rates) | -> https://cdle.colorado.gov/ui/employers/requirements/premiums/premium-rates |
+| CO | [Colorado Department of Labor & Employment — UI Premium Rates](https://cdle.colorado.gov/employers/unemployment-insurance-premiums/premium-rates) | 1 lines added, 1 removed |
 | CO | [Colorado Wage Withholding Tax Guide, January 2026](https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf) | -> https://tax.colorado.gov/sites/default/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf |
 | CO | [DR 1098 (10/21/25), 2026 Colorado Withholding Worksheet for Employers](https://tax.colorado.gov/sites/tax/files/documents/DR_1098_Colorado_Withholding_Worksheet_for_Employees.pdf) | -> https://tax.colorado.gov/sites/default/files/documents/DR_1098_Colorado_Withholding_Worksheet_for_Employees.pdf |
 | GA | [Employer's Withholding Tax Guide 2026 (Revised June 2026, reflecting HB 463 signed 2026-05](https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-june-2026/download) | -> https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-september-2026/download |
 | ID | [EPB00744 — Table for Percentage Computation Method of Withholding](https://tax.idaho.gov/document-mngr/pubs_EPB00744) | -> https://tax.idaho.gov/wp-content/uploads/pubs/EPB00744/EPB00744_07-23-2026.pdf |
 | ID | [Form ID W-4, Employee's Withholding Allowance Certificate (EFO00307, 04-28-2025 revision)](https://tax.idaho.gov/w4form) | -> https://tax.idaho.gov/wp-content/uploads/forms/EFO00307/EFO00307_04-28-2025.pdf |
 | ID | [Idaho Child Tax Credit Allowance Table (ICTCAT) page](https://tax.idaho.gov/ictcat) | -> https://tax.idaho.gov/taxes/income-tax/withholding/computing/#ictcat |
-| KY | [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs ](https://www.georgetownky.gov/2167/Taxes-License-Fees) | read with a headless browser |
 | MA | [Massachusetts DOR withholding tax forms (new Circular M editions are listed here)](https://www.mass.gov/lists/dor-withholding-tax-forms) | read with a headless browser |
 | MD | [Montgomery County, MD tipped-employee cash wage ($4.00/hr, Montgomery County Code Sec. 27-](https://www.montgomerycountymd.gov/humanrights/min-wage.html) | -> https://www.montgomerycountymd.gov/office-human-rights |
 | MI | [Revenue Administrative Bulletin 1988-27 — Section 125 cafeteria plan benefits excluded fro](https://michigan.gov/treasury/0,4679,7-121-44402_44415_44416-7351--,00.html) | -> https://www.michigan.gov/en/treasury/reference/rab/content/1988/revenue-administrative-bulletin-1988-27 |
@@ -311,7 +363,7 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 | WI | [Wis. Stat. § 71.03(13) — 'Wisconsin adjusted gross income' defined](https://docs.legis.wisconsin.gov/document/statutes/71.03) | -> https://docs.legis.wisconsin.gov/statutes/statutes/71/i/03 |
 | WY | [Wyoming Dept of Workforce Services -- Unemployment Tax Rates](https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-tax-rates/) | -> https://dws.wyo.gov/dws-division/unemployment-insurance/employers/unemployment-tax-rates/ |
 
-## Sites that block automated checks (26)
+## Sites that block automated checks (28)
 
 These can't be watched by a script (bot protection or JavaScript-only pages). Check them by hand now and then, or find the same document at an address that allows it.
 
@@ -325,6 +377,8 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 | CO | [Colorado wage withholding](https://tax.colorado.gov/withholding-tax) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | CO | [Colorado withholding tax guide](https://tax.colorado.gov/withholding-tax-guide) | read with a browser last time; a real browser was refused too |
 | DC | [DC Department of Employment Services -- Office of Wage-Hour Compliance](https://does.dc.gov/service/office-wage-hour-compliance-0) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| DC | [DC OTR withholding](https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| KY | [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs ](https://www.georgetownky.gov/2167/Taxes-License-Fees) | read with a browser last time; a real browser was refused too |
 | KY | [City of Pikeville -- Business Licenses](https://pikevilleky.gov/business/) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | KY | [Louisville Metro Revenue Commission -- W-1KJC Instructions and Louisville Metro Code Sec. ](https://louisvilleky.gov/sites/default/files/2024-12/w-1kjc_instructions_2025.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | ME | [Form W-4ME, Employee's Withholding Allowance Certificate (Revised: December 2025)](https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_form_w-4me_fillable.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
@@ -341,14 +395,14 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 | NY | [NY.gov -- New York State Paid Sick Leave FAQ](https://www.ny.gov/sites/default/files/atoms/files/PSL_FAQ_PaidSickLeaveFAQ.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NY | [NYS Paid Family Leave -- 2025 contribution rate 0.388%, maximum annual contribution $354.5](https://paidfamilyleave.ny.gov/2025) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | OH | [Ohio Municipal Income Tax Rates (The Finder, bulk CSV download)](https://api.thefinder.tax.ohio.gov/finder/api/v1/tax-rates/downloads/Muni/OHMuniRateTable.csv) | HTTP 401: the site refuses automated requests; a real browser was refused too |
-| TN | [TN Department of Labor and Workforce Development -- UI Tax Rates](https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax/ui-tax-rates.html) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | US | [HHS/ASPE 2026 Poverty Guidelines for the 48 Contiguous States and DC — household of 1: $15](https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| US | [Haw. Rev. Stat. § 652-1 — MARGINAL brackets on monthly disposable earnings: 5% of the firs](https://www.capitol.hawaii.gov/hrscurrent/Vol13_Ch0601-0676/HRS0652/HRS_0652-0001.htm) | read with a browser last time; a real browser was refused too |
 | US | [IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)](https://www.irs.gov/draft-tax-forms) | read with a browser last time; a real browser was refused too |
 | US | [Maine Department of Labor — 2026 minimum wage ($15.10/hr, effective 2026-01-01, cost-of-li](https://www.maine.gov/labor/news_events/article.shtml?id=13338762) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 
 </details>
 
-## Unchanged (463)
+## Unchanged (464)
 
 <details><summary>Show all</summary>
 
@@ -357,11 +411,12 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - AK - [Alaska Statutes 23.20 -- Alaska Employment Security Act (reciprocity/local tax context)](https://www.akleg.gov/basis/statutes.asp#23.20) (last changed: 2026-09-24)
 - AK - [U.S. Department of Labor, ETA -- Significant Provisions of State Unemployment Insurance Laws, Effect](https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2025.pdf) (last changed: 2026-09-30)
 - AL - [Alabama DOR withholding tax](https://www.revenue.alabama.gov/individual-corporate/withholding-tax-2/) (last changed: 2026-10-15)
-- AL - [Alabama Department of Labor -- 2026 UI wage base and rate figures (cross-source)](https://www2.labor.alabama.gov/) (last changed: 2026-09-24)
+- AL - [Alabama Department of Revenue -- NOTICE: Overtime Exemption Ends June 30, 2025](https://www.revenue.alabama.gov/notice-overtime-exemption-ends-june-30-2025/) (last changed: 2026-10-16)
 - AL - [Alabama State Comptroller -- Memorandum, 'Jefferson County Occupational Tax'](https://comptroller.alabama.gov/wp-content/uploads/2018/01/Jefferson-County-Occupational-Tax.pdf) (last changed: 2026-09-24)
 - AL - [City of Auburn -- Occupational License Fee](https://www.auburnal.gov/revenue/tax-information/occupational-license-fee/) (last changed: 2026-09-30)
 - AL - [City of Irondale -- Occupational License Fee](https://cityofirondaleal.gov/occupational-license-fee/) (last changed: 2026-09-30)
 - AL - [City of Leeds -- Occupational Tax](https://www.leedsalabama.gov/471/Occupational-Tax) (last changed: 2026-09-30)
+- AL - [City of Opelika -- announcement of the occupational tax cut](https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092) (last changed: 2026-10-16)
 - AL - [City of Tarrant -- occupational license fee ordinance (Municode)](https://mcclibraryfunctions.azurewebsites.us/api/ordinanceDownload/10178/1047327/pdf) (last changed: 2026-09-30)
 - AL - [Form A4 (Rev. 4/2025) -- Employee's Withholding Tax Exemption Certificate](https://www.revenue.alabama.gov/wp-content/uploads/2025/04/A4_0425.pdf) (last changed: 2026-09-24)
 - AL - [USDA National Finance Center -- Alabama State Income Tax Withholding (NFC-22-1666037747, still the c](https://help.nfc.usda.gov/bulletins/2022/1666037747.htm?taxmap=true) (last changed: 2026-09-24)
@@ -381,7 +436,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - AZ - [Arizona DOR -- Withholding Calculations](https://azdor.gov/individuals/withholding-calculations) (last changed: 2026-09-30)
 - AZ - [Arizona DOR withholding](https://azdor.gov/business/withholding-tax) (last changed: 2026-09-24)
 - AZ - [Arizona Form A-4 (2025)](https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2025_A-4_f.pdf) (last changed: 2026-09-30)
-- AZ - [City of Flagstaff -- City of Flagstaff announces minimum wage for 2026](https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165) (last changed: 2026-10-14)
 - AZ - [City of Tucson -- Tucson Minimum Wage Act (Proposition 206, November 2021)](https://www.tucsonaz.gov/Departments/Business-Services-Department/Tucson-Minimum-Wage-Act) (last changed: 2026-09-24)
 - CA - [California DE 44 employer's guide](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf) (last changed: 2026-09-24)
 - CA - [California Department of Industrial Relations -- Fast Food Minimum Wage Frequently Asked Questions](https://www.dir.ca.gov/dlse/Fast-Food-Minimum-Wage-FAQ.htm) (last changed: 2026-09-24)
@@ -401,7 +455,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - CO - [City of Boulder -- Local Minimum Wage](https://bouldercolorado.gov/local-minimum-wage) (last changed: 2026-09-24)
 - CO - [City of Glendale, CO — Occupational Privilege Tax (municipal code Chapter 3.21 and the city's own OP](https://www.glendale.co.us/355/Occupational-Privilege-Tax) (last changed: 2026-09-24)
 - CO - [City of Sheridan, CO — Occupational Privilege Tax](https://ci.sheridan.co.us/288/Occupational-Privilege-Tax) (last changed: 2026-09-24)
-- CO - [Colorado Department of Labor & Employment — UI Premium Rates](https://cdle.colorado.gov/employers/unemployment-insurance-premiums/premium-rates) (last changed: 2026-10-15)
 - CO - [Colorado Division of Labor Standards (local minimum wage notices, INFO #19)](https://cdle.colorado.gov/dlss) (last changed: 2026-10-02)
 - CO - [Colorado FAMLI -- premium rate (0.9% for 2023-2025; 0.88% from 2026)](https://famli.colorado.gov/employers) (last changed: 2026-09-24)
 - CO - [Colorado Wage Withholding Tax Guide, January 2026](https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf) (last changed: 2026-10-09)
@@ -445,6 +498,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - IA - [Iowa DOR -- Iowa Withholding Formula For Wages Paid Beginning January 1, 2025](https://revenue.iowa.gov/media/61/download?inline) (last changed: 2026-09-30)
 - IA - [Iowa Individual Income Tax Withholding Formula, Effective January 1, 2026](https://revenue.iowa.gov/media/53/download?inline=) (last changed: 2026-09-24)
 - IA - [Iowa Workforce Development / Iowa Division of Labor -- Your Rights Under the Iowa Minimum Wage Law a](https://workforce.iowa.gov/media/234/download) (last changed: 2026-09-24)
+- IA - [Iowa withholding](https://revenue.iowa.gov/taxes/tax-guidance/withholding-tax) (last changed: 2026-10-16)
 - ID - [EPB00744 — Table for Percentage Computation Method of Withholding](https://tax.idaho.gov/document-mngr/pubs_EPB00744) (last changed: 2026-09-24)
 - ID - [Form ID W-4, Employee's Withholding Allowance Certificate (EFO00307, 04-28-2025 revision)](https://tax.idaho.gov/w4form) (last changed: 2026-09-24)
 - ID - [Idaho Child Tax Credit Allowance Table (ICTCAT) page](https://tax.idaho.gov/ictcat) (last changed: 2026-09-24)
@@ -461,6 +515,8 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - IL - [Illinois withholding income tax](https://tax.illinois.gov/research/taxinformation/withholdingincometax.html) (last changed: 2026-09-24)
 - IL - [Pub-130, Withholding Illinois Income Tax for My Employees](https://tax.illinois.gov/research/publications/pubs/who-is-required-to-withhold-illinois-income-tax/withholding-illinois-income-tax-for-my-employees.html) (last changed: 2026-09-24)
 - IN - [Form WH-47 — Certificate of Residence](https://forms.in.gov/download.aspx?id=2419) (last changed: 2026-09-24)
+- IN - [Indiana Departmental Notice #1 (county rates)](https://www.in.gov/dor/files/dn01.pdf) (last changed: 2026-10-13)
+- IN - [Indiana Unemployment for Employers: New Employer Premium Rate (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/new-employer-premium-rate/) (last changed: 2026-09-24)
 - IN - [Indiana Unemployment for Employers: Rate Computation (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/) (last changed: 2026-09-24)
 - IN - [Indiana Unemployment for Employers: State Premium Rate Computation (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/state-premium-rate-computation/) (last changed: 2026-09-25)
 - KS - [Form 200, Local Intangibles Tax Return (Rev. 9-23-25)](https://www.ksrevenue.gov/pdf/20026.pdf) (last changed: 2026-09-24)
@@ -472,7 +528,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - KY - [City of Corbin Occupational Tax Office](https://www.corbin-ky.gov/assets/files/uploads/_20240118110308388_3c4b72d27552424881504b851b27ab70.pdf) (last changed: 2026-09-30)
 - KY - [City of Covington, KY — Finance Department, business licensing and occupational license fee](https://www.covingtonky.gov/government/departments/finance/business-licensing-occupational-license-fee) (last changed: 2026-09-24)
 - KY - [City of Franklin -- Business Licensing & Taxes](https://www.franklinky.gov/departments/finance_accounting/business_licensing_taxes.php) (last changed: 2026-09-30)
-- KY - [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs gross rece](https://www.georgetownky.gov/2167/Taxes-License-Fees) (last changed: 2026-09-24)
 - KY - [City of Henderson, KY — Occupational License Tax](https://www.hendersonky.gov/174/Occupational-License-Tax) (last changed: 2026-09-29)
 - KY - [City of Lexington -- Occupational license fee: rates and current forms](https://www.lexingtonky.gov/working/business-licensing-taxes/occupational-license-fee-rates-current-forms) (last changed: 2026-09-24)
 - KY - [City of Paducah -- Business License and Payroll Tax](https://paducahky.gov/departments/finance/business-license-and-payroll-tax) (last changed: 2026-09-30)
@@ -543,6 +598,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - MN - [2026 Form W-4MN, Section 2 -- Exemption From Minnesota Withholding](https://www.revenue.state.mn.us/sites/default/files/2026-04/w-4mn.pdf) (last changed: 2026-09-24)
 - MN - [2026 Minnesota Withholding Tax Instructions and Tables (wh-inst-26)](https://www.revenue.state.mn.us/sites/default/files/2025-12/wh-inst-26.pdf) (last changed: 2026-09-24)
 - MN - [City of Minneapolis -- Minimum wage increases to $16.37 for all employers](https://www.minneapolismn.gov/news/2025/december/minimum-wage/) (last changed: 2026-09-24)
+- MN - [City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)](https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses) (last changed: 2026-10-16)
 - MN - [Minn. R. 8002.0200 (administrative rule implementing 290.081's reciprocity exclusion)](https://www.revisor.mn.gov/rules/8002.0200/) (last changed: 2026-09-25)
 - MN - [Minn. Stat. § 268B.14 (Premium rates)](https://www.revisor.mn.gov/statutes/cite/268B.14) (last changed: 2026-09-25)
 - MN - [Minn. Stat. § 290.081 (Income of nonresidents, reciprocity)](https://www.revisor.mn.gov/statutes/cite/290.081) (last changed: 2026-09-25)
@@ -704,6 +760,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - SD - [South Dakota DLR -- Reemployment Assistance for Businesses (rate notices)](https://dlr.sd.gov/ra/businesses/default.aspx) (last changed: 2026-10-07)
 - SD - [South Dakota Department of Labor and Regulation -- Minimum Wage FAQ](https://dlr.sd.gov/employment_laws/minimum_wage_faq.aspx) (last changed: 2026-10-14)
 - SD - [South Dakota Department of Labor and Regulation -- Reemployment Assistance Tax FAQ](https://dlr.sd.gov/ra/businesses/faq.aspx) (last changed: 2026-09-24)
+- TN - [TN Department of Labor and Workforce Development -- UI Tax Rates](https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax/ui-tax-rates.html) (last changed: 2026-09-24)
 - TX - [Tex. Const. Art. VIII, sec. 24 -- prohibition on a state income tax](https://statutes.capitol.texas.gov/Docs/CN/htm/CN.8.htm) (last changed: 2026-09-24)
 - TX - [Texas Workforce Commission: your tax rates](https://www.twc.texas.gov/programs/unemployment-tax/your-tax-rates) (last changed: 2026-09-24)
 - US - [https://apps.dced.pa.gov/munstats-public/FindLocalTax.aspx](https://apps.dced.pa.gov/munstats-public/FindLocalTax.aspx) (last changed: 2026-09-24)
@@ -725,8 +782,8 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - US - [Federal Register: Railroad Retirement Board notices (RUIA/RRTA rates) - official API](https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=railroad-retirement-board) (last changed: 2026-09-30)
 - US - [Federal Register: SSA yearly wage base notice (Cost-of-Living Increase and Other Determinations) - o](https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=social-security-administration&conditions%5Bterm%5D=%22cost-of-living+increase+and+other+determinations%22) (last changed: 2026-09-24)
 - US - [Federal Register: new IRS withholding rules and proposed rules - official API](https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=internal-revenue-service&conditions%5Btype%5D%5B%5D=RULE&conditions%5Btype%5D%5B%5D=PRORULE&conditions%5Bterm%5D=withholding) (last changed: 2026-09-24)
+- US - [Federal Register: new Wage and Hour Division documents (minimum wage, overtime, garnishment) - offic](https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=wage-and-hour-division) (last changed: 2026-10-16)
 - US - [Fla. Stat. § 222.11 — ALL disposable earnings of a 'head of family' (providing more than half the su](https://www.flsenate.gov/Laws/Statutes/2010/222.11) (last changed: 2026-09-24)
-- US - [Haw. Rev. Stat. § 652-1 — MARGINAL brackets on monthly disposable earnings: 5% of the first $100/mon](https://www.capitol.hawaii.gov/hrscurrent/Vol13_Ch0601-0676/HRS0652/HRS_0652-0001.htm) (last changed: 2026-09-24)
 - US - [IRS Form W-4](https://www.irs.gov/pub/irs-pdf/fw4.pdf) (last changed: 2026-09-24)
 - US - [IRS Instructions for Schedule H (2025)](https://www.irs.gov/instructions/i1040sh) (last changed: 2026-09-30)
 - US - [IRS Notice 2024-80, 2025 Amounts Relating to Retirement Plans and IRAs](https://www.irs.gov/pub/irs-drop/n-24-80.pdf) (last changed: 2026-09-30)
@@ -785,7 +842,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - VT - [Vermont withholding](https://tax.vermont.gov/business/withholding) (last changed: 2026-10-01)
 - WA - [City of Seattle Office of Labor Standards -- Minimum Wage Ordinance](https://www.seattle.gov/laborstandards/ordinances/minimum-wage) (last changed: 2026-09-28)
 - WA - [City of Seattle, City Finance -- Payroll expense tax (2025 thresholds and rates)](https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/payroll-expense-tax) (last changed: 2026-10-14)
-- WA - [ESD — Paid Family and Medical Leave premium rate increases to 1.13% in 2026](https://esd.wa.gov/about-us/news-release/2025/paid-family-medical-leave-premium-rate-increases-113-2026) (last changed: 2026-09-24)
 - WA - [Employer Wage Reporting and Premiums Toolkit (v25.1, June 2026)](https://paidleave.wa.gov/app/uploads/2021/12/Employer-Wage-Reporting-and-Premiums-Toolkit-v25.1-2026.06.26.pdf) (last changed: 2026-09-24)
 - WA - [L&I — Paid Family & Medical Leave (exempt employer/employee categories)](https://www.lni.wa.gov/workers-rights/leave/paid-family-and-medical-leave) (last changed: 2026-09-24)
 - WA - [RCW 1.90.100 — Personal Income Tax Prohibition](https://app.leg.wa.gov/RCW/default.aspx?cite=1.90.100) (last changed: 2026-09-24)
@@ -793,7 +849,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - WA - [WA Cares Fund premium, RCW 50B.04.080 -- 0.58% of wages since 2023-07-01, unchanged through 2026](https://app.leg.wa.gov/RCW/default.aspx?cite=50B.04.080) (last changed: 2026-09-30)
 - WA - [WA Cares Fund — Exemptions](https://wacaresfund.wa.gov/exemptions) (last changed: 2026-09-24)
 - WA - [Washington Cares Fund premiums](https://wacaresfund.wa.gov/employers/) (last changed: 2026-09-24)
-- WA - [Washington ESD -- Paid Family & Medical Leave premiums to increase in 2025 (2024-10-23)](https://esd.wa.gov/about-us/news-release/2024/paid-family-medical-leave-premiums-increase-2025) (last changed: 2026-09-30)
 - WA - [Washington Paid Leave premium rates](https://paidleave.wa.gov/employers/) (last changed: 2026-09-24)
 - WA - [Washington State Department of Labor & Industries -- Local Minimum Wage Rates](https://lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates) (last changed: 2026-09-24)
 - WA - [Washington State Department of Labor & Industries -- Washington's minimum wage going up to $17.13 an](https://www.lni.wa.gov/news-events/article/25-27) (last changed: 2026-09-24)
