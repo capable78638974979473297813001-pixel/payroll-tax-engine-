@@ -73,7 +73,16 @@ function assertFiniteMoney(value: number, fnName: string): void {
  */
 export function roundHalfUp(raw: number): Cents {
   assertFiniteMoney(raw, 'roundHalfUp');
-  return raw >= 0 ? Math.round(raw) : -Math.round(-raw);
+  // A product like 903,500 cents x 0.009 is exactly 8,131.5 on paper but
+  // 8,131.499999999999 in binary floating point, which Math.round sends DOWN:
+  // a cent short on every amount that lands exactly on a half cent (e.g.
+  // $9,035.00 x 0.9% = $81.315 must be $81.32). Real money fractions
+  // (integer cents times a rate of at most six significant digits) never come
+  // within 1e-9 of a half without being on it, so nudge by that much.
+  const HALF_CENT_TOLERANCE = 1e-9;
+  return raw >= 0
+    ? Math.floor(raw + 0.5 + HALF_CENT_TOLERANCE)
+    : -Math.floor(-raw + 0.5 + HALF_CENT_TOLERANCE);
 }
 
 /** Apply a single rate to a base, rounding once at emission. */

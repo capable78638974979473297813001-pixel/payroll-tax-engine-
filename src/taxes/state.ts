@@ -1932,6 +1932,15 @@ function stateUnemploymentEmployeeTax(
 interface FlatRateConfig {
   rate: number;
   allowanceAmount: number;
+  /**
+   * false = the state withholds a straight percentage of THIS period's
+   * compensation, with no annualising step (Pennsylvania: REV-415, "withhold
+   * PA personal income tax at a flat rate of 3.07 percent of compensation").
+   * Absent or true annualises, which only matters for a state whose own
+   * formula does (Michigan's allowances are annual amounts). Annualising and
+   * dividing back rounds twice and drifts by a cent per cheque.
+   */
+  annualize?: boolean;
 }
 
 function flatRate(
@@ -1966,7 +1975,10 @@ function flatRate(
   const annualTaxable = atLeastZero(annualWages - annualAllowance);
 
   const annualTax = applyRate(annualTaxable, cfg.rate);
-  const amount = Math.round(annualTax / ctx.periodsPerYear);
+  const amount =
+    cfg.annualize === false
+      ? applyRate(taxableWages, cfg.rate) // one rounding, on the period's own compensation
+      : Math.round(annualTax / ctx.periodsPerYear);
 
   const detail = annualAllowance
     ? `${fmt(annualWages)}/yr less ${fmt(annualAllowance)} allowances @ ${(cfg.rate * 100).toFixed(2)}%`
@@ -8639,8 +8651,18 @@ function pennsylvaniaLocalTax(
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const taxableWages = ctx.taxableWagesFor(exempt);
   const estimatedAnnualWages = taxableWages * ctx.periodsPerYear;
+  // A low-income exemption is the EMPLOYEE's to claim: he or she files an
+  // exemption certificate with the municipality and the employer, and until
+  // then the employer withholds the full tax (the employee recovers it on the
+  // local return). DCED's LST guidance says the same of that tax: "Employers
+  // are not responsible for investigating exemptions or monitoring
+  // eligibility." So the threshold only decides ELIGIBILITY, and nothing is
+  // exempted unless certificate.eitExemptionCertificate is true. (Before
+  // 2026-10 this was applied automatically from the paycheck annualized,
+  // which under-withholds every low earner who hasn't filed one.)
+  const eitExemptionCertificate = cert.eitExemptionCertificate === true;
   const belowLIE = (threshold: number | undefined): boolean =>
-    threshold !== undefined && estimatedAnnualWages < dollars(threshold);
+    eitExemptionCertificate && threshold !== undefined && estimatedAnnualWages < dollars(threshold);
 
   // Each side's rate is the sum of its OWN municipal/school components,
   // each independently gated by ITS OWN low-income-exemption threshold —
@@ -9215,8 +9237,19 @@ function pennsylvaniaLST(
   const periodWages = ctx.taxableWagesFor(exempt);
   const estimatedAnnualWages = periodWages * ctx.periodsPerYear;
 
+  // Exempt only when the employee has FILED the exemption certificate
+  // (certificate.lstExemptionCertificate): DCED, Local Services Tax guidance:
+  // municipalities levying more than $10 must exempt people earning under
+  // $12,000, but "Employers are not responsible for investigating exemptions
+  // or monitoring eligibility, except that they must resume withholding if an
+  // exempt employee is paid more than $12,000 in the calendar year." Without
+  // a certificate the employer withholds. The threshold decides eligibility.
+  const lstExemptionCertificate = cert.lstExemptionCertificate === true;
   const belowLIE = (threshold: number | undefined): boolean =>
-    threshold !== undefined && threshold > 0 && estimatedAnnualWages < dollars(threshold);
+    lstExemptionCertificate &&
+    threshold !== undefined &&
+    threshold > 0 &&
+    estimatedAnnualWages < dollars(threshold);
   const municipalExempt = belowLIE(lst.lowIncomeExemption?.municipal);
   const schoolExempt = belowLIE(lst.lowIncomeExemption?.schoolDistrict);
 
@@ -9229,7 +9262,8 @@ function pennsylvaniaLST(
       taxableWages: 0,
       amount: 0,
       detail:
-        `$0 — estimated annual wages ${fmt(estimatedAnnualWages)} (this cheque annualized, not a true ` +
+        `$0 — employee exemption certificate on file (certificate.lstExemptionCertificate) and estimated ` +
+        `annual wages ${fmt(estimatedAnnualWages)} (this cheque annualized, not a true ` +
         `YTD figure) fall below BOTH the municipal ($${lst.lowIncomeExemption?.municipal.toLocaleString()}) ` +
         `and school district ($${lst.lowIncomeExemption?.schoolDistrict.toLocaleString()}) Act 32 ` +
         `low-income exemption thresholds`,
