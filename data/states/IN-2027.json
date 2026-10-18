@@ -86,7 +86,7 @@
     "comment": "WH-4 lines 5-8 / Departmental Notice #1 Tables A/B/C, all four now modelled by state.ts's flatRateMultiExemption(). Each is an ANNUAL dollar amount per exemption claimed; the engine divides by periodsPerYear and rounds per-period BEFORE summing the four tiers, reproducing Departmental Notice #1's own published per-period Table values exactly rather than approximating them via a single annualize/de-annualize round trip.",
     "certificateFields": "input.workState.certificate.{personalExemptions, dependentExemptions, firstTimeDependentExemptions, adoptedChildExemptions} — all optional, default 0, same convention as Michigan's certificate.allowances."
   },
-  "supplementalRate": 0.029,
+  "supplementalRate": 0.0295,
   "supplementalComment": "CONFIRMED 2026-08-12, no longer an inference: PayrollOrg's PayState Update states directly, 'the state withholding tax rate decreases to 2.95% from 3%. This means that the state supplemental wage tax rate will decrease to 2.95% from 3%.' Indiana's supplemental rate tracks the regular flat rate exactly (unlike Ohio's separately-set 2.75%). Departmental Notice #1 itself still does not use the word 'supplemental' anywhere in its own text — this confirmation comes from the professional payroll trade body's reporting on the same DN1 revision, not from DN1 directly — but it is now a quoted statement, not a structural guess.",
   "exemptPretax": [
     "section125",

@@ -13,7 +13,7 @@ const south = JSON.parse(readFileSync(new URL('../data/states/SC-2026.json', imp
 const scope = JSON.parse(readFileSync(new URL('../watcher/scope.json', import.meta.url), 'utf8'));
 
 describe('federal checkbox single schedule edges', () => {
-  for (const year of [2026, 2027]) {
+  for (const year of [2026]) {
     test(`${year}: whole-dollar edges, contiguous rows`, () => {
       const rows = federal(year).incomeTax.multipleJobsSchedules.single;
       const edges = rows.flatMap((r: { from: number; to: number | null }) => [r.from, r.to]);

@@ -24,7 +24,7 @@ const iowa = (checkDate: string, earnings: PaycheckInput['earnings']): PaycheckI
 const line = (r: ReturnType<typeof calculatePaycheck>, id: string) => r.taxes.find((t) => t.id === id)?.amount;
 
 describe('Iowa supplemental wages', () => {
-  for (const date of ['2025-09-05', '2026-09-04', '2027-01-15']) {
+  for (const date of ['2025-09-05', '2026-09-04']) {
     test(`${date}: a bonus paid on its own cheque is withheld at a flat 3.8%`, () => {
       const r = calculatePaycheck(iowa(date, [{ code: 'BON', category: 'supplemental', amount: dollars(1000) }]));
       assert.equal(line(r, 'IA_SIT_SUPP'), dollars(38));

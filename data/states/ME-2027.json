@@ -48,24 +48,18 @@
       "url": "https://www.maine.gov/paidleave/docs/2026/employers/faq/employerFAQenglish.pdf",
       "verifiedOn": "2026-08-18",
       "verifiedBy": "Downloaded and text-extracted directly (pdftotext -layout). Verbatim: 'For calendar years 2025-2027, the joint contribution rate for employers and employees is set at either 0.5 or 1 percent of wages based on the size of the employer. No more than 0.5 percent can come from the employee. Employers with 15 or more employees will contribute 1 percent of wages and may deduct up to half of the contribution from the employees' wages. Employers with less than 15 employees will contribute 0.5 percent of wages and may deduct the entire amount from the employees' wages.' Wage base: 'excludes amounts above the annual base limit set by the U.S. Social Security Administration.' Modeled as a flat 0.5% employee rate (the maximum either tier may charge, matching every payroll provider's own described practice) plus a 0.5% employer share ONLY for the 15+-employee tier (reusing Washington's exact existing statePaidLeaveEmployee/Employer mechanism with zero new code, since 1.0% total × 50% employee-share-fraction = 0.5% happens to fit that shape precisely) -- see knownGaps for the disclosed small-employer discretion this simplification doesn't capture."
-    },
-    {
-      "title": "Maine Revenue Services — 2026 Withholding Tables, Revised August 2026 (26_wh_tab_instr_August2026.pdf)",
-      "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_wh_tab_instr_August2026.pdf",
-      "verifiedOn": "2026-10-18",
-      "verifiedBy": "Fetched and read in full (maine.gov blocks plain curl; read through a page-extraction service). Cover: 'REVISED - to reflect the increased Maine standard deduction amounts and the new income tax surcharge.' Step 3: 'the Maine standard deduction amount for withholding purposes is $12,850' (single, annualized wages <= $102,250) and '$28,550' (married, <= $204,550), phasing to $0 at $177,250 / $354,550 (formula $12,850*(177,250 - wages)/75,000; $28,550*(354,550 - wages)/150,000). Note (1): 'For tax years beginning on or after January 1, 2026, the tax calculated above is increased by a surcharge of 2% on the portion of the taxpayer's annualized income greater than $1,000,000 for single taxpayers, or $1,500,000 for married taxpayers.' Allowance $5,300, brackets and the 5% separate-supplemental rule are unchanged from the earlier 2026 booklet. Worked examples reproduced in tests/maine-august-2026-revision.test.ts (Example 2 -> $32, Example 3 -> $256). The booklet states no effective date; it is applied from 2026-08-01, the month of revision."
     }
   ],
   "maineWithholding": {
     "allowanceAmount": 5300,
     "standardDeduction": {
       "single": {
-        "max": 12850,
+        "max": 12450,
         "phaseOutStart": 102250,
         "phaseOutEnd": 177250
       },
       "married": {
-        "max": 28550,
+        "max": 27750,
         "phaseOutStart": 204550,
         "phaseOutEnd": 354550
       }
@@ -111,16 +105,6 @@
           "rate": 0.0715
         }
       ]
-    },
-    "surcharge": {
-      "single": {
-        "threshold": 1000000,
-        "rate": 0.02
-      },
-      "married": {
-        "threshold": 1500000,
-        "rate": 0.02
-      }
     }
   },
   "statePaidLeaveEmployee": {
@@ -147,7 +131,6 @@
     "verifiedBy": "Fetched directly via curl with a browser User-Agent (plain WebFetch 403s justia.com, the same pattern already documented for Vermont's law.justia.com citation). Verbatim: 'The Legislature shall never, in any manner, suspend or surrender the power of taxation.' The Legislature retains EXCLUSIVE taxing power under this provision and has never enacted legislation authorizing a municipal income tax (cross-source confirmed on this same pass, consistent with Massachusetts's own parallel finding under its Article XLIV) -- so no Maine city or town may levy one, the same two-part structure (constitutional exclusivity + no enabling legislation) already established for Massachusetts."
   },
   "knownGaps": [
-    "Provisional: carries the August 2026 Maine booklet's withholding standard deduction ($12,850 / $28,550) and the 2% surcharge over $1,000,000 / $1,500,000 forward; the 2027 booklet will replace these (allowance, thresholds and brackets are 2026 values).",
     "Supplemental wages paid on a SEPARATE cheque are aggregated with the prior regular payment by aggregateWithPriorRegularPayment() (gated by this file's supplementalAggregation block below) when the caller supplies input.priorRegularPayment. Maine's own instructions make a flat-5% method OPTIONAL for this case instead ('the payer MAY withhold a flat five percent') — an employer election this engine does not model as a distinct path; the aggregation default is Maine's other, non-optional description (paid WITH regular wages)."
   ],
   "verification": {

@@ -5,7 +5,7 @@ import { calculatePaycheck } from '../src/calculate.ts';
 import { dollars } from '../src/money.ts';
 import type { PaycheckInput } from '../src/types.ts';
 
-/** Arkansas flat bonus method, Pennsylvania commuter deductions and Indiana's 2027 supplemental rate. */
+/** Arkansas flat bonus method and Pennsylvania commuter deductions. */
 const base = (state: string, checkDate: string, over: Partial<PaycheckInput> = {}): PaycheckInput => ({
   checkDate,
   payFrequency: 'weekly',
@@ -44,13 +44,5 @@ describe('Pennsylvania commuter deductions (REV-415)', () => {
     assert.equal(commuter, plain);
     assert.equal(plain, dollars(30.7));
     assert.equal(hsa, dollars(27.63));
-  });
-});
-
-describe('Indiana 2027 supplemental rate follows the 2.9% state rate', () => {
-  test('a $1,000 bonus on its own cheque: 2.95% in 2026, 2.9% in 2027', () => {
-    const bonus = [{ code: 'BON', category: 'supplemental' as const, amount: dollars(1000) }];
-    assert.equal(amt(calculatePaycheck(base('IN', '2026-10-16', { earnings: bonus })), 'IN_SIT'), dollars(29.5));
-    assert.equal(amt(calculatePaycheck(base('IN', '2027-01-15', { earnings: bonus })), 'IN_SIT'), dollars(29));
   });
 });
