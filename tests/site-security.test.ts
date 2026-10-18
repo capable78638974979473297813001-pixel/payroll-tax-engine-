@@ -124,13 +124,14 @@ describe('account security', () => {
       assert.equal(r.headers.get('location'), '/docs');
     }
     const home = await (await fetch(BASE + '/')).text();
-    assert.match(home, /\/tokens\.css/); // the design B home page is the main site
-    assert.doesNotMatch(home, /IBM Plex Mono/);
-
-    // The live calculator is a light card with its own black text, and the
-    // page opts out of forced dark rendering so it can't wash out.
+    // The landing page is its own document (home.css), not the shared
+    // console stylesheet. It stays light, keeps the pricing anchor the
+    // sandbox links to, and shows a real paycheck call.
+    assert.match(home, /\/assets\/home\.css/);
     assert.match(home, /name="color-scheme" content="light"/);
-    for (const id of ['calc', 'cState', 'cGross', 'sNet', 'tilesEmployee', 'stateGrid']) assert.match(home, new RegExp(`id="${id}"`), `home #${id}`);
+    assert.match(home, /id="pricing"/);
+    assert.match(home, /\/v1\/paycheck/);
+    assert.doesNotMatch(home, /id="cGross"/);
 
     // Static files revalidate, so a deploy is never hidden behind a stale cache.
     const css = await fetch(BASE + '/assets/site.css');

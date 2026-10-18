@@ -4,311 +4,390 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light" />
-<title>Omnia.tax — Payroll tax calculation API</title>
-<meta name="description" content="One API call returns every tax line on a paycheck — federal, state, and local. Pay per paycheck, with no contract, no minimums, and no sales call." />
+<title>Omnia.tax — payroll tax API</title>
+<meta name="description" content="Omnia.tax is a payroll tax API. POST /v1/paycheck returns federal tax, all 50 states and DC, and local taxes in eight states. Sandbox and a 14-day trial." />
 <link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="/tokens.css" />
-<link rel="stylesheet" href="/assets/site.css" />
-<!--OMNIA_CONFIG-->
+<link rel="preload" href="/assets/fonts/newsreader-500.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/assets/fonts/source-sans-3-400.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="/assets/home.css" />
 </head>
-<body class="page-landing">
-<header class="nav">
-  <a class="logo" href="/" aria-label="Omnia.tax"><img src="/logo/logo.svg" alt="" /></a>
-  <nav class="nav-links" aria-label="Primary">
-    <a href="#calculator">Try it</a>
-    <a href="#coverage">Coverage</a>
-    <a href="#pricing">Pricing</a>
-    <a href="/docs">Docs</a>
-  </nav>
-  <div class="nav-right">
-    <a class="signin" id="navSignin" href="/signin">Sign in</a>
-    <a class="btn btn-md btn-secondary" href="/docs">Start building</a>
-    <a class="btn btn-md btn-primary" id="navPrimary" href="/signup">Start free trial <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="mast">
+  <div class="wrap mast-inner">
+    <a class="brand" href="/" aria-label="Omnia.tax, home">
+      <img src="/logo/logo.svg" alt="" width="157" height="40" />
+    </a>
+    <p class="dateline">Payroll tax engine. OMNIA TAX LLC, 595 N Old Woodward Ave, Birmingham, Michigan.</p>
+    <nav aria-label="Primary">
+      <a href="/docs">Docs</a>
+      <a href="/sandbox">Sandbox</a>
+      <a href="/signin">Sign in</a>
+      <a class="btn" href="/signup">Start a 14-day trial</a>
+    </nav>
   </div>
 </header>
 
-<section class="hero" id="product">
-  <div class="hero-guides" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-  <div class="wrap hero-inner">
-    <div class="hero-eyebrow">
-      <span class="sq" aria-hidden="true"></span>
-      <span class="eyebrow">Payroll tax calculation API</span>
-      <span class="mono" style="margin-left:auto;color:var(--color-gray);font-size:12px">POST /v1/paycheck</span>
-    </div>
-    <h1>Accurate payroll tax, priced for growing payroll teams.</h1>
-    <div class="hero-row">
-      <p class="hero-lead">One API call returns every tax line on a paycheck — federal, state, and local. Rooftop-level geocoding and address lookup find the exact local jurisdictions for any work address, and wage-garnishment limits and minimum-wage checks come in the same call. Pay per paycheck, with no contract, no minimums, and no sales call.</p>
-      <div class="hero-actions">
-        <a class="btn btn-lg btn-primary" href="/signup">Start free trial <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
-        <a class="btn btn-lg btn-secondary" href="/docs">Start building</a>
-        <a class="btn btn-text" href="#pricing">See pricing</a>
-      </div>
-      <div class="hero-rule"></div>
-      <p class="hero-price"><b data-rate>$0.09</b> per paycheck · billed only for calls you make</p>
-    </div>
-  </div>
-</section>
-
-<section class="band-cobalt fig" id="calculator" aria-labelledby="calcTitle">
+<main id="main">
   <div class="wrap">
-    <div class="cc-head">
-      <p class="eyebrow">Try it &middot; no signup</p>
-      <h2 id="calcTitle">Run a real paycheck.</h2>
-      <p class="cc-sub">Type a work address or pick a state, then change the numbers. This is the same engine your API key calls, and every line below is real output.</p>
-    </div>
-    <div class="cc-card">
-      <form class="cc-in" id="calc" autocomplete="off" novalidate>
-        <h3>The paycheck</h3>
-        <div class="cc-f cc-addr">
-          <label for="cAddr"><span>Work address</span></label>
-          <div class="cc-addr-row">
-            <input id="cAddr" type="text" inputmode="text" autocomplete="street-address" maxlength="200" placeholder="233 S Wacker Dr, Chicago, IL 60606" aria-describedby="cAddrHelp" />
-            <button class="btn btn-md btn-ink" type="button" id="cLookup">Look up</button>
-          </div>
-          <p class="cc-help" id="cAddrHelp">Street, city and state. Rooftop-level address lookup finds the state and any city, county or school-district tax at that exact spot.</p>
-          <details class="cc-home" id="cHomeBox">
-            <summary>Lives somewhere else? Add a home address</summary>
-            <input id="cHome" type="text" autocomplete="off" maxlength="200" placeholder="1 Main St, Yonkers, NY 10701" aria-label="Home address" />
-          </details>
-          <div class="cc-examples" id="cExamples" aria-label="Example addresses"></div>
-          <div class="cc-geo" id="cGeo" role="status" hidden></div>
+    <section class="lede" aria-labelledby="title">
+      <h1 id="title">One POST returns the tax lines on a paycheck.</h1>
+      <div class="lede-copy">
+        <p>Omnia.tax is a payroll tax API, built as an affordable alternative to Symmetry Software’s engine. You send the wages, the W-4, and where the work happened. The response is each tax line, in integer cents.</p>
+        <p>It calculates withholding. It does not file returns, and it does not deposit pay. Symmetry’s tax engine is sold with Canada, US territories, and finished multi-state reciprocity. Those three are not claims this engine makes. Territories and Canada are out. An employee who lives in one state and works in another is in progress.</p>
+        <div class="actions">
+          <a class="btn" href="/signup">Start a 14-day trial</a>
+          <a class="textlink" href="/docs">Read the API</a>
+          <a class="textlink" href="/sandbox">Open the sandbox</a>
         </div>
-        <label class="cc-f" for="cState"><span>State</span>
-          <select id="cState"><option value="OH">Ohio</option></select></label>
-        <label class="cc-f" for="cFreq"><span>How often paid</span>
-          <select id="cFreq"><option value="weekly">Weekly</option><option value="biweekly" selected>Every two weeks</option><option value="semimonthly">Twice a month</option><option value="monthly">Monthly</option></select></label>
-        <label class="cc-f" for="cGross"><span>Gross pay for this check</span>
-          <span class="cc-money"><i>$</i><input id="cGross" inputmode="decimal" value="3,000.00" /></span></label>
-        <label class="cc-f" for="cFiling"><span>Federal W-4 filing status</span>
-          <select id="cFiling"><option value="single" selected>Single</option><option value="married_joint">Married filing jointly</option><option value="married_separate">Married filing separately</option><option value="head_of_household">Head of household</option></select></label>
-        <label class="cc-f" for="cPretax"><span>401(k) deferral this check</span>
-          <span class="cc-money"><i>$</i><input id="cPretax" inputmode="decimal" value="240.00" /></span></label>
-        <p class="cc-err" id="cErr" role="alert" hidden></p>
-        <div class="cc-saved" id="cSaved">
-          <h3>Saved scenarios</h3>
-          <p class="cc-help" id="cSavedOut">Sign in to keep scenarios on your account and reopen them any time. <a href="/signin">Sign in</a> or <a href="/signup">start a free trial</a>.</p>
-          <div id="cSavedIn" hidden>
-            <div class="cc-addr-row">
-              <input id="cSaveName" type="text" maxlength="60" placeholder="Name this scenario, e.g. Chicago hire" aria-label="Scenario name" />
-              <button class="btn btn-md btn-ink" type="button" id="cSave">Save</button>
-            </div>
-            <p class="cc-help" id="cSaveMsg" role="status"></p>
-            <ul class="cc-saved-list" id="cSavedList"></ul>
-          </div>
+        <p class="fine">The trial runs the same engine as a live key. A card or a bank account has to be on file before the 14 days start. <a href="/docs#pricing">See pricing</a> in the docs, or <a href="mailto:scottholdan@gmail.com">talk to us</a>.</p>
+      </div>
+      <div>
+        <p class="verb"><b>POST</b> /v1/paycheck</p>
+        <pre class="code" tabindex="0"><code>{
+  "checkDate": "2026-08-15",
+  "payFrequency": "biweekly",
+  "earnings": [
+    { "code": "REG", "category": "regular", "amount": 300000 }
+  ],
+  "deductions": [
+    { "code": "401K", "category": "deferral_401k", "amount": 24000 }
+  ],
+  "federalW4": {
+    "filingStatus": "single",
+    "multipleJobs": false,
+    "dependentCredit": 0,
+    "otherIncome": 0,
+    "deductions": 0,
+    "extraWithholding": 0
+  },
+  "ytd": { "socialSecurity": 0, "medicare": 0, "futa": 0 },
+  "workState": {
+    "code": "OH",
+    "certificate": { "workCity": "Columbus", "residenceCity": "Columbus" }
+  },
+  "employer": { "stateUnemploymentRate": { "OH": 0.031 } }
+}</code></pre>
+      </div>
+    </section>
+
+    <section class="band" id="columbus" aria-labelledby="columbus-title">
+      <h2 id="columbus-title">What that request returned</h2>
+      <div class="answer">
+        <div>
+          <p>Ran in this repo’s engine, not a sketch. <code>300000</code> is $3,000.00. The $240.00 401(k) is <code>24000</code>. Single filer, 2020 W-4, nothing extra withheld. Work and home are both Columbus, so the city tax is the resident rate. The Ohio unemployment line uses the 3.1% rate on the request. Leave <code>employer</code> off and the engine uses that state’s published new-employer rate, and writes that on the line.</p>
+          <p>Net pay is <code>211932</code> cents, $2,119.32. Columbus municipal tax on this check is <code>7500</code> cents.</p>
+          <table class="stub">
+            <caption>Same figures as the JSON on the right. Cents are what the API returns.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Line</th>
+                <th class="num" scope="col">Cents</th>
+                <th class="num" scope="col">Dollars</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="group"><th scope="colgroup" colspan="3">On the check</th></tr>
+              <tr><th scope="row">Gross pay</th><td class="num">300000</td><td class="num">$3,000.00</td></tr>
+              <tr><th scope="row">401(k) deferral</th><td class="num">24000</td><td class="num">$240.00</td></tr>
+              <tr class="group"><th scope="colgroup" colspan="3">Withheld from the employee</th></tr>
+              <tr><th scope="row">Federal income tax</th><td class="num">26758</td><td class="num">$267.58</td></tr>
+              <tr><th scope="row">Social Security</th><td class="num">18600</td><td class="num">$186.00</td></tr>
+              <tr><th scope="row">Medicare</th><td class="num">4350</td><td class="num">$43.50</td></tr>
+              <tr><th scope="row">Ohio income tax</th><td class="num">6860</td><td class="num">$68.60</td></tr>
+              <tr><th scope="row">Columbus municipal</th><td class="num">7500</td><td class="num">$75.00</td></tr>
+              <tr><th scope="row">Employee taxes</th><td class="num">64068</td><td class="num">$640.68</td></tr>
+              <tr class="net"><th scope="row">Net pay</th><td class="num">211932</td><td class="num">$2,119.32</td></tr>
+              <tr class="group"><th scope="colgroup" colspan="3">Employer, not taken from net</th></tr>
+              <tr><th scope="row">Social Security</th><td class="num">18600</td><td class="num">$186.00</td></tr>
+              <tr><th scope="row">Medicare</th><td class="num">4350</td><td class="num">$43.50</td></tr>
+              <tr><th scope="row">FUTA</th><td class="num">1800</td><td class="num">$18.00</td></tr>
+              <tr><th scope="row">Ohio unemployment</th><td class="num">9300</td><td class="num">$93.00</td></tr>
+              <tr class="net"><th scope="row">Employer taxes</th><td class="num">34050</td><td class="num">$340.50</td></tr>
+            </tbody>
+          </table>
         </div>
-      </form>
-      <div class="cc-out" aria-live="polite">
-        <div class="cc-stats">
-          <div class="cc-stat"><span class="cc-k">Gross pay</span><span class="cc-v" id="sGross">&mdash;</span></div>
-          <div class="cc-stat"><span class="cc-k">Employee taxes</span><span class="cc-v" id="sEmployee">&mdash;</span></div>
-          <div class="cc-stat cc-net"><span class="cc-k">Net pay</span><span class="cc-v" id="sNet">&mdash;</span><span class="cc-sub2" id="sPct"></span></div>
-          <div class="cc-stat"><span class="cc-k">Cost to employer</span><span class="cc-v" id="sCost">&mdash;</span></div>
+        <div>
+          <p class="verb">200 · <b>result</b></p>
+          <pre class="code" tabindex="0"><code>{
+  "result": {
+    "checkDate": "2026-08-15",
+    "grossPay": 300000,
+    "pretaxDeductions": 24000,
+    "posttaxDeductions": 0,
+    "employeeTaxTotal": 64068,
+    "employerTaxTotal": 34050,
+    "netPay": 211932,
+    "taxes": [
+      {
+        "id": "US_FIT",
+        "name": "Federal Income Tax",
+        "payer": "employee",
+        "jurisdiction": "federal",
+        "taxableWages": 276000,
+        "amount": 26758,
+        "detail": "annualised $71760.00 → adjusted $63160.00; bracket 22% over $57900.00; tentative/yr $6957.20 ÷ 26"
+      },
+      {
+        "id": "US_SS_EE",
+        "name": "Social Security",
+        "payer": "employee",
+        "jurisdiction": "federal",
+        "taxableWages": 300000,
+        "amount": 18600,
+        "detail": "$3000.00 @ 6.2%"
+      },
+      {
+        "id": "US_SS_ER",
+        "name": "Social Security (Employer)",
+        "payer": "employer",
+        "jurisdiction": "federal",
+        "taxableWages": 300000,
+        "amount": 18600,
+        "detail": "$3000.00 @ 6.2%"
+      },
+      {
+        "id": "US_MED_EE",
+        "name": "Medicare",
+        "payer": "employee",
+        "jurisdiction": "federal",
+        "taxableWages": 300000,
+        "amount": 4350,
+        "detail": "$3000.00 @ 1.45%, no wage cap"
+      },
+      {
+        "id": "US_MED_ER",
+        "name": "Medicare (Employer)",
+        "payer": "employer",
+        "jurisdiction": "federal",
+        "taxableWages": 300000,
+        "amount": 4350,
+        "detail": "$3000.00 @ 1.45%, no wage cap"
+      },
+      {
+        "id": "US_FUTA",
+        "name": "FUTA",
+        "payer": "employer",
+        "jurisdiction": "federal",
+        "taxableWages": 300000,
+        "amount": 1800,
+        "detail": "$3000.00 @ 0.6% net of the 5.4% state credit; no credit reduction is applied because this year's determination is made after 2026-11-10 and had not been published when this ruleset was written — a reduction, if any, applies retroactively to the whole year"
+      },
+      {
+        "id": "OH_SIT",
+        "name": "Ohio Income Tax",
+        "payer": "employee",
+        "jurisdiction": "state",
+        "taxableWages": 276000,
+        "amount": 6860,
+        "detail": "$2760.00 less $0.00 exemptions (0 × $25) = $2760.00 net @ 2.99% over $1001.92, base $16.03"
+      },
+      {
+        "id": "OH_SUI_ER",
+        "name": "Ohio Unemployment Insurance (Employer)",
+        "payer": "employer",
+        "jurisdiction": "state",
+        "taxableWages": 300000,
+        "amount": 9300,
+        "detail": "$3000.00 @ 3.100% — this employer's own assigned rate, capped at $9000.00/yr ($0.00 YTD already counted)"
+      },
+      {
+        "id": "OH_LOCAL",
+        "name": "Ohio Municipal Income Tax",
+        "payer": "employee",
+        "jurisdiction": "local",
+        "taxableWages": 300000,
+        "amount": 7500,
+        "detail": "$75.00 to Columbus @ 2.50% (residence and work municipality are the same)"
+      }
+    ]
+  }
+}</code></pre>
         </div>
-        <h3 class="cc-h">Taken out of the employee&rsquo;s pay</h3>
-        <p class="cc-hint">Click any line to see how it was calculated.</p>
-        <div class="cc-list" id="tilesEmployee"></div>
-        <h3 class="cc-h" id="employerHead" hidden>Paid by the employer, on top of gross pay</h3>
-        <div class="cc-list" id="tilesEmployer"></div>
-        <div class="cc-actions">
-          <a class="btn btn-lg btn-primary" href="/signup">Run this on your own payroll <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
-          <button class="btn btn-lg btn-secondary" type="button" id="cCopy">Copy as cURL</button>
+      </div>
+    </section>
+
+    <section class="band" id="pittsburgh" aria-labelledby="pitt-title">
+      <h2 id="pitt-title">Same wages in Pittsburgh. Two local rates.</h2>
+      <div class="pa">
+        <table class="stub">
+          <caption>Biweekly check dated 2026-06-15. Gross 300000 cents, no deductions, single W-4. Work PSD 700102 is Pittsburgh City and the Pittsburgh school district. The only change between the columns is residencePSD.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Line</th>
+              <th class="num" scope="col">Resident 700102</th>
+              <th class="num" scope="col">No residence PSD</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">PA earned income tax</th>
+              <td class="num">9000<br />$90.00</td>
+              <td class="num">3000<br />$30.00</td>
+            </tr>
+            <tr>
+              <th scope="row">PA local services tax</th>
+              <td class="num">200<br />$2.00</td>
+              <td class="num">200<br />$2.00</td>
+            </tr>
+            <tr>
+              <th scope="row">Pennsylvania income tax</th>
+              <td class="num">9210<br />$92.10</td>
+              <td class="num">9210<br />$92.10</td>
+            </tr>
+            <tr>
+              <th scope="row">Employee taxes</th>
+              <td class="num">73608<br />$736.08</td>
+              <td class="num">67608<br />$676.08</td>
+            </tr>
+            <tr class="net">
+              <th scope="row">Net pay</th>
+              <td class="num">226392<br />$2,263.92</td>
+              <td class="num">232392<br />$2,323.92</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pa-copy">
+          <p>The engine withholds the higher of the resident rate and the work location’s nonresident rate. For a resident of PSD 700102 that is 3%. The EIT detail on the resident response is:</p>
+          <p class="quote">$3000.00 @ 3.00% (the resident rate is higher) — resident 3.00% (PSD 700102) vs. work-location nonresident 1.00% (PSD 700102, PITTSBURGH CITY)</p>
+          <p>Leave <code>residencePSD</code> off and the same wages are taxed at the 1% nonresident rate. Detail:</p>
+          <p class="quote">$3000.00 @ 1.00% (the nonresident rate is higher) — resident 0.00% (PSD 88000/out-of-state) vs. work-location nonresident 1.00% (PSD 700102, PITTSBURGH CITY)</p>
+          <p>That response also carries a notice, tier <code>not_modelled</code>, because the home PSD was missing. It says to set <code>residencePSD</code>, or to set it to <code>880000</code> for a home outside Pennsylvania. The $60.00 gap in net pay is the earned income tax. Local services tax is $52.00 a year, split across 26 pays and rounded down to the cent, so both checks show 200 cents. Employer tax on both is 36216 cents. No employer unemployment rate was sent, so that line is Pennsylvania’s published new-employer rate, and the detail says so.</p>
         </div>
-        <p class="cc-note" id="cNote">Loading the engine&hellip;</p>
       </div>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="pricing">
-  <div class="wrap">
-    <div class="shead">
-      <div class="rule"></div>
-      <div class="sidx">01</div>
-      <div class="slabel eyebrow">Price</div>
-      <div class="sright">ONE LINE ITEM</div>
-      <h2 class="statement">No quote request. No pricing call.<span class="muted">Here it is.</span></h2>
-    </div>
-    <div class="figure-price" data-rate>$0.09</div>
-    <p class="per">per paycheck <span>— one calculation, one charge.</span></p>
-    <div class="terms-grid">
-      <div class="term"><div class="k"><b>01</b>Contract</div><p class="v">None</p></div>
-      <div class="term"><div class="k"><b>02</b>Minimums</div><p class="v">None</p></div>
-      <div class="term"><div class="k"><b>03</b>Setup fee</div><p class="v">None</p></div>
-      <div class="term"><div class="k"><b>04</b>Per-state or per-jurisdiction tiers</div><p class="v">None</p></div>
-      <div class="term"><div class="k"><b>05</b>Sales call</div><p class="v">Not needed</p></div>
-      <div class="term"><div class="k"><b>06</b>Billed for</div><p class="v">Only calls you make</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="coverage">
-  <div class="wrap">
-    <div class="shead">
-      <div class="rule"></div>
-      <div class="sidx">02</div>
-      <div class="slabel eyebrow">Coverage</div>
-      <div class="sright">FEDERAL · STATE · LOCAL</div>
-      <h2 class="statement" style="max-width:980px">Federal, state, and local — down to the city, county, school district, and transit district.</h2>
-    </div>
-    <div class="cols" style="margin-top:40px;align-items:start">
-      <div style="grid-column:1 / span 4">
-        <div class="cov-figure"><span class="n">50</span><span class="dc">+DC</span></div>
-        <p class="cov-cap">All 50 states and the District of Columbia, plus federal.</p>
-      </div>
-      <div style="grid-column:6 / span 7">
-        <div class="local-head"><span class="label-mono">Pick a state to run it</span><span class="mono" style="color:var(--color-gray);font-size:12px"><i class="dotkey" aria-hidden="true"></i> ALSO LOCAL TAXES</span></div>
-        <div class="state-grid" id="stateGrid" role="group" aria-label="States covered"><span class="mono" style="color:var(--color-gray);font-size:13px">Loading states&hellip;</span></div>
-        <p class="footnote"><b>Local taxes</b> are modelled for Alabama, Indiana, Kentucky, Michigan, Ohio, Pennsylvania, New York City and Yonkers, and Oregon transit. <b>Anywhere else</b> you get an explicit “not modelled” line. See 03.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="band-ink guess">
-  <div class="wrap">
-    <div class="shead dark">
-      <div class="rule"></div>
-      <div class="sidx">03</div>
-      <div class="slabel eyebrow" style="color:#fff">No guessing</div>
-      <div class="sright">EXPLICIT, ALWAYS</div>
-    </div>
-    <div class="cols" style="margin-top:32px">
-      <div style="grid-column:1 / span 7">
-        <h2><span style="display:block">Never a</span><span style="display:block">silent <span class="zero">$0</span>.</span></h2>
-        <p class="guess-body">If a rule or code is missing, the API returns an explicit error or a “not modelled” line. It never fills the gap with a quiet zero, so a missing tax can’t hide inside a clean-looking paycheck.</p>
-      </div>
-      <div style="grid-column:8 / span 5">
-        <div class="excerpt">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <span class="label-mono">A · A not-modelled line</span>
-            <span class="tag tag-outline" style="color:#fff">Live from the engine</span>
-          </div>
-          <pre id="nmExcerpt">Loading&hellip;</pre>
+      <div class="answer requests">
+        <div>
+          <p class="verb"><b>POST</b> /v1/paycheck · resident</p>
+          <pre class="code" tabindex="0"><code>{
+  "checkDate": "2026-06-15",
+  "payFrequency": "biweekly",
+  "earnings": [
+    { "code": "REG", "category": "regular", "amount": 300000 }
+  ],
+  "deductions": [],
+  "federalW4": {
+    "filingStatus": "single",
+    "multipleJobs": false,
+    "dependentCredit": 0,
+    "otherIncome": 0,
+    "deductions": 0,
+    "extraWithholding": 0
+  },
+  "ytd": { "socialSecurity": 0, "medicare": 0, "futa": 0 },
+  "workState": {
+    "code": "PA",
+    "certificate": { "workPSD": "700102", "residencePSD": "700102" }
+  }
+}</code></pre>
         </div>
-        <div class="excerpt">
-          <span class="label-mono">B · Or an explicit error</span>
-          <pre>{ <span class="s">"error"</span>, <span class="s">"code"</span>, <span class="s">"requestId"</span> }</pre>
-          <p style="color:var(--color-on-ink-muted);font-size:13px">Every error has the same shape. <a href="/docs#errors" style="color:#fff">See the Errors table in the docs.</a></p>
+        <div>
+          <p class="verb"><b>POST</b> /v1/paycheck · no home PSD</p>
+          <pre class="code" tabindex="0"><code>{
+  "checkDate": "2026-06-15",
+  "payFrequency": "biweekly",
+  "earnings": [
+    { "code": "REG", "category": "regular", "amount": 300000 }
+  ],
+  "deductions": [],
+  "federalW4": {
+    "filingStatus": "single",
+    "multipleJobs": false,
+    "dependentCredit": 0,
+    "otherIncome": 0,
+    "deductions": 0,
+    "extraWithholding": 0
+  },
+  "ytd": { "socialSecurity": 0, "medicare": 0, "futa": 0 },
+  "workState": {
+    "code": "PA",
+    "certificate": { "workPSD": "700102" }
+  }
+}</code></pre>
         </div>
-        <div class="never"><b>NEVER THIS</b><s>"amount": 0</s></div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<section class="section" id="developers">
-  <div class="wrap">
-    <div class="shead">
-      <div class="rule"></div>
-      <div class="sidx">04</div>
-      <div class="slabel eyebrow">Developers</div>
-      <div class="sright">POST /V1/PAYCHECK</div>
-      <h2 class="statement">Your first paycheck in one request.</h2>
-    </div>
-    <p class="lead" style="margin:16px 0 32px;color:var(--color-gray);font-size:18px;max-width:640px">Send the paycheck as JSON. Get back every tax line in the same response.</p>
-    <div class="cols">
-      <div class="facts" style="grid-column:1 / span 3">
-        <div class="fact"><span class="k">ENDPOINT</span><span class="v">POST /v1/paycheck</span></div>
-        <div class="fact"><span class="k">AUTH</span><span class="v">Bearer secret key</span></div>
-        <div class="fact"><span class="k">BODY</span><span class="v">application/json</span></div>
-        <div class="fact"><span class="k">AMOUNTS</span><span class="v">Integer cents</span></div>
+    <section class="band" id="places" aria-labelledby="places-title">
+      <h2 id="places-title">Where the rates actually are</h2>
+      <div class="places">
+        <div>
+          <h3>Federal, and a state file for each of these</h3>
+          <p>Federal income tax, Social Security, Medicare, and FUTA. State rulesets for the 50 states and the District of Columbia. The 2026 files on this build:</p>
+          <ul class="states">
+            <li>Alabama</li><li>Alaska</li><li>Arizona</li><li>Arkansas</li><li>California</li>
+            <li>Colorado</li><li>Connecticut</li><li>Delaware</li><li>District of Columbia</li><li>Florida</li>
+            <li>Georgia</li><li>Hawaii</li><li>Idaho</li><li>Illinois</li><li>Indiana</li>
+            <li>Iowa</li><li>Kansas</li><li>Kentucky</li><li>Louisiana</li><li>Maine</li>
+            <li>Maryland</li><li>Massachusetts</li><li>Michigan</li><li>Minnesota</li><li>Mississippi</li>
+            <li>Missouri</li><li>Montana</li><li>Nebraska</li><li>Nevada</li><li>New Hampshire</li>
+            <li>New Jersey</li><li>New Mexico</li><li>New York</li><li>North Carolina</li><li>North Dakota</li>
+            <li>Ohio</li><li>Oklahoma</li><li>Oregon</li><li>Pennsylvania</li><li>Rhode Island</li>
+            <li>South Carolina</li><li>South Dakota</li><li>Tennessee</li><li>Texas</li><li>Utah</li>
+            <li>Vermont</li><li>Virginia</li><li>Washington</li><li>West Virginia</li><li>Wisconsin</li>
+            <li>Wyoming</li>
+          </ul>
+          <p>No US territories. No Canada. A state with no ruleset for the check date comes back as a line whose detail starts with <code>NOT MODELLED</code> and whose amount is 0. Do not read that as zero tax.</p>
+        </div>
+        <div class="locals-col">
+          <h3>Local tax, in eight states</h3>
+          <ul class="locals">
+            <li><strong>Ohio.</strong> Municipal income tax, school districts, and JEDD/JEDZ zones. The 2026 municipality file has 683 rows, the school-district file 214, the zone file 157.</li>
+            <li><strong>Pennsylvania.</strong> Act 32 earned income tax and local services tax, keyed by PSD code. The 2026 register has 2,627 jurisdictions.</li>
+            <li><strong>Michigan.</strong> City income tax. 24 cities in the 2026 file.</li>
+            <li><strong>Indiana.</strong> County income tax. 92 counties in the 2026 file.</li>
+            <li><strong>Kentucky.</strong> Occupational license tax, city and county.</li>
+            <li><strong>Alabama.</strong> Municipal occupational tax. 29 municipalities in the 2026 file.</li>
+            <li><strong>New York.</strong> New York City resident tax, and Yonkers for a resident or for a nonresident who works in Yonkers.</li>
+            <li><strong>Oregon.</strong> Metro and Multnomah County, plus employer transit-district tax for TriMet, Lane Transit, Canby, Sandy, Wilsonville SMART, and South Clackamas.</li>
+          </ul>
+        </div>
       </div>
-      <div class="codepanel" style="grid-column:4 / span 5">
-        <div class="hd"><span>REQUEST</span><span style="color:var(--color-on-ink-muted)">cURL</span></div>
-        <pre id="landingCurl">Loading&hellip;</pre>
-        <div style="padding:0 16px 16px"><button class="btn btn-sm btn-ink" type="button" id="curlCopy">Copy</button> <a class="btn btn-sm btn-secondary" href="#calculator" style="margin-left:8px">Change the inputs</a></div>
-      </div>
-      <div class="respanel" style="grid-column:9 / span 4">
-        <div class="hd"><span>RESPONSE</span><span>200</span></div>
-        <div class="label-mono" style="padding:12px 16px 0;color:var(--color-gray)">Real response &middot; amounts in cents</div>
-        <pre class="tree live-resp" id="landingResp">Loading&hellip;</pre>
-      </div>
-    </div>
-    <div class="cents-call">
-      <span class="sq" aria-hidden="true"></span>
-      <div><p>Amounts in integer cents.</p><div class="mono">100000 = $1,000.00</div></div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<section class="section">
-  <div class="wrap">
-    <div class="shead">
-      <div class="rule"></div>
-      <div class="sidx">05</div>
-      <div class="slabel eyebrow">The fine print</div>
-      <div class="sright">INCLUDED IN THE PRICE</div>
-      <h2 class="statement">The fine print is short,<span class="muted">and it’s all in your favor.</span></h2>
-    </div>
-    <div style="margin-top:48px">
-      <div class="fp-row"><div class="num">01</div><h3>One call, every tax line</h3><p>Federal, state, and local lines come back together in a single response. No stitching calls together.</p></div>
-      <div class="fp-row"><div class="num">02</div><h3>Integer cents</h3><p>Every amount is a whole number of cents. No floating-point rounding, ever.</p></div>
-      <div class="fp-row"><div class="num">03</div><h3>Effective-dated rates</h3><p>A check dated before a rate change uses the rate that was in effect on that date.</p></div>
-      <div class="fp-row"><div class="num">04</div><h3>Garnishments &amp; minimum wage</h3><p>Both are answered in the same paycheck call, at no extra cost. Send a garnishment order and get back what the law lets you withhold: the federal Consumer Credit Protection Act limit for consumer debt, child support and federal student loans, with state rules applied. Send an hourly rate and get back whether it clears the binding federal, state or local minimum wage, across all 50 states, DC and 69 city and county ordinances.</p></div>
-      <div class="fp-row"><div class="num">05</div><h3>Rooftop geocoding &amp; address lookup</h3><p>Local taxes follow the exact address, not the ZIP code. Rooftop-level geocoding places a work or home address from a blend of address sources, at no extra cost, and every response reports the <code>precision</code> it achieved.</p></div>
-      <div class="fp-row"><div class="num">06</div><h3>No third-party dependencies</h3><p>The calculation runs with no third-party dependencies.</p></div>
-      <div class="fp-end"></div>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="shead">
-      <div class="rule"></div>
-      <div class="sidx">06</div>
-      <div class="slabel eyebrow">Questions</div>
-    </div>
-    <div class="cols" style="margin-top:32px">
-      <div style="grid-column:1 / span 3">
-        <h2 class="statement" style="grid-column:auto;margin:0 0 24px">Plain answers.</h2>
-        <p style="color:var(--color-gray)">Everything else is in the docs.</p>
-        <a class="btn btn-text" href="/docs">Read the docs</a>
+    <section class="band" id="limits" aria-labelledby="limits-title">
+      <h2 id="limits-title">Still open, and how an address gets in</h2>
+      <div class="limits">
+        <div>
+          <p><code>POST /v1/address</code> turns a work address into the state and the certificate a later paycheck needs: an Ohio city, a Pennsylvania PSD, an Indiana county, and the rest of that list. The lookup uses rooftop geocoding when a published address point matches. The response names the precision and who published the point. Resolve someone once, store the certificate, send it on each check.</p>
+          <p>The same paycheck call can also carry garnishments and a minimum-wage check. They come back on that result. The fields are in the <a href="/docs">docs</a>. The <a href="/sandbox">sandbox</a> posts to <code>/v1/paycheck</code> with a test key.</p>
+        </div>
+        <ul class="open-list">
+          <li><strong>Multi-state is in progress.</strong> Home in one state and work in another is not a finished path. Don’t build a pay run on it yet.</li>
+          <li><strong>Filing is out of scope.</strong> Nothing here produces a return, a W-2 file, or a payment to a tax agency.</li>
+          <li><strong>Direct deposit is out of scope.</strong> Net pay is a number on the response. The API does not move money.</li>
+          <li><strong>Territories and Canada are out of scope.</strong> Fifty states and the District of Columbia are the state list.</li>
+        </ul>
       </div>
-      <div class="faq" style="grid-column:4 / span 9">
-        <div class="faq-item"><div class="qrow"><span class="qn">Q1</span><div><h3>How much does it cost?</h3><p><span data-rate>$0.09</span> per paycheck calculated. No contract, no minimums, no setup fee, and no per-state or per-jurisdiction tiers.</p></div></div></div>
-        <div class="faq-item"><div class="qrow"><span class="qn">Q2</span><div><h3>What does it cover?</h3><p>Federal, all 50 states and DC, and local taxes down to the city, county, school district, and transit district, including Ohio, Pennsylvania, Michigan, Indiana, Kentucky, Alabama, New York City, Yonkers, and Oregon transit and Metro. Wage-garnishment limits and minimum-wage checks (federal, state and local) are included in the same call.</p></div></div></div>
-        <div class="faq-item"><div class="qrow"><span class="qn">Q3</span><div><h3>What if a jurisdiction isn’t covered?</h3><p>You get an explicit error or a “not modelled” line in the response. Never a silent $0.</p></div></div></div>
-        <div class="faq-item"><div class="qrow"><span class="qn">Q4</span><div><h3>How precise is the address lookup?</h3><p>Rooftop-level wherever our blend of address sources has a point for the address. Otherwise it falls back to block-level or street-range placement. Every response reports the <code>precision</code> it used, so you always know. It&rsquo;s included in the same <span data-rate>$0.09</span> per call. <a href="/docs">See the docs.</a></p></div></div></div>
-        <div class="faq-item"><div class="qrow"><span class="qn">Q5</span><div><h3>Do I need to talk to sales?</h3><p>No. Read the docs and start building.</p></div></div></div>
-      </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<section class="band-cobalt cta">
-  <div class="cta-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-  <div class="wrap cols" style="align-items:end">
-    <h2 style="grid-column:1 / span 8">Run your first paycheck today.</h2>
-    <div class="cta-side" style="grid-column:9 / span 4">
-      <div class="eyebrow">Per paycheck</div>
-      <div class="big" data-rate>$0.09</div>
-      <p>No contract. No minimums. No sales call.</p>
-      <div class="cta-actions">
-        <a class="btn btn-lg btn-white" href="/signup">Start free trial <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
-        <a class="btn btn-lg btn-outline-white" href="/docs">Start building</a>
+    <section class="band" id="pricing" aria-labelledby="price-title">
+      <h2 id="price-title">Pricing sits in the docs</h2>
+      <p>You pay for calculations that succeed. The figure is on the docs page, and it is not printed here. A 14-day trial needs a card or a bank account on file first. Terms are shown before that.</p>
+      <div class="pricing-row">
+        <a class="btn" href="/docs#pricing">See pricing</a>
+        <a class="textlink" href="mailto:scottholdan@gmail.com">Talk to us</a>
+        <a class="textlink" href="/signup">Start a 14-day trial</a>
       </div>
-    </div>
+    </section>
   </div>
-</section>
+</main>
 
-<footer class="footer">
-  <a class="logo logo-sm" href="/" aria-label="Omnia.tax"><img src="/logo/logo.svg" alt="" /></a>
-  <span class="tagline">Payroll tax calculation API<br />© 2026 OMNIA TAX LLC. All rights reserved.<br />Calculations, not tax or legal advice.</span>
-  <nav aria-label="Footer">
-    <a href="mailto:scottholdan@gmail.com">Contact</a>
-    <a href="#calculator">Try it</a>
-    <a href="#coverage">Coverage</a>
-    <a href="#pricing">Pricing</a>
-    <a href="/docs">Docs</a>
-    <a href="/terms">Terms</a>
-    <a href="/privacy">Privacy</a>
-    <a href="/acceptable-use">Acceptable use</a>
-    <a href="/disclaimer">Disclaimer</a>
-  </nav>
+<footer>
+  <div class="wrap foot">
+    <p>OMNIA TAX LLC, 595 N Old Woodward Ave, Birmingham, Michigan.</p>
+    <nav aria-label="Footer">
+      <a href="/docs">Docs</a>
+      <a href="/sandbox">Sandbox</a>
+      <a href="/signin">Sign in</a>
+      <a href="/signup">Trial</a>
+      <a href="/docs#pricing">Pricing</a>
+      <a href="/terms">Terms</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/acceptable-use">Acceptable use</a>
+      <a href="/disclaimer">Disclaimer</a>
+      <a href="mailto:scottholdan@gmail.com">scottholdan@gmail.com</a>
+    </nav>
+  </div>
 </footer>
-<script src="/assets/pricing.js"></script>
-<script src="/assets/session.js"></script>
-<script src="/assets/landing.js"></script>
 </body>
 </html>

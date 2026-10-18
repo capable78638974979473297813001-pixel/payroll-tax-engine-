@@ -224,6 +224,7 @@ function contentTypeFor(file: string): string {
   if (file.endsWith('.png')) return 'image/png';
   if (file.endsWith('.jpg') || file.endsWith('.jpeg')) return 'image/jpeg';
   if (file.endsWith('.json')) return 'application/json; charset=utf-8';
+  if (file.endsWith('.woff2')) return 'font/woff2';
   return 'application/octet-stream';
 }
 
