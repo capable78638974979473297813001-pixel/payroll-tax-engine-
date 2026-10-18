@@ -48,7 +48,7 @@
     "personalExemptionAnnual": 930.0,
     "ageOrBlindExemptionAnnual": 800.0,
     "$structuredFieldsNote": "The three numeric fields directly above are what src/taxes/state.ts's virginiaWithholding() actually reads (rules.withholdingStructure.standardDeductionAnnual etc.) -- added this pass alongside the narrative fields above, which were already correct but not machine-readable on their own.",
-    "standardDeductionSunset": "The $8,750 figure (up from a pre-2025 baseline of $8,500) is a TEMPORARY increase enacted by the 2025 General Assembly, 'scheduled to sunset after Taxable Year 2026 and revert to the standard deduction amounts that applied prior to Taxable Year 2019: $3,000.' For 2026 specifically (this file's target year) $8,750 is correct and current; a 2027 rebuild of this file would need to re-check whether the sunset actually occurred or was extended -- flagged explicitly as a near-term expiration risk, the same class of watch-item as Delaware's HB13 bracket-restructuring check.",
+    "standardDeductionSunset": "Updated 2026-10-18: the $8,750 figure was a temporary 2025 increase originally scheduled to sunset after Taxable Year 2026, but the 2026 Appropriation Act (HB 30, Special Session I, Chapter 1, third enactment clause) raises the single-filer standard deduction to $9,200 for TY2027 and $9,300 for TY2028-2029 (MFJ $18,400 / $18,600) and sunsets it after TY2029 (Virginia Tax 2026 Legislative Summary, July 6, 2026, https://www.tax.virginia.gov/laws-rules-decisions/legislative-summaries/26-82). $8,750 remains correct for 2026.",
     "brackets": {
       "annual": [
         { "from": 0, "to": 3000, "base": 0, "rate": 0.02 },

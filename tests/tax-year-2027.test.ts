@@ -47,8 +47,8 @@ describe('tax year 2027 (provisional)', () => {
     assert.equal(r.warnings?.some((w) => /provisional/.test(w)) ?? false, false);
   });
 
-  test("a 2027 check equals a late-2026 check in every state (2026's mid-year overlays are folded in), except Indiana's rate cut", () => {
-    for (const st of STATES.filter((s) => s !== 'IN')) {
+  test("a 2027 check equals a late-2026 check in every state (2026's mid-year overlays are folded in), except Indiana's rate cut and Virginia's standard deduction", () => {
+    for (const st of STATES.filter((s) => s !== 'IN' && s !== 'VA')) {
       const a = calculatePaycheck(pay('2026-10-16', st));
       const b = calculatePaycheck(pay('2027-01-15', st));
       assert.deepEqual(b.taxes.map((t) => [t.id, t.amount]), a.taxes.map((t) => [t.id, t.amount]), st);
@@ -66,6 +66,12 @@ describe('tax year 2027 (provisional)', () => {
   test('Indiana: state rate falls from 2.95% to 2.9% (IC 6-3-2-1) on 1 Jan 2027', () => {
     const a = amount(calculatePaycheck(pay('2026-10-16', 'IN')), 'IN_SIT')!;
     const b = amount(calculatePaycheck(pay('2027-01-15', 'IN')), 'IN_SIT')!;
+    assert.ok(b < a, `${b} should be below ${a}`);
+  });
+
+  test('Virginia: the single-filer standard deduction rises from $8,750 to $9,200 for TY2027 (2026 Appropriation Act), so withholding falls', () => {
+    const a = amount(calculatePaycheck(pay('2026-10-16', 'VA')), 'VA_SIT')!;
+    const b = amount(calculatePaycheck(pay('2027-01-15', 'VA')), 'VA_SIT')!;
     assert.ok(b < a, `${b} should be below ${a}`);
   });
 

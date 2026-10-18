@@ -6179,6 +6179,8 @@ interface MaineConfig {
   allowanceAmount: number; // dollars, annual, flat per allowance (Form W-4ME Step 2)
   standardDeduction: { single: MaineStandardDeductionBand; married: MaineStandardDeductionBand };
   brackets: { single: WIBracket[]; married: WIBracket[] };
+  /** Tax-year-2026 surcharge (L.D. 2212): extra `rate` on annualized income above `threshold`, dollars. */
+  surcharge?: { single: { threshold: number; rate: number }; married: { threshold: number; rate: number } };
 }
 
 /**
@@ -6287,7 +6289,12 @@ function maineWithholding(
   const brackets = cfg.brackets[status];
   const bracket = findWIBracket(brackets, annualIncome);
   const excess = annualIncome - dollars(bracket.from);
-  const annualWithholding = toWholeDollars(dollars(bracket.base) + applyRate(excess, bracket.rate));
+  const surcharge = cfg.surcharge?.[status];
+  const surchargeAmount =
+    surcharge && annualIncome > dollars(surcharge.threshold)
+      ? applyRate(annualIncome - dollars(surcharge.threshold), surcharge.rate)
+      : 0;
+  const annualWithholding = toWholeDollars(dollars(bracket.base) + applyRate(excess, bracket.rate) + surchargeAmount);
 
   const amount = toWholeDollars(Math.round(annualWithholding / periodsPerYear));
 
@@ -6301,7 +6308,9 @@ function maineWithholding(
     detail:
       `${fmt(annualWages)}/yr less ${fmt(allowanceAmount)} allowances (${allowances} × $${cfg.allowanceAmount}) ` +
       `less ${fmt(standardDeduction)} standard deduction (${status}) = ${fmt(annualIncome)} annualized income ` +
-      `@ ${(bracket.rate * 100).toFixed(2)}% bracket, annualized withholding ${fmt(annualWithholding)} ÷ ${periodsPerYear}, rounded to the nearest dollar`,
+      `@ ${(bracket.rate * 100).toFixed(2)}% bracket, ` +
+      (surchargeAmount ? `incl. ${fmt(surchargeAmount)} surcharge, ` : '') +
+      `annualized withholding ${fmt(annualWithholding)} ÷ ${periodsPerYear}, rounded to the nearest dollar`,
   };
 }
 
@@ -6813,7 +6822,11 @@ interface ORConfig {
     };
     annualizeMultiplier: Partial<Record<string, number>>;
   };
-  personalExemptionCredit: { perAllowance: number };
+  personalExemptionCredit: {
+    perAllowance: number;
+    /** Annual wages above which the formula sets allowances to 0 (150-206-436). */
+    zeroAllowancesAboveAnnualWages?: { single: number; married: number };
+  };
 }
 
 function findORCapTier(schedule: ORCapTier[], annualWages: number): ORCapTier {
@@ -6926,8 +6939,15 @@ function oregonWithholding(
 
   const cert = input.workState.certificate as Record<string, unknown>;
   const maritalStatusBox = resolveORMaritalStatus(cert);
-  const allowances = Number(cert.allowances ?? 0);
-  const promoted = maritalStatusBox === 'married' || allowances >= 3;
+  const claimedAllowances = Number(cert.allowances ?? 0);
+  // The formula's bracket/deduction choice uses the allowances claimed; the
+  // credit uses none once annual wages pass $100,000 (single) / $200,000 (married).
+  const promoted = maritalStatusBox === 'married' || claimedAllowances >= 3;
+  const zeroAbove = cfg.personalExemptionCredit.zeroAllowancesAboveAnnualWages;
+  const allowances =
+    zeroAbove && annualWages > dollars(maritalStatusBox === 'married' ? zeroAbove.married : zeroAbove.single)
+      ? 0
+      : claimedAllowances;
 
   const standardDeduction = dollars(
     promoted

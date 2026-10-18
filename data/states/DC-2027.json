@@ -24,10 +24,10 @@
       "verifiedBy": "cross_source_confirmed. Quoted: 'Total allowances are calculated by summing yourself, head of household status, age/blind allowances, spouse, and dependent allowances' -- confirms the NFC formula's 'Dependent Allowance = $X x Number of Dependents' label is really 'per-allowance amount x TOTAL D-4 allowance count,' not literally dependents-only, resolving what would otherwise look like a contradiction between the two sources."
     },
     {
-      "title": "D.C. Home Rule Act of 1973 nonresident-taxation prohibition",
-      "url": "https://code.dccouncil.gov/us/dc/council/code/sections/47-1806.04",
+      "title": "D.C. Code § 1-206.02(a)(5) (Home Rule Act § 602(a)(5)) nonresident-taxation prohibition",
+      "url": "https://code.dccouncil.gov/us/dc/council/code/sections/1-206.02",
       "verifiedOn": "2026-08-20",
-      "verifiedBy": "cross_source_confirmed across multiple sources (a state-and-local-tax law blog, a fiscal policy institute analysis) agreeing: 'The federal 1973 Home Rule Act gave the District the power to levy taxes, including income taxes, but it barred the District from taxing the personal income of nonresidents.' A genuinely different, BROADER mechanism than reciprocity as modelled anywhere else in this project -- not a bilateral agreement with 2-4 named states, but a blanket federal-statutory prohibition applying to residents of ALL 50 states equally."
+      "verifiedBy": "Primary text read 2026-10-18 (D.C. Code § 1-206.02(a)(5): the Council may not '(5) Impose any tax on the whole or any portion of the personal income, either directly or at the source thereof, of any individual not a resident of the District'); the earlier citation to § 47-1806.04 was wrong (that section covers credits). Earlier cross_source_confirmed across multiple sources (a state-and-local-tax law blog, a fiscal policy institute analysis) agreeing: 'The federal 1973 Home Rule Act gave the District the power to levy taxes, including income taxes, but it barred the District from taxing the personal income of nonresidents.' A genuinely different, BROADER mechanism than reciprocity as modelled anywhere else in this project -- not a bilateral agreement with 2-4 named states, but a blanket federal-statutory prohibition applying to residents of ALL 50 states equally."
     },
     {
       "title": "DC Universal Paid Leave (UPL) 0.75% employer-only rate",
