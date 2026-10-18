@@ -13,7 +13,8 @@
   "IN": "County income tax rate changes and a prior-table switch (rateChanges / priorTable in data/local/IN-counties-*.json, e.g. 2026-10-01).",
   "KY": "Local occupational license taxes change on city and county ordinance dates (12 dated rateChanges in data/local/KY-occupational-*.json).",
   "MI": "City income taxes (24 cities) are set by city ordinance or vote, not on a fixed date; the registry is in data/local/MI-cities-*.json.",
-  "PA": "Local earned-income and local-services taxes: 2,600+ taxing bodies with dated rateChanges (data/local/PA-EIT-LST-*.json, e.g. 2025-04-01)."
+  "PA": "Local earned-income and local-services taxes: 2,600+ taxing bodies with dated rateChanges (data/local/PA-EIT-LST-*.json, e.g. 2025-04-01).",
+  "SC": "Act 110 of 2026 (signed 2026-03-30) changed the income tax brackets retroactive to 2026-01-01, but SCDOR had not reissued its withholding formula as of 2026-10-18 (IL26-20); a revised WH-1603F can appear on any date (data/states/SC-2026.json knownGaps)."
  },
  "excluded": {
   "AK": "No state income tax on wages.",
@@ -48,7 +49,6 @@
   "OK": "No unscheduled mid-year change documented in the repo's 2025-2027 data; rates and tables change on January 1.",
   "OR": "No unscheduled mid-year change documented in the repo's 2025-2027 data; rates and tables change on January 1.",
   "RI": "No unscheduled mid-year change documented in the repo's 2025-2027 data; rates and tables change on January 1.",
-  "SC": "No unscheduled mid-year change documented in the repo's 2025-2027 data; rates and tables change on January 1.",
   "SD": "No state income tax on wages.",
   "TN": "No state income tax on wages or salaries.",
   "TX": "No state income tax on wages.",
