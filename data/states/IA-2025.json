@@ -45,6 +45,12 @@
     },
     "legacyAllowanceAmount": 40
   },
+  "supplementalWages": {
+    "flatRate": 0.038,
+    "appliesWhen": "paid_separately",
+    "source": "Iowa Department of Revenue, Iowa Withholding Tax Information (revenue.iowa.gov/taxes/tax-guidance/withholding-tax/iowa-withholding-tax-information, read 2026-10-18), Supplemental Wages: 'If federal income tax is withheld on a flat rate basis, Iowa income tax is required to be withheld at the highest rate applicable to individuals (3.8%). However, if the supplemental wage payment is included with the regular wage payment, the two are combined and the withholding tables or formulas are used.' (IAC 701-307.2(1)\"c\"). The engine always withholds federal tax on supplemental cash at the flat rate, so Iowa follows unconditionally, as for Kansas.",
+    "confidence": "primary_source_confirmed"
+  },
   "reciprocity": {
     "reciprocalStates": [
       "IL"

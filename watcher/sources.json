@@ -2232,6 +2232,89 @@
    ]
   },
   {
+   "id": "sc-e541c3c2bc",
+   "jurisdiction": "SC",
+   "title": "S.C. Code Ann. \u00a7 15-39-410 \u2014 earnings of the debtor for personal services excluded from property reachable to satisfy a judgment",
+   "url": "https://www.scstatehouse.gov/code/t15c039.php",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "sc-24b8143df9",
+   "jurisdiction": "SC",
+   "title": "SC Department of Employment and Workforce -- 2026 Tax Rate Cuts Press Release",
+   "url": "https://dew.sc.gov/news/2025-11/2026-tax-rate-cuts-press-release",
+   "origin": "data",
+   "used_by": [
+    "data/states/SC-2026.json",
+    "data/states/SC-2027.json"
+   ]
+  },
+  {
+   "id": "sc-5d02c5449a",
+   "jurisdiction": "SC",
+   "title": "SC Information Letter #26-20 (Aug. 31, 2026) -- Individual Income Tax Reform (Act 110 of 2026)",
+   "url": "https://dor.sc.gov/sites/dor/files/policies/IL26-20.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/SC-2026.json"
+   ]
+  },
+  {
+   "id": "sc-2e69ba108d",
+   "jurisdiction": "SC",
+   "title": "SC W-4 (Rev. 12/5/25) -- South Carolina Employee's Withholding Allowance Certificate, 2026",
+   "url": "https://dor.sc.gov/sites/dor/files/forms/SCW4_2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/SC-2026.json",
+    "data/states/SC-2027.json"
+   ]
+  },
+  {
+   "id": "sc-ae1c44cead",
+   "jurisdiction": "SC",
+   "title": "South Carolina DOR -- WH-1603F Formula for Computing South Carolina 2025 Withholding Tax (Rev. 11/12/24)",
+   "url": "https://dor.sc.gov/sites/dor/files/forms/WH1603F_2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/SC-2025.json"
+   ]
+  },
+  {
+   "id": "sc-f29ced8fb2",
+   "jurisdiction": "SC",
+   "title": "South Carolina withholding",
+   "url": "https://dor.sc.gov/withholding",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "sc-25117bc99e",
+   "jurisdiction": "SC",
+   "title": "WH-105 (Rev. 2/13/23) -- South Carolina Withholding Tax Information Guide",
+   "url": "https://dor.sc.gov/sites/dor/files/forms/WH105.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/SC-2026.json",
+    "data/states/SC-2027.json"
+   ]
+  },
+  {
+   "id": "sc-059afd732f",
+   "jurisdiction": "SC",
+   "title": "WH-1603F (Rev. 11/4/25) -- Formula for Computing South Carolina 2026 Withholding Tax",
+   "url": "https://dor.sc.gov/sites/dor/files/forms/WH1603F_2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/SC-2026.json",
+    "data/states/SC-2027.json"
+   ]
+  },
+  {
    "id": "ut-895cbf06ed",
    "jurisdiction": "UT",
    "title": "Utah Pub 14 page",

@@ -261,6 +261,12 @@
     ],
     "bracketStructureNote": "REVISED 2026-09-23 for HB 1001 / SB 1 (2026 fiscal session), which cut the top individual rate from 3.9% to 3.7% retroactive to 2026-01-01; DFA reissued the Formula Method (same 'Effective 01/01/2026' header, now at dfa.arkansas.gov/wp-content/uploads/Withholding-Tax-Formula.pdf) with 3.7% brackets, and PaycheckCity's check-date-08/28/2026 results confirm the new table is live. 34 bands: from $26,400 to $94,700 the rate is 3.7% less $367.16; from $94,701 to $97,600 the rate stays 3.7% while the adjustment steps down $10.00 every $100 ($369.90 to $89.90, transcribed exactly as published, including the first fine band's adjustment sitting above the wide band's); $97,601 and over is 3.7% less $79.90. Lower four brackets, the $2,470 standard deduction and the $29 credit are unchanged from the original January release."
   },
+  "supplementalWages": {
+    "flatRate": 0.039,
+    "appliesWhen": "always",
+    "source": "2025 rate: the instructions' 3.7% followed HB 1001's 2026 cut; the prior rate was the 3.9% top bracket (EY, taxnews.ey.com/news/2026-1239). Not read from a 2025 DFA edition.",
+    "confidence": "secondary_source"
+  },
   "exemptPretax": [
     "section125",
     "hsa",
