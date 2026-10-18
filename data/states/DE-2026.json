@@ -109,6 +109,14 @@
     "annualizeMultiplierComment": "Verbatim from Section 17: 'Multiply the daily gross by 300, weekly gross by 52, monthly gross by 12, semi-monthly gross by 24 and bi-weekly by 26.' Daily's x300 is NOT this engine's generic 260-workday PERIODS_PER_YEAR convention -- deliberately kept as Delaware's own published multiplier rather than silently using the engine default, the same fix New Jersey's daily table needed. Quarterly/semiannual/annual are not published by the Guide at all and are left absent -- delawareWithholding() throws a clear error for those rather than guessing.",
     "certificateFields": "input.workState.certificate.{maritalStatus ('mfj' selects married; anything else -- including 'single', 'mfs', or absent -- selects single, matching the Guide's Section 15(a) no-certificate default of 'a single person who has no withholding allowances'), exemptions (a single count -- the RESULT of Form DE-W4R's own Line G/10 worksheet, which the engine does not itself compute; the caller supplies the final number, same convention as Michigan's single allowances count)}."
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Employer's Guide s.2: Delaware withholding is required 'provided such payments are subject to withholding under the Internal Revenue Code'. No category named; federal conformity.",
+    "sources": [
+      "https://revenue.delaware.gov/employers-guide-withholding-regulations-employers-duties/"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

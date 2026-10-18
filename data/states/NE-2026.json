@@ -184,6 +184,14 @@
     "bracketsComment": "'Single' schedule is labelled 'SINGLE Person-Including Head of Household' and 'Married' is 'MARRIED Person-Including Surviving Spouse' in Circular EN's own table headers — i.e. Nebraska's own withholding table explicitly folds HOH into single (not this engine's usual disclosed simplification; the source says so directly, the same rare case Kansas's KW-100 was). EVERY one of Circular EN's 8 published per-period tables is now recorded here VERBATIM (not derived from the annual figure) — daily/weekly/biweekly/semimonthly/monthly/quarterly/semiannual/annual, both statuses. This SUPERSEDES an earlier version of this file that only had the annual table and derived the rest by division; that approximation is no longer needed or used now that the real tables are in hand. One cross-check worth keeping on record: the QUARTERLY table's own printed base at the $10,033 boundary is 243.24, while dividing the ANNUAL table's corresponding base (972.93) by 4 gives 243.2325, which rounds to 243.23 — a one-cent difference between the real published table and what naive division would have produced, exactly the kind of drift that would have gone unnoticed had the approximation been kept instead of replaced."
   },
   "supplementalComment": "Circular EN: if supplemental wages (bonus, commission, overtime, severance, sales awards) are paid WITH regular wages, treat the total as one payment through the normal formula. If paid separately, either (a) aggregate with the current or immediately preceding period's regular wages and net out tax already withheld — the engine's default — or (b) withhold a flat 3.5% (notably NOT Nebraska's top marginal rate of 4.60%, unlike most other states' flat-supplemental conventions in this project), computed by flatRateSupplementalFromConfig() only when the employer elects it (input.employer.supplementalFlatRateElection).",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "2026 Circular EN: 'All amounts determined to be wages and subject to federal income tax withholding are also wages for Nebraska purposes'; Neb. Reg. 21-002.11E: wages exclude employer contributions to retirement plans (401(k)) not subject to federal withholding; Department FAQ treats cafeteria-plan benefits as tax-qualified deductions. HSA and commuter: federal conformity assumed.",
+    "sources": [
+      "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026cir_en_whole.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

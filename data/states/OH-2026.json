@@ -282,6 +282,12 @@
   },
   "supplementalRate": 0.0275,
   "supplementalComment": "Flat 2.75% on bonuses/supplemental wages, in effect since 2026-01-01 and UNCHANGED by the August 1 bracket update — confirmed as a separate fact, not assumed to move with the regular-wage tables.",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "ORC 5747.06(A) withholds on compensation 'included in the employee's adjusted gross income'; ORC 5747.01(A) starts from federal AGI with no add-back for these categories. No Ohio guide names categories; federal conformity.",
+    "sources": [],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

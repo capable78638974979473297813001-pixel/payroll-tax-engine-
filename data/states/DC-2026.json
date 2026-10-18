@@ -90,6 +90,14 @@
     },
     "noCertificateDefault": "Zero allowances, no standard deduction. OTR FR-230 (2018, the last edition OTR printed): 'If a DC RESIDENT EMPLOYEE fails to furnish a certificate, the employer is required to withhold DC income tax as if the employee had not claimed any withholding allowances.' Also: 'The standard deduction will not be used in the withholding calculation.' (https://otr.cfo.dc.gov/sites/default/files/dc/sites/otr/publication/attachments/2018%20FR-230_12.13.17.pdf)"
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "D.C. Code 47-1801.04: 'Wages' means wages as defined in IRC 3401(a). OTR's FR-230 (2018) names no pre-tax category; federal conformity.",
+    "sources": [
+      "https://code.dccouncil.gov/us/dc/council/code/sections/47-1801.04"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

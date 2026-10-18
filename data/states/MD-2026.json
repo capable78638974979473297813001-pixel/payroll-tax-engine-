@@ -327,6 +327,12 @@
       "flat": 0.0225
     }
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "2025 Withholding Guide: wage exceptions 'are similar to the exclusions for federal withholding purposes, so that in most instances wages subject to federal withholding also will be subject to Maryland withholding.' Weakest official evidence in the set; no category named.",
+    "sources": [],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

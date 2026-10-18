@@ -53,6 +53,14 @@
     "finalRounding": "Whole dollar, per the formula document's own instruction: 'You must round the amounts that you withhold from your employees to the nearest whole dollar.'"
   },
   "supplementalComment": "Missouri offers the same two-option shape as several other states in this project: (1) flat 4.7% (the top marginal rate) on supplemental wages paid separately, computed by flatRateSupplementalFromConfig() (src/taxes/state.ts) only when the employer elects it (input.employer.supplementalFlatRateElection, since this state PERMITS the flat rate rather than requiring it), or (2) aggregate with the period's regular wages and net out tax already withheld — the engine's default without an election.",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "2026 Withholding Formula Step 1: 'Refer to Federal Publication 15 for questions concerning gross taxable income.' No category named.",
+    "sources": [
+      "https://dor.mo.gov/forms/Withholding%20Formula_2026.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

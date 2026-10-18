@@ -48,6 +48,14 @@
     },
     "taxableWagesBasis": "Gross taxable wages = federal W-2 Box 1 basis, i.e. gross wages LESS pretax deductions (Form A-4's own instructions: 'It is your gross wages less any pretax deductions, such as your share of health insurance premiums'). This means Arizona's withholding base already excludes 401(k)/125/HSA/etc. by the form's own explicit wording — the clearest, most directly-worded exemptPretax confirmation of any state in this project; no statute-inference chain needed."
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Form A-4 (2026): 'gross taxable wages' are 'the wages that will generally be in box 1 of your federal Form W-2... your gross wages less any pretax deductions'. No per-category text; conforms to W-2 box 1.",
+    "sources": [
+      "https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2026_A-4_f.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

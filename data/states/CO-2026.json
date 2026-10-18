@@ -62,6 +62,14 @@
     },
     "annualizeMultiplierComment": "DR 1098's own Pay Period Table, transcribed verbatim — identical to this engine's own PERIODS_PER_YEAR constant for every one of the 8 frequencies (no NJ-style daily-divisor mismatch to worry about here)."
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage Withholding Tax Guide (Jan 2026): 'Wages that are exempt from federal wage withholding are generally exempt from Colorado wage withholding.' No category named; federal conformity.",
+    "sources": [
+      "https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

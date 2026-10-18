@@ -89,6 +89,14 @@
     "rule": "NONE applicable to 2026. Virginia enacted a mandatory Paid Family and Medical Leave Insurance program in 2026 (signed by Gov. Spanberger, described as the first such program in the South), but its own timeline is explicit: employer contribution rates aren't even announced until October 2027, contributions begin April 2028, and benefits become payable December 2028. This is a real, sourced FUTURE fact, not a current gap -- recorded for forward planning (a 2028-vintage rebuild of this file will need the actual contribution rate once announced) but genuinely NOT a 2026 payroll input, unlike every other paidLeave entry in this project which describes a program already in force or explicitly confirmed absent.",
     "confidence": "cross_source_confirmed via search synthesis; not independently fetched from the Governor's own press release text this pass."
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Va. Code 58.1-460: 'Wages' means wages as defined under IRC 3401(a); Employer Withholding Instructions: 'Virginia law conforms to the federal definition of income subject to withholding.'",
+    "sources": [
+      "https://www.tax.virginia.gov/sites/default/files/vatax-pdf/employer-withholding-instructions.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
   "exemptPretaxComment": "RESOLVED this pass (was previously an open item with no array value at all, which broke the engine outright the moment VA got wired to calc-code -- ctx.taxableWagesFor() requires an array). Confirmed via Code of Virginia sec. 58.1-322: 'Virginia taxable income of a resident individual means his federal adjusted gross income' -- VA starts from FAGI, which already excludes 401(k)/125/HSA/etc. deferrals at the point of measurement, and none of secs. 58.1-322.01/.02's own addition/subtraction lists add those categories back. Same confidence tier as Indiana's/Kentucky's list-read confirmation (a completed statute read confirming absence of add-back), one tier below Michigan's named-enumeration RAB. Does NOT address whether the WITHHOLDING formula's own 'Gross pay' (G) definition in the Guide independently confirms this (it doesn't discuss it directly) -- but VTI's own FAGI-conformity is now source-confirmed regardless of what the Guide itself says, since withholding cannot logically use a broader base than the return-level income the withholding is supposed to approximate.",
   "knownGaps": [

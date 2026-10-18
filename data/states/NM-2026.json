@@ -343,6 +343,14 @@
     "$comment": "New Mexico Workers' Compensation Administration FAQ (workerscomp.nm.gov/faqs/, read directly 2026-09-23): 'a quarterly assessment fee of $4.80 for each covered employee working for their business on the last working day of each quarter ($2.25 is paid by the workers and $2.55 is paid by employers)', filed with Taxation and Revenue on the WC-1. Up from $4.30 ($2.00 / $2.30) under TRD's RPD-41108 instructions; the increase applies from 2025-07-01 (TRD notice: \"the WKC fee per employee has increased from $4.30 to $4.80, effective starting July 1, 2025\"), so all of 2026 uses the new amounts. Domestic servants and farm and ranch laborers are exempt (RPD-41108), mapped to the household/agricultural employment categories; real estate salespersons and 10%+ owner-officers aren't representable here, so those employers pass employer.quarterlyHeadFeeCollection.NM = 'skip'. Collected evenly across the quarter's cheques by default, which is what PaycheckCity does ($0.38 semimonthly, $0.75 monthly, matching to the cent)."
   },
   "roundingComment": "FYI-104's own worked example is cent-precision ($21.80) -- no whole-dollar rounding step anywhere in the document.",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "FYI-104: an employer who withholds federal tax must withhold NM tax; no category named (NM-specific Medical Care Savings Account exclusion is not an HSA). NMSA 7-2-2 starts from federal AGI; federal conformity.",
+    "sources": [
+      "https://realfile.tax.newmexico.gov/FYI-104.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
   "exemptPretaxComment": "Confirmed via NMSA 7-2-2's own text: New Mexico 'base income' for individual taxpayers is federal adjusted gross income (IRC sec. 62) plus a short specific add-back list untouched by 401(k)/125/HSA/FSA elective deferrals. Same evidentiary tier as Virginia's/West Virginia's/Louisiana's FAGI-conformity citations elsewhere in this project -- one inferential step removed from the withholding wage base itself (FYI-104 doesn't independently define 'wages'), but a genuine direct statute read.",
   "additionalOrReducedWithholding": {

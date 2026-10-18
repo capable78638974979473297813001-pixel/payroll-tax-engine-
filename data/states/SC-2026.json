@@ -72,6 +72,15 @@
       "filingStatusNote": "The SC W-4's own Line 3 has a Single/Married/Married-but-withhold-at-higher-Single-rate checkbox, but WH-1603F's formula NEVER references filing status anywhere in its 4 steps -- confirmed by reading the complete formula document, not by omission. The checkbox appears to only inform which worksheet path the employee follows to arrive at an allowance COUNT (page 3 of the SC W-4, not fetched in full this pass), with the actual withholding CALCULATION depending only on that resulting allowance count, unlike most other states in this project where marital status enters the formula directly (a separate deduction table or bracket schedule)."
     }
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "S.C. Code 12-8-520(D)(9) excludes from wages payments to or from employee benefit plans excluded from SC taxable income (covers 401(k), 403(b), 457, 125, FSA, HSA since SC starts from federal). CAVEAT: SC conforms to the IRC only through 12/31/2024 (IL26-4 rev.) and has not adopted the 2026 federal dependent-care increase to $7,500, so dependent_care may be limited to $5,000; not modelled.",
+    "sources": [
+      "https://www.scstatehouse.gov/code/t12c008.php",
+      "https://www.dor.sc.gov/sites/dor/files/policies/IL26-4(revised).pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

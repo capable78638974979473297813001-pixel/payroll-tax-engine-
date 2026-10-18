@@ -157,6 +157,14 @@
     },
     "verifiedExample": "Single, weekly $500, 3 allowances: 26,000 - 3,432 - 4,350 = 18,218 taxable; bracket [14,400-19,200): 288.00 + 5.5% x (18,218-14,400=3,818=209.99) = 497.99/yr / 52 = $9.5767 -> $9.58/wk. Matches Booklet A's own worked example exactly."
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Booklet A s.10 quotes HRS 235-61(a): wages exclude income excluded from gross income by HRS 235-7. DoTAX testimony (SB385, 2017): Hawaii conforms to IRC 223 (HSA). No other category named; federal conformity.",
+    "sources": [
+      "https://files.hawaii.gov/tax/news/pubs/25BkltA.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

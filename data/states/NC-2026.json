@@ -37,6 +37,12 @@
   },
   "roundFinalToWholeDollar": true,
   "roundingComment": "NC-30 states this explicitly on every single formula table page: 'Round off the final amount to the nearest whole dollar.' Uses this project's existing generic rules.roundFinalToWholeDollar mechanism (built for Maine, reused by Virginia) rather than new code.",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "NC-30: 'The term wages has the same meaning as in section 3401 of the Internal Revenue Code'; withhold 'to the same extent required for federal income tax purposes.' No category named.",
+    "sources": [],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
   "exemptPretaxComment": "Confirmed directly, not inferred: NC-30 Section 9 states 'The term wages has the same meaning as in section 3401 of the Internal Revenue Code' and 'Employers are required to withhold on wages to the same extent required for federal income tax purposes.' This ties NC's OWN withholding base definition directly to the federal IRC 3401 wage definition, which already excludes 401(k)/125/HSA/etc. elective deferrals at the point of measurement -- a more direct, on-point citation than most other federal-conformity states in this project (which typically only confirm conformity through the state's OWN taxable-income/AGI statute, one inferential step removed from the withholding base itself).",
   "reciprocity": {

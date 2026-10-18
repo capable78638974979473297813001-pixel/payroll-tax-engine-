@@ -153,6 +153,12 @@
   },
   "roundFinalToWholeDollar": true,
   "roundingComment": "OW-2 states directly: 'Oklahoma withholding computed using the percentage method must be rounded. Round to the nearest whole dollar by dropping any amount under 50 cents and increasing amounts from 50 to 99 cents to the next higher dollar.' Ordinary round-half-up to the whole dollar -- handled generically via rules.roundFinalToWholeDollar in stateIncomeTax(), the same mechanism built for Maine and reused by Virginia/North Carolina/Mississippi.",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "68 O.S. 2385.1(e): 'wages' has the same meaning as in the Internal Revenue Code; OAC 710:90-1-13(d): employer contributions to qualified cash or deferred arrangements are not subject to Oklahoma withholding. Federal conformity.",
+    "sources": [],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
   "exemptPretaxComment": "Oklahoma Statutes Title 68 Sec. 2358 confirms Oklahoma taxable income/AGI is adjusted FROM federal taxable income/AGI -- same evidentiary tier as LA/VA/WV/NM/HI's federal-conformity citations, not an itemized 401(k)/125 list.",
   "reciprocity": {

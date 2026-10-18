@@ -106,6 +106,14 @@
     "noCertificateDefault": "8 percent flat rate (HB 2119, 2019) — a genuinely different no-certificate default shape from every bracket-table state in this project (most default to 'single, zero allowances' run through the normal table; Oregon instead skips the table entirely and applies a flat 8% until a certificate is filed). Also reused as the ALTERNATE flat-rate method for supplemental wages paid separately from regular wages.",
     "noCertificateDefaultRate": 0.08
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "2026 Withholding Formulas FAQ #6: 'wages' excludes 'pre-tax deductions for insurance, cafeteria or flex spending plans (section 125 plans), retirement plans (section 401k, etc.), health savings accounts, etc.' Commuter, dependent care and 403(b) covered by 'etc.'; ORS 316.162(2)(k) excludes governmental 457(b).",
+    "sources": [
+      "https://www.oregon.gov/dor/forms/FormsPubs/withholding-tax-formulas_206-436_2026.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

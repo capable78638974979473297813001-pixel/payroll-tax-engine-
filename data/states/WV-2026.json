@@ -735,6 +735,14 @@
     "rule": "NONE for the private sector. West Virginia has no state-funded mandatory or voluntary Paid Family/Medical Leave program for private employers. SB 114 (2026 Regular Session) created only a narrow 2-year Paid Parental Leave PILOT PROGRAM for STATE EMPLOYEES (up to 12 weeks, birth/adoption/foster placement of a child under 12) -- out of scope for a general private-sector payroll engine, the same convention this project uses for public-employee-only programs.",
     "confidence": "cross_source_confirmed."
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "WV withholding FAQ: 'Compensation subject to Federal withholding is subject to West Virginia withholding.' W. Va. Code 11-21-71(a). Federal conformity.",
+    "sources": [
+      "https://tax.wv.gov/Business/Withholding/Pages/WithholdingTaxQuestionsAndAnswers.aspx"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

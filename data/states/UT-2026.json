@@ -122,6 +122,14 @@
     "statusNote": "Publication 14's own note: 'Use the Single column for taxpayers who file as head-of-household on their federal return' -- HOH folds into single, a direct quote from the source rather than this project's own usual disclosed simplification. True of both tables (the June 2025 revision uses identical language).",
     "noCertificateDefault": "Utah relies entirely on the federal W-4's own filing-status Step 1(c) checkbox -- there is no separate Utah certificate and no stated Utah-specific no-form default beyond whatever the federal W-4 default already is (single, per this engine's own standing convention for a missing/default federal W-4)."
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Pub 14: 'Utah calculates withholding tax based on wages subject to federal withholding tax (as defined by the IRS)' and 'defines wages by the Internal Revenue Code, Section 3401(a)'.",
+    "sources": [
+      "https://files.tax.utah.gov/tax/forms/pubs/pub-14.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

@@ -19,6 +19,15 @@
       "verifiedBy": "Downloaded and text-extracted directly. Covers NYS + NYC + Yonkers on ONE combined form: marital status (Single/HOH, Married, Married-but-withhold-at-higher-single-rate -- a THIRD checkbox, the same shape as Minnesota's W-4MN and Montana's MW-4, now a recurring pattern across states in this project), Line 1 = combined NYS+Yonkers allowance count, Line 2 = a SEPARATE NYC-only allowance count, Lines 3/4/5 = three SEPARATE additional-withholding dollar fields, one per jurisdiction (NYS/NYC/Yonkers) -- genuinely different from every other state's single additionalWithholding field, because NY's own form asks for three independent numbers on one certificate."
     }
   ],
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "NYS-50 income-item table: 401(k)/403(b) 'No, unless subject to federal income tax withholding'; 457 and SIMPLE 'No'; cafeteria/125 'No, if... not subject to federal income tax withholding'; dependent care 'No, unless federal income tax withholding is required'; qualified transportation 'No'. HSA not listed (general rule: federal wages). NARROW EXCEPTION NOT MODELLED: for the NYC IRC 125 flexible benefits program and certain NYC public employers, section 125 amounts are taxable for NYS withholding (Tax Law 671(b)(2)(F)-(G)).",
+    "sources": [
+      "https://www.tax.ny.gov/forms/publications/2024/wt/nys50-1224.htm",
+      "https://www.tax.ny.gov/bus/wt/income_subject.htm"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

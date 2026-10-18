@@ -6,6 +6,14 @@
   "roundFinalToWholeDollar": true,
   "$scopeNote": "STATE income tax + Paid Family & Medical Leave (PFML, employee AND employer shares, contributions began 2025-01-01, benefits available from 2026-05-01). Maine has NO local income tax anywhere and NO reciprocity agreement with any state -- residents working elsewhere instead claim a RETURN-level credit for taxes paid to another jurisdiction (out of scope, same convention as every other state's return-level credit already disclosed in this project, e.g. Connecticut's).",
   "$methodComment": "See maineWithholding()'s own doc comment in src/taxes/state.ts for the full mechanism (phased standard deduction + flat per-allowance amount + progressive bracket, structurally close to Wisconsin's bracketPhaseoutDeduction() but with a genuinely different, easy-to-miss feature: Maine rounds to the nearest WHOLE DOLLAR at multiple intermediate steps, not once at the end -- confirmed against all 3 of the source document's own worked examples, reproduced exactly in tests/engine.test.ts).",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "36 M.R.S. 5250(1): withholding applies where the employer is required to withhold federal tax. MRS Tax Alert (Apr 2005): HSA contributions through a section 125 plan are not subject to Maine withholding. No 2026 MRS text on 401(k)/403(b)/457.",
+    "sources": [
+      "https://www.maine.gov/REVENUE/publications/alerts/2005/2005apr.htm"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
   "exemptPretaxComment": "INFERRED, not directly confirmed: Maine's own 2026 withholding instructions explicitly state 'Maine does not conform to the federal deductions that may be used to reduce the required federal withholding amount' -- but that statement is specifically about federal Form W-4 Step 4(b) (the optional itemized-deductions adjustment line), a genuinely DIFFERENT concept from whether pretax elective deferrals (401(k), section 125, etc.) reduce the wage base BEFORE withholding is computed at all. No source found this session directly addresses pretax-deferral conformity either way, so this reuses the federal-conforming exemptPretax list by inference (standard payroll practice, the same conformity pattern as Michigan/Ohio/Idaho/Connecticut/Iowa/Vermont/Massachusetts in this project) rather than PA's non-conforming empty list -- lower confidence than this project's directly-quoted conformity findings for those states.",
   "sources": [

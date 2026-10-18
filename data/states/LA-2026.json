@@ -64,6 +64,12 @@
   },
   "roundFinalToWholeDollar": false,
   "roundingComment": "R-1306's own worked examples are cent-precision ($13.98, $111.54) -- no whole-dollar rounding step anywhere in the document. roundHalfUp (cent-level) only.",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "LDR FAQ: pre-tax contributions to a qualified cafeteria plan are not subject to state withholding (R.S. 47:111(E)(10)). The statute's wording refers to the Internal Revenue Code of 1954, a latent ambiguity for later items (HSA, IRC 132(f)); LDR reads it as the current Code. No LA text on 401(k)/403(b)/457/HSA/commuter; federal conformity assumed.",
+    "sources": [],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
   "exemptPretaxComment": "Confirmed via LA R.S. 47:293's own text: Louisiana 'tax table income' for residents starts from federal adjusted gross income. Since 401(k)/125/HSA/FSA elective deferrals are excluded from federal AGI before it's ever computed, this is the same one-inferential-step-removed conformity tier as Virginia's/West Virginia's FAGI-conformity citations elsewhere in this project -- not an itemized IRC-section list the way Kentucky's/Arkansas's citations are.",
   "additionalOrReducedWithholding": {

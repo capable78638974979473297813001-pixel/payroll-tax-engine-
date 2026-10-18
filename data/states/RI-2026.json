@@ -218,6 +218,12 @@
   },
   "supplementalRate": 0.0599,
   "supplementalComment": "Flat 5.99% (the top marginal rate) on supplemental wages paid separately from regular wages, per the booklet's own instruction ('The Supplemental withholding rate is 5.99%') — computed by flatRateSupplementalFromConfig() as an XX_SIT_SUPP line, with the bonus carved out of the regular base so it's taxed once. Scoped to a bonus paid on its OWN cheque; paid alongside regular wages, the ordinary tables run on the combined amount, which is what this state's own instruction calls for.",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "RIGL 44-30-71: withholding on wages subject to Rhode Island personal income tax; 2026 booklet: withholding applies when wages are subject to federal income tax withholding. Federal conformity.",
+    "sources": [],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

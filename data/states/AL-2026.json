@@ -74,6 +74,15 @@
       ]
     }
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Official category text: withholding booklet (Rev 01/26) 'Exclusions From Withholding Tax' names IRC 125, 219, 401(k), 401(k) SIMPLE, 403(b), 408(k), 408(k)(6), 408(p), 457 as 'not subject to withholding tax'. ADOR Rule 810-3-14-.02(1) (gross-income rule) excludes amounts under IRC 125, 132 and 129, which supports commuter and dependent_care. hsa and fsa are not named in the booklet: fsa rides on section 125; hsa is inferred from ADOR's Current Issues note that pre-tax HSA contributions are not deductible (already outside wages).",
+    "sources": [
+      "https://www.revenue.alabama.gov/wp-content/uploads/2026/01/whbooklet_0126.pdf",
+      "https://www.revenue.alabama.gov/wp-content/uploads/2021/12/810-3-14-.02.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
   "exemptPretaxComment": "Confirmed directly: the withholding booklet states 'the terms employer, employee, and wages have the same meaning as defined [federally]' and separately names '401(K) - Cash or Deferred Arrangement' and '401(K) Simple' among categories addressed by that federal-conformity framing. Same confidence tier as North Carolina's IRC 3401 citation.",
     "supplementalWages": {

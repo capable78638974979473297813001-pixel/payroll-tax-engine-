@@ -75,6 +75,14 @@
     "rule": "Supplemental wages (bonuses, commissions — anything 'paid to an employee by the individual's employer in addition to regular wages') paid on the SAME cheque as regular wages are aggregated and taxed as a single payment — exactly what src/taxes/state.ts's flatRateFixedDeduction() does with no special-casing, since it just taxes ctx.taxableWagesFor(exempt) as a whole regardless of each earning's category. Supplemental wages paid on a SEPARATE cheque are aggregated with the CURRENT or LAST PRECEDING regular payroll period by aggregateWithPriorRegularPayment() (gated by this file's supplementalAggregation block below) when the caller supplies input.priorRegularPayment.",
     "engineGap": "The separate-cheque case is NOT modelled. A standalone bonus run through calculatePaycheck() by itself (only a supplemental earning, no regular wages in that call) gets the full $3,360 deduction applied to it as if it were a complete period's only wages — which both UNDER-withholds relative to 103 KAR 18:070 (the deduction should have already been consumed by the regular wages it's supposed to aggregate with) and has no way to reach back into a prior calculatePaycheck() call's data even if the engine wanted to. Same class of disclosed cross-period gap as Indiana's 30-day nonresident rule and Michigan's Renaissance Zone."
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "42A003: wages 'mean the same as defined in Section 3401 of the Internal Revenue Code currently in effect for Kentucky'; wages subject to federal withholding are subject to Kentucky withholding. No category named; federal conformity.",
+    "sources": [
+      "https://revenue.ky.gov/Forms/42A003.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

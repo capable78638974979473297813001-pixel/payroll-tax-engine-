@@ -60,6 +60,14 @@
   },
   "supplementalRate": 0.0495,
   "supplementalComment": "UPGRADED 2026-08-12, though still short of an explicit quote: searched Illinois's own tax.illinois.gov site directly for the phrases 'supplemental wages' and 'supplemental withholding' — ZERO indexed results for either. Also read Pub-130 (the document that would be expected to define this if it existed) in full: no mention of a supplemental category anywhere. This is now a confirmed ABSENCE, not just an inference from structure — Illinois's own guidance apparatus does not appear to define a 'supplemental wages' concept at all, consistent with a single uniform flat rate applying to all compensation types without a special bonus rate. Still one tier below Indiana's supplementalRate (which has a direct quoted statement); this is 'searched and found nothing' rather than 'found an explicit yes.'",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "86 Ill. Adm. Code 100.7000 / 35 ILCS 5/701(a): no withholding on compensation 'of a character which is not subject to federal income tax withholding' (letter ruling IT 14-0005-GIL). No category named; federal conformity.",
+    "sources": [
+      "https://taxarchive.illinois.gov/content/dam/soi/en/web/taxarchive/research/legal/letter-rulings/income-tax/2014/it-14-0005.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",

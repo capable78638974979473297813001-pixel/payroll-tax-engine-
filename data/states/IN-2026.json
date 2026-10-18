@@ -68,6 +68,14 @@
   },
   "supplementalRate": 0.0295,
   "supplementalComment": "CONFIRMED 2026-08-12, no longer an inference: PayrollOrg's PayState Update states directly, 'the state withholding tax rate decreases to 2.95% from 3%. This means that the state supplemental wage tax rate will decrease to 2.95% from 3%.' Indiana's supplemental rate tracks the regular flat rate exactly (unlike Ohio's separately-set 2.75%). Departmental Notice #1 itself still does not use the word 'supplemental' anywhere in its own text — this confirmation comes from the professional payroll trade body's reporting on the same DN1 revision, not from DN1 directly — but it is now a quoted statement, not a structural guess.",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "IC 6-3-4-8(a): withholding applies to employers 'required under the provisions of the Internal Revenue Code to withhold'; IC 6-3-1-3.5(f)(3) references IRC 223(c)(2)(E) (HSA conformity). Departmental Notice #1 names no category; federal conformity.",
+    "sources": [
+      "https://iga.in.gov/ic/2026/Title_6/Article_3.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",
