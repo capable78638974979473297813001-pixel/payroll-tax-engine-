@@ -175,6 +175,13 @@
     "No paid-family-leave or disability program exists in Utah as far as this session found -- correctly absent, not an oversight.",
     "Supplemental wages: Publication 14 (Rev. 4/26, effective 2026-06-01) was fetched directly and read in full this pass -- the entire document contains ZERO mentions of \"bonus\" or \"supplemental\" anywhere. Some third-party payroll guides claim a separate Utah flat supplemental rate (a commonly cited figure is 4.65%) -- checked directly against the primary source and found NO SUCH RATE or mechanism in the current guide. A standalone bonus therefore runs through the same flat-rate-with-phaseout-allowance formula as any other wages, which is what this engine already does by default -- the same conclusion already reached for South Carolina and Louisiana/Oklahoma/Vermont in this project, each checked directly rather than assumed."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $50,700; range 0.1-7.1%; social cost 0.001; no fixed new-employer rate.",
+    "sources": [
+      "https://jobs.utah.gov/ui/employer/public/Questions/TaxRates.aspx"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 50700,

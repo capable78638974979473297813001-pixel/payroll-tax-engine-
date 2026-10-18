@@ -107,6 +107,13 @@
     "The 2026 Paid Family and Medical Leave program's contribution rate (not yet announced as of this pass -- due October 2027) is obviously not capturable yet; this file only records the timeline, not a rate.",
     "VA-4's own de minimis / no-liability exemption conditions (Line 3(a)/(b): no VA tax liability last year, or VAGI below $11,950 single / $23,900 married) were transcribed but not cross-checked against this engine's existing generic nonresidentDeMinimisReason()/applyStateWithholdingExemption() mechanism for fit -- a plausible future reuse, not evaluated this pass."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $8,000; base new-employer rate 2.5% plus add-ons; range 0.1-6.2%. The repo's 2.73% depends on add-ons (fund-building charge, 2026 pool-cost 0.03%) not confirmed from a primary source.",
+    "sources": [
+      "https://vec.virginia.gov/frequently-asked-questions"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 8000,

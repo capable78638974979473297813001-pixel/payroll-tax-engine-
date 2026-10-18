@@ -231,6 +231,13 @@
     "UI rate/wage-base figures and the reciprocity mechanism's exact deadlines are cross-source only, not independently fetched from a ND government page this pass -- one tier below this file's own withholding-booklet sourcing.",
     "Local-tax and paid-leave 'none' claims are cross-source confirmed only, not tied to a specific ND Century Code citation."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $46,600; new employer 1.00% (non-construction); range 0.07-9.67%.",
+    "sources": [
+      "https://www.jobsnd.com/sites/www/files/documents/jsnd-documents/uitaxrateschedules2026.pdf"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 46600,

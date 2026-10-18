@@ -236,6 +236,13 @@
     "Local occupational tax: CORRECTED, then NORMALIZED, then WIRED — 227 of 230 authoritative jurisdictions have a captured rate. CORRECTED 2026-08-31: the “39 confirmed decimal wage rate” figure on this line was stale and contradicted the local file's own “122” claim elsewhere in the project; ground truth counted directly from data/local/KY-occupational-2026.json is 131 (127 of 250 scraped rows carry a flat wageRateDecimal, 2 more use a resident/nonresident split instead, plus Louisville Metro and Lexington-Fayette which also use the split shape) — see that file's coverage note for the corrected count. kentuckyLocalTax() in src/taxes/state.ts now actually computes it, including the KRS 68.197 city-vs-county credit and the KRS 67.750(2) inverted pretax base (see localOccupationalTax.knownGap above for exactly what remains open, most notably that the credit mechanism's population-tier applicability isn't individually verified per county).",
     "The 103 KAR 18:070 fetch is captioned effective 2026-07-27 by its own source page; whether it differs from what was in force earlier in 2026 was not checked."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $12,000; new employer 2.7%; Schedule A 0.30-9.00%; no 2026 surcharge seen.",
+    "sources": [
+      "https://ui.ky.gov"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 12000,

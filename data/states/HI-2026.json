@@ -211,6 +211,14 @@
     "CLOSED 2026-09-02: reciprocity absence is now primary-source confirmed, not just cross-source. Fetched this file's own already-cited source (25BkltA.pdf, Hawaii's Booklet A Employer's Tax Guide, files.hawaii.gov -- WebFetch itself returned 403, so fetched via curl and extracted with pypdfium2) and searched all 112 pages directly for 'reciproc' -- zero matches anywhere in the document. The document DOES cover the two real cross-border exceptions Hawaii's withholding law actually has (a qualifying nonresident's 60-day-or-fewer exemption, Section 10(a), and the Military Spouses Residency Relief Act, Section 10(b)) in detail, so this isn't a case of the guide being silent on nonresident treatment generally -- it specifically has nothing resembling a bilateral reciprocal-withholding-exemption agreement with any other state, the same 'searched directly, zero mentions' confirmation tier this project already uses for New York's and Alabama's own reciprocity-absence claims.",
     "Supplemental wages: Booklet A Section 14(e) offers ONLY the aggregate method (current or last-preceding payroll period), no separate flat rate -- wired via the existing supplementalAggregation mechanism, which requires the caller to supply input.priorRegularPayment. Without it, a standalone bonus cheque falls back to this engine's existing default (annualize the bonus alone through the ordinary formula), same as every other supplementalAggregation state when the caller has no prior-payment data."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI $64,500 / 2.40% / max 5.60% / E&T 0.01%; TDI employee 0.5% capped at $7.50 weekly deduction.",
+    "sources": [
+      "https://labor.hawaii.gov/ui/tax-rate-schedule-and-weekly-benefit-amount/",
+      "https://labor.hawaii.gov/dcd/files/2025/12/2026-Maximum-Weekly-Wage-Base.pdf"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 64500,

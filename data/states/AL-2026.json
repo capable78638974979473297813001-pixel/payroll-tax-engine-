@@ -200,6 +200,13 @@
     "Form A4-MS (nonresident military spouse) is reproduced inside the booklet and its conditions are recorded under federalLawExemptions, but the form's own seven true/false eligibility questions are not modelled -- the caller adjudicates them and sets certificate.exempt.",
     "Employer-side UC figures ($8,000 base, 2.7% new-employer, 0.20%-6.80% experienced) remain cross-source confirmed rather than independently fetched from labor.alabama.gov -- see unemploymentInsurance.knownGap."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Statutory: wage base $8,000, new employer 2.70%, range 0.20-6.80% incl. 0.06% ESA (ADOL Employer Handbook). No 2026-specific rate page was retrievable; the 2026 range is not confirmed.",
+    "sources": [
+      "https://labor.alabama.gov/docs/guides/uc_emp_handbook_rev_2021.pdf"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 8000,

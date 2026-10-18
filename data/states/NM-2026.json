@@ -391,6 +391,13 @@
     "Gambling-winnings withholding (6%) and pension/annuity withholding are documented in FYI-104 but out of scope for a wage-withholding-only engine, same convention as every other state's out-of-scope withholding categories in this project.",
     "The 'married but elected higher-single-rate for federal purposes' instruction describes the PRE-2020 federal W-4's Line 3 checkbox, which doesn't exist on the 2020+ form this project's federalW4 model represents -- disclosed as inapplicable legacy guidance, not modelled."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $34,800. The 1% new-employer floor and industry rates up to 1.28% match secondary sources only (no primary rate table found).",
+    "sources": [
+      "https://www.dws.state.nm.us/UI-Tax-Information"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 34800,

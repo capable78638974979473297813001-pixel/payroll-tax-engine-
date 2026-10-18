@@ -3121,6 +3121,14 @@
     "Nonresident partial-Connecticut-service allocation (Form CT-W4NA, the percentage-of-services-in-Connecticut mechanism in Circular CT's Examples 8-10) is applied via applyNonresidentAllocation() (src/taxes/state.ts), which scales this state's income tax by certificate.nonresidentAllocationFraction. The engine does not compute that fraction itself \u2014 Connecticut's own percentage-of-services test is a fact only the caller has.",
     "Every pay frequency this engine supports (weekly/biweekly/semimonthly/monthly/quarterly/semiannual/annual/daily) works correctly with this method, unlike the per-period-TABLE states (NY/NJ/Montana/Idaho) which hard-stop on unpublished frequencies -- Connecticut's formula annualizes via ctx.periodsPerYear directly (Steps 3 and 13), so there is no per-frequency table to be missing rows from."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI $27,000 / 1.90% / 1.10-9.90%; PFML 0.5% employee up to the Social Security wage base, no employer match.",
+    "sources": [
+      "https://portal.ct.gov/dol",
+      "https://ctpaidleave.org"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters \u2014 the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 27000,

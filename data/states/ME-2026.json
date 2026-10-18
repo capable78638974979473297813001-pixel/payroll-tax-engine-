@@ -129,6 +129,13 @@
     "pfmlSmallEmployerDiscretion": "CLOSED on the 'fix it, find a way' pass: certificate.paidLeaveEmployeeRateOverride (a new generic field on the SHARED statePaidLeaveEmployeeTax(), not Maine-specific) lets a caller who knows a specific small employer's own chosen rate supply it directly, while the 0.5% default remains correct for the common case (Maine's own FAQ: 'no more than 0.5 percent can come from the employee' applies as the statutory MAXIMUM to BOTH the 15+ and under-15 tiers identically -- there was never a formula difference in the employee's own cap, only in whether the EMPLOYER'S net cost is zero or 0.5%, which this file already handles via the existing employerLiableForPaidLeaveShare gate).",
     "tribalExemptionGranularity": "CLOSED on the 'fix it, find a way' pass: certificate.exemptWages (cents, this pay period) added to maineWithholding() lets a caller exclude just the tribal-land-sourced portion of wages from the taxable base, rather than the all-or-nothing certificate.exempt flag. The caller still determines eligibility and the dollar split (the same boundary as every exemption in this project) -- this only removes the previous forced choice between 'exempt the whole cheque' and 'exempt nothing' for a genuinely mixed tribal/non-tribal pay period."
   },
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI $12,000; new employer 2.23% + CSSF 0.14% + UPAF 0.17% = 2.54%; range 0.31-6.60%. PFML 1% for 15+ employees, employer may deduct up to half, cap = Social Security base.",
+    "sources": [
+      "https://www.maine.gov/unemployment/docs/2026/employers/uitaxrates2026.pdf"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 12000,

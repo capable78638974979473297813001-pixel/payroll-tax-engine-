@@ -257,6 +257,13 @@
     "Supplemental wages Methods 1 and 2 (combining with a prior period's regular wages) are computed through aggregateWithPriorRegularPayment(), which takes the prior regular payment as input.priorRegularPayment, taxes the combined amount through Montana's own table, and subtracts the tax already withheld from that payment; Method 3's flat line stands down when they run — the methods are alternatives, not partners.",
     "UI penalty-rate mechanic, governmental/reimbursable no-wage-cap rule, and the UI-vs-income-tax wage-base distinction are documented but, consistent with every other state's employer-paid UI in this project, not computed by this engine at all — no per-employer experience-rating, delinquency-status, or employer-type-classification input exists anywhere in types.ts."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $47,300; range 0.00-6.12%; administrative fund tax 0.18% (0.13% classes 1-2); new-employer rate by industry.",
+    "sources": [
+      "https://uid.dli.mt.gov/_docs/contributions-bureau/Rate-Explanation.pdf"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 47300,

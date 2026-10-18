@@ -290,6 +290,13 @@
     "resolveIDMaritalStatus's no-form default (single) is this project's standing convention, not a rule stated anywhere in Idaho's own EPB00744, ictcat, W-4, or computing-withholding pages — none of them say what to withhold absent a form beyond 'you must have a Form W-4 on file.'",
     "nonresidentAlienAdjustment only publishes weekly/biweekly/semimonthly/monthly — Form ID W-4's own Pay Period table stops there (no quarterly/semiannual/daily/annual row), so bracketTwoStatusPerPeriod() falls back to $0 additional withholding for a nonresident alien on any of those less-common frequencies rather than guessing an interpolated figure."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $58,300; standard rate 1%; positive classes 0.208-0.694%, deficit classes up to 5.4%.",
+    "sources": [
+      "https://www2.labor.idaho.gov"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 58300,

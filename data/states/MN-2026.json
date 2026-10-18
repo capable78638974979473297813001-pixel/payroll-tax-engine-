@@ -297,6 +297,14 @@
     "RESOLVED, in both DATA and CODE: nonresident alien employees are now handled via certificate.nonresidentAlien, which reuses federal.ts's own new Pub 15-T Table 2 adjustment table (data/federal/2026.json's incomeTax.nonresidentAlienAdjustment) rather than duplicating the dollar figures -- proven in tests/engine.test.ts for both US_FIT and MN_SIT. DISCLOSED, not silently resolved: W-4MN's own instructions literally say 'Table 1' (the pre-2020-W-4 table), but this engine's FederalW4/certificate model only ever represents a 2020+-style form, so Table 2 -- the table that actually matches what this engine's inputs represent -- is what's used; that apparent mismatch in MN's own source text is recorded in nonresidentAlienProcedure above, not quietly smoothed over. Nonresident alien STUDENTS FROM INDIA and business apprentices remain out of scope (Pub 15-T's own carve-out; the caller is responsible for not setting the flag for that population).",
     "RESOLVED, in both DATA and CODE: Form W-4MN's third marital-status checkbox ('Married, but withhold at higher Single rate') is now an explicitly recognized value (certificate.maritalStatus:'married_withhold_as_single'), correctly resolving to the SINGLE bracket schedule -- proven with a fixture showing it produces a genuinely different number than the married schedule would. An unrecognized maritalStatus value now THROWS instead of silently defaulting to single, so a typo can no longer produce a plausible-looking wrong number -- see resolveMNMaritalStatus() in state.ts."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI wage base $44,000; base rate 0.40% + 14% additional assessment; max 8.90%; new-employer rate is industry-assigned. Paid Leave 0.88% total (employee up to 0.44%), wage cap $185,000, small-employer 0.66%.",
+    "sources": [
+      "https://www.uimn.org/employers/wages-taxes/tax-rates/index.jsp",
+      "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 44000,

@@ -298,6 +298,13 @@
     "Alternative supplemental-wage flat 8% method computed by flatRateSupplementalFromConfig() only on employer election (input.employer.supplementalFlatRateElection); without one the engine aggregates instead.",
     "Nonresident allocation, statewide transit tax self-employment provisions, and OR-40N/OR-40P return-level mechanics are out of scope — payroll withholding only."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI wage base $56,700, new employer 2.4%, range 0.9-5.4%; Paid Leave 1% up to $184,500; Workers' Benefit Fund 1.8 cents an hour. The 0.1% statewide transit tax was not re-checked.",
+    "sources": [
+      "https://www.oregon.gov/employ/businesses/pages/current-tax-rate.aspx"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 56700,

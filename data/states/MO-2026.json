@@ -116,6 +116,13 @@
     "Kansas City's local-tax figures remain cross_source_confirmed — direct fetch was attempted and BLOCKED (Akamai-style bot filtering, same as Wilmington DE). St. Louis's direct fetch attempt 404'd rather than being blocked, meaning the current URL wasn't found. (The RATE itself is now wired into and proven through calc code regardless — this gap is about source confidence tier, not whether the number works.)",
     "Supplemental-wage flat 4.7% method computed by flatRateSupplementalFromConfig() only on employer election (input.employer.supplementalFlatRateElection) — see supplementalComment above."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $9,000; new employer 2.376% (nonprofit 1.0%); range 0.0-6.0%.",
+    "sources": [
+      "https://labor.mo.gov/des/employers/tax-rates"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 9000,

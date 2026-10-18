@@ -254,6 +254,13 @@
     "Supplemental flat-3.5% method computed by flatRateSupplementalFromConfig() only on employer election (input.employer.supplementalFlatRateElection) — see supplementalComment above.",
     "Nonresident/non-wage withholding rules (construction contractors, nonresident personal-services withholding, gambling winnings) are real and documented in Circular EN but out of scope for this pass — payroll-specific wage withholding only."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $9,000; new employer 1.25%; range 0-5.4%. Category 20 wage base $24,000 not modelled.",
+    "sources": [
+      "https://dol.nebraska.gov/webdocs/Resources/Items/2026%20UI%20guide%20to%20understanding.pdf"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 9000,

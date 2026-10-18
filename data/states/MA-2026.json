@@ -126,6 +126,13 @@
     "exemptPretax rests on an inference (MA's general IRC conformity, standard payroll practice) rather than a directly-quoted Circular M wage definition -- see exemptPretaxComment.",
     "Supplemental wages paid on a separate cheque from regular wages: this engine models one calculatePaycheck() call at a time and cannot look back at a prior regular cheque -- same disclosed class of gap as every other state without a distinct supplemental method in this project. RE-CHECKED this pass via the USDA NFC bulletin already cited in this file (the same independent federal payroll shared-service source class used elsewhere in this project): it describes a single 5%/9%-surtax formula with no bonus/supplemental section at all, corroborating that no separate mechanism exists to miss."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI new employer 2.42% (construction 6.08%); PFML total 0.88%: employee 0.18% family + 0.28% medical = 0.46%, employer 0.42% (25+ employees), capped at the Social Security wage base. EMAC and Workforce Training Fund not modelled. Split changes 2027-01-01 (Ch. 101 of 2026).",
+    "sources": [
+      "https://www.mass.gov/info-details/employer-contributions-to-unemployment"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 15000,

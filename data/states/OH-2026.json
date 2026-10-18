@@ -420,6 +420,13 @@
     "CLOSED (comprehensive-audit pass): municipal income tax (OH_LOCAL, including the ORC 718.121 credit) and School District Income Tax (OH_SDIT) are now both wired into the calc engine — see interMunicipalCredit.knownGap and schoolDistrictIncomeTax.knownGap above for what each covers. Genuinely still open: this engine does not resolve a street address to a municipality/school district itself (the caller must already know certificate.residenceCity/workCity/schoolDistrictCode). CORRECTED 2026-08-31 (both clauses below were stale): JEDD/JEDZ zones are wired via a live coordinate lookup against Ohio's own ArcGIS boundary layer (geocode/districts.ts), not left unwired — see data/local/OH-jedd-jedz-2026.json's own knownGaps for the boundary-layer/rate-row count mismatch that lookup still has to work around. Kentucky's occupational tax is also wired (kentuckyLocalTax() in src/taxes/state.ts) and its own file now has 227 of 230 authoritative jurisdictions captured, not 29 — see data/local/KY-occupational-2026.json's own coverage note for current status.",
     "ORC 5747.06(A) names four MORE withholding exemptions this engine cannot represent: (3) any calendar quarter in which cash pay is under $300 — a dollar threshold, not an employment category, and this engine has no per-employer quarterly-cash-wages tracker for Ohio the way it does for household/agricultural FICA coverage elsewhere; (4) services for a foreign government or international organization; (5) newspaper/shopping-news delivery by a worker under 18; (6) non-business services paid in a medium other than cash. None has a matching EmploymentCategory value — reachable only via the generic certificate.exempt + exemptReason route, same boundary as Alabama's own federal-law exemptions."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $9,000; new employer 2.85% (construction 5.85%); range 0.4-10.1%.",
+    "sources": [
+      "https://jfs.ohio.gov/page/CAJM.hl56rs7cilxWeGzd"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 9000,

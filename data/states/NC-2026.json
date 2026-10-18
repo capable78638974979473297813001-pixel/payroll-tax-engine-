@@ -74,6 +74,13 @@
     "Supplemental wages RECONSIDERED, not a real gap ('fix any and all gaps' pass): NC-30 frames the flat-4.09%-on-supplemental-only treatment as an employer OPTION ('you can use one of these methods'), not a mandate -- the OTHER option it names is aggregation, which is exactly what this engine already does by default (northCarolinaWithholding() runs the full combined wage figure through one formula, with no supplemental/regular split at all). Since NC's flat supplemental rate (4.09%) is numerically IDENTICAL to the regular rate anyway, the two methods only diverge when the employee's allowances/deduction would otherwise apply differently to a same-cheque supplemental payment -- a real but narrow case, not built as a separate opt-in path this pass since the current default is itself one of NC-30's two named sanctioned methods, not an omission.",
     "No test yet exercises stateUnemploymentEmployee-style config since NC has no employee-paid UC component (unlike Pennsylvania) -- not applicable, noted for completeness only."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $34,200; new employer 1.000%; range 0.06-5.76%.",
+    "sources": [
+      "https://www.des.nc.gov/employers/tax-rate-information"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 34200,

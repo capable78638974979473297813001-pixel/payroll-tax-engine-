@@ -50,6 +50,7 @@
     }
   ],
   "knownGaps": [
+    "2026-10-18: AK-2026 was corrected after labor.alaska.gov's 2026 industry table showed the new-employer employer rate is 1.00% (1.50% is the total with the employee's 0.50%). This 2025 file still carries 1.5% for the employer side; the 2025 table was not re-read.",
     "Carried-over descriptive notes aside, this 2025 file models only employer unemployment (and, where the state has them, the employee unemployment, paid-leave, long-term-care and Seattle payroll-expense lines). Anything the 2026 file lists as unmodelled is unmodelled here too."
   ]
 }

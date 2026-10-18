@@ -183,6 +183,13 @@
     "Head-of-household filers are mapped to the 'single' standard-deduction band by engine convention; Publication W-166 itself has no third band, so this isn't a modelling gap so much as a disclosed choice about an ambiguity in the source.",
     "No mechanism exists for the marital-status certificate field beyond the two values Wisconsin's own formula recognizes ('single'/'married') — any other input silently maps to 'single', matching the fallback the formula itself requires but not separately validated or flagged if the caller passes something unexpected."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $14,000; new employer 3.05% (construction 2.50% not modelled).",
+    "sources": [
+      "https://dwd.wisconsin.gov/dwd/forms/ui/pdf/uct-1-e-2026.pdf"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 14000,

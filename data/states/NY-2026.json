@@ -2059,6 +2059,14 @@
     "RESOLVED 2026-09-02 (was previously unconfirmed despite multiple targeted searches): whether PFL's and DBL's own wage bases follow the SAME pretax exclusion list as NYS income tax withholding -- they don't, and PFL/DBL's own empty exemptPretax override (statePaidLeaveEmployee.exemptPretax/stateDisabilityEmployee.exemptPretax, both []) is correct as modelled. Confirmed directly from paidfamilyleave.ny.gov's own 'Cost and Deductions' page (fetched directly this pass): the premium is stated as '0.388% of their gross wages per pay period' -- NY's own PFL program site's own term of art is 'gross wages,' the same phrasing this file's own N-17-12 citation already established for the DIFFERENT (premium-is-after-tax) question, now confirmed for THIS question too from the state's own primary program page rather than assumed by analogy. 'Gross wages' is definitionally the unreduced figure, not a taxable-wages concept that would net out 401(k)/section-125 amounts first -- consistent with, not contradicting, this file's existing empty-list modelling. The Minnesota-style risk this note used to flag (UI wages NOT excluding 401(k) amounts unlike income-tax withholding, so assuming parity across two different taxes' wage definitions would be wrong) did not materialize here: PFL and DBL's wage base is confirmed gross, matching what was already coded, not silently assumed.",
     "RESOLVED: household-employee withholding is voluntary (NYS-50, quoted in this file's own voluntaryWithholdingEmploymentCategories block) -- wired via exemptEmploymentCategoryReason(), defaulting to $0 NY_SIT unless certificate.voluntaryWithholdingAgreement asserts an actual agreement is in place."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI wage base $17,600; new employer 4.1% total (4.025% + 0.075% RSF); range 1.7-9.5%; PFL 0.432% (annual max $411.91); DBL 0.5% capped at 60 cents a week.",
+    "sources": [
+      "https://www.tax.ny.gov/pdf/current_forms/wt/nys45i.pdf",
+      "https://paidfamilyleave.ny.gov/2026"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 17600,

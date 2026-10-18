@@ -268,6 +268,13 @@
     "Convenience withholding (opt-in RI withholding for out-of-state residents) documented but not modelled as a certificate mechanism. CLARIFIED (this pass): no new mechanism is needed. Convenience withholding is an agreement to withhold Rhode Island tax for someone working outside the state, and a caller obtains exactly that by resolving workState to RI for the payment — the engine then withholds RI tax on it in the ordinary way. What this engine deliberately does NOT do is decide on the employee's behalf that such an agreement exists, which is why there is no certificate flag: the agreement is the caller's fact, and setting the work state IS how it is expressed.",
     "Supplemental wages, RESOLVED THIS PASS but with a caveat: RI's own booklet states both a flat 5.99% option (Section 12) and an aggregate-with-last-preceding-period option (Section 4), wired as the same dual-method employer choice Missouri already uses in this project. The 5.99% figure is ALSO exactly RI's own top bracket rate, so it is not certain this is a genuinely independent method rather than Section 12 restating what aggregation converges to for a high earner -- both paths are offered rather than picking one with more confidence than the source supports."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI wage base $30,800; new employer 1.21% incl. 0.21% JDA; range 0.9-9.4%; TDI 1.1% on $100,000. Highest-rate employers' $32,300 base not modelled.",
+    "sources": [
+      "https://dlt.ri.gov/press-releases/2026-tax-rates-unemployment-insurance-and-temporary-disability-insurance"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 30800,

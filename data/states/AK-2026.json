@@ -48,12 +48,20 @@
     "Reciprocity, local-tax, and PFML absence are all cross-source confirmed via search synthesis rather than a direct fetch of a specific Alaska statute this pass -- same tier of confidence as several other no-income-tax states already in this project (TN, FL, SD).",
     "STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $54,200 and employee 0.50% (same cap); employer new-employer rate 1.00% (total 1.50% incl. employee) per the 2026 industry table.",
+    "sources": [
+      "https://labor.alaska.gov/estax/2026-industry-rates.html",
+      "https://labor.alaska.gov/estax/2026-experience-rates.html"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 54200,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
-    "newEmployerRate": 0.015,
-    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "newEmployerRate": 0.01,
+    "newEmployerRateSource": "CORRECTED 2026-10-18 from 0.015 to 0.01, primary: labor.alaska.gov 'UI Tax Rates For New (Industry) Employers, 2026' lists Employer Rate 1.00, Employee Rate 0.50, Total Rate 1.50 for every industry ('The Total Rate = Employer Rate + Employee Rate'). The 1.5% earlier here was the TOTAL; the employee's 0.5% is the separate stateUnemploymentEmployee line. (https://labor.alaska.gov/estax/2026-industry-rates.html)",
     "experienceRange": {
       "min": 0.01,
       "max": 0.054

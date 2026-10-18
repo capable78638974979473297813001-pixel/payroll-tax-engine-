@@ -103,6 +103,13 @@
     "The experience-rated Schedule A/B contribution-rate table is only partially transcribed (4 of many rows) -- not pursued to full completeness because South Dakota has no income tax and the table is unusable without a reserve-ratio input this engine doesn't carry regardless of completeness.",
     "Local-tax and UI figures rest on the DLR's own primary pages (strong) plus one secondary cross-check (onpay.com, not independently fetched in full) -- not a weakness specific to this file, but recorded per this project's standing confidence-tier convention."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $15,000; new employer 1.20% + 0.55% investment fee = 1.75% (construction 6.00% + 0.55%); administrative fee 0.08% for experience-rated employers. Top-rate ceiling conflict noted in suiEmployer.experienceRangeSource.",
+    "sources": [
+      "https://dlr.sd.gov/ra/businesses/faq.aspx"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 15000,

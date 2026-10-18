@@ -128,6 +128,13 @@
     "SC's own 'nonresident contractors', 'rental payments', and 'royalties/prizes/winnings' withholding categories (WH-105) are out of scope for a wage-withholding payroll engine -- correctly not modelled, noted for completeness only.",
     "Supplemental wages: WH-1603F (2026 Formula for Computing South Carolina Withholding Tax) was fetched directly and read in full this pass -- the entire document is 4 steps (annualize, deduct personal allowance + standard deduction, apply the Subtraction/Addition Method bracket, divide by periods) and contains zero mention of bonuses, supplemental wages, or any alternate flat-rate method. Some third-party payroll guides claim a separate SC flat supplemental rate (figures cited ranged inconsistently from 6.00% to 6.2%) -- checked directly against the primary source and found NO SUCH RATE exists in the 2026 formula document. A standalone bonus therefore runs through the same annualize-and-bracket formula as any other wages, which is what this engine already does by default, same as Louisiana/Oklahoma/Vermont in this project."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $14,000; new employer 1.060% (1.000% + 0.060%); range 0.060-5.460%; no 2026 surcharge.",
+    "sources": [
+      "https://www.dew.sc.gov/employers/tax-rate-information"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 14000,

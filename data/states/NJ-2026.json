@@ -1975,6 +1975,13 @@
     "Newark's $2,500/quarter minimum-payroll threshold is an EMPLOYER-AGGREGATE fact (total Newark payroll across every employee, for the whole quarter) that a single calculatePaycheck() call has no way to evaluate -- newarkPayrollTaxEmployer() always computes a nonzero amount whenever this employee's own Newark wages are nonzero, even in the rare case where the employer's true aggregate hasn't yet cleared $2,500 that quarter.",
     "Newark's >50%-Newark-resident-workforce apportionment (ordinance Line 2: excludes the wages of Newark-resident employees ABOVE the 50% threshold from the taxable base entirely) requires certificate.newarkResidentApportionmentExcluded to be set by the CALLER after the employer's own workforce-wide residency determination -- this engine cannot derive, from one employee's own data, whether that employee falls above or below the employer's 50% line. A secondary source described this as a flat 0.50% reduced RATE rather than an exclusion of specific employees' wages; the ordinance's own text (quoted in the code comment) supports the exclusion mechanism, not a blanket rate cut, and that is what's modelled."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI/WF wage base $44,800; July 2026-June 2027 new employer UI 0.026825 + WF/SWF 0.001175 = 2.8%, DI 0.5%; employee UI 0.3825% + WF 0.0425% = 0.425%; employee TDI 0.19% and FLI 0.23% on a $171,100 base.",
+    "sources": [
+      "https://www.nj.gov/labor/ea/employer-services/rate-info/"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 44800,

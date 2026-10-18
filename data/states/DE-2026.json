@@ -186,6 +186,13 @@
     "Daily pay frequency's x300 annualization multiplier is transcribed from the Guide's own formula sentence but not proven against a to-the-cent worked example (none published for 'daily') the way weekly/biweekly/semi-monthly/monthly all are.",
     "Supplemental wages: Delaware's own Employer's Guide describes a distinct annual-marginal method for a bonus paid separately (annualize regular wages alone, separately annualize regular-plus-bonus, withhold the difference) — a genuinely different shape from the \"combine as one per-period payment\" this engine's generic supplementalAggregation mechanism implements. delawareSupplementalAnnualMarginal() (src/taxes/state.ts) implements Delaware's own method exactly: a bonus on its own cheque annualizes the prior regular wage alone (input.priorRegularPayment), separately annualizes regular-plus-bonus, runs both through delawareWithholding()'s own bracket/standard-deduction/exemption-credit formula, and withholds the difference. Falls back to annualizing the bonus alone when the caller supplies no priorRegularPayment. Verified against a hand-derived worked case ($2,000/wk regular + $5,000 standalone bonus, single/0 exemptions -> bonus taxed at exactly 6.6% = $330.00) in tests/engine.test.ts."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI $14,500 / new employer 1.0% / merit range 0.3-5.4%; Paid Leave total 0.80% (parental 0.32%, medical 0.40%, caregiver 0.08%), employee up to 50%, capped at the FICA wage limit.",
+    "sources": [
+      "https://laborfiles.delaware.gov/main/pfl/Employer_and_TPAs_Guide_to_DPL.pdf"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 14500,

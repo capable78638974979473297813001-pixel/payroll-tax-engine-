@@ -217,6 +217,11 @@
     "Reciprocity's CA leg remains genuinely uncertain — see reciprocity.caLegNotIndependentlyVerified. The OR leg was actively checked and found ASYMMETRIC this session (see reciprocity.orAsymmetryConfirmed), which raises rather than lowers suspicion about whether the CA leg is truly mutual too.",
     "RESOLVED: both are reachable via the existing generic certificate.exempt + certificate.exemptReason mechanism (already unconditional for every state) — see this file's own certificateBasedExemptions block for the verbatim Form WEC text. The earlier claim that new certificate fields were needed was incorrect and is corrected here."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $8,000, new employer 2.00%, range 0.03%-8.36% (FY26 UIT-0603A; figures from the agency's search snippet because the PDF blocked fetching). Whether a Job Training surcharge applies is unconfirmed.",
+    "sources": []
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 8000,

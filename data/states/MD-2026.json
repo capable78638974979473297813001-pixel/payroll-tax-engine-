@@ -366,6 +366,13 @@
     "DC leg of reciprocity not independently verified from DC's own primary source this session (see reciprocity.notVerifiedThisSession above).",
     "The lump-sum bonus flat rate (6.50% + county's own top local rate) requires BOTH an employer election (input.employer.supplementalFlatRateElection.MD) AND the bonus to be the ONLY cash on that cheque, and is scoped to residents only (no lump-sum figure was found for the nonresident Special Nonresident Rate case). Without an election, a standalone bonus cheque falls back to this engine's existing default (the ordinary annual-bracket formula on the bonus alone) — the same disclosed approximation every other state without a distinct supplemental mechanism already carries in this project."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $8,500; table A 0.30-7.50%; new employers 1.0%-2.6% (required input is correct).",
+    "sources": [
+      "https://labor.maryland.gov"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 8500,

@@ -149,6 +149,13 @@
     "Reciprocity's INBOUND direction (6 states) IS implemented — see reciprocity.knownGap above. The OUTBOUND direction (a MI resident working in a reciprocal state) remains a genuine, project-wide architecture gap, not MI-specific.",
     "Employer SUTA is computed for Michigan — stateUnemploymentEmployerTax() reads the normalized suiEmployer block, using the employer's own assigned rate when the caller supplies one and the published new-employer rate otherwise. See unemploymentInsurance.knownGap for what's still open (years 3+ experience-rating requires per-employer history this engine doesn't track)."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Default wage base $9,500, reduced to $9,000 for qualifying employers in 2026; new employers 2.7% for the first two years. Experience range not confirmed.",
+    "sources": [
+      "https://www.michigan.gov/uia"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": {

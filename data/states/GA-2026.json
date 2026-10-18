@@ -91,6 +91,13 @@
     "Qualified Overtime Compensation and Cash Tips (a new HB 463 provision, Georgia's own limited-adoption version of the federal overtime/tips exemptions) is named in the guide's 'What's New' section but not independently researched or modelled this pass -- flagged as a real, dated (2026) provision worth a follow-up, not silently ignored.",
     "The SALT-deduction-cap decoupling and other HB 1199 federal-conformity details are noted in the guide but don't bear on wage withholding specifically -- out of scope, noted for completeness only."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $9,500, 'total tax rate of 2.70 percent' for new employers. Range 0.04-8.1% not confirmed.",
+    "sources": [
+      "https://dol.georgia.gov/faqs-employers/employers-faqs-unemployment-insurance"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 9500,

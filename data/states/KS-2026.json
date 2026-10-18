@@ -400,6 +400,13 @@
     "The flat 5% supplemental rate mirrors whichever method the employer used for FEDERAL withholding on the same payment (KW-100's own words), which this engine always treats as the flat-rate case for a \"supplemental\"-categorized earning -- there is no case in this engine where federal withholding on a bonus is computed by the combined-aggregate method, so the mirror is unconditional in practice, not because Kansas offers no choice.",
     "WIRED 2026-09-05, closing a gap flagged earlier the same day: Kansas assigns new CONSTRUCTION-industry employers a materially higher new-employer SUI rate (5.55%, per the Kansas Legislative Research Department's own 2026 briefing) than every other new employer (1.75%). src/taxes/state.ts's stateUnemploymentEmployerTax() now checks a new EmployerContext.suiIndustry map against suiEmployer.industryNewEmployerRates before falling back to the flat rate -- see that config's own industryNewEmployerRatesSource for the reasoning (chosen over flipping this state to employerSuppliedRateRequired so non-construction KS callers aren't forced to supply a rate they already get correctly by default)."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $15,100; new employer 1.75%; construction 5.55%; range 0-6.95%.",
+    "sources": [
+      "https://dol.ks.gov/employers"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 15100,

@@ -181,6 +181,13 @@
     "65-or-older / blind additional exemptions are folded into the personalExemptions count by convention rather than tracked as their own certificate field.",
     "The Oct 2025 (R45) prior county table (data/local/IN-counties-2026.json's priorTable) was RECONSTRUCTED from a 6-county diff plus a secondary industry-press source, not pulled directly from the R45 PDF itself — the DOR site only publishes the current notice, and Wayback Machine fetches were rate-limited (HTTP 498) on every attempt this session. Disclosed as reconstruction, not a primary-document pull, even though the underlying figures are corroborated."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $9,500; new employers 2.5%; range 0.50-7.40%.",
+    "sources": [
+      "https://www.in.gov/dwd/"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 9500,
