@@ -72,6 +72,15 @@
       "filingStatusNote": "The SC W-4's own Line 3 has a Single/Married/Married-but-withhold-at-higher-Single-rate checkbox, but WH-1603F's formula NEVER references filing status anywhere in its 4 steps -- confirmed by reading the complete formula document, not by omission. The checkbox appears to only inform which worksheet path the employee follows to arrive at an allowance COUNT (page 3 of the SC W-4, not fetched in full this pass), with the actual withholding CALCULATION depending only on that resulting allowance count, unlike most other states in this project where marital status enters the formula directly (a separate deduction table or bracket schedule)."
     }
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "S.C. Code 12-8-520(D)(9) excludes from wages payments to or from employee benefit plans excluded from SC taxable income (covers 401(k), 403(b), 457, 125, FSA, HSA since SC starts from federal). CAVEAT: SC conforms to the IRC only through 12/31/2024 (IL26-4 rev.) and has not adopted the 2026 federal dependent-care increase to $7,500, so dependent_care may be limited to $5,000; not modelled.",
+    "sources": [
+      "https://www.scstatehouse.gov/code/t12c008.php",
+      "https://www.dor.sc.gov/sites/dor/files/policies/IL26-4(revised).pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",
@@ -119,6 +128,13 @@
     "SC's own 'nonresident contractors', 'rental payments', and 'royalties/prizes/winnings' withholding categories (WH-105) are out of scope for a wage-withholding payroll engine -- correctly not modelled, noted for completeness only.",
     "Supplemental wages: WH-1603F (2026 Formula for Computing South Carolina Withholding Tax) was fetched directly and read in full this pass -- the entire document is 4 steps (annualize, deduct personal allowance + standard deduction, apply the Subtraction/Addition Method bracket, divide by periods) and contains zero mention of bonuses, supplemental wages, or any alternate flat-rate method. Some third-party payroll guides claim a separate SC flat supplemental rate (figures cited ranged inconsistently from 6.00% to 6.2%) -- checked directly against the primary source and found NO SUCH RATE exists in the 2026 formula document. A standalone bonus therefore runs through the same annualize-and-bracket formula as any other wages, which is what this engine already does by default, same as Louisiana/Oklahoma/Vermont in this project."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $14,000; new employer 1.060% (1.000% + 0.060%); range 0.060-5.460%; no 2026 surcharge.",
+    "sources": [
+      "https://www.dew.sc.gov/employers/tax-rate-information"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 14000,

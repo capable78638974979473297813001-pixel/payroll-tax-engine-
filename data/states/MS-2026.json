@@ -64,6 +64,14 @@
   },
   "roundFinalToWholeDollar": true,
   "roundingComment": "Pub 89-700 Section 13(e) states directly: 'This total is the amount to be withheld. This amount should be rounded to the nearest whole dollar.' Handled generically via rules.roundFinalToWholeDollar in stateIncomeTax() -- the same mechanism built for Maine and reused by Virginia/North Carolina -- not duplicated inside mississippiWithholding() itself.",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Title 35 Part III rule 105: benefits under IRC 125, 127 and 129 'are not subject to Mississippi withholding'; rule 102 / Miss. Code 27-7-16: contributions to tax-sheltered annuity, qualified retirement and deferred compensation plans are not gross income; 27-7-15(4)(aa) excludes HSA deposits (secondary copy). Commuter: no statement found; federal conformity assumed.",
+    "sources": [
+      "https://sos.ms.gov/ACCode/00000158c.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",
@@ -115,14 +123,21 @@
     "Section 13(f)'s true-voluntary-withholding categories (agricultural/household workers, MS residents working where the employer isn't legally required to withhold MS tax) are documented but out of scope for this engine, same as every other state's out-of-scope withholding categories.",
     "Supplemental wages: Pub 89-700 Section 9 offers only the aggregate method (current or last-preceding payroll period), no separate flat rate -- wired via the existing supplementalAggregation mechanism, which requires the caller to supply input.priorRegularPayment. Without it, a standalone bonus cheque falls back to this engine's existing default (annualize the bonus alone through the ordinary formula)."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $14,000; new employer 1.00%/1.10%/1.20% (primary); range 0.0%-5.4%. WIT contribution not modelled.",
+    "sources": [
+      "https://mdes.ms.gov/employers/unemployment-tax/reporting-and-filing/unemployment-tax-rates/"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 14000,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
     "newEmployerRate": 0.01,
-    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "newEmployerRateSource": "UPGRADED 2026-10-18 to primary: MDES 'Unemployment Tax Rates' page: 'the tax rate for a start-up business is 1.00% the first year of liability, 1.10% the second year of liability and 1.20% the third and subsequent years... These rates do not include the Workforce Investment and Training contribution rate that might be applicable'; 'Your tax rate will vary between 0.0% and 5.4%'. The engine has no employer-age input and applies year 1. The WIT contribution is not modelled. (https://mdes.ms.gov/employers/unemployment-tax/reporting-and-filing/unemployment-tax-rates/)",
     "experienceRange": {
-      "min": 0.002,
+      "min": 0.0,
       "max": 0.054
     },
     "employerSuppliedRateRequired": false,

@@ -84,6 +84,15 @@
     "certificate.employerLiableForPaidLeaveShare (gating the employer PFML share) is a caller-supplied flag reflecting the employer's OWN determination of whether they have 50+ WA employees -- this engine cannot verify that aggregate headcount from one employee's paycheck, the same class of gap already disclosed for Newark's $2,500/quarter threshold and >50%-resident-workforce apportionment.",
     "Washington's Capital Gains Tax (chapter 82A.04 RCW) is confirmed real and current (RCW 1.90.100(2)'s own carve-out) but is a RETURN-level excise tax on investment gains, not a payroll withholding -- correctly out of scope for this engine, recorded here only so a future reader doesn't mistake WA's 'no income tax' framing for 'no state tax of any kind.'"
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI wage base $78,200; new employers pay 115% of industry average (null is right); PFML 1.13% up to $184,500 with 71.43% employee share; WA Cares 0.58% uncapped.",
+    "sources": [
+      "https://esd.wa.gov/employer-requirements/unemployment-taxes/how-we-determine-tax-rates",
+      "https://paidleave.wa.gov/employer-roles-responsibilities/",
+      "https://www.wacaresfund.wa.gov/employers/"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 78200,

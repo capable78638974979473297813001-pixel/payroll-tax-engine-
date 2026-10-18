@@ -75,6 +75,14 @@
     "rule": "Supplemental wages (bonuses, commissions — anything 'paid to an employee by the individual's employer in addition to regular wages') paid on the SAME cheque as regular wages are aggregated and taxed as a single payment — exactly what src/taxes/state.ts's flatRateFixedDeduction() does with no special-casing, since it just taxes ctx.taxableWagesFor(exempt) as a whole regardless of each earning's category. Supplemental wages paid on a SEPARATE cheque are aggregated with the CURRENT or LAST PRECEDING regular payroll period by aggregateWithPriorRegularPayment() (gated by this file's supplementalAggregation block below) when the caller supplies input.priorRegularPayment.",
     "engineGap": "The separate-cheque case is NOT modelled. A standalone bonus run through calculatePaycheck() by itself (only a supplemental earning, no regular wages in that call) gets the full $3,360 deduction applied to it as if it were a complete period's only wages — which both UNDER-withholds relative to 103 KAR 18:070 (the deduction should have already been consumed by the regular wages it's supposed to aggregate with) and has no way to reach back into a prior calculatePaycheck() call's data even if the engine wanted to. Same class of disclosed cross-period gap as Indiana's 30-day nonresident rule and Michigan's Renaissance Zone."
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "42A003: wages 'mean the same as defined in Section 3401 of the Internal Revenue Code currently in effect for Kentucky'; wages subject to federal withholding are subject to Kentucky withholding. No category named; federal conformity.",
+    "sources": [
+      "https://revenue.ky.gov/Forms/42A003.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",
@@ -228,6 +236,13 @@
     "Local occupational tax: CORRECTED, then NORMALIZED, then WIRED — 227 of 230 authoritative jurisdictions have a captured rate. CORRECTED 2026-08-31: the “39 confirmed decimal wage rate” figure on this line was stale and contradicted the local file's own “122” claim elsewhere in the project; ground truth counted directly from data/local/KY-occupational-2026.json is 131 (127 of 250 scraped rows carry a flat wageRateDecimal, 2 more use a resident/nonresident split instead, plus Louisville Metro and Lexington-Fayette which also use the split shape) — see that file's coverage note for the corrected count. kentuckyLocalTax() in src/taxes/state.ts now actually computes it, including the KRS 68.197 city-vs-county credit and the KRS 67.750(2) inverted pretax base (see localOccupationalTax.knownGap above for exactly what remains open, most notably that the credit mechanism's population-tier applicability isn't individually verified per county).",
     "The 103 KAR 18:070 fetch is captioned effective 2026-07-27 by its own source page; whether it differs from what was in force earlier in 2026 was not checked."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $12,000; new employer 2.7%; Schedule A 0.30-9.00%; no 2026 surcharge seen.",
+    "sources": [
+      "https://ui.ky.gov"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 12000,

@@ -49,6 +49,13 @@
     "This state's UI wage base and rate mechanism are both primary-sourced. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
     "The exact 2.28%-9.78% new-employer range by industry is cross-source only -- W.S. 27-3 Article 5's own per-industry base-rate table was not independently fetched this pass."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $33,800; industry-assigned new-employer rate (8.5% if unregistered), so null is right.",
+    "sources": [
+      "https://dws.wyo.gov/dws-division/unemployment-insurance/employers/unemployment-tax-rates/"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 33800,

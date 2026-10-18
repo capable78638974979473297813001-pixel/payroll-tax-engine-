@@ -5,6 +5,14 @@
   "method": "flat_rate_marital_deduction",
   "$scopeNote": "STATE income tax only. Iowa has no local income tax anywhere. Iowa's ~297 school districts DO levy a school district surtax (up to 20% of state tax owed, average ~0.3%) but it is confirmed a RETURN-level mechanism, not employer-withheld -- the IA W-4's own Line 8 instructions tell an employee who owes surtax to compensate by reducing allowances or adding extra withholding on the SAME state withholding line, rather than the employer computing a separate per-district amount. This mirrors Connecticut's out-of-state credit and every other return-level (not withholding-level) mechanism already disclosed elsewhere in this project. No employee-paid unemployment, disability, or paid-leave program exists in Iowa.",
   "$methodComment": "Iowa became a true flat-tax state under SF2442: 3.80% flat over wages less a marital-status-dependent deduction, less a dollar allowance amount divided by pay periods (T1=G-D, T2=T1x3.80%, T3=T2-(W/P)). See flatRateMaritalDeduction()'s own doc comment in src/taxes/state.ts for why this engine stores only ANNUAL deduction figures (not a separately-transcribed per-period table) and why that's algebraically proven equivalent to the source's own per-period tables AND its explicit quarterly/semiannual fallback procedure.",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "701 IAC 307.1(1)(a): no withholding on compensation 'of a character which is not subject to federal income tax withholding'. No category named; federal conformity.",
+    "sources": [
+      "https://www.legis.iowa.gov/docs/iac/rule/701.307.1.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
   "exemptPretaxComment": "Iowa's own 2026 Withholding Formula document states directly: 'Certain payments made by the employer into employee retirement plans or for employee health insurance are not considered taxable wages and are not included in the calculations of withholding tax.' Confirms Iowa conforms to the federal withholding-wages base, the same conformity pattern as Michigan/Ohio/Idaho/Connecticut in this project (and the opposite of Pennsylvania's non-conformity) -- reuses federal.json's incomeTax.exemptPretax list.",
   "sources": [
@@ -65,6 +73,13 @@
     "Employer-paid unemployment insurance rates/wage base were not researched this pass (context-only, not engine-consumed, matching every other state's employer-only UI treatment in this project) -- no unemploymentInsuranceEmployer block included, unlike some other state files that do carry one at lower confidence tiers.",
     "WATCH: House File 2631 (91st General Assembly, status 'Introduced' as of this file's verifiedOn date) would create Iowa Code chapter 96A, a NEW employer/employee-funded family-and-medical-leave-insurance program administered by the Department of Workforce Development -- confirmed NOT currently enacted (the bill's own text reads 'NEW SECTION. 96A.1'), so this file's 'no PFML/SDI in Iowa' claim holds for 2026. If this bill or a successor passes, Iowa would need a statePaidLeaveEmployee (or employer-side) config added the same way New York/New Jersey/Connecticut's Paid Leave programs are modeled -- recheck this specifically on any future Iowa update rather than assuming the no-PFML status is still current."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $20,400; non-construction 1.000%, construction 5.400%; range 0-5.4%.",
+    "sources": [
+      "https://workforce.iowa.gov"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 20400,

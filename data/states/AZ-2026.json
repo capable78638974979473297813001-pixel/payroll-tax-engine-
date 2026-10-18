@@ -48,6 +48,14 @@
     },
     "taxableWagesBasis": "Gross taxable wages = federal W-2 Box 1 basis, i.e. gross wages LESS pretax deductions (Form A-4's own instructions: 'It is your gross wages less any pretax deductions, such as your share of health insurance premiums'). This means Arizona's withholding base already excludes 401(k)/125/HSA/etc. by the form's own explicit wording — the clearest, most directly-worded exemptPretax confirmation of any state in this project; no statute-inference chain needed."
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Form A-4 (2026): 'gross taxable wages' are 'the wages that will generally be in box 1 of your federal Form W-2... your gross wages less any pretax deductions'. No per-category text; conforms to W-2 box 1.",
+    "sources": [
+      "https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2026_A-4_f.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",
@@ -209,6 +217,11 @@
     "Reciprocity's CA leg remains genuinely uncertain — see reciprocity.caLegNotIndependentlyVerified. The OR leg was actively checked and found ASYMMETRIC this session (see reciprocity.orAsymmetryConfirmed), which raises rather than lowers suspicion about whether the CA leg is truly mutual too.",
     "RESOLVED: both are reachable via the existing generic certificate.exempt + certificate.exemptReason mechanism (already unconditional for every state) — see this file's own certificateBasedExemptions block for the verbatim Form WEC text. The earlier claim that new certificate fields were needed was incorrect and is corrected here."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $8,000, new employer 2.00%, range 0.03%-8.36% (FY26 UIT-0603A; figures from the agency's search snippet because the PDF blocked fetching). Whether a Job Training surcharge applies is unconfirmed.",
+    "sources": []
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 8000,

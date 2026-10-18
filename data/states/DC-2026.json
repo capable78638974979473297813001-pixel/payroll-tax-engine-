@@ -77,7 +77,7 @@
     ],
     "bracketsComment": "Verbatim from the NFC formula, and internally chain-verified before trusting it: 400 + (40000-10000)x0.06=400+1800=2200 (matches); 2200+(60000-40000)x0.065=2200+1300=3500 (matches); 3500+(250000-60000)x0.085=3500+16150=19650 (matches); 19650+(500000-250000)x0.0925=19650+23125=42775 (matches); 42775+(1000000-500000)x0.0975=42775+48750=91525 (matches) -- every published base independently reproduced from the one before it, zero discrepancies. ONE table for all filing statuses.",
     "allowanceAmountAnnual": 4300,
-    "allowanceAmountComment": "STALENESS DISCLOSED, not hidden: this figure is from the 2022 NFC bulletin ('the annual deduction amount has changed from $4,150 to $4,300') -- no 2026-dated confirmation of this SPECIFIC dollar figure was found this session, unlike the bracket thresholds (which WERE cross-checked against fresh 2026 sources and held up). DC's allowance amount plausibly adjusts periodically the way many states' does; this could be understating a 2026 figure that has since increased. Flagged explicitly as the single least-confident number in this file, rather than presented with the same confidence as the brackets.",
+    "allowanceAmountComment": "CONFIRMED 2026-10-18: OTR Tax Notice 2022-08 (Oct 17, 2022, https://otr.cfo.dc.gov/release/otr-tax-notice-2022-08-district-columbia-withholding-tax-year-2022) tells employers to withhold using the 2022 rate schedule 'and the federal allowance amount for tax year 2022', because the TCJA suspension of personal exemptions left OTR unable to produce its own tables. The federal allowance amount is $4,300: IRS Pub 15-T (2026), Worksheet 1A line 1k, 'Multiply line 1j by $4,300' (also the NFC TAXES 22-28 change from $4,150). OTR has published no FR-230 since 2018 (that edition used $4,150) and its D-4 is 'currently under review', so $4,300 follows from OTR's own rule plus the IRS figure rather than from a printed OTR number. An aggregator page showing $4,150 repeats the 2018 value.",
     "annualizeMultiplier": {
       "annual": 1,
       "semiannual": 2,
@@ -88,7 +88,15 @@
       "weekly": 52,
       "daily": 260
     },
-    "noCertificateDefault": "Not explicitly stated in the sources found this session -- modelled as single/zero-allowances per this project's standing convention for a missing certificate (the least-generous outcome), NOT independently confirmed as DC's own stated rule the way Delaware's or Missouri's no-form defaults were."
+    "noCertificateDefault": "Zero allowances, no standard deduction. OTR FR-230 (2018, the last edition OTR printed): 'If a DC RESIDENT EMPLOYEE fails to furnish a certificate, the employer is required to withhold DC income tax as if the employee had not claimed any withholding allowances.' Also: 'The standard deduction will not be used in the withholding calculation.' (https://otr.cfo.dc.gov/sites/default/files/dc/sites/otr/publication/attachments/2018%20FR-230_12.13.17.pdf)"
+  },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "D.C. Code 47-1801.04: 'Wages' means wages as defined in IRC 3401(a). OTR's FR-230 (2018) names no pre-tax category; federal conformity.",
+    "sources": [
+      "https://code.dccouncil.gov/us/dc/council/code/sections/47-1801.04"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
   },
   "exemptPretax": [
     "section125",
@@ -122,14 +130,22 @@
   },
   "verification": "PROVEN via calculatePaycheck(): the bracket table's own internal base-chain was independently verified (see bracketsComment) before being used to hand-derive test fixtures, since no full worked example with a stated final dollar answer was found in the NFC bulletin the way California/Rhode Island's own sources provided. See tests/engine.test.ts, describe('District of Columbia').",
   "knownGaps": [
-    "The $4,300 annual allowance amount is a 2022 figure, NOT re-confirmed for 2026 -- see allowanceAmountComment above. The BRACKETS were independently cross-checked against fresh 2026 sources and held up; the allowance amount was not.",
+    "RESOLVED 2026-10-18: the $4,300 allowance follows OTR Tax Notice 2022-08 ('the federal allowance amount') and IRS Pub 15-T (2026) Worksheet 1A line 1k; see allowanceAmountComment. It is derived from OTR's rule, not a number OTR prints; if OTR ever publishes a 2026+ FR-230 or a new D-4, compare.",
     "No current-year (2026) FR-230 booklet was locatable from DC's own OTR site this session -- this file rests on a federal-payroll-oriented secondary-primary source (NFC) rather than DC's own primary withholding publication.",
     "STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax.",
     "Universal Paid Leave (0.75%, employer-only) is computed as DC_PFML_ER via the statePaidLeaveEmployer block — see universalPaidLeave.$comment above.",
-    "The no-certificate default is this project's own standing convention (single/zero), not independently confirmed as DC's own stated rule.",
+    "The no-certificate default (zero allowances) is stated in OTR's 2018 FR-230; see bracketAnnualAllowanceDeduction.noCertificateDefault.",
     "Supplemental wages: DC's own FR-230 Employer Withholding Instructions were checked directly (2018 revision, the most recent full booklet publicly available, cross-checked against the NFC bulletin already cited in this file for anything current-year might have added) -- neither contains a distinct supplemental-wage withholding procedure at all, only a general definition of taxable \"wages\" that happens to name bonuses as an example. Third-party guides describing a DC supplemental rate are actually describing the FEDERAL 22%/37% flat rate, not a DC-specific one. A standalone bonus therefore runs through the same formula as any other wages, which is what this engine already does by default -- the same conclusion reached for South Carolina, Utah, and Arkansas in this project, each checked directly rather than assumed.",
     "CHECKED 2026-10-01: the FY2027 Budget Support (Emergency) Act cuts Universal Paid Leave BENEFITS for claims filed on or after 2026-10-01 (family leave 12 -> 6 weeks, medical 12 -> 10 weeks, weekly cap $1,190 -> $1,100) but leaves the employer contribution at 0.75% of covered wages with no employee contribution, so DC_PFML_ER is unchanged (Epstein Becker Green, 2026-09-23; secondary source, permanent act still in congressional review to about 2026-11-20). This engine computes the contribution, not benefits."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI $9,000; new employer 'average rate... or 2.7 percent, whichever is higher'; UPL 0.75% employer-paid for every 2026 quarter.",
+    "sources": [
+      "https://does.dc.gov/service/tax-rate-questions",
+      "https://dcpaidfamilyleave.dc.gov/tax-calculators/"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 9000,
