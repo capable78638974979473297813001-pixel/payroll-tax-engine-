@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
  */
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
-const PORT = 5300 + Math.floor(Math.random() * 300);
+const PORT = 5600 + Math.floor(Math.random() * 300);
 const BASE = `http://127.0.0.1:${PORT}`;
 const EMAIL = 'casey@secure.test';
 const WEBHOOK_SECRET = 'whsec_security';
