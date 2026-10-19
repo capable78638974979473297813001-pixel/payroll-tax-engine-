@@ -38,6 +38,8 @@ export interface LocalRow {
   name: string;
   kind: string;
   rate: number | null;
+  /** What to show in the rate column when it is not a percentage (a flat fee or an hourly wage). */
+  value?: string;
   detail: string;
 }
 
@@ -129,7 +131,11 @@ function localRowsFor(state: string, year: number): { rows: LocalRow[]; label: s
     const m = readJson(join(local, `OH-municipalities-${year}.json`));
     for (const c of m?.municipalities ?? []) add({ state, name: c.name, kind: 'Municipal income tax', rate: num(c.rate), detail: c.administeredBy && c.administeredBy !== 'self_or_other' ? `Administered by ${c.administeredBy}` : c.administeredBy ? 'Administered by the municipality' : 'Municipal income tax' });
     const s = readJson(join(local, `OH-school-districts-${year}.json`));
-    for (const c of s?.districts ?? []) add({ state, name: c.name, kind: 'School district income tax', rate: num(c.rate2026 ?? c.rate), detail: c.county ? `${c.county} County` : 'School district' });
+    for (const c of s?.districts ?? []) {
+      const m = /^(.*?)\s*\((.*)\)\s*$/.exec(String(c.name)); // "Triad LSD (0.50% expires 2030; 1.00% CPT)"
+      const where = c.county ? `${c.county} County` : 'School district';
+      add({ state, name: m ? m[1] : c.name, kind: 'School district income tax', rate: num(c.rate2026 ?? c.rate), detail: m ? `${where}. ${m[2]}` : where });
+    }
     const j = readJson(join(local, `OH-jedd-jedz-${year}.json`));
     for (const z of j?.zones ?? []) add({ state, name: z.name, kind: 'JEDD / JEDZ', rate: num(z.rate), detail: 'Joint economic development district or zone' });
     return { rows, label: 'City, school district, JEDD' };
@@ -173,16 +179,16 @@ function stateLocalExtras(state: string, raw: Record<string, any>): LocalRow[] {
   if (state === 'CO' && raw.localIncomeTax) {
     const li = raw.localIncomeTax;
     const opt = li.occupationalPrivilegeTax ?? {};
-    if (li.denver) out.push({ state, name: 'Denver', kind: 'Occupational privilege tax', rate: null, detail: `$${li.denver.employeeRate} a month employee, $${li.denver.employerRatePerEmployee} employer` });
+    if (li.denver) out.push({ state, name: 'Denver', kind: 'Occupational privilege tax', rate: null, value: `$${Number(li.denver.employeeRate).toFixed(2)}/mo`, detail: `Employee pays this; employer pays $${Number(li.denver.employerRatePerEmployee).toFixed(2)} per employee` });
     for (const [name, v] of Object.entries<any>(opt)) {
       if (name.startsWith('$') || v?.repealed) continue;
-      out.push({ state, name, kind: 'Occupational privilege tax', rate: null, detail: `$${v.employeeRate} a month employee, $${v.employerRatePerEmployee} employer` });
+      out.push({ state, name, kind: 'Occupational privilege tax', rate: null, value: `$${Number(v.employeeRate).toFixed(2)}/mo`, detail: `Employee pays this; employer pays $${Number(v.employerRatePerEmployee).toFixed(2)} per employee` });
     }
   }
   if (state === 'WV' && raw.localIncomeTax?.serviceFeeCities) {
     for (const [name, v] of Object.entries<any>(raw.localIncomeTax.serviceFeeCities)) {
       if (name.startsWith('$')) continue;
-      out.push({ state, name, kind: 'City service fee', rate: null, detail: typeof v?.weeklyRate === 'number' ? `$${v.weeklyRate.toFixed(2)} a week` : 'Per-week fee' });
+      out.push({ state, name, kind: 'City service fee', rate: null, ...(typeof v?.weeklyRate === 'number' ? { value: `$${v.weeklyRate.toFixed(2)}/wk` } : {}), detail: 'Flat fee withheld by the employer, not a percentage of wages' });
     }
   }
   if (state === 'WA' && raw.localIncomeTax) {
@@ -208,7 +214,8 @@ function minimumWageLocals(): Map<string, LocalRow[]> {
       name: j.name,
       kind: `Minimum wage (${j.level ?? 'local'})`,
       rate: null,
-      detail: typeof j.hourly === 'number' ? `$${j.hourly.toFixed(2)} an hour` : 'Local minimum wage',
+      ...(typeof j.hourly === 'number' ? { value: `$${j.hourly.toFixed(2)}/hr` } : {}),
+      detail: j.effectiveFrom ? `In effect from ${j.effectiveFrom}` : 'Local minimum wage',
     }));
     map.set(m[1], [...(map.get(m[1]) ?? []), ...rows]);
   }

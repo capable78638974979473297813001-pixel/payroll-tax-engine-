@@ -27,59 +27,71 @@
     <p class="eyebrow">Coverage</p>
     <h1 class="page">The whole USA, covered.</h1>
     <p class="sub">Federal, all 50 states and DC, and every local jurisdiction. Minimum wage and wage garnishments included.</p>
-  </div>
-  <div class="stats" id="stats" style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:48px">
-    <div><b id="s-states" style="font-size:22px;font-weight:500">51</b><div style="color:var(--ink2);font-size:14px">States and DC</div></div>
-    <div><b style="font-size:22px;font-weight:500">Federal</b><div style="color:var(--ink2);font-size:14px">Income tax, FICA, FUTA</div></div>
-    <div><b id="s-local" style="font-size:22px;font-weight:500">Local</b><div style="color:var(--ink2);font-size:14px">Local taxing jurisdictions listed</div></div>
-    <div><b id="s-wage" style="font-size:22px;font-weight:500">Min. wage</b><div style="color:var(--ink2);font-size:14px">Federal, state, local</div></div>
-    <div><b style="font-size:22px;font-weight:500">Garnishments</b><div style="color:var(--ink2);font-size:14px">Federal and state limits</div></div>
-  </div>
-  <p class="sub" style="margin-top:28px">Same-paycheck multi-state withholding is in progress. Reciprocity between a residence state and a work state is already on the call, as a residenceState next to workState.</p>
-
-  <div class="filters">
-    <label class="search"><span aria-hidden="true">⌕</span><input id="q" type="search" placeholder="Search a state" aria-label="Search a state" /></label>
-    <button class="chip" type="button" data-filter="all" aria-pressed="true">All</button>
-    <button class="chip" type="button" data-filter="income" aria-pressed="false">Income tax</button>
-    <button class="chip" type="button" data-filter="local" aria-pressed="false">Local</button>
-    <button class="chip" type="button" data-filter="wage" aria-pressed="false">Minimum wage</button>
-    <button class="chip" type="button" data-filter="garn" aria-pressed="false">Garnishment</button>
-    <span id="count" style="margin-left:auto;color:var(--ink3);font-size:14px"></span>
-  </div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Jurisdiction</th><th>Income tax</th><th>Unemployment</th><th>Local taxes</th><th>Minimum wage</th><th>Garnishment</th>
-        </tr>
-      </thead>
-      <tbody id="rows"></tbody>
-    </table>
-  </div>
-  <div class="pager">
-    <span>Rates are effective-dated and updated as jurisdictions publish changes.</span>
-    <span id="pages"></span>
+    <p class="cov-jump"><a href="#states">By state</a><a href="#local">Local jurisdictions</a></p>
   </div>
 
-  <div class="page-head" style="margin-top:72px">
+  <div class="cov-stats" id="stats">
+    <div class="cov-stat"><b id="s-states">51</b><span>States and DC</span></div>
+    <div class="cov-stat"><b>Federal</b><span>Income tax, FICA, FUTA</span></div>
+    <div class="cov-stat"><b id="s-local">—</b><span>Local jurisdictions listed</span></div>
+    <div class="cov-stat"><b id="s-wage">—</b><span>Local minimum wages</span></div>
+    <div class="cov-stat"><b>Garnishments</b><span>Federal and state limits</span></div>
+  </div>
+  <p class="cov-note">Same-paycheck multi-state withholding is in progress. Reciprocity between a residence state and a work state is already on the call, as a <code>residenceState</code> next to <code>workState</code>.</p>
+
+  <section class="cov-section" id="states" aria-labelledby="states-h">
+    <p class="eyebrow">By state</p>
+    <h2 id="states-h">Federal, every state and DC.</h2>
+    <p class="cov-lede">What the engine computes for each one. Where a state has local taxes, select the count to browse them below.</p>
+    <div class="cov-tools">
+      <label class="search"><span aria-hidden="true">⌕</span><input id="q" type="search" placeholder="Search a state" aria-label="Search a state" autocomplete="off" /></label>
+      <div class="cov-chips" role="group" aria-label="Filter states">
+        <button class="chip" type="button" data-filter="all" aria-pressed="true">All</button>
+        <button class="chip" type="button" data-filter="income" aria-pressed="false">Income tax</button>
+        <button class="chip" type="button" data-filter="none" aria-pressed="false">No income tax</button>
+        <button class="chip" type="button" data-filter="local" aria-pressed="false">Local taxes</button>
+        <button class="chip" type="button" data-filter="wage" aria-pressed="false">Local minimum wage</button>
+      </div>
+    </div>
+    <div class="table-wrap cov-table">
+      <table>
+        <caption class="sr-only">Coverage by state</caption>
+        <thead>
+          <tr><th scope="col">Jurisdiction</th><th scope="col">Income tax</th><th scope="col">Unemployment</th><th scope="col">Local taxes</th><th scope="col">Minimum wage</th><th scope="col">Garnishment</th></tr>
+        </thead>
+        <tbody id="rows"><tr><td class="empty" colspan="6">Loading coverage.</td></tr></tbody>
+      </table>
+    </div>
+    <div class="cov-foot"><span id="count" aria-live="polite"></span><nav class="cov-pages" id="pages" aria-label="State pages"></nav></div>
+    <p class="fine cov-fine">Rates are effective-dated and updated as jurisdictions publish changes.</p>
+    <noscript><p class="fine">The coverage tables load from <code>/api/coverage</code> and need JavaScript.</p></noscript>
+  </section>
+
+  <section class="cov-section" id="local" aria-labelledby="local-h">
     <p class="eyebrow">Local jurisdictions</p>
-    <h2 class="page" style="font-size:28px">Every city, county and district in the data.</h2>
-    <p class="sub" id="localSub">Search the counties, cities, school districts and taxing bodies the engine computes, with the rate it uses.</p>
-  </div>
-  <div class="filters">
-    <label class="search"><span aria-hidden="true">⌕</span><input id="lq" type="search" placeholder="Search a county, city or district" aria-label="Search a county, city or district" /></label>
-    <select id="lstate" aria-label="State" style="height:40px"><option value="">All states</option></select>
-    <button class="chip" type="button" data-lkind="tax" aria-pressed="true">Taxes</button>
-    <button class="chip" type="button" data-lkind="wage" aria-pressed="false">Minimum wage</button>
-    <span id="lcount" style="margin-left:auto;color:var(--ink3);font-size:14px"></span>
-  </div>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Jurisdiction</th><th>State</th><th>Type</th><th>Rate</th><th>Detail</th></tr></thead>
-      <tbody id="lrows"></tbody>
-    </table>
-  </div>
-  <div class="pager"><span id="lnote"></span><span id="lpages"></span></div>
+    <h2 id="local-h">Every city, county and district in the data.</h2>
+    <p class="cov-lede" id="localSub">Search the counties, cities, school districts and taxing bodies the engine computes, with the rate it applies to wages.</p>
+    <div class="cov-tools">
+      <label class="search"><span aria-hidden="true">⌕</span><input id="lq" type="search" placeholder="Search a county, city or district" aria-label="Search a county, city or district" autocomplete="off" /></label>
+      <select id="lstate" class="cov-select" aria-label="State"><option value="">All states</option></select>
+      <div class="cov-chips" role="group" aria-label="Type of list">
+        <button class="chip" type="button" data-lkind="tax" aria-pressed="true">Taxes</button>
+        <button class="chip" type="button" data-lkind="wage" aria-pressed="false">Minimum wage</button>
+      </div>
+    </div>
+    <div class="table-wrap cov-table">
+      <table>
+        <caption class="sr-only">Local jurisdictions</caption>
+        <thead>
+          <tr><th scope="col">Jurisdiction</th><th scope="col">State</th><th scope="col">Type</th><th scope="col" class="num" id="lrateh">Rate</th><th scope="col">Detail</th></tr>
+        </thead>
+        <tbody id="lrows"><tr><td class="empty" colspan="5">Loading jurisdictions.</td></tr></tbody>
+      </table>
+    </div>
+    <div class="cov-foot"><span id="lcount" aria-live="polite"></span><nav class="cov-pages" id="lpages" aria-label="Local pages"></nav></div>
+    <p class="fine cov-fine" id="lnote"></p>
+  </section>
+
   <div class="dev">
     <div>
       <h2>Start in the sandbox.</h2>
@@ -103,33 +115,72 @@
 <script src="/assets/v5.js"></script>
 <script>
 (function () {
-  function fmtRate(r) { return typeof r === 'number' ? (r * 100).toFixed(r * 100 % 1 === 0 ? 1 : 3).replace(/0+$/, '').replace(/\.$/, '') + '%' : '—'; }
-  function cell(tr, text, title) { var td = document.createElement('td'); td.textContent = text; if (title) td.title = title; tr.appendChild(td); return td; }
+  var STATE_SIZE = 12, LOCAL_SIZE = 15;
+  function $(id) { return document.getElementById(id); }
+  function num(n) { return Number(n).toLocaleString('en-US'); }
+  function fmtRate(r) {
+    if (typeof r !== 'number') return '—';
+    var p = (r * 100).toFixed(4).replace(/0+$/, '').replace(/\.$/, '');
+    return p + '%';
+  }
   function api(path) { return fetch(path).then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); }); }
+  function cell(tr, text, label, cls) {
+    var td = document.createElement('td');
+    td.textContent = text;
+    if (label) td.setAttribute('data-label', label);
+    if (cls) td.className = cls;
+    tr.appendChild(td);
+    return td;
+  }
+  function emptyRow(body, cols, text) {
+    body.textContent = '';
+    var tr = document.createElement('tr'), td = document.createElement('td');
+    td.className = 'empty'; td.colSpan = cols; td.textContent = text;
+    tr.appendChild(td); body.appendChild(tr);
+  }
+  function range(page, size, total) {
+    if (!total) return 'Nothing to show';
+    return 'Showing ' + num(page * size + 1) + '–' + num(Math.min(total, page * size + size)) + ' of ' + num(total);
+  }
+  /* Previous 1 … 4 5 6 … 276 Next */
   function pager(box, page, total, size, go) {
     box.textContent = '';
     var n = Math.max(1, Math.ceil(total / size));
-    function btn(label, target, disabled, current) {
-      var b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.disabled = !!disabled;
-      if (current) b.setAttribute('aria-current', 'page');
+    if (n < 2) return;
+    function btn(label, target, opts) {
+      opts = opts || {};
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = label;
+      b.disabled = !!opts.disabled;
+      if (opts.label) b.setAttribute('aria-label', opts.label);
+      if (opts.current) b.setAttribute('aria-current', 'page');
       b.addEventListener('click', function () { go(target); });
       box.appendChild(b);
     }
-    btn('Previous', page - 1, page === 0);
-    var from = Math.max(0, Math.min(page - 2, n - 5)), to = Math.min(n, from + 5);
-    for (var i = from; i < to; i++) btn(String(i + 1), i, false, i === page);
-    btn('Next', page + 1, page >= n - 1);
+    function gap() { var g = document.createElement('span'); g.className = 'gap'; g.textContent = '…'; g.setAttribute('aria-hidden', 'true'); box.appendChild(g); }
+    btn('Previous', page - 1, { disabled: page === 0 });
+    var shown = [0, n - 1, page - 1, page, page + 1].filter(function (i) { return i >= 0 && i < n; });
+    shown = shown.filter(function (v, i) { return shown.indexOf(v) === i; }).sort(function (a, b) { return a - b; });
+    var prev = -1;
+    shown.forEach(function (i) {
+      if (i - prev > 1) gap();
+      btn(String(i + 1), i, { current: i === page, label: 'Page ' + (i + 1) });
+      prev = i;
+    });
+    btn('Next', page + 1, { disabled: page >= n - 1 });
+  }
+  function pressed(group, attr, value) {
+    group.forEach(function (c) { c.setAttribute('aria-pressed', c.getAttribute(attr) === value ? 'true' : 'false'); });
   }
 
-  /* States */
-  var rows = [], filter = 'all', page = 0, size = 11;
-  var q = document.getElementById('q'), body = document.getElementById('rows');
-  var count = document.getElementById('count'), pages = document.getElementById('pages');
+  /* By state */
+  var rows = [], filter = 'all', page = 0;
+  var q = $('q'), body = $('rows');
+  var filterChips = Array.prototype.slice.call(document.querySelectorAll('.chip[data-filter]'));
   function matches(r) {
     if (filter === 'income') return r.income;
+    if (filter === 'none') return !r.income;
     if (filter === 'local') return r.localCount > 0;
     if (filter === 'wage') return r.wageLocal > 0;
-    if (filter === 'garn') return r.garn;
     return true;
   }
   function shown() {
@@ -138,85 +189,123 @@
       return matches(r) && (!text || r.name.toLowerCase().indexOf(text) >= 0 || r.code.toLowerCase() === text);
     });
   }
-  function render() {
+  function renderStates() {
     var list = shown();
-    var n = Math.max(1, Math.ceil(list.length / size));
+    var n = Math.max(1, Math.ceil(list.length / STATE_SIZE));
     if (page >= n) page = n - 1;
-    var slice = list.slice(page * size, page * size + size);
-    body.textContent = '';
-    slice.forEach(function (r) {
-      var tr = document.createElement('tr');
-      cell(tr, r.name, r.note);
-      cell(tr, r.incomeText);
-      cell(tr, r.unemp ? '✓' : '—');
-      cell(tr, r.localText, r.localNote);
-      cell(tr, r.wageText);
-      cell(tr, r.garn ? '✓' : '—');
-      body.appendChild(tr);
-    });
-    count.textContent = 'Showing ' + slice.length + ' of ' + list.length;
-    pager(pages, page, list.length, size, function (p) { page = p; render(); });
+    var slice = list.slice(page * STATE_SIZE, page * STATE_SIZE + STATE_SIZE);
+    if (!slice.length) { emptyRow(body, 6, 'No state matches.'); }
+    else {
+      body.textContent = '';
+      slice.forEach(function (r) {
+        var tr = document.createElement('tr');
+        cell(tr, r.name, 'Jurisdiction', 'name');
+        cell(tr, r.incomeText, 'Income tax', r.income ? 'yes' : 'dim');
+        cell(tr, r.unemp ? '✓' : '—', 'Unemployment', r.unemp ? 'yes' : 'dim');
+        var lt = cell(tr, '', 'Local taxes', r.localCount ? '' : 'dim');
+        if (r.localCount) {
+          var b = document.createElement('button');
+          b.type = 'button'; b.className = 'link'; b.textContent = r.localText;
+          b.title = (r.localNote ? r.localNote + ' ' : '') + 'Browse these below.';
+          b.addEventListener('click', function () { browse(r.code); });
+          lt.appendChild(b);
+        } else {
+          lt.textContent = r.localText;
+          if (r.localNote) lt.title = r.localNote;
+        }
+        cell(tr, r.wageText, 'Minimum wage', r.wageText === '—' ? 'dim' : '');
+        cell(tr, r.garn ? '✓' : '—', 'Garnishment', r.garn ? 'yes' : 'dim');
+        body.appendChild(tr);
+      });
+    }
+    $('count').textContent = range(page, STATE_SIZE, list.length);
+    pager($('pages'), page, list.length, STATE_SIZE, function (p) { page = p; renderStates(); $('states').scrollIntoView({ block: 'start' }); });
   }
-  q.addEventListener('input', function () { page = 0; render(); });
-  document.querySelectorAll('.chip[data-filter]').forEach(function (chip) {
+  q.addEventListener('input', function () { page = 0; renderStates(); });
+  filterChips.forEach(function (chip) {
     chip.addEventListener('click', function () {
       filter = chip.getAttribute('data-filter');
-      document.querySelectorAll('.chip[data-filter]').forEach(function (c) { c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'); });
-      page = 0; render();
+      pressed(filterChips, 'data-filter', filter);
+      page = 0; renderStates();
     });
   });
 
   /* Local jurisdictions */
-  var lkind = 'tax', lpage = 0, lsize = 15, ltimer = null;
-  var lq = document.getElementById('lq'), lstate = document.getElementById('lstate');
+  var lkind = 'tax', lpage = 0, ltimer = null, lseq = 0;
+  var lq = $('lq'), lstate = $('lstate');
+  var kindChips = Array.prototype.slice.call(document.querySelectorAll('.chip[data-lkind]'));
   function loadLocal() {
-    var qs = 'q=' + encodeURIComponent(lq.value.trim()) + '&state=' + encodeURIComponent(lstate.value) + '&kind=' + lkind + '&page=' + lpage + '&size=' + lsize;
+    var mine = ++lseq;
+    var qs = 'q=' + encodeURIComponent(lq.value.trim()) + '&state=' + encodeURIComponent(lstate.value) + '&kind=' + lkind + '&page=' + lpage + '&size=' + LOCAL_SIZE;
     api('/api/coverage/local?' + qs).then(function (res) {
-      var tb = document.getElementById('lrows'); tb.textContent = '';
-      res.items.forEach(function (it) {
-        var tr = document.createElement('tr');
-        cell(tr, it.name); cell(tr, it.state); cell(tr, it.kind); cell(tr, fmtRate(it.rate)); cell(tr, it.detail);
-        tb.appendChild(tr);
-      });
-      if (!res.items.length) { var tr = document.createElement('tr'); var td = cell(tr, 'No match in the data.'); td.colSpan = 5; tb.appendChild(tr); }
-      document.getElementById('lcount').textContent = res.total.toLocaleString('en-US') + ' ' + (res.total === 1 ? 'jurisdiction' : 'jurisdictions');
-      document.getElementById('lnote').textContent = 'Rates are the percentage the engine applies to wages where one applies.';
-      pager(document.getElementById('lpages'), res.page, res.total, res.size, function (p) { lpage = p; loadLocal(); });
+      if (mine !== lseq) return;
+      var tb = $('lrows');
+      if (!res.items.length) { emptyRow(tb, 5, 'No match in the data.'); }
+      else {
+        tb.textContent = '';
+        res.items.forEach(function (it) {
+          var tr = document.createElement('tr');
+          cell(tr, it.name, 'Jurisdiction', 'name');
+          cell(tr, it.state, 'State');
+          cell(tr, it.kind, 'Type');
+          cell(tr, it.value || fmtRate(it.rate), lkind === 'wage' ? 'Wage' : 'Rate', 'num' + (it.value || typeof it.rate === 'number' ? '' : ' dim'));
+          cell(tr, it.detail, 'Detail', 'dim');
+          tb.appendChild(tr);
+        });
+      }
+      $('lcount').textContent = range(res.page, res.size, res.total);
+      $('lnote').textContent = lkind === 'wage'
+        ? 'Hourly minimum wage set by the city or county.'
+        : 'Rate is the percentage of wages the engine applies. Flat fees show the amount; employer-paid taxes show a dash.';
+      pager($('lpages'), res.page, res.total, res.size, function (p) { lpage = p; loadLocal(); $('local').scrollIntoView({ block: 'start' }); });
     }).catch(function () {
-      document.getElementById('lnote').textContent = 'The local list could not be loaded just now.';
+      if (mine !== lseq) return;
+      emptyRow($('lrows'), 5, 'The local list could not be loaded just now.');
+      $('lcount').textContent = '';
     });
+  }
+  function browse(code) {
+    lstate.value = code; lq.value = ''; lkind = 'tax'; pressed(kindChips, 'data-lkind', 'tax'); lpage = 0;
+    loadLocal();
+    $('local').scrollIntoView({ block: 'start', behavior: 'smooth' });
   }
   lq.addEventListener('input', function () { clearTimeout(ltimer); ltimer = setTimeout(function () { lpage = 0; loadLocal(); }, 200); });
   lstate.addEventListener('change', function () { lpage = 0; loadLocal(); });
-  document.querySelectorAll('.chip[data-lkind]').forEach(function (chip) {
+  kindChips.forEach(function (chip) {
     chip.addEventListener('click', function () {
       lkind = chip.getAttribute('data-lkind');
-      document.querySelectorAll('.chip[data-lkind]').forEach(function (c) { c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'); });
+      pressed(kindChips, 'data-lkind', lkind);
+      $('lrateh').textContent = lkind === 'wage' ? 'Hourly' : 'Rate';
       lpage = 0; loadLocal();
     });
   });
 
   api('/api/coverage').then(function (cov) {
     var sm = cov.summary;
-    document.getElementById('s-states').textContent = String(sm.states);
-    document.getElementById('s-local').textContent = sm.localJurisdictions.toLocaleString('en-US');
-    document.getElementById('s-wage').textContent = sm.localMinimumWage + ' local';
-    rows = [{ name: 'Federal', code: 'US', income: true, incomeText: 'Income tax, FICA, FUTA', unemp: true, localText: '—', localCount: 0, localNote: '', wageText: 'Federal', wageLocal: 0, garn: true, note: '' }]
+    $('s-states').textContent = String(sm.states);
+    $('s-local').textContent = num(sm.localJurisdictions);
+    $('s-wage').textContent = num(sm.localMinimumWage);
+    rows = [{ name: 'Federal', code: 'US', income: true, incomeText: 'Income tax, FICA, FUTA', unemp: true, localText: '—', localCount: 0, localNote: '', wageText: 'Federal', wageLocal: 0, garn: true }]
       .concat(cov.states.map(function (s) {
         return {
-          name: s.name, code: s.code, income: s.incomeTax === 'withholding', incomeText: s.incomeTax === 'none' ? s.incomeTaxNote : '✓',
-          unemp: s.unemployment, localText: (s.localCount ? s.localTax + ' (' + s.localCount.toLocaleString('en-US') + ')' : s.localTax) + (s.localStatus === 'partial' ? ', partial' : ''),
-          localCount: s.localCount, localNote: s.localNote, wageText: s.minimumWageLocalCount ? 'State + ' + s.minimumWageLocalCount + ' local' : (s.minimumWage ? 'State' : '—'),
-          wageLocal: s.minimumWageLocalCount, garn: s.garnishment,
-          note: s.localNote
+          name: s.name, code: s.code, income: s.incomeTax === 'withholding', incomeText: s.incomeTax === 'none' ? 'None' : '✓',
+          unemp: s.unemployment,
+          localText: (s.localCount ? s.localTax + ' (' + num(s.localCount) + ')' : s.localTax) + (s.localStatus === 'partial' ? ', partial' : ''),
+          localCount: s.localCount, localNote: s.localNote,
+          wageText: s.minimumWageLocalCount ? 'State + ' + num(s.minimumWageLocalCount) + ' local' : (s.minimumWage ? 'State' : '—'),
+          wageLocal: s.minimumWageLocalCount, garn: s.garnishment
         };
       }));
     cov.states.forEach(function (s) {
       var o = document.createElement('option'); o.value = s.code; o.textContent = s.name; lstate.appendChild(o);
     });
-    render(); loadLocal();
+    var want = (new URLSearchParams(location.search).get('state') || '').toUpperCase();
+    if (want && cov.states.some(function (s) { return s.code === want; })) lstate.value = want;
+    renderStates();
+    loadLocal();
   }).catch(function () {
-    count.textContent = 'The coverage list could not be loaded just now.';
+    emptyRow(body, 6, 'The coverage list could not be loaded just now.');
+    emptyRow($('lrows'), 5, 'The local list could not be loaded just now.');
   });
 })();
 </script>

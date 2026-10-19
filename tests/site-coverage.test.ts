@@ -62,4 +62,17 @@ describe('coverage index', () => {
     assert.equal(wage, cov.summary.localMinimumWage);
     assert.equal(searchLocal({ kind: 'wage', state: 'CA', size: 1 }).total, json('minimum-wage/local/CA-local-2026.json').jurisdictions.length);
   });
+
+  test('flat fees and hourly wages carry their own display value, and expiry notes leave the name', () => {
+    const wv = searchLocal({ state: 'WV', kind: 'tax', size: 100 }).items;
+    assert.ok(wv.length >= 11 && wv.every((r) => r.rate === null && /^\$\d+\.\d\d\/wk$/.test(r.value ?? '')));
+    const ca = searchLocal({ kind: 'wage', state: 'CA', q: 'alameda' }).items[0];
+    assert.match(ca.value ?? '', /^\$\d+\.\d\d\/hr$/);
+    const oh = searchLocal({ state: 'OH', q: 'expires', size: 100 });
+    assert.ok(oh.items.every((r) => !r.name.includes('(') && /expires \d{4}/.test(r.detail)), 'rate notes moved from the name to the detail');
+    const triad = searchLocal({ state: 'OH', q: 'triad lsd' }).items[0];
+    assert.equal(triad.name, 'Triad LSD');
+    assert.match(triad.detail, /Champaign County\. 0\.50% expires 2030; 1\.00% CPT/);
+    assert.ok(oh.total > 0);
+  });
 });
