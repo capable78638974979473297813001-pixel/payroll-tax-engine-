@@ -15,7 +15,7 @@ Served on the site (linked from every footer):
 | Terms of Service | `/terms` | The master contract: license, payment, IP ownership, **warranty disclaimer**, **limitation of liability**, indemnity, governing law. This is your main liability shield. |
 | Privacy Policy | `/privacy` | What you collect and why; Stripe/email processors; cookies; retention; user rights (CCPA etc.). |
 | Acceptable Use | `/acceptable-use` | Rules of the road: no reselling, no scraping, no reverse engineering, keep keys secret. |
-| Disclaimer | `/disclaimer` | The payroll-specific shield: **calculations, not advice; you file, you verify, you're responsible.** |
+| Disclaimer | `/disclaimer` | The payroll-specific shield: **calculations, not advice; you file, you verify, you're responsible.** Terms §1 makes it, and the Acceptable Use Policy, part of the Terms. |
 
 The signup flow already records **consent** (terms version, typed signature, time,
 IP) — see `site/lib/terms.ts` and the acceptance records in the store. Keep those;
@@ -27,12 +27,12 @@ Search the `site/legal/` files (and `LICENSE`) for square-bracket tokens and rep
 every one:
 
 - `[LEGAL ENTITY NAME]` — **done**: the entity is **OMNIA TAX LLC** (filled in `LICENSE`, `site/legal/*`, the landing footer and `package.json`). Keep the name identical to the formation documents.
-- `[EFFECTIVE DATE]` — **done**: October 6, 2026.
+- `[EFFECTIVE DATE]` — **done**: Terms and Privacy are effective October 19, 2026 (Terms version `2026-10-19.2`, in `site/lib/terms.ts` and `site/legal/terms.html`; bump both together, and the test in `tests/site-signup.test.ts`). Acceptable Use and Disclaimer are dated October 6, 2026.
 - `[STATE]` — **done**: Michigan.
 - `[COUNTY, STATE]` — **done**: Oakland County, Michigan.
 - `[COMPANY ADDRESS]` — **done**: 595 N Old Woodward Ave, Birmingham, Michigan (add suite/ZIP if the formation documents list them).
 - `[SECURITY EMAIL]` / `[LEGAL EMAIL]` — **done**: scottholdan@gmail.com.
-- `[ARBITRATION BODY]` — **removed**: the optional arbitration clause was dropped, so disputes go to the Oakland County, Michigan courts. Add it back only on counsel's advice.
+- `[ARBITRATION BODY]` — the Terms (§9) now require individual binding arbitration in Michigan under the Federal Arbitration Act with a class-action and jury waiver, a 30-day opt-out by email, and Oakland County, Michigan courts for small claims, injunctions and anything that cannot be arbitrated. No named provider is set ("a recognized arbitration provider"). Counsel should confirm the clause and choose a provider.
 
 ## Ownership ("this is mine only")
 
@@ -50,8 +50,17 @@ every one:
 
 ## Things worth asking a lawyer about specifically
 
-- **Limitation of liability cap** (Terms §10) — the $100/12-months cap is standard for
-  low-priced SaaS; confirm it holds in your state and for your price point.
+- **Limitation of liability cap** (Terms §7) — total liability is capped at the fees paid in the
+  twelve months before the claim, and consequential damages and any tax, penalty or interest
+  are excluded; confirm both hold in Michigan and for your price once it is set.
+- **Price not published** — the public site shows the rate per calculation as "to be announced"
+  while Stripe bills live keys at the price you configure (`STRIPE_PRICE_ID`). Publish the rate
+  (or switch live keys off with `OMNIA_ISSUE_LIVE_KEYS` unset) before anyone can be charged;
+  counsel should confirm that charging under a rate "to be announced" is enforceable.
+- **Address lookups and employee data** — the Privacy Policy (§5) discloses that addresses sent
+  to `POST /v1/address` may be looked up with public geocoding services (U.S. Census Bureau,
+  OpenStreetMap Nominatim, state and county GIS). Confirm that disclosure and your customers'
+  notice obligations for employee home addresses.
 - **Auto-renewing subscription law** — US ROSCA and state "automatic renewal law"
   (e.g. California) require clear disclosure and easy cancellation. The trial is kept
   cancellable for this reason (`site/lib/terms.ts` explains it); confirm your renewal

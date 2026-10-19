@@ -341,9 +341,9 @@
     api('/api/account').then(function (r) {
       if (!r.ok || !r.body || !r.body.email) return;
       var a = $('navSignin');
-      if (a) { a.textContent = r.body.email; a.href = '/sandbox'; a.title = 'Open your console'; }
+      if (a) { a.textContent = r.body.email; a.href = '/dashboard'; a.title = 'Open your dashboard'; }
       var p = $('navPrimary');
-      if (p) { p.textContent = 'Open console'; p.href = '/sandbox'; }
+      if (p) { p.textContent = 'Open dashboard'; p.href = '/dashboard'; }
     });
   }
 

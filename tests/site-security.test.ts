@@ -94,7 +94,7 @@ before(async () => {
       ...process.env, PORT: String(PORT), SITE_DB_DIR: dir, RATE_LIMIT_PER_MIN: '1000', TRUST_PROXY: '',
       RESEND_API_KEY: 're_test', RESEND_API_BASE: fakeBase,
       STRIPE_SECRET_KEY: 'sk_test_fake', STRIPE_API_BASE: fakeBase, STRIPE_PRICE_ID: 'price_metered',
-      STRIPE_METER_EVENT: 'omnia_api_call', STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET, SIGNUP_PER_HOUR: '4',
+      STRIPE_METER_EVENT: 'omnia_api_call', STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET, OMNIA_ISSUE_LIVE_KEYS: '1', SIGNUP_PER_HOUR: '4',
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });

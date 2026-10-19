@@ -25,7 +25,7 @@
     <h2>API keys</h2>
     <p>Keys are stored as hashes. The full key is shown once, when it is issued. A key can be set to expire. After that the API returns <span class="mono">expired_key</span>.</p>
     <h2>Sandbox and live</h2>
-    <p>Sandbox keys start with <span class="mono">sk_test_</span>. Live keys start with <span class="mono">sk_live_</span>. They are separate. Every response says which mode answered, in the <span class="mono">omnia-mode</span> header. You can force a mode with the <span class="mono">Omnia-Mode</span> request header.</p>
+    <p>Sandbox keys start with <span class="mono">sk_test_</span>. Live keys start with <span class="mono">sk_live_</span>. They are separate. Every response says which mode answered, in the <span class="mono">Omnia-Mode</span> response header.</p>
     <h2>Rate limits</h2>
     <p>Calls are rate limited per key. When you hit the limit the API returns 429 <span class="mono">rate_limited</span> and a <span class="mono">Retry-After</span> header.</p>
     <h2>Passwords and sessions</h2>

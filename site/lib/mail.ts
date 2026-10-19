@@ -97,6 +97,35 @@ export async function sendVerificationEmail(args: {
   }
 }
 
+/** Where contact-form messages go. Defaults to the address published on the contact page. */
+export function contactRecipient(): string {
+  return process.env.CONTACT_TO || 'scottholdan@gmail.com';
+}
+
+/** A message from the contact form, delivered to the owner with Reply-To set to the sender. */
+export async function sendContactEmail(args: { name: string; email: string; company: string; message: string }): Promise<SendResult> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, reason: 'RESEND_API_KEY is not set.' };
+  const text = `From: ${args.name} <${args.email}>\nCompany: ${args.company || '(none)'}\n\n${args.message}`;
+  try {
+    const res = await fetch(RESEND_ENDPOINT, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: process.env.RESEND_FROM || defaultFrom(),
+        to: [contactRecipient()],
+        reply_to: args.email,
+        subject: `Omnia.tax contact: ${args.name}`.slice(0, 120),
+        text,
+      }),
+    });
+    if (!res.ok) return { sent: false, reason: `Resend responded ${res.status}` };
+    return { sent: true };
+  } catch (err) {
+    return { sent: false, reason: err instanceof Error ? err.message : 'Unknown error calling Resend.' };
+  }
+}
+
 function escapeHtml(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

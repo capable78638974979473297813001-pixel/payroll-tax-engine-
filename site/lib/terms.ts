@@ -21,7 +21,7 @@ import { TRIAL_DAYS } from './pricing.ts';
  * exposure.
  */
 
-export const TERMS_VERSION = '2026-10-19.1';
+export const TERMS_VERSION = '2026-10-19.2';
 export const TERM_MONTHS = 12;
 
 export interface TermsClause {
@@ -49,9 +49,9 @@ export function termsClauses(args: {
     {
       heading: 'What you are agreeing to pay',
       body:
-        `Live calculations are billed per successful POST /v1/paycheck, monthly, at the rate published for the account. ` +
+        `Live calculations are billed per successful calculation (POST /v1/paycheck), monthly, at the rate published for the account. ` +
         `That rate is to be announced. There is no per-employee fee, no seat license, and no setup fee. ` +
-        `Sandbox calls are not billed. Address lookups that do not match are not billed. ` +
+        `Sandbox calls are not billed. An address lookup that matches counts as one calculation on a live key; one that does not match is not billed. ` +
         `A minimum-wage check or a wage garnishment sent on the same paycheck call is part of that one calculation.`,
     },
     {

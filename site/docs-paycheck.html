@@ -42,9 +42,9 @@
         <tr><td class="mono">checkDate <span class="fine">string</span></td><td>required</td><td>Pay date, YYYY-MM-DD. Picks the tax year.</td></tr>
         <tr><td class="mono">payFrequency <span class="fine">string</span></td><td>required</td><td>weekly, biweekly, semimonthly or monthly.</td></tr>
         <tr><td class="mono">earnings <span class="fine">array</span></td><td>required</td><td>{ code, category, amount } per earning line. amount is cents.</td></tr>
-        <tr><td class="mono">deductions <span class="fine">array</span></td><td></td><td>Pretax and posttax deductions, amounts in cents.</td></tr>
-        <tr><td class="mono">federalW4 <span class="fine">object</span></td><td>required</td><td>filingStatus, multipleJobs, dependentCredit, otherIncome, deductions, extraWithholding.</td></tr>
-        <tr><td class="mono">ytd <span class="fine">object</span></td><td></td><td>Year-to-date socialSecurity, medicare, and futa wages, in cents.</td></tr>
+        <tr><td class="mono">deductions <span class="fine">array</span></td><td>required</td><td>Pretax and posttax deductions, amounts in cents. Send <code>[]</code> when there are none.</td></tr>
+        <tr><td class="mono">federalW4 <span class="fine">object</span></td><td>required</td><td>All six fields are required: filingStatus, multipleJobs, dependentCredit, otherIncome, deductions, extraWithholding. Dollar fields are cents.</td></tr>
+        <tr><td class="mono">ytd <span class="fine">object</span></td><td>required</td><td>Year-to-date socialSecurity, medicare, and futa wages, in cents. Send zeros at the start of the year.</td></tr>
         <tr><td class="mono">workState <span class="fine">object</span></td><td>required</td><td>{ code, certificate }. Pennsylvania uses workPSD and residencePSD.</td></tr>
         <tr><td class="mono">minimumWageCheck <span class="fine">object</span></td><td></td><td>{ hourlyRate } in cents, compared with wage floors on the same call.</td></tr>
         <tr><td class="mono">garnishments <span class="fine">array</span></td><td></td><td>Orders: consumer_creditor, child_support, federal_student_loan_default. amountOrdered is cents.</td></tr>
@@ -68,11 +68,16 @@
     <div class="table-wrap"><table>
       <thead><tr><th>Status</th><th>Code</th><th>Meaning</th></tr></thead>
       <tbody>
+        <tr><td>400</td><td class="mono">invalid_json</td><td>The body is not valid JSON.</td></tr>
         <tr><td>401</td><td class="mono">missing_key</td><td>No API key was sent.</td></tr>
         <tr><td>401</td><td class="mono">invalid_key</td><td>The key is wrong or inactive.</td></tr>
         <tr><td>401</td><td class="mono">expired_key</td><td>The key passed its expiry date.</td></tr>
         <tr><td>402</td><td class="mono">payment_method_required</td><td>No card or bank account on file.</td></tr>
+        <tr><td>402</td><td class="mono">subscription_cancelled</td><td>The subscription was cancelled. Start a new one in the console.</td></tr>
+        <tr><td>402</td><td class="mono">account_suspended</td><td>A payment failed and the key is paused. Update the payment method.</td></tr>
         <tr><td>422</td><td class="mono">invalid_input</td><td>The body failed validation. See details.</td></tr>
+        <tr><td>422</td><td class="mono">unsupported_tax_year</td><td>No rules for the year of checkDate.</td></tr>
+        <tr><td>422</td><td class="mono">cannot_compute</td><td>The input is valid but the engine cannot compute it, for example a missing certificate field. The message says which.</td></tr>
         <tr><td>429</td><td class="mono">rate_limited</td><td>Too many requests this minute. Retry later.</td></tr>
       </tbody>
     </table></div>
@@ -82,6 +87,7 @@
       <div class="tabs"><span class="tab-on">Request</span><span class="right">cURL</span></div>
       <pre><span class="d">curl https://api.omnia.tax/v1/paycheck \</span>
   <span class="d">-H "Authorization: Bearer $KEY" \</span>
+  <span class="d">-H "Content-Type: application/json" \</span>
   <span class="d">-d '{</span>
   <span class="k">"checkDate"</span><span class="d">: </span><span class="s">"2026-09-15"</span><span class="d">,</span>
   <span class="k">"payFrequency"</span><span class="d">: </span><span class="s">"weekly"</span><span class="d">,</span>
@@ -89,7 +95,9 @@
     <span class="k">"category"</span><span class="d">: </span><span class="s">"regular"</span><span class="d">, </span><span class="k">"amount"</span><span class="d">: </span><span class="n">140000</span><span class="d"> }],</span>
   <span class="k">"deductions"</span><span class="d">: [],</span>
   <span class="k">"federalW4"</span><span class="d">: { </span><span class="k">"filingStatus"</span><span class="d">: </span><span class="s">"head_of_household"</span><span class="d">,</span>
-    <span class="k">"multipleJobs"</span><span class="d">: false, </span><span class="k">"dependentCredit"</span><span class="d">: </span><span class="n">200000</span><span class="d"> },</span>
+    <span class="k">"multipleJobs"</span><span class="d">: false, </span><span class="k">"dependentCredit"</span><span class="d">: </span><span class="n">200000</span><span class="d">,</span>
+    <span class="k">"otherIncome"</span><span class="d">: </span><span class="n">0</span><span class="d">, </span><span class="k">"deductions"</span><span class="d">: </span><span class="n">0</span><span class="d">, </span><span class="k">"extraWithholding"</span><span class="d">: </span><span class="n">0</span><span class="d"> },</span>
+  <span class="k">"ytd"</span><span class="d">: { </span><span class="k">"socialSecurity"</span><span class="d">: </span><span class="n">0</span><span class="d">, </span><span class="k">"medicare"</span><span class="d">: </span><span class="n">0</span><span class="d">, </span><span class="k">"futa"</span><span class="d">: </span><span class="n">0</span><span class="d"> },</span>
   <span class="k">"workState"</span><span class="d">: { </span><span class="k">"code"</span><span class="d">: </span><span class="s">"PA"</span><span class="d">, </span><span class="k">"certificate"</span><span class="d">:</span>
     <span class="d">{ </span><span class="k">"workPSD"</span><span class="d">: </span><span class="s">"510101"</span><span class="d">, </span><span class="k">"residencePSD"</span><span class="d">: </span><span class="s">"510101"</span><span class="d"> } }</span>
 <span class="d">}'</span></pre>
