@@ -28,7 +28,9 @@
       <div class="field"><label for="company">Company</label><input id="company" name="company" autocomplete="organization" placeholder="Company name" /></div>
       <div class="field"><label for="message">Message</label><textarea id="message" name="message" placeholder="What are you building?" required></textarea></div>
       <button class="btn" type="submit">Send message</button>
-      <p class="hint">This opens an email to OMNIA TAX LLC. Nothing is stored on this page.</p>
+      <input name="website" id="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
+      <p class="hint" id="hint">Your message is emailed to OMNIA TAX LLC. We keep nothing on this page.</p>
+      <p class="field-error" id="err" hidden></p>
     </form>
     <div>
       <article style="border-top:1px solid var(--rule);padding:18px 0">
@@ -53,12 +55,29 @@
 <script>
 document.getElementById('form').addEventListener('submit', function (e) {
   e.preventDefault();
-  var name = document.getElementById('name').value.trim();
-  var email = document.getElementById('email').value.trim();
-  var company = document.getElementById('company').value.trim();
-  var message = document.getElementById('message').value.trim();
-  var body = 'From: ' + name + ' <' + email + '>\nCompany: ' + company + '\n\n' + message;
-  location.href = 'mailto:scottholdan@gmail.com?subject=' + encodeURIComponent('Omnia.tax') + '&body=' + encodeURIComponent(body);
+  var f = {
+    name: document.getElementById('name').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    company: document.getElementById('company').value.trim(),
+    message: document.getElementById('message').value.trim(),
+    website: document.getElementById('website').value
+  };
+  var btn = e.target.querySelector('button[type=submit]');
+  var err = document.getElementById('err'), hint = document.getElementById('hint');
+  err.hidden = true; btn.disabled = true;
+  function mailto() {
+    var body = 'From: ' + f.name + ' <' + f.email + '>\nCompany: ' + f.company + '\n\n' + f.message;
+    location.href = 'mailto:scottholdan@gmail.com?subject=' + encodeURIComponent('Omnia.tax') + '&body=' + encodeURIComponent(body);
+  }
+  fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(f) })
+    .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { status: r.status, body: j }; }); })
+    .then(function (r) {
+      btn.disabled = false;
+      if (r.status === 200) { e.target.reset(); hint.textContent = 'Sent. We will reply to the email address you gave.'; return; }
+      if (r.status === 501) { hint.textContent = 'Online sending is not switched on here, so this opens your email app instead.'; mailto(); return; }
+      err.textContent = (r.body && r.body.error) || 'We could not send your message. Please email us directly.';
+      err.hidden = false;
+    }, function () { btn.disabled = false; err.textContent = 'We could not reach the server. Please email us directly.'; err.hidden = false; });
 });
 </script>
 </body>

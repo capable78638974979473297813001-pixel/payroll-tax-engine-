@@ -43,7 +43,7 @@
   </main>
   <aside class="auth-aside">
     <h2>What you get</h2>
-    <article><h3>A sandbox key right away</h3><p>Runs the live engine. Not billed.</p></article>
+    <article><h3>A sandbox key to start</h3><p>Runs the live engine. Sandbox calls are not billed. A card is kept on file for the 14-day trial.</p></article>
     <article><h3>Federal, state and local tax</h3><p>One call, one line per tax, in cents.</p></article>
     <article><h3>Live keys when you're ready</h3><p>14-day trial, then pay per calculation.</p></article>
   </aside>
@@ -97,7 +97,7 @@
         Omnia.setLoading(btn, false);
         if (!res.ok) { fail(err, (res.body && res.body.error) || 'Could not sign you in.'); return; }
         Omnia.setSession({ email: res.body.email, name: res.body.name, company: res.body.company });
-        location.href = '/docs#billing';
+        location.href = '/dashboard';
       })
       .catch(function () { Omnia.setLoading(btn, false); fail(err, 'Could not reach the server. Try again.'); });
   });

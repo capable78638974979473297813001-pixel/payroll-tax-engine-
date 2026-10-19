@@ -241,6 +241,10 @@ export interface UsageEvent {
   statusCode: number;
   error: string | null;
   checkDate: string | null;
+  /** Which endpoint made the call. Absent on events recorded before this field existed (all paycheck calls). */
+  kind?: 'paycheck' | 'address';
+  /** For address lookups: whether an address matched. Only matched lookups are billable. */
+  matched?: boolean;
 }
 
 export interface EstimateEvent {

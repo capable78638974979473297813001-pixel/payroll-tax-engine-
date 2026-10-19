@@ -20,18 +20,13 @@
     <p class="eyebrow">Status</p>
     <h1 class="page">System status</h1>
   </div>
-  <div class="pill" style="margin-top:40px">
-    <strong>All systems operational</strong>
-    <span style="color:var(--ink3)">Example status</span>
+  <div class="pill" style="margin-top:40px" id="pill">
+    <strong id="overall">Checking</strong>
+    <span style="color:var(--ink3)" id="checked"></span>
   </div>
-  <p class="fine" style="margin-top:12px">The bars below are example data, not a live poll of production. GET /v1/health reports whether this server process is up.</p>
-  <div style="margin-top:28px">
-    <div class="status-row"><span>Paycheck API (POST /v1/paycheck)</span><span class="ticks" aria-hidden="true"></span><span>Operational</span></div>
-    <div class="status-row"><span>Address API (POST /v1/address)</span><span class="ticks" data-warn="1" aria-hidden="true"></span><span>Operational</span></div>
-    <div class="status-row"><span>Sandbox</span><span class="ticks" aria-hidden="true"></span><span>Operational</span></div>
-    <div class="status-row"><span>Dashboard and sign-in</span><span class="ticks" aria-hidden="true"></span><span>Operational</span></div>
-    <div class="status-row"><span>Billing</span><span class="ticks" aria-hidden="true"></span><span>Operational</span></div>
-  </div>
+  <p class="fine" style="margin-top:12px">This page asks the server for its own health, now and every 30 seconds. It reports what this server can do right now. It does not keep a history, and it cannot see a problem that stops the server answering.</p>
+  <div style="margin-top:28px" id="rows"></div>
+  <p class="fine" style="margin-top:20px" id="facts"></p>
 </main>
 <footer class="site-footer"><div class="wrap foot-grid">
   <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
@@ -41,13 +36,41 @@
 </div><p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p></footer>
 <script src="/assets/v5.js"></script>
 <script>
-document.querySelectorAll('.ticks').forEach(function (row) {
-  for (var i = 0; i < 40; i++) {
-    var t = document.createElement('i');
-    if (row.getAttribute('data-warn') && i === 28) t.className = 'warn';
-    row.appendChild(t);
+(function () {
+  function $(id) { return document.getElementById(id); }
+  function row(name, state, detail) {
+    var d = document.createElement('div'); d.className = 'status-row';
+    var a = document.createElement('span'); a.textContent = name;
+    var m = document.createElement('span'); m.textContent = detail || ''; m.style.color = 'var(--ink3)';
+    var c = document.createElement('span'); c.textContent = state;
+    d.appendChild(a); d.appendChild(m); d.appendChild(c);
+    return d;
   }
-});
+  function show(h, error) {
+    var rows = $('rows'); rows.textContent = '';
+    if (error || !h) {
+      $('overall').textContent = 'We could not reach the server';
+      $('checked').textContent = new Date().toLocaleTimeString();
+      rows.appendChild(row('Paycheck API (POST /v1/paycheck)', 'Unknown', 'No answer from /v1/health'));
+      $('facts').textContent = '';
+      return;
+    }
+    var ok = h.status === 'ok';
+    $('overall').textContent = ok ? 'All systems operational' : 'Degraded';
+    $('checked').textContent = 'Checked ' + new Date(h.time).toLocaleTimeString();
+    var calc = ok ? 'Operational' : 'Degraded';
+    rows.appendChild(row('Paycheck API (POST /v1/paycheck)', calc, h.states + ' jurisdictions loaded'));
+    rows.appendChild(row('Sandbox', calc, 'Tax years ' + (h.taxYears || []).join(', ')));
+    rows.appendChild(row('Dashboard and sign-in', h.store === 'ok' ? 'Operational' : 'Degraded', 'Account store ' + (h.store === 'ok' ? 'readable' : 'unreadable')));
+    rows.appendChild(row('Verification email', h.email ? 'Configured' : 'Not configured', h.email ? 'Codes are emailed' : 'Codes print to the server log'));
+    rows.appendChild(row('Billing', h.payments ? (h.metering ? 'Configured, metered' : 'Configured, card on file only') : 'Not configured', h.payments ? 'Stripe connected' : 'No payment processor connected'));
+    $('facts').textContent = 'API version ' + h.version + '.';
+  }
+  function poll() {
+    fetch('/v1/health', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (h) { show(h, false); }, function () { show(null, true); });
+  }
+  poll(); setInterval(poll, 30000);
+})();
 </script>
 </body>
 </html>

@@ -14,10 +14,11 @@ import {
 } from './lib/store.ts';
 import { CALL_TIERS, TRIAL_DAYS, estimate as computePricing, costForCalls } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
-import { isEmailConfigured, sendVerificationEmail } from './lib/mail.ts';
+import { isEmailConfigured, sendVerificationEmail, sendContactEmail } from './lib/mail.ts';
 import { validatePaycheckInput } from './lib/validate.ts';
 import { ExtrasRefusal, runPaycheckExtras, validatePaycheckExtras } from './lib/extras.ts';
 import { keyLifeFor } from './lib/keylife.ts';
+import { coverage, searchLocal } from './lib/coverage.ts';
 import { verifierConfigured, issueCode, checkCode } from './lib/verifier.ts';
 import { checkoutPaymentMethodTypes } from '../api/stripe.ts';
 import { hashPassword, verifyPassword, passwordProblem, MAX_PASSWORD } from './lib/password.ts';
@@ -204,11 +205,16 @@ function clientConfig() {
   };
 }
 
+/** The origin the docs' curl examples should call: this deployment, not a host this build may not own. */
+function apiOrigin(): string {
+  const configured = (process.env.PUBLIC_BASE_URL ?? '').trim().replace(/\/+$/, '');
+  return /^https?:\/\//.test(configured) ? configured : `http://localhost:${PORT}`;
+}
+
 function sendPage(res: ServerResponse, path: string): void {
-  const html = readFileSync(path, 'utf8').replace(
-    '<!--OMNIA_CONFIG-->',
-    `<script>window.OMNIA=${JSON.stringify(clientConfig())};</script>`,
-  );
+  const html = readFileSync(path, 'utf8')
+    .replace('<!--OMNIA_CONFIG-->', `<script>window.OMNIA=${JSON.stringify(clientConfig())};</script>`)
+    .replaceAll('https://api.omnia.tax', apiOrigin());
   const buf = Buffer.from(html);
   res.writeHead(200, {
     'Content-Type': 'text/html; charset=utf-8',
@@ -1761,6 +1767,46 @@ function handleUsage(req: IncomingMessage, res: ServerResponse): void {
     const monthAgo = Date.now() - 30 * 24 * 60 * 60_000;
     const callsToday = events.filter((e) => new Date(e.at).getTime() >= dayAgo).length;
     const callsThisMonth = events.filter((e) => new Date(e.at).getTime() >= monthAgo).length;
+
+    // Every key this account has held, newest first, and one bucket per UTC
+    // day for the last 30 days across all of them (what the usage log still
+    // retains; it is trimmed to MAX_USAGE_EVENTS).
+    const ownKeys = Object.values(db.keys).filter((k) => k.ownerEmail === session.email);
+    const ownHashes = new Set(ownKeys.map((k) => k.keyHash));
+    const windowEvents = db.usage.filter((u) => ownHashes.has(u.keyHash) && new Date(u.at).getTime() >= monthAgo);
+    const daily: { date: string; calls: number; errors: number }[] = [];
+    for (let i = 29; i >= 0; i--) daily.push({ date: new Date(Date.now() - i * 86_400_000).toISOString().slice(0, 10), calls: 0, errors: 0 });
+    for (const u of windowEvents) {
+      const bucket = daily.find((d) => d.date === u.at.slice(0, 10));
+      if (!bucket) continue;
+      if (u.statusCode === 200) bucket.calls += 1;
+      else bucket.errors += 1;
+    }
+    const modeOf = new Map(ownKeys.map((k) => [k.keyHash, keyMode(k)]));
+    let liveCalculations = 0;
+    let liveAddressLookups = 0;
+    let sandboxCalls = 0;
+    for (const u of db.usage) {
+      const mode = modeOf.get(u.keyHash);
+      if (!mode || u.statusCode !== 200) continue;
+      if (mode === 'test') sandboxCalls += 1;
+      else if (u.kind === 'address') liveAddressLookups += u.matched ? 1 : 0;
+      else liveCalculations += 1;
+    }
+    const callsLast30 = daily.reduce((n, d) => n + d.calls, 0);
+    const errorsLast30 = daily.reduce((n, d) => n + d.errors, 0);
+    const keys = ownKeys
+      .slice()
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .map((k) => ({
+        keyMasked: maskKey(k.keyPrefix),
+        mode: k.keyPrefix.startsWith('sk_live_') ? 'live' : 'test',
+        active: k.isActive,
+        createdAt: k.createdAt,
+        expiresAt: k.expiresAt,
+        lastUsedAt: k.lastUsedAt,
+        totalCalls: k.totalCalls ?? 0,
+      }));
     const recent = events
       .slice()
       .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
@@ -1779,6 +1825,13 @@ function handleUsage(req: IncomingMessage, res: ServerResponse): void {
       totalCalls: keyRecord.totalCalls ?? events.length,
       callsToday,
       callsThisMonth,
+      callsTodayOk: events.filter((e) => e.statusCode === 200 && new Date(e.at).getTime() >= dayAgo).length,
+      callsLast30,
+      errorsLast30,
+      errorRate: callsLast30 + errorsLast30 ? errorsLast30 / (callsLast30 + errorsLast30) : 0,
+      daily,
+      billing: { liveCalculations, liveAddressLookups, sandboxCalls },
+      keys,
       recent,
     });
   });
@@ -1872,7 +1925,10 @@ function authenticateKey(req: IncomingMessage, res: ServerResponse, limiter: str
     );
     return null;
   }
-  return { requestId, keyHash, rlHeaders, customerId: auth.customerId, meteredSubscription: auth.meteredSubscription };
+  // Only a live key bills. A sandbox (sk_test_) key never reaches Stripe, however
+  // the account is set up: the terms and the pricing page promise sandbox calls
+  // are not billed.
+  return { requestId, keyHash, rlHeaders, customerId: auth.customerId, meteredSubscription: auth.meteredSubscription && mode === 'live' };
 }
 
 async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -2030,7 +2086,7 @@ async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise
     const meter = matched && meteringConfigured() && ctx.meteredSubscription && ctx.customerId
       ? { customerId: ctx.customerId, identifier: requestId }
       : null;
-    recordUsage(keyHash, 200, null, null, meter);
+    recordUsage(keyHash, 200, null, null, meter, 'address', matched);
     sendJson(res, 200, {
       matched,
       state,
@@ -2059,10 +2115,12 @@ function recordUsage(
   error: string | null,
   checkDate: string | null,
   meter: { customerId: string; identifier: string } | null = null,
+  kind: 'paycheck' | 'address' = 'paycheck',
+  matched?: boolean,
 ): void {
   withDb((db) => {
     const at = new Date().toISOString();
-    appendUsage(db, { keyHash, at, statusCode, error, checkDate });
+    appendUsage(db, { keyHash, at, statusCode, error, checkDate, kind, ...(matched === undefined ? {} : { matched }) });
     const stored = db.keys[keyHash];
     if (stored) {
       stored.lastUsedAt = at;
@@ -2118,6 +2176,10 @@ function handleHealth(res: ServerResponse): void {
     states,
     store,
     taxYears: supportedYears(),
+    // Which integrations this server has been given keys for. Booleans only.
+    payments: Boolean(process.env.STRIPE_SECRET_KEY),
+    metering: meteringConfigured(),
+    email: isEmailConfigured() || verifierConfigured(),
     time: new Date().toISOString(),
   });
 }
@@ -2148,6 +2210,79 @@ function handleStates(res: ServerResponse, rawUrl: string): void {
     })
     .sort((a, b) => a.name.localeCompare(b.name));
   sendJson(res, 200, { year, states });
+}
+
+// ---------------------------------------------------------------------
+// POST /api/contact -- the contact form. Sends one email to the owner
+// through the same provider as verification codes. 501 when no provider is
+// connected, so the page can fall back to the visitor's own mail app.
+// ---------------------------------------------------------------------
+
+async function handleContact(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  let body: { name?: unknown; email?: unknown; company?: unknown; message?: unknown; website?: unknown };
+  try {
+    body = await readJson(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message });
+    return;
+  }
+  // A hidden field real visitors never fill in; bots do. Pretend it worked.
+  if (typeof body.website === 'string' && body.website.trim()) {
+    sendJson(res, 200, { ok: true });
+    return;
+  }
+  const name = String(body.name ?? '').trim().slice(0, 120);
+  const email = String(body.email ?? '').trim().toLowerCase().slice(0, 254);
+  const company = String(body.company ?? '').trim().slice(0, 160);
+  const message = String(body.message ?? '').trim().slice(0, 5000);
+  if (!name || !isValidEmail(email) || message.length < 5) {
+    sendJson(res, 400, { error: 'Name, a valid email and a message are required.', code: 'invalid_input' });
+    return;
+  }
+  if (!isEmailConfigured()) {
+    sendJson(res, 501, { error: 'Email is not connected on this server.', code: 'email_not_configured' });
+    return;
+  }
+  const gate = withDb((db) => hitStoredLimit(db, 'contact:' + clientAddress(req), 5, HOUR_MS));
+  if (!gate.allowed) {
+    sendJson(res, 429, { error: 'Too many messages from this network. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(gate.retryAfterSec) });
+    return;
+  }
+  const sent = await sendContactEmail({ name, email, company, message });
+  if (!sent.sent) {
+    console.error(`[contact] not delivered: ${sent.reason}`);
+    sendJson(res, 502, { error: 'We could not send your message just now.', code: 'send_failed' });
+    return;
+  }
+  sendJson(res, 200, { ok: true });
+}
+
+// ---------------------------------------------------------------------
+// GET /api/coverage and /api/coverage/local -- what this build computes,
+// read from the data files (site/lib/coverage.ts). Public: the coverage
+// page needs no sign-in, and nothing here is account data.
+// ---------------------------------------------------------------------
+
+function handleCoverage(res: ServerResponse): void {
+  const { year, summary, states } = coverage();
+  sendJson(res, 200, { year, summary, states }, { 'Cache-Control': 'public, max-age=300' });
+}
+
+function handleCoverageLocal(res: ServerResponse, rawUrl: string): void {
+  const q = new URL(rawUrl, 'http://x').searchParams;
+  const kind = q.get('kind');
+  sendJson(
+    res,
+    200,
+    searchLocal({
+      q: q.get('q') ?? '',
+      state: q.get('state') ?? '',
+      kind: kind === 'tax' || kind === 'wage' ? kind : 'all',
+      page: Number(q.get('page') ?? 0) || 0,
+      size: Number(q.get('size') ?? 25) || 25,
+    }),
+    { 'Cache-Control': 'public, max-age=300' },
+  );
 }
 
 // ---------------------------------------------------------------------
@@ -2343,6 +2478,7 @@ createServer((req, res) => {
     if (method === 'POST' && url === '/api/signin') return handleSignin(req, res);
     if (method === 'POST' && url === '/api/signin-password') return handleSigninPassword(req, res);
     if (method === 'POST' && url === '/api/password') return handlePassword(req, res);
+    if (method === 'POST' && url === '/api/contact') return handleContact(req, res);
     if (method === 'POST' && url === '/api/demo/paycheck') return handleDemoPaycheck(req, res);
     if (method === 'POST' && url === '/api/demo/resolve-address') return handleDemoResolveAddress(req, res);
     if (method === 'GET' && url === '/api/scenarios') return handleScenarioList(req, res);
@@ -2362,6 +2498,8 @@ createServer((req, res) => {
     if (method === 'POST' && (url === '/api/paycheck' || url === '/v1/paycheck')) return handlePaycheck(req, res);
     if (method === 'GET' && (url === '/api/health' || url === '/v1/health' || url === '/healthz')) return handleHealth(res);
     if (method === 'GET' && (url === '/api/states' || url === '/v1/states')) return handleStates(res, req.url ?? url);
+    if (method === 'GET' && (url === '/api/coverage' || url === '/v1/coverage')) return handleCoverage(res);
+    if (method === 'GET' && (url === '/api/coverage/local' || url === '/v1/coverage/local')) return handleCoverageLocal(res, req.url ?? url);
     if (method === 'POST' && (url === '/api/address' || url === '/v1/address')) return handleAddress(req, res);
     if (method === 'POST' && url === '/api/estimate') return handleEstimate(req, res);
     if (method === 'GET' && url === '/api/billing') return handleBilling(req, res);

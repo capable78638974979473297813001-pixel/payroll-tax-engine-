@@ -281,6 +281,11 @@ export function stateIncomeTax(
   // employer size AND individual compensation. See its own doc comment.
   const seattle = seattlePayrollExpenseTax(input, ctx, rules);
   if (seattle) lines.push(seattle);
+  // Seattle's Social Housing Tax — a SECOND, independent employer levy: 5% of
+  // each employee's Seattle compensation above $1,000,000 in a year, with no
+  // employer-size threshold. See its own doc comment.
+  const seattleSocialHousing = seattleSocialHousingTax(input, ctx, rules);
+  if (seattleSocialHousing) lines.push(seattleSocialHousing);
 
   // West Virginia's per-city Municipal Service Fee — see
   // westVirginiaMunicipalServiceFee()'s own doc comment for why this is a
@@ -376,6 +381,11 @@ export function stateIncomeTax(
   // and the 2,627-jurisdiction data file it reads from.
   const paLocal = pennsylvaniaLocalTax(input, ctx, rules);
   lines.push(...paLocal);
+
+  // The City of Pittsburgh's Payroll Expense Tax — an employer-only levy on
+  // top of the Act 32 EIT/LST above. See its own doc comment.
+  const pittsburghPET = pittsburghPayrollExpenseTaxEmployer(input, ctx, rules);
+  if (pittsburghPET) lines.push(pittsburghPET);
 
   // Michigan's 24-city local income tax (Uniform City Income Tax Ordinance,
   // Act 284) — see michiganLocalTax()'s own doc comment for the resident/
@@ -5111,6 +5121,85 @@ function seattlePayrollExpenseTax(
       `${fmt(priorYearPayroll)} of prior-year Seattle payroll`,
   };
 }
+/**
+ * Seattle's Social Housing Tax (SMC ch. 5.37, effective 2025-01-01) — an
+ * EMPLOYER-paid 5% on compensation above $1,000,000 paid in Seattle to one
+ * employee in a calendar year, from the first dollar over the line.
+ *
+ * Independent of (and additional to) the JumpStart payroll expense tax
+ * above, and unlike it there is no prior-year employer-payroll threshold,
+ * so no employer figure is needed — only the employee's running Seattle
+ * compensation (ytd.seattleCompensation, defaulting to zero, the same
+ * disclosed starting point JumpStart uses). Compensation here is GROSS:
+ * the City's own page counts deferred-comp contributions, so no pretax
+ * deduction is taken.
+ */
+function seattleSocialHousingTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (cert.locality !== 'Seattle') return null;
+
+  const cfg = (rules.localIncomeTax as
+    | { seattleSocialHousingTax?: { rate: number; compensationThreshold: number } }
+    | undefined)?.seattleSocialHousingTax;
+  if (!cfg) return null;
+
+  const thisCheque = ctx.taxableWagesFor([]);
+  const already = input.ytd.seattleCompensation ?? 0;
+  const threshold = dollars(cfg.compensationThreshold);
+  const taxableWages = atLeastZero(already + thisCheque - Math.max(already, threshold));
+  if (taxableWages === 0) return null;
+
+  return {
+    id: 'SEATTLE_SOCIAL_HOUSING_ER',
+    name: 'Seattle Social Housing Tax (Employer)',
+    payer: 'employer',
+    jurisdiction: 'local',
+    taxableWages,
+    amount: applyRate(taxableWages, cfg.rate),
+    detail:
+      `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}% — compensation above ${fmt(threshold)} for this ` +
+      `employee (${fmt(already)} paid in Seattle earlier this year); employer-paid, never withheld`,
+  };
+}
+
+/**
+ * The City of Pittsburgh's Payroll Expense Tax (City Code Title Two,
+ * Chapter 258) — 0.55%, EMPLOYER-only, on gross compensation for work done
+ * in the city. Collected by the City itself, separately from the Act 32
+ * EIT/LST that pennsylvaniaLocalTax() withholds, and layered on top of
+ * them. Gated on the already-resolved certificate.workPSD being one of the City
+ * of Pittsburgh's two PSD codes (700102 / 730105), the same convention as the EIT/LST. The ET-1
+ * instructions tax GROSS payroll and disallow deferred-comp / Section 125
+ * deductions, so no pretax reduction is taken.
+ */
+function pittsburghPayrollExpenseTaxEmployer(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  if (rules.code !== 'PA') return null;
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  const cfg = (rules.localTax as
+    | { pittsburghPayrollExpenseTax?: { rate: number; workPSDs: string[] } }
+    | undefined)?.pittsburghPayrollExpenseTax;
+  if (!cfg || typeof cert.workPSD !== 'string' || !cfg.workPSDs.includes(cert.workPSD)) return null;
+
+  const taxableWages = ctx.taxableWagesFor([]);
+  return {
+    id: 'PITTSBURGH_PAYROLL_ER',
+    name: 'Pittsburgh Payroll Expense Tax (Employer)',
+    payer: 'employer',
+    jurisdiction: 'local',
+    taxableWages,
+    amount: applyRate(taxableWages, cfg.rate),
+    detail: `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%, employer-only, on gross compensation for work in the City of Pittsburgh`,
+  };
+}
+
 function coloradoOccupationalPrivilegeTax(
   input: PaycheckInput,
   rules: StateRuleset,

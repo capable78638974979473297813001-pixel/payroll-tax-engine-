@@ -48,11 +48,13 @@
       <div class="tabs"><span class="tab-on">Quickstart</span><span class="right">cURL</span></div>
       <pre><span class="d">curl https://api.omnia.tax/v1/paycheck \</span>
   <span class="d">-H "Authorization: Bearer $OMNIA_SANDBOX_KEY" \</span>
-  <span class="d">-d @pa-philadelphia.json</span>
+  <span class="d">-H "Content-Type: application/json" \</span>
+  <span class="d">-d @paycheck.json</span>
 
 <span class="d">// 200 OK, amounts in cents</span>
 <span class="d">{ "result": { "grossPay": </span><span class="n">140000</span><span class="d">, "netPay": </span><span class="n">112965</span><span class="d">, … } }</span></pre>
     </div>
+    <p class="fine" style="margin-top:12px"><code>paycheck.json</code> is the request body shown under <a class="text-link" href="/docs/paycheck">POST /v1/paycheck</a>. The sandbox runs the same case, and seven others, from its examples menu.</p>
     <div class="cards">
       <a href="#making-requests"><strong>Quickstart</strong><span>→</span><p>Get a sandbox key and run your first paycheck.</p></a>
       <a href="#authentication"><strong>Authentication</strong><span>→</span><p>Bearer keys, sandbox and live modes.</p></a>
@@ -66,7 +68,7 @@
     <p class="sub">POST JSON to <span data-origin>/v1/paycheck</span> with <code>Authorization: Bearer</code> and <code>Content-Type: application/json</code>. A successful body is <code>{ "result": { … } }</code>. Amounts are integer cents.</p>
 
     <h2 id="authentication" style="margin-top:36px">Authentication</h2>
-    <p class="sub">Keys are shown once, stored as a hash, and sent as a bearer token. Test keys start with <code>sk_test_</code>. Live keys start with <code>sk_live_</code>. Send <code>Omnia-Mode: live</code> or <code>test</code> when a key should be forced into one mode. Every response includes <code>omnia-mode</code>.</p>
+    <p class="sub">Keys are shown once, stored as a hash, and sent as a bearer token. Test keys start with <code>sk_test_</code>. Live keys start with <code>sk_live_</code>. Every response includes an <code>Omnia-Mode</code> header, <code>test</code> or <code>live</code>, saying which mode the key is in.</p>
     <p class="fine" id="navKey">No key in this session</p>
     <p class="fine" id="navKeyNote">The full key is shown once, on the key screen.</p>
     <p class="fine" id="tierNote">Live calls are billed per calculation. The rate is to be announced.</p>
@@ -100,7 +102,7 @@
     <p class="sub"><code>grossPay</code>, <code>pretaxDeductions</code>, <code>posttaxDeductions</code>, <code>taxes[]</code> with <code>id</code>, <code>name</code>, <code>payer</code>, <code>jurisdiction</code>, <code>taxableWages</code>, <code>amount</code>, <code>detail</code>, <code>employeeTaxTotal</code>, <code>employerTaxTotal</code>, <code>netPay</code>, plus <code>notices</code> and <code>warnings</code> when an input needs a second look.</p>
 
     <h2 id="address" style="margin-top:36px">POST /v1/address</h2>
-    <p class="sub">Send a work address and, when you have it, a home address. The response includes a <code>workState</code> certificate you can reuse. Lookups that do not match an address are not billed.</p>
+    <p class="sub">Send a work address and, when you have it, a home address. The response includes a <code>workState</code> certificate you can reuse. A lookup that matches an address is counted like one calculation on a live key; a lookup that does not match is not billed.</p>
 
     <h2 id="states" style="margin-top:36px">GET /v1/states</h2>
     <p class="sub">Lists state codes the engine will calculate for the requested year.</p>
@@ -116,18 +118,23 @@
       <table>
         <thead><tr><th>Status</th><th>Code</th><th>Meaning</th></tr></thead>
         <tbody>
+          <tr><td>400</td><td class="mono">invalid_json</td><td>The body is not valid JSON.</td></tr>
           <tr><td>401</td><td class="mono">missing_key</td><td>No API key was sent.</td></tr>
           <tr><td>401</td><td class="mono">invalid_key</td><td>The key is wrong or inactive.</td></tr>
           <tr><td>401</td><td class="mono">expired_key</td><td>The key passed its expiry date.</td></tr>
           <tr><td>402</td><td class="mono">payment_method_required</td><td>No card or bank account on file.</td></tr>
+          <tr><td>402</td><td class="mono">subscription_cancelled</td><td>The subscription was cancelled. Start a new one in the console.</td></tr>
+          <tr><td>402</td><td class="mono">account_suspended</td><td>A payment failed and the key is paused. Update the payment method.</td></tr>
           <tr><td>422</td><td class="mono">invalid_input</td><td>The body failed validation. See details.</td></tr>
+          <tr><td>422</td><td class="mono">unsupported_tax_year</td><td>No rules for the year of checkDate.</td></tr>
+          <tr><td>422</td><td class="mono">cannot_compute</td><td>The input is valid but the engine cannot compute it, for example a missing certificate field. The message says which.</td></tr>
           <tr><td>429</td><td class="mono">rate_limited</td><td>Too many requests this minute. Retry later.</td></tr>
         </tbody>
       </table>
     </div>
 
     <h2 id="pricing" style="margin-top:36px">Pricing</h2>
-    <p class="sub">Pay per live calculation. The rate is to be announced. There is no per-employee price and no long contract. The first 14 days are a trial with a card on file. Sandbox calls are not billed. Minimum wage and garnishment checks on the same call are included.</p>
+    <p class="sub">Pay per live calculation. The rate is to be announced. There is no per-employee price and no long contract. The first 14 days are a trial with a card on file. Sandbox calls are not billed. Minimum wage and garnishment checks on the same call are included. A matched address lookup counts like one calculation.</p>
     <p class="sub" id="billingBody" style="margin-top:12px">Sign in to see this account’s trial. <a href="/signin">Sign in</a></p>
     <p class="sub" style="margin-top:28px">Stuck? Email <a href="mailto:scottholdan@gmail.com">scottholdan@gmail.com</a> with the requestId from the response.</p>
   </article>

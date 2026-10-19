@@ -99,7 +99,7 @@ describe('signup: a key needs a card or bank account on file', () => {
     assert.equal(r.status, 200);
     const created = db().accounts[EMAIL];
     assert.ok(created.termsAcceptedAt);
-    assert.equal(created.termsVersion, '2026-10-19.1');
+    assert.equal(created.termsVersion, '2026-10-19.2');
     const code = created.code;
     assert.match(code, /^\d{6}$/);
     const v = await post('/api/verify-email', { email: EMAIL, code });

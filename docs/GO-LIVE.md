@@ -277,3 +277,21 @@ add a **live** webhook endpoint, and repeat step 1–5 with a real card.
 - **Home-page calculator:** `POST /api/demo/paycheck` runs the real engine with no
   key, for a fixed small input shape, 120 calls per network address per hour. It is
   never billed and never touches an account.
+
+## What the site shows from real data (added with the v5 design)
+
+- **`/coverage`** reads `GET /api/coverage` and `GET /api/coverage/local`, computed from `data/` by
+  `site/lib/coverage.ts` (states, every county, city, school district and taxing body in the local
+  files, local minimum wages). Nothing on that page is typed by hand; a new data file shows up on the
+  next deploy. A state whose local list the data itself calls incomplete (AL, WV, CO) is marked
+  "partial" in the table.
+- **`/dashboard`** reads `GET /api/usage` (30-day calls per day, errors, every key the account has held,
+  live vs sandbox counts) and `GET /api/billing`. Its **Replace my key** button calls `POST /api/issue-key`.
+- **`/status`** polls `GET /v1/health` and reports only what that server can see: jurisdictions loaded,
+  account store readable, whether email and Stripe keys are present.
+- **`/contact`** posts to `POST /api/contact` (Resend, `CONTACT_TO`, five messages an hour per network,
+  hidden-field honeypot) and falls back to `mailto:` when no email provider is configured.
+- **Docs host.** The `curl` examples in `/docs` use `PUBLIC_BASE_URL` (the deployed origin), not a fixed host.
+- **Only live keys bill.** With metering configured, a key that starts `sk_test_` is never reported to
+  Stripe, so "sandbox calls are not billed" holds. Until `OMNIA_ISSUE_LIVE_KEYS=1`, every issued key is a
+  sandbox key and nothing is metered.
