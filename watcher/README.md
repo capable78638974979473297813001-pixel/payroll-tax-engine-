@@ -11,7 +11,7 @@ workflow also opens a GitHub issue with the report.
 
 ## What it watches
 
-`sources.json`, about 210 sources in 12 jurisdictions (see "Scope" below), built from two places:
+`sources.json`, about 230 sources in 14 jurisdictions (see "Scope" below), built from two places:
 
 - **`curated.json`**: each state agency's withholding / employer page, plus
   the federal publications (Pub 15, 15-T, W-4, IRS draft forms, contribution
@@ -38,12 +38,13 @@ data is refreshed for that date and doesn't need a daily watch. `scope.json`
 lists the jurisdictions that are left out, with a reason for each, and
 `build_sources.py` drops their sources (curated or cited in `data/`).
 
-- **Kept (12):** federal; **AR, GA, ID, OH, UT, WV**, which have documented
+- **Kept (14):** federal; **AR, GA, ID, ME, OH, SC, UT, WV**, which have documented
   unscheduled mid-year changes in this repo's data (AR's retroactive 2026 cut
-  and reissued formula, GA's HB 463, ID's reissued tables, OH's HB 96, UT's
-  HB 106, WV's SB 392); and **AL, IN, KY, MI, PA**, which have local-tax
+  and reissued formula, GA's HB 463, ID's reissued tables, ME's August 2026
+  booklet and surcharge, OH's HB 96, SC's Act 110 with withholding tables still
+  to be reissued, UT's HB 106, WV's SB 392); and **AL, IN, KY, MI, PA**, which have local-tax
   registries whose rates change on any date.
-- **Left out (41):** states with no tax on wages, the July-1-only states (MD,
+- **Left out (39):** states with no tax on wages, the July-1-only states (MD,
   VA, NJ, NM) and the January-1-only states.
 - This is a judgment from what the repo's 2025-2027 data records, **not a legal
   finding** that other states can't change mid-year. A state with no change
@@ -57,16 +58,24 @@ lists the jurisdictions that are left out, with a reason for each, and
 
 A landing page often stays the same while the document behind it changes: a
 village posts a new withholding notice at the same address, a county swaps the
-rate sheet. So an **index** page (`"kind": "index"`) also has the documents it
+rate sheet. So **every page** the watcher visits also has the documents it
 links to read, one level deep: PDFs, Word and Excel files, CSV and text, on the
-page's own site or any other `.gov`/`.us`/`.mil` site. Each becomes its own
-watched source (id `<page>~<hash>`, titled "... (linked from ...)"), compared
-and confirmed like any other, so a change to the notice is reported even though
-the page never moved.
+page's own site or any other `.gov`/`.us`/`.mil` site, including files whose
+address has no extension (`/download`, `/documents/`, `/dam/`, `/dA/`). Each
+becomes its own watched source (id `<page>~<hash>`, titled "... (linked from
+...)"), compared and confirmed like any other, so a change to the notice is
+reported even though the page never moved.
 
-- `"follow": true` does the same for a page that isn't an index; `"follow":
-  false` opts an index out; `"follow_limit": N` changes the 25-per-page cap
-  (a page with more says so in `state.json` as `follow_skipped`).
+- `"follow": false` opts a page out; `"follow_limit": N` changes the 150-per-page
+  cap (a page with more says so in `state.json` as `follow_skipped`). Across the
+  whole list the cap is 3,000 documents.
+- **Time budget.** Pages are read first, then documents in batches until 40
+  minutes have passed since the run began (`--max-minutes`, at least 10 minutes
+  are always left for documents). Documents already being watched go first, so a
+  backlog of first snapshots can never starve change detection; whatever is left
+  is read at the start of the next run, and the report says how many were
+  deferred and that they are not being watched until then. A first run over a
+  few hundred new documents therefore takes a few days to finish, not one job.
 - A linked document that can't be read (a dead link on someone else's page) is
   counted in the report's coverage line, not escalated as broken.
 - A document that stops being linked is dropped from the state.

@@ -18,7 +18,7 @@ can't bury the real changes.
 
 Beyond single pages it also:
 
-- reads the documents an index page links to (PDFs, spreadsheets), not just the
+- reads the documents every page links to (PDFs, spreadsheets), not just the
   page's own text, so a rate sheet that changes behind an unchanged landing page
   is still noticed ("follow", below);
 - compares the engine's local-tax data with Ohio's official bulk rate files row
@@ -86,10 +86,18 @@ DOC_EXTENSIONS = (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".txt", ".zi
 # Reading what an index page links to, not just the page. Each linked document
 # becomes its own watched source (id "<parent>~<hash of url>"), read like any
 # other: PDF text, spreadsheet strings, confirmed before a change is reported.
-# One level deep only, and capped, so a busy page can't turn into a crawl.
-FOLLOW_EXTENSIONS = tuple(e for e in DOC_EXTENSIONS if e != ".zip")
-FOLLOW_LIMIT_PER_PAGE = 25
-FOLLOW_LIMIT_TOTAL = 500
+# Every page source is followed (opt out with "follow": false), one level deep,
+# and capped generously so a news page can't turn into a crawl.
+FOLLOW_LIMIT_PER_PAGE = 150
+FOLLOW_LIMIT_TOTAL = 3000
+# Documents are read after the pages, in batches, until this many minutes have
+# passed since the run began. What is left over is read at the start of the next
+# run, so a first run over hundreds of new documents can't outlast the job.
+# Documents already being watched go first: a change is never starved by a
+# backlog of first snapshots.
+DEFAULT_MAX_MINUTES = 40
+MIN_DOCUMENT_MINUTES = 10
+DOCUMENT_BATCH = 96
 
 # Lines that change without the substance changing. Matched against each
 # normalised line; a matching line is dropped before hashing.
@@ -459,13 +467,21 @@ def binary_strings(body: bytes) -> str:
     return "\n".join(parts) if parts else fingerprint_text("binary", body)
 
 
+def is_document_url(url: str) -> bool:
+    """A link that points at a file rather than a page: by extension, or by the
+    path conventions government sites use when the address has none (Drupal and
+    Georgia's /download, Ohio's and Indiana's /dam/ and /dA/, /documents/)."""
+    path = urllib.parse.urlsplit(url).path.lower()
+    return (path.endswith(DOC_EXTENSIONS) or path.endswith("/download") or "/documents/" in path
+            or "/dam/" in path or path.startswith("/da/"))
+
+
 def document_links(links: list[tuple[str, str]], page_url: str) -> dict[str, str]:
     """Links worth announcing when they appear or vanish: documents anywhere,
     plus same-site pages (for index sources)."""
     out: dict[str, str] = {}
     for url, text in links:
-        path = urllib.parse.urlsplit(url).path.lower()
-        if path.endswith(DOC_EXTENSIONS) or path.endswith("/download") or "/documents/" in path:
+        if is_document_url(url):
             out.setdefault(url, text)
     return out
 
@@ -895,11 +911,11 @@ def _official_host(host: str) -> bool:
 def follow_children(results: list[Result], state: dict) -> list[dict]:
     """Sources for the documents that index pages link to.
 
-    A page is followed when it is an index (`"kind": "index"`) or says
-    `"follow": true`; `"follow": false` opts out, and `"follow_limit"` raises
-    or lowers the per-page cap. Only documents are followed (PDF, Word, Excel,
-    CSV, text), and only on the page's own site or another .gov/.us/.mil site.
-    A document that already has a source of its own isn't read twice.
+    Every page source is followed; `"follow": false` opts one out, and
+    `"follow_limit"` raises or lowers the per-page cap. Only documents are
+    followed (PDF, Word, Excel, CSV, text), and only on the page's own site or
+    another .gov/.us/.mil site. A document that already has a source of its own
+    isn't read twice.
     """
     own_urls = {r.source["url"] for r in results}
     children: dict[str, dict] = {}
@@ -907,14 +923,12 @@ def follow_children(results: list[Result], state: dict) -> list[dict]:
         s = r.source
         if s.get("origin") == "follow" or s.get("follow") is False:
             continue
-        if not (s.get("follow") or s.get("kind") == "index"):
-            continue
         links = r.links if r.links is not None else state.get(s["id"], {}).get("links", {})
         host = _host(r.final_url or s["url"])
         picked = []
         for url, text in sorted(links.items()):
             path = urllib.parse.urlsplit(url).path.lower()
-            if not (path.endswith(FOLLOW_EXTENSIONS) or path.endswith("/download")):
+            if path.endswith(".zip") or not is_document_url(url):
                 continue
             if url in own_urls or not (_host(url) == host or _official_host(_host(url))):
                 continue
@@ -1012,7 +1026,8 @@ def attention_items(results: list[Result], state: dict, findings: list[dict]) ->
 
 
 def build_report(results: list[Result], state: dict, today: str, started: float,
-                 findings: list[dict] | None = None, unread_children: int = 0) -> tuple[str, dict]:
+                 findings: list[dict] | None = None, unread_children: int = 0,
+                 deferred_children: int = 0) -> tuple[str, dict]:
     findings = findings or []
     attention = attention_items(results, state, findings)
     by_status: dict[str, list[Result]] = defaultdict(list)
@@ -1056,9 +1071,14 @@ def build_report(results: list[Result], state: dict, today: str, started: float,
     followed = sum(1 for r in results if r.source.get("origin") == "follow")
     if followed or unread_children:
         many = unread_children != 1
-        lines.append(f"{followed} of those are documents linked from index pages."
+        lines.append(f"{followed} of those are documents linked from pages."
                      + (f" {unread_children} other linked document{'s' if many else ''} could not be read (a dead link, "
                         f"or a file the site won't serve) and {'are' if many else 'is'} not counted above." if unread_children else ""))
+    if deferred_children:
+        lines.append(f"**{deferred_children} linked document{'s' if deferred_children != 1 else ''} "
+                     f"{'were' if deferred_children != 1 else 'was'} not read this run** (the time budget ran out) "
+                     f"and will be read first thing in the next run; until then {'they are' if deferred_children != 1 else 'it is'} "
+                     f"not being watched.")
     lines.append("")
 
     def describe_change(r: Result):
@@ -1178,6 +1198,7 @@ def build_report(results: list[Result], state: dict, today: str, started: float,
         "reconcile": findings,
         "followed_documents": sum(1 for r in results if r.source.get("origin") == "follow"),
         "followed_documents_unread": unread_children,
+        "followed_documents_deferred": deferred_children,
         "verified": verified,
         "unverified": len(unverified),
         "never_baselined": [r.source["url"] for r in never],
@@ -1195,6 +1216,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-browser", action="store_true", help="don't retry blocked sites in headless Chromium")
     ap.add_argument("--date", help="report date (default: today, US Eastern)")
     ap.add_argument("--dry-run", action="store_true", help="don't write state, snapshots or reports")
+    ap.add_argument("--max-minutes", type=float, default=DEFAULT_MAX_MINUTES,
+                    help="stop starting new linked documents after this many minutes (the rest wait for the next run)")
     args = ap.parse_args(argv)
 
     started = time.time()
@@ -1221,9 +1244,20 @@ def main(argv: list[str] | None = None) -> int:
     # Second pass: the documents the index pages link to.
     children = follow_children(results, state)
     unread_children = 0
+    deferred_children = 0
     if children:
-        print(f"Reading {len(children)} documents linked from index pages...", file=sys.stderr)
-        kids = run(children, state, args.confirm_delay, args.workers)
+        # Documents already being watched first, then first snapshots, in
+        # batches, until the time budget is spent.
+        ordered = sorted(children, key=lambda c: (c["id"] not in state, c["id"]))
+        deadline = max(started + args.max_minutes * 60, time.time() + MIN_DOCUMENT_MINUTES * 60)
+        print(f"Reading {len(children)} documents linked from pages...", file=sys.stderr)
+        kids: list[Result] = []
+        for i in range(0, len(ordered), DOCUMENT_BATCH):
+            if i and time.time() > deadline:
+                deferred_children = len(ordered) - i
+                print(f"Time budget spent: {deferred_children} documents wait for the next run.", file=sys.stderr)
+                break
+            kids += run(ordered[i:i + DOCUMENT_BATCH], state, args.confirm_delay, args.workers)
         kids = retry_slow(kids, state, args.confirm_delay, args.workers)
         if not args.no_browser:
             kids = retry_in_browser(kids, state, args.confirm_delay)
@@ -1238,7 +1272,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if not args.dry_run:
         apply_results(results, state, today)
-    report, summary = build_report(results, state, today, started, findings, unread_children)
+    report, summary = build_report(results, state, today, started, findings, unread_children, deferred_children)
 
     if not args.dry_run:
         STATE_FILE.parent.mkdir(parents=True, exist_ok=True)

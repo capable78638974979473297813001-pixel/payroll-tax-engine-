@@ -16,6 +16,7 @@ import sys
 import tempfile
 import threading
 import unittest
+from unittest import mock
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -639,15 +640,40 @@ class FollowTest(ServerTestCase):
         watch.SOURCES_FILE.write_text(json.dumps({"sources": srcs}))
         self.assertEqual(self.run_watch("2026-10-01")["counts"], {"new": 1})
 
-    def test_plain_pages_are_not_followed_unless_asked(self):
+    def test_every_page_is_followed_not_just_indexes_unless_it_opts_out(self):
         self.site.set_page("/tax", index_page(("/files/a.pdf", "A")))
         self.site.set_page("/files/a.pdf", pdf("1"), ctype="application/pdf")
-        self.sources("/tax")  # not an index
-        self.assertEqual(self.run_watch("2026-10-01")["counts"], {"new": 1})
+        self.sources("/tax")  # a plain page, not an index
+        self.assertEqual(self.run_watch("2026-10-01")["counts"], {"new": 2})
         srcs = json.loads(watch.SOURCES_FILE.read_text())["sources"]
-        srcs[0]["follow"] = True
+        srcs[0]["follow"] = False
         watch.SOURCES_FILE.write_text(json.dumps({"sources": srcs}))
-        self.assertEqual(self.run_watch("2026-10-02")["counts"], {"new": 1, "unchanged": 1})
+        # Opting out drops the document from the state and the run.
+        self.assertEqual(self.run_watch("2026-10-02")["counts"], {"unchanged": 1})
+        self.assertEqual(sum("~" in k for k in json.loads(watch.STATE_FILE.read_text())), 0)
+
+    def test_files_without_an_extension_are_read_when_the_path_says_document(self):
+        for url in ("/dam/upload/tables", "/documents/withholding", "/dA/1c13cef183/dn01.pdf", "/x/notice/download"):
+            self.assertTrue(watch.is_document_url(self.base + url), url)
+        for url in ("/forms/", "/news/story.html", "/files/page.aspx"):
+            self.assertFalse(watch.is_document_url(self.base + url), url)
+
+    def test_documents_left_over_when_the_time_budget_runs_out_are_read_next_run(self):
+        links = [(f"/files/d{i}.pdf", f"Doc {i}") for i in range(5)]
+        self.site.set_page("/tax", index_page(*links))
+        for u, _ in links:
+            self.site.set_page(u, pdf(u[-5]), ctype="application/pdf")
+        self.sources("/tax")
+        with mock.patch.object(watch, "MIN_DOCUMENT_MINUTES", 0), mock.patch.object(watch, "DOCUMENT_BATCH", 2):
+            first = self.run_watch("2026-10-01", "--max-minutes", "0")
+        self.assertEqual(first["followed_documents"], 2)
+        self.assertEqual(first["followed_documents_deferred"], 3)
+        self.assertIn("were not read this run", (watch.REPORT_DIR / "latest.md").read_text())
+        # Deferred documents keep no state yet, and the ones already read are not dropped.
+        self.assertEqual(sum("~" in k for k in json.loads(watch.STATE_FILE.read_text())), 2)
+        second = self.run_watch("2026-10-02")
+        self.assertEqual(second["counts"], {"unchanged": 3, "new": 3})
+        self.assertEqual(second["followed_documents_deferred"], 0)
 
     def test_a_dead_link_is_counted_not_escalated(self):
         self.site.set_page("/tax", index_page(("/files/a.pdf", "A"), ("/files/missing.pdf", "Missing")))
