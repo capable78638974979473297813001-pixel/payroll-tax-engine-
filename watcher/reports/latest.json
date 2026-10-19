@@ -1,16 +1,32 @@
 {
- "date": "2026-10-18",
+ "date": "2026-10-19",
  "counts": {
-  "unchanged": 166,
-  "new": 212,
+  "unchanged": 379,
   "blocked": 4,
   "gone": 2,
-  "unreachable": 2,
-  "unstable": 1
+  "changed": 1,
+  "new": 14
  },
- "total": 387,
- "changed": [],
- "significant_changes": 0,
+ "total": 400,
+ "changed": [
+  {
+   "id": "in-cd957f8ce0",
+   "jurisdiction": "IN",
+   "title": "WH-4, State Form 48845",
+   "url": "https://www.in.gov/dor/tax-forms/withholding-tax-forms/",
+   "detail": "8 lines added, 8 removed; 1 links added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.in.gov/dA/92797e5a5f/dn01.pdf?language_id=1"
+   ],
+   "links_removed": [
+    "https://www.in.gov/dor/files/dn01.pdf"
+   ],
+   "significant": true
+  }
+ ],
+ "significant_changes": 1,
  "broken": [
   "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
   "https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf"
@@ -99,14 +115,14 @@
    "detail": "added by hand; the official rate file has no row for it yet (the Finder's directory lists it as code 86492)"
   }
  ],
- "followed_documents": 177,
+ "followed_documents": 182,
  "followed_documents_unread": 8,
- "verified": 379,
- "unverified": 8,
+ "verified": 394,
+ "unverified": 6,
  "never_baselined": [
   "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
   "https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/",
   "https://pikevilleky.gov/business/"
  ],
- "max_consecutive_failures": 27
+ "max_consecutive_failures": 28
 }
