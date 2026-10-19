@@ -85,12 +85,12 @@ describe('accounts you can log back into', { skip: !havePython }, () => {
   });
 
   test('signup sends a real email through the Python service, and the code in it verifies', async () => {
-    const weak = await post('/api/signup', { name: 'Grace Hopper', email: EMAIL, company: 'Navy LLC', phone: '5555550101', password: 'short' });
+    const weak = await post('/api/signup', { name: 'Grace Hopper', email: EMAIL, company: 'Navy LLC', phone: '5555550101', password: 'short', agreeToTerms: true });
     assert.equal(weak.status, 400);
     assert.equal((await weak.json()).field, 'password');
     assert.equal(mail.length, 0, 'a rejected signup sends nothing');
 
-    const r = await post('/api/signup', { name: 'Grace Hopper', email: EMAIL, company: 'Navy LLC', phone: '5555550101', password: PW });
+    const r = await post('/api/signup', { name: 'Grace Hopper', email: EMAIL, company: 'Navy LLC', phone: '5555550101', password: PW, agreeToTerms: true });
     assert.equal(r.status, 200);
     assert.equal((await r.json()).emailSent, true);
     await mailArrives(1);
@@ -170,7 +170,7 @@ describe('accounts you can log back into', { skip: !havePython }, () => {
   });
 
   test('signing up again can not replace a verified account\'s password', async () => {
-    const r = await post('/api/signup', { name: 'Mallory', email: EMAIL, company: 'Evil', phone: '1', password: 'mallory takes over now' });
+    const r = await post('/api/signup', { name: 'Mallory', email: EMAIL, company: 'Evil', phone: '1', password: 'mallory takes over now', agreeToTerms: true });
     assert.equal(r.status, 200);
     assert.equal((await post('/api/signin-password', { email: EMAIL, password: 'mallory takes over now' })).status, 401);
     assert.equal((await post('/api/signin-password', { email: EMAIL, password: PW })).status, 200);

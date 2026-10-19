@@ -5,164 +5,95 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light" />
 <title>Terms of Service — Omnia.tax</title>
-<meta name="description" content="The Terms of Service governing use of the Omnia payroll-tax API and website." />
-<link rel="stylesheet" href="/legal/legal.css" />
+<meta name="description" content="Terms of Service for the Omnia.tax payroll tax calculation API, from OMNIA TAX LLC." />
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/assets/v5.css" />
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="/" aria-label="Omnia.tax"><img src="/logo/logo.svg" alt="" /><span class="tag">Legal</span></a>
-  <span class="spacer"></span>
-  <nav>
-    <a href="/terms">Terms</a>
-    <a href="/privacy">Privacy</a>
-    <a href="/acceptable-use">Acceptable Use</a>
-    <a href="/disclaimer">Disclaimer</a>
-  </nav>
-</header>
-
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
 <main class="wrap">
-  <div class="doc-head">
+  <div class="page-head">
     <p class="eyebrow">Legal</p>
-    <h1>Terms of Service</h1>
-    <div class="meta">
-      <span>Effective: October 6, 2026</span>
-      <span>Version: 1.0</span>
-      <span>Provider: OMNIA TAX LLC</span>
-    </div>
+    <h1 class="page">Terms of Service</h1>
+    <p class="sub">Effective October 19, 2026. Version 2026-10-19.1. These terms are between you and OMNIA TAX LLC, a Michigan limited liability company.</p>
   </div>
+  <div class="legal">
+    <nav class="toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+      <a href="#agreement">Agreement</a>
+      <a href="#service">The service</a>
+      <a href="#responsibility">Your responsibility</a>
+      <a href="#accounts">Accounts and keys</a>
+      <a href="#billing">Billing and the trial</a>
+      <a href="#warranty">As is, no warranty</a>
+      <a href="#liability">Limitation of liability</a>
+      <a href="#indemnity">Indemnification</a>
+      <a href="#arbitration">Arbitration</a>
+      <a href="#law">Michigan law</a>
+      <a href="#changes">Changes and suspension</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <article class="prose">
+      <h2 id="agreement">1. Agreement</h2>
+      <p>These Terms of Service are a binding agreement between you and, if you use Omnia for an organization, that organization (“you”) and OMNIA TAX LLC, doing business as Omnia (“Omnia,” “we”). They govern the Omnia website, API, console, and documentation (the “Service”).</p>
+      <p>By creating an account, checking “I agree to the Terms,” issuing an API key, or otherwise using the Service, you agree to these Terms and the <a href="/privacy">Privacy Policy</a>. If you do not agree, do not use the Service. You represent that you are at least 18 and, if you act for an organization, that you can bind it. The version and the time of your acceptance are stored with the account.</p>
 
-  <div class="notice">
-    Please read these Terms carefully. They include a <b>disclaimer of warranties</b>, a
-    <b>limitation of liability</b> and an <b>indemnification obligation</b>. By using Omnia you agree to them.
-  </div>
+      <h2 id="service">2. The service</h2>
+      <p>Omnia is software that calculates United States payroll-tax withholding and related employer tax lines from the inputs you supply: earnings, deductions, a Form W-4, year-to-date figures, and work and residence jurisdictions. The Service returns calculations and the detail behind them.</p>
+      <p>Results are calculations only. Omnia does not file returns, remit or deposit taxes, pay employees, move money, or act as your payroll provider, agent, or fiduciary. Omnia does not provide tax, legal, or accounting advice, and using the Service does not create that kind of relationship.</p>
 
-  <div class="toc">
-    <h2>Contents</h2>
-    <ol>
-      <li><a href="#accept">Agreement to terms</a></li>
-      <li><a href="#service">The service</a></li>
-      <li><a href="#not-advice">Not tax or legal advice</a></li>
-      <li><a href="#accounts">Accounts &amp; API keys</a></li>
-      <li><a href="#acceptable">Acceptable use</a></li>
-      <li><a href="#fees">Fees, billing &amp; trial</a></li>
-      <li><a href="#ip">Intellectual property</a></li>
-      <li><a href="#customer-data">Customer data</a></li>
-      <li><a href="#warranty">Disclaimer of warranties</a></li>
-      <li><a href="#liability">Limitation of liability</a></li>
-      <li><a href="#indemnity">Indemnification</a></li>
-      <li><a href="#term">Term &amp; termination</a></li>
-      <li><a href="#law">Governing law &amp; disputes</a></li>
-      <li><a href="#changes">Changes</a></li>
-      <li><a href="#contact">Contact</a></li>
-    </ol>
-  </div>
+      <h2 id="responsibility">3. You remain responsible</h2>
+      <p>You are solely responsible for your own payroll and for your own tax filings, deposits, reporting, and records. You are responsible for the accuracy of what you send, for deciding which jurisdictions apply to your facts, and for reviewing every result before you rely on it. A calculation is not a filing and it is not a determination by any tax authority.</p>
+      <p>You will not send more personal data than a calculation needs. The API does not require Social Security numbers, and you should not include them.</p>
 
-  <section class="clause" id="accept">
-    <h2 class="num"><span class="n">1</span>Agreement to terms</h2>
-    <p>These Terms of Service ("Terms") are a binding agreement between you and, if you are using Omnia on behalf of an organization, that organization ("you," "Customer") and <b>OMNIA TAX LLC</b>, doing business as Omnia ("Omnia," "we," "us"). They govern your access to and use of the Omnia website, API, console, documentation, and related services (together, the "Service").</p>
-    <p>By creating an account, issuing an API key, or otherwise accessing or using the Service, you agree to these Terms, the <a href="/privacy">Privacy Policy</a>, and the <a href="/acceptable-use">Acceptable Use Policy</a>, each incorporated by reference. If you do not agree, do not use the Service. You represent that you are at least 18 and, if acting for an organization, that you are authorized to bind it.</p>
-  </section>
+      <h2 id="accounts">4. Accounts and API keys</h2>
+      <p>You must give accurate account information and keep it current. An API key authenticates and bills to your account. Keep it secret and use it from your server. You are responsible for activity under your keys until you revoke them. Tell us if you think a key has been exposed. We may revoke a key we reasonably believe is compromised or abused.</p>
+      <p>You may not share, resell, or sublicense keys, probe the Service, overload it, or try to gain access you were not given. We may throttle, suspend, or end access for a violation.</p>
 
-  <section class="clause" id="service">
-    <h2 class="num"><span class="n">2</span>The service</h2>
-    <p>Omnia is software that computes United States payroll-tax withholding and related employer tax lines from inputs you supply (earnings, deductions, a Form W-4, year-to-date figures, and work/residence jurisdictions). The Service returns calculations and supporting detail. Omnia is a <b>calculation and information tool only</b>.</p>
-    <p>Omnia does <b>not</b> file returns, remit or deposit taxes, move money, act as your agent or payroll provider, or transmit anything to any tax authority. Those actions, and responsibility for them, remain entirely yours.</p>
-  </section>
+      <h2 id="billing">5. Billing and the trial</h2>
+      <p>Live calculations are billed per successful calculation, monthly, at the rate published for the account. That rate is to be announced. There is no per-employee fee, no seat license, no setup fee, and no long contract. Sandbox calls are not billed. Address lookups that do not match are not billed. A minimum-wage check or a garnishment sent on the same paycheck call is part of that one calculation.</p>
+      <p>A new account may include a 14-day trial. A card or bank account on file is required before a live key is issued. Nothing is charged during the trial if you stop before it ends. After the trial, the payment method may be charged for live calculations. Fees already incurred are not refundable except where the law requires a refund. If a charge fails, we may suspend keys until the balance is paid. Card and bank numbers are collected by our payment processor, not stored on Omnia’s servers.</p>
 
-  <section class="clause" id="not-advice">
-    <h2 class="num"><span class="n">3</span>Not tax, legal, or accounting advice</h2>
-    <p><b>The Service is not a substitute for professional judgment.</b> Omnia is not a certified public accountant, enrolled agent, tax preparer, attorney, or fiduciary, and no such relationship is created by your use of the Service. Outputs are informational and depend entirely on the accuracy and completeness of the inputs you provide and on your correct interpretation of your own facts (worker classification, nexus, reciprocity elections, eligibility, and similar determinations).</p>
-    <p><b>You are solely responsible</b> for reviewing every result, for the accuracy of your inputs, and for all tax filing, deposit, remittance, reporting, and recordkeeping obligations. You should consult a qualified professional about your specific situation before relying on any output.</p>
-  </section>
+      <h2 id="warranty">6. As is, no warranty</h2>
+      <p>THE SERVICE IS PROVIDED “AS IS” AND “AS AVAILABLE,” WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, OR STATUTORY. TO THE FULLEST EXTENT PERMITTED BY LAW, OMNIA TAX LLC DISCLAIMS ALL WARRANTIES, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, NON-INFRINGEMENT, AND ANY WARRANTY THAT THE SERVICE WILL BE UNINTERRUPTED OR ERROR-FREE, OR THAT ANY CALCULATION, RATE, OR RESULT WILL BE ACCURATE, COMPLETE, CURRENT, OR SUITABLE FOR YOUR SITUATION.</p>
+      <p>Tax law changes. Inputs and eligibility decisions are yours. You verify results before you rely on them.</p>
 
-  <section class="clause" id="accounts">
-    <h2 class="num"><span class="n">4</span>Accounts &amp; API keys</h2>
-    <ul>
-      <li>You must provide accurate account information and keep it current.</li>
-      <li>An API key authenticates and bills to your account. <b>Keep it secret and server-side.</b> You are responsible for all activity under your keys, including calls you did not intend, until you revoke the key.</li>
-      <li>Notify us promptly at <a href="mailto:scottholdan@gmail.com">scottholdan@gmail.com</a> if you suspect a key has been exposed. We may revoke or rotate a key we reasonably believe is compromised or abused.</li>
-      <li>You may not share, resell, or sublicense keys or access, or use the Service to build a competing product or dataset, except under a separate written agreement with us.</li>
-    </ul>
-  </section>
+      <h2 id="liability">7. Limitation of liability</h2>
+      <p>TO THE FULLEST EXTENT PERMITTED BY LAW, OMNIA TAX LLC AND ITS OFFICERS, MEMBERS, AND EMPLOYEES WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR LOST PROFITS, REVENUE, DATA, GOODWILL, OR ANY TAX, PENALTY, INTEREST, OR ASSESSMENT, ARISING OUT OF THE SERVICE OR THESE TERMS, EVEN IF ADVISED OF THE POSSIBILITY.</p>
+      <p>OMNIA TAX LLC’S TOTAL LIABILITY FOR ALL CLAIMS RELATING TO THE SERVICE OR THESE TERMS IS CAPPED AT THE FEES YOU PAID TO OMNIA TAX LLC FOR THE SERVICE IN THE TWELVE MONTHS BEFORE THE EVENT GIVING RISE TO THE CLAIM. THESE LIMITS ARE AN ESSENTIAL PART OF THE BARGAIN.</p>
 
-  <section class="clause" id="acceptable">
-    <h2 class="num"><span class="n">5</span>Acceptable use</h2>
-    <p>Your use of the Service is subject to the <a href="/acceptable-use">Acceptable Use Policy</a>. Among other things, you must not misuse, overload, probe, or attempt to gain unauthorized access to the Service; reverse engineer it except as law expressly permits; or use it unlawfully. We may throttle, suspend, or terminate access for a violation.</p>
-  </section>
+      <h2 id="indemnity">8. Indemnification</h2>
+      <p>You will defend, indemnify, and hold harmless OMNIA TAX LLC and its officers, members, and employees from claims, damages, liabilities, penalties, and reasonable legal fees arising out of your use of the Service, your inputs, your payroll or tax filings, your reliance on a result, your breach of these Terms, or your violation of law or of a third party’s rights.</p>
 
-  <section class="clause" id="fees">
-    <h2 class="num"><span class="n">6</span>Fees, billing &amp; trial</h2>
-    <ul>
-      <li><b>Usage-based pricing.</b> Except during any free trial, you pay for the calculations your keys make, metered against the rate card published on the Omnia website, plus any per-address resolution fees. Prices are exclusive of taxes; you are responsible for applicable sales, use, and similar taxes.</li>
-      <li><b>Free trial.</b> Any free trial runs for the stated period. Unless you cancel during the trial, the account converts to a paid term and your payment method is charged for usage from that date forward.</li>
-      <li><b>Committed term.</b> On conversion the account enters the term stated at signup. Fees already incurred are non-refundable except where required by law. You may stop renewal before the next term begins.</li>
-      <li><b>Payment.</b> You authorize us and our payment processor to charge your payment method for amounts due on a recurring basis. Card and bank details are handled by our processor and are not stored on Omnia's servers.</li>
-      <li><b>Non-payment.</b> If a charge fails, we may suspend your keys until the balance is paid. Suspension does not relieve you of accrued fees.</li>
-      <li><b>Changes.</b> We may change prices prospectively; changes take effect at your next term or on notice as required by law.</li>
-    </ul>
-  </section>
+      <h2 id="arbitration">9. Arbitration, class actions, and juries</h2>
+      <p>You and OMNIA TAX LLC agree that any dispute arising out of these Terms or the Service will be resolved by binding individual arbitration, and not in court, except that either party may bring an individual claim in small-claims court or seek temporary injunctive relief for misuse of intellectual property. The Federal Arbitration Act governs this agreement to arbitrate. The arbitration will be administered in Michigan by a recognized arbitration provider, before a single arbitrator, in English.</p>
+      <p>YOU AND OMNIA TAX LLC WAIVE ANY RIGHT TO A JURY TRIAL AND ANY RIGHT TO BRING OR PARTICIPATE IN A CLASS ACTION, CLASS ARBITRATION, OR OTHER REPRESENTATIVE PROCEEDING. The arbitrator may award relief only in favor of the individual party seeking relief and only to the extent needed to resolve that party’s claim.</p>
+      <p>You may opt out of this arbitration agreement by emailing scottholdan@gmail.com within 30 days after you first accept these Terms. Say that you opt out and include the account email. Opting out does not affect any other part of these Terms. If you opt out, or if a claim cannot be arbitrated, the state and federal courts in Oakland County, Michigan are the exclusive forum, and you consent to personal jurisdiction there.</p>
+      <p>A claim must be filed within one year after it accrues, or it is permanently barred, to the extent the law allows that limit. This section survives the end of your use of the Service.</p>
 
-  <section class="clause" id="ip">
-    <h2 class="num"><span class="n">7</span>Intellectual property</h2>
-    <p>The Service, including all software, source code, data compilations, tax rulesets, models, text, designs, logos, and documentation, and all intellectual-property rights in them, are and remain the exclusive property of Omnia and its licensors. The name "Omnia," the Omnia logo, and this website are proprietary. Nothing in these Terms transfers any ownership to you.</p>
-    <p>Subject to these Terms and your payment of fees, we grant you a limited, non-exclusive, non-transferable, revocable license to access and use the Service, and to use the outputs of your own calculations for your internal business and your clients' payroll, during your subscription. You may not copy, modify, distribute, sell, sublicense, host, scrape, or create derivative works of the Service, or remove any proprietary notice, except as expressly permitted. All rights not expressly granted are reserved.</p>
-    <p>If you send us feedback or suggestions, you grant us a perpetual, royalty-free license to use them without obligation to you.</p>
-  </section>
+      <h2 id="law">10. Michigan law</h2>
+      <p>These Terms are governed by the laws of the State of Michigan, without regard to conflict-of-laws rules. OMNIA TAX LLC is a Michigan limited liability company.</p>
 
-  <section class="clause" id="customer-data">
-    <h2 class="num"><span class="n">8</span>Customer data</h2>
-    <p>"Customer Data" is the input you submit to the Service and the account information you provide. As between the parties, you own Customer Data. You grant us a limited license to process it solely to provide, secure, support, and improve the Service, and as described in the <a href="/privacy">Privacy Policy</a>.</p>
-    <p>You represent that you have all rights and consents needed to submit Customer Data (including any personal information of your own employees or clients) to the Service, and that doing so does not violate any law or third-party right. Where we process personal information on your behalf, you are the controller and we are the processor. We maintain reasonable technical and organizational safeguards but no method of transmission or storage is perfectly secure.</p>
-  </section>
+      <h2 id="changes">11. Changes, suspension, and the end of the service</h2>
+      <p>We may change, suspend, or stop the Service, or any part of it, including when we need to for security, law, or the operation of the system. We may update these Terms. If a change is material we will post the new terms with a new effective date and version. The version stored on your account is the version you accepted. If you do not agree to an update, stop using the Service.</p>
+      <p>You may stop using the Service at any time. Sections that by their nature should survive, including responsibility for filings, warranty, liability, indemnity, and arbitration, survive.</p>
 
-  <section class="clause" id="warranty">
-    <h2 class="num"><span class="n">9</span>Disclaimer of warranties</h2>
-    <p class="caps"><b>The service is provided "as is" and "as available," without warranties of any kind, whether express, implied, or statutory. To the fullest extent permitted by law, Omnia disclaims all warranties, including merchantability, fitness for a particular purpose, title, non-infringement, and any warranty that the service will be uninterrupted, error-free, or that any calculation, rate, or result will be accurate, complete, current, or suitable for your particular situation.</b></p>
-    <p>You acknowledge that tax law is complex and changes, that inputs and eligibility determinations are yours, and that you are responsible for independently verifying results before relying on them.</p>
-  </section>
-
-  <section class="clause" id="liability">
-    <h2 class="num"><span class="n">10</span>Limitation of liability</h2>
-    <p class="caps"><b>To the fullest extent permitted by law, Omnia and its officers, employees, and suppliers will not be liable for any indirect, incidental, special, consequential, exemplary, or punitive damages, or for any lost profits, revenue, data, or goodwill, or for any tax, penalty, interest, fine, or assessment imposed on you or any third party, arising out of or relating to the service or these terms, even if advised of the possibility.</b></p>
-    <p class="caps"><b>Omnia's total aggregate liability for all claims relating to the service or these terms will not exceed the greater of (a) the fees you paid to Omnia for the service in the twelve (12) months before the event giving rise to the claim, or (b) one hundred U.S. dollars ($100).</b></p>
-    <p>Some jurisdictions do not allow certain limitations, so parts of this section may not apply to you; in that case liability is limited to the maximum extent permitted. These limitations are an essential basis of the bargain and apply even if a limited remedy fails of its essential purpose.</p>
-  </section>
-
-  <section class="clause" id="indemnity">
-    <h2 class="num"><span class="n">11</span>Indemnification</h2>
-    <p>You will defend, indemnify, and hold harmless Omnia and its officers, employees, and suppliers from and against any claims, damages, liabilities, penalties, and expenses (including reasonable legal fees) arising out of or related to: (a) your use of the Service; (b) your Customer Data or inputs; (c) your tax filings, deposits, remittances, or reliance on any output; (d) your violation of these Terms or applicable law; or (e) your infringement of any third-party right.</p>
-  </section>
-
-  <section class="clause" id="term">
-    <h2 class="num"><span class="n">12</span>Term &amp; termination</h2>
-    <p>These Terms apply while you use the Service. You may stop using the Service and close your account as described in the console or by contacting us; committed-term and non-refund provisions still apply. We may suspend or terminate access, with or without notice, for a violation of these Terms, non-payment, suspected abuse, legal requirement, or risk to the Service or others. On termination, your license ends and you must stop using the Service. Sections that by their nature should survive (including 3, 7–11, 13) survive termination.</p>
-  </section>
-
-  <section class="clause" id="law">
-    <h2 class="num"><span class="n">13</span>Governing law &amp; disputes</h2>
-    <p>These Terms are governed by the laws of the State of <b>Michigan</b>, without regard to conflict-of-laws rules. The state and federal courts located in <b>Oakland County, Michigan</b> have exclusive jurisdiction, and you consent to venue there.</p>
-  </section>
-
-  <section class="clause" id="changes">
-    <h2 class="num"><span class="n">14</span>Changes to these Terms</h2>
-    <p>We may update these Terms. If we make a material change we will provide reasonable notice (for example, by posting the updated Terms with a new effective date or by email). Your continued use after the change takes effect is your acceptance. If you do not agree, stop using the Service.</p>
-  </section>
-
-  <section class="clause" id="contact">
-    <h2 class="num"><span class="n">15</span>Contact</h2>
-    <p>OMNIA TAX LLC, 595 N Old Woodward Ave, Birmingham, Michigan. Questions about these Terms: <a href="mailto:scottholdan@gmail.com">scottholdan@gmail.com</a>.</p>
-  </section>
-
-  <div class="footer">
-    <span>© 2026 OMNIA TAX LLC. All rights reserved.</span>
-    <span>
-      <a href="/terms">Terms</a> ·
-      <a href="/privacy">Privacy</a> ·
-      <a href="/acceptable-use">Acceptable Use</a> ·
-      <a href="/disclaimer">Disclaimer</a> ·
-      <a href="/">Home</a>
-    </span>
+      <h2 id="contact">12. Contact</h2>
+      <p>OMNIA TAX LLC, 595 N Old Woodward Ave, Birmingham, Michigan. Questions about these Terms: <a href="mailto:scottholdan@gmail.com">scottholdan@gmail.com</a>.</p>
+    </article>
   </div>
 </main>
+<footer class="site-footer"><div class="wrap foot-grid">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+  <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+  <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+</div><p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p></footer>
+<script src="/assets/v5.js"></script>
 </body>
 </html>

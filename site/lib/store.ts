@@ -75,6 +75,15 @@ export interface AccountRecord {
 
   stage: SignupStage;
   createdAt: string;
+
+  /**
+   * Set when the signup form's "I agree to the Terms" box is checked.
+   * The checkbox is unchecked by default and POST /api/signup rejects the
+   * account without it. termsVersion is TERMS_VERSION at that moment.
+   * The later typed acceptance (TermsAcceptance) is a separate record.
+   */
+  termsAcceptedAt?: string | null;
+  termsVersion?: string | null;
 }
 
 /** Written once, never edited. */

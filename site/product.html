@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Product — Omnia.tax</title>
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="/product" aria-current="page">Product</a>
+      <a href="/coverage">Coverage</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+  </div>
+</header>
+<main class="wrap">
+  <div class="page-head">
+    <p class="eyebrow">Product</p>
+    <h1 class="page">One call from gross pay to net pay.</h1>
+    <p class="sub">Send a paycheck and get each tax line back with the wages it applied to, who pays it, and how it was worked out.</p>
+  </div>
+
+  <section class="split">
+    <div>
+      <h2>Request in, taxes out.</h2>
+      <p>POST /v1/paycheck takes earnings, deductions, the federal W-4 and the work state certificate. Amounts go in and come out in cents.</p>
+      <p style="margin-top:24px"><a class="text-link" href="/docs/paycheck">Paycheck reference →</a></p>
+    </div>
+    <div>
+      <p class="fine">pa-philadelphia sandbox example, $1,400.00 weekly</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tax</th><th>Payer</th><th>Level</th><th class="num">Amount</th></tr></thead>
+          <tbody>
+            <tr><td>Federal Income Tax</td><td>Employee</td><td>Federal</td><td class="num">$67.00</td></tr>
+            <tr><td>Social Security</td><td>Employee</td><td>Federal</td><td class="num">$86.80</td></tr>
+            <tr><td>Social Security (Employer)</td><td>Employer</td><td>Federal</td><td class="num">$86.80</td></tr>
+            <tr><td>Medicare</td><td>Employee</td><td>Federal</td><td class="num">$20.30</td></tr>
+            <tr><td>Medicare (Employer)</td><td>Employer</td><td>Federal</td><td class="num">$20.30</td></tr>
+            <tr><td>FUTA</td><td>Employer</td><td>Federal</td><td class="num">$8.40</td></tr>
+            <tr><td>Pennsylvania Income Tax</td><td>Employee</td><td>State</td><td class="num">$42.98</td></tr>
+            <tr><td>Pennsylvania Unemployment Compensation (Employee)</td><td>Employee</td><td>State</td><td class="num">$0.98</td></tr>
+            <tr><td>Pennsylvania Unemployment Insurance (Employer)</td><td>Employer</td><td>State</td><td class="num">$53.51</td></tr>
+            <tr><td>PA Local Earned Income Tax</td><td>Employee</td><td>Local</td><td class="num">$52.29</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="display:flex;justify-content:space-between;margin-top:16px"><span>Employee taxes</span><b>$270.35</b></p>
+      <p style="display:flex;justify-content:space-between;margin-top:8px"><span>Net pay</span><b style="color:var(--accent)">$1,129.65</b></p>
+    </div>
+  </section>
+
+  <section class="split">
+    <div>
+      <h2>Address to jurisdiction.</h2>
+      <p>Send a work and home address once. Get back the state and local certificate to reuse on every pay run. Addresses that don't match aren't billed.</p>
+      <p style="margin-top:24px"><a class="text-link" href="/docs#address">Address reference →</a></p>
+    </div>
+    <div class="panel">
+      <div class="tabs"><span class="tab-on">POST /v1/address</span><span class="right">Response shape, trimmed</span></div>
+      <pre><span class="d">Request</span>
+<span class="d">{ </span><span class="k">"workAddress"</span><span class="d">: </span><span class="s">"1401 John F Kennedy Blvd, Philadelphia, PA 19102"</span><span class="d">,</span>
+  <span class="k">"homeAddress"</span><span class="d">: </span><span class="s">"1401 John F Kennedy Blvd, Philadelphia, PA 19102"</span><span class="d"> }</span>
+
+<span class="d">Response</span>
+<span class="d">{ </span><span class="k">"workState"</span><span class="d">: { </span><span class="k">"code"</span><span class="d">: </span><span class="s">"PA"</span><span class="d">,</span>
+    <span class="k">"certificate"</span><span class="d">: { </span><span class="k">"workPSD"</span><span class="d">: </span><span class="s">"510101"</span><span class="d">, </span><span class="k">"residencePSD"</span><span class="d">: </span><span class="s">"510101"</span><span class="d"> } } }</span></pre>
+    </div>
+  </section>
+
+  <section class="split">
+    <div>
+      <h2>Minimum wage check.</h2>
+      <p>Add an hourly rate to the same call. The engine compares federal, state and local floors and tells you which one binds.</p>
+      <p style="margin-top:24px"><a class="text-link" href="/docs/paycheck">Minimum wage reference →</a></p>
+    </div>
+    <div class="panel">
+      <div class="tabs"><span class="tab-on">minimumWageCheck</span><span class="right">Engine output</span></div>
+      <pre><span class="d">Request (added to POST /v1/paycheck)</span>
+<span class="k">"minimumWageCheck"</span><span class="d">: { </span><span class="k">"hourlyRate"</span><span class="d">: </span><span class="n">3500</span><span class="d"> }</span>
+
+<span class="d">Response</span>
+<span class="k">"minimumWage"</span><span class="d">: {</span>
+  <span class="k">"requiredHourlyRate"</span><span class="d">: </span><span class="n">725</span><span class="d">, </span><span class="k">"bindingLevel"</span><span class="d">: </span><span class="s">"federal"</span><span class="d">,</span>
+  <span class="k">"bindingJurisdiction"</span><span class="d">: </span><span class="s">"United States (FLSA)"</span><span class="d">,</span>
+  <span class="k">"shortfallPerHour"</span><span class="d">: </span><span class="n">0</span><span class="d">, </span><span class="k">"considered"</span><span class="d">: [ … ] }</span></pre>
+    </div>
+  </section>
+
+  <section class="split">
+    <div>
+      <h2>Wage garnishments.</h2>
+      <p>Pass the orders on file. The engine applies the federal and state limits to disposable earnings and returns what to withhold.</p>
+      <p style="margin-top:24px"><a class="text-link" href="/docs/paycheck">Garnishment reference →</a></p>
+    </div>
+    <div class="panel">
+      <div class="tabs"><span class="tab-on">garnishments[]</span><span class="right">Engine output</span></div>
+      <pre><span class="d">Request (added to POST /v1/paycheck)</span>
+<span class="k">"garnishments"</span><span class="d">: [{ </span><span class="k">"id"</span><span class="d">: </span><span class="s">"cs-1"</span><span class="d">, </span><span class="k">"type"</span><span class="d">: </span><span class="s">"child_support"</span><span class="d">,</span>
+  <span class="k">"amountOrdered"</span><span class="d">: </span><span class="n">25000</span><span class="d">, </span><span class="k">"supportingOtherFamily"</span><span class="d">: </span><span class="n">false</span><span class="d"> }]</span>
+
+<span class="d">Response</span>
+<span class="k">"garnishment"</span><span class="d">: {</span>
+  <span class="k">"disposableEarnings"</span><span class="d">: </span><span class="n">112965</span><span class="d">, </span><span class="k">"aggregateCeiling"</span><span class="d">: </span><span class="n">67779</span><span class="d">,</span>
+  <span class="k">"lines"</span><span class="d">: [{ </span><span class="k">"orderId"</span><span class="d">: </span><span class="s">"cs-1"</span><span class="d">, </span><span class="k">"withheld"</span><span class="d">: </span><span class="n">25000</span><span class="d"> }],</span>
+  <span class="k">"netPayAfterGarnishment"</span><span class="d">: </span><span class="n">87965</span><span class="d"> }</span></pre>
+    </div>
+  </section>
+
+  <div class="dev">
+    <div>
+      <h2>Start in the sandbox.</h2>
+      <p>Run the example above with a free sandbox key. Go live and pay per calculation, with no long contract.</p>
+    </div>
+    <div class="dev-actions">
+      <a class="btn" href="/signup">Get a sandbox key</a>
+      <a class="btn secondary" href="/docs/paycheck">API reference</a>
+    </div>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

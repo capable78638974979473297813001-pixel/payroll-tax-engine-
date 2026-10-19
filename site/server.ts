@@ -12,7 +12,7 @@ import {
   type AccountRecord, type KeyRecord, type PaymentMethodRecord,
   type SavedScenario, type SubscriptionRecord, type TermsAcceptance, type TermsQuote,
 } from './lib/store.ts';
-import { CALL_TIERS, TRIAL_DAYS, PERIODS_PER_YEAR, estimate as computePricing, costForCalls } from './lib/pricing.ts';
+import { CALL_TIERS, TRIAL_DAYS, estimate as computePricing, costForCalls } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
 import { isEmailConfigured, sendVerificationEmail } from './lib/mail.ts';
 import { validatePaycheckInput } from './lib/validate.ts';
@@ -188,17 +188,19 @@ function sendHtml(res: ServerResponse, path: string): void {
   res.end(html);
 }
 
-/** Figures the pages display, read from pricing.ts so the HTML cannot drift. */
+/**
+ * Figures the pages may display. The per-call rate is intentionally omitted:
+ * the public site shows the price as TBA and must not embed a dollar rate.
+ */
 function clientConfig() {
   return {
     trialDays: TRIAL_DAYS,
     termMonths: TERM_MONTHS,
-    tiers: CALL_TIERS.map((t) => ({ upTo: Number.isFinite(t.upTo) ? t.upTo : null, rate: t.rate })),
-    periodsPerYear: PERIODS_PER_YEAR,
     codeTtlSec: CODE_TTL_MS / 1000,
     codeCooldownSec: CODE_COOLDOWN_MS / 1000,
     maxCodeAttempts: MAX_CODE_ATTEMPTS,
     rateLimitPerMin: paycheckLimiterLimit(),
+    termsVersion: TERMS_VERSION,
   };
 }
 
@@ -224,6 +226,8 @@ function contentTypeFor(file: string): string {
   if (file.endsWith('.png')) return 'image/png';
   if (file.endsWith('.jpg') || file.endsWith('.jpeg')) return 'image/jpeg';
   if (file.endsWith('.json')) return 'application/json; charset=utf-8';
+  if (file.endsWith('.woff2')) return 'font/woff2';
+  if (file.endsWith('.ttf')) return 'font/ttf';
   return 'application/octet-stream';
 }
 
@@ -293,7 +297,7 @@ function maskKey(prefix: string): string {
 // ---------------------------------------------------------------------
 
 async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  let body: { name?: string; email?: string; company?: string; phone?: string; password?: string };
+  let body: { name?: string; email?: string; company?: string; phone?: string; password?: string; agreeToTerms?: unknown };
   try {
     body = await readJson(req);
   } catch (err) {
@@ -312,6 +316,16 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
   }
   if (name.length > 200 || email.length > 254 || company.length > 200 || phone.length > 40) {
     sendJson(res, 400, { error: 'One of those fields is too long.' });
+    return;
+  }
+  // Unchecked by default on the form. The account stores the timestamp and
+  // TERMS_VERSION only after the server sees an explicit true.
+  if (body.agreeToTerms !== true) {
+    sendJson(res, 400, {
+      error: 'Check “I agree to the Terms” to create an account.',
+      code: 'terms_required',
+      field: 'agreeToTerms',
+    });
     return;
   }
 
@@ -370,6 +384,8 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
         : passwordHash ? new Date(now).toISOString() : existing?.passwordSetAt ?? null,
       stage: existing?.emailVerifiedAt ? existing.stage : 'unverified',
       createdAt: existing?.createdAt ?? new Date(now).toISOString(),
+      termsAcceptedAt: existing?.termsAcceptedAt ?? new Date(now).toISOString(),
+      termsVersion: existing?.termsVersion ?? TERMS_VERSION,
     };
     // An existing account keeps its profile: an unauthenticated signup
     // for a known email may only issue a new code, never rewrite it.
@@ -891,7 +907,15 @@ async function handleAcceptTerms(req: IncomingMessage, res: ServerResponse): Pro
     if (mismatch) {
       return { ok: false as const, status: 409, code: 'quote_mismatch', error: 'The figures changed since the terms were shown. Reload them and agree again.' };
     }
-    if (quote.expectedEmployees <= 0) {
+    // LEGACY per-employee quote gate (code: employees_required).
+    // Scott chose pay-per-calculation on 2026-10-19. The public site does
+    // not collect an employee count and does not show a price. The quote
+    // still records expectedEmployees so older billing tests and stored
+    // subscriptions keep their shape, but a zero count no longer blocks
+    // acceptance. Set LEGACY_EMPLOYEES_REQUIRED to true only to restore
+    // the old rejection.
+    const LEGACY_EMPLOYEES_REQUIRED = false;
+    if (LEGACY_EMPLOYEES_REQUIRED && quote.expectedEmployees <= 0) {
       return { ok: false as const, status: 400, code: 'employees_required', error: 'Enter your employee count and reload the terms before agreeing.' };
     }
     // Re-signing must not replace a subscription that already started (it
@@ -2152,6 +2176,9 @@ async function handleEstimate(req: IncomingMessage, res: ServerResponse): Promis
     sendJson(res, 400, { error: 'A valid work email is required.' });
     return;
   }
+  // LEGACY estimator. The public pricing page is pay-per-calculation and
+  // shows the rate as TBA. This endpoint still answers employee-based
+  // quotes so existing billing tests keep working. The site no longer calls it.
   if (employees <= 0) {
     sendJson(res, 400, { error: 'Tell us roughly how many employees you pay.' });
     return;
@@ -2249,6 +2276,16 @@ createServer((req, res) => {
       '/sandbox.html': 'sandbox.html',
       '/console': 'sandbox.html',
       '/_states': 'states.html',
+      '/product': 'product.html',
+      '/coverage': 'coverage.html',
+      '/pricing': 'pricing.html',
+      '/docs/paycheck': 'docs-paycheck.html',
+      '/changelog': 'changelog.html',
+      '/status': 'status.html',
+      '/about': 'about.html',
+      '/contact': 'contact.html',
+      '/security': 'security.html',
+      '/dashboard': 'dashboard.html',
     };
     if (method === 'GET' && pages[url]) {
       sendPage(res, join(HERE, pages[url]));
@@ -2329,7 +2366,18 @@ createServer((req, res) => {
     if (method === 'POST' && url === '/api/estimate') return handleEstimate(req, res);
     if (method === 'GET' && url === '/api/billing') return handleBilling(req, res);
 
-    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+    if (method === 'GET' && !url.startsWith('/api/') && !url.startsWith('/v1/')) {
+      const missing = readFileSync(join(HERE, 'not-found.html'));
+      res.writeHead(404, {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Length': missing.byteLength,
+        'Cache-Control': 'no-store',
+        ...SECURITY_HEADERS,
+      });
+      res.end(missing);
+      return;
+    }
+    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8', ...SECURITY_HEADERS });
     res.end('Not found');
   })().catch((err) => {
     console.error(err);

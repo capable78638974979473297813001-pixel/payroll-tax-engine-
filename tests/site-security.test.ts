@@ -124,13 +124,13 @@ describe('account security', () => {
       assert.equal(r.headers.get('location'), '/docs');
     }
     const home = await (await fetch(BASE + '/')).text();
-    assert.match(home, /\/tokens\.css/); // the design B home page is the main site
-    assert.doesNotMatch(home, /IBM Plex Mono/);
-
-    // The live calculator is a light card with its own black text, and the
-    // page opts out of forced dark rendering so it can't wash out.
+    assert.match(home, /\/assets\/v5\.css/);
     assert.match(home, /name="color-scheme" content="light"/);
-    for (const id of ['calc', 'cState', 'cGross', 'sNet', 'tilesEmployee', 'stateGrid']) assert.match(home, new RegExp(`id="${id}"`), `home #${id}`);
+    assert.match(home, /\/pricing/);
+    assert.match(home, /\/v1\/paycheck/);
+    assert.match(home, /OMNIA TAX LLC/);
+    assert.doesNotMatch(home, /id="cGross"/);
+    assert.doesNotMatch(home, /\$0\.09/);
 
     // Static files revalidate, so a deploy is never hidden behind a stale cache.
     const css = await fetch(BASE + '/assets/site.css');
@@ -148,7 +148,7 @@ describe('account security', () => {
   });
 
   test('with email on, the code is emailed and never written to the logs', async () => {
-    const r = await post('/api/signup', { name: 'Casey Rivers', email: EMAIL, company: 'Secure Payroll', phone: '555-000-1111' });
+    const r = await post('/api/signup', { name: 'Casey Rivers', email: EMAIL, company: 'Secure Payroll', phone: '555-000-1111', agreeToTerms: true });
     assert.equal(r.status, 200);
     assert.equal((await r.json()).emailSent, true);
     const code = codeFor(EMAIL);
@@ -301,7 +301,7 @@ describe('account security', () => {
 
   test('wrong guesses are capped per address per hour, across fresh codes', async () => {
     const victim = 'victim@secure.test';
-    await post('/api/signup', { name: 'Vic', email: victim, company: 'V', phone: '1' });
+    await post('/api/signup', { name: 'Vic', email: victim, company: 'V', phone: '1', agreeToTerms: true });
     // Burn 24 guesses (3 codes' worth); the per-code burn alone would allow more.
     for (let i = 0; i < 24; i++) await post('/api/verify-email', { email: victim, code: '000000' });
     // As if a fresh code had just been issued: even that right code is refused.
@@ -319,7 +319,7 @@ describe('account security', () => {
     // Two signups already happened above; the limit is 4 an hour.
     const statuses: number[] = [];
     for (let i = 0; i < 4; i++) {
-      const r = await post('/api/signup', { name: 'Flood', email: `flood${i}@spam.test`, company: 'Spam', phone: '1' });
+      const r = await post('/api/signup', { name: 'Flood', email: `flood${i}@spam.test`, company: 'Spam', phone: '1', agreeToTerms: true });
       statuses.push(r.status);
     }
     assert.deepEqual(statuses, [200, 200, 429, 429]);

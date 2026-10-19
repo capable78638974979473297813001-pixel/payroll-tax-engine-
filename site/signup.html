@@ -6,89 +6,65 @@
 <meta name="color-scheme" content="light" />
 <title>Create account — Omnia.tax</title>
 <link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="/tokens.css" />
-<link rel="stylesheet" href="/assets/site.css" />
+<link rel="stylesheet" href="/assets/v5.css" />
 <!--OMNIA_CONFIG-->
 </head>
 <body>
-<div class="onboard">
-  <aside class="step-panel">
-    <div class="step-panel-top">
-      <a class="logo" href="/" aria-label="Omnia.tax"><img src="/logo/logo-on-blue.svg" alt="" /></a>
-      <span class="label-mono" style="color:var(--color-on-cobalt-muted);font-weight:400">Onboarding</span>
-    </div>
-    <div class="step-num-row">
-      <div class="step-num">01</div>
-      <div class="step-of"><div class="eyebrow">Step</div><div class="of">OF 05</div></div>
-    </div>
-    <div class="step-rule"></div>
-    <div class="panel-head"><span>WHAT YOU GET</span><span>PRICE SHEET</span></div>
-    <div class="panel-rule"></div>
-    <div style="font-size:112px;font-weight:700;letter-spacing:-5px;line-height:0.9" data-rate>$0.09</div>
-    <div style="font-size:20px;font-weight:700;margin-bottom:16px">per paycheck</div>
-    <div class="panel-rows">
-      <div><span>Contract</span><b>None</b></div>
-      <div><span>Minimums</span><b>None</b></div>
-      <div><span>Setup fee</span><b>None</b></div>
-      <div><span>Free trial</span><b>First <span data-trial>14</span> days</b></div>
-    </div>
-    <div class="step-rule"></div>
-    <div class="due">
-      <div class="label-mono">Due today</div>
-      <p>Nothing is charged during the trial.</p>
-      <div class="zero">$0.00</div>
-    </div>
-  </aside>
-  <main class="form-col">
-    <div class="form-top"><span class="label-mono">Step 01 of 05</span></div>
-    <ol class="progress" aria-label="Progress">
-      <li class="current"><div class="bar"></div><div class="lbl"><span class="n">01</span> Account</div></li>
-      <li><div class="bar"></div><div class="lbl"><span class="n">02</span> Verify</div></li>
-      <li><div class="bar"></div><div class="lbl"><span class="n">03</span> Business</div></li>
-      <li><div class="bar"></div><div class="lbl"><span class="n">04</span> Payment</div></li>
-      <li><div class="bar"></div><div class="lbl"><span class="n">05</span> API key</div></li>
-    </ol>
-    <h1>Create your account.</h1>
-    <p class="lead">Five short steps to your API key. The first <span data-trial>14</span> days are free.</p>
-    <form class="form-stack" id="form" novalidate>
+<div class="auth">
+  <main class="auth-main">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <h1 class="page" style="margin-top:48px;font-size:34px;line-height:42px">Create your account</h1>
+    <p class="sub">Start with a sandbox key. Add a card when you want live keys. A password is at least 12 characters.</p>
+    <form id="form" novalidate style="margin-top:28px">
       <div class="field" id="emailField">
-        <label class="field-label" for="email">Work email</label>
+        <label for="email">Work email</label>
         <input id="email" name="email" type="email" autocomplete="email" placeholder="you@company.com" required />
-        <p class="field-error" id="emailError" hidden></p>
+        <p class="err" id="emailError" hidden></p>
       </div>
       <div class="field" id="pwField">
-        <label class="field-label" for="password">Password</label>
-        <div class="field-box">
-          <input id="password" name="password" type="password" autocomplete="new-password" placeholder="At least 12 characters" maxlength="200" required />
-          <button type="button" class="field-slot" id="pwToggle" aria-controls="password" aria-pressed="false">Show</button>
-        </div>
-        <p class="pw-rule" id="pwRule"><span class="box" aria-hidden="true"></span><svg class="check" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6l3 3 5-6" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>12+ characters</span></p>
-        <p class="field-error" id="pwError" hidden></p>
-        <p class="field-hint">Next we email a 6-digit code to confirm this address. You can sign in later with this password or a fresh code.</p>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" placeholder="At least 12 characters" maxlength="200" required />
+        <p class="hint" id="pwRule">At least 12 characters.</p>
+        <p class="err" id="pwError" hidden></p>
+        <button type="button" class="text-link" id="pwToggle" aria-controls="password" aria-pressed="false" style="background:none;border:0;padding:0;cursor:pointer">Show</button>
       </div>
       <div class="field" id="nameField">
-        <label class="field-label" for="name">Your name</label>
+        <label for="name">Your name</label>
         <input id="name" name="name" autocomplete="name" required />
-        <p class="field-error" id="nameError" hidden></p>
+        <p class="err" id="nameError" hidden></p>
       </div>
       <div class="field" id="companyField">
-        <label class="field-label" for="company">Business name</label>
+        <label for="company">Business name</label>
         <input id="company" name="company" autocomplete="organization" required />
-        <p class="field-error" id="companyError" hidden></p>
+        <p class="err" id="companyError" hidden></p>
       </div>
       <div class="field" id="phoneField">
-        <label class="field-label" for="phone">Phone</label>
+        <label for="phone">Phone</label>
         <input id="phone" name="phone" type="tel" autocomplete="tel" required />
-        <p class="field-error" id="phoneError" hidden></p>
+        <p class="err" id="phoneError" hidden></p>
       </div>
-      <p class="field-error" id="formError" hidden></p>
-      <button class="btn btn-lg btn-primary btn-block" id="submit" type="submit" disabled>Create account <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
+      <label class="check">
+        <input type="checkbox" id="agree" name="agreeToTerms" />
+        <span>I agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</span>
+      </label>
+      <p class="err" id="formError" hidden></p>
+      <button class="btn block" id="submit" type="submit" disabled>Create account</button>
     </form>
-    <p class="form-foot">Already have an account? <a class="btn btn-text" href="/signin">Sign in</a></p>
-    <p class="fine">By continuing you agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
+    <p class="fine" style="margin-top:22px">Already have an account? <a href="/signin">Log in</a></p>
   </main>
+  <aside class="auth-aside">
+    <h2>What you get</h2>
+    <article><h3>A sandbox key right away</h3><p>Runs the live engine. Not billed.</p></article>
+    <article><h3>Federal, state and local tax</h3><p>One call, one line per tax, in cents.</p></article>
+    <article><h3>Live keys when you're ready</h3><p>14-day trial, then pay per calculation. The rate is to be announced.</p></article>
+    <div class="panel" style="margin-top:28px">
+      <div class="tabs"><span class="tab-on">POST /v1/paycheck</span><span class="right">Sandbox</span></div>
+      <pre><span class="d">// 200 OK</span>
+<span class="d">{ "grossPay": </span><span class="n">140000</span><span class="d">, "employeeTaxTotal": </span><span class="n">27035</span><span class="d">,</span>
+  <span class="d">"netPay": </span><span class="n">112965</span><span class="d">, "taxes": [ … 10 lines ] }</span></pre>
+    </div>
+  </aside>
 </div>
-<script src="/assets/pricing.js"></script>
 <script src="/assets/session.js"></script>
 <script>
 (function () {
@@ -97,6 +73,7 @@
   var company = document.getElementById('company');
   var phone = document.getElementById('phone');
   var password = document.getElementById('password');
+  var agree = document.getElementById('agree');
   var submit = document.getElementById('submit');
   var params = new URLSearchParams(location.search);
   if (params.get('email')) email.value = params.get('email');
@@ -110,10 +87,11 @@
   function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
   function refresh() {
     var long = password.value.length >= 12;
-    document.getElementById('pwRule').classList.toggle('met', long);
-    submit.disabled = !(validEmail(email.value.trim()) && long && name.value.trim() && company.value.trim() && phone.value.trim());
+    document.getElementById('pwRule').style.color = long ? 'var(--ink)' : 'var(--ink3)';
+    submit.disabled = !(validEmail(email.value.trim()) && long && name.value.trim() && company.value.trim() && phone.value.trim() && agree.checked);
   }
   [email, password, name, company, phone].forEach(function (el) { el.addEventListener('input', refresh); });
+  agree.addEventListener('change', refresh);
   document.getElementById('pwToggle').addEventListener('click', function () {
     var show = password.type === 'password';
     password.type = show ? 'text' : 'password';
@@ -125,11 +103,14 @@
     e.preventDefault();
     document.getElementById('emailError').hidden = true;
     document.getElementById('pwError').hidden = true;
-    document.getElementById('pwField').classList.remove('error');
     document.getElementById('formError').hidden = true;
-    email.closest('.field').classList.remove('error');
+    if (!agree.checked) {
+      var box0 = document.getElementById('formError');
+      box0.textContent = 'Check “I agree to the Terms” to create an account.';
+      box0.hidden = false;
+      return;
+    }
     if (!validEmail(email.value.trim())) {
-      email.closest('.field').classList.add('error');
       var err = document.getElementById('emailError');
       err.textContent = 'Enter a valid work email.';
       err.hidden = false;
@@ -139,10 +120,10 @@
       name: name.value.trim(),
       email: email.value.trim(),
       company: company.value.trim(),
-      phone: phone.value.trim()
+      phone: phone.value.trim(),
+      agreeToTerms: true
     };
     Omnia.setLoading(submit, true);
-    // The password goes to the server once and is never kept in the page's storage.
     Omnia.api('/api/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ password: password.value }, payload)) })
       .then(function (res) {
         Omnia.setLoading(submit, false);
@@ -150,11 +131,9 @@
           var msg = (res.body && res.body.error) || 'Could not start signup.';
           var box = document.getElementById('formError');
           if (res.body && res.body.field === 'password') {
-            document.getElementById('pwField').classList.add('error');
             document.getElementById('pwError').textContent = msg;
             document.getElementById('pwError').hidden = false;
-          } else if (/email/i.test(msg)) {
-            email.closest('.field').classList.add('error');
+          } else if (/email/i.test(msg) && !(res.body && res.body.field === 'agreeToTerms')) {
             document.getElementById('emailError').textContent = msg;
             document.getElementById('emailError').hidden = false;
           } else {
@@ -175,6 +154,5 @@
   });
 })();
 </script>
-<footer class="legal-line" style="padding:16px 64px;font:12px/1.6 var(--font-mono,monospace);color:var(--color-gray,#6b6e76)">© 2026 OMNIA TAX LLC. All rights reserved. · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></footer>
 </body>
 </html>

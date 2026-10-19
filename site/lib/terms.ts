@@ -21,7 +21,7 @@ import { TRIAL_DAYS } from './pricing.ts';
  * exposure.
  */
 
-export const TERMS_VERSION = '2026-10-06.1';
+export const TERMS_VERSION = '2026-10-19.1';
 export const TERM_MONTHS = 12;
 
 export interface TermsClause {
@@ -39,45 +39,78 @@ export function termsClauses(args: {
     month: 'long',
     day: 'numeric',
   });
-  const annual = '$' + Math.round(args.estimatedAnnual).toLocaleString('en-US');
+  // expectedEmployees and estimatedAnnual stay on the quote record for the
+  // billing tests. They are not written into the clause text: the public
+  // price is "to be announced", and pricing is per calculation.
+  void args.estimatedAnnual;
+  void args.expectedEmployees;
 
   return [
     {
       heading: 'What you are agreeing to pay',
       body:
-        `Omnia is billed on usage: every call your key makes is metered against the published ` +
-        `rate card, with rooftop geocoding included at the same rate. Nothing is a flat fee and nothing ` +
-        `is per-seat. On the volume you entered (${args.expectedEmployees.toLocaleString()} employees) ` +
-        `that comes to about ${annual} a year — an estimate from your own numbers, not a cap or a quote.`,
+        `Live calculations are billed per successful POST /v1/paycheck, monthly, at the rate published for the account. ` +
+        `That rate is to be announced. There is no per-employee fee, no seat license, and no setup fee. ` +
+        `Sandbox calls are not billed. Address lookups that do not match are not billed. ` +
+        `A minimum-wage check or a wage garnishment sent on the same paycheck call is part of that one calculation.`,
     },
     {
-      heading: `Free for ${TRIAL_DAYS} days, then it converts`,
+      heading: `Free for ${TRIAL_DAYS} days, then usage is billed`,
       body:
-        `Your first ${TRIAL_DAYS} days are free and unmetered. On ${endsOn} the account converts ` +
-        `automatically to a paid ${TERM_MONTHS}-month term and your payment method is charged for usage ` +
-        `from that date forward. No one will ask you again — that is what this authorization is for.`,
+        `The first ${TRIAL_DAYS} days are not billed. On ${endsOn} the trial ends. ` +
+        `After that, the payment method on file may be charged for live calculations. ` +
+        `You can stop during the trial and not be charged.`,
     },
     {
-      heading: `The ${TERM_MONTHS}-month term is a commitment`,
+      heading: 'No long contract',
       body:
-        `Once the trial converts, the ${TERM_MONTHS}-month term runs to its end. You can stop renewing ` +
-        `before the next term begins, but the current one is not cancellable for convenience and fees ` +
-        `already incurred are not refundable. You may cancel at any point during the ${TRIAL_DAYS}-day ` +
-        `trial and never be charged.`,
+        `There is no minimum term. Stop calling the API and billing for new calculations stops. ` +
+        `Fees already incurred are not refundable except where the law requires a refund.`,
     },
     {
       heading: 'Payment method',
       body:
-        `You authorize Omnia to charge the card or bank account you attach for amounts metered under ` +
-        `this agreement, on a recurring monthly basis, until the term ends. Card and bank details are ` +
-        `handled by our payment processor and are never stored on Omnia's servers.`,
+        `You authorize Omnia to charge the card or bank account you attach for live calculations, monthly. ` +
+        `Card and bank details are handled by the payment processor and are not stored on Omnia's servers.`,
     },
     {
-      heading: 'What we owe you',
+      heading: 'Calculations only',
       body:
-        `Every rate carries the source it came from and the date a human verified it, and that record ` +
-        `is exportable for as long as you are a customer. Omnia computes withholding; filing, deposit ` +
-        `and the accuracy of what you send us remain yours. This is not tax advice.`,
+        `Results are calculations. You remain responsible for your own payroll, deposits, and tax filings. ` +
+        `Omnia does not file returns, remit tax, or move wages. This is not tax, legal, or accounting advice.`,
+    },
+    {
+      heading: 'As is, no warranty',
+      body:
+        `The service is provided as is and as available, without warranties of any kind, express, implied, or statutory, ` +
+        `including merchantability, fitness for a particular purpose, and any warranty that a calculation is accurate, complete, or current.`,
+    },
+    {
+      heading: 'Limitation of liability',
+      body:
+        `Omnia is not liable for consequential, incidental, special, indirect, or punitive damages, or for lost profits, data, or tax penalties. ` +
+        `Omnia's total liability for claims relating to the service is capped at the fees you paid Omnia in the 12 months before the claim.`,
+    },
+    {
+      heading: 'Indemnification',
+      body:
+        `You will indemnify Omnia and its officers and employees against claims arising from your inputs, your use of the results, ` +
+        `your payroll or tax filings, or your breach of these terms.`,
+    },
+    {
+      heading: 'Arbitration, class actions, and the jury',
+      body:
+        `Disputes are resolved by binding individual arbitration under the Federal Arbitration Act, in Michigan. ` +
+        `You and Omnia waive class actions, class arbitrations, and jury trials. ` +
+        `You may opt out of arbitration by emailing scottholdan@gmail.com within 30 days of first accepting these terms. ` +
+        `A claim must be brought within one year after it accrues, or it is barred, to the extent the law allows.`,
+    },
+    {
+      heading: 'Michigan law, and changes to the service',
+      body:
+        `Michigan law governs these terms, excluding conflict-of-laws rules. ` +
+        `Omnia may change, suspend, or stop the service, and may update these terms. ` +
+        `Material changes are posted with a new version. The version stored with your account is the one you accepted.`,
     },
   ];
 }

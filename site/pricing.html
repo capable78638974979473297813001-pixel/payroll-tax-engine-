@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Pricing — Omnia.tax</title>
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="/product">Product</a>
+      <a href="/coverage">Coverage</a>
+      <a href="/pricing" aria-current="page">Pricing</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+  </div>
+</header>
+<main class="wrap">
+  <div class="page-head">
+    <p class="eyebrow">Pricing</p>
+    <h1 class="page">Pay per calculation.</h1>
+    <p class="sub">Pay for each calculation with your API key. No long contract, no setup fee.</p>
+  </div>
+  <div class="price-grid">
+    <article class="plan">
+      <p style="font-weight:500">Per calculation</p>
+      <p class="rate">Rate to be announced</p>
+      <p style="color:var(--ink2)">Billed monthly per live calculation.</p>
+      <ul>
+        <li>Federal, state and local payroll tax</li>
+        <li>Address to jurisdiction lookups</li>
+        <li>Minimum wage checks</li>
+        <li>Wage garnishment limits</li>
+        <li>Sandbox and live API keys</li>
+        <li>Usage and invoices in the dashboard</li>
+      </ul>
+      <a class="btn block" href="/signup">Start free trial</a>
+      <p class="fine">14-day trial. A card on file is required.</p>
+    </article>
+    <div class="faq">
+      <h2 style="font-size:15px;font-weight:500;margin-bottom:8px">Questions</h2>
+      <article>
+        <h3>What counts as a calculation?</h3>
+        <p>One successful POST /v1/paycheck call. Minimum wage and garnishment checks are included in that same calculation. Address lookups that don't match aren't billed.</p>
+      </article>
+      <article>
+        <h3>Is there a contract?</h3>
+        <p>No. Usage is billed monthly. Stop using your key and billing stops.</p>
+      </article>
+      <article>
+        <h3>Why do you need a card for the trial?</h3>
+        <p>Live keys bill per call once the trial ends. A card or bank account on file lets your integration keep running without a gap.</p>
+      </article>
+      <article>
+        <h3>Is the sandbox free?</h3>
+        <p>Sandbox calls run the same engine and are not billed.</p>
+      </article>
+    </div>
+  </div>
+  <div class="dev">
+    <div>
+      <h2>Start in the sandbox.</h2>
+      <p>Run a paycheck with a free sandbox key. Go live and pay per calculation, with no long contract.</p>
+    </div>
+    <div class="dev-actions">
+      <a class="btn" href="/signup">Get a sandbox key</a>
+      <a class="btn secondary" href="/docs/paycheck">API reference</a>
+    </div>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

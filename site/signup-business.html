@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light" />
 <title>About your business — Omnia.tax</title>
 <link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="/tokens.css" />
+<link rel="stylesheet" href="/assets/v5.css" />
 <link rel="stylesheet" href="/assets/site.css" />
 <!--OMNIA_CONFIG-->
 </head>
@@ -23,17 +23,12 @@
     </div>
     <div class="step-rule"></div>
     <div class="panel-head">
-      <span>Live estimate</span>
-      <span class="tag tag-solid">Assumes biweekly</span>
+      <span>Billing</span>
+      <span class="tag tag-solid">Per calculation</span>
     </div>
     <div class="panel-rule"></div>
-    <div style="font-weight:700;font-size:18px">Estimated monthly cost</div>
-    <div class="est-val"><span class="approx">≈</span> <span id="est">$0.00</span><span class="mo">/month</span></div>
-    <div class="panel-rule"></div>
-    <div class="mono" id="formula" style="font-weight:700;font-size:18px"></div>
-    <div class="micro" id="formulaCap" style="color:var(--color-on-cobalt-muted)">EMPLOYEES × PAYCHECKS A YEAR × PRICE ÷ MONTHS</div>
-    <div class="assume"><i class="i" aria-hidden="true">i</i><span>We don’t know how often you pay. This estimate assumes biweekly pay (26 paychecks a year).</span></div>
-    <p class="note-muted">It counts one calculation per paycheck. Bonus runs and recalculations add calls. Failed calls aren’t billed.</p>
+    <div style="font-weight:700;font-size:18px">Pay per calculation</div>
+    <p class="note-muted">The rate is to be announced. There is no per-employee price. Sandbox calls are not billed. A card on file starts the 14-day trial.</p>
   </aside>
   <main class="form-col">
     <div class="form-top"><span class="label-mono">Step 03 of 05</span><span class="who" id="who"></span></div>
@@ -45,22 +40,11 @@
       <li><div class="bar"></div><div class="lbl"><span class="n">05</span> API key</div></li>
     </ol>
     <h1>About your business.</h1>
-    <p class="lead">Two questions, so we can estimate your monthly cost. You’re only billed for calls you make.</p>
+    <p class="lead">Sign the terms before a payment method is added. Billing is per calculation. The rate is to be announced.</p>
     <form class="form-stack" id="form">
       <div class="field">
         <label class="field-label" for="company">Business name</label>
         <input id="company" required />
-      </div>
-      <div>
-        <label class="field-label" for="employees">Employees you pay</label>
-        <div style="display:flex;align-items:center">
-          <div class="stepper">
-            <button type="button" id="minus" aria-label="Fewer employees">−</button>
-            <input id="employees" inputmode="numeric" value="20" />
-            <button type="button" id="plus" aria-label="More employees">+</button>
-          </div>
-          <span class="stepper-hint">Everyone who gets a paycheck from you.</span>
-        </div>
       </div>
       <div class="field">
         <label class="field-label" for="address">Business address</label>
@@ -96,31 +80,10 @@
   document.getElementById('company').value = session.company || '';
   document.getElementById('sign').value = session.name || '';
 
-  var employees = document.getElementById('employees');
-  var minus = document.getElementById('minus');
-  function n() { return Math.max(1, Math.round(Number(employees.value) || 1)); }
-  function render() {
-    var v = n();
-    employees.value = String(v);
-    minus.disabled = v <= 1;
-    var est = OmniaPricing.estimate(v, 'biweekly');
-    document.getElementById('est').textContent = OmniaPricing.formatMoney(est.monthly);
-    var rate = OmniaPricing.formatRate(est.rate);
-    if (est.inFirstTier) {
-      document.getElementById('formula').textContent = est.employees + ' × ' + est.periodsPerYear + ' × ' + rate + ' ÷ 12';
-      document.getElementById('formulaCap').textContent = 'EMPLOYEES × PAYCHECKS A YEAR × PRICE ÷ MONTHS';
-    } else {
-      document.getElementById('formula').textContent = OmniaPricing.formatMoney(est.annual) + ' / yr ÷ 12';
-      document.getElementById('formulaCap').textContent = 'ANNUAL COST ÷ 12';
-    }
-  }
-  minus.addEventListener('click', function () { employees.value = String(n() - 1); render(); loadTerms(); });
-  document.getElementById('plus').addEventListener('click', function () { employees.value = String(n() + 1); render(); loadTerms(); });
-  employees.addEventListener('change', function () { render(); loadTerms(); });
-  render();
-
   function loadTerms() {
-    var q = '/api/terms?employees=' + n() + '&payFrequency=biweekly&rooftop=false';
+    // Pay-per-calculation. Do not send an employee count; the legacy
+    // employees_required gate is flagged off in site/server.ts.
+    var q = '/api/terms?payFrequency=biweekly&rooftop=false';
     document.getElementById('submit').disabled = true;
     Omnia.api(q, { headers: Omnia.authHeaders() }).then(function (res) {
       if (!res.ok) {
@@ -135,9 +98,8 @@
       }).join('');
       var ends = res.body.trialEndsAt ? new Date(res.body.trialEndsAt).toLocaleDateString() : '';
       document.getElementById('agreeText').textContent =
-        'I authorize Omnia.tax to charge my payment method for metered usage once the ' +
-        res.body.trialDays + '-day trial ends on ' + ends + ', and I accept the ' +
-        res.body.termMonths + '-month term described above.';
+        'I agree to the Terms. After the ' + res.body.trialDays + '-day trial ends on ' + ends +
+        ', live calculations may be billed monthly. The rate is to be announced. There is no long contract.';
     });
   }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
@@ -159,7 +121,6 @@
       legalName: document.getElementById('company').value.trim(),
       billingEmail: session.email,
       address: document.getElementById('address').value.trim(),
-      expectedEmployees: n(),
       payFrequency: 'biweekly',
       rooftop: false
     };
@@ -173,7 +134,7 @@
           err.hidden = false;
           return;
         }
-        try { sessionStorage.setItem('omnia_employees', String(payload.expectedEmployees)); } catch (x) {}
+        try { sessionStorage.removeItem('omnia_employees'); } catch (x) {}
         location.href = '/signup/payment';
       });
   });

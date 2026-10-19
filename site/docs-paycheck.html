@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>POST /v1/paycheck — Omnia.tax</title>
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="docs-top">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <span style="color:var(--ink3)">Docs</span>
+  <a href="/status" style="margin-left:auto;color:var(--ink2)">API status</a>
+  <a class="btn sm" href="/dashboard">Dashboard</a>
+</header>
+<div class="docs-body">
+  <nav class="side" aria-label="Docs">
+    <h2>Get started</h2>
+    <a href="/docs">Overview</a>
+    <a href="/docs#making-requests">Quickstart</a>
+    <a href="/docs#authentication">Authentication</a>
+    <a href="/docs#errors">Errors</a>
+    <a href="/sandbox">Sandbox</a>
+    <h2>API reference</h2>
+    <a href="/docs/paycheck" aria-current="page">POST /v1/paycheck</a>
+    <a href="/docs#address">POST /v1/address</a>
+    <h2>Resources</h2>
+    <a href="/coverage">Coverage</a>
+    <a href="/changelog">Changelog</a>
+    <a href="/status">Status</a>
+  </nav>
+  <article>
+    <p><span class="mono" style="color:var(--accent)">POST</span> <span class="mono">/v1/paycheck</span></p>
+    <h1 class="page" style="margin-top:12px">Calculate a paycheck</h1>
+    <p class="sub">Returns each federal, state and local tax for one paycheck, plus totals and net pay. All amounts are integers in cents.</p>
+
+    <h2 style="margin-top:36px">Body</h2>
+    <div class="table-wrap"><table>
+      <tbody>
+        <tr><td class="mono">checkDate <span class="fine">string</span></td><td>required</td><td>Pay date, YYYY-MM-DD. Picks the tax year.</td></tr>
+        <tr><td class="mono">payFrequency <span class="fine">string</span></td><td>required</td><td>weekly, biweekly, semimonthly or monthly.</td></tr>
+        <tr><td class="mono">earnings <span class="fine">array</span></td><td>required</td><td>{ code, category, amount } per earning line. amount is cents.</td></tr>
+        <tr><td class="mono">deductions <span class="fine">array</span></td><td></td><td>Pretax and posttax deductions, amounts in cents.</td></tr>
+        <tr><td class="mono">federalW4 <span class="fine">object</span></td><td>required</td><td>filingStatus, multipleJobs, dependentCredit, otherIncome, deductions, extraWithholding.</td></tr>
+        <tr><td class="mono">ytd <span class="fine">object</span></td><td></td><td>Year-to-date socialSecurity, medicare, and futa wages, in cents.</td></tr>
+        <tr><td class="mono">workState <span class="fine">object</span></td><td>required</td><td>{ code, certificate }. Pennsylvania uses workPSD and residencePSD.</td></tr>
+        <tr><td class="mono">minimumWageCheck <span class="fine">object</span></td><td></td><td>{ hourlyRate } in cents, compared with wage floors on the same call.</td></tr>
+        <tr><td class="mono">garnishments <span class="fine">array</span></td><td></td><td>Orders: consumer_creditor, child_support, federal_student_loan_default. amountOrdered is cents.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 style="margin-top:36px">Response</h2>
+    <p class="sub">The HTTP body wraps the engine result: <code>{ "result": PaycheckResult }</code>.</p>
+    <div class="table-wrap"><table>
+      <tbody>
+        <tr><td class="mono">grossPay</td><td>Total earnings in cents.</td></tr>
+        <tr><td class="mono">taxes</td><td>{ id, name, payer, jurisdiction, taxableWages, amount, detail }.</td></tr>
+        <tr><td class="mono">employeeTaxTotal</td><td>Sum of employee taxes, in cents.</td></tr>
+        <tr><td class="mono">employerTaxTotal</td><td>Sum of employer taxes, in cents.</td></tr>
+        <tr><td class="mono">netPay</td><td>Gross minus employee taxes and deductions, in cents.</td></tr>
+        <tr><td class="mono">notices, warnings</td><td>Returned when an input needs a second look.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 style="margin-top:36px">Errors</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Status</th><th>Code</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>401</td><td class="mono">missing_key</td><td>No API key was sent.</td></tr>
+        <tr><td>401</td><td class="mono">invalid_key</td><td>The key is wrong or inactive.</td></tr>
+        <tr><td>401</td><td class="mono">expired_key</td><td>The key passed its expiry date.</td></tr>
+        <tr><td>402</td><td class="mono">payment_method_required</td><td>No card or bank account on file.</td></tr>
+        <tr><td>422</td><td class="mono">invalid_input</td><td>The body failed validation. See details.</td></tr>
+        <tr><td>429</td><td class="mono">rate_limited</td><td>Too many requests this minute. Retry later.</td></tr>
+      </tbody>
+    </table></div>
+  </article>
+  <aside>
+    <div class="panel">
+      <div class="tabs"><span class="tab-on">Request</span><span class="right">cURL</span></div>
+      <pre><span class="d">curl https://api.omnia.tax/v1/paycheck \</span>
+  <span class="d">-H "Authorization: Bearer $KEY" \</span>
+  <span class="d">-d '{</span>
+  <span class="k">"checkDate"</span><span class="d">: </span><span class="s">"2026-09-15"</span><span class="d">,</span>
+  <span class="k">"payFrequency"</span><span class="d">: </span><span class="s">"weekly"</span><span class="d">,</span>
+  <span class="k">"earnings"</span><span class="d">: [{ </span><span class="k">"code"</span><span class="d">: </span><span class="s">"REG"</span><span class="d">,</span>
+    <span class="k">"category"</span><span class="d">: </span><span class="s">"regular"</span><span class="d">, </span><span class="k">"amount"</span><span class="d">: </span><span class="n">140000</span><span class="d"> }],</span>
+  <span class="k">"deductions"</span><span class="d">: [],</span>
+  <span class="k">"federalW4"</span><span class="d">: { </span><span class="k">"filingStatus"</span><span class="d">: </span><span class="s">"head_of_household"</span><span class="d">,</span>
+    <span class="k">"multipleJobs"</span><span class="d">: false, </span><span class="k">"dependentCredit"</span><span class="d">: </span><span class="n">200000</span><span class="d"> },</span>
+  <span class="k">"workState"</span><span class="d">: { </span><span class="k">"code"</span><span class="d">: </span><span class="s">"PA"</span><span class="d">, </span><span class="k">"certificate"</span><span class="d">:</span>
+    <span class="d">{ </span><span class="k">"workPSD"</span><span class="d">: </span><span class="s">"510101"</span><span class="d">, </span><span class="k">"residencePSD"</span><span class="d">: </span><span class="s">"510101"</span><span class="d"> } }</span>
+<span class="d">}'</span></pre>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <div class="tabs"><span class="tab-on">Response</span><span class="right">200</span></div>
+      <pre><span class="d">{ "result": {</span>
+  <span class="k">"checkDate"</span><span class="d">: </span><span class="s">"2026-09-15"</span><span class="d">,</span>
+  <span class="k">"grossPay"</span><span class="d">: </span><span class="n">140000</span><span class="d">,</span>
+  <span class="k">"taxes"</span><span class="d">: [</span>
+    <span class="d">{ </span><span class="k">"id"</span><span class="d">: </span><span class="s">"US_FIT"</span><span class="d">, </span><span class="k">"amount"</span><span class="d">: </span><span class="n">6700</span><span class="d"> },</span>
+    <span class="d">{ </span><span class="k">"id"</span><span class="d">: </span><span class="s">"PA_SIT"</span><span class="d">, </span><span class="k">"amount"</span><span class="d">: </span><span class="n">4298</span><span class="d"> },</span>
+    <span class="d">{ </span><span class="k">"id"</span><span class="d">: </span><span class="s">"PA_EIT"</span><span class="d">, </span><span class="k">"payer"</span><span class="d">: </span><span class="s">"employee"</span><span class="d">,</span>
+      <span class="k">"jurisdiction"</span><span class="d">: </span><span class="s">"local"</span><span class="d">,</span>
+      <span class="k">"taxableWages"</span><span class="d">: </span><span class="n">140000</span><span class="d">, </span><span class="k">"amount"</span><span class="d">: </span><span class="n">5229</span><span class="d"> },</span>
+    <span class="d">// 7 more</span>
+  <span class="d">],</span>
+  <span class="k">"employeeTaxTotal"</span><span class="d">: </span><span class="n">27035</span><span class="d">,</span>
+  <span class="k">"employerTaxTotal"</span><span class="d">: </span><span class="n">16901</span><span class="d">,</span>
+  <span class="k">"netPay"</span><span class="d">: </span><span class="n">112965</span><span class="d"> } }</span></pre>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <div class="tabs"><span class="tab-on">Error</span><span class="right">401</span></div>
+      <pre><span class="d">{ </span><span class="k">"error"</span><span class="d">: </span><span class="s">"This API key expired on 2026-09-01."</span><span class="d">,</span>
+  <span class="k">"code"</span><span class="d">: </span><span class="s">"expired_key"</span><span class="d">,</span>
+  <span class="k">"requestId"</span><span class="d">: </span><span class="s">"req_3f9a1c07b2e4d856"</span><span class="d"> }</span></pre>
+    </div>
+  </aside>
+</div>
+</body>
+</html>

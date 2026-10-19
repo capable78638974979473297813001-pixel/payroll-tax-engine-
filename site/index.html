@@ -4,311 +4,125 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light" />
-<title>Omnia.tax — Payroll tax calculation API</title>
-<meta name="description" content="One API call returns every tax line on a paycheck — federal, state, and local. Pay per paycheck, with no contract, no minimums, and no sales call." />
+<title>Omnia.tax — Payroll tax calculation, as an API</title>
+<meta name="description" content="Send a paycheck. Get back federal, state, and local withholding, line by line." />
 <link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="/tokens.css" />
-<link rel="stylesheet" href="/assets/site.css" />
-<!--OMNIA_CONFIG-->
+<link rel="stylesheet" href="/assets/v5.css" />
 </head>
-<body class="page-landing">
-<header class="nav">
-  <a class="logo" href="/" aria-label="Omnia.tax"><img src="/logo/logo.svg" alt="" /></a>
-  <nav class="nav-links" aria-label="Primary">
-    <a href="#calculator">Try it</a>
-    <a href="#coverage">Coverage</a>
-    <a href="#pricing">Pricing</a>
-    <a href="/docs">Docs</a>
-  </nav>
-  <div class="nav-right">
-    <a class="signin" id="navSignin" href="/signin">Sign in</a>
-    <a class="btn btn-md btn-secondary" href="/docs">Start building</a>
-    <a class="btn btn-md btn-primary" id="navPrimary" href="/signup">Start free trial <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="/product">Product</a>
+      <a href="/coverage">Coverage</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav-end">
+      <a class="signin" href="/signin">Sign in</a>
+      <a class="btn sm" href="/signup">Get API key</a>
+    </div>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
   </div>
 </header>
 
-<section class="hero" id="product">
-  <div class="hero-guides" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-  <div class="wrap hero-inner">
-    <div class="hero-eyebrow">
-      <span class="sq" aria-hidden="true"></span>
-      <span class="eyebrow">Payroll tax calculation API</span>
-      <span class="mono" style="margin-left:auto;color:var(--color-gray);font-size:12px">POST /v1/paycheck</span>
-    </div>
-    <h1>Accurate payroll tax, priced for growing payroll teams.</h1>
-    <div class="hero-row">
-      <p class="hero-lead">One API call returns every tax line on a paycheck — federal, state, and local. Rooftop-level geocoding and address lookup find the exact local jurisdictions for any work address, and wage-garnishment limits and minimum-wage checks come in the same call. Pay per paycheck, with no contract, no minimums, and no sales call.</p>
+<main>
+  <div class="wrap hero">
+    <div>
+      <h1>Payroll tax calculation, as an API.</h1>
+      <p class="lede">Send a paycheck. Get back federal, state, and local withholding, line by line.</p>
       <div class="hero-actions">
-        <a class="btn btn-lg btn-primary" href="/signup">Start free trial <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
-        <a class="btn btn-lg btn-secondary" href="/docs">Start building</a>
-        <a class="btn btn-text" href="#pricing">See pricing</a>
+        <a class="btn" href="/signup">Start free trial</a>
+        <a class="text-link" href="/docs">Read the docs →</a>
       </div>
-      <div class="hero-rule"></div>
-      <p class="hero-price"><b data-rate>$0.09</b> per paycheck · billed only for calls you make</p>
+      <p class="fine">14-day trial, card on file. Then pay per calculation.</p>
+    </div>
+    <div class="panel" aria-label="POST /v1/paycheck example">
+      <div class="tabs">
+        <span class="tab-on">cURL</span>
+        <span>Node</span>
+        <span>Python</span>
+        <span class="right">Sandbox</span>
+      </div>
+      <pre><span class="n">POST</span> <span class="s">/v1/paycheck</span>
+<span class="d">{</span>
+  <span class="k">"checkDate"</span><span class="d">: </span><span class="s">"2026-09-15"</span><span class="d">, </span><span class="k">"payFrequency"</span><span class="d">: </span><span class="s">"weekly"</span><span class="d">,</span>
+  <span class="k">"earnings"</span><span class="d">: [{ </span><span class="k">"code"</span><span class="d">: </span><span class="s">"REG"</span><span class="d">, </span><span class="k">"amount"</span><span class="d">: </span><span class="n">140000</span><span class="d">, … }],</span>
+  <span class="k">"federalW4"</span><span class="d">: { </span><span class="k">"filingStatus"</span><span class="d">: </span><span class="s">"head_of_household"</span><span class="d">, … },</span>
+  <span class="k">"workState"</span><span class="d">: { </span><span class="k">"code"</span><span class="d">: </span><span class="s">"PA"</span><span class="d">, </span><span class="k">"certificate"</span><span class="d">: {</span>
+    <span class="k">"workPSD"</span><span class="d">: </span><span class="s">"510101"</span><span class="d">, </span><span class="k">"residencePSD"</span><span class="d">: </span><span class="s">"510101"</span><span class="d"> } }</span>
+<span class="d">}</span></pre>
+      <hr class="rule" />
+      <pre><span class="n">200</span> <span class="s">OK</span>   <span class="d">// amounts in cents</span>
+<span class="d">{ </span><span class="k">"grossPay"</span><span class="d">: </span><span class="n">140000</span><span class="d">,</span>
+  <span class="k">"taxes"</span><span class="d">: [</span>
+    <span class="d">{ </span><span class="k">"id"</span><span class="d">: </span><span class="s">"US_FIT"</span><span class="d">,  </span><span class="k">"amount"</span><span class="d">: </span><span class="n">6700</span><span class="d"> },</span>
+    <span class="d">{ </span><span class="k">"id"</span><span class="d">: </span><span class="s">"PA_SIT"</span><span class="d">,  </span><span class="k">"amount"</span><span class="d">: </span><span class="n">4298</span><span class="d"> },</span>
+    <span class="d">{ </span><span class="k">"id"</span><span class="d">: </span><span class="s">"PA_EIT"</span><span class="d">,  </span><span class="k">"amount"</span><span class="d">: </span><span class="n">5229</span><span class="d"> },</span>
+    <span class="d">… 7 more</span>
+  <span class="d">],</span>
+  <span class="k">"employeeTaxTotal"</span><span class="d">: </span><span class="n">27035</span><span class="d">,</span>
+  <span class="k">"netPay"</span><span class="d">: </span><span class="n">112965</span><span class="d"> }</span></pre>
     </div>
   </div>
-</section>
 
-<section class="band-cobalt fig" id="calculator" aria-labelledby="calcTitle">
-  <div class="wrap">
-    <div class="cc-head">
-      <p class="eyebrow">Try it &middot; no signup</p>
-      <h2 id="calcTitle">Run a real paycheck.</h2>
-      <p class="cc-sub">Type a work address or pick a state, then change the numbers. This is the same engine your API key calls, and every line below is real output.</p>
-    </div>
-    <div class="cc-card">
-      <form class="cc-in" id="calc" autocomplete="off" novalidate>
-        <h3>The paycheck</h3>
-        <div class="cc-f cc-addr">
-          <label for="cAddr"><span>Work address</span></label>
-          <div class="cc-addr-row">
-            <input id="cAddr" type="text" inputmode="text" autocomplete="street-address" maxlength="200" placeholder="233 S Wacker Dr, Chicago, IL 60606" aria-describedby="cAddrHelp" />
-            <button class="btn btn-md btn-ink" type="button" id="cLookup">Look up</button>
-          </div>
-          <p class="cc-help" id="cAddrHelp">Street, city and state. Rooftop-level address lookup finds the state and any city, county or school-district tax at that exact spot.</p>
-          <details class="cc-home" id="cHomeBox">
-            <summary>Lives somewhere else? Add a home address</summary>
-            <input id="cHome" type="text" autocomplete="off" maxlength="200" placeholder="1 Main St, Yonkers, NY 10701" aria-label="Home address" />
-          </details>
-          <div class="cc-examples" id="cExamples" aria-label="Example addresses"></div>
-          <div class="cc-geo" id="cGeo" role="status" hidden></div>
-        </div>
-        <label class="cc-f" for="cState"><span>State</span>
-          <select id="cState"><option value="OH">Ohio</option></select></label>
-        <label class="cc-f" for="cFreq"><span>How often paid</span>
-          <select id="cFreq"><option value="weekly">Weekly</option><option value="biweekly" selected>Every two weeks</option><option value="semimonthly">Twice a month</option><option value="monthly">Monthly</option></select></label>
-        <label class="cc-f" for="cGross"><span>Gross pay for this check</span>
-          <span class="cc-money"><i>$</i><input id="cGross" inputmode="decimal" value="3,000.00" /></span></label>
-        <label class="cc-f" for="cFiling"><span>Federal W-4 filing status</span>
-          <select id="cFiling"><option value="single" selected>Single</option><option value="married_joint">Married filing jointly</option><option value="married_separate">Married filing separately</option><option value="head_of_household">Head of household</option></select></label>
-        <label class="cc-f" for="cPretax"><span>401(k) deferral this check</span>
-          <span class="cc-money"><i>$</i><input id="cPretax" inputmode="decimal" value="240.00" /></span></label>
-        <p class="cc-err" id="cErr" role="alert" hidden></p>
-        <div class="cc-saved" id="cSaved">
-          <h3>Saved scenarios</h3>
-          <p class="cc-help" id="cSavedOut">Sign in to keep scenarios on your account and reopen them any time. <a href="/signin">Sign in</a> or <a href="/signup">start a free trial</a>.</p>
-          <div id="cSavedIn" hidden>
-            <div class="cc-addr-row">
-              <input id="cSaveName" type="text" maxlength="60" placeholder="Name this scenario, e.g. Chicago hire" aria-label="Scenario name" />
-              <button class="btn btn-md btn-ink" type="button" id="cSave">Save</button>
-            </div>
-            <p class="cc-help" id="cSaveMsg" role="status"></p>
-            <ul class="cc-saved-list" id="cSavedList"></ul>
-          </div>
-        </div>
-      </form>
-      <div class="cc-out" aria-live="polite">
-        <div class="cc-stats">
-          <div class="cc-stat"><span class="cc-k">Gross pay</span><span class="cc-v" id="sGross">&mdash;</span></div>
-          <div class="cc-stat"><span class="cc-k">Employee taxes</span><span class="cc-v" id="sEmployee">&mdash;</span></div>
-          <div class="cc-stat cc-net"><span class="cc-k">Net pay</span><span class="cc-v" id="sNet">&mdash;</span><span class="cc-sub2" id="sPct"></span></div>
-          <div class="cc-stat"><span class="cc-k">Cost to employer</span><span class="cc-v" id="sCost">&mdash;</span></div>
-        </div>
-        <h3 class="cc-h">Taken out of the employee&rsquo;s pay</h3>
-        <p class="cc-hint">Click any line to see how it was calculated.</p>
-        <div class="cc-list" id="tilesEmployee"></div>
-        <h3 class="cc-h" id="employerHead" hidden>Paid by the employer, on top of gross pay</h3>
-        <div class="cc-list" id="tilesEmployer"></div>
-        <div class="cc-actions">
-          <a class="btn btn-lg btn-primary" href="/signup">Run this on your own payroll <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
-          <button class="btn btn-lg btn-secondary" type="button" id="cCopy">Copy as cURL</button>
-        </div>
-        <p class="cc-note" id="cNote">Loading the engine&hellip;</p>
+  <div class="wrap steps" id="how">
+    <h2>How it works</h2>
+    <article>
+      <div class="n">01</div>
+      <h3>Look up the address</h3>
+      <p>Send a home and work address. We return the tax jurisdictions that apply.</p>
+    </article>
+    <article>
+      <div class="n">02</div>
+      <h3>Calculate the paycheck</h3>
+      <p>Send earnings and the W-4. We return each tax, who pays it, and the amount.</p>
+    </article>
+    <article>
+      <div class="n">03</div>
+      <h3>Show the result</h3>
+      <p>Each tax line comes with the taxable wages and how it was worked out.</p>
+    </article>
+  </div>
+
+  <section class="band" id="coverage">
+    <div class="wrap band-in">
+      <div>
+        <h2>The whole USA, covered.</h2>
+        <p class="sub">Federal, all 50 states and DC, and every local jurisdiction. Minimum wage and wage garnishments included.</p>
+        <p style="margin-top:28px"><a class="text-link" href="/coverage">See coverage →</a></p>
       </div>
+      <div class="stats">
+        <div class="stat"><b>50 + DC</b><span>Federal and state payroll tax</span></div>
+        <div class="stat"><b>Local</b><span>Every local jurisdiction</span></div>
+        <div class="stat"><b>Min. wage</b><span>Federal, state, and local rates</span></div>
+        <div class="stat"><b>Garnishments</b><span>Wage garnishments included</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap dev">
+    <div>
+      <h2>Start in the sandbox.</h2>
+      <p>Run the example above with a free sandbox key. Go live and pay per calculation, with no long contract.</p>
+    </div>
+    <div class="dev-actions">
+      <a class="btn" href="/signup">Get a sandbox key</a>
+      <a class="btn secondary" href="/docs/paycheck">API reference</a>
     </div>
   </div>
-</section>
+</main>
 
-<section class="section" id="pricing">
-  <div class="wrap">
-    <div class="shead">
-      <div class="rule"></div>
-      <div class="sidx">01</div>
-      <div class="slabel eyebrow">Price</div>
-      <div class="sright">ONE LINE ITEM</div>
-      <h2 class="statement">No quote request. No pricing call.<span class="muted">Here it is.</span></h2>
-    </div>
-    <div class="figure-price" data-rate>$0.09</div>
-    <p class="per">per paycheck <span>— one calculation, one charge.</span></p>
-    <div class="terms-grid">
-      <div class="term"><div class="k"><b>01</b>Contract</div><p class="v">None</p></div>
-      <div class="term"><div class="k"><b>02</b>Minimums</div><p class="v">None</p></div>
-      <div class="term"><div class="k"><b>03</b>Setup fee</div><p class="v">None</p></div>
-      <div class="term"><div class="k"><b>04</b>Per-state or per-jurisdiction tiers</div><p class="v">None</p></div>
-      <div class="term"><div class="k"><b>05</b>Sales call</div><p class="v">Not needed</p></div>
-      <div class="term"><div class="k"><b>06</b>Billed for</div><p class="v">Only calls you make</p></div>
-    </div>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
   </div>
-</section>
-
-<section class="section" id="coverage">
-  <div class="wrap">
-    <div class="shead">
-      <div class="rule"></div>
-      <div class="sidx">02</div>
-      <div class="slabel eyebrow">Coverage</div>
-      <div class="sright">FEDERAL · STATE · LOCAL</div>
-      <h2 class="statement" style="max-width:980px">Federal, state, and local — down to the city, county, school district, and transit district.</h2>
-    </div>
-    <div class="cols" style="margin-top:40px;align-items:start">
-      <div style="grid-column:1 / span 4">
-        <div class="cov-figure"><span class="n">50</span><span class="dc">+DC</span></div>
-        <p class="cov-cap">All 50 states and the District of Columbia, plus federal.</p>
-      </div>
-      <div style="grid-column:6 / span 7">
-        <div class="local-head"><span class="label-mono">Pick a state to run it</span><span class="mono" style="color:var(--color-gray);font-size:12px"><i class="dotkey" aria-hidden="true"></i> ALSO LOCAL TAXES</span></div>
-        <div class="state-grid" id="stateGrid" role="group" aria-label="States covered"><span class="mono" style="color:var(--color-gray);font-size:13px">Loading states&hellip;</span></div>
-        <p class="footnote"><b>Local taxes</b> are modelled for Alabama, Indiana, Kentucky, Michigan, Ohio, Pennsylvania, New York City and Yonkers, and Oregon transit. <b>Anywhere else</b> you get an explicit “not modelled” line. See 03.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="band-ink guess">
-  <div class="wrap">
-    <div class="shead dark">
-      <div class="rule"></div>
-      <div class="sidx">03</div>
-      <div class="slabel eyebrow" style="color:#fff">No guessing</div>
-      <div class="sright">EXPLICIT, ALWAYS</div>
-    </div>
-    <div class="cols" style="margin-top:32px">
-      <div style="grid-column:1 / span 7">
-        <h2><span style="display:block">Never a</span><span style="display:block">silent <span class="zero">$0</span>.</span></h2>
-        <p class="guess-body">If a rule or code is missing, the API returns an explicit error or a “not modelled” line. It never fills the gap with a quiet zero, so a missing tax can’t hide inside a clean-looking paycheck.</p>
-      </div>
-      <div style="grid-column:8 / span 5">
-        <div class="excerpt">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <span class="label-mono">A · A not-modelled line</span>
-            <span class="tag tag-outline" style="color:#fff">Live from the engine</span>
-          </div>
-          <pre id="nmExcerpt">Loading&hellip;</pre>
-        </div>
-        <div class="excerpt">
-          <span class="label-mono">B · Or an explicit error</span>
-          <pre>{ <span class="s">"error"</span>, <span class="s">"code"</span>, <span class="s">"requestId"</span> }</pre>
-          <p style="color:var(--color-on-ink-muted);font-size:13px">Every error has the same shape. <a href="/docs#errors" style="color:#fff">See the Errors table in the docs.</a></p>
-        </div>
-        <div class="never"><b>NEVER THIS</b><s>"amount": 0</s></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="developers">
-  <div class="wrap">
-    <div class="shead">
-      <div class="rule"></div>
-      <div class="sidx">04</div>
-      <div class="slabel eyebrow">Developers</div>
-      <div class="sright">POST /V1/PAYCHECK</div>
-      <h2 class="statement">Your first paycheck in one request.</h2>
-    </div>
-    <p class="lead" style="margin:16px 0 32px;color:var(--color-gray);font-size:18px;max-width:640px">Send the paycheck as JSON. Get back every tax line in the same response.</p>
-    <div class="cols">
-      <div class="facts" style="grid-column:1 / span 3">
-        <div class="fact"><span class="k">ENDPOINT</span><span class="v">POST /v1/paycheck</span></div>
-        <div class="fact"><span class="k">AUTH</span><span class="v">Bearer secret key</span></div>
-        <div class="fact"><span class="k">BODY</span><span class="v">application/json</span></div>
-        <div class="fact"><span class="k">AMOUNTS</span><span class="v">Integer cents</span></div>
-      </div>
-      <div class="codepanel" style="grid-column:4 / span 5">
-        <div class="hd"><span>REQUEST</span><span style="color:var(--color-on-ink-muted)">cURL</span></div>
-        <pre id="landingCurl">Loading&hellip;</pre>
-        <div style="padding:0 16px 16px"><button class="btn btn-sm btn-ink" type="button" id="curlCopy">Copy</button> <a class="btn btn-sm btn-secondary" href="#calculator" style="margin-left:8px">Change the inputs</a></div>
-      </div>
-      <div class="respanel" style="grid-column:9 / span 4">
-        <div class="hd"><span>RESPONSE</span><span>200</span></div>
-        <div class="label-mono" style="padding:12px 16px 0;color:var(--color-gray)">Real response &middot; amounts in cents</div>
-        <pre class="tree live-resp" id="landingResp">Loading&hellip;</pre>
-      </div>
-    </div>
-    <div class="cents-call">
-      <span class="sq" aria-hidden="true"></span>
-      <div><p>Amounts in integer cents.</p><div class="mono">100000 = $1,000.00</div></div>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="shead">
-      <div class="rule"></div>
-      <div class="sidx">05</div>
-      <div class="slabel eyebrow">The fine print</div>
-      <div class="sright">INCLUDED IN THE PRICE</div>
-      <h2 class="statement">The fine print is short,<span class="muted">and it’s all in your favor.</span></h2>
-    </div>
-    <div style="margin-top:48px">
-      <div class="fp-row"><div class="num">01</div><h3>One call, every tax line</h3><p>Federal, state, and local lines come back together in a single response. No stitching calls together.</p></div>
-      <div class="fp-row"><div class="num">02</div><h3>Integer cents</h3><p>Every amount is a whole number of cents. No floating-point rounding, ever.</p></div>
-      <div class="fp-row"><div class="num">03</div><h3>Effective-dated rates</h3><p>A check dated before a rate change uses the rate that was in effect on that date.</p></div>
-      <div class="fp-row"><div class="num">04</div><h3>Garnishments &amp; minimum wage</h3><p>Both are answered in the same paycheck call, at no extra cost. Send a garnishment order and get back what the law lets you withhold: the federal Consumer Credit Protection Act limit for consumer debt, child support and federal student loans, with state rules applied. Send an hourly rate and get back whether it clears the binding federal, state or local minimum wage, across all 50 states, DC and 69 city and county ordinances.</p></div>
-      <div class="fp-row"><div class="num">05</div><h3>Rooftop geocoding &amp; address lookup</h3><p>Local taxes follow the exact address, not the ZIP code. Rooftop-level geocoding places a work or home address from a blend of address sources, at no extra cost, and every response reports the <code>precision</code> it achieved.</p></div>
-      <div class="fp-row"><div class="num">06</div><h3>No third-party dependencies</h3><p>The calculation runs with no third-party dependencies.</p></div>
-      <div class="fp-end"></div>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="shead">
-      <div class="rule"></div>
-      <div class="sidx">06</div>
-      <div class="slabel eyebrow">Questions</div>
-    </div>
-    <div class="cols" style="margin-top:32px">
-      <div style="grid-column:1 / span 3">
-        <h2 class="statement" style="grid-column:auto;margin:0 0 24px">Plain answers.</h2>
-        <p style="color:var(--color-gray)">Everything else is in the docs.</p>
-        <a class="btn btn-text" href="/docs">Read the docs</a>
-      </div>
-      <div class="faq" style="grid-column:4 / span 9">
-        <div class="faq-item"><div class="qrow"><span class="qn">Q1</span><div><h3>How much does it cost?</h3><p><span data-rate>$0.09</span> per paycheck calculated. No contract, no minimums, no setup fee, and no per-state or per-jurisdiction tiers.</p></div></div></div>
-        <div class="faq-item"><div class="qrow"><span class="qn">Q2</span><div><h3>What does it cover?</h3><p>Federal, all 50 states and DC, and local taxes down to the city, county, school district, and transit district, including Ohio, Pennsylvania, Michigan, Indiana, Kentucky, Alabama, New York City, Yonkers, and Oregon transit and Metro. Wage-garnishment limits and minimum-wage checks (federal, state and local) are included in the same call.</p></div></div></div>
-        <div class="faq-item"><div class="qrow"><span class="qn">Q3</span><div><h3>What if a jurisdiction isn’t covered?</h3><p>You get an explicit error or a “not modelled” line in the response. Never a silent $0.</p></div></div></div>
-        <div class="faq-item"><div class="qrow"><span class="qn">Q4</span><div><h3>How precise is the address lookup?</h3><p>Rooftop-level wherever our blend of address sources has a point for the address. Otherwise it falls back to block-level or street-range placement. Every response reports the <code>precision</code> it used, so you always know. It&rsquo;s included in the same <span data-rate>$0.09</span> per call. <a href="/docs">See the docs.</a></p></div></div></div>
-        <div class="faq-item"><div class="qrow"><span class="qn">Q5</span><div><h3>Do I need to talk to sales?</h3><p>No. Read the docs and start building.</p></div></div></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="band-cobalt cta">
-  <div class="cta-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-  <div class="wrap cols" style="align-items:end">
-    <h2 style="grid-column:1 / span 8">Run your first paycheck today.</h2>
-    <div class="cta-side" style="grid-column:9 / span 4">
-      <div class="eyebrow">Per paycheck</div>
-      <div class="big" data-rate>$0.09</div>
-      <p>No contract. No minimums. No sales call.</p>
-      <div class="cta-actions">
-        <a class="btn btn-lg btn-white" href="/signup">Start free trial <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></a>
-        <a class="btn btn-lg btn-outline-white" href="/docs">Start building</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<footer class="footer">
-  <a class="logo logo-sm" href="/" aria-label="Omnia.tax"><img src="/logo/logo.svg" alt="" /></a>
-  <span class="tagline">Payroll tax calculation API<br />© 2026 OMNIA TAX LLC. All rights reserved.<br />Calculations, not tax or legal advice.</span>
-  <nav aria-label="Footer">
-    <a href="mailto:scottholdan@gmail.com">Contact</a>
-    <a href="#calculator">Try it</a>
-    <a href="#coverage">Coverage</a>
-    <a href="#pricing">Pricing</a>
-    <a href="/docs">Docs</a>
-    <a href="/terms">Terms</a>
-    <a href="/privacy">Privacy</a>
-    <a href="/acceptable-use">Acceptable use</a>
-    <a href="/disclaimer">Disclaimer</a>
-  </nav>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
 </footer>
-<script src="/assets/pricing.js"></script>
-<script src="/assets/session.js"></script>
-<script src="/assets/landing.js"></script>
+<script src="/assets/v5.js"></script>
 </body>
 </html>

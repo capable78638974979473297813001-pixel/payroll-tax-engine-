@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>About — Omnia.tax</title>
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <p class="eyebrow">About</p>
+    <h1 class="page">About Omnia.tax</h1>
+    <p class="sub">Payroll tax calculation for teams that build payroll software.</p>
+  </div>
+  <div class="prose" style="margin-top:36px;max-width:720px">
+    <h2>What it is</h2>
+    <p>Omnia.tax is an HTTP API that calculates United States payroll taxes for one paycheck. You send earnings, deductions, a federal Form W-4, year-to-date wages, and the work location. You get each tax line back: who pays it, the taxable wages, the amount in cents, and a short explanation of the math.</p>
+    <p>The service is operated by OMNIA TAX LLC, a Michigan limited liability company, at 595 N Old Woodward Ave, Birmingham, Michigan.</p>
+    <h2>What the calculation covers</h2>
+    <p>Federal income tax, Social Security, Medicare, and FUTA, plus state income tax and unemployment for all 50 states and the District of Columbia. Local taxes, minimum wage floors, and wage garnishments are on the same POST /v1/paycheck call. Rules are effective-dated from the check date you send.</p>
+    <h2>What it does not do</h2>
+    <p>Omnia calculates. It does not file tax returns, deposit or remit tax, pay employees, or move money. It does not give tax, legal, or accounting advice. You review the result and you remain responsible for your own payroll and filings.</p>
+    <h2>How the numbers stay current</h2>
+    <p>Rate files are checked against the sources jurisdictions publish. A change lands in the engine as data with an effective date, not as a silent edit to an old year.</p>
+  </div>
+</main>
+<footer class="site-footer"><div class="wrap foot-grid">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+  <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+  <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+</div><p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p></footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

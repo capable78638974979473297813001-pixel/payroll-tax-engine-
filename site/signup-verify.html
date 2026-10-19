@@ -6,77 +6,53 @@
 <meta name="color-scheme" content="light" />
 <title>Check your email — Omnia.tax</title>
 <link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="/tokens.css" />
-<link rel="stylesheet" href="/assets/site.css" />
+<link rel="stylesheet" href="/assets/v5.css" />
 <!--OMNIA_CONFIG-->
 </head>
 <body>
-<div class="onboard">
-  <aside class="step-panel">
-    <div class="step-panel-top">
-      <a class="logo" href="/" aria-label="Omnia.tax"><img src="/logo/logo-on-blue.svg" alt="" /></a>
-      <span class="label-mono" style="color:var(--color-on-cobalt-muted);font-weight:400">Onboarding</span>
-    </div>
-    <div class="step-num-row">
-      <div class="step-num">02</div>
-      <div class="step-of"><div class="eyebrow">Step</div><div class="of">OF 05</div></div>
-    </div>
-    <div class="step-rule"></div>
-    <div class="sheet">
-      <div class="micro">Sample message</div>
-      <div class="sheet-row"><span>From</span><b>Omnia.tax</b></div>
-      <div class="sheet-row"><span>To</span><b id="sheetTo">you@company.com</b></div>
-      <div class="sheet-row"><span>Subject</span><b>Your verification code</b></div>
-      <p style="margin:16px 0 0">Use this code to verify your email:</p>
-      <div class="code-sample" aria-hidden="true">••••••</div>
-      <p style="font-size:13px;color:var(--color-gray);margin:0">The code expires in <span id="ttlMin">15</span> minutes. If you didn’t ask for it, you can ignore this email. The digits above are a sample, not your code.</p>
-    </div>
-  </aside>
-  <main class="form-col">
-    <div class="form-top"><span class="label-mono">Step 02 of 05</span><span class="who" id="who"></span></div>
-    <ol class="progress">
-      <li class="done"><div class="bar"></div><div class="lbl"><span class="chk" aria-hidden="true"></span> Account</div></li>
-      <li class="current"><div class="bar"></div><div class="lbl"><span class="n">02</span> Verify</div></li>
-      <li><div class="bar"></div><div class="lbl"><span class="n">03</span> Business</div></li>
-      <li><div class="bar"></div><div class="lbl"><span class="n">04</span> Payment</div></li>
-      <li><div class="bar"></div><div class="lbl"><span class="n">05</span> API key</div></li>
-    </ol>
-    <h1>Check your email.</h1>
-    <p class="lead" id="lead1"></p>
-    <p class="lead" style="margin-top:0">Enter it below to confirm this address.</p>
-    <form id="form" class="form-stack">
-      <div>
-        <label class="field-label" for="c0">Verification code</label>
-        <div class="codes" id="codes">
-          <input class="code" id="c0" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1" />
-          <input class="code" id="c1" inputmode="numeric" maxlength="1" aria-label="Digit 2" />
-          <input class="code" id="c2" inputmode="numeric" maxlength="1" aria-label="Digit 3" />
-          <span class="gap" aria-hidden="true"><i></i></span>
-          <input class="code" id="c3" inputmode="numeric" maxlength="1" aria-label="Digit 4" />
-          <input class="code" id="c4" inputmode="numeric" maxlength="1" aria-label="Digit 5" />
-          <input class="code" id="c5" inputmode="numeric" maxlength="1" aria-label="Digit 6" />
-        </div>
-        <p class="field-error" id="codeError" hidden></p>
+<div class="auth">
+  <main class="auth-main">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <h1 class="page" style="margin-top:48px;font-size:34px;line-height:42px">Check your email</h1>
+    <p class="lead sub" id="lead1"></p>
+    <p class="lead fine">The code expires in <span id="ttlMin">15</span> minutes.</p>
+    <p class="fine" id="who"></p>
+    <form id="form" style="margin-top:24px">
+      <label class="lbl" for="c0">Code</label>
+      <div class="codes" id="codes">
+        <input class="code" id="c0" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1" />
+        <input class="code" id="c1" inputmode="numeric" maxlength="1" aria-label="Digit 2" />
+        <input class="code" id="c2" inputmode="numeric" maxlength="1" aria-label="Digit 3" />
+        <span class="gap" aria-hidden="true"></span>
+        <input class="code" id="c3" inputmode="numeric" maxlength="1" aria-label="Digit 4" />
+        <input class="code" id="c4" inputmode="numeric" maxlength="1" aria-label="Digit 5" />
+        <input class="code" id="c5" inputmode="numeric" maxlength="1" aria-label="Digit 6" />
       </div>
-      <button class="btn btn-lg btn-primary btn-block" id="submit" type="submit">Verify <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
+      <p class="err" id="codeError" hidden></p>
+      <button class="btn block" id="submit" type="submit" style="margin-top:24px">Verify email</button>
     </form>
-    <div class="resend-row" id="resendRow">
-      <button type="button" class="btn btn-text" id="resend" disabled>Resend code</button>
-      <span id="resendIn">in <span class="countdown" id="count">0:30</span></span>
-    </div>
-    <p class="form-foot" id="changeRow">Wrong email? <a class="btn btn-text" id="change" href="/signup">Change it</a></p>
-    <form id="npForm" class="form-stack" hidden novalidate>
+    <p id="resendRow" style="margin-top:18px">
+      <span>Didn't get it?</span>
+      <button type="button" class="text-link" id="resend" disabled style="background:none;border:0;cursor:pointer">Send a new code</button>
+      <span id="resendIn">in <span id="count">0:30</span></span>
+    </p>
+    <p id="changeRow" class="fine">Wrong email? <a id="change" href="/signup">Change it</a></p>
+    <form id="npForm" hidden novalidate style="margin-top:24px">
       <div class="field" id="npField">
-        <label class="field-label" for="np">New password</label>
-        <div class="field-box">
-          <input id="np" type="password" autocomplete="new-password" maxlength="200" placeholder="At least 12 characters" />
-          <button type="button" class="field-slot" id="npToggle" aria-controls="np" aria-pressed="false">Show</button>
-        </div>
-        <p class="field-error" id="npError" hidden></p>
+        <label for="np">New password</label>
+        <input id="np" type="password" autocomplete="new-password" maxlength="200" placeholder="At least 12 characters" />
+        <button type="button" class="text-link" id="npToggle" aria-controls="np" aria-pressed="false" style="background:none;border:0;cursor:pointer">Show</button>
+        <p class="err" id="npError" hidden></p>
       </div>
-      <button class="btn btn-lg btn-primary btn-block" id="npSubmit" type="submit">Save password</button>
+      <button class="btn block" id="npSubmit" type="submit">Save password</button>
     </form>
   </main>
+  <aside class="auth-aside">
+    <h2>What you get</h2>
+    <article><h3>A sandbox key right away</h3><p>Runs the live engine. Not billed.</p></article>
+    <article><h3>Federal, state and local tax</h3><p>One call, one line per tax, in cents.</p></article>
+    <p class="fine" style="margin-top:24px">Sample message to <b id="sheetTo">you@company.com</b>. The code expires in 15 minutes.</p>
+  </aside>
 </div>
 <script src="/assets/pricing.js"></script>
 <script src="/assets/session.js"></script>
@@ -228,7 +204,7 @@
 
   resend.addEventListener('click', function () {
     var path = signin ? '/api/signin' : '/api/signup';
-    var body = signin ? { email: email } : { name: pending.name, email: email, company: pending.company, phone: pending.phone };
+    var body = signin ? { email: email } : { name: pending.name, email: email, company: pending.company, phone: pending.phone, agreeToTerms: true };
     resend.disabled = true;
     Omnia.api(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (res) {
