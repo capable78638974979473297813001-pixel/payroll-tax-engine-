@@ -1477,6 +1477,120 @@
    ]
   },
   {
+   "id": "me-3a363f8d6d",
+   "jurisdiction": "ME",
+   "title": "14 M.R.S. \u00a7 3126 \u2014 ordinary garnishment limited to the lesser of 25% of disposable earnings or the amount by which disposable earnings exceed 40x the greater of the federal minimum wage or Maine's own minimum wage (26 M.R.S. \u00a7 664)",
+   "url": "https://legislature.maine.gov/statutes/14/title14sec3126-A.html",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "me-a062b9490e",
+   "jurisdiction": "ME",
+   "title": "City of Portland, Maine minimum wage -- November 2025 voter-approved schedule",
+   "url": "https://www.portlandmaine.gov/1016/Minimum-Wage",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/ME-local-2026.json"
+   ]
+  },
+  {
+   "id": "me-6e90449f56",
+   "jurisdiction": "ME",
+   "title": "City of Rockland, Maine -- 2026 Minimum Wage Notice",
+   "url": "https://rocklandmaine.gov/DocumentCenter/View/2670/2026-Minimum-Wage-Notice---Rockland",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/ME-local-2026.json"
+   ]
+  },
+  {
+   "id": "me-dcb810620b",
+   "jurisdiction": "ME",
+   "title": "Form W-4ME, Employee's Withholding Allowance Certificate (Revised: December 2025)",
+   "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_form_w-4me_fillable.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/ME-2026.json",
+    "data/states/ME-2027.json"
+   ]
+  },
+  {
+   "id": "me-4fec852204",
+   "jurisdiction": "ME",
+   "title": "Maine Department of Labor \u2014 2026 minimum wage ($15.10/hr, effective 2026-01-01, cost-of-living indexed annually since a 2016 referendum)",
+   "url": "https://www.maine.gov/labor/news_events/article.shtml?id=13338762",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "me-a4e08610f3",
+   "jurisdiction": "ME",
+   "title": "Maine Department of Labor \u2014 June 2026 Paid Family and Medical Leave (PFML) Employer FAQ",
+   "url": "https://www.maine.gov/paidleave/docs/2026/employers/faq/employerFAQenglish.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/ME-2026.json",
+    "data/states/ME-2027.json"
+   ]
+  },
+  {
+   "id": "me-7969f2a1bd",
+   "jurisdiction": "ME",
+   "title": "Maine Revenue Services -- 2025 Withholding Tables for Individual Income Tax (revised October 2024)",
+   "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_wh_tab_instr.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/ME-2025.json"
+   ]
+  },
+  {
+   "id": "me-17ca301d46",
+   "jurisdiction": "ME",
+   "title": "Maine Revenue Services \u2014 2026 Withholding Tables, Revised August 2026 (26_wh_tab_instr_August2026.pdf)",
+   "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_wh_tab_instr_August2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/ME-2026.json"
+   ]
+  },
+  {
+   "id": "me-d4d41f3909",
+   "jurisdiction": "ME",
+   "title": "Maine Revenue Services \u2014 Withholding Tables for Individual Income Tax (2026)",
+   "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_wh_tab_instr.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/ME-2026.json",
+    "data/states/ME-2027.json"
+   ]
+  },
+  {
+   "id": "me-105c493e59",
+   "jurisdiction": "ME",
+   "title": "Maine withholding tables",
+   "url": "https://www.maine.gov/revenue/taxes/income-estate-tax/employer-withholding",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "me-b65c78d430",
+   "jurisdiction": "ME",
+   "title": "USDA National Finance Center \u2014 Maine State Income Tax Withholding (NFC-26-1771620053)",
+   "url": "https://help.nfc.usda.gov/bulletins/2026/1771620053.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/ME-2026.json",
+    "data/states/ME-2027.json"
+   ]
+  },
+  {
    "id": "mi-60a02e5e6b",
    "jurisdiction": "MI",
    "title": "2026 Michigan Income Tax Withholding Guide, Form 446 (Rev. 02-26)",

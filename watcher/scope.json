@@ -14,7 +14,8 @@
   "KY": "Local occupational license taxes change on city and county ordinance dates (12 dated rateChanges in data/local/KY-occupational-*.json).",
   "MI": "City income taxes (24 cities) are set by city ordinance or vote, not on a fixed date; the registry is in data/local/MI-cities-*.json.",
   "PA": "Local earned-income and local-services taxes: 2,600+ taxing bodies with dated rateChanges (data/local/PA-EIT-LST-*.json, e.g. 2025-04-01).",
-  "SC": "Act 110 of 2026 (signed 2026-03-30) changed the income tax brackets retroactive to 2026-01-01, but SCDOR had not reissued its withholding formula as of 2026-10-18 (IL26-20); a revised WH-1603F can appear on any date (data/states/SC-2026.json knownGaps)."
+  "SC": "Act 110 of 2026 (signed 2026-03-30) changed the income tax brackets retroactive to 2026-01-01, but SCDOR had not reissued its withholding formula as of 2026-10-18 (IL26-20); a revised WH-1603F can appear on any date (data/states/SC-2026.json knownGaps).",
+  "ME": "Maine Revenue Services reissued its 2026 withholding tables in August 2026 (higher withholding standard deduction and a new 2% surcharge over $1,000,000 / $1,500,000, L.D. 2212), retroactive to January 1; the booklet was replaced at a new address (data/states/ME-2026.json effectiveDated)."
  },
  "excluded": {
   "AK": "No state income tax on wages.",
@@ -33,7 +34,6 @@
   "LA": "No unscheduled mid-year change documented in the repo's 2025-2027 data; rates and tables change on January 1.",
   "MA": "No unscheduled mid-year change documented in the repo's 2025-2027 data; rates and tables change on January 1.",
   "MD": "Only a July 1 step in the repo's data: HB 352 took effect 2025-07-01 when providers switched (effectiveDated in data/states/MD-2025.json); counties set rates Jan 1.",
-  "ME": "No unscheduled mid-year change documented in the repo's 2025-2027 data; rates and tables change on January 1.",
   "MN": "No unscheduled mid-year change documented in the repo's 2025-2027 data; rates and tables change on January 1.",
   "MO": "No unscheduled mid-year change documented in the repo's 2025-2027 data; rates and tables change on January 1.",
   "MS": "No unscheduled mid-year change documented in the repo's 2025-2027 data; rates and tables change on January 1.",
