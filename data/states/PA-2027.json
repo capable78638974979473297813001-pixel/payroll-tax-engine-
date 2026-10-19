@@ -391,6 +391,23 @@
       "pointer": "data/local/PA-EIT-LST-2026.json",
       "crossCheckedAgainstBulkData": "The $52/yr cap and $12,000 LIE threshold above match verbatim across every nonzero LST row in the bulk register pulled 2026-08-21 -- independent confirmation between this policy-text source and the actual per-jurisdiction data, not just an internally-consistent assumption."
     },
+    "pittsburghPayrollExpenseTax": {
+      "rate": 0.0055,
+      "payer": "employer",
+      "workPSDs": [
+        "700102",
+        "730105"
+      ],
+      "$workPSDsNote": "The City of Pittsburgh appears under TWO PSD codes in the Act 32 registry because it spans two school districts: 700102 (Pittsburgh SD) and 730105 (Baldwin-Whitehall SD). Both are the same city and both owe the Payroll Expense Tax. (East Pittsburgh Boro, 721005, is a different municipality and does not.)",
+      "$comment": "City of Pittsburgh Payroll Expense Tax (City Code Title Two, Chapter 258): an EMPLOYER-only 0.55% levy on gross compensation earned for work performed in whole or in part in the City of Pittsburgh, a SEPARATE city-collected tax from the Act 32 EIT/LST above (the employee's EIT and the $52 LST are withheld as usual; this one is never deducted from the employee -- the City's regulations say it may not be). Dispatched off certificate.workPSD being one of the City of Pittsburgh's PSD codes (workPSDs), the same already-resolved PSD convention as the EIT/LST. Computed on GROSS compensation with NO pretax reduction: the ET-1 instructions state the tax is on gross payroll and that deferred comp, 401(k), Section 125 etc. are not deducted.",
+      "source": {
+        "title": "City of Pittsburgh -- ET-1 2025 Payroll Expense Tax return and instructions (Rev 12/24)",
+        "url": "https://www.pittsburghpa.gov/files/assets/city/v/1/finance/documents/tax-faqs/et-2025-fillable.pdf",
+        "verifiedOn": "2026-10-19",
+        "verifiedBy": "PDF fetched directly and text-extracted with pdftotext -layout. Line 1 reads 'EMPLOYERS ... X .0055'; instructions: 'The Payroll Tax is on gross payroll of the Employer'; compensation means 'Salaries, wages, commissions, bonuses ...'. Quarterly returns due the last day of the second month after quarter end. Confirmed independently by the City's Payroll Tax FAQ/regulations (rate '.55% or .0055')."
+      },
+      "caveat": "CARRIED FORWARD into the 2027 ruleset: 0.55% is the rate on the City's live Taxes page and every ET-1 since 2017; no 2027 notice exists yet. Re-check when the 2027 ET-1 is published."
+    },
     "knownGap": "CLOSED, both halves (2026-08-21, follow-up pass -- Scott: 'do last gap'). DATA: all 2,627 jurisdictions, primary-sourced (see pointer). CODE: pennsylvaniaLocalTax()/pennsylvaniaLST() in src/taxes/state.ts now dispatch real PA_EIT and PA_LST lines via registry.ts's new paLocalRuleset() lookup -- the resident-vs-nonresident-rate comparison, the $52/yr cap, per-period proration (rounded DOWN to the cent, the one tax in this engine with that rounding direction -- see money.ts's new roundDownToCent()), and the $12,000 low-income exemption are all implemented and tested (7 tests against real Pittsburgh PSD data, 388/388 total pass). Genuinely still open, disclosed not hidden: (1) this engine does not resolve a physical address to a PSD code -- callers must supply certificate.workPSD/residencePSD already resolved, same convention Indiana's county tax already established; (2) LST's $10-or-less lump-sum-instead-of-prorate employer election is not modelled (always prorates); (3) whether Act 32's own 'earned income' base matches PA_SIT's compensation base (both use rules.exemptPretax) was assumed by structural inference, not independently statute-sourced this pass. CLOSED 2026-09-06 ('go to every state, fix real bugs' pass): the situs-priority rule's own 'a secondary employer need not withhold if shown proof of LST already withheld by the principal employer' text had been left disclosed-but-unfixed, meaning two concurrent PA employers withholding to the SAME PSD would have double-charged LST beyond the annual cap -- the same shape as West Virginia's un-modelled multi-job dedup fixed the same pass. pennsylvaniaLST() now reads a caller-supplied certificate.lstAlreadyWithheldElsewhere (opt-in, defaults to charge, so this is additive). The full situs-PRIORITY ordering itself (principal place of employment > residence-and-employment > closest-to-residence, for choosing WHICH of several simultaneous PA work locations owes it in the first place) remains unmodelled -- this implementation still assumes a single workPSD per paycheck; the new field only handles the 'already paid, don't double-charge' half, not the 'which employer is which priority tier' half."
   },
   "knownGaps": [

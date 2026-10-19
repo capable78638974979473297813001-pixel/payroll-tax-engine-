@@ -12046,6 +12046,130 @@ describe('Seattle payroll expense tax (JumpStart)', () => {
 });
 
 /**
+ * Seattle's Social Housing Tax — a second, independent employer levy: 5% of
+ * an employee's Seattle compensation above $1,000,000 a year, with NO
+ * employer-size threshold (the City's own page, checked 2026-10-19).
+ */
+describe('Seattle Social Housing Tax', () => {
+  const seattle = (wage: number, ytdComp: number | null, priorPayroll: number | null = null) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'semimonthly' as const,
+    earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(wage) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: {
+      socialSecurity: 0,
+      medicare: 0,
+      futa: 0,
+      ...(ytdComp !== null ? { seattleCompensation: dollars(ytdComp) } : {}),
+    },
+    workState: { code: 'WA', certificate: { locality: 'Seattle' } },
+    ...(priorPayroll !== null
+      ? { employer: { seattlePriorYearPayrollExpense: dollars(priorPayroll) } }
+      : {}),
+  });
+  const has = (r: ReturnType<typeof calculatePaycheck>) =>
+    r.taxes.some((t) => t.id === 'SEATTLE_SOCIAL_HOUSING_ER');
+
+  test('nothing is owed on an employee still under $1,000,000', () => {
+    assert.equal(has(calculatePaycheck(seattle(10000, 500000))), false);
+  });
+
+  test('only the part of the cheque above $1,000,000 is taxed, at 5%', () => {
+    // $995,000 already paid + $10,000 now: $5,000 sits above the line.
+    const r = calculatePaycheck(seattle(10000, 995000));
+    assert.equal(amountOf(r, 'SEATTLE_SOCIAL_HOUSING_ER'), dollars(250));
+  });
+
+  test('once past the line every further dollar is taxed', () => {
+    const r = calculatePaycheck(seattle(10000, 1200000));
+    assert.equal(amountOf(r, 'SEATTLE_SOCIAL_HOUSING_ER'), dollars(500));
+  });
+
+  test('it needs no employer-payroll figure, unlike JumpStart, and is employer-paid', () => {
+    const r = calculatePaycheck(seattle(10000, 1200000, null));
+    const line = r.taxes.find((t) => t.id === 'SEATTLE_SOCIAL_HOUSING_ER');
+    assert.equal(line?.payer, 'employer');
+    // JumpStart reports itself as not computed (amount 0) rather than guessing a tier; this tax still computes.
+    assert.equal(amountOf(r, 'SEATTLE_PAYROLL_ER'), 0);
+    assert.equal(amountOf(r, 'SEATTLE_SOCIAL_HOUSING_ER'), dollars(500));
+  });
+
+  test('stacks on top of JumpStart for a liable employer (both lines present)', () => {
+    const r = calculatePaycheck(seattle(10000, 1200000, 20000000));
+    assert.equal(amountOf(r, 'SEATTLE_SOCIAL_HOUSING_ER'), dollars(500));
+    assert.equal(amountOf(r, 'SEATTLE_PAYROLL_ER'), dollars(181.1)); // 1.811% upper band
+  });
+
+  test('a 401(k) deferral does not reduce the base — deferred comp counts', () => {
+    const r = calculatePaycheck({
+      ...seattle(10000, 1200000),
+      deductions: [{ code: '401K', category: 'pretax_401k' as const, amount: dollars(2000) }],
+    });
+    assert.equal(amountOf(r, 'SEATTLE_SOCIAL_HOUSING_ER'), dollars(500));
+  });
+});
+
+/**
+ * The City of Pittsburgh's Payroll Expense Tax — 0.55%, employer-only, on
+ * gross compensation for work in the city, on top of the Act 32 EIT/LST.
+ * Rate read off the City's own ET-1 (Rev 12/24).
+ */
+describe('Pittsburgh Payroll Expense Tax', () => {
+  const pgh = (workPSD: string, extra: Record<string, unknown> = {}) => ({
+    checkDate: '2026-08-15',
+    payFrequency: 'biweekly' as const,
+    earnings: [{ code: 'REG', category: 'regular' as const, amount: dollars(3000) }],
+    deductions: [],
+    federalW4: {
+      filingStatus: 'single' as const,
+      multipleJobs: false,
+      dependentCredit: 0,
+      otherIncome: 0,
+      deductions: 0,
+      extraWithholding: 0,
+    },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    workState: { code: 'PA', certificate: { workPSD, residencePSD: workPSD } },
+    ...extra,
+  });
+
+  test('0.55% of gross for work at either of the two Pittsburgh City PSD codes', () => {
+    for (const psd of ['700102', '730105']) {
+      const r = calculatePaycheck(pgh(psd));
+      assert.equal(amountOf(r, 'PITTSBURGH_PAYROLL_ER'), dollars(16.5), psd); // 3,000 × 0.55%
+      assert.equal(r.taxes.find((t) => t.id === 'PITTSBURGH_PAYROLL_ER')?.payer, 'employer');
+    }
+  });
+
+  test('does not touch the employee EIT/LST, which still withhold as before', () => {
+    const r = calculatePaycheck(pgh('700102'));
+    assert.equal(amountOf(r, 'PA_EIT'), dollars(90.0));
+  });
+
+  test('East Pittsburgh Boro (721005) is a different municipality and owes none', () => {
+    assert.equal(
+      calculatePaycheck(pgh('721005')).taxes.some((t) => t.id === 'PITTSBURGH_PAYROLL_ER'),
+      false,
+    );
+  });
+
+  test('a Section 125 deduction does not reduce the base — the City disallows it', () => {
+    const r = calculatePaycheck(
+      pgh('700102', { deductions: [{ code: 'MED', category: 'pretax_section125' as const, amount: dollars(500) }] }),
+    );
+    assert.equal(amountOf(r, 'PITTSBURGH_PAYROLL_ER'), dollars(16.5));
+  });
+});
+
+/**
  * Montana's supplemental Methods 1 and 2, and New Mexico's dollar-a-month
  * floor — the last two state-level mechanisms that were documented in the
  * data and had nowhere to run.

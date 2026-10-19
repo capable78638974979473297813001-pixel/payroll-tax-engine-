@@ -137,7 +137,21 @@
         "verifiedOn": "2026-08-25",
         "verifiedBy": "Fetched directly this pass. The 2026 table reads: liable at $9,074,409 or more of 2025 Seattle payroll expense, taxable compensation at $194,452 or more in 2026, with rates by payroll tier — under $129,634,413: 0.746% / 1.811%; $129,634,413 to under $1,296,344,132: 0.746% / 2.024%; $1,296,344,132 or more: 1.492% / 2.557% — the first rate of each pair applying to compensation from $194,452 to $518,537.99 and the second above $518,538."
       },
-      "notModelled": "Seattle's separate 5% excess compensation tax, and the grocery-business and government-entity exemptions, are not modelled — this engine has no employer-industry or entity-type input."
+      "notModelled": "The grocery-business and government-entity exemptions are not modelled -- this engine has no employer-industry or entity-type input. Seattle's separate 5% Social Housing Tax on compensation over $1,000,000 IS modelled -- see the seattleSocialHousingTax block next to this one."
+    },
+    "seattleSocialHousingTax": {
+      "rate": 0.05,
+      "compensationThreshold": 1000000,
+      "payer": "employer",
+      "$comment": "Seattle's Social Housing Tax (SMC ch. 5.37, Initiative 135, effective 2025-01-01): an EMPLOYER-paid 5% excise on compensation above $1,000,000 paid in Seattle to a single employee in a calendar year, starting from the first dollar over the line. A SECOND, independent levy layered on top of the JumpStart payroll expense tax -- it carries NO prior-year employer-payroll threshold (unlike JumpStart), so it applies to any business with a Seattle employee earning over $1M. The $1M figure is a flat statutory number, not inflation-indexed per the secondary source checked. Dispatched off certificate.locality === 'Seattle' and input.ytd.seattleCompensation (the same running figure JumpStart uses). Never withheld from the employee.",
+      "compensationBase": "Gross compensation. The City's own page: deferred-comp contributions count (so NO pretax reduction is taken here); stock grants/RSUs/PSUs count; stock options, tips, employer retirement contributions and owner returns of capital do not. The engine's earnings model has no stock-grant/option distinction, so the cheque's gross earnings are used as given.",
+      "source": {
+        "title": "City of Seattle, City Finance -- Social Housing Tax",
+        "url": "https://seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/social-housing-tax",
+        "verifiedOn": "2026-10-19",
+        "verifiedBy": "Fetched directly this pass. Verbatim: 'The tax is imposed on businesses at a tax rate of 5% on compensation that exceeds $1 million paid in Seattle to an employee' and 'starting with the first dollar paid in Seattle to an employee in excess of $1,000,000'. Also: 'imposed upon the business, not individual employees' and businesses 'may not subject employee compensation to withholding or deduction'. Filing: one annual return for 2025, quarterly after. The 2026 update notes on the page describe no change to the rate or threshold."
+      },
+      "notModelled": "The statutory entity exemptions (insurers, motor-fuel/liquor-distribution-only businesses, government entities, and independent contractors already counted in another business's payroll expense) are not modelled -- this engine has no employer-industry or entity-type input."
     }
   }
 }

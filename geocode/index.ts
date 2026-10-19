@@ -1190,7 +1190,8 @@ export async function resolveEmployee(
     notResolvable.push(
       "Seattle's JumpStart payroll expense tax needs input.employer.seattlePriorYearPayrollExpense (which rate tier " +
         "the employer falls in) and input.ytd.seattleCompensation (this employee's Seattle pay so far this year). " +
-        "Both are payroll facts no address can answer. certificate.locality was set to 'Seattle'; those two still need caller input.",
+        "Both are payroll facts no address can answer. certificate.locality was set to 'Seattle'; those two still need caller input. " +
+        "The separate Social Housing Tax (5% over $1M) needs only input.ytd.seattleCompensation.",
     );
   }
   if (work?.resolved?.coOptCity) {
