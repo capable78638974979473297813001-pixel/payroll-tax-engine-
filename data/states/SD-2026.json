@@ -103,6 +103,13 @@
     "The experience-rated Schedule A/B contribution-rate table is only partially transcribed (4 of many rows) -- not pursued to full completeness because South Dakota has no income tax and the table is unusable without a reserve-ratio input this engine doesn't carry regardless of completeness.",
     "Local-tax and UI figures rest on the DLR's own primary pages (strong) plus one secondary cross-check (onpay.com, not independently fetched in full) -- not a weakness specific to this file, but recorded per this project's standing confidence-tier convention."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $15,000; new employer 1.20% + 0.55% investment fee = 1.75% (construction 6.00% + 0.55%); administrative fee 0.08% for experience-rated employers. Top-rate ceiling conflict noted in suiEmployer.experienceRangeSource.",
+    "sources": [
+      "https://dlr.sd.gov/ra/businesses/faq.aspx"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 15000,
@@ -115,7 +122,7 @@
       "min": 0.0008,
       "max": 0.1
     },
-    "experienceRangeSource": "RESTATED 2026-10-06 as ALL-IN (contribution + administrative fee + investment fee), the same basis as newEmployerRate above. Informational: the engine does not read it. Floor 0.08%: the 2026 contribution schedule bottoms out at 0.00% (SDCL 61-5-25.7, reserve ratio 2.25% and over) and the investment fee is 0.00% at a 1.6% reserve ratio, but every experience-rated employer pays the 0.08% administrative fee for 2026 and later (SDCL 61-5-28.1; DLR FAQ: 'an administrative fee of eight-hundredths percent (.08%) ... must be paid by the employer'). Ceiling 10.00%: the top 2026 contribution rate is 9.39% (Schedule A, reserve ratio below -7.00%) + 0.08% fee + 0.53% investment fee (reserve ratio below 1.00%, SDCL 61-5-29). Without the investment fee the ceiling is 9.47%; 9.53% would be the superseded 2024-2025 table's 9.45% plus the 0.08% fee.",
+    "experienceRangeSource": "RESTATED 2026-10-06 as ALL-IN (contribution + administrative fee + investment fee), the same basis as newEmployerRate above. Informational: the engine does not read it. Floor 0.08%: the 2026 contribution schedule bottoms out at 0.00% (SDCL 61-5-25.7, reserve ratio 2.25% and over) and the investment fee is 0.00% at a 1.6% reserve ratio, but every experience-rated employer pays the 0.08% administrative fee for 2026 and later (SDCL 61-5-28.1; DLR FAQ: 'an administrative fee of eight-hundredths percent (.08%) ... must be paid by the employer'). Ceiling 10.00%: the top 2026 contribution rate is 9.39% (Schedule A, reserve ratio below -7.00%) + 0.08% fee + 0.53% investment fee (reserve ratio below 1.00%, SDCL 61-5-29). 2026-10-18 CONFLICT, UNRESOLVED: a separate check says the DLR FAQ's table (applies to wages paid on and after 2026-01-01) tops out at a 9.45% Schedule A rate, which would make the all-in ceiling about 10.06%; the FAQ's rate tables did not render in our fetch, so 9.39% / 10.00% is left as is. The engine tolerates +/-2 points around this range when flagging a supplied rate. Without the investment fee the ceiling is 9.47%; 9.53% would be the superseded 2024-2025 table's 9.45% plus the 0.08% fee.",
     "employerSuppliedRateRequired": false,
     "confidence": "cross_source_confirmed"
   }

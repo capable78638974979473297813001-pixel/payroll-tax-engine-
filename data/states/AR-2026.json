@@ -270,6 +270,14 @@
     "source": "Arkansas DFA, Withholding Tax Instructions for Employers (Revised 4/27/26), Supplemental Wages: 'If bonuses, commissions, or overtime wages are paid at the same time as regular wages, the income tax withheld shall be determined by the following method. Deduct 3.7% of the bonus or commission for state income tax.' Read 2026-10-18. The Formula PDF does not mention bonuses, which is why this was missed. The flat rate equals the top bracket rate set by HB 1001 (3.7% from 2026).",
     "confidence": "primary_source_confirmed"
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Official category text: DFA Employer's Instructions (eff. 01/01/2026) 'Exclusions from Withholding' names IRC 112, 125, 219, 401(k), 403(b), 408(k), 408(p), 457 ('should not be included in an employee's wages and are not subject to withholding'). hsa rests on Ark. Code 26-51-453 (adopts IRC 223), dependent_care on 26-51-404(b)(12) (IRC 129), commuter on 26-51-404(b)(19) (IRC 132, secondary copy); fsa rides on section 125.",
+    "sources": [
+      "https://www.dfa.arkansas.gov/wp-content/uploads/Withholding-Tax-Instructions-for-Employers.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",
@@ -1309,6 +1317,7 @@
     "knownGap": "This state's new-employer rate is cross-source only for the 2026-specific figure; wage base and experience range are stable/well-corroborated. STILL OPEN: whether this state's unemployment wage base excludes the same pretax categories as its income tax withholding (the engine currently applies exemptPretax to both) — elective deferrals are commonly included in the unemployment base while excluded from income tax."
   },
   "knownGaps": [
+    "2026-10-18 RECIPROCITY CHECK: no Arkansas reciprocity agreement exists; HB1116 (2025), which would have let DFA sign reciprocity agreements, 'Died in House Committee at Sine Die' (arkleg.state.ar.us). Re-check if a later bill passes. DFA's Texarkana border-city exemption is not a reciprocal-state exemption.",
     "2026-10-18 AUDIT: (1) DFA's earlier 2026 Formula PDF (modified 2025-12-09) used 3.90% in the top bracket; the 3.7% version was posted 2026-05-29 after HB 1001. This file applies 3.7% to every 2026 check date because DFA's header says 'Effective 01/01/2026'; checks run on the old table before June differed. (2) DFA's 'Exclusions from Withholding' names only IRC 112, 125, 219, 401(k), 403(b), 408(k), 408(p) and 457; hsa, dependent_care and commuter in exemptPretax rest on cafeteria-plan/federal conformity, not on that list.",
     "RESOLVED 2026-09-28: the low-income election (AR4EC Line 5) is now built from DFA's 2026 Low Income Tax Tables (lowIncomeElection.tables). Remaining edges, each reported as a notice rather than guessed: daily pay (no daily table) and more than 6 dependents (no column) use the Formula Method.",
     "exemptPretax RESOLVED via direct Arkansas Code sec. 26-51-414(a)(1) citation (see exemptPretaxComment) -- explicit IRC-section adoption for retirement/deferral categories; Section 125 cafeteria-plan treatment specifically remains a residual, smaller gap.",
@@ -1316,6 +1325,13 @@
     "RESOLVED 2026-10-06: AR4EC's low-income income thresholds now come from the 2026 form (AR4EC R 12/04/2025), not the 02/07/2025 one.",
     "Supplemental wages: the State of Arkansas Withholding Tax Formula Method document (Tax Year 2026) was fetched directly and read in full this pass -- it contains ZERO mentions of \"bonus\" or \"supplemental\" anywhere (CORRECTED 2026-10-18: DFA's separate Withholding Tax Instructions DO give a flat 3.7% bonus method, now modelled in supplementalWages). Third-party payroll guides claim a separate 3.9% Arkansas flat supplemental rate -- checked directly and found this is simply Arkansas's own TOP MARGINAL BRACKET RATE (see this file's own brackets, 5,201+ Married/equivalent taxed at exactly 3.90% under the January table, 3.70% since HB 1001), not a distinct published supplemental-wage rate. A standalone bonus therefore runs through the same annualize-and-bracket formula as any other wages, which is what this engine already does by default -- the same conclusion already reached for South Carolina and Utah in this project."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $7,000, new employer 2.0%, range 0.200-5.100% (deficit levels to 10.1%); the 0.2% stabilization rate is inside the range.",
+    "sources": [
+      "https://dws.arkansas.gov"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 7000,

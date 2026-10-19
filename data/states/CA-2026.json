@@ -1854,6 +1854,13 @@
     "Military spouse exemption (DE 4 Line 4) and the general exemption certification (DE 4 Line 3) are both real but not separately modelled as certificate fields beyond the existing generic certificate.exempt mechanism, which correctly produces $0 for both cases without distinguishing which applies.",
     "The flat supplemental rate (10.23%/6.6%, DE 44) requires the employer to actively elect it (input.employer.supplementalFlatRateElection.CA) AND the supplemental wage to be the ONLY cash on that cheque — DE 44's own rule that combined-with-regular-wages payments are required to run through the ordinary table, not a choice. Without an election AND without input.priorRegularPayment supplied for the aggregation path, a standalone bonus cheque falls back to this engine's default (annualize through the ordinary Method B formula), the same disclosed approximation every other state without a distinct supplemental mechanism already carries in this project — over-withholding is the likely direction for a true one-off bonus, since annualizing treats it as though it recurred every pay period."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI $7,000 / 3.4% new employer / Schedule F+ 1.5-6.2%; ETT 0.1% on $7,000 (recorded in unemploymentInsurance.employmentTrainingTax, not in suiEmployer); SDI 1.3% no wage cap.",
+    "sources": [
+      "https://edd.ca.gov/en/payroll_taxes/rates_and_withholding/"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 7000,

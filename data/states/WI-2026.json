@@ -60,6 +60,14 @@
     "certificateFields": "input.workState.certificate.{maritalStatus ('single'|'married', defaults to 'single' if absent or any other value — head-of-household has no separate band in Publication W-166 and is mapped to 'single' by engine convention, not a WI-published rule), exemptions (a single count, WT-4 Line 1)}."
   },
   "supplementalComment": "NOT a single flat rate, unlike OH's 2.75% or federal's 22% — Publication W-166's own 'Approved Flat Percentages' method estimates the employee's annual GROSS salary (regular wages only, annualized), finds which of the same four brackets it falls into, and applies THAT bracket's marginal rate (3.54% / 4.65% / 5.30% / 7.65%) flatly to the supplemental payment. NOW MODELLED (upgraded this session): state.ts's bracketSupplementalTax() implements exactly this — emits a separate WI_SIT_SUPP line, using the SAME bracket table as the regular calculation but a GROSS (not net-of-deduction) lookup basis, matching the source's own 'annual gross salary' wording. Proven against a hand-derived fixture in tests/engine.test.ts that deliberately lands the regular and supplemental lines in DIFFERENT brackets, to prove the gross-vs-net lookup distinction is real and not accidental.",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Pub W-166: 'Wisconsin follows federal provisions relating to HSAs'; Wis. Stat. 71.63(6) defines wages minus remuneration not subject to tax; fringe-benefit taxability follows federal law. Other categories: federal conformity.",
+    "sources": [
+      "https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",
@@ -175,6 +183,13 @@
     "Head-of-household filers are mapped to the 'single' standard-deduction band by engine convention; Publication W-166 itself has no third band, so this isn't a modelling gap so much as a disclosed choice about an ambiguity in the source.",
     "No mechanism exists for the marital-status certificate field beyond the two values Wisconsin's own formula recognizes ('single'/'married') — any other input silently maps to 'single', matching the fallback the formula itself requires but not separately validated or flagged if the caller passes something unexpected."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $14,000; new employer 3.05% (construction 2.50% not modelled).",
+    "sources": [
+      "https://dwd.wisconsin.gov/dwd/forms/ui/pdf/uct-1-e-2026.pdf"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 14000,

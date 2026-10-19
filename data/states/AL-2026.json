@@ -74,6 +74,15 @@
       ]
     }
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Official category text: withholding booklet (Rev 01/26) 'Exclusions From Withholding Tax' names IRC 125, 219, 401(k), 401(k) SIMPLE, 403(b), 408(k), 408(k)(6), 408(p), 457 as 'not subject to withholding tax'. ADOR Rule 810-3-14-.02(1) (gross-income rule) excludes amounts under IRC 125, 132 and 129, which supports commuter and dependent_care. hsa and fsa are not named in the booklet: fsa rides on section 125; hsa is inferred from ADOR's Current Issues note that pre-tax HSA contributions are not deductible (already outside wages).",
+    "sources": [
+      "https://www.revenue.alabama.gov/wp-content/uploads/2026/01/whbooklet_0126.pdf",
+      "https://www.revenue.alabama.gov/wp-content/uploads/2021/12/810-3-14-.02.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
   "exemptPretaxComment": "Confirmed directly: the withholding booklet states 'the terms employer, employee, and wages have the same meaning as defined [federally]' and separately names '401(K) - Cash or Deferred Arrangement' and '401(K) Simple' among categories addressed by that federal-conformity framing. Same confidence tier as North Carolina's IRC 3401 citation.",
     "supplementalWages": {
@@ -191,6 +200,13 @@
     "Form A4-MS (nonresident military spouse) is reproduced inside the booklet and its conditions are recorded under federalLawExemptions, but the form's own seven true/false eligibility questions are not modelled -- the caller adjudicates them and sets certificate.exempt.",
     "Employer-side UC figures ($8,000 base, 2.7% new-employer, 0.20%-6.80% experienced) remain cross-source confirmed rather than independently fetched from labor.alabama.gov -- see unemploymentInsurance.knownGap."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Statutory: wage base $8,000, new employer 2.70%, range 0.20-6.80% incl. 0.06% ESA (ADOL Employer Handbook). No 2026-specific rate page was retrievable; the 2026 range is not confirmed.",
+    "sources": [
+      "https://labor.alabama.gov/docs/guides/uc_emp_handbook_rev_2021.pdf"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 8000,

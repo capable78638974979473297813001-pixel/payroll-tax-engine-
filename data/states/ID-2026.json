@@ -7,6 +7,14 @@
   "$roundingComment": "Idaho State Tax Commission, Computing Idaho Withholding (tax.idaho.gov/taxes/income-tax/withholding/computing/, read directly 2026-09-23): 'Percentage Computation method -- ... Round to the nearest whole dollar.' and 'Annualized Wage method -- Round to nearest whole dollar.' Its own worked example ends '$1,060 divided by 52... remember to round $20'. Wired after the PaycheckCity comparison showed the unrounded cents as the only difference in all three Idaho cases.",
   "$scopeNote": "STATE income tax only. Idaho has no local income tax anywhere (cities/counties are statutorily barred from imposing one), no reciprocity agreements with any state, and no employee-paid unemployment insurance, disability insurance, or paid family leave program -- Idaho UI is employer-funded only, confirmed directly from the Idaho Department of Labor. This makes Idaho the simplest state file in this project: one tax, one flat rate, no locals, no other employee-paid levies.",
   "$methodComment": "Idaho is a flat-tax state: EPB00744 publishes two brackets per pay period per filing status -- $0 below a threshold, then 5.3% of everything above it. Checks before 2026-07-31 use the table Idaho still published then (04-28-2025: $15,000 / $30,000 a year, less $3,868 per ID W-4 child tax credit allowance, per tax.idaho.gov's computing page as archived 2026-03-17). From 2026-07-31 (effectiveDated) they use EPB00744 07-23-2026 ($16,100 / $32,200, no allowance: the credit sunset). Idaho tells employers not to adjust back to January. Tables are published per period, not derived from one annual figure.",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "tax.idaho.gov: 'Benefits such as 401(k) plans and cafeteria plans that the IRC considers tax deferred are also tax deferred for Idaho and not subject to income tax withholding.' Confirms deferral_401k and section125; others rest on Idaho Code 63-3035(a) federal conformity.",
+    "sources": [
+      "https://tax.idaho.gov/taxes/income-tax/withholding/income-you-must-withhold-on/"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",
@@ -282,6 +290,13 @@
     "resolveIDMaritalStatus's no-form default (single) is this project's standing convention, not a rule stated anywhere in Idaho's own EPB00744, ictcat, W-4, or computing-withholding pages — none of them say what to withhold absent a form beyond 'you must have a Form W-4 on file.'",
     "nonresidentAlienAdjustment only publishes weekly/biweekly/semimonthly/monthly — Form ID W-4's own Pay Period table stops there (no quarterly/semiannual/daily/annual row), so bracketTwoStatusPerPeriod() falls back to $0 additional withholding for a nonresident alien on any of those less-common frequencies rather than guessing an interpolated figure."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $58,300; standard rate 1%; positive classes 0.208-0.694%, deficit classes up to 5.4%.",
+    "sources": [
+      "https://www2.labor.idaho.gov"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 58300,

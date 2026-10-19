@@ -60,6 +60,14 @@
   },
   "supplementalRate": 0.0495,
   "supplementalComment": "UPGRADED 2026-08-12, though still short of an explicit quote: searched Illinois's own tax.illinois.gov site directly for the phrases 'supplemental wages' and 'supplemental withholding' — ZERO indexed results for either. Also read Pub-130 (the document that would be expected to define this if it existed) in full: no mention of a supplemental category anywhere. This is now a confirmed ABSENCE, not just an inference from structure — Illinois's own guidance apparatus does not appear to define a 'supplemental wages' concept at all, consistent with a single uniform flat rate applying to all compensation types without a special bonus rate. Still one tier below Indiana's supplementalRate (which has a direct quoted statement); this is 'searched and found nothing' rather than 'found an explicit yes.'",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "86 Ill. Adm. Code 100.7000 / 35 ILCS 5/701(a): no withholding on compensation 'of a character which is not subject to federal income tax withholding' (letter ruling IT 14-0005-GIL). No category named; federal conformity.",
+    "sources": [
+      "https://taxarchive.illinois.gov/content/dam/soi/en/web/taxarchive/research/legal/letter-rulings/income-tax/2014/it-14-0005.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",
@@ -150,6 +158,13 @@
     "See nonresidentThirtyDayRule.knownGap above: the under-30-day exemption is modelled via nonresidentDayCountReason(); the continuous proration above 30 days (Illinois's own fractional formula once the threshold is crossed) is not.",
     "SUI is experience-rated per employer (same structural note as every other state modelled) — the formula is fully documented, but an individual employer's Benefit Ratio requires employer-specific claims/payroll history no static jurisdiction constant can supply."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $14,250; entry rate 3.350%; minimum 0.750%, maximum 7.050%. Sector 56 new employers pay 3.45% (not modelled).",
+    "sources": [
+      "https://ides.illinois.gov"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 14250,

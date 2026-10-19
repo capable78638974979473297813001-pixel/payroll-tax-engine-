@@ -46,3 +46,11 @@ describe('Pennsylvania commuter deductions (REV-415)', () => {
     assert.equal(hsa, dollars(27.63));
   });
 });
+
+describe('Alaska new-employer rate (labor.alaska.gov 2026 industry table)', () => {
+  test('employer pays 1.00% and the employee 0.50% (1.50% total)', () => {
+    const r = calculatePaycheck(base('AK', '2026-09-04'));
+    assert.equal(amt(r, 'AK_SUI_ER'), dollars(10));
+    assert.equal(amt(r, 'AK_UC_EE'), dollars(5));
+  });
+});

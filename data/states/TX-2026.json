@@ -70,6 +70,13 @@
     "RESOLVED ('verify' pass, 2026-08-22): the stacked-component UI rate figures are now primary-sourced directly from TWC's own Discussion Paper, including the real finding that the Commission zeroed out the calculated Deficit Tax Rate for 2026 -- see unemploymentInsurance.rateComponents and its source note. The new-employer rate's exact mechanism (greater of 2.70% or NAICS average) remains cross-source only.",
     "The Deficit Tax Rate's zeroing is inferred by exact arithmetic match (0.36%-0.32%=0.04%, 7.86%-6.32%=1.54%), not a direct TWC statement that DTR specifically was the component adjusted -- Sec. 204.067 gives the Commission authority over RTR/OA/DTR jointly, so in principle a different combination could produce the same net figure, though DTR alone accounting for the entire gap at both ends is the simplest and best-supported explanation."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $9,000; new employer 2.70%; range 0.32-6.32%; ETIA 0.10% separate.",
+    "sources": [
+      "https://www.twc.texas.gov/programs/unemployment-tax/your-tax-rates"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 9000,

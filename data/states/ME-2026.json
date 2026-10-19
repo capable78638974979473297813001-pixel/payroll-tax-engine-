@@ -6,6 +6,14 @@
   "roundFinalToWholeDollar": true,
   "$scopeNote": "STATE income tax + Paid Family & Medical Leave (PFML, employee AND employer shares, contributions began 2025-01-01, benefits available from 2026-05-01). Maine has NO local income tax anywhere and NO reciprocity agreement with any state -- residents working elsewhere instead claim a RETURN-level credit for taxes paid to another jurisdiction (out of scope, same convention as every other state's return-level credit already disclosed in this project, e.g. Connecticut's).",
   "$methodComment": "See maineWithholding()'s own doc comment in src/taxes/state.ts for the full mechanism (phased standard deduction + flat per-allowance amount + progressive bracket, structurally close to Wisconsin's bracketPhaseoutDeduction() but with a genuinely different, easy-to-miss feature: Maine rounds to the nearest WHOLE DOLLAR at multiple intermediate steps, not once at the end -- confirmed against all 3 of the source document's own worked examples, reproduced exactly in tests/engine.test.ts).",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "36 M.R.S. 5250(1): withholding applies where the employer is required to withhold federal tax. MRS Tax Alert (Apr 2005): HSA contributions through a section 125 plan are not subject to Maine withholding. No 2026 MRS text on 401(k)/403(b)/457.",
+    "sources": [
+      "https://www.maine.gov/REVENUE/publications/alerts/2005/2005apr.htm"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
   "exemptPretaxComment": "INFERRED, not directly confirmed: Maine's own 2026 withholding instructions explicitly state 'Maine does not conform to the federal deductions that may be used to reduce the required federal withholding amount' -- but that statement is specifically about federal Form W-4 Step 4(b) (the optional itemized-deductions adjustment line), a genuinely DIFFERENT concept from whether pretax elective deferrals (401(k), section 125, etc.) reduce the wage base BEFORE withholding is computed at all. No source found this session directly addresses pretax-deferral conformity either way, so this reuses the federal-conforming exemptPretax list by inference (standard payroll practice, the same conformity pattern as Michigan/Ohio/Idaho/Connecticut/Iowa/Vermont/Massachusetts in this project) rather than PA's non-conforming empty list -- lower confidence than this project's directly-quoted conformity findings for those states.",
   "sources": [
@@ -120,6 +128,13 @@
     "wholeDollarFinalRounding": "CLOSED on the NFC verification pass: rules.roundFinalToWholeDollar (a new generic flag, not Maine-specific code) now re-rounds the primary SIT line to the nearest dollar AFTER additional/reduced withholding is applied, matching NFC's own Step 9 instruction exactly. Verified with a non-whole-dollar additionalWithholding test case ($33 base + $10.60 = $43.60 -> $44).",
     "pfmlSmallEmployerDiscretion": "CLOSED on the 'fix it, find a way' pass: certificate.paidLeaveEmployeeRateOverride (a new generic field on the SHARED statePaidLeaveEmployeeTax(), not Maine-specific) lets a caller who knows a specific small employer's own chosen rate supply it directly, while the 0.5% default remains correct for the common case (Maine's own FAQ: 'no more than 0.5 percent can come from the employee' applies as the statutory MAXIMUM to BOTH the 15+ and under-15 tiers identically -- there was never a formula difference in the employee's own cap, only in whether the EMPLOYER'S net cost is zero or 0.5%, which this file already handles via the existing employerLiableForPaidLeaveShare gate).",
     "tribalExemptionGranularity": "CLOSED on the 'fix it, find a way' pass: certificate.exemptWages (cents, this pay period) added to maineWithholding() lets a caller exclude just the tribal-land-sourced portion of wages from the taxable base, rather than the all-or-nothing certificate.exempt flag. The caller still determines eligibility and the dollar split (the same boundary as every exemption in this project) -- this only removes the previous forced choice between 'exempt the whole cheque' and 'exempt nothing' for a genuinely mixed tribal/non-tribal pay period."
+  },
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI $12,000; new employer 2.23% + CSSF 0.14% + UPAF 0.17% = 2.54%; range 0.31-6.60%. PFML 1% for 15+ employees, employer may deduct up to half, cap = Social Security base.",
+    "sources": [
+      "https://www.maine.gov/unemployment/docs/2026/employers/uitaxrates2026.pdf"
+    ]
   },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",

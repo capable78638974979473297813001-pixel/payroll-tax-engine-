@@ -68,6 +68,14 @@
   },
   "supplementalRate": 0.0295,
   "supplementalComment": "CONFIRMED 2026-08-12, no longer an inference: PayrollOrg's PayState Update states directly, 'the state withholding tax rate decreases to 2.95% from 3%. This means that the state supplemental wage tax rate will decrease to 2.95% from 3%.' Indiana's supplemental rate tracks the regular flat rate exactly (unlike Ohio's separately-set 2.75%). Departmental Notice #1 itself still does not use the word 'supplemental' anywhere in its own text — this confirmation comes from the professional payroll trade body's reporting on the same DN1 revision, not from DN1 directly — but it is now a quoted statement, not a structural guess.",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "IC 6-3-4-8(a): withholding applies to employers 'required under the provisions of the Internal Revenue Code to withhold'; IC 6-3-1-3.5(f)(3) references IRC 223(c)(2)(E) (HSA conformity). Departmental Notice #1 names no category; federal conformity.",
+    "sources": [
+      "https://iga.in.gov/ic/2026/Title_6/Article_3.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",
@@ -173,6 +181,13 @@
     "65-or-older / blind additional exemptions are folded into the personalExemptions count by convention rather than tracked as their own certificate field.",
     "The Oct 2025 (R45) prior county table (data/local/IN-counties-2026.json's priorTable) was RECONSTRUCTED from a 6-county diff plus a secondary industry-press source, not pulled directly from the R45 PDF itself — the DOR site only publishes the current notice, and Wayback Machine fetches were rate-limited (HTTP 498) on every attempt this session. Disclosed as reconstruction, not a primary-document pull, even though the underlying figures are corroborated."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $9,500; new employers 2.5%; range 0.50-7.40%.",
+    "sources": [
+      "https://www.in.gov/dwd/"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 9500,

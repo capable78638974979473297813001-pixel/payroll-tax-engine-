@@ -65,6 +65,13 @@
     "SUTA's full 18-class rate table (not just the min/max) was not obtained — detr.nv.gov's own PDFs were consistently blocked (see unemploymentInsurance.confidence above); would need either a different fetch path or a human-provided copy of the Small Business Impact Meeting PDF to close fully.",
     "MBT's $50,000 exemption is per-QUARTER, not per-year — a caller would need to track wages on a calendar-quarter basis, a different accumulation window than every other wage-base mechanism in this project (which are annual)."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $43,700; new employer 2.95%; range 0.25-5.4%; Career Enhancement Program 0.05% not modelled.",
+    "sources": [
+      "https://detr.nv.gov/content/media/FINAL_Contributions_Newsletter_June_2026.pdf"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 43700,

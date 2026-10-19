@@ -52,6 +52,13 @@
     "The local-government paid-leave preemption is now RESOLVED via a direct Fla. Stat. sec. 218.077 statute read (see sources above).",
     "Given no income tax exists, this file is intentionally lighter-weight than income-tax states in this project -- consistent with the South Dakota/Tennessee precedent."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $7,000, new employer 2.7%, range 0.1-5.4%.",
+    "sources": [
+      "https://floridarevenue.com/taxes/taxesfees/Pages/rt_rate.aspx"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 7000,

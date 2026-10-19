@@ -55,6 +55,14 @@
     },
     "formula": "Annualize wages (periodWages x periodsPerYear). Subtract the standard deduction: the HIGHER figure ONLY for MFJ-one-spouse-working (Status C); every other status (A/B/D -- Single, HoH, MFS, MFJ-both-working) shares the SAME lower figure. If dependents are claimed, also subtract dependentAllowanceAnnual x count. Multiply the remainder (floored at $0) by the flat rate. Divide by periods. No whole-dollar rounding (cent precision throughout, confirmed by both worked examples' own cent-level answers)."
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "2026 Employer's Tax Guide (rev. June 2026): 401(k), profit-sharing and deferred-compensation contributions are not taxable ('Georgia follows the federal guidelines', O.C.G.A. 48-7-27). Other categories: federal conformity assumed.",
+    "sources": [
+      "https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-june-2026/download"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": ["section125", "hsa", "fsa", "dependent_care", "deferral_401k", "deferral_403b", "deferral_457", "deferral_simple", "commuter"],
   "exemptPretaxComment": "Confirmed directly via the guide's own FAQ, the cleanest confirmation tier this project uses for this recurring question: 'Are contributions to qualified 401(k), profit sharing, or deferred compensation plans taxable? No.'",
   "reciprocity": {
@@ -83,6 +91,13 @@
     "Qualified Overtime Compensation and Cash Tips (a new HB 463 provision, Georgia's own limited-adoption version of the federal overtime/tips exemptions) is named in the guide's 'What's New' section but not independently researched or modelled this pass -- flagged as a real, dated (2026) provision worth a follow-up, not silently ignored.",
     "The SALT-deduction-cap decoupling and other HB 1199 federal-conformity details are noted in the guide but don't bear on wage withholding specifically -- out of scope, noted for completeness only."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $9,500, 'total tax rate of 2.70 percent' for new employers. Range 0.04-8.1% not confirmed.",
+    "sources": [
+      "https://dol.georgia.gov/faqs-employers/employers-faqs-unemployment-insurance"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 9500,

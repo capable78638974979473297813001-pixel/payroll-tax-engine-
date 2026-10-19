@@ -735,6 +735,14 @@
     "rule": "NONE for the private sector. West Virginia has no state-funded mandatory or voluntary Paid Family/Medical Leave program for private employers. SB 114 (2026 Regular Session) created only a narrow 2-year Paid Parental Leave PILOT PROGRAM for STATE EMPLOYEES (up to 12 weeks, birth/adoption/foster placement of a child under 12) -- out of scope for a general private-sector payroll engine, the same convention this project uses for public-employee-only programs.",
     "confidence": "cross_source_confirmed."
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "WV withholding FAQ: 'Compensation subject to Federal withholding is subject to West Virginia withholding.' W. Va. Code 11-21-71(a). Federal conformity.",
+    "sources": [
+      "https://tax.wv.gov/Business/Withholding/Pages/WithholdingTaxQuestionsAndAnswers.aspx"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",
@@ -763,6 +771,13 @@
     "No-certificate default (0 exemptions, two-earner table) is this project's standing convention applied by analogy, not confirmed against an explicit WV instruction the way Delaware's or Kansas's was.",
     "Supplemental wages: westVirginiaSupplementalAnnualMarginal() in src/taxes/state.ts implements WV's own Withholding Help page marginal-amount method against IT-100.2A's own published ANNUAL bracket table. Run against the help page's own $2,000-regular/$5,000-bonus worked example, this produces $229.00 (4.58%, IT-100.2A's own top marginal rate) rather than the page's stated 4.82%. Every bracket-grounded interpretation tried (annual table, biweekly period-level combine, both earner-type table variants) converges to 4.56%-4.58%, never 4.82% -- the working theory is a typo in the help page's own prose, not an error here, but that theory was NOT confirmed against a second WV source. Shipped anyway because 4.58% is directly traceable to IT-100.2A's own published rate. See the function's own doc comment and tests/engine.test.ts for the full disclosure. Falls back to this engine's generic annualize-the-bonus-alone default only when the caller supplies no input.priorRegularPayment at all."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $9,500; 2.7% statutory new-employer rate; SB 1053 fee from 2026-07-01 already in the file.",
+    "sources": [
+      "https://code.wvlegislature.gov/email/21a/"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 9500,

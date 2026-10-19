@@ -5,6 +5,14 @@
   "method": "bracket_per_period_kansas",
   "$scopeNote": "STATE income tax only. Kansas has no local wage-income tax anywhere -- Kansas's local 'intangibles tax' (Form 200, filed with the county clerk) applies only to INTEREST AND DIVIDEND income, not wages, and is a RETURN-level filing, not employer-withheld -- context-only, same disclosed-scope convention as Iowa's school district surtax and Connecticut's out-of-state credit. Kansas has no FORMAL bilateral reciprocity agreement with any state (no 'resident of state X owes $0 KS tax' exemption the way Michigan/Ohio/Indiana/Kentucky/New Jersey/Iowa's own reciprocity blocks work) -- but KW-100 DOES describe a real, different, WITHHOLDING-LEVEL mechanism for the opposite direction (a KANSAS resident working OUTSIDE Kansas): withhold the Kansas tax otherwise due, LESS whatever the other state withheld, floored at $0. NOW MODELLED: residentWorkingElsewhereCreditLine() in src/taxes/state.ts computes this generically off input.residenceState -- the first state in this project to need a SECOND state's tax computed as a residence-state credit within one calculatePaycheck() call, gated by this file's own residentWorkingElsewhereCredit flag so no other state's behavior changes. No employee-paid unemployment, disability, or paid-leave program exists in Kansas.",
   "$methodComment": "KW-100 (Rev. 10-24, 'for wages paid on and after 2024-07-01', still the current guide with no newer revision found -- Kansas's SB 1 (2024) tax reform reduced the state to a genuine 2-bracket system, 5.20%/5.58%). Subtract a per-period allowance, computed CONTINUOUSLY as the annual exemption amount divided by periodsPerYear (per KW-100's own literal instruction), from per-period gross wages, then look up the result in one of Kansas's own two per-period bracket tables (Single, which also covers Head of Household, or Joint) -- all 8 pay periods (Tables 1-8) are published independently and transcribed verbatim, the same convention as New Jersey/Vermont/Connecticut for genuine marginal-bracket states. See kansasExemptionAmount()'s own doc comment in src/taxes/state.ts for why Form K-4's allowance lines are NOT a flat per-allowance multiplier -- each line (personal, spouse, head-of-household, dependent) is worth a different dollar amount.",
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "KW-100: 'If your cafeteria, 401K, profit sharing, or other employee plan is considered to be wages by the federal government... Kansas withholding is also required'; 'any fringe benefit that is included in an employee's gross income and subject to federal withholding tax is also subject to Kansas withholding.' Federal wage tie.",
+    "sources": [
+      "https://www.ksrevenue.gov/pdf/kw100.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",
@@ -392,6 +400,13 @@
     "The flat 5% supplemental rate mirrors whichever method the employer used for FEDERAL withholding on the same payment (KW-100's own words), which this engine always treats as the flat-rate case for a \"supplemental\"-categorized earning -- there is no case in this engine where federal withholding on a bonus is computed by the combined-aggregate method, so the mirror is unconditional in practice, not because Kansas offers no choice.",
     "WIRED 2026-09-05, closing a gap flagged earlier the same day: Kansas assigns new CONSTRUCTION-industry employers a materially higher new-employer SUI rate (5.55%, per the Kansas Legislative Research Department's own 2026 briefing) than every other new employer (1.75%). src/taxes/state.ts's stateUnemploymentEmployerTax() now checks a new EmployerContext.suiIndustry map against suiEmployer.industryNewEmployerRates before falling back to the flat rate -- see that config's own industryNewEmployerRatesSource for the reasoning (chosen over flipping this state to employerSuppliedRateRequired so non-construction KS callers aren't forced to supply a rate they already get correctly by default)."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage base $15,100; new employer 1.75%; construction 5.55%; range 0-6.95%.",
+    "sources": [
+      "https://dol.ks.gov/employers"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 15100,

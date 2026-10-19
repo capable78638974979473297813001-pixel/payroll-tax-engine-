@@ -62,6 +62,14 @@
     },
     "annualizeMultiplierComment": "DR 1098's own Pay Period Table, transcribed verbatim — identical to this engine's own PERIODS_PER_YEAR constant for every one of the 8 frequencies (no NJ-style daily-divisor mismatch to worry about here)."
   },
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "Wage Withholding Tax Guide (Jan 2026): 'Wages that are exempt from federal wage withholding are generally exempt from Colorado wage withholding.' No category named; federal conformity.",
+    "sources": [
+      "https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",
@@ -225,6 +233,13 @@
     "The pre-mid-year-change formula does not apply here (DR 1098 has been a single, non-mid-year-changing formula for 2026 as far as this session found — no HB96/Ohio-style split-table situation was discovered for Colorado).",
     "Supplemental wages: both DR 1098 (2026 Colorado Withholding Worksheet for Employers) and the Colorado Wage Withholding Tax Guide (January 2026) were fetched directly and searched -- neither contains a distinct supplemental-wage withholding procedure or flat rate; the only \"supplemental\" mention in either document is a citation to the FEDERAL IRS Publication 15-A, not a Colorado-specific rule. A standalone bonus therefore runs through the same flat-rate-with-status-deduction formula as any other wages, which is what this engine already does by default -- the same conclusion reached for South Carolina, Utah, Arkansas, DC, and Massachusetts in this project, each checked directly rather than assumed."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI wage base $30,600; introductory rate 3.05% (non-construction); heavy-construction intro rate 6.285% not modelled. 2026 experience range not confirmed (premium-rates page now shows 2027 tables).",
+    "sources": [
+      "https://cdle.colorado.gov/ui/employers/requirements/premiums/introductory-rates"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 30600,

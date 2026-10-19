@@ -19,6 +19,15 @@
       "verifiedBy": "Downloaded and text-extracted directly. Covers NYS + NYC + Yonkers on ONE combined form: marital status (Single/HOH, Married, Married-but-withhold-at-higher-single-rate -- a THIRD checkbox, the same shape as Minnesota's W-4MN and Montana's MW-4, now a recurring pattern across states in this project), Line 1 = combined NYS+Yonkers allowance count, Line 2 = a SEPARATE NYC-only allowance count, Lines 3/4/5 = three SEPARATE additional-withholding dollar fields, one per jurisdiction (NYS/NYC/Yonkers) -- genuinely different from every other state's single additionalWithholding field, because NY's own form asks for three independent numbers on one certificate."
     }
   ],
+  "pretaxVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "NYS-50 income-item table: 401(k)/403(b) 'No, unless subject to federal income tax withholding'; 457 and SIMPLE 'No'; cafeteria/125 'No, if... not subject to federal income tax withholding'; dependent care 'No, unless federal income tax withholding is required'; qualified transportation 'No'. HSA not listed (general rule: federal wages). NARROW EXCEPTION NOT MODELLED: for the NYC IRC 125 flexible benefits program and certain NYC public employers, section 125 amounts are taxable for NYS withholding (Tax Law 671(b)(2)(F)-(G)).",
+    "sources": [
+      "https://www.tax.ny.gov/forms/publications/2024/wt/nys50-1224.htm",
+      "https://www.tax.ny.gov/bus/wt/income_subject.htm"
+    ],
+    "outcome": "No source contradicts any category in exemptPretax; categories not individually named rest on federal conformity."
+  },
   "exemptPretax": [
     "section125",
     "hsa",
@@ -2050,6 +2059,14 @@
     "RESOLVED 2026-09-02 (was previously unconfirmed despite multiple targeted searches): whether PFL's and DBL's own wage bases follow the SAME pretax exclusion list as NYS income tax withholding -- they don't, and PFL/DBL's own empty exemptPretax override (statePaidLeaveEmployee.exemptPretax/stateDisabilityEmployee.exemptPretax, both []) is correct as modelled. Confirmed directly from paidfamilyleave.ny.gov's own 'Cost and Deductions' page (fetched directly this pass): the premium is stated as '0.388% of their gross wages per pay period' -- NY's own PFL program site's own term of art is 'gross wages,' the same phrasing this file's own N-17-12 citation already established for the DIFFERENT (premium-is-after-tax) question, now confirmed for THIS question too from the state's own primary program page rather than assumed by analogy. 'Gross wages' is definitionally the unreduced figure, not a taxable-wages concept that would net out 401(k)/section-125 amounts first -- consistent with, not contradicting, this file's existing empty-list modelling. The Minnesota-style risk this note used to flag (UI wages NOT excluding 401(k) amounts unlike income-tax withholding, so assuming parity across two different taxes' wage definitions would be wrong) did not materialize here: PFL and DBL's wage base is confirmed gross, matching what was already coded, not silently assumed.",
     "RESOLVED: household-employee withholding is voluntary (NYS-50, quoted in this file's own voluntaryWithholdingEmploymentCategories block) -- wired via exemptEmploymentCategoryReason(), defaulting to $0 NY_SIT unless certificate.voluntaryWithholdingAgreement asserts an actual agreement is in place."
   ],
+  "suiVerification": {
+    "checkedOn": "2026-10-18",
+    "result": "UI wage base $17,600; new employer 4.1% total (4.025% + 0.075% RSF); range 1.7-9.5%; PFL 0.432% (annual max $411.91); DBL 0.5% capped at 60 cents a week.",
+    "sources": [
+      "https://www.tax.ny.gov/pdf/current_forms/wt/nys45i.pdf",
+      "https://paidfamilyleave.ny.gov/2026"
+    ]
+  },
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 17600,
