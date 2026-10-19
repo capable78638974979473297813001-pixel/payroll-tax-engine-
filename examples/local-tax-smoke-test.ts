@@ -195,7 +195,7 @@ const GROUPS: StateGroup[] = [
       {
         city: 'Metro + Multnomah (over threshold)',
         certificate: { metroDistrict: true, multnomahCounty: true },
-        ytd: { socialSecurity: 0, medicare: 0, futa: 0, localIncomeTax: { OR_METRO: dollars(195000), OR_MULTNOMAH: dollars(195000) } },
+        ytd: { socialSecurity: 0, medicare: 0, futa: 0, localIncomeTax: { OR_METRO: dollars(199500), OR_MULTNOMAH: dollars(199500) } },
       },
       { city: 'Metro only (under threshold)', certificate: { metroDistrict: true } },
       { city: 'Multnomah only (under threshold)', certificate: { multnomahCounty: true } },
