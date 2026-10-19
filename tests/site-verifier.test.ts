@@ -63,7 +63,7 @@ describe('site + python verifier', { skip: !havePython }, () => {
   });
 
   test('signup -> code from the verifier -> session, and the site store never holds a code', async () => {
-    const r = await post('/api/signup', { name: 'Ada Lovelace', email: EMAIL, company: 'Analytical LLC', phone: '5555550100' });
+    const r = await post('/api/signup', { name: 'Ada Lovelace', email: EMAIL, company: 'Analytical LLC', phone: '5555550100', agreeToTerms: true });
     assert.equal(r.status, 200);
     await new Promise((res) => setTimeout(res, 200));
     const code = lastCode();

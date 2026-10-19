@@ -83,15 +83,24 @@ describe('signup: a key needs a card or bank account on file', () => {
   let session = '';
   let key = '';
 
+  test('signup without the terms checkbox is refused', async () => {
+    const r = await post('/api/signup', { name: 'No Terms', email: 'noterms@acmepayroll.test', company: 'Acme', phone: '555-000-0000' });
+    assert.equal(r.status, 400);
+    assert.equal((await r.json()).code, 'terms_required');
+  });
+
   test('there are no anonymous keys', async () => {
     assert.equal((await fetch(`${BASE}/v1/sandbox-keys`, { method: 'POST' })).status, 404);
     assert.equal((await fetch(`${BASE}/api/sandbox-key`, { method: 'POST' })).status, 404);
   });
 
   test('signup sends a code; the code verifies the email and signs in', async () => {
-    const r = await post('/api/signup', { name: 'Jordan Casey', email: EMAIL, company: 'Acme Payroll', phone: '555-123-4567' });
+    const r = await post('/api/signup', { name: 'Jordan Casey', email: EMAIL, company: 'Acme Payroll', phone: '555-123-4567', agreeToTerms: true });
     assert.equal(r.status, 200);
-    const code = db().accounts[EMAIL].code;
+    const created = db().accounts[EMAIL];
+    assert.ok(created.termsAcceptedAt);
+    assert.equal(created.termsVersion, '2026-10-19.1');
+    const code = created.code;
     assert.match(code, /^\d{6}$/);
     const v = await post('/api/verify-email', { email: EMAIL, code });
     assert.equal(v.status, 200);

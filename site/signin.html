@@ -6,54 +6,47 @@
 <meta name="color-scheme" content="light" />
 <title>Sign in — Omnia.tax</title>
 <link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="/tokens.css" />
-<link rel="stylesheet" href="/assets/site.css" />
+<link rel="stylesheet" href="/assets/v5.css" />
 <!--OMNIA_CONFIG-->
 </head>
 <body>
-<div class="onboard">
-  <aside class="step-panel">
-    <div class="step-panel-top">
-      <a class="logo" href="/" aria-label="Omnia.tax"><img src="/logo/logo-on-blue.svg" alt="" /></a>
-      <span class="label-mono" style="color:var(--color-on-cobalt-muted);font-weight:400">Onboarding</span>
-    </div>
-    <div class="step-num-row"><div class="step-num" style="font-size:96px;letter-spacing:-4px">Sign in</div></div>
-    <div class="step-rule"></div>
-    <p>Sign in with your password, or have a 6-digit code emailed to you. Either way you land on the same account.</p>
-  </aside>
-  <main class="form-col">
-    <h1 id="title">Sign in.</h1>
-    <p class="lead" id="lead">Use the work email and password on your account.</p>
-    <form class="form-stack" id="pwForm" novalidate>
+<div class="auth">
+  <main class="auth-main">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <h1 class="page" id="title" style="margin-top:48px;font-size:34px;line-height:42px">Log in</h1>
+    <p class="sub" id="lead">Use the work email and password on your account.</p>
+    <form id="pwForm" novalidate style="margin-top:28px">
       <div class="field" id="emailField">
-        <label class="field-label" for="email">Work email</label>
+        <label for="email">Email</label>
         <input id="email" name="email" type="email" autocomplete="username" placeholder="you@company.com" required />
       </div>
       <div class="field" id="pwField">
-        <label class="field-label" for="password">Password</label>
-        <div class="field-box">
-          <input id="password" name="password" type="password" autocomplete="current-password" maxlength="200" />
-          <button type="button" class="field-slot" id="pwToggle" aria-controls="password" aria-pressed="false">Show</button>
-        </div>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" maxlength="200" />
+        <button type="button" class="text-link" id="pwToggle" aria-controls="password" aria-pressed="false" style="background:none;border:0;padding:0;cursor:pointer">Show</button>
       </div>
-      <p class="field-error" id="err" hidden></p>
-      <button class="btn btn-lg btn-primary btn-block" id="submit" type="submit">Sign in <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
+      <p class="err" id="err" hidden></p>
+      <p><button type="button" class="text-link" id="forgot" style="background:none;border:0;padding:0;cursor:pointer">Forgot password</button></p>
+      <button class="btn block" id="submit" type="submit" style="margin-top:12px">Log in</button>
     </form>
-    <form class="form-stack" id="codeForm" novalidate hidden>
+    <form id="codeForm" novalidate hidden style="margin-top:28px">
       <div class="field" id="codeEmailField">
-        <label class="field-label" for="codeEmail">Work email</label>
+        <label for="codeEmail">Email</label>
         <input id="codeEmail" type="email" autocomplete="email" placeholder="you@company.com" required />
       </div>
-      <p class="field-error" id="codeErr" hidden></p>
-      <button class="btn btn-lg btn-primary btn-block" id="codeSubmit" type="submit">Email me a code <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
+      <p class="err" id="codeErr" hidden></p>
+      <button class="btn block" id="codeSubmit" type="submit">Email me a sign-in code</button>
     </form>
-    <p class="form-foot" id="altRow">
-      <button type="button" class="btn btn-text" id="useCode">Email me a code instead</button>
-      <button type="button" class="btn btn-text" id="forgot" style="margin-left:16px">Forgot your password?</button>
-    </p>
-    <p class="form-foot" id="backRow" hidden><button type="button" class="btn btn-text" id="usePassword">Use my password instead</button></p>
-    <p class="form-foot">New here? <a class="btn btn-text" href="/signup">Create account</a></p>
+    <p id="altRow" style="margin-top:12px"><button type="button" class="btn secondary block" id="useCode">Email me a sign-in code</button></p>
+    <p id="backRow" hidden style="margin-top:12px"><button type="button" class="text-link" id="usePassword" style="background:none;border:0;cursor:pointer">Use my password instead</button></p>
+    <p class="fine" style="margin-top:28px">New to Omnia.tax? <a href="/signup">Create an account</a></p>
   </main>
+  <aside class="auth-aside">
+    <h2>What you get</h2>
+    <article><h3>A sandbox key right away</h3><p>Runs the live engine. Not billed.</p></article>
+    <article><h3>Federal, state and local tax</h3><p>One call, one line per tax, in cents.</p></article>
+    <article><h3>Live keys when you're ready</h3><p>14-day trial, then pay per calculation.</p></article>
+  </aside>
 </div>
 <script src="/assets/session.js"></script>
 <script>

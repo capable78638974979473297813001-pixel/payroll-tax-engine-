@@ -5,7 +5,7 @@
   var cfg = w.OMNIA || {
     trialDays: 14,
     termMonths: 12,
-    tiers: [{ upTo: null, rate: 0.09 }],
+    tiers: [],
     periodsPerYear: { weekly: 52, biweekly: 26, semimonthly: 24, monthly: 12 },
     codeTtlSec: 900,
     codeCooldownSec: 30,
@@ -59,7 +59,7 @@
     };
   }
 
-  /** $0.09, $0.125 — however many decimals the tier actually uses. */
+  /** Formats a numeric rate. The public site does not call this for display. */
   function formatRate(rate) {
     var n = Number(rate);
     if (!Number.isFinite(n)) return '';
@@ -79,9 +79,10 @@
 
   function apply(root) {
     var scope = root || document;
-    var rate = formatRate(headlineRate());
+    // The public site shows the rate as TBA. Dollar figures are not written
+    // into the page from this file.
     var days = String(cfg.trialDays);
-    scope.querySelectorAll('[data-rate]').forEach(function (el) { el.textContent = rate; });
+    scope.querySelectorAll('[data-rate]').forEach(function (el) { el.textContent = 'TBA'; });
     scope.querySelectorAll('[data-trial]').forEach(function (el) { el.textContent = days; });
   }
 

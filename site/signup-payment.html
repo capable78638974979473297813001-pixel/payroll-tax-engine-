@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light" />
 <title>Add a payment method — Omnia.tax</title>
 <link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="/tokens.css" />
+<link rel="stylesheet" href="/assets/v5.css" />
 <link rel="stylesheet" href="/assets/site.css" />
 <!--OMNIA_CONFIG-->
 </head>
@@ -26,15 +26,15 @@
     <div class="panel-rule"></div>
     <div class="panel-rows">
       <div><span>Plan</span><b>Pay per paycheck</b></div>
-      <div><span>Rate</span><b data-rate>$0.09</b></div>
-      <div><span>Estimated</span><b id="est">≈ $0.00/mo</b></div>
+      <div><span>Rate</span><b id="est">TBA</b></div>
+      <div><span>Billing</span><b>Per calculation</b></div>
     </div>
     <p id="estNote" style="color:var(--color-on-cobalt-muted);font-size:13px;margin:8px 0 0"></p>
     <div class="step-rule"></div>
     <div class="due">
       <div style="display:flex;justify-content:space-between;align-items:baseline">
         <span style="font-size:24px;font-weight:700">Due today</span>
-        <span class="zero" style="font-size:64px">$0.00</span>
+        <span class="zero" style="font-size:28px">Nothing during the trial</span>
       </div>
       <p>First charge after your <span data-trial>14</span>-day trial</p>
       <div class="label-mono" id="trialEnd">—</div>
@@ -58,7 +58,7 @@
       <p style="margin:0 0 20px;font-size:16px;line-height:1.5;color:#26272B">You&rsquo;ll enter it on Stripe&rsquo;s secure page, then come straight back here to get your API key. Your card or bank number goes to Stripe, not to us.</p>
       <ul style="margin:0 0 24px;padding-left:20px;font-size:16px;line-height:1.7;color:#0A0A0A">
         <li>Nothing is charged for the first <span data-trial>14</span> days.</li>
-        <li>After the trial you pay <b data-rate>$0.09</b> for each paycheck you calculate, billed monthly.</li>
+        <li>After the trial, each live calculation is billed monthly. The rate is to be announced.</li>
         <li>The terms you just signed apply.</li>
       </ul>
       <button class="btn btn-lg btn-primary btn-block" id="start2" type="button">Continue to Stripe <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
@@ -87,10 +87,8 @@
   Omnia.api('/api/account', { headers: Omnia.authHeaders() }).then(function (res) {
     if (res.status === 401) { location.href = '/signin'; return; }
     var sub = res.body && res.body.subscription;
-    var employees = (sub && sub.expectedEmployees) || Number(sessionStorage.getItem('omnia_employees')) || 1;
-    var est = OmniaPricing.estimate(employees, (sub && sub.payFrequency) || 'biweekly');
-    document.getElementById('est').textContent = '≈ ' + OmniaPricing.formatMoney(est.monthly) + '/mo';
-    document.getElementById('estNote').textContent = 'for ' + employees + ' employees (' + (est.payFrequency || 'biweekly') + ')';
+    document.getElementById('est').textContent = 'TBA';
+    document.getElementById('estNote').textContent = 'Per live calculation. No per-employee price.';
     if (sub && sub.trialEndsAt) document.getElementById('trialEnd').textContent = fmtDate(sub.trialEndsAt);
   });
 

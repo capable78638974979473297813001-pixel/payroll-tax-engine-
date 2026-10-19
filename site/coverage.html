@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Coverage — Omnia.tax</title>
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="/product">Product</a>
+      <a href="/coverage" aria-current="page">Coverage</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+  </div>
+</header>
+<main class="wrap">
+  <div class="page-head">
+    <p class="eyebrow">Coverage</p>
+    <h1 class="page">The whole USA, covered.</h1>
+    <p class="sub">Federal, all 50 states and DC, and every local jurisdiction. Minimum wage and wage garnishments included.</p>
+  </div>
+  <div class="stats" style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:48px">
+    <div><b style="font-size:22px;font-weight:500">51</b><div style="color:var(--ink2);font-size:14px">States and DC</div></div>
+    <div><b style="font-size:22px;font-weight:500">Federal</b><div style="color:var(--ink2);font-size:14px">Income tax, FICA, FUTA</div></div>
+    <div><b style="font-size:22px;font-weight:500">Local</b><div style="color:var(--ink2);font-size:14px">City, county, school district</div></div>
+    <div><b style="font-size:22px;font-weight:500">Min. wage</b><div style="color:var(--ink2);font-size:14px">Federal, state, local</div></div>
+    <div><b style="font-size:22px;font-weight:500">Garnishments</b><div style="color:var(--ink2);font-size:14px">Federal and state limits</div></div>
+  </div>
+  <p class="sub" style="margin-top:28px">Same-paycheck multi-state withholding is in progress. Reciprocity between a residence state and a work state is already on the call, as a residenceState next to workState.</p>
+
+  <div class="filters">
+    <label class="search"><span aria-hidden="true">⌕</span><input id="q" type="search" placeholder="Search a state, city or county" aria-label="Search a state, city or county" /></label>
+    <button class="chip" type="button" data-filter="all" aria-pressed="true">All</button>
+    <button class="chip" type="button" data-filter="income" aria-pressed="false">Income tax</button>
+    <button class="chip" type="button" data-filter="local" aria-pressed="false">Local</button>
+    <button class="chip" type="button" data-filter="wage" aria-pressed="false">Minimum wage</button>
+    <button class="chip" type="button" data-filter="garn" aria-pressed="false">Garnishment</button>
+    <span id="count" style="margin-left:auto;color:var(--ink3);font-size:14px"></span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Jurisdiction</th><th>Income tax</th><th>Unemployment</th><th>Local taxes</th><th>Minimum wage</th><th>Garnishment</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <div class="pager">
+    <span>Rates are effective-dated and updated as jurisdictions publish changes.</span>
+    <span id="pages"></span>
+  </div>
+  <div class="dev">
+    <div>
+      <h2>Start in the sandbox.</h2>
+      <p>Run a paycheck with a free sandbox key. Go live and pay per calculation, with no long contract.</p>
+    </div>
+    <div class="dev-actions">
+      <a class="btn" href="/signup">Get a sandbox key</a>
+      <a class="btn secondary" href="/docs/paycheck">API reference</a>
+    </div>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+<script>
+(function () {
+  var local = {
+    Alabama: 'Occupational tax',
+    Ohio: 'City, school district',
+    Pennsylvania: 'EIT, LST by PSD',
+    Michigan: 'City income tax',
+    Indiana: 'County tax',
+    Kentucky: 'Occupational tax',
+    'New York': 'NYC and Yonkers',
+    Oregon: 'Transit districts'
+  };
+  var names = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
+  var rows = [{ name: 'Federal', local: '—', income: '✓', unemp: '✓', wage: '✓', garn: '✓' }].concat(names.map(function (n) {
+    return { name: n, local: local[n] || '✓', income: '✓', unemp: '✓', wage: '✓', garn: '✓' };
+  }));
+  var q = document.getElementById('q');
+  var body = document.getElementById('rows');
+  var count = document.getElementById('count');
+  var pages = document.getElementById('pages');
+  var filter = 'all';
+  var page = 0;
+  var size = 11;
+  function shown() {
+    var text = q.value.trim().toLowerCase();
+    return rows.filter(function (r) {
+      if (text && r.name.toLowerCase().indexOf(text) < 0 && String(r.local).toLowerCase().indexOf(text) < 0) return false;
+      return true;
+    });
+  }
+  function render() {
+    var list = shown();
+    var pagesN = Math.max(1, Math.ceil(list.length / size));
+    if (page >= pagesN) page = pagesN - 1;
+    var slice = list.slice(page * size, page * size + size);
+    body.textContent = '';
+    slice.forEach(function (r) {
+      var tr = document.createElement('tr');
+      [r.name, r.income, r.unemp, r.local, r.wage, r.garn].forEach(function (cell) {
+        var td = document.createElement('td');
+        td.textContent = cell;
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+    count.textContent = 'Showing ' + slice.length + ' of ' + list.length;
+    pages.textContent = '';
+    var prev = document.createElement('button');
+    prev.type = 'button'; prev.textContent = 'Previous';
+    prev.disabled = page === 0;
+    prev.addEventListener('click', function () { page -= 1; render(); });
+    pages.appendChild(prev);
+    for (var i = 0; i < pagesN; i++) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = String(i + 1);
+      if (i === page) b.setAttribute('aria-current', 'page');
+      (function (n) { b.addEventListener('click', function () { page = n; render(); }); })(i);
+      pages.appendChild(b);
+    }
+    var next = document.createElement('button');
+    next.type = 'button'; next.textContent = 'Next';
+    next.disabled = page >= pagesN - 1;
+    next.addEventListener('click', function () { page += 1; render(); });
+    pages.appendChild(next);
+  }
+  q.addEventListener('input', function () { page = 0; render(); });
+  document.querySelectorAll('.chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      filter = chip.getAttribute('data-filter');
+      document.querySelectorAll('.chip').forEach(function (c) { c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'); });
+      page = 0;
+      render();
+    });
+  });
+  render();
+})();
+</script>
+</body>
+</html>

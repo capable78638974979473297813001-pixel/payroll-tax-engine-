@@ -5,144 +5,85 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light" />
 <title>Privacy Policy — Omnia.tax</title>
-<meta name="description" content="How Omnia collects, uses, and protects information." />
-<link rel="stylesheet" href="/legal/legal.css" />
+<meta name="description" content="Privacy Policy of OMNIA TAX LLC for the Omnia.tax API and website." />
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/assets/v5.css" />
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="/" aria-label="Omnia.tax"><img src="/logo/logo.svg" alt="" /><span class="tag">Legal</span></a>
-  <span class="spacer"></span>
-  <nav>
-    <a href="/terms">Terms</a>
-    <a href="/privacy">Privacy</a>
-    <a href="/acceptable-use">Acceptable Use</a>
-    <a href="/disclaimer">Disclaimer</a>
-  </nav>
-</header>
-
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
 <main class="wrap">
-  <div class="doc-head">
+  <div class="page-head">
     <p class="eyebrow">Legal</p>
-    <h1>Privacy Policy</h1>
-    <div class="meta">
-      <span>Effective: October 6, 2026</span>
-      <span>Provider: OMNIA TAX LLC</span>
-    </div>
+    <h1 class="page">Privacy Policy</h1>
+    <p class="sub">Effective October 19, 2026. This policy is from OMNIA TAX LLC, a Michigan limited liability company.</p>
   </div>
+  <div class="legal">
+    <nav class="toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+      <a href="#who">Who we are</a>
+      <a href="#collect">What we collect</a>
+      <a href="#use">How we use it</a>
+      <a href="#inputs">Calculation inputs</a>
+      <a href="#share">Who we share with</a>
+      <a href="#cookies">Cookies</a>
+      <a href="#retention">Retention</a>
+      <a href="#security">Security</a>
+      <a href="#rights">Your rights</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <article class="prose">
+      <h2 id="who">1. Who we are</h2>
+      <p>OMNIA TAX LLC (“Omnia,” “we”) operates the Omnia.tax website, API, and console. For your account information, Omnia is the organization that decides why that information is used. For the paycheck inputs you submit so we can run a calculation, you decide the purpose and we process them to return the result.</p>
+      <p>The Service is for businesses that calculate payroll taxes. It is not directed to children, and we do not knowingly collect information from anyone under 18.</p>
 
-  <div class="notice plain">
-    This policy explains what Omnia collects, why, and your choices. Omnia sells payroll-tax
-    infrastructure to businesses; it is not directed to consumers or children.
-  </div>
+      <h2 id="collect">2. What we collect</h2>
+      <p>Account and contact details: name, work email, business name, phone, and the password you choose. The password is stored only as a salted one-way hash. We also store the email verification code until it expires or is used, then it is not kept in the account record.</p>
+      <p>Agreement records: the terms version you accepted, the time you accepted it, the name you type when you sign the billing terms, and the IP address and user agent of that acceptance. We keep those as evidence of consent.</p>
+      <p>Billing: legal name and billing contact. Card and bank numbers are collected by our payment processor. We receive a processor reference, the brand, and the last four digits. We do not receive or store the full card or account number.</p>
+      <p>Usage and logs: timestamps, status codes, the check date, request identifiers, and approximate volume, plus rate-limit counters. We use them to run, secure, meter, and support the Service.</p>
+      <p>Messages you send us, including mail to scottholdan@gmail.com.</p>
 
-  <div class="toc">
-    <h2>Contents</h2>
-    <ol>
-      <li><a href="#scope">Scope &amp; roles</a></li>
-      <li><a href="#collect">What we collect</a></li>
-      <li><a href="#use">How we use it</a></li>
-      <li><a href="#calc-inputs">Calculation inputs</a></li>
-      <li><a href="#share">Who we share with</a></li>
-      <li><a href="#cookies">Cookies</a></li>
-      <li><a href="#retention">Retention</a></li>
-      <li><a href="#security">Security</a></li>
-      <li><a href="#rights">Your rights</a></li>
-      <li><a href="#intl">International</a></li>
-      <li><a href="#changes">Changes</a></li>
-      <li><a href="#contact">Contact</a></li>
-    </ol>
-  </div>
+      <h2 id="use">3. How we use it</h2>
+      <p>We use information to provide and secure the Service, to authenticate accounts and API keys, to meter live calculations, to send verification codes and account notices, to detect abuse, and to comply with law. We do not sell personal information. We do not use calculation inputs to train models or for advertising.</p>
 
-  <section class="clause" id="scope">
-    <h2 class="num"><span class="n">1</span>Scope &amp; roles</h2>
-    <p>This policy covers the Omnia website, API, and console (the "Service"), operated by <b>OMNIA TAX LLC</b> ("Omnia," "we"). For your <b>account information</b>, Omnia is the controller. For the <b>data you submit to the API to run a calculation</b>, you are the controller and Omnia is a processor acting on your instructions (see §4).</p>
-  </section>
+      <h2 id="inputs">4. Calculation inputs</h2>
+      <p>Wages, deductions, W-4 fields, year-to-date figures, and jurisdictions are processed to return the calculation and the usage record. They may relate to your employees or clients. You are responsible for having the rights and notices needed to send them. Do not send government identifiers the API does not need.</p>
 
-  <section class="clause" id="collect">
-    <h2 class="num"><span class="n">2</span>Information we collect</h2>
-    <ul>
-      <li><b>Account &amp; contact.</b> Name, work email, business name, phone, the password you choose (kept only as a salted one-way hash, never in readable form), and the verification code you enter, when you sign up.</li>
-      <li><b>Agreement records.</b> The terms version you accepted, the name you typed to sign, and the time and IP address of acceptance — kept as evidence of consent.</li>
-      <li><b>Billing.</b> Legal/business name and billing contact. Card and bank numbers are collected and stored by our payment processor, not by Omnia; we receive only a token, the card brand, and the last four digits.</li>
-      <li><b>Usage &amp; logs.</b> API calls (timestamps, status codes, the check date, request identifiers, approximate volume), rate-limit counters, and basic technical logs used to run, secure, meter, and support the Service.</li>
-      <li><b>Communications.</b> Messages you send us for support.</li>
-    </ul>
-  </section>
+      <h2 id="share">5. Who we share with</h2>
+      <p>Service providers that run the Service under contract, including the payment processor for billing and the email provider for verification codes. They may process information only to provide that service.</p>
+      <p>We share information when the law, a subpoena, or the protection of Omnia, our customers, or the public requires it, and in connection with a merger or sale of assets, subject to this policy. We do not rent personal information to third parties.</p>
 
-  <section class="clause" id="use">
-    <h2 class="num"><span class="n">3</span>How we use information</h2>
-    <ul>
-      <li>To provide, operate, secure, and improve the Service;</li>
-      <li>To authenticate accounts and API keys and to meter and bill usage;</li>
-      <li>To send transactional messages (verification codes, billing and account notices) and, where permitted, service updates;</li>
-      <li>To detect, prevent, and respond to fraud, abuse, and security incidents;</li>
-      <li>To comply with law and enforce our agreements.</li>
-    </ul>
-    <p>We do <b>not</b> sell your personal information, and we do not use your calculation inputs to train models or for advertising.</p>
-  </section>
+      <h2 id="cookies">6. Cookies</h2>
+      <p>The console uses one HTTP-only session cookie so you stay signed in. It is required for the console and is not used for advertising or cross-site tracking. We do not use third-party advertising cookies.</p>
 
-  <section class="clause" id="calc-inputs">
-    <h2 class="num"><span class="n">4</span>Calculation inputs</h2>
-    <p>The data you send to the API to compute a paycheck (wages, deductions, W-4 fields, year-to-date figures, and jurisdictions) is processed only to return the calculation and the associated usage record. It may relate to your employees or clients. You are responsible for having the rights and notices needed to send it, and for not sending more sensitive data than a calculation requires — the API does not require government identifiers such as Social Security numbers, and you should not include them.</p>
-    <p>We process these inputs on your behalf, retain the operational record described in §7, and make them available to you through your account.</p>
-  </section>
+      <h2 id="retention">7. Retention</h2>
+      <p>We keep account and agreement records while the account is open and as long as we need them for legal, tax, and audit duties, including proof of consent and billing records. Usage logs are trimmed over time. When information is no longer needed, we delete or de-identify it.</p>
 
-  <section class="clause" id="share">
-    <h2 class="num"><span class="n">5</span>Who we share information with</h2>
-    <ul>
-      <li><b>Service providers</b> that help us run the Service under contract, including our payment processor (Stripe) for billing and our email provider for verification and notices. They may process information only to provide their service to us.</li>
-      <li><b>Legal &amp; safety.</b> When required by law, subpoena, or to protect the rights, property, or safety of Omnia, our customers, or the public.</li>
-      <li><b>Business transfers.</b> In connection with a merger, acquisition, or sale of assets, subject to this policy.</li>
-    </ul>
-    <p>We do not sell or rent personal information to third parties.</p>
-  </section>
+      <h2 id="security">8. Security</h2>
+      <p>We use measures appropriate to the data, including HTTPS, hashing of API keys and passwords, and access limits. Card and bank numbers stay with the payment processor. No system is perfectly secure, and we cannot promise that it is. If a breach affects your information, we will notify you as the law requires.</p>
 
-  <section class="clause" id="cookies">
-    <h2 class="num"><span class="n">6</span>Cookies</h2>
-    <p>The console uses a single strictly-necessary session cookie (HTTP-only) to keep you signed in. It is required for the console to work and is not used for advertising or cross-site tracking. Your browser may also store small non-tracking preferences locally. We do not use third-party advertising or analytics cookies.</p>
-  </section>
+      <h2 id="rights">9. Your rights</h2>
+      <p>Depending on where you are, you may have rights to access, correct, delete, or export personal information, or to object to certain uses. Email scottholdan@gmail.com and we will respond as the law requires. If the request is about paycheck inputs that a customer submitted, contact that customer; we will help them as required. We will not treat you worse for asking.</p>
+      <p>We do not sell personal information or share it for cross-context behavioral advertising under the California Consumer Privacy Act and similar state laws.</p>
+      <p>Omnia is operated in the United States and stores data there. If you access the Service from somewhere else, you understand that the information is processed in the United States.</p>
 
-  <section class="clause" id="retention">
-    <h2 class="num"><span class="n">7</span>Data retention</h2>
-    <p>We keep account and agreement records for as long as your account is active and as needed to comply with legal, tax, and audit obligations. Usage logs are retained on a rolling basis for operations, security, and billing and are trimmed over time. When data is no longer needed, we delete or de-identify it. You may request deletion as described in §9, subject to records we must keep by law (for example, proof of consent and billing records).</p>
-  </section>
-
-  <section class="clause" id="security">
-    <h2 class="num"><span class="n">8</span>Security</h2>
-    <p>We use reasonable technical and organizational measures appropriate to the data, including encryption in transit (HTTPS), hashing of API keys and passwords, access controls, and keeping card/bank numbers with our PCI-compliant processor rather than on our servers. No system is perfectly secure; we cannot guarantee absolute security. If a breach affects your information, we will notify you as required by law.</p>
-  </section>
-
-  <section class="clause" id="rights">
-    <h2 class="num"><span class="n">9</span>Your rights &amp; choices</h2>
-    <p>Depending on where you or your data subjects are located, you or they may have rights to access, correct, delete, port, or restrict personal information, and to object to certain processing. For account information, contact <a href="mailto:scottholdan@gmail.com">scottholdan@gmail.com</a> and we will respond as required by applicable law. For calculation inputs, where Omnia is a processor, please direct requests to the customer (controller) who submitted the data; we will assist that customer as required. We will not discriminate against you for exercising a right.</p>
-    <p><b>U.S. state privacy laws</b> (such as California's CCPA/CPRA and similar laws): we do not sell or "share" personal information for cross-context behavioral advertising. To exercise a right, email <a href="mailto:scottholdan@gmail.com">scottholdan@gmail.com</a>.</p>
-  </section>
-
-  <section class="clause" id="intl">
-    <h2 class="num"><span class="n">10</span>International users</h2>
-    <p>Omnia is operated from and stores data in the United States and is intended for U.S. payroll use. If you access it from outside the United States, you consent to processing in the United States, which may have different data-protection laws than your location. [If you serve EU/UK data subjects, confirm a lawful transfer mechanism with counsel.]</p>
-  </section>
-
-  <section class="clause" id="changes">
-    <h2 class="num"><span class="n">11</span>Changes</h2>
-    <p>We may update this policy. Material changes will be posted here with a new effective date and, where appropriate, notified to you. Continued use after a change means you accept the updated policy.</p>
-  </section>
-
-  <section class="clause" id="contact">
-    <h2 class="num"><span class="n">12</span>Contact</h2>
-    <p>OMNIA TAX LLC, 595 N Old Woodward Ave, Birmingham, Michigan. Privacy questions: <a href="mailto:scottholdan@gmail.com">scottholdan@gmail.com</a>.</p>
-  </section>
-
-  <div class="footer">
-    <span>© 2026 OMNIA TAX LLC. All rights reserved.</span>
-    <span>
-      <a href="/terms">Terms</a> ·
-      <a href="/privacy">Privacy</a> ·
-      <a href="/acceptable-use">Acceptable Use</a> ·
-      <a href="/disclaimer">Disclaimer</a> ·
-      <a href="/">Home</a>
-    </span>
+      <h2 id="contact">10. Contact and changes</h2>
+      <p>We may update this policy. Material changes will be posted here with a new effective date. Continued use after the change means you accept the update.</p>
+      <p>OMNIA TAX LLC, 595 N Old Woodward Ave, Birmingham, Michigan. Privacy questions: <a href="mailto:scottholdan@gmail.com">scottholdan@gmail.com</a>.</p>
+    </article>
   </div>
 </main>
+<footer class="site-footer"><div class="wrap foot-grid">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+  <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+  <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+</div><p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p></footer>
+<script src="/assets/v5.js"></script>
 </body>
 </html>

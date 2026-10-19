@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Contact — Omnia.tax</title>
+<link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <p class="eyebrow">Contact</p>
+    <h1 class="page">Talk to us</h1>
+    <p class="sub">Questions about coverage, pricing, or an integration.</p>
+  </div>
+  <div class="contact-grid" style="margin-top:40px">
+    <form id="form">
+      <div class="field"><label for="name">Name</label><input id="name" name="name" autocomplete="name" placeholder="Your name" required /></div>
+      <div class="field"><label for="email">Work email</label><input id="email" name="email" type="email" autocomplete="email" placeholder="you@company.com" required /></div>
+      <div class="field"><label for="company">Company</label><input id="company" name="company" autocomplete="organization" placeholder="Company name" /></div>
+      <div class="field"><label for="message">Message</label><textarea id="message" name="message" placeholder="What are you building?" required></textarea></div>
+      <button class="btn" type="submit">Send message</button>
+      <p class="hint">This opens an email to OMNIA TAX LLC. Nothing is stored on this page.</p>
+    </form>
+    <div>
+      <article style="border-top:1px solid var(--rule);padding:18px 0">
+        <h2 style="margin:0;font-size:16px">OMNIA TAX LLC</h2>
+        <p style="color:var(--ink2)">A Michigan limited liability company<br />595 N Old Woodward Ave<br />Birmingham, Michigan</p>
+      </article>
+      <article style="border-top:1px solid var(--rule);padding:18px 0">
+        <h2 style="margin:0;font-size:16px">Email</h2>
+        <p><a href="mailto:scottholdan@gmail.com">scottholdan@gmail.com</a></p>
+      </article>
+      <p style="color:var(--ink2)">For a problem with a call, include the requestId from the response.</p>
+    </div>
+  </div>
+</main>
+<footer class="site-footer"><div class="wrap foot-grid">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+  <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+  <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+</div><p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p></footer>
+<script src="/assets/v5.js"></script>
+<script>
+document.getElementById('form').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var name = document.getElementById('name').value.trim();
+  var email = document.getElementById('email').value.trim();
+  var company = document.getElementById('company').value.trim();
+  var message = document.getElementById('message').value.trim();
+  var body = 'From: ' + name + ' <' + email + '>\nCompany: ' + company + '\n\n' + message;
+  location.href = 'mailto:scottholdan@gmail.com?subject=' + encodeURIComponent('Omnia.tax') + '&body=' + encodeURIComponent(body);
+});
+</script>
+</body>
+</html>
