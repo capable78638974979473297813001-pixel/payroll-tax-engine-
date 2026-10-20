@@ -1,0 +1,169 @@
+{
+  "$comment": "Auto-update is OFF. Turn it on only after reading watcher/autoupdate.py's header. Each rule names one kind of line the watcher may replace: files matching glob, keys listed, new value between min and max, no single change larger than max_abs_change, evidence only from the listed hosts. Anything not matched by a rule cannot be changed automatically; watcher/autoupdate-coverage.json says, for every jurisdiction, what is automatic and what is left to a person and why.",
+  "enabled": false,
+  "max_changes_per_run": 5,
+  "max_findings_per_run": 10,
+  "min_confirm_gap_seconds": 20,
+  "max_proposal_age_hours": 36,
+  "rules": [
+    {
+      "glob": "data/local/OH-municipalities-*.json",
+      "keys": [
+        "rate"
+      ],
+      "min": 0.0025,
+      "max": 0.04,
+      "max_abs_change": 0.01,
+      "hosts": [
+        "thefinder.tax.ohio.gov"
+      ]
+    },
+    {
+      "glob": "data/local/OH-jedd-jedz-*.json",
+      "keys": [
+        "rate",
+        "rateSourceRaw"
+      ],
+      "min": 0.0025,
+      "max": 0.04,
+      "max_abs_change": 0.01,
+      "hosts": [
+        "thefinder.tax.ohio.gov"
+      ]
+    },
+    {
+      "glob": "data/states/IL-*.json",
+      "keys": [
+        "rate",
+        "supplementalRate"
+      ],
+      "min": 0.01,
+      "max": 0.09,
+      "max_abs_change": 0.01,
+      "hosts": [
+        "tax.illinois.gov"
+      ]
+    },
+    {
+      "glob": "data/states/MI-*.json",
+      "keys": [
+        "rate",
+        "flatRate"
+      ],
+      "min": 0.01,
+      "max": 0.09,
+      "max_abs_change": 0.01,
+      "hosts": [
+        "www.michigan.gov"
+      ]
+    },
+    {
+      "glob": "data/states/MI-*.json",
+      "keys": [
+        "allowanceAmount"
+      ],
+      "min": 1000,
+      "max": 20000,
+      "max_abs_change": 1500,
+      "hosts": [
+        "www.michigan.gov"
+      ]
+    },
+    {
+      "glob": "data/states/KY-*.json",
+      "keys": [
+        "rate"
+      ],
+      "min": 0.01,
+      "max": 0.08,
+      "max_abs_change": 0.01,
+      "hosts": [
+        "revenue.ky.gov"
+      ]
+    },
+    {
+      "glob": "data/states/KY-*.json",
+      "keys": [
+        "deductionAmount"
+      ],
+      "min": 1000,
+      "max": 15000,
+      "max_abs_change": 1500,
+      "hosts": [
+        "revenue.ky.gov"
+      ]
+    },
+    {
+      "glob": "data/states/IN-*.json",
+      "keys": [
+        "rate",
+        "supplementalRate"
+      ],
+      "min": 0.01,
+      "max": 0.06,
+      "max_abs_change": 0.01,
+      "hosts": [
+        "www.in.gov"
+      ]
+    },
+    {
+      "glob": "data/states/LA-*.json",
+      "keys": [
+        "rate"
+      ],
+      "min": 0.01,
+      "max": 0.06,
+      "max_abs_change": 0.01,
+      "hosts": [
+        "dam.ldr.la.gov"
+      ]
+    },
+    {
+      "glob": "data/states/MS-*.json",
+      "keys": [
+        "rate"
+      ],
+      "min": 0.01,
+      "max": 0.06,
+      "max_abs_change": 0.01,
+      "hosts": [
+        "www.dor.ms.gov"
+      ]
+    },
+    {
+      "glob": "data/local/PA-EIT-LST-*.json",
+      "keys": [
+        "residentEIT",
+        "nonresidentEIT",
+        "schoolDistrictEIT",
+        "totalResidentEIT"
+      ],
+      "min": 0.0025,
+      "max": 0.05,
+      "max_abs_change": 0.01,
+      "hosts": [
+        "apps.dced.pa.gov"
+      ],
+      "independent_values": true,
+      "max_changes_per_run": 80,
+      "max_findings_per_run": 120
+    },
+    {
+      "glob": "data/local/PA-EIT-LST-*.json",
+      "keys": [
+        "municipal",
+        "schoolDistrict",
+        "total"
+      ],
+      "min": 1,
+      "max": 100,
+      "max_abs_change": 25,
+      "hosts": [
+        "apps.dced.pa.gov"
+      ],
+      "independent_values": true,
+      "max_changes_per_run": 80,
+      "max_findings_per_run": 120
+    }
+  ]
+}

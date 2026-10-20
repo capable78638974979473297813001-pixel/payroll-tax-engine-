@@ -38,7 +38,9 @@
     "allowanceAmount": 5900.0,
     "comment": "Michigan withholds 4.25% after subtracting the annual personal/dependency exemption allowance ($5,900 per exemption for 2026, up from $5,800 in 2025). The employee's MI-W4 exemption count goes in workState.certificate.allowances. NOTE: a widely-syndicated third-party page listed Michigan at 4.05% (the expired 2023 temporary rate) — the 4.25% here is from the official 2026 Form 446, not a secondary source."
   },
-  "supplementalWages": { "flatRate": 0.0425 },
+  "supplementalWages": {
+    "flatRate": 0.0425
+  },
   "supplementalComment": "WIRED (a later 'go to every state' pass): bonuses/other separate payments withhold at a flat 4.25% with NO exemption adjustment (Form 446) -- reused the existing generic flatRateSupplementalFromConfig() mechanism (already built for New Mexico/New York) by renaming this field from a bare supplementalRate number to the supplementalWages.flatRate shape that helper reads, rather than writing MI-specific code. Zero new engine code needed.",
   "pretaxVerification": {
     "checkedOn": "2026-10-18",

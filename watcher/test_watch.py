@@ -887,5 +887,40 @@ class ReconcileTest(unittest.TestCase):
         self.assertEqual([f["kind"] for f in out], ["unknown_reconciler"])
 
 
+class IndianaCountyReconcileTest(unittest.TestCase):
+    SRC = {"id": "in-x", "jurisdiction": "IN", "url": "https://www.in.gov/dor/files/dn01.pdf"}
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.repo = Path(self.tmp.name)
+        (self.repo / "data" / "local").mkdir(parents=True)
+        counties = [{"name": f"C{i}", "countyCode": f"{i:02d}", "rate": 0.02} for i in range(1, 93)]
+        counties[0]["rateChanges"] = [{"on": "2026-10-01", "rate": 0.021}]
+        (self.repo / "data" / "local" / "IN-counties-2026.json").write_text(json.dumps({"counties": counties}))
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def table(self, overrides=None):
+        rates = {i: "0.02" for i in range(1, 93)}
+        rates[1] = "0.021*"
+        rates.update(overrides or {})
+        rows = "\n".join(f"Co{chr(65 + i % 26)}{chr(65 + i // 26)} {i:02d} {rates[i]}" for i in rates)
+        return f"Indiana County Tax Rates: Effective Oct. 1, 2026\nCounty Name County Code County Tax Rate\n{rows}\n"
+
+    def test_agreement_is_silent(self):
+        self.assertEqual(reconcile.reconcile_in_counties(self.table(), self.SRC, "2026-10-20", self.repo), [])
+
+    def test_a_county_that_differs_is_reported_for_a_person_with_no_one_line_change(self):
+        out = reconcile.reconcile_in_counties(self.table({5: "0.0305"}), self.SRC, "2026-10-20", self.repo)
+        self.assertEqual([(f["kind"], f["severity"], f["code"]) for f in out], [("rate_differs", "action", "05")])
+        self.assertNotIn("change", out[0])
+
+    def test_a_table_that_does_not_parse_raises_unreadable(self):
+        out = reconcile.reconcile_in_counties("Indiana County Tax Rates: Effective Oct. 1, 2026\nAdams 01 0.016\n", self.SRC, "2026-10-20", self.repo)
+        self.assertEqual(out[0]["kind"], "unreadable")
+
+
+
 if __name__ == "__main__":
     unittest.main()

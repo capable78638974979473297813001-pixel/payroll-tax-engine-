@@ -779,6 +779,718 @@
    ]
   },
   {
+   "id": "az-74dcb09dc3",
+   "jurisdiction": "AZ",
+   "title": "150-206-692, Oregon's out-of-state/nonresident-employer guide (cross-referenced from OR-2026.json)",
+   "url": "https://www.oregon.gov/dor/forms/FormsPubs/withholding-transit-tax-non-resident_206-692.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/AZ-2026.json",
+    "data/states/AZ-2027.json",
+    "data/states/OR-2025.json",
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
+   ]
+  },
+  {
+   "id": "az-b247c4853d",
+   "jurisdiction": "AZ",
+   "title": "2026 Form A-4, Employee's Arizona Withholding Election",
+   "url": "https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2026_A-4_f.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/AZ-2026.json",
+    "data/states/AZ-2027.json"
+   ]
+  },
+  {
+   "id": "az-82d71cbef9",
+   "jurisdiction": "AZ",
+   "title": "2026 Form WEC Instructions, 'Nonresidents' section",
+   "url": "https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2026_WECi.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/AZ-2025.json",
+    "data/states/AZ-2026.json",
+    "data/states/AZ-2027.json"
+   ]
+  },
+  {
+   "id": "az-b0ba93171e",
+   "jurisdiction": "AZ",
+   "title": "A.R.S. \u00a7 33-1131(B) \u2014 maximum part of disposable earnings subject to garnishment: the lesser of 10% of disposable earnings, or the amount by which disposable earnings exceed 60 times the applicable minimum hourly wage",
+   "url": "https://www.azleg.gov/ars/33/01131.htm",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "az-ddbdf11123",
+   "jurisdiction": "AZ",
+   "title": "Arizona DOR -- Withholding Calculations",
+   "url": "https://azdor.gov/individuals/withholding-calculations",
+   "origin": "data",
+   "used_by": [
+    "data/states/AZ-2025.json"
+   ]
+  },
+  {
+   "id": "az-42fee4ee8e",
+   "jurisdiction": "AZ",
+   "title": "Arizona DOR withholding",
+   "url": "https://azdor.gov/business/withholding-tax",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "az-a8714fbb07",
+   "jurisdiction": "AZ",
+   "title": "Arizona DOR: news",
+   "url": "https://azdor.gov/news",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "az-e91daa9fa4",
+   "jurisdiction": "AZ",
+   "title": "Arizona Form A-4 (2025)",
+   "url": "https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2025_A-4_f.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/AZ-2025.json"
+   ]
+  },
+  {
+   "id": "az-b66098e04c",
+   "jurisdiction": "AZ",
+   "title": "City of Flagstaff -- City of Flagstaff announces minimum wage for 2026",
+   "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/AZ-local-2026.json"
+   ]
+  },
+  {
+   "id": "az-b653e42358",
+   "jurisdiction": "AZ",
+   "title": "City of Tucson -- Tucson Minimum Wage Act (Proposition 206, November 2021)",
+   "url": "https://www.tucsonaz.gov/Departments/Business-Services-Department/Tucson-Minimum-Wage-Act",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/AZ-local-2026.json"
+   ]
+  },
+  {
+   "id": "az-c562e891c7",
+   "jurisdiction": "AZ",
+   "title": "UIT-0603A (FY26), Unemployment Insurance Tax Rate Chart",
+   "url": "https://des.az.gov/sites/default/files/dl/UIT-0603A_FY26.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/AZ-2026.json",
+    "data/states/AZ-2027.json"
+   ]
+  },
+  {
+   "id": "ca-18d6f033c4",
+   "jurisdiction": "CA",
+   "title": "Cal. Civ. Proc. Code \u00a7 706.050 \u2014 ordinary garnishment limited to the lesser of 20% of disposable earnings, or 40% of the amount by which disposable earnings exceed 48 times the state (or, if higher, local) minimum hourly wage",
+   "url": "https://selfhelp.courts.ca.gov/guide-earnings-withholding-orders-employers",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "ca-8949de8a07",
+   "jurisdiction": "CA",
+   "title": "California DE 44 employer's guide",
+   "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf",
+   "origin": "curated"
+  },
+  {
+   "id": "ca-a80d980aed",
+   "jurisdiction": "CA",
+   "title": "California Department of Industrial Relations -- Fast Food Minimum Wage Frequently Asked Questions",
+   "url": "https://www.dir.ca.gov/dlse/Fast-Food-Minimum-Wage-FAQ.htm",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/sectoral/CA-sectoral-2026.json"
+   ]
+  },
+  {
+   "id": "ca-6d70c3ca38",
+   "jurisdiction": "CA",
+   "title": "California Department of Industrial Relations -- Health Care Worker Minimum Wage Frequently Asked Questions",
+   "url": "https://www.dir.ca.gov/dlse/Health-Care-Worker-Minimum-Wage-FAQ.htm",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/sectoral/CA-sectoral-2026.json"
+   ]
+  },
+  {
+   "id": "ca-432f46d844",
+   "jurisdiction": "CA",
+   "title": "California Department of Industrial Relations \u2014 state minimum wage $16.90/hr effective 2026-01-01",
+   "url": "https://www.dir.ca.gov/dlse/minimum_wage.htm",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "ca-f6adea0c7d",
+   "jurisdiction": "CA",
+   "title": "California EDD rates and withholding",
+   "url": "https://edd.ca.gov/en/payroll_taxes/rates_and_withholding/",
+   "kind": "index",
+   "origin": "curated",
+   "used_by": [
+    "data/states/CA-2025.json",
+    "data/states/CA-2026.json",
+    "data/states/CA-2027.json"
+   ]
+  },
+  {
+   "id": "ca-8d16e0539d",
+   "jurisdiction": "CA",
+   "title": "California EDD: news releases and announcements",
+   "url": "https://edd.ca.gov/en/about_edd/news_releases_and_announcements/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ca-b34cd4e59d",
+   "jurisdiction": "CA",
+   "title": "California Employer's Guide (DE 44), Rev. 52 (4-26) -- \"How to Withhold PIT on Supplemental Wages\"",
+   "url": "https://www.edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/CA-2026.json",
+    "data/states/CA-2027.json"
+   ]
+  },
+  {
+   "id": "ca-1c922938c9",
+   "jurisdiction": "CA",
+   "title": "California FTB: newsroom",
+   "url": "https://www.ftb.ca.gov/about-ftb/newsroom/index.html",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ca-f7282afcc3",
+   "jurisdiction": "CA",
+   "title": "California Withholding Schedules for 2026 (Method B - Exact Calculation Method)",
+   "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/26methb.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/CA-2026.json",
+    "data/states/CA-2027.json"
+   ]
+  },
+  {
+   "id": "ca-8ca2cdf685",
+   "jurisdiction": "CA",
+   "title": "City of Long Beach -- Notice of Annual Adjustment, Hotel Worker Hourly Rate $26.50 (Measure RW, effective July 1, 2026)",
+   "url": "https://www.longbeach.gov/globalassets/city-clerk/media-library/documents/public-notices/public-notices/measure-rw-bulletin-effective-july-1-2026",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/sectoral/CA-sectoral-2026.json"
+   ]
+  },
+  {
+   "id": "ca-3e493dc2a7",
+   "jurisdiction": "CA",
+   "title": "City of Santa Monica -- Minimum Wage",
+   "url": "https://www.santamonica.gov/minimum-wage",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/sectoral/CA-sectoral-2026.json"
+   ]
+  },
+  {
+   "id": "ca-55a9a37716",
+   "jurisdiction": "CA",
+   "title": "EDD -- California Withholding Schedules for 2025, Method B (Exact Calculation Method)",
+   "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/25methb.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/CA-2025.json"
+   ]
+  },
+  {
+   "id": "ca-3ea1db1639",
+   "jurisdiction": "CA",
+   "title": "Form DE 4, Employee's Withholding Allowance Certificate, Rev. 56 (1-26)",
+   "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de4.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/CA-2026.json",
+    "data/states/CA-2027.json"
+   ]
+  },
+  {
+   "id": "ca-008fd9678a",
+   "jurisdiction": "CA",
+   "title": "Information Sheet: Taxability of Employee Benefits (DE 231EB) Rev. 12 (6-17)",
+   "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de231eb.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/CA-2025.json",
+    "data/states/CA-2026.json",
+    "data/states/CA-2027.json"
+   ]
+  },
+  {
+   "id": "ca-35fd3e19bb",
+   "jurisdiction": "CA",
+   "title": "Information Sheet: Types of Payments (DE 231TP) Rev. 1 (6-16)",
+   "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de231tp.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/CA-2025.json",
+    "data/states/CA-2026.json",
+    "data/states/CA-2027.json"
+   ]
+  },
+  {
+   "id": "ca-0f612469ad",
+   "jurisdiction": "CA",
+   "title": "Unincorporated Los Angeles County minimum wage, July 1, 2025 step ($17.81)",
+   "url": "https://dcba.lacounty.gov/newsroom/new-worker-protections-for-july-1-2025/",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/CA-local-2026.json"
+   ]
+  },
+  {
+   "id": "co-002adac414",
+   "jurisdiction": "CO",
+   "title": "Boulder County -- Local Minimum Wage",
+   "url": "https://bouldercounty.gov/departments/commissioners/local-minimum-wage/",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/CO-local-2026.json"
+   ]
+  },
+  {
+   "id": "co-794ea9e0da",
+   "jurisdiction": "CO",
+   "title": "City and County of Denver -- Denver Local Minimum Wage Adjusts to $19.29 per Hour for 2026",
+   "url": "https://www.denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Department-of-Finance/News/2025/Denver-Local-Minimum-Wage-Adjusts-to-19.29-per-Hour-for-2026",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/CO-local-2026.json"
+   ]
+  },
+  {
+   "id": "co-6e7f2f8ff7",
+   "jurisdiction": "CO",
+   "title": "City and County of Denver Tax Guide Topic No. 61 -- Occupational Privilege Taxes (OPT or Head Tax)",
+   "url": "https://www.denvergov.org/content/dam/denvergov/Portals/571/documents/TaxGuide/TaxGuideTopic61_OccupationalPrivilegeTaxes.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/CO-2025.json",
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
+   ]
+  },
+  {
+   "id": "co-1827eb9141",
+   "jurisdiction": "CO",
+   "title": "City of Boulder -- Local Minimum Wage",
+   "url": "https://bouldercolorado.gov/local-minimum-wage",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/CO-local-2026.json"
+   ]
+  },
+  {
+   "id": "co-fa310c6979",
+   "jurisdiction": "CO",
+   "title": "City of Glendale, CO \u2014 Occupational Privilege Tax (municipal code Chapter 3.21 and the city's own OPT page)",
+   "url": "https://www.glendale.co.us/355/Occupational-Privilege-Tax",
+   "origin": "data",
+   "used_by": [
+    "data/states/CO-2025.json",
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
+   ]
+  },
+  {
+   "id": "co-56628cca1e",
+   "jurisdiction": "CO",
+   "title": "City of Sheridan, CO \u2014 Occupational Privilege Tax",
+   "url": "https://ci.sheridan.co.us/288/Occupational-Privilege-Tax",
+   "origin": "data",
+   "used_by": [
+    "data/states/CO-2025.json",
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
+   ]
+  },
+  {
+   "id": "co-783844535e",
+   "jurisdiction": "CO",
+   "title": "Colorado DOR -- DR 1098 Colorado Withholding Worksheet for Employers",
+   "url": "https://tax.colorado.gov/DR1098",
+   "origin": "data",
+   "used_by": [
+    "data/states/CO-2025.json"
+   ]
+  },
+  {
+   "id": "co-6f18c8d4c2",
+   "jurisdiction": "CO",
+   "title": "Colorado Department of Labor & Employment \u2014 UI Premium Rates",
+   "url": "https://cdle.colorado.gov/employers/unemployment-insurance-premiums/premium-rates",
+   "origin": "data",
+   "used_by": [
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
+   ]
+  },
+  {
+   "id": "co-87a5bd27f3",
+   "jurisdiction": "CO",
+   "title": "Colorado Department of Revenue: news",
+   "url": "https://tax.colorado.gov/news",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "co-bf8aca859b",
+   "jurisdiction": "CO",
+   "title": "Colorado Division of Labor Standards (local minimum wage notices, INFO #19)",
+   "url": "https://cdle.colorado.gov/dlss",
+   "kind": "index",
+   "origin": "curated",
+   "used_by": [
+    "data/minimum-wage/local/CO-local-2026.json"
+   ],
+   "replaces": [
+    "https://www.edgewaterco.gov/doing-business/minimum-wage"
+   ]
+  },
+  {
+   "id": "co-22bb192b52",
+   "jurisdiction": "CO",
+   "title": "Colorado FAMLI -- premium rate (0.9% for 2023-2025; 0.88% from 2026)",
+   "url": "https://famli.colorado.gov/employers",
+   "origin": "data",
+   "used_by": [
+    "data/states/CO-2025.json",
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
+   ]
+  },
+  {
+   "id": "co-0afe64d6b9",
+   "jurisdiction": "CO",
+   "title": "Colorado Wage Withholding Tax Guide, January 2026",
+   "url": "https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
+   ]
+  },
+  {
+   "id": "co-f33b5d7026",
+   "jurisdiction": "CO",
+   "title": "Colorado wage withholding",
+   "url": "https://tax.colorado.gov/withholding-tax",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "co-c08446b337",
+   "jurisdiction": "CO",
+   "title": "Colorado withholding tax guide",
+   "url": "https://tax.colorado.gov/withholding-tax-guide",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "co-1d9b7b596b",
+   "jurisdiction": "CO",
+   "title": "DR 1098 (10/21/25), 2026 Colorado Withholding Worksheet for Employers",
+   "url": "https://tax.colorado.gov/sites/tax/files/documents/DR_1098_Colorado_Withholding_Worksheet_for_Employees.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
+   ]
+  },
+  {
+   "id": "co-4e47f3aee1",
+   "jurisdiction": "CO",
+   "title": "USDA National Finance Center -- Colorado State Income Tax Withholding (NFC-26-1772551649, 2026-03-04)",
+   "url": "https://help.nfc.usda.gov/bulletins/2026/1772551649.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/CO-2025.json"
+   ]
+  },
+  {
+   "id": "ct-f8836fa76f",
+   "jurisdiction": "CT",
+   "title": "Connecticut 2026 Informational Publications (Circular CT is IP 2026(1))",
+   "url": "https://portal.ct.gov/drs/publications/informational-publications/2026/2026-informational-publications",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ct-75b91b6b44",
+   "jurisdiction": "CT",
+   "title": "Connecticut DRS -- IP 2025(1) Circular CT Employer's Tax Guide (issued 2024-12-17), including TPG-211 2025 Withholding Calculation Rules (Rev. 12/24)",
+   "url": "https://portal.ct.gov/-/media/drs/publications/pubsip/2025/ip-2025-1.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/CT-2025.json"
+   ]
+  },
+  {
+   "id": "ct-8add94a686",
+   "jurisdiction": "CT",
+   "title": "Connecticut DRS publications (new years' publication lists appear here)",
+   "url": "https://portal.ct.gov/drs/publications/publications-page",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ct-68210cdf52",
+   "jurisdiction": "CT",
+   "title": "Connecticut DRS: newsroom",
+   "url": "https://portal.ct.gov/drs/newsroom",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ct-1bcc7fb522",
+   "jurisdiction": "CT",
+   "title": "Form CT-W4, Employee's Withholding Certificate (Rev. 12/25, effective 2026-01-01)",
+   "url": "https://portal.ct.gov/-/media/drs/forms/2026/wth/ct-w4_1225fillable.pdf?rev=9e9e0216cd394f579961e1d4cd5c7ab3&hash=4D496BCBD10659462D3799732B5A91F2",
+   "origin": "data",
+   "used_by": [
+    "data/states/CT-2026.json",
+    "data/states/CT-2027.json"
+   ]
+  },
+  {
+   "id": "ct-deef46ce60",
+   "jurisdiction": "CT",
+   "title": "IP 2026(1), Connecticut Employer's Tax Guide, Circular CT",
+   "url": "https://portal.ct.gov/-/media/drs/publications/pubsip/2026/ip-2026-1.pdf?rev=4482a3dca0a44b28ae39381a91fb0916&hash=57C34787EE2C1D4A7F989EE1F6B8F0F8",
+   "origin": "data",
+   "used_by": [
+    "data/states/CT-2026.json",
+    "data/states/CT-2027.json"
+   ]
+  },
+  {
+   "id": "ct-52979ce45c",
+   "jurisdiction": "CT",
+   "title": "TPG-211, 2026 Withholding Calculation Rules (Rev. 12/25)",
+   "url": "https://portal.ct.gov/-/media/drs/forms/2025/wth/tpg-211_1225.pdf?rev=e16ef13773ec42d4bf0afd2e192e0176&hash=CCF9990D8EE0AA580A11BC6E97235650",
+   "origin": "data",
+   "used_by": [
+    "data/states/CT-2026.json",
+    "data/states/CT-2027.json"
+   ]
+  },
+  {
+   "id": "dc-95479ec6fd",
+   "jurisdiction": "DC",
+   "title": "D.C. Code \u00a7 1-206.02(a)(5) (Home Rule Act \u00a7 602(a)(5)) nonresident-taxation prohibition",
+   "url": "https://code.dccouncil.gov/us/dc/council/code/sections/1-206.02",
+   "origin": "data",
+   "used_by": [
+    "data/states/DC-2026.json"
+   ]
+  },
+  {
+   "id": "dc-9a1f378687",
+   "jurisdiction": "DC",
+   "title": "D.C. Code \u00a7 16-572 (as amended by the Wage Garnishment Fairness Amendment Act of 2018) \u2014 ordinary garnishment limited to 25% of the amount by which disposable wages exceed 40 times the DC minimum hourly wage; nothing withheld if disposable wages are at or below that 40x floor",
+   "url": "https://code.dccouncil.gov/us/dc/council/laws/22-296",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "dc-09b0713e93",
+   "jurisdiction": "DC",
+   "title": "D.C. Home Rule Act of 1973 nonresident-taxation prohibition",
+   "url": "https://code.dccouncil.gov/us/dc/council/code/sections/47-1806.04",
+   "origin": "data",
+   "used_by": [
+    "data/states/DC-2027.json"
+   ]
+  },
+  {
+   "id": "dc-f341759fb9",
+   "jurisdiction": "DC",
+   "title": "DC Department of Employment Services -- Office of Wage-Hour Compliance",
+   "url": "https://does.dc.gov/service/office-wage-hour-compliance-0",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/DC-2026.json"
+   ]
+  },
+  {
+   "id": "dc-eb5da3a2e2",
+   "jurisdiction": "DC",
+   "title": "DC Department of Employment Services \u2014 DC minimum wage $18.40/hr effective 2026-07-01 (up from a lower H1-2026 figure)",
+   "url": "https://does.dc.gov/sites/default/files/dc/sites/does/publication/attachments/2026%20Minimum%20Wage%20Poster.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "dc-8f124e7558",
+   "jurisdiction": "DC",
+   "title": "DC Department of Employment Services, Office of Paid Family Leave -- Employer Information",
+   "url": "https://dcpaidfamilyleave.dc.gov/employer-information/",
+   "origin": "data",
+   "used_by": [
+    "data/states/DC-2025.json"
+   ]
+  },
+  {
+   "id": "dc-b3198251fc",
+   "jurisdiction": "DC",
+   "title": "DC Department of Employment Services, Office of Wage and Hour -- District of Columbia Minimum Wage Increase (public notice)",
+   "url": "https://does.dc.gov/sites/default/files/dc/sites/does/publication/attachments/2026%20Minimum%20Wage%20Increase%20Notice_0.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/DC-2026.json"
+   ]
+  },
+  {
+   "id": "dc-66209869a6",
+   "jurisdiction": "DC",
+   "title": "DC OTR withholding",
+   "url": "https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "dc-ebcc73efdb",
+   "jurisdiction": "DC",
+   "title": "DC Office of Tax and Revenue: home (notices)",
+   "url": "https://otr.cfo.dc.gov/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "dc-c0035095f2",
+   "jurisdiction": "DC",
+   "title": "USDA National Finance Center -- District of Columbia Income Tax Withholding (NFC-22-1668460546, still NFC's current DC formula in 2026)",
+   "url": "https://help.nfc.usda.gov/bulletins/2022/1668460546.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/DC-2025.json",
+    "data/states/DC-2026.json",
+    "data/states/DC-2027.json"
+   ]
+  },
+  {
+   "id": "de-db28b6eada",
+   "jurisdiction": "DE",
+   "title": "Delaware Department of Labor -- Employer Services / Unemployment Insurance Tax (Merit Rate Table)",
+   "url": "https://labor.delaware.gov/divisions/unemployment-insurance/employer-services/",
+   "origin": "data",
+   "used_by": [
+    "data/states/DE-2026.json",
+    "data/states/DE-2027.json"
+   ]
+  },
+  {
+   "id": "de-1a96746d6a",
+   "jurisdiction": "DE",
+   "title": "Delaware Division of Revenue -- Employer's Guide (Withholding Tables)",
+   "url": "https://revenue.delaware.gov/employers-guide-withholding-tables/",
+   "origin": "data",
+   "used_by": [
+    "data/states/DE-2025.json"
+   ]
+  },
+  {
+   "id": "de-88bc0abf11",
+   "jurisdiction": "DE",
+   "title": "Delaware Division of Revenue: home (announcements)",
+   "url": "https://revenue.delaware.gov/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "de-b524d54773",
+   "jurisdiction": "DE",
+   "title": "Delaware House Bill 13 (153rd General Assembly) + House Substitute No. 2 for HB13 -- bracket-restructuring proposal",
+   "url": "https://legis.delaware.gov/BillDetail?LegislationId=141813",
+   "origin": "data",
+   "used_by": [
+    "data/states/DE-2026.json",
+    "data/states/DE-2027.json"
+   ]
+  },
+  {
+   "id": "de-196392c3ba",
+   "jurisdiction": "DE",
+   "title": "Delaware withholding forms and guide",
+   "url": "https://revenue.delaware.gov/employers-guide-withholding-regulations-employers-duties/",
+   "kind": "index",
+   "origin": "curated",
+   "used_by": [
+    "data/states/DE-2026.json",
+    "data/states/DE-2027.json"
+   ]
+  },
+  {
+   "id": "de-4632e0c374",
+   "jurisdiction": "DE",
+   "title": "Employer's & TPAs' Guide to Delaware Paid Leave",
+   "url": "https://laborfiles.delaware.gov/main/pfl/Employer_and_TPAs_Guide_to_DPL.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/DE-2025.json",
+    "data/states/DE-2026.json",
+    "data/states/DE-2027.json"
+   ]
+  },
+  {
+   "id": "de-656e00e512",
+   "jurisdiction": "DE",
+   "title": "Form DE-W4, Employee's Withholding Allowance Certificate + DE-W4R Resident Allowance Worksheet (Revision 20220304)",
+   "url": "https://revenuefiles.delaware.gov/2021/DE-W4.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/DE-2026.json",
+    "data/states/DE-2027.json"
+   ]
+  },
+  {
+   "id": "de-b681ce750c",
+   "jurisdiction": "DE",
+   "title": "Form W-4NR, Non-Resident Withholding Computation Worksheet (Revision 20220304)",
+   "url": "https://revenuefiles.delaware.gov/docs/w4nr.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/DE-2026.json",
+    "data/states/DE-2027.json"
+   ]
+  },
+  {
    "id": "ga-6162a1afda",
    "jurisdiction": "GA",
    "title": "Employer's Withholding Tax Guide 2026 (Revised June 2026, reflecting HB 463 signed 2026-05-11)",
@@ -855,6 +1567,187 @@
     "data/states/GA-2026.json",
     "data/states/GA-2027.json"
    ]
+  },
+  {
+   "id": "hi-3f42c3b67d",
+   "jurisdiction": "HI",
+   "title": "Haw. Rev. Stat. \u00a7 652-1 \u2014 MARGINAL brackets on monthly disposable earnings: 5% of the first $100/month, 10% of the next $100/month (i.e. the $100-$200 slice), 20% of everything over $200/month, prorated to 'an equivalent portion... per week' for other pay frequencies",
+   "url": "https://www.capitol.hawaii.gov/hrscurrent/Vol13_Ch0601-0676/HRS0652/HRS_0652-0001.htm",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "hi-93e02d06aa",
+   "jurisdiction": "HI",
+   "title": "Hawaii DLIR Disability Compensation Division -- 2025 Maximum Weekly Wage Base and Maximum Weekly Benefit Amount (2024-12-02)",
+   "url": "https://labor.hawaii.gov/dcd/files/2023/05/2025-Max-Weekly-Wage-Base-Rev-2025.03.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/HI-2025.json"
+   ]
+  },
+  {
+   "id": "hi-2371a36889",
+   "jurisdiction": "HI",
+   "title": "Hawaii DOTAX withholding",
+   "url": "https://tax.hawaii.gov/geninfo/a2_b2_4empl_whhold/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "hi-dea958dcf2",
+   "jurisdiction": "HI",
+   "title": "Hawaii Department of Taxation -- Booklet A, Employer's Tax Guide (Rev. 2025)",
+   "url": "https://files.hawaii.gov/tax/news/pubs/25BkltA.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/HI-2025.json",
+    "data/states/HI-2026.json",
+    "data/states/HI-2027.json"
+   ]
+  },
+  {
+   "id": "hi-4d28f20ef3",
+   "jurisdiction": "HI",
+   "title": "Hawaii Department of Taxation: news",
+   "url": "https://tax.hawaii.gov/news/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "hi-96e863a26e",
+   "jurisdiction": "HI",
+   "title": "Hawaii Dept of Labor and Industrial Relations -- Tax Rate Schedule and Weekly Benefit Amount (Unemployment Insurance)",
+   "url": "https://labor.hawaii.gov/ui/tax-rate-schedule-and-weekly-benefit-amount/",
+   "origin": "data",
+   "used_by": [
+    "data/states/HI-2026.json",
+    "data/states/HI-2027.json"
+   ]
+  },
+  {
+   "id": "hi-b2d260034e",
+   "jurisdiction": "HI",
+   "title": "Hawaii Dept of Labor and Industrial Relations, Disability Compensation Division -- 2026 Maximum Weekly Wage Base and Maximum Weekly Benefit Amount",
+   "url": "https://labor.hawaii.gov/dcd/files/2025/12/2026-Maximum-Weekly-Wage-Base.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/HI-2026.json",
+    "data/states/HI-2027.json"
+   ]
+  },
+  {
+   "id": "hi-42ace01381",
+   "jurisdiction": "HI",
+   "title": "Hawaii Dept of Labor and Industrial Relations, Wage Standards Division -- Hawaii Family Leave (HFLL)",
+   "url": "https://labor.hawaii.gov/wsd/hawaii-family-leave/",
+   "origin": "data",
+   "used_by": [
+    "data/states/HI-2026.json",
+    "data/states/HI-2027.json"
+   ]
+  },
+  {
+   "id": "hi-2d8114ad20",
+   "jurisdiction": "HI",
+   "title": "Hawaii employer payroll updates",
+   "url": "https://tax.hawaii.gov/payrollupdate/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ia-51d27e15e3",
+   "jurisdiction": "IA",
+   "title": "2026 IA W-4, Employee Withholding Allowance Certificate",
+   "url": "https://revenue.iowa.gov/media/4324/download?inline=",
+   "origin": "data",
+   "used_by": [
+    "data/states/IA-2026.json",
+    "data/states/IA-2027.json"
+   ]
+  },
+  {
+   "id": "ia-8c6708ce6a",
+   "jurisdiction": "IA",
+   "title": "House File 2631 (91st General Assembly) \u2014 proposed Iowa Family and Medical Leave Act",
+   "url": "https://www.legis.iowa.gov/docs/publications/LGI/91/HF2631.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/IA-2026.json",
+    "data/states/IA-2027.json"
+   ]
+  },
+  {
+   "id": "ia-28528caf00",
+   "jurisdiction": "IA",
+   "title": "Iowa - Illinois Reciprocal Agreement \u2014 Iowa Department of Revenue",
+   "url": "https://revenue.iowa.gov/taxes/tax-guidance/individual-income-tax/iowa-illinois-reciprocal-agreement",
+   "origin": "data",
+   "used_by": [
+    "data/states/IA-2026.json",
+    "data/states/IA-2027.json"
+   ]
+  },
+  {
+   "id": "ia-804775dea4",
+   "jurisdiction": "IA",
+   "title": "Iowa Code \u00a7 642.21 \u2014 disposable earnings exempt to the extent provided by the federal CCPA, PLUS an additional cumulative CALENDAR-YEAR dollar cap per judgment creditor keyed to the debtor's own earnings reasonably expected for the year",
+   "url": "https://www.legis.iowa.gov/docs/code/642.21.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "ia-12c77846db",
+   "jurisdiction": "IA",
+   "title": "Iowa DOR -- Iowa Withholding Formula For Wages Paid Beginning January 1, 2025",
+   "url": "https://revenue.iowa.gov/media/61/download?inline",
+   "origin": "data",
+   "used_by": [
+    "data/states/IA-2025.json"
+   ]
+  },
+  {
+   "id": "ia-0cdcab3179",
+   "jurisdiction": "IA",
+   "title": "Iowa Department of Revenue: press releases",
+   "url": "https://revenue.iowa.gov/press-releases",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ia-f7edae2a6c",
+   "jurisdiction": "IA",
+   "title": "Iowa Individual Income Tax Withholding Formula, Effective January 1, 2026",
+   "url": "https://revenue.iowa.gov/media/53/download?inline=",
+   "origin": "data",
+   "used_by": [
+    "data/states/IA-2026.json",
+    "data/states/IA-2027.json"
+   ]
+  },
+  {
+   "id": "ia-67f5cfc3d7",
+   "jurisdiction": "IA",
+   "title": "Iowa Workforce Development / Iowa Division of Labor -- Your Rights Under the Iowa Minimum Wage Law and Wage FAQs",
+   "url": "https://workforce.iowa.gov/media/234/download",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/IA-2026.json"
+   ]
+  },
+  {
+   "id": "ia-81aa5600bf",
+   "jurisdiction": "IA",
+   "title": "Iowa withholding",
+   "url": "https://revenue.iowa.gov/taxes/tax-guidance/withholding-tax",
+   "kind": "index",
+   "origin": "curated"
   },
   {
    "id": "id-8157f4d51a",
@@ -954,6 +1847,131 @@
    ]
   },
   {
+   "id": "il-24bd8dd136",
+   "jurisdiction": "IL",
+   "title": "2026 IL-700-T Illinois Withholding Tax Tables",
+   "url": "https://tax.illinois.gov/forms/withholding/currentyear/il-700-t-withholding-guide-tables.html",
+   "origin": "data",
+   "used_by": [
+    "data/states/IL-2026.json",
+    "data/states/IL-2027.json"
+   ]
+  },
+  {
+   "id": "il-558fcf3c52",
+   "jurisdiction": "IL",
+   "title": "2026 State Experience Factor and Employers' UI Contribution Rates (EA-50 Report, Illinois Department of Employment Security)",
+   "url": "https://ides.illinois.gov/content/dam/soi/en/web/ides/ides_forms_and_publications/EA-50_2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/IL-2026.json",
+    "data/states/IL-2027.json"
+   ]
+  },
+  {
+   "id": "il-908ea42275",
+   "jurisdiction": "IL",
+   "title": "735 ILCS 5/12-803 \u2014 maximum wage deduction: lesser of 15% of GROSS weekly wages, or the amount by which disposable earnings exceed 45x the greater of the state or federal minimum hourly wage",
+   "url": "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "il-db6bfb1728",
+   "jurisdiction": "IL",
+   "title": "City of Chicago / Cook County July 1, 2026 minimum wage announcements",
+   "url": "https://www.cookcountyil.gov/news/cook-county-issues-notice-minimum-wage-ordinance-5",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/IL-local-2026.json"
+   ]
+  },
+  {
+   "id": "il-cc04bd200f",
+   "jurisdiction": "IL",
+   "title": "Form IL-W-4 (R-07/23) and its Illinois Withholding Allowance Worksheet",
+   "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/withholding/documents/currentyear/il-w-4.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/IL-2025.json",
+    "data/states/IL-2026.json",
+    "data/states/IL-2027.json"
+   ]
+  },
+  {
+   "id": "il-6fbeebe70e",
+   "jurisdiction": "IL",
+   "title": "IL-W-5-NR \u2014 Employee's Statement of Nonresidence in Illinois (R-12/10)",
+   "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/withholding/documents/2025/il-w-5-nr.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/IL-2026.json",
+    "data/states/IL-2027.json"
+   ]
+  },
+  {
+   "id": "il-569cb0bca0",
+   "jurisdiction": "IL",
+   "title": "Illinois DOR -- 2025 Booklet IL-700-T, Illinois Withholding Tax Tables",
+   "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/withholding/documents/2025/il-700-t.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/IL-2025.json"
+   ]
+  },
+  {
+   "id": "il-1cfae155a8",
+   "jurisdiction": "IL",
+   "title": "Illinois Department of Labor \u2014 Minimum Wage Law (current state minimum hourly wage)",
+   "url": "https://labor.illinois.gov/laws-rules/fls/minimum-wage-law.html",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "il-869ba5b989",
+   "jurisdiction": "IL",
+   "title": "Illinois Department of Revenue: news",
+   "url": "https://tax.illinois.gov/research/news.html",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "il-00c7f8095a",
+   "jurisdiction": "IL",
+   "title": "Illinois State Income Tax Exemptions - 2026 (Illinois Office of Comptroller, Payroll Bulletin 1-26)",
+   "url": "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
+   "origin": "data",
+   "used_by": [
+    "data/states/IL-2026.json",
+    "data/states/IL-2027.json"
+   ]
+  },
+  {
+   "id": "il-584349fcaf",
+   "jurisdiction": "IL",
+   "title": "Illinois withholding income tax",
+   "url": "https://tax.illinois.gov/research/taxinformation/withholdingincometax.html",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "il-3574699e38",
+   "jurisdiction": "IL",
+   "title": "Pub-130, Withholding Illinois Income Tax for My Employees",
+   "url": "https://tax.illinois.gov/research/publications/pubs/who-is-required-to-withhold-illinois-income-tax/withholding-illinois-income-tax-for-my-employees.html",
+   "origin": "data",
+   "used_by": [
+    "data/states/IL-2026.json",
+    "data/states/IL-2027.json"
+   ]
+  },
+  {
    "id": "in-64c1a3537b",
    "jurisdiction": "IN",
    "title": "Form WH-47 \u2014 Certificate of Residence",
@@ -1002,7 +2020,8 @@
     "data/local/IN-counties-2027.json",
     "data/states/IN-2026.json",
     "data/states/IN-2027.json"
-   ]
+   ],
+   "reconcile": "in_counties"
   },
   {
    "id": "in-faecb568d1",
@@ -1047,6 +2066,58 @@
     "data/states/IN-2025.json",
     "data/states/IN-2026.json",
     "data/states/IN-2027.json"
+   ]
+  },
+  {
+   "id": "ks-68647e40a7",
+   "jurisdiction": "KS",
+   "title": "Form 200, Local Intangibles Tax Return (Rev. 9-23-25)",
+   "url": "https://www.ksrevenue.gov/pdf/20026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/KS-2026.json",
+    "data/states/KS-2027.json"
+   ]
+  },
+  {
+   "id": "ks-6a3e772e2e",
+   "jurisdiction": "KS",
+   "title": "K.S.A. \u00a7 60-2310 \u2014 wage garnishment: maximum part of earnings subject to garnishment is the lesser of 25% of aggregate disposable earnings, or the amount by which disposable earnings exceed 30 times the federal minimum hourly wage",
+   "url": "https://www.ksrevisor.gov/statutes/chapters/ch60/060_023_0010.html",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "ks-de3d4dd4ae",
+   "jurisdiction": "KS",
+   "title": "KW-100, Kansas Withholding Tax Guide (Rev. 10-24) -- SUPPLEMENTAL WAGES section, page 8",
+   "url": "https://ksrevenue.gov/pdf/kw100.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/KS-2026.json",
+    "data/states/KS-2027.json"
+   ]
+  },
+  {
+   "id": "ks-01bc8025f4",
+   "jurisdiction": "KS",
+   "title": "Kansas Department of Revenue: press releases",
+   "url": "https://www.ksrevenue.gov/pressreleases.html",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ks-41963fbebb",
+   "jurisdiction": "KS",
+   "title": "Kansas withholding tax guide KW-100",
+   "url": "https://www.ksrevenue.gov/pdf/kw100.pdf",
+   "origin": "curated",
+   "used_by": [
+    "data/states/KS-2026.json",
+    "data/states/KS-2027.json"
    ]
   },
   {
@@ -1477,6 +2548,283 @@
    ]
   },
   {
+   "id": "la-27745012e5",
+   "jurisdiction": "LA",
+   "title": "Louisiana DOR -- R-1306 (1/25) Louisiana Withholding Tables and Formulas, effective on or after January 1, 2025",
+   "url": "https://dam.ldr.la.gov/taxforms/1306-1-25.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/LA-2025.json"
+   ]
+  },
+  {
+   "id": "la-52c61d4ca4",
+   "jurisdiction": "LA",
+   "title": "Louisiana Department of Revenue: news and announcements",
+   "url": "https://revenue.louisiana.gov/news-and-announcements",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "la-b4d8c572ab",
+   "jurisdiction": "LA",
+   "title": "Louisiana Revised Statutes 47:293 -- Tax table income (residents)",
+   "url": "https://legis.la.gov/Legis/Law.aspx?d=101760",
+   "origin": "data",
+   "used_by": [
+    "data/states/LA-2026.json",
+    "data/states/LA-2027.json"
+   ]
+  },
+  {
+   "id": "la-706e332554",
+   "jurisdiction": "LA",
+   "title": "Louisiana withholding",
+   "url": "https://revenue.louisiana.gov/businesses/widely-used-tax-types/withholding/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "la-44bbdd7887",
+   "jurisdiction": "LA",
+   "title": "Louisiana withholding tax tables",
+   "url": "https://revenue.louisiana.gov/tax-professionals/general-resources/louisiana-withholding-tax-tables/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "la-bf29dd3ab3",
+   "jurisdiction": "LA",
+   "title": "R-1300 (1/26) -- Employee's Withholding Certificate (Form L-4)",
+   "url": "https://dam.ldr.la.gov/taxforms/1300-1-26-F.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/LA-2026.json",
+    "data/states/LA-2027.json"
+   ]
+  },
+  {
+   "id": "la-61b87ae030",
+   "jurisdiction": "LA",
+   "title": "R-1306 (1/26) -- Louisiana Withholding Tables and Formulas, effective on or after January 1, 2026",
+   "url": "https://dam.ldr.la.gov/taxforms/1306-1-26.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/LA-2026.json",
+    "data/states/LA-2027.json"
+   ]
+  },
+  {
+   "id": "la-80f6b568f8",
+   "jurisdiction": "LA",
+   "title": "USDA National Finance Center -- Louisiana State Income Tax Withholding bulletin (2025)",
+   "url": "https://help.nfc.usda.gov/bulletins/2025/1740487316.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/LA-2026.json",
+    "data/states/LA-2027.json"
+   ]
+  },
+  {
+   "id": "ma-8bd1b13b6d",
+   "jurisdiction": "MA",
+   "title": "Form M-4, Massachusetts Employee's Withholding Exemption Certificate (Rev. 11/19)",
+   "url": "https://www.miltonma.gov/DocumentCenter/View/6586/Massachusetts-Withholding-Form--M-4",
+   "origin": "data",
+   "used_by": [
+    "data/states/MA-2026.json",
+    "data/states/MA-2027.json"
+   ]
+  },
+  {
+   "id": "ma-949aae902f",
+   "jurisdiction": "MA",
+   "title": "Mass. DOR -- Massachusetts 4% Surtax on Taxable Income",
+   "url": "https://www.mass.gov/info-details/massachusetts-4-surtax-on-taxable-income",
+   "origin": "data",
+   "used_by": [
+    "data/states/MA-2025.json",
+    "data/states/MA-2026.json",
+    "data/states/MA-2027.json"
+   ]
+  },
+  {
+   "id": "ma-f8ac83d32f",
+   "jurisdiction": "MA",
+   "title": "Massachusetts Circular M (2026, effective January 1)",
+   "url": "https://www.mass.gov/doc/massachusetts-circular-m-income-tax-withholding-tables-at-50-effective-january-1-2026/download",
+   "origin": "curated"
+  },
+  {
+   "id": "ma-4ba7e518ce",
+   "jurisdiction": "MA",
+   "title": "Massachusetts Constitution, Article LXXXIX (Home Rule Amendment), Section 7 \u2014 Limitations on Local Powers",
+   "url": "https://malegislature.gov/Laws/Constitution",
+   "origin": "data",
+   "used_by": [
+    "data/states/MA-2026.json",
+    "data/states/MA-2027.json"
+   ]
+  },
+  {
+   "id": "ma-cdc80eeb37",
+   "jurisdiction": "MA",
+   "title": "Massachusetts DOR withholding tax forms (new Circular M editions are listed here)",
+   "url": "https://www.mass.gov/lists/dor-withholding-tax-forms",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ma-362d8dfbd0",
+   "jurisdiction": "MA",
+   "title": "Massachusetts Department of Revenue: home (news and notices)",
+   "url": "https://www.mass.gov/orgs/massachusetts-department-of-revenue",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ma-e69c23c523",
+   "jurisdiction": "MA",
+   "title": "Massachusetts General Laws Chapter 175M, Section 6 \u2014 PFML Contributions",
+   "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter175M/Section6",
+   "origin": "data",
+   "used_by": [
+    "data/states/MA-2026.json",
+    "data/states/MA-2027.json"
+   ]
+  },
+  {
+   "id": "ma-7a0396a96a",
+   "jurisdiction": "MA",
+   "title": "Massachusetts General Laws Chapter 62B, Section 2 \u2014 Duty of employer to withhold",
+   "url": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleIX/Chapter62B/Section2",
+   "origin": "data",
+   "used_by": [
+    "data/states/MA-2026.json",
+    "data/states/MA-2027.json"
+   ]
+  },
+  {
+   "id": "ma-f3f46b347e",
+   "jurisdiction": "MA",
+   "title": "USDA National Finance Center \u2014 Massachusetts State Income Tax Withholding (NFC-26-1769797447)",
+   "url": "https://help.nfc.usda.gov/bulletins/2026/1769797447.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/MA-2026.json",
+    "data/states/MA-2027.json"
+   ]
+  },
+  {
+   "id": "md-cdc17c3ba6",
+   "jurisdiction": "MD",
+   "title": "2026 Maryland State and Local Income Tax Withholding Information (Central Payroll Bureau memo, Attachment 1: county rate table)",
+   "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/md/state-payroll/memos/2026/2026-maryland-state-and-local-withholding-information.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/MD-2026.json",
+    "data/states/MD-2027.json"
+   ]
+  },
+  {
+   "id": "md-c500bb90f3",
+   "jurisdiction": "MD",
+   "title": "Comptroller of Maryland -- Withholding Tax Facts, January 2025 - December 2025 (Revised 07/25)",
+   "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/legal-publications/facts/Withholding-Tax-Facts-2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/MD-2025.json"
+   ]
+  },
+  {
+   "id": "md-d8888f97db",
+   "jurisdiction": "MD",
+   "title": "Howard County, MD -- Minimum Wage schedule (Finance Department)",
+   "url": "https://www.howardcountymd.gov/finance/minimum-wage",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/MD-local-2026.json"
+   ]
+  },
+  {
+   "id": "md-8bd8af5775",
+   "jurisdiction": "MD",
+   "title": "Maryland Comptroller (marylandtaxes.gov): home (announcements)",
+   "url": "https://www.marylandtaxes.gov/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "md-142e91c94e",
+   "jurisdiction": "MD",
+   "title": "Maryland Comptroller: business taxes",
+   "url": "https://www.marylandtaxes.gov/business/index.php",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "md-de02db8bce",
+   "jurisdiction": "MD",
+   "title": "Maryland Division of Labor and Industry -- Maryland Minimum Wage and Overtime Law (Employment Standards Service)",
+   "url": "https://www.labor.maryland.gov/labor/wages/wagehrfacts.shtml",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/MD-2026.json"
+   ]
+  },
+  {
+   "id": "md-6837586c10",
+   "jurisdiction": "MD",
+   "title": "Maryland employer withholding",
+   "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/instructions/withholding/2026/withholding-guide.pdf",
+   "origin": "curated",
+   "used_by": [
+    "data/states/MD-2026.json",
+    "data/states/MD-2027.json"
+   ]
+  },
+  {
+   "id": "md-982a16c674",
+   "jurisdiction": "MD",
+   "title": "Maryland withholding tax facts",
+   "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/legal-publications/facts/withholding-tax-facts-2026.pdf",
+   "origin": "curated",
+   "used_by": [
+    "data/states/MD-2026.json",
+    "data/states/MD-2027.json"
+   ]
+  },
+  {
+   "id": "md-43a4e93e35",
+   "jurisdiction": "MD",
+   "title": "Montgomery County, MD Office of Human Rights -- Minimum Wage Increase (July 1, 2026)",
+   "url": "https://www.montgomerycountymd.gov/office-human-rights/minimum-wage-increase",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/MD-local-2026.json"
+   ]
+  },
+  {
+   "id": "md-9dcde44192",
+   "jurisdiction": "MD",
+   "title": "Montgomery County, MD tipped-employee cash wage ($4.00/hr, Montgomery County Code Sec. 27-69)",
+   "url": "https://www.montgomerycountymd.gov/humanrights/min-wage.html",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/MD-local-2026.json"
+   ]
+  },
+  {
+   "id": "md-745492832a",
+   "jurisdiction": "MD",
+   "title": "USDA National Finance Center -- Maryland State and Counties Income Tax Withholding (NFC-25-1743080634, 2025 formula before the revision)",
+   "url": "https://help.nfc.usda.gov/bulletins/2025/1743080634.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/MD-2025.json"
+   ]
+  },
+  {
    "id": "me-3a363f8d6d",
    "jurisdiction": "ME",
    "title": "14 M.R.S. \u00a7 3126 \u2014 ordinary garnishment limited to the lesser of 25% of disposable earnings or the amount by which disposable earnings exceed 40x the greater of the federal minimum wage or Maine's own minimum wage (26 M.R.S. \u00a7 664)",
@@ -1570,6 +2918,14 @@
     "data/states/ME-2026.json",
     "data/states/ME-2027.json"
    ]
+  },
+  {
+   "id": "me-306412aaa2",
+   "jurisdiction": "ME",
+   "title": "Maine Revenue Services: home (announcements)",
+   "url": "https://www.maine.gov/revenue/",
+   "kind": "index",
+   "origin": "curated"
   },
   {
    "id": "me-105c493e59",
@@ -1802,6 +3158,1183 @@
     "data/local/MI-cities-2025.json",
     "data/local/MI-cities-2026.json",
     "data/local/MI-cities-2027.json"
+   ]
+  },
+  {
+   "id": "mn-5e6a2ed0fc",
+   "jurisdiction": "MN",
+   "title": "2026 Form W-4MN, Section 2 -- Exemption From Minnesota Withholding",
+   "url": "https://www.revenue.state.mn.us/sites/default/files/2026-04/w-4mn.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/MN-2025.json",
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
+   ]
+  },
+  {
+   "id": "mn-4b376a9ce0",
+   "jurisdiction": "MN",
+   "title": "2026 Minnesota Withholding Tax Instructions and Tables (wh-inst-26)",
+   "url": "https://www.revenue.state.mn.us/sites/default/files/2025-12/wh-inst-26.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
+   ]
+  },
+  {
+   "id": "mn-893d6401b7",
+   "jurisdiction": "MN",
+   "title": "City of Minneapolis -- Minimum wage increases to $16.37 for all employers",
+   "url": "https://www.minneapolismn.gov/news/2025/december/minimum-wage/",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/MN-local-2026.json"
+   ]
+  },
+  {
+   "id": "mn-bb67f51ead",
+   "jurisdiction": "MN",
+   "title": "City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)",
+   "url": "https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/MN-local-2026.json"
+   ]
+  },
+  {
+   "id": "mn-f57b907ac0",
+   "jurisdiction": "MN",
+   "title": "Minn. R. 8002.0200 (administrative rule implementing 290.081's reciprocity exclusion)",
+   "url": "https://www.revisor.mn.gov/rules/8002.0200/",
+   "origin": "data",
+   "used_by": [
+    "data/states/MN-2025.json",
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
+   ]
+  },
+  {
+   "id": "mn-bf10c5e515",
+   "jurisdiction": "MN",
+   "title": "Minn. Stat. \u00a7 268B.14 (Premium rates)",
+   "url": "https://www.revisor.mn.gov/statutes/cite/268B.14",
+   "origin": "data",
+   "used_by": [
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
+   ]
+  },
+  {
+   "id": "mn-2dafbfc1b6",
+   "jurisdiction": "MN",
+   "title": "Minn. Stat. \u00a7 290.081 (Income of nonresidents, reciprocity)",
+   "url": "https://www.revisor.mn.gov/statutes/cite/290.081",
+   "origin": "data",
+   "used_by": [
+    "data/states/MN-2025.json",
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
+   ]
+  },
+  {
+   "id": "mn-ceb55e82d9",
+   "jurisdiction": "MN",
+   "title": "Minn. Stat. \u00a7 477A.016",
+   "url": "https://www.revisor.mn.gov/statutes/cite/477A.016",
+   "origin": "data",
+   "used_by": [
+    "data/states/MN-2025.json",
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
+   ]
+  },
+  {
+   "id": "mn-f98d1c5bd3",
+   "jurisdiction": "MN",
+   "title": "Minn. Stat. \u00a7 571.922 \u2014 non-support garnishment: fully exempt at or below 40x the applicable minimum wage; 10% between 40x-60x; 15% between 60x-80x; 25% above 80x (a cliff schedule \u2014 crossing a threshold puts the WHOLE disposable-earnings figure in that bracket, not just the excess, unlike the federal formula)",
+   "url": "https://www.revisor.mn.gov/statutes/cite/571.922",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "mn-16a2679c7d",
+   "jurisdiction": "MN",
+   "title": "Minnesota DEED -- Paid Leave: premiums begin January 1, 2026",
+   "url": "https://mn.gov/deed/paidleave/employers/",
+   "origin": "data",
+   "used_by": [
+    "data/states/MN-2025.json"
+   ]
+  },
+  {
+   "id": "mn-5aa16f5b41",
+   "jurisdiction": "MN",
+   "title": "Minnesota Department of Labor and Industry -- Minimum wage in Minnesota",
+   "url": "https://www.dli.mn.gov/business/employment-practices/minimum-wage-minnesota",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/MN-2026.json"
+   ]
+  },
+  {
+   "id": "mn-66b2c3d97f",
+   "jurisdiction": "MN",
+   "title": "Minnesota Department of Labor and Industry \u2014 2026 statewide minimum wage ($11.41/hr, single rate for all employer sizes as of 2026-01-01)",
+   "url": "https://dli.mn.gov/news/minimum-wage-rate-adjusted-inflation-jan-1-2026",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "mn-670411f56a",
+   "jurisdiction": "MN",
+   "title": "Minnesota Department of Revenue -- Reciprocity for Individuals, and wh-inst-26 p.4 ('Reciprocity for Residents of Michigan or North Dakota')",
+   "url": "https://www.revenue.state.mn.us/reciprocity",
+   "origin": "data",
+   "used_by": [
+    "data/states/MN-2025.json",
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
+   ]
+  },
+  {
+   "id": "mn-589fa521cf",
+   "jurisdiction": "MN",
+   "title": "Minnesota Department of Revenue: what's new",
+   "url": "https://www.revenue.state.mn.us/whats-new",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "mn-c8db387719",
+   "jurisdiction": "MN",
+   "title": "Minnesota Paid Leave -- Premium rate and contributions",
+   "url": "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
+   "origin": "data",
+   "used_by": [
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
+   ]
+  },
+  {
+   "id": "mn-93ce91b34d",
+   "jurisdiction": "MN",
+   "title": "Minnesota withholding tax",
+   "url": "https://www.revenue.state.mn.us/withholding-tax",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "mn-a4a9d011be",
+   "jurisdiction": "MN",
+   "title": "USDA National Finance Center -- Minnesota State Income Tax Withholding (NFC-25-1743707530, 2025 formula)",
+   "url": "https://help.nfc.usda.gov/bulletins/2025/1743707530.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/MN-2025.json"
+   ]
+  },
+  {
+   "id": "mo-5666f995b6",
+   "jurisdiction": "MO",
+   "title": "2026 Missouri Withholding Tax Formula",
+   "url": "https://dor.mo.gov/forms/Withholding%20Formula_2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/MO-2026.json",
+    "data/states/MO-2027.json"
+   ]
+  },
+  {
+   "id": "mo-e6faef6bfd",
+   "jurisdiction": "MO",
+   "title": "Form MO W-4, Employee's Withholding Certificate",
+   "url": "https://dor.mo.gov/forms/MO%20W-4.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/MO-2026.json",
+    "data/states/MO-2027.json"
+   ]
+  },
+  {
+   "id": "mo-c4e0e7fb7d",
+   "jurisdiction": "MO",
+   "title": "Missouri DOR -- 2025 Missouri Withholding Tax Formula",
+   "url": "https://dor.mo.gov/forms/Withholding%20Formula_2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/MO-2025.json"
+   ]
+  },
+  {
+   "id": "mo-02e00fb2ac",
+   "jurisdiction": "MO",
+   "title": "Missouri Department of Labor and Industrial Relations -- Minimum Wage",
+   "url": "https://labor.mo.gov/dls/minimum-wage",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/MO-2026.json"
+   ]
+  },
+  {
+   "id": "mo-3cae079bc7",
+   "jurisdiction": "MO",
+   "title": "Missouri Department of Revenue: news",
+   "url": "https://dor.mo.gov/news/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "mo-90f0b9894b",
+   "jurisdiction": "MO",
+   "title": "Missouri unemployment insurance 2026 rate/wage-base reporting (Bloomberg Tax, Vensure, MO DOLIR's own labor.mo.gov/des/employers/tax-rates page referenced)",
+   "url": "https://labor.mo.gov/des/employers/tax-rates",
+   "origin": "data",
+   "used_by": [
+    "data/states/MO-2026.json",
+    "data/states/MO-2027.json"
+   ]
+  },
+  {
+   "id": "mo-d39daf2f0b",
+   "jurisdiction": "MO",
+   "title": "Missouri withholding",
+   "url": "https://dor.mo.gov/taxation/business/tax-types/withholding/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ms-50f9f98f5a",
+   "jurisdiction": "MS",
+   "title": "Mississippi Department of Employment Security -- Employer FAQs",
+   "url": "https://mdes.ms.gov/employer-faqs/",
+   "origin": "data",
+   "used_by": [
+    "data/states/MS-2026.json",
+    "data/states/MS-2027.json"
+   ]
+  },
+  {
+   "id": "ms-2451bbd302",
+   "jurisdiction": "MS",
+   "title": "Mississippi Department of Revenue: news",
+   "url": "https://www.dor.ms.gov/news",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ms-4ab0235759",
+   "jurisdiction": "MS",
+   "title": "Mississippi withholding",
+   "url": "https://www.dor.ms.gov/business/withholding-tax",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ms-f79d3f52fc",
+   "jurisdiction": "MS",
+   "title": "Pub 89-700-25-1 (Rev. 07/25) -- Withholding Income Tax Tables and Employer Instructions, effective January 1, 2026",
+   "url": "https://www.dor.ms.gov/sites/default/files/tax-forms/business/89700251revised1.13.2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/MS-2026.json",
+    "data/states/MS-2027.json"
+   ]
+  },
+  {
+   "id": "ms-90e917f2e5",
+   "jurisdiction": "MS",
+   "title": "USDA National Finance Center -- Mississippi State Income Tax Withholding (NFC-25-1745343478, effective pay period 06, 2025)",
+   "url": "https://help.nfc.usda.gov/bulletins/2025/1745343478.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/MS-2025.json"
+   ]
+  },
+  {
+   "id": "ms-bc2af1b7ff",
+   "jurisdiction": "MS",
+   "title": "USDA National Finance Center -- Mississippi State Income Tax Withholding bulletin (NFC-26-1768327516)",
+   "url": "https://help.nfc.usda.gov/bulletins/2026/1768327516.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/MS-2026.json",
+    "data/states/MS-2027.json"
+   ]
+  },
+  {
+   "id": "mt-871dbfd190",
+   "jurisdiction": "MT",
+   "title": "2026 Form MW-4, Montana Employee's Withholding and Exemption Certificate",
+   "url": "https://revenuefiles.mt.gov/files/Forms/Montana_Employee_Withholding_Allowance_and_Exemption_Certificate_Form_MW-4.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/MT-2026.json",
+    "data/states/MT-2027.json"
+   ]
+  },
+  {
+   "id": "mt-be96d1ec76",
+   "jurisdiction": "MT",
+   "title": "2026 Montana Publication 1, A Guide to Montana Tax Withholding and Estimated Payments",
+   "url": "https://revenuefiles.mt.gov/files/Forms/Publication-1/Publication-1-2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/MT-2026.json",
+    "data/states/MT-2027.json"
+   ]
+  },
+  {
+   "id": "mt-d3e1571950",
+   "jurisdiction": "MT",
+   "title": "Montana DLI -- UI Contribution Rate Schedules (all 12 schedules, I-XII)",
+   "url": "https://uid.dli.mt.gov/employers/schedule-of-contribution-rates",
+   "origin": "data",
+   "used_by": [
+    "data/states/MT-2026.json",
+    "data/states/MT-2027.json"
+   ]
+  },
+  {
+   "id": "mt-f98588262c",
+   "jurisdiction": "MT",
+   "title": "Montana Employer and Information Agent Guide (publication page)",
+   "url": "https://revenue.mt.gov/publications/montana-employer-and-information-agent-guide",
+   "kind": "index",
+   "origin": "curated",
+   "used_by": [
+    "data/states/MT-2025.json",
+    "data/states/MT-2026.json",
+    "data/states/MT-2027.json"
+   ],
+   "replaces": [
+    "https://mtrevenue.gov/publications/"
+   ]
+  },
+  {
+   "id": "mt-18605bd904",
+   "jurisdiction": "MT",
+   "title": "Montana Employer and Information Agent Guide with Montana Withholding Tax Tables (V4, November 2025)",
+   "url": "https://revenuefiles.mt.gov/files/Forms/Montana_Employer_and_Information_Agent_Guide_with_Tax_Tables.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/MT-2026.json",
+    "data/states/MT-2027.json"
+   ]
+  },
+  {
+   "id": "mt-2599ef4f7b",
+   "jurisdiction": "MT",
+   "title": "Montana withholding",
+   "url": "https://revenue.mt.gov/taxes/withholding-tax/wage-withholding-returns-and-payments",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "mt-2ae1b2691d",
+   "jurisdiction": "MT",
+   "title": "Montana withholding news",
+   "url": "https://revenue.mt.gov/news/recent-news/2026-withholding-updates",
+   "origin": "curated"
+  },
+  {
+   "id": "nc-70d5f0f2ba",
+   "jurisdiction": "NC",
+   "title": "N.C. Gen. Stat. \u00a7 1-362 \u2014 wages/personal earnings exempt from attachment/garnishment for ordinary judgment debt (North Carolina provides no attachment remedy against a resident debtor's wages outside taxes, support, and a short named list of exceptions)",
+   "url": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_1/GS_1-362.html",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "nc-0f5b81d0f3",
+   "jurisdiction": "NC",
+   "title": "NC Division of Employment Security -- Tax Rate Information",
+   "url": "https://www.des.nc.gov/employers/tax-rate-information",
+   "origin": "data",
+   "used_by": [
+    "data/states/NC-2026.json",
+    "data/states/NC-2027.json"
+   ]
+  },
+  {
+   "id": "nc-132025df37",
+   "jurisdiction": "NC",
+   "title": "NC-30 (Web 11-25) -- 2026 Income Tax Withholding Tables and Instructions for Employers",
+   "url": "https://www.ncdor.gov/income-tax-withholding-tables-and-instructions-employers/open",
+   "origin": "data",
+   "used_by": [
+    "data/states/NC-2026.json",
+    "data/states/NC-2027.json"
+   ]
+  },
+  {
+   "id": "nc-e720098358",
+   "jurisdiction": "NC",
+   "title": "NCDOR -- Withholding Tax Frequently Asked Questions",
+   "url": "https://www.ncdor.gov/withholding-tax-frequently-asked-questions",
+   "origin": "data",
+   "used_by": [
+    "data/states/NC-2026.json",
+    "data/states/NC-2027.json"
+   ]
+  },
+  {
+   "id": "nc-1eb060c52a",
+   "jurisdiction": "NC",
+   "title": "North Carolina Department of Revenue: news",
+   "url": "https://www.ncdor.gov/news",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "nc-2c67e69f29",
+   "jurisdiction": "NC",
+   "title": "North Carolina withholding",
+   "url": "https://www.ncdor.gov/taxes-forms/withholding-tax",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "nc-c0dcd0fd7e",
+   "jurisdiction": "NC",
+   "title": "USDA National Finance Center -- North Carolina Income Tax Withholding (2025)",
+   "url": "https://help.nfc.usda.gov/bulletins/2025/1740006150.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/NC-2025.json"
+   ]
+  },
+  {
+   "id": "nd-67b029ac73",
+   "jurisdiction": "ND",
+   "title": "2026 Income Tax Withholding Rates and Instructions (North Dakota Office of State Tax Commissioner)",
+   "url": "https://www.tax.nd.gov/sites/www/files/documents/forms/individual/2026-iit/2026-income-tax-withholding-rates-booklet.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/ND-2026.json",
+    "data/states/ND-2027.json"
+   ]
+  },
+  {
+   "id": "nd-f977a5524b",
+   "jurisdiction": "ND",
+   "title": "Form NDW-R -- Reciprocity Exemption from Withholding for Qualifying Minnesota and Montana Residents",
+   "url": "https://www.tax.nd.gov/sites/www/files/documents/forms/business/ndwrfillable.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/ND-2026.json",
+    "data/states/ND-2027.json"
+   ]
+  },
+  {
+   "id": "nd-6c3b61d236",
+   "jurisdiction": "ND",
+   "title": "North Dakota Office of State Tax Commissioner -- Income Tax Withholding Rates and Instructions, 2025 Calendar Year",
+   "url": "https://www.tax.nd.gov/sites/www/files/documents/misc-discuss-folder/Final_2025%20Income%20Tax%20Withholding%20Rates%20%20Instructions.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/ND-2025.json"
+   ]
+  },
+  {
+   "id": "nd-67fbd9af27",
+   "jurisdiction": "ND",
+   "title": "North Dakota Office of State Tax Commissioner: news",
+   "url": "https://www.tax.nd.gov/news",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "nd-ef1b55b103",
+   "jurisdiction": "ND",
+   "title": "North Dakota withholding",
+   "url": "https://www.tax.nd.gov/income-tax-withholding",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ne-1c1f4767ff",
+   "jurisdiction": "NE",
+   "title": "2026 Nebraska Circular EN (full withholding guide)",
+   "url": "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026cir_en_whole.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/NE-2026.json",
+    "data/states/NE-2027.json"
+   ]
+  },
+  {
+   "id": "ne-e1af9f570f",
+   "jurisdiction": "NE",
+   "title": "A Guide to Understanding Nebraska's Unemployment Insurance Combined Tax Rates (2026)",
+   "url": "https://dol.nebraska.gov/webdocs/Resources/Items/2026%20UI%20guide%20to%20understanding.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/NE-2026.json",
+    "data/states/NE-2027.json"
+   ]
+  },
+  {
+   "id": "ne-6b2caa8c06",
+   "jurisdiction": "NE",
+   "title": "Nebraska Attorney General -- suit against the City of Omaha over its minimum wage ordinance",
+   "url": "https://ago.nebraska.gov/news/attorney-general-hilgers-sues-city-omaha-over-unconstitutional-minimum-wage-ordinance",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/NE-local-2026.json"
+   ]
+  },
+  {
+   "id": "ne-f3a0bd30b6",
+   "jurisdiction": "NE",
+   "title": "Nebraska DOR -- Nebraska Income Tax Withholding Percentage Method Tables (For Wages Paid on or After January 1, 2025)",
+   "url": "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2024/2025_percent.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/NE-2025.json"
+   ]
+  },
+  {
+   "id": "ne-7fa665e1ae",
+   "jurisdiction": "NE",
+   "title": "Nebraska Department of Labor -- Nebraska's Minimum Wage Increases to $15 Effective January 1, 2026",
+   "url": "https://dol.nebraska.gov/PressRelease/Details/338",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/NE-2026.json"
+   ]
+  },
+  {
+   "id": "ne-261deda6aa",
+   "jurisdiction": "NE",
+   "title": "Nebraska Department of Revenue: news",
+   "url": "https://revenue.nebraska.gov/news",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ne-75dc704bc6",
+   "jurisdiction": "NE",
+   "title": "Nebraska Income Tax Withholding Percentage Method \u2014 Withholding Allowance Table",
+   "url": "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026_percent.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/NE-2026.json",
+    "data/states/NE-2027.json"
+   ]
+  },
+  {
+   "id": "ne-004af5cdf3",
+   "jurisdiction": "NE",
+   "title": "Nebraska Legislative Bill 258 (2026), approved by the Governor February 9, 2026",
+   "url": "https://nebraskalegislature.gov/FloorDocs/109/PDF/Slip/LB258.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/NE-2026.json"
+   ]
+  },
+  {
+   "id": "ne-d64b1f3636",
+   "jurisdiction": "NE",
+   "title": "Nebraska withholding",
+   "url": "https://revenue.nebraska.gov/businesses/nebraska-income-tax-withholding",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ne-174f834a71",
+   "jurisdiction": "NE",
+   "title": "USDA National Finance Center -- Nebraska State Income Tax Withholding (2025)",
+   "url": "https://help.nfc.usda.gov/bulletins/2025/1740158785.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/NE-2025.json"
+   ]
+  },
+  {
+   "id": "nj-92f4f549fb",
+   "jurisdiction": "NJ",
+   "title": "City of Newark Q1 2026 Payroll Tax Booklet",
+   "url": "https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF",
+   "origin": "data",
+   "used_by": [
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
+   ]
+  },
+  {
+   "id": "nj-812619eda0",
+   "jurisdiction": "NJ",
+   "title": "Form NJ-165 -- Employee's Certificate of Nonresidence in New Jersey",
+   "url": "https://www.nj.gov/treasury/taxation/pdf/current/nj165.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/NJ-2025.json",
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
+   ]
+  },
+  {
+   "id": "nj-00b93f8140",
+   "jurisdiction": "NJ",
+   "title": "Form NJ-W4, Employee's Withholding Allowance Certificate (1-21, last modified 2022-12-06)",
+   "url": "https://nj.gov/treasury/taxation/pdf/current/njw4.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
+   ]
+  },
+  {
+   "id": "nj-f6de512498",
+   "jurisdiction": "NJ",
+   "title": "HHS/ASPE 2026 Poverty Guidelines for the 48 Contiguous States and DC \u2014 household of 1: $15,960; +$5,680 per additional person",
+   "url": "https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "nj-580303cbb9",
+   "jurisdiction": "NJ",
+   "title": "NJ Division of Employer Accounts -- Rate information, contributions, and due dates",
+   "url": "https://www.nj.gov/labor/ea/employer-services/rate-info/",
+   "origin": "data",
+   "used_by": [
+    "data/states/NJ-2025.json",
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
+   ]
+  },
+  {
+   "id": "nj-42348e0230",
+   "jurisdiction": "NJ",
+   "title": "NJ Division of Temporary Disability and Family Leave Insurance \u2014 Worker FLI contribution rate",
+   "url": "https://www.nj.gov/labor/myleavebenefits/worker/fli/",
+   "origin": "data",
+   "used_by": [
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
+   ]
+  },
+  {
+   "id": "nj-c43cfa19f7",
+   "jurisdiction": "NJ",
+   "title": "NJ Division of Temporary Disability and Family Leave Insurance \u2014 Worker TDI contribution rate",
+   "url": "https://www.nj.gov/labor/myleavebenefits/worker/tdi/",
+   "origin": "data",
+   "used_by": [
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
+   ]
+  },
+  {
+   "id": "nj-26f8b9db2e",
+   "jurisdiction": "NJ",
+   "title": "NJDOL \u2014 New Benefit Rates for 2026 (taxable wage bases)",
+   "url": "https://www.nj.gov/labor/lwdhome/press/2025/20251229_newbenefitrates2026.shtml",
+   "origin": "data",
+   "used_by": [
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
+   ]
+  },
+  {
+   "id": "nj-3813640c13",
+   "jurisdiction": "NJ",
+   "title": "New Jersey Department of Labor and Workforce Development -- minimum wage increase announcement for January 1, 2026",
+   "url": "https://www.nj.gov/labor/lwdhome/press/2025/20251001_Minimum_Wage.shtml",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/NJ-2026.json"
+   ]
+  },
+  {
+   "id": "nj-0db1e90800",
+   "jurisdiction": "NJ",
+   "title": "New Jersey Division of Taxation: what's new",
+   "url": "https://www.nj.gov/treasury/taxation/whatsnew.shtml",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "nj-fb66759b8e",
+   "jurisdiction": "NJ",
+   "title": "New Jersey NJ-WT withholding instructions",
+   "url": "https://www.nj.gov/treasury/taxation/pdf/current/njwt.pdf",
+   "origin": "curated",
+   "used_by": [
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
+   ]
+  },
+  {
+   "id": "nj-0798523dd0",
+   "jurisdiction": "NJ",
+   "title": "New Jersey Office of Administrative Law -- Notice of Administrative Changes, Minimum Wage (N.J.A.C. 12:56-3.1/3.2/3.3), filed 2025-09-26",
+   "url": "https://www.nj.gov/labor/assets/PDFs/Legal%20Notices/Other/Public%20Notice%20Minimum%20Wage%202026_FINAL.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/NJ-2026.json"
+   ]
+  },
+  {
+   "id": "nj-d4de59a7e8",
+   "jurisdiction": "NJ",
+   "title": "New Jersey Withholding Rate Tables (Percentage Method, effective Oct 1, 2020)",
+   "url": "https://www.nj.gov/treasury/taxation/pdf/withholdingtables.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/NJ-2025.json",
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
+   ]
+  },
+  {
+   "id": "nj-5b6e2ab262",
+   "jurisdiction": "NJ",
+   "title": "New Jersey employer payroll tax",
+   "url": "https://www.nj.gov/treasury/taxation/businesses/payroll/index.shtml",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "nm-7b52bd6e80",
+   "jurisdiction": "NM",
+   "title": "City of Albuquerque -- Albuquerque Minimum Wage Information",
+   "url": "https://www.cabq.gov/legal/albuquerque-minimum-wage-information",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/NM-local-2026.json"
+   ]
+  },
+  {
+   "id": "nm-fe3826da79",
+   "jurisdiction": "NM",
+   "title": "City of Las Cruces -- Official Notice, Minimum Wage Ordinance (2026)",
+   "url": "https://lascruces.gov/wp-content/uploads/2025/09/MinimumWageEng26.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/NM-local-2026.json"
+   ]
+  },
+  {
+   "id": "nm-6fd4e854fb",
+   "jurisdiction": "NM",
+   "title": "City of Santa Fe -- Living Wage Ordinance notice (Municipal Code Sec. 28-1 SFCC 1987)",
+   "url": "https://santafenm.gov/media/news_pdf/2025_Living_Wage_Ordinance.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/NM-local-2026.json"
+   ]
+  },
+  {
+   "id": "nm-43a879eee4",
+   "jurisdiction": "NM",
+   "title": "New Mexico TRD -- Important return changes for 2026 (WKC fee notice)",
+   "url": "https://www.tax.newmexico.gov/individuals/wp-content/uploads/sites/5/2026/01/WKC-Fee-Payment-Other-Update-.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/NM-2025.json"
+   ]
+  },
+  {
+   "id": "nm-b8b9c21d3e",
+   "jurisdiction": "NM",
+   "title": "New Mexico Taxation and Revenue Department \u2014 FYI-104, New Mexico Withholding Tax",
+   "url": "https://www.tax.newmexico.gov/forms-publications/",
+   "origin": "data",
+   "used_by": [
+    "data/states/NM-2025.json",
+    "data/states/NM-2026.json",
+    "data/states/NM-2027.json"
+   ]
+  },
+  {
+   "id": "nm-f9ee77f1f0",
+   "jurisdiction": "NM",
+   "title": "New Mexico Taxation and Revenue: news",
+   "url": "https://www.tax.newmexico.gov/news/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "nm-f855813bdb",
+   "jurisdiction": "NM",
+   "title": "New Mexico withholding (FYI-104)",
+   "url": "https://realfile.tax.newmexico.gov/FYI-104.pdf",
+   "origin": "curated",
+   "used_by": [
+    "data/states/NM-2026.json",
+    "data/states/NM-2027.json"
+   ]
+  },
+  {
+   "id": "nm-c2ee8a3eed",
+   "jurisdiction": "NM",
+   "title": "New Mexico workers' compensation FAQ (fee amounts)",
+   "url": "https://www.workerscomp.nm.gov/faqs/",
+   "origin": "curated"
+  },
+  {
+   "id": "nm-1fbdd706ee",
+   "jurisdiction": "NM",
+   "title": "Santa Fe County -- Living Wage Ordinance and 2026 living wage adjustment announcement",
+   "url": "https://www.santafecountynm.gov/livingwage",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/NM-local-2026.json"
+   ]
+  },
+  {
+   "id": "nm-e2bec9c5a5",
+   "jurisdiction": "NM",
+   "title": "Santa Fe city and county living wage figures in effect through February 2026",
+   "url": "https://www.santafecountynm.gov/news/detail/santa-fe-county-announces-living-wage-increase-effective-march-1-2025",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/NM-local-2026.json"
+   ]
+  },
+  {
+   "id": "nm-38ef178358",
+   "jurisdiction": "NM",
+   "title": "Texas Workforce Commission cross-reference for New Mexico UI figures -- New Mexico DWS 'How UI Tax Rates Are Calculated' + Bloomberg Tax",
+   "url": "https://www.dws.state.nm.us/Unemployment/Unemployment-for-a-Business/Unemployment-Insurance-Tax-Information/How-UI-Tax-Rates-Are-Calculated",
+   "origin": "data",
+   "used_by": [
+    "data/states/NM-2026.json",
+    "data/states/NM-2027.json"
+   ]
+  },
+  {
+   "id": "nm-aea5c9a404",
+   "jurisdiction": "NM",
+   "title": "USDA National Finance Center -- New Mexico State Income Tax Withholding bulletin (2025)",
+   "url": "https://help.nfc.usda.gov/bulletins/2025/1741189057.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/NM-2026.json",
+    "data/states/NM-2027.json"
+   ]
+  },
+  {
+   "id": "ny-14de83a77f",
+   "jurisdiction": "NY",
+   "title": "29 U.S.C. 2611(4)(A)(i)-(ii)",
+   "url": "https://www.dol.gov/agencies/whd/fmla",
+   "origin": "data",
+   "used_by": [
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-ace9e454c1",
+   "jurisdiction": "NY",
+   "title": "DOL -- Calculating an Employer's UI Contribution Rate",
+   "url": "https://dol.ny.gov/calculating-employers-ui-contribution-rate",
+   "origin": "data",
+   "used_by": [
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-0bd46f2a22",
+   "jurisdiction": "NY",
+   "title": "DOL -- Employer Contribution Rate Table",
+   "url": "https://dol.ny.gov/employer-contribution-rate-table",
+   "origin": "data",
+   "used_by": [
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-f92e9989a1",
+   "jurisdiction": "NY",
+   "title": "DOL -- Subsidiary Contribution Rate Table",
+   "url": "https://dol.ny.gov/subsidiary-rate-table",
+   "origin": "data",
+   "used_by": [
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-3a561f3380",
+   "jurisdiction": "NY",
+   "title": "DOL -- Unemployment Insurance Rate Information",
+   "url": "https://dol.ny.gov/unemployment-insurance-rate-information",
+   "origin": "data",
+   "used_by": [
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-4c0e0a3dca",
+   "jurisdiction": "NY",
+   "title": "EEOC -- Section 2, Threshold Issues",
+   "url": "https://www.eeoc.gov/laws/guidance/section-2-threshold-issues",
+   "origin": "data",
+   "used_by": [
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-d4f2c6eeff",
+   "jurisdiction": "NY",
+   "title": "IRS -- Determining if an employer is an applicable large employer",
+   "url": "https://www.irs.gov/affordable-care-act/employers/determining-if-an-employer-is-an-applicable-large-employer",
+   "origin": "data",
+   "used_by": [
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-48aecf14c8",
+   "jurisdiction": "NY",
+   "title": "IT-2104, Employee's Withholding Allowance Certificate (2026)",
+   "url": "https://www.tax.ny.gov/pdf/current_forms/it/it2104_fill_in.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-4527e473d4",
+   "jurisdiction": "NY",
+   "title": "Instructions for Form NYS-45 (tax.ny.gov)",
+   "url": "https://www.tax.ny.gov/pdf/current_forms/wt/nys45i.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-75c50b7e24",
+   "jurisdiction": "NY",
+   "title": "NY Department of Financial Services -- COBRA and Premium Assistance",
+   "url": "https://www.dfs.ny.gov/consumers/health_insurance/cobra_and_premium_assistance",
+   "origin": "data",
+   "used_by": [
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-284a641e61",
+   "jurisdiction": "NY",
+   "title": "NY Department of Labor -- Register for Unemployment Insurance",
+   "url": "https://dol.ny.gov/register-unemployment-insurance-0",
+   "origin": "data",
+   "used_by": [
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-bb0eb744c9",
+   "jurisdiction": "NY",
+   "title": "NY Department of Labor -- Worker Adjustment and Retraining Notification (WARN)",
+   "url": "https://dol.ny.gov/worker-adjustment-and-retraining-notification-warn",
+   "origin": "data",
+   "used_by": [
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-98bb301062",
+   "jurisdiction": "NY",
+   "title": "NY Election Law 3-400 via NY Senate Open Legislation API (free key: NYSENATE_API_KEY)",
+   "url": "https://legislation.nysenate.gov/api/3/laws/ELN/3-400?key={env:NYSENATE_API_KEY}",
+   "origin": "curated",
+   "used_by": [
+    "data/minimum-wage/states/NY-2026.json"
+   ],
+   "drop_json_keys": [
+    "responseTime"
+   ],
+   "replaces": [
+    "https://www.nysenate.gov/legislation/laws/ELN/3-400"
+   ]
+  },
+  {
+   "id": "ny-56c42c3ba4",
+   "jurisdiction": "NY",
+   "title": "NY Labor Law 651 via NY Senate Open Legislation API (free key: NYSENATE_API_KEY)",
+   "url": "https://legislation.nysenate.gov/api/3/laws/LAB/651?key={env:NYSENATE_API_KEY}",
+   "origin": "curated",
+   "used_by": [
+    "data/minimum-wage/states/NY-2026.json"
+   ],
+   "drop_json_keys": [
+    "responseTime"
+   ],
+   "replaces": [
+    "https://www.nysenate.gov/legislation/laws/LAB/651"
+   ]
+  },
+  {
+   "id": "ny-8c25ef08ba",
+   "jurisdiction": "NY",
+   "title": "NY Paid Family Leave payroll deduction notice 2026 (rate and cap)",
+   "url": "https://www.wcb.ny.gov/content/main/forms/PFLDocs/pfl-pay-deduction-notice-2026.pdf",
+   "origin": "curated"
+  },
+  {
+   "id": "ny-a1e4ff92e7",
+   "jurisdiction": "NY",
+   "title": "NY State Comptroller payroll bulletins (PFL, withholding changes)",
+   "url": "https://www.osc.ny.gov/state-agencies/payroll-bulletins",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ny-7c8f6ff782",
+   "jurisdiction": "NY",
+   "title": "NY Workers' Compensation Board: Paid Family Leave 2026 announcement",
+   "url": "https://www.wcb.ny.gov/content/main/PressRe/paid-family-leave-2026.jsp",
+   "origin": "curated",
+   "used_by": [
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
+   ],
+   "replaces": [
+    "https://paidfamilyleave.ny.gov/private-employer-coverage-requirements"
+   ]
+  },
+  {
+   "id": "ny-47dc9810d4",
+   "jurisdiction": "NY",
+   "title": "NY.gov -- New York State Paid Sick Leave FAQ",
+   "url": "https://www.ny.gov/sites/default/files/atoms/files/PSL_FAQ_PaidSickLeaveFAQ.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-e7a67fb09a",
+   "jurisdiction": "NY",
+   "title": "NYS Paid Family Leave -- 2025 contribution rate 0.388%, maximum annual contribution $354.53",
+   "url": "https://paidfamilyleave.ny.gov/2025",
+   "origin": "data",
+   "used_by": [
+    "data/states/NY-2025.json"
+   ]
+  },
+  {
+   "id": "ny-f97c4f886a",
+   "jurisdiction": "NY",
+   "title": "New York Department of Taxation: press",
+   "url": "https://www.tax.ny.gov/press/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ny-878dc0d1f8",
+   "jurisdiction": "NY",
+   "title": "New York NYS-50-T-NYS",
+   "url": "https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_nys.pdf",
+   "origin": "curated",
+   "used_by": [
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-a960d02489",
+   "jurisdiction": "NY",
+   "title": "New York State Department of Labor -- Home Care Aide Minimum Wage Fact Sheet (P105)",
+   "url": "https://dol.ny.gov/home-care-aide-minimum-wage-fact-sheet-p105",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/sectoral/NY-sectoral-2026.json"
+   ]
+  },
+  {
+   "id": "ny-a7fb2e2987",
+   "jurisdiction": "NY",
+   "title": "New York State Department of Labor -- Minimum Wage (rates effective 01/01/2026)",
+   "url": "https://dol.ny.gov/minimum-wage-0",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/NY-2026.json"
+   ]
+  },
+  {
+   "id": "ny-526c9a8539",
+   "jurisdiction": "NY",
+   "title": "New York withholding tax",
+   "url": "https://www.tax.ny.gov/bus/wt/wtidx.htm",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ny-7a171c5c74",
+   "jurisdiction": "NY",
+   "title": "U.S. DOL -- COBRA Continuation Coverage",
+   "url": "https://www.dol.gov/general/topic/health-plans/cobra",
+   "origin": "data",
+   "used_by": [
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-6809ab1ee1",
+   "jurisdiction": "NY",
+   "title": "U.S. DOL Wage and Hour Opinion Letter (1986-05-07) on county-appointed poll workers",
+   "url": "https://www.dol.gov/agencies/whd/compliance-assistance/handy-reference-guide-flsa",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/NY-2026.json"
+   ]
+  },
+  {
+   "id": "ny-c0f5031cb1",
+   "jurisdiction": "NY",
+   "title": "data/minimum-wage/federal-2026.json (this engine's own federal minimum wage file)",
+   "url": "https://www.dol.gov/agencies/whd/flsa",
+   "origin": "data",
+   "used_by": [
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json",
+    "data/minimum-wage/federal-2026.json"
+   ]
+  },
+  {
+   "id": "ny-972c0c2c33",
+   "jurisdiction": "NY",
+   "title": "eCFR 29 CFR 553.106 amendment history - official API",
+   "url": "https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?section=553.106",
+   "origin": "curated",
+   "used_by": [
+    "data/minimum-wage/states/NY-2026.json"
+   ],
+   "replaces": [
+    "https://www.ecfr.gov/current/title-29/subtitle-B/chapter-V/subchapter-A/part-553/subpart-B/section-553.106"
    ]
   },
   {
@@ -2173,6 +4706,243 @@
    "origin": "curated"
   },
   {
+   "id": "ok-95b3b0461f",
+   "jurisdiction": "OK",
+   "title": "Form OK-W-4 (Rev. 3-2021) -- Employee's State Withholding Allowance Certificate",
+   "url": "https://oklahoma.gov/content/dam/ok/en/tax/documents/forms/businesses/general/OK-W-4.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/OK-2026.json",
+    "data/states/OK-2027.json"
+   ]
+  },
+  {
+   "id": "ok-592746841c",
+   "jurisdiction": "OK",
+   "title": "Oklahoma Employment Security Commission -- Important Numbers for Employers 2026",
+   "url": "https://oklahoma.gov/content/dam/ok/en/oesc/images/misc/Employer-Improtant-Numbers-2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/OK-2026.json",
+    "data/states/OK-2027.json"
+   ]
+  },
+  {
+   "id": "ok-bacea3a094",
+   "jurisdiction": "OK",
+   "title": "Oklahoma Tax Commission -- 2025 Oklahoma Income Tax Withholding Tables (Packet OW-2, revised 11-2024), effective January 1, 2025",
+   "url": "https://www.oklahoma.gov/content/dam/ok/en/tax/documents/resources/publications/businesses/withholding-tables/WHTables-2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/OK-2025.json"
+   ]
+  },
+  {
+   "id": "ok-79785e181a",
+   "jurisdiction": "OK",
+   "title": "Oklahoma Tax Commission: home (announcements)",
+   "url": "https://oklahoma.gov/tax.html",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ok-fc9a4ccbff",
+   "jurisdiction": "OK",
+   "title": "Oklahoma withholding OW-2",
+   "url": "https://oklahoma.gov/tax/businesses/withholding.html",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ok-0baa065a73",
+   "jurisdiction": "OK",
+   "title": "Packet OW-2 (Revised 11-2025) -- 2026 Oklahoma Income Tax Withholding Tables",
+   "url": "https://www.oklahoma.gov/content/dam/ok/en/tax/documents/resources/publications/businesses/withholding-tables/WHTables-2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/OK-2026.json",
+    "data/states/OK-2027.json"
+   ]
+  },
+  {
+   "id": "or-8a77bf70be",
+   "jurisdiction": "OR",
+   "title": "150-206-436 (Rev. 12-31-25) Oregon Withholding Tax Formulas, effective 2026-01-01",
+   "url": "https://www.oregon.gov/dor/forms/FormsPubs/withholding-tax-formulas_206-436_2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
+   ]
+  },
+  {
+   "id": "or-994103600c",
+   "jurisdiction": "OR",
+   "title": "150-211-503 (Rev. 11-18-25) A Guide to TriMet and Lane Transit Payroll Taxes",
+   "url": "https://www.oregon.gov/dor/forms/formspubs/transit-payroll-taxes_211-503.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
+   ]
+  },
+  {
+   "id": "or-c6f0345e29",
+   "jurisdiction": "OR",
+   "title": "2026 Oregon Combined Payroll Tax Report Instructions",
+   "url": "https://www.oregon.gov/dor/forms/FormsPubs/combined-payroll_211-155-2_2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/OR-2025.json",
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
+   ]
+  },
+  {
+   "id": "or-0e754ef068",
+   "jurisdiction": "OR",
+   "title": "Canby Area Transit Taxes: A guide for businesses",
+   "url": "https://www.canbyoregon.gov/sites/default/files/fileattachments/transit_tax/page/2041/transit_tax_guide_for_businesses.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/OR-2025.json",
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
+   ]
+  },
+  {
+   "id": "or-7dba5cabbb",
+   "jurisdiction": "OR",
+   "title": "City of Wilsonville Transit Payroll Tax Information",
+   "url": "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information",
+   "origin": "data",
+   "used_by": [
+    "data/states/OR-2025.json",
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
+   ]
+  },
+  {
+   "id": "or-d8f7c81835",
+   "jurisdiction": "OR",
+   "title": "Current Tax and Contribution Rates (Oregon Employment Department)",
+   "url": "https://www.oregon.gov/employ/businesses/pages/current-tax-rate.aspx",
+   "origin": "data",
+   "used_by": [
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
+   ]
+  },
+  {
+   "id": "or-cd2a16cb2a",
+   "jurisdiction": "OR",
+   "title": "ORS 18.385(2) \u2014 75% of disposable earnings exempt from execution, or a flat per-period dollar minimum, whichever protects more; the dollar minimums step up by wages-payable date: weekly $254 (before 2025-01-01), $305, $338 (from 2025-07-01), $400 (from 2026-07-01), then 30x the Oregon minimum wage from 2027-07-01",
+   "url": "https://www.oregonlegislature.gov/bills_laws/ors/ors018.html",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "or-afcf8168de",
+   "jurisdiction": "OR",
+   "title": "Oregon DOR -- Withholding Tax Formulas, 150-206-436 (Rev. 12-10-24) for 2025",
+   "url": "https://www.oregon.gov/dor/forms/FormsPubs/withholding-tax-formulas_206-436_2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/OR-2025.json"
+   ]
+  },
+  {
+   "id": "or-40ca208fd7",
+   "jurisdiction": "OR",
+   "title": "Oregon Department of Revenue: Statewide Transit Tax (webpage)",
+   "url": "https://www.oregon.gov/dor/programs/businesses/pages/statewide-transit-tax.aspx",
+   "origin": "data",
+   "used_by": [
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
+   ]
+  },
+  {
+   "id": "or-f5c7c2d0d9",
+   "jurisdiction": "OR",
+   "title": "Oregon Department of Revenue: news",
+   "url": "https://www.oregon.gov/dor/news/Pages/default.aspx",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "or-a1d9b0c474",
+   "jurisdiction": "OR",
+   "title": "Oregon Workers' Benefit Fund rule changes",
+   "url": "https://wcd.oregon.gov/laws/Pages/new-rules.aspx",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "or-2c278aef3b",
+   "jurisdiction": "OR",
+   "title": "Oregon local minimum-wage/regional rate history (July 2025 - June 2026 figures)",
+   "url": "https://www.oregon.gov/boli/workers/pages/minimum-wage.aspx",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/OR-2026.json"
+   ]
+  },
+  {
+   "id": "or-a1b082bcf6",
+   "jurisdiction": "OR",
+   "title": "Oregon payroll tax",
+   "url": "https://www.oregon.gov/dor/programs/businesses/pages/payroll-updates.aspx",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "or-76c5f8eb90",
+   "jurisdiction": "OR",
+   "title": "Oregon withholding and payroll tax",
+   "url": "https://www.oregon.gov/dor/programs/businesses/pages/withholding-and-payroll-tax.aspx",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "or-7782a0fa2f",
+   "jurisdiction": "OR",
+   "title": "Paid Leave Oregon \u2014 Contributions Calculator / rate page",
+   "url": "https://paidleave.oregon.gov/employers/contributions-calculator.html",
+   "origin": "data",
+   "used_by": [
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
+   ]
+  },
+  {
+   "id": "or-cc1c29b684",
+   "jurisdiction": "OR",
+   "title": "Personal Income Tax Withholding Information for Employers/Payroll Providers",
+   "url": "https://www.portland.gov/revenue/withholding",
+   "origin": "data",
+   "used_by": [
+    "data/states/OR-2025.json",
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
+   ]
+  },
+  {
+   "id": "or-41d95f1cf1",
+   "jurisdiction": "OR",
+   "title": "Sandy Area Metro (SAM) Payroll and Self-Employment Tax Instructions",
+   "url": "https://www.ci.sandy.or.us/sites/default/files/fileattachments/economic_development/page/4671/transit_tax_instructions.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/OR-2025.json",
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
+   ]
+  },
+  {
    "id": "pa-709b82ec0c",
    "jurisdiction": "PA",
    "title": "42 Pa. Cons. Stat. \u00a7 8127 \u2014 wages/salaries/commissions exempt from attachment, execution or other process except for support orders, restitution/costs/fines/bail in a criminal proceeding, board owed for 4 weeks or less, and PHEAA (student loan) obligations",
@@ -2231,17 +5001,6 @@
    ]
   },
   {
-   "id": "pa-dc25d178f2",
-   "jurisdiction": "PA",
-   "title": "PA DCED Municipal Statistics -- EIT/PIT/LST Tax Register with Collector (statewide, official)",
-   "url": "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2026",
-   "origin": "data",
-   "used_by": [
-    "data/local/PA-EIT-LST-2026.json",
-    "data/local/PA-EIT-LST-2027.json"
-   ]
-  },
-  {
    "id": "pa-86b8e60d34",
    "jurisdiction": "PA",
    "title": "PA DCED Municipal Statistics -- EIT/PIT/LST Tax Register with Collector (statewide, official) -- 2025 edition",
@@ -2250,6 +5009,26 @@
    "used_by": [
     "data/local/PA-EIT-LST-2025.json"
    ]
+  },
+  {
+   "id": "pa-dc25d178f2",
+   "jurisdiction": "PA",
+   "title": "PA DCED Municipal Statistics: statewide EIT/PIT/LST register, 2026 (every municipality and school district)",
+   "url": "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2026",
+   "origin": "curated",
+   "used_by": [
+    "data/local/PA-EIT-LST-2026.json",
+    "data/local/PA-EIT-LST-2027.json"
+   ],
+   "reconcile": "pa_local"
+  },
+  {
+   "id": "pa-26b2a164e8",
+   "jurisdiction": "PA",
+   "title": "PA DCED Municipal Statistics: statewide EIT/PIT/LST register, 2027 (every municipality and school district)",
+   "url": "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2027",
+   "origin": "curated",
+   "reconcile": "pa_local"
   },
   {
    "id": "pa-d4ff9b144e",
@@ -2358,6 +5137,75 @@
    ]
   },
   {
+   "id": "ri-d9f64cd9b0",
+   "jurisdiction": "RI",
+   "title": "2026 Rhode Island Employer's Income Tax Withholding Tables (RI Division of Taxation)",
+   "url": "https://tax.ri.gov/sites/g/files/xkgbur541/files/2025-12/2026%20Withholding%20Tax%20Booklet.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/RI-2026.json",
+    "data/states/RI-2027.json"
+   ]
+  },
+  {
+   "id": "ri-862019197a",
+   "jurisdiction": "RI",
+   "title": "RI DLT -- 2025 Tax Rates for Unemployment Insurance and Temporary Disability Insurance (2024-12-20)",
+   "url": "https://dlt.ri.gov/press-releases/2025-tax-rates-unemployment-insurance-and-temporary-disability-insurance",
+   "origin": "data",
+   "used_by": [
+    "data/states/RI-2025.json"
+   ]
+  },
+  {
+   "id": "ri-ca03346bf0",
+   "jurisdiction": "RI",
+   "title": "RI Department of Labor & Training: 2026 TDI/TCI and UI Tax Rates",
+   "url": "https://dlt.ri.gov/press-releases/2026-tax-rates-unemployment-insurance-and-temporary-disability-insurance",
+   "origin": "data",
+   "used_by": [
+    "data/states/RI-2026.json",
+    "data/states/RI-2027.json"
+   ]
+  },
+  {
+   "id": "ri-d5dc626ce2",
+   "jurisdiction": "RI",
+   "title": "Reciprocity check (Rhode Island has NONE with Massachusetts or Connecticut, its only bordering states)",
+   "url": "https://www.mass.gov/info-details/learn-about-the-income-tax-paid-to-another-jurisdiction-credit",
+   "origin": "data",
+   "used_by": [
+    "data/states/RI-2026.json",
+    "data/states/RI-2027.json"
+   ]
+  },
+  {
+   "id": "ri-e46370a788",
+   "jurisdiction": "RI",
+   "title": "Rhode Island Division of Taxation -- 2025 Rhode Island Withholding Tax Booklet",
+   "url": "https://tax.ri.gov/sites/g/files/xkgbur541/files/2024-12/2025%20Withholding%20Tax%20Booklet_0.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/RI-2025.json"
+   ]
+  },
+  {
+   "id": "ri-765fd57a39",
+   "jurisdiction": "RI",
+   "title": "Rhode Island Division of Taxation: news",
+   "url": "https://tax.ri.gov/news",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "ri-bdb5673f09",
+   "jurisdiction": "RI",
+   "title": "Rhode Island withholding",
+   "url": "https://tax.ri.gov/tax-sections/withholding-tax",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
    "id": "sc-e541c3c2bc",
    "jurisdiction": "SC",
    "title": "S.C. Code Ann. \u00a7 15-39-410 \u2014 earnings of the debtor for personal services excluded from property reachable to satisfy a judgment",
@@ -2409,6 +5257,14 @@
    "used_by": [
     "data/states/SC-2025.json"
    ]
+  },
+  {
+   "id": "sc-e75c9301b9",
+   "jurisdiction": "SC",
+   "title": "South Carolina Department of Revenue: news",
+   "url": "https://dor.sc.gov/news",
+   "kind": "index",
+   "origin": "curated"
   },
   {
    "id": "sc-f29ced8fb2",
@@ -2506,6 +5362,437 @@
    "kind": "index",
    "origin": "curated",
    "follow_limit": 10
+  },
+  {
+   "id": "va-10e4ee4522",
+   "jurisdiction": "VA",
+   "title": "Form VA-4, Employee's Virginia Income Tax Withholding Exemption Certificate (Rev. 04/26) + Personal Exemption Worksheet",
+   "url": "https://www.tax.virginia.gov/sites/default/files/taxforms/withholding/any/va-4-any.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/VA-2026.json",
+    "data/states/VA-2027.json"
+   ]
+  },
+  {
+   "id": "va-102cc000bf",
+   "jurisdiction": "VA",
+   "title": "Va. Code Ann. \u00a7 34-29 \u2014 ordinary garnishment limited to the lesser of 25% of disposable earnings, or the amount by which disposable earnings exceed 40 times the greater of the federal or Virginia minimum hourly wage; nothing withheld if weekly disposable earnings are at or below that 40x floor",
+   "url": "https://law.lis.virginia.gov/vacode/title34/chapter4/section34-29/",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "va-772b7a9542",
+   "jurisdiction": "VA",
+   "title": "Virginia Department of Labor and Industry \u2014 2026 minimum wage $12.77/hr effective 2026-01-01",
+   "url": "https://doli.virginia.gov/2025/07/29/virginia-minimum-wage-rate-increasing-effective-january-1-2026/",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "va-544db114da",
+   "jurisdiction": "VA",
+   "title": "Virginia Paid Family and Medical Leave Insurance Program -- Governor's own press release",
+   "url": "https://www.governor.virginia.gov/newsroom/news-releases/2026/may-releases/name-1117602-en.html",
+   "origin": "data",
+   "used_by": [
+    "data/states/VA-2026.json",
+    "data/states/VA-2027.json"
+   ]
+  },
+  {
+   "id": "va-b3a051ecad",
+   "jurisdiction": "VA",
+   "title": "Virginia Tax -- Income Tax Withholding Guide for Employers (Rev. 05/25)",
+   "url": "https://www.tax.virginia.gov/sites/default/files/vatax-pdf/employer-withholding-instructions.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/VA-2025.json",
+    "data/states/VA-2026.json",
+    "data/states/VA-2027.json"
+   ]
+  },
+  {
+   "id": "va-f3cdc7eea5",
+   "jurisdiction": "VA",
+   "title": "Virginia Tax: news",
+   "url": "https://www.tax.virginia.gov/news",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "va-de3b2aa134",
+   "jurisdiction": "VA",
+   "title": "Virginia unemployment insurance -- VEC's own wage-base FAQ",
+   "url": "https://www.vec.virginia.gov/FAQs/employers/what-wage-base-each-employee-i-will-pay-taxes",
+   "origin": "data",
+   "used_by": [
+    "data/states/VA-2026.json",
+    "data/states/VA-2027.json"
+   ]
+  },
+  {
+   "id": "va-3e26b60555",
+   "jurisdiction": "VA",
+   "title": "Virginia withholding",
+   "url": "https://www.tax.virginia.gov/withholding-tax",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "vt-29e2e95027",
+   "jurisdiction": "VT",
+   "title": "Form W-4VT, Employee's Withholding Allowance Certificate (Rev. 12/18)",
+   "url": "https://tax.vermont.gov/sites/tax/files/documents/W-4VT.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/VT-2026.json",
+    "data/states/VT-2027.json"
+   ]
+  },
+  {
+   "id": "vt-398dc1fc40",
+   "jurisdiction": "VT",
+   "title": "GB-1210-2026, 2026 Income Tax Withholding Instructions, Tables, and Charts",
+   "url": "https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/VT-2026.json",
+    "data/states/VT-2027.json"
+   ]
+  },
+  {
+   "id": "vt-64667005d4",
+   "jurisdiction": "VT",
+   "title": "Governor Phil Scott Launches Voluntary Paid Family and Medical Leave Program \u2014 Office of Governor Phil Scott",
+   "url": "https://governor.vermont.gov/vtfmli",
+   "origin": "data",
+   "used_by": [
+    "data/states/VT-2026.json",
+    "data/states/VT-2027.json"
+   ]
+  },
+  {
+   "id": "vt-8c4e916431",
+   "jurisdiction": "VT",
+   "title": "Vermont Department of Taxes -- GB-1210, 2025 Income Tax Withholding Instructions, Tables, and Charts",
+   "url": "https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/VT-2025.json"
+   ]
+  },
+  {
+   "id": "vt-686c0323e1",
+   "jurisdiction": "VT",
+   "title": "Vermont Department of Taxes: news",
+   "url": "https://tax.vermont.gov/news",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "vt-a359b6d000",
+   "jurisdiction": "VT",
+   "title": "Vermont withholding",
+   "url": "https://tax.vermont.gov/business/withholding",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "wa-ea2845b8a3",
+   "jurisdiction": "WA",
+   "title": "City of Seattle Office of Labor Standards -- Minimum Wage Ordinance",
+   "url": "https://www.seattle.gov/laborstandards/ordinances/minimum-wage",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/WA-local-2026.json"
+   ]
+  },
+  {
+   "id": "wa-78ec5c3b87",
+   "jurisdiction": "WA",
+   "title": "City of Seattle, City Finance -- Payroll expense tax (2025 thresholds and rates)",
+   "url": "https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/payroll-expense-tax",
+   "origin": "data",
+   "used_by": [
+    "data/states/WA-2025.json",
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
+   ]
+  },
+  {
+   "id": "wa-5ff259aacd",
+   "jurisdiction": "WA",
+   "title": "City of Seattle, City Finance -- Social Housing Tax",
+   "url": "https://seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/social-housing-tax",
+   "origin": "data",
+   "used_by": [
+    "data/states/WA-2025.json",
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
+   ]
+  },
+  {
+   "id": "wa-d3e1dd421e",
+   "jurisdiction": "WA",
+   "title": "ESD \u2014 Paid Family and Medical Leave premium rate increases to 1.13% in 2026",
+   "url": "https://esd.wa.gov/about-us/news-release/2025/paid-family-medical-leave-premium-rate-increases-113-2026",
+   "origin": "data",
+   "used_by": [
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
+   ]
+  },
+  {
+   "id": "wa-a84313703c",
+   "jurisdiction": "WA",
+   "title": "Employer Wage Reporting and Premiums Toolkit (v25.1, June 2026)",
+   "url": "https://paidleave.wa.gov/app/uploads/2021/12/Employer-Wage-Reporting-and-Premiums-Toolkit-v25.1-2026.06.26.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
+   ]
+  },
+  {
+   "id": "wa-c015da8f06",
+   "jurisdiction": "WA",
+   "title": "L&I \u2014 Paid Family & Medical Leave (exempt employer/employee categories)",
+   "url": "https://www.lni.wa.gov/workers-rights/leave/paid-family-and-medical-leave",
+   "origin": "data",
+   "used_by": [
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
+   ]
+  },
+  {
+   "id": "wa-0c72952674",
+   "jurisdiction": "WA",
+   "title": "RCW 1.90.100 \u2014 Personal Income Tax Prohibition",
+   "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=1.90.100",
+   "origin": "data",
+   "used_by": [
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
+   ]
+  },
+  {
+   "id": "wa-4ecb14e08b",
+   "jurisdiction": "WA",
+   "title": "RCW 36.65.030 \u2014 Tax on net income prohibited",
+   "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=36.65.030",
+   "origin": "data",
+   "used_by": [
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
+   ]
+  },
+  {
+   "id": "wa-bcdb420119",
+   "jurisdiction": "WA",
+   "title": "WA Cares Fund premium, RCW 50B.04.080 -- 0.58% of wages since 2023-07-01, unchanged through 2026",
+   "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=50B.04.080",
+   "origin": "data",
+   "used_by": [
+    "data/states/WA-2025.json"
+   ]
+  },
+  {
+   "id": "wa-f385d68879",
+   "jurisdiction": "WA",
+   "title": "WA Cares Fund \u2014 Exemptions",
+   "url": "https://wacaresfund.wa.gov/exemptions",
+   "origin": "data",
+   "used_by": [
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
+   ]
+  },
+  {
+   "id": "wa-c0a54c0b43",
+   "jurisdiction": "WA",
+   "title": "Washington Cares Fund premiums",
+   "url": "https://wacaresfund.wa.gov/employers/",
+   "origin": "curated"
+  },
+  {
+   "id": "wa-e27ed866d2",
+   "jurisdiction": "WA",
+   "title": "Washington Department of Revenue: news releases",
+   "url": "https://dor.wa.gov/about/news-releases",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "wa-c1c62014e4",
+   "jurisdiction": "WA",
+   "title": "Washington ESD -- Paid Family & Medical Leave premiums to increase in 2025 (2024-10-23)",
+   "url": "https://esd.wa.gov/about-us/news-release/2024/paid-family-medical-leave-premiums-increase-2025",
+   "origin": "data",
+   "used_by": [
+    "data/states/WA-2025.json"
+   ]
+  },
+  {
+   "id": "wa-b023203d3c",
+   "jurisdiction": "WA",
+   "title": "Washington Paid Leave premium rates",
+   "url": "https://paidleave.wa.gov/employers/",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "wa-d78f0154e8",
+   "jurisdiction": "WA",
+   "title": "Washington State Department of Labor & Industries -- Local Minimum Wage Rates",
+   "url": "https://lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/WA-local-2026.json"
+   ]
+  },
+  {
+   "id": "wa-b62d82f214",
+   "jurisdiction": "WA",
+   "title": "Washington State Department of Labor & Industries -- Washington's minimum wage going up to $17.13 an hour in 2026",
+   "url": "https://www.lni.wa.gov/news-events/article/25-27",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/WA-2026.json"
+   ]
+  },
+  {
+   "id": "wa-6a9cc2b420",
+   "jurisdiction": "WA",
+   "title": "Washington State Department of Labor & Industries \u2014 2026 minimum wage ($17.13/hr effective 2026-01-01)",
+   "url": "https://ofm.wa.gov/wp-content/uploads/sites/default/files/public/legacy/policy/25.60.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "wa-23d93d6d21",
+   "jurisdiction": "WA",
+   "title": "Washington State's Paid Family and Medical Leave \u2014 Estimate your Paid Leave payments",
+   "url": "https://paidleave.wa.gov/estimate-your-paid-leave-payments/",
+   "origin": "data",
+   "used_by": [
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
+   ]
+  },
+  {
+   "id": "wi-909b5f1dab",
+   "jurisdiction": "WI",
+   "title": "2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)",
+   "url": "https://dwd.wisconsin.gov/ui/employers/taxrates.htm",
+   "origin": "data",
+   "used_by": [
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
+   ]
+  },
+  {
+   "id": "wi-d584da02ba",
+   "jurisdiction": "WI",
+   "title": "DOR General Withholding Tax Questions (reciprocity, thresholds, WT-4)",
+   "url": "https://www.revenue.wi.gov/Pages/FAQS/pcs-with.aspx",
+   "origin": "data",
+   "used_by": [
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
+   ]
+  },
+  {
+   "id": "wi-44d4224e71",
+   "jurisdiction": "WI",
+   "title": "DOR Tax Rates FAQ (annual Form 1 individual income tax brackets)",
+   "url": "https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx",
+   "origin": "data",
+   "used_by": [
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
+   ]
+  },
+  {
+   "id": "wi-606a02364c",
+   "jurisdiction": "WI",
+   "title": "UCT-1-E, 2026 Wisconsin Employer's Quarterly Contribution Report (SUTA initial rates)",
+   "url": "https://dwd.wisconsin.gov/dwd/forms/ui/pdf/uct-1-e-2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
+   ]
+  },
+  {
+   "id": "wi-53244e93fe",
+   "jurisdiction": "WI",
+   "title": "Wis. Stat. \u00a7 71.03(13) \u2014 'Wisconsin adjusted gross income' defined",
+   "url": "https://docs.legis.wisconsin.gov/document/statutes/71.03",
+   "origin": "data",
+   "used_by": [
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
+   ]
+  },
+  {
+   "id": "wi-eb437d4ba6",
+   "jurisdiction": "WI",
+   "title": "Wis. Stat. \u00a7 812.34 \u2014 80% of disposable earnings exempt from garnishment (i.e. 20% reachable), further limited by the amount by which disposable earnings exceed 30x the FEDERAL minimum hourly wage",
+   "url": "https://docs.legis.wisconsin.gov/document/statutes/812.34",
+   "origin": "data",
+   "used_by": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "id": "wi-74db3ceaf3",
+   "jurisdiction": "WI",
+   "title": "Wisconsin Department of Revenue: news",
+   "url": "https://www.revenue.wi.gov/Pages/News/home.aspx",
+   "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "wi-b9ce22361c",
+   "jurisdiction": "WI",
+   "title": "Wisconsin Legislature -- Wis. Stat. 104.035 (minimum wage; opportunity employees)",
+   "url": "https://docs.legis.wisconsin.gov/2017/statutes/statutes/104/035/9",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/WI-2026.json"
+   ]
+  },
+  {
+   "id": "wi-bf48d4174b",
+   "jurisdiction": "WI",
+   "title": "Wisconsin W-166 withholding guide",
+   "url": "https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf",
+   "origin": "curated",
+   "used_by": [
+    "data/states/WI-2025.json",
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
+   ]
+  },
+  {
+   "id": "wi-2ea1a73c00",
+   "jurisdiction": "WI",
+   "title": "Wisconsin withholding",
+   "url": "https://www.revenue.wi.gov/Pages/Withholding/home.aspx",
+   "kind": "index",
+   "origin": "curated"
   },
   {
    "id": "wv-5a62d719fd",

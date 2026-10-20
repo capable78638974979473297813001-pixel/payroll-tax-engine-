@@ -11,7 +11,7 @@ workflow also opens a GitHub issue with the report.
 
 ## What it watches
 
-`sources.json`, about 230 sources in 14 jurisdictions (see "Scope" below), built from two places:
+`sources.json`, about 550 sources in 44 jurisdictions (see "Scope" below), built from two places:
 
 - **`curated.json`**: each state agency's withholding / employer page, plus
   the federal publications (Pub 15, 15-T, W-4, IRS draft forms, contribution
@@ -32,25 +32,23 @@ agencies (RITA, CCA), and the Finder's directories of jurisdictions.
 
 ## Scope
 
-The watcher is for catching **unscheduled** changes. A jurisdiction whose rates
-and tables only move on January 1, or on a July 1 step, is handled when the
-data is refreshed for that date and doesn't need a daily watch. `scope.json`
-lists the jurisdictions that are left out, with a reason for each, and
-`build_sources.py` drops their sources (curated or cited in `data/`).
+The watcher covers **every jurisdiction that levies an income tax on wages or
+any local tax the engine applies to a paycheck**, plus federal. Any of them can
+legislate or reissue its tables on any date, and local governments change rates
+on any date, so none is left to "we'll catch it at the January refresh".
 
-- **Kept (14):** federal; **AR, GA, ID, ME, OH, SC, UT, WV**, which have documented
-  unscheduled mid-year changes in this repo's data (AR's retroactive 2026 cut
-  and reissued formula, GA's HB 463, ID's reissued tables, ME's August 2026
-  booklet and surcharge, OH's HB 96, SC's Act 110 with withholding tables still
-  to be reissued, UT's HB 106, WV's SB 392); and **AL, IN, KY, MI, PA**, which have local-tax
-  registries whose rates change on any date.
-- **Left out (39):** states with no tax on wages, the July-1-only states (MD,
-  VA, NJ, NM) and the January-1-only states.
-- This is a judgment from what the repo's 2025-2027 data records, **not a legal
-  finding** that other states can't change mid-year. A state with no change
-  recorded here can still legislate one. To bring a jurisdiction back, delete
-  its line from `excluded` in `scope.json` and re-run `build_sources.py`; the
-  data files and `curated.json` are never touched.
+- **Covered (44):** federal and 43 states/DC: all 41 states with a wage income
+  tax plus DC, and Washington (Seattle's payroll expense tax).
+- **Left out (9):** AK, FL, NH, NV, SD, TN, TX, WY, which have no wage income
+  tax and no local wage or payroll tax in the data, and AS (territory minimum
+  wage). `watcher/test_coverage.py` fails if a state with a wage income tax or
+  a local tax in `data/` is not covered, or if a left-out state gains one.
+- Each covered state has its agency's withholding page plus a news or notices
+  page (`"kind": "index"`, so a new link is reported), and every official URL the
+  data cites. A newly covered jurisdiction is recorded as "New" on its first
+  run, not reported as a change.
+- To change the list, edit `scope.json` and re-run `build_sources.py`; the data
+  files and `curated.json` are never touched.
 - A state-code key in a data file (`"TX": {...}`) attributes the cites beneath
   it to that state, so e.g. a state's garnishment statute follows its scope.
 
@@ -109,6 +107,94 @@ Finder lags: a municipality can be in its directory for months before its
 rate rows appear (Woodville, July 2026), so this catches what the Finder knows
 and the engine doesn't, not what neither knows. For that, the local
 government's own pages are watched (and, with `follow`, their documents).
+
+## Fixing a number on its own (built, switched off)
+
+`autoupdate.py` can correct a number in `data/` without a person typing it, but
+only the smallest thing that is safe to automate: **replace one number on one
+line**. Everything in `data/` feeds a paycheck, so it has no other powers. It
+cannot add or delete a line, entry or file, touch code, tests, the site or
+notes, or change anything that is not a plain `"rate": 0.0125` line.
+
+It ships **off**. `watcher/autoupdate.json` has `"enabled": false` and the
+workflow's `AUTOUPDATE_ENABLED` repository variable is unset. Switched off, it
+still runs every day in check-only mode and writes
+[`reports/autoupdate-latest.md`](reports/autoupdate-latest.md): what it would
+have changed and, for everything else, the rule that kept it from changing it.
+Read that for a few weeks before turning it on.
+
+### What it covers, state by state
+
+`autoupdate-coverage.json` is the ledger: for **every** covered jurisdiction it
+says what auto-update can correct by itself (**automatic**), what it only
+compares with the official source and reports (**report only**), and what is left
+to a person and why. `test_coverage.py` enforces that every jurisdiction in
+scope is in it, that every item points at a real reader and (for automatic
+ones) a rule that covers its exact lines, and that no reader is unlisted.
+
+| Source of the number | Where | Tier |
+|---|---|---|
+| Ohio Finder rate files, row by row, with effective dates | OH municipal rates, OH JEDD/JEDZ rates (rate and its `rateSourceRaw` percent move together) | automatic |
+| DCED's statewide Excel register, row by row (all ~2,600 PA municipalities and school districts), with effective dates | PA local earned-income and local-services taxes: a rate and its total move together; the official date must equal the date the data records and fall on or before January 1 | automatic |
+| A sentence in an official document that names the year ("For 2026, the state ... rate ... is 2.95%") | IL, MI (rate, exemption; a second Treasury notice must agree), KY (rate, standard deduction), IN, LA, MS | automatic |
+| A sentence that does not name the year | PA state rate, IA, CT, NC, AZ, CO, MA, DE, MD, MN, AR, WI, SC, HI, DC, VA | report only |
+| A table in an official file | Indiana county rates (compared daily, 92 rows) | report only |
+| Per-period tables, bracket schedules, mid-year dated rows, city/county registries with no bulk file | the rest (see the ledger for each state and the reason) | a person |
+
+Why the year matters: a document that says "for 2026" is stating a value for
+the whole of 2026, which is what makes a one-line edit right for every pay date
+in that year's file. A sentence with no year might describe a mid-year change,
+and applying it to the whole year would be wrong for earlier paychecks, so it
+is only ever reported. Readers live in `extractors.json`; each is a pattern, the
+data lines it owns, and a frozen excerpt of the real sentence it was written
+against, which the tests re-read. `python watcher/extractors.py --refresh`
+rebuilds the excerpts from the stored snapshots and confirms the data agrees.
+
+A school district's rate is repeated in every municipality inside it, so one official change becomes dozens of proposals. Pennsylvania's rule therefore has its own limits (80 changes, 120 disagreements) instead of the global 5 and 10; a flood past that still applies nothing.
+
+The January swap (every state publishing its new-year document) is expected to
+trip the circuit breaker below; that is by design, and a person takes that batch.
+
+### The rules
+
+A proposal comes from `reconcile.py` (structured official files) or
+`extractors.py` (stated values). It is applied only if **every** rule holds,
+re-checked immediately before writing:
+
+| Rule | What it stops |
+|---|---|
+| Names the exact file and line(s) and the exact text expected on each; at most six edits, all in one file | Editing a line that moved or changed since the proposal |
+| File is a tracked `.json` under `data/`, matches an allow-list rule in `autoupdate.json`, not a symlink, this year or later | Code, tests, site, other repos' files, past years (those paychecks are final) |
+| Each line is `"<key>": <number>` (or a mirrored `"<key>": "<percent>"`) and the key is on the rule's list; only the number is swapped (indent, key and comma byte-identical). Linked lines (a rate and its copy, its percent string, or a total that is the sum of its parts) must satisfy their stated relation | Rewording, reformatting, a rate changed without its mirror |
+| File still parses and a deep comparison finds **exactly one** differing value, a number | Duplicate keys, an edit that lands somewhere unintended |
+| New value inside the rule's min/max and no further than `max_abs_change` from the old; neither old nor new is zero | Wild values; repealing a tax or starting one (a person's call) |
+| Entry has no `rateHistory`, no `sourceNote`/`$correctionNote`/`$addedNote`, no end date, and no field that mirrors the value unless that field is part of the change | Overwriting a hand-checked value; leaving a mirror stale |
+| A feed's change took effect on or before January 1 of the file's year, or a document's sentence names the file's year and the pattern is year-anchored | A mid-year change, which needs a dated row (a structural edit, so a person's) |
+| Evidence is a source in `sources.json`, at that address, over https, on an allow-listed host, read **twice**, apart by `min_confirm_gap_seconds`, same answer both times, fresh | A glitchy download, a spoofed or stale source |
+| Circuit breaker: more than `max_changes_per_run` eligible changes, or more than `max_findings_per_run` disagreements of any kind, applies **nothing** | The official file changing shape, which looks like hundreds of "corrections" |
+| After the write: the generated edge bundle is rebuilt, `git status` may show only the intended file plus that bundle, the diff must be exactly one removed and one added line per change, and the full test suite must pass | Side effects; a change the engine cannot absorb. Any failure restores every touched file |
+
+Applied changes are never committed to the default branch. The workflow puts
+them on `autoupdate/<date>` and opens a pull request whose body lists each file,
+line, old and new value and source. A person reviews and merges it.
+
+Everything it declines goes to the same report and the standing needs-attention
+issue as before. `watcher/autoupdate-log.jsonl` records every decision.
+
+To turn it on: set `"enabled": true` in `autoupdate.json` **and** the repository
+variable `AUTOUPDATE_ENABLED` to `true`, and allow Actions to create pull
+requests (Settings -> Actions -> General). A pull request opened with the
+default token does not trigger other workflows, so run the tests from the
+branch before merging. To widen it, add a rule (a new glob/key with bounds and
+hosts) in `autoupdate.json`; there is no way to widen it from a data file or a
+proposal.
+
+```sh
+python watcher/autoupdate.py             # check and report, write nothing
+python watcher/autoupdate.py --apply     # write too (needs "enabled": true)
+python -m unittest watcher/test_autoupdate.py
+AUTOUPDATE_E2E=1 python -m unittest watcher.test_autoupdate.AgainstTheRealEngine   # real build + real suite, in a clone
+```
 
 ## Needs attention
 

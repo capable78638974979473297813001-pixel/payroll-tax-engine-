@@ -1,0 +1,664 @@
+{
+ "$comment": "For every jurisdiction the source watch covers: what auto-update can correct by itself ('automatic', each backed by a rule in autoupdate.json), what it only compares and reports ('report_only'), and what is left to a person and why. tests enforce that every income-tax or local-tax jurisdiction in data/ appears here and that every reference is real. 'No wage income tax and no local tax' jurisdictions (AK FL NH NV SD TN TX WY) are in scope.json's excluded list instead.",
+ "jurisdictions": {
+  "AL": {
+   "taxes": [
+    "state income tax",
+    "municipal occupational taxes"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "State standard-deduction steps and brackets (A4)",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    },
+    {
+     "what": "29 municipal occupational taxes and Jefferson County",
+     "why": "No official bulk file exists (the League of Municipalities page is an aggregator and the collectors' forms are PDFs), and entries carry dated rateHistory rows. The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
+    }
+   ]
+  },
+  "AR": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [
+    "extractor:AR-standard-deduction",
+    "extractor:AR-exemption-credit"
+   ],
+   "person": [
+    {
+     "what": "Reissued withholding formula and bracket-credit tables",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table. Arkansas reissued its formula mid-year in 2026, which is a dated overlay."
+    }
+   ]
+  },
+  "AZ": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [
+    "extractor:AZ-default-rate"
+   ],
+   "person": [
+    {
+     "what": "Employee-elected percentages",
+     "why": "The form lists seven percentage choices, not a single stated rate; the default is reported when it differs."
+    }
+   ]
+  },
+  "CA": {
+   "taxes": [
+    "state income tax",
+    "SDI",
+    "local payroll items"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "EDD DE 44 per-period tables and supplemental rates",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table. (240 rate cells.)"
+    }
+   ]
+  },
+  "CO": {
+   "taxes": [
+    "state income tax",
+    "city occupational privilege taxes"
+   ],
+   "automatic": [],
+   "report_only": [
+    "extractor:CO-rate"
+   ],
+   "person": [
+    {
+     "what": "Standard deduction and city occupational privilege taxes (Aurora, Denver, Glendale, Greenwood Village, Sheridan)",
+     "why": "Each city publishes its own flat amount on its own page; there is no common feed. The cities' pages are watched."
+    }
+   ]
+  },
+  "CT": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [
+    "extractor:CT-no-form-rate"
+   ],
+   "person": [
+    {
+     "what": "TPG-211 withholding code tables",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    }
+   ]
+  },
+  "DC": {
+   "taxes": [
+    "district income tax"
+   ],
+   "automatic": [],
+   "report_only": [
+    "extractor:DC-allowance"
+   ],
+   "person": [
+    {
+     "what": "Bracket schedule",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    }
+   ]
+  },
+  "DE": {
+   "taxes": [
+    "state income tax",
+    "Wilmington city wage tax"
+   ],
+   "automatic": [],
+   "report_only": [
+    "extractor:DE-exemption-credit"
+   ],
+   "person": [
+    {
+     "what": "Brackets and the Wilmington wage tax",
+     "why": "Brackets are a table; the Wilmington rate is one number on the city's own page with no year stated."
+    }
+   ]
+  },
+  "GA": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Tables before and after 2026-05-11 (HB 463)",
+     "why": "The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
+    }
+   ]
+  },
+  "HI": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [
+    "extractor:HI-allowance"
+   ],
+   "person": [
+    {
+     "what": "Annualized bracket tables",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    }
+   ]
+  },
+  "IA": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [
+    "extractor:IA-rate"
+   ],
+   "person": [
+    {
+     "what": "Allowance and marital deduction amounts",
+     "why": "The IA W-4 instructions state them without naming the year, so a change is reported, not applied."
+    }
+   ]
+  },
+  "ID": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Per-period tables reissued mid-year",
+     "why": "The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
+    }
+   ]
+  },
+  "IL": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [
+    "extractor:IL-rate"
+   ],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Exemption allowance tiers",
+     "why": "Stated as a two-tier formula, not one number per line."
+    }
+   ]
+  },
+  "IN": {
+   "taxes": [
+    "state income tax",
+    "92 county income taxes"
+   ],
+   "automatic": [
+    "extractor:IN-rate"
+   ],
+   "report_only": [
+    "reconcile:in_counties"
+   ],
+   "person": [
+    {
+     "what": "County rates",
+     "why": "Counties change on January 1 and October 1 and the data records those as dated rows (rateChanges); the Departmental Notice table is compared every day and a difference is reported with the county and rate."
+    }
+   ]
+  },
+  "KS": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "KW-100 bracket tables",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    }
+   ]
+  },
+  "KY": {
+   "taxes": [
+    "state income tax",
+    "local occupational license taxes"
+   ],
+   "automatic": [
+    "extractor:KY-rate",
+    "extractor:KY-deduction"
+   ],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Local occupational license taxes",
+     "why": "The Secretary of State's database only answers in a browser and has no bulk file; entries carry dated rateChanges. The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
+    }
+   ]
+  },
+  "LA": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [
+    "extractor:LA-rate"
+   ],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Standard deduction amounts by claim count",
+     "why": "A tiered list, not one number per line."
+    }
+   ]
+  },
+  "MA": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [
+    "extractor:MA-rate"
+   ],
+   "person": [
+    {
+     "what": "Surtax threshold and exemption tiers",
+     "why": "Indexed each year and stated inside bracket tables."
+    }
+   ]
+  },
+  "MD": {
+   "taxes": [
+    "state income tax",
+    "county income taxes"
+   ],
+   "automatic": [],
+   "report_only": [
+    "extractor:MD-standard-deduction"
+   ],
+   "person": [
+    {
+     "what": "State brackets and 24 county rates",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table. County rates sit in a table in the MW507 PDF; a county change is a person's."
+    }
+   ]
+  },
+  "ME": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Withholding tables reissued in August 2026",
+     "why": "The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
+    }
+   ]
+  },
+  "MI": {
+   "taxes": [
+    "state income tax",
+    "24 city income taxes"
+   ],
+   "automatic": [
+    "extractor:MI-rate",
+    "extractor:MI-exemption"
+   ],
+   "report_only": [],
+   "person": [
+    {
+     "what": "City income taxes",
+     "why": "Each of the 24 cities sets its rate by ordinance and publishes it on its own page; entries carry hand-checked source notes, which block automatic edits."
+    }
+   ]
+  },
+  "MN": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [
+    "extractor:MN-allowance"
+   ],
+   "person": [
+    {
+     "what": "Bracket tables",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    }
+   ]
+  },
+  "MO": {
+   "taxes": [
+    "state income tax",
+    "Kansas City and St. Louis earnings taxes"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Formula amounts and the two city earnings taxes",
+     "why": "The formula is a PDF with no stated per-year sentence; the city rates are on each city's own page."
+    }
+   ]
+  },
+  "MS": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [
+    "extractor:MS-rate"
+   ],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Standard deduction and exemption amounts",
+     "why": "Stated in a small table, not one number per line."
+    }
+   ]
+  },
+  "MT": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Per-period bracket tables",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    }
+   ]
+  },
+  "NC": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [
+    "extractor:NC-rate"
+   ],
+   "person": [
+    {
+     "what": "Allowance tables",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    }
+   ]
+  },
+  "ND": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Two table vintages (before and after the 2020 federal W-4)",
+     "why": "The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
+    }
+   ]
+  },
+  "NE": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Per-period tables",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    }
+   ]
+  },
+  "NJ": {
+   "taxes": [
+    "state income tax",
+    "Newark payroll tax"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "NJ-WT rate tables and the Newark payroll tax",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    }
+   ]
+  },
+  "NM": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Percentage-method tables",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    }
+   ]
+  },
+  "NY": {
+   "taxes": [
+    "state income tax",
+    "NYC and Yonkers local taxes"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "NYS-50-T tables and the NYC and Yonkers rates",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    }
+   ]
+  },
+  "OH": {
+   "taxes": [
+    "state income tax",
+    "municipal income taxes",
+    "JEDD/JEDZ taxes",
+    "school district income taxes"
+   ],
+   "automatic": [
+    "reconcile:oh_municipal",
+    "reconcile:oh_jedd"
+   ],
+   "report_only": [],
+   "person": [
+    {
+     "what": "State withholding tables",
+     "why": "The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes. Ohio had October 2025 and August 2026 tables."
+    },
+    {
+     "what": "School district income taxes",
+     "why": "The official list is a PDF whose rows wrap across lines and carry percentages in their notes; the data file records a table-merge bug in a text parse. Not safe to read line by line."
+    }
+   ]
+  },
+  "OK": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Percentage-method tables",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    }
+   ]
+  },
+  "OR": {
+   "taxes": [
+    "state income tax",
+    "TriMet and Lane transit taxes",
+    "Portland-area local taxes"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Withholding formulas and the local taxes",
+     "why": "Transit rates change each July 1 by district decision and local surtaxes by ballot measure; each is on its own agency's page."
+    }
+   ]
+  },
+  "PA": {
+   "taxes": [
+    "state income tax",
+    "2,600+ local earned-income and local-services taxes"
+   ],
+   "automatic": [
+    "reconcile:pa_local"
+   ],
+   "report_only": [
+    "extractor:PA-rate"
+   ],
+   "person": [
+    {
+     "what": "State withholding rate",
+     "why": "The Revenue page says 3.07 percent without naming the year, so a difference is reported, never applied."
+    },
+    {
+     "what": "Local rates with a new or missing effective date, entries with their own notes or dated changes (Philadelphia's July 1 wage tax), duplicate PSD codes, and the low-income exemption amounts",
+     "why": "A change of date means a new rate, which is a dated row (a structural edit); an entry that carries its own note was hand-checked. Philadelphia is outside the register's annual cycle."
+    }
+   ]
+  },
+  "RI": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Per-period single table",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    }
+   ]
+  },
+  "SC": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [
+    "extractor:SC-allowance"
+   ],
+   "person": [
+    {
+     "what": "Formula not yet reissued after Act 110 (2026)",
+     "why": "The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
+    }
+   ]
+  },
+  "US": {
+   "taxes": [
+    "federal income tax withholding",
+    "FICA",
+    "FUTA"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Pub 15-T percentage and wage-bracket tables, W-4 steps, FICA and FUTA limits",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table. The eCFR and Federal Register feeds and the IRS publications are watched daily."
+    }
+   ]
+  },
+  "UT": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Tables before and after 2026-06-01",
+     "why": "The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
+    }
+   ]
+  },
+  "VA": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [
+    "extractor:VA-standard-deduction"
+   ],
+   "person": [
+    {
+     "what": "July 1 formula update",
+     "why": "The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
+    }
+   ]
+  },
+  "VT": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Per-period tables",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    }
+   ]
+  },
+  "WA": {
+   "taxes": [
+    "Seattle payroll expense tax (no wage income tax)"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Seattle tiers and thresholds, indexed each year",
+     "why": "Published on the city's page in prose and tables."
+    }
+   ]
+  },
+  "WI": {
+   "taxes": [
+    "state income tax"
+   ],
+   "automatic": [],
+   "report_only": [
+    "extractor:WI-exemption"
+   ],
+   "person": [
+    {
+     "what": "Standard deduction phase-out tables",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    }
+   ]
+  },
+  "WV": {
+   "taxes": [
+    "state income tax",
+    "city service fees"
+   ],
+   "automatic": [],
+   "report_only": [],
+   "person": [
+    {
+     "what": "Tables cut 5% retroactively by SB 392 (2026) and the city service fees",
+     "why": "The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
+    }
+   ]
+  }
+ }
+}

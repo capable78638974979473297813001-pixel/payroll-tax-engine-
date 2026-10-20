@@ -1,0 +1,547 @@
+{
+ "$comment": "Stated values the watcher can read out of official documents. year_anchored extractors name the year in the sentence they match, so what they read holds for the whole year and autoupdate.py may apply a change (if every other rule holds). The rest are report-only: a difference is listed for a person with the exact line to change. Calibration excerpts are frozen from the real documents by `python watcher/extractors.py --refresh`; the tests check each pattern still reads its excerpt.",
+ "extractors": [
+  {
+   "id": "IL-rate",
+   "name": "Illinois flat withholding rate",
+   "jurisdiction": "IL",
+   "source_id": "il-24bd8dd136",
+   "file": "data/states/IL-{year}.json",
+   "paths": [
+    [
+     "flatRate",
+     "rate"
+    ],
+    [
+     "supplementalRate"
+    ]
+   ],
+   "pattern": "Effective January 1, {year}, Tax Rate (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Effective January 1, 2026, Tax Rate 4.95%",
+    "value": 0.0495
+   }
+  },
+  {
+   "id": "MI-rate",
+   "name": "Michigan flat withholding rate",
+   "jurisdiction": "MI",
+   "source_id": "mi-60a02e5e6b",
+   "file": "data/states/MI-{year}.json",
+   "paths": [
+    [
+     "flatRate",
+     "rate"
+    ],
+    [
+     "supplementalWages",
+     "flatRate"
+    ]
+   ],
+   "pattern": "{year} Michigan Income Tax Withholding Guide Withholding Rate: (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "also": [
+    {
+     "source_id": "mi-faa154de5a",
+     "pattern": "the rate in effect under Section 51 for the {year} tax year is (\\d+(?:\\.\\d+)?)%",
+     "transform": "percent"
+    }
+   ],
+   "calibration": {
+    "year": 2026,
+    "excerpt": "2026 Michigan Income Tax Withholding Guide Withholding Rate: 4.25%",
+    "value": 0.0425
+   }
+  },
+  {
+   "id": "MI-exemption",
+   "name": "Michigan personal exemption amount",
+   "jurisdiction": "MI",
+   "source_id": "mi-60a02e5e6b",
+   "file": "data/states/MI-{year}.json",
+   "paths": [
+    [
+     "flatRate",
+     "allowanceAmount"
+    ]
+   ],
+   "pattern": "{year} Michigan Income Tax Withholding Guide Withholding Rate: \\d+(?:\\.\\d+)?% Personal Exemption Amount: \\$([\\d,]+)",
+   "transform": "dollars",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "2026 Michigan Income Tax Withholding Guide Withholding Rate: 4.25% Personal Exemption Amount: $5,900",
+    "value": 5900.0
+   }
+  },
+  {
+   "id": "KY-rate",
+   "name": "Kentucky flat withholding rate",
+   "jurisdiction": "KY",
+   "source_id": "ky-eff8df4c72",
+   "file": "data/states/KY-{year}.json",
+   "paths": [
+    [
+     "flatRate",
+     "rate"
+    ]
+   ],
+   "pattern": "{year} Kentucky Tax Rate: (\\d+(?:\\.\\d+)?)% of taxable income",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "2026 Kentucky Tax Rate: 3.5% of taxable income",
+    "value": 0.035
+   }
+  },
+  {
+   "id": "KY-deduction",
+   "name": "Kentucky standard deduction",
+   "jurisdiction": "KY",
+   "source_id": "ky-eff8df4c72",
+   "file": "data/states/KY-{year}.json",
+   "paths": [
+    [
+     "flatRate",
+     "deductionAmount"
+    ]
+   ],
+   "pattern": "{year} Kentucky Standard Deduction: \\$([\\d,]+)",
+   "transform": "dollars",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "2026 Kentucky Standard Deduction: $3,360",
+    "value": 3360.0
+   }
+  },
+  {
+   "id": "IN-rate",
+   "name": "Indiana state income tax rate",
+   "jurisdiction": "IN",
+   "source_id": "in-86066aa1c0",
+   "file": "data/states/IN-{year}.json",
+   "paths": [
+    [
+     "flatRate",
+     "rate"
+    ],
+    [
+     "supplementalRate"
+    ]
+   ],
+   "pattern": "For {year}, the state adjusted gross income tax rate for individuals is (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "For 2026, the state adjusted gross income tax rate for individuals is 2.95%",
+    "value": 0.0295
+   }
+  },
+  {
+   "id": "LA-rate",
+   "name": "Louisiana flat withholding rate",
+   "jurisdiction": "LA",
+   "source_id": "la-61b87ae030",
+   "file": "data/states/LA-{year}.json",
+   "paths": [
+    [
+     "flatRateBlockADeduction",
+     "rate"
+    ]
+   ],
+   "pattern": "(?s){year} Standard Deduction:.{0,600}?Based on a (\\d+(?:\\.\\d+)?)% Withholding Rate",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "2026 Standard Deduction: 1. Single Individual and Married-Separate ........ $12,875 2. Married-Joint Return, Qualified Surviving Spouse, or Head of Household ............... $25,750 Formulas - Based on a 3.09% Withholding Rate",
+    "value": 0.0309
+   }
+  },
+  {
+   "id": "MS-rate",
+   "name": "Mississippi income tax rate",
+   "jurisdiction": "MS",
+   "source_id": "ms-f79d3f52fc",
+   "file": "data/states/MS-{year}.json",
+   "paths": [
+    [
+     "bracketStatusDeduction",
+     "rate"
+    ]
+   ],
+   "pattern": "Income Tax Rates Taxable Income \\(Tax Year {year}\\) Tax Rate First \\$10,000 0% Remaining balance \\(excess of \\$10,000\\) (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Income Tax Rates Taxable Income (Tax Year 2026) Tax Rate First $10,000 0% Remaining balance (excess of $10,000) 4.0%",
+    "value": 0.04
+   }
+  },
+  {
+   "id": "PA-rate",
+   "name": "Pennsylvania withholding rate",
+   "jurisdiction": "PA",
+   "source_id": "pa-da0fba1e41",
+   "file": "data/states/PA-{year}.json",
+   "paths": [
+    [
+     "flatRate",
+     "rate"
+    ]
+   ],
+   "pattern": "flat rate of (\\d+(?:\\.\\d+)?) percent",
+   "transform": "percent",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "flat rate of 3.07 percent",
+    "value": 0.0307
+   }
+  },
+  {
+   "id": "IA-rate",
+   "name": "Iowa withholding rate",
+   "jurisdiction": "IA",
+   "source_id": "ia-51d27e15e3",
+   "file": "data/states/IA-{year}.json",
+   "paths": [
+    [
+     "iowaWithholding",
+     "rate"
+    ],
+    [
+     "supplementalWages",
+     "flatRate"
+    ]
+   ],
+   "pattern": "Multiply this amount by (\\d+(?:\\.\\d+)?)% \\(\\.\\d+\\)",
+   "transform": "percent",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Multiply this amount by 3.8% (.038)",
+    "value": 0.038
+   }
+  },
+  {
+   "id": "CT-no-form-rate",
+   "name": "Connecticut rate with no certificate",
+   "jurisdiction": "CT",
+   "source_id": "ct-1bcc7fb522",
+   "file": "data/states/CT-{year}.json",
+   "paths": [
+    [
+     "connecticutTables",
+     "noFormRate"
+    ]
+   ],
+   "pattern": "highest marginal rate of (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "highest marginal rate of 6.99%",
+    "value": 0.0699
+   }
+  },
+  {
+   "id": "NC-rate",
+   "name": "North Carolina withholding rate",
+   "jurisdiction": "NC",
+   "source_id": "nc-132025df37",
+   "file": "data/states/NC-{year}.json",
+   "paths": [
+    [
+     "flatRateStatusDeduction",
+     "rate"
+    ],
+    [
+     "supplementalWages",
+     "flatRate"
+    ]
+   ],
+   "pattern": "\\$12,750 x (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "$12,750 x 4.09%",
+    "value": 0.0409
+   }
+  },
+  {
+   "id": "AZ-default-rate",
+   "name": "Arizona default withholding rate",
+   "jurisdiction": "AZ",
+   "source_id": "az-42fee4ee8e",
+   "file": "data/states/AZ-{year}.json",
+   "paths": [
+    [
+     "employeeElectedFlat",
+     "defaultRate"
+    ]
+   ],
+   "pattern": "at the rate of (\\d+(?:\\.\\d+)?)% until the employee elects",
+   "transform": "percent",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "at the rate of 2.0% until the employee elects",
+    "value": 0.02
+   }
+  },
+  {
+   "id": "CO-rate",
+   "name": "Colorado flat withholding rate",
+   "jurisdiction": "CO",
+   "source_id": "co-1d9b7b596b",
+   "file": "data/states/CO-{year}.json",
+   "paths": [
+    [
+     "flatRateStatusDeduction",
+     "rate"
+    ]
+   ],
+   "pattern": "Multiply line 2b by (\\d+(?:\\.\\d+)?)% \\(0\\.\\d+\\)",
+   "transform": "percent",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Multiply line 2b by 4.40% (0.044)",
+    "value": 0.044
+   }
+  },
+  {
+   "id": "MA-rate",
+   "name": "Massachusetts withholding rate",
+   "jurisdiction": "MA",
+   "source_id": "ma-f3f46b347e",
+   "file": "data/states/MA-{year}.json",
+   "paths": [
+    [
+     "flatRateSurtaxCredit",
+     "rate"
+    ]
+   ],
+   "pattern": "Over \\$0 but not over \\$1,107,750 \\$0\\.00 plus (\\d+(?:\\.\\d+)?)% over",
+   "transform": "percent",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Over $0 but not over $1,107,750 $0.00 plus 5.00% over",
+    "value": 0.05
+   }
+  },
+  {
+   "id": "DE-exemption-credit",
+   "name": "Delaware personal credit per exemption",
+   "jurisdiction": "DE",
+   "source_id": "de-656e00e512",
+   "file": "data/states/DE-{year}.json",
+   "paths": [
+    [
+     "delawareWithholding",
+     "personalCreditPerExemption"
+    ]
+   ],
+   "pattern": "Multiply number on Line 10 by \\$([\\d,]+)",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Multiply number on Line 10 by $110",
+    "value": 110.0
+   }
+  },
+  {
+   "id": "MD-standard-deduction",
+   "name": "Maryland standard deduction",
+   "jurisdiction": "MD",
+   "source_id": "md-6837586c10",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "bracketStatePlusLocal",
+     "standardDeductionAnnual"
+    ]
+   ],
+   "pattern": "the Standard Deduction is \\$([\\d,]+)",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "the Standard Deduction is $3,400",
+    "value": 3400.0
+   }
+  },
+  {
+   "id": "MN-allowance",
+   "name": "Minnesota withholding allowance",
+   "jurisdiction": "MN",
+   "source_id": "mn-4b376a9ce0",
+   "file": "data/states/MN-{year}.json",
+   "paths": [
+    [
+     "bracketFlatAllowance",
+     "allowanceAmount"
+    ]
+   ],
+   "pattern": "withholding allowances by \\$([\\d,]+)",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "withholding allowances by $5,300",
+    "value": 5300.0
+   }
+  },
+  {
+   "id": "AR-standard-deduction",
+   "name": "Arkansas standard deduction",
+   "jurisdiction": "AR",
+   "source_id": "ar-99b61649d3",
+   "file": "data/states/AR-{year}.json",
+   "paths": [
+    [
+     "arkansasBracketCredit",
+     "standardDeductionAnnual"
+    ]
+   ],
+   "pattern": "Subtract the Standard Deduction of \\$ ?([\\d,]+) to arrive",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Subtract the Standard Deduction of $ 2,470 to arrive",
+    "value": 2470.0
+   }
+  },
+  {
+   "id": "AR-exemption-credit",
+   "name": "Arkansas credit per exemption",
+   "jurisdiction": "AR",
+   "source_id": "ar-99b61649d3",
+   "file": "data/states/AR-{year}.json",
+   "paths": [
+    [
+     "arkansasBracketCredit",
+     "personalCreditPerExemption"
+    ]
+   ],
+   "pattern": "Withholding Exemptions claimed on Form AR4EC by \\$([\\d,]+)",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Withholding Exemptions claimed on Form AR4EC by $29",
+    "value": 29.0
+   }
+  },
+  {
+   "id": "WI-exemption",
+   "name": "Wisconsin exemption amount",
+   "jurisdiction": "WI",
+   "source_id": "wi-bf48d4174b",
+   "file": "data/states/WI-{year}.json",
+   "paths": [
+    [
+     "bracketPhaseoutDeduction",
+     "exemptionAmount"
+    ]
+   ],
+   "pattern": "Determine exemption amount \\(1 x \\$([\\d,]+)\\)",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Determine exemption amount (1 x $400)",
+    "value": 400.0
+   }
+  },
+  {
+   "id": "SC-allowance",
+   "name": "South Carolina allowance amount",
+   "jurisdiction": "SC",
+   "source_id": "sc-059afd732f",
+   "file": "data/states/SC-{year}.json",
+   "paths": [
+    [
+     "flatRateAllowanceDeduction",
+     "allowanceAmountAnnual"
+    ]
+   ],
+   "pattern": "Amount per allowance \\(A\\) \\$([\\d,]+)",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Amount per allowance (A) $5,000",
+    "value": 5000.0
+   }
+  },
+  {
+   "id": "HI-allowance",
+   "name": "Hawaii withholding allowance",
+   "jurisdiction": "HI",
+   "source_id": "hi-dea958dcf2",
+   "file": "data/states/HI-{year}.json",
+   "paths": [
+    [
+     "annualBracket",
+     "allowanceAmountAnnual"
+    ]
+   ],
+   "pattern": "ANNUALIZED INCOME TAX WITHHOLDING Value of each regular withholding allowance \\.+ \\$([\\d,]+)",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "ANNUALIZED INCOME TAX WITHHOLDING Value of each regular withholding allowance ............ $1,144",
+    "value": 1144.0
+   }
+  },
+  {
+   "id": "DC-allowance",
+   "name": "DC annual deduction",
+   "jurisdiction": "DC",
+   "source_id": "dc-c0035095f2",
+   "file": "data/states/DC-{year}.json",
+   "paths": [
+    [
+     "bracketAnnualAllowanceDeduction",
+     "allowanceAmountAnnual"
+    ]
+   ],
+   "pattern": "annual deduction amount has changed from \\$[\\d,]+ to \\$([\\d,]+)",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "annual deduction amount has changed from $4,150 to $4,300",
+    "value": 4300.0
+   }
+  },
+  {
+   "id": "VA-standard-deduction",
+   "name": "Virginia standard deduction",
+   "jurisdiction": "VA",
+   "source_id": "va-b3a051ecad",
+   "file": "data/states/VA-{year}.json",
+   "paths": [
+    [
+     "withholdingStructure",
+     "standardDeductionAnnual"
+    ]
+   ],
+   "pattern": "increases the standard deduction from \\$[\\d,]+ to \\$([\\d,]+) for single filers",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "increases the standard deduction from $8,500 to $8,750 for single filers",
+    "value": 8750.0
+   }
+  }
+ ]
+}

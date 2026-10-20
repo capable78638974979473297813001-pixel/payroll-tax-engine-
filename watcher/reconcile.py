@@ -26,6 +26,7 @@ import csv
 import datetime as dt
 import io
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -50,9 +51,15 @@ def _iso(yyyymmdd: str) -> str:
     return f"{yyyymmdd[:4]}-{yyyymmdd[4:6]}-{yyyymmdd[6:8]}"
 
 
-def finding(kind: str, severity: str, source: dict, name: str, detail: str, code: str = "") -> dict:
-    return {"kind": kind, "severity": severity, "source_id": source.get("id", ""), "jurisdiction": source.get("jurisdiction", ""),
-            "code": code, "name": name, "detail": detail}
+def finding(kind: str, severity: str, source: dict, name: str, detail: str, code: str = "", change: dict | None = None) -> dict:
+    out = {"kind": kind, "severity": severity, "source_id": source.get("id", ""), "jurisdiction": source.get("jurisdiction", ""),
+           "code": code, "name": name, "detail": detail}
+    if change:
+        # A machine-readable description of the value the official file
+        # disagrees with. autoupdate.py is the only consumer, and it treats
+        # this as a claim to be re-checked, never as an instruction.
+        out["change"] = change
+    return out
 
 
 def _load(path: Path):
@@ -137,7 +144,10 @@ def reconcile_oh_municipal(text: str, source: dict, today: str, repo: Path = REP
             acknowledged = any(k in entry for k in ACKNOWLEDGED_KEYS)
             out.append(finding("rate_differs", "info" if acknowledged else "action", source, entry["name"],
                                f"official {r['rate'] * 100:.3f}% vs engine {ours * 100:.3f}%"
-                               + (" (acknowledged in the data file's own note)" if acknowledged else ""), code))
+                               + (" (acknowledged in the data file's own note)" if acknowledged else ""), code,
+                               change={"file": f"data/local/{path.name}", "id_key": "municode", "id": code, "key": "rate",
+                                       "old": ours, "new": r["rate"], "effective_from": _iso(r["start"]),
+                                       "source_url": source.get("url", "")}))
 
     # Rate changes the official file already schedules for later: the engine
     # should carry them too, so a January 1 increase isn't missed on the day.
@@ -153,7 +163,10 @@ def reconcile_oh_municipal(text: str, source: dict, today: str, repo: Path = REP
         if abs(ours - r["rate"]) > 1e-9:
             out.append(finding("scheduled_change_missing", "action", source, entry["name"],
                                f"the official file schedules {r['rate'] * 100:.3f}% from {_iso(r['start'])}; "
-                               f"the engine would use {ours * 100:.3f}%", r["code"]))
+                               f"the engine would use {ours * 100:.3f}%", r["code"],
+                               change={"file": f"data/local/{year_file.name}", "id_key": "municode", "id": r["code"],
+                                       "key": "rate", "old": ours, "new": r["rate"], "effective_from": _iso(r["start"]),
+                                       "source_url": source.get("url", "")}))
 
     # Rows the engine carries that the official file doesn't (yet). A row the
     # file schedules for later counts as present, and an engine rate of 0 as of
@@ -225,11 +238,212 @@ def reconcile_oh_jedd(text: str, source: dict, today: str, repo: Path = REPO, di
         elif abs(engine_rate(z, today) - r["rate"]) > 1e-9:
             ack = any(k in z for k in ACKNOWLEDGED_KEYS)
             out.append(finding("rate_differs", "info" if ack else "action", source, z["name"],
-                               f"official {r['rate'] * 100:.3f}% vs engine {engine_rate(z, today) * 100:.3f}%", r["id"]))
+                               f"official {r['rate'] * 100:.3f}% vs engine {engine_rate(z, today) * 100:.3f}%", r["id"],
+                               change={"file": f"data/local/{path.name}", "id_key": "jeddId", "id": r["id"], "key": "rate",
+                                       "old": engine_rate(z, today), "new": round(r["rate"], 6), "effective_from": _iso(r["start"]),
+                                       "derived": [{"key": "rateSourceRaw", "relation": "percent_string"}],
+                                       "source_url": source.get("url", "")}))
     return out
 
 
-RECONCILERS = {"oh_municipal": reconcile_oh_municipal, "oh_jedd": reconcile_oh_jedd}
+
+# --------------------------------------------------------------------------
+# Indiana county income tax (Departmental Notice #1, a PDF table)
+# --------------------------------------------------------------------------
+
+def reconcile_in_counties(text: str, source: dict, today: str, repo: Path = REPO, directory: dict | None = None) -> list[dict]:
+    """Departmental Notice #1 lists all 92 counties' rates "Effective <date>".
+    Counties change on January 1 and October 1, and the engine records those as
+    dated rows (rateChanges), which is a structural edit; so this reports a
+    disagreement for a person and proposes no one-line change."""
+    rows = {}
+    for m in re.finditer(r"^([A-Za-z.' ]+?) (\d{2}) (\d\.\d+|0)\*?[ \t]*$", text, re.M):
+        rows[m.group(2)] = (m.group(1).strip(), float(m.group(3)))
+    eff = re.search(r"Indiana County Tax Rates: Effective ([A-Z][a-z]+)\.? (\d{1,2}), (\d{4})", text)
+    if len(rows) != 92 or not eff:
+        return [finding("unreadable", "action", source, "Indiana county rate table",
+                        f"parsed {len(rows)} county rows (expected 92) and {'a' if eff else 'no'} effective date; the notice's format may have changed.")]
+    months = {m: i for i, m in enumerate(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], 1)}
+    on = f"{eff.group(3)}-{months[eff.group(1)[:3]]:02d}-{int(eff.group(2)):02d}"
+    path = repo / "data" / "local" / f"IN-counties-{on[:4]}.json"
+    data = _load(path)
+    if data is None:
+        return [finding("no_engine_file", "action", source, path.name, f"{path.name} not found; nothing to compare with")]
+    out = []
+    check_on = min(on, today) if today >= on else on
+    for c in data["counties"]:
+        row = rows.get(c["countyCode"])
+        if row is None:
+            continue
+        dated = [r for r in c.get("rateChanges", []) if r["on"] <= on]
+        ours = dated[-1]["rate"] if dated else c["rate"]
+        if abs(ours - row[1]) > 1e-9:
+            out.append(finding("rate_differs", "action", source, c["name"],
+                               f"the notice (effective {on}) lists {row[1]} vs the engine's {ours} as of that date; "
+                               "county rate changes are dated rows in the data, so a person adds the row", c["countyCode"]))
+    return out
+
+
+# --------------------------------------------------------------------------
+# Pennsylvania local earned-income and local-services taxes (DCED register)
+# --------------------------------------------------------------------------
+
+PA_COLUMNS = {
+    "year": "Reporting Year", "nonres": "Municipal Nonresident EIT (percent)", "nonres_on": "Municipal Nonresident EIT Effective Date",
+    "res": "Municipal Resident EIT (percent)", "res_on": "Municipal Resident EIT Effective Date",
+    "sd": "School District EIT (percent)", "sd_on": "School District EIT Effective Date",
+    "total": "Total Resident Income Tax (percent)", "lst_m": "Municipal LST (dollars)", "lst_m_on": "Municipal LST Effective Date",
+    "lst_sd": "School District LST (dollars)", "lst_sd_on": "School District LST Effective Date", "lst_total": "Total LST (dollars)",
+    "psd": "PSD Code",
+}
+
+
+def _pa_rows(body: bytes) -> list[dict] | None:
+    """The register's rows as dicts keyed by PA_COLUMNS, or None if the file
+    is not the register (wrong format, missing columns)."""
+    try:
+        import xlrd  # noqa: PLC0415
+        with open(os.devnull, "w") as quiet:
+            book = xlrd.open_workbook(file_contents=body, logfile=quiet)
+        sheet = book.sheet_by_index(0)
+    except Exception:  # noqa: BLE001
+        return None
+    header = None
+    for r in range(min(4, sheet.nrows)):
+        cells = [str(sheet.cell_value(r, c)).strip() for c in range(sheet.ncols)]
+        if PA_COLUMNS["psd"] in cells and PA_COLUMNS["res"] in cells:
+            header, first = {name: cells.index(label) for name, label in PA_COLUMNS.items() if label in cells}, r + 1
+            break
+    if header is None or len(header) < len(PA_COLUMNS):
+        return None
+    rows = []
+    for r in range(first, sheet.nrows):
+        row = {k: sheet.cell_value(r, c) for k, c in header.items()}
+        if str(row["psd"]).strip():
+            rows.append(row)
+    return rows
+
+
+def _pct(x) -> float:
+    return round(float(x or 0) / 100, 6)
+
+
+def reconcile_pa_local(body: bytes, source: dict, today: str, repo: Path = REPO, directory: dict | None = None) -> list[dict]:
+    """Compares DCED's statewide register with data/local/PA-EIT-LST-<year>.json,
+    entry by entry (PSD code). The register lists each rate with the date it
+    took effect, which is what lets a clean one-entry correction be applied
+    automatically: the official date must equal the one the data already
+    records and fall on or before January 1. Anything else (a new mid-year
+    rate, no date, a note on the entry) is reported for a person."""
+    m = re.search(r";(\d{4})$", source.get("url", ""))
+    rows = _pa_rows(body) if isinstance(body, (bytes, bytearray)) else None
+    if rows is None or len(rows) < 2000 or not m:
+        return [finding("unreadable", "action", source, "Pennsylvania local tax register",
+                        f"could not read the DCED register ({'not a spreadsheet with the expected columns' if rows is None else str(len(rows)) + ' rows, expected about 2,600'}); its format may have changed.")]
+    year = m.group(1)
+    populated = sum(1 for r in rows if r["res"] or r["nonres"] or r["sd"])
+    if populated < len(rows) * 0.5:
+        # DCED lists every municipality for a coming year before it has filled in a single rate.
+        return [finding("not_yet_published", "info", source, f"Pennsylvania register {year}",
+                        f"only {populated} of {len(rows)} rows carry a rate, so the {year} register is not published yet; nothing to compare")]
+    if any(str(r["year"]).strip() != year for r in rows):
+        return [finding("unreadable", "action", source, "Pennsylvania local tax register", f"rows are not all for reporting year {year}")]
+    path = repo / "data" / "local" / f"PA-EIT-LST-{year}.json"
+    data = _load(path)
+    if data is None:
+        return [finding("no_engine_file", "action", source, path.name, f"{path.name} not found; nothing to compare with")]
+    entries = data["jurisdictions"]
+    count_data: dict[str, int] = {}
+    for e in entries:
+        count_data[e["psdCode"]] = count_data.get(e["psdCode"], 0) + 1
+    count_reg: dict[str, int] = {}
+    for r in rows:
+        count_reg[str(r["psd"]).strip()] = count_reg.get(str(r["psd"]).strip(), 0) + 1
+    index = {e["psdCode"]: i for i, e in enumerate(entries)}
+    jan1 = f"{year}-01-01"
+
+    def iso(us: str) -> str:
+        mm = re.fullmatch(r"(\d{2})/(\d{2})/(\d{4})", us or "")
+        return f"{mm.group(3)}-{mm.group(1)}-{mm.group(2)}" if mm else ""
+
+    out = []
+    for r in rows:
+        psd = str(r["psd"]).strip()
+        if psd not in index:
+            out.append(finding("missing_from_engine", "action", source, f'{psd} (register only)', f"in the register but not in {path.name}", psd))
+            continue
+        e = entries[index[psd]]
+        end = dict(e)
+        for c in e.get("rateChanges", []):  # the register shows the latest rate, with its date
+            end.update(c.get("set", {}))
+        lst_end = end.get("lst") or {}
+        want = {"residentEIT": _pct(r["res"]), "nonresidentEIT": _pct(r["nonres"]), "schoolDistrictEIT": _pct(r["sd"]),
+                "totalResidentEIT": _pct(r["total"])}
+        diffs = {k: (end.get(k), v) for k, v in want.items() if abs((end.get(k) or 0) - v) > 1e-9}
+        lst_want = {"municipal": float(r["lst_m"] or 0), "schoolDistrict": float(r["lst_sd"] or 0), "total": float(r["lst_total"] or 0)}
+        lst_diffs = {k: (lst_end.get(k), v) for k, v in lst_want.items() if abs((lst_end.get(k) or 0) - v) > 1e-9} if lst_end else (
+            {k: (None, v) for k, v in lst_want.items() if v} if any(lst_want.values()) else {})
+        if not diffs and not lst_diffs:
+            continue
+        what = "; ".join([f"{k} official {v[1]:g} vs engine {v[0]}" for k, v in {**diffs, **{'lst.' + k: v for k, v in lst_diffs.items()}}.items()])
+        acknowledged = any(k in e for k in ACKNOWLEDGED_KEYS + ("$note", "yearNotes", "rateChanges"))
+        f = finding("rate_differs", "info" if acknowledged else "action", source, f"{e['municipality'].title()} ({e['county'].title()})",
+                    what + (" (the entry carries its own note or dated changes)" if acknowledged else ""), psd)
+        if acknowledged or count_data[psd] != 1 or count_reg[psd] != 1:
+            if count_data[psd] != 1 or count_reg[psd] != 1:
+                f["detail"] += " (PSD code appears more than once, so no single line can be named)"
+            out.append(f)
+            continue
+        # A clean correction: every changed field's official date is the date the
+        # data already records, on or before January 1.
+        base = ["jurisdictions", index[psd]]
+        edits, companions, ok = [], [], True
+        res_sd_changed = False
+        for key, on_key, data_on in (("residentEIT", "res_on", "residentEITEffective"), ("nonresidentEIT", "nonres_on", "nonresidentEITEffective"),
+                                      ("schoolDistrictEIT", "sd_on", "schoolDistrictEITEffective")):
+            if key in diffs:
+                date = str(r[on_key]).strip()
+                if not date or iso(date) > jan1 or e.get(data_on) != date or e.get(key) is None:
+                    ok = False
+                    break
+                edits.append({"path": base + [key], "new": want[key], "relation": None})
+                companions.append({"path": base + [data_on], "value": date})
+                res_sd_changed = res_sd_changed or key in ("residentEIT", "schoolDistrictEIT")
+        if ok and ("totalResidentEIT" in diffs or res_sd_changed):
+            if abs(want["totalResidentEIT"] - round(want["residentEIT"] + want["schoolDistrictEIT"], 6)) > 1e-9:
+                ok = False  # the register's own total is not the sum of its parts
+            elif not (set(diffs) - {"totalResidentEIT"}):
+                ok = False  # only the total disagrees: nothing the parts explain
+            else:
+                edits.append({"path": base + ["totalResidentEIT"], "new": want["totalResidentEIT"],
+                              "relation": {"sum": ["residentEIT", "schoolDistrictEIT"]}})
+        if ok and lst_diffs:
+            if not lst_end or not (set(lst_diffs) - {"total"}):
+                ok = False
+            else:
+                for key, on_key, data_on in (("municipal", "lst_m_on", "municipalEffective"), ("schoolDistrict", "lst_sd_on", "schoolDistrictEffective")):
+                    if key in lst_diffs:
+                        date = str(r[on_key]).strip()
+                        if not date or iso(date) > jan1 or lst_end.get(data_on) != date or e.get("rateChanges"):
+                            ok = False
+                            break
+                        edits.append({"path": base + ["lst", key], "new": lst_want[key], "relation": None})
+                        companions.append({"path": base + ["lst", data_on], "value": date})
+                if ok:
+                    if abs(lst_want["total"] - (lst_want["municipal"] + lst_want["schoolDistrict"])) > 1e-9:
+                        ok = False
+                    else:
+                        edits.append({"path": base + ["lst", "total"], "new": lst_want["total"],
+                                      "relation": {"sum": ["municipal", "schoolDistrict"]}})
+        if ok and edits:
+            first = next(x for x in edits if not x["relation"])
+            f["change"] = {"file": f"data/local/{path.name}", "edits": edits, "companions": companions, "new": first["new"],
+                           "effective_from": jan1, "source_url": source.get("url", "")}
+        out.append(f)
+    return out
+
+
+RECONCILERS = {"oh_municipal": reconcile_oh_municipal, "oh_jedd": reconcile_oh_jedd, "in_counties": reconcile_in_counties, "pa_local": reconcile_pa_local}
 
 
 def run(sources: list[dict], fetcher, today: str, repo: Path = REPO) -> list[dict]:
@@ -257,7 +471,14 @@ def run(sources: list[dict], fetcher, today: str, repo: Path = REPO) -> list[dic
             if d.ok:
                 directory = parse_finder_directory(d.body.decode("utf-8", errors="replace"))
         try:
-            findings.extend(fn(f.body.decode("utf-8", errors="replace"), s, today, repo, directory))
+            if name == "pa_local":
+                text = f.body  # a binary spreadsheet: the reader needs the bytes
+            elif s["url"].lower().split("?")[0].endswith(".pdf"):
+                import watch  # noqa: PLC0415 - circular at import time, fine at call time
+                text = watch.extract(s, f).text
+            else:
+                text = f.body.decode("utf-8", errors="replace")
+            findings.extend(fn(text, s, today, repo, directory))
         except Exception as e:  # noqa: BLE001 - one reconciler must not sink the run
             findings.append(finding("reconcile_error", "action", s, name, f"{type(e).__name__}: {e}"[:200]))
     return findings
