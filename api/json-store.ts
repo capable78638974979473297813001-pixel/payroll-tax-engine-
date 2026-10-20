@@ -1,4 +1,4 @@
-import { closeSync, existsSync, fsyncSync, mkdirSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeSync } from 'node:fs';
+import { closeSync, copyFileSync, existsSync, fsyncSync, mkdirSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeSync } from 'node:fs';
 import { dirname } from 'node:path';
 
 /**
@@ -48,10 +48,28 @@ export function readJsonFile<T>(file: string): T | null {
   }
 }
 
-/** Write JSON atomically: temp file + fsync + rename over the target. */
-export function writeJsonFileAtomic(file: string, value: unknown): void {
+/** Flush a directory entry (the rename) to disk. Best effort: not every platform allows opening a directory. */
+function fsyncDir(dir: string): void {
+  try {
+    const fd = openSync(dir, 'r');
+    try { fsyncSync(fd); } finally { closeSync(fd); }
+  } catch { /* unsupported here (e.g. Windows) */ }
+}
+
+/**
+ * Write JSON atomically: temp file + fsync + rename over the target, then
+ * fsync the directory so the rename itself survives power loss. With
+ * { backup: true } the file being replaced is first copied to `<file>.bak`,
+ * so one previous generation is always on disk. The caller has already
+ * parsed the current file (a corrupt one throws before we get here), so
+ * the backup is never a copy of a corrupt file.
+ */
+export function writeJsonFileAtomic(file: string, value: unknown, opts: { backup?: boolean } = {}): void {
   const dir = dirname(file);
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  if (opts.backup && existsSync(file)) {
+    try { copyFileSync(file, `${file}.bak`); } catch { /* a failed backup must not block the real write */ }
+  }
   const tmp = `${file}.${process.pid}.${Date.now()}.tmp`;
   const fd = openSync(tmp, 'w', 0o600);
   try {
@@ -66,6 +84,7 @@ export function writeJsonFileAtomic(file: string, value: unknown): void {
     try { unlinkSync(tmp); } catch { /* already gone */ }
     throw err;
   }
+  fsyncDir(dir);
 }
 
 const sleeper = new Int32Array(new SharedArrayBuffer(4));

@@ -330,7 +330,7 @@ export function withDb<T>(fn: (db: DB) => T): T {
   return withFileLock(FILE, () => {
     const db = load();
     const result = fn(db);
-    writeJsonFileAtomic(FILE, db);
+    writeJsonFileAtomic(FILE, db, { backup: true });
     return result;
   });
 }
