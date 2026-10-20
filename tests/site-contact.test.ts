@@ -2,6 +2,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { createServer, type Server } from 'node:http';
+import { createServer as createNetServer } from 'node:net';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
@@ -18,13 +19,18 @@ let withMail: ChildProcess;
 let without: ChildProcess;
 let dirA: string;
 let dirB: string;
-const PORT_A = 6400 + Math.floor(Math.random() * 150);
-const PORT_B = PORT_A + 150;
+/** An unused port, so parallel test files can never collide. */
+const freePort = () => new Promise<number>((resolve) => {
+  const srv = createNetServer();
+  srv.listen(0, '127.0.0.1', () => { const { port } = srv.address() as { port: number }; srv.close(() => resolve(port)); });
+});
+let PORT_A = 0;
+let PORT_B = 0;
 
 const post = (port: number, body: unknown) =>
   fetch(`http://127.0.0.1:${port}/api/contact`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 const ready = async (port: number) => {
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 200; i++) {
     try { if ((await fetch(`http://127.0.0.1:${port}/v1/health`)).ok) return; } catch { /* not up yet */ }
     await new Promise((r) => setTimeout(r, 150));
   }
@@ -32,6 +38,8 @@ const ready = async (port: number) => {
 };
 
 before(async () => {
+  PORT_A = await freePort();
+  PORT_B = await freePort();
   dirA = mkdtempSync(join(tmpdir(), 'contact-a-'));
   dirB = mkdtempSync(join(tmpdir(), 'contact-b-'));
   fake = createServer((req, res) => {

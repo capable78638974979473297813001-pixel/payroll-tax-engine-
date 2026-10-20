@@ -62,4 +62,29 @@ describe('coverage index', () => {
     assert.equal(wage, cov.summary.localMinimumWage);
     assert.equal(searchLocal({ kind: 'wage', state: 'CA', size: 1 }).total, json('minimum-wage/local/CA-local-2026.json').jurisdictions.length);
   });
+
+  test('flat fees and hourly wages carry their own display value, and expiry notes leave the name', () => {
+    const wv = searchLocal({ state: 'WV', kind: 'tax', size: 100 }).items;
+    assert.ok(wv.length >= 11 && wv.every((r) => r.rate === null && /^\$\d+\.\d\d\/wk$/.test(r.value ?? '')));
+    const ca = searchLocal({ kind: 'wage', state: 'CA', q: 'alameda' }).items[0];
+    assert.match(ca.value ?? '', /^\$\d+\.\d\d\/hr$/);
+    const oh = searchLocal({ state: 'OH', q: 'expires', size: 100 });
+    assert.ok(oh.items.every((r) => !r.name.includes('(') && /expires \d{4}/.test(r.detail)), 'rate notes moved from the name to the detail');
+    const triad = searchLocal({ state: 'OH', q: 'triad lsd' }).items[0];
+    assert.equal(triad.name, 'Triad LSD');
+    assert.match(triad.detail, /Champaign County\. 0\.50% expires 2030; 1\.00% CPT/);
+    assert.ok(oh.total > 0);
+  });
+
+  test('search matches a state by name and reports which states a search touches', () => {
+    const ohio = searchLocal({ q: 'ohio', kind: 'tax', size: 1 });
+    assert.ok(ohio.stateCounts.OH >= 1054, 'every Ohio row matches its state name');
+    const marion = searchLocal({ q: 'marion', kind: 'tax' });
+    assert.deepEqual(Object.keys(marion.stateCounts).sort(), ['IN', 'KY', 'OH', 'PA']);
+    assert.equal(Object.values(marion.stateCounts).reduce((a, b) => a + b, 0), marion.total);
+    // The state filter narrows the list but not the per-state counts.
+    const inOnly = searchLocal({ q: 'marion', state: 'IN', kind: 'tax' });
+    assert.equal(inOnly.total, marion.stateCounts.IN);
+    assert.deepEqual(inOnly.stateCounts, marion.stateCounts);
+  });
 });

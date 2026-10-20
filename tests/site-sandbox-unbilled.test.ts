@@ -2,6 +2,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { createServer, type Server } from 'node:http';
+import { createServer as createNetServer } from 'node:net';
 import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
@@ -15,8 +16,13 @@ import { fileURLToPath } from 'node:url';
  */
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
-const PORT = 6000 + Math.floor(Math.random() * 300);
-const BASE = `http://127.0.0.1:${PORT}`;
+/** An unused port, so parallel test files can never collide. */
+const freePort = () => new Promise<number>((resolve) => {
+  const srv = createNetServer();
+  srv.listen(0, '127.0.0.1', () => { const { port } = srv.address() as { port: number }; srv.close(() => resolve(port)); });
+});
+let PORT = 0;
+let BASE = '';
 const EMAIL = 'sandy@sandbox.test';
 
 const card = { id: 'pm_card', type: 'card', card: { brand: 'visa', last4: '4242' } };
@@ -41,6 +47,8 @@ const paycheckBody = {
 };
 
 before(async () => {
+  PORT = await freePort();
+  BASE = `http://127.0.0.1:${PORT}`;
   dir = mkdtempSync(join(tmpdir(), 'site-sandbox-'));
   fakes = createServer((req, res) => {
     let raw = '';
@@ -65,7 +73,7 @@ before(async () => {
     },
     stdio: 'ignore',
   });
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 200; i++) {
     try { if ((await fetch(`${BASE}/v1/health`)).ok) return; } catch { /* not up yet */ }
     await new Promise((r) => setTimeout(r, 150));
   }
