@@ -1,6 +1,7 @@
 """Lets the source watch correct a number in data/ on its own, under rules
-strict enough that the only thing it can ever do is replace one number on one
-line.
+strict enough that the only thing it can ever do is replace numbers on named
+lines: one value, plus the lines that must move with it (its copy, its
+percent string, a total that is a sum of its parts), all in one file.
 
 Why it is this narrow. Everything under data/ feeds a paycheck. A wrong
 automatic edit is a wrong net pay for every employee the engine calculates, so
@@ -57,6 +58,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import bisect
 import fnmatch
 import json
 import re
@@ -76,6 +78,7 @@ REPORT_MD = HERE / "reports" / "autoupdate-latest.md"
 # Fields the watcher may never be told to edit, whatever a rule says.
 NOTE_KEYS = ("$correctionNote", "sourceNote", "$addedNote")
 LINE_RE = re.compile(r'^(?P<indent>[ \t]*)"(?P<key>[A-Za-z][A-Za-z0-9_]*)": (?P<num>-?\d+(?:\.\d+)?)(?P<comma>,?)$')
+STRING_LINE_RE = re.compile(r'^(?P<indent>[ \t]*)"(?P<key>[A-Za-z][A-Za-z0-9_]*)": "(?P<num>\d+(?:\.\d+)?)"(?P<comma>,?)$')
 # Paths the generated bundle step may touch besides the one data file.
 GENERATED_PREFIXES = ("supabase/functions/_shared/",)
 
@@ -172,57 +175,191 @@ def _rule_for(cfg: dict, rel: str, key: str) -> dict | None:
 
 
 # --------------------------------------------------------------------------
-# turning findings into proposals
+# finding a value in a file
 # --------------------------------------------------------------------------
 
+def json_positions(text: str) -> dict[tuple, tuple[int, str, bool]]:
+    """{path: (1-based line, token as written, key repeated?)} for every
+    scalar in a JSON document. Used to turn "this value in this entry" into
+    "this line", and back, without assuming how the file was pretty-printed."""
+    newlines = [m.start() for m in re.finditer("\n", text)]
+    pos: dict[tuple, tuple[int, str, bool]] = {}
+    n = len(text)
+    i = 0
+
+    def line_of(idx: int) -> int:
+        return bisect.bisect_left(newlines, idx) + 1
+
+    def ws() -> None:
+        nonlocal i
+        while i < n and text[i] in " \t\r\n":
+            i += 1
+
+    def string() -> str:
+        nonlocal i
+        j = i + 1
+        while text[j] != '"':
+            j += 2 if text[j] == "\\" else 1
+        tok = text[i:j + 1]
+        i = j + 1
+        return tok
+
+    def value(path: tuple) -> None:
+        nonlocal i
+        ws()
+        c = text[i]
+        if c == "{":
+            i += 1
+            ws()
+            if text[i] == "}":
+                i += 1
+                return
+            seen: set[str] = set()
+            while True:
+                ws()
+                key = json.loads(string())
+                ws()
+                i += 1  # ':'
+                if key in seen:
+                    pos[path + (key,)] = (0, "", True)  # repeated key: unlocatable on purpose
+                seen.add(key)
+                value(path + (key,))
+                ws()
+                if text[i] == ",":
+                    i += 1
+                    continue
+                i += 1  # '}'
+                return
+        if c == "[":
+            i += 1
+            ws()
+            if text[i] == "]":
+                i += 1
+                return
+            k = 0
+            while True:
+                value(path + (k,))
+                k += 1
+                ws()
+                if text[i] == ",":
+                    i += 1
+                    continue
+                i += 1  # ']'
+                return
+        start = i
+        if c == '"':
+            tok = string()
+        else:
+            while i < n and text[i] not in ",}] \t\r\n":
+                i += 1
+            tok = text[start:i]
+        if path in pos and pos[path][2]:
+            return
+        pos[path] = (line_of(start), tok, False)
+
+    value(())
+    return pos
+
+
+def _positions(repo: Path, rel: str) -> dict:
+    try:
+        return json_positions((repo / rel).read_text())
+    except (OSError, ValueError, IndexError) as e:
+        raise Rejected(f"{rel} could not be read as JSON ({type(e).__name__})") from None
+
+
+def locate_path(repo: Path, rel: str, id_key: str, ident: str, key: str) -> tuple:
+    """The path of `key` inside the one object whose `id_key` is `ident`."""
+    pos = _positions(repo, rel)
+    token = json.dumps(ident)
+    holders = [path[:-1] for path, (_, tok, dup) in pos.items() if path and path[-1] == id_key and tok == token and not dup]
+    if len(holders) != 1:
+        raise Rejected(f"{id_key} {ident!r} appears {len(holders)} times, not exactly once")
+    target = holders[0] + (key,)
+    if target not in pos or pos[target][2]:
+        raise Rejected(f'"{key}" appears no or more than once in that entry, not exactly once')
+    return target
+
+
 def locate(repo: Path, rel: str, id_key: str, ident: str, key: str) -> int:
-    """The 1-based line of `"<key>": <number>` inside the one object whose
-    `<id_key>` is `ident`. Raises Rejected unless there is exactly one."""
-    lines = (repo / rel).read_text().split("\n")
-    id_lines = [i for i, ln in enumerate(lines) if re.fullmatch(rf'\s*"{re.escape(id_key)}": "{re.escape(ident)}",?', ln)]
-    if len(id_lines) != 1:
-        raise Rejected(f"{id_key} {ident!r} appears on {len(id_lines)} lines, not exactly one")
-    at = id_lines[0]
-    indent = re.match(r"[ \t]*", lines[at]).group()
-    # The object's braces sit one level out from its keys.
-    outer = indent[: max(0, len(indent) - 2)]
-    start = at
-    while start > 0 and lines[start] not in (outer + "{", outer + "{,"):
-        start -= 1
-    end = at
-    while end < len(lines) - 1 and lines[end] not in (outer + "}", outer + "},"):
-        end += 1
-    hits = [i for i in range(start, end + 1) if re.match(rf'^{re.escape(indent)}"{re.escape(key)}": ', lines[i])]
-    if len(hits) != 1:
-        raise Rejected(f'"{key}" appears {len(hits)} times in that entry, not exactly once')
-    return hits[0] + 1
+    """The 1-based line of `key` inside the one object whose `id_key` is `ident`."""
+    return _positions(repo, rel)[locate_path(repo, rel, id_key, ident, key)][0]
+
+
+def fmt_percent(x: float) -> str:
+    """0.015 -> '1.5', 0.02 -> '2': the way the data files spell a rate stated in percent."""
+    s = f"{round(float(x) * 100, 4):.4f}".rstrip("0")
+    return s[:-1] if s.endswith(".") else s
+
+
+def _edit_texts(raw: str, relation) -> str:
+    return raw[1:-1] if raw.startswith('"') else raw
+
+
+def normalize(p: dict) -> dict:
+    """Every proposal is a list of edits; the older single-edit shape (line,
+    key, old_text, new_text) is the same thing with one."""
+    if "edits" in p:
+        return p
+    q = dict(p)
+    q["edits"] = [{"line": p.get("line"), "key": p.get("key"), "old_text": p.get("old_text"),
+                   "new_text": p.get("new_text"), "relation": None}]
+    return q
 
 
 def proposals_from(confirmed: list[dict], repo: Path, today: str) -> list[dict]:
-    """Findings that carry a `change`, located to an exact line. A finding
-    whose line cannot be pinned down is dropped here (the rest of the run
-    still reports it for a person)."""
+    """Findings that carry a `change`, located to exact lines. A finding
+    whose lines cannot be pinned down is dropped here (the run still
+    reports it for a person)."""
     out = []
     for f in confirmed:
         ch = f.get("change")
         if not ch or f.get("severity") != "action":
             continue
         try:
-            line = locate(repo, ch["file"], ch["id_key"], ch["id"], ch["key"])
-        except (Rejected, OSError):
-            continue
-        text = (repo / ch["file"]).read_text().split("\n")[line - 1]
-        m = LINE_RE.match(text)
-        if not m:
+            pos = _positions(repo, ch["file"])
+            specs = ch.get("edits")
+            if specs is None:  # one value found by entry id, plus fields that mirror it
+                base = locate_path(repo, ch["file"], ch["id_key"], ch["id"], ch["key"])
+                specs = [{"path": list(base), "new": ch["new"], "relation": None}] + [
+                    {"path": list(base[:-1] + (d["key"],)), "relation": d["relation"]} for d in ch.get("derived", [])]
+            edits = []
+            for sp in specs:
+                path = tuple(sp["path"])
+                line, tok, dup = pos[path]
+                if dup:
+                    raise Rejected("repeated key")
+                rel = sp.get("relation")
+                if rel == "percent_string":
+                    new_text = fmt_percent(ch["new"])
+                elif isinstance(rel, dict) and "sum" in rel:
+                    new_text = None  # filled in below, once the other values are known
+                else:
+                    new_text = fmt_number(sp.get("new", ch["new"]))
+                edits.append({"path": list(path), "line": line, "key": str(path[-1]), "old_text": _edit_texts(tok, rel),
+                              "new_text": new_text, "relation": rel})
+            for e in edits:
+                if e["new_text"] is None:
+                    parts = []
+                    for k in e["relation"]["sum"]:
+                        sib = next((x for x in edits if x["key"] == k), None)
+                        if sib is not None:
+                            parts.append(float(sib["new_text"]))
+                        else:
+                            parts.append(float(_edit_texts(pos[tuple(e["path"][:-1]) + (k,)][1], None)))
+                    e["new_text"] = fmt_number(sum(parts))
+        except (Rejected, OSError, KeyError):
             continue
         out.append({
-            "id": f'{ch["file"]}#{ch["id_key"]}={ch["id"]}.{ch["key"]}',
-            "file": ch["file"], "line": line, "key": ch["key"],
-            "old_text": m.group("num"), "new_text": fmt_number(ch["new"]),
-            "new": ch["new"], "effective_from": ch["effective_from"],
+            "id": f'{ch["file"]}#{ch.get("id_key", "path")}={ch.get("id", "")}.{ch.get("key", "")}'
+                  if "id" in ch else f'{ch["file"]}#' + ",".join(".".join(map(str, sp["path"])) for sp in specs[:1]),
+            "file": ch["file"], "edits": edits, "new": ch["new"],
+            "effective_from": ch.get("effective_from", f'{ch["file"][-9:-5]}-01-01'),
             "name": f.get("name", ""), "kind": f["kind"], "as_of": today,
-            "evidence": {"source_id": f.get("source_id", ""), "url": ch.get("source_url", ""),
-                         "official_value": ch["new"], "reads": f.get("reads", [])},
+            "evidence": {"kind": ch.get("evidence_kind", "feed"), "source_id": f.get("source_id", ""),
+                         "url": ch.get("source_url", ""), "official_value": ch["new"], "reads": f.get("reads", []),
+                         **({"pattern": ch["pattern"], "matched_text": ch.get("matched_text", ""), "transform": ch.get("transform", "")}
+                            if ch.get("evidence_kind") == "text" else {})},
         })
     return out
 
@@ -231,32 +368,57 @@ def proposals_from(confirmed: list[dict], repo: Path, today: str) -> list[dict]:
 # the rules
 # --------------------------------------------------------------------------
 
+def _holder_blockers(holder: dict, edited_keys: set[str]) -> str | None:
+    if "rateHistory" in holder or "effectiveDated" in holder:
+        return "the entry has dated history; a change needs a dated row, which is a structural edit"
+    if any(re.search(r"terminat|endsOn|expir|sunset", k, re.I) for k in holder):
+        return "the entry has an end date; whether the rate still applies is a person's call"
+    if any(k in holder for k in NOTE_KEYS):
+        return "the entry carries a note recording a hand-checked departure from the official file"
+    mirrors = [k for k, v in holder.items()
+               if k not in edited_keys and isinstance(v, (str, int, float)) and not isinstance(v, bool)
+               and any(k.lower().startswith(e.lower()) or k.lower() == e.lower() + "raw" or k.lower().endswith("raw") for e in edited_keys)]
+    if mirrors:
+        return f"the entry has fields that mirror the value ({', '.join(mirrors)}); a one-line edit would leave them stale"
+    return None
+
+
 def check(p: dict, cfg: dict, repo: Path, sources: list[dict], today: str, now: dt.datetime | None = None) -> dict:
-    """Raises Rejected unless `p` is a single-number replacement that obeys
-    every rule. Returns what would be written: {path, text, replacement}.
+    """Raises Rejected unless `p` is a set of single-number replacements that
+    obeys every rule. Returns what would be written: {path, text, lines}.
     Pure: reads the repo, changes nothing. apply() calls it again just before
     writing, so a proposal is never trusted from earlier."""
     now = now or dt.datetime.now(dt.timezone.utc)
-    required = ("id", "file", "line", "key", "old_text", "new_text", "effective_from", "as_of", "evidence")
+    p = normalize(p)
+    required = ("id", "file", "edits", "effective_from", "as_of", "evidence")
     missing = [k for k in required if k not in p]
     if missing:
         raise Rejected(f"proposal is missing {', '.join(missing)}")
-    if not isinstance(p["line"], int) or isinstance(p["line"], bool) or p["line"] < 1:
-        raise Rejected("line must be a positive integer")
+    edits = [dict(e) for e in p["edits"]] if isinstance(p["edits"], list) else p["edits"]
+    if not isinstance(edits, list) or not (1 <= len(edits) <= cfg.get("max_edits_per_proposal", 6)):
+        raise Rejected("a proposal must hold between one and six edits")
+    for e in edits:
+        if not isinstance(e.get("line"), int) or isinstance(e.get("line"), bool) or e["line"] < 1:
+            raise Rejected("line must be a positive integer")
+        if not all(k in e for k in ("key", "old_text", "new_text")):
+            raise Rejected("an edit is missing key, old_text or new_text")
 
-    # 1 / 2: switch, path, allow-list
+    # 1 / 2: path, allow-list
     rel = p["file"]
     if not isinstance(rel, str) or rel.startswith(("/", "\\")) or ".." in Path(rel).parts or "\\" in rel:
         raise Rejected("path must be relative and stay inside the repository")
     if not rel.startswith("data/") or not rel.endswith(".json"):
         raise Rejected("only .json files under data/ can be changed")
-    rule = _rule_for(cfg, rel, p["key"])
-    if rule is None:
-        raise Rejected(f'no rule allows changing "{p["key"]}" in {rel}')
+    rules = []
+    for e in edits:
+        rule = _rule_for(cfg, rel, e["key"])
+        if rule is None:
+            raise Rejected(f'no rule allows changing "{e["key"]}" in {rel}')
+        rules.append(rule)
     path = repo / rel
     if path.is_symlink() or not path.is_file():
         raise Rejected("file is missing or is a symlink")
-    if path.resolve().parent != (repo / rel).parent.resolve() or repo.resolve() not in path.resolve().parents:
+    if repo.resolve() not in path.resolve().parents:
         raise Rejected("file resolves outside the repository")
     try:
         _git(repo, "ls-files", "--error-unmatch", rel)
@@ -268,88 +430,164 @@ def check(p: dict, cfg: dict, repo: Path, sources: list[dict], today: str, now: 
     file_year = int(ym.group(1))
     if file_year < int(today[:4]):
         raise Rejected(f"{file_year} is a past year; its paychecks are final")
-
-    # proposal freshness
     if p["as_of"] != today:
         raise Rejected(f"proposal is dated {p['as_of']}, not today ({today})")
 
-    # 3: the line, and only the number on it
+    # 3: each line, and only the number on it
     original = path.read_text()
     lines = original.split("\n")
-    if p["line"] > len(lines):
-        raise Rejected("line is past the end of the file")
-    current = lines[p["line"] - 1]
-    m = LINE_RE.match(current)
-    if not m:
-        raise Rejected(f"line {p['line']} is not a plain `\"key\": number` line")
-    if m.group("key") != p["key"]:
-        raise Rejected(f"line {p['line']} holds \"{m.group('key')}\", not \"{p['key']}\"")
-    if m.group("num") != p["old_text"]:
-        raise Rejected(f"line {p['line']} holds {m.group('num')}, not the {p['old_text']} the proposal expected")
-    new_text = p["new_text"]
-    if not re.fullmatch(r"\d+\.\d{1,6}", new_text):
-        raise Rejected("new value must be a plain decimal with at most six places")
-    replacement = f'{m.group("indent")}"{m.group("key")}": {new_text}{m.group("comma")}'
-    if replacement == current:
-        raise Rejected("nothing to change")
-
-    # 4: exactly one leaf differs
     new_lines = list(lines)
-    new_lines[p["line"] - 1] = replacement
-    new_original = "\n".join(new_lines)
+    seen_lines: set[int] = set()
+    for e, rule in zip(edits, rules):
+        if e["line"] > len(lines):
+            raise Rejected("line is past the end of the file")
+        if e["line"] in seen_lines:
+            raise Rejected("two edits on one line")
+        seen_lines.add(e["line"])
+        current = lines[e["line"] - 1]
+        rel_kind = e.get("relation")
+        m = (STRING_LINE_RE if rel_kind == "percent_string" else LINE_RE).match(current)
+        if not m:
+            raise Rejected(f"line {e['line']} is not a plain `\"key\": number` line")
+        if m.group("key") != e["key"]:
+            raise Rejected(f"line {e['line']} holds \"{m.group('key')}\", not \"{e['key']}\"")
+        if m.group("num") != e["old_text"]:
+            raise Rejected(f"line {e['line']} holds {m.group('num')}, not the {e['old_text']} the proposal expected")
+        nt = e["new_text"]
+        shape = r"\d+(?:\.\d{1,6})?" if (rel_kind == "percent_string" or rule.get("integers")) else r"\d+\.\d{1,6}"
+        if not (isinstance(nt, str) and re.fullmatch(shape, nt)):
+            raise Rejected("new value must be a plain decimal with at most six places")
+        q = '"' if rel_kind == "percent_string" else ""
+        replacement = f'{m.group("indent")}"{m.group("key")}": {q}{nt}{q}{m.group("comma")}'
+        if replacement == current:
+            raise Rejected("nothing to change")
+        new_lines[e["line"] - 1] = replacement
+
+    # 4: exactly these leaves differ, and nothing else
+    new_text_all = "\n".join(new_lines)
     try:
-        before, after = json.loads(original), json.loads(new_original)
+        before, after = json.loads(original), json.loads(new_text_all)
     except ValueError as e:
         raise Rejected(f"file does not parse after the change ({e})") from None
     diffs = _deep_diff(before, after)
-    if len(diffs) != 1:
-        raise Rejected(f"the change alters {len(diffs)} values, not exactly one")
-    leaf = diffs[0]
-    old_v, new_v = _get(before, leaf), _get(after, leaf)
-    if isinstance(old_v, bool) or isinstance(new_v, bool) or not isinstance(old_v, (int, float)) or not isinstance(new_v, (int, float)):
-        raise Rejected("only a number can be replaced by a number")
-    if leaf[-1] != p["key"]:
-        raise Rejected("the changed value is not under the named key")
+    if len(diffs) != len(edits):
+        raise Rejected(f"the change alters {len(diffs)} values, not exactly {len(edits)} (not exactly one per edit)")
+    pos = _positions(repo, rel)
+    by_line = {}
+    for path_t, (ln, _, dup) in pos.items():
+        if not dup:
+            by_line.setdefault(ln, []).append(path_t)
+    leaves = set(diffs)
+    holders: dict[tuple, set] = {}
+    for e in edits:
+        owners = by_line.get(e["line"], [])
+        if len(owners) != 1:
+            raise Rejected(f"line {e['line']} does not hold exactly one value")
+        leaf = owners[0]
+        if "path" in e and tuple(e["path"]) != leaf:
+            raise Rejected(f"line {e['line']} is not at the path the proposal named")
+        if leaf not in leaves:
+            raise Rejected("the changed value is not on the named line")
+        if leaf[-1] != e["key"]:
+            raise Rejected("the changed value is not under the named key")
+        e["_leaf"] = leaf
+        holders.setdefault(leaf[:-1], set()).add(e["key"])
+    for hp in holders:
+        if not isinstance(_get(before, hp), dict):
+            raise Rejected("the value is not a field of an entry")
+    if "effectiveDated" in before:
+        raise Rejected("the file carries effectiveDated overlays")
 
-    # 5: bounds
-    if old_v == 0 or new_v == 0:
-        raise Rejected("a value going to or from zero is a repeal or a new tax; a person decides")
-    if not (rule["min"] <= new_v <= rule["max"]):
-        raise Rejected(f"{new_v} is outside the allowed range {rule['min']}..{rule['max']}")
-    if abs(new_v - old_v) > rule["max_abs_change"] + 1e-12:
-        raise Rejected(f"a change of {abs(new_v - old_v):.6f} is larger than the {rule['max_abs_change']} cap")
-    if abs(new_v - float(p.get("new", new_v))) > 5e-7:
+    # 5: bounds, per edit; relations between edits
+    primary = [e for e in edits if not e.get("relation")]
+    if not primary:
+        raise Rejected("a proposal needs a primary edit backed by the evidence")
+    top_new = None
+    for e, rule in zip(edits, rules):
+        leaf = e["_leaf"]
+        old_v, new_v = _get(before, leaf), _get(after, leaf)
+        rk = e.get("relation")
+        if rk == "percent_string":
+            if not isinstance(old_v, str) or not isinstance(new_v, str):
+                raise Rejected("a mirrored percent must be a string")
+            continue
+        if isinstance(old_v, bool) or isinstance(new_v, bool) or not isinstance(old_v, (int, float)) or not isinstance(new_v, (int, float)):
+            raise Rejected("only a number can be replaced by a number")
+        if old_v == 0 or new_v == 0:
+            raise Rejected("a value going to or from zero is a repeal or a new tax; a person decides")
+        if not (rule["min"] <= new_v <= rule["max"]):
+            raise Rejected(f"{new_v} is outside the allowed range {rule['min']}..{rule['max']}")
+        if abs(new_v - old_v) > rule["max_abs_change"] + 1e-12:
+            raise Rejected(f"a change of {abs(new_v - old_v):.6f} is larger than the {rule['max_abs_change']} cap")
+        if rk is None:
+            if top_new is None:
+                top_new = new_v
+            elif abs(new_v - top_new) > 5e-7 and not rule.get("independent_values"):
+                raise Rejected("edits that are not mirrors of each other must be allowed to differ by their rule")
+    for e in edits:
+        rk = e.get("relation")
+        leaf = e["_leaf"]
+        new_v = _get(after, leaf)
+        if rk == "percent_string":
+            expected = fmt_percent(top_new if top_new is not None else float(p.get("new", 0)))
+            if new_v != expected:
+                raise Rejected(f"mirrored percent {new_v!r} is not the percent form of the rate ({expected!r})")
+        elif isinstance(rk, dict) and "sum" in rk:
+            total = round(sum(float(_get(after, e["_leaf"][:-1])[k]) for k in rk["sum"]), 6)
+            if abs(total - new_v) > 5e-7:
+                raise Rejected(f"{e['key']} is not the sum of {', '.join(rk['sum'])}")
+        elif rk == "copy":
+            if top_new is None or abs(new_v - top_new) > 5e-7:
+                raise Rejected(f"{e['key']} is not a copy of the value being changed")
+        elif rk is not None:
+            raise Rejected(f"unknown relation {rk!r}")
+    if abs((top_new if top_new is not None else 0) - float(p.get("new", top_new or 0))) > 5e-7:
         raise Rejected("new_text disagrees with the official value in the proposal")
 
     # 6: the holding object
-    holder = _get(before, leaf[:-1])
-    if not isinstance(holder, dict):
-        raise Rejected("the value is not a field of an entry")
-    if "rateHistory" in holder or "effectiveDated" in holder:
-        raise Rejected("the entry has dated history; a change needs a dated row, which is a structural edit")
-    if "effectiveDated" in before:
-        raise Rejected("the file carries effectiveDated overlays")
-    if any(k in holder for k in NOTE_KEYS):
-        raise Rejected("the entry carries a note recording a hand-checked departure from the official file")
-    mirrors = [k for k, v in holder.items() if k != p["key"] and (k.lower().startswith(p["key"].lower()) or k.lower().endswith("raw")) and isinstance(v, (str, int, float))]
-    if mirrors:
-        raise Rejected(f"the entry has fields that mirror the value ({', '.join(mirrors)}); a one-line edit would leave them stale")
+    for hp, keys in holders.items():
+        reason = _holder_blockers(_get(before, hp), keys)
+        if reason:
+            raise Rejected(reason)
 
-    # 7: one number must cover the whole year
-    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(p["effective_from"])):
-        raise Rejected("effective_from is not a date")
-    if p["effective_from"] > f"{file_year}-01-01":
-        raise Rejected(f"the official change starts {p['effective_from']}, after January 1 {file_year}; a mid-year change needs a dated row")
-    if p["effective_from"] > today and file_year == int(today[:4]):
-        raise Rejected("the official change has not started yet")
+    # 7: the whole year must be covered by what the evidence says
+    ev = p["evidence"]
+    if ev.get("kind", "feed") == "text":
+        year_ok = str(file_year)
+        pattern = str(ev.get("pattern", ""))
+        matched = str(ev.get("matched_text", ""))
+        if "{year}" not in pattern:
+            raise Rejected("a text pattern must name the year it is about")
+        try:
+            m = re.search(pattern.replace("{year}", year_ok), matched)
+        except re.error:
+            raise Rejected("the text pattern is not a valid expression") from None
+        if not m or year_ok not in matched:
+            raise Rejected(f"the quoted text does not state the value for {file_year}")
+        try:
+            raw = float(m.group(1).replace(",", ""))
+        except (IndexError, ValueError):
+            raise Rejected("the text pattern does not capture a number") from None
+        value = {"percent": raw / 100, "dollars": raw, "": raw}.get(ev.get("transform", ""))
+        if value is None or abs(value - float(p["new"])) > 5e-7:
+            raise Rejected("the number in the quoted text is not the proposed value")
+        if p["effective_from"] != f"{file_year}-01-01":
+            raise Rejected("a text source states a value for a whole year")
+    else:
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(p["effective_from"])):
+            raise Rejected("effective_from is not a date")
+        if p["effective_from"] > f"{file_year}-01-01":
+            raise Rejected(f"the official change starts {p['effective_from']}, after January 1 {file_year}; a mid-year change needs a dated row")
+        if p["effective_from"] > today and file_year == int(today[:4]):
+            raise Rejected("the official change has not started yet")
 
     # 8: evidence
-    ev = p["evidence"]
     url = urlparse(str(ev.get("url", "")))
     if url.scheme != "https" or not url.hostname:
         raise Rejected("evidence is not an https URL")
-    if url.hostname not in rule["hosts"]:
-        raise Rejected(f"{url.hostname} is not an allowed official host for this file")
+    for rule in rules:
+        if url.hostname not in rule["hosts"]:
+            raise Rejected(f"{url.hostname} is not an allowed official host for this file")
     tracked = [s for s in sources if s.get("id") == ev.get("source_id")]
     if not tracked or tracked[0].get("url") != str(ev.get("url")):
         raise Rejected("evidence is not a source the watcher tracks, at the address it tracks")
@@ -368,7 +606,7 @@ def check(p: dict, cfg: dict, repo: Path, sources: list[dict], today: str, now: 
     if age > cfg["max_proposal_age_hours"] or age < -1:
         raise Rejected("the evidence is stale or from the future")
 
-    return {"path": path, "text": new_original, "replacement": replacement, "original_line": current}
+    return {"path": path, "text": new_text_all, "lines": [e["line"] for e in edits]}
 
 
 def triage(proposals: list[dict], cfg: dict, repo: Path, sources: list[dict], today: str, total_findings: int,
@@ -383,7 +621,7 @@ def triage(proposals: list[dict], cfg: dict, repo: Path, sources: list[dict], to
                 raise Rejected("a second proposal for the same value")
             seen.add(p.get("id"))
             check(p, cfg, repo, sources, today, now)
-            accepted.append(p)
+            accepted.append(normalize(p))
         except Rejected as e:
             rejected.append({"proposal": p, "reason": str(e)})
     if total_findings > cfg["max_findings_per_run"]:
@@ -392,14 +630,15 @@ def triage(proposals: list[dict], cfg: dict, repo: Path, sources: list[dict], to
     elif len(accepted) > cfg["max_changes_per_run"]:
         rejected += [{"proposal": p, "reason": f"circuit breaker: {len(accepted)} changes in one run (limit {cfg['max_changes_per_run']})"} for p in accepted]
         accepted = []
-    # Two accepted proposals on one file are fine only if on different lines.
+    # Two accepted proposals may share a file but never a line.
     lines_seen: set[tuple[str, int]] = set()
     for p in list(accepted):
-        k = (p["file"], p["line"])
-        if k in lines_seen:
+        ks = {(p["file"], e["line"]) for e in p["edits"]}
+        if ks & lines_seen:
             accepted.remove(p)
             rejected.append({"proposal": p, "reason": "two proposals for the same line"})
-        lines_seen.add(k)
+        else:
+            lines_seen |= ks
     return accepted, rejected
 
 
@@ -419,6 +658,7 @@ def apply(accepted: list[dict], cfg: dict, repo: Path, sources: list[dict], toda
     if _git(repo, "status", "--porcelain", "--untracked-files=no").strip():
         raise Rejected("the working tree is not clean; refusing to mix automatic changes with other edits")
     verify = DEFAULT_VERIFY if verify is None else verify
+    accepted = [normalize(p) for p in accepted]
     touched: dict[Path, str] = {}
     try:
         # Re-check each one against the file as it is right now, one at a time.
@@ -439,7 +679,7 @@ def apply(accepted: list[dict], cfg: dict, repo: Path, sources: list[dict], toda
         for rel in intended:
             diff = _git(repo, "diff", "-U0", "--", rel)
             body = [ln for ln in diff.splitlines() if ln[:1] in "+-" and not ln.startswith(("+++", "---"))]
-            want = sum(1 for p in accepted if p["file"] == rel)
+            want = sum(len(p["edits"]) for p in accepted if p["file"] == rel)
             if len(body) != 2 * want:
                 raise Rejected(f"{rel}: the diff has {len(body)} changed lines, expected {2 * want}")
         return accepted
@@ -462,23 +702,29 @@ def log(entries: list[dict], path: Path = LOG) -> None:
             f.write(json.dumps(e, sort_keys=True) + "\n")
 
 
-def report(applied: list[dict], rejected: list[dict], mode: str, today: str, note: str = "") -> str:
+def report(applied: list[dict], rejected: list[dict], mode: str, today: str, note: str = "", others: list[dict] | None = None) -> str:
     out = [f"# Auto-update: {today}", "", f"Mode: **{mode}**.", ""]
     if note:
         out += [note, ""]
     if applied:
         out += ["## Would change" if mode != "applied" else "## Changed", ""]
         for p in applied:
-            out.append(f"- `{p['file']}` line {p['line']}: `{p['old_text']}` -> `{p['new_text']}` "
+            changes = "; ".join(f"line {e['line']} `{e['key']}`: `{e['old_text']}` -> `{e['new_text']}`" for e in p["edits"])
+            out.append(f"- `{p['file']}` {changes} "
                        f"({p['name']}; official change effective {p['effective_from']}; source {p['evidence']['url']})")
         out.append("")
     if rejected:
         out += ["## Left for a person", ""]
         for r in rejected:
-            p = r["proposal"]
-            out.append(f"- `{p.get('file', '?')}` line {p.get('line', '?')} ({p.get('name', '')}): {r['reason']}")
+            p = normalize(r["proposal"])
+            where = ", ".join(str(e.get("line", "?")) for e in p["edits"])
+            out.append(f"- `{p.get('file', '?')}` line {where} ({p.get('name', '')}): {r['reason']}")
         out.append("")
-    if not applied and not rejected:
+    if others:
+        out += ["## The data disagrees with an official statement (a person decides)", ""]
+        out += [f"- {o['name']}: {o['detail']}" for o in others]
+        out.append("")
+    if not applied and not rejected and not others:
         out += ["Nothing to change.", ""]
     return "\n".join(out)
 
@@ -488,10 +734,12 @@ def report(applied: list[dict], rejected: list[dict], mode: str, today: str, not
 # --------------------------------------------------------------------------
 
 def gather(sources: list[dict], fetcher, today: str, repo: Path, gap: float, sleep=time.sleep,
-           run=None) -> tuple[list[dict], int]:
+           run=None, others: list | None = None) -> tuple[list[dict], int]:
     """Reads the official files twice, `gap` seconds apart, and keeps only
-    findings that came out identical both times. Returns (confirmed, number
-    of action-level disagreements seen on the first read)."""
+    findings that came out identical both times. Returns (confirmed findings
+    that carry a change, number of action-level disagreements seen on the
+    first read). Confirmed disagreements with no change to propose are added
+    to `others` so the report can list them for a person."""
     if run is None:
         import reconcile  # noqa: PLC0415
         run = reconcile.run
@@ -502,18 +750,43 @@ def gather(sources: list[dict], fetcher, today: str, repo: Path, gap: float, sle
     second = run(sources, fetcher, today, repo)
 
     def key(f):
-        c = f.get("change") or {}
-        return (f["kind"], f["code"], c.get("file"), c.get("new"), c.get("old"), c.get("effective_from"))
+        return (f["kind"], f.get("code", ""), json.dumps(f.get("change"), sort_keys=True), f.get("detail", "") if not f.get("change") else "")
 
-    later = {key(f): f for f in second if f.get("change")}
+    later = {key(f): f for f in second}
     confirmed = []
     for f in first:
-        if f.get("change") and key(f) in later:
+        if key(f) not in later:
+            continue
+        if f.get("change"):
             f = dict(f)
             f["reads"] = [{"at": first_at.isoformat(), "value": f["change"]["new"]},
                           {"at": second_at.isoformat(), "value": later[key(f)]["change"]["new"]}]
             confirmed.append(f)
+        elif others is not None and f["severity"] == "action":
+            others.append(f)
     return confirmed, sum(1 for f in first if f["severity"] == "action")
+
+
+def run_all(sources: list[dict], fetcher, today: str, repo: Path, text_of) -> list[dict]:
+    """Every check the watcher can make against the data: the structured
+    official files (reconcile.py) and the values official documents state
+    (extractors.py)."""
+    import extractors  # noqa: PLC0415
+    import reconcile  # noqa: PLC0415
+
+    found = reconcile.run(sources, fetcher, today, repo)
+    registry = extractors.load(repo / "watcher" / "extractors.json")
+    tracked = {s["id"]: s for s in sources}
+    wanted = {x["source_id"] for x in registry} | {a["source_id"] for x in registry for a in x.get("also", [])}
+    texts = {}
+    for sid in sorted(wanted & set(tracked)):
+        f = fetcher(tracked[sid]["url"])
+        if f.ok:
+            try:
+                texts[sid] = text_of(tracked[sid], f)
+            except Exception:  # noqa: BLE001 - an unreadable document is "no statement", never a value
+                continue
+    return found + extractors.findings(registry, texts, tracked, today, repo)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -529,7 +802,9 @@ def main(argv: list[str] | None = None) -> int:
     sources = json.loads((repo / "watcher" / "sources.json").read_text())["sources"]
     today = dt.date.today().isoformat()
     gap = max(cfg["min_confirm_gap_seconds"] + 2, 2)
-    confirmed, total = gather(sources, watch.fetch, today, repo, gap)
+    others: list[dict] = []
+    confirmed, total = gather(sources, watch.fetch, today, repo, gap, others=others,
+                              run=lambda srcs, fetcher, day, r: run_all(srcs, fetcher, day, r, lambda s, f: watch.extract(s, f).text))
     accepted, rejected = triage(proposals_from(confirmed, repo, today), cfg, repo, sources, today, total)
 
     mode, note = "check only", ""
@@ -545,14 +820,15 @@ def main(argv: list[str] | None = None) -> int:
             note = f"Nothing was applied: {e}"
             rejected += [{"proposal": p, "reason": f"verification failed: {e}"} for p in accepted]
             accepted = []
-    text = report(accepted, rejected, mode, today, note)
+    text = report(accepted, rejected, mode, today, note, others)
     (repo / "watcher" / "reports").mkdir(exist_ok=True)
     (repo / "watcher" / "reports" / "autoupdate-latest.md").write_text(text)
     (repo / "watcher" / "reports" / "autoupdate-latest.json").write_text(json.dumps(
         {"date": today, "mode": mode, "applied": accepted if mode == "applied" else [],
-         "would_apply": accepted if mode != "applied" else [], "left_for_a_person": rejected}, indent=2) + "\n")
+         "would_apply": accepted if mode != "applied" else [], "left_for_a_person": rejected,
+         "disagreements_for_a_person": [{"name": o["name"], "detail": o["detail"], "jurisdiction": o.get("jurisdiction", "")} for o in others]}, indent=2) + "\n")
     log([{"date": today, "mode": mode, "id": p["id"], "result": "applied" if mode == "applied" else "eligible",
-          "old": p["old_text"], "new": p["new_text"]} for p in accepted]
+          "edits": [(e["key"], e["old_text"], e["new_text"]) for e in p["edits"]]} for p in accepted]
         + [{"date": today, "id": r["proposal"].get("id", "?"), "result": "left for a person", "reason": r["reason"]} for r in rejected],
         repo / "watcher" / "autoupdate-log.jsonl")
     print(text)

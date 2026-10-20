@@ -169,7 +169,8 @@
   {
    "jurisdiction": "IN",
    "title": "Indiana Departmental Notice #1 (county rates)",
-   "url": "https://www.in.gov/dor/files/dn01.pdf"
+   "url": "https://www.in.gov/dor/files/dn01.pdf",
+   "reconcile": "in_counties"
   },
   {
    "jurisdiction": "KS",
@@ -763,6 +764,204 @@
    "jurisdiction": "PA",
    "title": "Pennsylvania Department of Revenue: newsroom",
    "url": "https://www.pa.gov/agencies/revenue/newsroom",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "AZ",
+   "title": "Arizona DOR: news",
+   "url": "https://azdor.gov/news",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "CA",
+   "title": "California FTB: newsroom",
+   "url": "https://www.ftb.ca.gov/about-ftb/newsroom/index.html",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "CA",
+   "title": "California EDD: news releases and announcements",
+   "url": "https://edd.ca.gov/en/about_edd/news_releases_and_announcements/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "CO",
+   "title": "Colorado Department of Revenue: news",
+   "url": "https://tax.colorado.gov/news",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "CT",
+   "title": "Connecticut DRS: newsroom",
+   "url": "https://portal.ct.gov/drs/newsroom",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "DC",
+   "title": "DC Office of Tax and Revenue: home (notices)",
+   "url": "https://otr.cfo.dc.gov/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "DE",
+   "title": "Delaware Division of Revenue: home (announcements)",
+   "url": "https://revenue.delaware.gov/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "HI",
+   "title": "Hawaii Department of Taxation: news",
+   "url": "https://tax.hawaii.gov/news/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "IA",
+   "title": "Iowa Department of Revenue: press releases",
+   "url": "https://revenue.iowa.gov/press-releases",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "IL",
+   "title": "Illinois Department of Revenue: news",
+   "url": "https://tax.illinois.gov/research/news.html",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "KS",
+   "title": "Kansas Department of Revenue: press releases",
+   "url": "https://www.ksrevenue.gov/pressreleases.html",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "LA",
+   "title": "Louisiana Department of Revenue: news and announcements",
+   "url": "https://revenue.louisiana.gov/news-and-announcements",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "MA",
+   "title": "Massachusetts Department of Revenue: home (news and notices)",
+   "url": "https://www.mass.gov/orgs/massachusetts-department-of-revenue",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "MD",
+   "title": "Maryland Comptroller (marylandtaxes.gov): home (announcements)",
+   "url": "https://www.marylandtaxes.gov/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "MD",
+   "title": "Maryland Comptroller: business taxes",
+   "url": "https://www.marylandtaxes.gov/business/index.php",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "MN",
+   "title": "Minnesota Department of Revenue: what's new",
+   "url": "https://www.revenue.state.mn.us/whats-new",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "MO",
+   "title": "Missouri Department of Revenue: news",
+   "url": "https://dor.mo.gov/news/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "MS",
+   "title": "Mississippi Department of Revenue: news",
+   "url": "https://www.dor.ms.gov/news",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "NC",
+   "title": "North Carolina Department of Revenue: news",
+   "url": "https://www.ncdor.gov/news",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "ND",
+   "title": "North Dakota Office of State Tax Commissioner: news",
+   "url": "https://www.tax.nd.gov/news",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "NE",
+   "title": "Nebraska Department of Revenue: news",
+   "url": "https://revenue.nebraska.gov/news",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "NJ",
+   "title": "New Jersey Division of Taxation: what's new",
+   "url": "https://www.nj.gov/treasury/taxation/whatsnew.shtml",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "NM",
+   "title": "New Mexico Taxation and Revenue: news",
+   "url": "https://www.tax.newmexico.gov/news/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "New York Department of Taxation: press",
+   "url": "https://www.tax.ny.gov/press/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "OK",
+   "title": "Oklahoma Tax Commission: home (announcements)",
+   "url": "https://oklahoma.gov/tax.html",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "OR",
+   "title": "Oregon Department of Revenue: news",
+   "url": "https://www.oregon.gov/dor/news/Pages/default.aspx",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "RI",
+   "title": "Rhode Island Division of Taxation: news",
+   "url": "https://tax.ri.gov/news",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "VA",
+   "title": "Virginia Tax: news",
+   "url": "https://www.tax.virginia.gov/news",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "VT",
+   "title": "Vermont Department of Taxes: news",
+   "url": "https://tax.vermont.gov/news",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "WA",
+   "title": "Washington Department of Revenue: news releases",
+   "url": "https://dor.wa.gov/about/news-releases",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "WI",
+   "title": "Wisconsin Department of Revenue: news",
+   "url": "https://www.revenue.wi.gov/Pages/News/home.aspx",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "ME",
+   "title": "Maine Revenue Services: home (announcements)",
+   "url": "https://www.maine.gov/revenue/",
+   "kind": "index"
+  },
+  {
+   "jurisdiction": "SC",
+   "title": "South Carolina Department of Revenue: news",
+   "url": "https://dor.sc.gov/news",
    "kind": "index"
   }
  ]

@@ -321,10 +321,13 @@ class WhenNothingMayHappen(Base):
             au.apply(acc, self.cfg, self.root, SOURCES, TODAY, verify=[], now=NOW)
         self.assertEqual((self.root / FILE).read_text(), before)
 
-    def test_the_shipped_config_is_off_and_allows_only_oh_municipal_rates(self):
+    def test_the_shipped_config_is_off_and_every_rule_is_bounded(self):
         cfg = au.load_config(au.CONFIG)
         self.assertIs(cfg["enabled"], False)
-        self.assertEqual([(r["glob"], r["keys"]) for r in cfg["rules"]], [("data/local/OH-municipalities-*.json", ["rate"])])
+        for r in cfg["rules"]:
+            self.assertTrue(r["glob"].startswith("data/") and r["glob"].endswith(".json"), r)
+            self.assertTrue(0 < r["min"] < r["max"] and r["max_abs_change"] > 0 and r["hosts"], r)
+            self.assertTrue(all(h.count(".") >= 1 and "/" not in h for h in r["hosts"]), r)
         self.assertEqual(au.load_config(self.root / "missing.json")["rules"], [])
 
     def test_circuit_breaker_on_too_many_changes(self):
@@ -418,6 +421,274 @@ class Applying(Base):
         self.assertEqual(git(self.root, "status", "--porcelain"), "")
 
 
+JEDD_FILE = f"data/local/OH-jedd-jedz-{YEAR}.json"
+JEDD_RULES = [
+    {"glob": "data/local/OH-jedd-jedz-*.json", "keys": ["rate", "rateSourceRaw"], "min": 0.0025, "max": 0.04,
+     "max_abs_change": 0.01, "hosts": ["thefinder.tax.ohio.gov"]},
+    {"glob": "data/states/IL-*.json", "keys": ["rate", "supplementalRate"], "min": 0.01, "max": 0.09,
+     "max_abs_change": 0.01, "hosts": ["tax.illinois.gov"]},
+    {"glob": "data/local/PA-*.json", "keys": ["residentEIT", "schoolDistrictEIT", "totalResidentEIT"], "min": 0.0025, "max": 0.05,
+     "max_abs_change": 0.01, "hosts": ["apps.dced.pa.gov"], "independent_values": True},
+]
+IL_URL = "https://tax.illinois.gov/forms/withholding/currentyear/il-700-t-withholding-guide-tables.html"
+IL_FILE = f"data/states/IL-{YEAR}.json"
+PA_FILE = f"data/local/PA-EIT-LST-{YEAR}.json"
+
+
+class LinkedLines(Base):
+    """A change that must move several lines together, each still an exact
+    file-and-line replacement."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.cfg["rules"] += JEDD_RULES
+        write_json(self.root, JEDD_FILE, {"year": YEAR, "zones": [
+            {"name": "Zone A", "jeddId": "9156", "rate": 0.015, "rateSourceRaw": "1.5", "effectiveFrom": "2005-02-22"},
+            {"name": "Zone B", "jeddId": "9157", "rate": 0.02, "rateSourceRaw": "2", "effectiveFrom": "2005-02-22", "terminatedOn": "2030-01-01"},
+            {"name": "Zone C", "jeddId": "9158", "rate": 0.02, "rateSourceRaw": "2", "effectiveFrom": "2005-02-22", "$correctionNote": "x"},
+        ]})
+        write_json(self.root, IL_FILE, {"year": YEAR, "flatRate": {"rate": 0.0495, "comment": "c"}, "supplementalRate": 0.0495,
+                                        "supplementalComment": "s"})
+        write_json(self.root, PA_FILE, {"year": YEAR, "jurisdictions": [
+            {"psdCode": "1", "residentEIT": 0.005, "schoolDistrictEIT": 0.018, "totalResidentEIT": 0.023}]})
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-qm", "linked")
+        self.sources = SOURCES + [{"id": "il", "url": IL_URL}, {"id": "pa", "url": "https://apps.dced.pa.gov/x"}]
+
+    def jedd(self, ident="9156", new=0.0175, **over):
+        pos = au._positions(self.root, JEDD_FILE)
+        base = au.locate_path(self.root, JEDD_FILE, "jeddId", ident, "rate")
+        raw = base[:-1] + ("rateSourceRaw",)
+        p = {"id": f"jedd{ident}", "file": JEDD_FILE, "new": new, "effective_from": f"{YEAR}-01-01", "as_of": TODAY,
+             "name": "Zone", "kind": "rate_differs",
+             "edits": [{"path": list(base), "line": pos[base][0], "key": "rate", "old_text": pos[base][1], "new_text": au.fmt_number(new), "relation": None},
+                       {"path": list(raw), "line": pos[raw][0], "key": "rateSourceRaw", "old_text": pos[raw][1].strip('"'),
+                        "new_text": au.fmt_percent(new), "relation": "percent_string"}],
+             "evidence": {"source_id": "oh-muni", "url": FINDER, "official_value": new, "reads": self.reads(new)}}
+        p.update(over)
+        return p
+
+    def ok(self, p):
+        return au.check(p, self.cfg, self.root, self.sources, TODAY, NOW)
+
+    def bad(self, p, fragment):
+        with self.assertRaises(au.Rejected) as cm:
+            self.ok(p)
+        self.assertIn(fragment, str(cm.exception))
+
+    def test_a_rate_and_its_mirrored_percent_move_together(self):
+        plan = self.ok(self.jedd())
+        before, after = (self.root / JEDD_FILE).read_text().split("\n"), plan["text"].split("\n")
+        self.assertEqual(sum(a != b for a, b in zip(before, after)), 2)
+        self.assertIn('"rate": 0.0175,', "\n".join(after))
+        self.assertIn('"rateSourceRaw": "1.75",', "\n".join(after))
+
+    def test_the_mirror_must_be_the_percent_of_the_rate(self):
+        p = self.jedd()
+        p["edits"][1]["new_text"] = "1.8"
+        self.bad(p, "percent form of the rate")
+
+    def test_a_rate_alone_would_leave_its_mirror_stale(self):
+        p = self.jedd()
+        p["edits"] = p["edits"][:1]
+        self.bad(p, "mirror the value")
+
+    def test_a_zone_with_an_end_date_is_a_persons(self):
+        self.bad(self.jedd("9157"), "end date")
+
+    def test_a_zone_with_a_note_is_a_persons(self):
+        self.bad(self.jedd("9158"), "hand-checked departure")
+
+    def test_edits_must_each_be_exact(self):
+        p = self.jedd()
+        p["edits"][1]["line"] += 1
+        self.bad(p, "line")
+
+    def test_extra_edits_are_not_smuggled_in(self):
+        p = self.jedd()
+        p["edits"].append({"line": 1, "key": "rate", "old_text": "0", "new_text": "0.01", "relation": None})
+        with self.assertRaises(au.Rejected):
+            self.ok(p)
+
+    def test_no_more_than_six_edits(self):
+        p = self.jedd()
+        p["edits"] = p["edits"] * 4
+        self.bad(p, "between one and six")
+
+    def il(self, new=0.05, text=None, **over):
+        pos = au._positions(self.root, IL_FILE)
+        a, b = ("flatRate", "rate"), ("supplementalRate",)
+        sentence = text or f"Effective January 1, {YEAR}, Tax Rate {new * 100:g}%"
+        p = {"id": "il", "file": IL_FILE, "new": new, "effective_from": f"{YEAR}-01-01", "as_of": TODAY, "name": "IL", "kind": "stated_value_differs",
+             "edits": [{"path": list(a), "line": pos[a][0], "key": "rate", "old_text": "0.0495", "new_text": au.fmt_number(new), "relation": None},
+                       {"path": list(b), "line": pos[b][0], "key": "supplementalRate", "old_text": "0.0495", "new_text": au.fmt_number(new), "relation": "copy"}],
+             "evidence": {"kind": "text", "source_id": "il", "url": IL_URL, "official_value": new, "reads": self.reads(new),
+                          "pattern": r"Effective January 1, {year}, Tax Rate (\d+(?:\.\d+)?)%", "matched_text": sentence, "transform": "percent"}}
+        p.update(over)
+        return p
+
+    def test_a_year_anchored_sentence_in_an_official_document_is_enough(self):
+        plan = self.ok(self.il())
+        self.assertEqual(sum(a != b for a, b in zip((self.root / IL_FILE).read_text().split("\n"), plan["text"].split("\n"))), 2)
+
+    def test_copies_must_equal_the_primary(self):
+        p = self.il()
+        p["edits"][1]["new_text"] = "0.051"
+        self.bad(p, "not a copy")
+
+    def test_the_sentence_must_say_the_files_year(self):
+        self.bad(self.il(text=f"Effective January 1, {YEAR - 1}, Tax Rate 5%"), "does not state the value")
+
+    def test_the_pattern_must_name_a_year(self):
+        p = self.il()
+        p["evidence"]["pattern"] = r"Tax Rate (\d+(?:\.\d+)?)%"
+        self.bad(p, "name the year")
+
+    def test_the_number_in_the_sentence_must_be_the_proposed_value(self):
+        self.bad(self.il(new=0.05, text=f"Effective January 1, {YEAR}, Tax Rate 4.9%"), "not the proposed value")
+
+    def test_a_text_source_cannot_claim_a_mid_year_start(self):
+        self.bad(self.il(effective_from=f"{YEAR}-07-01"), "whole year")
+
+    def test_text_evidence_still_needs_two_agreeing_reads_on_a_tracked_host(self):
+        p = self.il()
+        p["evidence"]["reads"] = self.reads(0.05)[:1]
+        self.bad(p, "fewer than two")
+        p = self.il()
+        p["evidence"]["url"] = "https://example.com/il"
+        self.bad(p, "allowed official host")
+
+    def test_derived_totals_must_add_up(self):
+        pos = au._positions(self.root, PA_FILE)
+        res, tot = ("jurisdictions", 0, "residentEIT"), ("jurisdictions", 0, "totalResidentEIT")
+        def prop(total):
+            return {"id": "pa", "file": PA_FILE, "new": 0.007, "effective_from": f"{YEAR}-01-01", "as_of": TODAY, "name": "PA", "kind": "rate_differs",
+                    "edits": [{"path": list(res), "line": pos[res][0], "key": "residentEIT", "old_text": "0.005", "new_text": "0.007", "relation": None},
+                              {"path": list(tot), "line": pos[tot][0], "key": "totalResidentEIT", "old_text": "0.023", "new_text": total,
+                               "relation": {"sum": ["residentEIT", "schoolDistrictEIT"]}}],
+                    "evidence": {"source_id": "pa", "url": "https://apps.dced.pa.gov/x", "official_value": 0.007, "reads": self.reads(0.007)}}
+        self.ok(prop("0.025"))
+        self.bad(prop("0.024"), "not the sum")
+
+    def test_json_positions_see_every_value_and_flag_repeated_keys(self):
+        pos = au.json_positions('{\n "a": 1,\n "b": {"c": [1, 2.5, "x"]},\n "a": 2\n}\n')
+        self.assertEqual(pos[("b", "c", 1)][:2], (3, "2.5"))
+        self.assertTrue(pos[("a",)][2])
+
+
+class FromAnOfficialSentenceToTheLine(Base):
+    """The same chain for values official documents state in words."""
+
+    URL = "https://www.in.gov/dor/files/dn01.pdf"
+    NEXT = YEAR + 1
+
+    def setUp(self) -> None:
+        super().setUp()
+        import extractors  # noqa: PLC0415
+        self.ex = extractors
+        for y in (YEAR, self.NEXT):
+            write_json(self.root, f"data/states/IN-{y}.json", {"year": y, "flatRate": {"rate": 0.0295, "comment": "c"}, "supplementalRate": 0.0295,
+                                                              "supplementalComment": "s"})
+        write_json(self.root, f"data/states/PA-{YEAR}.json", {"year": YEAR, "flatRate": {"rate": 0.0307, "comment": "c"}})
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-qm", "states")
+        self.cfg["rules"].append({"glob": "data/states/IN-*.json", "keys": ["rate", "supplementalRate"], "min": 0.01, "max": 0.06,
+                                  "max_abs_change": 0.01, "hosts": ["www.in.gov"]})
+        self.sources = [{"id": "in", "url": self.URL, "jurisdiction": "IN", "title": "DN1"},
+                        {"id": "pa", "url": "https://www.pa.gov/employer-withholding.html", "jurisdiction": "PA"},
+                        {"id": "in2", "url": "https://www.in.gov/dor/other.pdf", "jurisdiction": "IN"}]
+        self.reg = [
+            {"id": "IN-rate", "name": "Indiana rate", "jurisdiction": "IN", "source_id": "in", "file": "data/states/IN-{year}.json",
+             "paths": [["flatRate", "rate"], ["supplementalRate"]],
+             "pattern": r"For {year}, the state adjusted gross income tax rate for individuals is (\d+(?:\.\d+)?)%", "transform": "percent"},
+            {"id": "PA-rate", "name": "PA rate", "jurisdiction": "PA", "source_id": "pa", "file": "data/states/PA-{year}.json",
+             "paths": [["flatRate", "rate"]], "pattern": r"flat rate of (\d+(?:\.\d+)?) percent", "transform": "percent", "year_anchored": False},
+        ]
+
+    def found(self, in_text, pa_text="a flat rate of 3.07 percent of compensation", reg=None):
+        tracked = {s["id"]: s for s in self.sources}
+        return self.ex.findings(reg or self.reg, {"in": in_text, "pa": pa_text}, tracked, TODAY, self.root)
+
+    def proposals(self, fs):
+        for f in fs:
+            f["reads"] = [{"at": (NOW - dt.timedelta(seconds=60)).isoformat(), "value": f.get("change", {}).get("new", 0)},
+                          {"at": NOW.isoformat(), "value": f.get("change", {}).get("new", 0)}]
+        self.cfg["min_confirm_gap_seconds"] = 20
+        return au.proposals_from(fs, self.root, TODAY)
+
+    def test_a_year_stated_in_the_document_is_applied_to_that_years_file(self):
+        fs = self.found(f"x For {YEAR}, the state adjusted gross income tax rate for individuals is 3.05%. y")
+        self.assertEqual(len(fs), 1)
+        ps = self.proposals(fs)
+        acc, rej = au.triage(ps, self.cfg, self.root, self.sources, TODAY, 1, NOW)
+        self.assertEqual((len(acc), rej), (1, []))
+        au.apply(acc, self.cfg, self.root, self.sources, TODAY, verify=[], now=NOW)
+        d = json.loads((self.root / f"data/states/IN-{YEAR}.json").read_text())
+        self.assertEqual((d["flatRate"]["rate"], d["supplementalRate"]), (0.0305, 0.0305))
+        self.assertEqual(json.loads((self.root / f"data/states/IN-{self.NEXT}.json").read_text())["flatRate"]["rate"], 0.0295)
+        self.assertEqual(len([l for l in git(self.root, "diff", "-U0").splitlines() if l.startswith("+") and not l.startswith("+++")]), 2)
+
+    def test_a_sentence_about_next_year_changes_only_next_years_file(self):
+        fs = self.found(f"For {self.NEXT}, the state adjusted gross income tax rate for individuals is 2.9%.")
+        self.assertEqual([f["change"]["file"] for f in fs], [f"data/states/IN-{self.NEXT}.json"])
+
+    def test_a_sentence_about_an_old_year_changes_nothing(self):
+        self.assertEqual(self.found(f"For {YEAR - 1}, the state adjusted gross income tax rate for individuals is 3.23%."), [])
+
+    def test_a_document_that_agrees_with_the_data_is_silent(self):
+        self.assertEqual(self.found(f"For {YEAR}, the state adjusted gross income tax rate for individuals is 2.95%."), [])
+
+    def test_two_different_rates_in_one_document_are_not_guessed_between(self):
+        t = f"For {YEAR}, the state adjusted gross income tax rate for individuals is 3.05%. For {YEAR}, the state adjusted gross income tax rate for individuals is 2.95%."
+        self.assertEqual(self.found(t), [])
+
+    def test_a_second_document_must_agree(self):
+        self.sources.append({"id": "in3", "url": "https://www.in.gov/third.pdf", "jurisdiction": "IN"})
+        reg = [dict(self.reg[0], also=[{"source_id": "in3", "pattern": r"{year} rate is (\d+(?:\.\d+)?)%", "transform": "percent"}])]
+        tracked = {s["id"]: s for s in self.sources}
+        main_text = f"For {YEAR}, the state adjusted gross income tax rate for individuals is 3.05%."
+        agree = self.ex.findings(reg, {"in": main_text, "in3": f"{YEAR} rate is 3.05%"}, tracked, TODAY, self.root)
+        differ = self.ex.findings(reg, {"in": main_text, "in3": f"{YEAR} rate is 3.1%"}, tracked, TODAY, self.root)
+        silent = self.ex.findings(reg, {"in": main_text}, tracked, TODAY, self.root)
+        self.assertEqual((len(agree), differ, silent), (1, [], []))
+
+    def test_a_document_that_does_not_name_the_year_is_reported_never_applied(self):
+        fs = self.found("x", pa_text="a flat rate of 3.2 percent of compensation")
+        self.assertEqual(len(fs), 1)
+        self.assertNotIn("change", fs[0])
+        self.assertIn("for a person", fs[0]["detail"])
+        self.assertEqual(au.proposals_from(fs, self.root, TODAY), [])
+
+    def test_a_claimed_sentence_that_is_not_in_the_proposal_is_refused(self):
+        fs = self.found(f"For {YEAR}, the state adjusted gross income tax rate for individuals is 3.05%.")
+        ps = self.proposals(fs)
+        ps[0]["evidence"]["matched_text"] = f"For {YEAR}, the state adjusted gross income tax rate for individuals is 2.95%."
+        acc, rej = au.triage(ps, self.cfg, self.root, self.sources, TODAY, 1, NOW)
+        self.assertEqual(acc, [])
+        self.assertIn("not the proposed value", rej[0]["reason"])
+
+    def test_an_unreadable_document_proposes_nothing(self):
+        tracked = {s["id"]: s for s in self.sources}
+        self.assertEqual(self.ex.findings(self.reg, {}, tracked, TODAY, self.root), [])
+
+    def test_gather_confirms_text_findings_with_two_reads_and_lists_the_rest(self):
+        body = f"For {YEAR}, the state adjusted gross income tax rate for individuals is 3.05%."
+        pa = "a flat rate of 3.2 percent of compensation"
+        pages = {self.URL: body, self.sources[1]["url"]: pa}
+
+        def fetcher(url):
+            return SimpleNamespace(ok=url in pages, body=pages.get(url, "").encode(), error="", status=200)
+
+        others: list = []
+        run = lambda srcs, f, day, repo: au.run_all(srcs, f, day, repo, lambda s, fetched: fetched.body.decode())
+        (self.root / "watcher").mkdir(exist_ok=True)
+        (self.root / "watcher" / "extractors.json").write_text(json.dumps({"extractors": self.reg}))
+        confirmed, total = au.gather(self.sources, fetcher, TODAY, self.root, gap=0, sleep=lambda s: None, run=run, others=others)
+        self.assertEqual((len(confirmed), total, len(others)), (1, 2, 1))
+        self.assertEqual(len(confirmed[0]["reads"]), 2)
+        self.assertEqual(others[0]["code"], "PA-rate")
+
+
 class FromTheOfficialFileToTheLine(Base):
     """The whole chain with the real reconciler: a stand-in for the Finder's
     CSV, the engine's data file, two reads, triage, apply."""
@@ -446,7 +717,7 @@ class FromTheOfficialFileToTheLine(Base):
         self.cfg["min_confirm_gap_seconds"] = 0
         ps = au.proposals_from(confirmed, self.root, TODAY)
         self.assertEqual(len(ps), 1)
-        self.assertEqual((ps[0]["old_text"], ps[0]["new_text"]), ("0.01", "0.0125"))
+        self.assertEqual((ps[0]["edits"][0]["old_text"], ps[0]["edits"][0]["new_text"]), ("0.01", "0.0125"))
         acc, rej = au.triage(ps, self.cfg, self.root, SOURCES, TODAY, total)
         self.assertEqual((len(acc), len(rej)), (1, 0), rej)
         au.apply(acc, self.cfg, self.root, SOURCES, TODAY, verify=[])

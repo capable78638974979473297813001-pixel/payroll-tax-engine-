@@ -239,12 +239,51 @@ def reconcile_oh_jedd(text: str, source: dict, today: str, repo: Path = REPO, di
             out.append(finding("rate_differs", "info" if ack else "action", source, z["name"],
                                f"official {r['rate'] * 100:.3f}% vs engine {engine_rate(z, today) * 100:.3f}%", r["id"],
                                change={"file": f"data/local/{path.name}", "id_key": "jeddId", "id": r["id"], "key": "rate",
-                                       "old": engine_rate(z, today), "new": r["rate"], "effective_from": _iso(r["start"]),
+                                       "old": engine_rate(z, today), "new": round(r["rate"], 6), "effective_from": _iso(r["start"]),
+                                       "derived": [{"key": "rateSourceRaw", "relation": "percent_string"}],
                                        "source_url": source.get("url", "")}))
     return out
 
 
-RECONCILERS = {"oh_municipal": reconcile_oh_municipal, "oh_jedd": reconcile_oh_jedd}
+
+# --------------------------------------------------------------------------
+# Indiana county income tax (Departmental Notice #1, a PDF table)
+# --------------------------------------------------------------------------
+
+def reconcile_in_counties(text: str, source: dict, today: str, repo: Path = REPO, directory: dict | None = None) -> list[dict]:
+    """Departmental Notice #1 lists all 92 counties' rates "Effective <date>".
+    Counties change on January 1 and October 1, and the engine records those as
+    dated rows (rateChanges), which is a structural edit; so this reports a
+    disagreement for a person and proposes no one-line change."""
+    rows = {}
+    for m in re.finditer(r"^([A-Za-z.' ]+?) (\d{2}) (\d\.\d+|0)\*?[ \t]*$", text, re.M):
+        rows[m.group(2)] = (m.group(1).strip(), float(m.group(3)))
+    eff = re.search(r"Indiana County Tax Rates: Effective ([A-Z][a-z]+)\.? (\d{1,2}), (\d{4})", text)
+    if len(rows) != 92 or not eff:
+        return [finding("unreadable", "action", source, "Indiana county rate table",
+                        f"parsed {len(rows)} county rows (expected 92) and {'a' if eff else 'no'} effective date; the notice's format may have changed.")]
+    months = {m: i for i, m in enumerate(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], 1)}
+    on = f"{eff.group(3)}-{months[eff.group(1)[:3]]:02d}-{int(eff.group(2)):02d}"
+    path = repo / "data" / "local" / f"IN-counties-{on[:4]}.json"
+    data = _load(path)
+    if data is None:
+        return [finding("no_engine_file", "action", source, path.name, f"{path.name} not found; nothing to compare with")]
+    out = []
+    check_on = min(on, today) if today >= on else on
+    for c in data["counties"]:
+        row = rows.get(c["countyCode"])
+        if row is None:
+            continue
+        dated = [r for r in c.get("rateChanges", []) if r["on"] <= on]
+        ours = dated[-1]["rate"] if dated else c["rate"]
+        if abs(ours - row[1]) > 1e-9:
+            out.append(finding("rate_differs", "action", source, c["name"],
+                               f"the notice (effective {on}) lists {row[1]} vs the engine's {ours} as of that date; "
+                               "county rate changes are dated rows in the data, so a person adds the row", c["countyCode"]))
+    return out
+
+
+RECONCILERS = {"oh_municipal": reconcile_oh_municipal, "oh_jedd": reconcile_oh_jedd, "in_counties": reconcile_in_counties}
 
 
 def run(sources: list[dict], fetcher, today: str, repo: Path = REPO) -> list[dict]:
@@ -272,7 +311,12 @@ def run(sources: list[dict], fetcher, today: str, repo: Path = REPO) -> list[dic
             if d.ok:
                 directory = parse_finder_directory(d.body.decode("utf-8", errors="replace"))
         try:
-            findings.extend(fn(f.body.decode("utf-8", errors="replace"), s, today, repo, directory))
+            if s["url"].lower().split("?")[0].endswith(".pdf"):
+                import watch  # noqa: PLC0415 - circular at import time, fine at call time
+                text = watch.extract(s, f).text
+            else:
+                text = f.body.decode("utf-8", errors="replace")
+            findings.extend(fn(text, s, today, repo, directory))
         except Exception as e:  # noqa: BLE001 - one reconciler must not sink the run
             findings.append(finding("reconcile_error", "action", s, name, f"{type(e).__name__}: {e}"[:200]))
     return findings

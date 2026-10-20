@@ -70,7 +70,7 @@ jobs:
 
       - name: Self-test (offline)
         if: steps.gate.outputs.run == 'true'
-        run: python -m unittest watcher/test_watch.py watcher/test_autoupdate.py
+        run: python -m unittest watcher/test_watch.py watcher/test_autoupdate.py watcher/test_coverage.py
 
       - name: Refresh the source list from data/
         if: steps.gate.outputs.run == 'true'
@@ -173,6 +173,44 @@ jobs:
               git pull --rebase --autostash origin "$base" && git push origin "HEAD:$base" && break
               sleep $((i * 5))
             done
+          fi
+
+      # What auto-update declined or only compared: the data disagrees with an
+      # official statement, or a proposed change broke a rule. One standing
+      # issue, rewritten on each run while anything is listed.
+      - name: Track what auto-update left for a person
+        if: steps.gate.outputs.run == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -f watcher/reports/autoupdate-latest.json ] || exit 0
+          count=$(python - <<'PY'
+          import json
+          s = json.load(open("watcher/reports/autoupdate-latest.json"))
+          print(len(s.get("left_for_a_person", [])) + len(s.get("disagreements_for_a_person", [])))
+          PY
+          )
+          [ "$count" != "0" ] || exit 0
+          title="Source watch: auto-update left items for a person"
+          body=$(python - <<'PY'
+          import json
+          s = json.load(open("watcher/reports/autoupdate-latest.json"))
+          lines = [f"As of {s['date']}, auto-update did not change these. Each is either a disagreement between the data and an official statement that needs a person, or a proposed change that broke one of its rules (the reason is listed). Rewritten on each run; close it once handled.", ""]
+          for r in s.get("left_for_a_person", []):
+              p = r["proposal"]
+              lines.append(f"- `{p.get('file', '?')}` ({p.get('name', '')}): {r['reason']}")
+          for d in s.get("disagreements_for_a_person", []):
+              lines.append(f"- {d['jurisdiction']} {d['name']}: {d['detail']}")
+          lines += ["", "Full report: watcher/reports/autoupdate-latest.md"]
+          print("\n".join(lines))
+          PY
+          )
+          number=$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[0].number')
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body "$body" || echo "::warning::Could not update the auto-update issue."
+          else
+            gh issue create --title "$title" --body "$body" || echo "::warning::Could not open the auto-update issue."
           fi
 
       # One standing issue, not one a day: opened while sources have never
