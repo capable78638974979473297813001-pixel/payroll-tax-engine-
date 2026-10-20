@@ -1,0 +1,18 @@
+{
+  "$comment": "Auto-update is OFF. Turn it on only after reading watcher/autoupdate.py's header. Each rule names one kind of line the watcher may replace: files matching glob, keys listed, new value between min and max, no single change larger than max_abs_change, evidence only from the listed hosts. Anything not matched by a rule cannot be changed automatically. OH JEDD/JEDZ files are deliberately absent: their entries carry rateSourceRaw, which a one-line edit would leave stale.",
+  "enabled": false,
+  "max_changes_per_run": 5,
+  "max_findings_per_run": 10,
+  "min_confirm_gap_seconds": 20,
+  "max_proposal_age_hours": 36,
+  "rules": [
+    {
+      "glob": "data/local/OH-municipalities-*.json",
+      "keys": ["rate"],
+      "min": 0.0025,
+      "max": 0.04,
+      "max_abs_change": 0.01,
+      "hosts": ["thefinder.tax.ohio.gov"]
+    }
+  ]
+}

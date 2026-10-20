@@ -50,9 +50,15 @@ def _iso(yyyymmdd: str) -> str:
     return f"{yyyymmdd[:4]}-{yyyymmdd[4:6]}-{yyyymmdd[6:8]}"
 
 
-def finding(kind: str, severity: str, source: dict, name: str, detail: str, code: str = "") -> dict:
-    return {"kind": kind, "severity": severity, "source_id": source.get("id", ""), "jurisdiction": source.get("jurisdiction", ""),
-            "code": code, "name": name, "detail": detail}
+def finding(kind: str, severity: str, source: dict, name: str, detail: str, code: str = "", change: dict | None = None) -> dict:
+    out = {"kind": kind, "severity": severity, "source_id": source.get("id", ""), "jurisdiction": source.get("jurisdiction", ""),
+           "code": code, "name": name, "detail": detail}
+    if change:
+        # A machine-readable description of the value the official file
+        # disagrees with. autoupdate.py is the only consumer, and it treats
+        # this as a claim to be re-checked, never as an instruction.
+        out["change"] = change
+    return out
 
 
 def _load(path: Path):
@@ -137,7 +143,10 @@ def reconcile_oh_municipal(text: str, source: dict, today: str, repo: Path = REP
             acknowledged = any(k in entry for k in ACKNOWLEDGED_KEYS)
             out.append(finding("rate_differs", "info" if acknowledged else "action", source, entry["name"],
                                f"official {r['rate'] * 100:.3f}% vs engine {ours * 100:.3f}%"
-                               + (" (acknowledged in the data file's own note)" if acknowledged else ""), code))
+                               + (" (acknowledged in the data file's own note)" if acknowledged else ""), code,
+                               change={"file": f"data/local/{path.name}", "id_key": "municode", "id": code, "key": "rate",
+                                       "old": ours, "new": r["rate"], "effective_from": _iso(r["start"]),
+                                       "source_url": source.get("url", "")}))
 
     # Rate changes the official file already schedules for later: the engine
     # should carry them too, so a January 1 increase isn't missed on the day.
@@ -153,7 +162,10 @@ def reconcile_oh_municipal(text: str, source: dict, today: str, repo: Path = REP
         if abs(ours - r["rate"]) > 1e-9:
             out.append(finding("scheduled_change_missing", "action", source, entry["name"],
                                f"the official file schedules {r['rate'] * 100:.3f}% from {_iso(r['start'])}; "
-                               f"the engine would use {ours * 100:.3f}%", r["code"]))
+                               f"the engine would use {ours * 100:.3f}%", r["code"],
+                               change={"file": f"data/local/{year_file.name}", "id_key": "municode", "id": r["code"],
+                                       "key": "rate", "old": ours, "new": r["rate"], "effective_from": _iso(r["start"]),
+                                       "source_url": source.get("url", "")}))
 
     # Rows the engine carries that the official file doesn't (yet). A row the
     # file schedules for later counts as present, and an engine rate of 0 as of
@@ -225,7 +237,10 @@ def reconcile_oh_jedd(text: str, source: dict, today: str, repo: Path = REPO, di
         elif abs(engine_rate(z, today) - r["rate"]) > 1e-9:
             ack = any(k in z for k in ACKNOWLEDGED_KEYS)
             out.append(finding("rate_differs", "info" if ack else "action", source, z["name"],
-                               f"official {r['rate'] * 100:.3f}% vs engine {engine_rate(z, today) * 100:.3f}%", r["id"]))
+                               f"official {r['rate'] * 100:.3f}% vs engine {engine_rate(z, today) * 100:.3f}%", r["id"],
+                               change={"file": f"data/local/{path.name}", "id_key": "jeddId", "id": r["id"], "key": "rate",
+                                       "old": engine_rate(z, today), "new": r["rate"], "effective_from": _iso(r["start"]),
+                                       "source_url": source.get("url", "")}))
     return out
 
 

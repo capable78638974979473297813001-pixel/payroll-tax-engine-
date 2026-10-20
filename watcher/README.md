@@ -110,6 +110,60 @@ rate rows appear (Woodville, July 2026), so this catches what the Finder knows
 and the engine doesn't, not what neither knows. For that, the local
 government's own pages are watched (and, with `follow`, their documents).
 
+## Fixing a number on its own (built, switched off)
+
+`autoupdate.py` can correct a number in `data/` without a person typing it, but
+only the smallest thing that is safe to automate: **replace one number on one
+line**. Everything in `data/` feeds a paycheck, so it has no other powers. It
+cannot add or delete a line, entry or file, touch code, tests, the site or
+notes, or change anything that is not a plain `"rate": 0.0125` line.
+
+It ships **off**. `watcher/autoupdate.json` has `"enabled": false` and the
+workflow's `AUTOUPDATE_ENABLED` repository variable is unset. Switched off, it
+still runs every day in check-only mode and writes
+[`reports/autoupdate-latest.md`](reports/autoupdate-latest.md): what it would
+have changed and, for everything else, the rule that kept it from changing it.
+Read that for a few weeks before turning it on.
+
+A proposal comes from `reconcile.py` (today: Ohio municipal rates read from the
+Finder's CSV; one `rate_differs` or `scheduled_change_missing` finding). It is
+applied only if **every** rule holds, re-checked immediately before writing:
+
+| Rule | What it stops |
+|---|---|
+| Names the exact file and line and the exact text expected there | Editing a line that moved or changed since the proposal |
+| File is a tracked `.json` under `data/`, matches an allow-list rule in `autoupdate.json`, not a symlink, this year or later | Code, tests, site, other repos' files, past years (those paychecks are final) |
+| The line is `"<key>": <number>` and the key is on the rule's list; only the number is swapped (indent, key and comma byte-identical) | Rewording, reformatting, multi-line or multi-value edits |
+| File still parses and a deep comparison finds **exactly one** differing value, a number | Duplicate keys, an edit that lands somewhere unintended |
+| New value inside the rule's min/max and no further than `max_abs_change` from the old; neither old nor new is zero | Wild values; repealing a tax or starting one (a person's call) |
+| Entry has no `rateHistory`, no `sourceNote`/`$correctionNote`/`$addedNote`, and no field that mirrors the value (`rateSourceRaw`) | Overwriting a hand-checked value; leaving a mirror stale. This is why JEDD/JEDZ files are not on the list |
+| The official change took effect on or before January 1 of the file's year | A mid-year change, which needs a dated row (a structural edit, so a person's) |
+| Evidence is a source in `sources.json`, at that address, over https, on an allow-listed host, read **twice**, apart by `min_confirm_gap_seconds`, same answer both times, fresh | A glitchy download, a spoofed or stale source |
+| Circuit breaker: more than `max_changes_per_run` eligible changes, or more than `max_findings_per_run` disagreements of any kind, applies **nothing** | The official file changing shape, which looks like hundreds of "corrections" |
+| After the write: the generated edge bundle is rebuilt, `git status` may show only the intended file plus that bundle, the diff must be exactly one removed and one added line per change, and the full test suite must pass | Side effects; a change the engine cannot absorb. Any failure restores every touched file |
+
+Applied changes are never committed to the default branch. The workflow puts
+them on `autoupdate/<date>` and opens a pull request whose body lists each file,
+line, old and new value and source. A person reviews and merges it.
+
+Everything it declines goes to the same report and the standing needs-attention
+issue as before. `watcher/autoupdate-log.jsonl` records every decision.
+
+To turn it on: set `"enabled": true` in `autoupdate.json` **and** the repository
+variable `AUTOUPDATE_ENABLED` to `true`, and allow Actions to create pull
+requests (Settings -> Actions -> General). A pull request opened with the
+default token does not trigger other workflows, so run the tests from the
+branch before merging. To widen it, add a rule (a new glob/key with bounds and
+hosts) in `autoupdate.json`; there is no way to widen it from a data file or a
+proposal.
+
+```sh
+python watcher/autoupdate.py             # check and report, write nothing
+python watcher/autoupdate.py --apply     # write too (needs "enabled": true)
+python -m unittest watcher/test_autoupdate.py
+AUTOUPDATE_E2E=1 python -m unittest watcher.test_autoupdate.AgainstTheRealEngine   # real build + real suite, in a clone
+```
+
 ## Needs attention
 
 A run with no changes is not an all-clear if an official bulk file the data is

@@ -70,7 +70,7 @@ jobs:
 
       - name: Self-test (offline)
         if: steps.gate.outputs.run == 'true'
-        run: python -m unittest watcher/test_watch.py
+        run: python -m unittest watcher/test_watch.py watcher/test_autoupdate.py
 
       - name: Refresh the source list from data/
         if: steps.gate.outputs.run == 'true'
@@ -120,6 +120,60 @@ jobs:
             sleep $((i * 5))
           done
           echo "::warning::Could not push the watch report."
+
+      # Auto-update (watcher/autoupdate.py). Always runs in check-only mode:
+      # it re-reads the official rate files twice, works out whether any
+      # disagreement is a clean one-number replacement, and writes
+      # watcher/reports/autoupdate-latest.md. It changes data/ only when the
+      # repository variable AUTOUPDATE_ENABLED is 'true' AND
+      # watcher/autoupdate.json has "enabled": true; both ship off. Even then it
+      # never touches the default branch: changes go on autoupdate/<date> and
+      # into a pull request that a person reviews and merges.
+      - name: Set up Node (auto-update verifies with the real test suite)
+        if: steps.gate.outputs.run == 'true' && vars.AUTOUPDATE_ENABLED == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Auto-update
+        if: steps.gate.outputs.run == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AUTOUPDATE_ENABLED: ${{ vars.AUTOUPDATE_ENABLED }}
+        run: |
+          git config user.name "source-watch[bot]"
+          git config user.email "source-watch[bot]@users.noreply.github.com"
+          base="${GITHUB_REF_NAME}"
+          today="${{ steps.gate.outputs.today }}"
+          if [ "$AUTOUPDATE_ENABLED" = "true" ]; then
+            git switch -c "autoupdate/$today"
+            python watcher/autoupdate.py --apply
+          else
+            python watcher/autoupdate.py
+          fi
+          if [ "$AUTOUPDATE_ENABLED" = "true" ] && ! git diff --quiet -- data; then
+            git add -A data supabase watcher
+            git commit -m "auto-update: $today (data/ lines replaced by source watch)"
+            git push origin "HEAD:autoupdate/$today"
+            gh pr create --base "$base" --head "autoupdate/$today" \
+              --title "Auto-update: official source corrections ($today)" \
+              --body "$(cat watcher/reports/autoupdate-latest.md)
+
+          Every change here is one number on one line, re-read from the official file twice and verified with the full test suite. Review the diff before merging; nothing was merged automatically." \
+              || echo "::warning::Could not open the auto-update pull request."
+            git switch "$base"
+          fi
+          # Reports and the log go to the base branch like the daily report.
+          if [ "$(git branch --show-current)" != "$base" ]; then git switch "$base"; fi
+          git add watcher/reports/autoupdate-latest.* watcher/autoupdate-log.jsonl 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "auto-update report: $today [skip ci]"
+            for i in 1 2 3 4; do
+              git pull --rebase --autostash origin "$base" && git push origin "HEAD:$base" && break
+              sleep $((i * 5))
+            done
+          fi
 
       # One standing issue, not one a day: opened while sources have never
       # been read or are broken, left alone while it is already open.
