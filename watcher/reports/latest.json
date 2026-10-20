@@ -1,32 +1,155 @@
 {
- "date": "2026-10-19",
+ "date": "2026-10-20",
  "counts": {
-  "unchanged": 379,
+  "unchanged": 373,
   "blocked": 4,
+  "changed": 7,
   "gone": 2,
-  "changed": 1,
-  "new": 14
+  "new": 236
  },
- "total": 400,
+ "total": 622,
  "changed": [
   {
-   "id": "in-cd957f8ce0",
+   "id": "al-dcd77af5c8",
+   "jurisdiction": "AL",
+   "title": "City of Opelika -- announcement of the occupational tax cut",
+   "url": "https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092",
+   "detail": "2 lines added, 2 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "in-f3e8cf456b~fefe2c31",
    "jurisdiction": "IN",
-   "title": "WH-4, State Form 48845",
-   "url": "https://www.in.gov/dor/tax-forms/withholding-tax-forms/",
-   "detail": "8 lines added, 8 removed; 1 links added, 1 removed",
+   "title": "Departmental Notice #1 (linked from Indiana DOR withholding)",
+   "url": "https://www.in.gov/dA/92797e5a5f/dn01.pdf?language_id=1",
+   "detail": "46 lines added, 54 removed",
+   "figures_added": [
+    "0.0171"
+   ],
+   "figures_removed": [
+    "0.017"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "in-e42a1b3562",
+   "jurisdiction": "IN",
+   "title": "Indiana DOR: departmental notices",
+   "url": "https://www.in.gov/dor/legal-resources/tax-library/departmental-notices/",
+   "detail": "1 lines added, 1 removed; 15 links added, 15 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [
-    "https://www.in.gov/dA/92797e5a5f/dn01.pdf?language_id=1"
+    "https://www.in.gov/dor/files/dn05.pdf",
+    "https://www.in.gov/dor/files/dn08.pdf",
+    "https://www.in.gov/dor/files/dn33.pdf",
+    "https://www.in.gov/dor/files/dn36.pdf",
+    "https://www.in.gov/dor/files/dn37.pdf",
+    "https://www.in.gov/dor/files/dn40.pdf",
+    "https://www.in.gov/dor/files/dn41.pdf",
+    "https://www.in.gov/dor/files/dn42.pdf",
+    "https://www.in.gov/dor/files/dn44.pdf",
+    "https://www.in.gov/dor/files/reference/dn01.pdf",
+    "https://www.in.gov/dor/files/reference/dn02.pdf",
+    "https://www.in.gov/dor/files/reference/dn03.pdf",
+    "https://www.in.gov/dor/files/reference/dn16.pdf",
+    "https://www.in.gov/dor/files/reference/dn43.pdf",
+    "https://www.in.gov/dor/files/reference/dn45.pdf"
    ],
    "links_removed": [
-    "https://www.in.gov/dor/files/dn01.pdf"
+    "https://www.in.gov/dA/08aee5849a/dn08.pdf?language_id=1",
+    "https://www.in.gov/dA/08b0a91827/dn45.pdf?language_id=1",
+    "https://www.in.gov/dA/1c13cef183/dn01.pdf?language_id=1",
+    "https://www.in.gov/dA/380e7e58fd/dn05.pdf?language_id=1",
+    "https://www.in.gov/dA/4303779d38/dn02.pdf?language_id=1",
+    "https://www.in.gov/dA/4f00d6bd37/dn41.pdf?language_id=1",
+    "https://www.in.gov/dA/846e009a54/dn33.pdf?language_id=1",
+    "https://www.in.gov/dA/b597a0cf17/dn42.pdf?language_id=1",
+    "https://www.in.gov/dA/b8bf9db542/dn43.pdf?language_id=1",
+    "https://www.in.gov/dA/c7308ef71f/dn36.pdf?language_id=1",
+    "https://www.in.gov/dA/cd91fc13f4/dn40.pdf?language_id=1",
+    "https://www.in.gov/dA/dbdab50b66/dn16.pdf?language_id=1",
+    "https://www.in.gov/dA/e466396cf5/dn03.pdf?language_id=1",
+    "https://www.in.gov/dA/eb284a415f/dn44.pdf?language_id=1",
+    "https://www.in.gov/dA/fa61e1bc2b/dn37.pdf?language_id=1"
    ],
+   "significant": true
+  },
+  {
+   "id": "in-86066aa1c0",
+   "jurisdiction": "IN",
+   "title": "Indiana Departmental Notice #1 (county rates)",
+   "url": "https://www.in.gov/dor/files/dn01.pdf",
+   "detail": "46 lines added, 54 removed",
+   "figures_added": [
+    "0.0171"
+   ],
+   "figures_removed": [
+    "0.017"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "mi-c62e8170b0",
+   "jurisdiction": "MI",
+   "title": "Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026",
+   "url": "https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026",
+   "detail": "2 lines added, 2 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [
+    "$2"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "oh-557c86e52b",
+   "jurisdiction": "OH",
+   "title": "RITA (Regional Income Tax Agency): news and updates (municipal rate and law changes)",
+   "url": "https://www.ritaohio.com/Resources/News",
+   "detail": "8 lines added, 6 removed; 4 links added, 3 removed",
+   "figures_added": [
+    "9%"
+   ],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=51cd1d53-eb98-4ba4-864a-30e8d190a56a",
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=8a25d195-993e-49fc-b7d2-5f9e2756a309",
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=9c040fc4-37c8-4ca4-b331-0c8ee46ad509",
+    "https://www.ritaohio.com/Resources/News?currentPage=19"
+   ],
+   "links_removed": [
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=33b4cbc6-1ea4-4d02-a437-b1d09742336e",
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=379ccc34-438c-4764-8a20-c3c80793784f",
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=62aeeffd-59f7-4d78-a378-e27793d06b52"
+   ],
+   "significant": true
+  },
+  {
+   "id": "oh-2fd5ea2a78",
+   "jurisdiction": "OH",
+   "title": "RITA: tax professionals news",
+   "url": "https://www.ritaohio.com/TaxProfessionals/News",
+   "detail": "1 lines added, 0 removed; 1 links added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=9c040fc4-37c8-4ca4-b331-0c8ee46ad509"
+   ],
+   "links_removed": [],
    "significant": true
   }
  ],
- "significant_changes": 1,
+ "significant_changes": 5,
  "broken": [
   "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
   "https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf"
@@ -115,14 +238,15 @@
    "detail": "added by hand; the official rate file has no row for it yet (the Finder's directory lists it as code 86492)"
   }
  ],
- "followed_documents": 182,
- "followed_documents_unread": 8,
- "verified": 394,
+ "followed_documents": 392,
+ "followed_documents_unread": 38,
+ "followed_documents_deferred": 0,
+ "verified": 616,
  "unverified": 6,
  "never_baselined": [
   "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
   "https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/",
   "https://pikevilleky.gov/business/"
  ],
- "max_consecutive_failures": 28
+ "max_consecutive_failures": 29
 }

@@ -2184,6 +2184,18 @@
    ]
   },
   {
+   "id": "pa-77a912686a",
+   "jurisdiction": "PA",
+   "title": "City of Pittsburgh -- ET-1 2025 Payroll Expense Tax return and instructions (Rev 12/24)",
+   "url": "https://www.pittsburghpa.gov/files/assets/city/v/1/finance/documents/tax-faqs/et-2025-fillable.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/PA-2025.json",
+    "data/states/PA-2026.json",
+    "data/states/PA-2027.json"
+   ]
+  },
+  {
    "id": "pa-ea8951d524",
    "jurisdiction": "PA",
    "title": "Maryland Form MW507 (COM/RAD-036, 07/25 revision) -- 2026 Employee's Maryland Withholding Exemption Certificate",
