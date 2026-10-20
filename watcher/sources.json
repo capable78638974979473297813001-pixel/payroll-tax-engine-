@@ -545,6 +545,14 @@
    ]
   },
   {
+   "id": "al-ed6876d0e5",
+   "jurisdiction": "AL",
+   "title": "Alabama League of Municipalities: municipal tax rates (occupational tax survey list)",
+   "url": "https://almonline.org/TaxRates.aspx",
+   "origin": "curated",
+   "reconcile": "al_league"
+  },
+  {
    "id": "al-a93eb2081a",
    "jurisdiction": "AL",
    "title": "Alabama State Comptroller -- Memorandum, 'Jefferson County Occupational Tax'",
@@ -2474,14 +2482,17 @@
   {
    "id": "ky-df76954a6f",
    "jurisdiction": "KY",
-   "title": "Kentucky Secretary of State -- Occupational License Tax Forms Database (KRS 67.766)",
+   "title": "Kentucky Secretary of State: occupational tax districts (spreadsheet of every district)",
    "url": "https://web.sos.ky.gov/occupationaltax/",
-   "origin": "data",
+   "origin": "curated",
    "used_by": [
     "data/local/KY-occupational-2025.json",
     "data/local/KY-occupational-2026.json",
     "data/local/KY-occupational-2027.json"
-   ]
+   ],
+   "reconcile": "ky_districts",
+   "button": "ctl00$ContentPlaceHolder1$bExcel",
+   "button_value": "Excel spreadsheet of all Occupational LicenseTax Districts"
   },
   {
    "id": "ky-0bec2793f5",
@@ -3118,6 +3129,19 @@
    "origin": "curated"
   },
   {
+   "id": "mi-a5ea13ea77",
+   "jurisdiction": "MI",
+   "title": "Michigan Treasury: which cities impose an income tax",
+   "url": "https://www.michigan.gov/taxes/questions/iit/accordion/general/what-cities-impose-an-income-tax",
+   "origin": "curated",
+   "used_by": [
+    "data/local/MI-cities-2025.json",
+    "data/local/MI-cities-2026.json",
+    "data/local/MI-cities-2027.json"
+   ],
+   "reconcile": "mi_city_list"
+  },
+  {
    "id": "mi-f5fa14dee6",
    "jurisdiction": "MI",
    "title": "Michigan withholding tax",
@@ -3128,14 +3152,15 @@
   {
    "id": "mi-b2211f9083",
    "jurisdiction": "MI",
-   "title": "Other Michigan Cities with Income Tax (City of Grand Rapids consolidated rate/exemption table)",
+   "title": "Other Michigan cities with income tax (City of Grand Rapids rate table)",
    "url": "https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/",
-   "origin": "data",
+   "origin": "curated",
    "used_by": [
     "data/local/MI-cities-2025.json",
     "data/local/MI-cities-2026.json",
     "data/local/MI-cities-2027.json"
-   ]
+   ],
+   "reconcile": "mi_city_rates"
   },
   {
    "id": "mi-0e4b206000",
@@ -3146,18 +3171,6 @@
    "used_by": [
     "data/states/MI-2026.json",
     "data/states/MI-2027.json"
-   ]
-  },
-  {
-   "id": "mi-a5ea13ea77",
-   "jurisdiction": "MI",
-   "title": "Which cities impose an income tax? (Michigan Dept of Treasury \u2014 authoritative list of all 24 cities)",
-   "url": "https://www.michigan.gov/taxes/questions/iit/accordion/general/what-cities-impose-an-income-tax",
-   "origin": "data",
-   "used_by": [
-    "data/local/MI-cities-2025.json",
-    "data/local/MI-cities-2026.json",
-    "data/local/MI-cities-2027.json"
    ]
   },
   {
@@ -4245,6 +4258,13 @@
    ]
   },
   {
+   "id": "ny-d610328ebc",
+   "jurisdiction": "NY",
+   "title": "New York City withholding tax tables and methods (NYS-50-T-NYC)",
+   "url": "https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_nyc.pdf",
+   "origin": "curated"
+  },
+  {
    "id": "ny-f97c4f886a",
    "jurisdiction": "NY",
    "title": "New York Department of Taxation: press",
@@ -4311,6 +4331,13 @@
    "used_by": [
     "data/minimum-wage/states/NY-2026.json"
    ]
+  },
+  {
+   "id": "ny-c76689cef6",
+   "jurisdiction": "NY",
+   "title": "Yonkers withholding tax tables and methods (NYS-50-T-Y)",
+   "url": "https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_y.pdf",
+   "origin": "curated"
   },
   {
    "id": "ny-c0f5031cb1",

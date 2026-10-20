@@ -542,6 +542,150 @@
     "excerpt": "increases the standard deduction from $8,500 to $8,750 for single filers",
     "value": 8750.0
    }
+  },
+  {
+   "id": "NY-supplemental-rate",
+   "name": "New York State supplemental wage rate",
+   "jurisdiction": "NY",
+   "source_id": "ny-878dc0d1f8",
+   "file": "data/states/NY-{year}.json",
+   "paths": [
+    [
+     "supplementalWages",
+     "flatRate"
+    ]
+   ],
+   "pattern": "(?s)New York State Withholding Tax Tables and Methods Effective January 1, {year} - December 31, {year}.{0,400000}?New York State supplemental rate of (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "New York State Withholding Tax Tables and Methods Effective January 1, 2026 - December 31, 2026 The information presented is current as of the publication's print date. Visit our website at www.tax.ny.gov for up-to-date  ...  employee's regular wages: • If you withhold income tax from an employee's regular wages, you can use one of the following methods for the supplemental wages: a. Withhold at the New York State supplemental rate of 11.70%",
+    "value": 0.117
+   }
+  },
+  {
+   "id": "NYC-supplemental-rate",
+   "name": "New York City supplemental wage rate",
+   "jurisdiction": "NY",
+   "source_id": "ny-d610328ebc",
+   "file": "data/states/NY-{year}.json",
+   "paths": [
+    [
+     "nycLocalTax",
+     "supplementalRate"
+    ]
+   ],
+   "pattern": "(?s)New York City Withholding Tax Tables and Methods Effective January 1, {year} - December 31, {year}.{0,400000}?New York City supplemental rate of (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "New York City Withholding Tax Tables and Methods Effective January 1, 2026 - December 31, 2026 Text Telephone (TTY) Hotline (for persons with hearing and speech disabilities using a TTY): If you have access to a TTY, con ... ur employee's regular wages: • If you withhold income tax from an employee's regular wages, you can use one of the following methods for the supplemental wages: a. Withhold at the New York City supplemental rate of 4.25%",
+    "value": 0.0425
+   }
+  },
+  {
+   "id": "Yonkers-resident-surcharge",
+   "name": "Yonkers resident surcharge",
+   "jurisdiction": "NY",
+   "source_id": "ny-c76689cef6",
+   "file": "data/states/NY-{year}.json",
+   "paths": [
+    [
+     "yonkersLocalTax",
+     "residentSurcharge",
+     "rate"
+    ]
+   ],
+   "pattern": "(?s)Yonkers Withholding Tax Tables and Methods Effective January 1, {year} - December 31, {year}.{0,400000}?Multiply the result by (\\d+(?:\\.\\d+)?)% ",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Yonkers Withholding Tax Tables and Methods Effective January 1, 2026 - December 31, 2026 The information presented is current as of the publication's print date. Visit our website at www.tax.ny.gov for up-to-date informa ...  4 Following across the same line, multiply the result from Step 3 by the amount in column 4. Step 5 Following across on the same line, add the result from Step 4 to the amount in column 5. Multiply the result by 16.75% ",
+    "value": 0.1675
+   }
+  },
+  {
+   "id": "Yonkers-nonresident-rate",
+   "name": "Yonkers nonresident earnings tax rate",
+   "jurisdiction": "NY",
+   "source_id": "ny-c76689cef6",
+   "file": "data/states/NY-{year}.json",
+   "paths": [
+    [
+     "yonkersLocalTax",
+     "nonresidentRate"
+    ]
+   ],
+   "pattern": "(?s)Yonkers Withholding Tax Tables and Methods Effective January 1, {year} - December 31, {year}.{0,400000}?nonresident earnings tax rate is (\\d*\\.\\d+|\\d+)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Yonkers Withholding Tax Tables and Methods Effective January 1, 2026 - December 31, 2026 The information presented is current as of the publication's print date. Visit our website at www.tax.ny.gov for up-to-date informa ... umber of payroll periods, which is the same number found in table P and used in Step 1. Daily Weekly Biweekly Semimonthly Monthly 260 52 26 24 12 Annual tax rate schedule The Yonkers nonresident earnings tax rate is .50%",
+    "value": 0.005
+   }
+  },
+  {
+   "id": "IN-personal-exemption",
+   "name": "Indiana personal exemption",
+   "jurisdiction": "IN",
+   "source_id": "in-86066aa1c0",
+   "file": "data/states/IN-{year}.json",
+   "paths": [
+    [
+     "exemptionTiers",
+     "personal"
+    ]
+   ],
+   "pattern": "deduct \\$([\\d,]+) per year per exemption claimed on line 5",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "deduct $1,000 per year per exemption claimed on line 5",
+    "value": 1000.0
+   }
+  },
+  {
+   "id": "IN-dependent-exemption",
+   "name": "Indiana dependent exemption",
+   "jurisdiction": "IN",
+   "source_id": "in-86066aa1c0",
+   "file": "data/states/IN-{year}.json",
+   "paths": [
+    [
+     "exemptionTiers",
+     "dependent"
+    ]
+   ],
+   "pattern": "deduct \\$([\\d,]+) per year per qualifying dependent exemption claimed on line 6",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "deduct $1,500 per year per qualifying dependent exemption claimed on line 6",
+    "value": 1500.0
+   }
+  },
+  {
+   "id": "IN-adopted-child-exemption",
+   "name": "Indiana adopted child exemption",
+   "jurisdiction": "IN",
+   "source_id": "in-86066aa1c0",
+   "file": "data/states/IN-{year}.json",
+   "paths": [
+    [
+     "exemptionTiers",
+     "adoptedChild"
+    ]
+   ],
+   "pattern": "deduct \\$([\\d,]+) per year per qualifying adopted child claimed on line 8",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "deduct $3,000 per year per qualifying adopted child claimed on line 8",
+    "value": 3000.0
+   }
   }
  ]
 }

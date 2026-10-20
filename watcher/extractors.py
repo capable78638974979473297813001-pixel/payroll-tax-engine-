@@ -62,6 +62,15 @@ def stated_value(text: str, pattern: str, year: int, transform: str) -> tuple[fl
     return value, sentence
 
 
+def short(sentence: str, keep: int = 220) -> str:
+    """A sentence a pattern matched across a whole document (an edition header
+    far above the figure) is quoted as its two ends, which the same pattern
+    still matches: the header, then the sentence."""
+    if len(sentence) <= 2 * keep + 20:
+        return sentence
+    return sentence[:keep] + " ... " + sentence[-keep:]
+
+
 def _get(node, path):
     for p in path:
         node = node[p]
@@ -115,7 +124,7 @@ def findings(extractors: list[dict], texts: dict[str, str], sources: dict[str, d
                 stale = [p for p, c in zip(x["paths"], current) if not (isinstance(c, (int, float)) and abs(c - value) < 5e-7)]
                 edits = [{"path": list(p), "new": value, "relation": None if i == 0 else "copy"} for i, p in enumerate(stale)]
                 finding["change"] = {"file": rel, "edits": edits, "new": value, "effective_from": f"{year}-01-01",
-                                     "evidence_kind": "text", "pattern": x["pattern"], "matched_text": sentence,
+                                     "evidence_kind": "text", "pattern": x["pattern"], "matched_text": short(sentence),
                                      "transform": x.get("transform", ""), "source_url": src["url"]}
             else:
                 finding["detail"] += " (the document does not name the year, so this is for a person to apply)"
@@ -153,7 +162,7 @@ def main(argv: list[str] | None = None) -> int:
         ok = got is not None and all(abs(got[0] - h) < 5e-7 for h in have)
         print(f"{'ok ' if ok else 'BAD'} {x['id']}: document {got[0] if got else None} data {have}")
         if ok and refresh:
-            x["calibration"] = {"year": year, "excerpt": got[1], "value": got[0]}
+            x["calibration"] = {"year": year, "excerpt": short(got[1]), "value": got[0]}
         bad += 0 if ok else 1
     if refresh:
         REGISTRY.write_text(json.dumps(registry, indent=1, ensure_ascii=False) + "\n")

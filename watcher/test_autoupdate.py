@@ -861,6 +861,106 @@ class FromThePennsylvaniaRegister(Base):
         self.assertIsNone(reconcile._pa_rows(b"not a spreadsheet"))
 
 
+class IndianaCountiesAndNewYorkEditions(Base):
+    """Indiana's January 1 county table and New York's edition-anchored rates."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        import extractors  # noqa: PLC0415
+        self.ex = extractors
+        self.cfg["rules"] += [
+            {"glob": "data/local/IN-counties-*.json", "keys": ["rate"], "min": 0.001, "max": 0.06, "max_abs_change": 0.01,
+             "hosts": ["www.in.gov"], "max_changes_per_run": 30, "max_findings_per_run": 40},
+            {"glob": "data/states/NY-*.json", "keys": ["flatRate", "supplementalRate", "rate", "nonresidentRate"], "min": 0.001, "max": 0.3,
+             "max_abs_change": 0.03, "hosts": ["www.tax.ny.gov"]},
+        ]
+
+    # --- Indiana --------------------------------------------------------
+    def in_setup(self, counties=None):
+        cs = counties or [{"name": f"C{i}", "countyCode": f"{i:02d}", "rate": 0.02} for i in range(1, 93)]
+        write_json(self.root, f"data/local/IN-counties-{YEAR}.json", {"year": YEAR, "counties": cs})
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-qm", "in")
+        self.src = {"id": "in", "url": "https://www.in.gov/dor/files/dn01.pdf", "jurisdiction": "IN", "reconcile": "in_counties"}
+
+    def in_table(self, when, **rates):
+        r = {i: "0.02" for i in range(1, 93)}
+        r.update({int(k[1:]): v for k, v in rates.items()})
+        rows = "\n".join(f"Co{chr(65 + i % 26)}{chr(65 + i // 26)} {i:02d} {r[i]}" for i in r)
+        return f"Indiana County Tax Rates: Effective {when}\nCounty Name County Code County Tax Rate\n{rows}\n"
+
+    def test_a_january_first_table_corrects_the_counties_rate_in_that_years_file(self):
+        self.in_setup()
+        fs = reconcile.reconcile_in_counties(self.in_table(f"Jan. 1, {YEAR}", c5="0.0215"), self.src, TODAY, self.root)
+        self.assertEqual([(f["code"], "change" in f) for f in fs], [("05", True)])
+        for f in fs:
+            f["reads"] = [{"at": (NOW - dt.timedelta(seconds=60)).isoformat(), "value": 0.0215}, {"at": NOW.isoformat(), "value": 0.0215}]
+        acc, rej = au.triage(au.proposals_from(fs, self.root, TODAY), self.cfg, self.root, [self.src], TODAY, 1, NOW)
+        self.assertEqual((len(acc), rej), (1, []))
+        au.apply(acc, self.cfg, self.root, [self.src], TODAY, verify=[], now=NOW)
+        cs = json.loads((self.root / f"data/local/IN-counties-{YEAR}.json").read_text())["counties"]
+        self.assertEqual([c["rate"] for c in cs if c["rate"] != 0.02], [0.0215])
+
+    def test_an_october_first_table_is_a_dated_row_for_a_person(self):
+        self.in_setup()
+        fs = reconcile.reconcile_in_counties(self.in_table(f"Oct. 1, {YEAR}", c5="0.0215"), self.src, TODAY, self.root)
+        self.assertEqual([("change" in f) for f in fs], [False])
+
+    def test_a_county_with_its_own_dated_rows_is_a_persons_even_on_january_first(self):
+        cs = [{"name": f"C{i}", "countyCode": f"{i:02d}", "rate": 0.02} for i in range(1, 93)]
+        cs[4]["rateChanges"] = [{"on": f"{YEAR}-10-01", "rate": 0.0225}]
+        self.in_setup(cs)
+        fs = reconcile.reconcile_in_counties(self.in_table(f"Jan. 1, {YEAR}", c5="0.0215"), self.src, TODAY, self.root)
+        self.assertEqual([("change" in f) for f in fs], [False])
+
+    # --- New York -------------------------------------------------------
+    NY = f"data/states/NY-{YEAR}.json"
+
+    def ny_setup(self):
+        write_json(self.root, self.NY, {
+            "supplementalWages": {"flatRate": 0.117, "quote": "verbatim: 'Withhold at the New York State supplemental rate of 11.70% (0.1170).'"},
+            "nycLocalTax": {"supplementalRate": 0.0425},
+            "yonkersLocalTax": {"residentSurcharge": {"rate": 0.1675, "quote": "Multiply the result by 16.75% (0.1675)."}, "nonresidentRate": 0.005}})
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-qm", "ny")
+        self.sources = [{"id": "nys", "url": "https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_nys.pdf", "jurisdiction": "NY"}]
+        self.reg = [{"id": "NY-supplemental-rate", "name": "NY supplemental", "jurisdiction": "NY", "source_id": "nys", "file": "data/states/NY-{year}.json",
+                     "paths": [["supplementalWages", "flatRate"]],
+                     "pattern": r"(?s)New York State Withholding Tax Tables and Methods Effective January 1, {year} - December 31, {year}.{0,400000}?New York State supplemental rate of (\d+(?:\.\d+)?)%",
+                     "transform": "percent"}]
+
+    def ny_doc(self, year, rate):
+        return (f"NYS-50-T-NYS (1/{str(year)[2:]}) New York State Withholding Tax Tables and Methods Effective January 1, {year} - December 31, {year} "
+                + "filler " * 5000 + f"Withhold at the New York State supplemental rate of {rate}% (0.1)")
+
+    def test_an_edition_for_this_year_states_the_rate_for_this_year(self):
+        self.ny_setup()
+        fs = self.ex.findings(self.reg, {"nys": self.ny_doc(YEAR, "12.10")}, {s["id"]: s for s in self.sources}, TODAY, self.root)
+        self.assertEqual(len(fs), 1)
+        self.assertLess(len(fs[0]["change"]["matched_text"]), 600)  # the header and the sentence, not 30 KB between them
+        for f in fs:
+            f["reads"] = [{"at": (NOW - dt.timedelta(seconds=60)).isoformat(), "value": 0.121}, {"at": NOW.isoformat(), "value": 0.121}]
+        acc, rej = au.triage(au.proposals_from(fs, self.root, TODAY), self.cfg, self.root, self.sources, TODAY, 1, NOW)
+        self.assertEqual((len(acc), rej), (1, []))
+        au.apply(acc, self.cfg, self.root, self.sources, TODAY, verify=[], now=NOW)
+        self.assertEqual(json.loads((self.root / self.NY).read_text())["supplementalWages"]["flatRate"], 0.121)
+        # The quote that still says 11.70% is not edited; the reviewer is told.
+        self.assertIn("supplementalWages.quote mentions the old value (0.117)", acc[0]["warnings"])
+        self.assertIn("check the prose", au.report(acc, [], "applied", TODAY))
+
+    def test_last_years_edition_says_nothing_about_this_year(self):
+        self.ny_setup()
+        self.assertEqual(self.ex.findings(self.reg, {"nys": self.ny_doc(YEAR - 1, "12.10")}, {s["id"]: s for s in self.sources}, TODAY, self.root), [])
+
+    def test_an_edition_for_next_year_changes_only_next_years_file(self):
+        self.ny_setup()
+        write_json(self.root, f"data/states/NY-{YEAR + 1}.json", json.loads((self.root / self.NY).read_text()))
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-qm", "ny next")
+        fs = self.ex.findings(self.reg, {"nys": self.ny_doc(YEAR + 1, "12.10")}, {s["id"]: s for s in self.sources}, TODAY, self.root)
+        self.assertEqual([f["change"]["file"] for f in fs], [f"data/states/NY-{YEAR + 1}.json"])
+
+
 class FromTheOfficialFileToTheLine(Base):
     """The whole chain with the real reconciler: a stand-in for the Finder's
     CSV, the engine's data file, two reads, triage, apply."""

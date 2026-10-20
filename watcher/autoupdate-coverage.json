@@ -7,7 +7,9 @@
     "municipal occupational taxes"
    ],
    "automatic": [],
-   "report_only": [],
+   "report_only": [
+    "reconcile:al_league"
+   ],
    "person": [
     {
      "what": "State standard-deduction steps and brackets (A4)",
@@ -15,7 +17,7 @@
     },
     {
      "what": "29 municipal occupational taxes and Jefferson County",
-     "why": "No official bulk file exists (the League of Municipalities page is an aggregator and the collectors' forms are PDFs), and entries carry dated rateHistory rows. The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
+     "why": "The League of Municipalities' list (compared city by city every day) is a survey with no effective dates and covers 25 of the 29 cities, and 21 of the data's entries were confirmed from the city's own documents, so a difference is reported for a person to check with the city, never applied. Entries carry dated rateHistory rows. The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
     }
    ]
   },
@@ -204,15 +206,22 @@
     "92 county income taxes"
    ],
    "automatic": [
-    "extractor:IN-rate"
+    "extractor:IN-rate",
+    "reconcile:in_counties"
    ],
    "report_only": [
-    "reconcile:in_counties"
+    "extractor:IN-personal-exemption",
+    "extractor:IN-dependent-exemption",
+    "extractor:IN-adopted-child-exemption"
    ],
    "person": [
     {
-     "what": "County rates",
-     "why": "Counties change on January 1 and October 1 and the data records those as dated rows (rateChanges); the Departmental Notice table is compared every day and a difference is reported with the county and rate."
+     "what": "County rates that take effect on October 1 (or any other mid-year date)",
+     "why": "A table effective January 1 corrects a county's rate in that year's file automatically (92 rows compared daily); an October 1 table is a dated row, which is a structural edit. Counties with their own dated rows stay with a person."
+    },
+    {
+     "what": "Exemption amounts",
+     "why": "Departmental Notice #1 states them without naming the year, so a difference is reported, not applied."
     }
    ]
   },
@@ -238,11 +247,13 @@
     "extractor:KY-rate",
     "extractor:KY-deduction"
    ],
-   "report_only": [],
+   "report_only": [
+    "reconcile:ky_districts"
+   ],
    "person": [
     {
-     "what": "Local occupational license taxes",
-     "why": "The Secretary of State's database only answers in a browser and has no bulk file; entries carry dated rateChanges. The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
+     "what": "Local occupational license taxes (about 250 districts)",
+     "why": "The Secretary of State's spreadsheet of every district is downloaded and read every day: a district added or whose record changed after the data was scraped is reported. The rates themselves are free text (\"2.375% eff. 1/1/2026\", \"$75 flat\"), many resolved by hand from ordinances, and entries carry dated rateChanges. The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
     }
    ]
   },
@@ -314,11 +325,14 @@
     "extractor:MI-rate",
     "extractor:MI-exemption"
    ],
-   "report_only": [],
+   "report_only": [
+    "reconcile:mi_city_list",
+    "reconcile:mi_city_rates"
+   ],
    "person": [
     {
      "what": "City income taxes",
-     "why": "Each of the 24 cities sets its rate by ordinance and publishes it on its own page; entries carry hand-checked source notes, which block automatic edits."
+     "why": "Treasury's list of the 24 cities and Grand Rapids' consolidated rate table are compared with the data every day (a new city, or a differing rate or exemption, is reported). Each city sets its rate by ordinance on its own page and every entry carries a hand-checked source note, which blocks automatic edits; the Grand Rapids table is itself secondary (it was wrong about Saginaw)."
     }
    ]
   },
@@ -452,12 +466,17 @@
     "state income tax",
     "NYC and Yonkers local taxes"
    ],
-   "automatic": [],
+   "automatic": [
+    "extractor:NY-supplemental-rate",
+    "extractor:NYC-supplemental-rate",
+    "extractor:Yonkers-resident-surcharge",
+    "extractor:Yonkers-nonresident-rate"
+   ],
    "report_only": [],
    "person": [
     {
-     "what": "NYS-50-T tables and the NYC and Yonkers rates",
-     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+     "what": "NYS-50-T tables, the NYC and Yonkers bracket tables, and Yonkers' derived supplemental rates",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table. Each flat rate above is read from its own edition (the document must say it is the Jan 1 to Dec 31 edition for the file's year)."
     }
    ]
   },

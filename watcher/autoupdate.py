@@ -631,7 +631,28 @@ def check(p: dict, cfg: dict, repo: Path, sources: list[dict], today: str, now: 
     if age > cfg["max_proposal_age_hours"] or age < -1:
         raise Rejected("the evidence is stale or from the future")
 
-    return {"path": path, "text": new_text_all, "lines": [e["line"] for e in edits]}
+    # Prose that quotes the old figure ("4.95% for 2026 ...") is not edited and
+    # may now be stale. That is cosmetic, not an engine input, so it does not
+    # block the change; the report and pull request list it for the reviewer.
+    warnings = []
+    for e in edits:
+        leaf = e["_leaf"]
+        old_v = _get(before, leaf)
+        if isinstance(old_v, bool) or not isinstance(old_v, (int, float)):
+            continue
+        forms = {f"{round(old_v * 100, 4):.4f}".rstrip("0").rstrip(".") + "%", f"{old_v:,.0f}" if float(old_v).is_integer() else f"{old_v:,.2f}", str(old_v)}
+        forms = {f for f in forms if len(f) >= 3}
+        for level in (leaf[:-1], leaf[:-2]):
+            try:
+                node = _get(before, level) if level else before
+            except (KeyError, IndexError, TypeError):
+                continue
+            if not isinstance(node, dict):
+                continue
+            for k, v in node.items():
+                if isinstance(v, str) and any(f in v for f in forms):
+                    warnings.append(f"{'.'.join(map(str, level + (k,))) or k} mentions the old value ({e['old_text']})")
+    return {"path": path, "text": new_text_all, "lines": [e["line"] for e in edits], "warnings": sorted(set(warnings))}
 
 
 def triage(proposals: list[dict], cfg: dict, repo: Path, sources: list[dict], today: str, total_findings: int,
@@ -707,6 +728,7 @@ def apply(accepted: list[dict], cfg: dict, repo: Path, sources: list[dict], toda
         # Re-check each one against the file as it is right now, one at a time.
         for p in accepted:
             plan = check(p, cfg, repo, sources, today, now)
+            p["warnings"] = plan["warnings"]
             touched.setdefault(plan["path"], plan["path"].read_text())
             plan["path"].write_text(plan["text"])
         for cmd in verify:
@@ -755,6 +777,8 @@ def report(applied: list[dict], rejected: list[dict], mode: str, today: str, not
             changes = "; ".join(f"line {e['line']} `{e['key']}`: `{e['old_text']}` -> `{e['new_text']}`" for e in p["edits"])
             out.append(f"- `{p['file']}` {changes} "
                        f"({p['name']}; official change effective {p['effective_from']}; source {p['evidence']['url']})")
+            for w in p.get("warnings", []):
+                out.append(f"  - check the prose: `{w}`")
         out.append("")
     if rejected:
         out += ["## Left for a person", ""]

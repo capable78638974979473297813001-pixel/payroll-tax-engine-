@@ -4,5 +4,11 @@
   "applied": [],
   "would_apply": [],
   "left_for_a_person": [],
-  "disagreements_for_a_person": []
+  "disagreements_for_a_person": [
+    {
+      "name": "Whitesville",
+      "detail": "the Secretary of State lists this district (entered 2026-10-06; rate '') but KY-occupational-2026.json does not",
+      "jurisdiction": "KY"
+    }
+  ]
 }

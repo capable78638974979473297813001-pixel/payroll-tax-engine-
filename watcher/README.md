@@ -136,9 +136,12 @@ ones) a rule that covers its exact lines, and that no reader is unlisted.
 |---|---|---|
 | Ohio Finder rate files, row by row, with effective dates | OH municipal rates, OH JEDD/JEDZ rates (rate and its `rateSourceRaw` percent move together) | automatic |
 | DCED's statewide Excel register, row by row (all ~2,600 PA municipalities and school districts), with effective dates | PA local earned-income and local-services taxes: a rate and its total move together; the official date must equal the date the data records and fall on or before January 1 | automatic |
-| A sentence in an official document that names the year ("For 2026, the state ... rate ... is 2.95%") | IL, MI (rate, exemption; a second Treasury notice must agree), KY (rate, standard deduction), IN, LA, MS | automatic |
-| A sentence that does not name the year | PA state rate, IA, CT, NC, AZ, CO, MA, DE, MD, MN, AR, WI, SC, HI, DC, VA | report only |
-| A table in an official file | Indiana county rates (compared daily, 92 rows) | report only |
+| A sentence in an official document that names the year ("For 2026, the state ... rate ... is 2.95%") | IL, MI (rate, exemption; a second Treasury notice must agree), KY (rate, standard deduction), IN, LA, MS, and New York's three flat-rate editions (state supplemental, NYC supplemental, Yonkers resident surcharge and nonresident rate: the document must say it is the Jan 1 to Dec 31 edition for the file's year) | automatic |
+| A sentence that does not name the year | PA state rate, IA, CT, NC, AZ, CO, MA, DE, MD, MN, AR, WI, SC, HI, DC, VA, IN exemption amounts | report only |
+| Indiana Departmental Notice #1, county table (92 rows) | IN counties: a table effective January 1 corrects the county's rate in that year's file; an October 1 table or a county with its own dated rows is reported | automatic / a person |
+| Kentucky Secretary of State's spreadsheet of every occupational tax district, downloaded through the site's own form button | KY: a district added, or whose record changed after the data was scraped (Whitesville, entered 2026-10-06, is the first catch) | report only |
+| Treasury's list of the 24 cities, and Grand Rapids' rate table | MI cities: a new or vanished city, or a rate or exemption that differs | report only |
+| Alabama League of Municipalities' survey list | AL: a city's rate that differs from the data (information where the data was confirmed from the city's own document) | report only |
 | Per-period tables, bracket schedules, mid-year dated rows, city/county registries with no bulk file | the rest (see the ledger for each state and the reason) | a person |
 
 Why the year matters: a document that says "for 2026" is stating a value for
@@ -149,6 +152,8 @@ is only ever reported. Readers live in `extractors.json`; each is a pattern, the
 data lines it owns, and a frozen excerpt of the real sentence it was written
 against, which the tests re-read. `python watcher/extractors.py --refresh`
 rebuilds the excerpts from the stored snapshots and confirms the data agrees.
+
+Prose that quotes a changed figure (a `comment` saying "4.95% for 2026") is not edited by the updater; the report and the pull request list those fields so the reviewer can fix the wording.
 
 A school district's rate is repeated in every municipality inside it, so one official change becomes dozens of proposals. Pennsylvania's rule therefore has its own limits (80 changes, 120 disagreements) instead of the global 5 and 10; a flood past that still applies nothing.
 

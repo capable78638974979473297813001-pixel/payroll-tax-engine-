@@ -139,7 +139,7 @@ def main() -> int:
         s.setdefault("title", None)
         out.append({k: s[k] for k in ("id", "jurisdiction", "title", "url", "kind", "origin", "used_by", "ignore",
                                       "contains", "drop_json_keys", "replaces", "keep", "follow", "follow_limit", "critical",
-                                      "reconcile", "directory") if s.get(k) or k == "follow" and s.get(k) is False})
+                                      "reconcile", "directory", "button", "button_value") if s.get(k) or k == "follow" and s.get(k) is False})
     excluded = set(load_scope().get("excluded", {}))
     dropped = [s for s in out if s["jurisdiction"] in excluded]
     out = [s for s in out if s["jurisdiction"] not in excluded]

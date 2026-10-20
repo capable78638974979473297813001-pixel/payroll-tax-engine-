@@ -975,6 +975,42 @@
    "title": "PA DCED Municipal Statistics: statewide EIT/PIT/LST register, 2027 (every municipality and school district)",
    "url": "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2027",
    "reconcile": "pa_local"
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "Kentucky Secretary of State: occupational tax districts (spreadsheet of every district)",
+   "url": "https://web.sos.ky.gov/occupationaltax/",
+   "reconcile": "ky_districts",
+   "button": "ctl00$ContentPlaceHolder1$bExcel",
+   "button_value": "Excel spreadsheet of all Occupational LicenseTax Districts"
+  },
+  {
+   "jurisdiction": "MI",
+   "title": "Michigan Treasury: which cities impose an income tax",
+   "url": "https://www.michigan.gov/taxes/questions/iit/accordion/general/what-cities-impose-an-income-tax",
+   "reconcile": "mi_city_list"
+  },
+  {
+   "jurisdiction": "MI",
+   "title": "Other Michigan cities with income tax (City of Grand Rapids rate table)",
+   "url": "https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/",
+   "reconcile": "mi_city_rates"
+  },
+  {
+   "jurisdiction": "AL",
+   "title": "Alabama League of Municipalities: municipal tax rates (occupational tax survey list)",
+   "url": "https://almonline.org/TaxRates.aspx",
+   "reconcile": "al_league"
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "New York City withholding tax tables and methods (NYS-50-T-NYC)",
+   "url": "https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_nyc.pdf"
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "Yonkers withholding tax tables and methods (NYS-50-T-Y)",
+   "url": "https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_y.pdf"
   }
  ]
 }

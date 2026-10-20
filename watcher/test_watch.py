@@ -922,5 +922,140 @@ class IndianaCountyReconcileTest(unittest.TestCase):
 
 
 
+class LocalRegistryReconcileTest(unittest.TestCase):
+    """Kentucky, Michigan and Alabama: sources that give no machine-readable
+    effective date, so every finding is for a person (no `change`)."""
+
+    SRC = {"id": "x", "jurisdiction": "XX", "url": "https://example.test/"}
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.repo = Path(self.tmp.name)
+        (self.repo / "data" / "local").mkdir(parents=True)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def put(self, name, data):
+        (self.repo / "data" / "local" / name).write_text(json.dumps(data))
+
+    # --- Kentucky -------------------------------------------------------
+    def ky(self, rows=None):
+        self.put("KY-occupational-2026.json", {"jurisdictions": {"scrapedOn": "2026-08-13", "scraped": [{"name": "Adairville"}, {"name": "Ashland"}, {"name": "Salem"}]}})
+        body = (Path(__file__).parent / "fixtures" / "ky_districts_sample.xls").read_bytes()
+        return body
+
+    def test_kentucky_reports_a_new_district_and_a_record_changed_since_the_scrape(self):
+        out = self._ky_out(self.ky())
+        names = {(f["kind"], f["name"]) for f in out}
+        self.assertEqual(names, {("missing_from_engine", "Whitesville"), ("record_changed", "Salem")})
+        self.assertTrue(all("change" not in f for f in out))
+
+    def _ky_out(self, body):
+        # The reader refuses spreadsheets with fewer than 150 districts (a truncated
+        # download); pad the fixture's four rows with quiet ones so the real check runs.
+        import xlrd
+        import xlwt
+        import io
+        book = xlrd.open_workbook(file_contents=body, logfile=io.StringIO())
+        sh = book.sheet_by_index(0)
+        wb = xlwt.Workbook()
+        w = wb.add_sheet("Tax Districts")
+        for r in range(sh.nrows):
+            for c in range(sh.ncols):
+                w.write(r, c, sh.cell_value(r, c))
+        for i in range(200):
+            for c, v in enumerate([str(1000 + i), f"Pad {i}", "X", "X", "O", "", "1%", "", "", "1/1/2020", "1/1/2020", "1/1/2020"]):
+                w.write(sh.nrows + i, c, v)
+        buf = io.BytesIO()
+        wb.save(buf)
+        data = json.loads((self.repo / "data" / "local" / "KY-occupational-2026.json").read_text())
+        data["jurisdictions"]["scraped"] += [{"name": f"Pad {i}"} for i in range(200)]
+        self.put("KY-occupational-2026.json", data)
+        return reconcile.reconcile_ky_districts(buf.getvalue(), self.SRC, "2026-10-20", self.repo)
+
+    def test_kentucky_refuses_a_truncated_download(self):
+        body = self.ky()
+        out = reconcile.reconcile_ky_districts(body, self.SRC, "2026-10-20", self.repo)
+        self.assertEqual(out[0]["kind"], "unreadable")
+        self.assertEqual(reconcile.reconcile_ky_districts(b"<html>", self.SRC, "2026-10-20", self.repo)[0]["kind"], "unreadable")
+
+    def test_a_form_button_download_posts_the_pages_hidden_fields(self):
+        page = ('<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="abc&amp;def" />'
+                '<input type="hidden" name="__EVENTVALIDATION" value="ev1" />')
+        sent = {}
+        with mock.patch.object(reconcile, "post_form", side_effect=lambda url, fields: sent.update(url=url, fields=fields) or b"FILE"):
+            body = reconcile._aspnet_button(page, "https://web.example/ot/", "ctl00$bExcel", "Excel")
+        self.assertEqual(body, b"FILE")
+        self.assertEqual((sent["fields"]["__VIEWSTATE"], sent["fields"]["__EVENTVALIDATION"], sent["fields"]["ctl00$bExcel"]), ("abc&def", "ev1", "Excel"))
+        self.assertEqual(sent["fields"]["__EVENTTARGET"], "")
+
+    def test_run_downloads_the_file_behind_the_button_and_reports_a_failed_download(self):
+        self.put("KY-occupational-2026.json", {"jurisdictions": {"scrapedOn": "2026-08-13", "scraped": []}})
+        src = dict(self.SRC, reconcile="ky_districts", button="ctl00$bExcel", button_value="Excel")
+        ok = type("F", (), {"ok": True, "body": b"<html>", "error": ""})()
+        with mock.patch.object(reconcile, "post_form", side_effect=OSError("down")):
+            out = reconcile.run([src], lambda u: ok, "2026-10-20", self.repo)
+        self.assertEqual(out[0]["kind"], "unreadable")
+
+    # --- Michigan -------------------------------------------------------
+    CITIES = [{"name": "Albion", "residentRate": 0.01, "nonresidentRate": 0.005, "exemptionAmount": 600, "sourceNote": "ok"},
+              {"name": "Saginaw", "residentRate": 0.015, "nonresidentRate": 0.0075, "exemptionAmount": 750,
+               "sourceNote": "Grand Rapids' table said 1.00%/0.50%, which was WRONG. Corrected."}]
+
+    def table(self, albion_rate="1.00", extra=""):
+        cell = lambda n, ex, r, nr: f"<h3>{n}</h3> Effective Date of Ordinance Accepts Common Form Yes Exemption Amount {ex} Exemption is prorated No Resident Rate {r}% Non-Resident Rate {nr}%"
+        pad = "".join(cell(f"City{i}", 600, "1.00", "0.50") for i in range(30))
+        return "<body>" + cell("Albion", 600, albion_rate, "0.50") + cell("Saginaw", 1000, "1.00", "0.50") + pad + extra + "</body>"
+
+    def test_michigan_rates_agree_and_a_known_wrong_table_entry_is_information(self):
+        self.put("MI-cities-2026.json", {"cities": self.CITIES})
+        out = reconcile.reconcile_mi_city_rates(self.table(), self.SRC, "2026-10-20", self.repo)
+        self.assertEqual([(f["name"], f["severity"]) for f in out], [("Saginaw", "info")])
+
+    def test_michigan_rate_difference_is_for_a_person(self):
+        self.put("MI-cities-2026.json", {"cities": self.CITIES})
+        out = reconcile.reconcile_mi_city_rates(self.table(albion_rate="1.25"), self.SRC, "2026-10-20", self.repo)
+        self.assertIn(("Albion", "action"), [(f["name"], f["severity"]) for f in out])
+        self.assertTrue(all("change" not in f for f in out))
+
+    def test_michigan_city_list_catches_a_new_city_and_a_vanished_one(self):
+        self.put("MI-cities-2026.json", {"cities": self.CITIES + [{"name": "Detroit", "residentRate": 0.024, "nonresidentRate": 0.012, "exemptionAmount": 600}]})
+        page = ("Three Michigan cities levy municipality taxes. City of Detroit The Michigan Department of Treasury administers income taxes for the City of Detroit. "
+                "These Michigan cities administer their own taxes including forms, filing, and payment requirements as well as taxpayer support. {} Follow us")
+        self.assertEqual(reconcile.reconcile_mi_city_list(page.format("Albion Saginaw"), self.SRC, "2026-10-20", self.repo), [])
+        out = reconcile.reconcile_mi_city_list(page.format("Albion Saginaw Newtown"), self.SRC, "2026-10-20", self.repo)
+        self.assertEqual({(f["kind"], f["name"]) for f in out}, {("missing_from_engine", "Newtown")})
+        out = reconcile.reconcile_mi_city_list(page.format("Albion"), self.SRC, "2026-10-20", self.repo)
+        self.assertIn(("not_in_official_file", "Saginaw"), [(f["kind"], f["name"]) for f in out])
+
+    # --- Alabama --------------------------------------------------------
+    def al_page(self, **rates):
+        base = {f"Town{chr(65 + i)}": "1" for i in range(18)}
+        base.update(rates)
+        items = "".join(f"<li>{n} {r}%</li>" for n, r in base.items())
+        return ('<p>intro</p><div id="OccupationalTax"><h2>Municipal Occupational Taxes</h2>'
+                '<p>All city and county rates are those given to the League by survey and should be verified with the appropriate entity for updates.</p>'
+                f'<ul>{items}</ul></div><footer>Copyright</footer>')
+
+    def al_data(self, tier="league_survey_only"):
+        ms = [{"name": f"Town{chr(65 + i)}", "rate": 0.01, "confirmation": {"tier": tier}} for i in range(18)]
+        self.put("AL-municipalities-2026.json", {"municipalities": ms})
+
+    def test_alabama_survey_list_difference_is_action_only_where_the_league_is_the_data_s_source(self):
+        self.al_data("league_survey_only")
+        out = reconcile.reconcile_al_league(self.al_page(TownB="2"), self.SRC, "2026-10-20", self.repo)
+        self.assertEqual([(f["name"], f["severity"]) for f in out], [("TownB", "action")])
+        self.al_data("primary_source")
+        out = reconcile.reconcile_al_league(self.al_page(TownB="2"), self.SRC, "2026-10-20", self.repo)
+        self.assertEqual([(f["name"], f["severity"]) for f in out], [("TownB", "info")])
+
+    def test_alabama_new_city_and_unreadable_page(self):
+        self.al_data()
+        out = reconcile.reconcile_al_league(self.al_page(Newville="1.5"), self.SRC, "2026-10-20", self.repo)
+        self.assertEqual([(f["kind"], f["name"]) for f in out], [("missing_from_engine", "Newville")])
+        self.assertEqual(reconcile.reconcile_al_league("<html></html>", self.SRC, "2026-10-20", self.repo)[0]["kind"], "unreadable")
+
+
 if __name__ == "__main__":
     unittest.main()

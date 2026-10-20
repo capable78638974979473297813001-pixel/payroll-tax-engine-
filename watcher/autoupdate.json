@@ -164,6 +164,35 @@
       "independent_values": true,
       "max_changes_per_run": 80,
       "max_findings_per_run": 120
+    },
+    {
+      "glob": "data/local/IN-counties-*.json",
+      "keys": [
+        "rate"
+      ],
+      "min": 0.001,
+      "max": 0.06,
+      "max_abs_change": 0.01,
+      "hosts": [
+        "www.in.gov"
+      ],
+      "max_changes_per_run": 30,
+      "max_findings_per_run": 40
+    },
+    {
+      "glob": "data/states/NY-*.json",
+      "keys": [
+        "flatRate",
+        "supplementalRate",
+        "rate",
+        "nonresidentRate"
+      ],
+      "min": 0.001,
+      "max": 0.3,
+      "max_abs_change": 0.03,
+      "hosts": [
+        "www.tax.ny.gov"
+      ]
     }
   ]
 }
