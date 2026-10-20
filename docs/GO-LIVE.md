@@ -189,6 +189,19 @@ refuses to use it: account and API requests return 500, `GET /api/health`
 returns `503` with `"store":"unreadable"`, and the file is left untouched —
 restore it from backup. It never silently starts over empty.
 
+**How accounts are saved.** Every change (signup, verification, signed terms,
+card on file, subscription, API key, usage) is written to
+`$SITE_DB_DIR/db.json` before the request returns: temp file, `fsync`, atomic
+rename, then `fsync` of the directory, so a crash or power loss leaves either
+the old file or the new one, never half of one. The previous generation is
+kept alongside as `db.json.bak`. On Render both live on the persistent disk
+at `/var/data/site`, which survives restarts and deploys (the container's own
+filesystem does not, so never point `SITE_DB_DIR` outside the disk). Recover
+from a damaged `db.json` by copying `db.json.bak` over it. The disk and `.bak`
+are the same volume, so the scheduled off-box backup of `/var/data/site`
+above is still what protects against losing the disk. `tests/site-persistence.test.ts`
+kills the server with SIGKILL and restarts it to prove nothing is lost.
+
 Health check for your load balancer or uptime monitor: `GET /api/health`
 (returns `200` with the API version and jurisdiction count).
 
