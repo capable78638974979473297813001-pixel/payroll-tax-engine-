@@ -26,6 +26,7 @@ import csv
 import datetime as dt
 import io
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -283,7 +284,166 @@ def reconcile_in_counties(text: str, source: dict, today: str, repo: Path = REPO
     return out
 
 
-RECONCILERS = {"oh_municipal": reconcile_oh_municipal, "oh_jedd": reconcile_oh_jedd, "in_counties": reconcile_in_counties}
+# --------------------------------------------------------------------------
+# Pennsylvania local earned-income and local-services taxes (DCED register)
+# --------------------------------------------------------------------------
+
+PA_COLUMNS = {
+    "year": "Reporting Year", "nonres": "Municipal Nonresident EIT (percent)", "nonres_on": "Municipal Nonresident EIT Effective Date",
+    "res": "Municipal Resident EIT (percent)", "res_on": "Municipal Resident EIT Effective Date",
+    "sd": "School District EIT (percent)", "sd_on": "School District EIT Effective Date",
+    "total": "Total Resident Income Tax (percent)", "lst_m": "Municipal LST (dollars)", "lst_m_on": "Municipal LST Effective Date",
+    "lst_sd": "School District LST (dollars)", "lst_sd_on": "School District LST Effective Date", "lst_total": "Total LST (dollars)",
+    "psd": "PSD Code",
+}
+
+
+def _pa_rows(body: bytes) -> list[dict] | None:
+    """The register's rows as dicts keyed by PA_COLUMNS, or None if the file
+    is not the register (wrong format, missing columns)."""
+    try:
+        import xlrd  # noqa: PLC0415
+        with open(os.devnull, "w") as quiet:
+            book = xlrd.open_workbook(file_contents=body, logfile=quiet)
+        sheet = book.sheet_by_index(0)
+    except Exception:  # noqa: BLE001
+        return None
+    header = None
+    for r in range(min(4, sheet.nrows)):
+        cells = [str(sheet.cell_value(r, c)).strip() for c in range(sheet.ncols)]
+        if PA_COLUMNS["psd"] in cells and PA_COLUMNS["res"] in cells:
+            header, first = {name: cells.index(label) for name, label in PA_COLUMNS.items() if label in cells}, r + 1
+            break
+    if header is None or len(header) < len(PA_COLUMNS):
+        return None
+    rows = []
+    for r in range(first, sheet.nrows):
+        row = {k: sheet.cell_value(r, c) for k, c in header.items()}
+        if str(row["psd"]).strip():
+            rows.append(row)
+    return rows
+
+
+def _pct(x) -> float:
+    return round(float(x or 0) / 100, 6)
+
+
+def reconcile_pa_local(body: bytes, source: dict, today: str, repo: Path = REPO, directory: dict | None = None) -> list[dict]:
+    """Compares DCED's statewide register with data/local/PA-EIT-LST-<year>.json,
+    entry by entry (PSD code). The register lists each rate with the date it
+    took effect, which is what lets a clean one-entry correction be applied
+    automatically: the official date must equal the one the data already
+    records and fall on or before January 1. Anything else (a new mid-year
+    rate, no date, a note on the entry) is reported for a person."""
+    m = re.search(r";(\d{4})$", source.get("url", ""))
+    rows = _pa_rows(body) if isinstance(body, (bytes, bytearray)) else None
+    if rows is None or len(rows) < 2000 or not m:
+        return [finding("unreadable", "action", source, "Pennsylvania local tax register",
+                        f"could not read the DCED register ({'not a spreadsheet with the expected columns' if rows is None else str(len(rows)) + ' rows, expected about 2,600'}); its format may have changed.")]
+    year = m.group(1)
+    populated = sum(1 for r in rows if r["res"] or r["nonres"] or r["sd"])
+    if populated < len(rows) * 0.5:
+        # DCED lists every municipality for a coming year before it has filled in a single rate.
+        return [finding("not_yet_published", "info", source, f"Pennsylvania register {year}",
+                        f"only {populated} of {len(rows)} rows carry a rate, so the {year} register is not published yet; nothing to compare")]
+    if any(str(r["year"]).strip() != year for r in rows):
+        return [finding("unreadable", "action", source, "Pennsylvania local tax register", f"rows are not all for reporting year {year}")]
+    path = repo / "data" / "local" / f"PA-EIT-LST-{year}.json"
+    data = _load(path)
+    if data is None:
+        return [finding("no_engine_file", "action", source, path.name, f"{path.name} not found; nothing to compare with")]
+    entries = data["jurisdictions"]
+    count_data: dict[str, int] = {}
+    for e in entries:
+        count_data[e["psdCode"]] = count_data.get(e["psdCode"], 0) + 1
+    count_reg: dict[str, int] = {}
+    for r in rows:
+        count_reg[str(r["psd"]).strip()] = count_reg.get(str(r["psd"]).strip(), 0) + 1
+    index = {e["psdCode"]: i for i, e in enumerate(entries)}
+    jan1 = f"{year}-01-01"
+
+    def iso(us: str) -> str:
+        mm = re.fullmatch(r"(\d{2})/(\d{2})/(\d{4})", us or "")
+        return f"{mm.group(3)}-{mm.group(1)}-{mm.group(2)}" if mm else ""
+
+    out = []
+    for r in rows:
+        psd = str(r["psd"]).strip()
+        if psd not in index:
+            out.append(finding("missing_from_engine", "action", source, f'{psd} (register only)', f"in the register but not in {path.name}", psd))
+            continue
+        e = entries[index[psd]]
+        end = dict(e)
+        for c in e.get("rateChanges", []):  # the register shows the latest rate, with its date
+            end.update(c.get("set", {}))
+        lst_end = end.get("lst") or {}
+        want = {"residentEIT": _pct(r["res"]), "nonresidentEIT": _pct(r["nonres"]), "schoolDistrictEIT": _pct(r["sd"]),
+                "totalResidentEIT": _pct(r["total"])}
+        diffs = {k: (end.get(k), v) for k, v in want.items() if abs((end.get(k) or 0) - v) > 1e-9}
+        lst_want = {"municipal": float(r["lst_m"] or 0), "schoolDistrict": float(r["lst_sd"] or 0), "total": float(r["lst_total"] or 0)}
+        lst_diffs = {k: (lst_end.get(k), v) for k, v in lst_want.items() if abs((lst_end.get(k) or 0) - v) > 1e-9} if lst_end else (
+            {k: (None, v) for k, v in lst_want.items() if v} if any(lst_want.values()) else {})
+        if not diffs and not lst_diffs:
+            continue
+        what = "; ".join([f"{k} official {v[1]:g} vs engine {v[0]}" for k, v in {**diffs, **{'lst.' + k: v for k, v in lst_diffs.items()}}.items()])
+        acknowledged = any(k in e for k in ACKNOWLEDGED_KEYS + ("$note", "yearNotes", "rateChanges"))
+        f = finding("rate_differs", "info" if acknowledged else "action", source, f"{e['municipality'].title()} ({e['county'].title()})",
+                    what + (" (the entry carries its own note or dated changes)" if acknowledged else ""), psd)
+        if acknowledged or count_data[psd] != 1 or count_reg[psd] != 1:
+            if count_data[psd] != 1 or count_reg[psd] != 1:
+                f["detail"] += " (PSD code appears more than once, so no single line can be named)"
+            out.append(f)
+            continue
+        # A clean correction: every changed field's official date is the date the
+        # data already records, on or before January 1.
+        base = ["jurisdictions", index[psd]]
+        edits, companions, ok = [], [], True
+        res_sd_changed = False
+        for key, on_key, data_on in (("residentEIT", "res_on", "residentEITEffective"), ("nonresidentEIT", "nonres_on", "nonresidentEITEffective"),
+                                      ("schoolDistrictEIT", "sd_on", "schoolDistrictEITEffective")):
+            if key in diffs:
+                date = str(r[on_key]).strip()
+                if not date or iso(date) > jan1 or e.get(data_on) != date or e.get(key) is None:
+                    ok = False
+                    break
+                edits.append({"path": base + [key], "new": want[key], "relation": None})
+                companions.append({"path": base + [data_on], "value": date})
+                res_sd_changed = res_sd_changed or key in ("residentEIT", "schoolDistrictEIT")
+        if ok and ("totalResidentEIT" in diffs or res_sd_changed):
+            if abs(want["totalResidentEIT"] - round(want["residentEIT"] + want["schoolDistrictEIT"], 6)) > 1e-9:
+                ok = False  # the register's own total is not the sum of its parts
+            elif not (set(diffs) - {"totalResidentEIT"}):
+                ok = False  # only the total disagrees: nothing the parts explain
+            else:
+                edits.append({"path": base + ["totalResidentEIT"], "new": want["totalResidentEIT"],
+                              "relation": {"sum": ["residentEIT", "schoolDistrictEIT"]}})
+        if ok and lst_diffs:
+            if not lst_end or not (set(lst_diffs) - {"total"}):
+                ok = False
+            else:
+                for key, on_key, data_on in (("municipal", "lst_m_on", "municipalEffective"), ("schoolDistrict", "lst_sd_on", "schoolDistrictEffective")):
+                    if key in lst_diffs:
+                        date = str(r[on_key]).strip()
+                        if not date or iso(date) > jan1 or lst_end.get(data_on) != date or e.get("rateChanges"):
+                            ok = False
+                            break
+                        edits.append({"path": base + ["lst", key], "new": lst_want[key], "relation": None})
+                        companions.append({"path": base + ["lst", data_on], "value": date})
+                if ok:
+                    if abs(lst_want["total"] - (lst_want["municipal"] + lst_want["schoolDistrict"])) > 1e-9:
+                        ok = False
+                    else:
+                        edits.append({"path": base + ["lst", "total"], "new": lst_want["total"],
+                                      "relation": {"sum": ["municipal", "schoolDistrict"]}})
+        if ok and edits:
+            first = next(x for x in edits if not x["relation"])
+            f["change"] = {"file": f"data/local/{path.name}", "edits": edits, "companions": companions, "new": first["new"],
+                           "effective_from": jan1, "source_url": source.get("url", "")}
+        out.append(f)
+    return out
+
+
+RECONCILERS = {"oh_municipal": reconcile_oh_municipal, "oh_jedd": reconcile_oh_jedd, "in_counties": reconcile_in_counties, "pa_local": reconcile_pa_local}
 
 
 def run(sources: list[dict], fetcher, today: str, repo: Path = REPO) -> list[dict]:
@@ -311,7 +471,9 @@ def run(sources: list[dict], fetcher, today: str, repo: Path = REPO) -> list[dic
             if d.ok:
                 directory = parse_finder_directory(d.body.decode("utf-8", errors="replace"))
         try:
-            if s["url"].lower().split("?")[0].endswith(".pdf"):
+            if name == "pa_local":
+                text = f.body  # a binary spreadsheet: the reader needs the bytes
+            elif s["url"].lower().split("?")[0].endswith(".pdf"):
                 import watch  # noqa: PLC0415 - circular at import time, fine at call time
                 text = watch.extract(s, f).text
             else:

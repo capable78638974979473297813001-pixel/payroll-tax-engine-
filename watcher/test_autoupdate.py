@@ -689,6 +689,178 @@ class FromAnOfficialSentenceToTheLine(Base):
         self.assertEqual(others[0]["code"], "PA-rate")
 
 
+PA_REG_FILE = f"data/local/PA-EIT-LST-{YEAR}.json"
+PA_URL = f"https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;{YEAR}"
+PA_RULES = [
+    {"glob": "data/local/PA-EIT-LST-*.json", "keys": ["residentEIT", "nonresidentEIT", "schoolDistrictEIT", "totalResidentEIT"],
+     "min": 0.0025, "max": 0.05, "max_abs_change": 0.01, "hosts": ["apps.dced.pa.gov"], "independent_values": True,
+     "max_changes_per_run": 80, "max_findings_per_run": 120},
+    {"glob": "data/local/PA-EIT-LST-*.json", "keys": ["municipal", "schoolDistrict", "total"], "min": 1, "max": 100,
+     "max_abs_change": 25, "hosts": ["apps.dced.pa.gov"], "independent_values": True, "max_changes_per_run": 80, "max_findings_per_run": 120},
+]
+
+
+class FromThePennsylvaniaRegister(Base):
+    """DCED's statewide register, row by row, against the PA local file."""
+
+    N = 2100
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.cfg["rules"] += PA_RULES
+        self.entries = []
+        for i in range(self.N):
+            self.entries.append({
+                "psdCode": f"{i + 100000}", "county": "ADAMS", "municipality": f"TOWN {i}", "schoolDistrictId": f"sd{i % 40}",
+                "schoolDistrict": f"SD {i % 40}", "residentEIT": 0.005, "nonresidentEIT": 0.005, "schoolDistrictEIT": 0.01,
+                "totalResidentEIT": 0.015, "residentEITEffective": "01/01/2000", "nonresidentEITEffective": "01/01/2000",
+                "schoolDistrictEITEffective": "07/01/2016",
+                "lst": {"municipal": 47.0, "schoolDistrict": 5.0, "total": 52.0, "municipalEffective": "01/01/2008", "schoolDistrictEffective": "01/01/2008"},
+                "eitCollector": "x"})
+        self.write()
+        self.source = {"id": "pa-reg", "url": PA_URL, "jurisdiction": "PA", "reconcile": "pa_local"}
+        self.sources = [self.source]
+        self.cfg["max_changes_per_run"] = 5
+
+    def write(self):
+        write_json(self.root, PA_REG_FILE, {"year": YEAR, "jurisdictions": self.entries})
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-qm", "pa", "--allow-empty")
+
+    def rows(self, **change):
+        rows = []
+        for e in self.entries:
+            rows.append({"year": str(YEAR), "psd": e["psdCode"], "res": 0.5, "res_on": "01/01/2000", "nonres": 0.5, "nonres_on": "01/01/2000",
+                         "sd": 1.0, "sd_on": "07/01/2016", "total": 1.5, "lst_m": 47.0, "lst_m_on": "01/01/2008", "lst_sd": 5.0,
+                         "lst_sd_on": "01/01/2008", "lst_total": 52.0})
+        for psd, upd in change.items():
+            for r in rows:
+                if r["psd"] == psd:
+                    r.update(upd)
+        return rows
+
+    def reconcile(self, rows):
+        with mock.patch.object(reconcile, "_pa_rows", return_value=rows):
+            return reconcile.reconcile_pa_local(b"x", self.source, TODAY, self.root)
+
+    def run_chain(self, rows):
+        fs = self.reconcile(rows)
+        for f in fs:
+            if f.get("change"):
+                f["reads"] = [{"at": (NOW - dt.timedelta(seconds=60)).isoformat(), "value": f["change"]["new"]},
+                              {"at": NOW.isoformat(), "value": f["change"]["new"]}]
+        ps = au.proposals_from([f for f in fs if f.get("change")], self.root, TODAY)
+        counts = {"pa-reg": sum(1 for f in fs if f["severity"] == "action")}
+        acc, rej = au.triage(ps, self.cfg, self.root, self.sources, TODAY, counts["pa-reg"], NOW, counts=counts)
+        return fs, ps, acc, rej
+
+    def test_the_whole_register_agreeing_with_the_data_is_silent(self):
+        self.assertEqual(self.reconcile(self.rows()), [])
+
+    def test_a_clean_resident_rate_correction_moves_the_rate_and_its_total_only(self):
+        fs, ps, acc, rej = self.run_chain(self.rows(**{"100007": {"res": 0.75, "total": 1.75}}))
+        self.assertEqual((len(fs), len(acc), rej), (1, 1, []))
+        self.assertEqual([(e["key"], e["old_text"], e["new_text"]) for e in acc[0]["edits"]],
+                         [("residentEIT", "0.005", "0.0075"), ("totalResidentEIT", "0.015", "0.0175")])
+        au.apply(acc, self.cfg, self.root, self.sources, TODAY, verify=[], now=NOW)
+        e = json.loads((self.root / PA_REG_FILE).read_text())["jurisdictions"][7]
+        self.assertEqual((e["residentEIT"], e["totalResidentEIT"], e["residentEITEffective"]), (0.0075, 0.0175, "01/01/2000"))
+        self.assertEqual(len([l for l in git(self.root, "diff", "-U0").splitlines() if l.startswith("+") and not l.startswith("+++")]), 2)
+
+    def test_a_school_district_change_fans_out_to_every_municipality_in_it(self):
+        changes = {e["psdCode"]: {"sd": 1.25, "total": 1.75} for e in self.entries if e["schoolDistrictId"] == "sd3"}
+        fs, ps, acc, rej = self.run_chain(self.rows(**changes))
+        self.assertEqual((len(changes), len(acc), rej), (len(fs), len(changes), []))
+        self.assertTrue(len(changes) > 5)  # more than the global cap, within the rule's own
+        au.apply(acc, self.cfg, self.root, self.sources, TODAY, verify=[], now=NOW)
+        sd = {e["schoolDistrictEIT"] for e in json.loads((self.root / PA_REG_FILE).read_text())["jurisdictions"] if e["schoolDistrictId"] == "sd3"}
+        self.assertEqual(sd, {0.0125})
+
+    def test_a_flood_of_differences_means_the_register_changed_shape(self):
+        changes = {e["psdCode"]: {"res": 0.9, "total": 1.9} for e in self.entries[:300]}
+        fs, ps, acc, rej = self.run_chain(self.rows(**changes))
+        self.assertEqual(acc, [])
+        self.assertTrue(all("circuit breaker" in r["reason"] for r in rej))
+
+    def test_a_changed_date_means_a_new_rate_not_a_correction(self):
+        fs, ps, acc, rej = self.run_chain(self.rows(**{"100007": {"res": 0.75, "total": 1.75, "res_on": "07/01/2026"}}))
+        self.assertEqual((len(fs), ps, acc), (1, [], []))
+
+    def test_a_mid_year_effective_date_is_never_applied(self):
+        e = self.entries[7]
+        e["residentEITEffective"] = f"07/01/{YEAR}"
+        self.write()
+        fs, ps, acc, rej = self.run_chain(self.rows(**{"100007": {"res": 0.75, "total": 1.75, "res_on": f"07/01/{YEAR}"}}))
+        self.assertEqual((len(fs), ps, acc), (1, [], []))
+
+    def test_no_official_date_means_no_automatic_change(self):
+        fs, ps, acc, rej = self.run_chain(self.rows(**{"100007": {"res": 0.75, "total": 1.75, "res_on": ""}}))
+        self.assertEqual((len(fs), ps), (1, []))
+
+    def test_an_entry_with_its_own_dated_changes_or_notes_is_reported_only(self):
+        self.entries[7]["rateChanges"] = [{"on": f"{YEAR}-07-01", "set": {"residentEIT": 0.01}}]
+        self.entries[8]["$note"] = "set annually"
+        self.write()
+        fs, ps, acc, rej = self.run_chain(self.rows(**{"100007": {"res": 0.75, "total": 1.75}, "100008": {"res": 0.75, "total": 1.75}}))
+        self.assertEqual((len(fs), {f["severity"] for f in fs}, ps), (2, {"info"}, []))
+
+    def test_a_register_whose_total_is_not_the_sum_of_its_parts_is_not_trusted(self):
+        fs, ps, acc, rej = self.run_chain(self.rows(**{"100007": {"res": 0.75, "total": 1.5}}))
+        self.assertEqual(ps, [])
+
+    def test_a_duplicate_psd_code_cannot_name_a_line(self):
+        self.entries[8]["psdCode"] = self.entries[7]["psdCode"]
+        self.write()
+        rows = self.rows()
+        rows[8]["psd"] = rows[7]["psd"]
+        rows[7]["res"] = 0.75
+        rows[7]["total"] = 1.75
+        fs = self.reconcile(rows)
+        self.assertTrue(fs)
+        self.assertTrue(all("change" not in f for f in fs))
+
+    def test_a_local_services_tax_correction_updates_its_parts_and_total(self):
+        fs, ps, acc, rej = self.run_chain(self.rows(**{"100009": {"lst_m": 42.0, "lst_total": 47.0}}))
+        self.assertEqual((len(acc), rej), (1, []))
+        self.assertEqual([(e["key"], e["new_text"]) for e in acc[0]["edits"]], [("municipal", "42.0"), ("total", "47.0")])
+
+    def test_tampering_with_a_companion_date_is_caught(self):
+        fs, ps, acc, rej = self.run_chain(self.rows(**{"100007": {"res": 0.75, "total": 1.75}}))
+        p = json.loads(json.dumps(acc[0]))
+        p["companions"][0]["value"] = "01/01/1999"
+        with self.assertRaises(au.Rejected) as cm:
+            au.check(p, self.cfg, self.root, self.sources, TODAY, NOW)
+        self.assertIn("companion", str(cm.exception))
+        p = json.loads(json.dumps(acc[0]))
+        p["companions"] = []
+        with self.assertRaises(au.Rejected) as cm:
+            au.check(p, self.cfg, self.root, self.sources, TODAY, NOW)
+        self.assertIn("mirror", str(cm.exception))
+
+    def test_a_register_with_the_wrong_year_or_too_few_rows_is_unreadable(self):
+        rows = self.rows()
+        self.assertEqual(self.reconcile(rows[:100])[0]["kind"], "unreadable")
+        rows[0]["year"] = str(YEAR - 1)
+        self.assertEqual(self.reconcile(rows)[0]["kind"], "unreadable")
+
+    def test_a_register_that_has_not_been_filled_in_yet_is_not_compared(self):
+        rows = [dict(r, res=0.0, nonres=0.0, sd=0.0, total=0.0) for r in self.rows()]
+        fs = self.reconcile(rows)
+        self.assertEqual([(f["kind"], f["severity"]) for f in fs], [("not_yet_published", "info")])
+
+    def test_a_register_missing_from_the_data_is_reported(self):
+        rows = self.rows()
+        rows.append(dict(rows[0], psd="999999"))
+        fs = self.reconcile(rows)
+        self.assertEqual([f["kind"] for f in fs], ["missing_from_engine"])
+
+    def test_the_real_spreadsheet_format_is_read(self):
+        rows = reconcile._pa_rows((Path(__file__).parent / "fixtures" / "pa_register_sample.xls").read_bytes())
+        self.assertEqual([r["psd"] for r in rows], ["010201", "530301"])
+        self.assertEqual((rows[0]["sd"], rows[0]["sd_on"], rows[0]["lst_total"]), (1.0, "07/01/2016", 52.0))
+        self.assertIsNone(reconcile._pa_rows(b"not a spreadsheet"))
+
+
 class FromTheOfficialFileToTheLine(Base):
     """The whole chain with the real reconciler: a stand-in for the Finder's
     CSV, the engine's data file, two reads, triage, apply."""

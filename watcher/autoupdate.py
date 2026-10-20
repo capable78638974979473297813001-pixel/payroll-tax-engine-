@@ -60,6 +60,7 @@ import argparse
 import datetime as dt
 import bisect
 import fnmatch
+import functools
 import json
 import re
 import subprocess
@@ -76,7 +77,7 @@ REPORT_JSON = HERE / "reports" / "autoupdate-latest.json"
 REPORT_MD = HERE / "reports" / "autoupdate-latest.md"
 
 # Fields the watcher may never be told to edit, whatever a rule says.
-NOTE_KEYS = ("$correctionNote", "sourceNote", "$addedNote")
+NOTE_KEYS = ("$correctionNote", "sourceNote", "$addedNote", "$note", "yearNotes")
 LINE_RE = re.compile(r'^(?P<indent>[ \t]*)"(?P<key>[A-Za-z][A-Za-z0-9_]*)": (?P<num>-?\d+(?:\.\d+)?)(?P<comma>,?)$')
 STRING_LINE_RE = re.compile(r'^(?P<indent>[ \t]*)"(?P<key>[A-Za-z][A-Za-z0-9_]*)": "(?P<num>\d+(?:\.\d+)?)"(?P<comma>,?)$')
 # Paths the generated bundle step may touch besides the one data file.
@@ -179,6 +180,13 @@ def _rule_for(cfg: dict, rel: str, key: str) -> dict | None:
 # --------------------------------------------------------------------------
 
 def json_positions(text: str) -> dict[tuple, tuple[int, str, bool]]:
+    """Cached by text: a Pennsylvania run asks about the same 1 MB file for
+    every one of its proposals."""
+    return _json_positions(text)
+
+
+@functools.lru_cache(maxsize=6)
+def _json_positions(text: str) -> dict[tuple, tuple[int, str, bool]]:
     """{path: (1-based line, token as written, key repeated?)} for every
     scalar in a JSON document. Used to turn "this value in this entry" into
     "this line", and back, without assuming how the file was pretty-printed."""
@@ -353,7 +361,7 @@ def proposals_from(confirmed: list[dict], repo: Path, today: str) -> list[dict]:
         out.append({
             "id": f'{ch["file"]}#{ch.get("id_key", "path")}={ch.get("id", "")}.{ch.get("key", "")}'
                   if "id" in ch else f'{ch["file"]}#' + ",".join(".".join(map(str, sp["path"])) for sp in specs[:1]),
-            "file": ch["file"], "edits": edits, "new": ch["new"],
+            "file": ch["file"], "edits": edits, "new": ch["new"], "companions": ch.get("companions", []),
             "effective_from": ch.get("effective_from", f'{ch["file"][-9:-5]}-01-01'),
             "name": f.get("name", ""), "kind": f["kind"], "as_of": today,
             "evidence": {"kind": ch.get("evidence_kind", "feed"), "source_id": f.get("source_id", ""),
@@ -368,15 +376,15 @@ def proposals_from(confirmed: list[dict], repo: Path, today: str) -> list[dict]:
 # the rules
 # --------------------------------------------------------------------------
 
-def _holder_blockers(holder: dict, edited_keys: set[str]) -> str | None:
-    if "rateHistory" in holder or "effectiveDated" in holder:
+def _holder_blockers(holder: dict, edited_keys: set[str], exempt: set[str] = frozenset()) -> str | None:
+    if "rateHistory" in holder or "effectiveDated" in holder or "rateChanges" in holder:
         return "the entry has dated history; a change needs a dated row, which is a structural edit"
     if any(re.search(r"terminat|endsOn|expir|sunset", k, re.I) for k in holder):
         return "the entry has an end date; whether the rate still applies is a person's call"
     if any(k in holder for k in NOTE_KEYS):
         return "the entry carries a note recording a hand-checked departure from the official file"
     mirrors = [k for k, v in holder.items()
-               if k not in edited_keys and isinstance(v, (str, int, float)) and not isinstance(v, bool)
+               if k not in edited_keys and k not in exempt and isinstance(v, (str, int, float)) and not isinstance(v, bool)
                and any(k.lower().startswith(e.lower()) or k.lower() == e.lower() + "raw" or k.lower().endswith("raw") for e in edited_keys)]
     if mirrors:
         return f"the entry has fields that mirror the value ({', '.join(mirrors)}); a one-line edit would leave them stale"
@@ -544,9 +552,26 @@ def check(p: dict, cfg: dict, repo: Path, sources: list[dict], today: str, now: 
     if abs((top_new if top_new is not None else 0) - float(p.get("new", top_new or 0))) > 5e-7:
         raise Rejected("new_text disagrees with the official value in the proposal")
 
-    # 6: the holding object
+    # 6: the holding object. Companions are fields that describe the value
+    # (an effective date) and stay as they are: each must already hold exactly
+    # what the official file says and be on or before January 1 of the year.
+    exempt: dict[tuple, set] = {}
+    for c in p.get("companions", []):
+        cp = tuple(c.get("path", ()))
+        if not cp or cp[:-1] not in holders:
+            raise Rejected("a companion field must sit in an entry being edited")
+        try:
+            have = _get(before, cp)
+        except (KeyError, IndexError, TypeError):
+            raise Rejected("a companion field is missing") from None
+        m = re.fullmatch(r"(\d{2})/(\d{2})/(\d{4})", str(c.get("value", "")))
+        if not m or have != c["value"]:
+            raise Rejected("a companion date does not match the official file")
+        if f"{m.group(3)}-{m.group(1)}-{m.group(2)}" > f"{file_year}-01-01":
+            raise Rejected(f"the official change starts {c['value']}, after January 1 {file_year}; a mid-year change needs a dated row")
+        exempt.setdefault(cp[:-1], set()).add(cp[-1])
     for hp, keys in holders.items():
-        reason = _holder_blockers(_get(before, hp), keys)
+        reason = _holder_blockers(_get(before, hp), keys, exempt.get(hp, set()))
         if reason:
             raise Rejected(reason)
 
@@ -610,7 +635,7 @@ def check(p: dict, cfg: dict, repo: Path, sources: list[dict], today: str, now: 
 
 
 def triage(proposals: list[dict], cfg: dict, repo: Path, sources: list[dict], today: str, total_findings: int,
-           now: dt.datetime | None = None) -> tuple[list[dict], list[dict]]:
+           now: dt.datetime | None = None, counts: dict | None = None) -> tuple[list[dict], list[dict]]:
     """(accepted, rejected). Rejections carry the rule. The circuit breaker
     and the one-change-per-entry rule are applied across the whole batch."""
     accepted, rejected = [], []
@@ -624,11 +649,29 @@ def triage(proposals: list[dict], cfg: dict, repo: Path, sources: list[dict], to
             accepted.append(normalize(p))
         except Rejected as e:
             rejected.append({"proposal": p, "reason": str(e)})
-    if total_findings > cfg["max_findings_per_run"]:
-        rejected += [{"proposal": p, "reason": f"circuit breaker: {total_findings} disagreements in one run (limit {cfg['max_findings_per_run']}); the official file may have changed shape"} for p in accepted]
-        accepted = []
-    elif len(accepted) > cfg["max_changes_per_run"]:
-        rejected += [{"proposal": p, "reason": f"circuit breaker: {len(accepted)} changes in one run (limit {cfg['max_changes_per_run']})"} for p in accepted]
+    # Circuit breakers. A rule may set its own limits (a school-district rate
+    # in Pennsylvania legitimately fans out to dozens of entries); otherwise the
+    # global ones apply. Findings are counted per source when the caller knows.
+    def rule_of(p):
+        return _rule_for(cfg, p["file"], p["edits"][0]["key"]) or {}
+
+    for sid in {p["evidence"].get("source_id") for p in accepted}:
+        group = [p for p in accepted if p["evidence"].get("source_id") == sid]
+        limit = rule_of(group[0]).get("max_findings_per_run", cfg["max_findings_per_run"])
+        seen_n = counts.get(sid, total_findings) if counts is not None else total_findings
+        if seen_n > limit:
+            rejected += [{"proposal": p, "reason": f"circuit breaker: {seen_n} disagreements in one run (limit {limit}); the official file may have changed shape"} for p in group]
+            accepted = [p for p in accepted if p not in group]
+    by_rule: dict[str, list] = {}
+    for p in accepted:
+        by_rule.setdefault(rule_of(p).get("glob", "") + "|" + ",".join(sorted(rule_of(p).get("keys", []))), []).append(p)
+    for group in by_rule.values():
+        limit = rule_of(group[0]).get("max_changes_per_run", cfg["max_changes_per_run"])
+        if len(group) > limit:
+            rejected += [{"proposal": p, "reason": f"circuit breaker: {len(group)} changes in one run (limit {limit})"} for p in group]
+            accepted = [p for p in accepted if p not in group]
+    if len(accepted) > cfg.get("max_total_changes_per_run", 150):
+        rejected += [{"proposal": p, "reason": f"circuit breaker: {len(accepted)} changes in one run across all sources"} for p in accepted]
         accepted = []
     # Two accepted proposals may share a file but never a line.
     lines_seen: set[tuple[str, int]] = set()
@@ -734,7 +777,7 @@ def report(applied: list[dict], rejected: list[dict], mode: str, today: str, not
 # --------------------------------------------------------------------------
 
 def gather(sources: list[dict], fetcher, today: str, repo: Path, gap: float, sleep=time.sleep,
-           run=None, others: list | None = None) -> tuple[list[dict], int]:
+           run=None, others: list | None = None, counts: dict | None = None) -> tuple[list[dict], int]:
     """Reads the official files twice, `gap` seconds apart, and keeps only
     findings that came out identical both times. Returns (confirmed findings
     that carry a change, number of action-level disagreements seen on the
@@ -764,6 +807,10 @@ def gather(sources: list[dict], fetcher, today: str, repo: Path, gap: float, sle
             confirmed.append(f)
         elif others is not None and f["severity"] == "action":
             others.append(f)
+    if counts is not None:
+        for f in first:
+            if f["severity"] == "action":
+                counts[f.get("source_id", "")] = counts.get(f.get("source_id", ""), 0) + 1
     return confirmed, sum(1 for f in first if f["severity"] == "action")
 
 
@@ -803,9 +850,10 @@ def main(argv: list[str] | None = None) -> int:
     today = dt.date.today().isoformat()
     gap = max(cfg["min_confirm_gap_seconds"] + 2, 2)
     others: list[dict] = []
-    confirmed, total = gather(sources, watch.fetch, today, repo, gap, others=others,
+    counts: dict = {}
+    confirmed, total = gather(sources, watch.fetch, today, repo, gap, others=others, counts=counts,
                               run=lambda srcs, fetcher, day, r: run_all(srcs, fetcher, day, r, lambda s, f: watch.extract(s, f).text))
-    accepted, rejected = triage(proposals_from(confirmed, repo, today), cfg, repo, sources, today, total)
+    accepted, rejected = triage(proposals_from(confirmed, repo, today), cfg, repo, sources, today, total, counts=counts)
 
     mode, note = "check only", ""
     if args.apply and not cfg["enabled"]:

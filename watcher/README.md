@@ -135,8 +135,9 @@ ones) a rule that covers its exact lines, and that no reader is unlisted.
 | Source of the number | Where | Tier |
 |---|---|---|
 | Ohio Finder rate files, row by row, with effective dates | OH municipal rates, OH JEDD/JEDZ rates (rate and its `rateSourceRaw` percent move together) | automatic |
+| DCED's statewide Excel register, row by row (all ~2,600 PA municipalities and school districts), with effective dates | PA local earned-income and local-services taxes: a rate and its total move together; the official date must equal the date the data records and fall on or before January 1 | automatic |
 | A sentence in an official document that names the year ("For 2026, the state ... rate ... is 2.95%") | IL, MI (rate, exemption; a second Treasury notice must agree), KY (rate, standard deduction), IN, LA, MS | automatic |
-| A sentence that does not name the year | PA, IA, CT, NC, AZ, CO, MA, DE, MD, MN, AR, WI, SC, HI, DC, VA | report only |
+| A sentence that does not name the year | PA state rate, IA, CT, NC, AZ, CO, MA, DE, MD, MN, AR, WI, SC, HI, DC, VA | report only |
 | A table in an official file | Indiana county rates (compared daily, 92 rows) | report only |
 | Per-period tables, bracket schedules, mid-year dated rows, city/county registries with no bulk file | the rest (see the ledger for each state and the reason) | a person |
 
@@ -148,6 +149,8 @@ is only ever reported. Readers live in `extractors.json`; each is a pattern, the
 data lines it owns, and a frozen excerpt of the real sentence it was written
 against, which the tests re-read. `python watcher/extractors.py --refresh`
 rebuilds the excerpts from the stored snapshots and confirms the data agrees.
+
+A school district's rate is repeated in every municipality inside it, so one official change becomes dozens of proposals. Pennsylvania's rule therefore has its own limits (80 changes, 120 disagreements) instead of the global 5 and 10; a flood past that still applies nothing.
 
 The January swap (every state publishing its new-year document) is expected to
 trip the circuit breaker below; that is by design, and a person takes that batch.

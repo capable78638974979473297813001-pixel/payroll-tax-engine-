@@ -129,6 +129,41 @@
       "hosts": [
         "www.dor.ms.gov"
       ]
+    },
+    {
+      "glob": "data/local/PA-EIT-LST-*.json",
+      "keys": [
+        "residentEIT",
+        "nonresidentEIT",
+        "schoolDistrictEIT",
+        "totalResidentEIT"
+      ],
+      "min": 0.0025,
+      "max": 0.05,
+      "max_abs_change": 0.01,
+      "hosts": [
+        "apps.dced.pa.gov"
+      ],
+      "independent_values": true,
+      "max_changes_per_run": 80,
+      "max_findings_per_run": 120
+    },
+    {
+      "glob": "data/local/PA-EIT-LST-*.json",
+      "keys": [
+        "municipal",
+        "schoolDistrict",
+        "total"
+      ],
+      "min": 1,
+      "max": 100,
+      "max_abs_change": 25,
+      "hosts": [
+        "apps.dced.pa.gov"
+      ],
+      "independent_values": true,
+      "max_changes_per_run": 80,
+      "max_findings_per_run": 120
     }
   ]
 }

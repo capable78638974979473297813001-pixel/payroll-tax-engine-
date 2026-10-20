@@ -963,6 +963,18 @@
    "title": "South Carolina Department of Revenue: news",
    "url": "https://dor.sc.gov/news",
    "kind": "index"
+  },
+  {
+   "jurisdiction": "PA",
+   "title": "PA DCED Municipal Statistics: statewide EIT/PIT/LST register, 2026 (every municipality and school district)",
+   "url": "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2026",
+   "reconcile": "pa_local"
+  },
+  {
+   "jurisdiction": "PA",
+   "title": "PA DCED Municipal Statistics: statewide EIT/PIT/LST register, 2027 (every municipality and school district)",
+   "url": "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2027",
+   "reconcile": "pa_local"
   }
  ]
 }

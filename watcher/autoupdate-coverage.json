@@ -517,14 +517,20 @@
     "state income tax",
     "2,600+ local earned-income and local-services taxes"
    ],
-   "automatic": [],
+   "automatic": [
+    "reconcile:pa_local"
+   ],
    "report_only": [
     "extractor:PA-rate"
    ],
    "person": [
     {
-     "what": "Local EIT and LST rates",
-     "why": "One school-district rate is repeated in every municipality inside the district and each entry carries a derived total, so a single official change edits many lines; the official export is an Excel file. Dated rate changes are rows."
+     "what": "State withholding rate",
+     "why": "The Revenue page says 3.07 percent without naming the year, so a difference is reported, never applied."
+    },
+    {
+     "what": "Local rates with a new or missing effective date, entries with their own notes or dated changes (Philadelphia's July 1 wage tax), duplicate PSD codes, and the low-income exemption amounts",
+     "why": "A change of date means a new rate, which is a dated row (a structural edit); an entry that carries its own note was hand-checked. Philadelphia is outside the register's annual cycle."
     }
    ]
   },

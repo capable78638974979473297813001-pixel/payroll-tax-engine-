@@ -5001,17 +5001,6 @@
    ]
   },
   {
-   "id": "pa-dc25d178f2",
-   "jurisdiction": "PA",
-   "title": "PA DCED Municipal Statistics -- EIT/PIT/LST Tax Register with Collector (statewide, official)",
-   "url": "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2026",
-   "origin": "data",
-   "used_by": [
-    "data/local/PA-EIT-LST-2026.json",
-    "data/local/PA-EIT-LST-2027.json"
-   ]
-  },
-  {
    "id": "pa-86b8e60d34",
    "jurisdiction": "PA",
    "title": "PA DCED Municipal Statistics -- EIT/PIT/LST Tax Register with Collector (statewide, official) -- 2025 edition",
@@ -5020,6 +5009,26 @@
    "used_by": [
     "data/local/PA-EIT-LST-2025.json"
    ]
+  },
+  {
+   "id": "pa-dc25d178f2",
+   "jurisdiction": "PA",
+   "title": "PA DCED Municipal Statistics: statewide EIT/PIT/LST register, 2026 (every municipality and school district)",
+   "url": "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2026",
+   "origin": "curated",
+   "used_by": [
+    "data/local/PA-EIT-LST-2026.json",
+    "data/local/PA-EIT-LST-2027.json"
+   ],
+   "reconcile": "pa_local"
+  },
+  {
+   "id": "pa-26b2a164e8",
+   "jurisdiction": "PA",
+   "title": "PA DCED Municipal Statistics: statewide EIT/PIT/LST register, 2027 (every municipality and school district)",
+   "url": "https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2027",
+   "origin": "curated",
+   "reconcile": "pa_local"
   },
   {
    "id": "pa-d4ff9b144e",
