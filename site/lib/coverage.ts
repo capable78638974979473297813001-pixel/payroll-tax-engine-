@@ -302,19 +302,28 @@ export interface LocalQuery {
   size?: number;
 }
 
-export function searchLocal(query: LocalQuery): { total: number; page: number; size: number; items: LocalRow[] } {
+export function searchLocal(query: LocalQuery): {
+  total: number;
+  page: number;
+  size: number;
+  items: LocalRow[];
+  /** Matches per state for the same text and kind, ignoring the state filter, so a page can show which states a search touches. */
+  stateCounts: Record<string, number>;
+} {
   const cov = coverage();
   const text = (query.q ?? '').trim().toLowerCase();
   const state = (query.state ?? '').trim().toUpperCase();
   const size = Math.min(100, Math.max(1, Math.trunc(query.size ?? 25)));
   const page = Math.max(0, Math.trunc(query.page ?? 0));
+  const names = new Map(cov.states.map((x) => [x.code, x.name.toLowerCase()]));
+  const stateCounts: Record<string, number> = {};
   const filtered = cov.local.filter((l) => {
-    if (state && l.state !== state) return false;
     const wage = l.kind.startsWith('Minimum wage');
     if (query.kind === 'tax' && wage) return false;
     if (query.kind === 'wage' && !wage) return false;
-    if (text && !`${l.name} ${l.kind} ${l.state} ${l.detail}`.toLowerCase().includes(text)) return false;
-    return true;
+    if (text && !`${l.name} ${l.kind} ${l.state} ${names.get(l.state) ?? ''} ${l.detail}`.toLowerCase().includes(text)) return false;
+    stateCounts[l.state] = (stateCounts[l.state] ?? 0) + 1;
+    return !state || l.state === state;
   });
-  return { total: filtered.length, page, size, items: filtered.slice(page * size, page * size + size) };
+  return { total: filtered.length, page, size, items: filtered.slice(page * size, page * size + size), stateCounts };
 }

@@ -42,9 +42,9 @@
   <section class="cov-section" id="states" aria-labelledby="states-h">
     <p class="eyebrow">By state</p>
     <h2 id="states-h">Federal, every state and DC.</h2>
-    <p class="cov-lede">What the engine computes for each one. Where a state has local taxes, select the count to browse them below.</p>
+    <p class="cov-lede">What the engine computes for each one. Where a state has local taxes, select the count to browse them below. Searching a county, city or district here also finds the states it is in.</p>
     <div class="cov-tools">
-      <label class="search"><span aria-hidden="true">⌕</span><input id="q" type="search" placeholder="Search a state" aria-label="Search a state" autocomplete="off" /></label>
+      <label class="search"><span aria-hidden="true">⌕</span><input id="q" type="search" placeholder="Search a state, county, city or district" aria-label="Search a state, county, city or district" autocomplete="off" /></label>
       <div class="cov-chips" role="group" aria-label="Filter states">
         <button class="chip" type="button" data-filter="all" aria-pressed="true">All</button>
         <button class="chip" type="button" data-filter="income" aria-pressed="false">Income tax</button>
@@ -63,16 +63,16 @@
       </table>
     </div>
     <div class="cov-foot"><span id="count" aria-live="polite"></span><nav class="cov-pages" id="pages" aria-label="State pages"></nav></div>
-    <p class="fine cov-fine">Rates are effective-dated and updated as jurisdictions publish changes.</p>
+    <p class="fine cov-fine">Rates are effective-dated and updated as jurisdictions publish changes. The local list shows only places that have a local tax, fee or minimum wage; “None levied” means the state has no local wage tax.</p>
     <noscript><p class="fine">The coverage tables load from <code>/api/coverage</code> and need JavaScript.</p></noscript>
   </section>
 
   <section class="cov-section" id="local" aria-labelledby="local-h">
     <p class="eyebrow">Local jurisdictions</p>
     <h2 id="local-h">Every city, county and district in the data.</h2>
-    <p class="cov-lede" id="localSub">Search the counties, cities, school districts and taxing bodies the engine computes, with the rate it applies to wages.</p>
+    <p class="cov-lede" id="localSub">Search the counties, cities, school districts and taxing bodies the engine computes, with the rate it applies to wages. Only places that have a local tax, fee or minimum wage are listed; if a place is missing, the data has none for it.</p>
     <div class="cov-tools">
-      <label class="search"><span aria-hidden="true">⌕</span><input id="lq" type="search" placeholder="Search a county, city or district" aria-label="Search a county, city or district" autocomplete="off" /></label>
+      <label class="search"><span aria-hidden="true">⌕</span><input id="lq" type="search" placeholder="Search a state, county, city or district" aria-label="Search a state, county, city or district" autocomplete="off" /></label>
       <select id="lstate" class="cov-select" aria-label="State"><option value="">All states</option></select>
       <div class="cov-chips" role="group" aria-label="Type of list">
         <button class="chip" type="button" data-lkind="tax" aria-pressed="true">Taxes</button>
@@ -175,6 +175,7 @@
   /* By state */
   var rows = [], filter = 'all', page = 0;
   var q = $('q'), body = $('rows');
+  var term = '', matchCounts = null;
   var filterChips = Array.prototype.slice.call(document.querySelectorAll('.chip[data-filter]'));
   function matches(r) {
     if (filter === 'income') return r.income;
@@ -184,9 +185,11 @@
     return true;
   }
   function shown() {
-    var text = q.value.trim().toLowerCase();
+    var text = term.toLowerCase();
     return rows.filter(function (r) {
-      return matches(r) && (!text || r.name.toLowerCase().indexOf(text) >= 0 || r.code.toLowerCase() === text);
+      if (!matches(r)) return false;
+      if (!text) return true;
+      return r.name.toLowerCase().indexOf(text) >= 0 || r.code.toLowerCase() === text || !!(matchCounts && matchCounts[r.code]);
     });
   }
   function renderStates() {
@@ -194,7 +197,7 @@
     var n = Math.max(1, Math.ceil(list.length / STATE_SIZE));
     if (page >= n) page = n - 1;
     var slice = list.slice(page * STATE_SIZE, page * STATE_SIZE + STATE_SIZE);
-    if (!slice.length) { emptyRow(body, 6, 'No state matches.'); }
+    if (!slice.length) { emptyRow(body, 6, term ? 'Nothing matches \u201c' + term + '\u201d. This page only lists places with a local tax, fee or minimum wage.' : 'No state matches this filter.'); }
     else {
       body.textContent = '';
       slice.forEach(function (r) {
@@ -203,9 +206,10 @@
         cell(tr, r.incomeText, 'Income tax', r.income ? 'yes' : 'dim');
         cell(tr, r.unemp ? '✓' : '—', 'Unemployment', r.unemp ? 'yes' : 'dim');
         var lt = cell(tr, '', 'Local taxes', r.localCount ? '' : 'dim');
+        var hit = term && matchCounts && matchCounts[r.code] ? matchCounts[r.code] : 0;
         if (r.localCount) {
           var b = document.createElement('button');
-          b.type = 'button'; b.className = 'link'; b.textContent = r.localText;
+          b.type = 'button'; b.className = 'link'; b.textContent = r.localText + (hit ? ' \u00b7 ' + num(hit) + ' match' + (hit === 1 ? '' : 'es') : '');
           b.title = (r.localNote ? r.localNote + ' ' : '') + 'Browse these below.';
           b.addEventListener('click', function () { browse(r.code); });
           lt.appendChild(b);
@@ -221,7 +225,6 @@
     $('count').textContent = range(page, STATE_SIZE, list.length);
     pager($('pages'), page, list.length, STATE_SIZE, function (p) { page = p; renderStates(); $('states').scrollIntoView({ block: 'start' }); });
   }
-  q.addEventListener('input', function () { page = 0; renderStates(); });
   filterChips.forEach(function (chip) {
     chip.addEventListener('click', function () {
       filter = chip.getAttribute('data-filter');
@@ -236,11 +239,11 @@
   var kindChips = Array.prototype.slice.call(document.querySelectorAll('.chip[data-lkind]'));
   function loadLocal() {
     var mine = ++lseq;
-    var qs = 'q=' + encodeURIComponent(lq.value.trim()) + '&state=' + encodeURIComponent(lstate.value) + '&kind=' + lkind + '&page=' + lpage + '&size=' + LOCAL_SIZE;
+    var qs = 'q=' + encodeURIComponent(term) + '&state=' + encodeURIComponent(lstate.value) + '&kind=' + lkind + '&page=' + lpage + '&size=' + LOCAL_SIZE;
     api('/api/coverage/local?' + qs).then(function (res) {
       if (mine !== lseq) return;
       var tb = $('lrows');
-      if (!res.items.length) { emptyRow(tb, 5, 'No match in the data.'); }
+      if (!res.items.length) { emptyRow(tb, 5, 'No match. Only places with a local tax, fee or minimum wage are listed; if a place is missing, the data has none for it.'); }
       else {
         tb.textContent = '';
         res.items.forEach(function (it) {
@@ -253,6 +256,8 @@
           tb.appendChild(tr);
         });
       }
+      matchCounts = term ? res.stateCounts : null;
+      if (term) renderStates();
       $('lcount').textContent = range(res.page, res.size, res.total);
       $('lnote').textContent = lkind === 'wage'
         ? 'Hourly minimum wage set by the city or county.'
@@ -265,11 +270,28 @@
     });
   }
   function browse(code) {
-    lstate.value = code; lq.value = ''; lkind = 'tax'; pressed(kindChips, 'data-lkind', 'tax'); lpage = 0;
+    lstate.value = code; q.value = ''; lq.value = ''; term = ''; matchCounts = null; renderStates(); lkind = 'tax'; pressed(kindChips, 'data-lkind', 'tax'); lpage = 0;
     loadLocal();
     $('local').scrollIntoView({ block: 'start', behavior: 'smooth' });
   }
-  lq.addEventListener('input', function () { clearTimeout(ltimer); ltimer = setTimeout(function () { lpage = 0; loadLocal(); }, 200); });
+  /* One search drives both lists: typing in either box updates the other. */
+  function setTerm(value, from) {
+    term = value.trim();
+    if (from !== q) q.value = value;
+    if (from !== lq) lq.value = value;
+    try {
+      var u = new URL(location.href);
+      if (term) u.searchParams.set('q', term); else u.searchParams.delete('q');
+      history.replaceState(null, '', u.pathname + u.search + u.hash);
+    } catch (e) { /* the address bar is a convenience */ }
+    page = 0; lpage = 0;
+    if (!term) matchCounts = null;
+    renderStates();
+    clearTimeout(ltimer);
+    ltimer = setTimeout(loadLocal, 200);
+  }
+  q.addEventListener('input', function () { setTerm(q.value, q); });
+  lq.addEventListener('input', function () { setTerm(lq.value, lq); });
   lstate.addEventListener('change', function () { lpage = 0; loadLocal(); });
   kindChips.forEach(function (chip) {
     chip.addEventListener('click', function () {
@@ -299,7 +321,10 @@
     cov.states.forEach(function (s) {
       var o = document.createElement('option'); o.value = s.code; o.textContent = s.name; lstate.appendChild(o);
     });
-    var want = (new URLSearchParams(location.search).get('state') || '').toUpperCase();
+    var params = new URLSearchParams(location.search);
+    var initial = (params.get('q') || '').trim();
+    if (initial) { term = initial; q.value = initial; lq.value = initial; }
+    var want = (params.get('state') || '').toUpperCase();
     if (want && cov.states.some(function (s) { return s.code === want; })) lstate.value = want;
     renderStates();
     loadLocal();

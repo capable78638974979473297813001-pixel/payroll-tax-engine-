@@ -75,4 +75,16 @@ describe('coverage index', () => {
     assert.match(triad.detail, /Champaign County\. 0\.50% expires 2030; 1\.00% CPT/);
     assert.ok(oh.total > 0);
   });
+
+  test('search matches a state by name and reports which states a search touches', () => {
+    const ohio = searchLocal({ q: 'ohio', kind: 'tax', size: 1 });
+    assert.ok(ohio.stateCounts.OH >= 1054, 'every Ohio row matches its state name');
+    const marion = searchLocal({ q: 'marion', kind: 'tax' });
+    assert.deepEqual(Object.keys(marion.stateCounts).sort(), ['IN', 'KY', 'OH', 'PA']);
+    assert.equal(Object.values(marion.stateCounts).reduce((a, b) => a + b, 0), marion.total);
+    // The state filter narrows the list but not the per-state counts.
+    const inOnly = searchLocal({ q: 'marion', state: 'IN', kind: 'tax' });
+    assert.equal(inOnly.total, marion.stateCounts.IN);
+    assert.deepEqual(inOnly.stateCounts, marion.stateCounts);
+  });
 });
