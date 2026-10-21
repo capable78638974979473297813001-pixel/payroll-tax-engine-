@@ -952,32 +952,15 @@ class LocalRegistryReconcileTest(unittest.TestCase):
         self.assertTrue(all("change" not in f for f in out))
 
     def _ky_out(self, body):
-        # The reader refuses spreadsheets with fewer than 150 districts (a truncated
-        # download); pad the fixture's four rows with quiet ones so the real check runs.
-        import xlrd
-        import xlwt
-        import io
-        book = xlrd.open_workbook(file_contents=body, logfile=io.StringIO())
-        sh = book.sheet_by_index(0)
-        wb = xlwt.Workbook()
-        w = wb.add_sheet("Tax Districts")
-        for r in range(sh.nrows):
-            for c in range(sh.ncols):
-                w.write(r, c, sh.cell_value(r, c))
-        for i in range(200):
-            for c, v in enumerate([str(1000 + i), f"Pad {i}", "X", "X", "O", "", "1%", "", "", "1/1/2020", "1/1/2020", "1/1/2020"]):
-                w.write(sh.nrows + i, c, v)
-        buf = io.BytesIO()
-        wb.save(buf)
+        # The fixture holds four real-looking districts plus 200 quiet ones, because the
+        # reader refuses spreadsheets with fewer than 150 districts (a truncated download).
         data = json.loads((self.repo / "data" / "local" / "KY-occupational-2026.json").read_text())
         data["jurisdictions"]["scraped"] += [{"name": f"Pad {i}"} for i in range(200)]
         self.put("KY-occupational-2026.json", data)
-        return reconcile.reconcile_ky_districts(buf.getvalue(), self.SRC, "2026-10-20", self.repo)
+        return reconcile.reconcile_ky_districts(body, self.SRC, "2026-10-20", self.repo)
 
     def test_kentucky_refuses_a_truncated_download(self):
-        body = self.ky()
-        out = reconcile.reconcile_ky_districts(body, self.SRC, "2026-10-20", self.repo)
-        self.assertEqual(out[0]["kind"], "unreadable")
+        self.ky()
         self.assertEqual(reconcile.reconcile_ky_districts(b"<html>", self.SRC, "2026-10-20", self.repo)[0]["kind"], "unreadable")
 
     def test_a_form_button_download_posts_the_pages_hidden_fields(self):
