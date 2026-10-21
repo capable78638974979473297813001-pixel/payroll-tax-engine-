@@ -164,6 +164,103 @@
       "independent_values": true,
       "max_changes_per_run": 80,
       "max_findings_per_run": 120
+    },
+    {
+      "glob": "data/local/IN-counties-*.json",
+      "keys": [
+        "rate"
+      ],
+      "min": 0.001,
+      "max": 0.06,
+      "max_abs_change": 0.01,
+      "hosts": [
+        "www.in.gov"
+      ],
+      "max_changes_per_run": 30,
+      "max_findings_per_run": 40
+    },
+    {
+      "glob": "data/states/NY-*.json",
+      "keys": [
+        "flatRate",
+        "supplementalRate",
+        "rate",
+        "nonresidentRate"
+      ],
+      "min": 0.001,
+      "max": 0.3,
+      "max_abs_change": 0.03,
+      "hosts": [
+        "www.tax.ny.gov"
+      ]
+    },
+    {
+      "glob": "data/states/OR-*.json",
+      "keys": [
+        "rate"
+      ],
+      "min": 0.0005,
+      "max": 0.03,
+      "max_abs_change": 0.002,
+      "hosts": [
+        "www.oregon.gov"
+      ]
+    },
+    {
+      "glob": "data/states/WA-*.json",
+      "keys": [
+        "lowerBandRate",
+        "upperBandRate"
+      ],
+      "min": 0.001,
+      "max": 0.05,
+      "max_abs_change": 0.005,
+      "hosts": [
+        "www.seattle.gov"
+      ]
+    },
+    {
+      "glob": "data/states/WA-*.json",
+      "keys": [
+        "employerPayrollThreshold",
+        "compensationThreshold",
+        "upperCompensationBand"
+      ],
+      "min": 100000,
+      "max": 20000000,
+      "max_abs_change": 2000000,
+      "integers": true,
+      "hosts": [
+        "www.seattle.gov"
+      ]
+    },
+    {
+      "glob": "data/states/MD-*.json",
+      "keys": [
+        "flat"
+      ],
+      "min": 0.01,
+      "max": 0.05,
+      "max_abs_change": 0.01,
+      "hosts": [
+        "www.marylandcomptroller.gov"
+      ]
+    },
+    {
+      "glob": "data/local/OH-school-districts-*.json",
+      "keys": [
+        "rate2026",
+        "rate2027",
+        "rate2028"
+      ],
+      "min": 0.001,
+      "max": 0.03,
+      "max_abs_change": 0.01,
+      "hosts": [
+        "tax.ohio.gov"
+      ],
+      "max_changes_per_run": 60,
+      "max_findings_per_run": 80
     }
   ]
 }

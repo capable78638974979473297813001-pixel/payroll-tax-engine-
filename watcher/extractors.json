@@ -46,7 +46,12 @@
     {
      "source_id": "mi-faa154de5a",
      "pattern": "the rate in effect under Section 51 for the {year} tax year is (\\d+(?:\\.\\d+)?)%",
-     "transform": "percent"
+     "transform": "percent",
+     "calibration": {
+      "year": 2026,
+      "excerpt": "the rate in effect under Section 51 for the 2026 tax year is 4.25%",
+      "value": 0.0425
+     }
     }
    ],
    "calibration": {
@@ -541,6 +546,1282 @@
     "year": 2026,
     "excerpt": "increases the standard deduction from $8,500 to $8,750 for single filers",
     "value": 8750.0
+   }
+  },
+  {
+   "id": "NY-supplemental-rate",
+   "name": "New York State supplemental wage rate",
+   "jurisdiction": "NY",
+   "source_id": "ny-878dc0d1f8",
+   "file": "data/states/NY-{year}.json",
+   "paths": [
+    [
+     "supplementalWages",
+     "flatRate"
+    ]
+   ],
+   "pattern": "(?s)New York State Withholding Tax Tables and Methods Effective January 1, {year} - December 31, {year}.{0,400000}?New York State supplemental rate of (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "New York State Withholding Tax Tables and Methods Effective January 1, 2026 - December 31, 2026 The information presented is current as of the publication's print date. Visit our website at www.tax.ny.gov for up-to-date  ...  employee's regular wages: • If you withhold income tax from an employee's regular wages, you can use one of the following methods for the supplemental wages: a. Withhold at the New York State supplemental rate of 11.70%",
+    "value": 0.117
+   }
+  },
+  {
+   "id": "NYC-supplemental-rate",
+   "name": "New York City supplemental wage rate",
+   "jurisdiction": "NY",
+   "source_id": "ny-d610328ebc",
+   "file": "data/states/NY-{year}.json",
+   "paths": [
+    [
+     "nycLocalTax",
+     "supplementalRate"
+    ]
+   ],
+   "pattern": "(?s)New York City Withholding Tax Tables and Methods Effective January 1, {year} - December 31, {year}.{0,400000}?New York City supplemental rate of (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "New York City Withholding Tax Tables and Methods Effective January 1, 2026 - December 31, 2026 Text Telephone (TTY) Hotline (for persons with hearing and speech disabilities using a TTY): If you have access to a TTY, con ... ur employee's regular wages: • If you withhold income tax from an employee's regular wages, you can use one of the following methods for the supplemental wages: a. Withhold at the New York City supplemental rate of 4.25%",
+    "value": 0.0425
+   }
+  },
+  {
+   "id": "Yonkers-resident-surcharge",
+   "name": "Yonkers resident surcharge",
+   "jurisdiction": "NY",
+   "source_id": "ny-c76689cef6",
+   "file": "data/states/NY-{year}.json",
+   "paths": [
+    [
+     "yonkersLocalTax",
+     "residentSurcharge",
+     "rate"
+    ]
+   ],
+   "pattern": "(?s)Yonkers Withholding Tax Tables and Methods Effective January 1, {year} - December 31, {year}.{0,400000}?Multiply the result by (\\d+(?:\\.\\d+)?)% ",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Yonkers Withholding Tax Tables and Methods Effective January 1, 2026 - December 31, 2026 The information presented is current as of the publication's print date. Visit our website at www.tax.ny.gov for up-to-date informa ...  4 Following across the same line, multiply the result from Step 3 by the amount in column 4. Step 5 Following across on the same line, add the result from Step 4 to the amount in column 5. Multiply the result by 16.75% ",
+    "value": 0.1675
+   }
+  },
+  {
+   "id": "Yonkers-nonresident-rate",
+   "name": "Yonkers nonresident earnings tax rate",
+   "jurisdiction": "NY",
+   "source_id": "ny-c76689cef6",
+   "file": "data/states/NY-{year}.json",
+   "paths": [
+    [
+     "yonkersLocalTax",
+     "nonresidentRate"
+    ]
+   ],
+   "pattern": "(?s)Yonkers Withholding Tax Tables and Methods Effective January 1, {year} - December 31, {year}.{0,400000}?nonresident earnings tax rate is (\\d*\\.\\d+|\\d+)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Yonkers Withholding Tax Tables and Methods Effective January 1, 2026 - December 31, 2026 The information presented is current as of the publication's print date. Visit our website at www.tax.ny.gov for up-to-date informa ... umber of payroll periods, which is the same number found in table P and used in Step 1. Daily Weekly Biweekly Semimonthly Monthly 260 52 26 24 12 Annual tax rate schedule The Yonkers nonresident earnings tax rate is .50%",
+    "value": 0.005
+   }
+  },
+  {
+   "id": "IN-personal-exemption",
+   "name": "Indiana personal exemption",
+   "jurisdiction": "IN",
+   "source_id": "in-86066aa1c0",
+   "file": "data/states/IN-{year}.json",
+   "paths": [
+    [
+     "exemptionTiers",
+     "personal"
+    ]
+   ],
+   "pattern": "deduct \\$([\\d,]+) per year per exemption claimed on line 5",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "deduct $1,000 per year per exemption claimed on line 5",
+    "value": 1000.0
+   }
+  },
+  {
+   "id": "IN-dependent-exemption",
+   "name": "Indiana dependent exemption",
+   "jurisdiction": "IN",
+   "source_id": "in-86066aa1c0",
+   "file": "data/states/IN-{year}.json",
+   "paths": [
+    [
+     "exemptionTiers",
+     "dependent"
+    ]
+   ],
+   "pattern": "deduct \\$([\\d,]+) per year per qualifying dependent exemption claimed on line 6",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "deduct $1,500 per year per qualifying dependent exemption claimed on line 6",
+    "value": 1500.0
+   }
+  },
+  {
+   "id": "IN-adopted-child-exemption",
+   "name": "Indiana adopted child exemption",
+   "jurisdiction": "IN",
+   "source_id": "in-86066aa1c0",
+   "file": "data/states/IN-{year}.json",
+   "paths": [
+    [
+     "exemptionTiers",
+     "adoptedChild"
+    ]
+   ],
+   "pattern": "deduct \\$([\\d,]+) per year per qualifying adopted child claimed on line 8",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "deduct $3,000 per year per qualifying adopted child claimed on line 8",
+    "value": 3000.0
+   }
+  },
+  {
+   "id": "OR-TriMet-rate",
+   "name": "TriMet transit district payroll tax rate",
+   "jurisdiction": "OR",
+   "source_id": "or-c6f0345e29",
+   "file": "data/states/OR-{year}.json",
+   "paths": [
+    [
+     "tripDistrictPayrollTaxes",
+     "triMet",
+     "rate"
+    ]
+   ],
+   "pattern": "(?s){year} Oregon Combined Payroll Tax Report Instructions.{0,100000}?TriMet Transit District \\(TM\\) tax rate is (\\d?\\.\\d+)",
+   "transform": "",
+   "also": [
+    {
+     "source_id": "or-994103600c",
+     "pattern": "(?s)TriMet Transit District rate.{0,400}?1/1/{yy} and beyond (\\d?\\.\\d+)",
+     "transform": "",
+     "calibration": {
+      "year": 2026,
+      "excerpt": "TriMet Transit District rate 1/1/22 to 12/31/22 0.007937 1/1/23 to 12/31/23 0.008037 1/1/24 to 12/31/24 0.008137 1/1/24 to 12/31/24 0.008137 1/1/25 to 12/31/25 0.008237 1/1/26 and beyond 0.008237",
+      "value": 0.008237
+     }
+    }
+   ],
+   "calibration": {
+    "year": 2026,
+    "excerpt": "2026 Oregon Combined Payroll Tax Report Instructions for Oregon employers For faster processing: ✓ File electronically. ✓ Pay on Revenue Online. ✓ Use this booklet. ✓ Check your math. ✓ No payroll? Enter 0 on lines 1a, 1 ... assessment rate is 0.018. • The taxable wage base for Unemployment Insurance (UI) is $56,700. • The Paid Leave contribution rate is 0.01, and the wage base is $184,500. • TriMet Transit District (TM) tax rate is 0.008237",
+    "value": 0.008237
+   }
+  },
+  {
+   "id": "OR-Lane-rate",
+   "name": "Lane Transit District payroll tax rate",
+   "jurisdiction": "OR",
+   "source_id": "or-c6f0345e29",
+   "file": "data/states/OR-{year}.json",
+   "paths": [
+    [
+     "tripDistrictPayrollTaxes",
+     "laneTransit",
+     "rate"
+    ]
+   ],
+   "pattern": "(?s){year} Oregon Combined Payroll Tax Report Instructions.{0,100000}?Lane Transit District \\(LTD\\) tax rate is (\\d?\\.\\d+)",
+   "transform": "",
+   "also": [
+    {
+     "source_id": "or-994103600c",
+     "pattern": "(?s)Lane Transit District rate.{0,300}?1/1/{yy} and beyond (\\d?\\.\\d+)",
+     "transform": "",
+     "calibration": {
+      "year": 2026,
+      "excerpt": "Lane Transit District rate 1/1/22 to 12/31/22 0.0077 1/1/23 to 12/31/23 0.0078 1/1/24 to 12/31/24 0.0079 1/1/25 to 12/31/25 0.0080 1/1/26 and beyond 0.0080",
+      "value": 0.008
+     }
+    }
+   ],
+   "calibration": {
+    "year": 2026,
+    "excerpt": "2026 Oregon Combined Payroll Tax Report Instructions for Oregon employers For faster processing: ✓ File electronically. ✓ Pay on Revenue Online. ✓ Use this booklet. ✓ Check your math. ✓ No payroll? Enter 0 on lines 1a, 1 ... for Unemployment Insurance (UI) is $56,700. • The Paid Leave contribution rate is 0.01, and the wage base is $184,500. • TriMet Transit District (TM) tax rate is 0.008237. • Lane Transit District (LTD) tax rate is 0.0080",
+    "value": 0.008
+   }
+  },
+  {
+   "id": "OR-statewide-transit-rate",
+   "name": "Oregon statewide transit tax rate",
+   "jurisdiction": "OR",
+   "source_id": "or-c6f0345e29",
+   "file": "data/states/OR-{year}.json",
+   "paths": [
+    [
+     "statewideTransitTax",
+     "rate"
+    ]
+   ],
+   "pattern": "(?s){year} Oregon Combined Payroll Tax Report Instructions.{0,100000}?Statewide Transit tax \\(STT\\) rate is (\\d?\\.\\d+)",
+   "transform": "",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "2026 Oregon Combined Payroll Tax Report Instructions for Oregon employers For faster processing: ✓ File electronically. ✓ Pay on Revenue Online. ✓ Use this booklet. ✓ Check your math. ✓ No payroll? Enter 0 on lines 1a, 1 ...  The Paid Leave contribution rate is 0.01, and the wage base is $184,500. • TriMet Transit District (TM) tax rate is 0.008237. • Lane Transit District (LTD) tax rate is 0.0080. • Statewide Transit tax (STT) rate is 0.001",
+    "value": 0.001
+   }
+  },
+  {
+   "id": "OR-Canby-rate",
+   "name": "Canby transit tax rate",
+   "jurisdiction": "OR",
+   "source_id": "or-0e754ef068",
+   "file": "data/states/OR-{year}.json",
+   "paths": [
+    [
+     "tripDistrictPayrollTaxes",
+     "canby",
+     "rate"
+    ]
+   ],
+   "pattern": "Tax Rate The tax rate is (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Tax Rate The tax rate is 0.6%",
+    "value": 0.006
+   }
+  },
+  {
+   "id": "OR-Sandy-rate",
+   "name": "Sandy transit tax rate",
+   "jurisdiction": "OR",
+   "source_id": "or-41d95f1cf1",
+   "file": "data/states/OR-{year}.json",
+   "paths": [
+    [
+     "tripDistrictPayrollTaxes",
+     "sandy",
+     "rate"
+    ]
+   ],
+   "pattern": "The tax rate is (\\d?\\.\\d+) \\(",
+   "transform": "",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "The tax rate is .006 (",
+    "value": 0.006
+   }
+  },
+  {
+   "id": "Seattle-employer-threshold",
+   "name": "Seattle payroll expense tax: payroll threshold",
+   "jurisdiction": "WA",
+   "source_id": "wa-78ec5c3b87",
+   "file": "data/states/WA-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "seattlePayrollExpenseTax",
+     "employerPayrollThreshold"
+    ]
+   ],
+   "pattern": "Annual Compensation of {year} \\$([\\d,]+) or more in \\d{4} \\$[\\d,]+ or more in {year}",
+   "transform": "dollars",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Annual Compensation of 2026 $9,074,409 or more in 2025 $194,452 or more in 2026",
+    "value": 9074409.0
+   }
+  },
+  {
+   "id": "Seattle-compensation-threshold",
+   "name": "Seattle payroll expense tax: compensation threshold",
+   "jurisdiction": "WA",
+   "source_id": "wa-78ec5c3b87",
+   "file": "data/states/WA-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "seattlePayrollExpenseTax",
+     "compensationThreshold"
+    ]
+   ],
+   "pattern": "Annual Compensation of {year} \\$[\\d,]+ or more in \\d{4} \\$([\\d,]+) or more in {year}",
+   "transform": "dollars",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Annual Compensation of 2026 $9,074,409 or more in 2025 $194,452 or more in 2026",
+    "value": 194452.0
+   }
+  },
+  {
+   "id": "Seattle-upper-band",
+   "name": "Seattle payroll expense tax: upper compensation band",
+   "jurisdiction": "WA",
+   "source_id": "wa-78ec5c3b87",
+   "file": "data/states/WA-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "seattlePayrollExpenseTax",
+     "upperCompensationBand"
+    ]
+   ],
+   "pattern": "(?s){year} Payroll Expense Tax of the Business \\(Tiers\\).{0,500}?\\$([\\d,]+) or more \\d\\.\\d+% \\d\\.\\d+% \\d\\.\\d+%",
+   "transform": "dollars",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "2026 Payroll Expense Tax of the Business (Tiers) Annual Employee Compensation (Levels) Less than $129,634,413 $129,634,413 but less than $1,296,344,132 $1,296,344,132 or more $0 - $194,451.99 N/A N/A N/A $194,452-$518,537.99 0.746% 0.746% 1.492% $518,538 or more 1.811% 2.024% 2.557%",
+    "value": 518538.0
+   }
+  },
+  {
+   "id": "Seattle-lower-band-rate-0",
+   "name": "Seattle payroll expense tax: lower band rate, tier 0",
+   "jurisdiction": "WA",
+   "source_id": "wa-78ec5c3b87",
+   "file": "data/states/WA-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "seattlePayrollExpenseTax",
+     "tiers",
+     0,
+     "lowerBandRate"
+    ]
+   ],
+   "pattern": "(?s){year} Payroll Expense Tax of the Business \\(Tiers\\).{0,500}?\\$[\\d,]+-\\$[\\d,.]+ (\\d\\.\\d+)% \\d\\.\\d+% \\d\\.\\d+% \\$[\\d,]+ or more",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "2026 Payroll Expense Tax of the Business (Tiers) Annual Employee Compensation (Levels) Less than $129,634,413 $129,634,413 but less than $1,296,344,132 $1,296,344,132 or more $0 - $194,451.99 N/A N/A N/A $194,452-$518,537.99 0.746% 0.746% 1.492% $518,538 or more",
+    "value": 0.00746
+   }
+  },
+  {
+   "id": "Seattle-upper-band-rate-0",
+   "name": "Seattle payroll expense tax: upper band rate, tier 0",
+   "jurisdiction": "WA",
+   "source_id": "wa-78ec5c3b87",
+   "file": "data/states/WA-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "seattlePayrollExpenseTax",
+     "tiers",
+     0,
+     "upperBandRate"
+    ]
+   ],
+   "pattern": "(?s){year} Payroll Expense Tax of the Business \\(Tiers\\).{0,500}?\\$[\\d,]+ or more (\\d\\.\\d+)% \\d\\.\\d+% \\d\\.\\d+% (?:2025|Each year)",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "2026 Payroll Expense Tax of the Business (Tiers) Annual Employee Compensation (Levels) Less than $129,634,413 $129,634,413 but less than $1,296,344,132 $1,296,344,132 or more $0 - $194,451.99 N/A N/A N/A $194,452-$518,537.99 0.746% 0.746% 1.492% $518,538 or more 1.811% 2.024% 2.557% 2025",
+    "value": 0.01811
+   }
+  },
+  {
+   "id": "Seattle-lower-band-rate-1",
+   "name": "Seattle payroll expense tax: lower band rate, tier 1",
+   "jurisdiction": "WA",
+   "source_id": "wa-78ec5c3b87",
+   "file": "data/states/WA-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "seattlePayrollExpenseTax",
+     "tiers",
+     1,
+     "lowerBandRate"
+    ]
+   ],
+   "pattern": "(?s){year} Payroll Expense Tax of the Business \\(Tiers\\).{0,500}?\\$[\\d,]+-\\$[\\d,.]+ \\d\\.\\d+% (\\d\\.\\d+)% \\d\\.\\d+% \\$[\\d,]+ or more",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "2026 Payroll Expense Tax of the Business (Tiers) Annual Employee Compensation (Levels) Less than $129,634,413 $129,634,413 but less than $1,296,344,132 $1,296,344,132 or more $0 - $194,451.99 N/A N/A N/A $194,452-$518,537.99 0.746% 0.746% 1.492% $518,538 or more",
+    "value": 0.00746
+   }
+  },
+  {
+   "id": "Seattle-upper-band-rate-1",
+   "name": "Seattle payroll expense tax: upper band rate, tier 1",
+   "jurisdiction": "WA",
+   "source_id": "wa-78ec5c3b87",
+   "file": "data/states/WA-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "seattlePayrollExpenseTax",
+     "tiers",
+     1,
+     "upperBandRate"
+    ]
+   ],
+   "pattern": "(?s){year} Payroll Expense Tax of the Business \\(Tiers\\).{0,500}?\\$[\\d,]+ or more \\d\\.\\d+% (\\d\\.\\d+)% \\d\\.\\d+% (?:2025|Each year)",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "2026 Payroll Expense Tax of the Business (Tiers) Annual Employee Compensation (Levels) Less than $129,634,413 $129,634,413 but less than $1,296,344,132 $1,296,344,132 or more $0 - $194,451.99 N/A N/A N/A $194,452-$518,537.99 0.746% 0.746% 1.492% $518,538 or more 1.811% 2.024% 2.557% 2025",
+    "value": 0.02024
+   }
+  },
+  {
+   "id": "Seattle-lower-band-rate-2",
+   "name": "Seattle payroll expense tax: lower band rate, tier 2",
+   "jurisdiction": "WA",
+   "source_id": "wa-78ec5c3b87",
+   "file": "data/states/WA-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "seattlePayrollExpenseTax",
+     "tiers",
+     2,
+     "lowerBandRate"
+    ]
+   ],
+   "pattern": "(?s){year} Payroll Expense Tax of the Business \\(Tiers\\).{0,500}?\\$[\\d,]+-\\$[\\d,.]+ \\d\\.\\d+% \\d\\.\\d+% (\\d\\.\\d+)% \\$[\\d,]+ or more",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "2026 Payroll Expense Tax of the Business (Tiers) Annual Employee Compensation (Levels) Less than $129,634,413 $129,634,413 but less than $1,296,344,132 $1,296,344,132 or more $0 - $194,451.99 N/A N/A N/A $194,452-$518,537.99 0.746% 0.746% 1.492% $518,538 or more",
+    "value": 0.01492
+   }
+  },
+  {
+   "id": "Seattle-upper-band-rate-2",
+   "name": "Seattle payroll expense tax: upper band rate, tier 2",
+   "jurisdiction": "WA",
+   "source_id": "wa-78ec5c3b87",
+   "file": "data/states/WA-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "seattlePayrollExpenseTax",
+     "tiers",
+     2,
+     "upperBandRate"
+    ]
+   ],
+   "pattern": "(?s){year} Payroll Expense Tax of the Business \\(Tiers\\).{0,500}?\\$[\\d,]+ or more \\d\\.\\d+% \\d\\.\\d+% (\\d\\.\\d+)% (?:2025|Each year)",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "2026 Payroll Expense Tax of the Business (Tiers) Annual Employee Compensation (Levels) Less than $129,634,413 $129,634,413 but less than $1,296,344,132 $1,296,344,132 or more $0 - $194,451.99 N/A N/A N/A $194,452-$518,537.99 0.746% 0.746% 1.492% $518,538 or more 1.811% 2.024% 2.557% 2025",
+    "value": 0.02557
+   }
+  },
+  {
+   "id": "Seattle-social-housing-rate",
+   "name": "Seattle social housing tax rate",
+   "jurisdiction": "WA",
+   "source_id": "wa-5ff259aacd",
+   "file": "data/states/WA-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "seattleSocialHousingTax",
+     "rate"
+    ]
+   ],
+   "pattern": "imposes a (\\d+(?:\\.\\d+)?)% tax starting with the first dollar paid in Seattle",
+   "transform": "percent",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "imposes a 5% tax starting with the first dollar paid in Seattle",
+    "value": 0.05
+   }
+  },
+  {
+   "id": "Seattle-social-housing-threshold",
+   "name": "Seattle social housing tax compensation threshold",
+   "jurisdiction": "WA",
+   "source_id": "wa-5ff259aacd",
+   "file": "data/states/WA-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "seattleSocialHousingTax",
+     "compensationThreshold"
+    ]
+   ],
+   "pattern": "to an employee in excess of \\$([\\d,]+)\\.",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "to an employee in excess of $1,000,000.",
+    "value": 1000000.0
+   }
+  },
+  {
+   "id": "MD-county-Allegany",
+   "name": "Maryland local income tax rate: Allegany",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Allegany",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Allegany (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ...  instructed to reduce or \"phaseout\" the number of exemptions being claimed on their Exemption Certificate, Form MW507. Note: For 2026, local rates for some counties have been adjusted (Allegany, and Kent). Allegany 3.20%",
+    "value": 0.032
+   }
+  },
+  {
+   "id": "MD-county-BaltimoreCounty",
+   "name": "Maryland local income tax rate: Baltimore County",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "BaltimoreCounty",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Baltimore\\ County (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... of exemptions being claimed on their Exemption Certificate, Form MW507. Note: For 2026, local rates for some counties have been adjusted (Allegany, and Kent). Allegany 3.20% Anne Arundel see below* Baltimore County 3.20%",
+    "value": 0.032
+   }
+  },
+  {
+   "id": "MD-county-Calvert",
+   "name": "Maryland local income tax rate: Calvert",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Calvert",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Calvert (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... being claimed on their Exemption Certificate, Form MW507. Note: For 2026, local rates for some counties have been adjusted (Allegany, and Kent). Allegany 3.20% Anne Arundel see below* Baltimore County 3.20% Calvert 3.20%",
+    "value": 0.032
+   }
+  },
+  {
+   "id": "MD-county-Caroline",
+   "name": "Maryland local income tax rate: Caroline",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Caroline",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Caroline (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... n their Exemption Certificate, Form MW507. Note: For 2026, local rates for some counties have been adjusted (Allegany, and Kent). Allegany 3.20% Anne Arundel see below* Baltimore County 3.20% Calvert 3.20% Caroline 3.20%",
+    "value": 0.032
+   }
+  },
+  {
+   "id": "MD-county-Carroll",
+   "name": "Maryland local income tax rate: Carroll",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Carroll",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Carroll (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... ion Certificate, Form MW507. Note: For 2026, local rates for some counties have been adjusted (Allegany, and Kent). Allegany 3.20% Anne Arundel see below* Baltimore County 3.20% Calvert 3.20% Caroline 3.20% Carroll 3.03%",
+    "value": 0.0303
+   }
+  },
+  {
+   "id": "MD-county-Cecil",
+   "name": "Maryland local income tax rate: Cecil",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Cecil",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Cecil (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... ate, Form MW507. Note: For 2026, local rates for some counties have been adjusted (Allegany, and Kent). Allegany 3.20% Anne Arundel see below* Baltimore County 3.20% Calvert 3.20% Caroline 3.20% Carroll 3.03% Cecil 2.74%",
+    "value": 0.0274
+   }
+  },
+  {
+   "id": "MD-county-Charles",
+   "name": "Maryland local income tax rate: Charles",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Charles",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Charles (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... 7. Note: For 2026, local rates for some counties have been adjusted (Allegany, and Kent). Allegany 3.20% Anne Arundel see below* Baltimore County 3.20% Calvert 3.20% Caroline 3.20% Carroll 3.03% Cecil 2.74% Charles 3.03%",
+    "value": 0.0303
+   }
+  },
+  {
+   "id": "MD-county-Dorchester",
+   "name": "Maryland local income tax rate: Dorchester",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Dorchester",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Dorchester (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... , local rates for some counties have been adjusted (Allegany, and Kent). Allegany 3.20% Anne Arundel see below* Baltimore County 3.20% Calvert 3.20% Caroline 3.20% Carroll 3.03% Cecil 2.74% Charles 3.03% Dorchester 3.30%",
+    "value": 0.033
+   }
+  },
+  {
+   "id": "MD-county-Garrett",
+   "name": "Maryland local income tax rate: Garrett",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Garrett",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Garrett (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ...  been adjusted (Allegany, and Kent). Allegany 3.20% Anne Arundel see below* Baltimore County 3.20% Calvert 3.20% Caroline 3.20% Carroll 3.03% Cecil 2.74% Charles 3.03% Dorchester 3.30% Frederick see below** Garrett 2.65%",
+    "value": 0.0265
+   }
+  },
+  {
+   "id": "MD-county-Harford",
+   "name": "Maryland local income tax rate: Harford",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Harford",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Harford (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ...  (Allegany, and Kent). Allegany 3.20% Anne Arundel see below* Baltimore County 3.20% Calvert 3.20% Caroline 3.20% Carroll 3.03% Cecil 2.74% Charles 3.03% Dorchester 3.30% Frederick see below** Garrett 2.65% Harford 3.06%",
+    "value": 0.0306
+   }
+  },
+  {
+   "id": "MD-county-Howard",
+   "name": "Maryland local income tax rate: Howard",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Howard",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Howard (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... nd Kent). Allegany 3.20% Anne Arundel see below* Baltimore County 3.20% Calvert 3.20% Caroline 3.20% Carroll 3.03% Cecil 2.74% Charles 3.03% Dorchester 3.30% Frederick see below** Garrett 2.65% Harford 3.06% Howard 3.20%",
+    "value": 0.032
+   }
+  },
+  {
+   "id": "MD-county-Kent",
+   "name": "Maryland local income tax rate: Kent",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Kent",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Kent (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... llegany 3.20% Anne Arundel see below* Baltimore County 3.20% Calvert 3.20% Caroline 3.20% Carroll 3.03% Cecil 2.74% Charles 3.03% Dorchester 3.30% Frederick see below** Garrett 2.65% Harford 3.06% Howard 3.20% Kent 3.30%",
+    "value": 0.033
+   }
+  },
+  {
+   "id": "MD-county-Montgomery",
+   "name": "Maryland local income tax rate: Montgomery",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Montgomery",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Montgomery (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... e Arundel see below* Baltimore County 3.20% Calvert 3.20% Caroline 3.20% Carroll 3.03% Cecil 2.74% Charles 3.03% Dorchester 3.30% Frederick see below** Garrett 2.65% Harford 3.06% Howard 3.20% Kent 3.30% Montgomery 3.20%",
+    "value": 0.032
+   }
+  },
+  {
+   "id": "MD-county-PrinceGeorges",
+   "name": "Maryland local income tax rate: Prince George's",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "PrinceGeorges",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Prince\\ George's (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... altimore County 3.20% Calvert 3.20% Caroline 3.20% Carroll 3.03% Cecil 2.74% Charles 3.03% Dorchester 3.30% Frederick see below** Garrett 2.65% Harford 3.06% Howard 3.20% Kent 3.30% Montgomery 3.20% Prince George's 3.20%",
+    "value": 0.032
+   }
+  },
+  {
+   "id": "MD-county-QueenAnnes",
+   "name": "Maryland local income tax rate: Queen Anne's",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "QueenAnnes",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Queen\\ Anne's (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... 0% Calvert 3.20% Caroline 3.20% Carroll 3.03% Cecil 2.74% Charles 3.03% Dorchester 3.30% Frederick see below** Garrett 2.65% Harford 3.06% Howard 3.20% Kent 3.30% Montgomery 3.20% Prince George's 3.20% Queen Anne's 3.20%",
+    "value": 0.032
+   }
+  },
+  {
+   "id": "MD-county-StMarys",
+   "name": "Maryland local income tax rate: St. Mary's",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "StMarys",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) St\\.\\ Mary's (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... Caroline 3.20% Carroll 3.03% Cecil 2.74% Charles 3.03% Dorchester 3.30% Frederick see below** Garrett 2.65% Harford 3.06% Howard 3.20% Kent 3.30% Montgomery 3.20% Prince George's 3.20% Queen Anne's 3.20% St. Mary's 3.20%",
+    "value": 0.032
+   }
+  },
+  {
+   "id": "MD-county-Somerset",
+   "name": "Maryland local income tax rate: Somerset",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Somerset",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Somerset (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... Carroll 3.03% Cecil 2.74% Charles 3.03% Dorchester 3.30% Frederick see below** Garrett 2.65% Harford 3.06% Howard 3.20% Kent 3.30% Montgomery 3.20% Prince George's 3.20% Queen Anne's 3.20% St. Mary's 3.20% Somerset 3.20%",
+    "value": 0.032
+   }
+  },
+  {
+   "id": "MD-county-Talbot",
+   "name": "Maryland local income tax rate: Talbot",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Talbot",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Talbot (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ...  Cecil 2.74% Charles 3.03% Dorchester 3.30% Frederick see below** Garrett 2.65% Harford 3.06% Howard 3.20% Kent 3.30% Montgomery 3.20% Prince George's 3.20% Queen Anne's 3.20% St. Mary's 3.20% Somerset 3.20% Talbot 2.40%",
+    "value": 0.024
+   }
+  },
+  {
+   "id": "MD-county-Washington",
+   "name": "Maryland local income tax rate: Washington",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Washington",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Washington (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... les 3.03% Dorchester 3.30% Frederick see below** Garrett 2.65% Harford 3.06% Howard 3.20% Kent 3.30% Montgomery 3.20% Prince George's 3.20% Queen Anne's 3.20% St. Mary's 3.20% Somerset 3.20% Talbot 2.40% Washington 2.95%",
+    "value": 0.0295
+   }
+  },
+  {
+   "id": "MD-county-Wicomico",
+   "name": "Maryland local income tax rate: Wicomico",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Wicomico",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Wicomico (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... ester 3.30% Frederick see below** Garrett 2.65% Harford 3.06% Howard 3.20% Kent 3.30% Montgomery 3.20% Prince George's 3.20% Queen Anne's 3.20% St. Mary's 3.20% Somerset 3.20% Talbot 2.40% Washington 2.95% Wicomico 3.20%",
+    "value": 0.032
+   }
+  },
+  {
+   "id": "MD-county-Worcester",
+   "name": "Maryland local income tax rate: Worcester",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "Worcester",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Worcester (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... erick see below** Garrett 2.65% Harford 3.06% Howard 3.20% Kent 3.30% Montgomery 3.20% Prince George's 3.20% Queen Anne's 3.20% St. Mary's 3.20% Somerset 3.20% Talbot 2.40% Washington 2.95% Wicomico 3.20% Worcester 2.25%",
+    "value": 0.0225
+   }
+  },
+  {
+   "id": "MD-county-BaltimoreCity",
+   "name": "Maryland local income tax rate: Baltimore City",
+   "jurisdiction": "MD",
+   "source_id": "md-982a16c674",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "countyRates",
+     "BaltimoreCity",
+     "flat"
+    ]
+   ],
+   "pattern": "(?s)Listed below are the actual {year} local income tax rates\\..{0,3000}?(?<![A-Za-z]) Baltimore\\ City (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Listed below are the actual 2026 local income tax rates. We provide separate tables for the convenience of employers who do not withhold using an automated or computerized system, or who prefer to look up the amounts to  ... rett 2.65% Harford 3.06% Howard 3.20% Kent 3.30% Montgomery 3.20% Prince George's 3.20% Queen Anne's 3.20% St. Mary's 3.20% Somerset 3.20% Talbot 2.40% Washington 2.95% Wicomico 3.20% Worcester 2.25% Baltimore City 3.20%",
+    "value": 0.032
+   }
+  },
+  {
+   "id": "MD-nonresident-special-rate",
+   "name": "Maryland special nonresident rate",
+   "jurisdiction": "MD",
+   "source_id": "md-cdc17c3ba6",
+   "file": "data/states/MD-{year}.json",
+   "paths": [
+    [
+     "bracketStatePlusLocal",
+     "nonresidentSpecialRate"
+    ]
+   ],
+   "pattern": "Special (\\d+(?:\\.\\d+)?)% Nonresident rate",
+   "transform": "percent",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Special 2.25% Nonresident rate",
+    "value": 0.0225
+   }
+  },
+  {
+   "id": "CO-Denver-employee-OPT",
+   "name": "Denver employee occupational privilege tax",
+   "jurisdiction": "CO",
+   "source_id": "co-6e7f2f8ff7",
+   "file": "data/states/CO-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "denver",
+     "employeeRate"
+    ]
+   ],
+   "pattern": "Employee OPT to be withheld by the employer at a rate of \\$([\\d.]+) per month",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Employee OPT to be withheld by the employer at a rate of $5.75 per month",
+    "value": 5.75
+   }
+  },
+  {
+   "id": "CO-Denver-employer-OPT",
+   "name": "Denver employer occupational privilege tax",
+   "jurisdiction": "CO",
+   "source_id": "co-6e7f2f8ff7",
+   "file": "data/states/CO-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "denver",
+     "employerRatePerEmployee"
+    ]
+   ],
+   "pattern": "Business OPT at a rate of \\$([\\d.]+) per month for each taxable employee",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Business OPT at a rate of $4.00 per month for each taxable employee",
+    "value": 4.0
+   }
+  },
+  {
+   "id": "CO-Denver-OPT-threshold",
+   "name": "Denver occupational privilege tax earnings threshold",
+   "jurisdiction": "CO",
+   "source_id": "co-6e7f2f8ff7",
+   "file": "data/states/CO-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "denver",
+     "monthlyEarningsThreshold"
+    ]
+   ],
+   "pattern": "at least five hundred dollars \\(\\$([\\d,]+)\\) for a calendar month",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "at least five hundred dollars ($500) for a calendar month",
+    "value": 500.0
+   }
+  },
+  {
+   "id": "CO-Glendale-OPT-threshold",
+   "name": "Glendale occupational privilege tax earnings threshold",
+   "jurisdiction": "CO",
+   "source_id": "co-fa310c6979",
+   "file": "data/states/CO-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "occupationalPrivilegeTax",
+     "Glendale",
+     "monthlyEarningsThreshold"
+    ]
+   ],
+   "pattern": "earn more than \\$([\\d,]+) during a calendar month",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "earn more than $750 during a calendar month",
+    "value": 750.0
+   }
+  },
+  {
+   "id": "CO-Glendale-OPT",
+   "name": "Glendale occupational privilege tax",
+   "jurisdiction": "CO",
+   "source_id": "co-fa310c6979",
+   "file": "data/states/CO-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "occupationalPrivilegeTax",
+     "Glendale",
+     "employeeRate"
+    ],
+    [
+     "localIncomeTax",
+     "occupationalPrivilegeTax",
+     "Glendale",
+     "employerRatePerEmployee"
+    ]
+   ],
+   "pattern": "The \\$(\\d+) monthly fee for these employees is matched by the employer",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "The $5 monthly fee for these employees is matched by the employer",
+    "value": 5.0
+   }
+  },
+  {
+   "id": "PA-LST-annual-cap",
+   "name": "Pennsylvania local services tax annual cap",
+   "jurisdiction": "PA",
+   "source_id": "pa-e04f3bceb7",
+   "file": "data/states/PA-{year}.json",
+   "paths": [
+    [
+     "localTax",
+     "lst",
+     "annualCap"
+    ]
+   ],
+   "pattern": "a \\$([\\d,]+) tax would be collected at \\$1 per week",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "a $52 tax would be collected at $1 per week",
+    "value": 52.0
+   }
+  },
+  {
+   "id": "PA-LST-exemption-threshold",
+   "name": "Pennsylvania local services tax low-income exemption",
+   "jurisdiction": "PA",
+   "source_id": "pa-e04f3bceb7",
+   "file": "data/states/PA-{year}.json",
+   "paths": [
+    [
+     "localTax",
+     "lst",
+     "lowIncomeExemption",
+     "threshold"
+    ]
+   ],
+   "pattern": "earned income and net profits from all sources within the political subdivision is less than \\$([\\d,]+)",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "earned income and net profits from all sources within the political subdivision is less than $12,000",
+    "value": 12000.0
+   }
+  },
+  {
+   "id": "PA-Pittsburgh-payroll-expense-rate",
+   "name": "Pittsburgh payroll expense tax",
+   "jurisdiction": "PA",
+   "source_id": "pa-77a912686a",
+   "file": "data/states/PA-{year}.json",
+   "paths": [
+    [
+     "localTax",
+     "pittsburghPayrollExpenseTax",
+     "rate"
+    ]
+   ],
+   "pattern": "Multiply line 1a by (\\d?\\.\\d+)",
+   "transform": "",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Multiply line 1a by 0.0055",
+    "value": 0.0055
+   }
+  },
+  {
+   "id": "DE-Wilmington-wage-tax",
+   "name": "Wilmington, DE city wage tax rate",
+   "jurisdiction": "DE",
+   "source_id": "de-097e9f1958",
+   "file": "data/states/DE-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "rate"
+    ]
+   ],
+   "pattern": "WAGE TAX Base: .{0,300}?Rate: (\\d+(?:\\.\\d+)?)%",
+   "transform": "percent",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "WAGE TAX Base: Individual gross earned income of City residents. Individual gross earned income of non-City residents working within the City limits. Rate: 1.25%",
+    "value": 0.0125
+   }
+  },
+  {
+   "id": "MO-StLouis-earnings-tax",
+   "name": "St. Louis earnings tax withheld from wages",
+   "jurisdiction": "MO",
+   "source_id": "mo-678c4d3268",
+   "file": "data/states/MO-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "stLouis",
+     "earningsTaxRate"
+    ]
+   ],
+   "pattern": "The Withholding Tax is a (\\d+(?:\\.\\d+)?)% tax imposed on the wages",
+   "transform": "percent",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "The Withholding Tax is a 1% tax imposed on the wages",
+    "value": 0.01
+   }
+  },
+  {
+   "id": "MO-StLouis-payroll-expense-tax",
+   "name": "St. Louis payroll expense tax",
+   "jurisdiction": "MO",
+   "source_id": "mo-678c4d3268",
+   "file": "data/states/MO-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "stLouis",
+     "payrollExpenseTax",
+     "rate"
+    ]
+   ],
+   "pattern": "Payroll Expense Tax is a (\\d+(?:\\.\\d+)?)% tax paid by the employer",
+   "transform": "percent",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "Payroll Expense Tax is a 0.5% tax paid by the employer",
+    "value": 0.005
+   }
+  },
+  {
+   "id": "WV-Charleston-service-fee",
+   "name": "Charleston, WV city service fee per week",
+   "jurisdiction": "WV",
+   "source_id": "wv-be7771fc3e",
+   "file": "data/states/WV-{year}.json",
+   "paths": [
+    [
+     "localIncomeTax",
+     "serviceFeeCities",
+     "Charleston",
+     "weeklyRate"
+    ]
+   ],
+   "pattern": "three dollar \\(\\$([\\d.]+)\\) per week City Service Fee",
+   "transform": "dollars",
+   "year_anchored": false,
+   "calibration": {
+    "year": 2026,
+    "excerpt": "three dollar ($3.00) per week City Service Fee",
+    "value": 3.0
    }
   }
  ]
