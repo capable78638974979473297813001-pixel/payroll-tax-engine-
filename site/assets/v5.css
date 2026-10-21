@@ -29,7 +29,8 @@
   --code-key: #AEB6BB;
   --code-num: #F2A38F;
   --code-rule: #2A2F32;
-  --field: #CFCFC9;
+  --field: #6B7076;   /* the outline of every place you type: >= 4.5:1 on white and on the page */
+  --field-w: 1.5px;
   --ok: #2F7D4F;
   --warn: #D9A441;
   --r-sm: 4px;
@@ -165,7 +166,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 28px 0 18px; }
 .search {
   display: flex; align-items: center; gap: 8px; height: 44px; width: min(380px, 100%);
-  border: 1px solid var(--field); border-radius: var(--r-sm); background: #fff; padding: 0 12px;
+  border: var(--field-w) solid var(--field); border-radius: var(--r-sm); background: #fff; padding: 0 12px;
 }
 .search input { border: 0; background: transparent; width: 100%; outline: none; }
 .chip { height: 36px; padding: 0 12px; border-radius: var(--r-sm); border: 1px solid var(--rule); background: transparent; color: var(--ink2); cursor: pointer; font-weight: 500; font-size: 14px; }
@@ -209,10 +210,14 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .field { margin: 0 0 18px; }
 .field label, .lbl { display: block; font-weight: 500; font-size: 14px; margin-bottom: 8px; }
 .field input, .field textarea, .box input {
-  width: 100%; height: 44px; border: 1px solid var(--field); border-radius: var(--r-sm); background: #fff; padding: 0 14px;
+  width: 100%; height: 44px; border: var(--field-w) solid var(--field); border-radius: var(--r-sm); background: #fff; padding: 0 14px;
 }
 .field textarea { height: 140px; padding: 12px 14px; resize: vertical; }
-.field input:focus, .field textarea:focus { outline: 2px solid var(--ink); outline-offset: 2px; }
+.field input:hover, .field textarea:hover, .search:hover, .cov-select:hover, .codes input:hover { border-color: var(--ink); }
+.field input:focus, .field textarea:focus { outline: 2px solid var(--ink); outline-offset: 2px; border-color: var(--ink); }
+.search:focus-within { border-color: var(--ink); outline: 2px solid var(--ink); outline-offset: 2px; }
+.codes input:focus { border-color: var(--ink); outline: 2px solid var(--ink); outline-offset: 2px; }
+input::placeholder, textarea::placeholder { color: #70757B; opacity: 1; }
 .hint { color: var(--ink3); font-size: 13px; margin-top: 8px; }
 .err { color: var(--accent); font-size: 14px; margin: 8px 0; }
 .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 22px; margin: 8px 0 18px; }
@@ -220,9 +225,10 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .codes { display: flex; gap: 8px; align-items: center; }
 .codes input {
   width: 52px; height: 64px; text-align: center; font-family: "Martian Mono", ui-monospace, monospace;
-  font-size: 22px; border: 1px solid var(--field); border-radius: var(--r-sm); background: #fff;
+  font-size: 22px; border: var(--field-w) solid var(--field); border-radius: var(--r-sm); background: #fff;
 }
-.codes .gap { width: 10px; }
+.codes .gap { width: 10px; flex: none; }
+.codes input { flex: 1 1 0; min-width: 0; max-width: 52px; }
 .row-between { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
 
 .legal { display: grid; grid-template-columns: 240px minmax(0, 760px); gap: 48px; padding-bottom: 80px; }
@@ -255,7 +261,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 
 .contact-grid { display: grid; grid-template-columns: 520px 1fr; gap: 80px; }
 .keyline { display: flex; gap: 8px; align-items: center; }
-.keyline code { flex: 1; border: 1px solid var(--field); border-radius: var(--r-md); background: #fff; padding: 16px; overflow: auto; }
+.keyline code { flex: 1; border: var(--field-w) solid var(--field); border-radius: var(--r-md); background: #fff; padding: 16px; overflow: auto; }
 
 @media (max-width: 980px) {
   :root { --pad: 24px; }
@@ -296,7 +302,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .cov-tools .search { flex: 1 1 280px; width: auto; max-width: 400px; min-width: 0; }
 .cov-tools .search:focus-within, .cov-select:focus { border-color: var(--ink); }
 .cov-select {
-  height: 44px; min-width: 168px; padding: 0 36px 0 12px; border: 1px solid var(--field); border-radius: var(--r-sm);
+  height: 44px; min-width: 168px; padding: 0 36px 0 12px; border: var(--field-w) solid var(--field); border-radius: var(--r-sm);
   background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4.5 6 8.5l4-4' fill='none' stroke='%235B6066' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 12px center;
   color: var(--ink); font: inherit; font-size: 15px; appearance: none; -webkit-appearance: none; cursor: pointer;
 }
