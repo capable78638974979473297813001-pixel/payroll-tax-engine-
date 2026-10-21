@@ -1057,5 +1057,42 @@ class LocalRegistryReconcileTest(unittest.TestCase):
         self.assertEqual(reconcile.reconcile_al_league("<html></html>", self.SRC, "2026-10-20", self.repo)[0]["kind"], "unreadable")
 
 
+class WestVirginiaCityFeesTest(unittest.TestCase):
+    SRC = {"id": "wv", "jurisdiction": "WV", "url": "https://sharedservices.wvu.edu/x"}
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.repo = Path(self.tmp.name)
+        (self.repo / "data" / "states").mkdir(parents=True)
+        cities = {"Charleston": {"weeklyRate": 3}, "Fairmont": {"weeklyRate": 2}, "Huntington": {"weeklyRate": 5}, "Parkersburg": {"weeklyRate": 2.5},
+                  "Weirton": {"weeklyRate": 5, "priorWeeklyRate": 2}, "Wheeling": {"weeklyRate": 2}}
+        (self.repo / "data" / "states" / "WV-2026.json").write_text(json.dumps({"localIncomeTax": {"serviceFeeCities": cities}}))
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def page(self, extra="", charleston="3.00"):
+        return ("<p>Charleston The Charleston ordinance applies to all. The service fee is imposed at the rate of $%s per calendar week of employment. "
+                "Fairmont The user fee applies to each employer. Each employer deducts $2.00 per week. Huntington The user fee applies to those. The fee is $5.00 per calendar week. "
+                "Parkersburg The user fee applies to any person. The fee is $2.50 per calendar week. Weirton The user fee applies to any person. The fee is imposed as $2.00 per calendar week. "
+                "Wheeling The user fee accrues each week. The fee is $2.00 per week. %s</p>") % (charleston, extra)
+
+    def run_it(self, html):
+        return reconcile.reconcile_wv_city_fees(html, self.SRC, "2026-10-21", self.repo)
+
+    def test_agreement_including_a_list_that_still_shows_a_cities_prior_rate_is_silent(self):
+        self.assertEqual(self.run_it(self.page()), [])
+
+    def test_a_city_the_data_lacks_and_a_changed_amount_are_reported(self):
+        out = self.run_it(self.page(extra="Chester The user fee applies to those who work. The fee is $2.00 per calendar week."))
+        self.assertEqual([(f["kind"], f["name"]) for f in out], [("missing_from_engine", "Chester")])
+        out = self.run_it(self.page(charleston="4.00"))
+        self.assertEqual([(f["kind"], f["name"]) for f in out], [("rate_differs", "Charleston")])
+        self.assertTrue(all("change" not in f for f in out))
+
+    def test_a_page_that_stops_parsing_is_unreadable(self):
+        self.assertEqual(self.run_it("<p>nothing</p>")[0]["kind"], "unreadable")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -74,12 +74,21 @@
    ],
    "automatic": [],
    "report_only": [
-    "extractor:CO-rate"
+    "extractor:CO-rate",
+    "extractor:CO-Denver-employee-OPT",
+    "extractor:CO-Denver-employer-OPT",
+    "extractor:CO-Denver-OPT-threshold",
+    "extractor:CO-Glendale-OPT-threshold",
+    "extractor:CO-Glendale-OPT"
    ],
    "person": [
     {
-     "what": "Standard deduction and city occupational privilege taxes (Aurora, Denver, Glendale, Greenwood Village, Sheridan)",
-     "why": "Each city publishes its own flat amount on its own page; there is no common feed. The cities' pages are watched."
+     "what": "Standard deduction",
+     "why": "Stated in the DR 1098 worksheet without a year-anchored sentence."
+    },
+    {
+     "what": "City occupational privilege taxes (Denver, Glendale, Greenwood Village, Sheridan; Aurora repealed its tax on 2025-01-01)",
+     "why": "Each city publishes its own flat amounts on its own page without naming the year; the pages are watched (Aurora's too, so a reinstatement is seen) and the Denver and Glendale amounts are compared every day, report-only."
     }
    ]
   },
@@ -120,12 +129,17 @@
    ],
    "automatic": [],
    "report_only": [
-    "extractor:DE-exemption-credit"
+    "extractor:DE-exemption-credit",
+    "extractor:DE-Wilmington-wage-tax"
    ],
    "person": [
     {
-     "what": "Brackets and the Wilmington wage tax",
-     "why": "Brackets are a table; the Wilmington rate is one number on the city's own page with no year stated."
+     "what": "Bracket schedule",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    },
+    {
+     "what": "The Wilmington wage tax",
+     "why": "The city's page and its budget office's rate sheet are watched; neither states the 1.25% in a sentence a script can read reliably."
     }
    ]
   },
@@ -292,14 +306,42 @@
     "state income tax",
     "county income taxes"
    ],
-   "automatic": [],
+   "automatic": [
+    "extractor:MD-county-Allegany",
+    "extractor:MD-county-BaltimoreCounty",
+    "extractor:MD-county-Calvert",
+    "extractor:MD-county-Caroline",
+    "extractor:MD-county-Carroll",
+    "extractor:MD-county-Cecil",
+    "extractor:MD-county-Charles",
+    "extractor:MD-county-Dorchester",
+    "extractor:MD-county-Garrett",
+    "extractor:MD-county-Harford",
+    "extractor:MD-county-Howard",
+    "extractor:MD-county-Kent",
+    "extractor:MD-county-Montgomery",
+    "extractor:MD-county-PrinceGeorges",
+    "extractor:MD-county-QueenAnnes",
+    "extractor:MD-county-StMarys",
+    "extractor:MD-county-Somerset",
+    "extractor:MD-county-Talbot",
+    "extractor:MD-county-Washington",
+    "extractor:MD-county-Wicomico",
+    "extractor:MD-county-Worcester",
+    "extractor:MD-county-BaltimoreCity"
+   ],
    "report_only": [
-    "extractor:MD-standard-deduction"
+    "extractor:MD-standard-deduction",
+    "extractor:MD-nonresident-special-rate"
    ],
    "person": [
     {
-     "what": "State brackets and 24 county rates",
-     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table. County rates sit in a table in the MW507 PDF; a county change is a person's."
+     "what": "State brackets",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    },
+    {
+     "what": "Anne Arundel and Frederick county rates (tiered)",
+     "why": "Their local rates are brackets, not one number; the other 22 counties' flat rates are read from the Comptroller's \"actual {year} local income tax rates\" list and corrected automatically."
     }
    ]
   },
@@ -357,11 +399,18 @@
     "Kansas City and St. Louis earnings taxes"
    ],
    "automatic": [],
-   "report_only": [],
+   "report_only": [
+    "extractor:MO-StLouis-earnings-tax",
+    "extractor:MO-StLouis-payroll-expense-tax"
+   ],
    "person": [
     {
-     "what": "Formula amounts and the two city earnings taxes",
-     "why": "The formula is a PDF with no stated per-year sentence; the city rates are on each city's own page."
+     "what": "Formula amounts",
+     "why": "The Revenue Department's formula is a PDF table with no stated per-year sentence."
+    },
+    {
+     "what": "The Kansas City and St. Louis earnings taxes and St. Louis' payroll expense tax",
+     "why": "The cities' official pages are now watched daily; they describe the 1% and 0.5% in prose with no stated year, so a change is flagged by the page diff and a person updates the number."
     }
    ]
   },
@@ -443,8 +492,12 @@
    "report_only": [],
    "person": [
     {
-     "what": "NJ-WT rate tables and the Newark payroll tax",
+     "what": "NJ-WT rate tables",
      "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    },
+    {
+     "what": "Newark payroll tax",
+     "why": "The city's quarterly booklet is a scanned PDF with no readable text, so it is fingerprinted: a changed booklet is flagged, and a person reads it."
     }
    ]
   },
@@ -489,7 +542,8 @@
    ],
    "automatic": [
     "reconcile:oh_municipal",
-    "reconcile:oh_jedd"
+    "reconcile:oh_jedd",
+    "reconcile:oh_school"
    ],
    "report_only": [],
    "person": [
@@ -498,8 +552,8 @@
      "why": "The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes. Ohio had October 2025 and August 2026 tables."
     },
     {
-     "what": "School district income taxes",
-     "why": "The official list is a PDF whose rows wrap across lines and carry percentages in their notes; the data file records a table-merge bug in a text parse. Not safe to read line by line."
+     "what": "Entries the updater cannot touch",
+     "why": "Municipalities, JEDD/JEDZ zones and school districts that carry a hand-checked note, an end date or dated history (about 16 of 840) are listed for a person."
     }
    ]
   },
@@ -522,12 +576,23 @@
     "TriMet and Lane transit taxes",
     "Portland-area local taxes"
    ],
-   "automatic": [],
-   "report_only": [],
+   "automatic": [
+    "extractor:OR-TriMet-rate",
+    "extractor:OR-Lane-rate",
+    "extractor:OR-statewide-transit-rate"
+   ],
+   "report_only": [
+    "extractor:OR-Canby-rate",
+    "extractor:OR-Sandy-rate"
+   ],
    "person": [
     {
-     "what": "Withholding formulas and the local taxes",
-     "why": "Transit rates change each July 1 by district decision and local surtaxes by ballot measure; each is on its own agency's page."
+     "what": "Withholding formulas",
+     "why": "Withholding comes from per-period tables or bracket schedules that the agency publishes as PDF or HTML tables. A cell in such a table cannot be verified one line at a time (the extractions are prone to column shifts), so a change is reported and a person updates the table."
+    },
+    {
+     "what": "Wilsonville and South Clackamas transit taxes, and the Portland-area surtaxes (Metro SHS, Multnomah PFA and Preschool for All)",
+     "why": "Wilsonville's page cannot be read by a script today and SCTD has no page in the watch; the Portland surtaxes are described in prose with tier thresholds that are not one stated number. Canby and Sandy are compared daily, report-only."
     }
    ]
   },
@@ -540,7 +605,10 @@
     "reconcile:pa_local"
    ],
    "report_only": [
-    "extractor:PA-rate"
+    "extractor:PA-rate",
+    "extractor:PA-LST-annual-cap",
+    "extractor:PA-LST-exemption-threshold",
+    "extractor:PA-Pittsburgh-payroll-expense-rate"
    ],
    "person": [
     {
@@ -548,7 +616,7 @@
      "why": "The Revenue page says 3.07 percent without naming the year, so a difference is reported, never applied."
     },
     {
-     "what": "Local rates with a new or missing effective date, entries with their own notes or dated changes (Philadelphia's July 1 wage tax), duplicate PSD codes, and the low-income exemption amounts",
+     "what": "Local rates with a new or missing effective date, entries with their own notes or dated changes (Philadelphia's July 1 wage tax), duplicate PSD codes",
      "why": "A change of date means a new rate, which is a dated row (a structural edit); an entry that carries its own note was hand-checked. Philadelphia is outside the register's annual cycle."
     }
    ]
@@ -639,14 +707,27 @@
   },
   "WA": {
    "taxes": [
-    "Seattle payroll expense tax (no wage income tax)"
+    "Seattle payroll expense tax and social housing tax (no wage income tax)"
    ],
-   "automatic": [],
-   "report_only": [],
+   "automatic": [
+    "extractor:Seattle-employer-threshold",
+    "extractor:Seattle-compensation-threshold",
+    "extractor:Seattle-upper-band",
+    "extractor:Seattle-lower-band-rate-0",
+    "extractor:Seattle-upper-band-rate-0",
+    "extractor:Seattle-lower-band-rate-1",
+    "extractor:Seattle-upper-band-rate-1",
+    "extractor:Seattle-lower-band-rate-2",
+    "extractor:Seattle-upper-band-rate-2"
+   ],
+   "report_only": [
+    "extractor:Seattle-social-housing-rate",
+    "extractor:Seattle-social-housing-threshold"
+   ],
    "person": [
     {
-     "what": "Seattle tiers and thresholds, indexed each year",
-     "why": "Published on the city's page in prose and tables."
+     "what": "Seattle tier payroll boundaries and the other local payroll items",
+     "why": "The tier boundaries by prior-year payroll are stated in a different table layout; the compensation thresholds and every rate on the year's table are automatic."
     }
    ]
   },
@@ -671,11 +752,18 @@
     "city service fees"
    ],
    "automatic": [],
-   "report_only": [],
+   "report_only": [
+    "reconcile:wv_city_fees",
+    "extractor:WV-Charleston-service-fee"
+   ],
    "person": [
     {
-     "what": "Tables cut 5% retroactively by SB 392 (2026) and the city service fees",
+     "what": "Tables cut 5% retroactively by SB 392 (2026)",
      "why": "The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
+    },
+    {
+     "what": "City service fees (Charleston, Huntington, Morgantown, Parkersburg, Wheeling, Weirton, Fairmont, Madison, Romney, Montgomery, Glen Dale)",
+     "why": "Each city sets a flat weekly fee by ordinance. WVU Shared Services' list of every city's fee ordinance is compared with the data city by city every day (it already shows Chester's $2 fee, which the data lacks) and Charleston's own overview is read for its $3; the list gives no effective dates, so nothing is applied."
     }
    ]
   }

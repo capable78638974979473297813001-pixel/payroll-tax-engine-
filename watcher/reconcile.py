@@ -498,6 +498,109 @@ def reconcile_al_league(html: str, source: dict, today: str, repo: Path = REPO, 
 
 
 # --------------------------------------------------------------------------
+# Ohio school district income tax (Department of Taxation's yearly list, a PDF)
+# --------------------------------------------------------------------------
+
+_SD_HEADER = re.compile(r"(?:School Districts With an Income Tax as of [A-Za-z]+ \d{4}\*? )?\d of \d School Tax Year Primary District \d{4} First Year County Number IRN School District Rate Effective")
+_SD_ROW = re.compile(r"(?:(?<= )|^)([A-Z][A-Za-z.]+(?: [A-Z][A-Za-z.]+)?\)?)(?: \*)? (\d{4}) (\d{5}) ")
+
+
+def parse_oh_school_list(text: str) -> tuple[int | None, list[dict], int | None]:
+    """(tax year, rows, the document's own count). A row is a county, the
+    four-digit district number, the IRN, a name that may wrap and carry notes
+    with percentages in them, then the rate and the year it first took effect.
+    Only the rate in that final position is trusted."""
+    flat = _SD_HEADER.sub(" ", re.sub(r"\s+", " ", text))
+    year = re.search(r"Tax Year (\d{4}) Rate Additional Information", flat)
+    if not year:
+        return None, [], None
+    body = flat[year.end():]
+    starts = [m.start() for m in _SD_ROW.finditer(body)]
+    rows = []
+    for a, b in zip(starts, starts[1:] + [len(body)]):
+        chunk = body[a:b]
+        m = _SD_ROW.match(chunk)
+        tail = re.search(r"(\d\.\d{2}) %(?: \(b\))? (\d{4})(?: \(a\).*)?\s*$", chunk[m.end():])
+        if m and tail:
+            rows.append({"sd": m.group(2), "irn": m.group(3), "name": chunk[m.end():m.end() + tail.start()].strip(), "rate": round(float(tail.group(1)) / 100, 6),
+                         "since": tail.group(2)})
+    total = re.search(r"Total number of districts are (\d+)", flat)
+    return int(year.group(1)), rows, int(total.group(1)) if total else None
+
+
+def reconcile_oh_school_districts(text: str, source: dict, today: str, repo: Path = REPO, directory: dict | None = None) -> list[dict]:
+    """Compares the Department of Taxation's list of every school district
+    income tax with data/local/OH-school-districts-<year>.json. The list is
+    for one tax year, so a rate on it holds for that whole year: a clean
+    one-line correction. Rows the reader cannot parse, or a parsed count that
+    is not the document's own count, make the whole file unreadable rather
+    than partly trusted."""
+    year, rows, total = parse_oh_school_list(text)
+    if year is None or not rows or (total is not None and len(rows) != total):
+        return [finding("unreadable", "action", source, "Ohio school district income tax list",
+                        f"read {len(rows)} districts{'' if total is None else f' of the {total} the document states'}; its layout may have changed.")]
+    path = repo / "data" / "local" / f"OH-school-districts-{year}.json"
+    data = _load(path)
+    if data is None:
+        return [finding("no_engine_file", "action", source, path.name, f"{path.name} not found; nothing to compare with")]
+    key = f"rate{year}"
+    ours = {}
+    dup = set()
+    for d in data["districts"]:
+        (dup.add if d["sdNumber"] in ours else lambda x: None)(d["sdNumber"])
+        ours[d["sdNumber"]] = d
+    seen = set()
+    out = []
+    for r in rows:
+        seen.add(r["sd"])
+        d = ours.get(r["sd"])
+        if d is None:
+            out.append(finding("missing_from_engine", "action", source, f"{r['name']} ({r['sd']})", f"on the Department's list at {r['rate'] * 100:g}% but not in {path.name}", r["sd"]))
+        elif abs(d.get(key, 0) - r["rate"]) > 1e-9:
+            f = finding("rate_differs", "action", source, d["name"], f"the Department's {year} list says {r['rate'] * 100:g}%; the data has {d.get(key, 0) * 100:g}%", r["sd"])
+            if r["sd"] not in dup and d.get(key):
+                f["change"] = {"file": f"data/local/{path.name}", "id_key": "sdNumber", "id": r["sd"], "key": key, "old": d.get(key), "new": r["rate"],
+                               "effective_from": f"{year}-01-01", "source_url": source.get("url", "")}
+            out.append(f)
+    for sd, d in ours.items():
+        if sd not in seen and d.get(key):
+            out.append(finding("not_in_official_file", "action", source, d["name"], f"the data has a {d[key] * 100:g}% rate for {year} but the Department's list does not include this district", sd))
+    return out
+
+
+# --------------------------------------------------------------------------
+# West Virginia city service fees (WVU Shared Services' list of every city's ordinance)
+# --------------------------------------------------------------------------
+
+def reconcile_wv_city_fees(html: str, source: dict, today: str, repo: Path = REPO, directory: dict | None = None) -> list[dict]:
+    """The list names each West Virginia city that charges a weekly user fee
+    and the amount. Compared with the data's serviceFeeCities: a city on the
+    list that the data lacks (Chester), or an amount that differs, is reported.
+    A city whose list amount equals the data's recorded prior rate is treated
+    as the list being behind, not the data being wrong. No effective dates are
+    given, so nothing is proposed."""
+    text = _html_text(html)
+    sections = re.split(r"(?<![A-Za-z])([A-Z][a-z]+(?: [A-Z][a-z]+)?) The (?=user fee|Charleston ordinance|service fee)", text)
+    listed: dict[str, float] = {}
+    for i in range(1, len(sections) - 1, 2):
+        m = re.search(r"\$(\d+(?:\.\d+)?) per (?:calendar )?week", sections[i + 1])
+        if m:
+            listed[sections[i]] = float(m.group(1))
+    data = _load(repo / "data" / "states" / f"WV-{today[:4]}.json")
+    if len(listed) < 5 or data is None:
+        return [finding("unreadable", "action", source, "West Virginia city user fee list", f"found {len(listed)} cities with an amount, expected about 8; the page's layout may have changed.")]
+    ours = data["localIncomeTax"]["serviceFeeCities"]
+    out = []
+    for city, fee in listed.items():
+        d = ours.get(city)
+        if d is None:
+            out.append(finding("missing_from_engine", "action", source, city, f"the list shows a ${fee:g} per week user fee in {city}, which the data does not have"))
+        elif abs(d["weeklyRate"] - fee) > 1e-9 and abs(d.get("priorWeeklyRate", -1) - fee) > 1e-9:
+            out.append(finding("rate_differs", "action", source, city, f"the list says ${fee:g} per week; the data has ${d['weeklyRate']:g}"))
+    return out
+
+
+# --------------------------------------------------------------------------
 # Pennsylvania local earned-income and local-services taxes (DCED register)
 # --------------------------------------------------------------------------
 
@@ -658,7 +761,7 @@ def reconcile_pa_local(body: bytes, source: dict, today: str, repo: Path = REPO,
 
 RECONCILERS = {"oh_municipal": reconcile_oh_municipal, "oh_jedd": reconcile_oh_jedd, "in_counties": reconcile_in_counties, "pa_local": reconcile_pa_local,
                "ky_districts": reconcile_ky_districts, "mi_city_list": reconcile_mi_city_list, "mi_city_rates": reconcile_mi_city_rates,
-               "al_league": reconcile_al_league}
+               "al_league": reconcile_al_league, "oh_school": reconcile_oh_school_districts, "wv_city_fees": reconcile_wv_city_fees}
 
 
 def run(sources: list[dict], fetcher, today: str, repo: Path = REPO) -> list[dict]:

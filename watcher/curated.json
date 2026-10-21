@@ -1011,6 +1011,53 @@
    "jurisdiction": "NY",
    "title": "Yonkers withholding tax tables and methods (NYS-50-T-Y)",
    "url": "https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_y.pdf"
+  },
+  {
+   "jurisdiction": "DE",
+   "title": "City of Wilmington: City wage and net profits taxes",
+   "url": "https://www.wilmingtonde.gov/residents/earned-income-tax-and-net-profits-tax"
+  },
+  {
+   "jurisdiction": "MO",
+   "title": "Kansas City, MO: earnings tax",
+   "url": "https://www.kcmo.gov/city-hall/departments/finance/earnings-tax"
+  },
+  {
+   "jurisdiction": "MO",
+   "title": "Kansas City, MO: tax guide for non-resident businesses (employer withholding of the earnings tax)",
+   "url": "https://www.kcmo.gov/city-hall/departments/finance/tax-home/tax-guides/tax-guide-for-non-resident-businesses"
+  },
+  {
+   "jurisdiction": "MO",
+   "title": "St. Louis: employer withholding and payroll expense tax information",
+   "url": "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/payroll-tax-info.cfm"
+  },
+  {
+   "jurisdiction": "MO",
+   "title": "St. Louis: earnings tax department",
+   "url": "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/index.cfm"
+  },
+  {
+   "jurisdiction": "WV",
+   "title": "City of Charleston, WV: city service fee overview",
+   "url": "https://www.charlestonwv.gov/sites/default/files/documents/2022-12/CITY%20SERVICE%20FEE%20OVERVIEW%2012.22%20%282%29.pdf"
+  },
+  {
+   "jurisdiction": "WV",
+   "title": "WVU Shared Services: West Virginia city user fee ordinances (every city's fee)",
+   "url": "https://sharedservices.wvu.edu/west-virginia-city-user-fee-ordinances",
+   "reconcile": "wv_city_fees"
+  },
+  {
+   "jurisdiction": "CO",
+   "title": "City of Aurora: occupational privilege tax (repealed 2025-01-01)",
+   "url": "https://www.auroragov.org/business_services/taxes/occupational_privilege_tax"
+  },
+  {
+   "jurisdiction": "OH",
+   "title": "Ohio Dept of Taxation: school district income tax list",
+   "url": "https://tax.ohio.gov/static/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf",
+   "reconcile": "oh_school"
   }
  ]
 }

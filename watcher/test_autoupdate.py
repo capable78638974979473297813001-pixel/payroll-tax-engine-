@@ -961,6 +961,146 @@ class IndianaCountiesAndNewYorkEditions(Base):
         self.assertEqual([f["change"]["file"] for f in fs], [f"data/states/NY-{YEAR + 1}.json"])
 
 
+class LocalTaxReaders(Base):
+    """Ohio school districts, Maryland counties, Oregon transit and Seattle."""
+
+    def sd_text(self, rates, year=YEAR, total=None):
+        rows = " ".join(f"County{chr(65 + i)} {2000 + i:04d} {45000 + i:05d} District {i} LSD {r} % (b) 2001" for i, r in enumerate(rates))
+        return (f"School Districts With an Income Tax as of January {year}* Tax Year {year} Rate Additional Information New (1) x "
+                f"Primary School Tax Year Primary District {year} First Year County Number IRN School District Rate Effective {rows} "
+                f"(a) Total number of districts are {total if total is not None else len(rates)}.")
+
+    def sd_setup(self, rates=("1.00", "0.75", "1.25")):
+        ds = [{"county": "X", "sdNumber": f"{2000 + i:04d}", "irn": f"{45000 + i:05d}", "name": f"District {i} LSD", f"rate{YEAR}": float(r) / 100,
+               "earnedIncomeOnlyBase": True, "firstYearEffective": 2001} for i, r in enumerate(rates)]
+        write_json(self.root, f"data/local/OH-school-districts-{YEAR}.json", {"year": YEAR, "districts": ds})
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-qm", "sd")
+        self.cfg["rules"].append({"glob": "data/local/OH-school-districts-*.json", "keys": [f"rate{YEAR}"], "min": 0.001, "max": 0.03,
+                                  "max_abs_change": 0.01, "hosts": ["tax.ohio.gov"], "max_changes_per_run": 60, "max_findings_per_run": 80})
+        self.src = {"id": "sd", "url": "https://tax.ohio.gov/static/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf", "jurisdiction": "OH", "reconcile": "oh_school"}
+
+    def test_school_district_list_agreeing_with_the_data_is_silent(self):
+        self.sd_setup()
+        self.assertEqual(reconcile.reconcile_oh_school_districts(self.sd_text(["1.00", "0.75", "1.25"]), self.src, TODAY, self.root), [])
+
+    def test_a_school_district_rate_correction_is_a_one_line_edit(self):
+        self.sd_setup()
+        fs = reconcile.reconcile_oh_school_districts(self.sd_text(["1.00", "1.00", "1.25"]), self.src, TODAY, self.root)
+        self.assertEqual([(f["code"], "change" in f) for f in fs], [("2001", True)])
+        for f in fs:
+            f["reads"] = [{"at": (NOW - dt.timedelta(seconds=60)).isoformat(), "value": 0.01}, {"at": NOW.isoformat(), "value": 0.01}]
+        acc, rej = au.triage(au.proposals_from(fs, self.root, TODAY), self.cfg, self.root, [self.src], TODAY, 1, NOW)
+        self.assertEqual((len(acc), rej), (1, []))
+        au.apply(acc, self.cfg, self.root, [self.src], TODAY, verify=[], now=NOW)
+        ds = json.loads((self.root / f"data/local/OH-school-districts-{YEAR}.json").read_text())["districts"]
+        self.assertEqual([d[f"rate{YEAR}"] for d in ds], [0.01, 0.01, 0.0125])
+
+    def test_a_list_that_does_not_parse_to_its_own_count_is_not_trusted(self):
+        self.sd_setup()
+        fs = reconcile.reconcile_oh_school_districts(self.sd_text(["1.00", "0.75", "1.25"], total=214), self.src, TODAY, self.root)
+        self.assertEqual([f["kind"] for f in fs], ["unreadable"])
+
+    def test_a_district_that_left_the_list_or_joined_it_is_reported_not_edited(self):
+        self.sd_setup()
+        fs = reconcile.reconcile_oh_school_districts(self.sd_text(["1.00", "0.75"]), self.src, TODAY, self.root)
+        self.assertEqual([(f["kind"], "change" in f) for f in fs], [("not_in_official_file", False)])
+        self.sd_setup(["1.00", "0.75"])
+        fs = reconcile.reconcile_oh_school_districts(self.sd_text(["1.00", "0.75", "1.25"]), self.src, TODAY, self.root)
+        self.assertEqual([(f["kind"], "change" in f) for f in fs], [("missing_from_engine", False)])
+
+    def test_a_percentage_inside_a_districts_notes_is_not_mistaken_for_its_rate(self):
+        rows = f"CountyA 2000 45000 District 0 LSD (0.75% expires 2026, 0.50% expires 2031) 1.25 % (b) 2007"
+        text = (f"Tax Year {YEAR} Rate Additional Information {rows} (a) Total number of districts are 1.")
+        y, parsed, total = reconcile.parse_oh_school_list(text)
+        self.assertEqual((y, [r["rate"] for r in parsed], total), (YEAR, [0.0125], 1))
+
+    # --- {yy}: Oregon's transit guide names the year as "1/1/26 and beyond" ---
+    OR = f"data/states/OR-{YEAR}.json"
+
+    def or_setup(self):
+        write_json(self.root, self.OR, {"tripDistrictPayrollTaxes": {"triMet": {"rate": 0.008237, "note": "x"}}})
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-qm", "or")
+        self.cfg["rules"].append({"glob": "data/states/OR-*.json", "keys": ["rate"], "min": 0.0005, "max": 0.03, "max_abs_change": 0.002, "hosts": ["www.oregon.gov"]})
+        self.sources = [{"id": "cp", "url": "https://www.oregon.gov/dor/forms/FormsPubs/combined-payroll_211-155-2_2026.pdf", "jurisdiction": "OR"},
+                        {"id": "tg", "url": "https://www.oregon.gov/dor/forms/formspubs/transit-payroll-taxes_211-503.pdf", "jurisdiction": "OR"}]
+        import extractors  # noqa: PLC0415
+        self.ex = extractors
+        self.reg = [{"id": "OR-TriMet-rate", "name": "TriMet", "jurisdiction": "OR", "source_id": "cp", "file": "data/states/OR-{year}.json",
+                     "paths": [["tripDistrictPayrollTaxes", "triMet", "rate"]],
+                     "pattern": r"(?s){year} Oregon Combined Payroll Tax Report Instructions.{0,100000}?TriMet Transit District \(TM\) tax rate is (\d?\.\d+)", "transform": "",
+                     "also": [{"source_id": "tg", "pattern": r"(?s)TriMet Transit District rate.{0,400}?1/1/{yy} and beyond (\d?\.\d+)", "transform": ""}]}]
+
+    def or_texts(self, combined, guide):
+        yy = str(YEAR)[2:]
+        return {"cp": f"{YEAR} Oregon Combined Payroll Tax Report Instructions filler TriMet Transit District (TM) tax rate is {combined}.",
+                "tg": f"TriMet Transit District rate 1/1/{int(yy) - 1} to 12/31/{int(yy) - 1} 0.008237 1/1/{yy} and beyond {guide} Deleted from TriMet"}
+
+    def test_two_oregon_documents_that_agree_change_the_rate(self):
+        self.or_setup()
+        tracked = {s["id"]: s for s in self.sources}
+        fs = self.ex.findings(self.reg, self.or_texts("0.008437", "0.008437"), tracked, TODAY, self.root)
+        self.assertEqual(len(fs), 1)
+        for f in fs:
+            f["reads"] = [{"at": (NOW - dt.timedelta(seconds=60)).isoformat(), "value": 0.008437}, {"at": NOW.isoformat(), "value": 0.008437}]
+        acc, rej = au.triage(au.proposals_from(fs, self.root, TODAY), self.cfg, self.root, self.sources, TODAY, 1, NOW)
+        self.assertEqual((len(acc), rej), (1, []))
+
+    def test_oregon_documents_that_disagree_change_nothing(self):
+        self.or_setup()
+        tracked = {s["id"]: s for s in self.sources}
+        self.assertEqual(self.ex.findings(self.reg, self.or_texts("0.008437", "0.008237"), tracked, TODAY, self.root), [])
+
+    def test_a_mid_year_row_in_the_guide_stops_the_pattern_matching(self):
+        self.or_setup()
+        tracked = {s["id"]: s for s in self.sources}
+        yy = str(YEAR)[2:]
+        t = self.or_texts("0.008437", "0.008437")
+        t["tg"] = f"TriMet Transit District rate 1/1/{yy} to 6/30/{yy} 0.008237 7/1/{yy} and beyond 0.008437 Deleted"
+        self.assertEqual(self.ex.findings(self.reg, t, tracked, TODAY, self.root), [])
+
+    # --- integers stay integers (Seattle's thresholds) ---------------------
+    WA = f"data/states/WA-{YEAR}.json"
+
+    def test_an_integer_in_the_file_is_written_back_as_an_integer(self):
+        write_json(self.root, self.WA, {"localIncomeTax": {"seattlePayrollExpenseTax": {"compensationThreshold": 194452, "upperCompensationBand": 518538}}})
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-qm", "wa")
+        self.cfg["rules"].append({"glob": "data/states/WA-*.json", "keys": ["compensationThreshold", "upperCompensationBand"], "min": 100000, "max": 20000000,
+                                  "max_abs_change": 2000000, "integers": True, "hosts": ["www.seattle.gov"]})
+        src = [{"id": "se", "url": "https://www.seattle.gov/city-finance/payroll-expense-tax", "jurisdiction": "WA"}]
+        import extractors  # noqa: PLC0415
+        reg = [{"id": "Seattle-compensation-threshold", "name": "Seattle", "jurisdiction": "WA", "source_id": "se", "file": "data/states/WA-{year}.json",
+                "paths": [["localIncomeTax", "seattlePayrollExpenseTax", "compensationThreshold"]],
+                "pattern": r"Annual Compensation of {year} \$[\d,]+ or more in \d{4} \$([\d,]+) or more in {year}", "transform": "dollars"}]
+        text = f"Annual Compensation of {YEAR} $9,074,409 or more in {YEAR - 1} $199,000 or more in {YEAR}"
+        fs = extractors.findings(reg, {"se": text}, {s["id"]: s for s in src}, TODAY, self.root)
+        for f in fs:
+            f["reads"] = [{"at": (NOW - dt.timedelta(seconds=60)).isoformat(), "value": 199000.0}, {"at": NOW.isoformat(), "value": 199000.0}]
+        acc, rej = au.triage(au.proposals_from(fs, self.root, TODAY), self.cfg, self.root, src, TODAY, 1, NOW)
+        self.assertEqual((len(acc), rej), (1, []))
+        self.assertEqual((acc[0]["edits"][0]["old_text"], acc[0]["edits"][0]["new_text"]), ("194452", "199000"))
+
+    # --- Maryland: each county is its own anchored reader ------------------
+    def test_a_maryland_county_rate_is_read_from_the_years_list_and_a_tiered_county_is_left_alone(self):
+        write_json(self.root, f"data/states/MD-{YEAR}.json", {"countyRates": {"Allegany": {"flat": 0.032}, "Kent": {"flat": 0.033}, "AnneArundel": {"tiered": {"single": []}}}})
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-qm", "md")
+        import extractors  # noqa: PLC0415
+        src = [{"id": "md", "url": "https://www.marylandcomptroller.gov/x.pdf", "jurisdiction": "MD"}]
+        pat = r"(?s)Listed below are the actual {year} local income tax rates\..{0,3000}?(?<![A-Za-z]) %s (\d+(?:\.\d+)?)%%"
+        reg = [{"id": f"MD-county-{k}", "name": k, "jurisdiction": "MD", "source_id": "md", "file": "data/states/MD-{year}.json",
+                "paths": [["countyRates", k, "flat"]], "pattern": pat % lbl, "transform": "percent"} for k, lbl in (("Allegany", "Allegany"), ("Kent", "Kent"))]
+        text = f"Listed below are the actual {YEAR} local income tax rates. We provide tables. Allegany 3.30% Anne Arundel see below* Kent 3.30%"
+        fs = []
+        for x in reg:
+            fs += extractors.findings([x], {"md": text}, {s["id"]: s for s in src}, TODAY, self.root)
+        self.assertEqual([f["code"] for f in fs], ["MD-county-Allegany"])  # Kent already 3.3%
+        self.assertEqual(fs[0]["change"]["edits"][0]["path"], ["countyRates", "Allegany", "flat"])
+        self.assertEqual(extractors.findings(reg, {"md": text.replace(str(YEAR), str(YEAR - 1))}, {s["id"]: s for s in src}, TODAY, self.root), [])
+
+
 class FromTheOfficialFileToTheLine(Base):
     """The whole chain with the real reconciler: a stand-in for the Finder's
     CSV, the engine's data file, two reads, triage, apply."""

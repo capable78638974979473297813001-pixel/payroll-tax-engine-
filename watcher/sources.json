@@ -550,6 +550,11 @@
    "title": "Alabama League of Municipalities: municipal tax rates (occupational tax survey list)",
    "url": "https://almonline.org/TaxRates.aspx",
    "origin": "curated",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
+   ],
    "reconcile": "al_league"
   },
   {
@@ -569,6 +574,42 @@
    "jurisdiction": "AL",
    "title": "City of Auburn -- Occupational License Fee",
    "url": "https://www.auburnal.gov/revenue/tax-information/occupational-license-fee/",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
+   ]
+  },
+  {
+   "id": "al-b257ddabbc",
+   "jurisdiction": "AL",
+   "title": "City of Birmingham -- Employers Return of Occupational Tax Withheld",
+   "url": "https://birminghamal.hdlgov.com/base64files/TAXES_FORM_4.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
+   ]
+  },
+  {
+   "id": "al-3e004633df",
+   "jurisdiction": "AL",
+   "title": "City of Fairfield -- Ordinance 1019, Occupational Tax",
+   "url": "https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
+   ]
+  },
+  {
+   "id": "al-8079166642",
+   "jurisdiction": "AL",
+   "title": "City of Glencoe -- Form G-1, Employer's Monthly/Quarterly Return of Occupational Tax Withheld (Ordinance #2010-002)",
+   "url": "https://cityofglencoe.org/wp-content/uploads/2021/09/Glencoe-Occupational-Tax-Form.pdf",
    "origin": "data",
    "used_by": [
     "data/local/AL-municipalities-2025.json",
@@ -605,6 +646,18 @@
    "jurisdiction": "AL",
    "title": "City of Opelika -- announcement of the occupational tax cut",
    "url": "https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
+   ]
+  },
+  {
+   "id": "al-24121568da",
+   "jurisdiction": "AL",
+   "title": "City of Southside -- Occupational Tax Return (06/30/2022)",
+   "url": "https://cityofsouthside.com/wp-content/uploads/2023/02/Occupational-Tax-Return.pdf",
    "origin": "data",
    "used_by": [
     "data/local/AL-municipalities-2025.json",
@@ -657,6 +710,66 @@
    "used_by": [
     "data/states/AL-2026.json",
     "data/states/AL-2027.json"
+   ]
+  },
+  {
+   "id": "al-c3583f810b",
+   "jurisdiction": "AL",
+   "title": "Gadsden-Etowah Industrial Development Authority -- Taxes and Fees",
+   "url": "https://gadsdenida.org/taxes-and-fees/",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
+   ]
+  },
+  {
+   "id": "al-3e22ac43db",
+   "jurisdiction": "AL",
+   "title": "Neumo (formerly Avenu Insights / Revenue Discovery Systems) -- Occupational License Tax Return, rev. 01/2026, the collecting agent's own return form with a per-jurisdiction rate column",
+   "url": "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Neumo%20Occupational%20Form.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
+   ]
+  },
+  {
+   "id": "al-cb9d4173c4",
+   "jurisdiction": "AL",
+   "title": "Neumo -- Universal Annual Reconciliation, Occupational, 2026 (same jurisdiction list)",
+   "url": "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Universal%20Annual%20Reconciliation-Occupational%202026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
+   ]
+  },
+  {
+   "id": "al-3157cc1074",
+   "jurisdiction": "AL",
+   "title": "Rainbow City -- Form G-1 (Rev 12/20), occupational license fee return",
+   "url": "https://www.rbcalabama.com/download/revenue-g-1/?wpdmdl=730&masterkey=60c8bce41072f",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
+   ]
+  },
+  {
+   "id": "al-83ed6d8d37",
+   "jurisdiction": "AL",
+   "title": "Town of Notasulga -- Occupational License (Ordinance No. 97-11-01)",
+   "url": "https://notasulgaal.com/occupational-license",
+   "origin": "data",
+   "used_by": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
    ]
   },
   {
@@ -1012,6 +1125,16 @@
    ]
   },
   {
+   "id": "ca-df99bec76c",
+   "jurisdiction": "CA",
+   "title": "City of Malibu -- 2026 minimum wage determination",
+   "url": "https://www.malibucity.org/minimumwage",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/CA-local-2026.json"
+   ]
+  },
+  {
    "id": "ca-3e493dc2a7",
    "jurisdiction": "CA",
    "title": "City of Santa Monica -- Minimum Wage",
@@ -1109,6 +1232,25 @@
    ]
   },
   {
+   "id": "co-eb6df42e52",
+   "jurisdiction": "CO",
+   "title": "City of Aurora \u2014 Occupational Privilege Tax repeal",
+   "url": "https://www.auroragov.org/business_services/taxes__licensing/occupational_privilege_tax",
+   "origin": "data",
+   "used_by": [
+    "data/states/CO-2025.json",
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
+   ]
+  },
+  {
+   "id": "co-9f9308f9f2",
+   "jurisdiction": "CO",
+   "title": "City of Aurora: occupational privilege tax (repealed 2025-01-01)",
+   "url": "https://www.auroragov.org/business_services/taxes/occupational_privilege_tax",
+   "origin": "curated"
+  },
+  {
    "id": "co-1827eb9141",
    "jurisdiction": "CO",
    "title": "City of Boulder -- Local Minimum Wage",
@@ -1123,6 +1265,18 @@
    "jurisdiction": "CO",
    "title": "City of Glendale, CO \u2014 Occupational Privilege Tax (municipal code Chapter 3.21 and the city's own OPT page)",
    "url": "https://www.glendale.co.us/355/Occupational-Privilege-Tax",
+   "origin": "data",
+   "used_by": [
+    "data/states/CO-2025.json",
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
+   ]
+  },
+  {
+   "id": "co-c68031ef52",
+   "jurisdiction": "CO",
+   "title": "City of Greenwood Village occupational privilege tax",
+   "url": "https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax",
    "origin": "data",
    "used_by": [
     "data/states/CO-2025.json",
@@ -1411,6 +1565,25 @@
     "data/states/DC-2026.json",
     "data/states/DC-2027.json"
    ]
+  },
+  {
+   "id": "de-097e9f1958",
+   "jurisdiction": "DE",
+   "title": "City of Wilmington FY2025 Tax Rates",
+   "url": "https://wilmdebudget.org/wp-content/uploads/2024/03/fy25-tax-rates.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/DE-2025.json",
+    "data/states/DE-2026.json",
+    "data/states/DE-2027.json"
+   ]
+  },
+  {
+   "id": "de-2ac0147578",
+   "jurisdiction": "DE",
+   "title": "City of Wilmington: City wage and net profits taxes",
+   "url": "https://www.wilmingtonde.gov/residents/earned-income-tax-and-net-profits-tax",
+   "origin": "curated"
   },
   {
    "id": "de-db28b6eada",
@@ -2153,10 +2326,58 @@
    ]
   },
   {
+   "id": "ky-c8ec2f40f3",
+   "jurisdiction": "KY",
+   "title": "Boone County Occupational License (administers Walton's tax)",
+   "url": "https://www.boonecountyky.org/services/occupational_licensing/index.php",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-4ffa011f46",
+   "jurisdiction": "KY",
+   "title": "City of Augusta Code of Ordinances Sec. 110.02",
+   "url": "https://codelibrary.amlegal.com/codes/augusta/latest/augusta_ky/0-0-0-8998",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
    "id": "ky-37570664b9",
    "jurisdiction": "KY",
    "title": "City of Brandenburg -- Ordinance 648 (June 2025)",
    "url": "https://brandenburg.ky.gov/wp-content/uploads/2025/06/ORD-648-Occupational-Tax-.33-JUNE-2025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-d8494038ef",
+   "jurisdiction": "KY",
+   "title": "City of Burkesville -- Application for Occupational License (posted 2024-08)",
+   "url": "https://cityofburkesville.org/wp-content/uploads/sites/80/2024/08/Application-Occupational-License.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-645eb3926f",
+   "jurisdiction": "KY",
+   "title": "City of Burkesville -- Occupational ordinance (posted 2024-08)",
+   "url": "https://cityofburkesville.org/wp-content/uploads/sites/80/2024/08/Occupational-Ordinance.pdf",
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
@@ -2189,6 +2410,54 @@
    ]
   },
   {
+   "id": "ky-3713bd108e",
+   "jurisdiction": "KY",
+   "title": "City of Dayton -- License and Fee Information",
+   "url": "https://daytonky.com/licenses/",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-14c5caeb9e",
+   "jurisdiction": "KY",
+   "title": "City of Eddyville -- Local Taxes",
+   "url": "https://www.eddyvilleky.org/Blog/10/local-taxes",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-b9aefb2d6e",
+   "jurisdiction": "KY",
+   "title": "City of Edmonton -- Forms",
+   "url": "https://cityofedmontonky.com/forms/",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-9e469b8ea6",
+   "jurisdiction": "KY",
+   "title": "City of Elizabethtown, KY \u2014 Code of Ordinances Chapter 110, \u00a7 110.03 Occupational License Tax Payment Required",
+   "url": "https://codelibrary.amlegal.com/codes/elizabethtownky/latest/elizabethtown_ky/0-0-0-3203",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
    "id": "ky-c1343deb18",
    "jurisdiction": "KY",
    "title": "City of Franklin -- Business Licensing & Taxes",
@@ -2213,6 +2482,30 @@
    ]
   },
   {
+   "id": "ky-6c997dd5ba",
+   "jurisdiction": "KY",
+   "title": "City of Grayson -- Occupational-Payroll",
+   "url": "https://www.graysonky.org/occupational-payroll",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-91791bad2e",
+   "jurisdiction": "KY",
+   "title": "City of Hartford -- Notice of Occupational License Fees",
+   "url": "https://hartfordky.org/notice-of-occupational-license-fees/",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
    "id": "ky-4de2e96fcb",
    "jurisdiction": "KY",
    "title": "City of Henderson, KY \u2014 Occupational License Tax",
@@ -2225,10 +2518,166 @@
    ]
   },
   {
+   "id": "ky-4391cdf3d9",
+   "jurisdiction": "KY",
+   "title": "City of Hickman Code of Ordinances Secs. 14-13 and 14-15 (Ord. No. 08-07)",
+   "url": "https://library.municode.com/ky/hickman/codes/code_of_ordinances?nodeId=COOR_CH14LIBURE_ARTIIOCLITA",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-213b3a8e45",
+   "jurisdiction": "KY",
+   "title": "City of Hopkinsville -- Occupational License application form",
+   "url": "https://cms2files.revize.com/hopkinsvilleky/document_center/Finance/Tax_Forms/OCCUPATIONAL_LIC___APPLICATION_FORM.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-1cbe07c606",
+   "jurisdiction": "KY",
+   "title": "City of Jackson -- Quarterly Withholding form",
+   "url": "https://cityofjacksonky.org/assets/forms/quarterly-withholding.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-5c85e5727a",
+   "jurisdiction": "KY",
+   "title": "City of Jeffersontown -- Occupational Tax",
+   "url": "https://www.jeffersontownky.com/383/Occupational-Tax",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
    "id": "ky-5f3cbf014a",
    "jurisdiction": "KY",
    "title": "City of Lexington -- Occupational license fee: rates and current forms",
    "url": "https://www.lexingtonky.gov/working/business-licensing-taxes/occupational-license-fee-rates-current-forms",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-ceacde3868",
+   "jurisdiction": "KY",
+   "title": "City of Lyndon occupational tax FAQ (GovOS / munirevs)",
+   "url": "https://lyndonky.munirevs.com/faq/",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-710db54a66",
+   "jurisdiction": "KY",
+   "title": "City of Marion Code of Ordinances Sec. 110.22",
+   "url": "https://codelibrary.amlegal.com/codes/marionky/latest/marion_ky/0-0-0-22684",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-8b42ebfcc3",
+   "jurisdiction": "KY",
+   "title": "City of Mayfield Code of Ordinances Sec. 9-42, Earnings and net profits tax payment required",
+   "url": "https://library.municode.com/ky/mayfield/codes/code_of_ordinances?nodeId=COOR_CH9OCLITARE_ARTIIOCLITA_S9-42EANEPRTAPARE",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-1ff676c3f2",
+   "jurisdiction": "KY",
+   "title": "City of McKee Code of Ordinances \u00a7 110.02 LICENSE REQUIRED; FEES",
+   "url": "https://codelibrary.amlegal.com/codes/mckeeky/latest/mckee_ky/0-0-0-2883",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-2cdb1c19cc",
+   "jurisdiction": "KY",
+   "title": "City of Middlesboro Code of Ordinances, Ch. 110 (levy section)",
+   "url": "https://codelibrary.amlegal.com/codes/middlesboroky/latest/middlesboro_ky/0-0-0-5065",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-6c2ae0551b",
+   "jurisdiction": "KY",
+   "title": "City of Middletown Code of Ordinances Sec. 114.23 (Ord. 07-13-2023-B, 10-12-2023-B)",
+   "url": "https://codelibrary.amlegal.com/codes/middletownky/latest/middletown_ky/0-0-0-10846",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-cf26826bae",
+   "jurisdiction": "KY",
+   "title": "City of Millersburg Ordinances (posted 2019-01)",
+   "url": "https://millersburgky.com/wp-content/uploads/2019/01/City-of-Millersburg-Ordinances.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-7e972afa2c",
+   "jurisdiction": "KY",
+   "title": "City of Nicholasville, KY \u2014 Tax Office",
+   "url": "https://nicholasville.org/tax-office/",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-b8537a1639",
+   "jurisdiction": "KY",
+   "title": "City of Nortonville Code of Ordinances \u00a7 110.03 OCCUPATIONAL LICENSE FEE PAYMENT REQUIRED",
+   "url": "https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279",
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
@@ -2273,6 +2722,18 @@
    ]
   },
   {
+   "id": "ky-0c466d1c1d",
+   "jurisdiction": "KY",
+   "title": "City of Prestonsburg -- Employer's Quarterly Return of License Fee Withheld",
+   "url": "https://prestonsburgcity.org/wp-content/docs/OLFee_License-Fee-Quarterly-Return-Fillable.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
    "id": "ky-8029ccbcee",
    "jurisdiction": "KY",
    "title": "City of Russell -- Occupational License Fee",
@@ -2297,6 +2758,18 @@
    ]
   },
   {
+   "id": "ky-0676f0e796",
+   "jurisdiction": "KY",
+   "title": "City of Simpsonville Code of Ordinances Sec. 110.27",
+   "url": "https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
    "id": "ky-a2771355e3",
    "jurisdiction": "KY",
    "title": "City of St. Matthews -- Occupational Tax",
@@ -2309,10 +2782,58 @@
    ]
   },
   {
+   "id": "ky-93c78c7f02",
+   "jurisdiction": "KY",
+   "title": "City of Union -- New 2023 Payroll and Business License",
+   "url": "https://cityofunionky.org/new-2023-payroll-and-business-license/",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-427ef499c2",
+   "jurisdiction": "KY",
+   "title": "City of Vanceburg -- Annual Reconciliation of License Fee",
+   "url": "https://www.cityofvanceburg.com/_files/ugd/2ae91a_8e635f8b0a724e379859934219b43aac.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-52edf2df75",
+   "jurisdiction": "KY",
+   "title": "City of Vanceburg -- Employee Quarterly Return",
+   "url": "https://www.cityofvanceburg.com/_files/ugd/2ae91a_5d54392ffbe34c1ba805a5216c0afd9e.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
    "id": "ky-8d03c801b6",
    "jurisdiction": "KY",
    "title": "City of West Liberty -- Occupational Tax Ordinance Amendment",
    "url": "https://westliberty.ky.gov/Ordinances/Occupational-Tax-Ordinance-Amendment.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-60c361c38f",
+   "jurisdiction": "KY",
+   "title": "City of Winchester -- Occupational License Fees (Payroll Tax)",
+   "url": "https://www.winchesterky.com/DepartmentsSubPage/30/occupational-license-fees-payroll-tax",
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
@@ -2427,6 +2948,18 @@
    ]
   },
   {
+   "id": "ky-9172972259",
+   "jurisdiction": "KY",
+   "title": "Kentucky Association of Counties -- Data Brief: 2026 County Occupational Tax Rates (payroll column, as of January 2026)",
+   "url": "https://kaco.org/media/7051/2026-databrief-occupationaltaxes.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
    "id": "ky-b732a96cb7",
    "jurisdiction": "KY",
    "title": "Kentucky DOR -- 2025 Form K-4",
@@ -2527,6 +3060,18 @@
    "jurisdiction": "KY",
    "title": "Powell County -- Ordinance 2025-07",
    "url": "http://www.powellcountyky.us/ordinances/Ordinance%202025-07.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "id": "ky-2fd58a677e",
+   "jurisdiction": "KY",
+   "title": "School District of Cumberland County -- Occupational License Tax ordinance (effective 2008-01-01)",
+   "url": "https://files.smartsites.parentsquare.com/12425/taxordinance-januarydoc.pdf",
    "origin": "data",
    "used_by": [
     "data/local/KY-occupational-2025.json",
@@ -2992,6 +3537,18 @@
    ]
   },
   {
+   "id": "mi-ae67de81fc",
+   "jurisdiction": "MI",
+   "title": "City of Saginaw \u2014 What is the tax rate for City of Saginaw Income Tax? (FAQ)",
+   "url": "https://www.saginaw-mi.com/FAQ.aspx?QID=131",
+   "origin": "data",
+   "used_by": [
+    "data/local/MI-cities-2025.json",
+    "data/local/MI-cities-2026.json",
+    "data/local/MI-cities-2027.json"
+   ]
+  },
+  {
    "id": "mi-67f33dcd9d",
    "jurisdiction": "MI",
    "title": "MCL 141.631 \u2014 City Income Tax Act, Sec. 31 (personal/dependency exemptions)",
@@ -3377,6 +3934,20 @@
    ]
   },
   {
+   "id": "mo-c8420000ff",
+   "jurisdiction": "MO",
+   "title": "Kansas City, MO: earnings tax",
+   "url": "https://www.kcmo.gov/city-hall/departments/finance/earnings-tax",
+   "origin": "curated"
+  },
+  {
+   "id": "mo-e28f1dacd6",
+   "jurisdiction": "MO",
+   "title": "Kansas City, MO: tax guide for non-resident businesses (employer withholding of the earnings tax)",
+   "url": "https://www.kcmo.gov/city-hall/departments/finance/tax-home/tax-guides/tax-guide-for-non-resident-businesses",
+   "origin": "curated"
+  },
+  {
    "id": "mo-c4e0e7fb7d",
    "jurisdiction": "MO",
    "title": "Missouri DOR -- 2025 Missouri Withholding Tax Formula",
@@ -3421,6 +3992,20 @@
    "title": "Missouri withholding",
    "url": "https://dor.mo.gov/taxation/business/tax-types/withholding/",
    "kind": "index",
+   "origin": "curated"
+  },
+  {
+   "id": "mo-2d09c4e722",
+   "jurisdiction": "MO",
+   "title": "St. Louis: earnings tax department",
+   "url": "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/index.cfm",
+   "origin": "curated"
+  },
+  {
+   "id": "mo-678c4d3268",
+   "jurisdiction": "MO",
+   "title": "St. Louis: employer withholding and payroll expense tax information",
+   "url": "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/payroll-tax-info.cfm",
    "origin": "curated"
   },
   {
@@ -4376,6 +4961,17 @@
    ]
   },
   {
+   "id": "oh-062f3b7675",
+   "jurisdiction": "OH",
+   "url": "https://www.ritaohio.com/municipalities",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json",
+    "data/local/OH-municipalities-2026.json",
+    "data/local/OH-municipalities-2027.json"
+   ]
+  },
+  {
    "id": "oh-8d6ac93833",
    "jurisdiction": "OH",
    "title": "CCA (Central Collection Agency): municipal income tax calendar and notices",
@@ -4396,6 +4992,18 @@
    ]
   },
   {
+   "id": "oh-f299d093c6",
+   "jurisdiction": "OH",
+   "title": "City of Cheviot Tax Department -- JEDD INFORMATION (Contracts with Green Township)",
+   "url": "https://cheviot.org/departments/tax/",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-jedd-jedz-2025.json",
+    "data/local/OH-jedd-jedz-2026.json",
+    "data/local/OH-jedd-jedz-2027.json"
+   ]
+  },
+  {
    "id": "oh-ccc56a7423",
    "jurisdiction": "OH",
    "title": "City of Dayton -- Joint Economic Development District",
@@ -4403,6 +5011,28 @@
    "origin": "data",
    "used_by": [
     "data/local/OH-jedd-jedz-2025.json"
+   ]
+  },
+  {
+   "id": "oh-010ac59f81",
+   "jurisdiction": "OH",
+   "title": "City of Gallipolis Tax Department",
+   "url": "https://cityofgallipolis.com/tax-department-2/",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json"
+   ]
+  },
+  {
+   "id": "oh-c2d873bbb4",
+   "jurisdiction": "OH",
+   "title": "City of Warren Income Tax Department -- Joint Economic Development Districts: 'The Warren-Champion Joint Economic Development District (JEDD) - 2.5% tax rate'",
+   "url": "https://www.warren.org/income_tax_department/joint_economic_development_districts_(jedd).php",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-jedd-jedz-2025.json",
+    "data/local/OH-jedd-jedz-2026.json",
+    "data/local/OH-jedd-jedz-2027.json"
    ]
   },
   {
@@ -4426,6 +5056,18 @@
    "used_by": [
     "data/states/OH-2026.json",
     "data/states/OH-2027.json"
+   ]
+  },
+  {
+   "id": "oh-d78d95e147",
+   "jurisdiction": "OH",
+   "title": "Jefferson Township -- Jefferson Township-Whitehall JEDD: 'On November 19th, 2024 ... mutually agreed to the termination of the ... JEDD Contract. Collections of the 2.5% income tax ceased as of November 19th, 2024.'",
+   "url": "https://www.jeffersontownship.org/departments___services/economic_development___planning/jefferson_township-whitehall_jedd.php",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-jedd-jedz-2025.json",
+    "data/local/OH-jedd-jedz-2026.json",
+    "data/local/OH-jedd-jedz-2027.json"
    ]
   },
   {
@@ -4499,16 +5141,17 @@
   {
    "id": "oh-504c7aae71",
    "jurisdiction": "OH",
-   "title": "Ohio Dept of Taxation - School District Income Tax rate list, Tax Year 2026",
+   "title": "Ohio Dept of Taxation: school district income tax list",
    "url": "https://tax.ohio.gov/static/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf",
-   "origin": "data",
+   "origin": "curated",
    "used_by": [
     "data/local/OH-school-districts-2026.json",
     "data/local/OH-school-districts-2027.json",
     "data/states/OH-2025.json",
     "data/states/OH-2026.json",
     "data/states/OH-2027.json"
-   ]
+   ],
+   "reconcile": "oh_school"
   },
   {
    "id": "oh-a262e9dc43",
@@ -4679,6 +5322,180 @@
    "origin": "curated"
   },
   {
+   "id": "oh-22f49a043c",
+   "jurisdiction": "OH",
+   "title": "RITA -- Tax Rates Table, 2025 new municipalities and tax rate changes",
+   "url": "https://www.ritaohio.com/TaxRatesTable",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-jedd-jedz-2025.json",
+    "data/local/OH-jedd-jedz-2026.json",
+    "data/local/OH-jedd-jedz-2027.json"
+   ]
+  },
+  {
+   "id": "oh-cfb9c9e685",
+   "jurisdiction": "OH",
+   "title": "RITA member page (the JEDD's administering agency) -- Recent Tax and Credit History",
+   "url": "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=047",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-jedd-jedz-2025.json",
+    "data/local/OH-jedd-jedz-2026.json",
+    "data/local/OH-jedd-jedz-2027.json"
+   ]
+  },
+  {
+   "id": "oh-7d9e4cc914",
+   "jurisdiction": "OH",
+   "title": "RITA member page (the JEDD's administering agency) -- Recent Tax and Credit History",
+   "url": "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=247",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-jedd-jedz-2025.json",
+    "data/local/OH-jedd-jedz-2026.json",
+    "data/local/OH-jedd-jedz-2027.json"
+   ]
+  },
+  {
+   "id": "oh-3b76750224",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Avon (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=020",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json"
+   ]
+  },
+  {
+   "id": "oh-c764d3cf54",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Circleville (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=190",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json"
+   ]
+  },
+  {
+   "id": "oh-33b5895ad2",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- DeGraff (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=249",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json"
+   ]
+  },
+  {
+   "id": "oh-b7e3e38768",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Germantown (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=353",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json",
+    "data/local/OH-municipalities-2026.json",
+    "data/local/OH-municipalities-2027.json"
+   ]
+  },
+  {
+   "id": "oh-4042a711fd",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Hanging Rock (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=616",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json"
+   ]
+  },
+  {
+   "id": "oh-3a77278cb4",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Lockbourne (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=427",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json"
+   ]
+  },
+  {
+   "id": "oh-917a7eb627",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Milford JEDD VIII",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=869",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-jedd-jedz-2025.json",
+    "data/local/OH-jedd-jedz-2026.json",
+    "data/local/OH-jedd-jedz-2027.json"
+   ]
+  },
+  {
+   "id": "oh-7f647951da",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Millville (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=691",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json"
+   ]
+  },
+  {
+   "id": "oh-f424ff0fc1",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- North Canton (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=546",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json"
+   ]
+  },
+  {
+   "id": "oh-15bd387bd3",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- North Hampton (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=695",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json",
+    "data/local/OH-municipalities-2026.json",
+    "data/local/OH-municipalities-2027.json"
+   ]
+  },
+  {
+   "id": "oh-c14dbbe03e",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Oak Hill (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=624",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json"
+   ]
+  },
+  {
+   "id": "oh-8c7dd91687",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Rio Grande (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=588",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json"
+   ]
+  },
+  {
+   "id": "oh-d4b192b4da",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Stockport (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=719",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json",
+    "data/local/OH-municipalities-2026.json",
+    "data/local/OH-municipalities-2027.json"
+   ]
+  },
+  {
    "id": "oh-2fd5ea2a78",
    "jurisdiction": "OH",
    "title": "RITA: tax professionals news",
@@ -4705,6 +5522,16 @@
    "origin": "curated"
   },
   {
+   "id": "oh-d10e598d74",
+   "jurisdiction": "OH",
+   "title": "Village of College Corner income tax ordinance (1%) and repeal resolution",
+   "url": "https://villageofcollegecorner.org/wp-content/uploads/2025/04/Rita-Repeal.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2025.json"
+   ]
+  },
+  {
    "id": "oh-740fc07d10",
    "jurisdiction": "OH",
    "title": "Village of Georgetown -- Income Tax",
@@ -4725,12 +5552,38 @@
    ]
   },
   {
+   "id": "oh-835e64da14",
+   "jurisdiction": "OH",
+   "title": "Village of Woodville -- Important Tax Notification (1% local municipal income tax from July 1, 2026, Ordinance 1-2026; signed by Tax Administrator Barb Rizzo)",
+   "url": "https://www.villageofwoodville.com/_files/ugd/ef2ef5_5f60f5fa78e64495b52690728f655b41.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2026.json",
+    "data/local/OH-municipalities-2027.json"
+   ]
+  },
+  {
+   "id": "oh-32b21ac71f",
+   "jurisdiction": "OH",
+   "title": "Village of Woodville -- Ordinance No. 1-2026, passed 02-09-2026: levies the village income tax, 'beginning July 1, 2026' (Section 2)",
+   "url": "https://www.villageofwoodville.com/_files/ugd/ef2ef5_fc1ed5429f25479b939fd57201b684f7.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/local/OH-municipalities-2026.json",
+    "data/local/OH-municipalities-2027.json"
+   ]
+  },
+  {
    "id": "oh-39c3471ef8",
    "jurisdiction": "OH",
    "title": "Village of Woodville: income tax page (withholding notice, forms, ordinance)",
    "url": "https://www.villageofwoodville.com/tax-information",
    "kind": "index",
-   "origin": "curated"
+   "origin": "curated",
+   "used_by": [
+    "data/local/OH-municipalities-2026.json",
+    "data/local/OH-municipalities-2027.json"
+   ]
   },
   {
    "id": "ok-95b3b0461f",
@@ -5822,6 +6675,13 @@
    "origin": "curated"
   },
   {
+   "id": "wv-be7771fc3e",
+   "jurisdiction": "WV",
+   "title": "City of Charleston, WV: city service fee overview",
+   "url": "https://www.charlestonwv.gov/sites/default/files/documents/2022-12/CITY%20SERVICE%20FEE%20OVERVIEW%2012.22%20%282%29.pdf",
+   "origin": "curated"
+  },
+  {
    "id": "wv-5a62d719fd",
    "jurisdiction": "WV",
    "title": "W. Va. Code \u00a7 38-5A-3 \u2014 ordinary (consumer credit sale/consumer loan judgment) garnishment limited to the lesser of 20% of disposable earnings, or the amount by which disposable earnings exceed 50 times the FEDERAL minimum hourly wage specifically (not a 'greater of state or federal' test)",
@@ -5864,6 +6724,14 @@
     "data/states/WV-2026.json",
     "data/states/WV-2027.json"
    ]
+  },
+  {
+   "id": "wv-638a265d37",
+   "jurisdiction": "WV",
+   "title": "WVU Shared Services: West Virginia city user fee ordinances (every city's fee)",
+   "url": "https://sharedservices.wvu.edu/west-virginia-city-user-fee-ordinances",
+   "origin": "curated",
+   "reconcile": "wv_city_fees"
   },
   {
    "id": "wv-863900c1b4",

@@ -52,7 +52,7 @@ def stated_value(text: str, pattern: str, year: int, transform: str) -> tuple[fl
     from. None unless the pattern matches and every match agrees."""
     found: dict[float, str] = {}
     text = re.sub(r"\s+", " ", text)
-    for m in re.finditer(pattern.replace("{year}", str(year)), text):
+    for m in re.finditer(pattern.replace("{year}", str(year)).replace("{yy}", str(year)[2:]), text):
         raw = float(m.group(1).replace(",", ""))
         value = raw / 100 if transform == "percent" else raw
         found.setdefault(round(value, 6), m.group(0))
@@ -160,6 +160,18 @@ def main(argv: list[str] | None = None) -> int:
         data = json.loads((REPO / x["file"].replace("{year}", str(year))).read_text())
         have = [_get(data, p) for p in x["paths"]]
         ok = got is not None and all(abs(got[0] - h) < 5e-7 for h in have)
+        for other in x.get("also", []):
+            o_text = None
+            if texts_dir and (texts_dir / f"{other['source_id']}.txt").exists():
+                o_text = (texts_dir / f"{other['source_id']}.txt").read_text()
+            elif (HERE / "state" / "snapshots" / f"{other['source_id']}.txt.gz").exists():
+                o_text = gzip.open(HERE / "state" / "snapshots" / f"{other['source_id']}.txt.gz", "rt").read()
+            o_got = stated_value(o_text, other["pattern"], year, other.get("transform", "")) if o_text is not None else None
+            if o_got is None or got is None or abs(o_got[0] - got[0]) > 5e-7:
+                ok = False
+                print(f"    the second document ({other['source_id']}) does not state the same value: {o_got[0] if o_got else None}")
+            elif refresh:
+                other["calibration"] = {"year": year, "excerpt": short(o_got[1]), "value": o_got[0]}
         print(f"{'ok ' if ok else 'BAD'} {x['id']}: document {got[0] if got else None} data {have}")
         if ok and refresh:
             x["calibration"] = {"year": year, "excerpt": short(got[1]), "value": got[0]}

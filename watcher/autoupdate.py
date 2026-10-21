@@ -344,6 +344,8 @@ def proposals_from(confirmed: list[dict], repo: Path, today: str) -> list[dict]:
                     new_text = None  # filled in below, once the other values are known
                 else:
                     new_text = fmt_number(sp.get("new", ch["new"]))
+                    if "." not in _edit_texts(tok, rel) and float(sp.get("new", ch["new"])).is_integer():
+                        new_text = str(int(sp.get("new", ch["new"])))  # an integer in the file stays an integer
                 edits.append({"path": list(path), "line": line, "key": str(path[-1]), "old_text": _edit_texts(tok, rel),
                               "new_text": new_text, "relation": rel})
             for e in edits:
@@ -581,13 +583,13 @@ def check(p: dict, cfg: dict, repo: Path, sources: list[dict], today: str, now: 
         year_ok = str(file_year)
         pattern = str(ev.get("pattern", ""))
         matched = str(ev.get("matched_text", ""))
-        if "{year}" not in pattern:
+        if "{year}" not in pattern and "{yy}" not in pattern:
             raise Rejected("a text pattern must name the year it is about")
         try:
-            m = re.search(pattern.replace("{year}", year_ok), matched)
+            m = re.search(pattern.replace("{year}", year_ok).replace("{yy}", year_ok[2:]), matched)
         except re.error:
             raise Rejected("the text pattern is not a valid expression") from None
-        if not m or year_ok not in matched:
+        if not m or (year_ok not in matched and f"/{year_ok[2:]} " not in matched):
             raise Rejected(f"the quoted text does not state the value for {file_year}")
         try:
             raw = float(m.group(1).replace(",", ""))
